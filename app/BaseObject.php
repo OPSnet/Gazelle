@@ -3,8 +3,8 @@
 namespace Gazelle;
 
 abstract class BaseObject extends Base {
-    /* used for handling updates */
-    protected array $updateField;
+    protected array $updateField; // used to store field updates
+    protected User  $updateUser;  // user performing the updates
 
     protected array|null $info;
 
@@ -47,13 +47,47 @@ abstract class BaseObject extends Base {
         return !empty($this->updateField);
     }
 
-    public function setUpdate(string $field, bool|int|float|string|null $value): mixed {
+    /**
+     * If an auxilliary update needs a User (e.g. for writing to the log)
+     * this method is used to supply the user.
+     */
+    public function setUpdateUser(User $user): mixed {
+        $this->updateUser = $user;
+        return $this;
+    }
+
+    /**
+     * Arrays and Gazelle objects can be passed, but it is expected that
+     * the derived class will deal with or pre-process the contents so
+     * the modify() method can do its thing.
+     */
+    public function setUpdate(string $field, array|bool|int|float|string|null $value): mixed {
         $this->updateField[$field] = $value;
         return $this;
     }
 
-    public function field(string $field): bool|int|float|string|null {
+    /**
+     * Fetch the value of a table field to be updated. Returns null if
+     * either the field does not exists, or it does and is set to null :)
+     * If ever this is a problem, you can always clearField() which
+     * guarantees the the field will no longer be present.
+     */
+    public function field(string $field): array|bool|int|float|string|null {
         return $this->updateField[$field] ?? null;
+    }
+
+    /**
+     * Remove a field from the update. This is useful in a derived class
+     * when an auxillary table needs to be update with this value.
+     * @return array|bool|int|float|string|null the contents of the field, or null
+     */
+    public function clearField(string $field): array|bool|int|float|string|null {
+        if (isset($this->updateField[$field])) {
+            $value = $this->updateField[$field];
+            unset($this->updateField[$field]);
+            return $value;
+        }
+        return null;
     }
 
     public function modify(): bool {

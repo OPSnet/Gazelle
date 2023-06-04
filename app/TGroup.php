@@ -138,7 +138,7 @@ class TGroup extends BaseObject {
             ORDER BY RevisionID DESC
             ", $this->id
         );
-        return self::$db->to_array('revision', MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     /**

@@ -10,7 +10,6 @@ class Artist extends BaseObject {
     protected const DISCOGS_API_URL = 'https://api.discogs.com/artists/%d';
 
     protected array $artistRole;
-    protected int $nrGroups = 0;
 
     /** All the groups */
     protected array $group = [];
@@ -30,6 +29,7 @@ class Artist extends BaseObject {
 
     public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->name())); }
     public function location(): string { return 'artist.php?id=' . $this->id; }
+    public function pkName(): string { return 'ArtistID'; }
     public function tableName(): string { return 'artists_group'; }
 
     protected function cacheKey(): string {
@@ -104,99 +104,6 @@ class Artist extends BaseObject {
         return $this->info;
     }
 
-    public function flush(): Artist {
-        self::$db->prepared_query("
-            SELECT DISTINCT concat('groups_artists_', GroupID)
-            FROM torrents_artists
-            WHERE ArtistID = ?
-            ", $this->id
-        );
-        self::$cache->delete_multi([
-            $this->cacheKey(),
-            sprintf(self::CACHE_REQUEST_ARTIST, $this->id),
-            sprintf(self::CACHE_TGROUP_ARTIST, $this->id),
-            ...self::$db->collect(0, false)
-        ]);
-        unset($this->info);
-        return $this;
-    }
-
-    public function body(): ?string {
-        return $this->info()['body'];
-    }
-
-    public function discogsId(): ?int {
-        return $this->info()['discogs_id'];
-    }
-
-    public function discogsName(): ?string {
-        return $this->info()['discogs_name'];
-    }
-
-    public function discogsIsPreferred(): bool {
-        return $this->info()['is_preferred'];
-    }
-
-    public function homonymCount(): int {
-        return $this->info()['homonyms'];
-    }
-
-    public function image(): ?string {
-        return $this->info()['image'];
-    }
-
-    public function isLocked(): bool {
-        return $this->hasAttr('locked');
-    }
-
-    public function isShowcase(): bool {
-        return $this->info()['showcase'] == 1;
-    }
-
-    public function name(): string {
-        return $this->info()['name'];
-    }
-
-    public function similarArtists(): array {
-        return $this->info()['similar'];
-    }
-
-    public function stats(): Stats\Artist{
-        if (!isset($this->stats)) {
-            $this->stats = new Stats\Artist($this->id);
-        }
-        return $this->stats;
-    }
-
-    public function hasAttr(string $name): bool {
-        return isset($this->info()['attr'][$name]);
-    }
-
-    public function toggleAttr(string $attr, bool $flag): bool {
-        $hasAttr = $this->hasAttr($attr);
-        $toggled = false;
-        if (!$flag && $hasAttr) {
-            self::$db->prepared_query("
-                DELETE FROM artist_has_attr
-                WHERE artist_id = ?
-                    AND artist_attr_id = (SELECT artist_attr_id FROM artist_attr WHERE name = ?)
-                ", $this->id, $attr
-            );
-            $toggled = self::$db->affected_rows() === 1;
-        } elseif ($flag && !$hasAttr) {
-            self::$db->prepared_query("
-                INSERT INTO artist_has_attr (artist_id, artist_attr_id)
-                    SELECT ?, artist_attr_id FROM artist_attr WHERE name = ?
-                ", $this->id, $attr
-            );
-            $toggled = self::$db->affected_rows() === 1;
-        }
-        if ($toggled) {
-            $this->flush();
-        }
-        return $toggled;
-    }
-
     public function loadArtistRole(): Artist {
         self::$db->prepared_query("
             SELECT ta.GroupID AS group_id,
@@ -243,6 +150,178 @@ class Artist extends BaseObject {
         return $this;
     }
 
+
+    public function flush(): Artist {
+        self::$db->prepared_query("
+            SELECT DISTINCT concat('groups_artists_', GroupID)
+            FROM torrents_artists
+            WHERE ArtistID = ?
+            ", $this->id
+        );
+        self::$cache->delete_multi([
+            $this->cacheKey(),
+            sprintf(self::CACHE_REQUEST_ARTIST, $this->id),
+            sprintf(self::CACHE_TGROUP_ARTIST, $this->id),
+            ...self::$db->collect(0, false)
+        ]);
+        unset($this->info);
+        return $this;
+    }
+
+    public function artistRole(): array {
+        if (!isset($this->artistRole)) {
+            $this->loadArtistRole();
+        }
+        return $this->artistRole;
+    }
+
+    public function body(): ?string {
+        return $this->info()['body'];
+    }
+
+    public function discogsId(): ?int {
+        return $this->info()['discogs_id'];
+    }
+
+    public function discogsName(): ?string {
+        return $this->info()['discogs_name'];
+    }
+
+    public function discogsIsPreferred(): bool {
+        return $this->info()['is_preferred'];
+    }
+
+    public function groupIds(): array {
+        if (!isset($this->groupIds)) {
+            $this->loadArtistRole();
+        }
+        return array_keys($this->groupRole);
+    }
+
+    public function group(int $groupId): array {
+        if (!isset($this->group)) {
+            $this->loadArtistRole();
+        }
+        return $this->group[$groupId] ?? []; // FIXME
+    }
+
+    public function homonymCount(): int {
+        return $this->info()['homonyms'];
+    }
+
+    public function image(): ?string {
+        return $this->info()['image'];
+    }
+
+    public function isLocked(): bool {
+        return $this->hasAttr('locked');
+    }
+
+    public function isShowcase(): bool {
+        return $this->info()['showcase'] == 1;
+    }
+
+    public function name(): string {
+        return $this->info()['name'];
+    }
+
+    public function sections(): array {
+        if (!isset($this->section)) {
+            $this->loadArtistRole();
+        }
+        return $this->section;
+    }
+
+    public function similarArtists(): array {
+        return $this->info()['similar'];
+    }
+
+    public function stats(): Stats\Artist{
+        if (!isset($this->stats)) {
+            $this->stats = new Stats\Artist($this->id);
+        }
+        return $this->stats;
+    }
+
+    public function hasAttr(string $name): bool {
+        return isset($this->info()['attr'][$name]);
+    }
+
+    public function toggleAttr(string $attr, bool $flag): bool {
+        $hasAttr = $this->hasAttr($attr);
+        $toggled = false;
+        if (!$flag && $hasAttr) {
+            self::$db->prepared_query("
+                DELETE FROM artist_has_attr
+                WHERE artist_id = ?
+                    AND artist_attr_id = (SELECT artist_attr_id FROM artist_attr WHERE name = ?)
+                ", $this->id, $attr
+            );
+            $toggled = self::$db->affected_rows() === 1;
+        } elseif ($flag && !$hasAttr) {
+            self::$db->prepared_query("
+                INSERT INTO artist_has_attr (artist_id, artist_attr_id)
+                    SELECT ?, artist_attr_id FROM artist_attr WHERE name = ?
+                ", $this->id, $attr
+            );
+            $toggled = self::$db->affected_rows() === 1;
+        }
+        if ($toggled) {
+            $this->flush();
+        }
+        return $toggled;
+    }
+
+    public function createRevision(
+        ?string $body,
+        ?string $image,
+        array   $summary,
+        User    $user,
+    ): int {
+        self::$db->prepared_query("
+            INSERT INTO wiki_artists
+                   (PageID, Body, Image, UserID, Summary)
+            VALUES (?,      ?,    ?,     ?,      ?)
+            ", $this->id, $body, $image, $user->id(),
+                implode(', ', array_filter($summary, fn($s) => !empty($s)))
+        );
+        dump($summary);
+        $revisionId = self::$db->inserted_id();
+        self::$db->prepared_query("
+            UPDATE artists_group SET
+                RevisionID = ?
+            WHERE ArtistID = ?
+            ", $revisionId, $this->id
+        );
+        $this->flush();
+        return $revisionId;
+    }
+
+    /**
+     * Revert to a prior revision of the artist metadata
+     * (Which also creates a new revision).
+     */
+    public function revertRevision(int $revisionId, \Gazelle\User $user): int {
+        self::$db->prepared_query("
+            INSERT INTO wiki_artists
+                  (Body, Image, PageID, UserID, Summary)
+            SELECT Body, Image, ?,      ?,      ?
+            FROM wiki_artists
+            WHERE RevisionID = ?
+            ", $this->id, $user->id(), "Reverted to revision $revisionId",
+                $revisionId
+        );
+        $newRevId = self::$db->inserted_id();
+        self::$db->prepared_query("
+            UPDATE artists_group SET
+                RevisionID = ?
+            WHERE ArtistID = ?
+            ", $newRevId, $this->id
+        );
+        $this->flush();
+        return $newRevId;
+    }
+
     public function revisionList(): array {
          self::$db->prepared_query("
             SELECT RevisionID AS revision,
@@ -254,27 +333,7 @@ class Artist extends BaseObject {
             ORDER BY RevisionID DESC
             ", $this->id
         );
-        return self::$db->to_array('revision', MYSQLI_ASSOC, false);
-    }
-
-    public function artistRole(): array {
-        return $this->artistRole;
-    }
-
-    public function groupIds(): array {
-        return array_keys($this->groupRole);
-    }
-
-    public function group(int $groupId): array {
-        return $this->group[$groupId] ?? []; // FIXME
-    }
-
-    public function nrGroups(): int {
-        return $this->nrGroups;
-    }
-
-    public function sections(): array {
-        return $this->section;
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     public function tagLeaderboard(): array {
@@ -520,84 +579,6 @@ class Artist extends BaseObject {
 
     public function usageTotal(): int {
         return count($this->requestIdUsage()) + count($this->tgroupIdUsage());
-    }
-
-    /**
-     * Sets the Discogs ID for the artist and returns the number of affected rows.
-     */
-    public function setDiscogsRelation(int $discogsId, int $userId): int {
-        if ($this->discogsId() === $discogsId) {
-            // don't blindly set the Discogs ID to something else if it's already set, or doesn't change
-            return 0;
-        }
-        $curl = curl_init();
-
-        curl_setopt_array($curl, [
-            CURLOPT_URL            => sprintf(self::DISCOGS_API_URL, $discogsId),
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT        => 10,
-            CURLOPT_USERAGENT      => FAKE_USERAGENT,
-        ]);
-        $proxy = httpProxy();
-        if ($proxy) {
-            curl_setopt_array($curl, [
-                CURLOPT_HTTPPROXYTUNNEL => true,
-                CURLOPT_PROXY           => $proxy,
-            ]);
-        }
-
-        $result = curl_exec($curl);
-        if (!is_string($result) || curl_getinfo($curl, CURLINFO_RESPONSE_CODE) !== 200) {
-            return 0;
-        }
-
-        /* Discogs names are e.g. "Spectrum (4)"
-         * This is split into "Spectrum" and 4 to detect and handle homonyms.
-         * First come, first served. The first homonym is considered preferred,
-         * so the artist page will show "Spectrum". Subsequent artists will
-         * be shown as "Spectrum (2)", "Spectrum (1)", ...
-         * This can be adjusted via a control panel afterwards.
-         */
-        $payload = json_decode($result);
-        $discogsName = $payload->name;
-        if (preg_match('/^(.*) \((\d+)\)$/', $discogsName, $match)) {
-            $discogsStem = $match[1];
-            $discogsSequence = (int)$match[2];
-        } else {
-            $discogsStem = $discogsName;
-            $discogsSequence = 1;
-        }
-        $discogsId = $discogsId;
-
-        // We only run this query when artist_discogs_id has changed, so the collision
-        // should only happen on the UNIQUE(artist_id) index
-        self::$db->prepared_query("
-            INSERT INTO artist_discogs
-                   (artist_discogs_id, artist_id, is_preferred, sequence, stem, name, user_id)
-            VALUES (?,                 ?,         ?,            ?,        ?,    ?,    ?)
-            ON DUPLICATE KEY UPDATE
-                artist_discogs_id = VALUES(artist_discogs_id),
-                is_preferred = VALUES(is_preferred),
-                sequence = VALUES(sequence),
-                stem = VALUES(stem),
-                name = VALUES(name),
-                user_id = VALUES(user_id)
-            ", $discogsId, $this->id, (int)($this->homonymCount() == 0),
-            $discogsSequence, $discogsStem, $discogsName, $userId
-        );
-        $affected = self::$db->affected_rows();
-        $this->flush();
-        return $affected;
-    }
-
-    public function removeDiscogsRelation(): int {
-        self::$db->prepared_query('
-            DELETE FROM artist_discogs WHERE artist_id = ?
-            ', $this->id
-        );
-        $affected = self::$db->affected_rows();
-        $this->flush();
-        return $affected;
     }
 
     public function addSimilar(Artist $similar, int $userId): int {
@@ -910,6 +891,134 @@ class Artist extends BaseObject {
         }
         return $similar;
     }
+
+    /**
+     * Modify an artist. If the body or image fields are edited, or any other
+     * change that has to appear in the history, a revision is created.
+     * Since a revision requires the user who made the edit to be recorded,
+     * the user is passed in as another field to update.
+     * The body, image, summary and updater  fields are then cleared so that
+     * the BaseObject method can do its job.
+     */
+
+    public function modify(): bool {
+        // handle the revision of body and image
+        $revisionData = [];
+        $summary      = [];
+        if ($this->field('body') !== null) {
+            $body = $this->clearField('body');
+            if (is_string($body)) {
+                $revisionData['body'] = $body;
+                $summary[] = 'description changed (len=' . mb_strlen($body) . ')';
+            }
+        }
+        if ($this->field('image') !== null) {
+            $image = $this->clearField('image');
+            if (is_string($image)) {
+                $revisionData['image'] = $image;
+                $summary[] = "image changed to '$image'";
+            }
+        }
+        $notes = $this->clearField('summary');
+        if (is_array($notes)) {
+            $summary = array_merge($summary, $notes);
+        }
+        $updated = false;
+        if ($revisionData || $summary) {
+            $this->setUpdate('RevisionID',
+                $this->createRevision(
+                    body:    $revisionData['body'] ?? $this->body(),
+                    image:   $revisionData['image'] ?? $this->image(),
+                    summary: $summary,
+                    user:    $this->updateUser,
+                )
+            );
+            $updated = true;
+        }
+
+        // handle Discogs
+        $discogsId = $this->clearField('discogs_id');
+        if (is_int($discogsId)) {
+            if ($discogsId > 0) {
+                $this->setDiscogsRelation($discogsId);
+            } else {
+                $this->removeDiscogsRelation();
+            }
+            $updated = true;
+        }
+        $parentUpdated = parent::modify();
+        $this->flush();
+        return $parentUpdated || $updated;
+    }
+
+    /**
+     * Sets the Discogs ID for the artist and returns the number of affected rows.
+     */
+    public function setDiscogsRelation(int $discogsId): int {
+        $curl = curl_init();
+        curl_setopt_array($curl, [
+            CURLOPT_URL            => sprintf(self::DISCOGS_API_URL, $discogsId),
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT        => 10,
+            CURLOPT_USERAGENT      => FAKE_USERAGENT,
+        ]);
+        $proxy = httpProxy();
+        if ($proxy) {
+            curl_setopt_array($curl, [
+                CURLOPT_HTTPPROXYTUNNEL => true,
+                CURLOPT_PROXY           => $proxy,
+            ]);
+        }
+
+        $result = curl_exec($curl);
+        if (!is_string($result) || curl_getinfo($curl, CURLINFO_RESPONSE_CODE) !== 200) {
+            return 0;
+        }
+
+        /* Discogs names are e.g. "Spectrum (4)"
+         * This is split into "Spectrum" and 4 to detect and handle homonyms.
+         * First come, first served. The first homonym is considered preferred,
+         * so the artist page will show "Spectrum". Subsequent artists will
+         * be shown as "Spectrum (2)", "Spectrum (1)", ...
+         * This can be adjusted via a control panel afterwards.
+         */
+        $payload = json_decode($result);
+        $discogsName = $payload->name;
+        if (preg_match('/^(.*) \((\d+)\)$/', $discogsName, $match)) {
+            $discogsStem = $match[1];
+            $discogsSequence = (int)$match[2];
+        } else {
+            $discogsStem = $discogsName;
+            $discogsSequence = 1;
+        }
+
+        // We only run this query when artist_discogs_id has changed, so the collision
+        // should only happen on the UNIQUE(artist_id) index
+        self::$db->prepared_query("
+            INSERT INTO artist_discogs
+                   (artist_discogs_id, artist_id, is_preferred, sequence, stem, name, user_id)
+            VALUES (?,                 ?,         ?,            ?,        ?,    ?,    ?)
+            ON DUPLICATE KEY UPDATE
+                artist_discogs_id = VALUES(artist_discogs_id),
+                is_preferred      = VALUES(is_preferred),
+                sequence          = VALUES(sequence),
+                stem              = VALUES(stem),
+                name              = VALUES(name),
+                user_id           = VALUES(user_id)
+            ", $discogsId, $this->id, (int)($this->homonymCount() == 0),
+            $discogsSequence, $discogsStem, $discogsName, $this->updateUser->id()
+        );
+        return self::$db->affected_rows();
+    }
+
+    public function removeDiscogsRelation(): int {
+        self::$db->prepared_query('
+            DELETE FROM artist_discogs WHERE artist_id = ?
+            ', $this->id
+        );
+        return self::$db->affected_rows();
+    }
+
 
     /**
      * Deletes an artist and their wiki and tags.

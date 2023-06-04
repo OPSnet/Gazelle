@@ -5,9 +5,4 @@ if (is_null($group)) {
     error(404);
 }
 
-echo $Twig->render('revision.twig', [
-    'id'   => $group->id(),
-    'list' => $group->revisionList(),
-    'name' => $group->name(),
-    'url'  => "torrents.php?id=",
-]);
+echo $Twig->render('revision.twig', ['object' => $group]);

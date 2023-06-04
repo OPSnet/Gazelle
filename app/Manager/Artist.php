@@ -63,10 +63,11 @@ class Artist extends \Gazelle\BaseManager {
 
     public function findByIdAndRevision(int $artistId, int $revisionId): ?\Gazelle\Artist {
         $id = (int)self::$db->scalar("
-            SELECT ArtistID
-            FROM artists_group
-            WHERE ArtistID = ?
-                AND RevisionID = ?
+            SELECT ag.ArtistID
+            FROM artists_group ag
+            INNER JOIN wiki_artists wa ON (wa.PageID = ag.ArtistID)
+            WHERE wa.PageID = ?
+                AND wa.RevisionID = ?
             ", $artistId, $revisionId
         );
         return $id ? new \Gazelle\Artist($id, $revisionId) : null;

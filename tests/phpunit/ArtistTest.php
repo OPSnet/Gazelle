@@ -21,7 +21,7 @@ class ArtistTest extends TestCase {
             $artist = $manager->findById($artistId);
             if ($artist) {
                 $artist->toggleAttr('locked', false);
-                $artist->remove($this->user, $logger);
+                // $artist->remove($this->user, $logger);
             }
         }
         $this->user->remove();
@@ -57,5 +57,72 @@ class ArtistTest extends TestCase {
         $this->assertFalse($artist->isLocked(), 'artist-is-unlocked');
         $this->assertTrue($artist->toggleAttr('locked', true), 'artist-toggle-locked');
         $this->assertTrue($artist->isLocked(), 'artist-is-locked');
+    }
+
+    public function testArtistRevision(): void {
+        $manager = new \Gazelle\Manager\Artist;
+        [$artistId, $aliasId] = $manager->create('phpunit.' . randomString(12));
+        $this->artistIdList[] = $artistId;
+        $artist = $manager->findById($artistId);
+
+        $revision = $artist->createRevision(
+            body:    'phpunit body test',
+            image:   'https://example.com/artist.jpg',
+            summary: ['phpunit first revision'],
+            user:    $this->user,
+        );
+        $this->assertGreaterThan(0, $revision, 'artist-revision-1-id');
+        $this->assertEquals('phpunit body test', $artist->body(), 'artist-body-revised');
+
+        $rev2 = $artist->createRevision(
+            body:    'phpunit body test revised',
+            image:   'https://example.com/artist-revised.jpg',
+            summary: ['phpunit second revision'],
+            user:    $this->user,
+        );
+        $this->assertEquals($revision + 1, $rev2, 'artist-revision-2');
+        $this->assertEquals('https://example.com/artist-revised.jpg', $artist->image(), 'artist-image-revised');
+
+        $artistV1 = $manager->findByIdAndRevision($artistId, $revision);
+        $this->assertNotNull($artistV1, 'artist-revision-1-found');
+        $this->assertEquals('phpunit body test', $artistV1->body(), 'artist-body-rev-1');
+
+        $artistV2 = $manager->findByIdAndRevision($artistId, $rev2);
+        $this->assertEquals('https://example.com/artist-revised.jpg', $artistV2->image(), 'artist-image-rev-2');
+
+        $list = $artist->revisionList();
+        $this->assertEquals('phpunit second revision', $list[0]['summary']);
+        $this->assertEquals($revision, $list[1]['revision']);
+
+        $rev3 = $artist->revertRevision($revision, $this->user);
+        $this->assertCount(3, $artist->revisionList());
+        $this->assertEquals($artistV1->body(), $artist->body(), 'artist-body-rev-3');
+    }
+
+    public function testArtistModify(): void {
+        $manager = new \Gazelle\Manager\Artist;
+        [$artistId, $aliasId] = $manager->create('phpunit.' . randomString(12));
+        $this->artistIdList[] = $artistId;
+        $artist = $manager->findById($artistId);
+
+        $this->assertTrue(
+            $artist->setUpdate('body', 'body modification')->setUpdateUser($this->user)->modify(),
+            'artist-modify-body'
+        );
+        $this->assertCount(1, $artist->revisionList());
+        $this->assertTrue(
+            $artist->setUpdate('VanityHouse', true)->setUpdateUser($this->user)->modify(),
+            'artist-modify-showcase'
+        );
+        $this->assertCount(1, $artist->revisionList());
+
+        $this->assertTrue(
+            $artist ->setUpdate('image', 'https://example.com/update.png')
+                ->setUpdate('summary', 'You look nice in a suit')
+                ->setUpdateUser($this->user)
+                ->modify(),
+            'artist-modify-image'
+        );
+        $this->assertCount(2, $artist->revisionList());
     }
 }

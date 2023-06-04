@@ -6,9 +6,4 @@ if (is_null($artist)) {
     error(404);
 }
 
-echo $Twig->render('revision.twig', [
-    'id'   => $artist->id(),
-    'list' => $artist->revisionList(),
-    'name' => $artist->name(),
-    'url'  => "artist.php?id=",
-]);
+echo $Twig->render('revision.twig', ['object' => $artist]);
