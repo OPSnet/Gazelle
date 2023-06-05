@@ -5,53 +5,26 @@ if (!$Viewer->permitted('torrents_edit')) {
 }
 authorize();
 
-$AliasID = (int)$_GET['aliasid'];
-if (!$AliasID) {
+$artMan = new Gazelle\Manager\Artist;
+$aliasId = (int)$_GET['aliasid'];
+$artist  = $artMan->findByAliasId($aliasId);
+if (is_null($artist)) {
     error(404);
 }
 
-$db = Gazelle\DB::DB();
-if ($db->scalar("
-    SELECT aa.AliasID
-    FROM artists_alias AS aa
-    INNER JOIN artists_alias AS aa2 USING (ArtistID)
-    WHERE aa.AliasID = ?
-    ", $AliasID
-) == 1) {
-    error("The alias $AliasID is the last alias for this artist; removing it would cause bad things to happen.");
+if ($artMan->aliasUseTotal($aliasId) == 1) {
+    error("The alias $aliasId is the only alias for this artist; removing it would cause bad things to happen.");
 }
 
-$GroupID = $db->scalar("
-    SELECT GroupID
-    FROM torrents_artists
-    WHERE AliasID = ?
-    ", $AliasID);
-if ($GroupID) {
-    error("The alias $AliasID still has the group (<a href=\"torrents.php?id=$GroupID\">$GroupID</a>) attached. Fix that first.");
+$tgroupList = $artMan->tgroupList($aliasId, new Gazelle\Manager\TGroup);
+if ($tgroupList) {
+    echo $Twig->render('artist/tgroup-usage.twig', [
+        'artist' => $artist,
+        'list'   => $tgroupList,
+    ]);
+    exit;
 }
 
-[$ArtistID, $ArtistName, $AliasName] = $db->row("
-    SELECT aa.ArtistID, ag.Name, aa.Name
-    FROM artists_alias AS aa
-    INNER JOIN artists_group AS ag USING (ArtistID)
-    WHERE aa.AliasID = ?
-    ", $AliasID
-);
+$artist->removeAlias($aliasId, $Viewer, new Gazelle\Log);
 
-$db->prepared_query("
-    DELETE FROM artists_alias WHERE AliasID = ?
-    ", $AliasID
-);
-$db->prepared_query("
-    UPDATE artists_alias SET
-        Redirect = '0'
-    WHERE Redirect = ?
-    ", $AliasID
-);
-
-(new Gazelle\Log)->general(
-    "The alias $AliasID ($AliasName) was removed from the artist $ArtistID ($ArtistName) by user "
-    . $Viewer->id() . " (" . $Viewer->username() . ")"
-);
-
-header("Location: " . redirectUrl("artist.php?action=edit&artistid={$ArtistID}"));
+header("Location: " . redirectUrl("artist.php?action=edit&artistid={$artist->id()}"));

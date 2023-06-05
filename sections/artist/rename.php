@@ -55,7 +55,7 @@ $db->begin_transaction();
 
 if (!$TargetAliasID || $TargetAliasID == $oldAliasId) {
     // no merge, just rename
-    $artist->rename($Viewer->id(), $oldAliasId, $newName, $reqMan);
+    $artist->rename($oldAliasId, $newName, $reqMan, $Viewer);
     $TargetArtistID = $ArtistID;
 } else {
     // Merge stuff

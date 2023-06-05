@@ -143,8 +143,8 @@ please send a Staff PM to ask a moderator to unlock the artist.</p>
             <div class="field_div">
                 <span class="label"><strong>Usage replaced with:</strong></span>
                 <select name="redirect">
-    {% for alias_id, info in alias_info %}
-                    <option value="{{ alias_id }}"{{ selected(info.name == name) }}>{{ info.name }}</option>
+    {% for alias_id, info in artist.aliasInfo %}
+                    <option value="{{ alias_id }}"{{ selected(info.name == artist.name) }}>{{ info.name }}</option>
     {% endfor %}
                     <option value="0">Non-redirecting alias</option>
                 </select><br />

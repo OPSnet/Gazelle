@@ -10,6 +10,6 @@ $similarId = (int)($_GET['similarid'] ?? 0);
 if (is_null($artist) || !$similarId) {
     error(404);
 }
-$artist->voteSimilar($Viewer->id(), $similarId, $Way === 'up');
+$artist->voteSimilar($Viewer, $similarId, $Way === 'up');
 
 header("Location: " . redirectUrl("artist.php?id=" . $artist->id()));

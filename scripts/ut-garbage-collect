@@ -11,6 +11,20 @@ require_once(__DIR__ . '/../lib/bootstrap.php');
 
 $db = Gazelle\DB::DB();
 
+// clean artists
+$db->prepared_query("
+    DELETE aha
+    FROM artists_group ag
+    INNER JOIN artist_has_attr aha ON (aha.artist_id = ag.ArtistID)
+    WHERE ag.Name like 'phpunit.%';
+");
+$db->prepared_query("
+    DELETE ag, aa
+    FROM artists_group ag
+    INNER JOIN artists_alias aa USING (ArtistID)
+    WHERE ag.Name like 'phpunit.%';
+");
+
 // clean reports
 $db->prepared_query("
     DELETE FROM reports
@@ -34,12 +48,11 @@ foreach ($db->collect(0, false) as $requestId) {
 }
 
 // clean torrents and torrent groups
-
 $db->prepared_query("
     SELECT g.ID as gid, t.ID as tid
     FROM torrents_group g
     LEFT JOIN torrents t on (t.GroupID = g.ID)
-    WHERE g.Name regexp '^(?:phpunit (?:category new|collfree|request|torman) [a-z]{6}|Some [a-z]{8} songs)$'
+    WHERE g.Name regexp '^(?:phpunit (?:category new|collfree|notify|reaper|request|seedbox|torman) [a-z]{6}|Some [a-z]{8} songs)$'
 ");
 $groupList   = $db->collect('gid', false);
 $torrentList = $db->collect('tid', false);
@@ -55,8 +68,10 @@ foreach ($torrentList as $torrentId) {
 $tgMan = new Gazelle\Manager\TGroup;
 foreach ($groupList as $tgroupId) {
     $tgroup = $tgMan->findById($tgroupId);
-    echo "tgroup $torrentId ({$tgroup->name()})\n";
-    $tgroup->remove(new Gazelle\User(1));
+    if ($tgroup) {
+        echo "tgroup $torrentId ({$tgroup->name()})\n";
+        $tgroup->remove(new Gazelle\User(1));
+    }
 }
 
 // clean collages

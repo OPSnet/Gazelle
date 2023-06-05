@@ -6,7 +6,7 @@ class Artist extends BaseObject {
     final const CACHE_REQUEST_ARTIST = 'artists_requests_%d';
     final const CACHE_TGROUP_ARTIST  = 'artists_groups_%d';
 
-    protected const CACHE_PREFIX    = 'artistv2_%d';
+    protected const CACHE_PREFIX    = 'artistv3_%d';
     protected const DISCOGS_API_URL = 'https://api.discogs.com/artists/%d';
 
     protected array $artistRole;
@@ -67,6 +67,16 @@ class Artist extends BaseObject {
             }
             $sql .= " WHERE $cond";
             $info = self::$db->rowAssoc($sql, ...$args);
+
+            self::$db->prepared_query("
+                SELECT AliasID AS alias_id,
+                    Redirect   AS redirect_id,
+                    Name       AS name
+                FROM artists_alias
+                WHERE ArtistID = ?
+                ", $this->id
+            );
+            $info['alias'] = self::$db->to_array('alias_id', MYSQLI_ASSOC, false);
 
             self::$db->prepared_query("
                 SELECT aa.name, aa.artist_attr_id
@@ -221,6 +231,10 @@ class Artist extends BaseObject {
         return $this->info()['showcase'] == 1;
     }
 
+    public function label(): string {
+        return "{$this->id} ({$this->name()})";
+    }
+
     public function name(): string {
         return $this->info()['name'];
     }
@@ -285,7 +299,6 @@ class Artist extends BaseObject {
             ", $this->id, $body, $image, $user->id(),
                 implode(', ', array_filter($summary, fn($s) => !empty($s)))
         );
-        dump($summary);
         $revisionId = self::$db->inserted_id();
         self::$db->prepared_query("
             UPDATE artists_group SET
@@ -354,12 +367,12 @@ class Artist extends BaseObject {
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
-    public function rename(int $userId, int $aliasId, string $name, Manager\Request $reqMan): void {
+    public function rename(int $aliasId, string $name, Manager\Request $reqMan, User $user): int {
         self::$db->prepared_query("
             INSERT INTO artists_alias
                    (ArtistID, Name, UserID, Redirect)
             VALUES (?,        ?,    ?,      0)
-            ", $this->id, $name, $userId
+            ", $this->id, $name, $user->id()
         );
         $targetId = self::$db->inserted_id();
         self::$db->prepared_query("
@@ -399,51 +412,37 @@ class Artist extends BaseObject {
         foreach ($requests as $requestId) {
             $reqMan->findById($requestId)->updateSphinx();
         }
+        $this->flush();
+        return $targetId;
     }
 
-    /**
-     * @throws \Gazelle\Exception\ResourceNotFoundException
-     * @throws \Gazelle\Exception\ArtistRedirectException
-     */
-    public function resolveRedirect(int $redirectId): int {
-        [$foundId, $foundRedirectId] = self::$db->row("
-            SELECT ArtistID, Redirect
-            FROM artists_alias
-            WHERE AliasID = ?
-            ", $redirectId
-        );
-        if (!$foundId) {
-            throw new Exception\ResourceNotFoundException((string)$redirectId);
-        }
-        if ($this->id !== $foundId) {
-            throw new Exception\ArtistRedirectException();
-        }
-        return $foundRedirectId > 0 ? (int)$foundRedirectId : $redirectId;
-    }
-
-    public function addAlias(int $userId, string $name, int $redirect): int {
+    public function addAlias(string $name, int $redirect, User $user, Log $logger): int {
         self::$db->prepared_query("
             INSERT INTO artists_alias
                    (ArtistID, Name, Redirect, UserID)
             VALUES (?,        ?,    ?,        ?)
-            ", $this->id, $name, $redirect, $userId
+            ", $this->id, $name, $redirect, $user->id()
         );
-        return self::$db->inserted_id();
+        $aliasId = self::$db->inserted_id();
+        $logger->general(
+            "The alias $aliasId ($name) was added to the artist {$this->label()} by user {$user->label()}"
+        );
+        $this->flush();
+        return $aliasId;
     }
 
     public function getAlias($name): int {
-        $alias = (int)self::$db->scalar('
-            SELECT AliasID
-            FROM artists_alias
-            WHERE ArtistID = ?
-                AND ArtistID != AliasID
-                AND Name = ?
-            ', $this->id, $name
+        $alias = array_keys(
+            array_filter(
+                $this->aliasList(),
+                fn($a) => (strcasecmp($a['name'], $name) == 0)
+            )
         );
-        return $alias ?: $this->id;
+        return empty($alias) ? $this->id : current($alias);
     }
 
-    public function removeAlias(int $aliasId): int {
+    public function clearAliasFromArtist(int $aliasId, User $user, Log $logger): int {
+        $alias = $this->aliasList()[$aliasId];
         self::$db->prepared_query("
             UPDATE artists_alias SET
                 ArtistID = ?,
@@ -451,18 +450,40 @@ class Artist extends BaseObject {
             WHERE AliasID = ?
             ", $this->id, $aliasId
         );
-        return self::$db->affected_rows();
+        $affected = self::$db->affected_rows();
+        if ($affected) {
+            $this->flush();
+            $logger->general(
+                "Redirection from the alias $aliasId ({$alias['name']}) for the artist {$this->label()} was removed by user {$user->label()}"
+            );
+        }
+        return $affected;
+    }
+
+    public function removeAlias(int $aliasId, User $user, Log $logger): int {
+        self::$db->begin_transaction();
+        $alias = $this->aliasList()[$aliasId];
+        self::$db->prepared_query("
+            DELETE FROM artists_alias WHERE AliasID = ?
+            ", $aliasId
+        );
+        $affected = self::$db->affected_rows();
+        if ($affected) {
+            $this->flush();
+            $logger->general(
+                "The alias $aliasId ({$alias['name']}) for the artist {$this->label()}  was removed by user {$user->label()}"
+            );
+        }
+        self::$db->commit();
+        return $affected;
+    }
+
+    public function aliasList(): array {
+        return $this->info()['alias'];
     }
 
     public function aliasNameList(): array {
-        self::$db->prepared_query("
-            SELECT Name
-            FROM artists_alias
-            WHERE Redirect = 0 AND ArtistID = ?
-            ORDER BY Name
-            ", $this->id
-        );
-        return self::$db->collect('Name', false);
+        return array_values(array_map(fn($a) => $a['name'], $this->aliasList()));
     }
 
     public function aliasInfo(): array {
@@ -581,11 +602,11 @@ class Artist extends BaseObject {
         return count($this->requestIdUsage()) + count($this->tgroupIdUsage());
     }
 
-    public function addSimilar(Artist $similar, int $userId): int {
+    public function addSimilar(Artist $similar, User $user): int {
         $artistId = $this->id;
         $similarArtistId = $similar->id();
         // Let's see if there's already a similar artists field for these two
-        $similarId = self::$db->scalar("
+        $similarId = (int)self::$db->scalar("
             SELECT s1.SimilarID
             FROM artists_similar AS s1
             INNER JOIN artists_similar AS s2 ON (s1.SimilarID = s2.SimilarID)
@@ -618,7 +639,7 @@ class Artist extends BaseObject {
             INSERT IGNORE INTO artists_similar_votes
                    (SimilarID, UserID, way)
             VALUES (?,         ?,      'up')
-            ", $similarId, $userId
+            ", $similarId, $user->id()
         );
         $affected = self::$db->affected_rows();
         self::$db->commit();
@@ -629,14 +650,17 @@ class Artist extends BaseObject {
         return $affected;
     }
 
-    public function voteSimilar(int $userId, int $similarId, bool $upvote): bool {
+    public function voteSimilar(User $user, int $similarId, bool $upvote): bool {
+        if ($this->id === $similarId) {
+            return false;
+        }
         if (self::$db->scalar("
             SELECT 1
             FROM artists_similar_votes
             WHERE SimilarID = ?
                 AND UserID = ?
                 AND Way = ?
-            ", $similarId, $userId, $upvote ? 'up' : 'down'
+            ", $similarId, $user->id(), $upvote ? 'up' : 'down'
         )) {
             return false;
         }
@@ -651,7 +675,7 @@ class Artist extends BaseObject {
             INSERT INTO artists_similar_votes
                    (SimilarID, UserID, Way)
             VALUES (?,         ?,      ?)
-            ", $similarId, $userId, $upvote ? 'up' : 'down'
+            ", $similarId, $user->id(), $upvote ? 'up' : 'down'
         );
         self::$db->commit();
         $similarArtistId = (int)self::$db->scalar("
@@ -674,7 +698,7 @@ class Artist extends BaseObject {
             SELECT ArtistID FROM artists_similar WHERE SimilarID = ?
             ", $similarId
         );
-        $artistIds = self::$db->collect(0);
+        $artistIds = self::$db->collect(0, false);
         if (!in_array($this->id, $artistIds)) {
             self::$db->rollback();
             return false;

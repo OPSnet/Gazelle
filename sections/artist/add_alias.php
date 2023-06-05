@@ -5,16 +5,18 @@ if (!$Viewer->permitted('torrents_edit')) {
 }
 authorize();
 
-$artist = (new Gazelle\Manager\Artist)->findById((int)$_POST['artistid']);
-if (is_null($artist)) {
-    error(404);
-}
-$ArtistID = $artist->id();
-$Redirect = (int)$_POST['redirect'];
+$redirectId = (int)$_POST['redirect'];
 $aliasName = Gazelle\Artist::sanitize($_POST['name']);
 if (is_null($aliasName) || empty($aliasName)) {
     error('You must supply an alias for this artist.');
 }
+
+$artMan = new Gazelle\Manager\Artist;
+$artist = $artMan->findById((int)$_POST['artistid']);
+if (is_null($artist)) {
+    error(404);
+}
+$artistId = $artist->id();
 
 /*
  * In the case of foo, who released an album before changing his name to bar and releasing another
@@ -34,9 +36,9 @@ $db->prepared_query("
 );
 if ($db->has_results()) {
     while ([$CloneAliasID, $CloneArtistID, $CloneAliasName, $CloneRedirect] = $db->next_record(MYSQLI_NUM, false)) {
-        $CloneAliasID = (int)$CloneAliasID;
-        $CloneArtistID = (int)$CloneArtistID;
-        if (!strcasecmp($CloneAliasName, $aliasName)) {
+        if (strcasecmp($CloneAliasName, $aliasName) == 0) {
+            $CloneAliasID = (int)$CloneAliasID;
+            $CloneArtistID = (int)$CloneArtistID;
             break;
         }
     }
@@ -44,37 +46,27 @@ if ($db->has_results()) {
         if (!$CloneRedirect) {
             error('No changes were made as the target alias did not redirect anywhere.');
         }
-        if (!($ArtistID == $CloneArtistID && $Redirect == 0)) {
-            error('An alias by that name already exists <a href="artist.php?id=' . $CloneArtistID . '">here</a>. You can try renaming that artist to this one.');
+        if ($artistId != $CloneArtistID || $redirectId) {
+            echo $Twig->render('artist/error-alias.twig', [
+                'alias'  => $aliasName,
+                'artist' => $artMan->findById($CloneArtistID),
+            ]);
+            exit;
         }
-        $artist->removeAlias($CloneAliasID);
-        (new Gazelle\Log)->general(sprintf("Redirection for the alias %d (%s) for the artist %d was removed by user %d (%s)",
-            $CloneAliasID, $aliasName, $ArtistID, $Viewer->id(), $Viewer->username()
-        ));
+        $artist->clearAliasFromArtist($CloneAliasID, $Viewer, new Gazelle\Log);
     }
 }
 
 if (!$CloneAliasID) {
-    if ($Redirect) {
-        try {
-            $Redirect = $artist->resolveRedirect($Redirect);
+    if ($redirectId) {
+        $redirectArtist = $artMan->findByRedirectId($redirectId);
+        if (is_null($redirectArtist)) {
+            error('Cannot redirect to a nonexistent artist alias.');
+        } elseif ($artist->id() != $redirectArtist->id()) {
+            error('Redirection must target an alias for the current artist.');
         }
-        catch (\Exception $e) {
-            switch ($e->getMessage()) {
-            case 'Artist:not-redirected':
-                error('Redirection must target an alias for the current artist.');
-            default:
-            case 'Artist:not-found':
-                error('Cannot redirect to a nonexistent artist alias.');
-            }
-        }
-
     }
-    $aliasId = $artist->addAlias($Viewer->id(), $aliasName, $Redirect);
-
-    (new Gazelle\Log)->general(sprintf("The alias %d (%s) was added to the artist %d (%s) by user %s",
-        $aliasId, $aliasName, $ArtistID, $artist->name(), $Viewer->label()
-    ));
+    $artist->addAlias($aliasName, $redirectId, $Viewer, new Gazelle\Log);
 }
 
-header("Location:" . redirectUrl("artist.php?action=edit&artistid={$ArtistID}"));
+header("Location:" . redirectUrl("artist.php?action=edit&artistid={$artistId}"));

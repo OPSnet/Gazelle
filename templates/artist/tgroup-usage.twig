@@ -1,0 +1,16 @@
+{{ header('Groups referring to ' ~ artist.name) }}
+
+<div class="pad thin">
+    There are still torrent groups that refer to <b>{{ artist.name }}</b>.<br />
+    Please remove the artist or replace them with a correct alias (or non-redirecting alias) from these groups before attempting to delete.<br />
+    <div class="box pad">
+        <ul>
+{% for tgroup in list %}
+            <li>
+                <a href="torrents.php?id={{ tgroup.id }}" class="tooltip" title="View torrent group" dir="ltr">{{ tgroup.name }}</a>
+            </li>
+{% endfor %}
+        </ul>
+    </div>
+</div>
+{{ footer() }}

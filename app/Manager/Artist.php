@@ -91,6 +91,27 @@ class Artist extends \Gazelle\BaseManager {
         return $id ? new \Gazelle\Artist($id, $revisionId): null;
     }
 
+    public function findByAliasId(int $aliasId): ?\Gazelle\Artist {
+        return $this->findById(
+            (int)self::$db->scalar("
+                SELECT aa.ArtistID
+                FROM artists_alias aa
+                INNER JOIN artists_group ag USING (ArtistID)
+                WHERE aa.AliasID = ?
+                ", $aliasId
+            )
+        );
+    }
+
+    public function findByRedirectId(int $redirectId): ?\Gazelle\Artist {
+        return $this->findById(
+            (int)self::$db->scalar("
+                SELECT ArtistID FROM artists_alias WHERE AliasID = ?
+                ", $redirectId
+            )
+        );
+    }
+
     public function findRandom(): ?\Gazelle\Artist {
         return $this->findById(
             (int)self::$db->scalar("
@@ -104,6 +125,30 @@ class Artist extends \Gazelle\BaseManager {
                 LIMIT 1
                 ", RANDOM_ARTIST_MIN_ENTRIES
             )
+        );
+    }
+
+    public function aliasUseTotal(int $aliasId): int {
+        return (int)self::$db->scalar("
+            SELECT count(*)
+            FROM artists_alias AS aa
+            INNER JOIN artists_alias AS aa2 USING (ArtistID)
+            WHERE aa.AliasID = ?
+            ", $aliasId
+        );
+    }
+
+    public function tgroupList(int $aliasId, \Gazelle\Manager\TGroup $tgMan): array {
+        self::$db->prepared_query("
+            SELECT GroupID FROM torrents_artists WHERE AliasID = ?
+            ", $aliasId
+        );
+        return array_filter(
+            array_map(
+                fn($id) => $tgMan->findById($id),
+                self::$db->collect(0, false)
+            ),
+            fn ($tgroup) => !empty($tgroup)
         );
     }
 
