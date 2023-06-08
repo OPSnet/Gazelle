@@ -9,34 +9,36 @@ class Time {
      * it's a string of a timestamp that we convert to a UNIX timestamp and then do a subtraction.
      * If the passed in $timestamp does not convert properly or is null, return false (error).
      */
-    public static function timeAgo(string|int|null $timestamp): false|int {
-        if ($timestamp === null) {
-            return false;
-        }
-
-        if (($filter = filter_var($timestamp, FILTER_VALIDATE_INT)) !== false) {
-            return $filter;
+    public static function timeAgo(string|int $timestamp): false|int {
+        if (is_numeric($timestamp)) {
+            $timestamp = (int)$timestamp;
         } else {
-            if ($timestamp == '' || is_null($timestamp)) {
+            if ($timestamp == '') {
                 return false;
             }
-            if (is_string($timestamp)) {
-                $timestamp = strtotime($timestamp);
-                if ($timestamp === false) {
-                    return false;
-                }
+            $timestamp = strtotime($timestamp);
+            if ($timestamp === false) {
+                return false;
             }
-            return time() - $timestamp;
         }
+        return time() - $timestamp;
     }
 
-    public static function diff(int|string|null $timestamp, int $levels = 2, bool $span = true, string|false $starttime = false, bool $hideAgo = false): string {
+    public static function diff(
+        int|string|null $timestamp,
+        int             $levels    = 2,
+        bool            $span      = true,
+        string|false    $starttime = false,
+        bool            $hideAgo   = false,
+    ): string {
         $starttime = ($starttime === false) ? time() : strtotime($starttime);
 
         if ($timestamp === 0 || $timestamp === '' || is_null($timestamp)) {
             return 'Never';
         }
-        if (is_string($timestamp)) {
+        if (is_numeric($timestamp)) {
+            $timestamp = (int)$timestamp;
+        } else {
             $timestamp = strtotime($timestamp);
             if ($timestamp === false) {
                 return 'Never';
@@ -67,86 +69,86 @@ class Time {
 
         $minutes = floor($remain / 60);
 
-        $return = '';
+        $timespec = '';
 
         if ($years > 0 && $levels > 0) {
             if ($years > 1) {
-                $return .= "$years years";
+                $timespec .= "$years years";
             } else {
-                $return .= "$years year";
+                $timespec .= "$years year";
             }
             $levels--;
         }
 
         if ($months > 0 && $levels > 0) {
-            if ($return != '') {
-                $return .= ', ';
+            if ($timespec != '') {
+                $timespec .= ', ';
             }
             if ($months > 1) {
-                $return .= "$months months";
+                $timespec .= "$months months";
             } else {
-                $return .= "$months month";
+                $timespec .= "$months month";
             }
             $levels--;
         }
 
         if ($weeks > 0 && $levels > 0) {
-            if ($return != '') {
-                $return .= ', ';
+            if ($timespec != '') {
+                $timespec .= ', ';
             }
             if ($weeks > 1) {
-                $return .= "$weeks weeks";
+                $timespec .= "$weeks weeks";
             } else {
-                $return .= "$weeks week";
+                $timespec .= "$weeks week";
             }
             $levels--;
         }
 
         if ($days > 0 && $levels > 0) {
-            if ($return != '') {
-                $return .= ', ';
+            if ($timespec != '') {
+                $timespec .= ', ';
             }
             if ($days > 1) {
-                $return .= "$days days";
+                $timespec .= "$days days";
             } else {
-                $return .= "$days day";
+                $timespec .= "$days day";
             }
             $levels--;
         }
 
         if ($hours > 0 && $levels > 0) {
-            if ($return != '') {
-                $return .= ', ';
+            if ($timespec != '') {
+                $timespec .= ', ';
             }
             if ($hours > 1) {
-                $return .= "$hours hours";
+                $timespec .= "$hours hours";
             } else {
-                $return .= "$hours hour";
+                $timespec .= "$hours hour";
             }
             $levels--;
         }
 
         if ($minutes > 0 && $levels > 0) {
-            if ($return != '') {
-                $return .= ' and ';
+            if ($timespec != '') {
+                $timespec .= ' and ';
             }
             if ($minutes > 1) {
-                $return .= "$minutes mins";
+                $timespec .= "$minutes mins";
             } else {
-                $return .= "$minutes min";
+                $timespec .= "$minutes min";
             }
         }
 
-        if ($return == '') {
-            $return = 'Just now';
+        if ($timespec == '') {
+            $timespec = 'Just now';
         } elseif (!$hideAgo) {
-            $return .= ' ago';
+            $timespec .= ' ago';
         }
 
         if ($span) {
-            return '<span class="time tooltip" title="'.date('M d Y, H:i', $timestamp).'">'.$return.'</span>';
+            return '<span class="time tooltip" title="'.date('M d Y, H:i', $timestamp).'">'.$timespec.'</span>';
         } else {
-            return $return;
+            return $timespec;
         }
     }
 
@@ -155,13 +157,8 @@ class Time {
      * string representing the number of years, months, weeks, days, and hours that make up that numeric amount. The
      * function then either surrounds the amount with a span or just returns the string. Giving a less than or equal
      * 0 hours to the function will return the string 'Never'.
-     *
-     * @param int $hours
-     * @param int $levels
-     * @param bool $span
-     * @return string
      */
-    public static function convertHours($hours, $levels = 2, $span = true) {
+    public static function convertHours(int $hours, int $levels = 2, bool $span = true): string {
         if ($hours <= 0) {
             return 'Never';
         }
@@ -272,20 +269,20 @@ class Time {
         return date('Y-m-d H:i:s', time() + $offset);
     }
 
-    public static function sqlTime($timestamp = false) {
+    public static function sqlTime($timestamp = false): string {
         if ($timestamp === false) {
             $timestamp = time();
         }
         return date('Y-m-d H:i:s', (int)$timestamp);
     }
 
-    public static function validDate($date_string) {
+    public static function validDate($date_string): bool {
         $date_time = explode(' ', $date_string);
         if (count($date_time) != 2) {
             return false;
         }
         [$date, $time] = $date_time;
-        $split_time = explode(':', $time);
+        $split_time = array_map('intval', explode(':', $time));
         if (count($split_time) != 3) {
             return false;
         }
@@ -299,7 +296,7 @@ class Time {
         if ($second != 0 && !(is_number($second) && $second < 60 && $second >= 0)) {
             return false;
         }
-        $split_date = explode('-', $date);
+        $split_date = array_map('intval', explode('-', $date));
         if (count($split_date) != 3) {
             return false;
         }
@@ -307,11 +304,11 @@ class Time {
         return checkdate($month, $day, $year);
     }
 
-    public static function isValidDate($date) {
+    public static function isValidDate($date): bool {
         return static::isValidDateTime($date, 'Y-m-d');
     }
 
-    public static function isValidDateTime($date_time, $format = 'Y-m-d H:i') {
+    public static function isValidDateTime($date_time, $format = 'Y-m-d H:i'): bool {
         $formatted_date_time = \DateTime::createFromFormat($format, $date_time);
         return $formatted_date_time && $formatted_date_time->format($format) == $date_time;
     }

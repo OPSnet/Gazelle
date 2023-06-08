@@ -53,5 +53,5 @@
 
 {% if own_profile or viewer.permitted('users_mod') or viewer.isFLS %}
     <li{% if not own_profile %} class="paranoia_override"{% endif %}>Torrent clients: {{ user.clients|join('; ') }}</li>
-    <li{% if not own_profile %} class="paranoia_override"{% endif %}>Password age: {{ user.passwordAge|raw }}</li>
+    <li{% if not own_profile %} class="paranoia_override"{% endif %}>Password age: {{ user.passwordAge|time_interval }}</li>
 {% endif %}

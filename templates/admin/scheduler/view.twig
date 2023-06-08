@@ -36,7 +36,7 @@
         <td title="{{ t.description }}">
             <a style="{{ color }}" href="tools.php?action=periodic&amp;mode=detail&amp;id={{ t.periodic_task_id }}">{{ prefix }}{{ t.name }}</a>
         </td>
-        <td>{{ t.period|time_interval }}</td>
+        <td>{{ t.period|time_compact }}</td>
         <td>
             <span class="reltime">{% if t.last_run %}{{ t.last_run|time_diff }}{% else %}Never{% endif %}</span>
             <span class="abstime hidden">{{ t.last_run|default('Never') }}</span>

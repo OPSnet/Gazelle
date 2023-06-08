@@ -19,10 +19,9 @@ class TimeTest extends TestCase {
 
     function providerTimestamp(): array {
         return [
-            [null, false],
             ['not a valid timestamp', false],
-            ['5', 5],
-            [1413, 1413],
+            ['5', time() - 5],
+            [1413, time() - 1413],
             ['2000-01-01 01:01:01', time() - strtotime('2000-01-01 01:01:01')]
         ];
     }

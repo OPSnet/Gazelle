@@ -14,6 +14,7 @@ class TwigTest extends TestCase {
     public function setUp(): void {
         Gazelle\Util\Twig::setUserMan(new Gazelle\Manager\User);
         $this->user = Helper::makeUser('user.' . randomString(6), 'user');
+        $this->user->setField('PermissionID', SYSOP)->modify();
     }
 
     public function tearDown(): void {
@@ -101,6 +102,12 @@ END;
 
         $this->assertEquals('abc "def"…', self::twig('{{ value|shorten(10) }}')->render(['value' => 'abc "def" ghi']), 'twig-shorten-10');
 
+        $this->assertEquals(
+            '2 hours and 7 mins',
+            self::twig('{{ value|time_interval }}')->render(['value' => 3600 * 2 + 7 * 60]),
+            'twig-time-ago'
+        );
+
         $this->assertMatchesRegularExpression(
             '@^<span class="time tooltip" title="[^"]+">1 hour ago</span>$@',
             self::twig('{{ value|time_diff }}')->render(['value' => date("Y-m-d H:i:s", strtotime("-1 hour"))]),
@@ -109,7 +116,7 @@ END;
 
         $this->assertEquals(
             '2h7s',
-            self::twig('{{ value|time_interval }}')->render(['value' => 3600 * 2 + 7]),
+            self::twig('{{ value|time_compact }}')->render(['value' => 3600 * 2 + 7]),
             'twig-time-interval'
         );
 
@@ -133,16 +140,20 @@ END;
 
         // yuck
         global $Viewer;
-        $Viewer = (new Gazelle\Manager\User)->find('@admin');
-        $this->assertEquals('<a href="user.php?id=1">admin</a>', self::twig('{{ user_id|user_url }}')->render(['user_id' => 1]), 'twig-user-url');
+        $Viewer = $this->user;
+        $this->assertEquals(
+            "<a href=\"user.php?id={$this->user->id()}\">{$this->user->username()}</a>",
+            self::twig('{{ user_id|user_url }}')->render(['user_id' => $this->user->id()]),
+            'twig-user-url'
+        );
         $this->assertMatchesRegularExpression(
-            '@^<a href="user.php\?id=1">admin</a><a target="_blank" href="[^"]+"><img class="donor_icon tooltip" src="[^"]+" (?:alt="[^"]+" )?(?:title="[^"]+" )?/></a> \(Sysop\)$@',
-            self::twig('{{ user_id|user_full }}')->render(['user_id' => 1]),
+            "@^<a href=\"user.php\?id={$this->user->id()}\">{$this->user->username()}</a><a target=\"_blank\" href=\"[^\"]+\"><img class=\"donor_icon tooltip\" src=\"[^\"]+\" (?:alt=\"[^\"]+\" )?(?:title=\"[^\"]+\" )?/></a> \(Sysop\)$@",
+            self::twig('{{ user_id|user_full }}')->render(['user_id' => $this->user->id()]),
             'twig-user-full'
         );
 
         $status = self::twig('{{ user_id|user_status(viewer) }}');
-        $this->assertIsString($status->render(['user_id' => 1, 'viewer' => $Viewer]), 'twig-user-status');
+        $this->assertIsString($status->render(['user_id' => $this->user->id(), 'viewer' => $this->user]), 'twig-user-status');
     }
 
     public function testImageCache(): void {
@@ -189,10 +200,8 @@ END;
     public function testFunction(): void {
         global $Document;
         $Document = 'index';
-        $this->assertStringStartsWith('<!DOCTYPE html>', self::twig('{{ header("page") }}')->render(), 'twig-function-header');
-
         global $Viewer;
-        $Viewer  = (new Gazelle\Manager\User)->find('@admin');
+        $Viewer  = $this->user;
         $current = (new Gazelle\User\Session($Viewer))->create([
             'keep-logged' => '0',
             'browser'     => [
@@ -206,6 +215,7 @@ END;
         ]);
         global $SessionID;
         $SessionID = $current['SessionID'];
+        $this->assertStringStartsWith('<!DOCTYPE html>', self::twig('{{ header("page") }}')->render(), 'twig-function-header');
         $this->assertStringEndsWith("</body>\n</html>\n", self::twig('{{ footer() }}')->render(), 'twig-function-footer');
 
         $this->assertEquals(

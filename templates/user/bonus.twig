@@ -60,7 +60,7 @@
         <td>{{ stats.torrent.fullLink|raw }}</td>
         <td class="nobr number_column">{{ stats.torrent.size|octet_size }}</td>
         <td class="number_column">{{ stats.seeders|number_format }}</td>
-        <td class="number_column">{{ (stats.seed_time * 60 * 60)|time_interval }}</td>
+        <td class="number_column">{{ (stats.seed_time * 60 * 60)|time_compact }}</td>
         <td class="number_column">{{ stats.hourly_points|number_format(3) }}</td>
         <td class="number_column">{{ stats.daily_points|number_format(3) }}</td>
         <td class="number_column">{{ stats.weekly_points|number_format(3) }}</td>

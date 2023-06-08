@@ -2356,46 +2356,6 @@ parameters:
 			path: ../app/Util/Textarea.php
 
 		-
-			message: "#^Call to function is_null\\(\\) with int\\|string will always evaluate to false\\.$#"
-			count: 1
-			path: ../app/Util/Time.php
-
-		-
-			message: "#^Method Gazelle\\\\Util\\\\Time\\:\\:isValidDate\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Util/Time.php
-
-		-
-			message: "#^Method Gazelle\\\\Util\\\\Time\\:\\:isValidDateTime\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Util/Time.php
-
-		-
-			message: "#^Method Gazelle\\\\Util\\\\Time\\:\\:sqlTime\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Util/Time.php
-
-		-
-			message: "#^Method Gazelle\\\\Util\\\\Time\\:\\:validDate\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Util/Time.php
-
-		-
-			message: "#^Parameter \\#1 \\$month of function checkdate expects int, string given\\.$#"
-			count: 1
-			path: ../app/Util/Time.php
-
-		-
-			message: "#^Parameter \\#2 \\$day of function checkdate expects int, string given\\.$#"
-			count: 1
-			path: ../app/Util/Time.php
-
-		-
-			message: "#^Parameter \\#3 \\$year of function checkdate expects int, string given\\.$#"
-			count: 1
-			path: ../app/Util/Time.php
-
-		-
 			message: "#^Method Gazelle\\\\Util\\\\Twig\\:\\:setUserMan\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: ../app/Util/Twig.php

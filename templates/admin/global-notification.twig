@@ -38,7 +38,7 @@
             <td>&nbsp;</td>
             <td>
 {% if alert.title %}
-                <input type="submit" name="delete" value="Delete Notification" /> ({{ remaining|time_interval }} remaining).
+                <input type="submit" name="delete" value="Delete Notification" /> ({{ remaining|time_compact }} remaining).
 {% else %}
                 <input type="submit" name="set" value="Create Notification" />
 {% endif %}

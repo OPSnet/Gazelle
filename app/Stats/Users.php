@@ -555,6 +555,17 @@ class Users extends \Gazelle\Base {
                 snatch_unique = VALUES(snatch_unique)
         ");
 
+        self::$db->prepared_query("
+            INSERT INTO user_summary_new (user_id, seedtime_hour)
+                SELECT xfh.uid,
+                   sum(seedtime)
+                FROM xbt_files_history xfh
+                INNER JOIN users_main um ON (um.ID = xfh.uid)
+                GROUP BY xfh.uid
+            ON DUPLICATE KEY UPDATE
+                seedtime_hour = VALUES(seedtime_hour)
+        ");
+
         self::$db->begin_transaction();
         self::$db->prepared_query("
             DELETE FROM user_summary

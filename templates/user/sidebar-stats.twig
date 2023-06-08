@@ -165,9 +165,15 @@
             <a href="torrents.php?type=seeding&amp;userid={{ user.id }}" class="brackets{{ _self.override(visible['seeding']) }}">View</a>
         {% if viewer.permitted('zip_downloader') %}
             <a id="collect-seeding" href="torrents.php?action=redownload&amp;type=seeding&amp;userid={{ user.id }}" class="brackets">Download</a>
-        {% endif %}
-    {% endif %}
+        {%- endif -%}
+    {% endif -%}
         </li>
+    {% if stats.seedingTotal > 0 %}
+        <li id="comm_seed_time"{{ _self.class_override(visible['seeding+']) }}>Mean seed time: <span class="tooltip" title="{{
+            stats.seedtimeHour|number_format }} hour{{ stats.seedtimeHour|plural
+            }}">{{ ((stats.seedtimeHour / stats.seedingTotal) * 3600)|time_interval
+        }}</span> </li>
+    {% endif %}
 {% endif %}
 
 {% if user.id == viewer.id or viewer.isStaff %}

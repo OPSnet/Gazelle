@@ -13,7 +13,7 @@ class User extends \Gazelle\BaseObject {
      */
 
     protected const CACHE_COMMENT_TOTAL = 'user_nrcomment_%d';
-    protected const CACHE_GENERAL       = 'user_statx_%d';
+    protected const CACHE_GENERAL       = 'user_stx_%d';
 
     // Cache the underlying db calls
     protected array $commentTotal;
@@ -87,6 +87,7 @@ class User extends \Gazelle\BaseObject {
                     request_vote_total,
                     request_vote_size,
                     seeding_total,
+                    seedtime_hour,
                     snatch_total,
                     snatch_unique,
                     unique_group_total,
@@ -114,6 +115,7 @@ class User extends \Gazelle\BaseObject {
                 'request_vote_total'    => 0,
                 'request_vote_size'     => 0,
                 'seeding_total'         => 0,
+                'seedtime_hour'         => 0,
                 'snatch_total'          => 0,
                 'snatch_unique'         => 0,
                 'unique_group_total'    => 0,
@@ -217,6 +219,10 @@ class User extends \Gazelle\BaseObject {
 
     public function seedingTotal(): int {
         return $this->general()['seeding_total'];
+    }
+
+    public function seedtimeHour(): int {
+        return $this->general()['seedtime_hour'];
     }
 
     public function snatchTotal(): int {

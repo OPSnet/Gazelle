@@ -121,7 +121,9 @@ class Donor extends \Gazelle\BaseUser {
      * When did the user last donate?
      */
     public function lastDonationDate(): ?string {
-        return $this->isDonor() ? $this->info()['last_donation_date'] : null;
+        return $this->isDonor() && isset($this->info()['last_donation_date'])
+            ? $this->info()['last_donation_date']
+            : null; // will not be set for Staff
     }
 
     public function leaderboardRank(): int {

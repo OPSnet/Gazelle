@@ -540,8 +540,14 @@ function proxyCheck(string $IP): bool {
  * Returns a <span> by default but can optionally return the raw time
  * difference in text (e.g. "16 hours and 28 minutes", "1 day, 18 hours").
  */
-function time_diff(string|null $TimeStamp, int $Levels = 2, bool $Span = true, string|false $StartTime = false): string {
-    return Time::diff($TimeStamp, $Levels, $Span, $StartTime);
+function time_diff(
+    string|null     $TimeStamp,
+    int             $Levels    = 2,
+    bool            $span      = true,
+    string|false    $StartTime = false,
+    bool            $hideAgo   = false,
+): string {
+    return Time::diff($TimeStamp, $Levels, $span, $StartTime, $hideAgo);
 }
 
 /*** Paranoia functions ***/

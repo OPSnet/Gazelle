@@ -126,13 +126,21 @@ class Twig {
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
+            'time_compact',
+            fn(int $seconds) => new \Twig\Markup(Time::convertSeconds($seconds), 'UTF-8')
+        ));
+
+        $twig->addFilter(new \Twig\TwigFilter(
             'time_diff',
             fn($time, $levels = 2) => new \Twig\Markup(time_diff($time, $levels), 'UTF-8')
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
             'time_interval',
-            fn(int $seconds) => new \Twig\Markup(Time::convertSeconds($seconds), 'UTF-8')
+            fn($time, $levels = 2) => new \Twig\Markup(
+                time_diff((string)\Gazelle\Util\Time::timeAgo($time), $levels, span: false, hideAgo: true),
+                'UTF-8'
+            )
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(

@@ -1639,16 +1639,13 @@ class User extends BaseObject {
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
-    public function passwordAge(): string {
-        $age = time_diff(
-            $this->getSingleValue('user_pw_age', '
-                SELECT coalesce(max(uhp.ChangeTime), um.created)
-                FROM users_main um
-                LEFT JOIN users_history_passwords uhp ON (uhp.UserID = um.ID)
-                WHERE um.ID = ?
-            ')
-        );
-        return substr($age, 0, (int)strpos($age, " ago"));
+    public function passwordAge(): int {
+        return time() - (int)$this->getSingleValue('user_pw_epoch', "
+            SELECT unix_timestamp(coalesce(max(uhp.ChangeTime), um.created))
+            FROM users_main um
+            LEFT JOIN users_history_passwords uhp ON (uhp.UserID = um.ID)
+            WHERE um.ID = ?
+        ");
     }
 
     public function forumWarning(): ?string {
