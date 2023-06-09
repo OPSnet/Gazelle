@@ -11,6 +11,7 @@
                 <td><strong>Browser</strong></td>
                 <td><strong>Platform</strong></td>
                 <td class="nobr"><strong>Last activity</strong></td>
+    {% if viewer.id == user.id or viewer.permitted('users_logout') %}
                 <td>
                     <form class="manage_form" name="sessions" action="" method="post">
                         <input type="hidden" name="action" value="sessions" />
@@ -19,6 +20,7 @@
                         <input type="submit" value="Log out all" />
                     </form>
                 </td>
+    {% endif %}
             </tr>
 {% for s in session %}
             <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
@@ -26,6 +28,7 @@
                 <td>{{ s.Browser }}</td>
                 <td>{{ s.OperatingSystem }}</td>
                 <td>{{ s.LastUpdate|time_diff }}</td>
+    {% if viewer.id == user.id or viewer.permitted('users_logout') %}
                 <td>
                     <form class="delete_form" name="session" action="" method="post">
                         <input type="hidden" name="action" value="sessions" />
@@ -34,6 +37,7 @@
                         <input type="submit" value="{% if s.SessionID == current %}Current" disabled="disabled{% else %}Log out{% endif %}" />
                     </form>
                 </td>
+    {% endif %}
             </tr>
 {% endfor %}
         </table>

@@ -26,8 +26,8 @@ if (isset($_POST['session'])) {
 }
 
 echo $Twig->render('user/session.twig', [
-    'auth'    => $Viewer->auth(),
     'current' => $SessionID,
     'session' => $session->info(),
     'user'    => $user,
+    'viewer'  => $Viewer,
 ]);
