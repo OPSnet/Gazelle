@@ -20,12 +20,12 @@
     {% set total_out = d.ratio + d.inactivity + d.manual %}
         <tr class="{{ cycle(['a', 'b'], loop.index0) }}">
             <td>{{ d.date }}</td>
-            <td>{{ d.joined|number_format }}</td>
+            <td>{{ d.created|number_format }}</td>
             <td>{{ d.manual|number_format }}</td>
             <td>{{ d.ratio|number_format }}</td>
             <td>{{ d.inactivity|number_format }}</td>
             <td>{{ total_out|number_format }}</td>
-            <td>{{ (d.joined - total_out)|number_format }}</td>
+            <td>{{ (d.created - total_out)|number_format }}</td>
         </tr>
 {% endfor %}
     </table>
@@ -49,6 +49,16 @@ Highcharts.chart('user-flow', {
     xAxis: {
         categories: [{{ category|join(',')|raw }}],
     },
+    yAxis: [
+        { // Primary yAxis
+            labels: { format: '{value}', style: { color: Highcharts.getOptions().colors[2] }},
+            title: { text: 'Change', style: { color: Highcharts.getOptions().colors[2] }},
+            opposite: true,
+        }, { // Secondary yAxis
+            title: { text: 'Net total', style: { color: Highcharts.getOptions().colors[0] }},
+            labels: { format: '{value}', style: { color: Highcharts.getOptions().colors[0] }},
+        }
+    ],
     tooltip: {
         headerFormat: '<b>{point.x}</b><br/>',
         pointFormat: '{series.name}: {point.y}'
@@ -57,8 +67,12 @@ Highcharts.chart('user-flow', {
         column: { stacking: 'normal' }
     },
     series: [
-        { name: 'Enabled',  data: [{{ enabled|join(',') }}] },
-        { name: 'Disabled', data: [{{ disabled|join(',') }}] },
+        { type: 'column', name: 'Enabled',  data: [{{ enabled|join(',') }}] },
+        { type: 'column', name: 'Disabled', data: [{{ disabled|join(',') }}] },
+        { type: 'spline', name: 'Net', yAxis: 1,
+            marker: { lineWidth: 2, color: 'teal', fillColor: 'steelblue'},
+            data: {{ net|json_encode|raw }},
+        }
     ]
 })});
 </script>

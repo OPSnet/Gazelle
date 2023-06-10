@@ -247,12 +247,12 @@ class UserManagerTest extends TestCase {
         $this->assertFalse($this->userList[2]->canLeech(), 'uman-user2-no-canleech');
     }
 
-    public function sendCustomPMTest(): void {
+    public function testSendCustomPM(): void {
         $userMan = new \Gazelle\Manager\User;
         $this->assertEquals(
             2,
             $userMan->sendCustomPM(
-                $this->userList[0]->id(),
+                $this->userList[0],
                 'phpunit sendCustomPMTest',
                 'phpunit sendCustomPMTest %USERNAME% message',
                 [$this->userList[1]->id(), $this->userList[2]->id()],
@@ -265,9 +265,17 @@ class UserManagerTest extends TestCase {
         $this->assertEquals(1, $receiver->messageTotal(), 'uman-custom-pm-count');
         $list = $receiver->messageList($pmMan, 2, 0);
         $this->assertEquals('phpunit sendCustomPMTest', $list[0]->subject(), 'uman-custom-pm-subject');
-
-        $postId = $list[0]['id'];
+        $postlist = $list[0]->postlist(10, 0);
+        $postId = $postlist[0]['id'];
         $pm = $pmMan->findByPostId($postId);
         $this->assertStringContainsString($this->userList[1]->username(), $pm->postBody($postId), 'uman-custom-pm-body');
+    }
+
+    public function testUserflow(): void {
+        $userflow = (new \Gazelle\Manager\User)->userflow();
+        $this->assertIsArray($userflow, 'uman-userflow-is-array');
+        $recent = end($userflow);
+        $this->assertIsArray($recent, 'uman-userflow-recent-is-array');
+        $this->assertEquals(['Week', 'created', 'disabled'], array_keys($recent), 'userman-recent-keys');
     }
 }

@@ -10,6 +10,7 @@ class User extends \Gazelle\BaseManager {
     protected const CACHE_STAFF = 'pm_staff_list';
     protected const ID_KEY = 'zz_u_%d';
     protected const USERNAME_KEY = 'zz_unam_%s';
+    protected const USERFLOW_KEY = 'uflow';
 
     final public const DISABLE_MANUAL     = 1;
     final public const DISABLE_TOR        = 2;
@@ -326,10 +327,12 @@ class User extends \Gazelle\BaseManager {
      * @return array [week, joined, disabled]
      */
     public function userflow(): array {
-        $userflow = self::$cache->get_value('userflow');
+        $userflow = self::$cache->get_value(self::USERFLOW_KEY);
         if ($userflow === false) {
             self::$db->prepared_query("
-                SELECT J.Week, J.n as Joined, coalesce(D.n, 0) as Disabled
+                SELECT J.Week,
+                    J.n              AS created,
+                    coalesce(D.n, 0) AS disabled
                 FROM (
                     SELECT DATE_FORMAT(created, '%X-%V') AS Week, count(*) AS n
                     FROM users_main
@@ -345,7 +348,7 @@ class User extends \Gazelle\BaseManager {
                 ORDER BY 1
             ");
             $userflow = self::$db->to_array('Week', MYSQLI_ASSOC, false);
-            self::$cache->cache_value('userflow', $userflow, 86400);
+            self::$cache->cache_value(self::USERFLOW_KEY, $userflow, 86400);
         }
         return $userflow;
     }
