@@ -272,14 +272,14 @@ class Vote extends \Gazelle\BaseUser {
      * @return array (Ups, Total, Score)
      */
     public function tgroupInfo(int $tgroupId): array {
-        if (!isset($this->tgroupInfo) || empty($this->tgroupInfo)) {
+        if (!isset($this->tgroupInfo) || empty($this->tgroupInfo) || $this->tgroupInfo['GroupId'] !== $tgroupId) {
             $key = sprintf(self::VOTED_GROUP, $tgroupId);
             $tgroupInfo = self::$cache->get_value($key);
             if ($tgroupInfo === false || is_null($tgroupInfo)) {
                 $tgroupInfo = self::$db->rowAssoc("
-                    SELECT Ups, `Total`, Score FROM torrents_votes WHERE GroupID = ?
+                    SELECT Ups, `Total`, Score, GroupId FROM torrents_votes WHERE GroupID = ?
                     ", $tgroupId
-                ) ?? ['Ups' => 0, 'Total' => 0, 'Score' => 0];
+                ) ?? ['Ups' => 0, 'Total' => 0, 'Score' => 0, 'GroupId' => 0];
                 self::$cache->cache_value($key, $tgroupInfo, 259200); // 3 days
             }
             $this->tgroupInfo = $tgroupInfo;
