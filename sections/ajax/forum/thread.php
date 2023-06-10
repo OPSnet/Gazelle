@@ -56,7 +56,7 @@ $paginator->setTotal($thread->postTotal());
 $slice = $thread->slice(page: $paginator->page(), perPage: $perPage);
 $db    = Gazelle\DB::DB();
 
-if ($_GET['updatelastread'] !== '0') {
+if (isset($_GET['updatelastread'])) {
     $LastPost = end($slice);
     $LastPost = $LastPost['ID'];
     reset($slice);
