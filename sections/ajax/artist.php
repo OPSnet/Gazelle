@@ -1,31 +1,33 @@
 <?php
 
-$artistMan = new Gazelle\Manager\Artist;
+$artistMan  = new Gazelle\Manager\Artist;
 $revisionId = isset($_GET['revisionid']) ? (int)$_GET['revisionid'] : null;
+$artistId   = (int)($_GET['id'] ?? 0);
 
-if (isset($_GET['id'])) {
+if ($artistId) {
     if (isset($_GET['artistname'])) {
         json_die("failure", "cannot set both id and artistname");
     }
     if (is_null($revisionId)) {
-        $artist = $artistMan->findById((int)$_GET['id']);
+        $artist = $artistMan->findById($artistId);
         if (is_null($artist)) {
             json_die("failure", "bad id");
         }
     } else {
-        $artist = $artistMan->findByIdAndRevision((int)$_GET['id'], $revisionId);
+        $artist = $artistMan->findByIdAndRevision($artistId, $revisionId);
         if (is_null($artist)) {
             json_die("failure", "bad id or revision");
         }
     }
 } elseif (isset($_GET['artistname'])) {
+    $artistName = trim($_GET['artistname']);
     if (is_null($revisionId)) {
-        $artist = $artistMan->findByName($_GET['artistname']);
+        $artist = $artistMan->findByName($artistName);
         if (is_null($artist)) {
             json_die("failure", "bad artistname");
         }
     } else {
-        $artist = $artistMan->findByNameAndRevision($_GET['artistname'], $revisionId);
+        $artist = $artistMan->findByNameAndRevision($artistName, $revisionId);
         if (is_null($artist)) {
             json_die("failure", "bad artistname or revision");
         }

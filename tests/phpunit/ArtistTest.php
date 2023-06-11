@@ -232,4 +232,30 @@ class ArtistTest extends TestCase {
         $this->assertEquals($sim2Id, $graph[$sim1Id]['related'][0], 'artist-sim-related');
         $this->assertLessThan($graph[$sim1Id]['proportion'], $graph[$sim2Id]['proportion'], 'artist-sim-proportion');
     }
+
+    public function testArtistJson(): void {
+        $manager = new \Gazelle\Manager\Artist;
+        [$artistId, $aliasId] = $manager->create('phpunit.' . randomString(12));
+        $artist = $manager->findById($artistId);
+        $this->artistIdList[] = $artist->id();
+
+        $json = (new \Gazelle\Json\Artist(
+            $artist,
+            $this->user,
+            new Gazelle\User\Bookmark($this->user),
+            new Gazelle\Manager\Request,
+            new Gazelle\Manager\TGroup,
+            new Gazelle\Manager\Torrent,
+        ));
+        $this->assertInstanceOf(\Gazelle\Json\Artist::class, $json->setReleasesOnly(true), 'artist-json-set-releases');
+        $payload = $json->payload();
+        $this->assertIsArray($payload, 'artist-json-payload');
+        $this->assertEquals($artist->id(), $payload['id'], 'artist-payload-id');
+        $this->assertEquals($artist->name(), $payload['name'], 'artist-payload-name');
+        $this->assertCount(0, $payload['tags'], 'artist-payload-tags');
+        $this->assertCount(0, $payload['similarArtists'], 'artist-payload-similar-artists');
+        $this->assertCount(0, $payload['torrentgroup'], 'artist-payload-torrentgroup');
+        $this->assertCount(0, $payload['requests'], 'artist-payload-requests');
+        $this->assertIsArray($payload['statistics'], 'artist-payload-statistics');
+    }
 }
