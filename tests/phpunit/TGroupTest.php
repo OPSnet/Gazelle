@@ -175,4 +175,9 @@ class TGroupTest extends TestCase {
         $tag3 = $tagMan->create('disco', $user);
         $this->assertFalse($this->tgroup->removeTag(new Gazelle\Tag($tag3)), 'tgroup-tag-remove-not-exists');
     }
+
+    public function testLatestUploads(): void {
+        // we can at least test the SQL
+        $this->assertIsArray((new \Gazelle\Manager\Torrent)->latestUploads(5), 'tgroup-latest-uploads');
+    }
 }

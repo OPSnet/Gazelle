@@ -5,7 +5,7 @@ namespace Gazelle\Manager;
 class Torrent extends \Gazelle\BaseManager {
     protected const ID_KEY = 'zz_t_%d';
 
-    final const CACHE_KEY_LATEST_UPLOADS = 'latest_uploads_%d';
+    final const CACHE_KEY_LATEST_UPLOADS = 'latest_up_%d';
     final const CACHE_KEY_PEERLIST_TOTAL = 'peerlist_total_%d';
     final const CACHE_KEY_PEERLIST_PAGE  = 'peerlist_page_%d_%d';
     final const CACHE_FOLDERNAME         = 'foldername_%s';
@@ -566,7 +566,7 @@ class Torrent extends \Gazelle\BaseManager {
                 INNER JOIN users_main     um ON (um.ID = t.UserID)
                 WHERE t.Time > now() - INTERVAL 3 DAY
                     AND t.Encoding IN ('Lossless', '24bit Lossless')
-                    AND tg.WikiImage != ''
+                    AND tg.WikiImage REGEXP '^https?://[^/]+/.*'
                     AND um.Enabled = '1'
                     AND NOT EXISTS (
                         SELECT 1
