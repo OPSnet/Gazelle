@@ -17,12 +17,11 @@ if (($Viewer->id() != $torrent->uploaderId() && !$Viewer->permitted('torrents_ed
     error(403);
 }
 
-$artist       = $torrent->group()->primaryArtist();
-$categoryId   = $torrent->group()->categoryId();
-$categoryName = $torrent->group()->categoryName();
+$tgroup       = $torrent->group();
+$categoryId   = $tgroup->categoryId();
+$categoryName = $tgroup->categoryName();
 $isMusic      = $categoryName === 'Music';
-$tgroupId     = $torrent->groupId();
-$torrentId    = $torrent->id();
+$artist       = $isMusic ? $tgroup->primaryArtist() : null;
 $releaseTypes = (new Gazelle\ReleaseType)->list();
 
 View::show_header('Edit torrent', ['js' => 'upload,torrent']);
@@ -45,7 +44,7 @@ if (!($torrent->isRemastered() && !$torrent->remasterYear()) || $Viewer->permitt
     $uploadForm = new Gazelle\Util\UploadForm(
         $Viewer,
         [
-            'ID'                      => $torrentId,
+            'ID'                      => $torrent->id(),
             'Media'                   => $torrent->media(),
             'Format'                  => $torrent->format(),
             'Bitrate'                 => $torrent->encoding(),
@@ -59,10 +58,10 @@ if (!($torrent->isRemastered() && !$torrent->remasterYear()) || $Viewer->permitt
             'FreeLeechType'           => $torrent->freeleechType(),
             'TorrentDescription'      => $torrent->description(),
             'CategoryID'              => $categoryId,
-            'Title'                   => $torrent->group()->name(),
-            'Year'                    => $torrent->group()->year(),
-            'VanityHouse'             => $torrent->group()->isShowcase(),
-            'GroupID'                 => $tgroupId,
+            'Title'                   => $tgroup->name(),
+            'Year'                    => $tgroup->year(),
+            'VanityHouse'             => $tgroup->isShowcase(),
+            'GroupID'                 => $tgroup->id(),
             'UserID'                  => $torrent->uploaderId(),
             'HasLog'                  => $torrent->hasLog(),
             'HasCue'                  => $torrent->hasCue(),
@@ -97,13 +96,13 @@ if ($Viewer->permitted('torrents_edit') && ($Viewer->permitted('users_mod') || $
     <form class="edit_form" name="torrent_group" action="torrents.php" method="post">
         <input type="hidden" name="action" value="editgroupid" />
         <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
-        <input type="hidden" name="torrentid" value="<?= $torrentId ?>" />
-        <input type="hidden" name="oldgroupid" value="<?= $tgroupId ?>" />
+        <input type="hidden" name="torrentid" value="<?= $torrent->id() ?>" />
+        <input type="hidden" name="oldgroupid" value="<?= $tgroup->id() ?>" />
         <table class="layout">
             <tr>
                 <td class="label">Group ID</td>
                 <td>
-                    <input type="text" name="groupid" value="<?= $tgroupId ?>" size="10" />
+                    <input type="text" name="groupid" value="<?= $tgroup->id() ?>" size="10" />
                 </td>
             </tr>
             <tr>
@@ -117,8 +116,8 @@ if ($Viewer->permitted('torrents_edit') && ($Viewer->permitted('users_mod') || $
     <form class="split_form" name="torrent_group" action="torrents.php" method="post">
         <input type="hidden" name="action" value="newgroup" />
         <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
-        <input type="hidden" name="torrentid" value="<?= $torrentId ?>" />
-        <input type="hidden" name="oldgroupid" value="<?= $tgroupId ?>" />
+        <input type="hidden" name="torrentid" value="<?= $torrent->id() ?>" />
+        <input type="hidden" name="oldgroupid" value="<?= $tgroup->id() ?>" />
         <table class="layout">
             <tr>
                 <td class="label">Artist</td>
@@ -129,13 +128,13 @@ if ($Viewer->permitted('torrents_edit') && ($Viewer->permitted('users_mod') || $
             <tr>
                 <td class="label">Title</td>
                 <td>
-                    <input type="text" name="title" value="<?= $torrent->group()->name() ?>" size="50" />
+                    <input type="text" name="title" value="<?= $tgroup->name() ?>" size="50" />
                 </td>
             </tr>
             <tr>
                 <td class="label">Year</td>
                 <td>
-                    <input type="text" name="year" value="<?= $torrent->group()->year() ?>" size="10" />
+                    <input type="text" name="year" value="<?= $tgroup->year() ?>" size="10" />
                 </td>
             </tr>
             <tr>
@@ -147,14 +146,14 @@ if ($Viewer->permitted('torrents_edit') && ($Viewer->permitted('users_mod') || $
     </form>
     <br />
 <?php
-    } /* category == 1 */
+    } /* Music category */
     if ($Viewer->permitted('users_mod')) { ?>
     <h2><a name="category-change">Change category</a></h2>
     <form action="torrents.php" method="post">
         <input type="hidden" name="action" value="changecategory" />
         <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
-        <input type="hidden" name="torrentid" value="<?= $torrentId ?>" />
-        <input type="hidden" name="oldgroupid" value="<?= $tgroupId ?>" />
+        <input type="hidden" name="torrentid" value="<?= $torrent->id() ?>" />
+        <input type="hidden" name="oldgroupid" value="<?= $tgroup->id() ?>" />
         <input type="hidden" name="oldartistid" value="<?= $artist?->id() ?>" />
         <input type="hidden" name="oldcategoryid" value="<?= $categoryId ?>" />
         <table>
@@ -188,13 +187,13 @@ if ($Viewer->permitted('torrents_edit') && ($Viewer->permitted('users_mod') || $
             <tr id="split_title">
                 <td class="label">Title</td>
                 <td>
-                    <input type="text" name="title" value="<?= $torrent->group()->name() ?>" size="50" />
+                    <input type="text" name="title" value="<?= $tgroup->name() ?>" size="50" />
                 </td>
             </tr>
             <tr id="split_year">
                 <td class="label">Year</td>
                 <td>
-                    <input type="text" name="year" value="<?= $torrent->group()->year() ?>" size="10" />
+                    <input type="text" name="year" value="<?= $tgroup->year() ?>" size="10" />
                 </td>
             </tr>
             <tr>
