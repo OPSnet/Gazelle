@@ -1,0 +1,6 @@
+#! /bin/bash
+
+set -euo pipefail
+
+patch -p1 < $(dirname $0)/../misc/patch/monero.patch
+patch -p1 < $(dirname $0)/../misc/patch/whichbrowser.patch

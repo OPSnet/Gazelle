@@ -1,0 +1,26 @@
+diff --git a/vendor/monero-integrations/monerophp/src/Cryptonote.php b/vendor/monero-integrations/monerophp/src/Cryptonote.php
+index 5ed207f..25f3709 100644
+--- a/vendor/monero-integrations/monerophp/vendor/monero-integrations/monerophp/src/Cryptonote.php
++++ b/vendor/monero-integrations/monerophp/src/Cryptonote.php
+@@ -28,6 +28,9 @@ namespace MoneroIntegrations\MoneroPhp;
+     class Cryptonote
+     {
+         protected $ed25519;
++        protected $base58;
++        protected $varint;
++
+         public function __construct()
+         {
+             $this->ed25519 = new ed25519();
+diff --git a/vendor/monero-integrations/monerophp/src/SHA3.php b/vendor/monero-integrations/monerophp/src/SHA3.php
+index e9d57ea..e08e787 100644
+--- a/vendor/monero-integrations/monerophp/src/SHA3.php
++++ b/vendor/monero-integrations/monerophp/src/SHA3.php
+@@ -52,6 +52,7 @@ class SHA3 {
+ 
+ 		const KECCAK_256 = 7;
+ 
++    protected $blockSize;
+ 
+ 	public static function init ($type = null) {
+ 		switch ($type) {
