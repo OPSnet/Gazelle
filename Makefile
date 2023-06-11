@@ -21,8 +21,8 @@ help:
 	echo '  mysqldump          - dump mysql database from docker to misc/gazelle.sql'
 	echo '  ocelot-reload-conf - signal Ocelot to reload its configuration'
 	echo '  ocelot-reload-db   - signal Ocelot to reload from database'
-	echo '  phpstan-analyse    - run phpstan over the code
-	echo '  phpstan-baseline   - generate a new phpstan baseline
+	echo '  phpstan-analyse    - run phpstan over the code'
+	echo '  phpstan-baseline   - generate a new phpstan baseline'
 	echo '  test               - run all linters and unit test suite'
 	echo '  twig-flush         - purge the Twig cache'
 	echo '  update             - pull from git and run production composer install'

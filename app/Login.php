@@ -51,7 +51,7 @@ class Login extends Base {
         bool $persistent = false,
         string $twofa    = '',
     ): ?User {
-        $this->username   = $username;
+        $this->username   = trim($username);
         $this->password   = $password;
         $this->watch      = $watch;
         $this->persistent = $persistent;
@@ -90,6 +90,10 @@ class Login extends Base {
     protected function attemptLogin(): ?User {
         // we have all we need to go forward
         $userMan = new Manager\User;
+        if (!preg_match(USERNAME_REGEXP, $this->username)) {
+            $this->error = self::ERR_CREDENTIALS;
+            return null;
+        }
         $user = $userMan->findByUsername($this->username);
         if (is_null($user)) {
             $this->error = self::ERR_CREDENTIALS;

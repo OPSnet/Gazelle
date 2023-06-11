@@ -896,41 +896,6 @@ parameters:
 			path: ../app/LogfileSummary.php
 
 		-
-			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
-			count: 1
-			path: ../app/LoginWatch.php
-
-		-
-			message: "#^Method Gazelle\\\\LoginWatch\\:\\:activeTotal\\(\\) should return int but returns bool\\|float\\|int\\|string\\|null\\.$#"
-			count: 1
-			path: ../app/LoginWatch.php
-
-		-
-			message: "#^Method Gazelle\\\\LoginWatch\\:\\:bannedEpoch\\(\\) should return int but returns int\\|false\\.$#"
-			count: 1
-			path: ../app/LoginWatch.php
-
-		-
-			message: "#^Method Gazelle\\\\LoginWatch\\:\\:bannedUntil\\(\\) should return string\\|null but returns bool\\|float\\|int\\|string\\|null\\.$#"
-			count: 1
-			path: ../app/LoginWatch.php
-
-		-
-			message: "#^Property Gazelle\\\\LoginWatch\\:\\:\\$id has no type specified\\.$#"
-			count: 1
-			path: ../app/LoginWatch.php
-
-		-
-			message: "#^Property Gazelle\\\\LoginWatch\\:\\:\\$ipaddr has no type specified\\.$#"
-			count: 1
-			path: ../app/LoginWatch.php
-
-		-
-			message: "#^Property Gazelle\\\\LoginWatch\\:\\:\\$userId has no type specified\\.$#"
-			count: 1
-			path: ../app/LoginWatch.php
-
-		-
 			message: "#^Method Gazelle\\\\Manager\\\\Applicant\\:\\:create\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: ../app/Manager/Applicant.php

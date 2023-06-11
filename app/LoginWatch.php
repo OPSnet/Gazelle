@@ -3,17 +3,15 @@
 namespace Gazelle;
 
 class LoginWatch extends Base {
-    protected $id;
-    protected $ipaddr;
-    protected $userId = 0;
+    protected int $id;
+    protected int $userId = 0;
 
-    public function __construct(string $ipaddr) {
-        $this->ipaddr = $ipaddr;
-        $this->id = self::$db->scalar("
+    public function __construct(protected string $ipaddr) {
+        $this->id = (int)self::$db->scalar("
             SELECT ID FROM login_attempts WHERE IP = ?
             ", $this->ipaddr
         );
-        if (is_null($this->id) && $ipaddr != '0.0.0.0') {
+        if (!$this->id && $ipaddr != '0.0.0.0') {
             self::$db->prepared_query("
                 INSERT INTO login_attempts
                        (IP, UserID)
@@ -48,7 +46,7 @@ class LoginWatch extends Base {
                 capture = ?
             WHERE ID = ?
             ', $seen ? 60 : LOGIN_ATTEMPT_BACKOFF[min($this->nrAttempts(), count(LOGIN_ATTEMPT_BACKOFF)-1)],
-                $this->userId, substr($username, 0, 20), $this->id
+                $this->userId, substr(urlencode($username), 0, 20), $this->id
         );
         return self::$db->affected_rows();
     }
@@ -74,17 +72,18 @@ class LoginWatch extends Base {
      * When does the login ban expire?
      */
     public function bannedUntil(): ?string {
-        return self::$db->scalar("
+        $until = self::$db->scalar("
             SELECT BannedUntil FROM login_attempts WHERE ID = ?
             ", $this->id
         );
+        return $until ? (string)$until : null;
     }
 
     /**
      * When does the login ban expire?
      */
-    public function bannedEpoch(): int {
-        return strtotime($this->bannedUntil()) ?? 0;
+    public function bannedEpoch(): int|false {
+        return strtotime($this->bannedUntil());
     }
 
     /**
@@ -138,7 +137,7 @@ class LoginWatch extends Base {
      * Get total login failures
      */
     public function activeTotal(): int {
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*)
             FROM login_attempts w
             WHERE (w.BannedUntil > now() OR w.LastAttempt > now() - INTERVAL 6 HOUR)
