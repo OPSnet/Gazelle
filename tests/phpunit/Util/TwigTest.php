@@ -108,6 +108,12 @@ END;
             'twig-time-ago'
         );
 
+        $this->assertEquals(
+            '30 mins',
+            self::twig('{{ value|time_interval }}')->render(['value' => 1800.125]),
+            'twig-time-float-ago'
+        );
+
         $this->assertMatchesRegularExpression(
             '@^<span class="time tooltip" title="[^"]+">1 hour ago</span>$@',
             self::twig('{{ value|time_diff }}')->render(['value' => date("Y-m-d H:i:s", strtotime("-1 hour"))]),

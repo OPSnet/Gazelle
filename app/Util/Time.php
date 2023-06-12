@@ -9,7 +9,7 @@ class Time {
      * it's a string of a timestamp that we convert to a UNIX timestamp and then do a subtraction.
      * If the passed in $timestamp does not convert properly or is null, return false (error).
      */
-    public static function timeAgo(string|int $timestamp): false|int {
+    public static function timeAgo(string|int|float $timestamp): false|int {
         if (is_numeric($timestamp)) {
             $timestamp = (int)$timestamp;
         } else {
