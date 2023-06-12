@@ -38,6 +38,7 @@ do
 done
 
 composer --version && composer install --no-progress
+scripts/local-patch
 
 echo "Create postgres database..."
 #hostname:port:database:username:password
