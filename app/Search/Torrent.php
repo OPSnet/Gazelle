@@ -706,7 +706,7 @@ class Torrent {
             }
             $torrentList = array_map(fn($id) => $this->torMan->findById($id), $tgroup->torrentIdList());
             foreach ($torrentList as $torrent) {
-                if (!$this->filter_torrent_internal($torrent)) {
+                if (is_null($torrent) || !$this->filter_torrent_internal($torrent)) {
                     unset($this->Groups[$tgroup->id()]);
                     break;
                 }
