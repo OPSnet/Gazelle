@@ -328,8 +328,9 @@ class TGroup extends BaseObject {
     }
 
     public function cover(): string {
-        return $this->info()['Image']
-            ?? (STATIC_SERVER . '/common/noartwork/' . strtolower($this->categoryName()) . ".png");
+        return is_null($this->image())
+            ? (STATIC_SERVER . '/common/noartwork/' . strtolower($this->categoryName()) . ".png")
+            : $this->image();
     }
 
     public function description(): string {
