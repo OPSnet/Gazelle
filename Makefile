@@ -103,5 +103,5 @@ twig-flush:
 
 .PHONY: update
 update:
-	git pull
+	git pull --recurse-submodules
 	composer install --no-dev --optimize-autoloader --no-progress

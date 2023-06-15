@@ -292,6 +292,7 @@ defined('DEBUG_TRACE') or define('DEBUG_TRACE', '');
 // ------------------------------------------------------------------------
 // IRC settings
 
+defined('IRC_PUBLIC_SERVER')       or define('IRC_PUBLIC_SERVER', 'irc.' . SITE_HOST);
 defined('DISABLE_IRC')             or define('DISABLE_IRC', false);
 defined('IRC_HTTP_SOCKET_ADDRESS') or define('IRC_HTTP_SOCKET_ADDRESS', 'http://localhost:51011/');
 
@@ -786,6 +787,7 @@ defined('VALID_PAGE') or define('VALID_PAGE', [
     'user',
     'userhistory',
     'view',
+    'webirc',
 ]);
 
 // Maximum length of a custom user title.

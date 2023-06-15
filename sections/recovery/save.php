@@ -83,7 +83,7 @@ recheck your spam folder), join the <tt>#recovery</tt> channel on IRC.</p>
 
 <blockquote>
 <h4>IRC details</h4>
-<p>Server: <tt>irc.orpheus.network</tt><br />
+<p>Server: <tt><?= IRC_PUBLIC_SERVER ?></tt><br />
 Port: 6667 or +7000 for SSL</p>
 </blockquote>
 

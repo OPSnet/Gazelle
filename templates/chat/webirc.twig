@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="referrer" content="same-origin" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <title>{{ constant('SITE_NAME') }} Chat</title>
+    <style>
+        /* target specific styles */
+        body {
+            /* disable the 'pull down to refresh' on mobiles */
+            overflow: hidden;
+        }
+        .kiwi-noscript-warn {
+            text-align: center;
+            font-weight: bold;
+            padding: 1em;
+        }
+    </style>
+    <link href="{{ constant('STATIC_SERVER') }}/assets/kiwi/static/css/app.c63fa69d.css" rel="preload" as="style">
+    <link href="{{ constant('STATIC_SERVER') }}/assets/kiwi/static/js/app.ed817c69.js" rel="preload" as="script">
+    <link href="{{ constant('STATIC_SERVER') }}/assets/kiwi/static/js/vendor.a2ff8ba8.js" rel="preload" as="script">
+    <link href="{{ constant('STATIC_SERVER') }}/assets/kiwi/static/css/app.c63fa69d.css" rel="stylesheet">
+</head>
+<body>
+{% if user.disableIRC %}
+<div>Your IRC privileges are disabled.</div>
+{% else %}
+<noscript>
+    <div class="kiwi-noscript-warn">
+        Please enable JavaScript and refresh the page to use this website.
+    </div>
+</noscript>
+<script type="application/json" name="kiwiconfig">
+{
+    "windowTitle": "{{ constant('SITE_NAME') }} Chat",
+    "startupScreen": "welcome",
+    "restricted": true,
+    "useMonospace": true,
+    "sidebarDefault": "nicklist",
+    "theme": "Dark",
+    "themes": [
+        { "name": "Default", "url": "{{ constant('STATIC_SERVER') }}/assets/kiwi/static/themes/default" },
+        { "name": "Dark", "url": "{{ constant('STATIC_SERVER') }}/assets/kiwi/static/themes/dark" },
+        { "name": "Coffee", "url": "{{ constant('STATIC_SERVER') }}/assets/kiwi/static/themes/coffee" },
+        { "name": "GrayFox", "url": "{{ constant('STATIC_SERVER') }}/assets/kiwi/static/themes/grayfox" },
+        { "name": "Nightswatch", "url": "{{ constant('STATIC_SERVER') }}/assets/kiwi/static/themes/nightswatch" },
+        { "name": "Osprey", "url": "{{ constant('STATIC_SERVER') }}/assets/kiwi/static/themes/osprey" },
+        { "name": "Radioactive", "url": "{{ constant('STATIC_SERVER') }}/assets/kiwi/static/themes/radioactive" },
+        { "name": "Sky", "url": "{{ constant('STATIC_SERVER') }}/assets/kiwi/static/themes/sky" },
+        { "name": "Elite", "url": "{{ constant('STATIC_SERVER') }}/assets/kiwi/static/themes/elite" }
+    ],
+    "startupOptions" : {
+        "server": "{{ constant('IRC_PUBLIC_SERVER') }}",
+        "port": 8000,
+        "tls": true,
+        "direct": true,
+        "nick": "{{ irc_nick }}",
+        "channel": "#orpheus",
+        "greetingText": "Welcome to {{ constant('SITE_NAME') }} IRC",
+        "buttonText": "Join",
+        "showPassword": true
+    },
+    "buffers": {
+        "show_link_previews": false,
+        "inline_link_auto_previews": false,
+        "inline_link_auto_previews_query": false,
+        "messageLayout": "compact",
+        "alert_on": "highlight",
+        "show_timestamps": true,
+        "show_hostnames": true,
+        "who_loop": false,
+        "nicklist_avatars": false
+    },
+    "plugins": [
+        {"name": "hermes_join", "url": "{{ constant('STATIC_SERVER') }}/assets/kiwi/plugins/hermes_join.js"}
+    ],
+    "hermes": {
+        "ircuser": "{{ user.username }}",
+        "irckey":  "{{ user.IRCKey }}"
+    }
+}
+</script>
+<div id="app"></div>
+<script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/assets/kiwi/static/js/vendor.a2ff8ba8.js"></script>
+<script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/assets/kiwi/static/js/app.ed817c69.js"></script>
+{% endif %}

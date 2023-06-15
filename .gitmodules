@@ -1,0 +1,3 @@
+[submodule "public/static/assets"]
+	path = public/static/assets
+	url = ../website-static-assets.git
