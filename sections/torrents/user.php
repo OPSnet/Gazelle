@@ -521,7 +521,7 @@ foreach (CATEGORY as $catKey => $catName) {
                         ?></div>
                 </div>
             </td>
-            <td class="td_time nobr"><?=time_diff($torrent->created(), 1)?></td>
+            <td class="td_time nobr"><?=time_diff($info['Time'], 1)?></td>
             <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
         </tr>
 <?php
