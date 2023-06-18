@@ -18,7 +18,6 @@ class Vote extends \Gazelle\BaseUser {
     protected const VOTED_GROUP   = 'group_voted_%d';
 
     protected int   $limit;
-    protected array $tgroupInfo;
     protected array $topConfig = [];
     protected array $topJoin   = [];
     protected array $topWhere  = [];
@@ -33,6 +32,15 @@ class Vote extends \Gazelle\BaseUser {
         ]);
         return $this;
     }
+
+    protected function flushTgroup(int $tgroupId): Vote {
+        self::$cache->delete_multi([
+            sprintf(self::VOTED_GROUP, $tgroupId),
+            sprintf(self::VOTE_PAIR_KEY, $tgroupId),
+        ]);
+        return $this->flush();
+    }
+
     public function link(): string { return $this->user()->link(); }
     public function location(): string { return $this->user()->location(); }
     public function tableName(): string { return 'users_votes'; }
@@ -272,19 +280,16 @@ class Vote extends \Gazelle\BaseUser {
      * @return array (Ups, Total, Score)
      */
     public function tgroupInfo(int $tgroupId): array {
-        if (!isset($this->tgroupInfo) || empty($this->tgroupInfo)) {
-            $key = sprintf(self::VOTED_GROUP, $tgroupId);
-            $tgroupInfo = self::$cache->get_value($key);
-            if ($tgroupInfo === false || is_null($tgroupInfo)) {
-                $tgroupInfo = self::$db->rowAssoc("
-                    SELECT Ups, `Total`, Score FROM torrents_votes WHERE GroupID = ?
-                    ", $tgroupId
-                ) ?? ['Ups' => 0, 'Total' => 0, 'Score' => 0];
-                self::$cache->cache_value($key, $tgroupInfo, 259200); // 3 days
-            }
-            $this->tgroupInfo = $tgroupInfo;
+        $key = sprintf(self::VOTED_GROUP, $tgroupId);
+        $tgroupInfo = self::$cache->get_value($key);
+        if ($tgroupInfo === false) {
+            $tgroupInfo = self::$db->rowAssoc("
+                SELECT Ups, `Total`, Score FROM torrents_votes WHERE GroupID = ?
+                ", $tgroupId
+            ) ?? ['Ups' => 0, 'Total' => 0, 'Score' => 0];
+            self::$cache->cache_value($key, $tgroupInfo, 259200); // 3 days
         }
-        return $this->tgroupInfo;
+        return $tgroupInfo;
     }
 
     /**
@@ -385,18 +390,12 @@ class Vote extends \Gazelle\BaseUser {
                 Score = ?
             ", $tgroupId, $ups, $score, $total, $ups, $score
         );
-        $this->tgroupInfo = self::$db->rowAssoc("
-            SELECT Ups, `Total`, Score FROM torrents_votes WHERE GroupID = ?
-            ", $tgroupId
-        );
         self::$db->commit();
 
         // update cache
         $this->userVote[$tgroupId] = $direction;
         self::$cache->cache_value(sprintf(self::VOTE_USER_KEY, $this->user->id()), $this->userVote, 259200); // 3 days
-        self::$cache->cache_value(sprintf(self::VOTED_GROUP, $tgroupId), $this->tgroupInfo, 259200);
-        self::$cache->delete_value(sprintf(self::VOTE_PAIR_KEY, $tgroupId));
-        $this->flush();
+        $this->flushTgroup($tgroupId);
 
         return [true, 'voted'];
     }
@@ -424,18 +423,12 @@ class Vote extends \Gazelle\BaseUser {
             WHERE GroupID = ?
             ", $total, $ups, $score, $tgroupId
         );
-        $this->tgroupInfo = self::$db->rowAssoc("
-            SELECT Ups, `Total`, Score FROM torrents_votes WHERE GroupID = ?
-            ", $tgroupId
-        );
         self::$db->commit();
 
         // Update cache
         unset($this->userVote[$tgroupId]);
         self::$cache->cache_value(sprintf(self::VOTE_USER_KEY, $this->user->id()), $this->userVote, 259200);
-        self::$cache->cache_value(sprintf(self::VOTED_GROUP, $tgroupId), $this->tgroupInfo, 259200);
-        self::$cache->delete_value(sprintf(self::VOTE_PAIR_KEY, $tgroupId));
-        $this->flush();
+        $this->flushTgroup($tgroupId);
 
         return [true, 'cleared'];
     }
