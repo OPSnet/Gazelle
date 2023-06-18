@@ -11,6 +11,7 @@ echo "GENERATING GAZELLE CONFIG..."
 (
     perl -ple 's/""/q{"} . qx(dd if=\/dev\/urandom count=1 bs=12 status=none | base64 | tr -d \\\\n) . q{"}/e' "${SOURCE}"
     date +"define('SITE_LAUNCH_YEAR', %Y);"
+    echo "define('IMAGE_CACHE_ENABLED', true);"
 ) > "${TARGET}"
 
 grep -q SERVER_ROOT "$TARGET" || echo "define('SERVER_ROOT', '$CI_PROJECT_DIR');" >> "${TARGET}"

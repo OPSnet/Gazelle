@@ -51,9 +51,13 @@ END;
             'twig-bb-format'
         );
 
-        $checked = self::twig('
-            {%- from "macro/form.twig" import checked -%}
-            <input type="checkbox" name="test"{{ truth|checked }} />');
+        $this->assertStringStartsWith(
+            '<img class="scale_image" onclick="lightbox.init(this, $(this).width());" alt="' . IMAGE_CACHE_HOST . '/f/full/',
+            self::twig('{{ text|bb_forum }}')->render(['text' => '[img=https://example.com/image.jpg]']),
+            'twig-bb-forum'
+        );
+
+        $checked = self::twig('{%- from "macro/form.twig" import checked -%}<input type="checkbox" name="test"{{ truth|checked }} />');
         $this->assertEquals(
             '<input type="checkbox" name="test" checked="checked" />',
             $checked->render(['truth' => true]),
@@ -152,6 +156,12 @@ END;
             self::twig('{{ user_id|user_url }}')->render(['user_id' => $this->user->id()]),
             'twig-user-url'
         );
+        (new Gazelle\User\Donor($this->user))->donate(
+            amount:  20,
+            xbtRate: 0.05,
+            source: 'phpunit twig source',
+            reason: 'phpunit twig reason',
+        );
         $this->assertMatchesRegularExpression(
             "@^<a href=\"user.php\?id={$this->user->id()}\">{$this->user->username()}</a><a target=\"_blank\" href=\"[^\"]+\"><img class=\"donor_icon tooltip\" src=\"[^\"]+\" (?:alt=\"[^\"]+\" )?(?:title=\"[^\"]+\" )?/></a> \(Sysop\)$@",
             self::twig('{{ user_id|user_full }}')->render(['user_id' => $this->user->id()]),
@@ -164,13 +174,10 @@ END;
 
     public function testImageCache(): void {
         $imageCache = self::twig('{{ image|image_cache }}');
-        if (!IMAGE_CACHE_ENABLED) {
-            $this->markTestSkipped('Image caching is not enabled');
-        }
         $this->assertStringStartsWith(
             IMAGE_CACHE_HOST . '/i/full/',
             $imageCache->render(['image' => 'https://example.com/image.url']),
-            'twig-image-full'
+            'twig-image-full-enabled'
         );
 
         $imageCache = self::twig('{{ image|image_cache(height, width) }}');
@@ -194,10 +201,8 @@ END;
     public function testImageProxy(): void {
         $imageCache = self::twig('{{ image|image_proxy(active) }}');
         $image = $imageCache->render(['image' => 'https://example.com/image.url', 'active' => true]);
-        if (IMAGE_CACHE_ENABLED) {
-            $this->assertStringStartsWith(IMAGE_CACHE_HOST . '/i/full/', $image, 'twig-image-proxy-spec');
-            $this->assertStringEndsWith('/proxy', $image, 'twig-image-proxy-end');
-        }
+        $this->assertStringStartsWith(IMAGE_CACHE_HOST . '/i/full/', $image, 'twig-image-proxy-spec');
+        $this->assertStringEndsWith('/proxy', $image, 'twig-image-proxy-end');
 
         $image = $imageCache->render(['image' => 'https://example.com/image.url', 'active' => false]);
         $this->assertStringEndsNotWith('/proxy', $image, 'twig-image-no-proxy-end');
@@ -208,6 +213,8 @@ END;
         $Document = 'index';
         global $Viewer;
         $Viewer  = $this->user;
+        $this->assertStringStartsWith('<!DOCTYPE html>', self::twig('{{ header("page") }}')->render(), 'twig-function-header');
+
         $current = (new Gazelle\User\Session($Viewer))->create([
             'keep-logged' => '0',
             'browser'     => [

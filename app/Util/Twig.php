@@ -2,6 +2,8 @@
 
 namespace Gazelle\Util;
 
+use Gazelle\Enum\CacheBucket;
+
 class Twig {
     protected static \Gazelle\Manager\User $userMan;
 
@@ -62,7 +64,12 @@ class Twig {
 
         $twig->addFilter(new \Twig\TwigFilter(
             'bb_format',
-            fn($text, $outputToc = true) => new \Twig\Markup(\Text::full_format($text, $outputToc), 'UTF-8')
+            fn($text, $outputToc = true) => new \Twig\Markup(\Text::full_format($text, $outputToc, cache: IMAGE_CACHE_ENABLED, bucket: CacheBucket::forum), 'UTF-8')
+        ));
+
+        $twig->addFilter(new \Twig\TwigFilter(
+            'bb_forum',
+            fn($text) => new \Twig\Markup(\Text::full_format($text, OutputTOC: false, cache: IMAGE_CACHE_ENABLED, bucket: CacheBucket::forum), 'UTF-8')
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
