@@ -93,6 +93,8 @@ $uploader       = $torrent->uploader();
 if (!(isset($_POST['delete']) && $Viewer->permitted('users_mod'))) {
     $torrent->flush();
     $Log = $logMessage ?? "No log message (torrent wasn't deleted).";
+} elseif ($torrent->isDeleted()) {
+    $Log = $logMessage ?? "No log message (torrent was already deleted).";
 } else {
     [$ok, $message] = $torrent->remove( /** @phpstan-ignore-line */
         $Viewer,
