@@ -24,7 +24,7 @@
     ) %}
  | <a href="torrents.php?action=delete&amp;torrentid={{ torrent.id }}" class="tooltip" title="Remove">RM</a>
 {% endif %}
-{% if pl %} | <a href="{{ torrent.url|raw }}" class="tooltip" title="Permalink">PL</a>{% endif %}
+{% if pl %} | <a href="{{ torrent.location }}" class="tooltip" title="Permalink">PL</a>{% endif %}
 {% for e in extra %}
  | {{ e|raw }}
 {% endfor %}

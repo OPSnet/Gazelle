@@ -1,6 +1,6 @@
 {{ header(user.username ~ ' &rsaquo; Permissions', {'js': 'user_perm'}) }}
 <div class="header">
-    <h2><a href="{{ user.url }}" class="username">{{ user.username }}</a> &rsaquo; Permissions</h2>
+    <h2><a href="{{ user.location }}" class="username">{{ user.username }}</a> &rsaquo; Permissions</h2>
     <div class="linkbox">
         <a id="perm-defaults" href="#" class="brackets">Defaults</a>
         <a href="tools.php?action=permissions&id={{ user.primaryClass }}" class="brackets">Primary permissions</a>

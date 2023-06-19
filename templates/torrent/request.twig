@@ -14,7 +14,7 @@
         </tr>
     {% endif %}
         <tr class="requestrows row{{ cycle(['a', 'b'], loop.index0) }}">
-            <td><a href="{{ r.url }}">{{ r.needFormatList|join(', ') -}}
+            <td><a href="{{ r.location }}">{{ r.needFormatList|join(', ') -}}
     {%- if r.needLog or r.needCue %} - {{ r.descriptionLogCue }} {% else %} {% endif -%}
     / {{- r.needEncodingList|join(', ') }} / {{ r.needFormatList|join(', ') -}}
             </a></td>

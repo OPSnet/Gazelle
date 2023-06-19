@@ -26,7 +26,7 @@
     {% for request in request_list %}
                         <div style="text-align: right;">
                             <strong class="important_text">{{ request.fillerId|user_url }} used this torrent to fill <a href="{{
-                                request.url }}">this request</a> {{ request.fillDate|time_diff }}</strong>
+                                request.location }}">this request</a> {{ request.fillDate|time_diff }}</strong>
                         </div>
     {% endfor %}
 {% endif %}

@@ -2,7 +2,7 @@
 {{ header(user.username ~ " &rsaquo; IP address history", {'js': 'iphist'}) }}
 <div class="thin">
     <div class="header">
-        <h2><a href="{{ user.url }}">{{ user.username }}</a> &rsaquo; IP address history</h2>
+        <h2><a href="{{ user.location }}">{{ user.username }}</a> &rsaquo; IP address history</h2>
     </div>
     {{ paginator.linkbox|raw }}
     <table>

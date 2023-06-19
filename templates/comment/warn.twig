@@ -1,7 +1,7 @@
 {{ header('Warn User') }}
 <div class="thin">
     <div class="header">
-        <h2>Warning <a href="{{ user.url }}">{{ user.username }}</a></h2>
+        <h2>Warning <a href="{{ user.location }}">{{ user.username }}</a></h2>
     </div>
     <div class="thin box pad">
         <form class="create_form" name="warning" action="" onsubmit="quickpostform.submit_button.disabled=true;" method="post">

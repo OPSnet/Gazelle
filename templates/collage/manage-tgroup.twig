@@ -48,7 +48,7 @@
                 <td>{{ tgroup.catalogueNumber|default('&nbsp;')|raw }}</td>
                 <td>{{ tgroup.year|default('&nbsp;')|raw }}</td>
                 <td>{{ tgroup.artistRole.link|raw|default('&mdash;')|raw }}</td>
-                <td><a href="{{ tgroup.url }}" class="tooltip" title="View torrent group">{{ tgroup.name }}</a></td>
+                <td><a href="{{ tgroup.location }}" class="tooltip" title="View torrent group">{{ tgroup.name }}</a></td>
                 <td class="nobr">{{ collage.entryCreated(id) }}</td>
                 <td class="nobr">{{ collage.entryUserId(id)|user_url }}</td>
                 <td class="nobr">

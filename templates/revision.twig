@@ -14,7 +14,7 @@
 {% for info in object.revisionList %}
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
         <td>
-            <a href="{{ object.url }}&amp;revisionid={{ info.revision }}">#{{ info.revision }}</a>
+            <a href="{{ object.location }}&amp;revisionid={{ info.revision }}">#{{ info.revision }}</a>
         </td>
         <td>
             {{ info.time }}
