@@ -276,37 +276,46 @@ function parse_user_agent(string $useragent): array {
         $OS = explode(" ", $Matches[2]);
         $dot = strrpos($Matches[1], '.') ?: null;
         $browserUserAgent = [
-            'Browser' => 'Lidarr',
-            'BrowserVersion' => substr($Matches[1], 0, $dot),
-            'OperatingSystem' => $OS[0] === 'macos' ? 'macOS' : ucfirst($OS[0]),
+            'Browser'                => 'Lidarr',
+            'BrowserVersion'         => substr($Matches[1], 0, $dot),
+            'OperatingSystem'        => $OS[0] === 'macos' ? 'macOS' : ucfirst($OS[0]),
             'OperatingSystemVersion' => $OS[1] ?? null
         ];
     } elseif (preg_match("/^VarroaMusica\/([0-9]+(?:dev)?)$/", $useragent, $Matches) === 1) {
         $browserUserAgent = [
-            'Browser' => 'VarroaMusica',
-            'BrowserVersion' => str_replace('dev', '', $Matches[1]),
-            'OperatingSystem' => null,
+            'Browser'                => 'VarroaMusica',
+            'BrowserVersion'         => str_replace('dev', '', $Matches[1]),
+            'OperatingSystem'        => null,
             'OperatingSystemVersion' => null
         ];
     } elseif (in_array($useragent, ['Headphones/None', 'whatapi [isaaczafuta]'])) {
         $browserUserAgent = [
-            'Browser' => $useragent,
-            'BrowserVersion' => null,
-            'OperatingSystem' => null,
+            'Browser'                => $useragent,
+            'BrowserVersion'         => null,
+            'OperatingSystem'        => null,
             'OperatingSystemVersion' => null
         ];
     } else {
-        $Result = new WhichBrowser\Parser($useragent);
-        $Browser = $Result->browser;
-        if (empty($Browser->getName())) {
-            $Browser = $Browser->using;
+        $result = new WhichBrowser\Parser($useragent);
+        $browser = $result->browser;
+        // Unlikely as it seems, the current version of WhichBrowser\Parser can fail with
+        // Call to a member function getName() on null
+        // (And the PHPDoc is a lie).
+        if (is_null($browser)) { /** @phpstan-ignore-line */
+            $browserUserAgent = [
+                'Browser'                => $useragent,
+                'BrowserVersion'         => null,
+                'OperatingSystem'        => 'useragent parse fail',
+                'OperatingSystemVersion' => null
+            ];
+        } else {
+            $browserUserAgent = [
+                'Browser'                => $browser->getName(),
+                'BrowserVersion'         => explode('.', $browser->getVersion())[0],
+                'OperatingSystem'        => $result->os->getName(),
+                'OperatingSystemVersion' => $result->os->getVersion()
+            ];
         }
-        $browserUserAgent = [
-            'Browser' => $Browser->getName(),
-            'BrowserVersion' => explode('.', $Browser->getVersion())[0],
-            'OperatingSystem' => $Result->os->getName(),
-            'OperatingSystemVersion' => $Result->os->getVersion()
-        ];
     }
     foreach (['Browser', 'BrowserVersion', 'OperatingSystem', 'OperatingSystemVersion'] as $Key) {
         if ($browserUserAgent[$Key] === "") {
