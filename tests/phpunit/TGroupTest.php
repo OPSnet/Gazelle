@@ -223,4 +223,8 @@ class TGroupTest extends TestCase {
             'tgroup-merge-general'
         );
     }
+
+    public function testStatsRefresh(): void {
+        $this->assertIsInt((new \Gazelle\Stats\TGroups)->refresh(), 'tgroup-stats-refresh');
+    }
 }

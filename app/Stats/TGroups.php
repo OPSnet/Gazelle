@@ -60,9 +60,16 @@ class TGroups extends \Gazelle\Base {
         self::$db->prepared_query("
             DELETE FROM tgroup_summary
         ");
+        // For performance reasons related to locking and deadlocks, the various tables
+        // are read uncommitted. This means that between the beginning of the function
+        // and now, a torrents_group row may have been deleted following a merge.
+        // We therefore must select only the rows that still exist when refreshing
+        // the tgroup_summary table.
         self::$db->prepared_query("
             INSERT INTO tgroup_summary
-            SELECT * FROM tgroup_summary_new
+            SELECT *
+            FROM tgroup_summary_new tsn
+            WHERE EXISTS (SELECT 1 FROM torrents_group tg WHERE tg.ID = tsn.tgroup_id)
         ");
         $processed = self::$db->affected_rows();
         self::$db->commit();
