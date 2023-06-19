@@ -3,7 +3,7 @@
 namespace Gazelle\Util;
 
 class LastFM extends \Gazelle\Base {
-    protected const LASTFM_API_URL = 'http://ws.audioscrobbler.com/2.0/?method=';
+    protected const LASTFM_API_URL = 'https://ws.audioscrobbler.com/2.0/?method=';
 
     public function artistEventList($ArtistID, $Artist, $Limit = 15) {
         $ArtistEvents = self::$cache->get_value("artist_events_$ArtistID");
@@ -22,7 +22,6 @@ class LastFM extends \Gazelle\Base {
     }
 
     public function userInfo(\Gazelle\User $user): ?array {
-        $Reponse = [];
         $lastfmName = $this->username($user->id());
         if (is_null($lastfmName)) {
             return null;
@@ -34,7 +33,7 @@ class LastFM extends \Gazelle\Base {
             if (isset($Response['info']) && isset($Response['info']['user'])) {
                 $Response = $Response['info']['user'];
                 if (!isset($Response['playlists'])) {
-                    $Reponse['playlists'] = 0;
+                    $Response['playlists'] = 0;
                 }
             } else {
                 $Response = null;
@@ -139,13 +138,12 @@ class LastFM extends \Gazelle\Base {
                 if (strcasecmp($viewername, $Username)) {
                     [$viewername, $Username] = [$Username, $viewername];
                 }
-                self::$cache->delete_value("lastfm_compare_{$Username}_$Username");
+                self::$cache->delete_value("lastfm_compare_{$viewername}_$Username");
             }
         }
     }
 
     protected function fetch(string $Method, array $Args) {
-        $curl = null;
         if (!LASTFM_API_KEY) {
             return false;
         }
