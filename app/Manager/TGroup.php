@@ -238,11 +238,16 @@ class TGroup extends \Gazelle\BaseManager {
             ", $new->id(), $old->id()
         );
 
+        $oldId    = $old->id();
+        $oldLabel = $old->label();
         $old->remove($user);
+        $log->general("Group $oldId deleted following merge to {$new->id()}.")
+            ->group($new->id(), $user->id(), "Merged Group $oldLabel to {$new->label()}")
+            ->merge($oldId, $new->id());
+
         self::$db->commit();
 
         $new->refresh();
-
         self::$cache->delete_multi([
             "requests_group_" . $new->id(),
             "torrent_collages_" . $new->id(),

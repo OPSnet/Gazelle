@@ -7,6 +7,7 @@ require_once(__DIR__ . '/../helper.php');
 
 class TGroupTest extends TestCase {
     protected Gazelle\TGroup $tgroup;
+    protected Gazelle\TGroup $tgroupExtra;
     protected Gazelle\Manager\TGroup $manager;
     protected string $name;
     protected int $year;
@@ -21,7 +22,7 @@ class TGroupTest extends TestCase {
         ];
         $this->userList['admin']->setField('PermissionID', MOD)->modify();
 
-        $this->name            = 'Live in ' . randomString(6);
+        $this->name            = 'phpunit live in ' . randomString(6);
         $this->year            = (int)date('Y');
         $this->recordLabel     = randomString(6) . ' Records';
         $this->catalogueNumber = randomString(3) . '-' . random_int(1000, 2000);
@@ -60,6 +61,9 @@ class TGroupTest extends TestCase {
     }
 
     public function tearDown(): void {
+        if (isset($this->tgroupExtra)) {
+            Helper::removeTGroup($this->tgroupExtra, $this->userList['admin']);
+        }
         Helper::removeTGroup($this->tgroup, $this->userList['admin']);
         foreach ($this->userList as $user) {
             $user->remove();
@@ -179,5 +183,44 @@ class TGroupTest extends TestCase {
     public function testLatestUploads(): void {
         // we can at least test the SQL
         $this->assertIsArray((new \Gazelle\Manager\Torrent)->latestUploads(5), 'tgroup-latest-uploads');
+    }
+
+    public function testTGroupMerge(): void {
+        $this->tgroupExtra = $this->manager->create(
+            categoryId:      1,
+            name:            $this->name . ' merge ' . randomString(10),
+            year:            $this->year,
+            recordLabel:     $this->recordLabel,
+            catalogueNumber: $this->catalogueNumber,
+            description:     "Description of {$this->name} merge",
+            image:           '',
+            releaseType:     (new Gazelle\ReleaseType)->findIdByName('Live album'),
+            showcase:        false,
+        );
+        Helper::makeTorrentMusic(
+            tgroup:          $this->tgroupExtra,
+            user:            $this->userList['user'],
+            catalogueNumber: 'UA-MG-1',
+        );
+
+        $oldId   = $this->tgroupExtra->id();
+        $oldName = $this->tgroupExtra->name();
+        $this->assertTrue(
+            $this->manager->merge($this->tgroupExtra, $this->tgroup, $this->userList['admin'], new \Gazelle\Log),
+            'tgroup-music-merge'
+        );
+
+        $sitelog = new \Gazelle\Manager\SiteLog(new \Gazelle\Manager\User);
+        $list = $sitelog->tgroupLogList($this->tgroup->id());
+        $event = end($list);
+        $this->assertStringContainsString("($oldName)", $event['info'], 'tgroup-merge-old-name');
+        $this->assertStringContainsString("({$this->tgroup->name()})", $event['info'], 'tgroup-merge-new-name');
+
+        $general = current($sitelog->page(1, 0, ''));
+        $this->assertEquals(
+            "Group <a href=\"torrents.php?id=$oldId\">$oldId</a> deleted following merge to {$this->tgroup->id()}.",
+            $general['message'],
+            'tgroup-merge-general'
+        );
     }
 }

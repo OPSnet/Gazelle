@@ -946,6 +946,8 @@ class TGroup extends BaseObject {
     }
 
     public function remove(User $user): bool {
+        $isMusic = ($this->categoryName() === 'Music');
+
         // Artists
         // Collect the artist IDs and then wipe the torrents_artist entry
         self::$db->prepared_query("
@@ -1040,7 +1042,7 @@ class TGroup extends BaseObject {
             return false;
         }
 
-        if ($this->categoryName() === 'Music') {
+        if ($isMusic) {
             self::$cache->decrement('stats_album_count');
         }
         self::$cache->decrement('stats_group_count');
