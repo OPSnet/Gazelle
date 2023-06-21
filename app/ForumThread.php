@@ -280,6 +280,10 @@ class ForumThread extends BaseObject {
     }
 
     public function remove(): int {
+        // LastPostID is a chicken and egg situation when removing a thread,
+        // so foreign key constraints need to be igored temporarily.
+        $db = new \Gazelle\DB;
+        $db->relaxConstraints(true);
         self::$db->prepared_query("
             DELETE ft, fp, unq
             FROM forums_topics AS ft
@@ -289,20 +293,24 @@ class ForumThread extends BaseObject {
             ", $this->id
         );
         $affected = self::$db->affected_rows();
+        $db->relaxConstraints(false);
         $this->forum()->adjust();
 
         (new Manager\Subscription)->move('forums', $this->id, null);
 
-        $this->updateRoot(
-            ...self::$db->row("
-                SELECT AuthorID, ID
-                FROM forums_posts
-                WHERE TopicID = ?
-                ORDER BY ID DESC
-                LIMIT 1
-                ", $this->id
-            )
+        $previousPost = self::$db->rowAssoc("
+            SELECT AuthorID AS user_id,
+                ID AS post_id
+            FROM forums_posts
+            WHERE TopicID = ?
+            ORDER BY ID DESC
+            LIMIT 1
+            ", $this->id
         );
+        if ($previousPost) {
+            // there will be no posts when the last thread is removed
+            $this->updateRoot($previousPost['user_id'], $previousPost['post_id']);
+        }
         $this->flush();
         return $affected;
     }

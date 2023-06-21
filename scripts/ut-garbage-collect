@@ -91,6 +91,8 @@ foreach ($db->collect(0, false) as $collageId) {
 
 // and finally, clean users
 
+(new Gazelle\DB)->relaxConstraints(true);
+
 $db->prepared_query("
     SELECT um.ID
     FROM users_main um
@@ -100,11 +102,11 @@ $userMan = new Gazelle\Manager\User;
 
 foreach ($db->collect(0, false) as $userId) {
     $user = $userMan->findById($userId);
-    echo "user {$user->label()}\n";
     $db->prepared_query("DELETE FROM forums_topics WHERE LastPostAuthorID = ?", $userId);
     $db->prepared_query("DELETE FROM locked_accounts WHERE UserID = ?", $userId);
     $db->prepared_query("DELETE FROM users_stats_daily WHERE UserID = ?", $userId);
     $db->prepared_query("DELETE FROM users_stats_monthly WHERE UserID = ?", $userId);
     $db->prepared_query("DELETE FROM users_stats_yearly WHERE UserID = ?", $userId);
+    echo "user {$user->label()}\n";
     $user->remove();
 }

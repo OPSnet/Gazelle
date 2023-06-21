@@ -214,7 +214,7 @@ class Forum extends BaseObject {
                     LAST.ID, LAST.TopicID, LAST.AuthorID, LAST.AddedTime,
                     ft.ForumID
                 FROM forums_posts fp
-                LEFT JOIN forums_topics ft on (ft.id = fp.topicid)
+                LEFT JOIN forums_topics ft ON (ft.ID = fp.TopicID)
                 LEFT JOIN (
                     /* find the most recent post of any thread in the forum */
                     SELECT p.ID, p.TopicID, p.AuthorID, p.AddedTime, t.ForumID
@@ -228,10 +228,10 @@ class Forum extends BaseObject {
             ) POST ON (POST.ForumID = f.ID)
             SET
                 f.NumTopics        = coalesce(POST.NumTopics, 0),
-                f.NumPosts         = coalesce(POST.NumPosts, 0),
-                f.LastPostTopicID  = POST.TopicID,
-                f.LastPostID       = POST.ID,
-                f.LastPostAuthorID = POST.AuthorID,
+                f.NumPosts         = coalesce(POST.NumPosts,  0),
+                f.LastPostTopicID  = coalesce(POST.TopicID,   0),
+                f.LastPostID       = coalesce(POST.ID,        0),
+                f.LastPostAuthorID = coalesce(POST.AuthorID,  0),
                 f.LastPostTime     = POST.AddedTime
             WHERE f.ID = ?
             ", $this->id, $this->id, $this->id

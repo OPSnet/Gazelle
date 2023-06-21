@@ -288,6 +288,8 @@ class ForumTest extends TestCase {
         $this->assertEquals(1, $poll->close(), 'forum-poll-close');
         $this->assertTrue($poll->isClosed(), 'forum-poll-is-closed');
         $this->assertFalse($poll->isFeatured(), 'forum-poll-is-no-longer-featured');
+
+        $this->assertEquals(5, $thread->remove(), 'forum-thread-remove');
     }
 
     public function testForumWarn(): void {
@@ -331,13 +333,18 @@ class ForumTest extends TestCase {
         $this->assertEquals(1, $inbox->messageTotal(), 'warn-user-inbox-total');
         $pm = $inbox->messageList($pmReceiverManager, 1, 0)[0];
         $this->assertEquals('You have been warned', $pm->subject(), 'warn-user-inbox-pm-subject');
-        $body = $pm->postList(1, 0)[0]['body'];
-        // remove trailing '+00' timezone from expiry timestamp
-        $this->assertStringStartsWith(
-            "You have been warned, the warning is set to expire on " . substr($expiry, 0, -3),
+        $postInfo = $pm->postList(1, 0)[0];
+        $body = $postInfo['body'];
+        $this->assertMatchesRegularExpression(
+            "/You have been warned, the warning is set to expire on \d+-\d+-\d+ \d+:\d+:\d+\. Remember, repeated warnings may jeopardize your account\./",
             $body,
             'warn-user-inbox-pm-body-start'
         );
-        $this->assertStringEndsWith("{$post->url()} - because phpunit", $body, 'warn-user-inbox-pm-body-end');
+        $this->assertStringEndsWith(
+            "Reason: forums.php?action=viewthread&amp;threadid={$thread->id()}&amp;postid={$post->id()}#post{$post->id()} - because phpunit",
+            $body,
+            'warn-user-inbox-pm-body-end'
+        );
+        $this->assertEquals(3, $thread->remove(), 'forum-thread-remove');
     }
 }
