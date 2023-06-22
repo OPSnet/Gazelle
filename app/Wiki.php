@@ -6,7 +6,7 @@ class Wiki extends BaseObject {
     protected const CACHE_KEY = 'wiki_%d';
 
     public function info(): array {
-        if (isset($this->info) && !empty($this->info)) {
+        if (isset($this->info)) {
             return $this->info;
         }
         $key = sprintf(self::CACHE_KEY, $this->id);
@@ -32,16 +32,23 @@ class Wiki extends BaseObject {
                 explode(',', $info['aliases']),
                 array_map('intval', explode(',', $info['users']))
             );
+            $saveToc = \Text::$TOC;
             \Text::$TOC = true;
             \Text::full_format($info['body'], false);
             $info['toc'] = \Text::parse_toc(0);
+            \Text::$TOC = $saveToc;
             self::$cache->cache_value($key, $info, 0);
         }
         $this->info = $info;
-        return $info;
+        return $this->info;
     }
 
-    public function flush(): Wiki { self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id)); return $this; }
+    public function flush(): Wiki {
+        unset($this->info);
+        self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
+        return $this;
+    }
+
     public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->title())); }
     public function location(): string { return 'wiki.php?action=article&id=' . $this->id; }
     public function tableName(): string { return 'wiki_articles'; }
@@ -143,14 +150,17 @@ class Wiki extends BaseObject {
      *
      * param int the article to remove
      */
-    public function remove() {
+    public function remove(): int {
         self::$db->begin_transaction();
         self::$db->prepared_query("DELETE FROM wiki_articles WHERE ID = ?", $this->id);
+        $affected = self::$db->affected_rows();
+
         self::$db->prepared_query("DELETE FROM wiki_aliases WHERE ArticleID = ?", $this->id);
         self::$db->prepared_query("DELETE FROM wiki_revisions WHERE ID = ?", $this->id);
         self::$db->commit();
         self::$cache->delete_value('wiki_aliases');
         $this->flush();
+        return $affected;
     }
 
     public function revisionList(): array {
@@ -172,12 +182,12 @@ class Wiki extends BaseObject {
      *
      * @throws DB\Mysql_DuplicateKeyException if alias already exists on another article
      */
-    public function addAlias(string $alias, int $userId): int {
+    public function addAlias(string $alias, User $user): int {
         self::$db->prepared_query("
             INSERT INTO wiki_aliases
                    (ArticleID, Alias, UserID)
             VALUES (?,         ?,     ?)
-            ", $this->id, self::normalizeAlias($alias), $userId
+            ", $this->id, self::normalizeAlias($alias), $user->id()
         );
         $this->flush();
         return self::$db->affected_rows();
@@ -189,7 +199,7 @@ class Wiki extends BaseObject {
      * @param string $alias the alias to remove
      */
     public function removeAlias(string $alias): int {
-        if (!isset($this->alias[$alias])) {
+        if (!isset($this->alias()[$alias])) {
             return 0;
         }
         self::$db->prepared_query("

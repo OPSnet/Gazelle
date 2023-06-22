@@ -5,14 +5,17 @@
 require_once(__DIR__ . '/../lib/bootstrap.php');
 
 $in = fopen($argv[1], 'r');
+if ($in === false) {
+    exit(1);
+}
 
-$row = fgets($in);
-[, $ID] = explode(':', str_replace(["\n", "\r"], '', fgets($in)));
-[, $read] = explode(':', str_replace(["\n", "\r"], '', fgets($in)));
-[, $edit] = explode(':', str_replace(["\n", "\r"], '', fgets($in)));
-[, $date] = explode(':', str_replace(["\n", "\r"], '', fgets($in)), 2);
-[, $title] = explode(':', str_replace(["\n", "\r"], '', fgets($in)), 2);
-[, $body] = explode(':', fgets($in));
+$row = (string)fgets($in);
+[, $ID] = explode(':', str_replace(["\n", "\r"], '', (string)fgets($in)));
+[, $read] = explode(':', str_replace(["\n", "\r"], '', (string)fgets($in)));
+[, $edit] = explode(':', str_replace(["\n", "\r"], '', (string)fgets($in)));
+[, $date] = explode(':', str_replace(["\n", "\r"], '', (string)fgets($in)), 2);
+[, $title] = explode(':', str_replace(["\n", "\r"], '', (string)fgets($in)), 2);
+[, $body] = explode(':', (string)fgets($in));
 
 $title = '[WHAT.CD] ' . trim($title);
 $body = trim($body);

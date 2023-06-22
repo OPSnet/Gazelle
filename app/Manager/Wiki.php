@@ -3,8 +3,31 @@
 namespace Gazelle\Manager;
 
 class Wiki extends \Gazelle\BaseManager {
-
     protected const ID_KEY = 'zz_w_%d';
+
+    /**
+     * Create a wiki article
+     */
+    public function create(
+        string $title,
+        string $body,
+        int $minRead,
+        int $minEdit,
+        \Gazelle\User $user
+    ): \Gazelle\Wiki {
+        $title = trim($title);
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
+            INSERT INTO wiki_articles
+                   (Title, Body, MinClassRead, MinClassEdit, Author)
+            VALUES (?,     ?,    ?,            ?,            ?)
+            ", $title, trim($body), $minRead, $minEdit, $user->id()
+        );
+        $article = new \Gazelle\Wiki(self::$db->inserted_id());
+        $article->addAlias($title, $user);
+        self::$db->commit();
+        return $article;
+    }
 
     /**
      * Find a wiki article based on its id.
@@ -27,18 +50,6 @@ class Wiki extends \Gazelle\BaseManager {
     }
 
     /**
-     * Find a wiki article based on its title.
-     *
-     * @return \Gazelle\Wiki|null id of article if it exists
-     */
-    public function findByTitle(string $title): ?\Gazelle\Wiki {
-        return $this->findById((int)self::$db->scalar("
-            SELECT ID FROM wiki_articles WHERE Title = ?
-            ", trim($title)
-        ));
-    }
-
-    /**
      * Find a wiki article based on an alias
      *
      * @return \Gazelle\Wiki|null id of article if it exists
@@ -51,21 +62,15 @@ class Wiki extends \Gazelle\BaseManager {
     }
 
     /**
-     * Create a wiki article
+     * Find a wiki article based on its title.
+     *
+     * @return \Gazelle\Wiki|null id of article if it exists
      */
-    public function create(string $title, string $body, int $minRead, int $minEdit, int $userId): \Gazelle\Wiki {
-        $title = trim($title);
-        self::$db->begin_transaction();
-        self::$db->prepared_query("
-            INSERT INTO wiki_articles
-                   (Title, Body, MinClassRead, MinClassEdit, Author)
-            VALUES (?,     ?,    ?,            ?,            ?)
-            ", $title, trim($body), $minRead, $minEdit, $userId
-        );
-        $article = new \Gazelle\Wiki(self::$db->inserted_id());
-        $article->addAlias($title, $userId);
-        self::$db->commit();
-        return $article;
+    public function findByTitle(string $title): ?\Gazelle\Wiki {
+        return $this->findById((int)self::$db->scalar("
+            SELECT ID FROM wiki_articles WHERE Title = ?
+            ", trim($title)
+        ));
     }
 
     /**
@@ -99,7 +104,7 @@ class Wiki extends \Gazelle\BaseManager {
         return [$minRead, $minEdit, null];
     }
 
-    public function articles(int $class, $letter): array {
+    public function articles(int $class, string $letter = '1'): array {
         $sql = "
             SELECT ID,
                 Title,

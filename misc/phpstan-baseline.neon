@@ -1661,46 +1661,6 @@ parameters:
 			path: ../app/Search/Torrent/Report.php
 
 		-
-			message: "#^Method Gazelle\\\\Search\\\\Wiki\\:\\:setOrderBy\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Search/Wiki.php
-
-		-
-			message: "#^Method Gazelle\\\\Search\\\\Wiki\\:\\:setOrderDir\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Search/Wiki.php
-
-		-
-			message: "#^Method Gazelle\\\\Search\\\\Wiki\\:\\:total\\(\\) should return int but returns bool\\|float\\|int\\|string\\|null\\.$#"
-			count: 1
-			path: ../app/Search/Wiki.php
-
-		-
-			message: "#^Property Gazelle\\\\Search\\\\Wiki\\:\\:\\$args has no type specified\\.$#"
-			count: 1
-			path: ../app/Search/Wiki.php
-
-		-
-			message: "#^Property Gazelle\\\\Search\\\\Wiki\\:\\:\\$orderBy has no type specified\\.$#"
-			count: 1
-			path: ../app/Search/Wiki.php
-
-		-
-			message: "#^Property Gazelle\\\\Search\\\\Wiki\\:\\:\\$orderDir has no type specified\\.$#"
-			count: 1
-			path: ../app/Search/Wiki.php
-
-		-
-			message: "#^Property Gazelle\\\\Search\\\\Wiki\\:\\:\\$viewer has no type specified\\.$#"
-			count: 1
-			path: ../app/Search/Wiki.php
-
-		-
-			message: "#^Property Gazelle\\\\Search\\\\Wiki\\:\\:\\$where has no type specified\\.$#"
-			count: 1
-			path: ../app/Search/Wiki.php
-
-		-
 			message: "#^Method Gazelle\\\\SiteInfo\\:\\:composerPackages\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: ../app/SiteInfo.php
@@ -2336,11 +2296,6 @@ parameters:
 			path: ../app/Util/Twig.php
 
 		-
-			message: "#^Method Gazelle\\\\Wiki\\:\\:remove\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Wiki.php
-
-		-
 			message: "#^Method Gazelle\\\\WitnessTable\\\\AbstractWitnessTable\\:\\:lastRead\\(\\) should return int\\|null but returns bool\\|float\\|int\\|string\\|null\\.$#"
 			count: 1
 			path: ../app/WitnessTable/AbstractWitnessTable.php
@@ -2659,21 +2614,6 @@ parameters:
 			message: "#^Parameter \\#1 \\$string of function md5 expects string, string\\|false given\\.$#"
 			count: 1
 			path: ../scripts/recheck-file-storage.php
-
-		-
-			message: "#^Parameter \\#1 \\$stream of function fgets expects resource, resource\\|false given\\.$#"
-			count: 8
-			path: ../scripts/upload-wiki.php
-
-		-
-			message: "#^Parameter \\#2 \\$string of function explode expects string, string\\|false given\\.$#"
-			count: 1
-			path: ../scripts/upload-wiki.php
-
-		-
-			message: "#^Parameter \\#3 \\$subject of function str_replace expects array\\|string, string\\|false given\\.$#"
-			count: 5
-			path: ../scripts/upload-wiki.php
 
 		-
 			message: "#^Parameter \\#1 \\$json of function json_decode expects string, string\\|false given\\.$#"

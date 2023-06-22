@@ -22,7 +22,7 @@ if ($error) {
     error($error);
 }
 
-$article = $wikiMan->create($title, $_POST['body'], $minRead, $minEdit, $Viewer->id());
+$article = $wikiMan->create($title, $_POST['body'], $minRead, $minEdit, $Viewer);
 (new Gazelle\Log)->general("Wiki article " . $article->id() . "\"$title\" was created by " . $Viewer->username());
 
 header('Location: ' . $article->location());

@@ -3,12 +3,10 @@
 namespace Gazelle\Search;
 
 class Wiki extends \Gazelle\Base {
-
-    protected $args;
-    protected $where;
-    protected $orderBy;
-    protected $orderDir;
-    protected $viewer;
+    protected array  $args;
+    protected string $where;
+    protected string $orderBy;
+    protected string $orderDir;
 
     public function __construct(\Gazelle\User $viewer, string $type, string $terms) {
         // Break search string down into individual words
@@ -20,18 +18,18 @@ class Wiki extends \Gazelle\Base {
         $this->where = 'WHERE ' . implode(' AND ', $cond);
     }
 
-    public function setOrderBy(string $orderBy) {
+    public function setOrderBy(string $orderBy): Wiki {
         $this->orderBy = $orderBy;
         return $this;
     }
 
-    public function setOrderDir(string $orderDir) {
+    public function setOrderDir(string $orderDir): Wiki {
         $this->orderDir = $orderDir;
         return $this;
     }
 
     public function total(): int {
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*) FROM wiki_articles " . $this->where, ...$this->args
         );
     }
