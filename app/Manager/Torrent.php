@@ -4,6 +4,7 @@ namespace Gazelle\Manager;
 
 class Torrent extends \Gazelle\BaseManager {
     protected const ID_KEY = 'zz_t_%d';
+    protected const CACHE_HIST = 'top10_hist_%s_%s';
 
     final const CACHE_KEY_LATEST_UPLOADS = 'latest_up_%d';
     final const CACHE_KEY_PEERLIST_TOTAL = 'peerlist_total_%d';
@@ -332,34 +333,30 @@ class Torrent extends \Gazelle\BaseManager {
         $historyId = self::$db->inserted_id();
 
         self::$db->prepared_query("
-            SELECT t.ID,
-                (t.Size * tls.Snatched) + (t.Size * 0.5 * tls.Leechers) AS score
+            SELECT t.ID
             FROM torrents AS t
             INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
-            INNER JOIN torrents_group AS tg     ON (tg.ID = t.GroupID)
-            WHERE tls.Seeders > 0
+            WHERE t.Size > 0
+                AND tls.Seeders > 0
                 AND t.Time > now() - INTERVAL ? DAY
-            GROUP BY tls.Seeders + tls.Leechers
-            ORDER BY score DESC, t.ID DESC
-            LIMIT ?
-            ", $days, 10
+            ORDER BY ln(t.Size) * tls.Snatched + ln(t.Size) * tls.Leechers DESC, t.ID DESC
+            LIMIT 20
+            ", $days
         );
-        $top10 = self::$db->to_array(false, MYSQLI_NUM, false);
 
-        $rank = 0;
-        foreach ($top10 as $torrentId => $score) {
+        $sequence = 0;
+        foreach (self::$db->collect(0, false) as $torrentId) {
             $torrent = $this->findById($torrentId);
             if ($torrent) {
-                self::$db->prepared_query('
+                self::$db->prepared_query("
                     INSERT INTO top10_history_torrents
-                           (HistoryID, sequence, TorrentID, TitleString, TagString)
-                    VALUES (?,         ?,        ?,         ?,           ?)
-                    ', $historyId, ++$rank, $torrentId, $torrent->fullLink(),
-                        implode(' ', $torrent->group()->tagNameList())
+                           (HistoryID, sequence, TorrentID)
+                    VALUES (?,         ?,        ?)
+                    ", $historyId, ++$sequence, $torrentId
                 );
             }
         }
-        return $rank;
+        return $historyId;
     }
 
     /**
@@ -677,5 +674,33 @@ class Torrent extends \Gazelle\BaseManager {
             $meta[] = "$log";
         }
         return ' ' . implode('/', $meta);
+    }
+
+    public function topTenHistoryList(string $datetime, bool $isByDay): array {
+        $key = sprintf(self::CACHE_HIST,
+            $isByDay ? 'day' : 'week',
+            preg_replace('/\D+/', '', $datetime)
+        );
+        $list = self::$cache->get_value($key);
+        if ($list === false) {
+            self::$db->prepared_query("
+                SELECT tht.sequence,
+                    tht.TorrentID AS torrent_id
+                FROM top10_history th
+                INNER JOIN top10_history_torrents tht ON (tht.HistoryID = th.ID)
+                INNER JOIN torrents t ON (t.ID = tht.TorrentID)
+                WHERE th.Type    = ?
+                    AND th.Date >= date(?)
+                    AND th.Date <  date(?) + INTERVAL ? DAY
+                ORDER BY tht.sequence ASC
+                ", $isByDay ? 'Daily' : 'Weekly', $datetime, $datetime, $isByDay ? 1 : 7
+            );
+            $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
+            self::$cache->cache_value($key, $list, 3600 * 24);
+        }
+        foreach ($list as &$entry) {
+            $entry['torrent'] = $this->findById($entry['torrent_id']);
+        }
+        return $list;
     }
 }

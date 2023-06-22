@@ -5,7 +5,7 @@ namespace Gazelle;
 class Torrent extends TorrentAbstract {
     use Pg;
 
-    final const CACHE_KEY                = 't_%d';
+    final const CACHE_KEY                = 't2_%d';
     final const CACHE_KEY_PEERLIST_TOTAL = 'peerlist_total_%d';
     final const CACHE_KEY_PEERLIST_PAGE  = 'peerlist_page_%d_%d';
     final const USER_RECENT_UPLOAD       = 'u_recent_up_%d';
@@ -44,7 +44,7 @@ class Torrent extends TorrentAbstract {
                 t.Size,
                 t.FreeTorrent,
                 t.FreeLeechType,
-                t.Time,
+                t.created,
                 t.Description,
                 t.LastReseedRequest,
                 tls.Seeders,

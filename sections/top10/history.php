@@ -1,200 +1,26 @@
 <?php
 
-use Gazelle\Util\Time;
-
 if (!$Viewer->permitted('users_mod')) {
     error(404);
 }
 
-$tgMan = new Gazelle\Manager\TGroup;
+$isByDay = trim($_GET['datetype'] ?? 'day')  == 'day';
 
-View::show_header('Top 10 Torrents history!');
-?>
-<div class="thin">
-    <div class="header">
-        <h2>Top 10 Torrents</h2>
-        <?= $Twig->render('top10/linkbox.twig') ?>
-    </div>
-    <div class="pad box">
-        <form class="search_form" name="top10" method="get" action="">
-            <input type="hidden" name="type" value="history" />
-            <h3>Search for a date! (After 2010-09-05)</h3>
-            <table class="layout">
-                <tr>
-                    <td class="label">Date:</td>
-                    <td><input type="text" id="date" name="date" value="<?=!empty($_GET['date']) ? display_str($_GET['date']) : 'YYYY-MM-DD'?>" onfocus="if ($('#date').raw().value == 'YYYY-MM-DD') { $('#date').raw().value = ''; }" /></td>
-                </tr>
-                <tr>
-                    <td class="label">Type:</td>
-                    <td>
-                        <input type="radio" name="datetype" value="day" checked="checked"> Day
-                        <input type="radio" name="datetype" value="week"> Week
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        <input type="submit" value="Submit" />
-                    </td>
-                </tr>
-            </table>
-        </form>
-    </div>
-<?php
 $db = Gazelle\DB::DB();
-if (!empty($_GET['date'])) {
-    $Date = $_GET['date'];
-    $SQLTime = $Date.' 00:00:00';
-
-    if (!Time::validDate($SQLTime)) {
-        error('Something is wrong with the date you provided');
+if (empty($_GET['date'])) {
+    $date = date('Y-m-d');
+    $list = [];
+} else {
+    $date = trim($_GET['date']);
+    if (!\Gazelle\Util\Time::validDate($date . ' 00:00:00')) {
+        error('That does not look like a date');
     }
-
-    if (empty($_GET['datetype']) || $_GET['datetype'] == 'day') {
-        $Type = 'day';
-        $Where = "
-            WHERE th.Date BETWEEN '$SQLTime' AND '$SQLTime' + INTERVAL 24 HOUR
-                AND Type = 'Daily'";
-    } else {
-        $Type = 'week';
-        $Where = "
-            WHERE th.Date BETWEEN '$SQLTime' - AND '$SQLTime' + INTERVAL 7 DAY
-                AND Type = 'Weekly'";
-    }
-
-    $Details = $Cache->get_value("top10_history_$SQLTime");
-    if ($Details === false) {
-        $db->prepared_query("
-            SELECT
-                tht.sequence,
-                tht.TitleString,
-                tht.TagString,
-                tht.TorrentID,
-                g.ID,
-                g.Name,
-                g.CategoryID,
-                group_concat(t.Name SEPARATOR '') AS TagList,
-                t.Format,
-                t.Encoding,
-                t.Media,
-                t.Scene,
-                t.HasLog,
-                t.HasCue,
-                t.HasLogDB,
-                t.LogScore,
-                t.LogChecksum,
-                t.RemasterYear,
-                g.Year,
-                t.RemasterTitle
-            FROM top10_history th
-            LEFT JOIN top10_history_torrents tht ON (tht.HistoryID = th.ID)
-            LEFT JOIN torrents t ON (t.ID = tht.TorrentID)
-            LEFT JOIN torrents_group g ON (g.ID = t.GroupID)
-            LEFT JOIN torrents_tags tt ON (tt.GroupID = g.ID)
-            LEFT JOIN tags t ON (t.ID = tt.TagID)
-            $Where
-            ORDER BY tht.sequence ASC
-        ");
-        $Details = $db->to_array();
-
-        $Cache->cache_value("top10_history_$SQLTime", $Details, 3600 * 24);
-    }
-?>
-
-    <br />
-    <div class="pad box">
-        <h3>Top 10 for <?=($Type == 'day' ? $Date : "the first week after $Date")?></h3>
-    <table class="torrent_table cats numbering border">
-    <tr class="colhead">
-        <td class="center" style="width: 15px;"></td>
-        <td class="center"></td>
-        <td><strong>Name</strong></td>
-    </tr>
-<?php
-    foreach ($Details as $Detail) {
-        [$Rank, $TitleString, $TagString, $TorrentID, $GroupID, $GroupName, $GroupCategoryID, $TorrentTags, $Format, $Encoding, $Media, $Scene, $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum, $Year, $GroupYear, $RemasterTitle, $Snatched, $Seeders, $Leechers, $Data] = $Detail;
-
-        $tgroup = $tgMan->findById($GroupID);
-        $Highlight = ($Rank % 2 ? 'a' : 'b');
-        // highlight every other row
-
-        if (is_null($tgroup)) {
-            $DisplayName = "$TitleString (Deleted)";
-        } else {
-            // Group still exists
-            $DisplayName = '';
-
-            $Artists = Artists::get_artist($GroupID);
-
-            if (!empty($Artists)) {
-                $DisplayName = Artists::display_artists($Artists, true, true);
-            }
-
-            $DisplayName .= "<a href=\"torrents.php?id=$GroupID&amp;torrentid=$TorrentID\" class=\"tooltip\" title=\"View torrent\" dir=\"ltr\">$GroupName</a>";
-
-            if ($GroupCategoryID == 1 && $GroupYear > 0) {
-                $DisplayName .= " [$GroupYear]";
-            }
-
-            // append extra info to torrent title
-            $ExtraInfo = '';
-            $AddExtra = '';
-            if ($Format) {
-                $ExtraInfo .= $Format;
-                $AddExtra = ' / ';
-            }
-            if ($Encoding) {
-                $ExtraInfo .= $AddExtra.$Encoding;
-                $AddExtra = ' / ';
-            }
-            //"FLAC / Lossless / Log (100%) / Cue / CD";
-            if ($HasLog) {
-                $ExtraInfo .= "$AddExtra Log".($HasLogDB ? " ($LogScore%)" : '');
-                $AddExtra = ' / ';
-            }
-            if ($HasCue) {
-                $ExtraInfo .= "{$AddExtra}Cue";
-                $AddExtra = ' / ';
-            }
-            if ($Media) {
-                $ExtraInfo .= $AddExtra.$Media;
-                $AddExtra = ' / ';
-            }
-            if ($Scene) {
-                $ExtraInfo .= "{$AddExtra}Scene";
-                $AddExtra = ' / ';
-            }
-            if ($Year > 0) {
-                $ExtraInfo .= $AddExtra.$Year;
-                $AddExtra = ' ';
-            }
-            if ($RemasterTitle) {
-                $ExtraInfo .= $AddExtra.$RemasterTitle;
-            }
-            if ($ExtraInfo != '') {
-                $ExtraInfo = "- [$ExtraInfo]";
-            }
-
-            $DisplayName .= $ExtraInfo;
-        } // if ($GroupID)
-
-?>
-    <tr class="group_torrent row<?=$Highlight?>">
-        <td style="padding: 8px; text-align: center;"><strong><?=$Rank?></strong></td>
-        <td class="center cats_col"><div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?=$tgroup->primaryTagCss() ?>"></div></td>
-        <td>
-        <span><?=($GroupID ? '<a href="torrents.php?action=download&amp;id='.$TorrentID.'&amp;torrent_pass='.$Viewer->announceKey().' title="Download" class="brackets tooltip">DL</a>' : '(Deleted)')?></span>
-            <?=$DisplayName?>
-            <div class="tags"><?= implode(', ',
-                array_map(fn($name) => "<a href=\"torrents.php?taglist=$name\">$name</a>", $tgroup->tagNameList())
-                ) ?></div>
-        </td>
-    </tr>
-<?php
-    } //foreach ($Details as $Detail)
-?>
-    </table><br />
-</div>
-</div>
-<?php
+    $list = (new Gazelle\Manager\Torrent)->topTenHistoryList($date, $isByDay);
 }
-View::show_footer();
+
+echo $Twig->render('top10/history.twig', [
+    'by_day' => $isByDay,
+    'date'   => $date,
+    'list'   => $list,
+    'viewer' => $Viewer,
+]);

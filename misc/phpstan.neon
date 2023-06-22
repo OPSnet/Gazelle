@@ -38,6 +38,7 @@ parameters:
         - DEBUG_EMAIL
         - DEBUG_MODE
         - DEBUG_UPLOAD_NOTIFICATION
+        - DEBUG_WARNINGS
         - FEATURE_EMAIL_REENABLE
         - HTTP_PROXY
         - IMAGE_HOST_BANNED

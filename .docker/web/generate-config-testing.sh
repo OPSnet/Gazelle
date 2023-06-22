@@ -7,10 +7,11 @@ SOURCE="${LIB_DIR}/devel.example.config.php"
 TARGET="${LIB_DIR}/override.config.php"
 
 [ -f ${TARGET} ] && exit 0
-echo "GENERATING GAZELLE CONFIG..."
+echo "Generating configuration parameters..."
 (
     perl -ple 's/""/q{"} . qx(dd if=\/dev\/urandom count=1 bs=12 status=none | base64 | tr -d \\\\n) . q{"}/e' "${SOURCE}"
     date +"define('SITE_LAUNCH_YEAR', %Y);"
+    date +"define('TOP_TEN_HISTORY_BEGIN', '%Y-%m-%d');"
     echo "define('IMAGE_CACHE_ENABLED', true);"
 ) > "${TARGET}"
 

@@ -34,7 +34,7 @@ class TorrentDeleted extends TorrentAbstract {
                 t.Size,
                 t.FreeTorrent,
                 t.FreeLeechType,
-                t.Time,
+                t.created,
                 t.Description,
                 t.LastReseedRequest,
                 0             AS Seeders,

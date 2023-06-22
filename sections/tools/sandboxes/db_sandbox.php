@@ -6,7 +6,7 @@ if (!$Viewer->permitted('admin_site_debug')) {
 
 $execute = false;
 if (isset($_GET['debug'])) {
-    $query = base64_decode($_GET['debug']);
+    $query = html_entity_decode(base64_decode($_GET['debug']));
     $textAreaRows = max(8, substr_count($query, "\n") + 2);
 } elseif (isset($_GET['table'])) {
     $query = (new Gazelle\DB)->selectQuery($_GET['table']);

@@ -105,6 +105,11 @@ defined('DONATION_MANAGER_USER_ID') or define('DONATION_MANAGER_USER_ID', 0);
 // an encrypted user id for automatic processing.
 defined('MONERO_DONATION_ADDRESS') or define ('MONERO_DONATION_ADDRESS', '');
 
+// Top 10 history date. Previous days and weeks of Top 10 torrents are
+// recorded in a task. There is not point going back prior to the start
+// of recorded history
+defined('TOP_TEN_HISTORY_BEGIN') or define('TOP_TEN_HISTORY_BEGIN', '2023-06-23');
+
 // ------------------------------------------------------------------------
 // Secrets
 // ALL OF THESE MUST BE OVERRIDDEN

@@ -136,7 +136,7 @@ abstract class TorrentAbstract extends BaseObject {
     }
 
     public function created(): string {
-        return $this->info()['Time'];
+        return $this->info()['created'];
     }
 
     /**
