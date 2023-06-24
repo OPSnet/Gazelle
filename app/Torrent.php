@@ -6,6 +6,7 @@ class Torrent extends TorrentAbstract {
     use Pg;
 
     final const CACHE_KEY                = 't2_%d';
+    final const CACHE_FOLDERNAME         = 'foldername_%s';
     final const CACHE_KEY_PEERLIST_TOTAL = 'peerlist_total_%d';
     final const CACHE_KEY_PEERLIST_PAGE  = 'peerlist_page_%d_%d';
     final const USER_RECENT_UPLOAD       = 'u_recent_up_%d';
@@ -570,5 +571,47 @@ class Torrent extends TorrentAbstract {
             ", $this->id, $limit, $offset
         );
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
+    }
+
+    /**
+     * Create a string that contains file info in a format that's easy to use for Sphinx
+     *
+     * @return string with the format .EXT sSIZEs NAME DELIMITER
+     */
+    public function metaFilename(string $name, int $size): string {
+        $name = make_utf8(strtr($name, "\n\r\t", '   '));
+        $extPos = mb_strrpos($name, '.');
+        $ext = $extPos === false ? '' : trim(mb_substr($name, $extPos + 1));
+        return sprintf(".%s s%ds %s %s", $ext, $size, $name, FILELIST_DELIM);
+    }
+
+    public function flushFoldernameCache(): void {
+        self::$cache->delete_value(sprintf(self::CACHE_FOLDERNAME, md5($this->path())));
+    }
+
+    /**
+     * Regenerate a torrent's file list from its meta data.
+     *
+     * @return int number of files regenned
+     */
+    public function regenerateFilelist(\Gazelle\File\Torrent $filer, \OrpheusNET\BencodeTorrent\BencodeTorrent $encoder): int {
+        $torrentFile = $filer->get($this->id);
+        if ($torrentFile === false) {
+            return 0;
+        }
+        $encoder->decodeString($torrentFile);
+        $data = $encoder->getData();
+        [
+            'total_size' => $totalSize,
+            'files'      => $fileList
+        ] = $encoder->getFileList();
+        $this->setField('Size', $totalSize)
+            ->setField('FilePath', isset($data['info']['files']) ? make_utf8($encoder->getName()) : '')
+            ->setField('FileList', implode("\n",
+                array_map(fn($f) => $this->metaFilename($f['path'], $f['size']), $fileList)
+            ))
+            ->modify();
+        $this->flushFoldernameCache();
+        return count($fileList);
     }
 }

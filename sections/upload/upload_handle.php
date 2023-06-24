@@ -569,7 +569,6 @@ foreach ($upload['extra'] as $info) {
         size:                    $info['TotalSize'],
     );
 
-    $torMan->flushFoldernameCache($extra->path());
     $size            = number_format($extra->size() / (1024 * 1024), 2);
     $upload['new'][] = $extra;
     $torrentFiler->put($info['TorEnc'], $extra->id());
@@ -618,7 +617,6 @@ if (!$Viewer->disableBonusPoints()) {
 }
 
 $tgroup->refresh();
-$torMan->flushFoldernameCache($DirName);
 
 if ($Viewer->option('AutoSubscribe')) {
     (new Gazelle\User\Subscription($Viewer))->subscribeComments('torrents', $GroupID);
@@ -665,8 +663,7 @@ $folderClash = 0;
 if ($isMusicUpload) {
     foreach ($folderCheck as $foldername) {
         // This also has the nice side effect of warming the cache immediately
-        $list = $torMan->findAllByFoldername($foldername);
-        if (count($list) > 1) {
+        if (count($torMan->findAllByFoldername($foldername)) > 1) {
             ++$folderClash;
         }
     }

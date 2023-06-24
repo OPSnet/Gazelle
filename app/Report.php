@@ -100,7 +100,7 @@ class Report extends BaseObject {
     }
 
     public function resolve(User $user, Manager\Report $manager): int {
-        // can't use setUpdate() because there is no elegant way to say `ResolvedTime = now()`
+        // can't use setField() because there is no elegant way to say `ResolvedTime = now()`
         self::$db->prepared_query("
             UPDATE reports SET
                 Status = 'Resolved',

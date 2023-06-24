@@ -74,6 +74,7 @@ class Torrent extends \Gazelle\BaseManager {
         );
         $tgroup->flush();
         $torrent->lockUpload();
+        $torrent->flushFoldernameCache();
         $user->flushRecentUpload();
 
         // Flush the most recent uploads when a new lossless upload is made
@@ -153,10 +154,6 @@ class Torrent extends \Gazelle\BaseManager {
         return $all;
     }
 
-    public function flushFoldernameCache(string $folder): void {
-        self::$cache->delete_value(sprintf(self::CACHE_FOLDERNAME, md5($folder)));
-    }
-
     public function missingLogfiles(int $userId): array {
         self::$db->prepared_query("
             SELECT ID FROM torrents WHERE HasLog = '1' AND HasLogDB = '0' AND UserID = ?
@@ -200,6 +197,7 @@ class Torrent extends \Gazelle\BaseManager {
 
     /**
      * Create a string that contains file info in a format that's easy to use for Sphinx
+     * NB: This is defined here because upload_handle needs it before a torrent is created
      *
      * @return string with the format .EXT sSIZEs NAME DELIMITER
      */
@@ -208,46 +206,6 @@ class Torrent extends \Gazelle\BaseManager {
         $extPos = mb_strrpos($name, '.');
         $ext = $extPos === false ? '' : trim(mb_substr($name, $extPos + 1));
         return sprintf(".%s s%ds %s %s", $ext, $size, $name, FILELIST_DELIM);
-    }
-
-    /**
-     * Regenerate a torrent's file list from its meta data,
-     * update the database record and clear relevant cache keys
-     *
-     * @return int number of files regenned
-     */
-    public function regenerateFilelist(int $torrentId): int {
-        $qid = self::$db->get_query_id();
-        $groupId = self::$db->scalar("
-            SELECT t.GroupID FROM torrents AS t WHERE t.ID = ?
-            ", $torrentId
-        );
-        $n = 0;
-        if ($groupId) {
-            $Tor = new \OrpheusNET\BencodeTorrent\BencodeTorrent;
-            $Tor->decodeString((string)(new \Gazelle\File\Torrent())->get($torrentId));
-            $TorData = $Tor->getData();
-            $folderPath = isset($TorData['info']['files']) ? make_utf8($Tor->getName()) : '';
-            ['total_size' => $TotalSize, 'files' => $FileList] = $Tor->getFileList();
-            $TmpFileList = [];
-            foreach ($FileList as $file) {
-                $TmpFileList[] = $this->metaFilename($file['path'], $file['size']);
-                ++$n;
-            }
-            self::$db->prepared_query("
-                UPDATE torrents SET
-                    Size = ?,
-                    FilePath = ?,
-                    FileList = ?
-                WHERE ID = ?
-                ", $TotalSize, $folderPath, implode("\n", $TmpFileList),
-                $torrentId
-            );
-            $this->findById($torrentId)?->flush();
-            $this->flushFoldernameCache($folderPath);
-        }
-        self::$db->set_query_id($qid);
-        return $n;
     }
 
     public function setSourceFlag(\OrpheusNET\BencodeTorrent\BencodeTorrent $torrent): bool {

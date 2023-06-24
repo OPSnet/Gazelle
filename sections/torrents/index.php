@@ -121,13 +121,8 @@ if (!empty($_REQUEST['action'])) {
             require_once('collector.php');
             break;
         case 'regen_filelist':
-            $torrentId = (int)($_REQUEST['torrentid'] ?? 0);
-            if ($torrentId && $Viewer->permitted('users_mod')) {
-                (new Gazelle\Manager\Torrent)->regenerateFilelist($torrentId);
-                header("Location: torrents.php?torrentid=$torrentId");
-                exit;
-            }
-            error(403);
+            require_once('regen.php');
+            break;
         case 'add_cover_art':
             require_once('add_cover_art.php');
             break;
