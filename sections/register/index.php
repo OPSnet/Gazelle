@@ -53,8 +53,8 @@ if (isset($_REQUEST['confirm'])) {
                 ->setEmail($email)
                 ->setPassword($_POST['password'])
                 ->setIpaddr($_SERVER['REMOTE_ADDR']);
-            if ($_POST['invite']) {
-                $creator->setInviteKey($_POST['invite']);
+            if ($_REQUEST['invite']) {
+                $creator->setInviteKey($_REQUEST['invite']);
             }
 
             try {
