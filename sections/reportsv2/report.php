@@ -66,7 +66,7 @@ $remasterTuple = $torrent->remasterTuple();
                             'viewer'  => $Viewer,
                         ]) ?>
                         &raquo; <a href="#" onclick="$('#torrent_<?= $torrentId ?>').gtoggle(); return false;"><?=
-                            implode(' / ', $torrent->labelList()) ?></a>
+                            implode(' / ', $torrent->labelList()) ?><?= $torrent->label() ?></a>
                     </td>
                     <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
                 </tr>
