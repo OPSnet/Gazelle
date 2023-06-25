@@ -151,18 +151,14 @@ if (!empty($_REQUEST['action'])) {
             break;
     }
 } else {
+    $manager = new \Gazelle\Manager\TGroup;
     if (!empty($_GET['id'])) {
         require_once('details.php');
     } elseif (isset($_GET['torrentid'])) {
         $torrentId = (int)$_GET['torrentid'];
-        $GroupID = Gazelle\DB::DB()->scalar("
-            SELECT GroupID FROM torrents WHERE ID = ?
-            UNION
-            SELECT GroupID FROM deleted_torrents WHERE ID = ?
-            ", $torrentId, $torrentId
-        );
-        if ($GroupID) {
-            header("Location: torrents.php?id=$GroupID&torrentid={$torrentId}#torrent{$torrentId}");
+        $tgroup = $manager->findByTorrentId($torrentId);
+        if ($tgroup) {
+            header("Location: torrents.php?id={$tgroup->id()}&torrentid={$torrentId}#torrent{$torrentId}");
         } else {
             header("Location: log.php?search=Torrent+$torrentId");
         }

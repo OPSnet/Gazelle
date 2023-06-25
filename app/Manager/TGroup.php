@@ -69,6 +69,16 @@ class TGroup extends \Gazelle\BaseManager {
         return $this;
     }
 
+    public function findByTorrentId(int $torrentId): ?\Gazelle\TGroup {
+        $id = (int)self::$db->scalar("
+            SELECT GroupID FROM torrents WHERE ID = ?
+            UNION ALL
+            SELECT GroupID FROM deleted_torrents WHERE ID = ?
+            ", $torrentId, $torrentId
+        );
+        return $this->findById($id);
+    }
+
     /**
      * Map a torrenthash to a group id
      */
