@@ -561,6 +561,7 @@ class Users extends \Gazelle\Base {
                    sum(seedtime)
                 FROM xbt_files_history xfh
                 INNER JOIN users_main um ON (um.ID = xfh.uid)
+                INNER JOIN torrents t ON (t.ID = xfh.fid)
                 GROUP BY xfh.uid
             ON DUPLICATE KEY UPDATE
                 seedtime_hour = VALUES(seedtime_hour)
