@@ -13,6 +13,7 @@ $imgProxy      = new Gazelle\Util\ImageProxy($Viewer);
 $torMan        = new Gazelle\Manager\Torrent;
 $reportMan     = new Gazelle\Manager\Torrent\Report($torMan);
 $reportTypeMan = new Gazelle\Manager\Torrent\ReportType;
+$reqMan        = new Gazelle\Manager\Request;
 $userMan       = new Gazelle\Manager\User;
 
 $report    = $reportMan->findNewest();
@@ -84,30 +85,12 @@ $reporter = $userMan->findById($report->reporterId());
             </div>
 <?php
     }
-    $db = Gazelle\DB::DB();
-    $db->prepared_query("
-        SELECT DISTINCT req.ID,
-            req.FillerID,
-            um.Username,
-            req.TimeFilled
-        FROM requests AS req
-        INNER JOIN users_main AS um ON (um.ID = req.FillerID)
-        LEFT JOIN torrents AS t ON (t.ID = req.TorrentID)
-        LEFT JOIN reportsv2 AS rep ON (rep.TorrentID = t.ID)
-        WHERE rep.Status != 'Resolved'
-            AND req.TorrentID = ?
-        ",  $torrentId
-    );
-    if ($db->has_results() > 0) {
-        while ([$RequestID, $FillerID, $FillerName, $FilledTime] = $db->next_record()) {
+    foreach ($reqMan->findByTorrentReported($torrent) as $request) {
 ?>
                 <div style="text-align: right;">
-                    <strong class="important_text"><a href="user.php?id=<?=$FillerID?>"><?=$FillerName?></a> used this torrent to fill <a href="requests.php?action=view&amp;id=<?=$RequestID?>">this request</a> <?=time_diff($FilledTime)?></strong>
+                    <strong class="important_text"><?= $userMan->findById($request->fillerId())->link() ?> used this torrent to fill <?= $request->link() ?> <?= time_diff($request->fillDate()) ?></strong>
                 </div>
-<?php   }
-    }
-
-?>
+<?php } ?>
         </td>
     </tr>
 <?php if ($report->trackList()) { ?>
