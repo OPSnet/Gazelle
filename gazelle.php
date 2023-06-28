@@ -18,7 +18,7 @@ date_default_timezone_set('UTC');
 $PathInfo = pathinfo($_SERVER['SCRIPT_NAME']);
 $Document = $PathInfo['filename'];
 
-if ($PathInfo['dirname'] !== '/') {
+if ($PathInfo['dirname'] !== '/') { /** @phpstan-ignore-line */
     exit;
 } elseif (in_array($Document, ['announce', 'scrape']) || (isset($_REQUEST['info_hash']) && isset($_REQUEST['peer_id']))) {
     die("d14:failure reason40:Invalid .torrent, try downloading again.e");
@@ -70,14 +70,14 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
     }
 } elseif (isset($_COOKIE['session'])) {
     $cookie = Crypto::decrypt($_COOKIE['session'], ENCKEY);
-    if ($cookie !== false) {
+    if ($cookie != false) {
         [$SessionID, $userId] = explode('|~|', Crypto::decrypt($cookie, ENCKEY));
         $Viewer = $userMan->findById((int)$userId);
         if (is_null($Viewer)) {
             setcookie('session', '', [
                 'expires'  => time() - 60 * 60 * 24 * 90,
                 'path'     => '/',
-                'secure'   => !DEBUG_MODE, /** @phpstan-ignore-line */
+                'secure'   => !DEBUG_MODE,
                 'httponly' => true,
                 'samesite' => 'Lax',
             ]);
@@ -152,7 +152,7 @@ if ($Viewer) {
 }
 
 $Debug->set_flag('load page');
-if (DEBUG_MODE || ($Viewer && $Viewer->permitted('site_debug'))) { /** @phpstan-ignore-line */
+if (DEBUG_MODE || ($Viewer && $Viewer->permitted('site_debug'))) {
     $Twig->addExtension(new Twig\Extension\DebugExtension());
 }
 
@@ -170,6 +170,9 @@ $Cache->cache_value('php_' . getmypid(), [
 
 register_shutdown_function(
     function () {
+        if (preg_match(DEBUG_URI, $_SERVER['REQUEST_URI'])) {
+            require(DEBUG_TRACE);
+        }
         $error = error_get_last();
         if ($error['type'] ?? 0 == E_ERROR) {
             global $Debug;
@@ -184,14 +187,14 @@ header('Cache-Control: no-cache, must-revalidate, post-check=0, pre-check=0');
 header('Pragma: no-cache');
 
 $Router = new Gazelle\Router($Viewer ? $Viewer->auth() : '');
-$file = realpath(__DIR__ . "/sections/{$Document}/index.php");
+$file = (string)realpath(__DIR__ . "/sections/{$Document}/index.php");
 if (!file_exists($file)) {
     error(404);
 } else {
     try {
         require_once($file);
     } catch (Gazelle\DB\Mysql_Exception $e) {
-        if (DEBUG_MODE || (isset($Viewer) && $Viewer->permitted('site_debug'))) { /** @phpstan-ignore-line */
+        if (DEBUG_MODE || (isset($Viewer) && $Viewer->permitted('site_debug'))) {
             echo $Twig->render('error-db.twig', [
                 'message' => $e->getMessage(),
                 'trace'   => str_replace(SERVER_ROOT . '/', '', $e->getTraceAsString()),

@@ -281,6 +281,11 @@ defined('MAIL_HOST') or define('MAIL_HOST', 'mail.' . SITE_HOST);
 // will be written to files in TMPDIR.
 defined('DEBUG_EMAIL') or define('DEBUG_EMAIL', false);
 
+// When you need to verify what arguments are in the request
+// Comes in handy for dynamic urls and DDoS attacks
+defined('DEBUG_URI') or define('DEBUG_URI', '/thisifine/');
+defined('DEBUG_TRACE') or define('DEBUG_TRACE', '');
+
 // ------------------------------------------------------------------------
 // IRC settings
 
