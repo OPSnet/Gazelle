@@ -249,4 +249,15 @@ class TGroupTest extends TestCase {
     public function testStatsRefresh(): void {
         $this->assertIsInt((new \Gazelle\Stats\TGroups)->refresh(), 'tgroup-stats-refresh');
     }
+
+    public function testRemasterList(): void {
+        $list = $this->tgroup->remasterList();
+        $id_list = $this->tgroup->torrentIdList();
+        $this->assertCount(2, $list, 'tgroup-remaster-list');
+        $this->assertEquals([$id_list[0]], $list[0]['id_list'], 'tgroup-remaster-list-0-id-list');
+        $this->assertEquals([$id_list[1], $id_list[2]], $list[1]['id_list'], 'tgroup-remaster-list-1-id-list');
+        $this->assertEquals('Limited Edition', $list[0]['title'], 'tgroup-remaster-title');
+        $this->assertEquals('UA-TG-2', $list[0]['catalogue_number'], 'tgroup-remaster-cat-no');
+        $this->assertEquals('Unitest Artists', $list[0]['record_label'], 'tgroup-remaster-rec-label');
+    }
 }

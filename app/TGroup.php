@@ -400,11 +400,11 @@ class TGroup extends BaseObject {
 
     public function remasterList(): array {
         self::$db->prepared_query("
-            SELECT min(ID)               AS id,
-                RemasterYear             AS year,
-                RemasterTitle            AS title,
-                RemasterRecordLabel      AS record_label,
-                RemasterCatalogueNumber  AS catalogue_number
+            SELECT group_concat(ID)     AS id_concat,
+                RemasterYear            AS year,
+                RemasterTitle           AS title,
+                RemasterRecordLabel     AS record_label,
+                RemasterCatalogueNumber AS catalogue_number
             FROM torrents
             WHERE Remastered = '1'
                 AND RemasterYear != 0
@@ -414,12 +414,17 @@ class TGroup extends BaseObject {
                 RemasterRecordLabel,
                 RemasterCatalogueNumber
             ORDER BY RemasterYear DESC,
-                RemasterTitle DESC,
-                RemasterRecordLabel DESC,
-                RemasterCatalogueNumber DESC
+                RemasterTitle ASC,
+                RemasterRecordLabel ASC,
+                RemasterCatalogueNumber ASC
             ", $this->id
         );
-        return self::$db->to_array(false, MYSQLI_BOTH, false);
+        $list = [];
+        foreach (self::$db->to_array(false, MYSQLI_BOTH, false) as $item) {
+            $item['id_list'] = array_map('intval', explode(',', $item['id_concat']));
+            $list[] = $item;
+        }
+        return $list;
     }
 
     /**

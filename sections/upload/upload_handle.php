@@ -646,6 +646,7 @@ if (defined('AJAX')) {
 
     if (isset($RequestID)) {
         define('NO_AJAX_ERROR', true);
+        $_REQUEST['torrentid'] = $TorrentID;
         $FillResponse = require_once(__DIR__ . '/../requests/take_fill.php');
         if (!isset($FillResponse['requestId'])) {
             $FillResponse = [

@@ -1,8 +1,8 @@
 <?php
 //**********************************************************************//
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Edit form ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-// This page relies on the Util\UploadForm class. All it does is call   //
-// the necessary functions.                                             //
+// This page relies on the Upload class. All it does is call the        //
+// necessary functions.                                                 //
 //----------------------------------------------------------------------//
 // At the bottom, there are grouping functions which are off limits to  //
 // most members.                                                        //
@@ -41,7 +41,7 @@ if ($Viewer->permitted('torrents_edit') && ($Viewer->permitted('users_mod') || $
 }
 
 if (!($torrent->isRemastered() && !$torrent->remasterYear()) || $Viewer->permitted('edit_unknowns')) {
-    $uploadForm = new Gazelle\Util\UploadForm(
+    $uploadForm = new Gazelle\Upload(
         $Viewer,
         [
             'ID'                      => $torrent->id(),
@@ -74,15 +74,17 @@ if (!($torrent->isRemastered() && !$torrent->remasterYear()) || $Viewer->permitt
             'LossymasterApproved'     => $torrent->hasLossymasterApproved(),
             'LossywebApproved'        => $torrent->hasLossywebApproved(),
         ],
-        $Err ?? false,
-        false
+        $Err ?? false
     );
     $uploadForm->setCategoryId($categoryId);
     echo $uploadForm->head();
     echo match($categoryName) {
         'Audiobooks', 'Comedy'                                   => $uploadForm->audiobook_form(),
         'Applications', 'Comics', 'E-Books', 'E-Learning Videos' => $uploadForm->simple_form(),
-        default                                                  => $uploadForm->music_form([]),
+        default => $uploadForm->music_form(
+            [],
+            new Gazelle\Manager\TGroup,
+        ),
     };
     echo $uploadForm->foot(false);
 };

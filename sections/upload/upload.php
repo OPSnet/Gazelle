@@ -11,15 +11,17 @@
 
 ini_set('max_file_uploads', '100');
 
+$tgMan = new Gazelle\Manager\TGroup;
 if (!isset($Properties)) {
     $requestId = (int)($_GET['requestid'] ?? 0);
     if ((int)($_GET['groupid'] ?? 0)) {
-        $tgroup = (new Gazelle\Manager\TGroup)->findById((int)$_GET['groupid']);
+        $tgroup = $tgMan->findById((int)$_GET['groupid']);
         if (is_null($tgroup)) {
             unset($_GET['groupid']);
         } else {
             $categoryId = $tgroup->categoryId();
             $Properties = [
+                'add-format'       => true,
                 'GroupID'          => $tgroup->id(),
                 'ReleaseType'      => $tgroup->releaseType(),
                 'Title'            => $tgroup->name(),
@@ -41,6 +43,7 @@ if (!isset($Properties)) {
         if ($request) {
             $categoryId = $request->categoryId();
             $Properties = [
+                'add-format'       => true,
                 'RequestID'        => $requestId,
                 'ReleaseType'      => $request->releaseType(),
                 'Title'            => $request->title(),
@@ -103,12 +106,15 @@ View::show_header('Upload', ['js' => 'upload,validate_upload,valid_tags,musicbra
 if (!isset($categoryId)) {
     $categoryId = CATEGORY_MUSIC;
 }
-$uploadForm = (new Gazelle\Util\UploadForm($Viewer, $Properties, $Err))
+$uploadForm = (new Gazelle\Upload($Viewer, $Properties, $Err))
     ->setCategoryId($categoryId);
 echo $uploadForm->head();
 echo match (CATEGORY[$categoryId - 1]) {
     'Audiobooks', 'Comedy'                                   => $uploadForm->audiobook_form(),
     'Applications', 'Comics', 'E-Books', 'E-Learning Videos' => $uploadForm->simple_form(),
-    default                                                  => $uploadForm->music_form((new Gazelle\Manager\Tag)->genreList()),
+    default => $uploadForm->music_form(
+        (new Gazelle\Manager\Tag)->genreList(),
+        $tgMan,
+    ),
 };
 echo $uploadForm->foot(true);

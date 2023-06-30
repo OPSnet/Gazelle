@@ -20,7 +20,7 @@ if (is_null($request)) {
 $error = [];
 $torrent = null;
 $tgMan = new Gazelle\Manager\Torrent;
-if (!empty($_REEQUEST['torrentid'])) {
+if (!empty($_REQUEST['torrentid'])) {
     $torrent = $tgMan->findById((int)$_REQUEST['torrentid']);
 } else {
     if (empty($_REQUEST['link'])) {

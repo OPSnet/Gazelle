@@ -62,10 +62,6 @@ parameters:
         - USER_LIMIT
     ignoreErrors:
     -
-      message: "/^Cannot access offset '\\w+' on array\\|false\\.$/"
-      paths:
-        -  ../app/Util/UploadForm.php
-    -
       message: '/^Function \w+\(\) (?:has parameter \$\w+ with|return type has) no value type specified in iterable type array\.$/'
       paths:
         -  ../lib/util.php
