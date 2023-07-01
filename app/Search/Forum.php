@@ -39,13 +39,6 @@ class Forum extends \Gazelle\BaseUser {
         $this->forbiddenForums = $this->user->forbiddenForums();
     }
 
-    public function setViewer(\Gazelle\User $viewer) {
-        $this->viewer = $viewer;
-        $this->permittedForums = $this->viewer->permittedForums();
-        $this->forbiddenForums = $this->viewer->forbiddenForums();
-        return $this;
-    }
-
     public function searchText(): string {
         return $this->searchText;
     }
@@ -58,12 +51,19 @@ class Forum extends \Gazelle\BaseUser {
         return $this->threadId;
     }
 
+    public function setViewer(\Gazelle\User $viewer): Forum {
+        $this->viewer = $viewer;
+        $this->permittedForums = $this->viewer->permittedForums();
+        $this->forbiddenForums = $this->viewer->forbiddenForums();
+        return $this;
+    }
+
     /**
      * Set search mode (by topic title or post body)
      *
      * @param string $mode (if 'body' then search in post bodies, anything else defaults to thread title)
      */
-    public function setSearchType(string $mode) {
+    public function setSearchType(string $mode): Forum {
         $this->threadTitleSearch = ($mode !== 'body');
         return $this;
     }
@@ -81,18 +81,19 @@ class Forum extends \Gazelle\BaseUser {
     /**
      * Set search text (will be split on whitespace into multiple words)
      */
-    public function setSearchText(string $searchText) {
+    public function setSearchText(string $searchText): Forum {
         $this->searchText = $searchText;
         return $this;
     }
 
     /**
-     * Set name of author to search for
+     * Set name of author to search for. If the author does not exist, the
+     * search will be for user_id = 0, which amounts to the same thing.
      */
-    public function setAuthor(string $username) {
+    public function setAuthor(string $username): Forum {
         $this->authorName = trim($username);
         if (!empty($this->authorName)) {
-            $this->authorId = self::$db->scalar("
+            $this->authorId = (int)self::$db->scalar("
                 SELECT ID FROM users_main WHERE Username = ?
                 ", $this->authorName
             );
@@ -105,7 +106,7 @@ class Forum extends \Gazelle\BaseUser {
     /**
      * Set the list of forum IDs within which to search
      */
-    public function setForumList(array $list) {
+    public function setForumList(array $list): Forum {
         $this->selectedForums = [];
         foreach ($list as $id) {
             $id = (int)$id;
@@ -113,12 +114,13 @@ class Forum extends \Gazelle\BaseUser {
                 $this->selectedForums[] = $id;
             }
         }
+        return $this;
     }
 
     /**
      * When searching on post history, will all posts in a thread be grouped?
      */
-    public function setShowGrouped(bool $showGrouped) {
+    public function setShowGrouped(bool $showGrouped): Forum {
         $this->showGrouped = $showGrouped;
         return $this;
     }
@@ -126,7 +128,7 @@ class Forum extends \Gazelle\BaseUser {
     /**
      * When searching on post history, are only unread posts wanted?
      */
-    public function setShowUnread(bool $showUnread) {
+    public function setShowUnread(bool $showUnread): Forum {
         $this->showUnread = $showUnread;
         return $this;
     }
@@ -134,7 +136,7 @@ class Forum extends \Gazelle\BaseUser {
     /**
      * Save a condition related to forums
      */
-    protected function setForumCond(string $condition, $arg) {
+    protected function setForumCond(string $condition, $arg): Forum {
         $this->forumCond[] = $condition;
         if (is_array($arg)) {
             $this->forumArgs = array_merge($this->forumArgs, $arg);
@@ -147,7 +149,7 @@ class Forum extends \Gazelle\BaseUser {
     /**
      * Save a condition related to thread searches
      */
-    protected function setThreadCond(string $condition, $arg) {
+    protected function setThreadCond(string $condition, $arg): Forum {
         $this->threadCond[] = $condition;
         if (is_array($arg)) {
             $this->threadArgs = array_merge($this->threadArgs, $arg);
@@ -160,26 +162,26 @@ class Forum extends \Gazelle\BaseUser {
     /**
      * Limit the search to threads created before this date
      */
-    public function setThreadCreatedBefore(string $date) {
+    public function setThreadCreatedBefore(string $date): Forum {
         return $this->setThreadCond('t.CreatedTime <= ?', $date);
     }
 
     /**
      * Limit the search to threads created after this date
      */
-    public function setThreadCreatedAfter(string $date) {
+    public function setThreadCreatedAfter(string $date): Forum {
         return $this->setThreadCond('t.CreatedTime >= ?', $date);
     }
 
-    public function setThreadId(int $threadId): void {
+    public function setThreadId(int $threadId): Forum {
         $this->threadId = $threadId;
-        $this->setThreadCond('t.ID = ?', $this->threadId);
+        return $this->setThreadCond('t.ID = ?', $this->threadId);
     }
 
     /**
      * Save a condition related to post searches
      */
-    protected function setPostCond(string $condition, $arg) {
+    protected function setPostCond(string $condition, $arg): Forum {
         $this->postCond[] = $condition;
         if (is_array($arg)) {
             $this->postArgs = array_merge($this->postArgs, $arg);
@@ -192,14 +194,14 @@ class Forum extends \Gazelle\BaseUser {
     /**
      * Limit the search to posts created before this date
      */
-    public function setPostCreatedBefore(string $date) {
+    public function setPostCreatedBefore(string $date): Forum {
         return $this->setPostCond('p.AddedTime <= ?', $date);
     }
 
     /**
      * Limit the search to threads created after this date
      */
-    public function setPostCreatedAfter(string $date) {
+    public function setPostCreatedAfter(string $date): Forum {
         return $this->setPostCond('p.AddedTime >= ?', $date);
     }
 
@@ -208,7 +210,7 @@ class Forum extends \Gazelle\BaseUser {
     /**
      * Do we need to split the search words for a full text search?
      */
-    public function setSplitWords(bool $splitWords) {
+    public function setSplitWords(bool $splitWords): Forum {
         $this->splitWords = $splitWords;
         return $this;
     }
@@ -280,7 +282,7 @@ class Forum extends \Gazelle\BaseUser {
         $cond[] = 't.ID = ?';
         $args[] = $threadId;
         $forumPostJoin = $this->isBodySearch() ? 'INNER JOIN forums_posts AS p ON (p.TopicID = t.ID)' : '';
-        return self::$db->scalar("
+        return (string)self::$db->scalar("
             SELECT Title
             FROM forums_topics AS t
             INNER JOIN forums AS f ON (f.ID = t.ForumID) $forumPostJoin
@@ -295,7 +297,7 @@ class Forum extends \Gazelle\BaseUser {
     public function totalHits(): int {
         [$cond, $args] = $this->setSplitWords(true)->configure();
         $forumPostJoin = $this->isBodySearch() ? 'INNER JOIN forums_posts AS p ON (p.TopicID = t.ID)' : '';
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*)
             FROM forums AS f
             INNER JOIN forums_topics AS t ON (t.ForumID = f.ID) $forumPostJoin
@@ -351,7 +353,7 @@ class Forum extends \Gazelle\BaseUser {
      */
     public function threadsByUserTotal(): int {
         [$cond, $args] = $this->configure();
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*)
             FROM forums AS f
             INNER JOIN forums_topics AS t ON (t.ForumID = f.ID)
@@ -390,7 +392,7 @@ class Forum extends \Gazelle\BaseUser {
 
     public function postHistoryTotal(): int {
         [$from, $cond, $args] = $this->configurePostHistory();
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*)
             $from
             WHERE
