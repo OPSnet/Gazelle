@@ -572,7 +572,6 @@ class Users extends \Gazelle\Base {
             DELETE FROM user_summary
         ");
 
-
         self::$db->prepared_query("
             INSERT INTO user_summary
             SELECT * FROM user_summary_new

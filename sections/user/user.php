@@ -85,56 +85,48 @@ echo $Twig->render('user/header.twig', [
     'userMan'      => $userMan,
     'viewer'       => $Viewer,
 ]);
-
+?>
+        <div class="box box_info box_userinfo_personal">
+            <div class="head colhead_dark">Personal</div>
+            <ul class="stats nobullet">
+                <li>Class: <strong><?= $userMan->userclassName($Class) ?></strong></li>
+<?php if (($secondary = (new Gazelle\User\Privilege($User))->secondaryClassList())) { ?>
+                <li>
+                    <ul class="stats">
+<?php
+        asort($secondary);
+        foreach ($secondary as $id => $name) {
+            if ($id == DONOR && !$User->propertyVisible($Viewer, 'hide_donor_heart')) {
+                continue;
+            }
+?>
+                        <li><?= $name ?></li>
+<?php } ?>
+                    </ul>
+                </li>
+<?php
+}
+echo $Twig->render('user/sidebar.twig', [
+    'applicant'     => new Gazelle\Manager\Applicant,
+    'invite_source' => $Viewer->permitted('admin_manage_invite_source')
+        ? (new Gazelle\Manager\InviteSource)->findSourceNameByUserId($UserID) : null,
+    'user'          => $User,
+    'viewer'        => $Viewer,
+]);
+?>
+            </ul>
+        </div>
+<?php
 if ($OwnProfile || $Viewer->permitted('users_mod')) {
-    $nextClass = $User->nextClass();
+    $nextClass = $User->nextClass($userMan);
     if ($nextClass) {
 ?>
         <div class="box box_info box_userinfo_nextclass">
             <div class="head colhead_dark"><a href="wiki.php?action=article&amp;name=userclasses">Next Class</a></div>
             <ul class="stats nobullet">
-                <li>Class: <?=$nextClass['Class']?></li>
-<?php
-        foreach ($nextClass['Requirements'] as $key => $req) {
-            [$current, $goal, $type] = $req;
-            if ($goal === 0) {
-                continue;
-            }
-
-            switch ($type) {
-            case 'time':
-                $percent = (time() - strtotime($current)) / $goal;
-                $current = time_diff($current);
-                $goal = $goal / (86400 * 7);
-                $goal = "$goal week" . plural($goal);
-                break;
-            case 'float':
-                if ($current === '∞') {
-                    $percent = 1;
-                } else {
-                    $percent = $current / $goal;
-                    $current = round($current, 2);
-                }
-                break;
-            case 'int':
-                $percent = $current === '∞' ? 1 : $current / $goal;
-                break;
-            case 'bytes':
-                $percent = $current / $goal;
-                $current = byte_format($current);
-                $goal = byte_format($goal);
-                break;
-            default:
-                continue 2;
-            }
-
-            $percent = sprintf('<span class="tooltip %s" title="%s">%s</span>',
-                ratio_css($percent),
-                round($percent * 100, 2) . '%',
-                round(min(1.0, $percent) * 100, 0) . '%'
-            );
- ?>
-                <li><?=$key?>: <?=$current?> / <?=$goal?> (<?=$percent?>)</li>
+                <li>Class: <?= $nextClass[ 'class']?></li>
+<?php   foreach ($nextClass['goal'] as $label => $require) { ?>
+                <li><?= $label ?>: <?= $require['current'] ?> / <?= $require['target'] ?> (<?= $require['percent'] ?>)</li>
 <?php   } ?>
             </ul>
         </div>
@@ -264,41 +256,12 @@ if ($User->propertyVisibleMulti($previewer, ['artistsadded', 'collagecontribs+',
             </ul>
         </div>
 <?php } ?>
-        <div class="box box_info box_userinfo_personal">
-            <div class="head colhead_dark">Personal</div>
-            <ul class="stats nobullet">
-                <li>Class: <?= $userMan->userclassName($User->primaryClass()) ?></li>
-<?php if (($secondary = (new Gazelle\User\Privilege($User))->secondaryClassList())) { ?>
-                <li>
-                    <ul class="stats">
+
 <?php
-        asort($secondary);
-        foreach ($secondary as $id => $name) {
-            if ($id == DONOR && !$User->propertyVisible($Viewer, 'hide_donor_heart')) {
-                continue;
-            }
-?>
-                        <li><?= $name ?></li>
-<?php } ?>
-                    </ul>
-                </li>
-<?php
-}
-echo $Twig->render('user/sidebar.twig', [
-    'applicant'     => new Gazelle\Manager\Applicant,
-    'invite_source' => $Viewer->permitted('admin_manage_invite_source')
-        ? (new Gazelle\Manager\InviteSource)->findSourceNameByUserId($UserID) : null,
-    'user'          => $User,
-    'viewer'        => $Viewer,
-]);
-?>
-            </ul>
-        </div>
-<?php
+
 if (check_paranoia_here('snatched')) {
     echo $Twig->render('user/tag-snatch.twig', [
-        'id'   => $UserID,
-        'list' => $User->tagSnatchCounts(),
+        'user' => $User,
     ]);
 }
 

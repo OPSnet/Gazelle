@@ -1931,45 +1931,68 @@ class User extends BaseObject {
         return [$ratio, $ratio == 0 ? $effectiveUpload : $effectiveUpload / $ratio - $this->downloadedSize()];
     }
 
-    public function nextClass(): ?array {
-        $criteria = (new Manager\User)->promotionCriteria()[$this->primaryClass()] ?? null;
+    public function nextClass(Manager\User $manager): ?array {
+        $criteria = $manager->promotionCriteria()[$this->primaryClass()];
         if (!$criteria) {
             return null;
         }
-
-        $progress = [
-            'Class' => (new Manager\User)->userclassName($criteria['To']),
-            'Requirements' => [
-                'Upload' => [$this->uploadedSize() + $this->stats()->requestVoteSize(), $criteria['MinUpload'], 'bytes'],
-                'Ratio' => [$this->downloadedSize() == 0 ? '∞'
-                    : $this->uploadedSize() / $this->downloadedSize(), $criteria['MinRatio'], 'float'],
-                'Time' => [
-                    $this->created(),
-                    $criteria['Weeks'] * 7 * 24 * 60 * 60,
-                    'time'
-                ],
-            ]
+        $upload   = $this->uploadedSize();
+        $download = $this->downloadedSize();
+        $bounty   = $this->stats()->requestVoteSize();
+        $week     = $criteria['Weeks'];
+        $goal = [
+            'Upload' => [
+                'current' => byte_format($upload + $bounty),
+                'target'  => byte_format($criteria['MinUpload']),
+                'percent' => ratio_percent(($upload + $bounty) / $criteria['MinUpload']),
+            ],
+            'Ratio' => [
+                'current' => $download == 0 ? '∞' : number_format($upload / $download, 2),
+                'target'  => number_format($criteria['MinRatio'], 2),
+                'percent' => ratio_percent($download == 0 ? 1 : ($upload / $download) / $criteria['MinRatio']),
+            ],
+            'Time' => [
+                'current' => time_diff($this->created()),
+                'target'  => "$week week" . plural($week),
+                'percent' => ratio_percent((time() - strtotime($this->created())) / ($criteria['Weeks'] * 7 * 86_400)),
+            ],
         ];
 
-        if (isset($criteria['MinUploads'])) {
-            $progress['Requirements']['Torrents'] = [$this->stats()->uploadTotal(), $criteria['MinUploads'], 'int'];
+        if ($criteria['MinUploads']) {
+            $uploadTotal = $this->stats()->uploadTotal();
+            $goal['Torrents'] = [
+                'current' => number_format($uploadTotal),
+                'target'  => $criteria['MinUploads'],
+                'percent' => ratio_percent($uploadTotal / $criteria['MinUploads']),
+            ];
         }
         if (isset($criteria['Extra'])) {
             foreach ($criteria['Extra'] as $req => $info) {
                 $query = $info['Query'];
-                if (str_starts_with($query, 'us.')) {
-                    $query = "SELECT $query FROM user_summary us WHERE user_id = ?";
+                $query = (str_starts_with($query, 'us.'))
+                    ? "SELECT $query FROM user_summary us WHERE user_id = ?"
+                    : str_replace('um.ID', '?', $query);
+                $current = (int)self::$db->scalar($query, ...array_fill(0, substr_count($query, '?'), $this->id));
+                if ($req == SITE_NAME . ' Upload') {
+                    $goal[$req] = [
+                        'current' => byte_format($current),
+                        'target'  => byte_format($info['Count']),
+                        'percent' => ratio_percent($current / $info['Count']),
+                    ];
                 } else {
-                    $query = str_replace('um.ID', '?', $query);
+                    $goal[$req] = [
+                        'current' => number_format($current),
+                        'target'  => $info['Count'],
+                        'percent' => ratio_percent($current / $info['Count']),
+                    ];
                 }
-                $progress['Requirements'][$req] = [
-                    self::$db->scalar($query, ...array_fill(0, substr_count($query, '?'), $this->id)),
-                    $info['Count'],
-                    $info['Type']
-                ];
             }
         }
-        return $progress;
+
+        return [
+            'class' => $manager->userclassName($criteria['To']),
+            'goal'  => $goal,
+        ];
     }
 
     public function seedingSize(): int {

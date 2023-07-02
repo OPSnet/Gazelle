@@ -104,6 +104,11 @@ class UtilTest extends TestCase {
         $this->assertEquals('r20', ratio_css(4.9999), 'format-get-ratio-css-r20-hi');
         $this->assertEquals('r50', ratio_css(5.0000), 'format-get-ratio-css-r50-hi');
 
+        $this->assertEquals('<span class="tooltip r00" title="0%">0%</span>', ratio_percent(0.0), 'ratio-percent-0');
+        $this->assertEquals('<span class="tooltip r05" title="50%">50%</span>', ratio_percent(0.5), 'ratio-percent-50');
+        $this->assertEquals('<span class="tooltip r10" title="100%">100%</span>', ratio_percent(1), 'ratio-percent-100');
+        $this->assertEquals('<span class="tooltip r20" title="200%">100%</span>', ratio_percent(2), 'ratio-percent-200');
+
         $this->assertEquals('--', ratio_html(0, 0), 'format-html-0-0-t');
         $this->assertEquals('--', ratio_html(0, 0, false), 'format-html-0-0-f');
         $this->assertEquals('<span class="tooltip r99" title="Infinite">∞</span>', ratio_html(100, 0), 'format-html-100-0-t');

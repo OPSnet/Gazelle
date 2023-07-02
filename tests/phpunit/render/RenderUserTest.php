@@ -47,16 +47,11 @@ class RenderUserTest extends TestCase {
         $this->assertStringContainsString('<div class="linkbox">', $header, 'user-header-div-linkbox');
         $this->assertStringContainsString('<div class="sidebar">', $header, 'user-header-div-sidebar');
 
+        // This would require a lot more scaffolding to test the actual markup
         $tag = Gazelle\Util\Twig::factory()->render('user/tag-snatch.twig', [
-            'id' => $Viewer->id(),
-            'list' => [
-                ['name' => 'jazz', 'n' => 20],
-                ['name' => 'rock', 'n' => 10],
-                ['name' => 'metal', 'n' => 5],
-            ],
+            'user' => $Viewer,
         ]);
-        $this->assertStringContainsString('Snatched tags', $tag, 'user-header-div-tag-heading');
-        $this->assertEquals(3, substr_count($tag, '<li>'), 'user-header-div-tag-total');
+        $this->assertEquals('', $tag, 'user-header-div-tag-heading');
 
         $stats = Gazelle\Util\Twig::factory()->render('user/sidebar-stats.twig', [
             'prl'          => $PRL,

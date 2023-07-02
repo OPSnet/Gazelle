@@ -7,6 +7,7 @@ require_once(__DIR__ . '/../helper.php');
 
 use \Gazelle\Enum\AvatarDisplay;
 use \Gazelle\Enum\AvatarSynthetic;
+use \Gazelle\Enum\UserStatus;
 
 class UserTest extends TestCase {
     protected \Gazelle\User $user;
@@ -192,6 +193,34 @@ class UserTest extends TestCase {
         $this->assertTrue($this->user->setField('lock-type', 0)->modify(), 'utest-set-unlocked');
         $this->user->flush();
         $this->assertFalse($this->user->isLocked(), 'utest-is-unlocked');
+    }
+
+    public function testNextClass(): void {
+        $this->user->setField('Enabled', UserStatus::enabled->value)->modify();
+
+        $manager = new Gazelle\Manager\User;
+        $next = $this->user->nextClass($manager);
+        $this->assertEquals('Member', $next['class'], 'user-next-class-is-member');
+
+        $goal = $next['goal'];
+        $this->assertCount(3, $goal, 'user-next-requirements');
+        $this->assertStringContainsString('100%', $goal['Ratio']['percent'],  'user-next-ratio');
+        $this->assertStringContainsString('0%',   $goal['Time']['percent'],   'user-next-time');
+        $this->assertStringContainsString('30%',  $goal['Upload']['percent'], 'user-next-upload');
+
+        $this->user->setField('created', date('Y-m-d H:i:s', strtotime('-2 day')))->modify();
+        $next = $this->user->nextClass($manager);
+        $this->assertStringContainsString('29%', $next['goal']['Time']['percent'], 'user-next-closer-time');
+        $this->user->setField('created', date('Y-m-d H:i:s', strtotime('-7 day')))->modify();
+        $next = $this->user->nextClass($manager);
+        $this->assertStringContainsString('100%', $next['goal']['Time']['percent'], 'user-next-has-time');
+
+        $this->user->addBounty(7 * 1024 * 1024 * 1024);
+        $next = $this->user->nextClass($manager);
+        $this->assertStringContainsString('100%',  $next['goal']['Upload']['percent'], 'user-next-has-upload');
+
+        $manager->promote();
+        $this->assertEquals('Member', $this->user->flush()->userclassName(), 'user-promoted-to-member');
     }
 
     public function testStylesheet(): void {

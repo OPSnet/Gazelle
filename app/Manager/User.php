@@ -892,13 +892,13 @@ class User extends \Gazelle\BaseManager {
                 SELECT um.ID
                 FROM users_main um
                 INNER JOIN users_leech_stats uls ON (uls.UserID = um.ID)
-                INNER JOIN user_summary       us ON (us.user_id = um.ID)
+                LEFT JOIN user_summary       us  ON (us.user_id = um.ID)
                 WHERE um.Enabled = ?
                     AND um.PermissionID = ?
-                    AND uls.Uploaded + us.request_bounty_size >= ?
+                    AND uls.Uploaded >= ?
                     AND (uls.Downloaded = 0 OR uls.Uploaded / uls.Downloaded >= ?)
-                    AND um.created < now() - INTERVAL ? WEEK
-                    AND us.upload_total >= ?
+                    AND um.created <= now() - INTERVAL ? WEEK
+                    AND coalesce(us.upload_total, 0) >= ?
             ";
             $args = [UserStatus::enabled->value, $level['From'], $level['MinUpload'], $level['MinRatio'], $level['Weeks'], $level['MinUploads']];
 
@@ -912,7 +912,7 @@ class User extends \Gazelle\BaseManager {
             }
 
             self::$db->prepared_query($query, ...$args);
-            foreach (self::$db->collect('ID', false) as $userId) {
+            foreach (self::$db->collect(0, false) as $userId) {
                 $user = $this->findById($userId);
                 if (is_null($user) || (new \Gazelle\User\Warning($user))->isWarned()) {
                     continue;

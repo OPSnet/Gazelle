@@ -120,6 +120,14 @@ function ratio_html(int $uploaded, int $downloaded, bool $wantColor = true): str
     return $ratio;
 }
 
+function ratio_percent(float $percent): string {
+    return sprintf('<span class="tooltip %s" title="%s">%s</span>',
+        ratio_css($percent),
+        round($percent * 100, 2) . '%',
+        round(min(1.0, $percent) * 100, 0) . '%'
+    );
+}
+
 /**
  * Gets the query string of the current page, minus the parameters in $Exclude,
  * plus the parameters in $NewParams
