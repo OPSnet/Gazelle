@@ -1,21 +1,22 @@
-{{ header('Split new group') }}
-<div class="center thin">
+{{ header('Split out into new group') }}
+<div class="thin">
 <div class="header">
-    <h2>Confirm Split!</h2>
+    <h2>Confirm split to new group</h2>
 </div>
 <div class="box pad">
     <form class="confirm_form" name="torrent_group" action="torrents.php" method="post">
         <input type="hidden" name="action" value="newgroup" />
         <input type="hidden" name="confirm" value="true" />
-        <input type="hidden" name="auth" value="{{ auth }}" />
-        <input type="hidden" name="torrentid" value="{{ torrent_id }}" />
-        <input type="hidden" name="oldgroupid" value="{{ group_id }}" />
+        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+        <input type="hidden" name="torrentid" value="{{ torrent.id }}" />
         <input type="hidden" name="artist" value="{{ artist }}" />
         <input type="hidden" name="title" value="{{ title }}" />
         <input type="hidden" name="year" value="{{ year }}" />
-        <h3>You are attempting to split the torrent <a href="torrents.php?torrentid={{ torrent_id }}">{{ torrent_id }}</a> off into a new group:</h3>
-        <ul><li>{{ artist }} - {{ title }} [{{ year }}]</li></ul>
-        <input type="submit" value="Confirm" />
+        <div class="box pad">From {{ torrent.group.link|raw }}:<br /><br />
+        you plan to split the torrent {{ torrent.id }} [{{ torrent.edition }} : ({{ torrent.shortLabel }})]
+        to:<br />
+        <b>{{ artist }} – {{ title }} [{{ year }}]</b>
+        <br /><br /><input type="submit" value="Confirm" />
     </form>
 </div>
 </div>

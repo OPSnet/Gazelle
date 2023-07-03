@@ -38,6 +38,57 @@ class TGroup extends \Gazelle\BaseManager {
         return $tgroup;
     }
 
+    public function createFromTorrent(
+        \Gazelle\Torrent          $torrent,
+        string                    $artistName,
+        string                    $title,
+        int                       $year,
+        \Gazelle\Manager\Artist   $artistMan,
+        \Gazelle\Manager\Bookmark $bookmarkMan,
+        \Gazelle\Manager\Comment  $commentMan,
+        \Gazelle\Log              $logger,
+        \Gazelle\User             $user,
+    ): \Gazelle\TGroup {
+        self::$db->prepared_query("
+            INSERT INTO torrents_group
+                   (Name, Year, CategoryID, WikiBody, WikiImage)
+            VALUES (?,    ?,    ?,          '',       '')
+            ", $title, $year, CATEGORY_MUSIC
+        );
+        $newId = self::$db->inserted_id();
+        $new = $this->findById($newId);
+        $new->addArtists([ARTIST_MAIN], [$artistName], $user, $artistMan, $logger);
+
+        self::$db->prepared_query('
+            UPDATE torrents SET
+                GroupID = ?
+            WHERE ID = ?
+            ', $newId, $torrent->id()
+        );
+
+        // Update or remove previous group, depending on whether there is anything left
+        $old = $torrent->group();
+        $oldId = $old->id();
+        if (self::$db->scalar('SELECT 1 FROM torrents WHERE GroupID = ?', $old->id())) {
+            $old->flush();
+            $old->refresh();
+        } else {
+            // TODO: votes etc!
+            $bookmarkMan->merge($oldId, $newId);
+            $commentMan->merge('torrents', $oldId, $newId);
+            $logger->merge($old->id(), $newId);
+            $old->remove($user);
+        }
+
+        $logger->group($newId, $user->id(), "split from group $oldId")
+            ->general("Torrent {$torrent->id()} was split out from group $oldId to $newId by {$user->label()}");
+
+        $new->flush()->refresh();
+        $torrent->flush();
+        return $new;
+
+    }
+
     public function findById(int $tgroupId): ?\Gazelle\TGroup {
         $key = sprintf(self::ID_KEY, $tgroupId);
         $id = self::$cache->get_value($key);

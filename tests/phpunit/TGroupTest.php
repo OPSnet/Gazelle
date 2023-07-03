@@ -224,6 +224,28 @@ class TGroupTest extends TestCase {
         );
     }
 
+    public function testTGroupSplit(): void {
+        $list = $this->tgroup->torrentIdList();
+        $this->assertCount(3, $list, 'tgroup-has-torrents');
+        $torrent = (new \Gazelle\Manager\Torrent)->findById($list[1]);
+        $this->assertInstanceOf(\Gazelle\Torrent::class, $torrent, 'tgroup-id-is-a-torrent');
+        $suffix = randomString(10);
+        $this->tgroupExtra = (new \Gazelle\Manager\TGroup)->createFromTorrent(
+            $torrent,
+            "phpunit split artist $suffix",
+            "php split title $suffix",
+            (int)date('Y'),
+            new \Gazelle\Manager\Artist,
+            new \Gazelle\Manager\Bookmark,
+            new \Gazelle\Manager\Comment,
+            new \Gazelle\Log,
+            $this->userList['admin'],
+        );
+        $this->assertInstanceOf(\Gazelle\TGroup::class, $this->tgroupExtra, 'tgroup-is-split');
+        $this->assertCount(2, $this->tgroup->flush()->torrentIdList(), 'tgroup-has-one-less-torrent');
+        $this->assertCount(1, $this->tgroupExtra->torrentIdList(), 'tgroup-split-has-one-torrent');
+    }
+
     public function testStatsRefresh(): void {
         $this->assertIsInt((new \Gazelle\Stats\TGroups)->refresh(), 'tgroup-stats-refresh');
     }
