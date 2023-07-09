@@ -28,8 +28,14 @@ do
     sleep 10
 done
 
-echo "Run migrations..."
+echo "Run mysql migrations..."
 if ! FKEY_MY_DATABASE=1 LOCK_MY_DATABASE=1 /var/www/vendor/bin/phinx migrate; then
+    echo "PHINX FAILED TO RUN MIGRATIONS"
+    exit 1
+fi
+
+echo "Run postgres migrations..."
+if ! /var/www/vendor/bin/phinx migrate -c ./misc/phinx-pg.php; then
     echo "PHINX FAILED TO RUN MIGRATIONS"
     exit 1
 fi

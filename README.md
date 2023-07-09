@@ -94,6 +94,8 @@ Edit the resulting file and then apply it:
 
 `docker exec -it $WEBCONT vendor/bin/phinx migrate`
 
+For postgres add `-c ./misc/phinx-pg.php` to the END of the phinx commands
+
 To access the database, look at `.docker/mysql-home/.my.cnf`
 The credentials should match those used in the `docker-compose.yml` file.
 

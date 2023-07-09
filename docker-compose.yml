@@ -28,8 +28,9 @@ services:
     volumes:
       - ./.docker/data/pg:/var/lib/postgresql/data
     environment:
-      - POSTGRES_PASSWORD=gazpg
-
+      - POSTGRES_USER=nyala
+      - POSTGRES_PASSWORD=nyalapw
+      - POSTGRES_DB=gz
   mysql:
     image: percona:ps-8.0
     ports:

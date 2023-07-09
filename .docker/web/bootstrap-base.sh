@@ -48,10 +48,6 @@ chmod 600 ~/.pgpass
 psql -U "$POSTGRES_USER" postgres -c "create role ${POSTGRES_DB_USER} with password '${POSTGRES_USER_PASSWORD}' login;"
 psql -U "$POSTGRES_USER" postgres -c "create database ${POSTGRES_DATABASE} with owner ${POSTGRES_DB_USER};"
 
-for sql in "${CI_PROJECT_DIR}"/misc/pg-migrations/*.sql ; do
-    psql -f "$sql" || exit 1
-done
-
 if [ -z "${MYSQL_INIT_DB-}" ]; then
     echo "Restore mysql dump..."
     time mysql < /opt/gazelle/mysql_schema.sql || exit 1
@@ -67,6 +63,12 @@ fi
 
 echo "Run mysql migrations..."
 if ! ( FKEY_MY_DATABASE=1 LOCK_MY_DATABASE=1 "${CI_PROJECT_DIR}/vendor/bin/phinx" migrate -e gazelle ) ; then
+    echo "PHINX FAILED TO RUN MIGRATIONS"
+    exit 1
+fi
+
+echo "Run postgres migrations..."
+if ! "${CI_PROJECT_DIR}/vendor/bin/phinx" migrate -c ./misc/phinx-pg.php; then
     echo "PHINX FAILED TO RUN MIGRATIONS"
     exit 1
 fi
