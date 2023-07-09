@@ -193,6 +193,7 @@ class Privilege extends \Gazelle\BaseManager {
             'users_edit_avatars' => 'Edit avatars',
             'users_edit_reset_keys' => 'Reset user passkey/authkey',
             'users_edit_profiles' => 'Edit user profiles',
+            'users_linked_users' => 'View and edit linked users',
             'users_view_friends' => 'View user friends',
             'users_reset_own_keys' => 'Reset own passkey/authkey',
             'users_edit_password' => 'Edit passwords',

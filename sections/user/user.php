@@ -407,7 +407,7 @@ foreach ($Collages as $collage) {
 <?php
 
 // Linked accounts
-if ($Viewer->permitted('users_edit_usernames')) {
+if ($Viewer->permitted('users_linked_users')) {
     [$linkGroupId, $comments, $list] = (new Gazelle\Manager\UserLink($User))->info();
     echo $Twig->render('user/linked.twig', [
         'auth'     => $Viewer->auth(),

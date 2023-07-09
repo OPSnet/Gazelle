@@ -1,6 +1,6 @@
 <?php
 
-if (!$Viewer->permitted('users_edit_usernames')) {
+if (!$Viewer->permitted('users_linked_users')) {
     error(403);
 }
 authorize();
