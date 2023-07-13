@@ -29,7 +29,7 @@ class Helper {
             releaseType:     $releaseType,
             name:            $name,
             description:     'phpunit music description',
-            image:           '',
+            image:           'https://example.com/phpunit-tgroup/' . randomString(10) . '.jpg',
             year:            (int)date('Y') - 1,
             recordLabel:     'Unitest Artists Corporation',
             catalogueNumber: 'UA-' . random_int(10000, 99999),

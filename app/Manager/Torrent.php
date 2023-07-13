@@ -506,60 +506,74 @@ class Torrent extends \Gazelle\BaseManager {
      * different groups. Uploads of paranoid and disabled users are excluded.
      * Uploads without cover art are excluded.
      *
-     * @return array of \Gazelle\TGroup objects
+     * @return array of \Gazelle\Torrent objects
      */
     public function latestUploads(int $limit): array {
-        $key = sprintf(self::CACHE_KEY_LATEST_UPLOADS, $limit);
+        $key    = sprintf(self::CACHE_KEY_LATEST_UPLOADS, $limit);
         $latest = self::$cache->get_value($key);
-        if ($latest === false) {
-            self::$db->prepared_query("
-                SELECT t.GroupID                    AS groupId,
-                    t.ID                            AS torrentId,
-                    coalesce(um.Paranoia, 'a:0:{}') AS paranoia
-                FROM torrents t
-                INNER JOIN torrents_group tg ON (tg.ID = t.GroupID)
-                INNER JOIN users_main     um ON (um.ID = t.UserID)
-                WHERE t.Time > now() - INTERVAL 3 DAY
-                    AND t.Encoding IN ('Lossless', '24bit Lossless')
-                    AND tg.WikiImage REGEXP '^https?://[^/]+/.*'
-                    AND um.Enabled = '1'
-                    AND NOT EXISTS (
-                        SELECT 1
-                        FROM torrents_tags ttex
-                        WHERE t.GroupID = ttex.GroupID
-                            AND ttex.TagID IN (" . placeholders(HOMEPAGE_TAG_IGNORE) . ")
-                    )
-                ORDER BY t.Time DESC
-                ", ...HOMEPAGE_TAG_IGNORE
-            );
-            $latest = [];
-            $seen = [];
-            $max = self::$db->record_count();
-            $nr = 0;
-            $qid = self::$db->get_query_id();
-            while ($nr < min($limit, $max)) {
-                self::$db->set_query_id($qid);
-                $row = self::$db->next_record(MYSQLI_ASSOC, false);
-                if (!$row) {
-                    break;
+        $retry  = 2;
+        while ($retry--) {
+            if ($latest === false) {
+                self::$db->prepared_query("
+                    SELECT t.GroupID                    AS group_id,
+                        t.ID                            AS torrent_id,
+                        coalesce(um.Paranoia, 'a:0:{}') AS paranoia
+                    FROM torrents t
+                    INNER JOIN torrents_group tg ON (tg.ID = t.GroupID)
+                    INNER JOIN users_main     um ON (um.ID = t.UserID)
+                    WHERE t.created > now() - INTERVAL 3 DAY
+                        AND t.Encoding IN ('Lossless', '24bit Lossless')
+                        AND tg.WikiImage REGEXP '^https?://[^/]+/.*'
+                        AND um.Enabled = '1'
+                        AND NOT EXISTS (
+                            SELECT 1
+                            FROM torrents_tags ttex
+                            WHERE t.GroupID = ttex.GroupID
+                                AND ttex.TagID IN (" . placeholders(HOMEPAGE_TAG_IGNORE) . ")
+                        )
+                    ORDER BY t.Time DESC
+                    ", ...HOMEPAGE_TAG_IGNORE
+                );
+                $latest = [];
+                $seen   = [];
+                $nr     = 0;
+                $qid    = self::$db->get_query_id();
+                $max    = self::$db->record_count();
+                while ($nr < min($limit, $max)) {
+                    self::$db->set_query_id($qid);
+                    $row = self::$db->next_record(MYSQLI_ASSOC, false);
+                    if (is_null($row)) {
+                        break;
+                    }
+                    if (in_array($row['group_id'], $seen)) {
+                        continue;
+                    }
+                    if (in_array('uploads', unserialize($row['paranoia']))) {
+                        continue;
+                    }
+                    $torrent = $this->findById($row['torrent_id']);
+                    if (is_null($torrent) || !$torrent->group()->image()) {
+                        continue;
+                    }
+                    $seen[]   = $row['group_id'];
+                    $latest[] = $row['torrent_id'];
+                    ++$nr;
                 }
-                if (in_array($row['groupId'], $seen)) {
-                    continue;
-                }
-                if (in_array('uploads', unserialize($row['paranoia']))) {
-                    continue;
-                }
-                $torrent = $this->findById($row['torrentId']);
-                if (is_null($torrent) || !$torrent->group()->image()) {
-                    continue;
-                }
-                $seen[]   = $row['groupId'];
-                $latest[] = $row['torrentId'];
-                ++$nr;
+                self::$cache->cache_value($key, $latest, 3600);
             }
-            self::$cache->cache_value($key, $latest, 86400);
+            // we either have a fresh list of ids, or it came from the cache
+            // reinstantiate the list as Torrent objects
+            $list = array_filter(
+                array_map(fn($id) => $this->findById($id), $latest),
+                fn($t) => $t?->group()?->image()
+            );
+            if (count($list) == count($latest)) {
+                return $list;
+            }
+            // a torrent was deleted since the list was cached: must regenerate a new list
+            $latest = false;
         }
-        return array_map(fn($id) => $this->findById($id), $latest);
+        return [];
     }
 
     /**

@@ -12,6 +12,7 @@ class TorrentManagerTest extends TestCase {
 
     public function setUp(): void {
         $this->user = Helper::makeUser('torman.' . randomString(10), 'torman');
+        $this->user->setField('Enabled', '1')->modify();
         $this->torrentList = [
             Helper::makeTorrentMusic(
                 tgroup: Helper::makeTGroupMusic(
@@ -62,6 +63,20 @@ class TorrentManagerTest extends TestCase {
             Helper::removeTGroup($torrent->group(), $this->user);
         }
         $this->user->remove();
+    }
+
+    public function testLatestUploads(): void {
+        $manager = new \Gazelle\Manager\Torrent;
+        $list = $manager->latestUploads(5);
+        $latestTotal = count($list);
+        $this->assertGreaterThanOrEqual(2, $latestTotal, 'latest-uploads-two-plus');
+        $remove = array_shift($this->torrentList);
+        Helper::removeTGroup($remove->group(), $this->user);
+        $this->assertEquals(
+            $latestTotal - 1,
+            count($manager->latestUploads(5)),
+            'latest-uploads-after-remove'
+        );
     }
 
     public function testTopTenHistoryList(): void {
