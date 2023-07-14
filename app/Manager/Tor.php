@@ -48,7 +48,7 @@ class Tor extends \Gazelle\Base {
             $changed += $st->rowCount();
         }
         $this->pg->pdo()->query("
-            DROP TEMPORARY TABLE tor_node_new
+            DROP TABLE tor_node_new
         ");
         $this->pg->pdo()->commit();
 
@@ -70,10 +70,9 @@ class Tor extends \Gazelle\Base {
     }
 
     public function isExitNode(string $ip): bool {
-        /** @phpstan-next-line */
-        return BLOCK_TOR ? false : (bool)$this->pg->scalar("
+        return BLOCK_TOR ? (bool)$this->pg->scalar("
             SELECT 1 FROM tor_node WHERE ipv4 = ?
             ", $ip
-        );
+        ) : false;
     }
 }
