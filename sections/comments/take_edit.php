@@ -18,7 +18,7 @@ if ($comment->userId() != $Viewer->id() && !$Viewer->permitted('site_moderate_fo
     error(403, true);
 }
 
-$comment->setBody($body)->setEditedUserID($Viewer->id())->modify();
+$comment->setField('Body', $body)->setField('EditedUserID', $Viewer->id())->modify();
 if ((bool)($_POST['pm'] ?? false) && !$comment->isAuthor($Viewer->id())) {
     // Send a PM to the user to notify them of the edit
     $id = $comment->id();

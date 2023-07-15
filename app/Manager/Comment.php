@@ -15,30 +15,20 @@ class Comment extends \Gazelle\BaseManager {
         };
     }
 
-    public function findById(int $postId): ?\Gazelle\Comment\AbstractComment {
-        [$page, $pageId] = self::$db->row("
-            SELECT Page, PageID FROM comments WHERE ID = ?
-            ", $postId
-        );
-        if (is_null($page)) {
-            return null;
-        }
-        $className = $this->className($page);
-        return new $className($pageId, 0, $postId);
-    }
-
     /**
      * Post a comment on an artist, request or torrent page.
      */
-    public function create(int $userId, string $page, int $pageId, string $body): \Gazelle\Comment\AbstractComment {
+    public function create(\Gazelle\User $user, string $page, int $pageId, string $body):
+        \Gazelle\Comment\Artist|\Gazelle\Comment\Collage|\Gazelle\Comment\Request|\Gazelle\Comment\Torrent
+    {
         self::$db->prepared_query("
             INSERT INTO comments
                    (Page, PageID, AuthorID, Body)
             VALUES (?,    ?,      ?,        ?)
-            ", $page, $pageId, $userId, $body
+            ", $page, $pageId, $user->id(), $body
         );
         $postId = self::$db->inserted_id();
-        $catalogueId = self::$db->scalar("
+        $catalogueId = (int)self::$db->scalar("
             SELECT floor((ceil(count(*) / ?) - 1) * ? / ?)
             FROM comments
             WHERE Page = ? AND PageID = ?
@@ -51,24 +41,36 @@ class Comment extends \Gazelle\BaseManager {
         if ($page == 'collages') {
             self::$cache->delete_value("{$page}_comments_recent_{$pageId}");
         }
-        $userMan = new \Gazelle\Manager\User;
-        $user = $userMan->findById($userId);
-        if ($user) {
-            (new \Gazelle\User\Notification\Quote($user))->create($userMan, $body, $postId, $page, $pageId);
-        }
+        (new \Gazelle\User\Notification\Quote($user))
+            ->create(new \Gazelle\Manager\User, $body, $postId, $page, $pageId);
         (new Subscription)->flushPage($page, $pageId);
 
         $className = $this->className($page);
-        return new $className($pageId, 0, $postId);
+        return new $className($pageId, 0, $postId); /** @phpstan-ignore-line */
     }
 
-    public function merge(string $page, int $pageId, int $targetPageId) {
+    public function findById(int $postId):
+        \Gazelle\Comment\Artist|\Gazelle\Comment\Collage|\Gazelle\Comment\Request|\Gazelle\Comment\Torrent|null
+    {
+        [$page, $pageId] = self::$db->row("
+            SELECT Page, PageID FROM comments WHERE ID = ?
+            ", $postId
+        );
+        if (is_null($page)) {
+            return null;
+        }
+        $className = $this->className($page);
+        return new $className($pageId, 0, $postId); /** @phpstan-ignore-line */
+    }
+
+    public function merge(string $page, int $pageId, int $targetPageId): int {
         self::$db->prepared_query("
             UPDATE comments SET
                 PageID = ?
             WHERE Page = ? AND PageID = ?
             ", $targetPageId, $page, $pageId
         );
+        $affected = self::$db->affected_rows();
         $pageCount = (int)self::$db->scalar("
             SELECT ceil(count(*) / ?) AS Pages
             FROM comments
@@ -93,14 +95,16 @@ class Comment extends \Gazelle\BaseManager {
         for ($i = 0; $i <= $last; ++$i) {
             self::$cache->delete_value(sprintf(self::CATALOG, $page, $targetPageId, $i));
         }
-        self::$cache->delete_value($page."_comments_$targetPageId");
+        self::$cache->delete_value("{$page}_comments_{$targetPageId}");
+        return $affected;
     }
 
     /**
      * Remove all comments on $page/$pageId (handle quote notifications and subscriptions as well)
-     * @return boolean removal successful (or there was nothing to remove)
+     *
+     * @return int number of comments that were removed
      */
-    public function remove(string $page, int $pageId) {
+    public function remove(string $page, int $pageId): int {
         $qid = self::$db->get_query_id();
 
         $pageCount = (int)self::$db->scalar("
@@ -111,7 +115,7 @@ class Comment extends \Gazelle\BaseManager {
             ", TORRENT_COMMENTS_PER_PAGE, $page, $pageId
         );
         if ($pageCount === 0) {
-            return false;
+            return 0;
         }
         $last = floor((TORRENT_COMMENTS_PER_PAGE * $pageCount - TORRENT_COMMENTS_PER_PAGE) / THREAD_CATALOGUE);
 
@@ -119,6 +123,7 @@ class Comment extends \Gazelle\BaseManager {
             DELETE FROM comments WHERE Page = ? AND PageID = ?
             ", $page, $pageId
         );
+        $affected = self::$db->affected_rows();
 
         // literally, move the comment thread to nowhere i.e. delete
         (new \Gazelle\Manager\Subscription)->move($page, $pageId, null);
@@ -135,7 +140,7 @@ class Comment extends \Gazelle\BaseManager {
         }
         self::$cache->delete_value($page . '_comments_' . $pageId);
 
-        return true;
+        return $affected;
     }
 
     public function loadEdits(string $page, int $postId): array {

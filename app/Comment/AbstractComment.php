@@ -3,11 +3,10 @@
 namespace Gazelle\Comment;
 
 abstract class AbstractComment extends \Gazelle\BaseObject {
-    protected $userId;
-    protected $lastRead = 0;
-    protected $total = 0;   // number of comments
-    protected $thread = []; // the page of comments
-    protected $viewer;
+    protected int   $userId;
+    protected int   $lastRead = 0;
+    protected int   $total;   // number of comments
+    protected array $thread = []; // the page of comments
 
     protected const PAGE_TOTAL = '%s_comments_%d';
 
@@ -28,6 +27,17 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
         protected int $id,
     ) {
         parent::__construct($id);
+    }
+
+    public function body(): string {
+        return (string)self::$db->scalar("
+            SELECT Body FROM comments WHERE Page = ?  AND ID = ?
+            ", $this->page(), $this->id
+        );
+    }
+
+    public function isAuthor(int $userId): bool {
+        return $this->userId() === $userId;
     }
 
     public function lastRead(): int {
@@ -76,8 +86,8 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
     }
 
     public function userId(): int {
-        if (is_null($this->userId)) {
-            $this->userId = self::$db->scalar("
+        if (!isset($this->userId)) {
+            $this->userId = (int)self::$db->scalar("
                 SELECT AuthorID FROM comments WHERE ID = ?
                 ", $this->id
             );
@@ -85,49 +95,24 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
         return $this->userId;
     }
 
-    public function isAuthor(int $userId): bool {
-        return $this->userId() === $userId;
-    }
-
-    public function setEditedUserID(int $userId) {
-        $this->setField('EditedUserID', $userId);
-        return $this;
-    }
-
-    public function setViewer(\Gazelle\User $viewer) {
-        $this->viewer = $viewer;
-        return $this;
-    }
-
-    public function setBody(string $body) {
-        $this->setField('Body', trim($body));
-        return $this;
-    }
-
-    public function body(): string {
-        return self::$db->scalar("
-            SELECT Body FROM comments WHERE Page = ?  AND ID = ?
-            ", $this->page(), $this->id
-        );
-    }
-
     /**
      * Load a page of comments
      */
-    public function load() {
+    public function load(): AbstractComment {
         $page = $this->page();
         $pageId = $this->pageId;
 
         // Get the total number of comments
         $key = sprintf(self::PAGE_TOTAL, $page, $pageId);
-        $this->total = self::$cache->get_value($key);
-        if ($this->total === false) {
-            $this->total = self::$db->scalar("
+        $total = self::$cache->get_value($key);
+        if ($total === false) {
+            $total = (int)self::$db->scalar("
                 SELECT count(*) FROM comments WHERE Page = ? AND PageID = ?
                 ", $page, $pageId
             );
-            self::$cache->cache_value($key, $this->total, 0);
+            self::$cache->cache_value($key, $total, 0);
         }
+        $this->total = $total;
 
         if (!$this->pageNum) {
             // default to final page, or page where specified post is found
@@ -178,9 +163,9 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
         return $this;
     }
 
-    public function handleSubscription(\Gazelle\User $user) {
+    public function handleSubscription(\Gazelle\User $user): int {
         if (empty($this->thread)) {
-            return;
+            return 0;
         }
         $lastPost = end($this->thread)['ID'];
         $page = $this->page();
@@ -198,19 +183,20 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
                 AND UserID = ?
             ", $page, $pageId, current($this->thread)['ID'], $lastPost, $userId
         );
-        if (self::$db->affected_rows()) {
+        $affected = self::$db->affected_rows();
+        if ($affected) {
             (new \Gazelle\User\Quote($user))->flush();
         }
 
         // last read
-        $this->lastRead = self::$db->scalar("
+        $this->lastRead = (int)self::$db->scalar("
             SELECT PostID
             FROM users_comments_last_read
             WHERE Page = ?
                 AND PageID = ?
                 AND UserID = ?
             ", $page, $pageId, $userId
-        ) ?? 0;
+        );
         if ($this->lastRead < $lastPost) {
             self::$db->prepared_query("
                 INSERT INTO users_comments_last_read
@@ -223,6 +209,7 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
             self::$cache->delete_value("subscriptions_user_new_$userId");
         }
         self::$db->commit();
+        return $affected;
     }
 
     /**
@@ -254,7 +241,7 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
         );
         self::$db->commit();
 
-        $commentPage = self::$db->scalar("
+        $commentPage = (int)self::$db->scalar("
             SELECT ceil(count(*) / ?) AS Page
             FROM comments
             WHERE Page = ?

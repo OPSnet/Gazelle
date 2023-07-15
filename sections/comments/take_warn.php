@@ -5,6 +5,9 @@ use Gazelle\Util\Time;
 if (!$Viewer->permitted('users_warn')) {
     error(404);
 }
+
+authorize();
+
 foreach (['reason', 'privatemessage', 'body', 'length', 'postid'] as $var) {
     if (!isset($_POST[$var])) {
         error("$var not set");
@@ -21,7 +24,7 @@ if (is_null($user) || $user->classLevel() > $Viewer->classLevel()) {
     error(403);
 }
 
-$comment->setBody(trim($_POST['body']))->modify();
+$comment->setField('Body', trim($_POST['body']))->modify();
 
 $weeks   = trim($_POST['length']);
 $reason  = trim($_POST['reason']);

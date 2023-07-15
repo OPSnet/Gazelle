@@ -147,7 +147,7 @@ class TGroupTest extends TestCase {
 
         $text       = 'phpunit tgroup subscribe ' . randomString();
         $commentMan = new Gazelle\Manager\Comment;
-        $comment    = $commentMan->create($this->userList['admin']->id(), 'torrents', 0, $text);
+        $comment    = $commentMan->create($this->userList['admin'], 'torrents', 0, $text);
         // TODO: should this be 1?
         $this->assertEquals(0, $comment->pageNum(), 'tgroup-comment-page-num');
 

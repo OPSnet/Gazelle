@@ -256,66 +256,6 @@ parameters:
 			path: ../app/Better/Bad.php
 
 		-
-			message: "#^Binary operation \"\\-\" between bool\\|float\\|int\\|string\\|null and 1 results in an error\\.$#"
-			count: 1
-			path: ../app/Comment/AbstractComment.php
-
-		-
-			message: "#^Method Gazelle\\\\Comment\\\\AbstractComment\\:\\:body\\(\\) should return string but returns bool\\|float\\|int\\|string\\|null\\.$#"
-			count: 1
-			path: ../app/Comment/AbstractComment.php
-
-		-
-			message: "#^Method Gazelle\\\\Comment\\\\AbstractComment\\:\\:handleSubscription\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Comment/AbstractComment.php
-
-		-
-			message: "#^Method Gazelle\\\\Comment\\\\AbstractComment\\:\\:load\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Comment/AbstractComment.php
-
-		-
-			message: "#^Method Gazelle\\\\Comment\\\\AbstractComment\\:\\:setBody\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Comment/AbstractComment.php
-
-		-
-			message: "#^Method Gazelle\\\\Comment\\\\AbstractComment\\:\\:setEditedUserID\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Comment/AbstractComment.php
-
-		-
-			message: "#^Method Gazelle\\\\Comment\\\\AbstractComment\\:\\:setViewer\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Comment/AbstractComment.php
-
-		-
-			message: "#^Property Gazelle\\\\Comment\\\\AbstractComment\\:\\:\\$lastRead has no type specified\\.$#"
-			count: 1
-			path: ../app/Comment/AbstractComment.php
-
-		-
-			message: "#^Property Gazelle\\\\Comment\\\\AbstractComment\\:\\:\\$thread has no type specified\\.$#"
-			count: 1
-			path: ../app/Comment/AbstractComment.php
-
-		-
-			message: "#^Property Gazelle\\\\Comment\\\\AbstractComment\\:\\:\\$total has no type specified\\.$#"
-			count: 1
-			path: ../app/Comment/AbstractComment.php
-
-		-
-			message: "#^Property Gazelle\\\\Comment\\\\AbstractComment\\:\\:\\$userId has no type specified\\.$#"
-			count: 1
-			path: ../app/Comment/AbstractComment.php
-
-		-
-			message: "#^Property Gazelle\\\\Comment\\\\AbstractComment\\:\\:\\$viewer has no type specified\\.$#"
-			count: 1
-			path: ../app/Comment/AbstractComment.php
-
-		-
 			message: "#^If condition is always false\\.$#"
 			count: 1
 			path: ../app/Contest.php
@@ -699,21 +639,6 @@ parameters:
 			message: "#^Method Gazelle\\\\Manager\\\\ClientWhitelist\\:\\:peerId\\(\\) should return string but returns bool\\|float\\|int\\|string\\|null\\.$#"
 			count: 1
 			path: ../app/Manager/ClientWhitelist.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\Comment\\:\\:create\\(\\) should return Gazelle\\\\Comment\\\\AbstractComment but returns object\\.$#"
-			count: 1
-			path: ../app/Manager/Comment.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\Comment\\:\\:findById\\(\\) should return Gazelle\\\\Comment\\\\AbstractComment\\|null but returns object\\.$#"
-			count: 1
-			path: ../app/Manager/Comment.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\Comment\\:\\:merge\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Manager/Comment.php
 
 		-
 			message: "#^Parameter \\#1 \\$id of class Gazelle\\\\Contest constructor expects int, float\\|int\\<min, \\-1\\>\\|int\\<1, max\\>\\|string\\|true given\\.$#"
