@@ -44,7 +44,6 @@ phpstan:
         - .composer
   script:
     - composer install --no-progress
-    - apk add patch
     - /bin/sh scripts/local-patch
     - phpstan analyse --no-progress --configuration misc/phpstan.neon
 

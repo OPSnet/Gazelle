@@ -649,8 +649,13 @@ class Text {
                             $ChildPrefix = $Attrib;
                         }
                         foreach ($Array[$ArrayPos]['Val'] as $Key=>$Val) {
-                            if (is_string($Val)) {
-                                $Id = $ChildPrefix.'.'.($CurrentId++);
+                            // phpstan complains about:
+                            // "Call to function is_string() with string will always evaluate to true."
+                            // But if you remove the call (since $Val is always supposed to be a string):
+                            // "Parameter #1 $string of function trim expects string, array|string given."
+                            // This is more a reflection on the hairiness of this code than anything else
+                            if (is_string($Val)) { /** @phpstan-ignore-line */
+                                $Id = $ChildPrefix . '.' . $CurrentId++;
                                 $Array[$ArrayPos]['Val'][$Key] = self::parse(trim($Val), $Id);
                                 $Array[$ArrayPos]['Val'][$Key]['Id'] = $Id;
                             }

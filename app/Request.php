@@ -330,7 +330,7 @@ class Request extends BaseObject {
 
     public function needLogScore(): int {
         return preg_match('/(\d+)%/', $this->descriptionLogCue(), $match)
-            ? $match[1]
+            ? (int)$match[1]
             : 0;
     }
 

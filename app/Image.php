@@ -3,17 +3,23 @@
 namespace Gazelle;
 
 class Image {
-    protected $image;
-    protected $height;
-    protected $width;
-    protected $type;
+    protected \GdImage $image;
+    protected int $height;
+    protected int $width;
+    protected int $type;
 
     public function __construct(string $data) {
-        $this->image = imagecreatefromstring($data);
-        if ($this->image) {
-            [$this->height, $this->width, $this->type] = getimagesizefromstring($data);
-        } else {
+        $image = imagecreatefromstring($data);
+        if ($image === false) {
             [$this->height, $this->width, $this->type] = [0, 0, 0];
+        } else {
+            $this->image = $image;
+            $result = getimagesizefromstring($data);
+            if ($result === false) {
+                [$this->height, $this->width, $this->type] = [0, 0, 0];
+            } else {
+                [$this->height, $this->width, $this->type] = $result;
+            }
         }
     }
 
@@ -25,7 +31,7 @@ class Image {
         return $this->width;
     }
 
-    function display() {
+    function display(): ?bool {
         return match ($this->type) {
             IMAGETYPE_BMP  => imagebmp($this->image),
             IMAGETYPE_GIF  => imagegif($this->image),
@@ -73,11 +79,18 @@ class Image {
     /**
      * Build and emit an image containing a simple text message.
      */
-    public static function render(string $text) {
+    public static function render(string $text): void {
         $font = realpath(__DIR__ . '/../fonts/VERDANAB.TTF');
+        if ($font === false) {
+            return;
+        }
         $pointSize = 40.0;
         while (true) {
-            [$left,, $right] = imageftbbox($pointSize, 0, $font, $text);
+            $result = imageftbbox($pointSize, 0, $font, $text);
+            if ($result === false) {
+                return;
+            }
+            [$left,, $right] = $result;
             $width = $right - $left;
             if ($width < 200) {
                 break;
@@ -87,12 +100,14 @@ class Image {
         }
 
         $image = imagecreatetruecolor(200, 200);
-        $foreground = imagecolorallocate($image, 0x1f, 0xd5, 0x4f);
-        $background = imagecolorallocate($image, 0x05, 0x14, 0x01);
-        imagefill($image, 0, 0, $background);
-        imagefttext($image, $pointSize, 0, (200 - $width) / 2, 120, $foreground, $font, $text);
-        imagepng($image);
-        imagedestroy($image);
+        if ($image !== false) {
+            $foreground = (int)imagecolorallocate($image, 0x1f, 0xd5, 0x4f);
+            $background = (int)imagecolorallocate($image, 0x05, 0x14, 0x01);
+            imagefill($image, 0, 0, $background);
+            imagefttext($image, $pointSize, 0, (int)((200 - $width) / 2), 120, $foreground, $font, $text);
+            imagepng($image);
+            imagedestroy($image);
+        }
     }
 
     /**
@@ -101,13 +116,17 @@ class Image {
      * to create simple pngs that are stored in a temp
      * directory, and then you can have a look afterwards.
      */
-    public static function debug(string $text) {
+    public static function debug(string $text): void {
         ob_start();
         self::render($text);
         $data = ob_get_contents();
         ob_end_clean();
-        $out = fopen(TMPDIR . "/$text.png", 'wb');
-        fputs($out, $data);
-        fclose($out);
+        if ($data !== false) {
+            $out = fopen(TMPDIR . "/$text.png", 'wb');
+            if ($out !== false) {
+                fputs($out, $data);
+                fclose($out);
+            }
+        }
     }
 }

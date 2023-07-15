@@ -69,7 +69,7 @@ class Comment extends \Gazelle\BaseManager {
             WHERE Page = ? AND PageID = ?
             ", $targetPageId, $page, $pageId
         );
-        $pageCount = self::$db->scalar("
+        $pageCount = (int)self::$db->scalar("
             SELECT ceil(count(*) / ?) AS Pages
             FROM comments
             WHERE Page = ? AND PageID = ?
@@ -103,7 +103,7 @@ class Comment extends \Gazelle\BaseManager {
     public function remove(string $page, int $pageId) {
         $qid = self::$db->get_query_id();
 
-        $pageCount = self::$db->scalar("
+        $pageCount = (int)self::$db->scalar("
             SELECT ceil(count(*) / ?) AS Pages
             FROM comments
             WHERE Page = ? AND PageID = ?

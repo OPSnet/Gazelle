@@ -10,7 +10,7 @@ $_POST['submit'] ??= $_POST['create'] ?? '';
 $manager = new Gazelle\Manager\IRC;
 
 if ($_POST['submit'] == 'Delete') { //Delete
-    $ID = intval($_POST['id'] ?? 0);
+    $ID = (int)($_POST['id'] ?? 0);
     if ($ID === 0) {
         error(0);
     }
@@ -19,7 +19,7 @@ if ($_POST['submit'] == 'Delete') { //Delete
     // Edit & Create have shared validation
     // we have a 'submit-234' key, so we want to pull out that 234
     $id = (int)explode('-',
-        current(
+        (string)current(
             array_keys(
                 array_filter(
                     $_POST,
