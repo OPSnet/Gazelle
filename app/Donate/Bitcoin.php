@@ -1,19 +1,19 @@
 <?php
 
 namespace Gazelle\Donate;
-use Gazelle;
-use BitWasp\Bitcoin\Address\AddressCreator;
-use BitWasp\Bitcoin\Key\Deterministic\HierarchicalKey;
-use BitWasp\Bitcoin\Network\Slip132\BitcoinRegistry;
-use BitWasp\Bitcoin\Key\Deterministic\Slip132\Slip132;
-use BitWasp\Bitcoin\Key\KeyToScript\KeyToScriptHelper;
-use BitWasp\Bitcoin\Key\Deterministic\HdPrefix\GlobalPrefixConfig;
-use BitWasp\Bitcoin\Key\Deterministic\HdPrefix\NetworkConfig;
-use BitWasp\Bitcoin\Serializer\Key\HierarchicalKey\Base58ExtendedKeySerializer;
-use BitWasp\Bitcoin\Serializer\Key\HierarchicalKey\ExtendedKeySerializer;
+
+use \BitWasp\Bitcoin\Address\AddressCreator;
+use \BitWasp\Bitcoin\Key\Deterministic\HierarchicalKey;
+use \BitWasp\Bitcoin\Network\Slip132\BitcoinRegistry;
+use \BitWasp\Bitcoin\Key\Deterministic\Slip132\Slip132;
+use \BitWasp\Bitcoin\Key\KeyToScript\KeyToScriptHelper;
+use \BitWasp\Bitcoin\Key\Deterministic\HdPrefix\GlobalPrefixConfig;
+use \BitWasp\Bitcoin\Key\Deterministic\HdPrefix\NetworkConfig;
+use \BitWasp\Bitcoin\Serializer\Key\HierarchicalKey\Base58ExtendedKeySerializer;
+use \BitWasp\Bitcoin\Serializer\Key\HierarchicalKey\ExtendedKeySerializer;
 
 class Bitcoin {
-    use Gazelle\Pg;
+    use \Gazelle\Pg;
 
     protected HierarchicalKey $parentKey;
     protected const basePath = '';
@@ -33,7 +33,7 @@ class Bitcoin {
      */
     public function __construct(
             string $xyzpub = BITCOIN_DONATION_XYZPUB,
-            protected Gazelle\Counter $nextKeyCounter = new Gazelle\Counter("donation-bitcoin")) {
+            protected \Gazelle\Counter $nextKeyCounter = new \Gazelle\Counter("donation-bitcoin")) {
         $adapter = \BitWasp\Bitcoin\Bitcoin::getEcAdapter();
         $slip132 = new Slip132(new KeyToScriptHelper($adapter));
         $btcPrefixes = new BitcoinRegistry();

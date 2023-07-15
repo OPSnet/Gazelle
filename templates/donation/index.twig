@@ -27,8 +27,9 @@
     <h3>Donating</h3>
 {% if monero_address %}
     <h2>Monero (XMR)</h2>
+    <br />
     <div class="pad donation_info">
-        You can send your monero donation to <span class="donation_address">{{ monero_address }}</span>
+        You can send your monero donation to: <span class="donation_address">{{ monero_address }}</span>
         Monero donations are credited semi-automatically. If your donation is not credited within seven days please
         {% if constant('DONATION_MANAGER_USER_ID') %}
             contact {{ constant('DONATION_MANAGER_USER_ID')|user_url }}.
@@ -36,13 +37,19 @@
             send a <a href="/staffpm.php">StaffPM</a>.
         {% endif %}
         <br /><br />
-        If you are sending your donation directly from an exchange, you should use Bitcoin (see below) for privacy reasons.
+        A word of warning: <b>do not send</b> Monero directly from an exchange or similar service.
+        You must transfer to your own wallet beforehand as the donation address can be linked to Orpheus.
+        If you cannot or need to send directly from an exchange, please use Bitcoin for your own safety.
     </div>
 {% endif %}
 {% if bitcoin_address %}
     <h2>Bitcoin (BTC)</h2>
+    <br />
     <div class="pad donation_info">
-        You can send your bitcoin donation to <span class="donation_address">{{ bitcoin_address }}</span>
+        You may send your bitcoin donation to: <span class="donation_address">{{ bitcoin_address }}</span>
+        This is your own personal address and should not be shared with anyone. After you have sent funds to
+        it once, for your own privacy and security you should never use it again. A fresh address will be allocated
+        for you after the previous transaction clears.<br /><br />
         Bitcoin donations are credited semi-automatically. If your donation is not credited within seven days please
         {% if constant('DONATION_MANAGER_USER_ID') %}
             contact {{ constant('DONATION_MANAGER_USER_ID')|user_url }}.
