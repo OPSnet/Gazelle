@@ -799,7 +799,7 @@ function checkFields() {
             ++error;
             $("#check").append('<li>No year specified. When was this released?</li>');
         }
-        if (!(is_new && $('#releasetype').val())) {
+        if (is_new && $('#releasetype').val() == '---') {
             ++error;
             $("#check").append('<li>Release type (Album, EP, ...) not specified.</li>');
         }
