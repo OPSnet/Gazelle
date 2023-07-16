@@ -38,7 +38,7 @@ do
 done
 
 composer --version && composer install --no-progress
-scripts/local-patch
+bin/local-patch
 
 echo "Create postgres database..."
 #hostname:port:database:username:password
@@ -88,9 +88,9 @@ fi
 if [ ! -d /var/lib/gazelle/torrent ]; then
     echo "Generate file storage directories..."
     time (
-        perl "${CI_PROJECT_DIR}/scripts/generate-storage-dirs" /var/lib/gazelle/torrent 2 100
-        perl "${CI_PROJECT_DIR}/scripts/generate-storage-dirs" /var/lib/gazelle/riplog 2 100
-        perl "${CI_PROJECT_DIR}/scripts/generate-storage-dirs" /var/lib/gazelle/riploghtml 2 100
+        perl "${CI_PROJECT_DIR}/bin/generate-storage-dirs" /var/lib/gazelle/torrent 2 100
+        perl "${CI_PROJECT_DIR}/bin/generate-storage-dirs" /var/lib/gazelle/riplog 2 100
+        perl "${CI_PROJECT_DIR}/bin/generate-storage-dirs" /var/lib/gazelle/riploghtml 2 100
     )
     chown -R gazelle /var/lib/gazelle
 fi

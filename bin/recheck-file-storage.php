@@ -84,7 +84,7 @@ while (($file = fgets($find)) !== false) {
         continue;
     }
     $db_digest = md5($db->scalar($config['MD5'], ...array_slice($match, 1)) . ($config['NEWLN'] ? "\n" : ''));
-    $file_digest = md5(file_get_contents($file));
+    $file_digest = md5((string)file_get_contents($file));
     if ($db_digest != $file_digest) {
         echo "$file contents $file_digest does not match db $db_digest\n";
         ++$mismatch;

@@ -1,7 +1,7 @@
 # These are the cron jobs.
 # Adjust PATH according to where the repository is checked out on the filesystem
 
-PATH=$PATH:/var/www/scripts
+PATH=$PATH:/var/www/bin
 
 0,15,30,45  *   * * * scheduler >> /tmp/schedule.log
 *           *   * * * /usr/bin/indexer -c /etc/sphinx/sphinx.conf --rotate delta requests_delta log_delta > /dev/null

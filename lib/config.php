@@ -62,7 +62,7 @@ defined('BETA') or define('BETA', false);
 // Path for storing temporary files (should be moved out of the root partition)
 defined('TMPDIR') or define('TMPDIR', '/tmp');
 
-// Paths for storing uploaded assets outside the database. See scripts/generate-storage-dirs
+// Paths for storing uploaded assets outside the database. See bin/generate-storage-dirs
 // Should also be moved out of the root partition.
 defined('STORAGE_PATH_TORRENT')    or define('STORAGE_PATH_TORRENT',    '/var/lib/gazelle/torrent');
 defined('STORAGE_PATH_RIPLOG')     or define('STORAGE_PATH_RIPLOG',     '/var/lib/gazelle/riplog');

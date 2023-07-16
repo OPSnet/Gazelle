@@ -16,7 +16,7 @@ will be 5 rows (from the five voters) in the users_votes table, and the
 torrents_votes table will contain one row with Total = 5, Ups = 3.
 
 If the `torrents_votes` is ever corrupted, it may be recreated with
-`scripts/rebuild-votes`. There is some discrepancy in the code between the
+`bin/rebuild-votes`. There is some discrepancy in the code between the
 above formula and the use of binomial_ci(Ups, Total).
 
 The user and group vote information are both cached. As the user object can

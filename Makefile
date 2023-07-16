@@ -1,9 +1,9 @@
 .DEFAULT_GOAL := help
 
 NOW := $(shell date +'%Y%m%d-%H%M%S')
-STORAGE_PATH_RIPLOG     := $(shell scripts/getconf STORAGE_PATH_RIPLOG)
-STORAGE_PATH_RIPLOGHTML := $(shell scripts/getconf STORAGE_PATH_RIPLOGHTML)
-STORAGE_PATH_TORRENT    := $(shell scripts/getconf STORAGE_PATH_TORRENT)
+STORAGE_PATH_RIPLOG     := $(shell bin/getconf STORAGE_PATH_RIPLOG)
+STORAGE_PATH_RIPLOGHTML := $(shell bin/getconf STORAGE_PATH_RIPLOGHTML)
+STORAGE_PATH_TORRENT    := $(shell bin/getconf STORAGE_PATH_TORRENT)
 
 .SILENT: help
 .PHONY: help
@@ -63,7 +63,7 @@ lint-php:
 
 .PHONY: lint-twig
 lint-twig:
-	scripts/twig-parse $(find templates -type f)
+	bin/twig-parse $(find templates -type f)
 
 .PHONY: mysqldump
 mysqldump:

@@ -14,6 +14,7 @@ ini_set('max_execution_time', -1);
 define('CHUNK', 100);
 
 $offset    = 0;
+$last      = 0;
 $processed = 0;
 $newLog    = 0;
 $errLog    = 0;
@@ -40,8 +41,8 @@ while (true) {
     while (list($logId, $torrentId, $log) = $db->next_record(MYSQLI_NUM, false)) {
         $last = $logId;
         ++$processed;
-        if (file_exists($logFiler->pathLegacy([$torrentId, $logId])) && !file_exists($logFiler->path([$torrentId, $logId]))) {
-            if (!copy($logFiler->pathLegacy([$torrentId, $logId]), $logFiler->path([$torrentId, $logId]))) {
+        if (file_exists($logFiler->pathLegacy([$torrentId, $logId])) && !file_exists($logFiler->path([$torrentId, $logId]))) { /** @phpstan-ignore-line */
+            if (!copy($logFiler->pathLegacy([$torrentId, $logId]), $logFiler->path([$torrentId, $logId]))) { /** @phpstan-ignore-line */
                 ++$errLog;
             }
             ++$newLog;

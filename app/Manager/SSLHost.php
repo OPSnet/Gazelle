@@ -15,7 +15,7 @@ class SSLHost extends \Gazelle\Base {
         }
         $notBefore = null;
         $notAfter = null;
-        $output = explode("\n", trim((string)shell_exec(SERVER_ROOT . "/scripts/ssl-check $hostname $port")));
+        $output = explode("\n", trim((string)shell_exec(SERVER_ROOT . "/bin/ssl-check $hostname $port")));
         if (count($output) != 2) {
             return [];
         }

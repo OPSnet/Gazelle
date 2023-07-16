@@ -1,2 +1,2 @@
-PATH=$PATH:/var/www/scripts
+PATH=$PATH:/var/www/bin
 */15 * * * * scheduler >> /tmp/schedule.log

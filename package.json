@@ -7,14 +7,14 @@
     "prod": "cross-env NODE_ENV=production yarn build",
     "build": "yarn build:scss && yarn build:previews",
     "build:scss": "webpack --no-progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
-    "build:previews": "node scripts/render_styles_preview.js",
+    "build:previews": "node bin/render_styles_preview.js",
     "start": "yarn build:scss -- --watch",
     "lint:css": "stylelint \"sass/**/*.scss\" || exit 0",
     "lint:css-checkstyle": "stylelint \"sass/**/*.scss\" --custom-formatter ./node_modules/stylelint-checkstyle-formatter/index.js || exit 0",
     "lint:php:internal": "find . -path './vendor' -prune -o -path ./node_modules -prune -o -path './.docker' -prune -o -type f -name '*.php' -print0 | xargs -0 -n1 -P4 php -l -n | (! grep -v \"No syntax errors detected\" )",
     "lint:php:phpcs": "vendor/bin/phpcs -p --report-width 1000",
     "lint:php": "yarn lint:php:internal && yarn lint:php:phpcs",
-    "lint:php:fix": "./.bin/phpcbf",
+    "lint:php:fix": "bin/phpcbf",
     "pre-commit": "yarn lint:php:fix",
     "prepare": "husky install"
   },
@@ -44,8 +44,8 @@
   "lint-staged": {
     "*.php": [
       "vendor/bin/phpstan analyze --no-progress --configuration=misc/phpstan.neon --memory-limit 512M",
-      ".bin/phpcs",
-      ".bin/phpcbf"
+      "bin/phpcs",
+      "bin/phpcbf"
     ]
   },
   "browserslist": [

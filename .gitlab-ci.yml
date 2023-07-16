@@ -45,7 +45,7 @@ phpstan:
         - .composer
   script:
     - composer install --no-progress
-    - /bin/sh scripts/local-patch
+    - /bin/sh bin/local-patch
     - phpstan analyse --no-progress --configuration misc/phpstan.neon
 
 e2e-tests:
@@ -102,7 +102,7 @@ e2e-tests:
   coverage: /^\s*Lines:\s*\d+.\d+\%/
   script:
     - /bin/bash "${CI_PROJECT_DIR}/.docker/web/bootstrap-base.sh"
-    - su gazelle -c "scripts/twig-parse \$(find templates -type f)"
+    - su gazelle -c "bin/twig-parse \$(find templates -type f)"
     - /bin/bash "${CI_PROJECT_DIR}/.docker/web/start-services.sh"
     - su gazelle -c "composer exec -- phpunit --configuration misc/phpunit.xml --coverage-php /tmp/coverage/phpunit.cov --exclude-group no-ci"
     - /bin/bash "${CI_PROJECT_DIR}/.docker/web/bootstrap-yarn.sh"
