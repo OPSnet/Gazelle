@@ -343,12 +343,12 @@ class Request extends BaseObject {
     }
 
     public function oclc(): ?string {
-        $oclc = str_replace(' ', '', $this->oclc());
+        $oclc = str_replace(' ', '', $this->info()['oclc']);
         if ($oclc === '') {
             return null;
         }
         return implode(', ',
-            array_map(fn ($id) => "<a href=\"https://www.worldcat.org/oclc/{$id}\">{$id}</a>",
+            array_map(fn($id) => "<a href=\"https://www.worldcat.org/oclc/{$id}\">{$id}</a>",
                 explode(',', $oclc)
             )
         );

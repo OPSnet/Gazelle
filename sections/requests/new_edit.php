@@ -65,21 +65,23 @@ if ($newRequest) {
 
     if (!isset($returnEdit)) {
         // if we are coming back from an edit, these were already initialized in take_new_edit
-        $categoryId  = $request->categoryId();
-        $title       = $request->title();
-        $description = $request->description();
-        $year        = $request->year();
-        $image       = $request->image();
-        $tags        = implode(', ', $request->tagNameList());
-        $releaseType = $request->releaseType();
-        $GroupID     = $request->tgroupId();
-        $VoteCount   = $request->userVotedTotal();
-        $IsFilled    = $request->isFilled();
-        $ownRequest  = $request->userId() == $Viewer->id();
-        $Checksum    = $request->needLogChecksum();
-        $LogCue      = $request->descriptionLogCue();
-        $NeedCue     = $request->needCue();
-        $NeedLog     = $request->needLog();
+        $categoryId      = $request->categoryId();
+        $title           = $request->title();
+        $description     = $request->description();
+        $year            = $request->year();
+        $image           = $request->image();
+        $tags            = implode(', ', $request->tagNameList());
+        $releaseType     = $request->releaseType();
+        $GroupID         = $request->tgroupId();
+        $catalogueNumber = $request->catalogueNumber();
+        $oclc            = $request->oclc();
+        $VoteCount       = $request->userVotedTotal();
+        $IsFilled        = $request->isFilled();
+        $ownRequest      = $request->userId() == $Viewer->id();
+        $Checksum        = $request->needLogChecksum();
+        $LogCue          = $request->descriptionLogCue();
+        $NeedCue         = $request->needCue();
+        $NeedLog         = $request->needLog();
         if ($NeedLog) {
             $MinLogScore = $request->needLogScore();
         }
@@ -268,7 +270,6 @@ if (!$newRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                     <td class="label">Allowed formats</td>
                     <td>
                         <input type="checkbox" name="all_formats" id="toggle_formats" onchange="Toggle('formats', <?=($newRequest ? 1 : 0)?>);"<?=!empty($FormatArray) && (count($FormatArray) === count(FORMAT)) ? ' checked="checked"' : ''; ?> /><label for="toggle_formats"> All</label>
-                        <span style="float: right;"><strong>NB: You cannot require a log or cue unless FLAC is an allowed format</strong></span>
 <?php
             foreach (FORMAT as $Key => $Val) {
                 if ($Key % 8 === 0) {
@@ -276,7 +277,7 @@ if (!$newRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                 }
 ?>
                         <input type="checkbox" name="formats[]" value="<?=$Key?>" onchange="ToggleLogCue(); if (!this.checked) { $('#toggle_formats').raw().checked = false; }" id="format_<?=$Key?>"
-                            <?=(!empty($FormatArray) && in_array($Key, $FormatArray) ? ' checked="checked"' : '')?> /><label for="format_<?=$Key?>"> <?=$Val?></label>
+                            <?=(!empty($FormatArray) && in_array($Val, $FormatArray) ? ' checked="checked"' : '')?> /><label for="format_<?=$Key?>"> <?=$Val?></label>
 <?php       } ?>
                     </td>
                 </tr>
@@ -291,7 +292,7 @@ if (!$newRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                 }
 ?>
                         <input type="checkbox" name="bitrates[]" value="<?=$Key?>" id="bitrate_<?=$Key?>"
-                            <?=(!empty($EncodingArray) && in_array($Key, $EncodingArray) ? ' checked="checked" ' : '')?>
+                            <?=(!empty($EncodingArray) && in_array($Val, $EncodingArray) ? ' checked="checked" ' : '')?>
                         onchange="if (!this.checked) { $('#toggle_bitrates').raw().checked = false; }" /><label for="bitrate_<?=$Key?>"> <?=$Val?></label>
 <?php       } ?>
                     </td>
@@ -307,7 +308,7 @@ if (!$newRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                 }
 ?>
                         <input type="checkbox" name="media[]" value="<?=$Key?>" id="media_<?=$Key?>"
-                            <?=(!empty($MediaArray) && in_array($Key, $MediaArray) ? ' checked="checked" ' : '')?>
+                            <?=(!empty($MediaArray) && in_array($Val, $MediaArray) ? ' checked="checked" ' : '')?>
                         onchange="ToggleLogCue(); if (!this.checked) { $('#toggle_media').raw().checked = false; }" /><label for="media_<?=$Key?>"> <?=$Val?></label>
 <?php   } ?>
                     </td>
@@ -315,6 +316,7 @@ if (!$newRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                 <tr id="logcue_tr" class="hidden">
                     <td class="label">Log / Checksum / Cue<br />(CD FLAC only)</td>
                     <td>
+                        <span style="float: right;"><strong>Note: You can only require a log or cue when FLAC is an allowed format</strong></span>
                         <input type="checkbox" id="needlog" name="needlog" onchange="ToggleLogScore()" <?=(!empty($NeedLog) ? 'checked="checked" ' : '')?>/><label for="needlog"> Require log</label>
                         <span id="minlogscore_span" class="hidden">&nbsp;<input type="text" name="minlogscore" id="minlogscore" size="4" value="<?=(!empty($MinLogScore) ? $MinLogScore : '')?>" /> Minimum log score</span>
                         <br />

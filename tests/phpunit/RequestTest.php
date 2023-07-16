@@ -80,7 +80,7 @@ class RequestTest extends TestCase {
             mediaList:       'CD|WEB',
             logCue:          'Log (100%) + Cue',
             checksum:        true,
-            oclc:            '',
+            oclc:            '123,456',
         );
         $this->assertInstanceOf(Gazelle\Request::class, $this->request, 'request-create');
 
@@ -126,6 +126,11 @@ class RequestTest extends TestCase {
         $this->assertEquals(
             '<a href="requests.php?tags=jazz">jazz</a> <a href="requests.php?tags=vaporwave">vaporwave</a>',
             $this->request->tagSearchLink(), 'request-tag-searchlink'
+        );
+        $this->assertEquals(
+            '<a href="https://www.worldcat.org/oclc/123">123</a>, <a href="https://www.worldcat.org/oclc/456">456</a>',
+            $this->request->oclc(),
+            'request-oclc'
         );
         $this->assertEquals('This is a unit test description', $this->request->description(), 'request-description');
         $this->assertTrue($this->request->needCue(), 'request-need-cue');

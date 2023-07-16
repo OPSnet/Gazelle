@@ -37,7 +37,10 @@ if ($newRequest) {
     if (is_null($request)) {
         error(404);
     }
-    $onlyMetadata = $Viewer->id() != $request->userId() && $Viewer->permitted('site_edit_requests');
+    $onlyMetadata = $Viewer->id() != $request->userId()
+        && $Viewer->permitted('site_edit_requests')
+        && !$Viewer->permitted('site_moderate_requests');
+
     $RequestID = $request->id();
 }
 

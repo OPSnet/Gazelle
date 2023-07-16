@@ -31,9 +31,14 @@ $db->prepared_query("
     WHERE Type = 'request'
         AND Reason = 'phpunit report'
 ");
+$db->prepared_query("
+    DELETE r
+    FROM reports r
+    LEFT JOIN users_main um ON (um.ID = r.UserID)
+    WHERE um.ID IS NULL
+");
 
 // clean requests
-
 $db->prepared_query("
     SELECT ID
     FROM requests
