@@ -6,12 +6,11 @@ if (is_null($torrent)) {
 }
 
 if (!$Viewer->permitted('users_mod')) {
-    if (time() - strtotime($torrent->lastReseedRequest()) < 864000) {
-        error('There was already a re-seed request for this torrent within the past 10 days.');
-    }
-    if (time() - strtotime($torrent->lastActiveDate()) < 345678) {
-        error(403);
-    }
+    match(true) {
+        is_null($torrent->lastActiveDate()) && !is_null($torrent->lastReseedRequestDate())              => error('There was already a re-seed request for this torrent within the past ' .RESEED_NEVER_ACTIVE_TORRENT. ' days.'),
+        !is_null($torrent->lastReseedRequestDate())                                                     => error('There was already a re-seed request for this torrent within the past ' .RESEED_TORRENT. ' days.'),
+        default                                                                                         => false,
+    };
 }
 
 echo $Twig->render('torrent/reseed-result.twig', [

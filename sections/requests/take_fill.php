@@ -44,7 +44,7 @@ if (!empty($_REQUEST['user']) && $Viewer->permitted('site_moderate_requests')) {
 } else {
     $filler = $Viewer;
 }
-if ($torrent->uploadGracePeriod()
+if ($torrent->isUploadGracePeriod()
     && $torrent->uploader()->id() !== $filler->id()
     && !$Viewer->permitted('site_moderate_requests')
 ) {

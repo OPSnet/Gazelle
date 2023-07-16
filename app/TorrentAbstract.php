@@ -407,11 +407,7 @@ abstract class TorrentAbstract extends BaseObject {
         return $this->info()['last_action'];
     }
 
-    public function lastActiveEpoch(): int {
-        return is_null($this->lastActiveDate()) ? 0 : (int)strtotime($this->lastActiveDate());
-    }
-
-    public function lastReseedRequest(): ?string {
+    public function lastReseedRequestDate(): ?string {
         return $this->info()['LastReseedRequest'];
     }
 
@@ -578,10 +574,25 @@ abstract class TorrentAbstract extends BaseObject {
     /**
      * Was it uploaded less than an hour ago? (Request fill grace period)
      */
-    public function uploadGracePeriod(): bool {
+    public function isUploadGracePeriod(): bool {
         return strtotime($this->created()) > date('U') - 3600;
     }
+    
+    /**
+     * Was it active more then 14 days ago? If never active has it been 3 days? (Reseed grace period)
+     */
+    public function isReseedRequestAllowed(): bool {
+        $lastRequestDate = $this->lastReseedRequestDate();
+        $lastActiveDate = (int)strtotime($this->lastActiveDate());
+        $createdDate = (int)strtotime($this->created());
 
+        return match(true) {
+            !$lastActiveDate && !$lastRequestDate           => (time() >= strtotime(RESEED_NEVER_ACTIVE_TORRENT .' days', $createdDate)),
+            !$lastRequestDate                               => (time() >= strtotime(RESEED_TORRENT . 'days', $lastActiveDate)),
+            default                                         => false,
+        };
+    }
+    
     /**
      * The uploader ID of this torrent
      */

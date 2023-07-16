@@ -136,4 +136,46 @@ class TorrentManagerTest extends TestCase {
             'tor-top10-history-week-list'
         );
     }
+
+    public function testReseedGracePeriod(): void {
+        $db = Gazelle\DB::DB();
+
+        // Torrent created today never active
+        $this->assertFalse($this->torrentList[1]->isReseedRequestAllowed());
+
+        // Torrent created RESEED_NEVER_ACTIVE_TORRENT days ago never active
+        $created = (new DateTime())
+            ->sub(new DateInterval("P3D"))->format('Y-m-d H:i:s');
+        $this->torrentList[1]->setField('created', $created)->modify();
+        $this->assertTrue($this->torrentList[1]->isReseedRequestAllowed());
+
+        // Torrent created RESEED_NEVER_ACTIVE_TORRENT days ago has been active recently
+        $db->prepared_query("
+            UPDATE torrents_leech_stats SET last_action = now() WHERE TorrentID = ?
+        ", $this->torrentList[1]->id());
+        $this->torrentList[1]->flush();
+        $this->assertFalse($this->torrentList[1]->isReseedRequestAllowed());
+
+        // Torrent created RESEED_NEVER_ACTIVE_TORRENT days ago reseed request
+        $db->prepared_query("
+            UPDATE torrents_leech_stats SET last_action = NULL WHERE TorrentID = ?
+        ", $this->torrentList[1]->id());
+        $this->torrentList[1]->flush();
+        $this->torrentList[1]->setField('LastReseedRequest', date('Y-m-d H:i:s'))->modify();
+        $this->assertFalse($this->torrentList[1]->isReseedRequestAllowed());
+        $this->torrentList[1]->setField('LastReseedRequest', null)->modify();
+
+        // Torrent was active RESEED_TORRENT days ago
+        $lastActive = (new DateTime($created))
+            ->sub(new DateInterval("P15D"))->format('Y-m-d H:i:s');
+        $db->prepared_query("
+            UPDATE torrents_leech_stats SET last_action = ? WHERE TorrentID = ?
+        ", $lastActive, $this->torrentList[1]->id());
+        $this->torrentList[1]->setField('created', $created)->modify();
+        $this->assertTrue($this->torrentList[1]->isReseedRequestAllowed());
+
+        // Torrent was active RESEED_TORRENT days ago reseed request
+        $this->torrentList[1]->setField('LastReseedRequest', date('Y-m-d H:i:s'))->modify();
+        $this->assertFalse($this->torrentList[1]->isReseedRequestAllowed());
+    }
 }

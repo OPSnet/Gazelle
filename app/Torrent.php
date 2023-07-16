@@ -325,6 +325,7 @@ class Torrent extends TorrentAbstract {
                 ])
             );
         }
+        $this->flush();
         return count($notify);
     }
 

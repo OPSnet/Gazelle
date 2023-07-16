@@ -487,6 +487,12 @@ defined('IGNORE_PAGE_MAX_MEMORY') or define('IGNORE_PAGE_MAX_MEMORY', ['artist',
 // Do not report these pages for being slow
 defined('IGNORE_PAGE_MAX_TIME') or define('IGNORE_PAGE_MAX_TIME', ['top10']);
 
+// How many days to wait until a never active torrent can be requested for reseed
+defined('RESEED_NEVER_ACTIVE_TORRENT') or define('RESEED_NEVER_ACTIVE_TORRENT', 3);
+
+// How many days to wait until a previously active torrent can be requested for reseed
+defined('RESEED_TORRENT') or define('RESEED_TORRENT', 14);
+
 // ------------------------------------------------------------------------
 // Inactivity reaper settings
 //

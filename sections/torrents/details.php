@@ -509,26 +509,16 @@ if (!$torrentList) {
                             Uploaded by <?= $torrent->uploader()->link() ?> <?=time_diff($torrent->created());?>
 <?php
     if ($torrent->seederTotal() == 0) {
-        $lastActive = $torrent->lastActiveEpoch();
-        $delta = time() - $lastActive;
         // If the last time this was seeded was 50 years ago, most likely it has never been seeded, so don't bother
         // displaying "Last active: 2000+ years" as that's dumb
-        if ($delta > 1_576_800_000) {
+        if (is_null($torrent->lastActiveDate())) {
 ?>
                             <br />Last active: Never
-<?php   } elseif ($delta >= 86400 * 14) { ?>
-                            <br /><strong>Last active: <?=time_diff($torrent->lastActiveDate()); ?></strong>
 <?php   } else { ?>
                             <br />Last active: <?= time_diff($torrent->lastActiveDate()); ?>
 <?php
         }
-        if ($delta >= 86400 * 3
-            && (
-                is_null($torrent->lastReseedRequest())
-                ||
-                time() - strtotime($torrent->lastReseedRequest()) >= 864000
-            )
-            || $Viewer->permitted('users_mod')
+        if ($torrent->isReseedRequestAllowed() || $Viewer->permitted('users_mod')
         ) {
 ?>
                             <br /><a href="torrents.php?action=reseed&amp;torrentid=<?=$TorrentID?>&amp;groupid=<?=

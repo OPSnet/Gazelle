@@ -675,4 +675,21 @@ class Torrent extends \Gazelle\BaseManager {
         }
         return $list;
     }
+
+    public function resetReseededRequest(): int {
+        self::$db->prepared_query("
+            UPDATE torrents AS t
+            LEFT JOIN torrents_leech_stats AS tls ON t.ID = tls.TorrentID
+            SET t.LastReseedRequest = NULL
+            WHERE t.LastReseedRequest <= (now() - INTERVAL " . RESEED_NEVER_ACTIVE_TORRENT . " DAY)
+                AND tls.last_action IS NULL
+        ");
+        $affected = self::$db->affected_rows();
+        self::$db->prepared_query("
+            UPDATE torrents SET
+                LastReseedRequest = NULL
+            WHERE LastReseedRequest <= (now() - INTERVAL " . RESEED_TORRENT . " DAY)
+        ");
+        return $affected += self::$db->affected_rows();
+    }
 }
