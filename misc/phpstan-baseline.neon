@@ -2446,36 +2446,6 @@ parameters:
 			path: ../sections/referral/index.php
 
 		-
-			message: "#^Variable \\$Types might not be defined\\.$#"
-			count: 1
-			path: ../sections/reports/report.php
-
-		-
-			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
-			count: 1
-			path: ../sections/reports/reports.php
-
-		-
-			message: "#^Using nullsafe method call on non\\-nullable type Gazelle\\\\ForumThread\\. Use \\-\\> instead\\.$#"
-			count: 1
-			path: ../sections/reports/reports.php
-
-		-
-			message: "#^Variable \\$Types might not be defined\\.$#"
-			count: 1
-			path: ../sections/reports/reports.php
-
-		-
-			message: "#^Variable \\$ToID might not be defined\\.$#"
-			count: 2
-			path: ../sections/reports/takecompose.php
-
-		-
-			message: "#^Strict comparison using === between mixed and '0' will always evaluate to false\\.$#"
-			count: 1
-			path: ../sections/reports/takereport.php
-
-		-
 			message: "#^Variable \\$ToID in isset\\(\\) always exists and is not nullable\\.$#"
 			count: 1
 			path: ../sections/reportsv2/ajax_take_pm.php

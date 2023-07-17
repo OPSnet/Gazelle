@@ -128,4 +128,17 @@ class Report extends BaseObject {
 
         return $affected;
     }
+
+    /**
+     * You should never call this in production - it is only for unit tests
+     */
+    public function remove(): int {
+        self::$db->prepared_query("
+            DELETE FROM reports WHERE ID = ?
+            ", $this->id
+        );
+        $this->flush();
+        self::$cache->delete_value('num_other_reports');
+        return $this->id();
+    }
 }

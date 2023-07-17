@@ -14,12 +14,7 @@ $ConvID = false;
 if (isset($_POST['convid']) && is_number($_POST['convid'])) {
     $ConvID = $_POST['convid'];
     $Subject = '';
-    $ToID = explode(',', $_POST['toid']);
-    foreach ($ToID as $TID) {
-        if (!is_number($TID)) {
-            $Err = 'A recipient does not exist.';
-        }
-    }
+    $ToID = (int)$_POST['toid'];
     $db = Gazelle\DB::DB();
     $db->prepared_query("
         SELECT UserID
@@ -32,15 +27,14 @@ if (isset($_POST['convid']) && is_number($_POST['convid'])) {
         error(403);
     }
 } else {
-    if (!is_number($_POST['toid'])) {
-        $Err = 'This recipient does not exist.';
-    } else {
-        $ToID = $_POST['toid'];
-    }
+    $ToID = (int)$_POST['toid'];
     $Subject = trim($_POST['subject']);
     if (empty($Subject)) {
         $Err = "You can't send a message without a subject.";
     }
+}
+if (!$ToID) {
+    $Err = 'This recipient does not exist.';
 }
 $Body = trim($_POST['body'] ?? '');
 if ($Body === '') {

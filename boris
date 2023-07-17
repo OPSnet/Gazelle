@@ -26,7 +26,8 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 $b = new Boris\Boris(SITE_NAME . '> ');
 $b->setInspector(new Boris\ExportInspector);
 
-$torMan = new Gazelle\Manager\Torrent;
+$torMan  = new Gazelle\Manager\Torrent;
+$userMan = new Gazelle\Manager\User;
 $preload = [
     'cache'       => $Cache,
     'db'          => Gazelle\DB::DB(),
@@ -39,15 +40,15 @@ $preload = [
     'pg'          => new Gazelle\DB\Pg(GZPG_DSN),
     'postMan'     => new Gazelle\Manager\ForumPost,
     'privMan'     => new Gazelle\Manager\Privilege,
-    'repMan'      => new Gazelle\Manager\Report,
+    'repMan'      => new Gazelle\Manager\Report($userMan),
     'reqMan'      => new Gazelle\Manager\Request,
     'tagMan'      => new Gazelle\Manager\Tag,
     'tgMan'       => new Gazelle\Manager\TGroup,
     'threadMan'   => new Gazelle\Manager\ForumThread,
     'torMan'      => $torMan,
-    'trepMan'      => new Gazelle\Manager\Torrent\Report($torMan),
-    'trepTypeMan'  => new Gazelle\Manager\Torrent\ReportType,
-    'userMan'     => new Gazelle\Manager\User,
+    'trepMan'     => new Gazelle\Manager\Torrent\Report($torMan),
+    'trepTypeMan' => new Gazelle\Manager\Torrent\ReportType,
+    'userMan'     => $userMan,
 ];
 
 printf("** preloaded objects:\n** %s\n", implode(', ', array_keys($preload)));

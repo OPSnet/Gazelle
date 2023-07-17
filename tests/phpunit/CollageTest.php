@@ -594,23 +594,4 @@ class CollageTest extends TestCase {
         $collage->remove();
         $this->assertInstanceOf(Gazelle\Collage::class, $manager->recoverById($collage->id()), 'collage-recover-by-id');
     }
-
-    public function testCollageReport(): void {
-        $name = 'phpunit collage report ' . randomString(20);
-        $this->collageList[] = (new Gazelle\Manager\Collage)->create(
-            user:        $this->userList['u1'],
-            categoryId:  2, /* Theme */
-            name:        $name,
-            description: 'phpunit collage report description',
-            tagList:     implode(' ', $this->tagList(3)),
-            logger:      new Gazelle\Log,
-        );
-        $collage = $this->collageList[0];
-
-        $manager = new Gazelle\Manager\Report;
-        $report = $manager->create($this->userList['u2'], $collage->id(), 'collage', 'phpunit collage report');
-        $this->assertEquals("phpunit collage report", $report->reason(), 'collage-report-reason');
-        $this->assertEquals($collage->id(), $report->subjectId(), 'collage-report-subject-id');
-        $this->assertEquals(1, $report->resolve($this->userList['u1'], $manager));
-    }
 }

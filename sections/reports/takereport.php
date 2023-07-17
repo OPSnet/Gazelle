@@ -25,7 +25,7 @@ if ($reportType !== 'request_update') {
     }
     $reason = "[b]Year[/b]: {$year}.\n\n";
     // If the release type is somehow invalid, return "Not given"; otherwise, return the release type.
-    $reason .= '[b]Release type[/b]: '.((empty($_POST['releasetype']) || !is_number($_POST['releasetype']) || $_POST['releasetype'] === '0')
+    $reason .= '[b]Release type[/b]: '.((empty($_POST['releasetype']) || !is_number($_POST['releasetype']) || $_POST['releasetype'] == '0')
         ? 'Not given' : (new Gazelle\ReleaseType)->findNameById($_POST['releasetype']))." . \n\n";
     $reason .= '[b]Additional comments[/b]: '.$_POST['comment'];
 }
@@ -44,7 +44,7 @@ if (is_null($location)) {
     error("Cannot generate a link to the reported item");
 }
 
-$report = (new Gazelle\Manager\Report)->create($Viewer, $subjectId, $reportType, $reason);
+$report = (new Gazelle\Manager\Report(new Gazelle\Manager\User))->create($Viewer, $subjectId, $reportType, $reason);
 
 $channelList = [];
 if ($reportType === 'request_update') {

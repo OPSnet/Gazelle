@@ -24,78 +24,17 @@ if (isset($_GET['id'])) {
 
 $paginator = new Gazelle\Util\Paginator(REPORTS_PER_PAGE, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($search->total());
-$idList    = $search->page($paginator->limit(), $paginator->offset());
-
-$collageMan = new Gazelle\Manager\Collage;
-$commentMan = new Gazelle\Manager\Comment;
-$forumMan   = new Gazelle\Manager\Forum;
-$threadMan  = new Gazelle\Manager\ForumThread;
-$postMan    = new Gazelle\Manager\ForumPost;
-$requestMan = new Gazelle\Manager\Request;
-$userMan    = new Gazelle\Manager\User;
-$reportMan  = (new Gazelle\Manager\Report)->setUserManager($userMan);
-
-$list = [];
-foreach ($idList as $id) {
-    $report = $reportMan->findById($id);
-    switch ($report-> subjectType()) {
-        case 'collage':
-            $context = [
-                'label'   => 'collage',
-                'subject' => $collageMan->findById($report->subjectId()),
-            ];
-            break;
-        case 'comment':
-            $context = [
-                'label'   => 'comment',
-                'subject' => $commentMan->findById($report->subjectId()),
-            ];
-            break;
-        case 'request':
-        case 'request_update':
-            $context = [
-                'label'   => 'request',
-                'subject' => $requestMan->findById($report->subjectId()),
-            ];
-            break;
-        case 'thread':
-            $thread = $threadMan->findById($report->subjectId());
-            $context = [
-                'label'   => 'forum thread',
-                'subject' => $thread,
-                'link'    => $thread
-                    ?  ($thread->forum()->link() . ' &rsaquo; ' . $thread->link()
-                        . ' created by ' . ($thread?->author()->link() ?? 'System'))
-                    : null,
-            ];
-            break;
-        case 'post':
-            $post = $postMan->findById($report->subjectId());
-            $link  = null;
-            if ($post) {
-                $thread = $post->thread();
-                $link = $thread->forum()->link() . ' &rsaquo; ' . $thread->link() . ' &rsaquo; ' . $post->link()
-                    . ' posted by ' . ($userMan->findById($post->userId())?->link() ?? 'System');
-            }
-            $context = [
-                'label'   => 'forum post',
-                'subject' => $post,
-                'link'    => $link,
-            ];
-            break;
-        case 'user':
-            $context = [
-                'label'   => 'user',
-                'subject' => $userMan->findById($report->subjectId()),
-            ];
-            break;
-    }
-    $context['report'] = $report;
-    $list[] = $context;
-}
 
 echo $Twig->render('report/index.twig', [
-    'list'      => $list,
+    'list' => (new Gazelle\Manager\Report(new Gazelle\Manager\User))->decorate(
+        $search->page($paginator->limit(), $paginator->offset()),
+        new Gazelle\Manager\Collage,
+        new Gazelle\Manager\Comment,
+        new Gazelle\Manager\Forum,
+        new Gazelle\Manager\ForumThread,
+        new Gazelle\Manager\ForumPost,
+        new Gazelle\Manager\Request,
+    ),
     'paginator' => $paginator,
     'type'      => $Types,
     'viewer'    => $Viewer,

@@ -5,12 +5,9 @@ namespace Gazelle\Manager;
 class Report extends \Gazelle\BaseManager {
     protected const ID_KEY = 'zz_r_%d';
 
-    protected User $userMan;
-
-    public function setUserManager(User $userMan): \Gazelle\Manager\Report {
-        $this->userMan = $userMan;
-        return $this;
-    }
+    public function __construct(
+        protected \Gazelle\Manager\User $userMan,
+    ) {}
 
     public function create(\Gazelle\User $user, int $id, string $type, string $reason): \Gazelle\Report {
         self::$db->prepared_query("
@@ -42,11 +39,77 @@ class Report extends \Gazelle\BaseManager {
         if (!$id) {
             return null;
         }
-        $report = new \Gazelle\Report($id);
-        if (isset($this->userMan)) {
-            $report->setUserManager($this->userMan);
+        return (new \Gazelle\Report($id))->setUserManager($this->userMan);
+    }
+
+    public function decorate(
+        array $idList,
+        \Gazelle\Manager\Collage     $collageMan,
+        \Gazelle\Manager\Comment     $commentMan,
+        \Gazelle\Manager\Forum       $forumMan,
+        \Gazelle\Manager\ForumThread $threadMan,
+        \Gazelle\Manager\ForumPost   $postMan,
+        \Gazelle\Manager\Request     $requestMan,
+    ): array {
+        $list = [];
+        foreach ($idList as $id) {
+            $report = $this->findById($id);
+            switch ($report-> subjectType()) {
+                case 'collage':
+                    $context = [
+                        'label'   => 'collage',
+                        'subject' => $collageMan->findById($report->subjectId()),
+                    ];
+                    break;
+                case 'comment':
+                    $context = [
+                        'label'   => 'comment',
+                        'subject' => $commentMan->findById($report->subjectId()),
+                    ];
+                    break;
+                case 'request':
+                case 'request_update':
+                    $context = [
+                        'label'   => 'request',
+                        'subject' => $requestMan->findById($report->subjectId()),
+                    ];
+                    break;
+                case 'thread':
+                    $thread = $threadMan->findById($report->subjectId());
+                    $context = [
+                        'label'   => 'forum thread',
+                        'subject' => $thread,
+                        'link'    => $thread
+                            ? ($thread->forum()->link() . ' &rsaquo; ' . $thread->link()
+                                . ' created by ' . ($thread->author()->link()))
+                            : null,
+                    ];
+                    break;
+                case 'post':
+                    $post = $postMan->findById($report->subjectId());
+                    $link  = null;
+                    if ($post) {
+                        $thread = $post->thread();
+                        $link = $thread->forum()->link() . ' &rsaquo; ' . $thread->link() . ' &rsaquo; ' . $post->link()
+                            . ' posted by ' . ($this->userMan->findById($post->userId())?->link() ?? 'System');
+                    }
+                    $context = [
+                        'label'   => 'forum post',
+                        'subject' => $post,
+                        'link'    => $link,
+                    ];
+                    break;
+                case 'user':
+                    $context = [
+                        'label'   => 'user',
+                        'subject' => $this->userMan->findById($report->subjectId()),
+                    ];
+                    break;
+            }
+            $context['report'] = $report;
+            $list[] = $context;
         }
-        return $report;
+        return $list;
     }
 
     public function remainingTotal(): int {
