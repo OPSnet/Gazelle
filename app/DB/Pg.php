@@ -5,7 +5,7 @@ namespace Gazelle\DB;
 class Pg {
     protected \PDO $pdo;
 
-    public function __construct(string $dsn) {
+    public function __construct(#[\SensitiveParameter] string $dsn) {
         $this->pdo = new \PDO($dsn);
     }
 

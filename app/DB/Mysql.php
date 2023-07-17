@@ -120,7 +120,7 @@ class Mysql {
     public function __construct(
         protected readonly string $Database,
         protected readonly string $User,
-        protected readonly string $Pass,
+        #[\SensitiveParameter] protected readonly string $Pass,
         protected readonly string $Server,
         protected readonly int $Port,
         protected readonly string $Socket,
