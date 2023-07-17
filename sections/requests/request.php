@@ -223,7 +223,7 @@ if (!$seen) {
             <tr>
                 <td class="label">Created</td>
                 <td>
-                    <?=time_diff($request->created()) ?> by <strong><?= $userMan->findById($request->userId())->username() ?></strong>
+                    <?=time_diff($request->created()) ?> by <strong><?= $userMan->findById($request->userId())->link() ?></strong>
                 </td>
             </tr>
 <?php
