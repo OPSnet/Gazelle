@@ -68,7 +68,28 @@ class Pg {
         if (!$st->execute([...$args])) {
             return [];
         }
-        return $st->fetchAll(\PDO::FETCH_ASSOC);
+        // If any columns are of datatype bytea then we get the contents
+        // from the stream immediately. As long as multi-GiB blobs are
+        // not stored in the db, this will be perfecly safe.
+        // If you want to store multi-GiB blobs, the design needs a rethink.
+        $needStream = [];
+        for ($end = $st->columnCount(), $i = 0; $i < $end; ++$i) {
+            $meta = $st->getColumnMeta($i);
+            if ($meta['native_type'] === 'bytea') { /** @phpstan-ignore-line */
+                $needStream[] = $meta['name'];
+            }
+        }
+        if (!$needStream) {
+            return $st->fetchAll(\PDO::FETCH_ASSOC);
+        }
+        $result = [];
+        foreach ($st->fetchAll(\PDO::FETCH_ASSOC) as $row) {
+            foreach ($needStream as $column) {
+                $row[$column] = stream_get_contents($row[$column]);
+            }
+            $result[] = $row;
+        }
+        return $result;
     }
 
     public function allByKey(string $key, string $query, ...$args): array {

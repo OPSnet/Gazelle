@@ -99,7 +99,7 @@ class DbTest extends TestCase {
         );
     }
 
-    public function testPgScalarBytea(): void {
+    public function testPgByteaScalar(): void {
         $this->pg()->prepared_query("
             create temporary table test_bytea (
                 payload bytea not null primary key
@@ -119,5 +119,33 @@ class DbTest extends TestCase {
             $this->pg()->scalar("select payload from test_bytea"),
             'db-pg-scalar-bytea'
         );
+        $this->pg()->prepared_query("
+            drop table test_bytea
+        ");
+    }
+
+    public function testPgByteaAll(): void {
+        $this->pg()->prepared_query("
+            create temporary table test_bytea (
+                id int generated always as identity,
+                payload bytea not null
+            )
+        ");
+        $payload = pack('C*', array_map(fn ($n) => chr($n), range(0, 255)));
+        $this->pg()->prepared_query("
+            insert into test_bytea (payload) values (?), (?)
+            ", $payload, $payload
+        );
+        $this->assertEquals(
+            [
+                ['id' => 1, 'payload' => $payload],
+                ['id' => 2, 'payload' => $payload],
+            ],
+            $this->pg()->all("select id, payload from test_bytea order by id"),
+            'db-pg-all-bytea'
+        );
+        $this->pg()->prepared_query("
+            drop table test_bytea
+        ");
     }
 }

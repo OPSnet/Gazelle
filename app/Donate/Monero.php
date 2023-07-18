@@ -87,15 +87,14 @@ class Monero {
      * @throws MoneroException if paymentId is of invalid format
      */
     public function findUserIdbyPaymentId(string $paymentId): ?int {
-        $paymentIdBin = hex2bin($paymentId);
-        if ($paymentIdBin === false || strlen($paymentIdBin) !== self::paymentIdLength) {
+        if (strlen($paymentId) !== self::paymentIdLength * 2 || !ctype_xdigit($paymentId)) {
             throw new MoneroException("invalid payment id: $paymentId");
         }
         return $this->pg()->scalar("
             SELECT id_user
             FROM donate_monero
             WHERE token = ?
-            ", pg_escape_bytea($paymentIdBin)
+            ", '\\x' . $paymentId
         );
     }
 
