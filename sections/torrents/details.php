@@ -79,7 +79,7 @@ $section = [
     ['id' => ARTIST_ARRANGER,  'name' => 'arranger',  'class' => 'artists_arranger',   'role' => 'Arranger',  'title' => 'Arranged by:'],
 ];
 
-View::show_header(display_str($title), ['js' => 'browse,comments,torrent,bbcode,cover_art,subscriptions,voting']);
+View::show_header(html_escape($title), ['js' => 'browse,comments,torrent,bbcode,cover_art,subscriptions,voting']);
 ?>
 <div class="thin">
     <div class="header">
@@ -149,9 +149,11 @@ $Index = 0;
 <div id="covers">
 <div id="cover_div_<?=$Index?>" class="pad">
 <?php
-$image = image_cache_encode($tgroup->cover());
+$image = html_escape(image_cache_encode($tgroup->cover()));
 ?>
-            <p align="center"><img width="100%" src="<?= $image ?>" alt="cover image" onclick="lightbox.init('<?= $image ?>', 220);" data-origin-src="<?= $tgroup->cover() ?>" /></p>
+            <p align="center"><img width="100%" src="<?= $image ?>" alt="cover image"
+                                   onclick="lightbox.init('<?= $image ?>', 220);"
+                                   data-origin-src="<?= html_escape($tgroup->cover()) ?>" /></p>
 <?php
 $Index++;
 ?>
@@ -160,14 +162,14 @@ $Index++;
                     <div id="cover_div_<?=$Index?>" class="pad"<?= $Viewer->option('ShowExtraCovers') ? '' : ' style="display: none;"' ?>>
                 <p align="center">
 <?php
-    $image = image_cache_encode($c['Image']);
+    $image = html_escape(image_cache_encode($c['Image']));
     if ($Viewer->option('ShowExtraCovers')) {
         $Src = 'src="' . $image . '"';
     } else {
         $Src = 'src="" data-gazelle-temp-src="' . $image . '"';
     }
 ?>
-                    <img id="cover_<?=$Index?>" width="100%" <?=$Src?> alt="<?=$c['Summary']?>" onclick="lightbox.init('<?= $image ?>', 220);" data-origin-src="<?= $c['Image'] ?>" />
+                    <img id="cover_<?=$Index?>" width="100%" <?=$Src?> alt="<?=$c['Summary']?>" onclick="lightbox.init('<?= $image ?>', 220);" data-origin-src="<?= html_escape($c['Image']) ?>" />
                 </p>
                 <ul class="stats nobullet">
                     <li><?= $c['Summary'] ?>
@@ -347,7 +349,7 @@ $DeletedTag = $Cache->get_value("deleted_tags_$tgroupId" . '_' . $Viewer->id());
             <ul class="stats nobullet">
 <?php   foreach ($tagList as $tag) { ?>
                 <li>
-                    <a href="torrents.php?taglist=<?=$tag['name']?>" style="float: left; display: block;"><?=display_str($tag['name'])?></a>
+                    <a href="torrents.php?taglist=<?=html_escape($tag['name'])?>" style="float: left; display: block;"><?=html_escape($tag['name'])?></a>
                     <div style="float: right; display: block; letter-spacing: -1px;" class="edit_tags_votes">
                     <a href="torrents.php?action=vote_tag&amp;way=up&amp;groupid=<?=$tgroupId?>&amp;tagid=<?= $tag['id'] ?>&amp;auth=<?=$Viewer->auth() ?>" title="Vote this tag up" class="tooltip vote_tag_up">&#x25b2;</a>
                     <?= $tag['score'] ?>
@@ -416,7 +418,7 @@ if (!$torrentList) {
         $mastering = implode('/', [$info['year'], $info['title'], $info['record_label'], $info['catalogue_number'], $info['media']]);
 ?>
             <tr class="releases_<?= $tgroup->releaseTypeName() ?> groupid_<?=$tgroupId?> edition group_torrent">
-                <td colspan="5" class="edition_info"><strong>[<?= $mastering ?>]</strong></td>
+                <td colspan="5" class="edition_info"><strong>[<?= html_escape($mastering) ?>]</strong></td>
             </tr>
             <tr>
                 <td><i>deleted</i></td>
@@ -449,7 +451,7 @@ if (!$torrentList) {
 ?>
             <tr class="releases_<?= $tgroup->releaseTypeName() ?> groupid_<?=$tgroupId?> edition group_torrent">
                 <td colspan="5" class="edition_info"><strong><a href="#" onclick="toggle_edition(<?=$tgroupId?>, <?=
-                    $EditionID?>, this, event);" title="Collapse this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all editions in this torrent group." class="tooltip">&ndash;</a> <?= $torrent->edition() ?></strong></td>
+                    $EditionID?>, this, event);" title="Collapse this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all editions in this torrent group." class="tooltip">&ndash;</a> <?= html_escape($torrent->edition()) ?></strong></td>
             </tr>
 <?php
         }
@@ -470,7 +472,7 @@ if (!$torrentList) {
             'torrent' => $torrent,
             'viewer'  => $Viewer,
             'extra'   => [
-                "<a href=\"ajax.php?action=torrent&amp;id=$TorrentID\" download=\"" . display_str($title)
+                "<a href=\"ajax.php?action=torrent&amp;id=$TorrentID\" download=\"" . html_escape($title)
                     . " [$TorrentID] [orpheus.network].json\" class=\"tooltip\" title=\"Download JSON\">JS</a>",
             ],
         ]);
@@ -569,7 +571,7 @@ if (!$torrentList) {
 <?php   } ?>
                                     </div>
                                     <div class="filelist_path" style="float: right;"><?=
-                                        $torrent->path() ? ("/" . $torrent->path() . "/") : '' ?></div>
+                                        $torrent->path() ? html_escape("/" . $torrent->path() . "/") : '' ?></div>
                                 </td>
                                 <td class="nobr" style="text-align: right">
                                     <strong>Size</strong>

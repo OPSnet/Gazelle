@@ -151,7 +151,7 @@ if ($report->image()) {
 <?php
     foreach ($report->image() as $image) {
 ?>
-            <img style="max-width: 200px;" onclick="lightbox.init(this, 200);" src="<?= image_cache_encode($image) ?>" alt="Relevant image" />
+            <img style="max-width: 200px;" onclick="lightbox.init(this, 200);" src="<?= html_escape(image_cache_encode($image)) ?>" alt="Relevant image" />
 <?php } ?>
         </td>
     </tr>
@@ -165,7 +165,7 @@ if ($report->image()) {
     <tr>
         <td class="label">Report comment:</td>
         <td colspan="3">
-            <input type="text" name="comment" id="comment<?= $reportId ?>" size="70" value="<?= display_str($report->comment()) ?>" />
+            <input type="text" name="comment" id="comment<?= $reportId ?>" size="70" value="<?= html_escape($report->comment()) ?>" />
             <input type="button" value="Update now" onclick="UpdateComment(<?= $reportId ?>);" />
         </td>
     </tr>

@@ -32,8 +32,8 @@ class ImageProxy {
      */
     public function tgroupThumbnail(\Gazelle\TGroup $tgroup): string {
         $image = $tgroup->image() ?: STATIC_SERVER . '/common/noartwork/' . strtolower($tgroup->categoryName()) . '.png';
-        return "<img src=\"". image_cache_encode($image, height: 150, width: 150)
-            . "\" width=\"90\" height=\"90\" alt=\"Cover\" onclick=\"lightbox.init('" . image_cache_encode($image)
-            . "', 90)\" data-origin-src=\"{$image}\" />";
+        return '<img src="'. html_escape(image_cache_encode($image, height: 150, width: 150))
+            . '" width="90" height="90" alt="Cover" onclick="lightbox.init(\'' . html_escape(image_cache_encode($image))
+            . '\', 90)" data-origin-src="' . html_escape($image) . '" />';
     }
 }

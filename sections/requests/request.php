@@ -77,10 +77,11 @@ if ($request->categoryName() === 'Music') {
                 <div class="pad">
 <?php
 if ($request->image()) {
-    $image = image_cache_encode($request->image());
+    $image = html_escape(image_cache_encode($request->image()));
 ?>
-                    <p align="center"><img style="width: 100%;" src="<?= $image ?>" alt="<?=
-                        $request->text() ?>" onclick="lightbox.init('<?= $image ?>', 220);" data-origin-src="<?= $request->image() ?>" /></p>
+                    <p align="center"><img style="width: 100%;" src="<?= $image ?>" alt="album art"
+                                           onclick="lightbox.init('<?= $image ?>', 220);"
+                                           data-origin-src="<?= html_escape($request->image()) ?>" /></p>
 <?php } else { ?>
                     <p align="center"><img style="width: 100%;" src="<?=STATIC_SERVER?>/common/noartwork/<?=CATEGORY_ICON[$request->categoryId() - 1]?>" alt="<?=$request->categoryName() ?>" class="tooltip" title="<?= $request->categoryName() ?>" height="220" border="0" /></p>
 <?php } ?>
@@ -171,7 +172,7 @@ if ($request->categoryName() === 'Music') {
             <ul class="stats nobullet">
 <?php foreach ($request->tagNameList() as $name) { ?>
                 <li>
-                    <a href="torrents.php?taglist=<?= $name ?>"><?= display_str($name) ?></a>
+                    <a href="torrents.php?taglist=<?= html_escape($name) ?>"><?= html_escape($name) ?></a>
                     <br style="clear: both;" />
                 </li>
 <?php } ?>
@@ -191,7 +192,7 @@ foreach ($topVoteList as $vote) {
 ?>
                 <tr>
                     <td>
-                        <a href="user.php?id=<?= $vote['user_id'] ?>"><?= ($bold ? '<strong>' : '') . display_str($vote['user']->username()) . ($bold ? '</strong>' : '')?></a>
+                        <a href="user.php?id=<?= $vote['user_id'] ?>"><?= ($bold ? '<strong>' : '') . html_escape($vote['user']->username()) . ($bold ? '</strong>' : '')?></a>
                     </td>
                     <td class="number_column">
                         <?=($bold ? '<strong>' : '') . byte_format($vote['bounty']) . ($bold ? "</strong>\n" : "\n")?>
@@ -205,7 +206,7 @@ if (!$seen) {
 ?>
                 <tr>
                     <td>
-                        <a href="user.php?id=<?= $Viewer->id() ?>"><strong><?= display_str($Viewer->username()) ?></strong></a>
+                        <a href="user.php?id=<?= $Viewer->id() ?>"><strong><?= html_escape($Viewer->username()) ?></strong></a>
                     </td>
                     <td class="number_column">
                         <strong><?= byte_format($bounty) ?></strong>
@@ -232,7 +233,7 @@ if ($request->categoryName() === 'Music') {
 ?>
             <tr>
                 <td class="label">Record label</td>
-                <td><?=$request->recordLabel() ?></td>
+                <td><?= html_escape($request->recordLabel()) ?></td>
             </tr>
 <?php
     }
@@ -240,7 +241,7 @@ if ($request->categoryName() === 'Music') {
 ?>
             <tr>
                 <td class="label">Catalogue number</td>
-                <td><?= $request->catalogueNumber() ?></td>
+                <td><?= html_escape($request->catalogueNumber()) ?></td>
             </tr>
 <?php } ?>
             <tr>
@@ -371,7 +372,7 @@ if ($request->canVote($Viewer)) {
                         </div>
 <?php   if ($Viewer->permitted('site_moderate_requests')) { ?>
                         <div class="field_div">
-                            For user: <input type="text" size="25" name="user"<?= !is_null($filler) ? " value=\"{$filler->username()}\"" : '' ?> />
+                            For user: <input type="text" size="25" name="user"<?= !is_null($filler) ? ' value="' . html_escape($filler->username()) . '"' : '' ?> />
                         </div>
 <?php   } ?>
                         <div class="submit_div">

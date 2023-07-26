@@ -269,8 +269,8 @@ View::show_header(sprintf($Title, $Username), ['js' => 'bbcode,comments']);
             'edit_time'   => $EditedTime,
             'id'          => $PostID,
             'heading'     => match($Page) {
-                'artist'   => "<a href=\"artist.php?id=$PageID\">$Name</a>",
-                'collages' => "<a href=\"collages.php?id=$PageID\">$Name</a>",
+                'artist'   => "<a href=\"artist.php?id=$PageID\">" . html_escape($Name) . "</a>",
+                'collages' => "<a href=\"collages.php?id=$PageID\">" . html_escape($Name) . "</a>",
                 'requests' => $requestList[$PageID]->smartLink(),
                 default    => $tgroupList[$PageID]->link(),
             },

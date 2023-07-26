@@ -104,7 +104,7 @@ END;
         $this->assertEquals('gogogogogo', self::twig('{{ value|repeat(5) }}')->render(['value' => 'go']), 'twig-repeat-5');
         $this->assertEquals('gogogo',     self::twig('{{ value|repeat(n) }}')->render(['value' => 'go', 'n' => 3]), 'twig-repeat-3');
 
-        $this->assertEquals('abc "def"…', self::twig('{{ value|shorten(10) }}')->render(['value' => 'abc "def" ghi']), 'twig-shorten-10');
+        $this->assertEquals('abc &quot;def&quot;…', self::twig('{{ value|shorten(10) }}')->render(['value' => 'abc "def" ghi']), 'twig-shorten-10');
 
         $this->assertEquals(
             '2 hours and 7 mins',

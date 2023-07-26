@@ -6,7 +6,7 @@ if (!$Viewer->permitted('torrents_edit')) {
 
 $artist = (new Gazelle\Manager\Artist)->findById((int)$_GET['artistid']);
 if (is_null($artist)) {
-    $id = display_str($_GET['artistid']); // might not be a number
+    $id = html_escape($_GET['artistid']); // might not be a number
     error("Cannot find an artist with the ID $id: See the <a href=\"log.php?search=Artist+$id\">site log</a>.");
 }
 

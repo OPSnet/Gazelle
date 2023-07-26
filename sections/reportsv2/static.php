@@ -95,7 +95,7 @@ if ($search->canUnclaim($Viewer)) {
                 <input type="hidden" id="uploaderid<?= $reportId ?>" name="uploaderid" value="<?= $uploaderId ?>" />
                 <input type="hidden" id="reporterid<?= $reportId ?>" name="reporterid" value="<?= $reporterId ?>" />
                 <input type="hidden" id="report_reason<?= $reportId ?>" name="report_reason" value="<?= $report->reason() ?>" />
-                <input type="hidden" id="raw_name<?= $reportId ?>" name="raw_name" value="<?= ($torrent?->fullName() ?? 'delete torrent') . " $size" ?>" />
+                <input type="hidden" id="raw_name<?= $reportId ?>" name="raw_name" value="<?= html_escape($torrent?->fullName() ?? 'delete torrent') . " $size" ?>" />
                 <input type="hidden" id="type<?= $reportId ?>" name="type" value="<?= $reportType->type() ?>" />
                 <input type="hidden" id="categoryid<?= $reportId ?>" name="categoryid" value="<?= $report->reportType()->categoryId() ?>" />
             </div>
@@ -119,7 +119,7 @@ if ($search->canUnclaim($Viewer)) {
                                 <tr class="colhead_dark">
                                     <td>
                                         <div class="filelist_title" style="float: left;">File Names</div>
-                                        <div class="filelist_path" style="float: right;"><?= $torrent?->path() ? "/{$torrent->path()}/" : '.' ?></div>
+                                        <div class="filelist_path" style="float: right;"><?= $torrent?->path() ? html_escape("/{$torrent->path()}/") : '.' ?></div>
                                     </td>
                                     <td class="nobr" style="text-align: right">
                                         <strong>Size</strong>
@@ -177,7 +177,7 @@ if ($search->canUnclaim($Viewer)) {
                                 <tr class="colhead_dark">
                                     <td>
                                         <div class="filelist_title" style="float: left;">File Names</div>
-                                        <div class="filelist_path" style="float: right;"><?= $extra->path() ? "/{$extra->path()}/" : '.' ?></div>
+                                        <div class="filelist_path" style="float: right;"><?= $extra->path() ? html_escape("/{$extra->path()}/") : '.' ?></div>
                                 </td>
                                 <td class="nobr" style="text-align: right">
                                     <strong>Size</strong>
@@ -319,7 +319,7 @@ if ($search->canUnclaim($Viewer)) {
 <?php
                 foreach ($report->image() as $image) {
 ?>
-                        <img style="max-width: 200px;" onclick="lightbox.init(this, 200);" src="<?= image_cache_encode($image) ?>" alt="Relevant image" />
+                        <img style="max-width: 200px;" onclick="lightbox.init(this, 200);" src="<?= html_escape(image_cache_encode($image)) ?>" alt="Relevant image" />
 <?php           } ?>
                     </td>
                 </tr>
@@ -332,7 +332,7 @@ if ($search->canUnclaim($Viewer)) {
                 <tr>
                     <td class="label">In progress by:</td>
                     <td>
-                        <a href="user.php?id=<?= $resolverId ?>"><?= $resolverName ?></a>
+                        <a href="user.php?id=<?= $resolverId ?>"><?= html_escape($resolverName) ?></a>
                     </td>
                 </tr>
 <?php
@@ -342,7 +342,7 @@ if ($search->canUnclaim($Viewer)) {
                 <tr>
                     <td class="label">Report comment:</td>
                     <td>
-                        <input type="text" name="comment" id="comment<?= $reportId ?>" size="70" value="<?= display_str($report->comment()) ?>" />
+                        <input type="text" name="comment" id="comment<?= $reportId ?>" size="70" value="<?= html_escape($report->comment()) ?>" />
                         <input type="button" value="Update now" onclick="UpdateComment(<?= $reportId ?>);" />
                     </td>
                 </tr>
@@ -395,10 +395,10 @@ if ($search->canUnclaim($Viewer)) {
                 <tr>
                     <td class="label"><strong>Extra</strong> log message:</td>
                     <td>
-                        <input type="text" name="log_message" id="log_message<?= $reportId ?>" size="40" value="<?= trim($report->message() ?? '') ?>" />
+                        <input type="text" name="log_message" id="log_message<?= $reportId ?>" size="40" value="<?= html_escape(trim($report->message() ?? '')) ?>" />
                     </td>
                 <tr>
-                    <td class="label"><strong>Extra</strong> staff notes:</span>
+                    <td class="label"><strong>Extra</strong> staff notes:</td>
                     <td>
                         <input type="text" name="admin_message" id="admin_message<?= $reportId ?>" size="40" />
                         (These notes will be added to the user profile)
@@ -424,7 +424,7 @@ if ($search->canUnclaim($Viewer)) {
                 <tr>
                     <td class="label">Resolver:</td>
                     <td>
-                        <a href="user.php?id=<?=$resolverId?>"><?= $resolverName ?></a>
+                        <a href="user.php?id=<?=$resolverId?>"><?= html_escape($resolverName) ?></a>
                     </td>
                 </tr>
                 <tr>

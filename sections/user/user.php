@@ -318,7 +318,7 @@ if ($Viewer->permitted('users_mod') && $User->onRatioWatch()) {
 ?>
         <div class="box">
             <div class="head">
-                <?= display_str($User->profileTitle()) ?>
+                <?= html_escape($User->profileTitle()) ?>
                 <span style="float: right;"><a href="#" onclick="$('#profilediv').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets">Hide</a></span>&nbsp;
             </div>
             <div class="pad profileinfo" id="profilediv">
@@ -332,7 +332,7 @@ foreach (range(1, 4) as $level) {
 ?>
     <div class="box">
         <div class="head">
-            <?= display_str($donor->profileTitle($level) ?? "Extra Info $level") ?>
+            <?= html_escape($donor->profileTitle($level) ?? "Extra Info $level") ?>
             <span style="float: right;"><a href="#" onclick="$('#profilediv_<?= $level ?>').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets">Hide</a></span>
         </div>
         <div class="pad profileinfo" id="profilediv_<?= $level ?>"><?= Text::full_format($profileInfo) ?></div>
@@ -377,7 +377,7 @@ foreach ($Collages as $collage) {
         <tr class="colhead">
             <td colspan="5">
                 <span style="float: left;">
-                    <?=display_str($collage->name())?> - <a href="collages.php?id=<?=$collage->id()?>" class="brackets">See full</a>
+                    <?=html_escape($collage->name())?> - <a href="collages.php?id=<?=$collage->id()?>" class="brackets">See full</a>
                 </span>
                 <span style="float: right;">
                     <a href="#" onclick="$('#collage<?=$collage->id()?>_box .images').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets"><?=$FirstCol ? 'Hide' : 'Show' ?></a>
@@ -392,7 +392,7 @@ foreach ($Collages as $collage) {
 ?>
             <td>
                 <a href="torrents.php?id=<?= $tgroupId ?>">
-                    <img class="tooltip" title="<?= $tgroup->text() ?>" src="<?= image_cache_encode($tgroup->cover()) ?>" width="107" />
+                    <img class="tooltip" title="<?= $tgroup->text() ?>" src="<?= html_escape(image_cache_encode($tgroup->cover())) ?>" width="107" />
                 </a>
             </td>
 <?php    } ?>
@@ -488,8 +488,11 @@ if ($Viewer->permitted('users_mod') || $Viewer->isStaff()) { ?>
             <div id="staffnotes" class="pad">
                 <input type="hidden" name="comment_hash" value="<?= $User->info()['CommentHash'] ?>" />
                 <div id="admincommentlinks" class="AdminComment" style="width: 98%;"><?=Text::full_format($User->staffNotes())?></div>
-                <textarea id="admincomment" name="admincomment" onkeyup="resize('admincomment');" class="AdminComment hidden" name="AdminComment" cols="65" rows="26" style="width: 98%;"><?=display_str($User->staffNotes())?></textarea>
-                <a href="#" name="admincommentbutton" onclick="ChangeTo('text'); return false;" class="brackets">Toggle edit</a>
+                <textarea id="admincomment" name="admincomment" onkeyup="resize('admincomment');"
+                          class="AdminComment hidden" name="AdminComment" cols="65" rows="26" style="width: 98%;">
+                    <?=html_escape($User->staffNotes())?></textarea>
+                <a href="#" name="admincommentbutton" onclick="ChangeTo('text'); return false;"
+                   class="brackets">Toggle edit</a>
                 <script type="text/javascript">
                     resize('admincomment');
                 </script>

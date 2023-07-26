@@ -19,8 +19,6 @@ class User extends BaseObject {
 
     final const SNATCHED_UPDATE_AFTERDL = 300; // How long after a torrent download we want to update a user's snatch lists
 
-    final const DISCOGS_API_URL = 'https://api.discogs.com/artists/%d';
-
     protected bool $forceCacheFlush = false;
     protected int $lastReadForum;
     protected string $warningExpiry;
@@ -46,7 +44,7 @@ class User extends BaseObject {
         $this->info = [];
         return $this;
     }
-    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), $this->username()); }
+    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), html_escape($this->username())); }
     public function location(): string { return 'user.php?id=' . $this->id; }
     public function tableName(): string { return 'users_main'; }
 

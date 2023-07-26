@@ -38,11 +38,11 @@ View::show_header(TOP_TEN_HEADING . " – last.fm", ['js' => 'jquery.imagesloade
                 $image = $artist['image'][3]['#text'];
                 if (!empty($image)) {
                     $image = image_cache_encode($image);
-                    $name  = display_str($artist['name']);
+                    $name  = html_escape($artist['name']);
 ?>
             <li>
                 <a href="artist.php?artistname=<?=$name?>">
-                    <img class="tooltip large_tile" alt="<?=$name?>" title="<?=$name?>" src="<?= $image ?>" />
+                    <img class="tooltip large_tile" alt="<?=$name?>" title="<?=$name?>" src="<?= html_escape($image) ?>" />
                 </a>
             </li>
 <?php
@@ -59,19 +59,14 @@ View::show_header(TOP_TEN_HEADING . " – last.fm", ['js' => 'jquery.imagesloade
                 if ($artist['name'] == '[unknown]' || !in_array($Category, ['hyped', 'weekly'])) {
                     continue;
                 }
-                $image = $artist['image'][3]['#text'];
-                if (!empty($image)) {
-                    $image = image_cache_encode($image);
-                    $name  = display_str($artist['name']);
+                $name  = html_escape($artist['name']);
 ?>
             <li>
                 <a class="tooltip_image" data-title-plain="<?= $name
-                    ?>" title="&lt;img class=&quot;large_tile&quot; src=&quot;<?=
-                    $image ?>&quot; alt=&quot;&quot; /&rsaquo;" href="artist.php?artistname=<?= $name ?>"><?= $name ?></a>
+                    ?>" href="artist.php?artistname=<?= $name ?>"><?= $name ?></a>
             </li>
 
 <?php
-                }
             }
 ?>
             </ul>

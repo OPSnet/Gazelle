@@ -85,21 +85,18 @@ class Twig {
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
-            'image',
-            function ($i) {
-                return new \Twig\Markup(image_cache_encode($i), 'UTF-8');
-            }
+            'image', 'image_cache_encode'
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
             'image_cache',
             fn(string $image, mixed $height = 0, mixed $width = 0)
-                => new \Twig\Markup(image_cache_encode(url: $image, height: (int)$height, width: (int)$width), 'UTF-8')
+                => image_cache_encode(url: $image, height: (int)$height, width: (int)$width)
         ));
         $twig->addFilter(new \Twig\TwigFilter(
             'image_proxy',
             fn(string $image, mixed $proxy = true)
-                => (bool)$proxy ? new \Twig\Markup(image_cache_encode(url: $image, proxy: true), 'UTF-8') : $image
+                => (bool)$proxy ? image_cache_encode(url: $image, proxy: true) : $image
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
@@ -131,7 +128,7 @@ class Twig {
 
         $twig->addFilter(new \Twig\TwigFilter(
             'shorten',
-            fn(string $text, int $length) => new \Twig\Markup(shortenString($text, $length), 'UTF-8')
+            fn(string $text, int $length) => shortenString($text, $length)
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
@@ -164,14 +161,14 @@ class Twig {
 
         $twig->addFilter(new \Twig\TwigFilter(
             'ucfirst',
-            fn($text) => new \Twig\Markup(ucfirst($text), 'UTF-8')
+            fn($text) => ucfirst($text)
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
             'ucfirstall',
-            fn($text) => new \Twig\Markup(ucfirst(
+            fn($text) => ucfirst(
                 implode(' ', array_map(fn($w) => ucfirst($w), explode(' ', $text)))
-            ), 'UTF-8')
+            )
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(

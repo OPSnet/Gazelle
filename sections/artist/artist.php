@@ -28,7 +28,7 @@ View::show_header($name, ['js' => 'browse,requests,bbcode,comments,voting,subscr
 ?>
 <div class="thin">
     <div class="header">
-        <h2><?=display_str($name)?><?= $RevisionID ? " (Revision #$RevisionID)" : '' ?><?= $Artist->isShowcase() ? ' [Showcase]' : '' ?></h2>
+        <h2><?=html_escape($name)?><?= $RevisionID ? " (Revision #$RevisionID)" : '' ?><?= $Artist->isShowcase() ? ' [Showcase]' : '' ?></h2>
         <div class="linkbox">
 <?php if ($Viewer->permitted('torrents_edit')) { ?>
             <a href="artist.php?action=edit&amp;artistid=<?= $artistId ?>" class="brackets">Edit</a>
@@ -77,12 +77,14 @@ echo $Twig->render('bookmark/action.twig', [
 <?php
 $imgProxy = new Gazelle\Util\ImageProxy($Viewer);
 if ($Artist->image()) {
-    $image = image_cache_encode($Artist->image());
+    $image = html_escape(image_cache_encode($Artist->image()));
 ?>
         <div class="box box_image">
-            <div class="head"><strong><?= $name ?></strong></div>
+            <div class="head"><strong><?= html_escape($name) ?></strong></div>
             <div style="text-align: center; padding: 10px 0px;">
-                <img style="max-width: 220px;" src="<?= $image ?>" alt="<?= $name ?>" onclick="lightbox.init('<?= $image ?>', 220);" data-origin-src="<?= $Artist->image() ?>" />
+                <img style="max-width: 220px;" src="<?= $image ?>" alt="artist image"
+                     onclick="lightbox.init('<?= $image ?>', 220);"
+                     data-origin-src="<?= html_escape($Artist->image()) ?>" />
             </div>
         </div>
 <?php } ?>
@@ -92,7 +94,7 @@ if ($Artist->image()) {
             <ul class="nobullet" style="padding-bottom: 2px">
                 <li>
                     <form class="search_form" name="filelists" action="torrents.php">
-                        <input type="hidden" name="artistname" value="<?= $name ?>" />
+                        <input type="hidden" name="artistname" value="<?= html_escape($name) ?>" />
                         <input type="hidden" name="action" value="advanced" />
                         <input type="text" autocomplete="off" id="filelist" name="filelist" size="24" placeholder="Find a specific song or track..." spellcheck="false" />
                         <input type="submit" value="&#x1f50e;" />
@@ -163,7 +165,7 @@ if ($Viewer->permitted('site_collages_manage') || $Viewer->activePersonalCollage
                 <li>Discogs ID: <i>not set</i></li>
 <?php } else { ?>
                 <li>Discogs ID: <?= $Artist->discogs()->id() ?></li>
-                <li>Name: <?= $Artist->discogs()->name() ?><?= $Artist->discogsIsPreferred()
+                <li>Name: <?= html_escape($Artist->discogs()->name()) ?><?= $Artist->discogsIsPreferred()
                     ? '<span title="This artist does not need to display a sequence number for disambiguation">' . " \xE2\x98\x85</span>" : '' ?></li>
                 <li><span title="Artists having the same name">Synonyms: <?= $Artist->homonymCount() - 1 ?></span></li>
 <?php } ?>
@@ -319,7 +321,7 @@ if ($sections = $Artist->sections()) {
                     </div>
 <?php   } ?>
                     <div class="group_info clear">
-                        <strong><?= $tgroup->year() ?> – <a href="<?= $tgroup->url() ?>" title="View torrent group" dir="ltr"><?= display_str($tgroup->name()) ?></a></strong>
+                        <strong><?= $tgroup->year() ?> – <a href="<?= $tgroup->url() ?>" title="View torrent group" dir="ltr"><?= html_escape($tgroup->name()) ?></a></strong>
                         <span class="float_right">
 <?php
         echo $Twig->render('bookmark/action.twig', [
@@ -451,7 +453,7 @@ if ($similar) {
       </div>
       <div id="flip_view_1" style="width: <?= SIMILAR_WIDTH ?>px; height: <?= SIMILAR_HEIGHT ?>px;">
         <div id="similar-artist" style=" top: <?= SIMILAR_HEIGHT/2 - 25 ?>px; left: <?= SIMILAR_WIDTH/2 - mb_strlen($Artist->name()) * 4 ?>px;">
-          <span class="name"><?= $Artist->name() ?></span>
+          <span class="name"><?= html_escape($Artist->name()) ?></span>
         </div>
         <div class="similar-artist-graph" style="padding-top: <?= SIMILAR_HEIGHT / SIMILAR_WIDTH * 100 ?>%;">
         <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMinYMin meet" viewBox="0 0 <?=
@@ -470,7 +472,7 @@ if ($similar) {
         }
         $xPos = max(3, $s['x'] - ($s['x'] < SIMILAR_WIDTH * 0.85 ? 0 : (int)(mb_strlen($s['artist_name']) * $pt * 0.6)));
         $yPos = max(3, $s['y'] + ($s['y'] < SIMILAR_HEIGHT * 0.5 ? -2 : 10));
-        $names .= "<a xlink:href=\"artist.php?id={$s['artist_id']}\"><text x=\"{$xPos}\" y=\"{$yPos}\" >{$s['artist_name']}</text></a>";
+        $names .= "<a xlink:href=\"artist.php?id={$s['artist_id']}\"><text x=\"{$xPos}\" y=\"{$yPos}\" >" . html_escape($s['artist_name']) . "</text></a>";
         foreach ($s['related'] as $r) {
             if ($r >= $s['artist_id']) {
 ?>

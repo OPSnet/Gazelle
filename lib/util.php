@@ -45,7 +45,7 @@ function display_str(mixed $Str): string {
     }
     if ($Str != '' && !is_number($Str)) {
         $Str = make_utf8($Str);
-        $Str = htmlspecialchars($Str, ENT_NOQUOTES|ENT_SUBSTITUTE, 'UTF-8', false);
+        $Str = htmlspecialchars($Str, ENT_QUOTES|ENT_SUBSTITUTE|ENT_HTML5, 'UTF-8', false);
         $Str = preg_replace("/&(?![A-Za-z]{0,4}\w{2,3};|#[0-9]{2,6};)/m", '&amp;', $Str);
 
         $Replace = [
@@ -73,7 +73,7 @@ function display_str(mixed $Str): string {
  * HTML-escape strings for usage in html tags
  */
 function html_escape(mixed $str): string {
-    return htmlentities($str, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5);
+    return htmlspecialchars($str, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8');
 }
 
 /**
