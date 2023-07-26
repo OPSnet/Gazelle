@@ -70,6 +70,13 @@ function display_str(mixed $Str): string {
 }
 
 /**
+ * HTML-escape strings for usage in html tags
+ */
+function html_escape(mixed $str): string {
+    return htmlentities($str, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5);
+}
+
+/**
  * Returns ratio
  */
 function ratio(int $uploaded, int $downloaded, int $digits = 2): string|false {

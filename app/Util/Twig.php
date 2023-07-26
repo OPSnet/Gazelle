@@ -31,20 +31,22 @@ class Twig {
                 $hoverAttr = ['class="avatar_1" width="' . AVATAR_WIDTH . '"'];
                 $text      = $data['text'];
                 if ($text !== false && $text != '') {
-                    $basicAttr[] = "title=\"$text\" alt=\"$text\"";
-                    $hoverAttr[] = "title=\"$text\" alt=\"$text\"";
+                    $basicAttr[] = 'title="' . html_escape($text) . '" alt="' . html_escape($text) . '"';
+                    $hoverAttr[] = 'title="' . html_escape($text) . '" alt="' . html_escape($text) . '"';
                 }
 
                 $image = $data['image'];
                 if ($image === USER_DEFAULT_AVATAR) {
                     $basicAttr[] = "src=\"$image\"";
                 } else {
-                    $basicAttr[] = 'src="' . image_cache_encode($image, width: AVATAR_WIDTH) . "\" data-origin-src=\"$image\"";
+                    $basicAttr[] = 'src="' . html_escape(image_cache_encode($image, width: AVATAR_WIDTH))
+                        . '" data-origin-src="' . html_escape($image) . '"';
                 }
 
                 $rollover = $data['hover'];
                 if ($rollover) {
-                    $hoverAttr[] = 'src="' . image_cache_encode($rollover, width: AVATAR_WIDTH) . "\" data-origin-src=\"$rollover\"";
+                    $hoverAttr[] = 'src="' . html_escape(image_cache_encode($rollover, width: AVATAR_WIDTH))
+                        . '" data-origin-src="' . html_escape($rollover) . '"';
                 }
                 return '<div class="avatar_container"><div><img ' . implode(' ', $basicAttr) . " /></div>"
                     . ($rollover ? ('<div><img ' . implode(' ', $hoverAttr) . ' /></div>') : '')
