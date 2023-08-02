@@ -1011,26 +1011,6 @@ parameters:
 			path: ../app/Manager/UserLink.php
 
 		-
-			message: "#^Method Gazelle\\\\Manager\\\\XBT\\:\\:fetchRate\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Manager/XBT.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\XBT\\:\\:fiat2xbt\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Manager/XBT.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\XBT\\:\\:latestRate\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Manager/XBT.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\XBT\\:\\:saveRate\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Manager/XBT.php
-
-		-
 			message: "#^Method Gazelle\\\\ReleaseType\\:\\:findExtendedNameById\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: ../app/ReleaseType.php

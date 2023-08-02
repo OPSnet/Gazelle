@@ -1,0 +1,53 @@
+#! /usr/bin/env php
+<?php
+
+/**
+ * Handle incoming bitcoin donation
+ *
+ * Usage: process-bitcoin-donation <address>,<btc_value> [<address>,<btc_value> ...]
+ *
+ * bitcoin-cli -rpcwallet=test listtransactions \* 20 | jq 'map([.address, .amount]|join(","))| join("|")' | tr -d \" | tr '|' '\0' | xargs -0 php process-bitcoin-donation
+ */
+
+require_once(__DIR__ . '/../lib/bootstrap.php');
+
+$bitcoin = new Gazelle\Donate\Bitcoin;
+$userMan = new Gazelle\Manager\User;
+
+$xbtRate = (new Gazelle\Manager\XBT)->latestRate('EUR');
+if (!$xbtRate) {
+    echo "No exchange rate for BTC\n";
+    exit(1);
+}
+
+array_shift($argv);
+foreach ($argv as $paymentData) {
+    [$address, $value] = explode(',', $paymentData, limit: 2);
+    $userId = $bitcoin->findUserIdbyAddress($address);
+    if (is_null($userId)) {
+        echo "No such address $address\n";
+        continue;
+    }
+    $user = $userMan->find($userId);
+    if (is_null($user)) {
+        echo "No such user $userId\n";
+        continue;
+    }
+    $value = (float)$value;
+    if ($value <= 0) {
+        echo "Bad donation value $value for $address\n";
+        continue;
+    }
+
+    $donor = new Gazelle\User\Donor($user);
+    $donor->donate(
+        amount:   $value,
+        xbtRate:  $xbtRate,
+        source:   'BTC donation',
+        reason:   "",
+        currency: 'XBT'
+    );
+    $bitcoin->invalidate($userId);
+    $fiatValue = $value * $xbtRate;
+    echo "added $fiatValue EUR ($value BTC) donation for " . $user->username() . "\n";
+}

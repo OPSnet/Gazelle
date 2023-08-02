@@ -15,7 +15,7 @@ class XBT extends \Gazelle\Base {
      * @param string $CC Currency Code
      * @return float current rate, or null if API endpoint cannot be reached or is in error.
      */
-    public function fetchRate(string $CC) {
+    public function fetchRate(string $CC): ?float {
         $curl = new \Gazelle\Util\Curl;
         if ($curl->fetch(sprintf(self::FX_QUOTE_URL, $CC))) {
             // {"data":{"base":"BTC","currency":"USD","amount":"8165.93"}}
@@ -29,16 +29,16 @@ class XBT extends \Gazelle\Base {
      *
      * @param string $CC Currency Code
      * @param float $rate The current rate (e.g. from fetchRate())
-     * @return boolean Success
+     * @return int, >0 indicates success
      */
-    public function saveRate(string $CC, float $rate) {
+    public function saveRate(string $CC, float $rate): int {
         self::$db->prepared_query('
             INSERT INTO xbt_forex
                    (cc, rate)
             VALUES (?,  ?)
             ', $CC, $rate
         );
-        return self::$db->affected_rows() == 1;
+        return self::$db->affected_rows();
     }
 
     /* Get the latest Forex rate for this currency
@@ -46,7 +46,7 @@ class XBT extends \Gazelle\Base {
      * @param string $CC Currency Code
      * @return float Current rate, or null on failure
      */
-    public function latestRate(string $CC) {
+    public function latestRate(string $CC): ?float {
         $key = sprintf(self::CACHE_KEY, $CC);
         $rate = self::$cache->get_value($key);
         if ($rate === false) {
@@ -78,8 +78,8 @@ class XBT extends \Gazelle\Base {
      * @param string $CC Currency Code
      * @return float Current amount in XBT, or null on failure
      */
-    public function fiat2xbt(float $amount, string $CC) {
+    public function fiat2xbt(float $amount, string $CC): ?float {
         $rate = $this->latestRate($CC);
-        return is_null($rate) ? null : $amount / $rate;
+        return !$rate ? null : $amount / $rate;
     }
 }
