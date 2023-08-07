@@ -91,11 +91,11 @@ if (in_array($details, ['all', 'snatched'])) {
     ];
 }
 
-View::show_header("Top $limit Torrents");
+View::show_header(TOP_TEN_HEADING . " – Torrents");
 ?>
 <div class="thin">
     <div class="header">
-        <h2>Top <?=$limit?> Torrents</h2>
+        <h2><?= TOP_TEN_HEADING ?> – Torrents</h2>
         <?= $Twig->render('top10/linkbox.twig', ['selected' => 'torrents']) ?>
     </div>
 <?php

@@ -1,7 +1,7 @@
-{{ header('Top Donors') }}
+{{ header(constant('TOP_TEN_HEADING') ~ ' – Donors') }}
 <div class="thin">
     <div class="header">
-        <h2>Top Donors</h2>
+        <h2>{{ constant('TOP_TEN_HEADING') }} – Donors</h2>
         {% include 'top10/linkbox.twig' with {'selected': 'donors'} %}
     </div>
 <h3>Top {{ limit }} Donors

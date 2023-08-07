@@ -19,11 +19,11 @@ switch ($Category) {
         break;
 }
 
-View::show_header('Last.fm', ['js' => 'jquery.imagesloaded,jquery.wookmark,top10', 'css' => 'tiles']);
+View::show_header(TOP_TEN_HEADING . " – last.fm", ['js' => 'jquery.imagesloaded,jquery.bookmark,top10', 'css' => 'tiles']);
 ?>
 <div class="thin">
     <div class="header">
-        <h2>Last.fm</h2>
+        <h2><?= TOP_TEN_HEADING ?> – last.fm</h2>
         <?= $Twig->render('top10/linkbox.twig', ['selected' => 'lastfm']) ?>
     </div>
 <?= $Twig->render('top10/linkbox-artist.twig', ['category' => $Category, 'view' => $View]) ?>

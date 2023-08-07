@@ -1,8 +1,8 @@
 {% from 'macro/form.twig' import checked -%}
-{{ header('Top 10 Torrents history') }}
+{{ header(constant('TOP_TEN_HEADING') ~ ' – Historical') }}
 <div class="thin">
     <div class="header">
-        <h2>Top 10 Torrents</h2>
+        <h2>{{ constant('TOP_TEN_HEADING') }} – Historical</h2>
         {% include 'top10/linkbox.twig' %}
     </div>
     <div class="pad box">

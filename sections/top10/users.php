@@ -38,11 +38,11 @@ $details = isset($tables[$details]) ? $details : 'all';
 $limit = $_GET['limit'] ?? 10;
 $limit = in_array($limit, [10, 100, 250]) ? $limit : 10;
 
-View::show_header("Top $limit Users");
+View::show_header(TOP_TEN_HEADING . " – Users");
 ?>
 <div class="thin">
     <div class="header">
-        <h2>Top <?= $limit ?> Users</h2>
+        <h2><?= TOP_TEN_HEADING ?> – Users</h2>
         <?= $Twig->render('top10/linkbox.twig', ['selected' => 'users']) ?>
     </div>
 <?php

@@ -110,8 +110,11 @@ defined('BITCOIN_DONATION_XYZPUB') or define('BITCOIN_DONATION_XYZPUB', '');
 
 // Top 10 history date. Previous days and weeks of Top 10 torrents are
 // recorded in a task. There is not point going back prior to the start
-// of recorded history
+// of recorded history.
 defined('TOP_TEN_HISTORY_BEGIN') or define('TOP_TEN_HISTORY_BEGIN', '2023-06-23');
+
+// The heading used for the Top 10 pages.
+defined('TOP_TEN_HEADING') or define('TOP_TEN_HEADING', 'Top 10');
 
 // ------------------------------------------------------------------------
 // Secrets

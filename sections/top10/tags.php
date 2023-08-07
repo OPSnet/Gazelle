@@ -9,11 +9,11 @@ $limit = in_array($limit, [10, 100, 250]) ? $limit : 10;
 
 $tag = new Gazelle\Top10\Tag;
 
-View::show_header('Top 10 Tags');
+View::show_header(TOP_TEN_HEADING . " – Tags");
 ?>
 <div class="thin">
     <div class="header">
-        <h2>Top 10 Tags</h2>
+        <h2><?= TOP_TEN_HEADING ?> – Tags</h2>
         <?= $Twig->render('top10/linkbox.twig', ['selected' => 'tags']) ?>
     </div>
 

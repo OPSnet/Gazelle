@@ -35,11 +35,11 @@ $urlStem      = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
 $topVotes     = $vote->topVotes();
 $number       = 0;
 
-View::show_header("Top $limit Voted Groups", ['js' => 'browse,voting']);
+View::show_header(TOP_TEN_HEADING . " – Voted Groups", ['js' => 'browse,voting']);
 ?>
 <div class="thin">
     <div class="header">
-        <h2>Top <?=$limit?> Voted Groups</h2>
+        <h2><?= TOP_TEN_HEADING ?> – Voted Groups</h2>
         <?= $Twig->render('top10/linkbox.twig', ['selected' => 'votes']) ?>
     </div>
 <?php if ($Viewer->permitted('site_advanced_top10')) { ?>
