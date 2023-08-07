@@ -78,7 +78,19 @@
     ['Stylesheet usage',        'tools.php?action=stylesheets',       viewer.permitted('admin_manage_stylesheets')],
 ]) }}
 
+{{ _self.category('Tags', [
+    ['Batch tag editor',      'tools.php?action=tags',          true],
+    ['Tag aliases',           'tools.php?action=tags_aliases',  true],
+    ['Official tags manager', 'tools.php?action=tags_official', true],
+]) }}
+
 </div><div class="toolbox_container">
+
+{{ _self.category('Finances', [
+    ['Donation log',          'tools.php?action=donation_log',    viewer.permitted('admin_donor_log')],
+    ['Donor rewards',         'tools.php?action=donor_rewards',   true],
+    ['Payment dates',         'tools.php?action=payment_list',    viewer.permitted('admin_view_payments')],
+]) }}
 
 {{ _self.category('Torrents', [
     ['Client whitelist',     'tools.php?action=whitelist',     viewer.permitted('admin_whitelist')],
@@ -86,12 +98,6 @@
     ['Collage recovery',     'collages.php?action=recover',    viewer.permitted('site_collages_recover')],
     ['Label aliases',        'tools.php?action=label_aliases', true],
     ['Rate limiting',        'tools.php?action=rate_limit',    viewer.permittedAny('admin_rate_limit_view', 'admin_rate_limit_manage')],
-]) }}
-
-{{ _self.category('Tags', [
-    ['Batch tag editor',      'tools.php?action=tags',          true],
-    ['Tag aliases',           'tools.php?action=tags_aliases',  true],
-    ['Official tags manager', 'tools.php?action=tags_official', true],
 ]) }}
 
 {{ _self.category('External data', [
@@ -104,13 +110,23 @@
     ['Tor exit nodes',         'tools.php?action=tor_node',        viewer.permitted('users_view_ips')],
 ]) }}
 
-{{ _self.category('Finances', [
-    ['Donation log',          'tools.php?action=donation_log',    viewer.permitted('admin_donor_log')],
-    ['Donor rewards',         'tools.php?action=donor_rewards',   true],
-    ['Payment dates',         'tools.php?action=payment_list',    viewer.permitted('admin_view_payments')],
+</div><div class="toolbox_container">
+
+{{ _self.category('Development', [
+    ['Cache/DB stats',        'tools.php?action=service_stats',            viewer.permitted('site_debug')],
+    ['Cache Inspector',       'tools.php?action=clear_cache',              viewer.permitted('site_debug')],
+    ['Database schema info',  'tools.php?action=database_specifics',       viewer.permitted('site_database_specifics')],
+    ['Error Analysis',        'tools.php?action=analysis_list',            viewer.permitted('site_analysis')],
+    ['PHP processes',         'tools.php?action=process_info',             viewer.permitted('admin_site_debug')],
+    ['Scheduler',             'tools.php?action=periodic&amp;mode=view',   viewer.permitted('admin_periodic_task_view')],
 ]) }}
 
-</div><div class="toolbox_container">
+{{ _self.category('Developer Sandboxes', [
+    ['BBCode sandbox',       'tools.php?action=bbcode_sandbox',            true],
+    ['DB sandbox',           'tools.php?action=db_sandbox',                viewer.permitted('admin_site_debug')],
+    ['Notification sandbox', 'tools.php?action=notification_sandbox',      viewer.permitted('admin_view_notifications')],
+    ['Referral sandbox',     'tools.php?action=referral_sandbox',          viewer.permitted('admin_manage_referrals') and constant('OPEN_EXTERNAL_REFERRALS')],
+]) }}
 
 {{ _self.category('Site Information', [
     ['Bonus points stats',   'tools.php?action=bonus_stats',    viewer.permitted('admin_bp_history')],
@@ -122,22 +138,6 @@
     ['Site options',         'tools.php?action=site_options',   viewer.permitted('users_mod')],
     ['SSL certificates',     'tools.php?action=ssl_host',       viewer.permitted('site_debug')],
     ['Tracker info',         'tools.php?action=ocelot_info',    true],
-]) }}
-
-{{ _self.category('Developer Sandboxes', [
-    ['BBCode sandbox',       'tools.php?action=bbcode_sandbox',            true],
-    ['DB sandbox',           'tools.php?action=db_sandbox',                viewer.permitted('admin_site_debug')],
-    ['Notification sandbox', 'tools.php?action=notification_sandbox',      viewer.permitted('admin_view_notifications')],
-    ['Referral sandbox',     'tools.php?action=referral_sandbox',          viewer.permitted('admin_manage_referrals') and constant('OPEN_EXTERNAL_REFERRALS')],
-]) }}
-
-{{ _self.category('Development', [
-    ['Cache/DB stats',        'tools.php?action=service_stats',            viewer.permitted('site_debug')],
-    ['Cache Inspector',       'tools.php?action=clear_cache',              viewer.permitted('site_debug')],
-    ['Database schema info',  'tools.php?action=database_specifics',       viewer.permitted('site_database_specifics')],
-    ['Error Analysis',        'tools.php?action=analysis_list',            viewer.permitted('site_analysis')],
-    ['PHP processes',         'tools.php?action=process_info',             viewer.permitted('admin_site_debug')],
-    ['Scheduler',             'tools.php?action=periodic&amp;mode=view',   viewer.permitted('admin_periodic_task_view')],
 ]) }}
 
 </div>
