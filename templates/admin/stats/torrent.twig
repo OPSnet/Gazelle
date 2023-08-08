@@ -113,66 +113,6 @@
             </table>
         </div>
     </div>
-
-    <br />
-    <div class="box">
-        <div class="head">Content Analysis</div>
-        <div class="pad">
-            <table>
-                <tr>
-                <th width="33%">Formats</th>
-                <th width="33%">Media</th>
-                <th width="34%">Categories</th>
-                </tr>
-                <tr>
-                <td style="vertical-align: top;"><table>
-{% for f in torr_stat.format %}
-                    <tr>
-                    <td>{{ f[0]|default('<i>Grand</i>')|raw }}</td>
-                    <td>{{ f[1]|default('<i>Total</i>')|raw }}</td>
-                    <td class="number_column">{{ f[2]|number_format }}</td>
-                    </tr>
-{% endfor %}
-                </table></td>
-                <td style="vertical-align: top;"><table>
-{% for m in torr_stat.media %}
-                    <tr><td>{{ m[0]|default('<i>Total</it>')|raw }}</td>
-                    <td class="number_column">{{ m[1]|number_format }}</td>
-                    </tr>
-{% endfor %}
-                </table></td>
-
-                <td style="vertical-align: top;"><table>
-{% set cat = constant('CATEGORY') %}
-{% for c in torr_stat.category %}
-                    <tr><td>{{ cat[c[0] - 1] }}</td>
-                    <td class="number_column">{{ c[1]|number_format }}</td>
-                    </tr>
-{% endfor %}
-                </table></td>
-
-                </tr>
-                <tr>
-                <th width="33%">Added in last month</th>
-                <th width="33%">&nbsp;</th>
-                <th width="34%">&nbsp;</th>
-                </tr>
-                <tr>
-
-                <td style="vertical-align: top;"><table>
-{% for f in torr_stat.formatMonth %}
-                    <tr><td>{{ f[0]|default('<i>Grand</i>')|raw }}</td>
-                    <td>{{ f[1]|default('<i>Total</i>')|raw }}</td>
-                    <td class="number_column">{{ f[2]|number_format }}</td>
-                    </tr>
-{% endfor %}
-                </table></td>
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
-                </tr>
-            </table>
-        </div>
-    </div>
 </div>
 
 <div class="thin">
@@ -230,6 +170,66 @@
             </table>
 
         </div>
+    </div>
+</div>
+
+<div class="thin">
+    <div class="box">
+        <div class="head">Content Analysis</div>
+        <div class="pad">
+            <table>
+                <tr>
+                <th width="33%">Formats</th>
+                <th width="33%">Media</th>
+                <th width="34%">Categories</th>
+                </tr>
+                <tr>
+                <td style="vertical-align: top;"><table>
+{% for f in torr_stat.format %}
+                    <tr>
+                    <td>{{ f[0]|default('<i>Grand</i>')|raw }}</td>
+                    <td>{{ f[1]|default('<i>Total</i>')|raw }}</td>
+                    <td class="number_column">{{ f[2]|number_format }}</td>
+                    </tr>
+{% endfor %}
+                </table></td>
+                <td style="vertical-align: top;"><table>
+{% for m in torr_stat.media %}
+                    <tr><td>{{ m[0]|default('<i>Total</it>')|raw }}</td>
+                    <td class="number_column">{{ m[1]|number_format }}</td>
+                    </tr>
+{% endfor %}
+                </table></td>
+
+                <td style="vertical-align: top;"><table>
+{% set cat = constant('CATEGORY') %}
+{% for c in torr_stat.category %}
+                    <tr><td>{{ cat[c[0] - 1] }}</td>
+                    <td class="number_column">{{ c[1]|number_format }}</td>
+                    </tr>
+{% endfor %}
+                </table></td>
+
+                </tr>
+                <tr>
+                <th width="33%">Added in last month</th>
+                <th width="33%">&nbsp;</th>
+                <th width="34%">&nbsp;</th>
+                </tr>
+                <tr>
+
+                <td style="vertical-align: top;"><table>
+{% for f in torr_stat.formatMonth %}
+                    <tr><td>{{ f[0]|default('<i>Grand</i>')|raw }}</td>
+                    <td>{{ f[1]|default('<i>Total</i>')|raw }}</td>
+                    <td class="number_column">{{ f[2]|number_format }}</td>
+                    </tr>
+{% endfor %}
+                </table></td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                </tr>
+            </table>
         </div>
     </div>
 </div>

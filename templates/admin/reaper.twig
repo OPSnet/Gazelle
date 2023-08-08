@@ -1,0 +1,49 @@
+{% from 'macro/form.twig' import checked %}
+{{ header('Manage Reaper Grace Period') }}
+<div class="thin">
+<div class="header">
+    <h2>Manage Reaper Grace Period</h2>
+</div>
+
+<div class="thin pad box">
+    If a user requires an extension to prevent their torrents
+    from being reaped, you can update the timer with this toolbox.
+    Use your browser's find-in-page function to jump directly to a user.
+    Dates that are displayed in green indicate that the beginning of the
+    countdown timer until reaping has been pushed forwards into the future.
+</div>
+
+<div class="pad">
+{% set total = list|length %}
+<h3>{{ total }} user{{ total|plural }} currently under observation by the reaper</h3>
+<form action="tools.php?action=reaper" method="post">
+<label><input type="checkbox" name="unseeded"{{ checked(unseeded) }}/> Show unseeded</label><br />
+<label><input type="checkbox" name="never"{{ checked(never) }}/> Show never seeded</label><br /><br />
+<table>
+    <tr class="colhead">
+        <td>User</td>
+        <td>Total</td>
+        <td>Earliest date</td>
+        <td>Latest date</td>
+        <td>Extend?</td>
+    </tr>
+{% for user in list %}
+    <tr>
+        <td>{{ user.user_id|user_url }}</td>
+        <td>{{ user.total|number_format }}</td>
+        <td{% if user.in_future %} style="color: lime"{% endif %}>{{ user.min_date|time_diff }}</td>
+        <td{% if user.in_future %} style="color: lime"{% endif %}>{{ user.max_date|time_diff }}</td>
+        <td><input type="checkbox" name="extend-{{ user.user_id }}" /></td>
+    </tr>
+{% endfor %}
+</table>
+<div class="thin pad box">
+    Extend the reaper grace period of all checked users by the following amount:
+    <br />
+    <br />
+    <input type="number" name="extension" value="30" max="365" size="5" /> days <input type="submit" value="Extend" />
+</div>
+<input type="hidden" name="auth" value="{{ viewer.auth }}" />
+</form>
+</div>
+{{ footer() }}

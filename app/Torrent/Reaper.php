@@ -581,4 +581,48 @@ class Reaper extends \Gazelle\Base {
         ");
         return self::$db->to_pair('day', 'total', false);
     }
+
+    public function extendGracePeriod(array $userIdList, int $days): int {
+        if (!$userIdList) {
+            return 0;
+        }
+        self::$db->prepared_query("
+            UPDATE torrent_unseeded tu
+            INNER JOIN torrents t ON (t.ID = tu.torrent_id)
+            SET
+                tu.unseeded_date = tu.unseeded_date + INTERVAL ? DAY
+            WHERE t.UserID IN (" . placeholders($userIdList) . ")",
+            $days, ...$userIdList
+        );
+        return self::$db->affected_rows();
+    }
+
+    public function unseederList(bool $showNever = false, bool $showUnseeded = true): array {
+        $state = [];
+        if ($showNever) {
+            $state[] = ReaperState::NEVER->value;
+        }
+        if ($showUnseeded) {
+            $state[] = ReaperState::UNSEEDED->value;
+        }
+        if (!$state) {
+            return [];
+        }
+
+        self::$db->prepared_query("
+            SELECT t.UserID                   AS user_id,
+                count(*)                      AS total,
+                min(tu.unseeded_date)         AS min_date,
+                max(tu.unseeded_date)         AS max_date,
+                min(tu.unseeded_date) > now() AS in_future
+            FROM torrents t
+            INNER JOIN torrent_unseeded tu ON (tu.torrent_id = t.ID)
+            INNER JOIN users_main       um ON (um.ID = t.UserID)
+            WHERE tu.state in (" . placeholders($state) . ")
+            GROUP BY t.UserID
+            ORDER BY um.Username;
+            ", ...$state
+        );
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
+    }
 }

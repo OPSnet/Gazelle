@@ -98,6 +98,7 @@
     ['Collage recovery',     'collages.php?action=recover',    viewer.permitted('site_collages_recover')],
     ['Label aliases',        'tools.php?action=label_aliases', true],
     ['Rate limiting',        'tools.php?action=rate_limit',    viewer.permittedAny('admin_rate_limit_view', 'admin_rate_limit_manage')],
+    ['Reaper extensions',    'tools.php?action=reaper',        viewer.permitted('site_view_flow')],
 ]) }}
 
 {{ _self.category('External data', [

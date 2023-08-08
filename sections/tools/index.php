@@ -171,6 +171,9 @@ switch ($_REQUEST['action']) {
     case 'rate_limit':
         require_once('managers/rate_limit.php');
         break;
+    case 'reaper':
+        require_once('managers/reaper.php');
+        break;
     case 'referral_accounts':
         require_once('managers/referral_accounts.php');
         break;

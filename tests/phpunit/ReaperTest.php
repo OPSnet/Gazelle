@@ -553,4 +553,40 @@ class ReaperTest extends TestCase {
         $this->assertContains($today, [date('Y-m-d'), date('Y-m-d', strtotime('1 hour ago'))], 'reaper-timeline');
     }
 
+    public function testGracePeriod(): void {
+        // Check that the unseeded_date can be extended
+        foreach ($this->torrentList as $torrent) {
+            $hour = NOTIFY_UNSEEDED_INITIAL_HOUR + 1;
+            $torrent->setField('Time', date('Y-m-d H:i:s', strtotime("-{$hour} hours")))->modify();
+            $this->modifyLastAction($torrent, NOTIFY_UNSEEDED_INITIAL_HOUR + 2);
+        }
+
+        $reaper = new \Gazelle\Torrent\Reaper(new Gazelle\Manager\Torrent, new Gazelle\Manager\User);
+        $reaper->process(
+            $reaper->initialUnseededList(),
+            Gazelle\Torrent\ReaperState::UNSEEDED,
+            Gazelle\Torrent\ReaperNotify::INITIAL
+        );
+
+        $uploaderId = $this->userList[0]->id();
+        $initial = array_filter(
+            $reaper->unseederList(),
+            fn($user) => $user['user_id'] == $uploaderId
+        );
+        $this->assertCount(1, $initial, 'reaper-grace-period-initial');
+        $this->assertEquals(
+            2, // two torrents will be extended 10 days
+            $reaper->extendGracePeriod([$uploaderId], 10),
+            'reaper-grace-period-extend'
+        );
+        $final = array_filter(
+            $reaper->unseederList(),
+            fn($user) => $user['user_id'] == $uploaderId
+        );
+        $this->assertEquals(
+            864000,
+            strtotime(array_values($final)[0]['min_date']) - strtotime(array_values($initial)[0]['min_date']),
+            'reaper-grace-period-delta'
+        );
+    }
 }

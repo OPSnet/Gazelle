@@ -2,7 +2,7 @@ From: Spine
 To: Operators
 Date: 2022-11-20
 Subject: Orpheus Development Papers #9 - Unseeded Purges
-Version: 1
+Version: 2
 
 For various reasons, some uploads will end up in an unseeded state, either
 because the uploader forgets to load it into their client so no-one else can
@@ -56,7 +56,8 @@ actions (second alert, ultimate removal) are based on this. If a member
 pleads for extra time to get their act together, this can be done by
 updating the `unseeded_date` to a time in the future (e.g. `now() + INTERVAL
 2 WEEK`. There is no point deleting the row: it will be inserted again
-during the next scheduler run.
+during the next scheduler run. This can be handled by moderators in the
+Reaper Extensions toolbox.
 
 Snatchers are also pinged to see if they can reseed the upload. The first
 person to do so can "claim" the reseed and receive a reward of bonus points.
