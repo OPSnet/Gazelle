@@ -16,6 +16,7 @@ echo $Twig->render('admin/user-info.twig', [
     'asn'       => new Gazelle\Search\ASN,
     'column'    => $column,
     'direction' => $direction,
+    'source'    => (new Gazelle\Manager\InviteSource)->findSourceNameByUserId($user->id()),
     'hist'      => new Gazelle\User\History($user, $column, $direction),
     'now'       => date('Y-m-d H:i:s'),
     'user'      => $user,

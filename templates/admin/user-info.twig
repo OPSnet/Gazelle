@@ -7,6 +7,17 @@
 <tr><th>Now</th><td colspan="6">{{ now }}</td></tr>
 <tr><th>Last seen</th><td colspan="6">{{ user.lastAccess|time_diff }}</td></tr>
 <tr><th>Joined</th><td colspan="6">{{ user.created }}</td></tr>
+<tr><th>URL</th><td colspan="6">{{ user.publicLocation }}</td></tr>
+<tr><th>Invited by</th><td colspan="6">
+{%- if not user.inviterId -%}
+    Nobody
+{%- else %}
+    {%- set inviter = user.inviter %}
+    {{- inviter.id|user_url }} {{ inviter.publicLocation -}}
+    {%- if not source and (inviter.isInterviewer or inviter.isRecruiter) %} (unconfirmed){% endif -%}
+    {%- if source %} from {{ source }}{% endif -%}
+{% endif -%}
+</td></tr>
 
 {% include 'admin/user-info-email.twig' with {'info': hist.email(asn),       'title': 'Email History' } only %}
 {% include 'admin/user-info-ipv4.twig'  with {'info': hist.siteIPv4(asn),    'title': 'Site IPv4 History' } only %}
