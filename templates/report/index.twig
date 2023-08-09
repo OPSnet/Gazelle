@@ -1,37 +1,63 @@
+{% from 'macro/form.twig' import checked -%}
 {{ header('Reports', {'js': 'bbcode,reports'}) }}
 <div class="thin">
     <div class="header">
         <h2>Active Reports</h2>
         <div class="linkbox">
-            <a href="reports.php">New</a> |
-            <a href="reports.php?view=old">Old</a> |
+            <a href="reports.php">Open</a> |
+            <a href="reports.php?view=old">Resolved</a> |
             <a href="reports.php?action=stats">Stats</a>
         </div>
+{% if view_old %}
+{% set order_by = order.orderBy %}
+{% set direction = order.direction %}
+    <form action="reports.php" method="post">
+        <div class="linkbox">
+            View by:
+            <label><input type="radio" name="order" value="created-desc"{{ checked(order_by == "created" and direction == 'DESC') }} /> Newest created</label>
+            <label><input type="radio" name="order" value="created-asc"{{ checked(order_by == "created" and direction == 'ASC') }} /> Oldest created</label>
+            <label><input type="radio" name="order" value="resolved-desc"{{ checked(order_by == "resolved" and direction == 'DESC') }} /> Newest resolved</label>
+            <label><input type="radio" name="order" value="resolved-asc"{{ checked(order_by == "resolved" and direction == 'ASC') }} /> Oldest resolved</label>
+        </div>
+        <div class="linkbox">
+            Filter by:
+            <label><input type="checkbox" name="type-collage"{{ checked('collage' in type_list) }} /> Collage</label>
+            <label><input type="checkbox" name="type-comment"{{ checked('comment' in type_list) }} /> Comment</label>
+            <label><input type="checkbox" name="type-request"{{ checked('request' in type_list) }} /> Request</label>
+            <label><input type="checkbox" name="type-thread"{{ checked('thread' in type_list) }} /> Thread</label>
+            <label><input type="checkbox" name="type-post"{{ checked('post' in type_list) }} /> Post</label>
+            <label><input type="checkbox" name="type-user"{{ checked('user' in type_list) }} /> User</label>
+            <input type="submit" value="Filter" />
+        </div>
+        <input type="hidden" name="action" value="reports" />
+        <input type="hidden" name="view" value="old" />
+    </form>
+{% endif %}
     </div>
 {{ paginator.linkbox|raw }}
 {% for item in list %}
-    {% set report = item.report %}
+    {%- set report = item.report %}
         <div id="report_{{ report.id }}" style="margin-bottom: 1em;" class="pending_report_v1">
             <table cellpadding="5" id="report_{{ report.id }}">
                 <tr>
                     <td><strong>{{ report.link|raw }}</strong></td>
                     <td>
                         <strong>{{ type[report.subjectType].title }}</strong> was reported by {{ report.reporter.id|user_url }} {{ report.created|time_diff }}
-    {% if report.reporter.id != viewer.id %}
+    {%- if report.reporter.id != viewer.id %}
                         <a href="reports.php?action=compose&amp;toid={{ report.reporter.id }}&amp;reportid={{ report.id }}&amp;type={{ report.subjectType }}&amp;thingid={{ report.subjectId }}" class="brackets">Contact</a>
-    {% endif %}
+    {%- endif %}
                     </td>
                 </tr>
                 <tr>
                     <td class="center" colspan="2">
                         <strong>
-    {% if item.link %}
+    {%- if item.link -%}
         {{ item.link|raw }}
-    {% elseif item.subject %}
+    {%- elseif item.subject -%}
         {{ item.subject.link|raw }}
-    {% else %}
+    {%- else -%}
         No {{ item.label }} with the reported ID found
-    {% endif %}
+    {%- endif -%}
                         </strong>
                     </td>
                 </tr>
@@ -70,7 +96,7 @@
     {% else %}
                 <tr>
                     <td colspan="2">
-                        Resolved by {{ report.resolver.id|user_url }}
+                        Resolved by {{ report.resolver.id|user_url }} {{ report.resolved|time_diff }}
                     </td>
                 </tr>
     {% endif %}

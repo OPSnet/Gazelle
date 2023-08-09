@@ -2,13 +2,21 @@
 
 namespace Gazelle\Search;
 
+use \Gazelle\Enum\SearchReportOrder;
+
 class Report extends \Gazelle\Base {
     protected array $args = [];
     protected array $cond = [];
+    protected SearchReportOrder $order;
 
     public function setId(int $id): Report {
         $this->cond[] = 'r.ID = ?';
         $this->args[]  = $id;
+        return $this;
+    }
+
+    public function setOrder(SearchReportOrder $order): Report {
+        $this->order = $order;
         return $this;
     }
 
@@ -18,9 +26,21 @@ class Report extends \Gazelle\Base {
         return $this;
     }
 
+    public function setTypeFilter(array $typeList): Report {
+        if ($typeList) {
+            $this->cond[] = 'r.Type in (' . placeholders($typeList) . ')';
+            array_push($this->args, ...$typeList);
+        }
+        return $this;
+    }
+
     public function restrictForumMod(): Report {
         $this->cond[] = "r.Type IN ('comment', 'post', 'thread')";
         return $this;
+    }
+
+    public function order(): SearchReportOrder {
+        return isset($this->order) ? $this->order : SearchReportOrder::createdDesc;
     }
 
     public function total(): int {
@@ -36,12 +56,13 @@ class Report extends \Gazelle\Base {
     public function page(int $limit, int $offset): array {
         $cond = implode(' AND ', $this->cond);
         $where = $cond ? "WHERE $cond" : '';
+        $column = $this->order()->orderBy() === 'created' ? 'r.ReportedTime' : 'r.resolvedTime';
 
         self::$db->prepared_query("
             SELECT r.ID
             FROM reports r
             $where
-            ORDER BY r.ReportedTime DESC
+            ORDER BY $column {$this->order()->direction()}
             LIMIT ? OFFSET ?
             ", ...[...$this->args, $limit, $offset]
         );

@@ -5,7 +5,7 @@ namespace Gazelle\Util;
 class Paginator {
     protected array $remove = []; // parameters to strip out of URIs (e.g. postid for comments)
     protected string $anchor = '';
-    protected string $param = '';
+    protected array $param = [];
     protected string $linkbox;
     protected int $total = 0;
     protected int $linkCount = 10;
@@ -48,7 +48,7 @@ class Paginator {
     }
 
     public function setParam(string $param): Paginator {
-        $this->param = '&amp;' . $param;
+        $this->param[] = $param;
         return $this;
     }
 
@@ -104,14 +104,15 @@ class Paginator {
                 return $this->linkbox;
             }
 
+            $paramList = $this->param ? ('&amp;' . implode('&amp;', $this->param)) : '';
             if ($this->page > 1) {
-                $this->linkbox = "<a href=\"{$uri}&amp;page=1{$this->param}{$this->anchor}\"><strong>&laquo; First</strong></a> "
-                    . "<a href=\"{$uri}&amp;page=" . ($this->page - 1) . $this->param . $this->anchor . '" class="pager_prev"><strong>&lsaquo; Prev</strong></a> | ';
+                $this->linkbox = "<a href=\"{$uri}&amp;page=1{$paramList}{$this->anchor}\"><strong>&laquo; First</strong></a> "
+                    . "<a href=\"{$uri}&amp;page=" . ($this->page - 1) . $paramList . $this->anchor . '" class="pager_prev"><strong>&lsaquo; Prev</strong></a> | ';
             }
 
             for ($i = $firstPage; $i <= $lastPage; $i++) {
                 if ($i != $this->page) {
-                    $this->linkbox .= "<a href=\"{$uri}&amp;page=$i{$this->param}{$this->anchor}\">";
+                    $this->linkbox .= "<a href=\"{$uri}&amp;page=$i{$paramList}{$this->anchor}\">";
                 }
                 $this->linkbox .= '<strong>';
                 $firstEntry = (($i - 1) * $this->perPage) + 1;
@@ -136,7 +137,7 @@ class Paginator {
             }
 
             if ($this->page && $this->page < $pageCount) {
-                $this->linkbox .= " | <a href=\"{$uri}&amp;page=" . ($this->page + 1) . $this->param . $this->anchor
+                $this->linkbox .= " | <a href=\"{$uri}&amp;page=" . ($this->page + 1) . $paramList . $this->anchor
                     . '" class="pager_next"><strong>Next &rsaquo;</strong></a>'
                     . " <a href=\"{$uri}&amp;page=$pageCount\"><strong> Last &raquo;</strong></a>";
             }
