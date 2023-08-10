@@ -258,4 +258,26 @@ class ArtistTest extends TestCase {
         $this->assertCount(0, $payload['requests'], 'artist-payload-requests');
         $this->assertIsArray($payload['statistics'], 'artist-payload-statistics');
     }
+
+    public function testArtistDiscogs(): void {
+        $manager = new \Gazelle\Manager\Artist;
+        [$artistId, $aliasId] = $manager->create('phpunit.' . randomString(12));
+        $artist = $manager->findById($artistId);
+        $this->artistIdList[] = $artist->id();
+
+        $id = -100000 + random_int(1, 100000);
+        $discogs = new Gazelle\Util\Discogs(
+            id: $id,
+            stem: 'discogs phpunit',
+            name: 'discogs phpunit',
+            sequence: 2,
+        );
+        $this->assertEquals($id, $discogs->id(), 'artist-discogs-id');
+        $this->assertEquals('discogs phpunit', $discogs->name(), 'artist-discogs-name');
+        $this->assertEquals('discogs phpunit', $discogs->stem(), 'artist-discogs-stem');
+        $this->assertEquals(2, $discogs->sequence(), 'artist-discogs-sequence');
+
+        $artist->setField('discogs', $discogs)->setUpdateUser($this->user)->modify();
+        $this->assertEquals('discogs phpunit', $artist->discogs()->name(), 'artist-self-discogs-name');
+    }
 }

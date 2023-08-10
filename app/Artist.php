@@ -6,8 +6,7 @@ class Artist extends BaseObject {
     final const CACHE_REQUEST_ARTIST = 'artists_requests_%d';
     final const CACHE_TGROUP_ARTIST  = 'artists_groups_%d';
 
-    protected const CACHE_PREFIX    = 'artistv3_%d';
-    protected const DISCOGS_API_URL = 'https://api.discogs.com/artists/%d';
+    protected const CACHE_PREFIX    = 'artist_%d';
 
     protected array $artistRole;
 
@@ -111,6 +110,14 @@ class Artist extends BaseObject {
             self::$cache->cache_value($cacheKey, $info, 3600);
             $this->info = $info;
         }
+
+        // hydrate the Discogs object
+        $this->info['discogs'] = new Util\Discogs(
+            id:       (int)$this->info['discogs_id'],
+            sequence: (int)$this->info['sequence'],
+            name:     (string)$this->info['discogs_name'],
+            stem:     (string)$this->info['discogs_stem'],
+        );
         return $this->info;
     }
 
@@ -189,12 +196,8 @@ class Artist extends BaseObject {
         return $this->info()['body'];
     }
 
-    public function discogsId(): ?int {
-        return $this->info()['discogs_id'];
-    }
-
-    public function discogsName(): ?string {
-        return $this->info()['discogs_name'];
+    public function discogs(): Util\Discogs {
+        return $this->info()['discogs'];
     }
 
     public function discogsIsPreferred(): bool {
@@ -961,15 +964,16 @@ class Artist extends BaseObject {
         }
 
         // handle Discogs
-        $discogsId = $this->clearField('discogs_id');
-        if (is_int($discogsId)) {
-            if ($discogsId > 0) {
-                $this->setDiscogsRelation($discogsId);
+        $discogs = $this->clearField('discogs');
+        if ($discogs) {
+            $updated = true;
+            if ($discogs->sequence() > 0) {
+                $this->setDiscogsRelation($discogs);
             } else {
                 $this->removeDiscogsRelation();
             }
-            $updated = true;
         }
+
         $parentUpdated = parent::modify();
         $this->flush();
         return $parentUpdated || $updated;
@@ -978,44 +982,7 @@ class Artist extends BaseObject {
     /**
      * Sets the Discogs ID for the artist and returns the number of affected rows.
      */
-    public function setDiscogsRelation(int $discogsId): int {
-        $curl = curl_init();
-        curl_setopt_array($curl, [
-            CURLOPT_URL            => sprintf(self::DISCOGS_API_URL, $discogsId),
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT        => 10,
-            CURLOPT_USERAGENT      => FAKE_USERAGENT,
-        ]);
-        $proxy = httpProxy();
-        if ($proxy) {
-            curl_setopt_array($curl, [
-                CURLOPT_HTTPPROXYTUNNEL => true,
-                CURLOPT_PROXY           => $proxy,
-            ]);
-        }
-
-        $result = curl_exec($curl);
-        if (!is_string($result) || curl_getinfo($curl, CURLINFO_RESPONSE_CODE) !== 200) {
-            return 0;
-        }
-
-        /* Discogs names are e.g. "Spectrum (4)"
-         * This is split into "Spectrum" and 4 to detect and handle homonyms.
-         * First come, first served. The first homonym is considered preferred,
-         * so the artist page will show "Spectrum". Subsequent artists will
-         * be shown as "Spectrum (2)", "Spectrum (1)", ...
-         * This can be adjusted via a control panel afterwards.
-         */
-        $payload = json_decode($result);
-        $discogsName = $payload->name;
-        if (preg_match('/^(.*) \((\d+)\)$/', $discogsName, $match)) {
-            $discogsStem = $match[1];
-            $discogsSequence = (int)$match[2];
-        } else {
-            $discogsStem = $discogsName;
-            $discogsSequence = 1;
-        }
-
+    public function setDiscogsRelation(Util\Discogs $discogs): int {
         // We only run this query when artist_discogs_id has changed, so the collision
         // should only happen on the UNIQUE(artist_id) index
         self::$db->prepared_query("
@@ -1029,8 +996,8 @@ class Artist extends BaseObject {
                 stem              = VALUES(stem),
                 name              = VALUES(name),
                 user_id           = VALUES(user_id)
-            ", $discogsId, $this->id, (int)($this->homonymCount() == 0),
-            $discogsSequence, $discogsStem, $discogsName, $this->updateUser->id()
+            ", $discogs->id(), $this->id, (int)($this->homonymCount() == 0),
+            $discogs->sequence(), $discogs->stem(), $discogs->name(), $this->updateUser->id()
         );
         return self::$db->affected_rows();
     }

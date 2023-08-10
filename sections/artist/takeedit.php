@@ -47,9 +47,9 @@ if ($showcase != $artist->isShowcase() && $Viewer->permitted('artist_edit_vanity
 
 $summary   = [];
 $discogsId = (int)($_POST['discogs-id']);
-if ($discogsId != $artist->discogsId()) {
+if ($discogsId != $artist->discogs()->id()) {
     $summary[] = $discogsId ? "Discogs relation set to $discogsId" : "Discogs relation cleared";
-    $artist->setField('discogs_id', $discogsId);
+    $artist->setField('discogs', new Gazelle\Util\Discogs($discogsId));
 }
 
 if (isset($_POST['locked'])) {
@@ -64,6 +64,6 @@ $notes = trim($_POST['summary']);
 if ($notes) {
     $summary[] = "notes: $notes";
 }
-$artist->setField('summary', $summary) ->setUpdateUser($Viewer)->modify();
+$artist->setField('summary', $summary)->setUpdateUser($Viewer)->modify();
 
 header("Location: " . $artist->location());

@@ -61,7 +61,7 @@ abstract class BaseObject extends Base {
      * the derived class will deal with or pre-process the contents so
      * the modify() method can do its thing.
      */
-    public function setField(string $field, array|bool|int|float|string|null $value): mixed {
+    public function setField(string $field, mixed $value): mixed {
         $this->updateField[$field] = $value;
         return $this;
     }
@@ -72,16 +72,16 @@ abstract class BaseObject extends Base {
      * If ever this is a problem, you can always clearField() which
      * guarantees the the field will no longer be present.
      */
-    public function field(string $field): array|bool|int|float|string|null {
+    public function field(string $field): mixed {
         return $this->updateField[$field] ?? null;
     }
 
     /**
      * Remove a field from the update. This is useful in a derived class
      * when an auxillary table needs to be update with this value.
-     * @return array|bool|int|float|string|null the contents of the field, or null
+     * @return mixed the contents of the field, or null
      */
-    public function clearField(string $field): array|bool|int|float|string|null {
+    public function clearField(string $field): mixed {
         if (isset($this->updateField[$field])) {
             $value = $this->updateField[$field];
             unset($this->updateField[$field]);
