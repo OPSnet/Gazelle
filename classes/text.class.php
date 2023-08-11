@@ -202,6 +202,28 @@ class Text {
     }
 
     /**
+     * Render BBCode as HTML without any div-like elements
+     */
+    public static function span_format(string $text): string {
+        // neuter <br> and self-closing elements elements
+        $text = preg_replace('/(?:\n+|\[\s*hr[^]]*\])/i', ' ', $text);
+        // neuter [quote]
+        $text = preg_replace('/\[\s*\/?quote[^]]*\]/i', '', $text);
+        // and strip the rest
+        return strip_tags(
+            self::full_format($text, false),
+            [
+                'b',
+                'cite',
+                'em',
+                'i',
+                'span',
+                'strong',
+            ]
+        );
+    }
+
+    /**
      * Output BBCode as XHTML
      */
     public static function full_format(

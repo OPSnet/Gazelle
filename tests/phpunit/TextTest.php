@@ -322,4 +322,26 @@ END_HTML;
             'text-tgroup-url'
         );
     }
+
+    public static function dataSpan(): array {
+        return [
+            ["span-hr",       "a[hr]b",                               "a b"],
+            ["span-img",      "[img]https://example.com/a.jpg[/img]", ""],
+            ["span-img-2",    "[img=https://example.com/a.jpg]",      ""],
+            ["span-pre",      "[pre]a\nb[/pre]",                      "a b"],
+            ["span-quote",    "[quote]abcd[/quote]",                  "abcd"],
+            ["span-quote-in", "[quote=who]abcd[/quote]",              "abcd"],
+            ["span-raw-url",  "https://example.com",                  "https://example.com"],
+            ["span-url",      "[url=https://example.com/]",           "https://example.com/"],
+            ["span-url-2",    "x[url=https://example.com/a.jpg]y",    "xy"],
+        ];
+    }
+
+    // for phpunit v10: #[DataProvider('dataSpan')]
+    /**
+     * @dataProvider dataSpan
+     */
+    public function testSpanText(string $name, string $bbcode, string $expected): void {
+        $this->assertEquals($expected, Text::span_format($bbcode), $name);
+    }
 }

@@ -237,7 +237,7 @@ class Bonus extends \Gazelle\BaseUser {
 
     public function purchaseTitle(string $label, string $title): bool {
         $item  = $this->items()[$label];
-        $title = $label === 'title-bb-y' ? \Text::full_format($title) : \Text::strip_bbcode($title);
+        $title = $label === 'title-bb-y' ? \Text::span_format($title) : \Text::strip_bbcode($title);
 
         if (!$this->user->setTitle($title)) {
             return false;
