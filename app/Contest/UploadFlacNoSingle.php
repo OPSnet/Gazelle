@@ -5,7 +5,6 @@ namespace Gazelle\Contest;
 /* how many non-Single 100% flacs uploaded? */
 
 class UploadFlacNoSingle extends AbstractContest {
-
     use TorrentLeaderboard;
 
     public function ranker(): array {
@@ -30,7 +29,7 @@ class UploadFlacNoSingle extends AbstractContest {
                         AND t.LogChecksum = '1'
                     )
                 )
-                AND t.Time BETWEEN ? AND ?
+                AND t.created BETWEEN ? AND ?
             GROUP By um.ID
             ",
             [ $this->begin, $this->begin, $this->end ]
@@ -51,7 +50,7 @@ class UploadFlacNoSingle extends AbstractContest {
                 AND ula.last_access >= c.date_begin
                 AND r.Name != 'Single'
                 AND t.Format = 'FLAC'
-                AND t.Time BETWEEN c.date_begin AND c.date_end
+                AND t.created BETWEEN c.date_begin AND c.date_end
                 AND (t.Media IN ('Vinyl', 'WEB', 'SACD')
                     OR (t.Media = 'CD'
                         AND t.HasLog = '1'
@@ -84,7 +83,7 @@ class UploadFlacNoSingle extends AbstractContest {
                     (t.ID IS NULL
                     OR (r.Name != 'Single'
                         AND t.Format = 'FLAC'
-                        AND t.Time BETWEEN c.date_begin AND c.date_end
+                        AND t.created BETWEEN c.date_begin AND c.date_end
                         AND (
                             t.Media IN ('Vinyl', 'WEB', 'SACD')
                             OR (t.Media = 'CD'

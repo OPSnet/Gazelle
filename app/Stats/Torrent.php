@@ -44,7 +44,7 @@ class Torrent extends \Gazelle\Base {
                         coalesce(sum(Size), 0),
                         coalesce(sum(FileCount), 0)
                     FROM torrents
-                    WHERE Time > now() - INTERVAL 1 DAY
+                    WHERE created > now() - INTERVAL 1 DAY
                 ");
 
                 [$info['week']['count'], $info['week']['size'], $info['week']['files']] = self::$db->row("
@@ -52,7 +52,7 @@ class Torrent extends \Gazelle\Base {
                         coalesce(sum(Size), 0),
                         coalesce(sum(FileCount), 0)
                     FROM torrents
-                    WHERE Time > now() - INTERVAL 7 DAY
+                    WHERE created > now() - INTERVAL 7 DAY
                 ");
 
                 [$info['month']['count'], $info['month']['size'], $info['month']['files']] = self::$db->row("
@@ -60,7 +60,7 @@ class Torrent extends \Gazelle\Base {
                         coalesce(sum(Size), 0),
                         coalesce(sum(FileCount), 0)
                     FROM torrents
-                    WHERE Time > now() - INTERVAL 30 DAY
+                    WHERE created > now() - INTERVAL 30 DAY
                 ");
 
                 [$info['quarter']['count'], $info['quarter']['size'], $info['quarter']['files']] = self::$db->row('
@@ -68,7 +68,7 @@ class Torrent extends \Gazelle\Base {
                         coalesce(sum(Size), 0),
                         coalesce(sum(FileCount), 0)
                     FROM torrents
-                    WHERE Time > now() - INTERVAL 120 DAY
+                    WHERE created > now() - INTERVAL 120 DAY
                 ');
 
                 self::$db->prepared_query("
@@ -81,7 +81,7 @@ class Torrent extends \Gazelle\Base {
                 self::$db->prepared_query("
                     SELECT Format, Encoding, count(*) as n
                     FROM torrents
-                    WHERE Time > now() - INTERVAL 1 MONTH
+                    WHERE created > now() - INTERVAL 1 MONTH
                     GROUP BY Format, Encoding WITH ROLLUP
                 ");
                 $info['format-month'] = self::$db->to_array(false, MYSQLI_NUM, false);
@@ -117,11 +117,11 @@ class Torrent extends \Gazelle\Base {
         $flow = self::$cache->get_value(self::TORRENT_FLOW);
         if ($flow === false) {
             self::$db->prepared_query("
-                SELECT date_format(t.Time,'%Y-%m') AS Month,
+                SELECT date_format(t.created,'%Y-%m') AS Month,
                     count(*) as t_net
                 FROM torrents t
                 GROUP BY Month
-                ORDER BY Time DESC
+                ORDER BY created DESC
                 LIMIT 12
             ");
             $flow = self::$db->to_array('Month', MYSQLI_ASSOC, false);
@@ -129,12 +129,12 @@ class Torrent extends \Gazelle\Base {
             $endMonth = reset($flow)['Month'] . '-01';
 
             self::$db->prepared_query("
-                SELECT date_format(Time,'%Y-%m') as Month,
+                SELECT date_format(created,'%Y-%m') as Month,
                     sum(Message LIKE 'Torrent % was uploaded by %') AS t_add,
                     sum(Message LIKE 'Torrent % was deleted %')     AS t_del
                 FROM log
-                WHERE Time BETWEEN ? AND last_day(?)
-                GROUP BY Month order by Time DESC
+                WHERE created BETWEEN ? AND last_day(?)
+                GROUP BY Month order by created DESC
                 ", $beginMonth, $endMonth
             );
             $delta = self::$db->to_array('Month', MYSQLI_ASSOC, false);

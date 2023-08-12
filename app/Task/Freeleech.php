@@ -11,7 +11,7 @@ class Freeleech extends \Gazelle\Task {
             FROM torrents
             WHERE FreeTorrent = '1'
                 AND FreeLeechType = '3'
-                AND Time < now() - INTERVAL 7 HOUR");
+                AND created < now() - INTERVAL 7 HOUR");
 
         self::$db->prepared_query("
             UPDATE torrents
@@ -19,7 +19,7 @@ class Freeleech extends \Gazelle\Task {
                 FreeLeechType = '0'
             WHERE FreeTorrent = '1'
                 AND FreeLeechType = '3'
-                AND Time < now() - INTERVAL 7 HOUR");
+                AND created < now() - INTERVAL 7 HOUR");
 
         self::$db->set_query_id($qId);
         while ([$groupID] = self::$db->next_record()) {

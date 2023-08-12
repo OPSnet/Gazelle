@@ -256,7 +256,7 @@ class Contest extends BaseObject {
                 LADDER.nr,
                 T.ID,
                 TG.Name,
-                T.Time
+                T.created
             ", $this->id, ...$args
         );
         $n = self::$db->affected_rows();

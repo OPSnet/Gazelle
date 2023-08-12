@@ -296,7 +296,7 @@ class Torrent extends \Gazelle\BaseManager {
             INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
             WHERE t.Size > 0
                 AND tls.Seeders > 0
-                AND t.Time > now() - INTERVAL ? DAY
+                AND t.created > now() - INTERVAL ? DAY
             ORDER BY ln(t.Size) * tls.Snatched + ln(t.Size) * tls.Leechers DESC, t.ID DESC
             LIMIT 20
             ", $days
@@ -531,7 +531,7 @@ class Torrent extends \Gazelle\BaseManager {
                             WHERE t.GroupID = ttex.GroupID
                                 AND ttex.TagID IN (" . placeholders(HOMEPAGE_TAG_IGNORE) . ")
                         )
-                    ORDER BY t.Time DESC
+                    ORDER BY t.created DESC
                     ", ...HOMEPAGE_TAG_IGNORE
                 );
                 $latest = [];

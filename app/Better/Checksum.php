@@ -3,7 +3,6 @@
 namespace Gazelle\Better;
 
 class Checksum extends AbstractBetter {
-
     public function mode(): string {
         return 'torrent';
     }
@@ -20,7 +19,7 @@ class Checksum extends AbstractBetter {
             INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)";
 
         $this->where[] = "t.HasLogDB = '1' AND t.LogChecksum = '0'";
-        $this->orderBy = "ORDER BY tls.Snatched DESC, t.Time ASC";
+        $this->orderBy = "ORDER BY tls.Snatched DESC, t.created ASC";
 
         if ($this->filter === 'snatched') {
             $this->where[] = "EXISTS (

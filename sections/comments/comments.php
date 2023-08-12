@@ -155,7 +155,7 @@ switch ($Action) {
             case 'uploaded':
                 $Title = "%s &rsaquo; Comments on their uploads";
                 $Join[] = 'INNER JOIN torrents t ON (t.GroupID = tg.ID)';
-                $condition[] = 'C.AddedTime > t.Time';
+                $condition[] = 'C.AddedTime > t.created';
                 $condition[] = "C.AuthorID != ?";
                 $condition[] = "t.UserID = ?";
                 $condArgs[] = $UserID;

@@ -118,7 +118,7 @@ class Bonus extends \Gazelle\Base {
                     INNER JOIN user_attr ua ON (ua.ID = uha.UserAttrID AND ua.Name IN ('disable-bonus-points', 'no-fl-gifts'))
                     WHERE uha.UserID = um.ID
                 )
-                AND t.Time >= ?
+                AND t.created >= ?
             ", $since
         );
         return $this->addMultiPoints($points, self::$db->collect('ID', false));

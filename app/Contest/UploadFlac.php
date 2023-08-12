@@ -28,7 +28,7 @@ class UploadFlac extends AbstractContest {
                     )
                 )
                 AND ula.last_access >= ?
-                AND t.Time BETWEEN ? AND ?
+                AND t.created BETWEEN ? AND ?
             GROUP By um.ID
             ",
             [ $this->begin, $this->begin, $this->end ]
@@ -46,7 +46,7 @@ class UploadFlac extends AbstractContest {
             WHERE um.Enabled = '1'
                 AND u.created <= c.date_end
                 AND xfu.remaining = 0
-                AND t.Time BETWEEN c.date_begin AND c.date_end
+                AND t.created BETWEEN c.date_begin AND c.date_end
                 AND t.Format = 'FLAC'
                 AND (t.Media IN ('SACD', 'Vinyl', 'WEB')
                     OR (t.Media = 'CD'
@@ -77,7 +77,7 @@ class UploadFlac extends AbstractContest {
                     OR (
                             xfu.remaining = 0
                         AND t.Format = 'FLAC'
-                        AND t.Time BETWEEN c.date_begin AND c.date_end
+                        AND t.created BETWEEN c.date_begin AND c.date_end
                         AND (
                             t.Media IN ('Vinyl', 'WEB', 'SACD')
                             OR (t.Media = 'CD'

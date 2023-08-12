@@ -13,8 +13,8 @@ class Torrent extends TorrentAbstract {
 
     final const SNATCHED_UPDATE_INTERVAL = 3600; // How often we want to update users' snatch lists
 
-    protected $tokenCache;
-    protected $updateTime;
+    protected array $tokenCache;
+    protected string $updateTime;
 
     public function location(): string { return "torrents.php?id={$this->groupId()}&torrentid={$this->id}#torrent{$this->id}"; }
     public function tableName(): string { return 'torrents'; }
@@ -80,19 +80,20 @@ class Torrent extends TorrentAbstract {
      * Check if the viewer has an active freeleech token on this torrent
      */
     public function hasToken(int $userId): bool {
-        if (!$this->tokenCache) {
+        if (!isset($this->tokenCache)) {
             $key = "users_tokens_" . $userId;
-            $this->tokenCache = self::$cache->get_value($key);
-            if ($this->tokenCache === false) {
+            $tokenCache = self::$cache->get_value($key);
+            if ($tokenCache === false) {
                 $qid = self::$db->get_query_id();
                 self::$db->prepared_query("
                     SELECT TorrentID FROM users_freeleeches WHERE Expired = 0 AND UserID = ?
                     ", $userId
                 );
-                $this->tokenCache = array_fill_keys(self::$db->collect('TorrentID', false), true);
+                $tokenCache = array_fill_keys(self::$db->collect(0, false), true);
                 self::$db->set_query_id($qid);
-                self::$cache->cache_value($key, $this->tokenCache, 3600);
+                self::$cache->cache_value($key, $tokenCache, 3600);
             }
+            $this->tokenCache = $tokenCache;
         }
         return isset($this->tokenCache[$this->id]);
     }
@@ -113,7 +114,7 @@ class Torrent extends TorrentAbstract {
                 default  => [$tgroup->name()],
             }
         );
-        $maxLength -= strlen($this->id) + 1 + ($asText ? 4 : 8);
+        $maxLength -= strlen((string)$this->id) + 1 + ($asText ? 4 : 8);
         $filename = safeFilename(shortenString($filename, $maxLength, true, false))
             . "-" . $this->id;
         return $asText ? "$filename.txt" : "$filename.torrent";
@@ -125,7 +126,7 @@ class Torrent extends TorrentAbstract {
     public function torrentBody(string $announceUrl): string {
         $filer = new \Gazelle\File\Torrent;
         $contents = $filer->get($this->id);
-        if (is_null($contents)) {
+        if ($contents == false) {
             return '';
         }
         $tor = new \OrpheusNET\BencodeTorrent\BencodeTorrent;
@@ -362,6 +363,17 @@ class Torrent extends TorrentAbstract {
             (new \Gazelle\User\Bonus($this->uploader()))->removePointsForUpload($this);
         }
 
+        $edition  = $this->edition();
+        $groupId  = $this->group()->id();
+        $infohash = $this->infohash();
+        $sizeMB   = number_format($this->size() / (1024 * 1024), 2) . ' MiB';
+        $name     = $this->name();
+        (new \Gazelle\Tracker)->update_tracker('delete_torrent', [
+            'id'        => $this->id,
+            'info_hash' => rawurlencode($this->infohashBinary()),
+            'reason'    => $trackerReason,
+        ]);
+
         $manager = new \Gazelle\DB;
         $manager->relaxConstraints(true);
         [$ok, $message] = $manager->softDelete(SQLDB, 'torrents_leech_stats', [['TorrentID', $this->id]], false);
@@ -369,14 +381,7 @@ class Torrent extends TorrentAbstract {
             return [false, $message];
         }
         [$ok, $message] = $manager->softDelete(SQLDB, 'torrents', [['ID', $this->id]]);
-        $infohash = $this->infohash();
         $manager->relaxConstraints(false);
-        (new \Gazelle\Tracker)->update_tracker('delete_torrent', [
-            'id' => $this->id,
-            'info_hash' => rawurlencode(hex2bin($infohash)),
-            'reason' => $trackerReason,
-        ]);
-        self::$cache->decrement('stats_torrent_count');
 
         $manager->softDelete(SQLDB, 'torrents_files',                  [['TorrentID', $this->id]]);
         $manager->softDelete(SQLDB, 'torrents_bad_files',              [['TorrentID', $this->id]]);
@@ -433,7 +438,6 @@ class Torrent extends TorrentAbstract {
         $deleteKeys = self::$db->collect('ck', false);
         $manager->softDelete(SQLDB, 'users_notify_torrents', [['TorrentID', $this->id]]);
 
-        $groupId = $this->group()->id();
         if (!is_null($user)) {
             $key = sprintf(self::USER_RECENT_UPLOAD, $user->id());
             $recent = self::$cache->get_value($key);
@@ -451,15 +455,13 @@ class Torrent extends TorrentAbstract {
 
         array_push($deleteKeys, "zz_t_" . $this->id, sprintf(self::CACHE_KEY, $this->id), "torrent_group_" . $groupId);
         self::$cache->delete_multi($deleteKeys);
+        self::$cache->decrement('stats_torrent_count');
         $this->group()->refresh();
+        $this->flush();
 
-        $sizeMB = number_format($this->info()['Size'] / (1024 * 1024), 2) . ' MiB';
         $userInfo = $user ? " by " . $user->username() : '';
         (new Log)->general(
-            "Torrent "
-                . $this->id . " (" . $this->name() . ") [" . $this->edition() .
-                "] ($sizeMB $infohash) was deleted" . $userInfo . " for reason: $reason"
-            )
+            "Torrent {$this->id} ($name) [$edition] ($sizeMB $infohash) was deleted$userInfo for reason: $reason")
             ->torrent(
                 $groupId, $this->id, $user?->id(),
                 "deleted torrent ($sizeMB $infohash) for reason: $reason"
@@ -470,7 +472,7 @@ class Torrent extends TorrentAbstract {
     }
 
     public function expireToken(int $userId): bool {
-        $hash = self::$db->scalar("
+        $hash = (string)self::$db->scalar("
             SELECT info_hash FROM torrents WHERE ID = ?
             ", $this->id
         );
@@ -500,7 +502,7 @@ class Torrent extends TorrentAbstract {
         return self::$db->to_array(false, MYSQLI_NUM, false);
     }
 
-    public function seederList(int $userId, int $limit, int $offset) {
+    public function seederList(int $userId, int $limit, int $offset): array {
         $key = sprintf(self::CACHE_KEY_PEERLIST_PAGE, $this->id, $offset);
         $list = self::$cache->get_value($key);
         if ($list === false) {
@@ -536,7 +538,7 @@ class Torrent extends TorrentAbstract {
     }
 
     public function downloadTotal(): int {
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(DISTINCT UserID) FROM users_downloads WHERE TorrentID = ?
             ", $this->id
         );

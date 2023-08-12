@@ -203,7 +203,7 @@ switch ($_GET['type']) {
             error(403);
         }
         $join = "";
-        $time = 'unix_timestamp(t.Time)';
+        $time = 'unix_timestamp(t.created)';
         $userField = 't.UserID';
         break;
     case 'uploaded-unseeded':
@@ -212,7 +212,7 @@ switch ($_GET['type']) {
         }
         $join = "LEFT JOIN xbt_files_users AS xfu ON (xfu.fid = t.ID AND xfu.uid = t.UserID)";
         $cond[] = 'xfu.fid IS NULL';
-        $time = 'unix_timestamp(t.Time)';
+        $time = 'unix_timestamp(t.created)';
         $userField = 't.UserID';
         break;
     case 'downloaded':

@@ -14,7 +14,7 @@ trait TorrentLeaderboard {
                     l.user_id,
                     l.entry_count,
                     l.last_entry_id,
-                    t.Time as last_upload,
+                    t.created as last_upload,
                     t.GroupID as group_id
                 FROM contest_leaderboard l
                 INNER JOIN torrents t ON (t.ID = l.last_entry_id)
@@ -23,7 +23,7 @@ trait TorrentLeaderboard {
                 WHERE um.Enabled = '1'
                     AND xfu.remaining = 0
                     AND  l.contest_id = ?
-                ORDER BY l.entry_count DESC, t.Time ASC, l.user_id ASC
+                ORDER BY l.entry_count DESC, t.created ASC, l.user_id ASC
                 LIMIT ? OFFSET ?
                 ", $this->id, $limit, $offset
             );

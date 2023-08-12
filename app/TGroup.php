@@ -203,7 +203,7 @@ class TGroup extends BaseObject {
                 group_concat(tt.NegativeVotes ORDER BY tt.PositiveVotes - tt.NegativeVotes DESC, tag.Name) AS tagDownvotes,
                 (tgha.TorrentGroupID IS NOT NULL) AS noCoverArt,
                 max(coalesce(t.Size, 0)) AS max_torrent_size,
-                max(coalesce(t.Time, '2000-01-01 00:00:00')) AS most_recent_upload
+                max(coalesce(t.created, '2000-01-01 00:00:00')) AS most_recent_upload
             FROM torrents_group AS tg
             LEFT JOIN torrents AS t ON (t.GroupID = tg.ID)
             LEFT JOIN torrents_tags AS tt ON (tt.GroupID = tg.ID)
@@ -669,7 +669,7 @@ class TGroup extends BaseObject {
                 tls.Leechers,
                 tls.Snatched,
                 t.FreeTorrent,
-                t.Time,
+                t.created,
                 t.Description,
                 t.FileList,
                 t.FilePath,
@@ -800,7 +800,7 @@ class TGroup extends BaseObject {
                 HasCue, FreeTorrent, Media, Format, Encoding, Description, RemasterYear, RemasterTitle,
                 RemasterRecordLabel, RemasterCatalogueNumber, FileList, TagList, VoteScore, ArtistName)
             SELECT
-                t.ID, g.ID, g.Name, g.Year, g.CategoryID, t.Time, g.ReleaseType,
+                t.ID, g.ID, g.Name, g.Year, g.CategoryID, t.created, g.ReleaseType,
                 g.RecordLabel, g.CatalogueNumber, g.VanityHouse, t.Size, tls.Snatched, tls.Seeders,
                 tls.Leechers, t.LogScore, cast(t.Scene AS CHAR), cast(t.HasLog AS CHAR), cast(t.HasCue AS CHAR),
                 cast(t.FreeTorrent AS CHAR), t.Media, t.Format, t.Encoding, t.Description,

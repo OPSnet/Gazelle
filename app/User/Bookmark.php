@@ -96,12 +96,12 @@ class Bookmark extends \Gazelle\BaseUser {
         $bookmarkList = self::$cache->get_value($key);
         $bookmarkList = false;
         self::$db->prepared_query("
-                SELECT GroupID AS tgroup_id,
-                    Sort       AS sequence,
-                    `Time`     AS created
-                FROM bookmarks_torrents
-                WHERE UserID = ?
-                ORDER BY Sort, `Time`
+                SELECT b.GroupID AS tgroup_id,
+                    b.Sort       AS sequence,
+                    b.Time       AS created
+                FROM bookmarks_torrents b
+                WHERE b.UserID = ?
+                ORDER BY b.Sort, b.Time
                 ", $this->user->id()
         );
         $bookmarkList = self::$db->to_array(false, MYSQLI_ASSOC, false);

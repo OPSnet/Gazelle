@@ -72,7 +72,7 @@ class Reaper extends \Gazelle\Base {
         return $this->initialList(
             cond: [
                 'tls.last_action IS NULL',
-                't.Time < now() - INTERVAL ? HOUR', // interval
+                't.created < now() - INTERVAL ? HOUR', // interval
             ],
             interval: NOTIFY_NEVER_SEEDED_INITIAL_HOUR,
             state:    ReaperState::NEVER,

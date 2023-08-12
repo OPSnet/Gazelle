@@ -3,12 +3,25 @@
 namespace Gazelle\Top10;
 
 class Torrent extends \Gazelle\Base {
+    private string $baseQuery = "
+        SELECT
+            t.ID,
+            g.ID,
+            ((t.Size * tls.Snatched) + (t.Size * 0.5 * tls.Leechers)) AS Data
+        FROM torrents AS t
+        INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
+        INNER JOIN torrents_group AS g ON (g.ID = t.GroupID)
+        %s
+        GROUP BY %s
+        ORDER BY %s
+        LIMIT %s";
+
     public function __construct (
         protected readonly array $formats,
         protected readonly \Gazelle\User $viewer,
     ) {}
 
-    public function getTopTorrents($getParameters, $details = 'all', $limit = 10) {
+    public function getTopTorrents($getParameters, $details = 'all', $limit = 10): array {
         $cacheKey = 'top10_v2_' . $details . '_' . md5(implode('', $getParameters)) . '_' . $limit;
         $topTorrents = self::$cache->get_value($cacheKey);
 
@@ -16,7 +29,7 @@ class Torrent extends \Gazelle\Base {
             return $topTorrents;
         }
         if (self::$cache->get_value("{$cacheKey}_lock")) {
-            return false;
+            return [];
         }
         self::$cache->cache_value("{$cacheKey}_lock", true, 3600);
 
@@ -82,67 +95,56 @@ class Torrent extends \Gazelle\Base {
         return (bool)$this->viewer->option('DisableFreeTorrentTop10');
     }
 
-    private function orderBy($details) {
+    private function orderBy($details): string {
         return match ($details) {
             'snatched' => 'tls.Snatched',
-            'seeded' => 'tls.Seeders',
-            'data' => 'Data',
-            default => '(tls.Seeders + tls.Leechers)',
+            'seeded'   => 'tls.Seeders',
+            'data'     => 'Data',
+            default    => '(tls.Seeders + tls.Leechers)',
         };
     }
 
-    private function detailsWhere($detailsParameters) {
+    private function detailsWhere(string $detailsParameters): array {
         return match ($detailsParameters) {
-            'day' => ["parameters" => null, "where" => "t.Time > now() - INTERVAL 1 DAY"],
-            'week' => ["parameters" => null, "where" => "t.Time > now() - INTERVAL 1 WEEK"],
-            'month' => ["parameters" => null, "where" => "t.Time > now() - INTERVAL 1 MONTH"],
-            'year' => ["parameters" => null, "where" => "t.Time > now() - INTERVAL 1 YEAR"],
+            'day'   => ["parameters" => null, "where" => "t.created > now() - INTERVAL 1 DAY"],
+            'week'  => ["parameters" => null, "where" => "t.created > now() - INTERVAL 1 WEEK"],
+            'month' => ["parameters" => null, "where" => "t.created > now() - INTERVAL 1 MONTH"],
+            'year'  => ["parameters" => null, "where" => "t.created > now() - INTERVAL 1 YEAR"],
             default => [],
         };
     }
 
-    private function excludedArtistClause($artistParameter) {
-        if (!empty($artistParameter)) {
-            $artists = preg_split('/\r\n|\r|\n/', trim($artistParameter));
-
-            $artistPrepare = fn($artist) => trim($artist);
-            $artists = array_map($artistPrepare, $artists);
-
-            $sql = "
-            LEFT JOIN (
-                SELECT COUNT(*) AS ArtistCount, ta.GroupID
-                FROM torrents_artists AS ta
-                INNER JOIN artists_alias AS aa ON (ta.AliasID = aa.AliasID)
-                WHERE ta.Importance != '2' AND aa.Name IN (" . placeholders($artists) . ")
-                GROUP BY ta.GroupID
-            ) AS ta ON (g.ID = ta.GroupID)";
-            return [$sql, $artists];
+    private function excludedArtistClause(string $artistParameter): array {
+        $artists = preg_split('/\r\n|\r|\n/', trim($artistParameter));
+        if ($artists) {
+            return [
+                " LEFT JOIN (
+                    SELECT COUNT(*) AS ArtistCount, ta.GroupID
+                    FROM torrents_artists AS ta
+                    INNER JOIN artists_alias AS aa ON (ta.AliasID = aa.AliasID)
+                    WHERE ta.Importance != '2' AND aa.Name IN (" . placeholders($artists) . ")
+                    GROUP BY ta.GroupID
+                ) AS ta ON (g.ID = ta.GroupID)",
+                array_map('trim', $artists)
+            ];
         }
-
         return ['', []];
     }
 
-    private function formatWhere($formatParameters) {
+    private function formatWhere(string $formatParameters): array {
         if (in_array($formatParameters, $this->formats)) {
             return ["parameters" => $formatParameters, "where" => "t.Format = ?"];
         }
-    }
-
-    private function freeleechWhere($getParameters) {
-        $disableFreeTorrentTop10 = $this->viewer->option('DisableFreeTorrentTop10') ?? false;
-
-        if (isset($getParameters['freeleech'])) {
-            $disableFreeTorrentTop10 = ($getParameters['freeleech'] == 'hide' ? 1 : 0);
-        }
-
-        if ($disableFreeTorrentTop10) {
-            return ["parameters" => null, "where" => "t.FreeTorrent = '0'"];
-        }
-
         return [];
     }
 
-    private function tagWhere($getParameters, $any = false) {
+    private function freeleechWhere(array $getParameters): array {
+        return ($getParameters['freeleech'] ?? '') == 'hide' || (bool)$this->viewer->option('DisableFreeTorrentTop10')
+            ? ["parameters" => null, "where" => "t.FreeTorrent = '0'"]
+            : [];
+    }
+
+    private function tagWhere(string $getParameters, bool $any = false): array {
         if (!empty($getParameters)) {
             $tags = explode(',', trim($getParameters));
             $replace = fn($tag) => preg_replace('/[^a-z0-9.]/', '', $tag);
@@ -168,22 +170,9 @@ class Torrent extends \Gazelle\Base {
         return [];
     }
 
-    private function flatten(array $array) {
+    private function flatten(array $array): array {
         $return = [];
         array_walk_recursive($array, function($a) use (&$return) { $return[] = $a; });
         return $return;
     }
-
-    private string $baseQuery = "
-        SELECT
-            t.ID,
-            g.ID,
-            ((t.Size * tls.Snatched) + (t.Size * 0.5 * tls.Leechers)) AS Data
-        FROM torrents AS t
-        INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
-        INNER JOIN torrents_group AS g ON (g.ID = t.GroupID)
-        %s
-        GROUP BY %s
-        ORDER BY %s
-        LIMIT %s";
 }

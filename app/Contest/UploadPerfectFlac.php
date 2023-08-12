@@ -5,7 +5,6 @@ namespace Gazelle\Contest;
 /* how many perfect 100% CD flacs uploaded? */
 
 class UploadPerfectFlac extends AbstractContest {
-
     use TorrentLeaderboard;
 
     public function ranker(): array {
@@ -24,7 +23,7 @@ class UploadPerfectFlac extends AbstractContest {
                 AND t.HasCue = '1'
                 AND t.LogScore = 100
                 AND t.LogChecksum = '1'
-                AND t.Time BETWEEN ? AND ?
+                AND t.created BETWEEN ? AND ?
             GROUP By um.ID
             ",
             [ $this->begin, $this->begin, $this->end ]
@@ -42,7 +41,7 @@ class UploadPerfectFlac extends AbstractContest {
             WHERE um.Enabled = '1'
                 AND ula.last_access >= c.date_begin
                 AND t.Format = 'FLAC'
-                AND t.Time BETWEEN c.date_begin AND c.date_end
+                AND t.created BETWEEN c.date_begin AND c.date_end
                 AND t.Media = 'CD'
                 AND t.HasLog = '1'
                 AND t.HasCue = '1'
@@ -69,7 +68,7 @@ class UploadPerfectFlac extends AbstractContest {
                 AND
                     (t.ID IS NULL
                     OR (t.Format = 'FLAC'
-                        AND t.Time BETWEEN c.date_begin AND c.date_end
+                        AND t.created BETWEEN c.date_begin AND c.date_end
                         AND t.Media = 'CD'
                         AND t.HasLog = '1'
                         AND t.HasCue = '1'

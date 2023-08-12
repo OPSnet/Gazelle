@@ -316,8 +316,6 @@ abstract class TorrentAbstract extends BaseObject {
 
     /**
      * The infohash of this torrent
-     *
-     * @return string hexified infohash
      */
     public function infohash(): string {
         return $this->info()['info_hash'];
@@ -325,8 +323,6 @@ abstract class TorrentAbstract extends BaseObject {
 
     /**
      * The infohash of this torrent (binary)
-     *
-     * @return string raw infohash
      */
     public function infohashBinary(): string {
         return $this->info()['info_hash_raw'];
@@ -577,7 +573,7 @@ abstract class TorrentAbstract extends BaseObject {
     public function isUploadGracePeriod(): bool {
         return strtotime($this->created()) > date('U') - 3600;
     }
-    
+
     /**
      * Was it active more then 14 days ago? If never active has it been 3 days? (Reseed grace period)
      */
@@ -592,7 +588,7 @@ abstract class TorrentAbstract extends BaseObject {
             default                                         => false,
         };
     }
-    
+
     /**
      * The uploader ID of this torrent
      */

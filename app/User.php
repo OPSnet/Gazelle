@@ -1741,7 +1741,7 @@ class User extends BaseObject {
                     AND g.CategoryID = '1'
                     AND t.UserID = ?
                 GROUP BY g.ID
-                ORDER BY t.Time DESC
+                ORDER BY t.created DESC
                 LIMIT ?
                 ", $this->id, $limit
             );

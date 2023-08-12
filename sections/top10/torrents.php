@@ -185,20 +185,7 @@ foreach ($context as $c) {
         <td style="text-align: right;" class="sign leechers"><img src="<?= $urlStem ?>leechers.png" alt="Leechers" title="Leechers" class="tooltip" /></td>
         <td style="text-align: right;">Transferred</td>
     </tr>
-<?php
-    // Server is already processing a top10 query. Starting another one will make things slow
-    if ($details === false) {
-?>
-        <tr class="rowb">
-            <td colspan="9" class="center">
-                Server is busy processing another top list request. Please try again in a minute.
-            </td>
-        </tr>
-        </table><br />
-<?php
-        continue;
-    } elseif (empty($details)) {
-?>
+<?php if (!$details) { ?>
         <tr class="rowb">
             <td colspan="9" class="center">
                 Found no torrents matching the criteria.
