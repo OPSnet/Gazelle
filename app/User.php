@@ -2114,9 +2114,9 @@ class User extends BaseObject {
     }
 
     /**
-     * Remove an active invitation
+     * Revoke an active invitation (restore previous invite total)
      */
-    public function removeInvite(string $key): bool {
+    public function revokeInvite(string $key): bool {
         self::$db->begin_transaction();
         self::$db->prepared_query("
             DELETE FROM invites WHERE InviteKey = ?
