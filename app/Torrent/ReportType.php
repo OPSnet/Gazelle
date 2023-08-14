@@ -3,7 +3,7 @@
 namespace Gazelle\Torrent;
 
 class ReportType extends \Gazelle\BaseObject {
-    final const CACHE_KEY = 'trepcfg_%d';
+    final const CACHE_KEY = 'trepcfg_v2_%d';
 
     protected array $changeSet;
 
@@ -37,6 +37,7 @@ class ReportType extends \Gazelle\BaseObject {
                     r.tracker_reason,
                     r.is_active,
                     r.is_admin,
+                    r.is_invisible,
                     r.need_image,
                     r.need_link,
                     r.need_sitelink,
@@ -102,6 +103,10 @@ class ReportType extends \Gazelle\BaseObject {
 
     public function isAdmin(): bool {
         return $this->info()['is_admin'];
+    }
+
+    public function isInvisible(): bool {
+        return $this->info()['is_invisible'];
     }
 
     public function name(): string {

@@ -244,7 +244,7 @@ class Bookmark extends \Gazelle\BaseUser {
                     }
                     $Feed->populate('torrents_bookmarks_t_' . $this->user->announceKey(),
                         $Feed->item(
-                            $torrent->name() . ' ' . '[' . $torrent->label() .']',
+                            $torrent->name() . ' ' . '[' . $torrent->label($this->user) .']',
                             \Text::strip_bbcode($tgroup->description()),
                             "torrents.php?action=download&id={$id}&torrent_pass=[[PASSKEY]]",
                             date('r'),

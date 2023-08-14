@@ -37,6 +37,12 @@
         <br />Admin-level report types are only available to Staff.</td>
     </tr>
     <tr>
+        <td class="colhead">Invisible</td>
+        <td>{{ config.isInvisible|truth }} <input type="checkbox" name="is_invisible"{{ checked(config.isInvisible) }} />
+        <br />The "Reported" label of an invisible report is show only to the reporter and staff.
+        The owner is not informed when an invisible report is created.</td>
+    </tr>
+    <tr>
         <td class="colhead">Category</td>
         <td>{{ config.categoryName }}
         <br /><select name="category_id">
@@ -123,9 +129,6 @@
         <td class="colhead">PM Body</td>
         <td>{{ pm.emit|raw }}
         <br />This message will be sent as a PM to the uploader when the report is created.</td>
-    </tr>
-    <tr>
-        <td colspan="3"><input type="submit" name="submit" value="Update" /></td>
     </tr>
     <tr>
         <td class="colhead">Log message</td>

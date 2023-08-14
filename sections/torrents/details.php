@@ -457,7 +457,7 @@ if (!$torrentList) {
         }
         $prev = $current;
 
-        $reportTotal = $torrent->reportTotal();
+        $reportTotal = $torrent->reportTotal($Viewer);
         $reportList  = array_map(fn ($id) => $reportMan->findById($id), $torrent->reportIdList($Viewer));
     ?>
             <tr class="torrent_row releases_<?= $tgroup->releaseTypeName() ?> groupid_<?=$tgroupId?> edition_<?= $EditionID
@@ -477,7 +477,7 @@ if (!$torrentList) {
             ],
         ]);
 ?>
-                    <a href="#" onclick="$('#torrent_<?=$TorrentID?>').gtoggle(); return false;">&#x25B6; <?= $torrent->label() ?></a>
+                    <a href="#" onclick="$('#torrent_<?=$TorrentID?>').gtoggle(); return false;">&#x25B6; <?= $torrent->label($Viewer) ?></a>
                 </td>
                 <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
             </tr>

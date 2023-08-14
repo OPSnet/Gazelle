@@ -4,7 +4,7 @@ namespace Gazelle;
 
 abstract class TorrentAbstract extends BaseObject {
     final const CACHE_LOCK       = 'torrent_lock_%d';
-    final const CACHE_REPORTLIST = 't_rpt2_%s_%d';
+    final const CACHE_REPORTLIST = 't_rpt2_%d';
 
     protected TGroup $tgroup;
     protected User   $viewer;
@@ -104,13 +104,6 @@ abstract class TorrentAbstract extends BaseObject {
             $info['LogCount'] = count($info['ripLogIds']);
             $info['FileList'] = explode("\n", $info['FileList']);
             if (!$this->isDeleted()) {
-                $info['Reported'] = self::$db->scalar("
-                    SELECT count(*)
-                    FROM reportsv2 r
-                    WHERE r.Status != 'Resolved'
-                        AND r.TorrentID = ?
-                    ", $this->id
-                );
                 self::$cache->cache_value($key, $info, ($info['Seeders'] ?? 0) > 0 ? 600 : 3600);
             }
         }
@@ -122,6 +115,7 @@ abstract class TorrentAbstract extends BaseObject {
             $info['PersonalFL'] = false;
             $info['IsSnatched'] = false;
         }
+
         $this->info = $info;
         return $this->info;
     }
@@ -299,10 +293,6 @@ abstract class TorrentAbstract extends BaseObject {
      */
     public function hasLogDb(): bool {
         return $this->info()['HasLogDB'];
-    }
-
-    public function hasReport(\Gazelle\User $viewer): bool {
-        return count($this->reportIdList($viewer)) > 0;
     }
 
     /**
@@ -499,42 +489,39 @@ abstract class TorrentAbstract extends BaseObject {
 
     /**
      * Get the reports associated with this torrent
-     * Non-admin users do not see Edited reports
      *
      * @return array of ids of \Gazelle\Torrent\Report
      */
     public function reportIdList(User $viewer): array {
-        $key = sprintf(self::CACHE_REPORTLIST, $viewer->permitted('admin_reports') ? 'a' : 'u', $this->id());
+        if ($this->isDeleted()) {
+            return [];
+        }
+        $key = sprintf(self::CACHE_REPORTLIST, $this->id());
         $list = self::$cache->get_value($key);
         if ($list === false) {
             $qid = self::$db->get_query_id();
-            if ($viewer->permitted('admin_reports')) {
-                self::$db->prepared_query("
-                    SELECT ID
-                    FROM reportsv2
-                    WHERE Status != 'Resolved'
-                        AND TorrentID = ?
-                    ", $this->id
-                );
-            } else {
-                self::$db->prepared_query("
-                    SELECT ID
-                    FROM reportsv2
-                    WHERE Status != 'Resolved'
-                        AND Type != 'edited'
-                        AND TorrentID = ?
-                    ", $this->id
-                );
-            }
-            $list = self::$db->collect(0, false);
+            self::$db->prepared_query("
+                SELECT r.ID      AS id,
+                    r.ReporterID AS reporter_id,
+                    trc.is_invisible
+                FROM reportsv2 r
+                INNER JOIN torrent_report_configuration trc ON (trc.type = r.Type)
+                WHERE r.Status != 'Resolved'
+                    AND r.TorrentID = ?
+                ", $this->id
+            );
+            $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
             self::$db->set_query_id($qid);
             self::$cache->cache_value($key, $list, 7200);
         }
-        return $list;
+        if (!$viewer->isStaff()) {
+            $list = array_filter($list, fn($r) => $r['is_invisible'] == 0 || $r['reporter_id'] == $viewer->id());
+        }
+        return array_column($list, 'id');
     }
 
-    public function reportTotal(): int {
-        return $this->info()['Reported'];
+    public function reportTotal(User $viewer): int {
+        return count($this->reportIdList($viewer));
     }
 
     public function ripLogIdList(): array {
@@ -705,10 +692,10 @@ abstract class TorrentAbstract extends BaseObject {
         return "<a href=\"{$this->url()}\">[$short]</a>";
     }
 
-    public function labelList(): array {
+    public function labelList(?User $viewer = null): array {
         $info = $this->info();
         $extra = [];
-        if (isset($this->viewer) && (new User\Snatch($this->viewer))->showSnatch($this->id)) {
+        if ($viewer && (new User\Snatch($viewer))->showSnatch($this->id)) {
             $extra[] = $this->labelElement('tl_snatched', 'Snatched!');
         }
         if (isset($info['FreeTorrent'])) {
@@ -744,15 +731,15 @@ abstract class TorrentAbstract extends BaseObject {
         if ($this->hasLossywebApproved()) {
             $extra[] = $this->labelElement('tl_approved tl_lossy_web', 'Lossy WEB Approved');
         }
-        if (isset($info['Reported']) && $info['Reported']) {
+        if ($viewer && $this->reportTotal($viewer)) {
             $extra[] = $this->labelElement('tl_reported', 'Reported');
         }
         return $extra;
     }
 
-    public function label(): string {
+    public function label(?User $viewer = null): string {
         $short = $this->shortLabel();
-        $extra = $this->labelList();
+        $extra = $this->labelList($viewer);
         if ($short) {
             return "[$short]" . ($extra ? ' ' . implode(' / ', $extra) : '');
         } elseif ($extra) {

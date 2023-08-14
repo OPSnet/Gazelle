@@ -13,10 +13,10 @@ if (isset($_POST['submit'])) {
     authorize();
     $changeSet = [];
 
-    foreach (['is_active', 'is_admin', 'resolve_delete', 'resolve_upload'] as $boolField) {
+    foreach (['is_active', 'is_admin', 'is_invisible', 'resolve_delete', 'resolve_upload'] as $boolField) {
         $new = ($_POST[$boolField] ?? '') === 'on';
         if ($new != $config->field($boolField)) {
-            $changeSet[] = ['field' => $boolField, 'new' => $new, 'old' => $config->field($boolField)];
+            $changeSet[] = ['field' => $boolField, 'new' => (int)$new, 'old' => $config->field($boolField)];
         }
     }
 

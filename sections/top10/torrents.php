@@ -224,7 +224,7 @@ foreach ($context as $c) {
                 ]) ?>
                 <strong><?= $tgroup->link() ?></strong> <?= $torrent->shortLabelLink() ?>
                 <br />[<?= $torrent->edition() ?>]
-<?php   if ($torrent->hasReport($Viewer)) { ?>
+<?php   if ($torrent->reportTotal($Viewer)) { ?>
                 - <strong class="torrent_label tl_reported">Reported</strong>
 <?php   } ?>
                 <?= $Twig->render('bookmark/action.twig', [

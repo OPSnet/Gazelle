@@ -13,6 +13,7 @@
         <td class="colhead">Name</td>
         <td class="colhead">Active</td>
         <td class="colhead">Admin</td>
+        <td class="colhead">Invisible</td>
         <td class="colhead">Category Name</td>
         <td class="colhead">Sequence</td>
         <td class="colhead">Need Image</td>
@@ -29,6 +30,7 @@
         <td>{{ r.name }}</td>
         <td>{{ r.isActive|truth }}</td>
         <td>{{ r.isAdmin|truth }}</td>
+        <td>{{ r.isInvisible|truth }}</td>
         <td>{{ r.categoryName }}</td>
         <td>{{ r.sequence }}</td>
         <td>{{ r.needImage }}</td>

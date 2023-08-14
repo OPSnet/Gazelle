@@ -109,7 +109,7 @@ $report = $reportMan->create(
     link:        $Links,
 );
 
-if ($reportType->type() != 'edited' && $torrent->uploaderId() != $Viewer->id()) {
+if (!$reportType->isInvisible() && $torrent->uploaderId() != $Viewer->id()) {
     (new Gazelle\Manager\User)->sendPM($torrent->uploaderId(), 0,
         "One of your torrents has been reported",
         $Twig->render('reportsv2/new.twig', [
