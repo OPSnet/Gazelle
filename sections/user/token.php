@@ -24,7 +24,7 @@ elseif ($_GET['do'] === 'generate') {
     if (empty($tokenName)) {
         $error = 'You must supply a name for the token.';
     }
-    elseif ($user->hasTokenByName($tokenName)) {
+    elseif ($user->hasApiTokenByName($tokenName)) {
         $error = 'You have already generated a token with that name.';
     } else {
         $token = $user->createApiToken($tokenName, ENCKEY);

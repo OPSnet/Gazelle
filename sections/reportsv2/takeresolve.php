@@ -121,7 +121,7 @@ if (!(isset($_POST['delete']) && $Viewer->permitted('users_mod'))) {
 
 $revokeUpload = isset($_POST['upload']);
 if ($revokeUpload) {
-    $uploader->revokeUpload();
+    $uploader->toggleAttr('disable-upload', true);
 }
 
 if ($weeksWarned > 0) {

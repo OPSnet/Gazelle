@@ -13,7 +13,7 @@ class UserTokenTest extends TestCase {
     protected \Gazelle\User $user;
 
     public function setUp(): void {
-        $this->user = Helper::makeUser('user.' . randomString(6), 'user');
+        $this->user = Helper::makeUser('token.' . randomString(10), 'token');
     }
 
     public function tearDown(): void {
@@ -79,5 +79,30 @@ class UserTokenTest extends TestCase {
         $this->assertEquals(1, $this->user->create2FA($manager, randomString(16)), 'utest-setup-mfa');
         $recovery = $this->user->list2FA();
         $this->assertCount(10, $recovery, 'utest-list-mfa');
+
+        $burn = array_pop($recovery);
+        $this->assertFalse($this->user->burn2FARecovery('no such key'), 'utest-no-burn-mfa');
+        $this->assertTrue($this->user->burn2FARecovery($burn), 'utest-burn-mfa');
+        $this->assertCount(9, $this->user->list2FA(), 'utest-less-mfa');
+        $this->assertNotNull($this->user->TFAKey(), 'utest-has-mfa-key');
+        $this->user->remove2FA()->modify();
+        $this->assertCount(0, $this->user->list2FA(), 'utest-remove-mfa');
+        $this->assertNull($this->user->TFAKey(), 'utest-no-mfa-key');
+    }
+
+    public function testApiToken(): void {
+        $this->assertCount(0, $this->user->apiTokenList(), 'user-token-none-creted');
+        $this->assertFalse($this->user->hasApiToken('no such token'), 'user-token-missing');
+
+        $token = $this->user->createApiToken('api-token', 'key');
+        $this->assertTrue($this->user->hasApiToken($token), 'user-token-create');
+        $this->assertTrue($this->user->hasApiTokenByName('api-token'), 'user-has-token-by-name');
+        $list = $this->user->apiTokenList();
+        $this->assertCount(1, $list, 'user-token-list');
+        $this->assertEquals(0, $this->user->revokeApiTokenById(0), 'user-revoke-missing');
+
+        $this->assertCount(0, $this->user->apiTokenList(revoked: true), 'user-token-none-revoked');
+        $this->assertEquals(1, $this->user->revokeApiTokenById($list[0]['id']), 'user-revoke-token');
+        $this->assertCount(1, $this->user->apiTokenList(revoked: true), 'user-token-one-revoked');
     }
 }

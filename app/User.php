@@ -764,9 +764,9 @@ class User extends BaseObject {
     /**
      * Checks whether user has autocomplete enabled
      *
-     * @param string $Type Where the is the input requested (search, other)
+     * @param string $Type Where is the input requested (search, other)
      */
-    public function hasAutocomplete($Type): bool {
+    public function hasAutocomplete(string $Type): bool {
         $autoComplete = $this->option('AutoComplete');
         if (is_null($autoComplete)) {
             // not set, default to enabled
@@ -2029,19 +2029,19 @@ class User extends BaseObject {
         return $token;
     }
 
-    public function apiTokenList(): array {
+    public function apiTokenList(bool $revoked = false): array {
         self::$db->prepared_query("
             SELECT id, name, token, created
             FROM api_tokens
             WHERE user_id = ?
-                AND revoked = 0
+                AND revoked = ?
             ORDER BY created DESC
-            ", $this->id
+            ", $this->id, (int)$revoked
         );
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
-    public function hasTokenByName(string $name): bool {
+    public function hasApiTokenByName(string $name): bool {
         return (bool)self::$db->scalar("
             SELECT 1
             FROM api_tokens
@@ -2053,14 +2053,14 @@ class User extends BaseObject {
     }
 
     public function hasApiToken(string $token): bool {
-        return self::$db->scalar("
+        return (bool)self::$db->scalar("
             SELECT 1
             FROM api_tokens
             WHERE revoked = 0
                 AND user_id = ?
                 AND token = ?
             ", $this->id, $token
-        ) === 1;
+        );
     }
 
     public function revokeApiTokenById(int $tokenId): int {
@@ -2070,17 +2070,6 @@ class User extends BaseObject {
             WHERE user_id = ? AND id = ?
             ", $this->id, $tokenId
         );
-        return self::$db->affected_rows();
-    }
-
-    public function revokeUpload(): int {
-        self::$db->prepared_query("
-            UPDATE users_info SET
-                DisableUpload = '1'
-            WHERE UserID = ?
-            ", $this->id
-        );
-        $this->flush();
         return self::$db->affected_rows();
     }
 

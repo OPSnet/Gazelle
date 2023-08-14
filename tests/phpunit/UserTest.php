@@ -17,6 +17,10 @@ class UserTest extends TestCase {
     }
 
     public function tearDown(): void {
+        \Gazelle\DB::DB()->prepared_query("
+            DELETE FROM user_read_forum WHERE user_id = ?
+            ", $this->user->id()
+        );
         $this->user->remove();
     }
 
@@ -33,7 +37,8 @@ class UserTest extends TestCase {
 
     public function testUserFind(): void {
         $userMan = new \Gazelle\Manager\User;
-        $admin = $userMan->find('@admin');
+        $admin = $userMan->find('@' . $this->user->username());
+        $this->user->setField('PermissionID', SYSOP)->modify();
         $this->assertTrue($admin->isStaff(), 'admin-is-admin');
         $this->assertTrue($admin->permitted('site_upload'), 'admin-permitted-site_upload');
         $this->assertTrue($admin->permitted('site_debug'), 'admin-permitted-site_debug');
@@ -42,17 +47,16 @@ class UserTest extends TestCase {
 
     public function testFindById(): void {
         $userMan = new \Gazelle\Manager\User;
-        $user = $userMan->findById(2);
+        $user = $userMan->findById($this->user->id());
         $this->assertFalse($user->isStaff(), 'user-is-not-admin');
-        $this->assertEquals($user->username(), 'user', 'user-username');
-        $this->assertEquals($user->email(), 'user@example.com', 'user-email');
-        $this->assertTrue($user->isEnabled(), 'user-is-enabled');
-        $this->assertFalse($user->isUnconfirmed(), 'user-is-confirmed');
+        $this->assertStringStartsWith('user.', $user->username(), 'user-username');
+        $this->assertStringEndsWith('@user.example.com', $user->email(), 'user-email');
+        $this->assertFalse($user->isEnabled(), 'user-is-enabled');
+        $this->assertTrue($user->isUnconfirmed(), 'user-is-confirmed');
         $this->assertFalse($user->permittedAny('site_analysis', 'site_debug'), 'utest-permittedAny-site-analysis-site-debug');
     }
 
     public function testAttr(): void {
-        $userMan = new \Gazelle\Manager\User;
         $this->assertFalse($this->user->hasUnlimitedDownload(), 'uattr-hasUnlimitedDownload');
         $this->user->toggleUnlimitedDownload(true);
         $this->assertTrue($this->user->hasUnlimitedDownload(), 'uattr-not-hasUnlimitedDownload');
@@ -63,12 +67,13 @@ class UserTest extends TestCase {
 
         $this->assertNull($this->user->option('nosuchoption'), 'uattr-nosuchoption');
 
-        $this->assertEquals($this->user->avatarMode(), AvatarDisplay::show, 'uattr-avatarMode');
-        $this->assertEquals($this->user->bonusPointsTotal(), 0, 'uattr-bp');
-        $this->assertEquals($this->user->downloadedSize(), 0, 'uattr-starting-download');
-        $this->assertEquals($this->user->postsPerPage(), POSTS_PER_PAGE, 'uattr-ppp');
-        $this->assertEquals($this->user->uploadedSize(), STARTING_UPLOAD, 'uattr-starting-upload');
-        $this->assertEquals($this->user->userclassName(), 'User', 'uattr-userclass-name');
+        $this->assertEquals(AvatarDisplay::show, $this->user->avatarMode(), 'uattr-avatarMode');
+        $this->assertTrue($this->user->showAvatars(), 'uattr-show-avatars');
+        $this->assertEquals(0, $this->user->bonusPointsTotal(), 'uattr-bp');
+        $this->assertEquals(0, $this->user->downloadedSize(), 'uattr-starting-download');
+        $this->assertEquals(POSTS_PER_PAGE, $this->user->postsPerPage(), 'uattr-ppp');
+        $this->assertEquals(STARTING_UPLOAD, $this->user->uploadedSize(), 'uattr-starting-upload');
+        $this->assertEquals('User', $this->user->userclassName(), 'uattr-userclass-name');
 
         $this->assertFalse($this->user->disableAvatar(), 'uattr-disableAvatar');
         $this->assertFalse($this->user->disableBonusPoints(), 'uattr-disableBonusPoints');
@@ -111,26 +116,44 @@ class UserTest extends TestCase {
         $this->assertTrue($this->user->updatePassword($password, '0.0.0.0'), 'utest-password-modify');
         $this->assertTrue($this->user->validatePassword($password), 'utest-password-validate-new');
         $this->assertCount(1, $this->user->passwordHistory(), 'utest-password-history');
-        $this->assertEquals($this->user->passwordCount(), 1, 'utest-password-count');
+        $this->assertEquals(1, $this->user->passwordCount(), 'utest-password-count');
     }
 
     public function testUser(): void {
-        $userMan = new \Gazelle\Manager\User;
         $this->assertEquals($this->user->username(), $this->user->flush()->username(), 'utest-flush-username');
 
-        $this->assertEquals($this->user->primaryClass(), USER, 'utest-primary-class');
-        $this->assertEquals($this->user->inboxUnreadCount(), 0, 'utest-inbox-unread');
-        $this->assertEquals($this->user->allowedPersonalCollages(), 0, 'utest-personal-collages-allowed');
-        $this->assertEquals($this->user->paidPersonalCollages(), 0, 'utest-personal-collages-paid');
-        $this->assertEquals($this->user->activePersonalCollages(), 0, 'utest-personal-collages-active');
-        $this->assertEquals($this->user->collagesCreated(), 0, 'utest-collage-created');
-        $this->assertEquals($this->user->pendingInviteCount(), 0, 'utest-personal-collages-active');
-        $this->assertEquals($this->user->seedingSize(), 0, 'utest-personal-collages-active');
+        $this->assertEquals(0, $this->user->announceKeyCount(), 'utest-announce-key-count');
+        $this->assertEquals(0, $this->user->allowedPersonalCollages(), 'utest-personal-collages-allowed');
+        $this->assertEquals(0, $this->user->paidPersonalCollages(), 'utest-personal-collages-paid');
+        $this->assertEquals(0, $this->user->activePersonalCollages(), 'utest-personal-collages-active');
+        $this->assertEquals(0, $this->user->collagesCreated(), 'utest-collage-created');
+        $this->assertEquals(0, $this->user->collageUnreadCount(), 'utest-collage-unread-count');
+        $this->assertEquals(0, $this->user->forumCatchupEpoch(), 'utest-forum-catchup-epoch');
+        $this->assertEquals(0, $this->user->inboxUnreadCount(), 'utest-inbox-unread');
+        $this->assertEquals(0, $this->user->pendingInviteCount(), 'utest-pending-invite-count');
+        $this->assertEquals(0, $this->user->downloadedOnRatioWatch(), 'utest-download-ratio-watch');
+        $this->assertEquals(0, $this->user->seedingSize(), 'utest-seeding-size');
+        $this->assertEquals(0, $this->user->torrentDownloadCount(0), 'utest-torrent-download-count');
+        $this->assertEquals(0, $this->user->torrentRecentRemoveCount(1), 'utest-torrent-recent-remove-count');
+        $this->assertEquals(0, $this->user->trackerIPCount(), 'utest-tracker-ipaddr-total');
+        $this->assertEquals(0.0, $this->user->requiredRatio(), 'utest-required-ratio');
+        $this->assertEquals(1, $this->user->emailCount(), 'utest-email-total');
+        $this->assertEquals(1, $this->user->siteIPCount(), 'utest-site-ipaddr-total');
+        $this->assertEquals('', $this->user->forbiddenForumsList(), 'utest-forbidden-forum-list');
+        $this->assertEquals([], $this->user->tagSnatchCounts(), 'utest-tag-snatch-counts');
+        $this->assertEquals([], $this->user->tokenList(new \Gazelle\Manager\Torrent, 0, 0), 'utest-token-list');
+        $this->assertEquals(USER, $this->user->primaryClass(), 'utest-primary-class');
+
+        $this->assertTrue($this->user->forumAccess(0, 0), 'utest-forum-access-low');
+        $this->assertFalse($this->user->forumAccess(0, 10000), 'utest-forum-access-high');
 
         $this->assertTrue($this->user->isVisible(), 'utest-is-visble');
-        $this->assertTrue($this->user->canLeech(), 'can-leech');
+        $this->assertTrue($this->user->canLeech(), 'utest-can-leech');
+        $this->assertTrue($this->user->hasAutocomplete('other'), 'utest-has-autocomplete-other');
+        $this->assertTrue($this->user->hasAutocomplete('search'), 'utest-has-autocomplete-search');
         $this->assertTrue($this->user->permitted('site_upload'), 'utest-permitted-site-upload');
         $this->assertTrue($this->user->permittedAny('site_upload', 'site_debug'), 'utest-permittedAny-site-upload-site-debug');
+        $this->assertTrue($this->user->updateCatchup(), 'utest-update-catchup');
 
         $this->assertFalse($this->user->isDisabled(), 'utest-is-disabled');
         $this->assertFalse($this->user->isFLS(), 'utest-is-fls');
@@ -140,15 +163,45 @@ class UserTest extends TestCase {
         $this->assertFalse($this->user->isStaffPMReader(), 'utest-is-staff-pm-reader');
         $this->assertFalse($this->user->isWarned(), 'utest-is-not-warned');
         $this->assertFalse($this->user->canCreatePersonalCollage(), 'utest-personal-collage-create');
+        $this->assertFalse($this->user->onRatioWatch(), 'utest-personal-on-ratio-watch');
         $this->assertFalse($this->user->permitted('site_debug'), 'utest-permitted-site-debug');
 
+        $this->assertNull($this->user->lastAccess(), 'utest-last-access');
+        $this->assertNull($this->user->warningExpiry(), 'utest-warning-expiry');
         $this->assertNull($this->user->warningExpiry(), 'utest-warning-expiry');
 
+        $this->assertEquals(32, strlen($this->user->announceKey()), 'utest-announce-key');
+        $this->assertStringStartsWith(ANNOUNCE_HTTPS_URL, $this->user->announceUrl(), 'utest-announce-url-begin');
+        $this->assertStringEndsWith('/announce', $this->user->announceUrl(), 'utest-announce-url-end');
         $this->assertCount(0, $this->user->announceKeyHistory(), 'utest-announce-key-history');
+
+        $this->assertEquals([], $this->user->recentSnatchList(), 'utest-recent-snatch');
+        $this->assertEquals([], $this->user->recentUploadList(), 'utest-recent-upload');
+        $this->assertTrue($this->user->flushRecentSnatch(), 'utest-flush-recent-snatch');
+        $this->assertTrue($this->user->flushRecentUpload(), 'utest-flush-recent-upload');
+
+        $this->assertEquals(0, $this->user->tokenCount(), 'utest-token-count');
+        $this->assertTrue($this->user->updateTokens(10), 'utest-token-update-10');
+        $this->assertTrue($this->user->updateTokens(5), 'utest-token-update-5');
+        $this->assertEquals(5, $this->user->tokenCount(), 'utest-token-new-count');
 
         // TODO: this will become null
         $this->assertEquals('', $this->user->slogan(), 'utest-slogan');
         $this->assertTrue($this->user->setField('slogan', 'phpunit slogan')->modify(), 'utest-modify-slogan');
+
+        $this->assertEquals('', $this->user->IRCKey(), 'utest-no-irc-key');
+        $this->user->setField('IRCkey', 'irckey')->modify();
+        $this->assertEquals('irckey', $this->user->IRCKey(), 'utest-irc-key');
+
+        $this->user->addStaffNote('phpunit staff note')->modify();
+        $this->assertStringContainsString('phpunit staff note', $this->user->staffNotes(), 'utest-staff-note');
+
+        $this->assertFalse($this->user->setTitle(str_repeat('x', USER_TITLE_LENGTH + 1)), 'utest-title-too-long');
+        $this->assertTrue($this->user->setTitle('custom title'), 'utest-set-title');
+        $this->user->modify();
+        $this->assertEquals('custom title', $this->user->title(), 'utest-title');
+        $this->assertTrue($this->user->removeTitle()->modify(), 'utest-remove-title');
+        $this->assertNull($this->user->title(), 'utest-null-title');
     }
 
     public function testAvatar(): void {
@@ -196,7 +249,9 @@ class UserTest extends TestCase {
     }
 
     public function testNextClass(): void {
+        $this->assertEquals(\Gazelle\Enum\UserStatus::unconfirmed, $this->user->userStatus(), 'utest-user-status-unconfirmed');
         $this->user->setField('Enabled', UserStatus::enabled->value)->modify();
+        $this->assertEquals(\Gazelle\Enum\UserStatus::enabled, $this->user->userStatus(), 'utest-user-status-enabled');
 
         $manager = new Gazelle\Manager\User;
         $next = $this->user->nextClass($manager);
@@ -300,5 +355,12 @@ class UserTest extends TestCase {
         $this->assertGreaterThan(0, count($watch->activeList('1', 'ASC', 10, 0)), 'loginwatch-active-list');
         $this->assertGreaterThan(0, $watch->clearAttempts(), 'loginwatch-clear');
         $this->assertEquals(0, $watch->nrAttempts(), 'loginwatch-no-attempts');
+    }
+
+    public function testParanoia(): void {
+        $this->assertEquals([], $this->user->paranoia(), 'utest-paranoia');
+        $this->assertEquals('Off', $this->user->paranoiaLabel(), 'utest-paranoid-label-off');
+        $this->assertEquals(0, $this->user->paranoiaLevel(), 'utest-paranoid-level-off');
+        $this->assertFalse($this->user->isParanoid('lastseen'), 'utest-is-not-last-seen-paranoid');
     }
 }

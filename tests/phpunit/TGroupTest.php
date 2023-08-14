@@ -94,6 +94,17 @@ class TGroupTest extends TestCase {
         $find = $this->manager->findById($this->tgroup->id());
         $this->assertInstanceOf(Gazelle\TGroup::class, $find, 'tgroup-instance-of');
         $this->assertEquals($this->tgroup->id(), $find->id(), 'tgroup-create-find');
+
+        $torMan = new \Gazelle\Manager\Torrent;
+        $torrent = $torMan->findById($this->tgroup->torrentIdList()[0]);
+        $this->assertEquals(1, $torrent->tokenCount(), 'tgroup-torrent-fl-cost');
+        $this->assertFalse($this->userList['user']->canSpendFLToken($torrent), 'tgroup-user-no-fltoken');
+
+        $bonus = (new \Gazelle\User\Bonus($this->userList['user']));
+        $this->assertEquals(1, $bonus->addPoints(10000), 'tgroup-user-add-bp');
+        $this->assertEquals(1, $bonus->purchaseToken('token-1'), 'tgroup-user-buy-token');
+        $this->assertTrue($this->userList['user']->canSpendFLToken($torrent), 'tgroup-user-fltoken');
+        $this->assertEquals(1, $this->userList['user']->registerDownload($torrent->id()), 'tgroup-user-register-dl');
     }
 
     public function testTGroupArtist(): void {

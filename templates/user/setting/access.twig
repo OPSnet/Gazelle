@@ -95,20 +95,42 @@
             Rememeber to revoke tokens you no longer use.<br />
             <strong class="important_text">Treat your tokens like passwords and keep them secret.</strong>
             <br /><br />
+{%- for token in user.apiTokenList %}
+    {%- if loop.first %}
             <table class="layout border">
                 <tr class='colhead'>
                     <th>Name</th>
                     <th>Created</th>
                     <th>Revoke</th>
                 </tr>
-{% for token in user.apiTokenList %}
+    {%- endif %}
                 <tr class="{{ cycle(['a', 'b'], loop.index0) }}">
                     <td>{{ token.name }}</td>
                     <td>{{ token.created|time_diff }}</td>
                     <td style='text-align: center'><a href='user.php?action=token&amp;do=revoke&amp;user_id={{ user.id }}&amp;token_id={{ token.id }}'>Revoke</a>
                 </tr>
-{% endfor %}
+    {%- if loop.last %}
             </table>
+    {%- endif %}
+{% endfor %}
+{%- for token in user.apiTokenList(true) %}
+    {%- if loop.first %}
+            <h4>Revoked tokens</h4>
+            <div>You cannot create a new token with the same name as a revoked token</div>
+            <table class="layout border">
+                <tr class='colhead'>
+                    <th>Name</th>
+                    <th>Created</th>
+                </tr>
+    {%- endif %}
+                <tr class="{{ cycle(['a', 'b'], loop.index0) }}">
+                    <td style="color: crimson;">{{ token.name }}</td>
+                    <td>{{ token.created|time_diff }}</td>
+                </tr>
+    {%- if loop.last %}
+            </table>
+    {%- endif %}
+{% endfor %}
             <a href="user.php?action=token&amp;user_id={{ user.id }}">Click here to create a new token</a>
         </td>
     </tr>
