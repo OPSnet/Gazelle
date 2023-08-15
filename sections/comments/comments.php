@@ -50,7 +50,7 @@ $TypeLinks = [];
 
 switch ($Action) {
     case 'artist':
-        $Title       = '%s &rsaquo; Artist comments';
+        $Title       = '%s › Artist comments';
         $table       = 'artists_group AS ag';
         $idField     = 'ag.ArtistID';
         $nameField   = 'ag.Name';
@@ -66,7 +66,7 @@ switch ($Action) {
 
         switch ($Type) {
             case 'created':
-                $Title = "%s &rsaquo; Comments on their collages";
+                $Title = "%s › Comments on their collages";
                 $condition[] = "cl.UserID = ?";
                 $condition[] = "C.AuthorID != ?";
                 $condArgs[] = $UserID;
@@ -77,7 +77,7 @@ switch ($Action) {
                 ];
                 break;
             case 'contributed':
-                $Title = '%s &rsaquo; Contributed collage comments';
+                $Title = '%s › Contributed collage comments';
                 $condition[] = "C.AuthorID != ? AND cl.ID IN (
                     SELECT DISTINCT CollageID FROM collages_torrents ct WHERE ct.UserID = ?
                     UNION ALL
@@ -89,7 +89,7 @@ switch ($Action) {
                 ];
                 break;
             default:
-                $Title = "%s &rsaquo; Collage comments";
+                $Title = "%s › Collage comments";
                 $condition[] = "C.AuthorID = ?";
                 $condArgs[]  = $UserID;
                 $TypeLinks = [
@@ -107,7 +107,7 @@ switch ($Action) {
 
         switch($Type) {
             case 'created':
-                $Title = "%s &rsaquo; Comments on their requests";
+                $Title = "%s › Comments on their requests";
                 $condition[] = "r.UserID = ?";
                 $condition[] = "C.AuthorID != ?";
                 $condArgs[] = $UserID;
@@ -118,7 +118,7 @@ switch ($Action) {
                 ];
                 break;
             case 'voted':
-                $Title = "%s &rsaquo; Comments on voted-on requests";
+                $Title = "%s › Comments on voted-on requests";
                 $Join[] = 'INNER JOIN requests_votes rv ON (rv.RequestID = r.ID)';
                 $condition[] = "rv.UserID = ?";
                 $condition[] = "C.AuthorID != ?";
@@ -130,7 +130,7 @@ switch ($Action) {
                 ];
                 break;
             default:
-                $Title = "%s &rsaquo; Request comments";
+                $Title = "%s › Request comments";
                 $condition[] = "C.AuthorID = ?";
                 $condArgs[] = $UserID;
                 $TypeLinks = $ownProfile
@@ -153,7 +153,7 @@ switch ($Action) {
 
         switch($Type) {
             case 'uploaded':
-                $Title = "%s &rsaquo; Comments on their uploads";
+                $Title = "%s › Comments on their uploads";
                 $Join[] = 'INNER JOIN torrents t ON (t.GroupID = tg.ID)';
                 $condition[] = 'C.AddedTime > t.created';
                 $condition[] = "C.AuthorID != ?";
@@ -166,7 +166,7 @@ switch ($Action) {
                 ];
                 break;
             default:
-                $Title = "%s &rsaquo; Torrent comments";
+                $Title = "%s › Torrent comments";
                 $condition[] = "C.AuthorID = ?";
                 $condArgs[] = $UserID;
                 $TypeLinks[] = [
@@ -245,7 +245,7 @@ View::show_header(sprintf($Title, $Username), ['js' => 'bbcode,comments']);
 ?>
 <div class="thin">
     <div class="header">
-        <h2><?= sprintf($Title, $User->link()) ?></h2>
+        <h2><?= sprintf(html_escape($Title), $User->link()) ?></h2>
 <?php if ($Links != '') { ?>
         <div class="linkbox">
             <?= $Links ?>
@@ -259,7 +259,7 @@ View::show_header(sprintf($Title, $Username), ['js' => 'bbcode,comments']);
     echo $paginator->linkbox();
     $commentMan = new Gazelle\Manager\Comment;
     $db->set_query_id($Comments);
-    while ([$AuthorID, $Page, $PageID, $Name, $PostID, $Body, $AddedTime, $EditedTime, $EditedUserID] = $db->next_record()) {
+    while ([$AuthorID, $Page, $PageID, $Name, $PostID, $Body, $AddedTime, $EditedTime, $EditedUserID] = $db->next_record(Escape: false)) {
         $author = new Gazelle\User($AuthorID);
         echo $Twig->render('comment/comment.twig', [
             'added_time'  => $AddedTime,

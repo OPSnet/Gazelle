@@ -12,5 +12,5 @@ if (is_null($body)) {
 }
 
 // This gets sent to the browser, which echoes it wherever
+header('Content-type: text/plain');
 echo $body;
-

@@ -27,8 +27,8 @@ class Request extends \Gazelle\Base {
     }
 
     public function setBookmarker(\Gazelle\User $user): Request {
-        $this->text         = "{$user->username()} &rsaquo; Bookmarked requests";
-        $this->title        = "{$user->link()} &rsaquo; Bookmarked requests";
+        $this->text         = "{$user->username()} › Bookmarked requests";
+        $this->title        = "{$user->link()} › Bookmarked requests";
         $this->bookmarkerId = $user->id();
         return $this;
     }
@@ -50,15 +50,15 @@ class Request extends \Gazelle\Base {
     }
 
     public function setCreator(\Gazelle\User $user): Request {
-        $this->text = "{$user->username()} &rsaquo; Requests created";
-        $this->title = "{$user->link()} &rsaquo; Requests created";
+        $this->text = "{$user->username()} › Requests created";
+        $this->title = "{$user->link()} › Requests created";
         $this->sphinxq->where('userid', $user->id());
         return $this;
     }
 
     public function setFiller(\Gazelle\User $user): Request {
-        $this->text = "{$user->username()} &rsaquo; Requests filled";
-        $this->title = "{$user->link()} &rsaquo; Requests filled";
+        $this->text = "{$user->username()} › Requests filled";
+        $this->title = "{$user->link()} › Requests filled";
         $this->sphinxq->where('fillerid', $user->id());
         return $this;
     }
@@ -213,8 +213,8 @@ class Request extends \Gazelle\Base {
     }
 
     public function setVoter(\Gazelle\User $user): Request {
-        $this->text = "{$user->username()} &rsaquo; Requests voted on";
-        $this->title = "{$user->link()} &rsaquo; Requests voted on";
+        $this->text = "{$user->username()} › Requests voted on";
+        $this->title = "{$user->link()} › Requests voted on";
         $this->sphinxq->where('voter', $user->id());
         return $this;
     }

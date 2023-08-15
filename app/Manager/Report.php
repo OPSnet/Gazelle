@@ -46,7 +46,6 @@ class Report extends \Gazelle\BaseManager {
         array $idList,
         \Gazelle\Manager\Collage     $collageMan,
         \Gazelle\Manager\Comment     $commentMan,
-        \Gazelle\Manager\Forum       $forumMan,
         \Gazelle\Manager\ForumThread $threadMan,
         \Gazelle\Manager\ForumPost   $postMan,
         \Gazelle\Manager\Request     $requestMan,

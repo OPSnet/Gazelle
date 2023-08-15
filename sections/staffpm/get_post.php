@@ -30,7 +30,8 @@ if (!$PostID) {
 
 if (($Viewer->id() == $UserID) || ($Viewer->isStaffPMReader() && $Viewer->effectiveClass() >= $Level)) {
     // This gets sent to the browser, which echoes it wherever
-    echo trim($Message);
+    header('Content-type: text/plain');
+    echo $Message;
 } else {
     error(403);
 }

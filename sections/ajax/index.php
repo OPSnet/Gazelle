@@ -7,7 +7,6 @@ $LimitedPages = [
     'add_log'         => [5, 10],
     'add_similar'     => [10, 20],
     'add_tag'         => [10, 20],
-    'addtag'          => [5, 10],
     'announcements'   => [2, 60],
     'artist'          => [15, 30],
     'better'          => [5, 10],
@@ -23,7 +22,6 @@ $LimitedPages = [
     'raw_bbcode'      => [5, 10],
     'request'         => [4, 60],
     'request_fill'    => [5, 10],
-    'requestfill'     => [5, 10],
     'requests'        => [5, 60],
     'riplog'          => [5, 10],
     'similar_artists' => [10, 60],
@@ -75,6 +73,7 @@ if (!$Viewer->permitted('site_unlimit_ajax') && isset($LimitedPages[$Action])) {
     } else {
         $Cache->increment_value('ajax_requests_'.$UserID);
         if ($UserRequests > $rate) {
+            Gazelle\Util\Irc::sendMessage(ADMIN_CHAN, "rate limit hit by {$Viewer->username()} on $Action");
             json_error("Rate limit exceeded");
         }
     }

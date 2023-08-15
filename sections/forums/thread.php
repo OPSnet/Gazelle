@@ -88,7 +88,7 @@ $avatarFilter = Gazelle\Util\Twig::factory()->createTemplate('{{ user|avatar(vie
 $transitions = $forumMan->threadTransitionList($Viewer, $forumId);
 $department = $forum->departmentList($Viewer);
 $auth = $Viewer->auth();
-View::show_header("Forums &rsaquo; $ForumName &rsaquo; " . display_str($thread->title()),
+View::show_header("Forums › $ForumName › {$thread->title()}",
      ['js' => 'comments,subscriptions,bbcode' . ($IsDonorForum ? ',donor_titles' : '')]
 );
 echo $Twig->render('forum/header-thread.twig', [

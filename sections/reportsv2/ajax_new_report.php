@@ -51,7 +51,7 @@ $reporter = $userMan->findById($report->reporterId());
     <input type="hidden" id="uploader<?= $reportId ?>" name="uploader" value="<?= $uploader->username() ?>" />
     <input type="hidden" id="uploaderid<?= $reportId ?>" name="uploaderid" value="<?= $uploader->id() ?>" />
     <input type="hidden" id="reporterid<?= $reportId ?>" name="reporterid" value="<?= $reporter->id() ?>" />
-    <input type="hidden" id="raw_name<?= $reportId ?>" name="raw_name" value="<?= $RawName ?>" />
+    <input type="hidden" id="raw_name<?= $reportId ?>" name="raw_name" value="<?= html_escape($RawName) ?>" />
     <input type="hidden" id="type<?= $reportId ?>" name="type" value="<?= $report->reportType()->type() ?>" />
     <input type="hidden" id="categoryid<?= $reportId ?>" name="categoryid" value="<?= $report->reportType()->categoryId() ?>" />
 </div>

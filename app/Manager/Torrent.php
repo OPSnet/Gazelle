@@ -7,16 +7,8 @@ class Torrent extends \Gazelle\BaseManager {
     protected const CACHE_HIST = 'top10_hist_%s_%s';
 
     final const CACHE_KEY_LATEST_UPLOADS = 'latest_up_%d';
-    final const CACHE_KEY_PEERLIST_TOTAL = 'peerlist_total_%d';
-    final const CACHE_KEY_PEERLIST_PAGE  = 'peerlist_page_%d_%d';
     final const CACHE_FOLDERNAME         = 'foldername_%s';
     final const FOLDER_SALT              = "v1\x01";
-
-    final const SNATCHED_UPDATE_INTERVAL = 3600; // How often we want to update users' snatch lists
-    final const SNATCHED_UPDATE_AFTERDL = 300; // How long after a torrent download we want to update a user's snatch lists
-
-    final const ARTIST_DISPLAY_TEXT = 1;
-    final const ARTIST_DISPLAY_HTML = 2;
 
     protected \Gazelle\User $viewer;
 

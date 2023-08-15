@@ -407,7 +407,7 @@ if ($Viewer->permitted('users_disable_any')) {
         $user->setField('can_leech', $disableLeech ? 1 : 0);
         $trackerUserUpdates['can_leech'] = $disableLeech;
         $editSummary[] = "leeching status changed ("
-            . enabledStatus($user->canLeech() ? '1' : '0')." &rarr; ".enabledStatus($disableLeech ? '1' : '0').")";
+            . enabledStatus($user->canLeech() ? '1' : '0')." → ".enabledStatus($disableLeech ? '1' : '0').")";
     }
     if ($disableInvites !== $user->disableInvites()) {
         $privChange[] = 'Your invite privileges have been ' . revoked($disableInvites);
@@ -491,7 +491,7 @@ $userStatus = match($_POST['UserStatus']) {
     default => UserStatus::unconfirmed,
 };
 if ($userStatus != $user->userStatus() && $Viewer->permitted('users_disable_users')) {
-    $enableStr = "account status {$user->userStatus()->label()} &rarr; {$userStatus->label()}";
+    $enableStr = "account status {$user->userStatus()->label()} → {$userStatus->label()}";
     if ($userStatus == UserStatus::disabled) {
         $userMan->disableUserList($tracker, [$userId], "Disabled via moderation", Gazelle\Manager\User::DISABLE_MANUAL);
         $trackerUserUpdates = [];

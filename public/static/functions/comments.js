@@ -111,7 +111,7 @@ function Quote(post, user, link) {
         }
         $('#quickpost').raw().value = $('#quickpost').raw().value
             + "[quote=" + username + (link == true ? "|" + target : "") + "]"
-            + html_entity_decode(response)
+            + response
             + "[/quote]";
         resize('quickpost');
     }
@@ -152,12 +152,12 @@ function Edit_Form(post,key) {
      */
     if (location.href.match(/forums\.php/)) {
         ajax.get("?action=get_post&post=" + postid, function(response) {
-            $('#editbox' + postid).raw().value = html_entity_decode(response);
+            $('#editbox' + postid).raw().value = response;
             resize('editbox' + postid);
         });
     } else {
         ajax.get("comments.php?action=get&postid=" + postid, function(response) {
-            $('#editbox' + postid).raw().value = html_entity_decode(response);
+            $('#editbox' + postid).raw().value = response;
             resize('editbox' + postid);
         });
     }

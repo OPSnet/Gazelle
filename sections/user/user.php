@@ -392,7 +392,7 @@ foreach ($Collages as $collage) {
 ?>
             <td>
                 <a href="torrents.php?id=<?= $tgroupId ?>">
-                    <img class="tooltip" title="<?= $tgroup->text() ?>" src="<?= html_escape(image_cache_encode($tgroup->cover())) ?>" width="107" />
+                    <img class="tooltip" title="<?= html_escape($tgroup->text()) ?>" src="<?= html_escape(image_cache_encode($tgroup->cover())) ?>" width="107" />
                 </a>
             </td>
 <?php    } ?>
@@ -489,8 +489,8 @@ if ($Viewer->permitted('users_mod') || $Viewer->isStaff()) { ?>
                 <input type="hidden" name="comment_hash" value="<?= $User->info()['CommentHash'] ?>" />
                 <div id="admincommentlinks" class="AdminComment" style="width: 98%;"><?=Text::full_format($User->staffNotes())?></div>
                 <textarea id="admincomment" name="admincomment" onkeyup="resize('admincomment');"
-                          class="AdminComment hidden" name="AdminComment" cols="65" rows="26" style="width: 98%;">
-                    <?=html_escape($User->staffNotes())?></textarea>
+                          class="AdminComment hidden" name="AdminComment" cols="65" rows="26" style="width: 98%;"><?=
+                    html_escape($User->staffNotes())?></textarea>
                 <a href="#" name="admincommentbutton" onclick="ChangeTo('text'); return false;"
                    class="brackets">Toggle edit</a>
                 <script type="text/javascript">

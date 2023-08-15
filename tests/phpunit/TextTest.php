@@ -85,6 +85,12 @@ class TextTest extends TestCase {
                 "[quote=user]abc [b]xyz[/b] def[/quote] [b][i][s][u]ghi[/u][/s][/i][/b]",
                 "<strong class=\"quoteheader\">user</strong> wrote: <blockquote>abc <strong>xyz</strong> def</blockquote> <strong><span style=\"font-style: italic;\"><span style=\"text-decoration: line-through;\"><span style=\"text-decoration: underline;\">ghi</span></span></span></strong>"
             ],
+            ["text-nest-3",     "[quote]<I am test>[/quote]", "<blockquote>&lt;I am test&gt;</blockquote>"],
+
+            ["text-escape-1",   "I'm test",          "I&apos;m test"],
+            ["text-escape-2",   "I&apos;m test",     "I&amp;apos;m test"],
+            ["text-escape-3",   "I&amp;apos;m test", "I&amp;amp;apos;m test"],
+            ["text-escape-4",   "<I am test>",       "&lt;I am test&gt;"],
         ];
     }
 
@@ -113,8 +119,15 @@ class TextTest extends TestCase {
         );
         $this->assertEquals(
             "<a href=\"" . SITE_URL . "/collages.php?id={$collage->id()}\">{$collage->name()}</a>",
-            Text::full_format($collage->publicUrl()),
+            Text::full_format($collage->publicLocation()),
             'text-collage-url'
+        );
+        $commentMan = new Gazelle\Manager\Comment;
+        $comment    = $commentMan->create($admin, 'collages', $collage->id(), "nice collage!");
+        $this->assertEquals(
+            "<a href=\"{$comment->url()}\">Collages Comment #{$comment->id()}</a>",
+            Text::full_format($comment->publicLocation()),
+            'text-collage-comment-link'
         );
         $this->assertEquals(1, $collage->remove(), 'text-remove-collage');
     }
@@ -156,15 +169,27 @@ class TextTest extends TestCase {
         $title    = $post->thread()->title();
 
         $this->assertMatchesRegularExpression(
-            "@^<a href=\"forums\.php\?action=viewthread&threadid={$threadId}\">\Q{$title}\E</a>$@",
+            "@^<a href=\"forums\.php\?action=viewthread&amp;threadid={$threadId}\">\Q{$title}\E</a>$@",
             Text::full_format("[thread]{$threadId}[/thread]"),
             'text-forum-thread'
         );
 
         $this->assertMatchesRegularExpression(
-            "@^<a href=\"forums\.php\?action=viewthread&threadid={$threadId}&postid={$postId}#post{$postId}\">\Q{$title}\E \(Post #{$postId}\)</a>$@",
+            "@^<a href=\"forums\.php\?action=viewthread&amp;threadid={$threadId}&amp;postid={$postId}#post{$postId}\">\Q{$title}\E \(Post #{$postId}\)</a>$@",
             Text::full_format("[thread]{$threadId}:{$postId}[/thread]"),
             'text-forum-post'
+        );
+
+        $this->assertMatchesRegularExpression(
+            "@^<a href=\"forums\.php\?action=viewthread&amp;threadid={$threadId}\">\Q{$title}\E</a>$@",
+            Text::full_format(SITE_URL . "/forums.php?action=viewthread&threadid={$threadId}"),
+            'text-forum-thread-link'
+        );
+
+        $this->assertMatchesRegularExpression(
+            "@^<a href=\"forums\.php\?action=viewthread&amp;threadid={$threadId}&amp;postid={$postId}#post{$postId}\">\Q{$title}\E \(Post #{$postId}\)</a>$@",
+            Text::full_format(SITE_URL . "/forums.php?action=viewthread&threadid={$threadId}&postid={$postId}#post{$postId}"),
+            'text-forum-post-link'
         );
 
         $this->assertEquals(1, $forum->remove(), 'text-remove-forum');
@@ -308,7 +333,7 @@ END_HTML;
         // FIXME: we generate torrent urls in two different ways
         $torrentRegexp = "^<a href=\"artist\.php\?id=\d+\" dir=\"ltr\">.*</a> – <a href=\"torrents\.php\?id={$tgroupId}&amp;torrentid={$torrentId}#torrent{$torrentId}\" dir=\"ltr\">.*</a> \[\d+ .*?\]";
         $this->assertMatchesRegularExpression("@{$torrentRegexp}@",
-            Text::full_format(SITE_URL . "/{$torrent->url()}"),
+            Text::full_format(SITE_URL . "/{$torrent->location()}"),
             "text-torrent-url tg={$tgroupId} t={$torrentId}"
         );
 
@@ -318,7 +343,7 @@ END_HTML;
             'text-tgroup-id'
         );
         $this->assertMatchesRegularExpression("@{$tgroupRegexp}@",
-            Text::full_format(SITE_URL . "/{$torrent->group()->url()}"),
+            Text::full_format(SITE_URL . "/{$torrent->group()->location()}"),
             'text-tgroup-url'
         );
     }

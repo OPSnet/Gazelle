@@ -20,10 +20,6 @@ class UtilTest extends TestCase {
         $this->assertEquals('&#8364;', display_str('&#128;'), 'display-str-entity-128');
         $this->assertEquals('&#376;',  display_str('&#159;'), 'display-str-entity-159');
 
-        $this->assertEquals('a<b', reverse_display_str('a<b'),     'display-revstr-a-lt-b');
-        $this->assertEquals(' ',   reverse_display_str('&#8364;'), 'display-revstr-entity-128');
-        $this->assertEquals('Ÿ',   reverse_display_str('&#376;'),  'display-revstr-entity-159');
-
         $this->assertTrue(is_number(1), 'is-number-1');
         $this->assertFalse(is_number(3.14), 'is-number-3.14');
         $this->assertFalse(is_number('abc'), 'is-number-abc');

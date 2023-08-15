@@ -146,7 +146,7 @@ class Upload extends \Gazelle\Base {
             </tr>
             <tr>
                 <td class="label">Image (recommended):</td>
-                <td><input type="text" id="image" name="image" size="60" value="<?=display_str($Torrent['Image'] ?? '') ?>"<?=$this->Disabled?> />
+                <td><input type="text" id="image" name="image" size="60" value="<?=html_escape($Torrent['Image'] ?? '') ?>"<?=$this->Disabled?> />
                     <img id="thumbnail" src="#" height="100" width="100" float="right" style="margin-left: 10px; vertical-align: top; display: none;" />
                 <br />Artwork helps improve the quality of the catalog. Please try to find a decent sized image (500x500).
 <?php       if (IMAGE_HOST_BANNED) { /** @phpstan-ignore-line */ ?>
@@ -167,7 +167,7 @@ class Upload extends \Gazelle\Base {
                     $n = 0;
                     foreach ($Artists as $Artist) {
 ?>
-                    <input type="text" id="artist_<?= $n++ ?>" name="artists[]" size="45" value="<?= display_str($Artist['name']) ?>" onblur="CheckVA();"<?=
+                    <input type="text" id="artist_<?= $n++ ?>" name="artists[]" size="45" value="<?= html_escape($Artist['name']) ?>" onblur="CheckVA();"<?=
                         $this->user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?><?= $this->Disabled ?> />
                     <select id="importance" name="importance[]"<?=$this->Disabled?>>
                         <option value="1"<?=($Importance == '1' ? ' selected="selected"' : '')?>>Main</option>
@@ -215,7 +215,7 @@ class Upload extends \Gazelle\Base {
             <tr id="title_tr">
                 <td class="label">Album title:</td>
                 <td>
-                    <input type="text" id="title" name="title" size="60" value="<?=display_str($Torrent['Title'] ?? '')?>"<?=$this->Disabled?> />
+                    <input type="text" id="title" name="title" size="60" value="<?=html_escape($Torrent['Title'] ?? '')?>"<?=$this->Disabled?> />
                     <p class="min_padding">Do not include the words remaster, re-issue, MFSL Gold, limited edition, bonus tracks, bonus disc or country-specific information in this field. That belongs in the edition information fields below; see <a href="wiki.php?action=article&amp;id=18" target="_blank">this</a> for further information. Also remember to use the correct capitalization for your upload. See the <a href="wiki.php?action=article&id=42" target="_blank">Capitalization Guidelines</a> for more information.</p>
                 </td>
             </tr>
@@ -230,19 +230,19 @@ class Upload extends \Gazelle\Base {
                 </td>
                 <td>
                     <p id="yearwarning" class="hidden">You have entered a year for a release which predates the medium's availability. You will need to change the year and enter additional edition information. If this information cannot be provided, check the &quot;Unknown Release&quot; check box below.</p>
-                    <input type="text" id="year" name="year" size="5" value="<?=display_str($Torrent['Year'] ?? '') ?>"<?=$this->Disabled?> onblur="CheckYear();" />
+                    <input type="text" id="year" name="year" size="5" value="<?=html_escape($Torrent['Year'] ?? '') ?>"<?=$this->Disabled?> onblur="CheckYear();" />
                     <br />This is the year of the original release. You may be uploading a remaster or re-edition that was published more recently.
                     <br />If so, there is a place to add that date below (check Edition information).
                 </td>
             </tr>
             <tr id="label_tr">
                 <td class="label">Record label (optional):</td>
-                <td><input type="text" id="record_label" name="record_label" size="40" value="<?=display_str($Torrent['RecordLabel'] ?? '') ?>"<?=$this->Disabled?> /></td>
+                <td><input type="text" id="record_label" name="record_label" size="40" value="<?=html_escape($Torrent['RecordLabel'] ?? '') ?>"<?=$this->Disabled?> /></td>
             </tr>
             <tr id="catalogue_tr">
                 <td class="label">Catalogue number (optional):</td>
                 <td>
-                    <input type="text" id="catalogue_number" name="catalogue_number" size="40" value="<?=display_str($Torrent['CatalogueNumber'] ?? '') ?>"<?=$this->Disabled?> />
+                    <input type="text" id="catalogue_number" name="catalogue_number" size="40" value="<?=html_escape($Torrent['CatalogueNumber'] ?? '') ?>"<?=$this->Disabled?> />
                     <br />
                     Please double-check the record label and catalogue number when using MusicBrainz. See <a href="wiki.php?action=article&amp;id=18" target="_blank">this guide</a> for more details.
                 </td>
@@ -262,7 +262,7 @@ class Upload extends \Gazelle\Base {
                         <br /><br />
 <?php    if ($GroupRemasters) { ?>
                         <input type="hidden" id="json_remasters" value="<?=
-                            str_replace('"', "&quot;", display_str(json_encode($GroupRemasters)))?>" />
+                            html_escape(json_encode($GroupRemasters))?>" />
                         <select id="groupremasters" name="groupremasters" onchange="GroupRemaster()"<?php
                                 if ($UnknownRelease) { echo ' disabled="disabled"'; } ?>>
                             <option value="">-------</option>
@@ -286,14 +286,17 @@ class Upload extends \Gazelle\Base {
                                 <tr id="edition_year">
                                     <td class="label">Year (required):</td>
                                     <td>
-                                        <input type="text" id="remaster_year" name="remaster_year" size="5" value="<?php if (is_array($Torrent) && isset($Torrent['RemasterYear'])) { echo display_str($Torrent['RemasterYear']); } ?>"<?php if ($UnknownRelease) { echo ' disabled="disabled"';} ?> />
+                                        <input type="text" id="remaster_year" name="remaster_year" size="5" value="<?php
+                                            if (is_array($Torrent) && isset($Torrent['RemasterYear'])) {
+                                                echo html_escape($Torrent['RemasterYear']);
+                                            } ?>"<?php if ($UnknownRelease) { echo ' disabled="disabled"';} ?> />
                                     </td>
                                 </tr>
                                 <tr id="edition_title">
                                     <td class="label">Title:</td>
                                     <td>
                                         <input type="text" id="remaster_title" name="remaster_title" size="50" value="<?=
-                                            $Torrent === false ? '' : display_str($Torrent['RemasterTitle'] ?? '')
+                                            $Torrent === false ? '' : html_escape($Torrent['RemasterTitle'] ?? '')
                                             ?>"<?php if ($UnknownRelease) { echo ' disabled="disabled"';} ?> />
                                         <p class="min_padding">Title of the edition (e.g. <span style="font-style: italic;">"Deluxe Edition" or "Remastered"</span>).</p>
                                     </td>
@@ -302,7 +305,7 @@ class Upload extends \Gazelle\Base {
                                     <td class="label">Record label:</td>
                                     <td>
                                         <input type="text" id="remaster_record_label" name="remaster_record_label" size="50" value="<?=
-                                            $Torrent === false ? '' : display_str($Torrent['RemasterRecordLabel'] ?? '')
+                                            $Torrent === false ? '' : html_escape($Torrent['RemasterRecordLabel'] ?? '')
                                             ?>"<?php if ($UnknownRelease) { echo ' disabled="disabled"';} ?> />
                                         <p class="min_padding">This is for the record label of the <strong>edition</strong>. It may differ from the original.</p>
                                     </td>
@@ -310,7 +313,7 @@ class Upload extends \Gazelle\Base {
                                 <tr id="edition_catalogue_number">
                                     <td class="label">Catalogue number:</td>
                                     <td><input type="text" id="remaster_catalogue_number" name="remaster_catalogue_number" size="50" value="<?=
-                                        $Torrent === false ? '' : display_str($Torrent['RemasterCatalogueNumber'] ?? '')
+                                        $Torrent === false ? '' : html_escape($Torrent['RemasterCatalogueNumber'] ?? '')
                                         ?>"<?php if ($UnknownRelease) { echo ' disabled="disabled"';} ?> />
                                         <p class="min_padding">This is for the catalogue number of the <strong>edition</strong>.</p>
                                     </td>
@@ -394,7 +397,10 @@ class Upload extends \Gazelle\Base {
 <?php   } ?>
                     </select>
                     <span id="other_bitrate_span"<?php if (!$OtherBitrate) { echo ' class="hidden"'; } ?>>
-                        <input type="text" name="other_bitrate" size="5" id="other_bitrate"<?php if ($OtherBitrate) { echo ' value="'.display_str($bitrate).'"';} ?> onchange="AltBitrate();" />
+                        <input type="text" name="other_bitrate" size="5" id="other_bitrate"<?php
+                            if ($OtherBitrate) {
+                                echo ' value="'.html_escape($bitrate).'"';
+                            } ?> onchange="AltBitrate();" />
                         <input type="checkbox" id="vbr" name="vbr"<?php if (isset($VBR)) { echo ' checked="checked"'; } ?> /><label for="vbr"> (VBR)</label>
                     </span>
                 </td>
@@ -494,7 +500,7 @@ class Upload extends \Gazelle\Base {
             <tr>
                 <td class="label">Release description (optional):</td>
                 <td>
-                <?= (new Textarea('release_desc', is_array($Torrent) ? display_str($Torrent['TorrentDescription'] ?? '') : '', 60, 5))->emit() ?>
+                <?= (new Textarea('release_desc', is_array($Torrent) ? ($Torrent['TorrentDescription'] ?? '') : '', 60, 5))->emit() ?>
                     <p class="min_padding">Contains information like encoder settings or details of the ripping process. <strong class="important_text">Do not paste the ripping log here.</strong></p>
                 </td>
             </tr>
@@ -520,7 +526,8 @@ class Upload extends \Gazelle\Base {
 <?php   } ?>
             <tr id="year_tr">
                 <td class="label">Year:</td>
-                <td><input type="text" id="year" name="year" size="5" value="<?= is_array($Torrent) ? display_str($Torrent['Year']) : '' ?>" /></td>
+                <td><input type="text" id="year" name="year" size="5" value="<?=
+                    is_array($Torrent) ? html_escape($Torrent['Year']) : '' ?>" /></td>
             </tr>
             <tr>
                 <td class="label">Format:</td>
@@ -558,7 +565,10 @@ class Upload extends \Gazelle\Base {
 <?php   } ?>
                     </select>
                     <span id="other_bitrate_span"<?php if (!$OtherBitrate) { echo ' class="hidden"'; } ?>>
-                        <input type="text" name="other_bitrate" size="5" id="other_bitrate"<?php if ($OtherBitrate) { echo ' value="'.display_str($Torrent['Bitrate']).'"';} ?> onchange="AltBitrate()" />
+                        <input type="text" name="other_bitrate" size="5" id="other_bitrate"<?php
+                            if ($OtherBitrate) {
+                                echo ' value="'.html_escape($Torrent['Bitrate']).'"';
+                            } ?> onchange="AltBitrate()" />
                         <input type="checkbox" id="vbr" name="vbr"<?php if (isset($VBR)) { echo ' checked="checked"'; } ?> /><label for="vbr"> (VBR)</label>
                     </span>
                 </td>
@@ -589,7 +599,7 @@ class Upload extends \Gazelle\Base {
             <tr>
                 <td class="label">Release description (optional):</td>
                 <td>
-                <?= (new Textarea('release_desc', is_array($Torrent) ? display_str($Torrent['TorrentDescription']) : '' , 60, 5))->emit() ?>
+                <?= (new Textarea('release_desc', is_array($Torrent) ? $Torrent['TorrentDescription'] : '' , 60, 5))->emit() ?>
                     <p class="min_padding">Contains information like encoder settings. For analog rips, this frequently contains lineage information.</p>
                 </td>
             </tr>

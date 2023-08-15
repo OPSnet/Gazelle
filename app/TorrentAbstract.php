@@ -134,7 +134,7 @@ abstract class TorrentAbstract extends BaseObject {
     }
 
     /**
-     * Get the general description (not the description of a specific release)
+     * Get the torrent release description.
      */
     public function description(): string {
         return $this->info()['Description'] ?? '';

@@ -103,6 +103,22 @@ if (!empty($_POST['requestid'])) {
     $Properties['RequestID'] = $RequestID;
 }
 
+if (!isset($_POST['workaround_broken_html_entities']) || $_POST['workaround_broken_html_entities'] != 0) {
+    // upload/edit was submitted with some script or through the API and may contain
+    // html entities that need to be unmangled
+    $brokenProperties = [ // pretty much everything that is not int/bool
+        'Title', 'RemasterTitle', 'RemasterRecordLabel', 'RemasterCatalogueNumber',
+        'RecordLabel', 'CatalogueNumber', 'GroupDescription', 'Description'
+    ];
+    foreach ($brokenProperties as $prop) {
+        $Properties[$prop] = html_unescape($Properties[$prop]);
+    }
+    foreach ($Artists as $idx => $name) {
+        $Artists[$idx] = html_unescape($name);
+    }
+    unset($brokenProperties);
+}
+
 //******************************************************************************//
 //--------------- Validate data in upload form ---------------------------------//
 
@@ -501,7 +517,7 @@ if ($tgroup) {
     $Viewer->stats()->increment('unique_group_total');
 }
 $GroupID = $tgroup->id();
-$logName = html_entity_decode($tgroup->text());
+$logName = $tgroup->text();
 
 // Description
 if ($NoRevision) {

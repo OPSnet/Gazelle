@@ -1009,7 +1009,7 @@ class User extends \Gazelle\BaseManager {
                     "You have been promoted to $toClass",
                     "Congratulations on your promotion to $toClass!\n\nTo read more about "
                         . SITE_NAME
-                        . "'s user classes, read [url=wiki.php?action=article&amp;name=userclasses]this wiki article[/url]."
+                        . "'s user classes, read [url=wiki.php?action=article&name=userclasses]this wiki article[/url]."
                 );
             }
         }
@@ -1066,7 +1066,7 @@ class User extends \Gazelle\BaseManager {
                     "You have been demoted to $toClass",
                     "You now only qualify for the \"$toClass\" user class.\n\nTo read more about "
                         . SITE_NAME
-                        . "'s user classes, read [url=wiki.php?action=article&amp;name=userclasses]this wiki article[/url]."
+                        . "'s user classes, read [url=wiki.php?action=article&name=userclasses]this wiki article[/url]."
                 );
             }
         }
@@ -1390,7 +1390,7 @@ class User extends \Gazelle\BaseManager {
             $tracker->update_tracker('update_user', ['passkey' => $user->announceKey(), 'can_leech' => '0']);
             $this->sendPM( $userId, 0,
                 'Your download privileges have been removed',
-                'You have downloaded more than 10 GB while on Ratio Watch. Your leeching privileges have been suspended. Please reread the rules and refer to this guide on [url=wiki.php?action=article&amp;name=ratiotips]how to improve your ratio[/url]',
+                'You have downloaded more than 10 GB while on Ratio Watch. Your leeching privileges have been suspended. Please reread the rules and refer to this guide on [url=wiki.php?action=article&name=ratiotips]how to improve your ratio[/url]',
             );
             $processed++;
             $task?->debug("Disabling leech for {$user->label()}", $userId);

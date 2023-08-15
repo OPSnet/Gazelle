@@ -186,7 +186,7 @@ class ForumThread extends BaseObject {
                 LIMIT ? OFFSET ?
                 ", $this->id, $this->pinnedPostId(), THREAD_CATALOGUE, $catId * THREAD_CATALOGUE
             );
-            $catalogue = self::$db->to_array(false, MYSQLI_ASSOC);
+            $catalogue = self::$db->to_array(false, MYSQLI_ASSOC, false);
             if (!$this->isLocked() || $this->isPinned()) {
                 self::$cache->cache_value($key, $catalogue, 0);
             }

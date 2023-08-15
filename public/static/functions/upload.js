@@ -567,24 +567,11 @@ function fillMusicForm(group, torrent, source) {
         }
     }
 
-    // ideally we are getting the JSON file from an endpoint that does not make use reverse
-    // HTML back into BBCode. We use `wikiBBcode` here, RED uses `bbBody`.
-    let albumDescField;
-    if (group['wikiBBcode'] !== undefined) {
-        albumDescField = 'wikiBBcode';
-    }
-    else if (group['bbBody'] !== undefined) {
-        albumDescField = 'bbBody';
-    }
-    else {
-        albumDescField = 'wikiBody';
-    }
-
     // fill out group info
     jsonFill(group, {
         record_label: 'recordLabel',
         catalogue_number: 'catalogueNumber',
-        album_desc: albumDescField,
+        album_desc: 'wikiBBcode',
     });
 
     // ideally, the torrent json contains a releaseName field that is human readable,
@@ -645,11 +632,12 @@ function fillMusicForm(group, torrent, source) {
         bitrate: 'bitrate',
     });
 
-    if (torrent['scene']) {
+    // deal with potential "string" bools
+    if (torrent['scene'] && torrent['scene'] !== 'false') {
         $('#scene').prop('checked', torrent['scene']);
     }
 
-    if (torrent['remastered'] === true) {
+    if (torrent['remastered'] && torrent['remastered'] !== 'false') {
         $('#remaster').prop('checked', true).triggerHandler('click');
         jsonFill(torrent, {
             remaster_year: 'remasterYear',
@@ -665,7 +653,6 @@ function fillForm(group, torrent, source) {
         title: 'name',
         year: 'year',
         image: 'wikiImage',
-        wikiBody: 'wikiBody',
     });
 
     if (!group['categoryName'] || group['categoryName'] === 'Music') {
@@ -707,13 +694,13 @@ function WaitForCategory(callback) {
 }
 
 function insertParsedJson(data, source) {
-    var group = data['response']['group'];
-    var torrent = data['response']['torrent'][0];
-    if(typeof(torrent) == 'undefined') {
-        torrent = data['response']['torrent'];
+    let group = data['response']['group'];
+    let torrent = data['response']['torrent'];
+    if (Array.isArray(torrent)) {
+        torrent = torrent[0];
     }
 
-    var categories_mapping = {
+    const categories_mapping = {
         'Music': 0,
         'Applications': 1,
         'E-Books': 2,
@@ -723,52 +710,102 @@ function insertParsedJson(data, source) {
         'Comics': 6
     };
 
-    var categories = $('#categories');
+    let categories = $('#categories');
     if (!group['categoryName']) {
         group['categoryName'] = 'Music';
     }
     categories.val(categories_mapping[group['categoryName']]).triggerHandler('change');
-    // delay for the form to change before filling it
-    WaitForCategory(function() {
-        fillForm(group, torrent, source);
-    });
+
+    function completeFill() {
+        // delay for the form to change before filling it
+        WaitForCategory(function() {
+            fillForm(group, torrent, source);
+        });
+    }
+
+    // ideally we are getting the JSON file from an endpoint that does not make use reverse
+    // HTML back into BBCode. We use `wikiBBcode` here, RED uses `bbBody`.
+    if (group['wikiBBcode'] === undefined) {
+        if (group['bbBody'] !== undefined) {
+            group['wikiBBcode'] = group['bbBody'];
+            completeFill();
+        } else if (group['wikiBody']) {
+            // worst case, we only have some rendered html code, ask the server to convert it back to bbcode
+            $.post('upload.php?action=parse_html',
+                {'html': group['wikiBody']}
+            ).done((response) => {
+                group['wikiBBcode'] = response.responseText;
+            }).fail((xhr) => {
+                alert("Error parsing the torrent group description.");
+                console.error(xhr);
+                group['wikiBBcode'] = '';
+            }).always(() => {
+                completeFill();
+            });
+        } else {
+            group['wikiBBcode'] = '';
+            completeFill();
+        }
+    } else {
+        completeFill();
+    }
 }
 
 function ParseUploadJson() {
-    var reader = new FileReader();
+    let reader = new FileReader();
     let source;
     reader.addEventListener('load', function() {
         try {
-            var data = JSON.parse(reader.result.toString());
-            $.post('upload.php?action=parse_json',
-                {'data': data}
-            ).done((response) => {
-                if (response && response.status === 'success') {
-                    insertParsedJson(response, source);
-                }
-                else {
-                    alert("Failed to parse JSON.");
-                }
-
-            }).error((xhr) => {
-                alert("Error with server response.");
-                const err = JSON.parse(xhr);
-                console.error(err.Message);
-            });
+            let data = JSON.parse(reader.result.toString());
+            data = unescapeStrings(data); // deal with legacy JS files that have html entities
+            insertParsedJson(data, source);
         }
         catch (e) {
-            alert("Could not read file. Please try again.");
+            alert("Failed to parse JSON file.");
             console.error(e);
         }
     }, false);
 
-    var file = $('#torrent-json-file')[0].files[0];
+    let file = $('#torrent-json-file')[0].files[0];
     if (file) {
         if (file.name.endsWith('[redacted.ch].json')) {
             source = 'red';
         }
         reader.readAsText(file);
     }
+}
+
+/**
+ * Recursively iterate over the whole parsed JSON object and remove all html escapes
+ * in strings (excluding object keys).
+ */
+function unescapeStrings(json_obj) {
+    if (!json_obj) {
+        return json_obj;
+    } else if (Array.isArray(json_obj)) {
+        json_obj.forEach((e, i) => {
+            json_obj[i] = unescapeStrings(e);
+        })
+    } else if (typeof json_obj === 'object') {
+        for (let [key, value] of Object.entries(json_obj)) {
+            // wikiBody is supposed to be html, wikiBBcode was generated by our gazelle fork
+            // and should not contain html entities (unless the uploader made an error)
+            if (key !== 'wikiBody' && key !== 'wikiBBcode') {
+                json_obj[key] = unescapeStrings(value);
+            }
+        }
+    } else if (typeof json_obj === 'string') {
+        return htmlDecode(json_obj);
+    }
+    return json_obj;
+}
+
+/**
+ * convert html entities to utf-8 characters
+ */
+function htmlDecode(string) {
+    let doc = new DOMParser().parseFromString(string, 'text/html');
+    return doc.documentElement.textContent;
 }
 
 function checkFields() {

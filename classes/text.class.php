@@ -237,7 +237,7 @@ class Text {
         if (is_null($Str)) {
             return '';
         }
-        $Str = display_str($Str);
+        $Str = html_escape($Str);
 
         self::$Headlines = [];
 
@@ -269,7 +269,7 @@ class Text {
     }
 
     public static function strip_bbcode(string $Str): string {
-        $Str = display_str($Str);
+        $Str = html_escape($Str);
 
         //Inline links
         $Str = preg_replace('/(?<!(\[url\]|\[url\=|\[img\=|\[img\]))http(s)?:\/\//i', '$1[inlineurl]http$2://', $Str);
@@ -336,7 +336,12 @@ class Text {
             return null;
         }
         parse_str($info['query'] ?? '', $args);
-        global $Cache;
+
+        if (isset($args['postid']) && isset($info['path']) && in_array($info['path'],
+                ['/artist.php', '/collages.php', '/requests.php', '/torrents.php'])) {
+            return self::bbcodeCommentUrl((int)$args['postid']);
+        }
+
         switch ($info['path'] ?? '') {
             case '/artist.php':
                 $name = Gazelle\DB::DB()->scalar('SELECT Name FROM artists_group WHERE ArtistID = ?',
@@ -354,9 +359,14 @@ class Text {
                 }
                 return match ($args['action']) {
                     'viewforum' => self::bbcodeForumUrl((int)$args['forumid']),
-                    'viewthread' => !isset($args['threadid']) && isset($args['postid'])
-                        ?  self::bbcodePostUrl((int)$args['postid'])
-                        :  self::bbcodeThreadUrl((int)$args['threadid']),
+                    'viewthread' => (function($args) {
+                        if (isset($args['postid'])) {
+                            return self::bbcodePostUrl((int)$args['postid']);
+                        } elseif (isset($args['threadid'])) {
+                            return self::bbcodeThreadUrl((int)$args['threadid']);
+                        }
+                        return null;
+                    })($args),
                     default => null,
                 };
 
@@ -828,14 +838,14 @@ class Text {
                     $Str .= '<a href="user.php?action=search&amp;search='.urlencode(trim($Block['Val'], '@')).'">'.$Block['Val'].'</a>';
                     break;
                 case 'artist':
-                    $Str .= '<a href="artist.php?artistname='.urlencode(self::undisplay_str($Block['Val'])).'">'.$Block['Val'].'</a>';
+                    $Str .= '<a href="artist.php?artistname='.urlencode(html_unescape($Block['Val'])).'">'.$Block['Val'].'</a>';
                     break;
                 case 'rule':
                     $Rule = trim(strtolower($Block['Val']));
                     if (!preg_match('/^[hr]/', $Rule)) {
                         $Rule = "r$Rule";
                     }
-                    $Str .= '<a href="rules.php?p=upload#'.urlencode(self::undisplay_str($Rule)).'">'.preg_replace('/[aA-zZ]/', '', $Block['Val']).'</a>';
+                    $Str .= '<a href="rules.php?p=upload#'.urlencode(html_unescape($Rule)).'">'.preg_replace('/[aA-zZ]/', '', $Block['Val']).'</a>';
                     break;
                 case 'collage':
                     $Str .= self::bbcodeCollageUrl((int)$Block['Val']);
@@ -869,7 +879,7 @@ class Text {
                     } else {
                         if (str_contains($Block['Attr'], 'noartist')) {
                             $Str .= "<a href=\"{$tgroup->url()}\" title=\"" . ($tgroup->hashTag() ?: 'View torrent group')
-                                . '" dir="ltr">' . display_str($tgroup->name()) . '</a>';
+                                . '" dir="ltr">' . html_escape($tgroup->name()) . '</a>';
                         } else {
                             $Str .= $tgroup->link();
                         }
@@ -1202,8 +1212,7 @@ class Text {
      * Given a String that is composed of HTML, attempt to convert it back
      * into BBCode. Useful when we're trying to deal with the output from
      * some other site's metadata. This also should reverse the HTML encoding
-     * that display_str does so we do not have to call reverse_display_str on the
-     * result.
+     * that html_escape does.
      */
     public static function parse_html(string $Html): string {
         $Document = new DOMDocument();
@@ -1383,14 +1392,6 @@ class Text {
         return str_replace(["<br />", "<br>"], "\n", $Str);
     }
 
-    /**
-     * Reverse the effects of display_str - un-sanitize HTML.
-     * Use sparingly.
-     */
-    protected static function undisplay_str(string $Str): string {
-        return mb_convert_encoding($Str, 'UTF-8', 'HTML-ENTITIES');
-    }
-
     public static function bbcodeCollageUrl(int $id, string $url = null): string {
         $cacheKey = 'bbcode_collage_' . $id;
         global $Cache;
@@ -1422,6 +1423,16 @@ class Text {
             : "[forum]{$val}[/forum]";
     }
 
+    protected static function bbcodeCommentUrl(int $postId): ?string {
+        $post = (new Gazelle\Manager\Comment)->findById($postId);
+        if (is_null($post)) {
+            return null;
+        }
+        // FIXME: this should give context about where the comment was posted (artist/collage/request/tgroup name)
+        return sprintf('<a href="%s">%s Comment #%s</a>',
+                       $post->url(), ucfirst($post->page()), $postId);
+    }
+
     protected static function bbcodePostUrl(int $postId): ?string {
         $post = (new \Gazelle\Manager\ForumPost)->findById($postId);
         if (is_null($post)) {
@@ -1449,10 +1460,10 @@ class Text {
         }
 
         if ($postId) {
-            return sprintf('<a href="forums.php?action=viewthread&threadid=%d&postid=%s#post%s">%s%s (Post #%s)</a>',
+            return sprintf('<a href="forums.php?action=viewthread&amp;threadid=%d&amp;postid=%s#post%s">%s%s (Post #%s)</a>',
                 $threadId, $postId, $postId, ($thread->isLocked() ? ICON_PADLOCK . ' ' : ''), $thread->title(), $postId);
         }
-        return sprintf('<a href="forums.php?action=viewthread&threadid=%d">%s%s</a>',
+        return sprintf('<a href="forums.php?action=viewthread&amp;threadid=%d">%s%s</a>',
             $threadId, ($thread->isLocked() ? ICON_PADLOCK . ' ' : ''), $thread->title());
     }
 }

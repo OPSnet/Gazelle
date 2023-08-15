@@ -31,7 +31,7 @@ class View {
         if (!isset($Viewer) || $pageTitle == 'Recover Password :: ' . SITE_NAME) {
             $js[] = 'storage.class';
             echo $Twig->render('index/public-header.twig', [
-                'page_title' => html_entity_decode($pageTitle),
+                'page_title' => $pageTitle,
                 'script'     => array_map(fn($s) => "$s.js", $js),
             ]);
             return;
@@ -136,7 +136,7 @@ class View {
 
         echo $Twig->render('index/private-header.twig', [
             'auth_args'    => "&amp;user={$Viewer->id()}&amp;passkey={$Viewer->announceKey()}&amp;authkey={$Viewer->auth()}&amp;auth={$Viewer->rssAuth()}",
-            'page_title'   => html_entity_decode($pageTitle),
+            'page_title'   => $pageTitle,
             'script'       => array_map(fn($s) => "$s.js", $js),
             'css_style'    => $cssList,
             'scss_style'   => $scssList,

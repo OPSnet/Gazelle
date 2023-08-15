@@ -99,12 +99,13 @@ if ($newRequest) {
 
 $releaseTypes = (new Gazelle\ReleaseType)->list();
 $GenreTags    = (new Gazelle\Manager\Tag)->genreList();
-$pageTitle    = $newRequest ? 'Create a request' : 'Edit request &rsaquo; ' . $request->selfLink();
+$pageTitle    = $newRequest ? 'Create a request' : 'Edit request › ' . $request->text();
+$pageHeader   = $newRequest ? 'Create a request' : 'Edit request › ' . $request->selfLink();
 View::show_header($pageTitle, ['js' => 'requests,form_validate']);
 ?>
 <div class="thin">
     <div class="header">
-        <h2><?= $pageTitle ?></h2>
+        <h2><?= $pageHeader ?></h2>
     </div>
 <?php
 if (!$newRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_requests')) {

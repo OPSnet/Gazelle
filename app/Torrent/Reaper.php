@@ -59,7 +59,7 @@ class Reaper extends \Gazelle\Base {
             . plural($total)
             . ($final ? " scheduled for deletion very soon" : " to rescue");
         return $this->userMan->sendPM($user->id(), 0, $subject,
-            self::$twig->render('notification/unseeded.twig', [
+            self::$twig->render('notification/unseeded.bbcode.twig', [
                 'final' => $final,
                 'never' => $never,
                 'list'  => $ids,
@@ -155,7 +155,7 @@ class Reaper extends \Gazelle\Base {
         $total = count($ids);
         return $this->userMan->sendPM($user->id(), 0,
             "You have " . article($total, 'an') . " unseeded snatch" . plural($total, 'es') . ' to save',
-            self::$twig->render('notification/unseeded-snatch.twig', [
+            self::$twig->render('notification/unseeded-snatch.bbcode.twig', [
                 'list' => $ids,
                 'user' => $user,
             ])

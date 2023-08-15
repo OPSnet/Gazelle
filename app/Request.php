@@ -63,12 +63,11 @@ class Request extends BaseObject {
      * Display the full title of the request with no links.
      */
     public function text(): string {
-        $title = display_str($this->title());
         return match($this->categoryName()) {
-            'Music'       => "{$this->artistRole()->text()} – $title [{$this->year()}]",
+            'Music'       => "{$this->artistRole()->text()} – {$this->title()} [{$this->year()}]",
             'Audiobooks',
-            'Comedy'      => "$title [{$this->year()}]",
-            default       => $title,
+            'Comedy'      => "{$this->title()} [{$this->year()}]",
+            default       => $this->title(),
         };
     }
 
@@ -564,9 +563,8 @@ class Request extends BaseObject {
 
         $user->addBounty($bounty);
         $name = $torrent->group()->text();
-        $message = "One of your requests&nbsp;&mdash;&nbsp;[url=requests.php?action=view&amp;id="
-            . $this->id . "]$name" . "[/url]&nbsp;&mdash;&nbsp;has been filled. You can view it here: [pl]"
-            . $torrent->id() . "[/pl]";
+        $message = "One of your requests — [url={$this->location()}]{$name}[/url] — has been filled."
+                   ." You can view it here: [pl]{$torrent->id()}[/pl]";
         self::$db->prepared_query("
             SELECT UserID FROM requests_votes WHERE RequestID = ?
             ", $this->id
@@ -620,7 +618,7 @@ class Request extends BaseObject {
 
         if ($filler->id() !== $admin->id()) {
             (new Manager\User)->sendPM($filler->id(), 0, 'A request you filled has been unfilled',
-                self::$twig->render('request/unfill-pm.twig', [
+                self::$twig->render('request/unfill-pm.bbcode.twig', [
                     'name'    => $name,
                     'reason'  => $reason,
                     'request' => $this,

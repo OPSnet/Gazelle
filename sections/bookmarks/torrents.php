@@ -33,7 +33,7 @@ $artistLeaderboard = $bookmark->torrentArtistLeaderboard(new Gazelle\Manager\Art
 $tagLeaderboard    = $bookmark->torrentTagLeaderboard();
 $CollageCovers     = $Viewer->option('CollageCovers') ?? 25;
 
-View::show_header($user->username() . " &rsaquo; Bookmarked torrent groups", ['js' => 'browse,collage']);
+View::show_header($user->username() . " › Bookmarked torrent groups", ['js' => 'browse,collage']);
 ?>
 <div class="thin">
     <div class="header">
@@ -286,7 +286,7 @@ foreach ($bookmarkList as $bm) {
                     'torrent' => $torrent,
                     'viewer'  => $Viewer,
                 ]) ?>
-                <strong><?= $tgroup->text() ?></strong>
+                <strong><?= html_escape($tgroup->text()) ?></strong>
                 <div class="tags"><?= implode(', ',
                     array_map(fn($name) => "<a href=\"torrents.php?taglist=$name\">$name</a>", $tgroup->tagNameList())
                     ) ?></div>

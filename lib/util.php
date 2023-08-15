@@ -77,6 +77,13 @@ function html_escape(mixed $str): string {
 }
 
 /**
+ * reverse of html_escape
+ */
+function html_unescape(string $str): string {
+    return html_entity_decode($str, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8');
+}
+
+/**
  * Returns ratio
  */
 function ratio(int $uploaded, int $downloaded, int $digits = 2): string|false {
@@ -214,34 +221,6 @@ function get_bytes(string $size): int {
         't'     => $value * 1_099_511_627_776,
         default => 0,
     });
-}
-
-/**
- * Un-HTML-escape a string for output.
- *
- * It's like the above function, but in reverse.
- */
-function reverse_display_str(string $Str): string {
-    if ($Str != '' && !is_number($Str)) {
-        $Replace = [
-            '&#39;','&quot;','&lt;','&gt;',
-            '&#8364;','&#8218;','&#402;','&#8222;','&#8230;','&#8224;','&#8225;','&#710;',
-            '&#8240;','&#352;','&#8249;','&#338;','&#381;','&#8216;','&#8217;','&#8220;',
-            '&#8221;','&#8226;','&#8211;','&#8212;','&#732;','&#8482;','&#353;','&#8250;',
-            '&#339;','&#382;','&#376;'
-        ];
-
-        $With = [
-            "'",'"',"<",">",
-            ' ','&#130;','&#131;','&#132;','&#133;','&#134;','&#135;','&#136;',
-            '&#137;','&#138;','&#139;','&#140;','&#142;','&#145;','&#146;','&#147;',
-            '&#148;','&#149;','&#150;','&#151;','&#152;','&#153;','&#154;','&#155;',
-            '&#156;','&#158;','Ÿ'
-        ];
-        $Str = str_replace($Replace, $With, $Str);
-        $Str = str_replace("&amp;", "&", $Str);
-    }
-    return $Str;
 }
 
 /**

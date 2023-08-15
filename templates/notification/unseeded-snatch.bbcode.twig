@@ -1,0 +1,22 @@
+{% autoescape false %}
+{%- set total = list|length -%}
+{%- set many = total > 1 -%}
+Dear {{ user.username }},
+
+In the past, you snatched {% if many %}{{ total }} uploads{% else %}an upload{%
+    endif %} that {% if many %}are{% else %}is{% endif %} no longer being seeded, which means {% if many %}they{% else %}it{%
+    endif %} will be removed in the near future. You can save the situation and prevent this from happening by reseeding {%
+    if many %}them{% else %}it{% endif %}. If you are the first to do so, you will be rewarded with extra bonus points for your efforts! Remember, seeding anything you snatched earns bonus points on {{
+    constant('SITE_NAME') }}.
+
+The exact details vary from client to client, but you will need to initiate a check and see that the torrent{% if many %}s are{% else %} is{% endif %} seeding at 100%. If you still have the files but have lost the torrent file, you may obtain a new copy by saving it from the [[n]DL] link. To check the state of an upload, click {% if many %}one of the links{% else %}the link{% endif %} below and look at the "Last active" time. For more information, please read [url=wiki.php?action=article&id=77]this article[/url].
+
+Once you have successfully reseeded the upload, you don't need to do anything else. If you meet all the conditions, you will receive a system PM.
+{% for t in list %}
+[*] [pl]{{ t }}[/pl]
+{% endfor -%}
+
+If you no longer wish to receive these notifications, you may turn them off in [url=/user.php?action=edit&userid=me#notification]your profile settings[/url]. At any time, you may view your [url=/torrents.php?userid=me&type=uploaded-unseeded]unseeded uploads[/url] and your [url=/torrents.php?userid=me&type=snatched-unseeded]unseeded snatches[/url].
+
+<3
+{% endautoescape %}

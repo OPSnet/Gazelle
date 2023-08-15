@@ -115,7 +115,7 @@ function Quote(post, user) {
         }
         $('#quickpost').raw().value = $('#quickpost').raw().value + "[quote=" + username + "]" +
             //response.replace(/(img|aud)(\]|=)/ig,'url$2').replace(/\[url\=(https?:\/\/[^\s\[\]<>"\'()]+?)\]\[url\](.+?)\[\/url\]\[\/url\]/gi, "[url]$1[/url]")
-            html_entity_decode(response)
+            response
         + "[/quote]";
         resize('quickpost');
     });

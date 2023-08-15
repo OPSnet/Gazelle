@@ -209,7 +209,6 @@ class ReportManagerTest extends TestCase {
             array_map(fn($r) => $r->id(), $this->reportList),
             new Gazelle\Manager\Collage,
             new Gazelle\Manager\Comment,
-            new Gazelle\Manager\Forum,
             new Gazelle\Manager\ForumThread,
             new Gazelle\Manager\ForumPost,
             new Gazelle\Manager\Request,

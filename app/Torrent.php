@@ -7,14 +7,10 @@ class Torrent extends TorrentAbstract {
 
     final const CACHE_KEY                = 't2_%d';
     final const CACHE_FOLDERNAME         = 'foldername_%s';
-    final const CACHE_KEY_PEERLIST_TOTAL = 'peerlist_total_%d';
     final const CACHE_KEY_PEERLIST_PAGE  = 'peerlist_page_%d_%d';
     final const USER_RECENT_UPLOAD       = 'u_recent_up_%d';
 
-    final const SNATCHED_UPDATE_INTERVAL = 3600; // How often we want to update users' snatch lists
-
     protected array $tokenCache;
-    protected string $updateTime;
 
     public function location(): string { return "torrents.php?id={$this->groupId()}&torrentid={$this->id}#torrent{$this->id}"; }
     public function tableName(): string { return 'torrents'; }

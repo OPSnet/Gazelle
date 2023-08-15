@@ -15,7 +15,7 @@ class Torrent extends \Gazelle\Json {
         return [
             'torrentId'       => $torrent->id(),
             'groupId'         => $tgroup->id(),
-            'groupName'       => html_entity_decode($tgroup->name()),
+            'groupName'       => $tgroup->name(),
             'groupCategoryId' => $tgroup->categoryId(),
             'wikiImage'       => $tgroup->image(),
             'torrentTags'     => implode(' ', $tgroup->tagNameList()),

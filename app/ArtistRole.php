@@ -153,8 +153,8 @@ abstract class ArtistRole extends \Gazelle\Base {
      */
     protected function artistLink(int $mode, array $info): string {
         return match ($mode) {
-            self::RENDER_HTML => '<a href="artist.php?id=' . $info['id'] . '" dir="ltr">' . display_str($info['name']) . '</a>',
-            default           => display_str($info['name']),
+            self::RENDER_HTML => '<a href="artist.php?id=' . $info['id'] . '" dir="ltr">' . html_escape($info['name']) . '</a>',
+            default           => $info['name'],
         };
     }
 }

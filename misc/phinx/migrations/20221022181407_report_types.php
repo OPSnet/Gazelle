@@ -568,7 +568,7 @@ Your torrent was reported because one or more tracks contain encoding errors.',
             'explanation'    => 'Explain exactly why you believe this log requires rescoring. For example, if it is a non-English log that needs scoring, or if the log was not uploaded at all.
 For checksum rescores of existing logs, please include the output from the appropriate validator (EAC\'s CheckLog.exe or XLD\'s log checker)and the version used. The scores given on other sites are known to be subject to errors. As a consequence, [b]a log with no checksum warning on another site is not grounds for requesting a rescore if it has an invalid checksum warning on ' . SITE_NAME . '[/b]',
             'pm_body'        =>
-                '[rule]2.2.10.3[/rule]. A FLAC upload with an EAC or XLD rip log that scores 100% on the log checker replaces one with a lower score... Note: A FLAC upload with a log that scores 95% for not defeating the audio cache may be rescored to 100% following the procedure outlined in [url=wiki.php?action=article&amp;id=79]this wiki[/url].
+                '[rule]2.2.10.3[/rule]. A FLAC upload with an EAC or XLD rip log that scores 100% on the log checker replaces one with a lower score... Note: A FLAC upload with a log that scores 95% for not defeating the audio cache may be rescored to 100% following the procedure outlined in [url=wiki.php?action=article&id=79]this wiki[/url].
 
 [rule]2.2.10.5[/rule]. XLD and EAC logs in languages other than English require a manual log checker score adjustment by staff.
 

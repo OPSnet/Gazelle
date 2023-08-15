@@ -1,7 +1,7 @@
 {% if donor_forum %}
-{{ header('Forums &rsaquo; ' ~ forum.name, {'js': 'donor,subscriptions'}) }}
+{{ header('Forums › ' ~ forum.name, {'js': 'donor,subscriptions'}) }}
 {% else %}
-{{ header('Forums &rsaquo; ' ~ forum.name, {'js': 'subscriptions'}) }}
+{{ header('Forums › ' ~ forum.name, {'js': 'subscriptions'}) }}
 {% endif %}
 <div class="thin">
     <h2><a href="forums.php">Forums</a> &rsaquo; <a href="forums.php#{{ forum.categoryName }}">{{ forum.categoryName }}</a> &rsaquo; {{ forum.name }}</h2>

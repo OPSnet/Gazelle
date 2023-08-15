@@ -7,16 +7,10 @@ if ($Viewer->disableUpload()) {
     error('Your upload privileges have been revoked.');
 }
 
-if (!empty($_GET['action'])) {
-    match ($_GET['action']) {
-        'parse_html' => require_once('parse_html.php'),
-        'parse_json' => require_once('parse_json.php'),
-        default      => error(404),
-    };
-}
-elseif (!empty($_POST['submit'])) {
+if (isset($_GET['action']) && $_GET['action'] == 'parse_html') {
+    require_once('parse_html.php');
+} elseif (!empty($_POST['submit'])) {
     require_once('upload_handle.php');
-}
-else {
+} else {
     require_once('upload.php');
 }

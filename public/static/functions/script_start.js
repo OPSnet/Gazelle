@@ -69,19 +69,6 @@ function is_array(input) {
     return typeof(input) === 'object' && input instanceof Array;
 }
 
-function function_exists(function_name) {
-    return (typeof this.window[function_name] === 'function');
-}
-
-function html_entity_decode(str) {
-    var el = document.createElement("div");
-    el.innerHTML = str;
-    for (var i = 0, ret = ''; i < el.childNodes.length; i++) {
-        ret += el.childNodes[i].nodeValue;
-    }
-    return ret;
-}
-
 function byte_format(size) {
     var steps = 0;
     while (steps < 8 && size >= 1024) {

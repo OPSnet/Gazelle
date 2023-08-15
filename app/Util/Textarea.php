@@ -87,15 +87,16 @@ class Textarea extends \Gazelle\Base {
     }
 
     public function field(): string {
+        $name = html_escape($this->name);
         $attr = array_merge($this->extra, [
-            'name="' . $this->name . '"',
-            'id="' . $this->name . '"',
+            'name="' . $name . '"',
+            'id="' . $name . '"',
             'cols="' . $this->cols . '"',
             'rows="' . $this->rows . '"',
-            'onkeyup="resize(\'' . $this->name . '\')"',
+            'onkeyup="resize(\'' . $name . '\')"',
         ]);
         return '<div id="textarea_wrap_' . $this->id . '" class="field_div textarea_wrap">'
-            . '<textarea ' . implode(' ', $attr ) . '>' . $this->value . '</textarea></div>';
+            . '<textarea ' . implode(' ', $attr ) . '>' . html_escape($this->value) . '</textarea></div>';
     }
 
     /**

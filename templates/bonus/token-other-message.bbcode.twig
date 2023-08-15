@@ -1,3 +1,4 @@
+{% autoescape false %}
 Hello {{ to }},
 
 [user]{{ from }}[/user] has sent you {{ amount }} freeleech token{{ amount|plural }} to use!
@@ -7,6 +8,7 @@ You can use tokens to download torrents without being charged any download.
 They said: [quote]{{ message }}[/quote] 
 {% endif %}
 
-More details about FL tokens can be found on [url=wiki.php?action=article&amp;id={{ wiki_id }}]the wiki[/url].
+More details about FL tokens can be found on [url=wiki.php?action=article&id={{ wiki_id }}]the wiki[/url].
 
 Enjoy!
+{% endautoescape %}

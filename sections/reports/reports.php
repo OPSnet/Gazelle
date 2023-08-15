@@ -61,7 +61,6 @@ echo $Twig->render('report/index.twig', [
         $search->page($paginator->limit(), $paginator->offset()),
         new Gazelle\Manager\Collage,
         new Gazelle\Manager\Comment,
-        new Gazelle\Manager\Forum,
         new Gazelle\Manager\ForumThread,
         new Gazelle\Manager\ForumPost,
         new Gazelle\Manager\Request,

@@ -7,4 +7,5 @@ if (is_null($post)) {
 if (!$Viewer->readAccess($post->thread()->forum())) {
     error(403);
 }
-echo display_str($post->body());
+header('Content-type: text/plain');
+echo $post->body();

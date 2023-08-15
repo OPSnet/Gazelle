@@ -10,9 +10,6 @@ class TGroup extends BaseObject {
     final const USER_RECENT_UPLOAD   = 'u_recent_up_%d';
     final const CACHE_REQUEST_TGROUP = 'req_tg_%d';
 
-    final const ARTIST_DISPLAY_TEXT = 1;
-    final const ARTIST_DISPLAY_HTML = 2;
-
     protected int   $revisionId = 0;
     protected bool  $showFallbackImage = true;
     protected ArtistRole\TGroup $artistRole;
@@ -57,13 +54,12 @@ class TGroup extends BaseObject {
     }
 
     public function text(): string {
-        $name = display_str($this->name());
         return match($this->categoryName()) {
-            'Music'  => "{$this->artistRole()->text()} – $name [{$this->year()} {$this->releaseTypeName()}]"
+            'Music'  => "{$this->artistRole()->text()} – {$this->name()} [{$this->year()} {$this->releaseTypeName()}]"
                 . ($this->isShowcase() ? '[Showcase]' : ''),
             'Audiobooks',
-            'Comedy' => "$name [{$this->year()}]",
-            default  => $name,
+            'Comedy' => "{$this->name()} [{$this->year()}]",
+            default  => $this->name(),
         };
     }
 

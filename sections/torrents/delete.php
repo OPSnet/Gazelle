@@ -81,7 +81,7 @@ if ($Viewer->permitted('admin_reports')) {
             <input type="hidden" id="uploader0" name="uploader" value="<?= $torrent->uploader()->username() ?>" />
             <input type="hidden" id="uploaderid0" name="uploaderid" value="<?= $uploaderId ?>" />
             <input type="hidden" id="reporterid0" name="reporterid" value="<?= $Viewer->id() ?>" />
-            <input type="hidden" id="raw_name0" name="raw_name" value="<?= "{$torrent->fullName()} $size" ?>" />
+            <input type="hidden" id="raw_name0" name="raw_name" value="<?= html_escape($torrent->fullName()) . " $size" ?>" />
             <input type="hidden" id="type0" name="type" value="<?= $reportType->type() ?>" />
             <input type="hidden" id="categoryid0" name="categoryid" value="<?= $torrent->group()->categoryId() ?>" />
             <input type="hidden" id="pm_type0" name="pm_type" value="Uploader" />
