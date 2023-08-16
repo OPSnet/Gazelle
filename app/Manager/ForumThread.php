@@ -6,6 +6,26 @@ class ForumThread extends \Gazelle\BaseManager {
     protected const ID_KEY = 'zz_ft_%d';
 
     /**
+     * Create a forum thread
+     */
+    public function create(\Gazelle\Forum $forum, int $userId, string $title, string $body): \Gazelle\ForumThread {
+        $db = new \Gazelle\DB;
+        $db->relaxConstraints(true);
+        self::$db->prepared_query("
+            INSERT INTO forums_topics
+                   (ForumID, Title, AuthorID, LastPostAuthorID)
+            Values (?,       ?,        ?,                ?)
+            ", $forum->id(), $title, $userId, $userId
+        );
+        $thread = $this->findById(self::$db->inserted_id());
+        $thread->addPost($userId, $body);
+        $db->relaxConstraints(false);
+        (new \Gazelle\Stats\User($userId))->increment('forum_thread_total');
+        $forum->flush();
+        return $thread;
+    }
+
+    /**
      * Instantiate a thread by its ID
      */
     public function findById(int $threadId): ?\Gazelle\ForumThread {
@@ -32,26 +52,6 @@ class ForumThread extends \Gazelle\BaseManager {
             ", $postId
         );
         return $id ? new \Gazelle\ForumThread($id) : null;
-    }
-
-    /**
-     * Create a forum thread
-     */
-    public function create(\Gazelle\Forum $forum, int $userId, string $title, string $body): \Gazelle\ForumThread {
-        $db = new \Gazelle\DB;
-        $db->relaxConstraints(true);
-        self::$db->prepared_query("
-            INSERT INTO forums_topics
-                   (ForumID, Title, AuthorID, LastPostAuthorID)
-            Values (?,       ?,        ?,                ?)
-            ", $forum->id(), $title, $userId, $userId
-        );
-        $thread = $this->findById(self::$db->inserted_id());
-        $thread->addPost($userId, $body);
-        $db->relaxConstraints(false);
-        (new \Gazelle\Stats\User($userId))->increment('forum_thread_total');
-        $forum->flush();
-        return $thread;
     }
 
     public function lockOldThreads(): int {

@@ -3,8 +3,20 @@
 namespace Gazelle\Manager;
 
 class ForumPost extends \Gazelle\BaseManager {
-
     protected const ID_KEY = 'zz_fp_%d';
+
+    /**
+     * Create a forum post
+     */
+    public function create(int $threadId, int $userId, string $body): \Gazelle\ForumPost {
+        self::$db->prepared_query("
+            INSERT INTO forums_posts
+                   (TopicID, AuthorID, Body)
+            Values (?,       ?,        ?)
+            ", $threadId, $userId, $body
+        );
+        return $this->findById(self::$db->inserted_id());
+    }
 
     /**
      * Instantiate a post by its ID
@@ -22,18 +34,5 @@ class ForumPost extends \Gazelle\BaseManager {
             }
         }
         return $id ? new \Gazelle\ForumPost($id) : null;
-    }
-
-    /**
-     * Create a forum post
-     */
-    public function create(int $threadId, int $userId, string $body): \Gazelle\ForumPost {
-        self::$db->prepared_query("
-            INSERT INTO forums_posts
-                   (TopicID, AuthorID, Body)
-            Values (?,       ?,        ?)
-            ", $threadId, $userId, $body
-        );
-        return $this->findById(self::$db->inserted_id());
     }
 }
