@@ -61,6 +61,7 @@ class Login extends Base {
         $user = $this->attemptLogin();
         if ($user) {
             $this->watch->clearAttempts();
+            $user->toggleAttr('inactive-warning-sent', false);
         } else {
             // we might not have an authenticated user, but still have the id of the username
             $this->watch->increment($this->userId, $this->username);

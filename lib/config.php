@@ -335,6 +335,13 @@ defined('SHOW_LOGO') or define('SHOW_LOGO', true);
 // How many enabled users are allowed? (Set to 0 for unlimited).
 defined('USER_LIMIT') or define('USER_LIMIT', 5000);
 
+// How many days of inactivity (not logging in) before an account is deactivated?
+// NB: If you do not want to deactivate stale accounts, disable the inactive user tasks
+defined('INACTIVE_USER_DEACTIVATE_DAYS') or define('INACTIVE_USER_DEACTIVATE_DAYS', 120);
+
+// How many days before sending an email to warn of pending deactivation?
+defined('INACTIVE_USER_WARN_DAYS') or define('INACTIVE_USER_WARN_DAYS', INACTIVE_USER_DEACTIVATE_DAYS - 7);
+
 // Set to false if you want to display the login form directly.
 defined('SHOW_PUBLIC_INDEX') or define('SHOW_PUBLIC_INDEX', true);
 

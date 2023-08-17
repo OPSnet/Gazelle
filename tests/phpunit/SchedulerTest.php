@@ -7,18 +7,14 @@ require_once(__DIR__ . '/../../lib/bootstrap.php');
 ini_set('memory_limit', '1G');
 
 class SchedulerTest extends TestCase {
-    protected Gazelle\TaskScheduler $scheduler;
-
-    public function setUp(): void {
-        $this->scheduler = new Gazelle\TaskScheduler;
-    }
-
     public function testRun(): void {
+        $scheduler = new Gazelle\TaskScheduler;
         $this->expectOutputRegex('/^(?:\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} \[(?:debug|info)\] (.*?)\n|Running task (?:.*?)\.\.\.DONE! \(\d+\.\d+\)\n)*$/');
-        $this->scheduler->run();
+        $scheduler->run();
     }
 
     public function testRunWithMissingImplementation(): void {
+        $scheduler = new Gazelle\TaskScheduler;
         $name = "RunUnimplemented";
         $db = Gazelle\DB::DB();
         $db->prepared_query("
@@ -34,7 +30,7 @@ class SchedulerTest extends TestCase {
         );
 
         $this->expectOutputRegex('/^(?:\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} \[(?:debug|info)\] (.*?)\n|Running task (?:.*?)\.\.\.DONE! \(\d+\.\d+\)\n)*$/');
-        $this->scheduler->run();
+        $scheduler->run();
         $db->prepared_query("
             DELETE FROM periodic_task WHERE classname = ?
             ", $name
@@ -42,10 +38,12 @@ class SchedulerTest extends TestCase {
     }
 
     public function testMissingTaskEntry(): void {
-        $this->assertEquals(-1, $this->scheduler->runClass("NoSuchClassname"), "sched-task-no-such-class");
+        $scheduler = new Gazelle\TaskScheduler;
+        $this->assertEquals(-1, $scheduler->runClass("NoSuchClassname"), "sched-task-no-such-class");
     }
 
     public function testMissingImplementation(): void {
+        $scheduler = new Gazelle\TaskScheduler;
         $name = "Unimplemented";
         $db = Gazelle\DB::DB();
         $db->prepared_query("
@@ -59,7 +57,7 @@ class SchedulerTest extends TestCase {
             ",
             $name, "phpunit task", "A task with no PHP implementation"
         );
-        $this->assertEquals(-1, $this->scheduler->runClass($name), "sched-task-unimplemented");
+        $this->assertEquals(-1, $scheduler->runClass($name), "sched-task-unimplemented");
         $db->prepared_query("
             DELETE FROM periodic_task WHERE classname = ?
             ", $name
@@ -71,8 +69,9 @@ class SchedulerTest extends TestCase {
      * @dataProvider taskProvider
      */
     public function testTask(string $taskName): void {
+        $scheduler = new Gazelle\TaskScheduler;
         ob_start();
-        $this->assertIsInt($this->scheduler->runClass($taskName), "sched-task-$taskName");
+        $this->assertIsInt($scheduler->runClass($taskName), "sched-task-$taskName");
         ob_end_clean();
     }
 
@@ -88,7 +87,6 @@ class SchedulerTest extends TestCase {
             ['DemoteUsers'],
             ['DemoteUsersRatio'],
             ['DisableDownloadingRatioWatch'],
-            ['DisableInactiveUsers'],
             ['DisableLeechingRatioWatch'],
             ['DisableStuckTasks'],
             ['DisableUnconfirmedUsers'],
@@ -98,6 +96,8 @@ class SchedulerTest extends TestCase {
             ['ExpireTagSnatchCache'],
             ['Freeleech'],
             ['HideOldRequests'],
+            ['InactiveUserWarn'],
+            ['InactiveUserDeactivate'],
             ['LockOldThreads'],
             ['LowerLoginAttempts'],
             ['NotifyNonseedingUploaders'],

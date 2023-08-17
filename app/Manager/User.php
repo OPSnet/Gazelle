@@ -688,6 +688,85 @@ class User extends \Gazelle\BaseManager {
         return count($idList);
     }
 
+    public function inactiveUserWarn(\Gazelle\Util\Mail $mailer): int {
+        self::$db->prepared_query("
+            SELECT DISTINCT um.ID
+            FROM users_main             um
+            INNER JOIN user_last_access ula ON (ula.user_id = um.ID)
+            INNER JOIN permissions      p   ON (p.ID = um.PermissionID)
+            WHERE um.Enabled = ?
+                AND ula.last_access < now() - INTERVAL ? DAY
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM user_has_attr uha
+                    INNER JOIN user_attr ua ON (ua.ID = uha.UserAttrId AND ua.Name = ?)
+                    WHERE uha.UserID = um.ID
+                )
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM users_levels ul
+                    INNER JOIN permissions ulp ON (ulp.ID = ul.PermissionID)
+                    WHERE ul.UserID = um.ID
+                        AND ulp.Name in (?, ?)
+                )
+                AND p.Name IN (?, ?)
+            ", UserStatus::enabled->value,
+                INACTIVE_USER_WARN_DAYS,
+                'inactive-warning-sent',
+                'Donor', 'Torrent Celebrity',
+                'User', 'Member'
+        );
+
+        $processed = 0;
+        foreach (self::$db->collect(0, false) as $userId) {
+            $user = $this->findById($userId);
+            if ($user) {
+                $mailer->send($user->email(), 'Your ' . SITE_NAME . ' account is about to be deactivated',
+                    self::$twig->render('email/disable-warning.twig', [
+                        'username' => $user->username(),
+                    ])
+                );
+                $processed++;
+                $user->toggleAttr('inactive-warning-sent', true);
+            }
+        }
+        return $processed;
+    }
+
+    public function inactiveUserDeactivate(\Gazelle\Tracker $tracker): int {
+        self::$db->prepared_query("
+            SELECT DISTiNCT um.ID
+            FROM users_main AS um
+            INNER JOIN user_last_access AS ula ON (ula.user_id = um.ID)
+            INNER JOIN permissions p ON (p.ID = um.PermissionID)
+            WHERE um.Enabled = ?
+                AND ula.last_access < now() - INTERVAL ? DAY
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM users_levels ul
+                    INNER JOIN permissions ulp ON (ulp.ID = ul.PermissionID)
+                    WHERE ul.UserID = um.ID
+                        AND ulp.Name in (?, ?)
+                )
+                AND p.Name IN (?, ?)
+            ", UserStatus::enabled->value,
+                INACTIVE_USER_DEACTIVATE_DAYS,
+                'Donor', 'Torrent Celebrity',
+                'User', 'Member'
+        );
+
+        $processed = 0;
+        foreach (self::$db->collect(0, false) as $userId) {
+            $user = $this->findById($userId);
+            if ($user) {
+                $this->disableUserList($tracker, [$userId], 'Disabled for inactivity.', self::DISABLE_INACTIVITY);
+                $processed++;
+            }
+            $this->flushEnabledUsersCount();
+        }
+        return $processed;
+    }
+
     /**
      * Warn a user. Returns expiry date.
      */

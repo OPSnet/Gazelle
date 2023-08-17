@@ -363,4 +363,26 @@ class UserTest extends TestCase {
         $this->assertEquals(0, $this->user->paranoiaLevel(), 'utest-paranoid-level-off');
         $this->assertFalse($this->user->isParanoid('lastseen'), 'utest-is-not-last-seen-paranoid');
     }
+
+    public function testInactive(): void {
+        $userMan = new \Gazelle\Manager\User;
+        $db      = \Gazelle\DB::DB();
+
+        $this->user->setField('Enabled', UserStatus::enabled->value)->modify();
+        $db->prepared_query("
+            INSERT INTO user_last_access (user_id, last_access) VALUES (?, now() - INTERVAL ? DAY)
+            ", $this->user->id(), INACTIVE_USER_WARN_DAYS + 1
+        );
+        $this->user->flush();
+        $this->assertEquals(1, $userMan->inactiveUserWarn(new \Gazelle\Util\Mail), 'utest-one-user-inactive-warned');
+        $this->assertTrue($this->user->hasAttr('inactive-warning-sent'), 'utest-inactive-warned');
+
+        $db->prepared_query("
+            UPDATE user_last_access SET last_access = now() - INTERVAL ? DAY WHERE user_id = ?
+            ", INACTIVE_USER_DEACTIVATE_DAYS + 1, $this->user->id()
+        );
+        $this->assertEquals(1, $userMan->inactiveUserDeactivate(new \Gazelle\Tracker), 'utest-one-user-inactive-deactivated');
+        $this->user->flush();
+        $this->assertTrue($this->user->isDisabled(), 'utest-inactive-deactivated');
+    }
 }
