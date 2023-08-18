@@ -22,7 +22,7 @@
         <td class="nowrap">{{ t.created|time_diff }}</td>
         <td>{{ t.expired ? 'Yes' : 'No' }}
     {%- if admin and not t.expired %}
-            &nbsp;<a href="userhistory.php?action=token_history&amp;expire=1&amp;auth={{ auth }}&amp;userid={{ t.userid }}&amp;torrentid={{ t.torrent_id }}">(expire)</a>
+            &nbsp;<a href="userhistory.php?action=token_history&amp;expire=1&amp;auth={{ auth }}&amp;userid={{ user.id }}&amp;torrentid={{ t.torrent_id }}">(expire)</a>
     {%- endif -%}
         </td>
     {% if own_profile or admin %}
