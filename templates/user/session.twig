@@ -15,7 +15,7 @@
                 <td>
                     <form class="manage_form" name="sessions" action="" method="post">
                         <input type="hidden" name="action" value="sessions" />
-                        <input type="hidden" name="auth" value="{{ auth }}" />
+                        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
                         <input type="hidden" name="all" value="1" />
                         <input type="submit" value="Log out all" />
                     </form>
@@ -32,7 +32,7 @@
                 <td>
                     <form class="delete_form" name="session" action="" method="post">
                         <input type="hidden" name="action" value="sessions" />
-                        <input type="hidden" name="auth" value="{{ auth }}" />
+                        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
                         <input type="hidden" name="session" value="{{ s.SessionID }}" />
                         <input type="submit" value="{% if s.SessionID == current %}Current" disabled="disabled{% else %}Log out{% endif %}" />
                     </form>
