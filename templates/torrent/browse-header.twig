@@ -255,17 +255,16 @@
         <span style="float: left;">{{ results_total|number_format }} Result{{ results_total|plural }}
 {% if results_total > results_shown and not viewer.permitted('site_search_many') %} (Showing first {{ results_shown|number_format }}  matches){% endif %}
         </span>
+        <input type="submit" class="search_button" value="Search" />
 {% if filtered %}
-        <input type="submit" name="setdefault" value="Make default" />
+        <input type="submit" class="setdefault_button" name="setdefault" value="Make default" />
 {% endif %}
 {% if viewer.option('DefaultSearch') %}
-        <input type="submit" name="cleardefault" value="Clear default" />
+        <input type="submit" class="cleardefault_button" name="cleardefault" value="Clear default" />
 {% endif %}
-        &nbsp;&nbsp;<input type="submit" value="Filter torrents" />
         <input type="hidden" name="action" id="ft_action" value="{{ search_mode }}" />
         <input type="hidden" name="searchsubmit" value="1" />
-        <input type="button" value="Reset" onclick="location.href = 'torrents.php{% if input.action == 'action' %}?action=advanced{% endif %}'" />
-        &nbsp;&nbsp;
+        <input type="button" class="reset_button" value="Reset" onclick="location.href = 'torrents.php{% if input.action == 'action' %}?action=advanced{% endif %}'" />
     </div>
 </div>
 </div>
