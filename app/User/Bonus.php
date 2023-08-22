@@ -487,7 +487,7 @@ class Bonus extends \Gazelle\BaseUser {
                 if (coalesce(sum(t.Size), 0) = 0,
                     0,
                     sum(bonus_accrual(t.Size, xfh.seedtime + (24 * 365.256363004),    tls.Seeders)) * (24 * 365.256363004)
-                    / sum(t.Size) / (1024*1024*1024)
+                    / (sum(t.Size) / (1024*1024*1024))
                 ) AS points_per_gb
             FROM (
                 SELECT DISTINCT uid, fid
