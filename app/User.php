@@ -3,12 +3,12 @@
 namespace Gazelle;
 
 use Gazelle\Enum\AvatarDisplay;
-use Gazelle\Enum\AvatarSynthetic;
 use Gazelle\Enum\UserStatus;
 use Gazelle\Enum\UserTokenType;
 
 use Gazelle\Util\Irc;
 use Gazelle\Util\Mail;
+use Gazelle\Util\Time;
 
 class User extends BaseObject {
     final const tableName          = 'users_main';
@@ -18,14 +18,12 @@ class User extends BaseObject {
 
     protected bool $forceCacheFlush = false;
     protected int $lastReadForum;
-    protected string $warningExpiry;
     protected User\Invite $invite;
 
     protected array $avatarCache;
     protected array $lastRead;
     protected array $forumWarning = [];
     protected array $staffNote = [];
-    protected array $voteSummary;
 
     protected Stats\User|null $stats;
     protected User\Snatch|null $snatch;
@@ -1006,6 +1004,48 @@ class User extends BaseObject {
      */
     public function removeTitle(): static {
         return $this->setField('Title', null);
+    }
+
+    /**
+     * Warn a user. Returns expiry date.
+     */
+    public function warn(int $duration, string $reason, \Gazelle\User $staff, string $userMessage): string {
+        $warnTime = Time::offset($duration * 7 * 86_400);
+        $warning  = new \Gazelle\User\Warning($this);
+        $expiry   = $warning->warningExpiry();
+        if ($expiry) {
+            $subject = 'You have received a new warning';
+            $message = "You have received a new warning by [user]{$staff->username()}[/user]. "
+                . "You had an existing warning (set to expire at $expiry).\n\nDue to this prior warning, "
+                . "you will remain warned until $warnTime.\nReason: $userMessage";
+        } else {
+            $subject = 'You have been warned';
+            $message = "You have been warned by [user]{$staff->username()}[/user]. "
+                . "The warning is set to expire on $warnTime. Remember, repeated warnings may jeopardize "
+                . "your account.\nReason: $userMessage";
+        }
+        (new \Gazelle\Manager\User)->sendPM($this->id(), 0, $subject, $message);
+        return $warning->add($reason, "$duration week" . plural($duration), $staff);
+    }
+
+    /**
+     * Issue a warning for a comment or forum post
+     */
+    public function warnPost(BaseObject $post, int $weekDuration, \Gazelle\User $staffer,
+                             string $staffReason, string $userMessage): void {
+        if (!$weekDuration) {  // verbal warning
+            $subject = 'You have received a verbal warning';
+            $body    = "You have received a verbal warning by [user]{$staffer->username()}[/user] for {$post->publicLocation()}.\n\n[quote]{$userMessage}[/quote]";
+            $warned  = "Verbally warned";
+            (new \Gazelle\Manager\User)->sendPM($this->id(), 0, $subject, $body);
+        } else {
+            $message = "for {$post->publicLocation()}.\n\n[quote]{$userMessage}[/quote]";
+            $expiry  = $this->warn($weekDuration, "{$post->publicLocation()} - $staffReason", $staffer, $message);
+            $warned  = "Warned until $expiry";
+        }
+        $this->addForumWarning(
+            "$warned by {$staffer->username()} for {$post->publicLocation()}\nReason: $staffReason")
+            ->modify();
     }
 
     public function modifyOption(string $name, $value): static {

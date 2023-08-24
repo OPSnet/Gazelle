@@ -27,7 +27,7 @@ if (is_null($report)) {
 $torrent = $report->torrent();
 if (is_null($torrent)) {
     $report->moderatorResolve($Viewer->id(), 'Report already dealt with (torrent deleted).');
-    $Cache->decrement('num_torrent_reportsv2');
+    $Cache->decrement_value('num_torrent_reportsv2');
     json_die("failure", "torrent already deleted?");
 }
 $torrentId = $torrent->id();
@@ -124,25 +124,26 @@ if ($revokeUpload) {
 }
 
 if ($weeksWarned > 0) {
-    $Reason = "Uploader of torrent ($torrentId) $name which was resolved with the preset: $reportTypeName.";
+    $Reason = $message = "Uploader of torrent ($torrentId) $name which was resolved with the preset: $reportTypeName.";
     if ($adminMessage) {
         $Reason .= " ($adminMessage)";
     }
     if ($revokeUpload) {
-        $Reason .= ' (Upload privileges removed).';
+        $Reason  .= ' (Upload privileges removed).';
+        $message .= ' (Upload privileges removed).';
     }
-    $userMan->warn($uploader, $weeksWarned, $Reason, $Viewer);
+    $uploader->warn($weeksWarned, $Reason, $Viewer, $message);
 } else {
     $staffNote = null;
     if ($revokeUpload) {
         $staffNote = 'Upload privileges removed by ' . $Viewer->username()
             . "\nReason: Uploader of torrent ($torrentId) $name which was [url="
-            . $report->url() . "]resolved with the preset: {$reportTypeName}[/url].";
+            . $report->location() . "]resolved with the preset: {$reportTypeName}[/url].";
     }
     if ($adminMessage) {
         // They did nothing of note, but still want to mark it (Or upload and mark)
         if (!$revokeUpload) {
-            $staffNote = "Torrent ($torrentId) $name [url=" . $report->url() . "]was reported[/url]: $adminMessage";
+            $staffNote = "Torrent ($torrentId) $name [url=" . $report->location() . "]was reported[/url]: $adminMessage";
         } else {
             $staffNote .= ", mod note: $adminMessage";
         }
@@ -166,7 +167,7 @@ if ($modNote || $weeksWarned > 0 || isset($_POST['delete']) || $SendPM) {
     }
 
     if ($weeksWarned > 0) {
-        $message[] = "This has resulted in a [url=wiki.php?action=article&amp;name=warnings]$weeksWarned week warning.[/url]";
+        $message[] = "This has resulted in a [url=wiki.php?action=article&name=warnings]$weeksWarned week warning.[/url]";
     }
 
     if ($revokeUpload) {

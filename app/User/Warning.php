@@ -14,15 +14,24 @@ class Warning extends \Gazelle\BaseUser {
         return $this;
     }
 
-    public function create(string $reason, string $interval, \Gazelle\User $warner): string {
+    public function add(string $reason, string $interval, \Gazelle\User $warner): string {
+        $args = [$this->id(), $warner->id(), $reason];
+        $oldExpire = $this->warningExpiry();
+        if ($oldExpire) {
+            $tsrange = 'tstzrange(?::timestamptz, ?::timestamptz + ?::interval)';
+            array_push($args, $oldExpire, $oldExpire);
+        } else {
+            $tsrange = 'tstzrange(now(), now() + ?::interval)';
+        }
+        $args[] = $interval;
         $end = (string)$this->pg()->scalar("
             insert into user_warning
                    (id_user, id_user_warner, reason, warning)
-            values (?,       ?,              ?,      tstzrange(now(), now() + ?::interval))
-            returning date_trunc('second', upper(warning))
-            ", $this->id(), $warner->id(), $reason, $interval
+            values (?,       ?,              ?,      $tsrange)
+            returning to_char(upper(warning), 'YYYY-MM-DD HH24:MI')
+            ", ...$args
         );
-        $this->user()->addStaffNote("Warned for $interval, expiry $end, reason: $reason");
+        $this->user()->addStaffNote("Warned for $interval (expiry $end) by {$warner->username()}. Reason: $reason")->modify();
         $this->flush();
         return $end;
     }
@@ -73,7 +82,7 @@ class Warning extends \Gazelle\BaseUser {
     public function clear(): int {
         $affected = (int)$this->pg()->prepared_query("
             update user_warning set
-                warning = tstzrange(lower(warning), now())
+                warning = tstzrange(lower(warning), greatest(lower(warning), now()))
             where upper(warning) > now()
                 and id_user = ?
             ", $this->id()

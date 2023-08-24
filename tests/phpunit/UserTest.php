@@ -314,19 +314,19 @@ class UserTest extends TestCase {
     public function testWarning(): void {
         $warned = new \Gazelle\User\Warning($this->user);
         $this->assertFalse($warned->isWarned(), 'utest-warn-initial');
-        $end = $warned->create(reason: 'phpunit 1', interval: '1 hour', warner: $this->user);
-        $this->assertTrue(Helper::recentDate($end, -3580), 'utest-warn-1-hour'); // one hour - 20 seconds
+        $end = $warned->add(reason: 'phpunit 1', interval: '1 hour', warner: $this->user);
+        $this->assertTrue(Helper::recentDate($end, -60 * 60 + 60), 'utest-warn-1-hour'); // one hour - 60 seconds
         $this->assertTrue($warned->isWarned(), 'utest-is-warned');
         $this->assertEquals(1, $warned->total(), 'utest-warn-total');
 
-        $userMan = new \Gazelle\Manager\User;
-        $end = $userMan->warn($this->user, 2, "phpunit warning", $this->user);
-        $this->assertTrue(Helper::recentDate($end, strtotime('+2 weeks') - 20), 'utest-warn-in-future'); // two weeks - 20 seconds
+        $end = $this->user->warn(2, "phpunit warning", $this->user, "phpunit");
+        $this->assertTrue(Helper::recentDate($end, strtotime('+2 weeks') - 60), 'utest-warn-in-future'); // two weeks - 60 seconds
         $this->assertEquals(2, $warned->total(), 'utest-warn-total');
         $warningList = $warned->warningList();
         $this->assertCount(2, $warningList, 'utest-warn-list');
         $this->assertEquals('phpunit 1', $warningList[0]['reason'], 'utest-warn-first-reason');
-        $this->assertEquals('true', $warningList[1]['active'], 'utest-warn-second-active');
+        $this->assertTrue($warningList[0]['active'], 'utest-warn-first-active');
+        $this->assertFalse($warningList[1]['active'], 'utest-warn-second-inactive');
 
         $this->assertEquals(2, $warned->clear(), 'utest-warn-clear');
         $this->assertFalse($warned->isWarned(), 'utest-warn-final');

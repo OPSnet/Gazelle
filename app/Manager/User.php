@@ -774,28 +774,6 @@ class User extends \Gazelle\BaseManager {
     }
 
     /**
-     * Warn a user. Returns expiry date.
-     */
-    public function warn(\Gazelle\User $user, int $duration, string $reason, \Gazelle\User $staff): string {
-        $warnTime = Time::offset($duration * 7 * 86_400);
-        $warning  = new \Gazelle\User\Warning($user);
-        $expiry   = $warning->warningExpiry();
-        $user->addStaffNote("Warned until $warnTime by {$staff->username()}")->modify();
-        if ($expiry) {
-            $this->sendPM($user->id(), 0,
-                'You have received a new warning',
-                "You had existing warning (set to expire at $expiry).\n\nDue to this prior warning, you will remain warned until $warnTime.\nReason: $reason"
-            );
-        } else {
-            $this->sendPM($user->id(), 0,
-                'You have been warned',
-                "You have been warned, the warning is set to expire on $warnTime. Remember, repeated warnings may jeopardize your account.\nReason: $reason"
-            );
-        }
-        return $warning->create($reason, "$duration week", $staff);
-    }
-
-    /**
      * Disable a list of users.
      *
      * @return int number of users disabled

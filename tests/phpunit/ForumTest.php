@@ -290,14 +290,13 @@ class ForumTest extends TestCase {
         // TODO: move more warning functionality out of sections/...
         $this->threadList[] = $thread
             = (new \Gazelle\Manager\ForumThread)->create($this->forum, $user->id(), 'user thread title', 'this is a new thread by a user');
+        $thread  = (new \Gazelle\Manager\ForumThread)->create($this->forum, $user->id(), 'user thread title', 'this is a new thread by a user');
         $post    = (new \Gazelle\Manager\ForumPost)->findById($thread->addPost($user->id(), 'offensive content'));
-        $userMan = new \Gazelle\Manager\User;
         $week    = 2;
         $message = "phpunit forum warn test " . randomString(10);
-        $expiry  = $userMan->warn($user, $week, "{$post->url()} - because phpunit", $admin);
         $this->assertNull($user->forumWarning(), 'forum-post-no-warning-history');
+        $user->warnPost($post, $week, $admin, "{$post->location()} - because phpunit", $message);
         $this->assertTrue($user->addForumWarning($message)->modify(), 'forum-post-add-warning');
-        $this->assertStringStartsWith(date('Y-m-d H', strtotime("+$week weeks")), $expiry, 'forum-post-warn');
         // phpstan does not realize that forumWarning() is volatile and so it considers that the value is still null when in fact it is a string
         $this->assertStringStartsWith(date('Y-m-d H'), $user->forumWarning(), 'forum-user-warning-history-start'); /** @phpstan-ignore-line */
         $this->assertStringEndsWith($message, $user->forumWarning(), 'forum-user-warning-history-end'); /** @phpstan-ignore-line */
@@ -310,15 +309,11 @@ class ForumTest extends TestCase {
         $postInfo = $pm->postList(1, 0)[0];
         $body = $postInfo['body'];
         $this->assertMatchesRegularExpression(
-            "/You have been warned, the warning is set to expire on \d+-\d+-\d+ \d+:\d+:\d+\. Remember, repeated warnings may jeopardize your account\./",
+            "/You have been warned by \[user]admin\.\w+\[\/user]\. The warning is set to expire on \d+-\d+-\d+ \d+:\d+:\d+\. Remember, repeated warnings may jeopardize your account\./",
             $body,
             'warn-user-inbox-pm-body-start'
         );
-        $this->assertStringEndsWith(
-            "Reason: forums.php?action=viewthread&amp;threadid={$thread->id()}&amp;postid={$post->id()}#post{$post->id()} - because phpunit",
-            $body,
-            'warn-user-inbox-pm-body-end'
-        );
+        $this->assertStringEndsWith($message . '[/quote]', $body,'warn-user-inbox-pm-body-end');
     }
 
     public function testForumPoll(): void {

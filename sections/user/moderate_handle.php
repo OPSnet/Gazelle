@@ -273,37 +273,26 @@ if ($Viewer->permitted('users_warn')) {
     $extend  = (int)($_POST['ExtendWarning'] ?? 0);
     $reduce  = (int)($_POST['ReduceWarning'] ?? 0);
     $warning = new Gazelle\User\Warning($user);
-    $create  = [];
     if (!isset($_POST['Warned'])) {
         if ($user->isWarned()) {
             $warning->clear();
             $editSummary[] = 'warning removed';
         }
-    } elseif ($extend || $reduce) {
-        $action   = $extend ? 'extended' : 'reduced';
-        $weeks    = $extend ?: $reduce;
-        $duration = 'week' . plural($weeks);
-        $create = [
-            'summary' => "warning $action $weeks $duration",
-            'subject' => "Your warning has been $action to $weeks $duration",
-            'body'    => "Your warning has been $action to $weeks $duration",
-        ];
+    } elseif ($reduce) {
         $warning->clear(); // replace the current warning with the new duration
-    } elseif ($weeks) {
-        $duration = 'week' . plural($weeks);
-        $create = [
-            'summary' => "warned for $weeks $duration",
-            'subject' => 'You have received a warning',
-            'body'    => "You have been [url=wiki.php?action=article&amp;name=warnings]warned[/url] for $weeks $duration",
-        ];
-    }
-    if ($create) {
-        $reason = trim($_POST['WarnReason'] ?? 'none given');
-        $expiry = $warning->create(reason: $reason, interval: "$weeks week", warner: $Viewer);
-        $create['body'] .= ", by [user]" . $Viewer->username() . "[/user]."
-            . " The reason given was:\n[quote]{$reason}[/quote]. The warning will expire at $expiry."
-            . "\n\nThis is an automated message. You may reply for more information if necessary.";
-        $userMan->sendPM($userId, $Viewer->id(), $create['subject'], $create['body']);
+        $duration = 'week' . plural($reduce);
+        $expiry = $warning->add($reason, "$reduce $duration", $Viewer);
+        $userMessage = trim($_POST['WarnReason'] ?? '');
+        $subject = "Your warning has been reduced to $reduce $duration";
+        $body = "Your warning has been reduced to $reduce $duration, set to expire at $expiry, "
+            . "by [user]{$Viewer->username()}[/user].";
+        if ($userMessage) {
+            $body .= " Reason:\n[quote]{$userMessage}[/quote].";
+        }
+        $userMan->sendPM($userId, 0, $subject, $body);
+    } elseif ($weeks || $extend) {
+        $staffReason = $reason ?: ($extend ? 'warning extension' : 'no reason');
+        $user->warn($extend ?: $weeks, $staffReason, $Viewer, $_POST['WarnReason'] ?? 'none given');
     }
 }
 

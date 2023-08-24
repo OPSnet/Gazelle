@@ -460,7 +460,7 @@ if ($Viewer->permitted('users_mod') || $Viewer->isStaffPMReader()) {
 }
 
 // Displays a table of forum warnings viewable only to Forum Moderators
-if ($User->isStaff() && $Viewer->permitted('users_warn')) {
+if ($Viewer->permitted('users_warn')) {
     $ForumWarnings = $User->forumWarning();
     if ($ForumWarnings) {
 ?>
