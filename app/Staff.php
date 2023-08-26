@@ -55,7 +55,7 @@ class Staff extends BaseUser {
             WHERE " . implode(' AND ', $cond), ...$args);
     }
 
-    public function userStaffPmList(int $viewerId): array {
+    public function userStaffPmList(\Gazelle\User $user): array {
         self::$db->prepared_query("
             SELECT spc.ID   AS pm_id,
                 spc.Subject AS subject,
@@ -75,7 +75,7 @@ class Staff extends BaseUser {
                 AND (spc.Level <= ? OR spc.AssignedToUser = ?)
             GROUP BY spc.ID
             ORDER BY spc.Date DESC
-            ", $this->user->id(), $this->user->effectiveClass(), $viewerId
+            ", $user->id(), $this->user->effectiveClass(), $this->user->id()
         );
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }

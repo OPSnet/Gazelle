@@ -454,7 +454,7 @@ if (!$Viewer->disableRequests() && $User->propertyVisible($previewer, 'requestsv
 
 if ($Viewer->permitted('users_mod') || $Viewer->isStaffPMReader()) {
     echo $Twig->render('admin/staffpm-list.twig', [
-        'list' => (new Gazelle\Staff($User))->userStaffPmList($Viewer->id()),
+        'list' => (new Gazelle\Staff($Viewer))->userStaffPmList($User),
     ]);
 }
 
