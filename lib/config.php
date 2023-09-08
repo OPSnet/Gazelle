@@ -749,57 +749,6 @@ defined('SOURCE_FLAG_WIKI_PAGE_ID') or define('SOURCE_FLAG_WIKI_PAGE_ID', 113);
 // likely require a corresonding change in the code or stylesheets.
 // ------------------------------------------------------------------------
 
-// Only these /<page>.php URLs will be rendered, antything else will
-// return a 404 error.
-
-defined('VALID_PAGE') or define('VALID_PAGE', [
-    'ajax',
-    'apply',
-    'artist',
-    'better',
-    'blog',
-    'bonus',
-    'bookmarks',
-    'chat',
-    'collages',
-    'comments',
-    'contest',
-    'donate',
-    'enable',
-    'error',
-    'forums',
-    'friends',
-    'inbox',
-    'index',
-    'irc',
-    'locked',
-    'log',
-    'logchecker',
-    'login',
-    'logout',
-    'random',
-    'recovery',
-    'referral',
-    'register',
-    'reports',
-    'reportsv2',
-    'requests',
-    'rules',
-    'signup',
-    'staff',
-    'staffblog',
-    'staffpm',
-    'stats',
-    'tools',
-    'top10',
-    'torrents',
-    'upload',
-    'user',
-    'userhistory',
-    'view',
-    'webirc',
-]);
-
 // Maximum length of a custom user title.
 defined('USER_TITLE_LENGTH') or define('USER_TITLE_LENGTH', 1024);
 

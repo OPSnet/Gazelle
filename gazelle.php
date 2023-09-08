@@ -36,12 +36,6 @@ if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])
 ) {
     $_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_X_FORWARDED_FOR'];
 }
-
-if (!in_array($Document, VALID_PAGE)) {
-    $_SERVER['SCRIPT_NAME'] = 'error.php';
-    $_SERVER['SCRIPT_FILENAME'] = 'error.php';
-    $Error = 404;
-}
 if (!isset($_SERVER['HTTP_USER_AGENT'])) {
     $_SERVER['HTTP_USER_AGENT'] = '[no-useragent]';
 }
@@ -187,9 +181,13 @@ header('Cache-Control: no-cache, must-revalidate, post-check=0, pre-check=0');
 header('Pragma: no-cache');
 
 $Router = new Gazelle\Router($Viewer ? $Viewer->auth() : '');
-$file = (string)realpath(__DIR__ . "/sections/{$Document}/index.php");
-if (!file_exists($file)) {
-    error(404);
+$file = realpath(__DIR__ . "/sections/{$Document}/index.php");
+if (!$file || !preg_match('/^[a-z][a-z0-9_]+$/', $Document)) {
+    if ($Viewer) {
+        error(403);  // will log to irc
+    } else {
+        error(404);
+    }
 } else {
     try {
         require_once($file);
