@@ -15,7 +15,7 @@ class ForumThread extends BaseObject {
         return $this;
     }
 
-    public function flushCatalog(int $begin, int $end) {
+    public function flushCatalog(int $begin, int $end): void {
         self::$cache->delete_multi(
             array_map(
                 fn($c) => sprintf(self::CACHE_CATALOG, $this->id, (int)floor((POSTS_PER_PAGE * $c) / THREAD_CATALOGUE)),
@@ -336,19 +336,6 @@ class ForumThread extends BaseObject {
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
-    public function pinPost(int $userId, int $postId, bool $set): int {
-        $this->addThreadNote($userId, "Post $postId " . ($set ? "pinned" : "unpinned"));
-        self::$db->prepared_query("
-            UPDATE forums_topics SET
-                StickyPostID = ?
-            WHERE ID = ?
-            ", $set ? $postId : 0, $this->id
-        );
-        $this->flush();
-        $this->flushCatalog(0, $this->lastPage());
-        return self::$db->affected_rows();
-    }
-
     protected function updateThread(int $userId, int $postId): int {
         self::$db->prepared_query("
             UPDATE forums_topics SET
@@ -462,7 +449,7 @@ class ForumThread extends BaseObject {
      * If $hasSticky is true, count will be one less.
      */
     public function lesserPostTotal(int $postId): int {
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*) FROM forums_posts WHERE TopicID = ? AND ID <= ?
             ", $this->id, $postId
         ) - (int)$this->isPinned();

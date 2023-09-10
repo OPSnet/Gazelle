@@ -347,4 +347,34 @@ class ForumTest extends TestCase {
         );
         $this->assertEquals(3, $thread->remove(), 'forum-thread-remove');
     }
+
+    public function testPostPin(): void {
+        $this->category = (new \Gazelle\Manager\ForumCategory)->create('phpunit category', 10002);
+        $forumMan       = new \Gazelle\Manager\Forum;
+        $admin          = $this->userList['admin'];
+        $user           = $this->userList['user'];
+        $this->forum    = $forumMan->create(
+            user:           $admin,
+            sequence:       151,
+            categoryId:     $this->category->id(),
+            name:           'Pin forum',
+            description:    'This is where it pins',
+            minClassRead:   100,
+            minClassWrite:  100,
+            minClassCreate: 100,
+            autoLock:       false,
+            autoLockWeeks:  42,
+        );
+
+        // TODO: move more warning functionality out of sections/...
+        $thread  = (new \Gazelle\Manager\ForumThread)->create($this->forum, $user->id(), 'unittest post pin', 'this is a new thread for post pins');
+        $post = (new \Gazelle\Manager\ForumPost)->findById($thread->addPost($user->id(), 'pinnable content'));
+
+        $this->assertFalse($post->isPinned(), 'forum-post-is-not-pinned');
+        $this->assertEquals(1, $post->pin($admin, true), 'forum-post-pin');
+        $this->assertTrue($post->isPinned(), 'forum-post-is-now-pinned');
+        $this->assertEquals(1, $post->pin($admin, false), 'forum-post-unpin');
+        $this->assertFalse($post->isPinned(), 'forum-post-is-no-longer-pinned');
+        $thread->remove();
+    }
 }

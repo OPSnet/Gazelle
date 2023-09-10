@@ -47,7 +47,7 @@ class ForumThread extends \Gazelle\BaseManager {
      * Find the thread from a post ID.
      */
     public function findByPostId(int $postId): ?\Gazelle\ForumThread {
-        $id = self::$db->scalar("
+        $id = (int)self::$db->scalar("
             SELECT TopicID FROM forums_posts WHERE ID = ?
             ", $postId
         );

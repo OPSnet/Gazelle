@@ -5,15 +5,10 @@ if (!$Viewer->permitted('site_moderate_forums')) {
 }
 authorize();
 
-$thread = (new Gazelle\Manager\ForumThread)->findById((int)($_POST['threadid'] ?? 0));
-if (is_null($thread)) {
+$post = (new Gazelle\Manager\ForumPost)->findById((int)($_GET['postid'] ?? 0));
+if (is_null($post)) {
     error(404);
 }
-$postId = (int)$_GET['postid'];
-if (!$postId) {
-    error(404);
-}
+$post->pin($Viewer, empty($_GET['remove']));
 
-$thread->pinPost($Viewer->id(), $postId, empty($_GET['remove']));
-
-header('Location: ' . $thread->location());
+header('Location: ' . $post->location());

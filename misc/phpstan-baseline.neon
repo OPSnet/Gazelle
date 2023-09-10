@@ -436,21 +436,6 @@ parameters:
 			path: ../app/File/RipLogHTML.php
 
 		-
-			message: "#^Method Gazelle\\\\ForumPost\\:\\:priorPostTotal\\(\\) should return int but returns bool\\|float\\|int\\|string\\|null\\.$#"
-			count: 1
-			path: ../app/ForumPost.php
-
-		-
-			message: "#^Binary operation \"\\-\" between bool\\|float\\|int\\|string\\|null and 0\\|1 results in an error\\.$#"
-			count: 1
-			path: ../app/ForumThread.php
-
-		-
-			message: "#^Method Gazelle\\\\ForumThread\\:\\:flushCatalog\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/ForumThread.php
-
-		-
 			message: "#^Method Gazelle\\\\Json\\:\\:emit\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: ../app/Json.php
@@ -694,31 +679,6 @@ parameters:
 			message: "#^Parameter \\#1 \\$id of class Gazelle\\\\ErrorLog constructor expects int, float\\|int\\<min, \\-1\\>\\|int\\<1, max\\>\\|string\\|true given\\.$#"
 			count: 3
 			path: ../app/Manager/ErrorLog.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\Forum\\:\\:flushToc\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Manager/Forum.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\Forum\\:\\:forumTransitionList\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Manager/Forum.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\Forum\\:\\:subscribedForumTotal\\(\\) should return int but returns bool\\|float\\|int\\|string\\|null\\.$#"
-			count: 1
-			path: ../app/Manager/Forum.php
-
-		-
-			message: "#^Method Gazelle\\\\Manager\\\\Forum\\:\\:unreadSubscribedForumTotal\\(\\) should return int but returns bool\\|float\\|int\\|string\\|null\\.$#"
-			count: 1
-			path: ../app/Manager/Forum.php
-
-		-
-			message: "#^Parameter \\#1 \\$id of class Gazelle\\\\ForumThread constructor expects int, float\\|int\\<min, \\-1\\>\\|int\\<1, max\\>\\|string\\|true given\\.$#"
-			count: 1
-			path: ../app/Manager/ForumThread.php
 
 		-
 			message: "#^Method Gazelle\\\\Manager\\\\IPv4\\:\\:createBan\\(\\) should return int but returns float\\|int\\<min, \\-1\\>\\|int\\<1, max\\>\\|string\\|true\\.$#"

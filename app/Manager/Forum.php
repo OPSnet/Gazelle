@@ -240,7 +240,7 @@ class Forum extends \Gazelle\BaseManager {
         return self::$db->affected_rows();
     }
 
-    public function forumTransitionList(\Gazelle\User $user) {
+    public function forumTransitionList(\Gazelle\User $user): array {
         $info = [];
         $items = self::$cache->get_value(self::CACHE_TRANSITION);
         if (!$items) {
@@ -310,7 +310,7 @@ class Forum extends \Gazelle\BaseManager {
         );
     }
 
-    public function flushToc() {
+    public function flushToc(): Forum {
         self::$cache->delete_multi([
             self::CACHE_TOC_MAIN,
             self::CACHE_LIST,
@@ -349,7 +349,7 @@ class Forum extends \Gazelle\BaseManager {
 
     public function subscribedForumTotal(\Gazelle\User $user): int {
         [$cond, $args] = $this->configureForUser($user);
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*)
             FROM users_subscriptions AS s
             LEFT JOIN forums_last_read_topics AS l ON (l.UserID = s.UserID AND l.TopicID = s.TopicID)
@@ -363,7 +363,7 @@ class Forum extends \Gazelle\BaseManager {
 
     public function unreadSubscribedForumTotal(\Gazelle\User $user): int {
         [$cond, $args] = $this->configureForUser($user);
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*)
             FROM users_subscriptions AS s
             LEFT JOIN forums_last_read_topics AS l ON (l.UserID = s.UserID AND l.TopicID = s.TopicID)

@@ -8,7 +8,7 @@ class ForumPost extends BaseObject {
     public function flush(): ForumPost {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
         $this->thread()->flush();
-        $this->info = [];
+        unset($this->info);
         return $this;
     }
 
@@ -20,7 +20,7 @@ class ForumPost extends BaseObject {
      * Get information about a post
      */
     public function info(): array {
-        if (isset($this->info) && !empty($this->info)) {
+        if (isset($this->info)) {
             return $this->info;
         }
         $key = sprintf(self::CACHE_KEY, $this->id);
@@ -35,7 +35,7 @@ class ForumPost extends BaseObject {
                     cast((SELECT ceil(sum(if(fp.ID <= p.ID, 1, 0)) / ?) FROM forums_posts fp WHERE fp.TopicID = t.ID) AS signed)
                                             AS page,
                     p.AuthorID              AS user_id,
-                    (p.ID = t.StickyPostID) AS is_sticky,
+                    (p.ID = t.StickyPostID) AS is_pinned,
                     p.Body                  AS body,
                     p.AddedTime             AS created,
                     p.EditedUserID          AS edit_user_id,
@@ -85,7 +85,7 @@ class ForumPost extends BaseObject {
     }
 
     public function priorPostTotal(): int {
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*)
             FROM forums_posts
             WHERE TopicID = (SELECT TopicID FROM forums_posts WHERE ID = ?)
@@ -125,6 +125,22 @@ class ForumPost extends BaseObject {
         return $affected;
     }
 
+    /**
+     * Pin/unpin a post in its thread
+     */
+    public function pin(User $user, bool $set): int {
+        $this->thread()->addThreadNote($user->id(), "Post {$this->id} " . ($set ? "pinned" : "unpinned"));
+        self::$db->prepared_query("
+            UPDATE forums_topics SET
+                StickyPostID = ?
+            WHERE ID = ?
+            ", $set ? $this->id : 0, $this->thread()->id()
+        );
+        $affected = self::$db->affected_rows();
+        $this->thread()->flushCatalog(0, $this->thread()->lastPage());
+        $this->flush();
+        return $affected;
+    }
     /**
      * Remove a post from a thread
      */
