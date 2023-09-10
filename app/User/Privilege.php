@@ -5,7 +5,12 @@ namespace Gazelle\User;
 class Privilege extends \Gazelle\BaseUser {
     final const CACHE_KEY = 'u_priv_%d';
 
-    public function flush(): Privilege { $this->user()->flush(); return $this; }
+    public function flush(): Privilege {
+        unset($this->info);
+        self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->user->id()));
+        $this->user()->flush();
+        return $this;
+    }
     public function link(): string { return $this->user()->link(); }
     public function location(): string { return $this->user()->location(); }
     public function tableName(): string { return 'users_levels'; }
@@ -117,7 +122,9 @@ class Privilege extends \Gazelle\BaseUser {
             VALUES (?,      (SELECT ID FROM permissions WHERE Name = ?))
             ", $this->id(), $className
         );
-        return self::$db->affected_rows();
+        $affected = self::$db->affected_rows();
+        $this->flush();
+        return $affected;
     }
 
     public function removeSecondaryClass(string $className): int {
@@ -129,6 +136,8 @@ class Privilege extends \Gazelle\BaseUser {
                 AND p.Name = ?
             ", $this->id(), $className
         );
-        return self::$db->affected_rows();
+        $affected = self::$db->affected_rows();
+        $this->flush();
+        return $affected;
     }
 }

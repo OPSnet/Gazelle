@@ -5,9 +5,11 @@ use \PHPUnit\Framework\TestCase;
 require_once(__DIR__ . '/../../lib/bootstrap.php');
 require_once(__DIR__ . '/../helper.php');
 
+define('FAKE_LEVEL', 666);
+
 /**
  * This test can be a little flakey locally if it fails halfway through. To fix up:
- * DELETE ul FROM users_levels ul LEFT JOIN users_info ui USING (userid) WHERE ui.userid IS NULL; DELETE FROM permissions WHERE level = 666;
+ * DELETE ul FROM users_levels ul LEFT JOIN users_info ui USING (userid) WHERE ui.userid IS NULL; DELETE FROM permissions WHERE level = ?; -- FAKE_LEVEL
  */
 
 class PrivilegeTest extends TestCase {
@@ -32,7 +34,7 @@ class PrivilegeTest extends TestCase {
         $this->assertCount(126, $privilegeList, 'privilege-total');
 
         $manager = new Gazelle\Manager\Privilege;
-        $this->assertNull($manager->findByLevel(666), 'privilege-find-none'); // if this fails check the `permissions` table
+        $this->assertNull($manager->findByLevel(FAKE_LEVEL), 'privilege-find-none'); // if this fails check the `permissions` table
 
         // create a privilege
         $badge     = 'X' . strtoupper(randomString(2));
@@ -43,20 +45,22 @@ class PrivilegeTest extends TestCase {
             badge:        $badge,
             name:         $name,
             values:       $custom,
-            level:        666,
+            level:        FAKE_LEVEL,
             secondary:    1,
             forums:       '',
             staffGroupId: null,
             displayStaff: false
         );
-        $find = $manager->findByLevel(666);
+        $find = $manager->findByLevel(FAKE_LEVEL);
         $this->assertInstanceOf(\Gazelle\Privilege::class, $find, 'privilege-find-by-level');
         $this->assertEquals($privilege->id(), $find->id(), 'privilege-found-self');
         $this->assertEquals($badge, $privilege->badge(), 'privilege-badge');
-        $this->assertEquals(666, $privilege->level(), 'privilege-level');
+        $this->assertEquals(FAKE_LEVEL, $privilege->level(), 'privilege-level');
         $this->assertCount(0, $privilege->permittedForums(), 'privilege-permitted-forums');
         $this->assertFalse($privilege->displayStaff(), 'privilege-display-staff');
         $this->assertTrue($privilege->isSecondary(), 'privilege-is-secondary');
+        $this->assertEquals($privilege->id(), $manager->findById($privilege->id())->id(), 'privilege-find-by-id');
+        $this->assertNull($manager->findById(1 + $privilege->id()), 'privilege-find-null');
 
         // assign privilege to user
         $this->assertEquals(0, $privilege->userTotal(), 'privilege-has-no-users-yet');
@@ -67,7 +71,7 @@ class PrivilegeTest extends TestCase {
 
         // TODO: User\Privilege should take care of adding and removing secondary classes
         $userPriv = new Gazelle\User\Privilege($this->userList['user']);
-        $this->assertEquals(666, $userPriv->maxSecondaryLevel(), 'privilege-user-max-level');
+        $this->assertEquals(FAKE_LEVEL, $userPriv->maxSecondaryLevel(), 'privilege-user-max-level');
         $this->assertEquals([$privilege->id() => $name], $userPriv->secondaryClassList(), 'privilege-user-list');
         $this->assertEquals([$badge => $name], $userPriv->badgeList(), 'privilege-user-badge');
 
@@ -91,11 +95,39 @@ class PrivilegeTest extends TestCase {
     /**
      * @dataProvider privilegeProvider
      */
-    public function testPrivilegeFls(int $privilegeId, string $method, string $label): void {
+    public function testPrivilegeSecondary(int $privilegeId, string $method, string $label): void {
         $user = $this->userList['user'];
+        $privilege = new Gazelle\Privilege($privilegeId);
+        $userPriv = new Gazelle\User\Privilege($user);
         $this->assertFalse($user->$method(), "privilege-user-not-$label");
         $this->assertEquals(1, $user->addClasses([$privilegeId]), "privilege-add-$label");
         $this->assertTrue($user->$method(), "privilege-user-now-$label");
+        // TODO: the method name and parameter could be improved
+        $this->assertTrue($userPriv->hasSecondaryClass($privilege->name()), "privilege-has-secondary-$label");
         $this->assertEquals(1, $user->removeClasses([$privilegeId]), "privilege-remove-$label");
+        $this->assertFalse($user->$method(), "privilege-user-no-longer-$label");
+        $this->assertFalse($userPriv->hasSecondaryClass($privilege->name()), "privilege-no-longerhas-secondary-$label");
+    }
+
+    public function testPrivilegeBadge(): void {
+        $manager = new Gazelle\Manager\Privilege;
+        $flsList = array_values(array_filter($manager->usageList(), fn($p) => $p['id'] == FLS_TEAM));
+        $total = $flsList[0]['total'];
+
+        $user = $this->userList['user'];
+        $this->assertEquals(3, $user->addClasses([FLS_TEAM, INTERVIEWER, RECRUITER]), "privilege-add-multi-secondary");
+        $this->assertEquals(0, $user->addClasses([FLS_TEAM, INTERVIEWER, RECRUITER]), "privilege-add-multi-no-op");
+        $userPriv = new Gazelle\User\Privilege($user);
+        $this->assertEquals(
+            [
+                'FLS' => 'First Line Support',
+                'IN'  => 'Interviewer',
+            ],
+            $userPriv->badgeList(),
+            'privilege-badge-list',
+        );
+        $this->assertGreaterThan(0, count($userPriv->secondaryPrivilegeList()), 'privilege-secondary-list');
+        $flsList = array_values(array_filter($manager->usageList(), fn($p) => $p['id'] == FLS_TEAM));
+        $this->assertEquals($total + 1, $flsList[0]['total'], 'privilege-one-new-fls');
     }
 }

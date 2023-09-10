@@ -2526,16 +2526,6 @@ parameters:
 			path: ../sections/tools/managers/ocelot.php
 
 		-
-			message: "#^Variable \\$privilege might not be defined\\.$#"
-			count: 1
-			path: ../sections/tools/managers/permissions_edit.php
-
-		-
-			message: "#^Variable \\$usersAffected might not be defined\\.$#"
-			count: 1
-			path: ../sections/tools/managers/permissions_edit.php
-
-		-
 			message: "#^Function type_list\\(\\) has parameter \\$Types with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: ../sections/tools/managers/referral_accounts.php
