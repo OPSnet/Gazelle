@@ -9,6 +9,7 @@ class ForumTest extends TestCase {
     protected Gazelle\ForumCategory $category;
     protected Gazelle\Forum         $forum;
     protected array                 $userList;
+    protected array                 $threadList;
 
     public function setUp(): void {
         $this->userList = [
@@ -19,6 +20,11 @@ class ForumTest extends TestCase {
     }
 
     public function tearDown(): void {
+        if (isset($this->threadList)) {
+            foreach ($this->threadList as $thread) {
+                $thread->remove();
+            }
+        }
         $this->forum->remove();
         $this->category->remove();
         foreach ($this->userList as $user) {
@@ -257,38 +263,6 @@ class ForumTest extends TestCase {
 
         // $this->assertEquals(3, $this->forum->userCatchup($admin->id()), 'forum-user-catchup');
 
-        // Forum Polls
-        $answer  = ['apple', 'banana', 'carrot'];
-        $pollMan = new \Gazelle\Manager\ForumPoll;
-        $poll    = $pollMan->create($thread->id(), 'Best food', $answer);
-        $this->assertInstanceOf(\Gazelle\ForumPoll::class, $poll, 'forum-poll-is-forum-poll');
-        $this->assertFalse($poll->isClosed(), 'forum-poll-is-not-closed');
-        $this->assertFalse($poll->hasRevealVotes(), 'forum-poll-is-not-featured');
-        $this->assertFalse($poll->isFeatured(), 'forum-poll-is-not-featured');
-        $this->assertEquals(0, $poll->total(), 'forum-poll-total');
-        $this->assertEquals($thread->id(), $poll->thread()->id(), 'forum-poll-thread-id');
-        $this->assertCount(3, $poll->vote(), 'forum-poll-vote-count');
-        $this->assertEquals($answer[1], $poll->vote()[1]['answer'], 'forum-poll-vote-1');
-
-        $find = $pollMan->findById($poll->id());
-        $this->assertEquals($poll->id(), $find->id(), 'forum-poll-find-by-id');
-
-        $this->assertEquals(1, $poll->addAnswer('sushi'), 'forum-poll-add-answer');
-
-        $this->assertEquals(0, $poll->addVote($user->id(), 12345), 'forum-poll-bad-vote');
-        $this->assertEquals(1, $poll->addVote($user->id(), 2),     'forum-poll-good-vote');
-        $this->assertEquals(2, $poll->response($user->id()),       'forum-poll-response-before');
-        $this->assertEquals(0, $poll->addVote($user->id(), 3),     'forum-poll-revote');
-        $this->assertEquals(1, $poll->modifyVote($user->id(), 3),  'forum-poll-change-vote');
-        $this->assertEquals(3, $poll->response($user->id()),       'forum-poll-response-after');
-
-        $this->assertEquals(1, $poll->moderate(true, false), 'forum-poll-moderate-feature-open');
-        $this->assertTrue($poll->isFeatured(), 'forum-poll-is-featured');
-
-        $this->assertEquals(1, $poll->close(), 'forum-poll-close');
-        $this->assertTrue($poll->isClosed(), 'forum-poll-is-closed');
-        $this->assertFalse($poll->isFeatured(), 'forum-poll-is-no-longer-featured');
-
         $this->assertEquals(5, $thread->remove(), 'forum-thread-remove');
     }
 
@@ -315,7 +289,8 @@ class ForumTest extends TestCase {
         }
 
         // TODO: move more warning functionality out of sections/...
-        $thread  = (new \Gazelle\Manager\ForumThread)->create($this->forum, $user->id(), 'user thread title', 'this is a new thread by a user');
+        $this->threadList[] = $thread
+            = (new \Gazelle\Manager\ForumThread)->create($this->forum, $user->id(), 'user thread title', 'this is a new thread by a user');
         $post    = (new \Gazelle\Manager\ForumPost)->findById($thread->addPost($user->id(), 'offensive content'));
         $userMan = new \Gazelle\Manager\User;
         $week    = 2;
@@ -345,7 +320,59 @@ class ForumTest extends TestCase {
             $body,
             'warn-user-inbox-pm-body-end'
         );
-        $this->assertEquals(3, $thread->remove(), 'forum-thread-remove');
+    }
+
+    public function testForumPoll(): void {
+        $this->category = (new \Gazelle\Manager\ForumCategory)->create('phpunit category', 10002);
+        $forumMan       = new \Gazelle\Manager\Forum;
+        $admin          = $this->userList['admin'];
+        $user           = $this->userList['user'];
+        $this->forum    = $forumMan->create(
+            user:           $admin,
+            sequence:       151,
+            categoryId:     $this->category->id(),
+            name:           'Pin forum',
+            description:    'This is where it pins',
+            minClassRead:   100,
+            minClassWrite:  100,
+            minClassCreate: 100,
+            autoLock:       false,
+            autoLockWeeks:  42,
+        );
+
+        $this->threadList[] = $thread
+            = (new \Gazelle\Manager\ForumThread)->create($this->forum, $user->id(), 'unittest post pin', 'this is a new thread for post pins');
+
+        $answer  = ['apple', 'banana', 'carrot'];
+        $pollMan = new \Gazelle\Manager\ForumPoll;
+        $poll    = $pollMan->create($thread->id(), 'Best food', $answer);
+        $this->assertInstanceOf(\Gazelle\ForumPoll::class, $poll, 'forum-poll-is-forum-poll');
+        $this->assertFalse($poll->isClosed(), 'forum-poll-is-not-closed');
+        $this->assertFalse($poll->hasRevealVotes(), 'forum-poll-is-not-featured');
+        $this->assertFalse($poll->isFeatured(), 'forum-poll-is-not-featured');
+        $this->assertEquals(0, $poll->total(), 'forum-poll-total');
+        $this->assertEquals($thread->id(), $poll->thread()->id(), 'forum-poll-thread-id');
+        $this->assertCount(3, $poll->vote(), 'forum-poll-vote-count');
+        $this->assertEquals($answer[1], $poll->vote()[1]['answer'], 'forum-poll-vote-1');
+
+        $find = $pollMan->findById($poll->id());
+        $this->assertEquals($poll->id(), $find->id(), 'forum-poll-find-by-id');
+
+        $this->assertEquals(1, $poll->addAnswer('sushi'), 'forum-poll-add-answer');
+
+        $this->assertEquals(0, $poll->addVote($user, 12345), 'forum-poll-bad-vote');
+        $this->assertEquals(1, $poll->addVote($user, 2),     'forum-poll-good-vote');
+        $this->assertEquals(2, $poll->response($user),       'forum-poll-response-before');
+        $this->assertEquals(0, $poll->addVote($user, 3),     'forum-poll-revote');
+        $this->assertEquals(1, $poll->modifyVote($user, 3),  'forum-poll-change-vote');
+        $this->assertEquals(3, $poll->response($user),       'forum-poll-response-after');
+
+        $this->assertEquals(1, $poll->moderate(true, false), 'forum-poll-moderate-feature-open');
+        $this->assertTrue($poll->isFeatured(), 'forum-poll-is-featured');
+
+        $this->assertEquals(1, $poll->close(), 'forum-poll-close');
+        $this->assertTrue($poll->isClosed(), 'forum-poll-is-closed');
+        $this->assertFalse($poll->isFeatured(), 'forum-poll-is-no-longer-featured');
     }
 
     public function testPostPin(): void {
@@ -366,8 +393,8 @@ class ForumTest extends TestCase {
             autoLockWeeks:  42,
         );
 
-        // TODO: move more warning functionality out of sections/...
-        $thread  = (new \Gazelle\Manager\ForumThread)->create($this->forum, $user->id(), 'unittest post pin', 'this is a new thread for post pins');
+        $this->threadList[] = $thread
+            = (new \Gazelle\Manager\ForumThread)->create($this->forum, $user->id(), 'unittest post pin', 'this is a new thread for post pins');
         $post = (new \Gazelle\Manager\ForumPost)->findById($thread->addPost($user->id(), 'pinnable content'));
 
         $this->assertFalse($post->isPinned(), 'forum-post-is-not-pinned');
@@ -375,6 +402,5 @@ class ForumTest extends TestCase {
         $this->assertTrue($post->isPinned(), 'forum-post-is-now-pinned');
         $this->assertEquals(1, $post->pin($admin, false), 'forum-post-unpin');
         $this->assertFalse($post->isPinned(), 'forum-post-is-no-longer-pinned');
-        $thread->remove();
     }
 }

@@ -106,7 +106,7 @@ if ($thread->hasPoll()) {
     $poll = new Gazelle\ForumPoll($threadId);
 
     $RevealVoters = $forum->hasRevealVotes();
-    $response = $poll->response($Viewer->id());
+    $response = $poll->response($Viewer);
     $answerList = $poll->vote();
     if ($response > 0 || (!is_null($response) && $RevealVoters)) {
         $answerList[$response]['answer'] = '&raquo; ' . $answerList[$response]['answer'];

@@ -28,7 +28,7 @@ if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
 } else {
     authorize();
     $response = (int)$_POST['vote'];
-    if (!$poll->addVote($Viewer->id(), $response)) {
+    if (!$poll->addVote($Viewer, $response)) {
         error(0, true);
     }
     $vote = $poll->vote(); // need to refresh the results to take the vote into account

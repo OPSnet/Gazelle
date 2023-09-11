@@ -8,7 +8,7 @@ class ForumPoll extends BaseObject {
 
     public function flush(): ForumPoll {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
-        $this->info = [];
+        unset($this->info);
         return $this;
     }
     public function link(): string { return $this->thread()->link(); }
@@ -19,7 +19,7 @@ class ForumPoll extends BaseObject {
     }
 
     public function info(): array {
-        if (isset($this->info) && !empty($this->info)) {
+        if (isset($this->info)) {
             return $this->info;
         }
         $key = sprintf(self::CACHE_KEY, $this->id);
@@ -176,7 +176,7 @@ class ForumPoll extends BaseObject {
         return $affected;
     }
 
-    public function addVote(int $userId, int $vote): int {
+    public function addVote(User $user, int $vote): int {
         $answer = $this->vote();
         if (!isset($answer[$vote]) && $vote != 0) {
             return 0;
@@ -185,34 +185,35 @@ class ForumPoll extends BaseObject {
             INSERT IGNORE INTO forums_polls_votes
                    (TopicID, UserID, Vote)
             VALUES (?,       ?,      ?)
-            ", $this->id, $userId, $vote
+            ", $this->id, $user->id(), $vote
         );
         $affected = self::$db->affected_rows();
         $this->flush();
         return $affected;
     }
 
-    public function modifyVote(int $userId, int $vote): int {
+    public function modifyVote(User $user, int $vote): int {
         self::$db->prepared_query("
             UPDATE forums_polls_votes SET
                 Vote = ?
             WHERE TopicID = ?
                 AND UserID = ?
-            ", $vote, $this->id, $userId
+            ", $vote, $this->id, $user->id()
         );
         $affected = self::$db->affected_rows();
         $this->flush();
         return $affected;
     }
 
-    public function response(int $userId): ?int {
-        return (int)self::$db->scalar("
+    public function response(User $user): ?int {
+        $vote = self::$db->scalar("
             SELECT Vote
             FROM forums_polls_votes
             WHERE UserID = ?
                 AND TopicID = ?
-            ", $userId, $this->id
+            ", $user->id(), $this->id
         );
+        return $vote ? (int)$vote : null;
     }
 
     /**

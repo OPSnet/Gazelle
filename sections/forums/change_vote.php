@@ -14,6 +14,6 @@ $vote = (int)$_GET['vote'];
 if (!$vote) {
     error(404);
 }
-$poll->modifyVote($Viewer->id(), $vote);
+$poll->modifyVote($Viewer, $vote);
 
 header("Location: " . $poll->location());
