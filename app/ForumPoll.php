@@ -3,6 +3,7 @@
 namespace Gazelle;
 
 class ForumPoll extends BaseObject {
+    final const tableName = 'forums_polls';
     final const CACHE_KEY = 'forum_poll_%d';
 
     public function flush(): ForumPoll {
@@ -10,7 +11,6 @@ class ForumPoll extends BaseObject {
         $this->info = [];
         return $this;
     }
-    public function tableName(): string { return 'forums_polls'; }
     public function link(): string { return $this->thread()->link(); }
     public function location(): string { return "forums.php?action=viewthread&threadid={$this->id}"; }
 

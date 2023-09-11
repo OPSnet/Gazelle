@@ -3,6 +3,8 @@
 namespace Gazelle;
 
 class TorrentLog extends BaseObject {
+    final const tableName = 'torrents_logs';
+
     public function __construct(
         protected Torrent $torrent,
         protected int $id,
@@ -13,7 +15,6 @@ class TorrentLog extends BaseObject {
     public function flush(): TorrentLog { $this->torrent->flush(); return $this; }
     public function link(): string { return $this->torrent->link(); }
     public function location(): string { return $this->torrent->location(); }
-    public function tableName(): string { return 'torrents_logs'; }
 
     public function torrentId(): int {
         return $this->torrent->id();

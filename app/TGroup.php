@@ -3,6 +3,7 @@
 namespace Gazelle;
 
 class TGroup extends BaseObject {
+    final const tableName            = 'torrents_group';
     final const CACHE_KEY            = 'tg_%d';
     final const CACHE_TLIST_KEY      = 'tlist_%d';
     final const CACHE_COVERART_KEY   = 'tg_cover_%d';
@@ -40,7 +41,6 @@ class TGroup extends BaseObject {
     }
 
     public function location(): string { return "torrents.php?id={$this->id}"; }
-    public function tableName(): string { return 'torrents_group'; }
 
     public function torrentLink(int $torrentId): string {
         $url = '<a href="' . $this->url() . "&amp;torrentid={$torrentId}#torrent{$torrentId}\" dir=\"ltr\">"

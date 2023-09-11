@@ -3,6 +3,7 @@
 namespace Gazelle\Torrent;
 
 class ReportType extends \Gazelle\BaseObject {
+    final const tableName = 'torrent_report_configuration';
     final const CACHE_KEY = 'trepcfg_v2_%d';
 
     protected array $changeSet;
@@ -17,7 +18,6 @@ class ReportType extends \Gazelle\BaseObject {
     public function link(): string { return ''; }
     public function location(): string { return "tools.php?action=torrent_report_edit&id=" . $this->id; }
     public function pkName(): string { return "torrent_report_configuration_id"; }
-    public function tableName(): string { return 'torrent_report_configuration'; }
 
     public function url(string|null $param = null): string {
         return htmlentities($this->location());
@@ -118,11 +118,11 @@ class ReportType extends \Gazelle\BaseObject {
     }
 
     public function needImageDefault(): string {
-        return $this->enumDefault($this->tableName(), 'need_image');
+        return $this->enumDefault(static::tableName, 'need_image');
     }
 
     public function needImageList(): array {
-        return $this->enumList($this->tableName(), 'need_image');
+        return $this->enumList(static::tableName, 'need_image');
     }
 
     public function needLink(): string {
@@ -130,11 +130,11 @@ class ReportType extends \Gazelle\BaseObject {
     }
 
     public function needLinkDefault(): string {
-        return $this->enumDefault($this->tableName(), 'need_link');
+        return $this->enumDefault(static::tableName, 'need_link');
     }
 
     public function needLinkList(): array {
-        return $this->enumList($this->tableName(), 'need_link');
+        return $this->enumList(static::tableName, 'need_link');
     }
 
     public function needSitelink(): string {
@@ -142,11 +142,11 @@ class ReportType extends \Gazelle\BaseObject {
     }
 
     public function needSitelinkDefault(): string {
-        return $this->enumDefault($this->tableName(), 'need_sitelink');
+        return $this->enumDefault(static::tableName, 'need_sitelink');
     }
 
     public function needSitelinkList(): array {
-        return $this->enumList($this->tableName(), 'need_sitelink');
+        return $this->enumList(static::tableName, 'need_sitelink');
     }
 
     public function needTrack(): string {
@@ -154,11 +154,11 @@ class ReportType extends \Gazelle\BaseObject {
     }
 
     public function needTrackDefault(): string {
-        return $this->enumDefault($this->tableName(), 'need_track');
+        return $this->enumDefault(static::tableName, 'need_track');
     }
 
     public function needTrackList(): array {
-        return $this->enumList($this->tableName(), 'need_track');
+        return $this->enumList(static::tableName, 'need_track');
     }
 
     public function pmBody(): ?string {

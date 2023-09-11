@@ -63,7 +63,6 @@ class WikiTest extends TestCase {
         $this->assertInstanceOf(\Gazelle\Wiki::class, $article->flush(), 'wiki-flush');
         $this->assertEquals("<a href=\"{$article->url()}\">{$article->title()}</a>", $article->link(), 'wiki-link');
         $this->assertEquals("wiki.php?action=article&id={$article->id()}", $article->location(), 'wiki-location');
-        $this->assertEquals("wiki_articles", $article->tableName(), 'wiki-table-name');
         $this->assertEquals($alias, array_keys($article->alias())[0], 'wiki-alias');
         $this->assertEquals('wiki body', $article->body(), 'wiki-body');
         $this->assertStringStartsWith(date('Y-m-d H'), $article->date(), 'wiki-date');

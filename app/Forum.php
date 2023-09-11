@@ -5,14 +5,11 @@ namespace Gazelle;
 class Forum extends BaseObject {
     use Pg;
 
+    final const tableName         = 'forums';
     final const CACHE_TOC_FORUM   = 'forum_tocv2_%d';
     final const CACHE_FORUM       = 'forum_%d';
     final const CACHE_THREAD_INFO = 'thread_%d_info';
     final const CACHE_CATALOG     = 'thread_%d_catalogue_%d';
-
-    public function tableName(): string {
-        return 'forums';
-    }
 
     public function location(): string {
         return 'forums.php?action=viewforum&forumid=' . $this->id;

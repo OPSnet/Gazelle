@@ -3,6 +3,7 @@
 namespace Gazelle\User;
 
 class Bonus extends \Gazelle\BaseUser {
+    final const tableName          = 'bonus_history';
     final const CACHE_PURCHASE     = 'bonus_purchase_%d';
     final const CACHE_SUMMARY      = 'bonus_summary_%d';
     final const CACHE_HISTORY      = 'bonus_history_%d_%d';
@@ -18,7 +19,6 @@ class Bonus extends \Gazelle\BaseUser {
     }
     public function link(): string { return $this->user()->link(); }
     public function location(): string { return $this->user()->location(); }
-    public function tableName(): string { return 'bonus_history'; }
 
     public function pointsSpent(): int {
         return (int)self::$db->scalar("

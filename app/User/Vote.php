@@ -3,11 +3,12 @@
 namespace Gazelle\User;
 
 class Vote extends \Gazelle\BaseUser {
-    final const Z_VAL    = 1.281728756502709;  // original
-    final const Z_VAL_90 = 1.6448536251336989; // p-value .90
-    final const Z_VAL_95 = 1.959963986120195;  //         .95
+    final const tableName = 'users_votes';
+    final const Z_VAL     = 1.281728756502709;  // original
+    final const Z_VAL_90  = 1.6448536251336989; // p-value .90
+    final const Z_VAL_95  = 1.959963986120195;  //         .95
 
-    final public const UPVOTE = 1;
+    final public const UPVOTE   = 1;
     final public const DOWNVOTE = 2;
 
     protected const VOTE_USER_KEY = 'vote_user_%d';
@@ -43,7 +44,6 @@ class Vote extends \Gazelle\BaseUser {
 
     public function link(): string { return $this->user()->link(); }
     public function location(): string { return $this->user()->location(); }
-    public function tableName(): string { return 'users_votes'; }
 
     public function __construct(\Gazelle\User $user) {
         parent::__construct($user);

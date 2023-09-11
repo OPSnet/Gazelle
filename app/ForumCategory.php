@@ -3,6 +3,7 @@
 namespace Gazelle;
 
 class ForumCategory extends BaseObject {
+    final const tableName = 'forums_categories';
     final const CACHE_KEY = 'forum_cat_%d';
 
     public function flush(): ForumCategory {
@@ -11,7 +12,6 @@ class ForumCategory extends BaseObject {
         $this->info = [];
         return $this;
     }
-    public function tableName(): string { return 'forums_categories'; }
     public function link(): string { return "<a href=\"{$this->location()}\">Forum Categories</a>"; }
     public function location(): string { return "tools.php?action=categories"; }
 

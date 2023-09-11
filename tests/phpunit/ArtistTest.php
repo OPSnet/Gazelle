@@ -69,8 +69,6 @@ class ArtistTest extends TestCase {
 
         $this->assertEquals("<a href=\"artist.php?id={$artist->id()}\">{$artist->name()}</a>", $artist->link(), 'artist-link');
         $this->assertEquals("artist.php?id={$artist->id()}", $artist->location(), 'artist-location');
-        $this->assertEquals('artists_group', $artist->tableName(), 'artist-table-name');
-        $this->assertEquals('ArtistID', $artist->pkName(), 'artist-table-pk');
         $this->assertNull($artist->body(), 'artist-body-null');
         $this->assertNull($artist->image(), 'artist-image-null');
         $this->assertFalse($artist->isLocked(), 'artist-is-unlocked');

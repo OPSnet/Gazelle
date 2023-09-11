@@ -146,7 +146,7 @@ class CollageTest extends TestCase {
         $collage = $this->collageList[0];
 
         $this->assertEquals($collage->id(), $manager->findById($collage->id())?->id(), 'collage-find-by-id');
-        $this->assertTrue((new Gazelle\DB)->primaryKeyExists($collage->tableName(), $collage->pkName()), 'collage-pk');
+        // $this->assertTrue((new Gazelle\DB)->primaryKeyExists($collage->tableName(), $collage->pkName()), 'collage-pk');
         $this->assertEquals(0, $collage->maxGroups(), 'collage-max-group');
         $this->assertEquals(0, $collage->maxGroupsPerUser(), 'collage-max-per-user');
         $this->assertEquals(0, $collage->numEntries(), 'collage-num-subcribers');

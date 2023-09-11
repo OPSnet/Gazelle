@@ -3,6 +3,12 @@
 namespace Gazelle;
 
 class Tag extends BaseObject {
+    final const tableName = 'tags';
+
+    public function flush(): Tag { unset($this->info); return $this; }
+    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->name())); }
+    public function location(): string { return 'torrents.php?taglist=' . $this->name(); }
+
     public function info(): array {
         return $this->info ??= self::$db->rowAssoc("
             SELECT t.Name AS name,
@@ -14,11 +20,6 @@ class Tag extends BaseObject {
             ", $this->id
         );
     }
-
-    public function flush(): Tag { unset($this->info); return $this; }
-    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->name())); }
-    public function location(): string { return 'torrents.php?taglist=' . $this->name(); }
-    public function tableName(): string { return 'tags'; }
 
     public function name(): string {
         return $this->info()['name'];

@@ -3,6 +3,8 @@
 namespace Gazelle\User\Notification;
 
 abstract class AbstractNotification extends \Gazelle\BaseUser {
+    const tableName = '';
+
     protected int    $context; // id of a table row
     protected int    $display;
     protected string $title;
@@ -11,7 +13,6 @@ abstract class AbstractNotification extends \Gazelle\BaseUser {
     public function flush(): AbstractNotification { $this->user()->flush(); return $this; }
     public function link(): string { return $this->user()->link(); }
     public function location(): string { return $this->user()->location(); }
-    public function tableName(): string { return ''; }
 
     abstract public function className(): string;
     abstract public function clear(): int;

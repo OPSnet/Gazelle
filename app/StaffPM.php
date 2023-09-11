@@ -3,6 +3,8 @@
 namespace Gazelle;
 
 class StaffPM extends BaseObject {
+    final const tableName = 'staff_pm_conversations';
+
     protected $author;
     protected $assigned;
 
@@ -12,7 +14,6 @@ class StaffPM extends BaseObject {
     }
     public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->subject())); }
     public function location(): string { return 'staffpm.php?action=viewconv&id=' . $this->id; }
-    public function tableName(): string { return 'staff_pm_conversations'; }
 
     public function flushUser(User $user) {
         self::$cache->delete_multi([

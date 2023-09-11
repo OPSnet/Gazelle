@@ -3,12 +3,13 @@
 namespace Gazelle\User;
 
 class Bookmark extends \Gazelle\BaseUser {
+    final const tableName = 'pm_conversations_users';
+
     protected array $all;
 
     public function flush(): Bookmark { $this->user()->flush(); return $this; }
     public function link(): string   { return $this->user()->link(); }
     public function location(): string   { return $this->user()->location(); }
-    public function tableName(): string   { return 'pm_conversations_users'; }
 
     /**
      * Get the bookmark schema.

@@ -3,6 +3,7 @@
 namespace Gazelle;
 
 class Request extends BaseObject {
+    final const tableName         = 'requests';
     protected const CACHE_REQUEST = "request_%d";
     protected const CACHE_ARTIST  = "request_artists_%d";
     protected const CACHE_VOTE    = "request_votes_%d";
@@ -21,7 +22,6 @@ class Request extends BaseObject {
     }
     public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->title())); }
     public function location(): string { return 'requests.php?action=view&id=' . $this->id; }
-    public function tableName(): string { return 'requests'; }
 
     /**
      * Display a title on the request page itself. If there are artists in the name,

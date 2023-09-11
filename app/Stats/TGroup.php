@@ -8,6 +8,7 @@ class TGroup extends \Gazelle\BaseObject {
      * want to do with a TGroup.
      */
 
+    final const tableName         = 'tgroup_summary';
     protected const CACHE_GENERAL = 'tg_stat_%d';
 
     // Cache the underlying db calls
@@ -19,7 +20,6 @@ class TGroup extends \Gazelle\BaseObject {
     }
     public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), 'Stats'); }
     public function location(): string { return 'torrents.php?id=' . $this->id; }
-    public function tableName(): string { return 'tgroup_summary'; }
 
     /**
      * @see \Gazelle\Stats\TGroups::refresh()

@@ -3,6 +3,7 @@
 namespace Gazelle\User;
 
 class Quote extends \Gazelle\BaseUser {
+    final const tableName        = 'users_notify_quoted';
     final const UNREAD_QUOTE_KEY = 'u_unread_%d';
 
     protected bool $showAll = false;
@@ -13,7 +14,6 @@ class Quote extends \Gazelle\BaseUser {
     }
     public function link(): string { return $this->user()->link(); }
     public function location(): string { return $this->user()->location(); }
-    public function tableName(): string { return 'users_notify_quoted'; }
 
     public function create(int $quoterId, string $page, int $pageId, int $postId): int {
         self::$db->prepared_query('

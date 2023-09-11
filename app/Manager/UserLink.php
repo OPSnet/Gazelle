@@ -3,10 +3,11 @@
 namespace Gazelle\Manager;
 
 class UserLink extends \Gazelle\BaseUser {
+    final const tableName = 'users_dupes';
+
     public function flush(): UserLink { $this->user()->flush(); return $this; }
     public function link(): string { return $this->user()->link(); }
     public function location(): string { return $this->user()->location(); }
-    public function tableName(): string { return 'users_dupes'; }
 
     public function groupId(\Gazelle\User $user): ?int {
         return self::$db->scalar("

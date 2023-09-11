@@ -3,10 +3,11 @@
 namespace Gazelle\User;
 
 class Friend extends \Gazelle\BaseUser {
+    final const tableName = 'friends';
+
     public function flush(): Friend { $this->user()->flush(); return $this; }
     public function link(): string { return $this->user()->link(); }
     public function location(): string { return $this->user()->location(); }
-    public function tableName(): string { return 'friends'; }
 
     public function isFriend(int $friendId): bool {
         return (bool)self::$db->scalar("

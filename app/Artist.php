@@ -3,6 +3,8 @@
 namespace Gazelle;
 
 class Artist extends BaseObject {
+    final const pkName               = 'ArtistID';
+    final const tableName            = 'artists_group';
     final const CACHE_REQUEST_ARTIST = 'artists_requests_%d';
     final const CACHE_TGROUP_ARTIST  = 'artists_groups_%d';
 
@@ -28,8 +30,6 @@ class Artist extends BaseObject {
 
     public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->name())); }
     public function location(): string { return 'artist.php?id=' . $this->id; }
-    public function pkName(): string { return 'ArtistID'; }
-    public function tableName(): string { return 'artists_group'; }
 
     protected function cacheKey(): string {
         return sprintf(self::CACHE_PREFIX, $this->id)

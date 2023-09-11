@@ -3,8 +3,9 @@
 namespace Gazelle\User;
 
 class Subscription extends \Gazelle\BaseUser {
-    protected const CACHE_KEY = "subscriptions_user_%d";
-    protected const NEW_KEY = "subscriptions_user_new_%d";
+    final const tableName     = 'users_subscriptions';
+    protected const CACHE_KEY = 'subscriptions_user_%d';
+    protected const NEW_KEY   = 'subscriptions_user_new_%d';
     protected array $threadList;
 
     public function flush(): Subscription {
@@ -17,7 +18,6 @@ class Subscription extends \Gazelle\BaseUser {
     }
     public function link(): string { return $this->user()->link(); }
     public function location(): string { return $this->user()->location(); }
-    public function tableName(): string { return 'users_subscriptions'; }
 
     /**
      * (Un)subscribe from a forum thread.

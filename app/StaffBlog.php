@@ -3,13 +3,14 @@
 namespace Gazelle;
 
 class StaffBlog extends BaseObject {
+    final const tableName = 'staff_blog';
+
     public function flush(): StaffBlog {
         $this->info = [];
         return $this;
     }
     public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->title())); }
     public function location(): string { return 'staffblog.php#blog' . $this->id; }
-    public function tableName(): string { return 'staff_blog'; }
 
     public function info(): array {
         if (isset($this->info) && !empty($this->info)) {

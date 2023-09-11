@@ -3,6 +3,8 @@
 namespace Gazelle\User;
 
 class Donor extends \Gazelle\BaseUser {
+    final const tableName     = 'donor_rewards';
+    final const pkName        = 'UserID';
     protected const CACHE_KEY = 'donor_%d';
 
     protected bool $isDonor;
@@ -15,8 +17,6 @@ class Donor extends \Gazelle\BaseUser {
     }
     public function link(): string { return $this->user()->link(); }
     public function location(): string { return $this->user()->location(); }
-    public function tableName(): string { return 'donor_rewards'; }
-    public function pkName(): string { return 'UserID'; }
 
     public function info(): array {
         if (isset($this->info) && !empty($this->info)) {

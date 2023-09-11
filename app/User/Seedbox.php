@@ -3,6 +3,7 @@
 namespace Gazelle\User;
 
 class Seedbox extends \Gazelle\BaseUser {
+    final const tableName = 'user_seedbox';
     protected const SUMMARY_KEY = 'seedbox_summary_';
 
     final public const VIEW_BY_NAME = 0;
@@ -24,7 +25,6 @@ class Seedbox extends \Gazelle\BaseUser {
     }
     public function link(): string { return $this->user()->link(); }
     public function location(): string { return $this->user()->location(); }
-    public function tableName(): string { return 'user_seedbox'; }
 
     public function __construct(\Gazelle\User $user) {
         parent::__construct($user);

@@ -3,6 +3,7 @@
 namespace Gazelle\User;
 
 class Stylesheet extends \Gazelle\BaseUser {
+    final const tableName     = '';
     protected const CACHE_KEY = 'u_ss2_%d';
 
     public function flush(): Stylesheet {
@@ -12,7 +13,6 @@ class Stylesheet extends \Gazelle\BaseUser {
     }
     public function link(): string { return $this->user()->link(); }
     public function location(): string { return $this->user()->location(); }
-    public function tableName(): string { return ''; }
 
     public function info(): array {
         if (isset($this->info)) {

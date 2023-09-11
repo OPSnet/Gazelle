@@ -55,7 +55,6 @@ class CommentTest extends TestCase {
         $this->assertCount(2, $thread, 'comment-artist-thread');
         $this->assertCount(2, $comment->threadList(new \Gazelle\Manager\User), 'comment-artist-threadlist');
         $this->assertEquals(2, $comment->total(), 'comment-artist-total');
-        $this->assertEquals('comments', $comment->tableName(), 'comment-table-name');
         $this->assertEquals($this->user->id(), $reply->userId(), 'comment-artist-user-id');
         $this->assertEquals(0, $comment->handleSubscription($this->user), 'comment-artist-handle-subscription');
 

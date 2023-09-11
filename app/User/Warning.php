@@ -5,6 +5,8 @@ namespace Gazelle\User;
 class Warning extends \Gazelle\BaseUser {
     use \Gazelle\Pg;
 
+    final const tableName = 'user_warning';
+
     protected array|null $info;
 
     public function flush(): Warning {
@@ -13,7 +15,6 @@ class Warning extends \Gazelle\BaseUser {
     }
     public function link(): string { return $this->user()->link(); }
     public function location(): string { return $this->user()->location(); }
-    public function tableName(): string { return 'user_warning'; }
 
     public function create(string $reason, string $interval, \Gazelle\User $warner): string {
         $end = (string)$this->pg()->scalar("

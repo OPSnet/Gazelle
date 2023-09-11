@@ -178,7 +178,6 @@ class TagTest extends TestCase {
             'tag-instance-link'
         );
         $this->assertEquals("torrents.php?taglist=$name", $tag->location(), 'tag-instance-location');
-        $this->assertEquals('tags', $tag->tableName(), 'tag-instance-table-name');
         $this->assertEquals('other', $tag->type(), 'tag-instance-table-name');
         $manager->officialize($name, $this->user);
         $this->assertEquals('genre', $tag->flush()->type(), 'tag-instance-genre');

@@ -8,6 +8,8 @@ namespace Gazelle;
  */
 
 class Thread extends BaseObject {
+    final const tableName = 'thread';
+
     protected $type;    // the type of thread
     protected $created; // date created
     protected $story;   // the array of notes in the conversation
@@ -15,7 +17,6 @@ class Thread extends BaseObject {
     public function flush(): Thread { return $this; }
     public function link(): string { return ''; }
     public function location(): string { return ''; }
-    public function tableName(): string { return 'thread'; }
 
     protected const CACHE_KEY = "thread_%d";
     protected const STORY_KEY = "thread_story_%d";

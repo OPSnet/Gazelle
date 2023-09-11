@@ -11,6 +11,7 @@ use \Gazelle\Util\Irc;
 use \Gazelle\Util\Mail;
 
 class User extends BaseObject {
+    final const tableName          = 'users_main';
     final const CACHE_KEY          = 'u_%d';
     final const CACHE_SNATCH_TIME  = 'users_snatched_%d_time';
     final const CACHE_NOTIFY       = 'u_notify_%d';
@@ -47,7 +48,6 @@ class User extends BaseObject {
     }
     public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), html_escape($this->username())); }
     public function location(): string { return 'user.php?id=' . $this->id; }
-    public function tableName(): string { return 'users_main'; }
 
     /**
      * Delegate stats methods to the Stats\User class

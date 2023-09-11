@@ -6,13 +6,12 @@ use Gazelle\Util\Mail;
 use Gazelle\Util\Time;
 
 class AutoEnable extends \Gazelle\BaseUser {
-    // Cache key to store the number of enable requests
+    final const tableName        = 'users_enable_requests';
     final const CACHE_TOTAL_OPEN = 'num_enable_requests';
 
     public function flush(): AutoEnable { $this->user()->flush(); return $this; }
-    public function link(): string     { return $this->user()->link(); }
-    public function location(): string     { return $this->user()->location(); }
-    public function tableName(): string     { return 'users_enable_requests'; }
+    public function link(): string { return $this->user()->link(); }
+    public function location(): string { return $this->user()->location(); }
 
     /**
      * Note: When calling this directly, it is your responsibility

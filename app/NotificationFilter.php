@@ -3,6 +3,7 @@
 namespace Gazelle;
 
 class NotificationFilter extends BaseObject {
+    final const tableName = 'users_notify_filters';
     protected const DIMENSION = [
         'artist', 'recordLabel', 'tag', 'notTag', 'category', 'format', 'encoding', 'media', 'user'
     ];
@@ -10,7 +11,6 @@ class NotificationFilter extends BaseObject {
     public function flush(): NotificationFilter { return $this; }
     public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), $this->url()); }
     public function location(): string { return 'user.php?action=notify'; }
-    public function tableName(): string { return 'users_notify_filters'; }
 
     public function info(): array {
         if (isset($this->info) && !empty($this->info)) {

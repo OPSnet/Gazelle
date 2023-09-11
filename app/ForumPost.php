@@ -3,7 +3,8 @@
 namespace Gazelle;
 
 class ForumPost extends BaseObject {
-    final const CACHE_KEY     = 'fpost_%d';
+    final const tableName = 'forums_posts';
+    final const CACHE_KEY = 'fpost_%d';
 
     public function flush(): ForumPost {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
@@ -14,7 +15,6 @@ class ForumPost extends BaseObject {
 
     public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), "Post #{$this->id}"); }
     public function location(): string { return "forums.php?action=viewthread&threadid={$this->threadId()}&postid={$this->id}#post{$this->id}"; }
-    public function tableName(): string { return 'forums_posts'; }
 
     /**
      * Get information about a post

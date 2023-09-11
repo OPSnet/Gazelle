@@ -3,7 +3,17 @@
 namespace Gazelle;
 
 class Wiki extends BaseObject {
+    final const tableName = 'wiki_articles';
     protected const CACHE_KEY = 'wiki_%d';
+
+    public function flush(): Wiki {
+        unset($this->info);
+        self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
+        return $this;
+    }
+
+    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->title())); }
+    public function location(): string { return 'wiki.php?action=article&id=' . $this->id; }
 
     public function info(): array {
         if (isset($this->info)) {
@@ -42,16 +52,6 @@ class Wiki extends BaseObject {
         $this->info = $info;
         return $this->info;
     }
-
-    public function flush(): Wiki {
-        unset($this->info);
-        self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
-        return $this;
-    }
-
-    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->title())); }
-    public function location(): string { return 'wiki.php?action=article&id=' . $this->id; }
-    public function tableName(): string { return 'wiki_articles'; }
 
     public function revisionBody(int $revision): string {
         return $revision === $this->revision()

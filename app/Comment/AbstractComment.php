@@ -3,12 +3,13 @@
 namespace Gazelle\Comment;
 
 abstract class AbstractComment extends \Gazelle\BaseObject {
+    final const tableName      = 'comments';
+    protected const PAGE_TOTAL = '%s_comments_%d';
+
     protected int   $userId;
     protected int   $lastRead = 0;
     protected int   $total;   // number of comments
     protected array $thread = []; // the page of comments
-
-    protected const PAGE_TOTAL = '%s_comments_%d';
 
     abstract public function page(): string;
     abstract public function pageUrl(): string;
@@ -19,7 +20,6 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
     }
     public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), "Comment #" . $this->id); }
     public function location(): string { return $this->pageUrl() . "{$this->pageId}&postid={$this->id}#post{$this->id}"; }
-    public function tableName(): string { return 'comments'; }
 
     public function __construct(
         protected int $pageId,

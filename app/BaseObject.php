@@ -3,6 +3,9 @@
 namespace Gazelle;
 
 abstract class BaseObject extends Base {
+    public const tableName = 'abstract';
+    public const pkName    = 'ID';
+
     protected array $updateField; // used to store field updates
     protected User  $updateUser;  // user performing the updates
 
@@ -16,7 +19,6 @@ abstract class BaseObject extends Base {
     abstract public function flush(): BaseObject;
     abstract public function link(): string;
     abstract public function location(): string;
-    abstract public function tableName(): string;
 
     public function id(): int {
         return $this->id;
@@ -37,10 +39,6 @@ abstract class BaseObject extends Base {
             $location .= str_contains($location, '?') ? "&$param" : "?$param";
         }
         return htmlentities($location);
-    }
-
-    public function pkName(): string {
-        return "ID";
     }
 
     public function dirty(): bool {
@@ -98,7 +96,7 @@ abstract class BaseObject extends Base {
         $args = [...array_values($this->updateField)];
         $args[] = $this->id();
         self::$db->prepared_query(
-            "UPDATE {$this->tableName()} SET $set WHERE {$this->pkName()} = ?",
+            "UPDATE " . static::tableName . " SET $set WHERE " . static::pkName . " = ?",
             ...$args
         );
         $success = (self::$db->affected_rows() === 1);

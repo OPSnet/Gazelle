@@ -3,14 +3,11 @@
 namespace Gazelle;
 
 class Staff extends BaseUser {
+    final const tableName = 'staff_blog_visits';
+
     public function flush(): Staff  { $this->user()->flush(); return $this; }
     public function link(): string { return $this->user()->link(); }
     public function location(): string { return $this->user()->location(); }
-    public function tableName(): string { return 'staff_blog_visits'; }
-
-    public function id(): int {
-        return $this->user->id();
-    }
 
     public function blogAlert(): bool {
         if (($readTime = self::$cache->get_value('staff_blog_read_'. $this->user->id())) === false) {

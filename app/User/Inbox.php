@@ -3,6 +3,8 @@
 namespace Gazelle\User;
 
 class Inbox extends \Gazelle\BaseUser {
+    final const tableName = 'pm_conversations_users';
+
     protected bool $unreadFirst;
     protected string $filter;
     protected string $folder = 'inbox';
@@ -12,7 +14,6 @@ class Inbox extends \Gazelle\BaseUser {
     public function flush(): Inbox  { $this->user()->flush(); return $this; }
     public function link(): string { return $this->user()->link(); }
     public function location(): string { return $this->user()->location(); }
-    public function tableName(): string { return 'pm_conversations_users'; }
 
     public function setFilter(string $filter): Inbox {
         $this->filter = $filter;

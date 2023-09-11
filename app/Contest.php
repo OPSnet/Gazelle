@@ -3,6 +3,8 @@
 namespace Gazelle;
 
 class Contest extends BaseObject {
+    final const pkName        = 'contest_id';
+    final const tableName     = 'contest';
     final const CACHE_CONTEST = 'contestv2_%d';
     final const CACHE_STATS   = 'contest_stats_%d';
     final const CONTEST_LEADERBOARD_CACHE_KEY = 'contest_leaderboard_%d_%d';
@@ -16,8 +18,6 @@ class Contest extends BaseObject {
     }
     public function link(): string { return "<a href=\"{$this->url()}\">{$this->name()}</a>"; }
     public function location(): string { return "contest.php?id={$this->id}"; }
-    public function pkName(): string { return "contest_id"; }
-    public function tableName(): string { return "contest"; }
 
     public function info(): array {
         if (isset($this->info) && !empty($this->info)) {

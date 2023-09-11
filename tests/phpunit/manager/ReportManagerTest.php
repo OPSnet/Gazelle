@@ -162,7 +162,6 @@ class ReportManagerTest extends TestCase {
         $this->reportList[] = $report;
 
         $this->assertInstanceOf(\Gazelle\Report::class, $report, 'report-user-create');
-        $this->assertEquals('reports', $report->tableName(), 'report-table-name');
         $this->assertEquals(
             "<a href=\"{$report->url()}\">Report #{$report->id()}</a>",
             $report->link(),

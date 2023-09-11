@@ -3,6 +3,8 @@
 namespace Gazelle\Torrent;
 
 class Report extends \Gazelle\BaseObject {
+    final const tableName = 'reportsv2';
+
     protected \Gazelle\TorrentAbstract|null|bool $torrent = false;
 
     public function __construct(
@@ -15,7 +17,6 @@ class Report extends \Gazelle\BaseObject {
     public function flush(): Report { $this->info = []; return $this; }
     public function link(): string { return sprintf('<a href="%s">Report #%d</a>', $this->url(), $this->id()); }
     public function location(): string { return "reportsv2.php?view=report&id=" . $this->id; }
-    public function tableName(): string { return 'reportsv2'; }
 
     public function info(): array {
         if (!isset($this->info) || $this->info === []) {

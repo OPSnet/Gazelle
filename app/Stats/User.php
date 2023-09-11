@@ -12,6 +12,7 @@ class User extends \Gazelle\BaseObject {
      * in the Users (plural) class.
      */
 
+    final const tableName               = 'user_summary';
     protected const CACHE_COMMENT_TOTAL = 'user_nrcomment_%d';
     protected const CACHE_GENERAL       = 'user_stx_%d';
 
@@ -29,7 +30,6 @@ class User extends \Gazelle\BaseObject {
     }
     public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), 'Stats'); }
     public function location(): string { return 'user.php?action=stats&userid=' . $this->id; }
-    public function tableName(): string { return 'user_summary'; }
 
     /**
      * Get the total number of comments made by page type

@@ -5,12 +5,12 @@ namespace Gazelle\User;
 use \Gazelle\Util\Crypto;
 
 class Session extends \Gazelle\BaseUser {
+    final const tableName     = 'users_sessions';
     protected const CACHE_KEY = 'u_sess_%d';
 
     public function flush(): Session { $this->user()->flush(); return $this; }
     public function link(): string { return $this->user()->link(); }
     public function location(): string { return $this->user()->location(); }
-    public function tableName(): string { return 'users_sessions'; }
 
     public function info(): array {
         if (isset($this->info) && !empty($this->info)) {

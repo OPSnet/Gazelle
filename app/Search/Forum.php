@@ -3,6 +3,8 @@
 namespace Gazelle\Search;
 
 class Forum extends \Gazelle\BaseUser {
+    final const tableName = 'forums';
+
     protected array $permittedForums = [];
     protected array $forbiddenForums = [];
     protected array $selectedForums = [];
@@ -31,7 +33,6 @@ class Forum extends \Gazelle\BaseUser {
     public function flush(): Forum  { $this->user()->flush(); return $this; }
     public function link(): string { return $this->user()->link(); }
     public function location(): string { return $this->user()->location(); }
-    public function tableName(): string { return ''; }
 
     public function __construct(\Gazelle\User $user) {
         parent::__construct($user);

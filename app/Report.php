@@ -3,6 +3,8 @@
 namespace Gazelle;
 
 class Report extends BaseObject {
+    final const tableName = 'reports';
+
     protected Manager\User $userMan;
 
     public function flush(): Report {
@@ -11,7 +13,6 @@ class Report extends BaseObject {
     }
     public function link(): string { return sprintf('<a href="%s">Report #%d</a>', $this->url(), $this->id()); }
     public function location(): string { return "reports.php?id={$this->id}#report{$this->id}"; }
-    public function tableName(): string { return 'reports'; }
 
     public function setUserManager(Manager\User $userMan): Report {
         $this->userMan = $userMan;

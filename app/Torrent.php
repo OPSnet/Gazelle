@@ -5,15 +5,15 @@ namespace Gazelle;
 class Torrent extends TorrentAbstract {
     use Pg;
 
-    final const CACHE_KEY                = 't2_%d';
-    final const CACHE_FOLDERNAME         = 'foldername_%s';
-    final const CACHE_KEY_PEERLIST_PAGE  = 'peerlist_page_%d_%d';
-    final const USER_RECENT_UPLOAD       = 'u_recent_up_%d';
+    final const tableName               = 'torrents';
+    final const CACHE_KEY               = 't2_%d';
+    final const CACHE_FOLDERNAME        = 'foldername_%s';
+    final const CACHE_KEY_PEERLIST_PAGE = 'peerlist_page_%d_%d';
+    final const USER_RECENT_UPLOAD      = 'u_recent_up_%d';
 
     protected array $tokenCache;
 
     public function location(): string { return "torrents.php?id={$this->groupId()}&torrentid={$this->id}#torrent{$this->id}"; }
-    public function tableName(): string { return 'torrents'; }
 
     public function infoRow(): ?array {
         return self::$db->rowAssoc("

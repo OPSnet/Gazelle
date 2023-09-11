@@ -10,6 +10,7 @@ class Collage extends BaseObject {
      * (artists or torrent groups).
      */
 
+    final const tableName    = 'collages';
     final const CACHE_KEY    = 'collagev4_%d';
     final const SUBS_KEY     = 'collage_subs_user_%d';
     final const SUBS_NEW_KEY = 'collage_subs_user_new_%d';
@@ -39,7 +40,6 @@ class Collage extends BaseObject {
     }
     public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->name())); }
     public function location(): string { return 'collages.php?id=' . $this->id; }
-    public function tableName(): string { return 'collages'; }
 
     public function info(): array {
         if (isset($this->info) && !empty($this->info)) {

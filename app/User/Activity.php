@@ -3,6 +3,8 @@
 namespace Gazelle\User;
 
 class Activity extends \Gazelle\BaseUser {
+    final const tableName = '';
+
     protected bool $showStaffInbox = false;
     protected array $action = [];
     protected array $alert = [];
@@ -10,7 +12,6 @@ class Activity extends \Gazelle\BaseUser {
     public function flush(): Activity { $this->user()->flush(); return $this; }
     public function link(): string { return $this->user()->link(); }
     public function location(): string { return $this->user()->location(); }
-    public function tableName(): string { return ''; }
 
     protected function setAction(string $action): Activity {
         $this->action[] = $action;

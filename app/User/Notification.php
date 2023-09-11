@@ -3,6 +3,7 @@
 namespace Gazelle\User;
 
 class Notification extends \Gazelle\BaseUser {
+    final const tableName     = 'users_notifications_settings';
     protected const CACHE_KEY = 'u_notif_%d';
 
     final const DISPLAY_DISABLED = 0;
@@ -39,7 +40,6 @@ class Notification extends \Gazelle\BaseUser {
     public function flush(): Notification { $this->user()->flush(); return $this; }
     public function link(): string { return $this->user()->link(); }
     public function location(): string { return $this->user()->location(); }
-    public function tableName(): string { return 'users_notifications_settings'; }
 
     public function config(): array {
         if (isset($this->config)) {

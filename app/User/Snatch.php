@@ -15,6 +15,8 @@ use \Gazelle\Util\CacheVector;
  */
 
 class Snatch extends \Gazelle\BaseUser {
+    final const tableName = 'xbt_snatched';
+
     // A power-of-2 size, to be balanced against how many rows a query on xbt_snatched could return
     final const RANGE     = 17;
     final const RANGE_BIT = 2 ** self::RANGE;
@@ -33,7 +35,6 @@ class Snatch extends \Gazelle\BaseUser {
     }
     public function link(): string { return $this->user()->link(); }
     public function location(): string { return $this->user()->location(); }
-    public function tableName(): string { return 'xbt_snatched'; }
 
     public function isSnatched(int $torrentId): bool {
         $offset = (int)floor($torrentId / self::RANGE_BIT);

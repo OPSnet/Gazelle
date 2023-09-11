@@ -3,6 +3,7 @@
 namespace Gazelle\User;
 
 class Privilege extends \Gazelle\BaseUser {
+    final const tableName = 'users_levels';
     final const CACHE_KEY = 'u_priv_%d';
 
     public function flush(): Privilege {
@@ -13,7 +14,6 @@ class Privilege extends \Gazelle\BaseUser {
     }
     public function link(): string { return $this->user()->link(); }
     public function location(): string { return $this->user()->location(); }
-    public function tableName(): string { return 'users_levels'; }
 
     public function info(): array {
         if (isset($this->info) && !empty($this->info)) {
