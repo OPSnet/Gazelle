@@ -361,7 +361,7 @@ class Torrent {
         }
         switch ($Attribute) {
             case 'year':
-                if (!is_numeric($Value) || !is_string($Value)) {
+                if (!is_string($Value)) {
                     return;
                 }
                 $this->search_year($Value);
