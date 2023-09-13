@@ -10,8 +10,6 @@ class AutoEnable extends \Gazelle\BaseUser {
     final const CACHE_TOTAL_OPEN = 'num_enable_requests';
 
     public function flush(): AutoEnable { $this->user()->flush(); return $this; }
-    public function link(): string { return $this->user()->link(); }
-    public function location(): string { return $this->user()->location(); }
 
     /**
      * Note: When calling this directly, it is your responsibility

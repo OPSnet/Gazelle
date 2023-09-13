@@ -38,8 +38,6 @@ class Notification extends \Gazelle\BaseUser {
     ];
 
     public function flush(): Notification { $this->user()->flush(); return $this; }
-    public function link(): string { return $this->user()->link(); }
-    public function location(): string { return $this->user()->location(); }
 
     public function config(): array {
         if (isset($this->config)) {

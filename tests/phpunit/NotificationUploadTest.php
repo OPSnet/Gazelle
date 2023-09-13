@@ -213,7 +213,6 @@ class NotificationUploadTest extends TestCase {
         $message = $notification->ircNotification();
         $this->assertStringContainsString($this->torrent->group()->name(), $message, 'ntick-irc-tgroup-name');
         $this->assertStringContainsString(implode(',', $this->torrent->group()->tagNameList()), $message, 'ntick-irc-tgroup-taglist');
-        $this->assertStringContainsString(SITE_URL . '/' . $this->torrent->group()->location(), $message, 'ntick-irc-torrent-url');
         $this->assertStringContainsString("[{$this->torrent->group()->releaseTypeName()}]", $message, 'ntick-irc-release-type');
 
         // look at the conditions to be met for a notification from this upload

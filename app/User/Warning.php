@@ -13,8 +13,6 @@ class Warning extends \Gazelle\BaseUser {
         unset($this->info);
         return $this;
     }
-    public function link(): string { return $this->user()->link(); }
-    public function location(): string { return $this->user()->location(); }
 
     public function create(string $reason, string $interval, \Gazelle\User $warner): string {
         $end = (string)$this->pg()->scalar("

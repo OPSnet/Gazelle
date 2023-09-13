@@ -10,8 +10,6 @@ class Activity extends \Gazelle\BaseUser {
     protected array $alert = [];
 
     public function flush(): Activity { $this->user()->flush(); return $this; }
-    public function link(): string { return $this->user()->link(); }
-    public function location(): string { return $this->user()->location(); }
 
     protected function setAction(string $action): Activity {
         $this->action[] = $action;

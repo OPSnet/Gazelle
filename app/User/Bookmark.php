@@ -8,8 +8,6 @@ class Bookmark extends \Gazelle\BaseUser {
     protected array $all;
 
     public function flush(): Bookmark { $this->user()->flush(); return $this; }
-    public function link(): string   { return $this->user()->link(); }
-    public function location(): string   { return $this->user()->location(); }
 
     /**
      * Get the bookmark schema.

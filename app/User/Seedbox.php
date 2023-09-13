@@ -17,19 +17,17 @@ class Seedbox extends \Gazelle\BaseUser {
     protected int $target;
     protected int $viewBy = self::VIEW_BY_NAME;
 
+    public function __construct(\Gazelle\User $user) {
+        parent::__construct($user);
+        $this->hashid = new \Hashids\Hashids(SEEDBOX_SALT);
+        $this->build();
+    }
+
     public function flush(): Seedbox {
         self::$cache->delete_value(self::SUMMARY_KEY . $this->user->id());
         unset($this->host);
         unset($this->free);
         return $this;
-    }
-    public function link(): string { return $this->user()->link(); }
-    public function location(): string { return $this->user()->location(); }
-
-    public function __construct(\Gazelle\User $user) {
-        parent::__construct($user);
-        $this->hashid = new \Hashids\Hashids(SEEDBOX_SALT);
-        $this->build();
     }
 
     public function setUnion(bool $isUnion): Seedbox {

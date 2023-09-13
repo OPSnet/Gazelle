@@ -15,8 +15,6 @@ class Donor extends \Gazelle\BaseUser {
         $this->info = [];
         return $this;
     }
-    public function link(): string { return $this->user()->link(); }
-    public function location(): string { return $this->user()->location(); }
 
     public function info(): array {
         if (isset($this->info) && !empty($this->info)) {

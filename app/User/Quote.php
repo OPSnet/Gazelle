@@ -12,8 +12,6 @@ class Quote extends \Gazelle\BaseUser {
         self::$cache->delete_value(sprintf(self::UNREAD_QUOTE_KEY, $this->user->id()));
         return $this;
     }
-    public function link(): string { return $this->user()->link(); }
-    public function location(): string { return $this->user()->location(); }
 
     public function create(int $quoterId, string $page, int $pageId, int $postId): int {
         self::$db->prepared_query('

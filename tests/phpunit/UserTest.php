@@ -287,7 +287,6 @@ class UserTest extends TestCase {
         $first = current($list);
         $url   = SITE_URL . 'static/bogus.css';
         $stylesheet = new \Gazelle\User\Stylesheet($this->user);
-        $this->assertEquals($this->user->link(), $stylesheet->link(), 'stylesheet-link');
         $this->assertNull($stylesheet->styleUrl(), 'stylesheet-no-external-url');
         $this->assertEquals(1, $stylesheet->modifyInfo($first['id'], null), 'stylesheet-modify');
         $this->assertEquals($first['css_name'], $stylesheet->cssName(), 'stylesheet-css-name');

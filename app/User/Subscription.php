@@ -16,8 +16,6 @@ class Subscription extends \Gazelle\BaseUser {
         ]);
         return $this;
     }
-    public function link(): string { return $this->user()->link(); }
-    public function location(): string { return $this->user()->location(); }
 
     /**
      * (Un)subscribe from a forum thread.

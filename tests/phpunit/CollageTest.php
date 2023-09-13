@@ -161,7 +161,6 @@ class CollageTest extends TestCase {
         $this->assertFalse($collage->isFeatured(), 'collage-is-not-featured');
         $this->assertFalse($collage->isOwner($this->userList['u2']->id()), 'collage-is-not-owner');
         $this->assertTrue($collage->isOwner($this->userList['u1']->id()), 'collage-is-owner');
-        $this->assertStringEndsWith("={$collage->id()}", $collage->location(), 'collage-location');
         $this->assertStringContainsString($collage->name(), $collage->link(), 'collage-link');
         $this->assertFalse($collage->hasAttr('sort-newest'), 'collage-no-sort-newest');
 

@@ -8,8 +8,6 @@ class SyntheticAvatar extends \Gazelle\BaseUser {
     final const tableName = '';
 
     public function flush(): \Gazelle\User { return $this->user->flush(); }
-    public function link(): string { return $this->user->link(); }
-    public function location(): string { return $this->user->location(); }
 
     public function avatar(string $username): string {
         $hash = md5(AVATAR_SALT . $username);

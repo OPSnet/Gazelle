@@ -42,9 +42,6 @@ class Vote extends \Gazelle\BaseUser {
         return $this->flush();
     }
 
-    public function link(): string { return $this->user()->link(); }
-    public function location(): string { return $this->user()->location(); }
-
     public function __construct(\Gazelle\User $user) {
         parent::__construct($user);
         $userKey = sprintf(self::VOTE_USER_KEY, $this->user->id());

@@ -6,8 +6,6 @@ class PermissionRateLimit extends \Gazelle\BaseUser {
     final const tableName = 'permission_rate_limit';
 
     public function flush(): PermissionRateLimit { $this->user()->flush(); return $this; }
-    public function link(): string { return $this->user()->link(); }
-    public function location(): string { return $this->user()->location(); }
 
     public function metrics(): ?array {
          return self::$db->rowAssoc("
