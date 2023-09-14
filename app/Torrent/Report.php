@@ -14,7 +14,7 @@ class Report extends \Gazelle\BaseObject {
         parent::__construct($id);
     }
 
-    public function flush(): Report { $this->info = []; return $this; }
+    public function flush(): static { $this->info = []; return $this; }
     public function link(): string { return sprintf('<a href="%s">Report #%d</a>', $this->url(), $this->id()); }
     public function location(): string { return "reportsv2.php?view=report&id=" . $this->id; }
 

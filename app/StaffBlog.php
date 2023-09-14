@@ -5,7 +5,7 @@ namespace Gazelle;
 class StaffBlog extends BaseObject {
     final const tableName = 'staff_blog';
 
-    public function flush(): StaffBlog {
+    public function flush(): static {
         $this->info = [];
         return $this;
     }

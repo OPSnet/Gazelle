@@ -5,7 +5,7 @@ namespace Gazelle;
 class StaffGroup extends BaseObject {
     final const tableName = 'staff_groups';
 
-    public function flush(): StaffGroup {
+    public function flush(): static {
         self::$cache->delete_value('staff');
         (new Manager\Privilege)->flush();
         return $this;

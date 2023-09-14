@@ -231,7 +231,7 @@ class UserCreator extends Base {
     /**
      * Set the initial admin comment. Not mandatory for creation
      */
-    public function setAdminComment(string $adminComment): UserCreator {
+    public function setAdminComment(string $adminComment): static {
         $this->adminComment[] = trim($adminComment);
         return $this;
     }
@@ -243,7 +243,7 @@ class UserCreator extends Base {
      * invitation was used, calling this method afterwards will override
      * the invitation email).
      */
-    public function setEmail(string $email): UserCreator {
+    public function setEmail(string $email): static {
         $this->email[] = trim($email);
         return $this;
     }
@@ -256,7 +256,7 @@ class UserCreator extends Base {
      *
      * @param int $id of the user
      */
-    public function setId(int $id): UserCreator {
+    public function setId(int $id): static {
         $this->id = $id;
         return $this;
     }
@@ -264,7 +264,7 @@ class UserCreator extends Base {
     /**
      * Set the invite key (only required if this is a creation via an invitation)
      */
-    public function setInviteKey(string $inviteKey): UserCreator {
+    public function setInviteKey(string $inviteKey): static {
         $this->inviteKey = trim($inviteKey);
         return $this;
     }
@@ -272,7 +272,7 @@ class UserCreator extends Base {
     /**
      * Set the user IPv4 address.
      */
-    public function setIpaddr(string $ipaddr): UserCreator {
+    public function setIpaddr(string $ipaddr): static {
         $this->ipaddr = trim($ipaddr);
         return $this;
     }
@@ -280,7 +280,7 @@ class UserCreator extends Base {
     /**
      * Set the password. Will be hashed before being stored.
      */
-    public function setPassword(#[\SensitiveParameter] string $password): UserCreator {
+    public function setPassword(#[\SensitiveParameter] string $password): static {
         $this->passHash = self::hashPassword($password);
         return $this;
     }
@@ -288,7 +288,7 @@ class UserCreator extends Base {
     /**
      * Set the username.
      */
-    public function setUsername(string $username): UserCreator {
+    public function setUsername(string $username): static {
         if (preg_match('/^' . str_replace('/', '', USERNAME_REGEXP) . '$/', trim($username), $match)) {
             if (!empty($match['username'])) {
                 $this->username = $match['username'];

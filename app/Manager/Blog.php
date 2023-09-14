@@ -6,9 +6,23 @@ class Blog extends \Gazelle\BaseManager {
     final const CACHE_KEY = 'blog';
     final const ID_KEY    = 'zz_blog_%d';
 
-    public function flush(): Blog {
+    public function flush(): static {
         self::$cache->delete_multi(['feed_blog', self::CACHE_KEY]);
         return $this;
+    }
+
+    /**
+     * Create a blog article
+     */
+    public function create(array $info): \Gazelle\Blog {
+        self::$db->prepared_query("
+            INSERT INTO blog
+                   (UserID, Title, Body, ThreadID, Important)
+            VALUES (?,      ?,     ?,    ?,        ?)
+            ", $info['userId'], trim($info['title']), trim($info['body']), $info['threadId'], $info['important']
+        );
+        $this->flush();
+        return new \Gazelle\Blog(self::$db->inserted_id());
     }
 
     public function findById(int $blogId): ?\Gazelle\Blog {
@@ -24,20 +38,6 @@ class Blog extends \Gazelle\BaseManager {
             }
         }
         return $id ? new \Gazelle\Blog($id) : null;
-    }
-
-    /**
-     * Create a blog article
-     */
-    public function create(array $info): \Gazelle\Blog {
-        self::$db->prepared_query("
-            INSERT INTO blog
-                   (UserID, Title, Body, ThreadID, Important)
-            VALUES (?,      ?,     ?,    ?,        ?)
-            ", $info['userId'], trim($info['title']), trim($info['body']), $info['threadId'], $info['important']
-        );
-        $this->flush();
-        return new \Gazelle\Blog(self::$db->inserted_id());
     }
 
     /**

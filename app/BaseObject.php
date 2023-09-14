@@ -16,7 +16,7 @@ abstract class BaseObject extends Base {
         protected int $id,
     ) {}
 
-    abstract public function flush(): BaseObject;
+    abstract public function flush(): static;
     abstract public function link(): string;
     abstract public function location(): string;
 

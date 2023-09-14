@@ -5,7 +5,7 @@ namespace Gazelle;
 class Privilege extends BaseObject {
     final const tableName = 'permissions';
 
-    public function flush(): Privilege { $this->info = []; return $this; }
+    public function flush(): static { $this->info = []; return $this; }
     public function location(): string { return ''; }
     public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), $this->url()); }
 

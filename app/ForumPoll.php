@@ -6,7 +6,7 @@ class ForumPoll extends BaseObject {
     final const tableName = 'forums_polls';
     final const CACHE_KEY = 'forum_poll_%d';
 
-    public function flush(): ForumPoll {
+    public function flush(): static {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
         unset($this->info);
         return $this;

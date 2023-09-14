@@ -9,7 +9,7 @@ class Bad extends AbstractBetter {
         return 'torrent';
     }
 
-    public function setBadType(string $bad): Bad {
+    public function setBadType(string $bad): static {
         $this->torrentFlag = match($bad) {
             'files'   => \Gazelle\TorrentFlag::badFile,
             'folders' => \Gazelle\TorrentFlag::badFolder,

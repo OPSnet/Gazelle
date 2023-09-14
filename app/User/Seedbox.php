@@ -23,34 +23,34 @@ class Seedbox extends \Gazelle\BaseUser {
         $this->build();
     }
 
-    public function flush(): Seedbox {
+    public function flush(): static {
         self::$cache->delete_value(self::SUMMARY_KEY . $this->user->id());
         unset($this->host);
         unset($this->free);
         return $this;
     }
 
-    public function setUnion(bool $isUnion): Seedbox {
+    public function setUnion(bool $isUnion): static {
         $this->isUnion = $isUnion;
         return $this;
     }
 
-    public function setSource(string $source): Seedbox {
+    public function setSource(string $source): static {
         $this->source = $this->hashid->decode($source)[0];
         return $this;
     }
 
-    public function setTarget(string $target): Seedbox {
+    public function setTarget(string $target): static {
         $this->target = $this->hashid->decode($target)[0];
         return $this;
     }
 
-    public function setViewByName(): Seedbox {
+    public function setViewByName(): static {
         $this->viewBy = self::VIEW_BY_NAME;
         return $this;
     }
 
-    public function setViewByPath(): Seedbox {
+    public function setViewByPath(): static {
         $this->viewBy = self::VIEW_BY_PATH;
         return $this;
     }

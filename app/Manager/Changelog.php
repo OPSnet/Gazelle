@@ -5,7 +5,7 @@ namespace Gazelle\Manager;
 class Changelog extends \Gazelle\Base {
     protected const CACHE_KEY = 'changelog2';
 
-    public function flush(): Changelog {
+    public function flush(): static {
         self::$cache->delete_value(self::CACHE_KEY);
         return $this;
     }

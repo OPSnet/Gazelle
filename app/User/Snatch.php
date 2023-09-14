@@ -27,7 +27,7 @@ class Snatch extends \Gazelle\BaseUser {
 
     protected array $snatchVec = [];
 
-    public function flush(): Snatch {
+    public function flush(): static {
         foreach (array_values($this->snatchVec) as $vector) {
             $vector->flush();
         }

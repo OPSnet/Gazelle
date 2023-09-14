@@ -6,7 +6,7 @@ class Stylesheet extends \Gazelle\BaseUser {
     final const tableName     = '';
     protected const CACHE_KEY = 'u_ss2_%d';
 
-    public function flush(): Stylesheet {
+    public function flush(): static {
         unset($this->info);
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id()));
         return $this;

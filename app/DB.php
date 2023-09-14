@@ -14,7 +14,7 @@ class DB extends Base {
      * Skip foreign key checks
      * @param bool $relax true if foreign key checks should be skipped
      */
-    public function relaxConstraints(bool $relax): DB {
+    public function relaxConstraints(bool $relax): static {
         if ($relax) {
             self::$db->prepared_query("SET foreign_key_checks = 0");
         } else {

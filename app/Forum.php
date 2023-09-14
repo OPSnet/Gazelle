@@ -21,7 +21,7 @@ class Forum extends BaseObject {
         );
     }
 
-    public function flush(): Forum {
+    public function flush(): static {
         $this->info = [];
         (new Manager\Forum)->flushToc();
         self::$cache->delete_multi([

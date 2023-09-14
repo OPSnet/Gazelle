@@ -8,7 +8,7 @@ class Request extends BaseObject {
     protected const CACHE_ARTIST  = "request_artists_%d";
     protected const CACHE_VOTE    = "request_votes_%d";
 
-    public function flush(): Request {
+    public function flush(): static {
         if ($this->tgroupId()) {
             self::$cache->delete_value("requests_group_" . $this->tgroupId());
         }

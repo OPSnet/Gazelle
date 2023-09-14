@@ -10,7 +10,7 @@ abstract class AbstractNotification extends \Gazelle\BaseUser {
     protected string $title;
     protected string $url;
 
-    public function flush(): AbstractNotification { $this->user()->flush(); return $this; }
+    public function flush(): static { $this->user()->flush(); return $this; }
     public function link(): string { return $this->user()->link(); }
     public function location(): string { return $this->user()->location(); }
 

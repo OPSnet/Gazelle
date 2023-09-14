@@ -32,13 +32,13 @@ class Debug {
         self::$db    =& $db;
     }
 
-    public function handle_errors(): Debug {
+    public function handle_errors(): static {
         error_reporting(E_WARNING | E_ERROR | E_PARSE);
         set_error_handler($this->php_error_handler(...));
         return $this;
     }
 
-    public function setStartTime(float $startTime): Debug {
+    public function setStartTime(float $startTime): static {
         self::$startTime = $startTime;
         return $this;
     }
@@ -183,7 +183,7 @@ class Debug {
         ];
     }
 
-    public function set_flag($Event): Debug {
+    public function set_flag($Event): static {
         self::$Flags[] = [
             $Event,
             (microtime(true) - self::$startTime) * 1000,

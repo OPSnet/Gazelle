@@ -9,7 +9,7 @@ abstract class TorrentAbstract extends BaseObject {
     protected TGroup $tgroup;
     protected User   $viewer;
 
-    public function flush(): TorrentAbstract {
+    public function flush(): static {
         self::$cache->delete_multi([
             sprintf(Torrent::CACHE_KEY, $this->id),
             sprintf(TorrentDeleted::CACHE_KEY, $this->id),
@@ -63,7 +63,7 @@ abstract class TorrentAbstract extends BaseObject {
     /**
      * Set the viewer context, for snatched indicators etc.
      */
-    public function setViewer(User $viewer): TorrentAbstract {
+    public function setViewer(User $viewer): static {
         $this->viewer = $viewer;
         return $this;
     }

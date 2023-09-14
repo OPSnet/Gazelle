@@ -5,6 +5,25 @@ namespace Gazelle\Manager;
 class StaffPM extends \Gazelle\BaseManager {
     protected const ID_KEY = 'zz_spm_%d';
 
+    public function create(\Gazelle\User $user, int $level, string $subject, string $message): \Gazelle\StaffPM {
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
+            INSERT INTO staff_pm_conversations
+                   (UserID, Level, Subject)
+            VALUES (?,      ?,     ?)
+            ", $user->id(), $level, $subject
+        );
+        $convId = self::$db->inserted_id();
+        self::$db->prepared_query("
+            INSERT INTO staff_pm_messages
+                   (UserID, Message, ConvID)
+            VALUES (?,      ?,       ?)
+            ", $user->id(), $message, $convId
+        );
+        self::$db->commit();
+        return $this->findById($convId);
+    }
+
     public function findById(int $pmId): ?\Gazelle\StaffPM {
         $key = sprintf(self::ID_KEY, $pmId);
         $id = self::$cache->get_value($key);
@@ -37,25 +56,6 @@ class StaffPM extends \Gazelle\BaseManager {
             }
         }
         return $result;
-    }
-
-    public function create(\Gazelle\User $user, int $level, string $subject, string $message): \Gazelle\StaffPM {
-        self::$db->begin_transaction();
-        self::$db->prepared_query("
-            INSERT INTO staff_pm_conversations
-                   (UserID, Level, Subject)
-            VALUES (?,      ?,     ?)
-            ", $user->id(), $level, $subject
-        );
-        $convId = self::$db->inserted_id();
-        self::$db->prepared_query("
-            INSERT INTO staff_pm_messages
-                   (UserID, Message, ConvID)
-            VALUES (?,      ?,       ?)
-            ", $user->id(), $message, $convId
-        );
-        self::$db->commit();
-        return $this->findById($convId);
     }
 
     public function createCommonAnswer(string $name, string $message): int {

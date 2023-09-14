@@ -37,7 +37,7 @@ class TaskScheduler extends Base {
         return class_exists($class);
     }
 
-    public function flush(): TaskScheduler {
+    public function flush(): static {
         self::$cache->delete_value(self::CACHE_TASKS);
         return $this;
     }

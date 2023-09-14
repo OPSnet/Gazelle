@@ -66,7 +66,7 @@ class Validator {
      * - regex
      *      - Regex (required), regular expression string to use within preg_match
      */
-    public function setField(string $FieldName, bool $Required, string $FieldType, string $ErrorMessage, array $Options = []): Validator {
+    public function setField(string $FieldName, bool $Required, string $FieldType, string $ErrorMessage, array $Options = []): static {
         $this->Fields[$FieldName] = [
             'Type' => strtolower($FieldType),
             'Required' => $Required,
@@ -80,7 +80,7 @@ class Validator {
         return $this;
     }
 
-    public function setFields(array $fields): Validator {
+    public function setFields(array $fields): static {
         foreach ($fields as $f) {
             [$name, $required, $type, $message] = $f;
             $options = count($f) === 5 ? $f[4] : [];

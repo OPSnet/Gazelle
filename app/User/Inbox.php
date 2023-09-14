@@ -11,29 +11,29 @@ class Inbox extends \Gazelle\BaseUser {
     protected string $searchField = 'user';
     protected string $searchTerm;
 
-    public function flush(): Inbox  { $this->user()->flush(); return $this; }
+    public function flush(): static  { $this->user()->flush(); return $this; }
 
-    public function setFilter(string $filter): Inbox {
+    public function setFilter(string $filter): static {
         $this->filter = $filter;
         return $this;
     }
 
-    public function setFolder(string $folder): Inbox {
+    public function setFolder(string $folder): static {
         $this->folder = $folder;
         return $this;
     }
 
-    public function setSearchField(string $searchField): Inbox {
+    public function setSearchField(string $searchField): static {
         $this->searchField = $searchField;
         return $this;
     }
 
-    public function setSearchTerm(string $searchTerm): Inbox {
+    public function setSearchTerm(string $searchTerm): static {
         $this->searchTerm = $searchTerm;
         return $this;
     }
 
-    public function setUnreadFirst(bool $unreadFirst): Inbox {
+    public function setUnreadFirst(bool $unreadFirst): static {
         $this->unreadFirst = $unreadFirst;
         return $this;
     }

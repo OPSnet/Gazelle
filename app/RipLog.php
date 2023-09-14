@@ -5,7 +5,7 @@ namespace Gazelle;
 class RipLog extends BaseObject {
     final const tableName = 'torrents_logs';
 
-    public function flush(): RipLog { return $this; }
+    public function flush(): static { return $this; }
     public function location(): string { return 'view.php?type=riplog&id=' . $this->torrentId . '.' . $this->id; }
     public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), "Log #" . $this->id); }
 

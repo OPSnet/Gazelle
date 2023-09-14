@@ -8,7 +8,7 @@ class Subscription extends \Gazelle\BaseUser {
     protected const NEW_KEY   = 'subscriptions_user_new_%d';
     protected array $threadList;
 
-    public function flush(): Subscription {
+    public function flush(): static {
         $this->threadList = [];
         self::$cache->delete_multi([
             sprintf(self::CACHE_KEY, $this->user->id()),

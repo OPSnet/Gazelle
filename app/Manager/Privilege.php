@@ -8,7 +8,7 @@ class Privilege extends \Gazelle\BaseManager {
 
     protected array $info = [];
 
-    public function flush(): Privilege {
+    public function flush(): static {
         self::$cache->delete_value(self::CACHE_KEY);
         $this->info = [];
         return $this;

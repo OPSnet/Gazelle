@@ -11,7 +11,7 @@ class NotificationTicket {
         protected int $torrentId,
     ) {}
 
-    public function flush(): NotificationTicket {
+    public function flush(): static {
         $this->info  = [];
         return $this;
     }
@@ -72,7 +72,7 @@ class NotificationTicket {
 
     // ---------------------------------------------------
 
-    public function incrementRetry(): NotificationTicket {
+    public function incrementRetry(): static {
         $this->pg()->prepared_query("
             update notification_ticket set
                 retry = retry + 1
@@ -87,7 +87,7 @@ class NotificationTicket {
         return $this->flush();
     }
 
-    public function setReach(int $reach): NotificationTicket {
+    public function setReach(int $reach): static {
         $this->pg()->prepared_query("
             update notification_ticket set
                 reach = ?
@@ -97,7 +97,7 @@ class NotificationTicket {
         return $this->flush();
     }
 
-    public function setState(NotificationTicketState $state): NotificationTicket {
+    public function setState(NotificationTicketState $state): static {
         $this->pg()->prepared_query("
             update notification_ticket set
                 state = ?
@@ -109,27 +109,27 @@ class NotificationTicket {
         return $this;
     }
 
-    public function setActive(): NotificationTicket {
+    public function setActive(): static {
         return $this->setState(NotificationTicketState::Active);
     }
 
-    public function setDone(): NotificationTicket {
+    public function setDone(): static {
         return $this->setState(NotificationTicketState::Done);
     }
 
-    public function setError(): NotificationTicket {
+    public function setError(): static {
         return $this->setState(NotificationTicketState::Error);
     }
 
-    public function setPending(): NotificationTicket {
+    public function setPending(): static {
         return $this->setState(NotificationTicketState::Pending);
     }
 
-    public function setRemoved(): NotificationTicket {
+    public function setRemoved(): static {
         return $this->setState(NotificationTicketState::Removed);
     }
 
-    public function setStale(): NotificationTicket {
+    public function setStale(): static {
         return $this->setState(NotificationTicketState::Stale);
     }
 

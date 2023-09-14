@@ -16,7 +16,7 @@ class PM extends Base {
         return $this->id;
     }
 
-    public function flush(): PM {
+    public function flush(): static {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id, $this->user->id()));
         $this->info = [];
         return $this;

@@ -22,7 +22,7 @@ class Request extends AbstractReport {
         return 'Request Report: ' . display_str($this->subject->title());
     }
 
-    public function isUpdate(bool $isUpdate): Request {
+    public function isUpdate(bool $isUpdate): static {
         $this->isUpdate = $isUpdate;
         return $this;
     }

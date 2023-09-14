@@ -14,7 +14,7 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
     abstract public function page(): string;
     abstract public function pageUrl(): string;
 
-    public function flush(): AbstractComment {
+    public function flush(): static {
         // No-op: There is no such thing as an individual comment cache
         return $this;
     }
@@ -98,7 +98,7 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
     /**
      * Load a page of comments
      */
-    public function load(): AbstractComment {
+    public function load(): static {
         $page = $this->page();
         $pageId = $this->pageId;
 

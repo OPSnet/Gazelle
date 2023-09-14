@@ -6,7 +6,7 @@ class StaffBlog extends \Gazelle\Base {
     final public const CACHE_KEY = 'sblog';
     protected const CACHE_READ_KEY = 'staff_blog_read_%d';
 
-    public function flush(): StaffBlog {
+    public function flush(): static {
         self::$cache->delete_value(self::CACHE_KEY);
         return $this;
     }

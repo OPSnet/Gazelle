@@ -6,7 +6,7 @@ class ForumPost extends BaseObject {
     final const tableName = 'forums_posts';
     final const CACHE_KEY = 'fpost_%d';
 
-    public function flush(): ForumPost {
+    public function flush(): static {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
         $this->thread()->flush();
         unset($this->info);

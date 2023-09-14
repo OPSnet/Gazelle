@@ -12,7 +12,7 @@ class Comment extends AbstractReport {
         return 'report/comment.twig';
     }
 
-    public function setContext(string $title): Comment {
+    public function setContext(string $title): static {
         $this->context['title'] = $title;
         return $this;
     }

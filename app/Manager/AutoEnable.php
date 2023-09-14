@@ -18,6 +18,36 @@ class AutoEnable extends \Gazelle\BaseManager {
     // Cache key to store the number of enable requests
     final const CACHE_TOTAL_OPEN = 'num_enable_requests';
 
+    /**
+     * Handle a new enable request
+     */
+    public function create(\Gazelle\User $user, string $email): ?\Gazelle\User\AutoEnable {
+        $enabler = $this->findByUser($user);
+        if ($enabler) {
+            if ($enabler->isRejected() && $enabler->createdAfter('-2 MONTH')) {
+                return null;
+            }
+            if ($enabler->isPending()) {
+                if ($enabler->createdBefore('-1 DAY')) {
+                    $user->addStaffNote("Additional enable request rejected from {$_SERVER['REMOTE_ADDR']}")->modify();
+                }
+                return $enabler;
+            }
+        }
+
+        self::$db->prepared_query("
+            INSERT INTO users_enable_requests
+                   (Email, IP, UserAgent, UserID, Timestamp)
+            VALUES (?,     ?,  ?,         ?,      now())
+            ", $email, $_SERVER['REMOTE_ADDR'], $_SERVER['HTTP_USER_AGENT'], $user->id()
+        );
+        $enablerId = self::$db->inserted_id();
+        $user->addStaffNote("Enable request $enablerId received from {$_SERVER['REMOTE_ADDR']}")->modify();
+        self::$cache->delete_value(self::CACHE_TOTAL_OPEN);
+
+        return $this->findById($enablerId);
+    }
+
     public function findById(int $enableId): ?\Gazelle\User\AutoEnable {
         [$id, $userId] = self::$db->row("
             SELECT ID, UserID FROM users_enable_requests WHERE ID = ?
@@ -58,36 +88,6 @@ class AutoEnable extends \Gazelle\BaseManager {
         return $total;
     }
 
-    /**
-     * Handle a new enable request
-     */
-    public function create(\Gazelle\User $user, string $email): ?\Gazelle\User\AutoEnable {
-        $enabler = $this->findByUser($user);
-        if ($enabler) {
-            if ($enabler->isRejected() && $enabler->createdAfter('-2 MONTH')) {
-                return null;
-            }
-            if ($enabler->isPending()) {
-                if ($enabler->createdBefore('-1 DAY')) {
-                    $user->addStaffNote("Additional enable request rejected from {$_SERVER['REMOTE_ADDR']}")->modify();
-                }
-                return $enabler;
-            }
-        }
-
-        self::$db->prepared_query("
-            INSERT INTO users_enable_requests
-                   (Email, IP, UserAgent, UserID, Timestamp)
-            VALUES (?,     ?,  ?,         ?,      now())
-            ", $email, $_SERVER['REMOTE_ADDR'], $_SERVER['HTTP_USER_AGENT'], $user->id()
-        );
-        $enablerId = self::$db->inserted_id();
-        $user->addStaffNote("Enable request $enablerId received from {$_SERVER['REMOTE_ADDR']}")->modify();
-        self::$cache->delete_value(self::CACHE_TOTAL_OPEN);
-
-        return $this->findById($enablerId);
-    }
-
     public function adminTotal(): array {
         self::$db->prepared_query("
             SELECT CheckedBy AS user_id,
@@ -100,7 +100,7 @@ class AutoEnable extends \Gazelle\BaseManager {
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
-    public function configureView(string $view, bool $showChecked): AutoEnable {
+    public function configureView(string $view, bool $showChecked): static {
         $this->cond[] = $showChecked
             ? 'uer.Outcome IS NOT NULL'
             : 'uer.Outcome IS NULL';
@@ -132,14 +132,14 @@ class AutoEnable extends \Gazelle\BaseManager {
         return $this;
     }
 
-    public function filterUsername(string $username): AutoEnable {
+    public function filterUsername(string $username): static {
         $this->join[] = "INNER JOIN users_main um1 ON (um1.ID = uer.UserID)";
         $this->cond[] = "um1.Username = ?";
         $this->args[] = $username;
         return $this;
     }
 
-    public function filterAdmin(string $username): AutoEnable {
+    public function filterAdmin(string $username): static {
         $this->join[] = "INNER JOIN users_main um2 ON (um2.ID = uer.CheckedBy)";
         $this->cond[] = "um2.Username = ?";
         $this->args[] = $username;

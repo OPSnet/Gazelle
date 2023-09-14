@@ -42,17 +42,17 @@ class Paginator {
         return (int)ceil($this->total / $this->perPage);
     }
 
-    public function setAnchor(string $anchor): Paginator {
+    public function setAnchor(string $anchor): static {
         $this->anchor = '#' . $anchor;
         return $this;
     }
 
-    public function setParam(string $param): Paginator {
+    public function setParam(string $param): static {
         $this->param[] = $param;
         return $this;
     }
 
-    public function setTotal(int $total): Paginator {
+    public function setTotal(int $total): static {
         $this->total = $total;
         return $this;
     }

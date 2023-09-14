@@ -3,6 +3,16 @@
 namespace Gazelle\Manager;
 
 class IRC extends \Gazelle\Base {
+    public function create(string $name, int $sort, int $minLevel, array $classList): int {
+        self::$db->prepared_query("
+            INSERT INTO irc_channels
+                   (Name, Sort, MinLevel, Classes)
+            VALUES (?,    ?,    ?,        ?)
+            ", $name, $sort, $minLevel, implode(',', $classList)
+        );
+        return self::$db->inserted_id();
+    }
+
     public function list(): array {
         self::$db->prepared_query("
             SELECT ID AS id,
@@ -19,16 +29,6 @@ class IRC extends \Gazelle\Base {
         }
         unset($row);
         return $list;
-    }
-
-    public function create(string $name, int $sort, int $minLevel, array $classList): int {
-        self::$db->prepared_query("
-            INSERT INTO irc_channels
-                   (Name, Sort, MinLevel, Classes)
-            VALUES (?,    ?,    ?,        ?)
-            ", $name, $sort, $minLevel, implode(',', $classList)
-        );
-        return self::$db->inserted_id();
     }
 
     public function modify (int $id, string $name, int $sort, int $minLevel, array $classList): int {

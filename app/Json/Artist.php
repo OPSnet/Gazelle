@@ -14,7 +14,7 @@ class Artist extends \Gazelle\Json {
         protected \Gazelle\Manager\Torrent $torMan
     ) {}
 
-    public function setReleasesOnly(bool $releasesOnly): Artist {
+    public function setReleasesOnly(bool $releasesOnly): static {
         $this->releasesOnly = $releasesOnly;
         return $this;
     }

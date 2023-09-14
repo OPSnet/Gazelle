@@ -5,6 +5,26 @@ namespace Gazelle\Manager;
 class SiteOption extends \Gazelle\Base {
     final const CACHE_KEY = 'site_option_%s';
 
+    /**
+     * Create a new option key/value pair.
+     *
+     * @return int ID of option (or null on failure e.g. duplicate name)
+     */
+    public function create(string $name, string $value, string $comment): ?int {
+        try {
+            self::$db->prepared_query('
+                INSERT INTO site_options
+                       (Name, Value, Comment)
+                VALUES (?,    ?,     ?)
+                ', $name, $value, $comment
+            );
+        } catch (\Gazelle\DB\Mysql_DuplicateKeyException) {
+            return null;
+        }
+        self::$cache->cache_value(sprintf(self::CACHE_KEY, $name), $value);
+        return self::$db->inserted_id();
+    }
+
     public function findValueByName(string $name): ?string {
         $key = sprintf(self::CACHE_KEY, $name);
         $value = self::$cache->get_value($key);
@@ -35,26 +55,6 @@ class SiteOption extends \Gazelle\Base {
             ORDER BY Name
         ");
         return self::$db->to_array('name', MYSQLI_ASSOC, false);
-    }
-
-    /**
-     * Create a new option key/value pair.
-     *
-     * @return int ID of option (or null on failure e.g. duplicate name)
-     */
-    public function create(string $name, string $value, string $comment): ?int {
-        try {
-            self::$db->prepared_query('
-                INSERT INTO site_options
-                       (Name, Value, Comment)
-                VALUES (?,    ?,     ?)
-                ', $name, $value, $comment
-            );
-        } catch (\Gazelle\DB\Mysql_DuplicateKeyException) {
-            return null;
-        }
-        self::$cache->cache_value(sprintf(self::CACHE_KEY, $name), $value);
-        return self::$db->inserted_id();
     }
 
     /**

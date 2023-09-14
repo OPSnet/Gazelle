@@ -9,7 +9,7 @@ class Warning extends \Gazelle\BaseUser {
 
     protected array|null $info;
 
-    public function flush(): Warning {
+    public function flush(): static {
         unset($this->info);
         return $this;
     }

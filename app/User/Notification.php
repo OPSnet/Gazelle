@@ -37,7 +37,7 @@ class Notification extends \Gazelle\BaseUser {
         'Torrents',
     ];
 
-    public function flush(): Notification { $this->user()->flush(); return $this; }
+    public function flush(): static { $this->user()->flush(); return $this; }
 
     public function config(): array {
         if (isset($this->config)) {
@@ -78,7 +78,7 @@ class Notification extends \Gazelle\BaseUser {
         return $this->config()[$alertType] != self::DISPLAY_DISABLED;
     }
 
-    public function setDocument(string $document, string $action): Notification {
+    public function setDocument(string $document, string $action): static {
         $this->document = $document;
         $this->action   = $action;
         return $this;

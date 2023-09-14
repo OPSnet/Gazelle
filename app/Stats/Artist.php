@@ -6,7 +6,7 @@ class Artist extends \Gazelle\BaseObject {
     final const tableName     = '/* artist stats */';
     protected const CACHE_KEY = 'a_stats_%d';
 
-    public function flush(): Artist {
+    public function flush(): static {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
         return $this;
     }

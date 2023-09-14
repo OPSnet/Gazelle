@@ -53,29 +53,29 @@ class Filter extends \Gazelle\Base {
         return array_unique(array_map('trim', preg_split('/\r\n?|\n/', trim($data)))); /** @phpstan-ignore-line */
     }
 
-    public function setMultiLine(string $field, $data): Filter {
+    public function setMultiLine(string $field, $data): static {
         $this->field[$field] = $this->multiLineSplit($data);
         return $this;
     }
 
-    public function setMultiValue(string $field, $data): Filter {
+    public function setMultiValue(string $field, $data): static {
         $this->field[$field] = array_unique(array_map('trim', $data));
         return $this;
     }
 
-    public function setBoolean(string $field, bool $flag): Filter {
+    public function setBoolean(string $field, bool $flag): static {
         $this->field[$field] = $flag ? '1' : '0';
         return $this;
     }
 
-    public function setLabel($label): Filter {
+    public function setLabel($label): static {
         if (isset($label)) {
             $this->field['label'] = trim($label);
         }
         return $this;
     }
 
-    public function setYears(int $from, int $to): Filter {
+    public function setYears(int $from, int $to): static {
         if ($from) {
             $this->field['from_year'] = $from;
             $this->field['to_year'] = $to ?: date('Y') + 3;
@@ -83,7 +83,7 @@ class Filter extends \Gazelle\Base {
         return $this;
     }
 
-    public function setUsers(\Gazelle\Manager\User $userMan, string $data): Filter {
+    public function setUsers(\Gazelle\Manager\User $userMan, string $data): static {
         $usernames = $this->multiLineSplit($data);
         foreach ($usernames as $username) {
             $user = $userMan->findByUsername($username);

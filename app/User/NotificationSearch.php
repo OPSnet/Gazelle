@@ -11,7 +11,7 @@ class NotificationSearch extends \Gazelle\BaseUser {
     protected array $cond = [];
     protected array $args = [];
 
-    public function flush(): NotificationSearch { $this->user()->flush(); return $this; }
+    public function flush(): static { $this->user()->flush(); return $this; }
 
     public function __construct(
         \Gazelle\User $user,
@@ -40,7 +40,7 @@ class NotificationSearch extends \Gazelle\BaseUser {
         }
     }
 
-    public function setFilter(int $filterId): NotificationSearch {
+    public function setFilter(int $filterId): static {
         $this->filterId = $filterId;
         $this->cond[] = 'unt.FilterID = ?';
         $this->args[] = $filterId;

@@ -8,7 +8,7 @@ class StaffPM extends BaseObject {
     protected $author;
     protected $assigned;
 
-    public function flush(): StaffPM {
+    public function flush(): static {
         $this->info = [];
         return $this;
     }

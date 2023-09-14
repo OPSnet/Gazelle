@@ -14,7 +14,7 @@ class TGroup extends \Gazelle\BaseObject {
     // Cache the underlying db calls
     protected array $general = [];
 
-    public function flush(): TGroup {
+    public function flush(): static {
         self::$cache->delete_value(sprintf(self::CACHE_GENERAL, $this->id));
         return $this;
     }

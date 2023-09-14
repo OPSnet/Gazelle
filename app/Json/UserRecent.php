@@ -11,7 +11,7 @@ class UserRecent extends \Gazelle\Json {
         protected \Gazelle\Manager\TGroup $tgMan,
     ) {}
 
-    public function setLimit(int $limit): UserRecent {
+    public function setLimit(int $limit): static {
         $this->limit = $limit;
         return $this;
     }

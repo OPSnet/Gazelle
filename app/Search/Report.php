@@ -9,24 +9,24 @@ class Report extends \Gazelle\Base {
     protected array $cond = [];
     protected SearchReportOrder $order;
 
-    public function setId(int $id): Report {
+    public function setId(int $id): static {
         $this->cond[] = 'r.ID = ?';
         $this->args[]  = $id;
         return $this;
     }
 
-    public function setOrder(SearchReportOrder $order): Report {
+    public function setOrder(SearchReportOrder $order): static {
         $this->order = $order;
         return $this;
     }
 
-    public function setStatus(array $status): Report {
+    public function setStatus(array $status): static {
         $this->cond[] = 'r.Status in (' . placeholders($status) . ')';
         array_push($this->args, ...$status);
         return $this;
     }
 
-    public function setTypeFilter(array $typeList): Report {
+    public function setTypeFilter(array $typeList): static {
         if ($typeList) {
             $this->cond[] = 'r.Type in (' . placeholders($typeList) . ')';
             array_push($this->args, ...$typeList);
@@ -34,7 +34,7 @@ class Report extends \Gazelle\Base {
         return $this;
     }
 
-    public function restrictForumMod(): Report {
+    public function restrictForumMod(): static {
         $this->cond[] = "r.Type IN ('comment', 'post', 'thread')";
         return $this;
     }

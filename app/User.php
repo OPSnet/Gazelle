@@ -32,7 +32,7 @@ class User extends BaseObject {
 
     protected Stats\User|null $stats;
 
-    public function flush(): User {
+    public function flush(): static {
         self::$cache->delete_multi([
             sprintf(self::CACHE_KEY, $this->id),
             sprintf(User\Privilege::CACHE_KEY, $this->id),
@@ -637,7 +637,7 @@ class User extends BaseObject {
         return self::$db->affected_rows() === 1;
     }
 
-    public function remove2FA(): User {
+    public function remove2FA(): static {
         return $this->setField('2FA_Key', null)
             ->setField('Recovery', null);
     }
@@ -951,7 +951,7 @@ class User extends BaseObject {
     /**
      * Record a forum warning for this user
      */
-    public function addForumWarning(string $reason): User {
+    public function addForumWarning(string $reason): static {
         $this->forumWarning[] = $reason;
         return $this;
     }
@@ -959,7 +959,7 @@ class User extends BaseObject {
     /**
      * Record a staff not for this user
      */
-    public function addStaffNote(string $note): User {
+    public function addStaffNote(string $note): static {
         $this->staffNote[] = $note;
         return $this;
     }
@@ -979,11 +979,11 @@ class User extends BaseObject {
     /**
      * Remove the custom title of a user
      */
-    public function removeTitle(): User {
+    public function removeTitle(): static {
         return $this->setField('Title', null);
     }
 
-    public function modifyOption(string $name, $value): User {
+    public function modifyOption(string $name, $value): static {
         $options = $this->info()['SiteOptions'];
         if (is_null($value)) {
             unset($options[$name]);

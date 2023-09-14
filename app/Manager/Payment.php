@@ -9,7 +9,7 @@ class Payment extends \Gazelle\Base {
     final const RENT_KEY = 'payment_monthly_rental';
     final const DUE_KEY  = 'payment_due';
 
-    public function flush(): Payment {
+    public function flush(): static {
         self::$cache->delete_multi([self::LIST_KEY, self::DUE_KEY, self::RENT_KEY]);
         return $this;
     }

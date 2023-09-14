@@ -14,7 +14,7 @@ class Thread extends BaseObject {
     protected $created; // date created
     protected $story;   // the array of notes in the conversation
 
-    public function flush(): Thread { return $this; }
+    public function flush(): static { return $this; }
     public function link(): string { return ''; }
     public function location(): string { return ''; }
 

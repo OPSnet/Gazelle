@@ -32,7 +32,7 @@ class Collage extends BaseObject {
         $this->collage->load();
     }
 
-    public function flush(): Collage {
+    public function flush(): static {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
         $this->userSubscriptions = null;
         $this->info = null;
@@ -113,7 +113,7 @@ class Collage extends BaseObject {
     }
     public function sortNewest(): bool { return $this->hasAttr('sort-newest'); }
 
-    public function setViewer(User $viewer): Collage {
+    public function setViewer(User $viewer): static {
         $this->viewer = $viewer;
         $this->lockedForUser = false;
         if (!$this->viewer->permitted('site_collages_delete')) {
@@ -309,11 +309,11 @@ class Collage extends BaseObject {
         return $this->collage->remove();
     }
 
-    public function toggleLocked(): Collage {
+    public function toggleLocked(): static {
         return $this->setField('Locked', $this->isLocked() ? '0' : '1');
     }
 
-    public function setFeatured(): Collage {
+    public function setFeatured(): static {
         return $this->setField('Featured', 1);
     }
 

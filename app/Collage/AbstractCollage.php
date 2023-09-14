@@ -65,7 +65,7 @@ abstract class AbstractCollage extends \Gazelle\Base {
     /**
      * Flush the cache keys associated with this collage.
      */
-    public function flushAll(array $keys = []): AbstractCollage {
+    public function flushAll(array $keys = []): static {
         self::$db->prepared_query("
             SELECT concat('collage_subs_user_new_', UserID)
             FROM users_collage_subs

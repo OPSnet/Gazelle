@@ -17,7 +17,7 @@ class Inbox extends \Gazelle\Json {
         protected \Gazelle\Manager\User $userMan,
     ) {}
 
-    public function setSearch(string $searchType, string $search): Inbox {
+    public function setSearch(string $searchType, string $search): static {
         $search = trim($search);
         switch($searchType) {
             case 'subject':

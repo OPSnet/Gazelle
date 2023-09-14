@@ -11,7 +11,7 @@ class Contest extends BaseObject {
 
     protected array $stats; /* entries, users */
 
-    public function flush(): Contest {
+    public function flush(): static {
         self::$cache->delete_value(sprintf(self::CACHE_CONTEST, $this->id));
         $this->info = [];
         return $this;

@@ -444,7 +444,7 @@ class User extends \Gazelle\BaseManager {
     /**
      * Flush the cached count of enabled users.
      */
-    public function flushEnabledUsersCount(): User {
+    public function flushEnabledUsersCount(): static {
         self::$cache->delete_value('stats_user_count');
         return $this;
     }

@@ -6,7 +6,7 @@ class Privilege extends \Gazelle\BaseUser {
     final const tableName = 'users_levels';
     final const CACHE_KEY = 'u_priv_%d';
 
-    public function flush(): Privilege {
+    public function flush(): static {
         unset($this->info);
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->user->id()));
         $this->user()->flush();

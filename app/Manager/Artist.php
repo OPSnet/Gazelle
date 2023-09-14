@@ -170,12 +170,12 @@ class Artist extends \Gazelle\BaseManager {
         return $aliasId ? [$artistId, $aliasId] : $this->create($name);
     }
 
-    public function setGroupId(int $groupId): Artist {
+    public function setGroupId(int $groupId): static {
         $this->groupId = $groupId;
         return $this;
     }
 
-    public function setUserId(int $userId): Artist {
+    public function setUserId(int $userId): static {
         $this->userId = $userId;
         return $this;
     }

@@ -9,7 +9,7 @@ class Bonus extends \Gazelle\BaseUser {
     final const CACHE_HISTORY      = 'bonus_history_%d_%d';
     final const CACHE_POOL_HISTORY = 'bonus_pool_history_%d';
 
-    public function flush(): Bonus {
+    public function flush(): static {
         $this->user->flush();
         self::$cache->delete_multi([
             sprintf(self::CACHE_HISTORY, $this->user->id(), 0),

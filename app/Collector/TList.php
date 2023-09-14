@@ -6,7 +6,7 @@ class TList extends \Gazelle\Collector {
     protected array $ids;
     protected bool $all = false;
 
-    public function setList(array $ids): TList {
+    public function setList(array $ids): static {
         $this->ids = $ids;
         return $this;
     }

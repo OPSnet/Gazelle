@@ -9,7 +9,7 @@ class Donor extends \Gazelle\BaseUser {
 
     protected bool $isDonor;
 
-    public function flush(): Donor {
+    public function flush(): static {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id()));
         unset($this->isDonor);
         $this->info = [];
@@ -175,7 +175,7 @@ class Donor extends \Gazelle\BaseUser {
         return $this->specialRank() > 1 && $this->info()['second_avatar'] ? $this->info()['second_avatar'] : false;
     }
 
-    public function updateAvatarHover(string $value): Donor {
+    public function updateAvatarHover(string $value): static {
         return $this->specialRank() > 1 ? $this->setField("SecondAvatar", trim($value)) : $this;
     }
 
@@ -186,7 +186,7 @@ class Donor extends \Gazelle\BaseUser {
         return $this->hasRankAbove(2) ? $this->info()['avatar_hover_text'] : false;
     }
 
-    public function updateAvatarHoverText(string $value): Donor {
+    public function updateAvatarHoverText(string $value): static {
         return $this->hasRankAbove(2) ? $this->setField("AvatarMouseOverText", trim($value)) : $this;
     }
 
@@ -236,7 +236,7 @@ class Donor extends \Gazelle\BaseUser {
         return $this->hasRankAbove(MAX_RANK) ? $this->info()['icon'] : null;
     }
 
-    public function updateIcon(string $value): Donor {
+    public function updateIcon(string $value): static {
         return $this->hasRankAbove(MAX_RANK) ? $this->setField("CustomIcon", trim($value)) : $this;
     }
 
@@ -258,7 +258,7 @@ class Donor extends \Gazelle\BaseUser {
         return (string)$this->info()['icon_link'];
     }
 
-    public function updateIconLink(string $value): Donor {
+    public function updateIconLink(string $value): static {
         return $this->hasRankAbove(1) ? $this->setField("CustomIconLink", $value) : $this;
     }
 
@@ -283,7 +283,7 @@ class Donor extends \Gazelle\BaseUser {
         return (string)$this->info()['icon_hover_text'];
     }
 
-    public function updateIconHoverText(string $value): Donor {
+    public function updateIconHoverText(string $value): static {
         return $this->hasRankAbove(1) ? $this->setField("IconMouseOverText", $value) : $this;
     }
 
@@ -330,7 +330,7 @@ class Donor extends \Gazelle\BaseUser {
     /**
      * Update the profile info
      */
-    public function updateProfileInfo(int $level, string $value): Donor {
+    public function updateProfileInfo(int $level, string $value): static {
         return $this->hasRankAbove($level) ? $this->setField("ProfileInfo$level", trim($value)) : $this;
     }
 
@@ -347,7 +347,7 @@ class Donor extends \Gazelle\BaseUser {
     /**
      * Update the profile info title
      */
-    public function updateProfileTitle(int $level, string $value): Donor {
+    public function updateProfileTitle(int $level, string $value): static {
         return $this->hasRankAbove($level) ? $this->setField("ProfileInfoTitle$level", trim($value)) : $this;
     }
 

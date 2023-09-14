@@ -310,7 +310,7 @@ class Forum extends \Gazelle\BaseManager {
         );
     }
 
-    public function flushToc(): Forum {
+    public function flushToc(): static {
         self::$cache->delete_multi([
             self::CACHE_TOC_MAIN,
             self::CACHE_LIST,

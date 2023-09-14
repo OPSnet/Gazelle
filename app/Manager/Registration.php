@@ -8,12 +8,12 @@ class Registration extends \Gazelle\Base {
     protected string $beforeDate;
     protected string $afterDate;
 
-    public function setBeforeDate(string $date): Registration {
+    public function setBeforeDate(string $date): static {
         $this->beforeDate = $date;
         return $this;
     }
 
-    public function setAfterDate(string $date): Registration {
+    public function setAfterDate(string $date): static {
         $this->afterDate = $date;
         return $this;
     }

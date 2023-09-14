@@ -5,6 +5,24 @@ namespace Gazelle\Manager;
 class ClientWhitelist extends \Gazelle\Base {
     final const CACHE_KEY = 'whitelisted_clients';
 
+     /**
+      * Create a client
+      *
+      * @param string $peer The new peer identifier
+      * @param string $vstring The new client vstring
+      * @return string The new peer identifier (unchanged)
+      */
+     public function create(string $peer, string $vstring) {
+        self::$db->prepared_query("
+            INSERT INTO xbt_client_whitelist
+                   (peer_id, vstring)
+            VALUES (?,       ?)
+            ", $peer, $vstring
+        );
+        self::$cache->delete_value(self::CACHE_KEY);
+        return $peer;
+    }
+
     /**
      * Get the peer ID of client
      *
@@ -31,24 +49,6 @@ class ClientWhitelist extends \Gazelle\Base {
             self::$cache->cache_value(self::CACHE_KEY, $list, 0);
         }
         return $list;
-    }
-
-     /**
-      * Create a client
-      *
-      * @param string $peer The new peer identifier
-      * @param string $vstring The new client vstring
-      * @return string The new peer identifier (unchanged)
-      */
-     public function create(string $peer, string $vstring) {
-        self::$db->prepared_query("
-            INSERT INTO xbt_client_whitelist
-                   (peer_id, vstring)
-            VALUES (?,       ?)
-            ", $peer, $vstring
-        );
-        self::$cache->delete_value(self::CACHE_KEY);
-        return $peer;
     }
 
      /**

@@ -14,7 +14,7 @@ class Blog extends BaseObject {
         return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->title()));
     }
 
-    public function flush(): Blog {
+    public function flush(): static {
         self::$cache->deleteMulti([
             Manager\Blog::CACHE_KEY,
             sprintf(self::CACHE_KEY, $this->id),

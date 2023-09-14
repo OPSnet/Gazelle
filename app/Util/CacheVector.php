@@ -33,14 +33,14 @@ class CacheVector extends \Gazelle\Base {
         }
     }
 
-    public function flush(): CacheVector {
+    public function flush(): static {
         self::$cache->delete_value($this->key);
         $this->bitvec = str_repeat(chr(0), $this->length);
         $this->empty  = true;
         return $this;
     }
 
-    public function persist(): CacheVector {
+    public function persist(): static {
         self::$cache->cache_value($this->key, $this->bitvec, $this->expiry);
         return $this;
     }

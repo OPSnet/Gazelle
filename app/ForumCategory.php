@@ -6,7 +6,7 @@ class ForumCategory extends BaseObject {
     final const tableName = 'forums_categories';
     final const CACHE_KEY = 'forum_cat_%d';
 
-    public function flush(): ForumCategory {
+    public function flush(): static {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
         self::$cache->delete_value(Manager\ForumCategory::LIST_KEY);
         $this->info = [];

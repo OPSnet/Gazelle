@@ -5,7 +5,7 @@ namespace Gazelle;
 class Tag extends BaseObject {
     final const tableName = 'tags';
 
-    public function flush(): Tag { unset($this->info); return $this; }
+    public function flush(): static { unset($this->info); return $this; }
     public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->name())); }
     public function location(): string { return 'torrents.php?taglist=' . $this->name(); }
 

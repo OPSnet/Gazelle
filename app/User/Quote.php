@@ -8,7 +8,7 @@ class Quote extends \Gazelle\BaseUser {
 
     protected bool $showAll = false;
 
-    public function flush(): Quote {
+    public function flush(): static {
         self::$cache->delete_value(sprintf(self::UNREAD_QUOTE_KEY, $this->user->id()));
         return $this;
     }
@@ -27,7 +27,7 @@ class Quote extends \Gazelle\BaseUser {
     /**
      * Toggle whether only unread quotes should be listed
      */
-    public function setShowAll(bool $showAll): Quote {
+    public function setShowAll(bool $showAll): static {
         $this->showAll = $showAll;
         return $this;
     }

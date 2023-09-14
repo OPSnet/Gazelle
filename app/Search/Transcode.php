@@ -24,27 +24,27 @@ class Transcode extends \Gazelle\Base {
         protected \Gazelle\Manager\Torrent $torMan
     ) {}
 
-    public function setModeAny(): Transcode {
+    public function setModeAny(): static {
         $this->mode = self::MODE_ANY;
         return $this;
     }
 
-    public function setModeSeeding(): Transcode {
+    public function setModeSeeding(): static {
         $this->mode = self::MODE_SEEDING;
         return $this;
     }
 
-    public function setModeSnatched(): Transcode {
+    public function setModeSnatched(): static {
         $this->mode = self::MODE_SNATCHED;
         return $this;
     }
 
-    public function setModeUploaded(): Transcode {
+    public function setModeUploaded(): static {
         $this->mode = self::MODE_UPLOADED;
         return $this;
     }
 
-    public function setSearch(string $search): Transcode {
+    public function setSearch(string $search): static {
         $this->search = $search;
         return $this;
     }
@@ -53,7 +53,7 @@ class Transcode extends \Gazelle\Base {
         return isset($this->wantV0);
     }
 
-    public function wantV0(): Transcode {
+    public function wantV0(): static {
         $this->wantV0 = true;
         return $this;
     }
@@ -62,7 +62,7 @@ class Transcode extends \Gazelle\Base {
         return isset($this->want320);
     }
 
-    public function want320(): Transcode {
+    public function want320(): static {
         $this->want320 = true;
         return $this;
     }

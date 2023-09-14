@@ -26,14 +26,14 @@ class Request extends \Gazelle\Base {
         return isset($this->bookmarkerId);
     }
 
-    public function setBookmarker(\Gazelle\User $user): Request {
+    public function setBookmarker(\Gazelle\User $user): static {
         $this->text         = "{$user->username()} › Bookmarked requests";
         $this->title        = "{$user->link()} › Bookmarked requests";
         $this->bookmarkerId = $user->id();
         return $this;
     }
 
-    public function setCategory(array $categoryList): Request {
+    public function setCategory(array $categoryList): static {
         if (in_array(count($categoryList), [0, count(CATEGORY)])) {
             return $this;
         }
@@ -49,21 +49,21 @@ class Request extends \Gazelle\Base {
         return $this;
     }
 
-    public function setCreator(\Gazelle\User $user): Request {
+    public function setCreator(\Gazelle\User $user): static {
         $this->text = "{$user->username()} › Requests created";
         $this->title = "{$user->link()} › Requests created";
         $this->sphinxq->where('userid', $user->id());
         return $this;
     }
 
-    public function setFiller(\Gazelle\User $user): Request {
+    public function setFiller(\Gazelle\User $user): static {
         $this->text = "{$user->username()} › Requests filled";
         $this->title = "{$user->link()} › Requests filled";
         $this->sphinxq->where('fillerid', $user->id());
         return $this;
     }
 
-    public function setEncoding(array $encodingList, bool $strict): Request {
+    public function setEncoding(array $encodingList, bool $strict): static {
         if (in_array(count($encodingList), [0, count(ENCODING)])) {
             return $this;
         }
@@ -84,7 +84,7 @@ class Request extends \Gazelle\Base {
         return $this;
     }
 
-    public function setFormat(array $formatList, bool $strict): Request {
+    public function setFormat(array $formatList, bool $strict): static {
         if (in_array(count($formatList), [0, count(FORMAT)])) {
             return $this;
         }
@@ -105,7 +105,7 @@ class Request extends \Gazelle\Base {
         return $this;
     }
 
-    public function setMedia(array $mediaList, bool $strict): Request {
+    public function setMedia(array $mediaList, bool $strict): static {
         $format = [];
         if (in_array(count($mediaList), [0, count(MEDIA)])) {
             return $this;
@@ -127,7 +127,7 @@ class Request extends \Gazelle\Base {
         return $this;
     }
 
-    public function setReleaseType(array $releaseTypeList, array $allReleaseType): Request {
+    public function setReleaseType(array $releaseTypeList, array $allReleaseType): static {
         if (in_array(count($releaseTypeList), [0, count($allReleaseType)])) {
             return $this;
         }
@@ -144,12 +144,12 @@ class Request extends \Gazelle\Base {
         return $this;
     }
 
-    public function setRequestor(int $requestor): Request {
+    public function setRequestor(int $requestor): static {
         $this->sphinxq->where('userid', $requestor);
         return $this;
     }
 
-    public function setTag(string $tagList, string $tagMode): Request {
+    public function setTag(string $tagList, string $tagMode): static {
         $tagList = str_replace('.', '_', trim($tagList));
         if ($tagList === '') {
             return $this;
@@ -172,7 +172,7 @@ class Request extends \Gazelle\Base {
         return $this;
     }
 
-    public function setText(string $text): Request {
+    public function setText(string $text): static {
         $text = trim($text);
         if ($text === '') {
             return $this;
@@ -207,24 +207,24 @@ class Request extends \Gazelle\Base {
         return $this;
     }
 
-    public function setVisible(bool $truth): Request {
+    public function setVisible(bool $truth): static {
         $this->sphinxq->where('visible', (int)$truth);
         return $this;
     }
 
-    public function setVoter(\Gazelle\User $user): Request {
+    public function setVoter(\Gazelle\User $user): static {
         $this->text = "{$user->username()} › Requests voted on";
         $this->title = "{$user->link()} › Requests voted on";
         $this->sphinxq->where('voter', $user->id());
         return $this;
     }
 
-    public function setYear(int $year): Request {
+    public function setYear(int $year): static {
         $this->sphinxq->where('year', $year);
         return $this;
     }
 
-    public function showUnfilled(): Request {
+    public function showUnfilled(): static {
         $this->sphinxq->where('torrentid', 0);
         return $this;
     }

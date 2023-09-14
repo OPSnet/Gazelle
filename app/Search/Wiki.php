@@ -18,12 +18,12 @@ class Wiki extends \Gazelle\Base {
         $this->where = 'WHERE ' . implode(' AND ', $cond);
     }
 
-    public function setOrderBy(string $orderBy): Wiki {
+    public function setOrderBy(string $orderBy): static {
         $this->orderBy = $orderBy;
         return $this;
     }
 
-    public function setOrderDir(string $orderDir): Wiki {
+    public function setOrderDir(string $orderDir): static {
         $this->orderDir = $orderDir;
         return $this;
     }

@@ -5,6 +5,8 @@ namespace Gazelle\User;
 class History extends \Gazelle\BaseUser {
     final const tableName = 'pm_conversations_users';
 
+    public function flush(): static { $this->user()->flush(); return $this; }
+
     public function __construct(
         \Gazelle\User $user,
         protected string $column = 'ip',
@@ -12,8 +14,6 @@ class History extends \Gazelle\BaseUser {
     ) {
         parent::__construct($user);
     }
-
-    public function flush(): History { $this->user()->flush(); return $this; }
 
     /**
      * Email history

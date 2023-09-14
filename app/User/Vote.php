@@ -26,7 +26,7 @@ class Vote extends \Gazelle\BaseUser {
     protected array $userVote;
     protected array $voteSummary;
 
-    public function flush(): Vote {
+    public function flush(): static {
         self::$cache->delete_multi([
             sprintf(self::VOTE_RECENT, $this->user->id()),
             sprintf(self::VOTE_TOTAL, $this->user->id()),
@@ -34,7 +34,7 @@ class Vote extends \Gazelle\BaseUser {
         return $this;
     }
 
-    protected function flushTgroup(int $tgroupId): Vote {
+    protected function flushTgroup(int $tgroupId): static {
         self::$cache->delete_multi([
             sprintf(self::VOTED_GROUP, $tgroupId),
             sprintf(self::VOTE_PAIR_KEY, $tgroupId),
@@ -63,18 +63,18 @@ class Vote extends \Gazelle\BaseUser {
         $this->userVote = $userVote;
     }
 
-    public function setTopLimit(int $limit): Vote {
+    public function setTopLimit(int $limit): static {
         $this->topConfig['limit'] = $limit;
         return $this;
     }
 
-    public function setTopTagList(array $tagList, bool $all): Vote {
+    public function setTopTagList(array $tagList, bool $all): static {
         $this->topConfig['tagList'] = $tagList;
         $this->topConfig['tagAll']  = $all;
         return $this;
     }
 
-    public function setTopYearInterval(int $lower, int $higher): Vote {
+    public function setTopYearInterval(int $lower, int $higher): static {
         if ($lower > 0) {
             if ($higher > 0) {
                 $this->topJoin['torrents_group'] = 'INNER JOIN torrents_group tg ON (tg.ID = v.GroupID)';

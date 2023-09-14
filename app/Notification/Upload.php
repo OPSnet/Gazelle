@@ -125,7 +125,7 @@ class Upload extends \Gazelle\Base {
     /**
      * Add a generic dimension that triggers a notification
      */
-    protected function addDimension(string $column, string $dimension): Upload {
+    protected function addDimension(string $column, string $dimension): static {
         if (!$dimension) {
             $this->cond[] = "unf.$column = ''";
             return $this;

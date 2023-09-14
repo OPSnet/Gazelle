@@ -25,12 +25,12 @@ class Curl {
         curl_close($this->curl);
     }
 
-    public function setMethod(CurlMethod $method): Curl {
+    public function setMethod(CurlMethod $method): static {
         $this->method = $method;
         return $this;
     }
 
-    public function setOption(int $option, $value): Curl {
+    public function setOption(int $option, $value): static {
         $this->option[$option] = $value;
         return $this;
     }
@@ -41,13 +41,13 @@ class Curl {
      * Implicity switches the HTTP method to POST and sets the content-type
      * to multipart/form-data.
      */
-    public function setPostData(array $postData): Curl {
+    public function setPostData(array $postData): static {
         $this->method   = CurlMethod::POST;
         $this->postData = $postData;
         return $this;
     }
 
-    public function setUseProxy(bool $useProxy): Curl {
+    public function setUseProxy(bool $useProxy): static {
         $this->useProxy = $useProxy;
         return $this;
     }

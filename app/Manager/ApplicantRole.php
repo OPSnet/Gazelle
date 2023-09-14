@@ -7,6 +7,17 @@ class ApplicantRole extends \Gazelle\Base {
     final const CACHE_KEY_ALL       = 'approle_list_all';
     final const CACHE_KEY_PUBLISHED = 'approle_list_published';
 
+    public function create(string $title, string $description, bool $published, int $userId) {
+        self::$db->prepared_query("
+            INSERT INTO applicant_role
+                   (Title, Description, Published, UserID)
+            VALUES (?,     ?,           ?,         ?)
+            ", $title, $description, $published ? 1 : 0, $userId
+        );
+        self::$cache->deleteMulti([self::CACHE_KEY_ALL, self::CACHE_KEY_PUBLISHED]);
+        return $this->findById(self::$db->inserted_id());
+    }
+
     public function findById(int $roleId): ?\Gazelle\ApplicantRole {
         $key = sprintf(self::ID_KEY, $roleId);
         $id = self::$cache->get_value($key);
@@ -20,17 +31,6 @@ class ApplicantRole extends \Gazelle\Base {
             }
         }
         return $id ? new \Gazelle\ApplicantRole($id) : null;
-    }
-
-    public function create(string $title, string $description, bool $published, int $userId) {
-        self::$db->prepared_query("
-            INSERT INTO applicant_role
-                   (Title, Description, Published, UserID)
-            VALUES (?,     ?,           ?,         ?)
-            ", $title, $description, $published ? 1 : 0, $userId
-        );
-        self::$cache->deleteMulti([self::CACHE_KEY_ALL, self::CACHE_KEY_PUBLISHED]);
-        return $this->findById(self::$db->inserted_id());
     }
 
     public function list($all = false) {

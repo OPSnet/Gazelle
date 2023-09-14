@@ -3,7 +3,6 @@
 namespace Gazelle\Better;
 
 class SingleSeeded extends AbstractBetter {
-
     public function mode(): string {
         return 'torrent';
     }
@@ -12,7 +11,7 @@ class SingleSeeded extends AbstractBetter {
         return 'FLAC releases with a single seeder';
     }
 
-    public function setUploader(\Gazelle\User $user): SingleSeeded {
+    public function setUploader(\Gazelle\User $user): static {
         $this->where[] = "t.UserID = ?";
         $this->args[] = $user->id();
         return $this;

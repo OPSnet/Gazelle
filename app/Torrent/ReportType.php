@@ -8,7 +8,7 @@ class ReportType extends \Gazelle\BaseObject {
 
     protected array $changeSet;
 
-    public function flush(): ReportType {
+    public function flush(): static {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
         self::$cache->delete_value(sprintf(\Gazelle\Manager\Torrent\ReportType::ID_KEY, $this->id));
         self::$cache->delete_value(sprintf(\Gazelle\Manager\Torrent\ReportType::NAME_KEY, $this->id));
@@ -201,7 +201,7 @@ class ReportType extends \Gazelle\BaseObject {
         return $this->info()['type'];
     }
 
-    public function setChangeSet(int $userId, array $changeSet): ReportType {
+    public function setChangeSet(int $userId, array $changeSet): static {
         $this->changeSet = [$userId, $changeSet];
         return $this;
     }

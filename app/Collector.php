@@ -201,7 +201,7 @@ abstract class Collector extends Base  {
     /**
      * Add a file to the list of files that did not match the user's format or quality requirements
      */
-    public function skip(array $info): Collector {
+    public function skip(array $info): static {
         $this->skipped[] = "{$info['Artist']}/{$info['Year']}/{$info['Name']}";
         return $this;
     }
@@ -209,7 +209,7 @@ abstract class Collector extends Base  {
     /**
      * Add a file to the list of files for which the torrent data is corrupt.
      */
-    public function fail(array $info): Collector {
+    public function fail(array $info): static {
         $this->error[] = "{$info['Artist']}/{$info['Year']}/{$info['Name']}";
         return $this;
     }

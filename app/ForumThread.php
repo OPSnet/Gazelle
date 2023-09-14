@@ -7,7 +7,7 @@ class ForumThread extends BaseObject {
     final const CACHE_KEY     = 'fthread_%d';
     final const CACHE_CATALOG = 'fthread_cat_%d_%d';
 
-    public function flush(): ForumThread {
+    public function flush(): static {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
         self::$cache->delete_value("edit_forums_{$this->id}");
         (new Manager\Forum)->flushToc();

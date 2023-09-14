@@ -11,7 +11,7 @@ class Counter {
         protected readonly string $name
     ) {}
 
-    public function flush(): Counter {
+    public function flush(): static {
         unset($this->info);
         return $this;
     }

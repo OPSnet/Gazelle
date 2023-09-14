@@ -3,14 +3,6 @@
 namespace Gazelle\Manager;
 
 class Contest extends \Gazelle\Base {
-    public function findById(int $contestId): ?\Gazelle\Contest {
-        $id = self::$db->scalar("
-            SELECT contest_id FROM contest WHERE contest_id = ?
-            ", $contestId
-        );
-        return $id ? new \Gazelle\Contest($id) : null;
-    }
-
     public function create (
         string $banner,
         string $dateBegin,
@@ -41,6 +33,14 @@ class Contest extends \Gazelle\Base {
             );
         }
         return $this->findById($contestId);
+    }
+
+    public function findById(int $contestId): ?\Gazelle\Contest {
+        $id = self::$db->scalar("
+            SELECT contest_id FROM contest WHERE contest_id = ?
+            ", $contestId
+        );
+        return $id ? new \Gazelle\Contest($id) : null;
     }
 
     /**

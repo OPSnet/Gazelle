@@ -5,23 +5,6 @@ namespace Gazelle\Manager;
 class Invite extends \Gazelle\Base {
     protected string|null $search;
 
-    public function findUserByKey(string $inviteKey, User $manager): ?\Gazelle\User {
-        return $manager->findById(
-            (int)self::$db->scalar("
-                SELECT InviterID FROM invites WHERE InviteKey = ?
-                ", $inviteKey
-            )
-        );
-    }
-
-    /**
-     * Set a text filter on email addresses
-     */
-    public function setSearch(string $search): Invite {
-        $this->search = $search;
-        return $this;
-    }
-
     public function create(\Gazelle\User $user, string $email, string $reason, string $source): ?\Gazelle\Invite {
         self::$db->begin_transaction();
         if (!$user->decrementInviteCount()) {
@@ -40,6 +23,23 @@ class Invite extends \Gazelle\Base {
         }
         self::$db->commit();
         return $invite;
+    }
+
+    public function findUserByKey(string $inviteKey, User $manager): ?\Gazelle\User {
+        return $manager->findById(
+            (int)self::$db->scalar("
+                SELECT InviterID FROM invites WHERE InviteKey = ?
+                ", $inviteKey
+            )
+        );
+    }
+
+    /**
+     * Set a text filter on email addresses
+     */
+    public function setSearch(string $search): static {
+        $this->search = $search;
+        return $this;
     }
 
     /**

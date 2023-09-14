@@ -121,7 +121,7 @@ class Artist extends BaseObject {
         return $this->info;
     }
 
-    public function loadArtistRole(): Artist {
+    public function loadArtistRole(): static {
         self::$db->prepared_query("
             SELECT ta.GroupID AS group_id,
                 ta.Importance as artist_role,
@@ -167,8 +167,7 @@ class Artist extends BaseObject {
         return $this;
     }
 
-
-    public function flush(): Artist {
+    public function flush(): static {
         self::$db->prepared_query("
             SELECT DISTINCT concat('groups_artists_', GroupID)
             FROM torrents_artists
@@ -253,7 +252,7 @@ class Artist extends BaseObject {
         return $this->info()['similar'];
     }
 
-    public function stats(): Stats\Artist{
+    public function stats(): Stats\Artist {
         if (!isset($this->stats)) {
             $this->stats = new Stats\Artist($this->id);
         }

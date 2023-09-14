@@ -9,14 +9,14 @@ class Activity extends \Gazelle\BaseUser {
     protected array $action = [];
     protected array $alert = [];
 
-    public function flush(): Activity { $this->user()->flush(); return $this; }
+    public function flush(): static { $this->user()->flush(); return $this; }
 
-    protected function setAction(string $action): Activity {
+    protected function setAction(string $action): static {
         $this->action[] = $action;
         return $this;
     }
 
-    public function setAlert(string $alert): Activity {
+    public function setAlert(string $alert): static {
         $this->alert[] = $alert;
         return $this;
     }
@@ -33,7 +33,7 @@ class Activity extends \Gazelle\BaseUser {
         return $this->showStaffInbox;
     }
 
-    public function configure(): Activity {
+    public function configure(): static {
         if ($this->user->onRatioWatch()) {
             $this->setAlert('<a class="nobr" href="rules.php?p=ratio">Ratio Watch</a>: You have '
                 . time_diff($this->user->ratioWatchExpiry(), 3)
@@ -48,7 +48,7 @@ class Activity extends \Gazelle\BaseUser {
         return $this;
     }
 
-    public function setApplicant(\Gazelle\Manager\Applicant $appMan): Activity {
+    public function setApplicant(\Gazelle\Manager\Applicant $appMan): static {
         if ($this->user->permitted('admin_manage_applicants')) {
             $total = $appMan->newApplicantCount() + $appMan->newReplyCount();
             if ($total > 0) {
@@ -60,7 +60,7 @@ class Activity extends \Gazelle\BaseUser {
         return $this;
     }
 
-    public function setDb(\Gazelle\DB $dbMan): Activity {
+    public function setDb(\Gazelle\DB $dbMan): static {
         if ($this->user->permitted('admin_site_debug')) {
             $longRunning = $dbMan->longRunning();
             if ($longRunning > 0) {
@@ -76,7 +76,7 @@ class Activity extends \Gazelle\BaseUser {
         return $this;
     }
 
-    public function setPayment(\Gazelle\Manager\Payment $payMan): Activity {
+    public function setPayment(\Gazelle\Manager\Payment $payMan): static {
         if ($this->user->permitted('admin_manage_payments')) {
             $soon = $payMan->soon();
             if ($soon && $soon['total']) {
@@ -87,7 +87,7 @@ class Activity extends \Gazelle\BaseUser {
         return $this;
     }
 
-    public function setReferral(\Gazelle\Manager\Referral $refMan): Activity {
+    public function setReferral(\Gazelle\Manager\Referral $refMan): static {
         if ($this->user->permitted('admin_site_debug')) {
             if (!apcu_exists('DB_KEY') || !apcu_fetch('DB_KEY')) {
                 $this->setAlert('<a href="tools.php?action=dbkey"><span style="color: red">DB key not loaded</span></a>');
@@ -101,7 +101,7 @@ class Activity extends \Gazelle\BaseUser {
         return $this;
     }
 
-    public function setReport(\Gazelle\Stats\Report $repStat): Activity {
+    public function setReport(\Gazelle\Stats\Report $repStat): static {
         if ($this->user->permitted('admin_reports')) {
             $this->setAction("Reports:<a class=\"nobr tooltip\" title=\"Torrent reports\" href=\"reportsv2.php\"> {$repStat->torrentOpenTotal()}
                 </a>/<a class=\"nobr tooltip\" title=\"Other reports\" href=\"reports.php\"> {$repStat->otherOpenTotal()} </a>"
@@ -115,7 +115,7 @@ class Activity extends \Gazelle\BaseUser {
         return $this;
     }
 
-    public function setScheduler(\Gazelle\TaskScheduler $scheduler): Activity {
+    public function setScheduler(\Gazelle\TaskScheduler $scheduler): static {
         if ($this->user->permitted('admin_periodic_task_view')) {
             $lastSchedulerRun = self::$db->scalar("
                 SELECT now() - max(launch_time) FROM periodic_task_history
@@ -132,7 +132,7 @@ class Activity extends \Gazelle\BaseUser {
         return $this;
     }
 
-    public function setSSLHost(\Gazelle\Manager\SSLHost $ssl): Activity {
+    public function setSSLHost(\Gazelle\Manager\SSLHost $ssl): static {
         if ($this->user->permitted('site_debug')) {
             $soon = $ssl->expirySoon('1 DAY');
             $url = "tools.php?action=ssl_host";
@@ -148,7 +148,7 @@ class Activity extends \Gazelle\BaseUser {
         return $this;
     }
 
-    public function setStaff(\Gazelle\Staff $staff): Activity {
+    public function setStaff(\Gazelle\Staff $staff): static {
         if ($staff->blogAlert()) {
             $this->setAlert('<a class="nobr" href="staffblog.php">New staff blog post!</a>');
         }
@@ -161,7 +161,7 @@ class Activity extends \Gazelle\BaseUser {
         return $this;
     }
 
-    public function setStaffPM(\Gazelle\Manager\StaffPM $spm): Activity {
+    public function setStaffPM(\Gazelle\Manager\StaffPM $spm): static {
         $total = $spm->countAtLevel($this->user, ['Unanswered']);
         if ($total > 0) {
             $this->showStaffInbox = true;

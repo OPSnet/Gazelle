@@ -40,7 +40,7 @@ abstract class AbstractBetter extends \Gazelle\Base {
      */
     abstract public function mode(): string;
 
-    public function setSearch(string $search): AbstractBetter {
+    public function setSearch(string $search): static {
         $this->dirty = true;
         $this->search = $search;
         return $this;
@@ -50,7 +50,7 @@ abstract class AbstractBetter extends \Gazelle\Base {
         return $this->search ?? null;
     }
 
-    public function addArtistUserSnatchJoin(): AbstractBetter {
+    public function addArtistUserSnatchJoin(): static {
         $this->baseQuery .= " INNER JOIN (
             SELECT DISTINCT ta.ArtistID
             FROM torrents_artists ta
@@ -61,7 +61,7 @@ abstract class AbstractBetter extends \Gazelle\Base {
         return $this;
     }
 
-    public function addArtistUserUploadJoin(): AbstractBetter {
+    public function addArtistUserUploadJoin(): static {
         $this->baseQuery .= "INNER JOIN (
             SELECT DISTINCT ta.ArtistID
             FROM torrents t

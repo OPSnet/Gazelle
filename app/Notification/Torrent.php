@@ -13,11 +13,12 @@ class Torrent extends \Gazelle\Base {
         $this->args = [$userId];
     }
 
-    protected function flush(): void {
+    public function flush(): static {
         self::$cache->delete_value('user_notify_upload_' . $this->userId);
+        return $this;
     }
 
-    public function setFilter(int $filterId): Torrent {
+    public function setFilter(int $filterId): static {
         $cond = [];
         $args = [];
         $cond[] = 'unf.ID = ?';

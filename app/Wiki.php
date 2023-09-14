@@ -6,7 +6,7 @@ class Wiki extends BaseObject {
     final const tableName = 'wiki_articles';
     protected const CACHE_KEY = 'wiki_%d';
 
-    public function flush(): Wiki {
+    public function flush(): static {
         unset($this->info);
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
         return $this;

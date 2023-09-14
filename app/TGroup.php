@@ -17,7 +17,7 @@ class TGroup extends BaseObject {
     protected User              $viewer;
     protected Stats\TGroup      $stats;
 
-    public function flush(): TGroup {
+    public function flush(): static {
         $this->info = [];
         self::$cache->delete_multi([
             sprintf(self::CACHE_KEY, $this->id),
@@ -66,7 +66,7 @@ class TGroup extends BaseObject {
     /**
      * When the image of a release group is changed, we need to flush other things
      */
-    public function imageFlush(): TGroup {
+    public function imageFlush(): static {
         self::$db->prepared_query("
             SELECT CollageID FROM collages_torrents WHERE GroupID = ?
             ", $this->id
@@ -99,7 +99,7 @@ class TGroup extends BaseObject {
         return $this;
     }
 
-    public function touch(): TGroup {
+    public function touch(): static {
         self::$db->prepared_query('
             UPDATE torrents_group SET
                 Time = now()
@@ -109,7 +109,7 @@ class TGroup extends BaseObject {
         return $this;
     }
 
-    public function setViewer(User $viewer): TGroup {
+    public function setViewer(User $viewer): static {
         $this->viewer = $viewer;
         return $this;
     }
@@ -118,7 +118,7 @@ class TGroup extends BaseObject {
      * Toggle whether an internal URL is returnd for missing cover artwork
      * is returned, or null. Used by API endpoints.
      */
-    public function showFallbackImage(bool $showFallbackImage): TGroup {
+    public function showFallbackImage(bool $showFallbackImage): static {
         $this->showFallbackImage = $showFallbackImage;
         return $this;
     }
@@ -750,7 +750,7 @@ class TGroup extends BaseObject {
     /**
      * Update the cache and sphinx delta index to keep everything up-to-date.
      */
-    public function refresh(): TGroup {
+    public function refresh(): static {
         $qid = self::$db->get_query_id();
 
         $voteScore = (int)self::$db->scalar("

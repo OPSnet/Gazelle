@@ -7,7 +7,7 @@ class Economic extends \Gazelle\Base {
 
     protected array $info;
 
-    public function flush(): Economic {
+    public function flush(): static {
         self::$cache->delete_value(self::CACHE_KEY);
         return $this;
     }

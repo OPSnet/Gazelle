@@ -36,7 +36,7 @@ class Upload extends \Gazelle\Base {
         }
     }
 
-    public function setCategoryId(int $categoryId): Upload {
+    public function setCategoryId(int $categoryId): static {
         // FIXME: the upload form counts categories from zero
         $this->categoryId = $categoryId - 1;
         return $this;
