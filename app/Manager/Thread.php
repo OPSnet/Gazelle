@@ -8,15 +8,13 @@ namespace Gazelle\Manager;
  */
 
 class Thread extends \Gazelle\Base {
-
-    /**
-     */
-    public function createThread($type) {
+    public function createThread($type): \Gazelle\Thread {
         self::$db->prepared_query("
             INSERT INTO thread (ThreadTypeID) VALUES (
                 (SELECT ID FROM thread_type WHERE Name = ?)
             )
-        ", $type);
+            ", $type
+        );
         return new \Gazelle\Thread(self::$db->inserted_id());
     }
 }

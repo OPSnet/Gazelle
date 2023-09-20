@@ -49,8 +49,8 @@ class Activity extends \Gazelle\BaseUser {
     }
 
     public function setApplicant(\Gazelle\Manager\Applicant $appMan): static {
-        if ($this->user->permitted('admin_manage_applicants')) {
-            $total = $appMan->newApplicantCount() + $appMan->newReplyCount();
+        if ($appMan->openList($this->user)) {
+            $total = $appMan->newTotal($this->user) + $appMan->newReplyTotal($this->user);
             if ($total > 0) {
                 $this->setAction(sprintf(
                     '<a href="apply.php?action=view">%d new Applicant event%s</a>', $total, plural($total)

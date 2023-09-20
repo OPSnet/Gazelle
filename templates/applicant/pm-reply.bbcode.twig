@@ -1,0 +1,8 @@
+{% autoescape false -%}
+Hello,
+
+[user]{{ poster.username|raw }}[/user] has replied to your application for the role of {{ applicant.role.title }}.
+You can view the reply [url={{ applicant.location }}]here[/url].
+
+~{{ constant('SITE_NAME') }} Staff <3
+{%- endautoescape -%}

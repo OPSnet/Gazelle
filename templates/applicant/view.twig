@@ -1,26 +1,28 @@
 {{ header('View Applications', {'js': 'apply'}) }}
+{% set is_staff = viewer.permitted('users_mod') %}
 <div class="thin">
 
 <div class="linkbox">
+{% if not is_staff %}
     <a href="/apply.php" class="brackets">Apply</a>
-{% if app.id and not is_staff %}
+    {%- if app.id and not is_staff %}
     <a href="/apply.php?action=view" class="brackets">View your applications</a>
-{% endif %}
-{% if is_staff %}
-    {% if resolved or (app.id and not resolved) %}
+    {%- endif %}
+{% else %}
     <a href="/apply.php?action=view" class="brackets">Current applications</a>
-    {% endif %}
-    {% if not resolved %}
+    {%- if not resolved %}
     <a href="/apply.php?action=view&status=resolved" class="brackets">Resolved applications</a>
-    {% endif %}
+    {%- endif %}
+    {%- if viewer.permitted('admin_manage_applicants') %}
     <a href="/apply.php?action=admin" class="brackets">Manage roles</a>
+    {%- endif %}
 {% endif %}
 </div>
 
 {% if app %}
 <div class="box">
     <div class="head"{% if app.isResolved %} style="font-style: italic;"{% endif %}>{{ app.roleTitle }}
-    {% if is_staff %}
+    {%- if is_staff %}
         <div style="float: right;">
             <form name="role_resolve" method="POST" action="/apply.php?action=view&amp;id={{ app.id }}">
                 <input type="submit" name="resolve" value="{% if app.isResolved %}Reopen{% else %}Resolve{% endif %}" />
@@ -29,16 +31,16 @@
             </form>
         </div>
         <br />Application received from {{ app.userId|user_full }} received {{ app.created|time_diff }}.
-    {% endif %}
+    {%- endif %}
     </div>
 
     <div class="pad">
         <p>{{ app.body|bb_format }}</p>
-    {% if not app.isResolved %}
+    {%- if not app.isResolved %}
         <form id="thread_note_reply" name="thread_note_replay" method="POST" action="/apply.php?action=view&amp;id={{ app.id }}">
-    {% endif %}
+    {%- endif %}
         <table class="forum_post wrap_overflow box vertical_margin">
-    {% for note in app.story(is_staff) %}
+    {%- for note in app.story(viewer) %}
             <tr class="colhead_dark">
                 <td colspan="2">
                     <div style="float: left; padding-top: 10px;">{{ note.user_id|user_url }} - {{ note.created|time_diff }}</div>
@@ -59,16 +61,16 @@
                     <div style="margin: 5px 4px 20px 4px">
                         {{ note.body|bb_format }}
                     </div>
-        {% if is_staff and not app.isResolved %}
+        {%- if is_staff and not app.isResolved %}
                     <div style="float: right; padding-top: 10px 0; margin-bottom: 6px;">
                         <input type="submit" name="note-delete-{{ note.id }}" value="delete" style="height: 20px; padding: 0 3px;"/>
                     </div>
-        {% endif %}
+        {%- endif %}
                 </td>
             </tr>
-    {% endfor %}
-    {% if not app.isResolved %}
-        {% if is_staff %}
+    {%- endfor %}
+    {%- if not app.isResolved %}
+        {%- if is_staff %}
             <tr>
                 <td class="label">Visibility</td>
                 <td>
@@ -78,7 +80,7 @@
                     </div>
                 <td>
             </tr>
-        {% endif %}
+        {%- endif %}
             <tr>
                 <td class="label">Reply</td>
                 <td>
@@ -96,43 +98,44 @@
                     </div>
                 </td>
             </tr>
-    {% endif %}
+    {%- endif %}
         </table>
         </form>
     </div>
 </div>
 {% else %}
     <h3>{% if resolved %}Resolved{% else %}Current{% endif %} Applications</h3>
-    {% for a in list %}
-        {% if loop.first %}
+    {%- for a in list %}
+        {%- if loop.first %}
     <table>
         <tr class="colhead">
             <td>Role</td>
-            {% if is_staff %}
+            {%- if is_staff %}
             <td>Applicant</td>
-            {% endif %}
+            {%- endif %}
             <td>Date Created</td>
-            <td>Comments</td>
-            <td>Last comment from</td>
-            <td>Last comment added</td>
+            <td>Replies</td>
+            <td>Last reply from</td>
+            <td>Last reply added</td>
         </tr>
-        {% endif %}
+        {%- endif %}
         <tr>
-            <td><a href="apply.php?action=view&amp;id={{ a.ID }}">{{ a.Role }}</a></td>
-        {% if is_staff %}
-            <td><a href="user.php?id={{ a.UserID }}">{{ a.Username }}</a></td>
-        {% endif %}
-            <td>{{ a.Created|time_diff }}</td>
-            <td>{{ a.nr_notes|number_format }}</td>
-            <td><a href="user.php?id={{ a.last_UserID }}">{{ a.last_Username }}</a></td>
-            <td>{% if a.last_Created %}{{ a.last_Created|time_diff }}{% endif %}</td>
+            <td>{{ a.link|raw }}</td>
+        {%- if is_staff %}
+            <td>{{ a.UserID|user_url }}</td>
+        {%- endif %}
+        {% set notes = a.story(viewer)|length %}
+            <td>{{ a.created|time_diff }}<pre></td>
+            <td>{% if notes %}{{ notes|number_format }}{% else %}<i>None</i>{% endif %}</td>
+            <td>{% if notes %}{{ a.thread.lastNoteUserId|user_url }}{% endif %}</td>
+            <td>{% if notes %}{{ a.thread.modified|time_diff }}{% endif %}</td>
         </tr>
-        {% if loop.last %}
+        {%- if loop.last %}
     </table>
-        {% endif %}
-    {% else %}
+        {%- endif %}
+    {%- else %}
 <div class="box pad">The cupboard is empty. There are no applications to show.</div>
-    {% endfor %}
+    {%- endfor %}
 {% endif %}
 </div>
 {{ footer() }}

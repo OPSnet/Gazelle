@@ -2,119 +2,137 @@
 
 namespace Gazelle;
 
-/* Conversation thread, allows protected staff notes intermingled
+/**
+ * Conversation thread, allows protected staff notes intermingled
  * with the public notes that both staff and member can see.
  * A collection of notes is called a story.
  */
 
 class Thread extends BaseObject {
-    final const tableName = 'thread';
+    final const tableName     = 'thread';
+    protected const CACHE_KEY = "threadv2_%d";
 
-    protected $type;    // the type of thread
-    protected $created; // date created
-    protected $story;   // the array of notes in the conversation
-
-    public function flush(): static { return $this; }
+    public function flush(): static {
+        self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
+        unset($this->info);
+        return $this;
+    }
     public function link(): string { return ''; }
     public function location(): string { return ''; }
 
-    protected const CACHE_KEY = "thread_%d";
-    protected const STORY_KEY = "thread_story_%d";
-
-    public function __construct(int $id) {
-        parent::__construct($id);
+    public function info(): array {
+        if (isset($this->info)) {
+            return $this->info;
+        }
         $key = sprintf(self::CACHE_KEY, $this->id);
-        [$this->type, $this->created] = self::$cache->get_value($key);
-        if (is_null($this->type)) {
-            [$this->type, $this->created] = self::$db->row("
-                SELECT tt.Name as ThreadType,
-                    t.Created
+        $info = self::$cache->get_value($key);
+        if ($info === false) {
+            $info = self::$db->rowAssoc("
+                SELECT tt.Name as type,
+                    t.Created as created
                 FROM thread t
                 INNER JOIN thread_type tt ON (tt.ID = t.ThreadTypeID)
                 WHERE t.ID = ?
                 ", $this->id
             );
-            if (is_null($this->type)) {
-                throw new Exception\ResourceNotFoundException($this->id);
-            }
-            self::$cache->cache_value($key, [$this->type, $this->created], 86400);
+            self::$db->prepared_query("
+                    SELECT n.ID AS id,
+                        n.UserID     AS user_id,
+                        n.Visibility AS visibility,
+                        n.Created    AS created,
+                        n.Body       AS body
+                    FROM thread_note n
+                    WHERE n.ThreadID = ?
+                ", $this->id
+            );
+            $info['story'] = self::$db->to_array(false, MYSQLI_ASSOC, false);
+            self::$cache->cache_value($key, $info, 0);
         }
-        $this->refresh(); /* load the story */
+        $this->info = $info;
+        return $this->info;
+    }
+
+    public function created(): string {
+        return $this->info()['created'];
     }
 
     /**
-     * Get the array of notes of the thread. A note is a hash with the following items:
-     *  id         - the id in thread_note table
-     *  user_id    - the id of the author in the users_main table
-     *  user_name  - the name of the member (normally we don't need anything else from there).
-     *  visibility - this note is 'public' or just visibible to 'staff'
-     *  created    - when was this note created
-     *  body       - the note text itself
-     * @return array The list of notes in a thread ordered by most recent first.
+     * The user_id of the last user who replied to the thread. Useful to distinguish
+     * whether staff made the most recent reply.
+     *
+     * @return int user_id or null if the thread is empty
+     */
+    public function lastNoteUserId(): ?int {
+        $story = $this->story();
+        if (!$story) {
+            return null;
+        }
+        $last = end($story);
+        return $last['user_id'];
+    }
+
+    /**
+     * The modified date of a thread is the date of the latest note,
+     * otherwise the date the thread was created.
+     */
+    public function modified(): string {
+        $story = $this->story();
+        if (!$story) {
+            return $this->created();
+        }
+        $last = end($story);
+        return $last['created'];
+    }
+
+    /**
+     * The thread story itself, an array of [id, user_id, visibility, created, body]
      */
     public function story(): array {
-        return $this->story;
+        return $this->info()['story'];
+    }
+
+    public function type(): string {
+        return $this->info()['type'];
     }
 
     /**
      * Persist a note to the db.
      */
-    public function saveNote(int $userId, string $body, string $visibility) {
+    public function saveNote(User $user, string $body, string $visibility): int {
         self::$db->prepared_query("
             INSERT INTO thread_note
                    (ThreadID, UserID, Body, Visibility)
             VALUES (?,        ?,      ?,    ?)
-            ", $this->id, $userId, $body, $visibility
+            ", $this->id, $user->id(), $body, $visibility
         );
-        return $this->refresh();
+        $inserted = self::$db->inserted_id();
+        $this->flush();
+        return $inserted;
     }
 
     /**
      * Persist a change to the note
      */
-    public function modifyNote(int $id, string $body, string $visibility) {
+    public function modifyNote(int $noteId, string $body, string $visibility): static {
         self::$db->prepared_query("
             UPDATE thread_note SET
                 Body = ?,
                 Visibility = ?
             WHERE ID = ?
-            ", $body, $visibility, $id
+            ", $body, $visibility, $noteId
         );
-        return $this->refresh();
+        return $this->flush();
     }
 
-    /**
-     * Delete a note.
-     */
-    public function removeNote(int $noteId) {
+    public function removeNote(int $noteId): int {
         self::$db->prepared_query("
             DELETE FROM thread_note
             WHERE ThreadID = ?
                 AND ID = ?
             ", $this->id, $noteId
         );
-        return $this->refresh();
-    }
-
-    /**
-     * Refresh the story cache when a note is added, changed, deleted.
-     */
-    protected function refresh() {
-        self::$db->prepared_query("
-            SELECT tn.ID      AS id,
-                tn.UserID     AS user_id,
-                um.Username   AS username,
-                tn.Visibility AS visibility,
-                tn.Created    AS created,
-                tn.Body       AS body
-            FROM thread_note tn
-            INNER JOIN users_main um ON (um.ID = tn.UserID)
-            WHERE tn.ThreadID = ?
-            ORDER BY tn.Created;
-            ", $this->id
-        );
-        $this->story = self::$db->to_array('id', MYSQLI_ASSOC, false);
-        self::$cache->cache_value(sprintf(self::STORY_KEY, $this->id), $this->story, 86400);
-        return $this;
+        $affected = self::$db->affected_rows();
+        $this->flush();
+        return $affected;
     }
 }

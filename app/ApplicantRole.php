@@ -2,108 +2,148 @@
 
 namespace Gazelle;
 
-class ApplicantRole extends Base {
-    protected $id;
-    protected $title;
-    protected $published;
-    protected $description;
-    protected $userId;
-    protected $created;
-    protected $modified;
+class ApplicantRole extends BaseObject {
+    final const tableName = 'applicant_role';
+    final const CACHE_KEY = 'approlev2_%d';
 
-    final const CACHE_KEY           = 'approle_%d';
-    final const CACHE_KEY_ALL       = 'approle_list_all';
-    final const CACHE_KEY_PUBLISHED = 'approle_list_published';
+    public function flush(): static {
+        self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
+        unset($this->info);
+        return $this;
+    }
+    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), html_escape($this->title())); }
+    public function location(): string { return 'apply.php?action=view&id=' . $this->id; }
 
-    public function __construct(int $id) {
-        $key = sprintf(self::CACHE_KEY, $id);
-        $data = self::$cache->get_value($key);
-        if ($data === false) {
-            self::$db->prepared_query("
-                SELECT Title, Published, Description, UserID, Created, Modified
+    public function info(): array {
+        if (isset($this->info)) {
+            return $this->info;
+        }
+        $key = sprintf(self::CACHE_KEY, $this->id);
+        $info = self::$cache->get_value($key);
+        if ($info === false) {
+            $info = self::$db->rowAssoc("
+                SELECT Title    AS title,
+                    Published   AS published,
+                    Description AS description,
+                    UserID      AS user_id,
+                    Created     AS created,
+                    Modified    AS modified
                 FROM applicant_role
                 WHERE ID = ?
-            ", $id);
-            if (!self::$db->has_results()) {
-                throw new Exception\ResourceNotFoundException($id);
-            }
-            $data = self::$db->next_record(MYSQLI_ASSOC);
-            self::$cache->cache_value($key, $data, 86400);
+                ", $this->id
+            );
+            self::$db->prepared_query("
+                SELECT user_id
+                FROM applicant_role_has_user
+                WHERE applicant_role_id = ?
+                ORDER BY user_id
+                ", $this->id
+            );
+            $info['viewer_list'] = self::$db->collect(0, false);
+            $info['published'] = (bool)$info['published'];
+            self::$cache->cache_value($key, $info, 86400);
         }
-        $this->id          = $id;
-        $this->title       = $data['Title'];
-        $this->published   = $data['Published'];
-        $this->description = $data['Description'];
-        $this->userId      = $data['UserID'];
-        $this->created     = $data['Created'];
-        $this->modified    = $data['Modified'];
+        $this->info = $info;
+        return $this->info;
     }
 
-    public function id() {
-        return $this->id;
+    public function title(): string {
+        return $this->info()['title'];
     }
 
-    public function title() {
-        return $this->title;
+    public function description(): string {
+        return $this->info()['description'];
     }
 
-    public function description() {
-        return $this->description;
+    public function isPublished(): bool {
+        return $this->info()['published'];
     }
 
-    public function isPublished() {
-        return $this->published;
+    public function isStaffViewer(User $user): bool {
+        return in_array($user->id(), $this->viewerList()) || $user->permitted('admin_manage_applicants');
     }
 
-    public function userId() {
-        return $this->userId;
+    public function isViewable(User $user): bool {
+        return $this->isPublished() || $this->isStaffViewer($user);
     }
 
-    public function created() {
-        return $this->created;
+    public function userId(): int {
+        return $this->info()['user_id'];
     }
 
-    public function modified() {
-        return $this->modified;
+    public function viewerList(): array {
+        return $this->info()['viewer_list'];
     }
 
-    public function modify($title, $description, $published) {
-        $this->title       = $title;
-        $this->description = $description;
-        $this->published   = $published ? 1 : 0;
-        $this->modified    = strftime('%Y-%m-%d %H:%M:%S', time());
+    public function created(): string {
+        return $this->info()['created'];
+    }
 
+    public function modified(): string {
+        return $this->info()['modified'];
+    }
+
+    public function apply(User $user, string $body): Applicant {
         self::$db->prepared_query("
-            UPDATE applicant_role SET
-                Title = ?,
-                Published = ?,
-                Description = ?,
-                Modified = ?
-            WHERE ID = ?
-        ", $this->title, $this->published, $this->description, $this->modified,
-            $this->id
+            INSERT INTO applicant
+                   (RoleID, UserID, Body, ThreadID)
+            VALUES (?,      ?,      ?,    ?)
+            ", $this->id, $user->id(), $body,
+                (new Manager\Thread())->createThread('staff-role')->id()
         );
-        self::$cache->delete_multi([self::CACHE_KEY_ALL, self::CACHE_KEY_PUBLISHED]);
-        self::$cache->cache_value(sprintf(self::CACHE_KEY, $this->id),
-            [
-                'Title'       => $this->title,
-                'Published'   => $this->published,
-                'Description' => $this->description,
-                'UserID'      => $this->userId,
-                'Created'     => $this->created,
-                'Modified'    => $this->modified
-            ]
-        );
-        return $this;
+        (new Manager\Applicant)->flush();
+        (new Manager\ApplicantRole)->flush();
+        return new \Gazelle\Applicant(self::$db->inserted_id());
+    }
+
+    public function modify(): bool {
+        $modified = false;
+        $userMan  = new Manager\User;
+        $list = preg_split('/\s+/', $this->clearField('viewer_list'));
+        $viewerList = empty($list)
+            ? []
+            : array_filter(
+                array_map(fn($name) => $userMan->find($name)?->id(), $list),
+                fn($user) => $user
+            );
+        sort($viewerList);
+        if ($viewerList != $this->viewerList()) {
+            self::$db->begin_transaction();
+            self::$db->prepared_query("
+                DELETE FROM applicant_role_has_user WHERE applicant_role_id = ?
+                ", $this->id
+            );
+            foreach ($viewerList as $userId) {
+                self::$db->prepared_query("
+                    INSERT INTO applicant_role_has_user
+                           (applicant_role_id, user_id)
+                    VALUES (?,                 ?)
+                    ", $this->id, $userId
+                );
+            }
+            self::$db->commit();
+            $modified = true;
+        }
+        $modified = parent::modify() || $modified;
+        if ($modified) {
+            $this->flush();
+        }
+        return $modified;
     }
 
     public function remove(): int {
+        self::$db->prepared_query("
+            DELETE FROM applicant_role_has_user WHERE applicant_role_id = ?
+            ", $this->id
+        );
         self::$db->prepared_query("
             DELETE FROM applicant_role WHERE ID = ?
             ", $this->id
         );
         $affected = self::$db->affected_rows();
-        self::$cache->delete_multi([self::CACHE_KEY_ALL, self::CACHE_KEY_PUBLISHED]);
+        (new Manager\Applicant)->flush();
+        (new Manager\ApplicantRole)->flush();
+        $this->flush();
         return $affected;
     }
 }

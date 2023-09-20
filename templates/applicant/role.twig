@@ -1,0 +1,57 @@
+{% from 'macro/form.twig' import checked %}
+{% if role %}
+{{ header('Edit Applicant Role') }}
+<div class="thin">
+
+<div class="linkbox">
+    <a href="/apply.php" class="brackets">Apply</a>
+    <a href="/apply.php?action=view" class="brackets">Current applications</a>
+    <a href="/apply.php?action=view&amp;status=resolved" class="brackets">Resolved applications</a>
+    <a href="/apply.php?action=admin" class="brackets">Admin</a>
+</div>
+{% endif %}
+<div class="box">
+<form method="post" action="/apply.php?action={% if role %}edit&amp;id={{ role.id }}{% else %}admin{% endif %}">
+    <div class="head">{% if role %}Edit {{ role.title }}{% else %}Create a new role{% endif %}</div>
+    <div class="pad">
+
+{% if error %}
+        <p>{{ error }}.</p>
+{% endif %}
+
+    <table>
+        <tr>
+            <td class="label">Title</td>
+            <td><input type="text" size="30" name="title" value="{{ role.title }}" /></td>
+        </tr>
+        <tr>
+            <td class="label">Viewers</td>
+            <td><input type="text" size="60" name="viewer_list" value="
+                {%- for user in viewer_list -%}@{{ user.username }} {% endfor %}" />
+                <br />You can enter a @username or user id
+            </td>
+        </tr>
+        <tr>
+            <td class="label">Visibility</td>
+            <td>
+                <input type="radio" name="status" value="1" id="status-pub"{{ checked(not role.isArchived) }} /><label for="status-pub">published</label><br />
+                <input type="radio" name="status" value="0" id="status-arch"{{ checked(role.isArchived) }} /><label for="status-arch">archived</label>
+            </td>
+        </tr>
+        <tr>
+            <td class="label">Description</td>
+            <td>
+                <input type="hidden" name="edit" value="{{ role.id }}"/>
+                <input type="hidden" name="user_id" value="{{ viewer.id }}"/>
+                <input type="hidden" name="auth" value="{{ viewer.auth }}"/>
+                {{ text.emit|raw }}
+                <input type="submit" id="submit" value="Save Role"/>
+            </td>
+        </tr>
+    </table>
+</div>
+</div>
+</form>
+</div>
+
+{{ footer() }}

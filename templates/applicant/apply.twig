@@ -3,9 +3,9 @@
 <div class="thin">
     <div class="header">
         <h3>Apply for a role at {{ constant('SITE_NAME') }}</h3>
-{% if is_admin or is_applicant %}
+{% if viewer.permitted('admin_manage_applicants') or is_applicant %}
         <div class="linkbox">
-    {% if is_admin %}
+    {% if viewer.permitted('admin_manage_applicants') %}
             <a href="/apply.php?action=view" class="brackets">Current applications</a>
             <a href="/apply.php?action=view&amp;status=resolved" class="brackets">Resolved applications</a>
             <a href="/apply.php?action=admin" class="brackets">Manage roles</a>
@@ -55,18 +55,19 @@
                 <select name="role">
                     <option value="">---</option>
 {% for role in list %}
-                    <option value="{{ role.role_id }}"{{ selected(role.title == title) }}>{{ role.title }}</option>
+                    <option value="{{ role.id }}"{{ selected(role.title == title) }}>{{ role.title }}</option>
 {% endfor %}
                 </select>
             </div>
             <div class="head">Your cover letter</div>
             <div class="pad">Give us least 80 characters to convince us!
-            {{ body.emit|raw }}
+            {{ body.field|raw }}
+            {{ body.preview|raw }}
             </div>
         </div>
 
         <div class="pad preview_submit">
-            <input type="hidden" name="auth" value="{{ auth }}" />
+            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
             {{ body.button|raw }}
             <input type="submit" value="Send Application" />
         </div>

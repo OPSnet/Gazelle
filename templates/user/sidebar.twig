@@ -47,7 +47,7 @@
     <li>IRC Key: {{ user.IRCKey ? 'Yes' : 'Not set' }}</li>
 {% endif %}
 
-{% if applicant.userIsApplicant(user.id) and (own_profile or viewer.permitted('admin_manage_applicants')) %}
+{% if applicant.userIsApplicant(user) and (own_profile or viewer.permitted('admin_manage_applicants')) %}
     <li>Roles applied for: <a href="/apply.php?action=view" class="brackets">View</a></li>
 {% endif %}
 

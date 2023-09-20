@@ -24,7 +24,7 @@
 <div class="permissions"><div class="toolbox_container">
 
 {{ _self.category('Administration', [
-    ['Applicant manager',            'apply.php?action=admin',               viewer.permitted('admin_manage_applicants')],
+    ['Applicant manager',            'apply.php?action=admin',               viewer.permitted('admin_manage_applicants') or applicant_viewer],
     ['Database encryption key',      'tools.php?action=dbkey',               viewer.permitted('admin_site_debug')],
     ['IRC channel manager',          'tools.php?action=irc',                 viewer.permitted('admin_manage_forums')],
     ['Permissions manager',          'tools.php?action=permissions',         viewer.permitted('admin_manage_permissions')],
