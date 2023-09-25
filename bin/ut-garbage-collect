@@ -24,6 +24,21 @@ $db->prepared_query("
     INNER JOIN artists_alias aa USING (ArtistID)
     WHERE ag.Name like 'phpunit.%';
 ");
+$db->prepared_query("
+    CREATE TEMPORARY TABLE orphan_similar (SimilarID int not null primary key)
+");
+$db->prepared_query("
+    INSERT INTO orphan_similar
+    SELECT DISTINCT sim.similarid
+    FROM artists_similar sim
+    LEFT JOIN artists_group ag USING (artistid)
+    WHERE ag.artistid IS NULL;
+");
+$db->prepared_query("
+    DELETE ss
+    FROM artists_similar_scores ss
+    INNER JOIN orphan_similar os USING (SimilarID)
+");
 
 // clean reports
 $db->prepared_query("

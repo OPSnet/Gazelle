@@ -99,13 +99,12 @@ class Artist extends \Gazelle\Json {
         }
 
         $JsonSimilar = [];
-        $similar = $artist->similarArtists();
-        foreach ($similar as $s) {
+        foreach ((new \Gazelle\Artist\Similar($artist))->info() as $s) {
             $JsonSimilar[] = [
-                'artistId'  => $s['ArtistID'],
-                'name'      => $s['Name'],
-                'score'     => $s['Score'],
-                'similarId' => $s['SimilarID']
+                'artistId'  => $s['artist_id'],
+                'name'      => $s['name'],
+                'score'     => $s['score'],
+                'similarId' => $s['similar_id']
             ];
         }
 

@@ -195,40 +195,64 @@ class ArtistTest extends TestCase {
 
     public function testArtistSimilar(): void {
         $manager = new \Gazelle\Manager\Artist;
-        [$artistId, $aliasId] = $manager->create('phpunit.' . randomString(12));
+        [$artistId, $aliasId] = $manager->create('phpunit.artsim.' . randomString(12));
         $artist = $manager->findById($artistId);
         $this->artistIdList[] = $artist->id();
         $this->voter = Helper::makeUser('art2.' . randomString(10), 'artist');
 
-        $this->assertFalse($artist->voteSimilar($this->voter, $artist->id(), true), 'artist-vote-self');
+        [$other1Id, $other1aliasId] = $manager->create('phpunit.other1.' . randomString(12));
+        $other1 = $manager->findById($other1Id);
+        [$other2Id, $other2aliasId] = $manager->create('phpunit.other2.' . randomString(12));
+        $other2 = $manager->findById($other2Id);
 
-        [$sim1Id, $sim1aliasId] = $manager->create('phpunit.' . randomString(12));
-        $sim1 = $manager->findById($sim1Id);
-        $this->artistIdList[] = $sim1->id();
-        [$sim2Id, $sim2aliasId] = $manager->create('phpunit.' . randomString(12));
-        $sim2 = $manager->findById($sim2Id);
-        $this->artistIdList[] = $sim2->id();
+        $this->artistIdList[] = $other1->id();
+        $this->artistIdList[] = $other2->id();
 
-        $this->assertEquals(1, $artist->addSimilar($sim1, $this->user), 'artist-add-sim1');
-        $this->assertEquals(0, $artist->addSimilar($sim1, $this->user), 'artist-read-sim1');
-        $this->assertEquals(1, $artist->addSimilar($sim2, $this->user), 'artist-add-sim2');
-        $this->assertEquals(1, $sim1->addSimilar($sim2, $this->user), 'artist-sim1-add-sim2');
+        $this->assertFalse($artist->similar()->voteSimilar($this->voter, $artist, true), 'artist-vote-self');
 
-        $this->assertTrue($artist->voteSimilar($this->voter, $sim1->id(), true), 'artist-vote-up-sim1');
-        $this->assertFalse($artist->voteSimilar($this->voter, $sim1->id(), true), 'artist-revote-up-sim1');
-        $this->assertTrue($sim1->voteSimilar($this->voter, $sim2->id(), false), 'artist-vote-down-sim2');
+        $logger  = new \Gazelle\Log;
+        $this->assertEquals(1, $artist->similar()->addSimilar($other1, $this->user, $logger), 'artist-add-other1');
+        $this->assertEquals(0, $artist->similar()->addSimilar($other1, $this->user, $logger), 'artist-read-other1');
+        $this->assertEquals(1, $artist->similar()->addSimilar($other2, $this->user, $logger), 'artist-add-other2');
+        $this->assertEquals(1, $other1->similar()->addSimilar($other2, $this->user, $logger), 'artist-other1-add-other2');
 
-        $graph = $artist->similarGraph(100, 100);
+        $this->assertTrue($artist->similar()->voteSimilar($this->voter, $other1, true), 'artist-vote-up-other1');
+        $this->assertFalse($artist->similar()->voteSimilar($this->voter, $other1, true), 'artist-revote-up-other1');
+        $this->assertTrue($other1->similar()->voteSimilar($this->voter, $other2, false), 'artist-vote-down-other2');
+
+        $this->assertEquals(
+            [
+                [
+                    'artist_id'  => $other1->id(),
+                    'name'       => $other1->name(),
+                    'score'      => 300,
+                    'similar_id' => $artist->similar()->findSimilarId($other1),
+                ],
+                [
+                    'artist_id'  => $other2->id(),
+                    'name'       => $other2->name(),
+                    'score'      => 200,
+                    'similar_id' => $artist->similar()->findSimilarId($other2),
+                ],
+            ],
+            $artist->similar()->info(),
+            'artist-similar-list'
+        );
+
+        $graph = $artist->similar()->similarGraph(100, 100);
         $this->assertCount(2, $graph, 'artist-similar-count');
         $this->assertEquals(
-            [$sim1Id, $sim2Id],
+            [$other1Id, $other2Id],
             array_values(array_map(fn($sim) => $sim['artist_id'], $graph)),
             'artist-similar-id-list'
         );
-        $this->assertEquals(400, $graph[$sim1Id]['score'], 'artist-sim1-score');
-        $this->assertEquals(200, $graph[$sim2Id]['score'], 'artist-sim2-score');
-        $this->assertEquals($sim2Id, $graph[$sim1Id]['related'][0], 'artist-sim-related');
-        $this->assertLessThan($graph[$sim1Id]['proportion'], $graph[$sim2Id]['proportion'], 'artist-sim-proportion');
+        $this->assertEquals($other2Id, $graph[$other1Id]['related'][0], 'artist-sim-related');
+        $this->assertLessThan($graph[$other1Id]['proportion'], $graph[$other2Id]['proportion'], 'artist-sim-proportion');
+
+        $requestMan = new \Gazelle\Manager\Request;
+        $this->assertFalse($artist->similar()->removeSimilar($artist, $this->voter, $logger), 'artist-remove-similar-self');
+        $this->assertTrue($artist->similar()->removeSimilar($other2, $this->voter, $logger), 'artist-remove-other');
+        $this->assertFalse($artist->similar()->removeSimilar($other2, $this->voter, $logger), 'artist-re-remove-other');
     }
 
     public function testArtistJson(): void {

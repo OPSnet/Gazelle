@@ -13,10 +13,10 @@ if (is_null($artist)) {
         error(404);
     }
 }
-$similar = $artistMan->findByName(trim($_POST['artistname'] ?? ''));
-if (is_null($similar)) {
-    $similar = $artistMan->findById((int)($_POST['similarid'] ?? 0));
-    if (is_null($similar)) {
+$other = $artistMan->findByName(trim($_POST['artistname'] ?? ''));
+if (is_null($other)) {
+    $other = $artistMan->findById((int)($_POST['similarid'] ?? 0));
+    if (is_null($other)) {
         if (defined('AJAX')) {
             json_die('failure', 'no such similar artist name');
         } else {
@@ -24,12 +24,12 @@ if (is_null($similar)) {
         }
     }
 }
-$artist->addSimilar($similar, $Viewer);
+$artist->similar()->addSimilar($other, $Viewer, new Gazelle\Log);
 
 if (defined('AJAX')) {
     json_print('success', [
         'artist'  => $artist->id(),
-        'similar' => $similar->id(),
+        'similar' => $artist->similar()->findSimilarId($other),
     ]);
 } else {
     header("Location: {$artist->location()}");

@@ -174,11 +174,8 @@ if ($Viewer->permitted('site_collages_manage') || $Viewer->activePersonalCollage
 
 <?php
 echo $Twig->render('artist/similar.twig', [
-    'admin'        => $Viewer->permitted('site_delete_tag'),
-    'artist_id'    => $artistId,
-    'auth'         => $authKey,
-    'autocomplete' => $Viewer->hasAutocomplete('other'),
-    'similar'      => $Artist->similarArtists(),
+    'similar'      => $Artist->similar(),
+    'viewer'       => $Viewer,
 ]);
 
 if ($Viewer->permitted('zip_downloader')) {
@@ -442,8 +439,8 @@ if ($requestList) {
 <?php
 }
 
-$similar = $Artist->similarGraph(SIMILAR_WIDTH, SIMILAR_HEIGHT);
-if ($similar) {
+$graph = $Artist->similar()->similarGraph(SIMILAR_WIDTH, SIMILAR_HEIGHT);
+if ($graph) {
 ?>
     <div id="similar_artist_map" class="box">
       <div id="flipper_head" class="head">
@@ -460,7 +457,7 @@ if ($similar) {
             SIMILAR_WIDTH ?> <?= SIMILAR_HEIGHT ?>" style="display: inline-block; position: absolute; top: 0; left: 0;">
 <?php
     $names = '';
-    foreach ($similar as $s) {
+    foreach ($graph as $s) {
         if ($s['proportion'] <= 0.2) {
             $pt = 8;
         } elseif ($s['proportion'] <= 0.3) {
@@ -476,7 +473,7 @@ if ($similar) {
         foreach ($s['related'] as $r) {
             if ($r >= $s['artist_id']) {
 ?>
-          <line x1="<?= $similar[$r]['x'] ?>" y1="<?= $similar[$r]['y'] ?>" x2="<?= $s['x'] ?>" y2="<?=
+          <line x1="<?= $graph[$r]['x'] ?>" y1="<?= $graph[$r]['y'] ?>" x2="<?= $s['x'] ?>" y2="<?=
             $s['y'] ?>" style="stroke:rgb(0,153,0);stroke-width:1" />
 <?php
             }
@@ -542,7 +539,7 @@ function require(file, callback) {
 }
 //]]>
 </script>
-<?php } // if $similar ?>
+<?php } // if $graph ?>
 
         <div id="artist_information" class="box">
             <div id="info" class="head">

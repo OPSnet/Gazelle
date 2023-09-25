@@ -61,9 +61,6 @@ switch ($_REQUEST['action'] ?? '') {
     case 'permissions':
         require_once('permissions.php');
         break;
-    case 'similar':
-        require_once('similar.php');
-        break;
     case 'moderate':
         require_once('takemoderate.php');
         break;

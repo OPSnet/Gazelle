@@ -16,9 +16,10 @@ function initArtistCloud() {
 }
 
 function loadArtists() {
-    $.getJSON('ajax.php?action=similar_artists&id='+artistId+'&limit='+LIMIT, function(data) {
+    $.getJSON('ajax.php?action=similar_artists&id='+artistId+'&limit='+LIMIT, function(response) {
         var first = true;
         var ratio;
+        data = response['response'];
         $.each(data, function(key, val) {
             if (first) {
                 ratio = val['score'] / 300;
@@ -26,7 +27,7 @@ function loadArtists() {
             }
             var score = val['score'] / ratio;
             score = score <= 150 ? 150 : score;
-            addArtist(val['id'], val['name'], score);
+            addArtist(val['artist_id'], val['name'], score);
         });
         createCloud();
     });
