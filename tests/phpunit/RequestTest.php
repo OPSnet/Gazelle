@@ -53,14 +53,18 @@ class RequestTest extends TestCase {
         $title   = 'The ' . randomString(6). ' Test Sessions';
         $userMan = new Gazelle\Manager\User;
 
-        $statsMan = new Gazelle\Stats\Users;
-        $statsMan->refresh();
+        $statsReq = new Gazelle\Stats\Request;
+        $statsReq->flush();
+        $statsUser = new Gazelle\Stats\Users;
+        $statsUser->refresh();
         $before = [
             'created-size'  => $this->userList['admin']->stats()->requestCreatedSize(),
             'created-total' => $this->userList['admin']->stats()->requestCreatedTotal(),
             'vote-size'     => $this->userList['admin']->stats()->requestVoteSize(),
             'vote-total'    => $this->userList['admin']->stats()->requestVoteTotal(),
             'uploaded'      => $this->userList['admin']->uploadedSize(),
+            'total'         => $statsReq->total(),
+            'total-filled'  => $statsReq->filledTotal(),
         ];
 
         $requestMan = new Gazelle\Manager\Request;
@@ -170,11 +174,15 @@ class RequestTest extends TestCase {
         $this->assertFalse($this->request->canEditOwn($this->userList['user']), 'request-edit-own-other');
         $this->assertFalse($this->request->canEdit($this->userList['user']), 'request-edit-other');
 
+        $statsReq->flush();
+        $this->assertEquals($before['total'] + 1, $statsReq->total(), 'request-stats-new-total');
+        $this->assertEquals($before['total-filled'], $statsReq->filledTotal(), 'request-stats-new-filled');
+
         // Initial vote from creator
         $bounty = 1024**2 * REQUEST_MIN;
         $this->assertTrue($this->request->vote($this->userList['admin'], $bounty), 'request-initial-bounty');
 
-        $statsMan->refresh();
+        $statsUser->refresh();
         $this->userList['admin']->flush();
         $after = [
             'created-size'  => $this->userList['admin']->stats()->requestCreatedSize(),
@@ -185,10 +193,10 @@ class RequestTest extends TestCase {
         ];
 
         $taxedBounty = (int)($bounty * (1 - REQUEST_TAX));
-        // $this->assertEquals(1 + $before['created-total'], $after['created-total'], 'request-created-total');
-        // $this->assertEquals(1 + $before['vote-total'], $after['vote-total'], 'request-vote-total');
-        // $this->assertEquals($taxedBounty, $after['created-size'] - $before['created-size'], 'request-created-size');
-        // $this->assertEquals($taxedBounty, $after['vote-size'] - $before['vote-size'], 'request-vote-size');
+        $this->assertEquals(1 + $before['created-total'], $after['created-total'], 'request-created-total');
+        $this->assertEquals(1 + $before['vote-total'], $after['vote-total'], 'request-vote-total');
+        $this->assertEquals($taxedBounty, $after['created-size'] - $before['created-size'], 'request-created-size');
+        $this->assertEquals($taxedBounty, $after['vote-size'] - $before['vote-size'], 'request-vote-size');
         $this->assertEquals(-$bounty, $after['uploaded'] - $before['uploaded'], 'request-subtract-bounty');
 
         $this->assertEquals([$this->userList['admin']->id()], array_column($this->request->userIdVoteList(), 'user_id'), 'request-user-id-vote-list');
@@ -212,10 +220,17 @@ class RequestTest extends TestCase {
         $this->assertEquals($fillBefore['bounty-size'] + $taxedBounty * 2, $this->userList['user']->stats()->requestBountySize(), 'request-fill-receive-bounty');
         $this->assertEquals($fillBefore['bounty-total'] + 1, $this->userList['user']->stats()->requestBountyTotal(), 'request-fill-receive-total');
 
+        $statsReq->flush();
+        $this->assertEquals($before['total'] + 1, $statsReq->total(), 'request-stats-now-total');
+        $this->assertEquals($before['total-filled'] + 1, $statsReq->filledTotal(), 'request-stats-now-filled');
+
         // and now unfill it
         $this->assertEquals(1, $this->request->unfill($this->userList['admin'], 'unfill unittest', new Gazelle\Manager\Torrent), 'request-unfill');
         $this->assertEquals($fillBefore['uploaded'], $this->userList['user']->flush()->uploadedSize(), 'request-fill-unfill-user');
         $this->assertEquals($fillBefore['bounty-total'], $this->userList['user']->stats()->requestBountyTotal(), 'request-fill-unfill-total');
+
+        $statsReq->flush();
+        $this->assertEquals($before['total-filled'], $statsReq->filledTotal(), 'request-stats-now-unfilled');
 
         $requestId = $this->request->id();
         $this->assertTrue($this->request->remove(), 'request-remove');

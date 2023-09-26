@@ -5,9 +5,18 @@ namespace Gazelle\Stats;
 class Request extends \Gazelle\Base {
     protected const CACHE_KEY = 'stats_req';
 
-    protected array $info;
+    protected array|null $info;
+
+    public function flush(): static {
+        self::$cache->delete_value(self::CACHE_KEY);
+        unset($this->info);
+        return $this;
+    }
 
     public function info() {
+        if (isset($this->info)) {
+            return $this->info;
+        }
         $info = self::$cache->get_value(self::CACHE_KEY);
         if ($info === false) {
             $info = self::$db->rowAssoc("
@@ -15,10 +24,11 @@ class Request extends \Gazelle\Base {
                     sum(if(FillerID > 0, 1, 0)) AS filled
                 FROM requests
             ");
-            self::$cache->cache_value(self::CACHE_KEY, $info, 3600 * 3 + random_int(0, 1800)); // three hours plus fuzz
-            $this->info = $info;
+            $info['filled'] = (int)$info['filled'];
+            self::$cache->cache_value(self::CACHE_KEY, $info, 3600 + random_int(0, 300)); // a bit over an hour
         }
-        return $info;
+        $this->info = $info;
+        return $this->info;
     }
 
     public function total(): int {
