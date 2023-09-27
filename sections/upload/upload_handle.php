@@ -22,6 +22,13 @@ function reportError(string $message): never {
     }
 }
 
+if (!$Viewer->permitted('site_upload')) {
+    reportError("Your userclass does not allow you to upload.");
+}
+if ($Viewer->disableUpload()) {
+    reportError('Your upload privileges have been revoked.');
+}
+
 //******************************************************************************//
 //--------------- Set $Properties array ----------------------------------------//
 // This is used if the form doesn't validate, and when the time comes to enter  //
