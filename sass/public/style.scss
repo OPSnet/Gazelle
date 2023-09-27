@@ -35,18 +35,21 @@
   text-align: center;
 }
 
-input[type="text"], input[type="password"] {
-  font-family: "tahoma", "arial", "helvetica", "sans-serif";
+input[type="text"],
+input[type="password"] {
+  font-family: tahoma, arial, helvetica, sans-serif;
   font-size: 8pt;
-  padding: 1px 3px 0px 3px;
+  padding: 1px 3px 0 3px;
   width: 200px;
 }
 
-input[type="text"]:valid, input[type="password"]:valid {
+input[type="text"]:valid,
+input[type="password"]:valid {
   border-style: none;
 }
 
-input[type="text"]:invalid, input[type="password"]:invalid {
+input[type="text"]:invalid,
+input[type="password"]:invalid {
   border-top-style: none;
   border-bottom-style: none;
   border-left-style: none;
@@ -67,7 +70,7 @@ a {
 
 a:hover {
   color: #1fd54f;
-  text-decoration:underline;
+  text-decoration: underline;
 }
 
 .action {

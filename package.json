@@ -9,8 +9,9 @@
     "build:scss": "webpack --no-progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
     "build:previews": "node bin/render_styles_preview.js",
     "start": "yarn build:scss -- --watch",
-    "lint:css": "stylelint \"sass/**/*.scss\" || exit 0",
-    "lint:css-checkstyle": "stylelint \"sass/**/*.scss\" --custom-formatter ./node_modules/stylelint-checkstyle-formatter/index.js || exit 0",
+    "lint:css": "stylelint --config misc/stylelint.json --cache --cache-location cache/stylelint \"sass/**/*.scss\" || exit 0",
+    "lint:css-fix": "stylelint --config misc/stylelint.json --cache --cache-location cache/stylelint --fix \"sass/**/*.scss\" || exit 0",
+    "lint:css-checkstyle": "stylelint --config misc/stylelint.json --cache --cache-location cache/stylelint \"sass/**/*.scss\" --custom-formatter ./node_modules/stylelint-checkstyle-formatter/index.js || exit 0",
     "lint:php:internal": "find . -path './vendor' -prune -o -path ./node_modules -prune -o -path './.docker' -prune -o -type f -name '*.php' -print0 | xargs -0 -n1 -P4 php -l -n | (! grep -v \"No syntax errors detected\" )",
     "lint:php:phpcs": "vendor/bin/phpcs -p --report-width 1000",
     "lint:php": "yarn lint:php:internal && yarn lint:php:phpcs",
@@ -46,6 +47,9 @@
       "vendor/bin/phpstan analyze --no-progress --configuration=misc/phpstan.neon --memory-limit 512M",
       "bin/phpcs",
       "bin/phpcbf"
+    ],
+    "*.scss": [
+      "stylelint --config misc/stylelint.json --cache --cache-location cache/stylelint"
     ]
   },
   "browserslist": [

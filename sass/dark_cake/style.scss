@@ -166,7 +166,7 @@ ul.thin {
   padding: 0;
 }
 ul.thin li {
-  margin: 0 0;
+  margin: 0;
   padding: 0;
 }
 
@@ -174,7 +174,7 @@ ul.thin li {
 
 #header {
   background: #383c4a;
-  padding: 0 0 0 0;
+  padding: 0;
   width: 100%;
 }
 
@@ -327,7 +327,7 @@ ul.thin li {
 
 #searchbars ul li ul li {
   display: block;
-  margin: 0 0 0 0;
+  margin: 0;
   padding: 0;
   width: 100%;
 }
@@ -365,7 +365,7 @@ ul.thin li {
   text-align: center;
   font-size: 0.95em;
   font-weight: bold;
-  margin: 0 auto 0 auto;
+  margin: 0 auto;
   padding: 10px;
   width: 350px;
 }
@@ -425,7 +425,7 @@ div.linkbox {
 }
 
 .min_padding {
-  margin: 0 0;
+  margin: 0;
   padding: 0;
 }
 
@@ -602,9 +602,9 @@ table.slice {
 /* Layout (artist page) */
 
 div#flip_view_1 div#similar-artist .name {
-    border: 1px solid #5294e2;
-    background: rgba(75, 81, 98, 0.5);
-    padding: 2px 4px;
+  border: 1px solid #5294e2;
+  background: rgba(75, 81, 98, 0.5);
+  padding: 2px 4px;
 }
 
 /* Layout (home page) */
@@ -743,9 +743,11 @@ p input {
 .torrent_table tr.group {
   background-color: #404552;
 }
+
 .torrent_table tr.group_torrent {
   background-color: #4b5162;
 }
+
 .torrent_table tr.torrent {
   background-color: #7c818c;
 }

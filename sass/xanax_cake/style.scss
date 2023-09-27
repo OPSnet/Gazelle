@@ -160,7 +160,7 @@ ul.thin {
 }
 
 ul.thin li {
-  margin: 0 0;
+  margin: 0;
   padding: 0;
 }
 
@@ -168,7 +168,7 @@ ul.thin li {
 
 #header {
   background: #F2E9E1;
-  padding: 0 0 0 0;
+  padding: 0;
   width: 100%;
 }
 
@@ -318,7 +318,7 @@ ul.thin li {
 
 #searchbars ul li ul li {
   display: block;
-  margin: 0 0 0 0;
+  margin: 0;
   padding: 0;
   width: 100%;
 }
@@ -355,7 +355,7 @@ ul.thin li {
   color: #444;
   font-size: 0.95em;
   font-weight: bold;
-  margin: 0 auto 0 auto;
+  margin: 0 auto;
   padding: 10px;
   text-align: center;
   width: 350px;
@@ -387,9 +387,9 @@ input.hidden {
 /* Layout (Artist page) */
 
 div#flip_view_1 div#similar-artist .name {
-    border: 1px solid #666666;
-    background: rgba(225, 225, 225, 0.5);
-    padding: 2px 4px;
+  border: 1px solid #666666;
+  background: rgba(225, 225, 225, 0.5);
+  padding: 2px 4px;
 }
 
 /* Layout (Any page) */
@@ -426,7 +426,7 @@ div.linkbox {
 }
 
 .min_padding {
-  margin: 0 0;
+  margin: 0;
   padding: 0;
 }
 

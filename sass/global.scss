@@ -1,190 +1,189 @@
 .box h3 {
-    font-size: 140%;
+  font-size: 140%;
 }
+
 .box h4 {
-    font-size: 130%;
+  font-size: 130%;
 }
+
 .box h5 {
-    font-size: 120%;
+  font-size: 120%;
 }
+
 .box h6 {
-    font-size: 110%;
+  font-size: 110%;
 }
 
 pre br {
-    line-height: 0px;
-    display: none;
+  line-height: 0px;
+  display: none;
 }
 
 .center {
-    text-align: center;
+  text-align: center;
 }
 
 .req-choice {
-    display: inline-block;
-    text-align: left;
-    width: 130px;
+  display: inline-block;
+  text-align: left;
+  width: 130px;
 }
 
 .cat-choice {
-    display: inline-block;
-    text-align: left;
-    width: 110px;
+  display: inline-block;
+  text-align: left;
+  width: 110px;
 }
 
 ul.rules {
-    list-style-type: none;
+  list-style-type: none;
 }
 
 div.rule_short {
-    font-weight: bold;
-    font-size: 10pt;
+  font-weight: bold;
+  font-size: 10pt;
 }
 
 div.rule_wrap {
-    display: inline-table;
-    width: 96%;
+  display: inline-table;
+  width: 96%;
 }
 
 a.rule_link {
-    display: inline-table;
-    font-weight: bold;
-    font-size: 10pt;
-    width: 4%;
+  display: inline-table;
+  font-weight: bold;
+  font-size: 10pt;
+  width: 4%;
 }
 
 .golden_rules {
-    list-style-type: none !important;
+  list-style-type: none !important;
 }
 
 .ft_cataloguenumber {
-    width: 160px;
+  width: 160px;
 }
 
 ul.collage_images {
-    display: table;
-    padding: 0px;
-    width: 100%;
-    border-collapse: collapse;
+  display: table;
+  padding: 0;
+  width: 100%;
+  border-collapse: collapse;
 }
 
 ul.collage_images li {
-    border: none;
-    float: left;
-    margin: 0;
-    width: 20%;
-    list-style: none;
-    list-style-type: none;
+  border: none;
+  float: left;
+  margin: 0;
+  width: 20%;
+  list-style: none;
+  list-style-type: none;
 }
 
 ul.collage_images li a {
-    display: block;
-    overflow: hidden;
+  display: block;
+  overflow: hidden;
 }
 
 .selected a {
-    font-weight: bold;
-    text-decoration: underline;
+  font-weight: bold;
+  text-decoration: underline;
 }
 
 .invisible {
-    visibility: hidden;
+  visibility: hidden;
 }
 
 .collage td {
-    padding: 0px;
-    border: none;
+  padding: 0;
+  border: none;
 }
 
 .line_new {
-    color: green;
+  color: green;
 }
 
 .line_deleted {
-    color: red;
+  color: red;
 }
 
 .line_moved {
-    color: blue;
-}
-
-.line_unchanged {
-
-}
-
-.log1 {
-
+  color: blue;
 }
 
 .log2 {
-    color: yellow;
+  color: yellow;
 }
 
 .log3 {
-    color: #0E88C6;
+  color: #0E88C6;
 }
 
 .log4 {
-     font-weight: bold;
+  font-weight: bold;
 }
 
 .log5 {
-     text-decoration: underline;
+  text-decoration: underline;
 }
 
 .good {
-    font-weight: bold;
-    color: green;
+  font-weight: bold;
+  color: green;
 }
 
 .bad {
-    font-weight: bold;
-    color: red;
+  font-weight: bold;
+  color: red;
 }
 
 .goodish {
-    font-weight: bold;
-    color: #35BF00;
+  font-weight: bold;
+  color: #35BF00;
 }
 
 .badish {
-    font-weight: bold;
-    color: #E5B244;
+  font-weight: bold;
+  color: #E5B244;
 }
 
 pre {
-    overflow: auto;
+  overflow: auto;
 }
 
 .hidden {
-    display: none;
+  display: none;
 }
 
 .disable_grouping {
-    display: none;
+  display: none;
 }
 
-form textarea, form input {
-    max-width: 100%;
+form textarea,
+form input {
+  max-width: 100%;
 }
 
 a.beta {
-    font-weight: bold;
-    color: #ff0000;
+  font-weight: bold;
+  color: #ff0000;
 }
 
 strong.important_text {
-    color: red;
-    font-weight: bold;
+  color: red;
+  font-weight: bold;
 }
 
 strong.important_text_alt {
-    color: green;
-    font-weight: bold;
+  color: green;
+  font-weight: bold;
 }
 
-.invalid, .warning, .error, .new {
-    color: #dd0000;
+.invalid,
+.warning,
+.error,
+.new {
+  color: #dd0000;
 }
 
 .sys-error {
@@ -203,80 +202,85 @@ strong.important_text_alt {
 
 /* Make [+] on add multiple artists stay at the bottom (on torrent details page) */
 div#AddArtists {
-    position: relative;
+  position: relative;
 }
 
 div#AddArtists a {
-    position: absolute;
-    right: 0pt;
-    bottom: 0pt;
+  position: absolute;
+  right: 0;
+  bottom: 0;
 }
 
 div#flip_view_1 {
-    position: relative; 
+  position: relative;
 }
 
 div#flip_view_1 div#similar-artist {
-    position: absolute;
-    z-index: 1;
-    font-size: 13pt;
-    white-space: nowrap;
+  position: absolute;
+  z-index: 1;
+  font-size: 13pt;
+  white-space: nowrap;
 }
 
 div#flip_view_1 .similar-artist-graph {
-    position: relative;
-    height: 0;
-    width: 100%;
+  position: relative;
+  height: 0;
+  width: 100%;
 }
 
-.clear:after {
-    content: ".";
-    display: block;
-    height: 0;
-    clear: both;
-    visibility: hidden;
+.clear::after {
+  content: ".";
+  display: block;
+  height: 0;
+  clear: both;
+  visibility: hidden;
 }
 
 .new-subscriptions {
-    font-weight: bold;
+  font-weight: bold;
 }
 
 #forums #quickpost {
-    width: 95%
+  width: 95%;
 }
 
 .rippywrap {
-    z-index: 25;
-    display: block;
-    position: fixed;
-    color: black;
-    text-align: center;
-    width: 190px;
-    height: 180px;
-    bottom: 0px;
-    right: 0px;
-    user-select: none;
+  z-index: 25;
+  display: block;
+  position: fixed;
+  color: black;
+  text-align: center;
+  width: 190px;
+  height: 180px;
+  bottom: 0;
+  right: 0;
+  user-select: none;
 }
 
 .rippywrap div.rippy {
-    z-index: 25;
-    height: 111px;
-    width: 190px;
-    position: fixed;
-    bottom: 0px;
-    right: 0px;
-    user-select: none;
+  z-index: 25;
+  height: 111px;
+  width: 190px;
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  user-select: none;
 }
 
 td.label {
-    vertical-align: top;
+  vertical-align: top;
 }
 
 td.nowrap {
-    white-space: nowrap;
+  white-space: nowrap;
 }
 
-td.colhead, td.colhead_dark, .colhead td, .colhead th, .colhead_dark td, .colhead_dark th {
+td.colhead,
+td.colhead_dark,
+.colhead td,
+.colhead th,
+.colhead_dark td,
+.colhead_dark th {
   top: 0;
   position: sticky;
   position: -webkit-sticky;
@@ -284,219 +288,220 @@ td.colhead, td.colhead_dark, .colhead td, .colhead th, .colhead_dark td, .colhea
 }
 
 span.rbt {
-    display: block;
-    padding: 8px 0 0;
-    background: url('../rippy/rippy_top.gif') no-repeat top;
+  display: block;
+  padding: 8px 0 0;
+  background: url('../rippy/rippy_top.gif') no-repeat top;
 }
 
 span.rbm {
-    display: block;
-    background: url('../rippy/rippy_middle.gif') repeat bottom;
-    padding: 0 5px;
+  display: block;
+  background: url('../rippy/rippy_middle.gif') repeat bottom;
+  padding: 0 5px;
 }
 
 span.rbb {
-    display: block;
-    padding: 4px 0px 18px;
-    margin-bottom: 5px;
-    background: url('../rippy/rippy_bottom.gif') no-repeat bottom;
+  display: block;
+  padding: 4px 0 18px;
+  margin-bottom: 5px;
+  background: url('../rippy/rippy_bottom.gif') no-repeat bottom;
 }
 
 span.secondary_class {
-    font-size: 85%;
-    font-weight: bold;
+  font-size: 85%;
+  font-weight: bold;
 }
 
 .breadcrumbs {
-    font-weight: bold;
-    text-align: right;
+  font-weight: bold;
+  text-align: right;
 }
 
 .paranoia_override {
-    font-style: italic;
+  font-style: italic;
 }
 
 #manage_collage_table.ui-sortable .drag {
-    cursor: n-resize;
+  cursor: n-resize;
 }
 
 #manage_collage_table.ui-sortable .ui-sortable-helper.drag {
-    cursor: grabbing;
+  cursor: grabbing;
 }
 
-#manage_collage_table .ui-sortable-helper td, #manage_collage_table .ui-sortable-placeholder {
-    border: 0;
+#manage_collage_table .ui-sortable-helper td,
+#manage_collage_table .ui-sortable-placeholder {
+  border: 0;
 }
 
 .drag_drop_save {
-    padding: 6px 0;
-    overflow: hidden;
+  padding: 6px 0;
+  overflow: hidden;
 }
 
 .headerSort {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .headerSort span {
-    background: url("../common/table-order.png") no-repeat scroll right -38px transparent;
-    padding: 0px 20px 0 0;
+  background: url("../common/table-order.png") no-repeat scroll right -38px transparent;
+  padding: 0 20px 0 0;
 }
 
 .headerSortDown span {
-    background: url("../common/table-order.png") no-repeat scroll right 4px transparent;
+  background: url("../common/table-order.png") no-repeat scroll right 4px transparent;
 }
 
 .headerSortUp span {
-    background: url("../common/table-order.png") no-repeat scroll right -79px transparent;
+  background: url("../common/table-order.png") no-repeat scroll right -79px transparent;
 }
 
 .headerSort.sorter-false,
 .headerSort.sorter-false span {
-    background-image: none;
-    cursor: default;
+  background-image: none;
+  cursor: default;
 }
 
 .album_votes {
-    text-align: center;
+  text-align: center;
 }
 
 .favoritecount {
-    font-size: 150%;
-    font-weight: bold;
+  font-size: 150%;
+  font-weight: bold;
 }
 
 .favoritecount_small {
-    font-size: 110%;
-    font-weight: bold;
+  font-size: 110%;
+  font-weight: bold;
 }
 
 ul.votedalbums li {
-    list-style: none;
-    list-style-type: none;
-    margin: 0;
+  list-style: none;
+  list-style-type: none;
+  margin: 0;
 }
 
-tr.torrent .bookmark>a:before {
-    text-decoration: none;
-    font-weight: normal;
+tr.torrent .bookmark > a::before {
+  text-decoration: none;
+  font-weight: normal;
 }
 
-tr.torrent .bookmark>a:after {
-    text-decoration: none;
-    font-weight: normal;
+tr.torrent .bookmark > a::after {
+  text-decoration: none;
+  font-weight: normal;
 }
 
 #sortable {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    width: 50%;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  width: 50%;
 }
 
 #sortable li {
-    padding: 0px;
-    font-size: 1.2em;
-    height: 1.5em;
+  padding: 0;
+  font-size: 1.2em;
+  height: 1.5em;
 }
-
 
 .ui-state-highlight {
-    background: #007DC6 /*{bgColorHighlight}*/;
-    opacity: 0.15;
-    width: 50%;
-
+  background: #007DC6 /*{bgColorHighlight}*/;
+  opacity: 0.15;
+  width: 50%;
 }
 
-.navigation_list, .navigation_list ol {
-    list-style-position: inside;
-    margin-top: 10px;
-    margin-bottom: 20px;
+.navigation_list,
+.navigation_list ol {
+  list-style-position: inside;
+  margin-top: 10px;
+  margin-bottom: 20px;
 }
 
 .navigation_list > li {
-    list-style-type: upper-roman !important;
+  list-style-type: upper-roman !important;
 }
 
 .navigation_list li li {
-    list-style-type: upper-alpha;
+  list-style-type: upper-alpha;
 }
 
 .navigation_list li li li {
-    list-style-type: decimal;
+  list-style-type: decimal;
 }
 
 .navigation_list li li li li {
-    list-style-type: lower-alpha;
+  list-style-type: lower-alpha;
 }
 
 .torrent_table .group .votes_info_td strong {
-    font-size: inherit;
+  font-size: inherit;
 }
 
 .preview_wrap {
-    text-align: left;
+  text-align: left;
 }
 
 .text_preview {
-    min-height: 100px
+  min-height: 100px;
 }
 
 #lastfm_compatibilitybar_container {
-    width: 100%;
-    height: 5px;
-    background: #969696;
+  width: 100%;
+  height: 5px;
+  background: #969696;
 }
 
 #lastfm_compatibilitybar {
-    height: 100%;
+  height: 100%;
 }
 
 .brackets {
-    text-indent: 0px;
-    white-space: nowrap;
+  text-indent: 0;
+  white-space: nowrap;
 }
 
-.votespan.brackets:before {
-    content: "(";
+.votespan.brackets::before {
+  content: "(";
 }
 
-.votespan.brackets:after {
-    content: ")";
+.votespan.brackets::after {
+  content: ")";
 }
 
-.brackets:before {
-    content: "[";
+.brackets::before {
+  content: "[";
 }
 
-.brackets:after {
-    content: "]";
+.brackets::after {
+  content: "]";
 }
 
-#userinfo .brackets:before, #userinfo .brackets:after {
-    content: "";
+#userinfo .brackets::before,
+#userinfo .brackets::after {
+  content: "";
 }
 .group_image {
-    overflow: hidden;
+  overflow: hidden;
 }
 .float_left {
-    float: left;
+  float: left;
 }
 .float_right {
-    float: right;
+  float: right;
 }
 .float_clear {
-    clear: both;
+  clear: both;
 }
 .group_image + .group_info {
-    margin-left: 100px;
+  margin-left: 100px;
 }
 
 .group_image img {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .user_title {
-    font-weight: normal;
+  font-weight: normal;
 }
 
 /*
@@ -507,242 +512,250 @@ tr.torrent .bookmark>a:after {
  * Fix long release descriptions overflowing containers (all browsers).
  * Fix flowing issues in the report resolving pages.
  */
-.wrap_overflow, .filelist_table td, .reportinfo_table, .torrentdetails blockquote {
-    word-break: normal;
-    word-wrap: break-word;
-    hyphens: auto;
+.wrap_overflow,
+.filelist_table td,
+.reportinfo_table,
+.torrentdetails blockquote {
+  word-break: normal;
+  word-wrap: break-word;
+  hyphens: auto;
 }
 /* Non-web-standard for webkit */
 .torrentdetails blockquote {
-    word-break: break-word;
+  word-break: break-word;
 }
 /* Fix long filename tables overflowing (Chrome only). */
 .filelist_table td:first-child {
-    word-break: break-all;
+  word-break: break-all;
 }
 /* Fix long overflow for Opera (doesn't support word-break). */
 .reportinfo_table {
-    table-layout: fixed;
+  table-layout: fixed;
 }
 /* Wrap release info for consistent DOM and to limit table expansion. */
 .no_overflow {
-    width: 100%;
-    overflow: hidden;
+  width: 100%;
+  overflow: hidden;
 }
 /* Stylesheet gallery in user profile editing */
 #css_gallery {
-    display: none;
-    overflow: hidden;
-    margin-top: 10px;
+  display: none;
+  overflow: hidden;
+  margin-top: 10px;
 }
 .preview_wrapper {
-    position: relative;
-    display: inline-block;
-    width: 29%;
-    height: 120px;
-    margin: 0 10px;
+  position: relative;
+  display: inline-block;
+  width: 29%;
+  height: 120px;
+  margin: 0 10px;
 }
 .preview_image {
-    display: block;
-    height: 80px;
-    cursor: pointer;
-    overflow: hidden;
+  display: block;
+  height: 80px;
+  cursor: pointer;
+  overflow: hidden;
 }
 .preview_image img {
-    width: 100%;
+  width: 100%;
 }
 .preview_name {
-    text-align: center;
-    margin-top: 5px;
+  text-align: center;
+  margin-top: 5px;
 }
 
 .option_group {
-    margin-bottom: 10px;
+  margin-bottom: 10px;
 }
 .option_group:last-child {
-    margin-bottom: 0px;
+  margin-bottom: 0;
 }
 
 .autocomplete-suggestions {
-    margin-top: 5px;
-    border: 1px solid #999;
-    background: #FFF;
-    width: auto !important;
+  margin-top: 5px;
+  border: 1px solid #999;
+  background: #FFF;
+  width: auto !important;
 }
 .autocomplete-suggestion {
-    padding: 2px 5px;
-    white-space: nowrap;
-    cursor: pointer;
+  padding: 2px 5px;
+  white-space: nowrap;
+  cursor: pointer;
 }
 .autocomplete-selected {
-    background: #F0F0F0;
+  background: #F0F0F0;
 }
 .autocomplete-suggestions strong {
-    font-weight: normal;
-    color: #3399FF;
+  font-weight: normal;
+  color: #3399FF;
 }
 
 .process_info {
-    table-layout: fixed;
-    width: 100%;
+  table-layout: fixed;
+  width: 100%;
 }
 .process_info_pid {
-    width: 70px;
+  width: 70px;
 }
 .process_info_data {
-    overflow: auto;
+  overflow: auto;
 }
 
 .setting_description > * {
-    margin: 1em 0 0 0;
+  margin: 1em 0 0 0;
 }
 
 .settings_sidebar {
-    min-height: 385px;
+  min-height: 385px;
 }
 
 #settings_sections {
-    position: absolute;
+  position: absolute;
 }
 
 #settings_sections.fixed {
-    position: fixed;
-    top: 0px;
+  position: fixed;
+  top: 0;
 }
 
-#settings_sections #submit, #settings_sections #settings_search {
-    box-sizing: border-box;
-    width: 100%;
+#settings_sections #submit,
+#settings_sections #settings_search {
+  box-sizing: border-box;
+  width: 100%;
 }
 
 #settings_sections h2 {
-    text-align: left;
+  text-align: left;
 }
 
 .donor_icon {
-    margin-left: 2px;
-    width: 15px;
-    height: 13px;
+  margin-left: 2px;
+  width: 15px;
+  height: 13px;
 }
 
 .donation_address {
-    display: block;
-    padding: 1em 0 1em 0;
-    font-weight: bold;
-    text-align: center;
+  display: block;
+  padding: 1em 0 1em 0;
+  font-weight: bold;
+  text-align: center;
 }
 
 .donation_info {
-    padding: 10px 10px 10px 20px;
-    margin-left: 10px;
-    margin-right: 10px;
-    margin-bottom: 20px;
+  padding: 10px 10px 10px 20px;
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-bottom: 20px;
 }
 
 .donation_info_title {
-    display: block;
-    font-size: 1.75em;
-    -webkit-margin-before: 1em;
-    -webkit-margin-after: 1em;
-    -webkit-margin-start: 0px;
-    -webkit-margin-end: 0px;
-    font-weight: bold;
-    margin: 10px 0;
+  display: block;
+  font-size: 1.75em;
+  -webkit-margin-before: 1em;
+  -webkit-margin-after: 1em;
+  -webkit-margin-start: 0;
+  -webkit-margin-end: 0;
+  font-weight: bold;
+  margin: 10px 0;
 }
 
 .number_column {
-    text-align: right;
+  text-align: right;
 }
 
 .wide_input_text {
-    width: 95%;
+  width: 95%;
 }
 
 .top_artist_list li {
-    margin-left: 25px;
-    margin-bottom: 5px;
-    list-style-type: decimal;
-    font-size: 150%;
+  margin-left: 25px;
+  margin-bottom: 5px;
+  list-style-type: decimal;
+  font-size: 150%;
 }
 
 .permission_subcontainer {
-    margin-bottom: 10px;
+  margin-bottom: 10px;
 }
 
-.vote_tag_up, .vote_artist_up, .vote_album_up {
-    font-weight: bolder;
+.vote_tag_up,
+.vote_artist_up,
+.vote_album_up {
+  font-weight: bolder;
 }
 
-.vote_tag_down, .vote_artist_down, .vote_album_down {
-    font-weight: bolder;
+.vote_tag_down,
+.vote_artist_down,
+.vote_album_down {
+  font-weight: bolder;
 }
 
 .noborder {
-    border: none;
+  border: none;
 }
 
 .two_columns {
-    float: left;
-    width: 50%;
-    box-sizing: border-box;
+  float: left;
+  width: 50%;
+  box-sizing: border-box;
 }
 
 .field_div {
-    margin-bottom: 10px;
+  margin-bottom: 10px;
 }
 
 .field_div:last-of-type {
-    margin-bottom: 0;
+  margin-bottom: 0;
 }
 
 .field_div .label,
 .submit_div .label {
-    float: left;
-    padding: 0 5px;
-    text-align: right;
-    width: 150px;
+  float: left;
+  padding: 0 5px;
+  text-align: right;
+  width: 150px;
 }
 .field_div .input,
 .submit_div .input {
-    padding: 0 5px;
+  padding: 0 5px;
 }
 
 .small_label {
-    text-align: right;
-    width: auto;
+  text-align: right;
+  width: auto;
 }
 
 .scale_image {
-    max-width: 500px;
+  max-width: 500px;
 }
 
 .sidebar img {
-    max-width: 220px;
+  max-width: 220px;
 }
 
 .forum_post td img {
-    max-width: 675px;
+  max-width: 675px;
 }
 
 #collage #reply_box img,
 #forums #reply_box img {
-    max-width: 650px;
+  max-width: 650px;
 }
 
 #artistcomments #reply_box img,
 #request_comments #reply_box img,
 #torrent_comments #reply_box img {
-    max-width: 400px;
+  max-width: 400px;
 }
 
 #artistcomments img,
 #request_comments img,
 #torrent_comments img {
-    max-width: 417px;
+  max-width: 417px;
 }
 
 .blog_post img {
-    max-width: 825px;
+  max-width: 825px;
 }
 
 #artist_information img,
@@ -750,100 +763,100 @@ tr.torrent .bookmark>a:after {
 .news_post img,
 .torrent_description img,
 .wiki_article img {
-    max-width: 570px;
+  max-width: 570px;
 }
 
 .torrentdetails img {
-    max-width: 540px;
+  max-width: 540px;
 }
 
 #inbox #preview img,
 #staffpm #reply_box img,
 #wiki .create_form img,
 #wiki .edit_form img {
-    max-width: 805px;
+  max-width: 805px;
 }
 
 #inbox .body img {
-    max-width: 830px;
+  max-width: 830px;
 }
 
 #userform img {
-    max-width: 490px;
+  max-width: 490px;
 }
 
 .profileinfo img {
-    max-width: 565px;
+  max-width: 565px;
 }
 
 #reportsv2 .manage_form img {
-    max-width: 616px;
+  max-width: 616px;
 }
 
 /* make Safari treat <input type="search" /> as a regular text box */
 input[type="search"] {
-    -webkit-appearance: textfield;
-    /*font-size: medium;
-    background: #fff;*/
+  -webkit-appearance: textfield;
+  /* font-size: medium;
+    background: #fff; */
 }
 
 #pad_next {
-    display: block;
-    margin-top: 10px;
+  display: block;
+  margin-top: 10px;
 }
 
 .last_edited {
-    display: block;
-    padding-right: 5px;
-    padding-top: 5px;
-    border-top: 1px solid #c7c7c7;
+  display: block;
+  padding-right: 5px;
+  padding-top: 5px;
+  border-top: 1px solid #c7c7c7;
 }
 
 .avatar_container img {
-    max-height: 400px;
-      max-width: 150px;
+  max-height: 400px;
+  max-width: 150px;
 }
 .avatar_container > div {
-    width: 0;
-    overflow: visible;
-    display: inline-block;
-    vertical-align: top;
-    transition: opacity 500ms;
+  width: 0;
+  overflow: visible;
+  display: inline-block;
+  vertical-align: top;
+  transition: opacity 500ms;
 }
 .avatar_container > :last-child {
-    opacity: 0;
+  opacity: 0;
 }
 .avatar_container > :first-child {
-    opacity: 1;
+  opacity: 1;
 }
 .avatar_container:hover > :first-child {
-    opacity: 0;
+  opacity: 0;
 }
 .avatar_container:hover > :last-child {
-      opacity: 1;
+  opacity: 1;
 }
 #user .avatar_container > :last-child {
-    margin-right: 150px
+  margin-right: 150px;
 }
 #user .avatar_container:hover > :last-child {
-    margin-right: 150px
+  margin-right: 150px;
 }
 
 @media only screen and (min-width: 768px) {
-    .avatar_container > :last-child {
-    margin-right: 150px
-    }
-    .avatar_container:hover > :last-child {
-    margin-right: 150px
-    }
+  .avatar_container > :last-child {
+    margin-right: 150px;
+  }
+  .avatar_container:hover > :last-child {
+    margin-right: 150px;
+  }
 }
 
 #recovery table td > pre {
-    max-width: 800px;
+  max-width: 800px;
 }
 
 .pager-link {
-  margin: 0px 2px;
+  margin: 0 2px;
   padding: 1px 3px;
 }
 
@@ -877,45 +890,46 @@ input[type="search"] {
 }
 
 #user .twofa_text {
-    font-size: 14px;
-    margin-top: 10px;
-    font-weight: 600;
+  font-size: 14px;
+  margin-top: 10px;
+  font-weight: 600;
 }
 
 .debug_table {
-    text-align: left;
-    width: 100%;
+  text-align: left;
+  width: 100%;
 }
 
 .xdebug-error {
-    font-size: 12px;
-    width: 95%;
-    margin: 0 auto 10px auto;
-    border-color: #606060;
-    background: #dddddd;
+  font-size: 12px;
+  width: 95%;
+  margin: 0 auto 10px auto;
+  border-color: #606060;
+  background: #dddddd;
 }
 
-.xdebug-error th, .xdebug-error td {
-    padding: 4px;
-    color: #202020;
+.xdebug-error th,
+.xdebug-error td {
+  padding: 4px;
+  color: #202020;
 }
 
 .xdebug-error th {
-    background: #d0d0d0;
-    color: #202020;
+  background: #d0d0d0;
+  color: #202020;
 }
 
 .xdebug-error span {
-    display: none;
+  display: none;
 }
 
 .xdebug-error_description th {
-    font-size: 1.2em;
-    padding: 20px 4px 20px 100px;
-    background: #cccccc;
+  font-size: 1.2em;
+  padding: 20px 4px 20px 100px;
+  background: #cccccc;
 }
 
 .xdebug-error_callStack th {
-    background: #606060;
-    color: #e0e0e0;
+  background: #606060;
+  color: #e0e0e0;
 }

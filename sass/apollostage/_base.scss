@@ -880,11 +880,11 @@ table.box2 {
 }
 
 div#flip_view_1 div#similar-artist .name {
-    border: 1px solid $base-text-color;
-    background: rgba(60, 60, 60, 0.7);
-    color: $base-text-color;
-    margin: 0;
-    padding: 0 5px;
+  border: 1px solid $base-text-color;
+  background: rgba(60, 60, 60, 0.7);
+  color: $base-text-color;
+  margin: 0;
+  padding: 0 5px;
 }
 
 #covers img {
@@ -1712,7 +1712,8 @@ blockquote {
 /* this query is mostly copied from what used to be above
  * despite the fact that this exists, there are still many
  * rules above that are overridden by media queries, rather
- * than being put here like they should be */
+ * than being put here like they should be
+ */
 
 @media (min-width: 480px) {
   .thin:last-child > :not(.two_columns) {
@@ -1884,8 +1885,8 @@ blockquote {
     order: -1;
   }
 
+  /* tired of specificity :( */
   #settings_sections {
-    /* tired of specificity :( */
     position: static !important;
   }
   /* END user settings */
@@ -2035,10 +2036,10 @@ blockquote {
     display: none;
   }
 
+  /* on mobile, it wraps even on normal words, so better like this */
+  /* TODO: how to handle super long-words */
   .group .group_info,
   .torrent .group_info {
-    /* on mobile, it wraps even on normal words, so better like this */
-    /* TODO: how to handle super long-words */
     word-break: inherit;
   }
 
@@ -2111,7 +2112,8 @@ blockquote {
 
   /* it would be nice to use flex for all group_torrents, but we can't de display:flex
    * on any old table cell. It only works here because our trs aren't using the normal
-   * table display anyways. */
+   * table display anyways.
+   */
 
   .torrent_table .group_torrent:not(.edition) td:first-child {
     display: flex;
@@ -2220,8 +2222,7 @@ blockquote {
   /* END collage table */
 
   /* BEGIN requests */
-  /* TODO: still show the time the request was filled without
-   * taking up too much space */
+  /* TODO: still show the time the request was filled without taking up too much space */
 
   #requests .request_table tr:not(.colhead) td:nth-child(n+2) {
     padding: 0 6px;
@@ -2293,7 +2294,7 @@ blockquote {
 
   /* BEGIN forum table structure */
   /* this is copied from general tables. We put it here in case that changes
-     in ways specific for tabular data */
+   in ways specific for tabular data */
 
   .forum_post tbody {
     align-items: stretch;
