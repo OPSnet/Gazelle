@@ -118,7 +118,9 @@ if (!isset($_POST['workaround_broken_html_entities']) || $_POST['workaround_brok
         'RecordLabel', 'CatalogueNumber', 'GroupDescription', 'Description'
     ];
     foreach ($brokenProperties as $prop) {
-        $Properties[$prop] = html_unescape($Properties[$prop]);
+        if (!empty($Properties[$prop])) {
+            $Properties[$prop] = html_unescape($Properties[$prop]);
+        }
     }
     foreach ($Artists as $idx => $name) {
         $Artists[$idx] = html_unescape($name);
