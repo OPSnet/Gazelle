@@ -7,14 +7,14 @@ abstract class Base {
     protected static Cache $cache;
     protected static \Twig\Environment $twig;
 
-    public static function initialize(Cache $cache, DB\Mysql $db, \Twig\Environment $twig) {
+    public static function initialize(Cache $cache, DB\Mysql $db, \Twig\Environment $twig): void {
         self::$db    = $db;
         self::$cache = $cache;
         self::$twig  = $twig;
     }
 
     public function enumList(string $table, string $column): array {
-        $columnType = self::$db->scalar("
+        $columnType = (string)self::$db->scalar("
             SELECT column_type
             FROM information_schema.columns
             WHERE table_schema = ?
@@ -29,7 +29,7 @@ abstract class Base {
     }
 
     public function enumDefault(string $table, string $column): ?string {
-        return self::$db->scalar("
+        $default = self::$db->scalar("
             SELECT column_default
             FROM information_schema.columns
             WHERE table_schema = ?
@@ -37,5 +37,6 @@ abstract class Base {
                 AND column_name = ?
             ", SQLDB, $table, $column
         );
+        return $default ? (string)$default : null;
     }
 }

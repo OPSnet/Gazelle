@@ -46,21 +46,6 @@ parameters:
 			path: ../app/API/Wiki.php
 
 		-
-			message: "#^Method Gazelle\\\\Base\\:\\:enumDefault\\(\\) should return string\\|null but returns bool\\|float\\|int\\|string\\|null\\.$#"
-			count: 1
-			path: ../app/Base.php
-
-		-
-			message: "#^Method Gazelle\\\\Base\\:\\:initialize\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/Base.php
-
-		-
-			message: "#^Parameter \\#2 \\$subject of function preg_match expects string, bool\\|float\\|int\\|string\\|null given\\.$#"
-			count: 1
-			path: ../app/Base.php
-
-		-
 			message: "#^Match expression does not handle remaining value\\: string$#"
 			count: 1
 			path: ../app/Better/Bad.php
