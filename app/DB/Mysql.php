@@ -123,7 +123,7 @@ class Mysql {
         #[\SensitiveParameter] protected readonly string $Pass,
         protected readonly string $Server,
         protected readonly int $Port,
-        protected readonly string $Socket,
+        protected readonly string|null $Socket,
     ) {}
 
     public function disableQueryLog(): void {

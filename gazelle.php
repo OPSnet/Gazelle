@@ -27,7 +27,7 @@ if ($PathInfo['dirname'] !== '/') { /** @phpstan-ignore-line */
 // 2. Start the engine
 
 require_once(__DIR__ . '/lib/bootstrap.php');
-global $Cache, $Debug, $Twig; // shut up phpstan
+global $Cache, $Debug, $Twig;
 
 // Get the user's actual IP address if they're proxied.
 if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])

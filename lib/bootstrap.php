@@ -10,12 +10,13 @@ if (!defined('SITE_NAME')) {
     require_once(__DIR__ . '/../vendor/autoload.php');
 }
 
-$Cache = new Gazelle\Cache;
-$DB    = new Gazelle\DB\Mysql(SQLDB, SQLLOGIN, SQLPASS, SQLHOST, SQLPORT, SQLSOCK);
-$Twig  = Gazelle\Util\Twig::factory();
-Gazelle\Base::initialize($Cache, $DB, $Twig);
+global $Cache, $Debug, $Twig;
 
-$Debug = new Gazelle\Debug($Cache, $DB);
+$Cache = new Gazelle\Cache;
+$Twig  = Gazelle\Util\Twig::factory();
+Gazelle\Base::initialize($Cache, Gazelle\DB::DB(), $Twig);
+
+$Debug = new Gazelle\Debug($Cache, Gazelle\DB::DB());
 $Debug->setStartTime($now)
     ->handle_errors()
     ->set_flag('init');

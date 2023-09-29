@@ -149,7 +149,7 @@ defined('SQLPORT') or define('SQLPORT', 3306);
 // The socket to use. See the php documentation on mysqli::connect
 // to understand how these fit together. If the database and PHP interpreter
 // are running on the same host then you want to use a socket.
-defined('SQLSOCK') or define('SQLSOCK', false);
+defined('SQLSOCK') or define('SQLSOCK', null);
 
 // The name of the database schema.
 defined('SQLDB') or define('SQLDB', 'gazelle');

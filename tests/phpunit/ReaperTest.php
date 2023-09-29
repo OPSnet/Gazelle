@@ -127,7 +127,7 @@ class ReaperTest extends TestCase {
     /**
      * This method is not necessary per se, but came in handy when debugging the tests
      */
-    protected function status(array $torrentList): void {
+    protected function reaperStatus(array $torrentList): void {
         $db = Gazelle\DB::DB();
         $db->prepared_query("
             SELECT t.ID,

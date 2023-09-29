@@ -4,10 +4,7 @@ namespace Gazelle;
 
 class DB extends Base {
     static public function DB(): DB\Mysql {
-        // This is pretty damn fucking horrible, but at least
-        // it is abstracted away into one solitary method.
-        global $DB;
-        return $DB;
+        return self::$db ??= new DB\Mysql(SQLDB, SQLLOGIN, SQLPASS, SQLHOST, SQLPORT, SQLSOCK);
     }
 
     /**
