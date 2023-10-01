@@ -36,18 +36,16 @@
 ]) }}
 
 {{ _self.category('Announcements', [
-    ['Album of the Month',  'tools.php?action=monthalbum',          viewer.permitted('admin_freeleech')],
     ['Change log',          'tools.php?action=change_log',          true],
+    ['Feature Album',       'tools.php?action=featured_album',      viewer.permitted('admin_freeleech')],
     ['Global notification', 'tools.php?action=global_notification', viewer.permitted('admin_global_notification')],
     ['Mass PM',             'tools.php?action=mass_pm',             viewer.permitted('admin_global_notification')],
     ['News post',           'tools.php?action=news',                viewer.permitted('admin_manage_news')],
-    ['Vanity House',        'tools.php?action=vanityhouse',         viewer.permitted('admin_freeleech')],
 ]) }}
 
 {{ _self.category('Rewards', [
     ['Manage bonus points',         'tools.php?action=bonus_points',       viewer.permitted('admin_bp_history')],
     ['Manage freeleech tokens',     'tools.php?action=tokens',             viewer.permitted('admin_freeleech')],
-    ['Freeleech torrents/collages', 'tools.php?action=multiple_freeleech', viewer.permitted('admin_freeleech')],
 
 ]) }}
 

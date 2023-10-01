@@ -2,6 +2,9 @@
 
 namespace Gazelle\Manager;
 
+use Gazelle\Enum\LeechType;
+use Gazelle\Enum\LeechReason;
+
 class Torrent extends \Gazelle\BaseManager {
     protected const ID_KEY = 'zz_t_%d';
     protected const CACHE_HIST = 'top10_hist_%s_%s';
@@ -144,6 +147,46 @@ class Torrent extends \Gazelle\BaseManager {
             }
         }
         return $all;
+    }
+
+    public function lookupLeechReason(string $leechReason): LeechReason {
+        return match ($leechReason) {
+            LeechReason::AlbumOfTheMonth->value => LeechReason::AlbumOfTheMonth,
+            LeechReason::Permanent->value       => LeechReason::Permanent,
+            LeechReason::Showcase->value        => LeechReason::Showcase,
+            LeechReason::StaffPick->value       => LeechReason::StaffPick,
+            default                             => LeechReason::Normal,
+        };
+    }
+
+    public function lookupLeechType(string $leechType): LeechType {
+        return match ($leechType) {
+            LeechType::Free->value    => LeechType::Free,
+            LeechType::Neutral->value => LeechType::Neutral,
+            default                   => LeechType::Normal,
+        };
+    }
+
+    public function leechReasonList(): array {
+        return [
+            LeechReason::Normal,
+            LeechReason::AlbumOfTheMonth,
+            LeechReason::Permanent,
+            LeechReason::Showcase,
+            LeechReason::StaffPick,
+        ];
+    }
+
+    public function leechTypeList(): array {
+        return [
+            LeechType::Normal,
+            LeechType::Neutral,
+            LeechType::Free,
+        ];
+    }
+
+    public function flushFoldernameCache(string $folder): void {
+        self::$cache->delete_value(sprintf(self::CACHE_FOLDERNAME, md5($folder)));
     }
 
     public function missingLogfiles(int $userId): array {
@@ -310,67 +353,39 @@ class Torrent extends \Gazelle\BaseManager {
     }
 
     /**
-     * Freeleech / neutral leech / normalise a set of torrents
-     *
-     * @param string $leechLevel 0 = normal, 1 = FL, 2 = NL
-     * @param string $reason 0 = Unknown, 1 = Staff picks, 2 = Perma-FL (Toolbox, etc.), 3 = Vanity House
-     * @param bool $all true = all torrents are made FL, false = only lossless torrents are made FL
-     * @param bool $limitLarge true and level is FL => torrents over 1GiB are NL
+     * Freeleech / neutral leech / normalise a list of torrents
+     * NB: If FLAC-only filtering is required, it must be handled by the calling code.
      */
-    public function setFreeleech(\Gazelle\User $user, array $TorrentIDs, string $leechLevel, $reason, bool $all, bool $limitLarge): int {
-        $QueryID = self::$db->get_query_id();
-        $condition = '';
-        if ($reason == '0') {
-            if (!$all) {
-                $condition .= " AND Encoding IN ('24bit Lossless', 'Lossless')";
-            }
-            if ($limitLarge) {
-                $condition .= " AND Size <= 1073741824"; // 1GiB
-            }
-        }
-
-        $placeholders = placeholders($TorrentIDs);
-        self::$db->begin_transaction();
+    public function setListFreeleech(
+        \Gazelle\Tracker $tracker,
+        \Gazelle\User    $user,
+        array            $idList,
+        LeechType        $leechType,
+        LeechReason      $reason
+    ): int {
+        $placeholders = placeholders($idList);
         self::$db->prepared_query($sql = "
             UPDATE torrents SET
                 FreeTorrent = ?, FreeLeechType = ?
             WHERE ID IN ($placeholders)
-                $condition
-            ", $leechLevel, $reason, ...$TorrentIDs
+            ", $leechType->value, $reason->value, ...$idList
         );
         $affected = self::$db->affected_rows();
 
-        if ($reason == '0' && $limitLarge) {
-            self::$db->prepared_query("
-                UPDATE torrents SET
-                    FreeTorrent = ?, FreeLeechType = ?
-                WHERE ID IN ($placeholders)
-                    AND Size > 1073741824
-                ", '2', $reason, ...$TorrentIDs
-            );
-            $affected += self::$db->affected_rows();
+        $refresh = [];
+        $log     = new \Gazelle\Log;
+        foreach ($idList as $torrentId) {
+            $torrent = $this->findById($torrentId)->flush();
+            $tracker->modifyTorrent($torrent, $leechType);
+            $tgroupId = $torrent->groupId();
+            if (!isset($refresh[$tgroupId])) {
+                $refresh[$tgroupId] = $torrent->group();
+            }
+            $log->torrent($tgroupId, $torrentId, $user->id(), "marked as freeleech type {$reason->label()}")
+                ->general($user->username() . " marked torrent $torrentId freeleech type {$reason->label()}");
         }
-
-        self::$db->prepared_query("
-            SELECT ID, GroupID, info_hash FROM torrents WHERE ID IN ($placeholders) ORDER BY GroupID ASC
-            ", ...$TorrentIDs
-        );
-        $Torrents = self::$db->to_array(false, MYSQLI_NUM, false);
-        $GroupIDs = self::$db->collect('GroupID', false);
-        self::$db->commit();
-        self::$db->set_query_id($QueryID);
-
-        $tgMan = new TGroup;
-        foreach ($GroupIDs as $id) {
-            $tgMan->findById($id)->refresh();
-        }
-
-        $log = new \Gazelle\Log;
-        $tracker = new \Gazelle\Tracker;
-        foreach ($Torrents as [$TorrentID, $GroupID, $InfoHash]) {
-            $tracker->update_tracker('update_torrent', ['info_hash' => rawurlencode($InfoHash), 'freetorrent' => $leechLevel]);
-            $log->torrent($GroupID, $TorrentID, $user->id(), "marked as freeleech type $reason")
-                ->general($user->username() . " marked torrent $TorrentID freeleech type $reason");
+        foreach ($refresh as $tgroup) {
+            $tgroup->refresh();
         }
 
         return $affected;

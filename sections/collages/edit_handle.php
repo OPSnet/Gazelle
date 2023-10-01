@@ -1,4 +1,8 @@
 <?php
+
+use Gazelle\Enum\LeechType;
+use Gazelle\Enum\LeechReason;
+
 authorize();
 
 $id = (int)$_POST['collageid'];
@@ -84,4 +88,20 @@ if ($Viewer->permitted('site_collages_delete')) {
 $collage->toggleAttr('sort-newest', isset($_POST['addition']));
 
 $collage->modify();
+
+if ($Viewer->permitted('admin_freeleech') && isset($_POST['leech_type'])) {
+    $torMan = new \Gazelle\Manager\Torrent;
+    $size = (int)($_POST['size'] ?? NEUTRAL_LEECH_THRESHOLD);
+    $unit = trim($_POST['unit'] ?? NEUTRAL_LEECH_UNIT);
+    $collage->setFreeleech(
+        torMan:    $torMan,
+        tracker:   new \Gazelle\Tracker,
+        user:      $Viewer,
+        leechType: $torMan->lookupLeechType($_POST['leech_type'] ?? LeechType::Normal->value),
+        reason:    $torMan->lookupLeechReason($_POST['leech_reason'] ?? LeechReason::Normal->value),
+        threshold: get_bytes("$size$unit"),
+        all:       $_POST['all'] == 'all',
+    );
+}
+
 header('Location: ' . $collage->location());

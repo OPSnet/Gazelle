@@ -16,6 +16,8 @@
 
 namespace Gazelle;
 
+use Gazelle\Enum\LeechType;
+use Gazelle\Enum\LeechReason;
 use Gazelle\Util\Irc;
 
 class Tracker {
@@ -31,8 +33,15 @@ class Tracker {
     public function addTorrent(Torrent $torrent): bool {
         return $this->update_tracker('add_torrent', [
             'id'          => $torrent->id(),
-            'info_hash'   => rawurlencode($torrent->flush()->infohashBinary()),
+            'info_hash'   => $torrent->flush()->infohashEncoded(),
             'freetorrent' => 0,
+        ]);
+    }
+
+    public function modifyTorrent(TorrentAbstract $torrent, LeechType $leechType): bool {
+        return $this->update_tracker('update_torrent', [
+            'info_hash'   => $torrent->infohashEncoded(),
+            'freetorrent' => $leechType->value
         ]);
     }
 

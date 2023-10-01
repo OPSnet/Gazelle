@@ -1,10 +1,15 @@
 <?php
+
+use Gazelle\Enum\FeaturedAlbumType;
+
 Text::$TOC = true;
 
+$featured   = new Gazelle\Manager\FeaturedAlbum;
 $contestMan = new Gazelle\Manager\Contest;
 $newsMan    = new Gazelle\Manager\News;
 $newsReader = new Gazelle\WitnessTable\UserReadNews;
 $tgMan      = new Gazelle\Manager\TGroup;
+$torMan     = new Gazelle\Manager\Torrent;
 
 if ($newsMan->latestId() != -1 && $newsReader->lastRead($Viewer->id()) < $newsMan->latestId()) {
     $newsReader->witness($Viewer->id());
@@ -33,23 +38,23 @@ if (!$contest) {
 }
 
 echo $Twig->render('index/private-sidebar.twig', [
-    'blog'              => new Gazelle\Manager\Blog,
-    'collage_count'     => (new Gazelle\Stats\Collage)->collageCount(),
-    'contest_rank'      => $contestRank,
-    'leaderboard'       => $leaderboard,
-    'featured_aotm'     => $tgMan->featuredAlbumAotm(),
-    'featured_showcase' => $tgMan->featuredAlbumShowcase(),
-    'staff_blog'        => new Gazelle\Manager\StaffBlog,
-    'poll'              => (new Gazelle\Manager\ForumPoll)->findByFeaturedPoll(),
-    'request_stats'     => new Gazelle\Stats\Request,
-    'torrent_stats'     => new Gazelle\Stats\Torrent,
-    'user_stats'        => new Gazelle\Stats\Users,
-    'viewer'            => $Viewer,
+    'blog'          => new Gazelle\Manager\Blog,
+    'collage_count' => (new Gazelle\Stats\Collage)->collageCount(),
+    'contest_rank'  => $contestRank,
+    'leaderboard'   => $leaderboard,
+    'aotm'          => $featured->findByType(FeaturedAlbumType::AlbumOfTheMonth),
+    'showcase'      => $featured->findByType(FeaturedAlbumType::Showcase),
+    'staff_blog'    => new Gazelle\Manager\StaffBlog,
+    'poll'          => (new Gazelle\Manager\ForumPoll)->findByFeaturedPoll(),
+    'request_stats' => new Gazelle\Stats\Request,
+    'torrent_stats' => new Gazelle\Stats\Torrent,
+    'user_stats'    => new Gazelle\Stats\Users,
+    'viewer'        => $Viewer,
 ]);
 
 echo $Twig->render('index/private-main.twig', [
     'admin'   => (int)$Viewer->permitted('admin_manage_news'),
     'contest' => $contestMan->currentContest(),
-    'latest'  => (new Gazelle\Manager\Torrent)->latestUploads(5),
+    'latest'  => $torMan->latestUploads(5),
     'news'    => $newsMan->headlines(),
 ]);

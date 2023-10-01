@@ -1476,41 +1476,6 @@ parameters:
 			path: ../app/WitnessTable/AbstractWitnessTable.php
 
 		-
-			message: "#^Comparison operation \"\\>\" between int\\<1, max\\> and 0 is always true\\.$#"
-			count: 1
-			path: ../classes/artists.class.php
-
-		-
-			message: "#^Method Artists\\:\\:display_artist\\(\\) has parameter \\$Artist with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../classes/artists.class.php
-
-		-
-			message: "#^Method Artists\\:\\:display_artists\\(\\) has parameter \\$Artists with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../classes/artists.class.php
-
-		-
-			message: "#^Method Artists\\:\\:get_artist\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../classes/artists.class.php
-
-		-
-			message: "#^Method Artists\\:\\:get_artists\\(\\) has parameter \\$GroupIDs with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../classes/artists.class.php
-
-		-
-			message: "#^Method Artists\\:\\:get_artists\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../classes/artists.class.php
-
-		-
-			message: "#^Unreachable statement \\- code above always terminates\\.$#"
-			count: 1
-			path: ../classes/artists.class.php
-
-		-
 			message: "#^Method Sphinxql\\:\\:error\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: ../classes/sphinxql.class.php
@@ -2256,11 +2221,6 @@ parameters:
 			path: ../sections/tools/managers/label_aliases.php
 
 		-
-			message: "#^Variable \\$message might not be defined\\.$#"
-			count: 1
-			path: ../sections/tools/managers/multiple_freeleech.php
-
-		-
 			message: "#^Variable \\$Tokens in empty\\(\\) always exists and is not falsy\\.$#"
 			count: 1
 			path: ../sections/tools/managers/ocelot.php
@@ -2269,11 +2229,6 @@ parameters:
 			message: "#^Function type_list\\(\\) has parameter \\$Types with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: ../sections/tools/managers/referral_accounts.php
-
-		-
-			message: "#^Variable \\$LargeTorrents might not be defined\\.$#"
-			count: 1
-			path: ../sections/tools/misc/vanity_house.php
 
 		-
 			message: "#^Parameter \\#1 \\(array\\<int, string\\>\\|string\\) of echo cannot be converted to string\\.$#"
@@ -2304,16 +2259,6 @@ parameters:
 			message: "#^Variable \\$SnatchedGroupClass might not be defined\\.$#"
 			count: 1
 			path: ../sections/top10/votes.php
-
-		-
-			message: "#^Offset 'FreeLeech' does not exist on array\\{Name\\: string, Format\\: mixed, Media\\: mixed, Encoding\\: mixed, TorrentDescription\\: string, Scene\\: '0'\\|'1', HasLog\\: '0'\\|'1', HasCue\\: '0'\\|'1', \\.\\.\\.\\}\\|array\\{Name\\: string, Format\\: mixed, Media\\: mixed, Encoding\\: mixed, TorrentDescription\\: string, Scene\\: '0'\\|'1', HasLog\\: '0'\\|'1', HasCue\\: '0'\\|'1', \\.\\.\\.\\}\\.$#"
-			count: 3
-			path: ../sections/torrents/takeedit.php
-
-		-
-			message: "#^Offset 'FreeLeechType' does not exist on array\\{Name\\: string, Format\\: mixed, Media\\: mixed, Encoding\\: mixed, TorrentDescription\\: string, Scene\\: '0'\\|'1', HasLog\\: '0'\\|'1', HasCue\\: '0'\\|'1', \\.\\.\\.\\}\\|array\\{Name\\: string, Format\\: mixed, Media\\: mixed, Encoding\\: mixed, TorrentDescription\\: string, Scene\\: '0'\\|'1', HasLog\\: '0'\\|'1', HasCue\\: '0'\\|'1', \\.\\.\\.\\}\\.$#"
-			count: 2
-			path: ../sections/torrents/takeedit.php
 
 		-
 			message: "#^Parameter \\#2 \\$array of function array_map expects array, array\\|false given\\.$#"

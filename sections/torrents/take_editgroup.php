@@ -1,4 +1,5 @@
 <?php
+
 authorize();
 
 if (!$Viewer->permitted('site_edit_wiki')) {

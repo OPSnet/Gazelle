@@ -366,7 +366,7 @@ class Torrent extends TorrentAbstract {
         $name     = $this->name();
         (new \Gazelle\Tracker)->update_tracker('delete_torrent', [
             'id'        => $this->id,
-            'info_hash' => rawurlencode($this->infohashBinary()),
+            'info_hash' => rawurlencode($this->infohashEncoded()),
             'reason'    => $trackerReason,
         ]);
 

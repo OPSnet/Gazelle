@@ -2,6 +2,9 @@
 
 namespace Gazelle;
 
+use Gazelle\Enum\LeechReason;
+use Gazelle\Enum\LeechType;
+
 class TGroup extends BaseObject {
     final const tableName            = 'torrents_group';
     final const CACHE_KEY            = 'tg_%d';
@@ -944,6 +947,36 @@ class TGroup extends BaseObject {
                 $revisionId
         );
         return $revert;
+    }
+
+    public function setFreeleech(
+        \Gazelle\Manager\Torrent $torMan,
+        \Gazelle\Tracker         $tracker,
+        \Gazelle\User            $user,
+        LeechType                $leechType,
+        LeechReason              $reason,
+        int                      $threshold = 0,
+        bool                     $all       = false,
+    ): int {
+        $regular = [];
+        $large   = [];
+        foreach ($this->torrentIdList() as $torrentId) {
+            $torrent = $torMan->findById($torrentId);
+            if ($all || $torrent->format() == 'FLAC') {
+                if ($threshold > 0 and $torrent->size() > $threshold) {
+                    $large[] = $torrent->id();
+                } else {
+                    $regular[] = $torrent->id();
+                }
+            }
+        }
+        if ($regular) {
+            $torMan->setListFreeleech($tracker, $user, $regular, $leechType, $reason);
+        }
+        if ($large) {
+            $torMan->setListFreeleech($tracker, $user, $large, LeechType::Neutral, $reason);
+        }
+        return count($regular) + count($large);
     }
 
     public function remove(User $user): bool {

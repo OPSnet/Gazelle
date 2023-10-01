@@ -130,7 +130,7 @@ class ForumTest extends TestCase {
         $this->assertEquals(0, $thread->lastPage(), 'fthread-last-page');
         $this->assertEquals(0, $thread->lastCatalog(), 'fthread-last-catalog');
         // weird cache shit
-        // $this->assertEquals(1, $this->forum->numThreads(), 'fthread-admin-number-thread-total');
+        $this->assertEquals(1, $this->forum->numThreads(), 'fthread-admin-number-thread-total');
 
         $this->assertEquals($admin->id(), $thread->authorId(), 'fthread-author-id');
         $this->assertEquals($admin->username(), $thread->author()->username(), 'fthread-author-username');

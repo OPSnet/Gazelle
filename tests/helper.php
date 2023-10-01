@@ -77,6 +77,7 @@ class Helper {
         string          $catalogueNumber = '',
         string          $recordLabel     = 'Unitest Artists',
         string          $title           = 'phpunit remaster title',
+        int             $size            = 10_000_000,
     ): \Gazelle\Torrent {
         if (empty($catalogueNumber)) {
             $catalogueNumber = 'UA-REM-' . random_int(10000, 99999);
@@ -91,7 +92,7 @@ class Helper {
             infohash:                'infohash-' . randomString(10),
             filePath:                'unit-test',
             fileList:                [],
-            size:                    random_int(10_000_000, 99_999_999),
+            size:                    $size,
             isScene:                 false,
             isRemaster:              true,
             remasterYear:            (int)date('Y'),

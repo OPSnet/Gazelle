@@ -3,12 +3,9 @@
 namespace Gazelle\Manager;
 
 class TGroup extends \Gazelle\BaseManager {
-    final const ID_KEY                 = 'zz_tg_%d';
-    protected const CACHE_KEY_FEATURED = 'featured_%d';
-    protected const VOTE_SIMILAR       = 'vote_similar_albums_%d';
+    final const ID_KEY = 'zz_tg_%d';
 
-    final const FEATURED_AOTM     = 0;
-    final const FEATURED_SHOWCASE = 1;
+    protected const VOTE_SIMILAR = 'vote_similar_albums_%d';
 
     protected \Gazelle\User $viewer;
 
@@ -318,35 +315,23 @@ class TGroup extends \Gazelle\BaseManager {
         return true;
     }
 
-    protected function featuredAlbum(int $type): array {
-        $key = sprintf(self::CACHE_KEY_FEATURED, $type);
-        if (($featured = self::$cache->get_value($key)) === false) {
-            $featured = self::$db->rowAssoc("
-                SELECT fa.GroupID,
-                    tg.Name,
-                    tg.WikiImage,
-                    fa.ThreadID,
-                    fa.Title
-                FROM featured_albums AS fa
-                INNER JOIN torrents_group AS tg ON (tg.ID = fa.GroupID)
-                WHERE Ended IS NULL AND type = ?
-                ", $type
-            );
-            if (!is_null($featured)) {
-                $featured['artist_name'] = \Artists::display_artists(\Artists::get_artist($featured['GroupID']), false, false);
-                $featured['image']       = image_cache_encode($featured['WikiImage']);
-            }
-            self::$cache->cache_value($key, $featured, 86400 * 7);
-        }
-        return $featured ?? [];
-    }
-
-    public function featuredAlbumAotm(): array {
-        return $this->featuredAlbum(self::FEATURED_AOTM);
-    }
-
-    public function featuredAlbumShowcase(): array {
-        return $this->featuredAlbum(self::FEATURED_SHOWCASE);
+    public function groupLog(int $groupId): array {
+        self::$db->prepared_query("
+            SELECT gl.TorrentID        AS torrent_id,
+                gl.UserID              AS user_id,
+                gl.Info                AS info,
+                gl.Time                AS created,
+                t.Media                AS media,
+                t.Format               AS format,
+                t.Encoding             AS encoding,
+                if(t.ID IS NULL, 1, 0) AS deleted
+            FROM group_log gl
+            LEFT JOIN torrents t ON (t.ID = gl.TorrentID)
+            WHERE gl.GroupID = ?
+            ORDER BY gl.Time DESC
+            ", $groupId
+        );
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     /**

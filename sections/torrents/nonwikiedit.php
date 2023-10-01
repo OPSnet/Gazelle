@@ -1,5 +1,8 @@
 <?php
 
+use Gazelle\Enum\LeechType;
+use Gazelle\Enum\LeechReason;
+
 authorize();
 
 $tgMan = new Gazelle\Manager\TGroup;
@@ -13,14 +16,19 @@ if (!$tgroup->canEdit($Viewer)) {
 }
 
 $log = [];
-if (isset($_POST['freeleechtype']) && $Viewer->permitted('torrents_freeleech')) {
-    if (!in_array($_POST['freeleechreason'] ?? '', ['0', '1', '2', '3'])) {
-        error(404);
-    }
-    $reason = $_POST['freeleechreason'];
-    $free = in_array($_POST['freeleechtype'], ['0', '1', '2']) ? $_POST['freeleechtype'] : '0';
-    $log[] = "freeleech type=$free reason=$reason";
-    (new Gazelle\Manager\Torrent)->setFreeleech($Viewer, $tgroup->torrentIdList(), $free, $reason, false, false);
+if (isset($_POST['leech_type']) && $Viewer->permitted('torrents_freeleech')) {
+    $torMan    = new Gazelle\Manager\Torrent;
+    $reason    = $torMan->lookupLeechReason($_POST['leech_reason'] ?? LeechReason::Normal->value);
+    $leechType = $torMan->lookupLeechType($_POST['leech_type'] ?? LeechType::Normal->value);
+    $tgroup->setFreeleech(
+        torMan:    $torMan,
+        tracker:   new Gazelle\Tracker,
+        user:      $Viewer,
+        leechType: $leechType,
+        reason:    $reason,
+        all:       $_POST['all'] == 'all',
+    );
+    $log[] = "freeleech type={$leechType->label()} reason={$reason->label()}";
 }
 
 $year = (int)trim($_POST['year']);

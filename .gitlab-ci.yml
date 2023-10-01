@@ -17,17 +17,17 @@ stages:
 #   WAIT_ON_FINISH - sleep for 1h after successful execution, useful for debugging
 
 variables:
-  POSTGRES_DATABASE: ${PG_DATABASE}_${CI_COMMIT_SHORT_SHA}
-  POSTGRES_USER: $PG_USER
-  POSTGRES_PASSWORD: $PG_PASSWORD
-  MYSQL_DATABASE: ${MYSQL_DATABASE}_${CI_COMMIT_SHORT_SHA}
-  MYSQL_USER: $MYSQL_USER
-  MYSQL_PASSWORD: $MYSQL_PASSWORD
-  MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
-  MEMCACHED_NAMESPACE: $CI_COMMIT_SHORT_SHA
   COMPOSER_HOME: ${CI_PROJECT_DIR}/.composer
   CYPRESS_CACHE_FOLDER: ${CI_PROJECT_DIR}/node_modules/.cypress-cache
   GIT_SUBMODULE_STRATEGY: recursive
+  MEMCACHED_NAMESPACE: $CI_COMMIT_SHORT_SHA
+  MYSQL_DATABASE: ${MYSQL_DATABASE}_${CI_COMMIT_SHORT_SHA}
+  MYSQL_PASSWORD: $MYSQL_PASSWORD
+  MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
+  MYSQL_USER: $MYSQL_USER
+  POSTGRES_DATABASE: ${PG_DATABASE}_${CI_COMMIT_SHORT_SHA}
+  POSTGRES_PASSWORD: $PG_PASSWORD
+  POSTGRES_USER: $PG_USER
 
 phpstan:
   stage: analyze
@@ -106,7 +106,7 @@ e2e-tests:
     - /bin/bash "${CI_PROJECT_DIR}/.docker/web/start-services.sh"
     - su gazelle -c "composer exec -- phpunit --configuration misc/phpunit.xml --coverage-php /tmp/coverage/phpunit.cov --exclude-group no-ci"
     - /bin/bash "${CI_PROJECT_DIR}/.docker/web/bootstrap-yarn.sh"
-    - yarn run cypress run
+    - yarn run cypress run || test "$WAIT_ON_FINISH"
     # note: phpcov has problems if .cov files are somewhere in the src tree
     - su gazelle -c '/opt/bin/phpcov merge "/tmp/coverage" --text "/tmp/coverage/coverage.txt" && cat "/tmp/coverage/coverage.txt"'
     - test "$WAIT_ON_FINISH" && sleep 3600 || exit 0

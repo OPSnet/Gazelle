@@ -2,6 +2,9 @@
 
 namespace Gazelle;
 
+use \Gazelle\Enum\LeechType;
+use \Gazelle\Enum\LeechReason;
+
 class Collage extends BaseObject {
     /**
      * A Gazelle\Collage is a holder object that delegates most functionality to
@@ -277,6 +280,63 @@ class Collage extends BaseObject {
         return $limit == -1
             ? $this->collage->torrentTagList() /** @phpstan-ignore-line */
             : array_slice($this->collage->torrentTagList(), 0, $limit, true); /** @phpstan-ignore-line */
+    }
+
+    /**
+     * Return a list of all the FLAC torrents in all the groups in this collage.
+     * No need to cache, because it will only ever be called by a moderator when
+     * freeleeching a collage
+     */
+    public function entryFlacList(): array {
+        self::$db->prepared_query("
+            SELECT t.ID
+            FROM collages_torrents ct
+            INNER JOIN torrents t  USING (GroupID)
+            WHERE t.Format = ?
+                AND ct.collageid = ?
+            ", 'FLAC', $this->id
+        );
+        return self::$db->collect(0, false);
+    }
+
+    public function entryAllList(): array {
+        self::$db->prepared_query("
+            SELECT t.ID
+            FROM collages_torrents ct
+            INNER JOIN torrents t  USING (GroupID)
+            WHERE ct.collageid = ?
+            ", $this->id
+        );
+        return self::$db->collect(0, false);
+    }
+
+    public function setFreeleech(
+        \Gazelle\Manager\Torrent $torMan,
+        \Gazelle\Tracker         $tracker,
+        \Gazelle\User            $user,
+        LeechType                $leechType,
+        LeechReason              $reason,
+        int                      $threshold = 0,
+        bool                     $all       = false,
+    ): int {
+        $regular = [];
+        $large   = [];
+        $idList  = $all ? $this->entryAllList() : $this->entryFlacList();
+        foreach ($idList as $torrentId) {
+            $torrent = $torMan->findById($torrentId);
+            if ($threshold > 0 and $torrent->size() > $threshold) {
+                $large[] = $torrent->id();
+            } else {
+                $regular[] = $torrent->id();
+            }
+        }
+        if ($regular) {
+            $torMan->setListFreeleech($tracker, $user, $regular, $leechType, $reason);
+        }
+        if ($large) {
+            $torMan->setListFreeleech($tracker, $user, $large, LeechType::Neutral, $reason);
+        }
+        return count($regular) + count($large);
     }
 
     /*** UPDATE METHODS ***/

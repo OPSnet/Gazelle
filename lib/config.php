@@ -392,6 +392,14 @@ defined('BYTES_PER_FREELEECH_TOKEN') or define('BYTES_PER_FREELEECH_TOKEN', 512 
 // How long does an activated token last before it is purged?
 defined('FREELEECH_TOKEN_EXPIRY_DAYS') or define('FREELEECH_TOKEN_EXPIRY_DAYS', 30);
 
+// When setting torrent groups or collages freeleech, "large" torrents
+// can be set to neutral leech, to avoid tanking the economy.
+// Scale of the neutral leech threshold (k, m, g for KiB, MiB and TiB, respectively)
+defined('NEUTRAL_LEECH_UNIT') or define('NEUTRAL_LEECH_UNIT', 'm');
+
+// Size of the the neutral leech threshold (in terms of the units specified above.
+defined('NEUTRAL_LEECH_THRESHOLD') or define('NEUTRAL_LEECH_THRESHOLD', 1024);
+
 // How much buffer does a request vote represent?
 defined('REQUEST_MIN') or define('REQUEST_MIN', 100); // in MiB
 
@@ -719,7 +727,7 @@ defined('TRASH_FORUM_ID') or define('TRASH_FORUM_ID', 4);
 defined('AOTM_FORUM_ID') or define('AOTM_FORUM_ID', 51);
 
 // The Showcase (Vanity House) forum.
-defined('VANITY_HOUSE_FORUM_ID') or define('VANITY_HOUSE_FORUM_ID', 18);
+defined('SHOWCASE_FORUM_ID') or define('SHOWCASE_FORUM_ID', 18);
 
 // The client whitelist suggestion forum.
 defined('CLIENT_WHITELIST_FORUM_ID') or define('CLIENT_WHITELIST_FORUM_ID', 680);

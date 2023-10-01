@@ -1,0 +1,53 @@
+{% from 'macro/torrent.twig' import freeleech %}
+{{ header('Feature an Album') }}
+<div class="header">
+    <h2>Feature an Album</h2>
+</div>
+
+<div class="thin">
+<br />
+<div class="box pad">
+{% if not current.aotm %}
+There is no current Album of the Month.
+{% else %}
+The current Album of the Month is {{ current.aotm.tgroup.link|raw }}
+<a class="brackets" href="{{ current.aotm.thread.location }}">Thread</a>
+<b><a class="brackets" href="tools.php?action=featured_album&unfeature=aotm&auth={{ viewer.auth }}">Unfeature</a></b>
+{% endif %}
+</div>
+<br />
+
+<div class="thin box pad">
+{% if not current.showcase %}
+There is no current Showcase.
+{% else %}
+The current Showcase is {{ current.showcase.tgroup.link|raw }}
+<a class="brackets" href="{{ current.showcase.thread.url|raw }}">Thread</a>
+<b><a class="brackets" href="tools.php?action=featured_album&unfeature=showcase&auth={{ viewer.auth }}">Unfeature</a></b>
+{% endif %}
+</div>
+<br />
+
+<div class="box pad">
+<form class="create_form" name="album" method="post" action="">
+    <div class="pad">
+        <input type="hidden" name="action" value="featured_album" />
+        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+        <h3>Torrent Group to feature</h3>
+        (enter a torrent group ID or URL)<br />
+        <input type="text" name="groupid" />
+        <br /><br />
+        <h3>Front page title</h3>
+        This is the title that will appear front page annoucement (the title of the forum thread will be the name of the torrent group)<br />
+        <input type="text" name="title" size="60" />
+        <br /><br />
+        <h3>Body</h3>
+        {{ body.emit|raw }}
+        <br /><br />
+        {{ freeleech(size, unit, leech_type, leech_reason) }}
+        <input type="submit" name="submit" value="Feature" class="submit" />
+    </div>
+</form>
+</div>
+</div>
+{{ footer() }}

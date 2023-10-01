@@ -23,6 +23,10 @@ define('BORIS', 1);
 $_SERVER['HTTP_USER_AGENT'] = 'boris';
 $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 
+use Gazelle\Enum\FeaturedAlbumType;
+use Gazelle\Enum\LeechType;
+use Gazelle\Enum\LeechReason;
+
 $b = new Boris\Boris(SITE_NAME . '> ');
 $b->setInspector(new Boris\ExportInspector);
 

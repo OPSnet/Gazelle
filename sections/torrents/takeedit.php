@@ -1,6 +1,8 @@
 <?php
 
 use OrpheusNET\Logchecker\Logchecker;
+use Gazelle\Enum\LeechType;
+use Gazelle\Enum\LeechReason;
 
 authorize();
 
@@ -11,7 +13,6 @@ if (is_null($torrent)) {
 }
 $Remastered   = $torrent->isRemastered();
 $RemasterYear = $torrent->remasterYear();
-$CurFreeLeech = $torrent->freeleechStatus();
 $TorrentID    = $torrent->id();
 $UserID       = $torrent->uploaderId();
 
@@ -58,23 +59,6 @@ if ($Properties['Remastered']) {
     $Properties['RemasterTitle']           = '';
     $Properties['RemasterRecordLabel']     = '';
     $Properties['RemasterCatalogueNumber'] = '';
-}
-
-if ($Viewer->permitted('torrents_freeleech')) {
-    $Free = $_POST['freeleechtype'] ?? '0';
-    if (!in_array($Free, ['0', '1', '2'])) {
-        error(0);
-    }
-    $Properties['FreeLeech'] = $Free;
-    if ($Free === '0') {
-        $FreeType = '0';
-    } else {
-        $FreeType = $_POST['freeleechreason'] ?? '0';
-        if (!in_array($FreeType, ['0', '1', '2', '3'])) {
-            error(0);
-        }
-    }
-    $Properties['FreeLeechType'] = $FreeType;
 }
 
 //******************************************************************************//
@@ -184,6 +168,7 @@ $current = $db->rowAssoc("
     WHERE ID = ?
     ", $TorrentID
 );
+$current['Remastered'] = ($current['Remastered'] === '1');
 $change = [];
 foreach ($current as $key => $value) {
     if ($key == 'GroupID') {
@@ -227,11 +212,6 @@ $args = [
     $Properties['RemasterRecordLabel'], $Properties['RemasterCatalogueNumber'],
 ];
 
-if ($Viewer->permitted('torrents_freeleech')) {
-    $set = array_merge($set, ['FreeTorrent = ?', 'FreeLeechType = ?']);
-    $args = array_merge($args, [$Properties['FreeLeech'], $Properties['FreeLeechType']]);
-}
-
 if ($Viewer->permitted('users_mod')) {
     $set = array_merge($set, ['HasLog = ?', 'HasCue = ?']);
     if ($Properties['Format'] == 'FLAC' && $Properties['Media'] == 'CD') {
@@ -268,12 +248,22 @@ $db->prepared_query("
     ", ...$args
 );
 
+if ($Viewer->permitted('torrents_freeleech')) {
+    $reason    = $torMan->lookupLeechReason($_POST['leech_reason'] ?? LeechReason::Normal->value);
+    $leechType = $torMan->lookupLeechType($_POST['leech_type'] ?? LeechType::Normal->value);
+    if ($leechType != $torrent->leechType() || $reason != $torrent->leechReason()) {
+        $torMan->setListFreeleech(
+            tracker:   new Gazelle\Tracker,
+            idList:    [$torrent->id()],
+            leechType: $leechType,
+            reason:    $reason,
+            user:      $Viewer,
+        );
+    }
+}
 $db->commit();
 
-if ($Viewer->permitted('torrents_freeleech') && $Properties['FreeLeech'] != $CurFreeLeech) {
-    $torMan->setFreeleech($Viewer, [$TorrentID], $Properties['FreeLeech'], $Properties['FreeLeechType'], true, false);
-}
-(new Gazelle\Manager\TGroup)->findById($current['GroupID'])?->refresh();
+$torrent->group()->refresh();
 
 $changeLog = implode(', ', $change);
 (new Gazelle\Log)->torrent($current['GroupID'], $TorrentID, $Viewer->id(), $changeLog)

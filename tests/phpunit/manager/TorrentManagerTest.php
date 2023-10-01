@@ -2,6 +2,9 @@
 
 use \PHPUnit\Framework\TestCase;
 
+use \Gazelle\Enum\LeechType;
+use \Gazelle\Enum\LeechReason;
+
 require_once(__DIR__ . '/../../../lib/bootstrap.php');
 require_once(__DIR__ . '/../../helper.php');
 
@@ -177,5 +180,32 @@ class TorrentManagerTest extends TestCase {
         // Torrent was active RESEED_TORRENT days ago reseed request
         $this->torrentList[1]->setField('LastReseedRequest', date('Y-m-d H:i:s'))->modify();
         $this->assertFalse($this->torrentList[1]->isReseedRequestAllowed());
+    }
+
+    public function testTorrentLeechReason(): void {
+        $manager = new \Gazelle\Manager\Torrent;
+
+        $this->assertEquals(LeechReason::Normal,    $manager->lookupLeechReason('0'), 'torman-leechreason-normal');
+        $this->assertEquals(LeechReason::StaffPick, $manager->lookupLeechReason('1'), 'torman-leechreason-staffpick');
+        $this->assertEquals(LeechReason::Permanent, $manager->lookupLeechReason('2'), 'torman-leechreason-permanent');
+        $this->assertEquals(LeechReason::Showcase,  $manager->lookupLeechReason('3'), 'torman-leechreason-showcase');
+
+        $showcase = LeechReason::Showcase;
+        $this->assertEquals('Showcase', $showcase->label(), 'torman-leechreason-value-showcase');
+
+        $this->assertCount(5, $manager->leechReasonList(), 'torman-leechreason-list');
+    }
+
+    public function testTorrentLeechType(): void {
+        $manager = new \Gazelle\Manager\Torrent;
+
+        $this->assertEquals(LeechType::Normal,  $manager->lookupLeechType('0'), 'torman-leechtype-normal');
+        $this->assertEquals(LeechType::Free,    $manager->lookupLeechType('1'), 'torman-leechtype-free');
+        $this->assertEquals(LeechType::Neutral, $manager->lookupLeechType('2'), 'torman-leechtype-neutral');
+
+        $leechType = LeechType::Free;
+        $this->assertEquals('Freeleech', $leechType->label(), 'torman-leechtype-value-free');
+
+        $this->assertCount(3, $manager->leechTypeList(), 'torman-leechtype-list');
     }
 }

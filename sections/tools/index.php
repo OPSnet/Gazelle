@@ -76,6 +76,9 @@ switch ($_REQUEST['action']) {
         }
         break;
 
+    case 'featured_album':
+        require_once('managers/featured_album.php');
+        break;
     case 'forum':
         require_once('managers/forum_list.php');
         break;
@@ -127,9 +130,6 @@ switch ($_REQUEST['action']) {
         break;
     case 'take_mass_pm':
         require_once('managers/take_mass_pm.php');
-        break;
-    case 'multiple_freeleech':
-        require_once('managers/multiple_freeleech.php');
         break;
 
     case 'navigation_alter':
@@ -337,13 +337,6 @@ switch ($_REQUEST['action']) {
                 require_once('development/periodic_run.php');
                 break;
         }
-        break;
-
-    case 'monthalbum':
-        require_once('misc/album_of_month.php');
-        break;
-    case 'vanityhouse':
-        require_once('misc/vanity_house.php');
         break;
 
     //Services

@@ -1,5 +1,6 @@
 <?php
 
+use \Gazelle\Enum\LeechType;
 use \Gazelle\Util\Irc;
 
 $torrent = (new Gazelle\Manager\Torrent)->findById((int)($_REQUEST['id'] ?? 0));
@@ -61,7 +62,7 @@ if (!($_REQUEST['usetoken'] ?? 0) && $torrent->uploaderId() != $userId) {
  * table and update their cache key.
  */
 
-if (isset($_REQUEST['usetoken']) && $torrent->freeleechStatus() == '0') {
+if (isset($_REQUEST['usetoken']) && $torrent->leechType() == LeechType::Normal) {
     if (!$Viewer->canSpendFLToken($torrent)) {
         json_or_error('You cannot use tokens here (leeching suspended or already freeleech).');
     }
@@ -86,7 +87,7 @@ if (isset($_REQUEST['usetoken']) && $torrent->freeleechStatus() == '0') {
 
         // Let the tracker know about this
         if (!(new Gazelle\Tracker)->update_tracker('add_token', [
-            'info_hash' => rawurlencode($torrent->infohashBinary()), 'userid' => $userId
+            'info_hash' => $torrent->infohashEncoded(), 'userid' => $userId
         ])) {
             $db->rollback();
             json_or_error('Sorry! An error occurred while trying to register your token. Most often, this is due to the tracker being down or under heavy load. Please try again later.');

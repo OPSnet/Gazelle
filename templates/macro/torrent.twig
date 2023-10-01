@@ -1,0 +1,33 @@
+{% macro freeleech(size, unit, leech_type, leech_reason) %}
+{% from 'macro/form.twig' import checked, selected -%}
+<label>
+    <input type="checkbox" name="change_leech" checked />&nbsp;Mark
+</label>
+<select name="all">
+    <option value="lossless" selected="selected">lossless</option>
+    <option value="all">all</option>
+</select>
+torrents as
+<select name="leech_type">
+{% for type in leech_type %}
+    <option value="{{ type.value }}"{{ selected(type.value == '0') }}>{{ type.label }}</option>
+{% endfor %}
+</select>
+for
+<select name="leech_reason">
+{% for reason in leech_reason %}
+    <option value="{{ reason.value }}"{{ selected(reason.value == '0') }}>{{ reason.label }}</option>
+{% endfor %}
+</select>
+<br />
+<label>
+    <input type="checkbox" name="neutral" checked />&nbsp;Neutral-leech torrents larger than
+</label>
+<input type="text" name="size" value="{{ size }}" size="2" />
+<select name="unit">
+    <option value="k"{{ selected(unit == 'k') }}>KiB</option>
+    <option value="m"{{ selected(unit == 'm') }}>MiB</option>
+    <option value="g"{{ selected(unit == 'g') }}>GiB</option>
+</select>
+<br />
+{% endmacro %}

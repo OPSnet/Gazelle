@@ -2,6 +2,8 @@
 
 namespace Gazelle\Search;
 
+use Gazelle\Enum\LeechType;
+
 class Torrent {
     final const TAGS_ANY = 0;
     final const TAGS_ALL = 1;
@@ -725,10 +727,10 @@ class Torrent {
     private function filter_torrent_internal(\Gazelle\Torrent $torrent): bool {
         if (isset($this->UsedTorrentAttrs['freetorrent'])) {
             $FilterValue = $this->UsedTorrentAttrs['freetorrent'];
-            if ($FilterValue == '3' && $torrent->freeleechStatus() != '0') {
+            if ($FilterValue == '3' && $torrent->leechType() != LeechType::Normal) {
                 // Either FL or NL is ok
                 return false;
-            } elseif ($FilterValue != '3' && $FilterValue != (int)$torrent->freeleechStatus()) {
+            } elseif (!in_array($FilterValue, ['3', $torrent->leechType()->value])) {
                 return false;
             }
         }

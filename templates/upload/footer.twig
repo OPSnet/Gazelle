@@ -5,16 +5,16 @@
     <tr id="freetorrent">
         <td class="label">Leech Type</td>
         <td>
-            <select name="freeleechtype">
-    {% for leech in ["Normal", "Free", "Neutral"] %}
-                <option value="{{ loop.index0 }}"{{ selected(loop.index0 == info.FreeTorrent) }}>{{ leech }}</option>
-    {% endfor %}
+            <select name="leech_type">
+            {% for type in leech_type %}
+                <option value="{{ type.value }}"{{ selected(type.value == info.leech_type.value) }}>{{ type.label }}</option>
+            {% endfor %}
             </select>
-            because
-            <select name="freeleechreason">
-    {% for reason in ["N/A", "Staff Pick", "Perma-FL", "Showcase"] %}
-                <option value="{{ loop.index0 }}"{{ selected(loop.index0 == info.FreeLeechType) }}>{{ reason }}</option>
-    {% endfor %}
+            for
+            <select name="leech_reason">
+            {% for reason in leech_reason %}
+                <option value="{{ reason.value }}"{{ selected(reason.value == info.leech_reason.value) }}>{{ reason.label }}</option>
+            {% endfor %}
             </select>
         </td>
     </tr>

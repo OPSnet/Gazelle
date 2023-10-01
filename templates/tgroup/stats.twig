@@ -3,6 +3,17 @@
         <strong>Statistics</strong>
     </div>
     <ul class="nobullet">
+{%- if featured -%}
+    <li>
+    {%- if featured.dateEnd is not empty -%}
+        {%- set date = featured.dateEnd|date('F Y') -%}
+    This was {{ date|article }} {{ date }} {{ featured.type.label }}</li>
+    {%- else -%}
+    This is {{ featured.type.label|article }} {{ featured.type.label }}
+    <br />
+    <br /></li>
+    {%- endif -%}
+{%- endif -%}
     <li>Downloads: {{ stats.downloadTotal }}</li>
     <li>Leechers: {{ stats.leechTotal }}</li>
     <li>Snatches: {{ stats.snatchTotal }}</li>

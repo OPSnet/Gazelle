@@ -7,12 +7,15 @@ if (is_null($collage)) {
 if ($collage->isPersonal() && !$collage->isOwner($Viewer->id()) && !$Viewer->permitted('site_collages_delete')) {
     error(403);
 }
+$torMan = new Gazelle\Manager\Torrent;
 
 echo $Twig->render('collage/edit.twig', [
-    'can_rename'  => $Viewer->permitted('site_collages_delete')
+    'can_rename'   => $Viewer->permitted('site_collages_delete')
         || ($collage->isPersonal() && $collage->isOwner($Viewer->id()) && $Viewer->permitted('site_collages_renamepersonal')),
-    'collage'     => $collage,
-    'description' => new Gazelle\Util\Textarea('description', $collage->description(), 60, 10),
-    'error'       => $Err ?? false,
-    'viewer'      => $Viewer,
+    'collage'      => $collage,
+    'description'  => new Gazelle\Util\Textarea('description', $collage->description(), 60, 10),
+    'error'        => $Err ?? false,
+    'leech_type'   => $torMan->leechTypeList(),
+    'leech_reason' => $torMan->leechReasonList(),
+    'viewer'       => $Viewer,
 ]);

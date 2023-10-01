@@ -2,6 +2,9 @@
 
 namespace Gazelle;
 
+use Gazelle\Enum\LeechReason;
+use Gazelle\Enum\LeechType;
+
 abstract class TorrentAbstract extends BaseObject {
     final const CACHE_LOCK       = 'torrent_lock_%d';
     final const CACHE_REPORTLIST = 't_rpt2_%d';
@@ -249,12 +252,22 @@ abstract class TorrentAbstract extends BaseObject {
         return $this->info()['Format'];
     }
 
-    public function freeleechStatus(): string {
-        return $this->info()['FreeTorrent'];
+    public function leechType(): LeechType {
+        return match($this->info()['FreeTorrent']) {
+            LeechType::Free->value    => LeechType::Free,
+            LeechType::Neutral->value => LeechType::Neutral,
+            default                   => LeechType::Normal,
+        };
     }
 
-    public function freeleechType(): string {
-        return $this->info()['FreeLeechType'];
+    public function leechReason(): LeechReason {
+        return match($this->info()['FreeLeechType']) {
+            LeechReason::AlbumOfTheMonth->value => LeechReason::AlbumOfTheMonth,
+            LeechReason::Permanent->value       => LeechReason::Permanent,
+            LeechReason::Showcase->value        => LeechReason::Showcase,
+            LeechReason::StaffPick->value       => LeechReason::StaffPick,
+            default                             => LeechReason::Normal,
+        };
     }
 
     /**
@@ -312,14 +325,14 @@ abstract class TorrentAbstract extends BaseObject {
     }
 
     /**
-     * The infohash of this torrent (binary)
+     * The infohash as expected by Ocelot
      */
-    public function infohashBinary(): string {
-        return $this->info()['info_hash_raw'];
+    public function infohashEncoded(): string {
+        return rawurlencode($this->info()['info_hash_raw']);
     }
 
     public function isFreeleech(): bool {
-        return $this->info()['FreeTorrent'] == '1';
+        return $this->info()['FreeTorrent'] == LeechType::Free->value;
     }
 
     public function isFreeleechPersonal(): bool {
@@ -327,7 +340,7 @@ abstract class TorrentAbstract extends BaseObject {
     }
 
     public function isNeutralleech(): bool {
-        return $this->info()['FreeTorrent'] == '2';
+        return $this->info()['FreeTorrent'] == LeechType::Neutral->value;
     }
 
     /* Is this a Perfect Flac?
@@ -698,14 +711,15 @@ abstract class TorrentAbstract extends BaseObject {
         if ($viewer && (new User\Snatch($viewer))->showSnatch($this->id)) {
             $extra[] = $this->labelElement('tl_snatched', 'Snatched!');
         }
-        if (isset($info['FreeTorrent'])) {
-            if ($info['FreeTorrent'] == '1') {
+        if ($info['PersonalFL']) {
+            $extra[] = $this->labelElement('tl_free tl_personal', 'Personal Freeleech!');
+        } else {
+            $leechType = $this->leechType();
+            if ($leechType == LeechType::Free) {
                 $extra[] = $this->labelElement('tl_free', 'Freeleech!');
-            } elseif ($info['FreeTorrent'] == '2') {
+            } elseif ($leechType == LeechType::Neutral) {
                 $extra[] = $this->labelElement('tl_free tl_neutral', 'Neutral Leech!');
             }
-        } elseif ($info['PersonalFL']) {
-            $extra[] = $this->labelElement('tl_free tl_personal', 'Personal Freeleech!');
         }
         if ($info['Media'] === 'CD' && $info['HasLog'] && $info['HasLogDB'] && !$info['LogChecksum']) {
             $extra[] = $this->labelElement('tl_notice', 'Bad/Missing Checksum');

@@ -72,11 +72,14 @@ class Upload extends \Gazelle\Base {
     }
 
     public function foot(bool $showFooter): string {
+        $torMan = new \Gazelle\Manager\Torrent;
         return self::$twig->render('upload/footer.twig', [
-            'is_upload'   => $this->Torrent === false || isset($this->Torrent['add-format']),
-            'info'        => $this->Torrent,
-            'show_footer' => $showFooter,
-            'user'        => $this->user,
+            'is_upload'    => $this->Torrent === false || isset($this->Torrent['add-format']),
+            'info'         => $this->Torrent,
+            'leech_type'   => $torMan->leechTypeList(),
+            'leech_reason' => $torMan->leechReasonList(),
+            'show_footer'  => $showFooter,
+            'viewer'       => $this->user,
         ]);
     }
 

@@ -2,31 +2,29 @@
 <div class="thin">
     <div class="sidebar">
 
-{% if featured_aotm %}
+{% if aotm.tgroup %}
 <div class="box">
     <div class="head colhead_dark">
         <strong>Album of the Month</strong>
-        <a href="forums.php?action=viewthread&amp;threadid={{ featured_aotm.ThreadID}}">[Discuss]</a>
+        <a href="forums.php?action=viewthread&amp;threadid={{ aotm.thread.id }}">[Discuss]</a>
     </div>
     <div class="center pad">
-        <a href="torrents.php?id={{ featured_aotm.GroupID }}" class="tooltip" title="{{
-            featured_aotm.artist_name }} - {{  featured_aotm.Name }}">
-            <img src="{{ featured_aotm.image|raw }}" alt="{{ featured_aotm.artist_name }} - {{ featured_aotm.Name }}" width="100%" />
+        <a href="{{ aotm.tgroup.location }}" class="tooltip" title="{{ aotm.tgroup.text }}">
+            <img src="{{ aotm.tgroup.image|image }}" alt="{{ aotm.tgroup.text }}" width="100%" />
         </a>
     </div>
 </div>
 {% endif %}
 
-{% if featured_showcase %}
+{% if showcase.tgroup %}
 <div class="box">
     <div class="head colhead_dark">
         <strong>Showcase</strong>
-        <a href="forums.php?action=viewthread&amp;threadid={{ featured_showcase.ThreadID}}">[Discuss]</a>
+        <a href="forums.php?action=viewthread&amp;threadid={{ showcase.thread_id }}">[Discuss]</a>
     </div>
     <div class="center pad">
-        <a href="torrents.php?id={{ featured_showcase.GroupID }}" class="tooltip" title="{{
-            featured_showcase.artist_name }} - {{  featured_showcase.Name }}">
-            <img src="{{ featured_showcase.image|raw }}" alt="{{ featured_showcase.artist_name }} - {{ featured_showcase.Name }}" width="100%" />
+        <a href="{{ aotm.tgroup.link }}" class="tooltip" title="{{ aotm.tgroup.text }}">
+            <img src="{{ showcase.tgroup.image|image }}" alt="{{ showcase.tgroup.text }}" width="100%" />
         </a>
     </div>
 </div>

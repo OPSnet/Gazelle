@@ -317,7 +317,8 @@ if ($musicRelease) {
 }
 
 echo $Twig->render('tgroup/stats.twig', [
-    'stats' => $tgroup->stats(),
+    'stats'    => $tgroup->stats(),
+    'featured' => (new Gazelle\Manager\FeaturedAlbum)->findById($tgroupId),
 ]);
 
 echo $Twig->render('vote/box.twig', [

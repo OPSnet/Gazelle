@@ -1,4 +1,5 @@
 {% from 'macro/form.twig' import checked, selected %}
+{% from 'macro/torrent.twig' import freeleech %}
 {{ header('Edit torrent group "' ~ tgroup.name ~ '"') }}
 <div class="thin">
     <div class="header">
@@ -21,7 +22,7 @@
 
                 <h3>Torrent group description:</h3>
                 {{ body.emit|raw }}
-{% if tgroup.categoryId == 1 %}
+{% if tgroup.categoryName == 'Music' %}
                 <h3>Release type:
                     <select id="releasetype" name="releasetype">
     {% for key, value in release_type %}
@@ -76,23 +77,19 @@
                 </tr>
     {% if viewer.permitted('torrents_freeleech') %}
                 <tr>
-                    <td class="label">Torrent <strong>group</strong> leech status</td>
+                    <td class="label">Leech status</td>
                     <td>
-                        <label><input type="radio" name="freeleechtype" value="0" checked="checked" /> Normal</label>
-                        <label><input type="radio" name="freeleechtype" value="1" /> Freeleech</label>
-                        <label><input type="radio" name="freeleechtype" value="2" /> Neutral</label>
-                        &mdash; reason
-                        <select name="freeleechreason">
-                            <option value="0" selected="selected">N/A</option>
-                            <option value="1" selected="selected">Staff Pick</option>
-                            <option value="2" selected="selected">Perma-FL</option>
-                            <option value="3" selected="selected">Showcase</option>
-                        </select<>
+                        <b>Note:</b> this affects all uploads in the group (but subsequent uploads will not inherit the value).
+                        <br />
+                        <br />
+                        {{ freeleech(size, unit, leech_type, leech_reason) }}
                     </td>
                 </tr>
     {% endif %}
             </table>
-            <input type="submit" value="Edit" />
+            <div style="text-align: center;">
+                <input type="submit" value="Edit" />
+            </div>
         </form>
     </div>
 {% endif %}

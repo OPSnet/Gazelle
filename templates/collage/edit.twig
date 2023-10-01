@@ -86,8 +86,15 @@
                 <td><input type="text" name="maxgroupsperuser" size="2" value="{{ collage.maxGroupsPerUser }}" /> (0 indicates unlimited)</td>
             </tr>
 {% endif %}
+{% if viewer.permitted('admin_freeleech') %}
+    {% from 'macro/torrent.twig' import freeleech %}
             <tr>
-                <td colspan="2" class="center"><input type="submit" value="Edit collage" /></td>
+                <td class="label">Leech status</td>
+                <td>{{ freeleech(constant('NEUTRAL_LEECH_THRESHOLD'), constant('NEUTRAL_LEECH_UNIT'), leech_type, leech_reason) }}</td>
+            </tr>
+{% endif %}
+            <tr>
+                <td></td><td><input type="submit" value="Edit collage" /></td>
             </tr>
         </table>
     </form>
