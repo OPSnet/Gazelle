@@ -11,7 +11,7 @@ of the mysql/mysqli functions, because this class provides debugging features an
 bunch of other cool stuff.
 
 Everything returned by this class is automatically escaped for output. This can be
-turned off by setting $Escape to false in next_record or to_array.
+turned off by setting $escape to false in next_record or to_array.
 
 //--------- Basic usage -------------------------------------------------------------
 
@@ -105,7 +105,7 @@ class Mysql_DuplicateKeyException extends Mysql_Exception {}
 class Mysql {
     public \mysqli|false $LinkID = false;
     protected \mysqli_result|false|null $QueryID = false;
-    protected array|null $Record = [];
+    protected array|false|null $Record = [];
     protected int $Row;
     protected int $Errno = 0;
     protected string $Error = '';
@@ -144,9 +144,9 @@ class Mysql {
     }
 
     public function connect(): void {
-        if (!$this->LinkID) {
+        if ($this->LinkID === false) {
             $this->LinkID = mysqli_connect($this->Server, $this->User, $this->Pass, $this->Database, $this->Port, $this->Socket);
-            if (!$this->LinkID) {
+            if ($this->LinkID === false) {
                 $this->Errno = mysqli_connect_errno();
                 $this->Error = mysqli_connect_error();
                 $this->halt('Connection failed (host:'.$this->Server.':'.$this->Port.')');
@@ -186,6 +186,9 @@ class Mysql {
         $this->setup_query();
         $Query = trim($Query);
         $this->PreparedQuery = $Query;
+        if ($this->LinkID === false) {
+            return false;
+        }
         $this->Statement = $this->LinkID->prepare($Query);
         if ($this->Statement === false) {
             $this->Errno = $this->LinkID->errno;
@@ -203,13 +206,12 @@ class Mysql {
      * type automatically set for how to bind it to the query (either
      * integer (i), double (d), or string (s)).
      *
-     * @param  array<mixed> $Parameters,... variables for the query
      * @return \mysqli_result|bool Returns a mysqli_result object
      *                            for successful SELECT queries,
      *                            or TRUE for other successful DML queries
      *                            or FALSE on failure.
      */
-    public function execute(...$Parameters): \mysqli_result|bool {
+    public function execute(mixed ...$Parameters): \mysqli_result|bool {
         /** @var \mysqli_stmt $Statement */
         $Statement = &$this->Statement;
 
@@ -234,7 +236,7 @@ class Mysql {
                 $Statement->execute();
                 return $Statement->get_result();
             } catch (\mysqli_sql_exception) {
-                if (mysqli_error($this->LinkID) == 1062) {
+                if ($this->LinkID && mysqli_error($this->LinkID) == 1062) {
                     throw new Mysql_DuplicateKeyException;
                 }
             }
@@ -252,8 +254,6 @@ class Mysql {
      * on keystrokes. If you do plan to be executing a prepared query
      * multiple times with different bound parameters, you'll want to call
      * the two functions separately instead of this function.
-     *
-     * @param mixed ...$Parameters
      */
     public function prepared_query(string $Query, mixed ...$Parameters): bool|\mysqli_result {
         $this->prepare($Query);
@@ -261,14 +261,17 @@ class Mysql {
     }
 
     private function attempt_query(string $Query, Callable $Closure): \mysqli_result|false {
-        global $Debug;
         $QueryStartTime = microtime(true);
+        if ($this->LinkID === false) {
+            return false;
+        }
         // In the event of a MySQL deadlock, we sleep allowing MySQL time to unlock, then attempt again for a maximum of 5 tries
         for ($i = 1; $i < 6; $i++) {
             $this->QueryID = $Closure();
             if (!in_array(mysqli_errno($this->LinkID), [1213, 1205])) {
                 break;
             }
+            global $Debug;
             $Debug->analysis('Non-Fatal Deadlock:', $Query, 3600 * 24);
             trigger_error("Database deadlock, attempt $i");
 
@@ -297,26 +300,24 @@ class Mysql {
     }
 
     public function inserted_id(): ?int {
-        if ($this->LinkID) {
-            return mysqli_insert_id($this->LinkID);
-        }
-        return null;
+        return $this->LinkID !== false ? (int)mysqli_insert_id($this->LinkID) : null;
     }
 
-    public function next_row(int $type = MYSQLI_NUM): ?array {
-        return $this->LinkID ? mysqli_fetch_array($this->QueryID, $type) : null;
+    public function next_row(int $type = MYSQLI_NUM): array|null|false {
+        return $this->QueryID ? mysqli_fetch_array($this->QueryID, $type) : false;
     }
 
-    public function next_record(int $Type = MYSQLI_BOTH, mixed $Escape = true, bool $Reverse = false): ?array {
-        // $Escape can be true, false, or an array of keys to not escape
-        // If $Reverse is true, then $Escape is an array of keys to escape
-        if ($this->LinkID) {
+    public function next_record(int $Type = MYSQLI_BOTH, array|bool $escape = true): ?array {
+        // $escape can be true, false, or an array of keys to not escape
+        // If $Reverse is true, then $escape is an array of keys to escape
+        if ($this->QueryID) {
             $this->Record = mysqli_fetch_array($this->QueryID, $Type);
             $this->Row++;
             if (!is_array($this->Record)) {
                 $this->QueryID = false;
-            } elseif ($Escape !== false) {
-                $this->Record = $this->display_array($this->Record, $Escape, $Reverse);
+                $this->Record = null;
+            } elseif ($escape !== false) {
+                $this->Record = $this->display_array($this->Record, $escape);
             }
             return $this->Record;
         }
@@ -332,24 +333,22 @@ class Mysql {
      * need to be escaped are strings that users input (with any characters) and
      * are not displayed inside a textarea or input field.
      *
-     * @param mixed  $Escape Boolean true/false for escaping entire/none of query
+     * @param mixed  $escape Boolean true/false for escaping entire/none of query
      *                          or can be an array of array keys for what columns to escape
      */
-    public function fetch_record(mixed ...$Escape): ?array {
-        if (count($Escape) === 1 && $Escape[0] === true) {
-            $Escape = true;
+    public function fetch_record(mixed ...$escape): ?array {
+        if (count($escape) === 1 && $escape[0] === true) {
+            $escape = true;
         }
-        elseif (count($Escape) === 0) {
-            $Escape = false;
+        elseif (count($escape) === 0) {
+            $escape = false;
         }
-        return $this->next_record(MYSQLI_BOTH, $Escape, true);
+        return $this->next_record(MYSQLI_BOTH, $escape);
     }
 
     public function close(): void {
-        if ($this->LinkID) {
-            if (!mysqli_close($this->LinkID)) {
-                $this->halt('Cannot close connection or connection did not open.');
-            }
+        if ($this->LinkID !== false) {
+            $this->halt('Cannot close connection or connection did not open.');
             $this->LinkID = false;
         }
     }
@@ -375,63 +374,69 @@ class Mysql {
 
     public function affected_rows(): int {
         if ($this->LinkID) {
-            return $this->LinkID->affected_rows;
+            return (int)$this->LinkID->affected_rows;
         }
         /* why the fuck is this necessary for \Gazelle\Bonus\purchaseInvite() ?! */
         if ($this->Statement) {
-            return $this->Statement->affected_rows;
+            return (int)$this->Statement->affected_rows;
         }
         return 0;
     }
 
     public function info(): string {
-        return mysqli_get_host_info($this->LinkID);
+        return $this->LinkID ? mysqli_get_host_info($this->LinkID) : '';
     }
 
     // Creates an array from a result set
     // If $Key is set, use the $Key column in the result set as the array key
     // Otherwise, use an integer
-    public function to_array(bool|string $Key = false, int $Type = MYSQLI_BOTH, bool|array $Escape = true): array {
+    public function to_array(bool|string $Key = false, int $Type = MYSQLI_BOTH, array|bool $escape = true): array {
         $Return = [];
-        while ($Row = mysqli_fetch_array($this->QueryID, $Type)) {
-            if ($Escape !== false) {
-                $Row = $this->display_array($Row, $Escape);
+        if ($this->QueryID) {
+            while ($Row = mysqli_fetch_array($this->QueryID, $Type)) {
+                if ($escape !== false) {
+                    $Row = $this->display_array($Row, $escape);
+                }
+                if ($Key !== false) {
+                    $Return[$Row[$Key]] = $Row;
+                } else {
+                    $Return[] = $Row;
+                }
             }
-            if ($Key !== false) {
-                $Return[$Row[$Key]] = $Row;
-            } else {
-                $Return[] = $Row;
-            }
+            mysqli_data_seek($this->QueryID, 0);
         }
-        mysqli_data_seek($this->QueryID, 0);
         return $Return;
     }
 
     //  Loops through the result set, collecting the $ValField column into an array with $KeyField as keys
-    public function to_pair(string $KeyField, string $ValField, bool $Escape = true): array {
+    public function to_pair(string $KeyField, string $ValField, bool $escape = true): array {
         $Return = [];
-        while ($Row = mysqli_fetch_array($this->QueryID)) {
-            if ($Escape) {
-                $Key = display_str($Row[$KeyField]);
-                $Val = display_str($Row[$ValField]);
-            } else {
-                $Key = $Row[$KeyField];
-                $Val = $Row[$ValField];
+        if ($this->QueryID) {
+            while ($Row = mysqli_fetch_array($this->QueryID)) {
+                if ($escape) {
+                    $Key = display_str($Row[$KeyField]);
+                    $Val = display_str($Row[$ValField]);
+                } else {
+                    $Key = $Row[$KeyField];
+                    $Val = $Row[$ValField];
+                }
+                $Return[$Key] = $Val;
             }
-            $Return[$Key] = $Val;
+            mysqli_data_seek($this->QueryID, 0);
         }
-        mysqli_data_seek($this->QueryID, 0);
         return $Return;
     }
 
     //  Loops through the result set, collecting the $Key column into an array
-    public function collect(int|string $Key, bool $Escape = true): array {
-        $Return = [];
-        while ($Row = mysqli_fetch_array($this->QueryID)) {
-            $Return[] = $Escape ? display_str($Row[$Key]) : $Row[$Key];
+    public function collect(int|string $key, bool $escape = true): array {
+        $collect = [];
+        if ($this->QueryID) {
+            while ($row = mysqli_fetch_array($this->QueryID)) {
+                $collect[] = $escape ? display_str($row[$key]) : $row[$key];
+            }
+            mysqli_data_seek($this->QueryID, 0);
         }
-        mysqli_data_seek($this->QueryID, 0);
-        return $Return;
+        return $collect;
     }
 
     /**
@@ -509,30 +514,38 @@ class Mysql {
         $Warnings = [];
         if ($this->LinkID !== false && mysqli_warning_count($this->LinkID)) {
             $e = mysqli_get_warnings($this->LinkID);
-            do {
-                if ($e->errno == 1592) {
-                    // 1592: Unsafe statement written to the binary log using statement format since BINLOG_FORMAT = STATEMENT.
-                    continue;
-                }
-                $Warnings[] = 'Code ' . $e->errno . ': ' . display_str($e->message);
-            } while ($e->next());
+            if ($e !== false) {
+                do {
+                    if ($e->errno == 1592) {
+                        // 1592: Unsafe statement written to the binary log using statement format since BINLOG_FORMAT = STATEMENT.
+                        continue;
+                    }
+                    $Warnings[] = 'Code ' . $e->errno . ': ' . display_str($e->message);
+                } while ($e->next());
+            }
         }
         $this->Queries[count($this->Queries) - 1][2] = $Warnings;
     }
 
     public function begin_transaction(): void {
-        if (!$this->LinkID) {
+        if (!$this->LinkID !== false) {
             $this->connect();
         }
-        mysqli_begin_transaction($this->LinkID);
+        if ($this->LinkID !== false) {
+            mysqli_begin_transaction($this->LinkID);
+        }
     }
 
     public function commit(): void {
-        mysqli_commit($this->LinkID);
+        if ($this->LinkID) {
+            mysqli_commit($this->LinkID);
+        }
     }
 
     public function rollback(): void {
-        mysqli_rollback($this->LinkID);
+        if ($this->LinkID) {
+            mysqli_rollback($this->LinkID);
+        }
     }
 
     public function dropTemporaryTable(string $tableName): void {
@@ -543,20 +556,17 @@ class Mysql {
 
     /**
      * HTML escape an entire array for output.
-     * @param array $Array, what we want to escape
-     * @param boolean|array $Escape
+     * @param boolean|array $escape
      *    if true, all keys escaped
      *    if false, no escaping.
      *    If array, it's a list of array keys not to escape.
-     * @param boolean $Reverse reverses $Escape such that then it's an array of keys to escape
-     * @return array mutated version of $Array with values escaped.
      */
-    protected function display_array(array $Array, bool|array $Escape = [], bool $Reverse = false): array {
-        foreach ($Array as $Key => $Val) {
-            if ((!is_array($Escape) && $Escape == true) || (!$Reverse && !in_array($Key, $Escape)) || ($Reverse && in_array($Key, $Escape))) {
-                $Array[$Key] = display_str($Val);
+    protected function display_array(array $field, array|bool $escape): array {
+        foreach ($field as $key => $val) {
+            if ($escape === true || (is_array($escape) && !in_array($key, $escape))) {
+                $field[$key] = display_str($val);
             }
         }
-        return $Array;
+        return $field;
     }
 }

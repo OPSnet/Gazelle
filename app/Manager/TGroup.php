@@ -233,12 +233,9 @@ class TGroup extends \Gazelle\BaseManager {
 
         // GroupIDs
         self::$db->prepared_query("SELECT ID FROM torrents WHERE GroupID = ?", $old->id());
-        $cacheKeys = [];
-        while ([$TorrentID] = self::$db->next_row()) {
-            $cacheKeys[] = sprintf(\Gazelle\Torrent::CACHE_KEY, $TorrentID);
-        }
-        self::$cache->delete_multi($cacheKeys);
-        unset($cacheKeys);
+        self::$cache->delete_multi(
+            array_map(fn($id) => sprintf(\Gazelle\Torrent::CACHE_KEY, $id), self::$db->collect(0, false))
+        );
 
         self::$db->prepared_query("
             UPDATE torrents SET
