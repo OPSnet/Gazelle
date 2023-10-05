@@ -13,9 +13,10 @@
         <input type="hidden" name="title" value="{{ title }}" />
         <input type="hidden" name="year" value="{{ year }}" />
         <div class="box pad">From {{ torrent.group.link|raw }}:<br /><br />
-        you plan to split the torrent {{ torrent.id }} [{{ torrent.edition }} : ({{ torrent.shortLabel }})]
-        to:<br />
-        <b>{{ artist }} – {{ title }} [{{ year }}]</b>
+            you plan to split the torrent {{ torrent.id }} [{{ torrent.edition }} : ({{ torrent.shortLabel }})]
+            to:<br />
+            <b>{{ artist }} – {{ title }} [{{ year }}]</b>
+        </div>
         <br /><br /><input type="submit" value="Confirm" />
     </form>
 </div>
