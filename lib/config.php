@@ -267,6 +267,16 @@ defined('MEMCACHE_HOST_LIST') or define('MEMCACHE_HOST_LIST', [
 defined('CACHE_ID') or define('CACHE_ID', 'ops');
 
 // ------------------------------------------------------------------------
+// Executable (binaries) settings
+//
+// adjust paths as appropriate
+
+defined('BIN_COMPOSER') or define('BIN_COMPOSER', '/usr/local/bin/composer');
+defined('BIN_GIT')      or define('BIN_GIT', '/usr/bin/git');
+defined('BIN_PHINX')    or define('BIN_PHINX', realpath(__DIR__ . '/../vendor/bin/phinx'));
+defined('PHINX_MYSQL')  or define('PHINX_MYSQL', realpath(__DIR__ . '/../phinx.php'));
+
+// ------------------------------------------------------------------------
 // Local image caching settings
 
 // Is local image caching enabled?

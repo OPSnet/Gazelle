@@ -21,6 +21,10 @@ class UserTest extends TestCase {
             DELETE FROM user_read_forum WHERE user_id = ?
             ", $this->user->id()
         );
+        \Gazelle\DB::DB()->prepared_query("
+            DELETE FROM users_stats_daily WHERE UserID = ?
+            ", $this->user->id()
+        );
         $this->user->remove();
     }
 
@@ -383,5 +387,54 @@ class UserTest extends TestCase {
         $this->assertEquals(1, $userMan->inactiveUserDeactivate(new \Gazelle\Tracker), 'utest-one-user-inactive-deactivated');
         $this->user->flush();
         $this->assertTrue($this->user->isDisabled(), 'utest-inactive-deactivated');
+    }
+
+    public function testStats(): void {
+        $eco = new \Gazelle\Stats\Economic;
+        $eco->flush();
+
+        $total    = $eco->tokenTotal();
+        $stranded = $eco->tokenStrandedTotal();
+        $this->user->setField('Enabled', UserStatus::enabled->value)->modify();
+        $this->assertTrue($this->user->updateTokens(23), 'utest-stats-token-5');
+
+        $eco->flush();
+        $this->assertEquals(23 + $total, $eco->tokenTotal(), 'utest-stats-total-tokens');
+        $this->assertEquals($stranded, $eco->tokenStrandedTotal(), 'utest-stats-total-stranded-tokens');
+
+        $disabled = $eco->userDisabledTotal();
+        $this->user->setField('Enabled', UserStatus::disabled->value)->modify();
+        $eco->flush();
+        $this->assertEquals(23 + $stranded, $eco->tokenStrandedTotal(), 'utest-stats-total-disabled-stranded-tokens');
+        $this->assertEquals(1 + $disabled, $eco->userDisabledTotal(), 'utest-stats-user-disabled-total');
+
+        $stats = new \Gazelle\Stats\Users;
+        $this->assertTrue($stats->newUsersAllowed($this->user), 'user-stats-new-users');
+        $this->assertGreaterThan(0, $stats->refresh(), 'user-stats-refresh');
+        $this->assertGreaterThan(0, $stats->registerActivity('users_stats_daily', 10), 'user-stats-register');
+
+        $this->assertIsArray($stats->flow(), 'user-stats-flow');
+        $this->assertIsArray($stats->browserDistributionList(), 'user-stats-browser-list');
+        $this->assertIsArray($stats->browserDistribution(), 'user-stats-browser-dist');
+        $this->assertIsArray($stats->userclassDistributionList(), 'user-stats-userclass-list');
+        $this->assertIsArray($stats->userclassDistribution(), 'user-stats-userclass-dist');
+        $this->assertIsArray($stats->platformDistributionList(), 'user-stats-platform-list');
+        $this->assertIsArray($stats->platformDistribution(), 'user-stats-platform-dist');
+        $this->assertIsArray($stats->geodistribution(), 'user-stats-geo-dist');
+        $this->assertIsArray($stats->peerStat(), 'user-stats-peer');
+        $this->assertIsArray($stats->stockpileTokenList(10), 'user-stats-stockpile');
+        $this->assertIsArray($stats->browserList(), 'user-stats-browser');
+        $this->assertIsArray($stats->operatingSystemList(), 'user-stats-os');
+
+        $this->assertIsInt($stats->leecherTotal(), 'user-stats-leecher');
+        $this->assertIsInt($stats->peerTotal(), 'user-stats-peer');
+        $this->assertIsInt($stats->seederTotal(), 'user-stats-seeder');
+        $this->assertIsInt($stats->snatchTotal(), 'user-stats-snatch');
+        $this->assertIsInt($stats->enabledUserTotal(), 'user-stats-enabled');
+
+        $this->assertIsArray($stats->activityStat(), 'user-stats-activity');
+        $this->assertIsInt($stats->dayActiveTotal(), 'user-stats-active-day');
+        $this->assertIsInt($stats->weekActiveTotal(), 'user-stats-active-week');
+        $this->assertIsInt($stats->monthActiveTotal(), 'user-stats-active-month');
     }
 }

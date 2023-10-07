@@ -271,4 +271,24 @@ class TGroupTest extends TestCase {
         $this->assertEquals('UA-TG-2', $list[0]['catalogue_number'], 'tgroup-remaster-cat-no');
         $this->assertEquals('Unitest Artists', $list[0]['record_label'], 'tgroup-remaster-rec-label');
     }
+
+    public function testTGroupStats(): void {
+        (new \Gazelle\Stats\TGroups)->refresh();
+
+        $stats = $this->tgroup->stats();
+        $this->assertIsInt($stats->downloadTotal(), 'tgroup-stats-download');
+        $this->assertIsInt($stats->leechTotal(), 'tgroup-stats-leech');
+        $this->assertIsInt($stats->seedingTotal(), 'tgroup-stats-seeding');
+        $this->assertIsInt($stats->snatchTotal(), 'tgroup-stats-snatch');
+
+        // test increment
+        $total = $stats->bookmarkTotal();
+        $this->assertIsInt($stats->bookmarkTotal(), 'tgroup-stats-bookmark');
+        $bookmark = new \Gazelle\User\Bookmark($this->userList['user']);
+        $bookmark->create('torrent', $this->tgroup->id());
+
+        (new \Gazelle\Stats\TGroups)->refresh();
+        $stats->flush();
+        $this->assertEquals($total + 1, $stats->bookmarkTotal(), 'tgroup-stats-update-bookmark');
+    }
 }

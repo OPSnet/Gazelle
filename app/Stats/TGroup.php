@@ -12,9 +12,10 @@ class TGroup extends \Gazelle\BaseObject {
     protected const CACHE_GENERAL = 'tg_stat_%d';
 
     // Cache the underlying db calls
-    protected array $general = [];
+    protected array|null $info;
 
     public function flush(): static {
+        unset($this->info);
         self::$cache->delete_value(sprintf(self::CACHE_GENERAL, $this->id));
         return $this;
     }
@@ -24,32 +25,32 @@ class TGroup extends \Gazelle\BaseObject {
     /**
      * @see \Gazelle\Stats\TGroups::refresh()
      */
-    public function general(): array {
-        if (empty($this->general)) {
-            $key = sprintf(self::CACHE_GENERAL, $this->id);
-            $general = self::$cache->get_value($key);
-            if ($general === false) {
-                $general = self::$db->rowAssoc("
-                    SELECT bookmark_total,
-                        download_total,
-                        leech_total,
-                        seeding_total,
-                        snatch_total
-                    FROM tgroup_summary
-                    WHERE tgroup_id = ?
-                    ", $this->id
-                ) ?? [
-                    'bookmark_total'   => 0,
-                    'download_total'   => 0,
-                    'leech_total'      => 0,
-                    'seeding_total'    => 0,
-                    'snatch_total'     => 0,
-                ];
-                self::$cache->cache_value($key, $general, 300);
-            }
-            $this->general = $general;
+    public function info(): array {
+        if (isset($this->info)) {
+            return $this->info;
         }
-        return $this->general;
+        $key = sprintf(self::CACHE_GENERAL, $this->id);
+        $info = self::$cache->get_value($key);
+        if ($info === false) {
+            $info = self::$db->rowAssoc("
+                SELECT bookmark_total,
+                    download_total,
+                    leech_total,
+                    seeding_total,
+                    snatch_total
+                FROM tgroup_summary
+                WHERE tgroup_id = ?
+                ", $this->id
+            ) ?? [
+                'bookmark_total'   => 0,
+                'download_total'   => 0,
+                'leech_total'      => 0,
+                'seeding_total'    => 0,
+                'snatch_total'     => 0,
+            ];
+        }
+        $this->info = $info;
+        return $this->info;
     }
 
     /**
@@ -65,28 +66,28 @@ class TGroup extends \Gazelle\BaseObject {
             WHERE tgroup_id = ?
             ", $incr, $this->id
         );
-        $this->general = [];
-        self::$cache->delete_value(sprintf(self::CACHE_GENERAL, $this->id));
-        return self::$db->affected_rows();
+        $affected = self::$db->affected_rows();
+        $this->flush();
+        return $affected;
     }
 
     public function bookmarkTotal(): int {
-        return $this->general()['bookmark_total'];
+        return $this->info()['bookmark_total'];
     }
 
     public function downloadTotal(): int {
-        return $this->general()['download_total'];
+        return $this->info()['download_total'];
     }
 
     public function leechTotal(): int {
-        return $this->general()['leech_total'];
+        return $this->info()['leech_total'];
     }
 
     public function seedingTotal(): int {
-        return $this->general()['seeding_total'];
+        return $this->info()['seeding_total'];
     }
 
     public function snatchTotal(): int {
-        return $this->general()['snatch_total'];
+        return $this->info()['snatch_total'];
     }
 }

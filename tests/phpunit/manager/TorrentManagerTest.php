@@ -208,4 +208,31 @@ class TorrentManagerTest extends TestCase {
 
         $this->assertCount(3, $manager->leechTypeList(), 'torman-leechtype-list');
     }
+
+    public function testTorrentStats(): void {
+        /**
+         * We don't really care exactly what values are returned (it would be
+         * more interesting to add a torrent and compare before/after, maybe
+         * some other time).
+         * We just want to exercise the code and show that it works
+         */
+        $stats = new \Gazelle\Stats\Torrent;
+        $this->assertInstanceOf(\Gazelle\Stats\Torrent::class, $stats->flush(), 'torrents-stats-flush');
+        $this->assertIsInt($stats-> torrentTotal(), 'torrent-stats-torrent-total');
+        $this->assertIsInt($stats-> totalFiles(), 'torrent-stats-file-total');
+        $this->assertIsInt($stats-> totalSize(), 'torrent-stats-size-total');
+        $this->assertIsInt($stats-> amount('day'), 'torrent-stats-interval-amount');
+        $this->assertIsInt($stats-> files('day'), 'torrent-stats-interval-files');
+        $this->assertIsInt($stats-> size('day'), 'torrent-stats-interval-size');
+        $this->assertIsInt($stats-> albumTotal(), 'torrent-stats-album-total');
+        $this->assertIsInt($stats-> artistTotal(), 'torrent-stats-artist-total');
+        $this->assertIsInt($stats-> perfectFlacTotal(), 'torrent-stats-perfect-flac-total');
+        $this->assertIsArray($stats-> category(), 'torrent-stats-category');
+        $this->assertIsArray($stats-> format(), 'torrent-stats-format');
+        $this->assertIsArray($stats-> formatMonth(), 'torrent-stats-format-month');
+        $this->assertIsArray($stats-> media(), 'torrent-stats-media');
+        $this->assertIsArray($stats-> flow(), 'torrent-stats-flow');
+        $this->assertIsArray($stats-> categoryList(), 'torrent-stats-category-list');
+        $this->assertIsArray($stats-> categoryTotal(), 'torrent-stats-category-total');
+    }
 }

@@ -39,7 +39,7 @@ if (!$contest) {
 
 echo $Twig->render('index/private-sidebar.twig', [
     'blog'          => new Gazelle\Manager\Blog,
-    'collage_count' => (new Gazelle\Stats\Collage)->collageCount(),
+    'collage_count' => (new Gazelle\Stats\Collage)->collageTotal(),
     'contest_rank'  => $contestRank,
     'leaderboard'   => $leaderboard,
     'aotm'          => $featured->findByType(FeaturedAlbumType::AlbumOfTheMonth),

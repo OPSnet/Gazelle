@@ -132,6 +132,9 @@ class CollageTest extends TestCase {
 
     public function test00CollageCreate(): void {
         $manager     = new Gazelle\Manager\Collage;
+        $stats       = new Gazelle\Stats\Collage;
+        $total       = $stats->collageTotal();
+
         $name        = 'phpunit collage create ' . randomString(20);
         $description = 'phpunit collage create description';
         $tagList     = $this->tagList(3);
@@ -145,8 +148,9 @@ class CollageTest extends TestCase {
         );
         $collage = $this->collageList[0];
 
+        $this->assertEquals($total + 1, $stats->collageTotal(), 'collage-stats-total');
+        $this->assertEquals($total + 2, $stats->increment(), 'collage-stats-increment');
         $this->assertEquals($collage->id(), $manager->findById($collage->id())?->id(), 'collage-find-by-id');
-        // $this->assertTrue((new Gazelle\DB)->primaryKeyExists($collage->tableName(), $collage->pkName()), 'collage-pk');
         $this->assertEquals(0, $collage->maxGroups(), 'collage-max-group');
         $this->assertEquals(0, $collage->maxGroupsPerUser(), 'collage-max-per-user');
         $this->assertEquals(0, $collage->numEntries(), 'collage-num-subcribers');

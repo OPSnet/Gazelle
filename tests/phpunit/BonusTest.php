@@ -1,6 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+use Gazelle\Enum\UserStatus;
 
 require_once(__DIR__ . '/../../lib/bootstrap.php');
 
@@ -24,18 +25,18 @@ class BonusTest extends TestCase {
             ->setEmail(randomString(6) . "@bonus.example.com")
             ->setPassword(randomString())
             ->setIpaddr('127.0.0.1')
-            ->setAdminComment('Created by tests/phpunit/InviteTest.php')
+            ->setAdminComment('Created by tests/phpunit/BonusTest.php')
             ->create();
         $this->userList['receiver'] = $creator
             ->setUsername('bonusr.' . randomString(6))
             ->setEmail(randomString(6) . "@bonus.example.com")
             ->setPassword(randomString())
             ->setIpaddr('127.0.0.1')
-            ->setAdminComment('Created by tests/phpunit/InviteTest.php')
+            ->setAdminComment('Created by tests/phpunit/BonusTest.php')
             ->create();
 
-        $this->userList['giver']->setField('Enabled', '1')->modify();
-        $this->userList['receiver']->setField('Enabled', '1')->modify();
+        $this->userList['giver']->setField('Enabled', UserStatus::enabled->value)->modify();
+        $this->userList['receiver']->setField('Enabled', UserStatus::enabled->value)->modify();
         $startingPoints = 10000;
 
         $giver = new Gazelle\User\Bonus($this->userList['giver']);
@@ -129,5 +130,32 @@ class BonusTest extends TestCase {
             'bonus-summary-initial'
         );
         $this->assertTrue($giver->removePoints(1.125), 'bonus-taketh-away');
+    }
+
+    public function testStats(): void {
+        $eco = new \Gazelle\Stats\Economic;
+        $eco->flush();
+
+        $total    = $eco->bonusTotal();
+        $stranded = $eco->bonusStrandedTotal();
+
+        $this->userList['bonus'] = (new Gazelle\UserCreator)
+            ->setUsername('bonusstat.' . randomString(6))
+            ->setEmail(randomString(6) . "@bonus.example.com")
+            ->setPassword(randomString())
+            ->setIpaddr('127.0.0.1')
+            ->setAdminComment('Created by tests/phpunit/BonusTest.php')
+            ->create();
+        $this->userList['bonus']->setField('Enabled', UserStatus::enabled->value)->modify();
+        $bonus = new Gazelle\User\Bonus($this->userList['bonus']);
+        $bonus->addPoints(98765);
+
+        $eco->flush();
+        $this->assertEquals(98765 + $total, $eco->bonusTotal(), 'bonus-total-points');
+        $this->assertEquals($stranded, $eco->bonusStrandedTotal(), 'bonus-total-stranded-points');
+
+        $this->userList['bonus']->setField('Enabled', UserStatus::disabled->value)->modify();
+        $eco->flush();
+        $this->assertEquals(98765 + $stranded, $eco->bonusStrandedTotal(), 'bonus-total-disabled-stranded-points');
     }
 }

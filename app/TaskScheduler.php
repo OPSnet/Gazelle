@@ -299,13 +299,15 @@ class TaskScheduler extends Base {
     }
 
     public function run(): void {
-        $phinxBinary = realpath(__DIR__ . '/../vendor/bin/phinx');
-        $phinxScript = realpath(__DIR__ . '/../phinx.php');
-        $pendingMigrations = array_filter(json_decode((string)shell_exec($phinxBinary . ' status -c '
-            . $phinxScript . ' --format=json | tail -n 1'), true)['migrations'],
-                fn($value) => count($value) > 0 && $value['migration_status'] === 'down');
+        $pendingMigrations = array_filter(
+            json_decode(
+                (string)shell_exec(BIN_PHINX . ' status -c ' . PHINX_MYSQL . ' --format=json | tail -n 1'),
+                true
+            )['migrations'],
+            fn($value) => count($value) > 0 && $value['migration_status'] === 'down'
+        );
 
-        if (count($pendingMigrations)) {
+        if ($pendingMigrations) {
             Irc::sendMessage(LAB_CHAN, 'Pending migrations found, scheduler cannot continue');
             echo "Pending migrations found, aborting\n";
             return;

@@ -6,17 +6,17 @@
             <table>
             <tr>
                 <td>Total torrents:</td><td class="number_column">{{ torr_stat.torrentTotal|number_format }}</td>
-                <td style="padding-left:50px">Mean torrents per user:</td><td class="number_column"><?=
-                    (torr_stat.torrentTotal / user_stat.enabledUserTotal)|number_format }}</td>
-                <td style="padding-left:50px">Mean files per torrent:</td><td class="number_column"><?=
-                    (torr_stat.totalFiles / tor_stat.torrentTotal)|number_format }}</td>
+                <td style="padding-left:50px">Mean torrents per user:</td><td class="number_column">
+                    {{- (torr_stat.torrentTotal / user_stat.enabledUserTotal)|number_format(2) }}</td>
+                <td style="padding-left:50px">Mean files per torrent:</td><td class="number_column">
+                    {{- (torr_stat.totalFiles / torr_stat.torrentTotal)|number_format(2) }}</td>
             </tr>
             <tr>
                 <td>Total size:</td><td class="number_column">{{ torr_stat.totalSize|octet_size }}</td>
-                <td style="padding-left:50px">Mean torrent size:</td><td class="number_column"><?=
-                    (torr_stat.totalSize / tor_stat.torrentTotal)|octet_size }}</td>
-                <td style="padding-left:50px">Mean filesize:</td><td class="number_column"><?=
-                    (torr_stat.totalSize / tor_stat.totalFiles)|octet_size }}</td>
+                <td style="padding-left:50px">Mean torrent size:</td><td class="number_column">
+                    {{- (torr_stat.totalSize / torr_stat.torrentTotal)|octet_size }}</td>
+                <td style="padding-left:50px">Mean filesize:</td><td class="number_column">
+                    {{- (torr_stat.totalSize / torr_stat.totalFiles)|octet_size }}</td>
             </tr>
             <tr>
                 <td>Total files:</td><td class="number_column">{{ torr_stat.totalFiles|number_format }}</td>

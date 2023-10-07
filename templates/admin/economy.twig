@@ -26,18 +26,19 @@ Tools necessary for economic management
     b. project effects with intelligent mathematical analysis of a 24, 48 or 72 hour freeleech
 #}
 
-{% set download = info.get('totalDownload') %}
-{% set upload   = info.get('totalUpload') %}
-{% set enabled  = info.get('totalEnabled') %}
-{% set leechers = info.get('totalLeechers') %}
-{% set peers    = info.get('totalPeerUsers') %}
-{% set seeders  = info.get('totalSeeders') %}
-{% set torrents = info.get('totalTorrents') %}
+{% set download = info.downloadTotal %}
+{% set upload   = info.uploadTotal %}
+{% set enabled  = info.userTotal %}
+{% set leechers = info.leecherTotal %}
+{% set peers    = info.userPeerTotal %}
+{% set seeders  = info.seederTotal %}
+{% set torrents = info.torrentTotal %}
 
-{% set snatches         = info.get('totalSnatches') %}
-{% set snatches_overall = info.get('totalOverallSnatches') %}
+{% set snatches         = info.snatchTotal %}
+{% set snatches_overall = info.snatchGrandTotal %}
 
 {{ header('Economy') }}
+
 <div class="thin">
     <div class="box">
         <div class="head">Overall stats</div>
@@ -55,21 +56,21 @@ Tools necessary for economic management
                 <li><strong>Mean download: </strong>{{ (download / enabled)|octet_size }}</li>
                 <li><strong>Mean buffer: </strong>{{ ((upload - download) / enabled)|octet_size }}</li>
                 <br />
-                <li><strong>Total request bounty: </strong>{{ info.get('totalBounty')|octet_size }}</li>
-                <li><strong>Available request bounty: </strong>{{ info.get('availableBounty')|octet_size }}</li>
+                <li><strong>Total request bounty: </strong>{{ info.bountyTotal|octet_size }}</li>
+                <li><strong>Available request bounty: </strong>{{ info.bountyAvailable|octet_size }}</li>
             </ul>
             </td>
             <td style="vertical-align:top; width:50%">
             <ul class="stats nobullet">
-                <li><strong>Users: </strong>{{ info.get('totalUsers')|number_format }}</li>
-                <li><strong>Users with 2FA: </strong>{{ info.get('2FA')|number_format }}</li>
-                <li><strong>Disabled users: </strong>{{ info.get('totalUsersDisabled')|number_format }}</li>
+                <li><strong>Users: </strong>{{ info.userTotal|number_format }}</li>
+                <li><strong>Users with 2FA: </strong>{{ info.userMfaTotal|number_format }}</li>
+                <li><strong>Disabled users: </strong>{{ info.userDisabledTotal|number_format }}</li>
                 <br />
-                <li><strong>BP in circulation: </strong>{{ info.get('totalBonus')|number_format }}</li>
-                <li><strong>BP stranded: </strong>{{ info.get('totalBonusStranded')|number_format }}</li>
+                <li><strong>BP in circulation: </strong>{{ info.bonusTotal|number_format }}</li>
+                <li><strong>BP stranded: </strong>{{ info.bonusStrandedTotal|number_format }}</li>
                 <br />
-                <li><strong>Tokens in circulation: </strong>{{ info.get('totalTokens')|number_format }}</li>
-                <li><strong>Tokens stranded: </strong>{{ info.get('totalTokensStranded')|number_format }}</li>
+                <li><strong>Tokens in circulation: </strong>{{ info.tokenTotal|number_format }}</li>
+                <li><strong>Tokens stranded: </strong>{{ info.tokenStrandedTotal|number_format }}</li>
             </ul>
             <br />
             <div>("Stranded" refers to disabled users)</div>

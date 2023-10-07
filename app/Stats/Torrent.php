@@ -3,23 +3,23 @@
 namespace Gazelle\Stats;
 
 class Torrent extends \Gazelle\Base {
-    protected array $info;
+    protected array|null $info;
 
     final const CACHE_KEY      = 'stat_global_torrent';
     final const PEER_KEY       = 'stat_global_peer';
     final const TORRENT_FLOW   = 'stat_tflow';
     final const CATEGORY_TOTAL = 'stat_tcat';
 
-    public function torrentTotal()           { return $this->info()['torrent-total']; }
-    public function totalFiles()             { return $this->info()['total-files']; }
-    public function totalSize()              { return $this->info()['total-size']; }
-    public function amount(string $interval) { return $this->info()[$interval]['count']; }
-    public function files(string $interval)  { return $this->info()[$interval]['files']; }
-    public function size(string $interval)   { return $this->info()[$interval]['size']; }
-    public function category()               { return $this->info()['category']; }
-    public function format()                 { return $this->info()['format']; }
-    public function formatMonth()            { return $this->info()['format-month']; }
-    public function media()                  { return $this->info()['media']; }
+    public function flush(): static {
+        self::$cache->deleteMulti([
+            self::CACHE_KEY,
+            self::PEER_KEY,
+            self::TORRENT_FLOW,
+            self::CATEGORY_TOTAL,
+        ]);
+        unset($this->info);
+        return $this;
+    }
 
     public function info(): array {
         if (!isset($this->info)) {
@@ -110,6 +110,17 @@ class Torrent extends \Gazelle\Base {
         return $this->info;
     }
 
+    public function torrentTotal(): int           { return $this->info()['torrent-total']; }
+    public function totalFiles(): int             { return $this->info()['total-files']; }
+    public function totalSize(): int              { return $this->info()['total-size']; }
+    public function amount(string $interval): int { return $this->info()[$interval]['count']; }
+    public function files(string $interval): int  { return $this->info()[$interval]['files']; }
+    public function size(string $interval): int   { return $this->info()[$interval]['size']; }
+    public function category(): array             { return $this->info()['category']; }
+    public function format(): array               { return $this->info()['format']; }
+    public function formatMonth(): array          { return $this->info()['format-month']; }
+    public function media(): array                { return $this->info()['media']; }
+
     /**
      * Yearly torrent flows (added, removed and net per month)
      */
@@ -129,12 +140,12 @@ class Torrent extends \Gazelle\Base {
             $endMonth = reset($flow)['Month'] . '-01';
 
             self::$db->prepared_query("
-                SELECT date_format(created,'%Y-%m') as Month,
+                SELECT date_format(Time,'%Y-%m') as Month,
                     sum(Message LIKE 'Torrent % was uploaded by %') AS t_add,
                     sum(Message LIKE 'Torrent % was deleted %')     AS t_del
                 FROM log
-                WHERE created BETWEEN ? AND last_day(?)
-                GROUP BY Month order by created DESC
+                WHERE Time BETWEEN ? AND last_day(?)
+                GROUP BY Month order by Time DESC
                 ", $beginMonth, $endMonth
             );
             $delta = self::$db->to_array('Month', MYSQLI_ASSOC, false);
@@ -185,7 +196,7 @@ class Torrent extends \Gazelle\Base {
     public function albumTotal(): int {
         $total = self::$cache->get_value('stats_album_count');
         if ($total === false) {
-            $total = self::$db->scalar("
+            $total = (int)self::$db->scalar("
                 SELECT count(*) FROM torrents_group WHERE CategoryID = 1
             ");
             self::$cache->cache_value('stats_album_count', $total, 7200 + random_int(0, 300));
@@ -199,7 +210,7 @@ class Torrent extends \Gazelle\Base {
     public function artistTotal(): int {
         $total = self::$cache->get_value('stats_artist_count');
         if ($total === false) {
-            $total = self::$db->scalar("
+            $total = (int)self::$db->scalar("
                 SELECT count(*) FROM artists_group
             ");
             self::$cache->cache_value('stats_artist_count', $total, 7200 + random_int(0, 300));
@@ -213,7 +224,7 @@ class Torrent extends \Gazelle\Base {
     public function perfectFlacTotal(): int {
         $total = self::$cache->get_value('stats_perfect_total');
         if ($total === false) {
-            $total = self::$db->scalar("
+            $total = (int)self::$db->scalar("
                 SELECT count(*)
                 FROM torrents
                 WHERE Format = 'FLAC'

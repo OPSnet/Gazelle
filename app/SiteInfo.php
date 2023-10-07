@@ -5,38 +5,44 @@ namespace Gazelle;
 use Gazelle\Util\Time;
 
 class SiteInfo extends Base {
-    public function gitBranch() {
-        return trim(shell_exec('git rev-parse --abbrev-ref HEAD'));
+    public function gitBranch(): string {
+        return trim((string)shell_exec(BIN_GIT . ' rev-parse --abbrev-ref HEAD'));
     }
 
-    public function gitHash() {
-        return trim(shell_exec('git rev-parse HEAD'));
+    public function gitHash(): string {
+        return trim((string)shell_exec(BIN_GIT . ' rev-parse HEAD'));
     }
 
-    public function gitHashRemote() {
-        return trim(shell_exec("git rev-parse origin/" . $this->gitBranch()));
+    public function gitHashRemote(): string {
+        return trim((string)shell_exec(BIN_GIT . ' rev-parse origin/' . $this->gitBranch()));
     }
 
-    public function phpinfo() {
+    public function phpinfo(): string {
         ob_start();
         phpinfo();
-        $p = ob_get_contents();
+        $p = (string)ob_get_contents();
         ob_end_clean();
-        return substr($p, strpos($p, '<body>') + 6, strpos($p, '</body>'));
+        return substr($p, (int)strpos($p, '<body>') + 6, (int)strpos($p, '</body>'));
     }
 
-    public function uptime() {
+    public function uptime(): array {
         $in = fopen('/proc/uptime', 'r');
-        [$uptime, $idletime] = array_map('floatval', explode(' ', trim(fgets($in))));
-        fclose($in);
-        $in = fopen('/proc/cpuinfo', 'r');
-        $ncpu = 0;
-        while (($line = fgets($in)) !== false) {
-           if (preg_match('/^processor\s+:\s+\d+/', $line)) {
-                ++$ncpu;
-            }
+        if ($in === false) {
+            [$uptime, $idletime] = [0, 0];
+        } else {
+            [$uptime, $idletime] = array_map('floatval', explode(' ', trim((string)fgets($in))));
+            fclose($in);
         }
-        fclose($in);
+        $ncpu = 0;
+        $in = fopen('/proc/cpuinfo', 'r');
+        if ($in !== false) {
+            while (($line = fgets($in)) !== false) {
+               if (preg_match('/^processor\s+:\s+\d+/', $line)) {
+                    ++$ncpu;
+                }
+            }
+            fclose($in);
+        }
         $now = time();
         return [
             'uptime'   => Time::diff($now - (int)$uptime),
@@ -44,14 +50,12 @@ class SiteInfo extends Base {
         ];
     }
 
-    public function phinx() {
-        $phinxBinary = realpath(__DIR__ . '/../vendor/bin/phinx');
-        $phinxScript = realpath(__DIR__ . '/../phinx.php');
+    public function phinx(): array {
         return [
-            'version' => explode(' ', shell_exec("$phinxBinary --version"))[5],
+            'version' => explode(' ', (string)shell_exec(BIN_PHINX . ' --version'))[5],
             'migration' => array_filter(
                 json_decode(
-                    shell_exec("$phinxBinary status -c $phinxScript --format=json|tail -n 1"),
+                    (string)shell_exec(BIN_PHINX . ' status -c ' . PHINX_MYSQL . ' --format=json|tail -n 1'),
                     true
                 )['migrations'],
                 fn($v) => count($v) > 0
@@ -59,15 +63,15 @@ class SiteInfo extends Base {
         ];
     }
 
-    public function composerVersion() {
-        return trim(shell_exec('composer --version 2>/dev/null'));
+    public function composerVersion(): string {
+        return trim((string)shell_exec(BIN_COMPOSER . ' --version 2>/dev/null'));
     }
 
-    public function composerPackages() {
+    public function composerPackages(): array {
         $packages = [];
         $root = realpath(__DIR__ . '/../');
 
-        $composer = json_decode(file_get_contents(realpath("$root/composer.json")), true);
+        $composer = json_decode((string)file_get_contents((string)realpath("$root/composer.json")), true);
         foreach ($composer['require'] as $name => $version) {
             if ($name != 'php') {
                 $packages[$name] = [
@@ -78,7 +82,7 @@ class SiteInfo extends Base {
             }
         }
 
-        $lock = json_decode(file_get_contents(realpath("$root/composer.lock")), true);
+        $lock = json_decode((string)file_get_contents((string)realpath("$root/composer.lock")), true);
         foreach ($lock['packages'] as $p) {
             if (isset($packages[$p['name']])) {
                 if ($p['name'] == $packages[$p['name']]['name']) {
@@ -87,7 +91,7 @@ class SiteInfo extends Base {
             }
         }
 
-        $info = json_decode(shell_exec("composer info -d $root --format=json 2>/dev/null"), true);
+        $info = json_decode((string)shell_exec(BIN_COMPOSER . " info -d $root --format=json 2>/dev/null"), true);
         foreach ($info['installed'] as $p) {
             if (!isset($packages[$p['name']])) {
                 $packages[$p['name']] = [

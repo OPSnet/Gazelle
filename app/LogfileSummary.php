@@ -28,7 +28,7 @@ class LogfileSummary {
     }
 
     public function overallScore(): int {
-        return is_null($this->lowestScore) ? 0 : $this->lowestScore;
+        return $this->lowestScore;
     }
 
     public function all(): array {

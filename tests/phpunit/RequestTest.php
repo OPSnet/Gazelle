@@ -223,6 +223,7 @@ class RequestTest extends TestCase {
         $statsReq->flush();
         $this->assertEquals($before['total'] + 1, $statsReq->total(), 'request-stats-now-total');
         $this->assertEquals($before['total-filled'] + 1, $statsReq->filledTotal(), 'request-stats-now-filled');
+        $this->assertIsFloat($statsReq->filledPercent(), 'request-stats-filled-percent');
 
         // and now unfill it
         $this->assertEquals(1, $this->request->unfill($this->userList['admin'], 'unfill unittest', new Gazelle\Manager\Torrent), 'request-unfill');

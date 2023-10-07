@@ -18,10 +18,9 @@ class User extends \Gazelle\BaseObject {
 
     // Cache the underlying db calls
     protected array $commentTotal;
-    protected array $general;
 
     public function flush(): static {
-        $this->general = [];
+        $this->info = [];
         self::$cache->delete_multi([
             sprintf(self::CACHE_COMMENT_TOTAL, $this->id),
             sprintf(self::CACHE_GENERAL, $this->id),
@@ -60,14 +59,14 @@ class User extends \Gazelle\BaseObject {
     /**
      * @see \Gazelle\Stats\Users::refresh()
      */
-    public function general(): array {
-        if (isset($this->general) && !empty($this->general)) {
-            return $this->general;
+    public function info(): array {
+        if (isset($this->info) && !empty($this->info)) {
+            return $this->info;
         }
         $key = sprintf(self::CACHE_GENERAL, $this->id);
-        $general = self::$cache->get_value($key);
-        if ($general === false) {
-            $general = self::$db->rowAssoc("
+        $info = self::$cache->get_value($key);
+        if ($info === false) {
+            $info = self::$db->rowAssoc("
                 SELECT artist_added_total,
                     collage_total,
                     collage_contrib,
@@ -121,10 +120,10 @@ class User extends \Gazelle\BaseObject {
                 'unique_group_total'    => 0,
                 'upload_total'          => 0,
             ];
-            self::$cache->cache_value($key, $general, 300);
+            self::$cache->cache_value($key, $info, 300);
         }
-        $this->general = $general;
-        return $this->general;
+        $this->info = $info;
+        return $this->info;
     }
 
     /**
@@ -140,105 +139,105 @@ class User extends \Gazelle\BaseObject {
             WHERE user_id = ?
             ", $incr, $this->id
         );
-        $this->general = [];
+        $this->info = [];
         self::$cache->delete_value(sprintf(self::CACHE_GENERAL, $this->id));
         return self::$db->affected_rows();
     }
 
     public function artistAddedTotal(): int {
-        return $this->general()['artist_added_total'];
+        return $this->info()['artist_added_total'];
     }
 
     public function collageTotal(): int {
-        return $this->general()['collage_total'];
+        return $this->info()['collage_total'];
     }
 
     public function collageContrib(): int {
-        return $this->general()['collage_contrib'];
+        return $this->info()['collage_contrib'];
     }
 
     public function downloadTotal(): int {
-        return $this->general()['download_total'];
+        return $this->info()['download_total'];
     }
 
     public function downloadUnique(): int {
-        return $this->general()['download_unique'];
+        return $this->info()['download_unique'];
     }
 
     public function flTokenTotal(): int {
-        return $this->general()['fl_token_total'];
+        return $this->info()['fl_token_total'];
     }
 
     public function forumPostTotal(): int {
-        return $this->general()['forum_post_total'];
+        return $this->info()['forum_post_total'];
     }
 
     public function forumThreadTotal(): int {
-        return $this->general()['forum_thread_total'];
+        return $this->info()['forum_thread_total'];
     }
 
     public function invitedTotal(): int {
-        return $this->general()['invited_total'];
+        return $this->info()['invited_total'];
     }
 
     public function leechTotal(): int {
-        return $this->general()['leech_total'];
+        return $this->info()['leech_total'];
     }
 
     public function perfectFlacTotal(): int {
-        return $this->general()['perfect_flac_total'];
+        return $this->info()['perfect_flac_total'];
     }
 
     public function perfecterFlacTotal(): int {
-        return $this->general()['perfecter_flac_total'];
+        return $this->info()['perfecter_flac_total'];
     }
 
     public function requestBountySize(): int {
-        return $this->general()['request_bounty_size'];
+        return $this->info()['request_bounty_size'];
     }
 
     public function requestBountyTotal(): int {
-        return $this->general()['request_bounty_total'];
+        return $this->info()['request_bounty_total'];
     }
 
     public function requestCreatedSize(): int {
-        return $this->general()['request_created_size'];
+        return $this->info()['request_created_size'];
     }
 
     public function requestCreatedTotal(): int {
-        return $this->general()['request_created_total'];
+        return $this->info()['request_created_total'];
     }
 
     public function requestVoteSize(): int {
-        return $this->general()['request_vote_size'];
+        return $this->info()['request_vote_size'];
     }
 
     public function requestVoteTotal(): int {
-        return $this->general()['request_vote_total'];
+        return $this->info()['request_vote_total'];
     }
 
     public function seedingTotal(): int {
-        return $this->general()['seeding_total'];
+        return $this->info()['seeding_total'];
     }
 
     public function seedtimeHour(): int {
-        return $this->general()['seedtime_hour'];
+        return $this->info()['seedtime_hour'];
     }
 
     public function snatchTotal(): int {
-        return $this->general()['snatch_total'];
+        return $this->info()['snatch_total'];
     }
 
     public function snatchUnique(): int {
-        return $this->general()['snatch_unique'];
+        return $this->info()['snatch_unique'];
     }
 
     public function uniqueGroupTotal(): int {
-        return $this->general()['unique_group_total'];
+        return $this->info()['unique_group_total'];
     }
 
     public function uploadTotal(): int {
-        return $this->general()['upload_total'];
+        return $this->info()['upload_total'];
     }
 
     public function timeline(): array {

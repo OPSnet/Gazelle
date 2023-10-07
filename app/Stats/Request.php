@@ -5,7 +5,7 @@ namespace Gazelle\Stats;
 class Request extends \Gazelle\Base {
     protected const CACHE_KEY = 'stats_req';
 
-    protected array|null $info;
+    protected array $info;
 
     public function flush(): static {
         self::$cache->delete_value(self::CACHE_KEY);
@@ -13,7 +13,7 @@ class Request extends \Gazelle\Base {
         return $this;
     }
 
-    public function info() {
+    public function info(): array {
         if (isset($this->info)) {
             return $this->info;
         }
