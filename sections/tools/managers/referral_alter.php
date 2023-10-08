@@ -33,7 +33,7 @@ if ($_POST['submit'] == 'Delete') {
 
     if ($_POST['submit'] === 'Create') {
         $ReferralManager->createAccount($_POST['site'], $_POST['url'], $_POST['user'], $_POST['password'],
-            $_POST['active'] == 'on' ? 1 : 0, $_POST['type'], $_POST['cookie']);
+            $_POST['active'] == 'on', $_POST['type'], $_POST['cookie']);
     } elseif ($_POST['submit'] === 'Edit') {
         $id = (int)$_POST['id'];
         if (!$id || !$ReferralManager->getAccount($id)) {
@@ -41,7 +41,7 @@ if ($_POST['submit'] == 'Delete') {
         }
 
         $ReferralManager->updateAccount($_POST['id'], $_POST['site'], $_POST['url'], $_POST['user'],
-            $_POST['password'], $_POST['active'] == 'on' ? 1 : 0, $_POST['type'], $_POST['cookie']);
+            $_POST['password'], $_POST['active'] == 'on', $_POST['type'], $_POST['cookie']);
     }
 }
 

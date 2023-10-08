@@ -50,14 +50,14 @@ View::show_header('External Tracker Referrals');
     <div class="center">
         <form name="referral_service" method="post" action="">
 <?php
-        foreach ($Accounts as $Account) {
-                $ID = "site" . $Account["ID"];
+    foreach ($Accounts as $Account) {
+            $ID = "site" . $Account["ID"];
 ?>
                 <div>
                     <input id="<?=$ID?>" type="radio" name="service" value="<?=$Account["ID"]?>"/>
                     <label for="<?=$ID?>"><?=$Account["Site"]?></label>
                 </div>
-<?php       } ?>
+<?php } ?>
             <br/>
             <input type="hidden" name="action" value="account">
             <input type="submit" name="submit" value="Submit" class="submit" />
@@ -104,7 +104,7 @@ View::show_header('External Tracker Referrals');
         header("Location: referral.php");
     }
 
-    $Email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
+    $Email = (string)filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
     $Error = false;
     $Invite = false;
     if (!preg_match(EMAIL_REGEXP, $Email)) {
@@ -131,16 +131,20 @@ View::show_header('External Tracker Referrals');
     <br />
     <h2>Step 2: Join</h2>
     <br />
-<?php     if ($Error) { ?>
+<?php
+    if (isset($Account)) {
+        if ($Error) {
+?>
     <h3>There was an error verifying your account at <?=$Account["Site"]?>. Please refresh the page and try again.</h3>
     <br />
     <p><?=$Error?></p>
-<?php     } else {
-        if (REFERRAL_SEND_EMAIL) { ?>
+<?php
+    } elseif (REFERRAL_SEND_EMAIL) {
+?>
             <h3>Congratulations, you have verified your account at <?=$Account["Site"]?>. We have sent you an email to the address you specified. Make sure to check your spam folder! Welcome to <?=SITE_NAME?>!</h3>
-<?php        } else { ?>
+<?php } else { ?>
             <h3>Congratulations, you have verified your account at <?=$Account["Site"]?>. <a href=register.php?invite=<?=$Invite?>">Click here</a> to register. Welcome to <?=SITE_NAME?></h3>
-<?php        } ?>
+<?php } ?>
 </div>
 <?php
     }

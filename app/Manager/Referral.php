@@ -7,11 +7,6 @@ use Gazelle\Util\Mail;
 use Gazelle\Util\Proxy;
 
 class Referral extends \Gazelle\Base {
-    private $accounts;
-    private readonly \Gazelle\Util\Proxy $proxy;
-
-    public $readOnly;
-
     final const CACHE_ACCOUNTS = 'referral_accounts';
     final const CACHE_BOUNCER = 'bouncer_status';
     // Do not change the ordering in this array after launch.
@@ -19,31 +14,35 @@ class Referral extends \Gazelle\Base {
     // Accounts which use the user ID instead of username.
     final const ID_TYPES = [3, 4, 5];
 
-    public function __construct() {
-        $this->accounts = self::$cache->get_value(self::CACHE_ACCOUNTS);
-        $this->proxy = new Proxy(REFERRAL_KEY, REFERRAL_BOUNCER);
+    private array $accounts;
+    private readonly \Gazelle\Util\Proxy $proxy;
+    public bool $readOnly;
 
-        if ($this->accounts === false) {
+    public function __construct() {
+        $accounts = self::$cache->get_value(self::CACHE_ACCOUNTS);
+        if ($accounts === false) {
             self::$db->prepared_query("SELECT ID, Site, Active, Type FROM referral_accounts");
-            $this->accounts = self::$db->has_results() ? self::$db->to_array('ID') : [];
-            foreach ($this->accounts as &$acc) {
+            $accounts = self::$db->to_array('ID', MYSQLI_ASSOC, false);
+            foreach ($accounts as &$acc) {
                 $acc["UserIsId"] = in_array($acc["Type"], self::ID_TYPES);
                 unset($acc);
             }
-            self::$cache->cache_value(self::CACHE_ACCOUNTS, $this->accounts, 86400 * 30);
+            self::$cache->cache_value(self::CACHE_ACCOUNTS, $accounts, 86400 * 30);
         }
+        $this->accounts = $accounts;
 
         $this->readOnly = !apcu_exists('DB_KEY');
-
         if (!$this->readOnly) {
             $url = self::$db->scalar("SELECT URL FROM referral_accounts LIMIT 1");
             if ($url) {
                 $this->readOnly = Crypto::dbDecrypt($url) == null;
             }
         }
+
+        $this->proxy = new Proxy(REFERRAL_KEY, REFERRAL_BOUNCER);
     }
 
-    public function checkBouncer() {
+    public function checkBouncer(): bool {
         if (!OPEN_EXTERNAL_REFERRALS) {
             // Not strictly true, but we don't care about this if referrals are closed.
             return true;
@@ -63,28 +62,28 @@ class Referral extends \Gazelle\Base {
         return $status == 'alive';
     }
 
-    public function generateToken() {
+    public function generateToken(): string {
         return 'OPS|' . randomString(64) . '|OPS';
     }
 
-    public function getTypes() {
+    public function getTypes(): array {
         return self::ACCOUNT_TYPES;
     }
 
-    public function getAccounts() {
+    public function getAccounts(): array {
         return $this->accounts;
     }
 
-    public function getActiveAccounts() {
+    public function getActiveAccounts(): array {
         return array_filter($this->accounts,
             fn($i) => $i['Active'] == '1' && !$this->readOnly);
     }
 
-    public function getAccount($id) {
+    public function getAccount(int $id): ?array {
         return array_key_exists($id, $this->accounts) ? $this->accounts[$id] : null;
     }
 
-    public function getFullAccount($id) {
+    public function getFullAccount(int $id): ?array {
         self::$db->prepared_query("
             SELECT ID, Site, URL, User, Password, Active, Type, Cookie
             FROM referral_accounts
@@ -107,7 +106,7 @@ class Referral extends \Gazelle\Base {
         return $account;
     }
 
-    public function getFullAccounts() {
+    public function getFullAccounts(): array {
         self::$db->prepared_query("
             SELECT ID, Site, URL, User, Password, Active, Type, Cookie
             FROM referral_accounts");
@@ -125,11 +124,10 @@ class Referral extends \Gazelle\Base {
             }
             return $accounts;
         }
-
         return [];
     }
 
-    public function createAccount($site, $url, $user, $password, $active, $type, $cookie) {
+    public function createAccount(string $site, string $url, string $user, string $password, bool $active, int $type, string $cookie): void {
         if ($this->readOnly) {
             return;
         }
@@ -155,7 +153,7 @@ class Referral extends \Gazelle\Base {
         self::$cache->delete_value(self::CACHE_ACCOUNTS);
     }
 
-    private function updateCookie($id, $cookie) {
+    private function updateCookie(int $id, string $cookie): void {
         if ($this->readOnly) {
             return;
         }
@@ -168,7 +166,7 @@ class Referral extends \Gazelle\Base {
         );
     }
 
-    public function updateAccount($id, $site, $url, $user, $password, $active, $type, $cookie) {
+    public function updateAccount(int $id, string $site, string $url, string $user, string $password, bool $active, int $type, string $cookie): void {
         if ($this->readOnly) {
             return;
         }
@@ -204,13 +202,13 @@ class Referral extends \Gazelle\Base {
         self::$cache->delete_value(self::CACHE_ACCOUNTS);
     }
 
-    public function deleteAccount($id) {
+    public function deleteAccount(int $id): void {
         self::$db->prepared_query("DELETE FROM referral_accounts WHERE ID = ?", $id);
 
         self::$cache->delete_value(self::CACHE_ACCOUNTS);
     }
 
-    public function getReferredUsers($startDate, $endDate, $site, $username, $invite, \Gazelle\Util\Paginator $paginator, $view) {
+    public function getReferredUsers(string $startDate, string $endDate, ?string $site, ?string $username, ?string $invite, \Gazelle\Util\Paginator $paginator, string $view): array {
         if (empty($startDate)) {
             $startDate = \Gazelle\Util\Time::offset(-3600 * 24 * 30);
         }
@@ -241,7 +239,7 @@ class Referral extends \Gazelle\Base {
 
         $filter = implode(' AND ', $filter);
 
-        $results = self::$db->scalar("
+        $results = (int)self::$db->scalar("
             SELECT count(*)
             FROM referral_users ru
             LEFT JOIN users_main um ON (um.ID = ru.UserID)
@@ -271,15 +269,14 @@ class Referral extends \Gazelle\Base {
         return self::$db->to_array('id', MYSQLI_ASSOC, false);
     }
 
-    public function deleteUserReferral($id) {
+    public function deleteUserReferral(int $id): void {
         self::$db->prepared_query("
             DELETE FROM referral_users WHERE ID = ?
             ", $id
         );
     }
 
-    public function validateCookie($acc)
-    {
+    public function validateCookie(array $acc): bool {
         return match ($acc["Type"]) {
             0 => $this->validateGazelleCookie($acc),
             1 => true,
@@ -289,7 +286,7 @@ class Referral extends \Gazelle\Base {
         };
     }
 
-    private function validateGazelleCookie($acc) {
+    private function validateGazelleCookie(array $acc): bool {
         $url  = $acc["URL"] . 'ajax.php';
 
         $result = $this->proxy->fetch($url, ["action" => "index"], $acc["Cookie"], false);
@@ -308,8 +305,7 @@ class Referral extends \Gazelle\Base {
         return str_contains($result["response"], "authkey");
     }
 
-    public function loginAccount(&$acc)
-    {
+    public function loginAccount(array &$acc): bool {
         return match ($acc["Type"]) {
             0 => $this->loginGazelleAccount($acc),
             1 => true,
@@ -321,7 +317,7 @@ class Referral extends \Gazelle\Base {
         };
     }
 
-    private function loginGazelleAccount(&$acc) {
+    private function loginGazelleAccount(array &$acc): bool {
         if ($this->validateGazelleCookie($acc)) {
             return true;
         }
@@ -339,7 +335,7 @@ class Referral extends \Gazelle\Base {
         return $result["status"] == 200;
     }
 
-    private function loginTentacleAccount(&$acc) {
+    private function loginTentacleAccount(array &$acc): bool {
         if ($this->validateTentacleCookie($acc)) {
             return true;
         }
@@ -357,7 +353,7 @@ class Referral extends \Gazelle\Base {
         return $result["status"] == 200;
     }
 
-    private function loginLuminanceAccount(&$acc) {
+    private function loginLuminanceAccount(array &$acc): bool {
         if ($this->validateLuminanceCookie($acc)) {
             return true;
         }
@@ -384,7 +380,7 @@ class Referral extends \Gazelle\Base {
         return $result["status"] == 200;
     }
 
-    private function loginGazelleHTMLAccount(&$acc) {
+    private function loginGazelleHTMLAccount(array &$acc): bool {
         if ($this->validateLuminanceCookie($acc)) {
             return true;
         }
@@ -402,7 +398,7 @@ class Referral extends \Gazelle\Base {
         return $result["status"] == 200;
     }
 
-    private function loginPTPAccount(&$acc) {
+    private function loginPTPAccount(array &$acc): bool {
         if ($this->validateLuminanceCookie($acc)) {
             return true;
         }
@@ -420,8 +416,7 @@ class Referral extends \Gazelle\Base {
         return $result["status"] == 200;
     }
 
-    public function verifyAccount($acc, $user, $key)
-    {
+    public function verifyAccount(array $acc, string $user, string $key): string|true {
         return match ($acc["Type"]) {
             0 => $this->verifyGazelleAccount($acc, $user, $key),
             1 => $this->verifyGGNAccount($acc, $user, $key),
@@ -433,7 +428,7 @@ class Referral extends \Gazelle\Base {
         };
     }
 
-    private function verifyGazelleAccount($acc, $user, $key) {
+    private function verifyGazelleAccount(array $acc, string $user, string $key): string|true {
         if (!$this->loginGazelleAccount($acc)) {
             return "Internal error 10";
         }
@@ -471,86 +466,63 @@ class Referral extends \Gazelle\Base {
         return "Token not found. Please try again.";
     }
 
-    private function verifyGGNAccount($acc, $user, $key) {
+    private function verifyGGNAccount(array $acc, string $user, string $key): string|true {
         $url = $acc["URL"] . 'api.php';
-
-        $result = $this->proxy->fetch($url, ["request" => "user", "name" => $user,
-            "key" => $acc["Password"]], [], false);
+        $result = $this->proxy->fetch($url, [
+                "request" => "user",
+                "name"    => $user,
+                "key"     => $acc["Password"],
+            ], [], false
+        );
         $json = json_decode($result["response"], true);
 
-        if (str_contains($json["response"]["profileText"], $key)) {
-            return true;
-        } else {
-            return "Token not found. Please try again.";
-        }
+        return str_contains($json["response"]["profileText"], $key) ? true :"Token not found. Please try again.";
     }
 
-    private function verifyTentacleAccount($acc, $user, $key) {
+    private function verifyTentacleAccount(array $acc, string $user, string $key): string|true {
         if (!$this->loginTentacleAccount($acc)) {
             return "Internal error 11";
         }
 
         $url = $acc["URL"] . 'user/profile/' . $user;
-
         $result = $this->proxy->fetch($url, [], $acc["Cookie"], false);
 
-        if (str_contains($result["response"], $key)) {
-            return true;
-        } else {
-            return "Token not found. Please try again.";
-        }
+        return str_contains($result["response"], $key) ? true :"Token not found. Please try again.";
     }
 
-    private function verifyLuminanceAccount($acc, $user, $key) {
+    private function verifyLuminanceAccount(array $acc, string $user, string $key): string|true {
         if (!$this->loginLuminanceAccount($acc)) {
             return "Internal error 12";
         }
 
         $url = $acc["URL"] . 'user.php';
-
         $result = $this->proxy->fetch($url, ["id" => $user], $acc["Cookie"], false);
 
-        if (str_contains($result["response"], $key)) {
-            return true;
-        } else {
-            return "Token not found. Please try again.";
-        }
+        return str_contains($result["response"], $key) ? true :"Token not found. Please try again.";
     }
 
-    private function verifyGazelleHTMLAccount($acc, $user, $key) {
+    private function verifyGazelleHTMLAccount(array $acc, string $user, string $key): string|true {
         if (!$this->loginGazelleHTMLAccount($acc)) {
             return "Internal error 13";
         }
 
         $url = $acc["URL"] . 'user.php';
+        $result = $this->proxy->fetch($url, ["id" => $user], $acc["Cookie"], false);
 
-        $result = $this->proxy->fetch($url, ["id" => $user],
-            $acc["Cookie"], false);
-
-        if (str_contains($result["response"], $key)) {
-            return true;
-        } else {
-            return "Token not found. Please try again.";
-        }
+        return str_contains($result["response"], $key) ? true :"Token not found. Please try again.";
     }
 
-    private function verifyPTPAccount($acc, $user, $key) {
+    private function verifyPTPAccount(array $acc, string $user, string $key): string|true {
         if (!$this->loginPTPAccount($acc)) {
             return "Internal error 14";
         }
 
         $url = $acc["URL"] . 'user.php';
-
         $result = $this->proxy->fetch($url, ["id" => $user], $acc["Cookie"], false);
-
-        if (str_contains($result["response"], $key)) {
-            return true;
-        } else {
-            return "Token not found. Please try again.";
-        }
+        return str_contains($result["response"], $key) ? true :"Token not found. Please try again.";
     }
 
-    public function generateInvite($acc, $username, $email) {
+    public function generateInvite(array $acc, string $username, string $email): array {
         $existing = self::$db->scalar("
             SELECT Username
             FROM referral_users

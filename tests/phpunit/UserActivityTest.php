@@ -1,22 +1,27 @@
 <?php
 
 use \PHPUnit\Framework\TestCase;
+use \Gazelle\Enum\UserStatus;
 
 require_once(__DIR__ . '/../../lib/bootstrap.php');
 require_once(__DIR__ . '/../helper.php');
 
 class UserActivityTest extends TestCase {
-    protected Gazelle\Manager\User $userMan;
+    protected array $userList;
 
-    public function setUp(): void {
-        $this->userMan = new Gazelle\Manager\User;
+    public function tearDown(): void {
+        foreach ($this->userList as $user) {
+            $user->remove();
+        }
     }
 
     public function testActivity(): void {
-        $admin = Helper::makeUser('admin.' . randomString(10), 'activity');
-        $admin->setField('PermissionID', SYSOP)->modify();
+        $this->userList['admin'] = Helper::makeUser('admin.' . randomString(10), 'activity');
+        $this->userList['admin']->setField('PermissionID', SYSOP)
+            ->setField('Enabled', UserStatus::enabled->value)
+            ->modify();
 
-        $activity = new Gazelle\User\Activity($admin);
+        $activity = new Gazelle\User\Activity($this->userList['admin']);
         $this->assertInstanceOf(Gazelle\User\Activity::class, $activity, 'user-activity-instance');
 
         $this->assertCount(0, $activity->actionList(), 'user-activity-action');
@@ -31,10 +36,8 @@ class UserActivityTest extends TestCase {
         $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->setReport(new Gazelle\Stats\Report), 'user-activity-report');
         $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->setSSLHost(new Gazelle\Manager\SSLHost), 'user-activity-sslhost');
         $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->setScheduler(new Gazelle\TaskScheduler), 'user-activity-scheduler');
-        $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->setStaff(new Gazelle\Staff($admin)), 'user-activity-staff-set');
+        $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->setStaff(new Gazelle\Staff($this->userList['admin'])), 'user-activity-staff-set');
         $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->setStaffPM(new Gazelle\Manager\StaffPM), 'user-activity-staffpm');
-
-        $admin->remove();
     }
 
     public function testBlog(): void {
@@ -56,7 +59,8 @@ class UserActivityTest extends TestCase {
         $this->assertEquals(1,      $blog->userId(),    'blog-user-id');
         $this->assertEquals($blog->id(), $manager->latestId(), 'blog-id-is-latest');
 
-        $notifier = new Gazelle\User\Notification($this->userMan->find('@user'));
+        $this->userList['user'] = Helper::makeUser('user.' . randomString(10), 'activity');
+        $notifier = new Gazelle\User\Notification($this->userList['user']);
         // if this fails, the CI database has drifted (or another UT has clobbered the expected value here)
         $this->assertTrue($notifier->isActive('Blog'), 'activity-notified-blog');
 
@@ -71,6 +75,7 @@ class UserActivityTest extends TestCase {
         $this->assertEquals($blog->url(), $alertBlog->notificationUrl(), 'alert-blog-url-is-blog');
 
         $this->assertEquals(1, $blog->remove(), 'blog-remove');
+        $this->userList['user']->remove();
     }
 
     public function testGlobal(): void {
@@ -82,7 +87,8 @@ class UserActivityTest extends TestCase {
         $this->assertIsArray($global->alert(), 'global-alert');
         $this->assertEqualsWithDelta(10 * 60, $global->remaining(), 30, 'global-remaining-within-30sec');
 
-        $notifier = new Gazelle\User\Notification($this->userMan->find('@user'));
+        $this->userList['user'] = Helper::makeUser('user.' . randomString(10), 'activity');
+        $notifier = new Gazelle\User\Notification($this->userList['user']);
         $alertList = $notifier->alertList();
         $this->assertArrayHasKey('Global', $alertList, 'alert-has-global');
 
@@ -96,10 +102,12 @@ class UserActivityTest extends TestCase {
     }
 
     public function testInbox(): void {
-        $admin = $this->userMan->find('@admin');
-        $user  = $this->userMan->find('@user');
+        $userMan = new Gazelle\Manager\User;
+        $this->userList['admin'] = Helper::makeUser('admin.' . randomString(10), 'activity');
+        $this->userList['admin']->setField('PermissionID', SYSOP)->modify();
+        $this->userList['user'] = Helper::makeUser('user.' . randomString(10), 'activity');
 
-        $inbox = new Gazelle\User\Notification\Inbox($user);
+        $inbox = new Gazelle\User\Notification\Inbox($this->userList['user']);
         $this->assertInstanceOf(Gazelle\User\Notification\Inbox::class, $inbox, 'alert-notification-inbox-instance');
         if ($inbox->load()) {
             // there are some messages in the inbox, mark them as read
@@ -107,11 +115,11 @@ class UserActivityTest extends TestCase {
         }
 
         // send a message
-        $convId = $this->userMan->sendPM($user->id(), $admin->id(), 'unit test message', 'unit test body');
+        $convId = $userMan->sendPM($this->userList['user']->id(), $this->userList['admin']->id(), 'unit test message', 'unit test body');
         $this->assertGreaterThan(0, $convId, 'alert-inbox-send');
 
         // check out the notifications
-        $notifier = new Gazelle\User\Notification($user);
+        $notifier = new Gazelle\User\Notification($this->userList['user']);
         // if this fails, the CI database has drifted (or another UT has clobbered the expected value here)
         $this->assertTrue($notifier->isActive('Inbox'), 'activity-notified-inbox');
 
@@ -123,24 +131,25 @@ class UserActivityTest extends TestCase {
         $this->assertEquals('You have a new message', $alertInbox->title(), 'alert-inbox-unread');
 
         // read it
-        $pm = (new Gazelle\Manager\PM($user))->findById($convId);
+        $pm = (new Gazelle\Manager\PM($this->userList['user']))->findById($convId);
         $this->assertInstanceOf(Gazelle\PM::class, $pm, 'inbox-unread-pm');
         $this->assertEquals(1, $pm->markRead(), 'alert-pm-read');
     }
 
     public function testNews(): void {
-        $admin = $this->userMan->find('@admin');
-        $user  = $this->userMan->find('@user');
-        $title = "This is the 6 o'clock news";
+        $this->userList['admin'] = Helper::makeUser('admin.' . randomString(10), 'activity');
+        $this->userList['admin']->setField('PermissionID', SYSOP)->modify();
+        $this->userList['user'] = Helper::makeUser('user.' . randomString(10), 'activity');
 
         $manager = new Gazelle\Manager\News;
-        $newsId  = $manager->create($admin->id(), $title, 'Not much happened');
+        $title = "This is the 6 o'clock news";
+        $newsId  = $manager->create($this->userList['admin']->id(), $title, 'Not much happened');
         $this->assertGreaterThan(0, $newsId, 'alert-news-create');
         $this->assertNull($manager->fetch(-1), 'alert-no-news-is-null-news');
         $info = $manager->fetch($newsId);
         $this->assertCount(2, $info, 'alert-latest-news');
 
-        $notifier = new Gazelle\User\Notification($user);
+        $notifier = new Gazelle\User\Notification($this->userList['user']);
         // if this fails, the CI database has drifted (or another UT has clobbered the expected value here)
         $this->assertTrue($notifier->isActive('News'), 'activity-notified-news');
 
