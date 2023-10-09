@@ -26,17 +26,17 @@ class Email extends \Gazelle\Base {
         }
     }
 
-    public function setColumn(int $column) {
+    public function setColumn(int $column): static {
         $this->column = $column;
         return $this;
     }
 
-    public function setDirection(int $direction) {
+    public function setDirection(int $direction): static {
         $this->direction = $direction;
         return $this;
     }
 
-    public function create(string $name) {
+    public function create(string $name): static {
         $this->name = $name;
         self::$db->dropTemporaryTable($this->name);
         self::$db->prepared_query("
@@ -79,7 +79,7 @@ class Email extends \Gazelle\Base {
     }
 
     public function liveTotal(): int {
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*)
             FROM users_main um
             INNER JOIN {$this->name} s ON (s.email = um.Email)
@@ -114,7 +114,7 @@ class Email extends \Gazelle\Base {
     }
 
     public function historyTotal(): int {
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*)
             FROM users_history_emails uhe
             INNER JOIN {$this->name} s ON (s.email = uhe.Email)

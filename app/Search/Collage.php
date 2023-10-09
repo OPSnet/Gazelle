@@ -3,7 +3,6 @@
 namespace Gazelle\Search;
 
 class Collage extends \Gazelle\Base {
-
     /* In queries, the collages table is aliased to c */
 
     protected bool $bookmarkView = false;
@@ -58,7 +57,7 @@ class Collage extends \Gazelle\Base {
         return $this->userLink;
     }
 
-    public function setBookmarkView(\Gazelle\User $user) {
+    public function setBookmarkView(\Gazelle\User $user): static {
         $this->bookmarkView = true;
         $this->userLink = $user->link();
         $this->join[]  = "INNER JOIN bookmarks_collages AS bc ON (c.ID = bc.CollageID)";
@@ -67,12 +66,12 @@ class Collage extends \Gazelle\Base {
         return $this;
     }
 
-    public function setCategory(array $category) {
+    public function setCategory(array $category): static {
         $this->category = array_filter($category, fn ($id) => in_array($id, array_keys(COLLAGE)));
         return $this;
     }
 
-    public function setContributor(\Gazelle\User $user) {
+    public function setContributor(\Gazelle\User $user): static {
         $this->contributor = true;
         $this->userLink = $user->link();
         $this->where[] = "c.ID IN (SELECT DISTINCT CollageID FROM collages_torrents WHERE UserID = ?)";
@@ -80,7 +79,7 @@ class Collage extends \Gazelle\Base {
         return $this;
     }
 
-    public function setLookup(string $lookup) {
+    public function setLookup(string $lookup): static {
         if (!in_array($lookup, ['name', 'description'])) {
             $lookup = 'name';
         }
@@ -88,29 +87,29 @@ class Collage extends \Gazelle\Base {
         return $this;
     }
 
-    public function setPersonal() {
+    public function setPersonal(): static {
         $this->where[] = 'c.CategoryID = 0';
         return $this;
     }
 
-    public function setTagAll(bool $tagAll) {
+    public function setTagAll(bool $tagAll): static {
         $this->tagAll = $tagAll;
         return $this;
     }
 
-    public function setTaglist(array $taglist) {
+    public function setTaglist(array $taglist): static {
         $this->taglist = $taglist;
         return $this;
     }
 
-    public function setUser(\Gazelle\User $user) {
+    public function setUser(\Gazelle\User $user): static {
         $this->userLink = $user->link();
         $this->where[] = 'c.UserID = ?';
         $this->args[]  = $user->id();
         return $this;
     }
 
-    public function setWordlist(string $wordlist) {
+    public function setWordlist(string $wordlist): static {
         if (preg_match_all('/(\S+)/', $wordlist, $match)) {
             array_push($this->where, ...array_fill(0, count($match[0]), "c." . $this->lookup . " LIKE concat('%', ?, '%')"));
             array_push($this->args, ...$match[0]);
@@ -118,7 +117,7 @@ class Collage extends \Gazelle\Base {
         return $this;
     }
 
-    public function configure() {
+    public function configure(): void {
         $this->header = new \Gazelle\Util\SortableTableHeader('time', [
             'time'        => ['dbColumn' => 'c.ID',          'defaultSort' => 'desc', 'text' => 'Created'],
             'name'        => ['dbColumn' => 'c.Name',        'defaultSort' => 'asc',  'text' => 'Collage'],
@@ -148,7 +147,7 @@ class Collage extends \Gazelle\Base {
         if (!$this->configured) {
             $this->configure();
         }
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*)
             FROM collages AS c {$this->_join}
             WHERE {$this->_where}

@@ -3,7 +3,6 @@
 namespace Gazelle\Search;
 
 class Donation extends \Gazelle\Base {
-
     protected array $join = [];
     protected array $cond = [];
     protected array $args = [];
@@ -11,20 +10,20 @@ class Donation extends \Gazelle\Base {
     protected string $_join;
     protected string $_where;
 
-    public function setUsername(string $username) {
+    public function setUsername(string $username): static {
         $this->join[] = "INNER JOIN users_main AS m ON (m.ID = d.UserID)";
         $this->cond[] = "m.Username LIKE concat('%', ?, '%')";
         $this->args[] = trim($username);
         return $this;
     }
 
-    public function setInterval(string $after, string $before) {
+    public function setInterval(string $after, string $before): static {
         $this->cond[] = "d.Time BETWEEN ? AND ?";
         array_push($this->args, trim($after), trim($before));
         return $this;
     }
 
-    protected function configure() {
+    protected function configure(): void {
         if (!isset($this->_where)) {
             $this->_where = empty($this->cond) ? '' : ('WHERE ' . implode(' AND ', $this->cond));
             $this->_join = implode(' ', $this->join);
@@ -33,7 +32,7 @@ class Donation extends \Gazelle\Base {
 
     public function total(): int {
         $this->configure();
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*)
             FROM donations AS d
             {$this->_join} {$this->_where}

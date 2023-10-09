@@ -156,7 +156,11 @@ class Request extends \Gazelle\Base {
         }
         $include = [];
         $exclude = [];
-        foreach (preg_split('/\s*,\s*/', $tagList) as $tag) {
+        $split = preg_split('/\s*,\s*/', $tagList);
+        if ($split === false) {
+            return $this;
+        }
+        foreach ($split as $tag) {
             if (preg_match('/^(![^!]+)$/', $tag, $match)) {
                 $exclude[] = $match[1];
             } else {
@@ -180,7 +184,11 @@ class Request extends \Gazelle\Base {
         $include = [];
         $exclude = [];
         $nrTerms = 0;
-        foreach (preg_split('/\s+/', $text) as $term) {
+        $split = preg_split('/\s+/', $text);
+        if ($split === false) {
+            return $this;
+        }
+        foreach ($split as $term) {
             // Skip isolated hyphens to enable "Artist - Title" searches
             if (in_array($term, ['-', '–'])) {
                 continue;
@@ -229,7 +237,7 @@ class Request extends \Gazelle\Base {
         return $this;
     }
 
-    public function limit(int $offset, int $limit, int $end) {
+    public function limit(int $offset, int $limit, int $end): static {
         $this->sphinxq->limit($offset, $limit, $end);
         return $this;
     }
@@ -281,8 +289,13 @@ class Request extends \Gazelle\Base {
             $this->sphinxq->select('id')->from('requests, requests_delta');
             $this->sphinxq->order_by($orderBy, $direction);
             $result      = $this->sphinxq->sphinxquery();
-            $this->total = (int)$result->get_meta('total_found');
-            $list = array_keys($result->to_array('id'));
+            if ($result !== false) {
+                $this->total = (int)$result->get_meta('total_found');
+                $list = array_keys($result->to_array('id'));
+            } else {
+                $this->total = 0;
+                $list = [];
+            }
         }
         $this->list = array_map(fn ($id) => $this->manager->findById($id), $list);
         return count($this->list);

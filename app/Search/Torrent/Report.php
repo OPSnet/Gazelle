@@ -48,7 +48,7 @@ class Report extends \Gazelle\Base {
                     break;
             }
         } else {
-            $user = $this->userMan->findById($this->id);
+            $user = $this->userMan->findById((int)$this->id);
             switch ($this->mode) {
                 case 'staff':
                     $this->title  = "{$user->link()}'s claimed reports";
@@ -130,6 +130,6 @@ class Report extends \Gazelle\Base {
     }
 
     public function total(): int {
-        return self::$db->scalar($this->totalSql(), ...$this->args);
+        return (int)self::$db->scalar($this->totalSql(), ...$this->args);
     }
 }

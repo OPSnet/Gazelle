@@ -31,17 +31,17 @@ class IPv4 extends \Gazelle\Base {
         }
     }
 
-    public function setColumn(int $column) {
+    public function setColumn(int $column): static {
         $this->column = $column;
         return $this;
     }
 
-    public function setDirection(int $direction) {
+    public function setDirection(int $direction): static {
         $this->direction = $direction;
         return $this;
     }
 
-    public function create(string $name) {
+    public function create(string $name): static {
         $this->name = $name;
         self::$db->dropTemporaryTable($this->name);
         self::$db->prepared_query("
@@ -80,7 +80,7 @@ class IPv4 extends \Gazelle\Base {
     }
 
     public function siteTotal(): int {
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*)
             FROM users_history_ips uhi
             INNER JOIN {$this->name} s ON (s.addr_a = uhi.IP)
@@ -114,7 +114,7 @@ class IPv4 extends \Gazelle\Base {
     }
 
     public function snatchTotal(): int {
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(DISTINCT xs.uid)
             FROM xbt_snatched xs
             INNER JOIN {$this->name} s ON (s.addr_a = xs.IP)
@@ -150,7 +150,7 @@ class IPv4 extends \Gazelle\Base {
     }
 
     public function trackerTotal(): int {
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(DISTINCT xfu.uid)
             FROM xbt_files_users xfu
             INNER JOIN {$this->name} s ON (s.addr_a = xfu.IP)
