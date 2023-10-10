@@ -3,8 +3,8 @@
 namespace Gazelle\Manager;
 
 class EmailBlacklist extends \Gazelle\Base {
-    protected $filterComment;
-    protected $filterEmail;
+    protected string $filterComment;
+    protected string $filterEmail;
 
     public function create(array $info): int {
         self::$db->prepared_query("
@@ -37,12 +37,12 @@ class EmailBlacklist extends \Gazelle\Base {
         return self::$db->affected_rows() === 1;
     }
 
-    public function filterComment(string $filterComment) {
+    public function filterComment(string $filterComment): static {
         $this->filterComment = $filterComment;
         return $this;
     }
 
-    public function filterEmail(string $filterEmail) {
+    public function filterEmail(string $filterEmail): static {
         $this->filterEmail = $filterEmail;
         return $this;
     }
@@ -66,7 +66,7 @@ class EmailBlacklist extends \Gazelle\Base {
 
     public function total(): int {
         [$from, $args] = $this->queryBase();
-        return self::$db->scalar("SELECT count(*) $from", ...$args);
+        return (int)self::$db->scalar("SELECT count(*) $from", ...$args);
     }
 
     public function page(int $limit, int $offset): array {

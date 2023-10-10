@@ -10,8 +10,8 @@ enum CurlMethod {
 }
 
 class Curl {
-    protected $curl;
-    protected $result;
+    protected \CurlHandle $curl;
+    protected string|bool $result;
     protected bool $useProxy = true;
     protected array $option;
     protected array $postData;
@@ -64,7 +64,7 @@ class Curl {
                 CurlMethod::GET  => CURLOPT_HTTPGET,
                 CurlMethod::HEAD => CURLOPT_NOBODY,
                 CurlMethod::POST => CURLOPT_POST,
-                CurlMethod::PUT  => CURLOPT_PUT,
+                CurlMethod::PUT  => CURLOPT_PUT, /** @phpstan-ignore-line */
             } => true,
         ]);
         $proxy = httpProxy();
@@ -86,7 +86,7 @@ class Curl {
     }
 
     public function result(): ?string {
-        return $this->result;
+        return $this->result === false ? null : (string)$this->result;
     }
 
     public function responseCode(): int {

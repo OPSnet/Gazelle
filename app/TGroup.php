@@ -740,7 +740,7 @@ class TGroup extends BaseObject {
      * How many unresolved torrent reports are there in this group?
      */
     public function unresolvedReportsTotal(): int {
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*)
             FROM reportsv2 AS r
             INNER JOIN torrents AS t ON (t.ID = r.TorrentID)
@@ -882,10 +882,10 @@ class TGroup extends BaseObject {
         }
 
         // Was this the last occurrence?
-        $inUse = self::$db->scalar("
+        $inUse = (int)self::$db->scalar("
             SELECT count(*) FROM torrents_tags WHERE TagID = ?
             ", $tagId
-        ) + self::$db->scalar("
+        ) + (int)self::$db->scalar("
             SELECT count(*)
             FROM requests_tags rt
             INNER JOIN requests r ON (r.ID = rt.RequestID)

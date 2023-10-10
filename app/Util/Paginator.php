@@ -68,13 +68,13 @@ class Paginator {
         $pageCount = 0;
         $this->linkbox = '';
 
-        $uri = preg_replace('/[?&]page=\d+/', '', $_SERVER['REQUEST_URI']);
+        $uri = (string)preg_replace('/[?&]page=\d+/', '', $_SERVER['REQUEST_URI']);
         foreach ($this->remove as $param) {
             /* page?param=1&keep=2 => page?keep=2
              * page?keep=2&param=1 => page?keep=2
              * page?keep=3&param=2&also=3 => page?keep=3&also=3
              */
-            $uri = preg_replace("/(?:(?<=\?)$param=[^&]+&?|&$param=[^&]+(?:(?=&)|$))/", '', $uri);
+            $uri = (string)preg_replace("/(?:(?<=\?)$param=[^&]+&?|&$param=[^&]+(?:(?=&)|$))/", '', $uri);
         }
         $uri = str_replace('&', '&amp;', $uri);
         if (!str_contains($uri, '?')) {

@@ -9,9 +9,17 @@ class Proxy {
     ) {}
 
     public function fetch($url, $params, $cookies, $post, $headers = []) {
-        $data = Crypto::encrypt(json_encode(['url' => $url, 'params' => $params,
-            'cookies' => $cookies, 'post' => $post, 'action' => 'fetch', 'headers' => $headers],
-            JSON_UNESCAPED_SLASHES), $this->key);
+        $data = Crypto::encrypt(
+            (string)json_encode([
+                'url'     => $url,
+                'params'  => $params,
+                'cookies' => $cookies,
+                'post'    => $post,
+                'action'  => 'fetch',
+                'headers' => $headers
+            ], JSON_UNESCAPED_SLASHES),
+            $this->key
+        );
 
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_TIMEOUT, 30);

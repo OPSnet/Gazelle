@@ -13,7 +13,7 @@ class Configuration {
 
     public function instance(string $dimension): \Gazelle\UserRank\AbstractUserRank {
         $className = "\\Gazelle\\UserRank\\Dimension\\" . $this->config[$dimension][1];
-        return new $className;
+        return new $className; /** @phpstan-ignore-line */
     }
 
     public function weight(string $dimension): int {

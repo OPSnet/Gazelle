@@ -281,7 +281,7 @@ class Bookmark extends \Gazelle\BaseUser {
     public function remove(string $type, int $id): int {
         [$table, $column] = $this->schema($type);
         if (!$id) {
-            throw new \Gazelle\Exception\BookmarkIdentifierException($id);
+            throw new \Gazelle\Exception\BookmarkIdentifierException((string)$id);
         }
         self::$db->prepared_query("
             DELETE FROM $table WHERE UserID = ?  AND $column = ?

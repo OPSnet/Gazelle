@@ -88,10 +88,11 @@ class StaffPM extends \Gazelle\BaseManager {
     }
 
     public function commonAnswer(int $id): ?string {
-        return self::$db->scalar("
+        $answer = self::$db->scalar("
             SELECT Message FROM staff_pm_responses WHERE ID = ?
             ", $id
         );
+        return $answer ? (string)$answer : null;
     }
 
     public function commonAnswerList(): array {
@@ -106,7 +107,7 @@ class StaffPM extends \Gazelle\BaseManager {
     }
 
     public function countByStatus(\Gazelle\User $viewer, array $status): int {
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*) FROM staff_pm_conversations
             WHERE (Level <= ? OR AssignedToUser = ?)
                 AND Status IN (" . placeholders($status) . ")
@@ -115,7 +116,7 @@ class StaffPM extends \Gazelle\BaseManager {
     }
 
     public function countAtLevel(\Gazelle\User $viewer, array $status): int {
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*) FROM staff_pm_conversations
             WHERE (Level = ? OR AssignedToUser = ?)
                 AND Status IN (" . placeholders($status) . ")

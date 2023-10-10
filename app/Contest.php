@@ -52,7 +52,7 @@ class Contest extends BaseObject {
             $info['bonus_pool'] = new BonusPool($info['bonus_pool_id']);
             // calculate the ratios of how the bonus pool is carved up
             // sum(bonusUser + bonusContest + bonusPerEntry) == 1.0
-            $bonusClaimSum = $info['bonus_user'] + $info['bonus_contest'] + $info['bonus_per_entry'];
+            $bonusClaimSum = (int)floor($info['bonus_user'] + $info['bonus_contest'] + $info['bonus_per_entry']);
             $info['bonus_user_ratio']      = $info['bonus_user'] / $bonusClaimSum;
             $info['bonus_contest_ratio']   = $info['bonus_contest'] / $bonusClaimSum;
             $info['bonus_per_entry_ratio'] = 1 - ($info['bonus_user_ratio'] + $info['bonus_contest_ratio']);
@@ -150,16 +150,16 @@ class Contest extends BaseObject {
         return !is_null($this->info()['bonus_pool']);
     }
 
-    public function bonusPoolTotal(): float {
-        return $this->info()['bonus_pool']?->total() ?? 0.0;
+    public function bonusPoolTotal(): int {
+        return (int)($this->info()['bonus_pool']?->total() ?? 0);
     }
 
     public function bonusStatus(): string {
         return $this->info()['bonus_status'];
     }
 
-    public function bonusPerContest(): float {
-        return $this->info()['bonus_contest'];
+    public function bonusPerContest(): int {
+        return (int)$this->info()['bonus_contest'];
     }
 
     public function bonusPerContestRatio(): float {
@@ -168,11 +168,11 @@ class Contest extends BaseObject {
 
     public function bonusPerContestValue(): int {
         $totalUsers = $this->totalUsers();
-        return $totalUsers ? floor($this->bonusPoolTotal() *  $this->bonusPerContestRatio() / $totalUsers) : 0;
+        return $totalUsers ? (int)floor($this->bonusPoolTotal() *  $this->bonusPerContestRatio() / $totalUsers) : 0;
     }
 
-    public function bonusPerEntry(): float {
-        return $this->info()['bonus_per_entry'];
+    public function bonusPerEntry(): int {
+        return (int)$this->info()['bonus_per_entry'];
     }
 
     public function bonusPerEntryRatio(): float {
@@ -181,11 +181,11 @@ class Contest extends BaseObject {
 
     public function bonusPerEntryValue(): int {
         $totalEntries = $this->totalEntries();
-        return $totalEntries ? floor($this->bonusPoolTotal() * $this->bonusPerEntryRatio() / $totalEntries) : 0;
+        return $totalEntries ? (int)floor($this->bonusPoolTotal() * $this->bonusPerEntryRatio() / $totalEntries) : 0;
     }
 
-    public function bonusPerUser(): float {
-        return $this->info()['bonus_user'];
+    public function bonusPerUser(): int {
+        return (int)$this->info()['bonus_user'];
     }
 
     public function bonusPerUserRatio(): float {
@@ -194,7 +194,7 @@ class Contest extends BaseObject {
 
     public function bonusPerUserValue(): int {
         $totalEnabledUsers = (new Stats\Users())->enabledUserTotal();
-        return $totalEnabledUsers ? floor($this->bonusPoolTotal() * $this->bonusPerUserRatio() / $totalEnabledUsers) : 0;
+        return $totalEnabledUsers ? (int)floor($this->bonusPoolTotal() * $this->bonusPerUserRatio() / $totalEnabledUsers) : 0;
     }
 
     public function isOpen(): bool {
@@ -302,6 +302,9 @@ class Contest extends BaseObject {
         $perEntryBonus    = $this->bonusPerEntryValue();
 
         $report = fopen(TMPDIR . "/payout-contest-" . $this->id . ".txt", 'a');
+        if ($report === false) {
+            return 0;
+        }
         fprintf($report, "# user=%d contest=%d entry=%d\n", $enabledUserBonus, $contestBonus, $perEntryBonus);
 
         $participants = $this->type()->userPayout($enabledUserBonus, $contestBonus, $perEntryBonus);

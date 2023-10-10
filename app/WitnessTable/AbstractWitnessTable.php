@@ -10,7 +10,8 @@ abstract class AbstractWitnessTable extends \Gazelle\Base {
     abstract public function witness(int $id): bool;
 
     protected function latestValue(): ?int {
-        return self::$db->scalar("SELECT max(ID) FROM {$this->reference()}");
+        $id = self::$db->scalar("SELECT max(ID) FROM {$this->reference()}");
+        return $id ? (int)$id : null;
     }
 
     protected function witnessValue(int $userId): bool {
@@ -45,13 +46,13 @@ abstract class AbstractWitnessTable extends \Gazelle\Base {
     /**
      * Return the ID of the most recent unread article
      *
-     * @param int $userId user ID of the reader
      * @return null|int article ID or null if no article has been read
      */
     public function lastRead(int $userId): ?int {
-        return self::$db->scalar("
+        $id = self::$db->scalar("
             SELECT {$this->valueColumn()} FROM {$this->tableName()} WHERE {$this->idColumn()} = ?
             ", $userId
         );
+        return $id ? (int)$id : null;
     }
 }

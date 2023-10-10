@@ -5,9 +5,6 @@ namespace Gazelle;
 class StaffPM extends BaseObject {
     final const tableName = 'staff_pm_conversations';
 
-    protected $author;
-    protected $assigned;
-
     public function flush(): static {
         $this->info = [];
         return $this;
@@ -15,11 +12,12 @@ class StaffPM extends BaseObject {
     public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->subject())); }
     public function location(): string { return 'staffpm.php?action=viewconv&id=' . $this->id; }
 
-    public function flushUser(User $user) {
+    public function flushUser(User $user): static {
         self::$cache->delete_multi([
             "num_staff_pms_" . $user->id(),
             "staff_pm_new_" . $user->id(),
         ]);
+        return $this;
     }
 
     public function info(): array {

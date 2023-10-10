@@ -28,7 +28,7 @@ class Router {
         protected readonly string $auth_key = ''
     ) {}
 
-    public function addRoute(string|array $methods, string $action, string $path, bool $authorize = false) {
+    public function addRoute(string|array $methods, string $action, string $path, bool $authorize = false): void {
         if (is_array($methods)) {
             foreach ($methods as $method) {
                 $this->addRoute($method, $action, $path, $authorize);
@@ -44,35 +44,34 @@ class Router {
         }
     }
 
-    public function addGet(string $action, string $file, bool $authorize = false) {
+    public function addGet(string $action, string $file, bool $authorize = false): void {
         $this->routes['GET'][$action] = ['file' => $file, 'authorize' => $authorize];
     }
 
-    public function addPost(string $action, string $file, bool $authorize = true) {
+    public function addPost(string $action, string $file, bool $authorize = true): void {
         $this->routes['POST'][$action] = ['file' => $file, 'authorize' => $authorize];
     }
 
-    public function authorizeGet(bool $authorize = true) {
+    public function authorizeGet(bool $authorize = true): void {
         $this->authorize['GET'] = $authorize;
     }
 
-    public function authorizePost(bool $authorize = true) {
+    public function authorizePost(bool $authorize = true): void {
         $this->authorize['POST'] = $authorize;
     }
 
-    public function authorized() {
+    public function authorized(): bool {
         return !empty($_REQUEST['auth']) && $_REQUEST['auth'] === $this->auth_key;
     }
 
-    public function hasRoutes() {
+    public function hasRoutes(): bool {
         return array_sum(array_map("count", $this->routes)) > 0;
     }
 
     /**
-     * @return string path to file to load
      * @throws RouterException
      */
-    public function getRoute(string $action) {
+    public function getRoute(string $action): string {
         $request_method = strtoupper(empty($_SERVER['REQUEST_METHOD']) ? 'GET' : $_SERVER['REQUEST_METHOD']);
         if (isset($this->routes[$request_method]) && isset($this->routes[$request_method][$action])) {
             $method = $this->routes[$request_method][$action];

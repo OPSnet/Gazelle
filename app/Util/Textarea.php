@@ -58,12 +58,12 @@ class Textarea extends \Gazelle\Base {
         return "preview_wrap_" . $this->id;
     }
 
-    public function setDisabled() {
+    public function setDisabled(): static {
         $this->extra[] = "disabled=\"disabled\"";
         return $this;
     }
 
-    public function setPreviewManual(bool $previewManual) {
+    public function setPreviewManual(bool $previewManual): static {
         $this->previewManual = $previewManual;
         return $this;
     }

@@ -36,6 +36,7 @@ parameters:
         - DISABLE_IRC
         - DISABLE_TRACKER
         - DEBUG
+        - DEBUG_CONTEST_PAYOUT
         - DEBUG_EMAIL
         - DEBUG_MODE
         - DEBUG_UPLOAD_NOTIFICATION

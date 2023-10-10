@@ -134,7 +134,7 @@ if ($Viewer->permitted('site_submit_requests')) {
                         <a class="brackets prev_cover" data-gazelle-prev-cover="<?=($Index - 1)?>" href="#">Prev</a>
                         <a class="brackets show_all_covers" href="#">Show all</a>
                         <a class="brackets next_cover" data-gazelle-next-cover="<?=($Index + 1)?>" href="#">Next</a>
-<?php   } elseif (count($coverArt) > 0) { ?>
+<?php   } else { ?>
                         <span class="brackets prev_cover">Prev</span>
                         <a class="brackets show_all_covers" href="#">Show all</a>
                         <a class="brackets next_cover" data-gazelle-next-cover="1" href="#">Next</a>

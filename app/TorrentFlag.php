@@ -19,7 +19,7 @@ enum TorrentFlag: string {
             TorrentFlag::cassette    => 'Cassette Approved',
             TorrentFlag::lossyMaster => 'Lossy Master Approved',
             TorrentFlag::lossyWeb    => 'Lossy WEB Approved',
-            TorrentFlag::noLineage   => 'Missing Lineage',
+            TorrentFlag::noLineage   => 'Missing Lineage', /** @phpstan-ignore-line */
         };
     }
 }

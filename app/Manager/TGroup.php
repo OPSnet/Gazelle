@@ -112,7 +112,7 @@ class TGroup extends \Gazelle\BaseManager {
      * Set the viewer context, for snatched indicators etc.
      * If this is set, and Torrent object created will have it set
      */
-    public function setViewer(\Gazelle\User $viewer) {
+    public function setViewer(\Gazelle\User $viewer): static {
         $this->viewer = $viewer;
         return $this;
     }

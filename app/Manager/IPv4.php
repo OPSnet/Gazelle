@@ -9,19 +9,19 @@ class IPv4 extends \Gazelle\Base {
     protected string $filterIpaddr;
     protected string $filterIpaddrRegexp;
 
-    public function setFilterNotes(string $filterNotes) {
+    public function setFilterNotes(string $filterNotes): static {
         $this->filterNotes = $filterNotes;
         return $this;
     }
 
-    public function setFilterIpaddr(string $filterIpaddr) {
+    public function setFilterIpaddr(string $filterIpaddr): static {
         if (preg_match(IP_REGEXP, $filterIpaddr)) {
             $this->filterIpaddr = $filterIpaddr;
         }
         return $this;
     }
 
-    public function setFilterIpaddrRegexp(string $re) {
+    public function setFilterIpaddrRegexp(string $re): static {
         $this->filterIpaddrRegexp = $re;
         return $this;
     }
@@ -46,7 +46,7 @@ class IPv4 extends \Gazelle\Base {
 
     public function total(): int {
         [$from, $args] = $this->queryBase();
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*) $from
             ", ...$args
         );
@@ -78,7 +78,7 @@ class IPv4 extends \Gazelle\Base {
             $args[] = $this->filterIpaddrRegexp;
         }
         $where  = join(' AND ', $cond);
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(DISTINCT IP) FROM users_history_ips WHERE $where
             ", ...$args
         );
@@ -136,7 +136,7 @@ class IPv4 extends \Gazelle\Base {
                 WHERE FromIP BETWEEN ? << 24 AND (? << 24) + 1
                 ", $A, $A
             );
-            $IPBans = self::$db->to_array(0, MYSQLI_NUM, false);
+            $IPBans = self::$db->to_array(false, MYSQLI_NUM, false);
             self::$cache->cache_value($key, $IPBans, 0);
         }
         $IPNum = sprintf('%u', ip2long($IP));
@@ -154,7 +154,7 @@ class IPv4 extends \Gazelle\Base {
      * the given reason to an existing ban. $to and $from are dotted quads
      */
     public function createBan(int $userId, string $from, string $to, string $reason): int {
-        $id = self::$db->scalar("
+        $id = (int)self::$db->scalar("
             SELECT ID
             FROM ip_bans
             WHERE FromIP = inet_aton(?)

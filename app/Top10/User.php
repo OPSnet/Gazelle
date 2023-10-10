@@ -23,7 +23,7 @@ class User extends \Gazelle\Base {
         self::DOWNLOAD_SPEED => 'down_speed',
     ];
 
-    public function fetch(string $type, int $limit) {
+    public function fetch(string $type, int $limit): array {
         if (!array_key_exists($type, $this->sortMap)) {
             return [];
         }
@@ -69,7 +69,6 @@ class User extends \Gazelle\Base {
             $results = self::$db->to_array();
             self::$cache->cache_value(sprintf(self::CACHE_KEY, $type, $limit), $results, 3600 * 12);
         }
-
         return $results;
     }
 }

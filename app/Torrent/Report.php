@@ -5,7 +5,7 @@ namespace Gazelle\Torrent;
 class Report extends \Gazelle\BaseObject {
     final const tableName = 'reportsv2';
 
-    protected \Gazelle\TorrentAbstract|null|bool $torrent = false;
+    protected \Gazelle\TorrentAbstract|null|false $torrent = false;
 
     public function __construct(
         int $id,
@@ -56,7 +56,7 @@ class Report extends \Gazelle\BaseObject {
         if (is_null($list) || $list === '') {
             return [];
         }
-        return preg_split('/\s+/', $list);
+        return preg_split('/\s+/', $list) ?: [];
     }
 
     public function image(): array {
@@ -64,7 +64,7 @@ class Report extends \Gazelle\BaseObject {
         if (is_null($list) || $list === '') {
             return [];
         }
-        return preg_split('/\s+/', $list);
+        return preg_split('/\s+/', $list) ?: [];
     }
 
     public function message(): ?string {
@@ -76,11 +76,12 @@ class Report extends \Gazelle\BaseObject {
     }
 
     public function otherIdList(): array {
-        $list = $this->info()['other_id'];
-        if (is_null($list) || $list === '') {
+        $otherList = $this->info()['other_id'];
+        if (is_null($otherList) || $otherList === '') {
             return [];
         }
-        return array_map('intval', preg_split('/\s+/', $list));
+        $list = preg_split('/\s+/', $otherList);
+        return $list ? array_map('intval', $list) : [];
     }
 
     public function reason(): string {
@@ -123,11 +124,12 @@ class Report extends \Gazelle\BaseObject {
     }
 
     public function trackList(): array {
-        $list = $this->info()['track_list'];
-        if (is_null($list) || $list === '') {
+        $trackList = $this->info()['track_list'];
+        if (is_null($trackList) || $trackList === '') {
             return [];
         }
-        return array_map('intval', preg_split('/\D+/', $list));
+        $list = preg_split('/\D+/', $trackList);
+        return $list ? array_map('intval', $list) : [];
     }
 
     public function type(): string {
@@ -135,6 +137,9 @@ class Report extends \Gazelle\BaseObject {
     }
 
     public function addTorrentFlag(\Gazelle\TorrentFlag $flag, \Gazelle\User $user): int {
+        if ($this->torrent === false) {
+            return 0;
+        }
         $affected = $this->torrent->addFlag($flag, $user);
         $this->torrent->flush();
         return $affected;
@@ -196,7 +201,9 @@ class Report extends \Gazelle\BaseObject {
                 AND ID = ?
             ", $userId, $message, $this->id
         );
-        $this->torrent->flush();
+        if ($this->torrent) {
+            $this->torrent->flush();
+        }
         self::$cache->delete_value(sprintf(\Gazelle\TorrentAbstract::CACHE_REPORTLIST, $this->torrentId()));
         return self::$db->affected_rows();
     }
@@ -213,7 +220,9 @@ class Report extends \Gazelle\BaseObject {
             WHERE ID = ?
             ", $log, $message, $this->id
         );
-        $this->torrent->flush();
+        if ($this->torrent) {
+            $this->torrent->flush();
+        }
         self::$cache->delete_value(sprintf(\Gazelle\TorrentAbstract::CACHE_REPORTLIST, $this->torrentId()));
         return self::$db->affected_rows();
     }

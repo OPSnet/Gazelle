@@ -47,10 +47,8 @@ class Subscription extends \Gazelle\Base {
     /**
      * Move all $Page subscriptions from $OldPageID to $NewPageID (for example when merging torrent groups).
      * @param string $Page 'forums', 'artist', 'collages', 'requests' or 'torrents'
-     * @param int $OldPageID source
-     * @param int $NewPageID target (if null, page is deleted)
      */
-    public function move(string $Page, int $OldPageID, ?int $NewPageID) {
+    public function move(string $Page, int $OldPageID, ?int $NewPageID): int {
         if ($Page == 'forums') {
             if ($NewPageID !== null) {
                 self::$db->prepared_query('
@@ -147,6 +145,6 @@ class Subscription extends \Gazelle\Base {
                 ', $Page, $OldPageID
             );
         }
-        $this->flushPage($Page, $OldPageID);
+        return $this->flushPage($Page, $OldPageID);
     }
 }

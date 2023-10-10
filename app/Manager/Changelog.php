@@ -31,7 +31,7 @@ class Changelog extends \Gazelle\Base {
     }
 
     public function total(): int {
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*) FROM changelog
         ");
     }

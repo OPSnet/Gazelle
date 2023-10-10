@@ -3,19 +3,17 @@
 namespace Gazelle\Util;
 
 class Mail {
-    protected $from = 'noreply';
+    protected string $from = 'noreply';
 
-    public function setFrom(string $from) {
+    public function setFrom(string $from): static {
         $this->from = $from;
         return $this;
     }
 
     /**
      * Send an email.
-     *
-     * @param string $to Recipient address
      */
-    public function send(string $to, string $subject, string $body) {
+    public function send(string $to, string $subject, string $body): void {
         $from = $this->from . '@' . SITE_HOST;
         $msgId = randomString(40);
         $headers = implode("\r\n", [
@@ -30,8 +28,10 @@ class Mail {
         ]);
         if (DEBUG_EMAIL) {
             $out = fopen(TMPDIR . "/$msgId.mail", "w");
-            fwrite($out, $headers . "\n" . $body . "\n");
-            fclose($out);
+            if ($out) {
+                fwrite($out, $headers . "\n" . $body . "\n");
+                fclose($out);
+            }
         } else {
             mail($to, $subject, $body, $headers, "-f $from");
         }

@@ -34,10 +34,10 @@ class Blog extends \Gazelle\BaseManager {
                 ", $blogId
             );
             if (!is_null($id)) {
-                self::$cache->cache_value($key, $id, 7200);
+                self::$cache->cache_value($key, (int)$id, 7200);
             }
         }
-        return $id ? new \Gazelle\Blog($id) : null;
+        return $id ? new \Gazelle\Blog((int)$id) : null;
     }
 
     /**
@@ -50,11 +50,12 @@ class Blog extends \Gazelle\BaseManager {
         $idList = self::$cache->get_value(self::CACHE_KEY);
         if ($idList === false) {
             self::$db->prepared_query("
-                SELECT b.ID FROM blog b
+                SELECT b.ID
+                FROM blog b
                 ORDER BY b.Time DESC
                 LIMIT 20
             ");
-            $idList = self::$db->collect(0, false) ?? [];
+            $idList = self::$db->collect(0, false);
             self::$cache->cache_value(self::CACHE_KEY, $idList, 7200);
         }
         return array_map(fn ($id) => new \Gazelle\Blog($id), $idList);
@@ -88,6 +89,6 @@ class Blog extends \Gazelle\BaseManager {
      */
     public function latestEpoch(): int {
         $latest = $this->latest();
-        return $latest ? strtotime($latest->created()) : 0;
+        return $latest ? (int)strtotime($latest->created()) : 0;
     }
 }

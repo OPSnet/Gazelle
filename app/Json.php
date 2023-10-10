@@ -14,7 +14,7 @@ abstract class Json extends Base {
     /**
      * Configure JSON printing (any of the json_encode  JSON_* constants)
      */
-    public function setMode(int $mode) {
+    public function setMode(int $mode): static {
         $this->mode = $mode;
         return $this;
     }
@@ -24,7 +24,7 @@ abstract class Json extends Base {
      * value when there is significant change in the payload.
      * If not called, the version defaults to 1.
      */
-    public function setVersion(int $version) {
+    public function setVersion(int $version): static {
         $this->version = $version;
         return $this;
     }
@@ -32,8 +32,8 @@ abstract class Json extends Base {
     /**
      * General failure routine for when bad things happen.
      */
-    public function failure(string $message) {
-        print json_encode(
+    public function failure(string $message): void {
+        echo json_encode(
             array_merge([
                     'status' => 'failure',
                     'response' => [],
@@ -46,13 +46,13 @@ abstract class Json extends Base {
         );
     }
 
-    public function emit() {
+    public function emit(): void {
         $payload = $this->payload();
         if (!$payload) {
             return;
         }
         try {
-            print json_encode(
+            echo json_encode(
                 array_merge([
                         'status' => 'success',
                         'response' => $payload,

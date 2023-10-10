@@ -3,23 +3,22 @@
 namespace Gazelle\Util;
 
 class FileChecker {
-
-    protected $comicsExtensions = [
+    protected array $comicsExtensions = [
         'cbr', 'cbz', 'gif', 'jpeg', 'jpg', 'pdf', 'png'
     ];
 
-    protected $musicExtensions = [
+    protected array $musicExtensions = [
         'ac3', 'accurip', 'azw3', 'chm', 'cue', 'djv', 'djvu', 'doc', 'docx', 'dts',
         'epub', 'ffp', 'flac', 'gif', 'htm', 'html', 'jpeg', 'jpg', 'json', 'lit', 'lrc',
         'log', 'm3u', 'm3u8', 'm4a', 'm4b', 'md5', 'mobi', 'mp3', 'mp4', 'nfo', 'pdf',
         'pls', 'png', 'rtf', 'sfv', 'txt', 'toc', 'yaml', 'yml'
     ];
 
-    protected $badExtensions = [
+    protected array $badExtensions = [
        'torrent'
     ];
 
-    protected $keywords = [
+    protected array $keywords = [
         'ahashare.com', 'demonoid.com', 'demonoid.me', 'djtunes.com', 'h33t', 'housexclusive.net',
         'limetorrents.com', 'mixesdb.com', 'mixfiend.blogstop', 'mixtapetorrent.blogspot',
         'plixid.com', 'reggaeme.com' , 'scc.nfo', 'thepiratebay.org', 'torrentday'

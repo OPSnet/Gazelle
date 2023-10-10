@@ -7,7 +7,7 @@ use Gazelle\Enum\CacheBucket;
 class Twig {
     protected static \Gazelle\Manager\User $userMan;
 
-    public static function setUserMan(\Gazelle\Manager\User $userMan) {
+    public static function setUserMan(\Gazelle\Manager\User $userMan): void {
         self::$userMan = $userMan;
     }
 

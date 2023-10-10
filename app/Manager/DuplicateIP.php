@@ -4,7 +4,7 @@ namespace Gazelle\Manager;
 
 class DuplicateIP extends \Gazelle\Base {
     public function total(int $threshold): int {
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*)
             FROM users_main AS um
             WHERE um.Enabled = '1'

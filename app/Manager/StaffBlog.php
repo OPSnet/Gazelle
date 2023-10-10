@@ -61,7 +61,7 @@ class StaffBlog extends \Gazelle\Base {
                 SELECT Time FROM staff_blog_visits WHERE UserID = ?
                 ", $user->id()
             );
-            $time = $time ? strtotime($time) : 0;
+            $time = $time ? (int)strtotime((string)$time) : 0;
             self::$cache->cache_value($key, $time, 86400);
         }
         return $time;

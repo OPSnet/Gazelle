@@ -5,7 +5,6 @@ namespace Gazelle\Contest;
 /* how many requests filled */
 
 class RequestFill extends AbstractContest {
-
     public function leaderboard(int $limit, int $offset): array {
         // TODO
         return [];
@@ -85,7 +84,7 @@ class RequestFill extends AbstractContest {
         return self::$db->to_array('ID', MYSQLI_ASSOC, false);
     }
 
-    public function requestPairs() {
+    public function requestPairs(): array {
         $key = "contest_pairs_" . $this->id;
         $pairs = self::$cache->get_value($key);
         if ($pairs === false) {

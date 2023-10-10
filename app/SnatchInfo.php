@@ -3,23 +3,23 @@
 namespace Gazelle;
 
 class SnatchInfo extends Base {
-    protected $searchField;
-    protected $searchValue;
+    protected string $searchField;
+    protected int|string $searchValue;
 
-    public function setContextUser(User $user) {
+    public function setContextUser(User $user): static {
         $this->searchField = 'xs.uid';
         $this->searchValue = $user->id();
         return $this;
     }
 
-    public function setContextIpaddr(string $ipaddr) {
+    public function setContextIpaddr(string $ipaddr): static {
         $this->searchField = 'xs.IP';
         $this->searchValue = $ipaddr;
         return $this;
     }
 
     public function total(): int {
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*) FROM xbt_snatched xs WHERE {$this->searchField} = ?
             ", $this->searchValue
         );

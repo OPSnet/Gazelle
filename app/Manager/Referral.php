@@ -35,7 +35,7 @@ class Referral extends \Gazelle\Base {
         if (!$this->readOnly) {
             $url = self::$db->scalar("SELECT URL FROM referral_accounts LIMIT 1");
             if ($url) {
-                $this->readOnly = Crypto::dbDecrypt($url) == null;
+                $this->readOnly = Crypto::dbDecrypt((string)$url) == null;
             }
         }
 
@@ -162,7 +162,7 @@ class Referral extends \Gazelle\Base {
             UPDATE referral_accounts
             SET Cookie = ?
             WHERE ID = ?
-            ", Crypto::dbEncrypt(json_encode($cookie)), $id
+            ", Crypto::dbEncrypt((string)json_encode($cookie)), $id
         );
     }
 
@@ -180,7 +180,7 @@ class Referral extends \Gazelle\Base {
             $cookie = '[]';
         }
         if ($cookie == '[]') {
-            $cookie = json_encode($account["Cookie"]);
+            $cookie = (string)json_encode($account["Cookie"]);
         }
         if (strlen($password) == 0) {
             $password = $account["Password"];

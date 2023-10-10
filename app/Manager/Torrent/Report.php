@@ -51,11 +51,11 @@ class Report extends \Gazelle\BaseManager {
         $key = sprintf(self::ID_KEY, $reportId);
         $id = self::$cache->get_value($key);
         if ($id === false) {
-            $id = self::$db->scalar("
+            $id = (int)self::$db->scalar("
                 SELECT ID FROM reportsv2 WHERE ID = ?
                 ", $reportId
             );
-            if (!is_null($id)) {
+            if ($id) {
                 self::$cache->cache_value($key, $id, 7200);
             }
         }
@@ -165,7 +165,7 @@ class Report extends \Gazelle\BaseManager {
      * How many open reports exist for this group
      */
     public function totalReportsGroup(int $groupId): int {
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*)
             FROM reportsv2 AS r
             INNER JOIN torrents AS t ON (t.ID = r.TorrentID)
@@ -179,7 +179,7 @@ class Report extends \Gazelle\BaseManager {
      * How many open reports exist for this uploader
      */
     public function totalReportsUploader(int $userId): int {
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*)
             FROM reportsv2 AS r
             INNER JOIN torrents AS t ON (t.ID = r.TorrentID)
@@ -189,7 +189,7 @@ class Report extends \Gazelle\BaseManager {
         );
     }
 
-    public function setSearchFilter(array $filter) {
+    public function setSearchFilter(array $filter): static {
         $this->filter = $filter;
         return $this;
     }
@@ -251,7 +251,7 @@ class Report extends \Gazelle\BaseManager {
          * which means that t.GroupID in a condition refers to the same thing in
          * the `torrents` table as well. I am not certain this is entirely sane.
          */
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*)
             FROM reportsv2 r
             LEFT JOIN torrents t ON (t.ID = r.TorrentID)

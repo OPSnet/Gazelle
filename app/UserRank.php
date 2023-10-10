@@ -68,7 +68,7 @@ class UserRank extends Base {
         $ok = true;
         foreach ($definition as $d) {
             $this->rank[$d] = $this->config->instance($d)->rank($dimension[$d]);
-            if ($this->rank[$d] === false) {
+            if ($this->rank[$d] == false) {
                 $ok = false;
             }
         }

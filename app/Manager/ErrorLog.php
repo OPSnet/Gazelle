@@ -3,7 +3,6 @@
 namespace Gazelle\Manager;
 
 class ErrorLog extends \Gazelle\BaseManager {
-
     protected string $filter;
 
     public function create(
@@ -11,7 +10,7 @@ class ErrorLog extends \Gazelle\BaseManager {
        string $digest, string $trace, string $request, string $errorList, string $loggedVar
     ): int {
         self::$db->begin_transaction();
-        $id = self::$db->scalar("
+        $id = (int)self::$db->scalar("
             SELECT error_log_id FROM error_log WHERE digest = ?
             ", $digest
         );
@@ -40,7 +39,7 @@ class ErrorLog extends \Gazelle\BaseManager {
      * Get an eror log based on its ID
      */
     public function findById(int $errorId): ?\Gazelle\ErrorLog {
-        $id = self::$db->scalar("
+        $id = (int)self::$db->scalar("
             SELECT error_log_id FROM error_log WHERE error_log_id = ?
             ", $errorId
         );
@@ -48,7 +47,7 @@ class ErrorLog extends \Gazelle\BaseManager {
     }
 
     public function findByPrev(int $errorId): ?\Gazelle\ErrorLog {
-        $id = self::$db->scalar("
+        $id = (int)self::$db->scalar("
             SELECT error_log_id
             FROM error_log
             WHERE updated > (SELECT updated FROM error_log WHERE error_log_id = ?)
@@ -60,7 +59,7 @@ class ErrorLog extends \Gazelle\BaseManager {
     }
 
     public function findByNext(int $errorId): ?\Gazelle\ErrorLog {
-        $id = self::$db->scalar("
+        $id = (int)self::$db->scalar("
             SELECT error_log_id
             FROM error_log
             WHERE updated < (SELECT updated FROM error_log WHERE error_log_id = ?)
@@ -71,7 +70,7 @@ class ErrorLog extends \Gazelle\BaseManager {
         return $id ? new \Gazelle\ErrorLog($id) : null;
     }
 
-    public function setFilter(string $filter) {
+    public function setFilter(string $filter): static {
         $this->filter = $filter;
         return $this;
     }
@@ -84,7 +83,7 @@ class ErrorLog extends \Gazelle\BaseManager {
             $where = "WHERE uri LIKE concat('%', ?, '%')";
             $args[] = $this->filter;
         }
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*) FROM error_log $where
             ", ...$args
         );

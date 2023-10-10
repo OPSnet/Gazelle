@@ -25,12 +25,9 @@ class ClientWhitelist extends \Gazelle\Base {
 
     /**
      * Get the peer ID of client
-     *
-     * @param int $clientId The ID of the client
-     * @return string The peer identifier
      */
-    public function peerId(int $clientId) {
-        return self::$db->scalar("
+    public function peerId(int $clientId): string {
+        return (string)self::$db->scalar("
             SELECT peer_id
             FROM xbt_client_whitelist
             WHERE id = ?
@@ -38,14 +35,15 @@ class ClientWhitelist extends \Gazelle\Base {
         );
     }
 
-    public function list() {
-        if (($list = self::$cache->get_value(self::CACHE_KEY)) === false) {
+    public function list(): array {
+        $list = self::$cache->get_value(self::CACHE_KEY);
+        if ($list === false) {
             self::$db->prepared_query("
                 SELECT id as client_id, vstring, peer_id
                 FROM xbt_client_whitelist
                 ORDER BY peer_id ASC
             ");
-            $list = self::$db->to_array('client_id', MYSQLI_ASSOC);
+            $list = self::$db->to_array('client_id', MYSQLI_ASSOC, false);
             self::$cache->cache_value(self::CACHE_KEY, $list, 0);
         }
         return $list;
@@ -59,7 +57,7 @@ class ClientWhitelist extends \Gazelle\Base {
       * @param string $vstring The new client vstring
       * @return string The previous peer identifier
       */
-     public function modify(int $clientId, string $peer, string $vstring) {
+     public function modify(int $clientId, string $peer, string $vstring): string {
         $prevPeer = $this->peerId($clientId);
         self::$db->prepared_query("
             UPDATE xbt_client_whitelist SET

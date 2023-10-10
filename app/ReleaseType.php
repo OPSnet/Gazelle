@@ -5,19 +5,20 @@ namespace Gazelle;
 class ReleaseType extends Base {
     protected const CACHE_KEY = 'release_type';
 
-    /** @var array */
-    protected $list;
+    protected array $list;
 
     public function __construct() {
-        if (($this->list = self::$cache->get_value(self::CACHE_KEY)) === false) {
+        $list = self::$cache->get_value(self::CACHE_KEY);
+        if ($list === false) {
             $qid = self::$db->get_query_id();
             self::$db->prepared_query("
                 SELECT ID, Name FROM release_type ORDER BY ID
             ");
-            $this->list = self::$db->to_pair('ID', 'Name');
+            $list = self::$db->to_pair('ID', 'Name', false);
             self::$db->set_query_id($qid);
-            self::$cache->cache_value(self::CACHE_KEY, $this->list, 86400 * 30);
+            self::$cache->cache_value(self::CACHE_KEY, $list, 86400 * 30);
         }
+        $this->list = $list;
     }
 
     public function list(): array {
@@ -35,15 +36,15 @@ class ReleaseType extends Base {
         return $list;
     }
 
-    public function findIdByName(string $name) {
-        return array_search($name, $this->list) ?: array_search('Unknown', $this->list);
+    public function findIdByName(string $name): int {
+        return (int)array_search($name, $this->list()) ?: (int)array_search('Unknown', $this->list());
     }
 
-    public function findNameById(int $id) {
+    public function findNameById(int $id): ?string {
         return $this->list[$id] ?? null;
     }
 
-    public function findExtendedNameById(int $id) {
+    public function findExtendedNameById(int $id): ?string {
         return $this->extendedList()[$id] ?? null;
     }
 

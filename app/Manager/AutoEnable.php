@@ -68,7 +68,7 @@ class AutoEnable extends \Gazelle\BaseManager {
             LIMIT 1
             ", $user->id()
         );
-        return is_null($id) ? null : new \Gazelle\User\AutoEnable($id, $user);
+        return is_null($id) ? null : new \Gazelle\User\AutoEnable((int)$id, $user);
     }
 
     public function findByToken(string $token): ?\Gazelle\User\AutoEnable {
@@ -82,7 +82,9 @@ class AutoEnable extends \Gazelle\BaseManager {
     public function openTotal(): int {
         $total = self::$cache->get_value(self::CACHE_TOTAL_OPEN);
         if ($total === false) {
-            $total = self::$db->scalar("SELECT count(*) FROM users_enable_requests WHERE Outcome IS NULL");
+            $total = (int)self::$db->scalar("
+                SELECT count(*) FROM users_enable_requests WHERE Outcome IS NULL
+            ");
             self::$cache->cache_value(self::CACHE_TOTAL_OPEN, $total);
         }
         return $total;
@@ -149,7 +151,7 @@ class AutoEnable extends \Gazelle\BaseManager {
     public function total(): int {
         $joinList = implode(' ', $this->join);
         $where = $this->cond ? ('WHERE ' . implode(' AND ', $this->cond)) : '';
-        return self::$db->scalar("
+        return (int)self::$db->scalar("
             SELECT count(*)
             FROM users_enable_requests AS uer
             INNER JOIN users_info ui ON (ui.UserID = uer.UserID)

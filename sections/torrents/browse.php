@@ -159,7 +159,7 @@ foreach ($Results as $Key => $GroupID) {
         $torrentList = [$Key];
     }
 
-    $SnatchedGroupClass = $tgroup->isSnatched($Viewer->id()) ? ' snatched_group' : '';
+    $SnatchedGroupClass = $tgroup->isSnatched() ? ' snatched_group' : '';
 
     if ($GroupResults && (count($torrentList) > 1 || $tgroup->categoryGrouped())) {
 ?>

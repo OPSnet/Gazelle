@@ -221,6 +221,6 @@ class ReportType extends \Gazelle\BaseObject {
                 ", $userId, json_encode($changeSet), $this->id
             );
         }
-        return $affected === 1 && self::$db->affected_rows() === 1;
+        return $affected && self::$db->affected_rows() === 1;
     }
 }
