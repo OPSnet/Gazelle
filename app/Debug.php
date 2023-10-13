@@ -2,9 +2,7 @@
 
 namespace Gazelle;
 
-use \Gazelle\Util\{Irc, Time};
-
-ini_set('max_execution_time',600);
+use Gazelle\Util\{Irc, Time};
 
 class Debug {
     protected const MAX_TIME = 20000;
@@ -56,16 +54,16 @@ class Debug {
 
         $Micro = (microtime(true) - self::$startTime) * 1000;
         if ($Micro > self::MAX_TIME && !in_array($document, IGNORE_PAGE_MAX_TIME)) {
-            $Reason[] = number_format($Micro, 3).' ms';
+            $Reason[] = number_format($Micro, 3) . ' ms';
         }
 
         $Errors = count($this->get_errors());
         if ($Errors > self::MAX_ERRORS) {
-            $Reason[] = $Errors.' PHP errors';
+            $Reason[] = $Errors . ' PHP errors';
         }
         $Ram = memory_get_usage(true);
         if ($Ram > self::MAX_MEMORY && !in_array($document, IGNORE_PAGE_MAX_MEMORY)) {
-            $Reason[] = byte_format($Ram).' RAM used';
+            $Reason[] = byte_format($Ram) . ' RAM used';
         }
 
         self::$db->warnings(); // see comment in MYSQL::query
@@ -114,7 +112,7 @@ class Debug {
         );
 
         self::$cache->cache_value(
-            'analysis_'.$id, [
+            'analysis_' . $id, [
                 'URI'      => isset($_SERVER['REQUEST_URI']) ? ($_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']) : 'cli',
                 'message'  => $message,
                 'time'     => time(),
@@ -159,7 +157,7 @@ class Debug {
     public function saveError(\Exception $e): void {
         $this->saveCase(
             $e->getMessage() . "\n"
-            . str_replace(SERVER_ROOT .'/', '', $e->getTraceAsString())
+            . str_replace(SERVER_ROOT . '/', '', $e->getTraceAsString())
         );
     }
 
@@ -212,7 +210,7 @@ class Debug {
             } elseif (is_object($Val)) {
                 $Return[$Key] .= $Val::class;
             } elseif (is_array($Val)) {
-                $Return[$Key] .= '['.$this->format_args($Val).']';
+                $Return[$Key] .= '[' . $this->format_args($Val) . ']';
             }
             $LastKey = $Key;
         }
@@ -240,7 +238,7 @@ class Debug {
         //At this time ONLY Array strict typing is fully supported.
         //Allow us to abuse strict typing (IE: function test(Array))
         if (preg_match('/^Argument (\d+) passed to \S+ must be an (array), (array|string|integer|double|object) given, called in (\S+) on line (\d+) and defined$/', $Error, $Matches)) {
-            $Error = 'Type hinting failed on arg '.$Matches[1]. ', expected '.$Matches[2].' but found '.$Matches[3];
+            $Error = 'Type hinting failed on arg ' . $Matches[1] . ', expected ' . $Matches[2] . ' but found ' . $Matches[3];
             $File = $Matches[4];
             $Line = $Matches[5];
         }
@@ -252,7 +250,7 @@ class Debug {
 
         //Class
         if (isset($Tracer[$Steps]['class'])) {
-            $Call .= $Tracer[$Steps]['class'].'::';
+            $Call .= $Tracer[$Steps]['class'] . '::';
         }
 
         //Function & args
@@ -330,10 +328,10 @@ class Debug {
             $Perf = [
                 'URI' => $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'],
                 'Memory usage' => byte_format(memory_get_usage(true)),
-                'Page process time' => number_format($PageTime, 3).' s',
+                'Page process time' => number_format($PageTime, 3) . ' s',
             ];
             if ($CPUTime) {
-                $Perf['CPU time'] = number_format($CPUTime / 1_000_000, 3).' s';
+                $Perf['CPU time'] = number_format($CPUTime / 1_000_000, 3) . ' s';
             }
             $Perf['Script start'] = Time::sqlTime(self::$startTime);
             $Perf['Script end'] = Time::sqlTime(microtime(true));

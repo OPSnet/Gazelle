@@ -134,7 +134,7 @@ class InviteTree extends \Gazelle\Base {
         return self::$db->affected_rows();
     }
 
-    function details(\Gazelle\Manager\User $userMan, \Gazelle\User $viewer): array {
+    public function details(\Gazelle\Manager\User $userMan, \Gazelle\User $viewer): array {
         if (is_null($this->treeId())) {
             return [];
         }

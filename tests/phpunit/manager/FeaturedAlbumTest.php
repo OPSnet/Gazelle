@@ -1,13 +1,13 @@
 <?php
 
-use \PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\TestCase;
 
 require_once(__DIR__ . '/../../../lib/bootstrap.php');
 require_once(__DIR__ . '/../../helper.php');
 
-use \Gazelle\Enum\FeaturedAlbumType;
-use \Gazelle\Enum\LeechType;
-use \Gazelle\Enum\LeechReason;
+use Gazelle\Enum\FeaturedAlbumType;
+use Gazelle\Enum\LeechType;
+use Gazelle\Enum\LeechReason;
 
 class FeaturedAlbumTest extends TestCase {
     protected Gazelle\TGroup      $tgroup;

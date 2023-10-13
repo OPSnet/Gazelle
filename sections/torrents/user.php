@@ -357,7 +357,7 @@ View::show_header($user->username() . "'s $action torrents", ['js' => 'voting'])
                             <option value="">Release type</option>
 <?php
     $releaseTypes = $releaseMan->list();
-    foreach ($releaseTypes as $id=>$type) {
+    foreach ($releaseTypes as $id => $type) {
 ?>
                             <option value="<?=display_str($id); ?>"<?= ($_GET['releasetype'] ?? '') == $id ? ' selected="selected"' : '' ?>><?=display_str($type); ?></option>
 <?php } ?>
@@ -453,7 +453,8 @@ foreach (CATEGORY as $catKey => $catName) {
     $x++;
 ?>
                     <td>
-                        <input type="checkbox" name="categories[<?=($catKey+1)?>]" id="cat_<?=($catKey+1)?>" value="1"<?php if (isset($_GET['categories'][$catKey + 1])) { ?> checked="checked"<?php } ?> />
+                        <input type="checkbox" name="categories[<?=($catKey + 1)?>]" id="cat_<?=($catKey + 1)?>" value="1"<?php if (isset($_GET['categories'][$catKey + 1])) {
+?> checked="checked"<?php } ?> />
                         <label for="cat_<?=($catKey + 1)?>"><?=$catName?></label>
                     </td>
 <?php } ?>

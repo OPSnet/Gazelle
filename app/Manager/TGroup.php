@@ -83,7 +83,6 @@ class TGroup extends \Gazelle\BaseManager {
         $new->flush()->refresh();
         $torrent->flush();
         return $new;
-
     }
 
     public function findById(int $tgroupId): ?\Gazelle\TGroup {

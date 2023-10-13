@@ -35,7 +35,7 @@ function classList(int $Selected = 0): string {
         if ($Selected == $Level) {
             $Return .= ' selected="selected"';
         }
-        $Return .= '>'.shortenString($Name, 20, true)."</option>\n";
+        $Return .= '>' . shortenString($Name, 20, true) . "</option>\n";
     }
     return $Return;
 }

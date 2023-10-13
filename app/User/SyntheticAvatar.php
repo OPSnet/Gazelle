@@ -2,7 +2,7 @@
 
 namespace Gazelle\User;
 
-use \Gazelle\Enum\AvatarSynthetic;
+use Gazelle\Enum\AvatarSynthetic;
 
 class SyntheticAvatar extends \Gazelle\BaseUser {
     final const tableName = '';
@@ -12,7 +12,7 @@ class SyntheticAvatar extends \Gazelle\BaseUser {
     public function avatar(string $username): string {
         $hash = md5(AVATAR_SALT . $username);
         $size = AVATAR_WIDTH;
-        return match((int)$this->user->option('Identicons')) {
+        return match ((int)$this->user->option('Identicons')) {
             AvatarSynthetic::monster->value => "https://secure.gravatar.com/avatar/{$hash}?s={$size}&r=pg&d=monsterid",
             AvatarSynthetic::wavatar->value => "https://secure.gravatar.com/avatar/{$hash}?s={$size}&r=pg&d=wavatar",
             AvatarSynthetic::retro->value   => "https://secure.gravatar.com/avatar/{$hash}?s={$size}&r=pg&d=retro",

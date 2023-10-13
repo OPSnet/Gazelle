@@ -126,7 +126,8 @@ if ($Viewer->permitted('site_advanced_top10')) {
                     <select name="format" style="width: auto;" class="ft_format">
                         <option value="">Any</option>
 <?php foreach (FORMAT as $formatName) { ?>
-                        <option value="<?=display_str($formatName)?>"<?php if ($format) { ?> selected="selected"<?php } ?>><?=display_str($formatName)?></option>
+                        <option value="<?=display_str($formatName)?>"<?php if ($format) {
+?> selected="selected"<?php } ?>><?=display_str($formatName)?></option>
 <?php } ?>
                     </select>
                 </td>

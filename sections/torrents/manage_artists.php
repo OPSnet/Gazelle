@@ -77,8 +77,7 @@ if (count($CleanArtists) > 0) {
         foreach ($EmptyArtists as $ArtistID) {
             (new Gazelle\Artist($ArtistID))->remove($Viewer, $logger);
         }
-    }
-    else {
+    } else {
         $NewImportance = (int)$_POST['importance'];
         if ($NewImportance === 0 || !isset(ARTIST_TYPE[$NewImportance])) {
             error(0);

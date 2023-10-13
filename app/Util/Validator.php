@@ -72,7 +72,7 @@ class Validator {
             'Required' => $Required,
             'ErrorMessage' => $ErrorMessage,
         ];
-        foreach(['allowcomma', 'allowperiod', 'comparefield', 'inarray', 'maxlength', 'minlength', 'range', 'regex'] as $option) {
+        foreach (['allowcomma', 'allowperiod', 'comparefield', 'inarray', 'maxlength', 'minlength', 'range', 'regex'] as $option) {
             if (!empty($Options[$option])) {
                 $this->Fields[$FieldName][$option] = $Options[$option];
             }
@@ -115,7 +115,7 @@ class Validator {
      *
      * TODO: date fields are not actually validated, need to figure out what the proper validation syntax should be.
      */
-    function validate(array $ValidateArray): bool {
+    public function validate(array $ValidateArray): bool {
         reset($this->Fields);
         foreach ($this->Fields as $FieldKey => $Field) {
             $ValidateVar = $ValidateArray[$FieldKey] ?? null;
@@ -152,14 +152,14 @@ class Validator {
                         $Match .= ',';
                     }
 
-                    if (preg_match('/[^'.$Match.']/', $ValidateVar) || strlen($ValidateVar) < 1) {
+                    if (preg_match('/[^' . $Match . ']/', $ValidateVar) || strlen($ValidateVar) < 1) {
                         $this->errorMessage = $Field['ErrorMessage'];
                         break;
                     } elseif ($MaxLength !== false && $ValidateVar > $MaxLength) {
-                        $this->errorMessage = $Field['ErrorMessage'].'!';
+                        $this->errorMessage = $Field['ErrorMessage'] . '!';
                         break;
                     } elseif ($ValidateVar < $MinLength) {
-                        $this->errorMessage = $Field['ErrorMessage']."$MinLength";
+                        $this->errorMessage = $Field['ErrorMessage'] . "$MinLength";
                         break;
                     }
 
@@ -221,12 +221,10 @@ class Validator {
                     if (!preg_match($Field['regex'], $ValidateVar)) {
                         $this->errorMessage = $Field['ErrorMessage'];
                         break;
-                    }
-                    elseif (isset($Field['maxlength']) && strlen($ValidateVar) > $Field['maxlength']) {
+                    } elseif (isset($Field['maxlength']) && strlen($ValidateVar) > $Field['maxlength']) {
                         $this->errorMessage = $Field['ErrorMessage'];
                         break;
-                    }
-                    elseif (isset($Field['minlength']) && strlen($ValidateVar) < $Field['minlength']) {
+                    } elseif (isset($Field['minlength']) && strlen($ValidateVar) < $Field['minlength']) {
                         $this->errorMessage = $Field['ErrorMessage'];
                         break;
                     }
@@ -248,16 +246,16 @@ class Validator {
         foreach ($this->Fields as $FieldKey => $Field) {
             $ValItem = '';
             if ($Field['Type'] == 'string') {
-                $ValItem = '    if ($(\'#'.$FieldKey.'\').raw().value == ""';
+                $ValItem = '    if ($(\'#' . $FieldKey . '\').raw().value == ""';
                 if (!empty($Field['maxlength'])) {
-                    $ValItem .= ' || $(\'#'.$FieldKey.'\').raw().value.length > '.$Field['maxlength'];
+                    $ValItem .= ' || $(\'#' . $FieldKey . '\').raw().value.length > ' . $Field['maxlength'];
                 } else {
-                    $ValItem .= ' || $(\'#'.$FieldKey.'\').raw().value.length > 255';
+                    $ValItem .= ' || $(\'#' . $FieldKey . '\').raw().value.length > 255';
                 }
                 if (!empty($Field['minlength'])) {
-                    $ValItem .= ' || $(\'#'.$FieldKey.'\').raw().value.length < '.$Field['minlength'];
+                    $ValItem .= ' || $(\'#' . $FieldKey . '\').raw().value.length < ' . $Field['minlength'];
                 }
-                $ValItem .= ') { return showError(\''.$FieldKey.'\',\''.$Field['ErrorMessage'].'\'); }'."\r\n";
+                $ValItem .= ') { return showError(\'' . $FieldKey . '\',\'' . $Field['ErrorMessage'] . '\'); }' . "\r\n";
 
             } elseif ($Field['Type'] == 'number') {
                 $Match = '0-9';
@@ -268,73 +266,73 @@ class Validator {
                     $Match .= ',';
                 }
 
-                $ValItem = '    if ($(\'#'.$FieldKey.'\').raw().value.match(/[^'.$Match.']/) || $(\'#'.$FieldKey.'\').raw().value.length < 1';
+                $ValItem = '    if ($(\'#' . $FieldKey . '\').raw().value.match(/[^' . $Match . ']/) || $(\'#' . $FieldKey . '\').raw().value.length < 1';
                 if (!empty($Field['maxlength'])) {
-                    $ValItem .= ' || $(\'#'.$FieldKey.'\').raw().value/1 > '.$Field['maxlength'];
+                    $ValItem .= ' || $(\'#' . $FieldKey . '\').raw().value/1 > ' . $Field['maxlength'];
                 }
                 if (!empty($Field['minlength'])) {
-                    $ValItem .= ' || $(\'#'.$FieldKey.'\').raw().value/1 < '.$Field['minlength'];
+                    $ValItem .= ' || $(\'#' . $FieldKey . '\').raw().value/1 < ' . $Field['minlength'];
                 }
-                $ValItem .= ') { return showError(\''.$FieldKey.'\',\''.$Field['ErrorMessage'].'\'); }'."\r\n";
+                $ValItem .= ') { return showError(\'' . $FieldKey . '\',\'' . $Field['ErrorMessage'] . '\'); }' . "\r\n";
 
             } elseif ($Field['Type'] == 'email') {
-                $ValItem = '    if (!validEmail($(\'#'.$FieldKey.'\').raw().value)';
+                $ValItem = '    if (!validEmail($(\'#' . $FieldKey . '\').raw().value)';
                 if (!empty($Field['maxlength'])) {
-                    $ValItem .= ' || $(\'#'.$FieldKey.'\').raw().value.length > '.$Field['maxlength'];
+                    $ValItem .= ' || $(\'#' . $FieldKey . '\').raw().value.length > ' . $Field['maxlength'];
                 } else {
-                    $ValItem .= ' || $(\'#'.$FieldKey.'\').raw().value.length > 255';
+                    $ValItem .= ' || $(\'#' . $FieldKey . '\').raw().value.length > 255';
                 }
                 if (!empty($Field['minlength'])) {
-                    $ValItem .= ' || $(\'#'.$FieldKey.'\').raw().value.length < '.$Field['minlength'];
+                    $ValItem .= ' || $(\'#' . $FieldKey . '\').raw().value.length < ' . $Field['minlength'];
                 } else {
-                    $ValItem .= ' || $(\'#'.$FieldKey.'\').raw().value.length < 6';
+                    $ValItem .= ' || $(\'#' . $FieldKey . '\').raw().value.length < 6';
                 }
-                $ValItem .= ') { return showError(\''.$FieldKey.'\',\''.$Field['ErrorMessage'].'\'); }'."\r\n";
+                $ValItem .= ') { return showError(\'' . $FieldKey . '\',\'' . $Field['ErrorMessage'] . '\'); }' . "\r\n";
 
             } elseif ($Field['Type'] == 'link') {
-                $ValItem = '    if (!validLink($(\'#'.$FieldKey.'\').raw().value)';
+                $ValItem = '    if (!validLink($(\'#' . $FieldKey . '\').raw().value)';
                 if (!empty($Field['maxlength'])) {
-                    $ValItem .= ' || $(\'#'.$FieldKey.'\').raw().value.length > '.$Field['maxlength'];
+                    $ValItem .= ' || $(\'#' . $FieldKey . '\').raw().value.length > ' . $Field['maxlength'];
                 } else {
-                    $ValItem .= ' || $(\'#'.$FieldKey.'\').raw().value.length > 255';
+                    $ValItem .= ' || $(\'#' . $FieldKey . '\').raw().value.length > 255';
                 }
                 if (!empty($Field['minlength'])) {
-                    $ValItem .= ' || $(\'#'.$FieldKey.'\').raw().value.length < '.$Field['minlength'];
+                    $ValItem .= ' || $(\'#' . $FieldKey . '\').raw().value.length < ' . $Field['minlength'];
                 } else {
-                    $ValItem .= ' || $(\'#'.$FieldKey.'\').raw().value.length < 10';
+                    $ValItem .= ' || $(\'#' . $FieldKey . '\').raw().value.length < 10';
                 }
-                $ValItem .= ') { return showError(\''.$FieldKey.'\',\''.$Field['ErrorMessage'].'\'); }'."\r\n";
+                $ValItem .= ') { return showError(\'' . $FieldKey . '\',\'' . $Field['ErrorMessage'] . '\'); }' . "\r\n";
 
             } elseif ($Field['Type'] == 'username') {
-                $ValItem = '    if ($(\'#'.$FieldKey.'\').raw().value.match(/[^a-zA-Z0-9_\-]/)';
+                $ValItem = '    if ($(\'#' . $FieldKey . '\').raw().value.match(/[^a-zA-Z0-9_\-]/)';
                 if (!empty($Field['maxlength'])) {
-                    $ValItem .= ' || $(\'#'.$FieldKey.'\').raw().value.length > '.$Field['maxlength'];
+                    $ValItem .= ' || $(\'#' . $FieldKey . '\').raw().value.length > ' . $Field['maxlength'];
                 }
                 if (!empty($Field['minlength'])) {
-                    $ValItem .= ' || $(\'#'.$FieldKey.'\').raw().value.length < '.$Field['minlength'];
+                    $ValItem .= ' || $(\'#' . $FieldKey . '\').raw().value.length < ' . $Field['minlength'];
                 }
-                $ValItem .= ') { return showError(\''.$FieldKey.'\',\''.$Field['ErrorMessage'].'\'); }'."\r\n";
+                $ValItem .= ') { return showError(\'' . $FieldKey . '\',\'' . $Field['ErrorMessage'] . '\'); }' . "\r\n";
 
             } elseif ($Field['Type'] == 'regex') {
-                $ValItem = '    if (!$(\'#'.$FieldKey.'\').raw().value.match('.$Field['regex'].')) { return showError(\''.$FieldKey.'\',\''.$Field['ErrorMessage'].'\'); }'."\r\n";
+                $ValItem = '    if (!$(\'#' . $FieldKey . '\').raw().value.match(' . $Field['regex'] . ')) { return showError(\'' . $FieldKey . '\',\'' . $Field['ErrorMessage'] . '\'); }' . "\r\n";
 
             } elseif ($Field['Type'] == 'date') {
-                $DisplayError = $FieldKey.'month';
+                $DisplayError = $FieldKey . 'month';
                 if (isset($Field['minlength']) && $Field['minlength'] == 3) {
-                    $Day = '$(\'#'.$FieldKey.'day\').raw().value';
+                    $Day = '$(\'#' . $FieldKey . 'day\').raw().value';
                     $DisplayError .= ",{$FieldKey}day";
                 } else {
                     $Day = '1';
                 }
                 $DisplayError .= ",{$FieldKey}year";
-                $ValItemHold = '    if (!validDate($(\'#'.$FieldKey.'month\').raw().value+\'/\'+'.$Day.'+\'/\'+$(\'#'.$FieldKey.'year\').raw().value)) { return showError(\''.$DisplayError.'\',\''.$Field['ErrorMessage'].'\'); }'."\r\n";
+                $ValItemHold = '    if (!validDate($(\'#' . $FieldKey . 'month\').raw().value+\'/\'+' . $Day . '+\'/\'+$(\'#' . $FieldKey . 'year\').raw().value)) { return showError(\'' . $DisplayError . '\',\'' . $Field['ErrorMessage'] . '\'); }' . "\r\n";
 
                 if (empty($Field['Required'])) {
-                    $ValItem = '    if ($(\'#'.$FieldKey.'month\').raw().value != ""';
+                    $ValItem = '    if ($(\'#' . $FieldKey . 'month\').raw().value != ""';
                     if (isset($Field['minlength']) && $Field['minlength'] == 3) {
-                        $ValItem .= ' || $(\'#'.$FieldKey.'day\').raw().value != ""';
+                        $ValItem .= ' || $(\'#' . $FieldKey . 'day\').raw().value != ""';
                     }
-                    $ValItem .= ' || $(\'#'.$FieldKey.'year\').raw().value != "") {'."\r\n";
+                    $ValItem .= ' || $(\'#' . $FieldKey . 'year\').raw().value != "") {' . "\r\n";
                     $ValItem .= $ValItemHold;
                     $ValItem .= "    }\r\n";
                 } else {
@@ -342,14 +340,14 @@ class Validator {
                 }
 
             } elseif ($Field['Type'] == 'checkbox') {
-                $ValItem = '    if (!$(\'#'.$FieldKey.'\').checked) { return showError(\''.$FieldKey.'\',\''.$Field['ErrorMessage'].'\'); }'."\r\n";
+                $ValItem = '    if (!$(\'#' . $FieldKey . '\').checked) { return showError(\'' . $FieldKey . '\',\'' . $Field['ErrorMessage'] . '\'); }' . "\r\n";
 
             } elseif ($Field['Type'] == 'compare') {
-                $ValItem = '    if ($(\'#'.$FieldKey.'\').raw().value!=$(\'#'.$Field['comparefield'].'\').raw().value) { return showError(\''.$FieldKey.','.$Field['comparefield'].'\',\''.$Field['ErrorMessage'].'\'); }'."\r\n";
+                $ValItem = '    if ($(\'#' . $FieldKey . '\').raw().value!=$(\'#' . $Field['comparefield'] . '\').raw().value) { return showError(\'' . $FieldKey . ',' . $Field['comparefield'] . '\',\'' . $Field['ErrorMessage'] . '\'); }' . "\r\n";
             }
 
             if (empty($Field['Required']) && $Field['Type'] != 'date') {
-                $ReturnJS .= '    if ($(\'#'.$FieldKey.'\').raw().value!="") {'."\r\n    ";
+                $ReturnJS .= '    if ($(\'#' . $FieldKey . '\').raw().value!="") {' . "\r\n    ";
                 $ReturnJS .= $ValItem;
                 $ReturnJS .= "    }\r\n";
             } else {

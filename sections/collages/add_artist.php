@@ -44,8 +44,7 @@ if ($_REQUEST['action'] == 'add_artist') {
         // From an artist page
         $URL[] = SITE_URL . '/artist.php?id=' . (int)$_POST['artistid'];
     }
-}
-elseif ($_REQUEST['action'] == 'add_artist_batch') {
+} elseif ($_REQUEST['action'] == 'add_artist_batch') {
     foreach (explode("\n", $_REQUEST['urls']) as $u) {
         $u = trim($u);
         if (strlen($u)) {

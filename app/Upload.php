@@ -14,8 +14,8 @@
 
 namespace Gazelle;
 
-use \Gazelle\Util\Textarea;
-use \OrpheusNET\Logchecker\Logchecker;
+use Gazelle\Util\Textarea;
+use OrpheusNET\Logchecker\Logchecker;
 
 class Upload extends \Gazelle\Base {
     protected int    $categoryId = 0;
@@ -129,7 +129,8 @@ class Upload extends \Gazelle\Base {
         </div>
         <div id="popup_background"></div>
 
-        <table id="form-music-upload" cellpadding="3" cellspacing="1" border="0" class="layout border<?php if ($Torrent === false) { echo ' slice'; } ?>" width="100%">
+        <table id="form-music-upload" cellpadding="3" cellspacing="1" border="0" class="layout border<?php if ($Torrent === false) {
+echo ' slice'; } ?>" width="100%">
 <?php   if (is_array($Torrent) && isset($Torrent['GroupID']) && !isset($Torrent['add-format'])) { ?>
             <tr><td colspan="2"><h3>Edit <?= $tgroup->link() ?></h3></td></tr>
 <?php   } else { ?>
@@ -228,8 +229,10 @@ class Upload extends \Gazelle\Base {
             </tr>
             <tr id="year_tr">
                 <td class="label">
-                    <span id="year_label_not_remaster"<?php if ($IsRemaster) { echo ' class="hidden"';} ?>>Year:</span>
-                    <span id="year_label_remaster"<?php if (!$IsRemaster) { echo ' class="hidden"';} ?>>Year of first release:</span>
+                    <span id="year_label_not_remaster"<?php if ($IsRemaster) {
+echo ' class="hidden"';} ?>>Year:</span>
+                    <span id="year_label_remaster"<?php if (!$IsRemaster) {
+echo ' class="hidden"';} ?>>Year of first release:</span>
                 </td>
                 <td>
                     <p id="yearwarning" class="hidden">You have entered a year for a release which predates the medium's availability. You will need to change the year and enter additional edition information. If this information cannot be provided, check the &quot;Unknown Release&quot; check box below.</p>
@@ -255,19 +258,25 @@ class Upload extends \Gazelle\Base {
             <tr>
                 <td class="label">Edition information:</td>
                 <td>
-                    <input type="checkbox" id="remaster" name="remaster"<?php if ($IsRemaster || $GroupRemasters) { echo ' checked="checked"'; } ?> onclick="Remaster();<?php if ($Torrent === false) { ?> CheckYear();<?php } ?>" />
+                    <input type="checkbox" id="remaster" name="remaster"<?php if ($IsRemaster || $GroupRemasters) {
+echo ' checked="checked"'; } ?> onclick="Remaster();<?php if ($Torrent === false) {
+?> CheckYear();<?php } ?>" />
                     <label for="remaster">Check this if this torrent is a different edition to the original, for example a remaster, country specific edition, or a release that includes additional bonus tracks or bonus discs.</label>
-                    <div id="remaster_true"<?php if (!($IsRemaster || $GroupRemasters)) { echo ' class="hidden"';} ?>>
+                    <div id="remaster_true"<?php if (!($IsRemaster || $GroupRemasters)) {
+echo ' class="hidden"';} ?>>
 <?php    if ($this->user->permitted('edit_unknowns') || (is_array($Torrent) && $this->user->id() == $Torrent['UserID'])) { ?>
                         <br />
-                        <input type="checkbox" id="unknown" name="unknown"<?php if ($UnknownRelease) { echo ' checked="checked"'; } ?> onclick="<?php if ($Torrent === false) { ?>CheckYear(); <?php } ?>ToggleUnknown();" /> <label for="unknown">Unknown Release</label>
+                        <input type="checkbox" id="unknown" name="unknown"<?php if ($UnknownRelease) {
+echo ' checked="checked"'; } ?> onclick="<?php if ($Torrent === false) {
+?>CheckYear(); <?php } ?>ToggleUnknown();" /> <label for="unknown">Unknown Release</label>
 <?php    } ?>
                         <br /><br />
 <?php    if ($GroupRemasters) { ?>
                         <input type="hidden" id="json_remasters" value="<?=
                             html_escape(json_encode($GroupRemasters))?>" />
                         <select id="groupremasters" name="groupremasters" onchange="GroupRemaster()"<?php
-                                if ($UnknownRelease) { echo ' disabled="disabled"'; } ?>>
+                                if ($UnknownRelease) {
+echo ' disabled="disabled"'; } ?>>
                             <option value="">-------</option>
 <?php
             $LastLine = '';
@@ -292,7 +301,8 @@ class Upload extends \Gazelle\Base {
                                         <input type="text" id="remaster_year" name="remaster_year" size="5" value="<?php
                                             if (is_array($Torrent) && isset($Torrent['RemasterYear'])) {
                                                 echo html_escape($Torrent['RemasterYear']);
-                                            } ?>"<?php if ($UnknownRelease) { echo ' disabled="disabled"';} ?> />
+                                            } ?>"<?php if ($UnknownRelease) {
+echo ' disabled="disabled"';} ?> />
                                     </td>
                                 </tr>
                                 <tr id="edition_title">
@@ -300,7 +310,8 @@ class Upload extends \Gazelle\Base {
                                     <td>
                                         <input type="text" id="remaster_title" name="remaster_title" size="50" value="<?=
                                             $Torrent === false ? '' : html_escape($Torrent['RemasterTitle'] ?? '')
-                                            ?>"<?php if ($UnknownRelease) { echo ' disabled="disabled"';} ?> />
+                                            ?>"<?php if ($UnknownRelease) {
+echo ' disabled="disabled"';} ?> />
                                         <p class="min_padding">Title of the edition (e.g. <span style="font-style: italic;">"Deluxe Edition" or "Remastered"</span>).</p>
                                     </td>
                                 </tr>
@@ -309,7 +320,8 @@ class Upload extends \Gazelle\Base {
                                     <td>
                                         <input type="text" id="remaster_record_label" name="remaster_record_label" size="50" value="<?=
                                             $Torrent === false ? '' : html_escape($Torrent['RemasterRecordLabel'] ?? '')
-                                            ?>"<?php if ($UnknownRelease) { echo ' disabled="disabled"';} ?> />
+                                            ?>"<?php if ($UnknownRelease) {
+echo ' disabled="disabled"';} ?> />
                                         <p class="min_padding">This is for the record label of the <strong>edition</strong>. It may differ from the original.</p>
                                     </td>
                                 </tr>
@@ -317,7 +329,8 @@ class Upload extends \Gazelle\Base {
                                     <td class="label">Catalogue number:</td>
                                     <td><input type="text" id="remaster_catalogue_number" name="remaster_catalogue_number" size="50" value="<?=
                                         $Torrent === false ? '' : html_escape($Torrent['RemasterCatalogueNumber'] ?? '')
-                                        ?>"<?php if ($UnknownRelease) { echo ' disabled="disabled"';} ?> />
+                                        ?>"<?php if ($UnknownRelease) {
+echo ' disabled="disabled"';} ?> />
                                         <p class="min_padding">This is for the catalogue number of the <strong>edition</strong>.</p>
                                     </td>
                                 </tr>
@@ -329,7 +342,8 @@ class Upload extends \Gazelle\Base {
             <tr>
                 <td class="label">Scene:</td>
                 <td>
-                    <input type="checkbox" id="scene" name="scene" <?php if (is_array($Torrent) && (bool)($Torrent['Scene'] ?? false)) { echo 'checked="checked" ';} ?>/>
+                    <input type="checkbox" id="scene" name="scene" <?php if (is_array($Torrent) && (bool)($Torrent['Scene'] ?? false)) {
+echo 'checked="checked" ';} ?>/>
                     <label for="scene">Select this only if this is a "scene release".<br />If you ripped it yourself, it is <strong>not</strong> a scene release. If you are not sure, <strong class="important_text">do not</strong> select it; you will be penalized. For information on the scene, visit <a href="https://en.wikipedia.org/wiki/Warez_scene" target="_blank">Wikipedia</a>.</label>
                 </td>
             </tr>
@@ -338,7 +352,8 @@ class Upload extends \Gazelle\Base {
                 <td class="label">Showcase:</td>
                 <td>
                     <label><input type="checkbox" id="vanity_house" name="vanity_house" <?php
-                        if (is_array($Torrent) && (bool)($Torrent['VanityHouse'] ?? false)) { echo ' checked="checked"';} ?> />
+                        if (is_array($Torrent) && (bool)($Torrent['VanityHouse'] ?? false)) {
+echo ' checked="checked"';} ?> />
                     Check this only if you are submitting your own work or submitting on behalf of the artist, and this is intended to be a Showcase release.
                     </label>
                 </td>
@@ -395,16 +410,18 @@ class Upload extends \Gazelle\Base {
         foreach (ENCODING as $Bitrate) {
 ?>
                         <option value="<?= $Bitrate ?>"<?=
-            ($SimpleBitrate && preg_match('/^'.$SimpleBitrate.'.*/', $Bitrate)) || ($OtherBitrate && $Bitrate == 'Other')
+            ($SimpleBitrate && preg_match('/^' . $SimpleBitrate . '.*/', $Bitrate)) || ($OtherBitrate && $Bitrate == 'Other')
                 ? ' selected="selected"' : '' ?> ><?= $Bitrate ?></option>
 <?php   } ?>
                     </select>
-                    <span id="other_bitrate_span"<?php if (!$OtherBitrate) { echo ' class="hidden"'; } ?>>
+                    <span id="other_bitrate_span"<?php if (!$OtherBitrate) {
+echo ' class="hidden"'; } ?>>
                         <input type="text" name="other_bitrate" size="5" id="other_bitrate"<?php
                             if ($OtherBitrate) {
-                                echo ' value="'.html_escape($bitrate).'"';
+                                echo ' value="' . html_escape($bitrate) . '"';
                             } ?> onchange="AltBitrate();" />
-                        <input type="checkbox" id="vbr" name="vbr"<?php if (isset($VBR)) { echo ' checked="checked"'; } ?> /><label for="vbr"> (VBR)</label>
+                        <input type="checkbox" id="vbr" name="vbr"<?php if (isset($VBR)) {
+echo ' checked="checked"'; } ?> /><label for="vbr"> (VBR)</label>
                     </span>
                 </td>
             </tr>
@@ -434,37 +451,46 @@ class Upload extends \Gazelle\Base {
             <tr>
                 <td class="label">Log/cue:</td>
                 <td>
-                    <input type="checkbox" id="flac_log" name="flac_log"<?php if ($HasLog) { echo ' checked="checked"';} ?> /> <label for="flac_log">Check this box if the torrent has, or should have, a log file.</label><br />
-                    <input type="checkbox" id="flac_cue" name="flac_cue"<?php if ($HasCue) { echo ' checked="checked"';} ?> /> <label for="flac_cue">Check this box if the torrent has, or should have, a cue file.</label><br />
+                    <input type="checkbox" id="flac_log" name="flac_log"<?php if ($HasLog) {
+echo ' checked="checked"';} ?> /> <label for="flac_log">Check this box if the torrent has, or should have, a log file.</label><br />
+                    <input type="checkbox" id="flac_cue" name="flac_cue"<?php if ($HasCue) {
+echo ' checked="checked"';} ?> /> <label for="flac_cue">Check this box if the torrent has, or should have, a cue file.</label><br />
                 </td>
             </tr>
             <tr>
                 <td class="label">Bad tags:</td>
-                <td><input type="checkbox" id="bad_tags" name="bad_tags"<?php if ($BadTags) { echo ' checked="checked"';} ?> /> <label for="bad_tags">Check this box if the torrent has bad tags.</label></td>
+                <td><input type="checkbox" id="bad_tags" name="bad_tags"<?php if ($BadTags) {
+echo ' checked="checked"';} ?> /> <label for="bad_tags">Check this box if the torrent has bad tags.</label></td>
             </tr>
             <tr>
                 <td class="label">Bad folder names:</td>
-                <td><input type="checkbox" id="bad_folders" name="bad_folders"<?php if ($BadFolders) { echo ' checked="checked"';} ?> /> <label for="bad_folders">Check this box if the torrent has bad folder names.</label></td>
+                <td><input type="checkbox" id="bad_folders" name="bad_folders"<?php if ($BadFolders) {
+echo ' checked="checked"';} ?> /> <label for="bad_folders">Check this box if the torrent has bad folder names.</label></td>
             </tr>
             <tr>
                 <td class="label">Bad file names:</td>
-                <td><input type="checkbox" id="bad_files" name="bad_files"<?php if ($BadFiles) {echo ' checked="checked"';} ?> /> <label for="bad_files">Check this box if the torrent has bad file names.</label></td>
+                <td><input type="checkbox" id="bad_files" name="bad_files"<?php if ($BadFiles) {
+echo ' checked="checked"';} ?> /> <label for="bad_files">Check this box if the torrent has bad file names.</label></td>
             </tr>
             <tr>
                 <td class="label">Missing lineage:</td>
-                <td><input type="checkbox" id="missing_lineage" name="missing_lineage"<?php if ($MissingLineage) {echo ' checked="checked"';} ?> /> <label for="missing_lineage">Check this box if the torrent is missing lineage information.</label></td>
+                <td><input type="checkbox" id="missing_lineage" name="missing_lineage"<?php if ($MissingLineage) {
+echo ' checked="checked"';} ?> /> <label for="missing_lineage">Check this box if the torrent is missing lineage information.</label></td>
             </tr>
             <tr>
                 <td class="label">Cassette approved:</td>
-                <td><input type="checkbox" id="cassette_approved" name="cassette_approved"<?php if ($CassetteApproved) {echo ' checked="checked"';} ?> /> <label for="cassette_approved">Check this box if the torrent is an approved cassette rip.</label></td>
+                <td><input type="checkbox" id="cassette_approved" name="cassette_approved"<?php if ($CassetteApproved) {
+echo ' checked="checked"';} ?> /> <label for="cassette_approved">Check this box if the torrent is an approved cassette rip.</label></td>
             </tr>
             <tr>
                 <td class="label">Lossy master approved:</td>
-                <td><input type="checkbox" id="lossymaster_approved" name="lossymaster_approved"<?php if ($LossymasterApproved) {echo ' checked="checked"';} ?> /> <label for="lossymaster_approved">Check this box if the torrent is an approved lossy master.</label></td>
+                <td><input type="checkbox" id="lossymaster_approved" name="lossymaster_approved"<?php if ($LossymasterApproved) {
+echo ' checked="checked"';} ?> /> <label for="lossymaster_approved">Check this box if the torrent is an approved lossy master.</label></td>
             </tr>
             <tr>
                 <td class="label">Lossy web approved:</td>
-                <td><input type="checkbox" id="lossyweb_approved" name="lossyweb_approved"<?php if ($LossywebApproved) { echo ' checked="checked"';} ?> /> <label for="lossyweb_approved">Check this box if the torrent is an approved lossy WEB release.</label></td>
+                <td><input type="checkbox" id="lossyweb_approved" name="lossyweb_approved"<?php if ($LossywebApproved) {
+echo ' checked="checked"';} ?> /> <label for="lossyweb_approved">Check this box if the torrent is an approved lossy WEB release.</label></td>
             </tr>
 <?php
         }
@@ -562,17 +588,19 @@ class Upload extends \Gazelle\Base {
         foreach (ENCODING as $Bitrate) {
 ?>
                         <option value="<?= $Bitrate ?>"<?=
-            ($SimpleBitrate && preg_match('/^'.$SimpleBitrate.'.*/', $Bitrate)) || ($OtherBitrate && $Bitrate == 'Other')
+            ($SimpleBitrate && preg_match('/^' . $SimpleBitrate . '.*/', $Bitrate)) || ($OtherBitrate && $Bitrate == 'Other')
                 ? ' selected="selected"' : '' ?>><?= $Bitrate ?></option>
 
 <?php   } ?>
                     </select>
-                    <span id="other_bitrate_span"<?php if (!$OtherBitrate) { echo ' class="hidden"'; } ?>>
+                    <span id="other_bitrate_span"<?php if (!$OtherBitrate) {
+echo ' class="hidden"'; } ?>>
                         <input type="text" name="other_bitrate" size="5" id="other_bitrate"<?php
                             if ($OtherBitrate) {
-                                echo ' value="'.html_escape($Torrent['Bitrate']).'"';
+                                echo ' value="' . html_escape($Torrent['Bitrate']) . '"';
                             } ?> onchange="AltBitrate()" />
-                        <input type="checkbox" id="vbr" name="vbr"<?php if (isset($VBR)) { echo ' checked="checked"'; } ?> /><label for="vbr"> (VBR)</label>
+                        <input type="checkbox" id="vbr" name="vbr"<?php if (isset($VBR)) {
+echo ' checked="checked"'; } ?> /><label for="vbr"> (VBR)</label>
                     </span>
                 </td>
             </tr>

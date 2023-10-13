@@ -3,7 +3,7 @@
 namespace Gazelle\Manager;
 
 class Contest extends \Gazelle\Base {
-    public function create (
+    public function create(
         string $banner,
         string $dateBegin,
         string $dateEnd,

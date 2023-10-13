@@ -21,4 +21,3 @@ echo $Twig->render('admin/scheduler/run.twig', [
     'output'    => $output,
     'processed' => $processed,
 ]);
-

@@ -70,9 +70,9 @@ class SphinxqlQuery {
                 }
             }
             if ($Exclude) {
-                $Filters[] = "$Attribute NOT IN (".implode(",", $Values).")";
+                $Filters[] = "$Attribute NOT IN (" . implode(",", $Values) . ")";
             } else {
-                $Filters[] = "$Attribute IN (".implode(",", $Values).")";
+                $Filters[] = "$Attribute IN (" . implode(",", $Values) . ")";
             }
         } else {
             if (!is_number($Values)) {
@@ -151,9 +151,9 @@ class SphinxqlQuery {
             $Field = "@$Field ";
         }
         if ($Escape === true) {
-            $this->Expressions[] = "$Field".Sphinxql::sph_escape_string($Expr);
+            $this->Expressions[] = "$Field" . Sphinxql::sph_escape_string($Expr);
         } else {
-            $this->Expressions[] = $Field.$Expr;
+            $this->Expressions[] = $Field . $Expr;
         }
         return $this;
     }
@@ -257,10 +257,10 @@ class SphinxqlQuery {
         }
         $this->QueryString = "SELECT $this->Select\nFROM $this->Indexes";
         if (!empty($this->Expressions)) {
-            $this->Filters['expr'] = "MATCH('".implode(' ', $this->Expressions)."')";
+            $this->Filters['expr'] = "MATCH('" . implode(' ', $this->Expressions) . "')";
         }
         if (!empty($this->Filters)) {
-            $this->QueryString .= "\nWHERE ".implode("\n\tAND ", $this->Filters);
+            $this->QueryString .= "\nWHERE " . implode("\n\tAND ", $this->Filters);
             unset($this->Filters['expr']);
         }
         if (!empty($this->GroupBy)) {
@@ -270,7 +270,7 @@ class SphinxqlQuery {
             $this->QueryString .= "\nWITHIN GROUP ORDER BY $this->SortGroupBy";
         }
         if (!empty($this->SortBy)) {
-            $this->QueryString .= "\nORDER BY ".implode(", ", $this->SortBy);
+            $this->QueryString .= "\nORDER BY " . implode(", ", $this->SortBy);
         }
         if (!empty($this->Limits)) {
             $this->QueryString .= "\nLIMIT $this->Limits";
@@ -297,7 +297,7 @@ class SphinxqlQuery {
         }
         $QueryString = $this->QueryString;
         $Result = $this->send_query($GetMeta);
-        $QueryProcessTime = (microtime(true) - $QueryStartTime)*1000;
+        $QueryProcessTime = (microtime(true) - $QueryStartTime) * 1000;
         Sphinxql::register_query($QueryString, $QueryProcessTime);
         return $Result;
     }

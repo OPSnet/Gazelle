@@ -67,11 +67,11 @@ header('Content-Type: application/json; charset=utf-8');
 // Enforce rate limiting everywhere except info.php
 if (!$Viewer->permitted('site_unlimit_ajax') && isset($LimitedPages[$Action])) {
     [$rate, $interval] = $LimitedPages[$Action];
-    if (($UserRequests = $Cache->get_value('ajax_requests_'.$UserID)) === false) {
+    if (($UserRequests = $Cache->get_value('ajax_requests_' . $UserID)) === false) {
         $UserRequests = 0;
-        $Cache->cache_value('ajax_requests_'.$UserID, '0', $interval);
+        $Cache->cache_value('ajax_requests_' . $UserID, '0', $interval);
     } else {
-        $Cache->increment_value('ajax_requests_'.$UserID);
+        $Cache->increment_value('ajax_requests_' . $UserID);
         if ($UserRequests > $rate) {
             Gazelle\Util\Irc::sendMessage(ADMIN_CHAN, "rate limit hit by {$Viewer->username()} on $Action");
             json_error("Rate limit exceeded");

@@ -1,13 +1,13 @@
 <?php
 
-use \PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\TestCase;
 
 require_once(__DIR__ . '/../../lib/bootstrap.php');
 require_once(__DIR__ . '/../helper.php');
 
-use \Gazelle\Enum\AvatarDisplay;
-use \Gazelle\Enum\AvatarSynthetic;
-use \Gazelle\Enum\UserStatus;
+use Gazelle\Enum\AvatarDisplay;
+use Gazelle\Enum\AvatarSynthetic;
+use Gazelle\Enum\UserStatus;
 
 class UserTest extends TestCase {
     protected \Gazelle\User $user;

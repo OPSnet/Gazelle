@@ -67,19 +67,15 @@ $SendPM = false;
 if ($_POST['resolve_type'] === 'tags_lots') {
     $report->addTorrentFlag(Gazelle\TorrentFlag::badTag, $Viewer);
     $SendPM = true;
-}
-elseif ($_POST['resolve_type'] === 'folders_bad') {
+} elseif ($_POST['resolve_type'] === 'folders_bad') {
     $report->addTorrentFlag(Gazelle\TorrentFlag::badFolder, $Viewer);
     $SendPM = true;
-}
-elseif ($_POST['resolve_type'] === 'filename') {
+} elseif ($_POST['resolve_type'] === 'filename') {
     $report->addTorrentFlag(Gazelle\TorrentFlag::badFile, $Viewer);
     $SendPM = true;
-}
-elseif ($_POST['resolve_type'] === 'lineage') {
+} elseif ($_POST['resolve_type'] === 'lineage') {
     $report->addTorrentFlag(Gazelle\TorrentFlag::noLineage, $Viewer);
-}
-elseif ($_POST['resolve_type'] === 'lossyapproval') {
+} elseif ($_POST['resolve_type'] === 'lossyapproval') {
     $report->addTorrentFlag(Gazelle\TorrentFlag::lossyMaster, $Viewer);
 }
 
@@ -136,14 +132,14 @@ if ($weeksWarned > 0) {
 } else {
     $staffNote = null;
     if ($revokeUpload) {
-        $staffNote = 'Upload privileges removed by '.$Viewer->username()
+        $staffNote = 'Upload privileges removed by ' . $Viewer->username()
             . "\nReason: Uploader of torrent ($torrentId) $name which was [url="
             . $report->url() . "]resolved with the preset: {$reportTypeName}[/url].";
     }
     if ($adminMessage) {
         // They did nothing of note, but still want to mark it (Or upload and mark)
         if (!$revokeUpload) {
-            $staffNote = "Torrent ($torrentId) $name [url=". $report->url() . "]was reported[/url]: $adminMessage";
+            $staffNote = "Torrent ($torrentId) $name [url=" . $report->url() . "]was reported[/url]: $adminMessage";
         } else {
             $staffNote .= ", mod note: $adminMessage";
         }

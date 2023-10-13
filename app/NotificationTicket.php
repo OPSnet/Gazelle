@@ -134,7 +134,7 @@ class NotificationTicket {
     }
 
     public function ticketState(string $state): NotificationTicketState {
-        return match($state) {
+        return match ($state) {
             'pending' => NotificationTicketState::Pending,
             'stale'   => NotificationTicketState::Stale,
             'active'  => NotificationTicketState::Active,

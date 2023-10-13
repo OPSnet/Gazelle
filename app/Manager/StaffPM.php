@@ -180,7 +180,7 @@ class StaffPM extends \Gazelle\BaseManager {
             LEFT JOIN staff_pm_conversations spc ON (spc.ResolverID = um.ID AND spc.Status = 'Resolved' AND spc.Date > now() - INTERVAL ? DAY)
             WHERE spm.SentDate > now() - INTERVAL ? DAY
                 AND p.Level <= ?
-                AND um.ID IN (" . placeholders($userIds) .")
+                AND um.ID IN (" . placeholders($userIds) . ")
             GROUP BY um.ID
             ORDER BY total DESC, total2 DESC
         ", $interval, $interval, $classLevel, ...$userIds);
@@ -198,7 +198,7 @@ class StaffPM extends \Gazelle\BaseManager {
             LEFT JOIN staff_pm_conversations spc ON (spc.UserID = um.ID AND spc.Date > now() - INTERVAL ? DAY)
             WHERE spm.SentDate > now() - INTERVAL ? DAY
                 AND p.Level <= ?
-                AND um.ID NOT IN (" . placeholders($userIds) .")
+                AND um.ID NOT IN (" . placeholders($userIds) . ")
             GROUP BY um.ID
             ORDER BY total DESC, total2 DESC
         ", $interval, $interval, $classLevel, ...$userIds);

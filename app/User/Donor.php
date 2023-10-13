@@ -296,7 +296,7 @@ class Donor extends \Gazelle\BaseUser {
             return image_cache_encode($icon);
         }
         $rank = $this->rank();
-        return STATIC_SERVER . "/common/symbols/" . match(true) {
+        return STATIC_SERVER . "/common/symbols/" . match (true) {
             $this->hasMaxSpecialRank() => "donor_6.png",
             ($rank >= MAX_RANK)        => "donor_5.png",
             ($rank === 5)              => "donor_4.png", // Two points between rank 4 and 5
@@ -368,7 +368,7 @@ class Donor extends \Gazelle\BaseUser {
             $label .= " (+$overflow)";
         }
 
-        return $label . match(true) {
+        return $label . match (true) {
             ($rank >= 6) => ' [Gold]',
             ($rank >= 4) => ' [Silver]',
             ($rank >= 3) => ' [Bronze]',
@@ -529,7 +529,7 @@ class Donor extends \Gazelle\BaseUser {
 
         // One invite given per two ranks gained, up to a certain limit
         $previousInvites = $this->invitesReceived();
-        $newInvites = min(MAX_RANK, (int)floor(($this->rank()+1) / 2) * 2) - $previousInvites;
+        $newInvites = min(MAX_RANK, (int)floor(($this->rank() + 1) / 2) * 2) - $previousInvites;
         if ($newInvites) {
             $cond[] = 'InvitesReceivedRank = InvitesReceivedRank + ?';
             $args[] = $newInvites;

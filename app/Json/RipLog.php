@@ -36,4 +36,3 @@ class RipLog extends \Gazelle\Json {
         ];
     }
 }
-

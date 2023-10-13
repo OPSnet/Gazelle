@@ -15,8 +15,8 @@ if (empty($idList)) {
 }
 
 switch ($_GET['type'] ?? '') {
-    case "resolve";
-        $status = match(trim($_GET['status' ?? ''])) {
+    case "resolve":
+        $status = match (trim($_GET['status' ?? ''])) {
             "Approve", "Approve Selected" => Gazelle\Manager\AutoEnable::APPROVED,
             "Discard", "Discard Selected" => Gazelle\Manager\AutoEnable::DISCARDED,
             "Reject", "Reject Selected"   => Gazelle\Manager\AutoEnable::DENIED,

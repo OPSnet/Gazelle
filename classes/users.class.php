@@ -42,11 +42,11 @@ class Users {
             $Str .= $donor->heart($Viewer);
         }
         $Str .= ($IsWarned && $user->isWarned()) ? '<a href="wiki.php?action=article&amp;name=warnings"'
-            . '><img src="'.STATIC_SERVER.'/common/symbols/warned.png" alt="Warned" title="Warned'
+            . '><img src="' . STATIC_SERVER . '/common/symbols/warned.png" alt="Warned" title="Warned'
             . ($Viewer->id() == $UserID ? ' - Expires ' . date('Y-m-d H:i', strtotime($user->warningExpiry())) : '')
             . '" class="tooltip" /></a>' : '';
         $Str .= ($IsEnabled && $user->isDisabled())
-            ? '<a href="rules.php"><img src="'.STATIC_SERVER.'/common/symbols/disabled.png" alt="Banned" title="Disabled" class="tooltip" /></a>'
+            ? '<a href="rules.php"><img src="' . STATIC_SERVER . '/common/symbols/disabled.png" alt="Banned" title="Disabled" class="tooltip" /></a>'
             : '';
 
         if ($Badges) {
@@ -56,7 +56,7 @@ class Users {
                 $badgeList[] = '<span class="tooltip secondary_class" title="' . $name . '">' . $badge . '</span>';
             }
             if ($badgeList) {
-                $Str .= '&nbsp;'.implode('&nbsp;', $badgeList);
+                $Str .= '&nbsp;' . implode('&nbsp;', $badgeList);
             }
         }
 
@@ -74,7 +74,7 @@ class Users {
             $userTitle = $user->title();
             if ($Viewer->permitted('site_proxy_images') && !empty($userTitle)) {
                 $userTitle = preg_replace_callback('/src=("?)(http.+?)(["\s>])/',
-                    function($Matches) {
+                    function ($Matches) {
                         return 'src=' . $Matches[1] . image_cache_encode($Matches[2]) . $Matches[3];
                     }, $userTitle
                 );

@@ -614,6 +614,5 @@ class DropDeadTables extends AbstractMigration {
                 'unique' => false,
             ])
             ->create();
-
     }
 }

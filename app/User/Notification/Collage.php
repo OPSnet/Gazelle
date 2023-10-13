@@ -3,7 +3,6 @@
 namespace Gazelle\User\Notification;
 
 class Collage extends AbstractNotification {
-
     public function className(): string {
         return 'confirmation';
     }

@@ -100,13 +100,16 @@ View::show_header('Forums › Search', ['js' => 'bbcode,forum_search,datetime_pi
             <tr>
                 <td><strong>Search in:</strong></td>
                 <td>
-                    <input type="radio" name="type" id="type_title" value="title"<?php if (!$search->isBodySearch()) { echo ' checked="checked"'; } ?> />
+                    <input type="radio" name="type" id="type_title" value="title"<?php if (!$search->isBodySearch()) {
+echo ' checked="checked"'; } ?> />
                     <label for="type_title">Titles</label>
-                    <input type="radio" name="type" id="type_body" value="body"<?php if ($search->isBodySearch()) { echo ' checked="checked"'; } ?> />
+                    <input type="radio" name="type" id="type_body" value="body"<?php if ($search->isBodySearch()) {
+echo ' checked="checked"'; } ?> />
                     <label for="type_body">Post bodies</label>
                 </td>
             </tr>
-            <tr id="post_created_row" <?php if (!$search->isBodySearch()) { echo "class='hidden'"; } ?>>
+            <tr id="post_created_row" <?php if (!$search->isBodySearch()) {
+echo "class='hidden'"; } ?>>
                 <td><strong>Post created:</strong></td>
                 <td>
                     After:
@@ -214,7 +217,8 @@ foreach ($results as $r) {
 <?php
     }
     if ($search->isBodySearch()) { ?>
-                <a href="#" onclick="$('#post_<?=$PostID?>_text').gtoggle(); return false;">(Show)</a> <span style="float: right;" class="tooltip last_read" title="Jump to post"><a href="forums.php?action=viewthread&amp;threadid=<?=$ID?><?php if (!empty($PostID)) { echo "&amp;postid=$PostID#post$PostID"; } ?>"></a></span>
+                <a href="#" onclick="$('#post_<?=$PostID?>_text').gtoggle(); return false;">(Show)</a> <span style="float: right;" class="tooltip last_read" title="Jump to post"><a href="forums.php?action=viewthread&amp;threadid=<?=$ID?><?php if (!empty($PostID)) {
+echo "&amp;postid=$PostID#post$PostID"; } ?>"></a></span>
 <?php    } ?>
             </td>
             <td>

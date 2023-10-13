@@ -48,21 +48,26 @@ function generate_tag_table(string $caption, string $tag, array $details, int $l
         $URLString = 'torrents.php?taglist=';
     }
 ?>
-    <h3>Top <?=$limit.' '.$caption?>
+    <h3>Top <?=$limit . ' ' . $caption?>
         <small class="top10_quantity_links">
 <?php
     switch ($limit) {
-        case 100: ?>
+        case 100:
+            ?>
             - <a href="top10.php?type=tags&amp;details=<?=$tag?>" class="brackets">Top 10</a>
             - <span class="brackets">Top 100</span>
             - <a href="top10.php?type=tags&amp;limit=250&amp;details=<?=$tag?>" class="brackets">Top 250</a>
-        <?php    break;
-        case 250: ?>
+        <?php
+            break;
+        case 250:
+            ?>
             - <a href="top10.php?type=tags&amp;details=<?=$tag?>" class="brackets">Top 10</a>
             - <a href="top10.php?type=tags&amp;limit=100&amp;details=<?=$tag?>" class="brackets">Top 100</a>
             - <span class="brackets">Top 250</span>
-        <?php    break;
-        default: ?>
+        <?php
+            break;
+        default:
+            ?>
             - <span class="brackets">Top 10</span>
             - <a href="top10.php?type=tags&amp;limit=100&amp;details=<?=$tag?>" class="brackets">Top 100</a>
             - <a href="top10.php?type=tags&amp;limit=250&amp;details=<?=$tag?>" class="brackets">Top 250</a>

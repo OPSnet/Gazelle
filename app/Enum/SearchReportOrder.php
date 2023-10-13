@@ -9,7 +9,7 @@ enum SearchReportOrder: int {
     case resolvedDesc = 3;
 
     public function label(): string {
-        return match($this) {
+        return match ($this) {
             self::createdAsc   => 'created-asc',
             self::createdDesc  => 'created-desc',
             self::resolvedAsc  => 'resolved-asc',
@@ -18,7 +18,7 @@ enum SearchReportOrder: int {
     }
 
     public function orderBy(): string {
-        return match($this) {
+        return match ($this) {
             self::createdAsc,
             self::createdDesc => 'created',
             self::resolvedAsc,
@@ -27,7 +27,7 @@ enum SearchReportOrder: int {
     }
 
     public function direction(): string {
-        return match($this) {
+        return match ($this) {
             self::createdAsc,
             self::resolvedAsc => 'ASC',
             self::createdDesc,

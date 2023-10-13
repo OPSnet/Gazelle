@@ -55,7 +55,7 @@ if ($viewMap[$View]['title'] === 'Your Unanswered') {
     if ($Viewer->effectiveClass() >= $Classes[MOD]['Level']) {
         $cond[] = 'spc.Level >= ?';
         $args[] = $Classes[MOD]['Level'];
-    } else if ($Viewer->effectiveClass() == $Classes[FORUM_MOD]['Level']) {
+    } elseif ($Viewer->effectiveClass() == $Classes[FORUM_MOD]['Level']) {
         $cond[] = 'spc.Level >= ?';
         $args[] = $Classes[FORUM_MOD]['Level'];
     }

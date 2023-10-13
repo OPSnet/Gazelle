@@ -18,7 +18,7 @@ class SiteOption extends \Gazelle\Base {
                 VALUES (?,    ?,     ?)
                 ', $name, $value, $comment
             );
-        } catch (\Gazelle\DB\Mysql_DuplicateKeyException) {
+        } catch (\Gazelle\DB\MysqlDuplicateKeyException) {
             return null;
         }
         self::$cache->cache_value(sprintf(self::CACHE_KEY, $name), $value);

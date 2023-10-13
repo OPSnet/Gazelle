@@ -102,7 +102,7 @@ $tracker = new Gazelle\Tracker;
 
 // If we're deleting the user, we can ignore all the other crap
 if ($_POST['UserStatus'] === 'delete' && $Viewer->permitted('users_delete_users')) {
-    (new Gazelle\Log)->general("User account {$user->label()} was deleted by ".$Viewer->username());
+    (new Gazelle\Log)->general("User account {$user->label()} was deleted by " . $Viewer->username());
     $tracker->update_tracker('remove_user', ['passkey' => $user->announceKey()]);
     $user->remove();
     header("Location: log.php?search=User+$userId");
@@ -407,7 +407,7 @@ if ($Viewer->permitted('users_disable_any')) {
         $user->setField('can_leech', $disableLeech ? 1 : 0);
         $trackerUserUpdates['can_leech'] = $disableLeech;
         $editSummary[] = "leeching status changed ("
-            . enabledStatus($user->canLeech() ? '1' : '0')." → ".enabledStatus($disableLeech ? '1' : '0').")";
+            . enabledStatus($user->canLeech() ? '1' : '0') . " → " . enabledStatus($disableLeech ? '1' : '0') . ")";
     }
     if ($disableInvites !== $user->disableInvites()) {
         $privChange[] = 'Your invite privileges have been ' . revoked($disableInvites);
@@ -485,7 +485,7 @@ if ($privChange && $userReason) {
     $editSummary[] = 'PM sent';
 }
 
-$userStatus = match($_POST['UserStatus']) {
+$userStatus = match ($_POST['UserStatus']) {
     '1'     =>  UserStatus::enabled,
     '2'     =>  UserStatus::disabled,
     default => UserStatus::unconfirmed,
@@ -507,7 +507,7 @@ if ($userStatus != $user->userStatus() && $Viewer->permitted('users_disable_user
             $set[] = "RatioWatchDownload = ?";
             $args[] = '0';
         } else {
-            $enableStr .= ' (Ratio: ' . ratio_html($user->uploadedSize(), $user->downloadedSize(), false) . ', RR: '.number_format($user->requiredRatio(), 2).')';
+            $enableStr .= ' (Ratio: ' . ratio_html($user->uploadedSize(), $user->downloadedSize(), false) . ', RR: ' . number_format($user->requiredRatio(), 2) . ')';
             if ($cur['RatioWatchEnds']) {
                 $set[] = "RatioWatchEnds = now()";
                 $set[] = "RatioWatchDownload = ?";

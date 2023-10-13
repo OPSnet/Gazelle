@@ -16,7 +16,7 @@ class Torrent extends \Gazelle\Base {
         ORDER BY %s
         LIMIT %s";
 
-    public function __construct (
+    public function __construct(
         protected readonly array $formats,
         protected readonly \Gazelle\User $viewer,
     ) {}
@@ -172,7 +172,7 @@ class Torrent extends \Gazelle\Base {
 
     private function flatten(array $array): array {
         $return = [];
-        array_walk_recursive($array, function($a) use (&$return) { $return[] = $a; });
+        array_walk_recursive($array, function ($a) use (&$return) { $return[] = $a; });
         return $return;
     }
 }

@@ -31,7 +31,7 @@ class IRC extends \Gazelle\Base {
         return $list;
     }
 
-    public function modify (int $id, string $name, int $sort, int $minLevel, array $classList): int {
+    public function modify(int $id, string $name, int $sort, int $minLevel, array $classList): int {
         self::$db->prepared_query("
             UPDATE irc_channels SET
                 Name = ?,

@@ -44,7 +44,7 @@ $forumId = $forum->id();
 $perPage = $_GET['pp'] ?? $Viewer->postsPerPage();
 
 //Post links utilize the catalogue & key params to prevent issues with custom posts per page
-$PostNum = match(true) {
+$PostNum = match (true) {
     isset($_GET['post'])        => (int)$_GET['post'],
     $post && !$post->isSticky() => $post->priorPostTotal(),
     default                     => 1,

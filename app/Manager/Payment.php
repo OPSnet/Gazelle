@@ -2,7 +2,7 @@
 
 namespace Gazelle\Manager;
 
-use \Gazelle\Exception\PaymentFetchForexException;
+use Gazelle\Exception\PaymentFetchForexException;
 
 class Payment extends \Gazelle\Base {
     final const LIST_KEY = 'payment_list';

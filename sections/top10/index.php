@@ -5,7 +5,7 @@ if (!$Viewer->permitted('site_top10')) {
     exit();
 }
 
-require_once(match($_GET['type'] ?? 'torrents') {
+require_once(match ($_GET['type'] ?? 'torrents') {
     'donors'  => 'donors.php',
     'history' => 'history.php',
     'lastfm'  => 'lastfm.php',

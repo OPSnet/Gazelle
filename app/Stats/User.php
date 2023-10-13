@@ -267,9 +267,9 @@ class User extends \Gazelle\BaseObject {
                 );
                 $stats = array_reverse(self::$db->to_array(false, MYSQLI_ASSOC, false));
                 $timeline = array_column($stats, 'epoch');
-                foreach(['data_up', 'data_down', 'buffer', 'bp', 'uploads', 'perfect'] as $dimension) {
+                foreach (['data_up', 'data_down', 'buffer', 'bp', 'uploads', 'perfect'] as $dimension) {
                     $series = array_column($stats, $dimension);
-                    $chart[$dimension] = array_map(fn($n) => [$timeline[$n], $series[$n]], range(0, count($series)-1));
+                    $chart[$dimension] = array_map(fn($n) => [$timeline[$n], $series[$n]], range(0, count($series) - 1));
                 }
                 $chart['start'] = $timeline[0] ?? null;
                 unset($chart);

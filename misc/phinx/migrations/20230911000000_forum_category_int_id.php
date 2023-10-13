@@ -19,6 +19,5 @@ final class ForumCategoryIntId extends AbstractMigration
     public function change(): void
     {
     // forums_categories
-
     }
 }

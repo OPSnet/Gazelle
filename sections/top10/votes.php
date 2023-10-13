@@ -50,7 +50,8 @@ View::show_header(TOP_TEN_HEADING . " – Voted Groups", ['js' => 'browse,voting
             <tr id="tagfilter">
                 <td class="label">Tags (comma-separated):</td>
                 <td class="ft_taglist">
-                    <input type="text" name="tags" size="75" value="<?php if (!empty($_GET['tags'])) { echo display_str($_GET['tags']);} ?>" />&nbsp;
+                    <input type="text" name="tags" size="75" value="<?php if (!empty($_GET['tags'])) {
+echo display_str($_GET['tags']);} ?>" />&nbsp;
                     <input type="radio" id="rdoAll" name="anyall" value="all"<?=($all ? ' checked="checked"' : '')?> /><label for="rdoAll"> All</label>&nbsp;&nbsp;
                     <input type="radio" id="rdoAny" name="anyall" value="any"<?=(!$all ? ' checked="checked"' : '')?> /><label for="rdoAny"> Any</label>
                 </td>
@@ -58,9 +59,11 @@ View::show_header(TOP_TEN_HEADING . " – Voted Groups", ['js' => 'browse,voting
             <tr id="yearfilter">
                 <td class="label">Year:</td>
                 <td class="ft_year">
-                    <input type="text" name="year1" size="4" value="<?php if (!empty($_GET['year1'])) { echo display_str($_GET['year1']);} ?>" />
+                    <input type="text" name="year1" size="4" value="<?php if (!empty($_GET['year1'])) {
+echo display_str($_GET['year1']);} ?>" />
                     to
-                    <input type="text" name="year2" size="4" value="<?php if (!empty($_GET['year2'])) { echo display_str($_GET['year2']);} ?>" />
+                    <input type="text" name="year2" size="4" value="<?php if (!empty($_GET['year2'])) {
+echo display_str($_GET['year2']);} ?>" />
                 </td>
             </tr>
             <tr>
@@ -76,17 +79,22 @@ View::show_header(TOP_TEN_HEADING . " – Voted Groups", ['js' => 'browse,voting
         <small class="top10_quantity_links">
 <?php
     switch ($limit) {
-        case 100: ?>
+        case 100:
+            ?>
             - <a href="top10.php?type=votes" class="brackets">Top 25</a>
             - <span class="brackets">Top 100</span>
             - <a href="top10.php?type=votes&amp;limit=250" class="brackets">Top 250</a>
-<?php            break;
-        case 250: ?>
+<?php
+            break;
+        case 250:
+            ?>
             - <a href="top10.php?type=votes" class="brackets">Top 25</a>
             - <a href="top10.php?type=votes&amp;limit=100" class="brackets">Top 100</a>
             - <span class="brackets">Top 250</span>
-<?php            break;
-        default: ?>
+<?php
+            break;
+        default:
+            ?>
             - <span class="brackets">Top 25</span>
             - <a href="top10.php?type=votes&amp;limit=100" class="brackets">Top 100</a>
             - <a href="top10.php?type=votes&amp;limit=250" class="brackets">Top 250</a>
@@ -148,7 +156,8 @@ if (count($topVotes) === 0) { ?>
             </div>
 <?php       } ?>
             <div class="group_info clear">
-                <strong><?= $result['sequence'] ?> - <?= $tgroup->link() ?><?php if ($tgroup->year()) { echo ' [' . $tgroup->year() . ']'; } ?></strong>
+                <strong><?= $result['sequence'] ?> - <?= $tgroup->link() ?><?php if ($tgroup->year()) {
+echo ' [' . $tgroup->year() . ']'; } ?></strong>
                 <div class="tags"><?= implode(', ', array_map(
                     fn($name) => "<a href=\"collages.php?action=search&amp;tags=$name\">$name</a>", $tgroup->tagNameList()
                     )) ?></div>

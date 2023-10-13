@@ -100,7 +100,7 @@ class Torrent extends TorrentAbstract {
     public function torrentFilename(bool $asText, int $maxLength): string {
         $tgroup = $this->group();
         $filename = implode('.',
-            match($tgroup->categoryName()) {
+            match ($tgroup->categoryName()) {
                 'Music'  => [
                     $tgroup->artistRole()->text(), $tgroup->year(), $tgroup->name(),
                     '(' . implode('-', [$this->media(), $this->format(), $this->encoding()]) . ')'

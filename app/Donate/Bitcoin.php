@@ -2,15 +2,15 @@
 
 namespace Gazelle\Donate;
 
-use \BitWasp\Bitcoin\Address\AddressCreator;
-use \BitWasp\Bitcoin\Key\Deterministic\HierarchicalKey;
-use \BitWasp\Bitcoin\Network\Slip132\BitcoinRegistry;
-use \BitWasp\Bitcoin\Key\Deterministic\Slip132\Slip132;
-use \BitWasp\Bitcoin\Key\KeyToScript\KeyToScriptHelper;
-use \BitWasp\Bitcoin\Key\Deterministic\HdPrefix\GlobalPrefixConfig;
-use \BitWasp\Bitcoin\Key\Deterministic\HdPrefix\NetworkConfig;
-use \BitWasp\Bitcoin\Serializer\Key\HierarchicalKey\Base58ExtendedKeySerializer;
-use \BitWasp\Bitcoin\Serializer\Key\HierarchicalKey\ExtendedKeySerializer;
+use BitWasp\Bitcoin\Address\AddressCreator;
+use BitWasp\Bitcoin\Key\Deterministic\HierarchicalKey;
+use BitWasp\Bitcoin\Network\Slip132\BitcoinRegistry;
+use BitWasp\Bitcoin\Key\Deterministic\Slip132\Slip132;
+use BitWasp\Bitcoin\Key\KeyToScript\KeyToScriptHelper;
+use BitWasp\Bitcoin\Key\Deterministic\HdPrefix\GlobalPrefixConfig;
+use BitWasp\Bitcoin\Key\Deterministic\HdPrefix\NetworkConfig;
+use BitWasp\Bitcoin\Serializer\Key\HierarchicalKey\Base58ExtendedKeySerializer;
+use BitWasp\Bitcoin\Serializer\Key\HierarchicalKey\ExtendedKeySerializer;
 
 class Bitcoin {
     use \Gazelle\Pg;
@@ -32,13 +32,14 @@ class Bitcoin {
      * @throws \Exception if $xyzpub is not valid
      */
     public function __construct(
-            string $xyzpub = BITCOIN_DONATION_XYZPUB,
-            protected \Gazelle\Counter $nextKeyCounter = new \Gazelle\Counter("donation-bitcoin")) {
+        protected string $xyzpub = BITCOIN_DONATION_XYZPUB,
+        protected \Gazelle\Counter $nextKeyCounter = new \Gazelle\Counter("donation-bitcoin"),
+    ) {
         $adapter = \BitWasp\Bitcoin\Bitcoin::getEcAdapter();
         $slip132 = new Slip132(new KeyToScriptHelper($adapter));
         $btcPrefixes = new BitcoinRegistry();
 
-        $prefix = match(substr($xyzpub, 0, 4)) {
+        $prefix = match (substr($xyzpub, 0, 4)) {
             'xpub' => $slip132->p2pkh($btcPrefixes),
             'ypub' => $slip132->p2shP2wpkh($btcPrefixes),
             'zpub' => $slip132->p2wpkh($btcPrefixes),

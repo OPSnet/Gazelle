@@ -23,7 +23,7 @@ foreach ($forumList as $forumId) {
         ];
     }
 
-    $category[count($category)-1]['forums'][] = [
+    $category[count($category) - 1]['forums'][] = [
         'forumId'            => $forumId,
         'forumName'          => $forum->name(),
         'forumDescription'   => $forum->description(),

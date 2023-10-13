@@ -8,7 +8,7 @@ final class BetterXcode extends AbstractMigration {
         $this->table('better_transcode_music')
             ->drop()
             ->save();
-        $this->table('better_transcode_music', ['id' => false, 'primary_key'=> ['tgroup_id', 'edition'], 'encoding' => 'utf8mb4'])
+        $this->table('better_transcode_music', ['id' => false, 'primary_key' => ['tgroup_id', 'edition'], 'encoding' => 'utf8mb4'])
             ->addColumn('tgroup_id', 'integer')
             ->addColumn('want_v0',  'boolean')
             ->addColumn('want_320', 'boolean')
@@ -20,7 +20,7 @@ final class BetterXcode extends AbstractMigration {
         $this->table('better_transcode_music')
             ->drop()
             ->save();
-        $this->table('better_transcode_music', ['id' => false, 'primary_key'=> ['better_transcode_music_id'], 'encoding' => 'utf8mb4'])
+        $this->table('better_transcode_music', ['id' => false, 'primary_key' => ['better_transcode_music_id'], 'encoding' => 'utf8mb4'])
             ->addColumn('better_transcode_music_id', 'integer', ['identity' => true])
             ->addColumn('tgroup_id', 'integer')
             ->addColumn('want_v0',  'boolean')

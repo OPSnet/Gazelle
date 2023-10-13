@@ -44,6 +44,6 @@ switch ($_REQUEST['action'] ?? '') {
         require('user_inbox.php');
         break;
     default:
-        require($Viewer->isStaffPMReader()? 'staff_inbox.php' : 'user_inbox.php');
+        require($Viewer->isStaffPMReader() ? 'staff_inbox.php' : 'user_inbox.php');
         break;
 }

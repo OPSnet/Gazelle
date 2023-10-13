@@ -218,7 +218,7 @@ class Referral extends \Gazelle\Base {
 
         if ($view === 'pending') {
             $filter[] = 'ru.Active = 0';
-        } else if ($view === 'processed') {
+        } elseif ($view === 'processed') {
             $filter[] = 'ru.Active = 1';
         }
 
@@ -476,7 +476,7 @@ class Referral extends \Gazelle\Base {
         );
         $json = json_decode($result["response"], true);
 
-        return str_contains($json["response"]["profileText"], $key) ? true :"Token not found. Please try again.";
+        return str_contains($json["response"]["profileText"], $key) ? true : "Token not found. Please try again.";
     }
 
     private function verifyTentacleAccount(array $acc, string $user, string $key): string|true {
@@ -487,7 +487,7 @@ class Referral extends \Gazelle\Base {
         $url = $acc["URL"] . 'user/profile/' . $user;
         $result = $this->proxy->fetch($url, [], $acc["Cookie"], false);
 
-        return str_contains($result["response"], $key) ? true :"Token not found. Please try again.";
+        return str_contains($result["response"], $key) ? true : "Token not found. Please try again.";
     }
 
     private function verifyLuminanceAccount(array $acc, string $user, string $key): string|true {
@@ -498,7 +498,7 @@ class Referral extends \Gazelle\Base {
         $url = $acc["URL"] . 'user.php';
         $result = $this->proxy->fetch($url, ["id" => $user], $acc["Cookie"], false);
 
-        return str_contains($result["response"], $key) ? true :"Token not found. Please try again.";
+        return str_contains($result["response"], $key) ? true : "Token not found. Please try again.";
     }
 
     private function verifyGazelleHTMLAccount(array $acc, string $user, string $key): string|true {
@@ -509,7 +509,7 @@ class Referral extends \Gazelle\Base {
         $url = $acc["URL"] . 'user.php';
         $result = $this->proxy->fetch($url, ["id" => $user], $acc["Cookie"], false);
 
-        return str_contains($result["response"], $key) ? true :"Token not found. Please try again.";
+        return str_contains($result["response"], $key) ? true : "Token not found. Please try again.";
     }
 
     private function verifyPTPAccount(array $acc, string $user, string $key): string|true {
@@ -519,7 +519,7 @@ class Referral extends \Gazelle\Base {
 
         $url = $acc["URL"] . 'user.php';
         $result = $this->proxy->fetch($url, ["id" => $user], $acc["Cookie"], false);
-        return str_contains($result["response"], $key) ? true :"Token not found. Please try again.";
+        return str_contains($result["response"], $key) ? true : "Token not found. Please try again.";
     }
 
     public function generateInvite(array $acc, string $username, string $email): array {

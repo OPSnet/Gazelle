@@ -11,8 +11,8 @@ namespace Gazelle\Util;
 
 class ImageProxy {
     public function __construct(
-        protected readonly \Gazelle\User $viewer) {
-    }
+        protected readonly \Gazelle\User $viewer,
+    ) {}
 
     /**
      * Checks if a link's host is (not) good, otherwise displays an error.
@@ -32,7 +32,7 @@ class ImageProxy {
      */
     public function tgroupThumbnail(\Gazelle\TGroup $tgroup): string {
         $image = $tgroup->image() ?: STATIC_SERVER . '/common/noartwork/' . strtolower($tgroup->categoryName()) . '.png';
-        return '<img src="'. html_escape(image_cache_encode($image, height: 150, width: 150))
+        return '<img src="' . html_escape(image_cache_encode($image, height: 150, width: 150))
             . '" width="90" height="90" alt="Cover" onclick="lightbox.init(\'' . html_escape(image_cache_encode($image))
             . '\', 90)" data-origin-src="' . html_escape($image) . '" />';
     }

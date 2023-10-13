@@ -88,7 +88,7 @@ class Artist extends \Gazelle\BaseManager {
                 AND RevisionID = ?
             ", trim($name), $revisionId
         );
-        return $id ? new \Gazelle\Artist($id, $revisionId): null;
+        return $id ? new \Gazelle\Artist($id, $revisionId) : null;
     }
 
     public function findByAliasId(int $aliasId): ?\Gazelle\Artist {

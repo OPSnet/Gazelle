@@ -78,7 +78,7 @@ $Properties['Image'] = trim($_POST['image'] ?? '');
 if ($Properties['Image']) {
     // Strip out Amazon's padding
     if (preg_match('/(http:\/\/ecx.images-amazon.com\/images\/.+)(\._.*_\.jpg)/i', $Properties['Image'], $match)) {
-        $Properties['Image'] = $match[1].'.jpg';
+        $Properties['Image'] = $match[1] . '.jpg';
     }
     if (!preg_match(IMAGE_REGEXP, $Properties['Image'])) {
         reportError(display_str($Properties['Image']) . " does not look like a valid image url");
@@ -135,7 +135,7 @@ if (!isset($_POST['workaround_broken_html_entities']) || $_POST['workaround_brok
 $Validate = new Gazelle\Util\Validator;
 $Validate->setFields([
     ['type', true, 'inarray', 'Please select a valid category.', ['inarray' => array_keys(CATEGORY)]],
-    ['release_desc', false, 'string','The release description you entered is too long.', ['maxlength'=>1_000_000]],
+    ['release_desc', false, 'string','The release description you entered is too long.', ['maxlength' => 1_000_000]],
     ['rules', true,'require','Your torrent must abide by the rules.'],
 ]);
 
@@ -155,15 +155,15 @@ if (isset($_POST['album_desc'])) {
 
 // audio types
 if (in_array($categoryName, ['Music', 'Audiobooks', 'Comedy'])) {
-    $Validate->setField('format', true, 'inarray','Please select a valid format.', ['inarray'=>FORMAT]);
+    $Validate->setField('format', true, 'inarray','Please select a valid format.', ['inarray' => FORMAT]);
     if ($Properties['Encoding'] !== 'Other') {
-        $Validate->setField('bitrate', true, 'inarray','You must choose a bitrate.', ['inarray'=>ENCODING]);
+        $Validate->setField('bitrate', true, 'inarray','You must choose a bitrate.', ['inarray' => ENCODING]);
     } else {
         if ($Properties['Format'] === 'FLAC') {
-            $Validate->setField('bitrate', true, 'string','FLAC bitrate must be lossless.', ['regex'=>'/Lossless/']);
+            $Validate->setField('bitrate', true, 'string','FLAC bitrate must be lossless.', ['regex' => '/Lossless/']);
         } else {
             $Validate->setField('other_bitrate',
-                true, 'string','You must enter the other bitrate (max length: 9 characters).', ['maxlength'=>9]);
+                true, 'string','You must enter the other bitrate (max length: 9 characters).', ['maxlength' => 9]);
             $Properties['Encoding'] = trim($_POST['other_bitrate']) . (!empty($_POST['vbr']) ? ' (VBR)' : '');;
         }
     }
@@ -178,20 +178,20 @@ switch ($categoryName) {
     case 'Music':
         $Validate->setFields([
             ['groupid', false, 'number', 'Group ID was not numeric'],
-            ['media', true, 'inarray','Please select a valid media.', ['inarray'=>MEDIA]],
+            ['media', true, 'inarray','Please select a valid media.', ['inarray' => MEDIA]],
             ['remaster_title', false, 'string','Remaster title must be between 1 and 80 characters.', ['range' => [1, 80]]],
             ['remaster_record_label', false, 'string','Remaster record label must be between 1 and 80 characters.', ['range' => [1, 80]]],
             ['remaster_catalogue_number', false, 'string','Remaster catalogue number must be between 1 and 80 characters.', ['range' => [1, 80]]],
         ]);
         if (!$Properties['GroupID']) {
             $Validate->setFields([
-                ['year', true, 'number','The year of the original release must be entered.', ['length'=>40]],
-                ['releasetype', true, 'inarray','Please select a valid release type.', ['inarray'=>array_keys($releaseTypes)]],
+                ['year', true, 'number','The year of the original release must be entered.', ['length' => 40]],
+                ['releasetype', true, 'inarray','Please select a valid release type.', ['inarray' => array_keys($releaseTypes)]],
                 ['record_label', false, 'string','Record label must be between 1 and 80 characters.', ['range' => [1, 80]]],
                 ['catalogue_number', false, 'string','Catalogue Number must be between 1 and 80 characters.', ['range' => [1, 80]]],
             ]);
             if ($Properties['Media'] == 'CD' && !$Properties['Remastered']) {
-                $Validate->setField('year', true, 'number', 'You have selected a year for an album that predates the media you say it was created on.', ['minlength'=>1982]);
+                $Validate->setField('year', true, 'number', 'You have selected a year for an album that predates the media you say it was created on.', ['minlength' => 1982]);
             }
         }
 
@@ -447,7 +447,7 @@ if (count($TooLongPaths) > 0) {
         defined('AJAX')
         ? (string)json_encode(
             ['The torrent contained one or more files with too long a name', ['list' => $TooLongPaths]],
-            JSON_INVALID_UTF8_SUBSTITUTE|JSON_PARTIAL_OUTPUT_ON_ERROR
+            JSON_INVALID_UTF8_SUBSTITUTE | JSON_PARTIAL_OUTPUT_ON_ERROR
         )
         : ('The torrent contained one or more files with too long a name: <ul>'
             . implode('', array_map(fn($p) => "<li>$p</li>", $TooLongPaths))
@@ -607,7 +607,7 @@ foreach ($upload['extra'] as $info) {
 if ($logfileSummary?->total()) {
     $torrentLogManager = new Gazelle\Manager\TorrentLog(new Gazelle\File\RipLog, new Gazelle\File\RipLogHTML);
     $checkerVersion = Logchecker::getLogcheckerVersion();
-    foreach($logfileSummary->all() as $logfile) {
+    foreach ($logfileSummary->all() as $logfile) {
         $torrentLogManager->create($torrent, $logfile, $checkerVersion);
     }
 }

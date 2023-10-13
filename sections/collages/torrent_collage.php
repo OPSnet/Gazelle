@@ -88,15 +88,19 @@ if ($Viewer->permitted('zip_downloader')) {
             $OpenGroup = true;
         }
 ?>
-                        <option id="opt<?=$GroupID.$OptionID?>" value="<?=$GroupID.$OptionID?>"<?php if (in_array($GroupID.$OptionID, $ZIPList)) { echo ' disabled="disabled"'; }?>><?=$OptName?></option>
+                        <option id="opt<?=$GroupID . $OptionID?>" value="<?=$GroupID . $OptionID?>"<?php if (in_array($GroupID . $OptionID, $ZIPList)) {
+echo ' disabled="disabled"'; }?>><?=$OptName?></option>
 <?php } /* foreach */ ?>
                     </optgroup>
                 </select>
                 <button type="button" onclick="add_selection();">+</button>
                 <select name="preference" style="width: 210px;">
-                    <option value="0"<?php if ($ZIPPrefs == 0) { echo ' selected="selected"'; } ?>>Prefer Original</option>
-                    <option value="1"<?php if ($ZIPPrefs == 1) { echo ' selected="selected"'; } ?>>Prefer Best Seeded</option>
-                    <option value="2"<?php if ($ZIPPrefs == 2) { echo ' selected="selected"'; } ?>>Prefer Bonus Tracks</option>
+                    <option value="0"<?php if ($ZIPPrefs == 0) {
+echo ' selected="selected"'; } ?>>Prefer Original</option>
+                    <option value="1"<?php if ($ZIPPrefs == 1) {
+echo ' selected="selected"'; } ?>>Prefer Best Seeded</option>
+                    <option value="2"<?php if ($ZIPPrefs == 2) {
+echo ' selected="selected"'; } ?>>Prefer Bonus Tracks</option>
                 </select>
                 <input type="submit" style="width: 210px;" value="Download" />
                 </form>
@@ -142,7 +146,7 @@ if ($Viewer->permitted('zip_downloader')) {
             if (!empty($chunk)) {
                 $CollagePages[] = implode('',
                     array_map(
-                        function($id) use ($collMan, $tgMan) {
+                        function ($id) use ($collMan, $tgMan) {
                             $tgroup = $tgMan->findById($id);
                             return $tgroup ? $collMan->tgroupCover($tgroup) : '';
                         }, $chunk

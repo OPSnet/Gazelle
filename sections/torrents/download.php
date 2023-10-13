@@ -1,7 +1,7 @@
 <?php
 
-use \Gazelle\Enum\LeechType;
-use \Gazelle\Util\Irc;
+use Gazelle\Enum\LeechType;
+use Gazelle\Util\Irc;
 
 $torrent = (new Gazelle\Manager\Torrent)->findById((int)($_REQUEST['id'] ?? 0));
 if (is_null($torrent)) {

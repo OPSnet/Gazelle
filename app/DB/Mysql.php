@@ -99,8 +99,8 @@ set_query_id($ResultSet)
 -------------------------------------------------------------------------------------
 *///---------------------------------------------------------------------------------
 
-class Mysql_Exception extends \Exception {}
-class Mysql_DuplicateKeyException extends Mysql_Exception {}
+class MysqlException extends \Exception {}
+class MysqlDuplicateKeyException extends MysqlException {}
 
 class Mysql {
     public \mysqli|false $LinkID = false;
@@ -136,11 +136,11 @@ class Mysql {
 
     private function halt(string $Msg): void {
         if ($this->Errno == 1062) {
-            throw new Mysql_DuplicateKeyException;
+            throw new MysqlDuplicateKeyException;
         }
         global $Debug;
         $Debug->saveCase("MySQL: error({$this->Errno}) {$this->Error} query=[$this->PreparedQuery]");
-        throw new Mysql_Exception("$Msg  -- {$this->Error}");
+        throw new MysqlException("$Msg  -- {$this->Error}");
     }
 
     public function connect(): void {
@@ -149,7 +149,7 @@ class Mysql {
             if ($this->LinkID === false) {
                 $this->Errno = mysqli_connect_errno();
                 $this->Error = mysqli_connect_error();
-                $this->halt('Connection failed (host:'.$this->Server.':'.$this->Port.')');
+                $this->halt('Connection failed (host:' . $this->Server . ':' . $this->Port . ')');
             }
         }
     }
@@ -220,24 +220,22 @@ class Mysql {
             foreach ($Parameters as $Parameter) {
                 if (is_integer($Parameter)) {
                     $Binders .= "i";
-                }
-                elseif (is_double($Parameter)) {
+                } elseif (is_double($Parameter)) {
                     $Binders .= "d";
-                }
-                else {
+                } else {
                     $Binders .= "s";
                 }
             }
             $Statement->bind_param($Binders, ...$Parameters);
         }
 
-        $Closure = function() use ($Statement) {
+        $Closure = function () use ($Statement) {
             try {
                 $Statement->execute();
                 return $Statement->get_result();
             } catch (\mysqli_sql_exception) {
                 if ($this->LinkID && mysqli_error($this->LinkID) == 1062) {
-                    throw new Mysql_DuplicateKeyException;
+                    throw new MysqlDuplicateKeyException;
                 }
             }
         };
@@ -260,7 +258,7 @@ class Mysql {
         return $this->execute(...$Parameters);
     }
 
-    private function attempt_query(string $Query, Callable $Closure): \mysqli_result|false {
+    private function attempt_query(string $Query, callable $Closure): \mysqli_result|false {
         $QueryStartTime = microtime(true);
         if ($this->LinkID === false) {
             return false;
@@ -279,8 +277,8 @@ class Mysql {
         }
         $QueryEndTime = microtime(true);
         // Kills admin pages, and prevents Debug->analysis when the whole set exceeds 1 MB
-        if (($Len = strlen($Query))>16384) {
-            $Query = substr($Query, 0, 16384).'... '.($Len-16384).' bytes trimmed';
+        if (($Len = strlen($Query)) > 16384) {
+            $Query = substr($Query, 0, 16384) . '... ' . ($Len - 16384) . ' bytes trimmed';
         }
         if ($this->queryLog) {
             $this->Queries[] = [$Query, ($QueryEndTime - $QueryStartTime) * 1000, null];
@@ -339,8 +337,7 @@ class Mysql {
     public function fetch_record(mixed ...$escape): ?array {
         if (count($escape) === 1 && $escape[0] === true) {
             $escape = true;
-        }
-        elseif (count($escape) === 0) {
+        } elseif (count($escape) === 0) {
             $escape = false;
         }
         return $this->next_record(MYSQLI_BOTH, $escape);

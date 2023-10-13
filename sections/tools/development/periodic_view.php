@@ -16,6 +16,6 @@ if ($taskId && $_REQUEST['mode'] === 'run_now') {
 }
 
 echo $Twig->render('admin/scheduler/view.twig', [
-    'task_list'=> $scheduler->getTaskDetails(),
+    'task_list' => $scheduler->getTaskDetails(),
     'viewer'   => $Viewer,
 ]);

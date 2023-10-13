@@ -2,7 +2,7 @@
 
 namespace Gazelle\Manager;
 
-use \Gazelle\Enum\UserStatus;
+use Gazelle\Enum\UserStatus;
 
 class Stylesheet extends \Gazelle\Base {
     final const CACHE_KEY = 'csslist';

@@ -1,7 +1,7 @@
 <?php
 
-use \Gazelle\Enum\UserStatus;
-use \Gazelle\Enum\UserTokenType;
+use Gazelle\Enum\UserStatus;
+use Gazelle\Enum\UserTokenType;
 
 if (isset($_REQUEST['confirm'])) {
     // Confirm registration
@@ -35,7 +35,7 @@ if (isset($_REQUEST['confirm'])) {
     $validator->setFields([
         ['username', true, 'regex', 'You did not enter a valid username.', ['regex' => USERNAME_REGEXP]],
         ['email', true, 'email', 'You did not enter a valid email address.'],
-        ['password', true, 'regex', 'A strong password is 8 characters or longer, contains at least 1 lowercase and uppercase letter, and contains at least a number or symbol, or is 20 characters or longer', ['regex'=>'/(?=^.{8,}$)(?=.*[^a-zA-Z])(?=.*[A-Z])(?=.*[a-z]).*$|.{20,}/']],
+        ['password', true, 'regex', 'A strong password is 8 characters or longer, contains at least 1 lowercase and uppercase letter, and contains at least a number or symbol, or is 20 characters or longer', ['regex' => '/(?=^.{8,}$)(?=.*[^a-zA-Z])(?=.*[A-Z])(?=.*[a-z]).*$|.{20,}/']],
         ['confirm_password', true, 'compare', 'Your passwords do not match.', ['comparefield' => 'password']],
         ['readrules', true, 'checkbox', 'You did not select the box that says you will read the rules.'],
         ['readwiki', true, 'checkbox', 'You did not select the box that says you will read the wiki.'],
@@ -59,7 +59,7 @@ if (isset($_REQUEST['confirm'])) {
 
             try {
                 $user = $creator->create();
-                (new Gazelle\Util\Mail)->send($user->email(), 'New account confirmation at '.SITE_NAME,
+                (new Gazelle\Util\Mail)->send($user->email(), 'New account confirmation at ' . SITE_NAME,
                     $Twig->render('email/registration.twig', [
                         'ipaddr' => $_SERVER['REMOTE_ADDR'],
                         'user'   => $user,
@@ -67,8 +67,7 @@ if (isset($_REQUEST['confirm'])) {
                     ])
                 );
                 $emailSent = true;
-            }
-            catch (Gazelle\Exception\UserCreatorException $e) {
+            } catch (Gazelle\Exception\UserCreatorException $e) {
                 switch ($e->getMessage()) {
                     case 'duplicate':
                         $error = 'Someone already took that username :-(';

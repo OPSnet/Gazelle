@@ -13,7 +13,7 @@ $offset    = 0;
 $search    = null;
 $paginator = new Gazelle\Util\Paginator(50, (int)($_GET['page'] ?? 1));
 
-$text = match(true) {
+$text = match (true) {
     isset($_POST['text'])     => trim($_POST['text']),
     isset($_GET['emaillist']) => implode("\n", explode(',', $_GET['emaillist'])),
     default                   => '',

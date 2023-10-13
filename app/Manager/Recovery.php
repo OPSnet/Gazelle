@@ -97,7 +97,7 @@ class Recovery extends \Gazelle\Base {
         if ($file['size'] > 10 * 1024 * 1024) {
             return [false, "File was too large, please make sure it is less than 10MB in size."];
         }
-        $filename = sha1(RECOVERY_SALT . random_int(0, 10_000_000). sha1_file($file['tmp_name']));
+        $filename = sha1(RECOVERY_SALT . random_int(0, 10_000_000) . sha1_file($file['tmp_name']));
         $destination = sprintf('%s/%s/%s/%s/%s',
             RECOVERY_PATH, substr($filename, 0, 1), substr($filename, 1, 1), substr($filename, 2, 1), $filename
         );
@@ -328,7 +328,7 @@ class Recovery extends \Gazelle\Base {
     }
 
     protected function candidateSql(): string {
-        return match(true) {
+        return match (true) {
             self::$db->entityExists('users_main', 'Uploaded') =>
                 sprintf('
                     SELECT m.Username, m.torrent_pass, m.Email, m.Uploaded, m.Downloaded, m.Enabled, m.PermissionID, m.ID as UserID,
@@ -350,7 +350,6 @@ class Recovery extends \Gazelle\Base {
                 ),
             default => throw new \Exception('Cannot determine recovery schema')
         };
-
     }
 
     public function findCandidate(string $username): ?array {
@@ -365,8 +364,7 @@ class Recovery extends \Gazelle\Base {
             $permission_t = "$schema.permissions";
             $users_main_t = "$schema.users_main";
             $torrents_t   = "$schema.torrents";
-        }
-        else {
+        } else {
             $permission_t = 'permissions';
             $users_main_t = 'users_main';
             $torrents_t   = 'torrents';
@@ -493,12 +491,10 @@ class Recovery extends \Gazelle\Base {
                     $irc_message = "Upscaled from $uploaded to $rescale_uploaded from final irc userclass $irc_userclass";
                     $final += 1.5 * ($rescale_uploaded - $final);
                     $irc_change = "\n\nThe above buffer calculation takes into account your final recorded userclass on IRC '$irc_userclass'";
-                }
-                else {
+                } else {
                     $irc_message = "No change from logged irc userclass $irc_userclass";
                 }
-            }
-            else {
+            } else {
                 $irc_message = 'never joined #APOLLO';
             }
 

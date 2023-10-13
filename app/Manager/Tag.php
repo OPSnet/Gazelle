@@ -355,7 +355,7 @@ class Tag extends \Gazelle\BaseManager {
             ");
             $aliasList = self::$db->to_array(false, MYSQLI_ASSOC, false);
             // Unify tag aliases to be in_this_format as tags not in.this.format
-            array_walk_recursive($aliasList, function(&$val, $key) {
+            array_walk_recursive($aliasList, function (&$val, $key) {
                 $val = strtr($val, '.', '_');
             });
             // Clean up the array for smaller cache size
@@ -396,7 +396,7 @@ class Tag extends \Gazelle\BaseManager {
             for ($i = 0; $i < $End; $i++) {
                 foreach ($TagAliases as $TagAlias) {
                     if (substr($Tags['exclude'][$i], 1) === $TagAlias['BadTag']) {
-                        $Tags['exclude'][$i] = '!'.$TagAlias['AliasTag'];
+                        $Tags['exclude'][$i] = '!' . $TagAlias['AliasTag'];
                         break;
                     }
                 }

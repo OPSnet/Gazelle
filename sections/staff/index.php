@@ -4,7 +4,7 @@ $userMan = new \Gazelle\Manager\User;
 $classList = $userMan->classList();
 
 echo $Twig->render('staff/index.twig', [
-    'hidden'=> true,
+    'hidden' => true,
     'reply' => new Gazelle\Util\Textarea('quickpost', ''),
     'fls'   => $userMan->flsList(),
     'staff' => $userMan->staffListGrouped(),

@@ -19,7 +19,7 @@ if (isset($_GET['report-type'])) {
     }
 }
 
-foreach(['reporter', 'handler', 'uploader'] as $role) {
+foreach (['reporter', 'handler', 'uploader'] as $role) {
     if (isset($_GET[$role]) && preg_match('/(@?[\w.-]+)/', $_GET[$role], $match)) {
         $user = $userMan->find($match[1]);
         if (is_null($user)) {

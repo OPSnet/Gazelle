@@ -82,4 +82,3 @@ class MigrateLeechStatTables extends AbstractMigration
         ");
     }
 }
-

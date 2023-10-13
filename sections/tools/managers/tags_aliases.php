@@ -17,8 +17,7 @@ if ($Viewer->permitted('users_mod')) {
         if ($_POST['save']) {
             $action = 'modification';
             $result = $tagMan->modifyAlias($aliasId, $_POST['badtag'], $_POST['aliastag']);
-        }
-        elseif ($_POST['delete']) {
+        } elseif ($_POST['delete']) {
             $action = 'removal';
             $result = $tagMan->removeAlias($aliasId);
         }

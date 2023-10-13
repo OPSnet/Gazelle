@@ -18,7 +18,7 @@ if ($_GET['method'] === 'single') {
     $type   = $_GET['type'] ?? 'artwork';
 }
 
-$better = match($type) {
+$better = match ($type) {
     'artistcollage' => new Gazelle\Better\ArtistCollage($user, $filter, new Gazelle\Manager\Artist),
     'artistdesc'    => new Gazelle\Better\ArtistDescription($user, $filter, new Gazelle\Manager\Artist),
     'artistdiscogs' => new Gazelle\Better\ArtistDiscogs($user, $filter, new Gazelle\Manager\Artist),

@@ -3,7 +3,6 @@
 namespace Gazelle\User\Notification;
 
 class Subscription extends AbstractNotification {
-
     public function className(): string {
         return 'confirmation';
     }

@@ -136,7 +136,7 @@ if ($OwnProfile || $Viewer->permitted('users_mod')) {
 
 // Last.fm statistics and comparability
 $lastfmInfo = (new Gazelle\Util\LastFM)->userInfo($User);
-if ($lastfmInfo)  {
+if ($lastfmInfo) {
     echo $Twig->render('user/lastfm.twig', [
         'can_reload'  => ($OwnProfile && $Cache->get_value("lastfm_clear_cache_$UserID") === false) || $Viewer->permitted('users_mod'),
         'info'        => $lastfmInfo,
@@ -149,7 +149,7 @@ $stats            = $User->stats();
 $Uploads          = check_paranoia_here('uploads+') ? $stats->uploadTotal() : 0;
 $ArtistsAdded     = check_paranoia_here('artistsadded') ? $stats->artistAddedTotal() : 0;
 $collageAdditions = check_paranoia_here('collagecontribs+') ? $stats->collageTotal() : 0;
-$releaseVotes     = $vote->userTotal(Vote::UPVOTE|Vote::DOWNVOTE);
+$releaseVotes     = $vote->userTotal(Vote::UPVOTE | Vote::DOWNVOTE);
 $bonusPointsSpent = $userBonus->pointsSpent();
 $torrentComments  = check_paranoia_here('torrentcomments++') ? $stats->commentTotal('torrents') : 0;
 $rank = new Gazelle\UserRank(
@@ -530,11 +530,9 @@ if ($Viewer->permitted('users_mod') || $Viewer->isStaff()) { ?>
         foreach ($ClassLevels as $CurClass) {
             if ($CurClass['Secondary']) {
                 continue;
-            }
-            elseif (!$OwnProfile && !$Viewer->permitted('users_promote_to', $Viewer->classLevel() - 1) && $CurClass['Level'] == $Viewer->effectiveClass()) {
+            } elseif (!$OwnProfile && !$Viewer->permitted('users_promote_to', $Viewer->classLevel() - 1) && $CurClass['Level'] == $Viewer->effectiveClass()) {
                 break;
-            }
-            elseif ($CurClass['Level'] > $Viewer->effectiveClass()) {
+            } elseif ($CurClass['Level'] > $Viewer->effectiveClass()) {
                 break;
             }
             if ($User->classLevel() == $CurClass['Level']) {
@@ -543,7 +541,7 @@ if ($Viewer->permitted('users_mod') || $Viewer->isStaff()) { ?>
                 $Selected = '';
             }
 ?>
-                        <option value="<?=$CurClass['ID']?>"<?=$Selected?>><?=$CurClass['Name'].' ('.$CurClass['Level'].')'?></option>
+                        <option value="<?=$CurClass['ID']?>"<?=$Selected?>><?=$CurClass['Name'] . ' (' . $CurClass['Level'] . ')'?></option>
 <?php        } ?>
                     </select>
                 </td>

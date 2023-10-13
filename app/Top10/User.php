@@ -72,4 +72,3 @@ class User extends \Gazelle\Base {
         return $results;
     }
 }
-

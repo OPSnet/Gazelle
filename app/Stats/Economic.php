@@ -100,4 +100,3 @@ class Economic extends \Gazelle\Base {
         return $this->info;
     }
 }
-

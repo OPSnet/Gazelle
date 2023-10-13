@@ -3,7 +3,7 @@
 namespace Gazelle;
 
 class Feed extends Base {
-    function header(): string {
+    public function header(): string {
         header('Cache-Control: no-cache, must-revalidate, post-check=0, pre-check=0');
         header('Pragma:');
         header('Expires: ' . date('D, d M Y H:i:s', time() + (2 * 60 * 60)) . ' GMT');
@@ -13,11 +13,11 @@ class Feed extends Base {
         return self::$twig->render('feed/header.twig');
     }
 
-    function footer(): string {
+    public function footer(): string {
         return self::$twig->render('feed/footer.twig');
     }
 
-    function channel(string $title, string $description): string {
+    public function channel(string $title, string $description): string {
         return self::$twig->render('feed/channel.twig', [
             'date'        => date('r'),
             'description' => $description,
@@ -25,7 +25,7 @@ class Feed extends Base {
         ]);
     }
 
-    function item(string $title, string $description, string $page, string $creator, string $date, string $comments = '', string $category = ''): string {
+    public function item(string $title, string $description, string $page, string $creator, string $date, string $comments = '', string $category = ''): string {
         return self::$twig->render('feed/item.twig', [
             'category'    => $category,
             'comments'    => $comments,
@@ -37,7 +37,7 @@ class Feed extends Base {
         ]);
     }
 
-    function retrieve(User $user, string $key): string {
+    public function retrieve(User $user, string $key): string {
         $list = self::$cache->get_value($key);
         if ($list === false) {
             $list = [];
@@ -46,7 +46,7 @@ class Feed extends Base {
         return implode('', array_map(fn ($item) => str_replace('[[PASSKEY]]', $announceKey, $item), $list));
     }
 
-    function populate(string $key, string $item): int {
+    public function populate(string $key, string $item): int {
         $list = self::$cache->get_value($key);
         if ($list === false) {
             $list = [];
@@ -100,7 +100,7 @@ class Feed extends Base {
     public function byFeedName(User $user, string $feedName): string {
         return $this->wrap(
             $this->channel(
-                match($feedName) {
+                match ($feedName) {
                     'torrents_all'        => 'Everything',
                     'torrents_apps'       => 'Applications',
                     'torrents_abooks'     => 'Audiobooks',
@@ -115,7 +115,7 @@ class Feed extends Base {
                     'torrents_vinyl'      => 'Vinyl',
                     'torrents_lossless24' => '24bit Lossless',
                 },
-                match($feedName) {
+                match ($feedName) {
                     'torrents_all'        => 'RSS feed for new uploads',
                     'torrents_apps'       => 'RSS feed for new application uploads',
                     'torrents_comedy'     => 'RSS feed for new comedy uploads',

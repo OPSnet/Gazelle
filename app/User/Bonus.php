@@ -136,7 +136,7 @@ class Bonus extends \Gazelle\BaseUser {
             $history = self::$db->to_array();
             self::$cache->cache_value($key, $history, 86400 * 3);
             /* since we had to fetch this page, invalidate the next one */
-            self::$cache->delete_value(sprintf(self::CACHE_HISTORY, $this->user->id(), $page+1));
+            self::$cache->delete_value(sprintf(self::CACHE_HISTORY, $this->user->id(), $page + 1));
         }
         return $history;
     }
@@ -145,14 +145,11 @@ class Bonus extends \Gazelle\BaseUser {
         $effectiveClass = $this->user->effectiveClass();
         if ($effectiveClass < 250) {
             $taxedValue = $value * BONUS_POOL_TAX_STD;
-        }
-        elseif($effectiveClass == 250 /* Elite */) {
+        } elseif ($effectiveClass == 250 /* Elite */) {
             $taxedValue = $value * BONUS_POOL_TAX_ELITE;
-        }
-        elseif($effectiveClass <= 500 /* EliteTM */) {
+        } elseif ($effectiveClass <= 500 /* EliteTM */) {
             $taxedValue = $value * BONUS_POOL_TAX_TM;
-        }
-        else {
+        } else {
             $taxedValue = $value * BONUS_POOL_TAX_STAFF;
         }
 
@@ -298,7 +295,7 @@ class Bonus extends \Gazelle\BaseUser {
                 VALUES (?,      (SELECT ID FROM user_attr WHERE Name = ?))
                 ", $this->user->id(), 'feature-seedbox'
             );
-        } catch (\Gazelle\DB\Mysql_DuplicateKeyException) {
+        } catch (\Gazelle\DB\MysqlDuplicateKeyException) {
             // no point in buying a second time
             self::$db->rollback();
             return false;

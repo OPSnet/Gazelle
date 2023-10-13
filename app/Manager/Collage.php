@@ -194,7 +194,7 @@ class Collage extends \Gazelle\BaseManager {
             self::$cache->cache_value($key, $default, 86400);
         }
         $list = [];
-        foreach($default as $id) {
+        foreach ($default as $id) {
             $collage = $this->findById($id);
             if ($collage) {
                 $list[] = $collage;
@@ -249,7 +249,7 @@ class Collage extends \Gazelle\BaseManager {
             self::$cache->cache_value($key, $default, 86400);
         }
         $list = [];
-        foreach($default as $id) {
+        foreach ($default as $id) {
             $collage = $this->findById($id);
             if ($collage) {
                 $list[] = $collage;
@@ -289,7 +289,7 @@ class Collage extends \Gazelle\BaseManager {
             );
             $pairs = self::$db->to_pair('ID', 'Name', false);
             $autocomplete = [];
-            foreach($pairs as $key => $value) {
+            foreach ($pairs as $key => $value) {
                 $autocomplete[] = ['data' => $key, 'value' => $value];
             }
             self::$cache->cache_value($key, $autocomplete, 1800 + 7200 * ($maxLength - $length));

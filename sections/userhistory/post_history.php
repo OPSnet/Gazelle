@@ -15,7 +15,7 @@ $showUnread = $ownProfile && (bool)($_GET['showunread'] ?? false);
 $showGrouped = $ownProfile && (bool)($_GET['group'] ?? false);
 
 if ($showGrouped) {
-    $title = 'Grouped '.($showUnread ? 'unread ' : '')."post history";
+    $title = 'Grouped ' . ($showUnread ? 'unread ' : '') . "post history";
 } elseif ($showUnread) {
     $title = "Unread post history";
 } else {

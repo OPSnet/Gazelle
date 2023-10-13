@@ -2,8 +2,8 @@
 
 namespace Gazelle\Notification;
 
-use \Gazelle\Util\Irc;
-use \Gazelle\Util\IrcText;
+use Gazelle\Util\Irc;
+use Gazelle\Util\IrcText;
 
 // NB: if you receive failures running this locally, the most likely cause is the
 //     presence of users_notify_filters rows that match the uploads created here.
@@ -299,7 +299,7 @@ class Upload extends \Gazelle\Base {
     public function ircNotification(): string {
         $torrent = $this->torrent;
         $tgroup  = $torrent->group();
-        return match($tgroup->categoryName()) {
+        return match ($tgroup->categoryName()) {
             'Music' => Irc::render(
                 IrcText::Bold,
                 'TORRENT:',

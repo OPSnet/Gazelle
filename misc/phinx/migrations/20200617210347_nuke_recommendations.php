@@ -6,7 +6,6 @@ class NukeRecommendations extends AbstractMigration {
     public function up(): void {
         $this->table('torrents_recommended')->drop()->update();
         $this->table('users_enable_recommendations')->drop()->update();
-
     }
 
     public function down(): void {

@@ -3,7 +3,7 @@
 namespace Gazelle;
 
 class DB extends Base {
-    static public function DB(): DB\Mysql {
+    public static function DB(): DB\Mysql {
         return self::$db ??= new DB\Mysql(SQLDB, SQLLOGIN, SQLPASS, SQLHOST, SQLPORT, SQLSOCK);
     }
 
@@ -78,11 +78,9 @@ class DB extends Base {
 
         if (!$n1) {
             return [false, "No such source table $source"];
-        }
-        elseif (!$n2) {
+        } elseif (!$n2) {
             return [false, "No such destination table $destination"];
-        }
-        elseif ($n1 != $n2) {
+        } elseif ($n1 != $n2) {
             // tables do not have the same number of columns
             return [false, "$source and $destination column count mismatch ($n1 != $n2)"];
         }
@@ -128,7 +126,7 @@ class DB extends Base {
             if (self::$db->affected_rows() == 0) {
                 return [false, "condition selected 0 rows"];
             }
-        } catch (DB\Mysql_DuplicateKeyException) {
+        } catch (DB\MysqlDuplicateKeyException) {
             // do nothing, for some reason it was already deleted
         }
 

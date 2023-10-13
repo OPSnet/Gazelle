@@ -9,7 +9,7 @@ enum UserStatus: string {
     case banned      = '3';
 
     public function label(): string {
-        return match($this) {
+        return match ($this) {
             UserStatus::unconfirmed => 'Unconfirmed',
             UserStatus::enabled     => 'Enabled',
             UserStatus::disabled    => 'Disabled',

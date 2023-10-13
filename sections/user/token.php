@@ -18,13 +18,11 @@ if ($_GET['do'] === 'revoke') {
     $user->revokeApiTokenById($tokenId);
     header("Location: {$user->location()}&action=edit");
     exit;
-}
-elseif ($_GET['do'] === 'generate') {
+} elseif ($_GET['do'] === 'generate') {
     $tokenName = $_POST['token_name'] ?? '';
     if (empty($tokenName)) {
         $error = 'You must supply a name for the token.';
-    }
-    elseif ($user->hasApiTokenByName($tokenName)) {
+    } elseif ($user->hasApiTokenByName($tokenName)) {
         $error = 'You have already generated a token with that name.';
     } else {
         $token = $user->createApiToken($tokenName, ENCKEY);
@@ -37,8 +35,7 @@ if (is_null($token)) {
         'id'    => $userId,
         'token_name' => $tokenName,
     ]);
-}
-else {
+} else {
     echo $Twig->render('user/token-show.twig', [
         'id'    => $userId,
         'name'  => $tokenName,

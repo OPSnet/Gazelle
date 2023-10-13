@@ -8,7 +8,7 @@ require_once(__DIR__ . '/../../../lib/config.php'); // for SITE_NAME
 
 final class ReportTypes extends AbstractMigration {
     public function up(): void {
-        $this->table('category', ['id' => false, 'primary_key'=> ['category_id'], 'encoding' => 'utf8mb4'])
+        $this->table('category', ['id' => false, 'primary_key' => ['category_id'], 'encoding' => 'utf8mb4'])
             ->addColumn('category_id', 'integer', ['identity' => true])
             ->addColumn('is_system',    'boolean', ['default' => false])
             ->addColumn('is_grouped',   'boolean', ['default' => false])
@@ -48,7 +48,7 @@ final class ReportTypes extends AbstractMigration {
         // hack: work around Mysql ignoring an explicit PK value
         $this->execute("update category set category_id = 0 where name = 'Global'");
 
-        $this->table('torrent_report_configuration', ['id' => false, 'primary_key'=> ['torrent_report_configuration_id'], 'encoding' => 'utf8mb4'])
+        $this->table('torrent_report_configuration', ['id' => false, 'primary_key' => ['torrent_report_configuration_id'], 'encoding' => 'utf8mb4'])
             ->addColumn('torrent_report_configuration_id', 'integer', ['identity' => true])
             ->addColumn('type',           'string', ['length' => 20])
             ->addColumn('name' ,          'string', ['length' => 30])
@@ -261,7 +261,7 @@ Your torrent was reported because it was missing discs.',
             'need_image'     => 'required',
             'explanation'    => 'Please show screenshot proof that this is an MQA-encoded file (unless it is clearly stated in the Release Description).',
             'pm_body'        =>
-                '[rule]1.2.9[/rule]. You have uploaded material that is currently forbidden. MQA-encoded FLAC torrents are not allowed on ' . SITE_NAME .'. For more information, see [[MQA]].',
+                '[rule]1.2.9[/rule]. You have uploaded material that is currently forbidden. MQA-encoded FLAC torrents are not allowed on ' . SITE_NAME . '. For more information, see [[MQA]].',
         ],[
             'category_id'    => 1,
             'type'           => 'bonus_tracks',
@@ -788,7 +788,7 @@ Your torrent was reported because it contained comics from multiple unrelated se
 Your torrent was reported because it contained multiple comic volumes.',
         ]])->save();
 
-        $this->table('torrent_report_configuration_log', ['id' => false, 'primary_key'=> ['torrent_report_configuration_log_id'], 'encoding' => 'utf8mb4'])
+        $this->table('torrent_report_configuration_log', ['id' => false, 'primary_key' => ['torrent_report_configuration_log_id'], 'encoding' => 'utf8mb4'])
             ->addColumn('torrent_report_configuration_log_id', 'integer', ['identity' => true])
             ->addColumn('torrent_report_configuration_id', 'integer')
             ->addColumn('created', 'datetime', ['default' => 'CURRENT_TIMESTAMP'])

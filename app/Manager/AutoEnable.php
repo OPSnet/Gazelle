@@ -125,6 +125,7 @@ class AutoEnable extends \Gazelle\BaseManager {
                 break;
             case 'ip_overlap':
                 $this->join[] = "INNER JOIN users_history_ips uhi ON (uhi.IP = uer.IP AND uhi.UserID != uer.UserID)";
+                break;
             case 'manual_disable':
                 $this->cond[] = "ui.BanReason != '3'";
                 break;

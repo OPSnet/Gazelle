@@ -261,7 +261,7 @@ if (!$NeedLog) {
         if ($MinLogScore >= 100) {
             $LogCue .= ' (100%)';
         } else {
-            $LogCue .= ' (>= '.$MinLogScore.'%)';
+            $LogCue .= ' (>= ' . $MinLogScore . '%)';
         }
     }
 }
@@ -383,7 +383,7 @@ foreach ($ArtistForm as $role => $Artists) {
     foreach ($Artists as $Artist) {
         $artistMan->addToRequest($Artist['id'], $Artist['aliasid'], $role);
         $Cache->increment('stats_album_count');
-        $Cache->delete_value('artists_requests_'.$Artist['id']);
+        $Cache->delete_value('artists_requests_' . $Artist['id']);
     }
 }
 

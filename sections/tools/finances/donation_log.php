@@ -19,7 +19,7 @@ $donorMan = new Gazelle\Manager\Donation;
 $timeline = $donorMan->timeline();
 
 echo $Twig->render('admin/donation-log.twig', [
-    'after'       => $_GET['after_date'] ?? date('Y-m-d', (int)date('U') - (int)(86400*365.25)),
+    'after'       => $_GET['after_date'] ?? date('Y-m-d', (int)date('U') - (int)(86400 * 365.25)),
     'before'      => $_GET['before_date'] ?? date('Y-m-d'),
     'amount'      => array_column($timeline, 'Amount'),
     'month'       => array_column($timeline, 'Month'),

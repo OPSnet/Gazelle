@@ -244,7 +244,7 @@ class Request extends \Gazelle\Base {
 
     public function execute(string $orderBy, string $direction): int {
         if (isset($this->bookmarkerId)) {
-            switch($orderBy) {
+            switch ($orderBy) {
                 case 'bounty':
                     $needVoteTable = true;
                     $orderBy       = 'sum(rv.Bounty)';

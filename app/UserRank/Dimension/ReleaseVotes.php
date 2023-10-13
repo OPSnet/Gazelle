@@ -3,7 +3,6 @@
 namespace Gazelle\UserRank\Dimension;
 
 class ReleaseVotes extends \Gazelle\UserRank\AbstractUserRank {
-
     public function cacheKey(): string {
         return 'rank_data_releasevites';
     }

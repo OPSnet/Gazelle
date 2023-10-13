@@ -12,7 +12,7 @@ enum AvatarSynthetic: int {
     case robot3    = 6;
 
     public function label(): string {
-        return match($this) {
+        return match ($this) {
             AvatarSynthetic::identicon => 'Identicon',
             AvatarSynthetic::monster   => 'Monsters',
             AvatarSynthetic::wavatar   => 'Wavatar',

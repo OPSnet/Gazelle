@@ -8,7 +8,7 @@ $tor = new Gazelle\Manager\Tor;
 
 if (isset($_POST['exitlist'])) {
     authorize();
-    $tor->add($_POST['exitlist']);      
+    $tor->add($_POST['exitlist']);
 }
 
 echo $Twig->render('admin/tor_node.twig', [

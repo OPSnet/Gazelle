@@ -30,8 +30,7 @@ if (!$filterId) {
     $label = $_POST['label' . $formId] ?? null;
     if ($label) {
         $filter->setLabel($label);
-    }
-    else {
+    } else {
         $error = 'You must add a label for the filter set';
     }
 }

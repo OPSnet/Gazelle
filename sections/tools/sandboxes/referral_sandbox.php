@@ -134,7 +134,7 @@ var_dump($response)
     <p>
         <strong class="important_text">DB key not loaded - accounts suspended</strong>
     </p>
-<?php } else if (empty($referralAccounts)) { ?>
+<?php } elseif (empty($referralAccounts)) { ?>
     <h3>Auto</h3>
     <p>No referral accounts found.</p>
 <?php } else { ?>

@@ -58,7 +58,7 @@ class View {
 
         $notifier = new Gazelle\User\Notification($Viewer);
         $alertList = $notifier->setDocument($Document, $_REQUEST['action'] ?? '')->alertList();
-        foreach($alertList as $alert) {
+        foreach ($alertList as $alert) {
             if (in_array($alert->display(), [Gazelle\User\Notification::DISPLAY_TRADITIONAL, Gazelle\User\Notification::DISPLAY_TRADITIONAL_PUSH])) {
                 $activity->setAlert(sprintf('<a href="%s">%s</a>', $alert->notificationUrl(), $alert->title()));
             }
@@ -83,7 +83,7 @@ class View {
             }
         }
 
-        $parseNavItem = function($val) {
+        $parseNavItem = function ($val) {
             $val = trim($val);
             return $val === 'false' ? false : $val;
         };
@@ -100,7 +100,7 @@ class View {
                 foreach ($Parts as $Part) {
                     $Tests[] = array_map($parseNavItem, explode(':', $Part));
                 }
-            } else if (str_contains($Tests, ',')) {
+            } elseif (str_contains($Tests, ',')) {
                 $Tests = array_map($parseNavItem, explode(',', $Tests));
             } else {
                 $Tests = [$Tests];
@@ -215,7 +215,7 @@ class View {
         global $Document;
         $alertList = (new Gazelle\User\Notification($Viewer))->setDocument($Document, $_REQUEST['action'] ?? '')->alertList();
         $notification = [];
-        foreach($alertList as $alert) {
+        foreach ($alertList as $alert) {
             if (in_array($alert->display(), [Gazelle\User\Notification::DISPLAY_POPUP, Gazelle\User\Notification::DISPLAY_POPUP_PUSH])) {
                 $notification[] = $alert;
             }

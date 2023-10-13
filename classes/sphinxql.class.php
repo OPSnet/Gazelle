@@ -81,8 +81,8 @@ class Sphinxql extends mysqli {
         if ($this->connect_errno) {
             $Errno = $this->connect_errno;
             $Error = $this->connect_error;
-            $this->error("Connection failed. (".strval($Errno).": ".strval($Error).")");
-            $Debug->set_flag("Could not connect to Sphinx server $this->Ident. (".strval($Errno).": ".strval($Error).")");
+            $this->error("Connection failed. (" . strval($Errno) . ": " . strval($Error) . ")");
+            $Debug->set_flag("Could not connect to Sphinx server $this->Ident. (" . strval($Errno) . ": " . strval($Error) . ")");
         } else {
             $Debug->set_flag("Connected to Sphinx server $this->Ident");
         }
@@ -96,10 +96,10 @@ class Sphinxql extends mysqli {
      */
     public function error($Msg, $Halt = false) {
         global $Debug, $Viewer;
-        $ErrorMsg = 'SphinxQL ('.$this->Ident.'): '.strval($Msg);
-        $Debug->analysis('SphinxQL Error', $ErrorMsg, 3600*24);
+        $ErrorMsg = 'SphinxQL (' . $this->Ident . '): ' . strval($Msg);
+        $Debug->analysis('SphinxQL Error', $ErrorMsg, 3600 * 24);
         if ($Halt === true && (DEBUG_MODE || $Viewer->permitted('site_debug'))) {
-            echo '<pre>'.display_str($ErrorMsg).'</pre>';
+            echo '<pre>' . display_str($ErrorMsg) . '</pre>';
             die();
         } elseif ($Halt === true) {
             error('-1');
@@ -116,22 +116,22 @@ class Sphinxql extends mysqli {
      */
     public static function sph_escape_string($String) {
         return strtr(strtolower($String), [
-            '('=>'\\\\(',
-            ')'=>'\\\\)',
-            '|'=>'\\\\|',
-            '-'=>'\\\\-',
-            '@'=>'\\\\@',
-            '~'=>'\\\\~',
-            '&'=>'\\\\&',
-            '\''=>'\\\'',
-            '<'=>'\\\\<',
-            '!'=>'\\\\!',
-            '"'=>'\\\\"',
-            '/'=>'\\\\/',
-            '*'=>'\\\\*',
-            '$'=>'\\\\$',
-            '^'=>'\\\\^',
-            '\\'=>'\\\\\\\\']
+            '(' => '\\\\(',
+            ')' => '\\\\)',
+            '|' => '\\\\|',
+            '-' => '\\\\-',
+            '@' => '\\\\@',
+            '~' => '\\\\~',
+            '&' => '\\\\&',
+            '\'' => '\\\'',
+            '<' => '\\\\<',
+            '!' => '\\\\!',
+            '"' => '\\\\"',
+            '/' => '\\\\/',
+            '*' => '\\\\*',
+            '$' => '\\\\$',
+            '^' => '\\\\^',
+            '\\' => '\\\\\\\\']
         );
     }
 

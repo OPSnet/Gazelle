@@ -11,7 +11,7 @@ if (!$article->editable($Viewer)) {
 
 try {
     $article->addAlias(trim($_POST['alias']), $Viewer);
-} catch (Gazelle\DB\Mysql_DuplicateKeyException) {
+} catch (Gazelle\DB\MysqlDuplicateKeyException) {
     error('The alias you attempted to add is already assigned to an article.');
 }
 

@@ -78,7 +78,7 @@ class CacheVector extends \Gazelle\Base {
      */
     public function set(int $value): bool {
         $offset = (int)floor($value / 8);
-        if ($offset < 0 || $offset > $this->length - 1)  {
+        if ($offset < 0 || $offset > $this->length - 1) {
             return false;
         }
         $source = ord(substr($this->bitvec, $offset, 1));
@@ -94,7 +94,7 @@ class CacheVector extends \Gazelle\Base {
      */
     public function get(int $value): bool {
         $offset = (int)floor($value / 8);
-        if ($offset < 0 || $offset > $this->length - 1)  {
+        if ($offset < 0 || $offset > $this->length - 1) {
             return false;
         }
         $mask   = 1 << ($value % 8);

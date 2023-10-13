@@ -10,7 +10,7 @@ class Staff extends BaseUser {
     public function location(): string { return $this->user()->location(); }
 
     public function blogAlert(): bool {
-        if (($readTime = self::$cache->get_value('staff_blog_read_'. $this->user->id())) === false) {
+        if (($readTime = self::$cache->get_value('staff_blog_read_' . $this->user->id())) === false) {
             $readTime = self::$db->scalar('
                 SELECT unix_timestamp(Time)
                 FROM staff_blog_visits

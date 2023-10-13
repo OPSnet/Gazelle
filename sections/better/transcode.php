@@ -26,7 +26,7 @@ $search = $_GET['search'] ?? null;
 $target = $_GET['target'] ?? null;
 $better = new Gazelle\Search\Transcode($user, new Gazelle\Manager\Torrent);
 
-switch($filter) {
+switch ($filter) {
     case 'seeding':
         $better->setModeSeeding();
         break;

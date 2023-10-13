@@ -12,7 +12,6 @@ final class ArtistSimilarFkey extends AbstractMigration {
         $this->table('artists_similar_votes')
             ->addForeignKey('SimilarID', 'artists_similar_scores', 'SimilarID', ['delete' => 'CASCADE', 'update' => 'CASCADE'])
             ->save();
-
     }
 
     public function down(): void {

@@ -554,17 +554,14 @@ class Reaper extends \Gazelle\Base {
             GROUP BY notify, state
         ");
         $results = self::$db->to_array(false, MYSQLI_ASSOC, false);
-        foreach($results as $r) {
+        foreach ($results as $r) {
             if ($r['state'] == ReaperState::UNSEEDED->value && $r['notify'] == ReaperNotify::INITIAL->value) {
                 $stats['unseeded_initial'] = $r['total'];
-            }
-            elseif ($r['state'] == ReaperState::UNSEEDED->value && $r['notify'] == ReaperNotify::FINAL->value) {
+            } elseif ($r['state'] == ReaperState::UNSEEDED->value && $r['notify'] == ReaperNotify::FINAL->value) {
                 $stats['unseeded_final'] = $r['total'];
-            }
-            elseif ($r['state'] == ReaperState::NEVER->value && $r['notify'] == ReaperNotify::INITIAL->value) {
+            } elseif ($r['state'] == ReaperState::NEVER->value && $r['notify'] == ReaperNotify::INITIAL->value) {
                 $stats['never_seeded_initial'] = $r['total'];
-            }
-            else {
+            } else {
                 $stats['never_seeded_final'] = $r['total'];
             }
         }

@@ -24,7 +24,7 @@ if ($needImage !== 'none') {
     <tr>
         <td class="label">
             Link(s) to <?= $needImage == 'proof' ? 'proof ' : '' ?>images<?=
-    match($needImage) {
+    match ($needImage) {
         'proof',
         'required' => ' <strong class="important_text">(Required)</strong>',
         'optional' => ' (Optional)',
@@ -59,7 +59,7 @@ if ($needLink !== 'none') {
     <tr>
         <td class="label">
             Link(s) to external source<?=
-    match($needLink) {
+    match ($needLink) {
         'required' => ' <strong class="important_text">(Required)</strong>',
         'optional' => ' (Optional)',
         default    => '',
@@ -78,7 +78,7 @@ if ($needSitelink !== 'none') {
     <tr>
         <td class="label">
             Permalink to <strong>other relevant</strong> torrent(s)<?=
-    match($needSitelink) {
+    match ($needSitelink) {
         'required' => ' <strong class="important_text">(Required)</strong>',
         'optional' => ' (Optional)',
         default    => '',

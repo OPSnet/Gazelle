@@ -191,7 +191,7 @@ class Torrent {
         ) {
             $ErrMsg = "Search\Torrent constructor arguments:\n" . print_r(func_get_args(), true);
             global $Debug;
-            $Debug->analysis('Bad arguments in Search\Torrent constructor', $ErrMsg, 3600*24);
+            $Debug->analysis('Bad arguments in Search\Torrent constructor', $ErrMsg, 3600 * 24);
             error('-1');
         }
         $this->Page = $searchMany ? $Page : min($Page, SPHINX_MAX_MATCHES / $PageSize);
@@ -312,7 +312,7 @@ class Torrent {
                 if (isset($Words['operator'])) {
                     // Is the operator already specified?
                     $Operator = $Words['operator'];
-                } elseif(isset(self::$FieldOperators[$Field])) {
+                } elseif (isset(self::$FieldOperators[$Field])) {
                     // Does this field have a non-standard operator?
                     $Operator = self::$FieldOperators[$Field];
                 } else {

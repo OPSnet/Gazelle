@@ -22,4 +22,3 @@ json_print("success", [
     'new'     => $reportType->type(),
     'success' => $report->changeType($reportType),
 ]);
-

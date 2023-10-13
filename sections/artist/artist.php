@@ -222,15 +222,19 @@ foreach (ZIP_OPTION as $Option) {
         $OpenGroup = true;
     }
 ?>
-                            <option id="opt<?=$GroupID.$OptionID?>" value="<?=$GroupID.$OptionID?>"<?php if (in_array($GroupID.$OptionID, $ZIPList)) { echo ' disabled="disabled"'; } ?>><?=$OptName?></option>
+                            <option id="opt<?=$GroupID . $OptionID?>" value="<?=$GroupID . $OptionID?>"<?php if (in_array($GroupID . $OptionID, $ZIPList)) {
+echo ' disabled="disabled"'; } ?>><?=$OptName?></option>
 <?php } /* foreach */ ?>
                         </optgroup>
                     </select>
                     <button type="button" onclick="add_selection()">+</button>
                     <select name="preference" style="width: 210px;">
-                        <option value="0"<?php if ($ZIPPrefs == 0) { echo ' selected="selected"'; } ?>>Prefer Original</option>
-                        <option value="1"<?php if ($ZIPPrefs == 1) { echo ' selected="selected"'; } ?>>Prefer Best Seeded</option>
-                        <option value="2"<?php if ($ZIPPrefs == 2) { echo ' selected="selected"'; } ?>>Prefer Bonus Tracks</option>
+                        <option value="0"<?php if ($ZIPPrefs == 0) {
+echo ' selected="selected"'; } ?>>Prefer Original</option>
+                        <option value="1"<?php if ($ZIPPrefs == 1) {
+echo ' selected="selected"'; } ?>>Prefer Best Seeded</option>
+                        <option value="2"<?php if ($ZIPPrefs == 2) {
+echo ' selected="selected"'; } ?>>Prefer Bonus Tracks</option>
                     </select>
                     <input type="submit" style="width: 210px;" value="Download" />
                 </form>
@@ -300,7 +304,7 @@ if ($sections = $Artist->sections()) {
                     <td class="sign leechers"><img src="<?= $urlStem ?>leechers.png" class="tooltip" alt="Leechers" title="Leechers" /></td>
                 </tr>
 <?php
-    foreach(array_keys($groupList) as $groupId) {
+    foreach (array_keys($groupList) as $groupId) {
         $groupId = (int)$groupId;
         $tgroup = $tgMan->findById($groupId);
         if (is_null($tgroup)) {
@@ -449,7 +453,7 @@ if ($graph) {
         <a id="flip_to" class="brackets" href="#" onclick="flipView(); return false;">Switch to cloud</a>
       </div>
       <div id="flip_view_1" style="width: <?= SIMILAR_WIDTH ?>px; height: <?= SIMILAR_HEIGHT ?>px;">
-        <div id="similar-artist" style=" top: <?= SIMILAR_HEIGHT/2 - 25 ?>px; left: <?= SIMILAR_WIDTH/2 - mb_strlen($Artist->name()) * 4 ?>px;">
+        <div id="similar-artist" style=" top: <?= SIMILAR_HEIGHT / 2 - 25 ?>px; left: <?= SIMILAR_WIDTH / 2 - mb_strlen($Artist->name()) * 4 ?>px;">
           <span class="name"><?= html_escape($Artist->name()) ?></span>
         </div>
         <div class="similar-artist-graph" style="padding-top: <?= SIMILAR_HEIGHT / SIMILAR_WIDTH * 100 ?>%;">
@@ -479,7 +483,7 @@ if ($graph) {
             }
         }
 ?>
-          <line x1="<?= SIMILAR_WIDTH/2 ?>" y1="<?= SIMILAR_HEIGHT/2 ?>" x2="<?= $s['x'] ?>" y2="<?=
+          <line x1="<?= SIMILAR_WIDTH / 2 ?>" y1="<?= SIMILAR_HEIGHT / 2 ?>" x2="<?= $s['x'] ?>" y2="<?=
             $s['y'] ?>" style="stroke:rgb(77,153,0);stroke-width:<?= (int)ceil($s['proportion'] * 4) + 1 ?>" />
 <?php
     }

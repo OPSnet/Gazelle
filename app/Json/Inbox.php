@@ -19,7 +19,7 @@ class Inbox extends \Gazelle\Json {
 
     public function setSearch(string $searchType, string $search): static {
         $search = trim($search);
-        switch($searchType) {
+        switch ($searchType) {
             case 'subject':
                 $words = array_unique(array_map('trim', explode(' ', $search)));
                 $this->cond = array_merge($this->cond, array_fill(0, count($words), "c.Subject LIKE concat('%', ?, '%')"));
@@ -31,7 +31,7 @@ class Inbox extends \Gazelle\Json {
                 $this->cond = array_merge($this->cond, array_fill(0, count($words), "m.Body LIKE concat('%', ?, '%')"));
                 $this->args = array_merge($this->args, $words);
                 break;
-           case 'user':
+            case 'user':
                 $this->join[] = 'INNER JOIN users_main AS um ON (um.ID = other.UserID)';
                 $this->cond[] = "um.Username LIKE concat('%', ?, '%')";
                 $this->args[] = $search;
@@ -60,7 +60,7 @@ class Inbox extends \Gazelle\Json {
             INNER JOIN pm_conversations_users AS cu ON (cu.ConvID = c.ID AND cu.UserID = ?)
             LEFT JOIN pm_conversations_users AS other ON (other.ConvID = c.ID AND other.UserID != ? AND other.ForwardedTo = 0)
             " . implode(' ', $this->join) . "
-            WHERE " . implode(' AND ', $this->cond) ."
+            WHERE " . implode(' AND ', $this->cond) . "
             ", $this->user->id(), $this->user->id(), ...$this->args
         );
         $paginator = new \Gazelle\Util\Paginator(MESSAGES_PER_PAGE, $this->page);
@@ -80,7 +80,7 @@ class Inbox extends \Gazelle\Json {
             INNER JOIN pm_conversations_users AS cu ON (cu.ConvID = c.ID AND cu.UserID = ?)
             LEFT JOIN pm_conversations_users AS other ON (other.ConvID = c.ID AND other.UserID != ? AND other.ForwardedTo = 0)
             " . implode(' ', $this->join) . "
-            WHERE " . implode(' AND ', $this->cond) ."
+            WHERE " . implode(' AND ', $this->cond) . "
             GROUP BY c.ID
             ORDER BY cu.Sticky, {$orderBy}
             LIMIT ? OFFSET ?

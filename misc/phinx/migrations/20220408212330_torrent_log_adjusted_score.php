@@ -10,7 +10,6 @@ final class TorrentLogAdjustedScore extends AbstractMigration {
                 'null' => true,
             ])
             ->save();
-
     }
 
     public function down(): void {

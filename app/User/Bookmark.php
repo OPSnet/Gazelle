@@ -17,7 +17,7 @@ class Bookmark extends \Gazelle\BaseUser {
      * @param string $type the type to get the schema for
      */
     public function schema($type): array {
-        return match($type) {
+        return match ($type) {
             'artist'  => ['bookmarks_artists',  'ArtistID'],
             'collage' => ['bookmarks_collages', 'CollageID'],
             'request' => ['bookmarks_requests', 'RequestID'],
@@ -219,7 +219,7 @@ class Bookmark extends \Gazelle\BaseUser {
             // overbooked
             return false;
         }
-        switch($type) {
+        switch ($type) {
             case 'torrent':
                 self::$db->prepared_query("
                     INSERT IGNORE INTO bookmarks_torrents
@@ -243,7 +243,7 @@ class Bookmark extends \Gazelle\BaseUser {
                     }
                     $Feed->populate('torrents_bookmarks_t_' . $this->user->announceKey(),
                         $Feed->item(
-                            $torrent->name() . ' ' . '[' . $torrent->label($this->user) .']',
+                            $torrent->name() . ' ' . '[' . $torrent->label($this->user) . ']',
                             \Text::strip_bbcode($tgroup->description()),
                             "torrents.php?action=download&id={$id}&torrent_pass=[[PASSKEY]]",
                             date('r'),

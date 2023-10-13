@@ -213,7 +213,7 @@ class Twig {
             'UTF-8'
         )));
 
-        $twig->addFunction(new \Twig\TwigFunction('donor_icon', function($icon, $userId) {
+        $twig->addFunction(new \Twig\TwigFunction('donor_icon', function ($icon, $userId) {
             return new \Twig\Markup(image_cache_encode($icon), 'UTF-8');
         }));
 
@@ -263,11 +263,11 @@ class Twig {
                 static $cache = [];
                 if (!isset($cache[$ip])) {
                     $Class = strtr($ip, '.', '-');
-                    $cache[$ip] = '<span class="cc_'.$Class.'">Resolving CC...'
+                    $cache[$ip] = '<span class="cc_' . $Class . '">Resolving CC...'
                         . '<script type="text/javascript">'
                             . '$(document).ready(function() {'
-                                . '$.get(\'tools.php?action=get_cc&ip='.$ip.'\', function(cc) {'
-                                    . '$(\'.cc_'.$Class.'\').html(cc);'
+                                . '$.get(\'tools.php?action=get_cc&ip=' . $ip . '\', function(cc) {'
+                                    . '$(\'.cc_' . $Class . '\').html(cc);'
                                 . '});'
                             . '});'
                         . '</script></span>';

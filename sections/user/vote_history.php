@@ -16,7 +16,7 @@ if (isset($_GET['up'])) {
 } elseif (isset($_GET['down'])) {
     $mask = Vote::DOWNVOTE;
 } else {
-    $mask = Vote::UPVOTE|Vote::DOWNVOTE;
+    $mask = Vote::UPVOTE | Vote::DOWNVOTE;
 }
 
 $vote = new Vote($user);

@@ -170,7 +170,7 @@ register_shutdown_function(
         $error = error_get_last();
         if ($error['type'] ?? 0 == E_ERROR) {
             global $Debug;
-            $Debug->saveCase(str_replace(SERVER_ROOT .'/', '', $error['message']));
+            $Debug->saveCase(str_replace(SERVER_ROOT . '/', '', $error['message']));
         }
     }
 );
@@ -191,7 +191,7 @@ if (!$file || !preg_match('/^[a-z][a-z0-9_]+$/', $Document)) {
 } else {
     try {
         require_once($file);
-    } catch (Gazelle\DB\Mysql_Exception $e) {
+    } catch (Gazelle\DB\MysqlException $e) {
         if (DEBUG_MODE || (isset($Viewer) && $Viewer->permitted('site_debug'))) {
             echo $Twig->render('error-db.twig', [
                 'message' => $e->getMessage(),
@@ -201,8 +201,7 @@ if (!$file || !preg_match('/^[a-z][a-z0-9_]+$/', $Document)) {
             $Debug->saveError($e);
             error("That is not supposed to happen, please send a Staff Message to \"Staff\" for investigation.");
         }
-    }
-    catch (\Exception $e) {
+    } catch (\Exception $e) {
         $Debug->saveError($e);
     }
 }
@@ -212,18 +211,14 @@ if ($Router->hasRoutes()) {
     try {
         /** @noinspection PhpIncludeInspection */
         require_once($Router->getRoute($action));
-    }
-    catch (Gazelle\Exception\RouterException $exception) {
+    } catch (Gazelle\Exception\RouterException $exception) {
         error(404);
-    }
-    catch (Gazelle\Exception\InvalidAccessException $exception) {
+    } catch (Gazelle\Exception\InvalidAccessException $exception) {
         error(403);
-    }
-    catch (Gazelle\DB\Mysql_Exception $e) {
+    } catch (Gazelle\DB\MysqlException $e) {
         $Debug->saveError($e);
         error("That was not supposed to happen, please send a Staff Message to \"Staff\" for investigation.");
-    }
-    catch (Exception $e) {
+    } catch (Exception $e) {
         $Debug->saveError($e);
     }
 }

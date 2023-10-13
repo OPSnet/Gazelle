@@ -8,15 +8,15 @@ if (isset($_GET['task'])) {
     $id = (int)($_GET['id'] ?? 0);
     if ($id) {
         switch ($_GET['task']) {
-            case 'accept';
+            case 'accept':
                 $ok = $recovery->accept($id, $Viewer->id(), $Viewer->username());
                 $message = $ok ? '<font color="#008000">Invite sent</font>' : '<font color="#800000">Invite not sent, check log</font>';
                 break;
-            case 'deny';
+            case 'deny':
                 $recovery->deny($id, $Viewer->id(), $Viewer->username());
                 $message = sprintf('<font color="orange">Request %d was denied</font>', $id);
                 break;
-            case 'unclaim';
+            case 'unclaim':
                 $recovery->unclaim($id, $Viewer->username());
                 $message = sprintf('<font color="orange">Request %d was unclaimed</font>', $id);
                 break;

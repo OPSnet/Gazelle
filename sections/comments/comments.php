@@ -105,7 +105,7 @@ switch ($Action) {
         $idField    = 'r.ID';
         $nameField  = 'r.Title';
 
-        switch($Type) {
+        switch ($Type) {
             case 'created':
                 $Title = "%s › Comments on their requests";
                 $condition[] = "r.UserID = ?";
@@ -151,7 +151,7 @@ switch ($Action) {
         $idField   = 'tg.ID';
         $nameField = 'tg.Name';
 
-        switch($Type) {
+        switch ($Type) {
             case 'uploaded':
                 $Title = "%s › Comments on their uploads";
                 $Join[] = 'INNER JOIN torrents t ON (t.GroupID = tg.ID)';
@@ -268,7 +268,7 @@ View::show_header(sprintf($Title, $Username), ['js' => 'bbcode,comments']);
             'editor'      => $userMan->findById((int)$EditedUserID),
             'edit_time'   => $EditedTime,
             'id'          => $PostID,
-            'heading'     => match($Page) {
+            'heading'     => match ($Page) {
                 'artist'   => "<a href=\"artist.php?id=$PageID\">" . html_escape($Name) . "</a>",
                 'collages' => "<a href=\"collages.php?id=$PageID\">" . html_escape($Name) . "</a>",
                 'requests' => $requestList[$PageID]->smartLink(),

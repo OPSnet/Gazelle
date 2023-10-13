@@ -2,7 +2,7 @@
 
 namespace Gazelle\Manager;
 
-use \Gazelle\Enum\UserTokenType;
+use Gazelle\Enum\UserTokenType;
 
 class UserToken extends \Gazelle\BaseManager {
     use \Gazelle\Pg;

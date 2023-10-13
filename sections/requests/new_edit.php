@@ -182,7 +182,8 @@ if (!$newRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                             <option value="<?= ARTIST_PRODUCER ?>"<?=($Importance == '<?= ARTIST_PRODUCER ?>' ? ' selected="selected"' : '')?>>Producer</option>
                             <option value="<?= ARTIST_ARRANGER ?>"<?=($Importance == '<?= ARTIST_ARRANGER ?>' ? ' selected="selected"' : '')?>>Arranger</option>
                         </select>
-                        <?php if ($First) { ?><a href="#" onclick="AddArtistField(); return false;" class="brackets">+</a> <a href="#" onclick="RemoveArtistField(); return false;" class="brackets">&minus;</a><?php } $First = false; ?>
+                        <?php if ($First) {
+?><a href="#" onclick="AddArtistField(); return false;" class="brackets">+</a> <a href="#" onclick="RemoveArtistField(); return false;" class="brackets">&minus;</a><?php } $First = false; ?>
                         <br />
 <?php
                     $cnt++;

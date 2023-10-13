@@ -1,12 +1,12 @@
 <?php
 
-use \PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\TestCase;
 
 require_once(__DIR__ . '/../../../lib/bootstrap.php');
 require_once(__DIR__ . '/../../helper.php');
 
-use \Gazelle\Enum\AvatarDisplay;
-use \Gazelle\Enum\AvatarSynthetic;
+use Gazelle\Enum\AvatarDisplay;
+use Gazelle\Enum\AvatarSynthetic;
 
 class TwigTest extends TestCase {
     protected \Gazelle\User $user;

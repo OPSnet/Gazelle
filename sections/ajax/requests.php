@@ -70,7 +70,7 @@ $search->setFormat($_GET['formats'] ?? [], $strict)
     ->setText($_GET['search'] ?? '')
     ->setTag(
         $_GET['tags'] ?? '',
-        match($_GET['tag_type'] ?? '1') {
+        match ($_GET['tag_type'] ?? '1') {
             '1'     => 'all',
             default => 'any',
         },
@@ -104,7 +104,7 @@ if ($type === 'random') {
 }
 
 $search->execute(
-    match($type) {
+    match ($type) {
         'year'     => 'year',
         'votes'    => 'votes',
         'bounty'   => 'bounty',

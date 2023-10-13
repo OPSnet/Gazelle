@@ -33,12 +33,10 @@ class Router {
             foreach ($methods as $method) {
                 $this->addRoute($method, $action, $path, $authorize);
             }
-        }
-        else {
+        } else {
             if (strtoupper($methods) === 'GET') {
                 $this->addGet($action, $path, $authorize);
-            }
-            elseif (strtoupper($methods) === 'POST') {
+            } elseif (strtoupper($methods) === 'POST') {
                 $this->addPost($action, $path, $authorize);
             }
         }
@@ -81,8 +79,7 @@ class Router {
 
         if (($this->authorize[$request_method] || $method['authorize']) && !$this->authorized()) {
             throw new InvalidAccessException();
-        }
-        else {
+        } else {
             return $method['file'];
         }
     }

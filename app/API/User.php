@@ -9,7 +9,7 @@ class User extends AbstractAPI {
     public function run(): array {
         if (isset($_GET['user_id'])) {
             $this->id = (int)$_GET['user_id'];
-        } else if (isset($_GET['username'])) {
+        } elseif (isset($_GET['username'])) {
             $this->username = $_GET['username'];
         } else {
             json_error("Need to supply either user_id or username");

@@ -7,11 +7,9 @@ $where = ["t.HasLog='1'", "t.HasLogDB='0'"];
 
 if ($_GET['type'] === 'active') {
     $where[] = 'tls.last_action > now() - INTERVAL 14 DAY';
-}
-else if ($_GET['type'] === 'unseeded') {
+} elseif ($_GET['type'] === 'unseeded') {
     $where = ['tls.Seeders = 0'];
-}
-else {
+} else {
     $where[] = 'tls.Seeders > 0';
 }
 

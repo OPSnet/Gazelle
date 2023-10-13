@@ -6,8 +6,17 @@ class ErrorLog extends \Gazelle\BaseManager {
     protected string $filter;
 
     public function create(
-       string $uri, int $userId, float $duration, int $memory, int $nrQuery, int $nrCache,
-       string $digest, string $trace, string $request, string $errorList, string $loggedVar
+        string $uri,
+        int $userId,
+        float $duration,
+        int $memory,
+        int $nrQuery,
+        int $nrCache,
+        string $digest,
+        string $trace,
+        string $request,
+        string $errorList,
+        string $loggedVar
     ): int {
         self::$db->begin_transaction();
         $id = (int)self::$db->scalar("

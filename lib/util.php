@@ -45,7 +45,7 @@ function display_str(mixed $Str): string {
     }
     if ($Str != '' && !is_number($Str)) {
         $Str = make_utf8($Str);
-        $Str = htmlspecialchars($Str, ENT_QUOTES|ENT_SUBSTITUTE|ENT_HTML5, 'UTF-8', false);
+        $Str = htmlspecialchars($Str, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8', false);
         $Str = preg_replace("/&(?![A-Za-z]{0,4}\w{2,3};|#[0-9]{2,6};)/m", '&amp;', $Str);
 
         $Replace = [
@@ -87,7 +87,7 @@ function html_unescape(string $str): string {
  * Returns ratio
  */
 function ratio(int $uploaded, int $downloaded, int $digits = 2): string|false {
-    return match(true) {
+    return match (true) {
         $downloaded == 0 && $uploaded == 0 => false,
         $downloaded == 0 => '∞',
         default => number_format(max($uploaded / $downloaded - (0.5 / 10 ** $digits), 0), $digits),
@@ -98,18 +98,42 @@ function ratio(int $uploaded, int $downloaded, int $digits = 2): string|false {
  * Gets the CSS class corresponding to a ratio
  */
 function ratio_css(float $ratio): string {
-    if ($ratio < 0.1) { return 'r00'; }
-    if ($ratio < 0.2) { return 'r01'; }
-    if ($ratio < 0.3) { return 'r02'; }
-    if ($ratio < 0.4) { return 'r03'; }
-    if ($ratio < 0.5) { return 'r04'; }
-    if ($ratio < 0.6) { return 'r05'; }
-    if ($ratio < 0.7) { return 'r06'; }
-    if ($ratio < 0.8) { return 'r07'; }
-    if ($ratio < 0.9) { return 'r08'; }
-    if ($ratio < 1.0) { return 'r09'; }
-    if ($ratio < 2.0) { return 'r10'; }
-    if ($ratio < 5.0) { return 'r20'; }
+    if ($ratio < 0.1) {
+        return 'r00';
+    }
+    if ($ratio < 0.2) {
+        return 'r01';
+    }
+    if ($ratio < 0.3) {
+        return 'r02';
+    }
+    if ($ratio < 0.4) {
+        return 'r03';
+    }
+    if ($ratio < 0.5) {
+        return 'r04';
+    }
+    if ($ratio < 0.6) {
+        return 'r05';
+    }
+    if ($ratio < 0.7) {
+        return 'r06';
+    }
+    if ($ratio < 0.8) {
+        return 'r07';
+    }
+    if ($ratio < 0.9) {
+        return 'r08';
+    }
+    if ($ratio < 1.0) {
+        return 'r09';
+    }
+    if ($ratio < 2.0) {
+        return 'r10';
+    }
+    if ($ratio < 5.0) {
+        return 'r20';
+    }
     return 'r50';
 }
 
@@ -149,7 +173,7 @@ function ratio_percent(float $percent): string {
  * @param array $NewParams New query items to insert into the URL
  */
 function get_url(array $Exclude = [], bool $Escape = true, bool $Sort = false, array $NewParams = []): string {
-    $QueryItems = NULL;
+    $QueryItems = null;
     parse_str($_SERVER['QUERY_STRING'], $QueryItems);
 
     foreach ($Exclude as $Key) {
@@ -607,34 +631,43 @@ function check_paranoia(string $Property, string|array $Paranoia, int $UserClass
     }
 
     $May = !in_array($Property, $Paranoia) && !in_array($Property . '+', $Paranoia);
-    if ($May)
+    if ($May) {
         return PARANOIA_ALLOWED;
+    }
 
     if ($Viewer->permitted('users_override_paranoia', $UserClass)) {
         return PARANOIA_OVERRIDDEN;
     }
-    $Override=false;
+    $Override = false;
     switch ($Property) {
         case 'downloaded':
         case 'ratio':
         case 'uploaded':
         case 'lastseen':
-            if ($Viewer->permitted('users_mod', $UserClass))
+            if ($Viewer->permitted('users_mod', $UserClass)) {
                 return PARANOIA_OVERRIDDEN;
+            }
             break;
-        case 'snatched': case 'snatched+':
-            if ($Viewer->permitted('users_view_torrents_snatchlist', $UserClass))
+        case 'snatched':
+        case 'snatched+':
+            if ($Viewer->permitted('users_view_torrents_snatchlist', $UserClass)) {
                 return PARANOIA_OVERRIDDEN;
+            }
             break;
-        case 'uploads': case 'uploads+':
-        case 'seeding': case 'seeding+':
-        case 'leeching': case 'leeching+':
-            if ($Viewer->permitted('users_view_seedleech', $UserClass))
+        case 'uploads':
+        case 'uploads+':
+        case 'seeding':
+        case 'seeding+':
+        case 'leeching':
+        case 'leeching+':
+            if ($Viewer->permitted('users_view_seedleech', $UserClass)) {
                 return PARANOIA_OVERRIDDEN;
+            }
             break;
         case 'invitedcount':
-            if ($Viewer->permitted('users_view_invites', $UserClass))
+            if ($Viewer->permitted('users_view_invites', $UserClass)) {
                 return PARANOIA_OVERRIDDEN;
+            }
             break;
     }
     return false;
@@ -706,7 +739,7 @@ function image_cache_encode(
     if ($proxy) {
         $spec = 'full';
     } else {
-        $spec = match($height || $width) {
+        $spec = match ($height || $width) {
             true  => ($height ? $height : '') . 'x' . ($width ? $width : ''),
             false => 'full', /** @phpstan-ignore-line */
         };

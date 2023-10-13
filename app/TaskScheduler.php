@@ -2,7 +2,7 @@
 
 namespace Gazelle;
 
-use \Gazelle\Util\Irc;
+use Gazelle\Util\Irc;
 
 class TaskScheduler extends Base {
     final const CACHE_TASKS = 'scheduled_tasks';
@@ -33,7 +33,7 @@ class TaskScheduler extends Base {
     }
 
     public static function isClassValid(string $class): bool {
-        $class = 'Gazelle\\Task\\'.$class;
+        $class = 'Gazelle\\Task\\' . $class;
         return class_exists($class);
     }
 

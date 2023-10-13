@@ -2,7 +2,7 @@
 
 namespace Gazelle;
 
-use \PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\TestCase;
 
 class SSLTest extends TestCase {
     protected Manager\SSLHost $manager;

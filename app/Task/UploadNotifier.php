@@ -11,4 +11,3 @@ class UploadNotifier extends \Gazelle\Task {
             );
     }
 }
-

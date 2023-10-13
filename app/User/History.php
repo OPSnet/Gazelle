@@ -75,7 +75,7 @@ class History extends \Gazelle\BaseUser {
 
     public function siteIPv4(\Gazelle\Search\ASN $asn): array {
         $dir = $this->direction === 'down' ? 'DESC' : 'ASC';
-        $orderBy = match($this->column) {
+        $orderBy = match ($this->column) {
             'first' => "StartTime $dir, inet_aton(IP) $dir, EndTime $dir",
             'last'  => "EndTime $dir, inet_aton(IP) $dir, StartTime $dir",
             default => "inet_aton(IP) $dir, StartTime $dir, EndTime $dir",
@@ -103,7 +103,7 @@ class History extends \Gazelle\BaseUser {
 
     public function trackerIPv4(\Gazelle\Search\ASN $asn): array {
         $dir = $this->direction === 'down' ? 'DESC' : 'ASC';
-        $orderBy = match($this->column) {
+        $orderBy = match ($this->column) {
             'first' => "from_unixtime(min(tstamp)) $dir, IP $dir, from_unixtime(max(tstamp)) $dir",
             'last'  => "from_unixtime(max(tstamp)) $dir, IP $dir, from_unixtime(min(tstamp)) $dir",
             default => "IP $dir, from_unixtime(min(tstamp)) $dir, from_unixtime(max(tstamp)) $dir",

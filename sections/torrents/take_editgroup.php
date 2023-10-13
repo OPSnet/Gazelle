@@ -53,7 +53,7 @@ if (($_GET['action'] ?? '') == 'revert') {
         $showcase = isset($_POST['vanity_house']) ? 1 : 0;
         if ($tgroup->isShowcase() != $showcase) {
             $tgroup->setField('VanityHouse', $showcase);
-            $logInfo[] = 'Vanity House status changed to '. ($showcase ? 'true' : 'false');
+            $logInfo[] = 'Vanity House status changed to ' . ($showcase ? 'true' : 'false');
         }
     }
 

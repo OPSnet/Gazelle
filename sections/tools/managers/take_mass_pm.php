@@ -25,7 +25,7 @@ $db->prepared_query("
 $userMan = new Gazelle\Manager\User;
 $subject = trim($_POST['subject']);
 $body = trim($_POST['body']);
-while([$userId] = $db->next_record()) {
+while ([$userId] = $db->next_record()) {
    $userMan->sendPM($userId, $fromId, $subject, $body);
 }
 

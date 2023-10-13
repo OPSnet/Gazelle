@@ -94,18 +94,18 @@ $OrderTable = [
     'Uploaded'   => 'uls1.Uploaded',
     'Username'   => 'um1.Username',
 ];
-$WayTable = ['Ascending'=>'ASC', 'Descending'=>'DESC'];
+$WayTable = ['Ascending' => 'ASC', 'Descending' => 'DESC'];
 
 // Arrays, regexps, and all that fun stuff we can use for validation, form generation, etc
-$OrderVals = ['inarray'=>array_keys($OrderTable)];
-$WayVals = ['inarray'=>array_keys($WayTable)];
+$OrderVals = ['inarray' => array_keys($OrderTable)];
+$WayVals = ['inarray' => array_keys($WayTable)];
 
-$DateChoices = ['inarray'=>['on', 'before', 'after', 'between']];
-$SingleDateChoices = ['inarray'=>['on', 'before', 'after']];
-$NumberChoices = ['inarray'=>['equal', 'above', 'below', 'between', 'buffer']];
-$OffNumberChoices = ['inarray'=>['equal', 'above', 'below', 'between', 'buffer', 'off']];
-$YesNo = ['inarray'=>['any', 'yes', 'no']];
-$Nullable = ['inarray'=>['any', 'isnull', 'isnotnull']];
+$DateChoices = ['inarray' => ['on', 'before', 'after', 'between']];
+$SingleDateChoices = ['inarray' => ['on', 'before', 'after']];
+$NumberChoices = ['inarray' => ['equal', 'above', 'below', 'between', 'buffer']];
+$OffNumberChoices = ['inarray' => ['equal', 'above', 'below', 'between', 'buffer', 'off']];
+$YesNo = ['inarray' => ['any', 'yes', 'no']];
+$Nullable = ['inarray' => ['any', 'isnull', 'isnotnull']];
 
 $emailHistoryChecked = false;
 $ipHistoryChecked = false;
@@ -246,8 +246,7 @@ if (empty($_GET)) {
 
     if ($searchLockedAccount) {
         $Join['la'] = 'INNER JOIN locked_accounts AS la ON (la.UserID = um1.ID)';
-    }
-    elseif (isset($_GET['lockedaccount']) && $_GET['lockedaccount'] == 'unlocked') {
+    } elseif (isset($_GET['lockedaccount']) && $_GET['lockedaccount'] == 'unlocked') {
         $Join['la'] = 'LEFT JOIN locked_accounts AS la ON (la.UserID = um1.ID)';
         $Where[] = 'la.UserID IS NULL';
     }
@@ -310,8 +309,7 @@ if (empty($_GET)) {
         $Args[] = $_GET['join1'];
         if ($op === 'on') {
             $Args[] = $_GET['join1'];
-        }
-        elseif ($op === 'between') {
+        } elseif ($op === 'between') {
             $Args[] = $_GET['join2'];
         }
     }
@@ -322,8 +320,7 @@ if (empty($_GET)) {
         $Args[] = $_GET['lastactive1'];
         if ($op === 'on') {
             $Args[] = $_GET['lastactive1'];
-        }
-        elseif ($op === 'between') {
+        } elseif ($op === 'between') {
             $Args[] = $_GET['lastactive2'];
         }
     }
@@ -376,8 +373,7 @@ if (empty($_GET)) {
             $Args[] = $_GET['uploaded1'] * 1024 ** 3;
             if ($op === 'on') {
                 $Args[] = $_GET['uploaded1'] * 1024 ** 3;
-            }
-            elseif ($op === 'between') {
+            } elseif ($op === 'between') {
                 $Args[] = $_GET['uploaded2'] * 1024 ** 3;
             }
         }
@@ -389,8 +385,7 @@ if (empty($_GET)) {
         $Args[] = $_GET['downloaded1'] * 1024 ** 3;
         if ($op === 'on') {
             $Args[] = $_GET['downloaded1'] * 1024 ** 3;
-        }
-        elseif ($op === 'between') {
+        } elseif ($op === 'between') {
             $Args[] = $_GET['downloaded2'] * 1024 ** 3;
         }
     }

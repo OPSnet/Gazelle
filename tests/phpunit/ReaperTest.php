@@ -1,6 +1,6 @@
 <?php
 
-use \PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Note to Developers/Testers

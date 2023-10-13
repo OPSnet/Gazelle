@@ -58,7 +58,7 @@ class Torrent extends \Gazelle\BaseManager {
                 ?, ?
             )", $tgroup->id(), $user->id(), $media, $format, $encoding,
                 $isRemaster ? '1' : '0', $remasterYear, $remasterTitle, $remasterRecordLabel, $remasterCatalogueNumber,
-                $infohash, $isScene ? '1': '0', $logScore, $hasChecksum ? '1' : '0', $hasLog ? '1' : '0',
+                $infohash, $isScene ? '1' : '0', $logScore, $hasChecksum ? '1' : '0', $hasLog ? '1' : '0',
                 $hasCue ? '1' : '0', $hasLogInDB ? '1' : '0', $filePath, count($fileList), implode("\n", $fileList),
                 $size, $description,
         );
@@ -252,8 +252,7 @@ class Torrent extends \Gazelle\BaseManager {
         if (!is_null($creationDate)) {
             if (is_null($torrentSource) && $creationDate <= GRANDFATHER_OLD_SOURCE) {
                 return false;
-            }
-            elseif (!is_null($torrentSource) && $torrentSource === GRANDFATHER_SOURCE && $creationDate <= GRANDFATHER_OLD_SOURCE) {
+            } elseif (!is_null($torrentSource) && $torrentSource === GRANDFATHER_SOURCE && $creationDate <= GRANDFATHER_OLD_SOURCE) {
                 return false;
             }
         }

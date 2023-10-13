@@ -37,7 +37,8 @@ View::show_header($user->username() . " › Bookmarked torrent groups", ['js' =>
 ?>
 <div class="thin">
     <div class="header">
-        <h2><?php if ($ownProfile) { ?><a href="feeds.php?feed=torrents_bookmarks_t_<?=
+        <h2><?php if ($ownProfile) {
+?><a href="feeds.php?feed=torrents_bookmarks_t_<?=
             $Viewer->auth() ?>&amp;user=<?= $Viewer->id() ?>&amp;auth=<?=
             $Viewer->rssAuth() ?>&amp;passkey=<?= $Viewer->announceKey() ?>&amp;authkey=<?=
             $Viewer->auth()?>&amp;name=<?=urlencode(SITE_NAME . ': Bookmarked Torrents')?>"><img src="<?=
@@ -160,7 +161,7 @@ if ($CollageCovers !== 0) { ?>
             $Groups = array_slice($bookmarkList, $i * $CollageCovers, $CollageCovers);
             $CollagePages[] = implode('',
                 array_map(
-                    function($bookmark) use ($collMan, $tgMan) {
+                    function ($bookmark) use ($collMan, $tgMan) {
                         $tgroup = $tgMan->findById($bookmark['tgroup_id']);
                         return $tgroup ? $collMan->tgroupCover($tgroup) : '';
                     },

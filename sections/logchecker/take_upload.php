@@ -30,7 +30,7 @@ if (!$logfileSummary->total()) {
     $torrentLogManager = new Gazelle\Manager\TorrentLog($ripFiler, $htmlFiler);
 
     $checkerVersion = Logchecker::getLogcheckerVersion();
-    foreach($logfileSummary->all() as $logfile) {
+    foreach ($logfileSummary->all() as $logfile) {
         $torrentLogManager->create($torrent, $logfile, $checkerVersion);
     }
     $torrent->modifyLogscore();

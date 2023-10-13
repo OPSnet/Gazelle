@@ -13,11 +13,11 @@ class TimeTest extends TestCase {
      * @param $timestamp
      * @param $expected
      */
-    function testTimeAgo($timestamp, $expected): void {
+    public function testTimeAgo($timestamp, $expected): void {
         $this->assertEquals($expected, Time::timeAgo($timestamp));
     }
 
-    function providerTimestamp(): array {
+    public function providerTimestamp(): array {
         return [
             ['not a valid timestamp', false],
             ['5', time() - 5],
@@ -32,11 +32,11 @@ class TimeTest extends TestCase {
      *
      * @dataProvider providerHours
      */
-    function testConvertHours($hours, $levels, $expected): void {
+    public function testConvertHours($hours, $levels, $expected): void {
         $this->assertEquals($expected, Time::convertHours($hours, $levels, false));
     }
 
-    function providerHours(): array {
+    public function providerHours(): array {
         return [
             [0, 2, 'Never'],
             [-1, 2, 'Never'],
@@ -51,7 +51,7 @@ class TimeTest extends TestCase {
         ];
     }
 
-    function testConvertHoursSpan(): void {
+    public function testConvertHoursSpan(): void {
         $this->assertEquals('<span>228y3mo3w1d2h</span>', Time::convertHours(2000000, 5));
     }
 }

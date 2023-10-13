@@ -87,19 +87,13 @@ abstract class TorrentAbstract extends BaseObject {
             if (is_null($info)) {
                 return $this->info = [];
             }
-            foreach (['last_action', 'LastReseedRequest', 'RemasterCatalogueNumber', 'RemasterRecordLabel', 'RemasterTitle', 'RemasterYear']
-                as $nullable
-            ) {
+            foreach (['last_action', 'LastReseedRequest', 'RemasterCatalogueNumber', 'RemasterRecordLabel', 'RemasterTitle', 'RemasterYear'] as $nullable) {
                 $info[$nullable] = $info[$nullable] == '' ? null : $info[$nullable];
             }
-            foreach (['LogChecksum', 'HasCue', 'HasLog', 'HasLogDB', 'Remastered', 'Scene']
-                as $zerotruth
-            ) {
+            foreach (['LogChecksum', 'HasCue', 'HasLog', 'HasLogDB', 'Remastered', 'Scene'] as $zerotruth) {
                 $info[$zerotruth] = !($info[$zerotruth] == '0');
             }
-            foreach (['BadFiles', 'BadFolders', 'BadTags', 'CassetteApproved', 'LossymasterApproved', 'LossywebApproved', 'MissingLineage']
-                as $emptytruth
-            ) {
+            foreach (['BadFiles', 'BadFolders', 'BadTags', 'CassetteApproved', 'LossymasterApproved', 'LossywebApproved', 'MissingLineage'] as $emptytruth) {
                 $info[$emptytruth] = !($info[$emptytruth] == '');
             }
 
@@ -253,7 +247,7 @@ abstract class TorrentAbstract extends BaseObject {
     }
 
     public function leechType(): LeechType {
-        return match($this->info()['FreeTorrent']) {
+        return match ($this->info()['FreeTorrent']) {
             LeechType::Free->value    => LeechType::Free,
             LeechType::Neutral->value => LeechType::Neutral,
             default                   => LeechType::Normal,
@@ -261,7 +255,7 @@ abstract class TorrentAbstract extends BaseObject {
     }
 
     public function leechReason(): LeechReason {
-        return match($this->info()['FreeLeechType']) {
+        return match ($this->info()['FreeLeechType']) {
             LeechReason::AlbumOfTheMonth->value => LeechReason::AlbumOfTheMonth,
             LeechReason::Permanent->value       => LeechReason::Permanent,
             LeechReason::Showcase->value        => LeechReason::Showcase,
@@ -582,8 +576,8 @@ abstract class TorrentAbstract extends BaseObject {
         $lastActiveDate = (int)strtotime($this->lastActiveDate());
         $createdDate = (int)strtotime($this->created());
 
-        return match(true) {
-            !$lastActiveDate && !$lastRequestDate           => (time() >= strtotime(RESEED_NEVER_ACTIVE_TORRENT .' days', $createdDate)),
+        return match (true) {
+            !$lastActiveDate && !$lastRequestDate           => (time() >= strtotime(RESEED_NEVER_ACTIVE_TORRENT . ' days', $createdDate)),
             !$lastRequestDate                               => (time() >= strtotime(RESEED_TORRENT . 'days', $lastActiveDate)),
             default                                         => false,
         };

@@ -2,7 +2,7 @@
 
 namespace Gazelle\Json;
 
-use \Gazelle\User\Vote;
+use Gazelle\User\Vote;
 
 class User extends \Gazelle\Json {
     public function __construct(
@@ -20,7 +20,7 @@ class User extends \Gazelle\Json {
 
         $stats           = $user->stats();
         $forumPosts      = $stats->forumPostTotal();
-        $releaseVotes    = (new Vote($user))->userTotal(Vote::UPVOTE|Vote::DOWNVOTE);
+        $releaseVotes    = (new Vote($user))->userTotal(Vote::UPVOTE | Vote::DOWNVOTE);
         $uploaded        = $this->valueOrNull($user->uploadedSize(),            'uploaded');
         $downloaded      = $this->valueOrNull($user->downloadedSize(),          'downloaded');
         $uploads         = $this->valueOrNull($stats->uploadTotal(),            'uploads+');
@@ -64,7 +64,7 @@ class User extends \Gazelle\Json {
             'profileText' => \Text::full_format($user->profileInfo()),
             'stats' => [
                 'joinedDate'    => $user->created(),
-                'lastAccess'    => match(true) {
+                'lastAccess'    => match (true) {
                     $viewer->id() == $user->id()                => $user->lastAccessRealtime(),
                     $viewer->isStaff()                          => $user->lastAccessRealtime(),
                     $user->propertyVisible($viewer, 'lastseen') => $user->lastAccess(),
@@ -73,7 +73,7 @@ class User extends \Gazelle\Json {
                 'uploaded'      => $uploaded,
                 'downloaded'    => $downloaded,
                 'requiredRatio' => $user->propertyVisible($viewer, 'requiredratio') ? $user->requiredRatio() : null,
-                'ratio'         => match(true) {
+                'ratio'         => match (true) {
                     is_null($uploaded) || is_null($downloaded)
                                  => null,
                     !$downloaded => 0.0,

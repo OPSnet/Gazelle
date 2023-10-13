@@ -2,7 +2,7 @@
 
 namespace Gazelle\User;
 
-use \Gazelle\Util\CacheVector;
+use Gazelle\Util\CacheVector;
 
 /**
  * A class to cache lookups of user snatch activity. Every snatch that a user

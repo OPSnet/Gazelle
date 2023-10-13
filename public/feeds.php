@@ -11,7 +11,7 @@ $feed = new Gazelle\Feed;
 $user = (new Gazelle\Manager\User)->findById((int)($_GET['user'] ?? 0));
 if (!$user?->isEnabled()
     || empty($_GET['feed'])
-    || md5($user->id() . RSS_HASH . $_GET['passkey' ?? 'NOTPASS']) !== $_GET['auth'] ?? 'NOTAUTH'
+    || md5($user->id() . RSS_HASH . ($_GET['passkey'] ?? 'NOTPASS')) !== ($_GET['auth'] ?? 'NOTAUTH')
 ) {
     echo $feed->blocked();
     exit;
@@ -43,7 +43,7 @@ switch ($_GET['feed']) {
         echo $feed->changelog(new Gazelle\Manager\Changelog);
         break;
     default:
-        echo match(true) {
+        echo match (true) {
             str_starts_with($_GET['feed'], 'torrents_bookmarks_t_') => $feed->bookmark($user, $_GET['feed']),
             str_starts_with($_GET['feed'], 'torrents_notify_') =>      $feed->personal($user, $_GET['feed'], $_GET['name'] ?? null),
             default => $feed->blocked()

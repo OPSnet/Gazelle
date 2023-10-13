@@ -12,7 +12,7 @@ enum TorrentFlag: string {
     case noLineage   = 'torrents_missing_lineage';
 
     public function label(): string {
-        return match($this) {
+        return match ($this) {
             TorrentFlag::badFile     => 'Bad Files',
             TorrentFlag::badFolder   => 'Bad Folders',
             TorrentFlag::badTag      => 'Bad Tags',

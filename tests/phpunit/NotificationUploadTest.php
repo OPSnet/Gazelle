@@ -1,7 +1,7 @@
 <?php
 
-use \PHPUnit\Framework\TestCase;
-use \Gazelle\NotificationTicketState;
+use PHPUnit\Framework\TestCase;
+use Gazelle\NotificationTicketState;
 
 require_once(__DIR__ . '/../../lib/bootstrap.php');
 require_once(__DIR__ . '/../helper.php');

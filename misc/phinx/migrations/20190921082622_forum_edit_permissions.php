@@ -28,7 +28,7 @@ class ForumEditPermissions extends AbstractMigration {
                 ->orderAsc('f.Sort')
                 ->execute();
             $insertData = [];
-            foreach((array)$statement->fetchAll('assoc') as $row) {
+            foreach ((array)$statement->fetchAll('assoc') as $row) {
                 if ($row['ID'] === TRASH_FORUM_ID) {
                     continue;
                 }

@@ -5,7 +5,7 @@ namespace Gazelle;
 class BonusPool extends Base {
     final const CACHE_SENT = 'bonuspool_sent_%d';
 
-    public function __construct (
+    public function __construct(
         protected readonly int $id,
     ) {}
 

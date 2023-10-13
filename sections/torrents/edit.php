@@ -78,7 +78,7 @@ if (!($torrent->isRemastered() && !$torrent->remasterYear()) || $Viewer->permitt
     );
     $uploadForm->setCategoryId($categoryId);
     echo $uploadForm->head();
-    echo match($categoryName) {
+    echo match ($categoryName) {
         'Audiobooks', 'Comedy'                                   => $uploadForm->audiobook_form(),
         'Applications', 'Comics', 'E-Books', 'E-Learning Videos' => $uploadForm->simple_form(),
         default => $uploadForm->music_form(

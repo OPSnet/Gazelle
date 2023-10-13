@@ -18,7 +18,7 @@ $userId = $Viewer->id();
 
 //Delete cached tag used for undos
 if (isset($_REQUEST['undo'])) {
-    $Cache->delete_value("deleted_tags_$tgroupId".'_'.$userId);
+    $Cache->delete_value("deleted_tags_$tgroupId" . '_' . $userId);
 }
 
 $added    = [];

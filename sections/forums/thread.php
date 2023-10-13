@@ -47,7 +47,7 @@ $IsDonorForum = ($forumId == DONOR_FORUM);
 $PerPage = $Viewer->postsPerPage();
 
 //Post links utilize the catalogue & key params to prevent issues with custom posts per page
-$PostNum = match(true) {
+$PostNum = match (true) {
     isset($_GET['post'])        => (int)$_GET['post'],
     $post && !$post->isSticky() => $post->priorPostTotal(),
     default                     => 1,
@@ -79,7 +79,7 @@ if ($lastRead < $lastOnPage) {
 
 $isSubscribed = (new Gazelle\User\Subscription($Viewer))->isSubscribed($threadId);
 if ($isSubscribed) {
-    $Cache->delete_value('subscriptions_user_new_'.$Viewer->id());
+    $Cache->delete_value('subscriptions_user_new_' . $Viewer->id());
 }
 
 $userMan = new Gazelle\Manager\User;
@@ -113,8 +113,11 @@ if ($thread->hasPoll()) {
     }
 ?>
     <div class="box thin clear">
-        <div class="head colhead_dark"><strong>Poll<?php if ($poll->isClosed()) { echo ' [Closed]'; } ?><?php if ($poll->isFeatured()) { echo ' [Featured]'; } ?></strong> <a href="#" onclick="$('#threadpoll').gtoggle(); log_hit(); return false;" class="brackets">View</a></div>
-        <div class="pad<?php if ($thread->isLocked()) { echo ' hidden'; } ?>" id="threadpoll">
+        <div class="head colhead_dark"><strong>Poll<?php if ($poll->isClosed()) {
+echo ' [Closed]'; } ?><?php if ($poll->isFeatured()) {
+echo ' [Featured]'; } ?></strong> <a href="#" onclick="$('#threadpoll').gtoggle(); log_hit(); return false;" class="brackets">View</a></div>
+        <div class="pad<?php if ($thread->isLocked()) {
+echo ' hidden'; } ?>" id="threadpoll">
             <p><strong><?=display_str($poll->question())?></strong></p>
 <?php if ($response !== null || $poll->isClosed() || $thread->isLocked()) { ?>
             <ul class="poll nobullet">
@@ -334,7 +337,8 @@ foreach ($slice as $Key => $Post) {
             <?= $avatarFilter->render(['user' => $author, 'viewer' => $Viewer]) ?>
         </td>
 <?php   } ?>
-        <td class="body" valign="top"<?php if (!$Viewer->showAvatars()) { echo ' colspan="2"'; } ?>>
+        <td class="body" valign="top"<?php if (!$Viewer->showAvatars()) {
+echo ' colspan="2"'; } ?>>
             <div id="content<?=$PostID?>">
                 <?= Text::full_format($Body, cache: IMAGE_CACHE_ENABLED, bucket: CacheBucket::forum) ?>
 <?php   if ($EditedUserID) { ?>
@@ -429,7 +433,8 @@ if ($Viewer->permitted('site_moderate_forums')) {
             <tr>
                 <td class="label"><label for="sticky_thread_checkbox" title="Pin this thread at the top of the list of threads">Pin</label></td>
                 <td>
-                    <input type="checkbox" id="sticky_thread_checkbox" onclick="$('#ranking_row').gtoggle();" name="sticky"<?php if ($thread->isPinned()) { echo ' checked="checked"'; } ?> tabindex="4" />
+                    <input type="checkbox" id="sticky_thread_checkbox" onclick="$('#ranking_row').gtoggle();" name="sticky"<?php if ($thread->isPinned()) {
+echo ' checked="checked"'; } ?> tabindex="4" />
                 </td>
             </tr>
             <tr id="ranking_row"<?= $thread->isPinned() ? '' : ' class="hidden"' ?>>
@@ -441,7 +446,8 @@ if ($Viewer->permitted('site_moderate_forums')) {
             <tr>
                 <td class="label"><label for="locked_thread_checkbox">Locked</label></td>
                 <td>
-                    <input type="checkbox" id="locked_thread_checkbox" name="locked"<?php if ($thread->isLocked()) { echo ' checked="checked"'; } ?> tabindex="6" />
+                    <input type="checkbox" id="locked_thread_checkbox" name="locked"<?php if ($thread->isLocked()) {
+echo ' checked="checked"'; } ?> tabindex="6" />
                 </td>
             </tr>
             <tr>
@@ -473,7 +479,8 @@ if ($Viewer->permitted('site_moderate_forums')) {
 <?php       } ?>
                     <optgroup label="<?= $forum->categoryName() ?>">
 <?php   } ?>
-                        <option value="<?= $forumId ?>"<?php if ($thread->forumId() == $forumId) { echo ' selected="selected"';} ?>><?=display_str($forum->name())?></option>
+                        <option value="<?= $forumId ?>"<?php if ($thread->forumId() == $forumId) {
+echo ' selected="selected"';} ?>><?=display_str($forum->name())?></option>
 <?php } // foreach ?>
                     </optgroup>
                     </select>

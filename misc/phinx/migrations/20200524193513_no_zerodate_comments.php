@@ -11,4 +11,3 @@ class NoZerodateComments extends AbstractMigration {
         $this->execute("ALTER TABLE comments MODIFY AddedTime datetime NOT NULL");
     }
 }
-

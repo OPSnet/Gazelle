@@ -7,7 +7,7 @@ class SiteLog extends \Gazelle\Base {
     protected array $result     = [];
     protected array $usernames  = [];
 
-    public function __construct (
+    public function __construct(
         protected \Gazelle\Manager\User $userMan,
     ) {}
 
@@ -115,21 +115,21 @@ class SiteLog extends \Gazelle\Base {
         for ($i = 0, $n = count($parts); $i < $n; $i++) {
             if (str_starts_with($parts[$i], SITE_URL)) {
                 $offset = strlen(SITE_URL) + 1; // trailing slash
-                $parts[$i] = '<a href="'.substr($parts[$i], $offset).'">'.substr($parts[$i], $offset).'</a>';
+                $parts[$i] = '<a href="' . substr($parts[$i], $offset) . '">' . substr($parts[$i], $offset) . '</a>';
             }
             switch (strtolower($parts[$i])) {
                 case 'artist':
                     $id = $parts[$i + 1];
                     if ((int)$id) {
-                        $message .= ' ' .$parts[$i++]." <a href=\"artist.php?id=$id\">$id</a>";
+                        $message .= ' ' . $parts[$i++] . " <a href=\"artist.php?id=$id\">$id</a>";
                     } else {
-                        $message .= ' ' .$parts[$i];
+                        $message .= ' ' . $parts[$i];
                     }
                     break;
                 case 'collage':
                     $id = $parts[$i + 1];
                     if ((int)$id) {
-                        $message .= ' ' .$parts[$i]." <a href=\"collages.php?id=$id\">$id</a>";
+                        $message .= ' ' . $parts[$i] . " <a href=\"collages.php?id=$id\">$id</a>";
                         $i++;
                     } else {
                         $message .= " {$parts[$i]}";
@@ -138,18 +138,18 @@ class SiteLog extends \Gazelle\Base {
                 case 'group':
                     $id = $parts[$i + 1];
                     if ((int)$id) {
-                        $message .= ' ' .$parts[$i]." <a href=\"torrents.php?id=$id\">$id</a>";
+                        $message .= ' ' . $parts[$i] . " <a href=\"torrents.php?id=$id\">$id</a>";
                     } else {
-                        $message .= ' ' .$parts[$i];
+                        $message .= ' ' . $parts[$i];
                     }
                     $i++;
                     break;
                 case 'request':
                     $id = $parts[$i + 1];
                     if ((int)$id) {
-                        $message .= ' ' .$parts[$i++]." <a href=\"requests.php?action=view&amp;id=$id\">$id</a>";
+                        $message .= ' ' . $parts[$i++] . " <a href=\"requests.php?action=view&amp;id=$id\">$id</a>";
                     } else {
-                        $message .= ' ' .$parts[$i];
+                        $message .= ' ' . $parts[$i];
                     }
                     break;
                 case 'torrent':
@@ -168,7 +168,7 @@ class SiteLog extends \Gazelle\Base {
                         if ((int)($parts[$i + 1])) {
                             $userId = $parts[++$i];
                         }
-                        $URL = "user $userId (<a href=\"user.php?id=$userId\">".substr($parts[++$i], 1, -1).'</a>)';
+                        $URL = "user $userId (<a href=\"user.php?id=$userId\">" . substr($parts[++$i], 1, -1) . '</a>)';
                     } elseif (in_array($parts[$i - 1], ['deleted', 'uploaded', 'edited', 'created', 'recovered'])) {
                         $username = $parts[++$i];
                         if (str_ends_with($username, ':')) {
@@ -176,7 +176,7 @@ class SiteLog extends \Gazelle\Base {
                             $colon = true;
                         }
                         $userId = $this->usernameLookup($username);
-                        $URL = $userId ? "<a href=\"user.php?id=$userId\">$username</a>".($colon ? ':' : '') : $username;
+                        $URL = $userId ? "<a href=\"user.php?id=$userId\">$username</a>" . ($colon ? ':' : '') : $username;
                     }
                     $message .= " by $URL";
                     break;

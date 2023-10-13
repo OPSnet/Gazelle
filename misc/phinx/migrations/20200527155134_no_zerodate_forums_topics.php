@@ -15,4 +15,3 @@ class NoZerodateForumsTopics extends AbstractMigration {
         ");
     }
 }
-

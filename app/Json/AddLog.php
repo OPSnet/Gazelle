@@ -20,7 +20,7 @@ class AddLog extends \Gazelle\Json {
 
         $logSummaries = [];
         $checkerVersion = Logchecker::getLogcheckerVersion();
-        foreach($this->logfileSummary->all() as $logfile) {
+        foreach ($this->logfileSummary->all() as $logfile) {
             $this->torrentLogManager->create($this->torrent, $logfile, $checkerVersion);
             $logSummaries[] = [
                 'score'         => $logfile->score(),

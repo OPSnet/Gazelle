@@ -22,7 +22,7 @@ $body = trim($body);
 
 echo "$title\n";
 
-while(($row = fgets($in))) {
+while (($row = fgets($in))) {
     $body .= $row;
 }
 

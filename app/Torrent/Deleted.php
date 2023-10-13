@@ -9,7 +9,7 @@ class Deleted extends \Gazelle\Base {
      *
      * @return array of many things
      */
-    static public function info(int $torrentId): array {
+    public static function info(int $torrentId): array {
         $template = "SELECT t.GroupID, t.UserID, t.Media, t.Format, t.Encoding,
                 t.Remastered, t.RemasterYear, t.RemasterTitle, t.RemasterCatalogueNumber, t.RemasterRecordLabel,
                 t.Scene, t.HasLog, t.HasCue, t.HasLogDB, t.LogScore, t.LogChecksum,

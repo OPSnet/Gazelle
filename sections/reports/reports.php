@@ -45,7 +45,7 @@ if (isset($_REQUEST['id'])) {
     if (isset($_REQUEST['order'])) {
         $paginator->setParam('view=old');
         $paginator->setParam("order={$_REQUEST['order']}");
-        $search->setOrder(match($_REQUEST['order']) {
+        $search->setOrder(match ($_REQUEST['order']) {
             'resolved-asc'  => SearchReportOrder::resolvedAsc,
             'resolved-desc' => SearchReportOrder::resolvedDesc,
             'created-asc'   => SearchReportOrder::createdAsc,

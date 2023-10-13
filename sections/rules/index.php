@@ -9,7 +9,7 @@ switch ($_GET['p'] ?? '') {
             'list' => (new Gazelle\Manager\ClientWhitelist)->list(),
         ]);
         break;
-    case 'collages';
+    case 'collages':
         echo $Twig->render('rules/collage.twig');
         break;
     case 'ratio':
@@ -28,7 +28,7 @@ switch ($_GET['p'] ?? '') {
             'level_10' => ($b >= 100 * $GiB) ? 'a' : 'b',
         ]);
         break;
-    case 'requests';
+    case 'requests':
         echo $Twig->render('rules/request.twig');
         break;
     case 'tag':

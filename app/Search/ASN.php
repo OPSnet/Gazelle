@@ -38,7 +38,7 @@ class ASN extends \Gazelle\Base {
                 coalesce(a.name, 'unknown') AS name,
                 a.id_asn                    AS n,
                 (t.id_tor_node IS NOT NULL) AS is_tor
-            FROM (SELECT unnest(ARRAY[" .  placeholders($ipList, "?::inet"). "]) as ip) AS lu
+            FROM (SELECT unnest(ARRAY[" .  placeholders($ipList, "?::inet") . "]) as ip) AS lu
             LEFT JOIN geo.asn_network an ON (an.network >>= lu.ip)
             LEFT JOIN geo.asn a USING (id_asn)
             LEFT JOIN tor_node t ON (t.ipv4 = lu.ip)

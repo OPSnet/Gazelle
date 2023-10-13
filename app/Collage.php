@@ -2,8 +2,8 @@
 
 namespace Gazelle;
 
-use \Gazelle\Enum\LeechType;
-use \Gazelle\Enum\LeechReason;
+use Gazelle\Enum\LeechType;
+use Gazelle\Enum\LeechReason;
 
 class Collage extends BaseObject {
     /**
@@ -218,7 +218,7 @@ class Collage extends BaseObject {
         if (empty($this->userSubscriptions)) {
             $key = sprintf(self::SUBS_KEY, $user->id());
             $subs = self::$cache->get_value($key);
-            if ($subs ===false) {
+            if ($subs === false) {
                 self::$db->prepared_query("
                     SELECT CollageID FROM users_collage_subs WHERE UserID = ?
                     ", $user->id()

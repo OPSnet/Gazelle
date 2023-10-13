@@ -258,7 +258,7 @@ class Quote extends \Gazelle\BaseUser {
                 LEFT JOIN forums AS f ON (f.ID = t.ForumID)
                 LEFT JOIN collages AS c ON (q.Page = 'collages' AND c.ID = q.PageID)
                 WHERE q.UnRead = true
-                    AND (q.Page != 'forums' OR " . implode(' AND ', $cond). ")
+                    AND (q.Page != 'forums' OR " . implode(' AND ', $cond) . ")
                     AND (q.Page != 'collages' OR c.Deleted = '0')
                     AND q.UserID = ?
                 ", ...$args

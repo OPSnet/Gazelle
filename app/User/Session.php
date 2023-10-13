@@ -2,7 +2,7 @@
 
 namespace Gazelle\User;
 
-use \Gazelle\Util\Crypto;
+use Gazelle\Util\Crypto;
 
 class Session extends \Gazelle\BaseUser {
     final const tableName     = 'users_sessions';

@@ -2,7 +2,7 @@
 
 namespace Gazelle\Donate;
 use Gazelle\Pg;
-use \MoneroIntegrations\MoneroPhp;
+use MoneroIntegrations\MoneroPhp;
 
 class Monero {
     use Pg;

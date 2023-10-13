@@ -28,8 +28,7 @@ if (isset($_POST['Username'])) {
             ->setIpaddr('127.0.0.1')
             ->setAdminComment('Created by ' . $Viewer->username() . ' via admin toolbox')
             ->create();
-    }
-    catch (Gazelle\Exception\UserCreatorException $e) {
+    } catch (Gazelle\Exception\UserCreatorException $e) {
         error(match ($e->getMessage()) {
             'username-invalid' => 'Specified username is forbidden',
             default            => 'Unable to create user',

@@ -105,7 +105,7 @@ class AutoEnable extends \Gazelle\BaseUser {
     }
 
     public function outcomeLabel(): string {
-        return match($this->outcome()) {
+        return match ($this->outcome()) {
             \Gazelle\Manager\AutoEnable::APPROVED  => "Approved",
             \Gazelle\Manager\AutoEnable::DENIED    => "Rejected",
             \Gazelle\Manager\AutoEnable::DISCARDED => "Discarded",

@@ -1,6 +1,6 @@
 <?php
 
-use \PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\TestCase;
 
 require_once(__DIR__ . '/../../lib/bootstrap.php');
 require_once(__DIR__ . '/../helper.php');
@@ -50,7 +50,7 @@ class RequestTest extends TestCase {
     public function testCreate(): void {
         $admin   = $this->userList['admin'];
         $user    = $this->userList['user'];
-        $title   = 'The ' . randomString(6). ' Test Sessions';
+        $title   = 'The ' . randomString(6) . ' Test Sessions';
         $userMan = new Gazelle\Manager\User;
 
         $statsReq = new Gazelle\Stats\Request;
@@ -68,7 +68,7 @@ class RequestTest extends TestCase {
         ];
 
         $requestMan = new Gazelle\Manager\Request;
-        $title = 'The ' . randomString(6). ' Test Sessions';
+        $title = 'The ' . randomString(6) . ' Test Sessions';
         $this->request = $requestMan->create(
             userId:          $this->userList['admin']->id(),
             categoryId:      (new Gazelle\Manager\Category)->findIdByName('Music'),
@@ -179,7 +179,7 @@ class RequestTest extends TestCase {
         $this->assertEquals($before['total-filled'], $statsReq->filledTotal(), 'request-stats-new-filled');
 
         // Initial vote from creator
-        $bounty = 1024**2 * REQUEST_MIN;
+        $bounty = 1024 ** 2 * REQUEST_MIN;
         $this->assertTrue($this->request->vote($this->userList['admin'], $bounty), 'request-initial-bounty');
 
         $statsUser->refresh();

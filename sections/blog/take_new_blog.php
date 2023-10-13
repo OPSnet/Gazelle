@@ -15,7 +15,7 @@ if (empty($title)) {
     error('The title of the blog article must not be empty');
 }
 
-$thread = match((int)($_POST['thread'] ?? -1)) {
+$thread = match ((int)($_POST['thread'] ?? -1)) {
     -1 => null,
      0 => (new Gazelle\Manager\ForumThread)->create(
         forum:  new Gazelle\Forum(ANNOUNCEMENT_FORUM_ID),

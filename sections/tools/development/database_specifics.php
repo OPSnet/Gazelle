@@ -36,7 +36,7 @@ $orderBy = $header->getOrderBy();
 $orderDir = $header->getOrderDir();
 
 $mode = $_GET['mode'] ?? 'show';
-switch($mode) {
+switch ($mode) {
     case 'show':
         $tableColumn = 'table_name';
         $where = '';

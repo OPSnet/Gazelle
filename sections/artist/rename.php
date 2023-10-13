@@ -37,7 +37,7 @@ if (empty($newName)) {
     error('No new name given.');
 }
 if ($oldName == $newName) {
-    error('The new name is identical to <a href="artist.php?artistname=' . display_str($oldName) .'">the old name</a>."');
+    error('The new name is identical to <a href="artist.php?artistname=' . display_str($oldName) . '">the old name</a>."');
 }
 if (!($oldAliasId = $artist->getAlias($oldName))) {
     error('Could not find existing alias ID');

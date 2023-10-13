@@ -140,7 +140,7 @@ $Err = $Validate->validate($_POST) ? false : $Validate->errorMessage();
 if (!$Err && isset($Properties['Image'])) { /** @phpstan-ignore-line */
     // Strip out Amazon's padding
     if (preg_match('/(http:\/\/ecx.images-amazon.com\/images\/.+)(\._.*_\.jpg)/i', $Properties['Image'], $match)) {
-        $Properties['Image'] = $match[1].'.jpg';
+        $Properties['Image'] = $match[1] . '.jpg';
     }
 
     if (!preg_match(IMAGE_REGEXP, $Properties['Image'])) {
@@ -194,7 +194,7 @@ $db->begin_transaction(); // It's all or nothing
 if ($logfileSummary->total()) {
     $torrentLogManager = new Gazelle\Manager\TorrentLog(new Gazelle\File\RipLog, new Gazelle\File\RipLogHTML);
     $checkerVersion = Logchecker::getLogcheckerVersion();
-    foreach($logfileSummary->all() as $logfile) {
+    foreach ($logfileSummary->all() as $logfile) {
         $torrentLogManager->create($torrent, $logfile, $checkerVersion);
     }
     $torrent->modifyLogscore();

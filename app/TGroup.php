@@ -35,7 +35,7 @@ class TGroup extends BaseObject {
     public function link(): string {
         $url = "<a href=\"{$this->url()}\" title=\"" . ($this->hashTag() ?: 'View torrent group') . '" dir="ltr">'
             . display_str($this->name()) . '</a>';
-        return match($this->categoryName()) {
+        return match ($this->categoryName()) {
             'Music'  => "{$this->artistRole()->link()} – $url [{$this->year()} {$this->releaseTypeName()}]",
             'Audiobooks',
             'Comedy' => "$url [{$this->year()}]",
@@ -48,7 +48,7 @@ class TGroup extends BaseObject {
     public function torrentLink(int $torrentId): string {
         $url = '<a href="' . $this->url() . "&amp;torrentid={$torrentId}#torrent{$torrentId}\" dir=\"ltr\">"
             . display_str($this->name()) . '</a>';
-        return match($this->categoryName()) {
+        return match ($this->categoryName()) {
             'Music'  => "{$this->artistRole()->link()} – $url [{$this->year()} {$this->releaseTypeName()}]",
             'Audiobooks',
             'Comedy' => "$url [{$this->year()}]",
@@ -57,7 +57,7 @@ class TGroup extends BaseObject {
     }
 
     public function text(): string {
-        return match($this->categoryName()) {
+        return match ($this->categoryName()) {
             'Music'  => "{$this->artistRole()->text()} – {$this->name()} [{$this->year()} {$this->releaseTypeName()}]"
                 . ($this->isShowcase() ? '[Showcase]' : ''),
             'Audiobooks',

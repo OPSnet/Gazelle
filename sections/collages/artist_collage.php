@@ -29,7 +29,7 @@ foreach ($Artists as $id => $Artist) {
 if ($CollageCovers) {
     if ($NumGroups > $CollageCovers) {
         $Render = array_merge($Render,
-            array_fill(0, $CollageCovers * ceil($NumGroups/$CollageCovers) - $NumGroups, '<li></li>')
+            array_fill(0, $CollageCovers * ceil($NumGroups / $CollageCovers) - $NumGroups, '<li></li>')
         );
     }
     for ($i = 0; $i < $NumGroups / $CollageCovers; $i++) {

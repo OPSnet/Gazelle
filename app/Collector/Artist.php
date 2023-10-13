@@ -53,7 +53,7 @@ class Artist extends \Gazelle\Collector {
                 $this->addZip(
                     $zip,
                     $info,
-                    match($this->roleList[$tgroup->id()]) {
+                    match ($this->roleList[$tgroup->id()]) {
                         ARTIST_MAIN      => $releaseMan->findNameById($info['ReleaseType']),
                         ARTIST_GUEST     => 'Guest Appearance',
                         ARTIST_REMIXER   => 'Remixed By',

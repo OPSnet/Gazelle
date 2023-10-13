@@ -3,7 +3,6 @@
 namespace Gazelle\User\Notification;
 
 class StaffBlog extends AbstractNotification {
-
     public function className(): string {
         return 'information';
     }

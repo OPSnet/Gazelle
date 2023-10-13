@@ -11,7 +11,6 @@ class FeaturedAlbum extends BaseObject {
     public function __construct(
         protected FeaturedAlbumType $type,
         protected int               $id,
-
     ) {
         parent::__construct($id);
     }
@@ -68,7 +67,7 @@ class FeaturedAlbum extends BaseObject {
     }
 
     public function type(): FeaturedAlbumType {
-        return match((int)$this->info()['type']) {
+        return match ((int)$this->info()['type']) {
             1       => FeaturedAlbumType::Showcase,
             default => FeaturedAlbumType::AlbumOfTheMonth,
         };

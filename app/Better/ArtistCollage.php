@@ -3,7 +3,6 @@
 namespace Gazelle\Better;
 
 class ArtistCollage extends AbstractBetter {
-
     public function mode(): string {
         return 'artist';
     }

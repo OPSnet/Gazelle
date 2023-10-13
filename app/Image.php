@@ -23,15 +23,15 @@ class Image {
         }
     }
 
-    function height(): int {
+    public function height(): int {
         return $this->height;
     }
 
-    function width(): int {
+    public function width(): int {
         return $this->width;
     }
 
-    function display(): ?bool {
+    public function display(): ?bool {
         return match ($this->type) {
             IMAGETYPE_BMP  => imagebmp($this->image),
             IMAGETYPE_GIF  => imagegif($this->image),
@@ -43,7 +43,7 @@ class Image {
         };
     }
 
-    function type(): string {
+    public function type(): string {
         return match ($this->type) {
             IMAGETYPE_BMP  => 'bmp',
             IMAGETYPE_GIF  => 'gif',

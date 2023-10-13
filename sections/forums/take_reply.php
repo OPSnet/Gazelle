@@ -12,7 +12,7 @@ if (is_null($thread)) {
 $threadId = $thread->id();
 $forum    = $thread->forum();
 
-if (!$Viewer->readAccess($forum)|| !$Viewer->writeAccess($forum) || $thread->isLocked() && !$Viewer->permitted('site_moderate_forums')) {
+if (!$Viewer->readAccess($forum) || !$Viewer->writeAccess($forum) || $thread->isLocked() && !$Viewer->permitted('site_moderate_forums')) {
     error(403);
 }
 

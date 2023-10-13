@@ -10,7 +10,7 @@ class Bad extends AbstractBetter {
     }
 
     public function setBadType(string $bad): static {
-        $this->torrentFlag = match($bad) { /** @phpstan-ignore-line */
+        $this->torrentFlag = match ($bad) { /** @phpstan-ignore-line */
             'files'   => \Gazelle\TorrentFlag::badFile,
             'folders' => \Gazelle\TorrentFlag::badFolder,
             'lineage' => \Gazelle\TorrentFlag::noLineage,
@@ -24,7 +24,7 @@ class Bad extends AbstractBetter {
     }
 
     public function heading(): string {
-        return match($this->torrentFlag) { /** @phpstan-ignore-line */
+        return match ($this->torrentFlag) { /** @phpstan-ignore-line */
             \Gazelle\TorrentFlag::badFile   => 'Releases with with bad filenames',
             \Gazelle\TorrentFlag::badFolder => 'Releases with with bad folders',
             \Gazelle\TorrentFlag::noLineage => 'Releases with missing lineage details',

@@ -13,7 +13,7 @@
     "lint:css-fix": "stylelint --config misc/stylelint.json --cache --cache-location cache/stylelint --fix \"sass/**/*.scss\" || exit 0",
     "lint:css-checkstyle": "stylelint --config misc/stylelint.json --cache --cache-location cache/stylelint \"sass/**/*.scss\" --custom-formatter ./node_modules/stylelint-checkstyle-formatter/index.js || exit 0",
     "lint:php:internal": "find . -path './vendor' -prune -o -path ./node_modules -prune -o -path './.docker' -prune -o -type f -name '*.php' -print0 | xargs -0 -n1 -P4 php -l -n | (! grep -v \"No syntax errors detected\" )",
-    "lint:php:phpcs": "vendor/bin/phpcs -p --report-width 1000",
+    "lint:php:phpcs": "vendor/bin/phpcs -p --report-width=1000",
     "lint:php": "yarn lint:php:internal && yarn lint:php:phpcs",
     "lint:php:fix": "bin/phpcbf",
     "pre-commit": "yarn lint:php:fix",

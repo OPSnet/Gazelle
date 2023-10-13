@@ -2,13 +2,13 @@
 
 namespace Gazelle;
 
-use \Gazelle\Enum\AvatarDisplay;
-use \Gazelle\Enum\AvatarSynthetic;
-use \Gazelle\Enum\UserStatus;
-use \Gazelle\Enum\UserTokenType;
+use Gazelle\Enum\AvatarDisplay;
+use Gazelle\Enum\AvatarSynthetic;
+use Gazelle\Enum\UserStatus;
+use Gazelle\Enum\UserTokenType;
 
-use \Gazelle\Util\Irc;
-use \Gazelle\Util\Mail;
+use Gazelle\Util\Irc;
+use Gazelle\Util\Mail;
 
 class User extends BaseObject {
     final const tableName          = 'users_main';
@@ -411,7 +411,7 @@ class User extends BaseObject {
         if (!isset($this->avatarCache[$viewedId])) {
             $donor = new User\Donor($viewed);
             $this->avatarCache[$viewedId] = [
-                'image' => match($this->avatarMode()) {
+                'image' => match ($this->avatarMode()) {
                     AvatarDisplay::show              => $viewed->avatar() ?: USER_DEFAULT_AVATAR,
                     AvatarDisplay::fallbackSynthetic => $viewed->avatar() ?: (new User\SyntheticAvatar($this))->avatar($viewed->username()),
                     AvatarDisplay::forceSynthetic    => (new User\SyntheticAvatar($this))->avatar($viewed->username()),
@@ -576,7 +576,7 @@ class User extends BaseObject {
     }
 
     public function userStatus(): UserStatus {
-        return match($this->info()['Enabled']) {
+        return match ($this->info()['Enabled']) {
             '1'     => UserStatus::enabled,
             '2'     => UserStatus::disabled,
             default => UserStatus::unconfirmed,
@@ -663,7 +663,7 @@ class User extends BaseObject {
 
     public function paranoiaLabel(): string {
         $level = $this->paranoiaLevel();
-        return match(true) {
+        return match (true) {
             ($level > 20) => 'Very high',
             ($level >  5) => 'High',
             ($level >  1) => 'Low',
@@ -1798,7 +1798,7 @@ class User extends BaseObject {
             } else {
                 $checked = true;
             }
-            $order[] = ['id' => $key. '_' . (int)(!!$checked), 'checked' => $checked, 'label' => $val];
+            $order[] = ['id' => $key . '_' . (int)(!!$checked), 'checked' => $checked, 'label' => $val];
         }
         return $order;
     }

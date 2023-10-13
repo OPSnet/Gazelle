@@ -30,7 +30,7 @@ if ($execute) {
         $db = Gazelle\DB::DB();
         $db->prepared_query($query);
         $result = $db->to_array(false, MYSQLI_ASSOC, false);
-    } catch (\Exception|\Error $e) {
+    } catch (\Exception | \Error $e) {
         $error = $e->getMessage();
     }
 }

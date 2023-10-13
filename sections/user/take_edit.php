@@ -131,7 +131,7 @@ if (!empty($_POST['password']) && !empty($_POST['new_pass_1']) && !empty($_POST[
     } else {
         if ($_POST['password'] == $_POST['new_pass_1']) {
             error('Your new password cannot be the same as your old password.');
-        } else if ($_POST['new_pass_1'] !== $_POST['new_pass_2']) {
+        } elseif ($_POST['new_pass_1'] !== $_POST['new_pass_2']) {
             error('You did not enter the same password twice.');
         }
         $user->setField('PassHash', Gazelle\UserCreator::hashPassword($_POST['new_pass_1']));

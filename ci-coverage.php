@@ -16,7 +16,7 @@ class CoverageHelper {
     const TARGET_DIR = '/tmp/coverage';
     private CodeCoverage $coverage;
 
-    function __construct() {
+    public function __construct() {
         $filter = new Filter;
         $filter->includeDirectory(__DIR__ . '/app');
         $filter->includeDirectory(__DIR__ . '/classes');
@@ -31,12 +31,14 @@ class CoverageHelper {
         $this->coverage->start('fpm-coverage');
     }
 
-    function __destruct() {
+    public function __destruct() {
         $this->coverage->stop();
         Filesystem::createDirectory($this::TARGET_DIR);
         $outfile = tempnam($this::TARGET_DIR, 'phpcov');
-        (new PhpReport)->process($this->coverage, $outfile);
-        rename($outfile, $outfile . ".cov");
+        if ($outfile !== false) {
+            (new PhpReport)->process($this->coverage, $outfile);
+            rename($outfile, $outfile . ".cov");
+        }
     }
 }
 

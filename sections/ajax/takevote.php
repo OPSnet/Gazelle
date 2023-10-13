@@ -14,7 +14,7 @@ $vote = new Gazelle\User\Vote($Viewer);
 if ($_REQUEST['do'] == 'unvote') {
     [$ok, $message] = $vote->clear($tgroupId);
 } elseif ($_REQUEST['do'] == 'vote') {
-    switch($_REQUEST['vote']) {
+    switch ($_REQUEST['vote']) {
         case 'up':
             [$ok, $message] = $vote->upvote($tgroupId);
             break;

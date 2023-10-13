@@ -24,8 +24,7 @@ foreach ($_POST as $k => $v) {
     if (preg_match('/^(action|check)-(\d+)$/', $k, $match)) {
         if ($match[1] == 'check' && $v) {
             $check[(int)$match[2]] = true;
-        }
-        elseif ($match[1] == 'action') {
+        } elseif ($match[1] == 'action') {
             if ($v == 'keep') {
                 continue;
             }
@@ -33,8 +32,7 @@ foreach ($_POST as $k => $v) {
                 error(0);
             }
             $action[(int)$match[2]] = $v;
-        }
-        else {
+        } else {
             error(0);
         }
     }

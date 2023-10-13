@@ -11,6 +11,5 @@ class BonusDiscount extends AbstractSeed
             'Value'   => 0,
             'Comment' => 'Bonus store discount (0 = no discount, 100 = everything free)',
         ])->save();
-
     }
 }

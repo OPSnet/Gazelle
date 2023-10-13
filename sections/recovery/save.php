@@ -31,8 +31,7 @@ $rate_limit = 0;
 
 if ($Cache->get_value($key)) {
     $msg = "Rate limiting in force.<br />You tried to save this page too rapidly following the previous save.";
-}
-else {
+} else {
     $info = $recovery->validate($_POST);
     if (count($info)) {
         $info['ipaddr']   = $ipaddr;
@@ -41,14 +40,13 @@ else {
         [$ok, $filename] = $recovery->saveScreenshot($_FILES);
         if (!$ok) {
             $msg = $filename; // the reason we were unable to save the screenshot info
-        }
-        else {
+        } else {
             $info['screenshot'] = $filename;
 
             $token = '';
             for ($i = 0; $i < 16; ++$i) {
-                $token .= chr(random_int(97, 97+25));
-                if (($i+1) % 4 == 0 && $i < 15) {
+                $token .= chr(random_int(97, 97 + 25));
+                if (($i + 1) % 4 == 0 && $i < 15) {
                     $token .= '-';
                 }
             }
@@ -56,13 +54,11 @@ else {
 
             if ($recovery->persist($info)) {
                 $msg = 'ok';
-            }
-            else {
+            } else {
                 $msg = "Unable to save, are you sure you haven't registered already?";
             }
         }
-    }
-    else {
+    } else {
         $msg = "Your upload was not accepted.";
     }
 }

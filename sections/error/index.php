@@ -2,7 +2,7 @@
 
 use Gazelle\Util\Irc;
 
-function notify ($Viewer, $Channel, $Message) {
+function notify($Viewer, $Channel, $Message) {
     Irc::sendMessage($Channel,
         $Message . " error by "
         . ($Viewer
@@ -49,7 +49,7 @@ switch ($Error) {
 }
 
 if (isset($Log) && $Log) {
-    $Description .= ' <a href="log.php?search='.$Log.'">Search Log</a>';
+    $Description .= ' <a href="log.php?search=' . $Log . '">Search Log</a>';
 }
 
 if (empty($NoHTML) && $Error != -1) {

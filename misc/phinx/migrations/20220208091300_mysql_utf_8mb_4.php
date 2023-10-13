@@ -57,7 +57,6 @@ final class MysqlUtf8mb4 extends AbstractMigration {
         $this->query("ALTER TABLE users_main
             MODIFY title varchar(1024)
         ");
-
     }
 
     public function down(): void {

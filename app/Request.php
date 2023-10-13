@@ -29,7 +29,7 @@ class Request extends BaseObject {
      */
     public function selfLink(): string {
         $title = display_str($this->title());
-        return match($this->categoryName()) {
+        return match ($this->categoryName()) {
             'Music' =>
                 "{$this->artistRole()->link()} – "
                 . ($this->isFilled()
@@ -52,7 +52,7 @@ class Request extends BaseObject {
      * Display the title of a request, with all fields linkified where it makes sense.
      */
     public function smartLink(): string {
-        return match($this->categoryName()) {
+        return match ($this->categoryName()) {
             'Music'                => "{$this->artistRole()->link()} – {$this->link()} [{$this->year()}]",
             'Audiobooks', 'Comedy' => "{$this->link()} [{$this->year()}]",
             default                => $this->link(),
@@ -63,7 +63,7 @@ class Request extends BaseObject {
      * Display the full title of the request with no links.
      */
     public function text(): string {
-        return match($this->categoryName()) {
+        return match ($this->categoryName()) {
             'Music'       => "{$this->artistRole()->text()} – {$this->title()} [{$this->year()}]",
             'Audiobooks',
             'Comedy'      => "{$this->title()} [{$this->year()}]",
@@ -564,7 +564,7 @@ class Request extends BaseObject {
         $user->addBounty($bounty);
         $name = $torrent->group()->text();
         $message = "One of your requests — [url={$this->location()}]{$name}[/url] — has been filled."
-                   ." You can view it here: [pl]{$torrent->id()}[/pl]";
+                   . " You can view it here: [pl]{$torrent->id()}[/pl]";
         self::$db->prepared_query("
             SELECT UserID FROM requests_votes WHERE RequestID = ?
             ", $this->id

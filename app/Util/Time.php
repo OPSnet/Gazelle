@@ -64,7 +64,7 @@ class Time {
         $days = floor($remain / 86400); // seconds in one day
         $remain = $remain - $days * 86400;
 
-        $hours=floor($remain / 3600); // seconds in one hour
+        $hours = floor($remain / 3600); // seconds in one hour
         $remain = $remain - $hours * 3600;
 
         $minutes = floor($remain / 60);
@@ -146,7 +146,7 @@ class Time {
         }
 
         if ($span) {
-            return '<span class="time tooltip" title="'.date('M d Y, H:i', $timestamp).'">'.$timespec.'</span>';
+            return '<span class="time tooltip" title="' . date('M d Y, H:i', $timestamp) . '">' . $timespec . '</span>';
         } else {
             return $timespec;
         }
@@ -163,50 +163,49 @@ class Time {
             return 'Never';
         }
 
-        $years = floor($hours/8760); // hours in a year
-        $remain = $hours - $years*8760;
+        $years = floor($hours / 8760); // hours in a year
+        $remain = $hours - $years * 8760;
 
-        $months = floor($remain/730); // hours in a month
-        $remain = $remain - $months*730;
+        $months = floor($remain / 730); // hours in a month
+        $remain = $remain - $months * 730;
 
-        $weeks = floor($remain/168); // hours in a week
-        $remain = $remain - $weeks*168;
+        $weeks = floor($remain / 168); // hours in a week
+        $remain = $remain - $weeks * 168;
 
-        $days = floor($remain/24); // hours in a day
-        $remain = $remain - $days*24;
+        $days = floor($remain / 24); // hours in a day
+        $remain = $remain - $days * 24;
 
         $hours = floor($remain);
 
         $return = '';
 
         if ($years > 0 && $levels > 0) {
-            $return .= $years.'y';
+            $return .= $years . 'y';
             $levels--;
         }
 
         if ($months > 0 && $levels > 0) {
-            $return .= $months.'mo';
+            $return .= $months . 'mo';
             $levels--;
         }
 
         if ($weeks > 0 && $levels > 0) {
-            $return .= $weeks.'w';
+            $return .= $weeks . 'w';
             $levels--;
         }
 
         if ($days > 0 && $levels > 0) {
-            $return .= $days.'d';
+            $return .= $days . 'd';
             $levels--;
         }
 
         if ($hours > 0 && $levels > 0) {
-            $return .= $hours.'h';
+            $return .= $hours . 'h';
         }
 
         if ($span) {
-            return '<span>'.$return.'</span>';
-        }
-        else {
+            return '<span>' . $return . '</span>';
+        } else {
             return $return;
         }
     }

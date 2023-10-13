@@ -3,7 +3,6 @@
 namespace Gazelle\Stats;
 
 class Artists extends \Gazelle\Base {
-
     public function updateUsage(): int {
         self::$db->begin_transaction();
         self::$db->prepared_query("

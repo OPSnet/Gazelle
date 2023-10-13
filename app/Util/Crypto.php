@@ -9,7 +9,7 @@ class Crypto {
             return '';
         }
         $iv = openssl_random_pseudo_bytes($iv_size);
-        return base64_encode($iv.openssl_encrypt($plaintext, 'AES-128-CBC', $key, OPENSSL_RAW_DATA, $iv));
+        return base64_encode($iv . openssl_encrypt($plaintext, 'AES-128-CBC', $key, OPENSSL_RAW_DATA, $iv));
     }
 
     public static function decrypt(string $ciphertext, string $key): string {

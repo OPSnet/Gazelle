@@ -18,9 +18,12 @@ class Comment extends \Gazelle\BaseManager {
     /**
      * Post a comment on an artist, request or torrent page.
      */
-    public function create(\Gazelle\User $user, string $page, int $pageId, string $body):
-        \Gazelle\Comment\Artist|\Gazelle\Comment\Collage|\Gazelle\Comment\Request|\Gazelle\Comment\Torrent
-    {
+    public function create(
+        \Gazelle\User $user,
+        string $page,
+        int $pageId,
+        string $body,
+    ): \Gazelle\Comment\Artist|\Gazelle\Comment\Collage|\Gazelle\Comment\Request|\Gazelle\Comment\Torrent {
         self::$db->prepared_query("
             INSERT INTO comments
                    (Page, PageID, AuthorID, Body)
@@ -49,9 +52,9 @@ class Comment extends \Gazelle\BaseManager {
         return new $className($pageId, 0, $postId); /** @phpstan-ignore-line */
     }
 
-    public function findById(int $postId):
-        \Gazelle\Comment\Artist|\Gazelle\Comment\Collage|\Gazelle\Comment\Request|\Gazelle\Comment\Torrent|null
-    {
+    public function findById(
+        int $postId,
+    ): \Gazelle\Comment\Artist|\Gazelle\Comment\Collage|\Gazelle\Comment\Request|\Gazelle\Comment\Torrent|null {
         [$page, $pageId] = self::$db->row("
             SELECT Page, PageID FROM comments WHERE ID = ?
             ", $postId

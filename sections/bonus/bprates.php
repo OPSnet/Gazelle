@@ -3,7 +3,7 @@
 $page = !empty($_GET['page']) ? (int) $_GET['page'] : 1;
 $page = max(1, $page);
 $limit = TORRENTS_PER_PAGE;
-$offset = TORRENTS_PER_PAGE * ($page-1);
+$offset = TORRENTS_PER_PAGE * ($page - 1);
 
 $heading = new \Gazelle\Util\SortableTableHeader('hourlypoints', [
     'size'          => ['dbColumn' => 'size',           'defaultSort' => 'desc', 'text' => 'Size'],

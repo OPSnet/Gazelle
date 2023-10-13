@@ -7,7 +7,7 @@ enum ReaperState: string {
     case UNSEEDED = 'unseeded';
 
     public function notifyAttr(): string {
-        return match($this) {
+        return match ($this) {
             ReaperState::NEVER    => 'no-pm-unseeded-upload',
             ReaperState::UNSEEDED => 'no-pm-unseeded-snatch', /** @phpstan-ignore-line */
         };

@@ -2,7 +2,7 @@
 
 namespace Gazelle\Search;
 
-use \Gazelle\Enum\SearchReportOrder;
+use Gazelle\Enum\SearchReportOrder;
 
 class Report extends \Gazelle\Base {
     protected array $args = [];

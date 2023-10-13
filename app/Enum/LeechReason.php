@@ -10,7 +10,7 @@ enum LeechReason: string {
     case AlbumOfTheMonth = '4';
 
     public function label(): string {
-        return match($this) {
+        return match ($this) {
             LeechReason::Normal          => 'Normal',
             LeechReason::StaffPick       => 'Staff Pick',
             LeechReason::Permanent       => 'Permanent FL',

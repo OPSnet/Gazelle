@@ -17,4 +17,3 @@ class NoZerodateReports extends AbstractMigration {
         ");
     }
 }
-

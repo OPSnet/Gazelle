@@ -3,7 +3,6 @@
 namespace Gazelle\Report;
 
 abstract class AbstractReport extends \Gazelle\Base {
-
     /**
      * The context array is used to stash away pieces of information that will
      * be needed in the template, but are too complicated to derive within the

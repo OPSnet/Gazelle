@@ -467,7 +467,7 @@ class Vote extends \Gazelle\BaseUser {
             }
             $this->voteSummary = $voteSummary;
         }
-        return match($mask) {
+        return match ($mask) {
             self::UPVOTE   => (int)$this->voteSummary['up'],
             self::DOWNVOTE => $this->voteSummary['total'] - $this->voteSummary['up'],
             default        => $this->voteSummary['total'],
@@ -480,8 +480,7 @@ class Vote extends \Gazelle\BaseUser {
         if ($mask === self::UPVOTE) {
             $cond[] = 'Type = ?';
             $args[] = 'Up';
-        }
-        elseif ($mask === self::DOWNVOTE) {
+        } elseif ($mask === self::DOWNVOTE) {
             $cond[] = 'Type = ?';
             $args[] = 'Down';
         }

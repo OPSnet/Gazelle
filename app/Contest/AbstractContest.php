@@ -5,7 +5,7 @@ namespace Gazelle\Contest;
 trait TorrentLeaderboard {
     public function leaderboard(int $limit, int $offset): array {
         $key = sprintf(\Gazelle\Contest::CONTEST_LEADERBOARD_CACHE_KEY,
-            $this->id, (int)($offset/CONTEST_ENTRIES_PER_PAGE)
+            $this->id, (int)($offset / CONTEST_ENTRIES_PER_PAGE)
         );
         $leaderboard = self::$cache->get_value($key);
         if ($leaderboard === false) {

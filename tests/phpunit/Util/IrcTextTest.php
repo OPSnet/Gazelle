@@ -2,9 +2,9 @@
 
 namespace Gazelle;
 
-use \Gazelle\Util\Irc;
-use \Gazelle\Util\IrcText;
-use \PHPUnit\Framework\TestCase;
+use Gazelle\Util\Irc;
+use Gazelle\Util\IrcText;
+use PHPUnit\Framework\TestCase;
 
 class IrcTextTest extends TestCase {
     public function testIrcText(): void {

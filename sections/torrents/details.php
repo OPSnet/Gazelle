@@ -482,7 +482,8 @@ if (!$torrentList) {
                 </td>
                 <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
             </tr>
-            <tr class="releases_<?=$tgroup->releaseType() ?> groupid_<?=$tgroupId?> edition_<?=$EditionID?> torrentdetails pad <?php if (!isset($_GET['torrentid']) || $_GET['torrentid'] != $TorrentID) { ?>hidden<?php } ?>" id="torrent_<?=$TorrentID; ?>">
+            <tr class="releases_<?=$tgroup->releaseType() ?> groupid_<?=$tgroupId?> edition_<?=$EditionID?> torrentdetails pad <?php if (!isset($_GET['torrentid']) || $_GET['torrentid'] != $TorrentID) {
+?>hidden<?php } ?>" id="torrent_<?=$TorrentID; ?>">
                 <td colspan="5">
                     <div id="release_<?=$TorrentID?>" class="no_overflow">
                         <blockquote>
@@ -492,7 +493,7 @@ if (!$torrentList) {
         $total = count($folderClash);
         if ($total > 1) {
 ?>
-        <strong class="important">The folder of this upload clashes with <?= $total-1 ?> other upload<?= plural($total-1) ?>.<br />
+        <strong class="important">The folder of this upload clashes with <?= $total - 1 ?> other upload<?= plural($total - 1) ?>.<br />
         Downloading two or more uploads to the same folder may result in corrupted files.</strong>
         <ul class="nobullet">
 <?php

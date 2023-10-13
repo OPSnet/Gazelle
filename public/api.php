@@ -11,8 +11,8 @@ if (isset($_GET['clearcache'])) {
     unset($_GET['clearcache']);
 }
 
-header('Expires: '.date('D, d M Y H:i:s', time() + (2 * 60 * 60)).' GMT');
-header('Last-Modified: '.date('D, d M Y H:i:s').' GMT');
+header('Expires: ' . date('D, d M Y H:i:s', time() + (2 * 60 * 60)) . ' GMT');
+header('Last-Modified: ' . date('D, d M Y H:i:s') . ' GMT');
 header('Content-type: application/json');
 
 require_once(__DIR__ . '/../lib/bootstrap.php');

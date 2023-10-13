@@ -1,6 +1,6 @@
 <?php
 
-use \PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\TestCase;
 
 require_once(__DIR__ . '/../../lib/bootstrap.php');
 require_once(__DIR__ . '/../helper.php');
@@ -28,7 +28,7 @@ class WikiTest extends TestCase {
         }
     }
 
-    function providerAlias(): array {
+    public function providerAlias(): array {
         return [
             ['alias', 'alias  ', 'wiki-clean-alias-trim'],
             ['alias', 'a.l=i+a-s', 'wiki-clean-alias-regexp'],
@@ -116,7 +116,7 @@ class WikiTest extends TestCase {
         $newAlias = \Gazelle\Wiki::normalizeAlias('alias' . randomString(20));
         $this->assertEquals(1, $article->addAlias($newAlias, $this->userList['admin']), 'wiki-add-ok-alias');
 
-        $this->expectException(\Gazelle\DB\Mysql_DuplicateKeyException::class);
+        $this->expectException(\Gazelle\DB\MysqlDuplicateKeyException::class);
         $article->addAlias($newAlias, $this->userList['admin']);
     }
 

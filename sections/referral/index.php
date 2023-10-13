@@ -64,7 +64,7 @@ View::show_header('External Tracker Referrals');
         </form>
     </div>
 <?php
-} else if ($_POST['action'] == 'account') {
+} elseif ($_POST['action'] == 'account') {
     $Token = $ReferralManager->generateToken();
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
@@ -98,7 +98,7 @@ View::show_header('External Tracker Referrals');
     </div>
 </div>
 <?php
-} else if ($_POST['action'] == 'verify') {
+} elseif ($_POST['action'] == 'verify') {
     $Token = $_SESSION['referral_token'];
     if ($Token != $_POST['token']) {
         header("Location: referral.php");
@@ -121,7 +121,7 @@ View::show_header('External Tracker Referrals');
                 [$Success, $Invite] = $ReferralManager->generateInvite($Account, $_POST['username'], $Email);
                 if (!$Success) {
                     $Error = $Invite;
-                } else if ($Invite === false) {
+                } elseif ($Invite === false) {
                     $Error = "Failed to generate invite.";
                 }
             }

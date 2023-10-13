@@ -18,7 +18,7 @@ class Artist extends \Gazelle\BaseObject {
             return $this->info;
         }
         $key = sprintf(self::CACHE_KEY, $this->id);
-        $info =self::$cache->get_value($key);
+        $info = self::$cache->get_value($key);
         if ($info === false) {
             $info = self::$db->rowAssoc("
                 SELECT count(*)                    AS torrent_total,

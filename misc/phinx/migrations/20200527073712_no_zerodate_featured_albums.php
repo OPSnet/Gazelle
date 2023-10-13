@@ -17,4 +17,3 @@ class NoZerodateFeaturedAlbums extends AbstractMigration {
         ");
     }
 }
-

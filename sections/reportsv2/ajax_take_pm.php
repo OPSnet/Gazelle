@@ -29,7 +29,7 @@ if (!isset($_POST['from_delete'])) {
 
 $reportType = (new Gazelle\Manager\Torrent\ReportType)->findByType($_POST['resolve_type'] ?? '');
 
-switch($_POST['pm_type']) {
+switch ($_POST['pm_type']) {
     case 'Uploader':
         $ToID = (int)$_POST['uploaderid'];
         if ($Report) {

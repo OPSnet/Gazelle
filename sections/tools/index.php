@@ -233,8 +233,10 @@ switch ($_REQUEST['action']) {
     case 'donor_rewards':
         require_once('finances/donor_rewards.php');
         break;
+
     case 'payment_alter':
         require_once('finances/payment_alter.php');
+        break;
 
     case 'payment_list':
         require_once('finances/payment_list.php');

@@ -65,7 +65,7 @@ class Wiki extends BaseObject {
     /**
      * Normalize an alias
      */
-    static public function normalizeAlias(string $alias): string {
+    public static function normalizeAlias(string $alias): string {
         return trim(substr(preg_replace('/[^a-z0-9]/', '', strtolower(htmlentities(trim($alias)))), 0, 50));
     }
 
@@ -180,7 +180,7 @@ class Wiki extends BaseObject {
     /**
      * Add an alias to an existing article
      *
-     * @throws DB\Mysql_DuplicateKeyException if alias already exists on another article
+     * @throws DB\MysqlDuplicateKeyException if alias already exists on another article
      */
     public function addAlias(string $alias, User $user): int {
         self::$db->prepared_query("

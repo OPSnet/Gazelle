@@ -6,11 +6,11 @@ function class_list(int $Selected = 0): string {
     $Classes = (new Gazelle\Manager\User)->classList();
     foreach ($Classes as $Class) {
         if ($Class['Level'] <= $Viewer->effectiveClass()) {
-            $Return.='<option value="'.$Class['Level'].'"';
+            $Return .= '<option value="' . $Class['Level'] . '"';
             if ($Selected == $Class['Level']) {
-                $Return.=' selected="selected"';
+                $Return .= ' selected="selected"';
             }
-            $Return.='>'.shortenString($Class['Name'], 20, true).'</option>'."\n";
+            $Return .= '>' . shortenString($Class['Name'], 20, true) . '</option>' . "\n";
         }
     }
     return $Return;

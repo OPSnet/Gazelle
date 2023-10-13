@@ -8,4 +8,3 @@ class Peerupdate extends \Gazelle\Task {
         $this->processed += $updated;
     }
 }
-

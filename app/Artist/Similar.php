@@ -276,7 +276,7 @@ class Similar extends \Gazelle\Base {
         $layout = [];
         $angle = fmod($this->id(), 2 * M_PI);
         $golden = M_PI * (3 - sqrt(5));
-        foreach (range(0, $nrSimilar-1) as $r) {
+        foreach (range(0, $nrSimilar - 1) as $r) {
             $layout[] = $angle;
             $angle = fmod($angle + $golden, 2 * M_PI);
         }
@@ -295,7 +295,7 @@ class Similar extends \Gazelle\Base {
         // For all artists with relations, sort their relations list by least relations first.
         // The idea is to have other artists that are only related to this one close by.
         foreach ($similar as &$s) {
-            if ($s['nrRelated'] < 2)  {
+            if ($s['nrRelated'] < 2) {
                 // trivial case
                 continue;
             }
@@ -335,7 +335,7 @@ class Similar extends \Gazelle\Base {
                 // Rotate the layout angles to fit this artist in, so that we can
                 // pick the first and last angles off the layout list below.
                 $move = (int)ceil(($relatedToPlace + 1) / 2);
-                $layout = [...array_slice($layout, $move, NULL, true), ...array_slice($layout, 0, $move, true)];
+                $layout = [...array_slice($layout, $move, null, true), ...array_slice($layout, 0, $move, true)];
             }
             if (!($relatedTotal > 0 && $seen > 1)) {
                 $angle = array_shift($layout);
@@ -361,7 +361,7 @@ class Similar extends \Gazelle\Base {
                         $bestPrevAngle = min($bestPrevAngle, $prevAngleDistance);
                     }
                 }
-                if (fmod($bestNextAngle, 2 * M_PI) < fmod($bestPrevAngle, 2 * M_PI))  {
+                if (fmod($bestNextAngle, 2 * M_PI) < fmod($bestPrevAngle, 2 * M_PI)) {
                     $angle = array_shift($layout);
                     $up = false;
                 } else {

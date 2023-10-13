@@ -3,7 +3,6 @@
 namespace Gazelle\Better;
 
 class Artwork extends AbstractBetter {
-
     public function mode(): string {
         return 'group';
     }

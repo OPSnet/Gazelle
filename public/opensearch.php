@@ -11,7 +11,7 @@ $Type = in_array(($_GET['type'] ?? ''), ['torrents','artists','requests','forums
 echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
 
 <OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/" xmlns:moz="http://www.mozilla.org/2006/browser/search/">
-    <ShortName><?=SITE_NAME.' '.ucfirst($Type)?></ShortName>
+    <ShortName><?=SITE_NAME . ' ' . ucfirst($Type)?></ShortName>
     <Description>Search <?=SITE_NAME?> for <?=ucfirst($Type)?></Description>
     <Developer></Developer>
     <Image width="16" height="16" type="image/x-icon"><?= SITE_URL ?>/favicon.ico</Image>

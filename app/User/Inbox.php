@@ -104,7 +104,7 @@ class Inbox extends \Gazelle\BaseUser {
             $args[] = $this->searchTerm;
         }
         if (isset($this->filter)) {
-            switch($this->filter) {
+            switch ($this->filter) {
                 case 'system':
                     $cond[] = "cu2.UserID IS NULL";
                     break;

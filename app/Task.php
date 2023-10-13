@@ -2,7 +2,7 @@
 
 namespace Gazelle;
 
-use \Gazelle\Util\Irc;
+use Gazelle\Util\Irc;
 
 abstract class Task extends Base {
     protected array $events = [];
@@ -40,7 +40,7 @@ abstract class Task extends Base {
             ', 'completed', $errorCount, $this->processed, $elapsed, $this->historyId
         );
 
-        echo("DONE! (".number_format(microtime(true) - $this->startTime, 3).")\n");
+        echo("DONE! (" . number_format(microtime(true) - $this->startTime, 3) . ")\n");
 
         foreach ($this->events as $event) {
             printf("%s [%s] (%d) %s\n", $event->timestamp, $event->severity, $event->reference, $event->event);
@@ -61,7 +61,7 @@ abstract class Task extends Base {
 
             Irc::sendMessage(LAB_CHAN, 'Task ' . $this->name . ' is no longer sane ' . SITE_URL . '/tools.php?action=periodic&mode=detail&id=' . $this->taskId);
             // todo: send notifications to appropriate users
-        } else if ($errorCount == 0 && !$sane) {
+        } elseif ($errorCount == 0 && !$sane) {
             self::$db->prepared_query('
                 UPDATE periodic_task SET
                     is_sane = TRUE

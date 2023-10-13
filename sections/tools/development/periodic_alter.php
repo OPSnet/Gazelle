@@ -26,7 +26,7 @@ if ($p['submit'] == 'Delete') {
     $err = $Val->validate($p) ? false : $Val->errorMessage();
 
     if (!$scheduler::isClassValid($p['classname'])) {
-        $err = "Couldn't import class ".$p['classname'];
+        $err = "Couldn't import class " . $p['classname'];
     }
 
     if ($err) {

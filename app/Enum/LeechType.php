@@ -8,7 +8,7 @@ enum LeechType: string {
     case Neutral = '2';
 
     public function label(): string {
-        return match($this) {
+        return match ($this) {
             LeechType::Normal  => 'Normal',
             LeechType::Neutral => 'Neutral Leech',
             LeechType::Free    => 'Freeleech', /** @phpstan-ignore-line */

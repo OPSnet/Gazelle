@@ -95,7 +95,7 @@ class UserLink extends \Gazelle\BaseUser {
         return true;
     }
 
-    function addGroupComments(string $comments, string $adminName, bool $updateNote): void {
+    public function addGroupComments(string $comments, string $adminName, bool $updateNote): void {
         $groupId = $this->groupId($this->user);
         $oldHash = self::$db->scalar("
             SELECT sha1(Comments) AS CommentHash
@@ -124,7 +124,7 @@ class UserLink extends \Gazelle\BaseUser {
         }
     }
 
-    function info(): array {
+    public function info(): array {
         $sourceId = $this->user->id();
         [$linkedGroupId, $comments] = self::$db->row("
             SELECT d.ID, d.Comments
@@ -146,7 +146,7 @@ class UserLink extends \Gazelle\BaseUser {
         return [$linkedGroupId, $comments ?? '', self::$db->to_array(false, MYSQLI_ASSOC, false)];
     }
 
-    function remove(\Gazelle\User $target, string $adminName): int {
+    public function remove(\Gazelle\User $target, string $adminName): int {
         $targetId = $target->id();
         self::$db->prepared_query("
             UPDATE users_info AS i
@@ -170,7 +170,7 @@ class UserLink extends \Gazelle\BaseUser {
         return self::$db->affected_rows();
     }
 
-    function removeGroup(int $linkGroupId): int {
+    public function removeGroup(int $linkGroupId): int {
         self::$db->prepared_query("
             DELETE FROM dupe_groups WHERE ID = ?
             ", $linkGroupId

@@ -9,7 +9,7 @@ enum AvatarDisplay: int {
     case forceSynthetic    = 3;
 
     public function label(): string {
-        return match($this) {
+        return match ($this) {
             AvatarDisplay::show              => 'show',
             AvatarDisplay::none              => 'none',
             AvatarDisplay::fallbackSynthetic => 'fallbackSynthetic',

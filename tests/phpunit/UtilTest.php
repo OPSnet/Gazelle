@@ -1,7 +1,7 @@
 <?php
 
-use \PHPUnit\Framework\TestCase;
-use \Gazelle\Enum\CacheBucket;
+use PHPUnit\Framework\TestCase;
+use Gazelle\Enum\CacheBucket;
 
 require_once(__DIR__ . '/../../lib/bootstrap.php');
 

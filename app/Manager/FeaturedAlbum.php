@@ -93,7 +93,7 @@ class FeaturedAlbum extends \Gazelle\BaseManager {
             return null;
         }
         return new \Gazelle\FeaturedAlbum(
-            match((int)$type) {
+            match ((int)$type) {
                 1       => FeaturedAlbumType::Showcase,
                 default => FeaturedAlbumType::AlbumOfTheMonth,
             },

@@ -49,7 +49,7 @@ class Token extends \Gazelle\BaseUser {
     }
 
     public function type(): UserTokenType {
-        return match($this->info()['type']) {
+        return match ($this->info()['type']) {
             'confirm' => UserTokenType::confirm,
             'mfa'     => UserTokenType::mfa,
             default   => UserTokenType::password,

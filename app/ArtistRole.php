@@ -80,28 +80,28 @@ abstract class ArtistRole extends \Gazelle\Base {
             return $link = '';
         }
 
-        $and = match($mode) {
+        $and = match ($mode) {
             self::RENDER_HTML => ' &amp; ',
             default           => ' and ',
         };
 
         $chunk = [];
         if ($djCount > 0) {
-            $chunk[] = match($djCount) {
+            $chunk[] = match ($djCount) {
                 1 => $this->artistLink($mode, $roleList['dj'][0]),
                 2 => $this->artistLink($mode, $roleList['dj'][0]) . $and . $this->artistLink($mode, $roleList['dj'][1]),
                 default => $this->various('DJs', $roleList['dj'], $mode),
             };
         } else {
             if ($composerCount > 0) {
-                $chunk[] = match($composerCount) {
+                $chunk[] = match ($composerCount) {
                     1 => $this->artistLink($mode, $roleList['composer'][0]),
                     2 => $this->artistLink($mode, $roleList['composer'][0]) . $and . $this->artistLink($mode, $roleList['composer'][1]),
                     default => $this->various('Composers', $roleList['composer'], $mode),
                 };
                 if ($arrangerCount > 0) {
                     $chunk[] = 'arranged by';
-                    $chunk[] = match($arrangerCount) {
+                    $chunk[] = match ($arrangerCount) {
                         1 => $this->artistLink($mode, $roleList['arranger'][0]),
                         2 => $this->artistLink($mode, $roleList['arranger'][0]) . $and . $this->artistLink($mode, $roleList['arranger'][1]),
                         default => $this->various('Arrangers', $roleList['arranger'], $mode),
@@ -119,7 +119,7 @@ abstract class ArtistRole extends \Gazelle\Base {
                 $chunk[] = 'Various Artists';
             } else {
                 if ($mainCount > 0) {
-                    $chunk[] = match($mainCount) {
+                    $chunk[] = match ($mainCount) {
                         1 => $this->artistLink($mode, $roleList['main'][0]),
                         2 => $this->artistLink($mode, $roleList['main'][0]) . $and . $this->artistLink($mode, $roleList['main'][1]),
                         default => $this->various('Artists', $roleList['main'], $mode),
@@ -130,7 +130,7 @@ abstract class ArtistRole extends \Gazelle\Base {
                     if ($mainCount + $composerCount > 0 && ($composerCount < 3 || $mainCount > 0)) {
                         $chunk[] = 'under';
                     }
-                    $chunk[] = match($conductorCount) {
+                    $chunk[] = match ($conductorCount) {
                         1 => $this->artistLink($mode, $roleList['conductor'][0]),
                         2 => $this->artistLink($mode, $roleList['conductor'][0]) . $and . $this->artistLink($mode, $roleList['conductor'][1]),
                         default => $this->various('Conductors', $roleList['conductor'], $mode),

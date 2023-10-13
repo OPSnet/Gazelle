@@ -7,4 +7,3 @@ class UserLastAccess extends \Gazelle\Task {
         $this->processed += (new \Gazelle\Manager\User)->updateLastAccess();
     }
 }
-

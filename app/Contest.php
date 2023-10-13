@@ -262,7 +262,7 @@ class Contest extends BaseObject {
         $n = self::$db->affected_rows();
         self::$db->commit();
         /* recache the pages */
-        $pages = range(0, (int)(ceil($n)/CONTEST_ENTRIES_PER_PAGE) - 1);
+        $pages = range(0, (int)(ceil($n) / CONTEST_ENTRIES_PER_PAGE) - 1);
         foreach ($pages as $p) {
             self::$cache->delete_value(sprintf(self::CONTEST_LEADERBOARD_CACHE_KEY, $this->id, $p));
             $this->type()->leaderboard(CONTEST_ENTRIES_PER_PAGE, $p); /** @phpstan-ignore-line */
@@ -314,7 +314,7 @@ class Contest extends BaseObject {
             if ($p['total_entries']) {
                 $totalGain += $contestBonus + ($perEntryBonus * $p['total_entries']);
             }
-            $log = date('Y-m-d H:i:s') ." {$user->label()} n={$p['total_entries']} t={$totalGain}";
+            $log = date('Y-m-d H:i:s') . " {$user->label()} n={$p['total_entries']} t={$totalGain}";
             if ($user->hasAttr('no-fl-gifts') || $user->hasAttr('disable-bonus-points')) {
                 fwrite($report, "$log DECLINED\n");
                 continue;

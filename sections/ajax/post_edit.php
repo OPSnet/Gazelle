@@ -24,7 +24,7 @@ $history = $commentMan->loadEdits($pageType, $postId);
 if ($depth != 0) {
     $body = $history[$depth - 1][2];
 } else {
-    $body = match($pageType) {
+    $body = match ($pageType) {
         'forums' => (new Gazelle\Manager\ForumPost)->findById($postId)->body(),
         default  => $commentMan->findById($postId)->body(),
     };
