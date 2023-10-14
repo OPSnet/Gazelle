@@ -25,9 +25,9 @@ define('BOT_SERVER', 'irc.example.com');
 // If your database is on the same host as the PHP interpreter
 define('SQLSOCK', '/var/run/mysqld/mysqld.sock');
 
-define('SQLDB',    'thisisfine');
-define('SQLLOGIN', 'thisisfine');
-define('SQLPASS',  'thisisfine');
+define('SQLDB',    'changeme');
+define('SQLLOGIN', 'changeme');
+define('SQLPASS',  'changeme');
 
 define('SQL_PHINX_USER', 'thisis.phinx');
 define('SQL_PHINX_PASS', 'thisis.phinx');
@@ -41,10 +41,11 @@ define('SPHINXQL_SOCK', '/var/run/sphinx.sock');
 define('TRACKER_SECRET',    '0123456789abcdef0123456789abcdef01');
 define('TRACKER_REPORTKEY', '0123456789abcdef0123456789abcdef01');
 
-define('ENCKEY',       'thisisfine');
-define('RSS_HASH',     'thisisfine');
-define('SEEDBOX_SALT', 'thisisfine');
-define('AVATAR_SALT',  'thisisfine');
+define('ENCKEY',       'changeme');
+define('AUTHKEY',      'changeme');
+define('RSS_HASH',     'changeme');
+define('SEEDBOX_SALT', 'changeme');
+define('AVATAR_SALT',  'changeme');
 
 define('PARANOIA_PREVIEW_USER', 1);
 

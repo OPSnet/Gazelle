@@ -120,19 +120,20 @@ defined('TOP_TEN_HEADING') or define('TOP_TEN_HEADING', 'Top 10');
 // Secrets
 // ALL OF THESE MUST BE OVERRIDDEN
 
-// Symmetric encryption key for cookies and API tokens. Changing this after
+// Symmetric encryption and auth key for cookies. Changing this after
 // the site is launched will invalidate everyone's sessions and tokens.
 // This may be what you need in the event of a compromise.
-defined('ENCKEY') or define('ENCKEY', 'thisisfine');
+defined('ENCKEY') or define('ENCKEY', 'changeme');
+defined('AUTHKEY') OR define('AUTHKEY', 'changeme');
 
 // Extra salt added into RSS authentication
-defined('RSS_HASH') or define('RSS_HASH', 'thisisfine');
+defined('RSS_HASH') or define('RSS_HASH', 'changeme');
 
 // Seedbox ids are hashified with this salt.
-defined('SEEDBOX_SALT') or define('SEEDBOX_SALT', 'thisisfine');
+defined('SEEDBOX_SALT') or define('SEEDBOX_SALT', 'changeme');
 
 // User avatars are hashed with this salt.
-defined('AVATAR_SALT') or define('AVATAR_SALT', 'thisisfine');
+defined('AVATAR_SALT') or define('AVATAR_SALT', 'changeme');
 
 // ------------------------------------------------------------------------
 // MySQL settings
@@ -272,7 +273,7 @@ defined('CACHE_ID') or define('CACHE_ID', 'ops');
 defined('IMAGE_CACHE_ENABLED') or define('IMAGE_CACHE_ENABLED', false);
 
 // When local image caching is enabled, this is used to define the cache names of assets
-defined('IMAGE_CACHE_SECRET') or define('IMAGE_CACHE_SECRET', 'thisisfine');
+defined('IMAGE_CACHE_SECRET') or define('IMAGE_CACHE_SECRET', 'changeme');
 
 // When local image caching is enabled, this hostname is used.
 defined('IMAGE_CACHE_HOST') or define('IMAGE_CACHE_HOST', SITE_URL);
@@ -644,7 +645,7 @@ defined('RECOVERY') or define('RECOVERY', false);
 defined('RECOVERY_BUFFER') or define('RECOVERY_BUFFER', false);
 
 // Random salt for generating temporary filenames
-defined('RECOVERY_SALT') or define('RECOVERY_SALT', 'thisisfine');
+defined('RECOVERY_SALT') or define('RECOVERY_SALT', 'changeme');
 
 // Where are uploads for recovery proof stored?
 defined('RECOVERY_PATH') or define('RECOVERY_PATH', '');
@@ -677,7 +678,7 @@ defined('RECOVERY_ADMIN_NAME') or define('RECOVERY_ADMIN_NAME', 'RecoveryBot');
 defined('RECOVERY_BUFFER_REASSIGN_LIMIT') or define('RECOVERY_BUFFER_REASSIGN_LIMIT', 100);
 
 // Security check to prevent <form> stuffing
-defined('RECOVERY_PAIR_SALT') or define('RECOVERY_PAIR_SALT', 'thisisfine');
+defined('RECOVERY_PAIR_SALT') or define('RECOVERY_PAIR_SALT', 'changeme');
 
 // ------------------------------------------------------------------------
 // Permission.ID labels

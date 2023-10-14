@@ -97,7 +97,7 @@ class Session extends \Gazelle\BaseUser {
     }
 
     public function cookie(string $sessionId): string {
-        return Crypto::encrypt(Crypto::encrypt($sessionId . '|~|' . $this->user->id(), ENCKEY), ENCKEY);
+        return Crypto::encrypt($sessionId . '|~|' . $this->user->id(), ENCKEY);
     }
 
     public function drop(string $sessionId): int {

@@ -29,8 +29,12 @@ class Proxy {
         curl_setopt($curl, CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']);
         curl_setopt($curl, CURLOPT_POSTFIELDS, self::urlEncode($data));
         $result = curl_exec($curl);
+        $result = Crypto::decrypt(self::urlDecode($result), $this->key);
 
-        return json_decode(Crypto::decrypt(self::urlDecode($result), $this->key), true);
+        if ($result === false) {
+            return '';
+        }
+        return json_decode($result, true);
     }
 
     public static function urlEncode($data) {

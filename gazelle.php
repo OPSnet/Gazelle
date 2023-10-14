@@ -63,42 +63,45 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
         json_die('failure', $result);
     }
 } elseif (isset($_COOKIE['session'])) {
-    $cookie = Crypto::decrypt($_COOKIE['session'], ENCKEY);
-    if ($cookie != false) {
-        [$SessionID, $userId] = explode('|~|', Crypto::decrypt($cookie, ENCKEY));
-        $Viewer = $userMan->findById((int)$userId);
-        if (is_null($Viewer)) {
-            setcookie('session', '', [
-                'expires'  => time() - 60 * 60 * 24 * 90,
-                'path'     => '/',
-                'secure'   => !DEBUG_MODE,
-                'httponly' => true,
-                'samesite' => 'Lax',
-            ]);
-            header('Location: login.php');
-            exit;
-        }
-        if ($Viewer->isDisabled() && !in_array($Document, ['index', 'login'])) {
-            $Viewer->logoutEverywhere();
-            header('Location: login.php');
-            exit;
-        }
-        $session = new Gazelle\User\Session($Viewer);
-        if (!$session->valid($SessionID)) {
-            $Viewer->logout($SessionID);
-            header('Location: login.php');
-            exit;
-        }
-        $browser = parse_user_agent($_SERVER['HTTP_USER_AGENT']);
-        if ($Viewer->permitted('site_disable_ip_history')) {
-            $ipaddr = '127.0.0.1';
-            $browser['BrowserVersion'] = null;
-            $browser['OperatingSystemVersion'] = null;
-        } else {
-            $ipaddr = $_SERVER['REMOTE_ADDR'];
-        }
-        $session->refresh($SessionID, $ipaddr, $browser);
+    $forceLogout = function (): never {
+        setcookie('session', '', [
+            'expires'  => time() - 60 * 60 * 24 * 90,
+            'path'     => '/',
+            'secure'   => !DEBUG_MODE,
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
+        header('Location: login.php');
+        exit;
+    };
+    $cookieData = Crypto::decrypt($_COOKIE['session'], ENCKEY);
+    if ($cookieData === false) {
+        $forceLogout();
     }
+    [$SessionID, $userId] = explode('|~|', $cookieData);
+    $Viewer = $userMan->findById((int)$userId);
+    if (is_null($Viewer)) {
+        $forceLogout();
+    }
+    if ($Viewer->isDisabled() && !in_array($Document, ['index', 'login'])) {
+        $Viewer->logoutEverywhere();
+        $forceLogout();
+    }
+    $session = new Gazelle\User\Session($Viewer);
+    if (!$session->valid($SessionID)) {
+        $Viewer->logout($SessionID);
+        $forceLogout();
+    }
+    $browser = parse_user_agent($_SERVER['HTTP_USER_AGENT']);
+    if ($Viewer->permitted('site_disable_ip_history')) {
+        $ipaddr = '127.0.0.1';
+        $browser['BrowserVersion'] = null;
+        $browser['OperatingSystemVersion'] = null;
+    } else {
+        $ipaddr = $_SERVER['REMOTE_ADDR'];
+    }
+    $session->refresh($SessionID, $ipaddr, $browser);
+    unset($ipaddr, $browser, $session, $userId, $cookieData, $forceLogout);
 } elseif ($Document === 'torrents' && ($_REQUEST['action'] ?? '') == 'download' && isset($_REQUEST['torrent_pass'])) {
     $Viewer = $userMan->findByAnnounceKey($_REQUEST['torrent_pass']);
     if (is_null($Viewer) || $Viewer->isDisabled() || $Viewer->isLocked()) {

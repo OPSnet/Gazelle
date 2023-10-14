@@ -87,15 +87,15 @@ class User extends \Gazelle\BaseManager {
         } else {
             return [false, 'invalid authorization type, must be "token"'];
         }
-        $userId = (int)substr(
-            \Gazelle\Util\Crypto::decrypt(
-                base64_decode(str_pad(strtr($token, '-_', '+/'), strlen($token) % 4, '=', STR_PAD_RIGHT)),
-                ENCKEY
-            ),
-            32
+        $userId = (int)self::$db->scalar("
+            SELECT user_id FROM api_tokens WHERE token = ?
+            ", $token
         );
         $user = $this->findById($userId);
-        if (is_null($user) || !$user->hasApiToken($token) || $user->isDisabled() || $user->isLocked()) {
+        if (is_null($user)) {
+            // FIXME: should do some ip banning here too
+            return [false, 'invalid token'];
+        } elseif ($user->isDisabled() || $user->isLocked() || !$user->hasApiToken($token)) {
             $watch = new \Gazelle\LoginWatch($ipaddr);
             $watch->increment($userId, "[usertoken:$userId]");
             if ($watch->nrAttempts() >= 5) {

@@ -2011,23 +2011,20 @@ class User extends BaseObject {
     }
 
     public function createApiToken(string $name, string $key): string {
-        $suffix = sprintf('%014d', $this->id);
-
         while (true) {
-            // prevent collisions with an existing token name
-            $token = Util\Text::base64UrlEncode(Util\Crypto::encrypt(random_bytes(32) . $suffix, $key));
-            if (!$this->hasApiToken($token)) {
-                break;
+            // prevent collisions with an existing token
+            $token = base64_encode(random_bytes(87));
+            try {
+                self::$db->prepared_query("
+                    INSERT INTO api_tokens
+                           (user_id, name, token)
+                    VALUES (?,       ?,    ?)
+                    ", $this->id, $name, $token
+                );
+                return $token;
+            } catch (\Gazelle\DB\MysqlDuplicateKeyException) {
             }
         }
-
-        self::$db->prepared_query("
-            INSERT INTO api_tokens
-                   (user_id, name, token)
-            VALUES (?,       ?,    ?)
-            ", $this->id, $name, $token
-        );
-        return $token;
     }
 
     public function apiTokenList(bool $revoked = false): array {
