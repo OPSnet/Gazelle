@@ -66,6 +66,14 @@ class Comment extends \Gazelle\BaseManager {
         return new $className($pageId, 0, $postId); /** @phpstan-ignore-line */
     }
 
+    public function findBodyById(int $postId): ?string {
+        $body = self::$db->scalar("
+            SELECT Body FROM comments WHERE ID = ?
+            ", $postId
+        );
+        return is_null($body) ? null : (string)$body;
+    }
+
     public function merge(string $page, int $pageId, int $targetPageId): int {
         self::$db->prepared_query("
             UPDATE comments SET

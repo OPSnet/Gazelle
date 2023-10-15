@@ -76,7 +76,9 @@ class CommentTest extends TestCase {
         );
 
         $manager = new \Gazelle\Manager\Comment;
-        $comment = $manager->create($this->user, 'collages', $this->collage->id(), 'phpunit comment ' . randomString(10));
+        $body    = 'phpunit comment ' . randomString(10);
+        $comment = $manager->create($this->user, 'collages', $this->collage->id(), $body);
+        $this->assertEquals($body, $manager->findBodyById($comment->id()), 'comment-find-body');
         $this->assertInstanceOf(\Gazelle\Comment\Collage::class, $comment, 'comment-collage-create');
         $this->assertEquals('collages', $comment->page(), 'comment-collage-page');
         $this->assertEquals(
