@@ -274,15 +274,9 @@ class Bookmark extends \Gazelle\BaseUser {
 
     /**
      * Remove a bookmark of an object by a user
-     *
-     * @param string $type (on of artist, collage, request, torrent)
-     * @param int $id The ID of the object
      */
     public function remove(string $type, int $id): int {
         [$table, $column] = $this->schema($type);
-        if (!$id) {
-            throw new \Gazelle\Exception\BookmarkIdentifierException((string)$id);
-        }
         self::$db->prepared_query("
             DELETE FROM $table WHERE UserID = ?  AND $column = ?
             ", $this->user->id(), $id
