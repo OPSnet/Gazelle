@@ -3,8 +3,19 @@
 use PHPUnit\Framework\TestCase;
 
 require_once(__DIR__ . '/../../lib/bootstrap.php');
+require_once(__DIR__ . '/../helper.php');
 
 class TextTest extends TestCase {
+    protected array $userList;
+
+    public function tearDown(): void {
+        if (isset($this->userList)) {
+            foreach ($this->userList as $user) {
+                $user->remove();
+            }
+        }
+    }
+
     // for phpunit v10: #[DataProvider('dataTeX')]
     /**
      * @dataProvider dataTeX
@@ -26,15 +37,13 @@ class TextTest extends TestCase {
      * @dataProvider dataBB
      */
     public function testBB(string $name, string $bbcode, string $expected): void {
-        global $Viewer;
-        $Viewer = (new Gazelle\Manager\User)->find('@user');
-        Text::setViewer($Viewer);
+        $this->userList['user'] = Helper::makeUser('bb.' . randomString(6), 'text');
+        Text::setViewer($this->userList['user']);
         $this->assertEquals($expected, Text::full_format($bbcode), $name);
     }
 
     public static function dataBB(): array {
-        $url       = 'https://www.example.com/';
-        $user      = (new Gazelle\Manager\User)->find('@user');
+        $url  = 'https://www.example.com/';
 
         return [
             ["text-align-l",    "[align=left]o[/align]",         "<div style=\"text-align: left;\">o</div>"],
@@ -67,16 +76,9 @@ class TextTest extends TestCase {
             ["text-hide",       "[hide]secret[/hide]",
                 "<strong>Hidden text</strong>: <a href=\"javascript:void(0);\" onclick=\"BBCode.spoiler(this);\">Show</a><blockquote class=\"hidden spoiler\">secret</blockquote>"
             ],
-            ["text-mature",     "[mature]titties[/mature]",
-                "<span class=\"mature_blocked\" style=\"font-style: italic;\"><a href=\"wiki.php?action=article&amp;id=1063\">Mature content</a> has been blocked. You can choose to view mature content by editing your <a href=\"user.php?action=edit&amp;id={$user->id()}\">settings</a>.</span>"
-            ],
             ["text-spoiler",    "[spoiler]surprise[/spoiler]",
                 "<strong>Hidden text</strong>: <a href=\"javascript:void(0);\" onclick=\"BBCode.spoiler(this);\">Show</a><blockquote class=\"hidden spoiler\">surprise</blockquote>"
             ],
-
-            ["text-user-1",     "[user]user[/user]", "<a href=\"user.php?action=search&amp;search=user\">user</a>"],
-            ["text-user-2",     "@user",             "<a href=\"user.php?id={$user->id()}\">@user</a>"],
-            ["text-user-3",     "@user.",            "<a href=\"user.php?id={$user->id()}\">@user</a>."],
 
             ["text-emoji",      ":nod:",             "<img border=\"0\" src=\"" . STATIC_SERVER . "/common/smileys/nod.gif\" alt=\"\" />"],
 
@@ -108,9 +110,10 @@ class TextTest extends TestCase {
     }
 
     public function testCollage(): void {
-        $admin   = (new Gazelle\Manager\User)->find('@admin');
+        $this->userList['admin'] = Helper::makeUser('collage.' . randomString(6), 'text');
+        $this->userList['admin']->setField('PermissionID', SYSOP)->modify();
         $name    = 'collage ' . randomString(6);
-        $collage = (new Gazelle\Manager\Collage)->create($admin, 1, $name, 'phpunit collage', 'jazz,disco', new Gazelle\Log);
+        $collage = (new Gazelle\Manager\Collage)->create($this->userList['admin'], 1, $name, 'phpunit collage', 'jazz,disco', new Gazelle\Log);
         $this->assertInstanceOf(Gazelle\Collage::class, $collage, 'text-create-collage');
         $this->assertEquals(
             "<a href=\"collages.php?id={$collage->id()}\">{$collage->name()}</a>",
@@ -123,21 +126,22 @@ class TextTest extends TestCase {
             'text-collage-url'
         );
         $commentMan = new Gazelle\Manager\Comment;
-        $comment    = $commentMan->create($admin, 'collages', $collage->id(), "nice collage!");
+        $comment    = $commentMan->create($this->userList['admin'], 'collages', $collage->id(), "nice collage!");
         $this->assertEquals(
             "<a href=\"{$comment->url()}\">Collages Comment #{$comment->id()}</a>",
             Text::full_format($comment->publicLocation()),
             'text-collage-comment-link'
         );
-        $this->assertEquals(1, $collage->remove(), 'text-remove-collage');
+        $this->assertEquals(1, $collage->hardRemove(), 'text-remove-collage');
     }
 
     public function testForum(): void {
-        $user = (new Gazelle\Manager\User)->find('@admin');
-        Text::setViewer($user);
+        $this->userList['admin'] = Helper::makeUser('forum.' . randomString(6), 'text');
+        $this->userList['admin']->setField('PermissionID', SYSOP)->modify();
+        Text::setViewer($this->userList['admin']);
         $name  = 'forum ' . randomString(6);
         $forum = (new Gazelle\Manager\Forum)->create(
-            user: $user,
+            user: $this->userList['admin'],
             sequence: 999,
             categoryId: 1,
             name: $name,
@@ -156,7 +160,7 @@ class TextTest extends TestCase {
         );
 
         $thread = (new Gazelle\Manager\ForumThread)->create(
-            $forum, $user->id(), "phpunit thread title", "phpunit thread body"
+            $forum, $this->userList['admin']->id(), "phpunit thread title", "phpunit thread body"
         );
 
         $postId = (int)Gazelle\DB::DB()->scalar("
@@ -192,6 +196,7 @@ class TextTest extends TestCase {
             'text-forum-post-link'
         );
 
+        $this->assertEquals(2, $thread->remove(), 'text-remove-thread');
         $this->assertEquals(1, $forum->remove(), 'text-remove-forum');
     }
 
@@ -368,5 +373,23 @@ END_HTML;
      */
     public function testSpanText(string $name, string $bbcode, string $expected): void {
         $this->assertEquals($expected, Text::span_format($bbcode), $name);
+    }
+
+    public function testUser(): void {
+        $username = 'user.' . randomString(6);
+        $this->userList['user'] = Helper::makeUser($username, 'text');
+        Text::setViewer($this->userList['user']);
+
+        $this->assertEquals("<a href=\"user.php?action=search&amp;search=$username\">$username</a>", Text::full_format("[user]{$username}[/user]"), "text-user-1");
+
+        $url = "<a href=\"user.php?id={$this->userList['user']->id()}\">@$username</a>";
+        $this->assertEquals($url, Text::full_format("@$username"), "text-user-2");
+        $this->assertEquals("$url.", Text::full_format("@$username."), "text-user-3");
+
+        $this->assertEquals(
+            "<span class=\"mature_blocked\" style=\"font-style: italic;\"><a href=\"wiki.php?action=article&amp;id=1063\">Mature content</a> has been blocked. You can choose to view mature content by editing your <a href=\"user.php?action=edit&amp;id={$this->userList['user']->id()}\">settings</a>.</span>",
+            Text::full_format("[mature]titties[/mature]"),
+            "text-mature",
+        );
     }
 }

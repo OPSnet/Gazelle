@@ -3,24 +3,31 @@
 use PHPUnit\Framework\TestCase;
 
 require_once(__DIR__ . '/../../../lib/bootstrap.php');
+require_once(__DIR__ . '/../../helper.php');
 
 class RenderUserTest extends TestCase {
-    protected \Gazelle\Manager\User $userMan;
+    protected array $userList;
 
-    public function setUp(): void {
-        $this->userMan = new \Gazelle\Manager\User;
+    public function tearDown(): void {
+        foreach ($this->userList as $user) {
+            $user->remove();
+        }
     }
 
     public function testProfile(): void {
+        $this->userList['admin'] = Helper::makeUser('admin.' . randomString(6), 'render');
+        $this->userList['user'] = Helper::makeUser('user.' . randomString(6), 'render');
+
+        $this->userList['admin']->setField('PermissionID', SYSOP)->modify();
+
         global $Viewer;
-        $Viewer = $this->userMan->find('@admin');
-        $user   = $this->userMan->find('@user');
-        $PRL    = new \Gazelle\User\PermissionRateLimit($user);
+        $Viewer = $this->userList['admin'];
+        $PRL    = new \Gazelle\User\PermissionRateLimit($this->userList['user']);
 
         $sidebar = Gazelle\Util\Twig::factory()->render('user/sidebar.twig', [
             'applicant'     => new \Gazelle\Manager\Applicant,
             'invite_source' => 'invsrc',
-            'user'          => $user,
+            'user'          => $this->userList['user'],
             'viewer'        => $Viewer,
         ]);
         $this->assertEquals(
@@ -31,16 +38,16 @@ class RenderUserTest extends TestCase {
 
         $header = Gazelle\Util\Twig::factory()->render('user/header.twig', [
             'badge_list' => (new \Gazelle\User\Privilege($Viewer))->badgeList(),
-            'bonus'      => new Gazelle\User\Bonus($user),
-            'donor'      => new Gazelle\User\Donor($user),
+            'bonus'      => new Gazelle\User\Bonus($this->userList['user']),
+            'donor'      => new Gazelle\User\Donor($this->userList['user']),
             'freeleech' => [
                 'item'  => [],
                 'other' => null,
             ],
             'friend'       => new Gazelle\User\Friend($Viewer),
-            'preview_user' => $user,
-            'user'         => $user,
-            'userMan'      => $this->userMan,
+            'preview_user' => $this->userList['user'],
+            'user'         => $this->userList['user'],
+            'userMan'      => new \Gazelle\Manager\User,
             'viewer'       => $Viewer,
         ]);
         $this->assertStringContainsString('<div class="header">', $header, 'user-header-div-header');
@@ -56,7 +63,7 @@ class RenderUserTest extends TestCase {
         $stats = Gazelle\Util\Twig::factory()->render('user/sidebar-stats.twig', [
             'prl'          => $PRL,
             'upload_total' => [],
-            'user'         => $user,
+            'user'         => $this->userList['user'],
             'viewer'       => $Viewer,
             'visible'      => [
                 'collages+'  => PARANOIA_ALLOWED,

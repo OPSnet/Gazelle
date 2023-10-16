@@ -6,21 +6,31 @@ require_once(__DIR__ . '/../../lib/bootstrap.php');
 require_once(__DIR__ . '/../helper.php');
 
 class StaffBlogTest extends TestCase {
+    protected array $userList;
+
+    public function tearDown(): void {
+        foreach ($this->userList as $user) {
+            $user->remove();
+        }
+    }
+
     public function testStaffBlog(): void {
         $_SERVER['HTTP_USER_AGENT'] = 'phpunit';
-        $mod = Helper::makeUser('mod.' . randomString(6), 'mod')
-            ->setField('PermissionID', MOD);
-        $mod->modify();
-        $this->assertEquals('Moderator', $mod->userclassName(), 'mod-userclass-check');
+        $this->userList['admin'] = Helper::makeUser('admin.' . randomString(6), 'staffblog');
+        $this->userList['mod'] = Helper::makeUser('mod.' . randomString(6), 'staffblog');
 
-        $admin   = (new Gazelle\Manager\User)->find('@admin');
+        $this->userList['admin']->setField('PermissionID', SYSOP)->modify();
+        $this->userList['mod']->setField('PermissionID', MOD)->modify();
+
+        $this->assertEquals('Moderator', $this->userList['mod']->userclassName(), 'mod-userclass-check');
+
         $manager = new Gazelle\Manager\StaffBlog;
 
-        $blog = $manager->create($admin, 'phpunit staff blog', 'body text');
+        $blog = $manager->create($this->userList['admin'], 'phpunit staff blog', 'body text');
         $this->assertInstanceOf(Gazelle\StaffBlog::class, $blog, 'staff-blog-create');
         $this->assertEquals('phpunit staff blog', $blog->title(), 'staff-blog-title');
         $this->assertEquals('body text', $blog->body(), 'staff-blog-text');
-        $this->assertEquals($admin->id(), $blog->userId(), 'staff-blog-user-id');
+        $this->assertEquals($this->userList['admin']->id(), $blog->userId(), 'staff-blog-user-id');
         $this->assertIsString($blog->created(), 'staff-blog-created');
         $this->assertIsInt($blog->epoch(), 'staff-blog-epoch');
 
@@ -30,9 +40,9 @@ class StaffBlogTest extends TestCase {
         $this->assertEquals($location, $blog->url(), 'staff-blog-url');
         $this->assertEquals(SITE_URL . "/$location", $blog->publicUrl(), 'staff-blog-public-url');
 
-        $this->assertEquals(0, $manager->readBy($mod), 'staff-blog-not-read-by-mod');
-        $this->assertGreaterThan(0, $manager->catchup($mod), 'staff-blog-viewed-by-mod');
-        $this->assertGreaterThan(0, $manager->readBy($mod), 'staff-blog-now-read-by-mod');
+        $this->assertEquals(0, $manager->readBy($this->userList['mod']), 'staff-blog-not-read-by-mod');
+        $this->assertGreaterThan(0, $manager->catchup($this->userList['mod']), 'staff-blog-viewed-by-mod');
+        $this->assertGreaterThan(0, $manager->readBy($this->userList['mod']), 'staff-blog-now-read-by-mod');
 
         if (getenv('CI') === false) {
             // FIXME: Why does this fail only during CI
@@ -40,7 +50,7 @@ class StaffBlogTest extends TestCase {
             $this->assertStringContainsString($blog->body(),
                 $Twig->render('staffblog/list.twig', [
                     'list'   => $manager->blogList(),
-                    'viewer' => $mod,
+                    'viewer' => $this->userList['mod'],
                 ]),
                 'staff-blog-twig-render'
             );
@@ -54,6 +64,5 @@ class StaffBlogTest extends TestCase {
         $this->assertEquals($blog->id(), $list[0]->id(), 'staff-blog-latest');
 
         $this->assertEquals(1, $blog->remove(), 'staff-blog-removed');
-        $this->assertEquals(1, $mod->remove(), 'mod-removed');
     }
 }
