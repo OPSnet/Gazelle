@@ -203,13 +203,13 @@ class Twig {
             }
         ));
 
-        $twig->addFunction(new \Twig\TwigFunction('header', fn($title, $options = '') => new \Twig\Markup(
-            \View::show_header($title, $options),
+        $twig->addFunction(new \Twig\TwigFunction('header', fn($title, $options = []) => new \Twig\Markup(
+            \View::header($title, $options),
             'UTF-8'
         )));
 
-        $twig->addFunction(new \Twig\TwigFunction('footer', fn($options = []) => new \Twig\Markup(
-            \View::show_footer($options),
+        $twig->addFunction(new \Twig\TwigFunction('footer', fn(bool $showDisclaimer = false) => new \Twig\Markup(
+            \View::footer($showDisclaimer),
             'UTF-8'
         )));
 

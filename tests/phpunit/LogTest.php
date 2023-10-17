@@ -93,6 +93,10 @@ class LogTest extends TestCase {
         $this->user = Helper::makeUser('sitelog.' . randomString(6), 'sitelog');
         global $Viewer;
         $Viewer = $this->user;
+        global $Document;
+        $Document = '';
+        global $SessionID;
+        $SessionID = 'phpunit';
         $html = (Gazelle\Util\Twig::factory())->render('sitelog.twig', [
             'search'    => '',
             'paginator' => $paginator,

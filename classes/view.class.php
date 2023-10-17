@@ -1,13 +1,19 @@
 <?php
+
 class View {
     /**
-     * This function is to include the header file on a page.
-     *
-     * @param string $pageTitle the title of the page
-     * @param array $option associative array which has two keys 'css' and 'js'
-     *                      where each value is a comma separated list of files to include
+     * Display the page header
+     * @param array<string> $option
      */
-    public static function show_header(string $pageTitle, $option = []) {
+    public static function show_header(string $pageTitle, array $option = []): void {
+        echo self::header($pageTitle, $option);
+    }
+
+    /**
+     * Generate the page header
+     * @param array<string> $option
+     */
+    public static function header(string $pageTitle, array $option = []): string {
         global $Document, $Twig, $Viewer;
         if ($pageTitle != '') {
             $pageTitle .= ' :: ';
@@ -34,7 +40,7 @@ class View {
                 'page_title' => $pageTitle,
                 'script'     => array_map(fn($s) => "$s.js", $js),
             ]);
-            return;
+            return '';
         }
         array_push($js, 'autocomplete', 'jquery.autocomplete', 'jquery.countdown.min');
 
@@ -134,7 +140,7 @@ class View {
                 . "><a href=\"{$Target}\">{$Title}</a></li>\n";
         }
 
-        echo $Twig->render('index/private-header.twig', [
+        return $Twig->render('index/private-header.twig', [
             'auth_args'    => "&amp;user={$Viewer->id()}&amp;passkey={$Viewer->announceKey()}&amp;authkey={$Viewer->auth()}&amp;auth={$Viewer->rssAuth()}",
             'page_title'   => $pageTitle,
             'script'       => array_map(fn($s) => "$s.js", $js),
@@ -142,8 +148,8 @@ class View {
             'scss_style'   => $scssList,
             'stylesheet'   => new \Gazelle\User\Stylesheet($Viewer),
             'viewer'       => $Viewer,
-        ]);
-        echo $Twig->render('index/page-header.twig', [
+        ])
+        . $Twig->render('index/page-header.twig', [
             'action'      => $_REQUEST['action'] ?? null,
             'action_list' => $activity->actionList(),
             'alert_list'  => $activity->alertList(),
@@ -157,18 +163,11 @@ class View {
 
     /**
      * Determine if a link should be marked as 'active'
-     *
-     * @param mixed $Target The variable to compare all values against
-     * @param mixed $Tests The condition values. Type and dimension determines test type
-     *     Scalar: $Tests must be equal to $Target for a match
-     *     Array: All elements in $Tests must correspond to equal values in $Target 2-dimensional array
-     *            At least one array must be identical to $Target
+     * @param array<mixed> $Target
+     * @param array<mixed> $Tests
      */
-    protected static function add_active($Target, $Tests, $UserIDKey = false): bool {
-        if (!is_array($Tests)) {
-            // Scalars are nice and easy
-            return $Tests === $Target;
-        } elseif (!is_array($Tests[0])) {
+    protected static function add_active(array $Target, array $Tests, bool $UserIDKey = false): bool {
+        if (!is_array($Tests[0])) {
             // Test all values in vectors
             foreach ($Tests as $Type => $Part) {
                 if (!isset($Target[$Type]) || $Target[$Type] !== $Part) {
@@ -190,20 +189,15 @@ class View {
     }
 
     /**
-     * This function is to include the footer file on a page.
-     *
-     * @param array $Options an optional array that you can pass information to the
-     *                       header through as well as setup certain limitations
-     *                         Here is a list of parameters that work in the $Options array:
-     *                       ['disclaimer'] = [boolean] (False) Displays the disclaimer in the footer
+     * Display the footer of the page
      */
-    public static function show_footer($Options = []) {
-        echo self::footer($Options);
+    public static function show_footer(): void {
+        echo self::footer();
     }
 
-    public static function footer($Options = []) {
+    public static function footer(bool $showDisclaimer = false): string {
         global $Twig, $Viewer;
-        if (!isset($Viewer) || ($Options['recover'] ?? false) === true) {
+        if (!isset($Viewer)) {
             return $Twig->render('index/public-footer.twig');
         }
 
@@ -226,7 +220,7 @@ class View {
             'cache'        => $Cache,
             'db_time'      => Gazelle\DB::DB()->Time,
             'debug'        => $Debug,
-            'disclaimer'   => isset($Options['disclaimer']),
+            'disclaimer'   => $showDisclaimer,
             'last_active'  => (new Gazelle\User\Session($Viewer))->lastActive($SessionID),
             'launch'       => $launch,
             'load'         => sys_getloadavg(),

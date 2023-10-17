@@ -391,41 +391,6 @@ parameters:
 			path: ../classes/users.class.php
 
 		-
-			message: "#^Method View\\:\\:add_active\\(\\) has parameter \\$UserIDKey with no type specified\\.$#"
-			count: 1
-			path: ../classes/view.class.php
-
-		-
-			message: "#^Method View\\:\\:footer\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../classes/view.class.php
-
-		-
-			message: "#^Method View\\:\\:footer\\(\\) has parameter \\$Options with no type specified\\.$#"
-			count: 1
-			path: ../classes/view.class.php
-
-		-
-			message: "#^Method View\\:\\:show_footer\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../classes/view.class.php
-
-		-
-			message: "#^Method View\\:\\:show_footer\\(\\) has parameter \\$Options with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../classes/view.class.php
-
-		-
-			message: "#^Method View\\:\\:show_header\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../classes/view.class.php
-
-		-
-			message: "#^Method View\\:\\:show_header\\(\\) has parameter \\$option with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../classes/view.class.php
-
-		-
 			message: "#^Parameter \\#1 \\$json of function json_decode expects string, string\\|false given\\.$#"
 			count: 1
 			path: ../sections/ajax/index.php
