@@ -85,18 +85,18 @@ class Twig {
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
-            'image', 'image_cache_encode'
+            'image', fn(?string $image) => $image ? image_cache_encode($image) : $image
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
             'image_cache',
-            fn(string $image, mixed $height = 0, mixed $width = 0)
-                => image_cache_encode(url: $image, height: (int)$height, width: (int)$width)
+            fn(?string $image, mixed $height = 0, mixed $width = 0)
+                => $image ? image_cache_encode(url: $image, height: (int)$height, width: (int)$width) : $image
         ));
         $twig->addFilter(new \Twig\TwigFilter(
             'image_proxy',
-            fn(string $image, mixed $proxy = true)
-                => (bool)$proxy ? image_cache_encode(url: $image, proxy: true) : $image
+            fn(?string $image, mixed $proxy = true)
+                => ((bool)$proxy && $image) ? image_cache_encode(url: $image, proxy: true) : $image
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
