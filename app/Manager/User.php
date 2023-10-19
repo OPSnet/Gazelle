@@ -3,7 +3,6 @@
 namespace Gazelle\Manager;
 
 use Gazelle\Enum\UserStatus;
-
 use Gazelle\Util\Time;
 
 class User extends \Gazelle\BaseManager {

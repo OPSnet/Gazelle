@@ -495,6 +495,14 @@ class User extends BaseObject {
         return $this->info()['Downloaded'];
     }
 
+    public function downloadSpeed(): float {
+        $createdEpoch = strtotime($this->created());
+        if ($createdEpoch === false) {
+            return 0.0;
+        }
+        return $this->downloadedSize() / (time() - $createdEpoch);
+    }
+
     public function downloadedOnRatioWatch(): int {
         return $this->info()['RatioWatchDownload'];
     }
@@ -565,6 +573,14 @@ class User extends BaseObject {
 
     public function uploadedSize(): int {
         return $this->info()['Uploaded'];
+    }
+
+    public function uploadSpeed(): float {
+        $createdEpoch = strtotime($this->created());
+        if ($createdEpoch === false) {
+            return 0.0;
+        }
+        return ($this->uploadedSize() - STARTING_UPLOAD) / (time() - $createdEpoch);
     }
 
     public function userclassName(): string {

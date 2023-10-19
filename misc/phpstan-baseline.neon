@@ -721,16 +721,6 @@ parameters:
 			path: ../sections/ajax/top10/torrents.php
 
 		-
-			message: "#^Function generate_user_json\\(\\) has parameter \\$Details with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../sections/ajax/top10/users.php
-
-		-
-			message: "#^Function generate_user_json\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../sections/ajax/top10/users.php
-
-		-
 			message: "#^Call to an undefined method object\\:\\:run\\(\\)\\.$#"
 			count: 1
 			path: ../sections/api/index.php

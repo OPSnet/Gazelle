@@ -2,13 +2,37 @@
 
 namespace Gazelle\Stats;
 
+use Gazelle\Enum\UserStatus;
+
 class Users extends \Gazelle\Base {
     protected const USER_BROWSER  = 'stat_u_browser';
     protected const USER_CLASS    = 'stat_u_class';
     protected const USER_PLATFORM = 'stat_u_platform';
     protected const FLOW          = 'stat_flow';
 
-    protected array $info;
+    protected array|null $info;
+
+    public function flush(): static {
+        self::$cache->deleteMulti([
+            self::USER_BROWSER,
+            self::USER_CLASS,
+            self::USER_PLATFORM,
+            self::FLOW,
+        ]);
+        unset($this->info);
+        return $this;
+    }
+
+    public function flushTop(int $limit): static {
+        self::$cache->deleteMulti([
+            "topuserdl_$limit",
+            "topuserds_$limit",
+            "topuserul_$limit",
+            "topuserus_$limit",
+            "topusertotup_$limit",
+        ]);
+        return $this;
+    }
 
     /**
      * The annual flow of users: people registered and disabled
@@ -637,5 +661,105 @@ class Users extends \Gazelle\Base {
             ORDER BY total DESC, name, version
         ");
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
+    }
+
+    public function topDownloadList(int $limit): array {
+        $key = "topuserdl_$limit";
+        $top = self::$cache->get_value($key);
+        if ($top === false) {
+            self::$db->prepared_query("
+                SELECT um.ID
+                FROM users_main um
+                INNER JOIN users_leech_stats uls ON (uls.UserID = um.ID)
+                WHERE um.Enabled = ?
+                    AND (um.Paranoia IS NULL OR um.Paranoia NOT REGEXP 'downloaded')
+                ORDER BY uls.Downloaded DESC
+                LIMIT ?
+                ", UserStatus::enabled->value, $limit
+            );
+            $top = self::$db->collect(0, false);
+            self::$cache->cache_value($key, $top, 3600 * 12);
+        }
+        return $top;
+    }
+
+    public function topDownSpeedList(int $limit): array {
+        $key = "topuserds_$limit";
+        $top = self::$cache->get_value($key);
+        if ($top === false) {
+            self::$db->prepared_query("
+                SELECT um.ID
+                FROM users_main um
+                INNER JOIN users_leech_stats uls ON (uls.UserID = um.ID)
+                WHERE um.Enabled = ?
+                    AND (um.Paranoia IS NULL OR um.Paranoia NOT REGEXP 'downloaded')
+                ORDER BY uls.Downloaded / (unix_timestamp(now()) - unix_timestamp(um.created)) DESC
+                LIMIT ?
+                ", UserStatus::enabled->value, $limit
+            );
+            $top = self::$db->collect(0, false);
+            self::$cache->cache_value($key, $top, 3600 * 12);
+        }
+        return $top;
+    }
+
+    public function topUploadList(int $limit): array {
+        $key = "topuserul_$limit";
+        $top = self::$cache->get_value($key);
+        if ($top === false) {
+            self::$db->prepared_query("
+                SELECT um.ID
+                FROM users_main um
+                INNER JOIN users_leech_stats uls ON (uls.UserID = um.ID)
+                WHERE um.Enabled = ?
+                    AND (um.Paranoia IS NULL OR um.Paranoia NOT REGEXP 'uploaded')
+                ORDER BY uls.Uploaded DESC
+                LIMIT ?
+                ", UserStatus::enabled->value, $limit
+            );
+            $top = self::$db->collect(0, false);
+            self::$cache->cache_value($key, $top, 3600 * 12);
+        }
+        return $top;
+    }
+
+    public function topUpSpeedList(int $limit): array {
+        $key = "topuserus_$limit";
+        $top = self::$cache->get_value($key);
+        if ($top === false) {
+            self::$db->prepared_query("
+                SELECT um.ID
+                FROM users_main um
+                INNER JOIN users_leech_stats uls ON (uls.UserID = um.ID)
+                WHERE um.Enabled = ?
+                    AND (um.Paranoia IS NULL OR um.Paranoia NOT REGEXP 'uploaded')
+                ORDER BY uls.Uploaded / (unix_timestamp(now()) - unix_timestamp(um.created)) DESC
+                LIMIT ?
+                ", UserStatus::enabled->value, $limit
+            );
+            $top = self::$db->collect(0, false);
+            self::$cache->cache_value($key, $top, 3600 * 12);
+        }
+        return $top;
+    }
+
+    public function topTotalUploadList(int $limit): array {
+        $key = "topusertotup_$limit";
+        $top = self::$cache->get_value($key);
+        if ($top === false) {
+            self::$db->prepared_query("
+                SELECT um.ID
+                FROM users_main um
+                INNER JOIN user_summary us ON (us.user_id = um.ID)
+                WHERE um.Enabled = ?
+                    AND (um.Paranoia IS NULL OR um.Paranoia NOT REGEXP 'uploaded')
+                ORDER BY us.upload_total DESC
+                LIMIT ?
+                ", UserStatus::enabled->value, $limit
+            );
+            $top = self::$db->collect(0, false);
+            self::$cache->cache_value($key, $top, 3600 * 12);
+        }
+        return $top;
     }
 }
