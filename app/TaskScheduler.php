@@ -52,7 +52,7 @@ class TaskScheduler extends Base {
                    (name, classname, description, period, is_enabled, is_sane, is_debug)
             VALUES
                    (?,    ?,         ?,           ?,      ?,          ?,       ?)
-        ", $name, $class, $description, $period, $isEnabled, $isSane, $isDebug);
+        ", $name, $class, $description, $period, (int)$isEnabled, (int)$isSane, (int)$isDebug);
         $this->flush();
     }
 
@@ -71,7 +71,7 @@ class TaskScheduler extends Base {
                 is_sane = ?,
                 is_debug = ?
             WHERE periodic_task_id = ?
-        ", $name, $class, $description, $period, $isEnabled ? 1 : 0, $isSane ? 1 : 0, $isDebug ? 1 : 0, $id);
+        ", $name, $class, $description, $period, (int)$isEnabled, (int)$isSane, (int)$isDebug, $id);
         $this->flush();
     }
 
