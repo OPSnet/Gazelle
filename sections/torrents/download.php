@@ -108,8 +108,8 @@ if (isset($_REQUEST['usetoken']) && $torrent->leechType() == LeechType::Normal) 
 
 $Viewer->registerDownload($torrentId);
 
-if ($torrent->group()->categoryId() == 1 && $torrent->group()->image() != '' && $torrent->uploaderId() != $userId) {
-    $Viewer->flushRecentSnatch();
+if ($torrent->group()->categoryId() == CATEGORY_MUSIC && $torrent->group()->image() != '' && $torrent->uploaderId() != $userId) {
+    $Viewer->snatch()->flush();
 }
 
 header('Content-Type: ' . ($Viewer->downloadAsText() ? 'text/plain' : 'application/x-bittorrent') . '; charset=utf-8');

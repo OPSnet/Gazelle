@@ -23,7 +23,7 @@ $EditionID     = 0;
 $reportMan      = new Gazelle\Manager\Torrent\Report(new Gazelle\Manager\Torrent);
 $reportTypeMan  = new Gazelle\Manager\Torrent\ReportType;
 $reportTypeList = $reportTypeMan->categoryList($CategoryID);
-$snatcher       = new Gazelle\User\Snatch($Viewer);
+$snatcher       = $Viewer->snatch();
 $urlStem        = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
 $userMan        = new Gazelle\Manager\User;
 $reportList     = array_map(fn ($id) => $reportMan->findById($id), $torrent->reportIdList($Viewer));
@@ -38,7 +38,7 @@ View::show_header('Report', ['js' => 'reportsv2,browse,torrent,bbcode']);
         <h3><?= $tgroup->link() . " [{$tgroup->year()}] [{$tgroup->releaseTypeName()}]" ?></h3>
     </div>
     <div class="thin">
-        <table class="torrent_table details<?= $snatcher->showSnatch($torrent->id()) ? ' snatched' : '' ?>" id="torrent_details">
+        <table class="torrent_table details<?= $snatcher->showSnatch($torrent) ? ' snatched' : '' ?>" id="torrent_details">
             <tr class="colhead_dark">
                 <td width="80%"><strong>Reported torrent</strong></td>
                 <td><strong>Size</strong></td>
@@ -56,7 +56,7 @@ View::show_header('Report', ['js' => 'reportsv2,browse,torrent,bbcode']);
 $remasterTuple = $torrent->remasterTuple();
 ?>
                 <tr class="torrent_row releases_<?= $tgroup->releaseType() ?> groupid_<?=($GroupID)?> edition_<?=($EditionID)?> group_torrent<?=
-                    $snatcher->showSnatch($torrent->id()) ? ' snatched_torrent' : '' ?>" style="font-weight: normal;" id="torrent<?= $torrentId ?>">
+                    $snatcher->showSnatch($torrent) ? ' snatched_torrent' : '' ?>" style="font-weight: normal;" id="torrent<?= $torrentId ?>">
                     <td>
                         <?= $Twig->render('torrent/action-v2.twig', [
                             'edit'    => true,

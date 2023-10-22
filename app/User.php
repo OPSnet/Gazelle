@@ -13,12 +13,11 @@ use Gazelle\Util\Mail;
 class User extends BaseObject {
     final const tableName          = 'users_main';
     final const CACHE_KEY          = 'u_%d';
-    final const CACHE_SNATCH_TIME  = 'users_snatched_%d_time';
     final const CACHE_NOTIFY       = 'u_notify_%d';
-    final const USER_RECENT_SNATCH = 'u_recent_snatch_%d';
     final const USER_RECENT_UPLOAD = 'u_recent_up_%d';
 
-    final const SNATCHED_UPDATE_AFTERDL = 300; // How long after a torrent download we want to update a user's snatch lists
+    final protected const CACHE_SNATCH_TIME  = 'users_snatched_%d_time';
+    final protected const SNATCHED_UPDATE_AFTERDL = 300; // How long after a torrent download we want to update a user's snatch lists
 
     protected bool $forceCacheFlush = false;
     protected int $lastReadForum;
@@ -31,6 +30,7 @@ class User extends BaseObject {
     protected array $voteSummary;
 
     protected Stats\User|null $stats;
+    protected User\Snatch|null $snatch;
 
     public function flush(): static {
         self::$cache->delete_multi([
@@ -48,6 +48,16 @@ class User extends BaseObject {
     }
     public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), html_escape($this->username())); }
     public function location(): string { return 'user.php?id=' . $this->id; }
+
+    /**
+     * Delegate snatch status methods to the User\Snatch class
+     */
+    public function snatch(): User\Snatch {
+        if (!isset($this->snatch)) {
+            $this->snatch = new User\Snatch($this);
+        }
+        return $this->snatch;
+    }
 
     /**
      * Delegate stats methods to the Stats\User class
@@ -903,10 +913,6 @@ class User extends BaseObject {
         return $this->forceCacheFlush = $flush;
     }
 
-    public function flushRecentSnatch(): bool {
-        return self::$cache->delete_value(sprintf(self::USER_RECENT_SNATCH, $this->id));
-    }
-
     public function flushRecentUpload(): bool {
         return self::$cache->delete_value(sprintf(self::USER_RECENT_UPLOAD, $this->id));
     }
@@ -1674,40 +1680,6 @@ class User extends BaseObject {
         return (int)$this->getSingleValue('user_collage_create', "
             SELECT count(*) FROM collages WHERE Deleted = '0' AND UserID = ?
         ");
-    }
-
-    /**
-     * Default list 5 will be cached. When fetching a different amount,
-     * set $forceNoCache to true to avoid caching a list with an unexpected length.
-     * This technique should be revisited, possibly by adding the limit to the key.
-     */
-    public function recentSnatchList(int $limit = 5, bool $forceNoCache = false): array {
-        $key = sprintf(self::USER_RECENT_SNATCH, $this->id);
-        $recent = self::$cache->get_value($key);
-        if ($forceNoCache) {
-            $recent = false;
-        }
-        if ($recent === false) {
-            self::$db->prepared_query("
-                SELECT g.ID
-                FROM xbt_snatched AS s
-                INNER JOIN torrents AS t ON (t.ID = s.fid)
-                INNER JOIN torrents_group AS g ON (t.GroupID = g.ID)
-                WHERE g.CategoryID = '1'
-                    AND g.WikiImage != ''
-                    AND t.UserID != s.uid
-                    AND s.uid = ?
-                GROUP BY g.ID
-                ORDER BY s.tstamp DESC
-                LIMIT ?
-                ", $this->id, $limit
-            );
-            $recent = self::$db->collect(0, false);
-            if (!$forceNoCache) {
-                self::$cache->cache_value($key, $recent, 86400 * 3);
-            }
-        }
-        return $recent;
     }
 
     public function tagSnatchCounts(int $limit = 8): array {

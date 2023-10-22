@@ -27,7 +27,7 @@ if (empty($_GET['advanced']) || !$Viewer->permitted('site_advanced_top10')) {
 $vote->setTopLimit($limit);
 
 $bookmark     = new Gazelle\User\Bookmark($Viewer);
-$snatcher     = new Gazelle\User\Snatch($Viewer);
+$snatcher     = $Viewer->snatch();
 $imgProxy     = new Gazelle\Util\ImageProxy($Viewer);
 $tgMan        = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
 $torMan       = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
@@ -211,7 +211,7 @@ echo ' [' . $tgroup->year() . ']'; } ?></strong>
                 }
                 $prev = $current;
 ?>
-    <tr class="group_torrent torrent_row groupid_<?= $tgroupId ?> hidden edition_<?= $editionID ?><?= ($snatcher->showSnatch($torrentId) ? ' snatched_torrent' : '') . $snatchedGroupClass ?>">
+    <tr class="group_torrent torrent_row groupid_<?= $tgroupId ?> hidden edition_<?= $editionID ?><?= ($snatcher->showSnatch($torrent) ? ' snatched_torrent' : '') . $snatchedGroupClass ?>">
         <td colspan="3">
             <?= $Twig->render('torrent/action-v2.twig', [
                 'torrent' => $torrent,
@@ -228,7 +228,7 @@ echo ' [' . $tgroup->year() . ']'; } ?></strong>
             $torrentId = $torrentIdList[0];
             $torrent = $torMan->findById($torrentId);
 ?>
-    <tr class="torrent torrent_row<?= ($snatcher->showSnatch($torrentId) ? ' snatched_torrent' : '')
+    <tr class="torrent torrent_row<?= ($snatcher->showSnatch($torrent) ? ' snatched_torrent' : '')
         . $SnatchedGroupClass ?>" id="group_<?= $tgroupId ?>">
         <td></td>
         <td class="td_collage_category center">

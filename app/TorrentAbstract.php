@@ -107,7 +107,7 @@ abstract class TorrentAbstract extends BaseObject {
 
         if (!$this->isDeleted() && isset($this->viewer)) {
             $info['PersonalFL'] = $info['FreeTorrent'] == '0' && $this->hasToken($this->viewer->id());
-            $info['IsSnatched'] = (new User\Snatch($this->viewer))->showSnatch($this->id);
+            $info['IsSnatched'] = $this->viewer->snatch()->showSnatch($this);
         } else {
             $info['PersonalFL'] = false;
             $info['IsSnatched'] = false;
@@ -277,6 +277,9 @@ abstract class TorrentAbstract extends BaseObject {
     public function group(): TGroup {
         if (!isset($this->tgroup)) {
             $this->tgroup = new TGroup($this->groupId());
+            if (isset($this->viewer)) {
+                $this->tgroup->setViewer($this->viewer);
+            }
         }
         return $this->tgroup;
     }
@@ -702,7 +705,7 @@ abstract class TorrentAbstract extends BaseObject {
     public function labelList(?User $viewer = null): array {
         $info = $this->info();
         $extra = [];
-        if ($viewer && (new User\Snatch($viewer))->showSnatch($this->id)) {
+        if ($viewer?->snatch()?->showSnatch($this)) {
             $extra[] = $this->labelElement('tl_snatched', 'Snatched!');
         }
         if ($info['PersonalFL']) {

@@ -3,7 +3,7 @@
 $torMan    = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
 $reportMan = new Gazelle\Manager\Torrent\Report($torMan);
 $bookmark  = new Gazelle\User\Bookmark($Viewer);
-$snatcher  = new Gazelle\User\Snatch($Viewer);
+$snatcher  = $Viewer->snatch();
 $imgProxy  = new Gazelle\Util\ImageProxy($Viewer);
 $top10     = new Gazelle\Top10\Torrent(FORMAT, $Viewer);
 $urlStem   = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
@@ -208,7 +208,7 @@ foreach ($context as $c) {
         $isBookmarked = $bookmark->isTorrentBookmarked($groupId);
 ?>
     <tr class="torrent row <?=$index % 2 ? 'a' : 'b'?> <?=($isBookmarked ? ' bookmarked' : '')
-        . ($snatcher->showSnatch($torrent->id()) ? ' snatched_torrent' : '')?>">
+        . ($snatcher->showSnatch($torrent) ? ' snatched_torrent' : '')?>">
         <td style="padding: 8px; text-align: center;" class="td_rank m_td_left"><strong><?=$index + 1?></strong></td>
         <td class="center cats_col m_hidden"><div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>"></div></td>
         <td class="td_info big_info">

@@ -26,7 +26,7 @@ $reportMan     = new Gazelle\Manager\Torrent\Report($torMan);
 $reportTypeMan = new Gazelle\Manager\Torrent\ReportType;
 $requestMan    = new Gazelle\Manager\Request;
 $userMan       = new Gazelle\Manager\User;
-$snatcher      = new Gazelle\User\Snatch($Viewer);
+$snatcher      = $Viewer->snatch();
 $vote          = new Gazelle\User\Vote($Viewer);
 
 $isSubscribed   = (new Gazelle\User\Subscription($Viewer))->isSubscribedComments('torrents', $tgroupId);
@@ -462,7 +462,7 @@ if (!$torrentList) {
         $reportList  = array_map(fn ($id) => $reportMan->findById($id), $torrent->reportIdList($Viewer));
     ?>
             <tr class="torrent_row releases_<?= $tgroup->releaseTypeName() ?> groupid_<?=$tgroupId?> edition_<?= $EditionID
-                ?> group_torrent<?= $snatcher->showSnatch($TorrentID) ? ' snatched_torrent' : ''
+                ?> group_torrent<?= $snatcher->showSnatch($torrent) ? ' snatched_torrent' : ''
                 ?>" style="font-weight: normal;" id="torrent<?= $TorrentID ?>">
                 <td class="td_info">
 <?php

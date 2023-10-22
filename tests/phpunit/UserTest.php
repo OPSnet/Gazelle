@@ -175,9 +175,9 @@ class UserTest extends TestCase {
         $this->assertStringEndsWith('/announce', $this->user->announceUrl(), 'utest-announce-url-end');
         $this->assertCount(0, $this->user->announceKeyHistory(), 'utest-announce-key-history');
 
-        $this->assertEquals([], $this->user->recentSnatchList(), 'utest-recent-snatch');
+        $this->assertEquals([], $this->user->snatch()->recentSnatchList(), 'utest-recent-snatch');
         $this->assertEquals([], $this->user->recentUploadList(), 'utest-recent-upload');
-        $this->assertTrue($this->user->flushRecentSnatch(), 'utest-flush-recent-snatch');
+        $this->assertInstanceOf(Gazelle\User\Snatch::class, $this->user->snatch()->flush(), 'utest-flush-recent-snatch');
         $this->assertTrue($this->user->flushRecentUpload(), 'utest-flush-recent-upload');
 
         $this->assertEquals(0, $this->user->tokenCount(), 'utest-token-count');

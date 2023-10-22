@@ -57,7 +57,7 @@ if ($unread) {
 }
 
 $imgProxy = new Gazelle\Util\ImageProxy($Viewer);
-$snatcher = new Gazelle\User\Snatch($Viewer);
+$snatcher = $Viewer->snatch();
 
 View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notifications', ['js' => 'notifications']);
 ?>
@@ -134,8 +134,8 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
             $match = $tgroup->artistRole()?->matchName($filter->artistList() ?? []);
 ?>
     <tr id="torrent<?= $TorrentID ?>" class="torrent torrent_row<?=
-        ($snatcher->showSnatch($TorrentID) ? ' snatched_torrent' : '')
-        . ($tgroup->isSnatched($Viewer->id()) ? ' snatched_group' : '')
+        ($snatcher->showSnatch($torrent) ? ' snatched_torrent' : '')
+        . ($tgroup->isSnatched() ? ' snatched_group' : '')
         ?>">
         <td class="m_td_left td_checkbox" style="text-align: center;">
             <input type="checkbox" class="notify_box notify_box_<?=$FilterID?>" value="<?=$TorrentID?>" id="clear_<?=$TorrentID?>" tabindex="1" />

@@ -19,7 +19,7 @@ if (empty($_GET['userid'])) {
 }
 
 $bookmark = new Gazelle\User\Bookmark($user);
-$snatcher = new Gazelle\User\Snatch($Viewer);
+$snatcher = $Viewer->snatch();
 $tgMan    = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
 $torMan   = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
 $collMan  = (new Gazelle\Manager\Collage)->setImageProxy(new Gazelle\Util\ImageProxy($Viewer));
@@ -238,7 +238,7 @@ foreach ($bookmarkList as $bm) {
             if ($torrent->isRemasteredUnknown()) {
                 $FirstUnknown = !isset($FirstUnknown);
             }
-            $SnatchedTorrentClass = $snatcher->showSnatch($torrent->id()) ? ' snatched_torrent' : '';
+            $SnatchedTorrentClass = $snatcher->showSnatch($torrent) ? ' snatched_torrent' : '';
 
             $current = $torrent->remasterTuple();
             if ($prev != $current || (isset($FirstUnknown) && $FirstUnknown)) {
@@ -275,7 +275,7 @@ foreach ($bookmarkList as $bm) {
         if (is_null($torrent)) {
             continue;
         }
-        $SnatchedTorrentClass = $snatcher->showSnatch($torrent->id()) ? ' snatched_torrent' : '';
+        $SnatchedTorrentClass = $snatcher->showSnatch($torrent) ? ' snatched_torrent' : '';
 ?>
         <tr class="torrent torrent_row<?= $SnatchedTorrentClass . $SnatchedGroupClass ?>" id="group_<?= $tgroupId ?>">
             <td></td>

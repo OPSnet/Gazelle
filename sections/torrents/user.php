@@ -322,7 +322,7 @@ $urlStem      = "torrents.php?userid={$userId}&amp;type=";
 
 $torMan   = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
 $imgProxy = new Gazelle\Util\ImageProxy($Viewer);
-$snatcher = new Gazelle\User\Snatch($Viewer);
+$snatcher = $Viewer->snatch();
 
 View::show_header($user->username() . "'s $action torrents", ['js' => 'voting']);
 ?>
@@ -494,7 +494,7 @@ foreach (CATEGORY as $catKey => $catName) {
         $tgroup = $torrent->group();
         $tagList = $tgroup->tagList();
 ?>
-        <tr class="torrent torrent_row<?= ($snatcher->showSnatch($torrent->id()) ? ' snatched_torrent' : '')
+        <tr class="torrent torrent_row<?= ($snatcher->showSnatch($torrent) ? ' snatched_torrent' : '')
             . ($tgroup->isSnatched() ? ' snatched_group' : '')
             ?>">
             <td class="center cats_col">

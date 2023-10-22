@@ -58,7 +58,6 @@ echo $Twig->render('better/better.twig', [
     'better'    => $better,
     'filter'    => $filter,
     'search'    => $search,
-    'snatcher'  => new Gazelle\User\Snatch($Viewer),
     'type'      => $type,
     'paginator' => $paginator,
     'uploader'  => $uploader,

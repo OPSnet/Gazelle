@@ -344,7 +344,7 @@ foreach (range(1, 4) as $level) {
 if (check_paranoia_here('snatched')) {
     echo $Twig->render('user/recent.twig', [
         'id'     => $UserID,
-        'recent' => array_map(fn ($id) => $tgMan->findById($id), $User->recentSnatchList()),
+        'recent' => array_map(fn ($id) => $tgMan->findById($id), $User->snatch()->recentSnatchList()),
         'title'  => 'Snatches',
         'type'   => 'snatched',
         'thing'  => 'snatches',

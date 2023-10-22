@@ -10,9 +10,10 @@ class TGroup extends BaseObject {
     final const CACHE_KEY            = 'tg_%d';
     final const CACHE_TLIST_KEY      = 'tlist_%d';
     final const CACHE_COVERART_KEY   = 'tg_cover_%d';
-    final const USER_RECENT_SNATCH   = 'u_recent_snatch_%d';
     final const USER_RECENT_UPLOAD   = 'u_recent_up_%d';
     final const CACHE_REQUEST_TGROUP = 'req_tg_%d';
+
+    final protected const USER_RECENT_SNATCH   = 'u_recent_snatch_%d';
 
     protected int   $revisionId = 0;
     protected bool  $showFallbackImage = true;

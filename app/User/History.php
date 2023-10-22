@@ -215,7 +215,7 @@ class History extends \Gazelle\BaseUser {
             WHERE uid = ?
             ", $this->user->id()
         );
-        $this->user->flushRecentSnatch();
+        $this->user->snatch()->flush();
         return self::$db->affected_rows();
     }
 }

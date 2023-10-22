@@ -14,7 +14,7 @@ $bookmark = new Gazelle\User\Bookmark($Viewer);
 $collMan  = (new Gazelle\Manager\Collage)->setImageProxy(new \Gazelle\Util\ImageProxy($Viewer));
 $urlStem  = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
 $vote     = new Gazelle\User\Vote($Viewer);
-$snatcher = new Gazelle\User\Snatch($Viewer);
+$snatcher = $Viewer->snatch();
 
 $entryList    = $Collage->entryList();
 $groupsClosed = (bool)$Viewer->option('TorrentGrouping');
@@ -248,7 +248,7 @@ foreach ($entryList as $tgroupId) {
             }
             $prev = $current;
 ?>
-            <tr class="group_torrent torrent_row groupid_<?= $tgroupId ?> edition_<?= $EditionID ?><?= ($snatcher->showSnatch($torrent->id()) ? ' snatched_torrent' : '')
+            <tr class="group_torrent torrent_row groupid_<?= $tgroupId ?> edition_<?= $EditionID ?><?= ($snatcher->showSnatch($torrent) ? ' snatched_torrent' : '')
                 . $SnatchedGroupClass . ($groupsClosed ? ' hidden' : '') ?>">
                 <td class="td_info" colspan="3">
                     <?= $Twig->render('torrent/action-v2.twig', [
@@ -258,7 +258,7 @@ foreach ($entryList as $tgroupId) {
                     ]) ?>
                     &nbsp;&nbsp;&raquo;&nbsp;<?= $torrent->shortLabelLink() ?>
 <?php   } else { ?>
-            <tr class="torrent torrent_row<?= ($snatcher->showSnatch($torrent->id()) ? ' snatched_torrent' : '')
+            <tr class="torrent torrent_row<?= ($snatcher->showSnatch($torrent) ? ' snatched_torrent' : '')
                 . $SnatchedGroupClass ?>" id="group_<?= $tgroupId ?>">
                 <td></td>
                 <td class="td_collage_category center">
