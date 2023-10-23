@@ -755,7 +755,7 @@ class Torrent {
                 $Pass = $torrent->hasLog() && $torrent->logScore() != '100';
             } else {
                 // Any log score
-                $Pass = $$torrent->hasLog();
+                $Pass = $torrent->hasLog();
             }
             if (!$Pass) {
                 return false;
