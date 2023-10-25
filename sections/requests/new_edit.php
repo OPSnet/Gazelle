@@ -15,8 +15,9 @@ if ($newRequest) {
     if ($Viewer->uploadedSize() < 250 * 1024 * 1024 || !$Viewer->permitted('site_submit_requests')) {
         error('You have not enough upload to make a request.');
     }
+    $ownRequest      = true;
     $request         = null;
-    $categoryName    = '';
+    $categoryName    = 'Music';
     $image           = '';
     $title           = '';
     $description     = '';
@@ -33,7 +34,7 @@ if ($newRequest) {
         );
         if (!is_null($ArtistName)) {
             $ArtistForm = [
-                1 => [['name' => trim($ArtistName)]],
+                1 => [['name' => trim((string)$ArtistName)]],
                 2 => [],
                 3 => []
             ];
@@ -57,13 +58,15 @@ if ($newRequest) {
     if (is_null($request)) {
         error(404);
     }
-    $CanEdit = $request->canEdit($Viewer);
-    if (!$CanEdit) {
+    if (!$request->canEdit($Viewer)) {
         error(403);
     }
-    $requestId = $request->id();
+    $requestId  = $request->id();
+    $ownRequest = $request->userId() == $Viewer->id();
 
-    if (!isset($returnEdit)) {
+    if (isset($returnEdit)) {
+        /** @var string $categoryName */
+    } else {
         // if we are coming back from an edit, these were already initialized in take_new_edit
         $categoryId      = $request->categoryId();
         $title           = $request->title();
@@ -77,7 +80,6 @@ if ($newRequest) {
         $oclc            = $request->oclc();
         $VoteCount       = $request->userVotedTotal();
         $IsFilled        = $request->isFilled();
-        $ownRequest      = $request->userId() == $Viewer->id();
         $Checksum        = $request->needLogChecksum();
         $LogCue          = $request->descriptionLogCue();
         $NeedCue         = $request->needCue();
@@ -99,20 +101,19 @@ if ($newRequest) {
 
 $releaseTypes = (new Gazelle\ReleaseType)->list();
 $GenreTags    = (new Gazelle\Manager\Tag)->genreList();
-$pageTitle    = $newRequest ? 'Create a request' : 'Edit request › ' . $request->text();
-$pageHeader   = $newRequest ? 'Create a request' : 'Edit request › ' . $request->selfLink();
+$pageTitle    = $newRequest ? 'Create a request' : 'Request › Edit › ' . $request->text();
+$pageHeader   = $newRequest ? 'Create a request' : 'Request › Edit › ' . $request->selfLink();
+
 View::show_header($pageTitle, ['js' => 'requests,form_validate']);
+
 ?>
 <div class="thin">
     <div class="header">
         <h2><?= $pageHeader ?></h2>
     </div>
-<?php
-if (!$newRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_requests')) {
-    $requester = new Gazelle\User($request->userId());
-?>
+<?php if (!$ownRequest && $Viewer->permittedAny('site_edit_requests', 'site_moderate_requests')) { ?>
     <div class="box pad">
-        <strong class="important_text">Warning! You are editing <?= $requester->link() ?>'s request.
+        <strong class="important_text">Warning! You are editing <?= (new Gazelle\User($request->userId()))->link() ?>'s request.
         Be careful when making changes!</strong>
     </div>
 <?php } ?>
@@ -135,7 +136,7 @@ if (!$newRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
 <?php } ?>
                     </td>
                 </tr>
-<?php if ($newRequest || $CanEdit) { ?>
+<?php if ($newRequest || $Viewer->permittedAny('site_edit_requests', 'site_moderate_requests')) { ?>
                 <tr>
                     <td class="label">
                         Type
@@ -210,40 +211,40 @@ if (!$newRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                 <tr>
                     <td class="label">Title</td>
                     <td>
-                        <input type="text" name="title" size="45" value="<?= $title ?>" />
+                        <input type="text" name="title" size="45" value="<?= $title ?? '' ?>" />
                     </td>
                 </tr>
                 <tr id="recordlabel_tr">
                     <td class="label">Record label</td>
                     <td>
-                        <input type="text" name="recordlabel" size="45" value="<?= $recordLabel ?>" />
+                        <input type="text" name="recordlabel" size="45" value="<?= $recordLabel ?? '' ?>" />
                     </td>
                 </tr>
                 <tr id="cataloguenumber_tr">
                     <td class="label">Catalogue number</td>
                     <td>
-                        <input type="text" name="cataloguenumber" size="15" value="<?= $catalogueNumber ?>" />
+                        <input type="text" name="cataloguenumber" size="15" value="<?= $catalogueNumber ?? '' ?>" />
                     </td>
                 </tr>
                 <tr id="oclc_tr">
                     <td class="label">WorldCat (OCLC) ID</td>
                     <td>
-                        <input type="text" name="oclc" size="15" value="<?= $oclc ?>" />
+                        <input type="text" name="oclc" size="15" value="<?= $oclc ?? '' ?>" />
                     </td>
                 </tr>
 <?php } ?>
                 <tr id="year_tr">
                     <td class="label">Year</td>
                     <td>
-                        <input type="text" name="year" size="5" value="<?= $year ?>" />
+                        <input type="text" name="year" size="5" value="<?= $year ?? '' ?>" />
                     </td>
                 </tr>
-<?php if ($newRequest || $CanEdit) { ?>
+<?php if ($newRequest || $Viewer->permittedAny('site_edit_requests', 'site_moderate_requests')) { ?>
                 <tr id="image_tr">
                     <td class="label">Image</td>
                     <td>
-                        <input type="text" name="image" size="45" value="<?= $image ?>" />
-<?php       if (IMAGE_HOST_BANNED) { /** @phpstan-ignore-line */ ?>
+                        <input type="text" name="image" size="45" value="<?= $image ?? '' ?>" />
+<?php       if (IMAGE_HOST_BANNED) { /** @phpstan-ignore-line */  ?>
                         <br /><b>Images hosted on <strong class="important_text"><?= implode(', ', IMAGE_HOST_BANNED)
                             ?> are not allowed</strong>, please rehost first on one of <?= implode(', ', IMAGE_HOST_RECOMMENDED) ?>.</b>
 <?php       } ?>
@@ -259,7 +260,7 @@ if (!$newRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                             <option value="<?= display_str($Genre) ?>"><?= display_str($Genre) ?></option>
 <?php   } ?>
                         </select>
-                        <input type="text" id="tags" name="tags" size="45" value="<?= display_str($tags) ?>"<?=
+                        <input type="text" id="tags" name="tags" size="45" value="<?= display_str($tags ?? '') ?>"<?=
                             $Viewer->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> />
                         <br />
                         Tags should be comma-separated, and you should use a period (".") to separate words inside a tag&#8202;&mdash;&#8202;e.g. "<strong class="important_text_alt">hip.hop</strong>".
@@ -267,7 +268,7 @@ if (!$newRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                         There is a list of official tags to the left of the text box. Please use these tags instead of "unofficial" tags (e.g. use the official "<strong class="important_text_alt">drum.and.bass</strong>" tag, instead of an unofficial "<strong class="important_text">dnb</strong>" tag.).
                     </td>
                 </tr>
-<?php   if ($newRequest || $CanEdit || $ownRequest) { ?>
+<?php   if ($newRequest || $Viewer->permitted('site_moderate_requests')) { ?>
                 <tr id="formats_tr">
                     <td class="label">Allowed formats</td>
                     <td>
@@ -331,14 +332,14 @@ if (!$newRequest && $CanEdit && !$ownRequest && $Viewer->permitted('site_edit_re
                 <tr>
                     <td class="label">Description</td>
                     <td>
-                        <textarea name="description" cols="70" rows="7"><?= $description ?></textarea> <br />
+                        <textarea name="description" cols="70" rows="7"><?= $description ?? '' ?></textarea> <br />
                     </td>
                 </tr>
 <?php    if ($Viewer->permitted('site_moderate_requests')) { ?>
                 <tr>
                     <td class="label">Torrent group</td>
                     <td>
-                        <?=SITE_URL?>/torrents.php?id=<input type="text" name="groupid" value="<?=$GroupID?>" size="15" /><br />
+                        <?=SITE_URL?>/torrents.php?id=<input type="text" name="groupid" value="<?= $GroupID ?? '' ?>" size="15" /><br />
                         If this request matches a torrent group <span style="font-weight: bold;">already existing</span> on the site, please indicate that here.
                     </td>
                 </tr>
