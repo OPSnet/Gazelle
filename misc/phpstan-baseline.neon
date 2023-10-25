@@ -701,16 +701,6 @@ parameters:
 			path: ../sections/ajax/logchecker.php
 
 		-
-			message: "#^Function generate_tag_json\\(\\) has parameter \\$Details with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../sections/ajax/top10/tags.php
-
-		-
-			message: "#^Function generate_tag_json\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../sections/ajax/top10/tags.php
-
-		-
 			message: "#^Function payload\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: ../sections/ajax/top10/torrents.php

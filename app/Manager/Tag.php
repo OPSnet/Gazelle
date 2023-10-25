@@ -593,4 +593,76 @@ class Tag extends \Gazelle\BaseManager {
 
         return ['input' => $TagList, 'predicate' => implode(' ', $QueryParts)];
     }
+
+    protected function topList(string $key, int $limit, string $query): array {
+        $top = self::$cache->get_value($key);
+        if ($top === false) {
+            self::$db->prepared_query($query, $limit);
+            $top = [];
+            foreach (self::$db->to_array(false, MYSQLI_ASSOC, false) as $row) {
+                $top[] = [
+                    'name'     => $row['name'],
+                    'uses'     => $row['uses'],
+                    'posVotes' => (int)$row['posVotes'], // sum() returns a string
+                    'negVotes' => (int)$row['negVotes'],
+                ];
+            }
+            self::$cache->cache_value($key, $top, 3600 * 12);
+        }
+        return $top;
+    }
+
+    public function topTGroupList(int $limit): array {
+        return $this->topList(
+            "toptaguse_$limit",
+            $limit,
+            "
+                SELECT t.Name                 AS name,
+                    count(*)                  AS uses,
+                    sum(tt.PositiveVotes - 1) AS posVotes,
+                    sum(tt.NegativeVotes - 1) AS negVotes
+                FROM tags AS t
+                INNER JOIN torrents_tags AS tt ON (tt.TagID = t.ID)
+                GROUP BY tt.TagID
+                ORDER BY Uses DESC
+                LIMIT ?
+            ",
+        );
+    }
+
+    public function topRequestList(int $limit): array {
+        return $this->topList(
+            "toptagreq_$limit",
+            $limit,
+            "
+                SELECT t.Name AS name,
+                    count(*)  AS uses,
+                    0         AS posVotes,
+                    0         AS netVotes
+                FROM tags AS t
+                INNER JOIN requests_tags AS r ON (r.TagID = t.ID)
+                GROUP BY r.TagID
+                ORDER BY Uses DESC
+                LIMIT ?
+            ",
+        );
+    }
+
+    public function topVotedList(int $limit): array {
+        return $this->topList(
+            "toptagvote_$limit",
+            $limit,
+            "
+                SELECT t.Name                 AS name,
+                    count(*)                  AS uses,
+                    sum(tt.PositiveVotes - 1) AS posVotes,
+                    sum(tt.NegativeVotes - 1) AS negVotes
+                FROM tags AS t
+                INNER JOIN torrents_tags AS tt ON (tt.TagID = t.ID)
+                GROUP BY tt.TagID
+                ORDER BY PosVotes DESC
+                LIMIT ?
+            ",
+        );
+    }
 }
