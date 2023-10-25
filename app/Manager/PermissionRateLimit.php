@@ -10,10 +10,10 @@ class PermissionRateLimit extends \Gazelle\Base {
             INNER JOIN permissions p ON (p.ID = prl.permission_id)
             ORDER BY p.Level
         ');
-        return self::$db->to_array('ID', MYSQLI_ASSOC, false);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
-    public function save($id, $factor, $overshoot): int {
+    public function save(int $id, float $factor, int $overshoot): int {
          self::$db->prepared_query('
             INSERT INTO permission_rate_limit
                    (permission_id, factor, overshoot)
@@ -23,7 +23,7 @@ class PermissionRateLimit extends \Gazelle\Base {
         return self::$db->affected_rows();
     }
 
-    public function remove($id): int {
+    public function remove(int $id): int {
          self::$db->prepared_query('
              DELETE FROM permission_rate_limit WHERE permission_id = ?
             ', $id
