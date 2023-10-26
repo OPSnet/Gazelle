@@ -531,26 +531,6 @@ parameters:
 			path: ../sections/collages/artist_collage.php
 
 		-
-			message: "#^Parameter \\#1 \\$requestId of method Gazelle\\\\Manager\\\\Request\\:\\:findById\\(\\) expects int, int\\|string given\\.$#"
-			count: 1
-			path: ../sections/comments/comments.php
-
-		-
-			message: "#^Parameter \\#1 \\$tgroupId of method Gazelle\\\\Manager\\\\TGroup\\:\\:findById\\(\\) expects int, int\\|string given\\.$#"
-			count: 1
-			path: ../sections/comments/comments.php
-
-		-
-			message: "#^Parameter \\#1 \\$total of method Gazelle\\\\Util\\\\Paginator\\:\\:setTotal\\(\\) expects int, bool\\|float\\|int\\|string\\|null given\\.$#"
-			count: 1
-			path: ../sections/comments/comments.php
-
-		-
-			message: "#^Ternary operator condition is always true\\.$#"
-			count: 1
-			path: ../sections/comments/comments.php
-
-		-
 			message: "#^Function notify invoked with 2 parameters, 3 required\\.$#"
 			count: 1
 			path: ../sections/error/404.php

@@ -67,10 +67,8 @@ switch ($Action) {
         switch ($Type) {
             case 'created':
                 $Title = "%s › Comments on their collages";
-                $condition[] = "cl.UserID = ?";
-                $condition[] = "C.AuthorID != ?";
-                $condArgs[] = $UserID;
-                $condArgs[] = $UserID;
+                array_push($condition, "cl.UserID = ?", "C.AuthorID != ?");
+                array_push($condArgs, $UserID, $UserID);
                 $TypeLinks = [
                     [$BaseLink, "$Username &rsaquo; Collage comments"],
                     ["$BaseLink&amp;type=contributed", "$Username &rsaquo; Contributed collage comments"],
@@ -108,10 +106,8 @@ switch ($Action) {
         switch ($Type) {
             case 'created':
                 $Title = "%s › Comments on their requests";
-                $condition[] = "r.UserID = ?";
-                $condition[] = "C.AuthorID != ?";
-                $condArgs[] = $UserID;
-                $condArgs[] = $UserID;
+                array_push($condition, "r.UserID = ?", "C.AuthorID != ?");
+                array_push($condArgs, $UserID, $UserID);
                 $TypeLinks = [
                     [$BaseLink, "$Username &rsaquo; Request comments"],
                     ["$BaseLink&amp;type=contributed", "$Username &rsaquo; Voted-on request comments"],
@@ -120,10 +116,8 @@ switch ($Action) {
             case 'voted':
                 $Title = "%s › Comments on voted-on requests";
                 $Join[] = 'INNER JOIN requests_votes rv ON (rv.RequestID = r.ID)';
-                $condition[] = "rv.UserID = ?";
-                $condition[] = "C.AuthorID != ?";
-                $condArgs[] = $UserID;
-                $condArgs[] = $UserID;
+                array_push($condition, "rv.UserID = ?", "C.AuthorID != ?");
+                array_push($condArgs, $UserID, $UserID);
                 $TypeLinks = [
                     [$BaseLink, "$Username &rsaquo; Request comments"],
                     ["$BaseLink&amp;type=created", "$Username &rsaquo; Created request comments"],
@@ -155,11 +149,8 @@ switch ($Action) {
             case 'uploaded':
                 $Title = "%s › Comments on their uploads";
                 $Join[] = 'INNER JOIN torrents t ON (t.GroupID = tg.ID)';
-                $condition[] = 'C.AddedTime > t.created';
-                $condition[] = "C.AuthorID != ?";
-                $condition[] = "t.UserID = ?";
-                $condArgs[] = $UserID;
-                $condArgs[] = $UserID;
+                array_push($condition, "C.AuthorID != ?",  "t.UserID = ?", 'C.AddedTime > t.created');
+                array_push($condArgs, $UserID, $UserID);
                 $TypeLinks[] = [
                     $BaseLink,
                     $ownProfile ? "Your torrent comments" : "$Username &rsaquo; Torrent comments"
@@ -183,15 +174,15 @@ switch ($Action) {
 $Join[] = "INNER JOIN comments C ON (C.Page = ? AND C.PageID = $idField)";
 $joinArgs[] = $Action;
 $Join = implode("\n", $Join);
-$cond = count($condition) ? 'WHERE ' . implode(" AND ", $condition) : '';
+$cond = 'WHERE ' . implode(" AND ", $condition);
 
 $db = Gazelle\DB::DB();
 
 // Posts per page limit stuff
 $paginator = new Gazelle\Util\Paginator($Viewer->postsPerPage(), (int)($_GET['page'] ?? 1));
 $paginator->setTotal(
-    $db->scalar("
-        SELECT count(DISTINCT(C.ID)) FROM $table $Join $cond", ...array_merge($joinArgs, $condArgs)
+    (int)$db->scalar("
+        SELECT count(DISTINCT C.ID) FROM $table $Join $cond", ...array_merge($joinArgs, $condArgs)
     )
 );
 
@@ -219,11 +210,13 @@ $tgroupList = [];
 if ($Action == 'requests') {
     $requestMan = new Gazelle\Manager\Request;
     foreach (array_flip(array_flip($db->collect('PageID'))) as $id) {
+        $id = (int)$id;
         $requestList[$id] = $requestMan->findById($id);
     }
 } elseif ($Action == 'torrents') {
     $tgMan = new Gazelle\Manager\TGroup;
     foreach (array_flip(array_flip($db->collect('PageID'))) as $id) {
+        $id = (int)$id;
         $tgroupList[$id] = $tgMan->findById($id);
     }
 }
