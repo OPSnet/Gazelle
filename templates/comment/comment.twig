@@ -15,8 +15,7 @@
                 {{- dom.click('#quote-' ~ id, "Quote('" ~ id ~ "','" ~ author.username ~ "', true)") -}}
                 - <a href="#quickpost" id="quote-{{ id }}" class="brackets">Quote</a>
 {%    if own_comment or viewer.permitted('site_moderate_forums') %}
-                {{- dom.click('#edit-' ~ id, "Edit_Form('" ~ id ~ "','" ~ key ~ "')") -}}
-                - <a href="#post{{ id }}" id="edit-{{ id }}" class="brackets">Edit</a>
+                - <a href="#post{{ id }}" id="edit-{{ id }}" data-author="{{ author.id }}" data-key="{{ key }}" class="edit-post brackets">Edit</a>
 {%    endif %}
                 </span>
             </div>

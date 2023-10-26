@@ -117,50 +117,42 @@ function Quote(post, user, link) {
     }
 }
 
-function Edit_Form(post,key) {
-    postid = post;
-    var boxWidth, postuserid, pmbox, inputname;
-    //If no edit is already going underway or a previous edit was finished, make the necessary dom changes.
+
+function edit_post(id) {
+    let dataset = document.getElementById(id).dataset;
+    let postuserid = dataset.author;
+    let key = dataset.key;
+    let postid = id.substr(id.indexOf('-') + 1) // edit-1234 and #edit-1234 seen in the wild, want 1234
+    let is_forum = location.href.match(/forums\.php/);
+
+    var boxWidth, inputname, pmbox;
+    // If no edit is already underway or a previous edit was finished, make the necessary dom changes.
     if (!$('#editbox' + postid).results() || $('#editbox' + postid + '.hidden').results()) {
         $('#reply_box').ghide();
-        if (location.href.match(/torrents\.php/)
-                || location.href.match(/artist\.php/)) {
-            boxWidth = "50";
-        } else {
-            boxWidth = "80";
-        }
-        postuserid = $('#post' + postid + ' strong a').attr('href').split('=')[1];
-        if (postuserid != userid) {
-            pmbox = '<span id="pmbox' + postid + '"><label>PM user on edit? <input type="checkbox" name="pm" value="1" /></label></span>';
-        } else {
-            pmbox = '';
-        };
-        if (location.href.match(/forums\.php/)) {
-            inputname = "post";
-        } else {
-            inputname = "postid";
-        }
+        boxWidth = location.href.match(/(artist|torrents)\.php/) ? "50" : "80";
+        inputname = is_forum ? "post" : "postid";
+        pmbox = (postuserid != userid)
+            ? '<span id="pmbox' + postid + '"><label>PM user on edit? <input type="checkbox" name="pm" value="1" /></label></span>'
+            : '';
+        console.log([id, postid])
         $('#bar' + postid).raw().cancel = $('#content' + postid).raw().innerHTML;
         $('#bar' + postid).raw().oldbar = $('#bar' + postid).raw().innerHTML;
         $('#content' + postid).raw().innerHTML = "<div id=\"preview" + postid + "\"></div><form id=\"form" + postid + "\" method=\"post\" action=\"\">" + pmbox + "<input type=\"hidden\" name=\"auth\" value=\"" + authkey + "\" />&nbsp;<input type=\"hidden\" name=\"key\" value=\"" + key + "\" />&nbsp;<input type=\"hidden\" name=\"" + inputname + "\" value=\"" + postid + "\" /><textarea id=\"editbox" + postid + "\" onkeyup=\"resize('editbox" + postid + "');\" name=\"body\" cols=\"" + boxWidth + "\" rows=\"10\"></textarea></form>";
         $('#bar' + postid).raw().innerHTML = '<input type="button" value="Preview" onclick="Preview_Edit(' + postid + ');" />&nbsp;<input type="button" value="Post" onclick="Save_Edit(' + postid + ')" />&nbsp;<input type="button" value="Cancel" onclick="Cancel_Edit(' + postid + ');" />';
         $('#postcontrol-' + postid).ghide();
     }
+
     /* If it's the initial edit, fetch the post content to be edited.
      * If editing is already underway and edit is pressed again, reset the post
      * (keeps current functionality, move into brackets to stop from happening).
      */
-    if (location.href.match(/forums\.php/)) {
-        ajax.get("?action=get_post&post=" + postid, function(response) {
+    ajax.get(
+        (is_forum ? "?action=get_post&post=" : "comments.php?action=get&postid=") + postid,
+        function(response) {
             $('#editbox' + postid).raw().value = response;
             resize('editbox' + postid);
-        });
-    } else {
-        ajax.get("comments.php?action=get&postid=" + postid, function(response) {
-            $('#editbox' + postid).raw().value = response;
-            resize('editbox' + postid);
-        });
-    }
+        }
+    );
 }
 
 function Cancel_Edit(postid) {
@@ -401,3 +393,9 @@ StoreText.prototype = {
         $(this.form).submit($.proxy(this.remove, this));
     }
 };
+
+$(document).ready(function () {
+    $('.edit-post').click(function() {
+        edit_post(this.id);
+    });
+});

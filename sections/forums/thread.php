@@ -88,6 +88,7 @@ $avatarFilter = Gazelle\Util\Twig::factory()->createTemplate('{{ user|avatar(vie
 $transitions = $forumMan->threadTransitionList($Viewer, $forumId);
 $department = $forum->departmentList($Viewer);
 $auth = $Viewer->auth();
+
 View::show_header("Forums › $ForumName › {$thread->title()}",
      ['js' => 'comments,subscriptions,bbcode' . ($IsDonorForum ? ',donor_titles' : '')]
 );
@@ -289,7 +290,7 @@ foreach ($slice as $Key => $Post) {
     }
     if ((!$thread->isLocked() && $Viewer->writeAccess($forum) && $AuthorID == $Viewer->id()) && !$Viewer->disablePosting() || $Viewer->permitted('site_moderate_forums')) {
 ?>
-                - <a href="#post<?=$PostID?>" onclick="Edit_Form('<?=$PostID?>', '<?=$Key?>');" class="brackets">Edit</a>
+                - <a href="#post<?= $PostID ?>" id="#edit-<?= $PostID ?>" data-author="<?= $AuthorID ?>" data-key="<?= $Key ?>" class="edit-post brackets">Edit</a>
 <?php } ?>
 <?php if ($Viewer->permitted('site_forum_post_delete') && $thread->postTotal() > 1) { ?>
                 - <a href="#post<?=$PostID?>" onclick="Delete('<?=$PostID?>');" class="brackets">Delete</a>

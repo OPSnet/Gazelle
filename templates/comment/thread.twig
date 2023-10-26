@@ -17,7 +17,7 @@
                     <span id="postcontrol-{{ post.ID }}">
                     - <a href="#quickpost" onclick="Quote('{{ post.ID }}','{{ post.author_name }}', true);" class="brackets">Quote</a>
     {% if (viewer.permitted('site_moderate_forums')) or (post.AuthorID == viewer.Id) %}
-                    - <a href="#post{{ post.ID }}" onclick="Edit_Form('{{ post.ID }}','{{ key }}');" class="brackets">Edit</a>
+                    - <a href="#post{{ post.ID }}" id="edit-{{ post.ID }}" data-author="{{ post.AuthorID }}" data-key="{{ key }}" class="edit-post brackets">Edit</a>
     {% endif %}
                     </span>
                 </div>
