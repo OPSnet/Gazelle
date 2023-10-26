@@ -2,7 +2,7 @@
 
 namespace Gazelle\Stats;
 
-use \Gazelle\Enum\UserStatus;
+use Gazelle\Enum\UserStatus;
 
 class Economic extends \Gazelle\Base {
     final const CACHE_KEY = 'stats_eco';

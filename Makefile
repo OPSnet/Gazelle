@@ -59,7 +59,7 @@ lint-css:
 lint-php:
 	yarn lint:php:internal
 	yarn lint:php:phpcs || exit 0
-	composer phpstan analyse --configuration misc/phpstan.neon
+	vendor/bin/phpstan analyse --memory-limit=1024M --configuration=misc/phpstan.neon
 
 .PHONY: lint-twig
 lint-twig:

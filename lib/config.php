@@ -124,7 +124,7 @@ defined('TOP_TEN_HEADING') or define('TOP_TEN_HEADING', 'Top 10');
 // the site is launched will invalidate everyone's sessions and tokens.
 // This may be what you need in the event of a compromise.
 defined('ENCKEY') or define('ENCKEY', 'changeme');
-defined('AUTHKEY') OR define('AUTHKEY', 'changeme');
+defined('AUTHKEY') or define('AUTHKEY', 'changeme');
 
 // Extra salt added into RSS authentication
 defined('RSS_HASH') or define('RSS_HASH', 'changeme');
