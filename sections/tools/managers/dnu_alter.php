@@ -5,29 +5,23 @@ if (!$Viewer->permitted('admin_dnu')) {
 }
 
 authorize();
+
+$manager = new Gazelle\Manager\DNU;
+
 $db = Gazelle\DB::DB();
 
-if ($_POST['submit'] == 'Reorder') { // Reorder
-    foreach ($_POST['item'] as $Position => $Item) {
-        $db->prepared_query("
-            UPDATE do_not_upload SET
-                Sequence = ?
-            WHERE id = ?
-            ", $Position, $Item
-        );
-    }
+if ($_POST['submit'] == 'Reorder') {
+    // Reorder, issued from an ajax call, see dnu.js
+    echo json_encode($manager->reorder(array_map('intval', $_POST['item'] ?? [])));
+    exit;
+}
 
-} elseif ($_POST['submit'] == 'Delete') { //Delete
-    if (!is_number($_POST['id']) || $_POST['id'] == '') {
-        error(0);
-    }
-    $db->prepared_query('
-        DELETE FROM do_not_upload
-        WHERE ID = ?
-        ', $_POST['id']
-    );
+if ($_POST['submit'] == 'Delete') {
+    // Delete
+    $manager->remove((int)$_POST['id']);
 
-} else { //Edit & Create, Shared Validation
+} else {
+    // Edit & Create, Shared Validation
     $Val = new Gazelle\Util\Validator;
     $Val->setField('name', true, 'string', 'The name must be set, have a length of between 5 and 100 characters.', ['range' => [5, 100]]);
     $Val->setField('comment', false, 'string', 'The description has a maximum length of 255 characters.', ['maxlength' => 255]);
@@ -35,25 +29,21 @@ if ($_POST['submit'] == 'Reorder') { // Reorder
         error($Val->errorMessage());
     }
 
-    if ($_POST['submit'] == 'Edit') { //Edit
-        if (!is_number($_POST['id']) || $_POST['id'] == '') {
-            error(0);
-        }
-        $db->prepared_query("
-            UPDATE do_not_upload SET
-                Name = ?,
-                Comment = ?,
-                UserID = ?
-            WHERE ID = ?
-            ", trim($_POST['name']), trim($_POST['comment']), $Viewer->id(), $_POST['id']
+    if ($_POST['submit'] == 'Edit') {
+        // Edit
+        $manager->modify(
+            id:      (int)$_POST['id'],
+            name:    trim($_POST['name']),
+            comment: trim($_POST['comment']),
+            user:    $Viewer,
         );
-    } else { //Create
-        $db->prepared_query("
-            INSERT INTO do_not_upload
-                   (Name, Comment, UserID, Sequence)
-            VALUES (?,    ?,       ?,      9999)
-            ", trim($_POST['name']), trim($_POST['comment']), $Viewer->id()
-       );
+    } else {
+        // Create
+        $manager->create(
+            name:    trim($_POST['name']),
+            comment: trim($_POST['comment']),
+            user:    $Viewer,
+        );
     }
 }
 

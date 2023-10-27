@@ -7,16 +7,16 @@ jQuery(document).ready(function ($) {
         });
         return elements;
     };
+
     // Make table sortable
     $('#dnu tbody').sortable({
         helper: fixDimentions,
         cancel: 'input, .colhead, .rowa',
         update: function (event, ui) {
-            var post = $(this).sortable('serialize');
             request = $.ajax({
                 url: 'tools.php',
                 type: "post",
-                data: 'action=dnu_alter&auth=' + authkey + '&' + post + '&submit=Reorder'
+                data: 'action=dnu_alter&auth=' + authkey + '&' + $(this).sortable('serialize') + '&submit=Reorder'
             });
             request.done(function (response, textStatus, jqXHR) {
             });
