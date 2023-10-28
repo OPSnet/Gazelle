@@ -1,6 +1,6 @@
 diff --git a/vendor/monero-integrations/monerophp/src/Cryptonote.php b/vendor/monero-integrations/monerophp/src/Cryptonote.php
 index 5ed207f..25f3709 100644
---- a/vendor/monero-integrations/monerophp/vendor/monero-integrations/monerophp/src/Cryptonote.php
+--- a/vendor/monero-integrations/monerophp/src/Cryptonote.php
 +++ b/vendor/monero-integrations/monerophp/src/Cryptonote.php
 @@ -28,6 +28,9 @@ namespace MoneroIntegrations\MoneroPhp;
      class Cryptonote

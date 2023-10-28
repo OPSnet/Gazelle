@@ -1,0 +1,26 @@
+diff --git a/vendor/mdanter/ecc/src/Math/NumberTheory.php b/vendor/mdanter/ecc/src/Math/NumberTheory.php
+index 9b43b47..1a10f3e 100644
+--- a/vendor/mdanter/ecc/src/Math/NumberTheory.php
++++ b/vendor/mdanter/ecc/src/Math/NumberTheory.php
+@@ -44,6 +44,21 @@ class NumberTheory
+      */
+     private $adapter;
+ 
++    /**
++     * @var \GMP
++     */
++    private $zero;
++
++    /**
++     * @var \GMP
++     */
++    private $one;
++
++    /**
++     * @var \GMP
++     */
++    private $two;
++
+     /**
+      * @param GmpMathInterface $adapter
+      */
