@@ -72,10 +72,6 @@ class ForumPost extends BaseObject {
         return (bool)$this->info()['is_pinned'];
     }
 
-    public function isSticky(): bool {
-        return (bool)$this->info()['is_sticky'];
-    }
-
     public function page(): int {
         return $this->info()['page'];
     }

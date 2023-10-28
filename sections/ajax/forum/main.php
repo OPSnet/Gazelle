@@ -37,7 +37,6 @@ foreach ($forumList as $forumId) {
         'lastTopic'          => $forum->lastThread(),
         'read'               => $Viewer->hasReadLastPost($forum),
         'locked'             => $forum->isLocked(),
-        'sticky'             => $forum->isSticky(),
     ];
 }
 

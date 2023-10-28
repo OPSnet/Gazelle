@@ -136,10 +136,6 @@ class Forum extends BaseObject {
         return (bool)$this->info()['is_locked'];
     }
 
-    public function isSticky(): bool {
-        return (bool)$this->info()['is_sticky'];
-    }
-
     public function lastPostId(): int {
         return $this->info()['last_post_id'];
     }

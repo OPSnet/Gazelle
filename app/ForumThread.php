@@ -116,7 +116,7 @@ class ForumThread extends BaseObject {
     }
 
     public function isPinned(): bool {
-        return (bool)$this->info()['is_locked'];
+        return (bool)$this->info()['is_pinned'];
     }
 
     public function lastAuthorId(): int {

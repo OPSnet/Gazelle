@@ -80,7 +80,6 @@ class ForumTest extends TestCase {
         $this->assertFalse($this->forum->autoLock(), 'forum-autolock');
         $this->assertFalse($this->forum->hasRevealVotes(), 'forum-has-reveal-votes');
         $this->assertFalse($this->forum->isLocked(), 'forum-is-locked');
-        $this->assertFalse($this->forum->isSticky(), 'forum-is-sticky');
         $this->assertEquals(0, $this->forum->lastPostTime(), 'forum-last-post-time');
         $this->assertEquals(0, $this->forum->numPosts(), 'forum-post-total');
         $this->assertEquals(0, $this->forum->numThreads(), 'forum-thread-total');
