@@ -22,7 +22,7 @@ abstract class AbstractNotification extends \Gazelle\BaseUser {
         return $this->context ?? 0;
     }
 
-    public function setDisplay(int $display): AbstractNotification {
+    public function setDisplay(int $display): static {
         $this->display = $display;
         return $this;
     }

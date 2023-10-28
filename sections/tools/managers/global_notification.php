@@ -6,7 +6,7 @@ if (!$Viewer->permitted('admin_global_notification')) {
 
 $global = new Gazelle\Notification\GlobalNotification;
 if (isset($_POST['set'])) {
-    $global->create($_POST['title'],  $_POST['url'], $_POST['level'], (int)$_POST['length']);
+    $global->create($_POST['title'], $_POST['url'], $_POST['level'], (int)$_POST['length']);
 } elseif (isset($_POST['delete'])) {
     $global->remove();
 }
