@@ -576,13 +576,14 @@ abstract class TorrentAbstract extends BaseObject {
      */
     public function isReseedRequestAllowed(): bool {
         $lastRequestDate = $this->lastReseedRequestDate();
-        $lastActiveDate = (int)strtotime($this->lastActiveDate());
-        $createdDate = (int)strtotime($this->created());
+        $lastActiveDate  = $this->lastActiveDate();
+        $lastActiveEpoch = is_null($lastActiveDate) ? 0 : (int)strtotime($lastActiveDate);
+        $createdEpoch    = (int)strtotime($this->created());
 
         return match (true) {
-            !$lastActiveDate && !$lastRequestDate           => (time() >= strtotime(RESEED_NEVER_ACTIVE_TORRENT . ' days', $createdDate)),
-            !$lastRequestDate                               => (time() >= strtotime(RESEED_TORRENT . 'days', $lastActiveDate)),
-            default                                         => false,
+            !$lastActiveEpoch && !$lastRequestDate => (time() >= strtotime(RESEED_NEVER_ACTIVE_TORRENT . ' days', $createdEpoch)),
+            !$lastRequestDate                      => (time() >= strtotime(RESEED_TORRENT . 'days', $lastActiveEpoch)),
+            default                                => false,
         };
     }
 
