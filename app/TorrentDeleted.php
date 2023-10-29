@@ -2,6 +2,8 @@
 
 namespace Gazelle;
 
+use Gazelle\Enum\TorrentFlag;
+
 class TorrentDeleted extends TorrentAbstract {
     final const tableName = 'deleted_torrents';
     final const CACHE_KEY = 'tdel_%d';

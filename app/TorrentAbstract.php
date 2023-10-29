@@ -4,6 +4,7 @@ namespace Gazelle;
 
 use Gazelle\Enum\LeechReason;
 use Gazelle\Enum\LeechType;
+use Gazelle\Enum\TorrentFlag;
 
 abstract class TorrentAbstract extends BaseObject {
     final const CACHE_LOCK       = 'torrent_lock_%d';

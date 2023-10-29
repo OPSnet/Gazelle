@@ -2,6 +2,8 @@
 
 namespace Gazelle\Torrent;
 
+use Gazelle\Enum\TorrentFlag;
+
 class Report extends \Gazelle\BaseObject {
     final const tableName = 'reportsv2';
 
@@ -136,7 +138,7 @@ class Report extends \Gazelle\BaseObject {
         return $this->info()['type'];
     }
 
-    public function addTorrentFlag(\Gazelle\TorrentFlag $flag, \Gazelle\User $user): int {
+    public function addTorrentFlag(TorrentFlag $flag, \Gazelle\User $user): int {
         if ($this->torrent === false) {
             return 0;
         }

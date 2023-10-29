@@ -2,6 +2,8 @@
 
 namespace Gazelle;
 
+use Gazelle\Enum\TorrentFlag;
+
 class Torrent extends TorrentAbstract {
     use Pg;
 

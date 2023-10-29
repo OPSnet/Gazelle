@@ -1,4 +1,7 @@
 <?php
+
+use Gazelle\Enum\TorrentFlag;
+
 /*
  * This is the backend of the AJAXy reports resolve (When you press the shiny submit button).
  * This page shouldn't output anything except in error. If you do want output, it will be put
@@ -65,18 +68,18 @@ if ($fromReportPage && !$report->moderatorResolve($Viewer->id(), $_POST['comment
 
 $SendPM = false;
 if ($_POST['resolve_type'] === 'tags_lots') {
-    $report->addTorrentFlag(Gazelle\TorrentFlag::badTag, $Viewer);
+    $report->addTorrentFlag(TorrentFlag::badTag, $Viewer);
     $SendPM = true;
 } elseif ($_POST['resolve_type'] === 'folders_bad') {
-    $report->addTorrentFlag(Gazelle\TorrentFlag::badFolder, $Viewer);
+    $report->addTorrentFlag(TorrentFlag::badFolder, $Viewer);
     $SendPM = true;
 } elseif ($_POST['resolve_type'] === 'filename') {
-    $report->addTorrentFlag(Gazelle\TorrentFlag::badFile, $Viewer);
+    $report->addTorrentFlag(TorrentFlag::badFile, $Viewer);
     $SendPM = true;
 } elseif ($_POST['resolve_type'] === 'lineage') {
-    $report->addTorrentFlag(Gazelle\TorrentFlag::noLineage, $Viewer);
+    $report->addTorrentFlag(TorrentFlag::noLineage, $Viewer);
 } elseif ($_POST['resolve_type'] === 'lossyapproval') {
-    $report->addTorrentFlag(Gazelle\TorrentFlag::lossyMaster, $Viewer);
+    $report->addTorrentFlag(TorrentFlag::lossyMaster, $Viewer);
 }
 
 $adminMessage   = trim($_POST['admin_message']);

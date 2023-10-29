@@ -1,6 +1,6 @@
 <?php
 
-namespace Gazelle;
+namespace Gazelle\Enum;
 
 enum TorrentFlag: string {
     case badFile     = 'torrents_bad_files';
@@ -13,13 +13,13 @@ enum TorrentFlag: string {
 
     public function label(): string {
         return match ($this) {
-            TorrentFlag::badFile     => 'Bad Files',
-            TorrentFlag::badFolder   => 'Bad Folders',
-            TorrentFlag::badTag      => 'Bad Tags',
-            TorrentFlag::cassette    => 'Cassette Approved',
-            TorrentFlag::lossyMaster => 'Lossy Master Approved',
-            TorrentFlag::lossyWeb    => 'Lossy WEB Approved',
-            TorrentFlag::noLineage   => 'Missing Lineage', /** @phpstan-ignore-line */
+            self::badFile     => 'Bad Files',
+            self::badFolder   => 'Bad Folders',
+            self::badTag      => 'Bad Tags',
+            self::cassette    => 'Cassette Approved',
+            self::lossyMaster => 'Lossy Master Approved',
+            self::lossyWeb    => 'Lossy WEB Approved',
+            self::noLineage   => 'Missing Lineage', /** @phpstan-ignore-line */
         };
     }
 }

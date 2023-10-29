@@ -2,8 +2,10 @@
 
 namespace Gazelle\Better;
 
+use Gazelle\Enum\TorrentFlag;
+
 class Bad extends AbstractBetter {
-    protected \Gazelle\TorrentFlag $torrentFlag;
+    protected TorrentFlag $torrentFlag;
 
     public function mode(): string {
         return 'torrent';
@@ -11,24 +13,24 @@ class Bad extends AbstractBetter {
 
     public function setBadType(string $bad): static {
         $this->torrentFlag = match ($bad) { /** @phpstan-ignore-line */
-            'files'   => \Gazelle\TorrentFlag::badFile,
-            'folders' => \Gazelle\TorrentFlag::badFolder,
-            'lineage' => \Gazelle\TorrentFlag::noLineage,
-            'tags'    => \Gazelle\TorrentFlag::badTag,
+            'files'   => TorrentFlag::badFile,
+            'folders' => TorrentFlag::badFolder,
+            'lineage' => TorrentFlag::noLineage,
+            'tags'    => TorrentFlag::badTag,
         };
         return $this;
     }
 
-    public function torrentFlag(): \Gazelle\TorrentFlag {
+    public function torrentFlag(): TorrentFlag {
         return $this->torrentFlag;
     }
 
     public function heading(): string {
         return match ($this->torrentFlag) { /** @phpstan-ignore-line */
-            \Gazelle\TorrentFlag::badFile   => 'Releases with with bad filenames',
-            \Gazelle\TorrentFlag::badFolder => 'Releases with with bad folders',
-            \Gazelle\TorrentFlag::noLineage => 'Releases with missing lineage details',
-            \Gazelle\TorrentFlag::badTag    => 'Releases with with bad tags',
+            TorrentFlag::badFile   => 'Releases with with bad filenames',
+            TorrentFlag::badFolder => 'Releases with with bad folders',
+            TorrentFlag::noLineage => 'Releases with missing lineage details',
+            TorrentFlag::badTag    => 'Releases with with bad tags',
         };
     }
 

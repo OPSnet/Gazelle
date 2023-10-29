@@ -1,8 +1,9 @@
 <?php
 
-use OrpheusNET\Logchecker\Logchecker;
 use Gazelle\Enum\LeechType;
 use Gazelle\Enum\LeechReason;
+use Gazelle\Enum\TorrentFlag;
+use OrpheusNET\Logchecker\Logchecker;
 
 authorize();
 
@@ -221,13 +222,13 @@ if ($Viewer->permitted('users_mod')) {
     }
 
     foreach ([
-        (object)['flag' => Gazelle\TorrentFlag::badFile,     'property' => 'BadFiles'],
-        (object)['flag' => Gazelle\TorrentFlag::badFolder,   'property' => 'BadFolders'],
-        (object)['flag' => Gazelle\TorrentFlag::badTag,      'property' => 'BadTags'],
-        (object)['flag' => Gazelle\TorrentFlag::cassette,    'property' => 'CassetteApproved'],
-        (object)['flag' => Gazelle\TorrentFlag::lossyMaster, 'property' => 'LossymasterApproved'],
-        (object)['flag' => Gazelle\TorrentFlag::lossyWeb,    'property' => 'LossywebApproved'],
-        (object)['flag' => Gazelle\TorrentFlag::noLineage,   'property' => 'Lineage'],
+        (object)['flag' => TorrentFlag::badFile,     'property' => 'BadFiles'],
+        (object)['flag' => TorrentFlag::badFolder,   'property' => 'BadFolders'],
+        (object)['flag' => TorrentFlag::badTag,      'property' => 'BadTags'],
+        (object)['flag' => TorrentFlag::cassette,    'property' => 'CassetteApproved'],
+        (object)['flag' => TorrentFlag::lossyMaster, 'property' => 'LossymasterApproved'],
+        (object)['flag' => TorrentFlag::lossyWeb,    'property' => 'LossywebApproved'],
+        (object)['flag' => TorrentFlag::noLineage,   'property' => 'Lineage'],
     ] as $f) {
         $exists = $torrent->hasFlag($f->flag);
         if (!$exists && $Properties[$f->property]) {
