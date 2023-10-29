@@ -11,5 +11,6 @@ class UpdateSeedTimes extends \Gazelle\Task {
                 WHERE active = 1 AND remaining = 0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR)
             ON DUPLICATE KEY UPDATE seedtime = seedtime + 1
         ');
+        $this->processed = self::$db->affected_rows();
     }
 }
