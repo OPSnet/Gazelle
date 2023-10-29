@@ -157,7 +157,8 @@ COPY .docker /var/www/.docker
 RUN useradd -ms /bin/bash gazelle \
     && touch /var/log/php_error.log /var/log/xdebug.log \
     && chown -R gazelle:gazelle /var/www /var/log/php_error.log /var/log/xdebug.log \
-    && cp /var/www/.docker/web/php.ini /etc/php/${PHP_VER}/cli/php.ini \
+    && cp /var/www/.docker/web/php.ini /etc/php/${PHP_VER}/cli/10-php.ini \
+    && cp /var/www/.docker/web/php-cli.ini /etc/php/${PHP_VER}/cli/20-cli.ini \
     && cp /var/www/.docker/web/php.ini /etc/php/${PHP_VER}/fpm/php.ini \
     && cp /var/www/.docker/web/xdebug.ini /etc/php/${PHP_VER}/mods-available/xdebug.ini \
     && sed -i 's|xdebug.mode=debug|\0,coverage|' /etc/php/${PHP_VER}/mods-available/xdebug.ini \
