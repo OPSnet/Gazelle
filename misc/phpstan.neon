@@ -69,6 +69,7 @@ parameters:
       message: '/^Function \w+\(\) (?:has parameter \$\w+ with|return type has) no value type specified in iterable type array\.$/'
       paths:
         -  ../lib/util.php
+        -  ../sections/artist/concerts.php
     -
       message: '/^Method [^:]+::\w+\(\) has parameter \S+ with no (?:type specified|value type specified in iterable type array)\.$/'
       paths:

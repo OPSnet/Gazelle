@@ -1,8 +1,12 @@
 <?php
+
+/** @var Gazelle\Artist $Artist included from sections/artist/artist.php */
+
 $Concerts = '';
 ob_start();
 
-$ArtistEvents = (new Gazelle\Util\LastFM)->artistEventList($ArtistID, $name);
+$ArtistEvents = (new Gazelle\Util\LastFM)->artistEventList($Artist->id(), $Artist->name());
+
 $Hidden = false;
 if ($ArtistEvents === false) { // Something went wrong
     echo '<br />An error occurred when retrieving concert info.<br />';
@@ -13,10 +17,10 @@ if ($ArtistEvents === false) { // Something went wrong
     echo '<ul>';
     if (isset($ArtistEvents['events']['event'][0])) { // Multiple events
         foreach ($ArtistEvents['events']['event'] as $Event) {
-            make_concert_link($Event);
+            make_concert_link($Event, $Artist->name());
         }
     } else { // Single event
-        make_concert_link($ArtistEvents['events']['event'], $name);
+        make_concert_link($ArtistEvents['events']['event'], $Artist->name());
     }
     echo '</ul>';
 }
@@ -34,7 +38,7 @@ $Concerts .= ob_get_clean();
 </div>
 
 <?php
-function make_concert_link($Event, $Name) {
+function make_concert_link(array $Event, string $Name): void {
     // The event doesn't have a start date (this should never happen)
     if ($Event['startDate'] == '') {
         return;
@@ -54,7 +58,7 @@ function make_concert_link($Event, $Name) {
 <?php
 }
 
-function get_concert_post_template($Artist, $Event) {
+function get_concert_post_template(string $Artist, array $Event): string {
     $With = '';
     $EventTitle = '';
     $Location = '';
@@ -86,9 +90,7 @@ function get_concert_post_template($Artist, $Event) {
         $i = 0;
         $j = count($Event['artists']['artist']) - 1;
         foreach ($Event['artists']['artist'] as $WithArtist) {
-            if ($i === $j) {
-                $With .= " and [artist]" . $WithArtist . "[/artist]";
-            } elseif ($i == 0) {
+            if ($i == 0) {
                 $With .= "[artist]" . $WithArtist . "[/artist]";
             } else {
                 $With .= ", [artist]" . $WithArtist . "[/artist]";
@@ -109,12 +111,12 @@ $Website
 [align=center]. . . . . . . . . .[/align]";
 }
 
-function get_date_title($Str) {
+function get_date_title(string $Str): string {
     $Exploded = explode(' ', $Str);
     return $Exploded[2] . ' ' . $Exploded[1] . ', ' . $Exploded[3];
 }
 
-function get_date_post($Str) {
+function get_date_post(string $Str): string {
     $Exploded = explode(' ', $Str);
     return $Exploded[2] . ' ' . $Exploded[1] . ', ' . $Exploded[3] . ' (' . rtrim($Exploded[0], ',') . ')';
 }
