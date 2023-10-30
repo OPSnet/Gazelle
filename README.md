@@ -5,13 +5,12 @@ Although naturally focusing on music, it can be modified for most
 needs. Gazelle is written in PHP, Twig, JavaScript, and MySQL.
 
 ## Gazelle Runtime Dependencies
-* [Nginx](http://wiki.nginx.org/Main) (recommended)
-* [PHP 8.2.1+](https://www.php.net/) (required)
+* [PHP 8.2.6+](https://www.php.net/) (required)
+* [Nginx](http://wiki.nginx.org/Main) (required)
 * [NodeJS 12+](https://nodejs.org/en/) (required)
 * [Memcached](http://memcached.org/) (required)
-* [Sphinx 2.0.6 or newer](http://sphinxsearch.com/) (required)
-* [ocelot](https://github.com/OPSnet/Ocelot) (required)
-* [procps-ng](http://sourceforge.net/projects/procps-ng/) (recommended)
+* [Sphinx 2.2 or newer](http://sphinxsearch.com/) (required)
+* [ocelot](https://github.com/OPSnet/Ocelot) (optional)
 
 ## Logchecker
 To fully utilize the Logchecker, you must install the following
@@ -33,6 +32,25 @@ proxies, and tuning TCP configs to get proper performance and privacy.
 Docker is used to develop Gazelle. See https://docs.docker.com/engine/install/
 for more information on getting Docker set up locally.
 
+### Gazelle
+In the root folder of the Gazelle repository, run the following command:
+
+`docker compose up -d`
+
+This will pull and build the needed images to run Gazelle on Debian
+Bullseye. A volume is mounted from the base of the git repository at
+`/var/www` in the container. Changes to the source code are
+immediately served without rebuilding or restarting.
+
+You can access the site by viewing `http://localhost:7001/`
+
+The first account created is assigned the highest operational role
+(Sysop) automatically.
+
+The Sysop account might not have all the permissions that have
+been added recently. Navigate to the /tools.php?action=permissions
+page and tick everything.
+
 ### Ocelot
 The [ocelot](https://github.com/OPSnet/Ocelot) repository is used to build the Ocelot image. To keep things simple, check out the source in a
 sibling directory to Gazelle.
@@ -43,38 +61,20 @@ $ cd ocelot
 $ docker build . -t ocelot
 ```
 
-### Gazelle
-In the root folder of the Gazelle repository, run the following command:
+Ocelot can then be launched by specifying an additional configuration file:
 
-`docker compose up`
-
-This will pull and build the needed images to run Gazelle on Debian
-Bullseye. A volume is mounted from the base of the git repository at
-`/var/www` in the container. Changes to the source code are
-immediately served without rebuilding or restarting.
-
-You can access the site by viewing `http://localhost:7001/`
-
-The first account is 'admin' and has the highest level of  access
-to the site installation. The second account is 'user' and has
-standard user access. The passwords for both accounts are literally
-'password' (without the quotes). If you want to change these before
-building, edit misc/phinx/seeds/InitialUserSeeder.php first.
-
-The 'admin' account might not have all the permissions that have
-been added recently. Navigate to the /tools.php?action=permissions
-page and tick everything.
+`docker compose -f docker-compose.yml -f misc/docker-compose.ocelot.yml up -d`
 
 ### Ports
 The following ports are forwarded:
 * 80 -> 7001 (web)
 * 3306 -> 36000 (mysql)
-* 34000 -> 34000 (ocelot)
+* 34000 -> 34000 (ocelot if present)
 
 ## Going further
 You may want to install additional packages:
 * `apt update`
-* `apt install less procps vim`
+* `apt install less vim`
 
 If you want to poke around inside the web container, open a shell:
 

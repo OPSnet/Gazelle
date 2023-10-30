@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  ocelot:
+    image: ocelot
+    ports:
+      - 127.0.0.1:34000:34000
+    depends_on:
+      - mysql
+    volumes:
+      - ./.docker/ocelot/ocelot.conf:/srv/ocelot.conf
+      - ./.docker/ocelot/entrypoint.sh:/srv/entrypoint.sh
+    environment:
+      - DEVELOPMENT=true
+      - MYSQL_USER=gazelle
+      - MYSQL_PASSWORD=password
+    command:
+      - bash
+      - /srv/entrypoint.sh
