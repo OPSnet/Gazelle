@@ -132,4 +132,16 @@ class Helper {
         }
         $tgroup->remove($user);
     }
+
+    /**
+     * Test whether a timestamp (YYYY-MM-DD HH:MM:SS) is close enough to now.
+     * The default tolerance is 20 seconds.
+     */
+    public static function recentDate(string $date, int $tolerance = 20): bool {
+        $epoch = strtotime($date);
+        if ($epoch === false) {
+            return false;
+        }
+        return time() - $epoch < $tolerance;
+    }
 }

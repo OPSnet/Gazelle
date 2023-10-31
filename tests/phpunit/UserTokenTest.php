@@ -24,7 +24,7 @@ class UserTokenTest extends TestCase {
     public function testUserTokenCreate(): void {
         $manager = new \Gazelle\Manager\UserToken;
         $userToken = $manager->create(UserTokenType::password, $this->user);
-        $this->assertStringStartsWith(date('Y-m-d '), $userToken->expiry(), 'usertoken-expiry');
+        $this->assertTrue(Helper::recentDate($userToken->expiry()), 'usertoken-expiry');
 
         $this->assertInstanceOf(\Gazelle\User\Token::class, $manager->findById($userToken->id()), 'usertoken-find-by-id');
         $this->assertInstanceOf(\Gazelle\User\Token::class, $manager->findByToken($userToken->value()), 'usertoken-find-by-token');

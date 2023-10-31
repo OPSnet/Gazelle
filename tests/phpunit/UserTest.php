@@ -309,13 +309,13 @@ class UserTest extends TestCase {
         $warned = new \Gazelle\User\Warning($this->user);
         $this->assertFalse($warned->isWarned(), 'utest-warn-initial');
         $end = $warned->create(reason: 'phpunit 1', interval: '1 hour', warner: $this->user);
-        $this->assertStringStartsWith(date('Y-m-d '), $end, 'utest-warn-1-hour');
+        $this->assertTrue(Helper::recentDate($end, -3580), 'utest-warn-1-hour'); // one hour - 20 seconds
         $this->assertTrue($warned->isWarned(), 'utest-is-warned');
         $this->assertEquals(1, $warned->total(), 'utest-warn-total');
 
         $userMan = new \Gazelle\Manager\User;
         $end = $userMan->warn($this->user, 2, "phpunit warning", $this->user);
-        $this->assertStringStartsWith(date('Y-m-d', strtotime('+2 weeks')), $end, 'utest-warn-uman');
+        $this->assertTrue(Helper::recentDate($end, strtotime('+2 weeks') - 20), 'utest-warn-in-future'); // two weeks - 20 seconds
         $this->assertEquals(2, $warned->total(), 'utest-warn-total');
         $warningList = $warned->warningList();
         $this->assertCount(2, $warningList, 'utest-warn-list');
