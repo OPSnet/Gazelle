@@ -33,7 +33,7 @@ class InviteTest extends TestCase {
 
         $this->assertEquals(0, $this->user->stats()->invitedTotal(), 'invite-total-0');
         $this->assertEquals(0, $this->user->unusedInviteTotal(), 'invite-unused-0');
-        $this->assertEquals(0, $this->user->pendingInviteCount(), 'invite-pending-0-initial');
+        $this->assertEquals(0, $this->user->invite()->pendingTotal(), 'invite-pending-0-initial');
 
         // USER cannot invite, but MEMBER can
         $this->assertFalse($this->user->canInvite(),  'invite-cannot-invite');
@@ -48,8 +48,8 @@ class InviteTest extends TestCase {
         $this->assertTrue($bonus->purchaseInvite(),  'invite-purchase-invite');
         $this->assertEquals(1, $this->user->unusedInviteTotal(), 'invite-unused-1');
 
-        $this->assertTrue($this->user->decrementInviteCount(), 'invite-decrement-true');
-        $this->assertFalse($this->user->decrementInviteCount(), 'invite-decrement-none-left');
+        $this->assertTrue($this->user->invite()->issueInvite(), 'invite-issue-true');
+        $this->assertFalse($this->user->invite()->issueInvite(), 'invite-decrement-none-left');
         $this->user->setField('Invites', 1)->modify();
 
         // invite someone
@@ -59,9 +59,9 @@ class InviteTest extends TestCase {
         $this->assertFalse($manager->emailExists($this->user, $email), 'invitee-email-not-pending');
         $invite = $manager->create($this->user, $email, 'unittest', '');
         $this->assertInstanceOf(Gazelle\Invite::class, $invite, 'invite-invitee-created');
-        $this->assertEquals(1, $this->user->pendingInviteCount(), 'invite-pending-1');
+        $this->assertEquals(1, $this->user->invite()->pendingTotal(), 'invite-pending-1');
         $this->assertEquals(0, $this->user->unusedInviteTotal(), 'invite-unused-0-again');
-        $this->assertEquals($invite->email(), $this->user->pendingInviteList()[$invite->key()]['email'], 'invite-invitee-email');
+        $this->assertEquals($invite->email(), $this->user->invite()->pendingList()[$invite->key()]['email'], 'invite-invitee-email');
 
         // respond to invite
         $this->assertTrue($manager->inviteExists($invite->key()), 'invite-key-found');
@@ -70,10 +70,10 @@ class InviteTest extends TestCase {
         $this->assertEquals($this->user->id(), $this->invitee->inviter()->id(), 'invitee-invited-by');
         $this->assertEquals($this->user->id(), $this->invitee->inviterId(), 'invitee-invited-id');
         $this->assertEquals(1, $this->user->stats()->invitedTotal(), 'invite-total-1');
-        $this->assertEquals(0, $this->user->flush()->pendingInviteCount(), 'invite-pending-back-to-0');
-        $inviteList = $this->user->inviteList('um.ID', 'ASC');
+        $this->assertEquals(0, $this->user->flush()->invite()->pendingTotal(), 'invite-pending-back-to-0');
+        $inviteList = $this->user->invite()->page('um.ID', 'ASC', 1, 0);
         $this->assertCount(1, $inviteList, 'invite-invite-list-total');
-        $this->assertEquals($this->invitee->id(), $inviteList[0]['user_id'], 'invite-list-has-invitee');
+        $this->assertEquals($this->invitee->id(), $inviteList[0], 'invite-list-has-invitee');
 
         $this->assertTrue($this->invitee->isUnconfirmed(), 'invitee-unconfirmed');
         $this->assertInstanceOf(Gazelle\User::class, (new Gazelle\Manager\User)->findByAnnounceKey($this->invitee->announceKey()), 'invitee-confirmable');
@@ -86,8 +86,8 @@ class InviteTest extends TestCase {
         $email = randomString(10) . "@invitee.example.com";
         $this->assertFalse($manager->emailExists($this->user, $email), 'invitee-email-not-pending');
         $invite = $manager->create($this->user, $email, 'unittest', '');
-        $this->assertFalse($this->user->revokeInvite('nosuchthing'), 'invite-revoke-inexistant');
-        $this->assertTrue($this->user->revokeInvite($invite->key()), 'invite-revoke-existing');
+        $this->assertFalse($this->user->invite()->revoke('nosuchthing'), 'invite-revoke-inexistant');
+        $this->assertTrue($this->user->invite()->revoke($invite->key()), 'invite-revoke-existing');
         $this->assertEquals(1, $this->user->unusedInviteTotal(), 'invite-unused-1');
     }
 

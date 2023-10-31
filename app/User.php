@@ -22,6 +22,7 @@ class User extends BaseObject {
     protected bool $forceCacheFlush = false;
     protected int $lastReadForum;
     protected string $warningExpiry;
+    protected User\Invite $invite;
 
     protected array $avatarCache;
     protected array $lastRead;
@@ -535,6 +536,25 @@ class User extends BaseObject {
 
     public function label(): string {
         return $this->id . " (" . $this->info()['Username'] . ")";
+    }
+
+    public function lastAccess(): ?string {
+        $lastAccess = $this->getSingleValue('user_last_access', "
+            SELECT ula.last_access FROM user_last_access ula WHERE user_id = ?
+        ");
+        return $lastAccess ? (string)$lastAccess : null;
+    }
+
+    public function lastAccessRealtime(): ?string {
+        $lastAccess = self::$db->scalar("
+            SELECT coalesce(max(ulad.last_access), ula.last_access)
+            FROM user_last_access ula
+            LEFT JOIN user_last_access_delta ulad USING (user_id)
+            WHERE ula.user_id = ?
+            GROUP BY ula.user_id
+            ", $this->id
+        );
+        return $lastAccess ? (string)$lastAccess : null;
     }
 
     public function option(string $option): mixed {
@@ -1543,25 +1563,6 @@ class User extends BaseObject {
         return max(0, (int)$value - 1);
     }
 
-    public function lastAccess(): ?string {
-        $lastAccess = $this->getSingleValue('user_last_access', "
-            SELECT ula.last_access FROM user_last_access ula WHERE user_id = ?
-        ");
-        return $lastAccess ? (string)$lastAccess : null;
-    }
-
-    public function lastAccessRealtime(): ?string {
-        $lastAccess = self::$db->scalar("
-            SELECT coalesce(max(ulad.last_access), ula.last_access)
-            FROM user_last_access ula
-            LEFT JOIN user_last_access_delta ulad USING (user_id)
-            WHERE ula.user_id = ?
-            GROUP BY ula.user_id
-            ", $this->id
-        );
-        return $lastAccess ? (string)$lastAccess : null;
-    }
-
     public function passwordCount(): int {
         return (int)$this->getSingleValue('user_pw_count', '
             SELECT count(*) FROM users_history_passwords WHERE UserID = ?
@@ -1592,6 +1593,10 @@ class User extends BaseObject {
         ');
     }
 
+    public function invite(): User\Invite {
+        return $this->invite ??= new User\Invite($this);
+    }
+
     public function inviter(): ?User {
         return new User($this->inviterId());
     }
@@ -1602,62 +1607,6 @@ class User extends BaseObject {
 
     public function unusedInviteTotal(): int {
         return $this->disableInvites() ? 0 : $this->info()['Invites'];
-    }
-
-    public function decrementInviteCount(): bool {
-        if ($this->permitted('site_send_unlimited_invites')) {
-            return true;
-        }
-        self::$db->prepared_query("
-            UPDATE users_main SET
-                Invites = GREATEST(Invites, 1) - 1
-            WHERE ID = ?
-            ", $this->id
-        );
-        $affected = self::$db->affected_rows();
-        $this->flush();
-        return $affected > 0;
-    }
-
-    public function pendingInviteCount(): int {
-        return (int)$this->getSingleValue('user_inv_pending', '
-            SELECT count(*)
-            FROM invites
-            WHERE InviterID = ?
-        ');
-    }
-
-    public function pendingInviteList(): array {
-        self::$db->prepared_query("
-            SELECT InviteKey AS invite_key,
-                Email        AS email,
-                Expires      AS expires
-            FROM invites
-            WHERE InviterID = ?
-            ORDER BY Expires
-            ", $this->id
-        );
-        return self::$db->to_array('invite_key', MYSQLI_ASSOC, false);
-    }
-
-    public function inviteList(string $orderBy, string $direction): array {
-        self::$db->prepared_query("
-            SELECT
-                um.ID          AS user_id,
-                um.Email       AS email,
-                uls.Uploaded   AS uploaded,
-                uls.Downloaded AS downloaded,
-                um.created     AS created,
-                ula.last_access
-            FROM users_main AS um
-            LEFT  JOIN user_last_access AS ula ON (ula.user_id = um.ID)
-            INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
-            INNER JOIN users_info AS ui ON (ui.UserID = um.ID)
-            WHERE um.inviter_user_id = ?
-            ORDER BY $orderBy $direction
-            ", $this->id
-        );
-        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     public function passwordAge(): int {
@@ -2084,34 +2033,5 @@ class User extends BaseObject {
      */
     public function canPurchaseInvite(): bool {
         return !$this->disableInvites() && $this->effectiveClass() >= MIN_INVITE_CLASS;
-    }
-
-    /**
-     * Revoke an active invitation (restore previous invite total)
-     */
-    public function revokeInvite(string $key): bool {
-        self::$db->begin_transaction();
-        self::$db->prepared_query("
-            DELETE FROM invites WHERE InviteKey = ?
-            ", $key
-        );
-        if (self::$db->affected_rows() == 0) {
-            self::$db->rollback();
-            return false;
-        }
-        if ($this->permitted('site_send_unlimited_invites')) {
-            self::$db->commit();
-            return true;
-        }
-
-        self::$db->prepared_query("
-            UPDATE users_main SET
-                Invites = Invites + 1
-            WHERE ID = ?
-            ", $this->id
-        );
-        self::$db->commit();
-        $this->flush();
-        return true;
     }
 }

@@ -103,6 +103,7 @@ class UserCreator extends Base {
         if (!isset($this->id)) {
             $this->id = self::$db->inserted_id();
         }
+        $user = new User($this->id);
 
         // create users_info row
         self::$db->prepared_query("
@@ -185,9 +186,8 @@ class UserCreator extends Base {
             'passkey' => $this->announceKey
         ]);
 
-        $id = $this->id;
         $this->reset(); // So we can create another user
-        return new User($id);
+        return $user;
     }
 
     /**

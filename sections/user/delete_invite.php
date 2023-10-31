@@ -11,5 +11,5 @@ if ($user->id() != $Viewer->id()) {
     error(403);
 }
 
-$user->revokeInvite($inviteKey);
+$user->invite()->revoke($inviteKey);
 header('Location: user.php?action=invite');

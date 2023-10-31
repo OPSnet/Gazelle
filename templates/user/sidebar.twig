@@ -36,7 +36,7 @@
 
 {% if viewer.permitted('users_view_invites') or (own_profile and user.canPurchaseInvite) %}
     <li>Invites: {% if user.disableInvites %}<span title="Invites are disabled">X</span>{% else %}{{ user.unusedInviteTotal|number_format }}{% endif %}
-    ({{ user.pendingInviteCount|number_format }} in use)</li>
+    ({{ user.invite.pendingTotal|number_format }} in use)</li>
     {% set total = user.stats.invitedTotal %}
     <li>Invited: {{ total|number_format }}
     {% if total %} <a class="brackets" href="user.php?id={{ user.id }}&amp;action=invite">View</a>{% endif %}

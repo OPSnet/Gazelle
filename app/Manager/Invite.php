@@ -7,7 +7,7 @@ class Invite extends \Gazelle\Base {
 
     public function create(\Gazelle\User $user, string $email, string $reason, string $source): ?\Gazelle\Invite {
         self::$db->begin_transaction();
-        if (!$user->decrementInviteCount()) {
+        if (!$user->invite()->issueInvite()) {
             return null;
         }
         $inviteKey = randomString();
@@ -76,7 +76,7 @@ class Invite extends \Gazelle\Base {
      * @return array list of pending invites [inviter_id, ipaddr, invite_key, expires, email]
      */
     public function pendingInvites(int $limit, int $offset): array {
-        if (is_null($this->search)) {
+        if (!isset($this->search)) {
             $where = "/* no email filter */";
             $args = [];
         } else {
@@ -120,7 +120,7 @@ class Invite extends \Gazelle\Base {
     public function expire(\Gazelle\Task $task = null): int {
         self::$db->begin_transaction();
         self::$db->prepared_query("SELECT InviterID FROM invites WHERE Expires < now()");
-        $list = self::$db->collect('InviterID', false);
+        $list = self::$db->collect(0, false);
 
         self::$db->prepared_query("DELETE FROM invites WHERE Expires < now()");
         self::$db->prepared_query("

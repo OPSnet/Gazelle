@@ -1,9 +1,10 @@
 <?php
 
+$userMan = new Gazelle\Manager\User;
 if (!isset($_REQUEST['id'])) {
     $user = $Viewer;
 } else {
-    $user = (new Gazelle\Manager\User)->findById((int)$_REQUEST['id']);
+    $user = $userMan->findById((int)$_REQUEST['id']);
     if (is_null($user)) {
         error(404);
     }
@@ -28,7 +29,7 @@ if (count($userSource)) {
 }
 
 $heading = new \Gazelle\Util\SortableTableHeader('created', [
-    // see Gazelle\User::inviteList() for these table aliases
+    // see Gazelle\User\Invite::page() for these table aliases
     'id'         => ['dbColumn' => 'um.ID',           'defaultSort' => 'desc'],
     'username'   => ['dbColumn' => 'um.Username',     'defaultSort' => 'desc', 'text' => 'Username'],
     'email'      => ['dbColumn' => 'um.Email',        'defaultSort' => 'desc', 'text' => 'Email'],
@@ -39,14 +40,23 @@ $heading = new \Gazelle\Util\SortableTableHeader('created', [
     'ratio'      => ['dbColumn' => '(uls.Uploaded / uls.Downloaded)', 'defaultSort' => 'desc', 'text' => 'Ratio'],
 ]);
 
+$paginator = new Gazelle\Util\Paginator(ITEMS_PER_PAGE, (int)($_REQUEST['page'] ?? 1));
+$paginator->setTotal($user->invite()->total());
+
 echo $Twig->render('user/invited.twig', [
     'edit_source'       => ($_GET['edit'] ?? '') === 'source',
     'heading'           => $heading,
-    'invited'           => $user->inviteList($heading->getOrderBy(), $heading->getOrderDir()),
+    'invited'           => array_map(
+        fn($id) => $userMan->findById($id),
+        $user->invite()->page(
+            $heading->getOrderBy(), $heading->getOrderDir(), $paginator->limit(), $paginator->offset()
+        )
+    ),
     'inviter_config'    => $invSourceMan->inviterConfigurationActive($userId),
     'invites_open'      => (new Gazelle\Stats\Users)->newUsersAllowed($user),
     'invite_source'     => $invSourceMan->userSource($userId),
     'own_profile'       => $ownProfile,
+    'paginator'         => $paginator,
     'user'              => $user,
     'user_source'       => $invSourceMan->userSource($userId),
     'wiki_user_classes' => 4,

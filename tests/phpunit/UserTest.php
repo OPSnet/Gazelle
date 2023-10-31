@@ -134,7 +134,7 @@ class UserTest extends TestCase {
         $this->assertEquals(0, $this->user->collageUnreadCount(), 'utest-collage-unread-count');
         $this->assertEquals(0, $this->user->forumCatchupEpoch(), 'utest-forum-catchup-epoch');
         $this->assertEquals(0, $this->user->inboxUnreadCount(), 'utest-inbox-unread');
-        $this->assertEquals(0, $this->user->pendingInviteCount(), 'utest-pending-invite-count');
+        $this->assertEquals(0, $this->user->invite()->pendingTotal(), 'utest-pending-invite-count');
         $this->assertEquals(0, $this->user->downloadedOnRatioWatch(), 'utest-download-ratio-watch');
         $this->assertEquals(0, $this->user->seedingSize(), 'utest-seeding-size');
         $this->assertEquals(0, $this->user->torrentDownloadCount(0), 'utest-torrent-download-count');

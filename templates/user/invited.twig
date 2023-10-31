@@ -1,4 +1,12 @@
-{% from 'macro/form.twig' import select_invite_source -%}
+{% from 'macro/form.twig' import selected -%}
+{%- macro select_invite_source(user_id, config, source) -%}
+<select name="user-{{ user_id }}">
+    <option name="s-none">---</option>
+    {%- for c in config -%}
+    <option value="s-{{ c.invite_source_id }}"{{ selected(c.invite_source_id == source[user_id].invite_source_id) }}>{{ c.name }}</option>
+    {%- endfor -%}
+</select>
+{%- endmacro %}
 
 {{ header('Invites') }}
 <div class="thin">
@@ -57,7 +65,7 @@
         <div class="field_div">
             <div class="label">Invite source:</div>
             <div class="input">
-            <td class="nobr">{{ select_invite_source(0, inviter_config, user_source) }}</td>
+            {{ _self.select_invite_source(0, inviter_config, user_source) }}
             </div>
         </div>
     {% endif %}
@@ -69,7 +77,14 @@
         </div>
     {% if user.permitted('users_invite_notes') %}
         <div class="field_div">
-            <div class="label">Staff Note:</div>
+            <div class="label">&nbsp;</div>
+            <div class="input">
+            When inviting a person from another site, paste their user profile url here.
+                (E.g. <tt>{{ constant('SITE_URL') }}/user.php?id={{ user.id }}</tt>).
+            </div>
+        </div>
+        <div class="field_div">
+            <div class="label">Profile information:</div>
             <div class="input">
                 <input type="text" name="reason" size="40" maxlength="255" />
             </div>
@@ -94,7 +109,7 @@
     {% endif %}
 {% endif %}
 
-{% for p in user.pendingInviteList %}
+{% for p in user.invite.pendingList %}
     {% if loop.first %}
 <h3>Pending invites</h3>
 <div class="box pad">
@@ -102,18 +117,16 @@
         <tr class="colhead">
             <td>Email address</td>
             <td>Expires in</td>
-            <td>Key</td>
             <td>Invite link</td>
-            <td>Delete invite</td>
+            <td>Revoke invite</td>
         </tr>
     {% endif %}
         <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
             <td>{{ p.email }}</td>
             <td>{{ p.expires|time_diff }}</td>
-            <td>{{ p.invite_key }}</td>
-            <td><a href="register.php?invite={{ p.invite_key }}">Invite link</a></td>
+            <td>{{ constant('SITE_URL') }}/register.php?invite={{ p.invite_key }}</td>
             <td><a href="user.php?action=delete_invite&amp;invite={{ p.invite_key }}&amp;auth={{ user.auth }}"
-                onclick="return confirm('Are you sure you want to delete this invite?');">Delete invite</a></td>
+                onclick="return confirm('Are you sure you want to revoke this invite?');">Revoke invite</a></td>
         </tr>
     {% if loop.last %}
     </table>
@@ -129,11 +142,12 @@
     {% if edit_source %}
     <a class="brackets" href="user.php?action=invite">View</a>
     {% else %}
-    <a class="brackets" href="user.php?action=invite&edit=source">Edit sources</a>
+    <a class="brackets" href="user.php?action=invite&amp;edit=source">Edit sources</a>
     {% endif %}
 {% endif %}
 </h3>
 <div class="box pad">
+    {{ paginator.linkbox|raw }}
     <table class="invite_table m_table" width="100%">
         <tr class="colhead">
             <td class="m_th_left nobr">{{ heading|column('username') }}</td>
@@ -149,18 +163,18 @@
         </tr>
 {% for u in invited %}
         <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
-            <td class="td_username">{{ u.user_id|user_full|raw }}</td>
+            <td class="td_username">{{ u.id|user_full|raw }}</td>
             <td class="td_email">{{ u.email }}</td>
             <td class="td_join_date">{{ u.created|time_diff }}</td>
-            <td class="td_last_access">{{ u.last_access|time_diff }}</td>
-            <td class="td_up m_td_right">{{ u.uploaded|octet_size }}</td>
-            <td class="td_dl m_td_right">{{ u.downloaded|octet_size }}</td>
-            <td class="td_ratio m_td_right">{{ ratio(u.uploaded, u.downloaded) }}</td>
+            <td class="td_last_access">{{ u.lastAccess|time_diff }}</td>
+            <td class="td_up m_td_right">{{ u.uploadedSize|octet_size }}</td>
+            <td class="td_dl m_td_right">{{ u.downloadedSize|octet_size }}</td>
+            <td class="td_ratio m_td_right">{{ ratio(u.uploadedSize, u.downloadedSize) }}</td>
     {% if is_site_inviter %}
         {% if edit_source %}
-            <td class="nobr">{{ select_invite_source(u.user_id, inviter_config, user_source) }}</td>
+            <td class="nobr">{{ _self.select_invite_source(u.id, inviter_config, user_source) }}</td>
         {% else %}
-            <td class="nobr">{{ user_source[u.user_id].name|default('<i>not set</i>')|raw }}</td>
+            <td class="nobr">{{ user_source[u.id].name|default('<i>not set</i>')|raw }}</td>
         {% endif %}
     {% endif %}
         </tr>
@@ -172,6 +186,7 @@
         </tr>
 {% endif %}
     </table>
+    {{ paginator.linkbox|raw }}
 {% if is_site_inviter %}
     <input type="hidden" name="action" value="invite" />
     <input type="hidden" name="auth" value="{{ user.auth }}" />
