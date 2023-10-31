@@ -65,10 +65,6 @@ class TorrentDeleted extends TorrentAbstract {
         );
     }
 
-    public function hasToken(int $userId): bool {
-        return false;
-    }
-
     public function isDeleted(): bool {
         return true;
     }

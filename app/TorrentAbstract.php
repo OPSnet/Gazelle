@@ -18,14 +18,13 @@ abstract class TorrentAbstract extends BaseObject {
             sprintf(Torrent::CACHE_KEY, $this->id),
             sprintf(TorrentDeleted::CACHE_KEY, $this->id),
         ]);
-        $this->info = [];
+        unset($this->info);
         $this->group()->flush();
         return $this;
     }
 
     abstract public function addFlag(TorrentFlag $flag, User $user): int;
     abstract public function infoRow(): ?array;
-    abstract public function hasToken(int $userId): bool;
 
     public function link(): string {
         return $this->group()->torrentLink($this->id);
@@ -78,7 +77,7 @@ abstract class TorrentAbstract extends BaseObject {
      * @return array of many things
      */
     public function info(): array {
-        if (isset($this->info) && !empty($this->info)) {
+        if (isset($this->info)) {
             return $this->info;
         }
         $key = sprintf($this->isDeleted() ? TorrentDeleted::CACHE_KEY : Torrent::CACHE_KEY, $this->id);
@@ -107,7 +106,7 @@ abstract class TorrentAbstract extends BaseObject {
         }
 
         if (!$this->isDeleted() && isset($this->viewer)) {
-            $info['PersonalFL'] = $info['FreeTorrent'] == '0' && $this->hasToken($this->viewer->id());
+            $info['PersonalFL'] = $info['FreeTorrent'] == LeechType::Normal->value && $this->viewer->hasToken($this);
             $info['IsSnatched'] = $this->viewer->snatch()->showSnatch($this);
         } else {
             $info['PersonalFL'] = false;

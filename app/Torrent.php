@@ -13,8 +13,6 @@ class Torrent extends TorrentAbstract {
     final const CACHE_KEY_PEERLIST_PAGE = 'peerlist_page_%d_%d';
     final const USER_RECENT_UPLOAD      = 'u_recent_up_%d';
 
-    protected array $tokenCache;
-
     public function location(): string { return "torrents.php?id={$this->groupId()}&torrentid={$this->id}#torrent{$this->id}"; }
 
     public function infoRow(): ?array {
@@ -72,28 +70,6 @@ class Torrent extends TorrentAbstract {
             GROUP BY t.ID
             ", $this->id
         );
-    }
-
-    /**
-     * Check if the viewer has an active freeleech token on this torrent
-     */
-    public function hasToken(int $userId): bool {
-        if (!isset($this->tokenCache)) {
-            $key = "users_tokens_" . $userId;
-            $tokenCache = self::$cache->get_value($key);
-            if ($tokenCache === false) {
-                $qid = self::$db->get_query_id();
-                self::$db->prepared_query("
-                    SELECT TorrentID FROM users_freeleeches WHERE Expired = 0 AND UserID = ?
-                    ", $userId
-                );
-                $tokenCache = array_fill_keys(self::$db->collect(0, false), true);
-                self::$db->set_query_id($qid);
-                self::$cache->cache_value($key, $tokenCache, 3600);
-            }
-            $this->tokenCache = $tokenCache;
-        }
-        return isset($this->tokenCache[$this->id]);
     }
 
     /**

@@ -16,9 +16,6 @@ class User extends BaseObject {
     final const CACHE_NOTIFY       = 'u_notify_%d';
     final const USER_RECENT_UPLOAD = 'u_recent_up_%d';
 
-    final protected const CACHE_SNATCH_TIME  = 'users_snatched_%d_time';
-    final protected const SNATCHED_UPDATE_AFTERDL = 300; // How long after a torrent download we want to update a user's snatch lists
-
     protected bool $forceCacheFlush = false;
     protected int $lastReadForum;
     protected string $warningExpiry;
@@ -32,6 +29,7 @@ class User extends BaseObject {
 
     protected Stats\User|null $stats;
     protected User\Snatch|null $snatch;
+    protected array|null $tokenCache;
 
     public function flush(): static {
         self::$cache->delete_multi([
@@ -41,10 +39,12 @@ class User extends BaseObject {
             sprintf('user_invited_%d', $this->id),
             sprintf('user_last_access_%d', $this->id),
             sprintf('user_stat_%d', $this->id),
+            sprintf('users_tokens_%d', $this->id),
         ]);
         $this->stats()->flush();
-        $this->stats = null;
-        $this->info = [];
+        unset($this->info);
+        unset($this->stats);
+        unset($this->tokenCache);
         return $this;
     }
     public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), html_escape($this->username())); }
@@ -97,7 +97,7 @@ class User extends BaseObject {
     }
 
     public function info(): array {
-        if (isset($this->info) && !empty($this->info)) {
+        if (isset($this->info)) {
             return $this->info;
         }
         $key = sprintf(self::CACHE_KEY, $this->id);
@@ -1163,30 +1163,6 @@ class User extends BaseObject {
         return $affected;
     }
 
-    public function registerDownload(int $torrentId): int {
-        self::$db->prepared_query("
-            INSERT INTO users_downloads
-                   (UserID, TorrentID)
-            VALUES (?,      ?)
-            ", $this->id, $torrentId
-        );
-        $affected = self::$db->affected_rows();
-        if (!$affected) {
-            return 0;
-        }
-        $this->stats()->increment('download_total');
-        self::$cache->delete_value('user_rlim_' . $this->id);
-        $key = sprintf(self::CACHE_SNATCH_TIME, $this->id);
-        $nextUpdate = self::$cache->get_value($key);
-        if ($nextUpdate !== false) {
-            $soon = time() + self::SNATCHED_UPDATE_AFTERDL;
-            if ($soon < $nextUpdate['next']) { // only if the change is closer than the next update
-                self::$cache->cache_value($key, ['next' => $soon], 0);
-            }
-        }
-        return $affected;
-    }
-
     /**
      * Validate a user password
      *
@@ -1745,6 +1721,28 @@ class User extends BaseObject {
     }
 
     /**
+     * Check if the viewer has an active freeleech token on this torrent
+     */
+    public function hasToken(TorrentAbstract $torrent): bool {
+        if (!isset($this->tokenCache)) {
+            $key = "users_tokens_" . $this->id;
+            $tokenCache = self::$cache->get_value($key);
+            if ($tokenCache === false) {
+                $qid = self::$db->get_query_id();
+                self::$db->prepared_query("
+                    SELECT TorrentID FROM users_freeleeches WHERE Expired = 0 AND UserID = ?
+                    ", $this->id
+                );
+                $tokenCache = array_fill_keys(self::$db->collect(0, false), true);
+                self::$db->set_query_id($qid);
+                self::$cache->cache_value($key, $tokenCache, 3600);
+            }
+            $this->tokenCache = $tokenCache;
+        }
+        return isset($this->tokenCache[$torrent->id()]);
+    }
+
+    /**
      * Can the user spend a token (or more) to set this torrent Freeleech?
      * Note: The torrent object MUST be instantiated with setViewer() set
      * to the user.
@@ -1929,6 +1927,21 @@ class User extends BaseObject {
             'class' => $manager->userclassName($criteria['To']),
             'goal'  => $goal,
         ];
+    }
+
+    /**
+     * See whether a user is seeding a torrent. This method has no caching, but is
+     * only expected to be called at the moment a user wants to download a torrent.
+     */
+    public function isSeeding(TorrentAbstract $torrent): bool {
+        return (bool)self::$db->scalar("
+            SELECT 1
+            FROM xbt_files_users
+            WHERE uid = ?
+                AND fid = ?
+            LIMIT 1;
+            ", $this->id, $torrent->id()
+        );
     }
 
     public function seedingSize(): int {

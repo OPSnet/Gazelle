@@ -104,7 +104,6 @@ class TGroupTest extends TestCase {
         $this->assertEquals(1, $bonus->addPoints(10000), 'tgroup-user-add-bp');
         $this->assertEquals(1, $bonus->purchaseToken('token-1'), 'tgroup-user-buy-token');
         $this->assertTrue($this->userList['user']->canSpendFLToken($torrent), 'tgroup-user-fltoken');
-        $this->assertEquals(1, $this->userList['user']->registerDownload($torrent->id()), 'tgroup-user-register-dl');
     }
 
     public function testTGroupArtist(): void {

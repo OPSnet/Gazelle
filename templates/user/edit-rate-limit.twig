@@ -20,7 +20,7 @@
          limit|number_format(0) }} download{{ downloads|plural }}.
      {% if downlads > limit %}(deficit = {{ (downloads - limit)|number_format }}){% endif %}
      </li>
-    <li>Allowed download overshoot for the previous 24 hours is {{ prl.metrics.overshoot }}, recent activity is {{ prl.recentDownloadCount|number_format }} downloaded.</li>
+    <li>Allowed download overshoot for the previous 24 hours is {{ prl.metrics.overshoot }}, recent activity is {{ prl.recentDownloadTotal|number_format }} downloaded.</li>
     {% if not prl.safeFactor and not prl.safeOvershoot %}
     <li><strong class="important_text">Downloads are blocked for 24 hours or until more torrents are snatched or seeded.</strong></li>
     {% endif %}
