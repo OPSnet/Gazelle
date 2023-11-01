@@ -134,7 +134,7 @@ class Email extends \Gazelle\Base {
             FROM users_history_emails uhe
             INNER JOIN {$this->name} s ON (s.email = uhe.Email)
             INNER JOIN users_main   um ON (um.ID = uhe.UserID)
-            WHERE ((um.created = uhe.Time and uhe.Email != um.Email) OR um.created != uhe.Time)
+            WHERE ((um.created = uhe.created and uhe.Email != um.Email) OR um.created != uhe.created)
             ORDER BY $column $direction
             LIMIT ? OFFSET ?
             ", $limit, $offset
