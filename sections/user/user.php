@@ -16,6 +16,7 @@ $Class       = $User->primaryClass();
 $donor       = new Gazelle\User\Donor($User);
 $userBonus   = new Gazelle\User\Bonus($User);
 $viewerBonus = new Gazelle\User\Bonus($Viewer);
+$history     = new Gazelle\User\History($User);
 $PRL         = new Gazelle\User\PermissionRateLimit($User);
 $donorMan    = new Gazelle\Manager\Donation;
 $tgMan       = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
@@ -229,7 +230,7 @@ if ($User->propertyVisibleMulti($previewer, ['artistsadded', 'collagecontribs+',
             <div class="head colhead_dark">History</div>
             <ul class="stats nobullet">
 <?php if ($Viewer->permitted('users_view_email')) { ?>
-                <li>Emails: <?=number_format($User->emailCount())?> <a href="userhistory.php?action=email&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
+                <li>Emails: <?=number_format($history->emailTotal())?> <a href="userhistory.php?action=email&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
 <?php
     }
     if ($Viewer->permitted('users_view_ips')) {
@@ -610,7 +611,7 @@ if ($Viewer->permitted('users_mod') || $Viewer->isStaff()) { ?>
         $fm = new Gazelle\Manager\Forum;
         echo $Twig->render('user/edit-privileges.twig', [
             'asn'     => new Gazelle\Search\ASN,
-            'history' => new Gazelle\User\History($User),
+            'history' => $history,
             'user'    => $User,
             'viewer'  => $Viewer,
             'forum'   => [

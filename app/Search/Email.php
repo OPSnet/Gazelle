@@ -42,7 +42,7 @@ class Email extends \Gazelle\Base {
         self::$db->prepared_query("
             CREATE TEMPORARY TABLE {$this->name} (
                 email varchar(255) NOT NULL PRIMARY KEY
-            ) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci
+            )
         ");
         return $this;
     }
@@ -122,14 +122,14 @@ class Email extends \Gazelle\Base {
     }
 
     public function historyList(int $limit, int $offset): array {
-        $column = ['uhe.Email', 'um.Username', 'um.created', 'uhe.Time', 'inet_aton(uhe.IP)'][$this->column];
+        $column = ['uhe.Email', 'um.Username', 'um.created', 'uhe.created', 'inet_aton(uhe.IP)'][$this->column];
         $direction = ['ASC', 'DESC'][$this->direction];
         self::$db->prepared_query("
             SELECT uhe.Email AS email,
                 um.Username  AS username,
                 um.ID        AS user_id,
                 um.created   AS created,
-                uhe.Time     AS change_date,
+                uhe.created  AS change_date,
                 uhe.IP       AS ipv4
             FROM users_history_emails uhe
             INNER JOIN {$this->name} s ON (s.email = uhe.Email)

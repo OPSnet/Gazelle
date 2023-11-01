@@ -3,10 +3,6 @@
 namespace Gazelle\User;
 
 class History extends \Gazelle\BaseUser {
-    final const tableName = 'pm_conversations_users';
-
-    public function flush(): static { $this->user()->flush(); return $this; }
-
     public function __construct(
         \Gazelle\User $user,
         protected string $column = 'ip',
@@ -15,21 +11,26 @@ class History extends \Gazelle\BaseUser {
         parent::__construct($user);
     }
 
+    public function flush(): static {
+        $this->user()->flush();
+        return $this;
+    }
+
     /**
      * Email history
      *
-     * @return array [email address, ip, date, useragent]
+     * @return array [email address, ip, date, useragent, country code, AS, AS name]
      */
     public function email(\Gazelle\Search\ASN $asn): array {
         self::$db->prepared_query("
             SELECT h.Email  AS email,
-                h.Time      AS created,
+                h.created   AS created,
                 h.IP        AS ipv4,
                 h.useragent AS useragent
             FROM users_history_emails AS h
             WHERE h.UserID = ?
-            ORDER BY h.Time DESC
-            ", $this->user->id()
+            ORDER BY h.created DESC
+            ", $this->id()
         );
         $asnList = $asn->findByIpList(self::$db->collect('ipv4', false));
         $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
@@ -53,14 +54,14 @@ class History extends \Gazelle\BaseUser {
             SELECT users_history_emails_id AS id,
                 Email  AS email,
                 UserID AS user_id,
-                Time   AS created,
                 IP     AS ipv4,
+                created,
                 useragent
             FROM users_history_emails AS uhe
             WHERE uhe.UserID != ?
                 AND uhe.Email in (SELECT DISTINCT Email FROM users_history_emails WHERE UserID = ?)
-            ORDER BY uhe.Email, uhe.Time DESC
-            ", $this->user->id(), $this->user->id()
+            ORDER BY uhe.Email, uhe.created DESC
+            ", $this->id(), $this->id()
         );
         $asnList = $asn->findByIpList(self::$db->collect('ipv4', false));
         $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
@@ -71,6 +72,71 @@ class History extends \Gazelle\BaseUser {
         }
         unset($row);
         return $list;
+    }
+
+    /**
+     * How many email addresses have been recorded for this user
+     */
+    public function emailTotal(): int {
+        return (int)self::$db->scalar("
+            SELECT count(*) FROM users_history_emails WHERE UserID = ?
+            ", $this->id()
+        );
+    }
+
+    /**
+     * Register the change in email address. Note: this should be called
+     * *BEFORE* updating the new email address, otherwise it will not be
+     * possible to send a warning message to the old address.
+     */
+    public function registerNewEmail(string $newEmail, string $ipaddr, \Gazelle\Util\Irc $irc, \Gazelle\Util\Mail $mailer): int {
+        self::$db->prepared_query("
+            INSERT INTO users_history_emails
+                   (UserID, Email, IP, useragent)
+            VALUES (?,      ?,     ?,  ?)
+            ", $this->id(), $newEmail, $ipaddr, $_SERVER['HTTP_USER_AGENT']
+        );
+        $irc::sendMessage(
+            $this->user->username(),
+            "Security alert: Your email address was changed via $ipaddr with {$_SERVER['HTTP_USER_AGENT']}. Not you? Contact staff ASAP."
+        );
+        $irc::sendMessage(
+            ADMIN_CHAN,
+            "Alert! email address for {$this->user->username()} was changed from {$this->user->email()} to $newEmail via $ipaddr with UA={$_SERVER['HTTP_USER_AGENT']}."
+        );
+        $mailer->send($this->user->email(), 'Email address changed information for ' . SITE_NAME,
+            self::$twig->render('email/email-address-change.twig', [
+                'ipaddr'     => $ipaddr,
+                'new_email'  => $newEmail,
+                'now'        => date('Y-m-d H:i:s'),
+                'user_agent' => $_SERVER['HTTP_USER_AGENT'],
+                'username'   => $this->user->username(),
+            ])
+        );
+        return self::$db->affected_rows();
+    }
+
+    public function resetEmail(string $email, string $ipaddr): int {
+        self::$db->prepared_query("
+            DELETE FROM users_history_emails
+            WHERE UserID = ?
+            ", $this->id()
+        );
+        self::$db->prepared_query("
+            INSERT INTO users_history_emails
+                   (UserID, Email, IP, useragent)
+            VALUES (?,      ?,     ?, 'email-reset')
+            ", $this->id(), $email, $ipaddr
+        );
+        self::$db->prepared_query("
+            UPDATE users_main SET
+                Email = ?
+            WHERE ID = ?
+            ", $email, $this->id()
+        );
+        $affected = self::$db->affected_rows();
+        $this->flush();
+        return $affected;
     }
 
     public function siteIPv4(\Gazelle\Search\ASN $asn): array {
@@ -88,7 +154,7 @@ class History extends \Gazelle\BaseUser {
             WHERE UserID = ?
             GROUP BY IP
             ORDER BY $orderBy
-            ", $this->user->id()
+            ", $this->id()
         );
         $asnList = $asn->findByIpList(self::$db->collect('ipv4', false));
         $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
@@ -116,7 +182,7 @@ class History extends \Gazelle\BaseUser {
             WHERE uid = ?
             GROUP BY inet_aton(IP)
             ORDER BY $orderBy
-            ", $this->user->id()
+            ", $this->id()
         );
         $asnList = $asn->findByIpList(self::$db->collect('ipv4', false));
         $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
@@ -133,35 +199,35 @@ class History extends \Gazelle\BaseUser {
         $n = 0;
         self::$db->prepared_query("
             DELETE FROM users_history_ips WHERE UserID = ?
-            ", $this->user->id()
+            ", $this->id()
         );
         $n += self::$db->affected_rows();
         self::$db->prepared_query("
             UPDATE users_main SET IP = '127.0.0.1' WHERE ID = ?
-            ", $this->user->id()
+            ", $this->id()
         );
         $n += self::$db->affected_rows();
         self::$db->prepared_query("
             UPDATE xbt_snatched SET IP = '' WHERE uid = ?
-            ", $this->user->id()
+            ", $this->id()
         );
         $n += self::$db->affected_rows();
         self::$db->prepared_query("
             UPDATE users_history_passwords SET ChangerIP = '', useragent = 'reset-ip-history' WHERE UserID = ?
-            ", $this->user->id()
+            ", $this->id()
         );
         $n += self::$db->affected_rows();
         self::$db->prepared_query("
             UPDATE users_history_passkeys SET ChangerIP = '' WHERE UserID = ?
-            ", $this->user->id()
+            ", $this->id()
         );
         $n += self::$db->affected_rows();
         self::$db->prepared_query("
             UPDATE users_sessions SET IP = '127.0.0.1' WHERE UserID = ?
-            ", $this->user->id()
+            ", $this->id()
         );
         $n += self::$db->affected_rows();
-        $this->user->flush();
+        $this->flush();
         return $n;
     }
 
@@ -169,51 +235,29 @@ class History extends \Gazelle\BaseUser {
         self::$db->prepared_query('
             DELETE FROM users_downloads
             WHERE UserID = ?
-            ', $this->user->id()
+            ', $this->id()
         );
         return self::$db->affected_rows();
     }
 
-    public function resetEmail(string $email, string $ipaddr): bool {
-        self::$db->prepared_query("
-            DELETE FROM users_history_emails
-            WHERE UserID = ?
-            ", $this->user->id()
-        );
-        self::$db->prepared_query("
-            INSERT INTO users_history_emails
-                   (UserID, Email, IP, useragent)
-            VALUES (?,      ?,     ?, 'email-reset')
-            ", $this->user->id(), $email, $ipaddr
-        );
-        self::$db->prepared_query("
-            UPDATE users_main
-            SET Email = ?
-            WHERE ID = ?
-            ", $email, $this->user->id()
-        );
-        $this->user->flush();
-        return self::$db->affected_rows() === 1;
-    }
-
-    public function resetRatioWatch(): bool {
+    public function resetRatioWatch(): int {
         self::$db->prepared_query("
             UPDATE users_info SET
                 RatioWatchEnds = NULL,
                 RatioWatchDownload = 0,
                 RatioWatchTimes = 0
             WHERE UserID = ?
-            ", $this->user->id()
+            ", $this->id()
         );
-        $this->user->flush();
-        return self::$db->affected_rows() === 1;
+        $this->flush();
+        return self::$db->affected_rows();
     }
 
     public function resetSnatched(): int {
         self::$db->prepared_query("
             DELETE FROM xbt_snatched
             WHERE uid = ?
-            ", $this->user->id()
+            ", $this->id()
         );
         $this->user->snatch()->flush();
         return self::$db->affected_rows();

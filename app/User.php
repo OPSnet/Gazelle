@@ -937,27 +937,6 @@ class User extends BaseObject {
         return self::$cache->delete_value(sprintf(self::USER_RECENT_UPLOAD, $this->id));
     }
 
-    public function recordEmailChange(string $newEmail, string $ipaddr): int {
-        self::$db->prepared_query("
-            INSERT INTO users_history_emails
-                   (UserID, Email, IP, useragent)
-            VALUES (?,      ?,     ?,  ?)
-            ", $this->id, $newEmail, $ipaddr, $_SERVER['HTTP_USER_AGENT']
-        );
-        Irc::sendMessage($this->username(), "Security alert: Your email address was changed via $ipaddr with {$_SERVER['HTTP_USER_AGENT']}. Not you? Contact staff ASAP.");
-        (new Mail)->send($this->email(), 'Email address changed information for ' . SITE_NAME,
-            self::$twig->render('email/email-address-change.twig', [
-                'ipaddr'     => $ipaddr,
-                'new_email'  => $newEmail,
-                'now'        => date('Y-m-d H:i:s'),
-                'user_agent' => $_SERVER['HTTP_USER_AGENT'],
-                'username'   => $this->username(),
-            ])
-        );
-        self::$cache->delete_value('user_email_count_' . $this->id);
-        return self::$db->affected_rows();
-    }
-
     public function recordPasswordChange(string $ipaddr): int {
         self::$db->prepared_query("
             INSERT INTO users_history_passwords
@@ -1561,12 +1540,6 @@ class User extends BaseObject {
         return (int)$this->getSingleValue('user_trackip_count', "
             SELECT count(DISTINCT IP) FROM xbt_snatched WHERE uid = ? AND IP != ''
         ");
-    }
-
-    public function emailCount(): int {
-        return (int)$this->getSingleValue('user_email_count', '
-            SELECT count(*) FROM users_history_emails WHERE UserID = ?
-        ');
     }
 
     public function invite(): User\Invite {

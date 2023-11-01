@@ -141,7 +141,7 @@ class UserCreator extends Base {
         foreach ($this->email as $e) {
             self::$db->prepared_query('
                 INSERT INTO users_history_emails
-                       (UserID, Email, IP, useragent, Time)
+                       (UserID, Email, IP, useragent, created)
                 VALUES (?,      ?,     ?,  ?,         now() - INTERVAL ? SECOND)
                 ', $this->id, $e, $this->ipaddr, $_SERVER['HTTP_USER_AGENT'], $past--
             );

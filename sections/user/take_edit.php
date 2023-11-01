@@ -2,6 +2,7 @@
 
 authorize();
 
+$irc     = new Gazelle\Util\Irc;
 $userMan = new Gazelle\Manager\User;
 if (!isset($_REQUEST['id'])) {
     $ownProfile = true;
@@ -13,9 +14,7 @@ if (!isset($_REQUEST['id'])) {
     }
     $ownProfile = ($user->id() == $Viewer->id());
     if (!$ownProfile && !$Viewer->permitted('users_edit_profiles')) {
-        Gazelle\Util\Irc::sendMessage(ADMIN_CHAN, 'User ' . $Viewer->label()
-            . ' tried to edit ' . $user->publicLocation()
-        );
+        $irc::sendMessage(ADMIN_CHAN, "User {$Viewer->label()} tried to edit {$user->publicLocation()}");
         error(403);
     }
 }
@@ -271,8 +270,9 @@ if ($ResetPassword) {
     $user->recordPasswordChange($Viewer->ipaddr());
 }
 
+$history = new \Gazelle\User\History($user);
 if ($NewEmail) {
-    $user->recordEmailChange($NewEmail, $Viewer->ipaddr());
+    $history->registerNewEmail($NewEmail, $Viewer->ipaddr(), $irc, new \Gazelle\Util\Mail);
 }
 
 if (isset($_POST['resetpasskey'])) {

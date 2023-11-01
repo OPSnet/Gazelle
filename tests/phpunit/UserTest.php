@@ -141,7 +141,6 @@ class UserTest extends TestCase {
         $this->assertEquals(0, $this->user->torrentRecentRemoveCount(1), 'utest-torrent-recent-remove-count');
         $this->assertEquals(0, $this->user->trackerIPCount(), 'utest-tracker-ipaddr-total');
         $this->assertEquals(0.0, $this->user->requiredRatio(), 'utest-required-ratio');
-        $this->assertEquals(1, $this->user->emailCount(), 'utest-email-total');
         $this->assertEquals(1, $this->user->siteIPCount(), 'utest-site-ipaddr-total');
         $this->assertEquals('', $this->user->forbiddenForumsList(), 'utest-forbidden-forum-list');
         $this->assertEquals([], $this->user->tagSnatchCounts(), 'utest-tag-snatch-counts');
