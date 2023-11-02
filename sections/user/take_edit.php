@@ -202,30 +202,7 @@ foreach ($NavItems as $n) {
     }
 }
 
-$LastFMUsername = trim($_POST['lastfm_username'] ?? '');
-$OldFMUsername = (new Gazelle\Util\LastFM)->username($userId);
-if (is_null($OldFMUsername) && $LastFMUsername !== '') {
-    $db->prepared_query('
-        INSERT INTO lastfm_users (ID, Username)
-        VALUES (?, ?)
-        ', $userId, $LastFMUsername
-    );
-    $Cache->delete_value("lastfm_username_$userId");
-} elseif (!is_null($OldFMUsername) && $LastFMUsername !== '') {
-    $db->prepared_query('
-        UPDATE lastfm_users SET
-            Username = ?
-        WHERE ID = ?
-        ', $LastFMUsername, $userId
-    );
-    $Cache->delete_value("lastfm_username_$userId");
-} elseif (!is_null($OldFMUsername) && $LastFMUsername === '') {
-    $db->prepared_query('
-        DELETE FROM lastfm_users WHERE ID = ?
-        ', $userId
-    );
-    $Cache->delete_value("lastfm_username_$userId");
-}
+(new Gazelle\Util\LastFM)->modifyUsername($user, trim($_POST['lastfm_username'] ?? ''));
 
 /* transform
  *   'notifications_News_popup'

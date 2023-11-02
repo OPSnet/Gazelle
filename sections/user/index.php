@@ -93,37 +93,10 @@ switch ($_REQUEST['action'] ?? '') {
         require_once('user.php');
         break;
 
-    // Provide public methods for Last.fm data gets.
-    case 'lastfm_compare':
-        if (isset($_GET['username'])) {
-            echo (new Gazelle\Util\LastFM)->compare($Viewer->id(), $_GET['username']);
-        }
+    case 'lastfm':
+        require_once('lastfm.php');
         break;
-    case 'lastfm_last_played_track':
-        if (isset($_GET['username'])) {
-            echo (new Gazelle\Util\LastFM)->lastTrack($_GET['username']);
-        }
-        break;
-    case 'lastfm_top_artists':
-        if (isset($_GET['username'])) {
-            echo (new Gazelle\Util\LastFM)->topArtists($_GET['username']);
-        }
-        break;
-    case 'lastfm_top_albums':
-        if (isset($_GET['username'])) {
-            echo (new Gazelle\Util\LastFM)->topAlbums($_GET['username']);
-        }
-        break;
-    case 'lastfm_top_tracks':
-        if (isset($_GET['username'])) {
-            echo (new Gazelle\Util\LastFM)->topTracks($_GET['username']);
-        }
-        break;
-    case 'lastfm_clear_cache':
-        if (isset($_GET['username']) && isset($_GET['uid'])) {
-            echo (new Gazelle\Util\LastFM)->clear($Viewer->id(), $_GET['username'],$_GET['uid']);
-        }
-        break;
+
     default:
         if (isset($_REQUEST['id'])) {
             require_once('user.php');

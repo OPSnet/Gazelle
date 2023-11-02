@@ -62,9 +62,6 @@ echo $Twig->render('bookmark/action.twig', [
             <a href="artist.php?action=revert&amp;artistid=<?=$artistId?>&amp;revisionid=<?=$RevisionID?>&amp;auth=<?= $authKey ?>" class="brackets">Revert to this revision</a>
 <?php } ?>
             <a href="artist.php?id=<?=$artistId?>#info" class="brackets">Info</a>
-<?php if (LASTFM_API_KEY) { /** @phpstan-ignore-line */ ?>
-            <a href="artist.php?id=<?=$artistId?>#concerts" class="brackets">Concerts</a>
-<?php } ?>
             <a href="artist.php?id=<?=$artistId?>#artistcomments" class="brackets">Comments</a>
             <a href="artist.php?action=history&amp;artistid=<?= $artistId ?>" class="brackets">View history</a>
 <?php if ($Viewer->permitted('site_delete_artist') && $Viewer->permitted('torrents_delete')) { ?>
@@ -553,11 +550,6 @@ function require(file, callback) {
             </div>
             <div id="body" class="body"><?=Text::full_format($Artist->body())?></div>
         </div>
-<?php
-if (LASTFM_API_KEY) { /** @phpstan-ignore-line */
-    require_once('concerts.php');
-}
-?>
     <div id="artistcomments">
 <?php
 $commentPage = new Gazelle\Comment\Artist($artistId, (int)($_GET['page'] ?? 0), (int)($_GET['postid'] ?? 0));

@@ -29,7 +29,7 @@ $navItems = $userMan->forumNavItemList();
 echo $Twig->render('user/setting.twig', [
     'donor'           => $donor,
     'js'              => (new Gazelle\Util\Validator)->generateJS('userform'),
-    'lastfm_username' => (new Gazelle\Util\LastFM)->username($UserID),
+    'lastfm_username' => (new Gazelle\Util\LastFM)->username($user),
     'nav_items'       => $navItems,
     'nav_items_user'  => $user->forumNavList() ?: array_keys(array_filter($navItems, fn($item) => $item['initial'])),
     'notify_config'   => (new Gazelle\User\Notification($user))->config(),

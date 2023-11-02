@@ -1,5 +1,4 @@
 <?php
-define('LIMIT', 100);
 
 $Category = $_GET['category'] ?? 'weekly';
 $Category = in_array($Category, ['all_time', 'weekly', 'hyped']) ? $Category : 'weekly';
@@ -10,10 +9,7 @@ $View = in_array($View, ['tiles', 'list']) ? $View : 'tiles';
 $lastFM = new Gazelle\Util\LastFM;
 switch ($Category) {
     case 'weekly':
-        $Artists = json_decode($lastFM->weeklyArtists(LIMIT), true)['artists']['artist'];
-        break;
-    case 'hyped':
-        $Artists = json_decode($lastFM->hypedArtists(LIMIT), true)['artists']['artist'];
+        $Artists = $lastFM->weeklyArtists();
         break;
     default:
         break;

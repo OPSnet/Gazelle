@@ -385,8 +385,8 @@ defined('DEBUG_UPLOAD_NOTIFICATION') or define('DEBUG_UPLOAD_NOTIFICATION', fals
 // If true, no PMs sent to users, no db updates performed.
 defined('DEBUG_CONTEST_PAYOUT') or define('DEBUG_CONTEST_PAYOUT', false);
 
-// if null, no attempt will be made to contact the last.fm website.
-defined('LASTFM_API_KEY') or define('LASTFM_API_KEY', null);
+// if false, no attempt will be made to contact the last.fm website.
+defined('LASTFM_API_KEY') or define('LASTFM_API_KEY', false);
 
 // Fake useragent (to override default cURL useragent string).
 defined('FAKE_USERAGENT') or define('FAKE_USERAGENT', 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.1 Safari/537.11');

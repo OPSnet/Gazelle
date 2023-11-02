@@ -5,165 +5,217 @@ namespace Gazelle\Util;
 class LastFM extends \Gazelle\Base {
     protected const LASTFM_API_URL = 'https://ws.audioscrobbler.com/2.0/?method=';
 
-    public function artistEventList($ArtistID, $Artist, $Limit = 15) {
-        $ArtistEvents = self::$cache->get_value("artist_events_$ArtistID");
-        if ($ArtistEvents === false) {
-            $ArtistEvents = $this->fetch("artist.getEvents", ["artist" => $Artist, "limit" => $Limit]);
-            self::$cache->cache_value("artist_events_$ArtistID", $ArtistEvents, 432000);
+    public function flush(string $username): bool {
+        $key = "lastfm_clear_cache_$username";
+        $allowed = self::$cache->get_value($key);
+        if (!$allowed) {
+            return false;
         }
-        return $ArtistEvents;
+        // Prevent clearing the cache on the same uid page for the next 10 minutes.
+        self::$cache->cache_value($key, true, 600);
+        self::$cache->delete_multi([
+            "lastfm_user_info_$username",
+            "lastfm_last_played_track_$username",
+            "lastfm_top_albums_$username",
+            "lastfm_top_artists_$username",
+            "lastfm_top_tracks_$username",
+        ]);
+        return true;
     }
 
-    public function username(int $userId): ?string {
-        return self::$db->scalar("
+    public function modifyUsername(\Gazelle\User $user, string $username): int {
+        $previous = $this->username($user);
+        $hasPrevious = $previous !== null;
+        if (!$previous && $username !== "") {
+            self::$db->prepared_query("
+                INSERT INTO lastfm_users (Username, ID)
+                VALUES (?, ?)
+                ", $username, $user->id()
+            );
+        } elseif ($previous && $username !== "") {
+            self::$db->prepared_query("
+                UPDATE lastfm_users SET
+                    Username = ?
+                WHERE ID = ?
+                ", $username, $user->id()
+            );
+        } elseif ($previous && $username === "") {
+            self::$db->prepared_query("
+                DELETE FROM lastfm_users WHERE ID = ?
+                ", $user->id()
+            );
+        }
+        $affected = self::$db->affected_rows();
+        if ($affected) {
+            if ($previous) {
+                $this->flush($previous);
+            }
+            $this->flush($username);
+        }
+        return $affected;
+    }
+
+    public function username(\Gazelle\User $user): ?string {
+        $username = self::$db->scalar("
             SELECT username FROM lastfm_users WHERE ID = ?
-            ", $userId
+            ", $user->id()
         );
+        return is_null($username) ? null : (string)$username;
     }
 
     public function userInfo(\Gazelle\User $user): ?array {
-        $lastfmName = $this->username($user->id());
-        if (is_null($lastfmName)) {
+        $username = $this->username($user);
+        if (is_null($username)) {
             return null;
         }
-        $key = 'lastfm_user_info_' . urlencode($lastfmName);
-        $Response = self::$cache->get_value($key);
-        if ($Response === false) {
-            $Response = $this->fetch("user.getInfo", ["user" => $lastfmName]);
-            if (isset($Response['info']) && isset($Response['info']['user'])) {
-                $Response = $Response['info']['user'];
-                if (!isset($Response['playlists'])) {
-                    $Response['playlists'] = 0;
-                }
+        $key = 'lastfm_user_info_' . urlencode($username);
+        $response = self::$cache->get_value($key);
+        if ($response === false) {
+            $response = $this->fetch("user.getInfo", ["user" => $username]);
+            $response = isset($response['user']) ? $response['user'] : null;
+            self::$cache->cache_value($key, $response, 86400);
+        }
+        return $response;
+    }
+
+    public function lastTrack(string $username): ?array {
+        $key = "lastfm_last_played_track_$username";
+        $response = self::$cache->get_value($key);
+        if ($response === false) {
+            $response = $this->fetch("user.getRecentTracks", ["user" => $username, "limit" => 1]);
+            if ($response === false) {
+                $response = ['none' => true];
             } else {
-                $Response = null;
+                // Take the single last played track out of the response.
+                $info = $response['recenttracks']['track'][0];
+                $response = [
+                    'album'  => $info['album']['#text'],
+                    'artist' => $info['artist']['#text'],
+                    'name'   => $info['name'],
+                ];
             }
-            $Response['username'] = $lastfmName;
-            self::$cache->cache_value($key, $Response, 86400);
+            self::$cache->cache_value($key, $response, 7200);
         }
-        return $Response;
+        return $response;
     }
 
-    public function compare(int $viewerId, $Username, $Limit = 15) {
-        $viewername = $this->username($viewerId);
-        if (is_null($viewername)) {
-            return null;
-        }
-        if (strcasecmp($viewername, $Username)) {
-            [$viewername, $Username] = [$Username, $viewername];
-        }
-        $Response = self::$cache->get_value("lastfm_compare_$viewername" . "_$Username");
-        if ($Response === false) {
-            $Response = json_encode($this->fetch("tasteometer.compare",
-                ["type1" => "user", "type2" => "user", "value1" => $viewername, "value2" => $Username, "limit" => $Limit]));
-            self::$cache->cache_value("lastfm_compare_$viewername" . "_$Username", $Response, 86400 * 7);
-        }
-        return $Response;
-    }
-
-    public function lastTrack($Username) {
-        if (!LASTFM_API_KEY) {
-            return '';
-        }
-        $Response = self::$cache->get_value("lastfm_last_played_track_$Username");
-        if ($Response === false) {
-            $Response = $this->fetch("user.getRecentTracks", ["user" => $Username, "limit" => 1]);
-            // Take the single last played track out of the response.
-            $Response = json_encode($Response['recenttracks']['track']);
-            self::$cache->cache_value("lastfm_last_played_track_$Username", $Response, 7200);
-        }
-        return $Response;
-    }
-
-    public function topArtists($Username, $Limit = 15) {
-        $Response = self::$cache->get_value("lastfm_top_artists_$Username");
-        if ($Response === false) {
+    public function topAlbums(string $username, int $limit = 15): array {
+        $key = "lastfm_top_albums_$username";
+        $response = self::$cache->get_value($key);
+        if ($response === false) {
             sleep(1);
-            $Response = json_encode($this->fetch("user.getTopArtists", ["user" => $Username, "limit" => $Limit]));
-            self::$cache->cache_value("lastfm_top_artists_$Username", $Response, 86400);
-        }
-        return $Response;
-    }
-
-    public function topAlbums($Username, $Limit = 15) {
-        $Response = self::$cache->get_value("lastfm_top_albums_$Username");
-        if ($Response === false) {
-            sleep(2);
-            $Response = json_encode($this->fetch("user.getTopAlbums", ["user" => $Username, "limit" => $Limit]));
-            self::$cache->cache_value("lastfm_top_albums_$Username", $Response, 86400);
-        }
-        return $Response;
-    }
-
-    public function topTracks($Username, $Limit = 15) {
-        $Response = self::$cache->get_value("lastfm_top_tracks_$Username");
-        if ($Response === false) {
-            sleep(3);
-            $Response = json_encode($this->fetch("user.getTopTracks", ["user" => $Username, "limit" => $Limit]));
-            self::$cache->cache_value("lastfm_top_tracks_$Username", $Response, 86400);
-        }
-        return $Response;
-    }
-
-    public function weeklyArtists($Limit = 100) {
-        $Response = self::$cache->get_value("lastfm_top_artists_$Limit");
-        if ($Response === false) {
-            $Response = json_encode($this->fetch("chart.getTopArtists", ["limit" => $Limit]));
-            self::$cache->cache_value("lastfm_top_artists_$Limit", $Response, 86400);
-        }
-        return $Response;
-    }
-
-    public function hypedArtists($Limit = 100) {
-        $Response = self::$cache->get_value("lastfm_hyped_artists_$Limit");
-        if ($Response === false) {
-            $Response = json_encode($this->fetch("chart.getHypedArtists", ["limit" => $Limit]));
-            self::$cache->cache_value("lastfm_hyped_artists_$Limit", $Response, 86400);
-        }
-        return $Response;
-    }
-
-    public function clear($viewerId, $Username, $UserID) {
-        $Response = self::$cache->get_value("lastfm_clear_cache_$UserID");
-        if ($Response === false) {
-            // Prevent clearing the cache on the same uid page for the next 10 minutes.
-            self::$cache->cache_value("lastfm_clear_cache_$UserID", 1, 600);
-            self::$cache->delete_value("lastfm_user_info_$Username");
-            self::$cache->delete_value("lastfm_last_played_track_$Username");
-            self::$cache->delete_value("lastfm_top_artists_$Username");
-            self::$cache->delete_value("lastfm_top_albums_$Username");
-            self::$cache->delete_value("lastfm_top_tracks_$Username");
-            $viewername = $this->username($viewerId);
-            if (!is_null($viewername)) {
-                if (strcasecmp($viewername, $Username)) {
-                    [$viewername, $Username] = [$Username, $viewername];
+            $response = $this->fetch("user.getTopAlbums", ["user" => $username, "limit" => $limit]);
+            if ($response === false) {
+                $response = [];
+            } else {
+                $top = [];
+                foreach ($response['topalbums']['album'] as $entry) {
+                    $top[] = [
+                        'artist'    => $entry['artist']['name'],
+                        'name'      => $entry['name'],
+                        'playcount' => (int)$entry['playcount'],
+                        'url'       => $entry['url'],
+                    ];
                 }
-                self::$cache->delete_value("lastfm_compare_{$viewername}_$Username");
+                $response = $top;
             }
+            self::$cache->cache_value($key, $response, 86400);
         }
+        return $response;
     }
 
-    protected function fetch(string $Method, array $Args) {
-        if (!LASTFM_API_KEY) {
+    public function topArtists(string $username, int $limit = 15): ?array {
+        $key = "lastfm_top_artists_$username";
+        $response = self::$cache->get_value($key);
+        if ($response === false) {
+            sleep(1);
+            $response = $this->fetch("user.getTopArtists", ["user" => $username, "limit" => $limit]);
+            if ($response === false) {
+                $response = [];
+            } else {
+                $top = [];
+                foreach ($response['topartists']['artist'] as $entry) {
+                    $top[] = [
+                        'name'      => $entry['name'],
+                        'playcount' => (int)$entry['playcount'],
+                        'url'       => $entry['url'],
+                    ];
+                }
+                $response = $top;
+            }
+            self::$cache->cache_value($key, $response, 86400);
+        }
+        return $response;
+    }
+
+    public function topTracks(string $username, int $limit = 15): array {
+        $key = "lastfm_top_tracks_$username";
+        $response = self::$cache->get_value($key);
+        if ($response === false) {
+            sleep(1);
+            $response = $this->fetch("user.getTopTracks", ["user" => $username, "limit" => $limit]);
+            if ($response === false) {
+                $response = [];
+            } else {
+                $top = [];
+                foreach ($response['toptracks']['track'] as $entry) {
+                    $top[] = [
+                        'artist'    => $entry['artist']['name'],
+                        'name'      => $entry['name'],
+                        'playcount' => (int)$entry['playcount'],
+                        'url'       => $entry['url'],
+                    ];
+                }
+                $response = $top;
+            }
+
+            self::$cache->cache_value($key, $response, 86400);
+        }
+        return $response;
+    }
+
+    public function weeklyArtists(int $limit = 50): array {
+        $key = "lastfm_top_artists_$limit";
+        $response = self::$cache->get_value($key);
+        if ($response === false) {
+            $response = $this->fetch("chart.getTopArtists", ["limit" => $limit]);
+            if ($response === false) {
+                $response = [];
+            } else {
+                $top = [];
+                foreach ($response['artists']['artist'] as $entry) {
+                    $top[] = [
+                        'name'      => $entry['name'],
+                        'playcount' => (int)$entry['playcount'],
+                        'listeners' => (int)$entry['listeners'],
+                    ];
+                }
+                $response = $top;
+            }
+            self::$cache->cache_value($key, $response, 86400);
+        }
+        return $response;
+    }
+
+    protected function fetch(string $method, array $args): array|false {
+        if (LASTFM_API_KEY == false) {
             return false;
         }
-        $RecentFailsKey = 'lastfm_api_fails';
-        $RecentFails = (int)self::$cache->get_value($RecentFailsKey);
-        if ($RecentFails > 5) {
+        $recentFailsKey = 'lastfm_api_fails';
+        $recentFails = (int)self::$cache->get_value($recentFailsKey);
+        if ($recentFails > 5) {
             // Take a break if last.fm's API is down/nonfunctional
             return false;
         }
-        $Url = self::LASTFM_API_URL . $Method;
-        foreach ($Args as $Key => $Value) {
-            $Url .= "&$Key=" . urlencode($Value);
+        $url = self::LASTFM_API_URL . $method;
+        foreach ($args as $Key => $Value) {
+            $url .= "&$Key=" . urlencode($Value);
         }
-        $Url .= "&format=json&api_key=" . LASTFM_API_KEY;
         $curl = new Curl;
-        if ($curl->fetch($Url)) {
+        if ($curl->fetch($url . "&format=json&api_key=" . LASTFM_API_KEY)) {
             return json_decode($curl->result(), true);
-        } else {
-            self::$cache->cache_value($RecentFailsKey, $RecentFails + 1, 1800);
-            return false;
         }
+        self::$cache->cache_value($recentFailsKey, $recentFails + 1, 1800);
+        return false;
     }
 }

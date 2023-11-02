@@ -388,6 +388,22 @@ class UserTest extends TestCase {
         $this->assertTrue($this->user->isDisabled(), 'utest-inactive-deactivated');
     }
 
+    public function testLastFM(): void {
+        $lastfm   = new \Gazelle\Util\LastFM;
+        $username = 'phpunit.' . randomString(6);
+        $this->assertNull($lastfm->username($this->user), 'lastfm-no-username');
+        $this->assertEquals(1, $lastfm->modifyUsername($this->user, $username), 'lastfm-create-username');
+        $this->assertEquals($username, $lastfm->username($this->user), 'lastfm-has-username');
+
+        $username = "new.$username";
+        $this->assertEquals(1, $lastfm->modifyUsername($this->user, $username), 'lastfm-modify-username');
+        $this->assertEquals($username, $lastfm->username($this->user), 'lastfm-has-new-username');
+        $this->assertEquals(0, $lastfm->modifyUsername($this->user, $username), 'lastfm-no-modify-username');
+
+        $this->assertEquals(1, $lastfm->modifyUsername($this->user, ''), 'lastfm-remove-username');
+        $this->assertNull($lastfm->username($this->user), 'lastfm-has-no-username');
+    }
+
     public function testStats(): void {
         $eco = new \Gazelle\Stats\Economic;
         $eco->flush();

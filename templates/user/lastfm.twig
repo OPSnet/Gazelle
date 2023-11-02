@@ -1,12 +1,11 @@
 <div class="box box_info box_lastfm">
     <div class="head colhead_dark">Last.fm</div>
     <ul class="stats nobullet">
-        <li>
-            Username: <a id="lastfm_username" href="{{ info.url }}" target="_blank" class="tooltip" title="{{ info.name }}
-            on Last.fm: {{ info.playcount|number_format }} plays, {{ info.playlists|number_format }} playlist{{ info.playlists }}">{{ info.username }}</a>
+        <li>Username: <a id="lastfm_username" href="{{ info.url }}" target="_blank" class="tooltip" title="{{
+            info.name }} on Last.fm: {{ info.playcount|number_format }} plays, {{
+            info.artist_count|number_format }} artists">{{ info.name }}</a>
         </li>
-        <div id="lastfm_stats"{% if own_profile %} data-uid="1"{% endif %}>
-        </div>
+        <div id="lastfm_stats"{% if own_profile %} data-uid="1"{% endif %}></div>
         <li>
             <span id="lastfm_expand" class="brackets">Show more info</span>
 {% if can_reload %}
