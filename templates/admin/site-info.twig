@@ -79,6 +79,39 @@ div#phpinfo hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}
 {% endfor %}
     </div>
 
+    <h3>Tables with duplicate foreign keys</h3>
+    <div class="box pad">
+{% for table in site_info.tablesWithDuplicateForeignKeys %}
+    {% if loop.first %}
+    <div class="thin">The following tables have redundant foreign key definitions.
+    All but one of the definitions per table/column may safely be removed.</div><br />
+    <table>
+        <tr class="colhead">
+            <td>Table</td>
+            <td>Column</td>
+            <td>Referenced table</td>
+            <td>Referenced column</td>
+            <td>Constraint name</td>
+        </tr>
+    {% endif %}
+        <tr>
+            <td>{{ table.TABLE_NAME }}</td>
+            <td>{{ table.COLUMN_NAME }}</td>
+            <td>{{ table.REFERENCED_TABLE_NAME }}</td>
+            <td>{{ table.REFERENCED_COLUMN_NAME }}</td>
+            <td>{{ table.CONSTRAINT_NAME }}</td>
+        </tr>
+        <tr>
+            <td colspan="5">To correct: <tt>ALTER TABLE {{ table.TABLE_NAME }} DROP CONSTRAINT {{ table.CONSTRAINT_NAME }};</tt></td>
+        </tr>
+    {% if loop.last %}
+    </table>
+    {% endif %}
+{% else %}
+    <p>All tables have a correct foreign keys</p>
+{% endfor %}
+    </div>
+
     <h3>Composer</h3>
     <div class="box pad">
         Composer Version: {{ site_info.composerVersion }}<br />

@@ -130,6 +130,37 @@ class SiteInfo extends Base {
         return self::$db->collect(0);
     }
 
+    /**
+     * List of tables that have multiple foreign keys on the same referenced table.
+     * This can occur due to the use of online schema changers.
+     * Dropping a redundant key is as simple as
+     * ALTER TABLE table_name DROP CONSTRAINT constraint_name
+     */
+    public function tablesWithDuplicateForeignKeys(): array {
+        self::$db->prepared_query("
+            SELECT kcu.table_name,
+                kcu.column_name,
+                kcu.referenced_table_name,
+                kcu.referenced_column_name,
+                kcu.constraint_name
+            FROM information_schema.key_column_usage kcu
+            INNER JOIN (
+                SELECT table_name,
+                    column_name,
+                    referenced_table_name,
+                    referenced_column_name 
+                FROM information_schema.key_column_usage 
+                WHERE referenced_table_schema = ?
+                GROUP BY table_name, column_name, referenced_table_name, referenced_column_name 
+                HAVING count(*) > 1
+            ) DUP USING (table_name, column_name, referenced_table_name, referenced_column_name)
+            WHERE kcu.referenced_table_schema = ?
+            ORDER BY 1, 2, 3, 4, 5;
+            ", SQLDB, SQLDB
+        );
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
+    }
+
     public function tableRowsRead(string $tableName): array {
         self::$db->prepared_query("
             SELECT ROWS_READ, ROWS_CHANGED, ROWS_CHANGED_X_INDEXES

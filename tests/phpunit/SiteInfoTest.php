@@ -16,6 +16,7 @@ class SiteInfoTest extends TestCase {
         $this->assertIsArray($info->composerPackages(), 'siteinfo-composer-packages');
         $this->assertTrue($info->tableExists('users_main'), 'siteinfo-table-exists');
         $this->assertEquals([], $info->tablesWithoutPK(), 'siteinfo-table-no-pk');
+        $this->assertEquals([], $info->tablesWithDuplicateForeignKeys(), 'siteinfo-table-dup-foreign-keys');
         $this->assertIsArray($info->tableRowsRead('users_main'), 'siteinfo-table-read');
         $this->assertIsArray($info->indexRowsRead('users_main'), 'siteinfo-index-read');
         $this->assertIsArray($info->tableStats('users_main'), 'siteinfo-table-stats');
