@@ -1,23 +1,22 @@
 <?php
 
-/**
- * @var \Gazelle\Collage $Collage
- * @var int              $CollageCovers
- * @var int              $CollageID
- * @var array            $CollagePages
- * @var int              $NumGroups
- */
+$tgMan         = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
+$torMan        = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
+$bookmark      = new Gazelle\User\Bookmark($Viewer);
+$collMan       = (new Gazelle\Manager\Collage)->setImageProxy(new \Gazelle\Util\ImageProxy($Viewer));
+$urlStem       = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
+$vote          = new Gazelle\User\Vote($Viewer);
 
-$tgMan    = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
-$torMan   = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
-$bookmark = new Gazelle\User\Bookmark($Viewer);
-$collMan  = (new Gazelle\Manager\Collage)->setImageProxy(new \Gazelle\Util\ImageProxy($Viewer));
-$urlStem  = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
-$vote     = new Gazelle\User\Vote($Viewer);
-$snatcher = $Viewer->snatch();
+/** @var Gazelle\Collage $Collage required from collage.php */
 
-$entryList    = $Collage->entryList();
-$groupsClosed = (bool)$Viewer->option('TorrentGrouping');
+$Collage->setViewer($Viewer);
+$CollageID     = $Collage->id();
+$CollageCovers = ($Viewer->option('CollageCovers') ?: 25) * (1 - (int)$Viewer->option('HideCollage'));
+$CollagePages  = [];
+$NumGroups     = $Collage->numEntries();
+$snatcher      = $Viewer->snatch();
+$entryList     = $Collage->entryList();
+$groupsClosed  = (bool)$Viewer->option('TorrentGrouping');
 
 echo $Twig->render('collage/header.twig', [
     'bookmarked' => $bookmark->isCollageBookmarked($CollageID),

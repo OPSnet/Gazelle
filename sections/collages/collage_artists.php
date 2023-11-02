@@ -1,19 +1,17 @@
 <?php
 
-/**
- * @var \Gazelle\Collage $Collage
- * @var int              $CollageCovers
- * @var int              $CollageID
- * @var array            $CollagePages
- * @var int              $NumGroups
- */
+/** @var Gazelle\Collage $Collage required from collage.php */
 
-$Artists = $Collage->artistList();
-
-$NumGroups = $Collage->numArtists();
+$Collage->setViewer($Viewer);
+$CollageID       = $Collage->id();
+$CollageCovers   = (int)($Viewer->option('CollageCovers') ?: 25) * (1 - (int)$Viewer->option('HideCollage'));
+$CollagePages    = [];
+$NumGroups       = $Collage->numEntries();
+$Artists         = $Collage->artistList();
+$NumGroups       = $Collage->numArtists();
 $NumGroupsByUser = 0;
-$Render = [];
-$ArtistTable = '';
+$Render          = [];
+$ArtistTable     = '';
 
 foreach ($Artists as $id => $Artist) {
     $name = html_escape($Artist['name']);
@@ -29,7 +27,7 @@ foreach ($Artists as $id => $Artist) {
 if ($CollageCovers) {
     if ($NumGroups > $CollageCovers) {
         $Render = array_merge($Render,
-            array_fill(0, $CollageCovers * ceil($NumGroups / $CollageCovers) - $NumGroups, '<li></li>')
+            array_fill(0, $CollageCovers * (int)ceil($NumGroups / $CollageCovers) - $NumGroups, '<li></li>')
         );
     }
     for ($i = 0; $i < $NumGroups / $CollageCovers; $i++) {

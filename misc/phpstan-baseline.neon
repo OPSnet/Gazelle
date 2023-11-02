@@ -421,11 +421,6 @@ parameters:
 			path: ../sections/better/better.php
 
 		-
-			message: "#^Parameter \\#2 \\$count of function array_fill expects int, float given\\.$#"
-			count: 1
-			path: ../sections/collages/artist_collage.php
-
-		-
 			message: "#^Function notify invoked with 2 parameters, 3 required\\.$#"
 			count: 1
 			path: ../sections/error/404.php
