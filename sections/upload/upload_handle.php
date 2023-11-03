@@ -229,7 +229,13 @@ if (!is_uploaded_file($TorrentName) || !filesize($TorrentName)) {
 
 $torMan   = new Gazelle\Manager\Torrent;
 $bencoder = new OrpheusNET\BencodeTorrent\BencodeTorrent;
-$bencoder->decodeFile($TorrentName);
+try {
+    $bencoder->decodeFile($TorrentName);
+} catch (\RuntimeException $e) {
+    if ($e->getMessage() == "Could not fully decode bencode string") {
+        reportError("The torrent file '{$File['name']}' is corrupted, please recreate it");
+    }
+}
 $PublicTorrent    = $bencoder->makePrivate(); // The torrent is now private.
 $UnsourcedTorrent = $torMan->setSourceFlag($bencoder);
 $infohash         = $bencoder->getHexInfoHash();
@@ -304,7 +310,13 @@ if ($isMusicUpload) {
             }
 
             $xbencoder = new OrpheusNET\BencodeTorrent\BencodeTorrent;
-            $xbencoder->decodeFile($fileTmpName);
+            try {
+                $xbencoder->decodeFile($fileTmpName);
+            } catch (\RuntimeException $e) {
+                if ($e->getMessage() == "Could not fully decode bencode string") {
+                    reportError("The torrent file '{$filename}' is corrupted, please recreate it");
+                }
+            }
             $ExtraTorData = $xbencoder->getData();
             if (isset($ExtraTorData['encrypted_files'])) {
                 reportError('At least one of the torrents contain an encrypted file list which is not supported here');
