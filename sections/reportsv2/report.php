@@ -192,11 +192,11 @@ if (!empty($torrent->description())) {
             <br />
 
             <div id="dynamic_form">
-                <input id="sitelink" type="hidden" name="sitelink" size="50" value="<?=(!empty($_POST['sitelink']) ? display_str($_POST['sitelink']) : '')?>" />
-                <input id="image" type="hidden" name="image" size="50" value="<?=(!empty($_POST['image']) ? display_str($_POST['image']) : '')?>" />
-                <input id="track" type="hidden" name="track" size="8" value="<?=(!empty($_POST['track']) ? display_str($_POST['track']) : '')?>" />
-                <input id="link" type="hidden" name="link" size="50" value="<?=(!empty($_POST['link']) ? display_str($_POST['link']) : '')?>" />
-                <input id="extra" type="hidden" name="extra" value="<?=(!empty($_POST['extra']) ? display_str($_POST['extra']) : '')?>" />
+                <input id="sitelink" type="hidden" name="sitelink" size="50" value="<?= display_str($_POST['sitelink'] ?? '') ?>" />
+                <input id="image" type="hidden" name="image" size="50" value="<?= display_str($_POST['image'] ?? '') ?>" />
+                <input id="track" type="hidden" name="track" size="8" value="<?= display_str($_POST['track'] ?? '') ?>" />
+                <input id="link" type="hidden" name="link" size="50" value="<?= display_str($_POST['link'] ?? '') ?>" />
+                <input id="extra" type="hidden" name="extra" value="<?= display_str($_POST['extra'] ?? '') ?>" />
 
                 <script type="text/javascript">ChangeReportType();</script>
             </div>

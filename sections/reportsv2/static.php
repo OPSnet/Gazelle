@@ -342,7 +342,7 @@ if ($search->canUnclaim($Viewer)) {
                 <tr>
                     <td class="label">Report comment:</td>
                     <td>
-                        <input type="text" name="comment" id="comment<?= $reportId ?>" size="70" value="<?= html_escape($report->comment()) ?>" />
+                        <input type="text" name="comment" id="comment<?= $reportId ?>" size="70" value="<?= html_escape($report->comment() ?? '') ?>" />
                         <input type="button" value="Update now" onclick="UpdateComment(<?= $reportId ?>);" />
                     </td>
                 </tr>
@@ -436,7 +436,7 @@ if ($search->canUnclaim($Viewer)) {
                 <tr>
                     <td class="label">Report comments:</td>
                     <td>
-                        <?= display_str($report->comment()) ?>
+                        <?= display_str($report->comment() ?? '') ?>
                     </td>
                 </tr>
                 <tr>
