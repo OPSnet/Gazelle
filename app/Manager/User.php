@@ -420,14 +420,21 @@ class User extends \Gazelle\BaseManager {
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
-    public function flushUserclass(int $level): int {
+    public function flushUserclass(int $userclassId): int {
         self::$db->prepared_query("
             SELECT um.ID
             FROM users_main um
             INNER JOIN permissions p ON (p.ID = um.PermissionID)
             WHERE um.Enabled = ?
-                AND p.Level = ?
-            ", UserStatus::enabled->value, $level
+                AND p.ID = ?
+            UNION DISTINCT
+            SELECT um.ID
+            FROM users_main um
+            INNER JOIN users_levels ul ON (ul.UserID = um.ID)
+            WHERE um.Enabled = ?
+                AND ul.PermissionID = ?
+            ", UserStatus::enabled->value, $userclassId,
+                UserStatus::enabled->value, $userclassId
         );
         $affected = 0;
         foreach (self::$db->collect(0, false) as $id) {

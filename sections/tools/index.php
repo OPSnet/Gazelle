@@ -151,14 +151,14 @@ switch ($_REQUEST['action']) {
         require_once('managers/ocelot.php');
         break;
 
-    case 'permissions':
-        require_once('managers/permissions_list.php');
+    case 'userclass':
+        require_once('managers/userclass_list.php');
         break;
     case 'privilege-edit':
-        require_once('managers/permissions_edit.php');
+        require_once('managers/userclass_edit.php');
         break;
     case 'privilege-alter':
-        require_once('managers/permissions_alter.php');
+        require_once('managers/userclass_alter.php');
         break;
     case 'privilege_matrix':
         require_once('managers/privilege_matrix.php');

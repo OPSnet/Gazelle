@@ -55,7 +55,8 @@
 {% if privilege.id %}
         <tr>
             <td class="label">Total users in this class</td>
-            <td>{{ privilege.userTotal|number_format }}&nbsp;<a href="/user.php?action=search&class[]={{ privilege.id }}" class="brackets">View</a></td>
+            <td>{{ privilege.userTotal|number_format }}&nbsp;<a href="/user.php?action=search&{%
+                if privilege.isSecondary %}secclass{% else %}class[]{% endif %}={{ privilege.id }}" class="brackets">View</a></td>
         </tr>
 {% endif %}
     </table>

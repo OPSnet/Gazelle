@@ -79,7 +79,7 @@ if (isset($_REQUEST['submit'])) {
         ->setField('`Values`', serialize($values))
         ->modify();
 
-    $usersAffected = (new Gazelle\Manager\User)->flushUserclass($level);
+    $usersAffected = (new Gazelle\Manager\User)->flushUserclass($privilege->id());
 }
 
-require_once('permissions_edit.php');
+require_once('userclass_edit.php');

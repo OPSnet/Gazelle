@@ -271,6 +271,17 @@ class UserManagerTest extends TestCase {
         $this->assertStringContainsString($this->userList[1]->username(), $pm->postBody($postId), 'uman-custom-pm-body');
     }
 
+    public function testUserclassFlush(): void {
+        $userMan = new \Gazelle\Manager\User;
+        $administratorId = (int)current(array_filter($userMan->classList(), fn($class) => $class['Name'] == 'Administrator'))['ID'];
+        $alphaTeamId = (int)current(array_filter($userMan->classList(), fn($class) => $class['Name'] == 'Alpha Team'))['ID'];
+
+        $this->userList[0]->addClasses([$administratorId]);
+        $this->userList[1]->addClasses([$alphaTeamId]);
+        $this->assertEquals(1, $userMan->flushUserclass($administratorId), 'uman-flush-userclass-administrator');
+        $this->assertEquals(1, $userMan->flushUserclass($alphaTeamId), 'uman-flush-userclass-alphateam');
+    }
+
     public function testUserflow(): void {
         $userflow = (new \Gazelle\Manager\User)->userflow();
         $this->assertIsArray($userflow, 'uman-userflow-is-array');
