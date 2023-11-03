@@ -98,6 +98,12 @@ if (isset($_POST['album_desc'])) {
 }
 $Properties['GroupID'] = $_POST['groupid'] ?? null;
 
+// The UserID field is not needed as part of the torrent creation
+// (the Viewer object is used for that), but it simplifies the
+// code if something errors out below and the upload form has to
+// be repopulated.
+$Properties['UserID'] = $Viewer->id();
+
 if (empty($_POST['artists'])) {
     $Artists = [];
     $Importance = [];

@@ -33,6 +33,7 @@ if (!isset($Properties)) {
                 'VanityHouse'      => $tgroup->isShowcase(),
                 'Artists'          => $tgroup->artistRole()?->idList() ?? [],
                 'TagList'          => implode(', ', $tgroup->tagNameList()),
+                'UserID'           => $Viewer->id(),
             ];
             if ($requestId) {
                 $Properties['RequestID'] = $requestId;
@@ -54,6 +55,7 @@ if (!isset($Properties)) {
                 'CatalogueNumber'  => $request->catalogueNumber(),
                 'Artists'          => $request->artistRole()?->idList() ?? [],
                 'TagList'          => implode(', ', $request->tagNameList()),
+                'UserID'           => $Viewer->id(),
             ];
         }
     }
