@@ -2,7 +2,7 @@
 
 namespace Gazelle\Manager;
 
-class PermissionRateLimit extends \Gazelle\Base {
+class UserclassRateLimit extends \Gazelle\Base {
     public function list(): array {
          self::$db->prepared_query('
             SELECT p.ID, p.Name, prl.factor, prl.overshoot

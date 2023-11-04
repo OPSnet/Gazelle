@@ -19,7 +19,7 @@ if (preg_match('/^(BTWebClient|Python-urllib|python-requests|uTorrent)/', $_SERV
     json_or_error('You have already downloaded this torrent file four times. If you need to download it again, please do so from your browser.');
 }
 
-$download = new Gazelle\Download($Viewer, $torrent, isset($_REQUEST['usetoken']));
+$download = new Gazelle\Download($torrent, new Gazelle\User\UserclassRateLimit($Viewer), isset($_REQUEST['usetoken']));
 $status = $download->status();
 
 if ($status == DownloadStatus::ok) {
@@ -30,13 +30,17 @@ if ($status == DownloadStatus::ok) {
 }
 
 if ($status == DownloadStatus::flood) {
-    Irc::sendMessage(
-        STATUS_CHAN,
-        "{$Viewer->publicLocation()} ({$Viewer->username()}) ({$_SERVER['REMOTE_ADDR']}) accessing "
-        . SITE_URL . $_SERVER['REQUEST_URI']
-        . (!empty($_SERVER['HTTP_REFERER']) ? " from " . $_SERVER['HTTP_REFERER'] : '')
-        . ' hit download rate limit'
-    );
+    $key = "ratelimit_flood_" . $Viewer->id();
+    if ($Cache->get_value($key) === false) {
+        $Cache->cache_value($key, true, 3600);
+        Irc::sendMessage(
+            STATUS_CHAN,
+            "{$Viewer->publicLocation()} ({$Viewer->username()}) ({$_SERVER['REMOTE_ADDR']}) accessing "
+            . SITE_URL . $_SERVER['REQUEST_URI']
+            . (!empty($_SERVER['HTTP_REFERER']) ? " from " . $_SERVER['HTTP_REFERER'] : '')
+            . ' hit download rate limit'
+        );
+    }
 }
 
 json_or_error($status->message());

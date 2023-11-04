@@ -17,7 +17,7 @@ $donor       = new Gazelle\User\Donor($User);
 $userBonus   = new Gazelle\User\Bonus($User);
 $viewerBonus = new Gazelle\User\Bonus($Viewer);
 $history     = new Gazelle\User\History($User);
-$PRL         = new Gazelle\User\PermissionRateLimit($User);
+$limiter     = new Gazelle\User\UserclassRateLimit($User);
 $donorMan    = new Gazelle\Manager\Donation;
 $tgMan       = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
 $resetToken  = $Viewer->permitted('users_mod')
@@ -267,7 +267,7 @@ if (check_paranoia_here('snatched')) {
 }
 
 echo $Twig->render('user/sidebar-stats.twig', [
-    'prl'            => $PRL,
+    'prl'            => $limiter,
     'upload_total'   => $Uploads,
     'user'           => $User,
     'viewer'         => $Viewer,
@@ -564,7 +564,7 @@ if ($Viewer->permitted('users_mod') || $Viewer->isStaff()) { ?>
 
     if ($Viewer->permitted('admin_rate_limit_manage')) {
         echo $Twig->render('user/edit-rate-limit.twig', [
-            'prl'  => $PRL,
+            'prl'  => $limiter,
             'user' => $User,
         ]);
     }

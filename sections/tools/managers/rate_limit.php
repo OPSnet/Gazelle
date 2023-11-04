@@ -4,12 +4,12 @@ if (!$Viewer->permittedAny('admin_rate_limit_view', 'admin_rate_limit_manage')) 
     error(403);
 }
 
-$PRL = new Gazelle\Manager\PermissionRateLimit;
+$limiter = new Gazelle\Manager\UserclassRateLimit;
 if ($_POST) {
     authorize();
     $remove = array_filter($_POST, fn($x) => preg_match('/^remove-\d+$/', $x), ARRAY_FILTER_USE_KEY);
     if (count($remove) == 1) {
-        $PRL->remove((int)trim(array_keys($remove)[0], 'remove-'));
+        $limiter->remove((int)trim(array_keys($remove)[0], 'remove-'));
     } elseif ($_POST['task'] === 'add') {
         $val = new Gazelle\Util\Validator;
         $val->setFields([
@@ -20,7 +20,7 @@ if ($_POST) {
         if (!$val->validate($_POST)) {
             error($val->errorMessage());
         }
-        $PRL->save($_POST['class'], $_POST['factor'], $_POST['overshoot']);
+        $limiter->save($_POST['class'], $_POST['factor'], $_POST['overshoot']);
     } else {
         error(403);
     }
@@ -29,6 +29,6 @@ if ($_POST) {
 echo $Twig->render('admin/rate-limiting.twig', [
     'class_list' => (new Gazelle\Manager\User)->classList(),
     'priv_list'  => (new Gazelle\Manager\Privilege)->privilegeList(),
-    'rate_list'  => $PRL->list(),
+    'rate_list'  => $limiter->list(),
     'viewer'     => $Viewer,
 ]);

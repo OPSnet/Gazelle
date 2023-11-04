@@ -16,13 +16,12 @@ class RenderUserTest extends TestCase {
 
     public function testProfile(): void {
         $this->userList['admin'] = Helper::makeUser('admin.' . randomString(6), 'render');
+        $this->userList['admin']->setField('PermissionID', SYSOP)->modify();
         $this->userList['user'] = Helper::makeUser('user.' . randomString(6), 'render');
 
-        $this->userList['admin']->setField('PermissionID', SYSOP)->modify();
-
         global $Viewer;
-        $Viewer = $this->userList['admin'];
-        $PRL    = new \Gazelle\User\PermissionRateLimit($this->userList['user']);
+        $Viewer  = $this->userList['admin'];
+        $limiter = new \Gazelle\User\UserclassRateLimit($this->userList['user']);
 
         $sidebar = Gazelle\Util\Twig::factory()->render('user/sidebar.twig', [
             'applicant'     => new \Gazelle\Manager\Applicant,
@@ -61,7 +60,7 @@ class RenderUserTest extends TestCase {
         $this->assertEquals('', $tag, 'user-header-div-tag-heading');
 
         $stats = Gazelle\Util\Twig::factory()->render('user/sidebar-stats.twig', [
-            'prl'          => $PRL,
+            'prl'          => $limiter,
             'upload_total' => [],
             'user'         => $this->userList['user'],
             'viewer'       => $Viewer,

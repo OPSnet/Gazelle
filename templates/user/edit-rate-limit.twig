@@ -4,7 +4,7 @@
     <td><input type="checkbox" name="unlimitedDownload" id="unlimitedDownload"{{ checked(user.hasUnlimitedDownload) }} />
     If checked, user is not subject to rate limiting of torrent files (i.e. [DL] links).
     <p>
-{% if prl.metrics is empty %}
+{% if prl.userclassFactor is null and prl.userclassOvershoot is null %}
     Download/Snatch rate limits do not apply to {{ user.userclassName }}.
 {% else %}
     {% set snatches = user.stats.snatchUnique %}
@@ -15,14 +15,14 @@
     <ul class="nobullet">
     <li>{{ user.username }} has {{ snatches|number_format }} unique snatch{{ snatches|plural('es') }} and is seeding {{ user.stats.seedingTotal }} versus {{
         downloads|number_format }} unique download{{ downloads|plural }} which give a factor of
-        {% if prl.activityFactor is nan %}&infin;{% else %}{{ prl.activityFactor|number_format(2) }}{% endif %}.
-        {{ user.userclassName }} factor is {{ prl.metrics.factor }}, which represents {{
+        {% if prl.userFactor is nan %}&infin;{% else %}{{ prl.userFactor|number_format(2) }}{% endif %}.
+        {{ user.userclassName }} factor is {{ prl.userclassFactor }}, which represents {{
          limit|number_format(0) }} download{{ downloads|plural }}.
-     {% if downlads > limit %}(deficit = {{ (downloads - limit)|number_format }}){% endif %}
+     {% if downloads > limit %}(deficit = {{ (downloads - limit)|number_format }}){% endif %}
      </li>
-    <li>Allowed download overshoot for the previous 24 hours is {{ prl.metrics.overshoot }}, recent activity is {{ prl.recentDownloadTotal|number_format }} downloaded.</li>
-    {% if not prl.safeFactor and not prl.safeOvershoot %}
-    <li><strong class="important_text">Downloads are blocked for 24 hours or until more torrents are snatched or seeded.</strong></li>
+    <li>Allowed download overshoot for the previous 24 hours is {{ prl.userclassOvershoot }}, recent activity is {{ prl.recentDownloadTotal|number_format }} downloaded.</li>
+    {% if prl.isOvershoot %}
+    <li><strong class="important_text">Downloads are blocked for up to 24 hours or until more torrents are snatched or seeded.</strong></li>
     {% endif %}
 {% endif %}
     </p>

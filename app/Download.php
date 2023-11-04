@@ -18,8 +18,8 @@ class Download extends Base {
     protected DownloadStatus $status;
 
     public function __construct(
-        protected \Gazelle\User $user,
         protected \Gazelle\Torrent $torrent,
+        protected \Gazelle\User\UserclassRateLimit $limiter,
         protected bool $useToken
     ) {}
 
@@ -32,13 +32,14 @@ class Download extends Base {
 
     public function authorize(): DownloadStatus {
         /**
-         * You can always download your own torrent, a torrent you have snatched or are seeding
+         * You can always download your own torrent, a torrent you have snatched or are seeding.
          */
-        $userId = $this->user->id();
+        $user = $this->limiter->user();
+        $userId = $user->id();
         if (
             $this->torrent->uploaderId() == $userId
-            || $this->user->snatch()->isSnatched($this->torrent)
-            || $this->user->isSeeding($this->torrent)
+            || $user->snatch()->isSnatched($this->torrent)
+            || $user->isSeeding($this->torrent)
         ) {
             return $this->success();
         }
@@ -46,34 +47,39 @@ class Download extends Base {
         /**
          * You cannot download if you are on ratio watch
          */
-        if (!$this->user->canLeech()) {
+        if (!$user->canLeech()) {
             return DownloadStatus::ratio;
         }
 
-        /* If this is not their torrent, then see if they have downloaded too
-         * many files, compared to completely snatched items. If that is too
-         * high, and they have already downloaded too many files recently, then
+        /**
+         * You can download a freeleech torrent without restriction.
+         */
+        if ($this->torrent->isFreeleech()) {
+            return $this->success();
+        }
+
+        /* This is not their torrent, see if they have downloaded too many
+         * files, compared to completely snatched items. If that is too high,
+         * and they have already downloaded too many files recently, then
          * stop them. Exception: always allowed if they are using FL tokens.
          */
         if (!$this->useToken && $this->torrent->uploaderId() != $userId) {
-            $PRL = new \Gazelle\User\PermissionRateLimit($this->user);
-            if (!$PRL->safeFactor() && !$PRL->safeOvershoot()) {
-                $PRL->register($this->torrent);
+            if ($this->limiter->isOvershoot($this->torrent)) {
                 return DownloadStatus::flood;
             }
         }
 
-        /* If they are trying use a token on this, we need to make sure they
-         * have enough. If so, deduct the number required, note it in the freeleech
-         * table and update their cache key.
+        /* If they are trying use a token on this, make sure they have enough.
+         * If so, deduct the number required, note it in the freeleech table
+         * and update their cache key.
          */
         if ($this->useToken && $this->torrent->leechType() == LeechType::Normal) {
-            if (!$this->user->canSpendFLToken($this->torrent)) {
+            if (!$user->canSpendFLToken($this->torrent)) {
                 return DownloadStatus::free;
             }
 
-            // First make sure this isn't already FL, and if it is, do nothing
-            if (!$this->user->hasToken($this->torrent)) {
+            // First make sure this isn't already FL, and do nothing if it is
+            if (!$user->hasToken($this->torrent)) {
                 $tokenCount = $this->torrent->tokenCount();
                 if (!STACKABLE_FREELEECH_TOKENS && $tokenCount > 1) {
                     return DownloadStatus::too_big;
@@ -108,23 +114,24 @@ class Download extends Base {
                 );
                 self::$db->commit();
                 self::$cache->delete_value("user_tokens_$userId");
-                $this->user->flush();
+                $user->flush();
             }
         }
         return $this->success();
     }
 
     protected function success(): DownloadStatus {
+        $user = $this->limiter->user();
         self::$db->prepared_query("
             INSERT INTO users_downloads
                    (UserID, TorrentID)
             VALUES (?,      ?)
-            ", $this->user->id(), $this->torrent->id()
+            ", $user->id(), $this->torrent->id()
         );
 
-        $this->user->stats()->increment('download_total');
-        if ($this->torrent->group()->image() != '' && $this->torrent->uploaderId() != $this->user->id()) {
-            $this->user->snatch()->flush();
+        $user->stats()->increment('download_total');
+        if ($this->torrent->group()->image() != '' && $this->torrent->uploaderId() != $user->id()) {
+            $user->snatch()->flush();
         }
         return DownloadStatus::ok;
     }
