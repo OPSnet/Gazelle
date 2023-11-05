@@ -51,8 +51,8 @@ class UserCreator extends Base {
         if (!isset($this->inviteKey)) {
             $inviter = null;
         } else {
-            [$inviterId, $inviterReason, $email] = self::$db->row("
-                SELECT InviterID, Reason, Email
+            [$inviterId, $inviterNotes, $inviterReason, $email] = self::$db->row("
+                SELECT InviterID, Notes, Reason, Email
                 FROM invites
                 WHERE InviteKey = ?
                 ", $this->inviteKey
@@ -67,10 +67,13 @@ class UserCreator extends Base {
                 // as belonging to them.
                 $this->email[] = $email;
             }
-            if ($inviterReason) {
+            if (!empty($inviterReason)) {
                 $this->adminComment[] = $inviterReason;
             }
             $this->adminComment[] = "invite key = " . $this->inviteKey;
+            if (!empty($inviterNotes)) {
+                $this->adminComment[] = $inviterNotes;
+            }
         }
         if (!$this->email) {
             // neither setEmail() nor setInviteKey() produced anything useful
@@ -114,9 +117,10 @@ class UserCreator extends Base {
         );
 
         if ($inviter) {
-            (new Manager\InviteSource)->resolveInviteSource($this->inviteKey, $this->id);
+            (new Manager\InviteSource)->resolveInviteSource($this->inviteKey, $user);
             (new User\InviteTree($inviter))->add($this->id);
             (new Stats\User($inviter->id()))->increment('invited_total');
+            $user->externalProfile()->modifyProfile($inviterReason);
             self::$db->prepared_query("
                 DELETE FROM invites WHERE InviteKey = ?
                 ", $this->inviteKey

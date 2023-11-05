@@ -28,7 +28,10 @@
         {{ inviter.id|user_url -}}
         {%- if viewer.permitted('admin_manage_invite_source') -%}
             {%- if not invite_source and (inviter.isInterviewer or inviter.isRecruiter) %} <i>unconfirmed</i>{% endif -%}
-            {%- if invite_source %} from {{ invite_source }}{% endif -%}
+            {%- if invite_source %} from {{ invite_source -}}
+                {%- set profile = user.externalProfile.profile -%}
+                {%- if profile %}<br /><tt>{{ profile }}</tt>{% endif -%}
+            {%- endif -%}
         {% endif -%}
     {% endif -%}
     </li>

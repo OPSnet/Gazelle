@@ -27,6 +27,7 @@
     ['Applicant manager',            'apply.php?action=admin',               viewer.permitted('admin_manage_applicants') or applicant_viewer],
     ['Database encryption key',      'tools.php?action=dbkey',               viewer.permitted('admin_site_debug')],
     ['IRC channel manager',          'tools.php?action=irc',                 viewer.permitted('admin_manage_forums')],
+    ['Invite Sources',               'tools.php?action=invite_source',       viewer.permitted('admin_manage_invite_source')],
     ['Privilege matrix',             'tools.php?action=privilege_matrix',    viewer.permitted('admin_manage_permissions')],
     ['Reports V1',                   'reports.php',                          viewer.permittedAny('admin_reports', 'site_moderate_forums')],
     ['Staff page group manager',     'tools.php?action=staff_groups',        viewer.permitted('admin_manage_permissions')],
@@ -70,7 +71,6 @@
     ['Forum categories',        'tools.php?action=categories',        viewer.permitted('admin_manage_forums')],
     ['Forum departments',       'tools.php?action=forum',             viewer.permitted('admin_manage_forums')],
     ['Forum transitions',       'tools.php?action=forum_transitions', viewer.permitted('admin_manage_forums')],
-    ['Invite Sources',          'tools.php?action=invite_source',     viewer.permitted('admin_manage_invite_source')],
     ['Navigation link manager', 'tools.php?action=navigation',        viewer.permitted('admin_manage_navigation')],
     ['Stylesheet usage',        'tools.php?action=stylesheets',       viewer.permitted('admin_manage_stylesheets')],
 ]) }}

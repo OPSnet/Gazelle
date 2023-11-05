@@ -19,7 +19,13 @@ $manager = new Gazelle\Manager\Invite;
 if ($manager->emailExists($Viewer, $email)) {
     error('You already have a pending invite to that address!');
 }
-$invite = $manager->create($Viewer, $email, trim($_POST['reason'] ?? ''), $_POST['user-0'] ?? '');
+$invite = $manager->create(
+    $Viewer,
+    $email,
+    trim($_POST['notes'] ?? ''),
+    trim($_POST['reason'] ?? ''),
+    $_POST['user-0'] ?? ''
+);
 
 if (!$invite) {
     error(403);

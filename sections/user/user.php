@@ -110,7 +110,7 @@ echo $Twig->render('user/header.twig', [
 echo $Twig->render('user/sidebar.twig', [
     'applicant'     => new Gazelle\Manager\Applicant,
     'invite_source' => $Viewer->permitted('admin_manage_invite_source')
-        ? (new Gazelle\Manager\InviteSource)->findSourceNameByUserId($UserID) : null,
+        ? (new Gazelle\Manager\InviteSource)->findSourceNameByUser($User) : null,
     'user'          => $User,
     'viewer'        => $Viewer,
 ]);
@@ -623,7 +623,7 @@ if ($Viewer->permitted('users_mod') || $Viewer->isStaff()) { ?>
 
     if ($User->isInterviewer() || $User->isRecruiter() || $User->isStaff()) {
         echo $Twig->render('user/edit-invite-sources.twig', [
-            'list' => (new \Gazelle\Manager\InviteSource)->inviterConfiguration($User->id()),
+            'list' => (new \Gazelle\Manager\InviteSource)->inviterConfiguration($User),
         ]);
     }
 

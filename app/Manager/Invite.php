@@ -5,7 +5,7 @@ namespace Gazelle\Manager;
 class Invite extends \Gazelle\Base {
     protected string|null $search;
 
-    public function create(\Gazelle\User $user, string $email, string $reason, string $source): ?\Gazelle\Invite {
+    public function create(\Gazelle\User $user, string $email, string $notes, string $reason, string $source): ?\Gazelle\Invite {
         self::$db->begin_transaction();
         if (!$user->invite()->issueInvite()) {
             return null;
@@ -13,9 +13,9 @@ class Invite extends \Gazelle\Base {
         $inviteKey = randomString();
         self::$db->prepared_query("
             INSERT INTO invites
-                   (InviterID, InviteKey, Email, Reason, Expires)
-            VALUES (?,         ?,         ?,     ?,      now() + INTERVAL 3 DAY)
-            ", $user->id(), $inviteKey, $email, $reason
+                   (InviterID, InviteKey, Email, Notes, Reason, Expires)
+            VALUES (?,         ?,         ?,     ?,     ?,      now() + INTERVAL 3 DAY)
+            ", $user->id(), $inviteKey, $email, $notes, $reason
         );
         $invite = new \Gazelle\Invite($inviteKey);
         if (preg_match('/^s-(\d+)$/', $source, $match)) {

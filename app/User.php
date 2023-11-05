@@ -526,6 +526,10 @@ class User extends BaseObject {
         return $this->info()['Email'];
     }
 
+    public function externalProfile(): User\ExternalProfile {
+        return new User\ExternalProfile($this);
+    }
+
     public function ipaddr(): string {
         return $this->info()['IP'];
     }

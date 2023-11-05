@@ -15,7 +15,9 @@
     {%- set inviter = user.inviter %}
     {{- inviter.id|user_url }} {{ inviter.publicLocation -}}
     {%- if not source and (inviter.isInterviewer or inviter.isRecruiter) %} (unconfirmed){% endif -%}
-    {%- if source %} from {{ source }}{% endif -%}
+    {%- if source %} from {{ source }}
+    {%- endif -%}
+    <tt> {{ user.externalProfile.profile }}</tt>
 {% endif -%}
 </td></tr>
 

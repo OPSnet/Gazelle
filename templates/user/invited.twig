@@ -20,7 +20,9 @@
     </div>
 </div>
 
-{% set is_site_inviter = inviter_config|length %}
+{% set config = invite_source.inviterConfigurationActive(user) %}
+{% set user_source = invite_source.userSource(user) %}
+{% set is_site_inviter = config|length %}
 
 {% if user.disableInvites %}
 <div class="box pad" style="text-align: center;">
@@ -65,7 +67,7 @@
         <div class="field_div">
             <div class="label">Invite source:</div>
             <div class="input">
-            {{ _self.select_invite_source(0, inviter_config, user_source) }}
+            {{ _self.select_invite_source(0, config, user_source) }}
             </div>
         </div>
     {% endif %}
@@ -89,6 +91,14 @@
                 <input type="text" name="reason" size="40" maxlength="255" />
             </div>
         </div>
+        {% if user.isInterviewer or user.isStaff %}
+        <div class="field_div">
+            <div class="label">Additional notes:</div>
+            <div class="input">
+                {{ notes.emit|raw }}
+            </div>
+        </div>
+        {% endif %}
     {% endif %}
         <div class="field_div">
             <div class="label">&nbsp;</div>
@@ -172,11 +182,22 @@
             <td class="td_ratio m_td_right">{{ ratio(u.uploadedSize, u.downloadedSize) }}</td>
     {% if is_site_inviter %}
         {% if edit_source %}
-            <td class="nobr">{{ _self.select_invite_source(u.id, inviter_config, user_source) }}</td>
+            <td class="nobr">{{ _self.select_invite_source(u.id, config, user_source) }}</td>
         {% else %}
             <td class="nobr">{{ user_source[u.id].name|default('<i>not set</i>')|raw }}</td>
         {% endif %}
     {% endif %}
+        </tr>
+    {%- set profile = u.externalProfile.profile %}
+        <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+        {% if edit_source %}
+            <td colspan="8">
+                External profile (URL): <input type="text" name="reason-{{ u.id }}" size="40" maxlength="255" value="{{ profile }}" />
+            </td>
+        {% else %}
+            <td colspan="8">{% if profile %}{{ profile }}{% else %}<i>External profile not specified</i>{% endif %}</td>
+        {% endif %}
+            </td>
         </tr>
 {% endfor %}
 {% if is_site_inviter and edit_source %}

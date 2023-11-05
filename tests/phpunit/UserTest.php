@@ -113,6 +113,19 @@ class UserTest extends TestCase {
         $this->assertFalse($this->user->notifyDeleteSnatch(), 'uattr-no-pm-delete-snatch');
     }
 
+    public function testExternalProfile(): void {
+        $externalProfile = new \Gazelle\User\ExternalProfile($this->user);
+        $this->assertEquals('', $externalProfile->profile(), 'user-profile-new');
+        $this->assertEquals(1, $externalProfile->modifyProfile('phpunit'), 'user-profile-create');
+        $this->assertEquals('phpunit', $externalProfile->profile(), 'user-profile-set');
+
+        $this->assertEquals(1, $externalProfile->modifyProfile('phpunit update'), 'user-profile-update');
+        $this->assertEquals('phpunit update', $this->user->externalProfile()->profile(), 'user-profile-delegate');
+
+        $this->assertEquals(1, $externalProfile->remove(), 'user-profile-remove');
+        $this->assertEquals('', $externalProfile->profile(), 'user-profile-empty');
+    }
+
     public function testPassword(): void {
         $userMan = new \Gazelle\Manager\User;
         $password = randomString(30);

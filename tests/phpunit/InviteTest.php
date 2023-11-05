@@ -57,7 +57,7 @@ class InviteTest extends TestCase {
         $manager = new Gazelle\Manager\Invite;
         $email = randomString(10) . "@invitee.example.com";
         $this->assertFalse($manager->emailExists($this->user, $email), 'invitee-email-not-pending');
-        $invite = $manager->create($this->user, $email, 'unittest', '');
+        $invite = $manager->create($this->user, $email, 'unittest notes', 'unittest reason', '');
         $this->assertInstanceOf(Gazelle\Invite::class, $invite, 'invite-invitee-created');
         $this->assertEquals(1, $this->user->invite()->pendingTotal(), 'invite-pending-1');
         $this->assertEquals(0, $this->user->unusedInviteTotal(), 'invite-unused-0-again');
@@ -79,13 +79,156 @@ class InviteTest extends TestCase {
         $this->assertInstanceOf(Gazelle\User::class, (new Gazelle\Manager\User)->findByAnnounceKey($this->invitee->announceKey()), 'invitee-confirmable');
     }
 
+    public function testInviteSource(): void {
+        $inviteSourceMan = new Gazelle\Manager\InviteSource;
+        $userMan = new Gazelle\Manager\User;
+        $this->user = Helper::makeUser('invite.' . randomString(6), 'invite');
+        $this->user->setField('PermissionID', MEMBER)->modify();
+        $this->user->addClasses([
+            (int)current(array_filter($userMan->classList(), fn($class) => $class['Name'] == 'Recruiter'))['ID']
+        ]);
+        $this->assertNull($inviteSourceMan->findSourceNameByUser($this->user), 'invite-source-inviter-source');
+
+        // set up an invite source for an inviter
+        $initialSource = $inviteSourceMan->inviterConfiguration($this->user);
+        $this->assertIsArray($initialSource, 'invite-source-list-initial');
+
+        $sourceId = $inviteSourceMan->create('pu.'.randomString(6));
+        $this->assertIsInt($sourceId, 'invite-source-create');
+        $this->assertEquals(
+            1,
+            $inviteSourceMan->modifyInviterConfiguration($this->user, [$sourceId]),
+            'invite-source-inviter-assign'
+        );
+        $this->assertEquals(
+            1 + count($initialSource),
+            count($inviteSourceMan->inviterConfiguration($this->user)),
+            'invite-source-inviter-assigned'
+        );
+        $this->assertCount(
+            1,
+            array_filter(
+                $inviteSourceMan->summaryByInviter(),
+                fn($s) => $s['user_id'] === $this->user->id()
+            ),
+            'invite-source-inviter-summary'
+        );
+        $config = $inviteSourceMan->inviterConfigurationActive($this->user);
+        $this->assertCount(1, $config, 'invite-source-inviter-count');
+        $sourceName = $config[0]['name'];
+        $this->assertIsString($sourceName, 'invite-source-source-name');
+
+        // now invite a user from a designated source
+        $profile = 'https://example.com/user/' . random_int(1000, 9999);
+        $manager = new Gazelle\Manager\Invite;
+        $invite = $manager->create(
+            user: $this->user,
+            email: randomString(10) . "@invitee.src.example.com",
+            notes: 'phpunit notes',
+            reason: $profile,
+            source: $sourceName,
+        );
+        $this->assertEquals(
+            1,
+            $inviteSourceMan->createPendingInviteSource($sourceId, $invite->key()),
+            'invite-source-create-pending'
+        );
+
+        // create auser from the invite
+        $this->invitee = (new \Gazelle\UserCreator)
+            ->setUsername('create.' . randomString(6))
+            ->setEmail(randomString(6) . '@example.com')
+            ->setPassword(randomString(10))
+            ->setIpaddr('127.3.3.3')
+            ->setInviteKey($invite->key())
+            ->create();
+        $this->assertEquals(
+            $sourceName,
+            $inviteSourceMan->findSourceNameByUser($this->invitee),
+            'invitee-invite-source'
+        );
+        $this->assertEquals($profile, $this->invitee->externalProfile()->profile(), 'invite-source-profile');
+        $this->assertStringContainsString('phpunit notes', $this->invitee->staffNotes(), 'invite-recruiter-notes');
+
+        $inviteeList = $inviteSourceMan->userSource($this->user);
+        $this->assertCount(1, $inviteeList, 'invite-source-invited-list');
+        $this->assertEquals(
+            [
+                "user_id"          => $this->invitee->id(),
+                "invite_source_id" => $sourceId,
+                "name"             => $sourceName,
+            ],
+            $inviteeList[$this->invitee->id()],
+            'invite-source-invited-invitee'
+        );
+
+        $usage = current(array_filter(
+            $inviteSourceMan->usageList(),
+            fn($s) => $s['invite_source_id'] === $sourceId
+        ));
+        $this->assertEquals(
+            [
+                "invite_source_id" => $sourceId,
+                "name"             => $sourceName,
+                "inviter_total"    => 1,
+                "user_total"       => 1,
+            ],
+            $usage,
+            'invite-source-usage'
+        );
+
+        // change the invitee source and profile
+        $newProfile = $profile . "/new";
+        $new = [
+            $this->invitee->id() => [
+                "user_id" => $this->invitee->id(),
+                "source"  => 0,
+                "profile" => $newProfile,
+            ]
+        ];
+        $this->assertEquals(
+            2,
+            $inviteSourceMan->modifyInviteeSource($this->user, $new),
+            'invite-modify-invitee'
+        );
+        $this->assertEquals($newProfile, $this->invitee->externalProfile()->profile(), 'invite-source-new-profile');
+        $inviteeList = $inviteSourceMan->userSource($this->user);
+        $this->assertEquals(
+            [
+                "user_id"          => $this->invitee->id(),
+                "invite_source_id" => null,
+                "name"             => null,
+            ],
+            $inviteeList[$this->invitee->id()],
+            'invite-source-invitee-unsourced'
+        );
+
+        // tidy up
+        $db = Gazelle\DB::DB();
+        $db->prepared_query("
+            DELETE FROM invite_source_pending WHERE invite_source_id = ?
+            ", $sourceId
+        );
+        $db->prepared_query("
+            DELETE FROM user_has_invite_source WHERE invite_source_id = ?
+            ", $sourceId
+        );
+
+        $this->assertEquals(
+            1,
+            $inviteSourceMan->modifyInviterConfiguration($this->user, []),
+            'invite-source-user-clear'
+        );
+        $this->assertEquals(1, $inviteSourceMan->remove($sourceId), 'invite-source-create-remove');
+    }
+
     public function testRevokeInvite(): void {
         $this->user->setField('Invites', 1)->modify();
 
         $manager = new Gazelle\Manager\Invite;
         $email = randomString(10) . "@invitee.example.com";
         $this->assertFalse($manager->emailExists($this->user, $email), 'invitee-email-not-pending');
-        $invite = $manager->create($this->user, $email, 'unittest', '');
+        $invite = $manager->create($this->user, $email, 'unittest notes', 'unittest reason', '');
         $this->assertFalse($this->user->invite()->revoke('nosuchthing'), 'invite-revoke-inexistant');
         $this->assertTrue($this->user->invite()->revoke($invite->key()), 'invite-revoke-existing');
         $this->assertEquals(1, $this->user->unusedInviteTotal(), 'invite-unused-1');
@@ -100,7 +243,7 @@ class InviteTest extends TestCase {
         $this->assertTrue((new Gazelle\Stats\Users)->newUsersAllowed($this->user), 'etm-new-users-allowed');
         $this->assertTrue($this->user->canPurchaseInvite(),                        'etm-can-purchase-invites');
 
-        $invite = (new Gazelle\Manager\Invite)->create($this->user, randomString(10) . "@etm.example.com", 'unittest', '');
+        $invite = (new Gazelle\Manager\Invite)->create($this->user, randomString(10) . "@etm.example.com", 'unittest notes', 'unittest reason', '');
         $this->assertInstanceOf(Gazelle\Invite::class, $invite, 'etm-issued-invite');
     }
 }
