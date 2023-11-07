@@ -298,7 +298,14 @@ class Upload extends \Gazelle\Base {
 
     public function ircNotification(): string {
         $torrent = $this->torrent;
-        $tgroup  = $torrent->group();
+	$tgroup  = $torrent->group();
+	$releaseTags = [$torrent->media(), $torrent->format(), $torrent->encoding()];
+	/**
+	 * For CD media it publishes whether there is a Cue, Log, and Score. This can be used by tools like autobrr
+	 */
+	if (strcmp($torrent->media(), "CD") == 0) {
+		array_push($releaseTags, $torrent->hasCue() ? "Cue": "", $torrent->hasLog() ? "Log" : "", $torrent->logScore()); 
+	}
         return match ($tgroup->categoryName()) {
             'Music' => Irc::render(
                 IrcText::Bold,
@@ -313,7 +320,7 @@ class Upload extends \Gazelle\Base {
                 '[',
                 $torrent->isRemasteredUnknown() || !$torrent->isRemastered() ? $tgroup->year() : $torrent->remasterYear(),
                 "] [{$tgroup->releaseTypeName()}] ",
-                implode('/', [$torrent->media(), $torrent->format(), $torrent->encoding()]),
+                $torrent->implode('/', $releaseTags),
                 IrcText::ColorOff,
                 ' – ',
                 IrcText::SurfieGreen,
