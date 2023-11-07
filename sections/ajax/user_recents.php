@@ -9,7 +9,7 @@ if ($limit < 1 || $limit > 50) {
     json_error("bad limit");
 }
 
-(new Gazelle\Json\UserRecent($user, $Viewer, new Gazelle\Manager\TGroup))
+echo (new Gazelle\Json\UserRecent($user, $Viewer, new Gazelle\Manager\TGroup))
     ->setLimit($limit)
     ->setVersion(2)
-    ->emit();
+    ->response();

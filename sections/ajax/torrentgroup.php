@@ -15,5 +15,5 @@ if (is_null($tgroup)) {
     json_error('bad parameters');
 }
 
-(new Gazelle\Json\TGroup($tgroup, $Viewer, (new \Gazelle\Manager\Torrent)->setViewer($Viewer)))
-    ->emit();
+echo (new Gazelle\Json\TGroup($tgroup, $Viewer, (new \Gazelle\Manager\Torrent)->setViewer($Viewer)))
+    ->response();

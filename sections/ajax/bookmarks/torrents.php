@@ -14,10 +14,10 @@ if (empty($_GET['userid'])) {
     }
 }
 
-(new Gazelle\Json\Bookmark\TGroup(
+echo (new Gazelle\Json\Bookmark\TGroup(
     new Gazelle\User\Bookmark($user),
     new Gazelle\Manager\TGroup,
     new Gazelle\Manager\Torrent)
 )
     ->setVersion(2)
-    ->emit();
+    ->response();

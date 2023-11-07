@@ -15,8 +15,8 @@ $forumSearch = (new Gazelle\Search\Forum($user))
     ->setShowGrouped($ownProfile && (!isset($_GET['group']) || !!$_GET['group']))
     ->setShowUnread($ownProfile && (!isset($_GET['showunread']) || !!$_GET['showunread']));
 
-(new Gazelle\Json\PostHistory(
+echo (new Gazelle\Json\PostHistory(
     $forumSearch,
     new Gazelle\Manager\User,
     new Gazelle\Util\Paginator($Viewer->postsPerPage(), (int)($_GET['page'] ?? 1))
-))->emit();
+))->response();

@@ -5,6 +5,7 @@ namespace Gazelle;
 abstract class Json extends Base {
     protected int $mode    = JSON_INVALID_UTF8_SUBSTITUTE | JSON_THROW_ON_ERROR;
     protected int $version = 1;
+    protected string $failure;
 
     /**
      * The payload of a valid JSON response, implemented in the child class.
@@ -32,12 +33,17 @@ abstract class Json extends Base {
     /**
      * General failure routine for when bad things happen.
      */
-    public function failure(string $message): void {
-        echo json_encode(
+    public function failure(string $message): static {
+        $this->failure = $message;
+        return $this;
+    }
+
+    protected function failureResponse(): string {
+        return (string)json_encode(
             array_merge([
                     'status' => 'failure',
                     'response' => [],
-                    'error' => $message,
+                    'error' => $this->failure,
                 ],
                 $this->info(),
                 $this->debug(),
@@ -46,13 +52,13 @@ abstract class Json extends Base {
         );
     }
 
-    public function emit(): void {
-        $payload = $this->payload();
-        if (!$payload) {
-            return;
+    public function response(): string {
+        if (isset($this->failure)) {
+            return $this->failureResponse();
         }
+        $payload = $this->payload();
         try {
-            echo json_encode(
+            return (string)json_encode(
                 array_merge([
                         'status' => 'success',
                         'response' => $payload,
@@ -63,7 +69,9 @@ abstract class Json extends Base {
                 $this->mode
             );
         } catch (\JsonException) {
-            $this->failure("JSON encoding failed, look for malformed UTF-8 encoding");
+            return $this
+                ->failure("JSON encoding failed, look for malformed UTF-8 encoding")
+                ->failureResponse();
         }
     }
 

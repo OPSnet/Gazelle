@@ -8,4 +8,4 @@ if ($limit <= 0 || $offset < 0 || $limit > 10) {
     json_die('failure');
 }
 
-(new Gazelle\Json\News($limit, $offset))->setVersion(2)->emit();
+echo (new Gazelle\Json\News($limit, $offset))->setVersion(2)->response();

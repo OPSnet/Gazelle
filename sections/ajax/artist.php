@@ -36,7 +36,7 @@ if ($artistId) {
     json_die("failure", "bad parameters");
 }
 
-(new Gazelle\Json\Artist(
+echo (new Gazelle\Json\Artist(
     $artist,
     $Viewer,
     new Gazelle\User\Bookmark($Viewer),
@@ -46,4 +46,4 @@ if ($artistId) {
 ))
     ->setReleasesOnly(!empty($_GET['artistreleases']))
     ->setVersion(2)
-    ->emit();
+    ->response();

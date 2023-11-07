@@ -6,4 +6,4 @@ if (is_null($pm)) {
 }
 $pm->markRead();
 
-(new Gazelle\Json\PM($pm, new Gazelle\Manager\User))->emit();
+echo (new Gazelle\Json\PM($pm, new Gazelle\Manager\User))->response();

@@ -9,6 +9,6 @@ if (isset($_GET['search'])) {
     $search->setSearch($_GET['search']);
 }
 
-(new Gazelle\Json\Better\Transcode($Viewer->announceKey(), $search))
+echo (new Gazelle\Json\Better\Transcode($Viewer->announceKey(), $search))
     ->setVersion(2)
-    ->emit();
+    ->response();

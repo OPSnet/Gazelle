@@ -5,7 +5,7 @@ if (is_null($request)) {
     json_die("failure");
 }
 
-(new Gazelle\Json\Request(
+echo (new Gazelle\Json\Request(
     $request,
     $Viewer,
     new Gazelle\User\Bookmark($Viewer),
@@ -13,4 +13,4 @@ if (is_null($request)) {
     new Gazelle\Manager\User,
 ))
     ->setVersion(2)
-    ->emit();
+    ->response();

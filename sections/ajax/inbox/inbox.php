@@ -12,4 +12,4 @@ if (!empty($_GET['search'])) {
     $json->setSearch($_GET['searchtype'] ?? 'subject', $_GET['search']);
 }
 
-$json->setVersion(1)->emit();
+echo $json->setVersion(1)->response();

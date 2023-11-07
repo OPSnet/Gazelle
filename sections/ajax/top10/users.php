@@ -10,11 +10,11 @@ if (!in_array($limit, [10, 100, 250])) {
     json_die('failure', 'bad limit parameter');
 }
 
-(new Gazelle\Json\Top10\User(
+echo (new Gazelle\Json\Top10\User(
     details: $details,
     limit:   $limit,
     stats:   new Gazelle\Stats\Users,
     userMan: new Gazelle\Manager\User,
 ))
     ->setVersion(2)
-    ->emit();
+    ->response();

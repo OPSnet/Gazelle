@@ -11,6 +11,6 @@ if (is_null($torrent)) {
     json_error('bad parameters');
 }
 
-(new Gazelle\Json\Torrent($torrent, $Viewer, new Gazelle\Manager\Torrent))
+echo (new Gazelle\Json\Torrent($torrent, $Viewer, new Gazelle\Manager\Torrent))
     ->setVersion(5)
-    ->emit();
+    ->response();

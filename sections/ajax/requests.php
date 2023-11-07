@@ -117,6 +117,6 @@ $search->execute(
 );
 $paginator->setTotal($search->total());
 
-(new Gazelle\Json\Requests($search, $paginator->page(), $userMan))
+echo (new Gazelle\Json\Requests($search, $paginator->page(), $userMan))
     ->setVersion(2)
-    ->emit();
+    ->response();

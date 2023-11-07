@@ -11,11 +11,11 @@ if (empty($_FILES) || empty($_FILES['logfiles'])) {
     json_error('no log files uploaded');
 }
 
-(new Gazelle\Json\AddLog(
+echo (new Gazelle\Json\AddLog(
     $torrent,
     $Viewer,
     new Gazelle\Manager\TorrentLog(new Gazelle\File\RipLog, new Gazelle\File\RipLogHTML),
     new Gazelle\LogfileSummary($_FILES['logfiles']),
 ))
     ->setVersion(1)
-    ->emit();
+    ->response();

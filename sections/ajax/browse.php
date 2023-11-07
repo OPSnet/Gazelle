@@ -36,7 +36,7 @@ if ($resultTotal == 0) {
 }
 
 
-(new Gazelle\Json\TGroupList(
+echo (new Gazelle\Json\TGroupList(
     new Gazelle\User\Bookmark($Viewer),
     $Viewer->snatch(),
     new Gazelle\Manager\Artist,
@@ -48,4 +48,4 @@ if ($resultTotal == 0) {
     $Page
 ))
     ->setVersion(2)
-    ->emit();
+    ->response();

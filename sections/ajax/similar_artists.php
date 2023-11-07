@@ -6,4 +6,4 @@ if (is_null($artist) || !$limit) {
     print json_die('failure');
 }
 
-(new Gazelle\Json\ArtistSimilar($artist, $limit))->emit();
+echo (new Gazelle\Json\ArtistSimilar($artist, $limit))->response();

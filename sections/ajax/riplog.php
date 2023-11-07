@@ -9,5 +9,5 @@ if (is_null($torrent)) {
     json_error('torrent not found');
 }
 
-(new Gazelle\Json\RipLog($torrent->id(), $logId))
-    ->emit();
+echo (new Gazelle\Json\RipLog($torrent->id(), $logId))
+    ->response();
