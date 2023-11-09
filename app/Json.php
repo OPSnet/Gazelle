@@ -53,10 +53,10 @@ abstract class Json extends Base {
     }
 
     public function response(): string {
+        $payload = $this->payload();
         if (isset($this->failure)) {
             return $this->failureResponse();
         }
-        $payload = $this->payload();
         try {
             return (string)json_encode(
                 array_merge([

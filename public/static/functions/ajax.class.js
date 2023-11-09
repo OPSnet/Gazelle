@@ -69,14 +69,16 @@ var ajax = {
         req.send(params);
     },
     serialize: function (data) {
-        var query = '',
-            elements;
+        if (typeof data === 'object' && data.constructor.name != 'Array') {
+            return new URLSearchParams(data).toString();
+        }
+        var query = '';
         if (is_array(data)) {
             for (var key in data) {
                 query += key + '=' + encodeURIComponent(data[key]) + '&';
             }
         } else {
-            elements = document.getElementById(data).elements;
+            var elements = document.getElementById(data).elements;
             for (var i = 0, il = elements.length; i < il; i++) {
                 var element = elements[i];
                 if (!isset(element) || element.disabled || element.name === '') {

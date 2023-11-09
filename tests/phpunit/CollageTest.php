@@ -1,6 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+use Gazelle\Enum\CollageType;
 
 require_once(__DIR__ . '/../../lib/bootstrap.php');
 require_once(__DIR__ . '/../helper.php');
@@ -85,10 +86,9 @@ class CollageTest extends TestCase {
             $collage->toggleAttr('sort-newest', false);
             $collage->hardRemove();
         }
-        $this->tgroupList[0]->remove($this->userList['u1']);
-        $this->tgroupList[1]->remove($this->userList['u1']);
-        $this->tgroupList[2]->remove($this->userList['u2']);
-        $this->tgroupList[3]->remove($this->userList['u2']);
+        foreach ($this->tgroupList as $tgroup) {
+            $tgroup->remove($this->userList['u1']);
+        }
         foreach ($this->userList as $user) {
             $user->remove();
         }
@@ -97,7 +97,7 @@ class CollageTest extends TestCase {
     public function testArgParse(): void {
         $this->collageList[] = (new Gazelle\Manager\Collage)->create(
             user:        $this->userList['u1'],
-            categoryId:  1, /* Theme */
+            categoryId:  CollageType::theme->value,
             name:        'phpunit collage lock ' . randomString(20),
             description: 'phpunit collage lock description',
             tagList:     implode(' ', $this->tagList(3)),
@@ -140,7 +140,7 @@ class CollageTest extends TestCase {
         $tagList     = $this->tagList(3);
         $this->collageList[] = $manager->create(
             user:        $this->userList['u1'],
-            categoryId:  1, /* Theme */
+            categoryId:  CollageType::theme->value,
             name:        $name,
             description: $description,
             tagList:     implode(' ', $tagList),
@@ -178,7 +178,7 @@ class CollageTest extends TestCase {
         $manager = new Gazelle\Manager\Collage;
         $this->collageList[] = $manager->create(
             user:        $this->userList['u1'],
-            categoryId:  1, /* Theme */
+            categoryId:  CollageType::theme->value,
             name:        'phpunit collage add ' . randomString(20),
             description: 'phpunit collage add description',
             tagList:     implode(' ', $this->tagList(3)),
@@ -227,7 +227,7 @@ class CollageTest extends TestCase {
         $this->collageList = [
             $manager->create(
                 user:        $this->userList['u1'],
-                categoryId:  COLLAGE_ARTISTS_ID,
+                categoryId:  CollageType::artist->value,
                 name:        'phpunit collage artist ' . randomString(20),
                 description: 'phpunit collage artist description',
                 tagList:     implode(' ', $this->tagList(3)),
@@ -235,7 +235,7 @@ class CollageTest extends TestCase {
             ),
             $manager->create(
                 user:        $this->userList['u2'],
-                categoryId:  COLLAGE_ARTISTS_ID,
+                categoryId:  CollageType::artist->value,
                 name:        'phpunit collage artist ' . randomString(20),
                 description: 'phpunit collage artist description',
                 tagList:     implode(' ', $this->tagList(3)),
@@ -270,7 +270,7 @@ class CollageTest extends TestCase {
         $manager = new Gazelle\Manager\Collage;
         $this->collageList[] = $manager->create(
             user:        $this->userList['u1'],
-            categoryId:  4, /* Label */
+            categoryId:  CollageType::label->value,
             name:        'phpunit collage contrib ' . randomString(20),
             description: 'phpunit collage contrib description',
             tagList:     implode(' ', $this->tagList(3)),
@@ -340,7 +340,7 @@ class CollageTest extends TestCase {
         $this->collageList = [
             $manager->create(
                 user:        $user,
-                categoryId:  COLLAGE_PERSONAL_ID,
+                categoryId:  CollageType::personal->value,
                 name:        'phpunit collage feat 001 ' . randomString(20),
                 description: 'phpunit collage feature description',
                 tagList:     implode(' ', $this->tagList(3)),
@@ -348,7 +348,7 @@ class CollageTest extends TestCase {
             ),
             $manager->create(
                 user:        $user,
-                categoryId:  COLLAGE_PERSONAL_ID,
+                categoryId:  CollageType::personal->value,
                 name:        'phpunit collage feat 002 ' . randomString(20),
                 description: 'phpunit collage feature description',
                 tagList:     implode(' ', $this->tagList(3)),
@@ -356,7 +356,7 @@ class CollageTest extends TestCase {
             ),
             $manager->create(
                 user:        $user,
-                categoryId:  COLLAGE_PERSONAL_ID,
+                categoryId:  CollageType::personal->value,
                 name:        'phpunit collage feat 003 ' . randomString(20),
                 description: 'phpunit collage feature description',
                 tagList:     implode(' ', $this->tagList(3)),
@@ -364,7 +364,7 @@ class CollageTest extends TestCase {
             ),
             $manager->create(
                 user:        $user,
-                categoryId:  COLLAGE_PERSONAL_ID,
+                categoryId:  CollageType::personal->value,
                 name:        'phpunit collage feat 004 ' . randomString(20),
                 description: 'phpunit collage feature description',
                 tagList:     implode(' ', $this->tagList(3)),
@@ -398,9 +398,9 @@ class CollageTest extends TestCase {
     public function testCollageJson(): void {
         $this->collageList[] = (new Gazelle\Manager\Collage)->create(
             user:        $this->userList['u1'],
-            categoryId:  5,
-            name:        'phpunit collage personal ' . randomString(20),
-            description: 'phpunit collage personal description',
+            categoryId:  CollageType::staffPick->value,
+            name:        'phpunit collage json ' . randomString(20),
+            description: 'phpunit collage json description',
             tagList:     implode(' ', $this->tagList(3)),
             logger:      new Gazelle\Log,
         );
@@ -425,7 +425,7 @@ class CollageTest extends TestCase {
     public function testCollageLock(): void {
         $this->collageList[] = (new Gazelle\Manager\Collage)->create(
             user:        $this->userList['u1'],
-            categoryId:  1, /* Theme */
+            categoryId:  CollageType::chart->value,
             name:        'phpunit collage lock ' . randomString(20),
             description: 'phpunit collage lock description',
             tagList:     implode(' ', $this->tagList(3)),
@@ -449,49 +449,54 @@ class CollageTest extends TestCase {
             'collage-manager-personal-name'
         );
 
+        $stem = 'phpunit collage man ';
         $this->collageList = [
             $manager->create(
                 user:        $this->userList['u1'],
-                categoryId:  1,
-                name:        'phpunit collage auto ' . randomString(20),
-                description: 'phpunit collage auto description',
+                categoryId:  CollageType::series->value,
+                name:        $stem . randomString(20),
+                description: 'phpunit collage man description',
                 tagList:     implode(' ', $this->tagList(3)),
                 logger:      new Gazelle\Log,
             ),
             $manager->create(
                 user:        $this->userList['u1'],
-                categoryId:  1,
-                name:        'phpunit collage auto ' . randomString(20),
-                description: 'phpunit collage auto description',
+                categoryId:  CollageType::series->value,
+                name:        $stem . randomString(20),
+                description: 'phpunit collage man description',
                 tagList:     implode(' ', $this->tagList(3)),
                 logger:      new Gazelle\Log,
             ),
             $manager->create(
                 user:        $this->userList['u1'],
-                categoryId:  1,
-                name:        'phpunit collage auto ' . randomString(20),
-                description: 'phpunit collage auto description',
+                categoryId:  CollageType::series->value,
+                name:        $stem . randomString(20),
+                description: 'phpunit collage man description',
                 tagList:     implode(' ', $this->tagList(3)),
                 logger:      new Gazelle\Log,
             ),
             $manager->create(
                 user:        $this->userList['u2'],
-                categoryId:  2,
-                name:        'phpunit collage auto ' . randomString(20),
-                description: 'phpunit collage auto description',
+                categoryId:  CollageType::series->value,
+                name:        $stem . randomString(20),
+                description: 'phpunit collage man description',
                 tagList:     implode(' ', $this->tagList(3)),
                 logger:      new Gazelle\Log,
             ),
             $manager->create(
                 user:        $this->userList['u2'],
-                categoryId:  2,
-                name:        'phpunit collage auto ' . randomString(20),
-                description: 'phpunit collage auto description',
+                categoryId:  CollageType::genre->value,
+                name:        $stem . randomString(20),
+                description: 'phpunit collage man description',
                 tagList:     implode(' ', $this->tagList(3)),
                 logger:      new Gazelle\Log,
             ),
         ];
-        $this->assertCount(count($this->collageList), $manager->autocomplete('phpunit collage auto'), 'collage-manager-autocomplete');
+        $this->assertCount(
+            count($this->collageList),
+            $manager->autocomplete($stem),
+            'collage-manager-autocomplete'
+        );
         $nameList = array_map(fn($c) => $c->name(), $this->collageList);
         usort($nameList, 'strcasecmp');
         $autocomplete = $manager->autocomplete('phpunit collage auto');
@@ -511,7 +516,7 @@ class CollageTest extends TestCase {
     public function testCollagePersonal(): void {
         $this->collageList[] = (new Gazelle\Manager\Collage)->create(
             user:        $this->userList['u1'],
-            categoryId:  0, /* Personal */
+            categoryId:  CollageType::personal->value,
             name:        'phpunit collage personal ' . randomString(20),
             description: 'phpunit collage personal description',
             tagList:     implode(' ', $this->tagList(3)),
@@ -578,16 +583,17 @@ class CollageTest extends TestCase {
 
     public function testCollageRemove(): void {
         $manager = new Gazelle\Manager\Collage;
-        $name    = 'phpunit collage add ' . randomString(20);
+        $name    = 'phpunit collage remove ' . randomString(20);
         $this->collageList[] = $manager->create(
             user:        $this->userList['u1'],
-            categoryId:  1, /* Theme */
+            categoryId:  CollageType::theme->value,
             name:        $name,
-            description: 'phpunit collage add description',
+            description: 'phpunit collage remove description',
             tagList:     implode(' ', $this->tagList(3)),
             logger:      new Gazelle\Log,
         );
         $collage = $this->collageList[0];
+
         $this->assertEquals(1, $collage->remove(), 'collage-remove');
         $this->assertTrue($collage->isDeleted(), 'collage-is-deleted');
 
@@ -596,5 +602,115 @@ class CollageTest extends TestCase {
 
         $collage->remove();
         $this->assertInstanceOf(Gazelle\Collage::class, $manager->recoverById($collage->id()), 'collage-recover-by-id');
+    }
+
+    public function testCollageAjaxAdd(): void {
+        $manager = new Gazelle\Manager\Collage;
+        $name    = 'phpunit collage ajax ' . randomString(20);
+        $collage = $this->collageList[] = $manager->create(
+            user:        $this->userList['u1'],
+            categoryId:  CollageType::personal->value,
+            name:        $name,
+            description: 'phpunit collage ajax description',
+            tagList:     implode(' ', $this->tagList(3)),
+            logger:      new Gazelle\Log,
+        );
+        $artMan    = new Gazelle\Manager\Artist;
+        $tgMan     = new Gazelle\Manager\TGroup;
+
+        $fail = new Gazelle\Json\Ajax\CollageAdd(
+            collageId:     0,
+            entryId:       $this->tgroupList[2]->id(),
+            name:          '',
+            user:          $this->userList['u1'],
+            manager:       $manager,
+            artistManager: $artMan,
+            tgroupManager: $tgMan,
+        );
+        $response = json_decode($fail->response(), true);
+        $this->assertEquals('collage not found', $response['error'], 'collage-ajax-collage-404');
+
+        $fail = new Gazelle\Json\Ajax\CollageAdd(
+            collageId:     $collage->id(),
+            entryId:       0,
+            name:          '',
+            user:          $this->userList['u1'],
+            manager:       $manager,
+            artistManager: $artMan,
+            tgroupManager: $tgMan,
+        );
+        $response = json_decode($fail->response(), true);
+        $this->assertEquals('entry not found', $response['error'], 'collage-ajax-entry-404');
+
+        $byEntry = new Gazelle\Json\Ajax\CollageAdd(
+            collageId:     $collage->id(),
+            entryId:       $this->tgroupList[0]->id(),
+            name:          '',
+            user:          $this->userList['u1'],
+            manager:       $manager,
+            artistManager: $artMan,
+            tgroupManager: $tgMan,
+        );
+        $this->assertArrayHasKey('link', $byEntry->payload(), 'collage-ajax-add-entry-id');
+
+        $byName = new Gazelle\Json\Ajax\CollageAdd(
+            collageId:     0,
+            entryId:       $this->tgroupList[1]->id(),
+            name:          $collage->name(),
+            user:          $this->userList['u1'],
+            manager:       $manager,
+            artistManager: $artMan,
+            tgroupManager: $tgMan,
+        );
+        $this->assertArrayHasKey('link', $byName->payload(), 'collage-ajax-add-name');
+
+        $byUrl = new Gazelle\Json\Ajax\CollageAdd(
+            collageId:     0,
+            entryId:       $this->tgroupList[2]->id(),
+            name:          $collage->publicLocation(),
+            user:          $this->userList['u1'],
+            manager:       $manager,
+            artistManager: $artMan,
+            tgroupManager: $tgMan,
+        );
+        $this->assertArrayHasKey('link', $byUrl->payload(), 'collage-ajax-add-url');
+
+        $fail = new Gazelle\Json\Ajax\CollageAdd(
+            collageId:     $collage->id(),
+            entryId:       $this->tgroupList[0]->id(),
+            name:          '',
+            user:          $this->userList['u1'],
+            manager:       $manager,
+            artistManager: $artMan,
+            tgroupManager: $tgMan,
+        );
+        $this->assertEquals([], $fail->payload(), 'collage-ajax-add-already');
+        $response = json_decode($fail->response(), true);
+        $this->assertEquals('already present?', $response['error'], 'collage-ajax-error-already');
+
+        $fail = new Gazelle\Json\Ajax\CollageAdd(
+            collageId:     $collage->id(),
+            entryId:       $this->tgroupList[1]->id(),
+            name:          '',
+            user:          $this->userList['u2'],
+            manager:       $manager,
+            artistManager: $artMan,
+            tgroupManager: $tgMan,
+        );
+        $response = json_decode($fail->response(), true);
+        $this->assertEquals('personal', $response['error'], 'collage-ajax-error-personal');
+
+        $collage->toggleLocked()->modify();
+        $fail = new Gazelle\Json\Ajax\CollageAdd(
+            collageId:     $collage->id(),
+            entryId:       $this->tgroupList[1]->id(),
+            name:          '',
+            user:          $this->userList['u1'],
+            manager:       $manager,
+            artistManager: $artMan,
+            tgroupManager: $tgMan,
+        );
+        $response = json_decode($fail->response(), true);
+        $this->assertEquals('locked', $response['error'], 'collage-ajax-error-locked');
     }
 }

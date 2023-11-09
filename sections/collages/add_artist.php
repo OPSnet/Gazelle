@@ -2,22 +2,27 @@
 
 authorize();
 
-if (!($_REQUEST['action'] == 'add_artist' || $_REQUEST['action'] == 'add_artist_batch')) {
+if (!in_array($_POST['action'], ['add_artist', 'add_artist_batch'])) {
     error(403);
 }
 
-if (isset($_POST['collage_combo']) && (int)$_POST['collage_combo']) {
+$collageMan = new Gazelle\Manager\Collage;
+$collage    = null;
+if (isset($_POST['collage_combo'])) {
     // From artist page
-    $collageId = $_POST['collage_combo'];
-} elseif (isset($_POST['collage_ref']) && preg_match('@' . SITE_URL . '.*?(?:id=)?(\d+)(?:&|\s*$)?@', $_POST['collage_ref'], $match)) {
-    // From artist page
-    $collageId = $match[1];
+    $collage = $collageMan->findById((int)$_POST['collage_combo']);
+}
+if (is_null($collage) && isset($_POST['collage_ref'])) {
+    // From add artist widget
+    $ref = trim($_POST['collage_ref']);
+    $collage = $collageMan->findByName($ref);
+    if (is_null($collage) && preg_match('@' . SITE_URL . '/collages\.php.*?(?:id=)?(\d+)(?:&|\s*$)?@', $ref, $match)) {
+        $collage = $collageMan->findById((int)$match[1]);
+    }
 } else {
     // From collage page
-    $collageId = $_POST['collageid'];
+    $collage = $collageMan->findById((int)$_POST['collageid']);
 }
-$collageMan = new Gazelle\Manager\Collage;
-$collage = $collageMan->findById((int)$collageId);
 if (is_null($collage)) {
     error(404);
 }
@@ -43,6 +48,9 @@ if ($_REQUEST['action'] == 'add_artist') {
     } elseif (isset($_POST['artistid'])) {
         // From an artist page
         $URL[] = SITE_URL . '/artist.php?id=' . (int)$_POST['artistid'];
+    } elseif (isset($_POST['entryid'])) {
+        // From an autocomplete
+        $URL[] = SITE_URL . '/artist.php?id=' . (int)$_POST['entryid'];
     }
 } elseif ($_REQUEST['action'] == 'add_artist_batch') {
     foreach (explode("\n", $_REQUEST['urls']) as $u) {

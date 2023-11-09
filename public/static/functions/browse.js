@@ -388,11 +388,13 @@ function ToggleEditionRows() {
 }
 
 function add_to_collage() {
-    var post = new Array();
-    post['auth']       = authkey;
-    post['collage_id'] = Number(document.getElementById("collage-select").value);
-    post['entry_id']   = Number(document.getElementsByName("entryid")[0].value);
-    post['name']       = document.getElementsByName("collage_ref")[0].value 
+    var field = document.forms['add-to-collage'].elements;
+    var post = {
+        'auth':       authkey,
+        'name':       field['collage_ref'].value,
+        'entry_id':   Number(field['entryid'].value),
+        'collage_id': field['collage-select'] === undefined ? 0 : Number(field['collage-select'].value),
+    };
     $('#add-result').raw().innerHTML = '...';
     ajax.post('collages.php?action=ajax_add', post, function (response) {
         var result = JSON.parse(response);

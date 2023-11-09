@@ -413,7 +413,6 @@ function add_json_info(array $info): array {
         if (class_exists('Sphinxql') && !empty(\Sphinxql::$Queries)) {
             $info['searches'] = \Sphinxql::$Queries;
         }
-        $info = array_merge($info, ['debug' => $info]);
     }
     return $info;
 }

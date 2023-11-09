@@ -15,7 +15,7 @@
 {% else %}
             <div>Search for a collage name or URL:</div>
 {% endfor %}
-            <input type="text" name="collage_ref" size="25" />
+            <input type="text" name="collage_ref" id="collage_ref" size="25" data-gazelle-autocomplete="true" />
             <input type="hidden" name="action" value="add_artist" />
             <input type="hidden" name="entryid" value="{{ artist_id }}" />
             <input type="hidden" name="userid" value="{{ viewer.id }}" />

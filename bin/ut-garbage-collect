@@ -53,6 +53,20 @@ $db->prepared_query("
     WHERE um.ID IS NULL
 ");
 
+// clean collages
+$db->prepared_query("
+    SELECT ID
+    FROM collages
+    WHERE Name regexp '^(phpunit collage (?:ajax|comment|report) )'
+");
+
+$collageMan = new Gazelle\Manager\Collage;
+foreach ($db->collect(0, false) as $collageId) {
+    $collage = $collageMan->findById($collageId);
+    echo "collage {$collage->id()} ({$collage->name()})\n";
+    $collage->hardRemove();
+}
+
 // clean requests
 $db->prepared_query("
     SELECT ID

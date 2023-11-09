@@ -2,6 +2,8 @@
 
 namespace Gazelle\Manager;
 
+use Gazelle\Enum\CollageType;
+
 class Collage extends \Gazelle\BaseManager {
     final const ID_KEY = 'zz_c_%d';
     protected const CACHE_DEFAULT_ARTIST = 'collage_def_artist_%d';
@@ -11,6 +13,22 @@ class Collage extends \Gazelle\BaseManager {
     protected const ARTIST_KEY           = 'artists_collages_%d';
 
     protected \Gazelle\Util\ImageProxy $imageProxy;
+
+    public static function findType(int $type): ?\Gazelle\Enum\CollageType {
+        return match ($type) {
+            0 => \Gazelle\Enum\CollageType::personal,
+            1 => \Gazelle\Enum\CollageType::theme,
+            2 => \Gazelle\Enum\CollageType::genre,
+            3 => \Gazelle\Enum\CollageType::discography,
+            4 => \Gazelle\Enum\CollageType::label,
+            5 => \Gazelle\Enum\CollageType::staffPick,
+            6 => \Gazelle\Enum\CollageType::chart,
+            7 => \Gazelle\Enum\CollageType::artist,
+            8 => \Gazelle\Enum\CollageType::award,
+            9 => \Gazelle\Enum\CollageType::series,
+            default => null,
+        };
+    }
 
     public function create(
         \Gazelle\User $user,
@@ -267,27 +285,43 @@ class Collage extends \Gazelle\BaseManager {
         self::$cache->delete_value(sprintf(self::CACHE_DEFAULT_GROUP, $userId));
     }
 
-    public function autocomplete(string $text): array {
-        $maxLength = 10;
+    public function autocomplete(string $text, bool $isArtist = false): array {
+        $maxLength = 16;
         $length = min($maxLength, max(1, mb_strlen($text)));
         if ($length < 3) {
             return [];
         }
         $stem = mb_strtolower(mb_substr($text, 0, $length));
-        $key = 'autocomplete_collage_' . $length . '_' . $stem;
-        if (($autocomplete = self::$cache->get($key)) === false) {
-            self::$db->prepared_query("
-                SELECT ID,
-                    Name
-                FROM collages
-                WHERE Locked = '0'
-                    AND Deleted = '0'
-                    AND CategoryID NOT IN (?, ?)
-                    AND lower(Name) LIKE concat('%', ?, '%')
-                ORDER BY NumTorrents DESC, Name
-                LIMIT 10
-                ", COLLAGE_ARTISTS_ID, COLLAGE_PERSONAL_ID, $stem
-            );
+        $key = 'autocomp_collage_' . ($isArtist ? 'a_' : '') . "_$stem";
+        $autocomplete = self::$cache->get($key);
+        if ($autocomplete === false) {
+            if ($isArtist) {
+                self::$db->prepared_query("
+                    SELECT ID,
+                        Name
+                    FROM collages
+                    WHERE Locked = '0'
+                        AND Deleted = '0'
+                        AND CategoryID = ?
+                        AND Name LIKE concat('%', ?, '%')
+                    ORDER BY NumTorrents DESC, Name
+                    LIMIT 10
+                    ", COLLAGE_ARTISTS_ID, $stem
+                );
+            } else {
+                self::$db->prepared_query("
+                    SELECT ID,
+                        Name
+                    FROM collages
+                    WHERE Locked = '0'
+                        AND Deleted = '0'
+                        AND CategoryID NOT IN (?, ?)
+                        AND Name LIKE concat('%', ?, '%')
+                    ORDER BY NumTorrents DESC, Name
+                    LIMIT 10
+                    ", COLLAGE_ARTISTS_ID, COLLAGE_PERSONAL_ID, $stem
+                );
+            }
             $pairs = self::$db->to_pair('ID', 'Name', false);
             $autocomplete = [];
             foreach ($pairs as $key => $value) {
