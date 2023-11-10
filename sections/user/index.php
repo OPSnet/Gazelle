@@ -62,7 +62,7 @@ switch ($_REQUEST['action'] ?? '') {
         require_once('permissions.php');
         break;
     case 'moderate':
-        require_once('takemoderate.php');
+        require_once('take_moderate.php');
         break;
     case 'seedbox':
         require_once('seedbox_edit.php');
