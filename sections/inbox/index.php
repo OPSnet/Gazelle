@@ -1,12 +1,12 @@
 <?php
 
 require_once(match ($_REQUEST['action'] ?? '') {
-    'takecompose' => 'takecompose.php',
-    'takeedit'    => 'takeedit.php',
     'compose'     => 'compose.php',
-    'viewconv'    => 'conversation.php',
-    'masschange'  => 'massdelete_handle.php',
-    'get_post'    => 'get_post.php',
     'forward'     => 'forward.php',
+    'get_post'    => 'get_post.php',
+    'masschange'  => 'take_massdelete.php',
+    'takecompose' => 'take_compose.php',
+    'takeedit'    => 'take_edit.php',
+    'viewconv'    => 'conversation.php',
     default       => 'inbox.php',
 });
