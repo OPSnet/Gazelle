@@ -264,7 +264,7 @@ echo ' checked="checked"'; } ?> onclick="Remaster();<?php if ($Torrent === false
                     <label for="remaster">Check this if this torrent is a different edition to the original, for example a remaster, country specific edition, or a release that includes additional bonus tracks or bonus discs.</label>
                     <div id="remaster_true"<?php if (!($IsRemaster || $GroupRemasters)) {
 echo ' class="hidden"';} ?>>
-<?php    if ($this->user->permitted('edit_unknowns') || (is_array($Torrent) && $this->user->id() == $Torrent['UserID'])) { ?>
+<?php    if ($this->user->permitted('edit_unknowns') || (is_array($Torrent) && isset($Torrent['UserID']) && $Torrent['UserID'] == $this->user->id())) { ?>
                         <br />
                         <input type="checkbox" id="unknown" name="unknown"<?php if ($UnknownRelease) {
 echo ' checked="checked"'; } ?> onclick="<?php if ($Torrent === false) {
