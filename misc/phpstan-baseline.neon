@@ -631,16 +631,6 @@ parameters:
 			path: ../sections/top10/votes.php
 
 		-
-			message: "#^Parameter \\#2 \\$array of function array_map expects array, array\\|false given\\.$#"
-			count: 1
-			path: ../sections/user/take_edit.php
-
-		-
-			message: "#^Parameter \\#2 \\$array of function implode expects array\\<string\\>, array\\<void\\> given\\.$#"
-			count: 2
-			path: ../sections/user/user.php
-
-		-
 			message: "#^Function diff\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: ../sections/wiki/compare.php

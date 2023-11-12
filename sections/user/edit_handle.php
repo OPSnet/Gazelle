@@ -218,7 +218,7 @@ foreach ($NavItems as $n) {
 $notification = array_values(
     array_map(
         fn($s) => explode('_', $s),
-        preg_grep('/^notifications_[^_]+_/', array_keys($_POST))
+        preg_grep('/^notifications_[^_]+_/', array_keys($_POST)) /** @phpstan-ignore-line */
     )
 );
 $settings = [];

@@ -1,10 +1,4 @@
 <?php
-//TODO
-/*****************************************************************
-Finish removing the take[action] pages and utilize the index correctly
-Should the advanced search really only show if they match 3 perms?
-Make sure all constants are defined in config.php and not in random files
-*****************************************************************/
 
 switch ($_REQUEST['action'] ?? '') {
     case 'notify':
@@ -31,11 +25,11 @@ switch ($_REQUEST['action'] ?? '') {
     case 'edit':
         require_once('edit.php');
         break;
+    case 'take_edit':
+        require_once('edit_handle.php');
+        break;
     case '2fa':
         require_once('2fa/index.php');
-        break;
-    case 'take_edit':
-        require_once('take_edit.php');
         break;
     case 'dupes':
         require_once('manage_linked.php');
@@ -47,7 +41,7 @@ switch ($_REQUEST['action'] ?? '') {
         require_once('invite.php');
         break;
     case 'take_invite':
-        require_once('take_invite.php');
+        require_once('invite_handle.php');
         break;
     case 'delete_invite':
         require_once('delete_invite.php');
@@ -62,7 +56,7 @@ switch ($_REQUEST['action'] ?? '') {
         require_once('permissions.php');
         break;
     case 'moderate':
-        require_once('take_moderate.php');
+        require_once('moderate_handle.php');
         break;
     case 'seedbox':
         require_once('seedbox_edit.php');
@@ -77,19 +71,10 @@ switch ($_REQUEST['action'] ?? '') {
         require_once('vote_history.php');
         break;
     case 'clearcache':
-        if (!$Viewer->permitted('admin_clear_cache') || !$Viewer->permitted('users_override_paranoia')) {
+        if (!$Viewer->permittedAny('admin_clear_cache', 'users_override_paranoia')) {
             error(403);
         }
-        $UserID = $_REQUEST['id'];
-        $Cache->delete_multi([
-            'u_'                      . $UserID,
-            'collage_subs_user_new_'  . $UserID,
-            'donor_info_'             . $UserID,
-            'inbox_new_'              . $UserID,
-            'user_notify_upload_'     . $UserID,
-            'staff_pm_new_'           . $UserID,
-            'subscriptions_user_new_' . $UserID,
-        ]);
+        (new Gazelle\Manager\User)->findById((int)$_REQUEST['id'])?->flush();
         require_once('user.php');
         break;
 

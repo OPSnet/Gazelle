@@ -615,8 +615,8 @@ if ($Viewer->permitted('users_mod') || $Viewer->isStaff()) { ?>
             'user'    => $User,
             'viewer'  => $Viewer,
             'forum'   => [
-                'restricted_names' => implode(', ', array_map(function ($id) use ($fm) { $f = $fm->findById($id); $f ? $f->name() : $id; }, $User->forbiddenForums())),
-                'permitted_names'  => implode(', ', array_map(function ($id) use ($fm) { $f = $fm->findById($id); $f ? $f->name() : $id; }, $User->permittedForums())),
+                'restricted_names' => implode(', ', array_map(fn ($id) => $fm->findById($id)?->name() ?? $id, $User->forbiddenForums())),
+                'permitted_names'  => implode(', ', array_map(fn ($id) => $fm->findById($id)?->name() ?? $id, $User->permittedForums())),
             ],
         ]);
     }
