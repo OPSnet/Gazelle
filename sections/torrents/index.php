@@ -2,14 +2,39 @@
 
 if (!empty($_REQUEST['action'])) {
     switch ($_REQUEST['action']) {
+        case 'edit':
+            require_once('edit.php');
+            break;
+        case 'takeedit':
+            require_once('edit_handle.php');
+            break;
+        case 'changecategory':
+            require_once('edit_category_handle.php');
+            break;
+        case 'editgroup':
+            require_once('edit_group.php');
+            break;
+        case 'revert':
+        case 'takegroupedit':
+            require_once('edit_group_handle.php');
+            break;
+        case 'editgroupid':
+            require_once('new_groupid.php');
+            break;
+        case 'newgroup':
+            require_once('new_group_handle.php');
+            break;
+        case 'editrequest':
+            require_once('edit_request.php');
+            break;
+        case 'takeeditrequest':
+            require_once('edit_request_handle.php');
+            break;
         case 'editlog':
             require_once('edit_log.php');
             break;
-        case 'deletelog':
-            require_once('delete_log.php');
-            break;
         case 'take_editlog':
-            require_once('take_edit_log.php');
+            require_once('edit_log_handle.php');
             break;
         case 'rescore_log':
             require_once('rescore_log.php');
@@ -17,33 +42,17 @@ if (!empty($_REQUEST['action'])) {
         case 'viewlog':
             require_once('log_ajax.php');
             break;
+        case 'deletelog':
+            require_once('delete_log.php');
+            break;
         case 'removelogs':
-            require_once('remove_logs.php');
-            break;
-        case 'edit':
-            require_once('edit.php');
-            break;
-        case 'editgroup':
-            require_once('editgroup.php');
-            break;
-        case 'revert':
-        case 'takegroupedit':
-            require_once('take_editgroup.php');
-            break;
-        case 'editgroupid':
-            require_once('editgroupid.php');
-            break;
-        case 'changecategory':
-            require_once('takechangecategory.php');
+            require_once('delete_logs.php');
             break;
         case 'grouplog':
             require_once('grouplog.php');
             break;
-        case 'takeedit':
-            require_once('takeedit.php');
-            break;
-        case 'newgroup':
-            require_once('takenewgroup.php');
+        case 'history':
+            require_once('history.php');
             break;
         case 'peerlist':
             require_once('peerlist.php');
@@ -75,38 +84,29 @@ if (!empty($_REQUEST['action'])) {
         case 'delete_alias':
             require_once('delete_alias.php');
             break;
-        case 'history':
-            require_once('history.php');
-            break;
         case 'delete':
             require_once('delete.php');
             break;
         case 'takedelete':
-            require_once('takedelete.php');
+            require_once('delete_handle.php');
             break;
         case 'masspm':
             require_once('masspm.php');
             break;
+        case 'takemasspm':
+            require_once('masspm_handle.php');
+            break;
         case 'reseed':
             require_once('reseed.php');
-            break;
-        case 'takemasspm':
-            require_once('takemasspm.php');
             break;
         case 'vote_tag':
             require_once('vote_tag.php');
             break;
-        case 'notify':
-            require_once('notify.php');
-            break;
         case 'manage_artists':
             require_once('manage_artists.php');
             break;
-        case 'editrequest':
-            require_once('editrequest.php');
-            break;
-        case 'takeeditrequest':
-            require_once('takeeditrequest.php');
+        case 'notify':
+            require_once('notify.php');
             break;
         case 'notify_catchup':
         case 'notify_catchup_filter':
