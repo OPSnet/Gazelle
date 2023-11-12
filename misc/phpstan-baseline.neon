@@ -581,16 +581,6 @@ parameters:
 			path: ../sections/tools/managers/forum_transitions_list.php
 
 		-
-			message: "#^Variable \\$aliasLabel might not be defined\\.$#"
-			count: 1
-			path: ../sections/tools/managers/label_aliases.php
-
-		-
-			message: "#^Variable \\$badLabel might not be defined\\.$#"
-			count: 1
-			path: ../sections/tools/managers/label_aliases.php
-
-		-
 			message: "#^Variable \\$Tokens in empty\\(\\) always exists and is not falsy\\.$#"
 			count: 1
 			path: ../sections/tools/managers/ocelot.php

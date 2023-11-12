@@ -115,9 +115,6 @@ switch ($_REQUEST['action']) {
         require_once('managers/irc_alter.php');
         break;
 
-    case 'label_aliases':
-        require_once('managers/label_aliases.php');
-        break;
     case 'login_watch':
         require_once('managers/login_watch.php');
         break;
