@@ -446,21 +446,6 @@ parameters:
 			path: ../sections/recovery/save.php
 
 		-
-			message: "#^Variable \\$ToID in isset\\(\\) always exists and is not nullable\\.$#"
-			count: 1
-			path: ../sections/reportsv2/ajax_take_pm.php
-
-		-
-			message: "#^Parameter \\#2 \\$timestamp of function date expects int\\|null, int\\|false given\\.$#"
-			count: 2
-			path: ../sections/reportsv2/search.php
-
-		-
-			message: "#^Parameter \\#2 \\$array of function array_map expects array, array\\<int, string\\>\\|false given\\.$#"
-			count: 1
-			path: ../sections/reportsv2/takereport.php
-
-		-
 			message: "#^Function print_or_return\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: ../sections/requests/take_fill.php

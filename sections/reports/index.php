@@ -7,9 +7,9 @@ require_once(match ($_REQUEST['action'] ?? '') {
     'report'      => 'report.php',
     'resolve'     => 'ajax_resolve_report.php',
     'stats'       => 'stats.php',
-    'takecompose' => 'takecompose.php',
-    'takereport'  => 'takereport.php',
-    'takeresolve' => 'takeresolve.php',
+    'takecompose' => 'compose_handle.php',
+    'takereport'  => 'report_handle.php',
+    'takeresolve' => 'resolve_handle.php',
     'unclaim'     => 'ajax_unclaim_report.php',
     default       => 'reports.php',
 });

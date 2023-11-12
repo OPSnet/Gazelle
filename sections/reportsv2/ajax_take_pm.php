@@ -48,7 +48,7 @@ switch ($_POST['pm_type']) {
         json_error("no recipient target");
 }
 
-if (!(isset($ToID) && $ToID)) {
+if (!$ToID) {
     json_error("bad recipient id");
 } elseif ($ToID == $Viewer->id()) {
     json_error("message to self");

@@ -46,7 +46,7 @@ if (isset($_GET['dt-from']) && preg_match('/(\d\d\d\d-\d\d-\d\d)/', $_GET['dt-fr
     $filter['dt-from'] = $match[1];
     $dtFrom = $match[1];
 } else {
-    $dtFrom  = date('Y-m-d', strtotime(date('Y-m-d', strtotime(date('Y-m-d'))) . '-1 month'));
+    $dtFrom  = date('Y-m-d', (int)strtotime(date('Y-m-d', (int)strtotime(date('Y-m-d'))) . '-1 month'));
 }
 if (isset($_GET['dt-until']) && preg_match('/(\d\d\d\d-\d\d-\d\d)/', $_GET['dt-until'], $match)) {
     $filter['dt-until'] = $match[1];

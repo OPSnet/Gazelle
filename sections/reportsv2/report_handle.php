@@ -86,7 +86,10 @@ $trackList = '';
 if ($reportType->needTrack() !== 'none') {
     $trackList = trim($_POST['track']);
     if ($trackList !== 'all') {
-        $trackList = implode(' ', array_filter(array_map('intval', preg_split('/\D+/', $trackList)), fn ($n) => $n));
+        $split = preg_split('/\D+/', $trackList);
+        $trackList = ($split === false)
+            ? ''
+            : implode(' ', array_filter(array_map('intval', $split), fn ($n) => $n));
         if ($reportType->needTrack() === 'required' && $trackList === '') {
             error('Tracks should be given in a space-separated list of numbers with no other characters, or "all".');
         }
