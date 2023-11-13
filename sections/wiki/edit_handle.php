@@ -1,4 +1,5 @@
 <?php
+
 authorize();
 
 $wikiMan = new Gazelle\Manager\Wiki;
