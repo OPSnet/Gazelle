@@ -139,7 +139,6 @@ class UserTest extends TestCase {
     public function testUser(): void {
         $this->assertEquals($this->user->username(), $this->user->flush()->username(), 'utest-flush-username');
 
-        $this->assertEquals(0, $this->user->announceKeyCount(), 'utest-announce-key-count');
         $this->assertEquals(0, $this->user->allowedPersonalCollages(), 'utest-personal-collages-allowed');
         $this->assertEquals(0, $this->user->paidPersonalCollages(), 'utest-personal-collages-paid');
         $this->assertEquals(0, $this->user->activePersonalCollages(), 'utest-personal-collages-active');
@@ -185,11 +184,6 @@ class UserTest extends TestCase {
         $this->assertNull($this->user->lastAccess(), 'utest-last-access');
         $this->assertNull($this->user->warningExpiry(), 'utest-warning-expiry');
         $this->assertNull($this->user->warningExpiry(), 'utest-warning-expiry');
-
-        $this->assertEquals(32, strlen($this->user->announceKey()), 'utest-announce-key');
-        $this->assertStringStartsWith(ANNOUNCE_HTTPS_URL, $this->user->announceUrl(), 'utest-announce-url-begin');
-        $this->assertStringEndsWith('/announce', $this->user->announceUrl(), 'utest-announce-url-end');
-        $this->assertCount(0, $this->user->announceKeyHistory(), 'utest-announce-key-history');
 
         $this->assertEquals([], $this->user->snatch()->recentSnatchList(), 'utest-recent-snatch');
         $this->assertEquals([], $this->user->recentUploadList(), 'utest-recent-upload');
@@ -377,6 +371,28 @@ class UserTest extends TestCase {
         $this->assertEquals('Off', $this->user->paranoiaLabel(), 'utest-paranoid-label-off');
         $this->assertEquals(0, $this->user->paranoiaLevel(), 'utest-paranoid-level-off');
         $this->assertFalse($this->user->isParanoid('lastseen'), 'utest-is-not-last-seen-paranoid');
+    }
+
+    public function testAnnounceKey(): void {
+        $key = $this->user->announceKey();
+        $url = $this->user->announceUrl();
+
+        $this->assertEquals(0, $this->user->announceKeyCount(), 'utest-announce-key-count');
+        $this->assertEquals(32, strlen($key), 'utest-announce-key');
+        $this->assertStringStartsWith(ANNOUNCE_HTTPS_URL, $url, 'utest-announce-url-begin');
+        $this->assertStringEndsWith('/announce', $url, 'utest-announce-url-end');
+        $this->assertCount(0, $this->user->announceKeyHistory(), 'utest-announce-key-history');
+
+        $new = randomString(32);
+        $ipaddr = '127.2.2.2';
+        $this->assertEquals(1, $this->user->modifyAnnounceKeyHistory($key, $new, $ipaddr), 'utest-announce-key-modify');
+        $this->assertEquals(1, $this->user->announceKeyCount(), 'utest-announce-key-new-count');
+        $this->assertCount(1, $this->user->announceKeyHistory(), 'utest-announce-key-new-history');
+        $history = current($this->user->announceKeyHistory());
+        $this->assertEquals($key, $history['old'], 'utest-announce-key-history-old');
+        $this->assertEquals($new, $history['new'], 'utest-announce-key-history-new');
+        $this->assertEquals($ipaddr, $history['ipaddr'], 'utest-announce-key-history-ipaddr');
+        $this->assertTrue(Helper::recentDate($history['date']), 'utest-announce-key-history-date');
     }
 
     public function testInactive(): void {

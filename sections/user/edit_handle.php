@@ -253,18 +253,12 @@ if ($NewEmail) {
 }
 
 if (isset($_POST['resetpasskey'])) {
-    $OldPassKey = $user->announceKey();
-    $NewPassKey = randomString();
-    $ChangerIP = $Viewer->ipaddr();
-    $user->setField('torrent_pass', $NewPassKey);
-    $db->prepared_query('
-        INSERT INTO users_history_passkeys
-               (UserID, OldPassKey, NewPassKey, ChangerIP)
-        VALUES (?,      ?,          ?,          ?)
-        ', $userId, $OldPassKey, $NewPassKey, $ChangerIP
-    );
-
-    (new Gazelle\Tracker)->update_tracker('change_passkey', ['oldpasskey' => $OldPassKey, 'newpasskey' => $NewPassKey]);
+    $oldPasskey = $user->announceKey();
+    $newPasskey = randomString();
+    $ipaddr = $Viewer->ipaddr();
+    $user->setField('torrent_pass', $newPasskey);
+    $user->modifyAnnounceKeyHistory($oldPasskey, $newPasskey, $ipaddr);
+    (new Gazelle\Tracker)->modifyPasskey(old: $oldPasskey, new: $newPasskey);
 }
 
 $db->prepared_query("

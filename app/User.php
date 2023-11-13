@@ -1208,14 +1208,16 @@ class User extends BaseObject {
             && $this->uploadedSize() <= $this->downloadedSize() * $this->requiredRatio();
     }
 
-    public function modifyAnnounceKeyHistory(string $oldPasskey, string $newPasskey, string $ipaddr): bool {
+    public function modifyAnnounceKeyHistory(string $oldPasskey, string $newPasskey, string $ipaddr): int {
         self::$db->prepared_query("
             INSERT INTO users_history_passkeys
                    (UserID, OldPassKey, NewPassKey, ChangerIP)
             VALUES (?,      ?,          ?,          ?)
             ", $this->id, $oldPasskey, $newPasskey, $ipaddr
         );
-        return self::$db->affected_rows() === 1;
+        $affected = self::$db->affected_rows();
+        self::$cache->delete_value("user_passkey_count_{$this->id}");
+        return $affected;
     }
 
     public function announceKeyHistory(): array {

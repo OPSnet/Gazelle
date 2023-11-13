@@ -533,7 +533,7 @@ if ($Viewer->permitted('users_edit_reset_keys')) {
         $user->modifyAnnounceKeyHistory($user->announceKey(), $passkey, '0.0.0.0');
         $user->setField('torrent_pass', $passkey);
         $trackerUserUpdates['passkey'] = $passkey; // MUST come after the case for updating can_leech
-        $tracker->update_tracker('change_passkey', ['oldpasskey' => $user->announceKey(), 'newpasskey' => $passkey]);
+        $tracker->modifyPasskey(old: $user->announceKey(), new: $passkey);
         $editSummary[] = 'passkey reset';
     }
 }

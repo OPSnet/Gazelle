@@ -1,6 +1,5 @@
 <?php
 // TODO: The following actions are used, turn them into methods
-// change_passkey
 // add_token
 // remove_token
 // add_torrent DONE
@@ -42,6 +41,13 @@ class Tracker {
         return $this->update_tracker('update_torrent', [
             'info_hash'   => $torrent->infohashEncoded(),
             'freetorrent' => $leechType->value
+        ]);
+    }
+
+    public function modifyPasskey(string $old, string $new): bool {
+        return $this->update_tracker('change_passkey', [
+            'oldpasskey' => $old,
+            'newpasskey' => $new,
         ]);
     }
 
