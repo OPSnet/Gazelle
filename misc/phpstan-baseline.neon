@@ -326,16 +326,6 @@ parameters:
 			path: ../classes/users.class.php
 
 		-
-			message: "#^Parameter \\#1 \\$json of function json_decode expects string, string\\|false given\\.$#"
-			count: 1
-			path: ../sections/ajax/index.php
-
-		-
-			message: "#^Parameter \\#1 \\$filename of function file_put_contents expects string, string\\|false given\\.$#"
-			count: 1
-			path: ../sections/ajax/logchecker.php
-
-		-
 			message: "#^Function payload\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: ../sections/ajax/top10/torrents.php
@@ -419,11 +409,6 @@ parameters:
 			message: "#^If condition is always false\\.$#"
 			count: 1
 			path: ../sections/forums/thread.php
-
-		-
-			message: "#^Parameter \\#1 \\$filename of function file_put_contents expects string, string\\|false given\\.$#"
-			count: 1
-			path: ../sections/logchecker/take_test.php
 
 		-
 			message: "#^Variable \\$message might not be defined\\.$#"
@@ -524,16 +509,6 @@ parameters:
 			message: "#^Variable \\$role might not be defined\\.$#"
 			count: 2
 			path: ../sections/requests/take_new_edit.php
-
-		-
-			message: "#^Call to function is_null\\(\\) with mixed will always evaluate to false\\.$#"
-			count: 1
-			path: ../sections/staffpm/takepost.php
-
-		-
-			message: "#^Variable \\$staffPM might not be defined\\.$#"
-			count: 1
-			path: ../sections/staffpm/takepost.php
 
 		-
 			message: "#^Cannot access offset 'name' on array\\{name\\: string, passwd\\: string, gid\\: int, members\\: array\\<int, string\\>\\}\\|false\\.$#"

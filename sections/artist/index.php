@@ -7,8 +7,8 @@ if (!empty($_POST['action'])) {
         'change_artistid' => require_once('change_artistid.php'),
         'download'        => require_once('download.php'),
         'rename'          => require_once('rename.php'),
-        'edit'            => require_once('takeedit.php'),
-        'takeeditrequest' => require_once('takeeditrequest.php'),
+        'edit'            => require_once('edit_handle.php'),
+        'takeeditrequest' => require_once('edit_request_handle.php'),
         default           => error(0),
     };
 } elseif (!empty($_GET['action'])) {
@@ -19,11 +19,11 @@ if (!empty($_POST['action'])) {
         'delete_alias'    => require_once('delete_alias.php'),
         'delete_similar'  => require_once('delete_similar.php'),
         'edit'            => require_once('edit.php'),
-        'editrequest'     => require_once('editrequest.php'),
+        'editrequest'     => require_once('edit_request.php'),
         'history'         => require_once('history.php'),
         'notify'          => require_once('notify.php'),
-        'notifyremove'    => require_once('notifyremove.php'),
-        'revert'          => require_once('takeedit.php'),
+        'notifyremove'    => require_once('notify_remove.php'),
+        'revert'          => require_once('edit_handle.php'),
         'vote_similar'    => require_once('vote_similar.php'),
         default           => error(0),
     };

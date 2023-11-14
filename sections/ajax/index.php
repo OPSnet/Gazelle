@@ -60,7 +60,11 @@ if (!$Action || !isset($Viewer)) {
 $UserID = $Viewer->id();
 
 if (!empty($_SERVER['CONTENT_TYPE']) && str_starts_with($_SERVER['CONTENT_TYPE'], 'application/json')) {
-    $_POST = json_decode(file_get_contents('php://input'), true);
+    $input = file_get_contents('php://input');
+    if ($input === false) {
+        error("json decode failure");
+    }
+    $_POST = json_decode($input, true);
 }
 
 header('Content-Type: application/json; charset=utf-8');
@@ -188,7 +192,7 @@ switch ($Action) {
         };
         break;
     case 'votefavorite':
-        require_once('takevote.php');
+        require_once('vote_handle.php');
         break;
     case 'wiki':
         require_once('wiki.php');

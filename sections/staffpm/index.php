@@ -5,7 +5,7 @@ switch ($_REQUEST['action'] ?? '') {
         require('viewconv.php');
         break;
     case 'takepost':
-        require('takepost.php');
+        require('post_handle.php');
         break;
     case 'resolve':
         require('resolve.php');

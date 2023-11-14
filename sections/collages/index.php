@@ -22,7 +22,7 @@ switch ($_REQUEST['action'] ?? '') {
         require('delete.php');
         break;
     case 'take_delete':
-        require('take_delete.php');
+        require('delete_handle.php');
         break;
     case 'download':
         require('download.php');
