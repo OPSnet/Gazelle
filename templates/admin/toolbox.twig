@@ -26,7 +26,6 @@
 {{ _self.category('Administration', [
     ['Applicant manager',            'apply.php?action=admin',               viewer.permitted('admin_manage_applicants') or applicant_viewer],
     ['Database encryption key',      'tools.php?action=dbkey',               viewer.permitted('admin_site_debug')],
-    ['IRC channel manager',          'tools.php?action=irc',                 viewer.permitted('admin_manage_forums')],
     ['Invite Sources',               'tools.php?action=invite_source',       viewer.permitted('admin_manage_invite_source')],
     ['Privilege matrix',             'tools.php?action=privilege_matrix',    viewer.permitted('admin_manage_permissions')],
     ['Reports V1',                   'reports.php',                          viewer.permittedAny('admin_reports', 'site_moderate_forums')],
