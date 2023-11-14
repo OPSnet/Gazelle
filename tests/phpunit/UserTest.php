@@ -465,4 +465,25 @@ class UserTest extends TestCase {
         $this->assertIsInt($stats->weekActiveTotal(), 'user-stats-active-week');
         $this->assertIsInt($stats->monthActiveTotal(), 'user-stats-active-month');
     }
+
+    public function testUserRank(): void {
+        $rank = new Gazelle\UserRank(
+            new Gazelle\UserRank\Configuration(RANKING_WEIGHT),
+            [
+                'uploaded'   => STARTING_UPLOAD,
+                'downloaded' => 1,
+                'uploads'    => 0,
+                'requests'   => 0,
+                'posts'      => 0,
+                'bounty'     => 0,
+                'artists'    => 0,
+                'collage'    => 0,
+                'votes'      => 0,
+                'bonus'      => 0,
+                'comment-t'  => 0,
+            ]
+        );
+        $this->assertEquals(0, $rank->score(), 'userrank-score');
+        $this->assertEquals(1, $rank->rank('downloaded'), 'userrank-rank');
+    }
 }

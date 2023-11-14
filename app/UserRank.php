@@ -53,28 +53,12 @@ class UserRank extends Base {
 
     final const PREFIX = 'percentiles_'; // Prefix for memcache keys, to make life easier
 
-    public function score(): ?int {
-        return is_nan($this->score) ? null : (int)round($this->score, 0);
-    }
-
-    public function rank(string $dimension): int {
-        return $this->rank[$dimension];
-    }
-
     public function __construct(protected \Gazelle\UserRank\Configuration $config, array $dimension) {
         $definition = $this->config->definition();
 
         $dimension['uploaded'] -= STARTING_UPLOAD;
-        $ok = true;
         foreach ($definition as $d) {
             $this->rank[$d] = $this->config->instance($d)->rank($dimension[$d]);
-            if ($this->rank[$d] == false) {
-                $ok = false;
-            }
-        }
-        if (!$ok) {
-            $this->score = NAN;
-            return;
         }
 
         $totalWeight = 0.0;
@@ -93,5 +77,13 @@ class UserRank extends Base {
             $ratio = min(1, round($dimension['uploaded'] / $dimension['downloaded']));
         }
         $this->score *= $ratio;
+    }
+
+    public function rank(string $dimension): int {
+        return $this->rank[$dimension];
+    }
+
+    public function score(): ?int {
+        return (int)round($this->score, 0);
     }
 }
