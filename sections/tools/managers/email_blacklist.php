@@ -6,10 +6,10 @@ if (!$Viewer->permitted('users_view_email')) {
 
 $emailBlacklist = new Gazelle\Manager\EmailBlacklist;
 if (!empty($_POST['email'])) {
-    $emailBlacklist->filterEmail($_POST['email']);
+    $emailBlacklist->setFilterEmail(trim($_POST['email']));
 }
 if (!empty($_POST['comment'])) {
-    $emailBlacklist->filterComment($_POST['comment']);
+    $emailBlacklist->setFilterComment(trim($_POST['comment']));
 }
 
 $paginator = new Gazelle\Util\Paginator(LOG_ENTRIES_PER_PAGE, (int)($_GET['page'] ?? 1));

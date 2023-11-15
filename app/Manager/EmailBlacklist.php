@@ -2,21 +2,26 @@
 
 namespace Gazelle\Manager;
 
+/**
+ * The name of this class (and the underlying table name) are ambiguous.
+ * Individual email addresses as well as email domains can be blacklisted.
+ */
+
 class EmailBlacklist extends \Gazelle\Base {
     protected string $filterComment;
     protected string $filterEmail;
 
-    public function create(array $info): int {
+    public function create(string $domain, string $comment, \Gazelle\User $user): int {
         self::$db->prepared_query("
             INSERT INTO email_blacklist
                    (Email, Comment, UserID)
             VALUES (?,     ?,       ?)
-            ", $info['email'], $info['comment'], $info['user_id']
+            ", $domain, $comment, $user->id()
         );
         return self::$db->inserted_id();
     }
 
-    public function modify(int $id, array $info): bool {
+    public function modify(int $id, string $domain, string $comment, \Gazelle\User $user): int {
         self::$db->prepared_query("
             UPDATE email_blacklist SET
                 Email   = ?,
@@ -24,25 +29,36 @@ class EmailBlacklist extends \Gazelle\Base {
                 UserID  = ?,
                 Time    = now()
             WHERE ID = ?
-            ", $info['email'], $info['comment'], $info['user_id'], $id
+            ", $domain, $comment, $user->id(), $id
         );
-        return self::$db->affected_rows() === 1;
+        return self::$db->affected_rows();
     }
 
-    public function remove(int $id): bool {
+    public function remove(int $id): int {
         self::$db->prepared_query("
             DELETE FROM email_blacklist WHERE ID = ?
             ", $id
         );
-        return self::$db->affected_rows() === 1;
+        return self::$db->affected_rows();
     }
 
-    public function filterComment(string $filterComment): static {
+    public function exists(string $target): bool {
+        // This is a bit fragile: if someone adds an incorrect regexp, it will abort
+        return (bool)self::$db->scalar("
+            select 1 from email_blacklist WHERE ? REGEXP (
+                SELECT group_concat(Email SEPARATOR '|') FROM email_blacklist
+            )
+            LIMIT 1
+            ", $target
+        );
+    }
+
+    public function setFilterComment(string $filterComment): static {
         $this->filterComment = $filterComment;
         return $this;
     }
 
-    public function filterEmail(string $filterEmail): static {
+    public function setFilterEmail(string $filterEmail): static {
         $this->filterEmail = $filterEmail;
         return $this;
     }
@@ -50,11 +66,11 @@ class EmailBlacklist extends \Gazelle\Base {
     public function queryBase(): array {
         $args = [];
         $cond = [];
-        if ($this->filterComment) {
+        if (!empty($this->filterComment)) {
             $args[] = $this->filterComment;
             $cond[] = "Comment REGEXP ?";
         }
-        if ($this->filterEmail) {
+        if (!empty($this->filterEmail)) {
             $args[] = $this->filterEmail;
             $cond[] = "Email REGEXP ?";
         }

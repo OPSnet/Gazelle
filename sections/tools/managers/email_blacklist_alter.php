@@ -19,20 +19,26 @@ if ($_POST['submit'] === 'Delete') { // Delete
         error($validator->errorMessage());
     }
 
+    $email = trim($_POST['email']);
+    if (@preg_match("/$email/", '') === false) {
+        error(html_escape($email) . " is not a valid regular expression");
+    }
+
     if ($_POST['submit'] === 'Edit') { // Edit
-        if (!$emailBlacklist->modify((int)$_POST['id'], [
-            'email'   => trim($_POST['email']),
-            'comment' => trim($_POST['comment']),
-            'user_id' => $Viewer->id(),
-        ])) {
+        if (!$emailBlacklist->modify(
+            id:      (int)$_POST['id'],
+            domain:  $email,
+            comment: trim($_POST['comment']),
+            user:    $Viewer,
+        )) {
             error(0);
         }
     } else { // Create
-        if (!$emailBlacklist->create([
-            'email'   => trim($_POST['email']),
-            'comment' => trim($_POST['comment']),
-            'user_id' => $Viewer->id(),
-        ])) {
+        if (!$emailBlacklist->create(
+            domain:  $email,
+            comment: trim($_POST['comment']),
+            user:    $Viewer,
+        )) {
             error(0);
         }
     }

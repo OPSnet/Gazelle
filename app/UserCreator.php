@@ -75,9 +75,16 @@ class UserCreator extends Base {
                 $this->adminComment[] = $inviterNotes;
             }
         }
+
         if (!$this->email) {
             // neither setEmail() nor setInviteKey() produced anything useful
             throw new UserCreatorException('email');
+        }
+        $domainManager = new \Gazelle\Manager\EmailBlacklist;
+        foreach ($this->email as $email) {
+            if ($domainManager->exists($email)) {
+                throw new UserCreatorException('email');
+            }
         }
 
         // create users_main row
