@@ -43,6 +43,7 @@ class TGroup extends \Gazelle\BaseManager {
         \Gazelle\Manager\Artist   $artistMan,
         \Gazelle\Manager\Bookmark $bookmarkMan,
         \Gazelle\Manager\Comment  $commentMan,
+        \Gazelle\Manager\Vote     $voteMan,
         \Gazelle\Log              $logger,
         \Gazelle\User             $user,
     ): \Gazelle\TGroup {
@@ -70,10 +71,10 @@ class TGroup extends \Gazelle\BaseManager {
             $old->flush();
             $old->refresh();
         } else {
-            // TODO: votes etc!
-            $bookmarkMan->merge($oldId, $newId);
+            $bookmarkMan->merge($old, $new);
             $commentMan->merge('torrents', $oldId, $newId);
-            $logger->merge($old->id(), $newId);
+            $voteMan->merge($old, $new, new \Gazelle\Manager\User);
+            $logger->merge($old, $new);
             $old->remove($user);
         }
 
@@ -167,69 +168,14 @@ class TGroup extends \Gazelle\BaseManager {
         );
     }
 
-    public function merge(\Gazelle\TGroup $old, \Gazelle\TGroup $new, \Gazelle\User $user, \Gazelle\Log $log): bool {
-        // Votes ninjutsu. This is so annoyingly complicated.
-        // 1. Get a list of everybody who voted on the old group and clear their cache keys
-        self::$db->prepared_query("
-            SELECT concat('voted_albums_', UserID)
-            FROM users_votes
-            WHERE GroupID = ?
-            ", $old->id()
-        );
-        self::$cache->delete_multi(self::$db->collect(0, false));
-
-        self::$db->begin_transaction();
-
-        // 2. Update the existing votes where possible, clear out the duplicates left by key
-        // conflicts, and update the torrents_votes table
-        self::$db->prepared_query("
-            UPDATE IGNORE users_votes SET
-                GroupID = ?
-            WHERE GroupID = ?
-            ", $new->id(), $old->id()
-        );
-        self::$db->prepared_query("
-            DELETE FROM users_votes WHERE GroupID = ?
-            ", $old->id()
-        );
-        self::$db->prepared_query("
-            INSERT INTO torrents_votes (GroupId, Ups, Total, Score)
-            SELECT                      ?,       Ups, Total, 0
-            FROM (
-                SELECT
-                    ifnull(sum(if(Type = 'Up', 1, 0)), 0) As Ups,
-                    count(*) AS Total
-                FROM users_votes
-                WHERE GroupID = ?
-                GROUP BY GroupID
-            ) AS a
-            ON DUPLICATE KEY UPDATE
-                Ups = a.Ups,
-                Total = a.Total
-            ", $new->id(), $old->id()
-        );
-        if (self::$db->affected_rows()) {
-            // recompute score
-            self::$db->prepared_query("
-                UPDATE torrents_votes SET
-                    Score = IFNULL(binomial_ci(Ups, Total), 0)
-                WHERE GroupID = ?
-                ", $new->id()
-            );
-        }
-
-        // 3. Clear the votes_pairs keys
-        self::$db->prepared_query("
-            SELECT concat('vote_pairs_', v2.GroupId)
-            FROM users_votes AS v1
-            INNER JOIN users_votes AS v2 USING (UserID)
-            WHERE (v1.Type = 'Up' OR v2.Type = 'Up')
-                AND (v1.GroupId     IN (?, ?))
-                AND (v2.GroupId NOT IN (?, ?))
-            ", $old->id(), $new->id(), $old->id(), $new->id()
-        );
-        self::$cache->delete_multi(self::$db->collect(0, false));
-
+    public function merge(
+        \Gazelle\TGroup $old,
+        \Gazelle\TGroup $new,
+        \Gazelle\User $user,
+        \Gazelle\Manager\User $userManager,
+        \Gazelle\Manager\Vote $voteManager,
+        \Gazelle\Log $log,
+    ): bool {
         // GroupIDs
         self::$db->prepared_query("SELECT ID FROM torrents WHERE GroupID = ?", $old->id());
         self::$cache->delete_multi(
@@ -249,8 +195,9 @@ class TGroup extends \Gazelle\BaseManager {
             ", $new->id(), $old->id()
         );
 
-        (new \Gazelle\Manager\Bookmark)->merge($old->id(), $new->id());
+        (new \Gazelle\Manager\Bookmark)->merge($old, $new);
         (new \Gazelle\Manager\Comment)->merge('torrents', $old->id(), $new->id());
+        $voteManager->merge($old, $new, $userManager);
 
         // Collages
         self::$db->prepared_query("
@@ -297,7 +244,7 @@ class TGroup extends \Gazelle\BaseManager {
         $old->remove($user);
         $log->general("Group $oldId deleted following merge to {$new->id()}.")
             ->group($new->id(), $user->id(), "Merged Group $oldLabel to {$new->label()}")
-            ->merge($oldId, $new->id());
+            ->merge($old, $new);
 
         self::$db->commit();
 
@@ -463,10 +410,10 @@ class TGroup extends \Gazelle\BaseManager {
         if (self::$db->scalar('SELECT ID FROM torrents WHERE GroupID = ?', $old->id())) {
             $old->flush()->refresh();
         } else {
-            // TODO: votes etc.
-            (new \Gazelle\Manager\Bookmark)->merge($old->id(), $new->id());
+            (new \Gazelle\Manager\Bookmark)->merge($old, $new);
             (new \Gazelle\Manager\Comment)->merge('torrents', $old->id(), $new->id());
-            $logger->merge($old->id(), $new->id());
+            (new \Gazelle\Manager\Vote)->merge($old, $new, new \Gazelle\Manager\User);
+            $logger->merge($old, $new);
             $old->remove($user);
         }
         $new->refresh();

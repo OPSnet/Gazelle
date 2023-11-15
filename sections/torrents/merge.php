@@ -32,6 +32,13 @@ if (empty($_POST['confirm'])) {
 
 authorize();
 
-$tgMan->merge($old, $new, $Viewer, new Gazelle\Log);
+$tgMan->merge(
+    $old,
+    $new,
+    $Viewer,
+    new \Gazelle\Manager\User,
+    new \Gazelle\Manager\Vote,
+    new Gazelle\Log
+);
 
 header('Location: ' . $new->location());

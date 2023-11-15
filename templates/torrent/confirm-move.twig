@@ -1,4 +1,4 @@
-{{ header('Edit group ' ~ old.text) }}
+{{ header('Edit group ' ~ torrent.group.text) }}
 <div class="thin">
 <div class="header">
     <h2>Torrent Group ID Change Confirmation</h2>
@@ -9,11 +9,10 @@
         <input type="hidden" name="auth" value="{{ auth }}" />
         <input type="hidden" name="confirm" value="true" />
         <input type="hidden" name="torrentid" value="{{ torrent.id }}" />
-        <input type="hidden" name="oldgroupid" value="{{ old.id }}" />
         <input type="hidden" name="groupid" value="{{ new.id }}" />
         <h3>You are attempting to move the torrent with ID {{ torrent.id }} from the group:</h3>
         <ul>
-            <li>{{ old.link|raw }}</li>
+            <li>{{ torrent.group.link|raw }}</li>
         </ul>
         <h3>Into the group:</h3>
         <ul>

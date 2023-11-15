@@ -46,12 +46,12 @@ class Log extends Base {
         return $this;
     }
 
-    public function merge(int $oldId, int $newId): int {
+    public function merge(\Gazelle\TGroup $old, \Gazelle\TGroup $new): int {
         self::$db->prepared_query("
             UPDATE group_log SET
                 GroupID = ?
             WHERE GroupID = ?
-            ", $newId, $oldId
+            ", $new->id(), $old->id()
         );
         return self::$db->affected_rows();
     }

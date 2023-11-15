@@ -196,6 +196,8 @@ class TGroupTest extends TestCase {
     }
 
     public function testTGroupMerge(): void {
+        $admin = $this->userList['admin'];
+        $user = $this->userList['user'];
         $this->tgroupExtra = $this->manager->create(
             categoryId:      1,
             name:            $this->name . ' merge ' . randomString(10),
@@ -209,14 +211,28 @@ class TGroupTest extends TestCase {
         );
         Helper::makeTorrentMusic(
             tgroup:          $this->tgroupExtra,
-            user:            $this->userList['user'],
+            user:            $user,
             catalogueNumber: 'UA-MG-1',
         );
-
         $oldId   = $this->tgroupExtra->id();
         $oldName = $this->tgroupExtra->name();
+
+        (new Gazelle\User\Bookmark($admin))->create('torrent', $oldId);
+        (new Gazelle\Manager\Comment)->create($user, 'torrents', $oldId, 'phpunit comment ' . randomString(10));
+        $adminVote = new \Gazelle\User\Vote($admin);
+        $userVote = new \Gazelle\User\Vote($user);
+        $adminVote->upvote($oldId);
+        $userVote->downvote($oldId);
+
         $this->assertTrue(
-            $this->manager->merge($this->tgroupExtra, $this->tgroup, $this->userList['admin'], new \Gazelle\Log),
+            $this->manager->merge(
+                $this->tgroupExtra,
+                $this->tgroup,
+                $this->userList['admin'],
+                new \Gazelle\Manager\User,
+                new \Gazelle\Manager\Vote,
+                new \Gazelle\Log,
+            ),
             'tgroup-music-merge'
         );
 
@@ -232,6 +248,22 @@ class TGroupTest extends TestCase {
             $general['message'],
             'tgroup-merge-general'
         );
+
+        $this->assertTrue(
+            (new \Gazelle\User\Bookmark($admin))->isTorrentBookmarked($this->tgroup->id()),
+            'tgroup-merge-bookmark'
+        );
+
+        $comment = new Gazelle\Comment\Torrent($this->tgroup->id(), 1, 0);
+
+        // create new vote objects to pick up the state change
+        unset($adminVote);
+        unset($userVote);
+        $adminVote = new \Gazelle\User\Vote($admin);
+        $userVote = new \Gazelle\User\Vote($user);
+
+        $this->assertEquals(1, $adminVote->flush()->vote($this->tgroup->id()), 'tgroup-merge-upvote');
+        $this->assertEquals(-1, $userVote->flush()->vote($this->tgroup->id()), 'tgroup-merge-downvote');
     }
 
     public function testTGroupSplit(): void {
@@ -248,6 +280,7 @@ class TGroupTest extends TestCase {
             new \Gazelle\Manager\Artist,
             new \Gazelle\Manager\Bookmark,
             new \Gazelle\Manager\Comment,
+            new \Gazelle\Manager\Vote,
             new \Gazelle\Log,
             $this->userList['admin'],
         );

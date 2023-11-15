@@ -42,6 +42,7 @@ $new = (new Gazelle\Manager\TGroup)->createFromTorrent(
     new Gazelle\Manager\Artist,
     new Gazelle\Manager\Bookmark,
     new Gazelle\Manager\Comment,
+    new Gazelle\Manager\Vote,
     new Gazelle\Log,
     $Viewer,
 );

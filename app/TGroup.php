@@ -980,6 +980,40 @@ class TGroup extends BaseObject {
         return count($regular) + count($large);
     }
 
+    public function absorb(Torrent $torrent, User $user, Log $logger): int {
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
+            UPDATE torrents SET
+                GroupID = ?
+            WHERE ID = ?
+            ", $this->id, $torrent->id()
+        );
+
+        $affected = self::$db->affected_rows();
+        $old      = $torrent->group();
+        $oldId    = $old->id();
+
+        if ((bool)self::$db->scalar("SELECT count(*) FROM torrents WHERE GroupID = ?", $oldId)) {
+            $old->flush();
+            $old->refresh();
+        } else {
+            (new \Gazelle\Manager\Bookmark)->merge($old, $this);
+            (new \Gazelle\Manager\Comment)->merge('torrents', $oldId, $this->id);
+            (new \Gazelle\Manager\Vote)->merge($old, $this, new Manager\User);
+            $logger->merge($old, $this);
+
+            $old->remove($user);
+        }
+        $logger->group($this->id, $user->id(), "merged group $oldId")
+            ->general("Torrent " . $torrent->id() . " was edited by " . $user->label());
+        self::$db->commit();
+
+        $this->flush()->refresh();
+        $torrent->flush();
+
+        return $affected;
+    }
+
     public function remove(User $user): bool {
         $isMusic = ($this->categoryName() === 'Music');
 

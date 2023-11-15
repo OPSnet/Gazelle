@@ -23,14 +23,16 @@ class Vote extends \Gazelle\BaseUser {
     protected array $topJoin   = [];
     protected array $topWhere  = [];
     protected array $topArgs   = [];
-    protected array $userVote;
     protected array $voteSummary;
 
     public function flush(): static {
         self::$cache->delete_multi([
-            sprintf(self::VOTE_RECENT, $this->user->id()),
-            sprintf(self::VOTE_TOTAL, $this->user->id()),
+            sprintf(self::VOTE_RECENT, $this->id()),
+            sprintf(self::VOTE_TOTAL, $this->id()),
+            sprintf(self::VOTE_USER_KEY, $this->id()),
+            sprintf(self::VOTED_USER, $this->id()),
         ]);
+        unset($this->info);
         return $this;
     }
 
@@ -42,11 +44,13 @@ class Vote extends \Gazelle\BaseUser {
         return $this->flush();
     }
 
-    public function __construct(\Gazelle\User $user) {
-        parent::__construct($user);
-        $userKey = sprintf(self::VOTE_USER_KEY, $this->user->id());
-        $userVote = self::$cache->get_value($userKey);
-        if ($userVote === false) {
+    public function info(): array {
+        if (isset($this->info)) {
+            return $this->info;
+        }
+        $key = sprintf(self::VOTE_USER_KEY, $this->id());
+        $info = self::$cache->get_value($key);
+        if ($info === false) {
             self::$db->prepared_query("
                 SELECT GroupID,
                     CASE WHEN Type = 'Up' THEN 1
@@ -55,12 +59,13 @@ class Vote extends \Gazelle\BaseUser {
                      END as Vote
                 FROM users_votes
                 WHERE UserID = ?
-                ", $this->user->id()
+                ", $this->id()
             );
-            $userVote = self::$db->to_pair('GroupID', 'Vote', false);
-            self::$cache->cache_value($userKey, $userVote, 0);
+            $info = self::$db->to_pair('GroupID', 'Vote', false);
+            self::$cache->cache_value($key, $info, 0);
         }
-        $this->userVote = $userVote;
+        $this->info = $info;
+        return $info;
     }
 
     public function setTopLimit(int $limit): static {
@@ -251,7 +256,7 @@ class Vote extends \Gazelle\BaseUser {
         return self::$twig->render('vote/links.twig', [
             'group_id' => $tgroupId,
             'score'    => $this->score($this->total($tgroupId), $this->totalUp($tgroupId)),
-            'vote'     => $this->userVote[$tgroupId] ?? 0,
+            'vote'     => $this->info()[$tgroupId] ?? 0,
             'viewer'   => $this->user,
         ]);
     }
@@ -269,7 +274,7 @@ class Vote extends \Gazelle\BaseUser {
     }
 
     public function vote(int $tgroupId): int {
-        return $this->userVote[$tgroupId] ?? 0;
+        return $this->info()[$tgroupId] ?? 0;
     }
 
     /**
@@ -294,7 +299,7 @@ class Vote extends \Gazelle\BaseUser {
      * @return array [groupId => 0|1]
      */
     public function userVotes(): array {
-        $key = sprintf(self::VOTED_USER, $this->user->id());
+        $key = sprintf(self::VOTED_USER, $this->id());
         $votes = self::$cache->get_value($key);
         if ($votes === false) {
             self::$db->prepared_query("
@@ -302,7 +307,7 @@ class Vote extends \Gazelle\BaseUser {
                     CASE WHEN Type = 'Up' THEN 1 ELSE 0 END AS vote
                 FROM users_votes
                 WHERE UserID = ?
-                ", $this->user->id()
+                ", $this->id()
             );
             $votes = self::$db->to_pair('GroupID', 'vote', false);
             self::$cache->cache_value($key, $votes, 86400);
@@ -363,7 +368,7 @@ class Vote extends \Gazelle\BaseUser {
      * @return array [bool success, string reason]
      */
     protected function castVote(int $tgroupId, int $direction): array {
-        if (isset($this->userVote[$tgroupId])) {
+        if (isset($this->info()[$tgroupId])) {
             return [false, 'already-voted'];
         }
         $up = $direction === 1 ? 1 : 0;
@@ -374,7 +379,7 @@ class Vote extends \Gazelle\BaseUser {
             INSERT IGNORE INTO users_votes
                    (UserID, GroupID, upvote, Type)
             VALUES (?,      ?,       ?,      ?)
-            ", $this->user->id(), $tgroupId, $up, $up ? 'Up' : 'Down'
+            ", $this->id(), $tgroupId, $up, $up ? 'Up' : 'Down'
         );
         [$total, $ups, $score] = $this->summary($tgroupId);
         self::$db->prepared_query("
@@ -390,8 +395,8 @@ class Vote extends \Gazelle\BaseUser {
         self::$db->commit();
 
         // update cache
-        $this->userVote[$tgroupId] = $direction;
-        self::$cache->cache_value(sprintf(self::VOTE_USER_KEY, $this->user->id()), $this->userVote, 259200); // 3 days
+        $this->info[$tgroupId] = $direction;
+        self::$cache->cache_value(sprintf(self::VOTE_USER_KEY, $this->id()), $this->info, 259200); // 3 days
         $this->flushTgroup($tgroupId);
 
         return [true, 'voted'];
@@ -401,7 +406,7 @@ class Vote extends \Gazelle\BaseUser {
      * Clear a vote on this release group
      */
     public function clear(int $tgroupId): array {
-        if (!isset($this->userVote[$tgroupId])) {
+        if (!isset($this->info()[$tgroupId])) {
             return [false, 'not-voted'];
         }
 
@@ -409,7 +414,7 @@ class Vote extends \Gazelle\BaseUser {
         self::$db->prepared_query("
             DELETE FROM users_votes
             WHERE UserID = ? AND GroupID = ?
-            ", $this->user->id(), $tgroupId
+            ", $this->id(), $tgroupId
         );
         [$total, $ups, $score] = $this->summary($tgroupId);
         self::$db->prepared_query("
@@ -423,15 +428,15 @@ class Vote extends \Gazelle\BaseUser {
         self::$db->commit();
 
         // Update cache
-        unset($this->userVote[$tgroupId]);
-        self::$cache->cache_value(sprintf(self::VOTE_USER_KEY, $this->user->id()), $this->userVote, 259200);
+        unset($this->info[$tgroupId]);
+        self::$cache->cache_value(sprintf(self::VOTE_USER_KEY, $this->id()), $this->info, 259200);
         $this->flushTgroup($tgroupId);
 
         return [true, 'cleared'];
     }
 
     public function recent(\Gazelle\Manager\TGroup $tgMan): array {
-        $key = sprintf(self::VOTE_RECENT, $this->user->id());
+        $key = sprintf(self::VOTE_RECENT, $this->id());
         $recent = self::$cache->get_value($key);
         if ($recent === false) {
             self::$db->prepared_query("
@@ -443,7 +448,7 @@ class Vote extends \Gazelle\BaseUser {
                     AND uv.UserID = ?
                 ORDER BY uv.Time DESC
                 LIMIT 5
-                ", $this->user->id()
+                ", $this->id()
             );
             $recent = self::$db->to_array();
             self::$cache->cache_value($key, $recent, 0);
@@ -456,12 +461,12 @@ class Vote extends \Gazelle\BaseUser {
 
     public function userTotal(int $mask): int {
         if (!isset($this->voteSummary)) {
-            $key = sprintf(self::VOTE_TOTAL, $this->user->id());
+            $key = sprintf(self::VOTE_TOTAL, $this->id());
             $voteSummary = self::$cache->get_value($key);
             if ($voteSummary === false) {
                 $voteSummary = self::$db->rowAssoc("
                     SELECT count(*) AS total, coalesce(sum(Type='Up'), 0) AS up FROM users_votes WHERE UserID = ?
-                    ", $this->user->id()
+                    ", $this->id()
                 );
                 self::$cache->cache_value($key, $voteSummary, 0);
             }
@@ -476,7 +481,7 @@ class Vote extends \Gazelle\BaseUser {
 
     public function userPage(\Gazelle\Manager\TGroup $tgMan, int $mask, int $limit, int $offset): array {
         $cond = ['UserID = ?'];
-        $args = [$this->user->id()];
+        $args = [$this->id()];
         if ($mask === self::UPVOTE) {
             $cond[] = 'Type = ?';
             $args[] = 'Up';

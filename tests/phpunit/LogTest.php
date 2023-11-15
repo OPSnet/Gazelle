@@ -7,7 +7,10 @@ require_once(__DIR__ . '/../helper.php');
 
 class LogTest extends TestCase {
     protected const PREFIX = 'phpunit-logtest ';
-    protected \Gazelle\User $user;
+
+    protected \Gazelle\TGroup $tgroup;
+    protected \Gazelle\TGroup $tgroupNew;
+    protected \Gazelle\User   $user;
 
     public function tearDown(): void {
         $db = \Gazelle\DB::DB();
@@ -19,6 +22,12 @@ class LogTest extends TestCase {
             DELETE FROM group_log WHERE Info REGEXP ?
             ", '^' . self::PREFIX
         );
+        if (isset($this->tgroup)) {
+            $this->tgroup->remove($this->user);
+        }
+        if (isset($this->tgroupNew)) {
+            $this->tgroupNew->remove($this->user);
+        }
         if (isset($this->user)) {
             $this->user->remove();
         }
@@ -40,11 +49,19 @@ class LogTest extends TestCase {
 
     public function testGroupLog(): void {
         $logger = new \Gazelle\Log;
-        $logger->group(-1, 0, self::PREFIX . "group first " . randomString());
+        $this->user = Helper::makeUser('sitelog.' . randomString(6), 'sitelog');
+        $this->tgroup = Helper::makeTGroupMusic(
+            $this->user,
+            'phpunit log ' . randomString(6),
+            [[ARTIST_MAIN], ['phpunit log artist ' . randomString(6)]],
+            ['log.jam']
+        );
+        $tgroupId = $this->tgroup->id();
+        $logger->group($tgroupId, $this->user->id(), self::PREFIX . "group first " . randomString());
 
         $sitelog = new \Gazelle\Manager\SiteLog(new \Gazelle\Manager\User);
-        $this->assertCount(0, $sitelog->tgroupLogList(-101), 'grouplog-no-log');
-        $result = $sitelog->tgroupLogList(-1);
+        $this->assertCount(2, $sitelog->tgroupLogList($tgroupId), 'grouplog-intial');
+        $result = $sitelog->tgroupLogList($tgroupId);
         $latest = current($result);
         $this->assertEquals(
             ["torrent_id", "user_id", "info", "created", "media", "format", "encoding", "deleted"],
@@ -54,17 +71,27 @@ class LogTest extends TestCase {
         $this->assertEquals(1, $latest['deleted'], 'grouplog-latest-is-deleted');
         $this->assertEquals(0, $latest['torrent_id'], 'grouplog-latest-no-torrent-id');
 
-        $logger->group(-1, 0, self::PREFIX . "group extra " . randomString());
-        $logger->group(-2, 0, self::PREFIX . "group merge " . randomString());
-        $this->assertEquals(2, $logger->merge(-1, -2), 'grouplog-merge-result');
+        $this->tgroupNew = Helper::makeTGroupMusic(
+            $this->user,
+            'phpunit log ' . randomString(6),
+            [[ARTIST_MAIN], ['phpunit log artist ' . randomString(6)]],
+            ['log.jam']
+        );
+        $newId = $this->tgroupNew->id();
+        $logger->group($tgroupId, 0, self::PREFIX . "group extra " . randomString());
+        $logger->group($newId, 0, self::PREFIX . "group merge " . randomString());
+        $this->assertEquals(3, $logger->merge($this->tgroup, $this->tgroupNew), 'grouplog-merge-result');
 
         $messageList = array_map(
             fn($m) => $m['info'],
-            $sitelog->tgroupLogList(-2),
+            $sitelog->tgroupLogList($newId),
         );
-        $this->assertStringContainsString(self::PREFIX . 'group first ', $messageList[2], 'grouplog-merge-line-0');
-        $this->assertStringContainsString(self::PREFIX . 'group extra ', $messageList[1], 'grouplog-merge-line-1');
-        $this->assertStringContainsString(self::PREFIX . 'group merge ', $messageList[0], 'grouplog-merge-line-2');
+
+        $this->assertStringStartsWith(self::PREFIX . 'group merge ', $messageList[0], 'grouplog-merge-line-0');
+        $this->assertStringStartsWith(self::PREFIX . 'group extra ', $messageList[1], 'grouplog-merge-line-1');
+        $this->assertStringStartsWith('Added artist ', $messageList[2], 'grouplog-merge-line-2');
+        $this->assertStringStartsWith(self::PREFIX . 'group first ', $messageList[3], 'grouplog-merge-line-3');
+        $this->assertStringStartsWith('Added artist ', $messageList[4], 'grouplog-merge-line-4');
     }
 
     public function testTorrentlLog(): void {
