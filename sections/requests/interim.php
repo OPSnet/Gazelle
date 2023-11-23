@@ -18,7 +18,7 @@ if ($action === 'unfill') {
 }
 
 echo $Twig->render('request/interim.twig', [
-    'auth'     => $Viewer->auth(),
-    'id'       => $request->id(),
-    'action'   => $action,
+    'action'  => $action,
+    'request' => $request,
+    'viewer'  => $Viewer,
 ]);
