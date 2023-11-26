@@ -24,7 +24,7 @@ if ($_POST['oldtags'] ?? null) {
 $new = false;
 if ($_POST['newtag'] ?? null) {
     authorize();
-    $id = $tagMan->officialize($_POST['newtag'], $Viewer->id());
+    $id = $tagMan->officialize($_POST['newtag'], $Viewer);
     if ($id) {
         $new = $tagMan->findById($id);
     }
