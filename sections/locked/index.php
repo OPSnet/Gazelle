@@ -1,6 +1,10 @@
 <?php
 
 if (!$Viewer->permitted('users_mod') && !$Viewer->isLocked()) {
-    error(404);
+    header('Location: /');
+    exit;
 }
-require_once('default.php');
+
+echo $Twig->render('user/locked.twig', [
+    'viewer' => $Viewer,
+]);
