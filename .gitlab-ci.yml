@@ -61,6 +61,8 @@ e2e-tests:
     - name: percona:ps-8.0.29-21
       alias: mysql
       command:
+        - --datadir=/dev/shm/mysql
+        - --binlog-do-db=
         - --group-concat-max-len=1048576
         - --character-set-server=utf8mb4
         - --collation-server=utf8mb4_0900_ai_ci
@@ -75,6 +77,7 @@ e2e-tests:
     POSTGRES_DB_USER: gazelle
     PGUSER: $POSTGRES_DB_USER
     PGDATABASE: $POSTGRES_DATABASE
+    PGDATA: /dev/shm/pg
     TEST_SSL_HOST: $TEST_SSL_HOST
     #ELECTRON_RUN_AS_NODE: 1
   cache:
