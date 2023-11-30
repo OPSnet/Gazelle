@@ -30,6 +30,74 @@ class Bookmark extends \Gazelle\BaseUser {
     }
 
     /**
+     * Bookmark an object by a user
+     *
+     * @param string $type (on of artist, collage, request, torrent)
+     * @param int $id The ID of the object
+     */
+    public function create(string $type, int $id): bool {
+        [$table, $column] = $this->schema($type);
+        if ((bool)self::$db->scalar("
+            SELECT 1 FROM $table WHERE UserID = ? AND $column = ?
+            ", $this->user->id(), $id
+        )) {
+            // overbooked
+            return false;
+        }
+        switch ($type) {
+            case 'torrent':
+                self::$db->prepared_query("
+                    INSERT IGNORE INTO bookmarks_torrents
+                           (GroupID,  UserID, Sort)
+                    VALUES (?,        ?,
+                        (1 + coalesce((SELECT max(m.Sort) from bookmarks_torrents m WHERE m.UserID = ?), 0))
+                    )", $id, $this->user->id(), $this->user->id()
+                );
+                self::$cache->delete_multi(["u_book_t_" . $this->user->id(), "bookmarks_{$type}_" . $this->user->id(), "bookmarks_group_ids_" . $this->user->id()]);
+
+                $torMan = (new \Gazelle\Manager\Torrent)->setViewer($this->user);
+                $tgroup = (new \Gazelle\Manager\TGroup)->findById($id);
+                $tgroup->stats()->increment('bookmark_total');
+
+                // RSS feed stuff
+                $Feed = new \Gazelle\Feed;
+                foreach ($tgroup->torrentIdList() as $id) {
+                    $torrent = $torMan->findById($id);
+                    if (is_null($torrent)) {
+                        continue;
+                    }
+                    $Feed->populate('torrents_bookmarks_t_' . $this->user->announceKey(),
+                        $Feed->item(
+                            $torrent->name() . ' ' . '[' . $torrent->label($this->user) . ']',
+                            \Text::strip_bbcode($tgroup->description()),
+                            "torrents.php?action=download&id={$id}&torrent_pass=[[PASSKEY]]",
+                            date('r'),
+                            $this->user->username(),
+                            $torrent->group()->location(),
+                            implode(',', $tgroup->tagNameList()),
+                        )
+                    );
+                }
+                break;
+            case 'request':
+                self::$db->prepared_query("
+                    INSERT IGNORE INTO bookmarks_requests (RequestID, UserID) VALUES (?, ?)
+                    ", $id, $this->user->id()
+                );
+                self::$cache->delete_value("bookmarks_{$type}_" . $this->user->id());
+                break;
+            default:
+                self::$db->prepared_query("
+                    INSERT IGNORE INTO $table ($column, UserID) VALUES (?, ?)
+                    ", $id, $this->user->id()
+                );
+                self::$cache->delete_value("bookmarks_{$type}_" . $this->user->id());
+                break;
+        }
+        return true;
+    }
+
+    /**
      * Fetch all bookmarks of a certain type for a user.
      * This may seem like an inefficient way to go about this, but it means
      * that the database is only hit once, no matter how * many checks are
@@ -207,72 +275,21 @@ class Bookmark extends \Gazelle\BaseUser {
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
-    /**
-     * Bookmark an object by a user
-     *
-     * @param string $type (on of artist, collage, request, torrent)
-     * @param int $id The ID of the object
-     */
-    public function create(string $type, int $id): bool {
-        [$table, $column] = $this->schema($type);
-        if ((bool)self::$db->scalar("
-            SELECT 1 FROM $table WHERE UserID = ? AND $column = ?
-            ", $this->user->id(), $id
-        )) {
-            // overbooked
-            return false;
-        }
-        switch ($type) {
-            case 'torrent':
-                self::$db->prepared_query("
-                    INSERT IGNORE INTO bookmarks_torrents
-                           (GroupID,  UserID, Sort)
-                    VALUES (?,        ?,
-                        (1 + coalesce((SELECT max(m.Sort) from bookmarks_torrents m WHERE m.UserID = ?), 0))
-                    )", $id, $this->user->id(), $this->user->id()
-                );
-                self::$cache->delete_multi(["u_book_t_" . $this->user->id(), "bookmarks_{$type}_" . $this->user->id(), "bookmarks_group_ids_" . $this->user->id()]);
-
-                $torMan = (new \Gazelle\Manager\Torrent)->setViewer($this->user);
-                $tgroup = (new \Gazelle\Manager\TGroup)->findById($id);
-                $tgroup->stats()->increment('bookmark_total');
-
-                // RSS feed stuff
-                $Feed = new \Gazelle\Feed;
-                foreach ($tgroup->torrentIdList() as $id) {
-                    $torrent = $torMan->findById($id);
-                    if (is_null($torrent)) {
-                        continue;
-                    }
-                    $Feed->populate('torrents_bookmarks_t_' . $this->user->announceKey(),
-                        $Feed->item(
-                            $torrent->name() . ' ' . '[' . $torrent->label($this->user) . ']',
-                            \Text::strip_bbcode($tgroup->description()),
-                            "torrents.php?action=download&id={$id}&torrent_pass=[[PASSKEY]]",
-                            date('r'),
-                            $this->user->username(),
-                            $torrent->group()->location(),
-                            implode(',', $tgroup->tagNameList()),
-                        )
-                    );
-                }
-                break;
-            case 'request':
-                self::$db->prepared_query("
-                    INSERT IGNORE INTO bookmarks_requests (RequestID, UserID) VALUES (?, ?)
-                    ", $id, $this->user->id()
-                );
-                self::$cache->delete_value("bookmarks_{$type}_" . $this->user->id());
-                break;
-            default:
-                self::$db->prepared_query("
-                    INSERT IGNORE INTO $table ($column, UserID) VALUES (?, ?)
-                    ", $id, $this->user->id()
-                );
-                self::$cache->delete_value("bookmarks_{$type}_" . $this->user->id());
-                break;
-        }
-        return true;
+    public function removeSnatched(): int {
+        self::$db->prepared_query("
+            DELETE b
+            FROM bookmarks_torrents AS b
+            INNER JOIN (
+                SELECT DISTINCT t.GroupID
+                FROM torrents AS t
+                INNER JOIN xbt_snatched AS s ON (s.fid = t.ID)
+                WHERE s.uid = ?
+            ) AS s USING (GroupID)
+            WHERE b.UserID = ?
+            ", $this->user->id(), $this->user->id()
+        );
+        self::$cache->delete_value("bookmarks_group_ids_" . $this->user->id());
+        return self::$db->affected_rows();
     }
 
     /**
@@ -292,22 +309,5 @@ class Bookmark extends \Gazelle\BaseUser {
             (new \Gazelle\TGroup($id))->stats()->increment('bookmark_total', -1);
         }
         return $affected;
-    }
-
-    public function removeSnatched(): int {
-        self::$db->prepared_query("
-            DELETE b
-            FROM bookmarks_torrents AS b
-            INNER JOIN (
-                SELECT DISTINCT t.GroupID
-                FROM torrents AS t
-                INNER JOIN xbt_snatched AS s ON (s.fid = t.ID)
-                WHERE s.uid = ?
-            ) AS s USING (GroupID)
-            WHERE b.UserID = ?
-            ", $this->user->id(), $this->user->id()
-        );
-        self::$cache->delete_value("bookmarks_group_ids_" . $this->user->id());
-        return self::$db->affected_rows();
     }
 }

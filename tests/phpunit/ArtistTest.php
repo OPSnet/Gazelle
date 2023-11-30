@@ -281,6 +281,25 @@ class ArtistTest extends TestCase {
         $this->assertIsArray($payload['statistics'], 'artist-payload-statistics');
     }
 
+    public function testArtistBookmark(): void {
+        $name = 'phpunit.' . randomString(12);
+        $manager = new \Gazelle\Manager\Artist;
+        [$artistId, $aliasId] = $manager->create($name);
+        $artist = $manager->findById($artistId);
+        $this->artistIdList[] = $artist->id();
+
+        (new Gazelle\User\Bookmark($this->user))->create('artist', $artistId);
+        $json = new Gazelle\Json\Bookmark\Artist(new Gazelle\User\Bookmark($this->user));
+        $this->assertEquals(
+            [[
+                'artistId'   => $artistId,
+                'artistName' => $name,
+            ]],
+            $json->payload(),
+            'artist-json-bookmark-payload'
+        );
+    }
+
     public function testArtistDiscogs(): void {
         $manager = new \Gazelle\Manager\Artist;
         [$artistId, $aliasId] = $manager->create('phpunit.' . randomString(12));
