@@ -32,17 +32,9 @@ class ReaperTest extends TestCase {
     public function setUp(): void {
         // we need two users, one who uploads and one who snatches
         $this->userList = [
-            Helper::makeUser('reaper.' . randomString(10), 'reaper'),
-            Helper::makeUser('reaper.' . randomString(10), 'reaper'),
+            Helper::makeUser('reaper.' . randomString(10), 'reaper', enable: true, clearInbox: true),
+            Helper::makeUser('reaper.' . randomString(10), 'reaper', enable: true, clearInbox: true),
         ];
-        // enable them and wipe their inboxes (there is only one message)
-        foreach ($this->userList as $user) {
-            $user->setField('Enabled', '1')->modify();
-            $pmMan = new Gazelle\Manager\PM($user);
-            foreach ((new Gazelle\User\Inbox($user))->messageList($pmMan, 1, 0) as $pm) {
-                $pm->remove();
-            }
-        }
 
         // create a torrent group
         $this->tgroupName = 'phpunit reaper ' . randomString(6);
@@ -191,8 +183,7 @@ class ReaperTest extends TestCase {
     public function testNeverSeeded(): void {
         $user = $this->torrentList[0]->uploader();
         $pmMan = new Gazelle\Manager\PM($user);
-        $inbox = new Gazelle\User\Inbox($user);
-        $this->assertEquals(0, $inbox->messageTotal(), 'never-inbox-initial');
+        $this->assertEquals(0, $user->inbox()->messageTotal(), 'never-inbox-initial');
 
         $torMan  = new Gazelle\Manager\Torrent;
         $userMan = new Gazelle\Manager\User;
@@ -228,8 +219,8 @@ class ReaperTest extends TestCase {
         );
 
         // check the notification
-        $this->assertEquals(1, $inbox->messageTotal(), 'never-message-initial-count');
-        $pm = $inbox->messageList($pmMan, 1, 0)[0];
+        $this->assertEquals(1, $user->inbox()->messageTotal(), 'never-message-initial-count');
+        $pm = $user->inbox()->messageList($pmMan, 1, 0)[0];
         $this->assertEquals('You have a non-seeded new upload to rescue', $pm->subject(), 'never-message-initial-subject');
         $pm->remove();
 
@@ -258,8 +249,8 @@ class ReaperTest extends TestCase {
             'reaper-unseeded-stats-1'
         );
 
-        $this->assertEquals(1, $inbox->messageTotal(), 'never-message-2');
-        $pm   = $inbox->messageList($pmMan, 1, 0)[0];
+        $this->assertEquals(1, $user->inbox()->messageTotal(), 'never-message-2');
+        $pm   = $user->inbox()->messageList($pmMan, 1, 0)[0];
         $body = $pm->postList(1, 0)[0]['body'];
         $this->assertEquals('You have 2 non-seeded new uploads to rescue', $pm->subject(), 'never-message-2');
         $this->assertStringContainsString("Dear {$this->userList[0]->username()}", $body, 'never-body-2-dear');
@@ -277,7 +268,7 @@ class ReaperTest extends TestCase {
         // we no longer need to consider the torrent creation date.
         $this->modifyUnseededInterval($this->torrentList[1], NOTIFY_NEVER_SEEDED_FINAL_HOUR + 1);
 
-        $this->assertEquals(0, $inbox->messageTotal(), 'never-message-final-none');
+        $this->assertEquals(0, $user->inbox()->messageTotal(), 'never-message-final-none');
         $neverFinal = $reaper->finalNeverSeededList();
         $this->assertCount(1, $neverFinal, 'never-final-0'); // one user ...
         $this->assertEquals(1,                               // ... with one upload
@@ -299,8 +290,8 @@ class ReaperTest extends TestCase {
             'reaper-unseeded-stats-final'
         );
 
-        $this->assertEquals(1, $inbox->messageTotal(), 'never-message-final-count');
-        $pm   = $inbox->messageList($pmMan, 1, 0)[0];
+        $this->assertEquals(1, $user->inbox()->messageTotal(), 'never-message-final-count');
+        $pm   = $user->inbox()->messageList($pmMan, 1, 0)[0];
         $body = $pm->postList(1, 0)[0]['body'];
         $this->assertEquals('You have a non-seeded new upload scheduled for deletion very soon', $pm->subject(), 'never-message-final-subject');
         $this->assertStringContainsString("Dear {$this->userList[0]->username()}", $body, 'never-body-3-dear');
@@ -316,7 +307,7 @@ class ReaperTest extends TestCase {
         $this->assertCount(1, $list, 'never-reap-list');
 
         $this->assertEquals(1, $reaper->removeNeverSeeded(), 'never-reap-remove');
-        $pm   = $inbox->messageList($pmMan, 1, 0)[0];
+        $pm   = $user->inbox()->messageList($pmMan, 1, 0)[0];
         $body = $pm->postList(1, 0)[0]['body'];
         $this->assertEquals('1 of your uploads has been deleted for inactivity (never seeded)', $pm->subject(), 'never-remove-message');
         $this->assertStringContainsString("Dear {$this->userList[0]->username()}", $body, 'never-remove-body-dear');
@@ -371,8 +362,8 @@ class ReaperTest extends TestCase {
         );
 
         $inboxList = [
-            new Gazelle\User\Inbox($this->userList[0]),
-            new Gazelle\User\Inbox($this->userList[1]),
+            $this->userList[0]->inbox(),
+            $this->userList[1]->inbox(),
         ];
         $pmMan = [
             new Gazelle\Manager\PM($this->userList[0]),
@@ -515,8 +506,8 @@ class ReaperTest extends TestCase {
             Gazelle\Torrent\ReaperNotify::INITIAL
         );
 
-        $this->assertEquals(0, (new Gazelle\User\Inbox($this->userList[0]))->messageTotal(), 'never-uploader-no-notify');
-        $this->assertEquals(0, (new Gazelle\User\Inbox($this->userList[1]))->messageTotal(), 'never-snatcher-no-notify');
+        $this->assertEquals(0, $this->userList[0]->inbox()->messageTotal(), 'never-uploader-no-notify');
+        $this->assertEquals(0, $this->userList[1]->inbox()->messageTotal(), 'never-snatcher-no-notify');
     }
 
     public function testUnseededNotify(): void {
@@ -543,8 +534,8 @@ class ReaperTest extends TestCase {
             Gazelle\Torrent\ReaperNotify::INITIAL
         );
 
-        $this->assertEquals(1, (new Gazelle\User\Inbox($this->userList[0]))->messageTotal(), 'unseeded-uploader-no-notify');
-        $this->assertEquals(0, (new Gazelle\User\Inbox($this->userList[1]))->messageTotal(), 'unseeded-snatcher-no-notify');
+        $this->assertEquals(1, $this->userList[0]->inbox()->messageTotal(), 'unseeded-uploader-no-notify');
+        $this->assertEquals(0, $this->userList[1]->inbox()->messageTotal(), 'unseeded-snatcher-no-notify');
 
         $timeline = $reaper->timeline();
         $this->assertEquals([2], array_values($timeline), 'reaper-two-today');

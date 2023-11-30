@@ -94,8 +94,13 @@ class Applicant extends BaseObject {
         }
         $noteId = $this->thread()->saveNote($poster, $body, $visibility);
         if ($visibility == 'public' && $this->role()->isStaffViewer($poster)) {
-            (new Manager\User)->sendPM(
-                $this->userId(), 0,
+            /**
+             * We could send from the poster account, but that could
+             * direct the conversation away from the application page.
+             * Sending from System ensures the discussion is not fragmented
+             * between inboxes.
+             */
+            (new User($this->userId()))->inbox()->createSystem(
                 "You have a reply to your {$this->role()->title()} application",
                 self::$twig->render('applicant/pm-reply.bbcode.twig', [
                     'applicant' => $this,

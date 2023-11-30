@@ -554,7 +554,8 @@ $reclaimMsg
 --OPS Staff
 END_MSG;
                 }
-                $userMan->sendPM($siteUserId, 0, "Your buffer stats have been updated", $Body);
+                (new \Gazelle\User($siteUserId))->inbox()
+                    ->createSystem("Your buffer stats have been updated", $Body);
             }
 
             /* insert this first to avoid a potential reallocation */

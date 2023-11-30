@@ -49,6 +49,15 @@ class User extends BaseObject {
     public function location(): string { return 'user.php?id=' . $this->id; }
 
     /**
+     * Delegate snatch status methods to the User\Inbox class.
+     * A new object is instantiated each time. This is nearly
+     * always what you need, if just creating a new conversation.
+     */
+    public function inbox(): User\Inbox {
+        return new User\Inbox($this);
+    }
+
+    /**
      * Delegate snatch status methods to the User\Snatch class
      */
     public function snatch(): User\Snatch {
@@ -1024,27 +1033,32 @@ class User extends BaseObject {
                 . "The warning is set to expire on $warnTime. Remember, repeated warnings may jeopardize "
                 . "your account.\nReason: $userMessage";
         }
-        (new \Gazelle\Manager\User)->sendPM($this->id(), 0, $subject, $message);
+        $this->inbox()->createSystem($subject, $message);
         return $warning->add($reason, "$duration week" . plural($duration), $staff);
     }
 
     /**
      * Issue a warning for a comment or forum post
      */
-    public function warnPost(BaseObject $post, int $weekDuration, \Gazelle\User $staffer,
-                             string $staffReason, string $userMessage): void {
+    public function warnPost(
+        BaseObject $post,
+        int $weekDuration,
+        \Gazelle\User $staffer,
+        string $staffReason,
+        string $userMessage
+): void {
         if (!$weekDuration) {  // verbal warning
-            $subject = 'You have received a verbal warning';
-            $body    = "You have received a verbal warning by [user]{$staffer->username()}[/user] for {$post->publicLocation()}.\n\n[quote]{$userMessage}[/quote]";
             $warned  = "Verbally warned";
-            (new \Gazelle\Manager\User)->sendPM($this->id(), 0, $subject, $body);
+            $this->inbox()->createSystem(
+                "You have received a verbal warning",
+                "You have received a verbal warning by [user]{$staffer->username()}[/user] for {$post->publicLocation()}.\n\n[quote]{$userMessage}[/quote]"
+            );
         } else {
             $message = "for {$post->publicLocation()}.\n\n[quote]{$userMessage}[/quote]";
             $expiry  = $this->warn($weekDuration, "{$post->publicLocation()} - $staffReason", $staffer, $message);
             $warned  = "Warned until $expiry";
         }
-        $this->addForumWarning(
-            "$warned by {$staffer->username()} for {$post->publicLocation()}\nReason: $staffReason")
+        $this->addForumWarning("$warned by {$staffer->username()} for {$post->publicLocation()}\nReason: $staffReason")
             ->modify();
     }
 
@@ -1272,22 +1286,6 @@ class User extends BaseObject {
             ", $this->id
         );
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
-    }
-
-    public function inboxUnreadCount(): int {
-        $unread = self::$cache->get_value('inbox_new_' . $this->id);
-        if ($unread === false) {
-            $unread = (int)self::$db->scalar("
-                SELECT count(*)
-                FROM pm_conversations_users
-                WHERE UnRead    = '1'
-                    AND InInbox = '1'
-                    AND UserID  = ?
-                ", $this->id
-            );
-            self::$cache->cache_value('inbox_new_' . $this->id, $unread, 0);
-        }
-        return $unread;
     }
 
     public function supportCount(int $newClassId, int $levelClassId): int {

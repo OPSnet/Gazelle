@@ -2,15 +2,24 @@
 
 namespace Gazelle;
 
+/**
+ * A PM object is created from an inbox, either from a user with
+ * User\Inbox::create(), or a system PM via User\Inbox::createSystem()
+ *
+ * Instantiating a PM object afterwards necessarily requires a user
+ * object. This is the simplest, more secure method to ensure some
+ * random user cannot access another PM object by accident.
+ */
+
 class PM extends Base {
     protected const CACHE_KEY = 'pm_%d_%d';
 
-    protected array $info = [];
+    protected array|null $info;
 
     public function __construct(
         protected int $id,
         protected User $user
-    ) { }
+    ) {}
 
     public function id(): int {
         return $this->id;
@@ -18,75 +27,75 @@ class PM extends Base {
 
     public function flush(): static {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id, $this->user->id()));
-        $this->info = [];
+        unset($this->info);
         return $this;
     }
 
     public function info(): array {
-        if (empty($this->info)) {
-            $key = sprintf(self::CACHE_KEY, $this->id, $this->user->id());
-            $info = self::$cache->get_value($key);
-            if ($info === false) {
-                $info = self::$db->rowAssoc("
-                    SELECT c.Subject   AS subject,
-                        cu.Sticky      AS pinned,
-                        cu.UnRead      AS unread,
-                        cu.ForwardedTo AS forwarded_to,
-                        cu.SentDate    AS sent_date,
-                        cu2.UserID     AS sender_id
-                    FROM pm_conversations AS c
-                    INNER JOIN pm_conversations_users cu ON (cu.ConvID = c.ID)
-                    LEFT JOIN pm_conversations_users cu2 ON (cu2.ConvID = c.ID AND cu2.UserID != ?)
-                    WHERE c.ID = ?
-                        AND cu.UserID = ?
-                    ", $this->user->id(), $this->id, $this->user->id()
-                );
-                foreach (['pinned', 'unread'] as $field) {
-                    $info[$field] = ($info[$field] == '1');
-                }
-
-                // get the senders who have sent a message in this thread
-                self::$db->prepared_query("
-                    SELECT DISTINCT pm.SenderID
-                    FROM pm_messages pm
-                    WHERE pm.ConvID = ?
-                    ", $this->id
-                );
-                $info['sender_list'] = self::$db->collect(0, false);
-
-                // get the recipients of messages in this thread.
-                self::$db->prepared_query("
-                    SELECT DISTINCT cu.UserID
-                    FROM pm_conversations_users cu
-                    WHERE cu.ForwardedTo IN (0, cu.UserID)
-                        AND cu.ConvID = ?
-                        AND cu.UserID != ?
-                    ", $this->id, $this->user->id()
-                );
-                $info['recipient_list'] = [$this->user->id(), ...self::$db->collect(0, false)];
-                self::$cache->cache_value($key, $info, 86400);
-                $info['from_cache'] = false;
-            }
-            $this->info = $info;
-
-            $manager = new Manager\User;
-            $this->info['forwarded_to'] = $manager->findById($this->info['forwarded_to'] ?? 0);
-
-            $this->info['sender'] = [];
-            foreach ($this->info['sender_list'] as $userId) {
-                $this->info['sender'][$userId] = $manager->findById($userId);
+        if (isset($this->info)) {
+            return $this->info;
+        }
+        $key = sprintf(self::CACHE_KEY, $this->id, $this->user->id());
+        $info = self::$cache->get_value($key);
+        if ($info === false) {
+            $info = self::$db->rowAssoc("
+                SELECT c.Subject   AS subject,
+                    cu.Sticky      AS pinned,
+                    cu.UnRead      AS unread,
+                    cu.ForwardedTo AS forwarded_to,
+                    cu.SentDate    AS sent_date,
+                    cu2.UserID     AS sender_id
+                FROM pm_conversations AS c
+                INNER JOIN pm_conversations_users cu ON (cu.ConvID = c.ID)
+                LEFT JOIN pm_conversations_users cu2 ON (cu2.ConvID = c.ID AND cu2.UserID != ?)
+                WHERE c.ID = ?
+                    AND cu.UserID = ?
+                ", $this->user->id(), $this->id, $this->user->id()
+            );
+            foreach (['pinned', 'unread'] as $field) {
+                $info[$field] = ($info[$field] == '1');
             }
 
-            // If the viewer has lost PM privileges, non-Staff recipients are filtered out
-            $this->info['recipient'] = [];
-            $pmRevoked = $this->user->disablePm();
-            foreach ($this->info['recipient_list'] as $userId) {
-                $recipient = $manager->findById($userId);
-                if ($pmRevoked && !$recipient->isStaff()) {
-                    continue;
-                }
-                $this->info['recipient'][] = $userId;
+            // get the senders who have sent a message in this thread
+            self::$db->prepared_query("
+                SELECT DISTINCT pm.SenderID
+                FROM pm_messages pm
+                WHERE pm.ConvID = ?
+                ", $this->id
+            );
+            $info['sender_list'] = self::$db->collect(0, false);
+
+            // get the recipients of messages in this thread.
+            self::$db->prepared_query("
+                SELECT DISTINCT cu.UserID
+                FROM pm_conversations_users cu
+                WHERE cu.ForwardedTo IN (0, cu.UserID)
+                    AND cu.ConvID = ?
+                    AND cu.UserID != ?
+                ", $this->id, $this->user->id()
+            );
+            $info['recipient_list'] = [$this->user->id(), ...self::$db->collect(0, false)];
+            self::$cache->cache_value($key, $info, 86400);
+        }
+        $this->info = $info;
+
+        $manager = new Manager\User;
+        $this->info['forwarded_to'] = $manager->findById($this->info['forwarded_to'] ?? 0);
+
+        $this->info['sender'] = [];
+        foreach ($this->info['sender_list'] as $userId) {
+            $this->info['sender'][$userId] = $manager->findById($userId);
+        }
+
+        // If the viewer has lost PM privileges, non-Staff recipients are filtered out
+        $this->info['recipient'] = [];
+        $pmRevoked = $this->user->disablePm();
+        foreach ($this->info['recipient_list'] as $userId) {
+            $recipient = $manager->findById($userId);
+            if ($pmRevoked && !$recipient->isStaff()) {
+                continue;
             }
+            $this->info['recipient'][] = $userId;
         }
         return $this->info;
     }

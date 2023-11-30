@@ -378,8 +378,8 @@ class Bonus extends \Gazelle\BaseUser {
         return $amount;
     }
 
-    public function sendPmToOther(\Gazelle\User $receiver, int $amount, string $message): int {
-        return (new \Gazelle\Manager\User)->sendPM($receiver->id(), 0,
+    public function sendPmToOther(\Gazelle\User $receiver, int $amount, string $message): \Gazelle\PM {
+        return $receiver->inbox()->createSystem(
             "Here " . ($amount == 1 ? 'is' : 'are') . ' ' . article($amount) . " freeleech token" . plural($amount) . "!",
             self::$twig->render('bonus/token-other-message.bbcode.twig', [
                 'to'       => $receiver->username(),

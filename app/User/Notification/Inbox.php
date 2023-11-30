@@ -20,7 +20,7 @@ class Inbox extends AbstractNotification {
     }
 
     public function load(): bool {
-        $total = $this->user->inboxUnreadCount();
+        $total = $this->user->inbox()->unreadTotal();
         if ($total) {
             $this->title = 'You have ' . article($total) . ' new message' . plural($total);
             $this->url   = "inbox.php";

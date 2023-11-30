@@ -283,13 +283,14 @@ if ($Viewer->permitted('users_warn')) {
         $duration = 'week' . plural($reduce);
         $expiry = $warning->add($reason, "$reduce $duration", $Viewer);
         $userMessage = trim($_POST['WarnReason'] ?? '');
-        $subject = "Your warning has been reduced to $reduce $duration";
-        $body = "Your warning has been reduced to $reduce $duration, set to expire at $expiry, "
-            . "by [user]{$Viewer->username()}[/user].";
+        $body = "Your warning has been reduced to $reduce $duration, set to expire at $expiry, by [user]{$Viewer->username()}[/user].";
         if ($userMessage) {
             $body .= " Reason:\n[quote]{$userMessage}[/quote].";
         }
-        $userMan->sendPM($userId, 0, $subject, $body);
+        $user->inbox()->createSystem(
+            "Your warning has been reduced to $reduce $duration",
+            $body,
+        );
     } elseif ($weeks || $extend) {
         $staffReason = $reason ?: ($extend ? 'warning extension' : 'no reason');
         $user->warn($extend ?: $weeks, $staffReason, $Viewer, $_POST['WarnReason'] ?? 'none given');
@@ -462,8 +463,7 @@ if ($disableIRC !== $user->disableIRC()) {
 
 if ($privChange && $userReason) {
     sort($privChange);
-    $userMan->sendPM(
-        $userId, 0,
+    $user->inbox()->createSystem(
         count($privChange) == 1 ? $privChange[0] : 'Multiple privileges have changed on your account',
         $Twig->render('user/pm-privilege.twig', [
             'privs'  => $privChange,
@@ -475,8 +475,8 @@ if ($privChange && $userReason) {
 }
 
 $userStatus = match ($_POST['UserStatus']) {
-    '1'     =>  UserStatus::enabled,
-    '2'     =>  UserStatus::disabled,
+    '1'     => UserStatus::enabled,
+    '2'     => UserStatus::disabled,
     default => UserStatus::unconfirmed,
 };
 if ($userStatus != $user->userStatus() && $Viewer->permitted('users_disable_users')) {

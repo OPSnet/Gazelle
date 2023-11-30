@@ -58,11 +58,15 @@ class DemoteUsersRatio extends \Gazelle\Task {
 
         self::$db->set_query_id($query);
         $demotions = 0;
-        while ([$userID] = self::$db->next_record()) {
+        while ([$userId] = self::$db->next_record()) {
+            $user = $userMan->findById($userId);
+            if (is_null($user)) {
+                continue;
+            }
             $demotions++;
-            $this->debug("Demoting $userID to $classString for insufficient ratio", $userID);
-            self::$cache->delete_value("u_$userID");
-            $userMan->sendPM($userID, 0,
+            $this->debug("Demoting $userId to $classString for insufficient ratio", $userId);
+            $user->flush();
+            $user->inbox()->createSystem(
                 "You have been demoted to $classString",
                 "You now only meet the requirements for the \"$classString\" user class.\n\nTo read more about "
                     . SITE_NAME

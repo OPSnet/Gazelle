@@ -17,16 +17,18 @@ if (is_null($comment)) {
 if ($comment->userId() != $Viewer->id() && !$Viewer->permitted('site_moderate_forums')) {
     error(403, true);
 }
+$user = (new Gazelle\Manager\User)->findById($comment->userId());
+if (is_null($user)) {
+    error(0, true);
+}
 
 $comment->setField('Body', $body)->setField('EditedUserID', $Viewer->id())->modify();
 if ((bool)($_POST['pm'] ?? false) && !$comment->isAuthor($Viewer->id())) {
     // Send a PM to the user to notify them of the edit
-    $id = $comment->id();
     $url = $comment->publicUrl('action=jump');
-    $moderator = "[url=" . $Viewer->url() . "]" . $Viewer->username() . "[/url]";
-    (new Gazelle\Manager\User)-> sendPM($comment->userId(), 0,
-        "Your comment #$id has been edited",
-        "One of your comments has been edited by $moderator: [url]{$url}[/url]"
+    $user->inbox()->createSystem(
+        "Your comment #{$comment->id()} has been edited",
+        "One of your comments has been edited by [url={$Viewer->url()}]{$Viewer->username()}[/url]: [url]{$url}[/url]"
     );
 }
 

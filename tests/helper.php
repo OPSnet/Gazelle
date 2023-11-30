@@ -1,5 +1,7 @@
 <?php
 
+use Gazelle\Enum\UserStatus;
+
 class Helper {
     public static function makeTGroupEBook(
         string        $name,
@@ -102,15 +104,30 @@ class Helper {
         );
     }
 
-    public static function makeUser(string $username, string $tag): \Gazelle\User {
+    public static function makeUser(string $username, string $tag, bool $enable = false, bool $clearInbox = false): \Gazelle\User {
         $_SERVER['HTTP_USER_AGENT'] = 'phpunit';
-        return (new Gazelle\UserCreator)
+        $user = (new Gazelle\UserCreator)
             ->setUsername($username)
             ->setEmail(randomString(6) . "@{$tag}.example.com")
             ->setPassword(randomString())
             ->setIpaddr('127.0.0.1')
             ->setAdminComment("Created by tests/helper/User($tag)")
             ->create();
+        if ($enable) {
+            $user->setField('Enabled', UserStatus::enabled->value)->modify();
+        }
+        if ($clearInbox) {
+            $user = self::clearInbox($user);
+        }
+        return $user;
+    }
+
+    public static function clearInbox(\Gazelle\User $user): \Gazelle\User {
+        $pmMan = new \Gazelle\Manager\PM($user);
+        foreach ($user->inbox()->messageList($pmMan, 1, 0) as $pm) {
+            $pm->remove();
+        }
+        return $user;
     }
 
     public static function makeUserByInvite(string $username, string $key): \Gazelle\User {

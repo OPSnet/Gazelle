@@ -13,16 +13,9 @@ class SearchReportTest extends TestCase {
 
     public function setUp(): void {
         $this->userList = [
-            Helper::makeUser('searchrep.' . randomString(10), 'searchrep'),
-            Helper::makeUser('searchrep.' . randomString(10), 'searchrep'),
+            Helper::makeUser('searchrep.' . randomString(10), 'searchrep', enable: true, clearInbox: true),
+            Helper::makeUser('searchrep.' . randomString(10), 'searchrep', enable: true, clearInbox: true),
         ];
-        foreach ($this->userList as $user) {
-            $user->setField('Enabled', '1')->modify();
-            $pmMan = new \Gazelle\Manager\PM($user);
-            foreach ((new \Gazelle\User\Inbox($user))->messageList($pmMan, 1, 0) as $pm) {
-                $pm->remove();
-            }
-        }
 
         $this->collage = (new \Gazelle\Manager\Collage)->create(
             user:        $this->userList[0],

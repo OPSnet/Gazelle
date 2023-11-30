@@ -22,11 +22,13 @@ if ($Viewer->id() != $post->userId()) {
         error("You cannot edit someone else's post", true);
     }
     if ($_POST['pm'] ?? 0) {
-        (new Gazelle\Manager\User)->sendPM($post->userId(), 0,
+        $user = (new Gazelle\Manager\User)->findById($post->userId());
+        if (is_null($user)) {
+            error(0);
+        }
+        $user->inbox()->createSystem(
             "Your post #{$post->id()} has been edited",
-            sprintf('One of your posts has been edited by [url=%s]%s[/url]: [url]%s[/url]',
-                $Viewer->url(), $Viewer->username(), $post->url()
-            )
+            "One of your posts has been edited by [url={$Viewer->url()}]{$Viewer->username()}[/url]: [url]{$post->url()}[/url]"
         );
     }
 }

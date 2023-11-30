@@ -39,7 +39,7 @@ $new = $reportMan->create(
 );
 
 if ($other->uploaderId() != $Viewer->id()) {
-    (new Gazelle\Manager\User)->sendPM($other->uploaderId(), 0,
+    $other->uploader()->inbox()->createSystem(
         "One of your torrents has been reported",
         $Twig->render('reportsv2/new.twig', [
             'id'     => $other->id(),

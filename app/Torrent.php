@@ -254,7 +254,7 @@ class Torrent extends TorrentAbstract {
      *
      * @return int number of people messaged
      */
-    public function issueReseedRequest(User $viewer): int {
+    public function issueReseedRequest(User $viewer, Manager\User $userMan): int {
         self::$db->prepared_query('
             UPDATE torrents SET
                 LastReseedRequest = now()
@@ -281,21 +281,24 @@ class Torrent extends TorrentAbstract {
             'tdate'  => $this->created(),
         ];
 
-        $userMan   = new Manager\User;
         $groupId   = $this->groupId();
         $name      = $this->group()->text();
         $torrentId = $this->id;
 
         foreach ($notify as $userId => $info) {
-            $userMan->sendPM($userId, 0,
+            $user = $userMan->findById($userId);
+            if (is_null($user)) {
+                continue;
+            }
+            $user->inbox()->createSystem(
                 "Re-seed request for torrent $name",
-                self::$twig->render('torrent/reseed-pm.twig', [
+                self::$twig->render('torrent/reseed-pm.bbcode.twig', [
                     'action'     => $info['action'],
                     'date'       => $info['tdate'],
                     'group_id'   => $groupId,
                     'torrent_id' => $torrentId,
                     'name'       => $name,
-                    'user'       => new User($userId),
+                    'user'       => $user,
                     'viewer'     => $viewer,
                 ])
             );

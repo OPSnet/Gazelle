@@ -113,9 +113,9 @@ $report = $reportMan->create(
 );
 
 if (!$reportType->isInvisible() && $torrent->uploaderId() != $Viewer->id()) {
-    (new Gazelle\Manager\User)->sendPM($torrent->uploaderId(), 0,
+    $torrent->uploader()->inbox()->createSystem(
         "One of your torrents has been reported",
-        $Twig->render('reportsv2/new.twig', [
+        $Twig->render('reportsv2/new.bbcode.twig', [
             'id'     => $torrent->id(),
             'title'  => $reportType->name(),
             'reason' => $report->reason(),

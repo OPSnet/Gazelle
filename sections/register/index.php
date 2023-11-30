@@ -13,11 +13,9 @@ if (isset($_REQUEST['confirm'])) {
     }
     $user = $token->user();
     $user->setField('Enabled', UserStatus::enabled->value)->modify();
-    (new Gazelle\Manager\User)->sendPM($user->id(), 0,
+    $user->inbox()->createSystem(
         "Welcome to " . SITE_NAME,
-        $Twig->render('register/welcome.twig', [
-            'user' => $user,
-        ])
+        $Twig->render('register/welcome.bbcode.twig', ['user' => $user])
     );
     (new Gazelle\Tracker)->update_tracker('add_user', ['id' => $user->id(), 'passkey' => $user->announceKey()]);
     $Cache->increment('stats_user_count');

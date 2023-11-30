@@ -1,6 +1,6 @@
 <?php
 
-$inbox = new Gazelle\User\Inbox($Viewer);
+$inbox = $Viewer->inbox();
 $inbox->setFolder($_GET['section'] ?? $_GET['action'] ?? 'inbox');
 if (isset($_GET['searchtype'])) {
     $inbox->setSearchField($_GET['searchtype']);

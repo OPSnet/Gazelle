@@ -456,45 +456,6 @@ class User extends \Gazelle\BaseManager {
     }
 
     /**
-     * Sends a PM from $FromId to $ToId.
-     *
-     * @return int conversation Id
-     */
-    public function sendPM(int $toId, int $fromId, string $subject, string $body): int {
-        if ($toId === 0 || $toId === $fromId) {
-            // Don't allow users to send messages to the system or themselves
-            return 0;
-        }
-
-        $qid = self::$db->get_query_id();
-        self::$db->begin_transaction();
-        self::$db->prepared_query("
-            INSERT INTO pm_conversations (Subject) VALUES (?)
-            ", mb_substr($subject, 0, 255)
-        );
-        $convId = self::$db->inserted_id();
-
-        $placeholders = ["(?, ?, '1', '0', '1')"];
-        $args = [$toId, $convId];
-        if ($fromId !== 0) {
-            $placeholders[] = "(?, ?, '0', '1', '0')";
-            $args = array_merge($args, [$fromId, $convId]);
-        }
-
-        self::$db->prepared_query("
-            INSERT INTO pm_conversations_users
-                   (UserID, ConvID, InInbox, InSentbox, UnRead)
-            VALUES
-            " . implode(', ', $placeholders), ...$args
-        );
-        $this->deliverPM($toId, $fromId, $subject, $body, $convId);
-        self::$db->commit();
-        self::$db->set_query_id($qid);
-
-        return $convId;
-    }
-
-    /**
      * Send a reply from $FromId to $ToId.
      *
      * @return int conversation Id
@@ -565,7 +526,7 @@ class User extends \Gazelle\BaseManager {
                 continue;
             }
             $message = preg_replace('/%USERNAME%/', $user->username(), $template);
-            $this->sendPM($userId, $sender->id(), $subject, $message);
+            $user->inbox()->create($sender, $subject, $message);
             $total++;
         }
         return $total;
@@ -579,7 +540,10 @@ class User extends \Gazelle\BaseManager {
 
         $snatchers = self::$db->collect(0, false);
         foreach ($snatchers as $userId) {
-            $this->sendPM($userId, 0, $subject, $body);
+            $user = $this->findById($userId);
+            if ($user) {
+                $user->inbox()->createSystem($subject, $body);
+            }
         }
         $total = count($snatchers);
         (new \Gazelle\Log)->general($viewer->username() . " sent a mass PM to $total snatcher" . plural($total)
@@ -600,7 +564,10 @@ class User extends \Gazelle\BaseManager {
             . ".";
 
         if ($pmUploader) {
-            $this->sendPM($uploaderId, 0, $subject, sprintf($message, 'you uploaded'));
+            $user = $this->findById($uploaderId);
+            if ($user) {
+                $user->inbox()->createSystem($subject, sprintf($message, 'you uploaded'));
+            }
         }
         $seen = [$uploaderId];
 
@@ -615,7 +582,10 @@ class User extends \Gazelle\BaseManager {
         );
         $ids = self::$db->collect('uid');
         foreach ($ids as $userId) {
-            $this->sendPM($userId, 0, $subject, sprintf($message, 'you are seeding'));
+            $user = $this->findById($userId);
+            if ($user) {
+                $user->inbox()->createSystem($subject, sprintf($message, 'you are seeding'));
+            }
         }
         $seen = array_merge($seen, $ids);
 
@@ -630,7 +600,10 @@ class User extends \Gazelle\BaseManager {
         );
         $ids = self::$db->collect('uid');
         foreach ($ids as $userId) {
-            $this->sendPM($userId, 0, $subject, sprintf($message, 'you have snatched'));
+            $user = $this->findById($userId);
+            if ($user) {
+                $user->inbox()->createSystem($subject, sprintf($message, 'you have snatched'));
+            }
         }
         $seen = array_merge($seen, $ids);
 
@@ -645,7 +618,10 @@ class User extends \Gazelle\BaseManager {
         );
         $ids = self::$db->collect('UserID');
         foreach ($ids as $userId) {
-            $this->sendPM($userId, 0, $subject, sprintf($message, 'you have downloaded'));
+            $user = $this->findById($userId);
+            if ($user) {
+                $user->inbox()->createSystem($subject, sprintf($message, 'you have downloaded'));
+            }
         }
 
         return count(array_merge($seen, $ids));
@@ -989,7 +965,7 @@ class User extends \Gazelle\BaseManager {
                 $user->setField('PermissionID', $level['To'])
                     ->addStaffNote("Class changed to $toClass by System")
                     ->modify();
-                $this->sendPM($userId, 0,
+                $user->inbox()->createSystem(
                     "You have been promoted to $toClass",
                     "Congratulations on your promotion to $toClass!\n\nTo read more about "
                         . SITE_NAME
@@ -1046,7 +1022,7 @@ class User extends \Gazelle\BaseManager {
                 $user->setField('PermissionID', $level['From'])
                     ->addStaffNote("Class changed to $toClass by System")
                     ->modify();
-                $this->sendPM($userId, 0,
+                $user->inbox()->createSystem(
                     "You have been demoted to $toClass",
                     "You now only qualify for the \"$toClass\" user class.\n\nTo read more about "
                         . SITE_NAME
@@ -1371,13 +1347,13 @@ class User extends \Gazelle\BaseManager {
             $user->setField('can_leech', 0)
                 ->addStaffNote("Leeching privileges suspended by ratio watch system (required ratio: $ratio) for downloading more than 10 GBs on ratio watch.")
                 ->modify();
-            $tracker->update_tracker('update_user', ['passkey' => $user->announceKey(), 'can_leech' => '0']);
-            $this->sendPM( $userId, 0,
+            $user->inbox()->createSystem(
                 'Your download privileges have been removed',
                 'You have downloaded more than 10 GB while on Ratio Watch. Your leeching privileges have been suspended. Please reread the rules and refer to this guide on [url=wiki.php?action=article&name=ratiotips]how to improve your ratio[/url]',
             );
-            $processed++;
+            $tracker->update_tracker('update_user', ['passkey' => $user->announceKey(), 'can_leech' => '0']);
             $task?->debug("Disabling leech for {$user->label()}", $userId);
+            $processed++;
         }
         self::$db->commit();
         return $processed;
@@ -1409,13 +1385,12 @@ class User extends \Gazelle\BaseManager {
             if (is_null($user)) {
                 continue;
             }
-            $user->flush();
-            $tracker->update_tracker('update_user', ['passkey' => $user->announceKey(), 'can_leech' => '1']);
-            $task?->debug("Taking {$user->label()} off ratio watch", $userId);
-            $this->sendPM($userId, 0,
+            $user->inbox()->createSystem(
                 'You have been taken off Ratio Watch',
                 "Congratulations! Feel free to begin downloading again.\n To ensure that you do not get put on ratio watch again, please read the rules located [url=rules.php?p=ratio]here[/url].\n"
             );
+            $tracker->update_tracker('update_user', ['passkey' => $user->announceKey(), 'can_leech' => '1']);
+            $task?->debug("Taking {$user->label()} off ratio watch", $userId);
             $processed++;
         }
         self::$db->commit();
@@ -1445,7 +1420,7 @@ class User extends \Gazelle\BaseManager {
                 ->addStaffNote("Leeching ability suspended by ratio watch system (required ratio: $ratio)")
                 ->modify();
             $tracker->update_tracker('update_user', ['passkey' => $user->announceKey(), 'can_leech' => '0']);
-            $this->sendPM($userId, 0,
+            $user->inbox()->createSystem(
                 'Your downloading privileges have been suspended',
                 "As you did not raise your ratio in time, your downloading privileges have been revoked. You will not be able to download any torrents until your ratio is above your new required ratio."
             );
@@ -1481,13 +1456,12 @@ class User extends \Gazelle\BaseManager {
             if (is_null($user)) {
                 continue;
             }
-            $user->flush();
-            $this->sendPM($userId, 0,
+            $user->inbox()->createSystem(
                 'You have been put on Ratio Watch',
                 "This happens when your ratio falls below the requirements outlined in the rules located [url=rules.php?p=ratio]here[/url].\n For information about ratio watch, click the link above."
             );
-            $processed++;
             $task?->debug("Putting $userId on ratio watch", $userId);
+            $processed++;
         }
         self::$db->commit();
         return $processed;

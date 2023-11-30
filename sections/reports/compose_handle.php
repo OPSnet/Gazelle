@@ -12,12 +12,11 @@ $subject = trim($_POST['subject']);
 if (empty($subject)) {
     error("You can't send a message without a subject.");
 }
-
 $body = trim($_POST['body'] ?? '');
 if ($body === '') {
     error("You can't send a message without a body!");
 }
 
-$userMan->sendPM($recipient->id(), $Viewer->id(), $subject, $body);
+$recipient->inbox()->create($Viewer, $subject, $body);
 
 header('Location: reports.php');

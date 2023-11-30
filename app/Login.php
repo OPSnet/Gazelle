@@ -6,6 +6,7 @@ class Login extends Base {
     final public const NO_ERROR = 0;
     final public const ERR_CREDENTIALS = 1;
     final public const ERR_UNCONFIRMED = 2;
+    final public const FLOOD_COUNT = 'login_flood_total_%d';
 
     protected int $error = self::NO_ERROR;
     protected bool $persistent = false;
@@ -62,16 +63,30 @@ class Login extends Base {
         if ($user) {
             $this->watch->clearAttempts();
             $user->toggleAttr('inactive-warning-sent', false);
+            self::$cache->delete_value(sprintf(self::FLOOD_COUNT, $user->id()));
         } else {
             // we might not have an authenticated user, but still have the id of the username
             $this->watch->increment($this->userId, $this->username);
             if ($this->watch->nrAttempts() > 10) {
                 $this->watch->ban($this->username);
-                (new Manager\User)->sendPM($this->userId, 0, "Too many login attempts on your account",
-                    self::$twig->render('login/too-many-failures.twig', [
-                    'ipaddr' => $this->ipaddr,
-                    'username' => $this->username,
-                ]));
+
+                $key = 'login_flood_' . $this->userId;
+                if (self::$cache->get_value($key) === false) {
+                    self::$cache->cache_value($key, true, 86400);
+                    // fake a user object temporarily to send them some email
+                    (new User($this->userId))->inbox()->createSystem(
+                        "Too many login attempts on your account",
+                        self::$twig->render('login/too-many-failures.bbcode.twig', [
+                            'ipaddr'   => $this->ipaddr,
+                            'username' => $this->username,
+                        ])
+                    );
+                }
+                $key = sprintf(self::FLOOD_COUNT, $this->userId);
+                if (self::$cache->get_value($key) === false) {
+                    self::$cache->cache_value($key, 0, 86400 * 7);
+                }
+                self::$cache->increment($key);
             } elseif ($this->watch->nrBans() > 3) {
                 (new Manager\IPv4)->createBan(
                     $this->userId, $this->ipaddr, $this->ipaddr, 'Automated ban, too many failed login attempts'

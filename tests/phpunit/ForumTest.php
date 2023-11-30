@@ -283,7 +283,7 @@ class ForumTest extends TestCase {
             autoLockWeeks:  42,
         );
         $pmMan = new Gazelle\Manager\PM($user);
-        foreach ((new Gazelle\User\Inbox($user))->messageList($pmMan, 1, 0) as $pm) {
+        foreach ($user->inbox()->messageList($pmMan, 1, 0) as $pm) {
             $pm->remove();
         }
 
@@ -301,7 +301,7 @@ class ForumTest extends TestCase {
         $this->assertStringStartsWith(date('Y-m-d H'), $user->forumWarning(), 'forum-user-warning-history-start'); /** @phpstan-ignore-line */
         $this->assertStringEndsWith($message, $user->forumWarning(), 'forum-user-warning-history-end'); /** @phpstan-ignore-line */
 
-        $inbox = new \Gazelle\User\Inbox($user);
+        $inbox = $user->inbox();
         $pmReceiverManager = new Gazelle\Manager\PM($inbox->user());
         $this->assertEquals(1, $inbox->messageTotal(), 'warn-user-inbox-total');
         $pm = $inbox->messageList($pmReceiverManager, 1, 0)[0];

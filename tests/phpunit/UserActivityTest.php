@@ -107,19 +107,19 @@ class UserActivityTest extends TestCase {
         $this->userList['admin']->setField('PermissionID', SYSOP)->modify();
         $this->userList['user'] = Helper::makeUser('user.' . randomString(10), 'activity');
 
-        $inbox = new Gazelle\User\Notification\Inbox($this->userList['user']);
-        $this->assertInstanceOf(Gazelle\User\Notification\Inbox::class, $inbox, 'alert-notification-inbox-instance');
-        if ($inbox->load()) {
-            // there are some messages in the inbox, mark them as read
-            $inbox->clear();
-        }
+        $admin = $this->userList['admin'];
+        $user  = $this->userList['user'];
+        $notification = new Gazelle\User\Notification\Inbox($user);
+        $this->assertInstanceOf(Gazelle\User\Notification\Inbox::class, $notification, 'alert-notification-inbox-instance');
+        $this->assertFalse($notification->load(), 'alert-notification-inbox-none');
+        $this->assertEquals(0, $notification->clear(), 'alert-notification-inbox-clear');
 
-        // send a message
-        $convId = $userMan->sendPM($this->userList['user']->id(), $this->userList['admin']->id(), 'unit test message', 'unit test body');
-        $this->assertGreaterThan(0, $convId, 'alert-inbox-send');
+        // send a message from admin to user
+        $pm = $user->inbox()->create($admin, 'unit test message', 'unit test body');
+        $this->assertGreaterThan(0, $pm->id(), 'alert-inbox-send');
 
         // check out the notifications
-        $notifier = new Gazelle\User\Notification($this->userList['user']);
+        $notifier = new Gazelle\User\Notification($user);
         // if this fails, the CI database has drifted (or another UT has clobbered the expected value here)
         $this->assertTrue($notifier->isActive('Inbox'), 'activity-notified-inbox');
 
@@ -131,9 +131,9 @@ class UserActivityTest extends TestCase {
         $this->assertEquals('You have a new message', $alertInbox->title(), 'alert-inbox-unread');
 
         // read it
-        $pm = (new Gazelle\Manager\PM($this->userList['user']))->findById($convId);
-        $this->assertInstanceOf(Gazelle\PM::class, $pm, 'inbox-unread-pm');
-        $this->assertEquals(1, $pm->markRead(), 'alert-pm-read');
+        $read = (new Gazelle\Manager\PM($user))->findById($pm->id());
+        $this->assertInstanceOf(Gazelle\PM::class, $read, 'inbox-unread-pm');
+        $this->assertEquals(1, $read->markRead(), 'alert-pm-read');
     }
 
     public function testNews(): void {

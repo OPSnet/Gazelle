@@ -15,5 +15,5 @@ if (!$Viewer->permitted('users_mod')) {
 
 echo $Twig->render('torrent/reseed-result.twig', [
     'torrent' => $torrent,
-    'total'   => $torrent->issueReseedRequest($Viewer),
+    'total'   => $torrent->issueReseedRequest($Viewer, new \Gazelle\Manager\User),
 ]);

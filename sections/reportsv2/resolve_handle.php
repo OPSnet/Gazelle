@@ -183,7 +183,7 @@ if ($modNote || $weeksWarned > 0 || isset($_POST['delete']) || $SendPM) {
     }
 
     $message[] = "Report was handled by [user]" . $Viewer->username() . "[/user].";
-    $userMan->sendPM($uploader->id(), 0, $name, implode("\n\n", $message));
+    $uploader->inbox()->createSystem($name, implode("\n\n", $message));
 }
 
 $Cache->delete_value("reports_torrent_$torrentId");

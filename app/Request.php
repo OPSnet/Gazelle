@@ -569,14 +569,12 @@ class Request extends BaseObject {
             SELECT UserID FROM requests_votes WHERE RequestID = ?
             ", $this->id
         );
-        $ids = self::$db->collect(0, false);
-        $userMan = new Manager\User;
-        foreach ($ids as $userId) {
-            $userMan->sendPM($userId, 0, "The request \"$name\" has been filled", $message);
+        foreach (self::$db->collect(0, false) as $userId) {
+            (new User($userId))->inbox()->createSystem("The request \"$name\" has been filled", $message);
         }
 
-        (new Log)->general("Request " . $this->id . " ($name) was filled by " . $user->label()
-            . " with the torrent " . $torrent->id() . " for a "
+        (new Log)->general(
+            "Request {$this->id} ($name) was filled by {$user->label()} with the torrent {$torrent->id()} for a "
             . byte_format($bounty) . ' bounty.'
         );
 
@@ -617,7 +615,8 @@ class Request extends BaseObject {
         );
 
         if ($filler->id() !== $admin->id()) {
-            (new Manager\User)->sendPM($filler->id(), 0, 'A request you filled has been unfilled',
+            $filler->inbox()->createSystem(
+                'A request you filled has been unfilled',
                 self::$twig->render('request/unfill-pm.bbcode.twig', [
                     'name'    => $name,
                     'reason'  => $reason,
@@ -749,8 +748,9 @@ class Request extends BaseObject {
         );
         $affected = self::$db->affected_rows();
         if ($affected) {
-            (new Manager\User)->sendPM($fillerId, 0, "Bounty was reduced on a request you filled",
-                self::$twig->render('request/bounty-reduction.twig', [
+            (new User($fillerId))->inbox()->createSystem(
+                "Bounty was reduced on a request you filled",
+                self::$twig->render('request/bounty-reduction.bbcode.twig', [
                     'bounty'      => $bounty,
                     'fill_date'   => $fillDate,
                     'request_url' => $this->url(),

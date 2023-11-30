@@ -13,11 +13,14 @@ if ($Viewer->id() != $request->userId() && !$Viewer->permitted('site_moderate_re
 $reason = trim($_POST['reason']);
 $title = $request->text();
 if ($request->userId() !== $Viewer->id()) {
-    (new Gazelle\Manager\User)->sendPM($request->userId(), 0,
-        'A request you created has been deleted',
-        "The request \"$title\" was deleted by [url=" . $Viewer->url() . "]"
-            . $Viewer->username() . "[/url] for the reason: [quote]{$reason}[/quote]"
-    );
+    $user = (new Gazelle\Manager\User)->findById($request->userId());
+    if ($user) {
+        $user->inbox()->createSystem(
+            'A request you created has been deleted',
+            "The request \"$title\" was deleted by [url=" . $Viewer->url() . "]"
+                . $Viewer->username() . "[/url] for the reason: [quote]{$reason}[/quote]"
+        );
+    }
 }
 $requestId = $request->id();
 $request->remove();

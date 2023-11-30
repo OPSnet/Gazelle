@@ -10,17 +10,10 @@ class UserManagerTest extends TestCase {
 
     public function setUp(): void {
         $this->userList = [
-            Helper::makeUser('um1.' . randomString(10), 'userman'),
-            Helper::makeUser('um2.' . randomString(10), 'userman'),
-            Helper::makeUser('um3.' . randomString(10), 'userman'),
+            Helper::makeUser('um1.' . randomString(10), 'userman', enable: true, clearInbox: true),
+            Helper::makeUser('um2.' . randomString(10), 'userman', enable: true, clearInbox: true),
+            Helper::makeUser('um3.' . randomString(10), 'userman', enable: true, clearInbox: true),
         ];
-        foreach ($this->userList as $user) {
-            $user->setField('Enabled', '1')->modify();
-            $pmMan = new Gazelle\Manager\PM($user);
-            foreach ((new Gazelle\User\Inbox($user))->messageList($pmMan, 1, 0) as $pm) {
-                $pm->remove();
-            }
-        }
     }
 
     public function tearDown(): void {
@@ -164,7 +157,7 @@ class UserManagerTest extends TestCase {
             $user->flush();
         }
 
-        $receiver = new \Gazelle\User\Inbox($this->userList[0]);
+        $receiver = $this->userList[0]->inbox();
         $pmMan    = new \Gazelle\Manager\PM($receiver->user());
         $this->assertEquals(1, $receiver->messageTotal(), 'uman-ratiowatch-pm-count');
         $list = $receiver->messageList($pmMan, 2, 0);
@@ -174,7 +167,7 @@ class UserManagerTest extends TestCase {
         foreach ($this->userList as $user) {
             $user->setField('Enabled', '1')->modify();
             $pmMan = new Gazelle\Manager\PM($user);
-            foreach ((new Gazelle\User\Inbox($user))->messageList($pmMan, 1, 0) as $pm) {
+            foreach ($user->inbox()->messageList($pmMan, 1, 0) as $pm) {
                 $pm->remove();
             }
         }
@@ -194,7 +187,7 @@ class UserManagerTest extends TestCase {
         $this->assertEquals(1, $userMan->ratioWatchBlock($tracker), 'uman-ratiowatch-do-block');
         $this->userList[0]->flush();
 
-        $receiver = new \Gazelle\User\Inbox($this->userList[0]);
+        $receiver = $this->userList[0]->inbox();
         $pmMan    = new \Gazelle\Manager\PM($receiver->user());
         $this->assertEquals(1, $receiver->messageTotal(), 'uman-ratiowatch-pm-block-count');
         $list = $receiver->messageList($pmMan, 2, 0);
@@ -226,7 +219,7 @@ class UserManagerTest extends TestCase {
         $this->assertEquals(0, $userMan->ratioWatchClear($tracker), 'uman-ratiowatch-reprocess-clear');
         $this->userList[1]->flush();
 
-        $receiver = new \Gazelle\User\Inbox($this->userList[1]);
+        $receiver = $this->userList[1]->inbox();
         $pmMan    = new \Gazelle\Manager\PM($receiver->user());
         $this->assertEquals(1, $receiver->messageTotal(), 'uman-ratiowatch-pm-clear-count');
         $list = $receiver->messageList($pmMan, 2, 0);
@@ -239,7 +232,7 @@ class UserManagerTest extends TestCase {
         $this->assertEquals(0, $userMan->ratioWatchEngage($tracker), 'uman-ratiowatch-reprocess-engage');
         $this->userList[2]->flush();
 
-        $receiver = new \Gazelle\User\Inbox($this->userList[2]);
+        $receiver = $this->userList[2]->inbox();
         $pmMan    = new \Gazelle\Manager\PM($receiver->user());
         $this->assertEquals(1, $receiver->messageTotal(), 'uman-ratiowatch-pm-engage-count');
         $list = $receiver->messageList($pmMan, 2, 0);
@@ -260,7 +253,7 @@ class UserManagerTest extends TestCase {
             'uman-send-custom-pm'
         );
 
-        $receiver = new \Gazelle\User\Inbox($this->userList[1]);
+        $receiver = $this->userList[2]->inbox();
         $pmMan    = new \Gazelle\Manager\PM($receiver->user());
         $this->assertEquals(1, $receiver->messageTotal(), 'uman-custom-pm-count');
         $list = $receiver->messageList($pmMan, 2, 0);
@@ -268,7 +261,7 @@ class UserManagerTest extends TestCase {
         $postlist = $list[0]->postlist(10, 0);
         $postId = $postlist[0]['id'];
         $pm = $pmMan->findByPostId($postId);
-        $this->assertStringContainsString($this->userList[1]->username(), $pm->postBody($postId), 'uman-custom-pm-body');
+        $this->assertStringContainsString($this->userList[2]->username(), $pm->postBody($postId), 'uman-custom-pm-body');
     }
 
     public function testUserclassFlush(): void {

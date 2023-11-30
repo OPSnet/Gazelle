@@ -323,9 +323,9 @@ class Contest extends BaseObject {
             if (DEBUG_CONTEST_PAYOUT) {
                 continue;
             }
-            $userMan->sendPM($p['ID'], 0,
+            $user->inbox()->createSystem(
                 "You have received " . number_format($totalGain, 2) . " bonus points!",
-                self::$twig->render('contest/payout-uploader.twig', [
+                self::$twig->render('contest/payout-uploader.bbcode.twig', [
                     'contest'         => $this,
                     'contest_bonus'   => $contestBonus,
                     'enabled_bonus'   => $enabledUserBonus,

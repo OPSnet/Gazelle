@@ -25,16 +25,10 @@ class CollageTest extends TestCase {
 
     public function setUp(): void {
         $this->userList = [
-            'u1'  => Helper::makeUser('u1.' . randomString(6), 'collage'),
-            'u2'  => Helper::makeUser('u2.' . randomString(6), 'collage'),
-            'u3'  => Helper::makeUser('u3.' . randomString(6), 'collage'),
+            'u1'  => Helper::makeUser('u1.' . randomString(6), 'collage', clearInbox: true),
+            'u2'  => Helper::makeUser('u2.' . randomString(6), 'collage', clearInbox: true),
+            'u3'  => Helper::makeUser('u3.' . randomString(6), 'collage', clearInbox: true),
         ];
-        foreach ($this->userList as $user) {
-            $pmMan = new Gazelle\Manager\PM($user);
-            foreach ((new Gazelle\User\Inbox($user))->messageList($pmMan, 1, 0) as $pm) {
-                $pm->remove();
-            }
-        }
         $this->artistName = [
             'The phpunit ' . randomString(8) . ' Band',
             'The phpunit ' . randomString(8) . ' Sisters',

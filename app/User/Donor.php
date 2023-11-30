@@ -513,7 +513,7 @@ class Donor extends \Gazelle\BaseUser {
         }
 
         // Send them a thank you PM
-        $id = (new \Gazelle\Manager\User)->sendPM($this->id(), 0,
+        $this->user()->inbox()->createSystem(
             'Your contribution has been received and credited. Thank you!',
             $this->messageBody($currency, $amount, $rankDelta, $this->rank())
         );
@@ -576,7 +576,7 @@ class Donor extends \Gazelle\BaseUser {
         }
 
         if ($specialRank < 1 && $totalRank >= 10) {
-            (new \Gazelle\Manager\User)->sendPM($this->id(), 0,
+            $this->user()->inbox()->createSystem(
                 "You have Reached Special Donor Rank #1! You've Earned: One Donor Pick. Details Inside.",
                 self::$twig->render('donation/special-rank-1.twig', [
                    'forum_url'   => 'forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790',
@@ -587,7 +587,7 @@ class Donor extends \Gazelle\BaseUser {
         }
 
         if ($specialRank < 2 && $totalRank >= 20) {
-            (new \Gazelle\Manager\User)->sendPM($this->id(), 0,
+            $this->user()->inbox()->createSystem(
                 "You have Reached Special Donor Rank #2! You've Earned: The Double-Avatar. Details Inside.",
                 self::$twig->render('donation/special-rank-2.twig', [
                    'forum_url' => 'forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790',
@@ -597,7 +597,7 @@ class Donor extends \Gazelle\BaseUser {
         }
 
         if ($specialRank < 3 && $totalRank >= 50) {
-            (new \Gazelle\Manager\User)->sendPM($this->id(), 0,
+            $this->user()->inbox()->createSystem(
                 "You have Reached Special Donor Rank #3! You've Earned: Diamond Rank. Details Inside.",
                 self::$twig->render('donation/special-rank-3.twig', [
                    'forum_url'      => 'forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790',

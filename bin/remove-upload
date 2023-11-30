@@ -39,7 +39,7 @@ foreach ($argv as $torrentId) {
     }
 
     $bonus->addPoints($points);
-    $userMan->sendPM($uploader->id(), 0,
+    $uploader->inbox()->createSystem(
         "Your upload $name has been removed",
         "Due to a transient bug, your upload $name was not completed by the backend. Since it did not break any rules (we hope), please feel free to re-upload it. Since this is on us, you have been gifted $points points."
     );

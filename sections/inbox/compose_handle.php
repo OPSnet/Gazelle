@@ -25,8 +25,7 @@ if ($pm) {
     if (empty($subject)) {
         error('You cannot send a message without a subject.');
     }
-    $pmId = $userMan->sendPM($recipient->id(), $Viewer->id(), $subject, $body);
-    $pm = new Gazelle\PM($pmId, $Viewer);
+    $pm = $recipient->inbox()->create($Viewer, $subject, $body);
 }
 
 (new Gazelle\Manager\Notification)->push([$recipient->id()],

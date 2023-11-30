@@ -48,12 +48,13 @@ switch ($_POST['pm_type']) {
         json_error("no recipient target");
 }
 
-if (!$ToID) {
+$recipient = (new Gazelle\Manager\User)->findById($ToID);
+if (is_null($recipient)) {
     json_error("bad recipient id");
 } elseif ($ToID == $Viewer->id()) {
     json_error("message to self");
 }
 
-$convId = (new Gazelle\Manager\User)->sendPM($ToID, $Viewer->id(), $_POST['raw_name'] ?? "Report", $Message);
+$pm = $recipient->inbox()->create($Viewer, $_POST['raw_name'] ?? "Report", $Message);
 
-echo "PM delivered, msg id $convId";
+echo "PM delivered, msg id {$pm->id()}";

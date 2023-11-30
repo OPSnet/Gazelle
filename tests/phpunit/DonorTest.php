@@ -8,16 +8,10 @@ require_once(__DIR__ . '/../helper.php');
 class DonorTest extends TestCase {
     protected Gazelle\User\Donor $donor;
 
-    protected function clearInbox(Gazelle\User $user): void {
-        $pmMan = new Gazelle\Manager\PM($user);
-        foreach ((new Gazelle\User\Inbox($user))->messageList($pmMan, 50, 0) as $pm) {
-            $pm->remove();
-        }
-    }
-
     public function setUp(): void {
-        $this->donor = new Gazelle\User\Donor(Helper::makeUser('donor.' . randomString(6), 'donor'));
-        $this->clearInbox($this->donor->user());
+        $this->donor = new Gazelle\User\Donor(
+            Helper::makeUser('donor.' . randomString(6), 'donor', clearInbox: true)
+        );
     }
 
     public function tearDown(): void {
@@ -65,11 +59,11 @@ class DonorTest extends TestCase {
         $this->assertTrue($donor->isDonor(), 'donor-is-now-new');
         $this->assertEquals(0, $donor->invitesReceived(), 'donor-no-invites');
 
-        $inbox = new Gazelle\User\Inbox($donor->user());
+        $inbox = $donor->user()->inbox();
         $this->assertEquals(1, $inbox->messageTotal(), 'donor-inbox-small-total');
         $list = $inbox->messageList(new Gazelle\Manager\PM($donor->user()), 1, 0);
         $this->assertStringContainsString('Your contribution has been received and credited', $list[0]->subject(), 'inbox-pm-subject');
-        $this->clearInbox($donor->user());
+        Helper::clearInbox($donor->user());
 
         // second donation
         $this->assertEquals(
@@ -197,7 +191,7 @@ class DonorTest extends TestCase {
             'donor-donate-rank-2'
         );
 
-        $this->assertEquals(1, (new Gazelle\User\Inbox($donor->user()))->messageTotal(), 'donor-inbox-rank-2');
+        $this->assertEquals(1, $donor->user()->inbox()->messageTotal(), 'donor-inbox-rank-2');
         $this->assertEquals(2, $donor->rank(), 'donor-rank-2');
         $this->assertEquals(2, $donor->totalRank(), 'donor-total-rank-2');
         $this->assertEquals(0, $donor->specialRank(), 'donor-not-special-rank-2');

@@ -13,16 +13,9 @@ class ReportManagerTest extends TestCase {
 
     public function setUp(): void {
         $this->userList = [
-            Helper::makeUser('report.' . randomString(10), 'report'),
-            Helper::makeUser('report.' . randomString(10), 'report'),
+            Helper::makeUser('report.' . randomString(10), 'report', enable: true, clearInbox: true),
+            Helper::makeUser('report.' . randomString(10), 'report', enable: true, clearInbox: true),
         ];
-        foreach ($this->userList as $user) {
-            $user->setField('Enabled', '1')->modify();
-            $pmMan = new Gazelle\Manager\PM($user);
-            foreach ((new Gazelle\User\Inbox($user))->messageList($pmMan, 1, 0) as $pm) {
-                $pm->remove();
-            }
-        }
     }
 
     public function tearDown(): void {

@@ -42,10 +42,8 @@ class Reaper extends \Gazelle\Base {
 
     /**
      * Send a PM to a seeder listing their unseeded items
-     *
-     * @return int PM conversation id
      */
-    public function notifySeeder(\Gazelle\User $user, array $ids, ReaperState $state, ReaperNotify $notify): ?int {
+    public function notifySeeder(\Gazelle\User $user, array $ids, ReaperState $state, ReaperNotify $notify): ?\Gazelle\PM {
         if ($user->hasAttr($state->notifyAttr())) {
             // No conversation will be created as they didn't ask for one
             return null;
@@ -53,12 +51,12 @@ class Reaper extends \Gazelle\Base {
         $never   = $state === ReaperState::NEVER;
         $final   = $notify === ReaperNotify::FINAL;
         $total   = count($ids);
-        $subject = ($never ? "You have " : "There " . ($total > 1 ? 'are' : 'is') . " ")
-            . article($total, $never ? 'a' : 'an') // "a non-seeded" versus "an unseeded"
-            . ($never ? " non-seeded new upload" : " unseeded upload")
-            . plural($total)
-            . ($final ? " scheduled for deletion very soon" : " to rescue");
-        return $this->userMan->sendPM($user->id(), 0, $subject,
+        return $user->inbox()->createSystem(
+            ($never ? "You have " : "There " . ($total > 1 ? 'are' : 'is') . " ")
+                . article($total, $never ? 'a' : 'an') // "a non-seeded" versus "an unseeded"
+                . ($never ? " non-seeded new upload" : " unseeded upload")
+                . plural($total)
+            . ($final ? " scheduled for deletion very soon" : " to rescue"),
             self::$twig->render('notification/unseeded.bbcode.twig', [
                 'final' => $final,
                 'never' => $never,
@@ -148,12 +146,10 @@ class Reaper extends \Gazelle\Base {
      * Send a PM to a snatcher with their unseeded uploads.
      * NB: A message is sent only on the initial phase. On the final round,
      * messages are sent only to the seeders.
-     *
-     * @return int PM conversation id
      */
-    public function notifySnatcher(\Gazelle\User $user, array $ids): int {
+    public function notifySnatcher(\Gazelle\User $user, array $ids): \Gazelle\PM {
         $total = count($ids);
-        return $this->userMan->sendPM($user->id(), 0,
+        return $user->inbox()->createSystem(
             "You have " . article($total, 'an') . " unseeded snatch" . plural($total, 'es') . ' to save',
             self::$twig->render('notification/unseeded-snatch.bbcode.twig', [
                 'list' => $ids,
@@ -279,7 +275,7 @@ class Reaper extends \Gazelle\Base {
         return $this->remove(
             reaperList: $this->reaperList(ReaperState::NEVER, REMOVE_NEVER_SEEDED_HOUR),
             reason:     'inactivity (never seeded)',
-            template:   'notification/removed-never-seeded.twig',
+            template:   'notification/removed-never-seeded.bbcode.twig',
         );
     }
 
@@ -287,7 +283,7 @@ class Reaper extends \Gazelle\Base {
         return $this->remove(
             reaperList: $this->reaperList(ReaperState::UNSEEDED, REMOVE_UNSEEDED_HOUR),
             reason:     'inactivity (unseeded)',
-            template:   'notification/removed-unseeded.twig',
+            template:   'notification/removed-unseeded.bbcode.twig',
         );
     }
 
@@ -362,8 +358,11 @@ class Reaper extends \Gazelle\Base {
             if ($notes) {
                 $total = count($notes);
                 $user = $this->userMan->findById($userId);
-                if ($user?->isEnabled()) {
-                    $this->userMan->sendPM($userId, 0,
+                if (is_null($user)) {
+                    continue;
+                }
+                if ($user->isEnabled()) {
+                    $user->inbox()->createSystem(
                         "$total of your uploads " . ($total == 1 ? 'has' : 'have') . " been deleted for $reason",
                         self::$twig->render($template, [
                             'notes' => $notes,
@@ -377,11 +376,14 @@ class Reaper extends \Gazelle\Base {
         // now inform the snatchers of all the torrents that were reaped during this run
         foreach ($userList as $userId => $torrentList) {
             $user = $this->userMan->findById($userId);
-            if ($user?->isEnabled()) {
+            if (is_null($user)) {
+                continue;
+            }
+            if ($user->isEnabled()) {
                 $total = count($torrentList);
-                $this->userMan->sendPM($userId, 0,
+                $user->inbox()->createSystem(
                     "$total of your snatches " . ($total == 1 ? 'was' : 'were') . " deleted for inactivity",
-                    self::$twig->render('notification/removed-unseeded-snatch.twig', [
+                    self::$twig->render('notification/removed-unseeded-snatch.bbcode.twig', [
                         'list' => $torrentList,
                         'user' => $user,
                     ])
@@ -516,9 +518,9 @@ class Reaper extends \Gazelle\Base {
         $points = REAPER_RESEED_REWARD_FACTOR * $bonus->torrentValue($torrent);
         $bonus->addPoints($points);
         $bonus->user()->addStaffNote("Awarded {$points} BP for reseeding [pl]{$torrent->id()}[/pl]")->modify();
-        $this->userMan->sendPM($bonus->user()->id(), 0,
+        $bonus->user()->inbox()->createSystem(
             "Thank you for reseeding {$torrent->group()->name()}!",
-            self::$twig->render('notification/reseed.twig', [
+            self::$twig->render('notification/reseed.bbcode.twig', [
                 'points'  => $points,
                 'torrent' => $torrent,
                 'user'    => $bonus->user(),

@@ -5,13 +5,81 @@ namespace Gazelle\User;
 class Inbox extends \Gazelle\BaseUser {
     final const tableName = 'pm_conversations_users';
 
+    final const CACHE_NEW = 'inbox_new_%d';
+
     protected bool $unreadFirst;
     protected string $filter;
     protected string $folder = 'inbox';
     protected string $searchField = 'user';
     protected string $searchTerm;
 
-    public function flush(): static  { $this->user()->flush(); return $this; }
+    public function __construct(\Gazelle\User $user) {
+        parent::__construct($user);
+    }
+
+    public function flush(): static  {
+        self::$cache->delete_value(sprintf(self::CACHE_NEW, $this->id()));
+        $this->user->flush();
+        return $this;
+    }
+
+    public function createSystem(string $subject, string $body): ?\Gazelle\PM {
+        return $this->create(null, $subject, $body);
+    }
+
+    /**
+     * To send a message to a user, you instantiate their inbox and
+     * create() a PM
+     */
+    public function create(?\Gazelle\User $from, string $subject, string $body): ?\Gazelle\PM {
+        $fromId = $from?->id() ?? 0;
+        if ($this->id() === $fromId) {
+            // Don't allow users to send messages to the system or themselves
+            return null;
+        }
+
+        $qid = self::$db->get_query_id();
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
+            INSERT INTO pm_conversations (Subject) VALUES (?)
+            ", mb_substr($subject, 0, 255)
+        );
+        $convId = self::$db->inserted_id();
+
+        $placeholders = [
+            "(?, ?, '1', '0', '1')",
+            "(?, ?, '0', '1', '0')",
+        ];
+        $args = [$this->id(), $convId, $fromId, $convId];
+
+        self::$db->prepared_query("
+            INSERT INTO pm_conversations_users
+                   (UserID, ConvID, InInbox, InSentbox, UnRead)
+            VALUES
+            " . implode(', ', $placeholders), ...$args
+        );
+        self::$db->prepared_query("
+            INSERT INTO pm_messages
+                   (SenderID, ConvID, Body)
+            VALUES (?,        ?,      ?)
+            ", $fromId, $convId, $body
+        );
+        self::$db->commit();
+        self::$db->set_query_id($qid);
+
+        $senderName = $from?->username() ?? 'System';
+        (new \Gazelle\Manager\Notification)->push(
+            [$this->id()],
+            "Message from $senderName, Subject: $subject", $body, SITE_URL . '/inbox.php', \Gazelle\Manager\Notification::INBOX,
+        );
+        $this->flush();
+        self::$cache->delete_multi([
+            "pm_{$convId}_{$fromId}",
+            "pm_{$convId}_{$this->id()}",
+        ]);
+
+        return new \Gazelle\PM($convId, $this->user);
+    }
 
     public function setFilter(string $filter): static {
         $this->filter = $filter;
@@ -119,6 +187,23 @@ class Inbox extends \Gazelle\BaseUser {
         return [$cond, $args];
     }
 
+    public function unreadTotal(): int {
+        $key = sprintf(self::CACHE_NEW, $this->id());
+        $unread = self::$cache->get_value($key);
+        if ($unread === false) {
+            $unread = (int)self::$db->scalar("
+                SELECT count(*)
+                FROM pm_conversations_users
+                WHERE UnRead    = '1'
+                    AND InInbox = '1'
+                    AND UserID  = ?
+                ", $this->id()
+            );
+            self::$cache->cache_value($key, $unread, 0);
+        }
+        return $unread;
+    }
+
     public function messageTotal(): int {
         [$cond, $args] = $this->configure();
         $where = $cond ? ("WHERE " . implode(' AND ', $cond)) : '/* all */';
@@ -156,7 +241,7 @@ class Inbox extends \Gazelle\BaseUser {
 
     protected function massFlush(array $ids): void {
         $userId = $this->user->id();
-        self::$cache->delete_multi(["inbox_new_$userId", ...array_map(fn ($id) => "pm_{$id}_{$userId}", $ids)]);
+        self::$cache->delete_multi([sprintf(self::CACHE_NEW, $userId), ...array_map(fn ($id) => "pm_{$id}_{$userId}", $ids)]);
     }
 
     public function massRemove(array $ids): int {
