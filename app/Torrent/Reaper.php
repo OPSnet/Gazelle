@@ -2,6 +2,9 @@
 
 namespace Gazelle\Torrent;
 
+use Gazelle\Enum\ReaperNotify;
+use Gazelle\Enum\ReaperState;
+
 class Reaper extends \Gazelle\Base {
     public function __construct(
         protected \Gazelle\Manager\Torrent $torMan,

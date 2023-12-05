@@ -1,6 +1,6 @@
 <?php
 
-namespace Gazelle\Torrent;
+namespace Gazelle\Enum;
 
 enum ReaperNotify: string {
     case INITIAL = 'initial';

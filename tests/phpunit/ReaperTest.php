@@ -2,6 +2,9 @@
 
 use PHPUnit\Framework\TestCase;
 
+use Gazelle\Enum\ReaperNotify;
+use Gazelle\Enum\ReaperState;
+
 /**
  * Note to Developers/Testers
  * ==========================
@@ -200,11 +203,7 @@ class ReaperTest extends TestCase {
         $this->assertCount(1, $neverInitial, 'never-initial-0-count');
         $this->assertEquals(
             1,
-            $reaper->process(
-                $neverInitial,
-                Gazelle\Torrent\ReaperState::NEVER,
-                Gazelle\Torrent\ReaperNotify::INITIAL
-            ),
+            $reaper->process($neverInitial, ReaperState::NEVER, ReaperNotify::INITIAL),
             'never-initial-process'
         );
         $this->assertEquals(
@@ -231,11 +230,7 @@ class ReaperTest extends TestCase {
         $neverInitial = $reaper->initialNeverSeededList();
         $this->assertCount(1, $neverInitial, 'never-initial-2'); // one user ...
         $this->assertEquals(2,                            // ... with two uploads
-            $reaper->process(
-                $neverInitial,
-                Gazelle\Torrent\ReaperState::NEVER,
-                Gazelle\Torrent\ReaperNotify::INITIAL
-            ),
+            $reaper->process($neverInitial, ReaperState::NEVER, ReaperNotify::INITIAL),
             'never-2-process'
         );
         $this->assertEquals(
@@ -272,11 +267,7 @@ class ReaperTest extends TestCase {
         $neverFinal = $reaper->finalNeverSeededList();
         $this->assertCount(1, $neverFinal, 'never-final-0'); // one user ...
         $this->assertEquals(1,                               // ... with one upload
-            $reaper->process(
-                $neverFinal,
-                Gazelle\Torrent\ReaperState::NEVER,
-                Gazelle\Torrent\ReaperNotify::FINAL
-            ),
+            $reaper->process($neverFinal, ReaperState::NEVER, ReaperNotify::FINAL),
             'never-final-process'
         );
         $this->assertEquals(
@@ -301,7 +292,7 @@ class ReaperTest extends TestCase {
         $this->modifyUnseededInterval($this->torrentList[1], REMOVE_NEVER_SEEDED_HOUR + 1);
         $id = $this->torrentList[1]->id();
         $list = $reaper->reaperList(
-            state:    Gazelle\Torrent\ReaperState::NEVER,
+            state:    ReaperState::NEVER,
             interval: REMOVE_NEVER_SEEDED_HOUR,
         );
         $this->assertCount(1, $list, 'never-reap-list');
@@ -343,11 +334,7 @@ class ReaperTest extends TestCase {
         $this->assertCount(1, $unseededInitial, 'unseeded-initial-1');
         $this->assertEquals(
             2,
-            $reaper->process(
-                $unseededInitial,
-                Gazelle\Torrent\ReaperState::UNSEEDED,
-                Gazelle\Torrent\ReaperNotify::INITIAL
-            ),
+            $reaper->process($unseededInitial, ReaperState::UNSEEDED, ReaperNotify::INITIAL),
             'unseeded-initial-process'
         );
         $this->assertEquals(
@@ -427,11 +414,7 @@ class ReaperTest extends TestCase {
 
         $this->assertCount(1, $unseededFinal, 'unseeded-final-0');
         $this->assertEquals(1,
-            $reaper->process(
-                $unseededFinal,
-                Gazelle\Torrent\ReaperState::UNSEEDED,
-                Gazelle\Torrent\ReaperNotify::FINAL
-            ),
+            $reaper->process($unseededFinal, ReaperState::UNSEEDED, ReaperNotify::FINAL),
             'unseeded-final-process'
         );
         $this->assertEquals(
@@ -459,7 +442,7 @@ class ReaperTest extends TestCase {
         $this->modifyUnseededInterval($this->torrentList[1], REMOVE_UNSEEDED_HOUR + 1);
         $id = $this->torrentList[1]->id();
         $list = $reaper->reaperList(
-            state:    Gazelle\Torrent\ReaperState::UNSEEDED,
+            state:    ReaperState::UNSEEDED,
             interval: REMOVE_UNSEEDED_HOUR,
         );
         $this->assertCount(1, $list, 'unseeded-reap-list');
@@ -500,11 +483,7 @@ class ReaperTest extends TestCase {
 
         // look for never seeded
         $reaper = new \Gazelle\Torrent\Reaper(new Gazelle\Manager\Torrent, new Gazelle\Manager\User);
-        $reaper->process(
-            $reaper->initialNeverSeededList(),
-            Gazelle\Torrent\ReaperState::NEVER,
-            Gazelle\Torrent\ReaperNotify::INITIAL
-        );
+        $reaper->process($reaper->initialNeverSeededList(), ReaperState::NEVER, ReaperNotify::INITIAL);
 
         $this->assertEquals(0, $this->userList[0]->inbox()->messageTotal(), 'never-uploader-no-notify');
         $this->assertEquals(0, $this->userList[1]->inbox()->messageTotal(), 'never-snatcher-no-notify');
@@ -528,11 +507,7 @@ class ReaperTest extends TestCase {
 
         // look for unseeded
         $reaper = new \Gazelle\Torrent\Reaper(new Gazelle\Manager\Torrent, new Gazelle\Manager\User);
-        $reaper->process(
-            $reaper->initialUnseededList(),
-            Gazelle\Torrent\ReaperState::UNSEEDED,
-            Gazelle\Torrent\ReaperNotify::INITIAL
-        );
+        $reaper->process($reaper->initialUnseededList(), ReaperState::UNSEEDED, ReaperNotify::INITIAL);
 
         $this->assertEquals(1, $this->userList[0]->inbox()->messageTotal(), 'unseeded-uploader-no-notify');
         $this->assertEquals(0, $this->userList[1]->inbox()->messageTotal(), 'unseeded-snatcher-no-notify');
@@ -553,11 +528,7 @@ class ReaperTest extends TestCase {
         }
 
         $reaper = new \Gazelle\Torrent\Reaper(new Gazelle\Manager\Torrent, new Gazelle\Manager\User);
-        $reaper->process(
-            $reaper->initialUnseededList(),
-            Gazelle\Torrent\ReaperState::UNSEEDED,
-            Gazelle\Torrent\ReaperNotify::INITIAL
-        );
+        $reaper->process($reaper->initialUnseededList(), ReaperState::UNSEEDED, ReaperNotify::INITIAL);
 
         $uploaderId = $this->userList[0]->id();
         $initial = array_filter(
