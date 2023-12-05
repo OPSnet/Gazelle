@@ -1351,7 +1351,7 @@ class User extends \Gazelle\BaseManager {
                 'Your download privileges have been removed',
                 'You have downloaded more than 10 GB while on Ratio Watch. Your leeching privileges have been suspended. Please reread the rules and refer to this guide on [url=wiki.php?action=article&name=ratiotips]how to improve your ratio[/url]',
             );
-            $tracker->update_tracker('update_user', ['passkey' => $user->announceKey(), 'can_leech' => '0']);
+            $tracker->refreshUser($user);
             $task?->debug("Disabling leech for {$user->label()}", $userId);
             $processed++;
         }
@@ -1385,11 +1385,12 @@ class User extends \Gazelle\BaseManager {
             if (is_null($user)) {
                 continue;
             }
+            $user->flush();
             $user->inbox()->createSystem(
                 'You have been taken off Ratio Watch',
                 "Congratulations! Feel free to begin downloading again.\n To ensure that you do not get put on ratio watch again, please read the rules located [url=rules.php?p=ratio]here[/url].\n"
             );
-            $tracker->update_tracker('update_user', ['passkey' => $user->announceKey(), 'can_leech' => '1']);
+            $tracker->refreshUser($user);
             $task?->debug("Taking {$user->label()} off ratio watch", $userId);
             $processed++;
         }
@@ -1419,13 +1420,13 @@ class User extends \Gazelle\BaseManager {
             $user->setField('can_leech', 0)
                 ->addStaffNote("Leeching ability suspended by ratio watch system (required ratio: $ratio)")
                 ->modify();
-            $tracker->update_tracker('update_user', ['passkey' => $user->announceKey(), 'can_leech' => '0']);
             $user->inbox()->createSystem(
                 'Your downloading privileges have been suspended',
                 "As you did not raise your ratio in time, your downloading privileges have been revoked. You will not be able to download any torrents until your ratio is above your new required ratio."
             );
-            ++$processed;
+            $tracker->refreshUser($user);
             $task?->debug("Disabled leech for {$user->label()}", $userId);
+            ++$processed;
         }
         self::$db->commit();
         return $processed;

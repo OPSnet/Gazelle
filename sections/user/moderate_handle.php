@@ -99,11 +99,13 @@ if ($mergeStatsFrom && ($downloaded != $user->downloadedSize() || $uploaded != $
 }
 
 $tracker = new Gazelle\Tracker;
+$needTrackerAdd     = false;
+$needTrackerRefresh = false;
 
 // If we're deleting the user, we can ignore all the other crap
 if ($_POST['UserStatus'] === 'delete' && $Viewer->permitted('users_delete_users')) {
     (new Gazelle\Log)->general("User account {$user->label()} was deleted by " . $Viewer->username());
-    $tracker->update_tracker('remove_user', ['passkey' => $user->announceKey()]);
+    $tracker->removeUser($user);
     $user->remove();
     header("Location: log.php?search=User+$userId");
     exit;
@@ -112,7 +114,6 @@ if ($_POST['UserStatus'] === 'delete' && $Viewer->permitted('users_delete_users'
 // User was not deleted. Perform other stuff.
 
 $editSummary = [];
-$trackerUserUpdates = ['passkey' => $user->announceKey()];
 
 $lockType = (int)$_POST['LockType'];
 if ($user->lockType() != $lockType) {
@@ -159,7 +160,7 @@ if ($logoutSession && $Viewer->permitted('users_logout')) {
 
 if ($visible != $user->isVisible() && $Viewer->permitted('users_make_invisible')) {
     $user->setField('Visible', $visible ? '1' : '0');
-    $trackerUserUpdates['visible'] = $visible;
+    $needTrackerRefresh = true;
     $editSummary[] = 'swarm visibility ' . ($visible ? 'on' : 'off');
 }
 
@@ -395,7 +396,7 @@ if ($Viewer->permitted('users_disable_any')) {
     if ($disableLeech != $user->canLeech()) {
         $privChange[] = 'Your leeching privileges have been ' . revoked((bool)$disableLeech);
         $user->setField('can_leech', $disableLeech ? 1 : 0);
-        $trackerUserUpdates['can_leech'] = $disableLeech;
+        $needTrackerRefresh = true;
         $editSummary[] = "leeching status changed ("
             . enabledStatus($user->canLeech() ? '1' : '0') . " → " . enabledStatus($disableLeech ? '1' : '0') . ")";
     }
@@ -483,14 +484,11 @@ if ($userStatus != $user->userStatus() && $Viewer->permitted('users_disable_user
     $enableStr = "account status {$user->userStatus()->label()} → {$userStatus->label()}";
     if ($userStatus == UserStatus::disabled) {
         $userMan->disableUserList($tracker, [$userId], "Disabled via moderation", Gazelle\Manager\User::DISABLE_MANUAL);
-        $trackerUserUpdates = [];
+        $needTrackerRefresh = false;
     } elseif ($userStatus == UserStatus::enabled) {
-        $Cache->increment('stats_user_count');
-        $visibleTrIP = $visible && $user->ipaddr() != '127.0.0.1' ? '1' : '0';
-        $tracker->update_tracker('add_user', ['id' => $userId, 'passkey' => $user->announceKey(), 'visible' => $visibleTrIP]);
+        $needTrackerAdd = true;
         if (($user->downloadedSize() == 0) || ($user->uploadedSize() / $user->downloadedSize() >= $user->requiredRatio())) {
             $user->setField('can_leech', 1);
-            $canLeech = 1;
             $set[] = "RatioWatchEnds = ?";
             $args[] = null;
             $set[] = "RatioWatchDownload = ?";
@@ -501,9 +499,7 @@ if ($userStatus != $user->userStatus() && $Viewer->permitted('users_disable_user
                 $set[] = "RatioWatchEnds = now()";
                 $set[] = "RatioWatchDownload = ?";
                 $args[] = $user->downloadedSize();
-                $canLeech = 0;
             }
-            $trackerUserUpdates['can_leech'] = 0;
         }
         $set[] = "BanReason = ?";
         $args[] = '0';
@@ -521,7 +517,6 @@ if ($Viewer->permitted('users_edit_reset_keys')) {
         $passkey = randomString();
         $user->modifyAnnounceKeyHistory($user->announceKey(), $passkey, '0.0.0.0');
         $user->setField('torrent_pass', $passkey);
-        $trackerUserUpdates['passkey'] = $passkey; // MUST come after the case for updating can_leech
         $tracker->modifyPasskey(old: $user->announceKey(), new: $passkey);
         $editSummary[] = 'passkey reset';
     }
@@ -614,12 +609,13 @@ if ($flTokens != $user->tokenCount()) {
     $user->updateTokens($flTokens);
 }
 
-if (count($trackerUserUpdates) > 1) {
-    $tracker->update_tracker('update_user', $trackerUserUpdates);
-}
-
 $user->modify();
 $user->flush();
+if ($needTrackerAdd) {
+    $tracker->addUser($user);
+} elseif ($needTrackerRefresh) {
+    $tracker->refreshUser($user);
+}
 
 if (isset($_POST['invite_source_update'])) {
     $source = array_keys(array_filter($_POST, fn($x) => preg_match('/^source-\d+$/', $x), ARRAY_FILTER_USE_KEY));

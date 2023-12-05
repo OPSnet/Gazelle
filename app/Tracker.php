@@ -2,12 +2,8 @@
 // TODO: The following actions are used, turn them into methods
 // add_token
 // remove_token
-// add_torrent DONE
 // delete_torrent
 // update_torrent
-// add_user
-// update_user
-// remove_user
 // remove_users
 // add_whitelist
 // edit_whitelist
@@ -19,7 +15,7 @@ use Gazelle\Enum\LeechType;
 use Gazelle\Enum\LeechReason;
 use Gazelle\Util\Irc;
 
-class Tracker {
+class Tracker extends Base {
     final const STATS_MAIN = 0;
     final const STATS_USER = 1;
 
@@ -31,8 +27,8 @@ class Tracker {
 
     public function addTorrent(Torrent $torrent): bool {
         return $this->update_tracker('add_torrent', [
-            'id'          => $torrent->id(),
             'info_hash'   => $torrent->flush()->infohashEncoded(),
+            'id'          => $torrent->id(),
             'freetorrent' => 0,
         ]);
     }
@@ -48,6 +44,29 @@ class Tracker {
         return $this->update_tracker('change_passkey', [
             'oldpasskey' => $old,
             'newpasskey' => $new,
+        ]);
+    }
+
+    public function addUser(User $user): bool {
+        self::$cache->increment('stats_user_count');
+        return $this->update_tracker('add_user', [
+            'passkey' => $user->announceKey(),
+            'id'      => $user->id(),
+            'visible' => $user->isVisible() ? '1' : '0',
+        ]);
+    }
+
+    public function refreshUser(User $user): bool {
+        return $this->update_tracker('update_user', [
+            'passkey'   => $user->announceKey(),
+            'can_leech' => $user->canLeech() ? '1' : '0',
+            'visible'   => $user->isVisible() ? '1' : '0',
+        ]);
+    }
+
+    public function removeUser(User $user): bool {
+        return $this->update_tracker('remove_user', [
+            'passkey' => $user->announceKey(),
         ]);
     }
 

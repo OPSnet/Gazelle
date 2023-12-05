@@ -17,9 +17,8 @@ if (isset($_REQUEST['confirm'])) {
         "Welcome to " . SITE_NAME,
         $Twig->render('register/welcome.bbcode.twig', ['user' => $user])
     );
-    (new Gazelle\Tracker)->update_tracker('add_user', ['id' => $user->id(), 'passkey' => $user->announceKey()]);
-    $Cache->increment('stats_user_count');
     echo $Twig->render('register/complete.twig');
+    (new Gazelle\Tracker)->addUser($user);
 
 } elseif (OPEN_REGISTRATION || isset($_REQUEST['invite']) || (new Gazelle\Stats\Users)->enabledUserTotal() == 0) {
     if ($_REQUEST['invite']) {

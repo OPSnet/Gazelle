@@ -200,10 +200,7 @@ class AutoEnable extends \Gazelle\BaseUser {
                 WHERE um.ID = ?
                 ", $userId
             );
-            (new \Gazelle\Tracker)->update_tracker('add_user', [
-                'id'      => $userId,
-                'passkey' => $this->user->announceKey(),
-            ]);
+            (new \Gazelle\Tracker)->addUser($this->user);
             self::$cache->delete_value(self::CACHE_TOTAL_OPEN);
             $success = true;
         }

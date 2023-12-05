@@ -163,39 +163,29 @@ class UserCreator extends Base {
             INSERT INTO user_bonus (user_id) VALUES (?)
             ", $this->id
         );
-
         self::$db->prepared_query("
             INSERT INTO user_flt (user_id) VALUES (?)
             ", $this->id
         );
-
         self::$db->prepared_query("
             INSERT INTO user_summary (user_id) VALUES (?)
             ", $this->id
         );
-
         self::$db->prepared_query("
             INSERT INTO users_history_ips (UserID, IP) VALUES (?, ?)
             ", $this->id, $this->ipaddr
         );
-
         self::$db->prepared_query("
             INSERT INTO users_leech_stats (UserID, Uploaded) VALUES (?, ?)
             ", $this->id, STARTING_UPLOAD
         );
-
         self::$db->prepared_query("
             INSERT INTO users_notifications_settings (UserID) VALUES (?)
             ", $this->id
         );
-
         self::$db->commit();
 
-        self::$cache->increment('stats_user_count');
-        (new \Gazelle\Tracker)->update_tracker('add_user', [
-            'id'      => $this->id,
-            'passkey' => $this->announceKey
-        ]);
+        (new Tracker)->addUser($user);
 
         $this->reset(); // So we can create another user
         return $user;
