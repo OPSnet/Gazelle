@@ -47,8 +47,8 @@ class Paginator {
         return $this;
     }
 
-    public function setParam(string $param): static {
-        $this->param[] = $param;
+    public function setParam(string $key, string $value): static {
+        $this->param[$key] = $value;
         return $this;
     }
 
@@ -65,7 +65,6 @@ class Paginator {
         if (isset($this->linkbox)) {
             return $this->linkbox;
         }
-        $pageCount = 0;
         $this->linkbox = '';
 
         $uri = (string)preg_replace('/[?&]page=\d+/', '', $_SERVER['REQUEST_URI']);
@@ -76,14 +75,12 @@ class Paginator {
              */
             $uri = (string)preg_replace("/(?:(?<=\?)$param=[^&]+&?|&$param=[^&]+(?:(?=&)|$))/", '', $uri);
         }
-        $uri = str_replace('&', '&amp;', $uri);
-        if (!str_contains($uri, '?')) {
-            $uri .= '?';
-        }
+        $uri = str_replace('&', '&amp;', rtrim($uri, '?'));
+        $uri .= str_contains($uri, '?') ? '&amp;' : '?';
 
         if ($this->total > 0) {
-            $this->page = min($this->page, (int)ceil($this->total / $this->perPage));
-            $pageCount = (int)ceil($this->total / $this->perPage);
+            $pageCount = $this->pages();
+            $this->page = min($this->page, $pageCount);
 
             if ($pageCount <= $this->linkCount) {
                 $firstPage = 1;
@@ -104,15 +101,15 @@ class Paginator {
                 return $this->linkbox;
             }
 
-            $paramList = $this->param ? ('&amp;' . implode('&amp;', $this->param)) : '';
+            $paramList = $this->param ? ('&amp;' . http_build_query($this->param, '', '&amp;')) : '';
             if ($this->page > 1) {
-                $this->linkbox = "<a href=\"{$uri}&amp;page=1{$paramList}{$this->anchor}\"><strong>&laquo; First</strong></a> "
-                    . "<a href=\"{$uri}&amp;page=" . ($this->page - 1) . $paramList . $this->anchor . '" class="pager_prev"><strong>&lsaquo; Prev</strong></a> | ';
+                $this->linkbox = "<a href=\"{$uri}page=1{$paramList}{$this->anchor}\"><strong>&laquo; First</strong></a> "
+                    . "<a href=\"{$uri}page=" . ($this->page - 1) . $paramList . $this->anchor . '" class="pager_prev"><strong>&lsaquo; Prev</strong></a> | ';
             }
 
             for ($i = $firstPage; $i <= $lastPage; $i++) {
                 if ($i != $this->page) {
-                    $this->linkbox .= "<a href=\"{$uri}&amp;page=$i{$paramList}{$this->anchor}\">";
+                    $this->linkbox .= "<a href=\"{$uri}page=$i{$paramList}{$this->anchor}\">";
                 }
                 $this->linkbox .= '<strong>';
                 $firstEntry = (($i - 1) * $this->perPage) + 1;
@@ -137,9 +134,10 @@ class Paginator {
             }
 
             if ($this->page && $this->page < $pageCount) {
-                $this->linkbox .= " | <a href=\"{$uri}&amp;page=" . ($this->page + 1) . $paramList . $this->anchor
+                $this->linkbox .= " | <a href=\"{$uri}page=" . ($this->page + 1) . $paramList . $this->anchor
                     . '" class="pager_next"><strong>Next &rsaquo;</strong></a>'
-                    . " <a href=\"{$uri}&amp;page=$pageCount\"><strong> Last &raquo;</strong></a>";
+                    . " <a href=\"{$uri}page=" . $pageCount . $paramList . $this->anchor
+                    . "\"><strong> Last &raquo;</strong></a>";
             }
         }
         if (strlen($this->linkbox)) {
@@ -147,20 +145,5 @@ class Paginator {
             $this->linkbox = "<div class=\"linkbox\">$anchorName{$this->linkbox}</div>";
         }
         return $this->linkbox;
-    }
-
-    // used for pagination of peer/snatch/download lists on torrentdetails.php
-    public function linkboxJS(string $action, int $torrentId): string {
-        if ($this->total < $this->perPage) {
-            return '';
-        }
-        $page = range(1, (int)ceil($this->total / $this->perPage));
-        $link = [];
-        foreach ($page as $p) {
-            $link[] = ($p === $this->page)
-                ? $p
-                : "<a href=\"#\" onclick=\"$action($torrentId, $p); return false;\">$p</a>";
-        }
-        return '<div class="linkbox">' . implode(' &sdot; ', $link) . '</div>';
     }
 }

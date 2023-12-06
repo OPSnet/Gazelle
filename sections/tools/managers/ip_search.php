@@ -26,7 +26,7 @@ if ($text) {
 
     $found = $search->add($text);
     if ($found) {
-        $paginator->setParam('iplist=' . $search->ipList())
+        $paginator->setParam('iplist', $search->ipList())
             ->setTotal(max($search->siteTotal(), $search->snatchTotal(), $search->trackerTotal()));
         $limit  = $paginator->limit();
         $offset = $paginator->offset();

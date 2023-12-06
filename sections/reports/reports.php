@@ -38,13 +38,13 @@ if (isset($_REQUEST['id'])) {
         $typeList = $formTypeList;
     }
     foreach ($typeList as $type) {
-        $paginator->setParam("type-$type=on");
+        $paginator->setParam("type-$type", "on");
     }
     $search->setTypeFilter($typeList);
 
     if (isset($_REQUEST['order'])) {
-        $paginator->setParam('view=old');
-        $paginator->setParam("order={$_REQUEST['order']}");
+        $paginator->setParam('view', 'old');
+        $paginator->setParam("order", $_REQUEST['order']);
         $search->setOrder(match ($_REQUEST['order']) {
             'resolved-asc'  => SearchReportOrder::resolvedAsc,
             'resolved-desc' => SearchReportOrder::resolvedDesc,

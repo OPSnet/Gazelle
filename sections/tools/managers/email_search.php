@@ -27,7 +27,7 @@ if ($text) {
     $list  = $search->extract($text);
     $found = $search->add($list);
     if ($found) {
-        $paginator->setParam('emaillist=' . implode(',', $list))
+        $paginator->setParam('emaillist', implode(',', $list))
             ->setTotal(max($search->liveTotal(), $search->historyTotal()));
         $limit  = $paginator->limit();
         $offset = $paginator->offset();
