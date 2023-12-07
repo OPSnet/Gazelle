@@ -2,6 +2,8 @@
 
 namespace Gazelle;
 
+use Gazelle\Enum\NotificationTicketState;
+
 class NotificationTicket {
     use Pg;
 

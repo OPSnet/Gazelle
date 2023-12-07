@@ -2,7 +2,7 @@
 
 namespace Gazelle\Manager;
 
-use Gazelle\NotificationTicketState;
+use Gazelle\Enum\NotificationTicketState;
 
 class Notification extends \Gazelle\Base {
     use \Gazelle\Pg;

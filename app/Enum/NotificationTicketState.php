@@ -1,6 +1,6 @@
 <?php
 
-namespace Gazelle;
+namespace Gazelle\Enum;
 
 enum NotificationTicketState: string {
     case Pending = 'pending';
