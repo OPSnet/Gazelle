@@ -47,7 +47,7 @@ foreach ($Tags as $tagName) {
         $tagMan->createTorrentTagVote($tagId, $tgroupId, $userId, 'up');
         $added[] = $resolved;
 
-        (new Gazelle\Log)->group($tgroupId, $userId, "Tag \"$resolved\" added to group");
+        (new Gazelle\Log)->group($tgroup, $Viewer, "Tag \"$resolved\" added to group");
     }
 }
 

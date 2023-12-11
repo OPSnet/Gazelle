@@ -78,7 +78,7 @@ class TGroup extends \Gazelle\BaseManager {
             $old->remove($user);
         }
 
-        $logger->group($newId, $user->id(), "split from group $oldId")
+        $logger->group($new, $user, "split from group $oldId")
             ->general("Torrent {$torrent->id()} was split out from group $oldId to $newId by {$user->label()}");
 
         $new->flush()->refresh();
@@ -243,7 +243,7 @@ class TGroup extends \Gazelle\BaseManager {
         $oldLabel = $old->label();
         $old->remove($user);
         $log->general("Group $oldId deleted following merge to {$new->id()}.")
-            ->group($new->id(), $user->id(), "Merged Group $oldLabel to {$new->label()}")
+            ->group($new, $user, "Merged Group $oldLabel to {$new->label()}")
             ->merge($old, $new);
 
         self::$db->commit();
@@ -418,7 +418,7 @@ class TGroup extends \Gazelle\BaseManager {
         }
         $new->refresh();
 
-        $logger->group($new->id(), $user->id(),
+        $logger->group($new, $user,
             "category changed from {$old->categoryId()} to {$new->categoryId()}, merged from group {$old->id()}"
             )
             ->general("Torrent {$torrent->id()} was changed to category {$new->categoryId()} by {$user->label()}");

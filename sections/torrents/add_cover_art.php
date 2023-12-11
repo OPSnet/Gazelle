@@ -28,7 +28,7 @@ foreach ($imageList as $n => $image) {
     if ($banned) {
         error("Please rehost images from $banned elsewhere.");
     }
-    $tgroup->addCoverArt($image, trim($summaryList[$n]), $Viewer->id(), $logger);
+    $tgroup->addCoverArt($image, trim($summaryList[$n]), $Viewer, $logger);
 }
 
 header('Location: ' . redirectUrl($tgroup->location()));

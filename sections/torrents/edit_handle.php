@@ -267,7 +267,7 @@ $db->commit();
 $torrent->group()->refresh();
 
 $changeLog = implode(', ', $change);
-(new Gazelle\Log)->torrent($current['GroupID'], $TorrentID, $Viewer->id(), $changeLog)
+(new Gazelle\Log)->torrent($torrent, $Viewer, $changeLog)
     ->general("Torrent $TorrentID ({$torrent->group()->name()}) in group {$current['GroupID']} was edited by "
         . $Viewer->username() . " ($changeLog)");
 

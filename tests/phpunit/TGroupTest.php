@@ -135,10 +135,10 @@ class TGroupTest extends TestCase {
     }
 
     public function testTGroupCoverArt(): void {
-        $coverId = $this->tgroup->addCoverArt('https://www.example.com/cover.jpg', 'cover art summary', 1, new Gazelle\Log);
+        $coverId = $this->tgroup->addCoverArt('https://www.example.com/cover.jpg', 'cover art summary', $this->userList['user'], new Gazelle\Log);
         $this->assertGreaterThan(0, $coverId, 'tgroup-cover-art-add');
-        $this->assertEquals(1, $this->tgroup->removeCoverArt($coverId, 1, new Gazelle\Log), 'tgroup-cover-art-del-ok');
-        $this->assertEquals(0, $this->tgroup->removeCoverArt(9999999, 1, new Gazelle\Log), 'tgroup-cover-art-del-nok');
+        $this->assertEquals(1, $this->tgroup->removeCoverArt($coverId, $this->userList['user'], new Gazelle\Log), 'tgroup-cover-art-del-ok');
+        $this->assertEquals(0, $this->tgroup->removeCoverArt(9999999, $this->userList['user'], new Gazelle\Log), 'tgroup-cover-art-del-nok');
     }
 
     public function testTGroupRevision(): void {

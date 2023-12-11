@@ -50,7 +50,7 @@ if ($tgroup->catalogueNumber() != $catNumber) {
 }
 
 if ($tgroup->dirty()) {
-    (new Gazelle\Log)->group($tgroup->id(), $Viewer->id(), ucfirst(implode(", ", $log)));
+    (new Gazelle\Log)->group($tgroup, $Viewer, ucfirst(implode(", ", $log)));
     $tgroup->modify();
     $tgroup->refresh();
 }

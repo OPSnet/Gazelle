@@ -182,8 +182,7 @@ if (isset($_POST['confirm'])) {
         ", $ArtistID
     );
     (new Gazelle\Log)->general(
-        "The artist $ArtistID ($ArtistName) was made into a non-redirecting alias of artist $NewArtistID ($NewArtistName) by user "
-        . $Viewer->id() . " (" . $Viewer->username() . ')'
+        "The artist $ArtistID ($ArtistName) was made into a non-redirecting alias of artist $NewArtistID ($NewArtistName) by user {$Viewer->label()}"
     );
     header("Location: artist.php?action=edit&artistid=$NewArtistID");
     exit;

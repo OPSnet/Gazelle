@@ -9,8 +9,8 @@ if (empty($_POST['importance']) || empty($_POST['artists']) || empty($_POST['gro
     error(0);
 }
 
-$GroupID = (int)$_POST['groupid'];
-if (!$GroupID) {
+$tgroup = (new Gazelle\Manager\TGroup)->findById((int)($_POST['groupid'] ?? 0));
+if (is_null($tgroup)) {
     error(404);
 }
 $Artists = explode(',', $_POST['artists']);
@@ -29,10 +29,6 @@ foreach ($Artists as $Artist) {
 
 if (count($CleanArtists) > 0) {
     $db = Gazelle\DB::DB();
-    $GroupName = $db->scalar('
-        SELECT Name FROM torrents_group WHERE ID = ?
-        ', $GroupID
-    );
     $placeholders = placeholders($ArtistIDs);
     $db->prepared_query("
         SELECT ArtistID, Name
@@ -50,14 +46,12 @@ if (count($CleanArtists) > 0) {
                 WHERE GroupID = ?
                     AND ArtistID = ?
                     AND Importance = ?
-                ", $GroupID, $ArtistID, $Importance
+                ", $tgroup->id(), $ArtistID, $Importance
             );
             if ($db->affected_rows()) {
                 $change = "artist $ArtistID ({$ArtistNames[$ArtistID]['Name']}) removed as " . ARTIST_TYPE[$Importance];
-                $logger->group($GroupID, $Viewer->id(), $change)
-                    ->general("$change in group {$GroupID} ({$GroupName}) by user "
-                        . $Viewer->id() . " (" . $Viewer->username() . ")"
-                    );
+                $logger->group($tgroup, $Viewer, $change)
+                    ->general("$change in group {$tgroup->id()} ({$tgroup->name()}) by user {$Viewer->label()}");
                 $Cache->delete_value("artist_groups_$ArtistID");
             }
         }
@@ -87,7 +81,7 @@ if (count($CleanArtists) > 0) {
                 Importance = ?
             WHERE GroupID = ?
                 AND ArtistID IN ($placeholders)
-            ", $NewImportance, $GroupID, ...$ArtistIDs
+            ", $NewImportance, $tgroup->id(), ...$ArtistIDs
         );
         $logger = new Gazelle\Log;
         foreach ($CleanArtists as $Artist) {
@@ -98,10 +92,10 @@ if (count($CleanArtists) > 0) {
             }
             $change = "artist $ArtistID ({$ArtistNames[$ArtistID]['Name']}) changed role from "
                 . ARTIST_TYPE[$Importance] . " to " . ARTIST_TYPE[$NewImportance];
-            $logger->group($GroupID, $Viewer->id(), $change)
-                ->general("$change in group {$GroupID} ({$GroupName}) by user " . $Viewer->label());
+            $logger->group($tgroup, $Viewer, $change)
+                ->general("$change in group {$tgroup->id()} ({$tgroup->name()}) by user " . $Viewer->label());
         }
     }
-    (new \Gazelle\Manager\TGroup)->findById($GroupID)?->refresh();
-    header("Location: torrents.php?id=$GroupID");
+    $tgroup->refresh();
 }
+header("Location: {$tgroup->location()}");

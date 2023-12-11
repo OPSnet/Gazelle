@@ -19,13 +19,13 @@ class Log extends Base {
     /**
      * Write a group entry
      */
-    public function group(int $groupId, int $userId, string $message): static {
+    public function group(TGroup $tgroup, ?User $user, string $message): static {
         $qid = self::$db->get_query_id();
         self::$db->prepared_query("
             INSERT INTO group_log
                    (GroupID, UserID, Info, TorrentID, Hidden)
             VALUES (?,       ?,      ?,    0,         0)
-            ", $groupId, $userId, $message
+            ", $tgroup->id(), $user?->id(), $message
         );
         self::$db->set_query_id($qid);
         return $this;
@@ -34,13 +34,13 @@ class Log extends Base {
     /**
      * Write a torrent entry
      */
-    public function torrent(int $groupId, int $torrentId, ?int $userId, string $message): static {
+    public function torrent(Torrent $torrent, ?User $user, string $message): static {
         $qid = self::$db->get_query_id();
         self::$db->prepared_query("
             INSERT INTO group_log
                    (GroupID, TorrentID, UserID, Info, Hidden)
             VALUES (?,       ?,         ?,      ?,    0)
-            ", $groupId, $torrentId, $userId, $message
+            ", $torrent->groupId(), $torrent->id(), $user?->id(), $message
         );
         self::$db->set_query_id($qid);
         return $this;

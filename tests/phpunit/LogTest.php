@@ -57,7 +57,7 @@ class LogTest extends TestCase {
             ['log.jam']
         );
         $tgroupId = $this->tgroup->id();
-        $logger->group($tgroupId, $this->user->id(), self::PREFIX . "group first " . randomString());
+        $logger->group($this->tgroup, $this->user, self::PREFIX . "group first " . randomString());
 
         $sitelog = new \Gazelle\Manager\SiteLog(new \Gazelle\Manager\User);
         $this->assertCount(2, $sitelog->tgroupLogList($tgroupId), 'grouplog-intial');
@@ -77,14 +77,13 @@ class LogTest extends TestCase {
             [[ARTIST_MAIN], ['phpunit log artist ' . randomString(6)]],
             ['log.jam']
         );
-        $newId = $this->tgroupNew->id();
-        $logger->group($tgroupId, 0, self::PREFIX . "group extra " . randomString());
-        $logger->group($newId, 0, self::PREFIX . "group merge " . randomString());
+        $logger->group($this->tgroup, null, self::PREFIX . "group extra " . randomString());
+        $logger->group($this->tgroupNew, null, self::PREFIX . "group merge " . randomString());
         $this->assertEquals(3, $logger->merge($this->tgroup, $this->tgroupNew), 'grouplog-merge-result');
 
         $messageList = array_map(
             fn($m) => $m['info'],
-            $sitelog->tgroupLogList($newId),
+            $sitelog->tgroupLogList($this->tgroupNew->id()),
         );
 
         $this->assertStringStartsWith(self::PREFIX . 'group merge ', $messageList[0], 'grouplog-merge-line-0');
@@ -96,15 +95,29 @@ class LogTest extends TestCase {
 
     public function testTorrentlLog(): void {
         $logger = new \Gazelle\Log;
-        $logger->torrent(-3, -30, -5, self::PREFIX . "torrent " . randomString());
+        $this->user = Helper::makeUser('sitelog.' . randomString(6), 'sitelog');
+        $this->tgroup = Helper::makeTGroupMusic(
+            $this->user,
+            'phpunit log ' . randomString(6),
+            [[ARTIST_MAIN], ['phpunit log artist ' . randomString(6)]],
+            ['log.jam']
+        );
+        $torrent = Helper::makeTorrentMusic(
+            tgroup: $this->tgroup,
+            user:  $this->user,
+            title: randomString(10),
+        );
+        $logger->torrent($torrent, $this->user, self::PREFIX . "torrent " . randomString());
 
         $sitelog = new \Gazelle\Manager\SiteLog(new \Gazelle\Manager\User);
-        $this->assertCount(0, $sitelog->tgroupLogList(-1001), 'torrentlog-no-log');
-        $result = $sitelog->tgroupLogList(-3);
+        $this->assertCount(2, $sitelog->tgroupLogList($this->tgroup->id()), 'torrentlog-has-log');
+
+        $torrent->remove($this->user, 'phpunit log delete');
+        $result = $sitelog->tgroupLogList($this->tgroup->id());
         $latest = current($result);
         $this->assertEquals(1, $latest['deleted'], 'torrentlog-latest-is-deleted');
-        $this->assertEquals(-30, $latest['torrent_id'], 'torrentlog-latest-torrent-id');
-        $this->assertEquals(-5, $latest['user_id'], 'torrentlog-latest-user-id');
+        $this->assertEquals($torrent->id(), $latest['torrent_id'], 'torrentlog-latest-torrent-id');
+        $this->assertEquals($this->user->id(), $latest['user_id'], 'torrentlog-latest-user-id');
     }
 
     public function testRenderLog(): void {

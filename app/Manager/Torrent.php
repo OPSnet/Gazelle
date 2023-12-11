@@ -380,7 +380,7 @@ class Torrent extends \Gazelle\BaseManager {
             if (!isset($refresh[$tgroupId])) {
                 $refresh[$tgroupId] = $torrent->group();
             }
-            $log->torrent($tgroupId, $torrentId, $user->id(), "marked as freeleech type {$reason->label()}")
+            $log->torrent($torrent, $user, "marked as freeleech type {$reason->label()}")
                 ->general($user->username() . " marked torrent $torrentId freeleech type {$reason->label()}");
         }
         foreach ($refresh as $tgroup) {

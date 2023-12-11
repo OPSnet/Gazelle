@@ -1,7 +1,7 @@
-{{ header("History for Group " ~ tgroup_id) }}
+{{ header("History for torrent group " ~ id) }}
 <div class="thin">
     <div class="header">
-        <h2>History for {{ tgroup.link|default("Group " ~ tgroup_id)|raw }}</h2>
+        <h2>{{ tgroup.link|default("Group " ~ tgroup_id)|raw }} › Changelog</h2>
     </div>
     <table>
         <tr class="colhead">

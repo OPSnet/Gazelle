@@ -230,7 +230,7 @@ class Torrent extends TorrentAbstract {
             WHERE ID = ?
             ", $this->id
         );
-        $logger->torrent($this->groupId(), $this->id, $user->id(), "All logs removed from torrent");
+        $logger->torrent($this, $user, "All logs removed from torrent");
         self::$db->commit();
         $this->flush();
 
@@ -335,6 +335,7 @@ class Torrent extends TorrentAbstract {
      */
     public function remove(?User $user, string $reason, int $trackerReason = -1): array {
         $qid = self::$db->get_query_id();
+        self::$db->begin_transaction();
         $this->info();
         if ($this->id > MAX_PREV_TORRENT_ID) {
             (new \Gazelle\User\Bonus($this->uploader()))->removePointsForUpload($this);
@@ -355,6 +356,7 @@ class Torrent extends TorrentAbstract {
         $manager->relaxConstraints(true);
         [$ok, $message] = $manager->softDelete(SQLDB, 'torrents_leech_stats', [['TorrentID', $this->id]], false);
         if (!$ok) {
+            self::$db->rollback();
             return [false, $message];
         }
         [$ok, $message] = $manager->softDelete(SQLDB, 'torrents', [['ID', $this->id]]);
@@ -430,19 +432,17 @@ class Torrent extends TorrentAbstract {
             );
         }
 
+        $userInfo = $user ? " by " . $user->username() : '';
+        (new Log)->general(
+            "Torrent {$this->id} ($name) [$edition] ($sizeMB $infohash) was deleted$userInfo for reason: $reason")
+            ->torrent($this, $user, "deleted torrent ($sizeMB $infohash) for reason: $reason");
+        self::$db->commit();
+
         array_push($deleteKeys, "zz_t_" . $this->id, sprintf(self::CACHE_KEY, $this->id), "torrent_group_" . $groupId);
         self::$cache->delete_multi($deleteKeys);
         self::$cache->decrement('stats_torrent_count');
         $this->group()->refresh();
         $this->flush();
-
-        $userInfo = $user ? " by " . $user->username() : '';
-        (new Log)->general(
-            "Torrent {$this->id} ($name) [$edition] ($sizeMB $infohash) was deleted$userInfo for reason: $reason")
-            ->torrent(
-                $groupId, $this->id, $user?->id(),
-                "deleted torrent ($sizeMB $infohash) for reason: $reason"
-            );
 
         self::$db->set_query_id($qid);
         return [true, "torrent " . $this->id . " removed"];

@@ -491,22 +491,22 @@ class TGroup extends BaseObject {
                 );
     }
 
-    public function addCoverArt(string $image, string $summary, int $userId, \Gazelle\Log $logger): int {
+    public function addCoverArt(string $image, string $summary, User $user, Log $logger): int {
         self::$db->prepared_query("
             INSERT IGNORE INTO cover_art
                    (GroupID, Image, Summary, UserID)
             VALUES (?,       ?,     ?,       ?)
-            ", $this->id, $image, $summary, $userId
+            ", $this->id, $image, $summary, $user->id()
         );
         $id = self::$db->inserted_id();
         if ($id) {
-            $logger->group($this->id, $userId, "Additional cover \"$summary - $image\" added to group");
+            $logger->group($this, $user, "Additional cover \"$summary - $image\" added to group");
             self::$cache->delete_value(sprintf(self::CACHE_COVERART_KEY, $this->id));
         }
         return $id;
     }
 
-    public function removeCoverArt(int $coverId, int $userId, \Gazelle\Log $logger): int {
+    public function removeCoverArt(int $coverId, User $user, Log $logger): int {
         [$image, $summary] = self::$db->row("
             SELECT Image, Summary
             FROM cover_art
@@ -522,7 +522,7 @@ class TGroup extends BaseObject {
         );
         $affected = self::$db->affected_rows();
         if ($affected) {
-            $logger->group($this->id, $userId, "Additional cover \"$summary - $image\" removed from group");
+            $logger->group($this, $user, "Additional cover \"$summary - $image\" removed from group");
             self::$cache->delete_value(sprintf(self::CACHE_COVERART_KEY, $this->id));
         }
         return $affected;
@@ -612,7 +612,7 @@ class TGroup extends BaseObject {
         );
 
         foreach ($add as $artistLabel) {
-            $logger->group($this->id, $user->id(), "Added artist $artistLabel")
+            $logger->group($this, $user, "Added artist $artistLabel")
                 ->general("Artist $artistLabel was added to the group {$this->label()} by user {$user->label()}");
         }
         self::$cache->increment_value('stats_album_count', count($names));
@@ -1004,8 +1004,8 @@ class TGroup extends BaseObject {
 
             $old->remove($user);
         }
-        $logger->group($this->id, $user->id(), "merged group $oldId")
-            ->general("Torrent " . $torrent->id() . " was edited by " . $user->label());
+        $logger->group($this, $user, "merged group $oldId")
+            ->general("Torrent {$torrent->id()} was edited by {$user->label()}");
         self::$db->commit();
 
         $this->flush()->refresh();
@@ -1132,7 +1132,7 @@ class TGroup extends BaseObject {
         $success = $this->setField('Name', $name)->modify();
         if ($success) {
             $this->refresh();
-            $logger->group($this->id, $user->id(), "renamed to \"$name\" from \"$oldName\"")
+            $logger->group($this, $user, "renamed to \"$name\" from \"$oldName\"")
                 ->general("Torrent Group {$this->id} was renamed to \"$name\" from \"$oldName\" by {$user->username()}");
         }
         return $success;

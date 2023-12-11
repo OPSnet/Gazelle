@@ -27,7 +27,7 @@ if ($tgroup->removeArtist($artist, $role, $Viewer, $logger)) {
 }
 
 $label = "$artistId ($artistName) [" . ARTIST_TYPE[$role] . "]";
-$logger->group($tgroup->id(), $Viewer->id(), "removed artist $label")
+$logger->group($tgroup, $Viewer, "removed artist $label")
     ->general("Artist $label removed from group " . $tgroup->label() . " by user " . $Viewer->label());
 
 header('Location: ' . redirectUrl($tgroup->location()));
