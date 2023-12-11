@@ -26,6 +26,7 @@ class Report extends \Gazelle\BaseManager {
         \Gazelle\Torrent            $torrent,
         \Gazelle\User               $user,
         \Gazelle\Torrent\ReportType $reportType,
+        \Gazelle\Util\Irc           $irc,
         string $reason,
         string $otherIdList,
         string $track = '',
@@ -38,13 +39,21 @@ class Report extends \Gazelle\BaseManager {
             VALUES (?,          ?,         ?,    ?,           ?,     ?,     ?,       ?)
             ", $user->id(), $torrent->id(), $reportType->type(), $reason, $otherIdList, $track, $image, $link
         );
-        $id = self::$db->inserted_id();
+
+        $report = new \Gazelle\Torrent\Report(self::$db->inserted_id(), $this->torMan);
+        if ($reportType->type() == 'urgent') {
+            $irc::sendMessage(
+                IRC_CHAN_MOD,
+                "URGENT: {$user->username()} reported {$torrent->name()} – " . SITE_URL . $report->location()
+            );
+        }
+
         self::$cache->delete_value(sprintf(\Gazelle\TorrentAbstract::CACHE_REPORTLIST, $torrent->id()));
         self::$cache->delete_value("reports_torrent_{$torrent->id()}");
         self::$cache->increment('num_torrent_reportsv2');
         $torrent->flush();
 
-        return $this->findById($id);
+        return $report;
     }
 
     public function findById(int $reportId): ?\Gazelle\Torrent\Report {

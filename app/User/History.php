@@ -101,7 +101,7 @@ class History extends \Gazelle\BaseUser {
             "Security alert: Your email address was changed via $ipaddr with {$_SERVER['HTTP_USER_AGENT']}. Not you? Contact staff ASAP."
         );
         $irc::sendMessage(
-            ADMIN_CHAN,
+            IRC_CHAN_STAFF,
             "Alert! email address for {$this->user->username()} was changed from {$this->user->email()} to $newEmail via $ipaddr with UA={$_SERVER['HTTP_USER_AGENT']}."
         );
         $mailer->send($this->user->email(), 'Email address changed information for ' . SITE_NAME,

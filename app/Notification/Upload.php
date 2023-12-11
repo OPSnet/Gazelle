@@ -293,7 +293,7 @@ class Upload extends \Gazelle\Base {
     }
 
     public function sendIrcNotification(): void {
-        Irc::sendMessage(IRC_ANNOUNCE, $this->ircNotification());
+        Irc::sendMessage(IRC_CHAN_ANNOUNCE, $this->ircNotification());
     }
 
     public function ircNotification(): string {

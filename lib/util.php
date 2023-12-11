@@ -283,9 +283,10 @@ function authorize(bool $Ajax = false): void {
     if ($Viewer->auth() === ($_REQUEST['auth'] ?? $_REQUEST['authkey'] ?? '')) {
         return;
     }
-    Irc::sendMessage(STATUS_CHAN,
-        $Viewer->username() . " just failed authorize on "
-        . $_SERVER['REQUEST_URI'] . (!empty($_SERVER['HTTP_REFERER']) ? " coming from " . $_SERVER['HTTP_REFERER'] : ""));
+    Irc::sendMessage(IRC_CHAN_STATUS,
+        "{$Viewer->username()} authorize failed on {$_SERVER['REQUEST_URI']}"
+        . (!empty($_SERVER['HTTP_REFERER']) ? " coming from " . $_SERVER['HTTP_REFERER'] : "")
+    );
     error('Invalid authorization key. Go back, refresh, and try again.', $Ajax);
 }
 

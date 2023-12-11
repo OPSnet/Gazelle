@@ -14,9 +14,9 @@ require_once('array.php');
 if (!array_key_exists($_POST['type'], $Types)) {
     error(403);
 }
-$reportType = $_POST['type'];
+$subjectType = $_POST['type'];
 
-if ($reportType !== 'request_update') {
+if ($subjectType !== 'request_update') {
     $reason = $_POST['reason'];
 } else {
     $year = trim($_POST['year']);
@@ -30,7 +30,7 @@ if ($reportType !== 'request_update') {
     $reason .= '[b]Additional comments[/b]: ' . $_POST['comment'];
 }
 
-$location = match ($reportType) {
+$location = match ($subjectType) {
     'collage'        => "collages.php?id=$subjectId",
     'comment'        => "comments.php?action=jump&postid=$subjectId",
     'post'           => (new Gazelle\Manager\ForumPost)->findById($subjectId)?->location(), // could be null
@@ -44,17 +44,11 @@ if (is_null($location)) {
     error("Cannot generate a link to the reported item");
 }
 
-$report = (new Gazelle\Manager\Report(new Gazelle\Manager\User))->create($Viewer, $subjectId, $reportType, $reason);
-
-$channelList = [];
-if ($reportType === 'request_update') {
-    $channelList[] = IRC_CHAN_REPORT_REQUEST;
-} elseif (in_array($reportType, ['comment', 'post', 'thread'])) {
-    $channelList[] = IRC_CHAN_REPORT_FORUM;
+$report = (new Gazelle\Manager\Report(new Gazelle\Manager\User))->create($Viewer, $subjectId, $subjectType, $reason);
+if (in_array($report->subjectType(), ['user', 'comment'])) {
+    Irc::sendMessage(
+        IRC_CHAN_MOD,
+        "Report #{$report->id()} – {$Viewer->username()} reported a $subjectType: " . SITE_URL . "/$location"
+    );
 }
-$message = "{$report->id()} – {$Viewer->username()} reported a $reportType: " . SITE_URL . "/$location : " . strtr($reason, "\n", ' ');
-foreach ($channelList as $channel) {
-    Irc::sendMessage($channel, $message);
-}
-
 header("Location: $location");

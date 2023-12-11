@@ -69,7 +69,10 @@ $threadId = $thread->id();
 if ($needPoll) {
     (new Gazelle\Manager\ForumPoll)->create($threadId, $question, $answerList);
     if ($forum->id() == STAFF_FORUM_ID) {
-        Irc::sendMessage(MOD_CHAN, "Poll created by {$Viewer->username()}: \"$question\" " . $thread->publicLocation());
+        Irc::sendMessage(
+            IRC_CHAN_STAFF,
+            "Poll created by {$Viewer->username()}: \"$question\" " . $thread->publicLocation()
+        );
     }
 }
 

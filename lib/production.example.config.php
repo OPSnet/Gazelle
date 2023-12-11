@@ -20,7 +20,7 @@ define('TRACKER_NAME', 'tracker.example.com');
 define('TRACKER_PORT', 12345);
 
 define('SQLHOST', '10.0.0.1');
-define('BOT_SERVER', 'irc.example.com');
+define('IRC_HOSTNAME', 'irc.example.com');
 
 // If your database is on the same host as the PHP interpreter
 define('SQLSOCK', '/var/run/mysqld/mysqld.sock');

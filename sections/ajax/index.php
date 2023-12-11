@@ -77,7 +77,7 @@ if (!$Viewer->permitted('site_unlimit_ajax') && isset($LimitedPages[$Action])) {
     } else {
         $Cache->increment_value('ajax_requests_' . $UserID);
         if ($UserRequests > $rate) {
-            Gazelle\Util\Irc::sendMessage(ADMIN_CHAN, "rate limit hit by {$Viewer->username()} on $Action");
+            Gazelle\Util\Irc::sendMessage(IRC_CHAN_STATUS, "ajax rate limit hit by {$Viewer->username()} on $Action");
             json_error("Rate limit exceeded");
         }
     }

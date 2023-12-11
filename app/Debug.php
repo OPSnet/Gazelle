@@ -148,7 +148,7 @@ class Debug {
         }
         $case = $this->saveCase($Report);
         global $Document;
-        Irc::sendMessage(LAB_CHAN, "{$Message} $Document "
+        Irc::sendMessage(IRC_CHAN_STATUS, "{$Message} $Document "
             . SITE_URL . "/tools.php?action=analysis&case=$case "
             . SITE_URL . '/' . $RequestURI
         );

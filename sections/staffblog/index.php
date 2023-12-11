@@ -35,9 +35,7 @@ if ($Viewer->permitted('admin_manage_blog')) {
                 }
                 if ($_REQUEST['action'] == 'takenewblog') {
                     $blog = $blogMan->create($Viewer, $title, $body);
-                    Irc::sendMessage(MOD_CHAN, "New staff blog: " . $blog->title()
-                        . " - " . $blog->publicLocation()
-                    );
+                    Irc::sendMessage(IRC_CHAN_STAFF, "New staff blog: {$blog->title()} – {$blog->publicLocation()}");
                 } else {
                     $blog->setField('Title', $title)
                         ->setField('Body', $body)

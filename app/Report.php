@@ -111,20 +111,13 @@ class Report extends BaseObject {
             ", $user->id(), $this->id
         );
         $affected = self::$db->affected_rows();
+
         $this->flush();
         self::$cache->delete_value('num_other_reports');
-
-        $channelList = [];
         if ($this->subjectType() == 'request_update') {
-            $channelList[] = IRC_CHAN_REPORT_REQUEST;
             self::$cache->decrement('num_update_reports');
         } elseif (in_array($this->subjectType(), ['comment', 'post', 'thread'])) {
-            $channelList[] = IRC_CHAN_REPORT_FORUM;
             self::$cache->decrement('num_forum_reports');
-        }
-        $message = "Report {$this->id()} resolved by {$user->username()} ({$manager->remainingTotal()} remaining).";
-        foreach ($channelList as $channel) {
-            Util\Irc::sendMessage($channel, $message);
         }
 
         return $affected;

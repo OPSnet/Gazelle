@@ -531,7 +531,7 @@ class Referral extends \Gazelle\Base {
         );
 
         if ($existing) {
-            return [false, "Account already used for referral, join " . BOT_DISABLED_CHAN . " on " . BOT_SERVER . " for help."];
+            return [false, "Account already used for referral, join " . IRC_CHAN_BLOCKED . " on " . IRC_HOSTNAME . " for help."];
         }
 
         $inviteKey = randomString();

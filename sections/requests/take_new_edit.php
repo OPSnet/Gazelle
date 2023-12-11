@@ -415,7 +415,7 @@ if (!$newRequest) {
 
     Gazelle\Util\Irc::sendMessage(
         IRC_CHAN_REQUEST,
-        $request->text() . " - " . $request->publicLocation() . " - " . implode(' ', $tags)
+        "{$request->text()} – {$request->publicLocation()} – " . implode(' ', $tags)
     );
 }
 

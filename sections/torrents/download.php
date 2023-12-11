@@ -34,7 +34,7 @@ if ($status == DownloadStatus::flood) {
     if ($Cache->get_value($key) === false) {
         $Cache->cache_value($key, true, 3600);
         Irc::sendMessage(
-            STATUS_CHAN,
+            IRC_CHAN_STATUS,
             "{$Viewer->publicLocation()} ({$Viewer->username()}) ({$_SERVER['REMOTE_ADDR']}) accessing "
             . SITE_URL . $_SERVER['REQUEST_URI']
             . (!empty($_SERVER['HTTP_REFERER']) ? " from " . $_SERVER['HTTP_REFERER'] : '')

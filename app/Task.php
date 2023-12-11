@@ -59,8 +59,10 @@ abstract class Task extends Base {
             ', $this->taskId);
             self::$cache->delete_value(TaskScheduler::CACHE_TASKS);
 
-            Irc::sendMessage(LAB_CHAN, 'Task ' . $this->name . ' is no longer sane ' . SITE_URL . '/tools.php?action=periodic&mode=detail&id=' . $this->taskId);
-            // todo: send notifications to appropriate users
+            Irc::sendMessage(
+                IRC_CHAN_DEV,
+                "Task {$this->name} is no longer sane " . SITE_URL . "/tools.php?action=periodic&mode=detail&id={$this->taskId}"
+            );
         } elseif ($errorCount == 0 && !$sane) {
             self::$db->prepared_query('
                 UPDATE periodic_task SET
@@ -69,7 +71,7 @@ abstract class Task extends Base {
             ', $this->taskId);
             self::$cache->delete_value(TaskScheduler::CACHE_TASKS);
 
-            Irc::sendMessage(LAB_CHAN, 'Task ' . $this->name . ' is now sane');
+            Irc::sendMessage(IRC_CHAN_DEV, "Task {$this->name} is now sane");
         }
         return $this->processed;
     }

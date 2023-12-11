@@ -51,6 +51,7 @@ class TorrentReportManagerTest extends TestCase {
             reportType:  $type,
             reason:      'phpunit urgent report',
             otherIdList: '',
+            irc:         new Gazelle\Util\Irc,
         );
         $this->assertEquals([], $torrent->labelList($this->userList[0]), 'uploader-report-label');
 

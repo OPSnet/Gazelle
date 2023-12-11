@@ -18,14 +18,14 @@ function toggle_visibility(id) {
 Your request to re-enable your account has been received. You can expect
 a reply message in your email within 48 hours.<br />
 If you do not receive an email after 48 hours have passed, please visit us
-on IRC for assistance in {{ constant('BOT_DISABLED_CHAN') }}
-on {{ constant('BOT_SERVER') }}
+on IRC for assistance in {{ constant('IRC_CHAN_BLOCKED') }}
+on {{ constant('IRC_HOSTNAME') }}
     {% elseif enabler.isRejected %}
 Your request to re-enable your account has been rejected.<br />
 This may be because a request is already pending for your username,
 or because a recent request was denied.<br /><br />
-You are encouraged to discuss this with staff by visiting {{ constant('BOT_DISABLED_CHAN') }}
-on {{ constant('BOT_SERVER') }}
+You are encouraged to discuss this with staff by visiting {{ constant('IRC_CHAN_BLOCKED') }}
+on {{ constant('IRC_HOSTNAME') }}
     {% endif %}
 {% endif %}
 <br /><br /><a href='/'>Back</a>
@@ -56,8 +56,8 @@ cannot do so, please see below.</p>
 
 <p>If you are unsure why your account is disabled, or you wish to
 discuss this with staff, come to our IRC network at
-<b>{{ constant('BOT_SERVER') }}</b> and join the
-<b>{{ constant('BOT_DISABLED_CHAN') }}</b>&nbsp;channel. Use of Mibbit is
+<b>{{ constant('IRC_HOSTNAME') }}</b> and join the
+<b>{{ constant('IRC_CHAN_BLOCKED') }}</b>&nbsp;channel. Use of Mibbit is
 <i>not</i> recommended. If nobody is online when you join, after a
 time your session will be disconnected and you will never receive
 a reply and will have to connect again. It could be a while before

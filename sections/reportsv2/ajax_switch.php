@@ -36,6 +36,7 @@ $new = $reportMan->create(
     reason:      $report->reason(),
     image:       implode(' ', $report->image()),
     otherIdList: (string)$report->torrentId(),
+    irc:         new Gazelle\Util\Irc,
 );
 
 if ($other->uploaderId() != $Viewer->id()) {

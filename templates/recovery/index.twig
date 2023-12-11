@@ -99,8 +99,8 @@ same IP address.</p>
 {% else %}
 <p>Recovery is currently closed.</p>
 
-<p>Please join <tt>{{ constant('BOT_SERVER') }}</tt> (port 6669 or +7000 for SSL) for
-more information (#disabled channel).</p>
+<p>Please join <tt>{{ constant('IRC_HOSTAME') }}</tt> (port {{ constant('IRC_PORT_CLEARTEXT') }}  or +{{ constant('IRC_PORT') }} for SSL) for
+more information ({{ constant('IRC_CHAN_BLOCKED') }} channel).</p>
 {% endif %}
 </div>
 

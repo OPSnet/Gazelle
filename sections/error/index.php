@@ -19,7 +19,7 @@ switch ($Error) {
     case '403':
         $Title = "Error 403";
         $Description = "You tried to go to a page that you don't have enough permission to view.";
-        notify($Viewer, STATUS_CHAN, 403);
+        notify($Viewer, IRC_CHAN_STATUS, 403);
         break;
     case '404':
         $Title = "Error 404";
@@ -32,7 +32,7 @@ switch ($Error) {
     case '0':
         $Title = "Invalid Input";
         $Description = "Something was wrong with the input provided with your request, and the server is refusing to fulfill it.";
-        notify($Viewer, STATUS_CHAN, 'PHP-0');
+        notify($Viewer, IRC_CHAN_STATUS, 'PHP');
         break;
     case '-1':
         $Title = "Invalid request";

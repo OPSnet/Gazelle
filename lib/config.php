@@ -306,25 +306,36 @@ defined('DEBUG_TRACE') or define('DEBUG_TRACE', '');
 // ------------------------------------------------------------------------
 // IRC settings
 
-defined('IRC_PUBLIC_SERVER')       or define('IRC_PUBLIC_SERVER', 'irc.' . SITE_HOST);
 defined('DISABLE_IRC')             or define('DISABLE_IRC', false);
+defined('IRC_HOSTNAME')            or define('IRC_HOSTNAME', 'irc.' . SITE_HOST);
+defined('IRC_PORT')                or define('IRC_PORT', 7000);
+defined('IRC_PORT_CLEARTEXT')      or define('IRC_PORT_CLEARTEXT', 6669);
+defined('IRC_BOT')                 or define('IRC_BOT', 'Rippy');
 defined('IRC_HTTP_SOCKET_ADDRESS') or define('IRC_HTTP_SOCKET_ADDRESS', 'http://localhost:51011/');
 
-defined('IRC_CHAN_REPORT_REQUEST ') or define('IRC_CHAN_REPORT_REQUEST', '#requestedits');
-defined('IRC_CHAN_REPORT_FORUM')    or define('IRC_CHAN_REPORT_FORUM',   '#forumreports');
-defined('IRC_CHAN_REQUEST ')        or define('IRC_CHAN_REQUEST',        '#requests');
+// Main channel for registered users
+defined('IRC_CHAN') or define('IRC_CHAN', '#mygazelle');
 
-defined('BOT_NICK')          or define('BOT_NICK', 'Rippy');
-defined('BOT_SERVER')        or define('BOT_SERVER', 'localhost');
-defined('BOT_PORT')          or define('BOT_PORT', 7000);
-defined('BOT_CHAN')          or define('BOT_CHAN', '#mygazelle');
-defined('ADMIN_CHAN')        or define('ADMIN_CHAN', '#admin');
-defined('LAB_CHAN')          or define('LAB_CHAN', '#lab');
-defined('STATUS_CHAN')       or define('STATUS_CHAN', '#status');
-defined('MOD_CHAN')          or define('MOD_CHAN', '#staff');
-defined('BOT_DISABLED_CHAN') or define('BOT_DISABLED_CHAN', '#blocked');
-defined('BOT_REPORT_CHAN')   or define('BOT_REPORT_CHAN', '#reports');
-defined('IRC_ANNOUNCE')      or define('IRC_ANNOUNCE', '#announce');
+// Channel announcing new uploads
+defined('IRC_CHAN_ANNOUNCE') or define('IRC_CHAN_ANNOUNCE', '#announce');
+
+// Channel announcing new requests
+defined('IRC_CHAN_REQUEST') or define('IRC_CHAN_REQUEST', '#requests');
+
+// Public channel for inactive users, login problems and similar
+defined('IRC_CHAN_BLOCKED') or define('IRC_CHAN_BLOCKED', '#blocked');
+
+// Channel for general messages to staff
+defined('IRC_CHAN_STAFF') or define('IRC_CHAN_STAFF', '#staff');
+
+// Channel for general messages to moderators (urgent reports)
+defined('IRC_CHAN_MOD') or define('IRC_CHAN_MOD', '#staff');
+
+// Channel for messages that require attention on the backend (low-traffic)
+defined('IRC_CHAN_DEV') or define('IRC_CHAN_DEV', '#gazelle-lab');
+
+// Channel for messages of unusual user activity (potentially high-traffic)
+defined('IRC_CHAN_STATUS ') or define('IRC_CHAN_STATUS', '#gazelle-status');
 
 // ------------------------------------------------------------------------
 // Push server settings

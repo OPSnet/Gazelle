@@ -76,7 +76,7 @@ class Tracker {
             Irc::sendMessage('#tracker', "$MaxAttempts $Err $Get");
             global $Cache;
             if ($Cache->get_value('ocelot_error_reported') === false) {
-                Irc::sendMessage(ADMIN_CHAN, "Failed to update ocelot: $Err : $Get");
+                Irc::sendMessage(IRC_CHAN_DEV, "Failed to update ocelot: $Err : $Get");
                 $Cache->cache_value('ocelot_error_reported', true, 3600);
             }
             return false;
