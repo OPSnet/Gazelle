@@ -29,13 +29,30 @@ class Artist extends BaseObject {
         protected int $revisionId = 0
     ) {}
 
-    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->name())); }
-    public function location(): string { return 'artist.php?id=' . $this->id; }
-
     protected function cacheKey(): string {
         return sprintf(self::CACHE_PREFIX, $this->id)
             . ($this->revisionId ? '_r' . $this->revisionId : '');
     }
+
+    public function flush(): static {
+        self::$db->prepared_query("
+            SELECT DISTINCT concat('groups_artists_', GroupID)
+            FROM torrents_artists
+            WHERE ArtistID = ?
+            ", $this->id
+        );
+        self::$cache->delete_multi([
+            $this->cacheKey(),
+            sprintf(self::CACHE_REQUEST_ARTIST, $this->id),
+            sprintf(self::CACHE_TGROUP_ARTIST, $this->id),
+            ...self::$db->collect(0, false)
+        ]);
+        unset($this->info);
+        return $this;
+    }
+
+    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->name())); }
+    public function location(): string { return 'artist.php?id=' . $this->id; }
 
     public function info(): array {
         $cacheKey = $this->cacheKey();
@@ -149,23 +166,6 @@ class Artist extends BaseObject {
             $this->groupRole[$groupId][] = $role;
             ++$this->artistRole[$role];
         }
-        return $this;
-    }
-
-    public function flush(): static {
-        self::$db->prepared_query("
-            SELECT DISTINCT concat('groups_artists_', GroupID)
-            FROM torrents_artists
-            WHERE ArtistID = ?
-            ", $this->id
-        );
-        self::$cache->delete_multi([
-            $this->cacheKey(),
-            sprintf(self::CACHE_REQUEST_ARTIST, $this->id),
-            sprintf(self::CACHE_TGROUP_ARTIST, $this->id),
-            ...self::$db->collect(0, false)
-        ]);
-        unset($this->info);
         return $this;
     }
 
@@ -680,6 +680,143 @@ class Artist extends BaseObject {
         return self::$db->affected_rows();
     }
 
+    public function merge(
+        Artist          $old,
+        User            $user,
+        Manager\Collage $collMan,
+        Manager\Comment $commMan,
+        Manager\Request $reqMan,
+        Manager\TGroup  $tgMan,
+        Log             $logger,
+    ): int {
+        self::$db->begin_transaction();
+
+        // Get the ids of the objects that need to be flushed
+        $oldId = $old->id();
+        self::$db->prepared_query("
+            SELECT UserID FROM bookmarks_artists WHERE ArtistID = ?
+            ", $oldId
+        );
+        $bookmarkList = self::$db->collect(0, false);
+        self::$db->prepared_query("
+            SELECT ca.CollageID
+            FROM collages_artists AS ca
+            WHERE ca.ArtistID = ?
+            ", $oldId
+        );
+        $artistCollageList = self::$db->collect(0, false);
+        self::$db->prepared_query("
+            SELECT DISTINCT GroupID FROM torrents_artists WHERE ArtistID = ?
+            ", $oldId
+        );
+        $groupList = self::$db->collect(0, false);
+        self::$db->prepared_query("
+            SELECT DISTINCT RequestID FROM requests_artists WHERE ArtistID = ?
+            ", $oldId
+        );
+        $requestList = self::$db->collect(0, false);
+
+        // only need to flush torrent collages, no db update is required
+        self::$db->prepared_query("
+            SELECT DISTINCT ct.CollageID
+            FROM collages_torrents AS ct
+            INNER JOIN torrents_artists AS ta USING (GroupID)
+            WHERE ta.ArtistID = ?
+            ", $oldId
+        );
+        $collageList = self::$db->collect(0, false);
+
+        // Update the old artist id to the new one in the target object,
+        // if it does not yet exists there. Delete any remaining old ids
+        // as the new id is already present in the target object.
+        // In Postgresql this will be handled by a merge statement.
+        $newId = $this->id();
+        self::$db->prepared_query("
+            UPDATE bookmarks_artists
+            LEFT JOIN (SELECT UserID FROM bookmarks_artists WHERE ArtistID = ?) X USING (UserID)
+            SET ArtistID = ?
+            WHERE ArtistID = ? AND X.UserID IS NULL;
+            ", $newId, $newId, $oldId
+        );
+        self::$db->prepared_query("
+            DELETE FROM bookmarks_artists WHERE ArtistID = ?
+            ", $oldId
+        );
+        self::$db->prepared_query("
+            UPDATE collages_artists Old
+            LEFT JOIN (SELECT CollageID from collages_artists where ArtistID = ?) New using (CollageID)
+            SET Old.ArtistID = ?
+            WHERE Old.ArtistID = ? AND New.CollageID IS NULL
+            ", $newId, $newId, $oldId
+        );
+        self::$db->prepared_query("
+            DELETE FROM collages_artists WHERE ArtistID = ?
+            ", $oldId
+        );
+
+        self::$db->prepared_query("
+            UPDATE requests_artists Old
+            LEFT JOIN (SELECT RequestID from requests_artists where ArtistID = ?) New using (RequestID)
+            SET Old.ArtistID = ?
+            WHERE Old.ArtistID = ? AND New.RequestID IS NULL
+            ", $newId, $newId, $oldId
+        );
+        self::$db->prepared_query("
+            DELETE FROM requests_artists WHERE ArtistID = ?
+            ", $oldId
+        );
+
+        self::$db->prepared_query("
+            UPDATE torrents_artists Old
+            LEFT JOIN (SELECT GroupID from torrents_artists where ArtistID = ?) New using (GroupID)
+            SET Old.ArtistID = ?
+            WHERE Old.ArtistID = ? AND New.GroupID IS NULL
+            ", $newId, $newId, $oldId
+        );
+        self::$db->prepared_query("
+            DELETE FROM torrents_artists WHERE ArtistID = ?
+            ", $oldId
+        );
+
+        // Merge all of this artist's aliases with the new artist
+        self::$db->prepared_query("
+            UPDATE artists_alias SET
+                ArtistID = ?
+            WHERE ArtistID = ?
+            ", $newId, $oldId
+        );
+
+        $commMan->merge('artist', $oldId, $newId);
+
+        // Cache clearing
+        self::$cache->delete_multi([array_map(fn ($id) => "notify_artists_$id", $bookmarkList)]);
+        self::$cache->delete_multi([array_map(fn ($id) => sprintf(\Gazelle\Collage::CACHE_KEY, $id), $collageList)]);
+        foreach ($artistCollageList as $collageId) {
+            $collMan->findById($collageId)?->flush();
+        }
+        foreach ($groupList as $tgroupId) {
+            $tgMan->findById($tgroupId)?->refresh();
+        }
+        foreach ($requestList as $requestId) {
+            $reqMan->findById($requestId)?->updateSphinx();
+        }
+
+        // Delete the old artist
+        $oldName = $old->name();
+        self::$db->prepared_query("
+            DELETE FROM artists_group WHERE ArtistID = ?
+            ", $oldId
+        );
+        $affected = self::$db->affected_rows();
+        $logger->general(
+            "The artist $oldId ($oldName) was made into a non-redirecting alias of artist $newId ({$this->name()}) by user {$user->label()}"
+        );
+        self::$db->commit();
+        self::$cache->delete_value("zz_a_$oldId");
+        $this->flush();
+        $old->flush();
+        return $affected;
+    }
 
     /**
      * Deletes an artist and their wiki and tags.
@@ -689,6 +826,7 @@ class Artist extends BaseObject {
         $qid  = self::$db->get_query_id();
         $id   = $this->id;
         $name = $this->name();
+        $this->flush();
 
         self::$db->begin_transaction();
         self::$db->prepared_query("DELETE FROM artists_alias WHERE ArtistID = ?", $id);
@@ -701,8 +839,6 @@ class Artist extends BaseObject {
         self::$db->commit();
 
         self::$cache->delete_value('zz_a_' . $id);
-        self::$cache->delete_value('artist_' . $id);
-        self::$cache->delete_value('artist_groups_' . $id);
         self::$cache->decrement('stats_artist_count');
 
         self::$db->set_query_id($qid);

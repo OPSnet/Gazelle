@@ -23,6 +23,7 @@ class TGroup extends BaseObject {
 
     public function flush(): static {
         $this->info = [];
+        unset($this->artistRole);
         self::$cache->delete_multi([
             sprintf(self::CACHE_KEY, $this->id),
             sprintf(self::CACHE_TLIST_KEY, $this->id),

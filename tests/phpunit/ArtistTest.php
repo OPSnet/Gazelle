@@ -2,14 +2,18 @@
 
 use PHPUnit\Framework\TestCase;
 
+use Gazelle\Enum\CollageType;
+
 require_once(__DIR__ . '/../../lib/bootstrap.php');
 require_once(__DIR__ . '/../helper.php');
 
 class ArtistTest extends TestCase {
-    protected Gazelle\Artist $artist;
-    protected Gazelle\User   $user;
-    protected Gazelle\User   $voter;
-    protected array          $artistIdList = [];
+    protected Gazelle\Artist  $artist;
+    protected Gazelle\Collage $collage;
+    protected array           $tgroupList;
+    protected Gazelle\User    $user;
+    protected Gazelle\User    $extra;
+    protected array           $artistIdList = [];
 
     public function setUp(): void {
         $this->user = Helper::makeUser('arty.' . randomString(10), 'artist');
@@ -25,8 +29,16 @@ class ArtistTest extends TestCase {
                 $artist->remove($this->user, $logger);
             }
         }
-        if (isset($this->voter)) {
-            $this->voter->remove();
+        if (isset($this->extra)) {
+            $this->extra->remove();
+        }
+        if (isset($this->collage)) {
+            $this->collage->hardRemove();
+        }
+        if (isset($this->tgroupList)) {
+            foreach ($this->tgroupList as $tgroup) {
+                Helper::removeTGroup($tgroup, $this->user);
+            }
         }
         $this->user->remove();
     }
@@ -151,6 +163,101 @@ class ArtistTest extends TestCase {
         $this->assertEquals($aliasId + 1, $newId, 'artist-new-non-redirect');
     }
 
+    public function testArtistMerge(): void {
+        $manager = new \Gazelle\Manager\Artist;
+        $oldName = 'phpunit.artist.' . randomString(12);
+        [$oldArtistId, $oldAliasId] = $manager->create($oldName);
+        $old = $manager->findById($oldArtistId);
+        $this->artistIdList[] = $old->id();
+
+        $newName = 'phpunit.artist.' . randomString(12);
+        [$newArtistId, $newAliasId] = $manager->create($newName);
+        $new = $manager->findById($newArtistId);
+        $this->artistIdList[] = $new->id();
+
+        $userBk = new Gazelle\User\Bookmark($this->user);
+        $userBk->create('artist', $oldArtistId);
+
+        $commentMan = new \Gazelle\Manager\Comment;
+        $postList = [
+            $commentMan->create($this->user, 'artist', $old->id(), 'phpunit merge ' . randomString(6)),
+            $commentMan->create($this->user, 'artist', $new->id(), 'phpunit merge ' . randomString(6)),
+        ];
+
+        $this->extra = Helper::makeUser('merge.' . randomString(10), 'merge');
+        $extraBk = new Gazelle\User\Bookmark($this->extra);
+        $extraBk->create('artist', $oldArtistId);
+        $extraBk->create('artist', $newArtistId);
+
+        $log = new Gazelle\Log;
+        $collMan = new Gazelle\Manager\Collage;
+        $this->collage = $collMan->create(
+            user:        $this->user,
+            categoryId:  CollageType::artist->value,
+            name:        'phpunit merge artist ' . randomString(10),
+            description: 'phpunit merge artist description',
+            tagList:     'jazz',
+            logger:      $log,
+        );
+        $this->collage->addEntry($oldArtistId, $this->user->id());
+
+        $this->tgroupList = [
+            Helper::makeTGroupMusic(
+                $this->user,
+                'phpunit artist merge1 ' . randomString(10),
+                [[ARTIST_MAIN], [$oldName]],
+                ['hip.hop'],
+            ),
+            Helper::makeTGroupMusic(
+                $this->user,
+                'phpunit artist merge2 ' . randomString(10),
+                [[ARTIST_MAIN], [$oldName, $newName]],
+                ['hip.hop'],
+            ),
+        ];
+
+        $this->assertEquals(
+            1,
+            $new->merge(
+                $old,
+                $this->user,
+                new Gazelle\Manager\Collage,
+                new Gazelle\Manager\Comment,
+                new Gazelle\Manager\Request,
+                new Gazelle\Manager\TGroup,
+                $log,
+            ),
+            'artist-merge-n',
+        );
+        $this->assertNull($manager->findById($oldArtistId), 'art-merge-no-old');
+        $this->assertTrue($userBk->isArtistBookmarked($newArtistId), 'art-merge-user-bookmarked-new');
+        $this->assertTrue($extraBk->isArtistBookmarked($newArtistId), 'art-merge-extra-bookmarked-new');
+        $this->assertCount(1, $extraBk->artistList(), 'art-merge-extra-bookmarked-list');
+
+        // FIXME: flushed collage objects cannot be refreshed
+        $merged = $collMan->findById($this->collage->id());
+        $this->assertEquals([$newArtistId], $merged->entryList(), 'art-merge-collage');
+
+        $comment = new \Gazelle\Comment\Artist($newArtistId, 1, 0);
+        $comment->load(); // FIXME: load() should not be necessary
+        $this->assertEquals(
+            [$postList[0]->id(), $postList[1]->id()],
+            array_map(fn($p) => $p['ID'], $comment->thread()),
+            'art-merge-comments'
+        );
+
+        $n = 0;
+        foreach ($this->tgroupList as $tgroup) {
+            ++$n;
+            $artistRole = $tgroup->flush()->artistRole();
+            $this->assertEquals(
+                [(string)ARTIST_MAIN => [['id' => $new->id(), 'name' => $oldName]]],
+                $artistRole->idList(),
+                "art-merge-ar-$n"
+            );
+        }
+    }
+
     public function testArtistModify(): void {
         $manager = new \Gazelle\Manager\Artist;
         [$artistId, $aliasId] = $manager->create('phpunit.' . randomString(12));
@@ -198,7 +305,7 @@ class ArtistTest extends TestCase {
         [$artistId, $aliasId] = $manager->create('phpunit.artsim.' . randomString(12));
         $artist = $manager->findById($artistId);
         $this->artistIdList[] = $artist->id();
-        $this->voter = Helper::makeUser('art2.' . randomString(10), 'artist');
+        $this->extra = Helper::makeUser('art2.' . randomString(10), 'artist');
 
         [$other1Id, $other1aliasId] = $manager->create('phpunit.other1.' . randomString(12));
         $other1 = $manager->findById($other1Id);
@@ -208,7 +315,7 @@ class ArtistTest extends TestCase {
         $this->artistIdList[] = $other1->id();
         $this->artistIdList[] = $other2->id();
 
-        $this->assertFalse($artist->similar()->voteSimilar($this->voter, $artist, true), 'artist-vote-self');
+        $this->assertFalse($artist->similar()->voteSimilar($this->extra, $artist, true), 'artist-vote-self');
 
         $logger  = new \Gazelle\Log;
         $this->assertEquals(1, $artist->similar()->addSimilar($other1, $this->user, $logger), 'artist-add-other1');
@@ -216,9 +323,9 @@ class ArtistTest extends TestCase {
         $this->assertEquals(1, $artist->similar()->addSimilar($other2, $this->user, $logger), 'artist-add-other2');
         $this->assertEquals(1, $other1->similar()->addSimilar($other2, $this->user, $logger), 'artist-other1-add-other2');
 
-        $this->assertTrue($artist->similar()->voteSimilar($this->voter, $other1, true), 'artist-vote-up-other1');
-        $this->assertFalse($artist->similar()->voteSimilar($this->voter, $other1, true), 'artist-revote-up-other1');
-        $this->assertTrue($other1->similar()->voteSimilar($this->voter, $other2, false), 'artist-vote-down-other2');
+        $this->assertTrue($artist->similar()->voteSimilar($this->extra, $other1, true), 'artist-vote-up-other1');
+        $this->assertFalse($artist->similar()->voteSimilar($this->extra, $other1, true), 'artist-revote-up-other1');
+        $this->assertTrue($other1->similar()->voteSimilar($this->extra, $other2, false), 'artist-vote-down-other2');
 
         $this->assertEquals(
             [
@@ -250,9 +357,9 @@ class ArtistTest extends TestCase {
         $this->assertLessThan($graph[$other1Id]['proportion'], $graph[$other2Id]['proportion'], 'artist-sim-proportion');
 
         $requestMan = new \Gazelle\Manager\Request;
-        $this->assertFalse($artist->similar()->removeSimilar($artist, $this->voter, $logger), 'artist-remove-similar-self');
-        $this->assertTrue($artist->similar()->removeSimilar($other2, $this->voter, $logger), 'artist-remove-other');
-        $this->assertFalse($artist->similar()->removeSimilar($other2, $this->voter, $logger), 'artist-re-remove-other');
+        $this->assertFalse($artist->similar()->removeSimilar($artist, $this->extra, $logger), 'artist-remove-similar-self');
+        $this->assertTrue($artist->similar()->removeSimilar($other2, $this->extra, $logger), 'artist-remove-other');
+        $this->assertFalse($artist->similar()->removeSimilar($other2, $this->extra, $logger), 'artist-re-remove-other');
     }
 
     public function testArtistJson(): void {

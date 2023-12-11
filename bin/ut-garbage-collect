@@ -25,6 +25,11 @@ $db->prepared_query("
     WHERE ag.Name like 'phpunit.%';
 ");
 $db->prepared_query("
+    DELETE FROM bookmarks_artists ba WHERE NOT EXISTS(
+        SELECT 1 FROM artists_group ag WHERE ag.ArtistID = ba.ArtistID
+    )
+");
+$db->prepared_query("
     CREATE TEMPORARY TABLE orphan_similar (SimilarID int not null primary key)
 ");
 $db->prepared_query("
