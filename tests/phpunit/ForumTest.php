@@ -40,6 +40,7 @@ class ForumTest extends TestCase {
         // If you hit a duplicate key error here it is due to an aborted previous test run
         $this->category = $fcatMan->create('phpunit category', 10001);
         $this->assertInstanceOf(\Gazelle\ForumCategory::class, $this->category, 'forum-cat-is-forum-cat');
+        $this->assertEquals(0, $this->category->forumTotal(), 'forum-category-forum-none');
 
         $categoryEphemeral = $fcatMan->create('phpunit other', 10002);
         $this->assertCount($initial + 2, $fcatMan->forumCategoryList(), 'forum-cat-category-list');
@@ -61,11 +62,12 @@ class ForumTest extends TestCase {
         $admin        = $this->userList['admin'];
         $user         = $this->userList['user'];
         $userTocTotal = count($forumMan->tableOfContents($user));
+        $forumName    = 'phpunit first forum';
         $this->forum  = $forumMan->create(
             user:           $admin,
             sequence:       150,
             categoryId:     $this->category->id(),
-            name:           'First forum',
+            name:           $forumName,
             description:    'This is where it happens',
             minClassRead:   100,
             minClassWrite:  200,
@@ -73,9 +75,11 @@ class ForumTest extends TestCase {
             autoLock:       false,
             autoLockWeeks:  42,
         );
+        $this->assertEquals(1, $this->category->forumTotal(), 'forum-category-forum-total');
         $this->assertInstanceOf(\Gazelle\Forum::class, $this->forum, 'forum-is-forum');
         $this->assertEquals(0, $this->category->remove(), 'forum-cat-remove-in-use');
         $this->assertCount($tocTotal + 1, $forumMan->tableOfContentsMain(), 'forum-test-toc-main');
+        $this->forum->userCatchup($admin);
 
         $this->assertFalse($this->forum->autoLock(), 'forum-autolock');
         $this->assertFalse($this->forum->hasRevealVotes(), 'forum-has-reveal-votes');
@@ -91,7 +95,7 @@ class ForumTest extends TestCase {
         $this->assertEquals(300, $this->forum->minClassCreate(), 'forum-min-class-create');
         $this->assertEquals($this->category->name(), $this->forum->categoryName(), 'forum-category-name');
         $this->assertEquals('This is where it happens', $this->forum->description(), 'forum-description');
-        $this->assertEquals('First forum', $this->forum->name(), 'forum-name');
+        $this->assertEquals($forumName, $this->forum->name(), 'forum-name');
         $this->assertNull($this->forum->lastThread(), 'forum-last-thread');
 
         $find = $forumMan->findById($this->forum->id());
@@ -101,7 +105,7 @@ class ForumTest extends TestCase {
             user:           $this->userList['admin'],
             sequence:       100,
             categoryId:     $this->category->id(),
-            name:           'Announcements',
+            name:           'phpunit announcements',
             description:    'This is where it begins',
             minClassRead:   200,
             minClassWrite:  300,
@@ -112,7 +116,7 @@ class ForumTest extends TestCase {
 
         $nameList = $forumMan->nameList();
         $this->assertCount($initial + 2, $nameList, 'forum-name-list');
-        $this->assertEquals('First forum', $nameList[$this->forum->id()]['Name'], 'forum-name-list-name-0');
+        $this->assertEquals($forumName, $nameList[$this->forum->id()]['Name'], 'forum-name-list-name-0');
         $this->assertEquals($second->id(), $nameList[$second->id()]['id'], 'forum-name-list-id-1');
 
         $idList = $forumMan->forumList();
@@ -158,7 +162,7 @@ class ForumTest extends TestCase {
             user:           $admin,
             sequence:       200,
             categoryId:     $this->forum->categoryId(),
-            name:           'Chit-chat',
+            name:           'phpunit chit-chat',
             description:    'This is where mods chat',
             minClassRead:   $secretLevel,
             minClassWrite:  $secretLevel,
@@ -246,7 +250,7 @@ class ForumTest extends TestCase {
         $thread->catchup($admin->id(), $replyId);
         $this->assertEquals(1, $adminSub->unread(), 'fpost-subscriptions-admin-one-read');
 
-        $readLast = $this->forum->userLastRead($admin->id(), 50);
+        $readLast = $this->forum->userLastRead($admin);
         $this->assertCount(1, $readLast, 'forum-last-read-list-total');
         $this->assertEquals(
             [
@@ -260,9 +264,43 @@ class ForumTest extends TestCase {
             'forum-last-read-list-one'
         );
 
-        // $this->assertEquals(3, $this->forum->userCatchup($admin->id()), 'forum-user-catchup');
-
         $this->assertEquals(5, $thread->remove(), 'forum-thread-remove');
+    }
+
+    public function testForumAutoSub(): void {
+        $this->category = (new \Gazelle\Manager\ForumCategory)->create('phpunit category', 10010);
+        $this->forum    = (new \Gazelle\Manager\Forum)->create(
+            user:           $this->userList['admin'],
+            sequence:       151,
+            categoryId:     $this->category->id(),
+            name:           'phpunit autosub forum',
+            description:    'This is where it autosubs',
+            minClassRead:   100,
+            minClassWrite:  100,
+            minClassCreate: 100,
+            autoLock:       false,
+            autoLockWeeks:  42,
+        );
+
+        $user = $this->userList['user'];
+        $this->assertFalse($this->forum->isAutoSubscribe($user), 'forum-autosub-not-autosub');
+        $this->assertEquals(1, $this->forum->toggleAutoSubscribe($user, true), 'forum-autosub-toggle-autosub');
+        $this->assertTrue($this->forum->isAutoSubscribe($user), 'forum-autosub-now-autosub');
+        $this->assertEquals(0, $this->forum->toggleAutoSubscribe($user, true), 'forum-autosub-toggle-none');
+
+        $this->assertEquals([$user->id()], $this->forum->autoSubscribeUserIdList(), 'forum-autosub-userlist');
+        $this->assertEquals([], $this->forum->autoSubscribeForUserList($user), 'forum-autosub-forum-list');
+        $user->addCustomPrivilege('site_forum_autosub');
+        $this->assertEquals([$this->forum->id()], $this->forum->autoSubscribeForUserList($user), 'forum-autosub-forum-list');
+
+        $threadMan = new \Gazelle\Manager\ForumThread;
+        $this->threadList[] = $threadMan->create($this->forum, $this->userList['admin']->id(), 'phpunit thread title', 'this is a new thread');
+        $this->threadList[] = $threadMan->create($this->forum, $this->userList['admin']->id(), 'phpunit thread title 2', 'this is also a new thread');
+        $this->assertEquals(2, $this->forum->userCatchup($user), 'forum-user-autosub-catchup');
+
+        $this->assertEquals(1, $this->forum->toggleAutoSubscribe($user, false), 'forum-autosub-off-autosub');
+        $this->assertFalse($this->forum->isAutoSubscribe($user), 'forum-autosub-no-longer-autosub');
+        $this->assertEquals([], $this->forum->autoSubscribeUserIdList(), 'forum-autosub-no-userlist');
     }
 
     public function testForumWarn(): void {
@@ -274,7 +312,7 @@ class ForumTest extends TestCase {
             user:           $admin,
             sequence:       151,
             categoryId:     $this->category->id(),
-            name:           'Warn forum',
+            name:           'phpunit warn forum',
             description:    'This is where it warns',
             minClassRead:   100,
             minClassWrite:  100,
@@ -325,8 +363,8 @@ class ForumTest extends TestCase {
             user:           $admin,
             sequence:       151,
             categoryId:     $this->category->id(),
-            name:           'Pin forum',
-            description:    'This is where it pins',
+            name:           'phpunit poll forum',
+            description:    'This is where it polls',
             minClassRead:   100,
             minClassWrite:  100,
             minClassCreate: 100,
@@ -378,7 +416,7 @@ class ForumTest extends TestCase {
             user:           $admin,
             sequence:       151,
             categoryId:     $this->category->id(),
-            name:           'Pin forum',
+            name:           'phpunit pin forum',
             description:    'This is where it pins',
             minClassRead:   100,
             minClassWrite:  100,
@@ -396,5 +434,39 @@ class ForumTest extends TestCase {
         $this->assertTrue($post->isPinned(), 'forum-post-is-now-pinned');
         $this->assertEquals(1, $post->pin($admin, false), 'forum-post-unpin');
         $this->assertFalse($post->isPinned(), 'forum-post-is-no-longer-pinned');
+    }
+
+    public function testForumRender(): void {
+        $name = 'phpunit category ' . randomString(6);
+        $this->category = (new \Gazelle\Manager\ForumCategory)->create($name, 10002);
+        $forumMan       = new \Gazelle\Manager\Forum;
+        $admin          = $this->userList['admin'];
+        $this->forum    = $forumMan->create(
+            user:           $admin,
+            sequence:       153,
+            categoryId:     $this->category->id(),
+            name:           'phpunit render forum',
+            description:    'This is where it render',
+            minClassRead:   100,
+            minClassWrite:  100,
+            minClassCreate: 100,
+            autoLock:       false,
+            autoLockWeeks:  42,
+        );
+        $paginator = (new Gazelle\Util\Paginator(TOPICS_PER_PAGE, 1))->setTotal(1);
+        global $Viewer; // to render header()
+        $Viewer = $admin;
+        $this->assertStringContainsString(
+            "<a href=\"forums.php#$name\">$name</a>",
+            (Gazelle\Util\Twig::factory())->render('forum/forum.twig', [
+                'dept_list'   => $this->forum->departmentList($admin),
+                'donor_forum' => false,
+                'forum'       => $this->forum,
+                'toc'         => $this->forum->tableOfContentsForum($paginator->page()),
+                'paginator'   => $paginator,
+                'viewer'      => $admin,
+            ]),
+            'forum-render-forum',
+        );
     }
 }

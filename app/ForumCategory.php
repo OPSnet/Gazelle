@@ -9,14 +9,14 @@ class ForumCategory extends BaseObject {
     public function flush(): static {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
         self::$cache->delete_value(Manager\ForumCategory::LIST_KEY);
-        $this->info = [];
+        unset($this->info);
         return $this;
     }
     public function link(): string { return "<a href=\"{$this->location()}\">Forum Categories</a>"; }
     public function location(): string { return "tools.php?action=categories"; }
 
     public function info(): array {
-        if (!empty($this->info)) {
+        if (isset($this->info)) {
             return $this->info;
         }
         $key = sprintf(self::CACHE_KEY, $this->id);

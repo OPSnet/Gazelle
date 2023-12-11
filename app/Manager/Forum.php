@@ -145,7 +145,7 @@ class Forum extends \Gazelle\BaseManager {
                     continue;
                 }
                 $autosubList  = $forum->autoSubscribeForUserList($user);
-                $userLastRead = $forum->userLastRead($user->id(), $user->postsPerPage());
+                $userLastRead = $forum->userLastRead($user);
                 if (isset($userLastRead[$f['LastPostTopicID']])) {
                     $isRead       = true;
                     $lastReadPage = (int)$userLastRead[$f['LastPostTopicID']]['Page'];

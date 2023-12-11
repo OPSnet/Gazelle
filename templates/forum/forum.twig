@@ -17,7 +17,7 @@
 {% if viewer.permitted('site_forum_autosub') %}
         {{- dom.click('#autosub', "autosub(" ~ forum.id ~ "); return false;") -}}
         <a id="autosub" title="Be subscribed automatically to any new threads that are created in this forum" href="#" class="brackets">{%
-            if forum.isAutoSubscribe(viewer.id) %}Cancel autosubscribe{% else %}Auto subscribe{% endif %}</a>
+            if forum.isAutoSubscribe(viewer) %}Cancel autosubscribe{% else %}Auto subscribe{% endif %}</a>
 {% endif %}
 {% if viewer.createAccess(forum) and not viewer.disablePosting %}
         <a href="forums.php?action=new&amp;forumid={{ forum.id }}" class="brackets">New thread</a>

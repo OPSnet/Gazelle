@@ -20,8 +20,7 @@ if (!$Viewer->readAccess($forum)) {
 $paginator = new Gazelle\Util\Paginator(TOPICS_PER_PAGE, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($forum->threadCount());
 
-$perPage      = $Viewer->postsPerPage();
-$userLastRead = $forum->userLastRead($Viewer->id(), $perPage);
+$userLastRead = $forum->userLastRead($Viewer);
 $forumToc     = $forum->tableOfContentsForum($paginator->page());
 
 foreach ($forumToc as &$thread) {
@@ -43,7 +42,7 @@ foreach ($forumToc as &$thread) {
         . ($thread['IsSticky'] ? '_sticky' : '');
 
     $links = [];
-    $threadPages = ceil($thread['NumPosts'] / $perPage);
+    $threadPages = ceil($thread['NumPosts'] / $Viewer->postsPerPage());
     if ($threadPages > 1) {
         $ellipsis = false;
         for ($i = 1; $i <= $threadPages; $i++) {

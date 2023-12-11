@@ -13,5 +13,5 @@ if (is_null($forum)) {
     error(404);
 }
 
-$forum->userCatchup($Viewer->id());
+$forum->userCatchup($Viewer);
 header('Location: ' . $forum->location());

@@ -113,6 +113,15 @@ class UserTest extends TestCase {
         $this->assertFalse($this->user->notifyDeleteSnatch(), 'uattr-no-pm-delete-snatch');
     }
 
+    public function testCustomPrivilege(): void {
+        $privilege = 'site_unlimit_ajax';
+        $this->assertFalse($this->user->permitted($privilege), 'user-permitted-custom-no');
+        $this->assertTrue($this->user->addCustomPrivilege($privilege), 'user-permitted-custom-modify');
+        $this->assertTrue($this->user->permitted($privilege), 'user-permitted-custom-yes');
+        $this->assertTrue($this->user->modifyPrivilegeList([]), 'user-permitted-custom-none');
+        $this->assertFalse($this->user->permitted($privilege), 'user-permitted-custom-removed');
+    }
+
     public function testExternalProfile(): void {
         $externalProfile = new \Gazelle\User\ExternalProfile($this->user);
         $this->assertEquals('', $externalProfile->profile(), 'user-profile-new');

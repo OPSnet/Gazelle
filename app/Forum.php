@@ -314,7 +314,7 @@ class Forum extends BaseObject {
         return self::$db->to_array('forum_id', MYSQLI_ASSOC, false);
     }
 
-    public function userCatchup(int $userId): int {
+    public function userCatchup(User $user): int {
         self::$db->prepared_query("
             INSERT INTO forums_last_read_topics
                    (UserID, TopicID, PostID)
@@ -322,7 +322,7 @@ class Forum extends BaseObject {
             FROM forums_topics
             WHERE ForumID = ?
             ON DUPLICATE KEY UPDATE PostID = LastPostID
-            ", $userId, $this->id
+            ", $user->id(), $this->id
         );
         return self::$db->affected_rows();
     }
@@ -334,7 +334,7 @@ class Forum extends BaseObject {
      *  - int 'PostID'  The post id
      *  - int 'Page'    The page number
      */
-    public function userLastRead(int $userId, int $perPage): array {
+    public function userLastRead(User $user): array {
         self::$db->prepared_query("
             SELECT
                 l.TopicID,
@@ -350,18 +350,18 @@ class Forum extends BaseObject {
             INNER JOIN forums_topics ft ON (ft.ID = l.TopicID)
             WHERE ft.ForumID = ?
                 AND l.UserID = ?
-            ", $perPage, $this->id, $userId
+            ", $user->postsPerPage(), $this->id, $user->id()
         );
         return self::$db->to_array('TopicID', MYSQLI_ASSOC, false);
     }
 
-    public function isAutoSubscribe(int $userId): bool {
+    public function isAutoSubscribe(User $user): bool {
         return (bool)$this->pg()->scalar("
             SELECT 1
             FROM forum_autosub
             WHERE id_forum = ?
                 AND id_user = ?
-            ", $this->id, $userId
+            ", $this->id, $user->id()
         );
     }
 
@@ -387,21 +387,21 @@ class Forum extends BaseObject {
      *
      * return @int 1 if the state actually changed, otherwise 0
      */
-    public function toggleAutoSubscribe(int $userId, bool $active): int {
+    public function toggleAutoSubscribe(User $user, bool $active): int {
         if ($active) {
             return $this->pg()->prepared_query("
                 INSERT INTO forum_autosub
                        (id_forum, id_user)
                 VALUES (?,        ?)
                 ON CONFLICT (id_forum, id_user) DO NOTHING
-                ", $this->id, $userId
+                ", $this->id, $user->id()
             );
         } else {
             return $this->pg()->prepared_query("
                 DELETE FROM forum_autosub
                 WHERE id_forum = ?
                     AND id_user = ?
-                ", $this->id, $userId
+                ", $this->id, $user->id()
             );
         }
     }

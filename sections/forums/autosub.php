@@ -11,7 +11,7 @@ if (is_null($forum)) {
 }
 
 $active = (bool)$_POST['active'];
-if ($forum->toggleAutoSubscribe($Viewer->id(), $active)) {
+if ($forum->toggleAutoSubscribe($Viewer, $active)) {
     json_print('success', ['autosub' => $active]);
 } else {
     json_error('unchanged');

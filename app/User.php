@@ -278,7 +278,7 @@ class User extends BaseObject {
      * @param array $current a list of "perm_<permission_name>" custom permissions
      * @return bool was there a change?
      */
-    public function modifyPermissionList(array $current): bool {
+    public function modifyPrivilegeList(array $current): bool {
         $permissionList = array_keys(\Gazelle\Manager\Privilege::privilegeList());
         $default = $this->defaultPermissionList();
         $delta = [];
