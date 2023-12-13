@@ -171,3 +171,10 @@ foreach ($db->collect(0, false) as $userId) {
     echo "user {$user->label()}\n";
     $user->remove();
 }
+
+$db->prepared_query("
+    DELETE uf
+    FROM users_freeleeches uf
+    LEFT JOIN users_main um ON (um.ID = uf.UserID)
+    WHERE um.ID IS NULL
+");

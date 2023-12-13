@@ -89,17 +89,23 @@ $collage->toggleAttr('sort-newest', isset($_POST['addition']));
 
 $collage->modify();
 
-if ($Viewer->permitted('admin_freeleech') && isset($_POST['leech_type'])) {
+if ($Viewer->permitted('admin_freeleech') && isset($_POST['change_leech'])) {
     $torMan = new \Gazelle\Manager\Torrent;
-    $size = (int)($_POST['size'] ?? NEUTRAL_LEECH_THRESHOLD);
-    $unit = trim($_POST['unit'] ?? NEUTRAL_LEECH_UNIT);
+    if (!isset($_POST['neutral'])) {
+        $threshold = 0;
+    } else {
+        $threshold = get_bytes(
+            (int)($_POST['size'] ?? NEUTRAL_LEECH_THRESHOLD)
+            . trim($_POST['unit'] ?? NEUTRAL_LEECH_UNIT)
+        );
+    }
     $collage->setFreeleech(
         torMan:    $torMan,
         tracker:   new \Gazelle\Tracker,
         user:      $Viewer,
         leechType: $torMan->lookupLeechType($_POST['leech_type'] ?? LeechType::Normal->value),
         reason:    $torMan->lookupLeechReason($_POST['leech_reason'] ?? LeechReason::Normal->value),
-        threshold: get_bytes("$size$unit"),
+        threshold: $threshold,
         all:       $_POST['all'] == 'all',
     );
 }
