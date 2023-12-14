@@ -20,13 +20,13 @@ class UserCreator extends Base {
     protected string|null $username;
 
     public function create(): User {
-        if (!$this->ipaddr) {
+        if (!isset($this->ipaddr)) {
             throw new UserCreatorException('ipaddr');
         }
-        if (!$this->passHash) {
+        if (!isset($this->passHash)) {
             throw new UserCreatorException('password');
         }
-        if (!$this->username) {
+        if (!isset($this->username)) {
             throw new UserCreatorException('username');
         }
         if (self::$db->scalar("SELECT 1 FROM users_main WHERE Username = ?", $this->username)) {

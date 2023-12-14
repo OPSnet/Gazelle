@@ -8,7 +8,9 @@ class UserCreateTest extends TestCase {
     protected Gazelle\User $user;
 
     public function tearDown(): void {
-        $this->user->remove();
+        if (isset($this->user)) {
+            $this->user->remove();
+        }
     }
 
     public function testCreate(): void {
@@ -63,5 +65,46 @@ class UserCreateTest extends TestCase {
         $this->assertInstanceOf(\Gazelle\User::class, $enabledUser, 'user-create-login-success');
         $this->assertEquals(0, $watch->nrAttempts(), 'user-create-two-login-cleared');
         $this->assertEquals(0, $watch->nrBans(), 'user-create-two-login-banned');
+    }
+
+    public function testZeroFailure(): void {
+        $_SERVER['HTTP_USER_AGENT'] = 'phpunit';
+
+        $creator = (new \Gazelle\UserCreator)
+            ->setUsername('0')
+            ->setEmail("test@example.com")
+            ->setPassword(randomString(20))
+            ->setIpaddr('127.0.0.100')
+            ->setAdminComment('Created by tests/phpunit/UserCreateTest.php');
+
+        $this->expectException(Gazelle\Exception\UserCreatorException::class);
+        $creator->create();
+    }
+
+    public function testNameFailure(): void {
+        $_SERVER['HTTP_USER_AGENT'] = 'phpunit';
+
+        $creator = (new \Gazelle\UserCreator)
+            ->setUsername(randomString(21))
+            ->setEmail("test@example.com")
+            ->setPassword(randomString(20))
+            ->setIpaddr('127.0.0.100')
+            ->setAdminComment('Created by tests/phpunit/UserCreateTest.php');
+
+        $this->expectException(Gazelle\Exception\UserCreatorException::class);
+        $creator->create();
+    }
+
+    public function testNameTrim(): void {
+        $_SERVER['HTTP_USER_AGENT'] = 'phpunit';
+        $this->user = (new \Gazelle\UserCreator)
+            ->setUsername(' ' . randomString(6))
+            ->setEmail("test@example.com")
+            ->setPassword(randomString(20))
+            ->setIpaddr('127.0.0.100')
+            ->setAdminComment('Created by tests/phpunit/UserCreateTest.php')
+            ->create();
+
+        $this->assertInstanceOf(Gazelle\User::class, $this->user, 'user-create-trim');
     }
 }
