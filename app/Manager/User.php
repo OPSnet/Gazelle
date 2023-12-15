@@ -503,12 +503,15 @@ class User extends \Gazelle\BaseManager {
 
         // Update the cached new message count.
         self::$cache->cache_value("inbox_new_$toId",
-            self::$db->scalar("
+            (int)self::$db->scalar("
                 SELECT count(*) FROM pm_conversations_users WHERE UnRead = '1' AND InInbox = '1' AND UserID = ?
                 ", $toId
             )
         );
-        self::$cache->delete_multi(["pm_{$convId}_{$fromId}", "pm_{$convId}_{$toId}"]);
+        self::$cache->delete_multi([
+            sprintf(\Gazelle\PM::CACHE_KEY, $convId, $fromId),
+            sprintf(\Gazelle\PM::CACHE_KEY, $convId, $toId),
+        ]);
         $senderName = self::$db->scalar("
             SELECT Username FROM users_main WHERE ID = ?
             ", $fromId

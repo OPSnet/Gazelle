@@ -12,7 +12,7 @@ namespace Gazelle;
  */
 
 class PM extends Base {
-    protected const CACHE_KEY = 'pm_%d_%d';
+    public final const CACHE_KEY = 'pm2_%d_%d';
 
     protected array|null $info;
 
@@ -43,7 +43,7 @@ class PM extends Base {
                     cu.Sticky      AS pinned,
                     cu.UnRead      AS unread,
                     cu.ForwardedTo AS forwarded_to,
-                    cu.SentDate    AS sent_date,
+                    greatest(cu.ReceivedDate, cu.SentDate) AS created_date,
                     cu2.UserID     AS sender_id
                 FROM pm_conversations AS c
                 INNER JOIN pm_conversations_users cu ON (cu.ConvID = c.ID)
@@ -113,7 +113,7 @@ class PM extends Base {
     }
 
     public function sentDate(): string {
-        return $this->info()['sent_date'];
+        return $this->info()['created_date'];
     }
 
     public function subject(): string {

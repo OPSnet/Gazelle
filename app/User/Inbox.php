@@ -74,8 +74,8 @@ class Inbox extends \Gazelle\BaseUser {
         );
         $this->flush();
         self::$cache->delete_multi([
-            "pm_{$convId}_{$fromId}",
-            "pm_{$convId}_{$this->id()}",
+            sprintf(\Gazelle\PM::CACHE_KEY, $convId, $fromId),
+            sprintf(\Gazelle\PM::CACHE_KEY, $convId, $this->id()),
         ]);
 
         return new \Gazelle\PM($convId, $this->user);
@@ -224,15 +224,14 @@ class Inbox extends \Gazelle\BaseUser {
         $unreadFirst = $this->showUnreadFirst() ? "if(cu.Unread = '1', 0, 1) ASC," : '';
         array_push($args, $limit, $offset);
         self::$db->prepared_query("
-            SELECT cu.ConvID
+            SELECT DISTINCT cu.ConvID
             FROM pm_conversations AS c
             INNER JOIN pm_conversations_users AS cu ON (cu.ConvID = c.ID AND cu.UserID = ?)
             INNER JOIN pm_messages AS pm USING (ConvID)
             LEFT JOIN pm_conversations_users AS cu2 ON (cu2.ConvID = c.ID AND cu2.UserID != ? AND cu2.ForwardedTo = 0)
             LEFT JOIN users_main AS um ON (um.ID = cu2.UserID)
             WHERE " . implode(' AND ', $cond) . "
-            GROUP BY c.ID
-            ORDER BY cu.Sticky, $unreadFirst cu.SentDate DESC, max(pm.ID)
+            ORDER BY cu.Sticky, $unreadFirst greatest(cu.ReceivedDate, cu.SentDate) DESC
             LIMIT ? OFFSET ?
             ", $this->user->id(), $this->user->id(), ...$args
         );
@@ -241,7 +240,10 @@ class Inbox extends \Gazelle\BaseUser {
 
     protected function massFlush(array $ids): void {
         $userId = $this->user->id();
-        self::$cache->delete_multi([sprintf(self::CACHE_NEW, $userId), ...array_map(fn ($id) => "pm_{$id}_{$userId}", $ids)]);
+        self::$cache->delete_multi([
+            sprintf(self::CACHE_NEW, $userId),
+            ...array_map(fn ($id) => sprintf(\Gazelle\PM::CACHE_KEY, $id, $userId), $ids)
+        ]);
     }
 
     public function massRemove(array $ids): int {
