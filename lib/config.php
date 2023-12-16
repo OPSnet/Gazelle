@@ -226,15 +226,16 @@ defined('SPHINX_MAX_MATCHES') or define('SPHINX_MAX_MATCHES', 1000);
 // ------------------------------------------------------------------------
 // Ocelot settings
 
-// If you have not set Ocelot up in the development environment then this
+// If you have set Ocelot up in the development environment then this
 // should be overridden and set to true.
 defined('DISABLE_TRACKER') or define('DISABLE_TRACKER', false);
 
 // Public-facing hostname of the Ocelot instance
 defined('TRACKER_NAME') or define('TRACKER_NAME', 'localhost');
 
-// IP address of the Ocelot instance (on your internal network)
-defined('TRACKER_HOST') or define('TRACKER_HOST', 'localhost');
+// This is the name of the docker Ocelot container
+// In production this will be the IP address of the Ocelot instance on your internal network
+defined('TRACKER_HOST') or define('TRACKER_HOST', 'ocelot');
 
 // TCP port of the Ocelot instance
 // Must match the Ocelot configuration
@@ -242,11 +243,11 @@ defined('TRACKER_PORT') or define('TRACKER_PORT', 34000);
 
 // Shared secret that is compiled into Ocelot (see config.cpp). Must
 // be exactly 32 alphanumeric characters.
-defined('TRACKER_SECRET') or define('TRACKER_SECRET', 'abcdefghijklmnopqrstuvwxyz123456');
+defined('TRACKER_SECRET') or define('TRACKER_SECRET', '00000000000000000000000000000000');
 
 // Second shared secret that is compiled into Ocelot (see config.cpp). Must
 // be exactly 32 alphanumeric characters.
-defined('TRACKER_REPORTKEY') or define('TRACKER_REPORTKEY', 'abcdefghijklmnopqrstuvwxyz123456');
+defined('TRACKER_REPORTKEY') or define('TRACKER_REPORTKEY', '00000000000000000000000000000000');
 
 // Announce URLs for users. Some clients cannot do HTTPS, and some people
 // persist in using these clients, which is a great pity.

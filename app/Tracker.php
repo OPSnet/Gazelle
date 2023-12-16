@@ -20,9 +20,14 @@ class Tracker extends Base {
     final const STATS_USER = 1;
 
     protected static array $Requests = [];
+    protected string|false $error;
 
     public function requestList(): array {
         return self::$Requests;
+    }
+
+    public function last_error(): string|false {
+        return $this->error;
     }
 
     public function addTorrent(Torrent $torrent): bool {
@@ -90,12 +95,12 @@ class Tracker extends Base {
         }
 
         $MaxAttempts = 3;
-        $Err = false;
-        if ($this->send_request($Get, $MaxAttempts, $Err) === false) {
-            Irc::sendMessage('#tracker', "$MaxAttempts $Err $Get");
+        $this->error = false;
+        if ($this->send_request($Get, $MaxAttempts) === false) {
+            Irc::sendMessage('#tracker', "$MaxAttempts $Get {$this->error}");
             global $Cache;
             if ($Cache->get_value('ocelot_error_reported') === false) {
-                Irc::sendMessage(IRC_CHAN_DEV, "Failed to update ocelot: $Err : $Get");
+                Irc::sendMessage(IRC_CHAN_DEV, "Failed to update ocelot: {$this->error} : $Get");
                 $Cache->cache_value('ocelot_error_reported', true, 3600);
             }
             return false;
@@ -182,12 +187,9 @@ class Tracker extends Base {
     /**
      * Send a request to the tracker
      *
-     * @param string $Get GET string to send to the tracker
-     * @param int $MaxAttempts Maximum number of failed attempts before giving up
-     * @param bool $Err Variable to use as storage for the error string if the request fails
      * @return false|string tracker response message or false if the request failed
      */
-    private function send_request($Get, $MaxAttempts = 1, &$Err = false): false|string {
+    private function send_request(string $Get, int $MaxAttempts = 1): false|string {
         if (DISABLE_TRACKER) {
             return false;
         }
@@ -200,20 +202,20 @@ class Tracker extends Base {
         $Response = "";
         while (!$Success && $Attempts++ < $MaxAttempts) {
             if ($Sleep) {
-                sleep($Sleep);
+                usleep((int)$Sleep);
             }
-            $Sleep = 6;
+            $Sleep = 1200000; // 1200ms
 
             // Send request
             $File = fsockopen(TRACKER_HOST, TRACKER_PORT, $ErrorNum, $ErrorString);
             if ($File) {
                 if (fwrite($File, $Header) === false) {
-                    $Err = "Failed to fwrite()";
-                    $Sleep = 3;
+                    $this->error = "Failed to fwrite()";
+                    $Sleep *= 1.5; // exponential backoff
                     continue;
                 }
             } else {
-                $Err = "Failed to fsockopen() - $ErrorNum - $ErrorString";
+                $this->error = "Failed to fsockopen(" . TRACKER_HOST . ":" . TRACKER_PORT . ") - $ErrorNum - $ErrorString";
                 continue;
             }
 
