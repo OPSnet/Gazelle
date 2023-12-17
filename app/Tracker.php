@@ -2,12 +2,7 @@
 // TODO: The following actions are used, turn them into methods
 // add_token
 // remove_token
-// delete_torrent
-// update_torrent
 // remove_users
-// add_whitelist
-// edit_whitelist
-// remove_whitelist
 
 namespace Gazelle;
 
@@ -72,6 +67,25 @@ class Tracker extends Base {
     public function removeUser(User $user): bool {
         return $this->update_tracker('remove_user', [
             'passkey' => $user->announceKey(),
+        ]);
+    }
+
+    public function addWhitelist(string $peer): bool {
+        return $this->update_tracker('add_whitelist', [
+            'peer_id' => $peer,
+        ]);
+    }
+
+    public function modifyWhitelist(string $old, string $new): bool {
+        return $this->update_tracker('edit_whitelist', [
+            'old_peer_id' => $old,
+            'new_peer_id' => $new,
+        ]);
+    }
+
+    public function removeWhitelist(string $peer): bool {
+        return $this->update_tracker('remove_whitelist', [
+            'peer_id' => $peer,
         ]);
     }
 

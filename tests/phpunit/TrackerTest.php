@@ -89,4 +89,19 @@ class TrackerTest extends TestCase {
             'tracker-global-untracked-peer-count'
         );
     }
+
+    /**
+     * @group no-ci
+     */
+    public function testTrackerWhitelist(): void {
+        $tracker = new \Gazelle\Tracker;
+        $peer = '#utest-' . randomString(10);
+
+        $this->assertTrue($tracker->removeWhitelist($peer), 'tracker-whitelist-remove-inexistent');
+        $this->assertTrue($tracker->addWhitelist($peer), 'tracker-whitelist-add-inexistent');
+        $this->assertTrue($tracker->modifyWhitelist($peer, $peer . 'Z'), 'tracker-whitelist-modify');
+
+        $this->assertTrue($tracker->removeWhitelist($peer), 'tracker-whitelist-remove-1');
+        $this->assertTrue($tracker->removeWhitelist($peer . 'Z'), 'tracker-whitelist-remove-2');
+    }
 }
