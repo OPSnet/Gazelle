@@ -23,13 +23,15 @@
         <div class="box box2">
             <div class="head"><strong>Numbers and such</strong></div>
             <div class="pad">
-{% if peer_stats %}
-                User ID: {{ user_id }}<br />
-                Leeching: {{ peer_stats[0]|number_format }}<br />
-                Seeding: {{ peer_stats[1]|number_format }}<br />
+{% if user %}
+                User ID: {{ user.id }} ({{ user.link|raw }})<br />
+                Leeching: {{ peer_stats.leeching|number_format }}<br />
+                Seeding: {{ peer_stats.seeding|number_format }}<br />
+{% elseif user_id %}
+                Failed to get stats for user {{ user_id }}, or user does not exist
 {% elseif main_stats %}
     {% for key, value in main_stats %}
-                {%- if value == "Uptime:" -%}
+                {%- if key == "uptime" -%}
                     {{ value }}
                 {%- elseif key starts with "bytes " -%}
                     {{ value|octet_size }}
@@ -38,10 +40,6 @@
                 {%- endif %}
                 {{ key }}<br />
     {% endfor %}
-{% elseif announce_key %}
-                Failed to get stats for user {{ user_id }}
-{% elseif user_id %}
-                User {{ user_id }} doesn't exist
 {% else %}
                 Failed to get tracker info
 {% endif %}

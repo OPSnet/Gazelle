@@ -20,7 +20,7 @@ class Tracker extends Base {
     final const STATS_USER = 1;
 
     protected static array $Requests = [];
-    protected string|false $error;
+    protected string|false $error    = false;
 
     public function requestList(): array {
         return self::$Requests;
@@ -79,12 +79,8 @@ class Tracker extends Base {
      * Send a GET request over a socket directly to the tracker
      * For example, Tracker::update_tracker('change_passkey', array('oldpasskey' => OLD_PASSKEY, 'newpasskey' => NEW_PASSKEY)) will send the request:
      * GET /tracker_32_char_secret_code/update?action=change_passkey&oldpasskey=OLD_PASSKEY&newpasskey=NEW_PASSKEY HTTP/1.1
-     *
-     * @param string $Action The action to send
-     * @param array $Updates An associative array of key->value pairs to send to the tracker
-     * @param boolean $ToIRC Sends a message to the channel #tracker with the GET URL.
      */
-    public function update_tracker($Action, $Updates, $ToIRC = false): bool {
+    public function update_tracker(string $Action, array $Updates, bool $ToIRC = false): bool {
         if (DISABLE_TRACKER) {
             return true;
         }
@@ -125,42 +121,29 @@ class Tracker extends Base {
     }
 
     /**
-     * Get peer stats for a user from the tracker
-     *
-     * @return array (0 => $Leeching, 1 => $Seeding)
+     * Get peer stats of a user from the tracker
      */
-    public function user_peer_count(string $TorrentPass): array {
-        $Stats = $this->get_stats(self::STATS_USER, ['key' => $TorrentPass]);
-        if (empty($Stats)) {
-            return [0, 0];
-        }
-        if (isset($Stats['leeching']) && isset($Stats['seeding'])) {
-            $Leeching = $Stats['leeching'];
-            $Seeding = $Stats['seeding'];
-        } else {
-            // User doesn't exist, but don't tell anyone
-            $Leeching = $Seeding = 0;
-        }
-        return [$Leeching, $Seeding];
+    public function user_peer_count(User $user): array {
+        $stats = $this->get_stats(self::STATS_USER, ['key' => $user->announceKey()]);
+        return [
+            'leeching' => $stats['leeching'] ?? 0,
+            'seeding'  => $stats['seeding']  ?? 0
+        ];
     }
 
     /**
      * Get whatever info the tracker has to report
-     *
-     * @return array results from get_stats()
      */
-    public function info() {
+    public function info(): array {
         return $this->get_stats(self::STATS_MAIN);
     }
 
     /**
      * Send a stats request to the tracker and process the results
      *
-     * @param int $Type Stats type to get
-     * @param false|array $Params Parameters required by stats type
      * @return array with stats in named keys or empty if the request failed
      */
-    private function get_stats($Type, false|array $Params = false): array {
+    protected function get_stats(int $Type, false|array $Params = false): array {
         if (DISABLE_TRACKER) {
             return [];
         }
@@ -178,8 +161,12 @@ class Tracker extends Base {
         }
         $Stats = [];
         foreach (explode("\n", $Response) as $Stat) {
-            [$Val, $Key] = explode(" ", $Stat, 2);
-            $Stats[$Key] = $Val;
+            if (preg_match('/^Uptime: (.*)$/', $Stat, $match)) {
+                $Stats['uptime'] = $match[1];
+            } else {
+                [$Val, $Key] = explode(" ", $Stat, 2);
+                $Stats[$Key] = (int)$Val;
+            }
         }
         return $Stats;
     }
@@ -189,7 +176,7 @@ class Tracker extends Base {
      *
      * @return false|string tracker response message or false if the request failed
      */
-    private function send_request(string $Get, int $MaxAttempts = 1): false|string {
+    protected function send_request(string $Get, int $MaxAttempts = 1): false|string {
         if (DISABLE_TRACKER) {
             return false;
         }
