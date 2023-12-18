@@ -4,6 +4,7 @@ WORKDIR /var/www
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV PHP_VER=8.2
+ENV NODE_VERSION=16
 
 # Software package layer
 # Nodesource setup comes after yarnpkg because it runs `apt-get update`
