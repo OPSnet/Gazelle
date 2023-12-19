@@ -36,6 +36,7 @@ class User extends BaseObject {
             sprintf('user_inv_pending_%d', $this->id),
             sprintf('user_invited_%d', $this->id),
             sprintf('user_last_access_%d', $this->id),
+            sprintf('user_siteip_count_%d', $this->id),
             sprintf('user_stat_%d', $this->id),
             sprintf('users_tokens_%d', $this->id),
         ]);
@@ -1175,31 +1176,6 @@ class User extends BaseObject {
         return self::$db->affected_rows() === 1;
     }
 
-    public function updateIP($oldIP, $newIP): int {
-        self::$db->prepared_query('
-            UPDATE users_history_ips SET
-                EndTime = now()
-            WHERE EndTime IS NULL
-                AND UserID = ?  AND IP = ?
-                ', $this->id, $oldIP
-        );
-        self::$db->prepared_query('
-            INSERT IGNORE INTO users_history_ips
-                   (UserID, IP)
-            VALUES (?,      ?)
-            ', $this->id, $newIP
-        );
-        self::$db->prepared_query('
-            UPDATE users_main SET
-                IP = ?, ipcc = ?
-            WHERE ID = ?
-            ', $newIP, geoip($newIP), $this->id
-        );
-        $affected = self::$db->affected_rows();
-        $this->flush();
-        return $affected;
-    }
-
     /**
      * Validate a user password
      *
@@ -1549,19 +1525,6 @@ class User extends BaseObject {
         return $value;
     }
 
-    public function duplicateIPv4Count(): int {
-        $cacheKey = "ipv4_dup_" . str_replace('-', '_', $this->info()['IP']);
-        $value = self::$cache->get_value($cacheKey);
-        if ($value === false) {
-            $value = self::$db->scalar("
-                SELECT count(*) FROM users_history_ips WHERE IP = ?
-                ", $this->info()['IP']
-            );
-            self::$cache->cache_value($cacheKey, $value, 3600);
-        }
-        return max(0, (int)$value - 1);
-    }
-
     public function passwordCount(): int {
         return (int)$this->getSingleValue('user_pw_count', '
             SELECT count(*) FROM users_history_passwords WHERE UserID = ?
@@ -1571,12 +1534,6 @@ class User extends BaseObject {
     public function announceKeyCount(): int {
         return (int)$this->getSingleValue('user_passkey_count', '
             SELECT count(*) FROM users_history_passkeys WHERE UserID = ?
-        ');
-    }
-
-    public function siteIPCount(): int {
-        return (int)$this->getSingleValue('user_siteip_count', '
-            SELECT count(DISTINCT IP) FROM users_history_ips WHERE UserID = ?
         ');
     }
 

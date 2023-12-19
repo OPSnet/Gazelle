@@ -26,7 +26,13 @@ class UserHistoryTest extends TestCase {
 
         $this->assertEquals(
             1,
-            $history->registerNewEmail($newEmail, '127.1.2.3', new \Gazelle\Util\Irc, new \Gazelle\Util\Mail),
+            $history->registerNewEmail(
+                $newEmail,
+                '127.1.2.3',
+                new \Gazelle\Manager\IPv4,
+                new \Gazelle\Util\Irc,
+                new \Gazelle\Util\Mail,
+            ),
             'userhist-record-email'
         );
         $this->assertEquals(2, $history->emailTotal(), 'userhist-email-total');
@@ -41,7 +47,13 @@ class UserHistoryTest extends TestCase {
 
         $email   = $this->userList[0]->email();
         $history = new \Gazelle\User\History($user);
-        $history->registerNewEmail($email, '127.1.2.3', new \Gazelle\Util\Irc, new \Gazelle\Util\Mail);
+        $history->registerNewEmail(
+            $email,
+            '127.1.2.3',
+            new \Gazelle\Manager\IPv4,
+            new \Gazelle\Util\Irc,
+            new \Gazelle\Util\Mail,
+        );
         $user->setField('Email', $email)->modify();
 
         $duplicate = $history->emailDuplicate(new \Gazelle\Search\ASN);

@@ -100,7 +100,7 @@ class User extends \Gazelle\BaseManager {
             if ($watch->nrAttempts() >= 5) {
                 $watch->ban("[id:$userId]");
                 if ($watch->nrBans() >= 10) {
-                    $ipv4Man->createBan(0, $ipaddr, $ipaddr, 'Automated ban per failed token usage');
+                    $ipv4Man->createBan($userId, $ipaddr, $ipaddr, 'Automated ban per failed token usage');
                 }
             }
             return [false, 'invalid token'];

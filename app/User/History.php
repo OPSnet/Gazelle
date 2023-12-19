@@ -89,7 +89,13 @@ class History extends \Gazelle\BaseUser {
      * *BEFORE* updating the new email address, otherwise it will not be
      * possible to send a warning message to the old address.
      */
-    public function registerNewEmail(string $newEmail, string $ipaddr, \Gazelle\Util\Irc $irc, \Gazelle\Util\Mail $mailer): int {
+    public function registerNewEmail(
+        string $newEmail,
+        string $ipaddr,
+        \Gazelle\Manager\IPv4 $ipv4,
+        \Gazelle\Util\Irc $irc,
+        \Gazelle\Util\Mail $mailer
+    ): int {
         self::$db->prepared_query("
             INSERT INTO users_history_emails
                    (UserID, Email, IP, useragent)
@@ -100,10 +106,12 @@ class History extends \Gazelle\BaseUser {
             $this->user->username(),
             "Security alert: Your email address was changed via $ipaddr with {$_SERVER['HTTP_USER_AGENT']}. Not you? Contact staff ASAP."
         );
-        $irc::sendMessage(
-            IRC_CHAN_STAFF,
-            "Alert! email address for {$this->user->username()} was changed from {$this->user->email()} to $newEmail via $ipaddr with UA={$_SERVER['HTTP_USER_AGENT']}."
-        );
+        if ($ipv4->setFilterIpaddr($ipaddr)->userTotal($this->user) == 0) {
+            $irc::sendMessage(
+                IRC_CHAN_STAFF,
+                "Email address for {$this->user->username()} was changed from {$this->user->email()} to $newEmail from unusual address $ipaddr with UA={$_SERVER['HTTP_USER_AGENT']}."
+            );
+        }
         $mailer->send($this->user->email(), 'Email address changed information for ' . SITE_NAME,
             self::$twig->render('email/email-address-change.twig', [
                 'ipaddr'     => $ipaddr,

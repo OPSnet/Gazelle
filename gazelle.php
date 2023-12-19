@@ -137,7 +137,7 @@ if ($Viewer) {
         if ($ipv4Man->isBanned($_SERVER['REMOTE_ADDR'])) {
             error('Your IP address has been banned.');
         }
-        $Viewer->updateIP($Viewer->ipaddr(), $_SERVER['REMOTE_ADDR']);
+        $ipv4Man->register($Viewer, $_SERVER['REMOTE_ADDR']);
     }
     if ($Viewer->isLocked() && !in_array($Document, ['staffpm', 'ajax', 'locked', 'logout', 'login'])) {
         $Document = 'locked';

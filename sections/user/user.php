@@ -19,6 +19,7 @@ $viewerBonus = new Gazelle\User\Bonus($Viewer);
 $history     = new Gazelle\User\History($User);
 $limiter     = new Gazelle\User\UserclassRateLimit($User);
 $donorMan    = new Gazelle\Manager\Donation;
+$ipv4        = new Gazelle\Manager\IPv4;
 $tgMan       = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
 $resetToken  = $Viewer->permitted('users_mod')
     ? (new Gazelle\Manager\UserToken)->findByUser($User, UserTokenType::password)
@@ -235,7 +236,7 @@ if ($User->propertyVisibleMulti($previewer, ['artistsadded', 'collagecontribs+',
     }
     if ($Viewer->permitted('users_view_ips')) {
 ?>
-                <li>IPs: <?=number_format($User->siteIPCount())?> <a href="userhistory.php?action=ips&amp;userid=<?=$UserID?>" class="brackets">View</a>&nbsp;<a href="userhistory.php?action=ips&amp;userid=<?=$UserID?>&amp;usersonly=1" class="brackets">View users</a></li>
+                <li>IPs: <?=number_format($ipv4->userTotal($User))?> <a href="userhistory.php?action=ips&amp;userid=<?=$UserID?>" class="brackets">View</a>&nbsp;<a href="userhistory.php?action=ips&amp;userid=<?=$UserID?>&amp;usersonly=1" class="brackets">View users</a></li>
 <?php   if ($Viewer->permitted('users_mod')) { ?>
                 <li>Tracker IPs: <?=number_format($User->trackerIPCount())?> <a href="userhistory.php?action=tracker_ips&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
 <?php

@@ -25,7 +25,7 @@ if (isset($_POST['submit'])) {
             error($validator->errorMessage());
         }
         if ($id) {
-            $IPv4Man->modifyBan($id, $Viewer->id(), $_POST['start'], $_POST['end'], trim($_POST['notes']));
+            $IPv4Man->modifyBan($Viewer, $id, $_POST['start'], $_POST['end'], trim($_POST['notes']));
         } else {
             $IPv4Man->createBan($Viewer->id(), $_POST['start'], $_POST['end'], trim($_POST['notes']));
         }

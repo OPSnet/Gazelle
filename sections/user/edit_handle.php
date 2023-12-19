@@ -249,7 +249,7 @@ if ($ResetPassword) {
 
 $history = new \Gazelle\User\History($user);
 if ($NewEmail) {
-    $history->registerNewEmail($NewEmail, $Viewer->ipaddr(), $irc, new \Gazelle\Util\Mail);
+    $history->registerNewEmail($NewEmail, $Viewer->ipaddr(), new \Gazelle\Manager\IPv4, $irc, new \Gazelle\Util\Mail);
 }
 
 if (isset($_POST['resetpasskey'])) {

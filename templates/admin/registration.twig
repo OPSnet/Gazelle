@@ -96,10 +96,10 @@
             </td>
             <td style="vertical-align: top">
                 <span style="float: left; padding-left: 2px;" title="Duplicate usage by other users">
-                {{- user.duplicateIPv4Count -}}
+                {{- ipv4.duplicateTotal(user) -}}
         {%- if user.inviter and user.ipaddr != user.inviter.ipaddr -%}
                 <br />
-                {{- user.inviter.duplicateIPv4Count -}}
+                {{- ipv4.duplicateTotal(user.inviter) -}}
         {% endif %}
                 </span>
             </td>
