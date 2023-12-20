@@ -7,7 +7,7 @@
     var topAlbums = "";
     var topTracks = "";
     var expanded = false;
-    $(document).ready(function () {
+    document.addEventListener('DOMContentLoaded', function () {
         // Avoid conflicting with other jQuery instances (userscripts et al).
 //        $.noConflict(); // Why is this needed?
         // Fetch the username (appended from php) to base all get requests on.

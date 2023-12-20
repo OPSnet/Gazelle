@@ -24,7 +24,7 @@ function clearSelected(filterId) {
     });
 }
 
-$(document).ready(function () {
+document.addEventListener('DOMContentLoaded', function () {
     var notifyBoxes = $('.notify_box');
     notifyBoxes.keydown(function(e) {
         var nextBox, index = notifyBoxes.index($(this));

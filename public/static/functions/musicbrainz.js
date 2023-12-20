@@ -22,7 +22,7 @@ var $searched = false;
 var $popup_state = 0;
 var $musicbrainz_state = 0;
 
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
     loadCSS();
     enableMusicBrainzButton();
     controlPopup();

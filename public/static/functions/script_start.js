@@ -369,7 +369,7 @@ $.fn.extend({
     }
 });
 
-$(document).ready(function () {
+document.addEventListener('DOMContentLoaded', function () {
     $('#torrentssearch').focus(function () { if (this.value == 'Torrents') { this.value = ''; }});
     $('#torrentssearch').blur(function () { if (this.value == '') { this.value = 'Torrents'; }});
 

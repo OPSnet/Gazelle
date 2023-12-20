@@ -18,7 +18,7 @@ function findRule() {
     $('.before_rules').toggle(query_string.length === 0);
 }
 
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
     var search_string = $('#search_string');
     var original_value = search_string.val();
     search_string.keyup(findRule);

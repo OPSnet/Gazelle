@@ -1,4 +1,4 @@
-jQuery(document).ready(function ($) {
+document.addEventListener('DOMContentLoaded', function ($) {
     // Helper function to preserve table cell dimentions
     var fixDimentions = function (unused, elements) {
         // Iterate through each table cell and correct width

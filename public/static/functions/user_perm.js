@@ -1,4 +1,4 @@
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
     $("#perm-defaults").click(function() {
         for (i = 0; i < $('#permissionsform').raw().elements.length; i++) {
             element = $('#permissionsform').raw().elements[i];

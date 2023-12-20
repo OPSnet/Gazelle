@@ -1,7 +1,7 @@
 (function () {
     var show_all = false;
     var current;
-    $(document).ready(function() {
+    document.addEventListener('DOMContentLoaded', function() {
         show_all = $(".show_all_covers").text() == "Hide";
         $(".next_cover").click(function(e) {
             e.preventDefault();

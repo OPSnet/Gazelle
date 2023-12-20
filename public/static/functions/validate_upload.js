@@ -1,5 +1,5 @@
 (function () {
-    $(document).ready(function () {
+    document.addEventListener('DOMContentLoaded', function () {
         // Upload button is clicked
         $("#post").click(function(e) {
             // Make sure "Music" category is selected.

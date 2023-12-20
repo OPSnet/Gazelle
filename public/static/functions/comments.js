@@ -394,7 +394,7 @@ StoreText.prototype = {
     }
 };
 
-$(document).ready(function () {
+document.addEventListener('DOMContentLoaded', function () {
     $('.edit-post').click(function() {
         edit_post(this.id);
     });

@@ -161,7 +161,7 @@ function download_warning() {
     return confirm('If you no longer have the content, your ratio WILL be affected; be sure to check the cumulative size of all torrents before redownloading!');
 }
 
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
     $("#random_password").click(function() {
         var length = 32,
             charset = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ0123456789",

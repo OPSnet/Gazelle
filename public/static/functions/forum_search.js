@@ -1,4 +1,4 @@
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
     $(".forum_category").click(function(e) {
         var id = this.id;
         var isChecked = $(this).text() != "Check all";

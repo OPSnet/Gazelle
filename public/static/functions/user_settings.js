@@ -2,7 +2,7 @@ var PUSHOVER = 5;
 var TOASTY = 4;
 var PUSHBULLET = 6;
 
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
     var top = $('#settings_sections').offset().top - parseFloat($('#settings_sections').css('marginTop').replace(/auto/, 0));
     $(window).scroll(function (event) {
         var y = $(this).scrollTop();

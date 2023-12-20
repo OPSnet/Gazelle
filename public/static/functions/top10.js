@@ -1,4 +1,4 @@
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
     if (jQuery().imagesLoaded && jQuery().wookmark) {
         $('.tiles').imagesLoaded(function() {
             $(".tiles img").each(function() {

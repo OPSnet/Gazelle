@@ -1,4 +1,4 @@
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
     $("#sandbox").keyup(function() {
         $.ajax({
             type : "POST",

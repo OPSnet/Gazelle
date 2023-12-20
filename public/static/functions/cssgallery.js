@@ -1,4 +1,4 @@
-$(document).ready(function () {
+document.addEventListener('DOMContentLoaded', function () {
     // If the custom stylesheet field is empty, select the current style from the previews
     if (!$('input#styleurl').val()){
         var radiobutton = $('input[name="stylesheet_gallery"][value="' + $('select#stylesheet').val() + '"]');

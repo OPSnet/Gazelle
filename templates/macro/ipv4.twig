@@ -9,7 +9,7 @@
 {%- macro rdns(ip) -%}
 <span class="host_{{ ip|replace({'.': '-'}) }}">Resolving host...
 <script type="text/javascript">
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
     $.get('tools.php?action=get_host&ip={{ ip }}', function(host) {
         $('.host_{{ ip|replace({'.': '-'}) }}').html(host);
     });

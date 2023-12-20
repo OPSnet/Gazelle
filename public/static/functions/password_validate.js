@@ -15,70 +15,67 @@ var MATCH_OLD_PASSWORD = 8;
 
 var USER_PATH = "/user.php";
 
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
 
-var old = $("#new_pass_1").val().length;
-var password1;
-var password2;
+    var old = $("#new_pass_1").val().length;
+    var password1;
+    var password2;
 
-$("#new_pass_1").keyup(function() {
-    password1 = $("#new_pass_1").val();
-    if (password1.length != old) {
-        disableSubmit();
-        calculateComplexity(password1);
-        old = password1.length;
-    }
+    $("#new_pass_1").keyup(function() {
+        password1 = $("#new_pass_1").val();
+        if (password1.length != old) {
+            disableSubmit();
+            calculateComplexity(password1);
+            old = password1.length;
+        }
+    });
 
-});
+    $("#new_pass_1").change(function() {
+        password1 = $("#new_pass_1").val();
+        password2 = $("#new_pass_2").val();
 
-$("#new_pass_1").change(function() {
-    password1 = $("#new_pass_1").val();
-    password2 = $("#new_pass_2").val();
+        if (password1.length == 0 && password2.length == 0) {
+            enableSubmit();
+        } else if (getStrong() == true) {
+            validatePassword(password1);
+        }
+    });
 
-    if (password1.length == 0 && password2.length == 0) {
-        enableSubmit();
-    } else if (getStrong() == true) {
-        validatePassword(password1);
-    }
+    $("#new_pass_1").focus(function() {
+        password1 = $("#new_pass_1").val();
+        password2 = $("#new_pass_2").val();
+        if (password1.length > 0) {
+            checkMatching(password1, password2);
+        }
+    });
 
-});
-
-$("#new_pass_1").focus(function() {
-    password1 = $("#new_pass_1").val();
-    password2 = $("#new_pass_2").val();
-    if (password1.length > 0) {
+    $("#new_pass_2").keyup(function() {
+        password2 = $("#new_pass_2").val();
         checkMatching(password1, password2);
-    }
-});
+    });
 
-$("#new_pass_2").keyup(function() {
-    password2 = $("#new_pass_2").val();
-    checkMatching(password1, password2);
-});
-
-$("#new_pass_1").blur(function() {
-    password1 = $("#new_pass_1").val();
-    password2 = $("#new_pass_2").val();
-    if (password1.length == 0 && password2.length == 0) {
-        enableSubmit();
-    }
-});
-
+    $("#new_pass_1").blur(function() {
+        password1 = $("#new_pass_1").val();
+        password2 = $("#new_pass_2").val();
+        if (password1.length == 0 && password2.length == 0) {
+            enableSubmit();
+        }
+    });
 });
 
 function validatePassword(password) {
     if (isUserPage()) {
-     $.ajax({
-        type: 'POST',
-        dataType: 'text',
-        url : 'ajax.php?action=password_validate',
-        data: 'password=' + password,
-        async: false,
-        success: function(value) {
-            if (value == 'false') {
-                setStatus(COMMON);
+        $.ajax({
+            type: 'POST',
+            dataType: 'text',
+            url : 'ajax.php?action=password_validate',
+            data: 'password=' + password,
+            async: false,
+            success: function(value) {
+                if (value == 'false') {
+                    setStatus(COMMON);
+                }
             }
-        }
         });
     }
 }

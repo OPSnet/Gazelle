@@ -1,4 +1,4 @@
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
     var skip = getSkippedPage();
     $('.noty-notification').each(function() {
         var $this = $(this);

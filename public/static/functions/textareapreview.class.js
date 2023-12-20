@@ -1,5 +1,5 @@
 var TextareaPreview;
-$(document).ready(function () {
+document.addEventListener('DOMContentLoaded', function () {
     'use strict';
     TextareaPreview = function (id, textarea_id) {
         if (!isNaN(+id)) {

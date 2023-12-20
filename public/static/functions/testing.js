@@ -1,4 +1,4 @@
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
     $(".run").click(function(e) {
         e.preventDefault();
         var id = $(this).data("gazelle-id");

@@ -1,4 +1,4 @@
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
     var url = new gazURL();
     var query = url.query;
     switch (url.path) {

@@ -1,4 +1,4 @@
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
     var field = $('input[name="adjusted_score"]');
     $('form[name="edit_log"] input:checkbox').each(function() {
         if ($(this).data('score')) {

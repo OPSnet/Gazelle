@@ -3,7 +3,7 @@
 var LIMIT = 10;
 var artistId, artistName;
 var artistTags;
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
     initArtistCloud();
 });
 function initArtistCloud() {

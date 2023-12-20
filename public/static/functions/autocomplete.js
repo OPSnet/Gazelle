@@ -1,4 +1,4 @@
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
     var url = new gazURL();
     var ARTIST_AUTOCOMPLETE_URL  = 'artist.php?action=autocomplete';
     var COLLAGE_AUTOCOMPLETE_URL = 'collages.php?action=autocomplete';

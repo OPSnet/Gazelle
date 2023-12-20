@@ -1,4 +1,4 @@
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
     var trimmed = false;
     var tags = $("#tags");
     $("#tag_list").change(function() {

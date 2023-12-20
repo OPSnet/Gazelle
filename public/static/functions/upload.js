@@ -942,6 +942,6 @@ function uploadFormInit() {
     }
 }
 
-$(document).ready(function () {
+document.addEventListener('DOMContentLoaded', function () {
     uploadFormInit();
 });

@@ -1,5 +1,5 @@
 var tooltip_delay = 500;
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
     if (!$.fn.tooltipster) {
         $('.tooltip_interactive, .tooltip_image, .tooltip, .tooltip_gold').each(function() {
             if ($(this).data('title-plain')) {

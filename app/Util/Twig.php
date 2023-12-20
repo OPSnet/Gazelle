@@ -265,7 +265,7 @@ class Twig {
                     $Class = strtr($ip, '.', '-');
                     $cache[$ip] = '<span class="cc_' . $Class . '">Resolving CC...'
                         . '<script type="text/javascript">'
-                            . '$(document).ready(function() {'
+                            . "document.addEventListener('DOMContentLoaded', function() {"
                                 . '$.get(\'tools.php?action=get_cc&ip=' . $ip . '\', function(cc) {'
                                     . '$(\'.cc_' . $Class . '\').html(cc);'
                                 . '});'
@@ -286,7 +286,7 @@ class Twig {
                 if (!isset($cache[$ip])) {
                     $class = strtr($ip, '.', '-');
                     $cache[$ip] = '<span class="host_' . $class
-                        . '">Resolving host' . "\xE2\x80\xA6" . '<script type="text/javascript">$(document).ready(function() {'
+                        . ">Resolving host – <script type=\"text/javascript\">document.addEventListener('DOMContentLoaded', function() {"
                         .  "\$.get('tools.php?action=get_host&ip=$ip', function(host) {\$('.host_$class').html(host)})})</script></span>";
                 }
                 return $cache[$ip];

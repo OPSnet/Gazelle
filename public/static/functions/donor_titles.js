@@ -1,4 +1,4 @@
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
     if ($('#donor_title_prefix_preview').length === 0) {
         return;
     }

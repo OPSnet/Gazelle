@@ -1,6 +1,6 @@
 (function() {
     var ids = Array();
-    $(document).ready(function() {
+    document.addEventListener('DOMContentLoaded', function() {
         $("input[id^=check_all]").click(function() {
             // Check or uncheck all requests
             var checked = ($(this).attr('checked') == 'checked') ? true : false;
