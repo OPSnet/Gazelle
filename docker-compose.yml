@@ -26,7 +26,7 @@ services:
     ports:
       - 127.0.0.1:54321:5432
     volumes:
-      - ./.docker/data/pg:/var/lib/postgresql/data
+      - pg-data:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=nyala
       - POSTGRES_PASSWORD=nyalapw
@@ -36,13 +36,13 @@ services:
     ports:
       - 127.0.0.1:36000:3306
     volumes:
-      - ./.docker/data/mysql:/var/lib/mysql
+      - mysql-data:/var/lib/mysql
     environment:
       - MYSQL_DATABASE=gazelle
       - MYSQL_USER=gazelle
       - MYSQL_PASSWORD=password
       - MYSQL_ROOT_PASSWORD=sc5tlc9JSCC6
-    command: 
+    command:
       - mysqld
       - --group-concat-max-len=1048576
       - --character-set-server=utf8mb4
@@ -58,9 +58,14 @@ services:
       - mysql
       - web
     volumes:
-      - ./.docker/data/sphinxsearch:/var/lib/sphinxsearch/data/
+      - sphinx-data:/var/lib/sphinxsearch/data/
       - ./.docker/sphinxsearch/sphinx.conf:/var/lib/sphinxsearch/conf/sphinx.conf
     environment:
       # These should match what you set for your mysql container above
       - MYSQL_USER=gazelle
       - MYSQL_PASSWORD=password
+
+volumes:
+  mysql-data:
+  pg-data:
+  sphinx-data:
