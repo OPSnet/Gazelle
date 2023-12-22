@@ -400,19 +400,17 @@ function json_or_error(mixed $JsonError, mixed $Error = null, bool $NoHTML = fal
 
 function add_json_info(array $info): array {
     if (!isset($info['info'])) {
-        $info = array_merge($info, [
-            'info' => [
-                'source' => SITE_NAME,
-                'version' => 1,
-            ],
-        ]);
+        $info['info'] = [
+            'source' => SITE_NAME,
+            'version' => 1,
+        ];
     }
     global $Viewer;
     if (!isset($info['debug']) && $Viewer instanceof \Gazelle\User && $Viewer->permitted('site_debug')) {
         global $Debug;
-        $info = ['debug' => ['queries' => $Debug->get_queries()]];
+        $info['debug'] = ['queries' => $Debug->get_queries()];
         if (class_exists('Sphinxql') && !empty(\Sphinxql::$Queries)) {
-            $info['searches'] = \Sphinxql::$Queries;
+            $info['debug']['searches'] = \Sphinxql::$Queries;
         }
     }
     return $info;
