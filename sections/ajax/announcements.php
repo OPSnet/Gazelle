@@ -13,13 +13,12 @@ foreach ($headlines as $item) {
     if (--$show < 0) {
         break;
     }
-    [$id, $title, $body, $time] = $item;
     $news[] = [
-        'newsId'   => $id,
-        'title'    => $title,
-        'bbBody'   => $body,
-        'body'     => Text::full_format($body),
-        'newsTime' => $time,
+        'newsId'   => $item['id'],
+        'title'    => $item['title'],
+        'bbBody'   => $item['body'],
+        'body'     => Text::full_format($item['body']),
+        'newsTime' => $item['created'],
     ];
 }
 
