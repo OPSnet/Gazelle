@@ -9,12 +9,15 @@ $top10  = new Gazelle\Top10\Torrent(FORMAT, $Viewer);
 $torMan = new Gazelle\Manager\Torrent;
 $result = [];
 
+// Filter out common parameters that are not needed in getTopTorrents to get more cache hits
+$getParameters = array_filter($_GET, function ($k) { return !in_array($k, ['action', 'details', 'limit', 'type']); }, ARRAY_FILTER_USE_KEY);
+
 if ($details == 'all' || $details == 'day') {
     $result[] = [
         'caption' => 'Most Active Torrents Uploaded in the Past Day',
         'tag'     => 'day',
         'limit'   => $limit,
-        'results' => payload($torMan, $top10->getTopTorrents($_GET, 'day', $limit)),
+        'results' => payload($torMan, $top10->getTopTorrents($getParameters, 'day', $limit)),
     ];
 }
 
@@ -23,7 +26,7 @@ if ($details == 'all' || $details == 'week') {
         'caption' => 'Most Active Torrents Uploaded in the Past Week',
         'tag'     => 'week',
         'limit'   => $limit,
-        'results' => payload($torMan, $top10->getTopTorrents($_GET, 'week', $limit)),
+        'results' => payload($torMan, $top10->getTopTorrents($getParameters, 'week', $limit)),
     ];
 }
 
@@ -32,7 +35,7 @@ if ($details == 'all' || $details == 'month') {
         'caption' => 'Most Active Torrents Uploaded in the Past Month',
         'tag'     => 'month',
         'limit'   => $limit,
-        'results' => payload($torMan, $top10->getTopTorrents($_GET, 'month', $limit)),
+        'results' => payload($torMan, $top10->getTopTorrents($getParameters, 'month', $limit)),
     ];
 }
 
@@ -41,7 +44,7 @@ if ($details == 'all' || $details == 'year') {
         'caption' => 'Most Active Torrents Uploaded in the Past Year',
         'tag'     => 'year',
         'limit'   => $limit,
-        'results' => payload($torMan, $top10->getTopTorrents($_GET, 'year', $limit)),
+        'results' => payload($torMan, $top10->getTopTorrents($getParameters, 'year', $limit)),
     ];
 }
 
@@ -50,7 +53,7 @@ if ($details == 'all' || $details == 'overall') {
         'caption' => 'Most Active Torrents Uploaded of All Time',
         'tag'     => 'overall',
         'limit'   => $limit,
-        'results' => payload($torMan, $top10->getTopTorrents($_GET, 'overall', $limit)),
+        'results' => payload($torMan, $top10->getTopTorrents($getParameters, 'overall', $limit)),
     ];
 }
 
@@ -59,7 +62,7 @@ if ($details == 'all' || $details == 'snatched') {
         'caption' => 'Most Snatched  Torrents',
         'tag'     => 'snatched',
         'limit'   => $limit,
-        'results' => payload($torMan, $top10->getTopTorrents($_GET, 'snatched', $limit)),
+        'results' => payload($torMan, $top10->getTopTorrents($getParameters, 'snatched', $limit)),
     ];
 }
 
@@ -68,7 +71,7 @@ if ($details == 'all' || $details == 'data') {
         'caption' => 'Most Data Transferred Torrents',
         'tag'     => 'data',
         'limit'   => $limit,
-        'results' => payload($torMan, $top10->getTopTorrents($_GET, 'data', $limit)),
+        'results' => payload($torMan, $top10->getTopTorrents($getParameters, 'data', $limit)),
     ];
 }
 
@@ -77,7 +80,7 @@ if ($details == 'all' || $details == 'seeded') {
         'caption' => 'Best Seeded Torrents',
         'tag'     => 'seeded',
         'limit'   => $limit,
-        'results' => payload($torMan, $top10->getTopTorrents($_GET, 'seeded', $limit)),
+        'results' => payload($torMan, $top10->getTopTorrents($getParameters, 'seeded', $limit)),
     ];
 }
 
