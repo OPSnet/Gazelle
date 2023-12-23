@@ -35,7 +35,7 @@ View::show_header('Report', ['js' => 'reportsv2,browse,torrent,bbcode']);
         <h2>Report a torrent</h2>
     </div>
     <div class="header">
-        <h3><?= $tgroup->link() . " [{$tgroup->year()}] [{$tgroup->releaseTypeName()}]" ?></h3>
+        <h3><?= $tgroup->link() ?></h3>
     </div>
     <div class="thin">
         <table class="torrent_table details<?= $snatcher->showSnatch($torrent) ? ' snatched' : '' ?>" id="torrent_details">
@@ -65,8 +65,7 @@ $remasterTuple = $torrent->remasterTuple();
                             'torrent' => $torrent,
                             'viewer'  => $Viewer,
                         ]) ?>
-                        &raquo; <a href="#" onclick="$('#torrent_<?= $torrentId ?>').gtoggle(); return false;"><?=
-                            implode(' / ', $torrent->labelList($Viewer)) ?><?= $torrent->label($Viewer) ?></a>
+                        &raquo; <a href="#" onclick="$('#torrent_<?= $torrentId ?>').gtoggle(); return false;"><?= $torrent->label($Viewer) ?></a>
                     </td>
                     <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
                 </tr>
