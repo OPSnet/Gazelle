@@ -9,7 +9,6 @@ class UsersTest extends TestCase {
         $stats = new \Gazelle\Stats\Users;
 
         /* not easy to test precise results, but at least the SQL can be exercised */
-        $this->assertIsArray($stats->flow(), 'stats-users-flow');
         $this->assertIsArray($stats->browserDistribution(), 'stats-users-browser');
         $this->assertIsArray($stats->browserDistributionList(), 'stats-users-browser-list');
         $this->assertIsArray($stats->userclassDistribution(), 'stats-users-userclass');
@@ -17,11 +16,13 @@ class UsersTest extends TestCase {
         $this->assertIsArray($stats->platformDistribution(), 'stats-users-platform');
         $this->assertIsArray($stats->platformDistributionList(), 'stats-users-platform-list');
         $this->assertIsArray($stats->geodistribution(), 'stats-users-geodistribution');
-        $this->assertCount(3, $stats->peerStat(), 'stats-users-peer');
         $this->assertIsInt($stats->leecherTotal(), 'stats-users-total-leecher');
         $this->assertIsInt($stats->peerTotal(), 'stats-users-total-peer');
         $this->assertIsInt($stats->seederTotal(), 'stats-users-total-seeder');
         $this->assertIsInt($stats->snatchTotal(), 'stats-users-total-snatch');
+
+        $this->assertCount(3, $stats->peerStat(), 'stats-users-peer');
+        $this->assertCount(12, $stats->flow(), 'stats-users-flow');
     }
 
     public function testTop(): void {

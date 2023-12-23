@@ -7,7 +7,7 @@ class Torrent extends \Gazelle\Base {
 
     final const CACHE_KEY      = 'stat_global_torrent';
     final const PEER_KEY       = 'stat_global_peer';
-    final const TORRENT_FLOW   = 'stat_tflow';
+    final const TORRENT_FLOW   = 'stat_t_flow';
     final const CATEGORY_TOTAL = 'stat_tcat';
 
     public function flush(): static {
@@ -128,32 +128,38 @@ class Torrent extends \Gazelle\Base {
         $flow = self::$cache->get_value(self::TORRENT_FLOW);
         if ($flow === false) {
             self::$db->prepared_query("
-                SELECT date_format(t.created,'%Y-%m') AS Month,
-                    count(*) as t_net
-                FROM torrents t
-                GROUP BY Month
-                ORDER BY created DESC
-                LIMIT 12
+                WITH RECURSIVE dates AS (
+                    SELECT last_day(now() - INTERVAL 13 MONTH) + INTERVAL 1 DAY AS eom
+                    UNION ALL
+                    SELECT last_day(eom + INTERVAL 1 MONTH)
+                    FROM dates
+                    WHERE last_day(eom + INTERVAL 1 MONTH) < last_day(now())
+                ),
+                delta AS (
+                    SELECT last_day(Time)                                         AS eom,
+                        sum(if(Message LIKE 'Torrent % was uploaded by %', 1, 0)) AS t_add,
+                        sum(if(Message LIKE 'Torrent % was deleted by %', -1, 0)) AS t_del
+                    FROM log
+                    WHERE Time BETWEEN last_day(now() - INTERVAL 13 MONTH) + INTERVAL 1 DAY
+                        AND last_day(now() - INTERVAL 1 MONTH)
+                    GROUP BY eom
+                )
+                SELECT date_format(dates.eom, '%Y-%m') AS Month,
+                    count(DISTINCT t.ID)               AS t_net,
+                    coalesce(delta.t_add, 0)           AS t_add,
+                    coalesce(delta.t_del, 0)           AS t_del
+                FROM dates
+                LEFT JOIN torrents t ON (last_day(t.Time) = dates.eom)
+                LEFT JOIN delta USING (eom)
+                GROUP BY eom
+                ORDER BY eom
             ");
             $flow = self::$db->to_array('Month', MYSQLI_ASSOC, false);
-            $beginMonth = end($flow)['Month'] . '-01';
-            $endMonth = reset($flow)['Month'] . '-01';
-
-            self::$db->prepared_query("
-                SELECT date_format(Time,'%Y-%m') as Month,
-                    sum(Message LIKE 'Torrent % was uploaded by %') AS t_add,
-                    sum(Message LIKE 'Torrent % was deleted %')     AS t_del
-                FROM log
-                WHERE Time BETWEEN ? AND last_day(?)
-                GROUP BY Month order by Time DESC
-                ", $beginMonth, $endMonth
-            );
-            $delta = self::$db->to_array('Month', MYSQLI_ASSOC, false);
-            foreach (array_keys($flow) as $m) {
-                $flow[$m]['t_add'] = (int)($delta[$m]['t_add'] ?? 0);
-                $flow[$m]['t_del'] = -(int)($delta[$m]['t_del'] ?? 0);
+            foreach ($flow as &$f) {
+                $f['t_add'] = (int)$f['t_add'];
+                $f['t_del'] = (int)$f['t_del'];
             }
-            $flow = array_reverse($flow);
+            unset($f);
             self::$cache->cache_value(self::TORRENT_FLOW, $flow, mktime(0, 0, 0, date('n') + 1, 2)); //Tested: fine for dec -> jan
         }
         return $flow;

@@ -8,7 +8,7 @@ class Users extends \Gazelle\Base {
     protected const USER_BROWSER  = 'stat_u_browser';
     protected const USER_CLASS    = 'stat_u_class';
     protected const USER_PLATFORM = 'stat_u_platform';
-    protected const FLOW          = 'stat_flow';
+    protected const FLOW          = 'stat_u_flow';
 
     protected array|null $info;
 
@@ -40,37 +40,36 @@ class Users extends \Gazelle\Base {
     public function flow(): array {
         $flow = self::$cache->get_value(self::FLOW);
         if ($flow === false) {
-            /* Mysql does not implement a full outer join, so if there is a month with
-             * no joiners, any banned users in that same month will not appear.
-             * Mysql does not implement sequence generators as in Postgres, so if there
-             * is a month without any joiners or banned, it will not appear at all.
-             * Deal with it. - Spine
-             */
             self::$db->prepared_query("
-                SELECT J.Mon,
-                    J.n              AS new,
-                    coalesce(D.n, 0) AS disabled
-                FROM (
-                    SELECT DATE_FORMAT(created,'%Y%m') AS M,
-                        DATE_FORMAT(created, '%b %Y')  AS Mon,
-                        count(*)                       AS n
-                    FROM users_main
-                    GROUP BY M
-                    ORDER BY 1 DESC
-                    LIMIT 1, 12
-                    ) J
-                LEFT JOIN (
-                    SELECT DATE_FORMAT(BanDate, '%Y%m') AS M,
-                        DATE_FORMAT(BanDate, '%b %Y')   AS Mon,
-                        count(*)                        AS n
-                    FROM users_info
-                    GROUP By M
-                    ORDER BY 1 DESC
-                    LIMIT 1, 12
-                ) D USING (M)
-                ORDER BY J.M;
+                WITH RECURSIVE dates AS (
+                    SELECT last_day(now() - INTERVAL 13 MONTH) + INTERVAL 1 DAY AS eom
+                    UNION ALL
+                    SELECT last_day(eom + INTERVAL 1 MONTH)
+                    FROM dates
+                    WHERE last_day(eom + INTERVAL 1 MONTH) < last_day(now())
+                ),
+                unew AS (
+                    SELECT count(*)         AS total,
+                        last_day(u.created) AS eom
+                    FROM users_main u
+                    WHERE last_day(u.created)
+                        BETWEEN last_day(now() - INTERVAL 13 MONTH) AND last_day(now() - INTERVAL 1 MONTH)
+                    GROUP BY eom
+                )
+                SELECT date_format(dates.eom, '%Y-%m') AS Month,
+                    coalesce(unew.total, 0)            AS new,
+                    count(distinct ui.UserID)          AS disabled
+                FROM dates
+                LEFT JOIN unew USING (eom)
+                LEFT JOIN users_info ui ON (last_day(ui.BanDate) = dates.eom)
+                GROUP BY dates.eom
+                ORDER BY dates.eom
             ");
-            $flow = self::$db->to_array('Mon', MYSQLI_ASSOC, false);
+            $flow = self::$db->to_array('Month', MYSQLI_ASSOC, false);
+            foreach ($flow as &$f) {
+                $f['new'] = (int)$f['new'];
+            }
+            unset($f);
             self::$cache->cache_value(self::FLOW, $flow, mktime(0, 0, 0, date('n') + 1, 2)); //Tested: fine for Dec -> Jan
         }
         return $flow;
