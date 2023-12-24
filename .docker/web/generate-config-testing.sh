@@ -31,3 +31,8 @@ grep -q GZPG_PASSWORD "$TARGET" || echo "define('GZPG_PASSWORD', '$POSTGRES_USER
 grep -q CACHE_ID "$TARGET" || echo "define('CACHE_ID', '$MEMCACHED_NAMESPACE');" >> "${TARGET}"
 # sphinx
 grep -q SPHINX_HOST "$TARGET" || echo "define('SPHINX_HOST', '127.0.0.1');" >> "${TARGET}"
+# tracker
+sed -i "s/'DISABLE_TRACKER', true/'DISABLE_TRACKER', false/" "${TARGET}"
+grep -q TRACKER_HOST "$TARGET" || echo "define('TRACKER_HOST', '127.0.0.1');" >> "${TARGET}"
+grep -q TRACKER_NAME "$TARGET" || echo "define('TRACKER_NAME', 'localhost');" >> "${TARGET}"
+grep -q TRACKER_PORT "$TARGET" || echo "define('TRACKER_PORT', '6666');" >> "${TARGET}"
