@@ -3,7 +3,7 @@ FROM debian:bullseye-slim
 ENV DEB_RELEASE bullseye
 ENV DEBIAN_FRONTEND noninteractive
 ENV PHP_VER 8.2
-ENV NODE_VERSION 16
+ENV NODE_VERSION 20
 
 WORKDIR /var/www
 

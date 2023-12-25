@@ -1,4 +1,10 @@
-let mix = require('laravel-mix');
+const crypto = require('node:crypto');
+const mix = require('laravel-mix');
+
+// TODO: shim to override md4 with a supported crypto algorithm that does not crash out node, until
+// we upgrade to a newer version of webpack that defaults to using sha256.
+const crypto_orig_createHash = crypto.createHash;
+crypto.createHash = (algorithm) => crypto_orig_createHash(algorithm == "md4" ? "sha256" : algorithm);
 
 let sassopts = {
     sassOptions: {

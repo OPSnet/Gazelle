@@ -7,7 +7,7 @@ needs. Gazelle is written in PHP, Twig, JavaScript, and MySQL.
 ## Gazelle Runtime Dependencies
 * [PHP 8.2.6+](https://www.php.net/) (required)
 * [Nginx](http://wiki.nginx.org/Main) (required)
-* [NodeJS 12+](https://nodejs.org/en/) (required)
+* [NodeJS 20+](https://nodejs.org/en/) (required)
 * [Memcached](http://memcached.org/) (required)
 * [Sphinx 2.2 or newer](http://sphinxsearch.com/) (required)
 * [ocelot](https://github.com/OPSnet/Ocelot) (optional)
