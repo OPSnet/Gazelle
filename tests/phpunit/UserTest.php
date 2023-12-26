@@ -293,6 +293,9 @@ class UserTest extends TestCase {
 
         $manager->promote();
         $this->assertEquals('Member', $this->user->flush()->userclassName(), 'user-promoted-to-member');
+
+        $this->user->setField('PermissionId', SYSOP)->modify();
+        $this->assertNull($this->user->nextClass($manager), 'user-next-class-is-null');
     }
 
     public function testStylesheet(): void {

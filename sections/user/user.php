@@ -126,7 +126,7 @@ if ($OwnProfile || $Viewer->permitted('users_mod')) {
         <div class="box box_info box_userinfo_nextclass">
             <div class="head colhead_dark"><a href="wiki.php?action=article&amp;name=userclasses">Next Class</a></div>
             <ul class="stats nobullet">
-                <li>Class: <?= $nextClass[ 'class']?></li>
+                <li>Class: <?= $nextClass['class']?></li>
 <?php   foreach ($nextClass['goal'] as $label => $require) { ?>
                 <li><?= $label ?>: <?= $require['current'] ?> / <?= $require['target'] ?> (<?= $require['percent'] ?>)</li>
 <?php   } ?>

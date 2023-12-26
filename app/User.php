@@ -1840,7 +1840,7 @@ class User extends BaseObject {
     }
 
     public function nextClass(Manager\User $manager): ?array {
-        $criteria = $manager->promotionCriteria()[$this->primaryClass()];
+        $criteria = $manager->promotionCriteria()[$this->primaryClass()] ?? null;
         if (!$criteria) {
             return null;
         }
