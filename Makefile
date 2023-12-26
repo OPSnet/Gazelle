@@ -18,9 +18,10 @@ help:
 	echo '  lint-css           - lint (style check) the CSS'
 	echo '  lint-php           - lint (style check) the PHP'
 	echo '  lint-twig          - lint (style check) the Twig templates'
-	echo '  mysqldump          - dump mysql database from docker to misc/gazelle.sql'
+	echo '  mysqldump          - dump mysql database from docker to misc/mysql-dump.sql'
 	echo '  ocelot-reload-conf - signal Ocelot to reload its configuration'
 	echo '  ocelot-reload-db   - signal Ocelot to reload from database'
+	echo '  pgdump             - dump postgresql database from docker to misc/postgresql-dump.sql'
 	echo '  phpstan-analyse    - run phpstan over the code'
 	echo '  phpstan-baseline   - generate a new phpstan baseline'
 	echo '  test               - run all linters and unit test suite'
@@ -65,17 +66,15 @@ lint-php:
 lint-twig:
 	bin/twig-parse $(find templates -type f)
 
+# defaults file must be chmod 0400 and look something like:
+#
+# [mysqldump]
+# user=gazelle
+# password=password
+
 .PHONY: mysqldump
 mysqldump:
-	mysqldump -h 127.0.0.1 -P 36000 -u gazelle --password=password -d gazelle --skip-add-drop-table --skip-add-locks --single-transaction | sed 's/ AUTO_INCREMENT=[0-9]*//g' > misc/gazelle.sql
-
-.PHONY: phpstan-analyse
-phpstan-analyse:
-	vendor/bin/phpstan analyse --memory-limit=1024M --configuration=misc/phpstan.neon
-
-.PHONY: phpstan-baseline
-phpstan-baseline:
-	vendor/bin/phpstan analyse --memory-limit=1024M --configuration=misc/phpstan.neon --generate-baseline misc/phpstan-baseline.neon
+	docker exec $(shell docker ps|awk '/percona:/ {print $$1}') mysqldump --defaults-file=~/mysqldump.cnf gazelle --single-transaction > misc/mysql-dump.sql
 
 .PHONY: ocelot-reload-conf
 ocelot-reload-conf:
@@ -84,6 +83,18 @@ ocelot-reload-conf:
 .PHONY: ocelot-reload-db
 ocelot-reload-db:
 	pkill -USR1 ocelot
+
+.PHONY: pgdump
+pgdump:
+	docker exec -e POSTGRES_PASSWORD=nyalapw $(shell docker ps|awk '/postgres:/ {print $$1}') pg_dumpall -U nyala > misc/postgresql-dump.sql
+
+.PHONY: phpstan-analyse
+phpstan-analyse:
+	vendor/bin/phpstan analyse --memory-limit=1024M --configuration=misc/phpstan.neon
+
+.PHONY: phpstan-baseline
+phpstan-baseline:
+	vendor/bin/phpstan analyse --memory-limit=1024M --configuration=misc/phpstan.neon --generate-baseline misc/phpstan-baseline.neon
 
 .PHONY: rector
 rector:

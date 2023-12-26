@@ -20,6 +20,8 @@
 __MACOSX/
 
 /cache
+/misc/mysql-dump.sql
+/misc/postgresql-dump.sql
 /misc/phinx/seeded.txt
 /node_modules
 /public/static/font/
