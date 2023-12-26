@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0d3873116e8a50948c5c053672e4f36a",
+    "content-hash": "2906c2c40f52f8e03dee3a6d49b45a11",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -1121,30 +1121,30 @@
         },
         {
             "name": "orpheusnet/logchecker",
-            "version": "0.11.1",
+            "version": "0.12.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/OPSnet/Logchecker.git",
-                "reference": "e71120ed6e39b69b69d6e30e0d2d4badef8fd1be"
+                "reference": "96f1dfbf0b7e8fbb14bbae7b81938900aa13e4b1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/OPSnet/Logchecker/zipball/e71120ed6e39b69b69d6e30e0d2d4badef8fd1be",
-                "reference": "e71120ed6e39b69b69d6e30e0d2d4badef8fd1be",
+                "url": "https://api.github.com/repos/OPSnet/Logchecker/zipball/96f1dfbf0b7e8fbb14bbae7b81938900aa13e4b1",
+                "reference": "96f1dfbf0b7e8fbb14bbae7b81938900aa13e4b1",
                 "shasum": ""
             },
             "require": {
                 "ext-mbstring": "*",
-                "php": ">=7.2",
+                "php": ">=7.3",
                 "symfony/console": "^3.4 | ^4.0 | ^5.0",
                 "symfony/process": "^3.4 | ^4.0 | ^5.0",
                 "symfony/yaml": "^3.4 | ^4.0 | ^5.0"
             },
             "require-dev": {
                 "brainmaestro/composer-git-hooks": "^2.8",
-                "phpstan/phpstan": "^0.12",
-                "phpunit/phpunit": "^8.5",
-                "squizlabs/php_codesniffer": "^3.5"
+                "phpstan/phpstan": "^1.10",
+                "phpunit/phpunit": "^9.6",
+                "squizlabs/php_codesniffer": "^3.8.0"
             },
             "bin": [
                 "bin/logchecker"
@@ -1176,9 +1176,9 @@
             "description": "Logchecker for validating logs generated from supported ripping programs (like EAC and XLD)",
             "support": {
                 "issues": "https://github.com/OPSnet/Logchecker/issues",
-                "source": "https://github.com/OPSnet/Logchecker/tree/0.11.1"
+                "source": "https://github.com/OPSnet/Logchecker/tree/0.12.0"
             },
-            "time": "2023-09-03T20:03:09+00:00"
+            "time": "2023-12-26T00:13:05+00:00"
         },
         {
             "name": "psr/cache",
