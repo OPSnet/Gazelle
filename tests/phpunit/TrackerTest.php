@@ -1,6 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+use Gazelle\Enum\DownloadStatus;
 use Gazelle\Enum\LeechType;
 
 require_once(__DIR__ . '/../../lib/bootstrap.php');
@@ -103,5 +104,32 @@ class TrackerTest extends TestCase {
 
         $this->assertTrue($tracker->removeWhitelist($peer), 'tracker-whitelist-remove-1');
         $this->assertTrue($tracker->removeWhitelist($peer . 'Z'), 'tracker-whitelist-remove-2');
+    }
+
+    public function testTrackerExpireFreeleech(): void {
+        $tracker = new \Gazelle\Tracker;
+        $this->user = Helper::makeUser('trkfree.' . randomString(10), 'tracker');
+        $this->torrent = Helper::makeTorrentMusic(
+            Helper::makeTGroupMusic(
+                name:       'tracker ' . randomString(10),
+                artistName: [[ARTIST_MAIN], ['Tracker Girl ' . randomString(12)]],
+                tagName:    ['trap'],
+                user:       $this->user,
+            ),
+            user:  $this->user,
+            title: 'tracker ' . randomString(10),
+        );
+
+        $downloader = Helper::makeUser('trkdown.' . randomString(10), 'tracker');
+        $downloader->updateTokens(10);
+        $download = new Gazelle\Download($this->torrent, new \Gazelle\User\UserclassRateLimit($downloader), true);
+        $this->assertEquals(DownloadStatus::ok, $download->status(), 'tracker-downloader-enough-tokens');
+
+        $userId    = $downloader->id();
+        $torrentId = $this->torrent->id();
+        $fakeId    = $torrentId + 1;
+
+        $this->assertEquals(1, $tracker->expireFreeleechTokens("$userId:$torrentId,$userId:$fakeId"), 'tracker-expire-tokens');
+        $downloader->remove();
     }
 }

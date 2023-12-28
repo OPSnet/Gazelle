@@ -89,6 +89,63 @@ class Tracker extends Base {
         ]);
     }
 
+    public function expireFreeleechTokens(string $payload): int {
+        $clear = [];
+        $expire = [];
+        foreach (explode(',', $payload) as $item) {
+            [$userId, $torrentId] = array_map('intval', explode(':', $item));
+            if ($userId && $torrentId) {
+                $expire[] = [$userId, $torrentId];
+                $clear[$userId] = true;
+            }
+        }
+
+        if (!$expire) {
+            return 0;
+        }
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
+            CREATE TEMPORARY TABLE expire_freeleech (
+                UserID int NOT NULL,
+                TorrentID int NOT NULL,
+                PRIMARY KEY (UserID, TorrentID)
+            )
+        ");
+        self::$db->prepared_query("
+            INSERT IGNORE INTO expire_freeleech (UserID, TorrentID) VALUES
+            " . placeholders($expire, '(?, ?)')
+            , ...array_merge(...$expire)
+        );
+        self::$db->prepared_query("
+            UPDATE users_freeleeches uf
+            INNER JOIN expire_freeleech ef USING (UserID, TorrentID)
+            SET
+                Expired = true
+            WHERE
+                Expired = false
+        ");
+        $affected = self::$db->affected_rows();
+        self::$db->prepared_query("
+            DROP TABLE IF EXISTS expire_freeleech
+        ");
+        self::$db->commit();
+        if (DEBUG_TRACKER_TOKEN_EXPIRE !== false) {
+            $filename = (string)DEBUG_TRACKER_TOKEN_EXPIRE; // phpstan, grrr
+            $out = fopen($filename, 'a');
+            if ($out !== false) {
+                fprintf($out, "%s u=%d t=%d s=%s\n",
+                    date('Y-m-d H:i:s'),
+                    count($clear),
+                    count($expire),
+                    $payload,
+                );
+                fclose($out);
+            }
+        }
+        self::$cache->delete_multi(array_map(fn($id) => "users_tokens_$id", array_keys($clear)));
+        return $affected;
+    }
+
     /**
      * Send a GET request over a socket directly to the tracker
      * For example, Tracker::update_tracker('change_passkey', array('oldpasskey' => OLD_PASSKEY, 'newpasskey' => NEW_PASSKEY)) will send the request:

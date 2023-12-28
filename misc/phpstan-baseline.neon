@@ -556,11 +556,6 @@ parameters:
 			path: ../sections/tools/managers/forum_transitions_list.php
 
 		-
-			message: "#^Variable \\$Tokens in empty\\(\\) always exists and is not falsy\\.$#"
-			count: 1
-			path: ../sections/tools/managers/ocelot.php
-
-		-
 			message: "#^Function type_list\\(\\) has parameter \\$Types with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: ../sections/tools/managers/referral_accounts.php

@@ -254,6 +254,11 @@ defined('TRACKER_REPORTKEY') or define('TRACKER_REPORTKEY', '0000000000000000000
 defined('ANNOUNCE_HTTP_URL') or define('ANNOUNCE_HTTP_URL', 'http://' . TRACKER_NAME);
 defined('ANNOUNCE_HTTPS_URL') or define('ANNOUNCE_HTTPS_URL', 'https://' . TRACKER_NAME);
 
+// Define this to be a file (writable by the web server user) to trace the
+// expiry of freeleech tokens by Ocelot. Note that if this is set in
+// lib/override.config.php, the default TMP symbol has not yet been defined.
+defined('DEBUG_TRACKER_TOKEN_EXPIRE') or define('DEBUG_TRACKER_TOKEN_EXPIRE', false);
+
 // ------------------------------------------------------------------------
 // Memcached settings
 
