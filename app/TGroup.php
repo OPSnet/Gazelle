@@ -294,8 +294,8 @@ class TGroup extends BaseObject {
         );
     }
 
-    public function artistName(): string {
-        return $this->artistRole()->text();
+    public function artistName(): ?string {
+        return $this->artistRole()?->text();
     }
 
     public function artistRole(): ?ArtistRole\TGroup {
@@ -306,6 +306,10 @@ class TGroup extends BaseObject {
             $this->artistRole = new ArtistRole\TGroup($this->id, new Manager\Artist);
         }
         return $this->artistRole;
+    }
+
+    public function hasArtistRole(): bool {
+        return $this->artistRole() instanceof ArtistRole\TGroup;
     }
 
     public function catalogueNumber(): ?string {

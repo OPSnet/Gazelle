@@ -29,6 +29,7 @@ class CategoryTest extends TestCase {
             name: 'phpunit category change ' . randomString(6),
             user: $user,
         );
+        $this->assertFalse($tgroup->hasArtistRole(), 'tgroup-cat-non-music');
         $torrentList = array_map(fn($info) =>
             Helper::makeTorrentEBook(
                 tgroup:      $tgroup,
@@ -56,6 +57,7 @@ class CategoryTest extends TestCase {
             user:        $user,
         );
         $this->assertInstanceOf(Gazelle\TGroup::class, $new, 'cat-change-to-music');
+        $this->assertTrue($new->hasArtistRole(), 'tgroup-cat-is-music');
         $artist = (new Gazelle\Manager\Artist)->findByName($artistName);
         $this->assertEquals($artistName, $artist->name(), 'cat-new-artist');
         $this->assertEquals(

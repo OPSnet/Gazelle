@@ -49,7 +49,7 @@ abstract class TorrentAbstract extends BaseObject {
 
     public function name(): string {
         $tgroup = $this->group();
-        return $tgroup->categoryName() === 'Music'
+        return $tgroup->hasArtistRole()
             ? $tgroup->artistName() . " – " . $tgroup->name()
             : $tgroup->name();
     }
