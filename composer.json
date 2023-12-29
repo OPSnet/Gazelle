@@ -43,10 +43,10 @@
     "whichbrowser/parser": "^2.1.7"
   },
   "require-dev": {
-    "phpstan/phpstan": "^1.10.3",
-    "phpunit/php-code-coverage": "^9.2.25",
-    "phpunit/phpunit": "^9.6.3",
-    "rector/rector": "^0.15.18",
+    "phpstan/phpstan": "^1.10.50",
+    "phpunit/php-code-coverage": "^9.2.30",
+    "phpunit/phpunit": "^9.6.15",
+    "rector/rector": "^0.18.13",
     "squizlabs/php_codesniffer": "^3"
   },
   "scripts": {

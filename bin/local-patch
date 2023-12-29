@@ -2,8 +2,7 @@
 
 set -euo pipefail
 
-ROOT="$(dirname $0)"
-
-patch -p1 < "$ROOT"/../misc/patch/ecc.patch
-patch -p1 < "$ROOT"/../misc/patch/monerophp.patch
-patch -p1 < "$ROOT"/../misc/patch/whichbrowser.patch
+for patch in "$(dirname $0)"/../misc/patch/*.patch 
+do
+    patch -p1 < $patch
+done
