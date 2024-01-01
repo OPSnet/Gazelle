@@ -89,6 +89,10 @@ class Request extends BaseObject {
         return new ArtistRole\Request($this->id, new Manager\Artist);
     }
 
+    public function hasArtistRole(): bool {
+        return $this->artistRole() instanceof ArtistRole\Request;
+    }
+
     public function info(): array {
         if (isset($this->info) && !empty($this->info)) {
             return $this->info;

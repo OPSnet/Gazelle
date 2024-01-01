@@ -11,7 +11,7 @@ class TGroup extends \Gazelle\Json {
 
     public function tgroupPayload(): array {
         $tgroup = $this->tgroup;
-        if ($tgroup->categoryName() != 'Music') {
+        if (!$tgroup->hasArtistRole()) {
             $musicInfo = null;
         } else {
             $role = $tgroup->artistRole()->idList();

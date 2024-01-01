@@ -64,7 +64,7 @@ class Collage extends \Gazelle\Json {
                 'tagList'         => array_values($tgroup->tagNameList()),
                 'releaseType'     => $tgroup->releaseType(),
                 'wikiImage'       => $tgroup->image(),
-                'musicInfo'       => $tgroup->categoryName() == 'Music' ? $tgroup->artistRole()->roleListByType() : null,
+                'musicInfo'       => $tgroup->artistRole()?->roleListByType(),
                 'torrents'        => $torrentList,
             ];
         }

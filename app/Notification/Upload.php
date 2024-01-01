@@ -66,7 +66,7 @@ class Upload extends \Gazelle\Base {
 
         // add artists if applicable
         // [main => [1, 2, 3], guest => [4, 5, 6], ...]
-        if ($tgroup->categoryName() == 'Music') {
+        if ($tgroup->hasArtistRole()) {
             $this->addDimension('ReleaseTypes', $tgroup->releaseTypeName());
 
             $mainName  = [];

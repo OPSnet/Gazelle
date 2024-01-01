@@ -401,7 +401,7 @@ class TGroup extends \Gazelle\BaseManager {
             recordLabel:     null,
             catalogueNumber: null,
         );
-        if ($new->categoryName() === 'Music') {
+        if ($new->hasArtistRole()) {
             $new->addArtists([ARTIST_MAIN], [$artistName], $user, $artistMan, $logger);
         }
         $torrent->setField('GroupID', $new->id())->modify();

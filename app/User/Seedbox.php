@@ -157,7 +157,7 @@ class Seedbox extends \Gazelle\BaseUser {
                 'id'       => $tid,
                 'folder'   => $torrent->path(),
                 'sortname' => $tgroup->name(),
-                'artist'   => $tgroup->categoryName() == 'Music'
+                'artist'   => $tgroup->hasArtistRole()
                     ? $tgroup->artistRole()->link()
                     : '&mdash;',
                 'name'     => $torrent->fullLink(),

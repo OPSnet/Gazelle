@@ -26,9 +26,7 @@ class Requests extends \Gazelle\Json {
                 'requestorName' => $user->username(),
                 'fillerName'    => (string)$filler?->username(),
                 'bounty'        => $request->bountyTotal(),
-                'artists'       => $request->categoryName() === 'Music'
-                    ? array_values($request->artistRole()->idList())
-                    : [],
+                'artists'       => array_values($request->artistRole()?->idList() ?? []),
             ];
         }
         return [

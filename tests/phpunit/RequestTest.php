@@ -126,6 +126,8 @@ class RequestTest extends TestCase {
         $this->assertEquals('Unitest Artists', $this->request->recordLabel(), 'request-rec-label');
         $this->assertEquals(1, $this->request->categoryId(), 'request-cat-id');
         $this->assertEquals('Music', $this->request->categoryName(), 'request-cat-name');
+        $this->assertTrue($this->request->hasArtistRole(), 'request-has-artist-role');
+        $this->assertInstanceOf(\Gazelle\ArtistRole\Request::class, $this->request->artistRole(), 'request-artist-role');
         $this->assertEquals(['jazz', 'vaporwave'], $this->request->tagNameList(), 'request-tag-list');
         $this->assertEquals(
             '<a href="requests.php?tags=jazz">jazz</a> <a href="requests.php?tags=vaporwave">vaporwave</a>',
