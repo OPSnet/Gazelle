@@ -31,6 +31,7 @@ class ASN extends \Gazelle\Base {
             return [];
         }
         $ipList = array_map(fn ($ip) => $ip === '' ? '0.0.0.0' : $ip, $ipList);
+        $ipList = array_map(fn ($ip) => str_contains($ip, '%3A') ? '0.0.0.0' : $ip, $ipList); // filter truncated IPv6 addresses from ocelot
         $result = $this->pg->all("
             SELECT lu.ip,
                 an.network,
