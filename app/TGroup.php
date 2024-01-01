@@ -9,7 +9,7 @@ class TGroup extends BaseObject {
     final const tableName            = 'torrents_group';
     final const CACHE_KEY            = 'tg_%d';
     final const CACHE_TLIST_KEY      = 'tlist_%d';
-    final const CACHE_COVERART_KEY   = 'tg_cover_%d';
+    final const CACHE_COVERART_KEY   = 'tg_cov_%d';
     final const USER_RECENT_UPLOAD   = 'u_recent_up_%d';
     final const CACHE_REQUEST_TGROUP = 'req_tg_%d';
 
@@ -513,9 +513,7 @@ class TGroup extends BaseObject {
 
     public function removeCoverArt(int $coverId, User $user, Log $logger): int {
         [$image, $summary] = self::$db->row("
-            SELECT Image, Summary
-            FROM cover_art
-            WHERE ID = ?
+            SELECT Image, Summary FROM cover_art WHERE ID = ?
             ", $coverId
         );
         if (is_null($image)) {
@@ -533,12 +531,16 @@ class TGroup extends BaseObject {
         return $affected;
     }
 
-    public function coverArt(Manager\User $userMan): array {
+    public function coverArt(): array {
         $key = sprintf(self::CACHE_COVERART_KEY, $this->id);
         $list = self::$cache->get_value($key);
         if ($list === false) {
             self::$db->prepared_query("
-                SELECT ID, Image, Summary, UserID, Time
+                SELECT ID   AS id,
+                    Image   AS image,
+                    Summary AS summary,
+                    UserID  AS user_id,
+                    Time    AS created
                 FROM cover_art
                 WHERE GroupID = ?
                 ORDER BY Time ASC
@@ -546,10 +548,6 @@ class TGroup extends BaseObject {
             );
             $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
             self::$cache->cache_value($key, $list, 0);
-        }
-        foreach ($list as &$cover) {
-            $user = $userMan->findById($cover['UserID']);
-            $cover['userlink'] = $user ? $user->link() : 'System';
         }
         return $list;
     }

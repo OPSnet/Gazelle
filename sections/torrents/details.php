@@ -37,8 +37,6 @@ $categoryId     = $tgroup->categoryId();
 $musicRelease   = $tgroup->categoryName() == 'Music';
 $tagList        = $tgroup->tagList();
 $year           = $tgroup->year();
-$title          = $tgroup->text();
-$coverArt       = $tgroup->coverArt($userMan);
 $torrentList    = $tgroup->torrentIdList();
 $removed        = $torrentList ? [] : $tgroup->deletedMasteringList();
 
@@ -79,133 +77,14 @@ $section = [
     ['id' => ARTIST_ARRANGER,  'name' => 'arranger',  'class' => 'artists_arranger',   'role' => 'Arranger',  'title' => 'Arranged by:'],
 ];
 
-View::show_header($title, ['js' => 'browse,comments,torrent,bbcode,cover_art,subscriptions,voting']);
-?>
-<div class="thin">
-    <div class="header">
-        <h2><?= $tgroup->link() ?></h2>
-        <div class="linkbox">
-<?php if ($Viewer->permitted('site_edit_wiki')) { ?>
-            <a href="<?= $tgroup->url() ?>&amp;action=editgroup" class="brackets">Edit description</a>
-<?php } ?>
-            <a href="<?= $tgroup->url() ?>&amp;action=editrequest" class="brackets">Request an Edit</a>
-<?php if ($RevisionID && $Viewer->permitted('site_edit_wiki')) { ?>
-            <a href="<?= $tgroup->url() ?>&amp;action=revert&amp;revisionid=<?=$RevisionID ?>&amp;auth=<?=$Viewer->auth()?>" class="brackets">Revert to this revision</a>
-<?php
-}
-echo $Twig->render('bookmark/action.twig', [
-    'class'         => 'torrent',
-    'id'            => $tgroup->id(),
+echo $Twig->render('torrent/detail-header.twig', [
     'is_bookmarked' => (new Gazelle\User\Bookmark($Viewer))->isTorrentBookmarked($tgroup->id()),
+    'revision_id'   => $RevisionID,
+    'tgroup'        => $tgroup,
+    'viewer'        => $Viewer,
 ]);
 ?>
-            <a href="#" id="subscribelink_torrents<?=$tgroupId?>" class="brackets" onclick="SubscribeComments('torrents', <?=$tgroupId?>); return false;"><?=
-                $isSubscribed ? 'Unsubscribe' : 'Subscribe'?></a>
-<?php if ($musicRelease) { ?>
-            <a href="upload.php?groupid=<?=$tgroupId?>" class="brackets">Add format</a>
-<?php
-}
-if ($Viewer->permitted('site_submit_requests')) {
-?>
-            <a href="requests.php?action=new&amp;groupid=<?=$tgroupId?>" class="brackets">Request format</a>
-<?php } ?>
-            <a href="<?= $tgroup->url() ?>&amp;action=history" class="brackets">View history</a>
-            <a href="<?= $tgroup->url() ?>&amp;action=grouplog" class="brackets">View log</a>
-        </div>
-    </div>
-    <div class="sidebar">
-        <div class="box box_image box_image_albumart box_albumart"><!-- .box_albumart deprecated -->
-            <div class="head">
-                <strong><?= count($coverArt) > 0 ? 'Covers (' . (count($coverArt) + 1) . ')' : 'Cover' ?></strong>
-<?php if (!$coverArt) { ?>
-                <span>
-                    <a class="brackets show_all_covers" href="#">Hide</a>
-                </span>
-<?php
-} elseif ($Viewer->option('ShowExtraCovers')) {
-    for ($Index = 0, $last = count($coverArt); $Index <= $last; $Index++) {
-?>
-                <span id="cover_controls_<?=($Index)?>"<?=($Index > 0 ? ' style="display: none;"' : '')?>>
-<?php   if ($Index == count($coverArt)) { ?>
-                        <a class="brackets prev_cover" data-gazelle-prev-cover="<?=($Index - 1)?>" href="#">Prev</a>
-                        <a class="brackets show_all_covers" href="#">Show all</a>
-                        <span class="brackets next_cover">Next</span>
-<?php   } elseif ($Index > 0) { ?>
-                        <a class="brackets prev_cover" data-gazelle-prev-cover="<?=($Index - 1)?>" href="#">Prev</a>
-                        <a class="brackets show_all_covers" href="#">Show all</a>
-                        <a class="brackets next_cover" data-gazelle-next-cover="<?=($Index + 1)?>" href="#">Next</a>
-<?php   } else { ?>
-                        <span class="brackets prev_cover">Prev</span>
-                        <a class="brackets show_all_covers" href="#">Show all</a>
-                        <a class="brackets next_cover" data-gazelle-next-cover="1" href="#">Next</a>
-<?php   } ?>
-                </span>
-<?php
-    }
-}
-$Index = 0;
-?>
-            </div>
-<div id="covers">
-<div id="cover_div_<?=$Index?>" class="pad">
-<?php
-$image = html_escape(image_cache_encode($tgroup->cover()));
-?>
-            <p align="center"><img width="100%" src="<?= $image ?>" alt="cover image"
-                                   onclick="lightbox.init('<?= $image ?>', 220);"
-                                   data-origin-src="<?= html_escape($tgroup->cover()) ?>" /></p>
-<?php
-$Index++;
-?>
-</div>
-<?php foreach ($coverArt as $c) { ?>
-                    <div id="cover_div_<?=$Index?>" class="pad"<?= $Viewer->option('ShowExtraCovers') ? '' : ' style="display: none;"' ?>>
-                <p align="center">
-<?php
-    $image = html_escape(image_cache_encode($c['Image']));
-    if ($Viewer->option('ShowExtraCovers')) {
-        $Src = 'src="' . $image . '"';
-    } else {
-        $Src = 'src="" data-gazelle-temp-src="' . $image . '"';
-    }
-?>
-                    <img id="cover_<?=$Index?>" width="100%" <?=$Src?> alt="<?=$c['Summary']?>" onclick="lightbox.init('<?= $image ?>', 220);" data-origin-src="<?= html_escape($c['Image']) ?>" />
-                </p>
-                <ul class="stats nobullet">
-                    <li><?= $c['Summary'] ?>
-<?php if ($Viewer->permitted('users_mod')) { ?>
-                        added by <?= $c['userlink'] ?>
-<?php } ?>
-                        <span class="remove remove_cover_art"><a href="#" onclick="if (confirm('Do not delete valid alternative cover art. Are you sure you want to delete this cover art?') == true) { ajax.get('ajax.php?action=torrent_remove_cover_art&amp;auth=<?=
-                            $Viewer->auth() ?>&amp;id=<?= $c['ID'] ?>&amp;groupid=<?= $tgroupId ?>'); this.parentNode.parentNode.parentNode.style.display = 'none'; this.parentNode.parentNode.parentNode.previousElementSibling.style.display = 'none'; } else { return false; }" class="brackets tooltip" title="Remove image">X</a></span>
-                    </li>
-                </ul>
-            </div>
-<?php
-    $Index++;
-}
-?>
-</div>
 
-<?php if ($Viewer->permitted('site_edit_wiki') && $tgroup->image() != '') { ?>
-        <div id="add_cover_div">
-            <div style="padding: 10px;">
-                <span style="float: right;" class="additional_add_artists">
-                    <a onclick="addCoverField(); return false;" href="#" class="brackets">Add alternate cover</a>
-                </span>
-            </div>
-            <div class="body">
-                <form class="add_form" name="covers" id="add_covers_form" action="torrents.php" method="post">
-                    <div id="add_cover">
-                        <input type="hidden" name="action" value="add_cover_art" />
-                        <input type="hidden" name="auth" value="<?=$Viewer->auth() ?>" />
-                        <input type="hidden" name="groupid" value="<?=$tgroupId?>" />
-                    </div>
-                </form>
-            </div>
-        </div>
-<?php } ?>
-    </div>
 <?php
 if ($musicRelease) {
     $role = $tgroup->artistRole()->roleList();
@@ -473,7 +352,7 @@ if (!$torrentList) {
             'torrent' => $torrent,
             'viewer'  => $Viewer,
             'extra'   => [
-                "<a href=\"ajax.php?action=torrent&amp;id=$TorrentID\" download=\"" . html_escape($title)
+                "<a href=\"ajax.php?action=torrent&amp;id=$TorrentID\" download=\"" . html_escape($tgroup->text())
                     . " [$TorrentID] [orpheus.network].json\" class=\"tooltip\" title=\"Download JSON\">JS</a>",
             ],
         ]);

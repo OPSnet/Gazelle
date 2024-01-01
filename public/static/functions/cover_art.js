@@ -2,7 +2,7 @@
     var show_all = false;
     var current;
     document.addEventListener('DOMContentLoaded', function() {
-        show_all = $(".show_all_covers").text() == "Hide";
+        show_all = $(".show_all_covers").text() == "Show one";
         $(".next_cover").click(function(e) {
             e.preventDefault();
             var next = $(this).data("gazelle-next-cover");
@@ -29,7 +29,7 @@
             if (!show_all) {
                 current = $("#covers div:visible").attr("id");
                 show_all = true;
-                $(this).text("Hide");
+                $(this).text("Show one");
                 $("#covers img").each(function() {
                     $(this).attr("src", $(this).data("gazelle-temp-src"));
                 });
