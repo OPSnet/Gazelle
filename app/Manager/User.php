@@ -6,15 +6,15 @@ use Gazelle\Enum\UserStatus;
 use Gazelle\Util\Time;
 
 class User extends \Gazelle\BaseManager {
-    protected const CACHE_STAFF = 'pm_staff_list';
-    protected const ID_KEY = 'zz_u_%d';
-    protected const USERNAME_KEY = 'zz_unam_%s';
-    protected const USERFLOW_KEY = 'uflow';
-
+    final public const ID_KEY             = 'zz_u_%d';
+    final public const USERNAME_KEY       = 'zz_unam_%s';
     final public const DISABLE_MANUAL     = 1;
     final public const DISABLE_TOR        = 2;
     final public const DISABLE_INACTIVITY = 3;
     final public const DISABLE_TREEBAN    = 4;
+
+    final protected const CACHE_STAFF  = 'pm_staff_list';
+    final protected const USERFLOW_KEY = 'uflow';
 
     /**
      * Get a User object based on a magic field (id or @name)

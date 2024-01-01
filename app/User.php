@@ -970,14 +970,20 @@ class User extends BaseObject {
     }
 
     public function remove(): int {
+        $id       = $this->id;
+        $username = $this->username();
         // Many, but not all, of the associated user tables will drop their entries via foreign key cascades.
         // But some won't. If this call fails, you will need to decide what to do about the tables in question.
         self::$db->prepared_query("
             DELETE FROM users_main WHERE ID = ?
-            ", $this->id
+            ", $id
         );
         $affected = self::$db->affected_rows();
         $this->flush();
+        self::$cache->delete_multi([
+            sprintf(Manager\User::ID_KEY, $id),
+            sprintf(Manager\User::USERNAME_KEY, $username),
+        ]);
         return $affected;
     }
 

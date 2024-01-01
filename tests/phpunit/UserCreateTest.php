@@ -45,7 +45,19 @@ class UserCreateTest extends TestCase {
         $this->assertEquals(SITE_URL . "/$location", $this->user->publicLocation(), 'user-public-location');
         $this->assertEquals($location, $this->user->url(), 'user-url');
         $this->assertEquals(SITE_URL . "/$location", $this->user->publicUrl(), 'user-public-url');
+    }
 
+    public function testLogin(): void {
+        $_SERVER['REMOTE_ADDR']     = '127.0.0.100';
+        $_SERVER['HTTP_USER_AGENT'] = 'phpunit';
+
+        $this->user = (new \Gazelle\UserCreator)
+            ->setUsername('phpunit.' . randomString(10))
+            ->setEmail('email@example.com')
+            ->setPassword('password')
+            ->setIpaddr($_SERVER['REMOTE_ADDR'])
+            ->setAdminComment('phpunit test login')
+            ->create();
         $login = new Gazelle\Login;
         $watch = new Gazelle\LoginWatch($_SERVER['REMOTE_ADDR']);
         $watch->clearAttempts();
@@ -54,14 +66,14 @@ class UserCreateTest extends TestCase {
         $this->assertNull($result, 'user-create-login-bad-pw-null');
         $this->assertEquals(\Gazelle\Login::ERR_CREDENTIALS, $login->error(), 'user-create-login-bad-pw-error');
 
-        $result = $login->login($this->user->username(), $password, $watch);
+        $result = $login->login($this->user->username(), 'password', $watch);
         $this->assertNull($result, 'user-create-login-unconfirmed-null');
         $this->assertEquals(\Gazelle\Login::ERR_UNCONFIRMED, $login->error(), 'user-create-login-unconfirmed-error');
 
         $this->assertEquals(2, $watch->nrAttempts(), 'user-create-two-login-attempts');
         $this->user->setField('Enabled', '2')->modify();
 
-        $enabledUser = $login->login($this->user->username(), $password, $watch);
+        $enabledUser = $login->login($this->user->username(), 'password', $watch);
         $this->assertInstanceOf(\Gazelle\User::class, $enabledUser, 'user-create-login-success');
         $this->assertEquals(0, $watch->nrAttempts(), 'user-create-two-login-cleared');
         $this->assertEquals(0, $watch->nrBans(), 'user-create-two-login-banned');

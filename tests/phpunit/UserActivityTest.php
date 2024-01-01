@@ -75,7 +75,6 @@ class UserActivityTest extends TestCase {
         $this->assertEquals($blog->url(), $alertBlog->notificationUrl(), 'alert-blog-url-is-blog');
 
         $this->assertEquals(1, $blog->remove(), 'blog-remove');
-        $this->userList['user']->remove();
     }
 
     public function testGlobal(): void {

@@ -17,15 +17,17 @@ class UserTest extends TestCase {
     }
 
     public function tearDown(): void {
-        \Gazelle\DB::DB()->prepared_query("
-            DELETE FROM user_read_forum WHERE user_id = ?
-            ", $this->user->id()
-        );
-        \Gazelle\DB::DB()->prepared_query("
-            DELETE FROM users_stats_daily WHERE UserID = ?
-            ", $this->user->id()
-        );
-        $this->user->remove();
+        if (isset($this->user)) {
+            \Gazelle\DB::DB()->prepared_query("
+                DELETE FROM user_read_forum WHERE user_id = ?
+                ", $this->user->id()
+            );
+            \Gazelle\DB::DB()->prepared_query("
+                DELETE FROM users_stats_daily WHERE UserID = ?
+                ", $this->user->id()
+            );
+            $this->user->remove();
+        }
     }
 
     public function modifyAvatarRender(AvatarDisplay $display, AvatarSynthetic $synthetic): int {
@@ -58,6 +60,13 @@ class UserTest extends TestCase {
         $this->assertFalse($user->isEnabled(), 'user-is-enabled');
         $this->assertTrue($user->isUnconfirmed(), 'user-is-confirmed');
         $this->assertFalse($user->permittedAny('site_analysis', 'site_debug'), 'utest-permittedAny-site-analysis-site-debug');
+
+        $id       = $this->user->id();
+        $username = $this->user->username();
+        $this->assertEquals(1, $this->user->remove(), 'user-remove');
+        $this->assertNull((new \Gazelle\Manager\User)->findById($id), 'user-is-removed');
+        $this->assertNull((new \Gazelle\Manager\User)->findByUsername($username), 'username-is-removed');
+        unset($this->user);
     }
 
     public function testAttr(): void {

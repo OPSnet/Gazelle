@@ -81,9 +81,5 @@ class FriendTest extends TestCase {
         $this->friend[0]->add($this->friend[2]->user()->id());
         $this->assertEquals(2, $this->friend[0]->total(), 'friend-has-friends');
         $this->assertEquals(1, $this->friend[0]->remove($this->friend[1]->user()->id()), 'friend-unfriend');
-
-        foreach (array_keys($this->friend) as $n) {
-            $this->assertEquals(1, $this->friend[$n]->user()->remove(), "friend-remove-$n");
-        }
     }
 }
