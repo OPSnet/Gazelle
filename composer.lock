@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1ca84c75ab0d1b61d03f9ba871191e86",
+    "content-hash": "37aae56b9b43c3b17c448db10051851c",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -1184,21 +1184,21 @@
         },
         {
             "name": "orpheusnet/logchecker",
-            "version": "0.12.0",
+            "version": "0.13.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/OPSnet/Logchecker.git",
-                "reference": "96f1dfbf0b7e8fbb14bbae7b81938900aa13e4b1"
+                "reference": "4d910a29a8919485abbfea5fd45f811b073496ff"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/OPSnet/Logchecker/zipball/96f1dfbf0b7e8fbb14bbae7b81938900aa13e4b1",
-                "reference": "96f1dfbf0b7e8fbb14bbae7b81938900aa13e4b1",
+                "url": "https://api.github.com/repos/OPSnet/Logchecker/zipball/4d910a29a8919485abbfea5fd45f811b073496ff",
+                "reference": "4d910a29a8919485abbfea5fd45f811b073496ff",
                 "shasum": ""
             },
             "require": {
                 "ext-mbstring": "*",
-                "php": ">=7.3",
+                "php": "^8.0",
                 "symfony/console": "^3.4 | ^4.0 | ^5.0",
                 "symfony/process": "^3.4 | ^4.0 | ^5.0",
                 "symfony/yaml": "^3.4 | ^4.0 | ^5.0"
@@ -1239,9 +1239,9 @@
             "description": "Logchecker for validating logs generated from supported ripping programs (like EAC and XLD)",
             "support": {
                 "issues": "https://github.com/OPSnet/Logchecker/issues",
-                "source": "https://github.com/OPSnet/Logchecker/tree/0.12.0"
+                "source": "https://github.com/OPSnet/Logchecker/tree/0.13.0"
             },
-            "time": "2023-12-26T00:13:05+00:00"
+            "time": "2023-12-31T23:44:43+00:00"
         },
         {
             "name": "psr/cache",
@@ -4924,5 +4924,5 @@
         "ext-openssl": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.6.0"
 }
