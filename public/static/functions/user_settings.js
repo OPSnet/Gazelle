@@ -2,6 +2,9 @@ var PUSHOVER = 5;
 var TOASTY = 4;
 var PUSHBULLET = 6;
 
+const userFormSelector = '#userform table.user_options';
+const searchSelector = userFormSelector + ' > tbody > tr';
+
 document.addEventListener('DOMContentLoaded', function() {
     var top = $('#settings_sections').offset().top - parseFloat($('#settings_sections').css('marginTop').replace(/auto/, 0));
     $(window).scroll(function (event) {
@@ -19,9 +22,9 @@ document.addEventListener('DOMContentLoaded', function() {
             if (id) {
                 e.preventDefault();
                 if (id == "all_settings" || id == "live_search") {
-                    $("#userform table").show();
+                    $(userFormSelector).show();
                 } else {
-                    $("#userform table").hide();
+                    $(userFormSelector).hide();
                     $("#" + id).show();
                 }
             }
@@ -31,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
     $("#settings_search").on("keyup", function() {
         var search = $(this).val().toLowerCase();
         if ($.trim(search).length > 0) {
-            $("#userform tr").not(".colhead_dark").each(function(index) {
+            $(searchSelector).not(".colhead_dark").each(function(index) {
                 var text = $(this).find("td:first").text().toLowerCase();
                 if (text.length > 0 && search.length > 0 && fuzzyMatch(text, search)) {
                     $(this).show();
@@ -41,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         } else {
-            $("#userform tr").show();
+            $(searchSelector).show();
         }
     });
 
