@@ -3,11 +3,15 @@
 namespace Gazelle;
 
 class ForumPoll extends BaseObject {
-    final const tableName = 'forums_polls';
-    final const CACHE_KEY = 'forum_poll_%d';
+    final public const tableName = 'forums_polls';
+    final public const pkName    = 'TopicID';
+    final protected const CACHE_KEY = 'forum_poll_%d';
 
     public function flush(): static {
-        self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
+        self::$cache->delete_multi([
+            sprintf(self::CACHE_KEY, $this->id),
+            Manager\ForumPoll::CACHE_FEATURED_POLL,
+        ]);
         unset($this->info);
         return $this;
     }
@@ -104,6 +108,10 @@ class ForumPoll extends BaseObject {
         return $this->info()['total'];
     }
 
+    public function close(): static {
+        return $this->setField('Closed', '1');
+    }
+
     /**
      * The current tally of votes
      *
@@ -116,21 +124,6 @@ class ForumPoll extends BaseObject {
 
     public function hasRevealVotes(): bool {
         return $this->thread()->forum()->hasRevealVotes();
-    }
-
-    public function close(): int {
-        self::$cache->delete_value("polls_{$this->id}");
-        self::$db->prepared_query("
-            UPDATE forums_polls SET
-                Closed   = '1',
-                Featured = null
-            WHERE TopicID = ?
-            ", $this->id
-        );
-        $affected = self::$db->affected_rows();
-        $this->flush();
-        self::$cache->delete_value(Manager\ForumPoll::CACHE_FEATURED_POLL);
-        return $affected;
     }
 
     protected function answerList(): array {
@@ -214,29 +207,6 @@ class ForumPoll extends BaseObject {
             ", $user->id(), $this->id
         );
         return $vote ? (int)$vote : null;
-    }
-
-    /**
-     * TODO: feature and unfeature a poll.
-     */
-    public function moderate(bool $toFeature, bool $toClose): int {
-        $affected = 0;
-        if ($toFeature && !$this->isFeatured()) {
-            self::$db->prepared_query("
-                UPDATE forums_polls SET
-                    Featured = now()
-                WHERE TopicID = ?
-                ", $this->id
-            );
-            $affected += self::$db->affected_rows();
-            self::$cache->cache_value(Manager\ForumPoll::CACHE_FEATURED_POLL, $this->id, 0);
-        }
-
-        if ($toClose) {
-            $affected += $this->close();
-        }
-        $this->flush();
-        return $affected;
     }
 
     /**

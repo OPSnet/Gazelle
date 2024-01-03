@@ -1,0 +1,111 @@
+{% if poll %}
+{% set thread = poll.thread %}
+{% set forum = thread.forum %}
+{% set reveal_voters = forum.hasRevealVotes %}
+{% set response = poll.response(viewer) %}
+{% set answer_list = poll.vote %}
+<div class="box thin clear">
+<div class="head colhead_dark">
+    <strong>Poll{% if poll.isClosed %} [Closed]{% endif %}{% if poll.isFeatured %} [Featured]{% endif %}</strong>
+    <a href="#" onclick="$('#threadpoll').gtoggle(); log_hit(); return false;" class="brackets">Toggle</a>
+</div>
+{% if viewer.permitted('forums_polls_moderate') %}
+    <div style="float: right">
+    {% if not (reveal_voters or poll.isClosed) %}
+    <form class="manage_form" name="poll" action="forums.php" method="post">
+        <input type="hidden" name="action" value="poll_mod" />
+        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+        <input type="hidden" name="threadid" value="{{ thread.id }}" />
+        <input type="checkbox" name="ck-feat" />
+        <input type="submit" name="feature" value="{% if poll.isFeatured %}Unfeature{% else %}Feature{% endif %}" />
+    </form>
+    {% endif %}
+    <form class="manage_form" name="poll" action="forums.php" method="post">
+        <input type="hidden" name="action" value="poll_mod" />
+        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+        <input type="hidden" name="threadid" value="{{ thread.id }}" />
+        <input type="checkbox" name="ck-close" />
+        <input type="submit" name="close" value="{% if poll.isClosed %}Reopen{% else %}Close{% endif %}" />
+    </form>
+    </div>
+{% endif %}
+<div class="pad{% if thread.isLocked %} hidden{% endif %}" id="threadpoll">
+    <strong>{{ poll.question }}</strong>
+{% if response or poll.isClosed or thread.isLocked %}
+    <ul class="poll nobullet">
+    {% if not reveal_voters %}
+        {% for choice in answer_list %}
+            <li>{% if response == loop.index %}&raquo; {% endif %}
+            {{ choice.answer }} ({{ choice.percent|number_format(2) }}%)</li>
+            <li class="graph">
+                <span class="left_poll"></span>
+                <span class="center_poll" style="width: {{ choice.ratio|number_format(2) }}%;"></span>
+                <span class="right_poll"></span>
+            </li>
+        {% endfor %}
+        {% if answer_list[0].total > 0 %}
+        <li>{% if response == '0' %}&raquo; {% endif %}(Blank) ({{ answer_list[0].total|number_format(2) }}%)</li>
+        <li class="graph">
+            <span class="left_poll"></span>
+            <span class="center_poll" style="width: {{ choice.ratio|number_format(2) }}%;"></span>
+            <span class="right_poll"></span>
+        </li>
+        {% endif %}
+    </ul>
+    <br />
+    <strong>Votes:</strong> {{ poll.total|number_format }}<br />
+{% else %}
+    <ul class="nobullet" id="poll_options">
+    {# Staff forum, output voters, not percentages #}
+    {% set total_staff = 0 %}
+    {% set total_voted = 0 %}
+    {% for response, info in poll.staffVote(user_man) %}
+        {% if response != 'missing' %}
+            {% set total_staff = total_staff + info.who|length %}
+            {% set total_voted = total_voted + info.who|length %}
+?>
+        <li><a href="forums.php?action=change_vote&amp;threadid={{ thread.id }}&amp;auth={{ viewer.auth
+            }}&amp;vote={{ response }}">{% if info.answer %}{{ info.answer }}{% else %}Abstain{% endif %}</a>
+            {% if info.who|length %} \xE2\x80\x93 {{ info.who|join(', ') }}{% else %}<i>none</i>{% endif %}
+        {% endif %}
+    {% endfor %}
+    {% if vote.missing.who|length %}
+        {% set total_staff = total.staff + vote.missing.who %}
+        <li>Missing: {{ info.who|join(', ') }}</li>
+    {% endif %}
+    </ul>
+    {% if forum.id in constant('FORUM_REVEAL_VOTE') %}
+    <br />
+    <strong>Voted:</strong> {{ total_voted|number_format }} of {{ total_staff|number_format }} total. (You may click on a choice to change your vote).
+    <br />
+    {% endif %}
+    <a href="#" onclick="AddPollOption({{ thread.id }}); return false;" class="brackets">+</a>
+
+{% endif %}
+{% else %}
+{# user has not voted #}
+        <div id="poll_container">
+            <form class="vote_form" name="poll" id="poll" action="">
+                <input type="hidden" name="action" value="poll" />
+                <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+                <input type="hidden" name="large" value="1" />
+                <input type="hidden" name="threadid" value="{{ thread.id }}" />
+                <ul class="nobullet" id="poll_options">
+    {% for response, choice in answer_list %}
+                    <li>
+                        <input type="radio" name="vote" id="answer_{{ response }}" value="{{ response }}" />
+                        <label for="answer_{{ response }}">{{ choice.answer }}</label>
+                    </li>
+    {% endfor %}
+                    <li>
+                        <br />
+                        <input type="radio" name="vote" id="answer_0" value="0" /> <label for="answer_0">Abstain</label><br />
+                    </li>
+                </ul>
+                <input type="button" onclick="ajax.post('index.php','poll',function(response) { $('#poll_container').raw().innerHTML = response});" value="Vote" />
+            </form>
+        </div>
+{% endif %}
+    </div>
+</div>
+{%- endif %}{# if poll #}

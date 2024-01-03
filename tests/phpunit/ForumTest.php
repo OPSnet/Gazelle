@@ -399,12 +399,16 @@ class ForumTest extends TestCase {
         $this->assertEquals(1, $poll->modifyVote($user, 3),  'forum-poll-change-vote');
         $this->assertEquals(3, $poll->response($user),       'forum-poll-response-after');
 
-        $this->assertEquals(1, $poll->moderate(true, false), 'forum-poll-moderate-feature-open');
+        $poll->setField('Featured', date('Y-m-d H-i-s'))->modify();
         $this->assertTrue($poll->isFeatured(), 'forum-poll-is-featured');
 
-        $this->assertEquals(1, $poll->close(), 'forum-poll-close');
+        $poll->close()->setField('Featured', null)->modify();
         $this->assertTrue($poll->isClosed(), 'forum-poll-is-closed');
         $this->assertFalse($poll->isFeatured(), 'forum-poll-is-no-longer-featured');
+
+        $poll->setField('Closed', '0')->setField('Featured', date('Y-m-d H-i-s'))->modify();
+        $this->assertFalse($poll->isClosed(), 'forum-poll-is-reopened');
+        $this->assertTrue($poll->isFeatured(), 'forum-poll-is-refeatured');
     }
 
     public function testPostPin(): void {
@@ -454,8 +458,10 @@ class ForumTest extends TestCase {
             autoLockWeeks:  42,
         );
         $paginator = (new Gazelle\Util\Paginator(TOPICS_PER_PAGE, 1))->setTotal(1);
-        global $Viewer; // to render header()
-        $Viewer = $admin;
+        global $Document, $SessionID, $Viewer; // to render header()
+        $Document  = '';
+        $SessionID = 'phpunit';
+        $Viewer    = $admin;
         $this->assertStringContainsString(
             "<a href=\"forums.php#$name\">$name</a>",
             (Gazelle\Util\Twig::factory())->render('forum/forum.twig', [

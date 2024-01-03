@@ -34,7 +34,7 @@ if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
     $vote = $poll->vote(); // need to refresh the results to take the vote into account
 
     if ($response !== 0) {
-        $vote[$response]['answer'] = '=> ' . $vote[$response]['answer'];
+        $vote[$response]['answer'] = '&raquo; ' . $vote[$response]['answer'];
     }
 ?>
         <ul class="poll nobullet">

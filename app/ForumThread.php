@@ -257,7 +257,7 @@ class ForumThread extends BaseObject {
         $affected = self::$db->affected_rows();
         if ($affected) {
             if ($locked && $this->hasPoll()) {
-                $this->poll()->close();
+                $this->poll()->close()->modify();
             }
             if ($forumId != $oldForumId) {
                 (new Forum($forumId))->adjust();
