@@ -56,8 +56,11 @@ if ($UserID == $Viewer->id()) {
 $previewer = $Preview ? $userMan->findById(PARANOIA_PREVIEW_USER) : $Viewer;
 $Paranoia  = $Preview ? explode(',', $_GET['paranoia']) : $User->paranoia();
 
-function check_paranoia_here(string $Setting): int|false {
+function check_paranoia_here(?string $Setting): int|false {
     global $Paranoia, $Class, $UserID, $Preview;
+    if (!$Setting) {
+        return PARANOIA_ALLOWED;
+    }
     if ($Preview) {
         return check_paranoia($Setting, $Paranoia ?? [], $Class);
     } else {
@@ -149,11 +152,6 @@ if ($lastfmInfo) {
 $vote             = new Vote($User);
 $stats            = $User->stats();
 $Uploads          = check_paranoia_here('uploads+') ? $stats->uploadTotal() : 0;
-$ArtistsAdded     = check_paranoia_here('artistsadded') ? $stats->artistAddedTotal() : 0;
-$collageAdditions = check_paranoia_here('collagecontribs+') ? $stats->collageTotal() : 0;
-$releaseVotes     = $vote->userTotal(Vote::UPVOTE | Vote::DOWNVOTE);
-$bonusPointsSpent = $userBonus->pointsSpent();
-$torrentComments  = check_paranoia_here('torrentcomments++') ? $stats->commentTotal('torrents') : 0;
 $rank = new Gazelle\UserRank(
     new Gazelle\UserRank\Configuration(RANKING_WEIGHT),
     [
@@ -163,59 +161,44 @@ $rank = new Gazelle\UserRank(
         'requests'   => $stats->requestBountyTotal(),
         'posts'      => $stats->forumPostTotal(),
         'bounty'     => $stats->requestVoteSize(),
-        'artists'    => $ArtistsAdded,
-        'collage'    => $collageAdditions,
-        'votes'      => $releaseVotes,
-        'bonus'      => $bonusPointsSpent,
-        'comment-t'  => $torrentComments,
-    ]
+        'artists'    => check_paranoia_here('artistsadded') ? $stats->artistAddedTotal() : 0,
+        'collage'    => check_paranoia_here('collagecontribs+') ? $stats->collageTotal() : 0,
+        'votes'      => $vote->userTotal(Vote::UPVOTE | Vote::DOWNVOTE),
+        'bonus'      => $userBonus->pointsSpent(),
+        'comment-t'  => check_paranoia_here('torrentcomments++') ? $stats->commentTotal('torrents') : 0,
+    ],
 );
+
+$byteFormatter = function ($value) { return byte_format($value); };
+$numberFormatter = function ($value) { return number_format($value); };
+
+$statList = [
+    // [dimension, permission, title, formatter, tooltip suffix]
+    ['uploaded', 'uploaded', 'Data uploaded', $byteFormatter, 'uploaded'],
+    ['downloaded', 'downloaded', 'Data downloaded', $byteFormatter, 'downloaded'],
+    ['uploads', 'uploads+', 'Torrents uploaded', $numberFormatter, 'uploads'],
+    ['requests', 'requestsfilled_count', 'Requests filled', $numberFormatter, 'filled'],
+    ['bounty', 'requestsvoted_bounty', 'Request votes', $byteFormatter, 'spent'],
+    ['posts', null, 'Forum posts made', $numberFormatter, 'posts'],
+    ['comment-t', 'torrentcomments++', 'Torrent comments', $numberFormatter, 'posted'],
+    ['collage', 'collagecontribs+', 'Collage contributions', $numberFormatter, 'contributions'],
+    ['artists', 'artistsadded', 'Artists added', $numberFormatter, 'added'],
+    ['votes', null, 'Release votes cast', $numberFormatter, 'votes'],
+]
 ?>
         <div class="box box_info box_userinfo_percentile">
             <div class="head colhead_dark">Percentile Rankings (hover for values)</div>
             <ul class="stats nobullet">
-<?php if (($Override = check_paranoia_here('uploaded'))) { ?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?= byte_format($User->uploadedSize()) ?> uploaded">Data uploaded: <?= $rank->rank('uploaded') ?></li>
 <?php
+foreach ($statList as $item) {
+    if (($Override = check_paranoia_here($item[1]))) {
+?>
+                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?= $item[3]($rank->raw($item[0])) ?> <?= $item[4] ?>"><?= $item[2] ?>: <?= $rank->rank($item[0]) ?></li>
+<?php
+    }
 }
-if (($Override = check_paranoia_here('downloaded'))) {
-?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?= byte_format($User->downloadedSize()) ?> downloaded">Data downloaded: <?= $rank->rank('downloaded') ?></li>
-<?php
-}
-if (($Override = check_paranoia_here('uploads+'))) {
-?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=number_format($Uploads)?> uploads">Torrents uploaded: <?= $rank->rank('uploads') ?></li>
-<?php
-}
-if (($Override = check_paranoia_here('requestsfilled_count'))) {
-?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=number_format($stats->requestBountyTotal())?> filled">Requests filled: <?= $rank->rank('requests') ?></li>
-<?php
-}
-if (($Override = check_paranoia_here('requestsvoted_bounty'))) {
-?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?= byte_format($stats->requestBountySize()) ?> spent">Request votes: <?= $rank->rank('bounty') ?></li>
-<?php } ?>
-                <li class="tooltip" title="<?=number_format($stats->forumPostTotal())?> posts">Forum posts made: <?= $rank->rank('posts') ?></li>
-<?php
-if (($Override = check_paranoia_here('torrentcomments++'))) {
-?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?= number_format($torrentComments) ?> posted">Torrent comments: <?= $rank->rank('comment-t') ?></li>
-<?php
-}
-if (($Override = check_paranoia_here('collagecontribs+'))) {
-?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=number_format($collageAdditions)?> contributions">Collage contributions: <?= $rank->rank('collage') ?></li>
-<?php
-}
-if (($Override = check_paranoia_here('artistsadded'))) {
-?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=number_format($ArtistsAdded)?> added">Artists added: <?= $rank->rank('artists') ?></li>
-<?php } ?>
-                <li class="tooltip" title="<?=number_format($releaseVotes)?> votes">Release votes cast: <?= $rank->rank('votes') ?></li>
-<?php if ($OwnProfile || $Viewer->permitted('admin_bp_history')) { ?>
-                <li class="tooltip<?= !$OwnProfile && $Viewer->permitted('admin_bp_history') ? ' paranoia_override' : '' ?>" title="<?=number_format($bonusPointsSpent)?> spent">Bonus points spent: <?= $rank->rank('bonus') ?></li>
+if ($OwnProfile || $Viewer->permitted('admin_bp_history')) { ?>
+                <li class="tooltip<?= !$OwnProfile && $Viewer->permitted('admin_bp_history') ? ' paranoia_override' : '' ?>" title="<?=number_format($rank->raw('bonus')) ?> spent">Bonus points spent: <?= $rank->rank('bonus') ?></li>
 <?php
 }
 if ($User->propertyVisibleMulti($previewer, ['artistsadded', 'collagecontribs+', 'downloaded', 'requestsfilled_count', 'requestsvoted_bounty', 'torrentcomments++', 'uploaded', 'uploads+', ])) {

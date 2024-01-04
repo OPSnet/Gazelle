@@ -48,12 +48,14 @@ namespace Gazelle;
  */
 
 class UserRank extends Base {
+    protected array $dimension;
     protected array $rank;
     protected float $score = 0.0;
 
     final const PREFIX = 'percentiles_'; // Prefix for memcache keys, to make life easier
 
     public function __construct(protected \Gazelle\UserRank\Configuration $config, array $dimension) {
+        $this->dimension = $dimension;
         $definition = $this->config->definition();
 
         $dimension['uploaded'] -= STARTING_UPLOAD;
@@ -77,6 +79,10 @@ class UserRank extends Base {
             $ratio = min(1, round($dimension['uploaded'] / $dimension['downloaded']));
         }
         $this->score *= $ratio;
+    }
+
+    public function raw(string $dimension): mixed {
+        return $this->dimension[$dimension];
     }
 
     public function rank(string $dimension): int {
