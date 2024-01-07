@@ -3,11 +3,14 @@ FROM debian:bullseye-slim
 WORKDIR /var/www
 
 ENV DEBIAN_FRONTEND noninteractive
-ENV PHP_VER=8.2
-ENV NODE_VERSION=20
+ENV PHP_VER 8.2
+ENV NODE_VERSION 20
 
-# Software package layer
-# Nodesource setup comes after yarnpkg because it runs `apt-get update`
+# Uncomment to skip the chromium download when installing puppeteer. If you do,
+# you'll need to launch puppeteer with:
+#     browser.launch({executablePath: 'google-chrome-unstable'})
+# ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
+
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         apt-transport-https \
@@ -52,19 +55,7 @@ RUN apt-get update \
         unzip \
         yarn \
         zlib1g-dev \
-    && apt-get autoremove \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-COPY --from=composer:2.5.1 /usr/bin/composer /usr/local/bin/composer
-
-# Python tools layer
-RUN pip3 install chardet eac-logchecker xld-logchecker
-
-# Puppeteer layer
-# This installs the necessary packages to run the bundled version of chromium for puppeteer
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
+        # This installs the necessary packages to run the bundled version of chromium for puppeteer
         gconf-service \
         libasound2 \
         libatk1.0-0 \
@@ -102,18 +93,9 @@ RUN apt-get update \
         xdg-utils \
     && apt-get autoremove \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-# If running Docker >= 1.13.0 use docker run's --init arg to reap zombie processes, otherwise
-# uncomment the following lines to have `dumb-init` as PID 1
-# ADD https://github.com/Yelp/dumb-init/releases/download/v1.2.0/dumb-init_1.2.0_amd64 /usr/local/bin/dumb-init
-# RUN chmod +x /usr/local/bin/dumb-init
-# ENTRYPOINT ["dumb-init", "--"]
-
-# Uncomment to skip the chromium download when installing puppeteer. If you do,
-# you'll need to launch puppeteer with:
-#     browser.launch({executablePath: 'google-chrome-unstable'})
-# ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
+    && rm -rf /var/lib/apt/lists/* \
+    # Python tools layer
+    && pip3 install chardet eac-logchecker xld-logchecker
 
 # testing layer
 # backports needed for sphinx
@@ -137,8 +119,8 @@ RUN echo 'deb http://deb.debian.org/debian bullseye-backports main' > /etc/apt/s
         libasound2 \
         libxtst6 \
         procps \
-        #xauth \
         xvfb \
+    && apt-get autoremove \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir /opt/bin \
@@ -153,6 +135,7 @@ RUN echo 'deb http://deb.debian.org/debian bullseye-backports main' > /etc/apt/s
 #    && rm /tmp/firefox.tar.bz2 \
 #    && ln -fs /opt/firefox/firefox /usr/bin/firefox
 
+COPY --from=composer:2.6.6 /usr/bin/composer /usr/local/bin/composer
 COPY .docker /var/www/.docker
 
 # Permissions and configuration layer
