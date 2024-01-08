@@ -3,7 +3,7 @@
 namespace Gazelle\User;
 
 class Bookmark extends \Gazelle\BaseUser {
-    final const tableName = 'pm_conversations_users';
+    final public const tableName = 'pm_conversations_users';
 
     protected array $all;
 

@@ -5,12 +5,12 @@ namespace Gazelle\Manager;
 use Gazelle\Enum\CollageType;
 
 class Collage extends \Gazelle\BaseManager {
-    final const ID_KEY = 'zz_c_%d';
-    protected const CACHE_DEFAULT_ARTIST = 'collage_def_artist_%d';
-    protected const CACHE_DEFAULT_GROUP  = 'collage_def_tgroup_%d';
-    protected const TGROUP_GENERAL_KEY   = 'torrent_collages_%d';
-    protected const TGROUP_PERSONAL_KEY  = 'torrent_collages_personal_%d';
-    protected const ARTIST_KEY           = 'artists_collages_%d';
+    final public const ID_KEY = 'zz_c_%d';
+    final protected const CACHE_DEFAULT_ARTIST = 'collage_def_artist_%d';
+    final protected const CACHE_DEFAULT_GROUP  = 'collage_def_tgroup_%d';
+    final protected const TGROUP_GENERAL_KEY   = 'torrent_collages_%d';
+    final protected const TGROUP_PERSONAL_KEY  = 'torrent_collages_personal_%d';
+    final protected const ARTIST_KEY           = 'artists_collages_%d';
 
     protected \Gazelle\Util\ImageProxy $imageProxy;
 

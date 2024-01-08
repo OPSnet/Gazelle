@@ -5,7 +5,7 @@ namespace Gazelle\User;
 use Gazelle\Enum\AvatarSynthetic;
 
 class SyntheticAvatar extends \Gazelle\BaseUser {
-    final const tableName = '';
+    final public const tableName = '';
 
     public function flush(): static { $this->user->flush(); return $this; }
 

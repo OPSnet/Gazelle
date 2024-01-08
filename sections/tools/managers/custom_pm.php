@@ -30,7 +30,7 @@ if (isset($_POST['query'])) {
             try {
                 $result = (new \Gazelle\DB\Pg(GZPG_DSN))->column($_POST['query']);
             } catch (\Exception $e) {
-                $error = get_class($e) . " " . $e->getMessage();
+                $error = $e::class . " " . $e->getMessage();
             }
             break;
         default:

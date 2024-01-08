@@ -327,7 +327,6 @@ class Forum extends \Gazelle\BaseManager {
      *
      * It is a pre-requisite that the `forums` table have the alias f.
      *
-     * @param \Gazelle\User $user
      * @return array of [conditions, args]
      */
     public function configureForUser(\Gazelle\User $user): array {

@@ -11,23 +11,23 @@ use Gazelle\Util\Mail;
 use Gazelle\Util\Time;
 
 class User extends BaseObject {
-    final const tableName          = 'users_main';
-    final const CACHE_KEY          = 'u_%d';
-    final const CACHE_NOTIFY       = 'u_notify_%d';
-    final const USER_RECENT_UPLOAD = 'u_recent_up_%d';
+    final public const tableName             = 'users_main';
+    final protected const CACHE_KEY          = 'u_%d';
+    final protected const CACHE_NOTIFY       = 'u_notify_%d';
+    final protected const USER_RECENT_UPLOAD = 'u_recent_up_%d';
 
     protected bool $forceCacheFlush = false;
     protected int $lastReadForum;
-    protected User\Invite $invite;
 
     protected array $avatarCache;
     protected array $lastRead;
+    protected array $tokenCache;
     protected array $forumWarning = [];
     protected array $staffNote = [];
 
-    protected Stats\User|null $stats;
-    protected User\Snatch|null $snatch;
-    protected array|null $tokenCache;
+    protected Stats\User  $stats;
+    protected User\Invite $invite;
+    protected User\Snatch $snatch;
 
     public function flush(): static {
         self::$cache->delete_multi([
@@ -554,7 +554,7 @@ class User extends BaseObject {
         $lastAccess = $this->getSingleValue('user_last_access', "
             SELECT ula.last_access FROM user_last_access ula WHERE user_id = ?
         ");
-        return $lastAccess ? (string)$lastAccess : null;
+        return $lastAccess ?: null;
     }
 
     public function lastAccessRealtime(): ?string {
@@ -1578,7 +1578,7 @@ class User extends BaseObject {
         $warning = $this->getSingleValue('user_forum_warn', "
             SELECT Comment FROM users_warnings_forums WHERE UserID = ?
         ");
-        return $warning ? (string)$warning : null;
+        return $warning ?: null;
     }
 
     public function collagesCreated(): int {

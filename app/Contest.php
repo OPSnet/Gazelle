@@ -3,11 +3,11 @@
 namespace Gazelle;
 
 class Contest extends BaseObject {
-    final const pkName        = 'contest_id';
-    final const tableName     = 'contest';
-    final const CACHE_CONTEST = 'contestv2_%d';
-    final const CACHE_STATS   = 'contest_stats_%d';
-    final const CONTEST_LEADERBOARD_CACHE_KEY = 'contest_leaderboard_%d_%d';
+    final public const pkName        = 'contest_id';
+    final public const tableName     = 'contest';
+    final public const CACHE_CONTEST = 'contestv2_%d';
+    final public const CACHE_STATS   = 'contest_stats_%d';
+    final public const CONTEST_LEADERBOARD_CACHE_KEY = 'contest_leaderboard_%d_%d';
 
     protected array $stats; /* entries, users */
 

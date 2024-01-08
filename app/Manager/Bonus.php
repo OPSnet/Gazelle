@@ -3,8 +3,8 @@
 namespace Gazelle\Manager;
 
 class Bonus extends \Gazelle\Base {
-    final const CACHE_ITEM = 'bonus_item';
-    final const CACHE_OPEN_POOL = 'bonus_pool'; // also defined in \Gazelle\Bonus
+    final public const CACHE_OPEN_POOL = 'bonus_pool'; // also defined in \Gazelle\Bonus
+    final protected const CACHE_ITEM   = 'bonus_item';
 
     protected array $items;
 

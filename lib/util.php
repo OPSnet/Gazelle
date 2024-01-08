@@ -491,7 +491,7 @@ function make_utf8(?string $str): string {
 function randomString($len = 32) {
     $alphabet = str_split('abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ0123456789');
     $max = count($alphabet);
-    $mask = (int)pow(2, ceil(log($len, 2))) - 1;
+    $mask = 2 ** (int)ceil(log($len, 2)) - 1;
     $out = '';
     while (strlen($out) < $len) {
         $n = ord(openssl_random_pseudo_bytes(1)) & $mask;
@@ -636,7 +636,6 @@ function check_paranoia(string $Property, string|array $Paranoia, int $UserClass
     if ($Viewer->permitted('users_override_paranoia', $UserClass)) {
         return PARANOIA_OVERRIDDEN;
     }
-    $Override = false;
     switch ($Property) {
         case 'downloaded':
         case 'ratio':
@@ -694,7 +693,7 @@ function geoip(string $IP): string {
     } else {
         $Long = sprintf('%u', ip2long($IP));
     }
-    if (!$Long || $Long == 2130706433) { // No need to check cc for 127.0.0.1
+    if (!$Long || $Long == 2_130_706_433) { // No need to check cc for 127.0.0.1
         return 'XX';
     }
     return '?';
@@ -738,7 +737,7 @@ function image_cache_encode(
         $spec = 'full';
     } else {
         $spec = match ($height || $width) {
-            true  => ($height ? $height : '') . 'x' . ($width ? $width : ''),
+            true  => ($height ?: '') . 'x' . ($width ?: ''),
             false => 'full', /** @phpstan-ignore-line */
         };
     }
@@ -752,5 +751,5 @@ function image_cache_valid(string $url, int|null $epoch = null, string $secret =
     // skip over slashes in http://xxx/
     // if the /proxy specifier has been used, it is combined in $encode
     [,,, $cache_bucket, $spec, $sig, $encode] = explode('/', $url, 7);
-    return (string)$sig === image_cache_signature($cache_bucket . '/' . (string)$encode, $epoch, $secret);
+    return $sig === image_cache_signature($cache_bucket . '/' . $encode, $epoch, $secret);
 }

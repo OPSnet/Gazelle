@@ -23,8 +23,8 @@ json_print("success", [
     'notifications' => [
         'messages'         => $Viewer->inbox()->unreadTotal(),
         'notifications'    => (new \Gazelle\User\Notification\Torrent($Viewer))->unread(),
-        'newAnnouncement'  => (new \Gazelle\Manager\News)->latestId() < (new \Gazelle\WitnessTable\UserReadNews)->lastRead($Viewer->id()),
-        'newBlog'          => $latestBlog && $latestBlog->createdEpoch() < (new \Gazelle\WitnessTable\UserReadBlog)->lastRead($Viewer->id()),
+        'newAnnouncement'  => (new \Gazelle\Manager\News)->latestId() < (new \Gazelle\WitnessTable\UserReadNews)->lastRead($Viewer),
+        'newBlog'          => $latestBlog && $latestBlog->createdEpoch() < (new \Gazelle\WitnessTable\UserReadBlog)->lastRead($Viewer),
         'newSubscriptions' => (new \Gazelle\User\Subscription($Viewer))->unread() > 0,
     ],
     'userstats' => [

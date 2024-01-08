@@ -247,7 +247,7 @@ class Torrent {
             return;
         }
         $result = $SphQLResult; /* to keep phpstan happy */
-        if ($result->Errno === false || $result->Errno > 0) {
+        if ($result->Errno > 0) {
             return;
         }
         if ($this->Random && $this->GroupResults) {

@@ -3,7 +3,7 @@
 namespace Gazelle;
 
 class NotificationFilter extends BaseObject {
-    final const tableName = 'users_notify_filters';
+    final public const tableName = 'users_notify_filters';
     protected const DIMENSION = [
         'artist', 'recordLabel', 'tag', 'notTag', 'category', 'format', 'encoding', 'media', 'user'
     ];

@@ -3,7 +3,7 @@
 namespace Gazelle\User;
 
 class Seedbox extends \Gazelle\BaseUser {
-    final const tableName = 'user_seedbox';
+    final public const tableName = 'user_seedbox';
     protected const SUMMARY_KEY = 'seedbox_summary_';
 
     final public const VIEW_BY_NAME = 0;

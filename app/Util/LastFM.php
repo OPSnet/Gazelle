@@ -25,7 +25,6 @@ class LastFM extends \Gazelle\Base {
 
     public function modifyUsername(\Gazelle\User $user, string $username): int {
         $previous = $this->username($user);
-        $hasPrevious = $previous !== null;
         if (!$previous && $username !== "") {
             self::$db->prepared_query("
                 INSERT INTO lastfm_users (Username, ID)
@@ -72,7 +71,7 @@ class LastFM extends \Gazelle\Base {
         $response = self::$cache->get_value($key);
         if ($response === false) {
             $response = $this->fetch("user.getInfo", ["user" => $username]);
-            $response = isset($response['user']) ? $response['user'] : null;
+            $response = $response['user'] ?? null;
             self::$cache->cache_value($key, $response, 86400);
         }
         return $response;

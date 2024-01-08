@@ -3,9 +3,9 @@
 namespace Gazelle\Manager;
 
 class Applicant extends \Gazelle\Base {
-    final const ID_KEY   = 'zz_appl_%d';
-    final const LIST_KEY = 'applicant_list';
-    final const RESOLVED_KEY = 'applicant_resolved';
+    final protected const ID_KEY   = 'zz_appl_%d';
+    final protected const LIST_KEY = 'applicant_list';
+    final protected const RESOLVED_KEY = 'applicant_resolved';
 
     // There is no create() function here. Objects of this class are created
     // by a User applying for an ApplicantRole:

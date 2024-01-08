@@ -3,7 +3,7 @@
 namespace Gazelle\User;
 
 class Friend extends \Gazelle\BaseUser {
-    final const tableName = 'friends';
+    final public const tableName = 'friends';
 
     public function flush(): static { $this->user()->flush(); return $this; }
 

@@ -3,7 +3,7 @@
 namespace Gazelle\Stats;
 
 class Artist extends \Gazelle\BaseObject {
-    final const tableName     = '/* artist stats */';
+    final public const tableName     = '/* artist stats */';
     protected const CACHE_KEY = 'a_stats_%d';
 
     public function flush(): static {

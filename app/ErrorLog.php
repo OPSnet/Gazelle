@@ -3,7 +3,7 @@
 namespace Gazelle;
 
 class ErrorLog extends BaseObject {
-    final const tableName = 'error_log';
+    final public const tableName = 'error_log';
 
     public function flush(): static { return $this; }
     public function link(): string { return ''; }

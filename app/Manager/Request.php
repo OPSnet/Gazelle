@@ -3,7 +3,7 @@
 namespace Gazelle\Manager;
 
 class Request extends \Gazelle\BaseManager {
-    final const ID_KEY = 'zz_r_%d';
+    final public const ID_KEY = 'zz_r_%d';
 
     public function create(
         int $userId,

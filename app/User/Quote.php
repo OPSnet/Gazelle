@@ -3,8 +3,8 @@
 namespace Gazelle\User;
 
 class Quote extends \Gazelle\BaseUser {
-    final const tableName        = 'users_notify_quoted';
-    final const UNREAD_QUOTE_KEY = 'u_unread_%d';
+    final public const tableName = 'users_notify_quoted';
+    final protected const UNREAD_QUOTE_KEY = 'u_unread_%d';
 
     protected bool $showAll = false;
 

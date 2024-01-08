@@ -3,7 +3,7 @@
 namespace Gazelle;
 
 class TorrentLog extends BaseObject {
-    final const tableName = 'torrents_logs';
+    final public const tableName = 'torrents_logs';
 
     public function __construct(
         protected Torrent $torrent,

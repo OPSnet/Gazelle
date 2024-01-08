@@ -3,7 +3,7 @@
 namespace Gazelle\User;
 
 class Stylesheet extends \Gazelle\BaseUser {
-    final const tableName     = '';
+    final public const tableName     = '';
     protected const CACHE_KEY = 'u_ss2_%d';
 
     public function flush(): static {

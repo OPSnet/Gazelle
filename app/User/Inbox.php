@@ -3,9 +3,9 @@
 namespace Gazelle\User;
 
 class Inbox extends \Gazelle\BaseUser {
-    final const tableName = 'pm_conversations_users';
+    final public const tableName = 'pm_conversations_users';
 
-    final const CACHE_NEW = 'inbox_new_%d';
+    final protected const CACHE_NEW = 'inbox_new_%d';
 
     protected bool $unreadFirst;
     protected string $filter;
@@ -115,10 +115,7 @@ class Inbox extends \Gazelle\BaseUser {
     }
 
     public function showUnreadFirst(): bool {
-        if (isset($this->unreadFirst)) {
-            return $this->unreadFirst;
-        }
-        return (bool)$this->user->option('ListUnreadPMsFirst');
+        return $this->unreadFirst ?? (bool)$this->user->option('ListUnreadPMsFirst');
     }
 
     public function folder(): string {

@@ -3,8 +3,8 @@
 namespace Gazelle\Manager;
 
 class ForumCategory extends \Gazelle\BaseManager {
-    final const LIST_KEY = 'forum_cat';
-    protected const ID_KEY = 'zz_fc_%d';
+    final public const LIST_KEY = 'forum_cat';
+    final protected const ID_KEY = 'zz_fc_%d';
 
     /**
      * Create a forum category

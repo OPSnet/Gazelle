@@ -3,8 +3,8 @@
 namespace Gazelle;
 
 class Blog extends BaseObject {
-    final const tableName = 'blog';
-    final const CACHE_KEY = 'blog_%d';
+    final public const tableName = 'blog';
+    final public const CACHE_KEY = 'blog_%d';
 
     public function location(): string {
         return 'blog.php?id=' . $this->id . '#blog' . $this->id;

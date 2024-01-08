@@ -15,7 +15,7 @@ use Gazelle\Util\CacheVector;
  */
 
 class Snatch extends \Gazelle\BaseUser {
-    final const tableName          = 'xbt_snatched';
+    final public const tableName          = 'xbt_snatched';
 
     // A power-of-2 size, to be balanced against how many rows a query on xbt_snatched could return
     final protected const RANGE     = 17;

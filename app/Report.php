@@ -3,7 +3,7 @@
 namespace Gazelle;
 
 class Report extends BaseObject {
-    final const tableName = 'reports';
+    final public const tableName = 'reports';
 
     protected Manager\User $userMan;
 

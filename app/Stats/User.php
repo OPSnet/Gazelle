@@ -12,9 +12,9 @@ class User extends \Gazelle\BaseObject {
      * in the Users (plural) class.
      */
 
-    final const tableName               = 'user_summary';
-    protected const CACHE_COMMENT_TOTAL = 'user_nrcomment_%d';
-    protected const CACHE_GENERAL       = 'user_stx_%d';
+    final public const tableName              = 'user_summary';
+    final protected const CACHE_COMMENT_TOTAL = 'user_nrcomment_%d';
+    final protected const CACHE_GENERAL       = 'user_stx_%d';
 
     // Cache the underlying db calls
     protected array $commentTotal;

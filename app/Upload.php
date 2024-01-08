@@ -22,8 +22,8 @@ class Upload extends \Gazelle\Base {
     protected string $Disabled = '';
     protected bool   $DisabledFlag = false;
 
-    const TORRENT_INPUT_ACCEPT = ['application/x-bittorrent', '.torrent'];
-    const JSON_INPUT_ACCEPT = ['application/json', '.json'];
+    final public const TORRENT_INPUT_ACCEPT = ['application/x-bittorrent', '.torrent'];
+    final public const JSON_INPUT_ACCEPT = ['application/json', '.json'];
 
     public function __construct(
         protected \Gazelle\User $user,
@@ -596,7 +596,7 @@ echo ' checked="checked"';} ?> /> <label for="lossyweb_approved">Check this box 
                     <span id="other_bitrate_span"<?php if (!$OtherBitrate) {
 echo ' class="hidden"'; } ?>>
                         <input type="text" name="other_bitrate" size="5" id="other_bitrate"<?php
-                            if ($OtherBitrate) {
+                            if ($OtherBitrate && isset($Torrent['Bitrate'])) {
                                 echo ' value="' . html_escape($Torrent['Bitrate']) . '"';
                             } ?> onchange="AltBitrate()" />
                         <input type="checkbox" id="vbr" name="vbr"<?php if (isset($VBR)) {

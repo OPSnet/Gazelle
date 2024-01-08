@@ -3,8 +3,8 @@
 namespace Gazelle\Manager;
 
 class ApplicantRole extends \Gazelle\Base {
-    final const ID_KEY   = 'zz_applr_%d';
-    final const LIST_KEY = 'approle';
+    final protected const ID_KEY   = 'zz_applr_%d';
+    final protected const LIST_KEY = 'approle';
 
     public function create(string $title, string $description, bool $published, \Gazelle\User $user): \Gazelle\ApplicantRole {
         self::$db->prepared_query("

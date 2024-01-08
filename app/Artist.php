@@ -3,10 +3,10 @@
 namespace Gazelle;
 
 class Artist extends BaseObject {
-    final const pkName               = 'ArtistID';
-    final const tableName            = 'artists_group';
-    final const CACHE_REQUEST_ARTIST = 'artists_requests_%d';
-    final const CACHE_TGROUP_ARTIST  = 'artists_groups_%d';
+    final public const pkName               = 'ArtistID';
+    final public const tableName            = 'artists_group';
+    final public const CACHE_REQUEST_ARTIST = 'artists_requests_%d';
+    final public const CACHE_TGROUP_ARTIST  = 'artists_groups_%d';
 
     protected const CACHE_PREFIX    = 'artist_%d';
 

@@ -3,10 +3,10 @@
 namespace Gazelle\Collage;
 
 abstract class AbstractCollage extends \Gazelle\Base {
-    protected int        $id; // hold a local copy of our ID to save time
-    protected array|null $artists;
-    protected array|null $contributors;
-    protected array|null $created;
+    protected int   $id; // hold a local copy of our ID to save time
+    protected array $artists;
+    protected array $contributors;
+    protected array $created;
 
     abstract public function entryTable(): string;
     abstract public function entryColumn(): string;
@@ -77,9 +77,9 @@ abstract class AbstractCollage extends \Gazelle\Base {
         }
         self::$cache->delete_multi($keys);
         $this->holder->flush();
-        $this->artists      = null;
-        $this->contributors = null;
-        $this->created      = null;
+        unset($this->artists);
+        unset($this->contributors);
+        unset($this->created);
         return $this;
     }
 

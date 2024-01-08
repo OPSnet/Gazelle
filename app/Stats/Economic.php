@@ -5,9 +5,9 @@ namespace Gazelle\Stats;
 use Gazelle\Enum\UserStatus;
 
 class Economic extends \Gazelle\Base {
-    final const CACHE_KEY = 'stats_eco';
+    final public const CACHE_KEY = 'stats_eco';
 
-    protected array|null $info;
+    protected array $info;
 
     public function flush(): static {
         unset($this->info);

@@ -3,9 +3,9 @@
 namespace Gazelle;
 
 class ForumThread extends BaseObject {
-    final const tableName     = 'forums_topics';
-    final const CACHE_KEY     = 'fthread_%d';
-    final const CACHE_CATALOG = 'fthread_cat_%d_%d';
+    final public const tableName     = 'forums_topics';
+    final public const CACHE_KEY     = 'fthread_%d';
+    final public const CACHE_CATALOG = 'fthread_cat_%d_%d';
 
     public function flush(): static {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));

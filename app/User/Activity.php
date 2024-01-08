@@ -3,7 +3,7 @@
 namespace Gazelle\User;
 
 class Activity extends \Gazelle\BaseUser {
-    final const tableName = '';
+    final public const tableName = '';
 
     protected bool $showStaffInbox = false;
     protected array $action = [];

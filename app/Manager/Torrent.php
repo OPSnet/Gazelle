@@ -9,9 +9,9 @@ class Torrent extends \Gazelle\BaseManager {
     protected const ID_KEY = 'zz_t_%d';
     protected const CACHE_HIST = 'top10_hist_%s_%s';
 
-    final const CACHE_KEY_LATEST_UPLOADS = 'latest_up_%d';
-    final const CACHE_FOLDERNAME         = 'foldername_%s';
-    final const FOLDER_SALT              = "v1\x01";
+    final public const CACHE_KEY_LATEST_UPLOADS = 'latest_up_%d';
+    final protected const CACHE_FOLDERNAME      = 'foldername_%s';
+    final protected const FOLDER_SALT           = "v1\x01";
 
     protected \Gazelle\User $viewer;
 

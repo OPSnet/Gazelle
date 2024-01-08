@@ -5,7 +5,7 @@ namespace Gazelle;
 use Gazelle\Util\Irc;
 
 class TaskScheduler extends Base {
-    final const CACHE_TASKS = 'scheduled_tasks';
+    final public const CACHE_TASKS = 'scheduled_tasks';
 
     public function getTask(int $id): ?array {
         $tasks = $this->getTasks();

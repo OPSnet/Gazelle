@@ -27,7 +27,7 @@ class Cache extends \Memcached {
     /**
      * Torrent Group cache version
      */
-    final const GROUP_VERSION = 6;
+    final public const GROUP_VERSION = 6;
 
     protected array $hit;
     protected array $delete;

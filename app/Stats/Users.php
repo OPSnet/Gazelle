@@ -10,7 +10,7 @@ class Users extends \Gazelle\Base {
     protected const USER_PLATFORM = 'stat_u_platform';
     protected const FLOW          = 'stat_u_flow';
 
-    protected array|null $info;
+    protected array $info;
 
     public function flush(): static {
         self::$cache->deleteMulti([

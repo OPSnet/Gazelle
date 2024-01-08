@@ -52,7 +52,7 @@ if (isset($Log) && $Log) {
     $Description .= ' <a href="log.php?search=' . $Log . '">Search Log</a>';
 }
 
-if (empty($NoHTML) && $Error != -1) {
+if (empty($NoHTML) && isset($Error) && $Error != -1) {
     echo $Twig->render('error.twig', [
         'title'       => $Title,
         'description' => $Description,

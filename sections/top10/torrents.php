@@ -49,7 +49,7 @@ $groupByToggleQuery .= 'groups=' . $groupByToggleName;
 
 $context = [];
 // Filter out common parameters that are not needed in getTopTorrents to get more cache hits
-$getParameters = array_filter($_GET, function ($k) { return !in_array($k, ['advanced', 'details', 'limit']); }, ARRAY_FILTER_USE_KEY);
+$getParameters = array_filter($_GET, fn($k) => !in_array($k, ['advanced', 'details', 'limit']), ARRAY_FILTER_USE_KEY);
 if (in_array($details, ['all', 'day'])) {
     $context[] = [
         'caption' => 'Most Active Torrents Uploaded in the Past Day',

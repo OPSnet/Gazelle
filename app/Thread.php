@@ -9,7 +9,7 @@ namespace Gazelle;
  */
 
 class Thread extends BaseObject {
-    final const tableName     = 'thread';
+    final public const tableName     = 'thread';
     protected const CACHE_KEY = "threadv2_%d";
 
     public function flush(): static {

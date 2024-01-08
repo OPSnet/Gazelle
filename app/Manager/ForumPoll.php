@@ -3,8 +3,8 @@
 namespace Gazelle\Manager;
 
 class ForumPoll extends \Gazelle\BaseManager {
-    final const CACHE_FEATURED_POLL = 'polls_featured';
-    protected const ID_KEY = 'zz_fpoll_%d';
+    final public const CACHE_FEATURED_POLL = 'polls_featured';
+    final protected const ID_KEY = 'zz_fpoll_%d';
 
     /**
      * Create a poll for forum thread

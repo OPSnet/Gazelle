@@ -7,11 +7,11 @@ use Gazelle\Enum\TorrentFlag;
 class Torrent extends TorrentAbstract {
     use Pg;
 
-    final const tableName               = 'torrents';
-    final const CACHE_KEY               = 't2_%d';
-    final const CACHE_FOLDERNAME        = 'foldername_%s';
-    final const CACHE_KEY_PEERLIST_PAGE = 'peerlist_page_%d_%d';
-    final const USER_RECENT_UPLOAD      = 'u_recent_up_%d';
+    final public const tableName               = 'torrents';
+    final public const CACHE_KEY               = 't2_%d';
+    final public const CACHE_FOLDERNAME        = 'foldername_%s';
+    final public const CACHE_KEY_PEERLIST_PAGE = 'peerlist_page_%d_%d';
+    final public const USER_RECENT_UPLOAD      = 'u_recent_up_%d';
 
     public function location(): string { return "torrents.php?id={$this->groupId()}&torrentid={$this->id}#torrent{$this->id}"; }
 
@@ -106,7 +106,7 @@ class Torrent extends TorrentAbstract {
         $tor = new \OrpheusNET\BencodeTorrent\BencodeTorrent;
         try {
             $tor->decodeString($contents);
-        } catch (\RuntimeException $e) {
+        } catch (\RuntimeException) {
             return '';
         }
         $tor->cleanDataDictionary();

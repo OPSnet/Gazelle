@@ -26,7 +26,7 @@ class Similar extends \Gazelle\Base {
     protected const CACHE_KEY    = 'artsim_%d';
     protected const POSITION_KEY = 'artpos_%d';
 
-    protected array|null $info;
+    protected array $info;
 
     public function __construct(
         protected \Gazelle\Artist $artist,

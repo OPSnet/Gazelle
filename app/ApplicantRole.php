@@ -3,8 +3,8 @@
 namespace Gazelle;
 
 class ApplicantRole extends BaseObject {
-    final const tableName = 'applicant_role';
-    final const CACHE_KEY = 'approlev2_%d';
+    final public const tableName = 'applicant_role';
+    final public const CACHE_KEY = 'approlev2_%d';
 
     public function flush(): static {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));

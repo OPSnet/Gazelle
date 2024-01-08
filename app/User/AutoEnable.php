@@ -6,8 +6,8 @@ use Gazelle\Util\Mail;
 use Gazelle\Util\Time;
 
 class AutoEnable extends \Gazelle\BaseUser {
-    final const tableName        = 'users_enable_requests';
-    final const CACHE_TOTAL_OPEN = 'num_enable_requests';
+    final public const tableName        = 'users_enable_requests';
+    final protected const CACHE_TOTAL_OPEN = 'num_enable_requests';
 
     public function flush(): static { $this->user()->flush(); return $this; }
 

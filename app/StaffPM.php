@@ -3,7 +3,7 @@
 namespace Gazelle;
 
 class StaffPM extends BaseObject {
-    final const tableName = 'staff_pm_conversations';
+    final public const tableName = 'staff_pm_conversations';
 
     public function flush(): static {
         $this->info = [];

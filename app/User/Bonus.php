@@ -3,11 +3,11 @@
 namespace Gazelle\User;
 
 class Bonus extends \Gazelle\BaseUser {
-    final const tableName          = 'bonus_history';
-    final const CACHE_PURCHASE     = 'bonus_purchase_%d';
-    final const CACHE_SUMMARY      = 'bonus_summary_%d';
-    final const CACHE_HISTORY      = 'bonus_history_%d_%d';
-    final const CACHE_POOL_HISTORY = 'bonus_pool_history_%d';
+    final public const tableName          = 'bonus_history';
+    final protected const CACHE_PURCHASE     = 'bonus_purchase_%d';
+    final protected const CACHE_SUMMARY      = 'bonus_summary_%d';
+    final protected const CACHE_HISTORY      = 'bonus_history_%d_%d';
+    final protected const CACHE_POOL_HISTORY = 'bonus_pool_history_%d';
 
     public function flush(): static {
         $this->user->flush();

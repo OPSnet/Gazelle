@@ -3,7 +3,7 @@
 namespace Gazelle\Manager;
 
 class PM extends \Gazelle\BaseUser {
-    final const tableName  = 'pm_conversations_users';
+    final public const tableName  = 'pm_conversations_users';
     protected const ID_KEY = 'zz_pm_%d_%d';
 
     public function flush(): static     { $this->user()->flush(); return $this; }

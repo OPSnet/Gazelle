@@ -37,9 +37,6 @@ class SiteLog extends \Gazelle\Base {
             }
             return $this->decorate(self::$db->to_array(false, MYSQLI_NUM, false));
         }
-
-        // full text search required: hit Sphinx
-        $page = min(SPHINX_MAX_MATCHES / TORRENTS_PER_PAGE, $page);
         $sq = new \SphinxqlQuery();
         $sq->select('id')
             ->from('log, log_delta')

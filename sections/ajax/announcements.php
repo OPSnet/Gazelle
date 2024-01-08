@@ -2,8 +2,8 @@
 
 $newsMan = new Gazelle\Manager\News;
 $newsReader = new \Gazelle\WitnessTable\UserReadNews;
-if ($newsMan->latestId() < $newsReader->lastRead($Viewer->id())) {
-    $newsReader->witness($Viewer->id());
+if ($newsMan->latestId() < $newsReader->lastRead($Viewer)) {
+    $newsReader->witness($Viewer);
 }
 
 $headlines = $newsMan->headlines();

@@ -3,9 +3,10 @@
 namespace Gazelle\User;
 
 class Subscription extends \Gazelle\BaseUser {
-    final const tableName     = 'users_subscriptions';
-    protected const CACHE_KEY = 'subscriptions_user_%d';
-    protected const NEW_KEY   = 'subscriptions_user_new_%d';
+    final public const tableName    = 'users_subscriptions';
+    final protected const CACHE_KEY = 'subscriptions_user_%d';
+    final protected const NEW_KEY   = 'subscriptions_user_new_%d';
+
     protected array $threadList;
 
     public function flush(): static {

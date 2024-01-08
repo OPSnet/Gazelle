@@ -5,9 +5,9 @@ namespace Gazelle\User;
 class Warning extends \Gazelle\BaseUser {
     use \Gazelle\Pg;
 
-    final const tableName = 'user_warning';
+    final public const tableName = 'user_warning';
 
-    protected array|null $info;
+    protected array $info;
 
     public function flush(): static {
         unset($this->info);
@@ -80,7 +80,7 @@ class Warning extends \Gazelle\BaseUser {
      * Remove any current warnings
      */
     public function clear(): int {
-        $affected = (int)$this->pg()->prepared_query("
+        $affected = $this->pg()->prepared_query("
             update user_warning set
                 warning = tstzrange(lower(warning), greatest(lower(warning), now()))
             where upper(warning) > now()

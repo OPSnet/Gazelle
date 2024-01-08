@@ -3,7 +3,7 @@
 namespace Gazelle;
 
 class Wiki extends BaseObject {
-    final const tableName = 'wiki_articles';
+    final public const tableName = 'wiki_articles';
     protected const CACHE_KEY = 'wiki_%d';
 
     public function flush(): static {

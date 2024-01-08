@@ -103,7 +103,7 @@ class UserToken extends \Gazelle\BaseManager {
     }
 
     public function removeUser(\Gazelle\User $user): int {
-        return (int)$this->pg()->prepared_query("
+        return $this->pg()->prepared_query("
             delete from user_token where id_user = ?
             ", $user->id()
         );

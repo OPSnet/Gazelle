@@ -3,7 +3,7 @@
 namespace Gazelle\Manager;
 
 class TGroup extends \Gazelle\BaseManager {
-    final const ID_KEY = 'zz_tg_%d';
+    final public const ID_KEY = 'zz_tg_%d';
 
     protected const VOTE_SIMILAR = 'vote_similar_albums_%d';
 

@@ -3,7 +3,7 @@
 namespace Gazelle;
 
 class Privilege extends BaseObject {
-    final const tableName = 'permissions';
+    final public const tableName = 'permissions';
 
     public function flush(): static { $this->info = []; return $this; }
     public function location(): string { return ''; }

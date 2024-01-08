@@ -132,10 +132,8 @@ if (!$TargetAliasID || $TargetAliasID == $oldAliasId) {
         WHERE AliasID = ?
         ", $oldAliasId
     );
-    if (!empty($Requests)) {
-        foreach ($Requests as $RequestID) {
-            $reqMan->findById($RequestID)?->updateSphinx();
-        }
+    foreach ($Requests as $RequestID) {
+        $reqMan->findById($RequestID)?->updateSphinx();
     }
     if ($ArtistID != $TargetArtistID) {
         $db->prepared_query("

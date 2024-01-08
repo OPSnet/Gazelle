@@ -10,7 +10,7 @@ $torMan = new Gazelle\Manager\Torrent;
 $result = [];
 
 // Filter out common parameters that are not needed in getTopTorrents to get more cache hits
-$getParameters = array_filter($_GET, function ($k) { return !in_array($k, ['action', 'details', 'limit', 'type']); }, ARRAY_FILTER_USE_KEY);
+$getParameters = array_filter($_GET, fn($k) => !in_array($k, ['action', 'details', 'limit', 'type']), ARRAY_FILTER_USE_KEY);
 
 if ($details == 'all' || $details == 'day') {
     $result[] = [

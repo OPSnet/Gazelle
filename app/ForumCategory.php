@@ -3,8 +3,8 @@
 namespace Gazelle;
 
 class ForumCategory extends BaseObject {
-    final const tableName = 'forums_categories';
-    final const CACHE_KEY = 'forum_cat_%d';
+    final public const tableName = 'forums_categories';
+    final public const CACHE_KEY = 'forum_cat_%d';
 
     public function flush(): static {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));

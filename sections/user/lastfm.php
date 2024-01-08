@@ -10,7 +10,7 @@ if (!$username && $mode != 'weekly') {
     exit;
 }
 echo json_encode(match ($mode) {
-    'flush'       => $username == $lastfm->username($Viewer) ? $lastfm->flush($username) : false,
+    'flush'       => $username == $lastfm->username($Viewer) && $lastfm->flush($username),
     'last_track'  => $lastfm->lastTrack($username),
     'top_artists' => $lastfm->topArtists($username),
     'top_albums'  => $lastfm->topAlbums($username),

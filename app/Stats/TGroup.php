@@ -8,11 +8,11 @@ class TGroup extends \Gazelle\BaseObject {
      * want to do with a TGroup.
      */
 
-    final const tableName         = 'tgroup_summary';
+    final public const tableName         = 'tgroup_summary';
     protected const CACHE_GENERAL = 'tg_stat_%d';
 
     // Cache the underlying db calls
-    protected array|null $info;
+    protected array $info;
 
     public function flush(): static {
         unset($this->info);

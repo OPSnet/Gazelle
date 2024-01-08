@@ -3,8 +3,8 @@
 namespace Gazelle\User;
 
 class Donor extends \Gazelle\BaseUser {
-    final const tableName     = 'donor_rewards';
-    final const pkName        = 'UserID';
+    final public const tableName     = 'donor_rewards';
+    final public const pkName        = 'UserID';
     protected const CACHE_KEY = 'donor_%d';
 
     protected bool $isDonor;

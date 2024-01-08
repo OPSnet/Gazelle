@@ -5,10 +5,10 @@ namespace Gazelle\User;
 class ExternalProfile extends \Gazelle\BaseUser {
     use \Gazelle\Pg;
 
-    final const tableName = 'user_external_profile';
-    final const pkName    = 'id_user';
+    final public const tableName = 'user_external_profile';
+    final public const pkName    = 'id_user';
 
-    protected array|null $info;
+    protected array $info;
 
     public function flush(): static {
         unset($this->info);

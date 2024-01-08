@@ -4,10 +4,10 @@ namespace Gazelle\Manager;
 
 class AutoEnable extends \Gazelle\BaseManager {
     // Outcomes
-    final const PENDING   = 0;
-    final const APPROVED  = 1;
-    final const DENIED    = 2;
-    final const DISCARDED = 3;
+    final public const PENDING   = 0;
+    final public const APPROVED  = 1;
+    final public const DENIED    = 2;
+    final public const DISCARDED = 3;
 
     // search for the admin toolbox
     protected array $where = [];
@@ -16,7 +16,7 @@ class AutoEnable extends \Gazelle\BaseManager {
     protected array $args = [];
 
     // Cache key to store the number of enable requests
-    final const CACHE_TOTAL_OPEN = 'num_enable_requests';
+    final public const CACHE_TOTAL_OPEN = 'num_enable_requests';
 
     /**
      * Handle a new enable request

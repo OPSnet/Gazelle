@@ -20,7 +20,7 @@ class ImageProxy {
      */
     public function badHost(string $url): ?string {
         foreach (IMAGE_HOST_BANNED as $host) { /** @phpstan-ignore-line */
-            if (stripos($url, (string) $host) !== false) {
+            if (stripos($url, $host) !== false) {
                 return $host;
             }
         }

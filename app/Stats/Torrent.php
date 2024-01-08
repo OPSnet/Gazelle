@@ -3,12 +3,12 @@
 namespace Gazelle\Stats;
 
 class Torrent extends \Gazelle\Base {
-    protected array|null $info;
+    protected array $info;
 
-    final const CACHE_KEY      = 'stat_global_torrent';
-    final const PEER_KEY       = 'stat_global_peer';
-    final const TORRENT_FLOW   = 'stat_t_flow';
-    final const CATEGORY_TOTAL = 'stat_tcat';
+    final public const CACHE_KEY      = 'stat_global_torrent';
+    final public const PEER_KEY       = 'stat_global_peer';
+    final public const TORRENT_FLOW   = 'stat_t_flow';
+    final public const CATEGORY_TOTAL = 'stat_tcat';
 
     public function flush(): static {
         self::$cache->deleteMulti([

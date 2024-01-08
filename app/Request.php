@@ -3,7 +3,7 @@
 namespace Gazelle;
 
 class Request extends BaseObject {
-    final const tableName         = 'requests';
+    final public const tableName         = 'requests';
     protected const CACHE_REQUEST = "request_%d";
     protected const CACHE_ARTIST  = "request_artists_%d";
     protected const CACHE_VOTE    = "request_votes_%d";

@@ -14,7 +14,7 @@ namespace Gazelle;
 class PM extends Base {
     public final const CACHE_KEY = 'pm2_%d_%d';
 
-    protected array|null $info;
+    protected array $info;
 
     public function __construct(
         protected int $id,

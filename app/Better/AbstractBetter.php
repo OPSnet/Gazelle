@@ -3,7 +3,7 @@
 namespace Gazelle\Better;
 
 abstract class AbstractBetter extends \Gazelle\Base {
-    final const CACHE_TOTAL = 'better_%s_total';
+    final public const CACHE_TOTAL = 'better_%s_total';
 
     protected string $baseQuery;
     protected string $countBy;

@@ -52,7 +52,7 @@ class UserRank extends Base {
     protected array $rank;
     protected float $score = 0.0;
 
-    final const PREFIX = 'percentiles_'; // Prefix for memcache keys, to make life easier
+    final public const PREFIX = 'percentiles_'; // Prefix for memcache keys, to make life easier
 
     public function __construct(protected \Gazelle\UserRank\Configuration $config, array $dimension) {
         $this->dimension = $dimension;

@@ -8,16 +8,16 @@ class Notification extends \Gazelle\Base {
     use \Gazelle\Pg;
 
     // Option types
-    final const OPT_PUSH             = 3;
-    final const OPT_POPUP_PUSH       = 4;
-    final const OPT_TRADITIONAL_PUSH = 5;
+    final public const OPT_PUSH             = 3;
+    final public const OPT_POPUP_PUSH       = 4;
+    final public const OPT_TRADITIONAL_PUSH = 5;
 
     // Types. These names must correspond to column names in users_notifications_settings
-    final const NEWS         = 'News';
-    final const BLOG         = 'Blog';
-    final const INBOX        = 'Inbox';
-    final const QUOTES       = 'Quotes';
-    final const GLOBALNOTICE = 'Global';
+    final public const NEWS         = 'News';
+    final public const BLOG         = 'Blog';
+    final public const INBOX        = 'Inbox';
+    final public const QUOTES       = 'Quotes';
+    final public const GLOBALNOTICE = 'Global';
 
     /**
      * This method is called from a scheduled task. Its job is to look

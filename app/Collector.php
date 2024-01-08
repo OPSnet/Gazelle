@@ -41,8 +41,8 @@ ORDER BY t.GroupID ASC, sequence DESC, tls.Seeders ASC
 */
 
 abstract class Collector extends Base  {
-    final const CHUNK_SIZE = 100;
-    final const ORDER_BY = ['t.RemasterTitle DESC', 'tls.Seeders ASC', 't.Size ASC'];
+    final public const CHUNK_SIZE = 100;
+    final public const ORDER_BY = ['t.RemasterTitle DESC', 'tls.Seeders ASC', 't.Size ASC'];
 
     protected string $sql  = '';
     protected array $args = [];

@@ -3,7 +3,7 @@
 namespace Gazelle\User;
 
 class NotificationSearch extends \Gazelle\BaseUser {
-    final const tableName = 'users_notify_torrents';
+    final public const tableName = 'users_notify_torrents';
 
     protected bool $dirty = true;
     protected int $filterId;

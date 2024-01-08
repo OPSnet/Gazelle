@@ -5,8 +5,8 @@ namespace Gazelle;
 use Gazelle\Enum\FeaturedAlbumType;
 
 class FeaturedAlbum extends BaseObject {
-    final const tableName = 'featured_albums';
-    final const FEATURED  = 'feat_%s_%d';
+    final public const tableName = 'featured_albums';
+    final public const FEATURED  = 'feat_%s_%d';
 
     public function __construct(
         protected FeaturedAlbumType $type,

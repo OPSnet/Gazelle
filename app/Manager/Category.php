@@ -3,8 +3,8 @@
 namespace Gazelle\Manager;
 
 class Category extends \Gazelle\Base {
-    final const NAME_KEY   = 'cat_name';
-    final const REPORT_KEY = 'cat_report';
+    final protected const NAME_KEY   = 'cat_name';
+    final protected const REPORT_KEY = 'cat_report';
 
     protected array $info = [];
 
@@ -14,7 +14,6 @@ class Category extends \Gazelle\Base {
     }
 
     public function findIdByName(string $name): ?int {
-        $list = $this->nameList();
         $found = current(array_filter(
             $this->nameList(),
             fn($n) => $n['name'] == $name

@@ -3,8 +3,8 @@
 namespace Gazelle\Comment;
 
 abstract class AbstractComment extends \Gazelle\BaseObject {
-    final const tableName      = 'comments';
-    protected const PAGE_TOTAL = '%s_comments_%d';
+    final public const tableName     = 'comments';
+    final protected const PAGE_TOTAL = '%s_comments_%d';
 
     protected int   $userId;
     protected int   $lastRead = 0;

@@ -7,12 +7,12 @@ use Gazelle\Util\Mail;
 use Gazelle\Util\Proxy;
 
 class Referral extends \Gazelle\Base {
-    final const CACHE_ACCOUNTS = 'referral_accounts';
-    final const CACHE_BOUNCER = 'bouncer_status';
+    final protected const CACHE_ACCOUNTS = 'referral_accounts';
+    final protected const CACHE_BOUNCER = 'bouncer_status';
     // Do not change the ordering in this array after launch.
-    final const ACCOUNT_TYPES = ['Gazelle (API)', 'Gazelle Games', 'Tentacles', 'Luminance', 'Gazelle (HTML)', 'PTP'];
+    final protected const ACCOUNT_TYPES = ['Gazelle (API)', 'Gazelle Games', 'Tentacles', 'Luminance', 'Gazelle (HTML)', 'PTP'];
     // Accounts which use the user ID instead of username.
-    final const ID_TYPES = [3, 4, 5];
+    final protected const ID_TYPES = [3, 4, 5];
 
     private array $accounts;
     private readonly \Gazelle\Util\Proxy $proxy;

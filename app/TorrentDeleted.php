@@ -5,8 +5,8 @@ namespace Gazelle;
 use Gazelle\Enum\TorrentFlag;
 
 class TorrentDeleted extends TorrentAbstract {
-    final const tableName = 'deleted_torrents';
-    final const CACHE_KEY = 'tdel_%d';
+    final public const tableName = 'deleted_torrents';
+    final public const CACHE_KEY = 'tdel_%d';
 
     public function location(): string { return "log.php?search=Torrent+" . $this->id; }
 

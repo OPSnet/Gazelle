@@ -3,7 +3,7 @@
 namespace Gazelle\Search;
 
 class Forum extends \Gazelle\BaseUser {
-    final const tableName = 'forums';
+    final public const tableName = 'forums';
 
     protected array $permittedForums = [];
     protected array $forbiddenForums = [];

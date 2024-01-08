@@ -40,7 +40,7 @@ class Report extends \Gazelle\Base {
     }
 
     public function order(): SearchReportOrder {
-        return isset($this->order) ? $this->order : SearchReportOrder::createdDesc;
+        return $this->order ?? SearchReportOrder::createdDesc;
     }
 
     public function total(): int {

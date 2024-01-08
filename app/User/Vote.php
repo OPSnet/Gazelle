@@ -3,10 +3,10 @@
 namespace Gazelle\User;
 
 class Vote extends \Gazelle\BaseUser {
-    final const tableName = 'users_votes';
-    final const Z_VAL     = 1.281728756502709;  // original
-    final const Z_VAL_90  = 1.6448536251336989; // p-value .90
-    final const Z_VAL_95  = 1.959963986120195;  //         .95
+    final public const tableName = 'users_votes';
+    final protected const Z_VAL     = 1.281728756502709;  // original
+    final protected const Z_VAL_90  = 1.6448536251336989; // p-value .90
+    final protected const Z_VAL_95  = 1.959963986120195;  //         .95
 
     final public const UPVOTE   = 1;
     final public const DOWNVOTE = 2;

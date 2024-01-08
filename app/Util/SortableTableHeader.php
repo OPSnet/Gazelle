@@ -5,8 +5,8 @@ namespace Gazelle\Util;
 class SortableTableHeader {
     private const SORT_DIRS = ['asc' => 'desc', 'desc' => 'asc', '' => ''];
 
-    private string $currentSortKey;
-    private string $currentSortDir;
+    private readonly string $currentSortKey;
+    private readonly string $currentSortDir;
 
     /**
      * SortableTableHeader constructor.

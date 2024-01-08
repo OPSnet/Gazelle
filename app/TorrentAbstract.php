@@ -7,8 +7,8 @@ use Gazelle\Enum\LeechType;
 use Gazelle\Enum\TorrentFlag;
 
 abstract class TorrentAbstract extends BaseObject {
-    final const CACHE_LOCK       = 'torrent_lock_%d';
-    final const CACHE_REPORTLIST = 't_rpt2_%d';
+    final public const CACHE_LOCK       = 'torrent_lock_%d';
+    final public const CACHE_REPORTLIST = 't_rpt2_%d';
 
     protected TGroup $tgroup;
     protected User   $viewer;

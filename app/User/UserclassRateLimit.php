@@ -3,9 +3,9 @@
 namespace Gazelle\User;
 
 class UserclassRateLimit extends \Gazelle\BaseUser {
-    final const tableName = 'permission_rate_limit';
+    final public const tableName = 'permission_rate_limit';
 
-    protected array|null $info;
+    protected array $info;
 
     public function flush(): static {
         $this->user()->flush();

@@ -3,9 +3,9 @@
 namespace Gazelle;
 
 class Applicant extends BaseObject {
-    final const tableName        = 'applicant';
-    final const CACHE_KEY        = 'applicantv2_%d';
-    final const ENTRIES_PER_PAGE = 1000; // TODO: change to 50 and implement pagination
+    final public const tableName        = 'applicant';
+    final public const CACHE_KEY        = 'applicantv2_%d';
+    final public const ENTRIES_PER_PAGE = 1000; // TODO: change to 50 and implement pagination
 
     public function flush(): static {
         (new Manager\Applicant)->flush();

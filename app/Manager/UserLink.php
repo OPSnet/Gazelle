@@ -3,7 +3,7 @@
 namespace Gazelle\Manager;
 
 class UserLink extends \Gazelle\BaseUser {
-    final const tableName = 'users_dupes';
+    final public const tableName = 'users_dupes';
 
     public function flush(): static { $this->user()->flush(); return $this; }
     public function link(): string { return $this->user()->link(); }

@@ -8,16 +8,16 @@ use Gazelle\Exception\UserCreatorException;
 use Gazelle\Util\Time;
 
 class UserCreator extends Base {
-    protected bool $newInstall;
-    protected array $adminComment = [];
-    protected array $email = [];
-    protected int|null $id;
-    protected int|null $permissionId;
-    protected string|null $announceKey;
-    protected string|null $inviteKey;
-    protected string|null $ipaddr;
-    protected string|null $passHash;
-    protected string|null $username;
+    protected bool   $newInstall;
+    protected array  $adminComment = [];
+    protected array  $email = [];
+    protected int    $id;
+    protected int    $permissionId;
+    protected string $announceKey;
+    protected string $inviteKey;
+    protected string $ipaddr;
+    protected string $passHash;
+    protected string $username;
 
     public function create(): User {
         if (!isset($this->ipaddr)) {
@@ -43,10 +43,6 @@ class UserCreator extends Base {
         } else {
             $this->permissionId = USER;
         }
-
-        $authKey = substr(strtr(base64_encode(hash('sha256', hash('sha256', randomString(64), true), true)), '+/', '-_'), 0, 32);
-        $infoFields = ['AuthKey'];
-        $infoArgs = [$authKey];
 
         if (!isset($this->inviteKey)) {
             $inviter = null;
@@ -199,13 +195,13 @@ class UserCreator extends Base {
         $this->newInstall   = false;
         $this->adminComment = [];
         $this->email        = [];
-        $this->id           = null;
-        $this->announceKey  = null;
-        $this->inviteKey    = null;
-        $this->ipaddr       = null;
-        $this->passHash     = null;
-        $this->permissionId = null;
-        $this->username     = null;
+        unset($this->id);
+        unset($this->announceKey);
+        unset($this->inviteKey);
+        unset($this->ipaddr);
+        unset($this->passHash);
+        unset($this->permissionId);
+        unset($this->username);
     }
 
     /**

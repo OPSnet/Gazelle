@@ -21,7 +21,7 @@ class SSLHost extends \Gazelle\Base {
         }
         foreach ($output as $line) {
             [$event, $date] = explode('=', $line);
-            $date = date('Y-m-d H:m:s', (int)strtotime((string)$date));
+            $date = date('Y-m-d H:m:s', (int)strtotime($date));
             switch ($event) {
                 case 'notAfter':
                     $notAfter = $date;

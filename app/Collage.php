@@ -13,14 +13,14 @@ class Collage extends BaseObject {
      * (artists or torrent groups).
      */
 
-    final const tableName    = 'collages';
-    final const CACHE_KEY    = 'collagev4_%d';
-    final const SUBS_KEY     = 'collage_subs_user_%d';
-    final const SUBS_NEW_KEY = 'collage_subs_user_new_%d';
+    final public const tableName    = 'collages';
+    final public const CACHE_KEY    = 'collagev4_%d';
+    final public const SUBS_KEY     = 'collage_subs_user_%d';
+    final public const SUBS_NEW_KEY = 'collage_subs_user_new_%d';
 
-    protected bool       $lockedForUser = false;
-    protected array|null $userSubscriptions;
-    protected User       $viewer;
+    protected bool  $lockedForUser = false;
+    protected array $userSubscriptions;
+    protected User  $viewer;
 
     protected Collage\AbstractCollage $collage;
 
@@ -37,15 +37,15 @@ class Collage extends BaseObject {
 
     public function flush(): static {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
-        $this->userSubscriptions = null;
-        $this->info = null;
+        unset($this->userSubscriptions);
+        unset($this->info);
         return $this;
     }
     public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->name())); }
     public function location(): string { return 'collages.php?id=' . $this->id; }
 
     public function info(): array {
-        if (isset($this->info) && !empty($this->info)) {
+        if (isset($this->info)) {
             return $this->info;
         }
         $key = sprintf(self::CACHE_KEY, $this->id);
@@ -180,7 +180,7 @@ class Collage extends BaseObject {
                 ", $user->id(), $this->id
             );
             $affected = self::$db->affected_rows();
-            if (!empty($this->userSubscriptions)) {
+            if (isset($this->userSubscriptions)) {
                 unset($this->userSubscriptions[$user->id()]);
             }
             $delta = -1;
@@ -215,7 +215,7 @@ class Collage extends BaseObject {
      * they have subscribed to this collage.
      */
     public function isSubscribed(User $user): bool {
-        if (empty($this->userSubscriptions)) {
+        if (!isset($this->userSubscriptions)) {
             $key = sprintf(self::SUBS_KEY, $user->id());
             $subs = self::$cache->get_value($key);
             if ($subs === false) {

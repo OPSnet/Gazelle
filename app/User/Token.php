@@ -7,7 +7,7 @@ use Gazelle\Enum\UserTokenType;
 class Token extends \Gazelle\BaseUser {
     use \Gazelle\Pg;
 
-    final const tableName = 'user_token';
+    final public const tableName = 'user_token';
 
     public function flush(): static { unset($this->info); return $this; }
 

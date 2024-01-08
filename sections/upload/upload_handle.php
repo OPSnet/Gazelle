@@ -535,7 +535,7 @@ if ($tgroup) {
         description:     $Properties['GroupDescription'],
         image:           $Properties['Image'],
         releaseType:     $Properties['ReleaseType'],
-        showcase:        (bool)($Viewer->permitted('torrents_edit_vanityhouse') && isset($_POST['vanity_house'])),
+        showcase:        $Viewer->permitted('torrents_edit_vanityhouse') && isset($_POST['vanity_house']),
     );
     if ($isMusicUpload) {
         $tgroup->addArtists($ArtistRoleList, $ArtistNameList, $Viewer, new Gazelle\Manager\Artist, $log);

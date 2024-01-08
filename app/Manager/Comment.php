@@ -3,7 +3,7 @@
 namespace Gazelle\Manager;
 
 class Comment extends \Gazelle\BaseManager {
-    final const CATALOG = '%s_comments_%d_cat_%d';
+    final public const CATALOG = '%s_comments_%d_cat_%d';
 
     protected function className(string $page): string {
         return match ($page) {

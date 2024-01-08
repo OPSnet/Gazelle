@@ -5,7 +5,7 @@ namespace Gazelle\Torrent;
 use Gazelle\Enum\TorrentFlag;
 
 class Report extends \Gazelle\BaseObject {
-    final const tableName = 'reportsv2';
+    final public const tableName = 'reportsv2';
 
     protected \Gazelle\TorrentAbstract|null|false $torrent = false;
 

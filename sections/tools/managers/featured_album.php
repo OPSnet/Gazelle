@@ -14,16 +14,11 @@ $manager = new Gazelle\Manager\FeaturedAlbum;
 
 if (isset($_GET['unfeature'])) {
     authorize();
-    switch ($_GET['unfeature']) {
-        case 'aotm':
-            $manager->findByType(FeaturedAlbumType::AlbumOfTheMonth)?->unfeature();
-            break;
-        case 'showcase':
-            $manager->findByType(FeaturedAlbumType::Showcase)?->unfeature();
-            break;
-        default:
-            error(403);
-    }
+    match ($_GET['unfeature']) {
+        'aotm'     => $manager->findByType(FeaturedAlbumType::AlbumOfTheMonth)?->unfeature(),
+        'showcase' => $manager->findByType(FeaturedAlbumType::Showcase)?->unfeature(),
+        default    => error(403),
+    };
     header('Location: tools.php?action=featured_album');
     exit;
 }

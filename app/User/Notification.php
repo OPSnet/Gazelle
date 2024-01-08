@@ -3,15 +3,15 @@
 namespace Gazelle\User;
 
 class Notification extends \Gazelle\BaseUser {
-    final const tableName     = 'users_notifications_settings';
+    final public const tableName     = 'users_notifications_settings';
     protected const CACHE_KEY = 'u_notif_%d';
 
-    final const DISPLAY_DISABLED = 0;
-    final const DISPLAY_POPUP = 1;
-    final const DISPLAY_TRADITIONAL = 2;
-    final const DISPLAY_PUSH = 3;
-    final const DISPLAY_POPUP_PUSH = 4;
-    final const DISPLAY_TRADITIONAL_PUSH = 5;
+    final public const DISPLAY_DISABLED = 0;
+    final public const DISPLAY_POPUP = 1;
+    final public const DISPLAY_TRADITIONAL = 2;
+    final public const DISPLAY_PUSH = 3;
+    final public const DISPLAY_POPUP_PUSH = 4;
+    final public const DISPLAY_TRADITIONAL_PUSH = 5;
 
     protected array  $alert;
     protected array  $config;

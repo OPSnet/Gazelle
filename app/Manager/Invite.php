@@ -3,7 +3,7 @@
 namespace Gazelle\Manager;
 
 class Invite extends \Gazelle\Base {
-    protected string|null $search;
+    protected string $search;
 
     public function create(\Gazelle\User $user, string $email, string $notes, string $reason, string $source): ?\Gazelle\Invite {
         self::$db->begin_transaction();

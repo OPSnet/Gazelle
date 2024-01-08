@@ -3,7 +3,7 @@
 namespace Gazelle\Manager;
 
 class ClientWhitelist extends \Gazelle\Base {
-    final const CACHE_KEY = 'whitelisted_clients';
+    final protected const CACHE_KEY = 'whitelisted_clients';
 
      /**
       * Create a client

@@ -8,7 +8,7 @@ namespace Gazelle\Manager;
  */
 
 class IPv4 extends \Gazelle\Base {
-    final const CACHE_KEY = 'ipv4_bans_';
+    final protected const CACHE_KEY = 'ipv4_bans_';
 
     protected string $filterNotes;
     protected string $filterIpaddr;
@@ -276,7 +276,7 @@ class IPv4 extends \Gazelle\Base {
             ", $id
         );
         $affected = self::$db->affected_rows();
-        self::$cache->delete_value(self::CACHE_KEY . (string)$A);
+        self::$cache->delete_value(self::CACHE_KEY . $A);
         return $affected;
     }
 }

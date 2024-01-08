@@ -3,7 +3,7 @@
 namespace Gazelle;
 
 class StaffGroup extends BaseObject {
-    final const tableName = 'staff_groups';
+    final public const tableName = 'staff_groups';
 
     public function flush(): static {
         self::$cache->delete_value('staff');

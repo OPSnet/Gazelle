@@ -7,9 +7,9 @@ use MoneroIntegrations\MoneroPhp;
 class Monero {
     use Pg;
 
-    private string $spendKey;
-    private string $viewKey;
-    private MoneroPhp\Cryptonote $cryptoNote;
+    private readonly string $spendKey;
+    private readonly string $viewKey;
+    private readonly MoneroPhp\Cryptonote $cryptoNote;
     private const networkByte = '12'; // this is hex, 0x12 == 18
 
     protected const paymentIdLength = 8;
@@ -34,7 +34,6 @@ class Monero {
     /**
      * Find the current payment id for user.
      *
-     * @param int $userId
      * @return string payment id in hex or null if no payment id exists
      */
     protected function findPaymentIdByUserId(int $userId): ?string {
@@ -53,7 +52,6 @@ class Monero {
     /**
      * Find the current payment id or create a new one for user.
      *
-     * @param int $userId
      * @return string payment id in hex
      */
     protected function createPaymentIdByUserId(int $userId): string {

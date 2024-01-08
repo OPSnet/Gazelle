@@ -3,7 +3,7 @@
 namespace Gazelle\Collage;
 
 class TGroup extends AbstractCollage {
-    protected array|null $groupIds;
+    protected array $groupIds;
     protected array $sequence = [];
     protected array $torrentTags = [];
 
@@ -100,11 +100,11 @@ class TGroup extends AbstractCollage {
     }
 
     protected function flushTarget(int $tgroupId): void {
-        $this->groupIds = null;
         $this->flushAll([
             "torrent_collages_$tgroupId",
             "torrent_collages_personal_$tgroupId",
         ]);
+        unset($this->groupIds);
     }
 
     public function rebuildTagList(): array {

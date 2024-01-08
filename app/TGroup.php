@@ -6,17 +6,17 @@ use Gazelle\Enum\LeechReason;
 use Gazelle\Enum\LeechType;
 
 class TGroup extends BaseObject {
-    final const tableName            = 'torrents_group';
-    final const CACHE_KEY            = 'tg_%d';
-    final const CACHE_TLIST_KEY      = 'tlist_%d';
-    final const CACHE_COVERART_KEY   = 'tg_cov_%d';
-    final const USER_RECENT_UPLOAD   = 'u_recent_up_%d';
-    final const CACHE_REQUEST_TGROUP = 'req_tg_%d';
+    final public const tableName            = 'torrents_group';
+    final public const CACHE_KEY            = 'tg_%d';
+    final public const CACHE_TLIST_KEY      = 'tlist_%d';
+    final public const CACHE_COVERART_KEY   = 'tg_cover_%d';
+    final public const USER_RECENT_UPLOAD   = 'u_recent_up_%d';
+    final public const CACHE_REQUEST_TGROUP = 'req_tg_%d';
 
-    final protected const USER_RECENT_SNATCH   = 'u_recent_snatch_%d';
+    final protected const USER_RECENT_SNATCH = 'u_recent_snatch_%d';
 
-    protected int   $revisionId = 0;
-    protected bool  $showFallbackImage = true;
+    protected int  $revisionId = 0;
+    protected bool $showFallbackImage = true;
     protected ArtistRole\TGroup $artistRole;
     protected User              $viewer;
     protected Stats\TGroup      $stats;

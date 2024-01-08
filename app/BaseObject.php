@@ -9,7 +9,7 @@ abstract class BaseObject extends Base {
     protected array $updateField; // used to store field updates
     protected User  $updateUser;  // user performing the updates
 
-    protected array|null $info;
+    protected array $info;
 
     // FIXME: StaffPM breaks readonly-ness due to inheritance
     public function __construct(

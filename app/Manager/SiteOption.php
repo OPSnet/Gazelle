@@ -3,7 +3,7 @@
 namespace Gazelle\Manager;
 
 class SiteOption extends \Gazelle\Base {
-    final const CACHE_KEY = 'site_option_%s';
+    final protected const CACHE_KEY = 'site_option_%s';
 
     /**
      * Create a new option key/value pair.

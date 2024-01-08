@@ -3,7 +3,7 @@
 namespace Gazelle\User\Notification;
 
 abstract class AbstractNotification extends \Gazelle\BaseUser {
-    const tableName = '';
+    public const tableName = '';
 
     protected int    $context; // id of a table row
     protected int    $display;

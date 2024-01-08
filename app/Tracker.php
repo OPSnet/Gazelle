@@ -11,8 +11,8 @@ use Gazelle\Enum\LeechReason;
 use Gazelle\Util\Irc;
 
 class Tracker extends Base {
-    final const STATS_MAIN = 0;
-    final const STATS_USER = 1;
+    final public const STATS_MAIN = 0;
+    final public const STATS_USER = 1;
 
     protected static array $Requests = [];
     protected string|false $error    = false;
