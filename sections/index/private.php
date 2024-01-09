@@ -11,8 +11,8 @@ $newsReader = new Gazelle\WitnessTable\UserReadNews;
 $tgMan      = new Gazelle\Manager\TGroup;
 $torMan     = new Gazelle\Manager\Torrent;
 
-if ($newsMan->latestId() != -1 && $newsReader->lastRead($Viewer->id()) < $newsMan->latestId()) {
-    $newsReader->witness($Viewer->id());
+if ($newsMan->latestId() != -1 && $newsReader->lastRead($Viewer) < $newsMan->latestId()) {
+    $newsReader->witness($Viewer);
 }
 
 $contest     = $contestMan->currentContest();

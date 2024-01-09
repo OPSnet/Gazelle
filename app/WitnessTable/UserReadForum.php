@@ -8,7 +8,7 @@ class UserReadForum extends AbstractWitnessTable {
     protected function idColumn(): string    { return 'user_id'; }
     protected function valueColumn(): string { return 'last_read'; }
 
-    public function witness(int $userId): bool {
-        return $this->witnessDate($userId);
+    public function witness(\Gazelle\User $user): bool {
+        return $this->witnessDate($user);
     }
 }

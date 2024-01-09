@@ -103,8 +103,9 @@ class Blog extends BaseObject {
             DELETE FROM blog WHERE ID = ?
             ", $this->id
         );
+        $affected = self::$db->affected_rows();
         $this->flush();
-        return self::$db->affected_rows();
+        return $affected;
     }
 
     /**

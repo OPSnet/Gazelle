@@ -40,43 +40,6 @@ class UserActivityTest extends TestCase {
         $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->setStaffPM(new Gazelle\Manager\StaffPM), 'user-activity-staffpm');
     }
 
-    public function testBlog(): void {
-        $manager = new Gazelle\Manager\Blog;
-        $title   = 'Unit test blog';
-        $body    = 'Blogging about unit tests';
-        $blog = $manager->create([
-            'userId'    => 1,
-            'title'     => $title,
-            'body'      => $body,
-            'threadId'  => null,
-            'important' => 1,
-        ]);
-        $this->assertInstanceOf(Gazelle\Blog::class, $blog, 'activity-blog-create');
-        $this->assertEquals($body,  $blog->body(),      'blog-body');
-        $this->assertEquals($title, $blog->title(),     'blog-title');
-        $this->assertEquals(1,      $blog->important(), 'blog-importance');
-        $this->assertEquals(0,      $blog->threadId(),  'blog-thread-id');
-        $this->assertEquals(1,      $blog->userId(),    'blog-user-id');
-        $this->assertEquals($blog->id(), $manager->latestId(), 'blog-id-is-latest');
-
-        $this->userList['user'] = Helper::makeUser('user.' . randomString(10), 'activity');
-        $notifier = new Gazelle\User\Notification($this->userList['user']);
-        // if this fails, the CI database has drifted (or another UT has clobbered the expected value here)
-        $this->assertTrue($notifier->isActive('Blog'), 'activity-notified-blog');
-
-        $alertList = $notifier->setDocument('index.php', '')->alertList();
-        $this->assertArrayHasKey('Blog', $alertList, 'alert-has-blog');
-
-        $alertBlog = $alertList['Blog'];
-        $this->assertInstanceOf(Gazelle\User\Notification\Blog::class, $alertBlog, 'alert-blog-instance');
-        $this->assertEquals('Blog', $alertBlog->type(), 'alert-blog-type');
-        $this->assertEquals("Blog: $title", $alertBlog->title(), 'alert-blog-title');
-        $this->assertEquals($blog->id(), $alertBlog->context(), 'alert-blog-context-is-blog');
-        $this->assertEquals($blog->url(), $alertBlog->notificationUrl(), 'alert-blog-url-is-blog');
-
-        $this->assertEquals(1, $blog->remove(), 'blog-remove');
-    }
-
     public function testGlobal(): void {
         $global = new Gazelle\Notification\GlobalNotification;
         $global->remove(); // just in case

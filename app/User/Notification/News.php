@@ -8,7 +8,7 @@ class News extends AbstractNotification {
     }
 
     public function clear(): int {
-        if ((new \Gazelle\WitnessTable\UserReadNews)->witness($this->user->id())) {
+        if ((new \Gazelle\WitnessTable\UserReadNews)->witness($this->user)) {
             $this->user->flush();
         }
         return (new \Gazelle\Manager\News)->latestId();
@@ -20,7 +20,7 @@ class News extends AbstractNotification {
         if ($newsId === -1) {
             return false;
         }
-        $lastRead = (new \Gazelle\WitnessTable\UserReadNews)->lastRead($this->user->id());
+        $lastRead = (new \Gazelle\WitnessTable\UserReadNews)->lastRead($this->user);
 
         // You must be new around here.
         $newJoiner = is_null($lastRead)

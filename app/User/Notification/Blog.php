@@ -8,7 +8,7 @@ class Blog extends AbstractNotification {
     }
 
     public function clear(): int {
-        return (int)(new \Gazelle\WitnessTable\UserReadBlog)->witness($this->user->id());
+        return (int)(new \Gazelle\WitnessTable\UserReadBlog)->witness($this->user);
     }
 
     public function load(): bool {
@@ -17,7 +17,7 @@ class Blog extends AbstractNotification {
         if (is_null($latest)) {
             return false;
         }
-        $lastRead = (new \Gazelle\WitnessTable\UserReadBlog)->lastRead($this->user->id());
+        $lastRead = (new \Gazelle\WitnessTable\UserReadBlog)->lastRead($this->user);
 
         // You must be new around here.
         $newJoiner = is_null($lastRead) && $latest->createdEpoch() > strtotime($this->user->created());

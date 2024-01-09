@@ -1280,7 +1280,7 @@ class User extends BaseObject {
     }
 
     public function updateCatchup(): bool {
-        return (new WitnessTable\UserReadForum)->witness($this->id);
+        return (new WitnessTable\UserReadForum)->witness($this);
     }
 
     public function addClasses(array $classes): int {

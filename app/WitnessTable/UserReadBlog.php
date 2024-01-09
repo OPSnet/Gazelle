@@ -8,7 +8,7 @@ class UserReadBlog extends AbstractWitnessTable {
     protected function idColumn(): string    { return 'user_id'; }
     protected function valueColumn(): string { return 'blog_id'; }
 
-    public function witness(int $userId): bool {
-        return $this->witnessValue($userId);
+    public function witness(\Gazelle\User $user): bool {
+        return $this->witnessValue($user);
     }
 }
