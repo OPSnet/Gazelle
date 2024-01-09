@@ -23,22 +23,41 @@
         <div class="box box2">
             <div class="head"><strong>Numbers and such</strong></div>
             <div class="pad">
-{% if user %}
-                User ID: {{ user.id }} ({{ user.link|raw }})<br />
-                Leeching: {{ peer_stats.leeching|number_format }}<br />
-                Seeding: {{ peer_stats.seeding|number_format }}<br />
+{% if user_id and user_stats|length %}
+            <table>
+            <tr>
+                <td class="label">User</td>
+                <td>{{ user_stats.id|user_full }}
+            </tr>
+            <tr>
+                <td class="label">Leeching</td>
+                <td>{{ user_stats.leeching|number_format }}</td>
+            </tr>
+            <tr>
+                <td class="label">Seeding</td>
+                <td>{{ user_stats.seeding|number_format }}</td>
+            </tr>
+            <tr>
+                <td class="label">Info</td>
+                <td>
+                    Allowed: {{ user_stats.can_leech }}<br />
+                    Hidden: {{ user_stats.protected }}<br />
+                    Deleted: {{ user_stats.deleted }}<br />
+                </td>
+            </tr>
+            </table>
 {% elseif user_id %}
-                Failed to get stats for user {{ user_id }}, or user does not exist
+                User id {{ user_id }} is not known to the tracker.
 {% elseif main_stats %}
     {% for key, value in main_stats %}
-                {%- if key == "uptime" -%}
-                    {{ value }}
+                {%- if key in ["uptime", "version"] -%}
+                     {{ key }} {{ value }}
                 {%- elseif key starts with "bytes " -%}
-                    {{ value|octet_size }}
+                    {{ value|octet_size }} {{ key }}
                 {%- else -%}
-                    {{ value|number_format }}
+                    {{ value|number_format }} {{ key }}
                 {%- endif %}
-                {{ key }}<br />
+                <br />
     {% endfor %}
 {% else %}
                 Failed to get tracker info

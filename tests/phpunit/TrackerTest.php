@@ -76,17 +76,37 @@ class TrackerTest extends TestCase {
         $this->assertFalse($tracker->last_error(), 'tracker-init');
 
         $info = $tracker->info();
-        $this->assertCount(13, $info, 'tracker-info');
+        $this->assertCount(18, $info, 'tracker-info');
 
         $this->user = Helper::makeUser('trk.' . randomString(10), 'tracker');
         $this->assertTrue($tracker->addUser($this->user), 'tracker-add-user');
         $this->assertEquals(
-            ['leeching' => 0, 'seeding' => 0],
-            $tracker->user_peer_count($this->user),
-            'tracker-global-peer-count'
+            [
+                'id'        => $this->user->id(),
+                'can_leech' => 1,
+                'protected' => 0,
+                'deleted'   => 0,
+                'leeching'  => 0,
+                'seeding'   => 0,
+            ],
+            $tracker->userReport($this->user),
+            'tracker-user-report-ok'
         );
-        $this->user->setField('can_leech', 0)->modify();
+
+        $this->user->setField('can_leech', 0)->setField('Visible', '0')->modify();
         $this->assertTrue($tracker->refreshUser($this->user), 'tracker-refresh-user');
+        $this->assertEquals(
+            [
+                'id'        => $this->user->id(),
+                'can_leech' => 0,
+                'protected' => 1,
+                'deleted'   => 0,
+                'leeching'  => 0,
+                'seeding'   => 0,
+            ],
+            $tracker->userReport($this->user),
+            'tracker-user-report-cannot-leech'
+        );
 
         $announceKey = $this->user->announceKey();
         $this->user->setField('torrent_pass', randomString())->modify();
@@ -95,20 +115,7 @@ class TrackerTest extends TestCase {
         $this->assertTrue($tracker->removeUser($this->user), 'tracker-remove-user');
 
         $current = $tracker->info();
-        $this->assertEquals($info['requests handled'] + 7, $current['requests handled'], 'tracker-requests-handled');
-    }
-
-    /**
-     * @group no-ci
-     */
-    public function testTrackerUntracked(): void {
-        $tracker = new \Gazelle\Tracker;
-        $this->user = Helper::makeUser('trknope.' . randomString(10), 'tracker');
-        $this->assertEquals(
-            ['leeching' => 0, 'seeding' => 0],
-            $tracker->user_peer_count($this->user),
-            'tracker-global-untracked-peer-count'
-        );
+        $this->assertEquals($info['requests handled'] + 8, $current['requests handled'], 'tracker-requests-handled');
     }
 
     /**

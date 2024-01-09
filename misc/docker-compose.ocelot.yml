@@ -2,7 +2,7 @@ version: '3'
 
 services:
   ocelot:
-    image: ocelot
+    image: ocelot:latest
     ports:
       - 127.0.0.1:34000:34000
     depends_on:

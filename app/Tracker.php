@@ -193,7 +193,7 @@ class Tracker extends Base {
      * @return array|false (0 => $Leeching, 1 => $Seeding) or false if request failed
      */
     public function global_peer_count(): array|false {
-        $Stats = $this->get_stats(self::STATS_MAIN);
+        $Stats = $this->report(self::STATS_MAIN);
         if (isset($Stats['leechers tracked']) && isset($Stats['seeders tracked'])) {
             $Leechers = $Stats['leechers tracked'];
             $Seeders = $Stats['seeders tracked'];
@@ -204,21 +204,17 @@ class Tracker extends Base {
     }
 
     /**
-     * Get peer stats of a user from the tracker
+     * Get user context from the tracker
      */
-    public function user_peer_count(User $user): array {
-        $stats = $this->get_stats(self::STATS_USER, ['key' => $user->announceKey()]);
-        return [
-            'leeching' => $stats['leeching'] ?? 0,
-            'seeding'  => $stats['seeding']  ?? 0
-        ];
+    public function userReport(User $user): array {
+        return $this->report(self::STATS_USER, ['key' => $user->announceKey()]);
     }
 
     /**
      * Get whatever info the tracker has to report
      */
     public function info(): array {
-        return $this->get_stats(self::STATS_MAIN);
+        return $this->report(self::STATS_MAIN);
     }
 
     /**
@@ -226,7 +222,7 @@ class Tracker extends Base {
      *
      * @return array with stats in named keys or empty if the request failed
      */
-    protected function get_stats(int $Type, false|array $Params = false): array {
+    protected function report(int $Type, false|array $Params = false): array {
         if (DISABLE_TRACKER) {
             return [];
         }
@@ -239,13 +235,16 @@ class Tracker extends Base {
             return [];
         }
         $Response = $this->send_request($Get);
-        if ($Response === false) {
+        if ($Response === false || $Response === "") {
             return [];
+        }
+        if ($Type === self::STATS_USER) {
+            return json_decode($Response, true);
         }
         $Stats = [];
         foreach (explode("\n", $Response) as $Stat) {
-            if (preg_match('/^Uptime: (.*)$/', $Stat, $match)) {
-                $Stats['uptime'] = $match[1];
+            if (preg_match('/^(Uptime|version): (.*)$/', $Stat, $match)) {
+                $Stats[strtolower($match[1])] = $match[2];
             } else {
                 [$Val, $Key] = explode(" ", $Stat, 2);
                 $Stats[$Key] = (int)$Val;
@@ -270,6 +269,7 @@ class Tracker extends Base {
         $StartTime = microtime(true);
         $Data = "";
         $Response = "";
+        $code = 0;
         while (!$Success && $Attempts++ < $MaxAttempts) {
             if ($Sleep) {
                 usleep((int)$Sleep);
@@ -294,6 +294,11 @@ class Tracker extends Base {
             while (!feof($File)) {
                 $Response .= fread($File, 1024);
             }
+            if (preg_match('/HTTP\/1.1 (\d+)/', $Response, $match)) {
+                $code = $match[1];
+            } else {
+                break;
+            }
             $DataStart = strpos($Response, "\r\n\r\n") + 4;
             $DataEnd = strrpos($Response, "\n");
             if ($DataEnd > $DataStart) {
@@ -302,7 +307,7 @@ class Tracker extends Base {
                 $Data = "";
             }
             $Status = substr($Response, $DataEnd + 1);
-            if ($Status == "success") {
+            if ($code == 200 || $Status == "success") {
                 $Success = true;
             }
         }
@@ -310,6 +315,7 @@ class Tracker extends Base {
         $Request = [
             'path' => array_pop($path_array), // strip authkey from path
             'response' => ($Success ? $Data : $Response),
+            'code' => $code,
             'status' => ($Success ? 'ok' : 'failed'),
             'time' => 1000 * (microtime(true) - $StartTime)
         ];
