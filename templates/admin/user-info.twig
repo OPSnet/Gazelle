@@ -32,9 +32,9 @@
     <input type="hidden" name="action" value="user_info" />
     <input type="hidden" name="userid" value="{{ user.id }}" />
 Order by <select name="col">
-    <option value="ip"{{ selected(column == "ip") }}>IP address</option>
     <option value="first"{{ selected(column == "first") }}>First seen</option>
     <option value="last"{{ selected(column == "last") }}>Last seen</option>
+    <option value="ip"{{ selected(column == "ip") }}>IP address</option>
 </select>
 <select name="dir">
     <option value="up"{{ selected(direction == "up") }}>Ascending</option>
