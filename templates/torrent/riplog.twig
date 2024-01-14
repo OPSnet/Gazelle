@@ -6,7 +6,7 @@
     <td>This torrent has {{ total }} log{{ total|plural }} with a total score of {{ log_score }}/100
         {% if total > 1 and viewer.permitted('torrents_delete') %}
         <span style="float: right; font-weight: normal"><a class="brackets" onclick="return confirm('This is permanent and irreversible. Missing logs can still be uploaded.');"
-            href="torrents.php?action=removelogs&amp;torrentid={{ id }}">Remove all logs</a></span><br />
+            href="torrents.php?action=removelogs&amp;torrentid={{ id }}&amp;auth={{ viewer.auth }}">Remove all logs</a></span><br />
         {% endif %}
     </td>
 </tr>
@@ -16,7 +16,7 @@
     {% if viewer.permitted('users_mod') %}
         <div style="padding: 10px; float: right"><a class="brackets" href="torrents.php?action=editlog&amp;torrentid={{ id }}&amp;logid={{ log.id }}">Edit Log</a>
         <a class="brackets" onclick="return confirm('Are you sure you want to deleted this log? There is NO undo!');"
-            href="torrents.php?action=deletelog&amp;torrentid={{ id }}&amp;logid={{ log.id }}&amp;auth={{ viewer.auth }}">Delete Log</a>
+            href="torrents.php?action=removelog&amp;torrentid={{ id }}&amp;logid={{ log.id }}&amp;auth={{ viewer.auth }}">Delete Log</a>
 
         </div>
     {% endif %}

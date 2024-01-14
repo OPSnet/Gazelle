@@ -103,7 +103,7 @@ describe('uploading torrent', () => {
                 cy.window().should('have.property', 'authkey');
                 cy.visit('/torrents.php', {
                     qs: {
-                        action: 'deletelog',
+                        action: 'removelog',
                         torrentid: torrent_id,
                         logid: log_id,
                         auth: window.authkey
@@ -142,7 +142,7 @@ describe('uploading torrent', () => {
             .then((window) => {
             cy.window().should('have.property', 'authkey');
             cy.visit('/torrents.php', {qs: {
-                    action: 'deletelog',
+                    action: 'removelog',
                     torrentid: torrent_id,
                     logid: log_id,
                     auth: window.authkey

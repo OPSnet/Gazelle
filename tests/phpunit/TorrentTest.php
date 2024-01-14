@@ -38,4 +38,17 @@ class TorrentTest extends TestCase {
         $this->assertEquals(0, $this->torrent->removeFlag(TorrentFlag::badFolder), 'torrent-remove-no-flag');
         $this->assertFalse($this->torrent->hasFlag(TorrentFlag::badFile), 'torrent-no-more--bad-file-flag');
     }
+
+    public function testRemoveAllLogs(): void {
+        $this->assertEquals(
+            0,
+            $this->torrent->removeAllLogs(
+                $this->user,
+                new Gazelle\File\RipLog,
+                new Gazelle\File\RipLogHTML,
+                new Gazelle\Log,
+            ),
+            'torrent-remove-all-logs'
+        );
+    }
 }

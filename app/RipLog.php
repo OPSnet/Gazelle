@@ -6,8 +6,12 @@ class RipLog extends BaseObject {
     final public const tableName = 'torrents_logs';
 
     public function flush(): static { return $this; }
-    public function location(): string { return 'view.php?type=riplog&id=' . $this->torrentId . '.' . $this->id; }
-    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), "Log #" . $this->id); }
+    public function location(): string {
+        return "view.php?type=riplog&id={$this->torrentId}.{$this->id}";
+    }
+    public function link(): string {
+        return "<a href=\"{$this->url()}\">Log #{$this->id}</a>";
+    }
 
     public function __construct(
         protected int $torrentId,

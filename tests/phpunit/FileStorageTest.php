@@ -56,11 +56,16 @@ class FileStorageTest extends TestCase {
          * lengths to ensure there is no funny business happening during file
          * uploads and there is no easy way to mock it.
          */
-        $text  = "This is a phpunit log file";
-        $id    = [496801, 31334];
+        $id    = [0, 0];
         $filer = new Gazelle\File\RipLog;
-        $this->assertNotEquals($text, $filer->get($id), 'file-r-get-nok');
-        $this->assertFalse($filer->exists($id),         'file-r-exists-nok');
+        $this->assertFalse($filer->exists($id), 'file-r-exists-nok');
+        $this->assertFalse($filer->get($id),    'file-r-get-nok');
+
+        $json = new Gazelle\Json\RipLog(0, 0);
+        $this->assertInstanceOf(Gazelle\Json\RipLog::class, $json, 'json-riplog-class');
+        $payload = $json->payload();
+        $this->assertCount(17, $payload, 'json-riplog-payload');
+        $this->assertFalse($payload['success'], 'json-riplog-success-404');
     }
 
     public function testContestsTorrent(): void {

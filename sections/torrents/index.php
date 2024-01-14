@@ -42,11 +42,12 @@ if (!empty($_REQUEST['action'])) {
         case 'viewlog':
             require_once('log_ajax.php');
             break;
-        case 'deletelog':
-            require_once('delete_log.php');
+        case 'deletelog': // legacy name
+        case 'removelog':
+            require_once('remove_log.php');
             break;
         case 'removelogs':
-            require_once('delete_logs.php');
+            require_once('remove_logs.php');
             break;
         case 'grouplog':
             require_once('grouplog.php');

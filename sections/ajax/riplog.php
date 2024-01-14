@@ -10,4 +10,5 @@ if (is_null($torrent)) {
 }
 
 echo (new Gazelle\Json\RipLog($torrent->id(), $logId))
+    ->setVersion(2)
     ->response();
