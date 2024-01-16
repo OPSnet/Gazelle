@@ -13,7 +13,7 @@ if ($privilege) {
         error('You cannot delete a class with users.');
     }
     $privilege->remove();
-    header("Location: tools.php?action=permissions");
+    header("Location: tools.php?action=userclass");
     exit;
 }
 

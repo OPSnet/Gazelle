@@ -3,7 +3,8 @@
 namespace Gazelle\Manager;
 
 class StaffGroup extends \Gazelle\BaseManager {
-    protected const ID_KEY = 'zz_sg_%d';
+    final public const LIST_KEY = 'stgroup';
+    final public const ID_KEY   = 'zz_sg_%d';
 
     public function create(int $sequence, string $name): \Gazelle\StaffGroup {
         self::$db->prepared_query("
@@ -12,9 +13,7 @@ class StaffGroup extends \Gazelle\BaseManager {
             Values (?,    ?)
             ", $sequence, $name
         );
-        $staffGroup = $this->findById(self::$db->inserted_id());
-        $staffGroup->flush();
-        return $staffGroup;
+        return new \Gazelle\StaffGroup(self::$db->inserted_id());
     }
 
     public function findById(int $staffGroupId): ?\Gazelle\StaffGroup {

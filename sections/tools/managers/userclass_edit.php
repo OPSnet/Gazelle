@@ -10,7 +10,7 @@ $privilege = null;
 if (isset($_REQUEST['id']) && $_REQUEST['id'] !== 'new') {
     $privilege = $privMan->findById((int)$_REQUEST['id']);
     if (is_null($privilege)) {
-        header("Location: tools.php?action=permissions");
+        header("Location: tools.php?action=userclass");
         exit;
     }
 }
@@ -19,7 +19,7 @@ echo $Twig->render('admin/privilege-edit.twig', [
     'edited'     => isset($usersAffected),
     'edit_total' => $usersAffected ?? 0,
     'js'         => (new Gazelle\Util\Validator)->generateJS('permissionsform'),
-    'group_list' => $privMan->staffGroupList(),
+    'group_list' => (new Gazelle\Manager\StaffGroup)->groupList(),
     'privilege'  => $privilege,
     'viewer'     => $Viewer,
 ]);

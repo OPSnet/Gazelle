@@ -55,8 +55,8 @@ The first account created is assigned the highest operational role
 (Sysop) automatically.
 
 The Sysop account might not have all the permissions that have
-been added recently. Navigate to the /tools.php?action=permissions
-page and tick everything.
+been added recently. Navigate to the /tools.php?action=userclass
+page and tick everything for the Sysop class.
 
 ### Ocelot
 The [ocelot](https://github.com/OPSnet/Ocelot) repository is used to build the

@@ -1,9 +1,9 @@
 {{ header(user.username ~ ' › Permissions', {'js': 'user_perm'}) }}
 <div class="header">
-    <h2><a href="{{ user.location }}" class="username">{{ user.username }}</a> &rsaquo; Permissions</h2>
+    <h2><a href="{{ user.location }}" class="username">{{ user.username }}</a> &rsaquo; Privileges</h2>
     <div class="linkbox">
         <a id="perm-defaults" href="#" class="brackets">Defaults</a>
-        <a href="tools.php?action=permissions&id={{ user.primaryClass }}" class="brackets">Primary permissions</a>
+        <a href="tools.php?action=privilege-edit&id={{ user.primaryClass }}" class="brackets">Primary privileges</a>
     </div>
 </div>
 <div class="box pad thin">
@@ -11,7 +11,7 @@
     grant and revoke access to specific features. If you think that to add access
     to a feature, you need to uncheck everything else, <strong>YOU ARE
     WRONG</strong>. The check boxes on the left, which are grayed out, are the
-    standard permissions granted by their user class. Any changes you make to
+    standard privileges granted by their user class. Any changes you make to
     the right side will overwrite this.</p>
     <p>It's not complicated, and if you screw up, click the "Defaults" link at
     the top. It will reset the user to their respective features granted by

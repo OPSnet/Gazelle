@@ -97,16 +97,6 @@ class Privilege extends \Gazelle\BaseManager {
         return $this->info;
     }
 
-    public function staffGroupList(): array {
-        self::$db->prepared_query("
-            SELECT ID AS id,
-                Name AS name
-            FROM staff_groups
-            ORDER BY Sort
-        ");
-        return self::$db->to_pair('id', 'name', false);
-    }
-
     /**
      * Statistics on how many people are in the different user classes.
      */
