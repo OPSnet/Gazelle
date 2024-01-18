@@ -59,12 +59,7 @@ if (empty($_POST['question']) || empty($_POST['answers']) || !$Viewer->permitted
     }
 }
 
-$thread = (new Gazelle\Manager\ForumThread)->create(
-    forum:  $forum,
-    userId: $Viewer->id(),
-    title:  $title,
-    body:   $body,
-);
+$thread = (new Gazelle\Manager\ForumThread)->create($forum, $Viewer, $title, $body);
 $threadId = $thread->id();
 if ($needPoll) {
     (new Gazelle\Manager\ForumPoll)->create($threadId, $question, $answerList);

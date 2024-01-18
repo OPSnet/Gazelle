@@ -72,9 +72,9 @@ if ($quote->unreadTotal()) {
     $quote->clearThread($threadId, $firstOnPage, $lastOnPage);
 }
 
-$lastRead = $thread->userLastReadPost($Viewer->id());
+$lastRead = $thread->userLastReadPost($Viewer);
 if ($lastRead < $lastOnPage) {
-    $thread->catchup($Viewer->id(), $lastOnPage);
+    $thread->catchup($Viewer, $lastOnPage);
 }
 
 $isSubscribed = (new Gazelle\User\Subscription($Viewer))->isSubscribed($threadId);

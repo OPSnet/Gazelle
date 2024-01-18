@@ -172,12 +172,10 @@ class Quote extends \Gazelle\BaseUser {
         );
         $quoteList = self::$db->to_array(false, MYSQLI_ASSOC, false);
 
-        $page = [];
-        new \Gazelle\Manager\Forum;
-        $postMan     = new \Gazelle\Manager\ForumPost;
-        new \Gazelle\ReleaseType;
-        $reqMan      = new \Gazelle\Manager\Request;
-        $tgMan       = new \Gazelle\Manager\TGroup;
+        $page    = [];
+        $postMan = new \Gazelle\Manager\ForumPost;
+        $reqMan  = new \Gazelle\Manager\Request;
+        $tgMan   = new \Gazelle\Manager\TGroup;
 
         foreach ($quoteList as $q) {
             $context = [];

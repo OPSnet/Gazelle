@@ -22,13 +22,12 @@ class FeaturedAlbumTest extends TestCase {
             tagName:    ['opera'],
             user:       $this->user,
         );
-        $this->thread =
-            (new \Gazelle\Manager\ForumThread)->create(
-                new Gazelle\Forum(AOTM_FORUM_ID),
-                $this->user->id(),
-                'phpunit aotm ' . $this->tgroup->text(),
-                'this is an aotm thread'
-            );
+        $this->thread = (new \Gazelle\Manager\ForumThread)->create(
+            new Gazelle\Forum(AOTM_FORUM_ID),
+            $this->user,
+            'phpunit aotm ' . $this->tgroup->text(),
+            'this is an aotm thread'
+        );
     }
 
     public function tearDown(): void {

@@ -18,10 +18,10 @@ if (empty($title)) {
 $thread = match ((int)($_POST['thread'] ?? -1)) {
     -1 => null,
      0 => (new Gazelle\Manager\ForumThread)->create(
-        forum:  new Gazelle\Forum(ANNOUNCEMENT_FORUM_ID),
-        userId: $Viewer->id(),
-        title:  $title,
-        body:   $body,
+        forum: new Gazelle\Forum(ANNOUNCEMENT_FORUM_ID),
+        user:  $Viewer,
+        title: $title,
+        body:  $body,
     ),
     default => (new Gazelle\Manager\ForumThread)->findById((int)$_POST['thread']),
 };

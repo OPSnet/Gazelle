@@ -37,7 +37,7 @@ class ForumSearchTest extends TestCase {
         $title        = 'search thread ' . randomString(10);
         $body         = 'search body ' . randomString(10);
         $threadMan    = new \Gazelle\Manager\ForumThread;
-        $this->thread = $threadMan->create($this->forum, $this->user->id(), $title, $body);
+        $this->thread = $threadMan->create($this->forum, $this->user, $title, $body);
 
         $search = new \Gazelle\Search\Forum($this->user);
         $this->assertInstanceOf(\Gazelle\Search\Forum::class, $search, 'forum-search-new');
@@ -85,7 +85,7 @@ class ForumSearchTest extends TestCase {
         $title        = 'search thread ' . randomString(10);
         $body         = 'search body ' . randomString(10);
         $threadMan    = new \Gazelle\Manager\ForumThread;
-        $this->thread = $threadMan->create($this->forum, $this->user->id(), $title, $body);
+        $this->thread = $threadMan->create($this->forum, $this->user, $title, $body);
 
         $search = new \Gazelle\Search\Forum($this->user);
         $this->assertInstanceOf(\Gazelle\Search\Forum::class, $search->setAuthor($this->user->username()), 'forum-search-author');

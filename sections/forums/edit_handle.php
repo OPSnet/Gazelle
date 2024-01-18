@@ -33,7 +33,7 @@ if ($Viewer->id() != $post->userId()) {
     }
 }
 
-$post->edit($Viewer->id(), trim($_POST['body']));
+$post->edit($Viewer, trim($_POST['body']));
 
 // This gets sent to the browser, which echoes it in place of the old body
 echo Text::full_format($post->body());

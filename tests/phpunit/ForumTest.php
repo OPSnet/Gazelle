@@ -128,7 +128,7 @@ class ForumTest extends TestCase {
 
         // Forum Threads
         $threadMan = new \Gazelle\Manager\ForumThread;
-        $thread    = $threadMan->create($this->forum, $admin->id(), 'thread title', 'this is a new thread');
+        $thread    = $threadMan->create($this->forum, $admin, 'thread title', 'this is a new thread');
         $this->assertEquals(1, $thread->postTotal(), 'fthread-post-total');
         $this->assertEquals(0, $thread->lastPage(), 'fthread-last-page');
         $this->assertEquals(0, $thread->lastCatalog(), 'fthread-last-catalog');
@@ -205,12 +205,11 @@ class ForumTest extends TestCase {
         $admin = $this->userList['admin'];
         $this->assertEquals(1, $admin->stats()->forumPostTotal(), 'fpost-first-user-stats');
         $message = 'first reply';
-        $postId = $thread->addPost($admin->id(), $message);
+        $post = $thread->addPost($admin, $message);
         $this->assertEquals(2, $admin->stats()->flush()->forumPostTotal(), 'fpost-first-user-reply');
 
         /* post first reply */
         $postMan = new \Gazelle\Manager\ForumPost;
-        $post    = $postMan->findById($postId);
         $this->assertEquals($message, $post->body(), 'fpost-first-post');
         $this->assertEquals(1, $this->forum->numPosts(), 'fpost-forum-post-total');
 
@@ -221,9 +220,15 @@ class ForumTest extends TestCase {
 
         /* quote first post in reply */
         $body = "good job @{$admin->username()}";
-        $replyId = $thread->addPost($user->id(), $body);
+        $reply = $thread->addPost($user, $body);
         // Should the following actions (quote and subscription handling) be performed by the addPost() method?
-        (new Gazelle\User\Notification\Quote($admin))->create(new Gazelle\Manager\User, $body, $replyId, 'forums', $thread->id());
+        (new Gazelle\User\Notification\Quote($admin))->create(
+            new Gazelle\Manager\User,
+            $body,
+            $reply->id(),
+            'forums',
+            $thread->id(),
+        );
         (new Gazelle\Manager\Subscription)->flushPage('forums', $thread->id());
 
         $this->assertEquals(1, $forumMan->unreadSubscribedForumTotal($admin), 'fpost-subscriptions-admin-forum-man-unread');
@@ -236,9 +241,9 @@ class ForumTest extends TestCase {
         $page = $quote->page(10, 0);
         $this->assertCount(1, $page, 'fpost-quote-page-count');
         $this->assertEquals($admin->id(), $page[0]['quoter_id'], 'fpost-quote-page-0-quoter');
-        $this->assertEquals($postMan->findById($replyId)->url(), $page[0]['jump'], 'fpost-quote-page-0-jump');
+        $this->assertEquals($postMan->findById($reply->id())->url(), $page[0]['jump'], 'fpost-quote-page-0-jump');
 
-        $this->assertEquals(1, $quote->clearThread($thread->id(), $postId, $replyId), 'fpost-clear-thread');
+        $this->assertEquals(1, $quote->clearThread($thread->id(), $post->id(), $reply->id()), 'fpost-clear-thread');
         $this->assertEquals(0, $quote->total(), 'fpost-quote-admin-total-clear');
         $this->assertEquals(0, $quote->unreadTotal(), 'fpost-quote-admin-unread-total-clear');
 
@@ -247,7 +252,7 @@ class ForumTest extends TestCase {
         $this->assertEquals($thread->id(), $latest[0]['PageID'], 'fpost-quote-admin-unread-page-id');
         $this->assertNull($latest[0]['PostID'], 'fpost-quote-admin-unread-post-id');
 
-        $thread->catchup($admin->id(), $replyId);
+        $thread->catchup($admin, $reply->id());
         $this->assertEquals(1, $adminSub->unread(), 'fpost-subscriptions-admin-one-read');
 
         $readLast = $this->forum->userLastRead($admin);
@@ -256,7 +261,7 @@ class ForumTest extends TestCase {
             [
                 $thread->id() => [
                     "TopicID" => $thread->id(),
-                    "PostID"  => $replyId,
+                    "PostID"  => $reply->id(),
                     "Page"    => 1,
                 ]
             ],
@@ -294,8 +299,8 @@ class ForumTest extends TestCase {
         $this->assertEquals([$this->forum->id()], $this->forum->autoSubscribeForUserList($user), 'forum-autosub-forum-list');
 
         $threadMan = new \Gazelle\Manager\ForumThread;
-        $this->threadList[] = $threadMan->create($this->forum, $this->userList['admin']->id(), 'phpunit thread title', 'this is a new thread');
-        $this->threadList[] = $threadMan->create($this->forum, $this->userList['admin']->id(), 'phpunit thread title 2', 'this is also a new thread');
+        $this->threadList[] = $threadMan->create($this->forum, $this->userList['admin'], 'phpunit thread title', 'this is a new thread');
+        $this->threadList[] = $threadMan->create($this->forum, $this->userList['admin'], 'phpunit thread title 2', 'this is also a new thread');
         $this->assertEquals(2, $this->forum->userCatchup($user), 'forum-user-autosub-catchup');
 
         $this->assertEquals(1, $this->forum->toggleAutoSubscribe($user, false), 'forum-autosub-off-autosub');
@@ -327,9 +332,9 @@ class ForumTest extends TestCase {
 
         // TODO: move more warning functionality out of sections/...
         $this->threadList[] = $thread
-            = (new \Gazelle\Manager\ForumThread)->create($this->forum, $user->id(), 'user thread title', 'this is a new thread by a user');
-        $thread  = (new \Gazelle\Manager\ForumThread)->create($this->forum, $user->id(), 'user thread title', 'this is a new thread by a user');
-        $post    = (new \Gazelle\Manager\ForumPost)->findById($thread->addPost($user->id(), 'offensive content'));
+            = (new \Gazelle\Manager\ForumThread)->create($this->forum, $user, 'user thread title', 'this is a new thread by a user');
+        $thread  = (new \Gazelle\Manager\ForumThread)->create($this->forum, $user, 'user thread title', 'this is a new thread by a user');
+        $post    = $thread->addPost($user, 'offensive content');
         $week    = 2;
         $message = "phpunit forum warn test " . randomString(10);
         $this->assertNull($user->forumWarning(), 'forum-post-no-warning-history');
@@ -373,7 +378,7 @@ class ForumTest extends TestCase {
         );
 
         $this->threadList[] = $thread
-            = (new \Gazelle\Manager\ForumThread)->create($this->forum, $user->id(), 'unittest post pin', 'this is a new thread for post pins');
+            = (new \Gazelle\Manager\ForumThread)->create($this->forum, $user, 'phpunit post pin', 'this is a new thread for post pins');
 
         $answer  = ['apple', 'banana', 'carrot'];
         $pollMan = new \Gazelle\Manager\ForumPoll;
@@ -430,8 +435,8 @@ class ForumTest extends TestCase {
         );
 
         $this->threadList[] = $thread
-            = (new \Gazelle\Manager\ForumThread)->create($this->forum, $user->id(), 'unittest post pin', 'this is a new thread for post pins');
-        $post = (new \Gazelle\Manager\ForumPost)->findById($thread->addPost($user->id(), 'pinnable content'));
+            = (new \Gazelle\Manager\ForumThread)->create($this->forum, $user, 'unittest post pin', 'this is a new thread for post pins');
+        $post = $thread->addPost($user, 'pinnable content');
 
         $this->assertFalse($post->isPinned(), 'forum-post-is-not-pinned');
         $this->assertEquals(1, $post->pin($admin, true), 'forum-post-pin');

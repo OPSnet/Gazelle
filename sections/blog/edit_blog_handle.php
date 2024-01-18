@@ -24,10 +24,10 @@ $manager = new Gazelle\Manager\ForumThread;
 $thread = match ((int)($_POST['thread'] ?? -1)) {
     -1 => null,
      0 => $manager->create(
-        forum:  new Gazelle\Forum(ANNOUNCEMENT_FORUM_ID),
-        userId: $Viewer->id(),
-        title:  $title,
-        body:   $body,
+        forum: new Gazelle\Forum(ANNOUNCEMENT_FORUM_ID),
+        user:  $Viewer,
+        title: $title,
+        body:  $body,
     ),
     default => $manager->findById((int)$_POST['thread']),
 };

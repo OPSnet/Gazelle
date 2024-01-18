@@ -160,7 +160,7 @@ class TextTest extends TestCase {
         );
 
         $thread = (new Gazelle\Manager\ForumThread)->create(
-            $forum, $this->userList['admin']->id(), "phpunit thread title", "phpunit thread body"
+            $forum, $this->userList['admin'], "phpunit thread title", "phpunit thread body"
         );
 
         $postId = (int)Gazelle\DB::DB()->scalar("

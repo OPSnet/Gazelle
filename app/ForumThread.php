@@ -194,27 +194,26 @@ class ForumThread extends BaseObject {
         return array_slice($catalogue, ($perPage * ($page - 1)) % THREAD_CATALOGUE, $perPage, true);
     }
 
-    public function addPost(int $userId, string $body): int {
-        $post = (new Manager\ForumPost)->create($this->id, $userId, $body);
-        $postId = $post->id();
+    public function addPost(User $user, string $body): ForumPost {
+        $post = (new Manager\ForumPost)->create($this, $user, $body);
         $this->info();
         $this->info['post_total_summary']++;
-        $this->info['last_post_id']        = $postId;
-        $this->info['last_post_author_id'] = $userId;
+        $this->info['last_post_id']        = $post->id();
+        $this->info['last_post_author_id'] = $user->id();
 
-        $this->updateThread($userId, $postId);
-        (new Stats\User($userId))->increment('forum_post_total');
-        return $postId;
+        $this->updateThread($user, $post->id());
+        (new Stats\User($user->id()))->increment('forum_post_total');
+        return $post;
     }
 
-    public function mergePost(int $userId, string $body): int {
+    public function mergePost(User $user, string $body): ForumPost {
         [$postId, $oldBody] = self::$db->row("
             SELECT ID, Body
             FROM forums_posts
             WHERE TopicID = ?
                 AND AuthorID = ?
             ORDER BY ID DESC LIMIT 1
-            ", $this->id, $userId
+            ", $this->id, $user->id()
         );
 
         // Edit the post
@@ -225,7 +224,7 @@ class ForumThread extends BaseObject {
                 Body = CONCAT(Body, '\n\n', ?),
                 EditedTime = now()
             WHERE ID = ?
-            ", $userId, $body, $postId
+            ", $user->id(), $body, $postId
         );
 
         // Store edit history
@@ -233,12 +232,12 @@ class ForumThread extends BaseObject {
             INSERT INTO comments_edits
                    (EditUser, PostID, Body, Page)
             VALUES (?,        ?,      ?,   'forums')
-            ", $userId, $postId, $oldBody
+            ", $user->id(), $postId, $oldBody
         );
         self::$db->commit();
 
-        $this->updateThread($userId, $postId);
-        return $postId;
+        $this->updateThread($user, $postId);
+        return new ForumPost($postId);
     }
 
     public function editThread(int $forumId, bool $pinned, int $rank, bool $locked, string $title): int {
@@ -336,7 +335,7 @@ class ForumThread extends BaseObject {
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
-    protected function updateThread(int $userId, int $postId): int {
+    protected function updateThread(User $user, int $postId): int {
         self::$db->prepared_query("
             UPDATE forums_topics SET
                 NumPosts         = NumPosts + 1,
@@ -344,12 +343,12 @@ class ForumThread extends BaseObject {
                 LastPostID       = ?,
                 LastPostAuthorID = ?
             WHERE ID = ?
-            ", $postId, $userId, $this->id()
+            ", $postId, $user->id(), $this->id()
         );
         $affected = self::$db->affected_rows();
         if ($affected) {
-            $this->updateRoot($userId, $postId);
-            (new \Gazelle\Manager\Forum)->flushToc();
+            $this->updateRoot($user->id(), $postId);
+            (new Manager\Forum)->flushToc();
             $this->forum()->flush();
             $this->flush();
         }
@@ -413,14 +412,14 @@ class ForumThread extends BaseObject {
         return $catalogue;
     }
 
-    public function catchup(int $userId, int $postId): int {
+    public function catchup(User $user, int $postId): int {
         self::$db->prepared_query("
             INSERT INTO forums_last_read_topics
                    (UserID, TopicID, PostID)
             VALUES (?,      ?,       ?)
             ON DUPLICATE KEY UPDATE
                 PostID = ?
-            ", $userId, $this->id, $postId, $postId
+            ", $user->id(), $this->id, $postId, $postId
         );
         return self::$db->affected_rows();
     }
@@ -437,10 +436,10 @@ class ForumThread extends BaseObject {
     /**
      * Return the last (highest previously read) post ID for a user in this thread.
      */
-    public function userLastReadPost(int $userId): int {
+    public function userLastReadPost(User $user): int {
         return (int)self::$db->scalar("
             SELECT PostID FROM forums_last_read_topics WHERE UserID = ? AND TopicID = ?
-            ", $userId, $this->id
+            ", $user->id(), $this->id
         );
     }
 

@@ -8,14 +8,14 @@ class ForumPost extends \Gazelle\BaseManager {
     /**
      * Create a forum post
      */
-    public function create(int $threadId, int $userId, string $body): \Gazelle\ForumPost {
+    public function create(\Gazelle\ForumThread $thread, \Gazelle\User $user, string $body): \Gazelle\ForumPost {
         self::$db->prepared_query("
             INSERT INTO forums_posts
                    (TopicID, AuthorID, Body)
             Values (?,       ?,        ?)
-            ", $threadId, $userId, $body
+            ", $thread->id(), $user->id(), $body
         );
-        return $this->findById(self::$db->inserted_id());
+        return new \Gazelle\ForumPost(self::$db->inserted_id());
     }
 
     /**

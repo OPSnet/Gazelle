@@ -8,19 +8,19 @@ class ForumThread extends \Gazelle\BaseManager {
     /**
      * Create a forum thread
      */
-    public function create(\Gazelle\Forum $forum, int $userId, string $title, string $body): \Gazelle\ForumThread {
+    public function create(\Gazelle\Forum $forum, \Gazelle\User $user, string $title, string $body): \Gazelle\ForumThread {
         $db = new \Gazelle\DB;
         $db->relaxConstraints(true);
         self::$db->prepared_query("
             INSERT INTO forums_topics
                    (ForumID, Title, AuthorID, LastPostAuthorID)
             Values (?,       ?,        ?,                ?)
-            ", $forum->id(), $title, $userId, $userId
+            ", $forum->id(), $title, $user->id(), $user->id()
         );
-        $thread = $this->findById(self::$db->inserted_id());
-        $thread->addPost($userId, $body);
+        $thread = new \Gazelle\ForumThread(self::$db->inserted_id());
+        $thread->addPost($user, $body);
         $db->relaxConstraints(false);
-        (new \Gazelle\Stats\User($userId))->increment('forum_thread_total');
+        (new \Gazelle\Stats\User($user->id()))->increment('forum_thread_total');
         $forum->flush();
         return $thread;
     }

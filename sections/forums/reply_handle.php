@@ -24,10 +24,11 @@ if ($body === '') {
 }
 
 if ($thread->lastAuthorId() == $Viewer->id() && isset($_POST['merge'])) {
-    $postId = $thread->mergePost($Viewer->id(), $body);
+    $post = $thread->mergePost($Viewer, $body);
 } else {
-    $postId = $thread->addPost($Viewer->id(), $body);
+    $post = $thread->addPost($Viewer, $body);
 }
+$postId = $post->id();
 
 (new Gazelle\User\Notification\Quote($Viewer))->create(
     new Gazelle\Manager\User, $body, $postId, 'forums', $threadId
