@@ -29,7 +29,7 @@ if (!$Viewer->permitted('site_collages_delete')) {
     if ($collage->isLocked()) {
         error('This collage is locked');
     }
-    if ($collage->isPersonal() && !$collage->isOwner($Viewer->id())) {
+    if ($collage->isPersonal() && !$collage->isOwner($Viewer)) {
         error('You cannot edit someone else\'s personal collage.');
     }
     if ($collage->maxGroups() > 0 && $collage->numEntries() >= $collage->maxGroups()) {
@@ -73,7 +73,7 @@ foreach ($URL as $u) {
 if (!$Viewer->permitted('site_collages_delete')) {
     $maxGroupsPerUser = $collage->maxGroupsPerUser();
     if ($maxGroupsPerUser > 0) {
-        if ($collage->countByUser($Viewer->id()) + count($groupIds) > $maxGroupsPerUser) {
+        if ($collage->contributionTotal($Viewer) + count($groupIds) > $maxGroupsPerUser) {
             $entry = $maxGroupsPerUser === 1 ? 'entry' : 'entries';
             error("You may add no more than $maxGroupsPerUser $entry to this collage.");
         }
@@ -87,7 +87,7 @@ if (!$Viewer->permitted('site_collages_delete')) {
 }
 
 foreach ($groupIds as $groupId) {
-    $collage->addEntry($groupId, $Viewer->id());
+    $collage->addEntry($groupId, $Viewer);
 }
-$collageMan->flushDefaultGroup($Viewer->id());
+$collageMan->flushDefaultGroup($Viewer);
 header('Location: ' . $collage->location());

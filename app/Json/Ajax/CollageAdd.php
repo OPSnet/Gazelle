@@ -44,7 +44,7 @@ class CollageAdd extends \Gazelle\Json {
             if ($collage->isLocked()) {
                 return $this->setFailure('locked');
             }
-            if ($collage->isPersonal() && !$collage->isOwner($this->user->id())) {
+            if ($collage->isPersonal() && !$collage->isOwner($this->user)) {
                 return $this->setFailure('personal');
             }
             if ($collage->maxGroups() > 0 && $collage->numEntries() >= $collage->maxGroups()) {
@@ -52,20 +52,20 @@ class CollageAdd extends \Gazelle\Json {
             }
             $maxGroupsPerUser = $collage->maxGroupsPerUser();
             if ($maxGroupsPerUser > 0) {
-                if ($collage->countByUser($this->user->id()) >= $maxGroupsPerUser) {
+                if ($collage->contributionTotal($this->user) >= $maxGroupsPerUser) {
                     return $this->setFailure('you have already contributed');
                 }
             }
         }
 
-        if (!$collage->addEntry($entry->id(), $this->user->id())) {
+        if (!$collage->addEntry($entry->id(), $this->user)) {
             return $this->setFailure('already present?');
         }
 
         if ($collage->isArtist()) {
-            $this->manager->flushDefaultArtist($this->user->id());
+            $this->manager->flushDefaultArtist($this->user);
         } else {
-            $this->manager->flushDefaultGroup($this->user->id());
+            $this->manager->flushDefaultGroup($this->user);
         }
         return ['link' => $collage->link()];
     }

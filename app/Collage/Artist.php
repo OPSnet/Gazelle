@@ -51,6 +51,9 @@ class Artist extends AbstractCollage {
     }
 
     public function entryList(): array {
+        if (!isset($this->artists)) {
+            $this->load();
+        }
         return array_keys($this->artists);
     }
 

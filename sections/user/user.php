@@ -355,7 +355,7 @@ if ($OwnProfile || !$User->hasAttr('hide-vote-recent') || $Viewer->permitted('vi
 }
 
 $FirstCol = true;
-$Collages = (new Gazelle\Manager\Collage)->findPersonalByUserId($UserID);
+$Collages = (new Gazelle\Manager\Collage)->findPersonalByUser($User);
 foreach ($Collages as $collage) {
 ?>
     <table class="layout recent" id="collage<?=$collage->id()?>_box" cellpadding="0" cellspacing="0" border="0">

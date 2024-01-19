@@ -156,7 +156,7 @@ if ($musicRelease) {
 if ($musicRelease) {
     if ($Viewer->permitted('site_collages_manage') || $Viewer->activePersonalCollages()) {
         echo $Twig->render('torrent/collage-add.twig', [
-            'collage_list' => $collageMan->addToCollageDefault($Viewer->id(), $tgroupId),
+            'collage_list' => $collageMan->addToCollageDefault($tgroupId, $Viewer),
             'tgroup_id'    => $tgroupId,
             'viewer'       => $Viewer,
         ]);

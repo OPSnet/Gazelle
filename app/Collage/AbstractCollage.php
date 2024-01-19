@@ -107,7 +107,7 @@ abstract class AbstractCollage extends \Gazelle\Base {
     /**
      * Add an entry to a collage.
      */
-    public function addEntry(int $entryId, int $userId): int {
+    public function addEntry(int $entryId, \Gazelle\User $user): int {
         if ($this->hasEntry($entryId)) {
             return 0;
         }
@@ -128,7 +128,7 @@ abstract class AbstractCollage extends \Gazelle\Base {
                     WHERE ca.CollageID = ?
                 )
             )
-            ", $this->id, $userId, $entryId, $mult, $this->id
+            ", $this->id, $user->id(), $entryId, $mult, $this->id
 
         );
         $affected = self::$db->affected_rows();

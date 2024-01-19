@@ -199,7 +199,7 @@ class ArtistTest extends TestCase {
             tagList:     'jazz',
             logger:      $log,
         );
-        $this->collage->addEntry($oldArtistId, $this->user->id());
+        $this->collage->addEntry($oldArtistId, $this->user);
 
         $this->tgroupList = [
             Helper::makeTGroupMusic(

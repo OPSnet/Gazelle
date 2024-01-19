@@ -51,7 +51,7 @@ class CollageFreeleechTest extends TestCase {
                     user:   $this->user,
                 );
             }
-            $this->collage->addEntry($tgroup->flush()->id(), $this->user->id());
+            $this->collage->addEntry($tgroup->flush()->id(), $this->user);
         }
     }
 

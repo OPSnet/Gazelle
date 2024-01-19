@@ -27,7 +27,7 @@
         <a href="collages.php?action={{ object == 'torrent' ? 'manage' : 'manage_artists' }}&amp;collageid={{ collage.id }}" class="brackets">Manage entries</a>
 {% endif %}
         <a href="reports.php?action=report&amp;type=collage&amp;id={{ collage.id }}" class="brackets">Report collage</a>
-{% if viewer.permitted('site_collages_delete') or collage.isOwner(viewer.id) %}
+{% if viewer.permitted('site_collages_delete') or collage.isOwner(viewer) %}
         <a href="collages.php?action=delete&amp;collageid={{ collage.id }}" class="brackets">Delete</a>
 {% endif %}
     </div>

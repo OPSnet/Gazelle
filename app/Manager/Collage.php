@@ -16,16 +16,16 @@ class Collage extends \Gazelle\BaseManager {
 
     public static function findType(int $type): ?\Gazelle\Enum\CollageType {
         return match ($type) {
-            0 => \Gazelle\Enum\CollageType::personal,
-            1 => \Gazelle\Enum\CollageType::theme,
-            2 => \Gazelle\Enum\CollageType::genre,
-            3 => \Gazelle\Enum\CollageType::discography,
-            4 => \Gazelle\Enum\CollageType::label,
-            5 => \Gazelle\Enum\CollageType::staffPick,
-            6 => \Gazelle\Enum\CollageType::chart,
-            7 => \Gazelle\Enum\CollageType::artist,
-            8 => \Gazelle\Enum\CollageType::award,
-            9 => \Gazelle\Enum\CollageType::series,
+            0 => CollageType::personal,
+            1 => CollageType::theme,
+            2 => CollageType::genre,
+            3 => CollageType::discography,
+            4 => CollageType::label,
+            5 => CollageType::staffPick,
+            6 => CollageType::chart,
+            7 => CollageType::artist,
+            8 => CollageType::award,
+            9 => CollageType::series,
             default => null,
         };
     }
@@ -93,7 +93,7 @@ class Collage extends \Gazelle\BaseManager {
         );
     }
 
-    public function findPersonalByUserId(int $userId): array {
+    public function findPersonalByUser(\Gazelle\User $user): array {
         self::$db->prepared_query("
             SELECT ID
             FROM collages
@@ -101,7 +101,7 @@ class Collage extends \Gazelle\BaseManager {
                 AND CategoryID = 0
                 AND Deleted = '0'
             ORDER BY Featured DESC, Name ASC
-            ", $userId
+            ", $user->id()
         );
         return array_map(fn($id) => $this->findById($id), self::$db->collect(0, false));
     }
@@ -165,8 +165,9 @@ class Collage extends \Gazelle\BaseManager {
         return $new;
     }
 
-    public function addToArtistCollageDefault(int $userId, int $artistId): array {
-        $key = sprintf(self::CACHE_DEFAULT_ARTIST, $userId);
+    public function addToArtistCollageDefault(int $artistId, \Gazelle\User $user): array {
+        $userId  = $user->id();
+        $key     = sprintf(self::CACHE_DEFAULT_ARTIST, $userId);
         $default = self::$cache->get_value($key);
         if ($default === false) {
             // Ensure that some of the creator's collages are in the result
@@ -222,8 +223,8 @@ class Collage extends \Gazelle\BaseManager {
         return $list;
     }
 
-    public function addToCollageDefault(int $userId, int $groupId): array {
-        $key = sprintf(self::CACHE_DEFAULT_GROUP, $userId);
+    public function addToCollageDefault(int $groupId, \Gazelle\User $user): array {
+        $key = sprintf(self::CACHE_DEFAULT_GROUP, $user->id());
         $default = self::$cache->get_value($key);
         if ($default === false) {
             // All of their personal collages are in the result
@@ -238,7 +239,7 @@ class Collage extends \Gazelle\BaseManager {
                         SELECT 1 FROM collages_torrents WHERE CollageID = c.ID AND GroupID = ?
                     )
                 ORDER BY c.Updated DESC
-                ", $userId, COLLAGE_PERSONAL_ID, $groupId
+                ", $user->id(), COLLAGE_PERSONAL_ID, $groupId
             );
             $default = self::$db->collect(0, false);
 
@@ -262,7 +263,7 @@ class Collage extends \Gazelle\BaseManager {
                 GROUP BY c.ID
                 ORDER BY max(ca.AddedOn) DESC
                 LIMIT 5
-                ", $userId, COLLAGE_PERSONAL_ID, $userId, $groupId
+                ", $user->id(), COLLAGE_PERSONAL_ID, $user->id(), $groupId
             );
             $default = array_merge($default, self::$db->collect(0, false));
             self::$cache->cache_value($key, $default, 86400);
@@ -277,12 +278,14 @@ class Collage extends \Gazelle\BaseManager {
         return $list;
     }
 
-    public function flushDefaultArtist(int $userId): void {
-        self::$cache->delete_value(sprintf(self::CACHE_DEFAULT_ARTIST, $userId));
+    public function flushDefaultArtist(\Gazelle\User $user): static {
+        self::$cache->delete_value(sprintf(self::CACHE_DEFAULT_ARTIST, $user->id()));
+        return $this;
     }
 
-    public function flushDefaultGroup(int $userId): void {
-        self::$cache->delete_value(sprintf(self::CACHE_DEFAULT_GROUP, $userId));
+    public function flushDefaultGroup(\Gazelle\User $user): static {
+        self::$cache->delete_value(sprintf(self::CACHE_DEFAULT_GROUP, $user->id()));
+        return $this;
     }
 
     public function autocomplete(string $text, bool $isArtist = false): array {
@@ -332,9 +335,9 @@ class Collage extends \Gazelle\BaseManager {
         return $autocomplete;
     }
 
-    public function subscribedTGroupCollageList(int $userId, bool $viewAll): array {
+    public function subscribedTGroupCollageList(\Gazelle\User $user, bool $viewAll): array {
         $cond = ['s.UserID = ?'];
-        $args = [$userId];
+        $args = [$user->id()];
         if ($viewAll) {
             $groupIds = 'min(ct.GroupID)';
         } else {
@@ -362,9 +365,9 @@ class Collage extends \Gazelle\BaseManager {
         return $list;
     }
 
-    public function subscribedArtistCollageList(int $userId, bool $viewAll): array {
+    public function subscribedArtistCollageList(\Gazelle\User $user, bool $viewAll): array {
         $cond = ['s.UserID = ?'];
-        $args = [$userId];
+        $args = [$user->id()];
         if ($viewAll) {
             $artistIds = 'min(ca.ArtistID)';
         } else {

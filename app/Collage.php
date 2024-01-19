@@ -101,7 +101,7 @@ class Collage extends BaseObject {
     public function isDeleted(): bool { return $this->info()['is_deleted'] === '1'; }
     public function isFeatured(): bool { return (bool)$this->info()['is_featured']; }
     public function isLocked(): bool { return $this->info()['is_locked'] == '1' || $this->lockedForUser; }
-    public function isOwner(int $userId): bool { return $this->info()['user_id'] === $userId; }
+    public function isOwner(User $user): bool { return $this->info()['user_id'] === $user->id(); }
     public function isPersonal(): bool { return $this->info()['category_id'] === 0; }
 
     public function isArtist(): bool { return $this->categoryId() === COLLAGE_ARTISTS_ID; }
@@ -121,7 +121,7 @@ class Collage extends BaseObject {
         $this->lockedForUser = false;
         if (!$this->viewer->permitted('site_collages_delete')) {
             if ($this->categoryId() === 0) {
-                if (!$this->viewer->permitted('site_collages_personal') || !$this->isOwner($this->viewer->id())) {
+                if (!$this->viewer->permitted('site_collages_personal') || !$this->isOwner($this->viewer)) {
                     $this->lockedForUser = true;
                 }
             }
@@ -145,15 +145,15 @@ class Collage extends BaseObject {
             && (
                 (!$this->isPersonal() && ($user->permitted('site_collages_manage') || $user->activePersonalCollages()))
                 ||
-                ($this->isPersonal() && $this->isOwner($user->id()))
+                ($this->isPersonal() && $this->isOwner($user))
             );
     }
 
     /**
      * How many entries in this collage are owned by a given user
      */
-    public function countByUser(int $userId): int {
-        return $this->contributors()[$userId] ?? 0;
+    public function contributionTotal(User $user): int {
+        return $this->contributors()[$user->id()] ?? 0;
     }
 
     public function entryCreated(int $entryId): string {
@@ -341,8 +341,8 @@ class Collage extends BaseObject {
 
     /*** UPDATE METHODS ***/
 
-    public function addEntry(int $entryId, int $userId): int {
-        return $this->collage->addEntry($entryId, $userId);
+    public function addEntry(int $entryId, User $user): int {
+        return $this->collage->addEntry($entryId, $user);
     }
 
     public function hasEntry(int $entryId): bool {

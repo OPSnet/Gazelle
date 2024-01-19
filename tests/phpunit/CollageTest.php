@@ -157,8 +157,8 @@ class CollageTest extends TestCase {
         $this->assertFalse($collage->isArtist(), 'collage-is-not-artist');
         $this->assertFalse($collage->isDeleted(), 'collage-is-not-deleted');
         $this->assertFalse($collage->isFeatured(), 'collage-is-not-featured');
-        $this->assertFalse($collage->isOwner($this->userList['u2']->id()), 'collage-is-not-owner');
-        $this->assertTrue($collage->isOwner($this->userList['u1']->id()), 'collage-is-owner');
+        $this->assertFalse($collage->isOwner($this->userList['u2']), 'collage-is-not-owner');
+        $this->assertTrue($collage->isOwner($this->userList['u1']), 'collage-is-owner');
         $this->assertStringContainsString($collage->name(), $collage->link(), 'collage-link');
         $this->assertFalse($collage->hasAttr('sort-newest'), 'collage-no-sort-newest');
 
@@ -199,15 +199,15 @@ class CollageTest extends TestCase {
         // This is why we must
         sleep(1);
 
-        $this->assertEquals(1, $collage->addEntry($this->tgroupList[0]->id(), $this->userList['u3']->id(), 'collage-add-entry'));
-        $this->assertEquals(0, $collage->addEntry($this->tgroupList[0]->id(), $this->userList['u2']->id(), 'collage-add-dupe-entry'));
-        $unread = $manager->subscribedTGroupCollageList($this->userList['u2']->id(), false);
+        $this->assertEquals(1, $collage->addEntry($this->tgroupList[0]->id(), $this->userList['u3'], 'collage-add-entry'));
+        $this->assertEquals(0, $collage->addEntry($this->tgroupList[0]->id(), $this->userList['u2'], 'collage-add-dupe-entry'));
+        $unread = $manager->subscribedTGroupCollageList($this->userList['u2'], false);
         $this->assertCount(1, $unread, 'collage-one-unread');
 
         // catchup
         // TODO: this relies on a side effect in isSubscribed(), the clearing should be more explicit
         $this->assertTrue($collage->isSubscribed($this->userList['u2']), 'collage-catchup');
-        $this->assertCount(0, $manager->subscribedTGroupCollageList($this->userList['u2']->id(), false), 'collage-none-unread');
+        $this->assertCount(0, $manager->subscribedTGroupCollageList($this->userList['u2'], false), 'collage-none-unread');
 
         $this->assertEquals(1, $collage->toggleSubscription($this->userList['u2']), 'collage-unsubscribe');
         $this->assertFalse($collage->isSubscribed($this->userList['u2']), 'collage-is-no-longer-subcribed');
@@ -218,6 +218,7 @@ class CollageTest extends TestCase {
 
     public function testCollageArtist(): void {
         $manager = new Gazelle\Manager\Collage;
+        $logger = new Gazelle\Log;
         $this->collageList = [
             $manager->create(
                 user:        $this->userList['u1'],
@@ -225,27 +226,45 @@ class CollageTest extends TestCase {
                 name:        'phpunit collage artist ' . randomString(20),
                 description: 'phpunit collage artist description',
                 tagList:     implode(' ', $this->tagList(3)),
-                logger:      new Gazelle\Log,
+                logger:      $logger,
             ),
             $manager->create(
-                user:        $this->userList['u2'],
+                user:        $this->userList['u1'],
                 categoryId:  CollageType::artist->value,
                 name:        'phpunit collage artist ' . randomString(20),
                 description: 'phpunit collage artist description',
                 tagList:     implode(' ', $this->tagList(3)),
-                logger:      new Gazelle\Log,
+                logger:      $logger,
+            ),
+            $manager->create(
+                user:        $this->userList['u1'],
+                categoryId:  CollageType::artist->value,
+                name:        'phpunit collage artist ' . randomString(20),
+                description: 'phpunit collage artist description',
+                tagList:     implode(' ', $this->tagList(4)),
+                logger:      $logger,
             ),
         ];
 
         $artistMan = new Gazelle\Manager\Artist;
+        $artistList = [];
         foreach ($this->artistName as $artistName) {
             $artist = $artistMan->findByName($artistName);
             $this->assertNotNull($artist, "find $artistName");
-            $this->collageList[0]->addEntry($artistMan->findByName($artistName)?->id(), $this->userList['u1']->id());
+            $this->collageList[0]->addEntry($artistMan->findByName($artistName)?->id(), $this->userList['u1']);
+            $artistList[] = $artist;
         }
-        $this->collageList[1]->addEntry($artistMan->findByName($this->artistName[1])?->id(), $this->userList['u1']->id());
-        $this->collageList[1]->addEntry($artistMan->findByName($this->artistName[2])?->id(), $this->userList['u2']->id());
-        $this->collageList[1]->addEntry($artistMan->findByName($this->artistName[3])?->id(), $this->userList['u3']->id());
+
+        $this->collageList[1]->addEntry($artistList[0]->id(), $this->userList['u1']);
+        $this->assertCount(1, $manager->addToArtistCollageDefault($artistList[0]->id(), $this->userList['u1']), 'collage-default-add-acollage-never');
+        $this->collageList[1]->addEntry($artistList[1]->id(), $this->userList['u1']);
+
+        $default = $manager->addToArtistCollageDefault($artistList[1]->id(), $this->userList['u1']);
+        $this->assertCount(1, $default, 'collage-default-add-acollage-added');
+        $this->assertEquals($this->collageList[2]->id(), $default[0]->id(), 'collage-default-artist-suggestion');
+
+        $this->collageList[1]->addEntry($artistList[2]->id(), $this->userList['u2']);
+        $this->collageList[1]->addEntry($artistList[3]->id(), $this->userList['u3']);
 
         $this->assertEquals(3, $this->collageList[1]->numContributors(), 'collage-artist-contributor');
         $summary = $manager->artistSummary($artistMan->findByName($this->artistName[2])->id());
@@ -257,6 +276,12 @@ class CollageTest extends TestCase {
             date('Y-m-d '),
             $this->collageList[1]->entryCreated($artistMan->findByName($this->artistName[3])->id()),
             'collage-artist-entry-created'
+        );
+
+        $this->assertInstanceOf(
+            \Gazelle\Manager\Collage::class,
+            $manager->flushDefaultArtist($this->userList['u1']),
+            'collage-flush-default-artist-suggestion'
         );
     }
 
@@ -277,10 +302,21 @@ class CollageTest extends TestCase {
         $u1 = $this->userList['u1'];
         $u2 = $this->userList['u2'];
         $u3 = $this->userList['u3'];
-        $collage->addEntry($this->tgroupList[0]->id(), $u1->id());
-        $collage->addEntry($this->tgroupList[1]->id(), $u3->id());
-        $collage->addEntry($this->tgroupList[2]->id(), $u3->id());
-        $collage->addEntry($this->tgroupList[3]->id(), $u3->id());
+
+        $this->assertCount(0, $manager->addToCollageDefault($this->tgroupList[1]->id(), $u2), 'collage-default-add-tcollage-never');
+        $collage->addEntry($this->tgroupList[0]->id(), $u1);
+        $default = $manager->addToCollageDefault($this->tgroupList[1]->id(), $u1);
+        $this->assertCount(1, $default, 'collage-default-add-tcollage-added');
+        $this->assertEquals($collage->id(), $default[0]->id(), 'collage-default-suggestion');
+        $this->assertInstanceOf(
+            \Gazelle\Manager\Collage::class,
+            $manager->flushDefaultGroup($u1),
+            'collage-flush-default-suggestion'
+        );
+
+        $collage->addEntry($this->tgroupList[1]->id(), $u3);
+        $collage->addEntry($this->tgroupList[2]->id(), $u3);
+        $collage->addEntry($this->tgroupList[3]->id(), $u3);
         $this->assertEquals(4, $collage->numEntries(), 'collage-has-4');
         $this->assertCount(4, $collage->topArtists(), 'collage-has-4-artists');
         $this->assertEquals(2, $collage->numContributors(), 'collage-two-contributors');
@@ -295,7 +331,7 @@ class CollageTest extends TestCase {
         $this->assertTrue($collage->userHasContributed($u1), 'collage-user-1-has-contrib');
         $this->assertFalse($collage->userHasContributed($u2), 'collage-user-2-no-contrib');
         $this->assertTrue($collage->userHasContributed($u3), 'collage-user-3-has-contrib');
-        $this->assertEquals(3, $collage->countByUser($u3->id()), 'collage-contributor-three');
+        $this->assertEquals(3, $collage->contributionTotal($u3), 'collage-contributor-three');
         $this->assertEquals($u1->id(), $collage->entryUserId($this->tgroupList[0]->id()), 'collage-contribution-by');
 
         $idList = array_map(fn($n) => $this->tgroupList[$n]->id(), range(0, 3));
@@ -324,7 +360,7 @@ class CollageTest extends TestCase {
         $this->assertEquals([$idList[3], $idList[0], $idList[2]], $collage->entryList(), 'collage-removed-entry-list');
 
         $this->assertTrue($collage->toggleAttr('sort-newest', true), 'collage-personal-sort-newest');
-        $collage->addEntry($this->tgroupList[1]->id(), $u3->id());
+        $collage->addEntry($this->tgroupList[1]->id(), $u3);
         $this->assertEquals([$idList[1], $idList[3], $idList[0], $idList[2]], $collage->entryList(), 'collage-add-first');
     }
 
@@ -365,14 +401,14 @@ class CollageTest extends TestCase {
                 logger:      new Gazelle\Log,
             ),
         ];
-        $personal = $manager->findPersonalByUserId($user->id());
+        $personal = $manager->findPersonalByUser($user);
         $this->assertEquals(
             array_map(fn($c) => $c->id(), [$this->collageList[0], $this->collageList[1], $this->collageList[2], $this->collageList[3]]),
             array_map(fn($c) => $c->id(), $personal),
             'collage-personal-list'
         );
         $this->assertTrue($personal[2]->setFeatured()->modify(), 'collage-set-featured');
-        $personal = $manager->findPersonalByUserId($user->id());
+        $personal = $manager->findPersonalByUser($user);
         $this->assertEquals(
             array_map(fn($c) => $c->id(), [$this->collageList[2], $this->collageList[0], $this->collageList[1], $this->collageList[3]]),
             array_map(fn($c) => $c->id(), $personal),
@@ -381,7 +417,7 @@ class CollageTest extends TestCase {
 
         $tgroupId = $this->tgroupList[0]->id();
         foreach ($this->collageList as $collage) {
-            $collage->addEntry($tgroupId, $user->id());
+            $collage->addEntry($tgroupId, $user);
         }
         $summary = $manager->tgroupPersonalSummary($tgroupId);
         $this->assertEquals(4, $summary['total'], 'collage-manager-personal-tgroup-total');
@@ -400,7 +436,7 @@ class CollageTest extends TestCase {
         );
         $collage = $this->collageList[0];
         foreach (range(0, 3) as $n) {
-            $collage->addEntry($this->tgroupList[$n]->id(), $this->userList['u3']->id());
+            $collage->addEntry($this->tgroupList[$n]->id(), $this->userList['u3']);
         }
         $this->assertTrue((new Gazelle\User\Bookmark($this->userList['u1']))->create('collage', $collage->id()), 'collage-bookmark');
 
@@ -497,9 +533,8 @@ class CollageTest extends TestCase {
         $this->assertEquals($nameList, array_column($autocomplete, 'value'), 'collage-manager-autocomplete');
 
         $tgroupId = $this->tgroupList[0]->id();
-        $userId   = $this->userList['u3']->id();
         foreach ($this->collageList as $collage) {
-            $collage->addEntry($tgroupId, $userId);
+            $collage->addEntry($tgroupId, $this->userList['u3']);
         }
         $summary = $manager->tgroupGeneralSummary($tgroupId);
         $this->assertEquals(5, $summary['total'], 'collage-manager-summary-tgroup-total');
@@ -524,9 +559,9 @@ class CollageTest extends TestCase {
         $this->assertTrue($collage->userCanContribute($this->userList['u1']), 'collage-can-contribute-personal');
         $this->assertFalse($collage->userCanContribute($this->userList['u2']), 'collage-cannot-contribute-personal');
 
-        $collage->addEntry($this->tgroupList[0]->id(), $this->userList['u1']->id());
-        $collage->addEntry($this->tgroupList[1]->id(), $this->userList['u3']->id());
-        $collage->addEntry($this->tgroupList[3]->id(), $this->userList['u3']->id());
+        $collage->addEntry($this->tgroupList[0]->id(), $this->userList['u1']);
+        $collage->addEntry($this->tgroupList[1]->id(), $this->userList['u3']);
+        $collage->addEntry($this->tgroupList[3]->id(), $this->userList['u3']);
         $this->assertEquals(
             [
                 $this->tgroupList[3]->id(),
@@ -540,7 +575,7 @@ class CollageTest extends TestCase {
         $this->assertFalse($collage->hasEntry($this->tgroupList[2]->id()), 'collage-entry-absent');
 
         $this->assertTrue($collage->toggleAttr('sort-newest', true), 'collage-personal-sort-newest');
-        $collage->addEntry($this->tgroupList[2]->id(), $this->userList['u2']->id());
+        $collage->addEntry($this->tgroupList[2]->id(), $this->userList['u2']);
         $this->assertEquals(
             [
                 $this->tgroupList[3]->id(),
@@ -553,7 +588,7 @@ class CollageTest extends TestCase {
         );
 
         $this->assertTrue($collage->toggleAttr('sort-newest', false), 'collage-personal-toggle-newest');
-        $collage->addEntry($this->tgroupList[4]->id(), $this->userList['u2']->id());
+        $collage->addEntry($this->tgroupList[4]->id(), $this->userList['u2']);
         $this->assertEquals(
             [
                 $this->tgroupList[4]->id(),

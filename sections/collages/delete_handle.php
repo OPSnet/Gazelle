@@ -11,7 +11,7 @@ $collage = (new Gazelle\Manager\Collage)->findById((int)$_POST['collageid']);
 if (is_null($collage)) {
     error(404);
 }
-if (!$Viewer->permitted('site_collages_delete') && !$collage->isOwner($Viewer->id())) {
+if (!$Viewer->permitted('site_collages_delete') && !$collage->isOwner($Viewer)) {
     error(403);
 }
 
