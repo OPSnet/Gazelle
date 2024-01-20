@@ -210,7 +210,7 @@ foreach (ZIP_OPTION as $Option) {
 
     if ($GroupID != $LastGroupID) {
         $LastGroupID = $GroupID;
-        if ($OpenGroup) { /** @phpstan-ignore-line */
+        if ($OpenGroup) {
 ?>
                         </optgroup>
 <?php   } ?>

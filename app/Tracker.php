@@ -129,7 +129,7 @@ class Tracker extends Base {
             DROP TABLE IF EXISTS expire_freeleech
         ");
         self::$db->commit();
-        if (DEBUG_TRACKER_TOKEN_EXPIRE !== false) {
+        if (DEBUG_TRACKER_TOKEN_EXPIRE) {
             $filename = (string)DEBUG_TRACKER_TOKEN_EXPIRE; // phpstan, grrr
             $out = fopen($filename, 'a');
             if ($out !== false) {

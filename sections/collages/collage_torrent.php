@@ -78,7 +78,7 @@ if ($Viewer->permitted('zip_downloader')) {
         [$GroupID, $OptionID, $OptName] = $Option;
         if ($GroupID != $LastGroupID) {
             $LastGroupID = $GroupID;
-            if ($OpenGroup) { /** @phpstan-ignore-line */
+            if ($OpenGroup) {
 ?>
                     </optgroup>
 <?php        } ?>

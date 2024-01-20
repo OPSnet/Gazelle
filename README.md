@@ -134,7 +134,7 @@ in the gazelle repo's root directory (this one).
 
 Similarly, the phpstan container can be built with
 
-    docker build -t gazelle-phpstan:latest -f .docker/Dockerfile-phpstan --compress .docker
+    docker build -t gazelle-phpstan:latest -f .docker/phpstan.Dockerfile --compress .docker
 
 
 ## Upgrading Postgresql
