@@ -7,7 +7,7 @@ require_once(__DIR__ . '/../helper.php');
 
 class MoneroTest extends TestCase {
     public function testMoneroAddress(): void {
-        $cn = new Gazelle\Donate\MoneroCryptonote();
+        $cn = new \MoneroIntegrations\MoneroPhp\Cryptonote();
         $mainAddress = "4AdUndXHHZ6cfufTMvppY6JwXNouMBzSkbLYfpAV5Usx3skxNgYeYTRj5UzqtReoS44qo9mtmXCqY45DJ852K5Jv2684Rge";
         $mainDecoded = $cn->decode_address($mainAddress);
         $m = new Gazelle\Donate\Monero($mainAddress);
