@@ -3,7 +3,7 @@
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Color\Color;
 use Endroid\QrCode\Encoding\Encoding;
-use Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelHigh;
+use Endroid\QrCode\ErrorCorrectionLevel;
 use Endroid\QrCode\Writer\PngWriter;
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -35,7 +35,7 @@ $qrCode = Builder::create()
     ->writerOptions([])
     ->data('otpauth://totp/' . SITE_NAME . "?secret=$secret")
     ->encoding(new Encoding('UTF-8'))
-    ->errorCorrectionLevel(new ErrorCorrectionLevelHigh())
+    ->errorCorrectionLevel(ErrorCorrectionLevel::High)
     ->size(400)
     ->margin(20)
     ->foregroundColor(new Color(0, 0, 0, 0))

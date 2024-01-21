@@ -169,4 +169,8 @@ class UtilTest extends TestCase {
             'image-cache-proxied-ignore-resize-reference-vector'
         );
     }
+
+    public function testZip(): void {
+        $this->assertInstanceOf(\ZipStream\ZipStream::class, \Gazelle\Util\Zip::make("phpunit"), 'zip-object');
+    }
 }

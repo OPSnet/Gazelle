@@ -31,9 +31,9 @@
     "ext-openssl": "*",
     "d11wtq/boris": "^v1.0.10",
     "doersf/bitcoin-php": "^2.0",
-    "endroid/qr-code": "^4.8.1",
-    "hashids/hashids": "^4.1.0",
-    "maennchen/zipstream-php": "^2.4.0",
+    "endroid/qr-code": "^5.0",
+    "hashids/hashids": "^5.0",
+    "maennchen/zipstream-php": "^3.1",
     "monero-integrations/monerophp": "dev-master",
     "orpheusnet/bencode-torrent": "^1.3.0",
     "orpheusnet/logchecker": "^0.13.0",
@@ -43,10 +43,10 @@
     "whichbrowser/parser": "^2.1.7"
   },
   "require-dev": {
-    "phpstan/phpstan": "^1.10.50",
+    "phpstan/phpstan": "^1.10.56",
     "phpunit/php-code-coverage": "^9.2.30",
-    "phpunit/phpunit": "^9.6.15",
-    "rector/rector": "^0.18.13",
+    "phpunit/phpunit": "^9.6.16",
+    "rector/rector": "^0.19",
     "squizlabs/php_codesniffer": "^3"
   },
   "scripts": {
