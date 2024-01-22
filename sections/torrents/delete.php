@@ -104,7 +104,7 @@ if ($Viewer->permitted('admin_reports')) {
                         </div>
 <?php
     }
-    $UploaderOthers = (new Gazelle\Stats\User($uploaderId))->unresolvedReportsTotal();
+    $UploaderOthers = $torrent->uploader()->stats()->unresolvedReportsTotal();
     if ($UploaderOthers > 0) {
 ?>
                         <div style="text-align: right;">

@@ -202,7 +202,7 @@ class ForumThread extends BaseObject {
         $this->info['last_post_author_id'] = $user->id();
 
         $this->updateThread($user, $post->id());
-        (new Stats\User($user->id()))->increment('forum_post_total');
+        $user->stats()->increment('forum_post_total');
         return $post;
     }
 

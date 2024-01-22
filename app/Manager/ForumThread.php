@@ -20,7 +20,7 @@ class ForumThread extends \Gazelle\BaseManager {
         $thread = new \Gazelle\ForumThread(self::$db->inserted_id());
         $thread->addPost($user, $body);
         $db->relaxConstraints(false);
-        (new \Gazelle\Stats\User($user->id()))->increment('forum_thread_total');
+        $user->stats()->increment('forum_thread_total');
         $forum->flush();
         return $thread;
     }

@@ -122,7 +122,7 @@ class UserCreator extends Base {
         if ($inviter) {
             (new Manager\InviteSource)->resolveInviteSource($this->inviteKey, $user);
             (new User\InviteTree($inviter, $manager))->add($user);
-            (new Stats\User($inviter->id()))->increment('invited_total');
+            $inviter->stats()->increment('invited_total');
             $user->externalProfile()->modifyProfile($inviterReason);
             self::$db->prepared_query("
                 DELETE FROM invites WHERE InviteKey = ?

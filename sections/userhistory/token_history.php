@@ -28,7 +28,7 @@ if ($_GET['expire'] ?? 0) {
 }
 
 $paginator = new Gazelle\Util\Paginator(25, (int)($_GET['page'] ?? 1));
-$paginator->setTotal((new Gazelle\Stats\User($user->id()))->flTokenTotal());
+$paginator->setTotal($user->stats()->flTokenTotal());
 
 echo $Twig->render('user/history-freeleech.twig', [
     'admin'       => $Viewer->permitted('admin_fl_history'),

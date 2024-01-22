@@ -15,6 +15,6 @@ if (!isset($_GET['userid'])) {
 
 echo $Twig->render('user/timeline.twig', [
     'user'   => $user,
-    'charts' => (new Gazelle\Stats\User($user->id()))->timeline(),
+    'charts' => $user->stats()->timeline(),
     'viewer' => $Viewer,
 ]);
