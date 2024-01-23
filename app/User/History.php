@@ -102,11 +102,12 @@ class History extends \Gazelle\BaseUser {
             VALUES (?,      ?,     ?,  ?)
             ", $this->id(), $newEmail, $ipaddr, $_SERVER['HTTP_USER_AGENT']
         );
+        $affected = self::$db->affected_rows();
         $irc::sendMessage(
             $this->user->username(),
             "Security alert: Your email address was changed via $ipaddr with {$_SERVER['HTTP_USER_AGENT']}. Not you? Contact staff ASAP."
         );
-        if ($ipv4->setFilterIpaddr($ipaddr)->userTotal($this->user) == 0) {
+        if ($ipaddr != "127.0.0.1" && $ipv4->setFilterIpaddr($ipaddr)->userTotal($this->user) == 0) {
             $irc::sendMessage(
                 IRC_CHAN_STAFF,
                 "Email address for {$this->user->username()} was changed from {$this->user->email()} to $newEmail from unusual address $ipaddr with UA={$_SERVER['HTTP_USER_AGENT']}."
@@ -121,7 +122,7 @@ class History extends \Gazelle\BaseUser {
                 'username'   => $this->user->username(),
             ])
         );
-        return self::$db->affected_rows();
+        return $affected;
     }
 
     public function resetEmail(string $email, string $ipaddr): int {
