@@ -3,6 +3,38 @@
 use Gazelle\Enum\UserStatus;
 
 class Helper {
+    public static function makeRequestMusic(
+        \Gazelle\User $user,
+        string        $title,
+        int           $releaseType     = 1,
+        string        $description     = 'This is a unit test description',
+        string        $recordLabel     = 'Unitest Artists',
+        string        $catalogueNumber =  'UA-7890',
+        string        $encodingList    = 'Lossless|V0 (VBR)',
+        string        $formatList      = 'MP3|FLAC',
+        string        $mediaList       = 'CD|WEB',
+        string        $logCue          = 'Log (100%) + Cue',
+        bool          $checksum        = true,
+    ): \Gazelle\Request {
+        return (new \Gazelle\Manager\Request)->create(
+            userId:          $user->id(),
+            categoryId:      (new \Gazelle\Manager\Category)->findIdByName('Music'),
+            year:            (int)date('Y'),
+            title:           $title,
+            image:           '',
+            description:     $description,
+            recordLabel:     $recordLabel,
+            catalogueNumber: $catalogueNumber,
+            releaseType:     $releaseType,
+            encodingList:    $encodingList,
+            formatList:      $formatList,
+            mediaList:       $mediaList,
+            logCue:          $logCue,
+            checksum:        $checksum,
+            oclc:            '123,456',
+        );
+    }
+
     public static function makeTGroupEBook(
         string        $name,
         \Gazelle\User $user,

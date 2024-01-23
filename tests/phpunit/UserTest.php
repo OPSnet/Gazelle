@@ -230,6 +230,16 @@ class UserTest extends TestCase {
         $this->assertNull($this->user->title(), 'utest-null-title');
     }
 
+    public function testUpDown(): void {
+        $this->assertEquals(STARTING_UPLOAD, $this->user->uploadedSize(), 'utest-initial-up');
+        $this->assertEquals(0, $this->user->downloadedSize(), 'utest-initial-down');
+        $this->user->setField('leech_upload', STARTING_UPLOAD * 4)
+            ->setField('leech_download', STARTING_UPLOAD * 2)
+            ->modify();
+        $this->assertEquals(STARTING_UPLOAD * 4, $this->user->uploadedSize(), 'utest-modified-up');
+        $this->assertEquals(STARTING_UPLOAD * 2, $this->user->downloadedSize(), 'utest-modified-down');
+    }
+
     public function testAvatar(): void {
         $userMan = new \Gazelle\Manager\User;
         $this->assertEquals('', $this->user->avatar(), 'utest-avatar-blank');

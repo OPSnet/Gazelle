@@ -228,7 +228,7 @@ class Inbox extends \Gazelle\BaseUser {
             LEFT JOIN pm_conversations_users AS cu2 ON (cu2.ConvID = c.ID AND cu2.UserID != ? AND cu2.ForwardedTo = 0)
             LEFT JOIN users_main AS um ON (um.ID = cu2.UserID)
             WHERE " . implode(' AND ', $cond) . "
-            ORDER BY cu.Sticky, $unreadFirst greatest(cu.ReceivedDate, cu.SentDate) DESC
+            ORDER BY cu.Sticky, $unreadFirst greatest(cu.ReceivedDate, cu.SentDate) DESC, cu.ConvID DESC
             LIMIT ? OFFSET ?
             ", $this->user->id(), $this->user->id(), ...$args
         );

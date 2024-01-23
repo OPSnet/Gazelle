@@ -203,19 +203,15 @@ if ($invites != $user->unusedInviteTotal() && $Viewer->permitted('users_edit_inv
     $editSummary[] = "number of invites changed from {$user->unusedInviteTotal()} to $invites";
 }
 
-$leechSet = [];
-$leechArgs = [];
 if ($editRatio) {
     if ($uploaded != $user->uploadedSize() && $uploaded != $_POST['OldUploaded']) {
-        $leechSet[] = 'Uploaded = ?';
-        $leechArgs[] = $uploaded;
+        $user->setField('leech_upload', $uploaded);
         $editSummary[] = "uploaded changed from " . byte_format($user->uploadedSize())
             . ' to ' . byte_format($uploaded)
             . " (delta " . byte_format($uploaded - $user->uploadedSize()) . ")";
     }
     if ($downloaded != $user->downloadedSize() && $downloaded != $_POST['OldDownloaded']) {
-        $leechSet[] = 'Downloaded = ?';
-        $leechArgs[] = $downloaded;
+        $user->setField('leech_download', $downloaded);
         $editSummary[] = "downloaded changed from " . byte_format($user->downloadedSize())
             . ' to ' . byte_format($downloaded)
             . " (delta " . byte_format($downloaded - $user->downloadedSize()) . ")";
@@ -535,10 +531,8 @@ if ($mergeStatsFrom && $Viewer->permitted('users_edit_ratio')) {
     if ($stats) {
         $merge = new Gazelle\User($stats['userId']);
         $merge->flush();
-        $leechSet[] = "Uploaded = Uploaded + ?";
-        $leechArgs[] = $stats['up'];
-        $leechSet[] = "Downloaded = Downloaded + ?";
-        $leechArgs[] = $stats['down'];
+        $user->setField('leech_uploaded', $user->uploadedSize() + $stats['up'])
+            ->setField('leech_downloaded', $user->downloadedSize() + $stats['down']);
         $editSummary[] = sprintf('leech stats (up: %s, down: %s, ratio: %s) merged from %s (%s) prior(up: %s, down: %s, ratio: %s)',
             byte_format($stats['up']), byte_format($stats['down']), ratio($stats['up'], $stats['down']),
             $merge->url(), $mergeStatsFrom,
@@ -551,7 +545,7 @@ if ($changePassword && $Viewer->permitted('users_edit_password')) {
     $editSummary[] = 'password reset';
 }
 
-if (!(count($set) || count($leechSet) || count($editSummary)) && $reason) {
+if (!(count($set) || count($editSummary)) && $reason) {
     $editSummary[] = 'notes added';
 }
 
@@ -576,16 +570,6 @@ if ($set) {
         SET " .  implode(', ', $set) . "
         WHERE UserID = ?
         ", ...$args
-    );
-}
-
-if ($leechSet) {
-    $leechArgs[] = $userId;
-    Gazelle\DB::DB()->prepared_query("
-        UPDATE users_leech_stats
-        SET " . implode(', ', $leechSet) . "
-        WHERE UserID = ?
-        ", ...$leechArgs
     );
 }
 

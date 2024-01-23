@@ -7,6 +7,7 @@ require_once(__DIR__ . '/../../helper.php');
 
 class UserManagerTest extends TestCase {
     protected array $userList;
+    protected \Gazelle\Request $request;
 
     public function setUp(): void {
         $this->userList = [
@@ -17,6 +18,9 @@ class UserManagerTest extends TestCase {
     }
 
     public function tearDown(): void {
+        if (isset($this->request)) {
+            $this->request->remove();
+        }
         foreach ($this->userList as $user) {
             $user->remove();
         }
@@ -128,6 +132,60 @@ class UserManagerTest extends TestCase {
         $this->assertEquals(15, $this->userList[0]->tokenCount(), 'uman-masstoken-clear4-0');
         $this->assertEquals(15, $this->userList[1]->tokenCount(), 'uman-masstoken-clear4-1');
         $this->assertEquals(15, $this->userList[2]->tokenCount(), 'uman-masstoken-clear4-2');
+    }
+
+    public function testUserclassPromotion(): void {
+        $userMan = new \Gazelle\Manager\User;
+        $this->assertEquals(0, $userMan->promote(), 'uman-promote-initial');
+        $this->assertEquals(0, $userMan->demote(), 'uman-demote-initial');
+
+        // back date user creation
+        $user0 = $this->userList[0];
+        $user1 = $this->userList[1];
+        $db = Gazelle\DB::DB();
+        $db->prepared_query("
+            UPDATE users_main SET
+                created = created - INTERVAL 8 DAY
+            WHERE ID IN (?, ?)
+            ", $user0->id(), $user1->id()
+        );
+        // 11GiB to be eligible for User => Member promotion
+        $user0->setField('leech_upload', 11 * 1024 ** 3)->modify();
+        $this->assertEquals(1, $userMan->promote(), 'uman-user-member-promotion');
+
+        $inbox = $user0->inbox()->setUnreadFirst(true);
+        $this->assertEquals(1, $inbox->messageTotal(), 'uman-promote-inbox-total');
+        $list = $inbox->messageList(new Gazelle\Manager\PM($user0), 1, 0);
+        $this->assertEquals('You have been promoted to Member', $list[0]->subject(), 'uman-promote-pm-subject');
+
+        $user0->setField('leech_upload', 9 * 1024 ** 3)->modify();
+        $this->assertEquals(1, $userMan->demote(), 'uman-user-member-demotion');
+        $this->assertEquals(2, $inbox->messageTotal(), 'uman-promote-inbox-total');
+        $list = $inbox->messageList(new Gazelle\Manager\PM($user0), 2, 0);
+        $this->assertEquals('You have been demoted to User', $list[0]->subject(), 'uman-demote-pm-subject');
+
+        // 11GiB and create a request for 5GiB to be eligible for User => Member promotion
+        $user1->setField('leech_upload', 11 * 1024 ** 3)->modify();
+        $this->request = Helper::makeRequestMusic($user1, 'phpunit user promote request');
+        $this->assertTrue($this->request->vote($user1, 5 * 1024 ** 3), 'uman-user-member-req-vote');
+
+        // recompute user request stats
+        $stats = new Gazelle\Stats\Users;
+        $stats->refresh();
+        $this->assertEquals(1, $userMan->promote(), 'uman-user-member-req-promotion');
+
+        $inbox = $user1->inbox();
+        $this->assertEquals(1, $inbox->messageTotal(), 'uman-promote-req-inbox-total');
+        $list = $inbox->messageList(new Gazelle\Manager\PM($user1), 2, 0);
+        $this->assertEquals('You have been promoted to Member', $list[0]->subject(), 'uman-promote-req-pm-subject');
+
+        $this->request->remove();
+        $stats->refresh(); // recompute after removal
+        $user1->flush();   // resync user's cache with reality
+
+        $this->assertEquals(1, $userMan->demote(), 'uman-user-member-req-demotion');
+        $list = $inbox->messageList(new Gazelle\Manager\PM($user1), 3, 0);
+        $this->assertEquals('You have been demoted to User', $list[0]->subject(), 'uman-demote-req-pm-subject');
     }
 
     public function testUserRatioWatch(): void {

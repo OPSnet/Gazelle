@@ -103,12 +103,6 @@ class InboxTest extends TestCase {
         $bodyList = [randomString(), randomString(), randomString(), randomString()];
         $pmList   = [];
         foreach ($bodyList as $body) {
-            // Unfortunately there is no other way that works reliably.
-            // Since the Unread flag applies to the entire conversation and the Sent date
-            // has second granularity, the inbox-unread-first-is-unread will fail
-            // whenever the wallclock second rolls over from one second to the next
-            // between first and last message sent. This problem never show up in real life.
-            sleep(1);
             $pmList[] = $receiverInbox->create($senderInbox->user(), $subject, $body);
         }
         $convList = array_map(fn($p) => $p->id(), $pmList);

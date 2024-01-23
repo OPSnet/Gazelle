@@ -66,6 +66,9 @@ class User extends \Gazelle\BaseObject {
         $key = sprintf(self::CACHE_GENERAL, $this->id);
         $info = self::$cache->get_value($key);
         if ($info === false) {
+            // If a user has done nothing so far (no collages, no downloads...)
+            // they will have no row in user_summary as yet, hence the need
+            // to fallback on an array with values of 0
             $info = self::$db->rowAssoc("
                 SELECT artist_added_total,
                     collage_total,

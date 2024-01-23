@@ -937,7 +937,7 @@ class User extends \Gazelle\BaseManager {
                 LEFT JOIN user_summary       us  ON (us.user_id = um.ID)
                 WHERE um.Enabled = ?
                     AND um.PermissionID = ?
-                    AND uls.Uploaded >= ?
+                    AND uls.Uploaded + us.request_vote_size >= ?
                     AND (uls.Downloaded = 0 OR uls.Uploaded / uls.Downloaded >= ?)
                     AND um.created <= now() - INTERVAL ? WEEK
                     AND coalesce(us.upload_total, 0) >= ?
@@ -990,15 +990,20 @@ class User extends \Gazelle\BaseManager {
                 SELECT ID
                 FROM users_main um
                 INNER JOIN users_leech_stats uls ON (uls.UserID = um.ID)
-                INNER JOIN users_info         ui ON (ui.UserID = um.ID)
-                INNER JOIN user_summary       us ON (us.user_id = um.ID)
+                LEFT JOIN user_summary       us  ON (us.user_id = um.ID)
                 WHERE um.Enabled = ?
                     AND um.PermissionID = ?
                     AND (
-                        uls.Uploaded + us.request_bounty_size < ?
-                        OR us.upload_total < ?
+                        uls.Uploaded + coalesce(us.request_vote_size, 0) < ?
+                        OR (? > 0 AND coalesce(us.upload_total, 0) < ?)
             ";
-            $args = [UserStatus::enabled->value, $level['To'], $level['MinUpload'], $level['MinUploads']];
+            $args = [
+                UserStatus::enabled->value,
+                $level['To'],
+                $level['MinUpload'],
+                $level['MinUploads'],
+                $level['MinUploads']
+            ];
 
             if (!empty($level['Extra'])) {
                 $query .= ' OR NOT ' . implode(' AND ',

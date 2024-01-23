@@ -1112,9 +1112,30 @@ class User extends BaseObject {
             $changed = $changed || self::$db->affected_rows() === 1;
             $this->staffNote = [];
         }
-        if (isset($this->updateField['lock-type'])) {
-            $lockType = $this->updateField['lock-type'];
-            unset($this->updateField['lock-type']);
+
+        $leechSet = [];
+        $leechArgs = [];
+        if ($this->field('leech_upload') !== null) {
+            $leechSet[] = 'Uploaded = ?';
+            $leechArgs[] = $this->clearField('leech_upload');
+        }
+        if ($this->field('leech_download') !== null) {
+            $leechSet[] = 'Downloaded = ?';
+            $leechArgs[] = $this->clearField('leech_download');
+        }
+        if ($leechSet) {
+            $leechArgs[] = $this->id;
+            self::$db->prepared_query("
+                UPDATE users_leech_stats
+                SET " . implode(', ', $leechSet) . "
+                WHERE UserID = ?
+                ", ...$leechArgs
+            );
+            $changed = $changed || self::$db->affected_rows() === 1;
+        }
+
+        if ($this->field('lock-type') !== null) {
+            $lockType = $this->clearField('lock-type');
             if (!$lockType) {
                 self::$db->prepared_query("
                     DELETE FROM locked_accounts WHERE UserID = ?
