@@ -7,7 +7,7 @@
 <div class="thin">
     <div class="box pad">In this toolbox, you can specify an arbitrary SQL query that returns a list of
     user IDs, and then deliver a PM to those users. Note that if the results include your own ID, you
-    will not receive the message, however, all messages will be in your Sendbox.</div>
+    will receive the message, and all messages will be in your Sentbox.</div>
 </div>
 
 {% if delivered != false %}
@@ -31,7 +31,7 @@
         <tr valign="top">
             <td align="right" class="label">Query:</td>
             <td>
-                {%- if error %}<strong>{{ error }}</strong>{% endif %}
+                {%- if error %}<strong class="important_text">{{ error }}</strong>{% endif %}
                 <textarea name="query" cols="100" rows="6">{{ query|raw }}</textarea>
             <br />
 
@@ -54,9 +54,19 @@
             </td>
         </tr>
         <tr>
+            <td align="right" class="label">Anonymous:</td>
+            <td>
+                <label><input type="checkbox" name="anonymous" /> Check to send as a System message</label>
+                {% if not id_list %}
+                <br />Note that if you send this message anonymously, you will not receive a copy in your Sendbox and
+                people will not be able to answer (in this case, recommend a Staff PM or IRC).
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
             <td align="right" class="label">Send:</td>
             <td>
-                <label><input type="checkbox" name="send" /> This must be checked to send the message</label>
+                <label><input type="checkbox" name="send" /> Check to send (you really mean it!)</label>
             </td>
         </tr>
 {% else %}

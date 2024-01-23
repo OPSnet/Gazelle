@@ -521,7 +521,7 @@ class User extends \Gazelle\BaseManager {
         );
     }
 
-    public function sendCustomPM(\Gazelle\User $sender, string $subject, string $template, array $idList): int {
+    public function sendCustomPM(?\Gazelle\User $sender, string $subject, string $template, array $idList): int {
         $total = 0;
         foreach ($idList as $userId) {
             $user = $this->findById($userId);
@@ -529,7 +529,11 @@ class User extends \Gazelle\BaseManager {
                 continue;
             }
             $message = preg_replace('/%USERNAME%/', $user->username(), $template);
-            $user->inbox()->create($sender, $subject, $message);
+            if ($sender) {
+                $user->inbox()->create($sender, $subject, $message);
+            } else {
+                $user->inbox()->createSystem($subject, $message);
+            }
             $total++;
         }
         return $total;

@@ -36,6 +36,9 @@ if (isset($_POST['query'])) {
         default:
             error("Bad database source, try again");
     }
+    if (!$error && !$result && $_POST['query']) {
+        $error = "Query returned 0 rows";
+    }
 
     // we don't actually know if the query returned user ids, so check them
     $userMan = new Gazelle\Manager\User;
@@ -50,7 +53,12 @@ if (isset($_POST['query'])) {
         if (empty($_POST['subject'])) {
             $error = "You must supply a subject for the message";
         } else {
-            $delivered = $userMan->sendCustomPM($Viewer, trim($_POST['subject']), trim($_POST['message']), $idList);
+            $delivered = $userMan->sendCustomPM(
+                isset($_POST['anonymous']) ? null : $Viewer,
+                trim($_POST['subject']),
+                trim($_POST['message']),
+                $idList
+            );
         }
     }
 }
