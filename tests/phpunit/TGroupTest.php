@@ -90,6 +90,9 @@ class TGroupTest extends TestCase {
         $this->assertEquals(0, $this->tgroup->unresolvedReportsTotal(), 'tgroup-create-unresolved-reports');
         $this->assertEquals($this->tgroup->name(), $this->tgroup->flush()->name(), 'tgroup-create-flush');
 
+        $this->assertTrue($this->tgroup->isOwner($this->userList['user']), 'tgroup-user-is-owner');
+        $this->assertFalse($this->tgroup->isOwner($this->userList['admin']), 'tgroup-user-not-owner');
+
         $this->assertNull($this->manager->findById(-666), 'tgroup-no-instance-of');
         $find = $this->manager->findById($this->tgroup->id());
         $this->assertInstanceOf(Gazelle\TGroup::class, $find, 'tgroup-instance-of');

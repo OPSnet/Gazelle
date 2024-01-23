@@ -46,7 +46,7 @@
         </form>
     </div>
 
-{% if tgroup.isOwner(viewer.id) or viewer.permitted('torrents_edit') %}
+{% if tgroup.isOwner(viewer) or viewer.permitted('torrents_edit') %}
     <h3>Non-wiki torrent group editing</h3>
     <div class="box pad">
         <form class="edit_form" name="torrent_group" action="torrents.php" method="post">

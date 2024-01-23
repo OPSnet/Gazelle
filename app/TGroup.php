@@ -350,13 +350,13 @@ class TGroup extends BaseObject {
         return $this->info()['Image'];
     }
 
-    public function isOwner(int $userId): bool {
+    public function isOwner(User $user): bool {
         return (bool)self::$db->scalar("
             SELECT 1
             FROM torrents t
             WHERE t.GroupID = ?
                 AND t.UserID = ?
-            ", $this->id, $userId
+            ", $this->id, $user->id()
         );
     }
 
