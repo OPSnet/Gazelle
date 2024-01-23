@@ -48,7 +48,7 @@ $report = (new Gazelle\Manager\Report(new Gazelle\Manager\User))->create($Viewer
 if (in_array($report->subjectType(), ['user', 'comment'])) {
     Irc::sendMessage(
         IRC_CHAN_MOD,
-        "Report #{$report->id()} – {$Viewer->username()} reported a $subjectType: " . SITE_URL . "/$location"
+        "{$Viewer->username()} reported a $subjectType, see {$report->location()}"
     );
 }
 header("Location: $location");
