@@ -1547,13 +1547,12 @@ class User extends \Gazelle\BaseManager {
         return count($idList);
     }
 
-    public function expireFreeleechTokens(\Gazelle\Tracker $tracker): int {
+    public function expireFreeleechTokens(\Gazelle\Manager\Torrent $torrentMan, \Gazelle\Tracker $tracker): int {
         $slop   = 1.04; // 4% overshoot on download before forced expiry
 
         self::$db->prepared_query("
             SELECT uf.UserID,
-                uf.TorrentID,
-                t.info_hash
+                uf.TorrentID
             FROM users_freeleeches AS uf
             INNER JOIN torrents AS t ON (t.ID = uf.TorrentID)
             WHERE uf.Expired = FALSE
@@ -1565,15 +1564,23 @@ class User extends \Gazelle\BaseManager {
         $clear = [];
         $processed = 0;
         foreach ($expire as $token) {
-            $clear["users_tokens_{$token['UserID']}"] = true;
-            $tracker->update_tracker('remove_token', ['info_hash' => rawurlencode($token['info_hash']), 'userid' => $token['UserID']]);
+            $user = $this->findById($token['UserID']);
+            if (is_null($user)) {
+                continue;
+            }
+            $torrent = $torrentMan->findById($token['TorrentID']);
+            if (is_null($torrent)) {
+                continue;
+            }
+            $clear["users_tokens_{$user->id()}"] = true;
+            $tracker->removeToken($torrent, $user);
             $processed++;
             self::$db->prepared_query("
                 UPDATE users_freeleeches SET
                     Expired = TRUE
                 WHERE TorrentID = ?
                     AND UserID = ?
-                ", $token['TorrentID'], $token['UserID']
+                ", $torrent->id(), $user->id()
             );
         }
         self::$cache->delete_multi(array_keys($clear));

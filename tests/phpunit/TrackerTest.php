@@ -31,6 +31,26 @@ class TrackerTest extends TestCase {
     /**
      * @group no-ci
      */
+    public function testTrackerToken(): void {
+        $this->user = Helper::makeUser('trkfl.' . randomString(10), 'tracker');
+        $this->torrent = Helper::makeTorrentMusic(
+            Helper::makeTGroupMusic(
+                name:       'tracker ' . randomString(10),
+                artistName: [[ARTIST_MAIN], ['Tracker Girl ' . randomString(12)]],
+                tagName:    ['trap'],
+                user:       $this->user,
+            ),
+            user:  $this->user,
+            title: 'tracker ' . randomString(10),
+        );
+        $tracker = new \Gazelle\Tracker;
+        $this->assertTrue($tracker->addToken($this->torrent, $this->user), 'tracker-add-token');
+        $this->assertTrue($tracker->removeToken($this->torrent, $this->user), 'tracker-remove-token');
+    }
+
+    /**
+     * @group no-ci
+     */
     public function testTrackerTorrent(): void {
         $this->user = Helper::makeUser('trk.' . randomString(10), 'tracker');
         $this->torrent = Helper::makeTorrentMusic(

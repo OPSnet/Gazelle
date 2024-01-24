@@ -448,24 +448,25 @@ class Torrent extends TorrentAbstract {
         return [true, "torrent " . $this->id . " removed"];
     }
 
-    public function expireToken(int $userId): bool {
+    public function expireToken(User $user): int {
         $hash = (string)self::$db->scalar("
             SELECT info_hash FROM torrents WHERE ID = ?
             ", $this->id
         );
         if (!$hash) {
-            return false;
+            return 0;
         }
         self::$db->prepared_query("
             UPDATE users_freeleeches SET
                 Expired = true
             WHERE UserID = ?
                 AND TorrentID = ?
-            ", $userId, $this->id
+            ", $user->id(), $this->id
         );
-        self::$cache->delete_value("users_tokens_{$userId}");
-        (new \Gazelle\Tracker)->update_tracker('remove_token', ['info_hash' => rawurlencode($hash), 'userid' => $userId]);
-        return true;
+        $affected = self::$db->affected_rows();
+        self::$cache->delete_value("users_tokens_{$user->id()}");
+        (new \Gazelle\Tracker)->removeToken($this, $user);
+        return $affected;
     }
 
     /**

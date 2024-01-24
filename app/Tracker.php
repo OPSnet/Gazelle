@@ -1,7 +1,5 @@
 <?php
 // TODO: The following actions are used, turn them into methods
-// add_token
-// remove_token
 // remove_users
 
 namespace Gazelle;
@@ -23,6 +21,20 @@ class Tracker extends Base {
 
     public function last_error(): string|false {
         return $this->error;
+    }
+
+    public function addToken(Torrent $torrent, User $user): bool {
+        return $this->update_tracker('add_token', [
+            'info_hash' => $torrent->infohashEncoded(),
+            'userid'    => $user->id(),
+        ]);
+    }
+
+    public function removeToken(Torrent $torrent, User $user): bool {
+        return $this->update_tracker('remove_token', [
+            'info_hash' => $torrent->infohashEncoded(),
+            'userid'    => $user->id(),
+        ]);
     }
 
     public function addTorrent(Torrent $torrent): bool {

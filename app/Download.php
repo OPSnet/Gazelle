@@ -11,7 +11,7 @@ use Gazelle\Enum\LeechType;
  *   - might have downloaded too many torrent files recently.
  *   - might be trying to use tokens and not have enough.
  *
- * The User\Download class encapsulates this logic.
+ * This class encapsulates this logic.
  */
 
 class Download extends Base {
@@ -20,14 +20,11 @@ class Download extends Base {
     public function __construct(
         protected \Gazelle\Torrent $torrent,
         protected \Gazelle\User\UserclassRateLimit $limiter,
-        protected bool $useToken
+        protected bool $useToken,
     ) {}
 
     public function status(): DownloadStatus {
-        if (!isset($this->status)) {
-            $this->status = $this->authorize();
-        }
-        return $this->status;
+        return $this->status ??= $this->authorize();
     }
 
     public function authorize(): DownloadStatus {
@@ -36,16 +33,18 @@ class Download extends Base {
          */
         $user = $this->limiter->user();
         $userId = $user->id();
-        if (
-            $this->torrent->uploaderId() == $userId
+        if ($this->torrent->uploaderId() == $userId
             || $user->snatch()->isSnatched($this->torrent)
             || $user->isSeeding($this->torrent)
         ) {
-            return $this->success();
+            // if no token is in play, we are done
+            if (!$this->useToken) {
+                return $this->success();
+            }
         }
 
         /**
-         * You cannot download if you are on ratio watch
+         * You cannot download, token or not, if you are on ratio watch
          */
         if (!$user->canLeech()) {
             return DownloadStatus::ratio;
@@ -63,27 +62,32 @@ class Download extends Base {
          * and they have already downloaded too many files recently, then
          * stop them. Exception: always allowed if they are using FL tokens.
          */
-        if (!$this->useToken && $this->torrent->uploaderId() != $userId) {
-            if ($this->limiter->isOvershoot($this->torrent)) {
-                return DownloadStatus::flood;
-            }
+        if (!$this->useToken
+            && $this->torrent->uploaderId() != $userId
+            && $this->limiter->isOvershoot($this->torrent)
+        ) {
+            return DownloadStatus::flood;
         }
 
-        /* If they are trying use a token on this, make sure they have enough.
+        /* They are trying use a token on this: make sure they have enough.
          * If so, deduct the number required, note it in the freeleech table
          * and update their cache key.
          */
         if ($this->useToken && $this->torrent->leechType() == LeechType::Normal) {
+            // can they even consider the idea?
+            $tokenCount = $this->torrent->tokenCount();
+            if ($user->tokenCount() < $tokenCount || (!STACKABLE_FREELEECH_TOKENS && $tokenCount > 1)) {
+                return DownloadStatus::too_big;
+            }
+
+            // make sure personal freeleech on the torrent is up to date
+            $this->torrent->flush()->setViewer($this->limiter->user());
             if (!$user->canSpendFLToken($this->torrent)) {
                 return DownloadStatus::free;
             }
 
-            // First make sure this isn't already FL, and do nothing if it is
+            // Spend some tokens to make it personal freeleech
             if (!$user->hasToken($this->torrent)) {
-                $tokenCount = $this->torrent->tokenCount();
-                if (!STACKABLE_FREELEECH_TOKENS && $tokenCount > 1) {
-                    return DownloadStatus::too_big;
-                }
                 self::$db->begin_transaction();
                 self::$db->prepared_query('
                     UPDATE user_flt SET
@@ -95,11 +99,7 @@ class Download extends Base {
                     self::$db->rollback();
                     return DownloadStatus::no_tokens;
                 }
-
-                // Let the tracker know about this
-                if (!(new \Gazelle\Tracker)->update_tracker('add_token', [
-                    'info_hash' => $this->torrent->infohashEncoded(), 'userid' => $userId
-                ])) {
+                if (!(new \Gazelle\Tracker)->addToken($this->torrent, $user)) {
                     self::$db->rollback();
                     return DownloadStatus::tracker;
                 }
