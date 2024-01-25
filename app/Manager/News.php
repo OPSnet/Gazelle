@@ -8,15 +8,16 @@ class News extends \Gazelle\Base {
     /**
      * Create a news article
      */
-    public function create(int $userId, string $title, string $body): int {
+    public function create(\Gazelle\User $user, string $title, string $body): int {
         self::$db->prepared_query("
             INSERT INTO news
                    (UserID, Title, Body)
             VALUES (?,      ?,     ?)
-            ", $userId, trim($title), trim($body)
+            ", $user->id(), trim($title), trim($body)
         );
+        $id = self::$db->inserted_id();
         self::$cache->delete_multi(['feed_news', self::CACHE_KEY]);
-        return self::$db->inserted_id();
+        return $id;
     }
 
     /**

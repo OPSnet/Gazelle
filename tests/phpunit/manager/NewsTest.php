@@ -29,7 +29,7 @@ class NewsTest extends TestCase {
         $manager = new \Gazelle\Manager\News;
         $initial = $manager->headlines();
         $this->news = $manager->create(
-            $this->userList[0]->id(),
+            $this->userList[0],
             'phpunit news',
             'phpunit news body',
         );
@@ -44,7 +44,7 @@ class NewsTest extends TestCase {
     public function testNewsWitness(): void {
         $manager    = new \Gazelle\Manager\News;
         $this->news = $manager->create(
-            $this->userList[0]->id(),
+            $this->userList[0],
             'phpunit news witness',
             'phpunit news witness body',
         );
@@ -59,7 +59,7 @@ class NewsTest extends TestCase {
         $manager    = new \Gazelle\Manager\News;
         $title      = 'phpunit news notif';
         $this->news = $manager->create(
-            $this->userList[0]->id(),
+            $this->userList[0],
             $title,
             'phpunit news notif body',
         );
