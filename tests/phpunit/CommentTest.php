@@ -138,7 +138,7 @@ class CommentTest extends TestCase {
         $this->assertEquals('torrents', $comment->page(), 'comment-torrent-page');
         $this->assertEquals('torrents.php?id=', $comment->pageUrl(), 'comment-torrent-page-url');
 
-        $this->assertTrue($comment->isAuthor($this->user->id()), 'comment-torrent-is-author');
+        $this->assertTrue($comment->isAuthor($this->user), 'comment-torrent-is-author');
         $this->assertStringStartsWith('phpunit comment ', $comment->body(), 'comment-torrent-body');
         $this->assertTrue(
             $comment->setField('Body', 'phpunit edit')

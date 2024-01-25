@@ -23,7 +23,7 @@ if (is_null($user)) {
 }
 
 $comment->setField('Body', $body)->setField('EditedUserID', $Viewer->id())->modify();
-if ((bool)($_POST['pm'] ?? false) && !$comment->isAuthor($Viewer->id())) {
+if ((bool)($_POST['pm'] ?? false) && !$comment->isAuthor($Viewer)) {
     // Send a PM to the user to notify them of the edit
     $url = $comment->publicUrl('action=jump');
     $user->inbox()->createSystem(

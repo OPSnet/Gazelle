@@ -36,8 +36,8 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
         );
     }
 
-    public function isAuthor(int $userId): bool {
-        return $this->userId() === $userId;
+    public function isAuthor(\Gazelle\User $user): bool {
+        return $this->userId() === $user->id();
     }
 
     public function lastRead(): int {
