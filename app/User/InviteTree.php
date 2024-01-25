@@ -13,11 +13,17 @@ class InviteTree extends \Gazelle\Base {
     protected array $info;
 
     public function __construct(
-        protected \Gazelle\User $user
+        protected \Gazelle\User $user,
+        protected \Gazelle\Manager\User $userMan,
     ) {}
 
+    public function flush(): static {
+        unset($this->info);
+        return $this;
+    }
+
     public function info(): array {
-        if (empty($this->info)) {
+        if (!isset($this->info)) {
             $this->info = self::$db->rowAssoc("
                 SELECT
                     t1.TreeID        AS tree_id,
@@ -36,7 +42,7 @@ class InviteTree extends \Gazelle\Base {
                 WHERE t1.UserID = ?
                 ", $this->user->id()
             ) ?? [
-               'tree_id'      => null,
+               'tree_id'      => 0,
                'depth'        => null,
                'position'     => null,
                'max_position' => null,
@@ -45,7 +51,7 @@ class InviteTree extends \Gazelle\Base {
         return $this->info;
     }
 
-    public function treeId(): ?int {
+    public function treeId(): int {
         return $this->info()['tree_id'];
     }
 
@@ -85,7 +91,7 @@ class InviteTree extends \Gazelle\Base {
         return self::$db->collect('UserID');
     }
 
-    public function add(int $userId): int {
+    public function add(\Gazelle\User $user): int {
         if (!$this->treeId()) {
             // Not everyone is created by the genesis user. Invite trees may be disconnected.
             self::$db->prepared_query("
@@ -94,7 +100,7 @@ class InviteTree extends \Gazelle\Base {
                 VALUES (?, (SELECT coalesce(max(it.TreeID), 0) + 1 FROM invite_tree AS it))
                 ", $this->user->id()
             );
-            $this->info = [];
+            $this->flush();
         }
         $nextPosition = self::$db->scalar("
             SELECT TreePosition
@@ -129,13 +135,15 @@ class InviteTree extends \Gazelle\Base {
             INSERT INTO invite_tree
                    (UserID, InviterID, TreeID, TreePosition, TreeLevel)
             VALUES (?,      ?,         ?,      ?,            ?)
-            ", $userId, $this->user->id(), $this->treeId(), $nextPosition, $this->depth() + 1
+            ", $user->id(), $this->user->id(), $this->treeId(), $nextPosition, $this->depth() + 1
         );
-        return self::$db->affected_rows();
+        $affected = self::$db->affected_rows();
+        $this->flush();
+        return $affected;
     }
 
-    public function details(\Gazelle\Manager\User $userMan, \Gazelle\User $viewer): array {
-        if (is_null($this->treeId())) {
+    public function details(\Gazelle\User $viewer): array {
+        if (!$this->treeId()) {
             return [];
         }
 
@@ -187,7 +195,7 @@ class InviteTree extends \Gazelle\Base {
         ];
         $classSummary = [];
         foreach ($inviteeList as [$inviteeId, $position, $depth]) {
-            $invitee = $userMan->findById($inviteeId);
+            $invitee = $this->userMan->findById($inviteeId);
             if (is_null($invitee)) {
                 continue;
             }
@@ -234,7 +242,7 @@ class InviteTree extends \Gazelle\Base {
             : [ 'classes' =>
                 array_merge(
                     ...array_map(
-                        fn($c) => [$userMan->userclassName($c) => $classSummary[$c]],
+                        fn($c) => [$this->userMan->userclassName($c) => $classSummary[$c]],
                         array_keys($classSummary)
                     )
                 ),

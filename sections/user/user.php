@@ -405,7 +405,7 @@ if ($Viewer->permitted('users_linked_users')) {
 }
 
 if ($Viewer->permitted('users_view_invites')) {
-    $tree = new Gazelle\User\InviteTree($User);
+    $tree = new Gazelle\User\InviteTree($User, $userMan);
     if ($tree->hasInvitees()) {
 ?>
         <div class="box" id="invitetree_box">
@@ -414,7 +414,7 @@ if ($Viewer->permitted('users_view_invites')) {
             </div>
             <div id="invitetree" class="hidden">
                 <?= $Twig->render('user/invite-tree.twig', [
-                    ...(new Gazelle\User\InviteTree($User))->details($userMan, $Viewer),
+                    ...$tree->details($Viewer),
                     'user'   => $User,
                     'viewer' => $Viewer,
                 ]) ?>

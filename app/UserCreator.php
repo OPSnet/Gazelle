@@ -43,7 +43,7 @@ class UserCreator extends Base {
         } else {
             $this->permissionId = USER;
         }
-
+        $manager = new Manager\User;
         if (!isset($this->inviteKey)) {
             $inviter = null;
         } else {
@@ -53,7 +53,7 @@ class UserCreator extends Base {
                 WHERE InviteKey = ?
                 ", $this->inviteKey
             );
-            $inviter = (new Manager\User)->findById((int)$inviterId);
+            $inviter = $manager->findById((int)$inviterId);
             if (is_null($inviter)) {
                 throw new UserCreatorException('invitation');
             }
@@ -121,7 +121,7 @@ class UserCreator extends Base {
 
         if ($inviter) {
             (new Manager\InviteSource)->resolveInviteSource($this->inviteKey, $user);
-            (new User\InviteTree($inviter))->add($this->id);
+            (new User\InviteTree($inviter, $manager))->add($user);
             (new Stats\User($inviter->id()))->increment('invited_total');
             $user->externalProfile()->modifyProfile($inviterReason);
             self::$db->prepared_query("

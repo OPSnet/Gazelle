@@ -14,7 +14,7 @@ if (!isset($_GET['userid'])) {
 }
 
 echo $Twig->render('user/invite-tree-page.twig', [
-    ...(new Gazelle\User\InviteTree($user))->details($userMan, $Viewer),
+    ...(new Gazelle\User\InviteTree($user, $userMan))->details($Viewer),
     'user'   => $user,
     'viewer' => $Viewer,
 ]);

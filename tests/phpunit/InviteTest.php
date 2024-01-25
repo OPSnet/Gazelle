@@ -77,6 +77,17 @@ class InviteTest extends TestCase {
 
         $this->assertTrue($this->invitee->isUnconfirmed(), 'invitee-unconfirmed');
         $this->assertInstanceOf(Gazelle\User::class, (new Gazelle\Manager\User)->findByAnnounceKey($this->invitee->announceKey()), 'invitee-confirmable');
+
+        // invite tree functionality
+        $inviteTree = new \Gazelle\User\InviteTree($this->user, new Gazelle\Manager\User);
+        $this->assertInstanceOf(\Gazelle\User\InviteTree::class, $inviteTree, 'invite-tree-ctor');
+        $this->assertGreaterThan(0, $inviteTree->treeId(), 'invite-tree-new-id');
+        $this->assertTrue($inviteTree->hasInvitees(), 'invite-tree-has-invitees');
+        $this->assertEquals(0, $inviteTree->depth(), 'invite-tree-depth');
+        $list = $inviteTree->inviteeList();
+        $this->assertCount(1, $list, 'invite-tree-list');
+        $this->assertEquals($this->invitee->id(), $list[0], 'invite-tree-user-id');
+        $this->assertGreaterThan(0, $inviteTree->position(), 'invite-tree-position');
     }
 
     public function testInviteSource(): void {
