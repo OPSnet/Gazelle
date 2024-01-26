@@ -72,7 +72,7 @@ class Helper {
         $tgroup->addArtists($artistName[0], $artistName[1], $user, new Gazelle\Manager\Artist, new Gazelle\Log);
         $tagMan = new \Gazelle\Manager\Tag;
         foreach ($tagName as $tag) {
-            $tagMan->createTorrentTag($tagMan->create($tag, $user), $tgroup->id(), $user->id(), 10);
+            $tagMan->createTorrentTag($tagMan->create($tag, $user), $tgroup, $user, 10);
         }
         $tgroup->refresh();
         return $tgroup;

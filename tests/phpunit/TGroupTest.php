@@ -178,10 +178,10 @@ class TGroupTest extends TestCase {
         $tagMan = new Gazelle\Manager\Tag;
         $tagId = $tagMan->create('synthetic.disco.punk', $user);
         $this->assertGreaterThan(1, $tagId, 'tgroup-tag-create');
-        $this->assertEquals(1, $tagMan->createTorrentTag($tagId, $this->tgroup->id(), $user->id(), 10), 'tgroup-tag-add-one');
+        $this->assertEquals(1, $tagMan->createTorrentTag($tagId, $this->tgroup, $user, 10), 'tgroup-tag-add-one');
 
         $tag2 = $tagMan->create('acoustic.norwegian.black.metal', $user);
-        $this->assertEquals(1, $tagMan->createTorrentTag($tag2, $this->tgroup->id(), $user->id(), 5), 'tgroup-tag-add-two');
+        $this->assertEquals(1, $tagMan->createTorrentTag($tag2, $this->tgroup, $user, 5), 'tgroup-tag-add-two');
         $this->tgroup->flush();
         $this->assertCount(2, $this->tgroup->tagNameList(), 'tgroup-tag-name-list');
         $this->assertContains('synthetic.disco.punk', $this->tgroup->tagNameList(), 'tgroup-tag-name-find-one');

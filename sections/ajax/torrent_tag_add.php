@@ -13,12 +13,10 @@ $tgroup = $tgMan->findById((int)($_REQUEST['groupid'] ?? 0));
 if (is_null($tgroup)) {
     json_or_error('invalid groupid', 0);
 }
-$tgroupId = $tgroup->id();
-$userId = $Viewer->id();
 
 //Delete cached tag used for undos
 if (isset($_REQUEST['undo'])) {
-    $Cache->delete_value("deleted_tags_$tgroupId" . '_' . $userId);
+    $Cache->delete_value("deleted_tags_{$tgroup->id()}_{$Viewer->id()}");
 }
 
 $added    = [];
@@ -34,7 +32,7 @@ foreach ($Tags as $tagName) {
         $rejected[] = $tagName;
     } else {
         $tagId = $tagMan->create($resolved, $Viewer);
-        if ($tagMan->torrentTagHasVote($tagId, $tgroupId, $userId)) {
+        if ($tagMan->torrentTagHasVote($tagId, $tgroup, $Viewer)) {
             // User has already voted on this tag
             if (defined('AJAX')) {
                 json_error('you have already voted on this tag');
@@ -43,8 +41,8 @@ foreach ($Tags as $tagName) {
             }
             exit;
         }
-        $tagMan->createTorrentTag($tagId, $tgroupId, $userId, 3);
-        $tagMan->createTorrentTagVote($tagId, $tgroupId, $userId, 'up');
+        $tagMan->createTorrentTag($tagId, $tgroup, $Viewer, 3);
+        $tagMan->createTorrentTagVote($tagId, $tgroup, $Viewer, 'up');
         $added[] = $resolved;
 
         (new Gazelle\Log)->group($tgroup, $Viewer, "Tag \"$resolved\" added to group");

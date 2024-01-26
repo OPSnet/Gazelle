@@ -557,7 +557,7 @@ if (!$Properties['GroupID']) {
     foreach ($Properties['TagList'] as $tag) {
         $tag = $tagMan->resolve($tagMan->sanitize($tag));
         if (!empty($tag)) {
-            $tagMan->createTorrentTag($tagMan->create($tag, $Viewer), $GroupID, $Viewer->id(), 10);
+            $tagMan->createTorrentTag($tagMan->create($tag, $Viewer), $tgroup, $Viewer, 10);
         }
     }
 }

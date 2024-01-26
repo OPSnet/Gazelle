@@ -132,7 +132,6 @@ class Tag extends \Gazelle\BaseManager {
     /**
      * Make a tag official
      *
-     * $userId Who is doing the officializing/
      * return id of the officialized tag.
      */
     public function officialize(string $name, \Gazelle\User $user): int {
@@ -469,36 +468,36 @@ class Tag extends \Gazelle\BaseManager {
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
-    public function createTorrentTag(int $tagId, int $groupId, int $userId, int $weight): int {
+    public function createTorrentTag(int $tagId, \Gazelle\TGroup $tgroup, \Gazelle\User $user, int $weight): int {
         self::$db->prepared_query("
             INSERT INTO torrents_tags
                    (TagID, GroupID, UserID, PositiveVotes)
             VALUES (?,     ?,       ?,      ?)
             ON DUPLICATE KEY UPDATE
                 PositiveVotes = PositiveVotes + 2
-            ", $tagId, $groupId, $userId, $weight
+            ", $tagId, $tgroup->id(), $user->id(), $weight
         );
         return self::$db->affected_rows();
     }
 
-    public function createTorrentTagVote(int $tagId, int $groupId, int $userId, string $vote): int {
+    public function createTorrentTagVote(int $tagId, \Gazelle\TGroup $tgroup, \Gazelle\User $user, string $vote): int {
         self::$db->prepared_query("
             INSERT INTO torrents_tags_votes
                    (TagID, GroupID, UserID, Way)
             VALUES (?,     ?,       ?,      ?)
-            ", $tagId, $groupId, $userId, $vote
+            ", $tagId, $tgroup->id(), $user->id(), $vote
         );
         return self::$db->affected_rows();
     }
 
-    public function torrentTagHasVote(int $tagId, int $groupId, int $userId): bool {
+    public function torrentTagHasVote(int $tagId, \Gazelle\TGroup $tgroup, \Gazelle\User $user): bool {
         return (bool)self::$db->scalar("
             SELECT 1
             FROM torrents_tags_votes
             WHERE TagID = ?
                 AND GroupID = ?
                 AND UserID = ?
-            ", $tagId, $groupId, $userId
+            ", $tagId, $tgroup->id(), $user->id()
         );
     }
 
@@ -531,7 +530,7 @@ class Tag extends \Gazelle\BaseManager {
         return array_map(fn($v) => ['value' => $v[0]], $suggestions);
     }
 
-    public function userTopTagList(int $userId): array {
+    public function userTopTagList(\Gazelle\User $user): array {
         self::$db->prepared_query("
             SELECT tags.Name
             FROM xbt_snatched AS s
@@ -545,7 +544,7 @@ class Tag extends \Gazelle\BaseManager {
             GROUP BY tt.TagID
             ORDER BY ((count(tags.Name) - 2) * (sum(tt.PositiveVotes) - sum(tt.NegativeVotes))) / (tags.Uses * 0.8) DESC
             LIMIT 8
-            ", $userId
+            ", $user->id()
         );
         return self::$db->collect(0, false);
     }

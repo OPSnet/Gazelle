@@ -113,7 +113,7 @@ echo $Twig->render('torrent/browse-header.twig', [
 
 if ($NumResults == 0) {
     echo $Twig->render('torrent/search-none.twig', [
-        'list' => $tagMan->userTopTagList($Viewer->id()),
+        'list' => $tagMan->userTopTagList($Viewer),
     ]);
     exit;
 }

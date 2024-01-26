@@ -71,7 +71,7 @@ class TagTest extends TestCase {
 
         // Is empty because vote counts below 10 are ignored,
         // but at least we know the SQL is syntactically valid.
-        $this->assertCount(0, $manager->userTopTagList($this->user->id()), 'tag-user-count');
+        $this->assertCount(0, $manager->userTopTagList($this->user), 'tag-user-count');
     }
 
     public function testAlias(): void {
@@ -137,7 +137,7 @@ class TagTest extends TestCase {
         $manager = new Gazelle\Manager\Tag;
         $folkId  = $manager->lookup('phpunit.folk');
         $this->assertFalse(
-            $manager->torrentTagHasVote($folkId, $this->tgroup->id(), $this->user->id()),
+            $manager->torrentTagHasVote($folkId, $this->tgroup, $this->user),
             'tag-has-no-vote'
         );
         $result  = $manager->torrentLookup($manager->lookup('phpunit.electronic'));
@@ -146,17 +146,12 @@ class TagTest extends TestCase {
         $this->assertEquals($this->tgroup->id(), $item['torrentGroupId'], 'tag-found-tgroup');
         $this->assertEquals(
             1,
-            $manager->createTorrentTagVote(
-                $manager->lookup('phpunit.folk'),
-                $this->tgroup->id(),
-                $this->user->id(),
-                'up'
-            ),
+            $manager->createTorrentTagVote($manager->lookup('phpunit.folk'), $this->tgroup, $this->user, 'up'),
             'tag-tgroup-vote'
         );
         $db = Gazelle\DB::DB();
         $this->assertTrue(
-            $manager->torrentTagHasVote($folkId, $this->tgroup->id(), $this->user->id()),
+            $manager->torrentTagHasVote($folkId, $this->tgroup, $this->user),
             'tag-has-no-vote'
         );
         // not enough uses to have a meaninful result, but at least the query is run
