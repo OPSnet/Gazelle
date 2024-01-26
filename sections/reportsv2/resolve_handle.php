@@ -26,7 +26,7 @@ if (is_null($report)) {
 
 $torrent = $report->torrent();
 if (is_null($torrent)) {
-    $report->moderatorResolve($Viewer->id(), 'Report already dealt with (torrent deleted).');
+    $report->moderatorResolve($Viewer, 'Report already dealt with (torrent deleted).');
     $Cache->decrement_value('num_torrent_reportsv2');
     json_die("failure", "torrent already deleted?");
 }
@@ -53,7 +53,7 @@ if ($fromReportPage && in_array($_POST['resolve_type'], ['manual', 'dismiss'])) 
     } else {
         $comment = 'Report was dismissed as invalid.';
     }
-    if ($report->moderatorResolve($Viewer->id(), $comment)) {
+    if ($report->moderatorResolve($Viewer, $comment)) {
         $Cache->delete_multi(['num_torrent_reportsv2', "reports_torrent_$torrentId"]);
     } else {
         echo $Twig->render('reportsv2/already-resolved.twig', ['report' => $report]);
@@ -61,7 +61,7 @@ if ($fromReportPage && in_array($_POST['resolve_type'], ['manual', 'dismiss'])) 
     exit;
 }
 
-if ($fromReportPage && !$report->moderatorResolve($Viewer->id(), $_POST['comment'] ?? '')) {
+if ($fromReportPage && !$report->moderatorResolve($Viewer, $_POST['comment'] ?? '')) {
     echo $Twig->render('reportsv2/already-resolved.twig', ['report' => $report]);
     exit;
 }

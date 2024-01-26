@@ -29,7 +29,7 @@ if (is_null($report->torrent())) {
     $torMan->findById($report->torrentId())?->flush();
     exit;
 }
-$report->claim($Viewer->id());
+$report->claim($Viewer);
 
 $torrent  = $report->torrent();
 $tgroupId = $torrent->groupId();

@@ -16,33 +16,33 @@ class Report extends \Gazelle\BaseObject {
         parent::__construct($id);
     }
 
-    public function flush(): static { $this->info = []; return $this; }
+    public function flush(): static {
+        unset($this->info);
+        return $this;
+    }
     public function link(): string { return sprintf('<a href="%s">Report #%d</a>', $this->url(), $this->id()); }
     public function location(): string { return "reportsv2.php?view=report&id=" . $this->id; }
 
     public function info(): array {
-        if (!isset($this->info) || $this->info === []) {
-            $this->info = self::$db->rowAssoc("
-                SELECT ReporterID  AS reporter_id,
-                    ResolverID     AS resolver_id,
-                    TorrentID      AS torrent_id,
-                    Type           AS type,
-                    ModComment     AS comment,
-                    UserComment    AS reason,
-                    Status         AS status,
-                    ReportedTime   AS created,
-                    LastChangeTime AS modified,
-                    Track          AS track_list,
-                    Image          AS image,
-                    ExtraID        AS other_id,
-                    Link           AS external_link,
-                    LogMessage     AS message
-                FROM reportsv2
-                WHERE ID = ?
-                ", $this->id
-            );
-        }
-        return $this->info;
+        return $this->info ??= self::$db->rowAssoc("
+            SELECT ReporterID  AS reporter_id,
+                ResolverID     AS resolver_id,
+                TorrentID      AS torrent_id,
+                Type           AS type,
+                ModComment     AS comment,
+                UserComment    AS reason,
+                Status         AS status,
+                ReportedTime   AS created,
+                LastChangeTime AS modified,
+                Track          AS track_list,
+                Image          AS image,
+                ExtraID        AS other_id,
+                Link           AS external_link,
+                LogMessage     AS message
+            FROM reportsv2
+            WHERE ID = ?
+            ", $this->id
+        );
     }
 
     public function comment(): ?string {
@@ -147,16 +147,18 @@ class Report extends \Gazelle\BaseObject {
         return $affected;
     }
 
-    public function claim(int $userId): int {
+    public function claim(\Gazelle\User $user): int {
         self::$db->prepared_query("
             UPDATE reportsv2 SET
                 LastChangeTime = now(),
                 Status = 'InProgress',
                 ResolverID = ?
             WHERE ID = ?
-            ", $userId, $this->id
+            ", $user->id(), $this->id
         );
-        return self::$db->affected_rows();
+        $affected = self::$db->affected_rows();
+        $this->flush();
+        return $affected;
     }
 
     /**
@@ -179,7 +181,7 @@ class Report extends \Gazelle\BaseObject {
         return -1;
     }
 
-    public function resolve(string $message): bool {
+    public function resolve(string $message): int {
         self::$db->prepared_query("
             UPDATE reportsv2 SET
                 Status = 'Resolved',
@@ -188,11 +190,13 @@ class Report extends \Gazelle\BaseObject {
             WHERE ID = ?
             ", $message, $this->id
         );
+        $affected = self::$db->affected_rows();
         self::$cache->decrement('num_torrent_reportsv2');
-        return self::$db->affected_rows() === 1;
+        $this->flush();
+        return $affected;
     }
 
-    public function moderatorResolve(int $userId, string $message): int {
+    public function moderatorResolve(\Gazelle\User $user, string $message): int {
         self::$db->prepared_query("
             UPDATE reportsv2 SET
                 Status = 'Resolved',
@@ -201,13 +205,15 @@ class Report extends \Gazelle\BaseObject {
                 ModComment = ?
             WHERE Status != 'Resolved'
                 AND ID = ?
-            ", $userId, $message, $this->id
+            ", $user->id(), $message, $this->id
         );
+        $affected = self::$db->affected_rows();
         if ($this->torrent) {
             $this->torrent->flush();
         }
         self::$cache->delete_value(sprintf(\Gazelle\TorrentAbstract::CACHE_REPORTLIST, $this->torrentId()));
-        return self::$db->affected_rows();
+        $this->flush();
+        return $affected;
     }
 
     /**
@@ -222,11 +228,13 @@ class Report extends \Gazelle\BaseObject {
             WHERE ID = ?
             ", $log, $message, $this->id
         );
+        $affected = self::$db->affected_rows();
         if ($this->torrent) {
             $this->torrent->flush();
         }
         self::$cache->delete_value(sprintf(\Gazelle\TorrentAbstract::CACHE_REPORTLIST, $this->torrentId()));
-        return self::$db->affected_rows();
+        $this->flush();
+        return $affected;
     }
 
     public function changeType(\Gazelle\Torrent\ReportType $rt): int {
@@ -251,6 +259,8 @@ class Report extends \Gazelle\BaseObject {
             WHERE ID = ?
             ", trim($comment), $this->id
         );
-        return self::$db->affected_rows();
+        $affected = self::$db->affected_rows();
+        $this->flush();
+        return $affected;
     }
 }
