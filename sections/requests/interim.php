@@ -4,17 +4,21 @@ $request = (new Gazelle\Manager\Request)->findById((int)$_GET['id']);
 if (is_null($request)) {
     error(404);
 }
-$action = $_GET['action'];
-if ($action === 'unfill') {
-    if (!in_array($Viewer->id(), [$request->userId(), $request->fillerId()]) && !$Viewer->permitted('site_moderate_requests')) {
-        error(403);
-    }
-} elseif ($action === 'delete') {
-    if ($Viewer->id() != $request->userId() && !$Viewer->permitted('site_moderate_requests')) {
-        error(403);
-    }
-} else {
-    error(0);
+
+$action = $_GET['action'] ?? '';
+switch ($action) {
+    case 'delete':
+        if ($Viewer->id() != $request->userId() && !$Viewer->permitted('site_moderate_requests')) {
+            error(403);
+        }
+        break;
+    case 'unfill':
+        if (!in_array($Viewer->id(), [$request->userId(), $request->fillerId()]) && !$Viewer->permitted('site_moderate_requests')) {
+            error(403);
+        }
+        break;
+    default:
+        error(0);
 }
 
 echo $Twig->render('request/interim.twig', [

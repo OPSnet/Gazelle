@@ -6,7 +6,8 @@ class Request extends \Gazelle\BaseManager {
     final public const ID_KEY = 'zz_r_%d';
 
     public function create(
-        int $userId,
+        \Gazelle\User $user,
+        int $bounty,
         int $categoryId,
         int $year,
         string $title,
@@ -29,11 +30,14 @@ class Request extends \Gazelle\BaseManager {
                 CatalogueNumber, ReleaseType, BitrateList, FormatList, MediaList, LogCue, Checksum, OCLC, GroupID)
             VALUES (
                 now(), 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            $userId, $categoryId, $title, $year, $image, $description, $recordLabel,
+            $user->id(), $categoryId, $title, $year, $image, $description, $recordLabel,
             $catalogueNumber, $releaseType, $encodingList, $formatList, $mediaList, $logCue,
             (int)$checksum ? 1 : 0, $oclc, $groupId
         );
-        return new \Gazelle\Request(self::$db->inserted_id());
+        $request = new \Gazelle\Request(self::$db->inserted_id());
+        $request->vote($user, $bounty);
+        $request->artistFlush();
+        return $request;
     }
 
     public function findById(int $requestId): ?\Gazelle\Request {

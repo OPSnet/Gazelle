@@ -1,0 +1,251 @@
+{%- from 'macro/form.twig' import checked, disabled, selected -%}
+{%- set autocomplete = viewer.hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' -%}
+{%- set new = action == 'new' -%}
+{{ header('Request › ' ~ (new ? 'Create' : 'Edit › ' ~ request.text), {'js': 'requests,form_validate'}) }}
+<div class="thin">
+  <div class="header">
+    <h2><a href="requests.php">Requests</a> › {% if new %}Create{% else %}Edit › {{ request.smartLink|raw }}{% endif %}</h2>
+  </div>
+{% if not new and request.userId != viewer.id and viewer.permittedAny('site_edit_requests', 'site_moderate_requests') %}
+    <div class="box pad">
+        <strong class="important_text">Warning! You are editing {{ request.userId|user_url }}'s request.
+        Be careful when making changes!</strong>
+    </div>
+{% endif %}
+  <div class="box pad">
+    <form action="" method="post" id="request_form" onsubmit="Calculate();">
+      <div>
+{% if not new %}
+        <input type="hidden" name="requestid" value="{{ request.id }}" />
+{% endif %}
+        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+        <input type="hidden" name="action" value="take{{ action }}" />
+      </div>
+
+      <table class="layout">
+        <tr>
+          <td colspan="2" class="center">Please make sure your request follows <a href="rules.php?p=requests">the request rules</a>!
+{% if error %}
+      <div class="save_message error">{{ error }}</div>
+{% endif %}
+          </td>
+        </tr>
+{% if new or viewer.permittedAny('site_edit_requests', 'site_moderate_requests') -%}
+        <tr>
+          <td class="label">Type</td>
+          <td>
+            <select id="categories" name="type" onchange="Categories();">
+  {%- for cat in constant('CATEGORY') -%}
+              <option value="{{ cat }}"{{ selected(cat == category_name) }}>{{ cat }}</option>
+  {%- endfor -%}
+            </select>
+          </td>
+        </tr>
+  {%- if category_name == 'Music' -%}
+        <tr id="releasetypes_tr">
+          <td class="label">Release type</td>
+          <td>
+            <select id="releasetype" name="releasetype">
+              <option value="0">---</option>
+    {%- for k, v in release_list -%}
+              <option value="{{ k }}"{{ selected(k == release_type) }}>{{ v }}</option>
+    {%- endfor -%}
+            </select>
+          </td>
+        </tr>
+        <tr id="artist_tr">
+          <td class="label">Artist(s)</td>
+          <td id="artistfields">
+            <p id="vawarning" class="hidden">Please use the multiple artists feature rather than adding "Various Artists" as an artist; read <a href="wiki.php?action=article&amp;id=64" target="_blank">this</a> for more information.</p>
+    {%- for role, name_list in artist_role -%}
+      {%- for idx, name in name_list -%}
+            <input type="text" size="45" id="artist_{{ loop.index0 }}" name="artists[]"{{ autocomplete|raw }} value="{{ name.name }}" />
+            <select id="importance" name="importance[]">
+              <option value="{{ constant('ARTIST_MAIN') }}"{{ selected(role == constant('ARTIST_MAIN')) }}>Main</option>
+              <option value="{{ constant('ARTIST_GUEST') }}"{{ selected(role == constant('ARTIST_GUEST')) }}>Guest</option>
+              <option value="{{ constant('ARTIST_COMPOSER') }}"{{ selected(role == constant('ARTIST_COMPOSER')) }}>Composer</option>
+              <option value="{{ constant('ARTIST_CONDUCTOR') }}"{{ selected(role == constant('ARTIST_CONDUCTOR')) }}>Conductor</option>
+              <option value="{{ constant('ARTIST_DJ') }}"{{ selected(role == constant('ARTIST_DJ')) }}>DJ / Compiler</option>
+              <option value="{{ constant('ARTIST_REMIXER') }}"{{ selected(role == constant('ARTIST_REMIXER')) }}>Remixer</option>
+              <option value="{{ constant('ARTIST_PRODUCER') }}"{{ selected(role == constant('ARTIST_PRODUCER')) }}>Producer</option>
+              <option value="{{ constant('ARTIST_ARRANGER') }}"{{ selected(role == constant('ARTIST_ARRANGER')) }}>Arranger</option>
+            </select>
+        {%- if loop.parent.loop.first and loop.first -%}
+<a href="#" onclick="AddArtistField(); return false;" class="brackets">+</a> <a href="#" onclick="RemoveArtistField(); return false;" class="brackets">&minus;</a>
+            <br />
+        {%- endif -%}
+      {%- endfor -%}
+    {%- else -%}
+            <input type="text" size="45" id="artist_0" name="artists[]"{{ autocomplete|raw }} onblur="CheckVA();" />
+            <select id="importance" name="importance[]">
+              <option value="{{ constant('ARTIST_MAIN') }}">Main</option>
+              <option value="{{ constant('ARTIST_GUEST') }}">Guest</option>
+              <option value="{{ constant('ARTIST_COMPOSER') }}">Composer</option>
+              <option value="{{ constant('ARTIST_CONDUCTOR') }}">Conductor</option>
+              <option value="{{ constant('ARTIST_DJ') }}">DJ / Compiler</option>
+              <option value="{{ constant('ARTIST_REMIXER') }}">Remixer</option>
+              <option value="{{ constant('ARTIST_PRODUCER') }}">Producer</option>
+              <option value="{{ constant('ARTIST_ARRANGER') }}">Arranger</option>
+            </select>
+            <a href="#" onclick="AddArtistField(); return false;" class="brackets">+</a> <a href="#" onclick="RemoveArtistField(); return false;" class="brackets">&minus;</a>
+    {%- endfor -%}
+          </td>
+        </tr>
+  {%- endif -%}
+        <tr>
+          <td class="label">Title</td>
+          <td><input type="text" name="title" size="45" value="{{ title }}" /></td>
+        </tr>
+  {%- if category_name == 'Music' -%}
+        <tr id="recordlabel_tr">
+          <td class="label">Record label</td>
+          <td><input type="text" name="recordlabel" size="45" value="{{ record_label }}" /></td>
+        </tr>
+        <tr id="cataloguenumber_tr">
+          <td class="label">Catalogue number</td>
+          <td><input type="text" name="cataloguenumber" size="15" value="{{ catalogue_number }}" /></td>
+        </tr>
+        <tr id="oclc_tr">
+          <td class="label">WorldCat (OCLC) ID</td>
+          <td><input type="text" name="oclc" size="15" value="{{ oclc }}" /></td>
+        </tr>
+  {%- endif -%}
+        <tr id="year_tr">
+          <td class="label">Year</td>
+          <td><input type="text" name="year" size="5" value="{{ year == 0 ? '' : year }}" /></td>
+        </tr>
+        <tr id="image_tr">
+          <td class="label">Image</td>
+          <td>
+            <input type="text" name="image" size="45" value="{{ image }}" />
+  {%- if constant('IMAGE_HOST_BANNED') -%}
+            <br /><b>Images hosted on <strong class="important_text">{{ constant('IMAGE_HOST_BANNED')|join(', ')
+              }} are not allowed</strong>, please rehost first on one of {{ constant('IMAGE_HOST_RECOMMENDED')|join(', ') }}.</b>
+  {%- endif -%}
+          </td>
+        </tr>
+{% endif %}
+        <tr>
+          <td class="label">Tags</td>
+          <td>
+            <select id="genre_tags" name="genre_tags" onchange="add_tag(); return false;">
+              <option>---</option>
+{% for tag in tag_list %}
+              <option value="{{ tag }}">{{ tag }}</option>
+{% endfor %}
+            </select>
+            <input type="text" id="tags" name="tags" size="45" value="{{ tags }}"{{ autocomplete|raw }} />
+            <br />
+            Tags should be comma-separated, and you should use a period (".") to separate words inside a tag&#8202;&mdash;&#8202;e.g. "<strong class="important_text_alt">hip.hop</strong>".
+            <br /><br />
+            There is a list of official tags to the left of the text box. Please use these tags instead of "unofficial" tags (e.g. use the official "<strong class="important_text_alt">drum.and.bass</strong>" tag, instead of an unofficial "<strong class="important_text">dnb</strong>" tag.).
+          </td>
+        </tr>
+{% if new or viewer.permitted('site_moderate_requests') %}
+        <tr id="formats_tr">
+          <td class="label">Allowed formats</td>
+          <td>
+            <label><input type="checkbox" name="all_formats" id="toggle_formats" onchange="Toggle('formats', {{ new ? 1 : 0 }});"{{ checked(format.all) }} /> All</label>
+  {%- for k, v in constant('FORMAT') -%}
+    {%- if loop.index % 8 == 0 %}<br />{% else %}&nbsp;&nbsp;{% endif -%}
+            <label><input type="checkbox" name="formats[]" value="{{ k }}" id="format_{{ k }}"{{ checked(format.exists(v)) }}
+                onchange="ToggleLogCue(); if (!this.checked) { $('#toggle_formats').raw().checked = false; }" /> {{ v }}</label>
+  {%- endfor -%}
+          </td>
+        </tr>
+        <tr id="bitrates_tr">
+          <td class="label">Allowed encodings</td>
+          <td>
+            <label><input type="checkbox" name="all_bitrates" id="toggle_bitrates" onchange="Toggle('bitrates', {{ new ? 1 : 0 }});"{{ checked(encoding.all) }} /> All</label>
+  {%- for k, v in constant('ENCODING') -%}
+    {%- if loop.index % 8 == 0 %}<br />{% endif -%}
+            <label><input type="checkbox" name="bitrates[]" value="{{ k }}" id="bitrate_{{ k }}"{{ checked(encoding.exists(v)) }}
+            onchange="if (!this.checked) { $('#toggle_bitrates').raw().checked = false; }" /> {{ v }}</label>
+  {%- endfor -%}
+          </td>
+        </tr>
+        <tr id="media_tr">
+          <td class="label">Allowed media</td>
+          <td>
+           <label><input type="checkbox" name="all_media" id="toggle_media" onchange="Toggle('media', {{ new ? 1 : 0 }});"{{ checked(media.all) }} /> All</label>
+  {%- for k, v in constant('MEDIA') -%}
+    {%- if loop.index % 8 == 0 %}<br />{% endif -%}
+            <label><input type="checkbox" name="media[]" value="{{ k }}" id="media_{{ k }}"{{ checked(media.exists(v)) }}
+            onchange="ToggleLogCue(); if (!this.checked) { $('#toggle_media').raw().checked = false; }" /> {{ v }}</label>
+  {%- endfor -%}
+          </td>
+        </tr>
+        <tr id="logcue_tr" class="hidden">
+          <td class="label">Log / Checksum / Cue<br />(CD FLAC only)</td>
+          <td>
+            <span style="float: right;"><strong>Note: You can only require a log or cue when FLAC is an allowed format</strong></span>
+            <label><input type="checkbox" id="needlog" name="needlog" onchange="ToggleLogScore()"{{ checked(log_cue.needLog) }} /> Require log</label>
+            <span id="minlogscore_span" class="hidden">&nbsp;<input type="text" name="minlogscore" id="minlogscore" size="4" value="{{ log_cue.minScore ? log_cue.minScore : ''}}" /> Minimum log score</span>
+            <br />
+            <label><input type="checkbox" id="needcksum" name="needcksum"{{ checked(log_cue.needLogChecksum) }} /> Require checksum</label>
+            <br />
+            <label><input type="checkbox" id="needcue" name="needcue"{{ checked(log_cue.needCue) }} /> Require cue file</label>
+          </td>
+        </tr>
+{% endif %}
+        <tr>
+          <td class="label">Description</td>
+          <td>{{ description.emit|raw }}</td>
+        </tr>
+{% if tgroup %}
+        <tr>
+          <td class="label">Torrent group</td>
+          <td>
+  {%- if new or viewer.permitted('site_moderate_requests') -%}
+            {{ constant('SITE_URL') }}/torrents.php?id=<input type="text" name="groupid" value="" size="15" /><br />
+            If this request matches a torrent group <b>already existing</b> on the site, please indicate that here.
+  {%- else -%}
+            {{ tgroup.link|raw }}<br />
+            This request is associated with the above torrent group.
+            <input type="hidden" name="groupid" value="{{ tgroup.id }}" />
+  {%- endif -%}
+          </td>
+        </tr>
+{% endif %}
+{% if new %}
+        <tr id="voting">
+          <td class="label">Bounty (MiB)</td>
+          <td>
+            <input type="text" id="amount_box" name="amount_box" size="8" value="{{ amount_box }}" />
+            <select id="unit" name="unit" onchange="Calculate();">
+              <option value="mb"{{ selected(not unit_GiB) }}>MiB</option>
+              <option value="gb"{{ selected(unit_GiB) }}>GiB</option>
+            </select>
+  {%- if constant('REQUEST_TAX') > 0.0 %}<strong>{{ constant('REQUEST_TAX') * 100 }}% of this is deducted as tax by the system.</strong>{% endif %}
+            <p>Bounty must be greater than or equal to {{ constant('REQUEST_MIN') }} MiB.</p>
+          </td>
+        </tr>
+        <tr>
+          <td class="label">Bounty information</td>
+          <td>
+            <input type="hidden" id="amount" name="amount" value="{{ amount }}" />
+            <input type="hidden" id="current_uploaded" value="{{ viewer.uploadedSize }}" />
+            <input type="hidden" id="current_downloaded" value="{{ viewer.downloadedSize }}" />
+            <input type='hidden' id='request_tax' value="{{ constant('REQUEST_TAX') }}" />
+  {%- if constant('REQUEST_TAX') > 0 %}
+              Bounty after tax: <strong><span id="bounty_after_tax">{{ (100 * (1 - constant('REQUEST_TAX')))|number_format(0) }} MiB</span></strong><br />
+  {%- else %}
+              <span id="bounty_after_tax" style="display: none;">{{ (100 * (1 - constant('REQUEST_TAX')))|number_format(2) }} MiB</span>
+  {%- endif %}
+            If you add the entered <strong><span id="new_bounty">{{ constant('REQUEST_MIN')|number_format(0) }} MiB</span></strong> of bounty, your new stats will be: <br />
+            Uploaded: <span id="new_uploaded">{{ viewer.uploadedSize|octet_size }}</span><br />
+            Ratio: <span id="new_ratio">{{ ratio(viewer.uploadedsize, viewer.downloadedSize) }}</span>
+          </td>
+        </tr>
+{% endif %}
+        <tr>
+          <td colspan="2" class="center">
+            <input type="submit" id="button" value="{% if new %}Create{% else %}Edit{% endif %} request"{{ disabled(new) }} />
+          </td>
+        </tr>
+      </table>
+    </form>
+    <script type="text/javascript">ToggleLogCue(); {% if new %}Calculate(); {% endif %}Categories();</script>
+  </div>
+</div>
+{{ footer() -}}

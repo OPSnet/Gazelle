@@ -6,11 +6,23 @@ use Gazelle\Enum\CacheBucket;
 require_once(__DIR__ . '/../../lib/bootstrap.php');
 
 class UtilTest extends TestCase {
-    public function testUtil(): void {
+    public function testBasic(): void {
         $this->assertEquals(2,    article(2),       'article-2-a');
         $this->assertEquals(3,    article(3, 'an'), 'article-3-an');
         $this->assertEquals('a',  article(1),       'article-1-a');
         $this->assertEquals('an', article(1, 'an'), 'article-1-an');
+
+        $this->assertEquals([], array_trim_prefix('xx_', []), 'array_trim_prefix-empty');
+        $this->assertEquals(
+            [1, 22],
+            array_trim_prefix('xx_', ['xx_1', 'xx_22']),
+            'array_trim_prefix-pure'
+        );
+        $this->assertEquals(
+            [2, 'yy_33'],
+            array_trim_prefix('xx_', ['xx_2', 'yy_33']),
+            'array_trim_prefix-mixed'
+        );
 
         $this->assertEquals('',        display_str([]),       'display-str-array');
         $this->assertEquals('',        display_str(null),     'display-str-null');

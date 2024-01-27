@@ -14,17 +14,24 @@ class SiteLog extends \Gazelle\Base {
     public function totalMatches(): int { return $this->totalMatches; }
     public function result(): array { return $this->result; }
 
-    public function page(int $page, int $offset, string $searchTerm): array {
-        if ($searchTerm === '') {
-            // no full text search: hit the DB directly
+    public function page(int $page, int $offset, string $searchTerm, bool $bypassSphinx = false): array {
+        if ($searchTerm === '' || $bypassSphinx) {
+            // either no search term or realtime query
+            $args = [$offset, LOG_ENTRIES_PER_PAGE];
+            if ($searchTerm === '') {
+                $where = '';
+            } else {
+                $where = " WHERE Message LIKE concat('%', ?, '%')";
+                array_unshift($args, $searchTerm);
+            }
             self::$db->prepared_query("
                 SELECT ID   AS id,
                     Message AS message,
                     Time    AS created
-                FROM log
+                FROM log$where
                 ORDER BY ID DESC
                 LIMIT ?, ?
-                ", $offset, LOG_ENTRIES_PER_PAGE
+                ", ...$args
             );
             $this->totalMatches = (int)self::$db->record_count();
             if ($this->totalMatches < LOG_ENTRIES_PER_PAGE) {

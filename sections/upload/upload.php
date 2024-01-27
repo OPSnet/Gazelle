@@ -57,6 +57,7 @@ if (!isset($Properties)) {
                 'TagList'          => implode(', ', $request->tagNameList()),
                 'UserID'           => $Viewer->id(),
             ];
+            show($request->artistRole()?->idList());
         }
     }
 }

@@ -31,7 +31,7 @@ function Vote(amount, requestid) {
 
     ajax.get('requests.php?action=takevote&id=' + requestid + '&auth=' + authkey + '&amount=' + amount, function (response) {
         if (response == 'bankrupt') {
-            error_message("You do not have sufficient upload credit to add " + byte_format(amount) + " to this request");
+            error_message("You do not have sufficient upload credit to add " + byte_format(amount, 0) + " to this request");
             return;
         } else if (response == 'missing') {
             error_message("Cannot find this request");
@@ -53,13 +53,13 @@ function Vote(amount, requestid) {
             $('#total_bounty').raw().value = totalBounty;
             $('#formatted_bounty').raw().innerHTML = byte_format(totalBounty);
             if (requestTax > 0) {
-                save_message("Your vote of " + byte_format(amount) + ", adding a " + byte_format(amount * (1 - $('#request_tax').raw().value)) + " bounty, has been added");
+                save_message("Your vote of " + byte_format(amount, 0) + ", adding a " + byte_format(amount * (1 - $('#request_tax').raw().value), 0) + " bounty, has been added");
             } else {
-                save_message("Your vote of " + byte_format(amount) + " has been added");
+                save_message("Your vote of " + byte_format(amount, 0) + " has been added");
             }
             $('#button').raw().disabled = true;
         } else {
-            save_message("Your vote of " + byte_format(amount) + " has been added");
+            save_message("Your vote of " + byte_format(amount, 0) + " has been added");
         }
     });
 }
@@ -69,23 +69,23 @@ function Calculate() {
     var amt = Math.floor($('#amount_box').raw().value * mul);
     if (amt > $('#current_uploaded').raw().value) {
         $('#new_uploaded').raw().innerHTML = "You can't afford that request!";
-        $('#new_bounty').raw().innerHTML = "0.00 MiB";
-        $('#bounty_after_tax').raw().innerHTML = "0.00 MiB";
+        $('#new_bounty').raw().innerHTML = "0 MiB";
+        $('#bounty_after_tax').raw().innerHTML = "0 MiB";
         $('#button').raw().disabled = true;
     } else if (isNaN($('#amount_box').raw().value)
             || (window.location.search.indexOf('action=new') != -1 && $('#amount_box').raw().value * mul < 100 * 1024 * 1024)
             || (window.location.search.indexOf('action=view') != -1 && $('#amount_box').raw().value * mul < 100 * 1024 * 1024)) {
-        $('#new_uploaded').raw().innerHTML = byte_format(($('#current_uploaded').raw().value));
-        $('#new_bounty').raw().innerHTML = "0.00 MiB";
-        $('#bounty_after_tax').raw().innerHTML = "0.00 MiB";
+        $('#new_uploaded').raw().innerHTML = byte_format(($('#current_uploaded').raw().value), 2);
+        $('#new_bounty').raw().innerHTML = "0 MiB";
+        $('#bounty_after_tax').raw().innerHTML = "0 MiB";
         $('#button').raw().disabled = true;
     } else {
         $('#button').raw().disabled = false;
         $('#amount').raw().value = amt;
-        $('#new_uploaded').raw().innerHTML = byte_format(($('#current_uploaded').raw().value) - amt);
+        $('#new_uploaded').raw().innerHTML = byte_format(($('#current_uploaded').raw().value) - amt, 2);
         $('#new_ratio').raw().innerHTML = ratio($('#current_uploaded').raw().value - amt, $('#current_downloaded').raw().value);
-        $('#new_bounty').raw().innerHTML = byte_format(mul * $('#amount_box').raw().value);
-        $('#bounty_after_tax').raw().innerHTML = byte_format(mul * (1 - $('#request_tax').raw().value) * $('#amount_box').raw().value);
+        $('#new_bounty').raw().innerHTML = byte_format(mul * $('#amount_box').raw().value, 0);
+        $('#bounty_after_tax').raw().innerHTML = byte_format(mul * (1 - $('#request_tax').raw().value) * $('#amount_box').raw().value, 0);
     }
 }
 
@@ -101,23 +101,23 @@ function AddArtistField() {
     ArtistField.size = 45;
     ArtistField.onblur = CheckVA;
 
-    var ImportanceField = document.createElement("select");
-    ImportanceField.id = "importance";
-    ImportanceField.name = "importance[]";
-    ImportanceField.options[0] = new Option("Main", "1");
-    ImportanceField.options[1] = new Option("Guest", "2");
-    ImportanceField.options[2] = new Option("Composer", "4");
-    ImportanceField.options[3] = new Option("Conductor", "5");
-    ImportanceField.options[4] = new Option("DJ / Compiler", "6");
-    ImportanceField.options[5] = new Option("Remixer", "3");
-    ImportanceField.options[6] = new Option("Producer", "7");
-    ImportanceField.options[7] = new Option("Arranger", "8");
+    var roleField = document.createElement("select");
+    roleField.id = "importance";
+    roleField.name = "importance[]";
+    roleField.options[0] = new Option("Main", "1");
+    roleField.options[1] = new Option("Guest", "2");
+    roleField.options[2] = new Option("Composer", "4");
+    roleField.options[3] = new Option("Conductor", "5");
+    roleField.options[4] = new Option("DJ / Compiler", "6");
+    roleField.options[5] = new Option("Remixer", "3");
+    roleField.options[6] = new Option("Producer", "7");
+    roleField.options[7] = new Option("Arranger", "8");
 
     var x = $('#artistfields').raw();
     x.appendChild(document.createElement("br"));
     x.appendChild(ArtistField);
     x.appendChild(document.createTextNode('\n'));
-    x.appendChild(ImportanceField);
+    x.appendChild(roleField);
 
     if ($("#artist_0").data("gazelle-autocomplete")) {
         $(ArtistField).live('focus', function() {
@@ -170,6 +170,8 @@ function Categories() {
         ToggleLogCue();
         $('#year_tr').gshow();
         $('#cataloguenumber_tr').gshow();
+        $('#recordlabel_tr').gshow();
+        $('#oclc_tr').gshow();
     } else if (cat == "Audiobooks" || cat == "Comedy") {
         $('#year_tr').gshow();
         $('#artist_tr').ghide();
@@ -179,6 +181,8 @@ function Categories() {
         $('#media_tr').ghide();
         $('#logcue_tr').ghide();
         $('#cataloguenumber_tr').ghide();
+        $('#recordlabel_tr').ghide();
+        $('#oclc_tr').ghide();
     } else {
         $('#artist_tr').ghide();
         $('#releasetypes_tr').ghide();
@@ -188,6 +192,8 @@ function Categories() {
         $('#logcue_tr').ghide();
         $('#year_tr').ghide();
         $('#cataloguenumber_tr').ghide();
+        $('#recordlabel_tr').ghide();
+        $('#oclc_tr').ghide();
     }
 }
 

@@ -52,7 +52,8 @@ class ReportManagerTest extends TestCase {
 
     public function testReportRequest(): void {
         $this->request = (new Gazelle\Manager\Request)->create(
-            userId:          $this->userList[1]->id(),
+            user:            $this->userList[1],
+            bounty:          REQUEST_MIN * 1024 * 1024,
             categoryId:      (new Gazelle\Manager\Category)->findIdByName('Comics'),
             year:            (int)date('Y'),
             title:           'phpunit request report',

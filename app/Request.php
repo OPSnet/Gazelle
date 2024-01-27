@@ -17,7 +17,7 @@ class Request extends BaseObject {
             sprintf(self::CACHE_ARTIST, $this->id),
             sprintf(self::CACHE_VOTE, $this->id),
         ]);
-        $this->info = [];
+        unset($this->info);
         return $this;
     }
     public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->title())); }
@@ -71,15 +71,17 @@ class Request extends BaseObject {
         };
     }
 
-    public function artistFlush(): void {
+    public function artistFlush(): int {
         $this->flush();
         self::$db->prepared_query("
             SELECT ArtistID FROM requests_artists WHERE RequestID = ?
             ", $this->id
         );
+        $affected = (int)self::$db->record_count();
         self::$cache->delete_multi([
             ...array_map(fn ($id) => "artists_requests_$id", self::$db->collect(0, false)),
         ]);
+        return $affected;
     }
 
     public function artistRole(): ?ArtistRole\Request {
@@ -94,7 +96,7 @@ class Request extends BaseObject {
     }
 
     public function info(): array {
-        if (isset($this->info) && !empty($this->info)) {
+        if (isset($this->info)) {
             return $this->info;
         }
         $info = self::$db->rowAssoc("
@@ -153,6 +155,7 @@ class Request extends BaseObject {
         $info['need_encoding'] = explode('|', $info['encoding_list'] ?? 'Unknown');
         $info['need_format']   = explode('|', $info['format_list']   ?? 'Unknown');
         $info['need_media']    = explode('|', $info['media_list']    ?? 'Unknown');
+
         $this->info = $info;
         return $this->info;
     }
@@ -243,6 +246,18 @@ class Request extends BaseObject {
         return $this->info()['description'];
     }
 
+    public function encoding(): Request\Encoding {
+        return new Request\Encoding($this->needEncoding('Any'), array_keys($this->currentEncoding()));
+    }
+
+    public function format(): Request\Format {
+        return new Request\Format($this->needFormat('Any'), array_keys($this->currentFormat()));
+    }
+
+    public function media(): Request\Media {
+        return new Request\Media($this->needMedia('Any'), array_keys($this->currentMedia()));
+    }
+
     public function descriptionEncoding(): ?string {
         $need = $this->info()['need_encoding'];
         return empty($need) ? null : implode(', ', $need);
@@ -303,6 +318,15 @@ class Request extends BaseObject {
         return $this->info()['media_list'];
     }
 
+    public function logCue(): Request\LogCue {
+        return new Request\LogCue(
+            needLogChecksum: $this->needLogChecksum(),
+            needCue:         $this->needCue(),
+            needLog:         $this->needLog(),
+            minScore:        $this->needLogScore(),
+        );
+    }
+
     public function needCue(): bool {
         return str_contains($this->descriptionLogCue(), 'Cue');
     }
@@ -346,8 +370,12 @@ class Request extends BaseObject {
     }
 
     public function oclc(): ?string {
-        $oclc = str_replace(' ', '', $this->info()['oclc']);
-        if ($oclc === '') {
+        return $this->info()['oclc'];
+    }
+
+    public function oclcLink(): ?string {
+        $oclc = $this->oclc();
+        if (is_null($oclc) || $oclc === '') {
             return null;
         }
         return implode(', ',
@@ -471,18 +499,6 @@ class Request extends BaseObject {
         return $error;
     }
 
-    public function addTag(int $tagId): int {
-        self::$db->prepared_query("
-            INSERT IGNORE INTO requests_tags
-                   (TagID, RequestID)
-            VALUES (?,     ?)
-            ", $tagId, $this->id
-        );
-        $affected = self::$db->affected_rows();
-        $this->flush();
-        return $affected;
-    }
-
     /**
      * Vote on a request (transfer upload buffer from user to a request.
      *
@@ -537,8 +553,6 @@ class Request extends BaseObject {
         $this->updateSphinx();
         self::$db->commit();
 
-        $this->flush();
-        $this->artistFlush();
         $user->flush();
 
         return true;
@@ -566,7 +580,7 @@ class Request extends BaseObject {
         self::$db->commit();
 
         $user->addBounty($bounty);
-        $name = $torrent->group()->text();
+        $name = $this->title();
         $message = "One of your requests — [url={$this->location()}]{$name}[/url] — has been filled."
                    . " You can view it here: [pl]{$torrent->id()}[/pl]";
         self::$db->prepared_query("
@@ -578,7 +592,7 @@ class Request extends BaseObject {
         }
 
         (new Log)->general(
-            "Request {$this->id} ($name) was filled by {$user->label()} with the torrent {$torrent->id()} for a "
+            "Request {$this->id} ($name) was filled by user {$user->label()} with the torrent {$torrent->id()} for a "
             . byte_format($bounty) . ' bounty.'
         );
 
@@ -593,7 +607,6 @@ class Request extends BaseObject {
         if (is_null($torrent)) {
             $torrent = $torMan->findDeletedById($this->torrentId());
         }
-        $name = $torrent->group()->text();
 
         self::$db->begin_transaction();
         self::$db->prepared_query("
@@ -622,7 +635,7 @@ class Request extends BaseObject {
             $filler->inbox()->createSystem(
                 'A request you filled has been unfilled',
                 self::$twig->render('request/unfill-pm.bbcode.twig', [
-                    'name'    => $name,
+                    'name'    => $torrent->group()->text(),
                     'reason'  => $reason,
                     'request' => $this,
                     'viewer'  => $admin,
@@ -630,9 +643,8 @@ class Request extends BaseObject {
             );
         }
 
-        (new Log)->general("Request " . $this->id . " ($name), with a "
-            . byte_format($bounty) . " bounty, was unfilled by "
-            . $admin->label() . " for the reason: $reason"
+        (new Log)->general("Request {$this->id} ({$this->title()}), with a " . byte_format($bounty)
+            . " bounty, was unfilled by user {$admin->label()} for the reason: $reason"
         );
 
         $this->artistFlush();
@@ -765,6 +777,31 @@ class Request extends BaseObject {
         return $affected;
     }
 
+    public function addTag(int $tagId): int {
+        self::$db->prepared_query("
+            INSERT IGNORE INTO requests_tags
+                   (TagID, RequestID)
+            VALUES (?,     ?)
+            ", $tagId, $this->id
+        );
+        return self::$db->affected_rows();
+    }
+
+    public function setTagList(array $tagList, User $user, Manager\Tag $manager): int {
+        $affected = 0;
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
+            DELETE FROM requests_tags WHERE RequestID = ?
+            ", $this->id()
+        );
+        foreach ($tagList as $tag) {
+            $affected += $this->addTag($manager->create($tag, $user));
+        }
+        self::$db->commit();
+        $this->flush();
+        return $affected;
+    }
+
     /**
      * Update the sphinx requests delta table.
      */
@@ -794,12 +831,13 @@ class Request extends BaseObject {
         return $affected;
     }
 
-    public function updateBookmarkStats(): void {
+    public function updateBookmarkStats(): int {
         self::$db->prepared_query("
             SELECT UserID FROM bookmarks_requests WHERE RequestID = ?
             ", $this->id
         );
-        if (self::$db->record_count() > 100) {
+        $affected = (int)self::$db->record_count();
+        if ($affected > 100) {
             // Sphinx doesn't like huge MVA updates. Update sphinx_requests_delta
             // and live with the <= 1 minute delay if we have more than 100 bookmarkers
             $this->updateSphinx();
@@ -810,6 +848,7 @@ class Request extends BaseObject {
                 . ") WHERE id = {$this->id}"
             );
         }
+        return $affected;
     }
 
     public function remove(): bool {

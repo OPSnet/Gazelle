@@ -425,6 +425,15 @@ function show(mixed $data): void {
 }
 
 /**
+ * Transform the values of an array by stripping off a common prefix
+ * E.g.:
+ *  array_strip_prefix('abc_', ['abc_1', 'abc_2']) ==> ['1', '2']
+ */
+function array_trim_prefix(string $prefix, array $list): array {
+    return array_map(fn($v) => trim($v, $prefix), $list);
+}
+
+/**
  * Utility function that unserializes an array, and then if the unserialization fails,
  * it'll then return an empty array instead of a null or false which will break downstream
  * things that require an incoming array

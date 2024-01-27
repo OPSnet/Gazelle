@@ -69,7 +69,10 @@ function is_array(input) {
     return typeof(input) === 'object' && input instanceof Array;
 }
 
-function byte_format(size) {
+function byte_format(size, precision) {
+    if (precision === undefined) {
+        precision = 2;
+    }
     var steps = 0;
     while (steps < 8 && size >= 1024) {
         steps++;
@@ -96,7 +99,7 @@ function byte_format(size) {
         case 8: ext = ' YiB';
                 break;
     }
-    return (size.toFixed(2) + ext);
+    return (size.toFixed(precision) + ext);
 }
 
 function ratio_css(ratio) {

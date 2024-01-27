@@ -2,7 +2,7 @@
 <div class="thin center">
 <div class="box" style="width: 600px; margin: 0px auto;">
     <div class="head colhead">
-        {{ action|capitalize }} Request
+        {{ action|capitalize }} Request {{ request.smartLink|raw }}
     </div>
     <div class="pad">
         <form class="{% if action == 'delete' %}delete_form{% else %}edit_form{% endif %}" name="request" action="requests.php" method="post">

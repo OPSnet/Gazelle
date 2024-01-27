@@ -17,7 +17,8 @@ class Helper {
         bool          $checksum        = true,
     ): \Gazelle\Request {
         return (new \Gazelle\Manager\Request)->create(
-            userId:          $user->id(),
+            user:            $user,
+            bounty:          100 * 1024 ** 3,
             categoryId:      (new \Gazelle\Manager\Category)->findIdByName('Music'),
             year:            (int)date('Y'),
             title:           $title,

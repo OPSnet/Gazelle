@@ -838,16 +838,6 @@ defined('CATEGORY_ICON') or define('CATEGORY_ICON', [
     'comics.png'
 ]);
 
-// Allowed upload formats.
-defined('FORMAT') or define('FORMAT', [
-    'MP3',
-    'FLAC',
-    'Ogg Vorbis',
-    'AAC',
-    'AC3',
-    'DTS'
-]);
-
 // Allowed upload encodings.
 defined('ENCODING') or define('ENCODING', [
     'Lossless',
@@ -866,6 +856,16 @@ defined('ENCODING') or define('ENCODING', [
     'APX (VBR)',
     'q8.x (VBR)',
     'Other'
+]);
+
+// Allowed upload formats.
+defined('FORMAT') or define('FORMAT', [
+    'MP3',
+    'FLAC',
+    'Ogg Vorbis',
+    'AAC',
+    'AC3',
+    'DTS'
 ]);
 
 // Allowed upload media.

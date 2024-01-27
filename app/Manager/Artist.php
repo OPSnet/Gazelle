@@ -191,14 +191,4 @@ class Artist extends \Gazelle\BaseManager {
     public function sectionTitle(int $sectionId): string {
         return (new \Gazelle\ReleaseType)->sectionTitle($sectionId);
     }
-
-    public function addToRequest(int $artistId, int $aliasId, int $role): int {
-        self::$db->prepared_query("
-            INSERT IGNORE INTO requests_artists
-                   (RequestID, ArtistID, AliasID, artist_role_id, Importance)
-            VALUES (?,         ?,        ?,       ?,              ?)
-            ", $this->groupId, $artistId, $aliasId, $role, (string)$role
-        );
-        return self::$db->affected_rows();
-    }
 }

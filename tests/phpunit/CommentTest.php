@@ -91,7 +91,8 @@ class CommentTest extends TestCase {
 
     public function testCommentRequest(): void {
         $this->request = (new Gazelle\Manager\Request)->create(
-            userId:          $this->user->id(),
+            user:            $this->user,
+            bounty:          REQUEST_MIN * 1024 * 1024,
             categoryId:      (new Gazelle\Manager\Category)->findIdByName('Music'),
             year:            (int)date('Y'),
             title:           'phpunit request comment',

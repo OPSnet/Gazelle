@@ -27,7 +27,8 @@ class SearchReportTest extends TestCase {
         );
 
         $this->request = (new \Gazelle\Manager\Request)->create(
-            userId:          $this->userList[1]->id(),
+            user:            $this->userList[1],
+            bounty:          REQUEST_MIN * 1024 * 1024,
             categoryId:      (new \Gazelle\Manager\Category)->findIdByName('Music'),
             year:            (int)date('Y'),
             title:           'phpunit request report',

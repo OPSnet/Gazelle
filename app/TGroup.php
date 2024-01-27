@@ -28,6 +28,7 @@ class TGroup extends BaseObject {
             sprintf(self::CACHE_KEY, $this->id),
             sprintf(self::CACHE_TLIST_KEY, $this->id),
             sprintf(self::CACHE_COVERART_KEY, $this->id),
+            sprintf(self::CACHE_REQUEST_TGROUP, $this->id),
             "torrent_group_{$this->id}",
             "groups_artists_{$this->id}",
         ]);

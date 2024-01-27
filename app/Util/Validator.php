@@ -122,6 +122,7 @@ class Validator {
 
             if ($ValidateVar != '' || !empty($Field['Required']) || $Field['Type'] == 'date') {
                 if ($Field['Type'] == 'string') {
+                    $ValidateVar = trim($ValidateVar );
                     if (isset($Field['range'])) {
                         [$MinLength, $MaxLength] = $Field['range'];
                     } else {
@@ -175,6 +176,18 @@ class Validator {
                         break;
                     } elseif (strlen($ValidateVar) < $MinLength) {
                         $this->errorMessage = $Field['ErrorMessage'];
+                        break;
+                    }
+
+                } elseif ($Field['Type'] == 'image') {
+                    if (!preg_match(IMAGE_REGEXP, $ValidateVar)) {
+                        $this->errorMessage = html_escape($ValidateVar) . " does not look like a valid image url";
+                        break;
+                    }
+                    global $Viewer; // FIXME
+                    $banned = (new \Gazelle\Util\ImageProxy($Viewer))->badHost($ValidateVar);
+                    if ($banned) {
+                        $this->errorMessage = "Please rehost images from " . html_escape($banned) . " elsewhere.";
                         break;
                     }
 

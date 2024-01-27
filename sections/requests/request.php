@@ -335,7 +335,7 @@ if ($request->canVote($Viewer)) {
                             ? 'Bounty after tax: <strong><span id="bounty_after_tax">' . sprintf("%0.2f", 100 * (1 - REQUEST_TAX)) . ' MiB</span></strong><br />'
                             : '<span id="bounty_after_tax" style="display: none;">' . sprintf("%0.2f", 100 * (1 - REQUEST_TAX)) . ' MiB</span>'
                         ?>
-                        If you add the entered <strong><span id="new_bounty">0.00 MiB</span></strong> of bounty, your new stats will be: <br />
+                        If you add the entered <strong><span id="new_bounty">0 MiB</span></strong> of bounty, your new stats will be: <br />
                         Uploaded: <span id="new_uploaded"><?= byte_format($Viewer->uploadedSize()) ?></span><br />
                         Ratio: <span id="new_ratio"><?= ratio_html($Viewer->uploadedSize(),$Viewer->downloadedSize()) ?></span>
                         <input type="button" id="button" value="Vote!" disabled="disabled" onclick="Vote();" />
