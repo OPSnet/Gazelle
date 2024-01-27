@@ -35,7 +35,7 @@ class Staff extends BaseUser {
             "Status = 'Unanswered'",
             '(AssignedToUser = ? OR LEAST((SELECT max(Level) FROM permissions), Level) <= ?)',
         ];
-        $effectiveClass = $this->user->effectiveClass();
+        $effectiveClass = $this->user->privilege()->effectiveClassLevel();
         $args = [$this->user->id(), $effectiveClass];
         $classes = (new Manager\User)->classList();
         if ($effectiveClass >= $classes[MOD]['Level']) {
@@ -72,7 +72,7 @@ class Staff extends BaseUser {
                 AND (spc.Level <= ? OR spc.AssignedToUser = ?)
             GROUP BY spc.ID
             ORDER BY spc.Date DESC
-            ", $user->id(), $this->user->effectiveClass(), $this->user->id()
+            ", $user->id(), $this->user->privilege()->effectiveClassLevel(), $this->user->id()
         );
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }

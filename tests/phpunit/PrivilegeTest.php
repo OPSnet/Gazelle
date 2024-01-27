@@ -34,7 +34,7 @@ class PrivilegeTest extends TestCase {
         $this->assertCount(126, $privilegeList, 'privilege-total');
 
         $manager = new Gazelle\Manager\Privilege;
-        $this->assertNull($manager->findByLevel(FAKE_LEVEL), 'privilege-find-none'); // if this fails check the `permissions` table
+        $this->assertNull($manager->findByLevel(FAKE_LEVEL), 'privilege-find-none'); // if this fails, check the `permissions` table
 
         // create a privilege
         $badge     = 'X' . strtoupper(randomString(2));
@@ -64,20 +64,20 @@ class PrivilegeTest extends TestCase {
 
         // assign privilege to user
         $this->assertEquals(0, $privilege->userTotal(), 'privilege-has-no-users-yet');
-        $this->assertEquals(0, $this->userList['user']->secondaryClassesList()[$privilege->name()]['isSet'], 'privilege-user-no-secondary-yet');
+        $this->assertEquals(0, $this->userList['user']->privilege()->secondaryClassesList()[$privilege->name()]['isSet'], 'privilege-user-no-secondary-yet');
         $this->assertEquals(1, $this->userList['user']->addClasses([$privilege->id()]), 'privilege-add-secondary');
-        $this->assertEquals(1, $this->userList['user']->secondaryClassesList()[$privilege->name()]['isSet'], 'privilege-user-no-secondary-yet');
+        $this->assertEquals(1, $this->userList['user']->privilege()->secondaryClassesList()[$privilege->name()]['isSet'], 'privilege-user-no-secondary-yet');
         $this->assertEquals(1, $privilege->flush()->userTotal(), 'privilege-has-one-user');
 
         // TODO: User\Privilege should take care of adding and removing secondary classes
-        $userPriv = new Gazelle\User\Privilege($this->userList['user']);
+        $userPriv = $this->userList['user']->privilege();
         $this->assertEquals(FAKE_LEVEL, $userPriv->maxSecondaryLevel(), 'privilege-user-max-level');
         $this->assertEquals([$privilege->id() => $name], $userPriv->secondaryClassList(), 'privilege-user-list');
         $this->assertEquals([$badge => $name], $userPriv->badgeList(), 'privilege-user-badge');
 
         // revoke privilege
         $this->assertEquals(1, $this->userList['user']->removeClasses([$privilege->id()]), 'privilege-remove-secondary');
-        $this->assertEquals(0, $this->userList['user']->secondaryClassesList()[$privilege->name()]['isSet'], 'privilege-user-no-more-secondary');
+        $this->assertEquals(0, $this->userList['user']->privilege()->secondaryClassesList()[$privilege->name()]['isSet'], 'privilege-user-no-more-secondary');
         $this->assertEquals(0, $privilege->flush()->userTotal(), 'privilege-has-no-users');
 
         $this->assertEquals(1, $privilege->remove(), 'privilege-remove');
@@ -98,15 +98,14 @@ class PrivilegeTest extends TestCase {
     public function testPrivilegeSecondary(int $privilegeId, string $method, string $label): void {
         $user = $this->userList['user'];
         $privilege = new Gazelle\Privilege($privilegeId);
-        $userPriv = new Gazelle\User\Privilege($user);
         $this->assertFalse($user->$method(), "privilege-user-not-$label");
         $this->assertEquals(1, $user->addClasses([$privilegeId]), "privilege-add-$label");
         $this->assertTrue($user->$method(), "privilege-user-now-$label");
         // TODO: the method name and parameter could be improved
-        $this->assertTrue($userPriv->hasSecondaryClass($privilege->name()), "privilege-has-secondary-$label");
+        $this->assertTrue($user->privilege()->hasSecondaryClass($privilege->name()), "privilege-has-secondary-$label");
         $this->assertEquals(1, $user->removeClasses([$privilegeId]), "privilege-remove-$label");
         $this->assertFalse($user->$method(), "privilege-user-no-longer-$label");
-        $this->assertFalse($userPriv->hasSecondaryClass($privilege->name()), "privilege-no-longerhas-secondary-$label");
+        $this->assertFalse($user->privilege()->hasSecondaryClass($privilege->name()), "privilege-no-longerhas-secondary-$label");
     }
 
     public function testPrivilegeBadge(): void {
@@ -117,7 +116,7 @@ class PrivilegeTest extends TestCase {
         $user = $this->userList['user'];
         $this->assertEquals(3, $user->addClasses([FLS_TEAM, INTERVIEWER, RECRUITER]), "privilege-add-multi-secondary");
         $this->assertEquals(0, $user->addClasses([FLS_TEAM, INTERVIEWER, RECRUITER]), "privilege-add-multi-no-op");
-        $userPriv = new Gazelle\User\Privilege($user);
+        $userPriv = $user->privilege();
         $this->assertEquals(
             [
                 'FLS' => 'First Line Support',

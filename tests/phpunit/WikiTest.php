@@ -51,8 +51,8 @@ class WikiTest extends TestCase {
         $article = $manager->create(
             $title,
             'wiki body',
-            $this->userList['user']->effectiveClass(),
-            $this->userList['user']->effectiveClass(),
+            $this->userList['user']->privilege()->effectiveClassLevel(),
+            $this->userList['user']->privilege()->effectiveClassLevel(),
             $this->userList['admin']
         );
         $this->assertInstanceOf(\Gazelle\Wiki::class, $article, 'wiki-create-open');
@@ -69,8 +69,8 @@ class WikiTest extends TestCase {
         $this->assertEquals($title, $article->title(), 'wiki-title');
         $this->assertEquals($title, $article->shortName($title), 'wiki-short-name');
         $this->assertEquals($this->userList['admin']->id(), $article->authorId(), 'wiki-author-id');
-        $this->assertEquals($this->userList['user']->effectiveClass(), $article->minClassRead(), 'wiki-min-read');
-        $this->assertEquals($this->userList['user']->effectiveClass(), $article->minClassEdit(), 'wiki-min-edit');
+        $this->assertEquals($this->userList['user']->privilege()->effectiveClassLevel(), $article->minClassRead(), 'wiki-min-read');
+        $this->assertEquals($this->userList['user']->privilege()->effectiveClassLevel(), $article->minClassEdit(), 'wiki-min-edit');
 
         $this->assertTrue($article->editable($this->userList['user']), 'wiki-edit-user');
         $this->assertTrue($article->editable($this->userList['admin']), 'wiki-edit-sysop');
@@ -86,8 +86,8 @@ class WikiTest extends TestCase {
         $article = $manager->create(
             $title,
             'wiki body',
-            $this->userList['user']->effectiveClass(),
-            $this->userList['user']->effectiveClass(),
+            $this->userList['user']->privilege()->effectiveClassLevel(),
+            $this->userList['user']->privilege()->effectiveClassLevel(),
             $this->userList['admin']
         );
         $this->articleList[] = $article;
@@ -107,8 +107,8 @@ class WikiTest extends TestCase {
         $article = $manager->create(
             $title,
             'wiki body',
-            $this->userList['user']->effectiveClass(),
-            $this->userList['user']->effectiveClass(),
+            $this->userList['user']->privilege()->effectiveClassLevel(),
+            $this->userList['user']->privilege()->effectiveClassLevel(),
             $this->userList['admin']
         );
         $this->articleList[] = $article;
@@ -151,8 +151,8 @@ class WikiTest extends TestCase {
         $article = $manager->create(
             $title,
             'wiki body',
-            $this->userList['user']->effectiveClass(),
-            $this->userList['user']->effectiveClass(),
+            $this->userList['user']->privilege()->effectiveClassLevel(),
+            $this->userList['user']->privilege()->effectiveClassLevel(),
             $this->userList['admin']
         );
         $this->articleList[] = $article;
@@ -170,13 +170,13 @@ class WikiTest extends TestCase {
         $manager = new \Gazelle\Manager\Wiki;
         $access = $manager->configureAccess(
             user:    $this->userList['user'],
-            minRead: $this->userList['user']->effectiveClass(),
-            minEdit: $this->userList['admin']->effectiveClass(),
+            minRead: $this->userList['user']->privilege()->effectiveClassLevel(),
+            minEdit: $this->userList['admin']->privilege()->effectiveClassLevel(),
         );
         $this->assertEquals(
             [
-                $this->userList['user']->effectiveClass(),
-                $this->userList['user']->effectiveClass(),
+                $this->userList['user']->privilege()->effectiveClassLevel(),
+                $this->userList['user']->privilege()->effectiveClassLevel(),
                 null,
             ],
             $access,
@@ -189,7 +189,7 @@ class WikiTest extends TestCase {
         $access = $manager->configureAccess(
             user:    $this->userList['user'],
             minRead: 0,
-            minEdit: $this->userList['user']->effectiveClass(),
+            minEdit: $this->userList['user']->privilege()->effectiveClassLevel(),
         );
         $this->assertEquals(
             [
@@ -203,7 +203,7 @@ class WikiTest extends TestCase {
 
         $access = $manager->configureAccess(
             user:    $this->userList['user'],
-            minRead: $this->userList['user']->effectiveClass(),
+            minRead: $this->userList['user']->privilege()->effectiveClassLevel(),
             minEdit: 0,
         );
         $this->assertEquals(
@@ -218,8 +218,8 @@ class WikiTest extends TestCase {
 
         $access = $manager->configureAccess(
             user:    $this->userList['user'],
-            minRead: $this->userList['admin']->effectiveClass(),
-            minEdit: $this->userList['user']->effectiveClass(),
+            minRead: $this->userList['admin']->privilege()->effectiveClassLevel(),
+            minEdit: $this->userList['user']->privilege()->effectiveClassLevel(),
         );
         $this->assertEquals(
             [
@@ -233,8 +233,8 @@ class WikiTest extends TestCase {
 
         $access = $manager->configureAccess(
             user:    $this->userList['user'],
-            minRead: $this->userList['user']->effectiveClass(),
-            minEdit: $this->userList['admin']->effectiveClass(),
+            minRead: $this->userList['user']->privilege()->effectiveClassLevel(),
+            minEdit: $this->userList['admin']->privilege()->effectiveClassLevel(),
         );
         $this->assertEquals(
             [
@@ -248,13 +248,13 @@ class WikiTest extends TestCase {
 
         $access = $manager->configureAccess(
             user:    $this->userList['admin'],
-            minRead: $this->userList['user']->effectiveClass(),
-            minEdit: $this->userList['admin']->effectiveClass(),
+            minRead: $this->userList['user']->privilege()->effectiveClassLevel(),
+            minEdit: $this->userList['admin']->privilege()->effectiveClassLevel(),
         );
         $this->assertEquals(
             [
-                $this->userList['user']->effectiveClass(),
-                $this->userList['admin']->effectiveClass(),
+                $this->userList['user']->privilege()->effectiveClassLevel(),
+                $this->userList['admin']->privilege()->effectiveClassLevel(),
                 null,
             ],
             $access,

@@ -27,7 +27,7 @@
 {% include 'admin/privilege-list.twig'
     with {
         'default': user.defaultPermissionList,
-        'user': user.permissionList,
+        'user': user.privilege.activeList,
     } only
 %}
 </form>

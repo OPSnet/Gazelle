@@ -58,7 +58,7 @@ class StaffPMTest extends TestCase {
         $this->assertTrue($spm->isUnread(), 'spm-fls-unread');
 
         $this->assertEquals(1, $spm->assign($this->fls, $this->fls), 'spm-user-assign-fls-by-fls');
-        $this->assertEquals($this->fls->effectiveClass(), $spm->classLevel(), 'spm-fls-classlevel-fls');
+        $this->assertEquals($this->fls->privilege()->effectiveClassLevel(), $spm->classLevel(), 'spm-fls-classlevel-fls');
         // FIXME: Kill internal cache
         // $this->assertFalse($spm->unassigned(), 'spm-fls-assigned');
 

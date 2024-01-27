@@ -45,6 +45,9 @@ class UserCreateTest extends TestCase {
         $this->assertEquals(SITE_URL . "/$location", $this->user->publicLocation(), 'user-public-location');
         $this->assertEquals($location, $this->user->url(), 'user-url');
         $this->assertEquals(SITE_URL . "/$location", $this->user->publicUrl(), 'user-public-url');
+
+        $info = $this->user->stats()->info();
+        $this->assertCount(24, $info, 'user-empty-stats');
     }
 
     public function testLogin(): void {

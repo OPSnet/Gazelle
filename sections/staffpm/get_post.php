@@ -28,7 +28,7 @@ if (!$PostID) {
     ", $PostID
 );
 
-if (($Viewer->id() == $UserID) || ($Viewer->isStaffPMReader() && $Viewer->effectiveClass() >= $Level)) {
+if (($Viewer->id() == $UserID) || ($Viewer->isStaffPMReader() && $Viewer->privilege()->effectiveClassLevel() >= $Level)) {
     // This gets sent to the browser, which echoes it wherever
     header('Content-type: text/plain');
     echo $Message;

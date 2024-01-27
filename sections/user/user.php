@@ -76,7 +76,7 @@ $DisplayCustomTitle = !empty($User->title())
 
 View::show_header($Username, ['js' => 'jquery.imagesloaded,jquery.wookmark,user,bbcode,requests,lastfm,comments,info_paster', 'css' => 'tiles']);
 echo $Twig->render('user/header.twig', [
-    'badge_list' => (new Gazelle\User\Privilege($User))->badgeList(),
+    'badge_list' => $User->privilege()->badgeList(),
     'bonus'      => $userBonus,
     'donor'      => $donor,
     'freeleech'  => [
@@ -95,7 +95,7 @@ echo $Twig->render('user/header.twig', [
             <div class="head colhead_dark">Personal</div>
             <ul class="stats nobullet">
                 <li>Class: <strong><?= $userMan->userclassName($Class) ?></strong></li>
-<?php if (($secondary = (new Gazelle\User\Privilege($User))->secondaryClassList())) { ?>
+<?php if (($secondary = $User->privilege()->secondaryClassList())) { ?>
                 <li>
                     <ul class="stats">
 <?php
@@ -515,9 +515,9 @@ if ($Viewer->permitted('users_mod') || $Viewer->isStaff()) { ?>
         foreach ($ClassLevels as $CurClass) {
             if ($CurClass['Secondary']) {
                 continue;
-            } elseif (!$OwnProfile && !$Viewer->permitted('users_promote_to', $Viewer->classLevel() - 1) && $CurClass['Level'] == $Viewer->effectiveClass()) {
+            } elseif (!$OwnProfile && !$Viewer->permitted('users_promote_to', $Viewer->classLevel() - 1) && $CurClass['Level'] == $Viewer->privilege()->effectiveClassLevel()) {
                 break;
-            } elseif ($CurClass['Level'] > $Viewer->effectiveClass()) {
+            } elseif ($CurClass['Level'] > $Viewer->privilege()->effectiveClassLevel()) {
                 break;
             }
             if ($User->classLevel() == $CurClass['Level']) {
@@ -536,7 +536,7 @@ if ($Viewer->permitted('users_mod') || $Viewer->isStaff()) { ?>
 
     if ($Viewer->permitted('users_promote_below') || $Viewer->permitted('users_promote_to')) {
         echo $Twig->render('user/edit-secondary-class.twig', [
-            'permission' => $User->secondaryClassesList(),
+            'permission' => $User->privilege()->secondaryClassesList(),
         ]);
     }
 

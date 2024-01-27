@@ -107,6 +107,10 @@ class TGroupTest extends TestCase {
         $this->assertEquals(1, $bonus->addPoints(10000), 'tgroup-user-add-bp');
         $this->assertEquals(1, $bonus->purchaseToken('token-1'), 'tgroup-user-buy-token');
         $this->assertTrue($this->userList['user']->canSpendFLToken($torrent), 'tgroup-user-fltoken');
+
+        (new Gazelle\Stats\Users)->refresh();
+        $this->assertEquals(3, $this->userList['user']->stats()->uploadTotal(), 'tgroup-user-stats-upload');
+        $this->assertEquals(1, $this->userList['user']->stats()->uniqueGroupTotal(), 'tgroup-user-stats-unique');
     }
 
     public function testTGroupArtist(): void {

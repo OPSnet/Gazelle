@@ -110,11 +110,11 @@ class Wiki extends BaseObject {
     }
 
     public function editable(User $user): bool {
-        return $this->minClassEdit() <= $user->effectiveClass();
+        return $this->minClassEdit() <= $user->privilege()->effectiveClassLevel();
     }
 
     public function readable(User $user): bool {
-        return $this->minClassRead() <= $user->effectiveClass();
+        return $this->minClassRead() <= $user->privilege()->effectiveClassLevel();
     }
 
     /**

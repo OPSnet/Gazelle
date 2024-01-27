@@ -93,7 +93,7 @@ class StaffPM extends BaseObject {
     public function visible(User $viewer): bool {
         return in_array($viewer->id(), [$this->userId(), $this->assignedUserId()])
             || ($viewer->isFLS() && $this->classLevel() == 0)
-            || ($viewer->isStaff() && $this->classLevel() <= $viewer->effectiveClass());
+            || ($viewer->isStaff() && $this->classLevel() <= $viewer->privilege()->effectiveClassLevel());
     }
 
     public function assign(User $to, User $by): int {
@@ -103,7 +103,7 @@ class StaffPM extends BaseObject {
                 AssignedToUser = ?,
                 Level = ?
             WHERE ID = ?
-            ", $to->id(), $to->effectiveClass(), $this->id,
+            ", $to->id(), $to->privilege()->effectiveClassLevel(), $this->id,
         );
         $affected = self::$db->affected_rows();
         $this->flush();

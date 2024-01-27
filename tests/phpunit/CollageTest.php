@@ -128,7 +128,6 @@ class CollageTest extends TestCase {
         $manager     = new Gazelle\Manager\Collage;
         $stats       = new Gazelle\Stats\Collage;
         $total       = $stats->collageTotal();
-
         $name        = 'phpunit collage create ' . randomString(20);
         $description = 'phpunit collage create description';
         $tagList     = $this->tagList(3);
@@ -161,6 +160,12 @@ class CollageTest extends TestCase {
         $this->assertTrue($collage->isOwner($this->userList['u1']), 'collage-is-owner');
         $this->assertStringContainsString($collage->name(), $collage->link(), 'collage-link');
         $this->assertFalse($collage->hasAttr('sort-newest'), 'collage-no-sort-newest');
+
+        $this->assertEquals(
+            1,
+            $this->userList['u1']->stats()->collageTotal(),
+            'collage-user-total'
+        );
 
         $find = $manager->findByName($name);
         $this->assertEquals($collage->id(), $find->id(), 'collage-find-by-name');

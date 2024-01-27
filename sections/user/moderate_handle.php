@@ -332,7 +332,7 @@ if ($Viewer->permitted('users_give_donor')) {
 $removedClasses = [];
 $addedClasses   = [];
 if ($Viewer->permittedAny('users_promote_below', 'users_promote_to')) {
-    $currentClasses = array_keys((new Gazelle\User\Privilege($user))->secondaryClassList());
+    $currentClasses = array_keys($user->privilege()->secondaryClassList());
     sort($currentClasses);
     sort($secondaryClasses);
     if ($currentClasses != $secondaryClasses) {

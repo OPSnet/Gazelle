@@ -36,7 +36,7 @@ class RenderUserTest extends TestCase {
         );
 
         $header = Gazelle\Util\Twig::factory()->render('user/header.twig', [
-            'badge_list' => (new \Gazelle\User\Privilege($Viewer))->badgeList(),
+            'badge_list' => $Viewer->privilege()->badgeList(),
             'bonus'      => new Gazelle\User\Bonus($this->userList['user']),
             'donor'      => new Gazelle\User\Donor($this->userList['user']),
             'freeleech' => [

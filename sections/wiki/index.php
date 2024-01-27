@@ -5,7 +5,7 @@ function class_list(int $Selected = 0): string {
     $Return = '';
     $Classes = (new Gazelle\Manager\User)->classList();
     foreach ($Classes as $Class) {
-        if ($Class['Level'] <= $Viewer->effectiveClass()) {
+        if ($Class['Level'] <= $Viewer->privilege()->effectiveClassLevel()) {
             $Return .= '<option value="' . $Class['Level'] . '"';
             if ($Selected == $Class['Level']) {
                 $Return .= ' selected="selected"';

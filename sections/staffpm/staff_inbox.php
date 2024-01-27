@@ -44,18 +44,18 @@ $viewingResolved = $viewMap[$View]['title'] === 'Resolved';
 
 if (isset($_GET['id'])) {
     $cond = ['spc.Level <= ? AND spc.UserID = ? AND spc.status = ?'];
-    $args = array_merge([$Viewer->effectiveClass(), (int)$_GET['id'], 'Resolved']);
+    $args = array_merge([$Viewer->privilege()->effectiveClassLevel(), (int)$_GET['id'], 'Resolved']);
 } else {
     $cond = ['(spc.Level <= ? OR spc.AssignedToUser = ?) AND spc.Status IN (' . placeholders($viewMap[$View]['status']) . ')'];
-    $args = array_merge([$Viewer->effectiveClass(), $Viewer->id()], $viewMap[$View]['status']);
+    $args = array_merge([$Viewer->privilege()->effectiveClassLevel(), $Viewer->id()], $viewMap[$View]['status']);
 }
 
 $Classes = (new Gazelle\Manager\User)->classList();
 if ($viewMap[$View]['title'] === 'Your Unanswered') {
-    if ($Viewer->effectiveClass() >= $Classes[MOD]['Level']) {
+    if ($Viewer->privilege()->effectiveClassLevel() >= $Classes[MOD]['Level']) {
         $cond[] = 'spc.Level >= ?';
         $args[] = $Classes[MOD]['Level'];
-    } elseif ($Viewer->effectiveClass() == $Classes[FORUM_MOD]['Level']) {
+    } elseif ($Viewer->privilege()->effectiveClassLevel() == $Classes[FORUM_MOD]['Level']) {
         $cond[] = 'spc.Level >= ?';
         $args[] = $Classes[FORUM_MOD]['Level'];
     }

@@ -12,7 +12,7 @@ if (isset($_GET['id'])) {
 if (is_null($wiki)) {
     json_error("article not found");
 }
-if ($wiki->minClassRead() > $Viewer->effectiveClass()) {
+if ($wiki->minClassRead() > $Viewer->privilege()->effectiveClassLevel()) {
     json_error("higher user class required to view article");
 }
 

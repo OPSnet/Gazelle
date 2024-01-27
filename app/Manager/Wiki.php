@@ -81,7 +81,7 @@ class Wiki extends \Gazelle\BaseManager {
      */
     public function configureAccess(\Gazelle\User $user, int $minRead, int $minEdit) {
         $isAdmin = $user->permitted('admin_manage_wiki');
-        $class = $user->effectiveClass();
+        $class = $user->privilege()->effectiveClassLevel();
 
         if (!$isAdmin) {
             return [100, 100, null];

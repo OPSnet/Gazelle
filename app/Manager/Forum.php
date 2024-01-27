@@ -265,11 +265,13 @@ class Forum extends \Gazelle\BaseManager {
         }
 
         $userId = $user->id();
-        $info['EffectiveClass']  = $user->effectiveClass();
-        $info['ExtraClasses']    = array_keys((new \Gazelle\User\Privilege($user))->secondaryClassList());
-        $info['Permissions']     = array_keys($user->info()['Permission']);
-        $info['ExtraClassesOff'] = array_flip(array_map(fn ($i) => -$i, $info['ExtraClasses']));
-        $info['PermissionsOff']  = array_flip(array_map(fn ($i) => "-$i", array_keys($user->info()['Permission'])));
+        $info['EffectiveClass']  = $user->privilege()->effectiveClassLevel();
+        $userclassList = array_keys($user->privilege()->secondaryClassList());
+        $info['ExtraClasses']    = $userclassList;
+        $info['ExtraClassesOff'] = array_flip(array_map(fn ($i) => -$i, $userclassList));
+        $privilegeList = array_keys($user->privilege()->secondaryPrivilegeList());
+        $info['Permissions']     = $privilegeList;
+        $info['PermissionsOff']  = array_flip(array_map(fn ($i) => "-$i", $privilegeList));
 
         return array_filter($items, function ($item) use ($info, $userId) {
             if (count(array_intersect_key($item['permission_levels'], $info['ExtraClassesOff'])) > 0) {

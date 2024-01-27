@@ -70,7 +70,7 @@ class Bonus extends \Gazelle\BaseUser {
         if (preg_match('/^collage-\d$/', $label)) {
             return $item['Price'] * 2 ** $this->user->paidPersonalCollages();
         }
-        return $this->user->effectiveClass() >= $item['FreeClass'] ? 0 : (int)$item['Price'];
+        return $this->user->privilege()->effectiveClassLevel() >= $item['FreeClass'] ? 0 : (int)$item['Price'];
     }
 
     public function otherList(): array {
@@ -142,7 +142,7 @@ class Bonus extends \Gazelle\BaseUser {
     }
 
     public function donate(int $poolId, int $value): bool {
-        $effectiveClass = $this->user->effectiveClass();
+        $effectiveClass = $this->user->privilege()->effectiveClassLevel();
         if ($effectiveClass < 250) {
             $taxedValue = $value * BONUS_POOL_TAX_STD;
         } elseif ($effectiveClass == 250 /* Elite */) {

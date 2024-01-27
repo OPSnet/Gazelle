@@ -28,7 +28,7 @@ if (isset($_GET['convid'])) {
     exit;
 }
 
-if ($Viewer->effectiveClass() < $staffPm->classLevel() && $Viewer->id() != $staffPm->assignedUserId()) {
+if ($Viewer->privilege()->effectiveClassLevel() < $staffPm->classLevel() && $Viewer->id() != $staffPm->assignedUserId()) {
     // Staff member is not allowed to assign conversation
     echo '-1';
 } else {

@@ -12,7 +12,7 @@ use Gazelle\Util\Time;
 
 class User extends BaseObject {
     final public const tableName             = 'users_main';
-    final protected const CACHE_KEY          = 'u_%d';
+    final protected const CACHE_KEY          = 'u2_%d';
     final protected const CACHE_NOTIFY       = 'u_notify_%d';
     final protected const USER_RECENT_UPLOAD = 'u_recent_up_%d';
 
@@ -25,14 +25,14 @@ class User extends BaseObject {
     protected array $forumWarning = [];
     protected array $staffNote = [];
 
-    protected Stats\User  $stats;
-    protected User\Invite $invite;
-    protected User\Snatch $snatch;
+    protected Stats\User     $stats;
+    protected User\Invite    $invite;
+    protected User\Privilege $privilege;
+    protected User\Snatch    $snatch;
 
     public function flush(): static {
         self::$cache->delete_multi([
             sprintf(self::CACHE_KEY, $this->id),
-            sprintf(User\Privilege::CACHE_KEY, $this->id),
             sprintf('user_inv_pending_%d', $this->id),
             sprintf('user_invited_%d', $this->id),
             sprintf('user_last_access_%d', $this->id),
@@ -41,7 +41,9 @@ class User extends BaseObject {
             sprintf('users_tokens_%d', $this->id),
         ]);
         $this->stats()->flush();
+        $this->privilege()->flush();
         unset($this->info);
+        unset($this->privilege);
         unset($this->stats);
         unset($this->tokenCache);
         return $this;
@@ -59,23 +61,23 @@ class User extends BaseObject {
     }
 
     /**
-     * Delegate snatch status methods to the User\Snatch class
+     * Delegate privilege methods to the User\Invite class
+     * This delegation is stateful.
      */
-    public function snatch(): User\Snatch {
-        if (!isset($this->snatch)) {
-            $this->snatch = new User\Snatch($this);
-        }
-        return $this->snatch;
+    public function invite(): User\Invite {
+        return $this->invite ??= new User\Invite($this);
     }
 
-    /**
-     * Delegate stats methods to the Stats\User class
-     */
+    public function privilege(): User\Privilege {
+        return $this->privilege ??= new User\Privilege($this);;
+    }
+
+    public function snatch(): User\Snatch {
+        return $this->snatch ??= new User\Snatch($this);;
+    }
+
     public function stats(): \Gazelle\Stats\User {
-        if (!isset($this->stats)) {
-            $this->stats = new Stats\User($this->id);
-        }
-        return $this->stats;
+        return $this->stats ??= new Stats\User($this->id);
     }
 
     /**
@@ -121,7 +123,6 @@ class User extends BaseObject {
                 um.can_leech,
                 um.collage_total,
                 um.created,
-                um.CustomPermissions,
                 um.inviter_user_id,
                 um.IP,
                 um.Email,
@@ -141,17 +142,13 @@ class User extends BaseObject {
                 um.2FA_Key,
                 ui.AdminComment,
                 ui.NavItems,
-                ui.PermittedForums,
                 ui.RatioWatchEnds,
                 ui.RatioWatchDownload,
-                ui.RestrictedForums,
                 ui.SiteOptions,
                 uls.Uploaded,
                 uls.Downloaded,
                 p.Level AS Class,
                 p.Name  AS className,
-                p.Values AS primaryPermissions,
-                p.PermittedForums AS primaryForum,
                 if(p.Level >= (SELECT Level FROM permissions WHERE ID = ?), 1, 0) as isStaff,
                 uf.tokens AS FLTokens,
                 coalesce(ub.points, 0) AS BonusPoints,
@@ -183,47 +180,6 @@ class User extends BaseObject {
         $this->info['RatioWatchEndsEpoch'] = $this->info['RatioWatchEnds']
             ? strtotime($this->info['RatioWatchEnds']) : 0;
 
-        $privilege = new User\Privilege($this);
-        $this->info['effective_class'] = max($this->info['Class'], $privilege->maxSecondaryLevel());
-
-        $this->info['Permission'] = [];
-        $primary = unserialize($this->info['primaryPermissions']) ?: [];
-        foreach ($primary as $name => $value) {
-            $this->info['Permission'][$name] = (bool)$value;
-        }
-        foreach ($privilege->secondaryPrivilegeList() as $name => $value) {
-            $this->info['Permission'][$name] = (bool)$value;
-        }
-        $this->info['defaultPermission'] = $this->info['Permission'];
-
-        // a custom permission may revoke a primary or secondary grant
-        $custom = $this->info['CustomPermissions'] ? unserialize($this->info['CustomPermissions']) : [];
-        foreach ($custom as $name => $value) {
-            $this->info['Permission'][$name] = (bool)$value;
-        }
-
-        $forumAccess = $privilege->allowedForumList(); // grants from secondary classes
-        $allowed = array_map('intval', explode(',', $this->info['PermittedForums']));
-        foreach ($allowed as $forumId) {
-            if ($forumId) {
-                $forumAccess[$forumId] = true;
-            }
-        }
-        $allowed = array_map('intval', explode(',', $this->info['primaryForum']));
-        foreach ($allowed as $forumId) {
-            if ($forumId) {
-                $forumAccess[$forumId] = true;
-            }
-        }
-        $forbidden = array_map('intval', explode(',', $this->info['RestrictedForums']));
-        foreach ($forbidden as $forumId) {
-            // forbidden may override permitted
-            if ($forumId) {
-                $forumAccess[$forumId] = false;
-            }
-        }
-        $this->info['forum_access'] = $forumAccess;
-
         self::$db->prepared_query("
             SELECT ua.Name, ua.ID
             FROM user_attr ua
@@ -248,13 +204,6 @@ class User extends BaseObject {
     }
 
     /**
-     * Get the permissions (granted or revoked) for this user
-     */
-    public function permissionList(): array {
-        return $this->info()['Permission'];
-    }
-
-    /**
      * Get the default permissions of this user
      * (before any userlevel grants or revocations are considered).
      */
@@ -267,8 +216,9 @@ class User extends BaseObject {
             SELECT CustomPermissions FROM users_main WHERE ID = ?
             ", $this->id
         );
-        $custom = empty($custom) ? [] : unserialize($custom);
+        $custom = unserialize($custom) ?: [];
         $custom[$name] = 1;
+        $this->privilege()->flush();
         return $this->setField('CustomPermissions', serialize($custom))->modify();
     }
 
@@ -297,46 +247,27 @@ class User extends BaseObject {
             ", count($delta) ? serialize($delta) : null, $this->id
         );
         $affected = self::$db->affected_rows();
-        $this->flush();
+        $this->privilege()->flush();
         return $affected === 1;
     }
 
     /**
-     * Does the user have a specific permission?
+     * Does the user have a specific privilege?
      */
-    public function permitted(string $permission): bool {
-        return $this->info()['Permission'][$permission] ?? false;
+    public function permitted(string $privilege): bool {
+        return $this->privilege()->permitted($privilege);
     }
 
     /**
-     * Does the user have any of the specified permissions?
-     *
-     * @param string[] $permission names
+     * Does the user have any of the specified privileges?
      */
-    public function permittedAny(...$permission): bool {
-        foreach ($permission as $p) {
-            if ($this->info()['Permission'][$p] ?? false) {
+    public function permittedAny(string ...$privilege): bool {
+        foreach ($privilege as $p) {
+            if ($this->privilege()->permitted($p)) {
                 return true;
             }
         }
         return false;
-    }
-
-    /**
-     * Get the secondary classes of the user (enabled or not)
-     */
-    public function secondaryClassesList(): array {
-        self::$db->prepared_query('
-            SELECT p.ID                AS permId,
-                p.Name                 AS permName,
-                (l.UserID IS NOT NULL) AS isSet
-            FROM permissions AS p
-            LEFT JOIN users_levels AS l ON (l.PermissionID = p.ID AND l.UserID = ?)
-            WHERE p.Secondary = 1
-            ORDER BY p.Name
-            ', $this->id
-        );
-        return self::$db->to_array('permName', MYSQLI_ASSOC, false);
     }
 
     public function hasAttr(string $name): bool {
@@ -524,10 +455,6 @@ class User extends BaseObject {
 
     public function downloadedOnRatioWatch(): int {
         return $this->info()['RatioWatchDownload'];
-    }
-
-    public function effectiveClass(): int {
-        return $this->info()['effective_class'];
     }
 
     public function email(): string {
@@ -846,22 +773,22 @@ class User extends BaseObject {
      * (Note that banning takes precedence of permitting).
      */
     public function forbiddenForums(): array {
-        return array_keys(array_filter($this->info()['forum_access'], fn ($v) => $v === false));
+        return $this->privilege()->forbiddenForumIdList();
     }
 
     /**
      * Return the list for forum IDs to which the user has been granted special access.
      */
     public function permittedForums(): array {
-        return array_keys(array_filter($this->info()['forum_access'], fn ($v) => $v === true));
+        return $this->privilege()->permittedForumIdList();
     }
 
     public function forbiddenForumsList(): string {
-        return $this->info()['RestrictedForums'];
+        return $this->privilege()->forbiddenForums();
     }
 
     public function permittedForumsList(): string {
-        return $this->info()['PermittedForums'];
+        return $this->privilege()->permittedForums();
     }
 
     /**
@@ -1462,9 +1389,9 @@ class User extends BaseObject {
     public function isWarned(): bool      { return !is_null($this->warningExpiry()); }
 
     public function isStaff(): bool         { return $this->info()['isStaff']; }
-    public function isFLS(): bool           { return (new User\Privilege($this))->isFLS(); }
-    public function isInterviewer(): bool   { return (new User\Privilege($this))->isInterviewer(); }
-    public function isRecruiter(): bool     { return (new User\Privilege($this))->isRecruiter(); }
+    public function isFLS(): bool           { return $this->privilege()->isFLS(); }
+    public function isInterviewer(): bool   { return $this->privilege()->isInterviewer(); }
+    public function isRecruiter(): bool     { return $this->privilege()->isRecruiter(); }
     public function isStaffPMReader(): bool { return $this->isFLS() || $this->isStaff(); }
 
     public function warningExpiry(): ?string {
@@ -1568,10 +1495,6 @@ class User extends BaseObject {
         return (int)$this->getSingleValue('user_trackip_count', "
             SELECT count(DISTINCT IP) FROM xbt_snatched WHERE uid = ? AND IP != ''
         ");
-    }
-
-    public function invite(): User\Invite {
-        return $this->invite ??= new User\Invite($this);
     }
 
     public function inviter(): ?User {
@@ -2046,6 +1969,6 @@ class User extends BaseObject {
      * @return boolean false if insufficient funds, otherwise true
      */
     public function canPurchaseInvite(): bool {
-        return !$this->disableInvites() && $this->effectiveClass() >= MIN_INVITE_CLASS;
+        return !$this->disableInvites() && $this->privilege()->effectiveClassLevel() >= MIN_INVITE_CLASS;
     }
 }

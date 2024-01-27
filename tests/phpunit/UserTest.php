@@ -47,6 +47,7 @@ class UserTest extends TestCase {
         $this->user->setField('PermissionID', SYSOP)->modify();
         $this->assertTrue($admin->isStaff(), 'admin-is-admin');
         $this->assertTrue($admin->permitted('site_upload'), 'admin-permitted-site_upload');
+        $this->assertFalse($admin->permitted('no_such_privilege'), 'admin-not-permitted-bogus');
         $this->assertTrue($admin->permitted('site_debug'), 'admin-permitted-site_debug');
         $this->assertTrue($admin->permittedAny('site_analysis', 'site_debug'), 'admin-permitted-any-site_analysis-site_debug');
     }

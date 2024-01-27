@@ -78,6 +78,7 @@ class ForumTest extends TestCase {
         $this->assertEquals(1, $this->category->forumTotal(), 'forum-category-forum-total');
         $this->assertInstanceOf(\Gazelle\Forum::class, $this->forum, 'forum-is-forum');
         $this->assertEquals(0, $this->category->remove(), 'forum-cat-remove-in-use');
+        // If you hit a mismatch here it is due to an aborted previous test run
         $this->assertCount($tocTotal + 1, $forumMan->tableOfContentsMain(), 'forum-test-toc-main');
         $this->forum->userCatchup($admin);
 
@@ -147,6 +148,8 @@ class ForumTest extends TestCase {
         $this->assertFalse($thread->isLocked(), 'fthread-is-locked');
         $this->assertFalse($thread->isPinned(), 'fthread-is-pinned');
 
+        $this->assertEquals(1, $admin->stats()->forumThreadTotal(), 'fthread-user-stats-total');
+
         // Forum Thread Notes
         $threadNote = 'this is a note';
         $id = $thread->addThreadNote($admin->id(), $threadNote);
@@ -157,7 +160,7 @@ class ForumTest extends TestCase {
         $this->assertEquals($threadNote, $notes[0]['Body'], 'fthread-thread-note-body');
 
         // Forum ACLs
-        $secretLevel = $admin->effectiveClass();
+        $secretLevel = $admin->privilege()->effectiveClassLevel();
         $secret = $forumMan->create(
             user:           $admin,
             sequence:       200,
@@ -306,6 +309,38 @@ class ForumTest extends TestCase {
         $this->assertEquals(1, $this->forum->toggleAutoSubscribe($user, false), 'forum-autosub-off-autosub');
         $this->assertFalse($this->forum->isAutoSubscribe($user), 'forum-autosub-no-longer-autosub');
         $this->assertEquals([], $this->forum->autoSubscribeUserIdList(), 'forum-autosub-no-userlist');
+    }
+
+    public function testForumForbidden(): void {
+        $this->category = (new \Gazelle\Manager\ForumCategory)->create('phpunit category', 10002);
+        $forumMan       = new \Gazelle\Manager\Forum;
+        $user           = $this->userList['user'];
+        $this->forum    = $forumMan->create(
+            user:           $this->userList['admin'],
+            sequence:       151,
+            categoryId:     $this->category->id(),
+            name:           'phpunit forbid forum',
+            description:    'This is where it forbids',
+            minClassRead:   100,
+            minClassWrite:  100,
+            minClassCreate: 100,
+            autoLock:       false,
+            autoLockWeeks:  42,
+        );
+        $this->assertTrue($user->readAccess($this->forum), 'forum-forbid-read-allowed');
+        $this->assertTrue($user->writeAccess($this->forum), 'forum-forbid-write-allowed');
+        $this->assertTrue($user->createAccess($this->forum), 'forum-forbid-create-allowed');
+
+         \Gazelle\DB::DB()->prepared_query("
+            UPDATE users_info SET
+                RestrictedForums = ?
+            WHERE UserID = ?
+            ", $this->forum->id(), $user->id()
+        );
+        $user->flush();
+        $this->assertFalse($user->readAccess($this->forum), 'forum-forbid-read-denied');
+        $this->assertFalse($user->writeAccess($this->forum), 'forum-forbid-write-denied');
+        $this->assertFalse($user->createAccess($this->forum), 'forum-forbid-create-denied');
     }
 
     public function testForumWarn(): void {
@@ -464,7 +499,7 @@ class ForumTest extends TestCase {
         );
         $paginator = (new Gazelle\Util\Paginator(TOPICS_PER_PAGE, 1))->setTotal(1);
         global $Document, $SessionID, $Viewer; // to render header()
-        $Document  = '';
+        $Document  = 'forum';
         $SessionID = 'phpunit';
         $Viewer    = $admin;
         $this->assertStringContainsString(

@@ -61,7 +61,7 @@ class Twig {
 
         $twig->addFilter(new \Twig\TwigFilter(
             'badge_list',
-            fn(\Gazelle\User $user) => (new \Gazelle\User\Privilege($user))->badgeList()
+            fn(\Gazelle\User $user) => $user->privilege()->badgeList()
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
