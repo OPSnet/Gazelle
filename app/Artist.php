@@ -354,55 +354,6 @@ class Artist extends BaseObject {
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
-    public function rename(int $aliasId, string $name, Manager\Request $reqMan, User $user): int {
-        self::$db->prepared_query("
-            INSERT INTO artists_alias
-                   (ArtistID, Name, UserID, Redirect)
-            VALUES (?,        ?,    ?,      0)
-            ", $this->id, $name, $user->id()
-        );
-        $targetId = self::$db->inserted_id();
-        self::$db->prepared_query("
-            UPDATE artists_alias SET Redirect = ? WHERE AliasID = ?
-            ", $targetId, $aliasId
-        );
-        self::$db->prepared_query("
-            UPDATE artists_group SET Name = ? WHERE ArtistID = ?
-            ", $name, $this->id
-        );
-
-        // process artists in torrents
-        self::$db->prepared_query("
-            SELECT GroupID FROM torrents_artists WHERE AliasID = ?
-            ", $aliasId
-        );
-        $groups = self::$db->collect('GroupID');
-        self::$db->prepared_query("
-            UPDATE IGNORE torrents_artists SET AliasID = ?  WHERE AliasID = ?
-            ", $targetId, $aliasId
-        );
-        $tgroupMan = new Manager\TGroup;
-        foreach ($groups as $groupId) {
-            $tgroupMan->findById($groupId)?->refresh();
-        }
-
-        // process artists in requests
-        self::$db->prepared_query("
-            SELECT RequestID FROM requests_artists WHERE AliasID = ?
-            ", $aliasId
-        );
-        $requests = self::$db->collect('RequestID');
-        self::$db->prepared_query("
-            UPDATE IGNORE requests_artists SET AliasID = ? WHERE AliasID = ?
-            ", $targetId, $aliasId
-        );
-        foreach ($requests as $requestId) {
-            $reqMan->findById($requestId)->updateSphinx();
-        }
-        $this->flush();
-        return $targetId;
-    }
-
     public function addAlias(string $name, int $redirect, User $user, Log $logger): int {
         self::$db->prepared_query("
             INSERT INTO artists_alias
@@ -816,6 +767,205 @@ class Artist extends BaseObject {
         $this->flush();
         $old->flush();
         return $affected;
+    }
+
+    public function rename(int $aliasId, string $name, Manager\Request $reqMan, User $user): int {
+        self::$db->prepared_query("
+            INSERT INTO artists_alias
+                   (ArtistID, Name, UserID, Redirect)
+            VALUES (?,        ?,    ?,      0)
+            ", $this->id, $name, $user->id()
+        );
+        $newId = self::$db->inserted_id();
+        self::$db->prepared_query("
+            UPDATE artists_alias SET Redirect = ? WHERE AliasID = ?
+            ", $newId, $aliasId
+        );
+        self::$db->prepared_query("
+            UPDATE artists_group SET Name = ? WHERE ArtistID = ?
+            ", $name, $this->id
+        );
+
+        // process artists in torrents
+        self::$db->prepared_query("
+            SELECT GroupID FROM torrents_artists WHERE AliasID = ?
+            ", $aliasId
+        );
+        $groups = self::$db->collect('GroupID');
+        self::$db->prepared_query("
+            UPDATE IGNORE torrents_artists SET AliasID = ?  WHERE AliasID = ?
+            ", $newId, $aliasId
+        );
+        $tgMan = new Manager\TGroup;
+        foreach ($groups as $groupId) {
+            $tgMan->findById($groupId)?->refresh();
+        }
+
+        // process artists in requests
+        self::$db->prepared_query("
+            SELECT RequestID FROM requests_artists WHERE AliasID = ?
+            ", $aliasId
+        );
+        $requests = self::$db->collect('RequestID');
+        self::$db->prepared_query("
+            UPDATE IGNORE requests_artists SET AliasID = ? WHERE AliasID = ?
+            ", $newId, $aliasId
+        );
+        foreach ($requests as $requestId) {
+            $reqMan->findById($requestId)->updateSphinx();
+        }
+        $this->flush();
+        return $newId;
+    }
+
+    public function smartRename(
+        string          $name,
+        Manager\Artist  $artistMan,
+        Manager\Comment $commentMan,
+        Manager\Request $reqMan,
+        Manager\TGroup  $tgMan,
+        User            $user,
+    ): Artist {
+        [$newAliasId, $newArtistId] = self::$db->row("
+            SELECT AliasID, ArtistID
+            FROM artists_alias
+            WHERE name = ?
+            ", $name
+        );
+
+        $oldAliasId = $this->getAlias($this->name());
+        if (!$newAliasId || $newAliasId == $oldAliasId) {
+            // no merge, just rename
+            $this->rename($oldAliasId, $name, $reqMan, $user);
+            return $this;
+        }
+
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
+            UPDATE artists_alias SET
+                Redirect = ?,
+                ArtistID = ?
+            WHERE AliasID = ?
+            ", $newAliasId, $newArtistId, $oldAliasId
+        );
+        self::$db->prepared_query("
+            UPDATE artists_alias SET
+                Redirect = '0'
+            WHERE AliasID = ?
+            ", $newAliasId
+        );
+        if ($this->id == $newArtistId) {
+            self::$db->prepared_query("
+                UPDATE artists_group SET
+                    Name = ?
+                WHERE ArtistID = ?
+                ", $name, $this->id
+            );
+        } else {
+            self::$db->prepared_query("
+                UPDATE artists_alias SET
+                    ArtistID = ?
+                WHERE ArtistID = ?
+                ", $newArtistId, $this->id
+            );
+            self::$db->prepared_query("
+                DELETE FROM artists_group WHERE ArtistID = ?
+                ", $this->id
+            );
+        }
+
+        self::$db->prepared_query("
+            SELECT GroupID FROM torrents_artists WHERE AliasID = ?
+            ", $oldAliasId
+        );
+        $Groups = self::$db->collect('GroupID', false);
+        self::$db->prepared_query("
+            UPDATE IGNORE torrents_artists SET
+                AliasID = ?,
+                ArtistID = ?
+            WHERE AliasID = ?
+            ", $newAliasId, $newArtistId, $oldAliasId
+        );
+        self::$db->prepared_query("
+            DELETE FROM torrents_artists WHERE AliasID = ?
+            ", $oldAliasId
+        );
+        foreach ($Groups as $id) {
+            $tgMan->findById($id)?->refresh();
+        }
+
+        self::$db->prepared_query("
+            SELECT RequestID FROM requests_artists WHERE AliasID = ?
+            ", $oldAliasId
+        );
+        $Requests = self::$db->collect('RequestID', false);
+        self::$db->prepared_query("
+            UPDATE IGNORE requests_artists SET
+                AliasID = ?,
+                ArtistID = ?
+            WHERE AliasID = ?
+            ", $newAliasId, $newArtistId, $oldAliasId
+        );
+        self::$db->prepared_query("
+            DELETE FROM requests_artists WHERE AliasID = ?
+            ", $oldAliasId
+        );
+        foreach ($Requests as $id) {
+            $reqMan->findById($id)?->updateSphinx();
+        }
+
+        if ($this->id != $newArtistId) {
+            self::$db->prepared_query("
+                SELECT GroupID FROM torrents_artists WHERE ArtistID = ?
+                ", $this->id
+            );
+            $Groups = self::$db->collect('GroupID', false);
+            self::$db->prepared_query("
+                UPDATE IGNORE torrents_artists SET
+                    ArtistID = ?
+                WHERE ArtistID = ?
+                ", $newArtistId, $this->id
+            );
+            self::$db->prepared_query("
+                DELETE FROM torrents_artists WHERE ArtistID = ?
+                ", $this->id
+            );
+            foreach ($Groups as $id) {
+                $tgMan->findById($id)?->refresh();
+            }
+
+            self::$db->prepared_query("
+                SELECT RequestID FROM requests_artists WHERE ArtistID = ?
+                ", $this->id
+            );
+            $Requests = self::$db->collect('RequestID', false);
+            self::$db->prepared_query("
+                UPDATE IGNORE requests_artists SET
+                    ArtistID = ?
+                WHERE ArtistID = ?
+                ", $newArtistId, $this->id
+            );
+            self::$db->prepared_query("
+                DELETE FROM requests_artists WHERE ArtistID = ?
+                ", $this->id
+            );
+            foreach ($Requests as $id) {
+                $reqMan->findById($id)?->updateSphinx();
+            }
+            $commentMan->merge('artist', $this->id, $newArtistId);
+        }
+
+        $new = $artistMan->findById($newArtistId);
+        if ($new) {
+            self::$db->commit();
+        } else {
+            self::$db->rollback();
+            error("Unable to rename artist");
+        }
+
+        $this->flush();
+        $new->flush();
+        return $new;
     }
 
     /**

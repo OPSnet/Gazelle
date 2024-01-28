@@ -58,7 +58,7 @@ class ArtistTest extends TestCase {
         );
         // If the following test fails locally:
         // before test run: TRUNCATE TABLE artist_usage;
-        // afte test run: (new \Gazelle\Stats\Artists)->updateUsage();
+        // after test run: (new \Gazelle\Stats\Artists)->updateUsage();
         $this->assertEquals($artistId, $manager->findRandom()->id(), 'artist-find-random');
         $this->assertNull($manager->findByIdAndRevision($artistId, -666), 'artist-find-revision-fail');
 
@@ -298,6 +298,76 @@ class ArtistTest extends TestCase {
             'artist-rename'
         );
         $this->assertEquals($rename, $artist->name(), 'artist-is-renamed');
+    }
+
+    public function testArtistRenameHarder(): void {
+        $manager = new \Gazelle\Manager\Artist;
+        [$artistId, $aliasId] = $manager->create('phpunit.' . randomString(12));
+        $artist = $manager->findById($artistId);
+        $this->artistIdList[] = $artist->id();
+
+        $commentMan = new \Gazelle\Manager\Comment;
+        $post = $commentMan->create($this->user, 'artist', $artist->id(), 'phpunit smart rename ' . randomString(6));
+
+        $requestMan = new Gazelle\Manager\Request;
+        $request = $requestMan->create(
+            user:            $this->user,
+            bounty:          100 * 1024 ** 2,
+            categoryId:      (new Gazelle\Manager\Category)->findIdByName('Music'),
+            year:            (int)date('Y'),
+            title:           'phpunit smart rename ' . randomString(6),
+            image:           '',
+            description:     'This is a unit test description',
+            recordLabel:     'Unitest Artists',
+            catalogueNumber: 'UA-7890',
+            releaseType:     1,
+            encodingList:    'Lossless',
+            formatList:      'MP3',
+            mediaList:       'CD',
+            logCue:          'Log (100%) + Cue',
+            checksum:        true,
+            oclc:            '',
+        );
+        $request->artistRole()->set(
+            [ARTIST_MAIN => [$artist->name()]],
+            new Gazelle\Manager\Artist,
+        );
+
+        $this->tgroupList = [
+            Helper::makeTGroupMusic(
+                $this->user,
+                'phpunit artist smart rename ' . randomString(10),
+                [[ARTIST_MAIN], [$artist->name()]],
+                ['deep.house'],
+            ),
+        ];
+
+        $name = $artist->name() . '-rename2';
+        $renamed = $artist->smartRename(
+            $name,
+            $manager,
+            $commentMan,
+            $requestMan,
+            new \Gazelle\Manager\TGroup,
+            $this->user,
+        );
+        $this->assertEquals($name, $renamed->name(), 'artist-is-smart-renamed');
+
+        $commentPage = new Gazelle\Comment\Artist($renamed->id(), 1, 0);
+        $commentPage->load();
+        $threadList = $commentPage->threadList(new Gazelle\Manager\User);
+        $this->assertCount(1, $threadList, 'artist-renamed-comments');
+        $this->assertEquals($post->id(), $threadList[0]['postId'], 'artist-renamed-comments');
+
+        $request->flush();
+        $idList = $request->artistRole()->idList();
+        $this->assertEquals($renamed->id(), $idList[ARTIST_MAIN][0]['id'], 'artist-renamed-request');
+        $request->remove();
+
+        $this->tgroupList[0]->flush();
+        $idList = $this->tgroupList[0]->artistRole()->idList();
+        $this->assertEquals($renamed->id(), $idList[ARTIST_MAIN][0]['id'], 'artist-renamed-tgroup');
+
     }
 
     public function testArtistSimilar(): void {
