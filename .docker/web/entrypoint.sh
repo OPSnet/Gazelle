@@ -7,10 +7,11 @@ run_service()
     service "$1" start || exit 1
 }
 
+npm install -g npm@10.4.0
 if [ "$ENV" == "prod" ]; then
-    su -c 'composer --version && composer install --no-progress --no-dev --optimize-autoloader --no-suggest; yarn --prod; npx browserslist@latest --update-db; yarn prod' gazelle
+    su -c 'composer --version && composer install --no-progress --no-dev --optimize-autoloader --no-suggest; npm install -g npm@10.4.0; yarn --prod; npx update-browserslist-db@latest; yarn prod' gazelle
 else
-    su -c 'composer --version && composer install --no-progress; yarn; npx browserslist@latest --update-db; yarn dev' gazelle
+    su -c 'composer --version && composer install --no-progress; yarn; npx update-browserslist-db@latest; yarn dev' gazelle
 fi
 
 [ -f /var/www/lib/override.config.php ] || bash /var/www/.docker/web/generate-config.sh
