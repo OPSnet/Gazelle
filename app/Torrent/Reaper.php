@@ -461,6 +461,12 @@ class Reaper extends \Gazelle\Base {
         $prevTorrentId    = false;
         $longestTimeSpent = false;
         foreach ($seederList as [$torrentId, $timeSpent, $userId]) {
+            $torrent = $this->torMan->findById($torrentId);
+            $user    = $this->userMan->findById($userId);
+            if (is_null($torrent) || is_null($user) || $torrent->uploaderId() == $userId) {
+                // you cannot earn points from your own upload
+                continue;
+            }
             if ($longestTimeSpent === false) {
                 $longestTimeSpent = $timeSpent;
             }
@@ -468,11 +474,6 @@ class Reaper extends \Gazelle\Base {
                 $saved[] = $torrentId;
             }
             if ($timeSpent + 900 >= $longestTimeSpent) {
-                $torrent = $this->torMan->findById($torrentId);
-                $user    = $this->userMan->findById($userId);
-                if (is_null($torrent) || is_null($user)) {
-                    continue;
-                }
                 $win[] = [
                     $torrentId,
                     $userId,
