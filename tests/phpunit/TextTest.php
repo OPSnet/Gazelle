@@ -1,6 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 require_once(__DIR__ . '/../../lib/bootstrap.php');
 require_once(__DIR__ . '/../helper.php');
@@ -16,15 +17,12 @@ class TextTest extends TestCase {
         }
     }
 
-    // for phpunit v10: #[DataProvider('dataTeX')]
-    /**
-     * @dataProvider dataTeX
-     */
+    #[DataProvider('dataTeX')]
     public function testTeX(string $name, string $bbcode, string $expected): void {
         $this->assertEquals($expected, Text::full_format($bbcode), $name);
     }
 
-    public function dataTeX(): array {
+    public static function dataTeX(): array {
         return [
             ['text-tex-basic',  '[tex]some formula[/tex]',                '<katex>some formula</katex>'],
             ['text-tex-outer',  '[size=4][tex]some formula[/tex][/size]', '<span class="size4"><katex>some formula</katex></span>'],
@@ -32,10 +30,7 @@ class TextTest extends TestCase {
         ];
     }
 
-    // for phpunit v10: #[DataProvider('dataBB')]
-    /**
-     * @dataProvider dataBB
-     */
+    #[DataProvider('dataBB')]
     public function testBB(string $name, string $bbcode, string $expected): void {
         $this->userList['user'] = Helper::makeUser('bb.' . randomString(6), 'text');
         Text::setViewer($this->userList['user']);
@@ -43,8 +38,7 @@ class TextTest extends TestCase {
     }
 
     public static function dataBB(): array {
-        $url  = 'https://www.example.com/';
-
+        $url = 'https://www.example.com/';
         return [
             ["text-align-l",    "[align=left]o[/align]",         "<div style=\"text-align: left;\">o</div>"],
             ["text-artist",     "[artist]Frank Zappa[/artist]",  "<a href=\"artist.php?artistname=Frank+Zappa\">Frank Zappa</a>"],
@@ -200,7 +194,7 @@ class TextTest extends TestCase {
         $this->assertEquals(1, $forum->remove(), 'text-remove-forum');
     }
 
-    public function dataList(): array {
+    public static function dataList(): array {
         return [
             ['text-list-a', <<<END_BB
 [*] one
@@ -260,10 +254,7 @@ END_HTML],
         ];
     }
 
-    // for phpunit v10: #[DataProvider('dataList')]
-    /**
-     * @dataProvider dataList
-     */
+    #[DataProvider('dataList')]
     public function testList(string $name, string $bbcode, string $expected): void {
         $this->assertEquals($expected, Text::full_format($bbcode), $name);
     }
@@ -367,16 +358,13 @@ END_HTML;
         ];
     }
 
-    // for phpunit v10: #[DataProvider('dataSpan')]
-    /**
-     * @dataProvider dataSpan
-     */
+    #[DataProvider('dataSpan')]
     public function testSpanText(string $name, string $bbcode, string $expected): void {
         $this->assertEquals($expected, Text::span_format($bbcode), $name);
     }
 
     public function testUser(): void {
-        $username = 'user.' . randomString(6);
+        $username = 'text.' . randomString(6);
         $this->userList['user'] = Helper::makeUser($username, 'text');
         Text::setViewer($this->userList['user']);
 
@@ -387,7 +375,7 @@ END_HTML;
         $this->assertEquals("$url.", Text::full_format("@$username."), "text-user-3");
 
         $this->assertEquals(
-            "<span class=\"mature_blocked\" style=\"font-style: italic;\"><a href=\"wiki.php?action=article&amp;id=1063\">Mature content</a> has been blocked. You can choose to view mature content by editing your <a href=\"user.php?action=edit&amp;id={$this->userList['user']->id()}\">settings</a>.</span>",
+            "<span class=\"mature_blocked\" style=\"font-style: italic;\"><a href=\"wiki.php?action=article&amp;id=1063\">Mature content</a> has been blocked. You can choose to view mature content by editing your <a href=\"user.php?action=edit&amp;id=me\">settings</a>.</span>",
             Text::full_format("[mature]titties[/mature]"),
             "text-mature",
         );

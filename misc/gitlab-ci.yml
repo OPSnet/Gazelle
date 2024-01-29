@@ -54,9 +54,9 @@ e2e-tests:
     name: gazelle-e2e-testing
     entrypoint: [""]
   services:
-    - name: memcached:1.6.17-alpine
+    - name: memcached:1.6.23-alpine
       alias: memcached
-    - name: postgres:14.6-alpine
+    - name: postgres:14.10-alpine
       alias: postgres
     - name: percona:ps-8.0.29-21
       alias: mysql
@@ -111,7 +111,7 @@ e2e-tests:
     - /bin/bash "${CI_PROJECT_DIR}/.docker/web/bootstrap-yarn.sh"
     - yarn run cypress run || test "$WAIT_ON_FINISH"
     # note: phpcov has problems if .cov files are somewhere in the src tree
-    - su gazelle -c '/opt/bin/phpcov merge "/tmp/coverage" --text "/tmp/coverage/coverage.txt" && cat "/tmp/coverage/coverage.txt"'
+    - su gazelle -c 'vendor/bin/phpcov merge "/tmp/coverage" --text "/tmp/coverage/coverage.txt" && cat "/tmp/coverage/coverage.txt"'
     - test "$WAIT_ON_FINISH" && sleep 3600 || exit 0
 
 # Sonarqube main image: mc1arke/sonarqube-with-community-branch-plugin:9.5-community

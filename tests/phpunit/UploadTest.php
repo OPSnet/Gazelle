@@ -21,6 +21,9 @@ class UploadTest extends TestCase {
 
         $this->assertInstanceOf(\Gazelle\Upload::class, $upload->setCategoryId(CATEGORY_MUSIC), 'upload-music');
         $this->assertStringContainsString($this->user->auth(), $upload->head(), 'upload-head');
+
+        global $Viewer;
+        $Viewer = $this->user;
         $this->assertStringContainsString(
             '<input id="post" type="submit" value="Upload torrent" />',
             $upload->foot(true),

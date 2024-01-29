@@ -43,9 +43,10 @@
     "whichbrowser/parser": "^2.1.7"
   },
   "require-dev": {
-    "phpstan/phpstan": "^1.10.56",
-    "phpunit/php-code-coverage": "^9.2.30",
-    "phpunit/phpunit": "^9.6.16",
+    "phpstan/phpstan": "^1.10",
+    "phpunit/phpcov": "^9.0",
+    "phpunit/php-code-coverage": "^10",
+    "phpunit/phpunit": "^10",
     "rector/rector": "^0.19",
     "squizlabs/php_codesniffer": "^3"
   },
@@ -53,7 +54,7 @@
     "phpstan": "phpstan analyse",
     "test": [
         "Composer\\Config::disableProcessTimeout",
-        "phpunit"
+        "phpunit -c misc/phpunit.xml"
     ]
   }
 }

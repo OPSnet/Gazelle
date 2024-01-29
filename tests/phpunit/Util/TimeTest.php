@@ -3,21 +3,18 @@
 namespace Gazelle\Util;
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 class TimeTest extends TestCase {
-    /**
-     * @group no-ci
-     * These tests cause spurious errors when test execution takes too long.
-     *
-     * @dataProvider providerTimestamp
-     * @param $timestamp
-     * @param $expected
-     */
-    public function testTimeAgo($timestamp, $expected): void {
+    // These tests cause spurious errors when test execution takes too long.
+    #[Group('no-ci')]
+    #[DataProvider('providerTimestamp')]
+    public function testTimeAgo(string $timestamp, mixed $expected): void {
         $this->assertEquals($expected, Time::timeAgo($timestamp));
     }
 
-    public function providerTimestamp(): array {
+    public static function providerTimestamp(): array {
         return [
             ['not a valid timestamp', false],
             ['5', time() - 5],
@@ -26,17 +23,12 @@ class TimeTest extends TestCase {
         ];
     }
 
-    /**
-     * @param $hours
-     * @param $expected
-     *
-     * @dataProvider providerHours
-     */
-    public function testConvertHours($hours, $levels, $expected): void {
+    #[DataProvider('providerHours')]
+    public function testConvertHours(int $hours, int $levels, string $expected): void {
         $this->assertEquals($expected, Time::convertHours($hours, $levels, false));
     }
 
-    public function providerHours(): array {
+    public static function providerHours(): array {
         return [
             [0, 2, 'Never'],
             [-1, 2, 'Never'],

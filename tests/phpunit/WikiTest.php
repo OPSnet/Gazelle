@@ -1,6 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 require_once(__DIR__ . '/../../lib/bootstrap.php');
 require_once(__DIR__ . '/../helper.php');
@@ -28,7 +29,7 @@ class WikiTest extends TestCase {
         }
     }
 
-    public function providerAlias(): array {
+    public static function providerAlias(): array {
         return [
             ['alias', 'alias  ', 'wiki-clean-alias-trim'],
             ['alias', 'a.l=i+a-s', 'wiki-clean-alias-regexp'],
@@ -37,9 +38,7 @@ class WikiTest extends TestCase {
         ];
     }
 
-    /**
-     * @dataProvider providerAlias
-     */
+    #[DataProvider('providerAlias')]
     public function testNormalizeAlias(string $expected, string $input, string $message): void {
         $this->assertEquals($expected, \Gazelle\Wiki::normalizeAlias($input), $message);
     }

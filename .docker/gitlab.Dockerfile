@@ -123,9 +123,6 @@ RUN echo 'deb http://deb.debian.org/debian bullseye-backports main' > /etc/apt/s
     && apt-get autoremove \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
-    && mkdir /opt/bin \
-    && curl -fsSL https://phar.phpunit.de/phpcov-8.2.1.phar --output /opt/bin/phpcov \
-    && chmod +x /opt/bin/phpcov \
     && sed -i 's|START=no|START=yes|' /etc/default/sphinxsearch
 
 # add firefox for cypress

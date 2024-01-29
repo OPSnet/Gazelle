@@ -1,7 +1,7 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
-// use PHPUnit\Framework\Attributes\DataProvider;
+use \PHPUnit\Framework\TestCase;
+use \PHPUnit\Framework\Attributes\DataProvider;
 
 require_once(__DIR__ . '/../../lib/bootstrap.php');
 ini_set('memory_limit', '1G');
@@ -64,10 +64,7 @@ class SchedulerTest extends TestCase {
         );
     }
 
-    // for phpunit v10: #[DataProvider('taskProvider')]
-    /**
-     * @dataProvider taskProvider
-     */
+    #[DataProvider('taskProvider')]
     public function testTask(string $taskName): void {
         $scheduler = new Gazelle\TaskScheduler;
         ob_start();

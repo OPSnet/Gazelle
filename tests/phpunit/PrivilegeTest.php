@@ -1,6 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 require_once(__DIR__ . '/../../lib/bootstrap.php');
 require_once(__DIR__ . '/../helper.php');
@@ -92,9 +93,7 @@ class PrivilegeTest extends TestCase {
         ];
     }
 
-    /**
-     * @dataProvider privilegeProvider
-     */
+    #[DataProvider('privilegeProvider')]
     public function testPrivilegeSecondary(int $privilegeId, string $method, string $label): void {
         $user = $this->userList['user'];
         $privilege = new Gazelle\Privilege($privilegeId);
