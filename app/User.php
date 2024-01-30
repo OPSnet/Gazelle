@@ -170,7 +170,7 @@ class User extends BaseObject {
         }
 
         $this->info['CommentHash'] = sha1($this->info['AdminComment']);
-        $this->info['NavItems']    = array_map('trim', explode(',', $this->info['NavItems'] ?? ''));
+        $this->info['NavItems']    = empty($this->info['NavItems']) ? [] : explode(',', $this->info['NavItems']);
         $this->info['ParanoiaRaw'] = $this->info['Paranoia'];
         $this->info['Paranoia']    = $this->info['Paranoia'] ? unserialize($this->info['Paranoia']) : [];
         $this->info['SiteOptions'] = $this->info['SiteOptions'] ? unserialize($this->info['SiteOptions']) : [];
@@ -197,9 +197,9 @@ class User extends BaseObject {
     }
 
     /**
-     * Get the custom forum navigation configuration.
+     * Get the custom navigation configuration.
      */
-    public function forumNavList(): array {
+    public function navigationList(): array {
         return $this->info()['NavItems'];
     }
 

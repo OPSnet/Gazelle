@@ -6,5 +6,5 @@ if (!$Viewer->permitted('admin_manage_navigation')) {
 
 echo $Twig->render('admin/forum-navigation.twig', [
     'auth' => $Viewer->auth(),
-    'list' => (new Gazelle\Manager\User)->forumNavItemList(),
+    'list' => (new Gazelle\Manager\User)->userNavFullList(),
 ]);

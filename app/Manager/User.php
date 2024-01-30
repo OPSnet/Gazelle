@@ -1622,19 +1622,18 @@ class User extends \Gazelle\BaseManager {
         return $affected;
     }
 
-    public function forumNavItemUserList(\Gazelle\User $user): array {
-        $UserIds = $user->forumNavList();
-        $NavItems = $this->forumNavItemList();
+    public function userNavList(\Gazelle\User $user): array {
+        $navList = $user->navigationList();
         $list = [];
-        foreach ($NavItems as $n) {
-            if (($n['mandatory'] || in_array($n['id'], $UserIds)) || (!count($UserIds) && $n['initial'])) {
+        foreach ($this->userNavFullList() as $n) {
+            if ($n['mandatory'] || in_array($n['id'], $navList) || (!$navList && $n['initial'])) {
                 $list[] = $n;
             }
         }
         return $list;
     }
 
-    public function forumNavItemList(): array {
+    public function userNavFullList(): array {
         $list = self::$cache->get_value("nav_items");
         if (!$list) {
             $QueryID = self::$db->get_query_id();

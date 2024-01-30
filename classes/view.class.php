@@ -89,27 +89,19 @@ class View {
             }
         }
 
-        $parseNavItem = function ($val) {
-            $val = trim($val);
-            return $val === 'false' ? false : $val;
-        };
-
         $PageID = [$Document, $_REQUEST['action'] ?? false, $_REQUEST['type'] ?? false];
         $navLinks = [];
-        $navItems = (new Gazelle\Manager\User)->forumNavItemUserList($Viewer);
-        foreach ($navItems as $n) {
+        foreach ((new Gazelle\Manager\User)->userNavList($Viewer) as $n) {
             [$ID, $Key, $Title, $Target, $Tests, $TestUser, $Mandatory] = array_values($n);
             if (str_contains($Tests, ':')) {
-                $Parts = array_map('trim', explode(',', $Tests));
-                $Tests = [];
-
-                foreach ($Parts as $Part) {
-                    $Tests[] = array_map($parseNavItem, explode(':', $Part));
+                $testList = [];
+                foreach (array_map('trim', explode(',', $Tests)) as $Part) {
+                    $testList[] = array_map(fn ($t) => $t === 'false' ? false : $t, explode(':', $Part));
                 }
             } elseif (str_contains($Tests, ',')) {
-                $Tests = array_map($parseNavItem, explode(',', $Tests));
+                $testList = array_map(fn ($t) => $t === 'false' ? false : $t, explode(',', $Tests));
             } else {
-                $Tests = [$Tests];
+                $testList = [$Tests];
             }
             if ($Key === 'notifications' && !$Viewer->permitted('site_torrents_notify')) {
                 continue;
@@ -129,10 +121,10 @@ class View {
                 if ($activity->showStaffInbox()) {
                     $extraClass[] = 'new-subscriptions';
                 }
-                if (self::add_active($PageID, $Tests)) {
+                if (self::add_active($PageID, $testList)) {
                     $extraClass[] = 'active';
                 }
-            } elseif ($TestUser && $Viewer->id() != ($_REQUEST['userid'] ?? 0) && self::add_active($PageID, $Tests)) {
+            } elseif ($TestUser && $Viewer->id() != ($_REQUEST['userid'] ?? 0) && self::add_active($PageID, $testList)) {
                 $extraClass[] = 'active';
             }
             $navLinks[] = "<li id=\"nav_{$Key}\""

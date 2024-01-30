@@ -155,7 +155,7 @@ class UserTest extends TestCase {
         $this->assertEquals(1, $this->user->passwordCount(), 'utest-password-count');
     }
 
-    public function testUser(): void {
+    public function testUserBasic(): void {
         $this->assertEquals($this->user->username(), $this->user->flush()->username(), 'utest-flush-username');
 
         $this->assertEquals(0, $this->user->allowedPersonalCollages(), 'utest-personal-collages-allowed');
@@ -174,6 +174,7 @@ class UserTest extends TestCase {
         $this->assertEquals('', $this->user->forbiddenForumsList(), 'utest-forbidden-forum-list');
         $this->assertEquals([], $this->user->tagSnatchCounts(), 'utest-tag-snatch-counts');
         $this->assertEquals([], $this->user->tokenList(new \Gazelle\Manager\Torrent, 0, 0), 'utest-token-list');
+        $this->assertEquals([], $this->user->navigationList(), 'utest-navigation-list');
         $this->assertEquals(USER, $this->user->primaryClass(), 'utest-primary-class');
 
         $this->assertTrue($this->user->forumAccess(0, 0), 'utest-forum-access-low');

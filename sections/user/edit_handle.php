@@ -194,9 +194,8 @@ if ($Viewer->permitted('site_advanced_search')) {
     unset($Options['SearchType']);
 }
 
-$NavItems = $userMan->forumNavItemList();
 $UserNavItems = [];
-foreach ($NavItems as $n) {
+foreach ($userMan->userNavFullList() as $n) {
     if ($n['mandatory'] || (!empty($_POST["n_{$n['id']}"]) && $_POST["n_{$n['id']}"] == 'on')) {
         $UserNavItems[] = $n['id'];
     }
