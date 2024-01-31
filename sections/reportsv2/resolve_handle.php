@@ -16,23 +16,42 @@ if (!$Viewer->permitted('admin_reports')) {
 authorize();
 
 $fromReportPage = !isset($_POST['from_delete']);
+$reportTypeMan  = new Gazelle\Manager\Torrent\ReportType;
 $reportMan      = new Gazelle\Manager\Torrent\Report(new Gazelle\Manager\Torrent);
 $userMan        = new Gazelle\Manager\User;
 
 $report = $reportMan->findById((int)($_POST['reportid'] ?? 0));
 if (is_null($report)) {
-    json_die("failure", "error report id");
+    // torrent is being deleted using RM link
+    $torMan = new Gazelle\Manager\Torrent;
+    $torrent = $torMan->findById((int)($_POST['torrentid'] ?? 0));
+    if (is_null($torrent)) {
+        json_die("failure", "torrent not found");
+    }
+    $reportType = $reportTypeMan->findByType($_POST['resolve_type'] ?? '');
+    if (is_null($reportType)) {
+        json_die("failure", "bad report type");
+    }
+    $report = $reportMan->create(
+        torrent:     $torrent,
+        user:        $Viewer,
+        reportType:  $reportType,
+        irc:         new Gazelle\Util\Irc,
+        reason:      '',
+        otherIdList: '',
+    );
+} else {
+    $torrent = $report->torrent();
 }
 
-$torrent = $report->torrent();
 if (is_null($torrent)) {
     $report->moderatorResolve($Viewer, 'Report already dealt with (torrent deleted).');
-    $Cache->decrement_value('num_torrent_reportsv2');
+    $Cache->delete_value('num_torrent_reportsv2');
     json_die("failure", "torrent already deleted?");
 }
 $torrentId = $torrent->id();
 if (isset($_POST['delete']) && $torrent->hasUploadLock()) {
-    json_die("You requested to delete the torrent $torrentId, but this is currently not possible because the upload process is still running. Please try again later.");
+    json_die("failure", "You requested to delete the torrent $torrentId, but this is currently not possible because the upload process is still running. Please try again later.");
 }
 
 $modNote = trim($_POST['uploader_pm']);
@@ -66,6 +85,16 @@ if ($fromReportPage && !$report->moderatorResolve($Viewer, $_POST['comment'] ?? 
     exit;
 }
 
+if ($_POST['resolve_type'] != $report->type()) {
+    $reportType = $reportTypeMan->findByType($_POST['resolve_type'] ?? '');
+    if (is_null($reportType)) {
+        json_die("failure", "invalid report type");
+    }
+    $reportTypeName = $reportType->name();
+} else {
+    $reportTypeName = $report->reportType()->name();
+}
+
 $SendPM = false;
 if ($_POST['resolve_type'] === 'tags_lots') {
     $report->addTorrentFlag(TorrentFlag::badTag, $Viewer);
@@ -85,7 +114,6 @@ if ($_POST['resolve_type'] === 'tags_lots') {
 $adminMessage   = trim($_POST['admin_message']);
 $logMessage     = isset($_POST['log_message']) ? trim($_POST['log_message']) : null;
 $name           = $torrent->fullName() . ' (' . byte_format($torrent->size()) . ')';
-$reportTypeName = $report->reportType()->name();
 $uploader       = $torrent->uploader();
 
 //Log and delete
