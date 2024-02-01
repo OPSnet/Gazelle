@@ -76,7 +76,6 @@ $DisplayCustomTitle = !empty($User->title())
 
 View::show_header($Username, ['js' => 'jquery.imagesloaded,jquery.wookmark,user,bbcode,requests,lastfm,comments,info_paster', 'css' => 'tiles']);
 echo $Twig->render('user/header.twig', [
-    'badge_list' => $User->privilege()->badgeList(),
     'bonus'      => $userBonus,
     'donor'      => $donor,
     'freeleech'  => [
@@ -90,54 +89,15 @@ echo $Twig->render('user/header.twig', [
     'userMan'      => $userMan,
     'viewer'       => $Viewer,
 ]);
-?>
-        <div class="box box_info box_userinfo_personal">
-            <div class="head colhead_dark">Personal</div>
-            <ul class="stats nobullet">
-                <li>Class: <strong><?= $userMan->userclassName($Class) ?></strong></li>
-<?php if (($secondary = $User->privilege()->secondaryClassList())) { ?>
-                <li>
-                    <ul class="stats">
-<?php
-        asort($secondary);
-        foreach ($secondary as $id => $name) {
-            if ($id == DONOR && !$User->propertyVisible($Viewer, 'hide_donor_heart')) {
-                continue;
-            }
-?>
-                        <li><?= $name ?></li>
-<?php } ?>
-                    </ul>
-                </li>
-<?php
-}
+
 echo $Twig->render('user/sidebar.twig', [
     'applicant'     => new Gazelle\Manager\Applicant,
     'invite_source' => $Viewer->permitted('admin_manage_invite_source')
         ? (new Gazelle\Manager\InviteSource)->findSourceNameByUser($User) : null,
+    'next_class'    => $nextClass = $User->nextClass($userMan),
     'user'          => $User,
     'viewer'        => $Viewer,
 ]);
-?>
-            </ul>
-        </div>
-<?php
-if ($OwnProfile || $Viewer->permitted('users_mod')) {
-    $nextClass = $User->nextClass($userMan);
-    if ($nextClass) {
-?>
-        <div class="box box_info box_userinfo_nextclass">
-            <div class="head colhead_dark"><a href="wiki.php?action=article&amp;name=userclasses">Next Class</a></div>
-            <ul class="stats nobullet">
-                <li>Class: <?= $nextClass['class']?></li>
-<?php   foreach ($nextClass['goal'] as $label => $require) { ?>
-                <li><?= $label ?>: <?= $require['current'] ?> / <?= $require['target'] ?> (<?= $require['percent'] ?>)</li>
-<?php   } ?>
-            </ul>
-        </div>
-<?php
-    }
-}
 
 // Last.fm statistics and comparability
 $lastfmInfo = (new Gazelle\Util\LastFM)->userInfo($User);
@@ -354,38 +314,11 @@ if ($OwnProfile || !$User->hasAttr('hide-vote-recent') || $Viewer->permitted('vi
     ]);
 }
 
-$FirstCol = true;
-$Collages = (new Gazelle\Manager\Collage)->findPersonalByUser($User);
-foreach ($Collages as $collage) {
-?>
-    <table class="layout recent" id="collage<?=$collage->id()?>_box" cellpadding="0" cellspacing="0" border="0">
-        <tr class="colhead">
-            <td colspan="5">
-                <span style="float: left;">
-                    <?=html_escape($collage->name())?> - <a href="collages.php?id=<?=$collage->id()?>" class="brackets">See full</a>
-                </span>
-                <span style="float: right;">
-                    <a href="#" onclick="$('#collage<?=$collage->id()?>_box .images').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets"><?=$FirstCol ? 'Hide' : 'Show' ?></a>
-                </span>
-            </td>
-        </tr>
-        <tr class="images<?=$FirstCol ? '' : ' hidden'?>">
-<?php
-    $list = array_slice($collage->groupIds(), 0, 5);
-    foreach ($list as $tgroupId) {
-        $tgroup = $tgMan->findById($tgroupId);
-?>
-            <td>
-                <a href="torrents.php?id=<?= $tgroupId ?>">
-                    <img class="tooltip" title="<?= html_escape($tgroup->text()) ?>" src="<?= html_escape(image_cache_encode($tgroup->cover())) ?>" width="107" />
-                </a>
-            </td>
-<?php    } ?>
-        </tr>
-    </table>
-<?php
-    $FirstCol = false;
-}
+echo $Twig->render('user/collage-list.twig', [
+    'list'    => (new Gazelle\Manager\Collage)->findPersonalByUser($User),
+    'manager' => $tgMan,
+]);
+
 ?>
     <!-- for the "jump to staff tools" button -->
     <a id="staff_tools"></a>

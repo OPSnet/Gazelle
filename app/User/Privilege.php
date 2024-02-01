@@ -88,6 +88,7 @@ class Privilege extends \Gazelle\BaseUser {
                 }
             }
         }
+        asort($info['secondary']);
 
         // a custom privilege may revoke a primary or secondary grant
         foreach (unserialize($config['custom_privileges'] ?? '') ?: [] as $name => $value) {

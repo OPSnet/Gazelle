@@ -1,0 +1,27 @@
+{% for collage in list %}
+<table class="layout recent" id="collage{{ collage.id }}_box" cellpadding="0" cellspacing="0" border="0">
+    <tr class="colhead">
+        <td colspan="5">
+            <span style="float: left;">{{ collage.link|raw }}</span>
+    {{- dom.click("#cca-" ~ collage.id,
+        "$('#collage" ~ collage.id ~ "_box .images').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;")
+    -}}
+            <span style="float: right;">
+                <a href="#" id="cca-{{ collage.id }}" class="brackets">{% if loop.first %}Hide{% else %}Show{% endif %}</a>
+            </span>
+        </td>
+        </tr>
+    <tr class="images{% if not loop.first %} hidden{% endif %}">
+    {% for tgroup_id in collage.groupIds|slice(0, 5) %}
+        {% set tgroup = manager.findById(tgroup_id) %}
+        {% if tgroup %}
+        <td>
+            <a href="torrents.php?id={{ tgroup_id }}">
+                <img class="tooltip" title="{{ tgroup.text }}" src="{{ tgroup.cover|image_cache(width = 150) }}" width="107" />
+            </a>
+        </td>
+        {% endif %}
+    {% endfor %}
+    </tr>
+</table>
+{% endfor %}

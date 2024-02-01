@@ -1,8 +1,25 @@
-{% set own_profile = user.id == viewer.id %}
+<div class="box box_info box_userinfo_personal">
+    <div class="head colhead_dark">Personal</div>
+    <ul class="stats nobullet">
+        <li>Class: <strong>{{ user.userclassName }}</strong></li>
+{% for id, name in user.privilege.secondaryClassList %}
+    {% if loop.first %}
+        <li>
+            <ul class="stats">
+    {% endif %}
+    {% if id != constant('DONOR') or user.propertyVisible(viewer, 'hide_donor_heart') %}
+                <li>{{ name }}</li>
+    {% endif %}
+    {% if loop.last %}
+            </ul>
+        </li>
+    {% endif %}
+{% endfor %}
 
+{% set own_profile = user.id == viewer.id %}
     <li>Paranoia level: {{ user.paranoiaLabel }}</li>
 
-{% if own_profile or viewer.permitted('users_view_email') %}
+{%- if own_profile or viewer.permitted('users_view_email') %}
     <li>Email: <a href="mailto:{{ user.email }}">{{ user.email }}</a>
     {% if viewer.permitted('users_view_email') %}
     <a href="user.php?action=search&amp;email_history=on&amp;email={{ user.email }}" title="Search" class="brackets tooltip">S</a>
@@ -10,16 +27,16 @@
     </li>
 {% endif %}
 
-{% if viewer.permitted('users_view_ips') %}
+{%- if viewer.permitted('users_view_ips') %}
     {% include 'user/ip.twig' with {'user': user} %}
 {% endif %}
 
-{% if own_profile or viewer.permitted('users_view_keys') %}
+{%- if own_profile or viewer.permitted('users_view_keys') %}
     {{- dom.click("#passkey", "togglePassKey('" ~ user.announceKey ~ "'); return false;") -}}
     <li>Passkey: <a href="#" id="passkey" class="brackets">View</a></li>
 {% endif %}
 
-{% if viewer.permitted('users_view_invites') %}
+{%- if viewer.permitted('users_view_invites') %}
     <li>Invited by:
     {%- if not user.inviterId %}
         <i>Nobody</i>
@@ -37,7 +54,7 @@
     </li>
 {% endif %}
 
-{% if viewer.permitted('users_view_invites') or (own_profile and user.canPurchaseInvite) %}
+{%- if viewer.permitted('users_view_invites') or (own_profile and user.canPurchaseInvite) %}
     <li>Invites: {% if user.disableInvites %}<span title="Invites are disabled">X</span>{% else %}{{ user.unusedInviteTotal|number_format }}{% endif %}
     ({{ user.invite.pendingTotal|number_format }} in use)</li>
     {% set total = user.stats.invitedTotal %}
@@ -46,15 +63,31 @@
     </li>
 {% endif %}
 
-{% if own_profile or viewer.permitted('users_override_paranoia') %}
+{%- if own_profile or viewer.permitted('users_override_paranoia') %}
     <li>IRC Key: {{ user.IRCKey ? 'Yes' : 'Not set' }}</li>
 {% endif %}
 
-{% if applicant.userIsApplicant(user) and (own_profile or viewer.permitted('admin_manage_applicants')) %}
+{%- if applicant.userIsApplicant(user) and (own_profile or viewer.permitted('admin_manage_applicants')) %}
     <li>Roles applied for: <a href="/apply.php?action=view" class="brackets">View</a></li>
 {% endif %}
 
-{% if own_profile or viewer.permitted('users_mod') or viewer.isFLS %}
+{%- if own_profile or viewer.permitted('users_mod') or viewer.isFLS %}
     <li{% if not own_profile %} class="paranoia_override"{% endif %}>Torrent clients: {{ user.clients|join('; ') }}</li>
     <li{% if not own_profile %} class="paranoia_override"{% endif %}>Password age: {{ user.passwordAge|time_interval }}</li>
+{% endif %}
+
+</ul>
+</div>
+
+{%- if (own_profile or viewer.permitted('users_mod')) and next_class %}
+<div class="box box_info box_userinfo_nextclass">
+    <div class="head colhead_dark"><a href="wiki.php?action=article&amp;name=userclasses">Next Class</a></div>
+    <ul class="stats nobullet">
+        <li>Class: {{ next_class.class }}</li>
+    {% for label, require in next_class.goal %}
+        <li>{{ label }}: {% if label == 'Time' %}{{ require.current|time_diff }}{% else %}{{ require.current }}{% endif
+            %} / {{ require.target }} ({{ require.percent|raw }})</li>
+    {% endfor %}
+    </ul>
+</div>
 {% endif %}

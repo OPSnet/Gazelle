@@ -16,7 +16,7 @@
         {%- if user.isDisabled -%}
         &nbsp;<a href="rules.php"><img src="{{ constant('STATIC_SERVER') }}/common/symbols/disabled.png" alt="Banished" title="Naughty person" class="tooltip" /></a>
         {%- endif -%}
-        {% for badge, name in badge_list %}
+        {% for badge, name in user.privilege.badgeList %}
             <span class="tooltip secondary_class" title="{{ name }}">{{ badge }}</span>
         {% endfor %}
         {% if friend.isMutual(user.id) %}<span title="The feeling is mutual (awww!)">💕</span>

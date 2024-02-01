@@ -1810,7 +1810,7 @@ class User extends BaseObject {
                 'percent' => ratio_percent($download == 0 ? 1 : ($upload / $download) / $criteria['MinRatio']),
             ],
             'Time' => [
-                'current' => time_diff($this->created()),
+                'current' => $this->created(),
                 'target'  => "$week week" . plural($week),
                 'percent' => ratio_percent((time() - strtotime($this->created())) / ($criteria['Weeks'] * 7 * 86_400)),
             ],
