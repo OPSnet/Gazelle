@@ -4,15 +4,9 @@
   "type": "project",
   "license": "Unlicense",
   "authors": [
-    {
-      "name": "What.CD"
-    },
-    {
-      "name": "Apollo"
-    },
-    {
-      "name": "Orpheus"
-    }
+    { "name": "What.CD" },
+    { "name": "Apollo" },
+    { "name": "Orpheus" }
   ],
   "autoload": {
     "psr-4": {

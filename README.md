@@ -58,6 +58,12 @@ The Sysop account might not have all the permissions that have
 been added recently. Navigate to the /tools.php?action=userclass
 page and tick everything for the Sysop class.
 
+Once the Gazelle container has been built successfully, it may be
+stopped and subsequently restarted without requiring connectivity
+with the outside world. This also means that composer and yarn are
+not automatically updated during a container restart and is a manual
+chore to perform periodically.
+
 ### Ocelot
 The [ocelot](https://github.com/OPSnet/Ocelot) repository is used to build the
 Ocelot image. To keep things simple, check out the source in a sibling
