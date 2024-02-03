@@ -492,7 +492,9 @@ class Text {
             // Thus, we have to handle these before we handle the majority of tags
 
             //5a) Different for different types of tag. Some tags don't close, others are weird like [*]
-            if ($TagName == 'img' && !empty($Tag[3][0])) { //[img=...]
+            if ($i >= strlen($Str)) {
+                // document end, tag unclosed
+            } elseif ($TagName == 'img' && !empty($Tag[3][0])) { //[img=...]
                 $Block = ''; // Nothing inside this tag
                 // Don't need to touch $i
             } elseif ($TagName == 'hr') {

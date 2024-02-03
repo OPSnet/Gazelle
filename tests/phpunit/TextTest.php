@@ -248,6 +248,9 @@ END_HTML],
 END_BB, <<<END_HTML
 <ol class="postlist"><li>alpha</li><li>beta</li><li>delta</li></ol>
 END_HTML],
+            ['text-list-h', "[*]", <<<END_HTML
+<ul class="postlist"><li></li></ul>
+END_HTML],
         ];
     }
 
