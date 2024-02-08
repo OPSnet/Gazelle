@@ -9,11 +9,11 @@ if (!empty($_POST['name'])) {
     authorize();
     $manager->create(trim($_POST['name']));
 }
-$remove = array_keys(array_filter($_POST, fn($x) => preg_match('/^remove-\d+$/', $x), ARRAY_FILTER_USE_KEY));
+$remove = array_key_extract_suffix('remove-', $_POST);
 if ($remove) {
     authorize();
     foreach ($remove as $r) {
-        $manager->remove((int)explode('-', $r)[1]);
+        $manager->remove($r);
     }
 }
 

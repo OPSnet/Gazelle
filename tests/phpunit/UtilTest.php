@@ -24,6 +24,18 @@ class UtilTest extends TestCase {
             'array_trim_prefix-mixed'
         );
 
+        $this->assertEquals([], array_key_extract_suffix('zz-', []), 'array_extract_suffix-empty');
+        $this->assertEquals(
+            [14, 28],
+            array_key_extract_suffix('zz-', ['zz-14' => true, 'zz-28' => true, 'nope' => true]),
+            'array_extract_suffix-mixed'
+        );
+        $this->assertEquals(
+            [],
+            array_key_extract_suffix('zz-', ['abc' => true, 'def' => true, 'nope' => true]),
+            'array_extract_suffix-none'
+        );
+
         $this->assertEquals('',        display_str([]),       'display-str-array');
         $this->assertEquals('',        display_str(null),     'display-str-null');
         $this->assertEquals('',        display_str(false),    'display-str-false');

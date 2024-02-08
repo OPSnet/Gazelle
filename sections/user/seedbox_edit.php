@@ -23,46 +23,39 @@ $seedbox = new Gazelle\User\Seedbox($user);
 if (isset($_POST['mode'])) {
     switch ($_POST['mode']) {
         case 'update':
-            $id   = array_filter($_POST, fn($x) => preg_match('/^id-\d+$/', $x), ARRAY_FILTER_USE_KEY);
-            $ip   = array_filter($_POST, fn($x) => preg_match('/^ip-\d+$/', $x), ARRAY_FILTER_USE_KEY);
-            $name = array_filter($_POST, fn($x) => preg_match('/^name-\d+$/', $x), ARRAY_FILTER_USE_KEY);
-            $sig  = array_filter($_POST, fn($x) => preg_match('/^sig-\d+$/', $x), ARRAY_FILTER_USE_KEY);
-            $ua   = array_filter($_POST, fn($x) => preg_match('/^ua-\d+$/', $x), ARRAY_FILTER_USE_KEY);
-            if (count($id) != count($ip)) {
+            $idList   = array_key_extract_suffix('id-', $_POST);
+            $ipList   = array_key_extract_suffix('ip-', $_POST);
+            $nameList = array_key_extract_suffix('name-', $_POST);
+            $sigList  = array_key_extract_suffix('sig-', $_POST);
+            $uaList   = array_key_extract_suffix('ua-', $_POST);
+            if (count($idList) != count($ipList)) {
                 error("id/ip mismatch");
-            } elseif (count($id) != count($name)) {
+            } elseif (count($idList) != count($nameList)) {
                 error("id/name mismatch");
-            } elseif (count($id) != count($sig)) {
+            } elseif (count($idList) != count($sigList)) {
                 error("id/sig mismatch");
-            } elseif (count($id) != count($ua)) {
+            } elseif (count($idList) != count($uaList)) {
                 error("id/ua mismatch");
             }
             $update = [];
-            for ($i = 1, $end = count($name); $i <= $end; ++$i) {
-                if ($sig["sig-$i"] != $seedbox->signature($ip["ip-$i"], $ua["ua-$i"])) {
+            for ($i = 1, $end = count($nameList); $i <= $end; ++$i) {
+                if ($sigList[$i] != $seedbox->signature($ipList[$i], $uaList[$i])) {
                     error("ip/ua signature failed");
                 }
                 $update[] = [
-                    'id'   => $id["id-$i"],
-                    'name' => $name["name-$i"],
-                    'ipv4' => $ip["ip-$i"],
-                    'ua'   => $ua["ua-$i"],
+                    'id'   => $idList[$i],
+                    'name' => $nameList[$i],
+                    'ipv4' => $ipList[$i],
+                    'ua'   => $uaList[$i],
                 ];
             }
             $seedbox->updateNames($update);
             break;
         case 'remove':
-            $rm = array_map(
-                fn($x) => explode('-', $x)[1],
-                array_keys(
-                    array_filter($_POST, fn($x) => preg_match('/^rm-\d+$/', $x), ARRAY_FILTER_USE_KEY)
-                )
-            );
-            $rmid = array_filter($_POST, fn($x) => preg_match('/^rmid-\d+$/', $x), ARRAY_FILTER_USE_KEY);
             $remove = [];
-            foreach ($rm as $id) {
-                if (isset($rmid["rmid-$id"])) {
-                    $remove[] = $rmid["rmid-$id"];
+            foreach (array_key_extract_suffix('rm-', $_POST) as $id) {
+                if (isset($_POST["rmid-$id"])) {
+                    $remove[] = $_POST["rmid-$id"];
                 }
             }
             $seedbox->removeNames($remove);

@@ -4,17 +4,14 @@ if (!$Viewer->permitted('site_analysis')) {
     error(403);
 }
 
-$remove = array_map(
-    fn ($key) => (int)(explode('-', $key)[1]),
-    array_keys(array_filter($_POST, fn($x) => preg_match('/^clear-\d+$/', $x), ARRAY_FILTER_USE_KEY))
-);
-
 $errMan = new Gazelle\Manager\ErrorLog;
-$removed = -1;
+$remove = array_key_extract_suffix('clear-', $_POST);
 if ($remove) {
     $removed = $errMan->remove($remove);
 } elseif (isset($_POST['slow-clear'])) {
     $removed = $errMan->removeSlow((float)($_POST['slow'] ?? 60.0));
+} else {
+    $removed = -1;
 }
 
 if (isset($_REQUEST['filter']) && isset($_REQUEST['search'])) {

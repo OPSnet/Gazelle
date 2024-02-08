@@ -434,6 +434,27 @@ function array_trim_prefix(string $prefix, array $list): array {
 }
 
 /**
+ * Transform the keys of an array by matching those with a common prefix
+ * and return the suffix as an int. This is especially useful for
+ * collections of checkboxes in forms.
+ * E.g.: you have a list of user ids from a query, [77, 1010, 6189]
+ * These are rendered as checkboxes with values:
+ * "user-77", "user-1010" and "user-6189". When the form is submitted,
+ * the first checkbox is unchecked and the remaining two are checked.
+ * In this case, array_key_extract_suffix("user-", $_POST) returns
+ * [1010, 6189]
+ */
+function array_key_extract_suffix(string $prefix, array $list): array {
+    return array_map(
+        fn($v) => (int)explode('-', $v)[1],
+        array_filter(
+            array_keys($list),
+            fn($v) => str_starts_with($v, $prefix)
+        )
+    );
+}
+
+/**
  * Utility function that unserializes an array, and then if the unserialization fails,
  * it'll then return an empty array instead of a null or false which will break downstream
  * things that require an incoming array

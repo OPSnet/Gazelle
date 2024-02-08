@@ -4,18 +4,10 @@ if (!$Viewer->permitted('site_view_flow')) {
     error(403);
 }
 
-$extend = array_map(
-    fn($x) => intval(explode('-', $x)[1]),
-    array_keys(
-        array_filter(
-            $_POST,
-            fn($x) => preg_match('/^extend-\d+$/', $x), ARRAY_FILTER_USE_KEY
-        )
-    )
-);
-
 $affected = false;
 $reaper   = new Gazelle\Torrent\Reaper(new Gazelle\Manager\Torrent, new Gazelle\Manager\User);
+
+$extend = array_key_extract_suffix('extend-', $_POST);
 if ($extend) {
     authorize();
     $affected = $reaper->extendGracePeriod($extend, (int)$_POST['extension']);

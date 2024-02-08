@@ -7,9 +7,9 @@ if (!$Viewer->permittedAny('admin_rate_limit_view', 'admin_rate_limit_manage')) 
 $limiter = new Gazelle\Manager\UserclassRateLimit;
 if ($_POST) {
     authorize();
-    $remove = array_filter($_POST, fn($x) => preg_match('/^remove-\d+$/', $x), ARRAY_FILTER_USE_KEY);
+    $remove = array_key_extract_suffix('remove-', $_POST);
     if (count($remove) == 1) {
-        $limiter->remove((int)trim(array_keys($remove)[0], 'remove-'));
+        $limiter->remove($remove[0]);
     } elseif ($_POST['task'] === 'add') {
         $val = new Gazelle\Util\Validator;
         $val->setFields([

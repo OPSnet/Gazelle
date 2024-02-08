@@ -29,31 +29,18 @@ if ($inviteSourceMan && isset($_GET['edit'])) {
      */
 
     $update = [];
-    $userList = array_filter($_POST, fn($x) => preg_match('/^user-\d+$/', $x), ARRAY_FILTER_USE_KEY);
-    foreach ($userList as $fieldName => $fieldValue) {
-        if (!preg_match('/^user-(\d+)$/', $fieldName, $match)) {
-            continue;
-        }
-        $userId = (int)$match[1];
+    foreach (array_key_extract_suffix('user-', $_POST) as $userId) {
         if (!isset($update[$userId])) {
             $update[$userId] = ['user_id' => $userId];
         }
-        if ($fieldValue === '---') {
-            $update[$userId]['source'] = 0;
-        } elseif (preg_match('/^s-(\d+)$/', $fieldValue, $sourceMatch)) {
-            $update[$userId]['source'] = (int)$sourceMatch[1];
-        }
+        $source = $_POST["user-$userId"];
+        $update[$userId]['source'] = $source === '---' ? 0 : explode('-', $source)[1];
     }
-
-    $reasonList = array_filter($_POST, fn($x) => preg_match('/^reason-\d+$/', $x), ARRAY_FILTER_USE_KEY);
-    foreach ($reasonList as $fieldName => $profile) {
-        if (preg_match('/^reason-(\d+)$/', $fieldName, $match)) {
-            $userId = (int)$match[1];
-            if (!isset($update[$userId])) {
-                $update[$userId] = [];
-            }
-            $update[$userId]['profile'] = trim($profile);
+    foreach (array_key_extract_suffix('reason-', $_POST) as $userId) {
+        if (!isset($update[$userId])) {
+            $update[$userId] = [];
         }
+        $update[$userId]['profile'] = trim($_POST["reason-$userId"]);
     }
 
     /**

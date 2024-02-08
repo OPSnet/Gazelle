@@ -584,12 +584,8 @@ if ($needTrackerAdd) {
 }
 
 if (isset($_POST['invite_source_update'])) {
-    $source = array_keys(array_filter($_POST, fn($x) => preg_match('/^source-\d+$/', $x), ARRAY_FILTER_USE_KEY));
-    if ($source) {
-        $idList = [];
-        foreach ($source as $s) {
-            $idList[] = ((int)explode('-', $s)[1]);
-        }
+    $idList = array_key_extract_suffix('source-', $_POST);
+    if ($idList) {
         (new Gazelle\Manager\InviteSource)->modifyInviterConfiguration($user, $idList);
         header("Location: tools.php?action=invite_source");
         exit;

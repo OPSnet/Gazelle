@@ -27,12 +27,10 @@ if (isset($_REQUEST['id'])) {
                 $appMan->flush();
             }
         } else {
-            $remove = array_filter($_POST, fn ($x) => preg_match('/^note-delete-\d+$/', $x), ARRAY_FILTER_USE_KEY);
+            $remove = array_key_extract_suffix('note-delete-', $_POST);
             if (count($remove) == 1) {
                 authorize();
-                $app->removeNote(
-                    (int)trim(array_keys($remove)[0], 'note-delete-')
-                );
+                $app->removeNote($remove[0]);
             }
         }
     }

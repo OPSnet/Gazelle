@@ -29,7 +29,7 @@ if (isset($_REQUEST['id'])) {
             fn($type) => explode('-', $type)[1],
             array_filter(
                 array_keys($_REQUEST),
-                fn($checkbox) => preg_match('/^type-(?:collage|comment|post|request|thread|user)+$/', $checkbox)
+                fn($checkbox) => (bool)preg_match('/^type-(?:collage|comment|post|request|thread|user)+$/', $checkbox)
             )
         )
     );

@@ -255,8 +255,9 @@ $havingCondition = '';
 if (trim($_GET['search'] ?? '') !== '') {
     $join .= "INNER JOIN torrents_artists AS ta ON (ta.GroupID = t.GroupID)
         INNER JOIN artists_alias AS aa ON (aa.AliasID = ta.AliasID)";
-    $words = array_unique(array_filter(explode(' ', $_GET['search']), 'mb_strlen'));
-    if ($words) {
+    $search = trim($_GET['search']);
+    if (strlen($search)) {
+        $words = array_unique(explode(' ', $search));
         $havingColumns = ", aa.Name as aName, tg.Name as gName, tg.Year";
         $having[] = '('
             . implode(' OR ', array_fill(0, count($words),

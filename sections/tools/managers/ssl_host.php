@@ -6,14 +6,9 @@ if (!$Viewer->permitted('users_view_ips')) {
 
 $ssl = new Gazelle\Manager\SSLHost;
 
-$remove = array_map(
-    fn ($n) => explode('-', $n)[1],
-    array_keys(
-        array_filter($_POST, fn ($e) => preg_match('/^id-\d+$/', $e), ARRAY_FILTER_USE_KEY)
-    )
-);
-
+$remove = array_key_extract_suffix('id-', $_POST);
 if ($remove) {
+    authorize();
     $ssl->removeList($remove);
 }
 if (!empty($_POST['hostname']) && !empty($_POST['port'])) {
