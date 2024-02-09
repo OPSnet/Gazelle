@@ -85,7 +85,7 @@ if ($isSubscribed) {
 $userMan = new Gazelle\Manager\User;
 $avatarFilter = Gazelle\Util\Twig::factory()->createTemplate('{{ user|avatar(viewer)|raw }}');
 
-$transitions = $forumMan->threadTransitionList($Viewer, $forumId);
+$transitions = (new Gazelle\Manager\ForumTransition)->threadTransitionList($Viewer, $forum);
 $department = $forum->departmentList($Viewer);
 $auth = $Viewer->auth();
 
@@ -255,7 +255,7 @@ if ($Viewer->permitted('site_moderate_forums') || ($Viewer->writeAccess($forum) 
     ]);
 }
 
-if (count($transitions)) {
+if ($transitions) {
 ?>
     <table class="layout border">
         <tr>
@@ -267,8 +267,8 @@ if (count($transitions)) {
                     <input type="hidden" name="auth" value="<?=$auth?>" />
                     <input type="hidden" name="threadid" value="<?=$threadId?>" />
                     <input type="hidden" name="page" value="<?=$Page?>" />
-                    <input type="hidden" name="transition" value="<?=$transition['id']?>" />
-                    <input type="submit" value="<?=$transition['label']?>" />
+                    <input type="hidden" name="transition" value="<?= $transition->id() ?>" />
+                    <input type="submit" value="<?= $transition->label() ?>" />
                 </form>
 <?php } ?>
             </td>
@@ -277,7 +277,6 @@ if (count($transitions)) {
 <?php
 }
 if ($Viewer->permitted('site_moderate_forums')) {
-    $Notes = $thread->threadNotes();
 ?>
     <br />
     <h3 id="thread_notes">Thread notes</h3> <a href="#" onclick="$('#thread_notes_table').gtoggle(); return false;" class="brackets">Toggle</a>
@@ -286,7 +285,7 @@ if ($Viewer->permitted('site_moderate_forums')) {
         <input type="hidden" name="auth" value="<?=$auth?>" />
         <input type="hidden" name="threadid" value="<?=$threadId?>" />
         <table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border hidden" id="thread_notes_table">
-<?php foreach ($Notes as $Note) { ?>
+<?php foreach ($thread->threadNotes() as $Note) { ?>
             <tr><td><?=Users::format_username($Note['AuthorID'])?> (<?=time_diff($Note['AddedTime'], 2, true)?>)</td><td><?=Text::full_format($Note['Body'])?></td></tr>
 <?php } ?>
             <tr>
@@ -338,22 +337,20 @@ echo ' checked="checked"'; } ?> tabindex="6" />
                 <td>
                     <select name="forumid" id="move_thread_selector" tabindex="8">
 <?php
-    $OpenGroup = false;
-    $LastCategoryID = -1;
+    $prevCategoryId = 0;
     $Forums = (new Gazelle\Manager\Forum)->forumList();
     foreach ($Forums as $forumId) {
         $forum = new Gazelle\Forum($forumId);
         if (!$Viewer->readAccess($forum)) {
             continue;
         }
-
-        if ($forum->categoryId() != $LastCategoryID) {
-            $LastCategoryID = $forum->categoryId();
-            if ($OpenGroup) {
-                $OpenGroup = true;
+        if ($prevCategoryId != $forum->categoryId()) {
+            if ($prevCategoryId) {
 ?>
                     </optgroup>
-<?php       } ?>
+<?php       }
+            $prevCategoryId = $forum->categoryId();
+?>
                     <optgroup label="<?= $forum->categoryName() ?>">
 <?php   } ?>
                         <option value="<?= $forumId ?>"<?php if ($thread->forumId() == $forumId) {

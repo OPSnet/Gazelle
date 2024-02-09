@@ -14,6 +14,6 @@ if (!strlen($body)) {
     error("Thread note cannot be empty");
 }
 
-$thread->addThreadNote($Viewer->id(), $body);
+$thread->addThreadNote($Viewer, $body);
 
 header("Location: {$thread->location()}#thread_notes");

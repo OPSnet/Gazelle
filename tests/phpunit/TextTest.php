@@ -134,17 +134,13 @@ class TextTest extends TestCase {
         $this->userList['admin']->setField('PermissionID', SYSOP)->modify();
         Text::setViewer($this->userList['admin']);
         $name  = 'forum ' . randomString(6);
-        $forum = (new Gazelle\Manager\Forum)->create(
-            user: $this->userList['admin'],
-            sequence: 999,
-            categoryId: 1,
-            name: $name,
+        $category = (new \Gazelle\Manager\ForumCategory)->create($name, 10003);
+        $forum = Helper::makeForum(
+            user:        $this->userList['admin'],
+            sequence:    999,
+            category:    $category,
+            name:        $name,
             description: 'phpunit forum test',
-            minClassRead: 100,
-            minClassWrite: 100,
-            minClassCreate: 100,
-            autoLock: false,
-            autoLockWeeks: 52,
         );
         $this->assertInstanceOf(Gazelle\Forum::class, $forum, 'text-create-forum');
         $this->assertEquals(
@@ -192,6 +188,7 @@ class TextTest extends TestCase {
 
         $this->assertEquals(2, $thread->remove(), 'text-remove-thread');
         $this->assertEquals(1, $forum->remove(), 'text-remove-forum');
+        $category->remove();
     }
 
     public static function dataList(): array {

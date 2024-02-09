@@ -5,7 +5,6 @@ namespace Gazelle\Manager;
 class Forum extends \Gazelle\BaseManager {
     protected const CACHE_TOC_MAIN   = 'forum_toc_main';
     protected const CACHE_LIST       = 'forum_list';
-    protected const CACHE_TRANSITION = 'forum_transition';
     protected const ID_KEY           = 'zz_f_%d';
     protected const ID_THREAD_KEY    = 'zz_ft_%d';
     protected const ID_POST_KEY      = 'zz_fp_%d';
@@ -194,122 +193,6 @@ class Forum extends \Gazelle\BaseManager {
             }
         }
         return $userToc;
-    }
-
-    protected function flushTransition(): void {
-        self::$cache->delete_value(self::CACHE_TRANSITION);
-    }
-
-    public function createTransition(array $args): int {
-        self::$db->prepared_query("
-            INSERT INTO forums_transitions
-                   (source, destination, label, permission_levels, permission_class, permissions, user_ids)
-            VALUES (?,      ?,           ?,     ?,                 ?,                ?,           ?)
-            ", $args['source'], $args['destination'], $args['label'], $args['secondary_classes'],
-            $args['permission_class'], $args['permissions'], $args['user_ids']
-        );
-        $this->flushTransition();
-        return self::$db->inserted_id();
-    }
-
-    public function modifyTransition(array $args): int {
-        self::$db->prepared_query("
-            UPDATE forums_transitions SET
-                source = ?,
-                destination = ?,
-                label = ?,
-                permission_levels = ?,
-                permission_class = ?,
-                permissions = ?,
-                user_ids = ?
-            WHERE forums_transitions_id = ?
-            ", $args['source'], $args['destination'], $args['label'], $args['secondary_classes'],
-               $args['permission_class'], $args['permissions'], $args['user_ids'],
-               $args['id']
-        );
-        $this->flushTransition();
-        return self::$db->affected_rows();
-    }
-
-    public function removeTransition(int $id): int {
-        self::$db->prepared_query("
-            DELETE FROM forums_transitions WHERE forums_transitions_id = ?
-            ", $id
-        );
-        $this->flushTransition();
-        return self::$db->affected_rows();
-    }
-
-    public function forumTransitionList(\Gazelle\User $user): array {
-        $info = [];
-        $items = self::$cache->get_value(self::CACHE_TRANSITION);
-        if (!$items) {
-            $queryId = self::$db->get_query_id();
-            self::$db->prepared_query("
-                SELECT forums_transitions_id AS id, source, destination, label, permission_levels,
-                       permission_class, permissions, user_ids
-                FROM forums_transitions
-            ");
-            $items = self::$db->to_array('id', MYSQLI_ASSOC, false);
-            self::$db->set_query_id($queryId);
-            foreach ($items as &$i) {
-                // permission_class == primary class
-                // permission_levels == secondary classes
-                $i['user_ids'] = array_fill_keys(explode(',', $i['user_ids']), 1);
-                $i['permissions'] = array_fill_keys(explode(',', $i['permissions']), 1);
-                $i['permission_levels'] = array_fill_keys(explode(',', $i['permission_levels']), 1);
-                unset($i['user_ids'][''], $i['permissions'][''], $i['permission_levels']['']);
-            }
-            unset($i);
-            self::$cache->cache_value(self::CACHE_TRANSITION, $items, 0);
-        }
-
-        $userId = $user->id();
-        $info['EffectiveClass']  = $user->privilege()->effectiveClassLevel();
-        $userclassList = array_keys($user->privilege()->secondaryClassList());
-        $info['ExtraClasses']    = $userclassList;
-        $info['ExtraClassesOff'] = array_flip(array_map(fn ($i) => -$i, $userclassList));
-        $privilegeList = array_keys($user->privilege()->secondaryPrivilegeList());
-        $info['Permissions']     = $privilegeList;
-        $info['PermissionsOff']  = array_flip(array_map(fn ($i) => "-$i", $privilegeList));
-
-        return array_filter($items, function ($item) use ($info, $userId) {
-            if (count(array_intersect_key($item['permission_levels'], $info['ExtraClassesOff'])) > 0) {
-                return false;
-            }
-
-            if (count(array_intersect_key($item['permissions'], $info['PermissionsOff'])) > 0) {
-                return false;
-            }
-
-            if (count(array_intersect_key($item['user_ids'], [-$userId => 1])) > 0) {
-                return false;
-            }
-
-            if (count(array_intersect_key($item['permission_levels'], $info['ExtraClasses'])) > 0) {
-                return true;
-            }
-
-            if (count(array_intersect_key($item['permissions'], $info['Permissions'])) > 0) {
-                return true;
-            }
-
-            if (count(array_intersect_key($item['user_ids'], [$userId => 1])) > 0) {
-                return true;
-            }
-
-            if ($item['permission_class'] <= $info['EffectiveClass']) {
-                return true;
-            }
-
-            return false;
-        });
-    }
-
-    public function threadTransitionList(\Gazelle\User $user, int $forumId): array {
-        return array_filter($this->forumTransitionList($user),
-            fn ($t) => $t['source'] === $forumId
-        );
     }
 
     public function flushToc(): static {

@@ -386,31 +386,6 @@ parameters:
 			path: ../sections/error/index.php
 
 		-
-			message: "#^Parameter \\#2 \\$pinned of method Gazelle\\\\ForumThread\\:\\:editThread\\(\\) expects bool, bool\\|int given\\.$#"
-			count: 1
-			path: ../sections/forums/mod_thread.php
-
-		-
-			message: "#^Variable \\$newForum might not be defined\\.$#"
-			count: 1
-			path: ../sections/forums/mod_thread.php
-
-		-
-			message: "#^Variable \\$newUrl might not be defined\\.$#"
-			count: 1
-			path: ../sections/forums/mod_thread.php
-
-		-
-			message: "#^Variable \\$transition might not be defined\\.$#"
-			count: 1
-			path: ../sections/forums/mod_thread.php
-
-		-
-			message: "#^If condition is always false\\.$#"
-			count: 1
-			path: ../sections/forums/thread.php
-
-		-
 			message: "#^Variable \\$message might not be defined\\.$#"
 			count: 1
 			path: ../sections/recovery/pair.php

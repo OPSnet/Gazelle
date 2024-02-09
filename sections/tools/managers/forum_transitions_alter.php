@@ -5,12 +5,14 @@ if (!$Viewer->permitted('admin_manage_forums')) {
 }
 
 authorize();
-$forMan = new Gazelle\Manager\Forum;
+$manager = new Gazelle\Manager\ForumTransition;
+$transition = $manager->findById((int)($_POST['id'] ?? 0));
 
 if ($_POST['submit'] === 'Delete') {
-    if (!$forMan->removeTransition((int)$_POST['id'])) {
-        error(0);
+    if (is_null($transition)) {
+        error(404);
     }
+    $transition->remove();
 } else {
     $validator = new Gazelle\Util\Validator;
     $validator->setFields([
@@ -20,24 +22,47 @@ if ($_POST['submit'] === 'Delete') {
         ['permissions', false, 'string', 'The permissions have a max length of 50 characters', ['maxlength' => 50]],
     ]);
 
-    $P = array_map('trim', $_POST);
-    if (!$validator->validate($P)) {
+    $_POST = array_map('trim', $_POST);
+    if (!$validator->validate($_POST)) {
         error($validator->errorMessage());
     }
 
-    if (empty($P['permissions'])) {
-        $P['permissions'] = '';
+    $forumMan = new Gazelle\Manager\Forum;
+    $source = $forumMan->findById((int)$_POST['source']);
+    if (is_null($source)) {
+        error("no such source forum id: " . (int)$_POST['source']);
     }
-    if ($_POST['submit'] === 'Create') {
-        if (!$forMan->createTransition($P)) {
-            error(0);
-        }
-    } elseif ($_POST['submit'] === 'Edit') {
-        if (!$forMan->modifyTransition($P)) {
-            error(0);
-        }
+    $target = $forumMan->findById((int)$_POST['destination']);
+    if (is_null($target)) {
+        error("no such target forum id: " . (int)$_POST['source']);
+    }
 
+    if ($_POST['submit'] === 'Create') {
+        $manager->create(
+            $source,
+            $target,
+            $_POST['label'],
+            (int)$_POST['permission_class'],
+            $_POST['secondary_classes'],
+            $_POST['permissions'],
+            $_POST['user_ids']
+        );
+    } elseif ($_POST['submit'] === 'Edit') {
+        if (is_null($transition)) {
+            error(404);
+        }
+        $transition
+            ->setField('source',            $source->id())
+            ->setField('destination',       $target->id())
+            ->setField('label',             $_POST['label'])
+            ->setField('permission_levels', $_POST['secondary_classes'])
+            ->setField('permission_class',  $_POST['permission_class'])
+            ->setField('permissions',       $_POST['permissions'])
+            ->setField('user_ids',          $_POST['user_ids'])
+            ->modify();
     }
 }
 
-header('Location: tools.php?action=forum_transitions' . (isset($_REQUEST['userid']) ? "&userid={$_REQUEST['userid']}" : ''));
+header('Location: tools.php?action=forum_transitions'
+    . (isset($_REQUEST['userid']) ? "&userid={$_REQUEST['userid']}" : '')
+);

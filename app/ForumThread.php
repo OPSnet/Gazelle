@@ -240,7 +240,7 @@ class ForumThread extends BaseObject {
         return new ForumPost($postId);
     }
 
-    public function editThread(int $forumId, bool $pinned, int $rank, bool $locked, string $title): int {
+    public function editThread(Forum $forum, bool $pinned, int $rank, bool $locked, string $title): int {
         $oldForumId = $this->forumId();
         self::$db->prepared_query("
             UPDATE forums_topics SET
@@ -250,7 +250,7 @@ class ForumThread extends BaseObject {
                 IsLocked = ?,
                 Title    = ?
             WHERE ID = ?
-            ", $forumId, $pinned ? '1' : '0', $rank, $locked ? '1' : '0', trim($title),
+            ", $forum->id(), $pinned ? '1' : '0', $rank, $locked ? '1' : '0', trim($title),
             $this->id
         );
         $affected = self::$db->affected_rows();
@@ -258,8 +258,8 @@ class ForumThread extends BaseObject {
             if ($locked && $this->hasPoll()) {
                 $this->poll()->close()->modify();
             }
-            if ($forumId != $oldForumId) {
-                (new Forum($forumId))->adjust();
+            if ($forum->id() != $oldForumId) {
+                $forum->adjust();
             }
             $this->updateRoot(
                 ...self::$db->row("
@@ -314,12 +314,12 @@ class ForumThread extends BaseObject {
         return $affected;
     }
 
-    public function addThreadNote(int $userId, string $notes): int {
+    public function addThreadNote(?User $user, string $notes): int {
         self::$db->prepared_query("
             INSERT INTO forums_topic_notes
                    (TopicID, AuthorID, Body)
             VALUES (?,       ?,        ?)
-            ", $this->id, $userId, $notes
+            ", $this->id, (int)($user?->id()), $notes
         );
         return self::$db->inserted_id();
     }

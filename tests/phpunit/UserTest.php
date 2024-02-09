@@ -464,6 +464,14 @@ class UserTest extends TestCase {
         $this->assertNull($lastfm->username($this->user), 'lastfm-has-no-username');
     }
 
+    public function testSecondaryClass(): void {
+        $this->assertFalse($this->user->isFLS(), 'user-is-not-secondary-fls');
+        $this->user->privilege()->addSecondaryClass('First Line Support');
+        $this->assertTrue($this->user->isFLS(), 'user-is-secondary-fls');
+        $this->user->privilege()->removeSecondaryClass('First Line Support');
+        $this->assertFalse($this->user->isFLS(), 'user-is-no-longer-secondary-fls');
+    }
+
     public function testStats(): void {
         $eco = new \Gazelle\Stats\Economic;
         $eco->flush();

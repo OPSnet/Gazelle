@@ -125,7 +125,7 @@ class ForumPost extends BaseObject {
      * Pin/unpin a post in its thread
      */
     public function pin(User $user, bool $set): int {
-        $this->thread()->addThreadNote($user->id(), "Post {$this->id} " . ($set ? "pinned" : "unpinned"));
+        $this->thread()->addThreadNote($user, "Post {$this->id} " . ($set ? "pinned" : "unpinned"));
         self::$db->prepared_query("
             UPDATE forums_topics SET
                 StickyPostID = ?

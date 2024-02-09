@@ -3,6 +3,32 @@
 use Gazelle\Enum\UserStatus;
 
 class Helper {
+    public static function makeForum(
+        string                 $name,
+        string                 $description,
+        int                    $sequence,
+        \Gazelle\ForumCategory $category,
+        \Gazelle\User          $user,
+        int                    $minClassRead   = 100,
+        int                    $minClassWrite  = 100,
+        int                    $minClassCreate = 100,
+        bool                   $autoLock       = false,
+        int                    $autoLockWeeks  = 42,
+    ): \Gazelle\Forum {
+        return (new Gazelle\Manager\Forum)->create(
+            user:           $user,
+            sequence:       $sequence,
+            categoryId:     $category->id(),
+            name:           $name,
+            description:    $description,
+            minClassRead:   $minClassRead,
+            minClassWrite:  $minClassWrite,
+            minClassCreate: $minClassCreate,
+            autoLock:       $autoLock,
+            autoLockWeeks:  $autoLockWeeks,
+        );
+    }
+
     public static function makeRequestMusic(
         \Gazelle\User $user,
         string        $title,

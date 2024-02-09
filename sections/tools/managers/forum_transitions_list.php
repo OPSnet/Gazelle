@@ -57,7 +57,7 @@ $userId = $user->id();
 
 $forumMan = new Gazelle\Manager\Forum;
 $forumList = array_map(fn($f) => new Gazelle\Forum($f), $forumMan->forumList());
-$items = $forumMan->forumTransitionList($user);
+$items = (new Gazelle\Manager\ForumTransition)->userTransitionList($user);
 
 View::show_header('Forum Transitions');
 ?>
@@ -96,40 +96,39 @@ View::show_header('Forum Transitions');
 <?php
 $row = 'b';
 foreach ($items as $i) {
-    [$id, $source, $destination, $label, $secondaryClasses, $userClass, $permissions, $userIds] = array_values($i);
     $row = $row === 'a' ? 'b' : 'a';
 ?>
     <tr class="row<?=$row?>">
         <form class="manage_form" name="navitems" action="" method="post">
-            <input type="hidden" name="id" value="<?=$id?>" />
+            <input type="hidden" name="id" value="<?= $i->id() ?>" />
             <input type="hidden" name="action" value="forum_transitions_alter" />
             <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
             <td>
                 <select name="source">
-                    <?=forumList($forumList, $source)?>
+                    <?=forumList($forumList, $i->sourceId())?>
                 </select>
             </td>
             <td>
                 <select name="destination">
-                    <?=forumList($forumList, $destination)?>
+                    <?=forumList($forumList, $i->destinationId())?>
                 </select>
             </td>
             <td>
-                <input type="text" name="label" value="<?=$label?>" />
+                <input type="text" size="10" name="label" value="<?=$i->label() ?>" />
             </td>
             <td>
-                <input type="text" name="secondary_classes" value="<?= implode(',', array_keys($secondaryClasses)) ?>" />
+                <input type="text" size="10" name="secondary_classes" value="<?= implode(', ', $i->secondaryClassIdList()) ?>" />
             </td>
             <td>
                 <select name="permission_class">
-                    <?=classList($userClass)?>
+                    <?= classList($i->classLevel()) ?>
                 </select>
             </td>
             <td>
-                <input type="text" name="permissions" value="<?= implode(',', array_keys($permissions)) ?>" />
+                <input type="text" size="10" name="permissions" value="" />
             </td>
             <td>
-                <input type="text" name="user_ids" value="<?= implode(',', array_keys($userIds)) ?>" />
+                <input type="text" size="10" name="user_ids" value="<?= implode(', ', $i->userIdList()) ?>" />
             </td>
             <td>
                 <input type="submit" name="submit" value="Edit" />
@@ -156,10 +155,10 @@ foreach ($items as $i) {
                 </select>
             </td>
             <td>
-                <input type="text" name="label" />
+                <input size="10" type="text" name="label" />
             </td>
             <td>
-                <input type="text" name="secondary_classes" />
+                <input size="10" type="text" name="secondary_classes" />
             </td>
             <td>
                 <select name="permission_class">
@@ -167,10 +166,10 @@ foreach ($items as $i) {
                 </select>
             </td>
             <td>
-                <input type="text" name="permissions" />
+                <input size="10" type="text" name="permissions" />
             </td>
             <td>
-                <input type="text" name="user_ids" />
+                <input size="10" type="text" name="user_ids" />
             </td>
             <td>
                 <input type="submit" name="submit" value="Create" />

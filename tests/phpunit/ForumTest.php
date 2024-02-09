@@ -8,8 +8,10 @@ require_once(__DIR__ . '/../helper.php');
 class ForumTest extends TestCase {
     protected Gazelle\ForumCategory $category;
     protected Gazelle\Forum         $forum;
+    protected Gazelle\Forum         $extra;
     protected array                 $userList;
     protected array                 $threadList;
+    protected array                 $transitionList;
 
     public function setUp(): void {
         $this->userList = [
@@ -20,10 +22,18 @@ class ForumTest extends TestCase {
     }
 
     public function tearDown(): void {
+        if (isset($this->transitionList)) {
+            foreach ($this->transitionList as $transition) {
+                $transition->remove();
+            }
+        }
         if (isset($this->threadList)) {
             foreach ($this->threadList as $thread) {
                 $thread->remove();
             }
+        }
+        if (isset($this->extra)) {
+            $this->extra->remove();
         }
         $this->forum->remove();
         $this->category->remove();
@@ -32,7 +42,7 @@ class ForumTest extends TestCase {
         }
     }
 
-    public function testForum(): void {
+    public function testForumCreate(): void {
         // Forum Categories
         $fcatMan = new \Gazelle\Manager\ForumCategory;
         $initial = count($fcatMan->forumCategoryList()); // from phinx seeds
@@ -63,17 +73,15 @@ class ForumTest extends TestCase {
         $user         = $this->userList['user'];
         $userTocTotal = count($forumMan->tableOfContents($user));
         $forumName    = 'phpunit first forum';
-        $this->forum  = $forumMan->create(
+        $this->forum  = Helper::makeForum(
             user:           $admin,
             sequence:       150,
-            categoryId:     $this->category->id(),
+            category:       $this->category,
             name:           $forumName,
             description:    'This is where it happens',
             minClassRead:   100,
             minClassWrite:  200,
             minClassCreate: 300,
-            autoLock:       false,
-            autoLockWeeks:  42,
         );
         $this->assertEquals(1, $this->category->forumTotal(), 'forum-category-forum-total');
         $this->assertInstanceOf(\Gazelle\Forum::class, $this->forum, 'forum-is-forum');
@@ -102,10 +110,10 @@ class ForumTest extends TestCase {
         $find = $forumMan->findById($this->forum->id());
         $this->assertEquals($this->forum->id(), $find->id(), 'forum-forum-find');
 
-        $second = $forumMan->create(
+        $this->extra = Helper::makeForum(
             user:           $this->userList['admin'],
             sequence:       100,
-            categoryId:     $this->category->id(),
+            category:       $this->category,
             name:           'phpunit announcements',
             description:    'This is where it begins',
             minClassRead:   200,
@@ -118,14 +126,13 @@ class ForumTest extends TestCase {
         $nameList = $forumMan->nameList();
         $this->assertCount($initial + 2, $nameList, 'forum-name-list');
         $this->assertEquals($forumName, $nameList[$this->forum->id()]['Name'], 'forum-name-list-name-0');
-        $this->assertEquals($second->id(), $nameList[$second->id()]['id'], 'forum-name-list-id-1');
+        $this->assertEquals($this->extra->id(), $nameList[$this->extra->id()]['id'], 'forum-name-list-id-1');
 
         $idList = $forumMan->forumList();
         $this->assertCount($initial + 2, $idList, 'forum-id-list-count');
-        $this->assertTrue(in_array($second->id(), $idList), 'forum-id-list-sequence');
+        $this->assertTrue(in_array($this->extra->id(), $idList), 'forum-id-list-sequence');
         $this->assertCount($userTocTotal + 1, $forumMan->tableOfContents($user), 'forum-test-toc-user');
         $this->assertEquals(0, $forumMan->subscribedForumTotal($user), 'forum-subscribed-total-user');
-        $this->assertEquals(1, $second->remove(), 'forum-remove-forum');
 
         // Forum Threads
         $threadMan = new \Gazelle\Manager\ForumThread;
@@ -152,7 +159,7 @@ class ForumTest extends TestCase {
 
         // Forum Thread Notes
         $threadNote = 'this is a note';
-        $id = $thread->addThreadNote($admin->id(), $threadNote);
+        $id = $thread->addThreadNote($admin, $threadNote);
         $this->assertGreaterThan(0, $id, 'fthread-add-thread-note');
 
         $notes = $thread->threadNotes();
@@ -161,17 +168,15 @@ class ForumTest extends TestCase {
 
         // Forum ACLs
         $secretLevel = $admin->privilege()->effectiveClassLevel();
-        $secret = $forumMan->create(
+        $secret = Helper::makeForum(
             user:           $admin,
             sequence:       200,
-            categoryId:     $this->forum->categoryId(),
+            category:       $this->category,
             name:           'phpunit chit-chat',
             description:    'This is where mods chat',
             minClassRead:   $secretLevel,
             minClassWrite:  $secretLevel,
             minClassCreate: $secretLevel,
-            autoLock:       false,
-            autoLockWeeks:  52,
         );
 
         $user = $this->userList['user'];
@@ -277,17 +282,12 @@ class ForumTest extends TestCase {
 
     public function testForumAutoSub(): void {
         $this->category = (new \Gazelle\Manager\ForumCategory)->create('phpunit category', 10010);
-        $this->forum    = (new \Gazelle\Manager\Forum)->create(
-            user:           $this->userList['admin'],
-            sequence:       151,
-            categoryId:     $this->category->id(),
-            name:           'phpunit autosub forum',
-            description:    'This is where it autosubs',
-            minClassRead:   100,
-            minClassWrite:  100,
-            minClassCreate: 100,
-            autoLock:       false,
-            autoLockWeeks:  42,
+        $this->forum    = Helper::makeForum(
+            user:        $this->userList['admin'],
+            sequence:    151,
+            category:    $this->category,
+            name:        'phpunit autosub forum',
+            description: 'This is where it autosubs',
         );
 
         $user = $this->userList['user'];
@@ -348,17 +348,12 @@ class ForumTest extends TestCase {
         $forumMan       = new \Gazelle\Manager\Forum;
         $admin          = $this->userList['admin'];
         $user           = $this->userList['user'];
-        $this->forum    = $forumMan->create(
-            user:           $admin,
-            sequence:       151,
-            categoryId:     $this->category->id(),
-            name:           'phpunit warn forum',
-            description:    'This is where it warns',
-            minClassRead:   100,
-            minClassWrite:  100,
-            minClassCreate: 100,
-            autoLock:       false,
-            autoLockWeeks:  42,
+        $this->forum    = Helper::makeForum(
+            user:        $admin,
+            sequence:    151,
+            category:    $this->category,
+            name:        'phpunit warn forum',
+            description: 'This is where it warns',
         );
         $pmMan = new Gazelle\Manager\PM($user);
         foreach ($user->inbox()->messageList($pmMan, 1, 0) as $pm) {
@@ -396,20 +391,14 @@ class ForumTest extends TestCase {
 
     public function testForumPoll(): void {
         $this->category = (new \Gazelle\Manager\ForumCategory)->create('phpunit category', 10002);
-        $forumMan       = new \Gazelle\Manager\Forum;
         $admin          = $this->userList['admin'];
         $user           = $this->userList['user'];
-        $this->forum    = $forumMan->create(
+        $this->forum    = Helper::makeForum(
             user:           $admin,
             sequence:       151,
-            categoryId:     $this->category->id(),
+            category:       $this->category,
             name:           'phpunit poll forum',
             description:    'This is where it polls',
-            minClassRead:   100,
-            minClassWrite:  100,
-            minClassCreate: 100,
-            autoLock:       false,
-            autoLockWeeks:  42,
         );
 
         $this->threadList[] = $thread
@@ -453,20 +442,14 @@ class ForumTest extends TestCase {
 
     public function testPostPin(): void {
         $this->category = (new \Gazelle\Manager\ForumCategory)->create('phpunit category', 10002);
-        $forumMan       = new \Gazelle\Manager\Forum;
         $admin          = $this->userList['admin'];
         $user           = $this->userList['user'];
-        $this->forum    = $forumMan->create(
+        $this->forum    = Helper::makeForum(
             user:           $admin,
             sequence:       151,
-            categoryId:     $this->category->id(),
+            category:       $this->category,
             name:           'phpunit pin forum',
             description:    'This is where it pins',
-            minClassRead:   100,
-            minClassWrite:  100,
-            minClassCreate: 100,
-            autoLock:       false,
-            autoLockWeeks:  42,
         );
 
         $this->threadList[] = $thread
@@ -483,19 +466,13 @@ class ForumTest extends TestCase {
     public function testForumRender(): void {
         $name = 'phpunit category ' . randomString(6);
         $this->category = (new \Gazelle\Manager\ForumCategory)->create($name, 10002);
-        $forumMan       = new \Gazelle\Manager\Forum;
         $admin          = $this->userList['admin'];
-        $this->forum    = $forumMan->create(
+        $this->forum    = Helper::makeForum(
             user:           $admin,
             sequence:       153,
-            categoryId:     $this->category->id(),
+            category:       $this->category,
             name:           'phpunit render forum',
-            description:    'This is where it render',
-            minClassRead:   100,
-            minClassWrite:  100,
-            minClassCreate: 100,
-            autoLock:       false,
-            autoLockWeeks:  42,
+            description:    'This is where it renders',
         );
         $paginator = (new Gazelle\Util\Paginator(TOPICS_PER_PAGE, 1))->setTotal(1);
         global $Document, $SessionID, $Viewer; // to render header()
@@ -513,6 +490,74 @@ class ForumTest extends TestCase {
                 'viewer'      => $admin,
             ]),
             'forum-render-forum',
+        );
+    }
+
+    public function testForumTransition(): void {
+        $admin = $this->userList['admin'];
+        $user  = $this->userList['user'];
+        $this->category = (new \Gazelle\Manager\ForumCategory)->create('phpunit forum transition', 10005);
+        $this->forum = Helper::makeForum(
+            user:           $admin,
+            sequence:       153,
+            category:       $this->category,
+            name:           'phpunit forum transition a',
+            description:    'This is where it transitions',
+        );
+        $this->extra = Helper::makeForum(
+            user:           $admin,
+            sequence:       153,
+            category:       $this->category,
+            name:           'phpunit forum transition b',
+            description:    'This is where it also transitions',
+        );
+        $manager = new Gazelle\Manager\ForumTransition;
+        $transition = $manager->create(
+           source:           $this->forum,
+           destination:      $this->extra,
+           label:            'phpunit',
+           userClass:        $this->userList['admin']->classLevel(),
+           secondaryClasses: '',
+           privileges:       '',
+           userIds:          '',
+        );
+        $this->assertInstanceOf(\Gazelle\ForumTransition::class, $transition, 'forum-trans-create');
+        $this->assertEquals('phpunit', $transition->label(), 'forum-trans-label');
+        $this->assertEquals($this->forum->id(), $transition->sourceId(), 'forum-trans-source');
+        $this->assertEquals($this->extra->id(), $transition->destinationId(), 'forum-trans-dest');
+        $this->assertEquals($this->userList['admin']->classLevel(), $transition->classLevel(), 'forum-trans-class-level');
+        $this->assertCount(0, $transition->secondaryClassIdList(), 'forum-trans-empty-secondary');
+        $this->assertCount(0, $transition->userIdList(), 'forum-trans-empty-user-list');
+        $this->assertTrue($transition->hasUser($this->userList['admin']), 'forum-transition-has-admin');
+        $this->assertFalse($transition->hasUser($this->userList['user']), 'forum-transition-hasnt-user');
+        $this->assertEquals(1, $transition->remove(), 'forum-trans-remove');
+
+        $this->userList['FLS'] = Helper::makeUser('fls.' . randomString(10), 'forum');
+        $this->userList['specific'] = Helper::makeUser('spec.' . randomString(10), 'forum');
+        $this->transitionList[] = $manager->create(
+           source:           $this->forum,
+           destination:      $this->extra,
+           label:            'phpunit',
+           userClass:        $this->userList['admin']->classLevel(),
+           secondaryClasses: (string)FLS_TEAM,
+           privileges:       '',
+           userIds:          (string)$this->userList['specific']->id(),
+        );
+        (new Gazelle\User\Privilege($this->userList['FLS']))->addSecondaryClass('First Line Support');
+        $this->assertTrue($this->userList['FLS']->isFLS(), 'user-is-fls');
+        $this->assertTrue($this->transitionList[0]->hasUser($this->userList['FLS']), 'forum-transition-has-fls');
+        $this->assertTrue($this->transitionList[0]->hasUser($this->userList['specific']), 'forum-transition-has-specific');
+        $this->assertCount(
+            1,
+            $manager->userTransitionList($this->userList['specific']),
+            'forum-user-transition-list'
+        );
+        $list = $manager->threadTransitionList($this->userList['FLS'], $this->forum);
+        $this->assertCount(1, $list, 'thread-transition-list');
+        $this->assertEquals(
+            $this->transitionList[0]->id(),
+            $list[$this->transitionList[0]->id()]->id(),
+            'forum-thread-transition-list'
         );
     }
 }

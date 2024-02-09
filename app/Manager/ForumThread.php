@@ -81,7 +81,7 @@ class ForumThread extends \Gazelle\BaseManager {
 
             foreach ($ids as $id) {
                 $thread = $this->findById($id);
-                $thread->addThreadNote(0, 'Locked automatically by schedule');
+                $thread->addThreadNote(null, 'Locked automatically by schedule');
                 $thread->flush();
                 $thread->forum()->flush();
             }
