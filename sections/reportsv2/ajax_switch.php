@@ -42,7 +42,7 @@ $new = $reportMan->create(
 if ($other->uploaderId() != $Viewer->id()) {
     $other->uploader()->inbox()->createSystem(
         "One of your torrents has been reported",
-        $Twig->render('reportsv2/new.twig', [
+        $Twig->render('reportsv2/new.bbcode.twig', [
             'id'     => $other->id(),
             'title'  => $new->reportType()->name(),
             'reason' => $new->reason(),
