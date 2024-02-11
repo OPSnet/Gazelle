@@ -245,6 +245,7 @@ class Privilege extends \Gazelle\BaseManager {
             'admin_staffpm_stats' => 'View Staff PM stats',
             'admin_login_watch' => 'Manage login watch',
             'admin_site_debug' => 'Access debug information',
+            'admin_tracker' => 'Manage tracker configuration variables',
             'admin_schedule' => 'Run the site schedule',
             'admin_periodic_task_manage' => 'Manage scheduler',
             'admin_periodic_task_view' => 'View scheduler logs',

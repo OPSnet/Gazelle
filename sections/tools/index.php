@@ -145,8 +145,13 @@ switch ($_REQUEST['action']) {
         break;
 
     case 'ocelot':
+        // this is the callback for ocelot
         require_once('managers/ocelot.php');
         break;
+    case 'ocelot_info':
+        require_once('managers/ocelot_info.php');
+        break;
+
 
     case 'userclass':
         require_once('managers/userclass_list.php');
@@ -240,10 +245,6 @@ switch ($_REQUEST['action']) {
         break;
 
     //Data
-    case 'ocelot_info':
-        require_once('data/ocelot_info.php');
-        break;
-
     case 'registration_log':
         require_once('data/registration_log.php');
         break;

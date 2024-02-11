@@ -23,6 +23,21 @@ class TrackerTest extends TestCase {
     /**
      * @group no-ci
      */
+    public function testTrackerAnnounce(): void {
+        $tracker  = new \Gazelle\Tracker;
+        $interval = 1000 + random_int(0, 2000);
+        $jitter   = random_int(0, 500);
+        $this->assertTrue($tracker->modifyAnnounceInterval($interval), 'tracker-announce-modify-interval');
+        $this->assertTrue($tracker->modifyAnnounceJitter($jitter), 'tracker-announce-modify-jitter');
+
+        $info = $tracker->info();
+        $this->assertEquals($interval, $info['announce interval'], 'tracker-announce-interval');
+        $this->assertEquals($jitter, $info['announce jitter'], 'tracker-announce-jitter');
+    }
+
+    /**
+     * @group no-ci
+     */
     public function testTrackerStats(): void {
         $tracker = new \Gazelle\Tracker;
         $this->assertEquals([0, 0], $tracker->global_peer_count(), 'tracker-global-peer-count');
@@ -76,7 +91,7 @@ class TrackerTest extends TestCase {
         $this->assertFalse($tracker->last_error(), 'tracker-init');
 
         $info = $tracker->info();
-        $this->assertCount(18, $info, 'tracker-info');
+        $this->assertCount(21, $info, 'tracker-info');
 
         $this->user = Helper::makeUser('trk.' . randomString(10), 'tracker');
         $this->assertTrue($tracker->addUser($this->user), 'tracker-add-user');

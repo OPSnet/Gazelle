@@ -3,9 +3,11 @@
     <div class="header">
         <h2>Tracker info</h2>
     </div>
+{% if user_id and user_stats|length %}
     <div class="linkbox">
         <a href="?action={{ action }}" class="brackets" />Main stats</a>
     </div>
+{% endif %}
     <div class="sidebar">
         <div class="box box2">
             <div class="head"><strong>User stats</strong></div>
@@ -50,20 +52,68 @@
                 User id {{ user_id }} is not known to the tracker.
 {% elseif main_stats %}
     {% for key, value in main_stats %}
-                {%- if key in ["uptime", "version"] -%}
-                     {{ key }} {{ value }}
-                {%- elseif key starts with "bytes " -%}
-                    {{ value|octet_size }} {{ key }}
-                {%- else -%}
-                    {{ value|number_format }} {{ key }}
-                {%- endif %}
+                {%- if key not in ["announce interval", "announce jitter"] -%}
+                    {%- if key in ["uptime", "version"] -%}
+                         {{ key }} {{ value }}
+                    {%- elseif key starts with "bytes " -%}
+                        {{ value|octet_size }} {{ key }}
+                    {%- else -%}
+                        {{ value|number_format }} {{ key }}
+                    {%- endif %}
                 <br />
+                {%- endif %}
     {% endfor %}
 {% else %}
                 Failed to get tracker info
 {% endif %}
             </div>
         </div>
+{% if viewer.permitted('admin_tracker') %}
+        <div class="box box2">
+            <div class="pad">
+            <div>In this section you can control the frequency at which clients
+            report back to the tracker. The announce interval is the amount
+            of time that a client must wait before reporting. Jitter is used
+            to smear the announce times, to avoid regular thundering herds when
+            the tracker is paused for a long interval and then restarted.</div>
+            <br />
+            <div>It is expected that you understand the impact and know what
+            you are doing. If you trash the values by accident, the standard
+            settings are 30 minute (1800s) announce intervals and 3 minutes
+            (180s) jitter.</div>
+            <br />
+            <div>Changes made to these values will not persist across a restart
+            of the tracker.</div>
+            <br />
+            <form action="" method="post">
+            <table>
+            <tr>
+                <td class="label">Announce interval</td>
+                <td>
+                    <input type="number" size="7" name="interval" value="{{ main_stats["announce interval"] }}" />
+                    {{ main_stats["announce interval"]|time_compact }}
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Announce jitter</td>
+                <td>
+                    <input type="number" size="7" name="jitter" value="{{ main_stats["announce jitter"] }}" />
+                    {{ main_stats["announce jitter"]|time_compact }}
+                </td>
+            </tr>
+            <tr>
+                <td class="label">&nbsp;</td>
+                <td>
+                    <input type="hidden" name="action" value="ocelot_info" />
+                    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+                    <input type="submit" value="Modify" />
+                </td>
+            </tr>
+            </table>
+            </form>
+            </div>
+        </div>
+{% endif %}
     </div>
 </div>
 {{ footer() }}

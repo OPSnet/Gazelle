@@ -101,6 +101,18 @@ class Tracker extends Base {
         ]);
     }
 
+    public function modifyAnnounceInterval(int $interval): bool {
+        return $this->update_tracker('update_announce_interval', [
+            'new_announce_interval' => $interval,
+        ]);
+    }
+
+    public function modifyAnnounceJitter(int $interval): bool {
+        return $this->update_tracker('update_announce_jitter', [
+            'new_announce_jitter' => $interval,
+        ]);
+    }
+
     public function expireFreeleechTokens(string $payload): int {
         $clear = [];
         $expire = [];
