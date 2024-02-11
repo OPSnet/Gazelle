@@ -91,7 +91,7 @@ class View {
 
         $PageID = [$Document, $_REQUEST['action'] ?? false, $_REQUEST['type'] ?? false];
         $navLinks = [];
-        foreach ((new Gazelle\Manager\User)->userNavList($Viewer) as $n) {
+        foreach ((new Gazelle\Manager\UserNavigation)->userControlList($Viewer) as $n) {
             [$ID, $Key, $Title, $Target, $Tests, $TestUser, $Mandatory] = array_values($n);
             if (str_contains($Tests, ':')) {
                 $testList = [];

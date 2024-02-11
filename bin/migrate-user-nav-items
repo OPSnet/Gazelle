@@ -1,0 +1,24 @@
+#!/usr/bin/env php
+<?php
+
+require_once(__DIR__ . '/../lib/bootstrap.php');
+
+$db = Gazelle\DB::DB();
+
+$db->prepared_query("
+    SELECT UserID, NavItems FROM users_info WHERE NavItems != '';
+");
+
+$manager = new Gazelle\Manager\User;
+
+$n = 0;
+foreach ($db->to_array(false, MYSQLI_NUM, false) as [$id, $items]) {
+    $user = $manager->findById($id);
+    if (is_null($user)) {
+        continue;
+    }
+    $user->setField('nav_list', array_map('intval', explode(',', $items)))->modify();
+    ++$n;
+}
+
+echo  "migrated $n users\n";

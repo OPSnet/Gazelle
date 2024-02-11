@@ -1629,31 +1629,6 @@ class User extends \Gazelle\BaseManager {
         return $affected;
     }
 
-    public function userNavList(\Gazelle\User $user): array {
-        $navList = $user->navigationList();
-        $list = [];
-        foreach ($this->userNavFullList() as $n) {
-            if ($n['mandatory'] || in_array($n['id'], $navList) || (!$navList && $n['initial'])) {
-                $list[] = $n;
-            }
-        }
-        return $list;
-    }
-
-    public function userNavFullList(): array {
-        $list = self::$cache->get_value("nav_items");
-        if (!$list) {
-            $QueryID = self::$db->get_query_id();
-            self::$db->prepared_query("
-                SELECT id, tag, title, target, tests, test_user, mandatory, initial
-                FROM nav_items");
-            $list = self::$db->to_array("id", MYSQLI_ASSOC, false);
-            self::$cache->cache_value("nav_items", $list, 0);
-            self::$db->set_query_id($QueryID);
-        }
-        return $list;
-    }
-
     public function checkPassword(string $password): string {
         return $password === ''
             || (bool)self::$db->scalar("

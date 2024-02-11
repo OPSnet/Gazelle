@@ -195,13 +195,13 @@ if ($Viewer->permitted('site_advanced_search')) {
 }
 $user->setField('option_list', $option);
 
-$UserNavItems = [];
-foreach ($userMan->userNavFullList() as $n) {
-    if ($n['mandatory'] || (!empty($_POST["n_{$n['id']}"]) && $_POST["n_{$n['id']}"] == 'on')) {
-        $UserNavItems[] = $n['id'];
+$navList = [];
+foreach ((new Gazelle\Manager\UserNavigation)->fullList() as $n) {
+    if ($n['mandatory'] || isset($_POST["n_{$n['id']}"])) {
+        $navList[] = (int)$n['id'];
     }
 }
-$user->setField('nav_list', $UserNavItems);
+$user->setField('nav_list', $navList);
 
 (new Gazelle\Util\LastFM)->modifyUsername($user, trim($_POST['lastfm_username'] ?? ''));
 

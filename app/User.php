@@ -129,6 +129,7 @@ class User extends BaseObject {
                 um.Enabled,
                 um.Invites,
                 um.IRCKey,
+                um.nav_list,
                 um.Paranoia,
                 um.PassHash,
                 um.PermissionID,
@@ -171,6 +172,7 @@ class User extends BaseObject {
         }
 
         $this->info['CommentHash'] = sha1($this->info['AdminComment']);
+        $this->info['nav_list']    = json_decode($this->info['nav_list'], true);
         $this->info['NavItems']    = empty($this->info['NavItems']) ? [] : explode(',', $this->info['NavItems']);
         $this->info['ParanoiaRaw'] = $this->info['Paranoia'];
         $this->info['Paranoia']    = $this->info['Paranoia'] ? unserialize($this->info['Paranoia']) : [];
@@ -198,7 +200,7 @@ class User extends BaseObject {
     }
 
     /**
-     * Get the custom navigation configuration.
+     * Get the custom user link navigation configuration.
      */
     public function navigationList(): array {
         return $this->info()['NavItems'];
@@ -1047,11 +1049,13 @@ class User extends BaseObject {
 
         $userInfo = [];
         if ($this->field('nav_list') !== null) {
-            $userInfo['NavItems = ?'] = implode(',', $this->clearField('nav_list'));
+            $userInfo['NavItems = ?'] = implode(',', $this->field('nav_list'));
+            $this->setField('nav_list', json_encode($this->clearField('nav_list')));
         }
         if ($this->field('option_list') !== null) {
-            $userInfo['SiteOptions = ?'] = serialize($this->clearField('option_list'));
+            $userInfo['SiteOptions = ?'] = serialize($this->clearField('option_list')); // remove field
         }
+
         foreach (['AdminComment', 'BanDate', 'BanReason', 'PermittedForums', 'RestrictedForums', 'RatioWatchDownload'] as $field) {
             if ($this->field($field) !== null) {
                 $userInfo["$field = ?"] = $this->clearField($field);

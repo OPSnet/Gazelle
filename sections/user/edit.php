@@ -24,14 +24,14 @@ foreach (range(1, 4) as $level) {
         ];
     }
 }
-$navItems = $userMan->userNavFullList();
+$navList = (new Gazelle\Manager\UserNavigation)->fullList();
 
 echo $Twig->render('user/setting.twig', [
     'donor'           => $donor,
     'js'              => (new Gazelle\Util\Validator)->generateJS('userform'),
     'lastfm_username' => (new Gazelle\Util\LastFM)->username($user),
-    'nav_items'       => $navItems,
-    'nav_items_user'  => $user->navigationList() ?: array_keys(array_filter($navItems, fn($item) => $item['initial'])),
+    'nav_items'       => $navList,
+    'nav_items_user'  => $user->navigationList(),
     'notify_config'   => (new Gazelle\User\Notification($user))->config(),
     'profile'         => $profile,
     'release_order'   => $user->releaseOrder((new Gazelle\ReleaseType)->extendedList()),
