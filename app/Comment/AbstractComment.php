@@ -225,13 +225,6 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
         }
 
         self::$db->begin_transaction();
-
-        $success = parent::modify();
-        if (!$success) {
-            self::$db->rollback();
-            return false;
-        }
-
         $page = $this->page();
         self::$db->prepared_query("
             INSERT INTO comments_edits
@@ -239,6 +232,11 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
             VALUES (?,    ?,      ?,    ?)
             ", $page, $this->id, $body, $this->field('EditedUserID')
         );
+        $success = parent::modify();
+        if (!$success) {
+            self::$db->rollback();
+            return false;
+        }
         self::$db->commit();
 
         $commentPage = (int)self::$db->scalar("

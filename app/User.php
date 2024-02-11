@@ -141,6 +141,7 @@ class User extends BaseObject {
                 um.Visible,
                 um.2FA_Key,
                 ui.AdminComment,
+                ui.BanDate,
                 ui.NavItems,
                 ui.RatioWatchEnds,
                 ui.RatioWatchDownload,
@@ -372,6 +373,10 @@ class User extends BaseObject {
             ];
         }
         return $this->avatarCache[$viewedId];
+    }
+
+    public function banDate(): ?string {
+        return $this->info()['BanDate'];
     }
 
     public function bonusPointsTotal(): int {
@@ -1040,23 +1045,45 @@ class User extends BaseObject {
             $this->staffNote = [];
         }
 
-        $leechSet = [];
-        $leechArgs = [];
+        $userInfo = [];
+        if ($this->field('nav_list') !== null) {
+            $userInfo['NavItems = ?'] = implode(',', $this->clearField('nav_list'));
+        }
+        if ($this->field('option_list') !== null) {
+            $userInfo['SiteOptions = ?'] = serialize($this->clearField('option_list'));
+        }
+        foreach (['AdminComment', 'BanDate', 'BanReason', 'PermittedForums', 'RestrictedForums', 'RatioWatchDownload'] as $field) {
+            if ($this->field($field) !== null) {
+                $userInfo["$field = ?"] = $this->clearField($field);
+            }
+        }
+        $now = [];
+        foreach (['BanDate', 'RatioWatchEnds'] as $field) {
+            if ($this->clearField($field)) {
+                $now[] = "$field = now()";
+            }
+        }
+        if ($userInfo || $now) {
+            $columns = implode(', ', [...array_keys($userInfo), ...$now]);
+            self::$db->prepared_query("
+                UPDATE users_info SET $columns WHERE UserID = ?
+                ", ...[...array_values($userInfo), $this->id]
+            );
+            $changed = $changed || self::$db->affected_rows() === 1;
+        }
+
+        $leech = [];
         if ($this->field('leech_upload') !== null) {
-            $leechSet[] = 'Uploaded = ?';
-            $leechArgs[] = $this->clearField('leech_upload');
+            $leech['Uploaded = ?'] = $this->clearField('leech_upload');
         }
         if ($this->field('leech_download') !== null) {
-            $leechSet[] = 'Downloaded = ?';
-            $leechArgs[] = $this->clearField('leech_download');
+            $leech['Downloaded = ?'] = $this->clearField('leech_download');
         }
-        if ($leechSet) {
-            $leechArgs[] = $this->id;
+        if ($leech) {
+            $columns = implode(', ', array_keys($leech));
             self::$db->prepared_query("
-                UPDATE users_leech_stats
-                SET " . implode(', ', $leechSet) . "
-                WHERE UserID = ?
-                ", ...$leechArgs
+                UPDATE users_leech_stats SET $columns WHERE UserID = ?
+                ", ...[...array_values($leech), $this->id]
             );
             $changed = $changed || self::$db->affected_rows() === 1;
         }
@@ -1079,6 +1106,7 @@ class User extends BaseObject {
             }
             $changed = $changed || self::$db->affected_rows() === 1;
         }
+
         if (parent::modify() || $changed) {
             $this->flush(); // parent::modify() may have done a flush() but it's too much code to optimize this second call away
             return true;

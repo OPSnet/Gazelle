@@ -164,10 +164,6 @@ if ($visible != $user->isVisible() && $Viewer->permitted('users_make_invisible')
     $editSummary[] = 'swarm visibility ' . ($visible ? 'on' : 'off');
 }
 
-// For the users_info update
-$set = [];
-$args = [];
-
 if ($slogan != $user->slogan() && ($Viewer->permitted('admin_manage_fls') || $ownProfile)) {
     $user->setField('slogan', $slogan);
     $editSummary[] = "First-Line Support status changed to \"$slogan\"";
@@ -363,8 +359,7 @@ foreach ($restricted as $forumId) {
 }
 $restrictedForums = implode(',', $restrictedIds);
 if ($restrictedForums != $cur['RestrictedForums']) {
-    $set[] = "RestrictedForums = ?";
-    $args[] = $restrictedForums;
+    $user->setField('RestrictedForums', $restrictedForums);
     $editSummary[] = "prohibited forum(s): " . ($restrictedForums == '' ? 'none' : implode(', ', $restrictedNames));
 }
 
@@ -381,8 +376,7 @@ foreach ($permitted as $forumId) {
 }
 $permittedForums = implode(',', $permittedIds);
 if ($permittedForums != $cur['PermittedForums']) {
-    $set[] = "PermittedForums = ?";
-    $args[] = $permittedForums;
+    $user->setField('PermittedForums', $permittedForums);
     $editSummary[] = "permitted forum(s): " . ($permittedForums == '' ? 'none' : implode(', ', $permittedNames));
 }
 
@@ -484,21 +478,18 @@ if ($userStatus != $user->userStatus() && $Viewer->permitted('users_disable_user
     } elseif ($userStatus == UserStatus::enabled) {
         $needTrackerAdd = true;
         if (($user->downloadedSize() == 0) || ($user->uploadedSize() / $user->downloadedSize() >= $user->requiredRatio())) {
-            $user->setField('can_leech', 1);
-            $set[] = "RatioWatchEnds = ?";
-            $args[] = null;
-            $set[] = "RatioWatchDownload = ?";
-            $args[] = '0';
+            $user->setField('can_leech', 1)
+                ->setField('RatioWatchEnds', null)
+                ->setField('RatioWatchDownload', 0);
         } else {
             $enableStr .= ' (Ratio: ' . ratio_html($user->uploadedSize(), $user->downloadedSize(), false) . ', RR: ' . number_format($user->requiredRatio(), 2) . ')';
             if ($cur['RatioWatchEnds']) {
-                $set[] = "RatioWatchEnds = now()";
-                $set[] = "RatioWatchDownload = ?";
-                $args[] = $user->downloadedSize();
+                $user->setField('can_leech', 1)
+                    ->setField('RatioWatchDownload', $user->downloadedSize())
+                    ->setFieldNow('RatioWatchEnds');
             }
         }
-        $set[] = "BanReason = ?";
-        $args[] = '0';
+        $user->setField('BanReason', 0);
     }
     $user->setField('Enabled', $userStatus->value);
     $editSummary[] = $enableStr;
@@ -545,7 +536,7 @@ if ($changePassword && $Viewer->permitted('users_edit_password')) {
     $editSummary[] = 'password reset';
 }
 
-if (!(count($set) || count($editSummary)) && $reason) {
+if (!(count($editSummary)) && $reason) {
     $editSummary[] = 'notes added';
 }
 
@@ -554,23 +545,14 @@ if (!(count($set) || count($editSummary)) && $reason) {
 // we do have a bug where if a mod changes something about a user AND changes the admin comment, we will lose
 // that change, but until we never decode stuff coming out of the DB, not much can be done.
 
-if (count($editSummary)) {
+if ($editSummary) {
     $summary = implode(', ', $editSummary) . ' by ' . $Viewer->username();
-    $set[] = "AdminComment = ?";
-    $args[] = Time::sqlTime() . ' - ' . ucfirst($summary) . ($reason ? "\nReason: $reason" : '') . "\n\n$adminComment";
-} elseif ($adminComment !== $cur['admincomment']) {
-    $set[] = "AdminComment = ?";
-    $args[] = $adminComment;
-}
-
-if ($set) {
-    $args[] = $userId;
-    Gazelle\DB::DB()->prepared_query("
-        UPDATE users_info
-        SET " .  implode(', ', $set) . "
-        WHERE UserID = ?
-        ", ...$args
+    $user->setField(
+        'AdminComment',
+        Time::sqlTime() . ' - ' . ucfirst($summary) . ($reason ? "\nReason: $reason" : '') . "\n\n$adminComment"
     );
+} elseif ($adminComment !== $cur['admincomment']) {
+    $user->setField('AdminComment', $adminComment);
 }
 
 if ($removedClasses) {

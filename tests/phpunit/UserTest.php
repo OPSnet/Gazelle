@@ -30,15 +30,11 @@ class UserTest extends TestCase {
         }
     }
 
-    public function modifyAvatarRender(AvatarDisplay $display, AvatarSynthetic $synthetic): int {
-        $db = Gazelle\DB::DB();
-        $db->prepared_query("
-            UPDATE users_info SET SiteOptions = ? WHERE UserID = ?
-            ", serialize(['DisableAvatars' => $display->value, 'Identicons' => $synthetic->value]), $this->user->id()
-        );
-        $affected = $db->affected_rows();
-        $this->user->flush();
-        return $affected;
+    public function modifyAvatarRender(AvatarDisplay $display, AvatarSynthetic $synthetic): bool {
+        return $this->user->setField('option_list', [
+                'DisableAvatars' => $display->value,
+                'Identicons'     => $synthetic->value
+            ])->modify();
     }
 
     public function testUserFind(): void {
@@ -224,6 +220,11 @@ class UserTest extends TestCase {
         $this->user->addStaffNote('phpunit staff note')->modify();
         $this->assertStringContainsString('phpunit staff note', $this->user->staffNotes(), 'utest-staff-note');
 
+        $notes = $this->user->staffNotes();
+        $new   = "\n" . randomString(20);
+        $this->assertTrue($this->user->setField('AdminComment', $notes . $new)->modify());
+        $this->assertEquals($notes . $new, $this->user->staffNotes());
+
         $this->assertFalse($this->user->setTitle(str_repeat('x', USER_TITLE_LENGTH + 1)), 'utest-title-too-long');
         $this->assertTrue($this->user->setTitle('custom title'), 'utest-set-title');
         $this->user->modify();
@@ -256,7 +257,7 @@ class UserTest extends TestCase {
         );
 
         // defeat the avatar cache
-        $this->assertEquals(1, $this->modifyAvatarRender(AvatarDisplay::none, AvatarSynthetic::robot1), 'utest-avatar-update-none');
+        $this->assertTrue($this->modifyAvatarRender(AvatarDisplay::none, AvatarSynthetic::robot1), 'utest-avatar-update-none');
         $this->assertEquals(AvatarDisplay::none, $this->user->avatarMode(), 'utest-has-avatar-none');
         $new = $userMan->findById($this->user->id());
         $this->assertEquals(USER_DEFAULT_AVATAR, $new->avatarComponentList($this->user->flush())['image'], 'utest-avatar-none');
@@ -267,10 +268,10 @@ class UserTest extends TestCase {
         $new = $userMan->findById($this->user->id());
         $this->assertEquals(USER_DEFAULT_AVATAR, $new->avatarComponentList($this->user->flush())['image'], 'utest-avatar-override-none');
 
-        $this->assertEquals(1, $this->modifyAvatarRender(AvatarDisplay::forceSynthetic, AvatarSynthetic::identicon), 'utest-avatar-update-synthetic-identicon');
+        $this->assertTrue($this->modifyAvatarRender(AvatarDisplay::forceSynthetic, AvatarSynthetic::identicon), 'utest-avatar-update-synthetic-identicon');
         $this->assertEquals(AvatarDisplay::forceSynthetic, $this->user->flush()->avatarMode(), 'utest-clone-avatar-forceSynthetic');
 
-        $this->assertEquals(1, $this->modifyAvatarRender(AvatarDisplay::show, AvatarSynthetic::robot1), 'utest-avatar-update-show');
+        $this->assertTrue($this->modifyAvatarRender(AvatarDisplay::show, AvatarSynthetic::robot1), 'utest-avatar-update-show');
         $new = $userMan->findById($this->user->id());
         $this->assertEquals('https://www.example.com/avatar.jpg', $new->avatarComponentList($this->user->flush())['image'], 'utest-avatar-show');
     }

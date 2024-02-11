@@ -7,6 +7,7 @@ abstract class BaseObject extends Base {
     public const pkName    = 'ID';
 
     protected array $updateField; // used to store field updates
+    protected array $nowField;    // used to store fields that must be updated to now()
     protected User  $updateUser;  // user performing the updates
 
     protected array $info;
@@ -42,7 +43,7 @@ abstract class BaseObject extends Base {
     }
 
     public function dirty(): bool {
-        return !empty($this->updateField);
+        return isset($this->updateField) || isset($this->nowField);
     }
 
     /**
@@ -65,6 +66,14 @@ abstract class BaseObject extends Base {
     }
 
     /**
+     * Fields that need to set to now() when updated.
+     */
+    public function setFieldNow(string $field): mixed {
+        $this->nowField[$field] = true;
+        return $this;
+    }
+
+    /**
      * Fetch the value of a table field to be updated. Returns null if
      * either the field does not exists, or it does and is set to null :)
      * If ever this is a problem, you can always clearField() which
@@ -77,12 +86,24 @@ abstract class BaseObject extends Base {
     /**
      * Remove a field from the update. This is useful in a derived class
      * when an auxillary table needs to be update with this value.
-     * @return mixed the contents of the field, or null
+     * If the field is to be set to now(), the name of the field is returned.
+     * @return mixed the contents of the field, the name of the field, or null
      */
     public function clearField(string $field): mixed {
+        if (isset($this->nowField[$field])) {
+            unset($this->nowField[$field]);
+            if (empty($this->nowField)) {
+                // if the array is merely empty, the dirty() method will return true
+                unset($this->nowField);
+            }
+            return $field;
+        }
         if (isset($this->updateField[$field])) {
             $value = $this->updateField[$field];
             unset($this->updateField[$field]);
+            if (empty($this->updateField)) {
+                unset($this->updateField);
+            }
             return $value;
         }
         return null;
@@ -92,14 +113,26 @@ abstract class BaseObject extends Base {
         if (!$this->dirty()) {
             return false;
         }
-        $set = implode(', ', [...array_map(fn($f) => "$f = ?", array_keys($this->updateField))]);
-        $args = [...array_values($this->updateField)];
+        if (!isset($this->updateField)) {
+            $set = [];
+            $args = [];
+        } else {
+            $set = array_map(fn($f) => "$f = ?", array_keys($this->updateField));
+            $args = array_values($this->updateField);
+        }
+        if (isset($this->nowField)) {
+            foreach (array_keys($this->nowField) as $field) {
+                $set[] = "$field = now()";
+            }
+        }
         $args[] = $this->id();
         self::$db->prepared_query(
-            "UPDATE " . static::tableName . " SET $set WHERE " . static::pkName . " = ?",
+            "UPDATE " . static::tableName . " SET " . implode(', ', $set) . " WHERE " . static::pkName . " = ?",
             ...$args
         );
         $success = (self::$db->affected_rows() === 1);
+        unset($this->updateField);
+        unset($this->nowField);
         if ($success) {
             $this->flush();
         }

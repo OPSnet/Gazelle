@@ -140,7 +140,7 @@ if (!empty($_POST['password']) && !empty($_POST['new_pass_1']) && !empty($_POST[
 
 $avatar = trim($_POST['avatar']);
 if ($avatar != $user->avatar()) {
-    if ($Viewer->disableAvatar()) {
+    if ($ownProfile && $user->disableAvatar()) {
         error('Your avatar privileges have been revoked.');
     }
     $len = strlen($avatar);
@@ -150,49 +150,50 @@ if ($avatar != $user->avatar()) {
     $user->setField('Avatar', $avatar);
 }
 
-$Options['DisableGrouping2']    = (!empty($_POST['disablegrouping']) ? 0 : 1);
-$Options['TorrentGrouping']     = (!empty($_POST['torrentgrouping']) ? 1 : 0);
-$Options['PostsPerPage']        = (int)$_POST['postsperpage'];
-$Options['CollageCovers']       = (int)$_POST['collagecovers'];
-$Options['ShowTorFilter']       = (empty($_POST['showtfilter']) ? 0 : 1);
-$Options['AutoSubscribe']       = (!empty($_POST['autosubscribe']) ? 1 : 0);
-$Options['DisableSmileys']      = (int)isset($_POST['disablesmileys']);
-$Options['EnableMatureContent'] = (!empty($_POST['enablematurecontent']) ? 1 : 0);
-$Options['UseOpenDyslexic']     = (!empty($_POST['useopendyslexic']) ? 1 : 0);
-$Options['Tooltipster']         = (!empty($_POST['usetooltipster']) ? 1 : 0);
-$Options['DisableAvatars']      = (int)($_POST['disableavatars'] ?? 0);
-$Options['Identicons']          = (int)($_POST['identicons'] ?? 0);
-$Options['DisablePMAvatars']    = (!empty($_POST['disablepmavatars']) ? 1 : 0);
-$Options['ListUnreadPMsFirst']  = (!empty($_POST['list_unread_pms_first']) ? 1 : 0);
-$Options['ShowSnatched']        = (!empty($_POST['showsnatched']) ? 1 : 0);
-$Options['DisableAutoSave']     = (!empty($_POST['disableautosave']) ? 1 : 0);
-$Options['NoVoteLinks']         = (!empty($_POST['novotelinks']) ? 1 : 0);
-$Options['CoverArt']            = (int)!empty($_POST['coverart']);
-$Options['ShowExtraCovers']     = (int)!empty($_POST['show_extra_covers']);
-$Options['AutoComplete']        = $_POST['autocomplete'];
-$Options['HttpsTracker']        = (!empty($_POST['httpstracker']) ? 1 : 0);
+$option['DisableGrouping2']    = (!empty($_POST['disablegrouping']) ? 0 : 1);
+$option['TorrentGrouping']     = (!empty($_POST['torrentgrouping']) ? 1 : 0);
+$option['PostsPerPage']        = (int)$_POST['postsperpage'];
+$option['CollageCovers']       = (int)$_POST['collagecovers'];
+$option['ShowTorFilter']       = (empty($_POST['showtfilter']) ? 0 : 1);
+$option['AutoSubscribe']       = (!empty($_POST['autosubscribe']) ? 1 : 0);
+$option['DisableSmileys']      = (int)isset($_POST['disablesmileys']);
+$option['EnableMatureContent'] = (!empty($_POST['enablematurecontent']) ? 1 : 0);
+$option['UseOpenDyslexic']     = (!empty($_POST['useopendyslexic']) ? 1 : 0);
+$option['Tooltipster']         = (!empty($_POST['usetooltipster']) ? 1 : 0);
+$option['DisableAvatars']      = (int)($_POST['disableavatars'] ?? 0);
+$option['Identicons']          = (int)($_POST['identicons'] ?? 0);
+$option['DisablePMAvatars']    = (!empty($_POST['disablepmavatars']) ? 1 : 0);
+$option['ListUnreadPMsFirst']  = (!empty($_POST['list_unread_pms_first']) ? 1 : 0);
+$option['ShowSnatched']        = (!empty($_POST['showsnatched']) ? 1 : 0);
+$option['DisableAutoSave']     = (!empty($_POST['disableautosave']) ? 1 : 0);
+$option['NoVoteLinks']         = (!empty($_POST['novotelinks']) ? 1 : 0);
+$option['CoverArt']            = (int)!empty($_POST['coverart']);
+$option['ShowExtraCovers']     = (int)!empty($_POST['show_extra_covers']);
+$option['AutoComplete']        = $_POST['autocomplete'];
+$option['HttpsTracker']        = (!empty($_POST['httpstracker']) ? 1 : 0);
 
 foreach (['DefaultSearch', 'DisableFreeTorrentTop10'] as $opt) {
-    if ($Viewer->option($opt)) {
-        $Options[$opt] = $Viewer->option($opt);
+    if ($user->option($opt)) {
+        $option[$opt] = $user->option($opt);
     }
 }
 
 if (empty($_POST['sorthide'])) {
-    $Options['SortHide'] = [];
+    $option['SortHide'] = [];
 } else {
     $JSON = json_decode($_POST['sorthide']);
     foreach ($JSON as $J) {
         $E = explode('_', $J);
-        $Options['SortHide'][$E[0]] = $E[1];
+        $option['SortHide'][$E[0]] = $E[1];
     }
 }
 
 if ($Viewer->permitted('site_advanced_search')) {
-    $Options['SearchType'] = (int)!empty($_POST['search_type_advanced']);
+    $option['SearchType'] = (int)!empty($_POST['search_type_advanced']);
 } else {
-    unset($Options['SearchType']);
+    unset($option['SearchType']);
 }
+$user->setField('option_list', $option);
 
 $UserNavItems = [];
 foreach ($userMan->userNavFullList() as $n) {
@@ -200,6 +201,7 @@ foreach ($userMan->userNavFullList() as $n) {
         $UserNavItems[] = $n['id'];
     }
 }
+$user->setField('nav_list', $UserNavItems);
 
 (new Gazelle\Util\LastFM)->modifyUsername($user, trim($_POST['lastfm_username'] ?? ''));
 
@@ -259,14 +261,6 @@ if (isset($_POST['resetpasskey'])) {
     $user->modifyAnnounceKeyHistory($oldPasskey, $newPasskey, $ipaddr);
     (new Gazelle\Tracker)->modifyPasskey(old: $oldPasskey, new: $newPasskey);
 }
-
-$db->prepared_query("
-    UPDATE users_info SET
-        NavItems = ?,
-        SiteOptions = ?
-    WHERE UserID = ?
-    ", implode(',', $UserNavItems), serialize($Options), $userId
-);
 
 $user->modify();
 

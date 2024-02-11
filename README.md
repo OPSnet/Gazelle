@@ -159,5 +159,8 @@ questions concerning Gazelle (or any of the repos published by
 Orpheus).
 
 ## Open source
+Run `yarn prepare` once, to install a git precommit hook that will run linting
+checks on PHP and CSS files at each commit.
+
 Create issues at https://github.com/OPSnet
 Patches welcome!
