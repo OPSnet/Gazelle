@@ -172,7 +172,7 @@ class User extends BaseObject {
         }
 
         $this->info['CommentHash'] = sha1($this->info['AdminComment']);
-        $this->info['nav_list']    = json_decode($this->info['nav_list'], true);
+        $this->info['nav_list']    = json_decode($this->info['nav_list'] ?? '[]', true);
         $this->info['NavItems']    = empty($this->info['NavItems']) ? [] : explode(',', $this->info['NavItems']);
         $this->info['ParanoiaRaw'] = $this->info['Paranoia'];
         $this->info['Paranoia']    = $this->info['Paranoia'] ? unserialize($this->info['Paranoia']) : [];
