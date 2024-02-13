@@ -37,14 +37,16 @@ class Privilege extends \Gazelle\BaseUser {
             ", $this->id()
         );
         $info = [
-            'level'            => $config['class_level'],
-            'level_secondary'  => 0,
-            'badge'            => [],
-            'forum'            => [],
-            'allowed_forums'   => $config['user_allowed_forums'],
-            'forbidden_forums' => $config['user_forbidden_forums'],
-            'privilege'        => [],
-            'secondary'        => [],
+            'level'                 => $config['class_level'],
+            'allowed_forums'        => $config['user_allowed_forums'],
+            'forbidden_forums'      => $config['user_forbidden_forums'],
+            'user_allowed_forums'   => $config['user_allowed_forums'],
+            'user_forbidden_forums' => $config['user_forbidden_forums'],
+            'level_secondary'       => 0,
+            'badge'                 => [],
+            'forum'                 => [],
+            'privilege'             => [],
+            'secondary'             => [],
         ];
         foreach (unserialize($config['privileges']) ?: [] as $name => $value) {
             $info['privilege'][$name] = (bool)$value;
@@ -142,18 +144,32 @@ class Privilege extends \Gazelle\BaseUser {
     }
 
     /**
-     * The forums forbidden for this user (shown in staff section of profile page).
-     * The userclass may allow access, but these are overridden.
+     * The forums forbidden for this user. (Usually the same as forbiddenUserForums()).
      */
     public function forbiddenForums(): string {
         return $this->info()['forbidden_forums'];
     }
 
     /**
-     * The extra forums allowed for this user, over and above those authorized by userclass
+     * The forums forbidden for this user (shown in staff section of profile page).
+     * The userclass may allow access, but these are overridden.
+     */
+    public function forbiddenUserForums(): ?string {
+        return $this->info()['user_forbidden_forums'];
+    }
+
+    /**
+     * All forums allowed for this user, over and above those authorized by userclass
      */
     public function permittedForums(): string {
-        return $this->info()['permitted_forums'];
+        return $this->info()['allowed_forums'];
+    }
+
+    /**
+     * The extra forums allowed for this user, over and above those authorized by userclass
+     */
+    public function permittedUserForums(): ?string {
+        return $this->info()['user_allowed_forums'];
     }
 
     /**

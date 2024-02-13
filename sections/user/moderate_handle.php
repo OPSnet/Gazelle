@@ -92,6 +92,8 @@ $cur = $user->info();
 if ($_POST['comment_hash'] != $cur['CommentHash']) {
     error("Somebody else has moderated this user since you loaded it. Please go back and refresh the page.");
 }
+$cur['PermittedForums']  = $user->privilege()->permittedUserForums();
+$cur['RestrictedForums'] = $user->privilege()->forbiddenUserForums();
 
 if ($mergeStatsFrom && ($downloaded != $user->downloadedSize() || $uploaded != $user->uploadedSize())) {
     // Too make make-work code to deal with this unlikely eventuality
@@ -489,7 +491,7 @@ if ($userStatus != $user->userStatus() && $Viewer->permitted('users_disable_user
                     ->setFieldNow('RatioWatchEnds');
             }
         }
-        $user->setField('BanReason', 0);
+        $user->setField('BanReason', '0');
     }
     $user->setField('Enabled', $userStatus->value);
     $editSummary[] = $enableStr;

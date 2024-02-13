@@ -75,12 +75,22 @@ abstract class BaseObject extends Base {
 
     /**
      * Fetch the value of a table field to be updated. Returns null if
-     * either the field does not exists, or it does and is set to null :)
-     * If ever this is a problem, you can always clearField() which
-     * guarantees the the field will no longer be present.
+     * either the field does not exists, or it does and is set to null.
+     * In this case you can call nullField() which will return true if
+     * the field is present and set to null.
      */
     public function field(string $field): mixed {
         return $this->updateField[$field] ?? null;
+    }
+
+    public function nowField(string $field): mixed {
+        return $this->nowField[$field] ?? null;
+    }
+
+    public function nullField(string $field): bool {
+        return isset($this->updateField)
+            && in_array($field, array_keys($this->updateField))
+            && is_null($this->updateField[$field]);
     }
 
     /**
@@ -90,7 +100,7 @@ abstract class BaseObject extends Base {
      * @return mixed the contents of the field, the name of the field, or null
      */
     public function clearField(string $field): mixed {
-        if (isset($this->nowField[$field])) {
+        if ($this->nowField($field)) {
             unset($this->nowField[$field]);
             if (empty($this->nowField)) {
                 // if the array is merely empty, the dirty() method will return true
@@ -98,7 +108,7 @@ abstract class BaseObject extends Base {
             }
             return $field;
         }
-        if (isset($this->updateField[$field])) {
+        if (isset($this->updateField[$field]) || $this->nullField($field)) {
             $value = $this->updateField[$field];
             unset($this->updateField[$field]);
             if (empty($this->updateField)) {

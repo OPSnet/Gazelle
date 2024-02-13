@@ -1056,15 +1056,16 @@ class User extends BaseObject {
             $userInfo['SiteOptions = ?'] = serialize($this->clearField('option_list')); // remove field
         }
 
-        foreach (['AdminComment', 'BanDate', 'BanReason', 'PermittedForums', 'RestrictedForums', 'RatioWatchDownload'] as $field) {
-            if ($this->field($field) !== null) {
-                $userInfo["$field = ?"] = $this->clearField($field);
-            }
-        }
         $now = [];
         foreach (['BanDate', 'RatioWatchEnds'] as $field) {
-            if ($this->clearField($field)) {
-                $now[] = "$field = now()";
+            if ($this->nowField($field)) {
+                // the value is the field, this came from $nowField
+                $now[] = "{$this->clearField($field)} = now()";
+            }
+        }
+        foreach (['AdminComment', 'BanDate', 'BanReason', 'PermittedForums', 'RestrictedForums', 'RatioWatchDownload', 'RatioWatchEnds'] as $field) {
+            if ($this->field($field) !== null || $this->nullField($field)) {
+                $userInfo["$field = ?"] = $this->clearField($field);
             }
         }
         if ($userInfo || $now) {
