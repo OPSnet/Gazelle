@@ -4,44 +4,29 @@ if (!$Viewer->permitted('users_mod')) {
     error(403);
 }
 
-$Val = new Gazelle\Util\Validator();
-$Val->setFields([
+$validator = new Gazelle\Util\Validator();
+$validator->setFields([
     ['tag',     true, 'string', 'Enter a single tag to change.', ['range' => [2, 100]]],
     ['replace', true, 'string', 'Enter a single replacement name.', ['range' => [2, 100]]],
 ]);
 $tagMan = new Gazelle\Manager\Tag();
-
-View::show_header('Batch Tag Editor');
-?>
-
-<div class="header">
-    <div class="linkbox">
-        <a href="tools.php?action=tags" class="brackets">Batch Tag Editor</a>
-        <a href="tools.php?action=tags_aliases" class="brackets">Tag Aliases</a>
-        <a href="tools.php?action=tags_official" class="brackets">Official Tags</a>
-        <a href="tools.php" class="brackets">Back to toolbox</a>
-    </div>
-    <h2>Batch Tag Editor</h2>
-</div>
-<div class="thin">
-<?= $Twig->render('tag/batch-editor.twig') ?>
-    <br />
-<?php
 
 $affectedTorrents = [];
 $affectedRequests = [];
 $failure          = [];
 $success          = [];
 
+$changed = 0;
+
 // use a loop for fast exit if any precondition fails
 while (isset($_GET['tag']) && isset($_GET['replace'])) {
-    if (!$Val->validate($_GET)) {
-        $failure[] = $Val->errorMessage();
+    if (!$validator->validate($_GET)) {
+        $failure[] = $validator->errorMessage();
         break;
     }
 
     // what are we merging
-    $current = $_GET['dirty'] ? trim($_GET['tag']) : $tagMan->sanitize($_GET['tag']);
+    $current = isset($_GET['dirty']) ? trim($_GET['tag']) : $tagMan->sanitize($_GET['tag']);
     $currentId = $tagMan->lookup($current);
     if (!$currentId) {
         $failure[] = "No such tag: <b>$current</b>";
@@ -65,11 +50,11 @@ while (isset($_GET['tag']) && isset($_GET['replace'])) {
         $failure[] = "Cannot merge tag {$current} to itself";
     }
 
-    if ($_GET['alias'] && count($replacement) > 1) {
+    if (isset($_GET['alias']) && count($replacement) > 1) {
         $failure[] = "Cannot create an alias for multiple tags";
     }
 
-    if ($_GET['list']) {
+    if (isset($_GET['list'])) {
         $affectedTorrents = $tagMan->torrentLookup($currentId);
         $affectedRequests = $tagMan->requestLookup($currentId);
     }
@@ -78,15 +63,14 @@ while (isset($_GET['tag']) && isset($_GET['replace'])) {
         break;
     }
 
-    $changed = $tagMan->merge($currentId, $replacement, $Viewer->id());
-    $success[] = "<b>$changed tag" . plural($changed) . "</b> changed";
+    $changed = $tagMan->rename($currentId, $replacement, $Viewer);
 
-    if ($_GET['alias']) {
+    if (isset($_GET['alias'])) {
         $madeAlias = $tagMan->createAlias($current, $replacement[0]);
         $success[] = "<b>" . $replacement[0] . "</b> is now an alias for <b>" . $current . "</b>";
     }
 
-    if ($_GET['official']) {
+    if (isset($_GET['official'])) {
         $madeOfficial = 0;
         foreach ($replacement as $r) {
             $madeOfficial += $tagMan->officialize($r, $Viewer->id());
@@ -96,37 +80,10 @@ while (isset($_GET['tag']) && isset($_GET['replace'])) {
     break;
 }
 
-if ($failure || $success) {
-?>
-    <div class="box pad center">
-<?php if ($failure) { ?>
-        <strong>Error: unable to merge tags</strong>
-        <ul class="nobullet">
-<?php   foreach ($failure as $message) { ?>
-            <li><?= $message ?></li>
-<?php   } ?>
-        </ul>
-<?php
-    }
-    if ($success) {
-?>
-        <strong>Success: merge completed</strong>
-        <ul class="nobullet">
-<?php   foreach ($success as $message) { ?>
-            <li><?= $message ?></li>
-<?php   } ?>
-        </ul>
-<?php
-    }
-}
-
-if (!$failure && $success && $_GET['list']) {
-    echo $Twig->render('tag/merged.twig', [
-        'torrents' => $affectedTorrents,
-        'requests' => $affectedRequests,
-    ]);
-}
-?>
-</div>
-<?php
-View::show_footer();
+echo $Twig->render('admin/tag-editor.twig', [
+    'changed'      => $changed,
+    'failure'      => $failure,
+    'success'      => $success,
+    'torrent_list' => $affectedTorrents,
+    'request_list' => $affectedRequests,
+]);
