@@ -9,31 +9,31 @@ class UsersTest extends TestCase {
         $stats = new \Gazelle\Stats\Users;
 
         /* not easy to test precise results, but at least the SQL can be exercised */
-        $this->assertIsArray($stats->browserDistribution(), 'stats-users-browser');
-        $this->assertIsArray($stats->browserDistributionList(), 'stats-users-browser-list');
-        $this->assertIsArray($stats->userclassDistribution(), 'stats-users-userclass');
-        $this->assertIsArray($stats->userclassDistributionList(), 'stats-users-userclass-list');
-        $this->assertIsArray($stats->platformDistribution(), 'stats-users-platform');
-        $this->assertIsArray($stats->platformDistributionList(), 'stats-users-platform-list');
-        $this->assertIsArray($stats->geodistribution(), 'stats-users-geodistribution');
-        $this->assertIsInt($stats->leecherTotal(), 'stats-users-total-leecher');
-        $this->assertIsInt($stats->peerTotal(), 'stats-users-total-peer');
-        $this->assertIsInt($stats->seederTotal(), 'stats-users-total-seeder');
-        $this->assertIsInt($stats->snatchTotal(), 'stats-users-total-snatch');
+        $this->assertIsArray($stats->browserDistribution(), 'users-stats-browser');
+        $this->assertIsArray($stats->browserDistributionList(), 'users-stats-browser-list');
+        $this->assertIsArray($stats->userclassDistribution(), 'users-stats-userclass');
+        $this->assertIsArray($stats->userclassDistributionList(), 'users-stats-userclass-list');
+        $this->assertIsArray($stats->platformDistribution(), 'users-stats-platform');
+        $this->assertIsArray($stats->platformDistributionList(), 'users-stats-platform-list');
+        $this->assertIsArray($stats->geodistribution(), 'users-stats-geodistribution');
+        $this->assertIsInt($stats->leecherTotal(), 'users-stats-total-leecher');
+        $this->assertIsInt($stats->peerTotal(), 'users-stats-total-peer');
+        $this->assertIsInt($stats->seederTotal(), 'users-stats-total-seeder');
+        $this->assertIsInt($stats->snatchTotal(), 'users-stats-total-snatch');
 
-        $this->assertCount(3, $stats->peerStat(), 'stats-users-peer');
-        $this->assertCount(12, $stats->flow(), 'stats-users-flow');
+        $this->assertCount(3, $stats->peerStat(), 'users-stats-peer');
+        $this->assertCount(24, $stats->flow(), 'users-stats-flow');
     }
 
     public function testTop(): void {
         $stats = new \Gazelle\Stats\Users;
-        $this->assertInstanceOf(Gazelle\Stats\Users::class, $stats->flush(), 'stats-users-flush');
-        $this->assertInstanceOf(Gazelle\Stats\Users::class, $stats->flushTop(10), 'stats-users-top-flush');
-        $this->assertIsArray($stats->topDownloadList(10), 'stats-users-top-download');
-        $this->assertIsArray($stats->topDownSpeedList(10), 'stats-users-top-downspeed');
-        $this->assertIsArray($stats->topUploadList(10), 'stats-users-top-upload');
-        $this->assertIsArray($stats->topUpSpeedList(10), 'stats-users-top-upspeed');
-        $this->assertIsArray($stats->topTotalUploadList(10), 'stats-users-top-total-upload');
+        $this->assertInstanceOf(Gazelle\Stats\Users::class, $stats->flush(), 'users-stats-flush');
+        $this->assertInstanceOf(Gazelle\Stats\Users::class, $stats->flushTop(10), 'users-stats-top-flush');
+        $this->assertIsArray($stats->topDownloadList(10), 'users-stats-top-download');
+        $this->assertIsArray($stats->topDownSpeedList(10), 'users-stats-top-downspeed');
+        $this->assertIsArray($stats->topUploadList(10), 'users-stats-top-upload');
+        $this->assertIsArray($stats->topUpSpeedList(10), 'users-stats-top-upspeed');
+        $this->assertIsArray($stats->topTotalUploadList(10), 'users-stats-top-total-upload');
     }
 
     public function testAjaxTop10(): void {

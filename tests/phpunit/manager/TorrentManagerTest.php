@@ -234,6 +234,6 @@ class TorrentManagerTest extends TestCase {
         $this->assertIsArray($stats->categoryList(), 'torrent-stats-category-list');
         $this->assertIsArray($stats->categoryTotal(), 'torrent-stats-category-total');
 
-        $this->assertCount(12, $stats->flow(), 'torrent-stats-flow');
+        $this->assertCount(24, $stats->flow(), 'torrent-stats-flow');
     }
 }

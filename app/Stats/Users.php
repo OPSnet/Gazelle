@@ -42,7 +42,7 @@ class Users extends \Gazelle\Base {
         if ($flow === false) {
             self::$db->prepared_query("
                 WITH RECURSIVE dates AS (
-                    SELECT last_day(now() - INTERVAL 13 MONTH) + INTERVAL 1 DAY AS eom
+                    SELECT last_day(now() - INTERVAL 24 MONTH) AS eom
                     UNION ALL
                     SELECT last_day(eom + INTERVAL 1 MONTH)
                     FROM dates
@@ -53,7 +53,8 @@ class Users extends \Gazelle\Base {
                         last_day(u.created) AS eom
                     FROM users_main u
                     WHERE last_day(u.created)
-                        BETWEEN last_day(now() - INTERVAL 13 MONTH) AND last_day(now() - INTERVAL 1 MONTH)
+                        BETWEEN last_day(now() - INTERVAL 24 MONTH)
+                        AND last_day(now() - INTERVAL 1 MONTH)
                     GROUP BY eom
                 )
                 SELECT date_format(dates.eom, '%Y-%m') AS Month,

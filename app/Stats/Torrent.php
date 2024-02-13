@@ -129,7 +129,7 @@ class Torrent extends \Gazelle\Base {
         if ($flow === false) {
             self::$db->prepared_query("
                 WITH RECURSIVE dates AS (
-                    SELECT last_day(now() - INTERVAL 13 MONTH) + INTERVAL 1 DAY AS eom
+                    SELECT last_day(now() - INTERVAL 24 MONTH) AS eom
                     UNION ALL
                     SELECT last_day(eom + INTERVAL 1 MONTH)
                     FROM dates
@@ -140,7 +140,8 @@ class Torrent extends \Gazelle\Base {
                         sum(if(Message LIKE 'Torrent % was uploaded by %', 1, 0)) AS t_add,
                         sum(if(Message LIKE 'Torrent % was deleted by %', -1, 0)) AS t_del
                     FROM log
-                    WHERE Time BETWEEN last_day(now() - INTERVAL 13 MONTH) + INTERVAL 1 DAY
+                    WHERE Time
+                        BETWEEN last_day(now() - INTERVAL 24 MONTH)
                         AND last_day(now() - INTERVAL 1 MONTH)
                     GROUP BY eom
                 )
