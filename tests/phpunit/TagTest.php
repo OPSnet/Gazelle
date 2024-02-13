@@ -7,10 +7,15 @@ require_once(__DIR__ . '/../helper.php');
 
 class TagTest extends TestCase {
     protected const PREFIX = 'phpunit.';
-    protected \Gazelle\User   $user;
-    protected \Gazelle\TGroup $tgroup;
+
+    protected \Gazelle\User    $user;
+    protected \Gazelle\TGroup  $tgroup;
+    protected \Gazelle\Request $request;
 
     public function tearDown(): void {
+        if (isset($this->request)) {
+            $this->request->remove();
+        }
         if (isset($this->user)) {
             if (isset($this->tgroup)) {
                 Helper::removeTGroup($this->tgroup, $this->user);
@@ -63,11 +68,19 @@ class TagTest extends TestCase {
         $this->assertEquals($tagId, $manager->create($name, $this->user), 'tag-create-again');
         $this->assertEquals($tagId, $manager->lookup($name), 'tag-lookup-success');
 
-        // rename
+        // rename to a new tag
         $new = "$name." . randomString(4);
         $this->assertNull($manager->lookup($new), 'tag-lookup-new-fail');
-        $this->assertEquals(1, $manager->rename($tagId, $new, $this->user), 'tag-rename');
+        $this->assertEquals(1, $manager->rename($tagId, [$new], $this->user), 'tag-rename');
         $this->assertEquals($tagId, $manager->lookup($new), 'tag-lookup-new-success');
+
+        // rename to an existing tag
+        $this->request = Helper::makeRequestMusic($this->user, 'phpunit tag create request');
+        $this->request->addTag($tagId);
+        $new   = "$name." . randomString(5);
+        $newId = $manager->create($new, $this->user);
+        $this->assertEquals(1, $manager->rename($tagId, [$new], $this->user), 'tag-existing-rename');
+        $this->assertEquals($newId, $manager->lookup($new), 'tag-lookup-existing-success');
 
         // Is empty because vote counts below 10 are ignored,
         // but at least we know the SQL is syntactically valid.
@@ -157,6 +170,88 @@ class TagTest extends TestCase {
         // not enough uses to have a meaninful result, but at least the query is run
         $this->assertCount(0, $manager->autocompleteAsJson('phpun'), 'tag-autocomplete');
         $this->assertCount(0, $manager->requestLookup($folkId), 'tag-request-lookup');
+    }
+
+    public function testSplitNew(): void {
+        $this->user = Helper::makeUser('tag.' . randomString(8), 'tag.split');
+        $manager = new Gazelle\Manager\Tag();
+        $name    = self::PREFIX . randomString(10);
+        $tagId   = $manager->create($name, $this->user);
+
+        $this->request = Helper::makeRequestMusic($this->user, 'phpunit tag split new request');
+        $this->request->addTag($tagId);
+        $this->tgroup = Helper::makeTGroupMusic(
+            name:       'phpunit tag ' . randomString(6),
+            artistName: [[ARTIST_MAIN], ['Tag Girl ' . randomString(12)]],
+            tagName:    [$name],
+            user:       $this->user,
+        );
+
+        // split tag into two new (indie.rock.alt.rock => indie.rock, alt.rock)
+        $this->assertEquals(
+            4, // 2 for each tgroup and request
+            $manager->rename($tagId, ["$name.1", "$name.2"], $this->user),
+            'tag-new-split',
+        );
+        $this->assertEquals(
+            ["$name.1", "$name.2"],
+            $this->request->flush()->tagNameList(),
+            'tag-split-new-request',
+        );
+        $this->assertEquals(
+            ["$name.1", "$name.2"],
+            array_values(array_map(fn($t) => $t['name'], $this->tgroup->flush()->tagList())),
+            'tag-split-new-tgroup',
+        );
+
+        $this->assertNull($manager->findByName($name), 'tag-new-gone');
+        $this->assertEquals(
+            2,
+            $manager->findByName("$name.2")->uses(),
+            'tag-new-uses',
+        );
+    }
+
+    public function testSplitExisting(): void {
+        $this->user = Helper::makeUser('tag.' . randomString(8), 'tag.split');
+        $manager = new Gazelle\Manager\Tag();
+        $name    = self::PREFIX . randomString(10);
+        $tagId   = $manager->create($name, $this->user);
+
+        $this->request = Helper::makeRequestMusic($this->user, 'phpunit user promote request');
+        $this->request->addTag($tagId);
+        $this->tgroup = Helper::makeTGroupMusic(
+            name:       'phpunit tag ' . randomString(6),
+            artistName: [[ARTIST_MAIN], ['Tag Girl ' . randomString(12)]],
+            tagName:    [$name],
+            user:       $this->user,
+        );
+
+        // split tag into two existing tags
+        $nameList = ["$name.3", "$name.4"];
+        $idList = array_map(fn($n) => $manager->create($n, $this->user), $nameList);
+        $this->assertEquals(
+            4,
+            $manager->rename($tagId, ["$name.3", "$name.4"], $this->user),
+            'tag-existing-split',
+        );
+        $this->assertEquals(
+            ["$name.3", "$name.4"],
+            $this->request->flush()->tagNameList(),
+            'tag-split-existing-request',
+        );
+        $this->assertEquals(
+            ["$name.3", "$name.4"],
+            array_values(array_map(fn($t) => $t['name'], $this->tgroup->flush()->tagList())),
+            'tag-split-existing-tgroup',
+        );
+
+        $this->assertNull($manager->findByName($name), 'tag-existing-gone');
+        $this->assertEquals(
+            2,
+            $manager->findByName("$name.3")->uses(),
+            'tag-existing-uses',
+        );
     }
 
     public function testTag(): void {

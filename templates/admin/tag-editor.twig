@@ -1,3 +1,15 @@
+{{ header('Batch Tag Editor') }}
+<div class="header">
+    <div class="linkbox">
+        <a href="tools.php?action=tags" class="brackets">Batch Tag Editor</a>
+        <a href="tools.php?action=tags_aliases" class="brackets">Tag Aliases</a>
+        <a href="tools.php?action=tags_official" class="brackets">Official Tags</a>
+        <a href="tools.php" class="brackets">Back to toolbox</a>
+    </div>
+    <h2>Batch Tag Editor</h2>
+</div>
+<div class="thin">
+
 <h4>Instructions for use</h4>
 
 <div class="box pad">
@@ -61,3 +73,68 @@ broken legacy tags, you may need to check "Do not sanitize".</p>
         </tr>
     </table>
 </form>
+    <br />
+{% if changed or failure or success %}
+<div class="box pad center">
+    {% if failure %}
+    <strong>Error: unable to merge tags</strong>
+    <ul class="nobullet">
+        {% for message in failure %}
+        <li>{{ message|raw }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% if changed or success %}
+    <strong>Success: merge completed</strong>
+    <ul class="nobullet">
+        <li><b>{{ changed }} tag{{ changed|plural }}</b> changed</li>
+        {% for message in success %}
+        <li>{{ message|raw }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+{% endif %}
+
+<br />
+<table>
+{% if torrent_list or request_list %}
+<tr class="colhead">
+<td style="width:50%">
+    Affected torrent groups
+</td>
+<td style="width:50%">
+    Affected requests
+</td>
+</tr>
+<tr>
+<td style="vertical-align: top;"><ul class="nobullet">
+    {% for t in torrent_list %}
+        {% if loop.first %}</ul>{% endif %}
+        {% if t.artistId %}
+    <li><a href="artist.php?id={{ t.artistId }}">{{ t.artistName }}</a> -
+        {% endif %}
+<a href="torrents.php?id={{ t.torrentGroupId}} ">{{ t.torrentGroupName }}</a></li>
+        {% if loop.last %}</ul>{% endif %}
+    {% else %}
+<td style="vertical-align: top;"><i>None</i></td>
+    {% endfor %}
+</td>
+
+    {% if not requests %}
+<td style="vertical-align: top;"><i>None</i></td>
+    {% else %}
+<td style="vertical-align: top;"><ul class="nobullet">
+        {% for r in requests %}
+            {% if r.artistId %}
+<li><a href="artist.php?id={{ r.artistId }}">{{ r.artistName }}</a> -
+            {% endif %}
+<a href="requests.php?action=view&amp;id={{ r.requestId }}">{{ r.requestName }}</a></li>
+        {% endfor %}
+</ul></td>
+    {% endif %}
+</tr>
+</table>
+{% endif %}
+</div>
+
+{{ footer() }}

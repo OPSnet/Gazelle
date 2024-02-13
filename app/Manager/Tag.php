@@ -213,80 +213,97 @@ class Tag extends \Gazelle\BaseManager {
         return $list;
     }
 
-    public function rename(int $tagId, string $name, \Gazelle\User $user): int {
+    protected function replace(int $oldId, int $newId, \Gazelle\User $user): int {
+        // When replacing a tag that exists, there is a chance that a tgroup or
+        // request might already have the tag. We therefore only add the tag if
+        // it is missing, and then we can remove the current tag uses.
+
+        // If the torrent has the old tag, but not the replacement, add it,
+        self::$db->prepared_query("
+            INSERT INTO torrents_tags (TagID, UserID, GroupID, PositiveVotes, NegativeVotes)
+                SELECT ?, ?, curr.GroupID, curr.PositiveVotes, curr.NegativeVotes
+                FROM torrents_tags curr
+                LEFT JOIN torrents_tags merge ON (merge.GroupID = curr.GroupID AND merge.TagID = ?)
+                WHERE curr.TagID = ? AND merge.TagID IS NULL
+            ", $newId, $user->id(), $newId, $oldId
+        );
+        $changed = self::$db->affected_rows();
+
+        // same for artists,
+        self::$db->prepared_query('
+            INSERT INTO artists_tags (TagID, UserID, ArtistID, PositiveVotes, NegativeVotes)
+                SELECT ?, ?, curr.ArtistID, curr.PositiveVotes, curr.NegativeVotes
+                FROM artists_tags curr
+                LEFT JOIN artists_tags merge ON (merge.ArtistID = curr.ArtistID AND merge.TagID = ?)
+                WHERE curr.TagID = ? AND merge.TagID IS NULL
+            ', $newId, $user->id(), $newId, $oldId
+        );
+        $changed += self::$db->affected_rows();
+
+        // and requests.
+        self::$db->prepared_query("
+            INSERT INTO requests_tags (TagID, RequestID)
+                SELECT ?, curr.RequestID
+                FROM requests_tags curr
+                LEFT JOIN requests_tags merge ON (merge.RequestID = curr.RequestID AND merge.TagID = ?)
+                WHERE curr.TagID = ? AND merge.TagID IS NULL
+            ", $newId, $newId, $oldId
+        );
+        $changed += self::$db->affected_rows();
+
+        // regenerate usage count for replacement tag
         self::$db->prepared_query("
             UPDATE tags SET
-                Name = ?,
-                UserID = ?
+                Uses = (
+                    (SELECT count(*) FROM artists_tags WHERE TagID = ?)
+                    + (SELECT count(*) FROM requests_tags WHERE TagID = ?)
+                    + (SELECT count(*) FROM torrents_tags WHERE TagID = ?)
+                )
             WHERE ID = ?
-            ", $name, $user->id(), $tagId
+            ", $newId, $newId, $newId, $newId
         );
-        return self::$db->affected_rows();
+        return $changed;
     }
 
-    public function merge(int $currentId, array $replacement, \Gazelle\User $user): int {
-        $totalChanged = 0;
-        $totalRenamed = 0;
-        foreach ($replacement as $r) {
-            $replacementId = $this->lookup($r);
-            if (is_null($replacementId)) {
-                // if we are splitting to more than one tag that does not exist
-                // then we can rename the first one but after that we have to
-                // begin creating additional tags.
-                if ($totalRenamed == 0) {
-                    $totalRenamed += $this->rename($currentId, $r, $user);
-                } else {
-                    $replacementId = $this->create($r, $user);
-                    ++$totalRenamed;
-                }
-                continue;
-            }
-
-            // If the torrent has the old tag, but not the replacement, add it,
-            $changed = 0;
-            self::$db->prepared_query("
-                INSERT INTO torrents_tags (TagID, UserID, GroupID, PositiveVotes, NegativeVotes)
-                    SELECT ?, ?, curr.GroupID, curr.PositiveVotes, curr.NegativeVotes
-                    FROM torrents_tags curr
-                    LEFT JOIN torrents_tags merge ON (merge.GroupID = curr.GroupID AND merge.TagID = ?)
-                    WHERE curr.TagID = ? AND merge.TagID IS NULL
-                ", $replacementId, $user->id(), $replacementId, $currentId
-            );
-            $changed += self::$db->affected_rows();
-
-            // same for artists,
-            self::$db->prepared_query('
-                INSERT INTO artists_tags (TagID, UserID, ArtistID, PositiveVotes, NegativeVotes)
-                    SELECT ?, ?, curr.ArtistID, curr.PositiveVotes, curr.NegativeVotes
-                    FROM artists_tags curr
-                    LEFT JOIN artists_tags merge ON (merge.ArtistID = curr.ArtistID AND merge.TagID = ?)
-                    WHERE curr.TagID = ? AND merge.TagID IS NULL
-                ', $replacementId, $user->id(), $replacementId, $currentId
-            );
-            $changed += self::$db->affected_rows();
-
-            // and requests.
-            self::$db->prepared_query("
-                INSERT INTO requests_tags (TagID, RequestID)
-                    SELECT ?, curr.RequestID
-                    FROM requests_tags curr
-                    LEFT JOIN requests_tags merge ON (merge.RequestID = curr.RequestID AND merge.TagID = ?)
-                    WHERE curr.TagID = ? AND merge.TagID IS NULL
-                ", $replacementId, $replacementId, $currentId
-            );
-            $changed += self::$db->affected_rows();
-
-            // update usage count for replacement tag
+    /**
+     * Rename a tag.
+     *
+     * This is not as simple as it appears at first glance. The simplest case a
+     * tag that is renamed (rokc => rock) and the target tag does not exist:
+     * all that is required is to change the text of the tag name. If the tag
+     * already exists, matters become more complicated, since some objects will
+     * have both tags (rokc, rock) and others will have only (rokc). The answer
+     * is to add (rock) to those objects that lack it, and then remove all uses
+     * of (rokc), and remove the tag itself to avoid it being used again.
+     *
+     * A further complication is that some people enter tags incorrectly and
+     * mash two (or more!) together, e.g. alt.rock.indie.rock. This needs to be
+     * replaced by two tags (alt.rock and indie.rock), both of which may or may
+     * not exist yet. The same issues as above also apply here: an object might
+     * have (alt.rock.indie.rock and alt.rock) in which case only (indie.rock)
+     * needs to be applied, and the old tag removed.
+     */
+    public function rename(int $tagId, array $replacement, \Gazelle\User $user): int {
+        if (count($replacement) > 1) {
+            return $this->split($tagId, $replacement, $user);
+        }
+        $name = $replacement[0];
+        $replacementId = $this->lookup($name);
+        if (is_null($replacementId)) {
+            // renaming a tag that does not yet exist is trivial
             self::$db->prepared_query("
                 UPDATE tags SET
-                    Uses = Uses + ?
+                    Name = ?,
+                    UserID = ?
                 WHERE ID = ?
-                ", $changed, $replacementId
+                ", $name, $user->id(), $tagId
             );
-            $totalChanged += $changed;
+            return self::$db->affected_rows();
         }
 
-        // Kill the old tag everywhere
+        self::$db->begin_transaction();
+        $changed = $this->replace($tagId, $replacementId, $user);
+
         self::$db->prepared_query("
             DELETE t, at, rt, tt
             FROM tags t
@@ -294,9 +311,46 @@ class Tag extends \Gazelle\BaseManager {
             LEFT JOIN requests_tags rt ON (rt.TagID = t.ID)
             LEFT JOIN torrents_tags tt ON (tt.TagID = t.ID)
             WHERE t.ID = ?
-            ", $currentId
+            ", $tagId
         );
-        return $totalChanged + $totalRenamed;
+        self::$db->commit();
+        return $changed;
+    }
+
+    public function split(int $tagId, array $replacement, \Gazelle\User $user): int {
+        $totalChanged = 0;
+        $renamed = false;
+        self::$db->begin_transaction();
+        foreach ($replacement as $r) {
+            $replacementId = $this->lookup($r);
+            if (is_null($replacementId)) {
+                // We can reuse the existing tag and just rename it.
+                if (!$renamed) {
+                    $totalChanged += $this->rename($tagId, [$r], $user);
+                    $renamed = true;
+                    continue;
+                }
+                $replacementId = $this->create($r, $user);
+                ++$totalChanged;
+            }
+
+            $totalChanged += $this->replace($tagId, $replacementId, $user);
+        }
+
+        // If we have not reused the original tag by renaming it, get rid of it.
+        if (!$renamed) {
+            self::$db->prepared_query("
+                DELETE t, at, rt, tt
+                FROM tags t
+                LEFT JOIN artists_tags  at ON (at.TagID = t.ID)
+                LEFT JOIN requests_tags rt ON (rt.TagID = t.ID)
+                LEFT JOIN torrents_tags tt ON (tt.TagID = t.ID)
+                WHERE t.ID = ?
+                ", $tagId
+            );
+        }
+        self::$db->commit();
+        return $totalChanged;
     }
 
     /**
