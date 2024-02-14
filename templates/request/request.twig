@@ -59,7 +59,7 @@
             <p id="vawarning" class="hidden">Please use the multiple artists feature rather than adding "Various Artists" as an artist; read <a href="wiki.php?action=article&amp;id=64" target="_blank">this</a> for more information.</p>
     {%- for role, name_list in artist_role -%}
       {%- for idx, name in name_list -%}
-            <input type="text" size="45" id="artist_{{ loop.index0 }}" name="artists[]"{{ autocomplete|raw }} value="{{ name.name }}" />
+            <input type="text" size="45" id="artist_{{ loop.index0 }}" name="artists[]"{{ autocomplete|raw }} value="{{ name }}" />
             <select id="importance" name="importance[]">
               <option value="{{ constant('ARTIST_MAIN') }}"{{ selected(role == constant('ARTIST_MAIN')) }}>Main</option>
               <option value="{{ constant('ARTIST_GUEST') }}"{{ selected(role == constant('ARTIST_GUEST')) }}>Guest</option>
