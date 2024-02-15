@@ -6,17 +6,14 @@ if (!$Viewer->permittedAny('admin_login_watch', 'admin_manage_ipbans')) {
 
 if ($_POST) {
     authorize();
-    if ($Viewer->permitted('admin_login_watch')) {
-        $clear = array_key_extract_suffix('clear-', $_POST);
-    } elseif ($Viewer->permitted('admin_manage_ipbans')) {
-        $ban = [];
-        $clear = [];
-        foreach (array_key_extract_suffix('admin-', $_POST) as $id) {
-            if ($_POST["admin-$id"] == 'ban') {
-                $ban[] = $id;
-            } elseif ($_POST["admin-$id"] == 'clear') {
-                $clear[] = $id;
-            }
+    $canBan = $Viewer->permitted('admin_manage_ipbans');
+    $ban    = [];
+    $clear  = [];
+    foreach (array_key_extract_suffix('admin-', $_POST) as $id) {
+        if ($canBan && $_POST["admin-$id"] == 'ban') {
+            $ban[] = $id;
+        } elseif ($_POST["admin-$id"] == 'clear') {
+            $clear[] = $id;
         }
     }
 }
