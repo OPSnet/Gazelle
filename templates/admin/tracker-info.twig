@@ -57,6 +57,8 @@
                          {{ key }} {{ value }}
                     {%- elseif key starts with "bytes " -%}
                         {{ value|octet_size }} {{ key }}
+                    {%- elseif key in ["system time", "user time"] -%}
+                        {{ value|number_format(6) }} {{ key }}
                     {%- else -%}
                         {{ value|number_format }} {{ key }}
                     {%- endif %}

@@ -40,6 +40,7 @@ class TrackerTest extends TestCase {
      */
     public function testTrackerStats(): void {
         $tracker = new \Gazelle\Tracker;
+        // this will fail if you have local clients logged into ocelot
         $this->assertEquals([0, 0], $tracker->global_peer_count(), 'tracker-global-peer-count');
     }
 
@@ -91,7 +92,7 @@ class TrackerTest extends TestCase {
         $this->assertFalse($tracker->last_error(), 'tracker-init');
 
         $info = $tracker->info();
-        $this->assertCount(21, $info, 'tracker-info');
+        $this->assertCount(30, $info, 'tracker-info');
 
         $this->user = Helper::makeUser('trk.' . randomString(10), 'tracker');
         $this->assertTrue($tracker->addUser($this->user), 'tracker-add-user');

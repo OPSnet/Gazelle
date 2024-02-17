@@ -258,8 +258,8 @@ class Tracker extends Base {
             if (preg_match('/^(Uptime|version): (.*)$/', $Stat, $match)) {
                 $Stats[strtolower($match[1])] = $match[2];
             } else {
-                [$Val, $Key] = explode(" ", $Stat, 2);
-                $Stats[$Key] = (int)$Val;
+                [$value, $key] = explode(" ", $Stat, 2);
+                $Stats[$key] = str_contains($value, ".") ? (float)$value : (int)$value;
             }
         }
         return $Stats;
