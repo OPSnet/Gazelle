@@ -297,8 +297,17 @@ class Upload extends \Gazelle\Base {
     }
 
     public function ircNotification(): string {
-        $torrent = $this->torrent;
-        $tgroup  = $torrent->group();
+        $torrent  = $this->torrent;
+        $tgroup   = $torrent->group();
+        $metadata = [$torrent->media(), $torrent->format(), $torrent->encoding()];
+        if ($torrent->media() == "CD") {
+            if ($torrent->hasCue()) {
+                $metdata[] = "Cue";
+            }
+            if ($torrent->hasLog()) {
+                array_push($metadata, "Log", $torrent->logScore());
+            }
+        }
         return match ($tgroup->categoryName()) {
             'Music' => Irc::render(
                 IrcText::Bold,
@@ -313,7 +322,7 @@ class Upload extends \Gazelle\Base {
                 '[',
                 $torrent->isRemasteredUnknown() || !$torrent->isRemastered() ? $tgroup->year() : $torrent->remasterYear(),
                 "] [{$tgroup->releaseTypeName()}] ",
-                implode('/', [$torrent->media(), $torrent->format(), $torrent->encoding()]),
+                implode('/', $metadata),
                 IrcText::ColorOff,
                 ' – ',
                 IrcText::SurfieGreen,
