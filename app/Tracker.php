@@ -137,8 +137,8 @@ class Tracker extends Base {
         ");
         self::$db->prepared_query("
             INSERT IGNORE INTO expire_freeleech (UserID, TorrentID) VALUES
-            " . placeholders($expire, '(?, ?)')
-            , ...array_merge(...$expire)
+            " . placeholders($expire, '(?, ?)'),
+            ...array_merge(...$expire)
         );
         self::$db->prepared_query("
             UPDATE users_freeleeches uf

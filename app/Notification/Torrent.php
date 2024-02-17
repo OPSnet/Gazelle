@@ -32,8 +32,8 @@ class Torrent extends \Gazelle\Base {
             FROM users_notify_torrents AS unt
             INNER JOIN torrents AS t ON (t.ID = unt.TorrentID)
             LEFT JOIN users_notify_filters AS unf ON (unf.ID = unt.FilterID)
-            WHERE " . implode(' AND ', $this->cond)
-            , ...$this->args
+            WHERE " . implode(' AND ', $this->cond),
+            ...$this->args
         );
     }
 

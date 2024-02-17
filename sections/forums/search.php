@@ -162,7 +162,7 @@ echo "class='hidden'"; } ?>>
             <tr>
 <?php   } ?>
                 <td>
-                    <input type="checkbox" name="forums[]" value="<?= $forumId ?>" data-category="forum_category_<?=$i?>" id="forum_<?= $forumId ?>"<?= in_array( $forumId , ($_GET['forums'] ?? [])) ? ' checked="checked"' : '' ?> />
+                    <input type="checkbox" name="forums[]" value="<?= $forumId ?>" data-category="forum_category_<?=$i?>" id="forum_<?= $forumId ?>"<?= in_array( $forumId, ($_GET['forums'] ?? [])) ? ' checked="checked"' : '' ?> />
                     <label for="forum_<?= $forumId ?>"><?=htmlspecialchars($forum->name())?></label>
                 </td>
 <?php

@@ -216,9 +216,8 @@ class Twig {
         $twig->addFunction(new \Twig\TwigFunction('donor_icon', fn($icon, $userId) => new \Twig\Markup(image_cache_encode($icon), 'UTF-8')));
 
         $twig->addFunction(new \Twig\TwigFunction('ipaddr', fn(string $ipaddr) => new \Twig\Markup(
-            "$ipaddr <a href=\"user.php?action=search&amp;ip_history=on&amp;matchtype=strict&amp;ip="
-                . $ipaddr . '" title="Search" class="brackets tooltip">S</a>'
-            , 'UTF-8'
+            "$ipaddr <a href=\"user.php?action=search&amp;ip_history=on&amp;matchtype=strict&amp;ip=$ipaddr\" title=\"Search\" class=\"brackets tooltip\">S</a>",
+            'UTF-8'
         )));
 
         $twig->addFunction(new \Twig\TwigFunction('mtime', fn($filename) => new \Twig\Markup(

@@ -397,8 +397,8 @@ class Forum extends \Gazelle\BaseUser {
             SELECT count(*)
             $from
             WHERE
-            " . implode(' AND ', $cond)
-            , ...$args
+            " . implode(' AND ', $cond),
+            ...$args
         );
     }
 

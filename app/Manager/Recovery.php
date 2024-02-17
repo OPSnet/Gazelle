@@ -479,8 +479,7 @@ class Recovery extends \Gazelle\Base {
                 SET buffer = true
                 WHERE mapped_id = ?
                 ", RECOVERY_DB
-                )
-                , $siteUserId
+                ), $siteUserId
             );
 
             /* upscale from IRC activity */

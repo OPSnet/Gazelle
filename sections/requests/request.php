@@ -337,7 +337,7 @@ if ($request->canVote($Viewer)) {
                         ?>
                         If you add the entered <strong><span id="new_bounty">0 MiB</span></strong> of bounty, your new stats will be: <br />
                         Uploaded: <span id="new_uploaded"><?= byte_format($Viewer->uploadedSize()) ?></span><br />
-                        Ratio: <span id="new_ratio"><?= ratio_html($Viewer->uploadedSize(),$Viewer->downloadedSize()) ?></span>
+                        Ratio: <span id="new_ratio"><?= ratio_html($Viewer->uploadedSize(), $Viewer->downloadedSize()) ?></span>
                         <input type="button" id="button" value="Vote!" disabled="disabled" onclick="Vote();" />
                     </form>
                 </td>

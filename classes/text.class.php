@@ -507,7 +507,7 @@ class Text {
                 if ($CloseTag === 0) { // block finishes with URL
                     $CloseTag = $Len;
                 }
-                if (preg_match('/[!,.?:]+$/',substr($Str, $i, $CloseTag), $Match)) {
+                if (preg_match('/[!,.?:]+$/', substr($Str, $i, $CloseTag), $Match)) {
                     $CloseTag -= strlen($Match[0]);
                 }
                 $URL = substr($Str, $i, $CloseTag);
@@ -981,7 +981,7 @@ class Text {
                     $Str .= '<div class="box pad" style="padding: 10px 10px 10px 20px">' . self::to_html($Block['Val'], $Rules, $cache, $bucket) . '</div>';
                     break;
                 case 'pad':
-                    $Attr = array_filter(explode('|',$Block['Attr'] ?? ''), fn($x) => is_numeric($x) && (float)$x >= 0);
+                    $Attr = array_filter(explode('|', $Block['Attr'] ?? ''), fn($x) => is_numeric($x) && (float)$x >= 0);
                     if (count($Attr) === 0) {
                         $Str .= self::to_html($Block['Val'], $Rules, $cache, $bucket);
                     } else {
@@ -1349,7 +1349,7 @@ class Text {
         $Str = str_replace(["\r\n", "\n"], "", $Str);
         $Str = preg_replace("/\<strong\>([a-zA-Z0-9 ]+)\<\/strong\>\: \<spoiler\>/", "[spoiler=\\1]", $Str);
         $Str = str_replace("</spoiler>", "[/spoiler]", $Str);
-        $Str = preg_replace("/\<strong class=\"quoteheader\"\>(.*)\<\/strong\>(.*)wrote\:(.*?)\<blockquote\>/","[quote=\\1]", $Str);
+        $Str = preg_replace("/\<strong class=\"quoteheader\"\>(.*)\<\/strong\>(.*)wrote\:(.*?)\<blockquote\>/", "[quote=\\1]", $Str);
         $Str = preg_replace("/\<(\/*)blockquote\>/", "[\\1quote]", $Str);
         $Str = preg_replace("/\<(\/*)strong\>/", "[\\1b]", $Str);
         $Str = preg_replace("/\<(\/*)italic\>/", "[\\1i]", $Str);

@@ -86,8 +86,8 @@ class Privilege extends BaseObject {
             self::$db->prepared_query(
                 $this->isSecondary()
                 ? "SELECT DISTINCT UserID FROM users_levels WHERE PermissionID = ?"
-                : "SELECT ID FROM users_main WHERE PermissionID = ?"
-                , $this->id
+                : "SELECT ID FROM users_main WHERE PermissionID = ?",
+                $this->id
             );
             $this->userFlush(self::$db->collect(0, false));
         }

@@ -611,8 +611,8 @@ class TGroup extends BaseObject {
         self::$db->prepared_query("
             INSERT IGNORE INTO torrents_artists
                    (GroupID, UserID, ArtistID, AliasID, artist_role_id, Importance)
-            VALUES " . placeholders($add, '(?, ?, ?, ?, ?, ?)')
-            , ...$args
+            VALUES " . placeholders($add, '(?, ?, ?, ?, ?, ?)'),
+            ...$args
         );
 
         foreach ($add as $artistLabel) {

@@ -73,15 +73,15 @@ class DbTest extends TestCase {
             ", 'abc'),
             'db-pg-row'
         );
-        $this->assertEquals(['i' => 3, 'j' => 'def'], $this->pg()->rowAssoc("
-            select id_t as i, label as j from t where id_t = ?
-            ", 3)
-            , 'db-pg-assoc-row'
+        $this->assertEquals(
+            ['i' => 3, 'j' => 'def'],
+            $this->pg()->rowAssoc("select id_t as i, label as j from t where id_t = ?", 3),
+            'db-pg-assoc-row'
         );
-        $this->assertEquals(['phpunit', 'abc', 'def', 'ghi'], $this->pg()->column("
-            select label from t order by id_t
-            ")
-            , 'db-pg-column'
+        $this->assertEquals(
+            ['phpunit', 'abc', 'def', 'ghi'],
+            $this->pg()->column("select label from t order by id_t"),
+            'db-pg-column'
         );
         $all = $this->pg()->all("
             select id_t, label, created from t order by id_t desc

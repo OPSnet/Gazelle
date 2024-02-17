@@ -154,22 +154,22 @@ if (!$isMusicUpload || !$Properties['GroupID']) {
 }
 
 if (isset($_POST['album_desc'])) {
-    $Validate->setField('album_desc', true, 'string','The album description has a minimum length of 10 characters.', ['range' => [10, 1_000_000]]);
+    $Validate->setField('album_desc', true, 'string', 'The album description has a minimum length of 10 characters.', ['range' => [10, 1_000_000]]);
 } elseif (isset($_POST['desc'])) {
-    $Validate->setField('desc', true, 'string','The description has a minimum length of 10 characters.', ['range' => [10, 1_000_000]]);
+    $Validate->setField('desc', true, 'string', 'The description has a minimum length of 10 characters.', ['range' => [10, 1_000_000]]);
 }
 
 // audio types
 if (in_array($categoryName, ['Music', 'Audiobooks', 'Comedy'])) {
-    $Validate->setField('format', true, 'inarray','Please select a valid format.', ['inarray' => FORMAT]);
+    $Validate->setField('format', true, 'inarray', 'Please select a valid format.', ['inarray' => FORMAT]);
     if ($Properties['Encoding'] !== 'Other') {
-        $Validate->setField('bitrate', true, 'inarray','You must choose a bitrate.', ['inarray' => ENCODING]);
+        $Validate->setField('bitrate', true, 'inarray', 'You must choose a bitrate.', ['inarray' => ENCODING]);
     } else {
         if ($Properties['Format'] === 'FLAC') {
-            $Validate->setField('bitrate', true, 'string','FLAC bitrate must be lossless.', ['regex' => '/Lossless/']);
+            $Validate->setField('bitrate', true, 'string', 'FLAC bitrate must be lossless.', ['regex' => '/Lossless/']);
         } else {
             $Validate->setField('other_bitrate',
-                true, 'string','You must enter the other bitrate (max length: 9 characters).', ['maxlength' => 9]);
+                true, 'string', 'You must enter the other bitrate (max length: 9 characters).', ['maxlength' => 9]);
             $Properties['Encoding'] = trim($_POST['other_bitrate']) . (!empty($_POST['vbr']) ? ' (VBR)' : '');;
         }
     }
@@ -178,7 +178,7 @@ if (in_array($categoryName, ['Music', 'Audiobooks', 'Comedy'])) {
 $releaseTypes = (new Gazelle\ReleaseType)->list();
 switch ($categoryName) {
     case 'Audiobooks':
-        $Validate->setField('year', true,'number','The year of the release must be entered.');
+        $Validate->setField('year', true, 'number', 'The year of the release must be entered.');
         break;
 
     case 'Music':
@@ -205,10 +205,10 @@ switch ($categoryName) {
             $Validate->setField('remaster_title', false, 'string', '"Orginal Release" is not a valid remaster title.');
         }
         if (!$Properties['Remastered']) {
-            $Validate->setField('remaster_year', false, 'number','Invalid remaster year.');
+            $Validate->setField('remaster_year', false, 'number', 'Invalid remaster year.');
         } else {
             if (!$Properties['UnknownRelease']) {
-                $Validate->setField('remaster_year', true, 'number','Year of remaster/re-issue must be entered.');
+                $Validate->setField('remaster_year', true, 'number', 'Year of remaster/re-issue must be entered.');
             }
             if ($Properties['Media'] == 'CD' ) {
                 $Validate->setField('remaster_year', true, 'number', 'You have selected a year for an album that predates the media you say it was created on.',

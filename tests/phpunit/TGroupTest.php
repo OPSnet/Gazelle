@@ -116,7 +116,7 @@ class TGroupTest extends TestCase {
     public function testTGroupArtist(): void {
         $artistName = 'The ' . randomString(6) . ' Band';
         $this->assertEquals(1, $this->tgroup->addArtists([ARTIST_MAIN], [$artistName], $this->userList['admin'], new Gazelle\Manager\Artist, new Gazelle\Log), 'tgroup-artist-add');
-        $this->assertEquals("$artistName – {$this->tgroup->name()} [{$this->tgroup->year()} Live album]" , $this->tgroup->text(), 'tgroup-artist-text');
+        $this->assertEquals("$artistName – {$this->tgroup->name()} [{$this->tgroup->year()} Live album]", $this->tgroup->text(), 'tgroup-artist-text');
 
         $this->assertNotNull($this->tgroup->primaryArtist(), 'tgroup-artist-primary');
 

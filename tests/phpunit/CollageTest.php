@@ -104,15 +104,18 @@ class CollageTest extends TestCase {
 
         $this->assertEquals(
             [],
-            $inner->parseUrlArgs('', 'li[]'),'collage-parse-no-arg'
+            $inner->parseUrlArgs('', 'li[]'),
+            'collage-parse-no-arg'
         );
         $this->assertEquals(
             [],
-            $inner->parseUrlArgs('y=1&y=2&y=3', 'x'), 'collage-parse-no-match'
+            $inner->parseUrlArgs('y=1&y=2&y=3', 'x'),
+            'collage-parse-no-match'
         );
         $this->assertEquals(
             [33, 44],
-            $inner->parseUrlArgs('a=11&b=33&a=22&b=44', 'b'), 'collage-parse-some'
+            $inner->parseUrlArgs('a=11&b=33&a=22&b=44', 'b'),
+            'collage-parse-some'
         );
         $this->assertEquals(
             [14, 31, 58, 68, 69, 54, 5],

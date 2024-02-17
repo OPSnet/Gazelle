@@ -154,8 +154,8 @@ class UserLink extends \Gazelle\BaseUser {
             INNER JOIN users_dupes AS d2 ON (d2.GroupID = d1.GroupID) SET
                 i.AdminComment = concat(now(), ?, i.AdminComment)
             WHERE d2.UserID = ?
-            ", " - Linked accounts updated: [user]" . $target->username() . "[/user] unlinked by $adminName\n\n"
-            , $targetId
+            ", " - Linked accounts updated: [user]" . $target->username() . "[/user] unlinked by $adminName\n\n",
+            $targetId
         );
         self::$db->prepared_query("
             DELETE FROM users_dupes WHERE UserID = ?

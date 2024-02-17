@@ -386,7 +386,7 @@ class ForumTest extends TestCase {
             $body,
             'warn-user-inbox-pm-body-start'
         );
-        $this->assertStringEndsWith($message . '[/quote]', $body,'warn-user-inbox-pm-body-end');
+        $this->assertStringEndsWith($message . '[/quote]', $body, 'warn-user-inbox-pm-body-end');
     }
 
     public function testForumPoll(): void {

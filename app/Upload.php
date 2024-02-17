@@ -630,7 +630,7 @@ echo ' checked="checked"'; } ?> /><label for="vbr"> (VBR)</label>
             <tr>
                 <td class="label">Release description (optional):</td>
                 <td>
-                <?= (new Textarea('release_desc', is_array($Torrent) ? $Torrent['TorrentDescription'] : '' , 60, 5))->emit() ?>
+                <?= (new Textarea('release_desc', is_array($Torrent) ? $Torrent['TorrentDescription'] : '', 60, 5))->emit() ?>
                     <p class="min_padding">Contains information like encoder settings. For analog rips, this frequently contains lineage information.</p>
                 </td>
             </tr>

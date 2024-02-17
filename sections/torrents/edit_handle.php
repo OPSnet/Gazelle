@@ -103,7 +103,7 @@ switch (CATEGORY[(int)($_POST['type'] ?? 0) - 1]) {
         if ($Properties['Remastered'] && !$Properties['UnknownRelease']) {
             $Validate->setField('remaster_year', true, 'number', 'Year of remaster/re-issue must be entered.');
         } else {
-            $Validate->setField('remaster_year', false,'number', 'Invalid remaster year.');
+            $Validate->setField('remaster_year', false, 'number', 'Invalid remaster year.');
         }
 
         if ($Properties['Encoding'] !== 'Other') {

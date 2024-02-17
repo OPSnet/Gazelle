@@ -114,8 +114,8 @@ class ReaperTest extends TestCase {
 
     protected function removeUnseededAlert(array $list): void {
         Gazelle\DB::DB()->prepared_query("
-            DELETE FROM torrent_unseeded WHERE torrent_id in (" . placeholders($list) . ")"
-            , ...array_map(fn($t) => $t->id(), $list)
+            DELETE FROM torrent_unseeded WHERE torrent_id in (" . placeholders($list) . ")",
+            ...array_map(fn($t) => $t->id(), $list)
         );
     }
 
@@ -135,8 +135,8 @@ class ReaperTest extends TestCase {
             FROM torrents t
             INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
             LEFT JOIN torrent_unseeded tu ON (tu.torrent_id = t.ID)
-            WHERE t.ID IN (" . placeholders($torrentList) . ")"
-            , ...array_map(fn($t) => $t->id(), $torrentList)
+            WHERE t.ID IN (" . placeholders($torrentList) . ")",
+            ...array_map(fn($t) => $t->id(), $torrentList)
         );
         echo implode("\t", ['id', 'created', 'created<last?', 'last_action', 'unseeded', 'final', 'never_seeded']), "\n";
         echo implode("\n",

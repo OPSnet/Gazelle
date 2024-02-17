@@ -118,8 +118,8 @@ class StaffPM extends BaseObject {
             SET Status = 'Unanswered',
                 Level = ?,
                 AssignedToUser = NULL
-            WHERE ID = ?"
-            , $level, $this->id
+            WHERE ID = ?",
+            $level, $this->id
         );
         $affected = self::$db->affected_rows();
         $this->flush();

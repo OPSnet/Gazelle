@@ -18,7 +18,7 @@
     <rule ref="PSR12">
         <exclude name="Generic.Files.LineLength" />
         <exclude name="Generic.Formatting.DisallowMultipleStatements" />
-        <exclude name="Generic.Functions.FunctionCallArgumentSpacing" />
+        <exclude name="Generic.Functions.FunctionCallArgumentSpacing.TooMuchSpaceAfterComma" />
         <exclude name="Generic.NamingConventions.UpperCaseConstantName" />
         <exclude name="Generic.WhiteSpace.ScopeIndent" />
 

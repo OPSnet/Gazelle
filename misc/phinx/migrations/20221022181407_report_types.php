@@ -10,10 +10,10 @@ final class ReportTypes extends AbstractMigration {
     public function up(): void {
         $this->table('category', ['id' => false, 'primary_key' => ['category_id'], 'encoding' => 'utf8mb4'])
             ->addColumn('category_id', 'integer', ['identity' => true])
-            ->addColumn('is_system',    'boolean', ['default' => false])
-            ->addColumn('is_grouped',   'boolean', ['default' => false])
-            ->addColumn('upload',       'enum', ['default' => 'simple', 'values' => ['audiobook', 'simple', 'music']])
-            ->addColumn('name',         'string', ['length' => 30])
+            ->addColumn('is_system',   'boolean', ['default' => false])
+            ->addColumn('is_grouped',  'boolean', ['default' => false])
+            ->addColumn('upload',      'enum', ['default' => 'simple', 'values' => ['audiobook', 'simple', 'music']])
+            ->addColumn('name',        'string', ['length' => 30])
             ->addIndex(['name'], ['unique' => true, 'name' => 'c_name_uidx'])
             ->create();
 
@@ -51,7 +51,7 @@ final class ReportTypes extends AbstractMigration {
         $this->table('torrent_report_configuration', ['id' => false, 'primary_key' => ['torrent_report_configuration_id'], 'encoding' => 'utf8mb4'])
             ->addColumn('torrent_report_configuration_id', 'integer', ['identity' => true])
             ->addColumn('type',           'string', ['length' => 20])
-            ->addColumn('name' ,          'string', ['length' => 30])
+            ->addColumn('name',           'string', ['length' => 30])
             ->addColumn('category_id',    'integer')
             ->addColumn('sequence',       'integer')
             ->addColumn('tracker_reason', 'integer', ['default' => -1])

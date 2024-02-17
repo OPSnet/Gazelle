@@ -7,7 +7,7 @@ final class BlogForeignKey extends AbstractMigration {
     public function change(): void {
         $this->table('user_read_blog')
             ->dropForeignKey('blog_id')
-            ->addForeignKey('blog_id', 'blog','ID', ['delete' => 'CASCADE', 'update' => 'CASCADE'])
+            ->addForeignKey('blog_id', 'blog', 'ID', ['delete' => 'CASCADE', 'update' => 'CASCADE'])
             ->save();
 
         $this->table('user_read_news')

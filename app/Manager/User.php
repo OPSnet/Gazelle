@@ -154,8 +154,8 @@ class User extends \Gazelle\BaseManager {
         if ($active) {
             self::$db->prepared_query("
                 INSERT IGNORE INTO user_has_attr (UserID, UserAttrID)
-                VALUES " . placeholders($idList, "(?, $attrId)")
-                , ...$idList
+                VALUES " . placeholders($idList, "(?, $attrId)"),
+                ...$idList
             );
         } else {
             self::$db->prepared_query("

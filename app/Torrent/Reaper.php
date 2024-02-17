@@ -138,7 +138,8 @@ class Reaper extends \Gazelle\Base {
         if ($args) {
             self::$db->prepared_query("
                 INSERT INTO torrent_unseeded_claim (user_id, torrent_id) VALUES "
-                    . placeholders(array_fill(0, (int)(count($args) / 2), true), "(?,?)") , ...$args
+                . placeholders(array_fill(0, (int)(count($args) / 2), true), "(?,?)"),
+                ...$args
             );
         }
         self::$db->commit();
@@ -207,7 +208,8 @@ class Reaper extends \Gazelle\Base {
             // can be sent later and then eventually reap what's left afterwards.
             self::$db->prepared_query("
                 INSERT INTO torrent_unseeded (torrent_id, state) VALUES "
-                    . placeholders($torrentIds, "(?,'" . $state->value . "')") , ...$torrentIds
+                . placeholders($torrentIds, "(?,'" . $state->value . "')"),
+                ...$torrentIds
             );
         }
         return $result;

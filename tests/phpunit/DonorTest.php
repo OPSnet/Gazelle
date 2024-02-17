@@ -41,9 +41,9 @@ class DonorTest extends TestCase {
 
         // test body
         $body = $donor->messageBody('EUR', 12.34, 1, 1);
-        $this->assertStringContainsString('[b]You Contributed:[/b] 12.34 EUR' , $body, 'donor-msg-amount');
-        $this->assertStringContainsString('[b]You Received:[/b] 1 Donor Point' , $body, 'donor-msg-point');
-        $this->assertStringContainsString('[b]Your Donor Rank:[/b] Donor Rank # 1' , $body, 'donor-msg-rank');
+        $this->assertStringContainsString('[b]You Contributed:[/b] 12.34 EUR', $body, 'donor-msg-amount');
+        $this->assertStringContainsString('[b]You Received:[/b] 1 Donor Point', $body, 'donor-msg-point');
+        $this->assertStringContainsString('[b]Your Donor Rank:[/b] Donor Rank # 1', $body, 'donor-msg-rank');
 
         // small donation
         $this->assertEquals(
