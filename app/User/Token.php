@@ -9,7 +9,10 @@ class Token extends \Gazelle\BaseUser {
 
     final public const tableName = 'user_token';
 
-    public function flush(): static { unset($this->info); return $this; }
+    public function flush(): static {
+        unset($this->info);
+        return $this;
+    }
 
     public function __construct(protected int $tokenId, \Gazelle\User $user) {
         parent::__construct($user);

@@ -8,7 +8,10 @@ class Session extends \Gazelle\BaseUser {
     final public const tableName     = 'users_sessions';
     protected const CACHE_KEY = 'u_sess_%d';
 
-    public function flush(): static { $this->user()->flush(); return $this; }
+    public function flush(): static {
+        $this->user()->flush();
+        return $this;
+    }
 
     public function info(): array {
         if (isset($this->info) && !empty($this->info)) {

@@ -12,7 +12,10 @@ class TorrentLog extends BaseObject {
         parent::__construct($id);
     }
 
-    public function flush(): static { $this->torrent->flush(); return $this; }
+    public function flush(): static {
+        $this->torrent->flush();
+        return $this;
+    }
     public function link(): string { return $this->torrent->link(); }
     public function location(): string { return $this->torrent->location(); }
 

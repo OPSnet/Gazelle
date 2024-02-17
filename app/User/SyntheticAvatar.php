@@ -7,7 +7,10 @@ use Gazelle\Enum\AvatarSynthetic;
 class SyntheticAvatar extends \Gazelle\BaseUser {
     final public const tableName = '';
 
-    public function flush(): static { $this->user->flush(); return $this; }
+    public function flush(): static {
+        $this->user->flush();
+        return $this;
+    }
 
     public function avatar(string $username): string {
         $hash = md5(AVATAR_SALT . $username);

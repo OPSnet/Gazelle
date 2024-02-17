@@ -9,7 +9,10 @@ class Activity extends \Gazelle\BaseUser {
     protected array $action = [];
     protected array $alert = [];
 
-    public function flush(): static { $this->user()->flush(); return $this; }
+    public function flush(): static {
+        $this->user()->flush();
+        return $this;
+    }
 
     protected function setAction(string $action): static {
         $this->action[] = $action;

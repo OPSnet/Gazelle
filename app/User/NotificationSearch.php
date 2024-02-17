@@ -11,7 +11,10 @@ class NotificationSearch extends \Gazelle\BaseUser {
     protected array $cond = [];
     protected array $args = [];
 
-    public function flush(): static { $this->user()->flush(); return $this; }
+    public function flush(): static {
+        $this->user()->flush();
+        return $this;
+    }
 
     public function __construct(
         \Gazelle\User $user,

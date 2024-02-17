@@ -172,7 +172,10 @@ class Torrent extends \Gazelle\Base {
 
     private function flatten(array $array): array {
         $return = [];
-        array_walk_recursive($array, function ($a) use (&$return) { $return[] = $a; });
+        array_walk_recursive(
+            $array,
+            function ($a) use (&$return) { $return[] = $a; }
+        );
         return $return;
     }
 }

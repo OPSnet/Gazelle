@@ -69,11 +69,11 @@ class User extends BaseObject {
     }
 
     public function privilege(): User\Privilege {
-        return $this->privilege ??= new User\Privilege($this);;
+        return $this->privilege ??= new User\Privilege($this);
     }
 
     public function snatch(): User\Snatch {
-        return $this->snatch ??= new User\Snatch($this);;
+        return $this->snatch ??= new User\Snatch($this);
     }
 
     public function stats(): \Gazelle\Stats\User {

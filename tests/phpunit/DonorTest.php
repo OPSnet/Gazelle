@@ -426,7 +426,8 @@ class DonorTest extends TestCase {
         $Cache->delete_value("donations_month_1"); // can be required when testing locally
         $this->assertLessThanOrEqual($manager->totalMonth(1), $last['Amount'], 'donor-manager-timeline');
 
-        global $Viewer; $Viewer = $this->donor->user(); // sadness
+        global $Viewer;
+        $Viewer = $this->donor->user(); // sadness
         $current = (new Gazelle\User\Session($Viewer))->create([
             'keep-logged' => '0',
             'browser'     => [
@@ -438,8 +439,10 @@ class DonorTest extends TestCase {
             'ipaddr'      => '127.0.0.1',
             'useragent'   => 'phpunit',
         ]);
-        global $SessionID; $SessionID = $current['SessionID']; // more sadness
-        global $Document; $Document = 'index'; // utter misery
+        global $SessionID;
+        $SessionID = $current['SessionID']; // more sadness
+        global $Document;
+        $Document = 'index'; // utter misery
 
         $paginator = (new Gazelle\Util\Paginator(USERS_PER_PAGE, 1))->setTotal($manager->rewardTotal());
         $render = (Gazelle\Util\Twig::factory())->render('donation/reward-list.twig', [

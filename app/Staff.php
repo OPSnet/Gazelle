@@ -5,7 +5,10 @@ namespace Gazelle;
 class Staff extends BaseUser {
     final public const tableName = 'staff_blog_visits';
 
-    public function flush(): static  { $this->user()->flush(); return $this; }
+    public function flush(): static  {
+        $this->user()->flush();
+        return $this;
+    }
     public function link(): string { return $this->user()->link(); }
     public function location(): string { return $this->user()->location(); }
 

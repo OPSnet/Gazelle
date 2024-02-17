@@ -30,7 +30,10 @@ class Forum extends \Gazelle\BaseUser {
 
     protected \Gazelle\User $viewer;
 
-    public function flush(): static  { $this->user()->flush(); return $this; }
+    public function flush(): static  {
+        $this->user()->flush();
+        return $this;
+    }
     public function link(): string { return $this->user()->link(); }
     public function location(): string { return $this->user()->location(); }
 

@@ -37,7 +37,10 @@ class Notification extends \Gazelle\BaseUser {
         'Torrents',
     ];
 
-    public function flush(): static { $this->user()->flush(); return $this; }
+    public function flush(): static {
+        $this->user()->flush();
+        return $this;
+    }
 
     public function config(): array {
         if (isset($this->config)) {

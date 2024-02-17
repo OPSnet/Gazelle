@@ -168,9 +168,8 @@ if (in_array($categoryName, ['Music', 'Audiobooks', 'Comedy'])) {
         if ($Properties['Format'] === 'FLAC') {
             $Validate->setField('bitrate', true, 'string', 'FLAC bitrate must be lossless.', ['regex' => '/Lossless/']);
         } else {
-            $Validate->setField('other_bitrate',
-                true, 'string', 'You must enter the other bitrate (max length: 9 characters).', ['maxlength' => 9]);
-            $Properties['Encoding'] = trim($_POST['other_bitrate']) . (!empty($_POST['vbr']) ? ' (VBR)' : '');;
+            $Validate->setField('other_bitrate', true, 'string', 'You must enter the other bitrate (max length: 9 characters).', ['maxlength' => 9]);
+            $Properties['Encoding'] = trim($_POST['other_bitrate']) . (!empty($_POST['vbr']) ? ' (VBR)' : '');
         }
     }
 }

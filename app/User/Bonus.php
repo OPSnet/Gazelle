@@ -530,9 +530,9 @@ class Bonus extends \Gazelle\BaseUser {
             LIMIT ?
             OFFSET ?
             ", $this->user->id(), $this->user->id(), $limit, $offset
-        ); $list = [];
-        $result = self::$db->to_array('ID', MYSQLI_ASSOC, false);
-        foreach ($result as $r) {
+        );
+        $list = [];
+        foreach (self::$db->to_array('ID', MYSQLI_ASSOC, false) as $r) {
             $r['torrent'] = new \Gazelle\Torrent($r['ID']);
             $list[] = $r;
         }

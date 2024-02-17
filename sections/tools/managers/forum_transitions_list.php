@@ -8,7 +8,7 @@ function forumList(array $list, int $selected = 0): string {
             if ($cat !== '') {
                 $return .= '</optgroup>';
             }
-            $cat = $forum->categoryName();;
+            $cat = $forum->categoryName();
             $return .= sprintf('<optgroup label="%s">', $cat);
         }
 

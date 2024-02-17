@@ -129,8 +129,8 @@ $rank = new Gazelle\UserRank(
     ],
 );
 
-$byteFormatter = function ($value) { return byte_format($value); };
-$numberFormatter = function ($value) { return number_format($value); };
+$byteFormatter = fn ($value) => byte_format($value);
+$numberFormatter = fn ($value) => number_format($value);
 
 $statList = [
     // [dimension, permission, title, formatter, tooltip suffix]

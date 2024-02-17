@@ -5,7 +5,10 @@ namespace Gazelle\User;
 class Friend extends \Gazelle\BaseUser {
     final public const tableName = 'friends';
 
-    public function flush(): static { $this->user()->flush(); return $this; }
+    public function flush(): static {
+        $this->user()->flush();
+        return $this;
+    }
 
     public function isFriend(int $friendId): bool {
         return (bool)self::$db->scalar("
