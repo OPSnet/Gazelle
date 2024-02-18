@@ -41,7 +41,7 @@ switch ($_GET['action'] ?? '') {
         require_once('history.php');
         break;
     case 'cacheflush':
-        (new \Gazelle\Manager\Bonus)->flushPriceCache();
+        (new \Gazelle\Manager\Bonus())->flushPriceCache();
         header("Location: bonus.php");
         exit;
     case 'donate':

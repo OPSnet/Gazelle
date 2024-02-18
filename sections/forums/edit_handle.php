@@ -5,7 +5,7 @@ if ($Viewer->disablePosting()) {
 }
 authorize();
 
-$post = (new Gazelle\Manager\ForumPost)->findById((int)($_POST['post'] ?? 0));
+$post = (new Gazelle\Manager\ForumPost())->findById((int)($_POST['post'] ?? 0));
 if (!$post) {
     error("No forum post #{$_POST['post']} found", true);
 }
@@ -22,7 +22,7 @@ if ($Viewer->id() != $post->userId()) {
         error("You cannot edit someone else's post", true);
     }
     if ($_POST['pm'] ?? 0) {
-        $user = (new Gazelle\Manager\User)->findById($post->userId());
+        $user = (new Gazelle\Manager\User())->findById($post->userId());
         if (is_null($user)) {
             error(0);
         }

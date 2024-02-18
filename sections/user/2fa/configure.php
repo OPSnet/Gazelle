@@ -11,7 +11,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 $valid = true;
-$auth = new RobThree\Auth\TwoFactorAuth;
+$auth = new RobThree\Auth\TwoFactorAuth();
 if (!empty($_SESSION['private_key'])) {
     $secret = $_SESSION['private_key'];
     if (isset($_POST['2fa'])) {

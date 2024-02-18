@@ -14,7 +14,7 @@ if (!$Viewer->permitted('admin_reports')) {
 }
 
 authorize();
-$torMan = new Gazelle\Manager\Torrent;
+$torMan = new Gazelle\Manager\Torrent();
 $other = $torMan->findById((int)$_POST['otherid']);
 if (is_null($other)) {
     json_error("bad other id");
@@ -36,7 +36,7 @@ $new = $reportMan->create(
     reason:      $report->reason(),
     image:       implode(' ', $report->image()),
     otherIdList: (string)$report->torrentId(),
-    irc:         new Gazelle\Util\Irc,
+    irc:         new Gazelle\Util\Irc(),
 );
 
 if ($other->uploaderId() != $Viewer->id()) {

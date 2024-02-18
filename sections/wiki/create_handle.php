@@ -2,13 +2,13 @@
 
 authorize();
 
-$validator = new Gazelle\Util\Validator;
+$validator = new Gazelle\Util\Validator();
 $validator->setField('title', true, 'string', 'The title must be between 3 and 100 characters', ['range' => [3, 100]]);
 if (!$validator->validate($_POST)) {
     error($validator->errorMessage());
 }
 
-$wikiMan = new Gazelle\Manager\Wiki;
+$wikiMan = new Gazelle\Manager\Wiki();
 $title = trim($_POST['title']);
 $article = $wikiMan->findByTitle($title);
 if ($article) {
@@ -24,6 +24,6 @@ if ($error) {
 }
 
 $article = $wikiMan->create($title, $_POST['body'], $minRead, $minEdit, $Viewer);
-(new Gazelle\Log)->general("Wiki article {$article->id()} \"$title\" was created by {$Viewer->username()}");
+(new Gazelle\Log())->general("Wiki article {$article->id()} \"$title\" was created by {$Viewer->username()}");
 
 header('Location: ' . $article->location());

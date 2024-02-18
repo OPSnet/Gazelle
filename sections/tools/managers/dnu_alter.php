@@ -6,7 +6,7 @@ if (!$Viewer->permitted('admin_dnu')) {
 
 authorize();
 
-$manager = new Gazelle\Manager\DNU;
+$manager = new Gazelle\Manager\DNU();
 
 $db = Gazelle\DB::DB();
 
@@ -22,7 +22,7 @@ if ($_POST['submit'] == 'Delete') {
 
 } else {
     // Edit & Create, Shared Validation
-    $Val = new Gazelle\Util\Validator;
+    $Val = new Gazelle\Util\Validator();
     $Val->setField('name', true, 'string', 'The name must be set, have a length of between 5 and 100 characters.', ['range' => [5, 100]]);
     $Val->setField('comment', false, 'string', 'The description has a maximum length of 255 characters.', ['maxlength' => 255]);
     if (!$Val->validate($_POST)) {

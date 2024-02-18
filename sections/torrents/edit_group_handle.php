@@ -8,7 +8,7 @@ if (!$Viewer->permitted('site_edit_wiki')) {
 if (!$Viewer->permitted('torrents_edit_vanityhouse') && isset($_POST['vanity_house'])) {
     error(403);
 }
-$tgroup = (new Gazelle\Manager\TGroup)->findById((int)$_REQUEST['groupid']);
+$tgroup = (new Gazelle\Manager\TGroup())->findById((int)$_REQUEST['groupid']);
 if (is_null($tgroup)) {
     error(404);
 }
@@ -37,7 +37,7 @@ if (($_GET['action'] ?? '') == 'revert') {
 } else {
     // edit, variables are passed via POST
     $ReleaseType = (int)$_POST['releasetype'];
-    $rt = new Gazelle\ReleaseType;
+    $rt = new Gazelle\ReleaseType();
     $newReleaseTypeName = $rt->findNameById($ReleaseType);
     if ($tgroup->categoryId() == 1 && !$newReleaseTypeName || $tgroup->categoryId() != 1 && $ReleaseType) {
         error(403);
@@ -93,7 +93,7 @@ if ($noCoverArt != $tgroup->hasNoCoverArt()) {
     $logInfo[] = "No cover art exception " . ($noCoverArt ? 'added' : 'removed');
 }
 if ($logInfo) {
-    (new Gazelle\Log)->group($tgroup, $Viewer, implode(', ', $logInfo));
+    (new Gazelle\Log())->group($tgroup, $Viewer, implode(', ', $logInfo));
 }
 
 header('Location: ' . $tgroup->location());

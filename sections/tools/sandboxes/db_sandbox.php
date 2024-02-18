@@ -9,7 +9,7 @@ if (isset($_GET['debug'])) {
     $query = html_entity_decode(base64_decode($_GET['debug']));
     $textAreaRows = max(8, substr_count($query, "\n") + 2);
 } elseif (isset($_GET['table'])) {
-    $query = (new Gazelle\DB)->selectQuery($_GET['table']);
+    $query = (new Gazelle\DB())->selectQuery($_GET['table']);
     $textAreaRows = max(8, substr_count($query, "\n") + 2);
 } elseif (!empty($_POST['query'])) {
     $query = trim($_POST['query']);

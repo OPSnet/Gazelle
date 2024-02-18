@@ -1,10 +1,10 @@
 <?php
 
-$userMan = new Gazelle\Manager\User;
+$userMan = new Gazelle\Manager\User();
 $user = [$Viewer->id() => $Viewer];
 
 $category = [];
-$forumList = (new Gazelle\Manager\Forum)->forumList();
+$forumList = (new Gazelle\Manager\Forum())->forumList();
 foreach ($forumList as $forumId) {
     $forum = new Gazelle\Forum($forumId);
     if (!$Viewer->readAccess($forum)) {

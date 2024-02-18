@@ -1,6 +1,6 @@
 <?php
 
-$statsTor = new Gazelle\Stats\Torrent;
+$statsTor = new Gazelle\Stats\Torrent();
 $flow = $statsTor->flow();
 
 echo $Twig->render('stats/torrent.twig', [

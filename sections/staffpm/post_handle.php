@@ -1,6 +1,6 @@
 <?php
 
-$manager = new Gazelle\Manager\StaffPM;
+$manager = new Gazelle\Manager\StaffPM();
 
 if (isset($_POST['convid'])) {
     $staffPM = $manager->findById((int)($_POST['convid'] ?? 0));

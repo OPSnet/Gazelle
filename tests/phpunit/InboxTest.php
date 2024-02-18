@@ -85,7 +85,7 @@ class InboxTest extends TestCase {
         // It could be as simple as $pm->reply('body');
 
         // reply
-        $userMan  = new Gazelle\Manager\User;
+        $userMan  = new Gazelle\Manager\User();
         $replyBody = 'reply two ' . randomString(10);
         $replyId = $userMan->replyPM($senderId, $receiverId, $subject, 'reply one', $pmSent->id());
         $replyId = $userMan->replyPM($senderId, $receiverId, $subject, $replyBody, $pmSent->id());

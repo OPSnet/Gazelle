@@ -15,7 +15,7 @@ if (!isset($_GET['userid'])) {
     if (!$Viewer->permitted('users_override_paranoia')) {
         error(403);
     }
-    $user = (new Gazelle\Manager\User)->findById((int)$_GET['userid']);
+    $user = (new Gazelle\Manager\User())->findById((int)$_GET['userid']);
     if (is_null($user)) {
         error(404);
     }
@@ -24,7 +24,7 @@ if (!isset($_GET['userid'])) {
 $filter = $_GET['filter'] ?? 'uploaded';
 $search = $_GET['search'] ?? null;
 $target = $_GET['target'] ?? null;
-$better = new Gazelle\Search\Transcode($user, new Gazelle\Manager\Torrent);
+$better = new Gazelle\Search\Transcode($user, new Gazelle\Manager\Torrent());
 
 switch ($filter) {
     case 'seeding':

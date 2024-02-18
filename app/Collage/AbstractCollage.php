@@ -145,7 +145,7 @@ abstract class AbstractCollage extends \Gazelle\Base {
     /**
      * Remove an entry from a collage
      */
-   public function removeEntry(int $entryId): int {
+    public function removeEntry(int $entryId): int {
         self::$db->begin_transaction();
         self::$db->prepared_query("
             DELETE FROM {$this->entryTable()}
@@ -204,7 +204,7 @@ abstract class AbstractCollage extends \Gazelle\Base {
         return $affected;
     }
 
-   public function remove(): int {
+    public function remove(): int {
         self::$db->prepared_query("
             UPDATE collages SET
                 Deleted = '1'

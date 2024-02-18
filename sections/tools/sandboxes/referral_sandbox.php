@@ -4,7 +4,7 @@ if (!$Viewer->permitted('admin_manage_referrals')) {
     error(403);
 }
 
-$referralManager = new Gazelle\Manager\Referral;
+$referralManager = new Gazelle\Manager\Referral();
 $referralAccounts = $referralManager->getFullAccounts();
 
 $cookie = [];

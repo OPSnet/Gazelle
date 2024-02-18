@@ -5,15 +5,15 @@ if (!($Viewer->permitted('site_delete_artist') && $Viewer->permitted('torrents_d
 }
 authorize();
 
-$artist = (new Gazelle\Manager\Artist)->findById((int)($_GET['artistid'] ?? 0));
+$artist = (new Gazelle\Manager\Artist())->findById((int)($_GET['artistid'] ?? 0));
 if (is_null($artist)) {
     error(404);
 }
 
-$tgMan = new Gazelle\Manager\TGroup;
+$tgMan = new Gazelle\Manager\TGroup();
 $tgroupList = array_map(fn ($id) => $tgMan->findById($id), $artist->tgroupIdUsage());
 
-$reqMan = new Gazelle\Manager\Request;
+$reqMan = new Gazelle\Manager\Request();
 $requestList = array_map(fn ($id) => $reqMan->findById($id), $artist->requestIdUsage());
 
 if (count($tgroupList) + count($requestList) > 0) {
@@ -26,7 +26,7 @@ if (count($tgroupList) + count($requestList) > 0) {
 }
 
 $name = $artist->name();
-$artist->remove($Viewer, new Gazelle\Log);
+$artist->remove($Viewer, new Gazelle\Log());
 
 echo $Twig->render('artist/remove-success.twig', [
     'name' => $name,

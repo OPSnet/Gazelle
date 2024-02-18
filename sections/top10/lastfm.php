@@ -6,7 +6,7 @@ $Category = in_array($Category, ['all_time', 'weekly', 'hyped']) ? $Category : '
 $View = $_GET['view'] ?? 'tiles';
 $View = in_array($View, ['tiles', 'list']) ? $View : 'tiles';
 
-$lastFM = new Gazelle\Util\LastFM;
+$lastFM = new Gazelle\Util\LastFM();
 switch ($Category) {
     case 'weekly':
         $Artists = $lastFM->weeklyArtists();

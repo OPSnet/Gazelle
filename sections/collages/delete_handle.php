@@ -7,7 +7,7 @@ if (!$reason) {
     error('You must enter a reason!');
 }
 
-$collage = (new Gazelle\Manager\Collage)->findById((int)$_POST['collageid']);
+$collage = (new Gazelle\Manager\Collage())->findById((int)$_POST['collageid']);
 if (is_null($collage)) {
     error(404);
 }
@@ -19,8 +19,8 @@ $collageId = $collage->id();
 $name = $collage->name();
 $collage->remove();
 
-(new Gazelle\Manager\Subscription)->flushPage('collages', $collageId);
-(new Gazelle\Log)->general(sprintf("Collage %d (%s) was deleted by %s: %s",
+(new Gazelle\Manager\Subscription())->flushPage('collages', $collageId);
+(new Gazelle\Log())->general(sprintf("Collage %d (%s) was deleted by %s: %s",
     $collageId, $name, $Viewer->username(), $reason
 ));
 

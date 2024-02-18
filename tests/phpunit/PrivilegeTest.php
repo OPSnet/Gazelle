@@ -34,7 +34,7 @@ class PrivilegeTest extends TestCase {
         $privilegeList = Gazelle\Manager\Privilege::privilegeList();
         $this->assertCount(127, $privilegeList, 'privilege-total');
 
-        $manager = new Gazelle\Manager\Privilege;
+        $manager = new Gazelle\Manager\Privilege();
         $this->assertNull($manager->findByLevel(FAKE_LEVEL), 'privilege-find-none'); // if this fails, check the `permissions` table
 
         // create a privilege
@@ -108,7 +108,7 @@ class PrivilegeTest extends TestCase {
     }
 
     public function testPrivilegeBadge(): void {
-        $manager = new Gazelle\Manager\Privilege;
+        $manager = new Gazelle\Manager\Privilege();
         $flsList = array_values(array_filter($manager->usageList(), fn($p) => $p['id'] == FLS_TEAM));
         $total = $flsList[0]['total'];
 

@@ -4,7 +4,7 @@ if (!$Viewer->permitted('users_view_keys')) {
     error(403);
 }
 
-$user = (new Gazelle\Manager\User)->findById((int)$_GET['userid']);
+$user = (new Gazelle\Manager\User())->findById((int)$_GET['userid']);
 if (is_null($user)) {
     error(404);
 }

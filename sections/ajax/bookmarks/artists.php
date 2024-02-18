@@ -6,7 +6,7 @@ if (empty($_GET['userid'])) {
     if (!$Viewer->permitted('users_override_paranoia')) {
         json_die('failure');
     }
-    $user = (new Gazelle\Manager\User)->findById((int)$_GET['userid']);
+    $user = (new Gazelle\Manager\User())->findById((int)$_GET['userid']);
     if (is_null($user)) {
         json_die('failure');
     }

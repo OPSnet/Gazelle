@@ -4,7 +4,7 @@ if (!$Viewer->permitted('users_view_ips')) {
     error(403);
 }
 
-$tor = new Gazelle\Manager\Tor;
+$tor = new Gazelle\Manager\Tor();
 
 if (isset($_POST['exitlist'])) {
     authorize();

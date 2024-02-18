@@ -6,7 +6,7 @@ require_once(__DIR__ . '/../../../lib/bootstrap.php');
 
 class UserclassRateLimitTest extends TestCase {
     public function testUserclassRateLimit(): void {
-        $limiter = new Gazelle\Manager\UserclassRateLimit;
+        $limiter = new Gazelle\Manager\UserclassRateLimit();
         $list = $limiter->list();
         $this->assertIsArray($list, 'userclass-ratelimit-initial'); // validate the SQL query
 

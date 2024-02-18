@@ -3,7 +3,7 @@
 if (!$Viewer->permitted('site_moderate_requests')) {
     error(403);
 }
-$torrent = (new Gazelle\Manager\Torrent)->findById((int)$_GET['torrentid']);
+$torrent = (new Gazelle\Manager\Torrent())->findById((int)$_GET['torrentid']);
 if (is_null($torrent)) {
     error(404);
 }

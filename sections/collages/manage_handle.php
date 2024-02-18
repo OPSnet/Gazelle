@@ -6,7 +6,7 @@ $groupId = (int)$_POST['groupid'];
 if (!$groupId) {
     error(404);
 }
-$collage = (new Gazelle\Manager\Collage)->findById((int)($_POST['collageid']));
+$collage = (new Gazelle\Manager\Collage())->findById((int)($_POST['collageid']));
 if (is_null($collage)) {
     error(404);
 }
@@ -17,7 +17,7 @@ if ($collage->isPersonal() && !$collage->isOwner($Viewer) && !$Viewer->permitted
 if (($_POST['submit'] ?? '') === 'Remove') {
     $userId = $collage->entryUserId($groupId);
     if ($collage->removeEntry($groupId)) {
-        (new Gazelle\Log)->general(sprintf("Collage %d (%s) group entry $groupId (added by user $userId) removed by %s",
+        (new Gazelle\Log())->general(sprintf("Collage %d (%s) group entry $groupId (added by user $userId) removed by %s",
             $collage->id(), $collage->name(), $Viewer->username()
         ));
     }

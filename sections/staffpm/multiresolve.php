@@ -1,6 +1,6 @@
 <?php
 
-$manager = new Gazelle\Manager\StaffPM;
+$manager = new Gazelle\Manager\StaffPM();
 
 $list = [];
 foreach ($_POST['id'] as $id) {

@@ -16,14 +16,14 @@ if (!$Viewer->permitted('admin_reports')) {
 authorize();
 
 $fromReportPage = !isset($_POST['from_delete']);
-$reportTypeMan  = new Gazelle\Manager\Torrent\ReportType;
-$reportMan      = new Gazelle\Manager\Torrent\Report(new Gazelle\Manager\Torrent);
-$userMan        = new Gazelle\Manager\User;
+$reportTypeMan  = new Gazelle\Manager\Torrent\ReportType();
+$reportMan      = new Gazelle\Manager\Torrent\Report(new Gazelle\Manager\Torrent());
+$userMan        = new Gazelle\Manager\User();
 
 $report = $reportMan->findById((int)($_POST['reportid'] ?? 0));
 if (is_null($report)) {
     // torrent is being deleted using RM link
-    $torMan = new Gazelle\Manager\Torrent;
+    $torMan = new Gazelle\Manager\Torrent();
     $torrent = $torMan->findById((int)($_POST['torrentid'] ?? 0));
     if (is_null($torrent)) {
         json_die("failure", "torrent not found");
@@ -36,7 +36,7 @@ if (is_null($report)) {
         torrent:     $torrent,
         user:        $Viewer,
         reportType:  $reportType,
-        irc:         new Gazelle\Util\Irc,
+        irc:         new Gazelle\Util\Irc(),
         reason:      '',
         otherIdList: '',
     );

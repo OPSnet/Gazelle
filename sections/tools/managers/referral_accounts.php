@@ -16,7 +16,7 @@ if (!$Viewer->permitted('admin_manage_referrals')) {
     error(403);
 }
 
-$ReferralManager = new Gazelle\Manager\Referral;
+$ReferralManager = new Gazelle\Manager\Referral();
 $ReferralAccounts = $ReferralManager->getFullAccounts();
 
 View::show_header('Referral Accounts');

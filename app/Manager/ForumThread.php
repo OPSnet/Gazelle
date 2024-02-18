@@ -9,7 +9,7 @@ class ForumThread extends \Gazelle\BaseManager {
      * Create a forum thread
      */
     public function create(\Gazelle\Forum $forum, \Gazelle\User $user, string $title, string $body): \Gazelle\ForumThread {
-        $db = new \Gazelle\DB;
+        $db = new \Gazelle\DB();
         $db->relaxConstraints(true);
         self::$db->prepared_query("
             INSERT INTO forums_topics

@@ -6,7 +6,7 @@ if (!$Viewer->permitted('site_edit_wiki')) {
 
 authorize();
 
-$artist = (new Gazelle\Manager\Artist)->findById((int)$_POST['artistid']);
+$artist = (new Gazelle\Manager\Artist())->findById((int)$_POST['artistid']);
 if (is_null($artist)) {
     error(404);
 }

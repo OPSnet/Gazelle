@@ -20,7 +20,7 @@ if (isset($_POST['Username'])) {
         error('Please supply a password');
     }
 
-    $creator = new Gazelle\UserCreator;
+    $creator = new Gazelle\UserCreator();
     try {
         $user = $creator->setUsername($username)
             ->setEmail($email)

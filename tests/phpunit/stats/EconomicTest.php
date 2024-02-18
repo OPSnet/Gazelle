@@ -6,7 +6,7 @@ require_once(__DIR__ . '/../../../lib/bootstrap.php');
 
 class EconomicTest extends TestCase {
     public function testEconomic(): void {
-        $eco = new \Gazelle\Stats\Economic;
+        $eco = new \Gazelle\Stats\Economic();
 
         $this->assertIsInt($eco->bountyAvailable(), 'eco-stats-bounty-available');
         $this->assertIsInt($eco->bountyTotal(), 'eco-stats-bounty-total');

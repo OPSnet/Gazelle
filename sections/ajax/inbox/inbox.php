@@ -5,7 +5,7 @@ $json = new Gazelle\Json\Inbox(
     $_GET['type'] ?? 'inbox',
     (int)($_GET['page'] ?? 1),
     ($_GET['sort'] ?? 'unread') === 'unread',
-    new Gazelle\Manager\User,
+    new Gazelle\Manager\User(),
 );
 
 if (!empty($_GET['search'])) {

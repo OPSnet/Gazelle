@@ -95,7 +95,7 @@ class Report extends \Gazelle\BaseObject {
     }
 
     public function reportType(): \Gazelle\Torrent\ReportType {
-        return (new \Gazelle\Manager\Torrent\ReportType)->findByType($this->type());
+        return (new \Gazelle\Manager\Torrent\ReportType())->findByType($this->type());
     }
 
     public function resolverId(): int {

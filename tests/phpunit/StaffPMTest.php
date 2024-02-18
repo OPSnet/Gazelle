@@ -14,7 +14,7 @@ class StaffPMTest extends TestCase {
     protected \Gazelle\User $user;
 
     public function setUp(): void {
-        $this->spMan = new \Gazelle\Manager\StaffPM;
+        $this->spMan = new \Gazelle\Manager\StaffPM();
         $this->fls   = Helper::makeUser('spm_fls_' . randomString(10), 'staffpm');
         $this->mod   = Helper::makeUser('spm_mod_' . randomString(10), 'staffpm');
         $this->sysop = Helper::makeUser('spm_sysop_' . randomString(10), 'staffpm');

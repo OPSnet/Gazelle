@@ -19,7 +19,7 @@ $text = match (true) {
     default                => '',
 };
 if ($text) {
-    $search = (new Gazelle\Search\IPv4(new Gazelle\Search\ASN))
+    $search = (new Gazelle\Search\IPv4(new Gazelle\Search\ASN()))
         ->create('search_' . getmypid())
         ->setColumn($column)
         ->setDirection($direction);

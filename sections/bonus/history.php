@@ -6,7 +6,7 @@ if (!isset($_GET['userid'])) {
     if (!$Viewer->permitted('admin_bp_history')) {
         error(403);
     }
-    $user = (new Gazelle\Manager\User)->findById((int)($_GET['userid'] ?? 0));
+    $user = (new Gazelle\Manager\User())->findById((int)($_GET['userid'] ?? 0));
     if (is_null($user)) {
         error(404);
     }

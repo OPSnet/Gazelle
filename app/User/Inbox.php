@@ -68,7 +68,7 @@ class Inbox extends \Gazelle\BaseUser {
         self::$db->set_query_id($qid);
 
         $senderName = $from?->username() ?? 'System';
-        (new \Gazelle\Manager\Notification)->push(
+        (new \Gazelle\Manager\Notification())->push(
             [$this->id()],
             "Message from $senderName, Subject: $subject", $body, SITE_URL . '/inbox.php', \Gazelle\Manager\Notification::INBOX,
         );

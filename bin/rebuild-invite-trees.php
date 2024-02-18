@@ -16,7 +16,7 @@ $inv = [];
 while ([$invitee, $inviter] = $db->next_record()) {
     $save = $db->get_query_id();
     if (!isset($inv[$inviter])) {
-        $inv[$inviter] = new Gazelle\User\InviteTree(new Gazelle\User($inviter), new Gazelle\Manager\User);
+        $inv[$inviter] = new Gazelle\User\InviteTree(new Gazelle\User($inviter), new Gazelle\Manager\User());
     }
     $inv[$inviter]->add($invitee);
     $db->set_query_id($save);

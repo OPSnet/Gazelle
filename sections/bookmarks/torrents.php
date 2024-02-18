@@ -11,7 +11,7 @@ if (empty($_GET['userid'])) {
     if (!$Viewer->permitted('users_override_paranoia')) {
         error(403);
     }
-    $user = (new Gazelle\Manager\User)->findById((int)($_GET['userid'] ?? 0));
+    $user = (new Gazelle\Manager\User())->findById((int)($_GET['userid'] ?? 0));
     if (is_null($user)) {
         error(404);
     }
@@ -20,16 +20,16 @@ if (empty($_GET['userid'])) {
 
 $bookmark = new Gazelle\User\Bookmark($user);
 $snatcher = $Viewer->snatch();
-$tgMan    = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
-$torMan   = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
-$collMan  = (new Gazelle\Manager\Collage)->setImageProxy(new Gazelle\Util\ImageProxy($Viewer));
+$tgMan    = (new Gazelle\Manager\TGroup())->setViewer($Viewer);
+$torMan   = (new Gazelle\Manager\Torrent())->setViewer($Viewer);
+$collMan  = (new Gazelle\Manager\Collage())->setImageProxy(new Gazelle\Util\ImageProxy($Viewer));
 
 $paginator = new Gazelle\Util\Paginator(200, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($bookmark->torrentTotal());
 
 $bookmarkList      = $bookmark->torrentList($paginator->limit(), $paginator->offset());
 $NumGroups         = count($bookmarkList);
-$artistLeaderboard = $bookmark->torrentArtistLeaderboard(new Gazelle\Manager\Artist);
+$artistLeaderboard = $bookmark->torrentArtistLeaderboard(new Gazelle\Manager\Artist());
 $tagLeaderboard    = $bookmark->torrentTagLeaderboard();
 $CollageCovers     = $Viewer->option('CollageCovers') ?? 25;
 

@@ -5,7 +5,7 @@ if (!$Viewer->permitted('site_forum_autosub')) {
 }
 authorize();
 
-$forum = (new Gazelle\Manager\Forum)->findById((int)($_POST['id'] ?? 0));
+$forum = (new Gazelle\Manager\Forum())->findById((int)($_POST['id'] ?? 0));
 if (is_null($forum)) {
     json_error('not found');
 }

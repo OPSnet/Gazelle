@@ -1,6 +1,6 @@
 <?php
 
-$wikiMan = new Gazelle\Manager\Wiki;
+$wikiMan = new Gazelle\Manager\Wiki();
 
 if (empty($_GET['nojump'])) {
     $article = $wikiMan->findByAlias($_GET['search'] ?? '');

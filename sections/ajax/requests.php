@@ -1,8 +1,8 @@
 <?php
 
-$search = new Gazelle\Search\Request(new Gazelle\Manager\Request);
+$search = new Gazelle\Search\Request(new Gazelle\Manager\Request());
 
-$userMan = new Gazelle\Manager\User;
+$userMan = new Gazelle\Manager\User();
 if (!isset($_GET['userid'])) {
     $user = null;
 } else {
@@ -76,7 +76,7 @@ $search->setFormat($_GET['formats'] ?? [], $strict)
         },
     )
     ->setCategory($_GET['filter_cat'] ?? [])
-    ->setReleaseType($_GET['releases'] ?? [], (new \Gazelle\ReleaseType)->list());
+    ->setReleaseType($_GET['releases'] ?? [], (new \Gazelle\ReleaseType())->list());
 
 if (!isset($_GET['show_filled'])) {
     $search->showUnfilled();

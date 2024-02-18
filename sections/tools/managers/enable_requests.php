@@ -9,7 +9,7 @@ if (!FEATURE_EMAIL_REENABLE) {
 }
 
 $showChecked = $_GET['show_checked'] ?? false;
-$enableMan = new Gazelle\Manager\AutoEnable;
+$enableMan = new Gazelle\Manager\AutoEnable();
 $enableMan->configureView($_GET['view'] ?? '', $showChecked);
 
 // Build query further based on search

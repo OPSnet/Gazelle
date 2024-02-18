@@ -4,7 +4,7 @@ if (!$Viewer->permitted('site_admin_requests')) {
     error(403);
 }
 
-$request = (new Gazelle\Manager\Request)->findById((int)$_GET['id']);
+$request = (new Gazelle\Manager\Request())->findById((int)$_GET['id']);
 if (is_null($request)) {
     error(404);
 }

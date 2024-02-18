@@ -3,15 +3,15 @@
 namespace Gazelle\Search;
 
 class Donation extends \Gazelle\Base {
-    protected array $join = [];
+    protected array $joinList = [];
     protected array $cond = [];
     protected array $args = [];
 
-    protected string $_join;
-    protected string $_where;
+    protected string $join;
+    protected string $where;
 
     public function setUsername(string $username): static {
-        $this->join[] = "INNER JOIN users_main AS m ON (m.ID = d.UserID)";
+        $this->joinList[] = "INNER JOIN users_main AS m ON (m.ID = d.UserID)";
         $this->cond[] = "m.Username LIKE concat('%', ?, '%')";
         $this->args[] = trim($username);
         return $this;
@@ -24,9 +24,9 @@ class Donation extends \Gazelle\Base {
     }
 
     protected function configure(): void {
-        if (!isset($this->_where)) {
-            $this->_where = empty($this->cond) ? '' : ('WHERE ' . implode(' AND ', $this->cond));
-            $this->_join = implode(' ', $this->join);
+        if (!isset($this->where)) {
+            $this->where = empty($this->cond) ? '' : ('WHERE ' . implode(' AND ', $this->cond));
+            $this->join = implode(' ', $this->joinList);
         }
     }
 
@@ -35,7 +35,7 @@ class Donation extends \Gazelle\Base {
         return (int)self::$db->scalar("
             SELECT count(*)
             FROM donations AS d
-            {$this->_join} {$this->_where}
+            {$this->join} {$this->where}
             ", ...$this->args
         );
     }
@@ -52,7 +52,7 @@ class Donation extends \Gazelle\Base {
                 d.AddedBy,
                 d.Reason
             FROM donations AS d
-            {$this->_join} {$this->_where}
+            {$this->join} {$this->where}
             ORDER BY d.Time DESC
             LIMIT ? OFFSET ?
             ", ...[...$this->args, $limit, $offset]

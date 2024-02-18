@@ -8,7 +8,7 @@ if (!$Viewer->permitted('site_database_specifics')) {
 $db = Gazelle\DB::DB();
 if (!empty($_GET['table']) && preg_match('/([\w-]+)/', $_GET['table'], $match)) {
     $tableName = $match[1];
-    $siteInfo = new Gazelle\SiteInfo;
+    $siteInfo = new Gazelle\SiteInfo();
     if (!$siteInfo->tableExists($tableName)) {
         error("No such table");
     }

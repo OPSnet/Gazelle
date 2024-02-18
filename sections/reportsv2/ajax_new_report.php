@@ -10,11 +10,11 @@ if (!$Viewer->permitted('admin_reports')) {
 }
 
 $imgProxy      = new Gazelle\Util\ImageProxy($Viewer);
-$torMan        = new Gazelle\Manager\Torrent;
+$torMan        = new Gazelle\Manager\Torrent();
 $reportMan     = new Gazelle\Manager\Torrent\Report($torMan);
-$reportTypeMan = new Gazelle\Manager\Torrent\ReportType;
-$reqMan        = new Gazelle\Manager\Request;
-$userMan       = new Gazelle\Manager\User;
+$reportTypeMan = new Gazelle\Manager\Torrent\ReportType();
+$reqMan        = new Gazelle\Manager\Request();
+$userMan       = new Gazelle\Manager\User();
 
 $report    = $reportMan->findNewest();
 $reportId  = $report->id();

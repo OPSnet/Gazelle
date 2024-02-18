@@ -372,9 +372,9 @@ class Text {
 
             case '/torrents.php':
                 if (isset($args['torrentid'])) {
-                    return (new \Gazelle\Manager\Torrent)->findById((int)$args['torrentid'])?->link();
+                    return (new \Gazelle\Manager\Torrent())->findById((int)$args['torrentid'])?->link();
                 } elseif (isset($args['id'])) {
-                    return (new \Gazelle\Manager\TGroup)->findById((int)$args['id'])?->link();
+                    return (new \Gazelle\Manager\TGroup())->findById((int)$args['id'])?->link();
                 }
                 return null;
 
@@ -877,7 +877,7 @@ class Text {
                     } elseif ((int)$Block['Val']) {
                         $GroupID = $Block['Val'];
                     }
-                    $tgroup = (new Gazelle\Manager\TGroup)->findById((int)$GroupID);
+                    $tgroup = (new Gazelle\Manager\TGroup())->findById((int)$GroupID);
                     if (is_null($tgroup)) {
                         $Str .= '[torrent]' . str_replace('[inlineurl]', '', $Block['Val']) . '[/torrent]';
                     } else {
@@ -1175,7 +1175,7 @@ class Text {
                 $username = $match['username'];
                 static $cache;
                 if (!isset($cache[$username])) {
-                    $userMan = new \Gazelle\Manager\User;
+                    $userMan = new \Gazelle\Manager\User();
                     $user = $userMan->findByUsername($username);
                     if (is_null($user) && preg_match('/^(.*)[.?]+$/', $username, $match)) {
                         // strip off trailing dots to see if we can match @Spine...
@@ -1415,7 +1415,7 @@ class Text {
     }
 
     protected static function bbcodeCommentUrl(int $postId): ?string {
-        $post = (new Gazelle\Manager\Comment)->findById($postId);
+        $post = (new Gazelle\Manager\Comment())->findById($postId);
         if (is_null($post)) {
             return null;
         }
@@ -1425,7 +1425,7 @@ class Text {
     }
 
     protected static function bbcodePostUrl(int $postId): ?string {
-        $post = (new \Gazelle\Manager\ForumPost)->findById($postId);
+        $post = (new \Gazelle\Manager\ForumPost())->findById($postId);
         if (is_null($post)) {
             return null;
         }
@@ -1442,7 +1442,7 @@ class Text {
             return "[thread]{$thread}[/thread]";
         }
 
-        $thread = (new \Gazelle\Manager\ForumThread)->findById($threadId);
+        $thread = (new \Gazelle\Manager\ForumThread())->findById($threadId);
         if (is_null($thread)) {
             return $postId ? "[thread]{$threadId}:{$postId}[/thread]" : "[thread]{$threadId}[/thread]";
         }

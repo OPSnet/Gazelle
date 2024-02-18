@@ -4,7 +4,7 @@ if (!$Viewer->permitted('site_analysis')) {
     error(403);
 }
 
-$errorLog = new Gazelle\Manager\ErrorLog;
+$errorLog = new Gazelle\Manager\ErrorLog();
 $case = null;
 
 if (isset($_POST['remove'])) {

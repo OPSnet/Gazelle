@@ -5,7 +5,7 @@ if ($Viewer->disablePosting()) {
 }
 authorize();
 
-$thread = (new Gazelle\Manager\ForumThread)->findById((int)($_POST['threadid'] ?? 0));
+$thread = (new Gazelle\Manager\ForumThread())->findById((int)($_POST['threadid'] ?? 0));
 if (is_null($thread)) {
     error(404);
 }
@@ -31,12 +31,12 @@ if ($thread->lastAuthorId() == $Viewer->id() && isset($_POST['merge'])) {
 $postId = $post->id();
 
 (new Gazelle\User\Notification\Quote($Viewer))->create(
-    new Gazelle\Manager\User, $body, $postId, 'forums', $threadId
+    new Gazelle\Manager\User(), $body, $postId, 'forums', $threadId
 );
 $subscription = new Gazelle\User\Subscription($Viewer);
 if (isset($_POST['subscribe']) && !$subscription->isSubscribed($threadId)) {
     $subscription->subscribe($threadId);
 }
-(new Gazelle\Manager\Subscription)->flushPage('forums', $threadId);
+(new Gazelle\Manager\Subscription())->flushPage('forums', $threadId);
 
 header("Location: {$thread->location()}&postid=$postId#post$postId");

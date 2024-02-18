@@ -12,7 +12,7 @@ if (!$name || !$message) {
 }
 
 $id     = (int)($_POST['id'] ?? 0);
-$spmMan = new Gazelle\Manager\StaffPM;
+$spmMan = new Gazelle\Manager\StaffPM();
 $answer = $spmMan->commonAnswer($id);
 if (is_null($answer)) {
     $spmMan->createCommonAnswer($name, $message);

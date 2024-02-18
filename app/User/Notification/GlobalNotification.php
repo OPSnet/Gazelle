@@ -17,13 +17,13 @@ class GlobalNotification extends AbstractNotification {
         self::$cache->cache_value(
             sprintf(self::CLEARED, $this->user->id()),
             true,
-            (new \Gazelle\Notification\GlobalNotification)->remaining()
+            (new \Gazelle\Notification\GlobalNotification())->remaining()
         );
         return 1;
     }
 
     public function load(): bool {
-        $alert = (new \Gazelle\Notification\GlobalNotification)->alert();
+        $alert = (new \Gazelle\Notification\GlobalNotification())->alert();
         if ($alert && self::$cache->get_value(sprintf(self::CLEARED, $this->user->id())) === false) {
             $this->title     = $alert['title'];
             $this->url       = $alert['url'];

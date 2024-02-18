@@ -10,7 +10,7 @@ class ForumThread extends BaseObject {
     public function flush(): static {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
         self::$cache->delete_value("edit_forums_{$this->id}");
-        (new Manager\Forum)->flushToc();
+        (new Manager\Forum())->flushToc();
         $last = $this->lastPage();
         $this->flushCatalog($last, $last);
         return $this;
@@ -195,7 +195,7 @@ class ForumThread extends BaseObject {
     }
 
     public function addPost(User $user, string $body): ForumPost {
-        $post = (new Manager\ForumPost)->create($this, $user, $body);
+        $post = (new Manager\ForumPost())->create($this, $user, $body);
         $this->info();
         $this->info['post_total_summary']++;
         $this->info['last_post_id']        = $post->id();
@@ -281,7 +281,7 @@ class ForumThread extends BaseObject {
     public function remove(): int {
         // LastPostID is a chicken and egg situation when removing a thread,
         // so foreign key constraints need to be igored temporarily.
-        $db = new \Gazelle\DB;
+        $db = new \Gazelle\DB();
         $db->relaxConstraints(true);
         self::$db->prepared_query("
             DELETE ft, fp, unq
@@ -295,7 +295,7 @@ class ForumThread extends BaseObject {
         $db->relaxConstraints(false);
         $this->forum()->adjust();
 
-        (new Manager\Subscription)->move('forums', $this->id, null);
+        (new Manager\Subscription())->move('forums', $this->id, null);
 
         $previousPost = self::$db->rowAssoc("
             SELECT AuthorID AS user_id,
@@ -348,7 +348,7 @@ class ForumThread extends BaseObject {
         $affected = self::$db->affected_rows();
         if ($affected) {
             $this->updateRoot($user->id(), $postId);
-            (new Manager\Forum)->flushToc();
+            (new Manager\Forum())->flushToc();
             $this->forum()->flush();
             $this->flush();
         }

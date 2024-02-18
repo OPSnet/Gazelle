@@ -15,7 +15,7 @@ class FriendTest extends TestCase {
     }
 
     public function testFriend(): void {
-        $manager = new Gazelle\Manager\User;
+        $manager = new Gazelle\Manager\User();
         $this->friend = [
             new Gazelle\User\Friend(Helper::makeUser('friend1.' . randomString(6), 'friend1')),
             new Gazelle\User\Friend(Helper::makeUser('friend2.' . randomString(6), 'friend2')),

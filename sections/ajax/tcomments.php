@@ -8,7 +8,7 @@ $commentPage = new Gazelle\Comment\Torrent($groupId, (int)($_GET['page'] ?? 1), 
 $thread = $commentPage->load()->thread();
 
 $userCache = [];
-$userMan = new Gazelle\Manager\User;
+$userMan = new Gazelle\Manager\User();
 
 $JsonComments = [];
 foreach ($thread as $Post) {

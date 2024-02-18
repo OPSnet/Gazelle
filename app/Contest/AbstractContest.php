@@ -29,7 +29,7 @@ trait TorrentLeaderboard {
             );
             $leaderboard = self::$db->to_array(false, MYSQLI_ASSOC, false);
 
-            $torMan = new \Gazelle\Manager\Torrent;
+            $torMan = new \Gazelle\Manager\Torrent();
             for ($i = 0, $leaderboardCount = count($leaderboard); $i < $leaderboardCount; $i++) {
                 $torrent = $torMan->findById($leaderboard[$i]['last_entry_id']);
                 $leaderboard[$i]['last_entry_link']

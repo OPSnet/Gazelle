@@ -8,7 +8,7 @@ Things to expect in $_GET:
 
 ********************************************************************************/
 
-$forum = (new Gazelle\Manager\Forum)->findById((int)$_GET['forumid']);
+$forum = (new Gazelle\Manager\Forum())->findById((int)$_GET['forumid']);
 if (!$forum) {
     error(404);
 }

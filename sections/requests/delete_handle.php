@@ -2,7 +2,7 @@
 
 authorize();
 
-$request = (new Gazelle\Manager\Request)->findById((int)$_POST['id']);
+$request = (new Gazelle\Manager\Request())->findById((int)$_POST['id']);
 if (is_null($request)) {
     error(404);
 }
@@ -13,7 +13,7 @@ if ($Viewer->id() != $request->userId() && !$Viewer->permitted('site_moderate_re
 $reason = trim($_POST['reason']);
 $title = $request->text();
 if ($request->userId() !== $Viewer->id()) {
-    $user = (new Gazelle\Manager\User)->findById($request->userId());
+    $user = (new Gazelle\Manager\User())->findById($request->userId());
     if ($user) {
         $user->inbox()->createSystem(
             'A request you created has been deleted',
@@ -25,7 +25,7 @@ if ($request->userId() !== $Viewer->id()) {
 $requestId = $request->id();
 $request->remove();
 
-(new Gazelle\Log)->general("Request $requestId ($title) was deleted by user "
+(new Gazelle\Log())->general("Request $requestId ($title) was deleted by user "
     . $Viewer->label() . " for the reason: $reason"
 );
 

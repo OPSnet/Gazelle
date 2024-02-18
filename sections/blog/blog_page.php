@@ -1,6 +1,6 @@
 <?php
 
-$blogMan = new Gazelle\Manager\Blog;
+$blogMan = new Gazelle\Manager\Blog();
 
 $action = ($_GET['action'] ?? '') === 'editblog' ? 'Edit' : 'Create';
 if ($Viewer->permitted('admin_manage_blog')) {
@@ -13,7 +13,7 @@ if ($Viewer->permitted('admin_manage_blog')) {
 
 $headlines = $blogMan->headlines();
 if ($headlines) {
-    (new \Gazelle\WitnessTable\UserReadBlog)->witness($Viewer);
+    (new \Gazelle\WitnessTable\UserReadBlog())->witness($Viewer);
 }
 
 echo $Twig->render('blog/editor.twig', [

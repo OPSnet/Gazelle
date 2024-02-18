@@ -45,8 +45,8 @@ class Comment extends \Gazelle\BaseManager {
             self::$cache->delete_value("{$page}_comments_recent_{$pageId}");
         }
         (new \Gazelle\User\Notification\Quote($user))
-            ->create(new \Gazelle\Manager\User, $body, $postId, $page, $pageId);
-        (new Subscription)->flushPage($page, $pageId);
+            ->create(new \Gazelle\Manager\User(), $body, $postId, $page, $pageId);
+        (new Subscription())->flushPage($page, $pageId);
 
         $className = $this->className($page);
         return new $className($pageId, 0, $postId); /** @phpstan-ignore-line */
@@ -100,7 +100,7 @@ class Comment extends \Gazelle\BaseManager {
         );
 
         // comment subscriptions
-        $subscription = new \Gazelle\Manager\Subscription;
+        $subscription = new \Gazelle\Manager\Subscription();
         $subscription->move($page, $pageId, $targetPageId);
 
         for ($i = 0; $i <= $last; ++$i) {
@@ -137,7 +137,7 @@ class Comment extends \Gazelle\BaseManager {
         $affected = self::$db->affected_rows();
 
         // literally, move the comment thread to nowhere i.e. delete
-        (new \Gazelle\Manager\Subscription)->move($page, $pageId, null);
+        (new \Gazelle\Manager\Subscription())->move($page, $pageId, null);
 
         self::$db->prepared_query("
             DELETE FROM users_notify_quoted WHERE Page = ? AND PageID = ?

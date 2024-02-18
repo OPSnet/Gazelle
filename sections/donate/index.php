@@ -1,14 +1,14 @@
 <?php
 
 if (MONERO_DONATION_ADDRESS) {
-    $moneroDonation = new Gazelle\Donate\Monero;
+    $moneroDonation = new Gazelle\Donate\Monero();
     $moneroAddr = $moneroDonation->address($Viewer->id());
 } else {
     $moneroAddr = null;
 }
 
 if (BITCOIN_DONATION_XYZPUB) {
-    $btcDonation = new Gazelle\Donate\Bitcoin;
+    $btcDonation = new Gazelle\Donate\Bitcoin();
     $btcAddr = $btcDonation->address($Viewer->id());
 } else {
     $btcAddr = null;

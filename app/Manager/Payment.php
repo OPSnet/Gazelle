@@ -64,7 +64,7 @@ class Payment extends \Gazelle\Base {
         }
 
         // update with latest forex rates
-        $XBT = new XBT;
+        $XBT = new XBT();
         foreach ($list as &$l) {
             $l['Active'] = (bool)$l['Active'];
             if ($l['cc'] == 'XBT') {

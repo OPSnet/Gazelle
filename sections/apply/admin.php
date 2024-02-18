@@ -1,6 +1,6 @@
 <?php
 
-$appRoleMan = new Gazelle\Manager\ApplicantRole;
+$appRoleMan = new Gazelle\Manager\ApplicantRole();
 if ($Viewer->permitted('admin_manage_applicants')) {
     $list = $appRoleMan->list(); // everything, including archived roles
 } else {

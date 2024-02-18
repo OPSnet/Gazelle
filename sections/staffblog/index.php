@@ -6,7 +6,7 @@ if (!$Viewer->permitted('users_mod')) {
     error(403);
 }
 
-$blogMan = new Gazelle\Manager\StaffBlog;
+$blogMan = new Gazelle\Manager\StaffBlog();
 $blogMan->catchup($Viewer);
 
 if ($Viewer->permitted('admin_manage_blog')) {

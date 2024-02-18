@@ -891,7 +891,7 @@ class User extends BaseObject {
             ", $this->id, $ipaddr, $_SERVER['HTTP_USER_AGENT']
         );
         Irc::sendMessage($this->username(), "Security alert: Your password was changed via $ipaddr with {$_SERVER['HTTP_USER_AGENT']}. Not you? Contact staff ASAP.");
-        (new Mail)->send($this->email(), 'Password changed information for ' . SITE_NAME,
+        (new Mail())->send($this->email(), 'Password changed information for ' . SITE_NAME,
             self::$twig->render('email/password-change.twig', [
                 'ipaddr'     => $ipaddr,
                 'now'        => date('Y-m-d H:i:s'),
@@ -987,7 +987,7 @@ class User extends BaseObject {
         \Gazelle\User $staffer,
         string $staffReason,
         string $userMessage
-): void {
+    ): void {
         if (!$weekDuration) {  // verbal warning
             $warned  = "Verbally warned";
             $this->inbox()->createSystem(
@@ -1261,7 +1261,7 @@ class User extends BaseObject {
     }
 
     public function updateCatchup(): bool {
-        return (new WitnessTable\UserReadForum)->witness($this);
+        return (new WitnessTable\UserReadForum())->witness($this);
     }
 
     public function addClasses(array $classes): int {
@@ -1809,7 +1809,7 @@ class User extends BaseObject {
 
     public function buffer(): array {
         $class = $this->primaryClass();
-        $demotion = array_filter((new Manager\User)->demotionCriteria(), fn($v) => in_array($class, $v['From']));
+        $demotion = array_filter((new Manager\User())->demotionCriteria(), fn($v) => in_array($class, $v['From']));
         $criteria = end($demotion);
 
         $effectiveUpload = $this->uploadedSize() + $this->stats()->requestBountySize();

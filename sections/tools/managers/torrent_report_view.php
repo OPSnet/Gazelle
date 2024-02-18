@@ -5,6 +5,6 @@ if (!$Viewer->permitted('users_mod')) {
 }
 
 echo $Twig->render('admin/torrent-report-view.twig', [
-    'list'   => (new Gazelle\Manager\Torrent\ReportType)->list(),
+    'list'   => (new Gazelle\Manager\Torrent\ReportType())->list(),
     'viewer' => $Viewer,
 ]);

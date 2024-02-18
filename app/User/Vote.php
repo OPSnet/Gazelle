@@ -91,11 +91,11 @@ class Vote extends \Gazelle\BaseUser {
                 $this->topWhere[] = 'tg.Year >= ?';
                 $this->topArgs[] = $lower;
             }
-         } elseif ($higher > 0) {
+        } elseif ($higher > 0) {
             $this->topJoin['torrents_group'] = 'INNER JOIN torrents_group tg ON (tg.ID = v.GroupID)';
             $this->topWhere[] = 'tg.Year <= ?';
             $this->topArgs[] = $higher;
-         }
+        }
          return $this;
     }
 

@@ -3,7 +3,7 @@
 authorize();
 
 $alias = $_GET['alias'] ?? '';
-$article = (new Gazelle\Manager\Wiki)->findByAlias($alias);
+$article = (new Gazelle\Manager\Wiki())->findByAlias($alias);
 if (is_null($article)) {
     error(404);
 }

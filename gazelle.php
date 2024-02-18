@@ -44,8 +44,8 @@ if (!isset($_SERVER['HTTP_USER_AGENT'])) {
 
 $SessionID = false;
 $Viewer    = null;
-$ipv4Man   = new Gazelle\Manager\IPv4;
-$userMan   = new Gazelle\Manager\User;
+$ipv4Man   = new Gazelle\Manager\IPv4();
+$userMan   = new Gazelle\Manager\User();
 Gazelle\Util\Twig::setUserMan($userMan);
 
 // Authorization header only makes sense for the ajax endpoint

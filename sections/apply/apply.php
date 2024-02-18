@@ -1,7 +1,7 @@
 <?php
 
-$appMan  = new Gazelle\Manager\Applicant;
-$roleMan = new Gazelle\Manager\ApplicantRole;
+$appMan  = new Gazelle\Manager\Applicant();
+$roleMan = new Gazelle\Manager\ApplicantRole();
 
 if (isset($_POST['auth'])) {
     authorize();

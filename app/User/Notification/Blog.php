@@ -8,16 +8,16 @@ class Blog extends AbstractNotification {
     }
 
     public function clear(): int {
-        return (int)(new \Gazelle\WitnessTable\UserReadBlog)->witness($this->user);
+        return (int)(new \Gazelle\WitnessTable\UserReadBlog())->witness($this->user);
     }
 
     public function load(): bool {
-        $blogMan = new \Gazelle\Manager\Blog;
+        $blogMan = new \Gazelle\Manager\Blog();
         $latest = $blogMan->latest();
         if (is_null($latest)) {
             return false;
         }
-        $lastRead = (new \Gazelle\WitnessTable\UserReadBlog)->lastRead($this->user);
+        $lastRead = (new \Gazelle\WitnessTable\UserReadBlog())->lastRead($this->user);
 
         // You must be new around here.
         $newJoiner = is_null($lastRead) && $latest->createdEpoch() > strtotime($this->user->created());

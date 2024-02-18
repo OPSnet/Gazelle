@@ -1,7 +1,7 @@
 <?php
 
-$userMan = new Gazelle\Manager\User;
-$search = (new Gazelle\Search\Collage)->setLookup($_GET['type'] ?? 'name');
+$userMan = new Gazelle\Manager\User();
+$search = (new Gazelle\Search\Collage())->setLookup($_GET['type'] ?? 'name');
 
 if (!empty($_GET['bookmarks'])) {
     $search->setBookmarkView($Viewer);
@@ -17,7 +17,7 @@ if (($_GET['action'] ?? '') === 'mine') {
     }
 
     if (!empty($_GET['tags'])) {
-        $tagMan = new Gazelle\Manager\Tag;
+        $tagMan = new Gazelle\Manager\Tag();
         $list = explode(',', $_GET['tags']);
         $taglist = [];
         foreach ($list as $name) {
@@ -57,7 +57,7 @@ echo $Twig->render('collage/browse.twig', [
     'input'     => $_GET,
     'page'      => $search->page($paginator->limit(), $paginator->offset()),
     'paginator' => $paginator,
-    'personal'  => (new Gazelle\Manager\Collage)->findPersonalByUser($Viewer),
+    'personal'  => (new Gazelle\Manager\Collage())->findPersonalByUser($Viewer),
     'search'    => $search,
     'viewer'    => $Viewer,
 ]);

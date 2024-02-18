@@ -1,6 +1,6 @@
 <?php
 
-$contestMan = new Gazelle\Manager\Contest;
+$contestMan = new Gazelle\Manager\Contest();
 
 switch ($_GET['action'] ?? '') {
     case 'leaderboard':

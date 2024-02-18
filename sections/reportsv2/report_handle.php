@@ -12,7 +12,7 @@
 
 authorize();
 
-$torMan = new Gazelle\Manager\Torrent;
+$torMan = new Gazelle\Manager\Torrent();
 $torrent = $torMan->findById((int)($_POST['torrentid'] ?? 0));
 if (is_null($torrent)) {
     error(404);
@@ -23,7 +23,7 @@ if ($reportMan->existsRecent($torrent->id(), $Viewer->id())) {
     error("Slow down, you're moving too fast!");
 }
 
-$reportType = (new Gazelle\Manager\Torrent\ReportType)->findByType($_POST['type'] ?? '');
+$reportType = (new Gazelle\Manager\Torrent\ReportType())->findByType($_POST['type'] ?? '');
 if (is_null($reportType)) {
     error("bad report type");
 }
@@ -110,7 +110,7 @@ $report = $reportMan->create(
     track:       $trackList,
     image:       $Images,
     link:        $Links,
-    irc:         new Gazelle\Util\Irc,
+    irc:         new Gazelle\Util\Irc(),
 );
 
 if (!$reportType->isInvisible() && $torrent->uploaderId() != $Viewer->id()) {

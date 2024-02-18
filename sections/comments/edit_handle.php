@@ -10,14 +10,14 @@ if (!strlen($body)) {
     error(404, true);
 }
 
-$comment = (new Gazelle\Manager\Comment)->findById((int)($_REQUEST['postid'] ?? 0));
+$comment = (new Gazelle\Manager\Comment())->findById((int)($_REQUEST['postid'] ?? 0));
 if (is_null($comment)) {
     error(404, true);
 }
 if ($comment->userId() != $Viewer->id() && !$Viewer->permitted('site_moderate_forums')) {
     error(403, true);
 }
-$user = (new Gazelle\Manager\User)->findById($comment->userId());
+$user = (new Gazelle\Manager\User())->findById($comment->userId());
 if (is_null($user)) {
     error(0, true);
 }

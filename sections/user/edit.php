@@ -1,6 +1,6 @@
 <?php
 
-$userMan = new Gazelle\Manager\User;
+$userMan = new Gazelle\Manager\User();
 
 $user = $userMan->findById(($_REQUEST['id'] ?? '') === 'me' ? $Viewer->id() : (int)($_REQUEST['id'] ?? 0));
 if (is_null($user)) {
@@ -24,19 +24,19 @@ foreach (range(1, 4) as $level) {
         ];
     }
 }
-$navList = (new Gazelle\Manager\UserNavigation)->fullList();
+$navList = (new Gazelle\Manager\UserNavigation())->fullList();
 
 echo $Twig->render('user/setting.twig', [
     'donor'           => $donor,
-    'js'              => (new Gazelle\Util\Validator)->generateJS('userform'),
-    'lastfm_username' => (new Gazelle\Util\LastFM)->username($user),
+    'js'              => (new Gazelle\Util\Validator())->generateJS('userform'),
+    'lastfm_username' => (new Gazelle\Util\LastFM())->username($user),
     'nav_items'       => $navList,
     'nav_items_user'  => $user->navigationList(),
     'notify_config'   => (new Gazelle\User\Notification($user))->config(),
     'profile'         => $profile,
-    'release_order'   => $user->releaseOrder((new Gazelle\ReleaseType)->extendedList()),
+    'release_order'   => $user->releaseOrder((new Gazelle\ReleaseType())->extendedList()),
     'stylesheet'      => new Gazelle\User\Stylesheet($user),
-    'stylesheets'     => (new Gazelle\Manager\Stylesheet)->list(),
+    'stylesheets'     => (new Gazelle\Manager\Stylesheet())->list(),
     'user'            => $user,
     'viewer'          => $Viewer,
 ]);

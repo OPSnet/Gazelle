@@ -4,7 +4,7 @@ use OrpheusNET\Logchecker\Logchecker;
 
 ini_set('upload_max_filesize', 1_000_000);
 
-$torrent = (new Gazelle\Manager\Torrent)->findById((int)$_POST['torrentid']);
+$torrent = (new Gazelle\Manager\Torrent())->findById((int)$_POST['torrentid']);
 if (is_null($torrent)) {
     error('No torrent is selected.');
 }
@@ -21,8 +21,8 @@ $logfileSummary = new Gazelle\LogfileSummary($_FILES['logfiles']);
 if (!$logfileSummary->total()) {
     error("No logfiles uploaded.");
 } else {
-    $ripFiler = new Gazelle\File\RipLog;
-    $htmlFiler = new Gazelle\File\RipLogHTML;
+    $ripFiler = new Gazelle\File\RipLog();
+    $htmlFiler = new Gazelle\File\RipLogHTML();
 
     $torrent->removeLogDb();
     $ripFiler->remove([$torrent->id(), null]);

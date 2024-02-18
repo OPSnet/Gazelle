@@ -1,7 +1,7 @@
 <?php
 
 $RevisionID = (int)($_GET['revisionid'] ?? 0);
-$artistMan = new Gazelle\Manager\Artist;
+$artistMan = new Gazelle\Manager\Artist();
 $Artist = $RevisionID
     ? $artistMan->findByIdAndRevision((int)($_GET['id'] ?? 0), $RevisionID)
     : $artistMan->findById((int)($_GET['id'] ?? 0));
@@ -12,17 +12,17 @@ $Artist->loadArtistRole();
 $artistId = $Artist->id();
 
 $bookmark   = new Gazelle\User\Bookmark($Viewer);
-$collageMan = new Gazelle\Manager\Collage;
-$tgMan      = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
-$torMan     = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
+$collageMan = new Gazelle\Manager\Collage();
+$tgMan      = (new Gazelle\Manager\TGroup())->setViewer($Viewer);
+$torMan     = (new Gazelle\Manager\Torrent())->setViewer($Viewer);
 $stats      = new Gazelle\Stats\Artist($artistId);
-$userMan    = new Gazelle\Manager\User;
+$userMan    = new Gazelle\Manager\User();
 $vote       = new Gazelle\User\Vote($Viewer);
 
 $authKey      = $Viewer->auth();
 $isSubscribed = (new Gazelle\User\Subscription($Viewer))->isSubscribedComments('artist', $artistId);
 $name         = $Artist->name();
-$requestList  = $Viewer->disableRequests() ? [] : (new Gazelle\Manager\Request)->findByArtist($Artist);
+$requestList  = $Viewer->disableRequests() ? [] : (new Gazelle\Manager\Request())->findByArtist($Artist);
 
 View::show_header($name, ['js' => 'browse,requests,bbcode,comments,voting,subscriptions']);
 ?>

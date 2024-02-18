@@ -4,7 +4,7 @@ if (!$Viewer->permitted('users_mod')) {
     error(403);
 }
 
-$config = (new Gazelle\Manager\Torrent\ReportType)->findById((int)($_GET['id'] ?? 0));
+$config = (new Gazelle\Manager\Torrent\ReportType())->findById((int)($_GET['id'] ?? 0));
 if (is_null($config)) {
     error(404);
 }
@@ -61,7 +61,7 @@ if (isset($_POST['submit'])) {
 }
 
 echo $Twig->render('admin/torrent-report-edit.twig', [
-    'category'    => (new Gazelle\Manager\Category)->categoryList(),
+    'category'    => (new Gazelle\Manager\Category())->categoryList(),
     'config'      => $config,
     'pm'          => new Gazelle\Util\Textarea('pm_body', $config->pmBody() ?? ''),
     'explanation' => new Gazelle\Util\Textarea('explanation', $config->explanation()),

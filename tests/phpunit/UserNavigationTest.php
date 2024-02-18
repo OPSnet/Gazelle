@@ -17,7 +17,7 @@ class UserNavigationTest extends TestCase {
     }
 
     public function testNavigationBasic(): void {
-        $manager = new Gazelle\Manager\UserNavigation;
+        $manager = new Gazelle\Manager\UserNavigation();
         $fullList = $manager->fullList();
         $this->assertCount(12, $fullList, 'user-nav-manager-full');
 

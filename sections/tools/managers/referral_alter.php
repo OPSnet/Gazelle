@@ -6,7 +6,7 @@ if (!$Viewer->permitted('admin_manage_referrals')) {
 
 authorize();
 
-$ReferralManager = new Gazelle\Manager\Referral;
+$ReferralManager = new Gazelle\Manager\Referral();
 
 if ($_POST['submit'] == 'Delete') {
     $id = (int)$_POST['id'];
@@ -15,7 +15,7 @@ if ($_POST['submit'] == 'Delete') {
     }
     $ReferralManager->deleteAccount($id);
 } else {
-    $Val = new Gazelle\Util\Validator;
+    $Val = new Gazelle\Util\Validator();
     $Val->setFields([
         ['site', true, 'string', 'The site must be set, and has a max length of 30 characters', ['maxlength' => 30]],
         ['url', true, 'string', 'The URL must be set, and has a max length of 30 characters', ['maxlength' => 30]],

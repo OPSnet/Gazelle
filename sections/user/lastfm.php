@@ -2,7 +2,7 @@
 
 header('Content-Type: application/json; charset=utf-8');
 
-$lastfm   = new Gazelle\Util\LastFM;
+$lastfm   = new Gazelle\Util\LastFM();
 $username = $_GET['username'] ?? null;
 $mode     = $_REQUEST['mode'] ?? '';
 if (!$username && $mode != 'weekly') {

@@ -2,13 +2,13 @@
 
 use Gazelle\Enum\UserTokenType;
 
-$userToken = (new Gazelle\Manager\UserToken)->findByToken($_GET['key']);
+$userToken = (new Gazelle\Manager\UserToken())->findByToken($_GET['key']);
 if ($userToken?->type() != UserTokenType::password) {
     header('Location: login.php?action=recover');
     exit;
 }
 
-$validator = new Gazelle\Util\Validator;
+$validator = new Gazelle\Util\Validator();
 $validator->setFields([
     ['verifypassword', true, 'compare', 'Your passwords did not match.', ['comparefield' => 'password']],
     ['password', true, 'regex',

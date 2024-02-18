@@ -6,7 +6,7 @@ if (!$Viewer->permitted('torrents_edit')) {
 
 authorize();
 
-$artistMan = new Gazelle\Manager\Artist;
+$artistMan = new Gazelle\Manager\Artist();
 $artist = $artistMan->findById((int)$_POST['artistid']);
 if (is_null($artist)) {
     error(404);
@@ -26,9 +26,9 @@ if ($oldName == $newName) {
 $new = $artist->smartRename(
     $newName,
     $artistMan,
-    new Gazelle\Manager\Comment,
-    new Gazelle\Manager\Request,
-    new Gazelle\Manager\TGroup,
+    new Gazelle\Manager\Comment(),
+    new Gazelle\Manager\Request(),
+    new Gazelle\Manager\TGroup(),
     $Viewer,
 );
 

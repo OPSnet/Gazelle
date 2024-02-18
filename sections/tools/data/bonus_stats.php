@@ -4,7 +4,7 @@ if (!$Viewer->permitted('admin_bp_history')) {
     error(403);
 }
 
-$bonus = new Gazelle\Stats\Bonus;
+$bonus = new Gazelle\Stats\Bonus();
 $day = [];
 $week = [];
 $month = [];
@@ -19,5 +19,5 @@ echo $Twig->render('admin/bonus-stats.twig', [
     'day'   => $day,
     'week'  => $week,
     'month' => $month,
-    'fl'    => (new Gazelle\Stats\Users)->stockpileTokenList(10),
+    'fl'    => (new Gazelle\Stats\Users())->stockpileTokenList(10),
 ]);

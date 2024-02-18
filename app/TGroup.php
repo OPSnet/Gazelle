@@ -304,7 +304,7 @@ class TGroup extends BaseObject {
             return null;
         }
         if (!isset($this->artistRole)) {
-            $this->artistRole = new ArtistRole\TGroup($this->id, new Manager\Artist);
+            $this->artistRole = new ArtistRole\TGroup($this->id, new Manager\Artist());
         }
         return $this->artistRole;
     }
@@ -399,7 +399,7 @@ class TGroup extends BaseObject {
     public function releaseTypeName(): ?string {
         static $releaseTypes;
         if (is_null($releaseTypes)) {
-            $releaseTypes = (new \Gazelle\ReleaseType)->list();
+            $releaseTypes = (new \Gazelle\ReleaseType())->list();
         }
         return $this->info()['ReleaseType'] == 0 ? null : $releaseTypes[$this->releaseType()];
     }
@@ -1001,9 +1001,9 @@ class TGroup extends BaseObject {
             $old->flush();
             $old->refresh();
         } else {
-            (new \Gazelle\Manager\Bookmark)->merge($old, $this);
-            (new \Gazelle\Manager\Comment)->merge('torrents', $oldId, $this->id);
-            (new \Gazelle\Manager\Vote)->merge($old, $this, new Manager\User);
+            (new \Gazelle\Manager\Bookmark())->merge($old, $this);
+            (new \Gazelle\Manager\Comment())->merge('torrents', $oldId, $this->id);
+            (new \Gazelle\Manager\Vote())->merge($old, $this, new Manager\User());
             $logger->merge($old, $this);
 
             $old->remove($user);
@@ -1032,8 +1032,8 @@ class TGroup extends BaseObject {
             DELETE FROM torrents_artists WHERE GroupID = ?
             ", $this->id
         );
-        $logger    = new Log;
-        $artistMan = new Manager\Artist;
+        $logger    = new Log();
+        $artistMan = new Manager\Artist();
         foreach ($artistList as $artistId) {
             $artist = $artistMan->findById($artistId);
             if ($artist) {
@@ -1074,7 +1074,7 @@ class TGroup extends BaseObject {
             self::$cache->delete_value("torrent_collages_" . $this->id);
         }
 
-        (new \Gazelle\Manager\Comment)->remove('torrents', $this->id);
+        (new \Gazelle\Manager\Comment())->remove('torrents', $this->id);
 
         // Requests
         self::$db->prepared_query("
@@ -1109,7 +1109,7 @@ class TGroup extends BaseObject {
             ", $this->id
         );
 
-        $manager = new \Gazelle\DB;
+        $manager = new \Gazelle\DB();
         [$ok, $message] = $manager->softDelete(SQLDB, 'torrents_group', [['ID', $this->id]]);
         if (!$ok) {
             return false;

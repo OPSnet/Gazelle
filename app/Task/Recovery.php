@@ -5,7 +5,7 @@ namespace Gazelle\Task;
 class Recovery extends \Gazelle\Task {
     public function run(): void {
         if (RECOVERY) {
-            $recovery = new \Gazelle\Manager\Recovery;
+            $recovery = new \Gazelle\Manager\Recovery();
             if (RECOVERY_AUTOVALIDATE) {
                 $recovery->validatePending();
             }

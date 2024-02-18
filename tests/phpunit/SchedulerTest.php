@@ -8,13 +8,13 @@ ini_set('memory_limit', '1G');
 
 class SchedulerTest extends TestCase {
     public function testRun(): void {
-        $scheduler = new Gazelle\TaskScheduler;
+        $scheduler = new Gazelle\TaskScheduler();
         $this->expectOutputRegex('/^(?:\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} \[(?:debug|info)\] (.*?)\n|Running task (?:.*?)\.\.\.DONE! \(\d+\.\d+\)\n)*$/');
         $scheduler->run();
     }
 
     public function testRunWithMissingImplementation(): void {
-        $scheduler = new Gazelle\TaskScheduler;
+        $scheduler = new Gazelle\TaskScheduler();
         $name = "RunUnimplemented";
         $db = Gazelle\DB::DB();
         $db->prepared_query("
@@ -38,12 +38,12 @@ class SchedulerTest extends TestCase {
     }
 
     public function testMissingTaskEntry(): void {
-        $scheduler = new Gazelle\TaskScheduler;
+        $scheduler = new Gazelle\TaskScheduler();
         $this->assertEquals(-1, $scheduler->runClass("NoSuchClassname"), "sched-task-no-such-class");
     }
 
     public function testMissingImplementation(): void {
-        $scheduler = new Gazelle\TaskScheduler;
+        $scheduler = new Gazelle\TaskScheduler();
         $name = "Unimplemented";
         $db = Gazelle\DB::DB();
         $db->prepared_query("
@@ -66,7 +66,7 @@ class SchedulerTest extends TestCase {
 
     #[DataProvider('taskProvider')]
     public function testTask(string $taskName): void {
-        $scheduler = new Gazelle\TaskScheduler;
+        $scheduler = new Gazelle\TaskScheduler();
         ob_start();
         $this->assertIsInt($scheduler->runClass($taskName), "sched-task-$taskName");
         ob_end_clean();

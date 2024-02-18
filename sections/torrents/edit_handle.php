@@ -7,7 +7,7 @@ use OrpheusNET\Logchecker\Logchecker;
 
 authorize();
 
-$torMan = new Gazelle\Manager\Torrent;
+$torMan = new Gazelle\Manager\Torrent();
 $torrent = $torMan->findById((int)($_POST['torrentid'] ?? 0));
 if (is_null($torrent)) {
     error(404);
@@ -79,7 +79,7 @@ if (!$Viewer->permitted('edit_unknowns')) {
     }
 }
 
-$Validate = new Gazelle\Util\Validator;
+$Validate = new Gazelle\Util\Validator();
 $Validate->setField('type', true, 'number', 'Not a valid category.', ['range' => [1, count(CATEGORY)]]);
 switch (CATEGORY[(int)($_POST['type'] ?? 0) - 1]) {
     case 'Music':
@@ -193,7 +193,7 @@ $logfileSummary = new Gazelle\LogfileSummary($_FILES['logfiles']);
 $db->begin_transaction(); // It's all or nothing
 
 if ($logfileSummary->total()) {
-    $torrentLogManager = new Gazelle\Manager\TorrentLog(new Gazelle\File\RipLog, new Gazelle\File\RipLogHTML);
+    $torrentLogManager = new Gazelle\Manager\TorrentLog(new Gazelle\File\RipLog(), new Gazelle\File\RipLogHTML());
     $checkerVersion = Logchecker::getLogcheckerVersion();
     foreach ($logfileSummary->all() as $logfile) {
         $torrentLogManager->create($torrent, $logfile, $checkerVersion);
@@ -254,7 +254,7 @@ if ($Viewer->permitted('torrents_freeleech')) {
     $leechType = $torMan->lookupLeechType($_POST['leech_type'] ?? LeechType::Normal->value);
     if ($leechType != $torrent->leechType() || $reason != $torrent->leechReason()) {
         $torMan->setListFreeleech(
-            tracker:   new Gazelle\Tracker,
+            tracker:   new Gazelle\Tracker(),
             idList:    [$torrent->id()],
             leechType: $leechType,
             reason:    $reason,
@@ -267,7 +267,7 @@ $db->commit();
 $torrent->group()->refresh();
 
 $changeLog = implode(', ', $change);
-(new Gazelle\Log)->torrent($torrent, $Viewer, $changeLog)
+(new Gazelle\Log())->torrent($torrent, $Viewer, $changeLog)
     ->general("Torrent $TorrentID ({$torrent->group()->name()}) in group {$current['GroupID']} was edited by "
         . $Viewer->username() . " ($changeLog)");
 

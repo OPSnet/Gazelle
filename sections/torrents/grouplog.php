@@ -6,10 +6,10 @@ if (!$tgroupId) {
     // so the best we can hope for is something that looks like a positive integer
     error(404);
 }
-$tgroup = (new Gazelle\Manager\TGroup)->findById($tgroupId);
+$tgroup = (new Gazelle\Manager\TGroup())->findById($tgroupId);
 
 echo $Twig->render('tgroup/group-log.twig', [
     'id'     => $tgroupId,
     'tgroup' => $tgroup,
-    'log'    => (new Gazelle\Manager\SiteLog(new Gazelle\Manager\User))->tgroupLogList($tgroupId),
+    'log'    => (new Gazelle\Manager\SiteLog(new Gazelle\Manager\User()))->tgroupLogList($tgroupId),
 ]);

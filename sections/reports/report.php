@@ -14,7 +14,7 @@ $reportType = $Types[$type];
 
 switch ($type) {
     case 'user':
-        $user = (new Gazelle\Manager\User)->findById($id);
+        $user = (new Gazelle\Manager\User())->findById($id);
         if (is_null($user)) {
             error(404);
         }
@@ -22,7 +22,7 @@ switch ($type) {
         break;
 
     case 'request':
-        $request = (new Gazelle\Manager\Request)->findById($id);
+        $request = (new Gazelle\Manager\Request())->findById($id);
         if (is_null($request)) {
             error(404);
         }
@@ -30,7 +30,7 @@ switch ($type) {
         break;
 
     case 'request_update':
-        $request = (new Gazelle\Manager\Request)->findById($id);
+        $request = (new Gazelle\Manager\Request())->findById($id);
         if (is_null($request)) {
             error(404);
         }
@@ -41,7 +41,7 @@ switch ($type) {
         break;
 
     case 'collage':
-        $collage = (new Gazelle\Manager\Collage)->findById($id);
+        $collage = (new Gazelle\Manager\Collage())->findById($id);
         if (is_null($collage)) {
             error(404);
         }
@@ -49,7 +49,7 @@ switch ($type) {
         break;
 
     case 'thread':
-        $thread = (new Gazelle\Manager\ForumThread)->findById($id);
+        $thread = (new Gazelle\Manager\ForumThread())->findById($id);
         if (is_null($thread)) {
             error(404);
         }
@@ -60,7 +60,7 @@ switch ($type) {
         break;
 
     case 'post':
-        $post = (new Gazelle\Manager\ForumPost)->findById($id);
+        $post = (new Gazelle\Manager\ForumPost())->findById($id);
         if (is_null($post)) {
             error(404);
         }
@@ -71,7 +71,7 @@ switch ($type) {
         break;
 
     case 'comment':
-        $comment = (new Gazelle\Manager\Comment)->findById($id);
+        $comment = (new Gazelle\Manager\Comment())->findById($id);
         if (is_null($comment)) {
             error(404);
         }
@@ -83,7 +83,7 @@ switch ($type) {
 
 echo $Twig->render('report/create.twig', [
     'id'          => $id,
-    'release'     => (new Gazelle\ReleaseType)->list(),
+    'release'     => (new Gazelle\ReleaseType())->list(),
     'report'      => $report,
     'report_type' => $reportType,
     'type'        => $type,

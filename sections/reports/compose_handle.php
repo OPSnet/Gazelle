@@ -2,7 +2,7 @@
 
 authorize();
 
-$userMan = new Gazelle\Manager\User;
+$userMan = new Gazelle\Manager\User();
 $recipient = $userMan->findById((int)($_POST['toid'] ?? 0));
 if (is_null($recipient)) {
     error("No such recipient!");

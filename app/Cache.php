@@ -87,7 +87,7 @@ class Cache extends \Memcached {
         $begin = microtime(true);
         if (empty($key)) {
             $value = false;
-         } else {
+        } else {
             $value = $this->get($key);
             if (!isset($this->hit[$key])) {
                 $this->hit[$key] = 0;

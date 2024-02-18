@@ -8,7 +8,7 @@ class RequestManagerTest extends TestCase {
     protected \Gazelle\Manager\Request $manager;
 
     public function setUp(): void {
-        $this->manager = new \Gazelle\Manager\Request;
+        $this->manager = new \Gazelle\Manager\Request();
     }
 
     public function testManager(): void {

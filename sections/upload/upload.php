@@ -11,7 +11,7 @@
 
 ini_set('max_file_uploads', '100');
 
-$tgMan = new Gazelle\Manager\TGroup;
+$tgMan = new Gazelle\Manager\TGroup();
 if (!isset($Properties)) {
     $requestId = (int)($_GET['requestid'] ?? 0);
     if ((int)($_GET['groupid'] ?? 0)) {
@@ -40,7 +40,7 @@ if (!isset($Properties)) {
             }
         }
     } elseif ($requestId) {
-        $request = (new Gazelle\Manager\Request)->findById($requestId);
+        $request = (new Gazelle\Manager\Request())->findById($requestId);
         if ($request) {
             $categoryId = $request->categoryId();
             $Properties = [
@@ -72,7 +72,7 @@ if (!isset($Err)) {
     $Err = false;
 }
 
-$dnu     = new Gazelle\Manager\DNU;
+$dnu     = new Gazelle\Manager\DNU();
 $dnuNew  = $dnu->hasNewForUser($Viewer);
 $dnuHide = !$dnuNew && $Viewer->permitted('torrents_hide_dnu');
 
@@ -116,7 +116,7 @@ echo match (CATEGORY[$categoryId - 1]) {
     'Audiobooks', 'Comedy'                                   => $uploadForm->audiobook_form(),
     'Applications', 'Comics', 'E-Books', 'E-Learning Videos' => $uploadForm->simple_form(),
     default => $uploadForm->music_form(
-        (new Gazelle\Manager\Tag)->genreList(),
+        (new Gazelle\Manager\Tag())->genreList(),
         $tgMan,
     ),
 };

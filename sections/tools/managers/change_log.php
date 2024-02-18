@@ -1,6 +1,6 @@
 <?php
 
-$changeMan = new Gazelle\Manager\Changelog;
+$changeMan = new Gazelle\Manager\Changelog();
 
 if ($Viewer->permitted('users_mod') && isset($_POST['perform'])) {
     authorize();

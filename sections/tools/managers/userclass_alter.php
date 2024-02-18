@@ -4,7 +4,7 @@ if (!$Viewer->permitted('admin_manage_permissions')) {
     error(403);
 }
 
-$privMan = new Gazelle\Manager\Privilege;
+$privMan = new Gazelle\Manager\Privilege();
 
 $privilege = $privMan->findById((int)($_REQUEST['removeid'] ?? 0));
 if ($privilege) {
@@ -23,7 +23,7 @@ $usersAffected = null;
 
 if (isset($_REQUEST['submit'])) {
     authorize();
-    $validator = new Gazelle\Util\Validator;
+    $validator = new Gazelle\Util\Validator();
     $validator->setFields([
         ['name', true, 'string', 'You did not enter a valid name for this permission set.'],
         ['level', true, 'number', 'You did not enter a valid level for this permission set.'],
@@ -52,7 +52,7 @@ if (isset($_REQUEST['submit'])) {
     $forums       = $_REQUEST['forums'];
     $displayStaff = isset($_REQUEST['displaystaff']);
     $staffGroupId = $displayStaff
-        ? (new Gazelle\Manager\StaffGroup)->findById((int)($_REQUEST['staffgroup'] ?? 0))?->id()
+        ? (new Gazelle\Manager\StaffGroup())->findById((int)($_REQUEST['staffgroup'] ?? 0))?->id()
         : null;
     $level        = (int)$_REQUEST['level'];
     $secondary    = (int)isset($_REQUEST['secondary']);
@@ -79,7 +79,7 @@ if (isset($_REQUEST['submit'])) {
         ->setField('`Values`', serialize($values))
         ->modify();
 
-    $usersAffected = (new Gazelle\Manager\User)->flushUserclass($privilege->id());
+    $usersAffected = (new Gazelle\Manager\User())->flushUserclass($privilege->id());
 }
 
 require_once('userclass_edit.php');

@@ -6,7 +6,7 @@ if (!$Viewer->permitted('admin_manage_news')) {
     error(403);
 }
 
-$newsMan = new Gazelle\Manager\News;
+$newsMan = new Gazelle\Manager\News();
 $create  = false;
 $title   = '';
 $body    = '';

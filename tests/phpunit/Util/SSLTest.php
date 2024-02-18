@@ -8,7 +8,7 @@ class SSLTest extends TestCase {
     protected Manager\SSLHost $manager;
 
     public function setUp(): void {
-        $this->manager = new Manager\SSLHost;
+        $this->manager = new Manager\SSLHost();
     }
 
     public function testAll(): void {

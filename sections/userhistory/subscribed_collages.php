@@ -5,12 +5,12 @@ if (!$Viewer->permitted('site_collages_subscribe')) {
 }
 
 $viewAll = (bool)($_GET['showall'] ?? 0);
-$collMan = new Gazelle\Manager\Collage;
+$collMan = new Gazelle\Manager\Collage();
 $groupSubs  = $collMan->subscribedTGroupCollageList($Viewer, $viewAll);
 $artistSubs = $collMan->subscribedArtistCollageList($Viewer, $viewAll);
 
-$tgMan    = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
-$torMan   = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
+$tgMan    = (new Gazelle\Manager\TGroup())->setViewer($Viewer);
+$torMan   = (new Gazelle\Manager\Torrent())->setViewer($Viewer);
 $imgProxy = new Gazelle\Util\ImageProxy($Viewer);
 $snatcher = $Viewer->snatch();
 $urlStem  = (new Gazelle\User\Stylesheet($Viewer))->imagePath();

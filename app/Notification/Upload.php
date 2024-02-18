@@ -260,7 +260,7 @@ class Upload extends \Gazelle\Base {
         }
         $this->rss[] = 'torrents_all';
 
-        $feed = new \Gazelle\Feed;
+        $feed = new \Gazelle\Feed();
         $item = $feed->item(
             title:       $torrent->fullName(),
             description: \Text::strip_bbcode($tgroup->description()),

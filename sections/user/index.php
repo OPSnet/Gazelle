@@ -74,7 +74,7 @@ switch ($_REQUEST['action'] ?? '') {
         if (!$Viewer->permittedAny('admin_clear_cache', 'users_override_paranoia')) {
             error(403);
         }
-        (new Gazelle\Manager\User)->findById((int)$_REQUEST['id'])?->flush();
+        (new Gazelle\Manager\User())->findById((int)$_REQUEST['id'])?->flush();
         require_once('user.php');
         break;
 

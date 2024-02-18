@@ -11,7 +11,7 @@ if (!$taskId) {
     error("Task not found");
 }
 
-$scheduler = new Gazelle\TaskScheduler;
+$scheduler = new Gazelle\TaskScheduler();
 ob_start();
 $processed = $scheduler->runTask($taskId, true);
 $output    = ob_get_flush();

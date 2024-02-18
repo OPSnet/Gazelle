@@ -4,8 +4,8 @@ if (!$Viewer->permitted('admin_staffpm_stats')) {
     error(403);
 }
 
-$userMan = new Gazelle\Manager\User;
-$spmMan  = new Gazelle\Manager\StaffPM;
+$userMan = new Gazelle\Manager\User();
+$spmMan  = new Gazelle\Manager\StaffPM();
 
 $isStaffView  = ($_REQUEST['view'] ?? 'staff') === 'staff';
 $SupportStaff = [...array_keys($userMan->flsList()), ...array_keys($userMan->staffList())];

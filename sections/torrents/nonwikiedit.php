@@ -5,7 +5,7 @@ use Gazelle\Enum\LeechReason;
 
 authorize();
 
-$tgMan = new Gazelle\Manager\TGroup;
+$tgMan = new Gazelle\Manager\TGroup();
 $tgroup = $tgMan->findById((int)($_POST['groupid']));
 if (is_null($tgroup)) {
     error(404);
@@ -17,12 +17,12 @@ if (!$tgroup->canEdit($Viewer)) {
 
 $log = [];
 if (isset($_POST['leech_type']) && $Viewer->permitted('torrents_freeleech')) {
-    $torMan    = new Gazelle\Manager\Torrent;
+    $torMan    = new Gazelle\Manager\Torrent();
     $reason    = $torMan->lookupLeechReason($_POST['leech_reason'] ?? LeechReason::Normal->value);
     $leechType = $torMan->lookupLeechType($_POST['leech_type'] ?? LeechType::Normal->value);
     $tgroup->setFreeleech(
         torMan:    $torMan,
-        tracker:   new Gazelle\Tracker,
+        tracker:   new Gazelle\Tracker(),
         user:      $Viewer,
         leechType: $leechType,
         reason:    $reason,
@@ -50,7 +50,7 @@ if ($tgroup->catalogueNumber() != $catNumber) {
 }
 
 if ($tgroup->dirty()) {
-    (new Gazelle\Log)->group($tgroup, $Viewer, ucfirst(implode(", ", $log)));
+    (new Gazelle\Log())->group($tgroup, $Viewer, ucfirst(implode(", ", $log)));
     $tgroup->modify();
     $tgroup->refresh();
 }

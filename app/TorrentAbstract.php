@@ -311,7 +311,7 @@ abstract class TorrentAbstract extends BaseObject {
      * This method can be used to verify that group() can be called.
      */
     public function hasTGroup(): bool {
-        return (new Manager\TGroup)->findById($this->groupId()) instanceof TGroup;
+        return (new Manager\TGroup())->findById($this->groupId()) instanceof TGroup;
     }
 
     /**

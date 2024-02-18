@@ -13,9 +13,9 @@ class DNU extends \Gazelle\Base {
                    (Name, Comment, UserID, Sequence)
             VALUES (?,    ?,       ?,      9999)
             ", $name, $comment, $user->id()
-       );
-       return self::$db->inserted_id();
-   }
+        );
+        return self::$db->inserted_id();
+    }
 
     public function modify(
         int           $id,

@@ -210,7 +210,7 @@ class LastFM extends \Gazelle\Base {
         foreach ($args as $Key => $Value) {
             $url .= "&$Key=" . urlencode($Value);
         }
-        $curl = new Curl;
+        $curl = new Curl();
         if ($curl->fetch($url . "&format=json&api_key=" . LASTFM_API_KEY)) {
             return json_decode($curl->result(), true);
         }

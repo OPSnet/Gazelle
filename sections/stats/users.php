@@ -1,6 +1,6 @@
 <?php
 
-$statsUser = new Gazelle\Stats\Users;
+$statsUser = new Gazelle\Stats\Users();
 $flow      = $statsUser->flow();
 
 [$Countries, $Rank, $CountryUsers, $CountryMax, $CountryMin, $LogIncrements]

@@ -4,7 +4,7 @@ namespace Gazelle\Task;
 
 class Reaper extends \Gazelle\Task {
     public function run(): void {
-        $reaper = new \Gazelle\Torrent\Reaper(new \Gazelle\Manager\Torrent, new \Gazelle\Manager\User);
+        $reaper = new \Gazelle\Torrent\Reaper(new \Gazelle\Manager\Torrent(), new \Gazelle\Manager\User());
         $this->processed = 0;
         if (REAPER_TASK_CLAIM) {
             $reaper->claim();

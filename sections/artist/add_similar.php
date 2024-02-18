@@ -4,7 +4,7 @@ if (!defined('AJAX')) {
     authorize();
 }
 
-$artistMan = new Gazelle\Manager\Artist;
+$artistMan = new Gazelle\Manager\Artist();
 $artist = $artistMan->findById((int)($_POST['artistid'] ?? 0));
 if (is_null($artist)) {
     if (defined('AJAX')) {
@@ -24,7 +24,7 @@ if (is_null($other)) {
         }
     }
 }
-$artist->similar()->addSimilar($other, $Viewer, new Gazelle\Log);
+$artist->similar()->addSimilar($other, $Viewer, new Gazelle\Log());
 
 if (defined('AJAX')) {
     json_print('success', [

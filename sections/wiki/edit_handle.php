@@ -2,7 +2,7 @@
 
 authorize();
 
-$wikiMan = new Gazelle\Manager\Wiki;
+$wikiMan = new Gazelle\Manager\Wiki();
 $article = $wikiMan->findById((int)$_POST['id']);
 if (is_null($article)) {
     error(404);
@@ -12,7 +12,7 @@ if (!$article->editable($Viewer)) {
     error(403);
 }
 
-$validator = new Gazelle\Util\Validator;
+$validator = new Gazelle\Util\Validator();
 $validator->setField('title', true, 'string', 'The title must be between 3 and 100 characters', ['range' => [3, 100]]);
 if (!$validator->validate($_POST)) {
     error($validator->errorMessage());

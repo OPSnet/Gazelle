@@ -19,7 +19,7 @@ class BonusTest extends TestCase {
     }
 
     public function testBonus(): void {
-        $creator = new Gazelle\UserCreator;
+        $creator = new Gazelle\UserCreator();
         $this->userList['giver'] = $creator
             ->setUsername('bonusg.' . randomString(6))
             ->setEmail(randomString(6) . "@bonus.example.com")
@@ -63,7 +63,7 @@ class BonusTest extends TestCase {
         $giver->setPoints($startingPoints);
         $this->assertEquals($startingPoints, $giver->user()->bonusPointsTotal(), 'bonus-set-points');
 
-        $itemList = (new Gazelle\Manager\Bonus)->itemList();
+        $itemList = (new Gazelle\Manager\Bonus())->itemList();
         $this->assertArrayHasKey('token-1', $itemList, 'item-token-1');
         $token = $giver->item('token-1');
         $price = $token['Price'];
@@ -133,13 +133,13 @@ class BonusTest extends TestCase {
     }
 
     public function testStats(): void {
-        $eco = new \Gazelle\Stats\Economic;
+        $eco = new \Gazelle\Stats\Economic();
         $eco->flush();
 
         $total    = $eco->bonusTotal();
         $stranded = $eco->bonusStrandedTotal();
 
-        $this->userList['bonus'] = (new Gazelle\UserCreator)
+        $this->userList['bonus'] = (new Gazelle\UserCreator())
             ->setUsername('bonusstat.' . randomString(6))
             ->setEmail(randomString(6) . "@bonus.example.com")
             ->setPassword(randomString())

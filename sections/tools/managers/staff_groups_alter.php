@@ -5,7 +5,7 @@ if (!$Viewer->permitted('admin_manage_permissions')) {
 }
 
 authorize();
-$manager = new Gazelle\Manager\StaffGroup;
+$manager = new Gazelle\Manager\StaffGroup();
 $staffGroup = $manager->findById((int)($_POST['id'] ?? 0));
 
 if ($_POST['submit'] == 'Delete') {
@@ -14,7 +14,7 @@ if ($_POST['submit'] == 'Delete') {
     }
     $staffGroup->remove();
 } else {
-    $validator = new Gazelle\Util\Validator;
+    $validator = new Gazelle\Util\Validator();
     $validator->setFields([
         ['sort', true, 'number', 'Sort must be set'],
         ['name', true, 'string', 'Name must be set, and has a max length of 50 characters', ['maxlength' => 50]],

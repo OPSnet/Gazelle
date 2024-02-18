@@ -12,7 +12,7 @@ class TwigTest extends TestCase {
     protected \Gazelle\User $user;
 
     public function setUp(): void {
-        Gazelle\Util\Twig::setUserMan(new Gazelle\Manager\User);
+        Gazelle\Util\Twig::setUserMan(new Gazelle\Manager\User());
         $this->user = Helper::makeUser('user.' . randomString(6), 'user');
         $this->user->setField('PermissionID', SYSOP)->modify();
     }
@@ -222,7 +222,7 @@ END;
                'BrowserVersion'         => '1.0',
                'OperatingSystem'        => 'phpunit/OS',
                'OperatingSystemVersion' => '1.0',
-           ],
+            ],
             'ipaddr'      => '127.0.0.1',
             'useragent'   => 'phpunit',
         ]);

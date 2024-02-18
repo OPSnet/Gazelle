@@ -5,6 +5,6 @@ if (!$Viewer->permittedAny('admin_reports', 'site_moderate_forums')) {
 }
 
 echo $Twig->render('report/stats.twig', [
-    'stats'  => new Gazelle\Stats\Report,
+    'stats'  => new Gazelle\Stats\Report(),
     'viewer' => $Viewer,
 ]);

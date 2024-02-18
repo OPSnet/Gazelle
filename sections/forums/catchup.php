@@ -8,7 +8,7 @@ if (($_GET['forumid'] ?? '') == 'all') {
     exit;
 }
 
-$forum = (new Gazelle\Manager\Forum)->findById((int)($_GET['forumid'] ?? 0));
+$forum = (new Gazelle\Manager\Forum())->findById((int)($_GET['forumid'] ?? 0));
 if (is_null($forum)) {
     error(404);
 }

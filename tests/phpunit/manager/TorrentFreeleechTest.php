@@ -39,7 +39,7 @@ class TorrentFreeleechTest extends TestCase {
     public function tearDown(): void {
         $tgroup = $this->torrentList[0]->group();
         $user   = $this->torrentList[0]->uploader();
-        $torMan = new Gazelle\Manager\Torrent;
+        $torMan = new Gazelle\Manager\Torrent();
         foreach ($this->torrentList as $torrent) {
             $torrent->remove($user, 'torman unit test');
         }
@@ -51,8 +51,8 @@ class TorrentFreeleechTest extends TestCase {
         $this->assertEquals(
             4,
             $this->torrentList[0]->group()->setFreeleech(
-                torMan:    new \Gazelle\Manager\Torrent,
-                tracker:   new \Gazelle\Tracker,
+                torMan:    new \Gazelle\Manager\Torrent(),
+                tracker:   new \Gazelle\Tracker(),
                 user:      $this->torrentList[0]->uploader(),
                 leechType: LeechType::Free,
                 reason:    LeechReason::StaffPick,
@@ -70,8 +70,8 @@ class TorrentFreeleechTest extends TestCase {
         $this->assertEquals(
             4,
             $this->torrentList[0]->group()->setFreeleech(
-                torMan:    new \Gazelle\Manager\Torrent,
-                tracker:   new \Gazelle\Tracker,
+                torMan:    new \Gazelle\Manager\Torrent(),
+                tracker:   new \Gazelle\Tracker(),
                 user:      $this->torrentList[0]->uploader(),
                 leechType: LeechType::Normal,
                 reason:    LeechReason::Normal,
@@ -90,8 +90,8 @@ class TorrentFreeleechTest extends TestCase {
         $this->assertEquals(
             5,
             $this->torrentList[0]->group()->setFreeleech(
-                torMan:    new \Gazelle\Manager\Torrent,
-                tracker:   new \Gazelle\Tracker,
+                torMan:    new \Gazelle\Manager\Torrent(),
+                tracker:   new \Gazelle\Tracker(),
                 user:      $this->torrentList[0]->uploader(),
                 leechType: LeechType::Free,
                 reason:    LeechReason::StaffPick,
@@ -102,5 +102,5 @@ class TorrentFreeleechTest extends TestCase {
 
         $this->assertEquals(LeechType::Free, $this->torrentList[3]->flush()->leechType(), 'torman-3-is-free');
         $this->assertEquals(LeechType::Free, $this->torrentList[4]->flush()->leechType(), 'torman-4-is-free');
-   }
+    }
 }

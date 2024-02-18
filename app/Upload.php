@@ -72,7 +72,7 @@ class Upload extends \Gazelle\Base {
     }
 
     public function foot(bool $showFooter): string {
-        $torMan = new \Gazelle\Manager\Torrent;
+        $torMan = new \Gazelle\Manager\Torrent();
         return self::$twig->render('upload/footer.twig', [
             'is_upload'    => $this->Torrent === false || isset($this->Torrent['add-format']),
             'info'         => $this->Torrent,
@@ -116,7 +116,7 @@ class Upload extends \Gazelle\Base {
             $LossymasterApproved = $Torrent['LossymasterApproved'] ?? false;
             $LossywebApproved    = $Torrent['LossywebApproved'] ?? false;
         }
-        $releaseTypes = (new \Gazelle\ReleaseType)->list();
+        $releaseTypes = (new \Gazelle\ReleaseType())->list();
 
         ob_start();
 ?>

@@ -31,7 +31,7 @@ class TagTest extends TestCase {
     }
 
     public function testSanitize(): void {
-        $manager = new Gazelle\Manager\Tag;
+        $manager = new Gazelle\Manager\Tag();
         $this->assertEquals('trim', $manager->sanitize(' trim '), 'tag-sanitize-trim');
         $this->assertEquals('lower', $manager->sanitize('Lower'), 'tag-sanitize-lower');
         $this->assertEquals('heavy.metal', $manager->sanitize('heavy metal'), 'tag-sanitize-internal-space');
@@ -41,14 +41,14 @@ class TagTest extends TestCase {
     }
 
     public function testNormalize(): void {
-        $manager = new Gazelle\Manager\Tag;
+        $manager = new Gazelle\Manager\Tag();
         $this->assertEquals('dub', $manager->normalize('Dub dub  DUB! '), 'tag-normalize-dup');
         $this->assertEquals('neo.folk', $manager->normalize('neo...folk neo-folk'), 'tag-normalize-more');
         $this->assertEquals('pop rock', $manager->normalize(' pop rock rock pop Rock'), 'tag-normalize-two');
     }
 
     public function testCreate(): void {
-        $manager = new Gazelle\Manager\Tag;
+        $manager = new Gazelle\Manager\Tag();
         $name    = self::PREFIX . randomString(5);
         $this->assertNull($manager->lookup($name), 'tag-lookup-fail');
 
@@ -75,7 +75,7 @@ class TagTest extends TestCase {
     }
 
     public function testAlias(): void {
-        $manager    = new Gazelle\Manager\Tag;
+        $manager    = new Gazelle\Manager\Tag();
         $this->user = Helper::makeUser('tag.' . randomString(6), 'tag');
 
         $badId  = $manager->create(self::PREFIX . randomString(10), $this->user);
@@ -97,7 +97,7 @@ class TagTest extends TestCase {
     }
 
     public function testOfficial(): void {
-        $manager    = new Gazelle\Manager\Tag;
+        $manager    = new Gazelle\Manager\Tag();
         $this->user = Helper::makeUser('tag.' . randomString(6), 'tag');
         $tagId      = $manager->create(self::PREFIX . randomString(10), $this->user);
         $this->assertEquals($tagId, $manager->officialize($manager->name($tagId), $this->user), 'tag-officalize-existing');
@@ -134,7 +134,7 @@ class TagTest extends TestCase {
             user:   $this->user,
         );
 
-        $manager = new Gazelle\Manager\Tag;
+        $manager = new Gazelle\Manager\Tag();
         $folkId  = $manager->lookup('phpunit.folk');
         $this->assertFalse(
             $manager->torrentTagHasVote($folkId, $this->tgroup, $this->user),
@@ -161,7 +161,7 @@ class TagTest extends TestCase {
 
     public function testTag(): void {
         $this->user = Helper::makeUser('tag.' . randomString(8), 'tag.tgroup');
-        $manager    = new Gazelle\Manager\Tag;
+        $manager    = new Gazelle\Manager\Tag();
         $name       = self::PREFIX . randomString(10);
         $tagId      = $manager->create($name, $this->user);
         $tag        = $manager->findById($tagId);
@@ -181,7 +181,7 @@ class TagTest extends TestCase {
     }
 
     public function testTop10(): void {
-        $manager = new Gazelle\Manager\Tag;
+        $manager = new Gazelle\Manager\Tag();
         $this->assertIsArray($manager->topTGroupList(1), 'tag-top10-tgroup');
         $this->assertIsArray($manager->topRequestList(1), 'tag-top10-request');
         $this->assertIsArray($manager->topVotedList(1), 'tag-top10-voted');

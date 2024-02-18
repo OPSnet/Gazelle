@@ -54,7 +54,7 @@ class TGroup extends AbstractCollage {
         $this->groupIds     = [];
         $this->contributors = [];
         $this->created      = [];
-        $tgMan              = new \Gazelle\Manager\TGroup;
+        $tgMan              = new \Gazelle\Manager\TGroup();
         foreach ($groupIds as $groupId) {
             $tgroup = $tgMan->findById($groupId);
             if (is_null($tgroup)) {
@@ -135,7 +135,7 @@ class TGroup extends AbstractCollage {
         if (!$this->holder->isPersonal()) {
             $rows = parent::remove();
         } else {
-            (new \Gazelle\Manager\Comment)->remove('collages', $this->id);
+            (new \Gazelle\Manager\Comment())->remove('collages', $this->id);
             self::$db->prepared_query("
                 DELETE FROM collages_torrents WHERE CollageID = ?
                 ", $this->id

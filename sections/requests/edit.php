@@ -1,6 +1,6 @@
 <?php
 
-$request = (new Gazelle\Manager\Request)->findById((int)($_GET['id'] ?? 0));
+$request = (new Gazelle\Manager\Request())->findById((int)($_GET['id'] ?? 0));
 if (is_null($request)) {
     error(404);
 }
@@ -44,9 +44,9 @@ echo $Twig->render('request/request.twig', [
     'request'          => $request,
     'category_name'    => $categoryName,
     'artist_role'      => $artistRole,
-    'tgroup'           => (new Gazelle\Manager\TGroup)->findById((int)($groupId ?? $request->tgroupId())),
-    'release_list'     => (new Gazelle\ReleaseType)->list(),
-    'tag_list'         => (new Gazelle\Manager\Tag)->genreList(),
+    'tgroup'           => (new Gazelle\Manager\TGroup())->findById((int)($groupId ?? $request->tgroupId())),
+    'release_list'     => (new Gazelle\ReleaseType())->list(),
+    'tag_list'         => (new Gazelle\Manager\Tag())->genreList(),
     'catalogue_number' => $catalogueNumber ?? $request->catalogueNumber(),
     'category_id'      => $categoryId      ?? $request->categoryId(),
     'description'      => new Gazelle\Util\Textarea('description', $description ?? $request->description(), 70, 7),

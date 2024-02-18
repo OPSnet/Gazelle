@@ -22,8 +22,8 @@ $newHtml   = 0;
 $errHtml   = 0;
 
 $db        = Gazelle\DB::DB();
-$logFiler  = new Gazelle\File\RipLog;
-$htmlFiler = new Gazelle\File\RipLogHTML;
+$logFiler  = new Gazelle\File\RipLog();
+$htmlFiler = new Gazelle\File\RipLogHTML();
 
 while (true) {
     $db->prepared_query('

@@ -4,7 +4,7 @@ if (!$Viewer->permitted('users_view_email')) {
     error(403);
 }
 
-$emailBlacklist = new Gazelle\Manager\EmailBlacklist;
+$emailBlacklist = new Gazelle\Manager\EmailBlacklist();
 if (!empty($_POST['email'])) {
     $emailBlacklist->setFilterEmail(trim($_POST['email']));
 }

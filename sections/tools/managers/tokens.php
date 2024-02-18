@@ -4,7 +4,7 @@ if (!$Viewer->permitted('users_mod')) {
     error(403);
 }
 
-$userMan = new Gazelle\Manager\User;
+$userMan = new Gazelle\Manager\User();
 $amount = (int)($_POST['numtokens'] ?? 0);
 $flAdded = false;
 $flCleared = false;

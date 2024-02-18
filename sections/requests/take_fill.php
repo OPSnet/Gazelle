@@ -12,14 +12,14 @@ if (!defined('AJAX')) {
     authorize();
 }
 
-$request = (new Gazelle\Manager\Request)->findById((int)$_REQUEST['requestid']);
+$request = (new Gazelle\Manager\Request())->findById((int)$_REQUEST['requestid']);
 if (is_null($request)) {
     error(404);
 }
 
 $error = [];
 $torrent = null;
-$tgMan = new Gazelle\Manager\Torrent;
+$tgMan = new Gazelle\Manager\Torrent();
 if (!empty($_REQUEST['torrentid'])) {
     $torrent = $tgMan->findById((int)$_REQUEST['torrentid']);
 } else {
@@ -37,7 +37,7 @@ if (is_null($torrent)) {
     $error[] = print_or_return('could not determine torrentid', 404);
 }
 if (!empty($_REQUEST['user']) && $Viewer->permitted('site_moderate_requests')) {
-    $filler = (new Gazelle\Manager\User)->findByUsername($_REQUEST['user']);
+    $filler = (new Gazelle\Manager\User())->findByUsername($_REQUEST['user']);
     if (is_null($filler)) {
         $error[] = 'No such user to fill for!';
     }

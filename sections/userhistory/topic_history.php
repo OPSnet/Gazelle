@@ -4,7 +4,7 @@ if ($Viewer->disableForums()) {
     error(403);
 }
 
-$user = empty($_GET['userid']) ? $Viewer : (new Gazelle\Manager\User)->findById((int)$_GET['userid']);
+$user = empty($_GET['userid']) ? $Viewer : (new Gazelle\Manager\User())->findById((int)$_GET['userid']);
 if (is_null($user)) {
     error(404);
 }

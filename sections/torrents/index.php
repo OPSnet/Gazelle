@@ -135,7 +135,7 @@ if (!empty($_REQUEST['action'])) {
             if (!empty($_GET['id'])) {
                 require_once('details.php');
             } elseif (isset($_GET['torrentid'])) {
-                $torrent = (new Gazelle\Manager\Torrent)->findById((int)$_GET['torrentid']);
+                $torrent = (new Gazelle\Manager\Torrent())->findById((int)$_GET['torrentid']);
                 if ($torrent) {
                     header('Location: ' . $torrent->location());
                 } else {
@@ -147,7 +147,7 @@ if (!empty($_REQUEST['action'])) {
             break;
     }
 } else {
-    $manager = new \Gazelle\Manager\TGroup;
+    $manager = new \Gazelle\Manager\TGroup();
     if (!empty($_GET['id'])) {
         require_once('details.php');
     } elseif (isset($_GET['torrentid'])) {

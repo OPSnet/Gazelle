@@ -9,7 +9,7 @@ Things to expect in $_GET:
 
 ********************************************************************************/
 
-$userMan = new Gazelle\Manager\User;
+$userMan = new Gazelle\Manager\User();
 
 //---------- Things to sort out before it can start printing/generating content
 
@@ -19,14 +19,14 @@ if (!isset($_GET['threadid']) && isset($_GET['topicid'])) {
 }
 
 if (isset($_GET['postid'])) {
-    $post = (new Gazelle\Manager\ForumPost)->findById((int)$_GET['postid']);
+    $post = (new Gazelle\Manager\ForumPost())->findById((int)$_GET['postid']);
     if (is_null($post)) {
         json_error('bad post id');
     }
     $thread = $post->thread();
 } elseif (isset($_GET['threadid'])) {
     $post = false;
-    $thread = (new Gazelle\Manager\ForumThread)->findById((int)$_GET['threadid']);
+    $thread = (new Gazelle\Manager\ForumThread())->findById((int)$_GET['threadid']);
     if (is_null($thread)) {
         json_error('bad thread id');
     }

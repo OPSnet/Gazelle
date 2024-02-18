@@ -274,7 +274,7 @@ class Recovery extends \Gazelle\Base {
              VALUES              (?,         ?,         ?,      ?,      now() + interval 1 week)
              ",                   $admin_id, $key,      $email, "Account recovery id={$id} key={$key}"
         );
-        (new Mail)->send($email, 'Account recovery confirmation at ' . SITE_NAME,
+        (new Mail())->send($email, 'Account recovery confirmation at ' . SITE_NAME,
             self::$twig->render('email/recovery.twig', [
                 'invite_key' => $key,
             ])
@@ -417,7 +417,7 @@ class Recovery extends \Gazelle\Base {
     }
 
     public function boostUpload(): void {
-        $userMan = new User;
+        $userMan = new User();
         $sql = sprintf("
             SELECT HIST.Username, HIST.mapped_id, HIST.UserID, HIST.Uploaded, HIST.Downloaded, HIST.Bounty, HIST.nr_torrents, HIST.userclass,
                 round(
@@ -545,7 +545,7 @@ go out and use it. You never know what tomorrow will bring.
 --OPS Staff
 END_MSG;
                 } else {
-                $Body = <<<END_MSG
+                    $Body = <<<END_MSG
 Dear {$username},
 
 $reclaimMsg

@@ -5,5 +5,5 @@ if (!$Viewer->permitted('site_view_flow')) {
 }
 
 echo $Twig->render('admin/economy.twig', [
-    'info' => new Gazelle\Stats\Economic,
+    'info' => new Gazelle\Stats\Economic(),
 ]);

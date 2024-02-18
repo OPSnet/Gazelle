@@ -12,7 +12,7 @@ if (!defined('SITE_NAME')) {
 
 global $Cache, $Debug, $Twig;
 
-$Cache = new Gazelle\Cache;
+$Cache = new Gazelle\Cache();
 $Twig  = Gazelle\Util\Twig::factory();
 Gazelle\Base::initialize($Cache, Gazelle\DB::DB(), $Twig);
 

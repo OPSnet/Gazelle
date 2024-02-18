@@ -1,6 +1,6 @@
 <?php
 
-$artistMan  = new Gazelle\Manager\Artist;
+$artistMan  = new Gazelle\Manager\Artist();
 $revisionId = isset($_GET['revisionid']) ? (int)$_GET['revisionid'] : null;
 $artistId   = (int)($_GET['id'] ?? 0);
 
@@ -40,9 +40,9 @@ echo (new Gazelle\Json\Artist(
     $artist,
     $Viewer,
     new Gazelle\User\Bookmark($Viewer),
-    new Gazelle\Manager\Request,
-    new Gazelle\Manager\TGroup,
-    new Gazelle\Manager\Torrent,
+    new Gazelle\Manager\Request(),
+    new Gazelle\Manager\TGroup(),
+    new Gazelle\Manager\Torrent(),
 ))
     ->setReleasesOnly(!empty($_GET['artistreleases']))
     ->setVersion(2)

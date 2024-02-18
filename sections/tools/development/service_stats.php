@@ -4,7 +4,7 @@ if (!$Viewer->permitted('site_debug')) {
     error(403);
 }
 
-$inspectDb = new Gazelle\DB;
+$inspectDb = new Gazelle\DB();
 $MemStats = $Cache->getStats();
 
 echo $Twig->render('admin/cache-db-stats.twig', [

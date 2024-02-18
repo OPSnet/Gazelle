@@ -12,7 +12,7 @@ Things to expect in $_GET:
 //---------- Things to sort out before it can start printing/generating content
 
 // Check for lame SQL injection attempts
-$forum = (new Gazelle\Manager\Forum)->findById((int)$_GET['forumid']);
+$forum = (new Gazelle\Manager\Forum())->findById((int)$_GET['forumid']);
 if (is_null($forum)) {
     print json_die(['status' => 'failure']);
 }
@@ -56,7 +56,7 @@ $LastRead = $db->to_array('TopicID');
 
 $JsonTopics = [];
 $userCache = [];
-$userMan = new Gazelle\Manager\User;
+$userMan = new Gazelle\Manager\User();
 foreach ($threadList as $thread) {
     [$threadId, $Title, $AuthorID, $Locked, $Sticky, $PostCount, $LastID, $LastTime, $LastAuthorID] = array_values($thread);
 

@@ -40,7 +40,7 @@ class Staff extends BaseUser {
         ];
         $effectiveClass = $this->user->privilege()->effectiveClassLevel();
         $args = [$this->user->id(), $effectiveClass];
-        $classes = (new Manager\User)->classList();
+        $classes = (new Manager\User())->classList();
         if ($effectiveClass >= $classes[MOD]['Level']) {
             $cond[] = 'Level >= ?';
             $args[] = $classes[MOD]['Level'];

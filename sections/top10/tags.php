@@ -7,7 +7,7 @@ $details = in_array($_GET['details'] ?? '', ['top_used', 'top_request', 'top_vot
 $limit = $_GET['limit'] ?? 10;
 $limit = in_array($limit, [10, 100, 250]) ? $limit : 10;
 
-$tag = new Gazelle\Manager\Tag;
+$tag = new Gazelle\Manager\Tag();
 
 View::show_header(TOP_TEN_HEADING . " – Tags");
 ?>

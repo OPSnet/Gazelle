@@ -1,7 +1,7 @@
 <?php
 
-$newsMan = new Gazelle\Manager\News;
-$newsReader = new \Gazelle\WitnessTable\UserReadNews;
+$newsMan = new Gazelle\Manager\News();
+$newsReader = new \Gazelle\WitnessTable\UserReadNews();
 if ($newsMan->latestId() < $newsReader->lastRead($Viewer)) {
     $newsReader->witness($Viewer);
 }
@@ -22,7 +22,7 @@ foreach ($headlines as $item) {
     ];
 }
 
-$headlines = (new Gazelle\Manager\Blog)->headlines();
+$headlines = (new Gazelle\Manager\Blog())->headlines();
 $blog = [];
 foreach ($headlines as $item) {
     $blog[] = [

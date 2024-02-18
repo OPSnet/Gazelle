@@ -91,14 +91,14 @@ class ApplicantRole extends BaseObject {
             ", $this->id, $user->id(), $body,
                 (new Manager\Thread())->createThread('staff-role')->id()
         );
-        (new Manager\Applicant)->flush();
-        (new Manager\ApplicantRole)->flush();
+        (new Manager\Applicant())->flush();
+        (new Manager\ApplicantRole())->flush();
         return new \Gazelle\Applicant(self::$db->inserted_id());
     }
 
     public function modify(): bool {
         $modified = false;
-        $userMan  = new Manager\User;
+        $userMan  = new Manager\User();
         $list = preg_split('/\s+/', $this->clearField('viewer_list'));
         $viewerList = empty($list)
             ? []
@@ -141,8 +141,8 @@ class ApplicantRole extends BaseObject {
             ", $this->id
         );
         $affected = self::$db->affected_rows();
-        (new Manager\Applicant)->flush();
-        (new Manager\ApplicantRole)->flush();
+        (new Manager\Applicant())->flush();
+        (new Manager\ApplicantRole())->flush();
         $this->flush();
         return $affected;
     }

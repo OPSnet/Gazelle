@@ -1,6 +1,6 @@
 <?php
 
-$appMan = new Gazelle\Manager\Applicant;
+$appMan = new Gazelle\Manager\Applicant();
 if (isset($_REQUEST['id'])) {
     $app = $appMan->findById((int)$_GET['id']);
     if (is_null($app)) {

@@ -1,6 +1,6 @@
 <?php
 
-$classList = (new Gazelle\Manager\User)->classList();
+$classList = (new Gazelle\Manager\User())->classList();
 
 echo $Twig->render('staffpm/user-inbox.twig', [
     'level' => [
@@ -8,7 +8,7 @@ echo $Twig->render('staffpm/user-inbox.twig', [
         'mod'   => $classList[MOD]['Level'],
         'sysop' => $classList[SYSOP]['Level'],
     ],
-    'list'   => (new Gazelle\Manager\StaffPM)->findAllByUserId($Viewer->id()),
+    'list'   => (new Gazelle\Manager\StaffPM())->findAllByUserId($Viewer->id()),
     'max'    => 'Sysop',
     'reply'  => new Gazelle\Util\Textarea('quickpost', ''),
     'viewer' => $Viewer,

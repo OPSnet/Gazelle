@@ -1,6 +1,6 @@
 <?php
 
-$userMan = new Gazelle\Manager\User;
+$userMan = new Gazelle\Manager\User();
 if (isset($_GET['userid']) && $Viewer->permitted('users_override_paranoia')) {
     $user = $userMan->findById((int)$_GET['userid']);
     if (is_null($user)) {
@@ -19,20 +19,20 @@ if ($_GET['method'] === 'single') {
 }
 
 $better = match ($type) {
-    'artistcollage' => new Gazelle\Better\ArtistCollage($user, $filter, new Gazelle\Manager\Artist),
-    'artistdesc'    => new Gazelle\Better\ArtistDescription($user, $filter, new Gazelle\Manager\Artist),
-    'artistdiscogs' => new Gazelle\Better\ArtistDiscogs($user, $filter, new Gazelle\Manager\Artist),
-    'artistimg'     => new Gazelle\Better\ArtistImage($user, $filter, new Gazelle\Manager\Artist),
-    'artwork'       => new Gazelle\Better\Artwork($user, $filter, (new Gazelle\Manager\TGroup)->setViewer($Viewer)),
-    'checksum'      => new Gazelle\Better\Checksum($user, $filter, (new Gazelle\Manager\Torrent)->setViewer($Viewer)),
-    'single'        => new Gazelle\Better\SingleSeeded($user, $filter, (new Gazelle\Manager\Torrent)->setViewer($Viewer)),
+    'artistcollage' => new Gazelle\Better\ArtistCollage($user, $filter, new Gazelle\Manager\Artist()),
+    'artistdesc'    => new Gazelle\Better\ArtistDescription($user, $filter, new Gazelle\Manager\Artist()),
+    'artistdiscogs' => new Gazelle\Better\ArtistDiscogs($user, $filter, new Gazelle\Manager\Artist()),
+    'artistimg'     => new Gazelle\Better\ArtistImage($user, $filter, new Gazelle\Manager\Artist()),
+    'artwork'       => new Gazelle\Better\Artwork($user, $filter, (new Gazelle\Manager\TGroup())->setViewer($Viewer)),
+    'checksum'      => new Gazelle\Better\Checksum($user, $filter, (new Gazelle\Manager\Torrent())->setViewer($Viewer)),
+    'single'        => new Gazelle\Better\SingleSeeded($user, $filter, (new Gazelle\Manager\Torrent())->setViewer($Viewer)),
     'files', 'folders', 'lineage', 'tags'
-                    => (new Gazelle\Better\Bad($user, $filter, new Gazelle\Manager\Torrent))->setBadType($type),
+                    => (new Gazelle\Better\Bad($user, $filter, new Gazelle\Manager\Torrent()))->setBadType($type),
     default         => error(0),
 };
 
 if (isset($_GET['remove']) && $better instanceof Gazelle\Better\Bad && $Viewer->permitted('admin_reports')) {
-    $torrent = (new Gazelle\Manager\Torrent)->findById((int)$_GET['remove']);
+    $torrent = (new Gazelle\Manager\Torrent())->findById((int)$_GET['remove']);
     if ($torrent) {
         $torrent->removeFlag($better->torrentFlag());
     }

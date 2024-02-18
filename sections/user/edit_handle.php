@@ -2,8 +2,8 @@
 
 authorize();
 
-$irc     = new Gazelle\Util\Irc;
-$userMan = new Gazelle\Manager\User;
+$irc     = new Gazelle\Util\Irc();
+$userMan = new Gazelle\Manager\User();
 if (!isset($_REQUEST['id'])) {
     $ownProfile = true;
     $user = $Viewer;
@@ -21,7 +21,7 @@ if (!isset($_REQUEST['id'])) {
 $db     = Gazelle\DB::DB();
 $userId = $user->id();
 
-$validator = new Gazelle\Util\Validator;
+$validator = new Gazelle\Util\Validator();
 $validator->setFields([
     ['stylesheet', true, "number", "You forgot to select a stylesheet."],
     ['styleurl', false, "regex", "You did not enter a valid stylesheet URL.", ['regex' => CSS_REGEXP]],
@@ -196,14 +196,14 @@ if ($Viewer->permitted('site_advanced_search')) {
 $user->setField('option_list', $option);
 
 $navList = [];
-foreach ((new Gazelle\Manager\UserNavigation)->fullList() as $n) {
+foreach ((new Gazelle\Manager\UserNavigation())->fullList() as $n) {
     if ($n['mandatory'] || isset($_POST["n_{$n['id']}"])) {
         $navList[] = (int)$n['id'];
     }
 }
 $user->setField('nav_list', $navList);
 
-(new Gazelle\Util\LastFM)->modifyUsername($user, trim($_POST['lastfm_username'] ?? ''));
+(new Gazelle\Util\LastFM())->modifyUsername($user, trim($_POST['lastfm_username'] ?? ''));
 
 /* transform
  *   'notifications_News_popup'
@@ -250,7 +250,7 @@ if ($ResetPassword) {
 
 $history = new \Gazelle\User\History($user);
 if ($NewEmail) {
-    $history->registerNewEmail($NewEmail, $Viewer->ipaddr(), new \Gazelle\Manager\IPv4, $irc, new \Gazelle\Util\Mail);
+    $history->registerNewEmail($NewEmail, $Viewer->ipaddr(), new \Gazelle\Manager\IPv4(), $irc, new \Gazelle\Util\Mail());
 }
 
 if (isset($_POST['resetpasskey'])) {
@@ -259,7 +259,7 @@ if (isset($_POST['resetpasskey'])) {
     $ipaddr = $Viewer->ipaddr();
     $user->setField('torrent_pass', $newPasskey);
     $user->modifyAnnounceKeyHistory($oldPasskey, $newPasskey, $ipaddr);
-    (new Gazelle\Tracker)->modifyPasskey(old: $oldPasskey, new: $newPasskey);
+    (new Gazelle\Tracker())->modifyPasskey(old: $oldPasskey, new: $newPasskey);
 }
 
 $user->modify();

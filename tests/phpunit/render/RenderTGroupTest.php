@@ -12,8 +12,8 @@ class RenderTGroupTest extends TestCase {
             return;
         }
 
-        $reqMan = new Gazelle\Manager\Request;
-        $tgMan  = new Gazelle\Manager\TGroup;
+        $reqMan = new Gazelle\Manager\Request();
+        $tgMan  = new Gazelle\Manager\TGroup();
         $this->assertIsString(
             Gazelle\Util\Twig::factory()->render('torrent/request.twig', [
                 'list' => $reqMan->findByTGroup($tgMan->findById($tgroupId))

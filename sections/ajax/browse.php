@@ -10,8 +10,8 @@ $GroupResults = ($_GET['group_results'] ?? '1') != '0';
 $Page = (int)($_GET['page'] ?? 1);
 
 $Search = new Gazelle\Search\Torrent(
-    new Gazelle\Manager\TGroup,
-    new Gazelle\Manager\Torrent,
+    new Gazelle\Manager\TGroup(),
+    new Gazelle\Manager\Torrent(),
     $GroupResults,
     $OrderBy,
     $OrderWay,
@@ -39,9 +39,9 @@ if ($resultTotal == 0) {
 echo (new Gazelle\Json\TGroupList(
     new Gazelle\User\Bookmark($Viewer),
     $Viewer->snatch(),
-    new Gazelle\Manager\Artist,
-    (new Gazelle\Manager\TGroup)->setViewer($Viewer),
-    (new Gazelle\Manager\Torrent)->setViewer($Viewer),
+    new Gazelle\Manager\Artist(),
+    (new Gazelle\Manager\TGroup())->setViewer($Viewer),
+    (new Gazelle\Manager\Torrent())->setViewer($Viewer),
     $Results,
     $GroupResults,
     $resultTotal,

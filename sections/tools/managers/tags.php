@@ -4,12 +4,12 @@ if (!$Viewer->permitted('users_mod')) {
     error(403);
 }
 
-$Val = new Gazelle\Util\Validator;
+$Val = new Gazelle\Util\Validator();
 $Val->setFields([
     ['tag',     true, 'string', 'Enter a single tag to change.', ['range' => [2, 100]]],
     ['replace', true, 'string', 'Enter a single replacement name.', ['range' => [2, 100]]],
 ]);
-$tagMan = new Gazelle\Manager\Tag;
+$tagMan = new Gazelle\Manager\Tag();
 
 View::show_header('Batch Tag Editor', ['js' => 'validate']);
 echo $Val->generateJS('tagform');

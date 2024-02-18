@@ -5,7 +5,7 @@ if (!$Viewer->disableIRC() && !$Viewer->IRCKey()) {
     $Viewer->setField('IRCKey', $ircKey)->modify();
 }
 
-$userMan = new Gazelle\Manager\User;
+$userMan = new Gazelle\Manager\User();
 $ircNick = str_replace('.', '', $Viewer->username());
 if (!$ircNick || $userMan->findByUsername($ircNick)) {
     $ircNick = str_replace('.', '_', $Viewer->username());

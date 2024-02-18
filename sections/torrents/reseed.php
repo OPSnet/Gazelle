@@ -1,6 +1,6 @@
 <?php
 
-$torrent = (new Gazelle\Manager\Torrent)->findById((int)$_GET['torrentid']);
+$torrent = (new Gazelle\Manager\Torrent())->findById((int)$_GET['torrentid']);
 if (is_null($torrent)) {
     error(404);
 }
@@ -15,5 +15,5 @@ if (!$Viewer->permitted('users_mod')) {
 
 echo $Twig->render('torrent/reseed-result.twig', [
     'torrent' => $torrent,
-    'total'   => $torrent->issueReseedRequest($Viewer, new \Gazelle\Manager\User),
+    'total'   => $torrent->issueReseedRequest($Viewer, new \Gazelle\Manager\User()),
 ]);

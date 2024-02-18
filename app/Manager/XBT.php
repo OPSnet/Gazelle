@@ -16,7 +16,7 @@ class XBT extends \Gazelle\Base {
      * @return float current rate, or null if API endpoint cannot be reached or is in error.
      */
     public function fetchRate(string $CC): ?float {
-        $curl = new \Gazelle\Util\Curl;
+        $curl = new \Gazelle\Util\Curl();
         if ($curl->fetch(sprintf(self::FX_QUOTE_URL, $CC))) {
             // {"data":{"base":"BTC","currency":"USD","amount":"8165.93"}}
             $payload = json_decode($curl->result());

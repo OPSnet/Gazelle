@@ -37,7 +37,7 @@ class TGroupManagerTest extends TestCase {
     }
 
     public function testFindByTorrentId(): void {
-        $manager = new \Gazelle\Manager\TGroup;
+        $manager = new \Gazelle\Manager\TGroup();
         $torrentId = $this->torrentList[0]->id();
         $this->assertEquals(
             $this->tgroupList[0]->id(),
@@ -47,7 +47,7 @@ class TGroupManagerTest extends TestCase {
     }
 
     public function testFindByInfohash(): void {
-        $manager = new \Gazelle\Manager\TGroup;
+        $manager = new \Gazelle\Manager\TGroup();
         $infohash = $this->torrentList[0]->infohash();
         $this->assertEquals(
             $this->tgroupList[0]->id(),
@@ -57,7 +57,7 @@ class TGroupManagerTest extends TestCase {
     }
 
     public function testRefreshBetterTranscode(): void {
-        $manager = new \Gazelle\Manager\TGroup;
+        $manager = new \Gazelle\Manager\TGroup();
         // There is at least something from our own tgroup
         $this->assertGreaterThanOrEqual(1, $manager->refreshBetterTranscode(), 'tgman-refresh-better-transcode');
     }

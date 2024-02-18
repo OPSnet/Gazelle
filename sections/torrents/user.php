@@ -9,7 +9,7 @@ if (!isset($_GET['userid'])) {
 if ($_GET['userid'] == 'me') {
     $_GET['userid'] = $Viewer->id();
 }
-$user = (new Gazelle\Manager\User)->findById((int)($_GET['userid'] ?? 0));
+$user = (new Gazelle\Manager\User())->findById((int)($_GET['userid'] ?? 0));
 if (is_null($user)) {
     error(404);
 }
@@ -66,7 +66,7 @@ if (!empty($_GET['media']) && in_array($_GET['media'], MEDIA)) {
     $args[] = $_GET['media'];
 }
 
-$releaseMan = new Gazelle\ReleaseType;
+$releaseMan = new Gazelle\ReleaseType();
 if (!empty($_GET['releasetype'])) {
     $releaseType = (int)$_GET['releasetype'];
     if ($releaseMan->findNameById($releaseType)) {
@@ -123,7 +123,7 @@ if (!isset($_GET['tags_type'])) {
 }
 
 if (!empty($_GET['tags'])) {
-    $tagMan = new Gazelle\Manager\Tag;
+    $tagMan = new Gazelle\Manager\Tag();
     $tags = explode(',', $_GET['tags']);
     $includeTags = [];
     $excludeTags = [];
@@ -321,7 +321,7 @@ $torrentsInfo = $db->to_array('TorrentID', MYSQLI_ASSOC);
 $action       = display_str($_GET['type']);
 $urlStem      = "torrents.php?userid={$userId}&amp;type=";
 
-$torMan   = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
+$torMan   = (new Gazelle\Manager\Torrent())->setViewer($Viewer);
 $imgProxy = new Gazelle\Util\ImageProxy($Viewer);
 $snatcher = $Viewer->snatch();
 

@@ -1,6 +1,6 @@
 <?php
 
-$post = (new Gazelle\Manager\ForumPost)->findById((int)($_GET['post'] ?? 0));
+$post = (new Gazelle\Manager\ForumPost())->findById((int)($_GET['post'] ?? 0));
 if (is_null($post)) {
     error(404);
 }

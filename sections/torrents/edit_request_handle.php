@@ -1,12 +1,12 @@
 <?php
 
-$tgroup = (new Gazelle\Manager\TGroup)->findById((int)($_POST['id'] ?? 0));
+$tgroup = (new Gazelle\Manager\TGroup())->findById((int)($_POST['id'] ?? 0));
 if (!$tgroup) {
     error(404);
 }
 authorize();
 
-$thread = (new Gazelle\Manager\ForumThread)->create(
+$thread = (new Gazelle\Manager\ForumThread())->create(
     forum: new Gazelle\Forum(EDITING_FORUM_ID),
     user:  new Gazelle\User(SYSTEM_USER_ID),
     title: "Editing request \xE2\x80\x93 Torrent Group: " . $tgroup->name(),

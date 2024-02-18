@@ -69,7 +69,7 @@ class TorrentManagerTest extends TestCase {
     }
 
     public function testLatestUploads(): void {
-        $manager = new \Gazelle\Manager\Torrent;
+        $manager = new \Gazelle\Manager\Torrent();
         $list = $manager->latestUploads(5);
         $latestTotal = count($list);
         $this->assertGreaterThanOrEqual(2, $latestTotal, 'latest-uploads-two-plus');
@@ -118,7 +118,7 @@ class TorrentManagerTest extends TestCase {
         }
         $this->topTenList[] = $histId;
 
-        $manager = new \Gazelle\Manager\Torrent;
+        $manager = new \Gazelle\Manager\Torrent();
         $date = explode(' ', $this->torrentList[0]->created())[0];
         $list = $manager->topTenHistoryList($date, isByDay: true);
         $this->assertCount(1, $list, 'tor-top10-history-by-day');
@@ -183,7 +183,7 @@ class TorrentManagerTest extends TestCase {
     }
 
     public function testTorrentLeechReason(): void {
-        $manager = new \Gazelle\Manager\Torrent;
+        $manager = new \Gazelle\Manager\Torrent();
 
         $this->assertEquals(LeechReason::Normal,    $manager->lookupLeechReason('0'), 'torman-leechreason-normal');
         $this->assertEquals(LeechReason::StaffPick, $manager->lookupLeechReason('1'), 'torman-leechreason-staffpick');
@@ -197,7 +197,7 @@ class TorrentManagerTest extends TestCase {
     }
 
     public function testTorrentLeechType(): void {
-        $manager = new \Gazelle\Manager\Torrent;
+        $manager = new \Gazelle\Manager\Torrent();
 
         $this->assertEquals(LeechType::Normal,  $manager->lookupLeechType('0'), 'torman-leechtype-normal');
         $this->assertEquals(LeechType::Free,    $manager->lookupLeechType('1'), 'torman-leechtype-free');
@@ -216,7 +216,7 @@ class TorrentManagerTest extends TestCase {
          * some other time).
          * We just want to exercise the code and show that it works
          */
-        $stats = new \Gazelle\Stats\Torrent;
+        $stats = new \Gazelle\Stats\Torrent();
         $this->assertInstanceOf(\Gazelle\Stats\Torrent::class, $stats->flush(), 'torrents-stats-flush');
         $this->assertIsInt($stats->torrentTotal(), 'torrent-stats-torrent-total');
         $this->assertIsInt($stats->totalFiles(), 'torrent-stats-file-total');

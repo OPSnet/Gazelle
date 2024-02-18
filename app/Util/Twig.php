@@ -16,7 +16,7 @@ class Twig {
             new \Twig\Loader\FilesystemLoader(__DIR__ . '/../../templates'), [
                 'debug' => DEBUG_MODE,
                 'cache' => __DIR__ . '/../../cache/twig'
-        ]);
+            ]);
 
         $twig->addFilter(new \Twig\TwigFilter(
             'article',
@@ -302,7 +302,7 @@ class Twig {
 
         $twig->addTest(new \Twig\TwigTest('request_fill', fn($contest) => $contest instanceof \Gazelle\Contest\RequestFill));
 
-        $twig->addGlobal('dom', new \Gazelle\Util\Dominator);
+        $twig->addGlobal('dom', new \Gazelle\Util\Dominator());
 
         return $twig;
     }

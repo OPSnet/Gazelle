@@ -10,7 +10,7 @@ if (!isset($_POST['action'])) {
     authorize();
     $userId = (int)$_POST['userid'];
 }
-$user = (new Gazelle\Manager\User)->findById($userId);
+$user = (new Gazelle\Manager\User())->findById($userId);
 if (!$user) {
     error(404);
 }
@@ -59,7 +59,7 @@ View::show_header($user->username() . ' › Seedboxes › View');
 if ($source && $target) {
     echo $Twig->render('seedbox/report.twig', [
         'list' => $seedbox->torrentList(
-            new Gazelle\Manager\Torrent,
+            new Gazelle\Manager\Torrent(),
             $paginator->limit(),
             $paginator->offset()
         ),

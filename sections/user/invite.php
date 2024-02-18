@@ -1,6 +1,6 @@
 <?php
 
-$userMan = new Gazelle\Manager\User;
+$userMan = new Gazelle\Manager\User();
 if (!isset($_GET['id'])) {
     $user = $Viewer;
 } else {
@@ -16,7 +16,7 @@ if (!$Viewer->permitted('users_view_invites') && !$ownProfile) {
 }
 
 $inviteSourceMan = $Viewer->permitted('users_view_invites') || $Viewer->isRecruiter()
-    ? new Gazelle\Manager\InviteSource
+    ? new Gazelle\Manager\InviteSource()
     : null;
 
 if ($inviteSourceMan && isset($_GET['edit'])) {
@@ -84,7 +84,7 @@ echo $Twig->render('user/invited.twig', [
             $heading->getOrderBy(), $heading->getOrderDir(), $paginator->limit(), $paginator->offset()
         )
     ),
-    'invites_open'      => (new Gazelle\Stats\Users)->newUsersAllowed($user),
+    'invites_open'      => (new Gazelle\Stats\Users())->newUsersAllowed($user),
     'invite_source'     => $inviteSourceMan,
     'notes'             => new Gazelle\Util\Textarea('notes', '', 60, 4),
     'own_profile'       => $ownProfile,

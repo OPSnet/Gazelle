@@ -4,9 +4,9 @@ if (!$Viewer->permitted('admin_reports')) {
     error(403);
 }
 
-$userMan       = new Gazelle\Manager\User;
-$reportMan     = new Gazelle\Manager\Torrent\Report(new Gazelle\Manager\Torrent);
-$reportTypeMan = new Gazelle\Manager\Torrent\ReportType;
+$userMan       = new Gazelle\Manager\User();
+$reportMan     = new Gazelle\Manager\Torrent\Report(new Gazelle\Manager\Torrent());
+$reportTypeMan = new Gazelle\Manager\Torrent\ReportType();
 $categories    = $reportMan->categories();
 
 $filter = [];

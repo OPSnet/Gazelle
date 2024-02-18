@@ -4,13 +4,13 @@ if (!$Viewer->permittedAny('users_mod', 'users_view_ips')) {
     error(403);
 }
 
-$user = (new Gazelle\Manager\User)->findById((int)($_GET['userid'] ?? 0));
+$user = (new Gazelle\Manager\User())->findById((int)($_GET['userid'] ?? 0));
 $ipaddr = $_GET['ip'] ?? null;
 if (is_null($user) && !preg_match(IP_REGEXP, $ipaddr)) {
     error(403);
 }
 
-$snatchInfo = new Gazelle\SnatchInfo;
+$snatchInfo = new Gazelle\SnatchInfo();
 if ($user) {
     $snatchInfo->setContextUser($user);
 } else {

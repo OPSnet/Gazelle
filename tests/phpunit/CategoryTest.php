@@ -7,7 +7,7 @@ require_once(__DIR__ . '/../helper.php');
 
 class CategoryTest extends TestCase {
     public function testCategory(): void {
-        $manager = new Gazelle\Manager\Category;
+        $manager = new Gazelle\Manager\Category();
 
         $this->assertEquals(1, $manager->findIdByName('Music'), 'cat-name-comics');
         $this->assertEquals(7, $manager->findIdByName('Comics'), 'cat-name-comics');
@@ -22,8 +22,8 @@ class CategoryTest extends TestCase {
     }
 
     public function testChangeCategory(): void {
-        $tgMan  = new Gazelle\Manager\TGroup;
-        $torMan = new Gazelle\Manager\Torrent;
+        $tgMan  = new Gazelle\Manager\TGroup();
+        $torMan = new Gazelle\Manager\Torrent();
         $user   = Helper::makeUser('tgcat.' . randomString(10), 'tgroup-cat');
         $tgroup = Helper::makeTGroupEBook(
             name: 'phpunit category change ' . randomString(6),
@@ -47,18 +47,18 @@ class CategoryTest extends TestCase {
         $new = $tgMan->changeCategory(
             old:         $tgroup,
             torrent:     $torrentList[1],
-            categoryId:  (new Gazelle\Manager\Category)->findIdByName('Music'),
+            categoryId:  (new Gazelle\Manager\Category())->findIdByName('Music'),
             name:        'phpunit category new ' . randomString(6),
             year:        (int)date('Y'),
             artistName:  $artistName,
-            releaseType: (new Gazelle\ReleaseType)->findIdByName('EP'),
-            artistMan:   new Gazelle\Manager\Artist,
-            logger:      new Gazelle\Log,
+            releaseType: (new Gazelle\ReleaseType())->findIdByName('EP'),
+            artistMan:   new Gazelle\Manager\Artist(),
+            logger:      new Gazelle\Log(),
             user:        $user,
         );
         $this->assertInstanceOf(Gazelle\TGroup::class, $new, 'cat-change-to-music');
         $this->assertTrue($new->hasArtistRole(), 'tgroup-cat-is-music');
-        $artist = (new Gazelle\Manager\Artist)->findByName($artistName);
+        $artist = (new Gazelle\Manager\Artist())->findByName($artistName);
         $this->assertEquals($artistName, $artist->name(), 'cat-new-artist');
         $this->assertEquals(
             [
@@ -86,9 +86,9 @@ class CategoryTest extends TestCase {
             name:        'phpunit category new ' . randomString(6),
             year:        (int)date('Y'),
             artistName:  'new artist ' . randomString(6),
-            releaseType: (new Gazelle\ReleaseType)->findIdByName('EP'),
-            artistMan:   new Gazelle\Manager\Artist,
-            logger:      new Gazelle\Log,
+            releaseType: (new Gazelle\ReleaseType())->findIdByName('EP'),
+            artistMan:   new Gazelle\Manager\Artist(),
+            logger:      new Gazelle\Log(),
             user:        $user,
         );
         $this->assertNull($new, 'cat-change-to-same');
@@ -98,13 +98,13 @@ class CategoryTest extends TestCase {
         $new = $tgMan->changeCategory(
             old:         $tgroup,
             torrent:     $torrentList[0],
-            categoryId:  (new Gazelle\Manager\Category)->findIdByName('Comedy'),
+            categoryId:  (new Gazelle\Manager\Category())->findIdByName('Comedy'),
             name:        'phpunit category new ' . randomString(6),
             year:        (int)date('Y'),
             artistName:  null,
             releaseType: null,
-            artistMan:   new Gazelle\Manager\Artist,
-            logger:      new Gazelle\Log,
+            artistMan:   new Gazelle\Manager\Artist(),
+            logger:      new Gazelle\Log(),
             user:        $user,
         );
         $this->assertInstanceOf(Gazelle\TGroup::class, $new, 'cat-change-to-comedy');

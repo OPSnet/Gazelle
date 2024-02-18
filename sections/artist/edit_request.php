@@ -1,6 +1,6 @@
 <?php
 
-$artist = (new Gazelle\Manager\Artist)->findById((int)($_GET['artistid'] ?? 0));
+$artist = (new Gazelle\Manager\Artist())->findById((int)($_GET['artistid'] ?? 0));
 if (is_null($artist)) {
     error(404);
 }

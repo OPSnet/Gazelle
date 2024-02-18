@@ -5,7 +5,7 @@ if (!$Viewer->permitted('site_view_flow')) {
 }
 
 $affected = false;
-$reaper   = new Gazelle\Torrent\Reaper(new Gazelle\Manager\Torrent, new Gazelle\Manager\User);
+$reaper   = new Gazelle\Torrent\Reaper(new Gazelle\Manager\Torrent(), new Gazelle\Manager\User());
 
 $extend = array_key_extract_suffix('extend-', $_POST);
 if ($extend) {

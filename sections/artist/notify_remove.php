@@ -5,7 +5,7 @@ if (!$Viewer->permitted('site_torrents_notify')) {
 }
 authorize();
 
-$artist = (new Gazelle\Manager\Artist)->findById((int)$_GET['artistid']);
+$artist = (new Gazelle\Manager\Artist())->findById((int)$_GET['artistid']);
 if (is_null($artist)) {
     error(404);
 }

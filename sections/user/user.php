@@ -3,7 +3,7 @@
 use Gazelle\Enum\UserTokenType;
 use Gazelle\User\Vote;
 
-$userMan = new Gazelle\Manager\User;
+$userMan = new Gazelle\Manager\User();
 $User = $userMan->findById((int)$_GET['id']);
 if (is_null($User)) {
     header("Location: log.php?search=User+" . (int)$_GET['id']);
@@ -18,11 +18,11 @@ $userBonus   = new Gazelle\User\Bonus($User);
 $viewerBonus = new Gazelle\User\Bonus($Viewer);
 $history     = new Gazelle\User\History($User);
 $limiter     = new Gazelle\User\UserclassRateLimit($User);
-$donorMan    = new Gazelle\Manager\Donation;
-$ipv4        = new Gazelle\Manager\IPv4;
-$tgMan       = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
+$donorMan    = new Gazelle\Manager\Donation();
+$ipv4        = new Gazelle\Manager\IPv4();
+$tgMan       = (new Gazelle\Manager\TGroup())->setViewer($Viewer);
 $resetToken  = $Viewer->permitted('users_mod')
-    ? (new Gazelle\Manager\UserToken)->findByUser($User, UserTokenType::password)
+    ? (new Gazelle\Manager\UserToken())->findByUser($User, UserTokenType::password)
     : false;
 
 if (!empty($_POST)) {
@@ -91,16 +91,16 @@ echo $Twig->render('user/header.twig', [
 ]);
 
 echo $Twig->render('user/sidebar.twig', [
-    'applicant'     => new Gazelle\Manager\Applicant,
+    'applicant'     => new Gazelle\Manager\Applicant(),
     'invite_source' => $Viewer->permitted('admin_manage_invite_source')
-        ? (new Gazelle\Manager\InviteSource)->findSourceNameByUser($User) : null,
+        ? (new Gazelle\Manager\InviteSource())->findSourceNameByUser($User) : null,
     'next_class'    => $nextClass = $User->nextClass($userMan),
     'user'          => $User,
     'viewer'        => $Viewer,
 ]);
 
 // Last.fm statistics and comparability
-$lastfmInfo = (new Gazelle\Util\LastFM)->userInfo($User);
+$lastfmInfo = (new Gazelle\Util\LastFM())->userInfo($User);
 if ($lastfmInfo) {
     echo $Twig->render('user/lastfm.twig', [
         'can_reload'  => ($OwnProfile && $Cache->get_value("lastfm_clear_cache_$UserID") === false) || $Viewer->permitted('users_mod'),
@@ -315,7 +315,7 @@ if ($OwnProfile || !$User->hasAttr('hide-vote-recent') || $Viewer->permitted('vi
 }
 
 echo $Twig->render('user/collage-list.twig', [
-    'list'    => (new Gazelle\Manager\Collage)->findPersonalByUser($User),
+    'list'    => (new Gazelle\Manager\Collage())->findPersonalByUser($User),
     'manager' => $tgMan,
 ]);
 
@@ -365,7 +365,7 @@ if ($Viewer->permitted('users_give_donor')) {
 
 if (!$Viewer->disableRequests() && $User->propertyVisible($previewer, 'requestsvoted_list')) {
     echo $Twig->render('request/user-unfilled.twig', [
-        'list'   => (new Gazelle\Manager\Request)->findUnfilledByUser($User, 100),
+        'list'   => (new Gazelle\Manager\Request())->findUnfilledByUser($User, 100),
         'viewer' => $Viewer,
     ]);
 }
@@ -525,9 +525,9 @@ if ($Viewer->permitted('users_mod') || $Viewer->isStaff()) { ?>
 
 <?php
     if ($Viewer->permitted('users_disable_posts') || $Viewer->permitted('users_disable_any')) {
-        $fm = new Gazelle\Manager\Forum;
+        $fm = new Gazelle\Manager\Forum();
         echo $Twig->render('user/edit-privileges.twig', [
-            'asn'     => new Gazelle\Search\ASN,
+            'asn'     => new Gazelle\Search\ASN(),
             'history' => $history,
             'user'    => $User,
             'viewer'  => $Viewer,
@@ -540,7 +540,7 @@ if ($Viewer->permitted('users_mod') || $Viewer->isStaff()) { ?>
 
     if ($User->isInterviewer() || $User->isRecruiter() || $User->isStaff()) {
         echo $Twig->render('user/edit-invite-sources.twig', [
-            'list' => (new \Gazelle\Manager\InviteSource)->inviterConfiguration($User),
+            'list' => (new \Gazelle\Manager\InviteSource())->inviterConfiguration($User),
         ]);
     }
 

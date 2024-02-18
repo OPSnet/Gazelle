@@ -6,7 +6,7 @@ $limit = (int)($_GET['limit'] ?? 10);
 $limit = in_array($limit, [10, 100, 250]) && $details !== 'all' ? $limit : 10;
 
 $top10  = new Gazelle\Top10\Torrent(FORMAT, $Viewer);
-$torMan = new Gazelle\Manager\Torrent;
+$torMan = new Gazelle\Manager\Torrent();
 $result = [];
 
 // Filter out common parameters that are not needed in getTopTorrents to get more cache hits

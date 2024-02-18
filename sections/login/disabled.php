@@ -2,9 +2,9 @@
 
 $enabler = null;
 if (isset($_POST['username'])) {
-    $user = (new Gazelle\Manager\User)->findByUsername(trim($_POST['username']));
+    $user = (new Gazelle\Manager\User())->findByUsername(trim($_POST['username']));
     if ($user) {
-        $enabler = (new Gazelle\Manager\AutoEnable)->create($user, $_POST['email']);
+        $enabler = (new Gazelle\Manager\AutoEnable())->create($user, $_POST['email']);
         if ($enabler) {
             setcookie('username', '', [
                 'expires'  => time() + 60 * 60,

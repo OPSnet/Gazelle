@@ -156,7 +156,7 @@ class Activity extends \Gazelle\BaseUser {
             $this->setAlert('<a class="nobr" href="staffblog.php">New staff blog post!</a>');
         }
         if (FEATURE_EMAIL_REENABLE) {
-            $total = (new \Gazelle\Manager\AutoEnable)->openTotal();
+            $total = (new \Gazelle\Manager\AutoEnable())->openTotal();
             if ($total > 0) {
                 $this->setAction('<a class="nobr" href="tools.php?action=enable_requests">' . $total . " Enable request" . plural($total) . "</a>");
             }

@@ -11,4 +11,4 @@ if (!(
     error(403);
 }
 
-(new Gazelle\Tracker)->expireFreeleechTokens($_GET['tokens']);
+(new Gazelle\Tracker())->expireFreeleechTokens($_GET['tokens']);

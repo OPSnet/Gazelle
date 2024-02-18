@@ -6,7 +6,7 @@ if (!$Viewer->permitted('admin_manage_forums')) {
 
 authorize();
 
-$forumMan = new Gazelle\Manager\Forum;
+$forumMan = new Gazelle\Manager\Forum();
 $forum = $forumMan->findById((int)($_POST['id'] ?? 0));
 if (is_null($forum) && in_array($_POST['submit'], ['Edit', 'Delete'])) {
     error(0);
@@ -21,7 +21,7 @@ if ($_POST['submit'] == 'Delete') {
         error(403);
     }
 
-    $validator = new Gazelle\Util\Validator;
+    $validator = new Gazelle\Util\Validator();
     $validator->setFields([
         ['name', true, 'string', 'The name must be set, and has a max length of 40 characters', ['maxlength' => 40]],
         ['description', false, 'string', 'The description has a max length of 255 characters', ['maxlength' => 255]],

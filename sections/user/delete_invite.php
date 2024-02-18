@@ -3,7 +3,7 @@
 authorize();
 
 $inviteKey = trim($_GET['invite'] ?? '');
-$user = (new Gazelle\Manager\Invite)->findUserByKey($inviteKey, new Gazelle\Manager\User);
+$user = (new Gazelle\Manager\Invite())->findUserByKey($inviteKey, new Gazelle\Manager\User());
 if (is_null($user)) {
     error(404);
 }

@@ -4,7 +4,7 @@ if (!$Viewer->permitted('admin_clear_cache')) {
     error(403);
 }
 
-$flusher = new Gazelle\Util\CacheMultiFlush;
+$flusher = new Gazelle\Util\CacheMultiFlush();
 
 if (isset($_POST['confirm-flush']) && isset($_POST['global_flush'])) {
     authorize();

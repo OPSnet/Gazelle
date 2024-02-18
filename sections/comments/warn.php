@@ -4,7 +4,7 @@ if (!$Viewer->permitted('users_warn')) {
     error(403);
 }
 
-$comment = (new Gazelle\Manager\Comment)->findById((int)($_POST['postid'] ?? 0));
+$comment = (new Gazelle\Manager\Comment())->findById((int)($_POST['postid'] ?? 0));
 if (is_null($comment)) {
     error(404);
 }

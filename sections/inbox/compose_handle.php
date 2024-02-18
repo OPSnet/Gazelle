@@ -2,7 +2,7 @@
 
 authorize();
 
-$recipient = (new Gazelle\Manager\User)->findById((int)$_POST['toid']);
+$recipient = (new Gazelle\Manager\User())->findById((int)$_POST['toid']);
 if (is_null($recipient)) {
     error(404);
 }
@@ -15,7 +15,7 @@ if ($body === '') {
     error('You cannot send a message without a body.');
 }
 
-$userMan = new Gazelle\Manager\User;
+$userMan = new Gazelle\Manager\User();
 $pmMan = new Gazelle\Manager\PM($Viewer);
 $pm = $pmMan->findById((int)($_POST['convid'] ?? 0));
 if ($pm) {
@@ -28,7 +28,7 @@ if ($pm) {
     $pm = $recipient->inbox()->create($Viewer, $subject, $body);
 }
 
-(new Gazelle\Manager\Notification)->push([$recipient->id()],
+(new Gazelle\Manager\Notification())->push([$recipient->id()],
     "Message from " . $Viewer->username() . ", Subject: " . $pm->subject(),
     $body,
     SITE_URL . '/inbox.php',

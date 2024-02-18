@@ -142,7 +142,7 @@ class ForumPost extends BaseObject {
      */
     public function remove(): bool {
         self::$db->begin_transaction();
-        $db = new DB;
+        $db = new DB();
         $db->relaxConstraints(true);
         self::$db->prepared_query("
             DELETE fp, unq
@@ -190,7 +190,7 @@ class ForumPost extends BaseObject {
         self::$db->commit();
 
         $this->thread()->forum()->adjust();
-        (new \Gazelle\Manager\Subscription)->flushPage('forums', $threadId);
+        (new \Gazelle\Manager\Subscription())->flushPage('forums', $threadId);
 
         $thread->flush();
         $pageOffset = $this->page() - 1;

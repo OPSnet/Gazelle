@@ -181,7 +181,7 @@ class Artist extends \Gazelle\BaseManager {
     }
 
     public function sectionName(int $sectionId): ?string {
-        return (new \Gazelle\ReleaseType)->findExtendedNameById($sectionId);
+        return (new \Gazelle\ReleaseType())->findExtendedNameById($sectionId);
     }
 
     public function sectionLabel(int $sectionId): string {
@@ -189,6 +189,6 @@ class Artist extends \Gazelle\BaseManager {
     }
 
     public function sectionTitle(int $sectionId): string {
-        return (new \Gazelle\ReleaseType)->sectionTitle($sectionId);
+        return (new \Gazelle\ReleaseType())->sectionTitle($sectionId);
     }
 }

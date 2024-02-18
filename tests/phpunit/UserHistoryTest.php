@@ -29,14 +29,14 @@ class UserHistoryTest extends TestCase {
             $history->registerNewEmail(
                 $newEmail,
                 '127.1.2.3',
-                new \Gazelle\Manager\IPv4,
-                new \Gazelle\Util\Irc,
-                new \Gazelle\Util\Mail,
+                new \Gazelle\Manager\IPv4(),
+                new \Gazelle\Util\Irc(),
+                new \Gazelle\Util\Mail(),
             ),
             'userhist-record-email'
         );
         $this->assertEquals(2, $history->emailTotal(), 'userhist-email-total');
-        $list = $history->email(new \Gazelle\Search\ASN);
+        $list = $history->email(new \Gazelle\Search\ASN());
         $this->assertEquals($newEmail, $list[0]['email'], 'userhist-list-0');
         $this->assertEquals($email,    $list[1]['email'], 'userhist-list-1');
     }
@@ -50,13 +50,13 @@ class UserHistoryTest extends TestCase {
         $history->registerNewEmail(
             $email,
             '127.1.2.3',
-            new \Gazelle\Manager\IPv4,
-            new \Gazelle\Util\Irc,
-            new \Gazelle\Util\Mail,
+            new \Gazelle\Manager\IPv4(),
+            new \Gazelle\Util\Irc(),
+            new \Gazelle\Util\Mail(),
         );
         $user->setField('Email', $email)->modify();
 
-        $duplicate = $history->emailDuplicate(new \Gazelle\Search\ASN);
+        $duplicate = $history->emailDuplicate(new \Gazelle\Search\ASN());
         $this->assertCount(1, $duplicate, 'email-duplicate-count');
         $this->assertEquals($this->userList[0]->id(), $duplicate[0]['user_id'], 'email-duplicate-user-id');
     }
@@ -65,6 +65,6 @@ class UserHistoryTest extends TestCase {
         $history = new \Gazelle\User\History($this->userList[0]);
         $email   = 'reset@phpunit';
         $this->assertEquals(1, $history->resetEmail($email, '127.2.3.4'), 'email-reset-action');
-        $this->assertEquals($email, $history->email(new \Gazelle\Search\ASN)[0]['email'], 'email-reset-address');
+        $this->assertEquals($email, $history->email(new \Gazelle\Search\ASN())[0]['email'], 'email-reset-address');
     }
 }

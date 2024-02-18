@@ -6,7 +6,7 @@ if (!$Viewer->permitted('site_torrents_notify')) {
 
 echo $Twig->render('user/edit-notification-filter.twig', [
     'list' => [
-        ...(new Gazelle\User\Notification($Viewer))->filterList(new Gazelle\Manager\User),
+        ...(new Gazelle\User\Notification($Viewer))->filterList(new Gazelle\Manager\User()),
         [
             'ID'            => false,
             'Label'         => '',
@@ -26,6 +26,6 @@ echo $Twig->render('user/edit-notification-filter.twig', [
             'Users'         => '',
         ]
     ],
-    'release_type' => (new Gazelle\ReleaseType)->list(),
+    'release_type' => (new Gazelle\ReleaseType())->list(),
     'viewer'       => $Viewer,
 ]);

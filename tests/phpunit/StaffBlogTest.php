@@ -24,7 +24,7 @@ class StaffBlogTest extends TestCase {
 
         $this->assertEquals('Moderator', $this->userList['mod']->userclassName(), 'mod-userclass-check');
 
-        $manager = new Gazelle\Manager\StaffBlog;
+        $manager = new Gazelle\Manager\StaffBlog();
 
         $blog = $manager->create($this->userList['admin'], 'phpunit staff blog', 'body text');
         $this->assertInstanceOf(Gazelle\StaffBlog::class, $blog, 'staff-blog-create');

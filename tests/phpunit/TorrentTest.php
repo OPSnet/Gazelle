@@ -44,9 +44,9 @@ class TorrentTest extends TestCase {
             0,
             $this->torrent->removeAllLogs(
                 $this->user,
-                new Gazelle\File\RipLog,
-                new Gazelle\File\RipLogHTML,
-                new Gazelle\Log,
+                new Gazelle\File\RipLog(),
+                new Gazelle\File\RipLogHTML(),
+                new Gazelle\Log(),
             ),
             'torrent-remove-all-logs'
         );

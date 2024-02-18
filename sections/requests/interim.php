@@ -1,6 +1,6 @@
 <?php
 
-$request = (new Gazelle\Manager\Request)->findById((int)$_GET['id']);
+$request = (new Gazelle\Manager\Request())->findById((int)$_GET['id']);
 if (is_null($request)) {
     error(404);
 }

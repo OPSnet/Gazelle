@@ -11,7 +11,7 @@ if (is_null($aliasName) || empty($aliasName)) {
     error('You must supply an alias for this artist.');
 }
 
-$artMan = new Gazelle\Manager\Artist;
+$artMan = new Gazelle\Manager\Artist();
 $artist = $artMan->findById((int)$_POST['artistid']);
 if (is_null($artist)) {
     error(404);
@@ -53,7 +53,7 @@ if ($db->has_results()) {
             ]);
             exit;
         }
-        $artist->clearAliasFromArtist($CloneAliasID, $Viewer, new Gazelle\Log);
+        $artist->clearAliasFromArtist($CloneAliasID, $Viewer, new Gazelle\Log());
     }
 }
 
@@ -66,7 +66,7 @@ if (!$CloneAliasID) {
             error('Redirection must target an alias for the current artist.');
         }
     }
-    $artist->addAlias($aliasName, $redirectId, $Viewer, new Gazelle\Log);
+    $artist->addAlias($aliasName, $redirectId, $Viewer, new Gazelle\Log());
 }
 
 header("Location:" . redirectUrl("artist.php?action=edit&artistid={$artistId}"));

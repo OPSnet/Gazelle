@@ -4,7 +4,7 @@ if ($Viewer->disableForums()) {
     json_error('You do not have access to the forums!');
 }
 
-$user = empty($_GET['userid']) ? $Viewer : (new Gazelle\Manager\User)->findById((int)$_GET['userid']);
+$user = empty($_GET['userid']) ? $Viewer : (new Gazelle\Manager\User())->findById((int)$_GET['userid']);
 if (is_null($user)) {
     json_error('User does not exist!');
 }
@@ -17,6 +17,6 @@ $forumSearch = (new Gazelle\Search\Forum($user))
 
 echo (new Gazelle\Json\PostHistory(
     $forumSearch,
-    new Gazelle\Manager\User,
+    new Gazelle\Manager\User(),
     new Gazelle\Util\Paginator($Viewer->postsPerPage(), (int)($_GET['page'] ?? 1))
 ))->response();

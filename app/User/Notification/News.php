@@ -8,19 +8,19 @@ class News extends AbstractNotification {
     }
 
     public function clear(): int {
-        if ((new \Gazelle\WitnessTable\UserReadNews)->witness($this->user)) {
+        if ((new \Gazelle\WitnessTable\UserReadNews())->witness($this->user)) {
             $this->user->flush();
         }
-        return (new \Gazelle\Manager\News)->latestId();
+        return (new \Gazelle\Manager\News())->latestId();
     }
 
     public function load(): bool {
-        $newsMan = new \Gazelle\Manager\News;
+        $newsMan = new \Gazelle\Manager\News();
         ["id" => $newsId, "title" => $title] = $newsMan->latest();
         if ($newsId === -1) {
             return false;
         }
-        $lastRead = (new \Gazelle\WitnessTable\UserReadNews)->lastRead($this->user);
+        $lastRead = (new \Gazelle\WitnessTable\UserReadNews())->lastRead($this->user);
 
         // You must be new around here.
         $newJoiner = is_null($lastRead)

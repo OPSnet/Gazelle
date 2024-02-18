@@ -23,7 +23,7 @@ if (!$Viewer->permitted('users_mod')) {
     error(403);
 }
 
-$userMan = new Gazelle\Manager\User;
+$userMan = new Gazelle\Manager\User();
 $user = $userMan->findById((int)$_POST['userid']);
 if (is_null($user)) {
     header("Location: log.php?search=User+" . (int)$_POST['userid']);
@@ -100,13 +100,13 @@ if ($mergeStatsFrom && ($downloaded != $user->downloadedSize() || $uploaded != $
     error("Do not transfer buffer and edit upload/download in the same operation.");
 }
 
-$tracker = new Gazelle\Tracker;
+$tracker = new Gazelle\Tracker();
 $needTrackerAdd     = false;
 $needTrackerRefresh = false;
 
 // If we're deleting the user, we can ignore all the other crap
 if ($_POST['UserStatus'] === 'delete' && $Viewer->permitted('users_delete_users')) {
-    (new Gazelle\Log)->general("User account {$user->label()} was deleted by " . $Viewer->username());
+    (new Gazelle\Log())->general("User account {$user->label()} was deleted by " . $Viewer->username());
     $tracker->removeUser($user);
     $user->remove();
     header("Location: log.php?search=User+$userId");
@@ -303,7 +303,7 @@ if ($Viewer->permitted('users_give_donor')) {
     if ($value > 0.0) {
         $donor->donate(
             amount:   $value,
-            xbtRate:  (new Gazelle\Manager\XBT)->latestRate('EUR'),
+            xbtRate:  (new Gazelle\Manager\XBT())->latestRate('EUR'),
             currency: $_POST['donation_currency'],
             reason:   trim($_POST['donation_reason']),
             source:   'Add Points',
@@ -347,7 +347,7 @@ if ($Viewer->permittedAny('users_promote_below', 'users_promote_to')) {
     }
 }
 
-$fMan = new Gazelle\Manager\Forum;
+$fMan = new Gazelle\Manager\Forum();
 $restricted = array_map('intval', array_unique(explode(',', trim($_POST['RestrictedForums']))));
 sort($restricted);
 $restrictedIds = [];
@@ -512,7 +512,7 @@ if ($Viewer->permitted('users_edit_reset_keys')) {
 }
 
 if ($sendHackedMail && $Viewer->permitted('users_disable_any')) {
-    (new Mail)->send($hackedEmail, 'Your ' . SITE_NAME . ' account',
+    (new Mail())->send($hackedEmail, 'Your ' . SITE_NAME . ' account',
         $Twig->render('email/hacked.twig')
     );
     $userMan->disableUserList($tracker, [$userId], "Disabled via hacked email", Gazelle\Manager\User::DISABLE_MANUAL);
@@ -588,7 +588,7 @@ if ($needTrackerAdd) {
 if (isset($_POST['invite_source_update'])) {
     $idList = array_key_extract_suffix('source-', $_POST);
     if ($idList) {
-        (new Gazelle\Manager\InviteSource)->modifyInviterConfiguration($user, $idList);
+        (new Gazelle\Manager\InviteSource())->modifyInviterConfiguration($user, $idList);
         header("Location: tools.php?action=invite_source");
         exit;
     }

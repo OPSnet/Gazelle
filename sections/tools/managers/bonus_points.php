@@ -16,7 +16,7 @@ if (isset($_REQUEST['add_points'])) {
         error('Please enter a positive number of points.');
     }
 
-    $bonusMan = new Gazelle\Manager\Bonus;
+    $bonusMan = new Gazelle\Manager\Bonus();
     $activeCount = $bonusMan->addActivePoints($active, $since);
     $uploadCount = $bonusMan->addUploadPoints($upload, $since);
     $seedCount   = $bonusMan->addSeedPoints($seed);

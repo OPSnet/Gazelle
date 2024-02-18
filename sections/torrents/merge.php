@@ -4,7 +4,7 @@ if (!$Viewer->permitted('torrents_edit')) {
     error(403);
 }
 
-$tgMan = new Gazelle\Manager\TGroup;
+$tgMan = new Gazelle\Manager\TGroup();
 $old = $tgMan->findById((int)($_POST['groupid'] ?? 0));
 if (is_null($old)) {
     error(404);
@@ -36,9 +36,9 @@ $tgMan->merge(
     $old,
     $new,
     $Viewer,
-    new \Gazelle\Manager\User,
-    new \Gazelle\Manager\Vote,
-    new Gazelle\Log
+    new \Gazelle\Manager\User(),
+    new \Gazelle\Manager\Vote(),
+    new Gazelle\Log()
 );
 
 header('Location: ' . $new->location());

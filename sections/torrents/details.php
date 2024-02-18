@@ -4,7 +4,7 @@ use Gazelle\Enum\CacheBucket;
 
 header('Access-Control-Allow-Origin: *');
 
-$tgMan  = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
+$tgMan  = (new Gazelle\Manager\TGroup())->setViewer($Viewer);
 $tgroup = $tgMan->findById((int)($_GET['id'] ?? 0));
 if (is_null($tgroup)) {
     error(404);
@@ -19,18 +19,18 @@ $commentPage->load()->handleSubscription($Viewer);
 $paginator = new Gazelle\Util\Paginator(TORRENT_COMMENTS_PER_PAGE, $commentPage->pageNum());
 $paginator->setAnchor('comments')->setTotal($commentPage->total())->removeParam('postid');
 
-$artistMan     = new Gazelle\Manager\Artist;
-$collageMan    = new Gazelle\Manager\Collage;
-$torMan        = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
+$artistMan     = new Gazelle\Manager\Artist();
+$collageMan    = new Gazelle\Manager\Collage();
+$torMan        = (new Gazelle\Manager\Torrent())->setViewer($Viewer);
 $reportMan     = new Gazelle\Manager\Torrent\Report($torMan);
-$reportTypeMan = new Gazelle\Manager\Torrent\ReportType;
-$requestMan    = new Gazelle\Manager\Request;
-$userMan       = new Gazelle\Manager\User;
+$reportTypeMan = new Gazelle\Manager\Torrent\ReportType();
+$requestMan    = new Gazelle\Manager\Request();
+$userMan       = new Gazelle\Manager\User();
 $snatcher      = $Viewer->snatch();
 $vote          = new Gazelle\User\Vote($Viewer);
 
 $isSubscribed   = (new Gazelle\User\Subscription($Viewer))->isSubscribedComments('torrents', $tgroupId);
-$releaseTypes   = (new Gazelle\ReleaseType)->list();
+$releaseTypes   = (new Gazelle\ReleaseType())->list();
 $urlStem        = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
 
 $categoryId     = $tgroup->categoryId();
@@ -197,7 +197,7 @@ if ($musicRelease) {
 
 echo $Twig->render('tgroup/stats.twig', [
     'stats'    => $tgroup->stats(),
-    'featured' => (new Gazelle\Manager\FeaturedAlbum)->findById($tgroupId),
+    'featured' => (new Gazelle\Manager\FeaturedAlbum())->findById($tgroupId),
 ]);
 
 echo $Twig->render('vote/box.twig', [

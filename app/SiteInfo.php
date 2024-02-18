@@ -37,7 +37,7 @@ class SiteInfo extends Base {
         $in = fopen('/proc/cpuinfo', 'r');
         if ($in !== false) {
             while (($line = fgets($in)) !== false) {
-               if (preg_match('/^processor\s+:\s+\d+/', $line)) {
+                if (preg_match('/^processor\s+:\s+\d+/', $line)) {
                     ++$ncpu;
                 }
             }

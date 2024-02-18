@@ -88,7 +88,7 @@ class Request extends BaseObject {
         if ($this->categoryName() !== 'Music') {
             return null;
         }
-        return new ArtistRole\Request($this->id, new Manager\Artist);
+        return new ArtistRole\Request($this->id, new Manager\Artist());
     }
 
     public function hasArtistRole(): bool {
@@ -556,7 +556,7 @@ class Request extends BaseObject {
         $user->flush();
 
         return true;
-   }
+    }
 
     public function fill(User $user, Torrent $torrent): int {
         $bounty = $this->bountyTotal();
@@ -591,7 +591,7 @@ class Request extends BaseObject {
             (new User($userId))->inbox()->createSystem("The request \"$name\" has been filled", $message);
         }
 
-        (new Log)->general(
+        (new Log())->general(
             "Request {$this->id} ($name) was filled by user {$user->label()} with the torrent {$torrent->id()} for a "
             . byte_format($bounty) . ' bounty.'
         );
@@ -643,7 +643,7 @@ class Request extends BaseObject {
             );
         }
 
-        (new Log)->general("Request {$this->id} ({$this->title()}), with a " . byte_format($bounty)
+        (new Log())->general("Request {$this->id} ({$this->title()}), with a " . byte_format($bounty)
             . " bounty, was unfilled by user {$admin->label()} for the reason: $reason"
         );
 
@@ -842,7 +842,7 @@ class Request extends BaseObject {
             // and live with the <= 1 minute delay if we have more than 100 bookmarkers
             $this->updateSphinx();
         } else {
-            (new \SphinxqlQuery)->raw_query(
+            (new \SphinxqlQuery())->raw_query(
                 "UPDATE requests, requests_delta SET bookmarker = ("
                 . implode(',', self::$db->collect('UserID'))
                 . ") WHERE id = {$this->id}"
@@ -869,7 +869,7 @@ class Request extends BaseObject {
             REPLACE INTO sphinx_requests_delta (ID) VALUES (?)
             ", $this->id
         );
-        (new \Gazelle\Manager\Comment)->remove('requests', $this->id);
+        (new \Gazelle\Manager\Comment())->remove('requests', $this->id);
         self::$db->commit();
 
         foreach ($artisIds as $artistId) {

@@ -4,7 +4,7 @@ if (!$Viewer->permitted('admin_manage_invite_source')) {
     error(403);
 }
 
-$manager = new Gazelle\Manager\InviteSource;
+$manager = new Gazelle\Manager\InviteSource();
 if (!empty($_POST['name'])) {
     authorize();
     $manager->create(trim($_POST['name']));

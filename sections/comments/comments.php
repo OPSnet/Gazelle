@@ -13,7 +13,7 @@
  *     If missing or invalid, this defaults to the comments one made
  */
 
-$userMan = new Gazelle\Manager\User;
+$userMan = new Gazelle\Manager\User();
 if (!isset($_GET['id'])) {
     $User = $Viewer;
 } else {
@@ -208,13 +208,13 @@ $Comments = $db->prepared_query("
 $requestList = [];
 $tgroupList = [];
 if ($Action == 'requests') {
-    $requestMan = new Gazelle\Manager\Request;
+    $requestMan = new Gazelle\Manager\Request();
     foreach (array_flip(array_flip($db->collect('PageID'))) as $id) {
         $id = (int)$id;
         $requestList[$id] = $requestMan->findById($id);
     }
 } elseif ($Action == 'torrents') {
-    $tgMan = new Gazelle\Manager\TGroup;
+    $tgMan = new Gazelle\Manager\TGroup();
     foreach (array_flip(array_flip($db->collect('PageID'))) as $id) {
         $id = (int)$id;
         $tgroupList[$id] = $tgMan->findById($id);
@@ -250,7 +250,7 @@ View::show_header(sprintf($Title, $Username), ['js' => 'bbcode,comments']);
 <?php
 } else {
     echo $paginator->linkbox();
-    $commentMan = new Gazelle\Manager\Comment;
+    $commentMan = new Gazelle\Manager\Comment();
     $db->set_query_id($Comments);
     while ([$AuthorID, $Page, $PageID, $Name, $PostID, $Body, $AddedTime, $EditedTime, $EditedUserID] = $db->next_record(escape: false)) {
         $author = new Gazelle\User($AuthorID);

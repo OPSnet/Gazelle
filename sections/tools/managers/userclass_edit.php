@@ -4,7 +4,7 @@ if (!$Viewer->permitted('admin_manage_permissions')) {
     error(403);
 }
 
-$privMan = new Gazelle\Manager\Privilege;
+$privMan = new Gazelle\Manager\Privilege();
 
 $privilege = null;
 if (isset($_REQUEST['id']) && $_REQUEST['id'] !== 'new') {
@@ -18,8 +18,8 @@ if (isset($_REQUEST['id']) && $_REQUEST['id'] !== 'new') {
 echo $Twig->render('admin/privilege-edit.twig', [
     'edited'     => isset($usersAffected),
     'edit_total' => $usersAffected ?? 0,
-    'js'         => (new Gazelle\Util\Validator)->generateJS('permissionsform'),
-    'group_list' => (new Gazelle\Manager\StaffGroup)->groupList(),
+    'js'         => (new Gazelle\Util\Validator())->generateJS('permissionsform'),
+    'group_list' => (new Gazelle\Manager\StaffGroup())->groupList(),
     'privilege'  => $privilege,
     'viewer'     => $Viewer,
 ]);

@@ -4,7 +4,7 @@ if (!$Viewer->permitted('users_view_invites')) {
     error(403);
 }
 
-$inviteMan = new Gazelle\Manager\Invite;
+$inviteMan = new Gazelle\Manager\Invite();
 
 $removed = null;
 if (!empty($_POST['invitekey']) && $Viewer->permitted('users_edit_invites')) {

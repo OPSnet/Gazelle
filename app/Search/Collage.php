@@ -15,13 +15,13 @@ class Collage extends \Gazelle\Base {
 
     protected array $category = [];
     protected array $taglist  = [];
-    protected array $join     = [];
-    protected array $where    = ["c.Deleted = '0'"];
+    protected array $joinList = [];
+    protected array $whereList= ["c.Deleted = '0'"];
     protected array $args     = [];
 
     /* the collapsed version of the above */
-    protected string $_join;
-    protected string $_where;
+    protected string $join;
+    protected string $where;
 
     protected \Gazelle\Util\SortableTableHeader $header;
 
@@ -30,7 +30,7 @@ class Collage extends \Gazelle\Base {
     }
 
     public function isFilteredView(): bool {
-        return count($this->where) > 1;
+        return count($this->whereList) > 1;
     }
 
     public function isBookmarkView(): bool {
@@ -60,8 +60,8 @@ class Collage extends \Gazelle\Base {
     public function setBookmarkView(\Gazelle\User $user): static {
         $this->bookmarkView = true;
         $this->userLink = $user->link();
-        $this->join[]  = "INNER JOIN bookmarks_collages AS bc ON (c.ID = bc.CollageID)";
-        $this->where[] = "bc.UserID = ?";
+        $this->joinList[]  = "INNER JOIN bookmarks_collages AS bc ON (c.ID = bc.CollageID)";
+        $this->whereList[] = "bc.UserID = ?";
         $this->args[]  = $user->id();
         return $this;
     }
@@ -74,7 +74,7 @@ class Collage extends \Gazelle\Base {
     public function setContributor(\Gazelle\User $user): static {
         $this->contributor = true;
         $this->userLink = $user->link();
-        $this->where[] = "c.ID IN (SELECT DISTINCT CollageID FROM collages_torrents WHERE UserID = ?)";
+        $this->whereList[] = "c.ID IN (SELECT DISTINCT CollageID FROM collages_torrents WHERE UserID = ?)";
         $this->args[] = $user->id();
         return $this;
     }
@@ -88,7 +88,7 @@ class Collage extends \Gazelle\Base {
     }
 
     public function setPersonal(): static {
-        $this->where[] = 'c.CategoryID = 0';
+        $this->whereList[] = 'c.CategoryID = 0';
         return $this;
     }
 
@@ -104,14 +104,14 @@ class Collage extends \Gazelle\Base {
 
     public function setUser(\Gazelle\User $user): static {
         $this->userLink = $user->link();
-        $this->where[] = 'c.UserID = ?';
+        $this->whereList[] = 'c.UserID = ?';
         $this->args[]  = $user->id();
         return $this;
     }
 
     public function setWordlist(string $wordlist): static {
         if (preg_match_all('/(\S+)/', $wordlist, $match)) {
-            array_push($this->where, ...array_fill(0, count($match[0]), "c." . $this->lookup . " LIKE concat('%', ?, '%')"));
+            array_push($this->whereList, ...array_fill(0, count($match[0]), "c." . $this->lookup . " LIKE concat('%', ?, '%')"));
             array_push($this->args, ...$match[0]);
         }
         return $this;
@@ -128,18 +128,18 @@ class Collage extends \Gazelle\Base {
         if ($this->category) {
             sort($this->category);
             if (implode(' ', $this->category) !== implode(' ', array_keys(COLLAGE))) {
-                $this->where[] = "c.CategoryID IN (" . placeholders($this->category) . ')';
+                $this->whereList[] = "c.CategoryID IN (" . placeholders($this->category) . ')';
                 array_push($this->args, ...$this->category);
             }
         }
         if ($this->taglist) {
-            $this->where[] = '(' . implode($this->tagAll ? ' AND ' : ' OR ',
+            $this->whereList[] = '(' . implode($this->tagAll ? ' AND ' : ' OR ',
                     array_fill(0, count($this->taglist), "c.TagList LIKE concat('%', ?, '%')"))
                 . ')';
             array_push($this->args, ...$this->taglist);
         }
-        $this->_join = implode(' ', $this->join);
-        $this->_where = implode(' AND ', $this->where);
+        $this->join = implode(' ', $this->joinList);
+        $this->where = implode(' AND ', $this->whereList);
         $this->configured = true;
     }
 
@@ -149,8 +149,8 @@ class Collage extends \Gazelle\Base {
         }
         return (int)self::$db->scalar("
             SELECT count(*)
-            FROM collages AS c {$this->_join}
-            WHERE {$this->_where}
+            FROM collages AS c {$this->join}
+            WHERE {$this->where}
             ", ...$this->args
         );
     }
@@ -170,8 +170,8 @@ class Collage extends \Gazelle\Base {
                 c.UserID       AS user_id,
                 c.Subscribers  AS subscriber_total,
                 c.Updated      AS updated
-            FROM collages AS c {$this->_join}
-            WHERE {$this->_where}
+            FROM collages AS c {$this->join}
+            WHERE {$this->where}
             ORDER BY $orderBy $orderDir
             LIMIT ? OFFSET ?
             ", ...[...$this->args, $limit, $offset]

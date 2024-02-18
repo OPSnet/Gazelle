@@ -1,6 +1,6 @@
 <?php
 
-$userMan = new Gazelle\Manager\User;
+$userMan = new Gazelle\Manager\User();
 if (!isset($_GET['userid'])) {
     $user = $Viewer;
 } else {

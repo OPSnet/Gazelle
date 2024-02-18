@@ -8,7 +8,7 @@ if (!defined('AJAX') || !AJAX) {
     authorize();
 }
 
-$tgMan = new Gazelle\Manager\TGroup;
+$tgMan = new Gazelle\Manager\TGroup();
 $tgroup = $tgMan->findById((int)($_REQUEST['groupid'] ?? 0));
 if (is_null($tgroup)) {
     json_or_error('invalid groupid', 0);
@@ -21,7 +21,7 @@ if (isset($_REQUEST['undo'])) {
 
 $added    = [];
 $rejected = [];
-$tagMan   = new \Gazelle\Manager\Tag;
+$tagMan   = new \Gazelle\Manager\Tag();
 $Tags     = array_unique(explode(',', $_REQUEST['tagname']));
 
 foreach ($Tags as $tagName) {
@@ -45,7 +45,7 @@ foreach ($Tags as $tagName) {
         $tagMan->createTorrentTagVote($tagId, $tgroup, $Viewer, 'up');
         $added[] = $resolved;
 
-        (new Gazelle\Log)->group($tgroup, $Viewer, "Tag \"$resolved\" added to group");
+        (new Gazelle\Log())->group($tgroup, $Viewer, "Tag \"$resolved\" added to group");
     }
 }
 

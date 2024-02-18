@@ -5,7 +5,7 @@ if (!$Viewer->permitted('admin_manage_blog')) {
 }
 authorize();
 
-$blogMan = new Gazelle\Manager\Blog;
+$blogMan = new Gazelle\Manager\Blog();
 $blog = $blogMan->findById((int)($_GET['id'] ?? 0));
 if (is_null($blog)) {
     error('You must provide an ID of a blog to delete');

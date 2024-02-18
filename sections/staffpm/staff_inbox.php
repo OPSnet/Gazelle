@@ -2,8 +2,8 @@
 
 $View = empty($_GET['view']) ? '' : display_str($_GET['view']);
 
-$staffpmMan = new Gazelle\Manager\StaffPM;
-$userMan    = new Gazelle\Manager\User;
+$staffpmMan = new Gazelle\Manager\StaffPM();
+$userMan    = new Gazelle\Manager\User();
 
 $viewMap = [
     '' => [
@@ -50,7 +50,7 @@ if (isset($_GET['id'])) {
     $args = array_merge([$Viewer->privilege()->effectiveClassLevel(), $Viewer->id()], $viewMap[$View]['status']);
 }
 
-$Classes = (new Gazelle\Manager\User)->classList();
+$Classes = (new Gazelle\Manager\User())->classList();
 if ($viewMap[$View]['title'] === 'Your Unanswered') {
     if ($Viewer->privilege()->effectiveClassLevel() >= $Classes[MOD]['Level']) {
         $cond[] = 'spc.Level >= ?';

@@ -1,6 +1,6 @@
 <?php
 
-$wikiMan = new Gazelle\Manager\Wiki;
+$wikiMan = new Gazelle\Manager\Wiki();
 if (isset($_GET['id'])) {
     $wiki = $wikiMan->findById((int)$_GET['id']);
 } elseif (isset($_GET['name'])) {
@@ -24,7 +24,7 @@ json_print("success", [
     'body'       => Text::full_format($wiki->body(), false),
     'aliases'    => $wiki->alias(),
     'authorID'   => $wiki->authorId(),
-    'authorName' => (new Gazelle\Manager\User)->findById($wiki->authorId())?->username(),
+    'authorName' => (new Gazelle\Manager\User())->findById($wiki->authorId())?->username(),
     'date'       => $wiki->date(),
     'revision'   => $wiki->revision(),
 ]);

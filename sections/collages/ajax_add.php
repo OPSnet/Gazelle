@@ -14,7 +14,7 @@ echo (new Gazelle\Json\Ajax\CollageAdd(
     entryId:       (int)$_REQUEST['entry_id'],
     name:          trim($_REQUEST['name']),
     user:          $Viewer,
-    manager:       new Gazelle\Manager\Collage,
-    artistManager: new Gazelle\Manager\Artist,
-    tgroupManager: new Gazelle\Manager\TGroup,
+    manager:       new Gazelle\Manager\Collage(),
+    artistManager: new Gazelle\Manager\Artist(),
+    tgroupManager: new Gazelle\Manager\TGroup(),
 ))->response();

@@ -17,7 +17,7 @@ if ($_GET['depth'] != $depth) {
     die("bad depth");
 }
 
-$commentMan = new Gazelle\Manager\Comment;
+$commentMan = new Gazelle\Manager\Comment();
 $history = $commentMan->loadEdits($pageType, $postId);
 
 [$userId, $editTime] = $history[$depth];
@@ -25,7 +25,7 @@ if ($depth != 0) {
     $body = $history[$depth - 1][2];
 } else {
     $body = match ($pageType) {
-        'forums' => (new Gazelle\Manager\ForumPost)->findById($postId)->body(),
+        'forums' => (new Gazelle\Manager\ForumPost())->findById($postId)->body(),
         default  => $commentMan->findById($postId)->body(),
     };
 }

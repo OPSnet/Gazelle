@@ -58,7 +58,7 @@ if ($old >= $new) {
     error("Selected older revision is more recent than selected newer revision.");
 }
 
-$wikiMan = new Gazelle\Manager\Wiki;
+$wikiMan = new Gazelle\Manager\Wiki();
 $article = $wikiMan->findById((int)$_GET['id']);
 if (is_null($article)) {
     error(404);

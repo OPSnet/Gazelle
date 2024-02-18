@@ -4,7 +4,7 @@
  * This is the page that displays the request to the end user after being created.
  */
 
-$request = (new Gazelle\Manager\Request)->findById((int)($_GET['id'] ?? 0));
+$request = (new Gazelle\Manager\Request())->findById((int)($_GET['id'] ?? 0));
 if (is_null($request)) {
     error(404);
 }
@@ -17,7 +17,7 @@ $paginator = new Gazelle\Util\Paginator(TORRENT_COMMENTS_PER_PAGE, $commentPage-
 $paginator->setAnchor('comments')->setTotal($commentPage->total())->removeParam('postid');
 
 $isSubscribed = (new Gazelle\User\Subscription($Viewer))->isSubscribedComments('requests', $requestId);
-$userMan = new Gazelle\Manager\User;
+$userMan = new Gazelle\Manager\User();
 $topVoteList = array_slice($request->userVoteList($userMan), 0, 5);
 $filler = $userMan->findById($request->fillerId());
 $roleList = $request->artistRole()?->roleList() ?? [];

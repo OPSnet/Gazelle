@@ -17,7 +17,7 @@ $heading = new \Gazelle\Util\SortableTableHeader('hourlypoints', [
     'pointspergb'   => ['dbColumn' => 'points_per_gb',  'defaultSort' => 'desc', 'text' => 'BP/GB/year'],
 ]);
 
-$userMan = new Gazelle\Manager\User;
+$userMan = new Gazelle\Manager\User();
 if (empty($_GET['userid'])) {
     $user = $Viewer;
     $ownProfile = true;

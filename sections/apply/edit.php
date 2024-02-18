@@ -4,7 +4,7 @@ if (!$Viewer->permitted('admin_manage_applicants')) {
     error(403);
 }
 
-$role = (new Gazelle\Manager\ApplicantRole)->findById((int)($_GET['id'] ?? 0));
+$role = (new Gazelle\Manager\ApplicantRole())->findById((int)($_GET['id'] ?? 0));
 if (is_null($role)) {
     error(404);
 }
@@ -27,7 +27,7 @@ if (isset($_POST['auth'])) {
     }
 }
 
-$userMan = new Gazelle\Manager\User;
+$userMan = new Gazelle\Manager\User();
 
 echo $Twig->render('applicant/role.twig', [
     'text'        => new Gazelle\Util\Textarea('description', $role->description()),

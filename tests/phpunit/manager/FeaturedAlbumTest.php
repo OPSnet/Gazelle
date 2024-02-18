@@ -22,7 +22,7 @@ class FeaturedAlbumTest extends TestCase {
             tagName:    ['opera'],
             user:       $this->user,
         );
-        $this->thread = (new \Gazelle\Manager\ForumThread)->create(
+        $this->thread = (new \Gazelle\Manager\ForumThread())->create(
             new Gazelle\Forum(AOTM_FORUM_ID),
             $this->user,
             'phpunit aotm ' . $this->tgroup->text(),
@@ -32,26 +32,26 @@ class FeaturedAlbumTest extends TestCase {
 
     public function tearDown(): void {
         $db = \Gazelle\DB::DB();
-        (new Gazelle\Manager\News)->remove(
+        (new Gazelle\Manager\News())->remove(
             (int)$db->scalar("
                 SELECT ID FROM news WHERE UserID = ?
                 ", $this->user->id()
             )
         );
-        (new Gazelle\Manager\FeaturedAlbum)->findById($this->tgroup->id())?->remove();
+        (new Gazelle\Manager\FeaturedAlbum())->findById($this->tgroup->id())?->remove();
         $this->tgroup->remove($this->user);
         $this->thread->remove();
         $this->user->remove();
     }
 
     public function testFeaturedAotm(): void {
-        $manager = new Gazelle\Manager\FeaturedAlbum;
+        $manager = new Gazelle\Manager\FeaturedAlbum();
         $aotm = $manager->create(
             featureType: FeaturedAlbumType::AlbumOfTheMonth,
-            news:        new \Gazelle\Manager\News,
-            tgMan:       new \Gazelle\Manager\TGroup,
-            torMan:      new \Gazelle\Manager\Torrent,
-            tracker:     new \Gazelle\Tracker,
+            news:        new \Gazelle\Manager\News(),
+            tgMan:       new \Gazelle\Manager\TGroup(),
+            torMan:      new \Gazelle\Manager\Torrent(),
+            tracker:     new \Gazelle\Tracker(),
             tgroup:      $this->tgroup,
             forumThread: $this->thread,
             title:       'AOTM phpunit feature ' . date('Y-m-d H:i:s'),
@@ -78,13 +78,13 @@ class FeaturedAlbumTest extends TestCase {
     }
 
     public function testFeaturedShowcase(): void {
-        $manager = new Gazelle\Manager\FeaturedAlbum;
+        $manager = new Gazelle\Manager\FeaturedAlbum();
         $showcase = $manager->create(
             featureType: FeaturedAlbumType::Showcase,
-            news:        new \Gazelle\Manager\News,
-            tgMan:       new \Gazelle\Manager\TGroup,
-            torMan:      new \Gazelle\Manager\Torrent,
-            tracker:     new \Gazelle\Tracker,
+            news:        new \Gazelle\Manager\News(),
+            tgMan:       new \Gazelle\Manager\TGroup(),
+            torMan:      new \Gazelle\Manager\Torrent(),
+            tracker:     new \Gazelle\Tracker(),
             tgroup:      $this->tgroup,
             forumThread: $this->thread,
             title:       'Showcase phpunit feature ' . date('Y-m-d H:i:s'),

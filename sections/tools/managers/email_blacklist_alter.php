@@ -5,14 +5,14 @@ if (!$Viewer->permitted('users_view_email')) {
 }
 
 authorize();
-$emailBlacklist = new Gazelle\Manager\EmailBlacklist;
+$emailBlacklist = new Gazelle\Manager\EmailBlacklist();
 
 if ($_POST['submit'] === 'Delete') { // Delete
     if (!$emailBlacklist->remove((int)$_POST['id'])) {
         error(0);
     }
 } else { // Edit & Create, Shared Validation
-    $validator = new Gazelle\Util\Validator;
+    $validator = new Gazelle\Util\Validator();
     $validator->setField('email', true, 'string', 'The email must be set', ['minlength' => 6]);
     $validator->setField('comment', false, 'string', 'The description has a max length of 255 characters', ['maxlength' => 255]);
     if (!$validator->validate($_POST)) {

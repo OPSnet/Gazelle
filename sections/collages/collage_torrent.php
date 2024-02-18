@@ -1,9 +1,9 @@
 <?php
 
-$tgMan         = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
-$torMan        = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
+$tgMan         = (new Gazelle\Manager\TGroup())->setViewer($Viewer);
+$torMan        = (new Gazelle\Manager\Torrent())->setViewer($Viewer);
 $bookmark      = new Gazelle\User\Bookmark($Viewer);
-$collMan       = (new Gazelle\Manager\Collage)->setImageProxy(new \Gazelle\Util\ImageProxy($Viewer));
+$collMan       = (new Gazelle\Manager\Collage())->setImageProxy(new \Gazelle\Util\ImageProxy($Viewer));
 $urlStem       = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
 $vote          = new Gazelle\User\Vote($Viewer);
 
@@ -28,7 +28,7 @@ echo $Twig->render('collage/header.twig', [
 echo$Twig->render('collage/sidebar.twig', [
     'artists'      => $Collage->numArtists(),
     'collage'      => $Collage,
-    'comments'     => (new Gazelle\Manager\Comment)->collageSummary($CollageID),
+    'comments'     => (new Gazelle\Manager\Comment())->collageSummary($CollageID),
     'contributors' => array_slice($Collage->contributors(), 0, 5, true),
     'entries'      => $Collage->numEntries(),
     'object'       => 'torrent',

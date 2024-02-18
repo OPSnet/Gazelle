@@ -60,7 +60,7 @@ class View {
 
         $activity = new Gazelle\User\Activity($Viewer);
         $activity->configure()
-            ->setStaffPM(new Gazelle\Manager\StaffPM);
+            ->setStaffPM(new Gazelle\Manager\StaffPM());
 
         $notifier = new Gazelle\User\Notification($Viewer);
         $alertList = $notifier->setDocument($Document, $_REQUEST['action'] ?? '')->alertList();
@@ -73,25 +73,25 @@ class View {
             array_push($js, 'noty/noty', 'noty/layouts/bottomRight', 'noty/themes/default', 'user_notifications');
         }
 
-        $payMan = new Gazelle\Manager\Payment;
+        $payMan = new Gazelle\Manager\Payment();
         if ($Viewer->permitted('users_mod')) {
             $activity->setStaff(new Gazelle\Staff($Viewer))
-                ->setReport(new Gazelle\Stats\Report)
+                ->setReport(new Gazelle\Stats\Report())
                 ->setPayment($payMan)
-                ->setApplicant(new Gazelle\Manager\Applicant)
-                ->setDb(new Gazelle\DB)
-                ->setScheduler(new Gazelle\TaskScheduler)
-                ->setSSLHost(new Gazelle\Manager\SSLHost)
+                ->setApplicant(new Gazelle\Manager\Applicant())
+                ->setDb(new Gazelle\DB())
+                ->setScheduler(new Gazelle\TaskScheduler())
+                ->setSSLHost(new Gazelle\Manager\SSLHost())
                 ;
 
             if (OPEN_EXTERNAL_REFERRALS) {
-                $activity->setReferral(new Gazelle\Manager\Referral);
+                $activity->setReferral(new Gazelle\Manager\Referral());
             }
         }
 
         $PageID = [$Document, $_REQUEST['action'] ?? false, $_REQUEST['type'] ?? false];
         $navLinks = [];
-        foreach ((new Gazelle\Manager\UserNavigation)->userControlList($Viewer) as $n) {
+        foreach ((new Gazelle\Manager\UserNavigation())->userControlList($Viewer) as $n) {
             [$ID, $Key, $Title, $Target, $Tests, $TestUser, $Mandatory] = array_values($n);
             if (str_contains($Tests, ':')) {
                 $testList = [];
@@ -147,7 +147,7 @@ class View {
             'alert_list'  => $activity->alertList(),
             'bonus'       => new Gazelle\User\Bonus($Viewer),
             'document'    => $Document,
-            'dono_target' => $payMan->monthlyPercent(new Gazelle\Manager\Donation),
+            'dono_target' => $payMan->monthlyPercent(new Gazelle\Manager\Donation()),
             'nav_links'   => $navLinks,
             'user'        => $Viewer,
         ]);

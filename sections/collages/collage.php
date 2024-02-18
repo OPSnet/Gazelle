@@ -1,6 +1,6 @@
 <?php
 
-$collageMan = new Gazelle\Manager\Collage;
+$collageMan = new Gazelle\Manager\Collage();
 $Collage = $collageMan->findById((int)($_GET['id'] ?? 0));
 if (is_null($Collage)) {
     error(404);

@@ -27,7 +27,7 @@ class BlogTest extends TestCase {
     }
 
     public function testBlogCreate(): void {
-        $manager = new \Gazelle\Manager\Blog;
+        $manager = new \Gazelle\Manager\Blog();
         $initial = $manager->headlines();
         $this->blog = $manager->create([
             'userId'    => $this->userList[0]->id(),
@@ -56,7 +56,7 @@ class BlogTest extends TestCase {
     }
 
     public function testBlogWitness(): void {
-        $manager = new \Gazelle\Manager\Blog;
+        $manager = new \Gazelle\Manager\Blog();
         $this->blog = $manager->create([
             'userId'    => $this->userList[0]->id(),
             'title'     => 'phpunit blog witness',
@@ -65,14 +65,14 @@ class BlogTest extends TestCase {
             'important' => 1,
         ]);
 
-        $witness = new \Gazelle\WitnessTable\UserReadBlog;
+        $witness = new \Gazelle\WitnessTable\UserReadBlog();
         $this->assertNull($witness->lastRead($this->userList[1]), 'blog-user-not-read');
         $this->assertTrue($witness->witness($this->userList[1]));
         $this->assertEquals($this->blog->id(), $witness->lastRead($this->userList[1]), 'blog-user-read');
     }
 
     public function testBlogNotification(): void {
-        $manager = new \Gazelle\Manager\Blog;
+        $manager = new \Gazelle\Manager\Blog();
         $title   = 'phpunit blog notif';
         $this->blog    = $manager->create([
             'userId'    => $this->userList[0]->id(),

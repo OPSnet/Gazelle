@@ -53,8 +53,8 @@ class InviteTest extends TestCase {
         $this->user->setField('Invites', 1)->modify();
 
         // invite someone
-        $this->assertTrue((new Gazelle\Stats\Users)->newUsersAllowed($this->user), 'invite-new-users-allowed');
-        $manager = new Gazelle\Manager\Invite;
+        $this->assertTrue((new Gazelle\Stats\Users())->newUsersAllowed($this->user), 'invite-new-users-allowed');
+        $manager = new Gazelle\Manager\Invite();
         $email = randomString(10) . "@invitee.example.com";
         $this->assertFalse($manager->emailExists($this->user, $email), 'invitee-email-not-pending');
         $invite = $manager->create($this->user, $email, 'unittest notes', 'unittest reason', '');
@@ -76,10 +76,10 @@ class InviteTest extends TestCase {
         $this->assertEquals($this->invitee->id(), $inviteList[0], 'invite-list-has-invitee');
 
         $this->assertTrue($this->invitee->isUnconfirmed(), 'invitee-unconfirmed');
-        $this->assertInstanceOf(Gazelle\User::class, (new Gazelle\Manager\User)->findByAnnounceKey($this->invitee->announceKey()), 'invitee-confirmable');
+        $this->assertInstanceOf(Gazelle\User::class, (new Gazelle\Manager\User())->findByAnnounceKey($this->invitee->announceKey()), 'invitee-confirmable');
 
         // invite tree functionality
-        $inviteTree = new \Gazelle\User\InviteTree($this->user, new Gazelle\Manager\User);
+        $inviteTree = new \Gazelle\User\InviteTree($this->user, new Gazelle\Manager\User());
         $this->assertInstanceOf(\Gazelle\User\InviteTree::class, $inviteTree, 'invite-tree-ctor');
         $this->assertGreaterThan(0, $inviteTree->treeId(), 'invite-tree-new-id');
         $this->assertTrue($inviteTree->hasInvitees(), 'invite-tree-has-invitees');
@@ -91,8 +91,8 @@ class InviteTest extends TestCase {
     }
 
     public function testInviteSource(): void {
-        $inviteSourceMan = new Gazelle\Manager\InviteSource;
-        $userMan = new Gazelle\Manager\User;
+        $inviteSourceMan = new Gazelle\Manager\InviteSource();
+        $userMan = new Gazelle\Manager\User();
         $this->user = Helper::makeUser('invite.' . randomString(6), 'invite');
         $this->user->setField('PermissionID', MEMBER)->modify();
         $this->user->addClasses([
@@ -131,7 +131,7 @@ class InviteTest extends TestCase {
 
         // now invite a user from a designated source
         $profile = 'https://example.com/user/' . random_int(1000, 9999);
-        $manager = new Gazelle\Manager\Invite;
+        $manager = new Gazelle\Manager\Invite();
         $invite = $manager->create(
             user: $this->user,
             email: randomString(10) . "@invitee.src.example.com",
@@ -146,7 +146,7 @@ class InviteTest extends TestCase {
         );
 
         // create auser from the invite
-        $this->invitee = (new \Gazelle\UserCreator)
+        $this->invitee = (new \Gazelle\UserCreator())
             ->setUsername('create.' . randomString(6))
             ->setEmail(randomString(6) . '@example.com')
             ->setPassword(randomString(10))
@@ -236,7 +236,7 @@ class InviteTest extends TestCase {
     public function testRevokeInvite(): void {
         $this->user->setField('Invites', 1)->modify();
 
-        $manager = new Gazelle\Manager\Invite;
+        $manager = new Gazelle\Manager\Invite();
         $email = randomString(10) . "@invitee.example.com";
         $this->assertFalse($manager->emailExists($this->user, $email), 'invitee-email-not-pending');
         $invite = $manager->create($this->user, $email, 'unittest notes', 'unittest reason', '');
@@ -251,10 +251,10 @@ class InviteTest extends TestCase {
         $this->assertEquals('Elite TM', $this->user->userclassName(),              'etm-userclass-check');
         $this->assertTrue($this->user->permitted('site_send_unlimited_invites'),   'etm-site-send-unlimited-invites');
         $this->assertFalse($this->user->permitted('site_can_invite_always'),       'etm-site-can-invite-always');
-        $this->assertTrue((new Gazelle\Stats\Users)->newUsersAllowed($this->user), 'etm-new-users-allowed');
+        $this->assertTrue((new Gazelle\Stats\Users())->newUsersAllowed($this->user), 'etm-new-users-allowed');
         $this->assertTrue($this->user->canPurchaseInvite(),                        'etm-can-purchase-invites');
 
-        $invite = (new Gazelle\Manager\Invite)->create($this->user, randomString(10) . "@etm.example.com", 'unittest notes', 'unittest reason', '');
+        $invite = (new Gazelle\Manager\Invite())->create($this->user, randomString(10) . "@etm.example.com", 'unittest notes', 'unittest reason', '');
         $this->assertInstanceOf(Gazelle\Invite::class, $invite, 'etm-issued-invite');
     }
 }

@@ -17,7 +17,7 @@ class IPv4Test extends TestCase {
     }
 
     public function testBan(): void {
-        $ipv4 = new \Gazelle\Manager\IPv4;
+        $ipv4 = new \Gazelle\Manager\IPv4();
         $initial = $ipv4->total();
         // if the following fails, it is due to a previous unittest failure
         $this->assertFalse($ipv4->isBanned('127.9.9.55'), 'ipv4-is-not-banned');
@@ -44,7 +44,7 @@ class IPv4Test extends TestCase {
     }
 
     public function testUserPage(): void {
-        $ipv4 = new \Gazelle\Manager\IPv4;
+        $ipv4 = new \Gazelle\Manager\IPv4();
         $this->assertEquals(1, $ipv4->register($this->user, '127.1.0.1'), 'ipv4-create');
         $this->assertEquals(2, $ipv4->userTotal($this->user), 'ipv4-user-total');
         $this->assertEquals(

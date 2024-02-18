@@ -10,6 +10,6 @@ if (isset($_REQUEST['id']) && $_REQUEST['id'] === 'new') {
 }
 
 echo $Twig->render('admin/privilege-usage.twig', [
-    'list'   => (new Gazelle\Manager\Privilege)->usageList(),
+    'list'   => (new Gazelle\Manager\Privilege())->usageList(),
     'viewer' => $Viewer,
 ]);

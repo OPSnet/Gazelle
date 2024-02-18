@@ -1,6 +1,6 @@
 <?php
 
-$top10 = new Gazelle\Top10\User;
+$top10 = new Gazelle\Top10\User();
 $tables = [
     'ul' => [
         'Title' => 'Uploaders',

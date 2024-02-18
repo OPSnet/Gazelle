@@ -45,7 +45,7 @@ echo $Twig->render('collage/header.twig', [
 echo $Twig->render('collage/sidebar.twig', [
     'artists'      => 0, // only makes sense for torrent collages
     'collage'      => $Collage,
-    'comments'     => (new Gazelle\Manager\Comment)->collageSummary($CollageID),
+    'comments'     => (new Gazelle\Manager\Comment())->collageSummary($CollageID),
     'contributors' => array_slice($Collage->contributors(), 0, 5, true),
     'entries'      => $Collage->numArtists(),
     'object'       => 'artist',

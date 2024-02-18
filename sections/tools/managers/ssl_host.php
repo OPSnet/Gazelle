@@ -4,7 +4,7 @@ if (!$Viewer->permitted('users_view_ips')) {
     error(403);
 }
 
-$ssl = new Gazelle\Manager\SSLHost;
+$ssl = new Gazelle\Manager\SSLHost();
 
 $remove = array_key_extract_suffix('id-', $_POST);
 if ($remove) {

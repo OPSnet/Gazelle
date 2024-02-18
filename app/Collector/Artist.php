@@ -39,7 +39,7 @@ class Artist extends \Gazelle\Collector {
     }
 
     public function fillZip(\ZipStream\ZipStream $zip): void {
-        $releaseMan = new \Gazelle\ReleaseType;
+        $releaseMan = new \Gazelle\ReleaseType();
         while (($downloadList = $this->process('GroupID')) != null) {
             foreach ($downloadList as $download) {
                 $torrent = $this->torMan->findById($download['TorrentID']);

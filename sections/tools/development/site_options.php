@@ -4,7 +4,7 @@ if (!$Viewer->permittedAny('admin_manage_permissions', 'users_mod')) {
     error(403);
 }
 
-$siteOption = new Gazelle\Manager\SiteOption;
+$siteOption = new Gazelle\Manager\SiteOption();
 
 if ($Viewer->permitted('admin_manage_permissions') && isset($_POST['submit'])) {
     authorize();
@@ -16,7 +16,7 @@ if ($Viewer->permitted('admin_manage_permissions') && isset($_POST['submit'])) {
     if ($_POST['submit'] == 'Delete') {
         $siteOption->remove($name);
     } else {
-        $Val = new Gazelle\Util\Validator;
+        $Val = new Gazelle\Util\Validator();
         $Val->setFields([
             ['name', true, 'regex', 'The name must be alphanumeric and may contain dashes or underscores. No spaces are allowed.', ['regex' => '/^[a-z][-_a-z0-9]{0,63}$/i']],
             ['value', true, 'string', 'You must specify a value for the option.'],

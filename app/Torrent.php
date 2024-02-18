@@ -98,12 +98,12 @@ class Torrent extends TorrentAbstract {
      * Convert a stored torrent into a binary file that can be loaded in a torrent client
      */
     public function torrentBody(string $announceUrl): string {
-        $filer = new \Gazelle\File\Torrent;
+        $filer = new \Gazelle\File\Torrent();
         $contents = $filer->get($this->id);
         if ($contents == false) {
             return '';
         }
-        $tor = new \OrpheusNET\BencodeTorrent\BencodeTorrent;
+        $tor = new \OrpheusNET\BencodeTorrent\BencodeTorrent();
         try {
             $tor->decodeString($contents);
         } catch (\RuntimeException) {
@@ -346,13 +346,13 @@ class Torrent extends TorrentAbstract {
         $infohash = $this->infohash();
         $sizeMB   = number_format($this->size() / (1024 * 1024), 2) . ' MiB';
         $name     = $this->name();
-        (new \Gazelle\Tracker)->update_tracker('delete_torrent', [
+        (new \Gazelle\Tracker())->update_tracker('delete_torrent', [
             'id'        => $this->id,
             'info_hash' => $this->infohashEncoded(),
             'reason'    => $trackerReason,
         ]);
 
-        $manager = new \Gazelle\DB;
+        $manager = new \Gazelle\DB();
         $manager->relaxConstraints(true);
         [$ok, $message] = $manager->softDelete(SQLDB, 'torrents_leech_stats', [['TorrentID', $this->id]], false);
         if (!$ok) {
@@ -433,7 +433,7 @@ class Torrent extends TorrentAbstract {
         }
 
         $userInfo = $user ? " by " . $user->username() : '';
-        (new Log)->general(
+        (new Log())->general(
             "Torrent {$this->id} ($name) [$edition] ($sizeMB $infohash) was deleted$userInfo for reason: $reason")
             ->torrent($this, $user, "deleted torrent ($sizeMB $infohash) for reason: $reason");
         self::$db->commit();
@@ -465,7 +465,7 @@ class Torrent extends TorrentAbstract {
         );
         $affected = self::$db->affected_rows();
         self::$cache->delete_value("users_tokens_{$user->id()}");
-        (new \Gazelle\Tracker)->removeToken($this, $user);
+        (new \Gazelle\Tracker())->removeToken($this, $user);
         return $affected;
     }
 

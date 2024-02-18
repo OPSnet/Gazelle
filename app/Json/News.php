@@ -20,7 +20,7 @@ class News extends \Gazelle\Json {
                     $r['created'],
                     time_diff($r['created'], 2, false),
                 ],
-                (new \Gazelle\Manager\News)->list($this->limit, $this->offset)
+                (new \Gazelle\Manager\News())->list($this->limit, $this->offset)
             )
         ];
     }

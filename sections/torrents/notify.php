@@ -7,7 +7,7 @@ if (!$Viewer->permitted('site_torrents_notify')) {
 }
 
 if ($Viewer->permitted('users_mod') && (int)($_GET['userid'] ?? 0)) {
-    $user = (new Gazelle\Manager\User)->findById((int)$_GET['userid']);
+    $user = (new Gazelle\Manager\User())->findById((int)$_GET['userid']);
     if (is_null($user)) {
         error(404);
     }
@@ -30,7 +30,7 @@ $headerMap = [
 $header = new SortableTableHeader('time', $headerMap);
 $headerIcons = new SortableTableHeader('time', $headerMap, ['asc' => '', 'desc' => '']);
 
-$torMan   = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
+$torMan   = (new Gazelle\Manager\Torrent())->setViewer($Viewer);
 $notifier = new Gazelle\User\NotificationSearch($user, $header->getOrderBy(), $header->getOrderDir(), $torMan);
 if (isset($_GET['filterid'])) {
     $notifier->setFilter((int)$_GET['filterid']);

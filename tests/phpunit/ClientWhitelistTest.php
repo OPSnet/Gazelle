@@ -6,7 +6,7 @@ require_once(__DIR__ . '/../../lib/bootstrap.php');
 
 class ClientWhitelistTest extends TestCase {
     public function testWhitelist(): void {
-        $manager = new Gazelle\Manager\ClientWhitelist;
+        $manager = new Gazelle\Manager\ClientWhitelist();
         $initial = $manager->list();
         $this->assertIsArray($initial, 'cwl-initial');
 

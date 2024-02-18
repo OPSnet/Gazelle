@@ -429,7 +429,7 @@ class Torrent {
 
             case 'releasetype':
                 $id = (int)$Value;
-                if (!is_null((new \Gazelle\ReleaseType)->findNameById($id))) {
+                if (!is_null((new \Gazelle\ReleaseType())->findNameById($id))) {
                     $this->SphQL->where('ReleaseType', $id);
                 }
                 break;
@@ -481,7 +481,7 @@ class Torrent {
     private function post_process_fields(): void {
         if (isset($this->Terms['taglist'])) {
             // Replace bad tags with tag aliases
-            $this->Terms['taglist'] = (new \Gazelle\Manager\Tag)->replaceAliasList($this->Terms['taglist']);
+            $this->Terms['taglist'] = (new \Gazelle\Manager\Tag())->replaceAliasList($this->Terms['taglist']);
             if (isset($this->RawTerms['tags_type']) && (int)$this->RawTerms['tags_type'] === self::TAGS_ANY) {
                 $this->Terms['taglist']['operator'] = self::SPH_BOOL_OR;
             }

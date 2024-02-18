@@ -23,7 +23,7 @@ function forumList(array $list, int $selected = 0): string {
 
 function classList(int $Selected = 0): string {
     $Return = '';
-    $Classes = (new Gazelle\Manager\User)->classList();
+    $Classes = (new Gazelle\Manager\User())->classList();
     foreach ($Classes as $Class) {
         if ($Class['Secondary']) {
             continue;
@@ -46,7 +46,7 @@ if (!$Viewer->permitted('admin_manage_forums')) {
 
 $user = null;
 if (isset($_REQUEST['userid'])) {
-    $user = (new Gazelle\Manager\User)->find($_REQUEST['userid']);
+    $user = (new Gazelle\Manager\User())->find($_REQUEST['userid']);
 } else {
     $user = $Viewer;
 }
@@ -55,9 +55,9 @@ if (is_null($user)) {
 }
 $userId = $user->id();
 
-$forumMan = new Gazelle\Manager\Forum;
+$forumMan = new Gazelle\Manager\Forum();
 $forumList = array_map(fn($f) => new Gazelle\Forum($f), $forumMan->forumList());
-$items = (new Gazelle\Manager\ForumTransition)->userTransitionList($user);
+$items = (new Gazelle\Manager\ForumTransition())->userTransitionList($user);
 
 View::show_header('Forum Transitions');
 ?>

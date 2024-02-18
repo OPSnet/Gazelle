@@ -8,7 +8,7 @@ if (!$Viewer->permittedAny('admin_reports', 'site_moderate_forums')) {
 
 require_once('array.php');
 
-$search    = new Gazelle\Search\Report;
+$search    = new Gazelle\Search\Report();
 $paginator = new Gazelle\Util\Paginator(REPORTS_PER_PAGE, (int)($_REQUEST['page'] ?? 1));
 $typeList  = ['collage', 'comment', 'post', 'request', 'thread', 'user'];
 
@@ -57,13 +57,13 @@ if (isset($_REQUEST['id'])) {
 $paginator->setTotal($search->total());
 
 echo $Twig->render('report/index.twig', [
-    'list' => (new Gazelle\Manager\Report(new Gazelle\Manager\User))->decorate(
+    'list' => (new Gazelle\Manager\Report(new Gazelle\Manager\User()))->decorate(
         $search->page($paginator->limit(), $paginator->offset()),
-        new Gazelle\Manager\Collage,
-        new Gazelle\Manager\Comment,
-        new Gazelle\Manager\ForumThread,
-        new Gazelle\Manager\ForumPost,
-        new Gazelle\Manager\Request,
+        new Gazelle\Manager\Collage(),
+        new Gazelle\Manager\Comment(),
+        new Gazelle\Manager\ForumThread(),
+        new Gazelle\Manager\ForumPost(),
+        new Gazelle\Manager\Request(),
     ),
     'paginator' => $paginator,
     'type'      => $Types,

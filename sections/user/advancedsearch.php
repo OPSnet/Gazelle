@@ -1,6 +1,6 @@
 <?php
 
-$userMan = new Gazelle\Manager\User;
+$userMan = new Gazelle\Manager\User();
 
 if (isset($_GET['search'])) {
     $_GET['search'] = trim($_GET['search']);
@@ -113,7 +113,7 @@ $disabledIpChecked = false;
 $trackerLiveSource = true;
 
 $paginator = new Gazelle\Util\Paginator(USERS_PER_PAGE, (int)($_GET['page'] ?? 1));
-$Stylesheets = (new \Gazelle\Manager\Stylesheet)->list();
+$Stylesheets = (new \Gazelle\Manager\Stylesheet())->list();
 
 $matchMode = ($_GET['matchtype'] ?? 'fuzzy');
 $searchDisabledInvites = (isset($_GET['disabled_invites']) && $_GET['disabled_invites'] != '');
@@ -140,7 +140,7 @@ if (empty($_GET)) {
         }
     }
 
-    $validator = new Gazelle\Util\Validator;
+    $validator = new Gazelle\Util\Validator();
     $validator->setFields([
         ['avatar', false, 'string', 'Avatar URL too long', ['maxlength' => 512]],
         ['bounty', false, 'inarray', "Invalid bounty field", $OffNumberChoices],

@@ -33,7 +33,7 @@ class UploadTest extends TestCase {
         $this->assertEquals("TextareaPreview.factory([[0, 'album_desc'],[1, 'release_desc']]);", $upload->albumReleaseJS(), 'upload-album-js');
         $this->assertEquals("TextareaPreview.factory([[0, 'desc']]);", $upload->descriptionJS(), 'upload-description-js');
 
-        $form = $upload->music_form(['acoustic', 'baroque.era', 'chillout'], new \Gazelle\Manager\TGroup);
+        $form = $upload->music_form(['acoustic', 'baroque.era', 'chillout'], new \Gazelle\Manager\TGroup());
         $this->assertStringStartsWith('        <div id="musicbrainz_popup"', $form, 'upload-music-popup');
         $this->assertStringContainsString('        <table id="form-music-upload"', $form, 'upload-music-begin');
         $this->assertStringContainsString('chillout', $form, 'upload-music-form');

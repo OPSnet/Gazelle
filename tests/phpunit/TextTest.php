@@ -107,7 +107,7 @@ class TextTest extends TestCase {
         $this->userList['admin'] = Helper::makeUser('collage.' . randomString(6), 'text');
         $this->userList['admin']->setField('PermissionID', SYSOP)->modify();
         $name    = 'collage ' . randomString(6);
-        $collage = (new Gazelle\Manager\Collage)->create($this->userList['admin'], 1, $name, 'phpunit collage', 'jazz,disco', new Gazelle\Log);
+        $collage = (new Gazelle\Manager\Collage())->create($this->userList['admin'], 1, $name, 'phpunit collage', 'jazz,disco', new Gazelle\Log());
         $this->assertInstanceOf(Gazelle\Collage::class, $collage, 'text-create-collage');
         $this->assertEquals(
             "<a href=\"collages.php?id={$collage->id()}\">{$collage->name()}</a>",
@@ -119,7 +119,7 @@ class TextTest extends TestCase {
             Text::full_format($collage->publicLocation()),
             'text-collage-url'
         );
-        $commentMan = new Gazelle\Manager\Comment;
+        $commentMan = new Gazelle\Manager\Comment();
         $comment    = $commentMan->create($this->userList['admin'], 'collages', $collage->id(), "nice collage!");
         $this->assertEquals(
             "<a href=\"{$comment->url()}\">Collages Comment #{$comment->id()}</a>",
@@ -134,7 +134,7 @@ class TextTest extends TestCase {
         $this->userList['admin']->setField('PermissionID', SYSOP)->modify();
         Text::setViewer($this->userList['admin']);
         $name  = 'forum ' . randomString(6);
-        $category = (new \Gazelle\Manager\ForumCategory)->create($name, 10003);
+        $category = (new \Gazelle\Manager\ForumCategory())->create($name, 10003);
         $forum = Helper::makeForum(
             user:        $this->userList['admin'],
             sequence:    999,
@@ -149,7 +149,7 @@ class TextTest extends TestCase {
             'text-forum'
         );
 
-        $thread = (new Gazelle\Manager\ForumThread)->create(
+        $thread = (new Gazelle\Manager\ForumThread())->create(
             $forum, $this->userList['admin'], "phpunit thread title", "phpunit thread body"
         );
 
@@ -158,7 +158,7 @@ class TextTest extends TestCase {
             FROM forums_posts fp
             INNER JOIN forums_topics ft ON (ft.ID = fp.TopicID)
         ");
-        $post = (new Gazelle\Manager\ForumPost)->findById($postId);
+        $post = (new Gazelle\Manager\ForumPost())->findById($postId);
         $threadId = $post->thread()->id();
         $title    = $post->thread()->title();
 
@@ -316,7 +316,7 @@ END_HTML;
             WHERE c.name = ?
             ", 'Music'
         );
-        $torrent = (new Gazelle\Manager\Torrent)->findById($id);
+        $torrent = (new Gazelle\Manager\Torrent())->findById($id);
         $torrentId = $torrent->id();
         $tgroupId  = $torrent->group()->id();
 

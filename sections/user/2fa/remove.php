@@ -1,7 +1,7 @@
 <?php
 
 // Remove 2FA. Users have to enter their password, moderators skip this step.
-$user = (new Gazelle\Manager\User)->findById((int)($_GET['userid'] ?? 0));
+$user = (new Gazelle\Manager\User())->findById((int)($_GET['userid'] ?? 0));
 if (is_null($user)) {
     error(404);
 }

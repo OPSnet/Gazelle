@@ -9,7 +9,7 @@ if (!strlen($search)) {
 echo (new Gazelle\Json\UserSearch(
     $search,
     $Viewer,
-    new Gazelle\Manager\User,
+    new Gazelle\Manager\User(),
     new Gazelle\Util\Paginator(AJAX_USERS_PER_PAGE, (int)($_GET['page'] ?? 1)),
 ))
     ->setVersion(2)

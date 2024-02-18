@@ -6,7 +6,7 @@ use Gazelle\Util\Mail;
 
 class GenerateInvite extends AbstractAPI {
     public function run() {
-        $userMan = new \Gazelle\Manager\User;
+        $userMan = new \Gazelle\Manager\User();
         $interviewer = null;
         if (isset($_GET['interviewer_id'])) {
             $interviewer = $userMan->findById((int)$_GET['interviewer_id']);
@@ -39,7 +39,7 @@ class GenerateInvite extends AbstractAPI {
             $interviewer->id(), $key, $email, "Passed Interview"
         );
         if (!empty($_GET['email'])) {
-            (new Mail)->send($email, 'New account confirmation at ' . SITE_NAME,
+            (new Mail())->send($email, 'New account confirmation at ' . SITE_NAME,
                 self::$twig->render('email/invite-interviewer.twig', [
                     'inviter_name' => $interviewer->username(),
                     'inviter_key' => $key,

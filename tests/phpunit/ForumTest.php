@@ -44,7 +44,7 @@ class ForumTest extends TestCase {
 
     public function testForumCreate(): void {
         // Forum Categories
-        $fcatMan = new \Gazelle\Manager\ForumCategory;
+        $fcatMan = new \Gazelle\Manager\ForumCategory();
         $initial = count($fcatMan->forumCategoryList()); // from phinx seeds
 
         // If you hit a duplicate key error here it is due to an aborted previous test run
@@ -66,7 +66,7 @@ class ForumTest extends TestCase {
         $this->assertCount($initial + 1, $fcatMan->usageList(), 'forum-cat-usage-removed');
 
         // Forums
-        $forumMan     = new \Gazelle\Manager\Forum;
+        $forumMan     = new \Gazelle\Manager\Forum();
         $initial      = count($forumMan->nameList());
         $tocTotal     = count($forumMan->tableOfContentsMain());
         $admin        = $this->userList['admin'];
@@ -135,7 +135,7 @@ class ForumTest extends TestCase {
         $this->assertEquals(0, $forumMan->subscribedForumTotal($user), 'forum-subscribed-total-user');
 
         // Forum Threads
-        $threadMan = new \Gazelle\Manager\ForumThread;
+        $threadMan = new \Gazelle\Manager\ForumThread();
         $thread    = $threadMan->create($this->forum, $admin, 'thread title', 'this is a new thread');
         $this->assertEquals(1, $thread->postTotal(), 'fthread-post-total');
         $this->assertEquals(0, $thread->lastPage(), 'fthread-last-page');
@@ -217,7 +217,7 @@ class ForumTest extends TestCase {
         $this->assertEquals(2, $admin->stats()->flush()->forumPostTotal(), 'fpost-first-user-reply');
 
         /* post first reply */
-        $postMan = new \Gazelle\Manager\ForumPost;
+        $postMan = new \Gazelle\Manager\ForumPost();
         $this->assertEquals($message, $post->body(), 'fpost-first-post');
         $this->assertEquals(1, $this->forum->numPosts(), 'fpost-forum-post-total');
 
@@ -231,13 +231,13 @@ class ForumTest extends TestCase {
         $reply = $thread->addPost($user, $body);
         // Should the following actions (quote and subscription handling) be performed by the addPost() method?
         (new Gazelle\User\Notification\Quote($admin))->create(
-            new Gazelle\Manager\User,
+            new Gazelle\Manager\User(),
             $body,
             $reply->id(),
             'forums',
             $thread->id(),
         );
-        (new Gazelle\Manager\Subscription)->flushPage('forums', $thread->id());
+        (new Gazelle\Manager\Subscription())->flushPage('forums', $thread->id());
 
         $this->assertEquals(1, $forumMan->unreadSubscribedForumTotal($admin), 'fpost-subscriptions-admin-forum-man-unread');
         $this->assertEquals(1, $adminSub->flush()->unread(), 'fpost-subscriptions-admin-new-unread');
@@ -281,7 +281,7 @@ class ForumTest extends TestCase {
     }
 
     public function testForumAutoSub(): void {
-        $this->category = (new \Gazelle\Manager\ForumCategory)->create('phpunit category', 10010);
+        $this->category = (new \Gazelle\Manager\ForumCategory())->create('phpunit category', 10010);
         $this->forum    = Helper::makeForum(
             user:        $this->userList['admin'],
             sequence:    151,
@@ -301,7 +301,7 @@ class ForumTest extends TestCase {
         $user->addCustomPrivilege('site_forum_autosub');
         $this->assertEquals([$this->forum->id()], $this->forum->autoSubscribeForUserList($user), 'forum-autosub-forum-list');
 
-        $threadMan = new \Gazelle\Manager\ForumThread;
+        $threadMan = new \Gazelle\Manager\ForumThread();
         $this->threadList[] = $threadMan->create($this->forum, $this->userList['admin'], 'phpunit thread title', 'this is a new thread');
         $this->threadList[] = $threadMan->create($this->forum, $this->userList['admin'], 'phpunit thread title 2', 'this is also a new thread');
         $this->assertEquals(2, $this->forum->userCatchup($user), 'forum-user-autosub-catchup');
@@ -312,8 +312,8 @@ class ForumTest extends TestCase {
     }
 
     public function testForumForbidden(): void {
-        $this->category = (new \Gazelle\Manager\ForumCategory)->create('phpunit category', 10002);
-        $forumMan       = new \Gazelle\Manager\Forum;
+        $this->category = (new \Gazelle\Manager\ForumCategory())->create('phpunit category', 10002);
+        $forumMan       = new \Gazelle\Manager\Forum();
         $user           = $this->userList['user'];
         $this->forum    = $forumMan->create(
             user:           $this->userList['admin'],
@@ -344,8 +344,8 @@ class ForumTest extends TestCase {
     }
 
     public function testForumWarn(): void {
-        $this->category = (new \Gazelle\Manager\ForumCategory)->create('phpunit category', 10002);
-        $forumMan       = new \Gazelle\Manager\Forum;
+        $this->category = (new \Gazelle\Manager\ForumCategory())->create('phpunit category', 10002);
+        $forumMan       = new \Gazelle\Manager\Forum();
         $admin          = $this->userList['admin'];
         $user           = $this->userList['user'];
         $this->forum    = Helper::makeForum(
@@ -362,8 +362,8 @@ class ForumTest extends TestCase {
 
         // TODO: move more warning functionality out of sections/...
         $this->threadList[] = $thread
-            = (new \Gazelle\Manager\ForumThread)->create($this->forum, $user, 'user thread title', 'this is a new thread by a user');
-        $thread  = (new \Gazelle\Manager\ForumThread)->create($this->forum, $user, 'user thread title', 'this is a new thread by a user');
+            = (new \Gazelle\Manager\ForumThread())->create($this->forum, $user, 'user thread title', 'this is a new thread by a user');
+        $thread  = (new \Gazelle\Manager\ForumThread())->create($this->forum, $user, 'user thread title', 'this is a new thread by a user');
         $post    = $thread->addPost($user, 'offensive content');
         $week    = 2;
         $message = "phpunit forum warn test " . randomString(10);
@@ -390,7 +390,7 @@ class ForumTest extends TestCase {
     }
 
     public function testForumPoll(): void {
-        $this->category = (new \Gazelle\Manager\ForumCategory)->create('phpunit category', 10002);
+        $this->category = (new \Gazelle\Manager\ForumCategory())->create('phpunit category', 10002);
         $admin          = $this->userList['admin'];
         $user           = $this->userList['user'];
         $this->forum    = Helper::makeForum(
@@ -402,10 +402,10 @@ class ForumTest extends TestCase {
         );
 
         $this->threadList[] = $thread
-            = (new \Gazelle\Manager\ForumThread)->create($this->forum, $user, 'phpunit post pin', 'this is a new thread for post pins');
+            = (new \Gazelle\Manager\ForumThread())->create($this->forum, $user, 'phpunit post pin', 'this is a new thread for post pins');
 
         $answer  = ['apple', 'banana', 'carrot'];
-        $pollMan = new \Gazelle\Manager\ForumPoll;
+        $pollMan = new \Gazelle\Manager\ForumPoll();
         $poll    = $pollMan->create($thread->id(), 'Best food', $answer);
         $this->assertInstanceOf(\Gazelle\ForumPoll::class, $poll, 'forum-poll-is-forum-poll');
         $this->assertFalse($poll->isClosed(), 'forum-poll-is-not-closed');
@@ -441,7 +441,7 @@ class ForumTest extends TestCase {
     }
 
     public function testPostPin(): void {
-        $this->category = (new \Gazelle\Manager\ForumCategory)->create('phpunit category', 10002);
+        $this->category = (new \Gazelle\Manager\ForumCategory())->create('phpunit category', 10002);
         $admin          = $this->userList['admin'];
         $user           = $this->userList['user'];
         $this->forum    = Helper::makeForum(
@@ -453,7 +453,7 @@ class ForumTest extends TestCase {
         );
 
         $this->threadList[] = $thread
-            = (new \Gazelle\Manager\ForumThread)->create($this->forum, $user, 'unittest post pin', 'this is a new thread for post pins');
+            = (new \Gazelle\Manager\ForumThread())->create($this->forum, $user, 'unittest post pin', 'this is a new thread for post pins');
         $post = $thread->addPost($user, 'pinnable content');
 
         $this->assertFalse($post->isPinned(), 'forum-post-is-not-pinned');
@@ -465,7 +465,7 @@ class ForumTest extends TestCase {
 
     public function testForumRender(): void {
         $name = 'phpunit category ' . randomString(6);
-        $this->category = (new \Gazelle\Manager\ForumCategory)->create($name, 10002);
+        $this->category = (new \Gazelle\Manager\ForumCategory())->create($name, 10002);
         $admin          = $this->userList['admin'];
         $this->forum    = Helper::makeForum(
             user:           $admin,
@@ -496,7 +496,7 @@ class ForumTest extends TestCase {
     public function testForumTransition(): void {
         $admin = $this->userList['admin'];
         $user  = $this->userList['user'];
-        $this->category = (new \Gazelle\Manager\ForumCategory)->create('phpunit forum transition', 10005);
+        $this->category = (new \Gazelle\Manager\ForumCategory())->create('phpunit forum transition', 10005);
         $this->forum = Helper::makeForum(
             user:           $admin,
             sequence:       153,
@@ -511,7 +511,7 @@ class ForumTest extends TestCase {
             name:           'phpunit forum transition b',
             description:    'This is where it also transitions',
         );
-        $manager = new Gazelle\Manager\ForumTransition;
+        $manager = new Gazelle\Manager\ForumTransition();
         $transition = $manager->create(
            source:           $this->forum,
            destination:      $this->extra,

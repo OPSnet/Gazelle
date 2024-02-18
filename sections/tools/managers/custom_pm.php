@@ -41,7 +41,7 @@ if (isset($_POST['query'])) {
     }
 
     // we don't actually know if the query returned user ids, so check them
-    $userMan = new Gazelle\Manager\User;
+    $userMan = new Gazelle\Manager\User();
     foreach ($result as $userId) {
         $user = $userMan->findById($userId);
         if ($user) {

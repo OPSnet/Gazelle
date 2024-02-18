@@ -1,6 +1,6 @@
 <?php
 
-$userMan = new Gazelle\Manager\User;
+$userMan = new Gazelle\Manager\User();
 if (!isset($_GET['userid'])) {
     $user = $Viewer;
 } else {
@@ -20,7 +20,7 @@ $header = new Gazelle\Util\SortableTableHeader('created', [
     'random'   => ['dbColumn' => 'RAND()',     'defaultSort' => ''],
 ]);
 
-$search = new Gazelle\Search\Request(new Gazelle\Manager\Request);
+$search = new Gazelle\Search\Request(new Gazelle\Manager\Request());
 $initial = !isset($_GET['submit']);
 $bookmarkView = false;
 
@@ -68,7 +68,7 @@ if (!$initial && empty($_GET['showall'])) {
 if (($initial && !isset($_GET['type'])) || (!$initial && !isset($_GET['show_filled']))) {
     $search->showUnfilled();
 }
-$releaseTypes = (new \Gazelle\ReleaseType)->list();
+$releaseTypes = (new \Gazelle\ReleaseType())->list();
 $search->setFormat($_GET['formats'] ?? [], isset($_GET['formats_strict']))
     ->setMedia($_GET['media'] ?? [], isset($_GET['media_strict']))
     ->setEncoding($_GET['bitrates'] ?? [], isset($_GET['bitrate_strict']))

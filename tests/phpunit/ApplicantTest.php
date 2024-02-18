@@ -31,7 +31,7 @@ class ApplicantTest extends TestCase {
     }
 
     public function testRoleApply(): void {
-        $roleManager = new \Gazelle\Manager\ApplicantRole;
+        $roleManager = new \Gazelle\Manager\ApplicantRole();
         $this->assertIsArray($roleManager->publishedList(), 'role-manager-list-published-is-array');
         $total = count($roleManager->list());
         $totalPublished = count($roleManager->publishedList());
@@ -52,7 +52,7 @@ class ApplicantTest extends TestCase {
         $this->assertCount($total + 1, $roleManager->list(), 'applicant-role-total-all');
 
         $this->userList['user'] = Helper::makeUser('user.' . randomString(10), 'applicant');
-        $manager = new \Gazelle\Manager\Applicant;
+        $manager = new \Gazelle\Manager\Applicant();
         // YUCK
         global $Viewer;
         $Viewer = $this->userList['user'];
@@ -78,13 +78,13 @@ class ApplicantTest extends TestCase {
     public function testApplicantNote(): void {
         $this->userList['mod'] = Helper::makeUser('mod.' . randomString(10), 'applicant');
         $this->userList['mod']->setField('PermissionID', MOD)->modify();
-        $manager = new \Gazelle\Manager\Applicant;
+        $manager = new \Gazelle\Manager\Applicant();
         $new = [
             'admin' => $manager->newReplyTotal($this->userList['admin']),
             'mod'   => $manager->newReplyTotal($this->userList['mod']),
         ];
 
-        $roleManager = new \Gazelle\Manager\ApplicantRole;
+        $roleManager = new \Gazelle\Manager\ApplicantRole();
         $this->roleList[] = $role =
             $roleManager->create('phpunit ' . randomString(6), 'this is a phpunit role', true, $this->userList['admin']);
 
@@ -112,12 +112,12 @@ class ApplicantTest extends TestCase {
         $this->userList['mod'] = Helper::makeUser('mod.' . randomString(10), 'applicant');
         $this->userList['mod']->setField('PermissionID', MOD)->modify();
 
-        $manager = new \Gazelle\Manager\Applicant;
+        $manager = new \Gazelle\Manager\Applicant();
         $new = [
             'admin' => $manager->newTotal($this->userList['admin']),
             'mod'   => $manager->newTotal($this->userList['mod']),
         ];
-        $roleManager = new \Gazelle\Manager\ApplicantRole;
+        $roleManager = new \Gazelle\Manager\ApplicantRole();
         $this->roleList[] = $basic =
             $roleManager->create('phpunit ' . randomString(6), 'this is a phpunit basic role', true, $this->userList['admin']);
         $basic->setField('viewer_list', '@' . $this->userList['mod']->username());
@@ -150,7 +150,7 @@ class ApplicantTest extends TestCase {
     }
 
     public function testUnpublishedRole(): void {
-        $roleManager = new \Gazelle\Manager\ApplicantRole;
+        $roleManager = new \Gazelle\Manager\ApplicantRole();
         $total = count($roleManager->list());
         $totalPublished = count($roleManager->publishedList());
 

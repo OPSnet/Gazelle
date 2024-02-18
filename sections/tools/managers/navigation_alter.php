@@ -8,7 +8,7 @@ if (!$Viewer->permitted('admin_manage_navigation')) {
 
 authorize();
 
-$manager = new Gazelle\Manager\UserNavigation;
+$manager = new Gazelle\Manager\UserNavigation();
 
 if ($_POST['submit'] == 'Delete') {
     $id = (int)($_POST['id'] ?? 0);
@@ -18,7 +18,7 @@ if ($_POST['submit'] == 'Delete') {
     }
     $control->remove();
 } else {
-    $validator = new Gazelle\Util\Validator;
+    $validator = new Gazelle\Util\Validator();
     $validator->setFields([
         ['tag',       true, 'string', 'The key must be set, and has a max length of 20 characters', ['maxlength' => 20]],
         ['title',     true, 'string', 'The title must be set, and has a max length of 50 characters', ['maxlength' => 50]],

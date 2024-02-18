@@ -21,7 +21,7 @@ if (!$isPersonal) {
     error(403);
 }
 
-$collageMan = new Gazelle\Manager\Collage;
+$collageMan = new Gazelle\Manager\Collage();
 if (isset($_POST['name'])) {
     $name = trim($_POST['name']);
     $check = $collageMan->findByName($name);
@@ -43,7 +43,7 @@ if (isset($_POST['name'])) {
 }
 
 if (!isset($_POST['regen-tags'])) {
-    $collage->setField('TagList', (new Gazelle\Manager\Tag)->normalize(str_replace(',', ' ', $_POST['tags'])));
+    $collage->setField('TagList', (new Gazelle\Manager\Tag())->normalize(str_replace(',', ' ', $_POST['tags'])));
 } else {
     $tagList = $collage->rebuildTagList();
     if (count($tagList) > 2) {
@@ -90,7 +90,7 @@ $collage->toggleAttr('sort-newest', isset($_POST['addition']));
 $collage->modify();
 
 if ($Viewer->permitted('admin_freeleech') && isset($_POST['change_leech'])) {
-    $torMan = new \Gazelle\Manager\Torrent;
+    $torMan = new \Gazelle\Manager\Torrent();
     if (!isset($_POST['neutral'])) {
         $threshold = 0;
     } else {
@@ -101,7 +101,7 @@ if ($Viewer->permitted('admin_freeleech') && isset($_POST['change_leech'])) {
     }
     $collage->setFreeleech(
         torMan:    $torMan,
-        tracker:   new \Gazelle\Tracker,
+        tracker:   new \Gazelle\Tracker(),
         user:      $Viewer,
         leechType: $torMan->lookupLeechType($_POST['leech_type'] ?? LeechType::Normal->value),
         reason:    $torMan->lookupLeechReason($_POST['leech_reason'] ?? LeechReason::Normal->value),

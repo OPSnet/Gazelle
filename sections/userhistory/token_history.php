@@ -3,7 +3,7 @@
 if (!isset($_GET['userid'])) {
     $user = $Viewer;
 } else {
-    $user = (new Gazelle\Manager\User)->findById((int)$_GET['userid']);
+    $user = (new Gazelle\Manager\User())->findById((int)$_GET['userid']);
     if (is_null($user)) {
         error(0);
     }
@@ -12,7 +12,7 @@ if (!isset($_GET['userid'])) {
     }
 }
 
-$torMan = new Gazelle\Manager\Torrent;
+$torMan = new Gazelle\Manager\Torrent();
 $torMan->setViewer($Viewer);
 
 if ($_GET['expire'] ?? 0) {

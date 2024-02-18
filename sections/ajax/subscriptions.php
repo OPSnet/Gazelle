@@ -6,7 +6,7 @@ if ($Viewer->disableForums()) {
 
 $showUnread = (bool)($_GET['showunread'] ?? true);
 
-$forMan = new Gazelle\Manager\Forum;
+$forMan = new Gazelle\Manager\Forum();
 $paginator = new Gazelle\Util\Paginator($Viewer->postsPerPage(), (int)($_GET['page'] ?? 1));
 $paginator->setTotal(
     $showUnread ? $forMan->unreadSubscribedForumTotal($Viewer) : $forMan->subscribedForumTotal($Viewer)

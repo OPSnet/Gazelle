@@ -44,7 +44,7 @@ class WikiTest extends TestCase {
     }
 
     public function testWikiCreate(): void {
-        $manager = new \Gazelle\Manager\Wiki;
+        $manager = new \Gazelle\Manager\Wiki();
         $title   = 'phpunit title ' . randomString(6);
         $alias   = \Gazelle\Wiki::normalizeAlias($title);
         $article = $manager->create(
@@ -79,7 +79,7 @@ class WikiTest extends TestCase {
     }
 
     public function testWikiAlias(): void {
-        $manager = new \Gazelle\Manager\Wiki;
+        $manager = new \Gazelle\Manager\Wiki();
         $title   = 'phpunit title ' . randomString(6);
         $alias   = \Gazelle\Wiki::normalizeAlias($title);
         $article = $manager->create(
@@ -100,7 +100,7 @@ class WikiTest extends TestCase {
     }
 
     public function testWikiException(): void {
-        $manager = new \Gazelle\Manager\Wiki;
+        $manager = new \Gazelle\Manager\Wiki();
         $title   = 'phpunit title ' . randomString(6);
         $alias   = \Gazelle\Wiki::normalizeAlias($title);
         $article = $manager->create(
@@ -120,12 +120,12 @@ class WikiTest extends TestCase {
     }
 
     public function testWikiList(): void {
-        $classList = (new \Gazelle\Manager\User)->classList();
+        $classList = (new \Gazelle\Manager\User())->classList();
         $level = [
             USER  => $classList[USER]['Level'],
             SYSOP => $classList[SYSOP]['Level'],
         ];
-        $manager = new \Gazelle\Manager\Wiki;
+        $manager = new \Gazelle\Manager\Wiki();
         $initial = [
             USER  => count($manager->articles($level[USER])),
             SYSOP => count($manager->articles($level[SYSOP])),
@@ -144,7 +144,7 @@ class WikiTest extends TestCase {
     }
 
     public function testWikiRevision(): void {
-        $manager = new \Gazelle\Manager\Wiki;
+        $manager = new \Gazelle\Manager\Wiki();
         $title   = 'phpunit title ' . randomString(6);
         $alias   = \Gazelle\Wiki::normalizeAlias($title);
         $article = $manager->create(
@@ -166,7 +166,7 @@ class WikiTest extends TestCase {
     }
 
     public function testConfigureAccess(): void {
-        $manager = new \Gazelle\Manager\Wiki;
+        $manager = new \Gazelle\Manager\Wiki();
         $access = $manager->configureAccess(
             user:    $this->userList['user'],
             minRead: $this->userList['user']->privilege()->effectiveClassLevel(),

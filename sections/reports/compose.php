@@ -17,7 +17,7 @@ $reportType = $Types[$type];
 
 $user = null;
 if (!isset($Return)) {
-    $user = (new Gazelle\Manager\User)->findById((int)($_GET['toid'] ?? 0));
+    $user = (new Gazelle\Manager\User())->findById((int)($_GET['toid'] ?? 0));
     if (is_null($user)) {
         error(404);
     }
@@ -28,7 +28,7 @@ if (!isset($Return)) {
 
 switch ($type) {
     case 'user':
-        $reported = (new Gazelle\Manager\User)->findById($id);
+        $reported = (new Gazelle\Manager\User())->findById($id);
         if (is_null($reported)) {
             error(404);
         }
@@ -37,7 +37,7 @@ switch ($type) {
 
     case 'request':
     case 'request_update':
-        $request = (new Gazelle\Manager\Request)->findById($id);
+        $request = (new Gazelle\Manager\Request())->findById($id);
         if (is_null($request)) {
             error(404);
         }
@@ -45,7 +45,7 @@ switch ($type) {
         break;
 
     case 'collage':
-        $collage = (new Gazelle\Manager\Collage)->findById($id);
+        $collage = (new Gazelle\Manager\Collage())->findById($id);
         if (is_null($collage)) {
             error(404);
         }
@@ -53,7 +53,7 @@ switch ($type) {
         break;
 
     case 'thread':
-        $thread = (new Gazelle\Manager\ForumThread)->findById($id);
+        $thread = (new Gazelle\Manager\ForumThread())->findById($id);
         if (is_null($thread)) {
             error(404);
         }
@@ -64,7 +64,7 @@ switch ($type) {
         break;
 
     case 'post':
-        $post = (new Gazelle\Manager\ForumPost)->findById($id);
+        $post = (new Gazelle\Manager\ForumPost())->findById($id);
         if (is_null($post)) {
             error(404);
         }
@@ -75,7 +75,7 @@ switch ($type) {
         break;
 
     case 'comment':
-        $comment = (new Gazelle\Manager\Comment)->findById($id);
+        $comment = (new Gazelle\Manager\Comment())->findById($id);
         if (is_null($comment)) {
             error(404);
         }

@@ -44,7 +44,7 @@ class DuplicateIpTest extends TestCase {
     }
 
     public function testDuplicateIpTotal(): void {
-        $dup = new \Gazelle\Manager\DuplicateIP;
+        $dup = new \Gazelle\Manager\DuplicateIP();
         $total = $dup->total(5);
         $this->assertGreaterThan(1, $total, 'duplicate-ip-total');
 

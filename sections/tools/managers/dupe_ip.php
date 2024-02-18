@@ -4,7 +4,7 @@ if (!$Viewer->permitted('users_view_ips')) {
     error(403);
 }
 
-$manager = new Gazelle\Manager\DuplicateIP;
+$manager = new Gazelle\Manager\DuplicateIP();
 $paginator = new Gazelle\Util\Paginator(USERS_PER_PAGE, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($manager->total(IP_OVERLAPS));
 

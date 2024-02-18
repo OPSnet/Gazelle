@@ -23,7 +23,7 @@ class SearchEmailTest extends TestCase {
     }
 
     public function testSearchEmail(): void {
-        $search = new \Gazelle\Search\Email(new \Gazelle\Search\ASN);
+        $search = new \Gazelle\Search\Email(new \Gazelle\Search\ASN());
         $search->create(randomString());
 
         $text = "chaff {$this->userList[0]->email()} chaff {$this->userList[1]->email()} chaff {$this->userList[2]->email()} dup {$this->userList[0]->email()} ";

@@ -5,7 +5,7 @@ if (!$Viewer->permitted('admin_view_payments')) {
 }
 
 echo $Twig->render('admin/payment.twig', [
-    'donorMan' => new Gazelle\Manager\Donation,
-    'list'     => (new Gazelle\Manager\Payment)->list(),
+    'donorMan' => new Gazelle\Manager\Donation(),
+    'list'     => (new Gazelle\Manager\Payment())->list(),
     'viewer'   => $Viewer,
 ]);

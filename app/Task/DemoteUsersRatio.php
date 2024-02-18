@@ -4,7 +4,7 @@ namespace Gazelle\Task;
 
 class DemoteUsersRatio extends \Gazelle\Task {
     public function run(): void {
-        $userMan = new \Gazelle\Manager\User;
+        $userMan = new \Gazelle\Manager\User();
         foreach ($userMan->demotionCriteria() as $criteria) {
             $this->demote($criteria['To'], $criteria['Ratio'], $criteria['Upload'], $criteria['From'], $userMan);
         }

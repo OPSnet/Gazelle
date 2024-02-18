@@ -1,6 +1,6 @@
 <?php
 
-$user = (new Gazelle\Manager\User)->findById((int)($_REQUEST['userid'] ?? 0));
+$user = (new Gazelle\Manager\User())->findById((int)($_REQUEST['userid'] ?? 0));
 if (is_null($user)) {
     error(404);
 }

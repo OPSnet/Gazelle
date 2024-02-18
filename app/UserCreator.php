@@ -43,7 +43,7 @@ class UserCreator extends Base {
         } else {
             $this->permissionId = USER;
         }
-        $manager = new Manager\User;
+        $manager = new Manager\User();
         if (!isset($this->inviteKey)) {
             $inviter = null;
         } else {
@@ -76,7 +76,7 @@ class UserCreator extends Base {
             // neither setEmail() nor setInviteKey() produced anything useful
             throw new UserCreatorException('email');
         }
-        $domainManager = new \Gazelle\Manager\EmailBlacklist;
+        $domainManager = new \Gazelle\Manager\EmailBlacklist();
         foreach ($this->email as $email) {
             if ($domainManager->exists($email)) {
                 throw new UserCreatorException('email');
@@ -120,7 +120,7 @@ class UserCreator extends Base {
         );
 
         if ($inviter) {
-            (new Manager\InviteSource)->resolveInviteSource($this->inviteKey, $user);
+            (new Manager\InviteSource())->resolveInviteSource($this->inviteKey, $user);
             (new User\InviteTree($inviter, $manager))->add($user);
             $inviter->stats()->increment('invited_total');
             $user->externalProfile()->modifyProfile($inviterReason);
@@ -181,7 +181,7 @@ class UserCreator extends Base {
         );
         self::$db->commit();
 
-        (new Tracker)->addUser($user);
+        (new Tracker())->addUser($user);
 
         $this->reset(); // So we can create another user
         return $user;

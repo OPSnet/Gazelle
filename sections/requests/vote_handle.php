@@ -8,7 +8,7 @@ if (!$Viewer->permitted('site_vote')) {
 
 authorize();
 
-$request = (new Gazelle\Manager\Request)->findById((int)($_GET['id'] ?? 0));
+$request = (new Gazelle\Manager\Request())->findById((int)($_GET['id'] ?? 0));
 if (is_null($request)) {
     echo "missing";
 } elseif ($request->isFilled()) {

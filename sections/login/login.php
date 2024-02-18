@@ -6,7 +6,7 @@ if (isset($Viewer)) {
 }
 
 $watch = new Gazelle\LoginWatch($_SERVER['REMOTE_ADDR']);
-$login = new Gazelle\Login;
+$login = new Gazelle\Login();
 
 if (isset($_POST['username'])) {
     $user = $login->login(
@@ -67,6 +67,6 @@ echo $Twig->render('login/login.twig', [
     'delta'    => $watch->bannedEpoch() - time(),
     'error'    => $login->error(),
     'ip_addr'  => $_SERVER['REMOTE_ADDR'],
-    'tor_node' => (new Gazelle\Manager\Tor)->isExitNode($_SERVER['REMOTE_ADDR']),
+    'tor_node' => (new Gazelle\Manager\Tor())->isExitNode($_SERVER['REMOTE_ADDR']),
     'watch'    => $watch,
 ]);

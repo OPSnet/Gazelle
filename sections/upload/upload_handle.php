@@ -138,7 +138,7 @@ if (!isset($_POST['workaround_broken_html_entities']) || $_POST['workaround_brok
 //--------------- Validate data in upload form ---------------------------------//
 
 // common to all types
-$Validate = new Gazelle\Util\Validator;
+$Validate = new Gazelle\Util\Validator();
 $Validate->setFields([
     ['type', true, 'inarray', 'Please select a valid category.', ['inarray' => array_keys(CATEGORY)]],
     ['release_desc', false, 'string','The release description you entered is too long.', ['maxlength' => 1_000_000]],
@@ -174,7 +174,7 @@ if (in_array($categoryName, ['Music', 'Audiobooks', 'Comedy'])) {
     }
 }
 
-$releaseTypes = (new Gazelle\ReleaseType)->list();
+$releaseTypes = (new Gazelle\ReleaseType())->list();
 switch ($categoryName) {
     case 'Audiobooks':
         $Validate->setField('year', true, 'number', 'The year of the release must be entered.');
@@ -232,8 +232,8 @@ if (!is_uploaded_file($TorrentName) || !filesize($TorrentName)) {
     reportError('No torrent file uploaded, or file is empty.');
 }
 
-$torMan   = new Gazelle\Manager\Torrent;
-$bencoder = new OrpheusNET\BencodeTorrent\BencodeTorrent;
+$torMan   = new Gazelle\Manager\Torrent();
+$bencoder = new OrpheusNET\BencodeTorrent\BencodeTorrent();
 try {
     $bencoder->decodeFile($TorrentName);
 } catch (\RuntimeException $e) {
@@ -252,7 +252,7 @@ if (isset($TorData['info']['meta version'])) {
     reportError('This torrent is not a V1 torrent. V2 and Hybrid torrents are not supported here.');
 }
 
-$checker     = new Gazelle\Util\FileChecker;
+$checker     = new Gazelle\Util\FileChecker();
 $DirName     = (isset($TorData['info']['files']) ? make_utf8($bencoder->getName()) : '');
 $checkName   = $checker->checkName($DirName); // check the folder name against the blacklist
 if ($checkName) {
@@ -265,7 +265,7 @@ $upload = [
     'new'   => [], // list of newly created Torrent objects
 ];
 
-$torrentFiler = new Gazelle\File\Torrent;
+$torrentFiler = new Gazelle\File\Torrent();
 $torrent      = $torMan->findByInfohash(bin2hex($bencoder->getHexInfoHash()));
 if ($torrent) {
     $torrentId = $torrent->id();
@@ -314,7 +314,7 @@ if ($isMusicUpload) {
                 reportError('Missing encoding/bitrate for extra torrent.');
             }
 
-            $xbencoder = new OrpheusNET\BencodeTorrent\BencodeTorrent;
+            $xbencoder = new OrpheusNET\BencodeTorrent\BencodeTorrent();
             try {
                 $xbencoder->decodeFile($fileTmpName);
             } catch (\RuntimeException $e) {
@@ -473,7 +473,7 @@ if (count($TooLongPaths) > 0) {
 }
 $Debug->set_flag('upload: torrent decoded');
 
-$tgMan      = new Gazelle\Manager\TGroup;
+$tgMan      = new Gazelle\Manager\TGroup();
 $tgroup     = null;
 $NoRevision = false;
 
@@ -517,7 +517,7 @@ $hasLogInDB = $logfileSummary?->total() > 0;
 //******************************************************************************//
 //--------------- Start database stuff -----------------------------------------//
 
-$log = new Gazelle\Log;
+$log = new Gazelle\Log();
 $Debug->set_flag('upload: database begin transaction');
 $db = Gazelle\DB::DB();
 $db->begin_transaction();
@@ -537,7 +537,7 @@ if ($tgroup) {
         showcase:        $Viewer->permitted('torrents_edit_vanityhouse') && isset($_POST['vanity_house']),
     );
     if ($isMusicUpload) {
-        $tgroup->addArtists($ArtistRoleList, $ArtistNameList, $Viewer, new Gazelle\Manager\Artist, $log);
+        $tgroup->addArtists($ArtistRoleList, $ArtistNameList, $Viewer, new Gazelle\Manager\Artist(), $log);
         $Cache->increment_value('stats_album_count', count($ArtistNameList));
     }
     $Viewer->stats()->increment('unique_group_total');
@@ -551,7 +551,7 @@ if ($NoRevision) {
 }
 
 // Tags
-$tagMan = new Gazelle\Manager\Tag;
+$tagMan = new Gazelle\Manager\Tag();
 if (!$Properties['GroupID']) {
     foreach ($Properties['TagList'] as $tag) {
         $tag = $tagMan->resolve($tagMan->sanitize($tag));
@@ -622,7 +622,7 @@ foreach ($upload['extra'] as $info) {
 //--------------- Write Files To Disk ------------------------------------------//
 
 if ($logfileSummary?->total()) {
-    $torrentLogManager = new Gazelle\Manager\TorrentLog(new Gazelle\File\RipLog, new Gazelle\File\RipLogHTML);
+    $torrentLogManager = new Gazelle\Manager\TorrentLog(new Gazelle\File\RipLog(), new Gazelle\File\RipLogHTML());
     $checkerVersion = Logchecker::getLogcheckerVersion();
     foreach ($logfileSummary->all() as $logfile) {
         $torrentLogManager->create($torrent, $logfile, $checkerVersion);
@@ -644,7 +644,7 @@ $Debug->set_flag('upload: database committed');
 
 $bonusTotal  = 0;
 $bonus       = new Gazelle\User\Bonus($Viewer);
-$tracker     = new Gazelle\Tracker;
+$tracker     = new Gazelle\Tracker();
 $folderCheck = [];
 foreach ($upload['new'] as $t) {
     $t->flush()->unlockUpload();
@@ -652,7 +652,7 @@ foreach ($upload['new'] as $t) {
     $tracker->addTorrent($t);
     $folderCheck[] = $t->path();
 }
-(new Gazelle\Manager\NotificationTicket)->create($torrent);
+(new Gazelle\Manager\NotificationTicket())->create($torrent);
 
 if (!$Viewer->disableBonusPoints()) {
     $bonus->addPoints($bonusTotal);

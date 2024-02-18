@@ -123,7 +123,7 @@ class UserSeedboxTest extends TestCase {
         $seedbox->setSource($hostList[$key2]['id'])->setTarget($hostList[$key1]['id']);
         $this->assertEquals([$this->torrentList[2]->id(), $this->torrentList[3]->id()], $seedbox->idList(), 'seedbox-2-not-1');
 
-        $list = $seedbox->torrentList(new Gazelle\Manager\Torrent, 3, 0);
+        $list = $seedbox->torrentList(new Gazelle\Manager\Torrent(), 3, 0);
         $this->assertEquals([$this->torrentList[2]->id(), $this->torrentList[3]->id()], array_map(fn($t) => $t['id'], $list), 'seedbox-list');
     }
 }

@@ -6,12 +6,12 @@ if (!$Viewer->permitted('users_mod')) {
 
 authorize();
 
-$torrent = (new Gazelle\Manager\Torrent)->findById((int)($_POST['torrentid'] ?? 0));
+$torrent = (new Gazelle\Manager\Torrent())->findById((int)($_POST['torrentid'] ?? 0));
 if (is_null($torrent)) {
     error('Torrent does not exist!');
 }
 
-$tgMan = new Gazelle\Manager\TGroup;
+$tgMan = new Gazelle\Manager\TGroup();
 $old = $tgMan->findById((int)($_POST['oldgroupid'] ?? 0));
 if (is_null($old)) {
     error('The source torrent group does not exist!');
@@ -23,7 +23,7 @@ if ($title === '') {
 }
 
 $newCategoryId = (int)($_POST['newcategoryid'] ?? 0);
-$newName = (new Gazelle\Manager\Category)->findNameById($newCategoryId);
+$newName = (new Gazelle\Manager\Category())->findNameById($newCategoryId);
 if (!$newName) {
     error('Bad category');
 } elseif ($newName === $old->categoryName()) {
@@ -38,8 +38,8 @@ $new = $tgMan->changeCategory(
     name:        $title,
     releaseType: (int)($_POST['releasetype'] ?? 0),
     year:        (int)($_POST['year'] ?? 0),
-    artistMan:   new Gazelle\Manager\Artist,
-    logger:      new Gazelle\Log,
+    artistMan:   new Gazelle\Manager\Artist(),
+    logger:      new Gazelle\Log(),
     user:        $Viewer,
 );
 

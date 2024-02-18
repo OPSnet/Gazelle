@@ -88,7 +88,7 @@ class Login extends Base {
                 }
                 self::$cache->increment($key);
             } elseif ($this->watch->nrBans() > 3) {
-                (new Manager\IPv4)->createBan(
+                (new Manager\IPv4())->createBan(
                     $this->userId, $this->ipaddr, $this->ipaddr, 'Automated ban, too many failed login attempts'
                 );
             }
@@ -105,7 +105,7 @@ class Login extends Base {
      */
     protected function attemptLogin(): ?User {
         // we have all we need to go forward
-        $userMan = new Manager\User;
+        $userMan = new Manager\User();
         if (!preg_match(USERNAME_REGEXP, $this->username)) {
             $this->error = self::ERR_CREDENTIALS;
             return null;
@@ -128,11 +128,11 @@ class Login extends Base {
             return null;
         }
         if ($TFAKey) {
-            $tfa = new \RobThree\Auth\TwoFactorAuth;
+            $tfa = new \RobThree\Auth\TwoFactorAuth();
             if (!$tfa->verifyCode($TFAKey, $this->twofa, 2)) {
                 // They have 2FA but the device key did not match
                 // Fallback to considering it as a recovery key.
-                $userToken = (new Manager\UserToken)->findByToken($this->twofa);
+                $userToken = (new Manager\UserToken())->findByToken($this->twofa);
                 if ($userToken) {
                     $userToken->consume();
                 }
@@ -149,8 +149,8 @@ class Login extends Base {
         }
 
         // Did they come in over Tor?
-        if (BLOCK_TOR && !$user->permitted('can_use_tor') && (new Manager\Tor)->isExitNode($this->ipaddr)) {
-            $userMan->disableUserList(new Tracker, [$user->id()], "Logged in via Tor ({$this->ipaddr})", Manager\User::DISABLE_TOR);
+        if (BLOCK_TOR && !$user->permitted('can_use_tor') && (new Manager\Tor())->isExitNode($this->ipaddr)) {
+            $userMan->disableUserList(new Tracker(), [$user->id()], "Logged in via Tor ({$this->ipaddr})", Manager\User::DISABLE_TOR);
             // return a newly disabled instance
             return $userMan->findById($user->id());
         }

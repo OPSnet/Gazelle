@@ -28,7 +28,7 @@ class UserRegistrationTest extends TestCase {
     }
 
     public function testUserRegistrationAfter(): void {
-        $reg = new Gazelle\Manager\Registration;
+        $reg = new Gazelle\Manager\Registration();
         $reg->setAfterDate("2600-01-01 00:00:01");
         $this->assertEquals(2, $reg->total(), 'user-reg-total-after');
 
@@ -39,7 +39,7 @@ class UserRegistrationTest extends TestCase {
     }
 
     public function testUserRegistrationBefore(): void {
-        $reg = new Gazelle\Manager\Registration;
+        $reg = new Gazelle\Manager\Registration();
         $reg->setBeforeDate("1600-12-31");
         $this->assertEquals(3, $reg->total(), 'user-reg-total-before');
 
@@ -51,7 +51,7 @@ class UserRegistrationTest extends TestCase {
     }
 
     public function testUserRegistrationBetween(): void {
-        $reg = new Gazelle\Manager\Registration;
+        $reg = new Gazelle\Manager\Registration();
         $reg->setAfterDate("1600-02-01")->setBeforeDate("1600-03-01");
         $this->assertEquals(1, $reg->total(), 'user-reg-total-between');
 
@@ -61,6 +61,6 @@ class UserRegistrationTest extends TestCase {
     }
 
     public function testUserRegistrationUnconfirmed(): void {
-        $this->assertEquals(3, (new Gazelle\Manager\User)->disableUnconfirmedUsers(), 'user-reg-unconfirmed');
+        $this->assertEquals(3, (new Gazelle\Manager\User())->disableUnconfirmedUsers(), 'user-reg-unconfirmed');
     }
 }

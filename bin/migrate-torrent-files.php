@@ -11,7 +11,7 @@ $offset    = 0;
 $processed = 0;
 $new       = 0;
 
-$filer = new Gazelle\File\Torrent;
+$filer = new Gazelle\File\Torrent();
 
 while (true) {
     $db->prepared_query('

@@ -21,7 +21,7 @@ if (isset($_POST['id'])) {
     if (!$_POST['comment']) {
         error('Please enter a comment to add to the users affected.');
     }
-    $userMan = new Gazelle\Manager\User;
+    $userMan = new Gazelle\Manager\User();
     $user = $userMan->find(trim($_POST['id']));
     if (is_null($user)) {
         error(404);
@@ -59,7 +59,7 @@ if (isset($_POST['id'])) {
                 if ($doComment) {
                     $invitee->addStaffNote($comment)->modify();
                 } elseif ($doDisable) {
-                    $userMan->disableUserList(new Gazelle\Tracker, [$inviteeId], $comment, Gazelle\Manager\User::DISABLE_TREEBAN);
+                    $userMan->disableUserList(new Gazelle\Tracker(), [$inviteeId], $comment, Gazelle\Manager\User::DISABLE_TREEBAN);
                 } elseif ($doInvites) {
                     $invitee->toggleAttr('disable-invites', true);
                     $invitee->addStaffNote($comment)->modify();

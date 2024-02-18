@@ -1,6 +1,6 @@
 <?php
 
-$poll = (new Gazelle\Manager\ForumPoll)->findById((int)($_POST['threadid'] ?? 0));
+$poll = (new Gazelle\Manager\ForumPoll())->findById((int)($_POST['threadid'] ?? 0));
 if (is_null($poll)) {
     error(404, true);
 }
@@ -40,7 +40,7 @@ if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
         <ul class="poll nobullet">
 <?php
         if ($poll->hasRevealVotes()) {
-            $staffVote = $poll->staffVote(new Gazelle\Manager\User);
+            $staffVote = $poll->staffVote(new Gazelle\Manager\User());
             foreach ($staffVote as $response => $info) {
                 if ($response !== 'missing') {
 ?>

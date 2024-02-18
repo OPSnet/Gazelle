@@ -17,7 +17,7 @@ if (!$year || empty($title) || empty($artistName)) {
     error(0);
 }
 
-$torrent = (new Gazelle\Manager\Torrent)->findById((int)($_POST['torrentid'] ?? 0));
+$torrent = (new Gazelle\Manager\Torrent())->findById((int)($_POST['torrentid'] ?? 0));
 if (is_null($torrent)) {
     error('Torrent does not exist!');
 }
@@ -34,16 +34,16 @@ if (empty($_POST['confirm'])) {
     exit;
 }
 
-$new = (new Gazelle\Manager\TGroup)->createFromTorrent(
+$new = (new Gazelle\Manager\TGroup())->createFromTorrent(
     $torrent,
     $artistName,
     $title,
     $year,
-    new Gazelle\Manager\Artist,
-    new Gazelle\Manager\Bookmark,
-    new Gazelle\Manager\Comment,
-    new Gazelle\Manager\Vote,
-    new Gazelle\Log,
+    new Gazelle\Manager\Artist(),
+    new Gazelle\Manager\Bookmark(),
+    new Gazelle\Manager\Comment(),
+    new Gazelle\Manager\Vote(),
+    new Gazelle\Log(),
     $Viewer,
 );
 

@@ -6,7 +6,7 @@ require_once(__DIR__ . '/../../../lib/bootstrap.php');
 
 class TorManagerTest extends TestCase {
     public function testTor(): void {
-        $manager = new \Gazelle\Manager\Tor;
+        $manager = new \Gazelle\Manager\Tor();
         $list = array_map(fn($n) => $n['ipv4'], $manager->exitNodeList());
         $this->assertIsArray($list, 'tornode-has-list');
         $this->assertFalse($manager->isExitNode('0.0.0.0'), 'tornode-0000-exit-node');

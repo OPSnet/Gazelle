@@ -4,7 +4,7 @@ if (!$Viewer->permitted('admin_view_referrals')) {
     error(403);
 }
 
-$ReferralManager = new Gazelle\Manager\Referral;
+$ReferralManager = new Gazelle\Manager\Referral();
 
 if (isset($_POST['id'])) {
     authorize();

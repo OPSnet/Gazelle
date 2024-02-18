@@ -4,7 +4,7 @@ if (!$Viewer->permitted('admin_manage_permissions')) {
     error(403);
 }
 
-$userMan = new Gazelle\Manager\User;
+$userMan = new Gazelle\Manager\User();
 $user = $userMan->findById((int)($_REQUEST['userid']));
 if (is_null($user)) {
     error(404);

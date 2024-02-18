@@ -6,7 +6,7 @@ switch ($_GET['p'] ?? '') {
         break;
     case 'clients':
         echo $Twig->render('rules/client-whitelist.twig', [
-            'list' => (new Gazelle\Manager\ClientWhitelist)->list(),
+            'list' => (new Gazelle\Manager\ClientWhitelist())->list(),
         ]);
         break;
     case 'collages':

@@ -13,7 +13,7 @@ if (!in_array($limit, [10, 100, 250])) {
 echo (new Gazelle\Json\Top10\Tag(
     details: $details,
     limit: $limit,
-    manager: new Gazelle\Manager\Tag,
+    manager: new Gazelle\Manager\Tag(),
 ))
     ->setVersion(2)
     ->response();

@@ -10,7 +10,7 @@ if (!isset($_POST['action'])) {
     authorize();
     $userId = (int)$_POST['userid'];
 }
-$user = (new Gazelle\Manager\User)->findById($userId);
+$user = (new Gazelle\Manager\User())->findById($userId);
 if (!$user) {
     error(404);
 }

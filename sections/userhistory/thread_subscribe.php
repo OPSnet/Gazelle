@@ -6,7 +6,7 @@ if ($Viewer->disableForums()) {
 }
 authorize();
 
-$thread = (new Gazelle\Manager\ForumThread)->findById((int)($_GET['threadid'] ?? 0));
+$thread = (new Gazelle\Manager\ForumThread())->findById((int)($_GET['threadid'] ?? 0));
 if (is_null($thread)) {
     error(404);
 }

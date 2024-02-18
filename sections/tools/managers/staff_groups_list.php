@@ -6,5 +6,5 @@ if (!$Viewer->permitted('admin_manage_permissions')) {
 
 echo $Twig->render('admin/staff-group.twig', [
     'auth' => $Viewer->auth(),
-    'list' => (new Gazelle\Manager\StaffGroup)->groupList(),
+    'list' => (new Gazelle\Manager\StaffGroup())->groupList(),
 ]);

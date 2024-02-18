@@ -3,7 +3,7 @@
 function class_list(int $Selected = 0): string {
     global $Viewer;
     $Return = '';
-    $Classes = (new Gazelle\Manager\User)->classList();
+    $Classes = (new Gazelle\Manager\User())->classList();
     foreach ($Classes as $Class) {
         if ($Class['Level'] <= $Viewer->privilege()->effectiveClassLevel()) {
             $Return .= '<option value="' . $Class['Level'] . '"';

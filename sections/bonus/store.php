@@ -42,7 +42,7 @@ if (($_GET['action'] ?? '') == 'donate') {
 }
 
 $points = (int)$Viewer->bonusPointsTotal();
-$bonusMan = new Gazelle\Manager\Bonus;
+$bonusMan = new Gazelle\Manager\Bonus();
 $auth = $Viewer->auth();
 $pool = $bonusMan->getOpenPool();
 if ($pool) {

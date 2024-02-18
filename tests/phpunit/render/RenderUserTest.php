@@ -24,7 +24,7 @@ class RenderUserTest extends TestCase {
         $limiter = new \Gazelle\User\UserclassRateLimit($this->userList['user']);
 
         $sidebar = Gazelle\Util\Twig::factory()->render('user/sidebar.twig', [
-            'applicant'     => new \Gazelle\Manager\Applicant,
+            'applicant'     => new \Gazelle\Manager\Applicant(),
             'invite_source' => 'invsrc',
             'user'          => $this->userList['user'],
             'viewer'        => $Viewer,
@@ -46,7 +46,7 @@ class RenderUserTest extends TestCase {
             'friend'       => new Gazelle\User\Friend($Viewer),
             'preview_user' => $this->userList['user'],
             'user'         => $this->userList['user'],
-            'userMan'      => new \Gazelle\Manager\User,
+            'userMan'      => new \Gazelle\Manager\User(),
             'viewer'       => $Viewer,
         ]);
         $this->assertStringContainsString('<div class="header">', $header, 'user-header-div-header');

@@ -551,7 +551,7 @@ class Referral extends \Gazelle\Base {
         );
 
         if (REFERRAL_SEND_EMAIL) {
-            (new Mail)->send($email, 'You have been invited to ' . SITE_NAME,
+            (new Mail())->send($email, 'You have been invited to ' . SITE_NAME,
                 self::$twig->render('email/referral.twig', [
                     'email' => $email,
                     'inviter_key' => $inviteKey,

@@ -147,7 +147,7 @@ class ReaperTest extends TestCase {
     // -------------------------
 
     public function testExpand(): void {
-        $reaper = new \Gazelle\Torrent\Reaper(new Gazelle\Manager\Torrent, new Gazelle\Manager\User);
+        $reaper = new \Gazelle\Torrent\Reaper(new Gazelle\Manager\Torrent(), new Gazelle\Manager\User());
 
         $this->assertEquals(
             [456 => [99, 88, 77]],
@@ -188,8 +188,8 @@ class ReaperTest extends TestCase {
         $pmMan = new Gazelle\Manager\PM($user);
         $this->assertEquals(0, $user->inbox()->messageTotal(), 'never-inbox-initial');
 
-        $torMan  = new Gazelle\Manager\Torrent;
-        $userMan = new Gazelle\Manager\User;
+        $torMan  = new Gazelle\Manager\Torrent();
+        $userMan = new Gazelle\Manager\User();
         $reaper  = new \Gazelle\Torrent\Reaper($torMan, $userMan);
         $initialUnseededStats = $reaper->stats();
 
@@ -310,8 +310,8 @@ class ReaperTest extends TestCase {
     }
 
     public function testUnseeded(): void {
-        $torMan  = new Gazelle\Manager\Torrent;
-        $userMan = new Gazelle\Manager\User;
+        $torMan  = new Gazelle\Manager\Torrent();
+        $userMan = new Gazelle\Manager\User();
         $reaper  = new \Gazelle\Torrent\Reaper($torMan, $userMan);
 
         $initialUnseededStats = $reaper->stats();
@@ -482,7 +482,7 @@ class ReaperTest extends TestCase {
         }
 
         // look for never seeded
-        $reaper = new \Gazelle\Torrent\Reaper(new Gazelle\Manager\Torrent, new Gazelle\Manager\User);
+        $reaper = new \Gazelle\Torrent\Reaper(new Gazelle\Manager\Torrent(), new Gazelle\Manager\User());
         $reaper->process($reaper->initialNeverSeededList(), ReaperState::NEVER, ReaperNotify::INITIAL);
 
         $this->assertEquals(0, $this->userList[0]->inbox()->messageTotal(), 'never-uploader-no-notify');
@@ -506,7 +506,7 @@ class ReaperTest extends TestCase {
         }
 
         // look for unseeded
-        $reaper = new \Gazelle\Torrent\Reaper(new Gazelle\Manager\Torrent, new Gazelle\Manager\User);
+        $reaper = new \Gazelle\Torrent\Reaper(new Gazelle\Manager\Torrent(), new Gazelle\Manager\User());
         $reaper->process($reaper->initialUnseededList(), ReaperState::UNSEEDED, ReaperNotify::INITIAL);
 
         $this->assertEquals(1, $this->userList[0]->inbox()->messageTotal(), 'unseeded-uploader-no-notify');
@@ -527,7 +527,7 @@ class ReaperTest extends TestCase {
             $this->modifyLastAction($torrent, NOTIFY_UNSEEDED_INITIAL_HOUR + 2);
         }
 
-        $reaper = new \Gazelle\Torrent\Reaper(new Gazelle\Manager\Torrent, new Gazelle\Manager\User);
+        $reaper = new \Gazelle\Torrent\Reaper(new Gazelle\Manager\Torrent(), new Gazelle\Manager\User());
         $reaper->process($reaper->initialUnseededList(), ReaperState::UNSEEDED, ReaperNotify::INITIAL);
 
         $uploaderId = $this->userList[0]->id();

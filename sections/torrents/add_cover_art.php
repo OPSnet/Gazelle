@@ -11,13 +11,13 @@ if (count($imageList) != count($summaryList)) {
     error('Missing an image or a summary');
 }
 
-$tgroup = (new Gazelle\Manager\TGroup)->findById((int)($_POST['groupid'] ?? 0));
+$tgroup = (new Gazelle\Manager\TGroup())->findById((int)($_POST['groupid'] ?? 0));
 if (is_null($tgroup)) {
     error(404);
 }
 
 $imgProxy = new Gazelle\Util\ImageProxy($Viewer);
-$logger   = new Gazelle\Log;
+$logger   = new Gazelle\Log();
 
 foreach ($imageList as $n => $image) {
     $image = trim($image);

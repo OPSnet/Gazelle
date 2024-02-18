@@ -2,7 +2,7 @@
 
 use Gazelle\Enum\UserTokenType;
 
-$validator = new Gazelle\Util\Validator;
+$validator = new Gazelle\Util\Validator();
 $validator->setField('email', true, 'email', 'You entered an invalid email address.');
 
 $error = false;
@@ -12,9 +12,9 @@ if (isset($_REQUEST['expired'])) {
 } elseif (!empty($_REQUEST['email'])) {
     $error = $validator->validate($_REQUEST) ? false : $validator->errorMessage();
     if (!$error) {
-        $user = (new Gazelle\Manager\User)->findByEmail(trim($_REQUEST['email']));
+        $user = (new Gazelle\Manager\User())->findByEmail(trim($_REQUEST['email']));
         if ($user) {
-            (new Gazelle\Manager\UserToken)->createPasswordResetToken($user);
+            (new Gazelle\Manager\UserToken())->createPasswordResetToken($user);
             $user->logoutEverywhere();
             $sent = true;
         }

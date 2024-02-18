@@ -6,8 +6,8 @@ if (!$Viewer->permitted('admin_whitelist')) {
 
 authorize();
 
-$tracker   = new Gazelle\Tracker;
-$whitelist = new Gazelle\Manager\ClientWhitelist;
+$tracker   = new Gazelle\Tracker();
+$whitelist = new Gazelle\Manager\ClientWhitelist();
 
 $submitAction = $_POST['submit'] ?? null;
 

@@ -7,7 +7,7 @@ require_once(__DIR__ . '/../helper.php');
 
 class StaffGroupTest extends TestCase {
     public function testStaffGroupCreate(): void {
-        $manager = new Gazelle\Manager\StaffGroup;
+        $manager = new Gazelle\Manager\StaffGroup();
         $initial = $manager->groupList();
 
         $sg = $manager->create(1234, 'phpunit');

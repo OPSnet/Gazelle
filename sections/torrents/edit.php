@@ -8,7 +8,7 @@
 // most members.                                                        //
 //**********************************************************************//
 
-$torrent = (new Gazelle\Manager\Torrent)->findById((int)($_GET['id'] ?? 0));
+$torrent = (new Gazelle\Manager\Torrent())->findById((int)($_GET['id'] ?? 0));
 if (is_null($torrent)) {
     error(404);
 }
@@ -22,7 +22,7 @@ $categoryId   = $tgroup->categoryId();
 $categoryName = $tgroup->categoryName();
 $isMusic      = $categoryName === 'Music';
 $artist       = $isMusic ? $tgroup->primaryArtist() : null;
-$releaseTypes = (new Gazelle\ReleaseType)->list();
+$releaseTypes = (new Gazelle\ReleaseType())->list();
 
 View::show_header('Edit torrent', ['js' => 'upload,torrent']);
 
@@ -83,7 +83,7 @@ if (!($torrent->isRemastered() && !$torrent->remasterYear()) || $Viewer->permitt
         'Applications', 'Comics', 'E-Books', 'E-Learning Videos' => $uploadForm->simple_form(),
         default => $uploadForm->music_form(
             [],
-            new Gazelle\Manager\TGroup,
+            new Gazelle\Manager\TGroup(),
         ),
     };
     echo $uploadForm->foot(false);

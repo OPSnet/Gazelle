@@ -9,7 +9,7 @@ $artistId = (int)$_POST['artistid'];
 if (!$artistId) {
     error(404);
 }
-$collage = (new Gazelle\Manager\Collage)->findById((int)$_POST['collageid']);
+$collage = (new Gazelle\Manager\Collage())->findById((int)$_POST['collageid']);
 if (is_null($collage)) {
     error(404);
 }

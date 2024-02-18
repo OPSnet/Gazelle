@@ -11,8 +11,8 @@ switch (CATEGORY[$_GET['categoryid']]) {
             echo $uploadForm->albumReleaseJS();
         } else {
             echo $uploadForm->music_form(
-                (new Gazelle\Manager\Tag)->genreList(),
-                new Gazelle\Manager\TGroup,
+                (new Gazelle\Manager\Tag())->genreList(),
+                new Gazelle\Manager\TGroup(),
             );
         }
         break;

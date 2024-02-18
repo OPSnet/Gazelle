@@ -21,7 +21,7 @@ $db->prepared_query("
     ", $permissionId, $Viewer->id(), $permissionId, $Viewer->id()
 );
 
-$userMan = new Gazelle\Manager\User;
+$userMan = new Gazelle\Manager\User();
 $subject = trim($_POST['subject']);
 $body    = trim($_POST['body']);
 while ([$userId] = $db->next_record()) {

@@ -1,6 +1,6 @@
 <?php
 
-$tgroup = (new Gazelle\Manager\TGroup)->findById((int)($_GET['id'] ?? 0));
+$tgroup = (new Gazelle\Manager\TGroup())->findById((int)($_GET['id'] ?? 0));
 if (!$tgroup) {
     error(404);
 }

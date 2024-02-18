@@ -136,7 +136,7 @@ class Mysql {
 
     private function halt(string $Msg): void {
         if ($this->Errno == 1062) {
-            throw new MysqlDuplicateKeyException;
+            throw new MysqlDuplicateKeyException();
         }
         global $Debug;
         $Debug->saveCase("MySQL: error({$this->Errno}) {$this->Error} query=[$this->PreparedQuery]");
@@ -235,7 +235,7 @@ class Mysql {
                 return $Statement->get_result();
             } catch (\mysqli_sql_exception) {
                 if ($this->LinkID && mysqli_error($this->LinkID) == 1062) {
-                    throw new MysqlDuplicateKeyException;
+                    throw new MysqlDuplicateKeyException();
                 }
             }
         };

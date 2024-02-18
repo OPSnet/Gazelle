@@ -22,7 +22,7 @@ switch ($_REQUEST['dupeaction'] ?? '') {
 
         if ($_REQUEST['target']) {
             $username = trim($_REQUEST['target']);
-            $target = (new Gazelle\Manager\User)->findByUsername($username);
+            $target = (new Gazelle\Manager\User())->findByUsername($username);
             if (is_null($target)) {
                 error("User '" . display_str($username) . "' not found.");
             } elseif ($source->id() === $target->id()) {

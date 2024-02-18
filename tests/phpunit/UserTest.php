@@ -38,7 +38,7 @@ class UserTest extends TestCase {
     }
 
     public function testUserFind(): void {
-        $userMan = new \Gazelle\Manager\User;
+        $userMan = new \Gazelle\Manager\User();
         $admin = $userMan->find('@' . $this->user->username());
         $this->user->setField('PermissionID', SYSOP)->modify();
         $this->assertTrue($admin->isStaff(), 'admin-is-admin');
@@ -49,7 +49,7 @@ class UserTest extends TestCase {
     }
 
     public function testFindById(): void {
-        $userMan = new \Gazelle\Manager\User;
+        $userMan = new \Gazelle\Manager\User();
         $user = $userMan->findById($this->user->id());
         $this->assertFalse($user->isStaff(), 'user-is-not-admin');
         $this->assertStringStartsWith('user.', $user->username(), 'user-username');
@@ -61,8 +61,8 @@ class UserTest extends TestCase {
         $id       = $this->user->id();
         $username = $this->user->username();
         $this->assertEquals(1, $this->user->remove(), 'user-remove');
-        $this->assertNull((new \Gazelle\Manager\User)->findById($id), 'user-is-removed');
-        $this->assertNull((new \Gazelle\Manager\User)->findByUsername($username), 'username-is-removed');
+        $this->assertNull((new \Gazelle\Manager\User())->findById($id), 'user-is-removed');
+        $this->assertNull((new \Gazelle\Manager\User())->findByUsername($username), 'username-is-removed');
         unset($this->user);
     }
 
@@ -142,7 +142,7 @@ class UserTest extends TestCase {
     }
 
     public function testPassword(): void {
-        $userMan = new \Gazelle\Manager\User;
+        $userMan = new \Gazelle\Manager\User();
         $password = randomString(30);
         $_SERVER['HTTP_USER_AGENT'] = 'phpunit';
         $this->assertTrue($this->user->updatePassword($password, '0.0.0.0'), 'utest-password-modify');
@@ -169,7 +169,7 @@ class UserTest extends TestCase {
         $this->assertEquals(0.0, $this->user->requiredRatio(), 'utest-required-ratio');
         $this->assertEquals('', $this->user->forbiddenForumsList(), 'utest-forbidden-forum-list');
         $this->assertEquals([], $this->user->tagSnatchCounts(), 'utest-tag-snatch-counts');
-        $this->assertEquals([], $this->user->tokenList(new \Gazelle\Manager\Torrent, 0, 0), 'utest-token-list');
+        $this->assertEquals([], $this->user->tokenList(new \Gazelle\Manager\Torrent(), 0, 0), 'utest-token-list');
         $this->assertEquals([], $this->user->navigationList(), 'utest-navigation-list');
         $this->assertEquals(USER, $this->user->primaryClass(), 'utest-primary-class');
 
@@ -244,7 +244,7 @@ class UserTest extends TestCase {
     }
 
     public function testAvatar(): void {
-        $userMan = new \Gazelle\Manager\User;
+        $userMan = new \Gazelle\Manager\User();
         $this->assertEquals('', $this->user->avatar(), 'utest-avatar-blank');
         $this->assertEquals(
             [
@@ -292,7 +292,7 @@ class UserTest extends TestCase {
         $this->user->setField('Enabled', UserStatus::enabled->value)->modify();
         $this->assertEquals(\Gazelle\Enum\UserStatus::enabled, $this->user->userStatus(), 'utest-user-status-enabled');
 
-        $manager = new Gazelle\Manager\User;
+        $manager = new Gazelle\Manager\User();
         $next = $this->user->nextClass($manager);
         $this->assertEquals('Member', $next['class'], 'user-next-class-is-member');
 
@@ -321,7 +321,7 @@ class UserTest extends TestCase {
     }
 
     public function testStylesheet(): void {
-        $manager = new \Gazelle\Manager\Stylesheet;
+        $manager = new \Gazelle\Manager\Stylesheet();
         $list = $manager->list();
         $this->assertGreaterThan(5, $list, 'we-can-haz-stylesheets');
         $this->assertEquals(count($list), count($manager->usageList('name', 'ASC')), 'stylesheet-list-usage');
@@ -371,7 +371,7 @@ class UserTest extends TestCase {
         $this->assertEquals(1, $watch->nrAttempts(), 'loginwatch-init-attempt');
         $this->assertEquals(0, $watch->nrBans(), 'loginwatch-init-ban');
 
-        $login  = new \Gazelle\Login;
+        $login  = new \Gazelle\Login();
         $result = $login->login(
             username: 'email@example.com',
             password: 'password',
@@ -428,7 +428,7 @@ class UserTest extends TestCase {
     }
 
     public function testInactive(): void {
-        $userMan = new \Gazelle\Manager\User;
+        $userMan = new \Gazelle\Manager\User();
         $db      = \Gazelle\DB::DB();
 
         $this->user->setField('Enabled', UserStatus::enabled->value)->modify();
@@ -437,20 +437,20 @@ class UserTest extends TestCase {
             ", $this->user->id(), INACTIVE_USER_WARN_DAYS + 1
         );
         $this->user->flush();
-        $this->assertEquals(1, $userMan->inactiveUserWarn(new \Gazelle\Util\Mail), 'utest-one-user-inactive-warned');
+        $this->assertEquals(1, $userMan->inactiveUserWarn(new \Gazelle\Util\Mail()), 'utest-one-user-inactive-warned');
         $this->assertTrue($this->user->hasAttr('inactive-warning-sent'), 'utest-inactive-warned');
 
         $db->prepared_query("
             UPDATE user_last_access SET last_access = now() - INTERVAL ? DAY WHERE user_id = ?
             ", INACTIVE_USER_DEACTIVATE_DAYS + 1, $this->user->id()
         );
-        $this->assertEquals(1, $userMan->inactiveUserDeactivate(new \Gazelle\Tracker), 'utest-one-user-inactive-deactivated');
+        $this->assertEquals(1, $userMan->inactiveUserDeactivate(new \Gazelle\Tracker()), 'utest-one-user-inactive-deactivated');
         $this->user->flush();
         $this->assertTrue($this->user->isDisabled(), 'utest-inactive-deactivated');
     }
 
     public function testLastFM(): void {
-        $lastfm   = new \Gazelle\Util\LastFM;
+        $lastfm   = new \Gazelle\Util\LastFM();
         $username = 'phpunit.' . randomString(6);
         $this->assertNull($lastfm->username($this->user), 'lastfm-no-username');
         $this->assertEquals(1, $lastfm->modifyUsername($this->user, $username), 'lastfm-create-username');
@@ -474,7 +474,7 @@ class UserTest extends TestCase {
     }
 
     public function testStats(): void {
-        $eco = new \Gazelle\Stats\Economic;
+        $eco = new \Gazelle\Stats\Economic();
         $eco->flush();
 
         $total    = $eco->tokenTotal();
@@ -492,7 +492,7 @@ class UserTest extends TestCase {
         $this->assertEquals(23 + $stranded, $eco->tokenStrandedTotal(), 'utest-stats-total-disabled-stranded-tokens');
         $this->assertEquals(1 + $disabled, $eco->userDisabledTotal(), 'utest-stats-user-disabled-total');
 
-        $stats = new \Gazelle\Stats\Users;
+        $stats = new \Gazelle\Stats\Users();
         $this->assertTrue($stats->newUsersAllowed($this->user), 'user-stats-new-users');
         $this->assertGreaterThan(0, $stats->refresh(), 'user-stats-refresh');
         $this->assertGreaterThan(0, $stats->registerActivity('users_stats_daily', 10), 'user-stats-register');

@@ -6,7 +6,7 @@ class StaffGroup extends BaseObject {
     final public const tableName = 'staff_groups';
 
     public function flush(): static {
-        (new Manager\Privilege)->flush();
+        (new Manager\Privilege())->flush();
         self::$cache->delete_value(Manager\StaffGroup::LIST_KEY);
         unset($this->info);
         return $this;

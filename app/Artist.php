@@ -485,7 +485,7 @@ class Artist extends BaseObject {
         }
 
         // go through the list and tie the alias to its non-redirecting ancestor
-        $userMan = new Manager\User;
+        $userMan = new Manager\User();
         $alias = [];
         foreach ($result as $aliasId => $info) {
             if ($info['redirectId']) {
@@ -494,7 +494,7 @@ class Artist extends BaseObject {
                     'alias_id' => $aliasId,
                     'name'     => $info['aliasName'],
                     'user'     => $userMan->findById($info['userId']),
-               ];
+                ];
             } else {
                 $alias[$aliasId] = [
                     'alias'    => [],
@@ -796,7 +796,7 @@ class Artist extends BaseObject {
             UPDATE IGNORE torrents_artists SET AliasID = ?  WHERE AliasID = ?
             ", $newId, $aliasId
         );
-        $tgMan = new Manager\TGroup;
+        $tgMan = new Manager\TGroup();
         foreach ($groups as $groupId) {
             $tgMan->findById($groupId)?->refresh();
         }
@@ -984,7 +984,7 @@ class Artist extends BaseObject {
         self::$db->prepared_query("DELETE FROM artists_tags WHERE ArtistID = ?", $id);
         self::$db->prepared_query("DELETE FROM wiki_artists WHERE PageID = ?", $id);
 
-        (new \Gazelle\Manager\Comment)->remove('artist', $id);
+        (new \Gazelle\Manager\Comment())->remove('artist', $id);
         $logger->general("Artist $id ($name) was deleted by " . $user->username());
         self::$db->commit();
 

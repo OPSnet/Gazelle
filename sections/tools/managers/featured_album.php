@@ -8,9 +8,9 @@ if (!$Viewer->permitted('users_mod')) {
     error(403);
 }
 
-$tgMan   = new Gazelle\Manager\TGroup;
-$torMan  = new Gazelle\Manager\Torrent;
-$manager = new Gazelle\Manager\FeaturedAlbum;
+$tgMan   = new Gazelle\Manager\TGroup();
+$torMan  = new Gazelle\Manager\Torrent();
+$manager = new Gazelle\Manager\FeaturedAlbum();
 
 if (isset($_GET['unfeature'])) {
     authorize();
@@ -63,12 +63,12 @@ if (isset($_POST['groupid'])) {
 
     $featuredAlbum = $manager->create(
         featureType: $featureType,
-        news:        new Gazelle\Manager\News,
+        news:        new Gazelle\Manager\News(),
         tgMan:       $tgMan,
         torMan:      $torMan,
-        tracker:     new Gazelle\Tracker,
+        tracker:     new Gazelle\Tracker(),
         tgroup:      $tgroup,
-        forumThread: (new Gazelle\Manager\ForumThread)->create(
+        forumThread: (new Gazelle\Manager\ForumThread())->create(
             forum: new Gazelle\Forum($featureType->forumId()),
             user:  $Viewer,
             title: $tgroup->text(),

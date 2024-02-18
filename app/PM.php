@@ -79,7 +79,7 @@ class PM extends Base {
         }
         $this->info = $info;
 
-        $manager = new Manager\User;
+        $manager = new Manager\User();
         $this->info['forwarded_to'] = $manager->findById($this->info['forwarded_to'] ?? 0);
 
         $this->info['sender'] = [];

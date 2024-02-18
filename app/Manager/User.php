@@ -516,7 +516,7 @@ class User extends \Gazelle\BaseManager {
             SELECT Username FROM users_main WHERE ID = ?
             ", $fromId
         );
-        (new Notification)->push([$toId],
+        (new Notification())->push([$toId],
             "Message from $senderName, Subject: $subject", $body, SITE_URL . '/inbox.php', Notification::INBOX
         );
     }
@@ -553,7 +553,7 @@ class User extends \Gazelle\BaseManager {
             }
         }
         $total = count($snatchers);
-        (new \Gazelle\Log)->general($viewer->username() . " sent a mass PM to $total snatcher" . plural($total)
+        (new \Gazelle\Log())->general($viewer->username() . " sent a mass PM to $total snatcher" . plural($total)
             . " of torrent " . $torrent->id() . " (" . $torrent->group()->text() . ")"
         );
         return $total;

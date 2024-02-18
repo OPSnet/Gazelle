@@ -14,7 +14,7 @@ class Torrent extends AbstractAPI {
     }
 
     protected function torrent(int $id): array {
-        $torrent = (new \Gazelle\Manager\Torrent)->findById($id);
+        $torrent = (new \Gazelle\Manager\Torrent())->findById($id);
         if (is_null($torrent)) {
             json_error('Torrent not found');
         }
@@ -45,7 +45,7 @@ class Torrent extends AbstractAPI {
     }
 
     protected function tgroup(int $id): array {
-        $tgroup = (new \Gazelle\Manager\TGroup)->findById($id);
+        $tgroup = (new \Gazelle\Manager\TGroup())->findById($id);
         if (is_null($tgroup)) {
             json_error('Group not found');
         }

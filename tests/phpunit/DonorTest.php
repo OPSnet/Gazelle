@@ -319,7 +319,7 @@ class DonorTest extends TestCase {
         );
         $this->assertEquals(1, $db->affected_rows(), 'donor-found-expirable');
 
-        $manager = new Gazelle\Manager\Donation;
+        $manager = new Gazelle\Manager\Donation();
         $this->assertEquals(1, $manager->expireRanks(), 'donor-expiry');
         $donor->flush();
         $this->assertEquals(5, $donor->rank(), 'donor-rank-now-5');
@@ -387,7 +387,7 @@ class DonorTest extends TestCase {
     }
 
     public function testDonorManager(): void {
-        $manager = new Gazelle\Manager\Donation;
+        $manager = new Gazelle\Manager\Donation();
         $initial = $manager->rewardTotal();
         $initialGrand = $manager->grandTotal();
 
@@ -411,7 +411,7 @@ class DonorTest extends TestCase {
             'donor-manager-grand-total'
         );
 
-        $this->assertGreaterThan(0, $manager->topDonorList(100, new Gazelle\Manager\User), 'donor-top-donor');
+        $this->assertGreaterThan(0, $manager->topDonorList(100, new Gazelle\Manager\User()), 'donor-top-donor');
         $this->assertGreaterThan($initial + DONOR_RANK_PRICE, $manager->totalMonth(1), 'donor-manager-month');
         $username = $this->donor->user()->username();
         $entry = array_values(array_filter($manager->rewardPage(null, 100, 0), fn($d) => $d['user_id'] == $this->donor->id()))[0];
@@ -435,7 +435,7 @@ class DonorTest extends TestCase {
                'BrowserVersion'         => '1.0',
                'OperatingSystem'        => 'phpunit/OS',
                'OperatingSystemVersion' => '1.0',
-           ],
+            ],
             'ipaddr'      => '127.0.0.1',
             'useragent'   => 'phpunit',
         ]);

@@ -7,8 +7,8 @@ if (isset($_GET['clearcache'])) {
 
 require_once(__DIR__ . '/../lib/bootstrap.php');
 
-$feed = new Gazelle\Feed;
-$user = (new Gazelle\Manager\User)->findById((int)($_GET['user'] ?? 0));
+$feed = new Gazelle\Feed();
+$user = (new Gazelle\Manager\User())->findById((int)($_GET['user'] ?? 0));
 if (!$user?->isEnabled()
     || empty($_GET['feed'])
     || md5($user->id() . RSS_HASH . ($_GET['passkey'] ?? 'NOTPASS')) !== ($_GET['auth'] ?? 'NOTAUTH')
@@ -34,13 +34,13 @@ switch ($_GET['feed']) {
         echo $feed->byFeedName($user, $_GET['feed']);
         break;
     case 'feed_news':
-        echo $feed->news(new Gazelle\Manager\News);
+        echo $feed->news(new Gazelle\Manager\News());
         break;
     case 'feed_blog':
-        echo $feed->blog(new Gazelle\Manager\Blog, new Gazelle\Manager\ForumThread);
+        echo $feed->blog(new Gazelle\Manager\Blog(), new Gazelle\Manager\ForumThread());
         break;
     case 'feed_changelog':
-        echo $feed->changelog(new Gazelle\Manager\Changelog);
+        echo $feed->changelog(new Gazelle\Manager\Changelog());
         break;
     default:
         echo match (true) {

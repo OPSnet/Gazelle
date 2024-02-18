@@ -6,6 +6,6 @@ if (!$Viewer->isStaffPMReader()) {
 
 echo $Twig->render('staffpm/common-response.twig', [
     'conv_id' => $_GET['convid'] ?? false,
-    'list'    => (new Gazelle\Manager\StaffPM)->commonAnswerList(),
+    'list'    => (new Gazelle\Manager\StaffPM())->commonAnswerList(),
     'viewer'  => $Viewer,
 ]);

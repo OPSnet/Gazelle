@@ -6,7 +6,7 @@ require_once(__DIR__ . '/../../lib/bootstrap.php');
 
 class CacheTest extends TestCase {
     public function testCache(): void {
-        $cache = new Gazelle\Cache;
+        $cache = new Gazelle\Cache();
         $this->assertCount(0, $cache->hitList(), 'cache-hit-list-empty');
         $this->assertCount(0, $cache->deleteList(), 'cache-del-list-empty');
 

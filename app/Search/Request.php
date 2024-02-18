@@ -19,7 +19,7 @@ class Request extends \Gazelle\Base {
     public function __construct(
         protected \Gazelle\Manager\Request $manager,
     ) {
-        $this->sphinxq = new \SphinxqlQuery;
+        $this->sphinxq = new \SphinxqlQuery();
     }
 
     public function isBookmarkView(): bool {
@@ -168,7 +168,7 @@ class Request extends \Gazelle\Base {
                 $this->negate = true;
             }
         }
-        $filter = (new \Gazelle\Manager\Tag)->sphinxFilter(['include' => $include, 'exclude' => $exclude], $this->negate, $tagMode === 'all');
+        $filter = (new \Gazelle\Manager\Tag())->sphinxFilter(['include' => $include, 'exclude' => $exclude], $this->negate, $tagMode === 'all');
         $this->tagList = $filter['input'];
         if ($filter['predicate']) {
             $this->sphinxq->where_match($filter['predicate'], 'taglist', false);

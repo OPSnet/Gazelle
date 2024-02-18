@@ -97,7 +97,7 @@ class Debug {
             $userId = (int)$Viewer?->id();
         }
 
-        $id = (new \Gazelle\Manager\ErrorLog)->create(
+        $id = (new \Gazelle\Manager\ErrorLog())->create(
            uri:       $uri,
            userId:    $userId,
            duration:  $duration,
@@ -121,7 +121,7 @@ class Debug {
                 'includes' => $this->get_includes(),
                 'vars'     => $this->get_logged_vars(),
                 'perf'     => $this->get_perf(),
-                'ocelot'        => (new \Gazelle\Tracker)->requestList(),
+                'ocelot'        => (new \Gazelle\Tracker())->requestList(),
                 'searches'      => class_exists('Sphinxql') ? \Sphinxql::$Queries : [],
                 'searches_time' => class_exists('Sphinxql') ? \Sphinxql::$Time : 0.0,
                 'queries'       => $this->get_queries(),

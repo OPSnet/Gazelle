@@ -4,7 +4,7 @@
  * they visit reportsv2.php?id=xxx
  */
 
-$torMan = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
+$torMan = (new Gazelle\Manager\Torrent())->setViewer($Viewer);
 $torrentId = (int)($_GET['id'] ?? 0);
 $torrent   = $torMan->findById($torrentId);
 if (is_null($torrent)) {
@@ -20,12 +20,12 @@ $remasterTuple = false;
 $FirstUnknown  = $torrent->isRemasteredUnknown();
 $EditionID     = 0;
 
-$reportMan      = new Gazelle\Manager\Torrent\Report(new Gazelle\Manager\Torrent);
-$reportTypeMan  = new Gazelle\Manager\Torrent\ReportType;
+$reportMan      = new Gazelle\Manager\Torrent\Report(new Gazelle\Manager\Torrent());
+$reportTypeMan  = new Gazelle\Manager\Torrent\ReportType();
 $reportTypeList = $reportTypeMan->categoryList($CategoryID);
 $snatcher       = $Viewer->snatch();
 $urlStem        = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
-$userMan        = new Gazelle\Manager\User;
+$userMan        = new Gazelle\Manager\User();
 $reportList     = array_map(fn ($id) => $reportMan->findById($id), $torrent->reportIdList($Viewer));
 
 View::show_header('Report', ['js' => 'reportsv2,browse,torrent,bbcode']);

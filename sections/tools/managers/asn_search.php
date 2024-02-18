@@ -8,7 +8,7 @@ $name      = false;
 $search    = false;
 $similar   = false;
 $result    = false;
-$asnSearch = new Gazelle\Search\ASN;
+$asnSearch = new Gazelle\Search\ASN();
 
 if (isset($_REQUEST['name'])) {
     $name = trim($_REQUEST['name']);

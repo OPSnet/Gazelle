@@ -1,6 +1,6 @@
 <?php
 
-$userMan = new \Gazelle\Manager\User;
+$userMan = new \Gazelle\Manager\User();
 $classList = $userMan->classList();
 
 echo $Twig->render('staff/index.twig', [

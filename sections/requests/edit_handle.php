@@ -6,7 +6,7 @@ if (!$Viewer->permitted('site_submit_requests') || $Viewer->uploadedSize() < 250
     error(403);
 }
 
-$requestMan = new Gazelle\Manager\Request;
+$requestMan = new Gazelle\Manager\Request();
 $request = $requestMan->findById((int)($_POST['requestid'] ?? 0));
 if (is_null($request)) {
     error(404);
@@ -32,7 +32,7 @@ $tags       = null;
 $tgroup     = null;
 
 while (true) {
-    $validator = new Gazelle\Util\Validator;
+    $validator = new Gazelle\Util\Validator();
     if (isset($_POST['description'])) {
         $validator->setField('description', true, 'string', 'You forgot to enter a description.', ['maxlength' => 32000]);
     }
@@ -87,7 +87,7 @@ while (true) {
 
     if (isset($_POST['releasetype'])) {
         $releaseType = (int)$_POST['releasetype'];
-        if (!(new Gazelle\ReleaseType)->findNameById($releaseType)) {
+        if (!(new Gazelle\ReleaseType())->findNameById($releaseType)) {
             $error = 'Please pick a release type';
             break;
         }
@@ -163,7 +163,7 @@ while (true) {
             ? (int)$match['id']
             : (int)$_POST['groupid'];
         if ($tgroupId > 0) {
-            $tgroup = (new Gazelle\Manager\TGroup)->findById($tgroupId);
+            $tgroup = (new Gazelle\Manager\TGroup())->findById($tgroupId);
             if (is_null($tgroup)) {
                 $error = 'The torrent group, if entered, must correspond to a music torrent group on the site.';
                 break;
@@ -234,13 +234,13 @@ if (isset($_POST['oclc'])) {
 
 $request->modify();
 if ($categoryName === 'Music' && $Viewer->permittedAny('site_edit_requests', 'site_moderate_requests')) {
-    $request->artistRole()->set($artistRole, new Gazelle\Manager\Artist);
+    $request->artistRole()->set($artistRole, new Gazelle\Manager\Artist());
 }
 if (isset($_POST['tags'])) {
     $request->setTagList(
         array_unique(array_map('trim', explode(',', trim($_POST['tags'])))),
         $Viewer,
-        new Gazelle\Manager\Tag,
+        new Gazelle\Manager\Tag(),
     );
 }
 $request->updateSphinx();

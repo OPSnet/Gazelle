@@ -23,7 +23,7 @@ class ForumSearchTest extends TestCase {
     }
 
     public function testForumSearchThread(): void {
-        $this->category = (new \Gazelle\Manager\ForumCategory)->create('phpunit category', 10001);
+        $this->category = (new \Gazelle\Manager\ForumCategory())->create('phpunit category', 10001);
         $this->forum  = Helper::makeForum(
             user:        $this->user,
             sequence:    250,
@@ -33,7 +33,7 @@ class ForumSearchTest extends TestCase {
         );
         $title        = 'search thread ' . randomString(10);
         $body         = 'search body ' . randomString(10);
-        $threadMan    = new \Gazelle\Manager\ForumThread;
+        $threadMan    = new \Gazelle\Manager\ForumThread();
         $this->thread = $threadMan->create($this->forum, $this->user, $title, $body);
 
         $search = new \Gazelle\Search\Forum($this->user);
@@ -66,7 +66,7 @@ class ForumSearchTest extends TestCase {
     }
 
     public function testForumSearchAuthor(): void {
-        $this->category = (new \Gazelle\Manager\ForumCategory)->create('phpunit category', 10001);
+        $this->category = (new \Gazelle\Manager\ForumCategory())->create('phpunit category', 10001);
         $this->forum  = Helper::makeForum(
             user:        $this->user,
             sequence:    250,
@@ -76,7 +76,7 @@ class ForumSearchTest extends TestCase {
         );
         $title        = 'search thread ' . randomString(10);
         $body         = 'search body ' . randomString(10);
-        $threadMan    = new \Gazelle\Manager\ForumThread;
+        $threadMan    = new \Gazelle\Manager\ForumThread();
         $this->thread = $threadMan->create($this->forum, $this->user, $title, $body);
 
         $search = new \Gazelle\Search\Forum($this->user);

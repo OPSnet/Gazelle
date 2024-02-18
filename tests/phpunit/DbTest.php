@@ -17,7 +17,7 @@ class DbTest extends TestCase {
             ", SQLDB
         );
 
-        $dbMan = new Gazelle\DB;
+        $dbMan = new Gazelle\DB();
         foreach ($db->collect(0, false) as $tableName) {
             [$ok, $message] = $dbMan->checkStructureMatch(SQLDB, $tableName, "deleted_$tableName");
             $this->assertTrue($ok, "mismatch -- $message");
@@ -25,19 +25,19 @@ class DbTest extends TestCase {
     }
 
     public function testGlobalStatus(): void {
-        $status = (new Gazelle\DB)->globalStatus();
+        $status = (new Gazelle\DB())->globalStatus();
         $this->assertGreaterThan(500, count($status), 'db-global-status');
         $this->assertEquals('server-cert.pem', $status['Current_tls_cert']['Value'], 'db-current-tls-cert');
     }
 
     public function testGlobalVariables(): void {
-        $list = (new Gazelle\DB)->globalVariables();
+        $list = (new Gazelle\DB())->globalVariables();
         $this->assertGreaterThan(500, count($list), 'db-global-variables');
         $this->assertEquals('ON', $list['foreign_key_checks']['Value'], 'db-foreign-key-checks-on');
     }
 
     public function testLongRunning(): void {
-        $this->assertEquals(0, (new Gazelle\DB)->longRunning(), 'db-long-running');
+        $this->assertEquals(0, (new Gazelle\DB())->longRunning(), 'db-long-running');
     }
 
     public function testPg(): void {

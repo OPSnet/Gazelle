@@ -14,7 +14,7 @@ class Irc {
         if (DISABLE_IRC) {
             return true;
         }
-        $curl = new Curl;
+        $curl = new Curl();
         $curl->setUseProxy(false)
             ->setMethod(CurlMethod::POST)
             ->setOption(CURLOPT_POSTFIELDS, $message)

@@ -11,7 +11,7 @@ if (isset($_POST['confirm'])) {
     if (empty($_POST['user'])) {
         error('You have to enter a username to give tokens to.');
     }
-    $user = (new Gazelle\Manager\User)->findByUsername(urldecode($_POST['user']));
+    $user = (new Gazelle\Manager\User())->findByUsername(urldecode($_POST['user']));
     if (is_null($user)) {
         error('Nobody with that name found at ' . SITE_NAME . '. Try a user search and give them tokens from their profile page.');
     } elseif ($user->id() == $Viewer->id()) {

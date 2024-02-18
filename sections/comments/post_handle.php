@@ -15,7 +15,7 @@ if (!$pageId) {
     error(404);
 }
 
-$commentMan = new Gazelle\Manager\Comment;
+$commentMan = new Gazelle\Manager\Comment();
 $comment = $commentMan->create($Viewer, $page, $pageId, $_POST['quickpost']);
 
 $subscription = new \Gazelle\User\Subscription($Viewer);

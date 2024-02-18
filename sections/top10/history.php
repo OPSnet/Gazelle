@@ -15,7 +15,7 @@ if (empty($_GET['date'])) {
     if (!\Gazelle\Util\Time::validDate($date . ' 00:00:00')) {
         error('That does not look like a date');
     }
-    $list = (new Gazelle\Manager\Torrent)->topTenHistoryList($date, $isByDay);
+    $list = (new Gazelle\Manager\Torrent())->topTenHistoryList($date, $isByDay);
 }
 
 echo $Twig->render('top10/history.twig', [

@@ -1,7 +1,7 @@
 <?php
 
 $vote = new Gazelle\User\Vote($Viewer);
-$tagMan = new Gazelle\Manager\Tag;
+$tagMan = new Gazelle\Manager\Tag();
 
 $all = ($_GET['anyall'] ?? 'all') === 'all';
 
@@ -29,8 +29,8 @@ $vote->setTopLimit($limit);
 $bookmark     = new Gazelle\User\Bookmark($Viewer);
 $snatcher     = $Viewer->snatch();
 $imgProxy     = new Gazelle\Util\ImageProxy($Viewer);
-$tgMan        = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
-$torMan       = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
+$tgMan        = (new Gazelle\Manager\TGroup())->setViewer($Viewer);
+$torMan       = (new Gazelle\Manager\Torrent())->setViewer($Viewer);
 $urlStem      = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
 $topVotes     = $vote->topVotes();
 $number       = 0;

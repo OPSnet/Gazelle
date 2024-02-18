@@ -173,9 +173,9 @@ class Quote extends \Gazelle\BaseUser {
         $quoteList = self::$db->to_array(false, MYSQLI_ASSOC, false);
 
         $page    = [];
-        $postMan = new \Gazelle\Manager\ForumPost;
-        $reqMan  = new \Gazelle\Manager\Request;
-        $tgMan   = new \Gazelle\Manager\TGroup;
+        $postMan = new \Gazelle\Manager\ForumPost();
+        $reqMan  = new \Gazelle\Manager\Request();
+        $tgMan   = new \Gazelle\Manager\TGroup();
 
         foreach ($quoteList as $q) {
             $context = [];
@@ -246,7 +246,7 @@ class Quote extends \Gazelle\BaseUser {
         $key = sprintf(self::UNREAD_QUOTE_KEY, $this->user->id());
         $total = self::$cache->get_value($key);
         if ($total === false) {
-            $forMan = new \Gazelle\Manager\Forum;
+            $forMan = new \Gazelle\Manager\Forum();
             [$cond, $args] = $forMan->configureForUser(new \Gazelle\User($this->user->id()));
             $args[] = $this->user->id(); // for q.UserID
             $total = (int)self::$db->scalar("

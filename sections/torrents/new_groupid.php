@@ -6,12 +6,12 @@ if (!$Viewer->permitted('torrents_edit')) {
     error(403);
 }
 
-$torrent = (new Gazelle\Manager\Torrent)->findById((int)($_POST['torrentid'] ?? 0));
+$torrent = (new Gazelle\Manager\Torrent())->findById((int)($_POST['torrentid'] ?? 0));
 if (is_null($torrent)) {
     error('Torrent does not exist!');
 }
 
-$tgMan = new Gazelle\Manager\TGroup;
+$tgMan = new Gazelle\Manager\TGroup();
 $new = $tgMan->findById((int)($_POST['groupid'] ?? 0));
 if (is_null($new)) {
     error('The destination torrent group does not exist!');
@@ -36,6 +36,6 @@ if (empty($_POST['confirm'])) {
 
 authorize();
 
-$new->absorb($torrent, $Viewer, new Gazelle\Log);
+$new->absorb($torrent, $Viewer, new Gazelle\Log());
 
 header('Location: ' . $new->location());

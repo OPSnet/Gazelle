@@ -8,7 +8,7 @@ $LogID = (int)($_POST['logid'] ?? 0);
 if (!$LogID) {
     error(404);
 }
-$torrent = (new Gazelle\Manager\Torrent)->findById((int)($_POST['torrentid'] ?? 0));
+$torrent = (new Gazelle\Manager\Torrent())->findById((int)($_POST['torrentid'] ?? 0));
 if (is_null($torrent)) {
     error(404);
 }

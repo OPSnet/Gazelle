@@ -22,7 +22,7 @@ final class AddDisableUserAttrs extends AbstractMigration
             ['Name' => 'disable-leech', 'Description' => 'This user has leeching privileges disabled']
          ];
          $this->table('user_attr')->insert($rows)->save();
-      }
+    }
 
     public function down(): void
     {

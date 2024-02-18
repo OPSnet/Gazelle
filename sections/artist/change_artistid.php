@@ -5,7 +5,7 @@ if (!$Viewer->permitted('torrents_edit')) {
 }
 authorize();
 
-$artMan = new Gazelle\Manager\Artist;
+$artMan = new Gazelle\Manager\Artist();
 $artist = $artMan->findById((int)($_POST['artistid'] ?? 0));
 if (is_null($artist)) {
     error('Please select a valid artist to change.');
@@ -26,11 +26,11 @@ if (isset($_POST['confirm'])) {
     $new->merge(
         $artist,
         $Viewer,
-        new \Gazelle\Manager\Collage,
-        new \Gazelle\Manager\Comment,
-        new \Gazelle\Manager\Request,
-        new \Gazelle\Manager\TGroup,
-        new \Gazelle\Log,
+        new \Gazelle\Manager\Collage(),
+        new \Gazelle\Manager\Comment(),
+        new \Gazelle\Manager\Request(),
+        new \Gazelle\Manager\TGroup(),
+        new \Gazelle\Log(),
     );
     header("Location: artist.php?action=edit&artistid={$new->id()}");
     exit;

@@ -4,13 +4,13 @@ if (!$Viewer->permitted('users_mod')) {
     error(403);
 }
 
-$tracker = new Gazelle\Tracker;
+$tracker = new Gazelle\Tracker();
 $stats   = false;
 $user    = null;
 $info    = $tracker->info();
 
 if (isset($_GET['userid'])) {
-    $user = (new Gazelle\Manager\User)->find($_GET['userid']);
+    $user = (new Gazelle\Manager\User())->find($_GET['userid']);
     if ($user) {
         $stats = $tracker->userReport($user);
         $_GET['userid'] = $user->id(); // change @user to id

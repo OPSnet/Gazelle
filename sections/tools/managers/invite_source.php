@@ -4,7 +4,7 @@ if (!$Viewer->permitted('admin_manage_invite_source')) {
     error(403);
 }
 
-$user = (new Gazelle\Manager\User)->find(trim($_POST['user'] ?? ''));
+$user = (new Gazelle\Manager\User())->find(trim($_POST['user'] ?? ''));
 if ($user) {
     header('Location: ' . $user->location() . "#invite_source");
     exit;
@@ -12,5 +12,5 @@ if ($user) {
 
 echo $Twig->render('admin/invite-source.twig', [
     'auth' => $Viewer->auth(),
-    'list' => (new Gazelle\Manager\InviteSource)->summaryByInviter(),
+    'list' => (new Gazelle\Manager\InviteSource())->summaryByInviter(),
 ]);

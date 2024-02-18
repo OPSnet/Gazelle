@@ -13,9 +13,9 @@ Things to expect in $_GET:
 
 //---------- Things to sort out before it can start printing/generating content
 
-$forumMan = new Gazelle\Manager\Forum;
+$forumMan = new Gazelle\Manager\Forum();
 if (isset($_GET['postid'])) {
-    $post = (new Gazelle\Manager\ForumPost)->findById((int)$_GET['postid']);
+    $post = (new Gazelle\Manager\ForumPost())->findById((int)$_GET['postid']);
     if (is_null($post)) {
         error(404);
     }
@@ -26,7 +26,7 @@ if (isset($_GET['postid'])) {
     $thread = $post->thread();
 } elseif (isset($_GET['threadid'])) {
     $post = null;
-    $thread = (new Gazelle\Manager\ForumThread)->findById((int)$_GET['threadid']);
+    $thread = (new Gazelle\Manager\ForumThread())->findById((int)$_GET['threadid']);
     if (is_null($thread)) {
         error(404);
     }
@@ -82,10 +82,10 @@ if ($isSubscribed) {
     $Cache->delete_value('subscriptions_user_new_' . $Viewer->id());
 }
 
-$userMan = new Gazelle\Manager\User;
+$userMan = new Gazelle\Manager\User();
 $avatarFilter = Gazelle\Util\Twig::factory()->createTemplate('{{ user|avatar(viewer)|raw }}');
 
-$transitions = (new Gazelle\Manager\ForumTransition)->threadTransitionList($Viewer, $forum);
+$transitions = (new Gazelle\Manager\ForumTransition())->threadTransitionList($Viewer, $forum);
 $department = $forum->departmentList($Viewer);
 $auth = $Viewer->auth();
 
@@ -338,7 +338,7 @@ echo ' checked="checked"'; } ?> tabindex="6" />
                     <select name="forumid" id="move_thread_selector" tabindex="8">
 <?php
     $prevCategoryId = 0;
-    $Forums = (new Gazelle\Manager\Forum)->forumList();
+    $Forums = (new Gazelle\Manager\Forum())->forumList();
     foreach ($Forums as $forumId) {
         $forum = new Gazelle\Forum($forumId);
         if (!$Viewer->readAccess($forum)) {

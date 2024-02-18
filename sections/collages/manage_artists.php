@@ -3,7 +3,7 @@
 if (!$Viewer->permitted('site_collages_create')) {
     error(403);
 }
-$collage = (new Gazelle\Manager\Collage)->findById((int)$_GET['collageid']);
+$collage = (new Gazelle\Manager\Collage())->findById((int)$_GET['collageid']);
 if (is_null($collage)) {
     error(404);
 }

@@ -16,7 +16,7 @@ class Users {
         if ($UserID == 0) {
             return 'System';
         }
-        $userMan = new Gazelle\Manager\User;
+        $userMan = new Gazelle\Manager\User();
         $user = $userMan->findById($UserID);
         if (is_null($user)) {
             return "Unknown [$UserID]";

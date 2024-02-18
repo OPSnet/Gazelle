@@ -55,12 +55,12 @@ class Bookmark extends \Gazelle\BaseUser {
                 );
                 self::$cache->delete_multi(["u_book_t_" . $this->user->id(), "bookmarks_{$type}_" . $this->user->id(), "bookmarks_group_ids_" . $this->user->id()]);
 
-                $torMan = (new \Gazelle\Manager\Torrent)->setViewer($this->user);
-                $tgroup = (new \Gazelle\Manager\TGroup)->findById($id);
+                $torMan = (new \Gazelle\Manager\Torrent())->setViewer($this->user);
+                $tgroup = (new \Gazelle\Manager\TGroup())->findById($id);
                 $tgroup->stats()->increment('bookmark_total');
 
                 // RSS feed stuff
-                $Feed = new \Gazelle\Feed;
+                $Feed = new \Gazelle\Feed();
                 foreach ($tgroup->torrentIdList() as $id) {
                     $torrent = $torMan->findById($id);
                     if (is_null($torrent)) {

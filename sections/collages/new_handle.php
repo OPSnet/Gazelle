@@ -10,9 +10,9 @@ if (!isset($_POST['category'])) {
     error(403);
 }
 $categoryId = (int)$_POST['category'];
-$collageMan = new Gazelle\Manager\Collage;
+$collageMan = new Gazelle\Manager\Collage();
 
-$Val = new Gazelle\Util\Validator;
+$Val = new Gazelle\Util\Validator();
 if ($categoryId != COLLAGE_PERSONAL_ID || $Viewer->permitted('site_collages_renamepersonal')) {
     $Val->setField('name', true, 'string', 'The name must be between 3 and 100 characters', ['range' => [3, 100]]);
     $name = trim($_POST['name']);
@@ -60,8 +60,8 @@ $collage = $collageMan->create(
     $categoryId,
     $name,
     $_POST['description'],
-    (new Gazelle\Manager\Tag)->normalize(str_replace(',', ' ', $_POST['tags'])),
-    new Gazelle\Log
+    (new Gazelle\Manager\Tag())->normalize(str_replace(',', ' ', $_POST['tags'])),
+    new Gazelle\Log()
 );
 
 if ($Viewer->option('AutoSubscribe')) {

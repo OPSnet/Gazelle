@@ -5,5 +5,5 @@ if (!$Viewer->permitted('admin_manage_permissions')) {
 }
 
 echo $Twig->render('admin/user-custom-permission.twig', [
-    'list' => (new Gazelle\Manager\User)->findAllByCustomPermission()
+    'list' => (new Gazelle\Manager\User())->findAllByCustomPermission()
 ]);

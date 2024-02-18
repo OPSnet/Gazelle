@@ -4,7 +4,7 @@ if (!$Viewer->permitted('site_view_flow')) {
     error(403);
 }
 
-$userMan = new Gazelle\Manager\User;
+$userMan = new Gazelle\Manager\User();
 $paginator = new Gazelle\Util\Paginator(100, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($userMan->userflowTotal());
 $showFlow = $paginator->page() === 1;

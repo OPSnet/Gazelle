@@ -1,7 +1,7 @@
 <?php
 authorize();
 
-$torrent = (new Gazelle\Manager\Torrent)->setViewer($Viewer)->findById((int)$_POST['torrentid']);
+$torrent = (new Gazelle\Manager\Torrent())->setViewer($Viewer)->findById((int)$_POST['torrentid']);
 if (is_null($torrent)) {
     error(404);
 }
@@ -29,7 +29,7 @@ if (!$success) {
     error($message);
 }
 
-(new Gazelle\Manager\User)->sendRemovalPm(
+(new Gazelle\Manager\User())->sendRemovalPm(
     $torrentId, $uploaderId, $fullName,
     "Torrent $torrentId $fullName (" . number_format($size / (1024 * 1024), 2) . ' MiB '
         . strtoupper($infohash) . ") was deleted by " . $Viewer->username() . ": $reason",

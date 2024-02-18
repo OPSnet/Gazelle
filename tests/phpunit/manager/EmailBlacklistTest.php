@@ -17,7 +17,7 @@ class EmailBlacklistTest extends TestCase {
     }
 
     public function testCreate(): void {
-        $manager = new \Gazelle\Manager\EmailBlacklist;
+        $manager = new \Gazelle\Manager\EmailBlacklist();
         $total   = $manager->total();
 
         $stem = randomString(10);

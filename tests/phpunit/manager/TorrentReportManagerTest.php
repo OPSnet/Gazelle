@@ -39,16 +39,16 @@ class TorrentReportManagerTest extends TestCase {
     }
 
     public function testWorkflowReport(): void {
-        $torMan = new \Gazelle\Manager\Torrent;
+        $torMan = new \Gazelle\Manager\Torrent();
         $torrent = $torMan->findById($this->tgroup->torrentIdList()[0]);
         $this->assertInstanceOf(\Gazelle\Torrent::class, $torrent, 'report-torrent-is-torrent');
         $report = (new \Gazelle\Manager\Torrent\Report($torMan))->create(
             torrent:     $torrent,
             user:        $this->userList[1],
-            reportType:  (new \Gazelle\Manager\Torrent\ReportType)->findByName('other'),
+            reportType:  (new \Gazelle\Manager\Torrent\ReportType())->findByName('other'),
             reason:      'phpunit other report',
             otherIdList: '123 234',
-            irc:         new Gazelle\Util\Irc,
+            irc:         new Gazelle\Util\Irc(),
         );
 
         $this->assertTrue(Helper::recentDate($report->created()), 'torrent-report-created');
@@ -81,25 +81,25 @@ class TorrentReportManagerTest extends TestCase {
     }
 
     public function testModeratorResolve(): void {
-        $torMan = new \Gazelle\Manager\Torrent;
+        $torMan = new \Gazelle\Manager\Torrent();
         $torrent = $torMan->findById($this->tgroup->torrentIdList()[0]);
         $this->assertInstanceOf(\Gazelle\Torrent::class, $torrent, 'report-torrent-is-torrent');
         $report = (new \Gazelle\Manager\Torrent\Report($torMan))->create(
             torrent:     $torrent,
             user:        $this->userList[1],
-            reportType:  (new \Gazelle\Manager\Torrent\ReportType)->findByName('other'),
+            reportType:  (new \Gazelle\Manager\Torrent\ReportType())->findByName('other'),
             reason:      'phpunit other report',
             otherIdList: '123 234',
-            irc:         new Gazelle\Util\Irc,
+            irc:         new Gazelle\Util\Irc(),
         );
         $this->assertEquals(1, $report->moderatorResolve($this->userList[0], 'phpunit moderator resolve'), 'torrent-report-moderator-resolve');
         $this->assertEquals('phpunit moderator resolve', $report->comment(), 'torrent-report-final-comment');
     }
 
     public function testUrgentReport(): void {
-        $torMan = new \Gazelle\Manager\Torrent;
+        $torMan = new \Gazelle\Manager\Torrent();
         $torMan->setViewer($this->userList[0]);
-        $type = (new \Gazelle\Manager\Torrent\ReportType)->findByName('urgent');
+        $type = (new \Gazelle\Manager\Torrent\ReportType())->findByName('urgent');
         $this->assertInstanceOf(\Gazelle\Torrent\ReportType::class, $type, 'torrent-report-instance-urgent');
 
         $torrentId = $this->tgroup->torrentIdList()[0];
@@ -110,7 +110,7 @@ class TorrentReportManagerTest extends TestCase {
             reportType:  $type,
             reason:      'phpunit urgent report',
             otherIdList: '',
-            irc:         new Gazelle\Util\Irc,
+            irc:         new Gazelle\Util\Irc(),
         );
         $this->assertEquals([], $torrent->labelList($this->userList[0]), 'uploader-report-label');
 

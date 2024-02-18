@@ -9,11 +9,11 @@ $currId   = false;
 $result   = false;
 $confirm  = false;
 $messsage = false;
-$recovery = new Gazelle\Manager\Recovery;
+$recovery = new Gazelle\Manager\Recovery();
 
 if (isset($_POST['curr']) && isset($_POST['prev'])) {
     authorize();
-    $userMan  = new Gazelle\Manager\User;
+    $userMan  = new Gazelle\Manager\User();
     $currId = (int)trim($_POST['curr']);
     $curr = $userMan->findById($currId);
     if (is_null($curr)) {

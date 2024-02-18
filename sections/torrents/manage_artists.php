@@ -9,7 +9,7 @@ if (empty($_POST['importance']) || empty($_POST['artists']) || empty($_POST['gro
     error(0);
 }
 
-$tgroup = (new Gazelle\Manager\TGroup)->findById((int)($_POST['groupid'] ?? 0));
+$tgroup = (new Gazelle\Manager\TGroup())->findById((int)($_POST['groupid'] ?? 0));
 if (is_null($tgroup)) {
     error(404);
 }
@@ -38,7 +38,7 @@ if (count($CleanArtists) > 0) {
     );
     $ArtistNames = $db->to_array('ArtistID', MYSQLI_ASSOC, false);
     if ($_POST['manager_action'] == 'delete') {
-        $logger = new Gazelle\Log;
+        $logger = new Gazelle\Log();
         foreach ($CleanArtists as $Artist) {
             [$Importance, $ArtistID] = $Artist;
             $db->prepared_query("
@@ -67,7 +67,7 @@ if (count($CleanArtists) > 0) {
         );
         $Items = $db->collect('ArtistID');
         $EmptyArtists = array_diff($ArtistIDs, $Items);
-        $logger = new Gazelle\Log;
+        $logger = new Gazelle\Log();
         foreach ($EmptyArtists as $ArtistID) {
             (new Gazelle\Artist($ArtistID))->remove($Viewer, $logger);
         }
@@ -83,7 +83,7 @@ if (count($CleanArtists) > 0) {
                 AND ArtistID IN ($placeholders)
             ", $NewImportance, $tgroup->id(), ...$ArtistIDs
         );
-        $logger = new Gazelle\Log;
+        $logger = new Gazelle\Log();
         foreach ($CleanArtists as $Artist) {
             [$Importance, $ArtistID] = $Artist;
             // Don't bother logging artists whose importance hasn't changed

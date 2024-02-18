@@ -5,7 +5,7 @@ if (!isset($_GET['id'])) {
     exit;
 }
 
-$manager = new Gazelle\Manager\StaffPM;
+$manager = new Gazelle\Manager\StaffPM();
 $staffPM = $manager->findById((int)($_GET['id'] ?? 0));
 if (is_null($staffPM)) {
     error(404);
@@ -17,7 +17,7 @@ if ($staffPM->userId() === $Viewer->id() && $staffPM->isUnread()) {
     // User is viewing their own unread conversation, set it to read
     $staffPM->markAsRead($Viewer);
 }
-$userMan = new Gazelle\Manager\User;
+$userMan = new Gazelle\Manager\User();
 
 echo $Twig->render('staffpm/message.twig', [
     'author'      => $userMan->findById($staffPM->userId()),

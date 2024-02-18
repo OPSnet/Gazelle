@@ -3,7 +3,7 @@ if (!$Viewer->permitted('admin_recovery')) {
     error(403);
 }
 
-$recovery = new Gazelle\Manager\Recovery;
+$recovery = new Gazelle\Manager\Recovery();
 if (isset($_GET['task'])) {
     $id = (int)($_GET['id'] ?? 0);
     if ($id) {

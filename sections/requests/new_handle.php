@@ -56,7 +56,7 @@ $scale   = 1024 ** ($unitGiB ? 3 : 2);
 while (true) { // break early on error
     if ($categoryName !== 'Music') {
         $artistRole = [];
-        $logCue = new Gazelle\Request\LogCue;
+        $logCue = new Gazelle\Request\LogCue();
     } else {
         $logCue = $format->exists('FLAC') && $media->exists('CD')
             ? new Gazelle\Request\LogCue(
@@ -65,7 +65,7 @@ while (true) { // break early on error
                 isset($_POST['needlog']),
                 (int)($_POST['minlogscore'] ?? 0)
             )
-            : new Gazelle\Request\LogCue;
+            : new Gazelle\Request\LogCue();
 
         if (empty($_POST['artists'])) {
             $error = 'You did not enter any artists.';
@@ -102,7 +102,7 @@ while (true) { // break early on error
             break;
         }
 
-        if (!(new Gazelle\ReleaseType)->findNameById($releaseType)) {
+        if (!(new Gazelle\ReleaseType())->findNameById($releaseType)) {
             $error = 'Please pick a release type';
             break;
         }
@@ -136,7 +136,7 @@ while (true) { // break early on error
             ? (int)$match['id']
             : (int)$_POST['groupid'];
         if ($GroupID > 0) {
-            $tgroup = (new Gazelle\Manager\TGroup)->findById($GroupID);
+            $tgroup = (new Gazelle\Manager\TGroup())->findById($GroupID);
             if (is_null($tgroup)) {
                 $error = 'The torrent group, if entered, must correspond to a music torrent group on the site.';
                 break;
@@ -144,7 +144,7 @@ while (true) { // break early on error
         }
     }
 
-    $validator = new Gazelle\Util\Validator;
+    $validator = new Gazelle\Util\Validator();
     $validator->setFields([
         ['description', true,  'string', 'You forgot to enter a description.', ['maxlength' => 32000]],
         ['image',       false, 'image',  ''],
@@ -182,7 +182,7 @@ if (isset($error)) {
     exit;
 }
 
-$request = (new Gazelle\Manager\Request)->create(
+$request = (new Gazelle\Manager\Request())->create(
     user:            $Viewer,
     bounty:          (int)($amount * $scale),
     categoryId:      $categoryId,
@@ -202,9 +202,9 @@ $request = (new Gazelle\Manager\Request)->create(
     groupId:         $tgroup?->id(),
 );
 if ($categoryName == 'Music') {
-    $request->artistRole()->set($artistRole, new Gazelle\Manager\Artist);
+    $request->artistRole()->set($artistRole, new Gazelle\Manager\Artist());
 }
-$request->setTagList(array_unique(array_map('trim', explode(',', $tags))), $Viewer, new Gazelle\Manager\Tag);
+$request->setTagList(array_unique(array_map('trim', explode(',', $tags))), $Viewer, new Gazelle\Manager\Tag());
 $tgroup?->flush();
 
 if ($Viewer->option('AutoSubscribe')) {

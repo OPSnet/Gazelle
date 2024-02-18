@@ -99,7 +99,7 @@ class Download extends Base {
                     self::$db->rollback();
                     return DownloadStatus::no_tokens;
                 }
-                if (!(new \Gazelle\Tracker)->addToken($this->torrent, $user)) {
+                if (!(new \Gazelle\Tracker())->addToken($this->torrent, $user)) {
                     self::$db->rollback();
                     return DownloadStatus::tracker;
                 }

@@ -6,8 +6,8 @@ require_once(__DIR__ . '/../lib/bootstrap.php');
 
 ini_set('max_execution_time', -1);
 
-$tracker = new Gazelle\Tracker;
-$userMan = new Gazelle\Manager\User;
+$tracker = new Gazelle\Tracker();
+$userMan = new Gazelle\Manager\User();
 
 $db = Gazelle\DB::DB();
 $db->prepared_query('

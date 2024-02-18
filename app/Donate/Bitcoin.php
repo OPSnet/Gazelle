@@ -45,7 +45,7 @@ class Bitcoin {
             'zpub' => $slip132->p2wpkh($btcPrefixes),
             default => throw new DonationException("invalid xyzpub key $xyzpub"),
         };
-        $network = new \BitWasp\Bitcoin\Network\Networks\Bitcoin;
+        $network = new \BitWasp\Bitcoin\Network\Networks\Bitcoin();
         $config = new GlobalPrefixConfig([
             new NetworkConfig($network, [$prefix])
         ]);

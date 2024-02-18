@@ -18,7 +18,7 @@ class CommentTest extends TestCase {
 
     public function tearDown(): void {
         if (isset($this->artist)) {
-            $this->artist->remove($this->user, new \Gazelle\Log);
+            $this->artist->remove($this->user, new \Gazelle\Log());
         }
         if (isset($this->collage)) {
             $this->collage->hardRemove();
@@ -33,8 +33,8 @@ class CommentTest extends TestCase {
     }
 
     public function testCommentArtist(): void {
-        $manager = new \Gazelle\Manager\Comment;
-        $artMan  = new \Gazelle\Manager\Artist;
+        $manager = new \Gazelle\Manager\Comment();
+        $artMan  = new \Gazelle\Manager\Artist();
         [$artistId, $aliasId] = $artMan->create('phpunit.' . randomString(12));
         $this->artist = $artMan->findById($artistId);
 
@@ -53,7 +53,7 @@ class CommentTest extends TestCase {
         $this->assertInstanceOf(\Gazelle\Comment\Artist::class, $comment->load(), 'comment-artist-load');
         $thread = $comment->thread();
         $this->assertCount(2, $thread, 'comment-artist-thread');
-        $this->assertCount(2, $comment->threadList(new \Gazelle\Manager\User), 'comment-artist-threadlist');
+        $this->assertCount(2, $comment->threadList(new \Gazelle\Manager\User()), 'comment-artist-threadlist');
         $this->assertEquals(2, $comment->total(), 'comment-artist-total');
         $this->assertEquals($this->user->id(), $reply->userId(), 'comment-artist-user-id');
         $this->assertEquals(0, $comment->handleSubscription($this->user), 'comment-artist-handle-subscription');
@@ -66,16 +66,16 @@ class CommentTest extends TestCase {
     }
 
     public function testCommentCollage(): void {
-        $this->collage = (new Gazelle\Manager\Collage)->create(
+        $this->collage = (new Gazelle\Manager\Collage())->create(
             user:        $this->user,
             categoryId:  1, /* Theme */
             name:        'phpunit collage comment ' . randomString(20),
             description: 'phpunit collage comment description',
             tagList:     'acoustic electronic',
-            logger:      new Gazelle\Log,
+            logger:      new Gazelle\Log(),
         );
 
-        $manager = new \Gazelle\Manager\Comment;
+        $manager = new \Gazelle\Manager\Comment();
         $body    = 'phpunit comment ' . randomString(10);
         $comment = $manager->create($this->user, 'collages', $this->collage->id(), $body);
         $this->assertEquals($body, $manager->findBodyById($comment->id()), 'comment-find-body');
@@ -90,10 +90,10 @@ class CommentTest extends TestCase {
     }
 
     public function testCommentRequest(): void {
-        $this->request = (new Gazelle\Manager\Request)->create(
+        $this->request = (new Gazelle\Manager\Request())->create(
             user:            $this->user,
             bounty:          REQUEST_MIN * 1024 * 1024,
-            categoryId:      (new Gazelle\Manager\Category)->findIdByName('Music'),
+            categoryId:      (new Gazelle\Manager\Category())->findIdByName('Music'),
             year:            (int)date('Y'),
             title:           'phpunit request comment',
             image:           '',
@@ -109,7 +109,7 @@ class CommentTest extends TestCase {
             oclc:            '',
         );
 
-        $manager = new \Gazelle\Manager\Comment;
+        $manager = new \Gazelle\Manager\Comment();
         $comment = $manager->create($this->user, 'requests', $this->request->id(), 'phpunit comment ' . randomString(10));
         $this->assertInstanceOf(\Gazelle\Comment\Request::class, $comment, 'comment-request-create');
         $this->assertEquals('requests', $comment->page(), 'comment-request-page');
@@ -121,7 +121,7 @@ class CommentTest extends TestCase {
     }
 
     public function testCommentTGroup(): void {
-        $manager = new \Gazelle\Manager\Comment;
+        $manager = new \Gazelle\Manager\Comment();
         $this->torrent = Helper::makeTorrentMusic(
             tgroup: Helper::makeTGroupMusic(
                 name:       'phpunit comment ' . randomString(6),
@@ -157,8 +157,8 @@ class CommentTest extends TestCase {
     }
 
     public function testCommentMerge(): void {
-        $manager = new \Gazelle\Manager\Comment;
-        $artMan  = new \Gazelle\Manager\Artist;
+        $manager = new \Gazelle\Manager\Comment();
+        $artMan  = new \Gazelle\Manager\Artist();
         [$artistId, $aliasId] = $artMan->create('phpunit.' . randomString(12));
         $this->artist = $artMan->findById($artistId);
 
@@ -171,6 +171,6 @@ class CommentTest extends TestCase {
         $manager->merge('artist', $artistExtraId, $this->artist->id());
         $this->assertInstanceOf(\Gazelle\Comment\Artist::class, $comment->load(), 'comment-merge-load');
         $this->assertCount(2, $comment->thread(), 'comment-artist-merged-thread');
-        $artistExtra->remove($this->user, new \Gazelle\Log);
+        $artistExtra->remove($this->user, new \Gazelle\Log());
     }
 }

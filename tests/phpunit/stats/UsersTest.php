@@ -6,7 +6,7 @@ require_once(__DIR__ . '/../../../lib/bootstrap.php');
 
 class UsersTest extends TestCase {
     public function testStats(): void {
-        $stats = new \Gazelle\Stats\Users;
+        $stats = new \Gazelle\Stats\Users();
 
         /* not easy to test precise results, but at least the SQL can be exercised */
         $this->assertIsArray($stats->browserDistribution(), 'users-stats-browser');
@@ -26,7 +26,7 @@ class UsersTest extends TestCase {
     }
 
     public function testTop(): void {
-        $stats = new \Gazelle\Stats\Users;
+        $stats = new \Gazelle\Stats\Users();
         $this->assertInstanceOf(Gazelle\Stats\Users::class, $stats->flush(), 'users-stats-flush');
         $this->assertInstanceOf(Gazelle\Stats\Users::class, $stats->flushTop(10), 'users-stats-top-flush');
         $this->assertIsArray($stats->topDownloadList(10), 'users-stats-top-download');
@@ -40,24 +40,24 @@ class UsersTest extends TestCase {
         $bogus = new Gazelle\Json\Top10\User(
             'bogus',
             10,
-            new \Gazelle\Stats\Users,
-            new \Gazelle\Manager\User,
+            new \Gazelle\Stats\Users(),
+            new \Gazelle\Manager\User(),
         );
         $this->assertCount(0, $bogus->payload(), 'user-ajax-top10-bogus');
 
         $all = new Gazelle\Json\Top10\User(
             'all',
             10,
-            new \Gazelle\Stats\Users,
-            new \Gazelle\Manager\User,
+            new \Gazelle\Stats\Users(),
+            new \Gazelle\Manager\User(),
         );
         $this->assertCount(5, $all->payload(), 'user-ajax-top10-all');
 
         $ul = new Gazelle\Json\Top10\User(
             'ul',
             10,
-            new \Gazelle\Stats\Users,
-            new \Gazelle\Manager\User,
+            new \Gazelle\Stats\Users(),
+            new \Gazelle\Manager\User(),
         );
         $this->assertCount(1, $ul->payload(), 'user-ajax-top10-ul');
     }

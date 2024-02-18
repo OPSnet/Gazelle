@@ -29,13 +29,13 @@ class CollageFreeleechTest extends TestCase {
                 user:       $this->user,
             ),
         ];
-        $this->collage = (new Gazelle\Manager\Collage)->create(
+        $this->collage = (new Gazelle\Manager\Collage())->create(
             user:        $this->user,
             categoryId:  2,
             name:        'phpunit collfree ' . randomString(10),
             description: 'phpunit collfree',
             tagList:     'pop',
-            logger:      new \Gazelle\Log,
+            logger:      new \Gazelle\Log(),
         );
         foreach ($this->tgroupList as $tgroup) {
             foreach ([
@@ -56,7 +56,7 @@ class CollageFreeleechTest extends TestCase {
     }
 
     public function tearDown(): void {
-        $torMan = new Gazelle\Manager\Torrent;
+        $torMan = new Gazelle\Manager\Torrent();
         foreach ($this->tgroupList as $tgroup) {
             $this->collage->removeEntry($tgroup->id());
             foreach ($tgroup->torrentIdList() as $torrentId) {
@@ -69,14 +69,14 @@ class CollageFreeleechTest extends TestCase {
     }
 
     public function testCollageFreeleech(): void {
-        $torMan = new \Gazelle\Manager\Torrent;
+        $torMan = new \Gazelle\Manager\Torrent();
         $idList = $this->collage->entryFlacList();
         $this->assertCount(4, $idList, 'collfree-flac-list');
         $this->assertEquals(
             4,
             $this->collage->setFreeleech(
                 torMan:    $torMan,
-                tracker:   new \Gazelle\Tracker,
+                tracker:   new \Gazelle\Tracker(),
                 user:      $this->user,
                 leechType: LeechType::Free,
                 reason:    LeechReason::Permanent,
@@ -99,7 +99,7 @@ class CollageFreeleechTest extends TestCase {
             4,
             $this->collage->setFreeleech(
                 torMan:    $torMan,
-                tracker:   new \Gazelle\Tracker,
+                tracker:   new \Gazelle\Tracker(),
                 user:      $this->user,
                 leechType: LeechType::Normal,
                 reason:    LeechReason::Normal,

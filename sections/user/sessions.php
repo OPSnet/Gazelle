@@ -7,7 +7,7 @@ if (!isset($_GET['id'])) {
     if ($userId !== $Viewer->id() && !$Viewer->permittedAny('users_logout', 'users_view_ips')) {
         error(403);
     }
-    $user = (new Gazelle\Manager\User)->findById($userId);
+    $user = (new Gazelle\Manager\User())->findById($userId);
     if (is_null($user)) {
         error(404);
     }

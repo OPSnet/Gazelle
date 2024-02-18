@@ -4,7 +4,7 @@ if (!$Viewer->permitted('site_analysis')) {
     error(403);
 }
 
-$errMan = new Gazelle\Manager\ErrorLog;
+$errMan = new Gazelle\Manager\ErrorLog();
 $remove = array_key_extract_suffix('clear-', $_POST);
 if ($remove) {
     $removed = $errMan->remove($remove);

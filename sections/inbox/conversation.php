@@ -15,6 +15,6 @@ echo $Twig->render('inbox/conversation.twig', [
     'paginator'  => $paginator,
     'pm'         => $pm,
     'post_list'  => $pm->postList($paginator->limit(), $paginator->offset()),
-    'staff_list' => (new Gazelle\Manager\User)->staffPMList(),
+    'staff_list' => (new Gazelle\Manager\User())->staffPMList(),
     'viewer'     => $Viewer,
 ]);

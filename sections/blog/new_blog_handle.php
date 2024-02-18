@@ -17,16 +17,16 @@ if (empty($title)) {
 
 $thread = match ((int)($_POST['thread'] ?? -1)) {
     -1 => null,
-     0 => (new Gazelle\Manager\ForumThread)->create(
+     0 => (new Gazelle\Manager\ForumThread())->create(
         forum: new Gazelle\Forum(ANNOUNCEMENT_FORUM_ID),
         user:  $Viewer,
         title: $title,
         body:  $body,
     ),
-    default => (new Gazelle\Manager\ForumThread)->findById((int)$_POST['thread']),
+    default => (new Gazelle\Manager\ForumThread())->findById((int)$_POST['thread']),
 };
 
-$blog = (new Gazelle\Manager\Blog)->create([
+$blog = (new Gazelle\Manager\Blog())->create([
     'title'     => $title,
     'body'      => $body,
     'important' => isset($_POST['important']) ? 1 : 0,

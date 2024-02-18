@@ -1,12 +1,12 @@
 <?php
 
-$artist = (new Gazelle\Manager\Artist)->findById((int)($_POST['artistid'] ?? 0));
+$artist = (new Gazelle\Manager\Artist())->findById((int)($_POST['artistid'] ?? 0));
 if (is_null($artist)) {
     error(404);
 }
 authorize();
 
-$thread = (new Gazelle\Manager\ForumThread)->create(
+$thread = (new Gazelle\Manager\ForumThread())->create(
     forum: new Gazelle\Forum(EDITING_FORUM_ID),
     user:  new Gazelle\User(SYSTEM_USER_ID),
     title: "Editing request – Artist: " . $artist->name(),

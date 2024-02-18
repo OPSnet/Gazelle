@@ -19,7 +19,7 @@ $text = match (true) {
     default                   => '',
 };
 if ($text) {
-    $search = (new Gazelle\Search\Email(new Gazelle\Search\ASN))
+    $search = (new Gazelle\Search\Email(new Gazelle\Search\ASN()))
         ->create('email_search_' . getmypid())
         ->setColumn($column)
         ->setDirection($direction);

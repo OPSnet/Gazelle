@@ -3,7 +3,7 @@
 if (!$Viewer->permitted('zip_downloader')) {
     error(403);
 }
-$user = (new Gazelle\Manager\User)->findById((int)($_GET['userid'] ?? 0));
+$user = (new Gazelle\Manager\User())->findById((int)($_GET['userid'] ?? 0));
 if (is_null($user)) {
     error(404);
 }
@@ -40,7 +40,7 @@ switch ($_GET['type']) {
 }
 
 $title = "{$user->username()}-$label";
-$collector = new Gazelle\Collector\TList($Viewer, new Gazelle\Manager\Torrent, $title, 0);
+$collector = new Gazelle\Collector\TList($Viewer, new Gazelle\Manager\Torrent(), $title, 0);
 
 $db = Gazelle\DB::DB();
 $db->prepared_query("

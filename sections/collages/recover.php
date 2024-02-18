@@ -8,7 +8,7 @@ $_POST['name'] = trim($_POST['name'] ?? '');
 
 if (!empty($_POST['id']) || $_POST['name'] !== '') {
     authorize();
-    $collageMan = new Gazelle\Manager\Collage;
+    $collageMan = new Gazelle\Manager\Collage();
     $collage = null;
 
     if (!empty($_POST['id'])) {
@@ -21,7 +21,7 @@ if (!empty($_POST['id']) || $_POST['name'] !== '') {
         error('Collage is completely deleted');
     } else {
         $collageId = $collage->flush()->id();
-        (new Gazelle\Log)->general("Collage $collageId was recovered by " . $Viewer->username());
+        (new Gazelle\Log())->general("Collage $collageId was recovered by " . $Viewer->username());
         header('Location: ' . $collage->location());
         exit;
     }

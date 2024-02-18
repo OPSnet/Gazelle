@@ -1,7 +1,7 @@
 <?php
 
 authorize();
-$tgroup = (new Gazelle\Manager\TGroup)->findById((int)$_GET['groupid']);
+$tgroup = (new Gazelle\Manager\TGroup())->findById((int)$_GET['groupid']);
 $tagId  = (int)$_GET['tagid'];
 $way    = $_GET['way'];
 

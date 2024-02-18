@@ -8,7 +8,7 @@ class Applicant extends BaseObject {
     final public const ENTRIES_PER_PAGE = 1000; // TODO: change to 50 and implement pagination
 
     public function flush(): static {
-        (new Manager\Applicant)->flush();
+        (new Manager\Applicant())->flush();
         if (isset($this->info)) {
             self::$cache->delete_value("user_applicant_{$this->userId()}");
         }

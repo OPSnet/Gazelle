@@ -1,6 +1,6 @@
 <?php
 
-$user = (new Gazelle\Manager\User)->findByUsername($_GET['search'] ?? $_GET['username'] ?? '');
+$user = (new Gazelle\Manager\User())->findByUsername($_GET['search'] ?? $_GET['username'] ?? '');
 if (!is_null($user)) {
     header('Location: ' . $user->location());
 }

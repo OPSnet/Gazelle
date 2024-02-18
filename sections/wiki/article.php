@@ -1,7 +1,7 @@
 <?php
 Text::$TOC = true;
 
-$wikiMan = new Gazelle\Manager\Wiki;
+$wikiMan = new Gazelle\Manager\Wiki();
 $article = false;
 $error = false;
 if (isset($_GET['id'])) {
@@ -22,7 +22,7 @@ if (!$article) {
 if (!$article->readable($Viewer)) {
     error(403);
 }
-$classList = (new Gazelle\Manager\User)->classLevelList();
+$classList = (new Gazelle\Manager\User())->classLevelList();
 
 echo $Twig->render('wiki/article.twig', [
     'article' => $article,

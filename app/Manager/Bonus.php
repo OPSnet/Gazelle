@@ -14,7 +14,7 @@ class Bonus extends \Gazelle\Base {
      * @return int Discount rate (0: normal price, 100: everything is free :)
      */
     public function discount(): int {
-        return (int)(new \Gazelle\Manager\SiteOption)->findValueByName('bonus-discount');
+        return (int)(new \Gazelle\Manager\SiteOption())->findValueByName('bonus-discount');
     }
 
     public function itemList(): array {

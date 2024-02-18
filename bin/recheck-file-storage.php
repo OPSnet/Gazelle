@@ -21,7 +21,7 @@ require_once(__DIR__ . '/../lib/bootstrap.php');
 $allConfig = [
     '-html' => [
         'CHECK' => 'SELECT Log FROM torrents_logs WHERE TorrentID = ? AND LogID = ?',
-        'FILER' => new Gazelle\File\RipLogHTML,
+        'FILER' => new Gazelle\File\RipLogHTML(),
         'MD5'   => 'SELECT Log AS digest FROM torrents_logs WHERE TorrentID = ? AND LogID = ?',
         'PIPE'  => '/usr/bin/find ' . STORAGE_PATH_RIPLOGHTML . ' -type f',
         'MATCH' => '~/(\d+)_(\d+)\.html$~',
@@ -29,7 +29,7 @@ $allConfig = [
     ],
     '-log' => [
         'CHECK' => 'SELECT 1 FROM torrents_logs WHERE TorrentID = ? AND LogID = ?',
-        'FILER' => new Gazelle\File\RipLog,
+        'FILER' => new Gazelle\File\RipLog(),
         'MD5'   => null,
         'PIPE'  => '/usr/bin/find ' . STORAGE_PATH_RIPLOG . ' -type f',
         'MATCH' => '~/(\d+)_(\d+)\.log$~',
@@ -37,7 +37,7 @@ $allConfig = [
     ],
     '-torrent' => [
         'CHECK' => 'SELECT 1 FROM torrents WHERE ID = ?',
-        'FILER' => new Gazelle\File\Torrent,
+        'FILER' => new Gazelle\File\Torrent(),
         'MD5'   => 'SELECT File AS digest FROM torrents_files WHERE TorrentID = ?',
         'PIPE'  => '/usr/bin/find ' . STORAGE_PATH_TORRENT . ' -type f',
         'MATCH' => '~/(\d+)\.torrent$~',

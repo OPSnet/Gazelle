@@ -13,15 +13,15 @@ if (!$Viewer->permitted('admin_reports')) {
     error(403);
 }
 
-$torMan        = new Gazelle\Manager\Torrent;
+$torMan        = new Gazelle\Manager\Torrent();
 $reportMan     = new Gazelle\Manager\Torrent\Report($torMan);
-$reportTypeMan = new Gazelle\Manager\Torrent\ReportType;
-$requestMan    = new Gazelle\Manager\Request;
-$userMan       = new Gazelle\Manager\User;
+$reportTypeMan = new Gazelle\Manager\Torrent\ReportType();
+$requestMan    = new Gazelle\Manager\Request();
+$userMan       = new Gazelle\Manager\User();
 $search        = new Gazelle\Search\Torrent\Report($_GET['view'] ?? '', $_GET['id'] ?? '', $reportTypeMan, $userMan);
 $imgProxy      = new Gazelle\Util\ImageProxy($Viewer);
-$ripFiler      = new Gazelle\File\RipLog;
-$htmlFiler     = new Gazelle\File\RipLogHTML;
+$ripFiler      = new Gazelle\File\RipLog();
+$htmlFiler     = new Gazelle\File\RipLogHTML();
 
 $paginator = new Gazelle\Util\Paginator(REPORTS_PER_PAGE, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($search->total());

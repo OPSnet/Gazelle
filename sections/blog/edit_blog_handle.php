@@ -15,12 +15,12 @@ if (empty($title)) {
     error('The title of the blog article must not be empty');
 }
 
-$blog = (new Gazelle\Manager\Blog)->findById((int)($_POST['blogid'] ?? 0));
+$blog = (new Gazelle\Manager\Blog())->findById((int)($_POST['blogid'] ?? 0));
 if (is_null($blog)) {
     error(404);
 }
 
-$manager = new Gazelle\Manager\ForumThread;
+$manager = new Gazelle\Manager\ForumThread();
 $thread = match ((int)($_POST['thread'] ?? -1)) {
     -1 => null,
      0 => $manager->create(

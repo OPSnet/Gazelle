@@ -9,6 +9,6 @@ if (!(new Gazelle\User\Bookmark($Viewer))->create($type, $id)) {
 }
 
 if ($type === 'request') {
-    (new Gazelle\Manager\Request)->findById($id)?->updateBookmarkStats();
+    (new Gazelle\Manager\Request())->findById($id)?->updateBookmarkStats();
 }
 print(json_encode('OK'));

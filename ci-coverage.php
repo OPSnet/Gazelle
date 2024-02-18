@@ -17,14 +17,14 @@ class CoverageHelper {
     private CodeCoverage $coverage;
 
     public function __construct() {
-        $filter = new Filter;
+        $filter = new Filter();
         $filter->includeDirectory(__DIR__ . '/app');
         $filter->includeDirectory(__DIR__ . '/classes');
         $filter->includeDirectory(__DIR__ . '/lib');
         $filter->includeDirectory(__DIR__ . '/public');
         $filter->includeDirectory(__DIR__ . '/sections');
         $this->coverage = new CodeCoverage(
-            (new Selector)->forLineCoverage($filter),
+            (new Selector())->forLineCoverage($filter),
             $filter
         );
         $this->coverage->cacheStaticAnalysis('/tmp/coverage-cache');
@@ -36,7 +36,7 @@ class CoverageHelper {
         Filesystem::createDirectory($this::TARGET_DIR);
         $outfile = tempnam($this::TARGET_DIR, 'phpcov');
         if ($outfile !== false) {
-            (new PhpReport)->process($this->coverage, $outfile);
+            (new PhpReport())->process($this->coverage, $outfile);
             rename($outfile, $outfile . ".cov");
         }
     }

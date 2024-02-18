@@ -5,7 +5,7 @@ use Gazelle\Enum\UserTokenType;
 
 if (isset($_REQUEST['confirm'])) {
     // Confirm registration
-    $token = (new Gazelle\Manager\UserToken)->findByToken($_REQUEST['confirm']);
+    $token = (new Gazelle\Manager\UserToken())->findByToken($_REQUEST['confirm']);
     if (!$token || $token->type() != UserTokenType::confirm || !$token->consume()) {
         // we have no token, or not of the right type, or not consumable (expired)
         echo $Twig->render('register/expired.twig');
@@ -18,17 +18,17 @@ if (isset($_REQUEST['confirm'])) {
         $Twig->render('register/welcome.bbcode.twig', ['user' => $user])
     );
     echo $Twig->render('register/complete.twig');
-    (new Gazelle\Tracker)->addUser($user);
+    (new Gazelle\Tracker())->addUser($user);
 
-} elseif (OPEN_REGISTRATION || isset($_REQUEST['invite']) || (new Gazelle\Stats\Users)->enabledUserTotal() == 0) {
+} elseif (OPEN_REGISTRATION || isset($_REQUEST['invite']) || (new Gazelle\Stats\Users())->enabledUserTotal() == 0) {
     if ($_REQUEST['invite']) {
-        if (!(new Gazelle\Manager\Invite)->inviteExists($_GET['invite'])) {
+        if (!(new Gazelle\Manager\Invite())->inviteExists($_GET['invite'])) {
             echo $Twig->render('register/no-invite.twig');
             exit;
         }
     }
 
-    $validator = new Gazelle\Util\Validator;
+    $validator = new Gazelle\Util\Validator();
     $validator->setFields([
         ['username', true, 'regex', 'You did not enter a valid username.', ['regex' => USERNAME_REGEXP]],
         ['email', true, 'email', 'You did not enter a valid email address.'],
@@ -45,7 +45,7 @@ if (isset($_REQUEST['confirm'])) {
             $username = trim($_POST['username']);
             $email    = trim($_POST['email']);
 
-            $creator = new Gazelle\UserCreator;
+            $creator = new Gazelle\UserCreator();
             $creator->setUsername($username)
                 ->setEmail($email)
                 ->setPassword($_POST['password'])
@@ -56,11 +56,11 @@ if (isset($_REQUEST['confirm'])) {
 
             try {
                 $user = $creator->create();
-                (new Gazelle\Util\Mail)->send($user->email(), 'New account confirmation at ' . SITE_NAME,
+                (new Gazelle\Util\Mail())->send($user->email(), 'New account confirmation at ' . SITE_NAME,
                     $Twig->render('email/registration.twig', [
                         'ipaddr' => $_SERVER['REMOTE_ADDR'],
                         'user'   => $user,
-                        'token'  => (new \Gazelle\Manager\UserToken)->create(UserTokenType::confirm, $user),
+                        'token'  => (new \Gazelle\Manager\UserToken())->create(UserTokenType::confirm, $user),
                     ])
                 );
                 $emailSent = true;

@@ -1,7 +1,7 @@
 <?php
 authorize();
 
-$article = (new Gazelle\Manager\Wiki)->findById((int)$_POST['article']);
+$article = (new Gazelle\Manager\Wiki())->findById((int)$_POST['article']);
 if (is_null($article)) {
     error(404);
 }

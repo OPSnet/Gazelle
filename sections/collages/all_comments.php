@@ -1,6 +1,6 @@
 <?php
 
-$collage = (new Gazelle\Manager\Collage)->findById((int)($_GET['collageid'] ?? 0));
+$collage = (new Gazelle\Manager\Collage())->findById((int)($_GET['collageid'] ?? 0));
 if (is_null($collage)) {
     error(404);
 }
@@ -18,6 +18,6 @@ echo $Twig->render('collage/comment.twig', [
     'paginator'     => $paginator,
     'textarea'      => (new Gazelle\Util\Textarea('quickpost', '', 90, 8))->setPreviewManual(true),
     'url'           => $_SERVER['REQUEST_URI'],
-    'userMan'       => new Gazelle\Manager\User,
+    'userMan'       => new Gazelle\Manager\User(),
     'viewer'        => $Viewer,
 ]);

@@ -8,7 +8,7 @@ if (!FEATURE_EMAIL_REENABLE) {
     json_error("This feature is currently deactivated.");
 }
 
-$enableMan = new Gazelle\Manager\AutoEnable;
+$enableMan = new Gazelle\Manager\AutoEnable();
 $idList = array_map('intval', $_GET['ids'] ?? []);
 if (empty($idList)) {
     json_error("You must select at least one request to resolve");

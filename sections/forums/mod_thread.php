@@ -17,9 +17,9 @@ if (!$Viewer->permitted('site_moderate_forums') && empty($_POST['transition'])) 
 }
 authorize();
 
-$forumMan = new Gazelle\Manager\Forum;
+$forumMan = new Gazelle\Manager\Forum();
 
-$thread = (new Gazelle\Manager\ForumThread)->findById((int)($_POST['threadid'] ?? 0));
+$thread = (new Gazelle\Manager\ForumThread())->findById((int)($_POST['threadid'] ?? 0));
 if (is_null($thread)) {
     error(404);
 }
@@ -68,7 +68,7 @@ if (isset($_POST['transition'])) {
     if ($transId < 1) {
         error(0);
     }
-    $transitions = (new Gazelle\Manager\ForumTransition)->threadTransitionList($Viewer, $forum);
+    $transitions = (new Gazelle\Manager\ForumTransition())->threadTransitionList($Viewer, $forum);
     if (!isset($transitions[$transId])) {
         error(0);
     }

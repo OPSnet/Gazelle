@@ -17,7 +17,7 @@ class DnuTest extends TestCase {
     }
 
     public function testDnu(): void {
-        $manager = new Gazelle\Manager\DNU;
+        $manager = new Gazelle\Manager\DNU();
 
         $initial = $manager->dnuList();
         $dnu = $manager->create('phpunit ' . randomString(10), 'phpunit description', $this->user);
@@ -51,7 +51,7 @@ class DnuTest extends TestCase {
     }
 
     public function testReorder(): void {
-        $manager = new Gazelle\Manager\DNU;
+        $manager = new Gazelle\Manager\DNU();
         $idList = array_map(fn ($x) => $x['id'], $manager->dnuList());
 
         $first  = $manager->create('phpunit first ' . randomString(10), 'phpunit description', $this->user);

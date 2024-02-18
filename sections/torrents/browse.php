@@ -2,10 +2,10 @@
 
 use Gazelle\Util\SortableTableHeader;
 
-$torMan    = (new Gazelle\Manager\Torrent)->setViewer($Viewer);
+$torMan    = (new Gazelle\Manager\Torrent())->setViewer($Viewer);
 $reportMan = new Gazelle\Manager\Torrent\Report($torMan);
-$tagMan    = new Gazelle\Manager\Tag;
-$tgMan     = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
+$tagMan    = new Gazelle\Manager\Tag();
+$tgMan     = (new Gazelle\Manager\TGroup())->setViewer($Viewer);
 $snatcher  = $Viewer->snatch();
 
 if (!empty($_GET['searchstr']) || !empty($_GET['groupname'])) {
@@ -53,8 +53,8 @@ if (isset($_GET['searchsubmit'])) {
 
 $paginator = new Gazelle\Util\Paginator(TORRENTS_PER_PAGE, (int)($_GET['page'] ?? 1));
 $Search = new Gazelle\Search\Torrent(
-    new Gazelle\Manager\TGroup,
-    new Gazelle\Manager\Torrent,
+    new Gazelle\Manager\TGroup(),
+    new Gazelle\Manager\Torrent(),
     $GroupResults,
     $header->getSortKey(),
     $header->getOrderDir(),
@@ -99,7 +99,7 @@ echo $Twig->render('torrent/browse-header.twig', [
     'hide_remaster' => ($_GET['remastertitle'] ?? $_GET['remasteryear'] ?? $_GET['remastercataloguenumber'] ?? '') != ''
         ? '' : ' hidden',
     'hide_advanced' => $hideAdvanced,
-    'release_type'  => (new Gazelle\ReleaseType)->list(),
+    'release_type'  => (new Gazelle\ReleaseType())->list(),
     'results_total' => $RealNumResults,
     'results_shown' => $NumResults,
     'search_mode'   => $searchMode,
@@ -118,7 +118,7 @@ if ($NumResults == 0) {
     exit;
 }
 
-$releaseTypes = (new Gazelle\ReleaseType)->list();
+$releaseTypes = (new Gazelle\ReleaseType())->list();
 $bookmark = new \Gazelle\User\Bookmark($Viewer);
 $imgProxy = new Gazelle\Util\ImageProxy($Viewer);
 

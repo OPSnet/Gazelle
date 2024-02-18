@@ -38,7 +38,7 @@ if (isset($_GET['mode']) && $_GET['mode'] === 'userrank') {
         'openssl_strong'   => $strong,
         'mysql_version'    => $db->scalar('SELECT @@version'),
         'php_version'      => phpversion(),
-        'site_info'        => new Gazelle\SiteInfo,
+        'site_info'        => new Gazelle\SiteInfo(),
         'timestamp_php'    => date('Y-m-d H:i:s'),
         'timestamp_db'     => $db->scalar("SELECT now()"),
     ]);

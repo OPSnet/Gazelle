@@ -4,7 +4,7 @@ if (!$Viewer->permitted('admin_manage_contest')) {
     error(403);
 }
 
-$contestMan = new Gazelle\Manager\Contest;
+$contestMan = new Gazelle\Manager\Contest();
 $create     = isset($_GET['action']) && $_GET['action'] === 'create';
 $saved      = false;
 
@@ -54,6 +54,6 @@ echo $Twig->render('contest/admin.twig', [
     'list'       => $contestMan->contestList(),
     'saved'      => $saved,
     'type'       => $contestMan->contestTypes(),
-    'user_count' => (new \Gazelle\Stats\Users)->enabledUserTotal(),
+    'user_count' => (new \Gazelle\Stats\Users())->enabledUserTotal(),
     'viewer'     => $Viewer,
 ]);

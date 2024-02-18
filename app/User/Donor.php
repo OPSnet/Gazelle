@@ -470,7 +470,7 @@ class Donor extends \Gazelle\BaseUser {
                 $fiatAmount = $amount;
                 break;
             default:
-                $xbtAmount  = (new \Gazelle\Manager\XBT)->fiat2xbt($amount, $currency);
+                $xbtAmount  = (new \Gazelle\Manager\XBT())->fiat2xbt($amount, $currency);
                 $fiatAmount = $xbtAmount * $xbtRate;
                 break;
         }

@@ -17,12 +17,12 @@ class UserTokenTest extends TestCase {
     }
 
     public function tearDown(): void {
-        (new \Gazelle\Manager\UserToken)->removeUser($this->user);
+        (new \Gazelle\Manager\UserToken())->removeUser($this->user);
         $this->user->remove();
     }
 
     public function testUserTokenCreate(): void {
-        $manager = new \Gazelle\Manager\UserToken;
+        $manager = new \Gazelle\Manager\UserToken();
         $userToken = $manager->create(UserTokenType::password, $this->user);
         $this->assertTrue(Helper::recentDate($userToken->expiry()), 'usertoken-expiry');
 
@@ -39,19 +39,19 @@ class UserTokenTest extends TestCase {
     }
 
     public function testUserTokenPermanent(): void {
-        $manager = new \Gazelle\Manager\UserToken;
+        $manager = new \Gazelle\Manager\UserToken();
         $userToken = $manager->create(UserTokenType::mfa, $this->user);
         $this->assertEquals('infinity', $userToken->expiry(), 'usertoken-permanent');
     }
 
     public function testUserTokenExists(): void {
-        $manager = new \Gazelle\Manager\UserToken;
+        $manager = new \Gazelle\Manager\UserToken();
         $userToken = $manager->create(UserTokenType::confirm, $this->user);
         $this->assertInstanceOf(\Gazelle\User\Token::class, $manager->findByUser($userToken->user(), UserTokenType::confirm), 'usertoken-find-by-user');
     }
 
     public function testPasswordToken(): void {
-        $manager = new \Gazelle\Manager\UserToken;
+        $manager = new \Gazelle\Manager\UserToken();
         $userToken = $manager->createPasswordResetToken($this->user);
         $this->assertEquals('1 day', UserTokenType::confirm->interval(), 'usertoken-confirm-interval');
 
@@ -69,12 +69,12 @@ class UserTokenTest extends TestCase {
     }
 
     public function testUserTokenMissing(): void {
-        $manager = new \Gazelle\Manager\UserToken;
+        $manager = new \Gazelle\Manager\UserToken();
         $this->assertNull($manager->findByUser($this->user, UserTokenType::mfa), 'usertoken-missing');
     }
 
     public function testMFA(): void {
-        $manager = new \Gazelle\Manager\UserToken;
+        $manager = new \Gazelle\Manager\UserToken();
         $this->assertCount(0, $this->user->list2FA(), 'utest-no-mfa');
         $this->assertEquals(1, $this->user->create2FA($manager, randomString(16)), 'utest-setup-mfa');
         $recovery = $this->user->list2FA();

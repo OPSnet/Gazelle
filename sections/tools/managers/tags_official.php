@@ -4,7 +4,7 @@ if (!$Viewer->permitted('users_mod')) {
     error(403);
 }
 
-$tagMan = new Gazelle\Manager\Tag;
+$tagMan = new Gazelle\Manager\Tag();
 
 $unofficialName = [];
 if ($_POST['oldtags'] ?? null) {

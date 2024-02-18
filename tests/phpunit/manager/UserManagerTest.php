@@ -27,7 +27,7 @@ class UserManagerTest extends TestCase {
     }
 
     public function testCycleAuthKeys(): void {
-        $userMan = new Gazelle\Manager\User;
+        $userMan = new Gazelle\Manager\User();
         $this->assertEquals(
             (int)\Gazelle\DB::DB()->scalar("
                 SELECT count(*) FROM users_main
@@ -38,10 +38,10 @@ class UserManagerTest extends TestCase {
     }
 
     public function testDisableUserList(): void {
-        $userMan = new Gazelle\Manager\User;
+        $userMan = new Gazelle\Manager\User();
         $idList  = array_map(fn($u) => $u->id(), $this->userList);
 
-        $this->assertEquals(3, $userMan->disableUserList(new \Gazelle\Tracker, $idList, 'phpunit mass disable', 3), 'uman-mass-disable');
+        $this->assertEquals(3, $userMan->disableUserList(new \Gazelle\Tracker(), $idList, 'phpunit mass disable', 3), 'uman-mass-disable');
         $this->userList[2]->flush();
         $this->assertTrue($this->userList[2]->isDisabled(), 'uman-disabled-user2');
         $this->assertFalse($this->userList[2]->isEnabled(), 'uman-enabled-user2');
@@ -49,7 +49,7 @@ class UserManagerTest extends TestCase {
     }
 
     public function testModifyUserAttr(): void {
-        $userMan = new Gazelle\Manager\User;
+        $userMan = new Gazelle\Manager\User();
         $idList  = array_map(fn($u) => $u->id(), $this->userList);
         $this->assertFalse($this->userList[0]->hasAttr('hide-tags'), 'uman-attr-no-attr');
 
@@ -58,7 +58,7 @@ class UserManagerTest extends TestCase {
     }
 
     public function testModifyUserMassToken(): void {
-        $userMan = new Gazelle\Manager\User;
+        $userMan = new Gazelle\Manager\User();
         $idList  = array_map(fn($u) => $u->id(), $this->userList);
         $this->assertEquals(0, $this->userList[0]->tokenCount(), 'uman-masstoken-initial');
 
@@ -98,7 +98,7 @@ class UserManagerTest extends TestCase {
 
         $this->assertEquals(
             1,
-            $userMan->disableUserList(new \Gazelle\Tracker, [$this->userList[2]->id()], 'phpunit fltoken', \Gazelle\Manager\User::DISABLE_MANUAL),
+            $userMan->disableUserList(new \Gazelle\Tracker(), [$this->userList[2]->id()], 'phpunit fltoken', \Gazelle\Manager\User::DISABLE_MANUAL),
             'uman-masstoken-disable'
         );
         $userMan->clearMassTokens(18, allowLeechDisabled: false, excludeDisabled: true);
@@ -135,7 +135,7 @@ class UserManagerTest extends TestCase {
     }
 
     public function testUserclassPromotion(): void {
-        $userMan = new \Gazelle\Manager\User;
+        $userMan = new \Gazelle\Manager\User();
         $this->assertEquals(0, $userMan->promote(), 'uman-promote-initial');
         $this->assertEquals(0, $userMan->demote(), 'uman-demote-initial');
 
@@ -170,7 +170,7 @@ class UserManagerTest extends TestCase {
         $this->assertTrue($this->request->vote($user1, 5 * 1024 ** 3), 'uman-user-member-req-vote');
 
         // recompute user request stats
-        $stats = new Gazelle\Stats\Users;
+        $stats = new Gazelle\Stats\Users();
         $stats->refresh();
         $this->assertEquals(1, $userMan->promote(), 'uman-user-member-req-promotion');
 
@@ -190,8 +190,8 @@ class UserManagerTest extends TestCase {
 
     public function testUserRatioWatch(): void {
         $db      = \Gazelle\DB::DB();
-        $tracker = new \Gazelle\Tracker;
-        $userMan = new \Gazelle\Manager\User;
+        $tracker = new \Gazelle\Tracker();
+        $userMan = new \Gazelle\Manager\User();
         $idList  = array_map(fn($u) => $u->id(), $this->userList);
 
         // put users onto ratio watch
@@ -299,7 +299,7 @@ class UserManagerTest extends TestCase {
     }
 
     public function testSendCustomPM(): void {
-        $userMan = new \Gazelle\Manager\User;
+        $userMan = new \Gazelle\Manager\User();
         $this->assertEquals(
             2,
             $userMan->sendCustomPM(
@@ -323,7 +323,7 @@ class UserManagerTest extends TestCase {
     }
 
     public function testUserclassFlush(): void {
-        $userMan = new \Gazelle\Manager\User;
+        $userMan = new \Gazelle\Manager\User();
         $administratorId = (int)current(array_filter($userMan->classList(), fn($class) => $class['Name'] == 'Administrator'))['ID'];
         $alphaTeamId = (int)current(array_filter($userMan->classList(), fn($class) => $class['Name'] == 'Alpha Team'))['ID'];
 
@@ -334,7 +334,7 @@ class UserManagerTest extends TestCase {
     }
 
     public function testUserflow(): void {
-        $userflow = (new \Gazelle\Manager\User)->userflow();
+        $userflow = (new \Gazelle\Manager\User())->userflow();
         $this->assertIsArray($userflow, 'uman-userflow-is-array');
         $recent = end($userflow);
         $this->assertIsArray($recent, 'uman-userflow-recent-is-array');

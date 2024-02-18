@@ -106,5 +106,4 @@ enum IrcText: string {
     case Mauve              = "\x0385";
     case Violet             = "\x0386";
     case LavenderRose       = "\x0387";
-
 }

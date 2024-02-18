@@ -6,14 +6,14 @@ if ($Viewer->uploadedSize() < 250 * 1024 * 1024 || !$Viewer->permitted('site_sub
 
 // We may be able to prepare some things based on whence we came
 if (isset($_GET['artistid'])) {
-    $artist = (new Gazelle\Manager\Artist)->findById((int)$_GET['artistid']);
+    $artist = (new Gazelle\Manager\Artist())->findById((int)$_GET['artistid']);
     if ($artist) {
         $artistRole = [
             ARTIST_MAIN => [['name' => $artist->name()]],
         ];
     }
 } elseif (isset($_GET['groupid'])) {
-    $tgroup = (new Gazelle\Manager\TGroup)->findById((int)$_GET['groupid']);
+    $tgroup = (new Gazelle\Manager\TGroup())->findById((int)$_GET['groupid']);
     if ($tgroup) {
         $categoryId   = $tgroup->categoryId();
         $categoryName = $tgroup->categoryName();
@@ -32,8 +32,8 @@ echo $Twig->render('request/request.twig', [
     'error'            => $error        ?? null,
     'tgroup'           => $tgroup       ?? null,
     'viewer'           => $Viewer,
-    'release_list'     => (new Gazelle\ReleaseType)->list(),
-    'tag_list'         => (new Gazelle\Manager\Tag)->genreList(),
+    'release_list'     => (new Gazelle\ReleaseType())->list(),
+    'tag_list'         => (new Gazelle\Manager\Tag())->genreList(),
     'amount'           => $amount          ?? REQUEST_MIN * 1024 ** 2,
     'amount_box'       => $amount          ?? REQUEST_MIN,
     'unit_GiB'         => $unitGiB         ?? false,

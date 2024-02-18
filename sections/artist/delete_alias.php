@@ -5,7 +5,7 @@ if (!$Viewer->permitted('torrents_edit')) {
 }
 authorize();
 
-$artMan = new Gazelle\Manager\Artist;
+$artMan = new Gazelle\Manager\Artist();
 $aliasId = (int)$_GET['aliasid'];
 $artist  = $artMan->findByAliasId($aliasId);
 if (is_null($artist)) {
@@ -16,7 +16,7 @@ if ($artMan->aliasUseTotal($aliasId) == 1) {
     error("The alias $aliasId is the only alias for this artist; removing it would cause bad things to happen.");
 }
 
-$tgroupList = $artMan->tgroupList($aliasId, new Gazelle\Manager\TGroup);
+$tgroupList = $artMan->tgroupList($aliasId, new Gazelle\Manager\TGroup());
 if ($tgroupList) {
     echo $Twig->render('artist/tgroup-usage.twig', [
         'artist' => $artist,
@@ -25,6 +25,6 @@ if ($tgroupList) {
     exit;
 }
 
-$artist->removeAlias($aliasId, $Viewer, new Gazelle\Log);
+$artist->removeAlias($aliasId, $Viewer, new Gazelle\Log());
 
 header("Location: " . redirectUrl("artist.php?action=edit&artistid={$artist->id()}"));

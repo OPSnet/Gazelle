@@ -29,19 +29,19 @@ class UserActivityTest extends TestCase {
         $this->assertCount(2, $activity->alertList(), 'user-activity-alert');
 
         $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->configure(), 'user-activity-configure');
-        $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->setApplicant(new Gazelle\Manager\Applicant), 'user-activity-applicant');
-        $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->setDb(new Gazelle\DB), 'user-activity-db');
-        $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->setPayment(new Gazelle\Manager\Payment), 'user-activity-payment');
-        $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->setReferral(new Gazelle\Manager\Referral), 'user-activity-referral');
-        $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->setReport(new Gazelle\Stats\Report), 'user-activity-report');
-        $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->setSSLHost(new Gazelle\Manager\SSLHost), 'user-activity-sslhost');
-        $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->setScheduler(new Gazelle\TaskScheduler), 'user-activity-scheduler');
+        $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->setApplicant(new Gazelle\Manager\Applicant()), 'user-activity-applicant');
+        $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->setDb(new Gazelle\DB()), 'user-activity-db');
+        $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->setPayment(new Gazelle\Manager\Payment()), 'user-activity-payment');
+        $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->setReferral(new Gazelle\Manager\Referral()), 'user-activity-referral');
+        $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->setReport(new Gazelle\Stats\Report()), 'user-activity-report');
+        $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->setSSLHost(new Gazelle\Manager\SSLHost()), 'user-activity-sslhost');
+        $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->setScheduler(new Gazelle\TaskScheduler()), 'user-activity-scheduler');
         $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->setStaff(new Gazelle\Staff($this->userList['admin'])), 'user-activity-staff-set');
-        $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->setStaffPM(new Gazelle\Manager\StaffPM), 'user-activity-staffpm');
+        $this->assertInstanceOf(Gazelle\User\Activity::class, $activity->setStaffPM(new Gazelle\Manager\StaffPM()), 'user-activity-staffpm');
     }
 
     public function testGlobal(): void {
-        $global = new Gazelle\Notification\GlobalNotification;
+        $global = new Gazelle\Notification\GlobalNotification();
         $global->remove(); // just in case
 
         $title  = 'global 10 minute news';
@@ -64,7 +64,7 @@ class UserActivityTest extends TestCase {
     }
 
     public function testInbox(): void {
-        $userMan = new Gazelle\Manager\User;
+        $userMan = new Gazelle\Manager\User();
         $this->userList['admin'] = Helper::makeUser('admin.' . randomString(10), 'activity');
         $this->userList['admin']->setField('PermissionID', SYSOP)->modify();
         $this->userList['user'] = Helper::makeUser('user.' . randomString(10), 'activity');
@@ -103,7 +103,7 @@ class UserActivityTest extends TestCase {
         $this->userList['admin']->setField('PermissionID', SYSOP)->modify();
         $this->userList['user'] = Helper::makeUser('user.' . randomString(10), 'activity');
 
-        $manager = new Gazelle\Manager\News;
+        $manager = new Gazelle\Manager\News();
         $title = "This is the 6 o'clock news";
         $newsId  = $manager->create($this->userList['admin'], $title, 'Not much happened');
         $this->assertGreaterThan(0, $newsId, 'alert-news-create');

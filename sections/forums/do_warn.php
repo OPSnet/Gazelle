@@ -16,7 +16,7 @@ function handleWarningRequest(\Gazelle\Manager\ForumPost|\Gazelle\Manager\Commen
         error(404);
     }
 
-    $userMan = new \Gazelle\Manager\User;
+    $userMan = new \Gazelle\Manager\User();
     $user = $userMan->findById($post->userId());
     if (is_null($user)) {
         error(404);

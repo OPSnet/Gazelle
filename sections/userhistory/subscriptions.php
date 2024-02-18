@@ -1,12 +1,12 @@
 <?php
 
-$artistMan  = new Gazelle\Manager\Artist;
-$collageMan = new Gazelle\Manager\Collage;
-$forumMan   = new Gazelle\Manager\Forum;
-$threadMan  = new Gazelle\Manager\ForumThread;
-$requestMan = new Gazelle\Manager\Request;
-$tgMan      = (new Gazelle\Manager\TGroup)->setViewer($Viewer);
-$userMan    = new Gazelle\Manager\User;
+$artistMan  = new Gazelle\Manager\Artist();
+$collageMan = new Gazelle\Manager\Collage();
+$forumMan   = new Gazelle\Manager\Forum();
+$threadMan  = new Gazelle\Manager\ForumThread();
+$requestMan = new Gazelle\Manager\Request();
+$tgMan      = (new Gazelle\Manager\TGroup())->setViewer($Viewer);
+$userMan    = new Gazelle\Manager\User();
 $subscriber = new Gazelle\User\Subscription($Viewer);
 $showUnread = (bool)($_GET['showunread'] ?? true);
 
