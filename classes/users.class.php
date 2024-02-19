@@ -1,4 +1,5 @@
 <?php
+
 class Users {
     /**
      * Returns a username string for display

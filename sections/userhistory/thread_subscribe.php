@@ -1,4 +1,5 @@
 <?php
+
 // perform the back end of subscribing to topics
 
 if ($Viewer->disableForums()) {

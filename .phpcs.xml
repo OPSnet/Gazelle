@@ -31,15 +31,11 @@
 
         <exclude name="PSR12.Classes.ClosingBrace" />
         <exclude name="PSR12.ControlStructures.ControlStructureSpacing" />
-        <exclude name="PSR12.Files.FileHeader" />
-        <exclude name="PSR12.Operators.OperatorSpacing" />
-        <exclude name="PSR12.Properties.ConstantVisibility" />
         <exclude name="PSR12.Traits.UseDeclaration" />
 
         <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing" />
         <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.BraceOnSameLine" />
         <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.ContentAfterBrace" />
-        <exclude name="Squiz.WhiteSpace.ControlStructureSpacing" />
         <exclude name="Squiz.WhiteSpace.ScopeClosingBrace" />
     </rule>
 

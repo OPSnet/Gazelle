@@ -16,7 +16,7 @@ class Collage extends \Gazelle\Base {
     protected array $category = [];
     protected array $taglist  = [];
     protected array $joinList = [];
-    protected array $whereList= ["c.Deleted = '0'"];
+    protected array $whereList = ["c.Deleted = '0'"];
     protected array $args     = [];
 
     /* the collapsed version of the above */

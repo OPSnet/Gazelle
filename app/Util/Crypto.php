@@ -19,7 +19,7 @@ class Crypto {
         if ($cipher === false) {
             throw new \Exception("internal openssl_encrypt error");
         }
-        return base64_encode($iv.$tag.$cipher);
+        return base64_encode($iv . $tag . $cipher);
     }
 
     public static function decrypt(string $ciphertext, string $key, string $aad = AUTHKEY): string|false {

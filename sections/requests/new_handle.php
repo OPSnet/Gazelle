@@ -152,7 +152,7 @@ while (true) { // break early on error
         ['tags',        true,  'string', 'You forgot to enter any tags!', ['maxlength' => 255]],
     ]);
     if ($categoryName == 'Music') {
-        $validator->setField('year', true,  'number', 'The year of the release must be entered.', ['maxlength' => date('Y')+2]);
+        $validator->setField('year', true,  'number', 'The year of the release must be entered.', ['maxlength' => date('Y') + 2]);
     }
 
     if (!$validator->validate($_POST)) {

@@ -1,12 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 use Phinx\Migration\AbstractMigration;
 
-final class NotificationTicket extends AbstractMigration
-{
-    public function up()
-    {
+final class NotificationTicket extends AbstractMigration {
+    public function up(): void {
         $this->execute('CREATE OR REPLACE FUNCTION modified_now() RETURNS TRIGGER AS $$
             BEGIN
                 NEW.modified = NOW();
@@ -30,9 +29,7 @@ final class NotificationTicket extends AbstractMigration
             EXECUTE FUNCTION modified_now()');
     }
 
-    public function down()
-    {
-
+    public function down(): void {
         $this->table('notification_ticket')->drop()->save();
         $this->execute('DROP TYPE nt_state');
         $this->execute('DROP FUNCTION modified_now');

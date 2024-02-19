@@ -19,7 +19,6 @@ if (isset($_REQUEST['confirm'])) {
     );
     echo $Twig->render('register/complete.twig');
     (new Gazelle\Tracker())->addUser($user);
-
 } elseif (OPEN_REGISTRATION || isset($_REQUEST['invite']) || (new Gazelle\Stats\Users())->enabledUserTotal() == 0) {
     if ($_REQUEST['invite']) {
         if (!(new Gazelle\Manager\Invite())->inviteExists($_GET['invite'])) {
@@ -106,7 +105,6 @@ if (isset($_REQUEST['confirm'])) {
         'readwiki'  => $_REQUEST['readwiki'] ?? false,
         'agereq'    => $_REQUEST['agereq'] ?? false,
     ]);
-
 } else {
     echo $Twig->render(isset($_GET['welcome'])
         ? 'register/code.twig'

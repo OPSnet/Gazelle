@@ -1,6 +1,5 @@
 <?php
 
-
 $search = trim($_GET['search'] ?? '');
 if (!strlen($search)) {
     json_die("failure", "no search terms");

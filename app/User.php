@@ -5,7 +5,6 @@ namespace Gazelle;
 use Gazelle\Enum\AvatarDisplay;
 use Gazelle\Enum\UserStatus;
 use Gazelle\Enum\UserTokenType;
-
 use Gazelle\Util\Irc;
 use Gazelle\Util\Mail;
 use Gazelle\Util\Time;

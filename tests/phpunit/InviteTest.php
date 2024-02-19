@@ -104,7 +104,7 @@ class InviteTest extends TestCase {
         $initialSource = $inviteSourceMan->inviterConfiguration($this->user);
         $this->assertIsArray($initialSource, 'invite-source-list-initial');
 
-        $sourceId = $inviteSourceMan->create('pu.'.randomString(6));
+        $sourceId = $inviteSourceMan->create('pu.' . randomString(6));
         $this->assertIsInt($sourceId, 'invite-source-create');
         $this->assertEquals(
             1,

@@ -503,7 +503,6 @@ if (!$Viewer->disableRequests()) {
     echo $Twig->render('torrent/request.twig', [
         'list' => $requestMan->findByTGroup($tgroup),
     ]);
-
 }
 
 echo $Twig->render('tgroup/similar.twig', [

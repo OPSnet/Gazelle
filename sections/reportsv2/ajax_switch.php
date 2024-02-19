@@ -1,4 +1,5 @@
 <?php
+
 /*
  * This page is for creating a report using AJAX.
  * It should have the following posted fields:

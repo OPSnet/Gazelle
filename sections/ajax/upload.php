@@ -1,4 +1,5 @@
 <?php
+
 // echo out the slice of the form needed for the selected upload type ($_GET['section']).
 
 $uploadForm = new Gazelle\Upload($Viewer);

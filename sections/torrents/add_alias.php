@@ -1,4 +1,5 @@
 <?php
+
 authorize();
 
 $tgMan = new Gazelle\Manager\TGroup();

@@ -1,4 +1,5 @@
 <?php
+
 /*
  * This is the page that gets the values of whether to delete/disable upload/warning duration
  * every time you change the resolve type on one of the two reports pages.

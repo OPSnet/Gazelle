@@ -1,4 +1,5 @@
 <?php
+
 authorize();
 
 if (!$Viewer->permitted('admin_manage_wiki')) {

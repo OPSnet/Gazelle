@@ -22,7 +22,7 @@ class Tag extends \Gazelle\Json {
         }
         if (in_array($this->details, ['all', 'ur'])) {
             $payload[] = [
-                'caption' =>'Most Used Request Tags',
+                'caption' => 'Most Used Request Tags',
                 'tag'     => 'ur',
                 'limit'   => $this->limit,
                 'results' => $this->manager->topRequestList($this->limit),

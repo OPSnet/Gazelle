@@ -1,6 +1,5 @@
 <?php
 
-
 if (!isset($_GET['apikey']) || empty($_GET['apikey'])) {
     echo '{"error": { "message": "No API Key specified" }}';
     die();

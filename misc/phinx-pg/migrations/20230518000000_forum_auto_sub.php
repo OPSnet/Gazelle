@@ -1,12 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 use Phinx\Migration\AbstractMigration;
 
-final class ForumAutoSub extends AbstractMigration
-{
-    public function up()
-    {
+final class ForumAutoSub extends AbstractMigration {
+    public function up(): void {
         $this->execute('CREATE TABLE forum_autosub (
                 id_forum INTEGER NOT NULL,
                 id_user INTEGER NOT NULL,
@@ -16,8 +15,7 @@ final class ForumAutoSub extends AbstractMigration
         $this->execute('CREATE INDEX fas_user_idx ON forum_autosub (id_user)');
     }
 
-    public function down()
-    {
+    public function down(): void {
         $this->table('forum_autosub')->drop()->save();
     }
 }

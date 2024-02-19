@@ -1,4 +1,5 @@
 <?php
+
 $forum = (new Gazelle\Manager\Forum())->findById((int)($_GET['forumid'] ?? 0));
 if (!$forum) {
     error(404);

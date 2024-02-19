@@ -1,4 +1,5 @@
 <?php
+
 $groupId = (int)($_GET['id'] ?? 0);
 if (!$groupId) {
     json_die("failure");

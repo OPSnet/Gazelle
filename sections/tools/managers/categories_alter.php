@@ -16,7 +16,6 @@ if ($_POST['submit'] == 'Delete') {
     if (!$forumCategory->remove()) {
         error('You must move all forums out of a category before deleting it.');
     }
-
 } else {
     // Edit & Create
     $validator = new Gazelle\Util\Validator();

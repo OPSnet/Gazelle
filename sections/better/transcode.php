@@ -1,4 +1,5 @@
 <?php
+
 /**
  * New transcode module:
  * $_GET['filter'] determines which torrents should be shown and can be uploaded (default), snatched or seeding

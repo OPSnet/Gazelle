@@ -19,7 +19,6 @@ if ($_POST['submit'] == 'Reorder') {
 if ($_POST['submit'] == 'Delete') {
     // Delete
     $manager->remove((int)$_POST['id']);
-
 } else {
     // Edit & Create, Shared Validation
     $Val = new Gazelle\Util\Validator();

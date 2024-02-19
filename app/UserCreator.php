@@ -3,7 +3,6 @@
 namespace Gazelle;
 
 use Gazelle\Enum\UserStatus;
-
 use Gazelle\Exception\UserCreatorException;
 use Gazelle\Util\Time;
 

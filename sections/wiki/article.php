@@ -1,4 +1,5 @@
 <?php
+
 Text::$TOC = true;
 
 $wikiMan = new Gazelle\Manager\Wiki();

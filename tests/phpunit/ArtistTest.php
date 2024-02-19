@@ -1,7 +1,6 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-
 use Gazelle\Enum\CollageType;
 
 require_once(__DIR__ . '/../../lib/bootstrap.php');

@@ -1,4 +1,5 @@
 <?php
+
 if (!$Viewer->permitted('site_collages_recover')) {
     error(403);
 }

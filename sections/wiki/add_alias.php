@@ -1,4 +1,5 @@
 <?php
+
 authorize();
 
 $article = (new Gazelle\Manager\Wiki())->findById((int)$_POST['article']);

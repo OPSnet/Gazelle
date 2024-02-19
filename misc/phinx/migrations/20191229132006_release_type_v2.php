@@ -1,6 +1,5 @@
 <?php
 
-
 use Phinx\Migration\AbstractMigration;
 
 class ReleaseTypeV2 extends AbstractMigration {

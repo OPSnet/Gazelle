@@ -1,4 +1,5 @@
 <?php
+
 /**********|| Page to show individual forums || ********************************\
 
 Things to expect in $_GET:

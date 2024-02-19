@@ -1,4 +1,5 @@
 <?php
+
 //Diff function by Leto of StC.
 function diff(string $OldText, string $NewText): array {
     $LineArrayOld = explode("\n", $OldText);

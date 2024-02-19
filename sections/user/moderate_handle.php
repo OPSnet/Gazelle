@@ -1,7 +1,6 @@
 <?php
 
 use Gazelle\Enum\UserStatus;
-
 use Gazelle\Util\Mail;
 use Gazelle\Util\Time;
 

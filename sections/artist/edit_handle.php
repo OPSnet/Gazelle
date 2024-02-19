@@ -20,7 +20,6 @@ if (($_GET['action'] ?? '') === 'revert') { // if we're reverting to a previous 
     $artist->revertRevision($revisionId, $Viewer);
     header("Location: " . $artist->location());
     exit;
-
 }
 
 $body = trim($_POST['body']);

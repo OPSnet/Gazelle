@@ -16,7 +16,6 @@ if (preg_match('/^(?:sandbox|update_geoip)/', $_REQUEST['action']) && !isset($ar
 }
 
 switch ($_REQUEST['action']) {
-
     //Managers
     case 'asn_search':
         require_once('managers/asn_search.php');

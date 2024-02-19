@@ -1,4 +1,5 @@
 <?php
+
 if (!$Viewer->permitted('admin_recovery')) {
     error(403);
 }

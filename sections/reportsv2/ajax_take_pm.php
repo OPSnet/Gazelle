@@ -1,4 +1,5 @@
 <?php
+
 /*
  * This is the AJAX backend for the SendNow() function.
  */

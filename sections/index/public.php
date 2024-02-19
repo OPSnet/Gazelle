@@ -1,4 +1,5 @@
 <?php
+
 if (!SHOW_PUBLIC_INDEX) {
     header('Location: login.php');
     exit;

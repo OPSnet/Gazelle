@@ -501,7 +501,6 @@ class Text {
                 $Block = ''; // Nothing inside this tag either
                 // Don't need to touch $i
             } elseif ($TagName == 'inlineurl') { // We did a big replace early on to turn http:// into [inlineurl]http://
-
                 // Let's say the block can stop at a newline or a space
                 $CloseTag = strcspn($Str, " \n\r", $i);
                 if ($CloseTag === 0) { // block finishes with URL
@@ -567,7 +566,6 @@ class Text {
                         $InTagPos = $InTag[0][1];
                         $NumInOpens++;
                     }
-
                 } while ($NumInOpens > $NumInCloses);
 
                 // Find the internal block inside the tag
@@ -1097,7 +1095,6 @@ class Text {
                     }
 
                     break;
-
             }
         }
         }

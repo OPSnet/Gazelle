@@ -171,7 +171,6 @@ class Similar extends \Gazelle\Base {
                 ", $similarId, $user->id(), $opposite
             );
             self::$db->commit();
-
         } else {
             // there is no vote: record it
             self::$db->begin_transaction();
@@ -397,7 +396,6 @@ class Similar extends \Gazelle\Base {
                 $similar[$r]['y'] = (int)(sin($angle) * $distance * $yOrigin) + $yOrigin;
                 $similar[$r]['proportion'] = ($similar[$r]['score'] / ($totalScore + 1)) ** 1.0;
             }
-
         }
         return $similar;
     }

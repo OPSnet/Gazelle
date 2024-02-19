@@ -46,7 +46,7 @@ while (true) {
         $validator->setField('title', true, 'string', 'You forgot to enter the title!', ['maxlength' => 255]);
     }
     if (isset($_POST['year'])) {
-        $validator->setField('year', true, 'number', 'The year of the release must be entered.', ['maxlength' => date('Y')+2]);
+        $validator->setField('year', true, 'number', 'The year of the release must be entered.', ['maxlength' => date('Y') + 2]);
     }
 
     if (!$validator->validate($_POST)) {

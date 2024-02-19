@@ -1,4 +1,5 @@
 <?php
+
 // TODO: The following actions are used, turn them into methods
 // remove_users
 

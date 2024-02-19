@@ -1,4 +1,5 @@
 <?php
+
 /*
  * This page is to outline all of the views built into reports v2.
  * It's used as the main page as it also lists the current reports by type

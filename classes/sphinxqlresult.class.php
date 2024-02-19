@@ -1,4 +1,5 @@
 <?php
+
 class SphinxqlResult {
     private $Result;
     private $Meta;

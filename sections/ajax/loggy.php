@@ -1,4 +1,5 @@
 <?php
+
 if (!$Viewer->permitted('site_archive_ajax')) {
     json_die('failure', 'insufficient permissions to view page');
 }

@@ -1,4 +1,5 @@
 <?php
+
 use Phinx\Seed\AbstractSeed;
 
 class ClientWhitelistSeeder extends AbstractSeed {

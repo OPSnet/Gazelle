@@ -1,4 +1,5 @@
 <?php
+
 // perform the back end of updating a resolve type
 
 if (!$Viewer->permitted('admin_reports')) {

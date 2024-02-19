@@ -1,6 +1,7 @@
 <?php
 
 namespace Gazelle\Donate;
+
 use Gazelle\Pg;
 use MoneroIntegrations\MoneroPhp;
 

@@ -1,12 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 use Phinx\Migration\AbstractMigration;
 
-final class UserWarning extends AbstractMigration
-{
-    public function up()
-    {
+final class UserWarning extends AbstractMigration {
+    public function up(): void {
         $this->execute('CREATE TABLE user_warning (
             id_user integer not null,
             id_user_warner integer not null,
@@ -15,8 +14,7 @@ final class UserWarning extends AbstractMigration
         );');
     }
 
-    public function down()
-    {
+    public function down(): void {
         $this->table('user_warning')->drop()->save();
     }
 }

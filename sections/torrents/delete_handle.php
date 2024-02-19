@@ -1,4 +1,5 @@
 <?php
+
 authorize();
 
 $torrent = (new Gazelle\Manager\Torrent())->setViewer($Viewer)->findById((int)$_POST['torrentid']);

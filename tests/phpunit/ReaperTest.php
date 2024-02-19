@@ -1,7 +1,6 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-
 use Gazelle\Enum\ReaperNotify;
 use Gazelle\Enum\ReaperState;
 
