@@ -770,6 +770,10 @@ tr.torrent .bookmark > a::after {
   max-width: 540px;
 }
 
+.request-vote:hover {
+  font-weight: 800;
+}
+
 #inbox #preview img,
 #staffpm #reply_box img,
 #wiki .create_form img,

@@ -1,5 +1,12 @@
 {% for r in list %}
     {% if loop.first %}
+<div class="hidden">
+    <form>
+    <input type="hidden" id="current_uploaded" value="{{ viewer.uploadedSize }}" />
+    <input type="hidden" id="current_downloaded" value="{{ viewer.downloadedSize }}" />
+    <input type="hidden" id="current_rr" value="{{ viewer.requiredRatio }}" />
+    </form>
+</div>
 <div class="box">
     <div class="head">
         <span style="font-weight: bold;">Requests ({{ list|length|number_format }})</span>
@@ -19,9 +26,14 @@
     / {{- r.needEncodingList|join(', ') }} / {{ r.needFormatList|join(', ') -}}
             </a></td>
             <td>
-                <span id="vote_count_{{ r.id }}">{{ r.userVotedTotal|number_format }}</span>
-    {%- if viewer.permitted('site_album_votes') -%}
-                &nbsp;&nbsp; <a href="javascript:Vote(0, {{ r.id }}) ?>)" class="brackets">+</a>
+                <span id="vote_count_{{ r.id }}">{{ r.userVotedTotal|number_format }}</span>&nbsp;&nbsp;
+    {%- set vote = request.userVote(viewer) -%}
+    {%- if vote -%}
+                <span title="You {% if request.isFilled %}contributed {% else %}have voted {% endif -%}{{
+                    vote['bounty']|octet_size }} towards this request">&check;</span>
+    {%- elseif not request.isFilled and viewer.permitted('site_vote') -%}
+                <span data-id="{{ request_id }}" data-bounty="{{ standard_bounty
+                    }}" class="request-vote tooltip brackets" data-n="{{ request.userVotedTotal }}" title="Add {{ standard_bounty|octet_size(0) }} bounty">Vote</span>
     {%- endif -%}
             </td>
             <td>{{ r.bountyTotal|octet_size }}</td>

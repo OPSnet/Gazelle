@@ -500,8 +500,10 @@ if (!$torrentList) {
 }
 
 if (!$Viewer->disableRequests()) {
-    echo $Twig->render('torrent/request.twig', [
-        'list' => $requestMan->findByTGroup($tgroup),
+    echo $Twig->render('request/torrent.twig', [
+        'list'            => $requestMan->findByTGroup($tgroup),
+        'standard_bounty' => REQUEST_MIN,
+        'viewer'          => $Viewer,
     ]);
 }
 

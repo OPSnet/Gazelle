@@ -118,6 +118,7 @@ if ($tagLeaderboard) {
     }
 } else {
 ?>
+            <ul class="stats nobullet">
                 <li><i>No tags</i></li>
 <?php } ?>
             </ul>
@@ -389,56 +390,15 @@ if ($sections = $Artist->sections()) {
     } /* section */
 ?>
                 </table>
-            </div>
-<?php
-} /* all sections */
+<?php } /* all sections */ ?>
+</div>
 
-if ($requestList) {
-?>
-    <table cellpadding="6" cellspacing="1" border="0" class="request_table border" width="100%" id="requests">
-        <tr class="colhead_dark">
-            <td style="width: 48%;">
-                <a href="#">&uarr;</a>&nbsp;
-                <strong>Request Name</strong>
-            </td>
-            <td class="nobr">
-                <strong>Vote</strong>
-            </td>
-            <td class="nobr">
-                <strong>Bounty</strong>
-            </td>
-            <td>
-                <strong>Added</strong>
-            </td>
-        </tr>
 <?php
-    $Row = 'b';
-    foreach ($requestList as $request) {
-        $Row = $Row === 'b' ? 'a' : 'b';
-?>
-        <tr class="row<?= $Row ?>">
-            <td>
-                <?= $request->smartLink() ?>
-                <div class="tags"><?= implode(' ', $request->tagNameList()) ?></div>
-            </td>
-            <td class="nobr">
-                <span id="vote_count_<?= $request->id() ?>"><?= $request->userVotedTotal() ?></span>
-<?php       if ($Viewer->permitted('site_album_votes')) { ?>
-                <input type="hidden" id="auth" name="auth" value="<?=$authKey?>" />
-                &nbsp;&nbsp; <a href="javascript:Vote(0, <?= $request->id() ?>)" class="brackets"><strong>+</strong></a>
-<?php       } ?>
-            </td>
-            <td class="nobr">
-                <span id="bounty_<?= $request->id() ?>"><?= byte_format($request->bountyTotal()) ?></span>
-            </td>
-            <td>
-                <?= time_diff($request->created()) ?>
-            </td>
-        </tr>
-<?php   } ?>
-    </table>
-<?php
-}
+echo $Twig->render('request/list.twig', [
+    'list'            => $requestList,
+    'standard_bounty' => REQUEST_MIN * 1024 * 1024,
+    'viewer'          => $Viewer,
+]);
 
 $graph = $Artist->similar()->similarGraph(SIMILAR_WIDTH, SIMILAR_HEIGHT);
 if ($graph) {

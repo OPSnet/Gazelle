@@ -226,6 +226,7 @@
             <input type="hidden" id="amount" name="amount" value="{{ amount }}" />
             <input type="hidden" id="current_uploaded" value="{{ viewer.uploadedSize }}" />
             <input type="hidden" id="current_downloaded" value="{{ viewer.downloadedSize }}" />
+            <input type="hidden" id="current_rr" value="{{ viewer.requiredRatio }}" />
             <input type='hidden' id='request_tax' value="{{ constant('REQUEST_TAX') }}" />
   {%- if constant('REQUEST_TAX') > 0 %}
               Bounty after tax: <strong><span id="bounty_after_tax">{{ (100 * (1 - constant('REQUEST_TAX')))|number_format(0) }} MiB</span></strong><br />

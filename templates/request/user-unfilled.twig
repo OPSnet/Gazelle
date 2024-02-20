@@ -1,6 +1,13 @@
 {% from 'macro/form.twig' import hidden %}
 {% for request in list %}
     {% if loop.first %}
+<div class="hidden">
+    <form>
+    <input type="hidden" id="current_uploaded" value="{{ viewer.uploadedSize }}" />
+    <input type="hidden" id="current_downloaded" value="{{ viewer.downloadedSize }}" />
+    <input type="hidden" id="current_rr" value="{{ viewer.requiredRatio }}" />
+    </form>
+</div>
 <div class="box" id="requests_box">
     <div class="head">
         Requests <a href="#" onclick="$('#requests').gtoggle(); return false;" class="brackets">Toggle</a>
@@ -11,7 +18,7 @@
                 <td style="width: 48%;">
                     <strong>Request Name</strong>
                 </td>
-                <td>
+                <td style="width: 7em;">
                     <strong>Vote</strong>
                 </td>
                 <td>
@@ -28,10 +35,15 @@
                     <div class="tags">{{ request.tagLinkList }}</div>
                 </td>
                 <td>
-                    <span id="vote_count_{{ request.id }}">{{ request.userVotedTotal }}</span>
-    {% if viewer.permitted('site_vote') %}
-                    &nbsp;&nbsp; <a href="javascript:Vote(0, {{ request.id }})" class="brackets">+</a>
-    {% endif %}
+                    <span id="vote_count_{{ request.id }}">{{ request.userVotedTotal|number_format }}</span>&nbsp;&nbsp;
+    {%- set vote = request.userVote(viewer) -%}
+    {%- if vote -%}
+                    <span title="You {% if request.isFilled %}contributed {% else %}have voted {% endif -%}{{
+                        vote['bounty']|octet_size }} towards this request">&check;</span>
+    {%- elseif not request.isFilled and viewer.permitted('site_vote') -%}
+                    <span data-id="{{ request.id }}" data-bounty="{{ standard_bounty
+                        }}" class="request-vote tooltip brackets" data-n="{{ request.userVotedTotal }}" title="Add {{ standard_bounty|octet_size(0) }} bounty">Vote</span>
+    {%- endif -%}
                 </td>
                 <td>
                     <span id="bounty_{{ request.id }}">{{ request.bountyTotal|octet_size }}</span>

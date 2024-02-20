@@ -220,6 +220,11 @@ if (!$seen) {
         </div>
     </div>
     <div class="main_column">
+        <form>
+        <input type="hidden" id="current_uploaded" value="<?= $Viewer->uploadedSize() ?>" />
+        <input type="hidden" id="current_downloaded" value="<?= $Viewer->downloadedSize() ?>" />
+        <input type="hidden" id="current_rr" value="<?= $Viewer->requiredRatio() ?>" />
+        </form>
         <table class="layout">
             <tr>
                 <td class="label">Created</td>
@@ -290,9 +295,10 @@ if ($request->tgroupId()) {
             <tr>
                 <td class="label">Votes</td>
                 <td>
-                    <span id="votecount"><?=number_format($request->userVotedTotal()) ?></span>
+                    <span id="votecount"><?= number_format($request->userVotedTotal()) ?></span>
 <?php if ($request->canVote($Viewer)) { ?>
-                    &nbsp;&nbsp;<a href="javascript:Vote(0)" class="brackets"><strong>+</strong></a>
+                    &nbsp;&nbsp;<span data-id="<?= $request->id() ?>" data-bounty="<?= REQUEST_MIN * 1024 * 1024 ?>" data-n="<?=
+                        $request->userVotedTotal() ?>" class="request-vote brackets tooltip" title="Add <?= byte_format(REQUEST_MIN * 1024 * 1024) ?> bounty">Vote</span>
                     <strong>Costs <?= REQUEST_MIN ?> MiB</strong>
 <?php } ?>
                 </td>
@@ -338,7 +344,7 @@ if ($request->canVote($Viewer)) {
                         If you add the entered <strong><span id="new_bounty">0 MiB</span></strong> of bounty, your new stats will be: <br />
                         Uploaded: <span id="new_uploaded"><?= byte_format($Viewer->uploadedSize()) ?></span><br />
                         Ratio: <span id="new_ratio"><?= ratio_html($Viewer->uploadedSize(), $Viewer->downloadedSize()) ?></span>
-                        <input type="button" id="button" value="Vote!" disabled="disabled" onclick="Vote();" />
+                        <input type="button" id="button" value="Vote!" disabled="disabled" />
                     </form>
                 </td>
             </tr>

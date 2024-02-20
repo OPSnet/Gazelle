@@ -159,93 +159,26 @@
     </form>
 {% endif %}
 
-{% for request in search.list %}
-    {% if loop.first %}
-    {{ paginator.linkbox|raw }}
-    <div class="hidden">
-        <form>
-        <input type="hidden" id="current_uploaded" value="{{ viewer.uploadedSize }}" />
-        </form>
-    </div>
-    <table id="request_table" class="request_table border m_table" cellpadding="6" cellspacing="1" border="0" width="100%">
-        <tr class="colhead_dark">
-            <td style="width: 38%;" class="m_th_left nobr">
-                Request Name / {{ header.emit('year')|raw }}
-            </td>
-            <td class="m_th_right nobr">
-                {{ header.emit('votes')|raw }}
-            </td>
-            <td class="m_th_right nobr">
-                {{ header.emit('bounty')|raw }}
-            </td>
-            <td class="nobr">
-                {{ header.emit('filled')|raw }}
-            </td>
-            <td class="nobr">
-                Filled by
-            </td>
-            <td class="nobr">
-                Requested by
-            </td>
-            <td class="nobr">
-                {{ header.emit('created')|raw }}
-            </td>
-            <td class="nobr">
-                {{ header.emit('lastvote')|raw }}
-            </td>
-        </tr>
-    {% endif %}
-    {% set request_id = request.id  %}
-        <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
-            <td>
-                {{ request.smartLink|raw }}
-                <div class="tags">{{ request.tagNameList|join(', ') }}</div>
-            </td>
-            <td class="m_td_right nobr">
-                <span id="vote_count_{{ request_id }}">{{ request.userVotedTotal|number_format }}</span>&nbsp;&nbsp;
-    {% set vote = request.userVote(viewer) %}
-    {% if vote %}
-                <span title="You {% if request.isFilled %}contributed {% else %}have voted {% endif -%}
-                {{ vote['bounty']|octet_size }} towards this request">&check;</span>
-    {% elseif not request.isFilled and viewer.permitted('site_vote') %}
-                <a href="javascript:Vote(0, {{ request_id }})" class="brackets"><strong>+</strong></a>
-    {% else %}
-                &nbsp;
-    {% endif %}
-            </td>
-            <td class="m_td_right number_column nobr">
-                {{ request.bountyTotal|octet_size }}
-            </td>
-            <td class="m_hidden nobr">
-    {% if request.isFilled %}
-                <a href="torrents.php?torrentid={{ request.torrentId }}"><strong>{{ request.fillDate|time_diff(1) }}</strong></a>
-    {% else %}
-                <strong>No</strong>
-    {% endif %}
-            </td>
-            <td>
-    {% if request.isFilled %}
-                {{ request.fillerId|user_url }}
-    {% else %}
-                &mdash;
-    {% endif %}
-            </td>
-            <td>{{ request.userId|user_url }}</td>
-            <td class="nobr">{{ request.created|time_diff(1) }}</td>
-            <td class="nobr">{{ request.lastVoteDate|time_diff(1) }}</td>
-        </tr>
-    {% if loop.last %}
-    </table>
-    {{ paginator.linkbox|raw }}
-    {% endif %}
-{% else %}
-    <div class="box pad" align="center">
-    {% if bookmark_view %}
-        <h3>You have not bookmarked any requests.</h3>
-    {% else %}
-        <h3>Nothing found with these filters.</h3>
-    {% endif %}
-{% endfor %}
-</div>
-{{ footer() }}
+{% include 'request/list.twig'
+    with {
+        'filtering':       filtering,
+        'header':          header,
+        'list':            search.list,
+        'paginator':       paginator,
+        'standard_bounty': standard_bounty,
+        'viewer':          viewer,
+    }
+    only
+%}
 
+{% if not search.list %}
+<div class="box pad" align="center">
+{%- if bookmark_view -%}
+    <h3>You have not bookmarked any requests.</h3>
+{%- else -%}
+    <h3>Nothing found with these filters.</h3>
+{%- endif -%}
+</div>
+{% endif %}
+
+{{ footer() }}

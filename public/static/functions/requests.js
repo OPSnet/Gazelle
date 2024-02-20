@@ -1,46 +1,34 @@
-function Vote(amount, requestid) {
-    if (typeof amount == 'undefined') {
-        amount = parseInt($('#amount').raw().value);
-    }
-    if (amount == 0) {
-        amount = 100 * 1024 * 1024;
-    }
-
-    var index;
-    var votecount;
-    if (!requestid) {
-        requestid = $('#requestid').raw().value;
-        votecount = $('#votecount').raw();
-        index = false;
-    } else {
-        votecount = $('#vote_count_' + requestid).raw();
-        bounty = $('#bounty_' + requestid).raw();
-        index = true;
-    }
-
-    if (amount > 100 * 1024 * 1024) {
-        upload = $('#current_uploaded').raw().value;
-        download = $('#current_downloaded').raw().value;
-        rr = $('#current_rr').raw().value;
-        if (amount > 0.3 * (upload - rr * download)) {
-            if (!confirm('This vote is more than 30% of your buffer. Please confirm that you wish to place this large of a vote.')) {
-                return false;
-            }
+function Vote(requestid, amount, votecount, upload, download, rr) {
+    if (amount > 100 * 1024 * 1024 && amount > 0.3 * (upload - rr * download)) {
+        if (!confirm('This vote is more than 30% of your buffer. Please confirm that you wish to place this large of a vote.')) {
+            return false;
         }
     }
 
     ajax.get('requests.php?action=takevote&id=' + requestid + '&auth=' + authkey + '&amount=' + amount, function (response) {
-        if (response == 'bankrupt') {
+        response = JSON.parse(response);
+        if (response.status == 'success') {
+            vote_count = document.getElementById('vote_count_' + response.id);
+            if (!vote_count) {
+                // we are an individual request page
+                vote_count = document.getElementById('votecount');
+            }
+            vote_count.textContent = response.total.toLocaleString('en-US');
+            vote_link = document.querySelectorAll('[data-id="' + response.id + '"]');
+            if (vote_link) {
+                vote_link[0].onClick = null;
+                vote_link[0].innerHTML = "&check;";
+                vote_link[0].classList.remove('brackets');
+            }
+        } else if (response.status == 'bankrupt') {
             error_message("You do not have sufficient upload credit to add " + byte_format(amount, 0) + " to this request");
             return;
-        } else if (response == 'missing') {
+        } else if (response.status == 'missing') {
             error_message("Cannot find this request");
             return;
-        } else if (response == 'filled') {
+        } else if (response.status == 'filled') {
             error_message("This request has already been filled");
             return;
-        } else if (response == 'success') {
-            votecount.innerHTML = (parseInt(votecount.innerHTML)) + 1;
         } else {
             error_message("Error on saving request vote. Please try again later.");
             return;
@@ -53,7 +41,7 @@ function Vote(amount, requestid) {
             $('#total_bounty').raw().value = totalBounty;
             $('#formatted_bounty').raw().innerHTML = byte_format(totalBounty);
             if (requestTax > 0) {
-                save_message("Your vote of " + byte_format(amount, 0) + ", adding a " + byte_format(amount * (1 - $('#request_tax').raw().value), 0) + " bounty, has been added");
+                save_message("Your vote of " + byte_format(amount, 0) + ", adding a " + byte_format(amount * (1 - requestTax), 0) + " bounty, has been added");
             } else {
                 save_message("Your vote of " + byte_format(amount, 0) + " has been added");
             }
@@ -67,7 +55,8 @@ function Vote(amount, requestid) {
 function Calculate() {
     var mul = (($('#unit').raw().options[$('#unit').raw().selectedIndex].value == 'mb') ? (1024*1024) : (1024*1024*1024));
     var amt = Math.floor($('#amount_box').raw().value * mul);
-    if (amt > $('#current_uploaded').raw().value) {
+    var current_uploaded = document.getElementById('current_uploaded').value;
+    if (amt > current_uploaded) {
         $('#new_uploaded').raw().innerHTML = "You can't afford that request!";
         $('#new_bounty').raw().innerHTML = "0 MiB";
         $('#bounty_after_tax').raw().innerHTML = "0 MiB";
@@ -75,15 +64,15 @@ function Calculate() {
     } else if (isNaN($('#amount_box').raw().value)
             || (window.location.search.indexOf('action=new') != -1 && $('#amount_box').raw().value * mul < 100 * 1024 * 1024)
             || (window.location.search.indexOf('action=view') != -1 && $('#amount_box').raw().value * mul < 100 * 1024 * 1024)) {
-        $('#new_uploaded').raw().innerHTML = byte_format(($('#current_uploaded').raw().value), 2);
+        $('#new_uploaded').raw().innerHTML = byte_format(current_uploaded, 2);
         $('#new_bounty').raw().innerHTML = "0 MiB";
         $('#bounty_after_tax').raw().innerHTML = "0 MiB";
         $('#button').raw().disabled = true;
     } else {
         $('#button').raw().disabled = false;
         $('#amount').raw().value = amt;
-        $('#new_uploaded').raw().innerHTML = byte_format(($('#current_uploaded').raw().value) - amt, 2);
-        $('#new_ratio').raw().innerHTML = ratio($('#current_uploaded').raw().value - amt, $('#current_downloaded').raw().value);
+        $('#new_uploaded').raw().innerHTML = byte_format(current_uploaded - amt, 2);
+        $('#new_ratio').raw().innerHTML = ratio(current_uploaded - amt, $('#current_downloaded').raw().value);
         $('#new_bounty').raw().innerHTML = byte_format(mul * $('#amount_box').raw().value, 0);
         $('#bounty_after_tax').raw().innerHTML = byte_format(mul * (1 - $('#request_tax').raw().value) * $('#amount_box').raw().value, 0);
     }
@@ -251,4 +240,42 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         Calculate();
     }
+
+    // from an individual request page
+    const button = document.getElementById('button');
+    if (button) {
+        button.addEventListener('click', function() {
+            var unit = document.getElementById('unit').value;
+            var scale = 0;
+            if (unit == "mb") {
+                scale = 1024 * 1024;
+            } else if (unit == "gb") {
+                scale = 1024 * 1024 * 1024;
+            }
+            Vote(
+                parseInt(document.getElementById('requestid').value),
+                parseInt(document.getElementById('amount_box').value) * scale,
+                parseInt(document.getElementById('votecount').textContent),
+                parseInt(document.getElementById('current_uploaded').value),
+                parseInt(document.getElementById('current_downloaded').value),
+                parseFloat(document.getElementById('current_rr').value),
+            );
+        });
+    }
+
+    // from a page that lists requests
+    const voter = document.querySelectorAll('.request-vote');
+    voter.forEach(function(span) {
+        span.addEventListener('click', function() {
+            Vote(
+                parseInt(this.dataset.id),
+                parseInt(this.dataset.bounty),
+                parseInt(this.dataset.n),
+                parseInt(document.getElementById('current_uploaded').value),
+                parseInt(document.getElementById('current_downloaded').value),
+                parseFloat(document.getElementById('current_rr').value),
+            );
+        });
+    });
+
 });

@@ -10,16 +10,6 @@ if (!isset($_GET['userid'])) {
     }
 }
 
-$header = new Gazelle\Util\SortableTableHeader('created', [
-    'year'     => ['dbColumn' => 'year',       'defaultSort' => 'desc', 'text' => 'Year'],
-    'votes'    => ['dbColumn' => 'votes',      'defaultSort' => 'desc', 'text' => 'Votes'],
-    'bounty'   => ['dbColumn' => 'bounty',     'defaultSort' => 'desc', 'text' => 'Bounty'],
-    'filled'   => ['dbColumn' => 'timefilled', 'defaultSort' => 'desc', 'text' => 'Filled'],
-    'created'  => ['dbColumn' => 'timeadded',  'defaultSort' => 'desc', 'text' => 'Created'],
-    'lastvote' => ['dbColumn' => 'lastvote',   'defaultSort' => 'desc', 'text' => 'Last Vote'],
-    'random'   => ['dbColumn' => 'RAND()',     'defaultSort' => ''],
-]);
-
 $search = new Gazelle\Search\Request(new Gazelle\Manager\Request());
 $initial = !isset($_GET['submit']);
 $bookmarkView = false;
@@ -90,6 +80,16 @@ if (isset($_GET['year'])) {
     $search->setYear((int)$_GET['year']);
 }
 
+$header = new Gazelle\Util\SortableTableHeader('created', [
+    'year'     => ['dbColumn' => 'year',       'defaultSort' => 'desc', 'text' => 'Year'],
+    'votes'    => ['dbColumn' => 'votes',      'defaultSort' => 'desc', 'text' => 'Votes'],
+    'bounty'   => ['dbColumn' => 'bounty',     'defaultSort' => 'desc', 'text' => 'Bounty'],
+    'filled'   => ['dbColumn' => 'timefilled', 'defaultSort' => 'desc', 'text' => 'Filled'],
+    'created'  => ['dbColumn' => 'timeadded',  'defaultSort' => 'desc', 'text' => 'Created'],
+    'lastvote' => ['dbColumn' => 'lastvote',   'defaultSort' => 'desc', 'text' => 'Last Vote'],
+    'random'   => ['dbColumn' => 'RAND()',     'defaultSort' => ''],
+]);
+
 $paginator = new Gazelle\Util\Paginator(REQUESTS_PER_PAGE, (int)($_GET['page'] ?? 1));
 if ($header->getOrderBy() === 'random') {
     $search->limit(0, REQUESTS_PER_PAGE, REQUESTS_PER_PAGE);
@@ -115,8 +115,10 @@ echo $Twig->render('request/index.twig', [
     'paginator'       => $paginator,
     'requestor'       => $requestor ?? null,
     'tag_mode'        => $_GET['tag_mode'] ?? 'all',
+    'filtering'       => true, // false on artist page
     'show_filled'     => $_GET['show_filled'] ?? null,
     'show_old'        => $_GET['showall'] ?? null,
+    'standard_bounty' => REQUEST_MIN * 1024 * 1024,
     'type'            => $_GET['type'] ?? null,
     'user'            => $user,
     'viewer'          => $Viewer,
