@@ -60,9 +60,7 @@ please send a Staff PM to ask a moderator to unlock the artist.</p>
 {% endif %}
     <tr>
         <td class="label" style="vertical-align: top;">Artist information</td>
-        <td>
-        <textarea name="body" cols="91" rows="15">{{ artist.body }}</textarea> <br /><br />
-        </td>
+        <td>{{ body.emit|raw }}<br /><br /></td>
     </tr>
     <tr>
         <td class="label" style="vertical-align: top;"><label for="showcase">Showcase a.k.a Vanity House</label></td>

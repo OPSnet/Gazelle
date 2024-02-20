@@ -12,5 +12,6 @@ if (is_null($artist)) {
 
 echo $Twig->render('artist/edit.twig', [
     'artist' => $artist,
+    'body'   => new Gazelle\Util\Textarea('body', $artist->body() ?? '', 91, 15),
     'viewer' => $Viewer,
 ]);
