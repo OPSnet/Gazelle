@@ -34,6 +34,7 @@ View::show_header($name, ['js' => 'browse,requests,bbcode,comments,voting,subscr
             <a href="artist.php?action=edit&amp;artistid=<?= $artistId ?>" class="brackets">Edit</a>
 <?php } ?>
             <a href="artist.php?action=editrequest&amp;artistid=<?=$artistId?>" class="brackets">Request an Edit</a>
+            <a href="upload.php?artistid=<?= $artistId ?>" class="brackets">Add upload</a>
 <?php if ($Viewer->permitted('site_submit_requests')) { ?>
             <a href="requests.php?action=new&amp;artistid=<?=$artistId?>" class="brackets">Add request</a>
 <?php

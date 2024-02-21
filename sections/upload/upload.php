@@ -1,9 +1,7 @@
 <?php
+
 //**********************************************************************//
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Upload form ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-// This page relies on the TORRENT_FORM class. All it does is call      //
-// the necessary functions.                                             //
-//----------------------------------------------------------------------//
 // $Properties, $Err and $categoryId are set in upload_handle.php,      //
 // and are only used when the form doesn't validate and this page must  //
 // be called again.                                                     //
@@ -57,7 +55,20 @@ if (!isset($Properties)) {
                 'TagList'          => implode(', ', $request->tagNameList()),
                 'UserID'           => $Viewer->id(),
             ];
-            show($request->artistRole()?->idList());
+        }
+    } elseif (isset($_GET['artistid'])) {
+        $artist = (new Gazelle\Manager\Artist())->findById((int)$_GET['artistid']);
+        if ($artist) {
+            $Properties = [
+                'add-format' => true,
+                'Artists'    => [
+                    ARTIST_MAIN => [[
+                        'id'   => $artist->id(),
+                        'name' => $artist->name(),
+                    ]],
+                ],
+                'UserID' => $Viewer->id(),
+            ];
         }
     }
 }
