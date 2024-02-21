@@ -3,11 +3,14 @@
     <div class="header">
         <h2>Tracker info</h2>
     </div>
-{% if user_id and user_stats|length %}
     <div class="linkbox">
+{% if (user_id and user_stats|length) or mem_stats %}
         <a href="?action={{ action }}" class="brackets" />Main stats</a>
-    </div>
 {% endif %}
+{% if not mem_stats %}
+        <a href="?action=ocelot_info&status=memory" class="brackets" />Memory stats</a>
+{% endif %}
+    </div>
     <div class="sidebar">
         <div class="box box2">
             <div class="head"><strong>User stats</strong></div>
@@ -50,10 +53,12 @@
             </table>
 {% elseif user_id %}
                 User id {{ user_id }} is not known to the tracker.
+{% elseif mem_stats%}
+    <pre>{{ mem_stats }}</pre>
 {% elseif main_stats %}
     {% for key, value in main_stats %}
                 {%- if key not in ["announce interval", "announce jitter"] -%}
-                    {%- if key in ["uptime", "version"] -%}
+                    {%- if key in ["uptime", "jemalloc_version", "version"] -%}
                          {{ key }} {{ value }}
                     {%- elseif key starts with "bytes " -%}
                         {{ value|octet_size }} {{ key }}

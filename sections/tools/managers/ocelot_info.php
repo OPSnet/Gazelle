@@ -46,9 +46,14 @@ if ($dirty) {
     $info = $tracker->info();
 }
 
+$memStats = ($_GET['status'] ?? '' == 'memory')
+    ? (new Gazelle\Tracker())->infoMemoryAlloc()
+    : null;
+
 echo $Twig->render('admin/tracker-info.twig', [
     'action'       => $_REQUEST['action'],
     'main_stats'   => $info,
+    'mem_stats'    => $memStats,
     'user_stats'   => $stats,
     'user_id'      => $_GET['userid'] ?? null,
     'user'         => $user,

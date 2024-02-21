@@ -181,19 +181,16 @@ class Tracker extends Base {
             return true;
         }
         // Build request
-        $Get = TRACKER_SECRET . "/update?action=$Action";
-        foreach ($Updates as $Key => $Value) {
-            $Get .= "&$Key=$Value";
+        $url = "/update?action=$Action";
+        foreach ($Updates as $k => $v) {
+            $url .= "&$k=$v";
         }
 
-        $MaxAttempts = 3;
         $this->error = false;
-        if ($this->send_request($Get, $MaxAttempts) === false) {
-            Irc::sendMessage('#tracker', "$MaxAttempts $Get {$this->error}");
-            global $Cache;
-            if ($Cache->get_value('ocelot_error_reported') === false) {
-                Irc::sendMessage(IRC_CHAN_DEV, "Failed to update ocelot: {$this->error} : $Get");
-                $Cache->cache_value('ocelot_error_reported', true, 3600);
+        if ($this->request(TRACKER_SECRET, $url, 5) === false) {
+            if (self::$cache->get_value('ocelot_error_reported') === false) {
+                Irc::sendMessage(IRC_CHAN_DEV, "Failed to update ocelot: {$this->error} : $url");
+                self::$cache->cache_value('ocelot_error_reported', true, 180);
             }
             return false;
         }
@@ -231,6 +228,15 @@ class Tracker extends Base {
     }
 
     /**
+     * Get whatever info the tracker has to report on memory allocations
+     */
+    public function infoMemoryAlloc(): string {
+        return DISABLE_TRACKER
+            ? "tracker is disabled by configuration"
+            : (string)$this->request(TRACKER_REPORTKEY, '/report?jemalloc=plain', 3);
+    }
+
+    /**
      * Send a stats request to the tracker and process the results
      *
      * @return array with stats in named keys or empty if the request failed
@@ -239,31 +245,31 @@ class Tracker extends Base {
         if (DISABLE_TRACKER) {
             return [];
         }
-        $Get = TRACKER_REPORTKEY . '/report?';
+        $url = '/report?';
         if ($Type === self::STATS_MAIN) {
-            $Get .= 'get=stats';
+            $url .= 'get=stats';
         } elseif ($Type === self::STATS_USER && !empty($Params['key'])) {
-            $Get .= "get=user&key={$Params['key']}";
+            $url .= "get=user&key={$Params['key']}";
         } else {
             return [];
         }
-        $Response = $this->send_request($Get);
-        if ($Response === false || $Response === "") {
+        $response = $this->request(TRACKER_REPORTKEY, $url, 5);
+        if ($response === false || $response === "") {
             return [];
         }
         if ($Type === self::STATS_USER) {
-            return json_decode($Response, true);
+            return json_decode($response, true);
         }
-        $Stats = [];
-        foreach (explode("\n", $Response) as $Stat) {
-            if (preg_match('/^(Uptime|version): (.*)$/', $Stat, $match)) {
-                $Stats[strtolower($match[1])] = $match[2];
+        $list = [];
+        foreach (explode("\n", $response) as $metric) {
+            if (preg_match('/^(Uptime|(?:jemalloc_)?version): (.*)$/', $metric, $match)) {
+                $list[strtolower($match[1])] = $match[2];
             } else {
-                [$value, $key] = explode(" ", $Stat, 2);
-                $Stats[$key] = str_contains($value, ".") ? (float)$value : (int)$value;
+                [$value, $key] = explode(" ", $metric, 2);
+                $list[$key] = str_contains($value, ".") ? (float)$value : (int)$value;
             }
         }
-        return $Stats;
+        return $list;
     }
 
     /**
@@ -271,66 +277,64 @@ class Tracker extends Base {
      *
      * @return false|string tracker response message or false if the request failed
      */
-    protected function send_request(string $Get, int $MaxAttempts = 1): false|string {
+    protected function request(string $secret, string $url, int $MaxAttempts): false|string {
         if (DISABLE_TRACKER) {
             return false;
         }
-        $Header = "GET /$Get HTTP/1.1\r\nHost: " . TRACKER_NAME . "\r\nConnection: Close\r\n\r\n";
+        $Header = "GET /$secret$url HTTP/1.1\r\nHost: " . TRACKER_NAME . "\r\nConnection: Close\r\n\r\n";
         $Attempts = 0;
-        $Sleep = 0;
         $Success = false;
         $StartTime = microtime(true);
         $Data = "";
-        $Response = "";
+        $response = "";
         $code = 0;
+        $sleep = 1200000; // 1200ms
         while (!$Success && $Attempts++ < $MaxAttempts) {
-            if ($Sleep) {
-                usleep((int)$Sleep);
-            }
-            $Sleep = 1200000; // 1200ms
-
             // Send request
-            $File = fsockopen(TRACKER_HOST, TRACKER_PORT, $ErrorNum, $ErrorString);
-            if ($File) {
-                if (fwrite($File, $Header) === false) {
+            $socket = fsockopen(TRACKER_HOST, TRACKER_PORT, $ErrorNum, $ErrorString);
+            if ($socket) {
+                if (fwrite($socket, $Header) === false) {
                     $this->error = "Failed to fwrite()";
-                    $Sleep *= 1.5; // exponential backoff
+                    usleep((int)$sleep);
+                    $sleep *= 1.5; // exponential backoff
                     continue;
                 }
             } else {
                 $this->error = "Failed to fsockopen(" . TRACKER_HOST . ":" . TRACKER_PORT . ") - $ErrorNum - $ErrorString";
+                usleep((int)$sleep);
+                $sleep *= 1.5; // exponential backoff
                 continue;
             }
 
             // Check for response.
-            $Response = '';
-            while (!feof($File)) {
-                $Response .= fread($File, 1024);
+            $response = '';
+            while (!feof($socket)) {
+                $response .= fread($socket, 1024);
             }
-            if (preg_match('/HTTP\/1.1 (\d+)/', $Response, $match)) {
+            if (preg_match('/HTTP\/1.1 (\d+)/', $response, $match)) {
                 $code = $match[1];
             } else {
                 break;
             }
-            $DataStart = strpos($Response, "\r\n\r\n") + 4;
-            $DataEnd = strrpos($Response, "\n");
+            $DataStart = strpos($response, "\r\n\r\n") + 4;
+            $DataEnd = strrpos($response, "\n");
             if ($DataEnd > $DataStart) {
-                $Data = substr($Response, $DataStart, $DataEnd - $DataStart);
+                $Data = substr($response, $DataStart, $DataEnd - $DataStart);
             } else {
                 $Data = "";
             }
-            $Status = substr($Response, $DataEnd + 1);
+            $Status = substr($response, $DataEnd + 1);
             if ($code == 200 || $Status == "success") {
                 $Success = true;
             }
         }
-        $path_array = explode("/", $Get, 2);
+        $path_array = explode("/", $url, 2);
         $Request = [
-            'path' => array_pop($path_array), // strip authkey from path
-            'response' => ($Success ? $Data : $Response),
-            'code' => $code,
-            'status' => ($Success ? 'ok' : 'failed'),
-            'time' => 1000 * (microtime(true) - $StartTime)
+            'path'     => array_pop($path_array), // strip authkey from path
+            'response' => ($Success ? $Data : $response),
+            'code'     => $code,
+            'status'   => ($Success ? 'ok' : 'failed'),
+            'time'     => 1000 * (microtime(true) - $StartTime),
         ];
         self::$Requests[] = $Request;
         if ($Success) {
