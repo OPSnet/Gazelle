@@ -33,7 +33,7 @@
     "orpheusnet/logchecker": "^0.13.0",
     "robmorgan/phinx": "^0.12.13",
     "robthree/twofactorauth": "^1.8.2",
-    "twig/twig": "^2.15.4",
+    "twig/twig": "^3.8",
     "whichbrowser/parser": "^2.1.7"
   },
   "require-dev": {
