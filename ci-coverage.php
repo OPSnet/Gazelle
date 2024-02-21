@@ -8,6 +8,16 @@ use SebastianBergmann\CodeCoverage\CodeCoverage;
 use SebastianBergmann\CodeCoverage\Report\PHP as PhpReport;
 use SebastianBergmann\CodeCoverage\Util\Filesystem;
 
+function filenameList(string $path): array { /** @phpstan-ignore-line */
+    $list = [];
+    foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path)) as $entry) {
+        $filename = $entry->getPathname();
+        if (str_ends_with($filename, '.php')) {
+            $list[] = $filename;
+        }
+    }
+    return $list;
+}
 
 class CoverageHelper {
     /*
@@ -19,11 +29,11 @@ class CoverageHelper {
 
     public function __construct() {
         $filter = new Filter();
-        $filter->includeDirectory(__DIR__ . '/app');
-        $filter->includeDirectory(__DIR__ . '/classes');
-        $filter->includeDirectory(__DIR__ . '/lib');
-        $filter->includeDirectory(__DIR__ . '/public');
-        $filter->includeDirectory(__DIR__ . '/sections');
+        $filter->includeFiles(filenameList(__DIR__ . '/app'));
+        $filter->includeFiles(filenameList(__DIR__ . '/classes'));
+        $filter->includeFiles(filenameList(__DIR__ . '/lib'));
+        $filter->includeFiles(filenameList(__DIR__ . '/public'));
+        $filter->includeFiles(filenameList(__DIR__ . '/sections'));
         $this->coverage = new CodeCoverage(
             (new Selector())->forLineCoverage($filter),
             $filter

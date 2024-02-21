@@ -8,25 +8,27 @@ STORAGE_PATH_TORRENT    := $(shell bin/getconf STORAGE_PATH_TORRENT)
 .SILENT: help
 .PHONY: help
 help:
-	echo '  help               - output this message'
-	echo '  build-css          - build the CSS'
-	echo '  check-php          - check that the modified PHP files are syntactically correct'
-	echo '  dump-all           - create tarballs of the following:'
-	echo '  dump-riplog        - create a tarball of the rip logs'
-	echo '  dump-riploghtml    - create a tarball of the HTMLified rip logs'
-	echo '  dump-torrent       - create a tarball of the rip logs'
-	echo '  lint-css           - lint (style check) the CSS'
-	echo '  lint-php           - lint (style check) the PHP'
-	echo '  lint-twig          - lint (style check) the Twig templates'
-	echo '  mysqldump          - dump mysql database from docker to misc/mysql-dump.sql'
-	echo '  ocelot-reload-conf - signal Ocelot to reload its configuration'
-	echo '  ocelot-reload-db   - signal Ocelot to reload from database'
-	echo '  pgdump             - dump postgresql database from docker to misc/postgresql-dump.sql'
-	echo '  phpstan-analyse    - run phpstan over the code'
-	echo '  phpstan-baseline   - generate a new phpstan baseline'
-	echo '  test               - run all linters and unit test suite'
-	echo '  twig-flush         - purge the Twig cache'
-	echo '  update             - pull from git and run production composer install'
+	echo '  help                 - output this message'
+	echo '  build-css            - build the CSS'
+	echo '  check-php            - check that the modified PHP files are syntactically correct'
+	echo '  composer-dev-update  - run local composer update'
+	echo '  composer-live-update - run production composer install from composer.lock'
+	echo '  dump-all             - create tarballs of the following:'
+	echo '  dump-riplog          - create a tarball of the rip logs'
+	echo '  dump-riploghtml      - create a tarball of the HTMLified rip logs'
+	echo '  dump-torrent         - create a tarball of the rip logs'
+	echo '  git-submodules       - update the git submodules'
+	echo '  lint-css             - lint (style check) the CSS'
+	echo '  lint-php             - lint (style check) the PHP'
+	echo '  lint-twig            - lint (style check) the Twig templates'
+	echo '  mysqldump            - dump mysql database from docker to misc/mysql-dump.sql'
+	echo '  ocelot-reload-conf   - signal Ocelot to reload its configuration'
+	echo '  ocelot-reload-db     - signal Ocelot to reload from database'
+	echo '  pgdump               - dump postgresql database from docker to misc/postgresql-dump.sql'
+	echo '  phpstan-analyse      - run phpstan over the code'
+	echo '  phpstan-baseline     - generate a new phpstan baseline'
+	echo '  test                 - run all linters and unit test suite'
+	echo '  twig-flush           - purge the Twig cache'
 
 .PHONY: build-css
 build-css:
@@ -35,6 +37,14 @@ build-css:
 .PHONY: check-php
 check-php:
 	git status | awk '/(modified|new file):/ {print $$NF}' | xargs -n1 php -l
+
+.PHONY: composer-dev-update
+composer-dev-update:
+	composer update --optimize-autoloader
+
+.PHONY: composer-prod-update
+composer-prod-update:
+	composer install --no-dev --optimize-autoloader --no-progress
 
 .PHONY: dump-all
 dump-all: dump-riplog dump-riploghtml dump-torrent
@@ -50,6 +60,10 @@ dump-riploghtml:
 .PHONY: dump-torrent
 dump-torrent:
 	tar -C "$(STORAGE_PATH_TORRENT)/.." -jcf torrent.$(NOW).tar.bz2 "$$(basename $(STORAGE_PATH_TORRENT))"
+
+.PHONY: git-submodules
+git-submodules:
+	git pull --recurse-submodules
 
 .PHONY: lint-css
 lint-css:
@@ -111,8 +125,3 @@ test: lint-css lint-php lint-twig
 .PHONY: twig-flush
 twig-flush:
 	find cache/twig -mindepth 1 -depth -delete
-
-.PHONY: update
-update:
-	git pull --recurse-submodules
-	composer install --no-dev --optimize-autoloader --no-progress

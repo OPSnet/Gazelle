@@ -1,6 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 require_once(__DIR__ . '/../../lib/bootstrap.php');
 
@@ -22,10 +23,7 @@ class SiteInfoTest extends TestCase {
         $this->assertIsArray($info->tableStats('users_main'), 'siteinfo-table-stats');
     }
 
-    /**
-     * git binary not available in the CI container
-     * @group no-ci
-     */
+    #[Group('no-ci')]
     public function testGitInfo(): void {
         $info = new Gazelle\SiteInfo();
         $this->assertIsString($info->gitBranch(), 'siteinfo-git-branch');

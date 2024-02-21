@@ -1,6 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 use Gazelle\Enum\DownloadStatus;
 use Gazelle\Enum\LeechType;
 
@@ -20,9 +21,7 @@ class TrackerTest extends TestCase {
         }
     }
 
-    /**
-     * @group no-ci
-     */
+    #[Group('no-ci')]
     public function testTrackerAnnounce(): void {
         $tracker  = new \Gazelle\Tracker();
         $interval = 1000 + random_int(0, 2000);
@@ -35,18 +34,14 @@ class TrackerTest extends TestCase {
         $this->assertEquals($jitter, $info['announce jitter'], 'tracker-announce-jitter');
     }
 
-    /**
-     * @group no-ci
-     */
+    #[Group('no-ci')]
     public function testTrackerStats(): void {
         $tracker = new \Gazelle\Tracker();
         // this will fail if you have local clients logged into ocelot
         $this->assertEquals([0, 0], $tracker->global_peer_count(), 'tracker-global-peer-count');
     }
 
-    /**
-     * @group no-ci
-     */
+    #[Group('no-ci')]
     public function testTrackerToken(): void {
         $this->user = Helper::makeUser('trkfl.' . randomString(10), 'tracker');
         $this->torrent = Helper::makeTorrentMusic(
@@ -64,9 +59,7 @@ class TrackerTest extends TestCase {
         $this->assertTrue($tracker->removeToken($this->torrent, $this->user), 'tracker-remove-token');
     }
 
-    /**
-     * @group no-ci
-     */
+    #[Group('no-ci')]
     public function testTrackerTorrent(): void {
         $this->user = Helper::makeUser('trk.' . randomString(10), 'tracker');
         $this->torrent = Helper::makeTorrentMusic(
@@ -84,9 +77,7 @@ class TrackerTest extends TestCase {
         $this->assertTrue($tracker->modifyTorrent($this->torrent, LeechType::Free), 'tracker-modify-torrent');
     }
 
-    /**
-     * @group no-ci
-     */
+    #[Group('no-ci')]
     public function testTrackerUser(): void {
         $tracker = new \Gazelle\Tracker();
         $this->assertFalse($tracker->last_error(), 'tracker-init');
@@ -134,9 +125,7 @@ class TrackerTest extends TestCase {
         $this->assertEquals($info['requests handled'] + 8, $current['requests handled'], 'tracker-requests-handled');
     }
 
-    /**
-     * @group no-ci
-     */
+    #[Group('no-ci')]
     public function testTrackerWhitelist(): void {
         $tracker = new \Gazelle\Tracker();
         $peer = '#utest-' . randomString(10);
