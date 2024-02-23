@@ -1,6 +1,6 @@
 {% from 'macro/form.twig' import selected %}
-{% from 'macro/ipv4.twig' import asn, ip_search, rdns %}
-{{ header('Bulk Email Search') }}
+{% from 'macro/ipv4.twig' import asn, ip_search %}
+{{ header('Bulk Email Search', {'js': 'resolve-ip'}) }}
 <div class="thin">
 <div class="header">
     <h2>Bulk Email Search</h2>
@@ -42,7 +42,7 @@
     <td>{{ r.created }}</td>
     <td>{% if r.user_id %}{{ r.user_id|user_url }}{% else %}User #{{ r.user_id }}{% endif %} / {{ r.email }}</td>
     <td>{{ asn(r.name, r.n) }}</td>
-    <td>{{ rdns(r.ipv4) }}</td>
+    <td><span class="resolve-ipv4" data-ip="{{ r.ipv4 }}">Resolving...</span></td>
     </tr>
     {% if loop.last %}
 </tbody>
@@ -77,7 +77,7 @@
     <td>{{ r.change_date }}</td>
     <td>{% if r.user_id %}{{ r.user_id|user_url }}{% else %}User #{{ r.user_id }}{% endif %} / {{ r.email }}</td>
     <td>{{ asn(r.name, r.n) }}</td>
-    <td>{{ rdns(r.ipv4) }}</td>
+    <td><span class="resolve-ipv4" data-ip="{{ r.ipv4 }}">Resolving...</span></td>
     </tr>
     {% if loop.last %}
 </tbody>

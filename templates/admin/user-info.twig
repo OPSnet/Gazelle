@@ -1,5 +1,5 @@
 {% from 'macro/form.twig' import selected -%}
-{{ header(user.username ~ ' › Email and IP summary') }}
+{{ header(user.username ~ ' › Email and IP summary', {'js': 'resolve-ip'}) }}
 <div class="box pad center">
 <h2>{{ user.id|user_url }} &rsaquo; Email and IP summary</h2>
 

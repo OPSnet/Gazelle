@@ -1,5 +1,5 @@
-{% from 'macro/ipv4.twig' import ip_search, rdns %}
-{{ header(user.username ~ " › IP address history", {'js': 'iphist'}) }}
+{% from 'macro/ipv4.twig' import ip_search %}
+{{ header(user.username ~ " › IP address history", {'js': 'resolve-ip'}) }}
 <div class="thin">
     <div class="header">
         <h2><a href="{{ user.location }}">{{ user.username }}</a> &rsaquo; IP address history</h2>
@@ -38,9 +38,9 @@
         <tr>
             <td>
             {% if not row.is_banned %}
-                 {{ ip_search(row.ip_addr) }} ({{ rdns(row.ip_addr) }})
+                 {{ ip_search(row.ip_addr) }} (<span class="resolve-ipv4" data-ip="{{ row.ip_addr }}">Resolving...</span>)
             {% else %}
-            <a href="tools.php?action=ip_ban&ip={{ row.ip_addr }}">{{ ip_search(row.ip_addr) }} ({{ rdns(row.ip_addr) }})
+            <a href="tools.php?action=ip_ban&ip={{ row.ip_addr }}">{{ ip_search(row.ip_addr) }} (<span class="resolve-ipv4" data-ip="{{ row.ip_addr }}">Resolving {{ row.ip_addr }}...</span>)
                 <img src="{{ constant('STATIC_SERVER') }}/common/symbols/disabled.png" alt="IP ranned" title="IP banned" class="tooltip" />
             </a>
             {% endif %}

@@ -1,4 +1,4 @@
-{{ header('Tracker IP address history › ' ~ (user ? user.username : "IP address " ~ ipaddr)) }}
+{{ header('Tracker IP address history › ' ~ (user ? user.username : "IP address " ~ ipaddr), {'js': 'resolve-ip'}) }}
 <div class="thin">
     <div class="header">
 {% if user  %}
@@ -59,7 +59,7 @@
         <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
             <td>
     {% if user %}
-            {{ r.IP }} ({{ resolveCountryIpv4(r.ip) }}) {{ resolveIpv4(r.ip) }}
+            {{ r.ip }} <span class="resolve-ipv4" data-ip="{{ r.ip }}">Resolving...</span> ({{ resolveCountryIpv4(r.ip) }})
             <a href="http://whatismyipaddress.com/ip/{{ r.ip }}" class="brackets tooltip" title="Search WIMIA.com">WI</a>
     {% else %}
             <a href="{{ urlstem }}userid={{ r.uid }}">{{ r.username }}</a>

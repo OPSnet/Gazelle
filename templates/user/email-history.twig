@@ -1,5 +1,5 @@
-{% from 'macro/ipv4.twig' import ip_search, rdns %}
-{{ header(user.username ~ " › Email History") }}
+{% from 'macro/ipv4.twig' import ip_search %}
+{{ header(user.username ~ " › Email History", {'js': 'resolve-ip'}) }}
 <div class="thin">
 <div class="header">
     <h2><a href="{{ user.location }}">{{ user.username }}</a> &rsaquo; Email history</h2>
@@ -21,7 +21,7 @@
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
         <td>{{ r.email }}</td>
         <td>{{ r.created }}</td>
-        <td>{{ ip_search(r.ipv4) }} ({{ rdns(r.ipv4) }})</td>
+        <td>{{ ip_search(r.ipv4) }} (<span class="resolve-ipv4" data-ip="{{ r.ipv4 }}">Resolving...</span>)</td>
         <td>{{ r.cc }}</td>
         <td>{{ r.asn }}</td>
         <td>{{ r.useragent }}</td>
@@ -53,7 +53,7 @@
         <td><a href="userhistory.php?action=email&userid={{ r.user_id }}">{{ r.user.username }}</a></td>
         <td>{{ r.user.email }}</td>
         <td>{{ r.created }}</td>
-        <td>{{ ip_search(r.ipv4) }} ({{ rdns(r.ipv4) }})</a></td>
+        <td>{{ ip_search(r.ipv4) }} (<span class="resolve-ipv4" data-ip="{{ r.ipv4 }}">Resolving...</span>)</td>
         <td>{{ r.cc }}</td>
         <td>{{ r.asn }}</td>
         <td>{{ r.useragent }}</td>

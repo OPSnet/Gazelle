@@ -28,36 +28,36 @@ class UserRegistrationTest extends TestCase {
     }
 
     public function testUserRegistrationAfter(): void {
-        $reg = new Gazelle\Manager\Registration();
+        $reg = new Gazelle\Manager\Registration(new Gazelle\Manager\User());
         $reg->setAfterDate("2600-01-01 00:00:01");
         $this->assertEquals(2, $reg->total(), 'user-reg-total-after');
 
         $list = $reg->page(10, 0);
         $this->assertCount(2, $list, 'user-reg-list-after');
-        $this->assertFalse(in_array($this->userList[2]->id(), $list), 'user-reg-after-not-2');
-        $this->assertTrue(in_array($this->userList[3]->id(), $list), 'user-reg-after-3');
+        $this->assertFalse(in_array($this->userList[2], $list), 'user-reg-after-not-2');
+        $this->assertTrue(in_array($this->userList[3], $list), 'user-reg-after-3');
     }
 
     public function testUserRegistrationBefore(): void {
-        $reg = new Gazelle\Manager\Registration();
+        $reg = new Gazelle\Manager\Registration(new Gazelle\Manager\User());
         $reg->setBeforeDate("1600-12-31");
         $this->assertEquals(3, $reg->total(), 'user-reg-total-before');
 
         $list = $reg->page(10, 0);
         $this->assertCount(3, $list, 'user-reg-list-before');
-        $this->assertTrue(in_array($this->userList[0]->id(), $list), 'user-reg-before-0');
-        $this->assertTrue(in_array($this->userList[2]->id(), $list), 'user-reg-before-2');
-        $this->assertFalse(in_array($this->userList[3]->id(), $list), 'user-reg-before-not-3');
+        $this->assertTrue(in_array($this->userList[0], $list), 'user-reg-before-0');
+        $this->assertTrue(in_array($this->userList[2], $list), 'user-reg-before-2');
+        $this->assertFalse(in_array($this->userList[3], $list), 'user-reg-before-not-3');
     }
 
     public function testUserRegistrationBetween(): void {
-        $reg = new Gazelle\Manager\Registration();
+        $reg = new Gazelle\Manager\Registration(new Gazelle\Manager\User());
         $reg->setAfterDate("1600-02-01")->setBeforeDate("1600-03-01");
         $this->assertEquals(1, $reg->total(), 'user-reg-total-between');
 
         $list = $reg->page(10, 0);
         $this->assertCount(1, $list, 'user-reg-list-between');
-        $this->assertEquals([$this->userList[1]->id()], $list, 'user-reg-between-1');
+        $this->assertEquals([$this->userList[1]], $list, 'user-reg-between-1');
     }
 
     public function testUserRegistrationUnconfirmed(): void {

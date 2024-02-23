@@ -1,6 +1,6 @@
 {% from 'macro/form.twig' import selected %}
-{% from 'macro/ipv4.twig' import asn, ip_search, rdns %}
-{{ header('Bulk IP Search') }}
+{% from 'macro/ipv4.twig' import asn, ip_search %}
+{{ header('Bulk IP Search', {'js': 'resolve-ip'}) }}
 <div class="thin">
 <div class="header">
     <h2>Bulk IP Search</h2>
@@ -42,7 +42,7 @@
     <td>{{ r.first_seen }}</td>
     <td>{{ r.last_seen }}</td>
     <td>{{ asn(r.name, r.n) }}</td>
-    <td>{{ rdns(r.ipv4) }}</td>
+    <td><span class="resolve-ipv4" data-ip="{{ r.ipv4 }}">Resolving...</span></td>
     <td>{% if r.user_id %}{{ r.user_id|user_url }}{% else %}User #{{ r.user_id }}{% endif %}</td>
     </tr>
     {% if loop.last %}
@@ -78,7 +78,7 @@
     <td>{{ r.first_seen }}</td>
     <td>{{ r.last_seen }}</td>
     <td>{{ asn(r.name, r.n) }}</td>
-    <td>{{ rdns(r.ipv4) }}</td>
+    <td><span class="resolve-ipv4" data-ip="{{ r.ipv4 }}">Resolving...</span></td>
     <td><a href="torrents.php?type=snatched&userid={{ r.user_id }}">{{ r.total|number_format }}</a></td>
     <td>{% if r.user_id %}{{ r.user_id|user_url }}{% else %}User #{{ r.user_id }}{% endif %}</td>
     </tr>
@@ -115,7 +115,7 @@
     <td>{{ r.first_seen }}</td>
     <td>{{ r.last_seen }}</td>
     <td>{{ asn(r.name, r.n) }}</td>
-    <td>{{ rdns(r.ipv4) }}</td>
+    <td><span class="resolve-ipv4" data-ip="{{ r.ipv4 }}">Resolving...</span></td>
     <td><a href="torrents.php?type=snatched&userid={{ r.user_id }}">{{ r.total|number_format }}</a></td>
     <td>{% if r.user_id %}{{ r.user_id|user_url }}{% else %}User #{{ r.user_id }}{% endif %}</td>
     </tr>

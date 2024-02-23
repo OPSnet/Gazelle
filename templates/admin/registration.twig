@@ -1,4 +1,4 @@
-{{ header('Registration log') }}
+{{ header('Registration log', {'js': 'resolve-ip'}) }}
 <div class="thin">
 <div class="box pad">
     <form action="" method="post" acclass="thin box pad">
@@ -104,10 +104,10 @@
                 </span>
             </td>
             <td style="vertical-align: top">
-                {{- resolveIpv4(user.ipaddr) -}}
+                <span class="resolve-ipv4" data-ip="{{ user.ipaddr }}">Resolving...</span>
         {% if user.inviter.id and user.inviter.ipaddr != user.ipaddr %}
                 <br />
-                {{- resolveIpv4(user.inviter.ipaddr) -}}
+                <span class="resolve-ipv4" data-ip="{{ user.inviter.ipaddr }}">Resolving...</span>
         {% endif %}
             </td>
             <td style="vertical-align: top">

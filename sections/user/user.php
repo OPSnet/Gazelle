@@ -74,7 +74,11 @@ $DisplayCustomTitle = !empty($User->title())
         fn ($m) => 'src=' . $m[1] . image_cache_encode($m[2]) . $m[3], $User->title())
     : $User->title();
 
-View::show_header($Username, ['js' => 'jquery.imagesloaded,jquery.wookmark,user,bbcode,requests,lastfm,comments,info_paster', 'css' => 'tiles']);
+View::show_header($Username, [
+    'js' => 'jquery.imagesloaded,jquery.wookmark,user,bbcode,requests,lastfm,comments,info_paster'
+        . ($Viewer->permitted('users_view_ips') ? ',resolve-ip' : ''),
+    'css' => 'tiles'
+]);
 echo $Twig->render('user/header.twig', [
     'bonus'      => $userBonus,
     'donor'      => $donor,

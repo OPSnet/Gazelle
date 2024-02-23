@@ -8,6 +8,10 @@ class Registration extends \Gazelle\Base {
     protected string $beforeDate;
     protected string $afterDate;
 
+    public function __construct(
+        protected User $manager,
+    ) {}
+
     public function setBeforeDate(string $date): static {
         $this->beforeDate = $date;
         return $this;
@@ -57,6 +61,13 @@ class Registration extends \Gazelle\Base {
             LIMIT ? OFFSET ?
             ", ...array_merge($args, [$limit, $offset])
         );
-        return self::$db->collect(0, false);
+        $list = [];
+        foreach (self::$db->collect(0, false) as $userId) {
+            $user = $this->manager->findById($userId);
+            if ($user) {
+                $list[] = $user;
+            }
+        }
+        return $list;
     }
 }

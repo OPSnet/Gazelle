@@ -274,23 +274,6 @@ class Twig {
             'UTF-8'
         )));
 
-        $twig->addFunction(new \Twig\TwigFunction('resolveIpv4', fn($addr) => new \Twig\Markup(
-            (function ($ip) {
-                if (!$ip) {
-                    $ip = '127.0.0.1';
-                }
-                static $cache = [];
-                if (!isset($cache[$ip])) {
-                    $class = strtr($ip, '.', '-');
-                    $cache[$ip] = '<span class="host_' . $class
-                        . ">Resolving host – <script type=\"text/javascript\">document.addEventListener('DOMContentLoaded', function() {"
-                        .  "\$.get('tools.php?action=get_host&ip=$ip', function(host) {\$('.host_$class').html(host)})})</script></span>";
-                }
-                return $cache[$ip];
-            })($addr),
-            'UTF-8'
-        )));
-
         $twig->addFunction(new \Twig\TwigFunction('shorten', fn($text, $length) => new \Twig\Markup(
             shortenString($text, $length),
             'UTF-8'

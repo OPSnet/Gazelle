@@ -1,4 +1,4 @@
-{% from 'macro/ipv4.twig' import asn, ip_search, rdns %}
+{% from 'macro/ipv4.twig' import asn, ip_search %}
 <tr><th colspan="7"><br />{{ title }}</th></tr>
 {% for r in info %}
     {% if loop.first %}
@@ -18,7 +18,7 @@
     <td>{{ r.first_seen }}</td>
     <td>{{ r.last_seen }}</td>
     <td>{{ asn(r.name, r.n) }}</td>
-    <td>{{ rdns(r.ipv4) }}</td>
+    <td><span class="resolve-ipv4" data-ip="{{ r.ipv4 }}">Resolving...</span></td>
     <td></td>
 </tr>
 {% else %}
