@@ -183,47 +183,25 @@ register_shutdown_function(
 header('Cache-Control: no-cache, must-revalidate, post-check=0, pre-check=0');
 header('Pragma: no-cache');
 
-$Router = new Gazelle\Router($Viewer ? $Viewer->auth() : '');
 $file = realpath(__DIR__ . "/sections/{$Document}/index.php");
 if (!$file || !preg_match('/^[a-z][a-z0-9_]+$/', $Document)) {
-    if ($Viewer) {
-        error(403);  // will log to irc
-    } else {
-        error(404);
-    }
-} else {
-    try {
-        require_once($file);
-    } catch (Gazelle\DB\MysqlException $e) {
-        if (DEBUG_MODE || (isset($Viewer) && $Viewer->permitted('site_debug'))) {
-            echo $Twig->render('error-db.twig', [
-                'message' => $e->getMessage(),
-                'trace'   => str_replace(SERVER_ROOT . '/', '', $e->getTraceAsString()),
-            ]);
-        } else {
-            $Debug->saveError($e);
-            error("That is not supposed to happen, please send a Staff Message to \"Staff\" for investigation.");
-        }
-    } catch (\Exception $e) {
-        $Debug->saveError($e);
-    }
+    error($Viewer ? 403 : 404);
 }
 
-if ($Router->hasRoutes()) {
-    $action = $_REQUEST['action'] ?? '';
-    try {
-        /** @noinspection PhpIncludeInspection */
-        require_once($Router->getRoute($action));
-    } catch (Gazelle\Exception\RouterException $exception) {
-        error(404);
-    } catch (Gazelle\Exception\InvalidAccessException $exception) {
-        error(403);
-    } catch (Gazelle\DB\MysqlException $e) {
+try {
+    require_once($file);
+} catch (Gazelle\DB\MysqlException $e) {
+    if (DEBUG_MODE || (isset($Viewer) && $Viewer->permitted('site_debug'))) {
+        echo $Twig->render('error-db.twig', [
+            'message' => $e->getMessage(),
+            'trace'   => str_replace(SERVER_ROOT . '/', '', $e->getTraceAsString()),
+        ]);
+    } else {
         $Debug->saveError($e);
-        error("That was not supposed to happen, please send a Staff Message to \"Staff\" for investigation.");
-    } catch (Exception $e) {
-        $Debug->saveError($e);
+        error("That is not supposed to happen, please send a Staff Message to \"Staff\" for investigation.");
     }
+} catch (\Exception $e) {
+    $Debug->saveError($e);
 }
 
 // 6. Finish up

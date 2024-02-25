@@ -1,17 +1,5 @@
 <?php
 
-/*********************************************************************\
-//--------------Mod thread-------------------------------------------//
-
-This page gets called if we're editing a thread.
-
-Known issues:
-If multiple threads are moved before forum activity occurs then
-threads will linger with the 'Moved' flag until they're knocked off
-the front page.
-
-\*********************************************************************/
-
 if (!$Viewer->permitted('site_moderate_forums') && empty($_POST['transition'])) {
     error(403);
 }

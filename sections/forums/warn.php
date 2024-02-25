@@ -3,6 +3,7 @@
 if (!$Viewer->permitted('users_warn')) {
     error(403);
 }
+authorize();
 
 $post = (new Gazelle\Manager\ForumPost())->findById((int)($_POST['postid'] ?? 0));
 if (is_null($post)) {
@@ -14,7 +15,7 @@ if (is_null($user)) {
 }
 
 echo $Twig->render('forum/warn.twig', [
-    'auth'     => $Viewer->auth(),
-    'post'     => $post,
-    'user'     => $user,
+    'post'   => $post,
+    'user'   => $user,
+    'viewer' => $Viewer,
 ]);

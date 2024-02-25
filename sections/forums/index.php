@@ -4,29 +4,27 @@ if ($Viewer->disableForums()) {
     error(403);
 }
 
-$Router->addGet('', __DIR__ . '/main.php');
-
-$Router->addPost('autosub',          __DIR__ . '/autosub.php');
-$Router->addPost('add_poll_option',  __DIR__ . '/add_poll_option.php');
-$Router->addPost('mod_thread',       __DIR__ . '/mod_thread.php');
-$Router->addPost('new',              __DIR__ . '/new_thread_handle.php');
-$Router->addPost('poll_mod',         __DIR__ . '/poll_mod.php');
-$Router->addPost('reply',            __DIR__ . '/reply_handle.php');
-$Router->addPost('take_topic_notes', __DIR__ . '/topic_notes_handle.php');
-$Router->addPost('take_warn',        __DIR__ . '/warn_handle.php');
-$Router->addPost('takeedit',         __DIR__ . '/edit_handle.php');
-$Router->addPost('warn',             __DIR__ . '/warn.php');
-
-$Router->addGet('catchup',            __DIR__ . '/catchup.php');
-$Router->addGet('change_vote',        __DIR__ . '/change_vote.php');
-$Router->addGet('delete',             __DIR__ . '/delete.php');
-$Router->addGet('delete_poll_option', __DIR__ . '/delete_poll_option.php');
-$Router->addGet('get_post',           __DIR__ . '/get_post.php');
-$Router->addGet('new',                __DIR__ . '/newthread.php');
-$Router->addGet('search',             __DIR__ . '/search.php');
-$Router->addGet('sticky_post',        __DIR__ . '/sticky_post.php');
-$Router->addGet('takeedit',           __DIR__ . '/edit_handle.php');
-$Router->addGet('viewforum',          __DIR__ . '/forum.php');
-$Router->addGet('viewthread',         __DIR__ . '/thread.php');
-$Router->addGet('viewtopic',          __DIR__ . '/thread.php');
-$Router->addGet('warn',               __DIR__ . '/warn.php');
+match ($_REQUEST['action'] ?? '') {
+    'add_poll_option'    => require_once('add_poll_option.php'),
+    'autosub'            => require_once('autosub.php'),
+    'catchup'            => require_once('catchup.php'),
+    'change_vote'        => require_once('change_vote.php'),
+    'delete'             => require_once('delete.php'),
+    'delete_poll_option' => require_once('delete_poll_option.php'),
+    'get_post'           => require_once('get_post.php'),
+    'mod_thread'         => require_once('thread_handle.php'),
+    'take-new'           => require_once('new_thread_handle.php'),
+    'new'                => require_once('new_thread.php'),
+    'poll_mod'           => require_once('poll_mod.php'),
+    'reply'              => require_once('reply_handle.php'),
+    'search'             => require_once('search.php'),
+    'sticky_post'        => require_once('sticky_post.php'),
+    'take_topic_notes'   => require_once('thread_notes_handle.php'),
+    'take_warn'          => require_once('warn_handle.php'),
+    'takeedit'           => require_once('edit_handle.php'),
+    'viewforum'          => require_once('forum.php'),
+    'viewthread'         => require_once('thread.php'),
+    'viewtopic'          => require_once('thread.php'),
+    'warn'               => require_once('warn.php'),
+    default              => require_once('main.php'),
+};

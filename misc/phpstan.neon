@@ -99,10 +99,6 @@ parameters:
         - ../bin/*
         - ../sections/*
     -
-      message: '/^Variable \$Router might not be defined\.$/'
-      paths:
-        -  ../sections/forums/index.php
-    -
       message: '/^Variable \$Types might not be defined\.$/'
       paths:
         - ../sections/reports/*
