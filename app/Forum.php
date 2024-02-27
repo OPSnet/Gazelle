@@ -6,10 +6,12 @@ class Forum extends BaseObject {
     use Pg;
 
     final public const tableName         = 'forums';
-    final public const CACHE_TOC_FORUM   = 'forum_tocv2_%d';
     final public const CACHE_FORUM       = 'forum_%d';
     final public const CACHE_THREAD_INFO = 'thread_%d_info';
     final public const CACHE_CATALOG     = 'thread_%d_catalogue_%d';
+
+    final protected const CACHE_TOC_FORUM   = 'forum_tocv2_%d';
+    final protected const CACHE_TOCV2_FORUM = 'ftoc_%d';
 
     public function location(): string {
         return 'forums.php?action=viewforum&forumid=' . $this->id;
@@ -27,6 +29,7 @@ class Forum extends BaseObject {
         self::$cache->delete_multi([
             sprintf(self::CACHE_FORUM, $this->id),
             sprintf(self::CACHE_TOC_FORUM, $this->id),
+            sprintf(self::CACHE_TOCV2_FORUM, $this->id),
         ]);
         return $this;
     }
@@ -152,8 +155,12 @@ class Forum extends BaseObject {
         return $this->info()['last_thread_id'];
     }
 
-    public function lastPostTime(): int {
+    public function lastPostEpoch(): int {
         return $this->info()['last_post_time'] ? strtotime($this->info()['last_post_time']) : 0;
+    }
+
+    public function lastPostTime(): ?string {
+        return $this->info()['last_post_time'];
     }
 
     public function minClassCreate(): int {
@@ -233,6 +240,36 @@ class Forum extends BaseObject {
         return self::$db->affected_rows();
     }
 
+    /**
+     * A page's worth of threads of a forum.
+     * The subsequent pages are regenerated on each pageview.
+     */
+    public function threadPage(Manager\ForumThread $manager, int $page = 1): array {
+        $key = sprintf(self::CACHE_TOCV2_FORUM, $this->id);
+        $idList = $page == 1 ? self::$cache->get_value($key) : false;
+        if ($idList === false) {
+            self::$db->prepared_query("
+                SELECT ft.ID
+                FROM forums_topics ft
+                WHERE ft.ForumID = ?
+                ORDER BY ft.Ranking DESC, ft.IsSticky DESC, ft.LastPostTime DESC
+                LIMIT ?, ?
+                ", $this->id, ($page - 1) * TOPICS_PER_PAGE, TOPICS_PER_PAGE
+            );
+            $idList = self::$db->collect(0, false);
+            if ($page == 1) {
+                self::$cache->cache_value($key, $idList, 86400 * 10);
+            }
+        }
+        return array_filter(
+            array_map(fn ($id) => $manager->findById($id), $idList),
+            fn ($t) => $t
+        );
+    }
+
+    /**
+     * @deprecated
+     */
     public function threadCount(): int {
         $toc = $this->tableOfContentsForum();
         return $toc ? current($toc)['threadCount'] : 0;
@@ -253,6 +290,8 @@ class Forum extends BaseObject {
      *    - int 'LastPostAuthorID' User id of author of most recent post
      *    - int 'stickyCount' Number of sticky posts
      *    - int 'threadCount' Total number of threads in forum
+     *
+     * @deprecated
      */
     public function tableOfContentsForum(int $page = 1): array {
         $key = sprintf(self::CACHE_TOC_FORUM, $this->id);
@@ -352,7 +391,12 @@ class Forum extends BaseObject {
                 AND l.UserID = ?
             ", $user->postsPerPage(), $this->id, $user->id()
         );
-        return self::$db->to_array('TopicID', MYSQLI_ASSOC, false);
+        $list = [];
+        foreach (self::$db->to_array('TopicID', MYSQLI_ASSOC, false) as $row) {
+            $row['Page'] = (int)$row['Page'];
+            $list[$row['TopicID']] = $row;
+        };
+        return $list;
     }
 
     public function isAutoSubscribe(User $user): bool {

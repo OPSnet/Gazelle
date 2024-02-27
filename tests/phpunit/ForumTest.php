@@ -5,6 +5,13 @@ use PHPUnit\Framework\TestCase;
 require_once(__DIR__ . '/../../lib/bootstrap.php');
 require_once(__DIR__ . '/../helper.php');
 
+/**
+ * In the original Gazelle implementation, two sets of developers implemented
+ * two distinct methods of keeping track of unread posts by users. As the code
+ * has migrated away from sections/forum to this class, the contradiction
+ * becomes more apparent. At some point these approaches will converge.
+ */
+
 class ForumTest extends TestCase {
     protected Gazelle\ForumCategory $category;
     protected Gazelle\Forum         $forum;
@@ -93,7 +100,7 @@ class ForumTest extends TestCase {
         $this->assertFalse($this->forum->autoLock(), 'forum-autolock');
         $this->assertFalse($this->forum->hasRevealVotes(), 'forum-has-reveal-votes');
         $this->assertFalse($this->forum->isLocked(), 'forum-is-locked');
-        $this->assertEquals(0, $this->forum->lastPostTime(), 'forum-last-post-time');
+        $this->assertEquals(0, $this->forum->lastPostEpoch(), 'forum-last-post-time');
         $this->assertEquals(0, $this->forum->numPosts(), 'forum-post-total');
         $this->assertEquals(0, $this->forum->numThreads(), 'forum-thread-total');
         $this->assertEquals($admin->id(), $this->forum->lastAuthorId(), 'forum-last-author-id');
@@ -156,6 +163,7 @@ class ForumTest extends TestCase {
         $this->assertFalse($thread->isPinned(), 'fthread-is-pinned');
 
         $this->assertEquals(1, $admin->stats()->forumThreadTotal(), 'fthread-user-stats-total');
+        $this->assertCount(0, $this->userList['user']->forumLastReadList(1, $this->forum), 'fthread-user-unread');
 
         // Forum Thread Notes
         $threadNote = 'this is a note';
@@ -188,13 +196,7 @@ class ForumTest extends TestCase {
         $this->assertTrue($admin->writeAccess($secret), 'fthread-secret-admin-write');
         $this->assertTrue($admin->createAccess($secret), 'fthread-secret-admin-create');
 
-         \Gazelle\DB::DB()->prepared_query("
-            UPDATE users_info SET
-                PermittedForums = ?
-            WHERE UserID = ?
-            ", $secret->id(), $user->id()
-        );
-        $user->flush();
+        $user->setField('PermittedForums', $secret->id())->modify();
         $this->assertTrue($user->readAccess($secret), 'fthread-secret-user-permitted-read');
         $this->assertTrue($user->writeAccess($secret), 'fthread-secret-user-permitted-write');
         $this->assertTrue($user->createAccess($secret), 'fthread-secret-user-permitted-create');
@@ -215,11 +217,12 @@ class ForumTest extends TestCase {
         $message = 'first reply';
         $post = $thread->addPost($admin, $message);
         $this->assertEquals(2, $admin->stats()->flush()->forumPostTotal(), 'fpost-first-user-reply');
+        $this->assertEquals($post->id(), $this->forum->flush()->lastPostId(), 'fpost-is-last-post');
 
         /* post first reply */
         $postMan = new \Gazelle\Manager\ForumPost();
         $this->assertEquals($message, $post->body(), 'fpost-first-post');
-        $this->assertEquals(1, $this->forum->numPosts(), 'fpost-forum-post-total');
+        $this->assertEquals(2, $this->forum->numPosts(), 'fpost-forum-post-total');
 
         $this->assertEquals(1, $userSub->unread(), 'fpost-subscriptions-user-unread');
         $adminSub = new \Gazelle\User\Subscription($admin); // now sub them
@@ -276,6 +279,7 @@ class ForumTest extends TestCase {
             $readLast,
             'forum-last-read-list-one'
         );
+        $this->assertCount(1, $this->userList['admin']->forumLastReadList(1, $this->forum), 'fthread-user-unread');
 
         $this->assertEquals(5, $thread->remove(), 'forum-thread-remove');
     }
@@ -331,16 +335,45 @@ class ForumTest extends TestCase {
         $this->assertTrue($user->writeAccess($this->forum), 'forum-forbid-write-allowed');
         $this->assertTrue($user->createAccess($this->forum), 'forum-forbid-create-allowed');
 
-         \Gazelle\DB::DB()->prepared_query("
-            UPDATE users_info SET
-                RestrictedForums = ?
-            WHERE UserID = ?
-            ", $this->forum->id(), $user->id()
-        );
-        $user->flush();
+        $user->setField('RestrictedForums', $this->forum->id())->modify();
         $this->assertFalse($user->readAccess($this->forum), 'forum-forbid-read-denied');
         $this->assertFalse($user->writeAccess($this->forum), 'forum-forbid-write-denied');
         $this->assertFalse($user->createAccess($this->forum), 'forum-forbid-create-denied');
+    }
+
+    public function testForumJson(): void {
+        $this->category = (new \Gazelle\Manager\ForumCategory())->create('phpunit category', 10002);
+        $forumMan       = new \Gazelle\Manager\Forum();
+        $this->forum    = Helper::makeForum(
+            user:        $this->userList['admin'],
+            sequence:    151,
+            category:    $this->category,
+            name:        'phpunit json forum',
+            description: 'This is where it json',
+        );
+
+        $json = (new Gazelle\Json\Forum(
+            $this->forum,
+            $this->userList['user'],
+            new Gazelle\Manager\ForumThread(),
+            new Gazelle\Manager\User(),
+            1,
+            1,
+        ));
+        $this->assertInstanceOf(Gazelle\Json::class, $json, 'forum-json-class');
+        $response = json_decode($json->response(), true);
+        $info = $response['response'];
+        $this->assertEquals($this->forum->name(), $info['forumName'], 'forum-json-name');
+        $this->assertEquals(0, $info['pages'], 'forum-json-pages');
+        $this->assertEquals(1, $info['currentPage'], 'forum-json-current-pages');
+        $this->assertCount(0, $info['threads'], 'forum-json-threads');
+
+        (new \Gazelle\Manager\ForumThread())
+            ->create($this->forum, $this->userList['admin'], 'thread title', 'this is a new thread');
+        $response = json_decode($json->response(), true);
+        $info = $response['response'];
+        $this->assertEquals(1, $info['pages'], 'forum-json-new-pages');
+        $this->assertCount(1, $info['threads'], 'forum-json-new-threads');
     }
 
     public function testForumWarn(): void {

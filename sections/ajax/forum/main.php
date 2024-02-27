@@ -33,7 +33,7 @@ foreach ($forumList as $forumId) {
         'lastAuthorId'       => $lastAuthorId,
         'lastPostAuthorName' => $user[$lastAuthorId] ? $user[$lastAuthorId]->username() : null,
         'lastTopicId'        => $forum->lastThreadId(),
-        'lastTime'           => strftime('%Y-%m-%d %H:%M:%S', $forum->lastPostTime()),
+        'lastTime'           => $forum->lastPostTime(),
         'lastTopic'          => $forum->lastThread(),
         'read'               => $Viewer->hasReadLastPost($forum),
         'locked'             => $forum->isLocked(),

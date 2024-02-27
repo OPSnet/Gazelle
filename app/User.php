@@ -842,7 +842,7 @@ class User extends BaseObject {
     public function hasReadLastPost(Forum $forum): bool {
         return $forum->isLocked()
             || $this->lastReadInThread($forum->lastThreadId()) >= $forum->lastPostId()
-            || $this->forumCatchupEpoch() >= $forum->lastPostTime();
+            || $this->forumCatchupEpoch() >= $forum->lastPostEpoch();
     }
 
     /**
@@ -872,6 +872,27 @@ class User extends BaseObject {
             );
         }
         return $this->lastReadForum;
+    }
+
+    public function forumLastReadList(int $perPage, Forum $forum): array {
+        self::$db->prepared_query("
+            SELECT l.TopicID AS thread_id,
+                l.PostID     AS post_id,
+                ceil((SELECT count(*) FROM forums_posts AS p WHERE p.TopicID = l.TopicID AND p.ID <= l.PostID) / ?)
+                    AS page
+            FROM forums_last_read_topics AS l
+            INNER JOIN forums_topics ft ON (ft.ID = l.TopicID)
+            INNER JOIN forums f ON (f.ID = ft.ForumID)
+            WHERE l.UserID = ?
+                AND f.ID = ?
+            ", $perPage, $this->id, $forum->id()
+        );
+        $list = [];
+        foreach (self::$db->to_array('thread_id', MYSQLI_ASSOC, false) as $row) {
+            $row['page'] = (int)$row['page'];
+            $list[$row['thread_id']] = $row;
+        }
+        return $list;
     }
 
     public function forceCacheFlush($flush = true): bool {

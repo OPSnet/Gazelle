@@ -4,7 +4,7 @@ namespace Gazelle;
 
 class ForumThread extends BaseObject {
     final public const tableName     = 'forums_topics';
-    final public const CACHE_KEY     = 'fthread_%d';
+    final public const CACHE_KEY     = 'fthreadv2_%d';
     final public const CACHE_CATALOG = 'fthread_cat_%d_%d';
 
     public function flush(): static {
@@ -52,6 +52,7 @@ class ForumThread extends BaseObject {
                     t.IsSticky = '1'    AS is_pinned,
                     isnull(p.TopicID)   AS no_poll,
                     count(fp.id)        AS post_total,
+                    max(fp.id)          AS last_post_id,
                     max(fp.AddedTime)   AS last_post_time
                 FROM forums_topics AS t
                 INNER JOIN forums_posts AS fp ON (fp.TopicID = t.ID)
@@ -127,7 +128,11 @@ class ForumThread extends BaseObject {
         return new User($this->lastAuthorId());
     }
 
-    public function lastPostTime(): int {
+    public function lastPostId(): int {
+        return $this->info()['last_post_id'];
+    }
+
+    public function lastPostTime(): string {
         return $this->info()['last_post_time'];
     }
 
