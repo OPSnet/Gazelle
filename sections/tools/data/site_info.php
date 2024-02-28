@@ -29,17 +29,17 @@ if (isset($_GET['mode']) && $_GET['mode'] === 'userrank') {
     ]);
 } else {
     $random = openssl_random_pseudo_bytes(8, $strong);
-    $db = Gazelle\DB::DB();
+    $db = new Gazelle\DB();
     echo $Twig->render('admin/site-info.twig', [
         'uid'              => uid(posix_getuid()),
         'gid'              => gid(posix_getgid()),
         'euid'             => uid(posix_geteuid()),
         'egid'             => gid(posix_getegid()),
         'openssl_strong'   => $strong,
-        'mysql_version'    => $db->scalar('SELECT @@version'),
+        'mysql_version'    => $db->version(),
         'php_version'      => phpversion(),
         'site_info'        => new Gazelle\SiteInfo(),
         'timestamp_php'    => date('Y-m-d H:i:s'),
-        'timestamp_db'     => $db->scalar("SELECT now()"),
+        'timestamp_db'     => $db->now(),
     ]);
 }

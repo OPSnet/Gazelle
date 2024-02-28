@@ -3,6 +3,7 @@
 use PHPUnit\Framework\TestCase;
 
 require_once(__DIR__ . '/../../lib/bootstrap.php');
+require_once(__DIR__ . '/../helper.php');
 
 class DbTest extends TestCase {
     use Gazelle\Pg;
@@ -22,6 +23,15 @@ class DbTest extends TestCase {
             [$ok, $message] = $dbMan->checkStructureMatch(SQLDB, $tableName, "deleted_$tableName");
             $this->assertTrue($ok, "mismatch -- $message");
         }
+    }
+
+    public function testDbTime(): void {
+        $this->assertTrue(Helper::recentDate((new Gazelle\DB())->now()), 'db-current-date');
+    }
+
+    public function testDbVersion(): void {
+        // to check the executability of the SQL inside
+        $this->assertIsString((new Gazelle\DB())->version(), 'db-version');
     }
 
     public function testGlobalStatus(): void {

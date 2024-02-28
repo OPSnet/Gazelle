@@ -20,6 +20,10 @@ class DB extends Base {
         return $this;
     }
 
+    public function now(): string {
+        return (string)self::$db->scalar("SELECT now()");
+    }
+
     public function globalStatus(): array {
         self::$db->prepared_query('SHOW GLOBAL STATUS');
         return self::$db->to_array('Variable_name', MYSQLI_ASSOC, false);
@@ -28,6 +32,10 @@ class DB extends Base {
     public function globalVariables(): array {
         self::$db->prepared_query('SHOW GLOBAL VARIABLES');
         return self::$db->to_array('Variable_name', MYSQLI_ASSOC, false);
+    }
+
+    public function version(): string {
+        return (string)self::$db->scalar("SELECT @@version");
     }
 
     public function selectQuery(string $tableName): string {
