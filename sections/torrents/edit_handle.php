@@ -228,7 +228,6 @@ if ($Viewer->permitted('users_mod')) {
         (object)['flag' => TorrentFlag::cassette,    'property' => 'CassetteApproved'],
         (object)['flag' => TorrentFlag::lossyMaster, 'property' => 'LossymasterApproved'],
         (object)['flag' => TorrentFlag::lossyWeb,    'property' => 'LossywebApproved'],
-        (object)['flag' => TorrentFlag::noLineage,   'property' => 'Lineage'],
     ] as $f) {
         $exists = $torrent->hasFlag($f->flag);
         if (!$exists && $Properties[$f->property]) {
@@ -238,6 +237,17 @@ if ($Viewer->permitted('users_mod')) {
             $change[] = "{$f->flag->label()} cleared";
             $torrent->removeFlag($f->flag);
         }
+    }
+}
+if ($Viewer->permitted('site_edit_lineage')) {
+    $lineage = TorrentFlag::noLineage;
+    $exists = $torrent->hasFlag($lineage);
+    if (!$exists && $Properties['Lineage']) {
+        $change[] = "{$lineage->label()} checked";
+        $torrent->addFlag($lineage, $Viewer);
+    } elseif ($exists && !$Properties['Lineage']) {
+        $change[] = "{$lineage->label()} cleared";
+        $torrent->removeFlag($lineage);
     }
 }
 

@@ -446,7 +446,8 @@ echo ' checked="checked"'; } ?> /><label for="vbr"> (VBR)</label>
             <tr id="extra_format_placeholder"></tr>
 <?php
         }
-        if (is_array($Torrent) && $this->user->permitted('users_mod')) {
+        if (is_array($Torrent)) {
+            if ($this->user->permitted('users_mod')) {
 ?>
             <tr>
                 <td class="label">Log/cue:</td>
@@ -473,11 +474,6 @@ echo ' checked="checked"';} ?> /> <label for="bad_folders">Check this box if the
 echo ' checked="checked"';} ?> /> <label for="bad_files">Check this box if the torrent has bad file names.</label></td>
             </tr>
             <tr>
-                <td class="label">Missing lineage:</td>
-                <td><input type="checkbox" id="missing_lineage" name="missing_lineage"<?php if ($MissingLineage) {
-echo ' checked="checked"';} ?> /> <label for="missing_lineage">Check this box if the torrent is missing lineage information.</label></td>
-            </tr>
-            <tr>
                 <td class="label">Cassette approved:</td>
                 <td><input type="checkbox" id="cassette_approved" name="cassette_approved"<?php if ($CassetteApproved) {
 echo ' checked="checked"';} ?> /> <label for="cassette_approved">Check this box if the torrent is an approved cassette rip.</label></td>
@@ -493,6 +489,16 @@ echo ' checked="checked"';} ?> /> <label for="lossymaster_approved">Check this b
 echo ' checked="checked"';} ?> /> <label for="lossyweb_approved">Check this box if the torrent is an approved lossy WEB release.</label></td>
             </tr>
 <?php
+            }
+            if ($this->user->permitted('site_edit_lineage')) {
+?>
+            <tr>
+                <td class="label">Missing lineage:</td>
+                <td><input type="checkbox" id="missing_lineage" name="missing_lineage"<?php if ($MissingLineage) {
+echo ' checked="checked"';} ?> /> <label for="missing_lineage">Check this box if the torrent is missing lineage information.</label></td>
+            </tr>
+<?php
+            }
         }
         if ($Torrent === false) {
 ?>

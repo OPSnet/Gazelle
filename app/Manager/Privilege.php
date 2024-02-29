@@ -154,6 +154,7 @@ class Privilege extends \Gazelle\BaseManager {
             'site_can_invite_always' => 'Invite beyond maximum user count',
             'users_invite_notes' => 'Add a staff note when inviting someone',
             'users_edit_invites' => 'Edit invite numbers and cancel sent invites',
+            'site_edit_lineage' => 'Edit the missing lineage flag',
             'site_edit_requests' => 'Edit the metdata of a request',
             'site_admin_requests' => 'Edit request bounties',
             'site_moderate_requests' => 'Moderate requests',
