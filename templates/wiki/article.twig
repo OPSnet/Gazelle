@@ -5,7 +5,7 @@
     <div class="linkbox">
         <a href="wiki.php?action=browse" class="brackets">Browse</a>
         <a href="wiki.php?action=create" class="brackets">Create</a>
-{% if article.minClassEdit <= viewer.effectiveClass %}
+{% if article.minClassEdit <= viewer.privilege.effectiveClassLevel %}
         <a href="wiki.php?action=edit&amp;id={{ article.id }}" class="brackets">Edit</a>
 {% endif %}
         <a href="wiki.php?action=revisions&amp;id={{ article.id }}" class="brackets">History</a>
@@ -64,7 +64,7 @@
         </li>
     </ul>
     </div>
-{% if article.minClassEdit <= viewer.effectiveClass %}
+{% if article.minClassEdit <= viewer.privilege.effectiveClassLevel %}
     <div class="box box_addalias">
         <div style="padding: 5px;">
             <form class="add_form" name="aliases" action="wiki.php" method="post">
