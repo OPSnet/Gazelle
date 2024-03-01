@@ -44,6 +44,14 @@ abstract class ArtistRole extends \Gazelle\Base {
         return $this->renderRole(self::RENDER_TEXT);
     }
 
+    public function nameList(): array {
+        $list = [];
+        foreach ($this->idList() as $role => $artistList) {
+            $list[$role] = array_map(fn ($a) => $a['name'], $artistList);
+        }
+        return $list;
+    }
+
     /**
      * A readable representation of the artists grouped by their roles in a
      * release group. All artist roles are present as arrays (no need to see if

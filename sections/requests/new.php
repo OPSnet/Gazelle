@@ -9,7 +9,7 @@ if (isset($_GET['artistid'])) {
     $artist = (new Gazelle\Manager\Artist())->findById((int)$_GET['artistid']);
     if ($artist) {
         $artistRole = [
-            ARTIST_MAIN => [['name' => $artist->name()]],
+            ARTIST_MAIN => [$artist->name()],
         ];
     }
 } elseif (isset($_GET['groupid'])) {
@@ -22,7 +22,7 @@ if (isset($_GET['artistid'])) {
         $releaseType  = $tgroup->releaseType();
         $image        = $tgroup->image();
         $tags         = implode(', ', $tgroup->tagNameList());
-        $artistRole   = $tgroup->artistRole()?->idList() ?? [];
+        $artistRole   = $tgroup->artistRole()?->nameList() ?? [];
     }
 }
 

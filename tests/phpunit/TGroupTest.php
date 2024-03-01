@@ -114,8 +114,11 @@ class TGroupTest extends TestCase {
     }
 
     public function testTGroupArtist(): void {
-        $artistName = 'The ' . randomString(6) . ' Band';
-        $this->assertEquals(1, $this->tgroup->addArtists([ARTIST_MAIN], [$artistName], $this->userList['admin'], new Gazelle\Manager\Artist(), new Gazelle\Log()), 'tgroup-artist-add');
+        $artMan = new Gazelle\Manager\Artist();
+        $logger = new Gazelle\Log();
+        $user   = $this->userList['admin'];
+        $artistName = 'phpunit ' . randomString(6) . ' band';
+        $this->assertEquals(1, $this->tgroup->addArtists([ARTIST_MAIN], [$artistName], $user, $artMan, $logger), 'tgroup-artist-add');
         $this->assertEquals("$artistName – {$this->tgroup->name()} [{$this->tgroup->year()} Live album]", $this->tgroup->text(), 'tgroup-artist-text');
 
         $this->assertNotNull($this->tgroup->primaryArtist(), 'tgroup-artist-primary');
@@ -132,6 +135,7 @@ class TGroupTest extends TestCase {
         $first = current($main);
         $this->assertEquals($artistName, $first['name'], 'tgroup-artist-first-name');
 
+
         $foundByArtist = $this->manager->findByArtistReleaseYear(
             $this->tgroup->artistRole()->text(),
             $this->tgroup->name(),
@@ -139,6 +143,26 @@ class TGroupTest extends TestCase {
             $this->tgroup->year(),
         );
         $this->assertEquals($this->tgroup->id(), $foundByArtist->id(), 'tgroup-find-name');
+
+        $this->assertEquals(
+            2,
+            $this->tgroup->addArtists(
+                [ARTIST_MAIN,     ARTIST_GUEST],
+                ["$artistName-2", "$artistName-guest"],
+                $user,
+                $artMan,
+                $logger,
+            ),
+            'tgroup-artist-add-2'
+        );
+        $this->assertEquals(
+            [
+                ARTIST_MAIN  => [$artistName, "$artistName-2"],
+                ARTIST_GUEST => ["$artistName-guest"],
+            ],
+            $this->tgroup->artistRole()->nameList(),
+            'tgroup-artist-name-list'
+        );
     }
 
     public function testTGroupCoverArt(): void {
