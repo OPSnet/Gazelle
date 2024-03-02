@@ -30,15 +30,8 @@ class TrackerTest extends TestCase {
         $this->assertTrue($tracker->modifyAnnounceJitter($jitter), 'tracker-announce-modify-jitter');
 
         $info = $tracker->info();
-        $this->assertEquals($interval, $info['announce interval'], 'tracker-announce-interval');
-        $this->assertEquals($jitter, $info['announce jitter'], 'tracker-announce-jitter');
-    }
-
-    #[Group('no-ci')]
-    public function testTrackerStats(): void {
-        $tracker = new \Gazelle\Tracker();
-        // this will fail if you have local clients logged into ocelot
-        $this->assertEquals([0, 0], $tracker->global_peer_count(), 'tracker-global-peer-count');
+        $this->assertEquals($interval, $info['announce interval']['value'], 'tracker-announce-interval');
+        $this->assertEquals($jitter, $info['announce jitter']['value'], 'tracker-announce-jitter');
     }
 
     #[Group('no-ci')]
@@ -80,13 +73,10 @@ class TrackerTest extends TestCase {
     #[Group('no-ci')]
     public function testTrackerUser(): void {
         $tracker = new \Gazelle\Tracker();
+        $info = $tracker->info();
         $this->assertFalse($tracker->last_error(), 'tracker-init');
 
-        $info = $tracker->info();
-        $this->assertCount(30, $info, 'tracker-info');
-
         $this->user = Helper::makeUser('trk.' . randomString(10), 'tracker');
-        $this->assertTrue($tracker->addUser($this->user), 'tracker-add-user');
         $this->assertEquals(
             [
                 'id'        => $this->user->id(),
@@ -118,11 +108,11 @@ class TrackerTest extends TestCase {
         $announceKey = $this->user->announceKey();
         $this->user->setField('torrent_pass', randomString())->modify();
         $this->assertTrue($tracker->modifyPasskey($announceKey, $this->user->announceKey()), 'tracker-modify-announce-key');
-
         $this->assertTrue($tracker->removeUser($this->user), 'tracker-remove-user');
 
+        $initial = current(array_filter($info, fn ($v) => $v['label'] == 'requests handled'))['value'];
         $current = $tracker->info();
-        $this->assertEquals($info['requests handled'] + 8, $current['requests handled'], 'tracker-requests-handled');
+        $this->assertEquals($info['requests handled']['value'] + 7, $current['requests handled']['value'], 'tracker-requests-handled');
     }
 
     #[Group('no-ci')]

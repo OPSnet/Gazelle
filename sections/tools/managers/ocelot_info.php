@@ -21,7 +21,7 @@ $dirty = false;
 if (isset($_POST['interval'])) {
     authorize();
     $interval = (int)$_POST['interval'];
-    if ($interval != $info['announce interval']) {
+    if ($interval != $info['announce interval']['value']) {
         if ($interval < 600) {
             error("Cowardly refusing to lower the announce interval below five minutes");
         }
@@ -33,7 +33,7 @@ if (isset($_POST['interval'])) {
 if (isset($_POST['jitter'])) {
     authorize();
     $jitter = (int)$_POST['jitter'];
-    if ($jitter != $info['announce jitter']) {
+    if ($jitter != $info['announce jitter']['value']) {
         if ($jitter < 0 || $jitter >= 3600) {
             error("Cowardly refusing to set the jitter to an absurd value");
         }
@@ -46,14 +46,10 @@ if ($dirty) {
     $info = $tracker->info();
 }
 
-$memStats = ($_GET['status'] ?? '' == 'memory')
-    ? (new Gazelle\Tracker())->infoMemoryAlloc()
-    : null;
-
 echo $Twig->render('admin/tracker-info.twig', [
     'action'       => $_REQUEST['action'],
     'main_stats'   => $info,
-    'mem_stats'    => $memStats,
+    'mem_stats'    => ($_GET['status'] ?? '' == 'memory') ? $tracker->infoMemoryAlloc() : null,
     'user_stats'   => $stats,
     'user_id'      => $_GET['userid'] ?? null,
     'user'         => $user,

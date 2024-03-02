@@ -806,13 +806,13 @@ class User extends \Gazelle\BaseManager {
         $Concat = '';
         foreach ($PassKeys as $PassKey) {
             if (strlen($Concat) > 3950) { // Ocelot's read buffer is 4 KiB and anything exceeding it is truncated
-                $tracker->update_tracker('remove_users', ['passkeys' => $Concat]);
+                $tracker->update('remove_users', ['passkeys' => $Concat]);
                 $Concat = $PassKey;
             } else {
                 $Concat .= $PassKey;
             }
         }
-        $tracker->update_tracker('remove_users', ['passkeys' => $Concat]);
+        $tracker->update('remove_users', ['passkeys' => $Concat]);
         return $n;
     }
 

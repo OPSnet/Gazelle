@@ -346,7 +346,7 @@ class Torrent extends TorrentAbstract {
         $infohash = $this->infohash();
         $sizeMB   = number_format($this->size() / (1024 * 1024), 2) . ' MiB';
         $name     = $this->name();
-        (new \Gazelle\Tracker())->update_tracker('delete_torrent', [
+        (new \Gazelle\Tracker())->update('delete_torrent', [
             'id'        => $this->id,
             'info_hash' => $this->infohashEncoded(),
             'reason'    => $trackerReason,

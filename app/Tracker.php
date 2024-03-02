@@ -1,6 +1,7 @@
 <?php
 
 // TODO: The following actions are used, turn them into methods
+// remove_torrent
 // remove_users
 
 namespace Gazelle;
@@ -25,21 +26,21 @@ class Tracker extends Base {
     }
 
     public function addToken(Torrent $torrent, User $user): bool {
-        return $this->update_tracker('add_token', [
+        return $this->update('add_token', [
             'info_hash' => $torrent->infohashEncoded(),
             'userid'    => $user->id(),
         ]);
     }
 
     public function removeToken(Torrent $torrent, User $user): bool {
-        return $this->update_tracker('remove_token', [
+        return $this->update('remove_token', [
             'info_hash' => $torrent->infohashEncoded(),
             'userid'    => $user->id(),
         ]);
     }
 
     public function addTorrent(Torrent $torrent): bool {
-        return $this->update_tracker('add_torrent', [
+        return $this->update('add_torrent', [
             'info_hash'   => $torrent->flush()->infohashEncoded(),
             'id'          => $torrent->id(),
             'freetorrent' => 0,
@@ -47,14 +48,14 @@ class Tracker extends Base {
     }
 
     public function modifyTorrent(TorrentAbstract $torrent, LeechType $leechType): bool {
-        return $this->update_tracker('update_torrent', [
+        return $this->update('update_torrent', [
             'info_hash'   => $torrent->infohashEncoded(),
             'freetorrent' => $leechType->value
         ]);
     }
 
     public function modifyPasskey(string $old, string $new): bool {
-        return $this->update_tracker('change_passkey', [
+        return $this->update('change_passkey', [
             'oldpasskey' => $old,
             'newpasskey' => $new,
         ]);
@@ -62,7 +63,7 @@ class Tracker extends Base {
 
     public function addUser(User $user): bool {
         self::$cache->increment('stats_user_count');
-        return $this->update_tracker('add_user', [
+        return $this->update('add_user', [
             'passkey' => $user->announceKey(),
             'id'      => $user->id(),
             'visible' => $user->isVisible() ? '1' : '0',
@@ -70,7 +71,7 @@ class Tracker extends Base {
     }
 
     public function refreshUser(User $user): bool {
-        return $this->update_tracker('update_user', [
+        return $this->update('update_user', [
             'passkey'   => $user->announceKey(),
             'can_leech' => $user->canLeech() ? '1' : '0',
             'visible'   => $user->isVisible() ? '1' : '0',
@@ -78,38 +79,38 @@ class Tracker extends Base {
     }
 
     public function removeUser(User $user): bool {
-        return $this->update_tracker('remove_user', [
+        return $this->update('remove_user', [
             'passkey' => $user->announceKey(),
         ]);
     }
 
     public function addWhitelist(string $peer): bool {
-        return $this->update_tracker('add_whitelist', [
+        return $this->update('add_whitelist', [
             'peer_id' => $peer,
         ]);
     }
 
     public function modifyWhitelist(string $old, string $new): bool {
-        return $this->update_tracker('edit_whitelist', [
+        return $this->update('edit_whitelist', [
             'old_peer_id' => $old,
             'new_peer_id' => $new,
         ]);
     }
 
     public function removeWhitelist(string $peer): bool {
-        return $this->update_tracker('remove_whitelist', [
+        return $this->update('remove_whitelist', [
             'peer_id' => $peer,
         ]);
     }
 
     public function modifyAnnounceInterval(int $interval): bool {
-        return $this->update_tracker('update_announce_interval', [
+        return $this->update('update_announce_interval', [
             'new_announce_interval' => $interval,
         ]);
     }
 
     public function modifyAnnounceJitter(int $interval): bool {
-        return $this->update_tracker('update_announce_jitter', [
+        return $this->update('update_announce_jitter', [
             'new_announce_jitter' => $interval,
         ]);
     }
@@ -173,10 +174,10 @@ class Tracker extends Base {
 
     /**
      * Send a GET request over a socket directly to the tracker
-     * For example, Tracker::update_tracker('change_passkey', array('oldpasskey' => OLD_PASSKEY, 'newpasskey' => NEW_PASSKEY)) will send the request:
+     * For example, Tracker::update('change_passkey', array('oldpasskey' => OLD_PASSKEY, 'newpasskey' => NEW_PASSKEY)) will send the request:
      * GET /tracker_32_char_secret_code/update?action=change_passkey&oldpasskey=OLD_PASSKEY&newpasskey=NEW_PASSKEY HTTP/1.1
      */
-    public function update_tracker(string $Action, array $Updates, bool $ToIRC = false): bool {
+    public function update(string $Action, array $Updates, bool $ToIRC = false): bool {
         if (DISABLE_TRACKER) {
             return true;
         }
@@ -198,22 +199,6 @@ class Tracker extends Base {
     }
 
     /**
-     * Get global peer stats from the tracker
-     *
-     * @return array|false (0 => $Leeching, 1 => $Seeding) or false if request failed
-     */
-    public function global_peer_count(): array|false {
-        $Stats = $this->report(self::STATS_MAIN);
-        if (isset($Stats['leechers tracked']) && isset($Stats['seeders tracked'])) {
-            $Leechers = $Stats['leechers tracked'];
-            $Seeders = $Stats['seeders tracked'];
-        } else {
-            return false;
-        }
-        return [$Leechers, $Seeders];
-    }
-
-    /**
      * Get user context from the tracker
      */
     public function userReport(User $user): array {
@@ -222,6 +207,7 @@ class Tracker extends Base {
 
     /**
      * Get whatever info the tracker has to report
+     * returns an array of arrays of ['label' => '...', 'value' => ..., 'type' => (byte, elapsed, number, string)]
      */
     public function info(): array {
         return $this->report(self::STATS_MAIN);
@@ -257,19 +243,7 @@ class Tracker extends Base {
         if ($response === false || $response === "") {
             return [];
         }
-        if ($Type === self::STATS_USER) {
-            return json_decode($response, true);
-        }
-        $list = [];
-        foreach (explode("\n", $response) as $metric) {
-            if (preg_match('/^(Uptime|(?:jemalloc_)?version): (.*)$/', $metric, $match)) {
-                $list[strtolower($match[1])] = $match[2];
-            } else {
-                [$value, $key] = explode(" ", $metric, 2);
-                $list[$key] = str_contains($value, ".") ? (float)$value : (int)$value;
-            }
-        }
-        return $list;
+        return json_decode($response, true);
     }
 
     /**

@@ -26,9 +26,9 @@
     </div>
     <div class="main_column">
         <div class="box box2">
-            <div class="head"><strong>Numbers and such</strong></div>
             <div class="pad">
-{% if user_id and user_stats|length %}
+{% if user_id and user_stats %}
+            <div class="head"><strong>User status</strong></div>
             <table>
             <tr>
                 <td class="label">User</td>
@@ -54,28 +54,21 @@
 {% elseif user_id %}
                 User id {{ user_id }} is not known to the tracker.
 {% elseif mem_stats%}
+    <div class="head"><strong>Memory allocation (jemalloc) statistics</strong></div>
     <pre>{{ mem_stats }}</pre>
 {% elseif main_stats %}
-    {% for key, value in main_stats %}
-                {%- if key not in ["announce interval", "announce jitter"] -%}
-                    {%- if key in ["uptime", "jemalloc_version", "version"] -%}
-                         {{ key }} {{ value }}
-                    {%- elseif key starts with "bytes " -%}
-                        {{ value|octet_size }} {{ key }}
-                    {%- elseif key in ["system time", "user time"] -%}
-                        {{ value|number_format(6) }} {{ key }}
-                    {%- else -%}
-                        {{ value|number_format }} {{ key }}
-                    {%- endif %}
-                <br />
-                {%- endif %}
+    <div class="head"><strong>Numbers and such</strong></div>
+        <div class="pad box2">
+    {% for name, item in main_stats %}
+        {{ name }}
+        {%- if item.type == 'number' %} {{ item.value|number_format }}
+        {%- elseif item.type == 'byte' %} {{ item.value|octet_size }}
+        {%- elseif item.type == 'elapsed' %} {{ item.value|time_compact }}
+        {%- else %} {{ item.value }}{% endif %}
+        <br />
     {% endfor %}
-{% else %}
-                Failed to get tracker info
-{% endif %}
-            </div>
         </div>
-{% if viewer.permitted('admin_tracker') %}
+    {% if viewer.permitted('admin_tracker') %}
         <div class="box box2">
             <div class="pad">
             <div>In this section you can control the frequency at which clients
@@ -97,15 +90,15 @@
             <tr>
                 <td class="label">Announce interval</td>
                 <td>
-                    <input type="number" size="7" name="interval" value="{{ main_stats["announce interval"] }}" />
-                    {{ main_stats["announce interval"]|time_compact }}
+                    <input type="number" size="7" name="interval" value="{{ main_stats["announce interval"].value }}" />
+                    {{ main_stats["announce interval"].value|time_compact }}
                 </td>
             </tr>
             <tr>
                 <td class="label">Announce jitter</td>
                 <td>
-                    <input type="number" size="7" name="jitter" value="{{ main_stats["announce jitter"] }}" />
-                    {{ main_stats["announce jitter"]|time_compact }}
+                    <input type="number" size="7" name="jitter" value="{{ main_stats["announce jitter"].value }}" />
+                    {{ main_stats["announce jitter"].value|time_compact }}
                 </td>
             </tr>
             <tr>
@@ -116,11 +109,17 @@
                     <input type="submit" value="Modify" />
                 </td>
             </tr>
+
             </table>
             </form>
             </div>
         </div>
+    {% endif %}
+{% else %}
+    <div>Failed to retrieve tracker info</div>
 {% endif %}
+            </div>
+        </div>
     </div>
 </div>
 {{ footer() }}
