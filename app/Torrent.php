@@ -480,7 +480,7 @@ class Torrent extends TorrentAbstract {
         return self::$db->to_array(false, MYSQLI_NUM, false);
     }
 
-    public function seederList(int $userId, int $limit, int $offset): array {
+    public function seederList(User $user, int $limit, int $offset): array {
         $key = sprintf(self::CACHE_KEY_PEERLIST_PAGE, $this->id, $offset);
         $list = self::$cache->get_value($key);
         if ($list === false) {
@@ -507,7 +507,7 @@ class Torrent extends TorrentAbstract {
                     AND xfu.fid = ?
                 ORDER BY xfu.uid = ? DESC, xfu.uploaded DESC
                 LIMIT ? OFFSET ?
-                ", $userId, $this->id, $userId, $limit, $offset
+                ", $user->id(), $this->id, $user->id(), $limit, $offset
             );
             $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
             self::$cache->cache_value($key, $list, 300);

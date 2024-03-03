@@ -10,7 +10,7 @@ $paginator->setTotal($torrent->seederTotal());
 
 echo $Twig->render('torrent/seederlist.twig', [
     'is_admin'   => $Viewer->permitted('users_mod'),
-    'list'       => $torrent->seederList($Viewer->id(), $paginator->limit(), $paginator->offset()),
+    'list'       => $torrent->seederList($Viewer, $paginator->limit(), $paginator->offset()),
     'paginator'  => $paginator,
     'torrent_id' => $torrent->id(),
     'url_stem'   => (new Gazelle\User\Stylesheet($Viewer))->imagePath(),
