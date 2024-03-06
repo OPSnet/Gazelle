@@ -1551,7 +1551,7 @@ class User extends BaseObject {
     }
 
     public function inviter(): ?User {
-        return new User($this->inviterId());
+        return $this->inviterId() ? new User($this->inviterId()) : null;
     }
 
     public function inviterId(): int {
