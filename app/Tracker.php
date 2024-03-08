@@ -219,7 +219,7 @@ class Tracker extends Base {
     public function infoMemoryAlloc(): string {
         return DISABLE_TRACKER
             ? "tracker is disabled by configuration"
-            : (string)$this->request(TRACKER_REPORTKEY, '/report?jemalloc=plain', 3);
+            : (string)$this->request(TRACKER_REPORTKEY, '/report?get=jemalloc', 3);
     }
 
     /**
@@ -315,5 +315,18 @@ class Tracker extends Base {
             return $Data;
         }
         return false;
+    }
+
+    public function delay(): array {
+        self::$db->prepared_query("
+            SELECT W.who, W.id, t.created
+            FROM (
+                SELECT 'gazelle' as who, max(id) as id from torrents
+                UNION
+                SELECT 'ocelot', max(fid) FROM xbt_files_users
+            ) W
+            LEFT JOIN torrents t USING (id);
+        ");
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 }

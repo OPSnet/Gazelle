@@ -36,6 +36,37 @@ class UtilTest extends TestCase {
             'array_extract_suffix-none'
         );
 
+        $this->assertEquals(
+            [],
+            extract_torrent_id("abc"),
+            'extract_torrent_id-text'
+        );
+        $this->assertEquals(
+            [801],
+            extract_torrent_id("801"),
+            'extract_torrent_id-scalar'
+        );
+        $this->assertEquals(
+            [22, 33, 44],
+            extract_torrent_id("22 33 44"),
+            'extract_torrent_id-number-list'
+        );
+        $this->assertEquals(
+            [8765],
+            extract_torrent_id(SITE_URL . "/torrents.php?id=2316&torrentid=8765#torrent8765"),
+            'extract_torrent_id-url'
+        );
+        $this->assertEquals(
+            [4575, 9317, 173],
+            extract_torrent_id(SITE_URL . "/torrents.php?id=2316&torrentid=4575#torrent4575 9317,173"),
+            'extract_torrent_id-mixed'
+        );
+        $this->assertEquals(
+            [],
+            extract_torrent_id(SITE_URL . "/users.php?id=2316"),
+            'extract_torrent_id-no-url'
+        );
+
         $this->assertEquals('',        display_str([]),       'display-str-array');
         $this->assertEquals('',        display_str(null),     'display-str-null');
         $this->assertEquals('',        display_str(false),    'display-str-false');

@@ -456,6 +456,18 @@ function array_key_extract_suffix(string $prefix, array $list): array {
 }
 
 /**
+ * Extract torrent ids from a string
+ * "http://localhost:7001/torrents.php?id=2316&torrentid=4575#torrent4575 9317,173"
+ * returns [4575, 9317, 173]
+ */
+function extract_torrent_id(string $text): array {
+    if (preg_match_all('/(?:[?&]torrentid=|(?<![:=#])\b)(\d+)/', trim($text), $match)) {
+        return array_map('intval', $match[1]);
+    }
+    return [];
+}
+
+/**
  * Utility function that unserializes an array, and then if the unserialization fails,
  * it'll then return an empty array instead of a null or false which will break downstream
  * things that require an incoming array

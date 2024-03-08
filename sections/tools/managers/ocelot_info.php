@@ -17,6 +17,19 @@ if (isset($_GET['userid'])) {
     }
 }
 
+$reannounceTotal = 0;
+$reannounced = 0;
+if (isset($_POST['tlist'])) {
+    $torMan = new Gazelle\Manager\Torrent();
+    foreach (extract_torrent_id($_POST['tlist']) as $id) {
+        $reannounceTotal++;
+        $torrent = $torMan->findById($id);
+        if ($torrent && !$torrent->isDeleted()) {
+            $reannounced += (int)$tracker->addTorrent($torrent);
+        }
+    }
+}
+
 $dirty = false;
 if (isset($_POST['interval'])) {
     authorize();
@@ -48,8 +61,14 @@ if ($dirty) {
 
 echo $Twig->render('admin/tracker-info.twig', [
     'action'       => $_REQUEST['action'],
+    'delay'        => $tracker->delay(),
     'main_stats'   => $info,
     'mem_stats'    => ($_GET['status'] ?? '' == 'memory') ? $tracker->infoMemoryAlloc() : null,
+    'reannounce'   => [
+        'active'  => isset($_POST['tlist']),
+        'total'   => $reannounceTotal,
+        'success' => $reannounced,
+    ],
     'user_stats'   => $stats,
     'user_id'      => $_GET['userid'] ?? null,
     'user'         => $user,

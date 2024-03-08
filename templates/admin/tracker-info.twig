@@ -13,22 +13,64 @@
     </div>
     <div class="sidebar">
         <div class="box box2">
-            <div class="head"><strong>User stats</strong></div>
+            <div class="head">User stats</div>
             <div class="pad">
                 <form method="get" action="">
                     <input type="hidden" name="action" value="ocelot_info" />
-                    <label for="userid">Get stats for user (id or @username)</label><br /><br />
-                    <input type="text" id="userid" name="userid" placeholder="User ID" value="{{ user_id }}" /><br /><br />
+                    <label>Get stats for user (id or @username)<br />
+                    <input type="text" name="userid" placeholder="User ID" value="{{ user_id }}" />
+                    </label><br />
                     <input type="submit" value="Go" />
                 </form>
             </div>
         </div>
+        <div class="box box2">
+            <div class="head">Reannounce torrents</div>
+            <div class="pad">
+                <form method="post" action="">
+                    <input type="hidden" name="action" value="ocelot_info" />
+                    <label>Enter a list of torrent ids or urls<br />
+                    <textarea name="tlist" rows="4" cols="20"></textarea>
+                    </label><br />
+                    <input type="submit" value="Reannounce" />
+                </form>
+            </div>
+        </div>
     </div>
+
     <div class="main_column">
+{% if reannounce.active %}
+        <div class="box box2">
+            <div class="pad">
+            {{ reannounce.success }} torrent{{ reannounce.success|plural }} of {{ reannounce.total }} reannounced.
+            </div>
+        </div>
+{% endif %}
+{% if not mem_stats and not user_stats %}
+        <div class="box box2">
+            <div class="pad">
+            <div class="head">Tracker delay</div>
+            <table>
+                <tr>
+                    <th>Source</th>
+                    <th>Torrent</th>
+                    <th>Created</th>
+                </tr>
+    {% for source in delay %}
+                <tr>
+                    <td>{{ source.who }}</td>
+                    <td><a href="{{ constant('SITE_URL') }}/torrents.php?torrentid={{ source.id }}">{{ source.id|default("None")  }}</a></td>
+                    <td>{{ source.created|time_diff }}</td>
+                </tr>
+    {% endfor %}
+            </table>
+            </div>
+        </div>
+{% endif %}
         <div class="box box2">
             <div class="pad">
 {% if user_id and user_stats %}
-            <div class="head"><strong>User status</strong></div>
+            <div class="head">User status</div>
             <table>
             <tr>
                 <td class="label">User</td>
@@ -54,10 +96,10 @@
 {% elseif user_id %}
                 User id {{ user_id }} is not known to the tracker.
 {% elseif mem_stats%}
-    <div class="head"><strong>Memory allocation (jemalloc) statistics</strong></div>
+    <div class="head">Memory allocation (jemalloc) statistics</div>
     <pre>{{ mem_stats }}</pre>
 {% elseif main_stats %}
-    <div class="head"><strong>Numbers and such</strong></div>
+    <div class="head">Numbers and such</div>
         <div class="pad box2">
     {% for name, item in main_stats %}
         {{ name }}
