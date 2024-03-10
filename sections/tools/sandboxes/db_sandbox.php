@@ -13,7 +13,7 @@ if (isset($_GET['debug'])) {
     $textAreaRows = max(8, substr_count($query, "\n") + 2);
 } elseif (!empty($_POST['query'])) {
     $query = trim($_POST['query']);
-    if (preg_match('@^(?:show(\s+[\w%\';]+)+|(?:explain\s+)?select\b(?:[\s\w()<>/.,!`\'"=*+-])+\bfrom)@i', $query) !== 1) {
+    if (preg_match('@^(?:show(\s+[\w%\';]+)+|(?:explain\s+)?select\b(?:[\s\w()<>#&/:.,?!`\'"=*+-])+\bfrom)@i', $query) !== 1) {
         error('Invalid query');
     }
     $textAreaRows = max(8, substr_count($query, "\n") + 2);
