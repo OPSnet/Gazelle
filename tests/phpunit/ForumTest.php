@@ -376,6 +376,43 @@ class ForumTest extends TestCase {
         $this->assertCount(1, $info['threads'], 'forum-json-new-threads');
     }
 
+    public function testForumThreadJson(): void {
+        $this->category = (new \Gazelle\Manager\ForumCategory())->create('phpunit category', 10002);
+        $forumMan       = new \Gazelle\Manager\Forum();
+        $this->forum    = Helper::makeForum(
+            user:        $this->userList['admin'],
+            sequence:    151,
+            category:    $this->category,
+            name:        'phpunit json thread',
+            description: 'This is where it thread json',
+        );
+
+        $threadMan = new \Gazelle\Manager\ForumThread();
+        $thread    = $threadMan->create(
+            $this->forum,
+            $this->userList['admin'],
+            'thread json title',
+            'this is a new json thread'
+        );
+
+        $json = (new Gazelle\Json\ForumThread(
+            $thread,
+            $this->userList['user'],
+            new Gazelle\Util\Paginator(25, 1),
+            true,
+            new Gazelle\Manager\User(),
+        ));
+        $this->assertInstanceOf(Gazelle\Json::class, $json, 'forum-json-class');
+        $response = json_decode($json->response(), true);
+        $result = $response['response'];
+        $this->assertEquals($thread->forumId(), $result['forumId'], 'json-thread-forum-id');
+        $this->assertCount(1, $result['posts'], 'json-thread-post-total');
+        $this->assertEquals(
+            $this->userList['admin']->username(),
+            $result['posts'][0]['author']['authorName'], 'json-thread-first-post-author'
+        );
+    }
+
     public function testForumWarn(): void {
         $this->category = (new \Gazelle\Manager\ForumCategory())->create('phpunit category', 10002);
         $forumMan       = new \Gazelle\Manager\Forum();

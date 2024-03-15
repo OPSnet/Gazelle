@@ -26,6 +26,10 @@ class Paginator {
         return $this->page;
     }
 
+    public function perPage(): int {
+        return $this->perPage;
+    }
+
     public function limit(): int {
         return $this->perPage;
     }
