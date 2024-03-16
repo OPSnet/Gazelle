@@ -218,7 +218,7 @@ class Recovery extends \Gazelle\Base {
         return self::$db->affected_rows();
     }
 
-    public function deny(int $id, int $admin_id, string $admin_username): int {
+    public function deny(int $id, string $admin_username): int {
         self::$db->prepared_query("
             UPDATE recovery SET
                 state = 'DENIED',

@@ -576,7 +576,7 @@ class ForumTest extends TestCase {
            privileges:       '',
            userIds:          (string)$this->userList['specific']->id(),
         );
-        (new Gazelle\User\Privilege($this->userList['FLS']))->addSecondaryClass('First Line Support');
+        (new Gazelle\User\Privilege($this->userList['FLS']))->addSecondaryClass(FLS_TEAM);
         $this->assertTrue($this->userList['FLS']->isFLS(), 'user-is-fls');
         $this->assertTrue($this->transitionList[0]->hasUser($this->userList['FLS']), 'forum-transition-has-fls');
         $this->assertTrue($this->transitionList[0]->hasUser($this->userList['specific']), 'forum-transition-has-specific');

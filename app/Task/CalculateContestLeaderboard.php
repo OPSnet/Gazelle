@@ -6,6 +6,6 @@ class CalculateContestLeaderboard extends \Gazelle\Task {
     public function run(): void {
         $contestMan = new \Gazelle\Manager\Contest();
         $this->processed = $contestMan->calculateAllLeaderboards();
-        $this->processed += $contestMan->schedulePayout(new \Gazelle\Manager\User());
+        $this->processed += $contestMan->schedulePayout();
     }
 }

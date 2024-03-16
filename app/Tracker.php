@@ -177,7 +177,7 @@ class Tracker extends Base {
      * For example, Tracker::update('change_passkey', array('oldpasskey' => OLD_PASSKEY, 'newpasskey' => NEW_PASSKEY)) will send the request:
      * GET /tracker_32_char_secret_code/update?action=change_passkey&oldpasskey=OLD_PASSKEY&newpasskey=NEW_PASSKEY HTTP/1.1
      */
-    public function update(string $Action, array $Updates, bool $ToIRC = false): bool {
+    public function update(string $Action, array $Updates): bool {
         if (DISABLE_TRACKER) {
             return true;
         }

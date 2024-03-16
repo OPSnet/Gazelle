@@ -194,7 +194,7 @@ class InviteTree extends \Gazelle\Base {
             'download_top'   => 0,
         ];
         $classSummary = [];
-        foreach ($inviteeList as [$inviteeId, $position, $depth]) {
+        foreach ($inviteeList as [$inviteeId, /* $position -- unused */, $depth]) {
             $invitee = $this->userMan->findById($inviteeId);
             if (is_null($invitee)) {
                 continue;

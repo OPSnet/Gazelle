@@ -147,7 +147,7 @@ class Seedbox extends \Gazelle\BaseUser {
         $info = self::$db->to_array('fid', MYSQLI_ASSOC, false);
 
         $list = [];
-        foreach ($info as $tid => $details) {
+        foreach (array_keys($info) as $tid) {
             $torrent = $torMan->findById($tid);
             if (is_null($torrent)) {
                 continue;
@@ -200,7 +200,7 @@ class Seedbox extends \Gazelle\BaseUser {
                 $n += self::$db->affected_rows();
             } else {
                 try {
-                    self::$db->prepared_query($sql = "
+                    self::$db->prepared_query("
                         UPDATE user_seedbox SET
                             name = ?
                         WHERE user_id = ?

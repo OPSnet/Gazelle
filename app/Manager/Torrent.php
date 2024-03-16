@@ -363,7 +363,7 @@ class Torrent extends \Gazelle\BaseManager {
         LeechReason      $reason
     ): int {
         $placeholders = placeholders($idList);
-        self::$db->prepared_query($sql = "
+        self::$db->prepared_query("
             UPDATE torrents SET
                 FreeTorrent = ?, FreeLeechType = ?
             WHERE ID IN ($placeholders)
@@ -696,6 +696,7 @@ class Torrent extends \Gazelle\BaseManager {
                 LastReseedRequest = NULL
             WHERE LastReseedRequest <= (now() - INTERVAL " . RESEED_TORRENT . " DAY)
         ");
-        return $affected += self::$db->affected_rows();
+        $affected += self::$db->affected_rows();
+        return $affected;
     }
 }

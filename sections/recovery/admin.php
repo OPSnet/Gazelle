@@ -14,7 +14,7 @@ if (isset($_GET['task'])) {
                 $message = $ok ? '<font color="#008000">Invite sent</font>' : '<font color="#800000">Invite not sent, check log</font>';
                 break;
             case 'deny':
-                $recovery->deny($id, $Viewer->id(), $Viewer->username());
+                $recovery->deny($id, $Viewer->username());
                 $message = sprintf('<font color="orange">Request %d was denied</font>', $id);
                 break;
             case 'unclaim':

@@ -218,30 +218,29 @@ class Privilege extends \Gazelle\BaseUser {
         return $this->info()['secondary'];
     }
 
-    public function hasSecondaryClass(string $className): bool {
-        return count($this->info()['secondary']) > 0;
+    public function hasSecondaryClassId(int $userclassId): bool {
+        return isset($this->info()['secondary'][$userclassId]);
     }
 
-    public function addSecondaryClass(string $className): int {
+    public function addSecondaryClass(int $userclassId): int {
         self::$db->prepared_query("
             INSERT INTO users_levels
                    (UserID, PermissionID)
-            VALUES (?,      (SELECT ID FROM permissions WHERE Name = ?))
-            ", $this->id(), $className
+            VALUES (?,      ?)
+            ", $this->id(), $userclassId
         );
         $affected = self::$db->affected_rows();
         $this->flush();
         return $affected;
     }
 
-    public function removeSecondaryClass(string $className): int {
+    public function removeSecondaryClass(int $userclassId): int {
         self::$db->prepared_query("
-            DELETE ul
-            FROM users_levels ul
-            INNER JOIN permissions p ON (p.ID = ul.PermissionID)
-            WHERE ul.UserID = ?
-                AND p.Name = ?
-            ", $this->id(), $className
+            DELETE
+            FROM users_levels
+            WHERE UserID = ?
+                AND PermissionID = ?
+            ", $this->id(), $userclassId
         );
         $affected = self::$db->affected_rows();
         $this->flush();

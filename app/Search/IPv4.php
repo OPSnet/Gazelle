@@ -125,7 +125,7 @@ class IPv4 extends \Gazelle\Base {
         $column = ['from_unixtime(min(xs.tstamp))', 'from_unixtime(max(xs.tstamp))', 's.addr_n', 'count(*)'][$this->column];
         $direction = ['ASC', 'DESC'][$this->direction];
 
-        self::$db->prepared_query($sql = "
+        self::$db->prepared_query("
             SELECT from_unixtime(min(xs.tstamp)) AS first_seen,
                 from_unixtime(max(xs.tstamp))    AS last_seen,
                 count(*)                         AS total,
@@ -161,7 +161,7 @@ class IPv4 extends \Gazelle\Base {
         $column = ['from_unixtime(min(xfu.mtime))', 'from_unixtime(max(xfu.mtime))', 's.addr_n', 'count(*)'][$this->column];
         $direction = ['ASC', 'DESC'][$this->direction];
 
-        self::$db->prepared_query($sql = "
+        self::$db->prepared_query("
             SELECT from_unixtime(min(xfu.mtime)) AS first_seen,
                 from_unixtime(max(xfu.mtime + xfu.timespent * 60)) AS last_seen,
                 count(*)                         AS total,

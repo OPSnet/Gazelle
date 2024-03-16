@@ -117,18 +117,6 @@ class Torrent extends TorrentAbstract {
         return $tor->getEncode();
     }
 
-    public function addLogDb(Logfile $logfile, string $version): int {
-        self::$db->prepared_query('
-            INSERT INTO torrents_logs
-                   (TorrentID, Score, `Checksum`, `FileName`, Ripper, RipperVersion, `Language`, ChecksumState, LogcheckerVersion, Details)
-            VALUES (?,         ?,      ?,          ?,         ?,      ?,              ?,         ?,             ?,                 ?)
-            ', $this->id, $logfile->score(), $logfile->checksumStatus(), $logfile->filename(), $logfile->ripper(),
-                $logfile->ripperVersion(), $logfile->language(), $logfile->checksumState(),
-                \OrpheusNET\Logchecker\Logchecker::getLogcheckerVersion(), $logfile->detailsAsString()
-        );
-        return self::$db->inserted_id();
-    }
-
     public function adjustLogscore(int $logId, bool $adjusted, int $adjScore, bool $adjChecksum, int $adjBy, $adjReason, array $adjDetails): int {
         self::$db->prepared_query("
             UPDATE torrents_logs SET

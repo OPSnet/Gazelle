@@ -121,7 +121,7 @@ class Contest extends \Gazelle\Base {
     /**
      * Redistribute the bonus points for a contest to the participants.
      */
-    public function schedulePayout(User $userMan): int {
+    public function schedulePayout(): int {
         self::$db->prepared_query("
             SELECT c.contest_id
             FROM contest c
@@ -133,7 +133,7 @@ class Contest extends \Gazelle\Base {
         $contests = array_map(fn($id) => $this->findById($id), self::$db->collect(0));
         $totalParticipants = 0;
         foreach ($contests as $contest) {
-            $totalParticipants += $contest->doPayout($userMan);
+            $totalParticipants += $contest->doPayout();
             $contest->setPaymentClosed();
         }
         return $totalParticipants;

@@ -376,7 +376,7 @@ class Forum extends \Gazelle\BaseUser {
         [$cond, $args] = $this->configure();
         $args[] = $limit;
         $args[] = $offset;
-        self::$db->prepared_query($sql = "
+        self::$db->prepared_query("
             SELECT t.ID        AS thread_id,
                 t.Title        AS thread_title,
                 t.CreatedTime  AS created_time,

@@ -98,13 +98,13 @@ class PrivilegeTest extends TestCase {
         $user = $this->userList['user'];
         $privilege = new Gazelle\Privilege($privilegeId);
         $this->assertFalse($user->$method(), "privilege-user-not-$label");
-        $this->assertEquals(1, $user->addClasses([$privilegeId]), "privilege-add-$label");
+        $this->assertEquals(1, $user->privilege()->addSecondaryClass($privilegeId, "privilege-add-$label"));
         $this->assertTrue($user->$method(), "privilege-user-now-$label");
         // TODO: the method name and parameter could be improved
-        $this->assertTrue($user->privilege()->hasSecondaryClass($privilege->name()), "privilege-has-secondary-$label");
+        $this->assertTrue($user->privilege()->hasSecondaryClassId($privilege->id()), "privilege-has-secondary-$label");
         $this->assertEquals(1, $user->removeClasses([$privilegeId]), "privilege-remove-$label");
         $this->assertFalse($user->$method(), "privilege-user-no-longer-$label");
-        $this->assertFalse($user->privilege()->hasSecondaryClass($privilege->name()), "privilege-no-longerhas-secondary-$label");
+        $this->assertFalse($user->privilege()->hasSecondaryClassId($privilege->id()), "privilege-no-longerhas-secondary-$label");
     }
 
     public function testPrivilegeBadge(): void {

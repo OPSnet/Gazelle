@@ -135,7 +135,7 @@ class Debug {
         return $id;
     }
 
-    public function analysis($Message, $Report = '', $Time = 43200): void {
+    public function analysis($Message, $Report = ''): void {
         $RequestURI = empty($_SERVER['REQUEST_URI']) ? '' : substr($_SERVER['REQUEST_URI'], 1);
         if (PHP_SAPI === 'cli'
             || in_array($RequestURI, ['tools.php?action=db_sandbox'])
@@ -291,7 +291,7 @@ class Debug {
     public function get_errors($Light = false): array {
         //Because the cache can't take some of these variables
         if ($Light) {
-            foreach (self::$Errors as $Key => $Value) {
+            foreach (array_keys(self::$Errors) as $Key) {
                 self::$Errors[$Key][3] = '';
             }
         }

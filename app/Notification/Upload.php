@@ -287,7 +287,7 @@ class Upload extends \Gazelle\Base {
         );
         foreach (self::$db->collect(0, false) as $subFeed) {
             $n++;
-            $feed->populate($rss, $item);
+            $feed->populate($rss, $subFeed);
         }
         return $n;
     }
@@ -302,7 +302,7 @@ class Upload extends \Gazelle\Base {
         $metadata = [$torrent->media(), $torrent->format(), $torrent->encoding()];
         if ($torrent->media() == "CD") {
             if ($torrent->hasCue()) {
-                $metdata[] = "Cue";
+                $metadata[] = "Cue";
             }
             if ($torrent->hasLog()) {
                 array_push($metadata, "Log", $torrent->logScore());

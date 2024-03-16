@@ -118,7 +118,7 @@ abstract class AbstractCollage extends \Gazelle\Base {
             $mult = $this->holder->isPersonal() ? -1 : 1;
         }
         $func = $mult > 0 ? 'max' : 'min';
-        self::$db->prepared_query($sql = "
+        self::$db->prepared_query("
             INSERT IGNORE INTO {$this->entryTable()}
                    (CollageID, UserID, {$this->entryColumn()}, Sort)
             VALUES (?,         ?,      ?,

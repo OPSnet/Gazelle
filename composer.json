@@ -37,6 +37,7 @@
     "whichbrowser/parser": "^2.1.7"
   },
   "require-dev": {
+    "phpmd/phpmd": "@stable",
     "phpstan/phpstan": "^1.10",
     "phpunit/phpcov": "^10.0",
     "phpunit/php-code-coverage": "^11",

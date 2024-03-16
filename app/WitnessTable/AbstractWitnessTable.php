@@ -16,7 +16,7 @@ abstract class AbstractWitnessTable extends \Gazelle\Base {
 
     protected function witnessValue(\Gazelle\User $user): bool {
         $latest = $this->latestValue();
-        self::$db->prepared_query($sql = "
+        self::$db->prepared_query("
             INSERT INTO {$this->tableName()}
             ({$this->idColumn()}, {$this->valueColumn()}) VALUES (?, ?)
             ON DUPLICATE KEY UPDATE {$this->valueColumn()} = ?

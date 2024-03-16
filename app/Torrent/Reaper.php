@@ -353,7 +353,7 @@ class Reaper extends \Gazelle\Base {
                     'name'     => $torrent->name(),
                     'tgroup'   => $torrent->group(),
                 ];
-                [$success, $message] = $torrent->remove(null, $reason, -1);
+                [$success, /* $message */] = $torrent->remove(null, $reason, -1);
                 if ($success) {
                     $removed++;
                     $notes[]   = $note;
@@ -482,7 +482,7 @@ class Reaper extends \Gazelle\Base {
                     $this->notifyWinner($torrent, new \Gazelle\User\Bonus($user)),
                 ];
             }
-            $prevTorrentid = $torrentId;
+            $prevTorrentId = $torrentId;
         }
 
         if ($saved) {

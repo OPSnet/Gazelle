@@ -108,7 +108,7 @@ class Bonus extends \Gazelle\Base {
     }
 
     public function addUploadPoints(int $points, string $since): int {
-        self::$db->prepared_query($sql = "
+        self::$db->prepared_query("
             SELECT DISTINCT um.ID
             FROM users_main um
             INNER JOIN torrents t ON (t.UserID = um.ID)

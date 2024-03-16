@@ -85,7 +85,7 @@ abstract class ArtistRole extends \Gazelle\Base {
         $mainCount      = count($roleList['main'] ?? []);
 
         if ($composerCount + $mainCount + $conductorCount + $djCount == 0) {
-            return $link = '';
+            return '';
         }
 
         $and = match ($mode) {
@@ -146,7 +146,7 @@ abstract class ArtistRole extends \Gazelle\Base {
                 }
             }
         }
-        return $link = implode(' ', $chunk);
+        return implode(' ', $chunk);
     }
 
     protected function various(string $role, array $artistList, int $mode): string {

@@ -467,9 +467,9 @@ class UserTest extends TestCase {
 
     public function testSecondaryClass(): void {
         $this->assertFalse($this->user->isFLS(), 'user-is-not-secondary-fls');
-        $this->user->privilege()->addSecondaryClass('First Line Support');
+        $this->user->privilege()->addSecondaryClass(FLS_TEAM);
         $this->assertTrue($this->user->isFLS(), 'user-is-secondary-fls');
-        $this->user->privilege()->removeSecondaryClass('First Line Support');
+        $this->user->privilege()->removeSecondaryClass(FLS_TEAM);
         $this->assertFalse($this->user->isFLS(), 'user-is-no-longer-secondary-fls');
     }
 

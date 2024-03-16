@@ -296,7 +296,7 @@ class Contest extends BaseObject {
         return self::$db->affected_rows();
     }
 
-    public function doPayout(Manager\User $userMan): int {
+    public function doPayout(): int {
         $enabledUserBonus = $this->bonusPerUserValue();
         $contestBonus     = $this->bonusPerContestValue();
         $perEntryBonus    = $this->bonusPerEntryValue();

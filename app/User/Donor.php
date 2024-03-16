@@ -91,7 +91,7 @@ class Donor extends \Gazelle\BaseUser {
     }
 
     public function isDonor(): bool {
-        return $this->isDonor ??= $this->user->isStaff() || $this->user->privilege()->hasSecondaryClass('Donor');
+        return $this->isDonor ??= $this->user->isStaff() || $this->user->privilege()->hasSecondaryClassId(DONOR);
     }
 
     public function isVisible(): bool {
@@ -681,14 +681,14 @@ class Donor extends \Gazelle\BaseUser {
         if ($this->isDonor()) {
             return 0;
         }
-        $affected = $this->user->privilege()->addSecondaryClass('Donor');
+        $affected = $this->user->privilege()->addSecondaryClass(DONOR);
         $this->isDonor = ($affected === 1);
         return $affected;
     }
 
     public function removeDonorStatus(): int {
         self::$db->begin_transaction();
-        $affected = $this->user->privilege()->removeSecondaryClass('Donor');
+        $affected = $this->user->privilege()->removeSecondaryClass(DONOR);
         self::$db->prepared_query('
             UPDATE users_donor_ranks SET
                 donor_rank  = 0,
