@@ -22,6 +22,10 @@ class LoginWatch extends Base {
         }
     }
 
+    public function id(): int {
+        return $this->id;
+    }
+
     /**
      * Record another failure attempt on this watch. If the user has not
      * logged in recently from this IP address then subsequent logins
@@ -180,24 +184,19 @@ class LoginWatch extends Base {
     /**
      * Ban the IP addresses pointed to by the IDs that are on login watch.
      */
-    public function setBan(int $userId, string $reason, array $list): int {
+    public function setBan(User $user, string $reason, array $list, Manager\IPv4 $manager): int {
         if (!$list) {
             return 0;
         }
-        $reason = trim($reason);
         $affected = 0;
         foreach ($list as $id) {
             $ipv4 = self::$db->scalar("
-                SELECT inet_aton(IP) FROM login_attempts WHERE ID = ?
-                ", $this->id
+                SELECT IP FROM login_attempts WHERE ID = ?
+                ", $id
             );
-            self::$db->prepared_query("
-                INSERT IGNORE INTO ip_bans
-                       (user_id, Reason, FromIP, ToIP)
-                VALUES (?,       ?,      ?,      ?)
-                ", $userId, substr($reason, 0, 255), $ipv4, $ipv4
-            );
-            $affected += self::$db->affected_rows();
+            if (is_string($ipv4)) {
+                $affected += $manager->createBan($user, $ipv4, $ipv4, $reason);
+            }
         }
         return $affected;
     }

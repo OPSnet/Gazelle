@@ -179,7 +179,7 @@ class IPv4 extends \Gazelle\Base {
      * force entry with an ID that does not correspond to a user, e.g. due
      * to a password brute-forcing attempt.
      */
-    public function createBan(int $userId, string $from, string $to, string $reason): int {
+    public function createBan(?\Gazelle\User $user, string $from, string $to, string $reason): int {
         $id = (int)self::$db->scalar("
             SELECT ID
             FROM ip_bans
@@ -187,23 +187,24 @@ class IPv4 extends \Gazelle\Base {
                 AND ToIP = inet_aton(?)
             ", $from, $to
         );
+        $reason = trim($reason);
         if ($id) {
             self::$db->prepared_query("
                 UPDATE ip_bans SET
                     Reason  = substring(concat(Reason, ' AND ', ?), 1, 255),
                     created = now()
                 WHERE ID = ?
-                ", trim($reason), $id
+                ", $reason, $id
             );
-            return $id;
+        } else {
+            self::$db->prepared_query("
+                INSERT INTO ip_bans
+                       (Reason, FromIP,       ToIP,         user_id)
+                VALUES (?,      inet_aton(?), inet_aton(?), ?)
+                ", substr($reason, 0, 255), $from, $to, (int)($user?->id())
+            );
+            $id = self::$db->inserted_id();
         }
-        self::$db->prepared_query("
-            INSERT INTO ip_bans
-                   (Reason, FromIP,       ToIP,         user_id)
-            VALUES (?,      inet_aton(?), inet_aton(?), ?)
-            ", substr($reason, 0, 255), $from, $to, $userId
-        );
-        $id = self::$db->inserted_id();
         $this->flush();
         return $id;
     }

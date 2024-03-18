@@ -21,7 +21,7 @@ class IPv4Test extends TestCase {
         $initial = $ipv4->total();
         // if the following fails, it is due to a previous unittest failure
         $this->assertFalse($ipv4->isBanned('127.9.9.55'), 'ipv4-is-not-banned');
-        $id = $ipv4->createBan($this->user->id(), '127.9.9.50', '127.9.9.60', 'phpunit');
+        $id = $ipv4->createBan($this->user, '127.9.9.50', '127.9.9.60', 'phpunit');
         $this->assertGreaterThan(0, $id, 'ipv4-ban-create');
         $this->assertTrue($ipv4->isBanned('127.9.9.55'), 'ipv4-is-banned');
         $this->assertEquals($initial + 1, $ipv4->total(), 'ipv4-total');

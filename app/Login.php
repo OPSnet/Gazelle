@@ -91,7 +91,7 @@ class Login extends Base {
                 }
             } elseif ($this->watch->nrBans() > 3) {
                 (new Manager\IPv4())->createBan(
-                    $this->userId, $this->ipaddr, $this->ipaddr, 'Automated ban, too many failed login attempts'
+                    null, $this->ipaddr, $this->ipaddr, 'Automated ban, too many failed login attempts'
                 );
             }
         }

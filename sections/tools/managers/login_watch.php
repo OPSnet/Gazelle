@@ -21,9 +21,10 @@ if ($_POST) {
 $watch = new Gazelle\LoginWatch('0.0.0.0');
 if (isset($ban)) {
     $nrBan = $watch->setBan(
-        $Viewer->id(),
+        $Viewer,
         $_REQUEST['reason'] ?? "Banned by " . $Viewer->username() . " from login watch.",
-        $ban
+        $ban,
+        new Gazelle\Manager\IPv4(),
     );
 }
 if (isset($clear)) {

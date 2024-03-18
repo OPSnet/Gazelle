@@ -396,6 +396,18 @@ class UserTest extends TestCase {
         $this->assertGreaterThan(0, count($watch->activeList('1', 'ASC', 10, 0)), 'loginwatch-active-list');
         $this->assertGreaterThan(0, $watch->clearAttempts(), 'loginwatch-clear');
         $this->assertEquals(0, $watch->nrAttempts(), 'loginwatch-no-attempts');
+
+        $ipv4man = new \Gazelle\Manager\IPv4();
+        $banId = $watch->setBan($this->user, 'phpunit ban', [$watch->id()], $ipv4man);
+        $this->assertGreaterThan(0, $banId, 'loginwatch-ip-ban');
+
+        $this->assertTrue($ipv4man->isBanned($login->ipaddr()), 'loginwatch-ip-is-banned');
+        $ipv4man->setFilterIpaddr($login->ipaddr());
+        $this->assertEquals(1, $ipv4man->total(), 'loginwatch-ip-total');
+        $page = $ipv4man->page('ID', 'ASC', 2, 0);
+        $this->assertCount(1, $page, 'loginwatch-ip-page');
+        $this->assertEquals($banId, $page[0]['id'], 'loginwatch-ip-id-page');
+        $this->assertEquals(1, $ipv4man->removeBan($banId), 'loginwatch-ip-ban-clear');
     }
 
     public function testParanoia(): void {
