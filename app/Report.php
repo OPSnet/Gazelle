@@ -100,19 +100,13 @@ class Report extends BaseObject {
         return $this;
     }
 
-    public function resolve(User $user, Manager\Report $manager): int {
-        // can't use setField() because there is no elegant way to say `ResolvedTime = now()`
-        self::$db->prepared_query("
-            UPDATE reports SET
-                Status = 'Resolved',
-                ResolvedTime = now(),
-                ResolverID = ?
-            WHERE ID = ?
-            ", $user->id(), $this->id
-        );
-        $affected = self::$db->affected_rows();
+    public function resolve(User $user): int {
+        $affected = $this
+            ->setField('Status', 'Resolved')
+            ->setField('ResolverID', $user->id())
+            ->setFieldNow('ResolvedTime')
+            ->modify();
 
-        $this->flush();
         self::$cache->delete_value('num_other_reports');
         if ($this->subjectType() == 'request_update') {
             self::$cache->decrement('num_update_reports');
@@ -120,7 +114,7 @@ class Report extends BaseObject {
             self::$cache->decrement('num_forum_reports');
         }
 
-        return $affected;
+        return (int)$affected;
     }
 
     /**

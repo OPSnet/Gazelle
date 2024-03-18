@@ -47,7 +47,7 @@ class ReportManagerTest extends TestCase {
         $this->reportList[] = $report;
         $this->assertEquals("phpunit collage report", $report->reason(), 'collage-report-reason');
         $this->assertEquals($this->collage->id(), $report->subjectId(), 'collage-report-subject-id');
-        $this->assertEquals(1, $report->resolve($this->userList[0], $manager));
+        $this->assertEquals(1, $report->resolve($this->userList[0]));
     }
 
     public function testReportRequest(): void {
@@ -141,7 +141,7 @@ class ReportManagerTest extends TestCase {
         $this->assertEquals($report->id(), $page[0], 'request-report-page-id');
 
         // resolve
-        $this->assertEquals(1, $report->resolve($this->userList[0], $manager), 'request-report-claim');
+        $this->assertEquals(1, $report->resolve($this->userList[0]), 'request-report-claim');
         $this->assertNotNull($report->resolved(), 'request-report-resolved-date');
         $this->assertEquals('Resolved', $report->status(), 'request-report-resolved-status');
         $resolver = $report->resolver();

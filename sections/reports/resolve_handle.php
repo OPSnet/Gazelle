@@ -5,14 +5,13 @@ if (!$Viewer->permittedAny('admin_reports', 'site_moderate_forums')) {
 }
 authorize();
 
-$manager = new Gazelle\Manager\Report(new Gazelle\Manager\User());
-$report  = $manager->findById((int)($_POST['id'] ?? 0));
+$report = (new Gazelle\Manager\Report(new Gazelle\Manager\User()))->findById((int)($_POST['id'] ?? 0));
 if (is_null($report)) {
     json_error('no report id');
 }
 if (!$Viewer->permitted('admin_reports') && !in_array($report->subjectType(), ['comment', 'post', 'thread'])) {
     error('forbidden ' . $report->subjectType());
 }
-$report->resolve($Viewer, $manager);
+$report->resolve($Viewer);
 
 header('Location: reports.php');
