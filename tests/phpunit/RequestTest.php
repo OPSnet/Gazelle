@@ -317,7 +317,7 @@ class RequestTest extends TestCase {
         $this->assertFalse($this->request->isFilled(), 'request-unfilled');
 
         $log = new Gazelle\Manager\SiteLog(new Gazelle\Manager\User());
-        $page = $log->page(1, 0, $this->request->title(), bypassSphinx: true);
+        $page = $log->page(2, 0, $this->request->title(), bypassSphinx: true);
         $this->assertStringStartsWith(
             "Request <a href=\"{$this->request->url()}\">{$this->request->id()}</a> ({$this->request->title()})",
             $page[0]['message'],

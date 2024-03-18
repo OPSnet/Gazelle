@@ -14,10 +14,10 @@ class SiteLog extends \Gazelle\Base {
     public function totalMatches(): int { return $this->totalMatches; }
     public function result(): array { return $this->result; }
 
-    public function page(int $page, int $offset, string $searchTerm, bool $bypassSphinx = false): array {
+    public function page(int $perPage, int $offset, string $searchTerm, bool $bypassSphinx = false): array {
         if ($searchTerm === '' || $bypassSphinx) {
             // either no search term or realtime query
-            $args = [$offset, LOG_ENTRIES_PER_PAGE];
+            $args = [$offset, $perPage];
             if ($searchTerm === '') {
                 $where = '';
             } else {
@@ -34,7 +34,7 @@ class SiteLog extends \Gazelle\Base {
                 ", ...$args
             );
             $this->totalMatches = (int)self::$db->record_count();
-            if ($this->totalMatches < LOG_ENTRIES_PER_PAGE) {
+            if ($this->totalMatches < $perPage) {
                 $this->totalMatches += $offset;
             } else {
                 $result = (new \SphinxqlQuery())->select('id')->from('log, log_delta')->limit(0, 1, 1)->sphinxquery();
@@ -48,7 +48,7 @@ class SiteLog extends \Gazelle\Base {
         $sq->select('id')
             ->from('log, log_delta')
             ->order_by('id', 'DESC')
-            ->limit($offset, LOG_ENTRIES_PER_PAGE, $offset + LOG_ENTRIES_PER_PAGE);
+            ->limit($offset, $perPage, $offset + $perPage);
         foreach (explode(' ', $searchTerm) as $s) {
             $sq->where_match($s, 'message');
         }
