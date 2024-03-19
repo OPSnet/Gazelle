@@ -29,14 +29,17 @@ class LoginWatch extends Base {
      */
     public function increment(int $userId, string $username): int {
         $this->userId = $userId;
-        $seen = (bool)self::$db->scalar("
-            SELECT 1
-            FROM users_history_ips
-            WHERE (EndTime IS NULL OR EndTime > now() - INTERVAL 1 WEEK)
-                AND UserID = ?
-                AND IP = ?
-            ", $this->userId, $this->ipaddr
-        );
+        $seen = match ($this->userId) {
+            0       => false,
+            default => (bool)self::$db->scalar("
+                    SELECT 1
+                    FROM users_history_ips
+                    WHERE (EndTime IS NULL OR EndTime > now() - INTERVAL 1 WEEK)
+                        AND UserID = ?
+                        AND IP = ?
+                    ", $this->userId, $this->ipaddr
+                )
+        };
         self::$db->prepared_query('
             UPDATE login_attempts SET
                 Attempts = Attempts + 1,
@@ -46,7 +49,7 @@ class LoginWatch extends Base {
                 capture = ?
             WHERE ID = ?
             ', $seen ? 60 : LOGIN_ATTEMPT_BACKOFF[min($this->nrAttempts(), count(LOGIN_ATTEMPT_BACKOFF) - 1)],
-                $this->userId, substr(urlencode($username), 0, 20), $this->id
+                $this->userId, substr($username, 0, 20), $this->id
         );
         return self::$db->affected_rows();
     }
@@ -140,7 +143,8 @@ class LoginWatch extends Base {
         return (int)self::$db->scalar("
             SELECT count(*)
             FROM login_attempts w
-            WHERE (w.BannedUntil > now() OR w.LastAttempt > now() - INTERVAL 6 HOUR)
+            WHERE (w.BannedUntil > now() - INTERVAL 24 HOUR AND Bans > 0)
+                OR (w.LastAttempt > now() - INTERVAL 6 HOUR AND attempts > 0)
         ");
     }
 
@@ -164,7 +168,8 @@ class LoginWatch extends Base {
             FROM login_attempts w
             LEFT JOIN users_main um ON (um.ID = w.UserID)
             LEFT JOIN ip_bans ip ON (ip.FromIP = inet_aton(w.IP))
-            WHERE (w.BannedUntil > now() OR w.LastAttempt > now() - INTERVAL 6 HOUR)
+            WHERE (w.BannedUntil > now() - INTERVAL 24 HOUR AND Bans > 0)
+                OR (w.LastAttempt > now() - INTERVAL 6 HOUR AND attempts > 0)
             ORDER BY $orderBy $orderWay
             LIMIT ? OFFSET ?
             ", $limit, $offset

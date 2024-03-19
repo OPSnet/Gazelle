@@ -70,23 +70,25 @@ class Login extends Base {
             if ($this->watch->nrAttempts() > 10) {
                 $this->watch->ban($this->username);
 
-                $key = 'login_flood_' . $this->userId;
-                if (self::$cache->get_value($key) === false) {
-                    self::$cache->cache_value($key, true, 86400);
-                    // fake a user object temporarily to send them some email
-                    (new User($this->userId))->inbox()->createSystem(
-                        "Too many login attempts on your account",
-                        self::$twig->render('login/too-many-failures.bbcode.twig', [
-                            'ipaddr'   => $this->ipaddr,
-                            'username' => $this->username,
-                        ])
-                    );
+                if ($this->userId) {
+                    $key = 'login_flood_' . $this->userId;
+                    if (self::$cache->get_value($key) === false) {
+                        self::$cache->cache_value($key, true, 86400);
+                        // fake a user object temporarily to send them some email
+                        (new User($this->userId))->inbox()->createSystem(
+                            "Too many login attempts on your account",
+                            self::$twig->render('login/too-many-failures.bbcode.twig', [
+                                'ipaddr' => $this->ipaddr,
+                                'username' => $this->username,
+                            ])
+                        );
+                    }
+                    $key = sprintf(self::FLOOD_COUNT, $this->userId);
+                    if (self::$cache->get_value($key) === false) {
+                        self::$cache->cache_value($key, 0, 86400 * 7);
+                    }
+                    self::$cache->increment($key);
                 }
-                $key = sprintf(self::FLOOD_COUNT, $this->userId);
-                if (self::$cache->get_value($key) === false) {
-                    self::$cache->cache_value($key, 0, 86400 * 7);
-                }
-                self::$cache->increment($key);
             } elseif ($this->watch->nrBans() > 3) {
                 (new Manager\IPv4())->createBan(
                     $this->userId, $this->ipaddr, $this->ipaddr, 'Automated ban, too many failed login attempts'

@@ -49,13 +49,6 @@ $paginator->setTotal($watch->activeTotal());
 
 $list = $watch->activeList($headerInfo->getOrderBy(), $headerInfo->getOrderDir(), $paginator->limit(), $paginator->offset());
 $resolve = isset($_REQUEST['resolve']);
-foreach ($list as &$attempt) {
-    $attempt['dns'] = $resolve ? gethostbyaddr($attempt['ipaddr']) : $attempt['ipaddr'];
-    if ($attempt['banned']) {
-        $attempt['ipaddr'] = sprintf('<span title="Banned">%s&nbsp;%s</span>', $attempt['ipaddr'], "\xE2\x9B\x94");
-    }
-}
-unset($attempt);
 
 echo $Twig->render('admin/login-watch.twig', [
     'auth'      => $Viewer->auth(),

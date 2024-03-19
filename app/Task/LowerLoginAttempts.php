@@ -7,7 +7,7 @@ class LowerLoginAttempts extends \Gazelle\Task {
         self::$db->prepared_query('
             UPDATE login_attempts
             SET Attempts = Attempts - 1
-            WHERE Attempts > 0
+            WHERE Attempts > 0 AND LastAttempt < now() - INTERVAL 1 HOUR
         ');
         $this->processed = self::$db->affected_rows();
 

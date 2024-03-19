@@ -368,7 +368,7 @@ class UserTest extends TestCase {
         $ipaddr = implode('.', ['127', random_int(0, 255), random_int(0, 255), random_int(0, 255)]);
         $_SERVER['REMOTE_ADDR'] = $ipaddr;
         $watch  = new \Gazelle\LoginWatch($ipaddr);
-        $this->assertEquals(1, $watch->nrAttempts(), 'loginwatch-init-attempt');
+        $this->assertEquals(0, $watch->nrAttempts(), 'loginwatch-init-attempt');
         $this->assertEquals(0, $watch->nrBans(), 'loginwatch-init-ban');
 
         $login  = new \Gazelle\Login();
@@ -382,7 +382,7 @@ class UserTest extends TestCase {
         $this->assertEquals('email@example.com', $login->username(), 'login-username');
         $this->assertEquals($ipaddr, $login->ipaddr(), 'login-ipaddr');
         $this->assertFalse($login->persistent(), 'login-persistent');
-        $this->assertEquals(2, $watch->nrAttempts(), 'loginwatch-attempt');
+        $this->assertEquals(1, $watch->nrAttempts(), 'loginwatch-attempt');
 
         $result = $login->login(
             username: $this->user->username(),
@@ -391,7 +391,7 @@ class UserTest extends TestCase {
         );
         $this->assertNull($result, 'login-bad-password');
         $this->assertEquals($login->error(), \Gazelle\Login::ERR_CREDENTIALS, 'login-error-password');
-        $this->assertEquals(3, $watch->nrAttempts(), 'loginwatch-more-attempt');
+        $this->assertEquals(2, $watch->nrAttempts(), 'loginwatch-more-attempt');
 
         $this->assertGreaterThan(0, count($watch->activeList('1', 'ASC', 10, 0)), 'loginwatch-active-list');
         $this->assertGreaterThan(0, $watch->clearAttempts(), 'loginwatch-clear');

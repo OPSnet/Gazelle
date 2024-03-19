@@ -1,5 +1,6 @@
 {% from 'macro/form.twig' import checked %}
-{{ header('Login Watch') }}
+{% from 'macro/ipv4.twig' import ip_search %}
+{{ header('Login Watch', {'js': 'resolve-ip'}) }}
 <div class="thin">
 <div class="header">
     <h2>Login Watch Management</h2>
@@ -33,7 +34,7 @@
 <table width="100%">
     <tr class="colhead">
         <td>{{ header.ipaddr|raw }}</td>
-        <td>DNS</td>
+        {% if resolve %}<td>rDNS</td>{% endif %}
         <td>{{ header.user|raw }}</td>
         <td>{{ header.attempts|raw }}</td>
         <td>{{ header.bans|raw }}</td>
@@ -49,12 +50,13 @@
     {% endif %}
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
         <td>
-            {{ b.ipaddr|raw }}
-            <a href="https://whatismyipaddress.com/ip/{{ b.ipaddr }}" class="brackets tooltip" title="whatismyipaddress.com" target="_blank">WI</a>
+            {{ ip_search(b.ipaddr) }}{% if b.banned %}<span title="Banned">&nbsp;⛔</span>{% endif %}
         </td>
+    {% if resolve %}
         <td>
-            {{ b.dns }}
+            <span class="resolve-ipv4" data-ip="{{ b.ipaddr }}">Resolving...</span>
         </td>
+    {% endif %}
         <td>
     {% if b.user_id %}
             {{ b.user_id|user_url }}
