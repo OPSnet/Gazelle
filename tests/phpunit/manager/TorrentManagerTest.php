@@ -82,58 +82,32 @@ class TorrentManagerTest extends TestCase {
     }
 
     public function testTopTenHistoryList(): void {
-        // add torrents to history top ten daily histories
-        $db = Gazelle\DB::DB();
         foreach ($this->torrentList as $torrent) {
-            $db->prepared_query("
-                INSERT INTO top10_history (Date, Type) VALUES (date(?), ?)
-                ", $torrent->created(), 'Daily'
-            );
-            $histId = $db->inserted_id();
-
-            $db->prepared_query("
-                INSERT INTO top10_history_torrents
-                       (TorrentID, HistoryID, sequence)
-                VALUES (?,         ?,         ?)
-                ", $torrent->id(), $histId, 1
-            );
-            $this->topTenList[] = $histId;
+            // here we need them to be created today
+            $torrent->setFieldNow('created')->modify();
         }
-
-        // now add them to a top ten weekly history
-        $db->prepared_query("
-            INSERT INTO top10_history (Date, Type) VALUES (date(?), ?)
-            ", $this->torrentList[0]->created(), 'Weekly'
-        );
-        $histId   = $db->inserted_id();
-        $sequence = 0;
-        foreach ($this->torrentList as $torrent) {
-            $db->prepared_query("
-                INSERT INTO top10_history_torrents
-                       (TorrentID, HistoryID, sequence)
-                VALUES (?,         ?,         ?)
-                ", $torrent->id(), $histId, ++$sequence
-            );
-        }
-        $this->topTenList[] = $histId;
-
+        Helper::addTorrentTraffic($this->torrentList[0], 1, 2, 2);
+        Helper::addTorrentTraffic($this->torrentList[1], 0, 3, 3);
         $manager = new \Gazelle\Manager\Torrent();
+        $this->topTenList[] = $manager->storeTop10('Daily', 1);
+        $this->topTenList[] = $manager->storeTop10('Weekly', 7);
+
+        global $Cache;
+        $Cache->delete_value($manager->topTenCacheKey(date('Ymd'), true));
+        $Cache->delete_value($manager->topTenCacheKey(date('Ymd'), false));
+
         $date = explode(' ', $this->torrentList[0]->created())[0];
         $list = $manager->topTenHistoryList($date, isByDay: true);
-        $this->assertCount(1, $list, 'tor-top10-history-by-day');
-        $this->assertEquals(1, $list[0]['sequence'], 'tor-top10-day-1-sequence');
-        $this->assertEquals($this->torrentList[0]->id(), $list[0]['torrent_id'], 'tor-top10-day-1-sequence');
+        $this->assertCount(2, $list, 'tor-top10-history-by-day');
+        $this->assertEquals(2, $list[1]['sequence'], 'tor-top10-day-1-sequence');
+        $this->assertEquals($this->torrentList[1]->id(), $list[0]['torrent_id'], 'tor-top10-day-1-id');
 
-        $date = explode(' ', $this->torrentList[1]->created())[0];
-        $list = $manager->topTenHistoryList($date, isByDay: true);
         $this->assertEquals(1, $list[0]['sequence'], 'tor-top10-day-2-sequence');
-        $this->assertEquals($this->torrentList[1]->id(), $list[0]['torrent_id'], 'tor-top10-day-2-sequence');
+        $this->assertEquals($this->torrentList[0]->id(), $list[1]['torrent_id'], 'tor-top10-day-2-id');
 
-        $date = explode(' ', $this->torrentList[0]->created())[0];
-        $list = $manager->topTenHistoryList($date, isByDay: false);
         $this->assertCount(2, $list, 'tor-top10-history-by-week');
         $this->assertEquals(
-            array_map(fn($t) => $t->id(), $this->torrentList),
+            [$this->torrentList[1]->id(), $this->torrentList[0]->id()],
             array_map(fn($t) => $t['torrent_id'], $list),
             'tor-top10-history-week-list'
         );

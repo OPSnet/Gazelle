@@ -163,6 +163,19 @@ class Helper {
         );
     }
 
+    public static function addTorrentTraffic(\Gazelle\Torrent $torrent, int $leechTotal, int $seedTotal, int $snatchTotal): int {
+        $db = \Gazelle\DB::DB();
+        $db->prepared_query("
+            UPDATE torrents_leech_stats SET
+                Leechers = ?,
+                Seeders  = ?,
+                Snatched = ?
+            WHERE TorrentID = ?
+            ", $leechTotal, $seedTotal, $snatchTotal, $torrent->id()
+        );
+        return $db->affected_rows();
+    }
+
     public static function makeUser(string $username, string $tag, bool $enable = false, bool $clearInbox = false): \Gazelle\User {
         $_SERVER['HTTP_USER_AGENT'] = 'phpunit';
         $user = (new Gazelle\UserCreator())

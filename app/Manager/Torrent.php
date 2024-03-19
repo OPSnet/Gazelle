@@ -317,40 +317,6 @@ class Torrent extends \Gazelle\BaseManager {
         return $info;
     }
 
-    public function storeTop10(string $type, string $key, int $days): int {
-        self::$db->prepared_query("
-            INSERT INTO top10_history (Type) VALUES (?)
-            ", $type
-        );
-        $historyId = self::$db->inserted_id();
-
-        self::$db->prepared_query("
-            SELECT t.ID
-            FROM torrents AS t
-            INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
-            WHERE t.Size > 0
-                AND tls.Seeders > 0
-                AND t.created > now() - INTERVAL ? DAY
-            ORDER BY ln(t.Size) * tls.Snatched + ln(t.Size) * tls.Leechers DESC, t.ID DESC
-            LIMIT 20
-            ", $days
-        );
-
-        $sequence = 0;
-        foreach (self::$db->collect(0, false) as $torrentId) {
-            $torrent = $this->findById($torrentId);
-            if ($torrent) {
-                self::$db->prepared_query("
-                    INSERT INTO top10_history_torrents
-                           (HistoryID, sequence, TorrentID)
-                    VALUES (?,         ?,        ?)
-                    ", $historyId, ++$sequence, $torrentId
-                );
-            }
-        }
-        return $historyId;
-    }
-
     /**
      * Freeleech / neutral leech / normalise a list of torrents
      * NB: If FLAC-only filtering is required, it must be handled by the calling code.
@@ -654,14 +620,52 @@ class Torrent extends \Gazelle\BaseManager {
         return ' ' . implode('/', $meta);
     }
 
-    public function topTenHistoryList(string $datetime, bool $isByDay): array {
-        $key = sprintf(self::CACHE_HIST,
+    public function topTenCacheKey(string $datetime, bool $isByDay): string {
+        return sprintf(self::CACHE_HIST,
             $isByDay ? 'day' : 'week',
             preg_replace('/\D+/', '', $datetime)
         );
+    }
+
+    public function storeTop10(string $type, int $days): int {
+        self::$db->prepared_query("
+            INSERT INTO top10_history (Type) VALUES (?)
+            ", $type
+        );
+        $historyId = self::$db->inserted_id();
+
+        self::$db->prepared_query("
+            SELECT t.ID
+            FROM torrents AS t
+            INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
+            WHERE t.Size > 0
+                AND tls.Seeders > 0
+                AND t.created > now() - INTERVAL ? DAY
+            ORDER BY ln(t.Size) * tls.Snatched + ln(t.Size) * tls.Leechers DESC, t.ID DESC
+            LIMIT 20
+            ", $days
+        );
+
+        $sequence = 0;
+        foreach (self::$db->collect(0, false) as $torrentId) {
+            $torrent = $this->findById($torrentId);
+            if ($torrent) {
+                self::$db->prepared_query("
+                    INSERT INTO top10_history_torrents
+                           (HistoryID, sequence, TorrentID)
+                    VALUES (?,         ?,        ?)
+                    ", $historyId, ++$sequence, $torrentId
+                );
+            }
+        }
+        return $historyId;
+    }
+
+    public function topTenHistoryList(string $datetime, bool $isByDay): array {
+        $key = $this->topTenCacheKey($datetime, $isByDay);
         $list = self::$cache->get_value($key);
         if ($list === false) {
-            self::$db->prepared_query("
+            self::$db->prepared_query($sql = "
                 SELECT tht.sequence,
                     tht.TorrentID AS torrent_id
                 FROM top10_history th
