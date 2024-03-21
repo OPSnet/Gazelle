@@ -564,7 +564,7 @@ if ($addedClasses) {
 }
 
 if ($changePassword && $Viewer->permitted('users_edit_password')) {
-    $user->updatePassword($_POST['ChangePassword'], '127.0.0.1');
+    $user->updatePassword($_POST['ChangePassword'], '127.0.0.1', 'staff-browser', false);
     (new \Gazelle\User\Session($user))->dropAll();
 }
 

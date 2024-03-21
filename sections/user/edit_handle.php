@@ -123,21 +123,6 @@ if ($user->email() != trim($_POST['email'])) {
     $user->setField('Email', $NewEmail);
 }
 
-$ResetPassword = false;
-if (!empty($_POST['password']) && !empty($_POST['new_pass_1']) && !empty($_POST['new_pass_2'])) {
-    if (!$user->validatePassword($_POST['password'])) {
-        error('You did not enter the correct password.');
-    } else {
-        if ($_POST['password'] == $_POST['new_pass_1']) {
-            error('Your new password cannot be the same as your old password.');
-        } elseif ($_POST['new_pass_1'] !== $_POST['new_pass_2']) {
-            error('You did not enter the same password twice.');
-        }
-        $user->setField('PassHash', Gazelle\UserCreator::hashPassword($_POST['new_pass_1']));
-        $ResetPassword = true;
-    }
-}
-
 $avatar = trim($_POST['avatar']);
 if ($avatar != $user->avatar()) {
     if ($ownProfile && $user->disableAvatar()) {
@@ -148,6 +133,21 @@ if ($avatar != $user->avatar()) {
         error('Your avatar link is too long ($len characters, maximum allowed is 255).');
     }
     $user->setField('Avatar', $avatar);
+}
+
+$ResetPassword = false;
+if (!empty($_POST['password']) && !empty($_POST['new_pass_1']) && !empty($_POST['new_pass_2'])) {
+    if (!$user->validatePassword($_POST['password'])) {
+        error('You did not enter the correct password.');
+    } else {
+        if ($_POST['password'] == $_POST['new_pass_1']) {
+            error('Your new password cannot be the same as your old password.');
+        } elseif ($_POST['new_pass_1'] !== $_POST['new_pass_2']) {
+            error('You did not enter the same password twice.');
+        }
+        $user->updatePassword($_POST['new_pass_1'], $Viewer->ipaddr(), $_SERVER['HTTP_USER_AGENT'], true);
+        $ResetPassword = true;
+    }
 }
 
 $option['DisableGrouping2']    = (!empty($_POST['disablegrouping']) ? 0 : 1);
@@ -242,10 +242,6 @@ foreach ([
     'no-pm-unseeded-upload' => !isset($_POST['notifyonunseededupload']),
 ] as $attr => $state) {
     $user->toggleAttr($attr, $state);
-}
-
-if ($ResetPassword) {
-    $user->recordPasswordChange($Viewer->ipaddr());
 }
 
 $history = new \Gazelle\User\History($user);

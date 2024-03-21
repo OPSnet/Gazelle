@@ -903,24 +903,16 @@ class User extends BaseObject {
         return self::$cache->delete_value(sprintf(self::USER_RECENT_UPLOAD, $this->id));
     }
 
-    public function recordPasswordChange(string $ipaddr): int {
-        self::$db->prepared_query("
-            INSERT INTO users_history_passwords
-                   (UserID, ChangerIP, useragent)
-            VALUES (?,      ?,         ?)
-            ", $this->id, $ipaddr, $_SERVER['HTTP_USER_AGENT']
-        );
-        Irc::sendMessage($this->username(), "Security alert: Your password was changed via $ipaddr with {$_SERVER['HTTP_USER_AGENT']}. Not you? Contact staff ASAP.");
+    protected function notifyPasswordChange(string $ipaddr, string $userAgent): void {
+        Irc::sendMessage($this->username(), "Security alert: Your password was changed via $ipaddr with $userAgent. Not you? Contact staff ASAP.");
         (new Mail())->send($this->email(), 'Password changed information for ' . SITE_NAME,
             self::$twig->render('email/password-change.twig', [
                 'ipaddr'     => $ipaddr,
                 'now'        => date('Y-m-d H:i:s'),
-                'user_agent' => $_SERVER['HTTP_USER_AGENT'],
+                'user_agent' => $userAgent,
                 'username'   => $this->username(),
             ])
         );
-        self::$cache->delete_value('user_pw_count_' . $this->id);
-        return self::$db->affected_rows();
     }
 
     public function remove(): int {
@@ -1203,27 +1195,22 @@ class User extends BaseObject {
         return $success;
     }
 
-    public function updatePassword(#[\SensitiveParameter] string $pw, string $ipaddr): bool {
-        self::$db->begin_transaction();
-        self::$db->prepared_query('
-            UPDATE users_main SET
-                PassHash = ?
-            WHERE ID = ?
-            ', UserCreator::hashPassword($pw), $this->id
-        );
-        if (self::$db->affected_rows() !== 1) {
-            self::$db->rollback();
-            return false;
-        }
+    /**
+     * Set a new user password. Requires calling modify() to persist new password.
+     */
+    public function updatePassword(#[\SensitiveParameter] string $pw, string $ipaddr, string $userAgent, bool $notify): static {
+        $this->setField('PassHash', UserCreator::hashPassword($pw));
         self::$db->prepared_query('
             INSERT INTO users_history_passwords
                    (UserID, ChangerIP, useragent)
             VALUES (?,      ?,         ?)
-            ', $this->id, $ipaddr, $_SERVER['HTTP_USER_AGENT']
+            ', $this->id, $ipaddr, $userAgent
         );
-        self::$db->commit();
-        $this->flush();
-        return true;
+        self::$cache->delete_value('user_pw_count_' . $this->id);
+        if ($notify) {
+            $this->notifyPasswordChange($ipaddr, $userAgent);
+        }
+        return $this;
     }
 
     public function passwordHistory(): array {

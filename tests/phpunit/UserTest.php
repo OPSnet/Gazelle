@@ -142,10 +142,8 @@ class UserTest extends TestCase {
     }
 
     public function testPassword(): void {
-        $userMan = new \Gazelle\Manager\User();
         $password = randomString(30);
-        $_SERVER['HTTP_USER_AGENT'] = 'phpunit';
-        $this->assertTrue($this->user->updatePassword($password, '0.0.0.0'), 'utest-password-modify');
+        $this->user->updatePassword($password, '0.0.0.0', 'test-ua', true)->modify();
         $this->assertTrue($this->user->validatePassword($password), 'utest-password-validate-new');
         $this->assertCount(1, $this->user->passwordHistory(), 'utest-password-history');
         $this->assertEquals(1, $this->user->passwordCount(), 'utest-password-count');

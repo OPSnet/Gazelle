@@ -29,7 +29,9 @@ if (!empty($_REQUEST['password'])) {
             exit;
         } else {
             // set new secret and password.
-            $userToken->user()->updatePassword($_REQUEST['password'], $_SERVER['REMOTE_ADDR']);
+            $userToken->user()
+                ->updatePassword($_REQUEST['password'], $_SERVER['REMOTE_ADDR'], $_SERVER['HTTP_USER_AGENT'], true)
+                ->modify();
             $userToken->user()->logoutEverywhere();
             $success = true;
         }
