@@ -11,7 +11,7 @@
 {{ header('Invites') }}
 <div class="thin">
 <div class="header">
-    <h2>{{ user.id|user_url }} &rsaquo; Invites</h2>
+    <h2>{{ user.id|user_url }} › Invites</h2>
     <div class="linkbox">
         <a href="user.php?action=invitetree{% if not own_profile %}&amp;userid={{ user.id }}{% endif %}" class="brackets">Invite tree</a>
 {% if user.permitted('users_view_invites') %}
@@ -77,7 +77,7 @@
                 <input type="email" name="email" size="40" />
             </div>
         </div>
-    {% if user.permitted('users_invite_notes') %}
+    {% if is_site_inviter or user.permitted('users_invite_notes') %}
         <div class="field_div">
             <div class="label">&nbsp;</div>
             <div class="input">
