@@ -94,6 +94,7 @@ class History extends \Gazelle\BaseUser {
     public function registerNewEmail(
         string $newEmail,
         string $ipaddr,
+        bool $notify,
         \Gazelle\Manager\IPv4 $ipv4,
         \Gazelle\Util\Irc $irc,
         \Gazelle\Util\Mail $mailer
@@ -105,25 +106,27 @@ class History extends \Gazelle\BaseUser {
             ", $this->id(), $newEmail, $ipaddr, $_SERVER['HTTP_USER_AGENT']
         );
         $affected = self::$db->affected_rows();
-        $irc::sendMessage(
-            $this->user->username(),
-            "Security alert: Your email address was changed via $ipaddr with {$_SERVER['HTTP_USER_AGENT']}. Not you? Contact staff ASAP."
-        );
-        if ($ipaddr != "127.0.0.1" && $ipv4->setFilterIpaddr($ipaddr)->userTotal($this->user) == 0) {
+        if ($notify) {
             $irc::sendMessage(
-                IRC_CHAN_STAFF,
-                "Email address for {$this->user->username()} was changed from {$this->user->email()} to $newEmail from unusual address $ipaddr with UA={$_SERVER['HTTP_USER_AGENT']}."
+                $this->user->username(),
+                "Security alert: Your email address was changed via $ipaddr with {$_SERVER['HTTP_USER_AGENT']}. Not you? Contact staff ASAP."
+            );
+            if ($ipv4->setFilterIpaddr($ipaddr)->userTotal($this->user) == 0) {
+                $irc::sendMessage(
+                    IRC_CHAN_STAFF,
+                    "Email address for {$this->user->username()} was changed from {$this->user->email()} to $newEmail from unusual address $ipaddr with UA={$_SERVER['HTTP_USER_AGENT']}."
+                );
+            }
+            $mailer->send($this->user->email(), 'Email address changed information for ' . SITE_NAME,
+                self::$twig->render('email/email-address-change.twig', [
+                    'ipaddr'     => $ipaddr,
+                    'new_email'  => $newEmail,
+                    'now'        => date('Y-m-d H:i:s'),
+                    'user_agent' => $_SERVER['HTTP_USER_AGENT'],
+                    'username'   => $this->user->username(),
+                ])
             );
         }
-        $mailer->send($this->user->email(), 'Email address changed information for ' . SITE_NAME,
-            self::$twig->render('email/email-address-change.twig', [
-                'ipaddr'     => $ipaddr,
-                'new_email'  => $newEmail,
-                'now'        => date('Y-m-d H:i:s'),
-                'user_agent' => $_SERVER['HTTP_USER_AGENT'],
-                'username'   => $this->user->username(),
-            ])
-        );
         return $affected;
     }
 
