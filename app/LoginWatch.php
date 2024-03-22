@@ -3,6 +3,8 @@
 namespace Gazelle;
 
 class LoginWatch extends Base {
+    use Pg;
+
     protected int $id;
     protected int $userId = 0;
 
@@ -33,6 +35,15 @@ class LoginWatch extends Base {
      */
     public function increment(int $userId, string $username): int {
         $this->userId = $userId;
+        $this->pg()->prepared_query("
+            insert into ip_history
+                   (id_user, ip, data_origin)
+            values (?,       ?,  'login-fail')
+            on conflict (id_user, ip, data_origin) do update set
+                total = ip_history.total + 1,
+                seen = tstzrange(lower(ip_history.seen), now())
+            ", $userId, $this->ipaddr
+        );
         $seen = match ($this->userId) {
             0       => false,
             default => (bool)self::$db->scalar("

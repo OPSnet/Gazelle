@@ -7,6 +7,8 @@ use Gazelle\Exception\UserCreatorException;
 use Gazelle\Util\Time;
 
 class UserCreator extends Base {
+    use Pg;
+
     protected bool   $newInstall;
     protected array  $adminComment = [];
     protected array  $email = [];
@@ -165,6 +167,12 @@ class UserCreator extends Base {
         self::$db->prepared_query("
             INSERT INTO user_summary (user_id) VALUES (?)
             ", $this->id
+        );
+        $this->pg()->prepared_query("
+            insert into ip_history
+                   (id_user, ip, data_origin)
+            values (?,       ?,  'registration')
+            ", $this->id, $this->ipaddr
         );
         self::$db->prepared_query("
             INSERT INTO users_history_ips (UserID, IP) VALUES (?, ?)

@@ -8,6 +8,8 @@ namespace Gazelle\Manager;
  */
 
 class IPv4 extends \Gazelle\Base {
+    use \Gazelle\Pg;
+
     final protected const CACHE_KEY = 'ipv4_bans_';
 
     protected string $filterNotes;
@@ -26,6 +28,15 @@ class IPv4 extends \Gazelle\Base {
     }
 
     public function register(\Gazelle\User $user, string $ipv4): int {
+        $this->pg()->prepared_query("
+            insert into ip_history
+                   (id_user, ip, data_origin)
+            values (?,       ?,  'site')
+            on conflict (id_user, ip, data_origin) do update set
+                total = ip_history.total + 1,
+                seen = tstzrange(lower(ip_history.seen), now())
+            ", $user->id(), $ipv4
+        );
         self::$db->prepared_query('
             INSERT INTO users_history_ips
                    (UserID, IP)

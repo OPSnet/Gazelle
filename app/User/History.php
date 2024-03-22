@@ -3,6 +3,8 @@
 namespace Gazelle\User;
 
 class History extends \Gazelle\BaseUser {
+    use \Gazelle\Pg;
+
     public function __construct(
         \Gazelle\User $user,
         protected string $column = 'ip',
@@ -205,7 +207,10 @@ class History extends \Gazelle\BaseUser {
     }
 
     public function resetIp(): int {
-        $n = 0;
+        $n = $this->pg()->prepared_query("
+            delete from ip_history where id_user = ?
+            ", $this->id()
+        );
         self::$db->prepared_query("
             DELETE FROM users_history_ips WHERE UserID = ?
             ", $this->id()

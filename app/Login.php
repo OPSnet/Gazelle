@@ -3,6 +3,8 @@
 namespace Gazelle;
 
 class Login extends Base {
+    use Pg;
+
     final public const NO_ERROR = 0;
     final public const ERR_CREDENTIALS = 1;
     final public const ERR_UNCONFIRMED = 2;
@@ -154,9 +156,27 @@ class Login extends Base {
         if (BLOCK_TOR && !$user->permitted('can_use_tor') && (new Manager\Tor())->isExitNode($this->ipaddr)) {
             $userMan->disableUserList(new Tracker(), [$user->id()], "Logged in via Tor ({$this->ipaddr})", Manager\User::DISABLE_TOR);
             // return a newly disabled instance
+            $this->pg()->prepared_query("
+                insert into ip_history
+                       (id_user, ip, data_origin)
+                values (?,       ?,  'login-fail')
+                on conflict (id_user, ip, data_origin) do update set
+                    total = ip_history.total + 1,
+                    seen = tstzrange(lower(ip_history.seen), now())
+                ", $user->id(), $this->ipaddr
+            );
             return $userMan->findById($user->id());
         }
 
+        $this->pg()->prepared_query("
+            insert into ip_history
+                   (id_user, ip, data_origin)
+            values (?,       ?,  'site')
+            on conflict (id_user, ip, data_origin) do update set
+                total = ip_history.total + 1,
+                seen = tstzrange(lower(ip_history.seen), now())
+            ", $user->id(), $this->ipaddr
+        );
         // We have a user!
         return $user;
     }
