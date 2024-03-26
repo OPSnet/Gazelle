@@ -26,6 +26,7 @@ class Artist extends BaseObject {
 
     public function __construct(
         protected int $id,
+        protected ?int $aliasId = null,
         protected int $revisionId = 0
     ) {}
 
@@ -61,8 +62,7 @@ class Artist extends BaseObject {
             $this->info = $info;
         } else {
             $sql = "
-            SELECT aa.Name           AS name,
-                ag.PrimaryAlias      AS primary_alias_id,
+            SELECT ag.PrimaryAlias   AS primary_alias_id,
                 wa.Image             AS image,
                 wa.body              AS body,
                 ag.VanityHouse       AS showcase,
@@ -72,7 +72,6 @@ class Artist extends BaseObject {
                 dg.sequence,
                 dg.is_preferred
             FROM artists_group AS ag
-            INNER JOIN artists_alias aa ON (ag.PrimaryAlias = aa.AliasID)
             LEFT JOIN artist_discogs AS dg ON (dg.artist_id = ag.ArtistID)
             ";
             if ($this->revisionId) {
@@ -171,6 +170,10 @@ class Artist extends BaseObject {
         return $this;
     }
 
+    public function aliasId(): int {
+        return $this->aliasId ?? $this->primaryAliasId();
+    }
+
     public function artistRole(): array {
         if (!isset($this->artistRole)) {
             $this->loadArtistRole();
@@ -225,7 +228,7 @@ class Artist extends BaseObject {
     }
 
     public function name(): string {
-        return $this->info()['name'];
+        return $this->aliasList()[$this->aliasId()]['name'];
     }
 
     public function primaryAliasId(): int {
@@ -360,12 +363,12 @@ class Artist extends BaseObject {
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
-    public function addAlias(string $name, int $redirect, User $user, Log $logger): int {
+    public function addAlias(string $name, ?int $redirect, User $user, Log $logger): int {
         self::$db->prepared_query("
             INSERT INTO artists_alias
                    (ArtistID, Name, Redirect, UserID)
             VALUES (?,        ?,    ?,        ?)
-            ", $this->id, $name, $redirect, $user->id()
+            ", $this->id, $name, $redirect ?? 0, $user->id()
         );
         $aliasId = self::$db->inserted_id();
         $logger->general(
@@ -385,27 +388,10 @@ class Artist extends BaseObject {
         return empty($alias) ? null : current($alias);  // @phpstan-ignore-line ?phpstan bug should return int|null but returns int|string|null.
     }
 
-    public function clearAliasFromArtist(int $aliasId, User $user, Log $logger): int {
-        $alias = $this->aliasList()[$aliasId];
-        self::$db->prepared_query("
-            UPDATE artists_alias SET
-                ArtistID = ?,
-                Redirect = 0
-            WHERE AliasID = ?
-            ", $this->id, $aliasId
-        );
-        $affected = self::$db->affected_rows();
-        if ($affected) {
-            $this->flush();
-            $logger->general(
-                "Redirection from the alias $aliasId ({$alias['name']}) for the artist {$this->label()} was removed by user {$user->label()}"
-            );
-        }
-        return $affected;
-    }
-
     public function removeAlias(int $aliasId, User $user, Log $logger): int {
-        self::$db->begin_transaction();
+        if ($this->aliasId === $aliasId) {
+            $this->aliasId = $this->primaryAliasId();
+        }
         $alias = $this->aliasList()[$aliasId];
         self::$db->prepared_query("
             DELETE FROM artists_alias WHERE AliasID = ?
@@ -418,7 +404,6 @@ class Artist extends BaseObject {
                 "The alias $aliasId ({$alias['name']}) for the artist {$this->label()}  was removed by user {$user->label()}"
             );
         }
-        self::$db->commit();
         return $affected;
     }
 
@@ -492,7 +477,7 @@ class Artist extends BaseObject {
 
         // go through the list and tie the alias to its non-redirecting ancestor
         $userMan = new Manager\User();
-        $alias = [];
+        $alias = [$this->primaryAliasId() => null];  // ensure primary alias is always the first item
         foreach ($result as $aliasId => $info) {
             if ($info['redirectId']) {
                 $redirect = $map[$aliasId];
@@ -639,6 +624,7 @@ class Artist extends BaseObject {
 
     public function merge(
         Artist          $old,
+        bool            $redirect,
         User            $user,
         Manager\Collage $collMan,
         Manager\Comment $commMan,
@@ -650,6 +636,7 @@ class Artist extends BaseObject {
 
         // Get the ids of the objects that need to be flushed
         $oldId = $old->id();
+        $oldName = $old->name();
         self::$db->prepared_query("
             SELECT UserID FROM bookmarks_artists WHERE ArtistID = ?
             ", $oldId
@@ -743,6 +730,24 @@ class Artist extends BaseObject {
             ", $newId, $oldId
         );
 
+        if ($redirect) {
+            // passing ArtistID because no index on Redirect
+            self::$db->prepared_query("
+                UPDATE artists_alias SET
+                    Redirect = ?
+                WHERE (AliasID = ? OR Redirect = ?) AND ArtistID = ?
+                ", $this->primaryAliasId(), $old->primaryAliasId(), $old->primaryAliasId(), $newId
+            );
+            self::$db->prepared_query("
+                UPDATE torrents_artists SET AliasID = ?  WHERE AliasID = ?
+            ", $this->primaryAliasId(), $old->primaryAliasId()
+            );
+            self::$db->prepared_query("
+                UPDATE requests_artists SET AliasID = ? WHERE AliasID = ?
+            ", $this->primaryAliasId(), $old->primaryAliasId()
+            );
+        }
+
         $commMan->merge('artist', $oldId, $newId);
 
         // Cache clearing
@@ -759,38 +764,102 @@ class Artist extends BaseObject {
         }
 
         // Delete the old artist
-        $oldName = $old->name();
         self::$db->prepared_query("
             DELETE FROM artists_group WHERE ArtistID = ?
             ", $oldId
         );
         $affected = self::$db->affected_rows();
-        $logger->general(
-            "The artist $oldId ($oldName) was made into a non-redirecting alias of artist $newId ({$this->name()}) by user {$user->label()}"
-        );
         self::$db->commit();
+        $logger->general(
+            "The artist $oldId ($oldName) was made into a " . ($redirect ? "" : "non-") . "redirecting alias of artist $newId ({$this->name()}) by user {$user->label()}"
+        );
         self::$cache->delete_value("zz_a_$oldId");
         $this->flush();
         $old->flush();
         return $affected;
     }
 
-    public function rename(int $aliasId, string $name, Manager\Request $reqMan, User $user): int {
-        self::$db->prepared_query("
-            INSERT INTO artists_alias
-                   (ArtistID, Name, UserID, Redirect)
-            VALUES (?,        ?,    ?,      0)
-            ", $this->id, $name, $user->id()
+    /**
+     * rename an alias
+     */
+    public function renameAlias(int $aliasId, string $newName, User $user, Manager\Request $reqMan, Manager\TGroup $tgMan): int {
+        $alias = $this->aliasList()[$aliasId];
+
+        if ($alias['redirect_id']) {
+            // renaming a redirect is not supported, just delete it
+            return $aliasId;
+        }
+
+        $oldName = $alias['name'];
+        if ($oldName === $newName) {
+            return $aliasId;
+        }
+
+        [$newId, $newArtistId, $newRedirect] = self::$db->row("
+            SELECT AliasID, ArtistID, Redirect
+            FROM artists_alias
+            WHERE name = ?
+            ", $newName
         );
-        $newId = self::$db->inserted_id();
-        self::$db->prepared_query("
-            UPDATE artists_alias SET Redirect = ? WHERE AliasID = ?
-            ", $newId, $aliasId
-        );
-        self::$db->prepared_query("
-            UPDATE artists_group SET PrimaryAlias = ? WHERE ArtistID = ?
-            ", $newId, $this->id
-        );
+
+        if ($newArtistId && $newArtistId !== $this->id) {
+            // new name already set for different artist, don't do anything
+            return $aliasId;
+        }
+
+        self::$db->begin_transaction();
+        if (strcasecmp($oldName, $newName) === 0) {
+            // case-correction
+            self::$db->prepared_query("
+                UPDATE artists_alias SET
+                  Name = ?
+                WHERE AliasID = ?
+                ", $newName, $aliasId
+            );
+            $newId = $aliasId;
+        } elseif ($newId) {
+            // change this alias to a redirect to an existing NRA
+            if ($newRedirect) {
+                // target alias has a redirect, clean up aliases first
+                return $aliasId;
+            }
+            self::$db->prepared_query("
+                UPDATE artists_alias SET
+                  Redirect = ?
+                WHERE AliasID = ?
+                ", $newId, $aliasId
+            );
+            // note: pass ArtistID because there is no index on Redirect
+            self::$db->prepared_query("
+                UPDATE artists_alias SET
+                  Redirect = ?
+                WHERE Redirect = ? AND ArtistID = ?
+                ", $newId, $aliasId, $this->id
+            );
+        } else {
+            // create a new alias and degrade the old one into a redirect
+            self::$db->prepared_query("
+                INSERT INTO artists_alias
+                       (ArtistID, Name, UserID, Redirect)
+                VALUES (?,        ?,    ?,      0)
+                ", $this->id, $newName, $user->id()
+            );
+            $newId = self::$db->inserted_id();
+            // note: pass ArtistID because there is no index on Redirect
+            self::$db->prepared_query("
+                UPDATE artists_alias SET
+                  Redirect = ?
+                WHERE (Redirect = ? OR AliasID = ?) AND ArtistID = ?
+                ", $newId, $aliasId, $aliasId, $this->id
+            );
+        }
+
+        if ($aliasId !== $newId && $aliasId === $this->primaryAliasId()) {
+            self::$db->prepared_query("
+                    UPDATE artists_group SET PrimaryAlias = ? WHERE ArtistID = ?
+                    ", $newId, $this->id
+            );
+        }
 
         // process artists in torrents
         self::$db->prepared_query("
@@ -802,7 +871,6 @@ class Artist extends BaseObject {
             UPDATE IGNORE torrents_artists SET AliasID = ?  WHERE AliasID = ?
             ", $newId, $aliasId
         );
-        $tgMan = new Manager\TGroup();
         foreach ($groups as $groupId) {
             $tgMan->findById($groupId)?->refresh();
         }
@@ -817,161 +885,13 @@ class Artist extends BaseObject {
             UPDATE IGNORE requests_artists SET AliasID = ? WHERE AliasID = ?
             ", $newId, $aliasId
         );
+        self::$db->commit();
+
         foreach ($requests as $requestId) {
             $reqMan->findById($requestId)->updateSphinx();
         }
         $this->flush();
         return $newId;
-    }
-
-    public function smartRename(
-        string          $name,
-        Manager\Artist  $artistMan,
-        Manager\Comment $commentMan,
-        Manager\Request $reqMan,
-        Manager\TGroup  $tgMan,
-        User            $user,
-    ): Artist {
-        [$newAliasId, $newArtistId] = self::$db->row("
-            SELECT AliasID, ArtistID
-            FROM artists_alias
-            WHERE name = ?
-            ", $name
-        );
-
-        $oldAliasId = $this->getAlias($this->name());
-        if (!$newAliasId || $newAliasId == $oldAliasId) {
-            // no merge, just rename
-            $this->rename($oldAliasId, $name, $reqMan, $user);
-            return $this;
-        }
-
-        self::$db->begin_transaction();
-        self::$db->prepared_query("
-            UPDATE artists_alias SET
-                Redirect = ?,
-                ArtistID = ?
-            WHERE AliasID = ?
-            ", $newAliasId, $newArtistId, $oldAliasId
-        );
-        self::$db->prepared_query("
-            UPDATE artists_alias SET
-                Redirect = '0'
-            WHERE AliasID = ?
-            ", $newAliasId
-        );
-        if ($this->id == $newArtistId) {
-            self::$db->prepared_query("
-                UPDATE artists_group SET
-                    PrimaryAlias = ?
-                WHERE ArtistID = ?
-                ", $newAliasId, $this->id
-            );
-        } else {
-            self::$db->prepared_query("
-                UPDATE artists_alias SET
-                    ArtistID = ?
-                WHERE ArtistID = ?
-                ", $newArtistId, $this->id
-            );
-            self::$db->prepared_query("
-                DELETE FROM artists_group WHERE ArtistID = ?
-                ", $this->id
-            );
-        }
-
-        self::$db->prepared_query("
-            SELECT GroupID FROM torrents_artists WHERE AliasID = ?
-            ", $oldAliasId
-        );
-        $Groups = self::$db->collect('GroupID', false);
-        self::$db->prepared_query("
-            UPDATE IGNORE torrents_artists SET
-                AliasID = ?,
-                ArtistID = ?
-            WHERE AliasID = ?
-            ", $newAliasId, $newArtistId, $oldAliasId
-        );
-        self::$db->prepared_query("
-            DELETE FROM torrents_artists WHERE AliasID = ?
-            ", $oldAliasId
-        );
-        foreach ($Groups as $id) {
-            $tgMan->findById($id)?->refresh();
-        }
-
-        self::$db->prepared_query("
-            SELECT RequestID FROM requests_artists WHERE AliasID = ?
-            ", $oldAliasId
-        );
-        $Requests = self::$db->collect('RequestID', false);
-        self::$db->prepared_query("
-            UPDATE IGNORE requests_artists SET
-                AliasID = ?,
-                ArtistID = ?
-            WHERE AliasID = ?
-            ", $newAliasId, $newArtistId, $oldAliasId
-        );
-        self::$db->prepared_query("
-            DELETE FROM requests_artists WHERE AliasID = ?
-            ", $oldAliasId
-        );
-        foreach ($Requests as $id) {
-            $reqMan->findById($id)?->updateSphinx();
-        }
-
-        if ($this->id != $newArtistId) {
-            self::$db->prepared_query("
-                SELECT GroupID FROM torrents_artists WHERE ArtistID = ?
-                ", $this->id
-            );
-            $Groups = self::$db->collect('GroupID', false);
-            self::$db->prepared_query("
-                UPDATE IGNORE torrents_artists SET
-                    ArtistID = ?
-                WHERE ArtistID = ?
-                ", $newArtistId, $this->id
-            );
-            self::$db->prepared_query("
-                DELETE FROM torrents_artists WHERE ArtistID = ?
-                ", $this->id
-            );
-            foreach ($Groups as $id) {
-                $tgMan->findById($id)?->refresh();
-            }
-
-            self::$db->prepared_query("
-                SELECT RequestID FROM requests_artists WHERE ArtistID = ?
-                ", $this->id
-            );
-            $Requests = self::$db->collect('RequestID', false);
-            self::$db->prepared_query("
-                UPDATE IGNORE requests_artists SET
-                    ArtistID = ?
-                WHERE ArtistID = ?
-                ", $newArtistId, $this->id
-            );
-            self::$db->prepared_query("
-                DELETE FROM requests_artists WHERE ArtistID = ?
-                ", $this->id
-            );
-            foreach ($Requests as $id) {
-                $reqMan->findById($id)?->updateSphinx();
-            }
-            $commentMan->merge('artist', $this->id, $newArtistId);
-        }
-
-        $new = $artistMan->findById($newArtistId);
-        if ($new) {
-            self::$db->commit();
-        } else {
-            self::$db->rollback();
-            error("Unable to rename artist");
-        }
-
-        $this->flush();
-        $new->flush();
-        return $new;
     }
 
     /**

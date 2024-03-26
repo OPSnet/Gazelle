@@ -77,7 +77,6 @@ ul.collage_images li {
   margin: 0;
   width: 20%;
   list-style: none;
-  list-style-type: none;
 }
 
 ul.collage_images li a {
@@ -209,6 +208,10 @@ div#AddArtists a {
   position: absolute;
   right: 0;
   bottom: 0;
+}
+
+.nra-rename-form {
+  display: inline-block;
 }
 
 div#flip_view_1 {

@@ -134,7 +134,8 @@ class ArtistTest extends TestCase {
         $artist = $manager->findByAliasId($aliasId);
         $this->artistIdList[] = $artist->id();
 
-        $this->assertEquals($artistId, $artist->id(), 'artist-find-by-alias');
+        $this->assertEquals($artistId, $artist->id(), 'artist-find-by-alias-id');
+        $this->assertEquals($artistId, $manager->findByAliasName($artist->name())->id(), 'artist-find-by-alias-name');
         $this->assertEquals(1, $manager->aliasUseTotal($aliasId), 'artist-sole-alias');
         $this->assertCount(0, $manager->tgroupList($aliasId, new Gazelle\Manager\TGroup()), 'artist-no-tgroup');
 
@@ -219,6 +220,7 @@ class ArtistTest extends TestCase {
             1,
             $new->merge(
                 $old,
+                false,
                 $this->user,
                 new Gazelle\Manager\Collage(),
                 new Gazelle\Manager\Comment(),
@@ -290,16 +292,20 @@ class ArtistTest extends TestCase {
         $artist = $manager->findById($artistId);
         $this->artistIdList[] = $artist->id();
 
+        $oldName = $artist->name();
         $rename = $artist->name() . '-rename';
         $this->assertEquals(
             $aliasId + 1,
-            $artist->rename($aliasId, $rename, new Gazelle\Manager\Request(), $this->user),
-            'artist-rename'
+            $artist->renameAlias($aliasId, $rename, $this->user, new Gazelle\Manager\Request(), new Gazelle\Manager\TGroup()),
+            'alias-rename'
         );
-        $this->assertEquals($rename, $artist->name(), 'artist-is-renamed');
+        $this->assertContains($rename, $artist->aliasNameList(), 'alias-is-renamed');
+        $newAlias = array_filter($artist->aliasList(), fn($v) => $v['name'] == $rename)[0];
+        $oldAlias = array_filter($artist->aliasList(), fn($v) => $v['name'] == $oldName)[0];
+        $this->assertEquals($newAlias['alias_id'], $oldAlias['redirect_id'], 'alias-is-redirected');
     }
 
-    public function testArtistRenameHarder(): void {
+    public function testArtistRenamePrimary(): void {
         $manager = new \Gazelle\Manager\Artist();
         [$artistId, $aliasId] = $manager->create('phpunit.' . randomString(12));
         $artist = $manager->findById($artistId);
@@ -342,17 +348,16 @@ class ArtistTest extends TestCase {
         ];
 
         $name = $artist->name() . '-rename2';
-        $renamed = $artist->smartRename(
+        $artist->renameAlias(
+            $artist->primaryAliasId(),
             $name,
-            $manager,
-            $commentMan,
+            $this->user,
             $requestMan,
             new \Gazelle\Manager\TGroup(),
-            $this->user,
         );
-        $this->assertEquals($name, $renamed->name(), 'artist-is-smart-renamed');
+        $this->assertEquals($name, $artist->name(), 'artist-is-smart-renamed');
 
-        $commentPage = new Gazelle\Comment\Artist($renamed->id(), 1, 0);
+        $commentPage = new Gazelle\Comment\Artist($artist->id(), 1, 0);
         $commentPage->load();
         $threadList = $commentPage->threadList(new Gazelle\Manager\User());
         $this->assertCount(1, $threadList, 'artist-renamed-comments');
@@ -360,12 +365,80 @@ class ArtistTest extends TestCase {
 
         $request->flush();
         $idList = $request->artistRole()->idList();
-        $this->assertEquals($renamed->id(), $idList[ARTIST_MAIN][0]['id'], 'artist-renamed-request');
+        $this->assertEquals($artist->id(), $idList[ARTIST_MAIN][0]['id'], 'artist-renamed-request');
         $request->remove();
 
         $this->tgroupList[0]->flush();
         $idList = $this->tgroupList[0]->artistRole()->idList();
-        $this->assertEquals($renamed->id(), $idList[ARTIST_MAIN][0]['id'], 'artist-renamed-tgroup');
+        $this->assertEquals($artist->id(), $idList[ARTIST_MAIN][0]['id'], 'artist-renamed-tgroup');
+    }
+
+    public function testRenameAliasCapchange(): void {
+        $artistMan = new \Gazelle\Manager\Artist();
+        $reqMan = new Gazelle\Manager\Request();
+        $tgMan = new \Gazelle\Manager\TGroup();
+        $logger  = new \Gazelle\Log();
+        $mainName = 'phpunit.' . randomString(12);
+        [$artistId, $mainAliasId] = $artistMan->create($mainName);
+        $artist = $artistMan->findById($artistId);
+        $aliasName = 'phpunit.' . randomString(12) . '-alias';
+        $artist->addAlias($aliasName, null, $this->user, $logger);
+
+        $aliasUpper = strtoupper($aliasName);
+        $aliasId = $artist->getAlias($aliasName);
+        $this->assertNotNull($aliasId, 'artist-rename-capchange-create');
+        $this->assertEquals($aliasId, $artist->renameAlias($aliasId, $aliasUpper, $this->user, $reqMan, $tgMan), 'artist-rename-capchange-1');
+        $this->assertEquals($aliasId, $artist->getAlias($aliasName), 'artist-rename-capchange-2');
+        $this->assertEquals($mainAliasId, $artist->primaryAliasId(), 'artist-rename-capchange-sanity');
+    }
+
+    public function testRenameAliasNraMerge(): void {
+        $artistMan = new \Gazelle\Manager\Artist();
+        $reqMan = new Gazelle\Manager\Request();
+        $tgMan = new \Gazelle\Manager\TGroup();
+        $logger  = new \Gazelle\Log();
+        $mainName = 'phpunit.' . randomString(12);
+        [$artistId, $mainAliasId] = $artistMan->create($mainName);
+        $artist = $artistMan->findById($artistId);
+
+        // create NRA
+        $a1Name = 'phpunit.' . randomString(12) . '-alias';
+        $a1Id = $artist->addAlias($a1Name, null, $this->user, $logger);
+
+        // add RA
+        $raAliasName = $a1Name . '-raalias';
+        $raId = $artist->addAlias($raAliasName, $a1Id, $this->user, $logger);
+
+        // create second NRA
+        $a2Name = 'phpunit.' . randomString(12) . '-alias';
+        $a2Id = $artist->addAlias($a2Name, null, $this->user, $logger);
+
+        $this->assertEquals($a2Id, $artist->renameAlias($a1Id, $a2Name, $this->user, $reqMan, $tgMan), 'artist-rename-nramerge-1');
+
+        $a1 = $artist->aliasList()[$a1Id];
+        $a2 = $artist->aliasList()[$a2Id];
+        $ra = $artist->aliasList()[$raId];
+
+        $this->assertEquals($a2Id, $a1['redirect_id'], 'artist-rename-nramerge-2');
+        $this->assertEquals($a2Id, $ra['redirect_id'], 'artist-rename-nramerge-3');
+        $this->assertEquals($a1Name, $a1['name'], 'artist-rename-nramerge-4');
+        $this->assertEquals($a2Id, $a2['alias_id'], 'artist-rename-nramerge-5');
+        $this->assertEquals($mainAliasId, $artist->primaryAliasId(), 'artist-rename-nramerge-sanity');
+
+        // rename a2 and test redirects
+        $a2NewName = 'phpunit.' . randomString(12) . '-new';
+        $a3Id = $artist->renameAlias($a2Id, $a2NewName, $this->user, $reqMan, $tgMan);
+        $this->assertNotEquals($a2Id, $a3Id, 'artist-rename-nramerge-6');
+
+        $a1 = $artist->aliasList()[$a1Id];
+        $a2 = $artist->aliasList()[$a2Id];
+        $ra = $artist->aliasList()[$raId];
+        $a3 = $artist->aliasList()[$a3Id];
+        $this->assertEquals($a3Id, $a3['alias_id'], 'artist-rename-id-simple');
+        $this->assertEquals($a2NewName, $a3['name'], 'artist-rename-name-simple');
+        $this->assertEquals($a3Id, $a1['redirect_id'], 'artist-rename-redirect-1');
+        $this->assertEquals($a3Id, $a2['redirect_id'], 'artist-rename-redirect-2');
+        $this->assertEquals($a3Id, $ra['redirect_id'], 'artist-rename-redirect-3');
     }
 
     public function testArtistSimilar(): void {

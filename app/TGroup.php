@@ -576,7 +576,7 @@ class TGroup extends BaseObject {
         $roleList = $this->artistRole()->roleList();
         foreach (['dj', 'composer', 'conductor', 'main'] as $role) {
             if (count($roleList[$role])) {
-                return new Artist($roleList[$role][0]['id']);
+                return new Artist($roleList[$role][0]['id'], $roleList[$role][0]['aliasid']);
             }
         }
         return null;

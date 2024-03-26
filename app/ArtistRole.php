@@ -60,7 +60,7 @@ abstract class ArtistRole extends \Gazelle\Base {
      *   'guest'    becomes 'with'
      *   'remixer'  becomes 'remixedBy'
      *   'composer' becomes 'composers'
-     * A role is an array of two keys: ["id" => 801, "name" => "The Group"]
+     * A role is an array of three keys: ["id" => 801, "aliasid" => 768, "name" => "The Group"]
      */
     public function roleListByType(): array {
         $list = $this->idList();

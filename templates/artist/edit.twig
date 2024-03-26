@@ -1,5 +1,5 @@
 {% from 'macro/form.twig' import checked, disabled, selected %}
-{{ header('Edit artist ' ~ artist.name) }}
+{{ header('Edit artist ' ~ artist.name, {'js': 'artist_edit'}) }}
 <div class="thin">
 
 <div class="header">
@@ -83,11 +83,7 @@ please send a Staff PM to ask a moderator to unlock the artist.</p>
 
 {% if viewer.permitted('torrents_edit') %}
 
-<form class="merge_form" name="artist" action="artist.php" method="post">
-<input type="hidden" name="action" value="change_artistid" />
-<input type="hidden" name="auth" value="{{ viewer.auth }}" />
-<input type="hidden" name="artistid" value="{{ artist.id }}" />
-    <table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border artist_edit" id="artist_edit_redirect">
+<table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border artist_edit" id="artist_edit_aliases">
     <tr class="colhead_dark">
         <td colspan="2"><strong>Alias Management</strong></td>
     </tr>
@@ -95,33 +91,56 @@ please send a Staff PM to ask a moderator to unlock the artist.</p>
         <td class="label" style="width: 120px; vertical-align: top;">Existing aliases</td>
         <td>
         <div style="float: right">
-            {{ constant('ICON_BLACK_SQUARE') }} non-redirecting alias (NRA)<br />
-            {{ constant('ICON_WHITE_SQUARE') }} alias of artist or previous NRA<br />
+            ★ primary artist name<br />
+            ■ non-redirecting alias (NRA)<br />
+            □ alias of artist or previous NRA<br />
         </div>
-        <ul class="nobullet">
+        <ul class="nobullet alias-last">
     {% for alias_id, info in artist.aliasInfo %}
-            <li><span title="Non-redirecting alias {{ info.alias_id }}">{{ constant('ICON_BLACK_SQUARE') }} {{ info.name }}</span> <span style="font-size: smaller">({{ info.alias_id }})</span>
-        {%- if info.user %} by <a href="/user.php?id={{ info.user.id}}">{{ info.user.id|user_url }}</a>{% endif -%}
-            &nbsp;<a href="artist.php?action=delete_alias&amp;aliasid={{ info.alias_id }}&amp;auth={{ viewer.auth }}" title="Delete this non-redirecting alias" class="brackets tooltip">X</a>
+            <li>
+                <span title="Non-redirecting alias {{ info.alias_id }}" class="nra-group">
+                    {% if info.alias_id == artist.primaryAliasId %}★{% else %}■{% endif %}
+                    <span id="nra-name-{{ info.alias_id }}" class="nra-name" data-nra-id="{{ info.alias_id }}">{{ info.name }}</span>
+                    <span class="nra-rename-form hidden">
+                        <form class="add_form" name="rename" action="artist.php" method="post" autocomplete="off">
+                            <input type="hidden" name="action" value="rename" />
+                            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+                            <input type="hidden" name="artistid" value="{{ artist.id }}" />
+                            <input type="hidden" name="aliasid" value="{{ info.alias_id }}" />
+                            <input type="text" name="name" value="{{ info.name }}" />
+                            <input type="submit" value="save" />
+                        </form>
+                    </span>
+                    <span style="font-size: smaller">({{ info.alias_id }})</span>
+                    {%- if info.user %} by {{ info.user.id|user_url }}{% endif -%}
+                    &nbsp;
+            {% if not artist.isLocked %}
+                {% if not info.alias and info.alias_id != artist.primaryAliasId %}
+                    <a href="artist.php?action=delete_alias&amp;aliasid={{ info.alias_id }}&amp;auth={{ viewer.auth }}"
+                         title="Delete this non-redirecting alias" class="brackets tooltip artist-alias-remove">X</a>
+                    &nbsp;
+                {% endif %}
+                    <a class="nra-link" href="#">[rename]</a>
+            {% endif %}
+                </span>
+            {% if info.alias %}
+                <ul class="nobullet alias-ra">
+                    {% for alias in info.alias %}
+                    <li><span title="alias {{ alias.alias_id }} of {{ info.name }}">□</span> {{ alias.name }} <span style="font-size: smaller">({{ alias.alias_id }})</span>
+                        {%- if alias.user %} by {{ alias.user.id|user_url }}{% endif -%}
+                        {% if not artist.isLocked -%}
+                            &nbsp;<a href="artist.php?action=delete_alias&amp;aliasid={{ alias.alias_id }}&amp;auth={{ viewer.auth }}" title="Delete this alias" class="brackets tooltip artist-alias-remove">X</a>
+                        {%- endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
             </li>
-        {% for alias in info.alias %}
-            <li><span title="alias {{ alias.alias_id }} of {{ info.name }}">{{ constant('ICON_WHITE_SQUARE') }}</span> {{ alias.name }} <span style="font-size: smaller">({{ alias.alias_id }})</span>
-            {%- if alias.user %} by <a href="/user.php?id={{ alias.user.id}}">{{ alias.user.id|user_url }}</a>{% endif -%}
-            {% if not artist.isLocked -%}
-                &nbsp;<a href="artist.php?action=delete_alias&amp;aliasid={{ alias.alias_id }}&amp;auth={{ viewer.auth }}" title="Delete this alias" class="brackets tooltip">X</a>
-            {%- endif %}
-            </li>
-        {% endfor %}
     {% endfor %}
-        {% if not info.redirectId %}
-                &nbsp;<?= "\xE2\x98\x85" ?>
-        {% endif %}
-            </li>
         </ul>
         </td>
     </tr>
 </table>
-</form>
 
 <form class="add_form" name="aliases" action="artist.php" method="post">
 <input type="hidden" name="action" value="add_alias" />
@@ -163,15 +182,15 @@ please send a Staff PM to ask a moderator to unlock the artist.</p>
 <input type="hidden" name="artistid" value="{{ artist.id }}" />
 <table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border artist_edit" id="artist_edit_redirect">
     <tr>
-        <td class="label" style="width: 120px; vertical-align: top;">Change to non-redirecting alias</td>
+        <td class="label" style="width: 120px; vertical-align: top;">Merge Artists</td>
         <td>
     {% if artist.isLocked %}
-            <p>Modifications are artist.isLocked</p>
+            <p>This artist is locked. Modifications are  not possible.</p>
     {% else %}
-            <p>Merges this artist ("{{ artist.name }}") into the artist specified below (without redirection),
-            so that ("{{ artist.name }}") and its aliases will appear as a non-redirecting alias of the artist entered in the text box below.</p>
-            <p>A non-redirecting alias is used so a release is show with the correct artist artist.name (e.g.
-            <i>Sun Ra All Stars</i> versus <i>Sun Ra and His Astro-Solar-Infinity Arkestra</i>) and all
+            <p>Merges this artist ("{{ artist.name }}") into the artist specified below,
+            so that ("{{ artist.name }}") and its aliases will appear as a (non-)redirecting alias of the artist entered in the text box below.</p>
+            <p>A non-redirecting alias is used so a release is shown with the correct artist (e.g.
+            <i>Sun Ra All Stars</i> or <i>Sun Ra and His Astro-Solar-Infinity Arkestra</i>) and all
             releases are shown on the artist page <i>Sun Ra</i>.</p>
             <br />
             <div style="text-align: center;">
@@ -179,42 +198,28 @@ please send a Staff PM to ask a moderator to unlock the artist.</p>
                 <strong>OR</strong><br />
                 <label for="newartistid">Artist name:</label>&nbsp;<input type="text" id="newartistname" name="newartistname" size="40" value="" />
             </div><br /><br />
+            <fieldset>
+                <legend>Redirection Option</legend>
+                <div>
+                    <input type="radio" id="artist_no_redirect" name="redirect" value="0" checked />
+                    <label for="artist_no_redirect">Non-redirecting alias</label>
+                </div>
+                <div>
+                    <input type="radio" id="artist_redirect" name="redirect" value="1" />
+                    <label for="artist_redirect">Redirecting alias</label>
+                </div>
+            </fieldset>
     {% endif %}
         </td>
     </tr>
     {% if not artist.isLocked %}
     <tr>
         <td>&nbsp;</td>
-        <td><input type="submit" value="Make non-redirecting alias" /></td>
+        <td><input type="submit" value="Merge Artists" /></td>
     </tr>
     {% endif %}
 </table>
 </form>
-
-    {% if artist.isLocked %}
-<h4>Renaming is locked</h4>
-    {% else %}
-<form class="rename_form" name="artist" action="artist.php" method="post">
-<input type="hidden" name="action" value="rename" />
-<input type="hidden" name="auth" value="{{ viewer.auth }}" />
-<input type="hidden" name="artistid" value="{{ artist.id }}" />
-    <table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border artist_edit" id="artist_edit_rename">
-    <tr class="colhead_dark">
-        <td colspan="2"><strong>Rename this artist</strong></td>
-    </tr>
-    <tr>
-        <td class="label" style="width: 120px; vertical-align: top;">New name</td>
-        <td>
-            <input type="text" name="name" size="92" value="{{ artist.name }}" /><br /><br />
-        </td>
-    </tr>
-    <tr>
-        <td>&nbsp;</td>
-        <td><input type="submit" value="Rename Artist" /></td>
-    </tr>
-    </table>
-</form>
-    {% endif %}
 {% endif %}
 <br />
 </div>

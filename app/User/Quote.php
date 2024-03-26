@@ -158,13 +158,10 @@ class Quote extends \Gazelle\BaseUser {
                 f.Name  AS ForumName,
                 t.ID    AS threadId,
                 t.Title AS ForumTitle,
-                aa.Name AS ArtistName,
                 c.Name  AS CollageName
             FROM users_notify_quoted AS q
             LEFT JOIN forums_topics  AS t ON (t.ID = q.PageID)
             LEFT JOIN forums         AS f ON (f.ID = t.ForumID)
-            LEFT JOIN artists_group  AS a ON (a.ArtistID = q.PageID)
-            INNER JOIN artists_alias   aa ON (a.PrimaryAlias = aa.AliasID)
             LEFT JOIN collages       AS c ON (c.ID = q.PageID)
             WHERE " . join(' AND ', $cond) . "
             ORDER BY q.Date DESC
@@ -174,17 +171,19 @@ class Quote extends \Gazelle\BaseUser {
         $quoteList = self::$db->to_array(false, MYSQLI_ASSOC, false);
 
         $page    = [];
-        $postMan = new \Gazelle\Manager\ForumPost();
-        $reqMan  = new \Gazelle\Manager\Request();
-        $tgMan   = new \Gazelle\Manager\TGroup();
+        $artistMan = new \Gazelle\Manager\Artist();
+        $postMan   = new \Gazelle\Manager\ForumPost();
+        $reqMan    = new \Gazelle\Manager\Request();
+        $tgMan     = new \Gazelle\Manager\TGroup();
 
         foreach ($quoteList as $q) {
             $context = [];
             switch ($q['Page']) {
             case 'artist':
+                $artist = $artistMan->findById($q['PageID']);
                 $context = [
                     'jump'  => "artist.php?id={$q['PageID']}&amp;postid={$q['PostID']}#post{$q['PostID']}",
-                    'link'  => sprintf('<a href="artist.php?id=%d">%s</a>', $q['PageID'], display_str($q['ArtistName'])),
+                    'link'  => $artist->link(),
                     'title' => 'Artist',
                 ];
                 break;

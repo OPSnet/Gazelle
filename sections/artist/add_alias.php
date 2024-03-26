@@ -6,67 +6,42 @@ if (!$Viewer->permitted('torrents_edit')) {
 authorize();
 
 $redirectId = (int)$_POST['redirect'];
-$aliasName = Gazelle\Artist::sanitize($_POST['name']);
-if (is_null($aliasName) || empty($aliasName)) {
-    error('You must supply an alias for this artist.');
+$newName = Gazelle\Artist::sanitize($_POST['name']);
+if (empty($newName)) {
+    error('The specified name is empty.');
 }
 
 $artMan = new Gazelle\Manager\Artist();
 $artist = $artMan->findById((int)$_POST['artistid']);
 if (is_null($artist)) {
     error(404);
+} elseif ($artist->isLocked() && !$Viewer->permitted('users_mod')) {
+    error('This artist is locked.');
 }
-$artistId = $artist->id();
 
-/*
- * In the case of foo, who released an album before changing his name to bar and releasing another
- * the field shared to make them appear on the same artist page is the ArtistID
- * 1. For a normal artist, there'll be one entry, with the ArtistID, the same name as the artist and a 0 redirect
- * 2. For Celine Dion (Céline Dion), there's two, same ArtistID, diff Names, one has a redirect to the alias of the first
- * 3. For foo, there's two, same ArtistID, diff names, no redirect
- */
-
-$db = Gazelle\DB::DB();
-$CloneAliasID = false;
-$db->prepared_query("
-    SELECT AliasID, ArtistID, Name, Redirect
-    FROM artists_alias
-    WHERE Name = ?
-    ", $aliasName
-);
-if ($db->has_results()) {
-    while ([$CloneAliasID, $CloneArtistID, $CloneAliasName, $CloneRedirect] = $db->next_record(MYSQLI_NUM, false)) {
-        if (strcasecmp($CloneAliasName, $aliasName) == 0) {
-            $CloneAliasID = (int)$CloneAliasID;
-            $CloneArtistID = (int)$CloneArtistID;
-            break;
-        }
+$otherArtist = $artMan->findByName($newName);
+if ($otherArtist) {
+    if ($otherArtist->id() === $artist->id()) {
+        error("This artist already has the specified alias.");
     }
-    if ($CloneAliasID) {
-        if (!$CloneRedirect) {
-            error('No changes were made as the target alias did not redirect anywhere.');
-        }
-        if ($artistId != $CloneArtistID || $redirectId) {
-            echo $Twig->render('artist/error-alias.twig', [
-                'alias'  => $aliasName,
-                'artist' => $artMan->findById($CloneArtistID),
-            ]);
-            exit;
-        }
-        $artist->clearAliasFromArtist($CloneAliasID, $Viewer, new Gazelle\Log());
+    echo $Twig->render('artist/error-alias.twig', [
+        'alias'  => $newName,
+        'artist' => $otherArtist,
+    ]);
+    exit;
+}
+
+$redirArtist = null;
+if ($redirectId) {
+    $redirArtist = $artMan->findByAliasId($redirectId);
+    if (is_null($redirArtist)) {
+        error("No alias found for desired redirect.");
+    }
+    if ($artist->id() !== $redirArtist->id()) {
+        error("Cannot redirect to the alias of a different artist.");
     }
 }
 
-if (!$CloneAliasID) {
-    if ($redirectId) {
-        $redirectArtist = $artMan->findByRedirectId($redirectId);
-        if (is_null($redirectArtist)) {
-            error('Cannot redirect to a nonexistent artist alias.');
-        } elseif ($artist->id() != $redirectArtist->id()) {
-            error('Redirection must target an alias for the current artist.');
-        }
-    }
-    $artist->addAlias($aliasName, $redirectId, $Viewer, new Gazelle\Log());
-}
+$artist->addAlias($newName, $redirectId, $Viewer, new Gazelle\Log());
 
-header("Location:" . redirectUrl("artist.php?action=edit&artistid={$artistId}"));
+header("Location:" . redirectUrl("artist.php?action=edit&artistid={$artist->id()}"));

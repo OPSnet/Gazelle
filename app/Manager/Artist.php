@@ -75,48 +75,46 @@ class Artist extends \Gazelle\BaseManager {
                 AND wa.RevisionID = ?
             ", $artistId, $revisionId
         );
-        return $id ? new \Gazelle\Artist($id, $revisionId) : null;
+        return $id ? new \Gazelle\Artist($id, null, $revisionId) : null;
     }
 
     public function findByName(string $name): ?\Gazelle\Artist {
-        return $this->findById((int)self::$db->scalar("
-            SELECT ag.ArtistID
-            FROM artists_group ag
-            INNER JOIN artists_alias aa ON (ag.PrimaryAlias = aa.AliasID)
-            WHERE aa.Name = ?
+        [$artistId, $aliasId] = self::$db->row("
+            SELECT ArtistID, AliasID FROM artists_alias WHERE Name = ?
             ", trim($name)
-        ));
+        );
+        return $artistId ? new \Gazelle\Artist($artistId, $aliasId) : null;
     }
 
     public function findByNameAndRevision(string $name, int $revisionId): ?\Gazelle\Artist {
-        $id = (int)self::$db->scalar("
-            SELECT ag.ArtistID
+        [$artistId, $aliasId] = self::$db->row("
+            SELECT ag.ArtistID, aa.AliasID
             FROM artists_group ag
-            INNER JOIN artists_alias aa ON (ag.PrimaryAlias = aa.AliasID)
+            INNER JOIN artists_alias aa ON (ag.ArtistID = aa.ArtistID)
             WHERE aa.Name = ?
                 AND ag.RevisionID = ?
             ", trim($name), $revisionId
         );
-        return $id ? new \Gazelle\Artist($id, $revisionId) : null;
+        return $artistId ? new \Gazelle\Artist($artistId, $aliasId, $revisionId) : null;
     }
 
     public function findByAliasId(int $aliasId): ?\Gazelle\Artist {
-        return $this->findById(
-            (int)self::$db->scalar("
-                SELECT aa.ArtistID
-                FROM artists_alias aa
-                INNER JOIN artists_group ag USING (ArtistID)
-                WHERE aa.AliasID = ?
-                ", $aliasId
-            )
+        [$artistId, $aliasId] = self::$db->row("
+            SELECT ArtistID, AliasID FROM artists_alias WHERE AliasID = ?
+            ", $aliasId
         );
+        return $artistId ? new \Gazelle\Artist($artistId, $aliasId) : null;
     }
 
-    public function findByRedirectId(int $redirectId): ?\Gazelle\Artist {
-        return $this->findById(
+    /**
+     * find artist for alias, with case sensitivity
+     */
+    public function findByAliasName(string $name): ?\Gazelle\Artist {
+        // FIXME: remove LIMIT 1 after DB cleanup
+        return $this->findByAliasId(
             (int)self::$db->scalar("
-                SELECT ArtistID FROM artists_alias WHERE AliasID = ?
-                ", $redirectId
+                SELECT AliasID FROM artists_alias WHERE Name = BINARY ? LIMIT 1
+                ", trim($name)
             )
         );
     }

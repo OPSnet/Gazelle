@@ -10,10 +10,15 @@ $aliasId = (int)$_GET['aliasid'];
 $artist  = $artMan->findByAliasId($aliasId);
 if (is_null($artist)) {
     error(404);
+} elseif ($artist->isLocked() && !$Viewer->permitted('users_mod')) {
+    error('This artist is locked.');
 }
 
-if ($artMan->aliasUseTotal($aliasId) == 1) {
-    error("The alias $aliasId is the only alias for this artist; removing it would cause bad things to happen.");
+if ($artist->primaryAliasId() === $aliasId) {
+    error("You cannot delete the primary alias.");
+}
+if (!empty($artist->aliasInfo()[$aliasId]['alias'])) {
+    error("This alias has redirecting aliases attached.");
 }
 
 $tgroupList = $artMan->tgroupList($aliasId, new Gazelle\Manager\TGroup());

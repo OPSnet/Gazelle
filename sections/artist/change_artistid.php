@@ -9,7 +9,10 @@ $artMan = new Gazelle\Manager\Artist();
 $artist = $artMan->findById((int)($_POST['artistid'] ?? 0));
 if (is_null($artist)) {
     error('Please select a valid artist to change.');
+} elseif ($artist->isLocked() && !$Viewer->permitted('users_mod')) {
+    error('This artist is locked.');
 }
+
 $new = $artMan->findById((int)($_POST['newartistid'] ?? 0));
 if (is_null($new)) {
     $new = $artMan->findByName($_POST['newartistname'] ?? '');
@@ -22,9 +25,12 @@ if ($artist->id() == $new->id()) {
     error('You cannot merge an artist with itself.');
 }
 
+$redirect = (bool)$_POST['redirect'];
+
 if (isset($_POST['confirm'])) {
     $new->merge(
         $artist,
+        $redirect,
         $Viewer,
         new \Gazelle\Manager\Collage(),
         new \Gazelle\Manager\Comment(),
@@ -39,5 +45,6 @@ if (isset($_POST['confirm'])) {
 echo $Twig->render('artist/merge.twig', [
     'artist'   => $artist,
     'new'      => $new,
+    'redirect' => $redirect,
     'viewer'   => $Viewer,
 ]);

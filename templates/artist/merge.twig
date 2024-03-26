@@ -7,10 +7,11 @@
     <input type="hidden" name="auth" value="{{ viewer.auth }}" />
     <input type="hidden" name="artistid" value="{{ artist.id }}" />
     <input type="hidden" name="newartistid" value="{{ new.id }}" />
+    <input type="hidden" name="redirect" value="{{ redirect }}" />
     <input type="hidden" name="confirm" value="1" />
     <div style="text-align: center;">
         <p>Please confirm that you wish to make <a href="artist.php?id={{ artist.id }}">{{ artist.name }} ({{ artist.id }})</a>
-            into a non-redirecting alias of <a href="artist.php?id={{ new.id }}">{{ new.name }} ({{ new.id }})</a>.</p>
+            into a {% if not redirect %}non-{% endif %}redirecting alias of <a href="artist.php?id={{ new.id }}">{{ new.name }} ({{ new.id }})</a>.</p>
         <br />
         <input type="submit" value="Confirm" />
     </div>

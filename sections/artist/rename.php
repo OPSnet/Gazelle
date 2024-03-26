@@ -7,29 +7,39 @@ if (!$Viewer->permitted('torrents_edit')) {
 authorize();
 
 $artistMan = new Gazelle\Manager\Artist();
-$artist = $artistMan->findById((int)$_POST['artistid']);
-if (is_null($artist)) {
+$artist = $artistMan->findById((int)($_POST['artistid'] ?? 0));
+if (is_null($artist) || empty($_POST['aliasid'])) {
     error(404);
+} elseif ($artist->isLocked() && !$Viewer->permitted('users_mod')) {
+    error('This artist is locked.');
 }
-$oldName = $artist->name();
-if (!$artist->getAlias($oldName)) {
-    error('Could not find existing alias ID');
-}
+
+$aliasId = (int)$_POST['aliasid'];
 $newName = Gazelle\Artist::sanitize($_POST['name']);
 if (empty($newName)) {
     error('No new name given.');
+} elseif (!isset($artist->aliasList()[$aliasId])) {
+    error('Could not find existing alias ID');
+} elseif ($artist->aliasList()[$aliasId]['name'] === $newName) {
+    error('The new name is identical to the old name."');
 }
-if ($oldName == $newName) {
-    error('The new name is identical to <a href="artist.php?artistname=' . display_str($oldName) . '">the old name</a>."');
+$oldName = $artist->aliasList()[$aliasId]['name'];
+
+$otherArtist = $artistMan->findByAliasName($newName);
+if (!is_null($otherArtist) && $otherArtist->id() !== $artist->id()) {
+    error("An artist with this alias already exists: {$otherArtist->name()} ({$otherArtist->id()})");
 }
 
-$new = $artist->smartRename(
+$result = $artist->renameAlias(
+    $aliasId,
     $newName,
-    $artistMan,
-    new Gazelle\Manager\Comment(),
+    $Viewer,
     new Gazelle\Manager\Request(),
     new Gazelle\Manager\TGroup(),
-    $Viewer,
 );
 
-header("Location: {$new->location()}");
+if ($result === $aliasId && strcasecmp($newName, $oldName) !== 0) {
+    error("The specified name is already in use.");
+}
+
+header("Location: artist.php?artistid={$artist->id()}&action=edit");

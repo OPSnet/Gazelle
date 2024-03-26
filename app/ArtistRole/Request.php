@@ -82,6 +82,7 @@ class Request extends \Gazelle\ArtistRole {
             SELECT r.artist_role_id,
                 r.slug      AS slug,
                 ra.ArtistID AS artist_id,
+                aa.AliasID  AS alias_id,
                 aa.Name     AS name
             FROM requests_artists AS ra
             INNER JOIN artist_role r ON (r.artist_role_id = ra.Importance)
@@ -96,7 +97,7 @@ class Request extends \Gazelle\ArtistRole {
      * A cryptic representation of the artists grouped by their roles in a
      * release group. All artist roles are present as arrays (no need to see if
      * the key exists).
-     * A role is an array of three keys: ["id" => 801, "name" => "The Group"]
+     * A role is an array of three keys: ["id" => 801, "aliasid" => 768, "name" => "The Group"]
      */
     public function idList(): array {
         if (!isset($this->artistList)) {
@@ -109,8 +110,9 @@ class Request extends \Gazelle\ArtistRole {
                 $list[$roleId] = [];
             }
             $list[$roleId][] = [
-                'id'   => $artist['artist_id'],
-                'name' => $artist['name'],
+                'id'      => $artist['artist_id'],
+                'aliasid' => $artist['alias_id'],
+                'name'    => $artist['name'],
             ];
         }
         return $list;

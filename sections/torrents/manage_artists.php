@@ -30,14 +30,6 @@ foreach ($Artists as $Artist) {
 if (count($CleanArtists) > 0) {
     $db = Gazelle\DB::DB();
     $placeholders = placeholders($ArtistIDs);
-    $db->prepared_query("
-        SELECT aa.ArtistID as ArtistID, aa.Name as Name
-        FROM artists_group ag
-        INNER JOIN artists_alias aa ON (ag.PrimaryAlias = aa.AliasID)
-        WHERE ArtistID IN ($placeholders)
-        ", ...$ArtistIDs
-    );
-    $ArtistNames = $db->to_array('ArtistID', MYSQLI_ASSOC, false);
     if ($_POST['manager_action'] == 'delete') {
         $logger = new Gazelle\Log();
         foreach ($CleanArtists as $Artist) {
@@ -50,7 +42,8 @@ if (count($CleanArtists) > 0) {
                 ", $tgroup->id(), $ArtistID, $Importance
             );
             if ($db->affected_rows()) {
-                $change = "artist $ArtistID ({$ArtistNames[$ArtistID]['Name']}) removed as " . ARTIST_TYPE[$Importance];
+                $artist = new Gazelle\Artist($ArtistID);
+                $change = "artist $ArtistID ({$artist->name()}) removed as " . ARTIST_TYPE[$Importance];
                 $logger->group($tgroup, $Viewer, $change)
                     ->general("$change in group {$tgroup->id()} ({$tgroup->name()}) by user {$Viewer->label()}");
                 $Cache->delete_value("artist_groups_$ArtistID");
@@ -89,9 +82,10 @@ if (count($CleanArtists) > 0) {
             [$Importance, $ArtistID] = $Artist;
             // Don't bother logging artists whose importance hasn't changed
             if ($Importance === $NewImportance) {
-                // continue;
+                continue;
             }
-            $change = "artist $ArtistID ({$ArtistNames[$ArtistID]['Name']}) changed role from "
+            $artist = new Gazelle\Artist($ArtistID);
+            $change = "artist $ArtistID ({$artist->name()}) changed role from "
                 . ARTIST_TYPE[$Importance] . " to " . ARTIST_TYPE[$NewImportance];
             $logger->group($tgroup, $Viewer, $change)
                 ->general("$change in group {$tgroup->id()} ({$tgroup->name()}) by user " . $Viewer->label());
