@@ -144,7 +144,8 @@ class TGroup extends \Gazelle\BaseManager {
             FROM torrents_group AS tg
             INNER JOIN torrents_artists AS ta ON (ta.GroupID = tg.ID)
             INNER JOIN artists_group AS ag ON (ta.ArtistID = ag.ArtistID)
-            WHERE ag.Name          = ?
+            INNER JOIN artists_alias aa ON (ag.PrimaryAlias = aa.AliasID)
+            WHERE aa.Name          = ?
                 AND tg.Name        = ?
                 AND tg.ReleaseType = ?
                 AND tg.Year        = ?

@@ -4,21 +4,18 @@ namespace Gazelle\API;
 
 class Artist extends AbstractAPI {
     public function run() {
-        if (!isset($_GET['artist_id'])) {
+        if (empty($_GET['artist_id'])) {
             json_error('Missing artist id');
         }
 
-        self::$db->prepared_query("
-            SELECT
-                ArtistID,
-                Name
-            FROM
-                artists_group
-            WHERE
-                ArtistID = ?", $_GET['artist_id']);
-        if (!self::$db->has_results()) {
+        $artistMan = new \Gazelle\Manager\Artist();
+        $artist = $artistMan->findById((int)$_GET['artist_id']);
+        if (is_null($artist)) {
             json_error('Artist not found');
         }
-        return self::$db->next_record(MYSQLI_ASSOC, false);
+        return [
+            'ArtistID' => $artist->id(),
+            'Name' => $artist->name(),
+        ];
     }
 }

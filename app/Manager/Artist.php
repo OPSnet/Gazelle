@@ -25,12 +25,12 @@ class Artist extends \Gazelle\BaseManager {
     }
 
     public function create(string $name): array {
+        $db = new \Gazelle\DB();
         self::$db->begin_transaction();
+        $db->relaxConstraints(true);
         self::$db->prepared_query('
-            INSERT INTO artists_group (Name)
-            VALUES (?)
-            ', $name
-        );
+            INSERT INTO artists_group (PrimaryAlias) VALUES (0)
+        ');
         $artistId = self::$db->inserted_id();
 
         self::$db->prepared_query('
@@ -39,6 +39,11 @@ class Artist extends \Gazelle\BaseManager {
             ', $artistId, $name
         );
         $aliasId = self::$db->inserted_id();
+        self::$db->prepared_query('
+            UPDATE artists_group SET PrimaryAlias = ? WHERE ArtistID = ?
+            ', $aliasId, $artistId
+        );
+        $db->relaxConstraints(false);
         self::$db->commit();
 
         self::$cache->increment('stats_artist_count');
@@ -75,17 +80,21 @@ class Artist extends \Gazelle\BaseManager {
 
     public function findByName(string $name): ?\Gazelle\Artist {
         return $this->findById((int)self::$db->scalar("
-            SELECT ArtistID FROM artists_group WHERE Name = ?
+            SELECT ag.ArtistID
+            FROM artists_group ag
+            INNER JOIN artists_alias aa ON (ag.PrimaryAlias = aa.AliasID)
+            WHERE aa.Name = ?
             ", trim($name)
         ));
     }
 
     public function findByNameAndRevision(string $name, int $revisionId): ?\Gazelle\Artist {
         $id = (int)self::$db->scalar("
-            SELECT ArtistID
-            FROM artists_group
-            WHERE Name = ?
-                AND RevisionID = ?
+            SELECT ag.ArtistID
+            FROM artists_group ag
+            INNER JOIN artists_alias aa ON (ag.PrimaryAlias = aa.AliasID)
+            WHERE aa.Name = ?
+                AND ag.RevisionID = ?
             ", trim($name), $revisionId
         );
         return $id ? new \Gazelle\Artist($id, $revisionId) : null;

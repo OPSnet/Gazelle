@@ -253,7 +253,7 @@ class Subscription extends \Gazelle\BaseUser {
                 lr.PostID,
                 null AS ForumID,
                 null AS ForumName,
-                IF(s.Page = 'artist', a.Name, co.Name) AS Name,
+                IF(s.Page = 'artist', aa.Name, co.Name) AS Name,
                 c.ID AS LastPost,
                 c.AddedTime AS LastPostTime,
                 c_lr.Body AS LastReadBody,
@@ -265,6 +265,7 @@ class Subscription extends \Gazelle\BaseUser {
             FROM users_subscriptions_comments AS s
             LEFT JOIN users_comments_last_read AS lr ON (lr.UserID = ? AND lr.Page = s.Page AND lr.PageID = s.PageID)
             LEFT JOIN artists_group AS a ON (s.Page = 'artist' AND a.ArtistID = s.PageID)
+            INNER JOIN artists_alias aa ON (a.PrimaryAlias = aa.AliasID)
             LEFT JOIN collages AS co ON (s.Page = 'collages' AND co.ID = s.PageID)
             LEFT JOIN comments AS c ON
                 (c.ID = (SELECT max(ID) FROM comments WHERE Page = s.Page AND PageID = s.PageID))

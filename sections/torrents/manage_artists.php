@@ -31,8 +31,9 @@ if (count($CleanArtists) > 0) {
     $db = Gazelle\DB::DB();
     $placeholders = placeholders($ArtistIDs);
     $db->prepared_query("
-        SELECT ArtistID, Name
-        FROM artists_group
+        SELECT aa.ArtistID as ArtistID, aa.Name as Name
+        FROM artists_group ag
+        INNER JOIN artists_alias aa ON (ag.PrimaryAlias = aa.AliasID)
         WHERE ArtistID IN ($placeholders)
         ", ...$ArtistIDs
     );

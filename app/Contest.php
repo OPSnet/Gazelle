@@ -247,7 +247,6 @@ class Contest extends BaseObject {
             SELECT ?, LADDER.userid, LADDER.nr, T.ID
             FROM torrents_group TG
             LEFT JOIN torrents_artists TA ON (TA.GroupID = TG.ID)
-            LEFT JOIN artists_group AG ON (AG.ArtistID = TA.ArtistID)
             INNER JOIN torrents T ON (T.GroupID = TG.ID)
             INNER JOIN (
                 $subquery

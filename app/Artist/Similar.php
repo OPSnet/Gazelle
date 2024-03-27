@@ -58,15 +58,16 @@ class Similar extends \Gazelle\Base {
         if ($info === false) {
             self::$db->prepared_query("
                 SELECT s2.ArtistID AS artist_id,
-                    a.Name         AS name,
+                    aa.Name        AS name,
                     ass.Score      AS score,
                     ass.SimilarID  AS similar_id
                 FROM artists_similar AS s1
                 INNER JOIN artists_similar AS s2 ON (s1.SimilarID = s2.SimilarID AND s1.ArtistID != s2.ArtistID)
                 INNER JOIN artists_similar_scores AS ass ON (ass.SimilarID = s1.SimilarID)
                 INNER JOIN artists_group AS a ON (a.ArtistID = s2.ArtistID)
+                INNER JOIN artists_alias aa ON (a.PrimaryAlias = aa.AliasID)
                 WHERE s1.ArtistID = ?
-                ORDER BY ass.Score DESC, a.Name
+                ORDER BY ass.Score DESC, aa.Name
                 LIMIT 30
                 ", $this->id()
             );
@@ -213,12 +214,13 @@ class Similar extends \Gazelle\Base {
         // find the similar artists of this one
         self::$db->prepared_query("
             SELECT s2.ArtistID       AS artist_id,
-                a.Name               AS artist_name,
+                aa.Name              AS artist_name,
                 ass.Score            AS score,
                 count(asv.SimilarID) AS votes
             FROM artists_similar s1
             INNER join artists_similar s2 ON (s1.SimilarID = s2.SimilarID AND s1.ArtistID != s2.ArtistID)
             INNER JOIN artists_group AS a ON (a.ArtistID = s2.ArtistID)
+            INNER JOIN artists_alias aa ON (a.PrimaryAlias = aa.AliasID)
             INNER JOIN artists_similar_scores ass ON (ass.SimilarID = s1.SimilarID)
             INNER JOIN artists_similar_votes asv ON (asv.SimilarID = s1.SimilarID)
             WHERE s1.ArtistID = ?

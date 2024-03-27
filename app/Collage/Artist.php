@@ -9,13 +9,14 @@ class Artist extends AbstractCollage {
     public function load(): int {
         self::$db->prepared_query("
             SELECT ca.ArtistID,
-                ag.Name,
+                aa.Name,
                 coalesce(wa.Image, '') AS Image,
                 ca.UserID,
                 ca.Sort,
                 ca.AddedOn AS created
             FROM collages_artists    AS ca
             INNER JOIN artists_group AS ag USING (ArtistID)
+            INNER JOIN artists_alias    aa ON (ag.PrimaryAlias = aa.AliasID)
             LEFT JOIN wiki_artists   AS wa USING (RevisionID)
             WHERE ca.CollageID = ?
             ORDER BY ca.Sort

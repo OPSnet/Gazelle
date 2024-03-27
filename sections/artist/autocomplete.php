@@ -21,12 +21,13 @@ if ($autoSuggest === false) {
     $db = Gazelle\DB::DB();
     $db->prepared_query("
         SELECT a.ArtistID,
-            a.Name
+            aa.Name
         FROM artists_group AS a
+        INNER JOIN artists_alias AS aa ON (a.PrimaryAlias = aa.AliasID)
         INNER JOIN torrents_artists AS ta ON (ta.ArtistID = a.ArtistID)
         INNER JOIN torrents AS t ON (t.GroupID = ta.GroupID)
         INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
-        WHERE a.Name LIKE ?
+        WHERE aa.Name LIKE ?
         GROUP BY ta.ArtistID
         ORDER BY tls.Snatched DESC
         LIMIT ?",

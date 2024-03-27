@@ -241,11 +241,12 @@ class Bookmark extends \Gazelle\BaseUser {
 
     public function artistList(): array {
         self::$db->prepared_query("
-            SELECT ag.ArtistID, ag.Name
+            SELECT ag.ArtistID, aa.Name
             FROM bookmarks_artists AS ba
             INNER JOIN artists_group AS ag USING (ArtistID)
+            INNER JOIN artists_alias aa ON (ag.PrimaryAlias = aa.AliasID)
             WHERE ba.UserID = ?
-            ORDER BY ag.Name
+            ORDER BY aa.Name
             ", $this->user->id()
         );
         return self::$db->to_pair('ArtistID', 'Name', false);

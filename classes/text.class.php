@@ -344,11 +344,7 @@ class Text {
 
         switch ($info['path'] ?? '') {
             case '/artist.php':
-                $name = Gazelle\DB::DB()->scalar('SELECT Name FROM artists_group WHERE ArtistID = ?',
-                    $args['id'] ?? 0);
-                return $name
-                    ? sprintf('<a href="%s?%s">%s</a>', $info['path'], $info['query'], $name) /** @phpstan-ignore-line */
-                    : null;
+                return (new \Gazelle\Manager\Artist())->findById((int)($args['id'] ?? 0))?->link();
 
             case '/collages.php':
                 return self::bbcodeCollageUrl((int)($args['id'] ?? $args['collageid']), $url);

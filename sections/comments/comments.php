@@ -51,9 +51,9 @@ $TypeLinks = [];
 switch ($Action) {
     case 'artist':
         $Title       = '%s › Artist comments';
-        $table       = 'artists_group AS ag';
+        $table       = 'artists_group ag INNER JOIN artists_alias aa ON (ag.PrimaryAlias = aa.AliasID)';
         $idField     = 'ag.ArtistID';
-        $nameField   = 'ag.Name';
+        $nameField   = 'aa.Name';
         $condition[] = "C.AuthorID = ?";
         $condArgs[]  = $UserID;
         break;

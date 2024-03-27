@@ -432,13 +432,14 @@ class Tag extends \Gazelle\BaseManager {
         self::$db->prepared_query("
             SELECT
                 ag.ArtistID AS artistId,
-                ag.Name     AS artistName,
+                aa.Name     AS artistName,
                 tg.ID       AS torrentGroupId,
                 tg.Name     AS torrentGroupName
             FROM torrents_group        AS tg
             INNER JOIN torrents_tags   AS t  ON (t.GroupID = tg.ID)
             LEFT JOIN torrents_artists AS ta ON (ta.GroupID = tg.ID)
             LEFT JOIN artists_group    AS ag ON (ag.ArtistID = ta.ArtistID)
+            INNER JOIN artists_alias      aa ON (ag.PrimaryAlias = aa.AliasID)
             WHERE t.TagID = ?
             ", $tagId
         );
@@ -455,13 +456,14 @@ class Tag extends \Gazelle\BaseManager {
         self::$db->prepared_query("
             SELECT
                 ag.ArtistID  AS artistId,
-                ag.Name      AS artistName,
+                aa.Name      AS artistName,
                 ra.RequestID AS requestId,
                 r.Title      AS requestName
             FROM requests              AS r
             INNER JOIN requests_tags   AS t  ON (t.RequestID = r.ID)
             LEFT JOIN requests_artists AS ra ON (r.ID = ra.RequestID)
             LEFT JOIN artists_group    AS ag ON (ag.ArtistID = ra.ArtistID)
+            INNER JOIN artists_alias      aa ON (ag.PrimaryAlias = aa.AliasID)
             WHERE t.TagID = ?
             ", $tagId
         );

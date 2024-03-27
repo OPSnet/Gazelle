@@ -158,12 +158,13 @@ class Quote extends \Gazelle\BaseUser {
                 f.Name  AS ForumName,
                 t.ID    AS threadId,
                 t.Title AS ForumTitle,
-                a.Name  AS ArtistName,
+                aa.Name AS ArtistName,
                 c.Name  AS CollageName
             FROM users_notify_quoted AS q
             LEFT JOIN forums_topics  AS t ON (t.ID = q.PageID)
             LEFT JOIN forums         AS f ON (f.ID = t.ForumID)
             LEFT JOIN artists_group  AS a ON (a.ArtistID = q.PageID)
+            INNER JOIN artists_alias   aa ON (a.PrimaryAlias = aa.AliasID)
             LEFT JOIN collages       AS c ON (c.ID = q.PageID)
             WHERE " . join(' AND ', $cond) . "
             ORDER BY q.Date DESC

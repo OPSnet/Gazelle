@@ -61,7 +61,8 @@ class Artist extends BaseObject {
             $this->info = $info;
         } else {
             $sql = "
-            SELECT ag.Name           AS name,
+            SELECT aa.Name           AS name,
+                ag.PrimaryAlias      AS primary_alias_id,
                 wa.Image             AS image,
                 wa.body              AS body,
                 ag.VanityHouse       AS showcase,
@@ -71,6 +72,7 @@ class Artist extends BaseObject {
                 dg.sequence,
                 dg.is_preferred
             FROM artists_group AS ag
+            INNER JOIN artists_alias aa ON (ag.PrimaryAlias = aa.AliasID)
             LEFT JOIN artist_discogs AS dg ON (dg.artist_id = ag.ArtistID)
             ";
             if ($this->revisionId) {
@@ -226,6 +228,10 @@ class Artist extends BaseObject {
         return $this->info()['name'];
     }
 
+    public function primaryAliasId(): int {
+        return $this->info()['primary_alias_id'];
+    }
+
     public function sections(): array {
         if (!isset($this->section)) {
             $this->loadArtistRole();
@@ -369,14 +375,14 @@ class Artist extends BaseObject {
         return $aliasId;
     }
 
-    public function getAlias($name): int {
+    public function getAlias($name): ?int {
         $alias = array_keys(
             array_filter(
                 $this->aliasList(),
                 fn($a) => (strcasecmp($a['name'], $name) == 0)
             )
         );
-        return empty($alias) ? $this->id : current($alias);
+        return empty($alias) ? null : current($alias);  // @phpstan-ignore-line ?phpstan bug should return int|null but returns int|string|null.
     }
 
     public function clearAliasFromArtist(int $aliasId, User $user, Log $logger): int {
@@ -782,8 +788,8 @@ class Artist extends BaseObject {
             ", $newId, $aliasId
         );
         self::$db->prepared_query("
-            UPDATE artists_group SET Name = ? WHERE ArtistID = ?
-            ", $name, $this->id
+            UPDATE artists_group SET PrimaryAlias = ? WHERE ArtistID = ?
+            ", $newId, $this->id
         );
 
         // process artists in torrents
@@ -857,9 +863,9 @@ class Artist extends BaseObject {
         if ($this->id == $newArtistId) {
             self::$db->prepared_query("
                 UPDATE artists_group SET
-                    Name = ?
+                    PrimaryAlias = ?
                 WHERE ArtistID = ?
-                ", $name, $this->id
+                ", $newAliasId, $this->id
             );
         } else {
             self::$db->prepared_query("
@@ -977,12 +983,16 @@ class Artist extends BaseObject {
         $id   = $this->id;
         $name = $this->name();
         $this->flush();
+        $db = new \Gazelle\DB();
 
         self::$db->begin_transaction();
+        $db->relaxConstraints(true);
+        self::$db->prepared_query("DELETE FROM artist_has_attr WHERE artist_id = ?", $id);
         self::$db->prepared_query("DELETE FROM artists_alias WHERE ArtistID = ?", $id);
         self::$db->prepared_query("DELETE FROM artists_group WHERE ArtistID = ?", $id);
         self::$db->prepared_query("DELETE FROM artists_tags WHERE ArtistID = ?", $id);
         self::$db->prepared_query("DELETE FROM wiki_artists WHERE PageID = ?", $id);
+        $db->relaxConstraints(false);
 
         (new \Gazelle\Manager\Comment())->remove('artist', $id);
         $logger->general("Artist $id ($name) was deleted by " . $user->username());

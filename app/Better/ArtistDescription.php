@@ -15,10 +15,11 @@ class ArtistDescription extends AbstractBetter {
         $this->field     = 'a.ArtistID';
         $this->baseQuery = "
             FROM artists_group a
+            INNER JOIN artists_alias aa ON (a.PrimaryAlias = aa.AliasID)
             LEFT JOIN wiki_artists wa USING (RevisionID)
             LEFT JOIN artist_usage au ON (au.artist_id = a.ArtistID)";
 
         $this->where[] = "(wa.Body IS NULL OR wa.Body = '')";
-        $this->orderBy = "ORDER BY coalesce(au.uses, 0) DESC, a.Name ASC";
+        $this->orderBy = "ORDER BY coalesce(au.uses, 0) DESC, aa.Name ASC";
     }
 }

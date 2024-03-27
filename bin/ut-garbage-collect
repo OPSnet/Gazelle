@@ -15,14 +15,16 @@ $db = Gazelle\DB::DB();
 $db->prepared_query("
     DELETE aha
     FROM artists_group ag
+    INNER JOIN artists_alias aa ON (ag.PrimaryAlias = aa.AliasID)
     INNER JOIN artist_has_attr aha ON (aha.artist_id = ag.ArtistID)
-    WHERE ag.Name like 'phpunit.%';
+    WHERE aa.Name like 'phpunit.%';
 ");
 $db->prepared_query("
     DELETE ag, aa
     FROM artists_group ag
+    INNER JOIN artists_alias aa ON (ag.PrimaryAlias = aa.AliasID)
     INNER JOIN artists_alias aa USING (ArtistID)
-    WHERE ag.Name like 'phpunit.%';
+    WHERE aa.Name like 'phpunit.%';
 ");
 $db->prepared_query("
     DELETE FROM bookmarks_artists ba WHERE NOT EXISTS(
