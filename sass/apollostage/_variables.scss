@@ -1,62 +1,110 @@
+// 
+// APOLLOSTAGE THEME 
+// DEFINE THEME COLORS AND ICONS
+
+// define theme colors
+
 $primary-accent-color: #83e4a6;
 $base-background-color: #041813;
 $base-text-color: #b9bdbd;
+$mono-text-color: #bdd;
 
-$userinfo-background-color-1: #1e7683aa;
-$userinfo-background-color-2: #1e7683;
-$userinfo-minor-hover-background-color: #189273;
-$userinfo-minor-color: #23d1a5;
-$userinfo-username-color: #20c098;
-$userinfo-username-hover-background-color: #16866a;
-$userinfo-background-color-1: #22696eaf;
-$userinfo-background-color-2: #22696e;
-
-$table-background-color: #212A2D;
-$secondary-table-background-color: #262e27;
+$table-background-color: #212A2D;						
+$secondary-table-background-color: #262e27;				// also form field in focus
 $form-background-color: #1B2426;
 $a-color: #f0f0f0;
 $a-hover-color: #c7fada;
-$header-background-color: #1a9f7d;
 
-$menu-li-second-child-background-color: #0a3a2e;
-$menu-li-third-child-background-color: #0c4a3b;
-$menu-li-fourth-child-background-color: #0f5b48;
-$menu-li-fifth-child-background-color: #126c56;
-$menu-li-sixth-child-background-color: #157d63;
-$menu-li-seventh-child-background-color: #188e70;
-$menu-li-ninth-child-background-color: #1daf8b;
+// menu bar gradient
+$menu-li-second-child-background-color: #0a3a2e;        // torrents        
+$menu-li-third-child-background-color: #0c4a3b;         // collages   
+$menu-li-fourth-child-background-color: #0f5b48;        // requests        
+$menu-li-fifth-child-background-color: #126c56;         // forums     
+$menu-li-sixth-child-background-color: #157d63;         // irc   
+$header-background-color: #1a9f7d;                      // top10
+$menu-li-seventh-child-background-color: #188e70;       // rules and mobile menu header        
+$menu-li-ninth-child-background-color: #1daf8b;         // wiki  
+$userinfo-username-color: #20c098;                      // username menu ~ closed
+$userinfo-username-hover-background-color: #16866a;     // username menu ~ open       
+$userinfo-minor-color: #23d1a5;                         // VV pulldown menu ~ closed
+$userinfo-minor-hover-background-color: #189273;        // VV pulldown menu ~ open        
+
+// mobile pulldown menu gradient
+
+$userinfo-background-color-1: #0a3a2e;   // mobile pulldown menu gradient 1			
+$userinfo-background-color-2: #22696e;	 // mobile pulldown menu gradient 2
+
+// notification gradient
+
+$gradient-color-1: #0c4a3b;	// usually works well with 'third-child'
+$gradient-color-2: #188e70; // usually works well with 'seventh-child'
+
+// these are GNDN: goes nowhere, does nothing
+
+$menu-background-color-1: #009999;		// noop
+$menu-background-color-2: #008888;		// noop
+
+// formatting colors for page elements
 
 $blockquote-background-color: #33363d;
+$box-background-color: #50505070;
+$box-border-color: #212A2DAA;
 $input-background-color: #252F32;
-
-$span-green-color: #4fb650;
-$span-blue-color: #4f50e9;
-
 $torrent-background-color: #1F282B;
-
 $footer-color: #959a9e;
-
 $input-color: #c6c9c9;
-
 $ratio-red-color: #e85050;
 $ratio-yellow-color: #e3ba65;
+$ratio-green-color: #4fb650;
+$selection-background-color: rgb(105 217 146 / 60%);
+$poll-background-color: rgb(131 228 166 / 10%);
 
-$menu-background-color-1: #0999;
-$menu-background-color-2: #088;
+// overrides these colors when called: why?
 
-$selection-background-color: rgba(105, 217, 146, 0.6);
-$poll-background-color: rgba(131, 228, 166, 0.1);
+$span-green-color: #4fb650; 	
+$span-blue-color: #4f50e9;  	
 
-$unread-icon: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAACVBMVEX///+D5KaD5Ka19X0BAAAAAnRSTlMAAHaTzTgAAAAtSURBVHhefYuhEQAwCMTetvv9Pl2CIfgpoSBwRORiguFKD4dMydeyqlZtrU8A6JMUKeHoG3AAAAAASUVORK5CYII=);
-$unread-locked-icon: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAD1BMVEX///+D5KaD5KaD5KaD5KbCVVhKAAAABHRSTlMAAFZXqn1YHwAAADxJREFUeF6VirERACAIxBxBmYCCERhAOPefyQc8KxtT5fLfHqxgQmyAFAT7Kj2LOZ0iwiXkMeGqyiH1uWz5Fw69ZPQ3OgAAAABJRU5ErkJggg==);
-$unread-sticky-icon: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAG1BMVEWD5Kb///+D5KaD5KaD5KaD5KaD5KaD5KaD5KYbYzDSAAAACHRSTlMAAFFTUl5URdDB1TQAAABISURBVHhehcahEYAwEADBY0AgE4ekDCRlUAKSEp6oKxvmJwLHqqV2lBlgeOPO4V1ZbMCbsmlkRiWDrcdzzVwxRSaAv6j6Te0es5kZ6IK/EdsAAAAASUVORK5CYII=);
-$unread-locked-sticky-icon: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAIVBMVEX///+D5KaD5KaD5KaD5KaD5KaD5KaD5KaD5KaD5KaD5KZyVm+gAAAACnRSTlMAAFZRUlNXVF5FRF9ofwAAAFxJREFUeF49zLEVgCAMBNDQWhmeNlbUdI7gGo7ACI5g5wYGu5vSkPC46r+7vNBI2FgzK3DwjZdowqeNIpyAGFbAG9at49oNjyxiEPvjqLE3OSdHrG0CpJTkaDcjPwJ6HWxMBPutAAAAAElFTkSuQmCC);
+// accent color for upload categories (stripes)
 
-$read-icon: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAACVBMVEX///+Vmp6Vmp6SEiFDAAAAAnRSTlMAAHaTzTgAAAAtSURBVHhefYuhEQAwCMTetvv9Pl2CIfgpoSBwRORiguFKD4dMydeyqlZtrU8A6JMUKeHoG3AAAAAASUVORK5CYII=);
-$read-locked-icon: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAD1BMVEX///+Vmp6Vmp6Vmp6Vmp4sa6RBAAAABHRSTlMAAFZXqn1YHwAAADxJREFUeF6VirERACAIxBxBmYCCERhAOPefyQc8KxtT5fLfHqxgQmyAFAT7Kj2LOZ0iwiXkMeGqyiH1uWz5Fw69ZPQ3OgAAAABJRU5ErkJggg==);
-$read-sticky-icon: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAG1BMVEWVmp7///+Vmp6Vmp6Vmp6Vmp6Vmp6Vmp6Vmp6SPnSpAAAACHRSTlMAAFFTUl5URdDB1TQAAABISURBVHhehcahEYAwEADBY0AgE4ekDCRlUAKSEp6oKxvmJwLHqqV2lBlgeOPO4V1ZbMCbsmlkRiWDrcdzzVwxRSaAv6j6Te0es5kZ6IK/EdsAAAAASUVORK5CYII=);
-$read-locked-sticky-icon: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAIVBMVEX///+Vmp6Vmp6Vmp6Vmp6Vmp6Vmp6Vmp6Vmp6Vmp6Vmp6HnQyEAAAACnRSTlMAAFZRUlNXVF5FRF9ofwAAAFxJREFUeF49zLEVgCAMBNDQWhmeNlbUdI7gGo7ACI5g5wYGu5vSkPC46r+7vNBI2FgzK3DwjZdowqeNIpyAGFbAG9at49oNjyxiEPvjqLE3OSdHrG0CpJTkaDcjPwJ6HWxMBPutAAAAAElFTkSuQmCC);
-/*
-s|url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAIVBMVEX///+D5KaD5KaD5KaD5KaD5KaD5KaD5KaD5KaD5KaD5KZyVm+gAAAACnRSTlMAAFZRUlNXVF5FRF9ofwAAAFxJREFUeF49zLEVgCAMBNDQWhmeNlbUdI7gGo7ACI5g5wYGu5vSkPC46r+7vNBI2FgzK3DwjZdowqeNIpyAGFbAG9at49oNjyxiEPvjqLE3OSdHrG0CpJTkaDcjPwJ6HWxMBPutAAAAAElFTkSuQmCC) center no-repeat|url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAIVBMVEX////FsJvFsJvFsJvFsJvFsJvFsJvFsJvFsJvFsJvFsJtBGALRAAAACnRSTlMAAFZRUlNXVF5FRF9ofwAAAFxJREFUeF49zLEVgCAMBNDQWhmeNlbUdI7gGo7ACI5g5wYGu5vSkPC46r+7vNBI2FgzK3DwjZdowqeNIpyAGFbAG9at49oNjyxiEPvjqLE3OSdHrG0CpJTkaDcjPwJ6HWxMBPutAAAAAElFTkSuQmCC) center no-repeat|Ig
-s|url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAIVBMVEX///+Vmp6Vmp6Vmp6Vmp6Vmp6Vmp6Vmp6Vmp6Vmp6Vmp6HnQyEAAAACnRSTlMAAFZRUlNXVF5FRF9ofwAAAFxJREFUeF49zLEVgCAMBNDQWhmeNlbUdI7gGo7ACI5g5wYGu5vSkPC46r+7vNBI2FgzK3DwjZdowqeNIpyAGFbAG9at49oNjyxiEPvjqLE3OSdHrG0CpJTkaDcjPwJ6HWxMBPutAAAAAElFTkSuQmCC) center no-repeat|url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAIVBMVEX///+UlJSUlJSUlJSUlJSUlJSUlJSUlJSUlJSUlJSUlJQ8L084AAAACnRSTlMAAFZRUlNXVF5FRF9ofwAAAFxJREFUeF49zLEVgCAMBNDQWhmeNlbUdI7gGo7ACI5g5wYGu5vSkPC46r+7vNBI2FgzK3DwjZdowqeNIpyAGFbAG9at49oNjyxiEPvjqLE3OSdHrG0CpJTkaDcjPwJ6HWxMBPutAAAAAElFTkSuQmCC) center no-repeat|Ig
-*/
+$accent-color-cats_music: darkslategray;
+$accent-color-cats_applications: silver;
+$accent-color-cats_audiobooks: cornflowerblue;
+$accent-color-cats_comedy: deepskyblue;
+$accent-color-cats_comics: gold;
+$accent-color-cats_ebooks: chocolate;
+$accent-color-cats_elearningvideos: mediumpurple;
+
+// accent color for tag bubbles
+
+// These can equal "ninth" and "second"
+// or adjust contrast as desired to emphasize/de-emphaszie
+$tag-bubble-background-color: #0a3a2e; 
+$tag-bubble-foreground-color: #1daf8b; 
+
+// Forum icons
+
+$unread-icon: url("https://wally-crunk.github.io/svg/gazelle/document-round.svg");
+$unread-locked-icon: url("https://wally-crunk.github.io/svg/gazelle/lock-round.svg");
+$unread-sticky-icon: url("https://wally-crunk.github.io/svg/gazelle/pin-round.svg");
+$unread-locked-sticky-icon: url("https://wally-crunk.github.io/svg/gazelle/pin-and-lock-round.svg");
+
+$read-icon: url("https://wally-crunk.github.io/svg/gazelle/document.svg");
+$read-locked-icon: url("https://wally-crunk.github.io/svg/gazelle/lock.svg");
+$read-sticky-icon: url("https://wally-crunk.github.io/svg/gazelle/pin.svg");
+$read-locked-sticky-icon: url("https://wally-crunk.github.io/svg/gazelle/pin-and-lock.svg");
+
+// Header Pulldown Menu (hamburger/chevron icon)
+
+$menu-open-state-icon: url("https://wally-crunk.github.io/svg/gazelle/menu.svg");
+$menu-closed-state-icon: url("https://wally-crunk.github.io/svg/gazelle/chevrons-down.svg");
+$mobile-pulldown-icon: url("https://wally-crunk.github.io/svg/gazelle/chevrons-down.svg");
+
+// Used in Header
+
+$site-logo-lockup: url("https://wally-crunk.github.io/svg/orpheus/ops-logo-lockup.svg");
+$site-logo-square: url("https://wally-crunk.github.io/svg/orpheus/ops-classic-loop-dark-trans.svg");
+
+// Used on Mobile
+$number-snatches-icon: url("https://wally-crunk.github.io/svg/gazelle/arrow-loop.svg");
+$number-seeders-icon: url("https://wally-crunk.github.io/svg/gazelle/arrow-up-round.svg");
+$number-leechers-icon: url("https://wally-crunk.github.io/svg/gazelle/arrow-down-round.svg");

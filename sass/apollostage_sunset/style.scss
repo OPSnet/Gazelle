@@ -1,61 +1,88 @@
-@import '../apollostage/variables';
+/* APOLLOSTAGE SUNSET THEME */
+
+// DEFINE THEME COLORS AND ICONS
+
+// import basic colors as a backup:
+
+@import '../apollostage/_variables';
+
+// and override as follows:
+
+// set theme colors
 
 $primary-accent-color: #e69f90;
 $base-background-color: #211f25;
 
-$userinfo-background-color-1: #875e80aa;
-$userinfo-background-color-2: #875e80;
-$userinfo-minor-hover-background-color: #7d809e;
-$userinfo-minor-color: #5c6086;
-$userinfo-username-color: #6c6584;
-$userinfo-username-hover-background-color: #89849d;
-$userinfo-background-color-1: #5c6086af;
-$userinfo-background-color-2: #5c6086;
-
 $table-background-color: #302d34;
 $secondary-table-background-color: #29262d;
+
 $form-background-color: #302d34;
 $a-color: #f4f4f4;
 $a-hover-color: #fad5cd;
-$header-background-color: #ab718d;
 
-$menu-li-second-child-background-color: #ffb0a0;
-$menu-li-third-child-background-color: #ff9e98;
-$menu-li-fourth-child-background-color: #fe8691;
-$menu-li-fifth-child-background-color: #f07c8e;
-$menu-li-sixth-child-background-color: #da7c92;
-$menu-li-seventh-child-background-color: #c47891;
-$menu-li-ninth-child-background-color: #8d6a87;
+// Ten color gradient:
+$menu-li-second-child-background-color: #ffb0a0;     // torrents
+$menu-li-third-child-background-color: #ff9e98;      // collages
+$menu-li-fourth-child-background-color:  #fe8691;    // requests
+$menu-li-fifth-child-background-color:  #f07c8e;     // forums
+$menu-li-sixth-child-background-color: #da7c92;      // irc
+$menu-li-seventh-child-background-color: #c47891;    // top10
+$header-background-color: #ef959c;                   // rules, also mobile menu header
+$menu-li-ninth-child-background-color: #8d6a87;      // wiki
+$userinfo-username-color: #6c6584;                	 // username menu ~ closed
+$userinfo-username-hover-background-color: #89849d;  // username menu ~ open
+$userinfo-minor-color: #5c6086;                      // VV pulldown menu ~ closed
+$userinfo-minor-hover-background-color: #7d809e;     // VV pulldown menu ~ open
+
+// mobile pulldown menu gradient
+
+$userinfo-background-color-1:  #875e80; // mobile pulldown menu gradient 1
+$userinfo-background-color-2:  #ef959c; // mobile pulldown menu gradient 2
+
+// notification gradient
+
+$gradient-color-1: #ff9e98;    // usually works well with 'third-child'
+$gradient-color-2: #c47891;    // usually works well with 'seventh-child'
+
+// these are GNDN: goes nowhere, does nothing
+
+$menu-background-color-1: #880d1e;  // unused
+$menu-background-color-2: #c47891;  // unused
+
+// formatting colors for page elements
 
 $blockquote-background-color: #38363d;
 $input-background-color: #3f3e46;
-
-$span-green-color: #54ba54;
-$span-blue-color: #5454ed;
-
 $torrent-background-color: #38363d;
-
 $footer-color: #a4a4a4;
-
 $input-color: #d1d1d1;
-
 $ratio-red-color: #ed5454;
 $ratio-yellow-color: #e8be69;
+$selection-background-color: rgba(217 130 111 /60%);
+$poll-background-color: rgba(230 159 144 /10%);
 
-$menu-background-color-1: #c4789199;
-$menu-background-color-2: #c47891;
+// overrides these colors when called: for more theme flavor?
 
-$selection-background-color: rgba(217, 130, 111, 0.6);
-$poll-background-color: rgba(230, 159, 144, 0.1);
+$span-green-color: #7ac792;
+$span-blue-color: #5454ed;
 
-$unread-icon: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAACVBMVEX////g4ODg4ODBKPUMAAAAAnRSTlMAAHaTzTgAAAAtSURBVHhefYuhEQAwCMTetvv9Pl2CIfgpoSBwRORiguFKD4dMydeyqlZtrU8A6JMUKeHoG3AAAAAASUVORK5CYII=);
-$unread-locked-icon: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAD1BMVEX////g4ODg4ODg4ODg4OAMRpkCAAAABHRSTlMAAFZXqn1YHwAAADxJREFUeF6VirERACAIxBxBmYCCERhAOPefyQc8KxtT5fLfHqxgQmyAFAT7Kj2LOZ0iwiXkMeGqyiH1uWz5Fw69ZPQ3OgAAAABJRU5ErkJggg==);
-$unread-sticky-icon: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAG1BMVEXg4OD////g4ODg4ODg4ODg4ODg4ODg4ODg4OBQ7+XbAAAACHRSTlMAAFFTUl5URdDB1TQAAABISURBVHhehcahEYAwEADBY0AgE4ekDCRlUAKSEp6oKxvmJwLHqqV2lBlgeOPO4V1ZbMCbsmlkRiWDrcdzzVwxRSaAv6j6Te0es5kZ6IK/EdsAAAAASUVORK5CYII=);
-$unread-locked-sticky-icon: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAIVBMVEX////g4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4OCDOE8QAAAACnRSTlMAAFZRUlNXVF5FRF9ofwAAAFxJREFUeF49zLEVgCAMBNDQWhmeNlbUdI7gGo7ACI5g5wYGu5vSkPC46r+7vNBI2FgzK3DwjZdowqeNIpyAGFbAG9at49oNjyxiEPvjqLE3OSdHrG0CpJTkaDcjPwJ6HWxMBPutAAAAAElFTkSuQmCC);
+// accent color for upload categories (stripes)
 
-$read-icon: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAACVBMVEX///+QkJCQkJBzLNgEAAAAAnRSTlMAAHaTzTgAAAAtSURBVHhefYuhEQAwCMTetvv9Pl2CIfgpoSBwRORiguFKD4dMydeyqlZtrU8A6JMUKeHoG3AAAAAASUVORK5CYII=);
-$read-locked-icon: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAD1BMVEX///+QkJCQkJCQkJCQkJAi+GD7AAAABHRSTlMAAFZXqn1YHwAAADxJREFUeF6VirERACAIxBxBmYCCERhAOPefyQc8KxtT5fLfHqxgQmyAFAT7Kj2LOZ0iwiXkMeGqyiH1uWz5Fw69ZPQ3OgAAAABJRU5ErkJggg==);
-$read-sticky-icon: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAG1BMVEWQkJD///+QkJCQkJCQkJCQkJCQkJCQkJCQkJA3mkjtAAAACHRSTlMAAFFTUl5URdDB1TQAAABISURBVHhehcahEYAwEADBY0AgE4ekDCRlUAKSEp6oKxvmJwLHqqV2lBlgeOPO4V1ZbMCbsmlkRiWDrcdzzVwxRSaAv6j6Te0es5kZ6IK/EdsAAAAASUVORK5CYII=);
-$read-locked-sticky-icon: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAIVBMVEX///+QkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJBBpNmTAAAACnRSTlMAAFZRUlNXVF5FRF9ofwAAAFxJREFUeF49zLEVgCAMBNDQWhmeNlbUdI7gGo7ACI5g5wYGu5vSkPC46r+7vNBI2FgzK3DwjZdowqeNIpyAGFbAG9at49oNjyxiEPvjqLE3OSdHrG0CpJTkaDcjPwJ6HWxMBPutAAAAAElFTkSuQmCC);
+$accent-color-cats_music: #fd6659;
+$accent-color-cats_applications: #f02940;
+$accent-color-cats_audiobooks: #a54873;
+$accent-color-cats_comedy: #8b869c;
+$accent-color-cats_comics: #688187;
+$accent-color-cats_ebooks: #578f9d;
+$accent-color-cats_elearningvideos: #793555;
+
+// accent color for tag bubbles
+
+// These can equal "ninth" and "second"
+// or adjust contrast as desired to emphasize/de-emphaszie
+$tag-bubble-background-color:  #8d6a87;
+$tag-bubble-foreground-color:  #ffb0a0;
 
 @import '../apollostage/_base';
+
+// EOF

@@ -1,0 +1,113 @@
+/* APOLLOSTAGE WAVE THEME */
+
+// DEFINE THEME COLORS AND ICONS
+// import basic colors as a backup:
+
+@import '../apollostage/_variables';
+
+// and override as follows:
+
+// define theme colors with convenience names
+
+$federal-blue: #030864ff;
+$midnight-blue: #1D157Cff;
+$tekhelet: #511EA7ff;
+$grape: #6E23B3ff;
+$french-violet: #8531C5ff;
+$veronica: #9A41DBff;
+$phlox: #BE46FFff;
+$fuchsia: #FF4CFFff;
+$mauve: #FEACFEff;        // unused
+$aqua: #1DF6FD;
+$deepskyblue: #1ED4F5;
+$babyblue: #FA61FA;       // unused
+$magentapink: #f652bb;
+$deepmagenta: #D427D4;
+$darkmagenta: #A802A8;
+$icterine: #FEFE78ff;     
+$delayedyellow: #f9f902;  // unused
+$salmonred: #F97A7F;      // unused
+$menudored: #c30910;      // unused
+$rebeccapurple: rebeccapurple;  // just a reminder
+
+// use theme colors
+
+$primary-accent-color: $deepskyblue;
+$base-background-color: #1d1c1d;
+
+$table-background-color: #2b2a2b;
+$secondary-table-background-color: #242324;
+
+$form-background-color: #2b2a2b;
+$a-color: $aqua;
+$a-hover-color: $icterine;
+
+// Ten color gradient:
+
+$menu-li-second-child-background-color: $federal-blue;   // torrents
+$menu-li-third-child-background-color: $midnight-blue;   // collages
+$menu-li-fourth-child-background-color: $tekhelet;       // requests
+$menu-li-fifth-child-background-color: $grape;           // forums
+$menu-li-sixth-child-background-color: $french-violet;   // irc
+$menu-li-seventh-child-background-color: $veronica;      // top10
+$header-background-color: $phlox;                        // rules, also mobile menu header
+$menu-li-ninth-child-background-color: $fuchsia;         // wiki
+$userinfo-username-color: $deepmagenta;                  // username menu ~ closed
+$userinfo-username-hover-background-color: $magentapink; // username menu ~ open
+$userinfo-minor-color: $darkmagenta;                     // VV pulldown menu ~ closed
+$userinfo-minor-hover-background-color: rebeccapurple;   // VV pulldown menu ~ open
+
+// mobile pulldown menu gradient
+
+$userinfo-background-color-1: $fuchsia;    // mobile pulldown menu gradient 1
+$userinfo-background-color-2: $grape;    // mobile pulldown menu gradient 2
+
+// notification gradient
+
+$gradient-color-1: $midnight-blue;  // usually works well with 'third-child'
+$gradient-color-2: $veronica; // usually works well with 'seventh-child'
+
+// these are GNDN: goes nowhere, does nothing
+
+$menu-background-color-1: #880D1E;  // noop
+$menu-background-color-2: #DD2D4A;  // noop
+
+// formatting colors for page elements
+
+$blockquote-background-color: #323132;
+$input-background-color: #383738;
+$torrent-background-color: #323132;
+$footer-color: #949494;
+$input-color: #c2c2c2;
+$ratio-red-color: #e74e4e;
+$ratio-yellow-color: #e1b661;
+$selection-background-color: rgb(245 40 145 / 60%);
+$poll-background-color: $midnight-blue;
+
+// overrides these colors when called: for more theme flavor?
+
+$span-green-color: #4eb44e;
+$span-blue-color: #4e4ee7;
+
+// accent color for upload categories (stripes)
+
+$accent-color-cats_music: #fd6659;
+$accent-color-cats_applications: #f02940;
+$accent-color-cats_audiobooks: #a54873;
+$accent-color-cats_comedy: #8b869c;
+$accent-color-cats_comics: #688187;
+$accent-color-cats_ebooks: #578f9d;
+$accent-color-cats_elearningvideos: #793555;
+
+// accent color for tag bubbles
+
+// These can equal "ninth" and "second"
+// or adjust contrast as desired to emphasize/de-emphaszie
+$tag-bubble-background-color: $fuchsia; 
+$tag-bubble-foreground-color: $icterine; 
+
+@import '../apollostage/_base';
+
+/* Johnson & Thomas in a Testarossa */
+
+// EOF

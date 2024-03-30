@@ -1,61 +1,91 @@
-@import '../apollostage/variables';
+/* APOLLOSTAGE COFFEE THEME */
+
+// DEFINE THEME COLORS AND ICONS
+
+// import basic colors as a backup:
+
+@import '../apollostage/_variables';
+
+// and override as follows:
+
+// define theme colors
 
 $primary-accent-color: #c5b09b;
 $base-background-color: #1d1c1d;
 
-$userinfo-background-color-1: #734d4588;
-$userinfo-background-color-2: #734d45;
-$userinfo-minor-hover-background-color: #794e49;
-$userinfo-minor-color: #63403c;
-$userinfo-username-color: #66433e;
-$userinfo-username-hover-background-color: #875752;
-$userinfo-background-color-1: #63403caf;
-$userinfo-background-color-2: #63403c;
-
 $table-background-color: #2b2a2b;
 $secondary-table-background-color: #242324;
-$form-background-color: #2b2a2b;
-$a-color: #f4f4f4;
-$a-hover-color: #eedfd1;
-$header-background-color: #6d4942;
 
-$menu-li-second-child-background-color: #8e6354;
-$menu-li-third-child-background-color: #8a6152;
-$menu-li-fourth-child-background-color: #845c4f;
-$menu-li-fifth-child-background-color: #7f574c;
-$menu-li-sixth-child-background-color: #785248;
-$menu-li-seventh-child-background-color: #734d45;
-$menu-li-ninth-child-background-color: #6a4640;
+$form-background-color: #2b2a2b;
+$a-color: #e0d2ce;
+$a-hover-color: #eedfd1;
+$mono-text-color: #D3C0BA;
+
+// Ten color gradient:
+
+$menu-li-second-child-background-color: #926354;    // torrents
+$menu-li-third-child-background-color: #8c5d50;     // collages
+$menu-li-fourth-child-background-color: #85584c;    // requests
+$menu-li-fifth-child-background-color: #7f5247;     // forums
+$menu-li-sixth-child-background-color: #784d43;     // irc
+$menu-li-seventh-child-background-color: #72483f;   // top10
+$header-background-color: #6c423b;                  // rules, also mobile menu header
+$menu-li-ninth-child-background-color: #653d37;     // wiki
+$userinfo-username-color: #5f3833;                  // username menu ~ closed
+$userinfo-username-hover-background-color: #9C6F68; // username menu ~ open
+$userinfo-minor-color: #59332f;                     // VV pulldown menu ~ closed
+$userinfo-minor-hover-background-color: #a1726d;    // VV pulldown menu ~ open
+
+// mobile pulldown menu gradient
+
+$userinfo-background-color-1: #341409;    // mobile pulldown menu gradient 1
+$userinfo-background-color-2: #59332f;    // mobile pulldown menu gradient 2
+
+// notification gradient
+
+$gradient-color-1: #8c5d50;	// usually works well with 'third-child'
+$gradient-color-2: #72483f; // usually works well with 'seventh-child'
+
+// these are GNDN: goes nowhere, does nothing
+
+$menu-background-color-1: #880D1E;  // noop
+$menu-background-color-2: #DD2D4A;  // noop
+
+// formatting colors for page elements
 
 $blockquote-background-color: #323132;
-$input-background-color: #383738;
+$input-background-color: #433C3B;
+$torrent-background-color: #323132;
+$footer-color: #949494;
+$input-color: #c2c2c2;
+$ratio-red-color: #e74e4e;
+$ratio-yellow-color: #e1b661;
+$selection-background-color: rgba(180, 160, 139, 0.6);
+$poll-background-color: rgba(197, 176, 155, 0.1);
+
+// overrides these colors when called: for more theme flavor?
 
 $span-green-color: #4eb44e;
 $span-blue-color: #4e4ee7;
 
-$torrent-background-color: #323132;
+// accent color for upload categories (stripes)
 
-$footer-color: #949494;
+$accent-color-cats_music: #fd6659;
+$accent-color-cats_applications: #f02940;
+$accent-color-cats_audiobooks: #a54873;
+$accent-color-cats_comedy: #8b869c;
+$accent-color-cats_comics: #688187;
+$accent-color-cats_ebooks: #578f9d;
+$accent-color-cats_elearningvideos: #793555;
 
-$input-color: #c2c2c2;
+// accent color for tag bubbles
 
-$ratio-red-color: #e74e4e;
-$ratio-yellow-color: #e1b661;
-
-$menu-background-color-1: #7f574c40;
-$menu-background-color-2: #7f574c;
-
-$selection-background-color: rgba(180, 160, 139, 0.6);
-$poll-background-color: rgba(197, 176, 155, 0.1);
-
-$unread-icon: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAACVBMVEX////FsJvFsJtRjvg0AAAAAnRSTlMAAHaTzTgAAAAtSURBVHhefYuhEQAwCMTetvv9Pl2CIfgpoSBwRORiguFKD4dMydeyqlZtrU8A6JMUKeHoG3AAAAAASUVORK5CYII=);
-$unread-locked-icon: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAD1BMVEX////FsJvFsJvFsJvFsJsZSitiAAAABHRSTlMAAFZXqn1YHwAAADxJREFUeF6VirERACAIxBxBmYCCERhAOPefyQc8KxtT5fLfHqxgQmyAFAT7Kj2LOZ0iwiXkMeGqyiH1uWz5Fw69ZPQ3OgAAAABJRU5ErkJggg==);
-$unread-sticky-icon: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAG1BMVEXFsJv////FsJvFsJvFsJvFsJvFsJvFsJvFsJt4MzxgAAAACHRSTlMAAFFTUl5URdDB1TQAAABISURBVHhehcahEYAwEADBY0AgE4ekDCRlUAKSEp6oKxvmJwLHqqV2lBlgeOPO4V1ZbMCbsmlkRiWDrcdzzVwxRSaAv6j6Te0es5kZ6IK/EdsAAAAASUVORK5CYII=);
-$unread-locked-sticky-icon: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAIVBMVEX////FsJvFsJvFsJvFsJvFsJvFsJvFsJvFsJvFsJvFsJtBGALRAAAACnRSTlMAAFZRUlNXVF5FRF9ofwAAAFxJREFUeF49zLEVgCAMBNDQWhmeNlbUdI7gGo7ACI5g5wYGu5vSkPC46r+7vNBI2FgzK3DwjZdowqeNIpyAGFbAG9at49oNjyxiEPvjqLE3OSdHrG0CpJTkaDcjPwJ6HWxMBPutAAAAAElFTkSuQmCC);
-
-$read-icon: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAACVBMVEX///+UlJSUlJT2VwJEAAAAAnRSTlMAAHaTzTgAAAAtSURBVHhefYuhEQAwCMTetvv9Pl2CIfgpoSBwRORiguFKD4dMydeyqlZtrU8A6JMUKeHoG3AAAAAASUVORK5CYII=);
-$read-locked-icon: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAD1BMVEX///+UlJSUlJSUlJSUlJQwXinZAAAABHRSTlMAAFZXqn1YHwAAADxJREFUeF6VirERACAIxBxBmYCCERhAOPefyQc8KxtT5fLfHqxgQmyAFAT7Kj2LOZ0iwiXkMeGqyiH1uWz5Fw69ZPQ3OgAAAABJRU5ErkJggg==);
-$read-sticky-icon: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAG1BMVEWUlJT///+UlJSUlJSUlJSUlJSUlJSUlJSUlJTf0GgPAAAACHRSTlMAAFFTUl5URdDB1TQAAABISURBVHhehcahEYAwEADBY0AgE4ekDCRlUAKSEp6oKxvmJwLHqqV2lBlgeOPO4V1ZbMCbsmlkRiWDrcdzzVwxRSaAv6j6Te0es5kZ6IK/EdsAAAAASUVORK5CYII=);
-$read-locked-sticky-icon: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAIVBMVEX///+UlJSUlJSUlJSUlJSUlJSUlJSUlJSUlJSUlJSUlJQ8L084AAAACnRSTlMAAFZRUlNXVF5FRF9ofwAAAFxJREFUeF49zLEVgCAMBNDQWhmeNlbUdI7gGo7ACI5g5wYGu5vSkPC46r+7vNBI2FgzK3DwjZdowqeNIpyAGFbAG9at49oNjyxiEPvjqLE3OSdHrG0CpJTkaDcjPwJ6HWxMBPutAAAAAElFTkSuQmCC);
+// These can equal "ninth" and "second"
+// or adjust contrast as desired to emphasize/de-emphaszie
+$tag-bubble-background-color: #422722; 
+$tag-bubble-foreground-color: #8d6653; 
 
 @import '../apollostage/_base';
+
+// EOF
+
