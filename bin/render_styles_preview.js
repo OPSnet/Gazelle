@@ -24,7 +24,7 @@ styleCandidates.forEach((entry) => {
     if (!entry.isDirectory) {
         return;
     }
-    if (!fs.existsSync(join(stylesPath, entry.name, 'images'))) {
+    if (!fs.existsSync(join(stylesPath, entry.name, 'style.css'))) {
         return;
     }
     if (entry.name === 'public') {

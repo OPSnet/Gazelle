@@ -99,11 +99,11 @@ View::show_header('Upload', ['js' => 'upload,validate_upload,valid_tags,musicbra
     </p>
     <table id="dnulist" class="<?= $dnuHide ? 'hidden' : '' ?>">
         <tr class="colhead">
-            <td width="30%"><strong>Name</strong></td>
-            <td><strong>Reason</strong></td>
+            <th width="30%"><strong>Name</strong></th>
+            <th><strong>Reason</strong></th>
         </tr>
-<?php foreach ($dnu->dnuList() as $bad) { ?>
-        <tr>
+<?php foreach ($dnu->dnuList() as $index => $bad) { ?>
+        <tr class="row<?=$index % 2 ? 'b' : 'a'?>">
             <td>
                 <?= Text::full_format($bad['name']) ?>
 <?php   if ($bad['is_new']) { ?>
