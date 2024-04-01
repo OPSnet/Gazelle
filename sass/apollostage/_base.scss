@@ -1,12 +1,12 @@
 /* ################################################################################ */
 /* APOLLOSTAGE THEME */
-/* version 2024 
+/* version 2024
 /* ################################################################################ */
 
 // SASS/SCSS NOTE
 // This is one of three files for the main ApolloStage theme:
 //  - style.scss, _base.scss, _variables.scss
-//  - Reminder, this file is called (imported) by the parent style.scss.
+//  - Reminder, this file is imported by the parent style.scss.
 // For the main ApolloStage theme: 
 //  - Colors & icons are all defined in _variables.scss.
 // For derivative themes:
@@ -19,38 +19,39 @@
 /**/
 /**/
 
-/*  # 2024-03-29 - R.A. (thanks H.E.)*/
-/*  # Fix: mobile menu, category stripes;  Add tag bubbles.
+/*  # 2024-04-01 - Updated by rubric_alert with hawkeye and community feedback. */
+/*  # Fix: mobile menu, category stripes;  
+/*  # Feature: Add SVGs, tag bubbles, italic fonts and more;
 /*  # Chore: Organized and documented the SCSS. */
 /*  For full changelog: see uncompiled SASS file. */
 
 // FULL CHANGELOG:
 //
-//   Fix: Fixed the mobile view (media <480px) with big help from H.E. Mobile
-//     menu includes an animation, and handling to prevent keyboard from opening 
-//     on iPh--e and other mobile devices.
+//   Fix: Fixed the mobile view (media <480px) with big help from hawkeye. Mobile
+//    menu includes an animation, and handling to prevent keyboard from opening 
+//    on iPh--e and other mobile devices.
 //
 //   Feature: Replaced all PNGs in the stylesheet with SVGs. SVGs are currently to
-//     be loaded from the gazelle edge server (or github repo), not encoded inline.
+//    be loaded from the gazelle edge server (or github repo), not encoded inline.
 //
 //   Feature: For SVGs, there is clear separation of 'gazelle' (universal) SVG
-//     images into one directory, and site-specific SVGs (like the site logo).
+//    images into one directory, and site-specific SVGs (like the site logo).
 //
 //   Fix: Messages with 'pre' were overrunning their box. Fixed with wrap.
 //
 //   Fix: Category decorations ~ Different categories (music, applications,
-//     Ebooks) have a colored stripe that was missing on desktop and 'floating'
-//     on collage views. Fixed.
+//    Ebooks) have a colored stripe that was missing on desktop and 'floating'
+//    on collage views. Fixed.
 //
 //   Feature: Tag bubbles ~ tags now appear in roundrects on torrent, collage-listing,
-//     collage-discog and requests pages. Commas are suppressed.  
+//    collage-discog and requests pages. Commas are suppressed.  
 //
 //   Feature: Tag bubbles have a hover effect on torrent, artist-discog, 
-//     collage-listing, and collage-discog pages. (Not available on request pages 
-//     because tags are not clickable on request pages.)  
+//    collage-listing, and collage-discog pages. (Not available on request pages 
+//    because tags are not clickable on request pages.)  
 //
 //   Fix: On mobile, images in private inbox no longer overrun the width,
-//     just like other locations.
+//    just like other locations.
 //
 //   Style: adjusted some colors for clarity. (Apollostage, Coffee and Sunset).
 //
@@ -59,7 +60,7 @@
 //   Feature: specific font for Monospace (not system default).
 //
 //   Format: change log and table of contents and section numbering. (SECTION 1 is 
-//     super long: this CSS doesn't have much structure in Desktop view.)
+//    super long: this CSS doesn't have much structure in Desktop view.)
 //
 //   Feature: theme styling for all notification dialogs.
 //
@@ -83,8 +84,8 @@
 /* ## 0.1 Font loading */
 /* # 1 DESKTOP VIEW */
 /* ## 1.1 Desktop view, handling of all classes */
-/* ## 1.2 Reserved
-/* ## 1.3 Reserved
+/* ## 1.2 Reserved */
+/* ## 1.3 Experimental Fix for Sticky Column Headings */
 /* ## 1.4 Upload Category Decoration Striping */
 /* ## 1.5 Header and menu layout */
 /* ## 1.6 Menu Handling */
@@ -114,12 +115,13 @@
 /* ## 3.13.3 forum headers */
 /* ## 3.14 rules */
 /* ## 3.15 site header */
-/* ## 3.15.1 handling to prevent keyboard opening on iP---e and other mobile devices */
+/* ## 3.15.1 prevent keyboard opening on iP---e and other mobile devices */
 /* ## 3.15.2 mobile menu layout */
 /* ## 3.15.3 searchboxes */
 /* ## 3.15.4 userinfo */
 /* ## 3.15.5 browse links */
 /* ## 3.15.6 checked */
+/* ## 3.16 Handling for sticky table headers on Mobile */
 /* # 4 MISCELLANEOUS
 /* ## 4.1 Changes for Mobile, super small window */
 /* ## 4.2 Tag bubble appearance on widescreen #wideload */
@@ -160,7 +162,7 @@
 /* ## 1.1 BEGIN desktop view, handling of classes */
 
 * {
-     box-sizing: inherit;
+    box-sizing: inherit;
 }
 
 body,
@@ -176,26 +178,26 @@ select,
 textarea,
 .tooltipster-default .tooltipster-content,
  {
-     font-family: 'Open Sans', Noto, 'Noto Sans', Helvetica, Arial, Tahoma, "Microsoft Yahei", sans-serif;
+    font-family: 'Open Sans', Noto, 'Noto Sans', Helvetica, Arial, Tahoma, "Microsoft Yahei", sans-serif;
  }
 
 body {
-     background-color: $base-background-color;
-     box-sizing: border-box;
-     color: $base-text-color;
-     font-size: 12px;
-     line-height: 1.6;
-     margin: 0 8px;
+    background-color: $base-background-color;
+    box-sizing: border-box;
+    color: $base-text-color;
+    font-size: 12px;
+    line-height: 1.6;
+    margin: 0 8px;
 }
 
 pre,code {
-     font-family: "JetBrains Mono", "Cascadia Code", Consolas, "Ubuntu Mono", Monaco, monospace;
-     font-optical-sizing: auto;
-     font-variant-ligatures: no-contextual;
-     font-weight: 200;
-     font-style: normal;
-     font-size: 13px;
-     color: $mono-text-color;
+    font-family: "JetBrains Mono", "Cascadia Code", Consolas, "Ubuntu Mono", Monaco, monospace;
+    font-optical-sizing: auto;
+    font-variant-ligatures: no-contextual;
+    font-weight: 200;
+    font-style: normal;
+    font-size: 12.5px;
+    color: $mono-text-color;
 }
 
 h1,
@@ -204,10 +206,10 @@ h3,
 h4,
 h5,
 h6 {
-     color: #fff;
-     line-height: normal;
-     margin: 8px 0;
-     max-width: 100%;
+    color: #fff;
+    line-height: normal;
+    margin: 8px 0;
+    max-width: 100%;
 }
 
 h1 a,
@@ -216,34 +218,34 @@ h3 a,
 h4 a,
 h5 a,
 h6 a {
-     color: $primary-accent-color;
+    color: $primary-accent-color;
 }
 
 h1,
 h2 {
-     font-size: 23px;
-     font-weight: 600;
+    font-size: 23px;
+    font-weight: 600;
 }
 
 h3,
 h4 {
-     font-size: 18px;
-     font-weight: 600;
+    font-size: 18px;
+    font-weight: 600;
 }
 
 h4,
 h5 {
-     font-size: 16px;
-     font-weight: 400;
+    font-size: 16px;
+    font-weight: 400;
 }
 
 a {
-     color: $a-color;
-     text-decoration: none;
+    color: $a-color;
+    text-decoration: none;
 }
 
 a:hover {
-     color: $a-hover-color;
+    color: $a-hover-color;
 }
 
 a:active,
@@ -256,7 +258,7 @@ select:active,
 select:focus,
 textarea:active,
 textarea:focus {
-     outline: 0;
+    outline: 0;
 }
 
 // 2024 fix -- provide formatting on .box.pad for the [box] tag
@@ -265,10 +267,10 @@ textarea:focus {
 
 .box .box.pad, 
 .main_column .box.pad:not(#reply_box) {
-     background-color: rgb(80 80 80 / 43.9%);
-     border: 2px solid $selection-background-color;
-     margin: 8px;
-     border-radius: 6px;
+    background-color: rgb(80 80 80 / 43.9%);
+    border: 2px solid $selection-background-color;
+    margin: 8px;
+    border-radius: 6px;
 }
 
 #content > .thin,
@@ -276,29 +278,29 @@ textarea:focus {
 .box2,
 .main_column,
 .sidebar {
-     overflow: hidden;
+    overflow: hidden;
 }
 
 .clear::after,
 .profileinfo::before {
-     content: '';
+    content: '';
 }
 
 #menu > ul a,
 .nobr {
-     white-space: nowrap;
+    white-space: nowrap;
 }
 
 #covers .stats .remove,
 .add_bookmark,
 .sidebar {
-     float: right;
+    float: right;
 }
 
 
 #header ul,
 .poll {
-     list-style: none;
+    list-style: none;
 }
 
 .body img,
@@ -307,157 +309,157 @@ textarea:focus {
 .news_post:not(.head) img,
 .profileinfo:not(.head) img,
 .wiki_article img {
-     vertical-align: middle;
+    vertical-align: middle;
 }
 
 svg|a {
-     fill: $a-color;
+    fill: $a-color;
 }
 
 svg|a:hover {
-     fill: $a-hover-color;
+    fill: $a-hover-color;
 }
 
 b,
 strong {
-     color: #fff;
-     font-weight: 600;
+    color: #fff;
+    font-weight: 600;
 }
 
 ol,
 ul {
-     margin: 12px;
-     padding-left: 16px;
+    margin: 12px;
+    padding-left: 16px;
 }
 
 ol.nobullet,
 ul.nobullet {
-     list-style-type: none;
+    list-style-type: none;
 }
 
 li {
-     margin-bottom: 4px;
+    margin-bottom: 4px;
 }
 
 li:last-child {
-     margin-bottom: 0;
+    margin-bottom: 0;
 }
 
 blockquote {
-     background-color: $blockquote-background-color;
-     border: 1px dashed rgb(255 255 255 / 25%);
-     margin: 12px;
-     padding: 12px;
+    background-color: $blockquote-background-color;
+    border: 1px dashed rgb(255 255 255 / 25%);
+    margin: 12px;
+    padding: 12px;
 }
 
 ::selection {
-     background-color: $selection-background-color;
-     color: #fff;
+    background-color: $selection-background-color;
+    color: #fff;
 }
 
 form input {
-     vertical-align: sub;
+    vertical-align: sub;
 }
 
 table,
 table .rowa:nth-child(even),
 table .rowb:nth-child(even) {
-     background-color: $table-background-color;
+    background-color: $table-background-color;
 }
 
 table {
-     border-collapse: collapse;
-     margin: 8px 0;
-     width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0;
+    width: 100%;
 }
 
 table .rowa,
 table .rowb {
-     border-top: 2px solid $secondary-table-background-color;
+    border-top: 2px solid $secondary-table-background-color;
 }
 
 table .rowa:nth-child(odd),
 table .rowb:nth-child(odd) {
-     background-color: $input-background-color;
+    background-color: $input-background-color;
 }
 
 table ul.options_list {
-     margin: 0;
-     padding: 0;
+    margin: 0;
+    padding: 0;
 }
 
 .colhead,
 .colhead_dark {
-     background-color: $input-background-color;
-     line-height: 18px;
+    background-color: $input-background-color;
+    line-height: 18px;
 }
 
 .colhead td,
 .colhead_dark td {
-     padding-bottom: 12px;
-     padding-top: 12px;
+    padding-bottom: 12px;
+    padding-top: 12px;
 }
 
 .colhead td.sign,
 .colhead_dark td.sign {
-     text-align: center !important;
+    text-align: center !important;
 }
 
 .colhead td.sign .tooltip,
 .colhead_dark td.sign .tooltip {
-     display: inline;
-     max-height: 13px;
-     max-width: 13px;
+    display: inline;
+    max-height: 13px;
+    max-width: 13px;
 }
 
 td {
-     padding: 4px 6px;
+    padding: 4px 6px;
 }
 
 td:first-child {
-     padding-left: 12px;
+    padding-left: 12px;
 }
 
 td:last-child {
-     padding-right: 12px;
+    padding-right: 12px;
 }
 
 form {
-     background-color: $form-background-color;
+    background-color: $form-background-color;
 }
 
 form table td.label {
-     color: $footer-color;
-     padding-top: 9px;
-     font-weight: 600;
-     text-align: right;
-     width: 180px;
+    color: $footer-color;
+    padding-top: 9px;
+    font-weight: 600;
+    text-align: right;
+    width: 180px;
 }
 
 button,
 input,
 select,
 textarea {
-     font-size: 12px;
+    font-size: 12px;
 }
 
 button,
 input[type="button"],
 input[type="submit"] {
-     background: linear-gradient($a-color, #b8b8b8);
-     border: none;
-     border-radius: 1.5px;
-     color: $input-background-color;
-     cursor: pointer;
-     font-weight: 600;
-     height: 32px;
-     padding: 0 12px;
+    background: linear-gradient($a-color, #b8b8b8);
+    border: none;
+    border-radius: 1.5px;
+    color: $input-background-color;
+    cursor: pointer;
+    font-weight: 600;
+    height: 32px;
+    padding: 0 12px;
 }
 
 button:active,
 input[type="button"]:active,
 input[type="submit"]:active {
-     background: linear-gradient(#b8b8b8, $a-color);
+    background: linear-gradient(#b8b8b8, $a-color);
 }
 
 input[type="email"],
@@ -466,11 +468,11 @@ input[type="text"],
 input[type="search"],
 select,
 textarea {
-     background: $input-background-color;
-     border: 1px solid rgb(255 255 255 / 8%);
-     color: $input-color;
-     height: 32px;
-     padding: 0 8px;
+    background: $input-background-color;
+    border: 1px solid rgb(255 255 255 / 8%);
+    color: $input-color;
+    height: 32px;
+    padding: 0 8px;
 }
 
 input[type="email"]:focus,
@@ -479,69 +481,69 @@ input[type="text"]:focus,
 input[type="search"]:focus,
 select:focus,
 textarea:focus {
-     border: 1px solid rgb(255 255 255 / 20%);
-     color: $a-color;
+    border: 1px solid rgb(255 255 255 / 20%);
+    color: $a-color;
 }
 
 textarea {
-     min-height: 96px;
-     padding-top: 6px;
-     width: 100%;
+    min-height: 96px;
+    padding-top: 6px;
+    width: 100%;
 }
 
 .body,
 .head,
 .pad {
-     padding: 12px;
+    padding: 12px;
 }
 
 span.size1 {
-     font-size: 0.75em;
+    font-size: 0.75em;
 }
 
 span.size2 {
-     font-size: 1em;
+    font-size: 1em;
 }
 
 span.size3 {
-     font-size: 1.25em;
+    font-size: 1.25em;
 }
 
 span.size4 {
-     font-size: 1.5em;
+    font-size: 1.5em;
 }
 
 span.size5 {
-     font-size: 1.75em;
+    font-size: 1.75em;
 }
 
 span.size6 {
-     font-size: 2em;
+    font-size: 2em;
 }
 
 span.size7 {
-     font-size: 2.25em;
+    font-size: 2.25em;
 }
 
 span.size8 {
-     font-size: 2.5em;
+    font-size: 2.5em;
 }
 
 span.size9 {
-     font-size: 2.75em;
+    font-size: 2.75em;
 }
 
 span.size10 {
-     font-size: 3em;
+    font-size: 3em;
 }
 
 strong.important_text {
-     color: $ratio-red-color;
+    color: $ratio-red-color;
 }
 
 /* used for anything? */
 strong.important_text_alt {
-     color: $ratio-green-color;
+    color: $ratio-green-color;
 }
 
 .error,
@@ -552,7 +554,7 @@ strong.important_text_alt {
 .r02,
 .r03,
 .warning {
-     color: $ratio-red-color;
+    color: $ratio-red-color;
 }
 
 .r04,
@@ -561,7 +563,7 @@ strong.important_text_alt {
 .r07,
 .r08,
 .r09 {
-     color: $ratio-yellow-color;
+    color: $ratio-yellow-color;
 }
 
 .r10,
@@ -569,7 +571,7 @@ strong.important_text_alt {
 .r50,
 .r99,
 .vote_tag_up {
-     color: $ratio-green-color;
+    color: $ratio-green-color;
 }
 
 .small_upvote,
@@ -577,8 +579,8 @@ strong.important_text_alt {
 .vote_album_up,
 .vote_artist_up,
 .vote_tag_up {
-     font-weight: bolder;
-     color: $ratio-green-color;
+    font-weight: bolder;
+    color: $ratio-green-color;
 }
 
 .small_downvote,
@@ -586,125 +588,125 @@ strong.important_text_alt {
 .vote_album_down,
 .vote_artist_down,
 .vote_tag_down {
-     font-weight: bolder;
-     color: $ratio-red-color;
+    font-weight: bolder;
+    color: $ratio-red-color;
 }
 
 #wrapper {
-     align-items: stretch;
-     display: flex;
-     flex-direction: column;
-     margin: auto;
-     max-width: 1020px;
+    align-items: stretch;
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    max-width: 1020px;
 }
 
 .main_column {
-     flex: 3;
+    flex: 3;
 }
 
 .sidebar {
-     flex: 1;
+    flex: 1;
 }
 
 .box,
 .box2 {
-     background-color: $form-background-color;
-     margin-bottom: 8px;
-     margin-top: 8px;
+    background-color: $form-background-color;
+    margin-bottom: 8px;
+    margin-top: 8px;
 }
 
 table.box,
 table.box2 {
-     overflow: auto;
+    overflow: auto;
 }
 
 .head {
-     background-color: $input-background-color;
-     line-height: 18px;
+    background-color: $input-background-color;
+    line-height: 18px;
 }
 
 .min_padding {
-     margin: 0;
-     padding: 0;
+    margin: 0;
+    padding: 0;
 }
 
 .clear::after {
-     display: block;
-     height: 0;
-     visibility: visible;
+    display: block;
+    height: 0;
+    visibility: visible;
 }
 
 .profileinfo::before {
-     clear: both;
-     display: table;
+    clear: both;
+    display: table;
 }
 
 .autocomplete-suggestions {
-     background-color: $a-color;
-     border: none;
-     color: #26282e;
-     margin-top: 4px;
+    background-color: $a-color;
+    border: none;
+    color: #26282e;
+    margin-top: 4px;
 }
 
 .autocomplete-suggestions .autocomplete-suggestion {
-     line-height: 24px;
-     padding: 0 8px;
+    line-height: 24px;
+    padding: 0 8px;
 }
 
 .autocomplete-suggestions .autocomplete-suggestion.autocomplete-selected {
-     background-color: $a-hover-color;
+    background-color: $a-hover-color;
 }
 
 .autocomplete-suggestions .autocomplete-suggestion strong {
-     color: #12a1e3;
+    color: #12a1e3;
 }
 
 .forum_post.forum_unread {
-     border-top: 2px solid $a-hover-color;
+    border-top: 2px solid $a-hover-color;
 }
 
 .forum_post .avatar {
-     padding: 0;
-     width: 150px;
+    padding: 0;
+    width: 150px;
 }
 
 .forum_post .avatar img {
-     display: block;
-     height: auto;
-     max-height: 400px !important;
-     max-width: 150px !important;
-     min-width: 150px;
-     width: auto;
+    display: block;
+    height: auto;
+    max-height: 400px !important;
+    max-width: 150px !important;
+    min-width: 150px;
+    width: auto;
 }
 
 .forum_post .body img,
 .sidebar img {
-     max-width: 100%;
+    max-width: 100%;
 }
 
 @media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
-     .forum_post .body img {
-          max-width: 720px;
-     }
+    .forum_post .body img {
+        max-width: 720px;
+    }
 }
 
 .forum_index h4,
 .forum_list h4 {
-     font-size: 12px;
+    font-size: 12px;
 }
 
 .forum_index h3,
 .forum_list h3 {
-     margin-top: 24px;
+    margin-top: 24px;
 }
 
 .forum_index td[style*='width: 2%'],
 .forum_list td[style*='width: 2%'] {
-     width: 24px !important;
+    width: 24px !important;
 }
 
 .last_read {
-     margin-left: 8px;
+    margin-left: 8px;
 }
 
 .last_read ::before {
@@ -715,330 +717,330 @@ table.box2 {
 
 #userinfo_minor::before,
 .linkbox br {
-     content: '';
+    content: '';
 }
 
 #nav_logchecker {
-     display: block;
+    display: block;
 }
 
 .read {
-     background: $read-icon center no-repeat;
+    background: $read-icon center no-repeat;
 }
 
 .unread {
-     background: $unread-icon center no-repeat;
+    background: $unread-icon center no-repeat;
 }
 
 .read_locked {
-     background: $read-locked-icon center no-repeat;
+    background: $read-locked-icon center no-repeat;
 }
 
 .unread_locked {
-     background: $unread-locked-icon center no-repeat;
+    background: $unread-locked-icon center no-repeat;
 }
 
 .read_sticky {
-     background: $read-sticky-icon center no-repeat;
+    background: $read-sticky-icon center no-repeat;
 }
 
 .unread_sticky {
-     background: $unread-sticky-icon center no-repeat;
+    background: $unread-sticky-icon center no-repeat;
 }
 
 .read_locked_sticky {
-     background: $read-locked-sticky-icon center no-repeat;
+    background: $read-locked-sticky-icon center no-repeat;
 }
 
 .unread_locked_sticky {
-     background: $unread-locked-sticky-icon center no-repeat;
+    background: $unread-locked-sticky-icon center no-repeat;
 }
 
 #header,
 #userinfo {
-     position: relative;
+    position: relative;
 }
 
 #header ul {
-     margin: 0;
-     padding: 0;
+    margin: 0;
+    padding: 0;
 }
 
 #header li {
-     margin: 0;
+    margin: 0;
 }
 
 #logo {
-     box-sizing: content-box;
-     height: 42px;
-     padding: 24px 8px 16px;
-     width: 200px;
+    box-sizing: content-box;
+    height: 42px;
+    padding: 24px 8px 16px;
+    width: 200px;
 }
 
 /* main logo during desktop view */
 #logo a {
-     background: $site-logo-lockup right no-repeat;
+    background: $site-logo-lockup right no-repeat;
  }
 
 #logo > a {
-     background-size: 200px;
-     display: block;
-     height: 100%;
-     margin-top: 0;
+    background-size: 200px;
+    display: block;
+    height: 100%;
+    margin-top: 0;
 }
 
 #menu > ul {
-     display: flex;
-     display: -ms-flexbox;
-     -ms-flex-flow: row nowrap;
-     flex-flow: row nowrap;
-     font-size: 13px;
-     overflow: hidden;
-     width: calc(100% - 149px);
+    display: flex;
+    display: -ms-flexbox;
+    -ms-flex-flow: row nowrap;
+    flex-flow: row nowrap;
+    font-size: 13px;
+    overflow: hidden;
+    width: calc(100% - 149px);
 }
 
 #menu > ul li {
-     -ms-flex: 1 1 auto;
-     flex: 1 1 auto;
+    -ms-flex: 1 1 auto;
+    flex: 1 1 auto;
 }
 
 #menu > ul a {
-     display: block;
-     height: 100%;
-     line-height: 50px;
-     text-align: center;
+    display: block;
+    height: 100%;
+    line-height: 50px;
+    text-align: center;
 }
 
 #menu > ul a:hover,
 #userinfo_minor:hover a:hover,
 #userinfo_username:hover a:hover {
-     background-color: $a-hover-color;
+    background-color: $a-hover-color;
 }
 
 #nav_index {
-     display: none;
+    display: none;
 }
 
 #userinfo_minor:hover a,
 #userinfo_username:hover a {
-     display: block;
+    display: block;
 }
 
 #userinfo_username #nav_userinfo > a {
-     display: block;
-     font-size: 13px;
-     line-height: 50px;
-     overflow: hidden;
-     text-align: center;
-     text-overflow: ellipsis;
-     white-space: nowrap;
-     width: 100px;
+    display: block;
+    font-size: 13px;
+    line-height: 50px;
+    overflow: hidden;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100px;
 }
 
 .linkbox,
 .linkbox .center {
-     text-align: right;
+    text-align: right;
 }
 
 #userinfo_major > li,
 #userinfo_stats > li,
 .linkbox .brackets {
-     margin-left: 8px;
+    margin-left: 8px;
 }
 
 #userinfo_major,
 #userinfo_stats {
-     display: flex;
-     display: -ms-flexbox;
-     -ms-flex-flow: row nowrap;
-     flex-flow: row nowrap;
-     position: absolute;
-     right: 8px;
+    display: flex;
+    display: -ms-flexbox;
+    -ms-flex-flow: row nowrap;
+    flex-flow: row nowrap;
+    position: absolute;
+    right: 8px;
 }
 
 #userinfo_major {
-     font-size: 13px;
-     right: 41px;
-     top: -53px;
+    font-size: 13px;
+    right: 41px;
+    top: -53px;
 }
 
 #userinfo_stats {
-     font-size: 13px;
-     top: -31px;
+    font-size: 13px;
+    top: -31px;
 }
 
 #searchbars > ul {
-     align-items: center;
-     background-color: $input-background-color;
-     display: flex;
-     display: -ms-flexbox;
-     -ms-flex-align: center;
-     height: 50px;
-     padding: 0 9px;
+    align-items: center;
+    background-color: $input-background-color;
+    display: flex;
+    display: -ms-flexbox;
+    -ms-flex-align: center;
+    height: 50px;
+    padding: 0 9px;
 }
 
 #searchbars > ul li {
-     -ms-flex: 1 1 auto;
-     flex: 1 1 auto;
-     margin-right: 9px;
+    -ms-flex: 1 1 auto;
+    flex: 1 1 auto;
+    margin-right: 9px;
 }
 
 #searchbars > ul li:last-child {
-     margin-right: 0;
+    margin-right: 0;
 }
 
 #searchbars > ul input {
-     background-color: $form-background-color;
-     width: 100%;
+    background-color: $form-background-color;
+    width: 100%;
 }
 
 #menu li:nth-child(2) {
-     background-color: $menu-li-second-child-background-color;
+    background-color: $menu-li-second-child-background-color;
 }
 
 #menu li:nth-child(3) {
-     background-color: $menu-li-third-child-background-color;
+    background-color: $menu-li-third-child-background-color;
 }
 
 #menu li:nth-child(4) {
-     background-color: $menu-li-fourth-child-background-color;
+    background-color: $menu-li-fourth-child-background-color;
 }
 
 #menu li:nth-child(5) {
-     background-color: $menu-li-fifth-child-background-color;
+    background-color: $menu-li-fifth-child-background-color;
 }
 
 #menu li:nth-child(6) {
-     background-color: $menu-li-sixth-child-background-color;
+    background-color: $menu-li-sixth-child-background-color;
 }
 
 #menu li:nth-child(7) {
-     background-color: $menu-li-seventh-child-background-color;
+    background-color: $menu-li-seventh-child-background-color;
 }
 
 #menu li:nth-child(8) {
-     background-color: $header-background-color;
+    background-color: $header-background-color;
 }
 
 #menu li:nth-child(9) {
-     background-color: $menu-li-ninth-child-background-color;
+    background-color: $menu-li-ninth-child-background-color;
 }
 
 #userinfo_username {
-     background-color: $userinfo-username-color;
-     right: 50px;
+    background-color: $userinfo-username-color;
+    right: 50px;
 }
 
 #menu {
-     border-radius: 5px 5px 0 0;
-     overflow: hidden;
+    border-radius: 5px 5px 0 0;
+    overflow: hidden;
 }
 
 .linkbox br {
-     display: block;
-     line-height: 4px;
+    display: block;
+    line-height: 4px;
 }
 
 .linkbox > strong {
-     color: $primary-accent-color;
+    color: $primary-accent-color;
 }
 
 #footer,
 .alertbar {
-     text-align: center;
+    text-align: center;
 }
 
 .linkbox .brackets::after,
 .linkbox .brackets::before {
-     display: none;
+    display: none;
 }
 
 .thin > .header {
-     display: flex;
-     display: -ms-flexbox;
-     -ms-flex-flow: row wrap;
-     flex-flow: row wrap;
-     width: 100%;
+    display: flex;
+    display: -ms-flexbox;
+    -ms-flex-flow: row wrap;
+    flex-flow: row wrap;
+    width: 100%;
 }
 
 #covers .cover_seperator,
 #noty_bottomRight_layout_container .brackets::after,
 #noty_bottomRight_layout_container .brackets::before {
-     display: none;
+    display: none;
 }
 
 .thin > .header h1,
 .thin > .header h2,
 .thin > .header h3 {
-     -ms-flex: 1 0 auto;
-     flex: 1 0 auto;
+    -ms-flex: 1 0 auto;
+    flex: 1 0 auto;
 }
 
 .thin > .header .linkbox {
-     align-self: flex-end;
-     flex: 1 0 auto;
-     -ms-flex: 1 0 auto;
-     -ms-flex-item-align: end;
-     margin-top: 8px;
+    align-self: flex-end;
+    flex: 1 0 auto;
+    -ms-flex: 1 0 auto;
+    -ms-flex-item-align: end;
+    margin-top: 8px;
 }
 
 
 #covers .pad,
 #covers p {
-     margin: 0;
-     padding: 0;
+    margin: 0;
+    padding: 0;
 }
 
 #add_cover_div > div:first-child,
 #artist .sidebar .box_image div:last-child {
-     padding: 0 !important;
+    padding: 0 !important;
 }
 
 div#flip_view_1 div#similar-artist .name {
-     border: 1px solid $base-text-color;
-     background: rgb(60 60 60 / 70%);
-     color: $base-text-color;
-     margin: 0;
-     padding: 0 5px;
+    border: 1px solid $base-text-color;
+    background: rgb(60 60 60 / 70%);
+    color: $base-text-color;
+    margin: 0;
+    padding: 0 5px;
 }
 
 #covers img {
-     width: 100%;
+    width: 100%;
 }
 
 #covers .stats {
-     margin: 0 8px 8px;
+    margin: 0 8px 8px;
 }
 
 #add_cover_div > div:first-child .additional_add_artists {
-     margin: 8px 12px;
+    margin: 8px 12px;
 }
 
 #add_cover_div .add_form input[type="text"] {
-     margin-bottom: 8px;
-     width: 100%;
+    margin-bottom: 8px;
+    width: 100%;
 }
 
 #artist .sidebar .box_image img {
-     max-width: 100% !important;
+    max-width: 100% !important;
 }
 
 .box_artists .brackets,
 .box_tags .edit_tags_votes .brackets {
-     margin: 0 4px;
+    margin: 0 4px;
 }
 
 .box_artists .brackets:last-child,
 .box_tags .edit_tags_votes .brackets:last-child {
-     margin-right: 0;
+    margin-right: 0;
 }
 
 .box_artists .brackets::after,
 .box_artists .brackets::before,
 .box_tags .edit_tags_votes .brackets::after,
 .box_tags .edit_tags_votes .brackets::before {
-     content: '';
-     display: none;
+    content: '';
+    display: none;
 }
 
 .box_addartists form,
@@ -1046,10 +1048,10 @@ div#flip_view_1 div#similar-artist .name {
 .box_addtag form,
 .box_search form,
 .box_zipdownload form {
-     display: -ms-flexbox;
-     display: flex;
-     -ms-flex-flow: row wrap;
-     flex-flow: row wrap;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-flow: row wrap;
+    flex-flow: row wrap;
 }
 
 .box_addartists input[type="text"],
@@ -1062,227 +1064,227 @@ div#flip_view_1 div#similar-artist .name {
 .box_search select,
 .box_zipdownload input[type="text"],
 .box_zipdownload select {
-     -ms-flex: 1 1 auto;
-     flex: 1 1 auto;
-     margin-right: 8px;
-     width: auto;
+    -ms-flex: 1 1 auto;
+    flex: 1 1 auto;
+    margin-right: 8px;
+    width: auto;
 }
 
 #AddArtists input,
 #AddArtists select {
-     margin-bottom: 8px;
-     width: 100%;
+    margin-bottom: 8px;
+    width: 100%;
 }
 
 .box_addtag .body strong {
-     display: block;
-     font-weight: 400;
-     margin-top: 8px;
+    display: block;
+    font-weight: 400;
+    margin-top: 8px;
 }
 
 .box_addtag .body br {
-     display: none;
+    display: none;
 }
 
 .add_torrent_container .field_div input {
-     width: 100%;
+    width: 100%;
 }
 
 .add_torrent_container form > span:last-child {
-     display: inline-block;
-     margin-top: 8px;
+    display: inline-block;
+    margin-top: 8px;
 }
 
 .box_zipdownload input,
 .box_zipdownload select {
-     margin-bottom: 8px;
-     margin-right: 0;
-     width: 100% !important;
+    margin-bottom: 8px;
+    margin-right: 0;
+    width: 100% !important;
 }
 
 .box_zipdownload input[type="submit"] {
-     margin-bottom: 0;
+    margin-bottom: 0;
 }
 
 .box_zipdownload #list {
-     margin: 0 0 8px;
-     width: 100%;
+    margin: 0 0 8px;
+    width: 100%;
 }
 
 .box_zipdownload #formats {
-     margin-right: 8px;
-     width: 170px !important;
+    margin-right: 8px;
+    width: 170px !important;
 }
 
 .torrent_table {
-     background-color: $secondary-table-background-color;
+    background-color: $secondary-table-background-color;
 }
 
 .torrent_table tr:not(.colhead, .colhead_dark) {
-     border-top: 2px solid $secondary-table-background-color;
+    border-top: 2px solid $secondary-table-background-color;
 }
 
 .torrent_table tr .number_column:not(:last-child) {
-     padding-right: 6px;
+    padding-right: 6px;
 }
 
 .torrent_table .group {
-     background-color: $input-background-color;
+    background-color: $input-background-color;
 }
 
 .group_torrent {
-     background-color: $form-background-color;
+    background-color: $form-background-color;
 }
 
 .group_torrent.edition,
 .torrent {
-     background-color: $torrent-background-color;
+    background-color: $torrent-background-color;
 }
 
 .torrentdetails .linkbox {
-     margin-bottom: 6px;
+    margin-bottom: 6px;
 }
 
 .group_info {
-     word-break: break-all;
+    word-break: break-all;
 }
 
 .big_info {
-     padding-bottom: 0;
-     padding-top: 0;
+    padding-bottom: 0;
+    padding-top: 0;
 }
 
 .big_info .group_image {
-     margin-right: 8px;
+    margin-right: 8px;
 }
 
 .big_info .group_info {
-     margin: 4px;
+    margin: 4px;
 }
 
 .big_info .group_info::after {
-     display: none;
+    display: none;
 }
 
 .tags a {
-     color: $footer-color;
-     font-size: 11px;
+    color: $footer-color;
+    font-size: 11px;
 }
 
 .tags a:hover {
-     color: $a-hover-color;
+    color: $a-hover-color;
 }
 
 .group_info > span:first-child,
 .group_torrent td:first-child > span,
 .torrent_links_block {
-     color: $footer-color;
-     float: right;
-     margin-right: 4px;
+    color: $footer-color;
+    float: right;
+    margin-right: 4px;
 }
 
 .add_bookmark {
-     margin-right: 4px;
+    margin-right: 4px;
 }
 
 .group_torrent:not(.edition) td:first-child {
-     padding-left: 24px;
+    padding-left: 24px;
 }
 
 .torrent_table .group td:first-child {
-     padding-left: 4px;
+    padding-left: 4px;
 }
 
 .hide_torrents > a,
 .show_torrents > a {
-     display: block;
-     font-size: 16px;
-     font-weight: 600;
-     line-height: 100%;
-     position: relative;
-     text-align: center;
-     width: 18px;
+    display: block;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 100%;
+    position: relative;
+    text-align: center;
+    width: 18px;
 }
 
 .show_torrents > a::after {
-     content: "\25b6";
+    content: "\25b6";
 }
 
 .hide_torrents > a::after {
-     content: "\25bc";
+    content: "\25bc";
 }
 
 .group_torrent .edition_info {
-     border-top: 1px solid transparent;
-     padding-left: 34px;
-     position: relative;
+    border-top: 1px solid transparent;
+    padding-left: 34px;
+    position: relative;
 }
 
 .group_torrent .edition_info a {
-     display: block;
-     font-size: 16px;
-     left: 0;
-     line-height: 27px;
-     position: absolute;
-     text-align: center;
-     top: 0;
-     width: 22px;
+    display: block;
+    font-size: 16px;
+    left: 0;
+    line-height: 27px;
+    position: absolute;
+    text-align: center;
+    top: 0;
+    width: 22px;
 }
 
 #artist .td_info > a {
-     margin-left: -8px;
+    margin-left: -8px;
 }
 
 .colhead td[width*='70%'],
 .colhead_dark td[width*='70%'] {
-     width: 100%;
+    width: 100%;
 }
 
 .colhead .cats_col,
 .colhead_dark .cats_col {
-     height: auto;
-     padding: 0;
+    height: auto;
+    padding: 0;
 }
 
 
 /* #2024 bugfix for messages with 'pre' that overrun the width of their message box. */
 pre {
-     white-space: pre-wrap;
+    white-space: pre-wrap;
 }
 
 .log_section pre {
-     line-height: 1.4;
+    line-height: 1.4;
 }
 
 .tooltipster-base {
-     box-shadow: 0 0 8px rgb(0 0 0 / 25%);
-     width: auto !important;
+    box-shadow: 0 0 8px rgb(0 0 0 / 25%);
+    width: auto !important;
 }
 
 .tooltipster-default {
-     background-color: $base-background-color;
-     border: 0 solid $primary-accent-color;
-     border-radius: 2.5px;
-     color: #c6c9c9;
+    background-color: $base-background-color;
+    border: 0 solid $primary-accent-color;
+    border-radius: 2.5px;
+    color: #c6c9c9;
 }
 
 .tooltipster-default .tooltipster-content {
-     background-color: $base-background-color;
-     color: #c6c9c9;
-     font-size: 12px;
-     line-height: 1.4;
-     padding: 4px 6px;
+    background-color: $base-background-color;
+    color: #c6c9c9;
+    font-size: 12px;
+    line-height: 1.4;
+    padding: 4px 6px;
 }
 
 .tooltipster-default .tooltipster-content a {
-     background-color: $base-background-color;
-     color: #c6c9c9;
-     font-weight: 600;
+    background-color: $base-background-color;
+    color: #c6c9c9;
+    font-weight: 600;
 }
 
 .alertbar,
 .tooltipster-default .tooltipster-content a:hover {
-     color: $primary-accent-color;
+    color: $primary-accent-color;
 }
 
 #content .header > h1,
@@ -1291,330 +1293,330 @@ pre {
 #content .thin > h1,
 #content .thin > h2,
 #content .thin > h3 {
-     margin-bottom: 0;
-     margin-top: 16px;
+    margin-bottom: 0;
+    margin-top: 16px;
 }
 
 ul.collage_images {
-     margin: 0;
-     width: 100%;
+    margin: 0;
+    width: 100%;
 }
 
 ul.collage_images li {
-     display: block;
-     height: auto;
-     overflow: hidden;
-     position: relative;
-     width: 20%;
+    display: block;
+    height: auto;
+    overflow: hidden;
+    position: relative;
+    width: 20%;
 }
 
 ul.collage_images li a,
 ul.collage_images li a img {
-     height: 100%;
-     position: absolute;
-     width: 100%;
+    height: 100%;
+    position: absolute;
+    width: 100%;
 }
 
 ul.collage_images li::before {
-     content: '';
-     float: left;
-     padding-top: 100%;
+    content: '';
+    float: left;
+    padding-top: 100%;
 }
 
 ul.collage_images li a {
-     display: block;
-     left: 0;
-     top: 0;
+    display: block;
+    left: 0;
+    top: 0;
 }
 
 ul.collage_images li a > span {
-     height: auto;
-     left: 0;
-     margin: 6px;
-     position: absolute;
-     top: 0;
-     width: auto;
+    height: auto;
+    left: 0;
+    margin: 6px;
+    position: absolute;
+    top: 0;
+    width: auto;
 }
 
 .recent {
-     table-layout: fixed;
+    table-layout: fixed;
 }
 
 .recent tr:not(.colhead, .colhead_dark) > td {
-     padding: 0;
-     position: relative;
+    padding: 0;
+    position: relative;
 }
 
 .recent tr:not(.colhead, .colhead_dark) > td::before {
-     content: '';
-     float: left;
-     padding-top: 100%;
+    content: '';
+    float: left;
+    padding-top: 100%;
 }
 
 .recent tr:not(.colhead, .colhead_dark) > td a {
-     height: 100%;
-     left: 0;
-     overflow: hidden;
-     position: absolute;
-     top: 0;
-     width: 100%;
+    height: 100%;
+    left: 0;
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    width: 100%;
 }
 
 .recent tr:not(.colhead, .colhead_dark) > td a img {
-     height: 100%;
-     position: absolute;
-     width: 100%;
+    height: 100%;
+    position: absolute;
+    width: 100%;
 }
 
 .alertbar {
-     font-size: 16px;
-     margin-top: 8px;
+    font-size: 16px;
+    margin-top: 8px;
 }
 
 #userform #settings_sections h2 a,
 .rule_short {
-     color: $a-color;
+    color: $a-color;
 }
 
 .poll li {
-     margin-bottom: 2px;
+    margin-bottom: 2px;
 }
 
 .poll .graph {
-     background-color: $poll-background-color;
-     display: block;
-     height: 8px;
-     margin-bottom: 12px;
+    background-color: $poll-background-color;
+    display: block;
+    height: 8px;
+    margin-bottom: 12px;
 }
 
 .poll .graph span {
-     background-color: $primary-accent-color;
-     display: block;
-     float: left;
-     height: 8px;
+    background-color: $primary-accent-color;
+    display: block;
+    float: left;
+    height: 8px;
 }
 
 .lightbox {
-     align-items: center;
-     background-color: rgb(0 0 0 / 32%);
-     bottom: 0;
-     cursor: pointer;
-     display: flex;
-     display: -ms-flexbox;
-     -ms-flex-align: center;
-     -ms-flex-flow: row nowrap;
-     flex-flow: row nowrap;
-     -ms-flex-pack: center;
-     justify-content: center;
-     left: 0;
-     margin: auto;
-     position: fixed;
-     right: 0;
-     top: 0;
-     user-select: none;
-     z-index: 1000;
+    align-items: center;
+    background-color: rgb(0 0 0 / 32%);
+    bottom: 0;
+    cursor: pointer;
+    display: flex;
+    display: -ms-flexbox;
+    -ms-flex-align: center;
+    -ms-flex-flow: row nowrap;
+    flex-flow: row nowrap;
+    -ms-flex-pack: center;
+    justify-content: center;
+    left: 0;
+    margin: auto;
+    position: fixed;
+    right: 0;
+    top: 0;
+    user-select: none;
+    z-index: 1000;
 }
 
 .lightbox.hidden {
-     display: none;
+    display: none;
 }
 
 .lightbox img {
-     box-shadow: 0 0 32px 6px rgb(0 0 0 / 32%);
-     display: block;
-     max-height: 92%;
-     max-width: 92%;
+    box-shadow: 0 0 32px 6px rgb(0 0 0 / 32%);
+    display: block;
+    max-height: 92%;
+    max-width: 92%;
 }
 
 #discog_table > div.box.center .brackets::after,
 #discog_table > div.box.center .brackets::before,
 #quickreplytext br:last-child {
-     display: none;
+    display: none;
 }
 
 #footer {
-     width: 100%;
-     color: $footer-color;
-     font-synthesis: 11px;
-     margin: 32px auto 16px;
+    width: 100%;
+    color: $footer-color;
+    font-synthesis: 11px;
+    margin: 32px auto 16px;
 }
 
 #footer p {
-     margin: 0;
+    margin: 0;
 }
 
 #messageform textarea,
 #quickreplytext textarea {
-     margin: 0 0 12px;
+    margin: 0 0 12px;
 }
 
 #discog_table > div.box.center {
-     background-color: $input-background-color;
-     padding: 12px;
-     text-align: left;
+    background-color: $input-background-color;
+    padding: 12px;
+    text-align: left;
 }
 
 #discog_table > div.box.center a {
-     margin: 0 8px;
+    margin: 0 8px;
 }
 
 .rule_summary {
-     padding: 24px !important;
+    padding: 24px !important;
 }
 
 .golden_rules {
-     margin: 0;
-     padding: 0;
+    margin: 0;
+    padding: 0;
 }
 
 .rule_wrap {
-     margin-bottom: 8px;
+    margin-bottom: 8px;
 }
 
 #musicbrainz_popup {
-     color: $base-background-color;
-     font-weight: 600;
+    color: $base-background-color;
+    font-weight: 600;
 }
 
 #musicbrainz_popup a {
-     color: $base-background-color;
+    color: $base-background-color;
 }
 
 #musicbrainz_popup a:hover {
-     color: $primary-accent-color;
+    color: $primary-accent-color;
 }
 
 #musicbrainz_popup .brackets {
-     font-weight: 400;
+    font-weight: 400;
 }
 
 #menu > ul,
 #userinfo_username .username,
 .album_votes .favoritecount {
-     font-weight: 600;
+    font-weight: 600;
 }
 
 #inbox #content .search_form input[type="search"],
 #wiki #content .search_form input[type="search"] {
-     margin-top: 8px;
-     width: 100% !important;
+    margin-top: 8px;
+    width: 100% !important;
 }
 
 #searchbox {
-     margin-bottom: 12px;
+    margin-bottom: 12px;
 }
 
 #inbox .manage_form .box {
-     padding: 0;
+    padding: 0;
 }
 
 #inbox .unreadpm {
-     background: rgb(255 255 255 / 25%);
+    background: rgb(255 255 255 / 25%);
 }
 
 #wiki .navigation_list {
-     margin: 0;
-     padding: 0;
+    margin: 0;
+    padding: 0;
 }
 
 #wiki .box_info ul {
-     margin: 0;
+    margin: 0;
 }
 
 #rules #content .thin .header p {
-     display: block;
-     margin: 0 0 8px;
-     width: 100%;
+    display: block;
+    margin: 0 0 8px;
+    width: 100%;
 }
 
 .profileinfo img {
-     max-width: 100%;
+    max-width: 100%;
 }
 
 #user .box > .head {
-     height: auto !important;
+    height: auto !important;
 }
 
 #user .box > .head span[style='float: left;']:first-child {
-     float: none !important;
+    float: none !important;
 }
 
 #user .avatar_container img {
-     max-height: 400px;
-     max-width: 150px;
+    max-height: 400px;
+    max-width: 150px;
 }
 
 #user #userform {
-     background-color: transparent;
-     width: calc(100% - 248px);
+    background-color: transparent;
+    width: calc(100% - 248px);
 }
 
 #userform #settings_sections h2 {
-     font-size: 12px;
-     line-height: 1.6;
+    font-size: 12px;
+    line-height: 1.6;
 }
 
 #userform #settings_sections h2 a:hover {
-     color: $a-hover-color;
+    color: $a-hover-color;
 }
 
 #userform #settings_sections input {
-     margin-top: 8px;
+    margin-top: 8px;
 }
 
 #dnulist tr:not(.colhead, .colhead_dark):nth-child(even) {
-     background-color: #3d3336;
+    background-color: #3d3336;
 }
 
 #dnulist tr:not(.colhead, .colhead_dark):nth-child(odd) {
-     background-color: $blockquote-background-color;
+    background-color: $blockquote-background-color;
 }
 
 #menu > ul a:hover,
 #userinfo_minor:hover a:hover,
 #userinfo_username:hover a:hover {
-     background-color: rgb(255 255 255 / 20%);
+    background-color: rgb(255 255 255 / 20%);
 }
 
 #torrents .filter_torrents .ft_submit {
-     display: -ms-flexbox;
-     display: flex;
-     -ms-flex-flow: row nowrap;
-     flex-flow: row nowrap;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-flow: row nowrap;
+    flex-flow: row nowrap;
 }
 
 #torrents .filter_torrents .ft_submit input {
-     margin-right: 4px;
+    margin-right: 4px;
 }
 
 #torrents .filter_torrents .ft_submit span {
-     -ms-flex-order: 2;
-     order: 2;
+    -ms-flex-order: 2;
+    order: 2;
 }
 
 #votes {
-     position: relative;
+    position: relative;
 }
 
 .album_votes {
-     line-height: normal;
+    line-height: normal;
 }
 
 #collages.collage_table .colhead td:last-child,
 #personal_collages .colhead td:last-child,
 .filelist_table .colhead_dark td:last-child,
 .forum_index .colhead td[style*='width: 7%'] {
-     text-align: right;
+    text-align: right;
 }
 
 .search_form {
-     margin: 8px 0;
-     overflow: hidden;
+    margin: 8px 0;
+    overflow: hidden;
 }
 
 .search_form div.submit {
-     margin: 12px;
-     text-align: center;
+    margin: 12px;
+    text-align: center;
 }
 
 .box.pad .search_form,
@@ -1622,25 +1624,25 @@ ul.collage_images li a > span {
 .search_form .filter_torrents div.submit,
 .searchbars .search_form,
 .sidebar .search_form {
-     margin: 0;
+    margin: 0;
 }
 
 .box table:not(.layout),
 .box2 table:not(.layout) {
-     border: 2px solid $secondary-table-background-color;
-     margin: 8px 0;
+    border: 2px solid $secondary-table-background-color;
+    margin: 8px 0;
 }
 
 span[style*='color: green'] {
-     color: $span-green-color !important;
+    color: $span-green-color !important;
 }
 
 span[style*='color: red'] {
-     color: $ratio-red-color !important;
+    color: $ratio-red-color !important;
 }
 
 span[style*='color: blue'] {
-     color: $span-blue-color !important;
+    color: $span-blue-color !important;
 }
 
 .filelist_table td,
@@ -1648,37 +1650,37 @@ span[style*='color: blue'] {
 .torrentdetails,
 .wrap_overflow,
 blockquote {
-     -webkit-hyphens: unset;
-     -ms-hyphens: unset;
-     hyphens: unset;
-     word-wrap: unset;
+    -webkit-hyphens: unset;
+    -ms-hyphens: unset;
+    hyphens: unset;
+    word-wrap: unset;
 }
 
 .filelist_table td,
 .reportinfo_table,
 .torrentdetails,
 blockquote {
-     background-color: $input-background-color;
+    background-color: $input-background-color;
 }
 
 #bookmarks #torrent_table tr:not(.colhead, .colhead_dark) td:nth-child(2) {
-     border-top: 1px solid transparent;
-     height: 100%;
-     padding: 0;
-     position: relative;
+    border-top: 1px solid transparent;
+    height: 100%;
+    padding: 0;
+    position: relative;
 }
 
 #bookmarks .torrent_row td:nth-child(3) > span:first-child {
-     float: right;
+    float: right;
 }
 
 #quickpost {
-     width: 100% !important;
+    width: 100% !important;
 }
 
 .donation_info {
-     margin-left: 0;
-     margin-right: 0;
+    margin-left: 0;
+    margin-right: 0;
 }
 
 #messageform #buttons input[type="button"],
@@ -1687,7 +1689,7 @@ blockquote {
 #quickpostform .preview_submit label,
 .forum_post .colhead_dark input[type="button"],
 .forum_post .colhead_dark label {
-     margin-right: 4px;
+    margin-right: 4px;
 }
 
 
@@ -1700,31 +1702,43 @@ blockquote {
 /* */
 
 .thin:not(.linkbox) > :not(.two_columns) {
-     width: 100%;
+    width: 100%;
 }
 
 .thin > table {
-     /* Still not sure why this actually happens. */
-     width: calc(100% - 8px);
+    /* Still not sure why this actually happens. */
+    width: calc(100% - 8px);
 }
 
 .thin > .sidebar ~ * {
-     width: auto;
+    width: auto;
 }
 
 #header {
-     display: flex;
-     flex-direction: column;
+    display: flex;
+    flex-direction: column;
 }
 
 #alerts {
-     order: 10;
+    order: 10;
 }
 
 /* END desktop view, handling of classes */
 
 /* # 1.2 Reserved [for more organization in the future]
-/* # 1.3 Reserved [for more organization in the future]
+
+/* ## 1.3 EXPERIMENTAL FIX FOR STICKY COLUMN HEADINGS
+/* Not all table headings are setup this way. 
+/* Examples include bonus points rate and Token history.
+/* Attempting to overwrite Global.css */
+.colhead_dark td, .colhead_dark th, .colhead td, .colhead th, td.colhead, td.colhead_dark {
+  top: 0;
+  position: sticky;
+  position: -webkit-sticky;
+  background: inherit !important; /* This is the important line. */
+  z-index: 10;  /* On mobile this will be overwritten. */
+  
+  }
 
 /* # 1.4 BEGIN UPLOAD CATEGORY DECORATION STRIPING */
 /* Begin category decorations for torrent-tables on torrent & collage pages */
@@ -1740,8 +1754,8 @@ blockquote {
 .cats_ebooks,
 .cats_elearningvideos,
 .cats_music {
-     width: 0;
-     height: 80px;   // 'album cover' images are hard-coded to 90px
+    width: 0;
+    height: 80px;   // 'album cover' images are hard-coded to 90px
 }
 
 /* collages do not include Images in their table rows, so they 
@@ -1753,36 +1767,36 @@ body#collage .cats_comics,
 body#collage .cats_ebooks,
 body#collage .cats_elearningvideos,
 body#collage .cats_music {
-     height: 2rem;
+    height: 2rem;
 }
 .cats_music {
-     /* Memo: If you desire NO decoration on music uploads,
-     /* turn this off. */
-     border-right: thin solid darkslategray;
+    /* Memo: If you desire NO decoration on music uploads,
+    /* turn this off. */
+    border-right: thin solid darkslategray;
 }
 
 .cats_applications {
-     border-right: thick solid silver;
+    border-right: thick solid silver;
 }
 
 .cats_audiobooks {
-     border-right: thick solid cornflowerblue;
+    border-right: thick solid cornflowerblue;
 }
 
 .cats_comedy {
-     border-right: thick solid deepskyblue;
+    border-right: thick solid deepskyblue;
 }
 
 .cats_comics {
-     border-right: thick solid gold;
+    border-right: thick solid gold;
 }
 
 .cats_ebooks {
-     border-right: thick solid chocolate;
+    border-right: thick solid chocolate;
 }
 
 .cats_elearningvideos {
-     border-right: thick solid mediumpurple;
+    border-right: thick solid mediumpurple;
 }
 /* #2024 */
 /* END category decorations for torrent tables on torrent & collage pages */
@@ -1791,99 +1805,99 @@ body#collage .cats_music {
 /* MENU AND TOP BAR, DESKTOP ONLY */
 
 @media (width >= 480px) {
-     .thin:last-child > :not(.two_columns) {
-          margin: 4px;
-     }
+    .thin:last-child > :not(.two_columns) {
+        margin: 4px;
+    }
 
-     #nav_donate .tooltip::after {
-          color: red;
-          content: '\2764\FE0F️';  // heart emoji symbol 
-          font-size: 75%;
-          vertical-align: top;
-     }
+    #nav_donate .tooltip::after {
+        color: red;
+        content: '\2764\FE0F️';  // heart emoji symbol 
+        font-size: 75%;
+        vertical-align: top;
+    }
 
-     #nav_staff {
-          font-weight: 400;
-     }
+    #nav_staff {
+        font-weight: 400;
+    }
 
-     #menu > ul > #nav_staff {
-          display: inline;
-          font-size: 13px;
-          position: absolute;
-          right: 8px;
-          top: 29px;
-     }
+    #menu > ul > #nav_staff {
+        display: inline;
+        font-size: 13px;
+        position: absolute;
+        right: 8px;
+        top: 29px;
+    }
 
-     #menu > ul > #nav_staff > a {
-          line-height: 1.6;
-          padding: 0;
-     }
+    #menu > ul > #nav_staff > a {
+        line-height: 1.6;
+        padding: 0;
+    }
 
-     #menu > ul > #nav_staff > a:hover {
-          background-color: transparent;
-          color: $a-hover-color;
-     }
+    #menu > ul > #nav_staff > a:hover {
+        background-color: transparent;
+        color: $a-hover-color;
+    }
 
-     #userinfo_minor::before {
-          background: $menu-closed-state-icon no-repeat;
-          filter: brightness(200%);  /*force white */
-          background-size: 28px;
-          background-position: center;
-          display: block;
-          height: 50px;
-          line-height: 50px;
-          width: 50px;
-     }
+    #userinfo_minor::before {
+        background: $menu-closed-state-icon no-repeat;
+        filter: brightness(200%);  /*force white */
+        background-size: 28px;
+        background-position: center;
+        display: block;
+        height: 50px;
+        line-height: 50px;
+        width: 50px;
+    }
 
-     #userinfo_minor a,
-     #userinfo_username a {
-          display: none;
-          line-height: 32px;
-          padding: 0 8px;
-          width: 150px;
-     }
+    #userinfo_minor a,
+    #userinfo_username a {
+        display: none;
+        line-height: 32px;
+        padding: 0 8px;
+        width: 150px;
+    }
 
-     #userinfo_minor:hover::before {
-          margin-left: 100px;
-     }
+    #userinfo_minor:hover::before {
+        margin-left: 100px;
+    }
 
-     #userinfo_minor {
-          background-color: $userinfo-minor-color;
-          border-radius: 0 5px 0 0;
-          right: 0;
-     }
+    #userinfo_minor {
+        background-color: $userinfo-minor-color;
+        border-radius: 0 5px 0 0;
+        right: 0;
+    }
 
-     #userinfo_minor,
-     #userinfo_username {
-          position: absolute;
-          z-index: 900;
-     }
+    #userinfo_minor,
+    #userinfo_username {
+        position: absolute;
+        z-index: 900;
+    }
 
-     #userinfo_minor:hover,
-     #userinfo_username:hover {
-          z-index: 800;
-     }
+    #userinfo_minor:hover,
+    #userinfo_username:hover {
+        z-index: 800;
+    }
 
-     #userinfo_username:hover {
-          border-radius: 0 10px 0 0;
-          right: 0;
-     }
+    #userinfo_username:hover {
+        border-radius: 0 10px 0 0;
+        right: 0;
+    }
 
-     #userinfo_minor:hover {
-          background-color: $userinfo-minor-hover-background-color;
-     }
+    #userinfo_minor:hover {
+        background-color: $userinfo-minor-hover-background-color;
+    }
 
-     #userinfo_username:hover {
-          background-color: $userinfo-username-hover-background-color;
-     }
+    #userinfo_username:hover {
+        background-color: $userinfo-username-hover-background-color;
+    }
 
-     .settings_sidebar {
-          margin-left: 8px;
-     }
+    .settings_sidebar {
+        margin-left: 8px;
+    }
 
-     #userform #settings_sections {
-          width: 240px;
-     }
+    #userform #settings_sections {
+        width: 240px;
+    }
 }
 /* END Menu and topbar, desktop only */
 
@@ -1892,49 +1906,49 @@ body#collage .cats_music {
 /* horizontal menu */
 /* #2024 change to styled color instead of #fff to match vertical pulldown menu */
 #menu > ul a:hover {
-     color: $a-color
+    color: $a-color
 }
 
 /* vertical pulldown menu */
 #userinfo_minor:hover a,
 #userinfo_username:hover a {
-     color: $a-color;
+    color: $a-color;
 }
 
 /* Icon revealed when menu is open */
 #userinfo_minor:hover::before {
-     background-color: rgb(0 0 0 / 0%);
-     background-position: center;
-     background-repeat: no-repeat;
-     background-attachment: scroll;
-     background-image: $menu-open-state-icon;
-     background-size: 30px;
-     background-origin: padding-box;
-     background-clip: border-box;
+    background-color: rgb(0 0 0 / 0%);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: scroll;
+    background-image: $menu-open-state-icon;
+    background-size: 30px;
+    background-origin: padding-box;
+    background-clip: border-box;
 }
 
 #searchbars .search_form {
-     background: 0 0;
+    background: 0 0;
 }
 
 #searchbars .search_form input {
-     border: none;
-     border-radius: 2.5px;
-     height: 30px;
+    border: none;
+    border-radius: 2.5px;
+    height: 30px;
 }
 
 #searchbars .search_form input:focus {
-     background: $secondary-table-background-color;
+    background: $secondary-table-background-color;
 }
 
 .sidebar {
-     order: 5;
+    order: 5;
 }
 
 .thin:last-child {
-     display: flex;
-     flex-wrap: wrap;
-     margin: -4px;
+    display: flex;
+    flex-wrap: wrap;
+    margin: -4px;
 }
 
 /* END MENU HANDLING */
@@ -1974,7 +1988,7 @@ body#collage .cats_music {
 /* first row of each box */
 #noty_bottomRight_layout_container .noty_message {
   background: radial-gradient(circle at top right, 
-     $gradient-color-1, $gradient-color-2) !important;
+    $gradient-color-1, $gradient-color-2) !important;
   color: $a-color !important;
   font-weight: 700;
   padding: 0 !important;
@@ -2019,19 +2033,19 @@ body#collage .cats_music {
 
 .sidebar .pad ol,
 .sidebar .pad ul {
-     margin-bottom: 0;
-     margin-top: 0;
-     padding-bottom: 0;
+    margin-bottom: 0;
+    margin-top: 0;
+    padding-bottom: 0;
 }
 
 .sidebar ol.nobullet,
 .sidebar ul.nobullet {
-     padding-left: 0;
+    padding-left: 0;
 }
 
 .sidebar img {
-     height: auto;
-     width: auto;
+    height: auto;
+    width: auto;
 }
 
 /* END SIDEBAR */
@@ -2085,16 +2099,16 @@ body#collage .cats_music {
 /*/
 
 @media only screen and (width <= 768px) {
-     /* For mobile phones: */
-     #inbox input[type="submit"] {
-          font-size: 10px;
-          padding: 4px;
-     }
+    /* For mobile phones: */
+    #inbox input[type="submit"] {
+        font-size: 10px;
+        padding: 4px;
+    }
 
-     #forums input {
-          font-size: 10px;
-          padding: 4px;
-     }
+    #forums input {
+        font-size: 10px;
+        padding: 4px;
+    }
 }
 /* */
 /* ################################################################################
@@ -2105,871 +2119,954 @@ body#collage .cats_music {
 /* Begin Changes for Mobile Site */
 
 @media (width <= 480px) {
-     .m_hidden {
-          display: none !important;
-     }
+    .m_hidden {
+        display: none !important;
+    }
 
-     /* override from earlier, it makes shit weird */
-     td:first-child {
-          padding-left: 6px;
-     }
-     
-     /* by request, limit inbox images to window size on mobile */
-     #inbox .body img {
-          max-width: 100% !important;
-     }
+    /* override from earlier, it makes shit weird */
+    td:first-child {
+        padding-left: 6px;
+    }
+    
+    /* by request, limit inbox images to window size on mobile */
+    #inbox .body img {
+        max-width: 100% !important;
+    }
 
-     /* ## 3.1 BEGIN site layout */
-     
-     #wrapper {
-          padding-top: 36px;
-     }
+    /* ## 3.1 BEGIN site layout */
+    
+    #wrapper {
+        padding-top: 36px;
+    }
 
-     .thin {
-          flex-direction: column;
-          margin: auto;
-     }
+    .thin {
+        flex-direction: column;
+        margin: auto;
+    }
 
-     /* the specificity goes up to 11 */
-     html > body div.thin > * {
-          width: 100%;
-     }
+    /* the specificity goes up to 11 */
+    html > body div.thin > * {
+        width: 100%;
+    }
 
-     form table td.label {
-          width: 5rem;
-     }
+    form table td.label {
+        width: 5rem;
+    }
 
-     .linkbox {
-          text-align: left;
-          width: 90%;
-     }
+    .linkbox {
+        text-align: left;
+        width: 90%;
+    }
 
-     html body .scale_image,
-     #stats img {
-          max-width: 100%;
-     }
-     /* END site layout */
+    html body .scale_image,
+    #stats img {
+        max-width: 100%;
+    }
+    /* END site layout */
 
-     /* ## 3.2 BEGIN notifications */
-     
-     .i-am-new {
-          width: calc(100% - 48px) !important;
-     }
+    /* ## 3.2 BEGIN notifications */
+    
+    .i-am-new {
+        width: calc(100% - 48px) !important;
+    }
 
-     .i-am-new li {
-          width: 100% !important;
-     }
-     /* END notifications */
+    .i-am-new li {
+        width: 100% !important;
+    }
+    /* END notifications */
 
-     /* ## 3.3 BEGIN user settings */
-     #user #userform {
-          align-items: stretch;
-          display: flex;
-          flex-direction: column;
-          margin-left: 0;
-          width: 100%;
-     }
+    /* ## 3.3 BEGIN user settings */
+    #user #userform {
+        align-items: stretch;
+        display: flex;
+        flex-direction: column;
+        margin-left: 0;
+        width: 100%;
+    }
 
-     .settings_sidebar {
-          flex: unset;
-          order: -1;
-     }
+    .settings_sidebar {
+        flex: unset;
+        order: -1;
+    }
 
-     /* tired of specificity :( */
-     #settings_sections {
-          position: static !important;
-     }
-     /* END user settings */
+    /* tired of specificity :( */
+    #settings_sections {
+        position: static !important;
+    }
+    /* END user settings */
 
-     /* ## 3.4 BEGIN forms */
+    /* ## 3.4 BEGIN forms */
 
-     input[type="search"],
-     input[type="text"],
-     input[type="email"],
-     input[type="password"],
-     select {
-          width: 100%;
-     }
+    input[type="search"],
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    select {
+        width: 100%;
+    }
 
-     #upload .box {
-          width: 100% !important;
-     }
+    #upload .box {
+        width: 100% !important;
+    }
 
-     .cat_list tr {
-          display: flex;
-          flex-wrap: wrap;
-     }
-     /* END forms */
+    .cat_list tr {
+        display: flex;
+        flex-wrap: wrap;
+    }
 
-     /* ## 3.5 BEGIN general tables */
-     
-     .m_table tbody,
-     .m_table .colhead,
-     .m_table .colhead_dark {
-          align-items: center;
-          display: flex;
-          flex-wrap: wrap;
-          width: 100%;
-     }
+    /* readability improvement for checkboxes on torrent.php */    
+    /* specific improvement for a specific problem; apologies */
+    
+    .layout.cat_list.ft_cat_list {
+        flex-direction: row;
+        height: auto;
+    }
+    .layout.cat_list.ft_cat_list tr td { 
+        width: 40% !important;
+    }
+    /* END forms */
+    
 
-     .m_table tbody {
-          align-items: stretch;
-          flex-direction: column;
-     }
-     /* END general tables */
+    /* ## 3.5 BEGIN general tables */
+    
+    .m_table tbody,
+    .m_table .colhead,
+    .m_table .colhead_dark {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+    }
 
-     /* ## 3.6 BEGIN table headers */
-     .m_table .colhead,
-     .m_table .colhead_dark {
-          flex-wrap: nowrap;
-     }
+    .m_table tbody {
+        align-items: stretch;
+        flex-direction: column;
+    }
+    /* END general tables */
 
-     .m_table .colhead td:not(.m_th_right, .m_th_left),
-     .m_table .colhead_dark td:not(.m_th_right, .m_th_left) {
-          display: none;
-     }
+    /* ## 3.6 BEGIN table headers */
+    .m_table .colhead,
+    .m_table .colhead_dark {
+        flex-wrap: nowrap;
+    }
 
-     .m_table .colhead td,
-     .m_table .colhead_dark td {
-          width: auto !important;
-     }
+    .m_table .colhead td:not(.m_th_right, .m_th_left),
+    .m_table .colhead_dark td:not(.m_th_right, .m_th_left) {
+        display: none;
+    }
 
-     .m_th_left {
-          visibility: hidden;
-     }
+    .m_table .colhead td,
+    .m_table .colhead_dark td {
+        width: auto !important;
+    }
 
-     .m_th_left_collapsable {
-          padding-left: 34px;
-     }
+    .m_th_left {
+        visibility: hidden;
+    }
 
-     .m_th_left::before {
-          color: white;
-          content: 'Info';
-          visibility: visible;
-     }
+    .m_th_left_collapsable {
+        padding-left: 34px;
+    }
 
-     /* ghetto :first-of-class */
-     .m_th_right {
-          margin-left: auto;
-     }
+    .m_th_left::before {
+        color: white;
+        content: 'Info';
+        visibility: visible;
+    }
 
-     .m_th_right + .m_th_right {
-          margin-left: unset;
-     }
+    /* ghetto :first-of-class */
+    .m_th_right {
+        margin-left: auto;
+    }
 
-     .m_th_right + .m_th_right + .m_th_right {
-          margin-left: unset;
-          padding-right: 12px;
-     }
-     /* END table headers */
+    .m_th_right + .m_th_right {
+        margin-left: unset;
+    }
 
-     /* ## 3.7 BEGIN table bodies */
-     
-     .m_table tr:not(.hidden, .colhead, .colhead_dark) {
+    .m_th_right + .m_th_right + .m_th_right {
+        margin-left: unset;
+        padding-right: 12px;
+    }
+    /* END table headers */
+
+    /* ## 3.7 BEGIN table bodies */
+    
+    .m_table tr:not(.hidden, .colhead, .colhead_dark) {
+        display: block;
+        line-height: 1.4;
+        padding-bottom: 3px;
+        /* for position:absolute children */
+        position: relative;
+        width: 100%;
+    }
+
+    .m_table td {
+        display: block;
+    }
+
+    .m_table tr:not(.colhead):not(.colhead_dark) td:not(.m_td_left):not(.m_td_right) {
+        padding-bottom: 0;
+        padding-top: 0;
+        text-align: left;
+        width: 81%; 
+    }
+
+    td.m_td_left {
+        align-items: center;
+        display: flex;
+        float: left;
+        height: 100%;
+        width: 34px;
+    }
+    /* END table bodies */
+
+    /* ## 3.8 BEGIN right-aligned numerical stats */
+    .m_td_right {
+        margin: 0;
+        padding: 0 !important;
+        position: absolute;
+        right: 16px;
+        /* this is for the first one only */
+        text-align: right;
+        top: 0.2rem;
+    }
+
+    /* specificity override will occur for third one, so this is fine */
+    .m_td_right + .m_td_right {
+        top: 1.6em;
+    }
+
+    .m_td_right + .m_td_right + .m_td_right {
+        top: 3em;
+    }
+    /* END right-aligned numerical stats */
+
+    /* ## 3.9 BEGIN torrent table */
+    .torrent_table * {
+        float: none;
+    }
+
+    .torrent_table .remove_bookmark a,
+    .torrent_table .add_bookmark a {
+        float: none !important;
+    }
+
+    .torrent_table .cats_col:not(.m_cats_col) {
+        display: none;
+    }
+
+    /* on mobile, it wraps even on normal words, so better like this */
+    .group .group_info,
+    .torrent .group_info {
+        word-break: inherit;
+        
+        /* #2024b11
+        /* On Torrent listings, prevent 'bookmark' and long titles
+        /* from overrunning the stats on the right  */.
+        margin-right: 40px;   
+    }
+
+    .torrent .group_info span:first-child {
+        order: 10;
+    }
+
+    .group_info .tags {
+        order: 20;
+        width: 100%;
+    }
+
+    #wrapper .m_table .edition {
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+
+    .edition_info {
+        padding: 4px 12px 4px 32px !important;
+    }
+
+    .group_torrent .edition_info a {
+        line-height: 23px;
+    }
+
+    .edition_1 {
+        /* for the right aligned numbers */
+        min-height: 5em;
+    }
+
+    .td_snatched.m_td_right,
+    .td_seeders.m_td_right,
+    .td_leechers.m_td_right {
+        min-width: 30px;
+        right: 4px;
+        text-align: left;
+    }
+
+    .td_snatched.m_td_right::before,
+    .td_seeders.m_td_right::before,
+    .td_leechers.m_td_right::before {
+        background: left / 10px no-repeat $number-snatches-icon;
+        color: #fff;
+        content: ':';
+        filter: brightness(80%);
+        position: absolute;
+        right: calc(100% + 2px);
+        text-align: right;
+        width: 14px;
+    }
+
+    .td_seeders.m_td_right::before {
+        background-image: $number-seeders-icon;
+    }
+
+    .td_leechers.m_td_right::before {
+        background-image: $number-leechers-icon;
+    }
+
+    .m_table.checkboxes td:first-child {
+        display: block;
+    }
+
+    /* ## 3.9.1 BEGIN expanded torrent group */
+    .group_torrent:not(.edition, .hidden) {
+        display: flex;
+        flex-direction: column;
+        padding: 5px 0 0 22px;
+    }
+
+    /* it would be nice to use flex for all group_torrents, but we can't de display:flex
+     * on any old table cell. It only works here because our trs aren't using the normal
+     * table display anyways.
+     */
+
+    .torrent_table .group_torrent:not(.edition) td:first-child {
+        display: flex;
+        /* for those ones with a million buttons */
+        flex-wrap: wrap;
+        padding: 0;
+        width: 80%;
+    }
+
+    .torrent_table .group_torrent:not(.edition) td:first-child span {
+        order: 5;
+        padding-left: 6px;
+    }
+
+    .td_file_count::before {
+        content: 'Files: ';
+    }
+
+    .torrent_table .group_torrent td:nth-child(4) {
+        padding-bottom: 5px;
+        text-align: left;
+    }
+
+    /* artist view page */
+    #torrents_album .edition_1 td:nth-child(n+2) {
+        padding-left: 15px;
+    }
+    /* END expanded torrent group */
+
+    /* BEGIN special treatment of Sizes */
+    /* On Collage-discog and Bookmark pages, sizes need to be forced left */
+    /* Apologies for being ultra-specific here, but don't want any side-effects */
+    
+    table#discog_table.torrent_table.grouping.cats.m_table .number_column.td_size.nobr,
+    table#torrent_table.torrent_table.grouping.cats.m_table  td.number_column.td_size.nobr {
+        text-align: left;
+        margin-left:1rem;
+        
+        &::before {
+            content: "\1F4C1 ";
+        }
+    }
+    
+    /* END special treatment of Sizes */
+      
+    /* ## 3.9.2 BEGIN top10 */
+    
+    /* 4 and 5 in colhead are hidden anyways */
+    #top10 .td_size::before {
+        content: 'Size: ';
+    }
+
+    .td_data::before {
+        content: 'Transferred: ';
+    }
+    /* END top10 */
+    /* END torrent table */
+
+    /* ## 3.10 BEGIN invite table */
+    .invite_table tr:not(.colhead) td:nth-child(3)::before {
+        content: 'Joined: ';
+    }
+
+    .invite_table tr:not(.colhead) td:nth-child(4)::before {
+        content: 'Seen: ';
+    }
+
+    .td_dl.m_td_right::before {
+        content: 'D: ';
+    }
+
+    .td_up.m_td_right::before {
+        content: 'U: ';
+    }
+
+    .td_ratio.m_td_right::before {
+        content: 'R: ';
+    }
+    /* END invite table */
+
+    /* ## 3.11 BEGIN collage table */
+    table.m_table.collage_table tr:not(.colhead):not(.colhead) {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .m_table .td_collage_category::before {
+        content: 'Category: ';
+    }
+
+    .m_table .td_collage_category {
+        order: 2;
+        padding-top: 0;
+    }
+
+    .collage_table .td_info {
+        padding-bottom: 0;
+    }
+
+    .collage_table .td_updated::before {
+        content: 'Updated: ';
+    }
+
+    .collage_table .td_updated {
+        order: 3;
+    }
+
+    .collage_table .td_author::before {
+        content: 'Author: ';
+    }
+
+    .collage_table .td_author {
+        order: 3;
+    }
+
+    .collage_table .td_torrent_count::before {
+        content: 'T: ';
+    }
+
+    .collage_table .td_subscribers::before {
+        content: 'S: ';
+    }
+
+    /* For mobile view */
+    .collage_table .td_collage_category,
+    .collage_table .td_updated,
+    .collage_table .td_author {
+        margin-left: 1rem;
+    }
+    
+    .collage_table .td_info .tags a:hover {
+    background: slategray !important;
+    color: darkslategray
+    }
+    
+    /* ## 3.11.1 BEGIN tag bubble appearance on mobile */
+    .collage_table .td_info .tags :not(:empty) {
+        box-sizing: border-box;
+        display: inline-block;
+        font-weight: 400;
+        font-size: 0.55rem;
+        vertical-align: baseline;
+        color: $tag-bubble-foreground-color; 
+        background: $tag-bubble-background-color !important;
+        padding: 0.05rem 0.5rem;
+        border: none !important;
+        border-radius: 1rem;
+        transition: all .35s;
+    }
+    /* uniquely for top10 page */
+    #top10 .tags {
+        width:auto;
+    }
+  
+    /* END tag bubble appearance on mobile */
+    /* ## 3.11.2 BEGIN title of collages on mobile */
+    .collage_table .td_info {
+        font-size: larger;
+    }
+    /* END title of collages on mobile */
+    /* END collage table */
+    
+    /* ## 3.12 BEGIN requests */
+    /* TODO: still show the time the request was filled without taking up too much space */
+
+    #requests .request_table tr:not(.colhead) td:nth-child(n+2) {
+        padding: 0 6px;
+    }
+
+    #requests .request_table tr:not(.colhead) td:nth-child(5)::before {
+        content: 'Filler: ';
+    }
+
+    #requests .request_table tr:not(.colhead) td:nth-child(6)::before {
+        content: 'Requester: ';
+    }
+
+    #requests .request_table tr:not(.colhead) td:nth-child(6) {
+        padding: 0 6px;
+    }
+
+    #requests .request_table tr:not(.colhead) td:nth-child(7)::before {
+        content: 'Added: ';
+    }
+
+    #requests .request_table tr:not(.colhead) td:nth-child(8)::before {
+        content: 'Last Vote: ';
+    }
+
+    #requests .request_table tr:not(.colhead) td:nth-child(8) {
+        padding-bottom: 4px;
+    }
+    /* END requests */
+
+    /* 3.13 BEGIN forums */
+    /* 3.13.1 BEGIN forum index */
+    .forum_index .last_read {
+        float: none !important;
+    }
+
+    .forum_index .last_topic,
+    .forum_index .last_poster {
+        float: none !important;
+    }
+
+    .forum_index .last_topic {
+        display: block;
+    }
+
+    #wrapper .td_read {
+        float: left;
+        height: 12px;
+        margin: 3px 5px 0 5px;
+        width: 11px;
+    }
+
+    .td_topic_count.m_td_right::before {
+        content: 'T: ';
+    }
+
+    .td_post_count.m_td_right::before {
+        content: 'P: ';
+    }
+
+    .td_author::before {
+        content: 'Author: ';
+    }
+
+    .td_replies.m_td_right::before {
+        content: 'R: ';
+    }
+    /* END forum index */
+
+    /* 3.13.2 BEGIN forum table structure */
+    /* this is copied from general tables. We put it here in case that changes
+     in ways specific for tabular data */
+
+    .forum_post tbody {
+        align-items: stretch;
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    .forum_post tr:not(.colhead_dark):not(.hidden) {
+        display: block;
+        position: relative;
+        width: 100%;
+    }
+    /* END forum table structure */
+
+    /* 3.13.3 BEGIN forum headers */
+    /* remove dashes from forum post headers */
+    .forum_post tr.colhead_dark {
+        color: transparent;
+        min-height: 50px;
+        padding-left: 54px;
+    }
+
+    .forum_post tr.colhead_dark span,
+    .forum_post tr.colhead_dark strong {
+        color: $input-color;
+    }
+
+    .forum_post tr.colhead_dark div {
+        display: inline;
+    }
+
+    .forum_post .time::after {
+        content: '\a';
+        white-space: pre;
+    }
+
+    .forum_post tr.colhead_dark div:nth-child(2) {
+        padding-left: 8px;
+    }
+
+    .forum_post .avatar {
+        left: 5px;
+        position: absolute;
+        top: -55px;
+        width: 0;
+        word-break: break-all;
+    }
+
+    .forum_post .avatar img {
+        max-height: 50px !important;
+        max-width: 50px !important;
+        min-height: 0;
+        min-width: 0;
+        position: absolute;
+    }
+    /* END forum headers */
+    /* END forums */
+
+    /* ## 3.14 BEGIN rules */
+    #rules .m_th_left::before {
+        content: 'Rules';
+    }
+
+    .rule_table .nobr {
+        white-space: unset;
+    }
+    /* END rules */
+
+    /* ## 3.15 BEGIN site header */
+    /* affectionately known as the hamburger bar on desktop */
+    
+    /* ## 3.15.1 BEGIN Handling to prevent keyboard from opening on iP---e and other mobile devices */
+
+    @keyframes delay-pointer-events {
+        0% {
+            visibility: hidden;
+        }
+        50% {
+            visibility: hidden;
+        }
+        100% {
+            visibility: visible;
+        }
+    }
+    
+    #header:hover #searchbars input,
+    // and Fix for Wis:
+    /* this may cause the search boxes to appear on a 1sec delay; not a bug */
+    #nav_userinfo, 
+    #nav_useredit, 
+orp        animation: delay-pointer-events 1000ms linear;
+    }
+    /* END Handling to prevent..*/
+    
+    /* ## 3.15.2 BEGIN MOBILE MENU LAYOUT */
+    
+    #header {
+        background: $header-background-color;
+        top: 0;
+        height: 0;
+        left: 0;
+        position: fixed;
+        transform: translateY(0);
+        transition: 200ms;
+        width: 100%;
+        z-index: 1000;
+        padding-bottom: 32px;
+        opacity: 0;
+    }
+    
+    // when debugging, change hover to a nonce word to force the menu open //
+    /* menu opens on hover #2024 */
+    #header:hover {
+         height: clamp(200px, calc(var(--row-height)*15), 100%);
+         opacity: 1;
+         transition: all 600ms cubic-bezier(1, 0.01, 0.3, 1.31);
+         border-bottom: groove $header-background-color;
+         box-shadow: 0px 50px 70px $gradient-color-1, 0 160px 160px #080808;
+    }
+
+    /* pulldown arrow icon for mobile view, top menu */
+    #extra1{ 
+          position: fixed;
+          top: 5px;
+          left: calc(50% - 12.5px);
           display: block;
-          line-height: 1.4;
-          padding-bottom: 3px;
-          /* for position:absolute children */
-          position: relative;
-          width: 100%;
-     }
-
-     .m_table td {
-          display: block;
-     }
-
-     .m_table tr:not(.colhead, .colhead_dark, .m_td_left, .m_td_right) {
-          padding-bottom: 0;
-          padding-top: 0;
-          text-align: left;
-          width: 81%;
-     }
-
-     td.m_td_left {
-          align-items: center;
-          display: flex;
-          float: left;
-          height: 100%;
-          width: 34px;
-     }
-     /* END table bodies */
-
-     /* ## 3.8 BEGIN right-aligned numerical stats */
-     .m_td_right {
-          margin: 0;
-          padding: 0 !important;
-          position: absolute;
-          right: 16px;
-          /* this is for the first one only */
-          text-align: right;
-          top: 0.2rem;
-     }
-
-     /* specificity override will occur for third one, so this is fine */
-     .m_td_right + .m_td_right {
-          top: 1.6em;
-     }
-
-     .m_td_right + .m_td_right + .m_td_right {
-          top: 3em;
-     }
-     /* END right-aligned numerical stats */
-
-     /* ## 3.9 BEGIN torrent table */
-     .torrent_table * {
-          float: none;
-     }
-
-     .torrent_table .remove_bookmark a,
-     .torrent_table .add_bookmark a {
-          float: none !important;
-     }
-
-     .torrent_table .cats_col:not(.m_cats_col) {
-          display: none;
-     }
-
-     /* on mobile, it wraps even on normal words, so better like this */
-     /* TODO: how to handle super long-words */
-     .group .group_info,
-     .torrent .group_info {
-          word-break: inherit;
-     }
-
-     .torrent .group_info span:first-child {
-          order: 10;
-     }
-
-     .group_info .tags {
-          order: 20;
-          width: 100%;
-     }
-
-     #wrapper .m_table .edition {
-          padding-top: 0;
-          padding-bottom: 0;
-     }
-
-     .edition_info {
-          padding: 4px 12px 4px 32px !important;
-     }
-
-     .group_torrent .edition_info a {
-          line-height: 23px;
-     }
-
-     .edition_1 {
-          /* for the right aligned numbers */
-          min-height: 5em;
-     }
-
-     .td_snatched.m_td_right,
-     .td_seeders.m_td_right,
-     .td_leechers.m_td_right {
-          min-width: 30px;
-          right: 4px;
-          text-align: left;
-     }
-
-     .td_snatched.m_td_right::before,
-     .td_seeders.m_td_right::before,
-     .td_leechers.m_td_right::before {
-          background: left / 10px no-repeat $number-snatches-icon;
-          color: #fff;
-          content: ':';
-          filter: brightness(80%);
-          position: absolute;
-          right: calc(100% + 2px);
-          text-align: right;
-          width: 14px;
-     }
-
-     .td_seeders.m_td_right::before {
-          background-image: $number-seeders-icon;
-     }
-
-     .td_leechers.m_td_right::before {
-          background-image: $number-leechers-icon;
-     }
-
-     .m_table.checkboxes td:first-child {
-          display: block;
-     }
-
-     /* ## 3.9.1 BEGIN expanded torrent group */
-     .group_torrent:not(.edition, .hidden) {
-          display: flex;
-          flex-direction: column;
-          padding: 5px 0 0 22px;
-     }
-
-     /* it would be nice to use flex for all group_torrents, but we can't de display:flex
-      * on any old table cell. It only works here because our trs aren't using the normal
-      * table display anyways.
-      */
-
-     .torrent_table .group_torrent:not(.edition) td:first-child {
-          display: flex;
-          /* for those ones with a million buttons */
-          flex-wrap: wrap;
-          padding: 0;
-          width: 80%;
-     }
-
-     .torrent_table .group_torrent:not(.edition) td:first-child span {
-          order: 5;
-          padding-left: 6px;
-     }
-
-     .td_file_count::before {
-          content: 'Files: ';
-     }
-
-     .torrent_table .group_torrent td:nth-child(4) {
-          padding-bottom: 5px;
-          text-align: left;
-     }
-
-     /* artist view page */
-     #torrents_album .edition_1 td:nth-child(n+2) {
-          padding-left: 15px;
-     }
-     /* END expanded torrent group */
-
-     /* ## 3.9.2 BEGIN top10 */
-     
-     /* 4 and 5 in colhead are hidden anyways */
-     #top10 .td_size::before {
-          content: 'Size: ';
-     }
-
-     .td_data::before {
-          content: 'Transferred: ';
-     }
-     /* END top10 */
-     /* END torrent table */
-
-     /* ## 3.10 BEGIN invite table */
-     .invite_table tr:not(.colhead) td:nth-child(3)::before {
-          content: 'Joined: ';
-     }
-
-     .invite_table tr:not(.colhead) td:nth-child(4)::before {
-          content: 'Seen: ';
-     }
-
-     .td_dl.m_td_right::before {
-          content: 'D: ';
-     }
-
-     .td_up.m_td_right::before {
-          content: 'U: ';
-     }
-
-     .td_ratio.m_td_right::before {
-          content: 'R: ';
-     }
-     /* END invite table */
-
-     /* ## 3.11 BEGIN collage table */
-     table.m_table.collage_table tr:not(.colhead):not(.colhead) {
-          display: flex;
-          flex-direction: column;
-     }
-
-     .m_table .td_collage_category::before {
-          content: 'Category: ';
-     }
-
-     .m_table .td_collage_category {
-          order: 2;
-          padding-top: 0;
-     }
-
-     .collage_table .td_info {
-          padding-bottom: 0;
-     }
-
-     .collage_table .td_updated::before {
-          content: 'Updated: ';
-     }
-
-     .collage_table .td_updated {
-          order: 3;
-     }
-
-     .collage_table .td_author::before {
-          content: 'Author: ';
-     }
-
-     .collage_table .td_author {
-          order: 3;
-     }
-
-     .collage_table .td_torrent_count::before {
-          content: 'T: ';
-     }
-
-     .collage_table .td_subscribers::before {
-          content: 'S: ';
-     }
-
-     /* For mobile view */
-     .collage_table .td_collage_category,
-     .collage_table .td_updated,
-     .collage_table .td_author {
-          margin-left: 1rem;
-     }
-     
-     .collage_table .td_info .tags a:hover {
-     background: slategray !important;
-     color: darkslategray
-     }
-     
-     /* ## 3.11.1 BEGIN tag bubble appearance on mobile */
-     .collage_table .td_info .tags :not(:empty) {
-          box-sizing: border-box;
-          display: inline-block;
-          font-weight: 400;
-          font-size: 0.55rem;
-          vertical-align: baseline;
-          color: $tag-bubble-foreground-color; 
-          background: $tag-bubble-background-color !important;
-          padding: 0.05rem 0.5rem;
-          border: none !important;
-          border-radius: 1rem;
-          transition: all .35s;
-      }
-     /* END tag bubble appearance on mobile */
-     /* ## 3.11.2 BEGIN title of collages on mobile */
-     .collage_table .td_info {
-          font-size: larger;
-     }
-     /* END title of collages on mobile */
-     /* END collage table */
-     
-     /* ## 3.12 BEGIN requests */
-     /* TODO: still show the time the request was filled without taking up too much space */
-
-     #requests .request_table tr:not(.colhead) td:nth-child(n+2) {
-          padding: 0 6px;
-     }
-
-     #requests .request_table tr:not(.colhead) td:nth-child(5)::before {
-          content: 'Filler: ';
-     }
-
-     #requests .request_table tr:not(.colhead) td:nth-child(6)::before {
-          content: 'Requester: ';
-     }
-
-     #requests .request_table tr:not(.colhead) td:nth-child(6) {
-          padding: 0 6px;
-     }
-
-     #requests .request_table tr:not(.colhead) td:nth-child(7)::before {
-          content: 'Added: ';
-     }
-
-     #requests .request_table tr:not(.colhead) td:nth-child(8)::before {
-          content: 'Last Vote: ';
-     }
-
-     #requests .request_table tr:not(.colhead) td:nth-child(8) {
-          padding-bottom: 4px;
-     }
-     /* END requests */
-
-     /* 3.13 BEGIN forums */
-     /* 3.13.1 BEGIN forum index */
-     .forum_index .last_read {
-          float: none !important;
-     }
-
-     .forum_index .last_topic,
-     .forum_index .last_poster {
-          float: none !important;
-     }
-
-     .forum_index .last_topic {
-          display: block;
-     }
-
-     #wrapper .td_read {
-          float: left;
-          height: 12px;
-          margin: 3px 5px 0;
-          width: 11px;
-     }
-
-     .td_topic_count.m_td_right::before {
-          content: 'T: ';
-     }
-
-     .td_post_count.m_td_right::before {
-          content: 'P: ';
-     }
-
-     .td_author::before {
-          content: 'Author: ';
-     }
-
-     .td_replies.m_td_right::before {
-          content: 'R: ';
-     }
-     /* END forum index */
-
-     /* 3.13.2 BEGIN forum table structure */
-     /* this is copied from general tables. We put it here in case that changes
-      in ways specific for tabular data */
-
-     .forum_post tbody {
-          align-items: stretch;
-          display: flex;
-          flex-direction: column;
-          flex-wrap: wrap;
-          width: 100%;
-     }
-
-     .forum_post tr:not(.colhead_dark):not(.hidden) {
-          display: block;
-          position: relative;
-          width: 100%;
-     }
-     /* END forum table structure */
-
-     /* 3.13.3 BEGIN forum headers */
-     /* remove dashes from forum post headers */
-     .forum_post tr.colhead_dark {
-          color: transparent;
-          min-height: 50px;
-          padding-left: 54px;
-     }
-
-     .forum_post tr.colhead_dark span,
-     .forum_post tr.colhead_dark strong {
-          color: $input-color;
-     }
-
-     .forum_post tr.colhead_dark div {
-          display: inline;
-     }
-
-     .forum_post .time::after {
-          content: '\a';
-          white-space: pre;
-     }
-
-     .forum_post tr.colhead_dark div:nth-child(2) {
-          padding-left: 8px;
-     }
-
-     .forum_post .avatar {
-          left: 5px;
-          position: absolute;
-          top: -55px;
-          width: 0;
-          word-break: break-all;
-     }
-
-     .forum_post .avatar img {
-          max-height: 50px !important;
-          max-width: 50px !important;
-          min-height: 0;
-          min-width: 0;
-          position: absolute;
-     }
-     /* END forum headers */
-     /* END forums */
-
-     /* ## 3.14 BEGIN rules */
-     #rules .m_th_left::before {
-          content: 'Rules';
-     }
-
-     .rule_table .nobr {
-          white-space: unset;
-     }
-     /* END rules */
-
-     /* ## 3.15 BEGIN site header */
-     /* affectionately known as the hamburger bar on desktop */
-     
-     /* ## 3.15.1 BEGIN Handling to prevent keyboard from opening on iP---e and other mobile devices */
-
-     @keyframes delay-pointer-events {
-          0% {
-              visibility: hidden;
-          }
-          50% {
-              visibility: hidden;
-          }
-          100% {
-              visibility: visible;
-          }
-     }
-     
-     #header:hover #searchbars input,
-     // and Fix for Wis:
-     #nav_userinfo, 
-     #nav_useredit, 
-     #nav_logout  {
-          animation: delay-pointer-events 2000ms linear;
-     }
-     /* END Handling to prevent..*/
-     
-     /* ## 3.15.2 BEGIN MOBILE MENU LAYOUT */
-     
-     #header {
+          opacity: 1!important;
+          width: 25px;
+          height: 25px;
+          background-image: $mobile-pulldown-icon;
+          background-size: contain;
+          z-index:500;
+          pointer-events: none;
+    }
+
+    #logo {
+        height: 2%;
+        left: 0;
+        padding: 0;
+        position: fixed;
+        top: 0;
+        /* #2024 - this is a weird comment and code: */
+        /* it's OVER 9000! */
+        transform: translateY(6000%);
+        width: 20%;
+        z-index: 500;
+    }
+
+    #logo a {
+        background-image: none;
+        display: block;
+        height: 32px;
+        width: 100%;
+    }
+    
+    #extra4,
+    #extra5 {
+          height: 32px;
+          position: fixed;
+          top: 0
+    }
+    
+    /* site logo in topbar for mobile */
+    #extra5 {
+          background-image: $site-logo-square; 
+          background-position: 0;
+          background-size: auto 24px;
+          background-repeat: no-repeat;
+          left: 4px;
+          pointer-events: none;
+          transform: translateZ(0);
+          width: 32px;
+          z-index: 400;
+    }
+    #extra4 {
           background: $header-background-color;
-          top: 0;
-          height: 0;
-          left: 0;
-          position: fixed;
-          transform: translateY(0);
-          transition: 200ms;
-          width: 100%;
-          z-index: 1000;
-          padding-bottom: 32px;
-          opacity: 0;
-     }
-
-     #header:hover {
-          height: 80%;
-          opacity: .96;
-          transition: all 600ms cubic-bezier(1.000, 0.010, 0.300, 1.310);
-     }
-
-     /* pulldown arrow icon for mobile view, top menu */
-     #extra1{ 
-            position: fixed;
-            top: 5px;
-            left: calc(50% - 12.5px);
-            display: block;
-            opacity: 1!important;
-            width: 25px;
-            height: 25px;
-            background-image: $mobile-pulldown-icon;
-            background-size: contain;
-            z-index:500;
-            pointer-events: none;
-     }
-
-     #logo {
-          height: 2%;
-          left: 0;
-          padding: 0;
-          position: fixed;
-          top: 0;
-          /* #2024 - this is a weird comment and code: */
-          /* it's OVER 9000! */
-          transform: translateY(6000%);
-          width: 20%;
-          z-index: 500;
-     }
-
-     #logo a {
-          background-image: none;
+          border-radius: 0 0 9px 9px;
           display: block;
-          height: 32px;
-          width: 100%;
-     }
-     
-     #extra4,
-     #extra5 {
-            height: 32px;
-            position: fixed;
-            top: 0
-     }
-     
-     /* site logo in topbar for mobile */
-     #extra5 {
-            background-image: $site-logo-square; 
-            background-position: 0;
-            background-size: auto 24px;
-            background-repeat: no-repeat;
-            left: 4px;
-            pointer-events: none;
-            transform: translateZ(0);
-            width: 32px;
-            z-index: 400;
-     }
-     #extra4 {
-            background: $header-background-color;
-            border-radius: 0 0 4px 4px;
-            display: block;
-            right: 0;
-            width: 100vw
-     }
-     
-     #extra4,#extra5 {
-            height: 32px;
-            position: fixed;
-            top: 0
-     }
-     
-     #header {
-          --row-height: 40px;
-     }
-
-     #header ul:not(#userinfo_major):not(#userinfo_stats) {
-          display: flex;
-          flex-wrap: wrap;
-          width: 100%;
-     }
-
-     #header ul:not(#userinfo_major):not(#userinfo_stats) li {
-          margin: 0;
-          width: 33.3%;
-     }
-
-     #header ul:not(#userinfo_major):not(#userinfo_stats) a {
-          line-height: var(--row-height);
-     }
-
-     #alerts {
-          display: none;
-     }
-
-     /* ## 3.15.3 BEGIN searchboxes */
-     #searchbars ul {
-          bottom: 0;
-          height: unset;
-          padding: 0 0 0 6px;
-          position: absolute;
-     }
-
-     #searchbars li {
-          height: var(--row-height);
-     }
-
-     #searchbars li:nth-child(-n+3) .search_form {
-          margin: 6px 6px 3px 0;
-     }
-
-     #searchbars li:nth-child(n+4) .search_form {
-          margin: 3px 6px 6px 0;
-     }
-
-     #header #searchbars input {
-          height: calc(var(--row-height) - 9px);
-     }
-     /* END searchboxes */
-          
-
-     /* 3.15.4 BEGIN userinfo */
-     #userinfo {
-          position: static;
-     }
-
-     #userinfo_major {
-          right: 12px;
-          top: calc(100% - var(--row-height) * 10 - 55px);
-     }
-
-     #userinfo_stats {
-          color: white;
-          line-height: 1.3;
-          right: 12px;
-          top: calc(100% - var(--row-height) * 10 - 38px);
-     }
-
-     #userinfo_stats span {
-          white-space: nowrap;
-     }
-
-     #stats_ratio {
-          // We'll allow the color-keyed ratio number to appear, with a dark background.
-          /* No need to force a color here, but this is where you could. */
-     }
-
-     #stats_ratio .tooltip {
-          /* Provide a small dark background for the number to appear in color */
-          background-color: #242424; // TODO could move to variables // 
-          border-radius: 0.45rem;
-          padding-left: 0.45rem;
-          padding-right: 0.45rem;
-     }
-
-     #userinfo_username {
-          background: radial-gradient(circle at top left, $userinfo-background-color-1, $userinfo-background-color-2);
-          position: absolute; 
-          left: 0;
-          /* #2024 fixed */
-     }
-
-     #nav_userclass {
-          display: none;
-     }
-
-     #userinfo_minor {
-          background: radial-gradient(circle at top left, $userinfo-background-color-1, $userinfo-background-color-2);
-          bottom: calc(var(--row-height) * 3);
-          position: absolute;
-     }
-
-     /* S P E C I F I C I T Y */
-     html > body #userinfo_minor a,
-     html > body #userinfo_username a {
-          display: block;
-          height: 100%;
-          line-height: 50px;
-          text-align: center;
-     }
-
-     #userinfo_username #nav_userinfo a {
-          width: unset;
-     }
-     /* END userinfo */
-
-     /* ## 3.15.5 BEGIN browse links */
-     #menu ul {
-          /* verify this later #qwerty #2024 */
-          background: radial-gradient(circle at top left, $userinfo-background-color-2, $userinfo-background-color-1);
-          bottom: calc(var(--row-height) * 7);
-          position: absolute;
-     }
-
-     #menu li {
-          background: transparent !important;
-     }
-     /* END browse links */
-
-     /* 3.15.6 BEGIN checked */
-
-     #extracb1 {
-          display: block;
-          height: 32px;
-          margin: 0;
-          opacity: 0;
-          position: fixed;
           right: 0;
-          top: 0;
-          width: 50vw;
-          z-index: 999;
-     }
+          width: 100%
+    }
+    
+    #extra4,#extra5 {
+          height: 32px;
+          position: fixed;
+          top: 0
+    }
+    
+    #header {
+        --row-height: 40px;
+    }
 
-     #extracb1:checked ~ #wrapper #header {
-          transform: translateY(120%);
-     }
+    #header ul:not(#userinfo_major):not(#userinfo_stats) {
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+    }
 
-     #extracb1:checked ~ #wrapper #logo {
-          transform: none;
-     }
+    #header ul:not(#userinfo_major):not(#userinfo_stats) li {
+        margin: 0;
+        width: 33.3%;
+    }
 
-     #extracb1:checked ~ #extra1 {
-          transform: translateY(5px) rotate(45deg);
-     }
+    #header ul:not(#userinfo_major):not(#userinfo_stats) a {
+        line-height: var(--row-height);
+    }
 
-     #extracb1:checked ~ #extra2 {
-          opacity: 0;
-     }
+    #alerts {
+        display: none;
+    }
 
-     #extracb1:checked ~ #extra3 {
-          transform: translateY(-5px) rotate(-45deg);
-     }
-     /* END checked */
-     /* END site header */
+    /* ## 3.15.3 BEGIN searchboxes */
+    #searchbars ul {
+        bottom: 0;
+        height: unset;
+        padding: 0 0 0 6px;
+        position: absolute;
+    }
+
+    #searchbars li {
+        height: var(--row-height);
+    }
+
+    #searchbars li:nth-child(-n+3) .search_form {
+        margin: 6px 6px 3px 0;
+    }
+
+    #searchbars li:nth-child(n+4) .search_form {
+        margin: 3px 6px 6px 0;
+    }
+
+    #header #searchbars input {
+        height: calc(var(--row-height) - 9px);
+    }
+    /* END searchboxes */
+        
+
+    /* 3.15.4 BEGIN userinfo */
+    
+    /* remove the nonce words DEBUGGING to see how this works */
+    #debugging #userinfo_major,
+    #debugging #userinfo_major > * {
+       border: thin dotted blue; border-radius: 1rem;
+    }
+    #debugging #userinfo_stats, 
+    #debugging #userinfo_stats > * {
+       border: thin dotted pink; border-radius: 1rem;
+    }
+      /* end debugging */
+    
+      #userinfo {
+        position: static;
+      }
+      #userinfo_major {
+        left: 2vw;
+        right: auto;
+        width: 60vw;
+        margin: auto;
+        top: calc(100% - var(--row-height) * 10 - 125px);
+        height: calc(2.4 * var(--row-height));;
+        flex-direction:  column;
+        justify-content: space-around;
+        background: $header-background-color;
+      }
+     
+      #userinfo_stats {
+        left: auto;
+        right: 2vw;
+        width: 60vw;
+        margin: auto;
+        color: $mono-text-color;
+        top: calc(100% - var(--row-height) * 10 - 125px);
+        height: calc(2.4 * var(--row-height));;
+        flex-direction:  column;
+        justify-content: space-around;
+        text-align: right;
+        background: $header-background-color;
+      }
+      
+      #userinfo_stats a,
+      #userinfo_major a {
+        text-decoration-line: underline;
+        text-decoration-style: dashed}
+  
+    #userinfo_stats span {
+        white-space: nowrap;
+    }
+
+    #stats_ratio {
+        // We'll allow the color-keyed ratio number to appear, with a dark background.
+        /* No need to force a color here, but this is where you could. */
+    }
+
+    #stats_ratio .tooltip {
+        /* Provide a small dark background for the number to appear in color */
+        background-color: #242424; // TODO could move to variables // 
+        border-radius: 0.45rem;
+        padding-left: 0.45rem;
+        padding-right: 0.45rem;
+    }
+
+    #userinfo_username {
+        background: radial-gradient(circle at top left, $userinfo-background-color-1, $userinfo-background-color-2);
+        position: absolute; 
+        left: 0;
+        /* #2024 fixed */
+    }
+
+    #nav_userclass {
+        display: none;
+    }
+
+    #userinfo_minor {
+        background: radial-gradient(circle at top left, $userinfo-background-color-1, $userinfo-background-color-2);
+        bottom: calc(var(--row-height) * 3);
+        position: absolute;
+    }
+
+    /* S P E C I F I C I T Y */
+    html > body #userinfo_minor a,
+    html > body #userinfo_username a {
+        display: block;
+        height: 100%;
+        line-height: 50px;
+        text-align: center;
+    }
+
+    #userinfo_username #nav_userinfo a {
+        width: unset;
+    }
+    /* END userinfo */
+
+    /* ## 3.15.5 BEGIN browse links */
+    #menu ul {
+        /* verify this later #qwerty #2024 */
+        background: radial-gradient(circle at top left, $userinfo-background-color-2, $userinfo-background-color-1);
+        bottom: calc(var(--row-height) * 7);
+        position: absolute;
+    }
+
+    #menu li {
+        background: transparent !important;
+    }
+    /* END browse links */
+
+    /* 3.15.6 BEGIN checked */
+
+    #extracb1 {
+        display: block;
+        height: 32px;
+        margin: 0;
+        opacity: 0;
+        position: fixed;
+        right: 0;
+        top: 0;
+        width: 50vw;
+        z-index: 999;
+    }
+
+    #extracb1:checked ~ #wrapper #header {
+        transform: translateY(120%);
+    }
+
+    #extracb1:checked ~ #wrapper #logo {
+        transform: none;
+    }
+
+    #extracb1:checked ~ #extra1 {
+        transform: translateY(5px) rotate(45deg);
+    }
+
+    #extracb1:checked ~ #extra2 {
+        opacity: 0;
+    }
+
+    #extracb1:checked ~ #extra3 {
+        transform: translateY(-5px) rotate(-45deg);
+    }
+    /* END checked */
+    /* END site header */
+
+
+    /* ## 3.16 Handling for sticky table headers on Mobile */
+    /* As with section 1.3 above, this only is useful on certain tables */
+    /* replacing the version in Global.css (hopefully) */
+    .colhead_dark td, .colhead_dark th, .colhead td, .colhead th, td.colhead, td.colhead_dark {
+      top: 2.0rem !important;   /* lower on mobile due to the header and pulldown menu */
+      position: sticky;
+      z-index: 0 !important; /* To go under the pulldown menu */
+      background: inherit !important;
+    }
+
 }
 
 /* ################################################################################
@@ -2979,9 +3076,9 @@ body#collage .cats_music {
 /* ## 4.1 Begin Changes for Mobile, SUPER SMALL window */
 
 @media (width <= 480px) and (height <= 480px) {
-     #header {
-          --row-height: 35px;
-     }
+    #header {
+        --row-height: 35px;
+    }
 }
 
 /* #wideload */
@@ -2997,26 +3094,26 @@ table.torrent_table.cats.checkboxes.border.m_table td.td_info.big_info div.group
 /* This monstrosity is for torrents.php?type=uploaded */
 table.torrent_table.cats.m_table td.td_info.big_info div.group_info.clear div.tags a {
 
-     visibility: visible;
-     box-sizing: border-box;
-     display: inline-block;
-     font-weight: 700;
-     font-size: 0.6rem;
-     vertical-align: baseline;
-     color: $tag-bubble-foreground-color; 
-     background: $tag-bubble-background-color; 
-     padding: 0 0.5rem;
-     border-radius: 1rem;
-     margin-bottom: 0.1rem;
-     transition: all 0.6s cubic-bezier(.25,.8,.25,1);;
+    visibility: visible;
+    box-sizing: border-box;
+    display: inline-block;
+    font-weight: 700;
+    font-size: 0.6rem;
+    vertical-align: baseline;
+    color: $tag-bubble-foreground-color; 
+    background: $tag-bubble-background-color; 
+    padding: 0 0.5rem;
+    border-radius: 1rem;
+    margin-bottom: 0.1rem;
+    transition: all 0.6s cubic-bezier(.25,.8,.25,1);;
 }
 
 /* Special non-clickable appearance: Applies to top10 and request_table pages, where tags are not clickable links. */
 #request_table .tags,
 #top10 .tags {
-     font-style: italic; 
-     font-weight: normal;
-     margin-inline: 1rem;
+    font-style: italic; 
+    font-weight: normal;
+    margin-inline: 1rem;
 }
 
 /* Hover effect: the people have spoken */
@@ -3028,12 +3125,12 @@ table.torrent_table.cats.m_table td.td_info.big_info div.group_info.clear div.ta
 table.torrent_table.cats.checkboxes.border.m_table td.td_info.big_info div.group_info.clear div.tags a:hover,
 /* This monstrosity is for torrents.php?type=uploaded */
 table.torrent_table.cats.m_table td.td_info.big_info div.group_info.clear div.tags a:hover {
-     color: $tag-bubble-background-color !important; 
-     background: $tag-bubble-foreground-color !important; 
-     transition: all 0.15s cubic-bezier(0.25,0.8,0.25,1);
-     box-shadow:
-     rgb(0 0 0 / 25%) 0 14px 28px, 
-     rgb(0 0 0 / 22%) 0 10px 10px; 
+    color: $tag-bubble-background-color !important; 
+    background: $tag-bubble-foreground-color !important; 
+    transition: all 0.15s cubic-bezier(0.25,0.8,0.25,1);
+    box-shadow:
+    rgb(0 0 0 / 25%) 0 14px 28px, 
+    rgb(0 0 0 / 22%) 0 10px 10px; 
 }
 
 /* remove commas between tag bubbles:
@@ -3050,7 +3147,7 @@ table.torrent_table.cats.m_table td.td_info.big_info div.group_info.clear div.ta
 
 /* This should not be necessary... */
 .tags a {
-     visibility: visible;
+    visibility: visible;
 }
 
 /**/
@@ -3060,3 +3157,5 @@ table.torrent_table.cats.m_table td.td_info.big_info div.group_info.clear div.ta
 /* ####### */
 /* # EOF # */
 /* ####### */
+
+
