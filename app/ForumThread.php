@@ -447,15 +447,4 @@ class ForumThread extends BaseObject {
             ", $user->id(), $this->id
         );
     }
-
-    /**
-     * The number of posts up to the given post in the thread
-     * If $hasSticky is true, count will be one less.
-     */
-    public function lesserPostTotal(int $postId): int {
-        return (int)self::$db->scalar("
-            SELECT count(*) FROM forums_posts WHERE TopicID = ? AND ID <= ?
-            ", $this->id, $postId
-        ) - (int)$this->isPinned();
-    }
 }
