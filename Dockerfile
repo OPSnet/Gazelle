@@ -98,10 +98,10 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     # Python tools layer
-    &&  pip3 install chardet eac-logchecker xld-logchecker
+    && pip3 install chardet eac-logchecker xld-logchecker
 
 COPY . /var/www
-COPY --from=composer:2.6.6 /usr/bin/composer /usr/local/bin/composer
+COPY --from=composer:2.7.2 /usr/bin/composer /usr/local/bin/composer
 
 # Permissions and configuration layer
 RUN useradd -ms /bin/bash gazelle \
@@ -117,7 +117,6 @@ RUN useradd -ms /bin/bash gazelle \
         | sed -r 's/pcntl_(fork|signal|signal_dispatch|waitpid),//g' \
         > /etc/php/${PHP_VER}/cli/conf.d/99-boris.ini \
     && .docker/web/generate-config.sh \
-    && bin/local-patch \
     && echo "Generate file storage directories..." \
     && perl /var/www/bin/generate-storage-dirs /var/lib/gazelle/torrent 2 100 \
     && perl /var/www/bin/generate-storage-dirs /var/lib/gazelle/riplog 2 100 \
@@ -126,6 +125,7 @@ RUN useradd -ms /bin/bash gazelle \
     && npm install -g npm@10.4.0 \
     && su gazelle -c 'composer --version \
        && composer install --no-progress --optimize-autoloader \
+       && bin/local-patch \
        && yarn \
        && npx update-browserslist-db@latest \
        && yarn dev'

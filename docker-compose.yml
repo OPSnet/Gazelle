@@ -19,10 +19,10 @@ services:
       - MYSQL_PASSWORD=password
 
   memcached:
-    image: memcached:1.6.20-alpine
+    image: memcached:1.6.26-alpine
 
   pg:
-    image: postgres:14-bullseye
+    image: postgres:16-bullseye
     ports:
       - 127.0.0.1:54321:5432
     volumes:
@@ -47,6 +47,7 @@ services:
       - --group-concat-max-len=1048576
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_0900_ai_ci
+      - --log-bin-trust-function-creators=ON
       - --userstat=on
       - --sql-mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
       # neither sphinxsearch or ocelot are compatible with the mysql8 caching_sha2_password plugin
