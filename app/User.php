@@ -1924,7 +1924,7 @@ class User extends BaseObject {
         ');
     }
 
-    public function createApiToken(string $name, string $key): string {
+    public function createApiToken(string $name): string {
         while (true) {
             // prevent collisions with an existing token
             $token = base64_encode(random_bytes(87));

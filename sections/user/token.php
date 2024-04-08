@@ -25,7 +25,7 @@ if ($_GET['do'] === 'revoke') {
     } elseif ($user->hasApiTokenByName($tokenName)) {
         $error = 'You have already generated a token with that name.';
     } else {
-        $token = $user->createApiToken($tokenName, ENCKEY);
+        $token = $user->createApiToken($tokenName);
     }
 }
 

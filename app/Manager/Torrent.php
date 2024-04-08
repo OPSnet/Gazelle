@@ -665,7 +665,7 @@ class Torrent extends \Gazelle\BaseManager {
         $key = $this->topTenCacheKey($datetime, $isByDay);
         $list = self::$cache->get_value($key);
         if ($list === false) {
-            self::$db->prepared_query($sql = "
+            self::$db->prepared_query("
                 SELECT tht.sequence,
                     tht.TorrentID AS torrent_id
                 FROM top10_history th

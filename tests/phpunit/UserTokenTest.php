@@ -94,7 +94,7 @@ class UserTokenTest extends TestCase {
         $this->assertCount(0, $this->user->apiTokenList(), 'user-token-none-creted');
         $this->assertFalse($this->user->hasApiToken('no such token'), 'user-token-missing');
 
-        $token = $this->user->createApiToken('api-token', 'key');
+        $token = $this->user->createApiToken('api-token');
         $this->assertTrue($this->user->hasApiToken($token), 'user-token-create');
         $this->assertTrue($this->user->hasApiTokenByName('api-token'), 'user-has-token-by-name');
         $list = $this->user->apiTokenList();
