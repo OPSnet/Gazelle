@@ -39,7 +39,7 @@
     "puppeteer": "^2.1.1",
     "sass": "^1.26.10",
     "sass-loader": "^9.0.2",
-    "sharp": "^0.25.4",
+    "sharp": "^0.32.6",
     "webpack": "^4"
   },
   "lint-staged": {
