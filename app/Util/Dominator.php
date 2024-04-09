@@ -10,6 +10,10 @@ namespace Gazelle\Util;
 class Dominator extends \Gazelle\Base {
     protected static array $click = [];
 
+    public function flush(): void {
+        self::$click = [];
+    }
+
     public function click(string $id, string $code): string {
         self::$click[$id] = $code;
         return '';

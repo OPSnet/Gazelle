@@ -332,7 +332,7 @@ if ($sections = $Artist->sections()) {
 
         if (!$Viewer->option('NoVoteLinks')) {
 ?>
-                        <br /><?= $vote->links($groupId) ?>
+                        <br /><?= $vote->links($tgroup) ?>
 <?php   } ?>
                         </span>
                         <div class="tags"><?= implode(' ', $tgroup->torrentTagList()) ?></div>

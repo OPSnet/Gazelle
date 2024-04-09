@@ -48,17 +48,17 @@ if (!$musicRelease) {
     $advanced  = $Viewer->permitted('site_advanced_top10');
     $rankList = [
         'overall' => [
-            'rank' => $vote->rankOverall($tgroupId),
+            'rank' => $vote->rankOverall($tgroup),
             'title' => '<a href="top10.php?type=votes">overall</a>',
         ],
         'decade' => [
-            'rank' => $vote->rankDecade($tgroupId, $year),
+            'rank' => $vote->rankDecade($tgroup),
             'title' => $advanced
                 ? "for the <a href=\"top10.php?advanced=1&amp;type=votes&amp;year1=$decade&amp;year2=$decadeEnd\">{$decade}s</a>"
                 : "for the {$decade}s",
         ],
         'year' => [
-            'rank' => $vote->rankYear($tgroupId, $year),
+            'rank' => $vote->rankYear($tgroup),
             'title' => $advanced
                 ? "for <a href=\"top10.php?advanced=1&amp;type=votes&amp;year1=$year\">$year</a>"
                 : "for $year",
@@ -201,9 +201,9 @@ echo $Twig->render('tgroup/stats.twig', [
 ]);
 
 echo $Twig->render('vote/box.twig', [
-    'group_id' => $tgroupId,
-    'vote'     => $vote,
-    'viewer'   => $Viewer,
+    'tgroup' => $tgroup,
+    'vote'   => $vote,
+    'viewer' => $Viewer,
 ]);
 
 $DeletedTag = $Cache->get_value("deleted_tags_$tgroupId" . '_' . $Viewer->id());
@@ -508,7 +508,7 @@ if (!$Viewer->disableRequests()) {
 }
 
 echo $Twig->render('tgroup/similar.twig', [
-    'similar' => $tgMan->similarVote($tgroupId),
+    'similar' => $tgMan->similarVote($tgroup),
 ]);
 ?>
         <div class="box torrent_description">

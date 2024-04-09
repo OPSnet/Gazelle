@@ -312,10 +312,10 @@ class TGroup extends \Gazelle\BaseManager {
         return $affected;
     }
 
-    public function similarVote(int $tgroupId): array {
-        $key = sprintf(self::VOTE_SIMILAR, $tgroupId);
+    public function similarVote(\Gazelle\TGroup $tgroup): array {
+        $key = sprintf(self::VOTE_SIMILAR, $tgroup->id());
         $similar = self::$cache->get_value($key);
-        if ($similar === false || !isset($similar[$tgroupId])) {
+        if ($similar === false || !isset($similar[$tgroup->id()])) {
             self::$db->prepared_query("
                 SELECT v.GroupID
                 FROM (
@@ -331,7 +331,7 @@ class TGroup extends \Gazelle\BaseManager {
                 ORDER BY binomial_ci(sum(if(v.Type = 'Up', 1, 0)), count(*)),
                     count(*) DESC
                 LIMIT 10
-                ", $tgroupId, $tgroupId
+                ", $tgroup->id(), $tgroup->id()
             );
             $similar = self::$db->collect(0, false);
             self::$cache->cache_value($key, $similar, 3600);

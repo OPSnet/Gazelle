@@ -1,8 +1,8 @@
-{% set total = vote.total(group_id) %}
-{% set up    = vote.totalUp(group_id) %}
-{% set down  = vote.totalDown(group_id) %}
-{% set score = vote.score(total, up) * 100 %}
-{% set way   = vote.vote(group_id) %}
+{% set total = vote.total(tgroup) %}
+{% set up    = vote.totalUp(tgroup) %}
+{% set down  = vote.totalDown(tgroup) %}
+{% set score = vote.score(tgroup) * 100 %}
+{% set way   = vote.vote(tgroup) %}
 <div class="box" id="votes">
     <div class="head"><strong>Album Votes</strong></div>
     <div class="album_votes body">
@@ -25,13 +25,13 @@
         <span id="upvoted"{% if way  != 1 %} class="hidden"{% endif %}>You have upvoted.<br /><br /></span>
         <span id="downvoted"{% if way  != -1 %} class="hidden"{% endif %}>You have downvoted.<br /><br /></span>
     {% if viewer.permitted('site_album_votes') %}
-        {{- dom.click('#vote-up', "UpVoteBox(" ~ group_id ~ ", '" ~ viewer.auth ~ "'); return false;") -}}
-        {{- dom.click('#vote-down', "DownVoteBox(" ~ group_id ~ ", '" ~ viewer.auth ~ "'); return false;") -}}
+        {{- dom.click('#vote-up', "UpVoteBox(" ~ tgroup.id ~ ", '" ~ viewer.auth ~ "'); return false;") -}}
+        {{- dom.click('#vote-down', "DownVoteBox(" ~ tgroup.id ~ ", '" ~ viewer.auth ~ "'); return false;") -}}
         <span{% if way  %} class="hidden"{% endif %} id="vote_message"><a href="#" id="vote-up" class="brackets upvote">Upvote</a>
         - <a href="#" id="vote-down" class="brackets downvote">Downvote</a></span>
         <span{% if not way  %} class="hidden"{% endif %} id="unvote_message">Changed your mind?
             <br />
-            {{- dom.click('#vote-clear', "UnvoteBox(" ~ group_id ~ ", '" ~ viewer.auth ~ "'); return false;") -}}
+            {{- dom.click('#vote-clear', "UnvoteBox(" ~ tgroup.id ~ ", '" ~ viewer.auth ~ "'); return false;") -}}
             <a href="#" id="vote-clear" class="brackets">Clear your vote</a>
     {% endif %}
 {% endif %}

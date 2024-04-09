@@ -252,8 +252,8 @@ class TGroupTest extends TestCase {
         (new Gazelle\Manager\Comment())->create($user, 'torrents', $oldId, 'phpunit comment ' . randomString(10));
         $adminVote = new \Gazelle\User\Vote($admin);
         $userVote = new \Gazelle\User\Vote($user);
-        $adminVote->upvote($oldId);
-        $userVote->downvote($oldId);
+        $adminVote->upvote($this->tgroupExtra);
+        $userVote->downvote($this->tgroupExtra);
 
         $this->assertTrue(
             $this->manager->merge(
@@ -293,8 +293,8 @@ class TGroupTest extends TestCase {
         $adminVote = new \Gazelle\User\Vote($admin);
         $userVote = new \Gazelle\User\Vote($user);
 
-        $this->assertEquals(1, $adminVote->flush()->vote($this->tgroup->id()), 'tgroup-merge-upvote');
-        $this->assertEquals(-1, $userVote->flush()->vote($this->tgroup->id()), 'tgroup-merge-downvote');
+        $this->assertEquals(1, $adminVote->flush()->vote($this->tgroup), 'tgroup-merge-upvote');
+        $this->assertEquals(-1, $userVote->flush()->vote($this->tgroup), 'tgroup-merge-downvote');
     }
 
     public function testTGroupSplit(): void {

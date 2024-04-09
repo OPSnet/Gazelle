@@ -26,6 +26,7 @@ class TwigTest extends TestCase {
     }
 
     public function testDominator(): void {
+        (new \Gazelle\Util\Dominator())->flush(); // in case anything has already been set
         $twig = Gazelle\Util\Twig::factory();
         $twig->createTemplate("{{ dom.click('#id', \"$('#id').frob(); return false;\") }}")->render();
         $expected = <<<END
