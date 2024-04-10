@@ -396,6 +396,20 @@ if ($Viewer->permitted('users_warn')) {
     }
 }
 
+if ($Viewer->permitted('users_auto_reports')) {
+    $raTypeMan = new \Gazelle\Manager\ReportAutoType();
+    $raSearch = new Gazelle\Search\ReportAuto(new \Gazelle\Manager\ReportAuto($raTypeMan), $raTypeMan);
+    $openReports = $raSearch->setUser($User)->setState(\Gazelle\Enum\ReportAutoState::open)->userTotalList($userMan);
+    if ($openReports && $openReports[0][1]) { ?>
+<div class="box">
+    <div class="head">
+        <a href="report_auto.php?userid=<?=$User->id()?>"><?=$openReports[0][1]?> open automated report<?=plural($openReports[0][1])?></a>
+    </div>
+</div>
+<?php
+    }
+}
+
 if ($Viewer->permitted('users_mod') || $Viewer->isStaff()) { ?>
         <form class="manage_form" name="user" id="form" action="user.php" method="post">
         <input type="hidden" name="action" value="moderate" />

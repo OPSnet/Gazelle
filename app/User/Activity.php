@@ -172,4 +172,14 @@ class Activity extends \Gazelle\BaseUser {
         }
         return $this;
     }
+
+    public function setAutoReport(\Gazelle\Search\ReportAuto $ru): static {
+        if ($this->user->permitted('users_auto_reports')) {
+            $open = $ru->setOwner(null)->setState(\Gazelle\Enum\ReportAutoState::open)->total();
+            if ($open > 0) {
+                $this->setAction('<a class="nobr" href="report_auto.php">' . $open . " Auto report" . plural($open) . "</a>");
+            }
+        }
+        return $this;
+    }
 }

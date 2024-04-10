@@ -177,6 +177,7 @@ class Privilege extends \Gazelle\BaseManager {
             'site_user_stats' => 'view other user stat graphs',
             'site_unlimit_ajax' => 'Bypass ajax api limits',
             'site_archive_ajax' => 'View archive-related ajax endpoints',
+            'users_auto_reports' => 'Access automated user reports',
             'users_edit_usernames' => 'Edit usernames',
             'users_edit_ratio' => 'Edit upload/download amounts',
             'users_edit_own_ratio' => 'Edit own upload/download amounts',

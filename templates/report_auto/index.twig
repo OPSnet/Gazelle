@@ -1,0 +1,112 @@
+{{ header('User Reports', {'js': 'bbcode,reportauto', 'css': 'reportauto'}) }}
+<div class="thin">
+    <div class="header">
+        <h2>{% if is_old %}Resolved{% else %}Active{% endif %} Reports</h2>
+        <div class="linkbox">
+            <a href="report_auto.php">New</a> |
+            <a href="report_auto.php?view=old">Old</a>
+        </div>
+        {% if type_count|length > 1 %}
+        <table class="auto_reports_type_box auto_reports_top_box"><tr><td>
+            <p>Reports by type</p>
+            <ul>
+            {% for item in type_count %}
+                <li><a href="{{ base_uri }}&amp;type={{ item[0].id }}">{{ item[1] }} {{ item[0].name }}</a></li>
+            {% endfor %}
+            </ul>
+        </td></tr></table>
+        {% endif %}
+        {% if user_count|length > 1 %}
+        <table class="auto_reports_user_box auto_reports_top_box"><tr><td>
+            <p>Reports by user</p>
+            <ul>
+            {% for item in user_count %}
+                <li><a href="{{ base_uri }}&amp;userid={{ item[0].id }}">{{ item[1] }} {{ item[0].username }}</a></li>
+            {% endfor %}
+            </ul>
+        </td></tr></table>
+        {% endif %}
+    </div>
+    {{ paginator.linkbox|raw }}
+    <div class="auto_reports_container">
+    {% for user_id, reports in auto_reports %}
+        <table id="auto_reports_{{ user_id }}" class="auto_reports">
+            <tr><td>{# wrapping in stupid table because stylesheets #}
+            <label class="auto_reports_expand" for="auto_reports_{{ user_id }}_cb">
+                <span class="auto_reports_header">
+                    <span class="report_auto">{{ user_id|user_full }}</span>
+                    <span class="report_num">{{ reports|length }} report{{ reports|length|plural }}</span>
+                    {% if (reports|last).isClaimed %}{# test if oldest report is claimed #}
+                        <span class="report_claimed">{% if is_old %}resolved{% else %}claimed{% endif %}
+                            by {{ (reports|last).ownerId|user_url }}</span>
+                    {% endif %}
+                </span>
+            </label>
+            {% if not is_old %}
+            <span class="all_buttons">
+                <button class="all_button" data-action="resolve_all" data-id="{{ user_id }}"{%
+                    if type_id %} data-typeid="{{ type_id }}"{% endif %}>Resolve all</button>
+                <button class="all_button" data-action="claim_all" data-id="{{ user_id }}"{%
+                    if type_id %} data-typeid="{{ type_id }}"{% endif %}>Claim all</button>
+            </span>
+            {% endif %}
+            <input type="checkbox" class="expand_checkbox" id="auto_reports_{{ user_id }}_cb" autocomplete="off" checked />
+            <div class="auto_reports_list expand_block">
+            {% for report in reports %}
+                <div id="user_report_{{ report.id }}">
+                    <div class="report_title">
+                        {% if report.isResolved %}(done){% endif %}
+                        <a class="report_link" href="{{ report.location }}">#{{ report.id }}</a>
+                        <span class="report_type">{{ report.text }}</span>
+                        <span class="report_time">{{ report.created|time_diff }}</span>
+                        {% if report.isClaimed %}
+                            <span class="report_claimed">{% if report.isResolved %}resolved{% else %}claimed{% endif %}
+                            by {{ report.ownerId|user_url }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="details">{{ report.details|bb_format }}</div>
+                    <div class="buttons">
+                        {% if report.isResolved %}
+                            <button class="action_button" data-action="unresolve" data-id="{{ report.id }}">Unresolve</button>
+                        {% else %}
+                            <button class="action_button" data-action="resolve" data-id="{{ report.id }}">Resolve</button>
+                        {% endif %}
+                        {% if report.ownerId != viewer.id %}
+                            <button class="action_button" data-action="claim" data-id="{{ report.id }}">Claim</button>
+                        {% else %}
+                            <button class="action_button" data-action="unclaim" data-id="{{ report.id }}">Unclaim</button>
+                        {% endif %}
+                        <button><label class="link" for="auto_reports_comments_{{ report.id }}_cb">Add Comment</label></button>
+                    </div>
+                    <input type="checkbox" class="expand_checkbox" id="auto_reports_comments_{{ report.id }}_cb" autocomplete="off" />
+                    <form class="add_comment expand_block">
+                        <textarea class="comment_box" name="comment" required="required" placeholder="Comment"></textarea>
+                        <input type="submit" value="Send">
+                        <input type="hidden" name="id" value="{{ report.id }}">
+                        <input type="hidden" name="auth" value="{{ viewer.auth }}">
+                    </form>
+                    <div class="comments">
+                    {% if report.hasComments %}
+                        {% for comment in report.comments %}
+                        <div class="comment">
+                            <span class="comment_time">{{ comment.created|time_diff }}</span>
+                            <span class="comment_user">{{ comment.id_user }}</span>
+                            <span class="comment_text">{{ comment.comment|bb_format }}</span>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+            </div>
+            </td></tr>
+        </table>
+    {% else %}
+        <div class="box pad thin">
+            <h4 style="text-align: center">No reports today, hooray!</h4>
+        </div>
+    {% endfor %}
+    </div>
+    {{ paginator.linkbox|raw }}
+</div>
+{{ footer() }}

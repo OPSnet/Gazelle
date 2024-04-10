@@ -78,6 +78,21 @@ class SiteOption extends \Gazelle\Base {
         return self::$db->affected_rows();
     }
 
+    /**
+     * Set option $name's value to $value
+     *
+     * @return int 1 if option was updated, otherwise 0
+     */
+    public function update(string $name, string $value): int {
+        self::$db->prepared_query('
+            UPDATE site_options SET Value = ? WHERE Name = ?
+            ', $value, $name
+        );
+        if ($affected = self::$db->affected_rows()) {
+            self::$cache->cache_value(sprintf(self::CACHE_KEY, $name), $value);
+        }
+        return $affected;
+    }
 
     /**
      * Remove an option by name

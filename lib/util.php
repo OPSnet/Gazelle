@@ -374,7 +374,7 @@ function json_die(array|string $status, array|string $message = "bad parameters"
 /**
  * Print JSON status result with an optional message.
  */
-function json_print(array|string $status, array|int|string $message): void {
+function json_print(array|string $status, array|int|string $message = null): void {
     if (is_string($status) && $status == 'success' && $message) {
         $response = ['status' => $status, 'response' => $message];
     } elseif ($message) {

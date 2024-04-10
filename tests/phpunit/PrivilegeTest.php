@@ -32,7 +32,7 @@ class PrivilegeTest extends TestCase {
 
     public function testPrivilegeCreate(): void {
         $privilegeList = Gazelle\Manager\Privilege::privilegeList();
-        $this->assertCount(128, $privilegeList, 'privilege-total');
+        $this->assertCount(129, $privilegeList, 'privilege-total');
 
         $manager = new Gazelle\Manager\Privilege();
         $this->assertNull($manager->findByLevel(FAKE_LEVEL), 'privilege-find-none'); // if this fails, check the `permissions` table

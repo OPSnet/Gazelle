@@ -1,0 +1,122 @@
+.auto_reports .auto_reports_list,
+.auto_reports .add_comment,
+.auto_reports .expand_checkbox {
+  display: none;
+}
+
+.auto_reports input[type=checkbox].expand_checkbox:checked + .expand_block {
+  display: revert;
+}
+
+.auto_reports input[type=checkbox].expand_checkbox:checked + .add_comment.expand_block {
+  display: grid;
+}
+
+table.auto_reports {
+  margin-bottom: 1em;
+  border: 0;
+}
+
+.auto_reports_top_box {
+  margin-bottom: 1em;
+}
+
+table.auto_reports_top_box ul {
+  column-width: 15em;
+  & > li {
+    margin-top: 0;
+    display: block;
+  }
+}
+
+.auto_reports_container label {
+  cursor: pointer;
+  align-self: center;
+}
+
+.auto_reports .add_comment > textarea {
+  height: auto;
+  min-height: 5em;
+}
+
+.auto_reports button {
+  background: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  opacity: 0.5;
+
+  &::before {
+    content: '[';
+  }
+  &::after {
+    content: ']';
+  }
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.auto_reports td {
+  display: grid;
+  grid-template-areas: 'title buttons' 'details details';
+  grid-template-columns: 1fr auto;
+}
+
+.auto_reports .auto_reports_expand {
+  grid-area: title;
+}
+
+.auto_reports .all_buttons {
+  grid-area: buttons;
+}
+
+.auto_reports_list {
+  grid-area: details;
+}
+
+.auto_reports_list > div {
+  border-top: 1px solid black;
+  display: grid;
+  grid-template-areas: 'title buttons' 'details details' 'add_comment add_comment' 'comments comments';
+  grid-template-columns: 1fr auto;
+}
+
+.auto_reports .report_title {
+  grid-area: title;
+  align-self: center;
+
+  & .report_type,
+  & .report_claimed {
+    font-weight: bold;
+  }
+  & .report_time {
+    font-style: italic;
+    padding-left: 1em;
+  }
+}
+
+.auto_reports .buttons {
+  grid-area: buttons;
+}
+
+.auto_reports .details {
+  grid-area: details;
+  padding: 1em;
+}
+
+.auto_reports .comments {
+  grid-area: comments;
+}
+
+.auto_reports .add_comment {
+  grid-area: add_comment;
+  grid-template-columns: 1fr auto;
+
+  & input[type=submit] {
+    padding: 0 1em 0 1em;
+    margin-left: 0.5em;
+  }
+}

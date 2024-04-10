@@ -31,6 +31,35 @@ class Pg {
         return $st->execute([...$args]) ? (int)$this->pdo->lastInsertId() : 0;
     }
 
+    /**
+     * DO NOT USE FOR UNTRUSTED DATA. There can likely be weird cases with specifically crafted data, especially BYTEA.
+     */
+    public function insertCopy(string $table, array $colList, array $rows): bool {
+        if (!$rows) {
+            return false;
+        }
+        static $delimiter = "\t", $nullAs = '\\N';
+        $processedRows = [];
+        foreach ($rows as $row) {
+            $vals = [];
+            foreach ($row as $val) {
+                if (is_null($val)) {
+                    $vals[] = $nullAs;
+                } elseif (is_string($val)) {
+                    $vals[] = str_replace(["\\", "\n", "\r", $delimiter], ["\\\\", "\\\n", "\\\r", "\\" . $delimiter], $val);
+                } elseif (is_bool($val)) {
+                    $vals[] = $val ? 't' : 'f';
+                } elseif (is_int($val) || is_float($val)) {
+                    $vals[] = $val;
+                } else {
+                    throw new \Exception("invalid column data type");
+                }
+            }
+            $processedRows[] = implode($delimiter, $vals);
+        }
+        return $this->pdo->pgsqlCopyFromArray($table, $processedRows, $delimiter, addslashes($nullAs), implode(',', $colList));
+    }
+
     protected function fetchRow(string $query, int $mode, ...$args): array {
         $st = $this->pdo->prepare($query);
         if ($st !== false && $st->execute([...$args])) {

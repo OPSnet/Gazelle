@@ -52,6 +52,7 @@
 
 {{ _self.category('User management', [
     ['Auto-Enable requests', 'tools.php?action=enable_requests',   constant('FEATURE_EMAIL_REENABLE')],
+    ['Automated Reports',    'report_auto.php',                    viewer.permitted('users_auto_reports')],
     ['Create user',          'tools.php?action=create_user',       viewer.permitted('admin_create_users')],
     ['Login watch',          'tools.php?action=login_watch',       viewer.permitted('admin_login_watch')],
     ['Invite pool',          'tools.php?action=invite_pool',       viewer.permitted('users_view_invites')],
