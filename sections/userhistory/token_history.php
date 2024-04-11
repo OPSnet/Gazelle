@@ -23,7 +23,7 @@ if ($_GET['expire'] ?? 0) {
     if (is_null($torrent)) {
         error(404);
     }
-    $torrent->expireToken($user->id());
+    $torrent->expireToken($user);
     header("Location: userhistory.php?action=token_history&userid=" . $user->id());
 }
 
