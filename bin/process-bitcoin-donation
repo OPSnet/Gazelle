@@ -6,7 +6,7 @@
  *
  * Usage: process-bitcoin-donation <address>,<btc_value> [<address>,<btc_value> ...]
  *
- * bitcoin-cli -rpcwallet=test listtransactions \* 20 | jq 'map([.address, .amount]|join(","))| join("|")' | tr -d \" | tr '|' '\0' | xargs -0 php process-bitcoin-donation
+ * bitcoin-cli -rpcwallet=test listtransactions \* 20 | jq '[.[]|select(.confirmations > 1)]|map([.address, .amount]|join(","))|join("|")' | tr -d \" | tr '|' '\0' | xargs -0 php process-bitcoin-donation
  */
 
 require_once(__DIR__ . '/../lib/bootstrap.php');
