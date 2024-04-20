@@ -1,0 +1,36 @@
+#! /usr/bin/env php
+<?php
+
+require_once(__DIR__ . '/../lib/bootstrap.php');
+
+$db = Gazelle\DB::DB();
+
+$db->prepared_query("
+    select v.ID
+    from torrents v
+    inner join (
+        select t.GroupID from (
+            select GroupID from torrents where Encoding = 'V2 (VBR)'
+        ) v2
+        inner join torrents t using (GroupID)
+        group by t.GroupID
+        having count(*) > 1
+    ) nuke using (GroupID)
+    where v.Encoding = 'V2 (VBR)'
+");
+
+$torMan = new Gazelle\Manager\Torrent;
+
+foreach ($db->collect(0, false) as $id) {
+    $torrent = $torMan->findById($id);
+    if (is_null($torrent)) {
+        echo "$id not found\n";
+        continue;
+    }
+    $location = $torrent->group()->publicLocation();
+
+    // tracker message BAD_FORMAT, no bonus point change
+    [$success, $message] = $torrent->remove(null, "The Great V2 Purge", 5, false);
+    $success = (int)$success;
+    echo "$id removed $message ($success) $location\n";
+}

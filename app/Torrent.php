@@ -321,11 +321,11 @@ class Torrent extends TorrentAbstract {
     /**
      * Remove a torrent.
      */
-    public function remove(?User $user, string $reason, int $trackerReason = -1): array {
+    public function remove(?User $user, string $reason, int $trackerReason = -1, bool $removePoints = true): array {
         $qid = self::$db->get_query_id();
         self::$db->begin_transaction();
         $this->info();
-        if ($this->id > MAX_PREV_TORRENT_ID) {
+        if ($this->id > MAX_PREV_TORRENT_ID && $removePoints) {
             (new \Gazelle\User\Bonus($this->uploader()))->removePointsForUpload($this);
         }
 
@@ -334,6 +334,9 @@ class Torrent extends TorrentAbstract {
         $infohash = $this->infohash();
         $sizeMB   = number_format($this->size() / (1024 * 1024), 2) . ' MiB';
         $name     = $this->name();
+        $media    = $this->media();
+        $format   = $this->format();
+        $encoding = $this->encoding();
         (new \Gazelle\Tracker())->update('delete_torrent', [
             'id'        => $this->id,
             'info_hash' => $this->infohashEncoded(),
@@ -423,7 +426,7 @@ class Torrent extends TorrentAbstract {
         $userInfo = $user ? " by " . $user->username() : '';
         (new Log())->general(
             "Torrent {$this->id} ($name) [$edition] ($sizeMB $infohash) was deleted$userInfo for reason: $reason")
-            ->torrent($this, $user, "deleted torrent ($sizeMB $infohash) for reason: $reason");
+            ->torrent($this, $user, "deleted torrent [$edition] ($media/$format/$encoding $sizeMB $infohash) for reason: $reason");
         self::$db->commit();
 
         array_push($deleteKeys, "zz_t_" . $this->id, sprintf(self::CACHE_KEY, $this->id), "torrent_group_" . $groupId);

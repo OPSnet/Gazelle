@@ -86,9 +86,6 @@ class Reaper extends \Gazelle\Base {
         $list = $this->initialList(
             cond: [
                 'tls.last_action < now() - INTERVAL ? HOUR', // interval
-                // TODO: We do not want to spam people who have voluntarily unseeded their redundant V2 uploads.
-                // We need to nuke these V2 torrents and afterwards the following condition may be removed.
-                "NOT (t.Format = 'MP3' AND t.Encoding = 'V2')",
             ],
             interval: NOTIFY_UNSEEDED_INITIAL_HOUR,
             state:    ReaperState::UNSEEDED,

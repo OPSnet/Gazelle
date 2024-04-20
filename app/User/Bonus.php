@@ -465,7 +465,6 @@ class Bonus extends \Gazelle\BaseUser {
             INNER JOIN torrents AS t ON (t.ID = xfu.fid)
             INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
             WHERE xfu.uid = ?
-                AND NOT (t.Format = 'MP3' AND t.Encoding = 'V2 (VBR)')
             ", $this->user->id(), $this->user->id()
         );
     }
@@ -496,7 +495,6 @@ class Bonus extends \Gazelle\BaseUser {
             INNER JOIN torrents AS t ON (t.ID = xfu.fid)
             INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
             WHERE xfu.uid = ?
-                AND NOT (t.Format = 'MP3' AND t.Encoding = 'V2 (VBR)')
             ", $this->user->id(), $this->user->id()
         );
         $stats['total_size'] = (int)$stats['total_size'];
@@ -525,7 +523,6 @@ class Bonus extends \Gazelle\BaseUser {
             INNER JOIN torrents_leech_stats AS tls ON (tls.TorrentID = t.ID)
             WHERE
                 xfu.uid = ?
-                AND NOT (t.Format = 'MP3' AND t.Encoding = 'V2 (VBR)')
             ORDER BY $orderBy $orderWay
             LIMIT ?
             OFFSET ?

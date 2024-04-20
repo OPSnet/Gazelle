@@ -171,7 +171,6 @@ class Bonus extends \Gazelle\Base {
                 AND xfu.remaining    = 0
                 AND xfu.mtime        > unix_timestamp(now() - INTERVAL 1 HOUR)
                 AND um.Enabled       = '1'
-                AND NOT (t.Format = 'MP3' AND t.Encoding = 'V2 (VBR)')
                 AND NOT EXISTS (
                     SELECT 1 FROM user_has_attr uha
                     INNER JOIN user_attr ua ON (ua.ID = uha.UserAttrID AND ua.Name IN ('disable-bonus-points'))
