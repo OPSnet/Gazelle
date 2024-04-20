@@ -4,9 +4,10 @@ namespace Gazelle\Torrent;
 
 class ReportType extends \Gazelle\BaseObject {
     final public const tableName = 'torrent_report_configuration';
+    final public const pkName    = 'torrent_report_configuration_id';
     final public const CACHE_KEY = 'trepcfg_v2_%d';
 
-    protected array $changeSet;
+    protected array $changeset;
 
     public function flush(): static {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
@@ -17,7 +18,6 @@ class ReportType extends \Gazelle\BaseObject {
     }
     public function link(): string { return ''; }
     public function location(): string { return "tools.php?action=torrent_report_edit&id=" . $this->id; }
-    public function pkName(): string { return "torrent_report_configuration_id"; }
 
     public function url(string|null $param = null): string {
         return htmlentities($this->location());
@@ -201,24 +201,24 @@ class ReportType extends \Gazelle\BaseObject {
         return $this->info()['type'];
     }
 
-    public function setChangeSet(int $userId, array $changeSet): static {
-        $this->changeSet = [$userId, $changeSet];
+    public function setChangeset(\Gazelle\User $user, array $changeset): static {
+        $this->changeset = [$user->id(), $changeset];
         return $this;
     }
 
     public function modify(): bool {
-        [$userId, $changeSet] = $this->changeSet;
-        foreach ($changeSet as $c) {
+        [$userId, $changeset] = $this->changeset;
+        foreach ($changeset as $c) {
             $this->setField($c['field'], $c['new']);
         }
-        $this->changeSet = [];
+        unset($this->changeset);
         $affected = parent::modify();
         if ($affected) {
             self::$db->prepared_query("
                 INSERT INTO torrent_report_configuration_log
                        (user_id, change_set, torrent_report_configuration_id)
                 VALUES (?,       ?,          ?)
-                ", $userId, json_encode($changeSet), $this->id
+                ", $userId, json_encode($changeset), $this->id
             );
         }
         return $affected && self::$db->affected_rows() === 1;

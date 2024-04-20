@@ -96,6 +96,12 @@ class TorrentReportManagerTest extends TestCase {
         $this->assertEquals('phpunit moderator resolve', $report->comment(), 'torrent-report-final-comment');
     }
 
+    public function testModifyReport(): void {
+        $reportType = (new \Gazelle\Manager\Torrent\ReportType())->findByName('other');
+        $reportType->setChangeset($this->userList[0], [['field' => 'is_admin', 'old' => $reportType->isAdmin(), 'new' => 0]]);
+        $this->assertFalse($reportType->setField('is_admin', false)->modify(), 'torrent-report-modify');
+    }
+
     public function testUrgentReport(): void {
         $torMan = new \Gazelle\Manager\Torrent();
         $torMan->setViewer($this->userList[0]);
