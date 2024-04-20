@@ -2,6 +2,9 @@
 
 $userMan = new Gazelle\Manager\User();
 if (!isset($_GET['userid'])) {
+    if (!$Viewer->permitted('site_user_stats')) {
+        error(403);
+    }
     $user = $Viewer;
 } else {
     $user = $userMan->findById((int)$_GET['userid']);
