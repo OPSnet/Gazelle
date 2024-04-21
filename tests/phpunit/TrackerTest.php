@@ -48,7 +48,14 @@ class TrackerTest extends TestCase {
             title: 'tracker ' . randomString(10),
         );
         $tracker = new \Gazelle\Tracker();
+        $this->assertTrue($tracker->addTorrent($this->torrent), 'tracker-add-torrent');
         $this->assertTrue($tracker->addToken($this->torrent, $this->user), 'tracker-add-token');
+        $report = $tracker->torrentReport($this->torrent);
+        $this->assertCount(9, array_keys($report), 'tracker-tinfo-count');
+        $this->assertEquals($this->torrent->id(), $report['id'], 'tracker-tinfo-id');
+        $this->assertCount(0, $report['leecher_list'], 'tracker-tinfo-leecher');
+        $this->assertCount(0, $report['seeder_list'], 'tracker-tinfo-seeder');
+        $this->assertEquals([$this->user->id()], $report['fltoken_list'], 'tracker-tinfo-fltoken');
         $this->assertTrue($tracker->removeToken($this->torrent, $this->user), 'tracker-remove-token');
     }
 
@@ -85,6 +92,7 @@ class TrackerTest extends TestCase {
                 'deleted'   => 0,
                 'leeching'  => 0,
                 'seeding'   => 0,
+                'traced'    => 0,
             ],
             $tracker->userReport($this->user),
             'tracker-user-report-ok'
@@ -92,6 +100,7 @@ class TrackerTest extends TestCase {
 
         $this->user->setField('can_leech', 0)->setField('Visible', '0')->modify();
         $this->assertTrue($tracker->refreshUser($this->user), 'tracker-refresh-user');
+        $this->assertTrue($tracker->traceUser($this->user, true), 'tracker-trace-user');
         $this->assertEquals(
             [
                 'id'        => $this->user->id(),
@@ -100,9 +109,25 @@ class TrackerTest extends TestCase {
                 'deleted'   => 0,
                 'leeching'  => 0,
                 'seeding'   => 0,
+                'traced'    => 1,
             ],
             $tracker->userReport($this->user),
             'tracker-user-report-cannot-leech'
+        );
+
+        $tracker->traceUser($this->user, false);
+        $this->assertEquals(
+            [
+                'id'        => $this->user->id(),
+                'can_leech' => 0,
+                'protected' => 1,
+                'deleted'   => 0,
+                'leeching'  => 0,
+                'seeding'   => 0,
+                'traced'    => 0,
+            ],
+            $tracker->userReport($this->user),
+            'tracker-user-report-untraced'
         );
 
         $announceKey = $this->user->announceKey();
@@ -112,7 +137,7 @@ class TrackerTest extends TestCase {
 
         $initial = current(array_filter($info, fn ($v) => $v['label'] == 'requests handled'))['value'];
         $current = $tracker->info();
-        $this->assertEquals($info['requests handled']['value'] + 7, $current['requests handled']['value'], 'tracker-requests-handled');
+        $this->assertEquals($info['requests handled']['value'] + 10, $current['requests handled']['value'], 'tracker-requests-handled');
     }
 
     #[Group('no-ci')]
@@ -141,6 +166,7 @@ class TrackerTest extends TestCase {
             user:  $this->user,
             title: 'tracker ' . randomString(10),
         );
+        $tracker->addTorrent($this->torrent);
 
         $downloader = Helper::makeUser('trkdown.' . randomString(10), 'tracker');
         $downloader->updateTokens(10);

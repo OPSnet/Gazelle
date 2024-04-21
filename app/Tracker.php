@@ -11,9 +11,6 @@ use Gazelle\Enum\LeechReason;
 use Gazelle\Util\Irc;
 
 class Tracker extends Base {
-    final public const STATS_MAIN = 0;
-    final public const STATS_USER = 1;
-
     protected static array $Requests = [];
     protected string|false $error    = false;
 
@@ -76,6 +73,17 @@ class Tracker extends Base {
             'can_leech' => $user->canLeech() ? '1' : '0',
             'visible'   => $user->isVisible() ? '1' : '0',
         ]);
+    }
+
+    public function traceUser(User $user, bool $trace): bool {
+        return $this->update('trace_user', [
+            'passkey'   => $user->announceKey(),
+            'trace'     => $trace ? '1' : '0',
+        ]);
+    }
+
+    public function isTraced(User $user): bool {
+        return (bool)$this->userReport($user)['traced'];
     }
 
     public function removeUser(User $user): bool {
@@ -198,11 +206,23 @@ class Tracker extends Base {
         return true;
     }
 
+    public function torrentReport(Torrent $torrent): array {
+        $result = $this->report("get=torrent&info_hash={$torrent->flush()->infohashEncoded()}");
+        if (empty($result)) {
+            return $result;
+        }
+        $result['last_flushed'] = date('Y-m-d H:i:s', $result['last_flushed']);
+        sort($result['fltoken_list']);
+        sort($result['leecher_list']);
+        sort($result['seeder_list']);
+        return $result;
+    }
+
     /**
      * Get user context from the tracker
      */
     public function userReport(User $user): array {
-        return $this->report(self::STATS_USER, ['key' => $user->announceKey()]);
+        return $this->report("get=user&key={$user->announceKey()}");
     }
 
     /**
@@ -210,7 +230,7 @@ class Tracker extends Base {
      * returns an array of arrays of ['label' => '...', 'value' => ..., 'type' => (byte, elapsed, number, string)]
      */
     public function info(): array {
-        return $this->report(self::STATS_MAIN);
+        return $this->report('get=stats');
     }
 
     /**
@@ -227,19 +247,11 @@ class Tracker extends Base {
      *
      * @return array with stats in named keys or empty if the request failed
      */
-    protected function report(int $Type, false|array $Params = false): array {
+    protected function report(string $params): array {
         if (DISABLE_TRACKER) {
             return [];
         }
-        $url = '/report?';
-        if ($Type === self::STATS_MAIN) {
-            $url .= 'get=stats';
-        } elseif ($Type === self::STATS_USER && !empty($Params['key'])) {
-            $url .= "get=user&key={$Params['key']}";
-        } else {
-            return [];
-        }
-        $response = $this->request(TRACKER_REPORTKEY, $url, 5);
+        $response = $this->request(TRACKER_REPORTKEY, "/report?$params", 5);
         if ($response === false || $response === "") {
             return [];
         }

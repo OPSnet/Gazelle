@@ -8,8 +8,8 @@ services:
     depends_on:
       - mysql
     volumes:
-      - ./.docker/ocelot/ocelot.conf:/srv/ocelot.conf
-      - ./.docker/ocelot/entrypoint.sh:/srv/entrypoint.sh
+      - ./misc/ocelot/ocelot.conf:/srv/ocelot.conf
+      - ./misc/ocelot/entrypoint.sh:/srv/entrypoint.sh
     environment:
       - DEVELOPMENT=true
       - MYSQL_USER=gazelle

@@ -3,3 +3,9 @@
     <td class="label">Visible in peer lists:</td>
     <td><input type="checkbox" name="Visible"{{ checked(is_visible) }} /></td>
 </tr>
+{% if viewer.permitted('admin_tracker') %}
+<tr>
+    <td class="label">Trace client requests to tracker:</td>
+    <td><input type="checkbox" name="tracker-trace"{{ checked(is_traced) }} /></td>
+</tr>
+{% endif %}

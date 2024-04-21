@@ -4,16 +4,31 @@ if (!$Viewer->permitted('users_mod')) {
     error(403);
 }
 
-$tracker = new Gazelle\Tracker();
-$stats   = false;
-$user    = null;
-$info    = $tracker->info();
+$tracker      = new Gazelle\Tracker();
+$stats        = false;
+$torrentStats = null;
+$user         = null;
+$info         = $tracker->info();
 
 if (isset($_GET['userid'])) {
     $user = (new Gazelle\Manager\User())->find($_GET['userid']);
     if ($user) {
         $stats = $tracker->userReport($user);
         $_GET['userid'] = $user->id(); // change @user to id
+    }
+}
+
+if (isset($_GET['torrentid'])) {
+    $torrent = (new Gazelle\Manager\Torrent())->findById((int)$_GET['torrentid']);
+    if ($torrent) {
+        $torrentStats = [
+            'info'    => $tracker->torrentReport($torrent),
+            'torrent' => $torrent,
+        ];
+    } else {
+        $torrentStats = [
+            'error' => "Torrent " . ((int)$_GET['torrentid']) . " not found",
+        ];
     }
 }
 
@@ -69,8 +84,10 @@ echo $Twig->render('admin/tracker-info.twig', [
         'total'   => $reannounceTotal,
         'success' => $reannounced,
     ],
-    'user_stats'   => $stats,
-    'user_id'      => $_GET['userid'] ?? null,
-    'user'         => $user,
-    'viewer'       => $Viewer,
+    'torrent_stats' => $torrentStats,
+    'user_stats'    => $stats,
+    'user_id'       => $_GET['userid'] ?? null,
+    'user'          => $user,
+    'viewer'        => $Viewer,
 ]);
+    dump($torrentStats);

@@ -230,9 +230,6 @@ defined('SPHINX_MAX_MATCHES') or define('SPHINX_MAX_MATCHES', 1000);
 // should be overridden and set to true.
 defined('DISABLE_TRACKER') or define('DISABLE_TRACKER', false);
 
-// Public-facing hostname of the Ocelot instance
-defined('TRACKER_NAME') or define('TRACKER_NAME', 'localhost');
-
 // This is the name of the docker Ocelot container
 // In production this will be the IP address of the Ocelot instance on your internal network
 defined('TRACKER_HOST') or define('TRACKER_HOST', 'ocelot');
@@ -240,6 +237,9 @@ defined('TRACKER_HOST') or define('TRACKER_HOST', 'ocelot');
 // TCP port of the Ocelot instance
 // Must match the Ocelot configuration
 defined('TRACKER_PORT') or define('TRACKER_PORT', 34000);
+
+// Public-facing hostname of the Ocelot instance
+defined('TRACKER_NAME') or define('TRACKER_NAME', '127.0.0.1' . ":" . TRACKER_PORT);
 
 // Shared secret that is compiled into Ocelot (see config.cpp). Must
 // be exactly 32 alphanumeric characters.

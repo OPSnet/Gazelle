@@ -1,2 +1,2 @@
 PATH=$PATH:/var/www/bin
-*/15 * * * * scheduler >> /tmp/schedule.log
+*/15 * * * * gazelle scheduler >> /tmp/schedule.log

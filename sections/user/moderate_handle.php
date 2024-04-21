@@ -85,7 +85,7 @@ if ($sendHackedMail && !empty(trim($_POST['HackedEmail']))) {
     $sendHackedMail = false;
 }
 $mergeStatsFrom = trim($_POST['MergeStatsFrom']);
-$reason = trim($_POST['Reason']);
+$reason         = trim($_POST['Reason']);
 
 $cur = $user->info();
 if ($_POST['comment_hash'] != $cur['CommentHash']) {
@@ -582,6 +582,9 @@ if ($needTrackerAdd) {
     $tracker->addUser($user);
 } elseif ($needTrackerRefresh) {
     $tracker->refreshUser($user);
+}
+if ($Viewer->permitted('admin_tracker')) {
+    $tracker->traceUser($user, isset($_POST['tracker-trace']));
 }
 
 if (isset($_POST['invite_source_update'])) {

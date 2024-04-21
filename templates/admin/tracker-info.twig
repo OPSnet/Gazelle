@@ -13,12 +13,24 @@
     </div>
     <div class="sidebar">
         <div class="box box2">
-            <div class="head">User stats</div>
+            <div class="head">User status</div>
             <div class="pad">
                 <form method="get" action="">
                     <input type="hidden" name="action" value="ocelot_info" />
-                    <label>Get stats for user (id or @username)<br />
+                    <label>Report status of user (id or @username)<br />
                     <input type="text" name="userid" placeholder="User ID" value="{{ user_id }}" />
+                    </label><br />
+                    <input type="submit" value="Go" />
+                </form>
+            </div>
+        </div>
+        <div class="box box2">
+            <div class="head">Torrent status</div>
+            <div class="pad">
+                <form method="get" action="">
+                    <input type="hidden" name="action" value="ocelot_info" />
+                    <label>Report status of torrent (id)<br />
+                    <input type="text" name="torrentid" placeholder="Torrent ID" value="{{ torrent_stats.torrent.id }}" />
                     </label><br />
                     <input type="submit" value="Go" />
                 </form>
@@ -46,10 +58,10 @@
             </div>
         </div>
 {% endif %}
-{% if not mem_stats and not user_stats %}
+{% if not mem_stats and not user_stats and not torrent_stats %}
         <div class="box box2">
             <div class="pad">
-            <div class="head">Tracker delay</div>
+            <div class="head">Tracker Delay</div>
             <table>
                 <tr>
                     <th>Source</th>
@@ -90,11 +102,65 @@
                     Allowed: {{ user_stats.can_leech }}<br />
                     Hidden: {{ user_stats.protected }}<br />
                     Deleted: {{ user_stats.deleted }}<br />
+                    Traced: {{ user_stats.traced }}<br />
                 </td>
             </tr>
             </table>
 {% elseif user_id %}
                 User id {{ user_id }} is not known to the tracker.
+{% elseif torrent_stats%}
+            <div class="head">Torrent status</div>
+            <table>
+    {% if torrent_stats.error %}
+            <tr>
+                <td>{{ torrent_stats.error }}</td>
+    {% else %}
+            <tr>
+                <td class="label">Title</td>
+                <td><a href="torrents.php?torrentid={{ torrent_stats.torrent.id }}">{{ torrent_stats.torrent.link|raw }}</a></td>
+            </tr>
+            <tr>
+                <td class="label">Completed</td>
+                <td>{{ torrent_stats.info.completed|number_format }}</td>
+            </tr>
+            <tr>
+                <td class="label">Balance</td>
+                <td>{{ torrent_stats.info.balance|number_format }}</td>
+            </tr>
+            <tr>
+                <td class="label">Last flushed</td>
+                <td>{{ torrent_stats.info.last_flushed|time_diff }}</td>
+            </tr>
+            <tr>
+                <td class="label">Last selected seeder</td>
+                <td>{{ torrent_stats.info.last_selected_seeder }}</td>
+            </tr>
+            <tr>
+                <td class="label">Leecher list</td>
+                <td>{% autoescape false %}{{ torrent_stats.info.leecher_list
+                    | map(id => "<a href=\"user.php?id=#{id}\">#{id}</a>")
+                    | default("none")
+                    | join(' ')
+                    }}{% endautoescape %}</td>
+            </tr>
+            <tr>
+                <td class="label">Seeder list</td>
+                <td>{% autoescape false %}{{ torrent_stats.info.seeder_list
+                    | map(id => "<a href=\"user.php?id=#{id}\">#{id}</a>")
+                    | default("none")
+                    | join(' ')
+                    }}{% endautoescape %}</td>
+            </tr>
+            <tr>
+                <td class="label">FL token list</td>
+                <td>{% autoescape false %}{{ torrent_stats.info.fltoken_list
+                    | map(id => "<a href=\"user.php?id=#{id}\">#{id}</a>")
+                    | default("none")
+                    | join(' ')
+                    }}{% endautoescape %}</td>
+            </tr>
+    {% endif %}
+            </table>
 {% elseif mem_stats%}
     <div class="head">Memory allocation (jemalloc) statistics</div>
     <pre>{{ mem_stats }}</pre>
