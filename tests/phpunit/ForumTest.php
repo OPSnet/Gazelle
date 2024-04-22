@@ -145,10 +145,10 @@ class ForumTest extends TestCase {
         // Forum Threads
         $threadMan = new \Gazelle\Manager\ForumThread();
         $thread    = $threadMan->create($this->forum, $admin, 'thread title', 'this is a new thread');
+        $this->assertEquals('this is a new thread', $thread->body(), 'fthread-body');
         $this->assertEquals(1, $thread->postTotal(), 'fthread-post-total');
         $this->assertEquals(0, $thread->lastPage(), 'fthread-last-page');
         $this->assertEquals(0, $thread->lastCatalog(), 'fthread-last-catalog');
-        // weird cache shit
         $this->assertEquals(1, $this->forum->numThreads(), 'fthread-admin-number-thread-total');
 
         $this->assertEquals($admin->id(), $thread->authorId(), 'fthread-author-id');

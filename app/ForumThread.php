@@ -92,6 +92,14 @@ class ForumThread extends BaseObject {
         return new User($this->authorId());
     }
 
+    /**
+     * The body of the initial post in the thread
+     */
+    public function body(): string {
+        $slice = $this->slice(1, 1);
+        return count($slice) ? $slice[0]['Body'] : '';
+    }
+
     public function created(): string {
         return $this->info()['created'];
     }

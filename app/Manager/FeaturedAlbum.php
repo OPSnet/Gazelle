@@ -71,11 +71,10 @@ class FeaturedAlbum extends \Gazelle\BaseManager {
             threshold: $threshold,
         );
 
-        // FIXME: There should be a $thread->body() shortcut to get the body of the first post in a thread
         $news->create(
             user:  $user,
             title: trim($title),
-            body:  $forumThread->slice(1, 1)[0]['Body'] . "\r\n\r\n[url={$forumThread->url()}]Come join the discussion[/url]",
+            body:  $forumThread->body() . "\r\n\r\n[url={$forumThread->url()}]Come join the discussion[/url]",
         );
 
         self::$db->commit();
