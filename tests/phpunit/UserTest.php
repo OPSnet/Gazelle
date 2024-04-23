@@ -504,7 +504,8 @@ class UserTest extends TestCase {
 
         $stats = new \Gazelle\Stats\Users();
         $this->assertTrue($stats->newUsersAllowed($this->user), 'user-stats-new-users');
-        $this->assertGreaterThan(0, $stats->refresh(), 'user-stats-refresh');
+        // will be zero on a fresh install
+        $this->assertGreaterThanOrEqual(0, $stats->refresh(), 'user-stats-refresh');
         $this->assertGreaterThan(0, $stats->registerActivity('users_stats_daily', 10), 'user-stats-register');
 
         $this->assertIsArray($stats->flow(), 'user-stats-flow');

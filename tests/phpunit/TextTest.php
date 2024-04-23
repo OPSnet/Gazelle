@@ -307,43 +307,6 @@ END_HTML;
         Text::$TOC = false;
     }
 
-    public function testTorrent(): void {
-        $id = (int)Gazelle\DB::DB()->scalar("
-            SELECT min(t.ID)
-            FROM torrents t
-            INNER JOIN torrents_group tg ON (tg.ID = t.GroupID)
-            INNER JOIN category c ON (c.category_id = tg.CategoryID)
-            WHERE c.name = ?
-            ", 'Music'
-        );
-        $torrent = (new Gazelle\Manager\Torrent())->findById($id);
-        $torrentId = $torrent->id();
-        $tgroupId  = $torrent->group()->id();
-
-        $torrentRegexp = "^<a href=\"artist\.php\?id=\d+\" dir=\"ltr\">.*</a> – <a title=\".*?\" href=\"/torrents\.php\?id={$tgroupId}&torrentid={$torrentId}#torrent{$torrentId}\">.* \[\d+ .*?\]</a>";
-        $this->assertMatchesRegularExpression("@{$torrentRegexp} .*$@",
-            Text::full_format("[pl]{$torrentId}[/pl]"),
-            'text-pl'
-        );
-
-        // FIXME: we generate torrent urls in two different ways
-        $torrentRegexp = "^<a href=\"artist\.php\?id=\d+\" dir=\"ltr\">.*</a> – <a href=\"torrents\.php\?id={$tgroupId}&amp;torrentid={$torrentId}#torrent{$torrentId}\" dir=\"ltr\">.*</a> \[\d+ .*?\]";
-        $this->assertMatchesRegularExpression("@{$torrentRegexp}@",
-            Text::full_format(SITE_URL . "/{$torrent->location()}"),
-            "text-torrent-url tg={$tgroupId} t={$torrentId}"
-        );
-
-        $tgroupRegexp = "<a href=\"artist\.php\?id=\d+\" dir=\"ltr\">.*?</a> – <a href=\"torrents.php\?id={$tgroupId}\" title=\".*?\" dir=\"ltr\">.*?</a> \[\d+ \S+\]";
-        $this->assertMatchesRegularExpression("@{$tgroupRegexp}@",
-            Text::full_format("[torrent]{$tgroupId}[/torrent]"),
-            'text-tgroup-id'
-        );
-        $this->assertMatchesRegularExpression("@{$tgroupRegexp}@",
-            Text::full_format(SITE_URL . "/{$torrent->group()->location()}"),
-            'text-tgroup-url'
-        );
-    }
-
     public static function dataSpan(): array {
         return [
             ["span-hr",       "a[hr]b",                               "a b"],

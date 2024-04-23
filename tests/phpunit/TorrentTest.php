@@ -51,4 +51,32 @@ class TorrentTest extends TestCase {
             'torrent-remove-all-logs'
         );
     }
+
+    public function testTorrentBBCode(): void {
+        $torrentId = $this->torrent->id();
+        $tgroupId  = $this->torrent->group()->id();
+
+        $torrentRegexp = "^<a href=\"artist\.php\?id=\d+\" dir=\"ltr\">.*</a> – <a title=\".*?\" href=\"/torrents\.php\?id={$tgroupId}&torrentid={$torrentId}#torrent{$torrentId}\">.* \[\d+ .*?\]</a>";
+        $this->assertMatchesRegularExpression("@{$torrentRegexp} .*$@",
+            Text::full_format("[pl]{$torrentId}[/pl]"),
+            'text-pl'
+        );
+
+        // FIXME: we generate torrent urls in two different ways
+        $torrentRegexp = "^<a href=\"artist\.php\?id=\d+\" dir=\"ltr\">.*</a> – <a href=\"torrents\.php\?id={$tgroupId}&amp;torrentid={$torrentId}#torrent{$torrentId}\" dir=\"ltr\">.*</a> \[\d+ .*?\]";
+        $this->assertMatchesRegularExpression("@{$torrentRegexp}@",
+            Text::full_format(SITE_URL . "/{$this->torrent->location()}"),
+            "text-torrent-url tg={$tgroupId} t={$torrentId}"
+        );
+
+        $tgroupRegexp = "<a href=\"artist\.php\?id=\d+\" dir=\"ltr\">.*?</a> – <a href=\"torrents.php\?id={$tgroupId}\" title=\".*?\" dir=\"ltr\">.*?</a> \[\d+ \S+\]";
+        $this->assertMatchesRegularExpression("@{$tgroupRegexp}@",
+            Text::full_format("[torrent]{$tgroupId}[/torrent]"),
+            'text-tgroup-id'
+        );
+        $this->assertMatchesRegularExpression("@{$tgroupRegexp}@",
+            Text::full_format(SITE_URL . "/{$this->torrent->group()->location()}"),
+            'text-tgroup-url'
+        );
+    }
 }
