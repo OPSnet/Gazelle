@@ -44,20 +44,16 @@ if (!$Viewer->permitted('admin_manage_forums')) {
     error(403);
 }
 
-$user = null;
-if (isset($_REQUEST['userid'])) {
-    $user = (new Gazelle\Manager\User())->find($_REQUEST['userid']);
-} else {
-    $user = $Viewer;
-}
+$user = isset($_REQUEST['userid'])
+    ? (new Gazelle\Manager\User())->find($_REQUEST['userid'])
+    : $Viewer;
 if (is_null($user)) {
     error(404);
 }
 $userId = $user->id();
 
-$forumMan = new Gazelle\Manager\Forum();
-$forumList = array_map(fn($f) => new Gazelle\Forum($f), $forumMan->forumList());
-$items = (new Gazelle\Manager\ForumTransition())->userTransitionList($user);
+$forumList = (new Gazelle\Manager\Forum())->forumList();
+$items     = (new Gazelle\Manager\ForumTransition())->userTransitionList($user);
 
 View::show_header('Forum Transitions');
 ?>

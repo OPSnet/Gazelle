@@ -4,9 +4,7 @@ $userMan = new Gazelle\Manager\User();
 $user = [$Viewer->id() => $Viewer];
 
 $category = [];
-$forumList = (new Gazelle\Manager\Forum())->forumList();
-foreach ($forumList as $forumId) {
-    $forum = new Gazelle\Forum($forumId);
+foreach ((new Gazelle\Manager\Forum())->forumList() as $forum) {
     if (!$Viewer->readAccess($forum)) {
         continue;
     }
@@ -24,7 +22,7 @@ foreach ($forumList as $forumId) {
     }
 
     $category[count($category) - 1]['forums'][] = [
-        'forumId'            => $forumId,
+        'forumId'            => $forum->id(),
         'forumName'          => $forum->name(),
         'forumDescription'   => $forum->description(),
         'numTopics'          => $forum->numThreads(),

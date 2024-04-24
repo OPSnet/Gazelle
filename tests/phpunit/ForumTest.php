@@ -135,7 +135,8 @@ class ForumTest extends TestCase {
         $this->assertEquals($forumName, $nameList[$this->forum->id()]['Name'], 'forum-name-list-name-0');
         $this->assertEquals($this->extra->id(), $nameList[$this->extra->id()]['id'], 'forum-name-list-id-1');
 
-        $idList = $forumMan->forumList();
+        $forumList = $forumMan->forumList();
+        $idList = array_map(fn ($f) => $f->id(), $forumList);
         $this->assertCount($initial + 2, $idList, 'forum-id-list-count');
         $this->assertTrue(in_array($this->extra->id(), $idList), 'forum-id-list-sequence');
         $this->assertCount($userTocTotal + 1, $forumMan->tableOfContents($user), 'forum-test-toc-user');

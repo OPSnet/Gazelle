@@ -128,12 +128,11 @@ echo "class='hidden'"; } ?>>
     $LastCategoryID = -1;
     $Columns = 0;
     $i = 0;
-    $Forums = (new Gazelle\Manager\Forum())->forumList();
-    foreach ($Forums as $forumId) {
-        $forum = new Gazelle\Forum($forumId);
+    foreach ((new Gazelle\Manager\Forum())->forumList() as $forum) {
         if (!$Viewer->readAccess($forum)) {
             continue;
         }
+        $forumId = $forum->id();
         $Columns++;
 
         if ($forum->categoryId() != $LastCategoryID) {

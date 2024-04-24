@@ -35,7 +35,6 @@ if (isset($_GET['postid'])) {
 }
 $threadId = $thread->id();
 $forum = $thread->forum();
-$forumId = $forum->id();
 
 if (!$Viewer->readAccess($forum)) {
     error(403);
@@ -43,7 +42,7 @@ if (!$Viewer->readAccess($forum)) {
 
 //Escape strings for later display
 $ForumName = display_str($forum->name());
-$IsDonorForum = ($forumId == DONOR_FORUM);
+$IsDonorForum = ($forum->id() == DONOR_FORUM);
 $PerPage = $Viewer->postsPerPage();
 
 //Post links utilize the catalogue & key params to prevent issues with custom posts per page
@@ -244,7 +243,7 @@ $lastPost = end($slice);
 if ($Viewer->permitted('site_moderate_forums') || ($Viewer->writeAccess($forum) && !$thread->isLocked())) {
     echo $Twig->render('reply.twig', [
         'action'   => 'reply',
-        'forum'    => $forumId,
+        'forum'    => $forum->id(),
         'id'       => $threadId,
         'merge'    => strtotime($lastPost['AddedTime']) > time() - 3600 && $lastPost['AuthorID'] == $Viewer->id(),
         'name'     => 'threadid',
@@ -338,12 +337,11 @@ echo ' checked="checked"'; } ?> tabindex="6" />
                     <select name="forumid" id="move_thread_selector" tabindex="8">
 <?php
     $prevCategoryId = 0;
-    $Forums = (new Gazelle\Manager\Forum())->forumList();
-    foreach ($Forums as $forumId) {
-        $forum = new Gazelle\Forum($forumId);
+    foreach ((new Gazelle\Manager\Forum())->forumList() as $forum) {
         if (!$Viewer->readAccess($forum)) {
             continue;
         }
+        $forumId = $forum->id();
         if ($prevCategoryId != $forum->categoryId()) {
             if ($prevCategoryId) {
 ?>
