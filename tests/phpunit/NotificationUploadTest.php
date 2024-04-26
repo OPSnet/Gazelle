@@ -42,7 +42,7 @@ class NotificationUploadTest extends TestCase {
             media:                   'WEB',
             format:                  'FLAC',
             encoding:                'Lossless',
-            infohash:                'infohash-' . randomString(10),
+            infohash:                'infohash-' . randomString(11),
             filePath:                'unit-test',
             fileList:                [],
             size:                    123_456_789,
@@ -384,6 +384,7 @@ class NotificationUploadTest extends TestCase {
         $this->userList = [
             'new.grp' => Helper::makeUser('new.grp.' . randomString(10), 'notification-ticket'),
         ];
+        // FIXME: this should return an object, not an id
         $filter = (new Gazelle\Notification\Filter())
             ->setLabel('New Group')
             ->setMultiLine('artist', '') // TODO: INSERT fails on not null assertion
@@ -416,7 +417,7 @@ class NotificationUploadTest extends TestCase {
             media:                   'WEB',
             format:                  'FLAC',
             encoding:                '24bit Lossless',
-            infohash:                'infohash-' . randomString(10),
+            infohash:                'infohash-' . randomString(11),
             filePath:                'unit-test',
             fileList:                [],
             size:                    123_456_789,
@@ -447,5 +448,66 @@ class NotificationUploadTest extends TestCase {
         $this->assertEquals(0, $stats['stale']['total'], 'notifier-ticket-stats-stale');
 
         $newTorrent->remove($this->torrent->uploader(), 'notify second unit test');
+    }
+
+    public function testNotificationSearch(): void {
+        $this->userList = [
+            'uploader' => Helper::makeUser('artist.' . randomString(10), 'notification-search'),
+            'search'   => Helper::makeUser('artist.' . randomString(10), 'notification-up'),
+        ];
+        // look for Compilation
+        $filter = (new Gazelle\Notification\Filter())
+            ->setLabel('Search')
+            ->setMultiLine('release_type', "Compilation")
+            ->setMultiLine('artist', '')
+            ->create($this->userList['search']->id());
+
+        $torrent = $this->torMan->create(
+            tgroup:                  $this->torrent->group(),
+            user:                    $this->userList['uploader'],
+            description:             'notify uploader description',
+            media:                   'WEB',
+            format:                  'FLAC',
+            encoding:                'Lossless',
+            infohash:                'infohash-' . randomString(11),
+            filePath:                'unit-test',
+            fileList:                [],
+            size:                    123_456_789,
+            isScene:                 false,
+            isRemaster:              true,
+            remasterYear:            2023,
+            remasterTitle:           '',
+            remasterRecordLabel:     'Unitest Artists',
+            remasterCatalogueNumber: 'UA-NOTIF-1',
+        );
+
+        // process the notifications
+        $ticket = (new Gazelle\Manager\NotificationTicket())->create($torrent);
+        Gazelle\DB::DB()->prepared_query("
+            INSERT INTO xbt_files_users
+                   (fid, uid, useragent, peer_id, active, remaining, ip, timespent, mtime)
+            VALUES (?,   ?,   ?,         ?,       1, 0, '127.0.0.1', 1, unix_timestamp(now() - interval 5 second))
+            ",  $torrent->id(), $torrent->uploaderId(), 'ua-' . randomString(12), randomString(20)
+        );
+        (new Gazelle\Manager\Notification())->handleTicket($ticket, $this->torMan);
+
+        $search = new Gazelle\User\NotificationSearch(
+            $this->userList['search'],
+            $this->torMan,
+            'unt.TorrentID',
+            'DESC'
+        );
+        $this->assertNull($search->filterId(), 'notif-search-no-filter');
+        $this->assertEquals(1, $search->total(), 'notif-search-total');
+        $page = $search->page(2, 0);
+        $this->assertCount(1, $page, 'notif-search-page');
+
+        $item = current($page);
+        $this->assertEquals($filter, $item['id'], 'notif-search-filter-id');
+        $this->assertEquals($filter, $item['filter']->id(), 'notif-search-filter-id');
+
+        $result = $item['result'];
+        $this->assertEquals($torrent->id(), $result[0]['torrent']->id(), 'notif-search-torrent-id');
+        $this->assertEquals(1, $result[0]['unread'], 'notif-search-unread');
     }
 }

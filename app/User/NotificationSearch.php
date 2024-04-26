@@ -18,9 +18,9 @@ class NotificationSearch extends \Gazelle\BaseUser {
 
     public function __construct(
         \Gazelle\User $user,
+        protected \Gazelle\Manager\Torrent $torMan,
         protected string $orderBy,
         protected string $direction,
-        protected \Gazelle\Manager\Torrent $torMan,
     ) {
         parent::__construct($user);
     }
@@ -57,20 +57,39 @@ class NotificationSearch extends \Gazelle\BaseUser {
     public function pageSql(): string {
         $this->configure();
         return "
-            SELECT unt.TorrentID,
-                unt.UnRead        AS unread,
-                unt.FilterID      AS filter_id
-                {$this->baseQuery}
-                ORDER BY {$this->orderBy} {$this->direction}
-                LIMIT ? OFFSET ?
+            SELECT unt.FilterID AS filter_id,
+                unt.TorrentID   AS torrent_id,
+                unt.UnRead      AS unread
+            {$this->baseQuery}
+            ORDER BY {$this->orderBy} {$this->direction}
+            LIMIT ? OFFSET ?
         ";
     }
 
     public function page(int $limit, int $offset): array {
         self::$db->prepared_query($this->pageSql(), ...[...$this->args, $limit, $offset]);
         $list = [];
+        $unread = [];
         foreach (self::$db->to_array(false, MYSQLI_ASSOC, false) as $row) {
-            $list[] = [...$row, 'torrent' => $this->torMan->findById($row['TorrentID'])];
+            $filterId = $row['filter_id'];
+            if (!isset($list[$filterId])) {
+                $filter = new \Gazelle\NotificationFilter($filterId);
+                $list[$filterId] = [
+                    'filter' => $filter,
+                    'id'     => $filterId,
+                    'result' => [],
+                ];
+            }
+            $list[$filterId]['result'][] = [
+                'torrent' => $this->torMan->findById($row['torrent_id']),
+                'unread'  => $row['unread'],
+            ];
+            if ($row['unread']) {
+                $unread[$row['torrent_id']] = 1;
+            }
+        }
+        if ($unread) {
+            $this->clearUnread($unread);
         }
         return $list;
     }
@@ -85,6 +104,9 @@ class NotificationSearch extends \Gazelle\BaseUser {
     }
 
     public function clearUnread(array $torrentIdList): int {
+        if (!$torrentIdList) {
+            return 0;
+        }
         self::$db->prepared_query("
             UPDATE users_notify_torrents SET
                 UnRead = 0

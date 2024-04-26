@@ -30,32 +30,21 @@ $headerMap = [
 $header = new SortableTableHeader('time', $headerMap);
 $headerIcons = new SortableTableHeader('time', $headerMap, ['asc' => '', 'desc' => '']);
 
-$torMan   = (new Gazelle\Manager\Torrent())->setViewer($Viewer);
-$notifier = new Gazelle\User\NotificationSearch($user, $header->getOrderBy(), $header->getOrderDir(), $torMan);
+$notifier = new Gazelle\User\NotificationSearch(
+    $user,
+    (new Gazelle\Manager\Torrent())->setViewer($Viewer),
+    $header->getOrderBy(),
+    $header->getOrderDir(),
+);
 if (isset($_GET['filterid'])) {
     $notifier->setFilter((int)$_GET['filterid']);
 }
 
 $paginator = new Gazelle\Util\Paginator(ITEMS_PER_PAGE, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($notifier->total());
-
 $page = $notifier->page($paginator->limit(), $paginator->offset());
-$filterList = [];
-foreach (array_unique(array_map(fn($n) => $n['filter_id'], $page)) as $filterId) {
-    $filterList[$filterId] = new Gazelle\NotificationFilter($filterId);
-}
 
-$unread = array_map(
-    fn ($n) => $n['TorrentID'],
-    array_filter(
-        $page,
-        fn ($n) => $n['unread'] == 1
-    )
-);
-if ($unread) {
-    $notifier->clearUnread($unread);
-}
-
+$bookmark = new Gazelle\User\Bookmark($Viewer);
 $imgProxy = new Gazelle\Util\ImageProxy($Viewer);
 $snatcher = $Viewer->snatch();
 
@@ -86,36 +75,24 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
 <?php
 } else {
     echo $paginator->linkbox();
-    $FilterGroups = [];
-    foreach ($page as $Result) {
-        if (!isset($FilterGroups[$Result['filter_id']])) {
-            $FilterGroups[$Result['filter_id']] = [
-                'FilterLabel' => $filterList[$Result['filter_id']]->label() ?? 'deleted filter',
-            ];
-        }
-        $FilterGroups[$Result['filter_id']][] = $Result;
-    }
-
-    $bookmark = new Gazelle\User\Bookmark($Viewer);
-    foreach ($FilterGroups as $FilterID => $FilterResults) {
-        $filter = $filterList[$FilterID];
+    foreach ($page as $filterId => $filter) {
 ?>
 <div class="header">
     <h3>
-        Matches for <a href="torrents.php?action=notify&amp;filterid=<?=$FilterID . ($ownProfile ? "" : "&amp;userid=$UserID") ?>"><?=$FilterResults['FilterLabel']?></a>
+        Matches for <a href="torrents.php?action=notify&amp;filterid=<?= $filterId . ($ownProfile ? "" : "&amp;userid=$UserID") ?>"><?= $filter['filter']->label() ?? 'deleted filter' ?></a>
     </h3>
 </div>
 <div class="linkbox notify_filter_links">
 <?php   if ($ownProfile) { ?>
-    <a href="#" onclick="clearSelected(<?=$FilterID?>); return false;" class="brackets">Clear selected in filter</a>
-    <a href="torrents.php?action=notify_clear_filter&amp;filterid=<?=$FilterID?>&amp;auth=<?= $Viewer->auth() ?>" class="brackets">Clear all old in filter</a>
-    <a href="torrents.php?action=notify_catchup_filter&amp;filterid=<?=$FilterID?>&amp;auth=<?= $Viewer->auth() ?>" class="brackets">Mark all in filter as read</a>
+    <a href="#" onclick="clearSelected(<?=$filterId?>); return false;" class="brackets">Clear selected in filter</a>
+    <a href="torrents.php?action=notify_clear_filter&amp;filterid=<?=$filterId?>&amp;auth=<?= $Viewer->auth() ?>" class="brackets">Clear all old in filter</a>
+    <a href="torrents.php?action=notify_catchup_filter&amp;filterid=<?=$filterId?>&amp;auth=<?= $Viewer->auth() ?>" class="brackets">Mark all in filter as read</a>
 <?php   } ?>
 </div>
-<form class="manage_form" name="torrents" id="notificationform_<?=$FilterID?>" action="">
+<form class="manage_form" name="torrents" id="notificationform_<?=$filterId?>" action="">
 <table class="torrent_table cats checkboxes border m_table">
     <tr class="colhead">
-        <td style="text-align: center;"><input type="checkbox" name="toggle" onclick="toggleChecks('notificationform_<?=$FilterID?>', this, '.notify_box')" /></td>
+        <td style="text-align: center;"><input type="checkbox" name="toggle" onclick="toggleChecks('notificationform_<?=$filterId?>', this, '.notify_box')" /></td>
         <td class="small cats_col"></td>
         <td style="width: 100%;" class="nobr">Name<?= ' / ' . $header->emit('year') ?></td>
         <td>Files</td>
@@ -126,19 +103,18 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
         <td class="sign nobr leechers"><?= $headerIcons->emit('leechers') ?></td>
     </tr>
 <?php
-        unset($FilterResults['FilterLabel']);
-        foreach ($FilterResults as $Result) {
-            $TorrentID = $Result['TorrentID'];
-            $torrent = $Result['torrent'];
-            $tgroup = $torrent->group();
-            $match = $tgroup->artistRole()?->matchName($filter->artistList() ?? []);
+        foreach ($filter['result'] as $result) {
+            $torrent   = $result['torrent'];
+            $torrentId = $torrent->id();
+            $tgroup    = $torrent->group();
+            $match     = $tgroup->artistRole()?->matchName($filter['filter']->artistList());
 ?>
-    <tr id="torrent<?= $TorrentID ?>" class="torrent torrent_row<?=
+    <tr id="torrent<?= $torrentId ?>" class="torrent torrent_row<?=
         ($snatcher->showSnatch($torrent) ? ' snatched_torrent' : '')
         . ($tgroup->isSnatched() ? ' snatched_group' : '')
         ?>">
         <td class="m_td_left td_checkbox" style="text-align: center;">
-            <input type="checkbox" class="notify_box notify_box_<?=$FilterID?>" value="<?=$TorrentID?>" id="clear_<?=$TorrentID?>" tabindex="1" />
+            <input type="checkbox" class="notify_box notify_box_<?=$filterId?>" value="<?=$torrentId?>" id="clear_<?=$torrentId?>" tabindex="1" />
         </td>
         <td class="center cats_col">
             <div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>"></div>
@@ -154,12 +130,12 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
                     'torrent' => $torrent,
                     'viewer'  => $Viewer,
                     'extra'   => [
-                        $ownProfile ? "<a href=\"#\" onclick=\"clearItem({$TorrentID}); return false;\" class=\"tooltip\" title=\"Remove from notifications list\">CL</a>" : ''
+                        $ownProfile ? "<a href=\"#\" onclick=\"clearItem({$torrentId}); return false;\" class=\"tooltip\" title=\"Remove from notifications list\">CL</a>" : ''
                     ],
                 ]) ?>
                 <strong><?= $torrent->fullLink() ?></strong>
                 <div class="torrent_info">
-<?php       if ($Result['unread']) { ?>
+<?php       if ($result['unread']) { ?>
                     <strong class="new">New!</strong>
 <?php
             }
