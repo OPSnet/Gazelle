@@ -2,14 +2,14 @@
 
 authorize();
 
-if (!$Viewer->permitted('site_submit_requests') || $Viewer->uploadedSize() < 250 * 1024 * 1024) {
-    error(403);
-}
-
 $requestMan = new Gazelle\Manager\Request();
 $request = $requestMan->findById((int)($_POST['requestid'] ?? 0));
 if (is_null($request)) {
     error(404);
+}
+
+if (!$request->canEdit($Viewer)) {
+    error(403);
 }
 
 if (!isset($_POST['type'])) {
@@ -140,9 +140,9 @@ while (true) {
         $request->setField('LogCue', '');
     } else {
         $logCue = new Gazelle\Request\LogCue(
-            needCue:         isset($_POST['needcue']) ?: $request->needCue(),
-            needLog:         isset($_POST['needlog']) ?: $request->needLog(),
-            needLogChecksum: isset($_POST['needcksum']) ?: $request->needLogChecksum(),
+            needCue:         isset($_POST['needcue']),
+            needLog:         isset($_POST['needlog']),
+            needLogChecksum: isset($_POST['needcksum']),
             minScore:        (int)($_POST['minlogscore'] ?? $request->needLogScore()),
         );
         if ($logCue->needLogChecksum() != $request->needLogChecksum()) {

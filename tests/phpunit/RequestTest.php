@@ -38,7 +38,7 @@ class RequestTest extends TestCase {
         $user  = $this->userList['user'];
 
         $manager = new Gazelle\Manager\Request();
-        $title   = 'phpunit ' . randomString(6) . ' Test Sessions';
+        $title   = 'phpunit ' . randomString(6) . ' Test Sessions (bonus VIP)';
         $image   = 'https://example.com/req.jpg';
         $this->request = $manager->create(
             user:            $admin,
@@ -61,6 +61,7 @@ class RequestTest extends TestCase {
         $id = $this->request->id();
 
         $this->assertInstanceOf(Gazelle\Request::class, $this->request, 'request-create');
+        $this->assertStringNotContainsString(' (bonus VIP)', $this->request->urlencodeTitle(), 'request-urlencode-title');
         $artistName = 'phpunit req ' . randomString(6);
         $this->assertEquals(
             1,
@@ -72,6 +73,7 @@ class RequestTest extends TestCase {
         );
         $this->assertInstanceOf(Gazelle\ArtistRole\Request::class, $this->request->artistRole(), 'request-artist-role');
         $this->assertInstanceOf(Gazelle\Request\LogCue::class, $this->request->logCue(), 'request-log-cue');
+        $this->assertStringContainsString('+', $this->request->urlencodeArtist(), 'request-urlencode-artist');
 
         $this->assertCount(0, $this->request->tagNameList());
         $tagMan = new Gazelle\Manager\Tag();
@@ -258,7 +260,10 @@ class RequestTest extends TestCase {
         $this->assertEquals(-$bounty, $after['uploaded'] - $before['uploaded'], 'request-subtract-bounty');
 
         // add some bounty
+        $this->assertFalse($this->request->hasNewVote(), 'request-no-new-vote');
+        sleep(1); // to ensure lastVoteDate() > created()
         $this->assertTrue($this->request->vote($user, $bounty), 'request-more-bounty');
+        $this->assertTrue($this->request->hasNewVote(), 'request-has-new-vote');
         $userVote = $this->request->userVote($user);
         $this->assertEquals($user->id(), $userVote['user_id'], 'request-user-vote-user-id');
         $this->assertEquals($taxedBounty, $userVote['bounty'], 'request-user-vote-bounty');

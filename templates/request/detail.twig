@@ -1,0 +1,345 @@
+{{ header("View request: " ~ request.text, {'js': 'comments,requests,bbcode,subscriptions'}) }}
+<div class="thin">
+    <div class="header">
+        <h2><a href="requests.php">Requests</a> &rsaquo; {{ request.categoryName }} &rsaquo; {{ request.selfLink|raw }}</h2>
+        <div class="linkbox">
+{% if request.canEdit(viewer) %}
+            <a href="requests.php?action=edit&amp;id={{ request.id }}" class="brackets">Edit</a>
+{% endif %}
+{% if viewer.permitted('site_admin_requests') %}
+            <a href="requests.php?action=edit-bounty&amp;id={{ request.id }}" class="brackets">Edit bounty</a>
+{% endif %}
+{% if request.canEdit(viewer) %}
+            <a href="requests.php?action=delete&amp;id={{ request.id }}" class="brackets">Delete</a>
+{% endif %}
+{% include 'bookmark/action.twig' with {
+    'class':         'request',
+    'float':         false,
+    'id':            request.id,
+    'is_bookmarked': is_bookmarked
+    } only
+%}
+            <a href="#" id="subscribelink_requests{{ request.id }}" class="brackets" onclick="SubscribeComments('requests',{{ request.id }});return false;">{% if is_subscribed %}Unsubscribe{% else %}Subscribe{% endif %}</a>
+           <a href="reports.php?action=report&amp;type=request&amp;id={{ request.id }}" class="brackets">Report request</a>
+{% if not request.isFilled %}
+            <a href="upload.php?request.id={{ request.id }}{% if request.tgroupId %}&amp;groupid={{ request.tgroupId }}{% endif %}" class="brackets">Upload request</a>
+    {% if request.categoryName == 'Music' and request.year == 0 %}
+            <a href="reports.php?action=report&amp;type=request_update&amp;id={{ request.id }}" class="brackets">Request update</a>
+    {% endif %}
+{% endif %}
+
+{% if request.categoryName == 'Music' %}
+            <a href="https://www.worldcat.org/search?qt=worldcat_org_all&amp;q={{ request.urlencodeArtist }}%20{{ request.urlencodeTitle }}" class="brackets">Find in library</a>
+            <a href="https://www.discogs.com/search/?q={{ request.urlencodeArtist }}+{{ request.urlencodeTitle }}&amp;type=release" class="brackets">Find on Discogs</a>
+{% endif %}
+        </div>
+    </div>
+    <div class="sidebar">
+        <div class="box box_image box_image_albumart box_albumart">
+            <div class="head"><strong>Cover</strong></div>
+            <div id="covers">
+                <div class="pad"><p align="center">
+{% if request.image %}
+    {%- set image = request.image|image -%}
+                    <img style="width: 100%;" src="{{ image }}" alt="album art" onclick="lightbox.init('{{ image }}', 220);" data-origin-src="{{ image }}" />
+{% else %}
+                    <img style="width: 100%;" src="{{ request.categoryImage }}" alt="{{ request.categoryName }}" class="tooltip" title="{{ request.categoryName }}" height="220" border="0" />
+{% endif %}
+                </p></div>
+            </div>
+        </div>
+{% if request.categoryName == 'Music' %}
+{% set role_list = request.artistRole.roleList %}
+        <div class="box box_artists">
+            <div class="head"><strong>Artists</strong></div>
+            <ul class="stats nobullet">
+    {% for a in role_list.composer %}
+        {% if loop.first %}
+                <li class="artists_composer"><strong>Composers:</strong></li>
+        {% endif %}
+                <li class="artists_composer">{{ a.artist.link|raw }}</li>
+    {% endfor %}
+    {% for a in role_list.dj %}
+        {% if loop.first %}
+                <li class="artists_dj"><strong>DJ / Compiler:</strong></li>
+        {% endif %}
+                <li class="artists_dj">{{ a.artist.link|raw }}</li>
+    {% endfor %}
+    {% for a in role_list.main %}
+        {% if loop.first %}
+                <li class="artists_main"><strong>{% if role_list.composer %}Performers{% else %}Artists{% endif %}</strong></li>
+        {% endif %}
+                <li class="artists_main">{{ a.artist.link|raw }}</li>
+    {% endfor %}
+    {% for a in role_list.dj %}
+        {% if loop.first %}
+                <li class="artists_with"><strong>With:</strong></li>
+        {% endif %}
+                <li class="artists_with">{{ a.artist.link|raw }}</li>
+    {% endfor %}
+    {% for a in role_list.dj %}
+        {% if loop.first %}
+                <li class="artists_conductor"><strong>Conducted by:</strong></li>
+        {% endif %}
+                <li class="artists_conductor">{{ a.artist.link|raw }}</li>
+    {% endfor %}
+    {% for a in role_list.remixer %}
+        {% if loop.first %}
+                <li class="artists_remix"><strong>Remixed by:</strong></li>
+        {% endif %}
+                <li class="artists_remix">{{ a.artist.link|raw }}</li>
+    {% endfor %}
+    {% for a in role_list.producer %}
+        {% if loop.first %}
+                <li class="artists_producer"><strong>Produced by:</strong></li>
+        {% endif %}
+                <li class="artists_producer">{{ a.artist.link|raw }}</li>
+    {% endfor %}
+    {% for a in role_list.arranger %}
+        {% if loop.first %}
+                <li class="artists_arranger"><strong>Arranged by:</strong></li>
+        {% endif %}
+                <li class="artists_arranger">{{ a.artist.link|raw }}</li>
+    {% endfor %}
+            </ul>
+        </div>
+{% endif %}
+        <div class="box box_tags">
+            <div class="head"><strong>Tags</strong></div>
+            <ul class="stats nobullet">
+{% for name in request.tagNameList %}
+                <li>
+                    <a href="torrents.php?taglist={{ name }}">{{ name }}</a>
+                    <br style="clear: both;" />
+                </li>
+{% endfor %}
+            </ul>
+        </div>
+        <div class="box box_votes">
+            <div class="head"><strong>Top Contributors</strong></div>
+            <table class="layout" id="request_top_contrib">
+{% set seen = false %}
+{% for vote in vote_list %}
+    {% if vote.user_id == viewer.id %}
+        {% set seen = true %}
+        {% set bold_open = '<bold>' %}
+        {% set bold_close = '</bold>' %}
+    {% else %}
+        {% set bold_open = '' %}
+        {% set bold_close = '' %}
+    {% endif %}
+                <tr>
+                    <td>
+                        <a href="user.php?id={{ vote['user_id'] }}">
+                        {{- bold_open|raw }}{{ vote.user.username }}{{ bold_close|raw -}}
+                        </a>
+                    </td>
+                    <td class="number_column">
+                        {{- bold_open|raw }}{{ vote.bounty|octet_size }}{{ bold_close|raw -}}
+                    </td>
+                </tr>
+{% endfor %}
+{% if not seen %}
+    {% set bounty = request.userBounty(viewer) %}
+    {% if bounty %}
+                <tr>
+                    <td>
+                        <a href="{{ viewer.location|raw }}"><strong>{{ viewer.username }}</strong></a>
+                    </td>
+                    <td class="number_column">
+                        <strong>{{ bounty|octet_size }}</strong>
+                    </td>
+                </tr>
+    {% endif %}
+{% endif %}
+            </table>
+        </div>
+    </div>
+    <div class="main_column">
+        <form>
+        <input type="hidden" id="current_uploaded" value="{{ viewer.uploadedSize }}" />
+        <input type="hidden" id="current_downloaded" value="{{ viewer.downloadedSize }}" />
+        <input type="hidden" id="current_rr" value="{{ viewer.requiredRatio }}" />
+        </form>
+        <table class="layout">
+            <tr>
+                <td class="label">Created</td>
+                <td>
+                    {{ request.created|time_diff }}  by <strong>{{ request.userId|user_url }}</strong>
+                </td>
+            </tr>
+{% if request.categoryName == 'Music' %}
+    {% if request.recordLabel %}
+            <tr>
+                <td class="label">Record label</td>
+                <td>{{ request.recordLabel }}</td>
+            </tr>
+    {% endif %}
+    {% if request.catalogueNumber %}
+            <tr>
+                <td class="label">Catalogue number</td>
+                <td>{{ request.catalogueNumber }}</td>
+            </tr>
+    {% endif %}
+            <tr>
+                <td class="label">Release type</td>
+                <td>{{ request.releaseTypeName }}</td>
+            </tr>
+            <tr>
+                <td class="label">Acceptable encodings</td>
+                <td>{{ request.descriptionEncoding|default('Unknown, please read the description.') }}</td>
+            </tr>
+            <tr>
+                <td class="label">Acceptable formats</td>
+                <td>{{ request.descriptionFormat|default('Unknown, please read the description.') }}</td>
+            </tr>
+            <tr>
+                <td class="label">Acceptable media</td>
+                <td>{{ request.descriptionMedia|default('Unknown, please read the description.') }}</td>
+            </tr>
+    {% if request.needCue or request.needLog or request.needLogChecksum %}
+            <tr>
+                <td class="label">Required CD FLAC only extras</td>
+                <td>{{ request.descriptionLogCue }}</td>
+            </tr>
+            <tr>
+                <td class="label">Required CD FLAC checksum</td>
+                <td>{{ request.needLogChecksum ? 'yes' : 'no' }}</td>
+            </tr>
+    {% endif %}
+{% endif %}
+{% if request.oclc %}
+            <tr>
+                <td class="label">WorldCat (OCLC) ID</td>
+                <td>{{ request.oclc }}</td>
+            </tr>
+{% endif %}
+{% if request.tgroupId %}
+            <tr>
+                <td class="label">Torrent group</td>
+                <td><a href="torrents.php?id={{ request.tgroupId }}">torrents.php?id={{ request.tgroupId }}</a></td>
+            </tr>
+{% endif %}
+            <tr>
+                <td class="label">Votes</td>
+                <td>
+                    <span id="votecount">{{ request.userVotedTotal|number_format }} </span>
+{% if request.canVote(viewer) -%}
+                    &nbsp;&nbsp;<span data-id="{{ request.id }}" data-bounty="{{
+                        constant('REQUEST_MIN') * 1024 * 1024 }}" data-n="{{ 
+                        request.userVotedTotal }}" class="request-vote brackets tooltip" title="Add {{
+                        (constant('REQUEST_MIN') * 1024 * 1024)|octet_size }} bounty">Vote</span>
+                    <strong>Costs {{ constant('REQUEST_MIN') }} MiB</strong>
+{% endif %}
+                </td>
+            </tr>
+{% if request.hasNewVote %}
+            <tr>
+                <td class="label">Last voted</td>
+                <td>{{ request.lastVoteDate|time_diff }}</td>
+            </tr>
+{% endif %}
+{% if request.canVote(viewer) %}
+            <tr id="voting">
+                <td class="label tooltip" title="These units are in base 2, not base 10. For example, there are 1,024 MiB in 1 GiB.">Custom vote (MiB)</td>
+                <td>
+                    <input type="text" id="amount_box" size="8" />
+                    <select id="unit" name="unit" onchange="Calculate();">
+                        <option value="mb">MiB</option>
+                        <option value="gb">GiB</option>
+                    </select>
+    {% if constant('REQUEST_TAX') > 0 -%}
+    <strong>{{ constant('REQUEST_TAX') * 100 }}% of this is deducted as tax by the system.</strong>
+    {%- endif %}
+                    <p>Bounty must be greater than or equal to {{ constant('REQUEST_MIN') }} MiB.</p>
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Bounty information</td>
+                <td>
+                    <form class="add_form" name="request" action="requests.php" method="get" id="request_form">
+                        <input type="hidden" name="action" value="vote" />
+                        <input type="hidden" id="request_tax" value="{{ constant('REQUEST_TAX') }}" />
+                        <input type="hidden" id="requestid" name="id" value="{{ request.id }}" />
+                        <input type="hidden" id="auth" name="auth" value="{{ viewer.auth }}" />
+                        <input type="hidden" id="amount" name="amount" value="0" />
+                        <input type="hidden" id="current_uploaded" value="{{ viewer.uploadedSize }}" />
+                        <input type="hidden" id="current_downloaded" value="{{ viewer.downloadedSize }}" />
+                        <input type="hidden" id="current_rr" value="{{ viewer.requiredRatio }}" />
+                        <input id="total_bounty" type="hidden" value="{{ request.bountyTotal }}" />
+    {% if constant('REQUEST_TAX') > 0 %}
+                            Bounty after tax: <strong><span id="bounty_after_tax">{{ tax_rate }} MiB</span></strong><br />
+    {% else %}
+                            <span id="bounty_after_tax" style="display: none;">{{ tax_rate }} MiB</span>
+    {% endif %}
+                        If you add the entered <strong><span id="new_bounty">0 MiB</span></strong> of bounty, your new stats will be: <br />
+                        Uploaded: <span id="new_uploaded">{{ viewer.uploadedSize|octet_size }}</span><br />
+                        Ratio: <span id="new_ratio">{{ ratio(viewer.uploadedSize, viewer.downloadedSize) }}</span>
+                        <input type="button" id="button" value="Vote!" disabled="disabled" />
+                    </form>
+                </td>
+            </tr>
+{% endif %}
+            <tr id="bounty">
+                <td class="label">Bounty</td>
+                <td id="formatted_bounty">{{ request.bountyTotal|octet_size }}</td>
+            </tr>
+{% if request.isFilled %}
+            <tr>
+                <td class="label">Filled</td>
+                <td>
+                    <strong><a href="torrents.php?torrentid={{ request.torrentId }}">Yes</a></strong>, by user {{ filler.username }}
+    {% if viewer.id in [request.userId, request.fillerId] or viewer.permitted('site_moderate_requests') %}
+                        <strong><a href="requests.php?action=unfill&amp;id={{ request.id }}" class="brackets">Unfill</a></strong> Unfilling a request without a <a href="/rules.php?p=requests">valid, nontrivial reason</a> will result in a warning.
+    {% endif %}
+                </td>
+            </tr>
+{% else %}
+            <tr>
+                <td class="label" valign="top">Fill request</td>
+                <td>
+                    <form class="edit_form" name="request" action="" method="post">
+                        <div class="field_div">
+                            <input type="hidden" name="action" value="takefill" />
+                            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+                            <input type="hidden" name="requestid" value="{{ request.id }}" />
+                            <input type="text" size="50" name="link"{% if link %}  value="{{ link }}"{% endif %} />
+                            <br />
+                            <strong>Must be the permalink [PL] of the torrent<br />(e.g. {{ constant('SITE_URL') }}/torrents.php?torrentid=nnn).</strong>
+                        </div>
+    {% if viewer.permitted('site_moderate_requests') %}
+                        <div class="field_div">
+                            For user: <input type="text" size="25" name="user"{% if filler %} value="{{ filler.username}}"{% endif %} />
+                        </div>
+    {% endif %}
+                        <div class="submit_div">
+                            <input type="submit" value="Fill request" />
+                        </div>
+                    </form>
+                </td>
+            </tr>
+{% endif %}
+        </table>
+        <div class="box box2 box_request_desc">
+            <div class="head"><strong>Description</strong></div>
+            <div class="pad">{{ request.description|bb_format }}</div>
+        </div>
+    <div id="request_comments">
+{% include 'comment/thread.twig' with {
+    'action':     'take_post',
+    'id':         request.id,
+    'comment':    comment_page,
+    'name':       'pageid',
+    'paginator':  paginator,
+    'subbed':     is_subscribed,
+    'textarea':   reply,
+    'url':        uri,
+    'url_stem':   'comments.php?page=requests',
+    'userMan':    user_man,
+    'viewer':     viewer
+    } only
+%}
+        </div>
+    </div>
+</div>
+{{ footer() }}

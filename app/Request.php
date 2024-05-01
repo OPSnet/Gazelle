@@ -196,6 +196,10 @@ class Request extends BaseObject {
         ];
     }
 
+    public function bountyTotal(): int {
+        return (int)array_sum(array_column($this->userIdVoteList(), 'bounty'));
+    }
+
     public function canEditOwn(User $user): bool {
         return !$this->isFilled() && $user->id() == $this->userId() && $this->userVotedTotal() < 2;
     }
@@ -218,6 +222,10 @@ class Request extends BaseObject {
 
     public function categoryName(): string {
         return $this->info()['category_name'];
+    }
+
+    public function categoryImage(): string {
+        return STATIC_SERVER . "/common/noartwork/" . CATEGORY_ICON[$this->categoryId() - 1];
     }
 
     public function created(): string {
@@ -285,9 +293,8 @@ class Request extends BaseObject {
         return $this->info()['fill_date'];
     }
 
-    public function userVote(User $user): ?array {
-        $vote =  array_filter($this->userIdVoteList(), fn ($r) => $r['user_id'] === $user->id());
-        return $vote ? current($vote) : null;
+    public function hasNewVote(): bool {
+        return strtotime($this->lastVoteDate()) > strtotime($this->created());
     }
 
     public function isFilled(): bool {
@@ -332,6 +339,9 @@ class Request extends BaseObject {
     }
 
     public function needEncoding(string $encoding): bool {
+        if ($this->needMediaList() === ['']) {
+            return true;
+        }
         return in_array($encoding, $this->needEncodingList());
     }
 
@@ -340,6 +350,9 @@ class Request extends BaseObject {
     }
 
     public function needFormat(string $format): bool {
+        if ($this->needMediaList() === ['']) {
+            return true;
+        }
         return in_array($format, $this->needFormatList());
     }
 
@@ -362,6 +375,9 @@ class Request extends BaseObject {
     }
 
     public function needMedia(string $media): bool {
+        if ($this->needMediaList() === ['']) {
+            return true;
+        }
         return in_array($media, $this->needMediaList());
     }
 
@@ -430,12 +446,25 @@ class Request extends BaseObject {
         return $this->info()['user_id'];
     }
 
-    public function year(): int {
-        return (int)$this->info()['year'];
+    public function urlencodeArtist(): string {
+        return  urlencode(str_replace(
+            ['arranged by ', 'performed by '],
+            ['', ''],
+            $this->artistRole()?->text() ?? ''
+        ));
+    }
+
+    public function urlencodeTitle(): string {
+        return urlencode(trim(preg_replace("/\([^\)]+\)/", '', $this->title())));
     }
 
     public function userIdVoteList(): array {
         return $this->info()['user_vote_list'];
+    }
+
+    public function userVote(User $user): ?array {
+        $vote =  array_filter($this->userIdVoteList(), fn ($r) => $r['user_id'] === $user->id());
+        return $vote ? current($vote) : null;
     }
 
     public function userVoteList(Manager\User $manager): array {
@@ -447,12 +476,12 @@ class Request extends BaseObject {
         return $list;
     }
 
-    public function bountyTotal(): int {
-        return (int)array_sum(array_column($this->userIdVoteList(), 'bounty'));
-    }
-
     public function userVotedTotal(): int {
         return count($this->userIdVoteList());
+    }
+
+    public function year(): int {
+        return (int)$this->info()['year'];
     }
 
     public function validate(Torrent $torrent): array {
