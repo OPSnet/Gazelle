@@ -491,11 +491,6 @@ parameters:
 			path: ../sections/top10/lastfm.php
 
 		-
-			message: "#^Function generate_tag_table\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../sections/top10/tags.php
-
-		-
 			message: "#^Variable \\$SnatchedGroupClass might not be defined\\.$#"
 			count: 1
 			path: ../sections/top10/votes.php
