@@ -19,7 +19,7 @@
 /**/
 /**/
 
-/*  # 2024-04-01 - Updated by rubric_alert with hawkeye and community feedback. */
+/*  # 2024-04-26 - Updated by rubric_alert with hawkeye and community feedback. */
 /*  # Fix: mobile menu, category stripes;  
 /*  # Feature: Add SVGs, tag bubbles, italic fonts and more;
 /*  # Chore: Organized and documented the SCSS. */
@@ -55,7 +55,11 @@
 //
 //   Style: adjusted some colors for clarity. (Apollostage, Coffee and Sunset).
 //
-//   Feature: fix lack of Italic support (replace oblique with Italic).  
+//   Style: torrent discog pages have more visible headers.
+//
+//   Fix: sessions page did not scroll to the right on mobile.
+//
+//   Feature: add Italic support (replace oblique with Italic).  
 //
 //   Feature: specific font for Monospace (not system default).
 //
@@ -114,17 +118,22 @@
 /* ## 3.13.2 forum table structure */
 /* ## 3.13.3 forum headers */
 /* ## 3.14 rules */
-/* ## 3.15 site header */
-/* ## 3.15.1 prevent keyboard opening on iP---e and other mobile devices */
-/* ## 3.15.2 mobile menu layout */
-/* ## 3.15.3 searchboxes */
-/* ## 3.15.4 userinfo */
-/* ## 3.15.5 browse links */
-/* ## 3.15.6 checked */
-/* ## 3.16 Handling for sticky table headers on Mobile */
+/* ## 3.14 reserved */
+/* ## 3.16 handling for sticky table headers on mobile */
+/* ## 3.17 site header */
+/* ## 3.17.1 prevent keyboard opening on ip---e and other mobile devices */
+/* ## 3.17.2 mobile menu layout */
+/* ## 3.17.3 searchboxes */
+/* ## 3.17.4 userinfo */
+/* ## 3.17.5 browse links */
+/* ## 3.17.6 checked */
+/* ## 3.18 torrent search, handling for tag appearance */
+
 /* # 4 MISCELLANEOUS
 /* ## 4.1 Changes for Mobile, super small window */
 /* ## 4.2 Tag bubble appearance on widescreen #wideload */
+/* ## 4.3 i-devices telephone number prevention */
+
 
 /**/
 /**/
@@ -278,7 +287,7 @@ textarea:focus {
 .box2,
 .main_column,
 .sidebar {
-    overflow: hidden;
+  overflow: hidden; 
 }
 
 .clear::after,
@@ -1434,6 +1443,34 @@ ul.collage_images li a > span {
     display: none;
 }
 
+/* #2024 style update for
+/* Discog table: for rows 'Albums', 'Compilations', 'Live Albums', etc. */
+#discog_table tr[id^=torrents_] {
+background-color: $userinfo-background-color-1;
+  :not(a.tooltip.brackets){font-size:125%; color:$primary-accent-color }
+}
+
+/* #2024 style update for
+/* Discog table: for names of albums, to help them stand out somewhat */
+#discog_table .discog strong a,
+#discog_table td.td_info.big_info div.group_info.clear strong a {
+font-size:115%;
+color: $primary-accent-color
+}
+
+/* #2024 style update for
+/* Discog table:  for encodings, to get breathing room after the >> character */
+div#discog_table td.td_info:not(span.torrent_links_block) > a 
+{padding-inline-start: 1em;}
+
+/* #2024 fix for 
+/* Sessions table should scroll */
+// override *both* have overflow set not to scroll
+.box.pad:has(.session_table.border),
+.box.pad .session_table.border {
+  overflow: scroll !important;
+}
+
 #footer {
     width: 100%;
     color: $footer-color;
@@ -1611,7 +1648,11 @@ ul.collage_images li a > span {
 
 .search_form {
     margin: 8px 0;
+    /* here */
+    /* #2024b14 only on desktop, not on mobile */
+    @media (min-width: 575px) {
     overflow: hidden;
+    }
 }
 
 .search_form div.submit {
@@ -1731,14 +1772,17 @@ blockquote {
 /* Not all table headings are setup this way. 
 /* Examples include bonus points rate and Token history.
 /* Attempting to overwrite Global.css */
-.colhead_dark td, .colhead_dark th, .colhead td, .colhead th, td.colhead, td.colhead_dark {
-  top: 0;
-  position: sticky;
-  position: -webkit-sticky;
-  background: inherit !important; /* This is the important line. */
-  z-index: 10;  /* On mobile this will be overwritten. */
-  
-  }
+
+/* disabled at beta 14 pending fix */
+
+// .colhead_dark td, .colhead_dark th, .colhead td, .colhead th, td.colhead, td.colhead_dark {
+//   top: 0;
+//   position: sticky;
+//   position: -webkit-sticky;
+//   background: inherit !important; /* This is the important line. */
+//   z-index: 10;  /* On mobile this will be overwritten. */
+//   
+//   }
 
 /* # 1.4 BEGIN UPLOAD CATEGORY DECORATION STRIPING */
 /* Begin category decorations for torrent-tables on torrent & collage pages */
@@ -1804,7 +1848,7 @@ body#collage .cats_music {
 /* #1.5 HEADER AND MENU LAYOUT */
 /* MENU AND TOP BAR, DESKTOP ONLY */
 
-@media (width >= 480px) {
+@media (min-width: 575px) {
     .thin:last-child > :not(.two_columns) {
         margin: 4px;
     }
@@ -2098,7 +2142,7 @@ body#collage .cats_music {
 /* than being put here like they should be
 /*/
 
-@media only screen and (width <= 768px) {
+@media only screen and (max-width: 575px) {
     /* For mobile phones: */
     #inbox input[type="submit"] {
         font-size: 10px;
@@ -2110,15 +2154,20 @@ body#collage .cats_music {
         padding: 4px;
     }
 }
+
+
+
+
 /* */
-/* ################################################################################
+/* */
+/* ################################################################################ */
 /* # 3 CHANGES FOR MOBILE SITE
 /* ################################################################################
 /* */
 
 /* Begin Changes for Mobile Site */
 
-@media (width <= 480px) {
+@media (max-width: 575px) {
     .m_hidden {
         display: none !important;
     }
@@ -2743,10 +2792,16 @@ body#collage .cats_music {
     }
     /* END rules */
 
-    /* ## 3.15 BEGIN site header */
+    /* ## 3.15 reserved */
+
+    /* ## 3.16 Handling for sticky table headers on Mobile */
+    /* */
+    /* Deleted, removed and expurgated */
+
+    /* ## 3.17 BEGIN site header */
     /* affectionately known as the hamburger bar on desktop */
     
-    /* ## 3.15.1 BEGIN Handling to prevent keyboard from opening on iP---e and other mobile devices */
+    /* ## 3.17.1 BEGIN Handling to prevent keyboard from opening on iP---e and other mobile devices */
 
     @keyframes delay-pointer-events {
         0% {
@@ -2761,15 +2816,16 @@ body#collage .cats_music {
     }
     
     #header:hover #searchbars input,
-    // and Fix for Wis:
     /* this may cause the search boxes to appear on a 1sec delay; not a bug */
-    #nav_userinfo, 
-    #nav_useredit, 
-    animation: delay-pointer-events 1000ms linear;
-    }
+     #nav_userinfo, 
+     #nav_useredit, 
+     #nav_logout  {
+          animation: delay-pointer-events 2000ms linear;
+     }
+
     /* END Handling to prevent..*/
     
-    /* ## 3.15.2 BEGIN MOBILE MENU LAYOUT */
+    /* ## 3.17.2 BEGIN MOBILE MENU LAYOUT */
     
     #header {
         background: $header-background-color;
@@ -2785,7 +2841,7 @@ body#collage .cats_music {
         opacity: 0;
     }
     
-    // when debugging, change hover to a nonce word to force the menu open //
+    // when debugging, remove hover to force the menu open //
     /* menu opens on hover #2024 */
     #header:hover {
          height: clamp(200px, calc(var(--row-height)*15), 100%);
@@ -2886,7 +2942,7 @@ body#collage .cats_music {
         display: none;
     }
 
-    /* ## 3.15.3 BEGIN searchboxes */
+    /* ## 3.17.3 BEGIN searchboxes */
     #searchbars ul {
         bottom: 0;
         height: unset;
@@ -2912,7 +2968,7 @@ body#collage .cats_music {
     /* END searchboxes */
         
 
-    /* 3.15.4 BEGIN userinfo */
+    /* 3.17.4 BEGIN userinfo */
     
     /* remove the nonce words DEBUGGING to see how this works */
     #debugging #userinfo_major,
@@ -3007,7 +3063,7 @@ body#collage .cats_music {
     }
     /* END userinfo */
 
-    /* ## 3.15.5 BEGIN browse links */
+    /* ## 3.17.5 BEGIN browse links */
     #menu ul {
         /* verify this later #qwerty #2024 */
         background: radial-gradient(circle at top left, $userinfo-background-color-2, $userinfo-background-color-1);
@@ -3020,7 +3076,7 @@ body#collage .cats_music {
     }
     /* END browse links */
 
-    /* 3.15.6 BEGIN checked */
+    /* 3.17.6 BEGIN checked */
 
     #extracb1 {
         display: block;
@@ -3055,17 +3111,52 @@ body#collage .cats_music {
     }
     /* END checked */
     /* END site header */
-
-
-    /* ## 3.16 Handling for sticky table headers on Mobile */
-    /* As with section 1.3 above, this only is useful on certain tables */
-    /* replacing the version in Global.css (hopefully) */
-    .colhead_dark td, .colhead_dark th, .colhead td, .colhead th, td.colhead, td.colhead_dark {
-      top: 2.0rem !important;   /* lower on mobile due to the header and pulldown menu */
-      position: sticky;
-      z-index: 0 !important; /* To go under the pulldown menu */
-      background: inherit !important;
+    
+    /* ## 3.18 Torrent search, handling for tag appearance */
+    
+    /* BEGIN tag display for Torrent search form on Mobile, 
+    /* when tags are set to display in profile settings */
+    
+    #taglist tr.label { 
+          position: sticky;
+          height: 2rem;
+          top:  2rem;   /* lower on mobile due to the header and pulldown menu */
+          z-index: 999 !important; /* To go under the pulldown menu */
     }
+    #taglist tr.label td {     
+          background: $menu-li-second-child-background-color;
+          color: $primary-accent-color;
+          align-content: center;
+          text-align: center;
+          border: $primary-accent-color;
+          width:100%
+    }
+    #taglist tr.label td::after {     
+     font-style:italic;
+      content: '— Use "Hide Tags" above or Profile Settings to hide this list of tags.';
+    }
+    
+    #taglist tr:not(.label) td {
+      border: 0.1px solid gray;
+      width:31% !important;
+         visibility: visible;
+        box-sizing: border-box;
+        display: inline-block;
+        font-weight: 200;
+        overflow: hidden;  text-overflow: ellipsis;
+        font-style: italic; 
+        vertical-align: baseline;
+        color: $tag-bubble-foreground-color !important; /*$tag-bubble-background-color;*/
+        background: $tag-bubble-background-color; 
+        padding: 0.25rem ;
+        border-radius: 1rem;
+        margin-bottom: 0.1rem;
+        transition: all 0.6s cubic-bezier(.25,.8,.25,1);;
+    } 
+    
+    /* END tag display for Torrent search form on Mobile, 
+    /* when tags are set to display in profile settings */
+    
 
 }
 
@@ -3073,13 +3164,26 @@ body#collage .cats_music {
 /* # 4 MISCELLANEOUS
 /* ################################################################################
 
-/* ## 4.1 Begin Changes for Mobile, SUPER SMALL window */
 
-@media (width <= 480px) and (height <= 480px) {
-    #header {
-        --row-height: 35px;
-    }
+/* ## 4.1 Begin Changes for Mobile, SUPER SMALL window */
+/* compact the Menu in two steps */
+
+@media (max-width: 575px) and (max-height: 600px) {
+  #header {
+    --row-height: 35px;
+  }
 }
+
+@media (max-width: 575px) and (max-height: 510px) {
+  #userinfo_major,
+  #userinfo_major > * {
+    display:none;
+  }
+  #userinfo_stats,
+  #userinfo_stats > * {
+    display:none;
+  }
+} 
 
 /* #wideload */
 /* ## 4.2 tag bubble appearance on widescreen */
@@ -3150,9 +3254,21 @@ table.torrent_table.cats.m_table td.td_info.big_info div.group_info.clear div.ta
     visibility: visible;
 }
 
-/**/
-/**/
-/*# sourceMappingURL=style.css.map */
+
+/* ## 4.3 i-devices telephone number prevention */
+/*
+/* Below prevents i-devices from converting long numbers to clickable telephone numbers. */
+
+*[x-apple-data-detectors] {
+    border-bottom: 0 !important;
+    cursor: default !important;
+    color: inherit !important;
+    text-decoration: none !important;
+}
+
+/* */
+/* */
+/*# sourceMappingURL=styles.css.map */
 
 /* ####### */
 /* # EOF # */
