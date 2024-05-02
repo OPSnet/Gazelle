@@ -89,7 +89,7 @@
 /* # 1 DESKTOP VIEW */
 /* ## 1.1 Desktop view, handling of all classes */
 /* ## 1.2 Reserved */
-/* ## 1.3 Experimental Fix for Sticky Column Headings */
+/* ## 1.3 Reserved */
 /* ## 1.4 Upload Category Decoration Striping */
 /* ## 1.5 Header and menu layout */
 /* ## 1.6 Menu Handling */
@@ -1768,21 +1768,7 @@ blockquote {
 
 /* # 1.2 Reserved [for more organization in the future]
 
-/* ## 1.3 EXPERIMENTAL FIX FOR STICKY COLUMN HEADINGS
-/* Not all table headings are setup this way. 
-/* Examples include bonus points rate and Token history.
-/* Attempting to overwrite Global.css */
-
-/* disabled at beta 14 pending fix */
-
-// .colhead_dark td, .colhead_dark th, .colhead td, .colhead th, td.colhead, td.colhead_dark {
-//   top: 0;
-//   position: sticky;
-//   position: -webkit-sticky;
-//   background: inherit !important; /* This is the important line. */
-//   z-index: 10;  /* On mobile this will be overwritten. */
-//   
-//   }
+/* # 1.3 Reserved [sticky column headers have been burninated]
 
 /* # 1.4 BEGIN UPLOAD CATEGORY DECORATION STRIPING */
 /* Begin category decorations for torrent-tables on torrent & collage pages */
