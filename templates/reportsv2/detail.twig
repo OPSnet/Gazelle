@@ -1,52 +1,113 @@
-{% set torrent = report.torrent %}
-{% if torrent.description %}
-                        <br /><div class="report_torrent_info" title="Release description of reported torrent">Release info: {{ torrent.description|bb_format }}</div>
-{% endif %}
-{% if report.status != 'resolved' %}
-    {% set tgroup_id = torrent.group.id %}
-    {% set group_total = manager.totalReportsGroup(tgroup_id) %}
-    {% if group_total > 1 %}
-        {% set group_total = group_total - 1 %}
-                        <div style="text-align: right;">
-                            <a href="reportsv2.php?view=group&amp;id={{ tgroup_id }}">There
-        {%- if group_total > 1 %} are {{ group_total }} other reports {% else %} is 1 other report {% endif -%}
-                                for torrents in this group</a>
-                        </div>
-    {% endif %}
-    {% set uploader_id = torrent.uploaderId %}
-    {% set uploaded_total = manager.totalReportsUploader(uploader_id) %}
-    {% if uploaded_total > 1 %}
-        {% set uploaded_total = uploaded_total - 1 %}
-                        <div style="text-align: right;">
-                            <a href="reportsv2.php?view=uploader&amp;id={{ uploader_id }}">There
-        {%- if upload_total > 1 %} are {{ upload_total }} other reports {% else %} is 1 other report {% endif -%}
-                                for torrents uploaded by this user</a>
-                        </div>
-    {% endif %}
-    {% for request in request_list %}
-                        <div style="text-align: right;">
-                            <strong class="important_text">{{ request.fillerId|user_url }} used this torrent to fill <a href="{{
-                                request.location }}">this request</a> {{ request.fillDate|time_diff }}</strong>
-                        </div>
-    {% endfor %}
-{% endif %}
+<div>
+    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+    <input type="hidden" id="categoryid{{ report.id }}" name="categoryid" value="{{ report.reportType.categoryId }}" />
+    <input type="hidden" id="raw_name{{ report.id }}" name="raw_name" value="{{ (torrent.fullName|default('deleted torrent')) ~ ' (' ~ ((torrent.size|default(0)) / (1024 * 1024))|number_format(2) ~ ' MiB)' }}" />
+    <input type="hidden" id="report_reason{{ report.id }}" name="report_reason" value="{{ report.reason }}" />
+    <input type="hidden" id="reporterid{{ report.id }}" name="reporterid" value="{{ report.reporterId }}" />
+    <input type="hidden" id="reportid{{ report.id }}" name="reportid" value="{{ report.id }}" />
+    <input type="hidden" id="torrentid{{ report.id }}" name="torrentid" value="{{ torrent.id }}" />
+    <input type="hidden" id="type{{ report.id }}" name="type" value="{{ report.reportType.id }}" />
+    <input type="hidden" id="uploader{{ report.id }}" name="uploader" value="{{ torrent.uploader.username }}" />
+    <input type="hidden" id="uploaderid{{ report.id }}" name="uploaderid" value="{{ torrent.uploaderId }}" />
+</div>
+<table class="box layout" cellpadding="5">
+<tr>
+    <td class="label"><a href="reportsv2.php?view=report&amp;id={{ report.id }}">Reported</a> torrent:</td>
+    <td>
+        {{ torrent.group.link|raw }} {{ torrent.shortLabelLink|raw }} ({{ torrent.size|octet_size }})
+        <br />{{ torrent.edition }}
+        <br /><a href="torrents.php?action=download&amp;id={{ torrent.id }}&amp;torrent_pass={{ viewer.announceKey }}" title="Download" class="brackets tooltip">DL</a>
+        <a href="#" class="brackets tooltip" onclick="show_downloads('{{ torrent.id }}', 0); return false;" title="View the list of users that have clicked the &quot;DL&quot; button.">Downloaders</a>
+        <a href="#" class="brackets tooltip" onclick="show_snatches('{{ torrent.id }}', 0); return false;" title="View the list of users that have reported a snatch to the tracker.">Snatchers</a>
+        <a href="#" class="brackets" onclick="show_seeders('{{ torrent.id }}', 0); return false;">Seeders</a>
+        <a href="#" class="brackets" onclick="show_files('{{ torrent.id }}'); return false;">Contents</a>
+        <div id="viewlog_{{ torrent.id }}" class="hidden"></div>
+        <div id="peers_{{ torrent.id }}" class="hidden"></div>
+        <div id="downloads_{{ torrent.id }}" class="hidden"></div>
+        <div id="snatches_{{ torrent.id }}" class="hidden"></div>
+        <div id="files_{{ torrent.id }}" class="hidden">
+            <table class="filelist_table">
+                <tr class="colhead_dark">
+                    <td>
+                        <div class="filelist_title" style="float: left;">File Names</div>
+                        <div class="filelist_path" style="float: right;">{{ torrent.path|default('.') }}</div>
+                    </td>
+                    <td class="nobr" style="text-align: right">
+                        <strong>Size</strong>
                     </td>
                 </tr>
+{% for f in torrent.fileList %}
+                <tr><td>{{ f.name }}</td><td class="number_column nobr">{{ f.size|octet_size }}</td></tr>
+{% endfor %}
+            </table>
+        </div>
+        <br /><span class="report_reporter">reported by {{ report.reporterId|user_url }} {{ report.created|time_diff }} for the reason: <strong>{{ report.reportType.name }}</strong></span>
+        <br />uploaded by {{ torrent.uploaderId|user_url }} on <span title="{{ torrent.created|time_diff(3, false) }}">{{ torrent.created }}</span>
+        <br />Last action: {{ torrent.lastActiveDate|default('Never') }}
+        <br /><span class="report_torrent_file_ext">Audio files present:
+{% for ext, total in torrent.fileListAudioMap -%}
+    {%- if loop.first %}<span class="file_ext_map">{% else %}, {% endif -%}
+        {{ ext }}: {{ total|number_format }}
+    {%- if loop.last %}</span>{% endif -%}
+{% else %}
+            <span class="file_ext_none">none</span>
+{% endfor %}
+        </span>
+{% set torrent = report.torrent %}
+{% if torrent.description %}
+        <br /><div class="report_torrent_info" title="Release description of reported torrent">Release info: {{ torrent.description|bb_format }}</div>
+{% endif %}
+{% if report.status != 'resolved' %}
+    {% if total_group > 1 %}
+        {% set total_group = total_group - 1 %}
+        <div style="text-align: right;">
+            <a href="reportsv2.php?view=group&amp;id={{ torrent.groupId }}">There
+        {%- if total_group > 1 %} are {{ total_group }} other reports {% else %} is 1 other report {% endif -%}
+                for torrents in this group</a>
+        </div>
+    {% endif %}
+    {% if total_uploader > 1 %}
+        {% set total_uploader = total_uploader - 1 %}
+        <div style="text-align: right;">
+            <a href="reportsv2.php?view=uploader&amp;id={{ torrent.uploaderId }}">There
+        {%- if total_uploader > 1 %} are {{ total_uploader }} other reports {% else %} is 1 other report {% endif -%}
+                for torrents uploaded by this user</a>
+        </div>
+    {% endif %}
+    {% if total_torrent > 1 %}
+        {% set total_torrent = total_torrent - 1 %}
+        <div style="text-align: right;">
+            <strong class="important_text">
+                <a href="reportsv2.php?view=torrent&amp;id={{ torrent.id }}">There
+                {%- if total_torrent > 1 %} are {{ total_torrent }} other reports {% else %} is 1 other report {% endif -%}
+                for this torrent</a>
+            </strong>
+        </div>
+    {% endif %}
+    {% for request in request_list %}
+        <div style="text-align: right;">
+            <strong class="important_text">{{ request.fillerId|user_url }} used this torrent to fill <a href="{{
+                request.location }}">this request</a> {{ request.fillDate|time_diff }}</strong>
+        </div>
+    {% endfor %}
+{% endif %}
+    </td>
+</tr>
 {% if report.trackList %}
-                <tr>
-                    <td class="label">Relevant tracks:</td>
-                    <td> {{ report.trackList|join(' ') }} </td>
-                </tr>
+<tr>
+    <td class="label">Relevant tracks:</td>
+    <td> {{ report.trackList|join(' ') }} </td>
+</tr>
 {% endif %}
 {% for link in report.externalLink %}
     {% if loop.first %}
-                <tr>
-                    <td class="label">Relevant links:</td>
-                    <td>
+<tr>
+    <td class="label">Relevant links:</td>
+    <td>
     {% endif %}
         {{ link|linkify }}
     {% if loop.last %}
-                    </td>
-                </tr>
+    </td>
+</tr>
     {% endif %}
 {% endfor %}

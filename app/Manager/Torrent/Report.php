@@ -197,6 +197,16 @@ class Report extends \Gazelle\BaseManager {
         );
     }
 
+    /**
+     * How many open reports exist for this torrent
+     */
+    public function totalReportsTorrent(\Gazelle\Torrent|\Gazelle\TorrentDeleted $torrent): int {
+        return (int)self::$db->scalar("
+            SELECT count(*) FROM reportsv2 WHERE Status != 'Resolved' AND TorrentID = ?
+            ", $torrent->id()
+        );
+    }
+
     public function setSearchFilter(array $filter): static {
         $this->filter = $filter;
         return $this;

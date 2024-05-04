@@ -55,9 +55,7 @@ if ($search->canUnclaim($Viewer)) {
 } else {
     foreach ($page as $report) {
         $reportId   = $report->id();
-        $reporterId = $report->reporterId();
         $resolverId = $report->resolverId();
-        $reporterName = $userMan->findById($reporterId)?->username() ?? 'System';
         $resolverName = $userMan->findById($resolverId)?->username() ?? 'System';
 
         if (is_null($report->torrent()) && $report->status() != 'Resolved') {
@@ -70,15 +68,9 @@ if ($search->canUnclaim($Viewer)) {
     </div>
 <?php
         } else {
-            $reportType   = $report->reportType();
             $torrentId    = $report->torrentId();
             $torrent      = $report->torrent()->setViewer($Viewer);
-
             $tgroupId     = (int)$torrent?->groupId();
-            $categoryId   = (int)$torrent?->group()?->categoryId();
-            $size         = '(' . number_format((int)$torrent?->size() / (1024 * 1024), 2) . ' MiB)';
-            $uploaderId   = (int)$torrent?->uploaderId();
-            $uploaderName = $userMan->findById($uploaderId)?->username() ?? 'System';
 ?>
     <div id="report<?= $reportId ?>">
         <form class="manage_form" style="80%" name="report" id="reportform_<?= $reportId ?>" action="reports.php" method="post">
@@ -87,67 +79,16 @@ if ($search->canUnclaim($Viewer)) {
 * Some of these are for takeresolve, namely the ones that aren't inputs, some for the JavaScript.
 */
 ?>
-            <div>
-                <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
-                <input type="hidden" id="reportid<?= $reportId ?>" name="reportid" value="<?= $reportId ?>" />
-                <input type="hidden" id="torrentid<?= $reportId ?>" name="torrentid" value="<?= $torrentId ?>" />
-                <input type="hidden" id="uploader<?= $reportId ?>" name="uploader" value="<?= $uploaderName ?>" />
-                <input type="hidden" id="uploaderid<?= $reportId ?>" name="uploaderid" value="<?= $uploaderId ?>" />
-                <input type="hidden" id="reporterid<?= $reportId ?>" name="reporterid" value="<?= $reporterId ?>" />
-                <input type="hidden" id="report_reason<?= $reportId ?>" name="report_reason" value="<?= $report->reason() ?>" />
-                <input type="hidden" id="raw_name<?= $reportId ?>" name="raw_name" value="<?= html_escape($torrent?->fullName() ?? 'delete torrent') . " $size" ?>" />
-                <input type="hidden" id="type<?= $reportId ?>" name="type" value="<?= $reportType->type() ?>" />
-                <input type="hidden" id="categoryid<?= $reportId ?>" name="categoryid" value="<?= $report->reportType()->categoryId() ?>" />
-            </div>
-            <table class="box layout" cellpadding="5">
-                <tr>
-                    <td class="label"><a href="reportsv2.php?view=report&amp;id=<?= $reportId ?>">Reported</a> torrent:</td>
-                    <td>
-                        <?= $torrent->group()->link() ?> <?= $torrent?->shortLabelLink() ?> <?= $size ?>
-                        <br /><?= $torrent?->edition() ?>
-                        <br /><a href="torrents.php?action=download&amp;id=<?= $torrentId ?>&amp;torrent_pass=<?= $Viewer->announceKey() ?>" title="Download" class="brackets tooltip">DL</a>
-                        <a href="#" class="brackets tooltip" onclick="show_downloads('<?=( $torrentId )?>', 0); return false;" title="View the list of users that have clicked the &quot;DL&quot; button.">Downloaders</a>
-                        <a href="#" class="brackets tooltip" onclick="show_snatches('<?=( $torrentId )?>', 0); return false;" title="View the list of users that have reported a snatch to the tracker.">Snatchers</a>
-                        <a href="#" class="brackets" onclick="show_seeders('<?=( $torrentId )?>', 0); return false;">Seeders</a>
-                        <a href="#" class="brackets" onclick="show_files('<?=( $torrentId )?>'); return false;">Contents</a>
-                        <div id="viewlog_<?= $torrentId ?>" class="hidden"></div>
-                        <div id="peers_<?= $torrentId ?>" class="hidden"></div>
-                        <div id="downloads_<?= $torrentId ?>" class="hidden"></div>
-                        <div id="snatches_<?= $torrentId ?>" class="hidden"></div>
-                        <div id="files_<?= $torrentId ?>" class="hidden">
-                            <table class="filelist_table">
-                                <tr class="colhead_dark">
-                                    <td>
-                                        <div class="filelist_title" style="float: left;">File Names</div>
-                                        <div class="filelist_path" style="float: right;"><?= $torrent?->path() ? html_escape("/{$torrent->path()}/") : '.' ?></div>
-                                    </td>
-                                    <td class="nobr" style="text-align: right">
-                                        <strong>Size</strong>
-                                    </td>
-                                </tr>
-<?php       foreach ($torrent?->fileList() ?? [] as $f) { ?>
-                                <tr><td><?= $f['name'] ?></td><td class="number_column nobr"><?= byte_format($f['size']) ?></td></tr>
-<?php       } ?>
-                            </table>
-                        </div>
-                        <br /><span class="report_reporter">reported by <a href="user.php?id=<?= $report->reporterId() ?>"><?= $reporterName ?></a> <?=time_diff($report->created())?> for the reason: <strong><?= $report->reportType()->name() ?></strong></span>
-                        <br />uploaded by <?= $torrent?->uploader()?->link() ?> on <span title="<?= time_diff($torrent?->created(), 3, false) ?>"><?= $torrent?->created() ?></span>
-                        <br />Last action: <?= $torrent?->lastActiveDate() ?: 'Never' ?>
-                        <br /><span class="report_torrent_file_ext">Audio files present:
-<?php
-            $extMap = $torrent?->fileListAudioMap() ?? [];
-            if (count($extMap) == 0) {
-?>
-                            <span class="file_ext_none">none</span>
-<?php       } else { ?>
-                            <span class="file_ext_map"><?= implode(', ', array_map(fn ($ext) => "$ext: {$extMap[$ext]}", array_keys($extMap))) ?></span>
-<?php       } ?>
-                        </span>
+
 <?php
             echo $Twig->render('reportsv2/detail.twig', [
-                'manager'      => $reportMan,
-                'report'       => $report,
-                'request_list' => $requestMan->findByTorrentReported($torrent),
+                'report'         => $report,
+                'request_list'   => $requestMan->findByTorrentReported($torrent),
+                'torrent'        => $torrent,
+                'total_group'    => $reportMan->totalReportsGroup($torrent->groupId()),
+                'total_uploader' => $reportMan->totalReportsUploader($torrent->uploaderId()),
+                'total_torrent'  => $reportMan->totalReportsTorrent($torrent),
+                'viewer'         => $Viewer,
             ]);
             if ($report->otherIdList()) {
 ?>
@@ -161,7 +102,7 @@ if ($search->canUnclaim($Viewer)) {
                     if ($extra) {
 ?>
                         <?= $n++ == 0 ? '' : '<br />' ?>
-                        <?= $extra->group()->link() ?> <?= $extra->shortLabelLink() ?> (<?= number_format($extra->size() / (1024 * 1024), 2) ?> MiB)
+                        <?= $extra->group()->link() ?> <?= $extra->shortLabelLink() ?> (<?= byte_format($extra->size()) ?>)
                         <br /><?= $extra->edition() ?>
                         <br /><a href="torrents.php?action=download&amp;id=<?= $extraId ?>&amp;torrent_pass=<?= $Viewer->announceKey() ?>" title="Download" class="brackets tooltip">DL</a>
                         <a href="#" class="brackets tooltip" onclick="show_downloads('<?= $extraId ?>', 0); return false;" title="View the list of users that have clicked the &quot;DL&quot; button.">Downloaders</a>
@@ -352,8 +293,9 @@ if ($search->canUnclaim($Viewer)) {
                     </td>
                     <td>
                         <select name="resolve_type" id="resolve_type<?= $reportId ?>" onchange="ChangeResolve(<?= $reportId ?>);">
-<?php           foreach ($reportTypeMan->categoryList($categoryId) as $rt) { ?>
-                            <option value="<?= $rt->type() ?>"><?= $rt->name() ?></option>
+<?php           foreach ($reportTypeMan->categoryList((int)$torrent?->group()?->categoryId()) as $rt) {
+                            $selected = $rt->type() === $report->type() ? ' selected' : '';
+                            ?><option value="<?= $rt->type() ?>"<?= $selected ?>><?= $rt->name() ?></option>
 <?php           } ?>
                         </select>
                         | <span id="options<?= $reportId ?>">
