@@ -1,0 +1,9 @@
+A torrent that you {{ action }} has been
+{%- if replacement_id %} replaced. You can find the new torrent [url=torrents.php?torrentid={{ replacement_id }}}]here[/url].
+{%- else %} deleted.{% endif %}
+
+The torrent was: {{ name }}
+
+If you are seeding it, please remove it from your client at the earliest opportunity. It will most likely be displayed as [b]{{ path }}[/b].
+
+[url=log.php?search=Torrent+{{ torrent_id }}]Log message[/url]:[quote]{{ log }}[/quote]

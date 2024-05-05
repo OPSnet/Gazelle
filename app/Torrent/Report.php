@@ -233,6 +233,7 @@ class Report extends \Gazelle\BaseObject {
             $this->torrent->flush();
         }
         self::$cache->delete_value(sprintf(\Gazelle\TorrentAbstract::CACHE_REPORTLIST, $this->torrentId()));
+        self::$cache->decrement('num_torrent_reportsv2');
         $this->flush();
         return $affected;
     }

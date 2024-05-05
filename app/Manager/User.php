@@ -559,39 +559,52 @@ class User extends \Gazelle\BaseManager {
         return $total;
     }
 
-    public function sendRemovalPm(int $torrentId, int $uploaderId, string $name, string $log, int $trumpId, bool $pmUploader): int {
-        $subject = 'Torrent deleted: ' . $name;
-        $message = 'A torrent %s '
-            . (!$trumpId
-                 ? ' has been deleted.'
-                 : " has been trumped. You can find the new torrent [url=torrents.php?torrentid={$trumpId}]here[/url]."
-            )
-            . "\n\n[url=log.php?search=Torrent+{$torrentId}]Log message[/url]: "
-            . str_replace('%', '%%', $log) // to prevent sprintf() interpolation
-            . ".";
-
+    /**
+     * Send a system PM to the person whose upload has been removed.
+     * Cannot use a torrent object here as it has already be deleted, which
+     * is why the ID and name needs to be passed in.
+     */
+    public function sendRemovalPm(\Gazelle\User $user, int $torrentId, string $name, string $path, string $log, int $replacementId, bool $pmUploader): int {
         if ($pmUploader) {
-            $user = $this->findById($uploaderId);
-            if ($user) {
-                $user->inbox()->createSystem($subject, sprintf($message, 'you uploaded'));
-            }
+            $user->inbox()->createSystem(
+                "Uploaded torrent deleted: $name",
+                self::$twig->render('reportsv2/message.bbcode.twig', [
+                    'action'         => 'uploaded',
+                    'log'            => $log,
+                    'name'           => $name,
+                    'path'           => $path,
+                    'torrent_id'     => $torrentId,
+                    'replacement_id' => $replacementId,
+                ]),
+            );
         }
-        $seen = [$uploaderId];
+        $seen = [$user->id()];
 
         self::$db->prepared_query("
             SELECT DISTINCT xfu.uid
             FROM xbt_files_users    xfu
-            LEFT JOIN user_has_attr uha ON (uha.UserID = xfu.uid AND uha.UserAttrID = (SELECT ID FROM user_attr WHERE Name = ?))
+            LEFT JOIN user_has_attr uha ON (uha.UserID = xfu.uid AND uha.UserAttrID =
+                (SELECT ID FROM user_attr WHERE Name = ?))
             WHERE uha.UserID IS NULL
                 AND xfu.fid = ?
                 AND xfu.uid NOT IN (" . placeholders($seen) . ")
             ", 'no-pm-delete-seed', $torrentId, ...$seen
         );
-        $ids = self::$db->collect('uid');
+        $ids  = self::$db->collect('uid');
         foreach ($ids as $userId) {
             $user = $this->findById($userId);
             if ($user) {
-                $user->inbox()->createSystem($subject, sprintf($message, 'you are seeding'));
+                $user->inbox()->createSystem(
+                    "Seeded torrent deleted: $name",
+                    self::$twig->render('reportsv2/message.bbcode.twig', [
+                        'action'         => 'were seeding',
+                        'log'            => $log,
+                        'name'           => $name,
+                        'path'           => $path,
+                        'torrent_id'     => $torrentId,
+                        'replacement_id' => $replacementId,
+                    ]),
+                );
             }
         }
         $seen = array_merge($seen, $ids);
@@ -599,17 +612,28 @@ class User extends \Gazelle\BaseManager {
         self::$db->prepared_query("
             SELECT DISTINCT xs.uid
             FROM xbt_snatched AS xs
-            LEFT JOIN user_has_attr uha ON (uha.UserID = xs.uid AND uha.UserAttrID = (SELECT ID FROM user_attr WHERE Name = ?))
+            LEFT JOIN user_has_attr uha ON (uha.UserID = xs.uid AND uha.UserAttrID =
+                (SELECT ID FROM user_attr WHERE Name = ?))
             WHERE uha.UserID IS NULL
                 AND xs.fid = ?
                 AND xs.uid NOT IN (" . placeholders($seen) . ")
             ", 'no-pm-delete-snatch', $torrentId, ...$seen
         );
-        $ids = self::$db->collect('uid');
+        $ids  = self::$db->collect('uid');
         foreach ($ids as $userId) {
             $user = $this->findById($userId);
             if ($user) {
-                $user->inbox()->createSystem($subject, sprintf($message, 'you have snatched'));
+                $user->inbox()->createSystem(
+                    "Snatched torrent deleted: $name",
+                    self::$twig->render('reportsv2/message.bbcode.twig', [
+                        'action'         => 'have snatched',
+                        'log'            => $log,
+                        'name'           => $name,
+                        'path'           => $path,
+                        'torrent_id'     => $torrentId,
+                        'replacement_id' => $replacementId,
+                    ]),
+                );
             }
         }
         $seen = array_merge($seen, $ids);
@@ -617,7 +641,8 @@ class User extends \Gazelle\BaseManager {
         self::$db->prepared_query("
             SELECT DISTINCT ud.UserID
             FROM users_downloads AS ud
-            LEFT JOIN user_has_attr uha ON (uha.UserID = ud.UserID AND uha.UserAttrID = (SELECT ID FROM user_attr WHERE Name = ?))
+            LEFT JOIN user_has_attr uha ON (uha.UserID = ud.UserID AND uha.UserAttrID =
+                (SELECT ID FROM user_attr WHERE Name = ?))
             WHERE uha.UserID IS NULL
                 AND ud.TorrentID = ?
                 AND ud.UserID NOT IN (" . placeholders($seen) . ")
@@ -627,11 +652,21 @@ class User extends \Gazelle\BaseManager {
         foreach ($ids as $userId) {
             $user = $this->findById($userId);
             if ($user) {
-                $user->inbox()->createSystem($subject, sprintf($message, 'you have downloaded'));
+                $user->inbox()->createSystem(
+                    "Downloaded torrent deleted: $name",
+                    self::$twig->render('reportsv2/message.bbcode.twig', [
+                        'action'         => 'have downloaded',
+                        'log'            => $log,
+                        'name'           => $name,
+                        'path'           => $path,
+                        'torrent_id'     => $torrentId,
+                        'replacement_id' => $replacementId,
+                    ]),
+                );
             }
         }
 
-        return count(array_merge($seen, $ids));
+        return count($seen) + count($ids);
     }
 
     public function disableUnconfirmedUsers(\Gazelle\Task $task = null): int {

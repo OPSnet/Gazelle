@@ -56,7 +56,6 @@ class InboxTest extends TestCase {
         $this->assertEquals([$receiverId, $senderId], $pmSent->recipientList(), 'pm-recipient-list');
 
         // receive the PM
-        $receiverInbox = $this->userList['receiver']->inbox();
         $pmReceiverManager = new Gazelle\Manager\PM($receiverInbox->user());
         $this->assertEquals(1, $receiverInbox->messageTotal(), 'inbox-initial-message-count');
         $list = $receiverInbox->messageList($pmReceiverManager, 2, 0);

@@ -49,7 +49,6 @@ class Report extends \Gazelle\BaseManager {
         }
 
         self::$cache->delete_value(sprintf(\Gazelle\TorrentAbstract::CACHE_REPORTLIST, $torrent->id()));
-        self::$cache->delete_value("reports_torrent_{$torrent->id()}");
         self::$cache->increment('num_torrent_reportsv2');
         $torrent->flush();
 

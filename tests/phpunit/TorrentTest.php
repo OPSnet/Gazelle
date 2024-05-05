@@ -1,6 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+use Gazelle\Enum\DownloadStatus;
 use Gazelle\Enum\TorrentFlag;
 
 require_once(__DIR__ . '/../../lib/bootstrap.php');
@@ -9,9 +10,10 @@ require_once(__DIR__ . '/../helper.php');
 class TorrentTest extends TestCase {
     protected \Gazelle\Torrent $torrent;
     protected \Gazelle\User    $user;
+    protected array            $userList;
 
     public function setUp(): void {
-        $this->user    = Helper::makeUser('torrent.' . randomString(10), 'rent');
+        $this->user    = Helper::makeUser('torrent.' . randomString(10), 'rent', clearInbox: true);
         $this->torrent = Helper::makeTorrentMusic(
             tgroup: Helper::makeTGroupMusic(
                 name:       'phpunit torrent ' . randomString(6),
@@ -27,6 +29,11 @@ class TorrentTest extends TestCase {
     public function tearDown(): void {
         Helper::removeTGroup($this->torrent->group(), $this->user);
         $this->user->remove();
+        if (isset($this->userList)) {
+            foreach ($this->userList as $user) {
+                $user->remove();
+            }
+        }
     }
 
     public function testFlag(): void {
@@ -37,6 +44,121 @@ class TorrentTest extends TestCase {
         $this->assertEquals(1, $this->torrent->removeFlag(TorrentFlag::badFile), 'torrent-remove-bad-file-flag');
         $this->assertEquals(0, $this->torrent->removeFlag(TorrentFlag::badFolder), 'torrent-remove-no-flag');
         $this->assertFalse($this->torrent->hasFlag(TorrentFlag::badFile), 'torrent-no-more--bad-file-flag');
+    }
+
+    public function testRemovalPm(): void {
+        $torrent = Helper::makeTorrentMusic(
+            tgroup: $this->torrent->group(),
+            user:   $this->user,
+            title:  randomString(10),
+        );
+
+        // a downloader
+        $this->userList['downloader'] = Helper::makeUser('torrent.' . randomString(10), 'rent', clearInbox: true);
+        $status = new Gazelle\Download($torrent, new \Gazelle\User\UserclassRateLimit($this->userList['downloader']), false);
+        $this->assertEquals(DownloadStatus::ok, $status->status(), 'torrent-removal-download');
+
+        // a snatcher
+        $this->userList['snatcher'] = Helper::makeUser('torrent.' . randomString(10), 'rent', clearInbox: true);
+        $db = Gazelle\DB::DB();
+        $db->prepared_query("
+            INSERT INTO xbt_snatched (uid, fid, IP, seedtime, tstamp)
+            VALUES                   (?,   ?, '127.0.0.1', 1, unix_timestamp(now()))
+            ", $this->userList['snatcher']->id(), $torrent->id()
+        );
+
+        // a seeder
+        $this->userList['seeder'] = Helper::makeUser('torrent.' . randomString(10), 'rent', clearInbox: true);
+        Gazelle\DB::DB()->prepared_query("
+            INSERT INTO xbt_files_users
+                   (fid, uid, useragent, peer_id, active, remaining, ip, timespent, mtime)
+            VALUES (?,   ?,   ?,         ?,       1, 0, '127.0.0.1', 1, unix_timestamp(now() - interval 5 second))
+            ",  $torrent->id(), $this->userList['seeder']->id(), 'ua-' . randomString(12), randomString(20)
+        );
+
+        $name = $torrent->fullName();
+        $path = $torrent->path();
+        $this->assertEquals(
+            4,
+            (new \Gazelle\Manager\User())->sendRemovalPm(
+                $this->user,
+                $torrent->id(),
+                $name,
+                $path,
+                log: 'phpunit removal test',
+                replacementId: 0,
+                pmUploader: true
+            ),
+            'torrent-removal-pm'
+        );
+
+        // uploader
+        $inbox = $this->user->inbox();
+        $this->assertEquals(1, $inbox->messageTotal(), 'torrent-removal-uploader-message-count');
+        $list = $inbox->messageList(new Gazelle\Manager\PM($this->user), 2, 0);
+        $pm = $list[0];
+        $this->assertStringStartsWith(
+            "Uploaded torrent deleted: $name",
+            $pm->subject(),
+            'torrent-removal-pm-subject'
+        );
+        $postList = $pm->postList(1, 0);
+        $this->assertStringStartsWith(
+            "A torrent that you uploaded has been deleted.",
+            $postList[0]['body'],
+            'torrent-removal-uploader-pm-recv-body'
+        );
+
+        // downloader
+        $inbox = $this->userList['downloader']->inbox();
+        $this->assertEquals(1, $inbox->messageTotal(), 'torrent-removal-downloader-message-count');
+        $list = $inbox->messageList(new Gazelle\Manager\PM($this->userList['downloader']), 2, 0);
+        $pm = $list[0];
+        $this->assertStringStartsWith(
+            "Downloaded torrent deleted: $name",
+            $pm->subject(),
+            'torrent-removal-downloader-pm-subject'
+        );
+        $postList = $pm->postList(1, 0);
+        $this->assertStringStartsWith(
+            "A torrent that you have downloaded has been deleted.",
+            $postList[0]['body'],
+            'torrent-removal-downloader-pm-recv-body'
+        );
+
+        // snatcher
+        $inbox = $this->userList['snatcher']->inbox();
+        $this->assertEquals(1, $inbox->messageTotal(), 'torrent-removal-snatcher-message-count');
+        $list = $inbox->messageList(new Gazelle\Manager\PM($this->userList['snatcher']), 2, 0);
+        $pm = $list[0];
+        $this->assertStringStartsWith(
+            "Snatched torrent deleted: $name",
+            $pm->subject(),
+            'torrent-removal-snatcher-pm-subject'
+        );
+        $postList = $pm->postList(1, 0);
+        $this->assertStringStartsWith(
+            "A torrent that you have snatched has been deleted.",
+            $postList[0]['body'],
+            'torrent-removal-snatcher-pm-recv-body'
+        );
+
+        // seeder
+        $inbox = $this->userList['seeder']->inbox();
+        $this->assertEquals(1, $inbox->messageTotal(), 'torrent-removal-seeder-message-count');
+        $list = $inbox->messageList(new Gazelle\Manager\PM($this->userList['seeder']), 2, 0);
+        $pm = $list[0];
+        $this->assertStringStartsWith(
+            "Seeded torrent deleted: $name",
+            $pm->subject(),
+            'torrent-removal-seeder-pm-subject'
+        );
+        $postList = $pm->postList(1, 0);
+        $this->assertStringStartsWith(
+            "A torrent that you were seeding has been deleted.",
+            $postList[0]['body'],
+            'torrent-removal-pm-seeder-recv-body'
+        );
     }
 
     public function testRemoveAllLogs(): void {

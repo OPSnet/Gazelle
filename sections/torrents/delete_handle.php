@@ -6,10 +6,10 @@ $torrent = (new Gazelle\Manager\Torrent())->setViewer($Viewer)->findById((int)$_
 if (is_null($torrent)) {
     error(404);
 }
-$torrentId  = $torrent->id();
-$uploaderId = $torrent->uploaderId();
+$torrentId = $torrent->id();
+$uploader  = $torrent->uploader();
 
-if ($Viewer->id() != $uploaderId && !$Viewer->permitted('torrents_delete')) {
+if ($Viewer->id() != $uploader->id() && !$Viewer->permitted('torrents_delete')) {
     error(403);
 }
 if ($Viewer->torrentRecentRemoveCount(USER_TORRENT_DELETE_HOURS) >= USER_TORRENT_DELETE_MAX && !$Viewer->permitted('torrents_delete_fast')) {
@@ -21,6 +21,7 @@ if ($torrent->hasUploadLock()) {
 }
 
 $fullName = $torrent->fullName();
+$path     = $torrent->path();
 $infohash = $torrent->infohash();
 $size     = $torrent->size();
 $reason   = implode(' ', array_map('trim', [$_POST['reason'], $_POST['extra']]));
@@ -31,11 +32,11 @@ if (!$success) {
 }
 
 (new Gazelle\Manager\User())->sendRemovalPm(
-    $torrentId, $uploaderId, $fullName,
+    $uploader, $torrentId, $fullName, $path,
     "Torrent $torrentId $fullName (" . number_format($size / (1024 * 1024), 2) . ' MiB '
         . strtoupper($infohash) . ") was deleted by " . $Viewer->username() . ": $reason",
     0,
-    $Viewer->id() != $uploaderId
+    $Viewer->id() != $uploader->id()
 );
 
 echo $Twig->render('torrent/deleted.twig', [

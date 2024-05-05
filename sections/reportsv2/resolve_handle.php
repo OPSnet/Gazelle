@@ -73,7 +73,7 @@ if ($fromReportPage && in_array($_POST['resolve_type'], ['manual', 'dismiss'])) 
         $comment = 'Report was dismissed as invalid.';
     }
     if ($report->moderatorResolve($Viewer, $comment)) {
-        $Cache->delete_multi(['num_torrent_reportsv2', "reports_torrent_$torrentId"]);
+        $Cache->delete_value('num_torrent_reportsv2');
     } else {
         echo $Twig->render('reportsv2/already-resolved.twig', ['report' => $report]);
     }
@@ -85,26 +85,26 @@ if ($fromReportPage && !$report->moderatorResolve($Viewer, $_POST['comment'] ?? 
     exit;
 }
 
-if ($_POST['resolve_type'] != $report->type()) {
+if ($_POST['resolve_type'] == $report->type()) {
+    $reportTypeName = $report->reportType()->name();
+} else {
     $reportType = $reportTypeMan->findByType($_POST['resolve_type'] ?? '');
     if (is_null($reportType)) {
         json_die("failure", "invalid report type");
     }
     $reportTypeName = $reportType->name();
-} else {
-    $reportTypeName = $report->reportType()->name();
 }
 
-$SendPM = false;
+$sendPM = false;
 if ($_POST['resolve_type'] === 'tags_lots') {
     $report->addTorrentFlag(TorrentFlag::badTag, $Viewer);
-    $SendPM = true;
+    $sendPM = true;
 } elseif ($_POST['resolve_type'] === 'folders_bad') {
     $report->addTorrentFlag(TorrentFlag::badFolder, $Viewer);
-    $SendPM = true;
+    $sendPM = true;
 } elseif ($_POST['resolve_type'] === 'filename') {
     $report->addTorrentFlag(TorrentFlag::badFile, $Viewer);
-    $SendPM = true;
+    $sendPM = true;
 } elseif ($_POST['resolve_type'] === 'lineage') {
     $report->addTorrentFlag(TorrentFlag::noLineage, $Viewer);
 } elseif ($_POST['resolve_type'] === 'lossyapproval') {
@@ -114,10 +114,14 @@ if ($_POST['resolve_type'] === 'tags_lots') {
 $adminMessage   = trim($_POST['admin_message']);
 $logMessage     = isset($_POST['log_message']) ? trim($_POST['log_message']) : null;
 $name           = $torrent->fullName() . ' (' . byte_format($torrent->size()) . ')';
+$path           = $torrent->path();
 $uploader       = $torrent->uploader();
+$pmUploader     = $sendPM || $weeksWarned > 0 || isset($_POST['delete']);
+$revokeUpload   = isset($_POST['upload']);
+$replacementId  = 0;
 
 //Log and delete
-if (!(isset($_POST['delete']) && $Viewer->permitted('users_mod'))) {
+if (!isset($_POST['delete'])) {
     $torrent->flush();
     $Log = $logMessage ?? "No log message (torrent wasn't deleted).";
 } elseif ($torrent->isDeleted()) {
@@ -133,91 +137,84 @@ if (!(isset($_POST['delete']) && $Viewer->permitted('users_mod'))) {
         exit;
     }
 
-    $Log = "Torrent $torrentId ($name) uploaded by " . $uploader->username()
-        . " was deleted by " . $Viewer->username()
-        . ($_POST['resolve_type'] == 'custom' ? '' : " for the reason: {$reportTypeName}.")
-        . ($logMessage ? " $logMessage" : '');
-
-    $TrumpID = 0;
-    if ($_POST['resolve_type'] === 'trump' && preg_match('/torrentid=([0-9]+)/', $logMessage, $match) === 1) {
-        $TrumpID = (int)$match[1];
+    $logList = ["Torrent $torrentId ($name) uploaded by {$uploader->username()} was deleted by {$Viewer->username()}"];
+    if ($_POST['resolve_type'] != 'custom') {
+        $logList[] = "for the reason: {$reportTypeName}.";
     }
-    $pmUploader = $weeksWarned > 0 || isset($_POST['delete']) || $SendPM;
-    $userMan->sendRemovalPm($torrentId, $uploader->id(), $name, $Log, $TrumpID, $pmUploader);
+    if ($logMessage) {
+        $logList[] = ", $logMessage";
+    }
+    $Log = implode(' ', $logList);
+
+    if (
+        in_array($_POST['resolve_type'], ['checksum_trump', 'trump'])
+        && preg_match('/torrentid=([0-9]+)/', $logMessage, $match) === 1
+    ) {
+        $replacementId = (int)$match[1];
+    }
 }
 
-$revokeUpload = isset($_POST['upload']);
-if ($revokeUpload) {
-    $uploader->toggleAttr('disable-upload', true);
-}
-
-if ($weeksWarned > 0) {
-    $Reason = $message = "Uploader of torrent ($torrentId) $name which was resolved with the preset: $reportTypeName.";
-    if ($adminMessage) {
-        $Reason .= " ($adminMessage)";
-    }
-    if ($revokeUpload) {
-        $Reason  .= ' (Upload privileges removed).';
-        $message .= ' (Upload privileges removed).';
-    }
-    $uploader->warn($weeksWarned, $Reason, $Viewer, $message);
-} else {
-    $staffNote = null;
-    if ($revokeUpload) {
-        $staffNote = 'Upload privileges removed by ' . $Viewer->username()
-            . "\nReason: Uploader of torrent ($torrentId) $name which was [url="
-            . $report->location() . "]resolved with the preset: {$reportTypeName}[/url].";
-    }
-    if ($adminMessage) {
-        // They did nothing of note, but still want to mark it (Or upload and mark)
-        if (!$revokeUpload) {
-            $staffNote = "Torrent ($torrentId) $name [url=" . $report->location() . "]was reported[/url]: $adminMessage";
-        } else {
-            $staffNote .= ", mod note: $adminMessage";
-        }
-    }
-    if ($staffNote) {
-        $uploader->addStaffNote($staffNote);
-    }
-}
-$uploader->modify(); // if there are notes to add
-
-//PM
-if ($modNote || $weeksWarned > 0 || isset($_POST['delete']) || $SendPM) {
+// send PMs to those concerned
+if ($modNote || $pmUploader) {
     $message = [
         "[url=torrents.php?torrentid=$torrentId]Your above torrent[/url] was reported "
         . (isset($_POST['delete']) ? 'and has been deleted.' : 'but not deleted.')
     ];
-
-    $Preset = $report->reportType()->pmBody();
-    if ($Preset != '') {
-         $message[] = "Reason: $Preset";
+    $reportReason = $report->reportType()->pmBody();
+    if ($reportReason != '') {
+         $message[] = "Reason: $reportReason";
     }
-
     if ($weeksWarned > 0) {
-        $message[] = "This has resulted in a [url=wiki.php?action=article&name=warnings]$weeksWarned week warning.[/url]";
+        $message[] = "This has resulted in a [url=wiki.php?action=article&name=warnings]{$weeksWarned} week warning.[/url]";
     }
-
     if ($revokeUpload) {
         $message[] = 'This has ' . ($weeksWarned > 0 ? 'also ' : '') . "resulted in the loss of your upload privileges.";
     }
-
     if ($Log) {
-        $message[] = "Log Message: $Log";
+        $message[] = "[url=log.php?search=Torrent+{$torrentId}]Log message[/url]:[quote]{$Log}[/quote]";
     }
-
     if ($modNote) {
-        $message[] = "Message from " . $Viewer->username() . ": $modNote";
+        $message[] = "[quote={$Viewer->username()}]{$modNote}[/quote]";
     }
+    $message[] = "Report was handled by [user]{$Viewer->username()}[/user].";
 
-    $message[] = "Report was handled by [user]" . $Viewer->username() . "[/user].";
-    $uploader->inbox()->createSystem($name, implode("\n\n", $message));
+    $uploader->inbox()->createSystem("Uploaded torrent removed: $name", implode("\n\n", $message));
+    $userMan->sendRemovalPm($uploader, $torrentId, $name, $path, $Log, $replacementId, false);
 }
 
-$Cache->delete_value("reports_torrent_$torrentId");
+if ($weeksWarned > 0) {
+    $reason = $message = "Uploader of torrent ($torrentId) $name which was resolved with the preset: $reportTypeName.";
+    if ($adminMessage) {
+        $reason .= " ($adminMessage)";
+    }
+    if ($revokeUpload) {
+        $reason  .= ' (Upload privileges removed).';
+        $message .= ' (Upload privileges removed).';
+    }
+    $uploader->warn($weeksWarned, $reason, $Viewer, $message);
+} else {
+    $staffNote = [];
+    if ($revokeUpload) {
+        $staffNote[] = "Upload privileges removed by {$Viewer->username()}"
+            . "\nReason: Uploader of torrent ($torrentId) $name which was [url={$report->location()}]resolved with the preset: {$reportTypeName}[/url].";
+    }
+    if ($adminMessage) {
+        // They did nothing of note, but still want to mark it (Or upload and mark)
+        $staffNote[] = $revokeUpload
+            ? "mod note: $adminMessage"
+            : "torrent ($torrentId) $name [url={$report->location()}]was reported[/url]: $adminMessage";
+    }
+    if ($staffNote) {
+        $uploader->addStaffNote(implode(', ', $staffNote));
+    }
+}
+
+if ($revokeUpload) {
+    $uploader->toggleAttr('disable-upload', true);
+}
+$uploader->modify(); // if there are notes to add
 
 // Now we've done everything, update the DB with values
 if ($fromReportPage) {
-    $Cache->decrement('num_torrent_reportsv2');
     $report->finalize($Log, $_POST['comment']);
 }
