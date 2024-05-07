@@ -11,6 +11,10 @@
     {%- if flag %} hidden{% endif -%}
 {%- endmacro %}
 
+{%- macro class_hidden(flag) -%}
+    {%- if flag %} class="hidden"{% endif -%}
+{%- endmacro %}
+
 {%- macro selected(flag) -%}
     {%- if flag %} selected="selected"{% endif -%}
 {%- endmacro %}

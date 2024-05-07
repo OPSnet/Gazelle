@@ -1,0 +1,120 @@
+{% from 'macro/form.twig' import checked, class_hidden, selected -%}
+{% for t in transition_list %}
+    {% if loop.first %}
+<table class="layout border">
+    <tr>
+        <td class="label">Move thread</td>
+        <td>
+    {% endif %}
+            <form action="forums.php" method="post" style="display: inline-block">
+                <input type="hidden" name="action" value="mod_thread" />
+                <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+                <input type="hidden" name="threadid" value="{{ thread.id }}" />
+                <input type="hidden" name="page" value="{{ page }}" />
+                <input type="hidden" name="transition" value="{{ t.id }}" />
+                <input type="submit" value="{{ t.label }}" />
+            </form>
+    {% if loop.last %}
+        </td>
+    </tr>
+</table>
+    {% endif %}
+{% endfor %}
+
+{% if viewer.permitted('site_moderate_forums') %}
+<br />
+<h3 id="thread_notes">Thread notes</h3> <a href="#" onclick="$('#thread_notes_table').gtoggle(); return false;" class="brackets">Toggle</a>
+<form action="forums.php" method="post">
+    <input type="hidden" name="action" value="take_topic_notes" />
+    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+    <input type="hidden" name="threadid" value="{{ thread.id }}" />
+    <table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border hidden" id="thread_notes_table">
+    {% for note in thread.threadNotes %}
+        <tr>
+            <td>{{ note.AuthorID|user_url }} ({{ note.AddedTime|time_diff(2) }})</td>
+            <td>{{ note.Body|bb_format }}</td>
+        </tr>
+    {% endfor %}
+        <tr>
+            <td colspan="2" class="center">
+                <div class="field_div textarea_wrap"><textarea id="topic_notes" name="body" cols="90" rows="3" onkeyup="resize('threadnotes');" style=" margin: 0px; width: 735px;"></textarea></div>
+                <input type="submit" value="Save" />
+            </td>
+        </tr>
+    </table>
+</form>
+<br />
+<h3>Edit thread</h3>
+<form class="edit_form" name="forum_thread" action="forums.php" method="post">
+    <div>
+    <input type="hidden" name="action" value="mod_thread" />
+    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+    <input type="hidden" name="threadid" value="{{ thread.id }}" />
+    <input type="hidden" name="page" value="{{ page }}" />
+    </div>
+    <table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border">
+        <tr>
+            <td class="label"><label for="sticky_thread_checkbox" title="Pin this thread at the top of the list of threads">Pin</label></td>
+            <td>
+                <input type="checkbox" id="sticky_thread_checkbox" onclick="$('#ranking_row').gtoggle();" name="sticky"{{ checked(thread.isPinned) }} tabindex="4" />
+            </td>
+        </tr>
+        <tr id="ranking_row"{{ class_hidden(thread.isPinned) }}>
+            <td class="label"><label for="thread_ranking_textbox">Ranking</label></td>
+            <td>
+                <input type="text" id="thread_ranking_textbox" name="ranking" value="{{ thread.pinnedRanking }}" tabindex="5" />
+            </td>
+        </tr>
+        <tr>
+            <td class="label"><label for="locked_thread_checkbox">Locked</label></td>
+            <td>
+                <input type="checkbox" id="locked_thread_checkbox" name="locked"{{ checked(thread.isLocked) }} tabindex="6" />
+            </td>
+        </tr>
+        <tr>
+            <td class="label"><label for="thread_title_textbox">Title</label></td>
+            <td>
+                <input type="text" id="thread_title_textbox" name="title" style="width: 75%;" value="{{ thread.title }}" tabindex="7" />
+            </td>
+        </tr>
+        <tr>
+            <td class="label"><label for="move_thread_selector">Move thread</label></td>
+            <td>
+                <select name="forumid" id="move_thread_selector" tabindex="8">
+    {% set prev = 0 %}
+    {% for forum in forum_list %}
+        {% if viewer.readAccess(forum) %}
+            {% if prev != forum.categoryId %}
+                {% if prev %}
+                </optgroup>
+                {% endif %}
+                {% set prev = forum.categoryId %}
+                <optgroup label="{{ forum.categoryName }}">
+            {% endif %}
+                    <option value="{{ forum.id }}"{{ selected(thread.forumId == forum.id) }}>{{ forum.name }}</option>
+        {% endif %}
+        {% if loop.last %}
+                </optgroup>
+        {% endif %}
+    {% endfor %}
+                </select>
+            </td>
+        </tr>
+    {% if viewer.permitted('site_admin_forums') %}
+        <tr>
+            <td class="label"><label for="delete_thread_checkbox">Delete thread</label></td>
+            <td>
+                <input type="checkbox" id="delete_thread_checkbox" name="delete" tabindex="2" />
+            </td>
+        </tr>
+    {% endif %}
+        <tr>
+            <td colspan="2" class="center">
+                <input type="submit" value="Edit thread" tabindex="3" />
+            </td>
+        </tr>
+    </table>
+</form>
+{% endif %}
+</div>
+{{ footer() }}
