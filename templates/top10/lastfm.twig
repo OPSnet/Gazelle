@@ -1,0 +1,38 @@
+{{ header(constant('TOP_TEN_HEADING') ~ " – last.fm", {'js': 'jquery.imagesloaded,jquery.wookmark,top10', 'css': 'tiles'}) }}
+<div class="thin">
+    <div class="header">
+        <h2>{{ constant('TOP_TEN_HEADING') }} – last.fm</h2>
+{% include 'top10/linkbox.twig' with {'selected': 'lastfm'} %}
+    </div>
+{% include 'top10/linkbox-artist.twig' with {'category': category, 'view': view} %}
+
+{%if view == 'tiles' %}
+    <div class="tiles_container">
+        <ul class="tiles">
+    {% for artist in artist_list %}
+        {% set image = artist['image'][3]['#text'] %}
+        {% if artist.name != '[unknown]' and category in ['hyped', 'weekly'] and image %}
+        <li>
+            <a href="artist.php?artistname={{ artist.name }}">
+                <img class="tooltip large_tile" alt="{{ artist.name }}" title="{{ artist.name }}" src="{{ image|image_cache }}" />
+            </a>
+        </li>
+        {% endif %}
+    {% endfor %}
+        </ul>
+    </div>
+{% else %}
+    <div class="list_container">
+        <ul class="top_artist_list">
+    {% for artist in artist_list %}
+        {% if artist.name != '[unknown]' and category in ['hyped', 'weekly'] %}
+        <li>
+            <a class="tooltip_image" data-title-plain="{{ artist.name }}" href="artist.php?artistname={{ artist.name }}">{{ artist.name }}</a>
+        </li>
+        {% endif %}
+    {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+</div>
+{{ footer() }}
