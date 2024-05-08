@@ -486,11 +486,6 @@ parameters:
 			path: ../sections/tools/sandboxes/referral_sandbox.php
 
 		-
-			message: "#^Variable \\$Artists might not be defined\\.$#"
-			count: 2
-			path: ../sections/top10/lastfm.php
-
-		-
 			message: "#^Variable \\$SnatchedGroupClass might not be defined\\.$#"
 			count: 1
 			path: ../sections/top10/votes.php
