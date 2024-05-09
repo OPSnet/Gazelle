@@ -35,36 +35,9 @@ $urlStem        = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
 
 $categoryId     = $tgroup->categoryId();
 $musicRelease   = $tgroup->categoryName() == 'Music';
-$tagList        = $tgroup->tagList();
 $year           = $tgroup->year();
 $torrentList    = $tgroup->torrentIdList();
 $removed        = $torrentList ? [] : $tgroup->deletedMasteringList();
-
-if (!$musicRelease) {
-    $rankList = [];
-} else {
-    $decade    = $year - ($year % 10);
-    $decadeEnd = $decade + 9;
-    $advanced  = $Viewer->permitted('site_advanced_top10');
-    $rankList = [
-        'overall' => [
-            'rank' => $vote->rankOverall($tgroup),
-            'title' => '<a href="top10.php?type=votes">overall</a>',
-        ],
-        'decade' => [
-            'rank' => $vote->rankDecade($tgroup),
-            'title' => $advanced
-                ? "for the <a href=\"top10.php?advanced=1&amp;type=votes&amp;year1=$decade&amp;year2=$decadeEnd\">{$decade}s</a>"
-                : "for the {$decade}s",
-        ],
-        'year' => [
-            'rank' => $vote->rankYear($tgroup),
-            'title' => $advanced
-                ? "for <a href=\"top10.php?advanced=1&amp;type=votes&amp;year1=$year\">$year</a>"
-                : "for $year",
-        ],
-    ];
-}
 
 $section = [
     ['id' => ARTIST_COMPOSER,  'name' => 'composer',  'class' => 'artists_composers',  'role' => 'Composer',  'title' => 'Composers:'],
@@ -153,122 +126,16 @@ if ($musicRelease) {
     }
 }
 
-if ($musicRelease) {
-    if ($Viewer->permitted('site_collages_manage') || $Viewer->activePersonalCollages()) {
-        echo $Twig->render('torrent/collage-add.twig', [
-            'collage_list' => $collageMan->addToCollageDefault($tgroupId, $Viewer),
-            'tgroup_id'    => $tgroupId,
-            'viewer'       => $Viewer,
-        ]);
-    }
-
-    $li = [];
-    foreach ($rankList as $key => $info) {
-        $rank = $info['rank'];
-        if (!$rank) {
-            continue;
-        }
-        if ($rank <= 10) {
-            $class = ' class="vr_top_10"';
-        } elseif ($rank <= 25) {
-            $class = ' class="vr_top_25"';
-        } elseif ($rank <= 50) {
-            $class = ' class="vr_top_50"';
-        } else {
-            $class = '';
-        }
-        $li[] = sprintf('<li id="vote_rank_%s"%s>No. %d %s</li>', $key, $class, $rank, $info['title']);
-    }
-    if ($li) {
-?>
-        <div class="box" id="votes_ranks">
-            <div class="head"><strong><?= SITE_NAME ?> Favorites</strong></div>
-            <div class="vote_charts body">
-                <ul class="stats nobullet" id="vote_rankings">
-<?php   foreach ($li as $item) { ?>
-                    <?= $item ?>
-<?php   } ?>
-                </ul>
-            </div>
-        </div>
-<?php
-    }
-}
-
 echo $Twig->render('tgroup/stats.twig', [
-    'stats'    => $tgroup->stats(),
-    'featured' => (new Gazelle\Manager\FeaturedAlbum())->findById($tgroupId),
+    'collage_list' => $collageMan->addToCollageDefault($tgroupId, $Viewer),
+    'featured'     => (new Gazelle\Manager\FeaturedAlbum())->findById($tgroupId),
+    'tag_undo'     => $Cache->get_value("deleted_tags_{$tgroupId}_{$Viewer->id()}"),
+    'tgroup'       => $tgroup,
+    'viewer'       => $Viewer,
+    'vote'         => $vote,
 ]);
-
-echo $Twig->render('vote/box.twig', [
-    'tgroup' => $tgroup,
-    'vote'   => $vote,
-    'viewer' => $Viewer,
-]);
-
-$DeletedTag = $Cache->get_value("deleted_tags_$tgroupId" . '_' . $Viewer->id());
 ?>
-        <div class="box box_tags">
-            <div class="head">
-                <strong>Tags</strong>
-<?php if ($DeletedTag) { ?>
-                    <form style="display: none;" id="undo_tag_delete_form" name="tags" action="ajax.php" method="post">
-                        <input type="hidden" name="action" value="add_tag" />
-                        <input type="hidden" name="auth" value="<?=$Viewer->auth() ?>" />
-                        <input type="hidden" name="groupid" value="<?=$tgroupId?>" />
-                        <input type="hidden" name="tagname" value="<?=$DeletedTag?>" />
-                        <input type="hidden" name="undo" value="true" />
-                    </form>
-                    <a class="brackets" href="#" onclick="$('#undo_tag_delete_form').raw().submit(); return false;">Undo delete</a>
-
-<?php } ?>
-            </div>
-<?php if (empty($tagList)) { ?>
-            <ul><li>There are no tags to display.</li></ul>
-<?php } else { ?>
-            <ul class="stats nobullet">
-<?php   foreach ($tagList as $tag) { ?>
-                <li>
-                    <a href="torrents.php?taglist=<?=html_escape($tag['name'])?>" style="float: left; display: block;"><?=html_escape($tag['name'])?></a>
-                    <div style="float: right; display: block; letter-spacing: -1px;" class="edit_tags_votes">
-                    <a href="torrents.php?action=vote_tag&amp;way=up&amp;groupid=<?=$tgroupId?>&amp;tagid=<?= $tag['id'] ?>&amp;auth=<?=$Viewer->auth() ?>" title="Vote this tag up" class="tooltip vote_tag_up">&#x25b2;</a>
-                    <?= $tag['score'] ?>
-                    <a href="torrents.php?action=vote_tag&amp;way=down&amp;groupid=<?=$tgroupId?>&amp;tagid=<?= $tag['id'] ?>&amp;auth=<?=$Viewer->auth() ?>" title="Vote this tag down" class="tooltip vote_tag_down">&#x25bc;</a>
-<?php       if ($Viewer->permitted('users_warn')) { ?>
-                    <a href="user.php?id=<?= $tag['userId'] ?>" title="View the profile of the user that added this tag" class="brackets tooltip view_tag_user">U</a>
-<?php
-            }
-            if (!$Viewer->disableTagging() && $Viewer->permitted('site_delete_tag')) {
-?>
-                    <span class="remove remove_tag"><a href="ajax.php?action=delete_tag&amp;groupid=<?=$tgroupId?>&amp;tagid=<?= $tag['id'] ?>&amp;auth=<?=$Viewer->auth() ?>" class="brackets tooltip" title="Remove tag">X</a></span>
-<?php       } ?>
-                    </div>
-                    <br style="clear: both;" />
-                </li>
-<?php   } /* foreach */ ?>
-            </ul>
-<?php } ?>
-        </div>
-
-<?php if (!$Viewer->disableTagging()) { ?>
-        <div class="box box_addtag">
-            <div class="head"><strong>Add tag</strong></div>
-            <div class="body">
-                <form class="add_form" name="tags" action="ajax.php" method="post">
-                    <input type="hidden" name="action" value="add_tag" />
-                    <input type="hidden" name="auth" value="<?=$Viewer->auth() ?>" />
-                    <input type="hidden" name="groupid" value="<?=$tgroupId?>" />
-                    <input type="text" name="tagname" id="tagname" size="20"<?=
-                        $Viewer->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> />
-                    <input type="submit" value="+" />
-                </form>
-                <br /><br />
-                <strong><a href="rules.php?p=tag" class="brackets">View tagging rules</a></strong>
-            </div>
-        </div>
-<?php } ?>
     </div>
-
     <div class="main_column">
 <?php
 echo $Twig->render('collage/summary.twig', [

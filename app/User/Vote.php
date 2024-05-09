@@ -111,12 +111,48 @@ class Vote extends \Gazelle\BaseUser {
         foreach ($list as $id => $score) {
             ++$rank;
             if ($prevScore && $prevScore !== $score) {
-                $prevRank  = $rank;
+                $prevRank = $rank;
             }
             $ranks[$id] = $prevRank;
-            $prevScore = $score;
+            $prevScore  = $score;
         }
         return $ranks;
+    }
+
+    public function ranking(\Gazelle\TGroup $tgroup, bool $viewAdvancedTop10): array {
+        if ($tgroup->categoryName() != 'Music') {
+            return [];
+        }
+        $ranking = [];
+        $rank    = $this->rankOverall($tgroup);
+        if ($rank) {
+            $ranking['overall'] = [
+                'rank'  => $rank,
+                'title' => '<a href="top10.php?type=votes">overall</a>',
+            ];
+        }
+        $year      = $tgroup->year();
+        $decade    = $year - ($year % 10);
+        $decadeEnd = $decade + 9;
+        $rank      = $this->rankDecade($tgroup);
+        if ($rank) {
+            $ranking['decade'] = [
+                'rank'  => $rank,
+                'title' => $viewAdvancedTop10
+                    ? "for the <a href=\"top10.php?advanced=1&amp;type=votes&amp;year1=$decade&amp;year2=$decadeEnd\">{$decade}s</a>"
+                    : "for the {$decade}s",
+            ];
+        }
+        $rank = $this->rankYear($tgroup);
+        if ($rank) {
+            $ranking['year'] = [
+                'rank'  => $rank,
+                'title' => $viewAdvancedTop10
+                    ? "for <a href=\"top10.php?advanced=1&amp;type=votes&amp;year1=$year\">$year</a>"
+                    : "for $year",
+            ];
+        }
+        return $ranking;
     }
 
     /**

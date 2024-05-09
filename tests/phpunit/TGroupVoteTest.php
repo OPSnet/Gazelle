@@ -63,6 +63,7 @@ class TGroupVoteTest extends TestCase {
         $this->assertEquals(1, $vote[0]->rankOverall($this->tgroupList[0]), 'tgroup-vote-rank-overall');
         $this->assertEquals(1, $vote[0]->rankYear($this->tgroupList[0]), 'tgroup-vote-rank-year');
         $this->assertEquals(1, $vote[0]->rankDecade($this->tgroupList[0]), 'tgroup-vote-rank-decade');
+        $this->assertCount(3, $vote[0]->ranking($this->tgroupList[0], true), 'tgroup-vote-ranking');
 
         $top = $vote[0]->topVotes();
         $this->assertEquals(1, $top[$this->tgroupList[0]->id()]['sequence'], 'tgroup-vote-top-1');
