@@ -1,5 +1,9 @@
 <?php
 
+if (!$Viewer->permitted('site_collages_manage')) {
+    error(403);
+}
+
 $collage = (new Gazelle\Manager\Collage())->findById((int)($_GET['collageid'] ?? $_GET['id'] ?? 0));
 if (is_null($collage) || $collage->isArtist()) {
     error(404);

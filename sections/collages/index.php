@@ -1,78 +1,24 @@
 <?php
 
-switch ($_REQUEST['action'] ?? '') {
-    case 'add_torrent':
-    case 'add_torrent_batch':
-        require('add_torrent.php');
-        break;
-    case 'add_artist':
-    case 'add_artist_batch':
-        require('add_artist.php');
-        break;
-    case 'ajax_add':
-        require('ajax_add.php');
-        break;
-    case 'autocomplete':
-        require('autocomplete.php');
-        break;
-    case 'comments':
-        require('all_comments.php');
-        break;
-    case 'delete':
-        require('delete.php');
-        break;
-    case 'take_delete':
-        require('delete_handle.php');
-        break;
-    case 'download':
-        require('download.php');
-        break;
-    case 'edit':
-        if (!$Viewer->permitted('site_edit_wiki')) {
-            error(403);
-        }
-        require('edit.php');
-        break;
-    case 'edit_handle':
-        if (!$Viewer->permitted('site_edit_wiki')) {
-            error(403);
-        }
-        require('edit_handle.php');
-        break;
-    case 'manage':
-        if (!$Viewer->permitted('site_collages_manage')) {
-            error(403);
-        }
-        require('manage.php');
-        break;
-    case 'manage_handle':
-        if (!$Viewer->permitted('site_collages_manage')) {
-            error(403);
-        }
-        require('manage_handle.php');
-        break;
-    case 'manage_artists':
-        if (!$Viewer->permitted('site_collages_manage')) {
-            error(403);
-        }
-        require('manage_artists.php');
-        break;
-    case 'manage_artists_handle':
-        if (!$Viewer->permitted('site_collages_manage')) {
-            error(403);
-        }
-        require('manage_artists_handle.php');
-        break;
-    case 'new':
-        require('new.php');
-        break;
-    case 'new_handle':
-        require('new_handle.php');
-        break;
-    case 'recover':
-        require('recover.php');
-        break;
-    default:
-        require(empty($_GET['id']) ? 'browse.php' : 'collage.php');
-        break;
-}
+require_once(match ($_REQUEST['action'] ?? '') {
+    'add_torrent',
+    'add_torrent_batch'     => 'add_torrent.php',
+    'add_artist',
+    'add_artist_batch'      => 'add_artist.php',
+    'ajax_add'              => 'ajax_add.php',
+    'autocomplete'          => 'autocomplete.php',
+    'comments'              => 'all_comments.php',
+    'delete'                => 'delete.php',
+    'take_delete'           => 'delete_handle.php',
+    'download'              => 'download.php',
+    'edit'                  => 'edit.php',
+    'edit_handle'           => 'edit_handle.php',
+    'manage'                => 'manage.php',
+    'manage_handle'         => 'manage_handle.php',
+    'manage_artists'        => 'manage_artists.php',
+    'manage_artists_handle' => 'manage_artists_handle.php',
+    'new'                   => 'new.php',
+    'new_handle'            => 'new_handle.php',
+    'recover'               => 'recover.php',
+    default                 => empty($_GET['id']) ? 'browse.php' : 'collage.php',
+});

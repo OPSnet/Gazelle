@@ -1,5 +1,9 @@
 <?php
 
+if (!$Viewer->permitted('site_collages_manage')) {
+    error(403);
+}
+
 authorize();
 
 $groupId = (int)$_POST['groupid'];
