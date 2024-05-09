@@ -1,10 +1,11 @@
 <?php
 
-authorize();
-
 if (!$Viewer->permitted('site_collages_create')) {
     error(403);
 }
+
+authorize();
+
 $artistId = (int)$_POST['artistid'];
 if (!$artistId) {
     error(404);

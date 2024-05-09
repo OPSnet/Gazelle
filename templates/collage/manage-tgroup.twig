@@ -36,13 +36,11 @@
             </tr>
         </thead>
         <tbody>
-{% set n = 0 %}
-{% for id in collage.groupIds %}
-    {% set tgroup = manager.findById(id) %}
+{% for tgroup in list %}
         <tr class="drag row{{ cycle(['a', 'b'], loop.index0) }}" id="li_{{ id }}">
             <form class="manage_form" name="collage" action="collages.php" method="post">
                 <td>
-                    <input class="sort_numbers" type="text" name="sort" value="{{ collage.sequence(id) }}" id="sort_{{ id }}" size="4" />
+                    <input class="sort_numbers" type="text" name="sort" value="{{ collage.sequence(tgroup.id) }}" id="sort_{{ tgroup.id }}" size="4" />
                 </td>
                 <td>{{ loop.index }}</td>
                 <td>{{ tgroup.catalogueNumber|default('&nbsp;')|raw }}</td>

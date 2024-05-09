@@ -3,6 +3,10 @@
 use Gazelle\Enum\LeechType;
 use Gazelle\Enum\LeechReason;
 
+if (!$Viewer->permitted('site_edit_wiki')) {
+    error(403);
+}
+
 authorize();
 
 $id = (int)$_POST['collageid'];

@@ -1,5 +1,9 @@
 <?php
 
+if (!$Viewer->permitted('site_edit_wiki')) {
+    error(403);
+}
+
 $collage = (new Gazelle\Manager\Collage())->findById((int)($_GET['collageid'] ?? 0));
 if (is_null($collage)) {
     error(404);
