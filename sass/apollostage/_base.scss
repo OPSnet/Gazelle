@@ -1,6 +1,6 @@
 /* ################################################################################ */
 /* APOLLOSTAGE THEME */
-/* version 2024
+/* version 2024.05.08c
 /* ################################################################################ */
 
 // SASS/SCSS NOTE
@@ -19,7 +19,7 @@
 /**/
 /**/
 
-/*  # 2024-04-26 - Updated by rubric_alert with hawkeye and community feedback. */
+/*  # 2024-05-08 - Updated by rubric_alert with hawkeye and community feedback. */
 /*  # Fix: mobile menu, category stripes;  
 /*  # Feature: Add SVGs, tag bubbles, italic fonts and more;
 /*  # Chore: Organized and documented the SCSS. */
@@ -3173,16 +3173,19 @@ body#collage .cats_music {
 
 /* #wideload */
 /* ## 4.2 tag bubble appearance on widescreen */
-/* Full clickable appearance: Applies to Torrent Pages, collage-listing pages, collage-discog pages. */
+/* Full clickable appearance; more comments in SCSS */
+/* Applies to Torrent Pages, collage-listing pages, collage-discog pages. */
 .collage_table .td_info .tags :not(:empty),
 #torrent_table .group .tags :not(:empty),
 #discog_table .group .tags :not(:empty),
 #request_table .tags,
 #top10 .tags,
-/* This monstrosity is for torrents.php?action=notify */
+/*  This monstrosity is for torrents.php?action=notify */
 table.torrent_table.cats.checkboxes.border.m_table td.td_info.big_info div.group_info.clear div.tags a,
-/* This monstrosity is for torrents.php?type=uploaded */
-table.torrent_table.cats.m_table td.td_info.big_info div.group_info.clear div.tags a {
+/*  This monstrosity is for torrents.php?type=uploaded */
+table.torrent_table.cats.m_table td.td_info.big_info div.group_info.clear div.tags a,
+/* This is for torrent group (album) pages in the sidebar */
+body#torrents div.box.box_tags li > a:first-child {
 
     visibility: visible;
     box-sizing: border-box;
@@ -3195,7 +3198,7 @@ table.torrent_table.cats.m_table td.td_info.big_info div.group_info.clear div.ta
     padding: 0 0.5rem;
     border-radius: 1rem;
     margin-bottom: 0.1rem;
-    transition: all 0.6s cubic-bezier(.25,.8,.25,1);;
+    transition: all 0.6s cubic-bezier(.25,.8,.25,1);
 }
 
 /* Special non-clickable appearance: Applies to top10 and request_table pages, where tags are not clickable links. */
@@ -3211,10 +3214,12 @@ table.torrent_table.cats.m_table td.td_info.big_info div.group_info.clear div.ta
 .collage_table .td_info .tags :not(:empty):hover,
 #torrent_table .group .tags :not(:empty):hover,
 #discog_table .tags :hover,
-/* This monstrosity is for torrents.php?action=notify */
+/*  This monstrosity is for torrents.php?action=notify */
 table.torrent_table.cats.checkboxes.border.m_table td.td_info.big_info div.group_info.clear div.tags a:hover,
-/* This monstrosity is for torrents.php?type=uploaded */
-table.torrent_table.cats.m_table td.td_info.big_info div.group_info.clear div.tags a:hover {
+/*  This monstrosity is for torrents.php?type=uploaded */
+table.torrent_table.cats.m_table td.td_info.big_info div.group_info.clear div.tags a:hover,
+/* This is for torrent group (album) pages in the sidebar */
+body#torrents div.box.box_tags li > a:first-child:hover {
     color: $tag-bubble-background-color !important; 
     background: $tag-bubble-foreground-color !important; 
     transition: all 0.15s cubic-bezier(0.25,0.8,0.25,1);
@@ -3231,7 +3236,6 @@ table.torrent_table.cats.m_table td.td_info.big_info div.group_info.clear div.ta
 table.torrent_table.cats.checkboxes.border.m_table td.td_info.big_info div.group_info.clear div.tags,
 /* This monstrosity is for torrents.php?type=uploaded */
 table.torrent_table.cats.m_table td.td_info.big_info div.group_info.clear div.tags {
-
   visibility: hidden;
 }
 

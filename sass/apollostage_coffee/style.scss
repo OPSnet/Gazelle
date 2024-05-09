@@ -1,4 +1,5 @@
 /* APOLLOSTAGE COFFEE THEME */
+/* 2024-05-08c */
 
 // DEFINE THEME COLORS AND ICONS
 
@@ -8,44 +9,66 @@
 
 // and override as follows:
 
+  $levelbb: #272524;
+  $levelaa: #302C2B;
+  $level01: #3D2C29;
+  $level02: #45322E;
+  $level03: #4E3833;
+  $level04: #563E37;
+  $level05: #5F443B;
+  $level06: #674A3F;
+  $level07: #6F5042;
+  $level08: #785746;
+  $level09: #805D49;
+  $level10: #89644C;
+  $text11: #B4825D;
+  $text12: #C0906A;
+  $text13: #CBA079;
+  $text14: #D7B18B;
+  $text15: #E4C6A6;
+  $text16: #EFDAC1;
+  $lemonzest: #fffacd;
+
 // define theme colors
 
-$primary-accent-color: #c5b09b;
+$primary-accent-color: $text16;
 $base-background-color: #1d1c1d;
 
-$table-background-color: #2b2a2b;
-$secondary-table-background-color: #242324;
+$table-background-color: $levelbb;
+$secondary-table-background-color: $level01;	// also form field in focus
+$input-background-color: $levelaa; 	            // also table-even-rows
+$form-background-color: $levelbb; 				// also boxes on frontpage
 
-$form-background-color: #2b2a2b;
-$a-color: #c5b09b;
-$a-hover-color: #eedfd1;
-$base-text-color: #eadfd6;
-$mono-text-color: #D3C0BA;
+$a-color: $lemonzest;
+$a-hover-color: $text13;
+$base-text-color: $text15;
+$mono-text-color: $text11;
+$input-color: $text14;
 
 // Ten color gradient:
 
-$menu-li-second-child-background-color: #926354;    // torrents
-$menu-li-third-child-background-color: #8c5d50;     // collages
-$menu-li-fourth-child-background-color: #85584c;    // requests
-$menu-li-fifth-child-background-color: #7f5247;     // forums
-$menu-li-sixth-child-background-color: #784d43;     // irc
-$menu-li-seventh-child-background-color: #72483f;   // top10
-$header-background-color: #6c423b;                  // rules, also mobile menu header
-$menu-li-ninth-child-background-color: #653d37;     // wiki
-$userinfo-username-color: #5f3833;                  // username menu ~ closed
-$userinfo-username-hover-background-color: #9C6F68; // username menu ~ open
-$userinfo-minor-color: #59332f;                     // VV pulldown menu ~ closed
-$userinfo-minor-hover-background-color: #a1726d;    // VV pulldown menu ~ open
+$menu-li-second-child-background-color: $level10;    // torrents
+$menu-li-third-child-background-color: $level09;     // collages
+$menu-li-fourth-child-background-color: $level08;    // requests
+$menu-li-fifth-child-background-color: $level07;     // forums
+$menu-li-sixth-child-background-color: $level06;     // irc
+$menu-li-seventh-child-background-color: $level05;   // top10
+$header-background-color: $level04;                  // rules, also mobile menu header
+$menu-li-ninth-child-background-color: $level03;     // wiki
+$userinfo-username-color: $level02;                  // username menu ~ closed
+$userinfo-username-hover-background-color: $level02; // username menu ~ open
+$userinfo-minor-color: $level01;                     // VV pulldown menu ~ closed
+$userinfo-minor-hover-background-color: $level03;    // VV pulldown menu ~ open
 
 // mobile pulldown menu gradient
 
-$userinfo-background-color-1: #341409;    // mobile pulldown menu gradient 1
-$userinfo-background-color-2: #59332f;    // mobile pulldown menu gradient 2
+$userinfo-background-color-1: $level09;    // mobile pulldown menu gradient 1
+$userinfo-background-color-2: $level03;    // mobile pulldown menu gradient 2
 
 // notification gradient
 
-$gradient-color-1: #8c5d50;	// usually works well with 'third-child'
-$gradient-color-2: #72483f; // usually works well with 'seventh-child'
+$gradient-color-1: $level09;	// usually works well with 'third-child'
+$gradient-color-2: $level03;    // usually works well with 'seventh-child'
 
 // these are GNDN: goes nowhere, does nothing
 
@@ -54,11 +77,9 @@ $menu-background-color-2: #DD2D4A;  // noop
 
 // formatting colors for page elements
 
-$blockquote-background-color: #323132;
-$input-background-color: #433C3B;
-$torrent-background-color: #323132;
+$blockquote-background-color: $level01;
+$torrent-background-color: $levelaa;
 $footer-color: #949494;
-$input-color: #c2c2c2;
 $ratio-red-color: #e74e4e;
 $ratio-yellow-color: #e1b661;
 $selection-background-color: rgba(180, 160, 139, 0.6);
@@ -83,8 +104,8 @@ $accent-color-cats_elearningvideos: #793555;
 
 // These can equal "ninth" and "second"
 // or adjust contrast as desired to emphasize/de-emphaszie
-$tag-bubble-background-color: #422722; 
-$tag-bubble-foreground-color: #8d6653; 
+$tag-bubble-background-color: $level04; 
+$tag-bubble-foreground-color: $text12; 
 
 @import '../apollostage/_base';
 
