@@ -1,0 +1,9 @@
+{%- macro css_rank(n) -%}
+    {%- if n <= 10 %}vr_top_10
+    {%- elseif n <= 25 %}vr_top_25
+    {%- elseif n <= 50 %}vr_top_50
+    {%- elseif n <= 100 %}vr_top_100
+    {%- elseif n <= 250 %}vr_top_250
+    {%- elseif n <= 500 %}vr_top_500
+    {%- else %}vr_top_n{% endif -%}
+{%- endmacro -%}

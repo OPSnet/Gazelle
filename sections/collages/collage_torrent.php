@@ -219,7 +219,7 @@ foreach ($entryList as $tgroupId) {
                 ]);
                 if (!$Viewer->option('NoVoteLinks') && $Viewer->permitted('site_album_votes')) {
 ?>
-                        <br /><?= $vote->links($tgroupId) ?>
+                        <br /><?= $vote->links($tgroup) ?>
 <?php           } ?>
                         </span>
                     <div class="tags"><?= implode(', ', array_map(
@@ -271,7 +271,7 @@ foreach ($entryList as $tgroupId) {
                     ]) ?>
                     <?= $Number ?> – <strong><?= $tgroup->link() ?></strong>
 <?php       if (!$Viewer->option('NoVoteLinks') && $Viewer->permitted('site_album_votes')) { ?>
-                    <?= $vote->links($tgroupId) ?>
+                    <?= $vote->links($tgroup) ?>
 <?php       } ?>
                     <div class="tags">
                         <?= implode(', ', array_map(fn ($name) => "<a href=\"collages.php?action=search&tags=$name\">$name</a>", $tgroup->tagNameList())) ?>

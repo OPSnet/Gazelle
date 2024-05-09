@@ -1,3 +1,30 @@
+{% from 'macro/rank.twig' import css_rank %}
+{% if tgroup.categoryName == 'Music' %}
+    {% if viewer.permitted('site_collages_manage') or viewer.activePersonalCollages %}
+        {% include 'torrent/collage-add.twig' with {
+            'collage_list': collage_list,
+            'tgroup_id': tgroup.id,
+            'viewer': viewer
+            } only
+        %}
+    {% endif %}
+
+    {% for key, r in vote.ranking(tgroup, viewer.permitted('site_advanced_top10')) %}
+        {% if loop.first %}
+<div class="box" id="votes_ranks">
+    <div class="head"><strong>{{ constant('SITE_NAME') }} Favorites</strong></div>
+    <div class="vote_charts body">
+        <ul class="stats nobullet" id="vote_rankings">
+        {% endif %}
+            <li id="vote_rank_{{ key }}" class="{{ css_rank(r.rank) }}">No. {{ r.rank }} {{ r.title|raw }}</li>
+        {% if loop.last %}
+        </ul>
+    </div>
+</div>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+
 <div class="box">
     <div class="head">
         <strong>Statistics</strong>
@@ -14,10 +41,15 @@
     <br /></li>
     {%- endif -%}
 {%- endif -%}
-    <li>Downloads: {{ stats.downloadTotal }}</li>
-    <li>Leechers: {{ stats.leechTotal }}</li>
-    <li>Snatches: {{ stats.snatchTotal }}</li>
-    <li>Seeders: {{ stats.seedingTotal }}</li>
-    <li>Bookmarked by {{ stats.bookmarkTotal }} user{{ stats.bookmarkTotal|plural }}</li>
+
+{% set stats = tgroup.stats %}
+    <li>Downloads: {{ stats.downloadTotal|number_format }}</li>
+    <li>Leechers: {{ stats.leechTotal|number_format }}</li>
+    <li>Snatches: {{ stats.snatchTotal|number_format }}</li>
+    <li>Seeders: {{ stats.seedingTotal|number_format }}</li>
+    <li>Bookmarked by {{ stats.bookmarkTotal|number_format }} user{{ stats.bookmarkTotal|plural }}</li>
     </ul>
 </div>
+
+{% include 'vote/box.twig' with {'tgroup': tgroup, 'viewer': viewer, 'vote': vote} only %}
+{% include 'tgroup/tag.twig' with {'tag_undo': tag_undo, 'tgroup': tgroup, 'viewer': viewer} only %}
