@@ -150,7 +150,7 @@ class Torrent extends \Gazelle\Base {
                     coalesce(delta.t_add, 0)           AS t_add,
                     coalesce(delta.t_del, 0)           AS t_del
                 FROM dates
-                LEFT JOIN torrents t ON (last_day(t.Time) = dates.eom)
+                LEFT JOIN torrents t ON (last_day(t.created) = dates.eom)
                 LEFT JOIN delta USING (eom)
                 GROUP BY eom
                 ORDER BY eom
