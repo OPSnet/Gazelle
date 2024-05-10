@@ -127,6 +127,7 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
 <?php       } ?>
             <div class="group_info clear">
                 <?= $Twig->render('torrent/action-v2.twig', [
+                    'js'      => true,
                     'torrent' => $torrent,
                     'viewer'  => $Viewer,
                     'extra'   => [
