@@ -215,13 +215,10 @@ if (!$torrentList) {
         echo $Twig->render('torrent/action-v2.twig', [
             'edit'    => true,
             'pl'      => true,
+            'js'      => true,
             'remove'  => true,
             'torrent' => $torrent,
             'viewer'  => $Viewer,
-            'extra'   => [
-                "<a href=\"ajax.php?action=torrent&amp;id=$TorrentID\" download=\"" . html_escape($tgroup->text())
-                    . " [$TorrentID] [orpheus.network].json\" class=\"tooltip\" title=\"Download JSON\">JS</a>",
-            ],
         ]);
 ?>
                     <a href="#" onclick="$('#torrent_<?=$TorrentID?>').gtoggle(); return false;">&#x25B6; <?= $torrent->label($Viewer) ?></a>

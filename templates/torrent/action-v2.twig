@@ -25,7 +25,7 @@
  | <a href="torrents.php?action=delete&amp;torrentid={{ torrent.id }}" class="tooltip" title="Remove">RM</a>
 {% endif %}
 {% if pl %} | <a href="{{ torrent.location }}" class="tooltip" title="Permalink">PL</a>{% endif %}
+{% if js %} | <a href="ajax.php?action=torrent&amp;id={{ torrent.id }}" download="{{ torrent.fullName }}.{{ torrent.id }}.opsnet.json" class="tooltip" title="Download JSON">JS</a>{% endif %}
 {% for e in extra %}
  | {{ e|raw }}
-{% endfor %}
-]</span>
+{% endfor %} ]</span>

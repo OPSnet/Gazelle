@@ -372,12 +372,9 @@ if ($sections = $Artist->sections()) {
             <td class="td_info" colspan="2">
                 <?= $Twig->render('torrent/action-v2.twig', [
                     'pl'      => true,
+                    'js'      => true,
                     'torrent' => $torrent,
                     'viewer'  => $Viewer,
-                    'extra'   => [
-                        "<a href=\"ajax.php?action=torrent&amp;id=$torrentId\" download=\""
-                            . html_escape($torrent->fullName()) . " $torrentId [orpheus.network].json\" class=\"tooltip\" title=\"Download JSON\">JS</a>",
-                    ],
                 ]) ?>
                 &nbsp;&nbsp;&raquo;&nbsp;<?= $torrent->shortLabelLink() ?>
             </td>

@@ -225,6 +225,7 @@ foreach ($Results as $Key => $GroupID) {
         <td class="td_info" colspan="3">
             <?= $Twig->render('torrent/action-v2.twig', [
                 'pl'      => true,
+                'js'      => true,
                 'torrent' => $torrent,
                 'viewer'  => $Viewer,
             ]) ?>
