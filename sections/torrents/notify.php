@@ -17,7 +17,7 @@ if ($Viewer->permitted('users_mod') && (int)($_GET['userid'] ?? 0)) {
 $UserID = $user->id();
 $ownProfile = $UserID === $Viewer->id();
 
-$imgTag = '<img src="' . (new Gazelle\User\Stylesheet($Viewer))->imagePath()
+$imgTag = '<img loading="lazy" src="' . (new Gazelle\User\Stylesheet($Viewer))->imagePath()
     . '%s.png" class="tooltip" alt="%s" title="%s"/>';
 $headerMap = [
     'year'     => ['dbColumn' => 'tg.Year',       'defaultSort' => 'desc', 'text' => 'Year'],

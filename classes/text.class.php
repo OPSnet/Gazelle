@@ -1010,7 +1010,7 @@ class Text {
                     } else {
                         $LocalURL = self::local_url($Block['Val']);
                         if ($LocalURL) {
-                            $Str .= '<img class="scale_image" onclick="lightbox.init(this, $(this).width());" alt="' . $Block['Val'] . '" src="' . $LocalURL . '" />';
+                            $Str .= '<img loading="lazy" class="scale_image" onclick="lightbox.init(this, $(this).width());" alt="' . $Block['Val'] . '" src="' . $LocalURL . '" />';
                         } else {
                             if ($cache) {
                                 $image    = image_cache_encode($Block['Val'], bucket: $bucket);
@@ -1019,7 +1019,7 @@ class Text {
                                 $image    = $Block['Val'];
                                 $original = "";
                             }
-                            $Str .= "<img class=\"scale_image\" onclick=\"lightbox.init(this, $(this).width());\" alt=\"$image\" src=\"$image\"$original />";
+                            $Str .= "<img loading=\"lazy\" class=\"scale_image\" onclick=\"lightbox.init(this, $(this).width());\" alt=\"$image\" src=\"$image\"$original />";
                         }
                     }
                     break;

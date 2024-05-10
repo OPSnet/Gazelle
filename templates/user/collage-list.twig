@@ -17,7 +17,7 @@
         {% if tgroup %}
         <td>
             <a href="torrents.php?id={{ tgroup_id }}">
-                <img class="tooltip" title="{{ tgroup.text }}" src="{{ tgroup.cover|image_cache(width = 150) }}" width="107" />
+                <img src="{{ tgroup.cover|image_cache(width = 150) }}" loading="lazy" class="tooltip" width="107" title="{{ tgroup.text }}" />
             </a>
         </td>
         {% endif %}
