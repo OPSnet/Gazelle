@@ -15,7 +15,7 @@ if (is_null($user)) {
 }
 $userId = $user->id();
 
-$imgTag = '<img src="' . (new Gazelle\User\Stylesheet($Viewer))->imagePath()
+$imgTag = '<img loading="lazy" src="' . (new Gazelle\User\Stylesheet($Viewer))->imagePath()
     . '%s.png" class="tooltip" alt="%s" title="%s"/>';
 $headerMap = [
     'name'     => ['dbColumn' => 'tg.Name', 'defaultSort' => 'asc',  'text' => 'Torrent'],

@@ -43,7 +43,7 @@ class Users {
             $Str .= $donor->heart($Viewer);
         }
         $Str .= ($IsWarned && $user->isWarned()) ? '<a href="wiki.php?action=article&amp;name=warnings"'
-            . '><img src="' . STATIC_SERVER . '/common/symbols/warned.png" alt="Warned" title="Warned'
+            . '><img loading="lazy" src="' . STATIC_SERVER . '/common/symbols/warned.png" alt="Warned" title="Warned'
             . ($Viewer->id() == $UserID ? ' - Expires ' . date('Y-m-d H:i', strtotime($user->warningExpiry())) : '')
             . '" class="tooltip" /></a>' : '';
         $Str .= ($IsEnabled && $user->isDisabled())

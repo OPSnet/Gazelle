@@ -40,13 +40,13 @@ class Twig {
                     $basicAttr[] = "src=\"$image\"";
                 } else {
                     $basicAttr[] = 'src="' . html_escape(image_cache_encode($image, width: AVATAR_WIDTH))
-                        . '" data-origin-src="' . html_escape($image) . '"';
+                        . '" loading="lazy" data-origin-src="' . html_escape($image) . '"';
                 }
 
                 $rollover = $data['hover'];
                 if ($rollover) {
                     $hoverAttr[] = 'src="' . html_escape(image_cache_encode($rollover, width: AVATAR_WIDTH))
-                        . '" data-origin-src="' . html_escape($rollover) . '"';
+                        . '" loading="eager" data-origin-src="' . html_escape($rollover) . '"';
                 }
                 return '<div class="avatar_container"><div><img ' . implode(' ', $basicAttr) . " /></div>"
                     . ($rollover ? ('<div><img ' . implode(' ', $hoverAttr) . ' /></div>') : '')

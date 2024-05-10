@@ -20,7 +20,7 @@
     {% set title = t.name ~ '<br />(' ~ t.group.tagNameList|join(', ') ~ ')<br />uploaded by ' ~ t.uploader.username ~ ' ' ~ t.created|time_diff %}
                 <li class="image_group_{{ t.groupId }}">
                 <a href="{{ t.location }}">
-                <img class="tooltip_interactive" src="{{ t.group.image|image_cache(width = 150) }}" title="{{ title }}" data-title-plain="{{
+                <img class="tooltip_interactive" src="{{ t.group.image|image_cache(width = 150) }}" loading="eager" title="{{ title }}" data-title-plain="{{
                     title|replace({'<br />': ' '}) }}" width="118" data-origin-src="{{ t.group.image }}" /></a>
                 </li>
 {% endfor %}

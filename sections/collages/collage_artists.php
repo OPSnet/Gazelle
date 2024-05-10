@@ -16,7 +16,7 @@ $ArtistTable     = '';
 foreach ($Artists as $id => $Artist) {
     $name = html_escape($Artist['name']);
     $image = $Artist['image']
-        ? sprintf('<img class="tooltip" src="%s" alt="%s" title="%s" width="118"  data-origin-src="%s" />',
+        ? sprintf('<img loading="lazy" class="tooltip" src="%s" alt="%s" title="%s" width="118"  data-origin-src="%s" />',
             html_escape(image_cache_encode($Artist['image'], height: 150, width: 150)),
             $name, $name, html_escape($Artist['image']))
         : ('<span style="width: 107px; padding: 5px;">' . $name . '</span>');

@@ -80,7 +80,7 @@ if ($Artist->image()) {
         <div class="box box_image">
             <div class="head"><strong><?= html_escape($name) ?></strong></div>
             <div style="text-align: center; padding: 10px 0px;">
-                <img style="max-width: 220px;" src="<?= $image ?>" alt="artist image"
+                <img loading="eager" style="max-width: 220px;" src="<?= $image ?>" alt="artist image"
                      onclick="lightbox.init('<?= $image ?>', 220);"
                      data-origin-src="<?= html_escape($Artist->image()) ?>" />
             </div>
