@@ -347,7 +347,7 @@ class Text {
                 return (new \Gazelle\Manager\Artist())->findById((int)($args['id'] ?? 0))?->link();
 
             case '/collages.php':
-                return self::bbcodeCollageUrl((int)($args['id'] ?? $args['collageid']), $url);
+                return self::bbcodeCollageUrl((int)($args['id'] ?? $args['collageid']));
 
             case '/forums.php':
                 if (!isset($args['action'])) {
@@ -1376,35 +1376,20 @@ class Text {
         return str_replace(["<br />", "<br>"], "\n", $Str);
     }
 
-    public static function bbcodeCollageUrl(int $id, string $url = null): string {
-        $cacheKey = 'bbcode_collage_' . $id;
-        global $Cache;
-        $name = $Cache->get_value($cacheKey);
-        if ($name === false) {
-            $name = Gazelle\DB::DB()->scalar('SELECT Name FROM collages WHERE id = ?', $id);
-            $Cache->cache_value($cacheKey, $name, 86400 + random_int(1, 3600));
-        }
-        return $name
-            ? ($url ? "<a href=\"$url\">$name</a>" : "<a href=\"collages.php?id=$id\">$name</a>")
-            : "[collage]{$id}[/collage]";
+    protected static function bbcodeCollageUrl(int $id): string {
+        $collage = (new \Gazelle\Manager\Collage())->findById($id);
+        return $collage?->link() ?? "[collage]{$id}[/collage]";
     }
 
-    protected static function bbcodeForumUrl(int $val): string {
-        $cacheKey = 'bbcode_forum_' . $val;
-        global $Cache;
-        [$id, $name] = $Cache->get_value($cacheKey);
-        if (is_null($id)) {
-            [$id, $name] = (int)$val > 0
-                ? Gazelle\DB::DB()->row('SELECT ID, Name FROM forums WHERE ID = ?', $val)
-                : Gazelle\DB::DB()->row('SELECT ID, Name FROM forums WHERE Name = ?', $val);
-            $Cache->cache_value($cacheKey, [$id, $name], 86400 + random_int(1, 3600));
+    protected static function bbcodeForumUrl(int $id): string {
+        $forum = (new \Gazelle\Manager\Forum())->findById($id);
+        if (is_null($forum)) {
+            return "[forum]{$id}[/forum]";
         }
-        if (!self::$viewer->readAccess(new Gazelle\Forum($id))) {
-            $name = 'restricted';
+        if (!self::$viewer->readAccess($forum)) {
+            return "[restricted forum]";
         }
-        return $name
-            ? sprintf('<a href="forums.php?action=viewforum&amp;forumid=%d">%s</a>', $id, $name)
-            : "[forum]{$val}[/forum]";
+        return $forum->link();
     }
 
     protected static function bbcodeCommentUrl(int $postId): ?string {
