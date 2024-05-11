@@ -16,9 +16,10 @@ class Artist extends \Gazelle\Collector {
 
     public function prepare(array $list): bool {
         self::$db->prepared_query("
-            SELECT GroupID, artist_role_id
-            FROM torrents_artists
-            WHERE ArtistID = ?
+            SELECT ta.GroupID, ta.artist_role_id
+            FROM torrents_artists ta
+            INNER JOIN artists_alias aa USING (AliasID)
+            WHERE aa.ArtistID = ?
             ", $this->artist->id()
         );
         while ([$groupId, $role] = self::$db->next_record(MYSQLI_NUM, false)) {

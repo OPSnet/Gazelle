@@ -74,7 +74,10 @@ class Request extends BaseObject {
     public function artistFlush(): int {
         $this->flush();
         self::$db->prepared_query("
-            SELECT ArtistID FROM requests_artists WHERE RequestID = ?
+            SELECT aa.ArtistID
+            FROM requests_artists ra
+            INNER JOIN artists_alias aa USING (AliasID)
+            WHERE RequestID = ?
             ", $this->id
         );
         $affected = (int)self::$db->record_count();
@@ -887,7 +890,10 @@ class Request extends BaseObject {
         self::$db->prepared_query("DELETE FROM requests WHERE ID = ?", $this->id);
         $affected = self::$db->affected_rows();
         self::$db->prepared_query("
-            SELECT ArtistID FROM requests_artists WHERE RequestID = ?
+            SELECT DISTINCT aa.ArtistID
+            FROM requests_artists ra
+            INNER JOIN artists_alias aa USING (AliasID)
+            WHERE ra.RequestID = ?
             ", $this->id
         );
         $artisIds = self::$db->collect(0, false);

@@ -21,25 +21,28 @@ function ArtistManager() {
     } else {
         GroupID = GroupID[1];
     }
-    var ArtistList;
-    if (!(ArtistList = $('#artist_list').raw())) {
+    let ArtistList = document.getElementById('artist_list');
+    let ArtistManager = document.getElementById('artistmanager');
+    if (!ArtistList) {
         return false;
-    } else if ($('#artistmanager').raw()) {
-        $('#artistmanager').gtoggle();
-        $('#artist_list').gtoggle();
+    } else if (ArtistManager) {
+        ArtistManager.classList.toggle('hidden');
+        ArtistList.classList.toggle('hidden');
     } else {
         MainArtistCount = 0;
-        var elArtistManager = document.createElement('div');
+        let elArtistManager = document.createElement('div');
         elArtistManager.id = 'artistmanager';
 
-        var elArtistList = ArtistList.cloneNode(true);
+        let elArtistList = ArtistList.cloneNode(true);
         elArtistList.id = 'artistmanager_list';
-        for (var i = 0; i < elArtistList.children.length; i++) {
-            switch (elArtistList.children[i].className) {
+        let artists = elArtistList.getElementsByClassName('artist_entry');
+        for (let i = 0; i < artists.length; i++) {
+            let importance;
+            switch (artists[i].classList[0]) {
                 case 'artists_main':
                     importance = 1;
                     break;
-                case 'artists_with':
+                case 'artists_guest':
                     importance = 2;
                     break;
                 case 'artists_remix':
@@ -60,19 +63,19 @@ function ArtistManager() {
                 case 'artists_arranger':
                     importance = 8;
                     break;
+                default:
+                    continue;
             }
-            if (elArtistList.children[i].children[0].tagName.toUpperCase() == 'A') {
-                var ArtistID = elArtistList.children[i].children[0].href.match(/[?&]id=(\d+)/)[1];
-                var elBox = document.createElement('input');
-                elBox.type = 'checkbox';
-                elBox.id = 'artistmanager_box'+(i-importance+1);
-                elBox.name = 'artistmanager_box';
-                elBox.value = importance+';'+ArtistID;
-                elBox.onclick = function(e) { SelectArtist(e,this); };
-                elArtistList.children[i].insertBefore(elBox, elArtistList.children[i].children[0]);
-                if (importance == 1 || importance == 4 || importance == 6) {
-                    MainArtistCount++;
-                }
+            let AliasID = artists[i].dataset.aliasid;
+            let elBox = document.createElement('input');
+            elBox.type = 'checkbox';
+            elBox.id = 'artistmanager_box' + i;
+            elBox.name = 'artistmanager_box';
+            elBox.value = importance + ';' + AliasID;
+            elBox.onclick = function(e) { SelectArtist(e,this); };
+            artists[i].insertBefore(elBox, artists[i].firstChild);
+            if (importance === 1 || importance === 4 || importance === 6) {
+                MainArtistCount++;
             }
         }
         elArtistManager.appendChild(elArtistList);
@@ -171,17 +174,19 @@ function SelectArtist(e,obj) {
     if (window.event) {
         e = window.event;
     }
-    EndBox = Number(obj.id.substr(17));
+    const EndBox = Number(obj.id.substr(17));
     if (!e.shiftKey || typeof StartBox == 'undefined') {
-        StartBox = Number(obj.id.substr(17));
+        StartBox = EndBox;
     }
-    Dir = (EndBox > StartBox ? 1 : -1);
-    var checked = obj.checked;
-    for (var i = StartBox; i != EndBox; i += Dir) {
-        var key, importance = obj.value.substr(0,1), id = obj.value.substr(2);
-        $('#artistmanager_box' + i).raw().checked = checked;
+    let Dir = (EndBox > StartBox ? 1 : -1);
+    let checked = obj.checked;
+    for (let i = StartBox; i !== EndBox; i += Dir) {
+        let el = document.getElementById('artistmanager_box' + i);
+        if (el) {
+            el.checked = checked;
+        }
     }
-    StartBox = Number(obj.id.substr(17));
+    StartBox = EndBox;
 }
 
 function ArtistManagerSubmit() {

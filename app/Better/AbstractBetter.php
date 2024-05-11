@@ -52,9 +52,10 @@ abstract class AbstractBetter extends \Gazelle\Base {
 
     public function addArtistUserSnatchJoin(): static {
         $this->baseQuery .= " INNER JOIN (
-            SELECT DISTINCT ta.ArtistID
+            SELECT DISTINCT aa.ArtistID
             FROM torrents_artists ta
             INNER JOIN torrents t ON (t.GroupID = ta.GroupID)
+            INNER JOIN artists_alias aa ON (ta.AliasID = aa.AliasID)
             INNER JOIN xbt_snatched x ON (x.fid = t.ID AND x.uid = ?)
         ) s ON (s.ArtistID = a.ArtistID)";
         $this->args[] = $this->user->id();
@@ -63,10 +64,11 @@ abstract class AbstractBetter extends \Gazelle\Base {
 
     public function addArtistUserUploadJoin(): static {
         $this->baseQuery .= "INNER JOIN (
-            SELECT DISTINCT ta.ArtistID
+            SELECT DISTINCT aa.ArtistID
             FROM torrents t
             INNER JOIN torrents_group tg ON (tg.ID = t.GroupID)
             INNER JOIN torrents_artists ta ON (ta.GroupID = tg.ID)
+            INNER JOIN artists_alias aa ON (ta.AliasID = aa.AliasID)
             WHERE t.UserID = ?
             ) s ON (s.ArtistID = a.ArtistID)";
         $this->args[] = $this->user->id();

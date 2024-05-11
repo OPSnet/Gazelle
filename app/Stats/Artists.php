@@ -10,9 +10,10 @@ class Artists extends \Gazelle\Base {
         ");
         self::$db->prepared_query("
             INSERT IGNORE INTO artist_usage (artist_id, role, uses)
-            SELECT ArtistID, Importance, count(*) AS uses
-            FROM torrents_artists
-            GROUP BY ArtistID, Importance
+            SELECT aa.ArtistID, ta.Importance, count(*) AS uses
+            FROM torrents_artists ta
+            INNER JOIN artists_alias aa USING (AliasID)
+            GROUP BY aa.ArtistID, ta.Importance
         ");
         $affected = self::$db->affected_rows();
         self::$db->commit();

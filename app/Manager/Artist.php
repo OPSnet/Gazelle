@@ -24,7 +24,7 @@ class Artist extends \Gazelle\BaseManager {
         $this->role = $role;
     }
 
-    public function create(string $name): array {
+    public function create(string $name): \Gazelle\Artist {
         $db = new \Gazelle\DB();
         self::$db->begin_transaction();
         $db->relaxConstraints(true);
@@ -48,7 +48,7 @@ class Artist extends \Gazelle\BaseManager {
 
         self::$cache->increment('stats_artist_count');
 
-        return [$artistId, $aliasId];
+        return new \Gazelle\Artist($artistId);
     }
 
     public function findById(int $artistId): ?\Gazelle\Artist {
@@ -80,43 +80,38 @@ class Artist extends \Gazelle\BaseManager {
 
     public function findByName(string $name): ?\Gazelle\Artist {
         [$artistId, $aliasId] = self::$db->row("
-            SELECT ArtistID, AliasID FROM artists_alias WHERE Name = ?
+            SELECT ArtistID,
+                   CASE WHEN Redirect > 0
+                        THEN Redirect
+                        ELSE AliasID END AS AliasID
+            FROM artists_alias WHERE Name = ?
             ", trim($name)
         );
         return $artistId ? new \Gazelle\Artist($artistId, $aliasId) : null;
     }
 
     public function findByNameAndRevision(string $name, int $revisionId): ?\Gazelle\Artist {
-        [$artistId, $aliasId] = self::$db->row("
-            SELECT ag.ArtistID, aa.AliasID
+        $artistId = self::$db->scalar("
+            SELECT ag.ArtistID
             FROM artists_group ag
             INNER JOIN artists_alias aa ON (ag.ArtistID = aa.ArtistID)
             WHERE aa.Name = ?
                 AND ag.RevisionID = ?
             ", trim($name), $revisionId
         );
-        return $artistId ? new \Gazelle\Artist($artistId, $aliasId, $revisionId) : null;
+        return $artistId ? new \Gazelle\Artist((int)$artistId, null, $revisionId) : null;
     }
 
     public function findByAliasId(int $aliasId): ?\Gazelle\Artist {
         [$artistId, $aliasId] = self::$db->row("
-            SELECT ArtistID, AliasID FROM artists_alias WHERE AliasID = ?
+            SELECT ArtistID,
+                   CASE WHEN Redirect > 0
+                        THEN Redirect 
+                        ELSE AliasID END AS AliasID
+            FROM artists_alias WHERE AliasID = ?
             ", $aliasId
         );
         return $artistId ? new \Gazelle\Artist($artistId, $aliasId) : null;
-    }
-
-    /**
-     * find artist for alias, with case sensitivity
-     */
-    public function findByAliasName(string $name): ?\Gazelle\Artist {
-        // FIXME: remove LIMIT 1 after DB cleanup
-        return $this->findByAliasId(
-            (int)self::$db->scalar("
-                SELECT AliasID FROM artists_alias WHERE Name = BINARY ? LIMIT 1
-                ", trim($name)
-            )
-        );
     }
 
     public function findRandom(): ?\Gazelle\Artist {
@@ -157,24 +152,6 @@ class Artist extends \Gazelle\BaseManager {
             ),
             fn ($tgroup) => !empty($tgroup)
         );
-    }
-
-    public function fetchArtistIdAndAliasId(string $name): ?array {
-        self::$db->prepared_query('
-            SELECT AliasID, ArtistID, Redirect, Name
-            FROM artists_alias
-            WHERE Name = ?
-            ', $name
-        );
-        while ([$aliasId, $artistId, $redirect, $foundAliasName] = self::$db->next_record(MYSQLI_NUM, false)) {
-            if (!strcasecmp($name, $foundAliasName)) {
-                if ($redirect) {
-                    $aliasId = $redirect;
-                }
-                break;
-            }
-        }
-        return $aliasId ? [$artistId, $aliasId] : $this->create($name);
     }
 
     public function setGroupId(int $groupId): static {

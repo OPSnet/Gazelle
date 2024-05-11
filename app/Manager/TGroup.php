@@ -143,13 +143,15 @@ class TGroup extends \Gazelle\BaseManager {
             SELECT tg.id
             FROM torrents_group AS tg
             INNER JOIN torrents_artists AS ta ON (ta.GroupID = tg.ID)
-            INNER JOIN artists_group AS ag ON (ta.ArtistID = ag.ArtistID)
-            INNER JOIN artists_alias aa ON (ag.PrimaryAlias = aa.AliasID)
-            WHERE aa.Name          = ?
-                AND tg.Name        = ?
+            WHERE tg.Name          = ?
                 AND tg.ReleaseType = ?
                 AND tg.Year        = ?
-            ", $artistName, $name, $releaseType, $year
+                AND ta.AliasID IN (
+                    SELECT a2.AliasID FROM artists_alias a1
+                    INNER JOIN artists_alias a2 ON (a1.ArtistID = a2.ArtistID)
+                    WHERE a1.Name = ?
+                )
+            ", $name, $releaseType, $year, $artistName
         );
         return $this->findById($id);
     }

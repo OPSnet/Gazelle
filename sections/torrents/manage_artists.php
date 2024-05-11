@@ -16,54 +16,45 @@ if (is_null($tgroup)) {
 $Artists = explode(',', $_POST['artists']);
 
 $CleanArtists = [];
-$ArtistIDs = [];
+$AliasIDs = [];
 $ArtistsString = '0';
 
 foreach ($Artists as $Artist) {
-    [$Importance, $ArtistID] = explode(';', $Artist);
-    if ($ArtistID && $Importance) {
-        $CleanArtists[] = [(int)$Importance, (int)$ArtistID];
-        $ArtistIDs[] = (int)$ArtistID;
+    [$Importance, $AliasID] = explode(';', $Artist);
+    if ($AliasID && $Importance) {
+        $CleanArtists[] = [(int)$Importance, (int)$AliasID];
+        $AliasIDs[] = (int)$AliasID;
     }
 }
 
 if (count($CleanArtists) > 0) {
     $db = Gazelle\DB::DB();
-    $placeholders = placeholders($ArtistIDs);
+    $logger = new Gazelle\Log();
+    $placeholders = placeholders($AliasIDs);
     if ($_POST['manager_action'] == 'delete') {
-        $logger = new Gazelle\Log();
+        $artistMan = new Gazelle\Manager\Artist();
+        $changedArtists = [];
         foreach ($CleanArtists as $Artist) {
-            [$Importance, $ArtistID] = $Artist;
+            [$Importance, $AliasID] = $Artist;
             $db->prepared_query("
                 DELETE FROM torrents_artists
                 WHERE GroupID = ?
-                    AND ArtistID = ?
+                    AND AliasID = ?
                     AND Importance = ?
-                ", $tgroup->id(), $ArtistID, $Importance
+                ", $tgroup->id(), $AliasID, $Importance
             );
             if ($db->affected_rows()) {
-                $artist = new Gazelle\Artist($ArtistID);
-                $change = "artist $ArtistID ({$artist->name()}) removed as " . ARTIST_TYPE[$Importance];
+                $artist = $artistMan->findByAliasId($AliasID);
+                $changedArtists[$artist->id()] = $artist;
+                $change = "artist {$artist->id()} ({$artist->name()}) removed as " . ARTIST_TYPE[$Importance];
                 $logger->group($tgroup, $Viewer, $change)
                     ->general("$change in group {$tgroup->id()} ({$tgroup->name()}) by user {$Viewer->label()}");
-                $Cache->delete_value("artist_groups_$ArtistID");
             }
         }
-        $db->prepared_query("
-            SELECT ArtistID
-                FROM requests_artists
-                WHERE ArtistID IN ($placeholders)
-            UNION DISTINCT
-            SELECT ArtistID
-                FROM torrents_artists
-                WHERE ArtistID IN ($placeholders)
-            ", ...[...$ArtistIDs, ...$ArtistIDs]
-        );
-        $Items = $db->collect('ArtistID');
-        $EmptyArtists = array_diff($ArtistIDs, $Items);
-        $logger = new Gazelle\Log();
-        foreach ($EmptyArtists as $ArtistID) {
-            (new Gazelle\Artist($ArtistID))->remove($Viewer, $logger);
+        foreach ($changedArtists as $artist) {
+            if (!$artist->usageTotal()) {
+                $artist->remove($Viewer, $logger);
+            }
         }
     } else {
         $NewImportance = (int)$_POST['importance'];
@@ -74,18 +65,18 @@ if (count($CleanArtists) > 0) {
             UPDATE IGNORE torrents_artists SET
                 Importance = ?
             WHERE GroupID = ?
-                AND ArtistID IN ($placeholders)
-            ", $NewImportance, $tgroup->id(), ...$ArtistIDs
+                AND AliasID IN ($placeholders)
+            ", $NewImportance, $tgroup->id(), ...$AliasIDs
         );
-        $logger = new Gazelle\Log();
+        $artistMan = new Gazelle\Manager\Artist();
         foreach ($CleanArtists as $Artist) {
-            [$Importance, $ArtistID] = $Artist;
+            [$Importance, $AliasID] = $Artist;
             // Don't bother logging artists whose importance hasn't changed
             if ($Importance === $NewImportance) {
                 continue;
             }
-            $artist = new Gazelle\Artist($ArtistID);
-            $change = "artist $ArtistID ({$artist->name()}) changed role from "
+            $artist = $artistMan->findByAliasId($AliasID);
+            $change = "artist {$artist->id()} ({$artist->name()}) changed role from "
                 . ARTIST_TYPE[$Importance] . " to " . ARTIST_TYPE[$NewImportance];
             $logger->group($tgroup, $Viewer, $change)
                 ->general("$change in group {$tgroup->id()} ({$tgroup->name()}) by user " . $Viewer->label());

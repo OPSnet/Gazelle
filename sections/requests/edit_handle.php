@@ -234,7 +234,7 @@ if (isset($_POST['oclc'])) {
 
 $request->modify();
 if ($categoryName === 'Music' && $Viewer->permittedAny('site_edit_requests', 'site_moderate_requests')) {
-    $request->artistRole()->set($artistRole, new Gazelle\Manager\Artist());
+    $request->artistRole()->set($artistRole, $Viewer, new Gazelle\Manager\Artist());
 }
 if (isset($_POST['tags'])) {
     $request->setTagList(

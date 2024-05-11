@@ -35,21 +35,20 @@ class CommentTest extends TestCase {
     public function testCommentArtist(): void {
         $manager = new \Gazelle\Manager\Comment();
         $artMan  = new \Gazelle\Manager\Artist();
-        [$artistId, $aliasId] = $artMan->create('phpunit.' . randomString(12));
-        $this->artist = $artMan->findById($artistId);
+        $this->artist = $artMan->create('phpunit.' . randomString(12));
 
-        $comment = $manager->create($this->user, 'artist', $artistId, 'phpunit comment ' . randomString(10));
+        $comment = $manager->create($this->user, 'artist', $this->artist->id(), 'phpunit comment ' . randomString(10));
         $this->assertInstanceOf(\Gazelle\Comment\Artist::class, $comment, 'comment-artist-create');
         $this->assertEquals('artist', $comment->page(), 'comment-artist-page');
         $this->assertEquals(
-            "<a href=\"artist.php?id={$artistId}&amp;postid={$comment->id()}#post{$comment->id()}\">Comment #{$comment->id()}</a>",
+            "<a href=\"artist.php?id={$this->artist->id()}&amp;postid={$comment->id()}#post{$comment->id()}\">Comment #{$comment->id()}</a>",
             $comment->link(),
             'comment-artist-link'
         );
         $this->assertEquals(0, $comment->lastRead(), 'comment-artist-last-read');
         $this->assertEquals(0, $comment->pageNum(), 'comment-artist-page-num');
 
-        $reply = $manager->create($this->user, 'artist', $artistId, 'phpunit reply ' . randomString(10));
+        $reply = $manager->create($this->user, 'artist', $this->artist->id(), 'phpunit reply ' . randomString(10));
         $this->assertInstanceOf(\Gazelle\Comment\Artist::class, $comment->load(), 'comment-artist-load');
         $thread = $comment->thread();
         $this->assertCount(2, $thread, 'comment-artist-thread');
@@ -159,16 +158,13 @@ class CommentTest extends TestCase {
     public function testCommentMerge(): void {
         $manager = new \Gazelle\Manager\Comment();
         $artMan  = new \Gazelle\Manager\Artist();
-        [$artistId, $aliasId] = $artMan->create('phpunit.' . randomString(12));
-        $this->artist = $artMan->findById($artistId);
-
-        [$artistExtraId, $aliasExtraId] = $artMan->create('phpunit.' . randomString(12));
-        $artistExtra = $artMan->findById($artistExtraId);
+        $this->artist = $artMan->create('phpunit.' . randomString(12));
+        $artistExtra = $artMan->create('phpunit.' . randomString(12));
 
         $comment = $manager->create($this->user, 'artist', $this->artist->id(), 'phpunit-merge-keep-artist');
-        $extra = $manager->create($this->user, 'artist', $artistExtraId, 'phpunit-merge-comment');
+        $manager->create($this->user, 'artist', $artistExtra->id(), 'phpunit-merge-comment');
 
-        $manager->merge('artist', $artistExtraId, $this->artist->id());
+        $manager->merge('artist', $artistExtra->id(), $this->artist->id());
         $this->assertInstanceOf(\Gazelle\Comment\Artist::class, $comment->load(), 'comment-merge-load');
         $this->assertCount(2, $comment->thread(), 'comment-artist-merged-thread');
         $artistExtra->remove($this->user, new \Gazelle\Log());

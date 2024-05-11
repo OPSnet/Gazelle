@@ -1002,7 +1002,6 @@ defined('CACHE_NAMESPACE') or define('CACHE_NAMESPACE', [
         'a1' => 'artist_%d',
         'a2' => 'artist_comments_%d',
         'a3' => 'artist_comments_%d_catalogue_0',
-        'a4' => 'artist_groups_%d',
         'a5' => 'artists_collages_%d',
         'a6' => 'artists_requests_%d',
         'a7' => 'similar_positions_%d',

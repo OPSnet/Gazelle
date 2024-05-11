@@ -85,8 +85,9 @@ class Request extends \Gazelle\BaseManager {
                 FROM requests AS r
                 INNER JOIN requests_votes v ON (v.RequestID = r.ID)
                 INNER JOIN requests_artists AS ra ON (ra.RequestID = r.ID)
+                INNER JOIN artists_alias aa ON (ra.AliasID = aa.AliasID)
                 WHERE r.TorrentID = 0
-                    AND ra.ArtistID = ?
+                    AND aa.ArtistID = ?
                 GROUP BY r.ID
                 ORDER BY count(v.UserID) DESC, sum(v.Bounty) DESC
                 ", $artist->id()

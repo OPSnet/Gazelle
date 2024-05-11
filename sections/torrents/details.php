@@ -81,7 +81,7 @@ if ($musicRelease) {
                     continue;
                 }
 ?>
-                <li class="<?= $s['class'] ?>">
+                <li class="<?= $s['class'] ?> artist_entry" data-aliasid="<?= $artist->aliasId() ?>">
                     <?= $artist->link() ?>&lrm;
 <?php           if ($Viewer->permitted('torrents_edit')) { ?>
                     (<span class="tooltip" title="Artist alias ID"><?= $artist->aliasId()

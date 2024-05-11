@@ -17,7 +17,7 @@ class TGroup extends \Gazelle\ArtistRole {
     protected function artistListQuery(): \mysqli_result|bool {
         return self::$db->prepared_query("
             SELECT ta.Importance,
-                ta.ArtistID,
+                aa.ArtistID,
                 aa.Name,
                 ta.AliasID
             FROM torrents_artists AS ta
@@ -35,6 +35,7 @@ class TGroup extends \Gazelle\ArtistRole {
         while ([$role, $artistId, $artistName, $aliasId] = self::$db->next_record(MYSQLI_NUM, false)) {
             $this->idList[$role][] = [
                 'id'      => $artistId,
+                'aliasid' => $aliasId,
                 'name'    => $artistName,
             ];
             $this->roleList[self::MAP[$role]][] = [

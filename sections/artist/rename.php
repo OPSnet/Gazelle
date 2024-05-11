@@ -25,7 +25,7 @@ if (empty($newName)) {
 }
 $oldName = $artist->aliasList()[$aliasId]['name'];
 
-$otherArtist = $artistMan->findByAliasName($newName);
+$otherArtist = $artistMan->findByName($newName);
 if (!is_null($otherArtist) && $otherArtist->id() !== $artist->id()) {
     error("An artist with this alias already exists: {$otherArtist->name()} ({$otherArtist->id()})");
 }

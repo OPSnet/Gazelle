@@ -63,7 +63,7 @@ class CategoryTest extends TestCase {
         $this->assertEquals(
             [
                 ARTIST_MAIN => [
-                    ['id' => $artist->id(), 'name' => $artist->name()],
+                    ['id' => $artist->id(), 'name' => $artist->name(), 'aliasid' => $artist->aliasId()],
                 ],
             ],
             $new->artistRole()->idList(),
