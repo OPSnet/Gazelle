@@ -6,7 +6,6 @@ class Artist extends BaseObject {
     final public const pkName               = 'ArtistID';
     final public const tableName            = 'artists_group';
     final public const CACHE_REQUEST_ARTIST = 'artists_requests_%d';
-    final public const CACHE_TGROUP_ARTIST  = 'artists_groups_%d';
 
     protected const CACHE_PREFIX    = 'artist_%d';
 
@@ -38,14 +37,14 @@ class Artist extends BaseObject {
     public function flush(): static {
         self::$db->prepared_query("
             SELECT DISTINCT concat('groups_artists_', GroupID)
-            FROM torrents_artists
-            WHERE ArtistID = ?
+            FROM torrents_artists ta
+            INNER JOIN artists_alias aa USING (AliasID)
+            WHERE aa.ArtistID = ?
             ", $this->id
         );
         self::$cache->delete_multi([
             $this->cacheKey(),
             sprintf(self::CACHE_REQUEST_ARTIST, $this->id),
-            sprintf(self::CACHE_TGROUP_ARTIST, $this->id),
             ...self::$db->collect(0, false)
         ]);
         unset($this->info);
@@ -132,7 +131,8 @@ class Artist extends BaseObject {
             FROM torrents_artists AS ta
             INNER JOIN torrents_group AS tg ON (tg.ID = ta.GroupID)
             INNER JOIN release_type AS rt ON (rt.ID = tg.ReleaseType)
-            WHERE ta.ArtistID = ?
+            INNER JOIN artists_alias aa ON (ta.AliasID = aa.AliasID)
+            WHERE aa.ArtistID = ?
             ORDER BY tg.Year DESC, tg.Name, rt.ID
             ", $this->id
         );
@@ -349,12 +349,13 @@ class Artist extends BaseObject {
         self::$db->prepared_query("
             SELECT t.Name AS name,
                 count(*)  AS total
-            FROM torrents_artists tga
-            INNER JOIN torrents_group tg ON (tg.ID = tga.GroupID)
-            INNER JOIN torrents_tags ta USING (GroupID)
-            INNER JOIN tags t ON (t.ID = ta.TagID)
+            FROM torrents_artists ta
+            INNER JOIN torrents_group tg ON (tg.ID = ta.GroupID)
+            INNER JOIN torrents_tags tt USING (GroupID)
+            INNER JOIN tags t ON (t.ID = tt.TagID)
+            INNER JOIN artists_alias aa ON (ta.AliasID = aa.AliasID)
             WHERE tg.CategoryID NOT IN (3, 7)
-                AND tga.ArtistID = ?
+                AND aa.ArtistID = ?
             GROUP BY t.Name
             ORDER By 2 desc, t.Name
             LIMIT 10
@@ -507,10 +508,11 @@ class Artist extends BaseObject {
 
     public function requestIdUsage(): array {
         self::$db->prepared_query("
-            SELECT r.ID
+            SELECT DISTINCT r.ID
             FROM requests AS r
             INNER JOIN requests_artists AS ra ON (ra.RequestID = r.ID)
-            WHERE ra.ArtistID = ?
+            INNER JOIN artists_alias       aa ON (ra.AliasID = aa.AliasID)
+            WHERE aa.ArtistID = ?
             ", $this->id
         );
         return self::$db->collect(0, false);
@@ -518,10 +520,11 @@ class Artist extends BaseObject {
 
     public function tgroupIdUsage(): array {
         self::$db->prepared_query("
-            SELECT tg.ID
+            SELECT DISTINCT tg.ID
             FROM torrents_group AS tg
             INNER JOIN torrents_artists AS ta ON (ta.GroupID = tg.ID)
-            WHERE ta.ArtistID = ?
+            INNER JOIN artists_alias       aa ON (ta.AliasID = aa.AliasID)
+            WHERE aa.ArtistID = ?
             ", $this->id
         );
         return self::$db->collect(0, false);
@@ -650,12 +653,18 @@ class Artist extends BaseObject {
         );
         $artistCollageList = self::$db->collect(0, false);
         self::$db->prepared_query("
-            SELECT DISTINCT GroupID FROM torrents_artists WHERE ArtistID = ?
+            SELECT DISTINCT GroupID
+            FROM torrents_artists ta
+            INNER JOIN artists_alias aa ON (ta.AliasID = aa.AliasID)
+            WHERE aa.ArtistID = ?
             ", $oldId
         );
         $groupList = self::$db->collect(0, false);
         self::$db->prepared_query("
-            SELECT DISTINCT RequestID FROM requests_artists WHERE ArtistID = ?
+            SELECT DISTINCT RequestID
+            FROM requests_artists ra
+            INNER JOIN artists_alias aa ON (ra.AliasID = aa.AliasID)
+            WHERE aa.ArtistID = ?
             ", $oldId
         );
         $requestList = self::$db->collect(0, false);
@@ -663,9 +672,10 @@ class Artist extends BaseObject {
         // only need to flush torrent collages, no db update is required
         self::$db->prepared_query("
             SELECT DISTINCT ct.CollageID
-            FROM collages_torrents AS ct
-            INNER JOIN torrents_artists AS ta USING (GroupID)
-            WHERE ta.ArtistID = ?
+            FROM collages_torrents      ct
+            INNER JOIN torrents_artists ta USING (GroupID)
+            INNER JOIN artists_alias    aa ON (ta.AliasID = aa.AliasID)
+            WHERE aa.ArtistID = ?
             ", $oldId
         );
         $collageList = self::$db->collect(0, false);
@@ -695,30 +705,6 @@ class Artist extends BaseObject {
         );
         self::$db->prepared_query("
             DELETE FROM collages_artists WHERE ArtistID = ?
-            ", $oldId
-        );
-
-        self::$db->prepared_query("
-            UPDATE requests_artists Old
-            LEFT JOIN (SELECT RequestID from requests_artists where ArtistID = ?) New using (RequestID)
-            SET Old.ArtistID = ?
-            WHERE Old.ArtistID = ? AND New.RequestID IS NULL
-            ", $newId, $newId, $oldId
-        );
-        self::$db->prepared_query("
-            DELETE FROM requests_artists WHERE ArtistID = ?
-            ", $oldId
-        );
-
-        self::$db->prepared_query("
-            UPDATE torrents_artists Old
-            LEFT JOIN (SELECT GroupID from torrents_artists where ArtistID = ?) New using (GroupID)
-            SET Old.ArtistID = ?
-            WHERE Old.ArtistID = ? AND New.GroupID IS NULL
-            ", $newId, $newId, $oldId
-        );
-        self::$db->prepared_query("
-            DELETE FROM torrents_artists WHERE ArtistID = ?
             ", $oldId
         );
 
@@ -885,6 +871,19 @@ class Artist extends BaseObject {
             UPDATE IGNORE requests_artists SET AliasID = ? WHERE AliasID = ?
             ", $newId, $aliasId
         );
+
+        if ($aliasId !== $newId) {
+            // delete entries that exist for both old + new alias
+            self::$db->prepared_query("
+                DELETE FROM torrents_artists WHERE AliasID = ?
+                ", $aliasId
+            );
+            self::$db->prepared_query("
+                DELETE FROM requests_artists WHERE AliasID = ?
+                ", $aliasId
+            );
+        }
+
         self::$db->commit();
 
         foreach ($requests as $requestId) {

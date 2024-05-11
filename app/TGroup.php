@@ -591,6 +591,13 @@ class TGroup extends BaseObject {
         $add = [];
         $args = [];
         $seen = [];
+
+        foreach ($this->artistRole()?->idList() ?? [] as $role => $artistList) {
+            foreach ($artistList as $artistData) {
+                $seen["$role:{$artistData['aliasid']}"] = true;
+            }
+        }
+
         $n = count($names);
         for ($i = 0; $i < $n; $i++) {
             $role = $roles[$i];
@@ -598,20 +605,20 @@ class TGroup extends BaseObject {
             if (!$name || !in_array($role, array_keys(ARTIST_TYPE))) {
                 continue;
             }
-            [$artistId, $aliasId] = $artistMan->fetchArtistIdAndAliasId($name);
-            if ($artistId && !isset($seen["$role:$artistId"])) {
-                $seen["$role:$artistId"] = true;
-                array_push($args, $this->id, $userId, $artistId, $aliasId, $role, (string)$role);
-                $add[] = "$artistId ($name) as " . ARTIST_TYPE[$role];
+            $artist = $artistMan->findByName($name) ?? $artistMan->create($name);
+            if (!isset($seen["$role:{$artist->aliasId()}"])) {
+                $seen["$role:{$artist->aliasId()}"] = true;
+                array_push($args, $this->id, $userId, $artist->aliasId(), $role, (string)$role);
+                $add[] = "{$artist->label()} as " . ARTIST_TYPE[$role];
             }
         }
         if (empty($add)) {
             return 0;
         }
         self::$db->prepared_query("
-            INSERT IGNORE INTO torrents_artists
-                   (GroupID, UserID, ArtistID, AliasID, artist_role_id, Importance)
-            VALUES " . placeholders($add, '(?, ?, ?, ?, ?, ?)'),
+            INSERT INTO torrents_artists
+                   (GroupID, UserID, AliasID, artist_role_id, Importance)
+            VALUES " . placeholders($add, '(?, ?, ?, ?, ?)'),
             ...$args
         );
 
@@ -628,9 +635,9 @@ class TGroup extends BaseObject {
         self::$db->prepared_query('
             DELETE FROM torrents_artists
             WHERE GroupID = ?
-                AND ArtistID = ?
+                AND AliasID = ?
                 AND Importance = ?
-            ', $this->id, $artist->id(), $role
+            ', $this->id, $artist->aliasId(), $role
         );
         if (!self::$db->affected_rows()) {
             return false;
@@ -823,11 +830,6 @@ class TGroup extends BaseObject {
         self::$db->commit();
 
         $this->flush();
-        foreach (($this->artistRole()?->idList() ?? []) as $role) {
-            foreach ($role as $artist) {
-                self::$cache->delete_value('artist_groups_' . $artist['id']); //Needed for at least freeleech change, if not others.
-            }
-        }
         self::$db->set_query_id($qid);
         return $this;
     }
@@ -1024,7 +1026,7 @@ class TGroup extends BaseObject {
         // Artists
         // Collect the artist IDs and then wipe the torrents_artist entry
         self::$db->prepared_query("
-            SELECT ArtistID FROM torrents_artists WHERE GroupID = ?
+            SELECT DISTINCT AliasID FROM torrents_artists WHERE GroupID = ?
             ", $this->id
         );
         $artistList = self::$db->collect(0, false);
@@ -1035,7 +1037,7 @@ class TGroup extends BaseObject {
         $logger    = new Log();
         $artistMan = new Manager\Artist();
         foreach ($artistList as $artistId) {
-            $artist = $artistMan->findById($artistId);
+            $artist = $artistMan->findByAliasId($artistId);
             if ($artist) {
                 if ($artist->usageTotal() === 0) {
                     $artist->remove($user, $logger);

@@ -6,48 +6,22 @@ class Request extends \Gazelle\ArtistRole {
     /**
      * Create or modify the set of artists associated with a request
      */
-    public function set(array $roleList, \Gazelle\Manager\Artist $manager): int {
+    public function set(array $roleList, \Gazelle\User $user, \Gazelle\Manager\Artist $manager): int {
         self::$db->begin_transaction();
         foreach ($roleList as $role => $artistList) {
             foreach ($artistList as $n => $name) {
-                // 1. See if each artist given already exists and if it does, grab the ID.
-                self::$db->prepared_query("
-                    SELECT ArtistID,
-                        AliasID,
-                        Name,
-                        Redirect
-                    FROM artists_alias
-                    WHERE Name = ?
-                    ", $name
-                );
-                while ([$artistId, $aliasId, $aliasName, $redirect] = self::$db->next_record(MYSQLI_NUM, false)) {
-                    if (!strcasecmp($name, $aliasName)) {
-                        if ($redirect) {
-                            $aliasId = $redirect;
-                        }
-                        $roleList[$role][$n] = [
-                            'id'      => $artistId,
-                            'aliasid' => $aliasId,
-                            'name'    => $aliasName,
-                        ];
-                        break;
-                    }
-                }
-                if (!$artistId) {
-                    // 2. For each artist that didn't exist, create an artist.
-                    [$artistId, $aliasId] = $manager->create($name);
-                    $roleList[$role][$n] = [
-                        'id'      => $artistId,
-                        'aliasid' => $aliasId,
-                        'name'    => $name
-                    ];
-                }
+                $artist = $manager->findByName($name) ?? $manager->create($name);
+                $roleList[$role][$n] = $artist;
             }
         }
 
         // remove any trace of the previous artistRole if we are updating
         self::$db->prepared_query("
-            SELECT concat('artists_requests_', ArtistID) FROM requests_artists WHERE RequestID = ?
+            SELECT concat('artists_requests_', aa.ArtistID)
+            FROM requests_artists ra
+            INNER JOIN artists_alias aa USING (AliasID)
+            WHERE ra.RequestID = ?
+            GROUP BY aa.ArtistID
             ", $this->id
         );
         self::$cache->delete_multi([
@@ -65,12 +39,12 @@ class Request extends \Gazelle\ArtistRole {
             foreach ($artistList as $artist) {
                 self::$db->prepared_query("
                     INSERT INTO requests_artists
-                           (RequestID, ArtistID, AliasID, artist_role_id, Importance)
-                    VALUES (?,         ?,        ?,       ?,              ?)
-                    ", $this->id, $artist['id'], $artist['aliasid'], $role, (string)$role
+                           (RequestID, UserID, AliasID, artist_role_id, Importance)
+                    VALUES (?,         ?,      ?,       ?,              ?)
+                    ", $this->id, $user->id(), $artist->aliasId(), $role, (string)$role
                 );
                 $affected += self::$db->affected_rows();
-                self::$cache->delete_value("artists_requests_{$artist['id']}");
+                self::$cache->delete_value("artists_requests_{$artist->id()}");
             }
         }
         self::$db->commit();
@@ -81,7 +55,7 @@ class Request extends \Gazelle\ArtistRole {
         return self::$db->prepared_query("
             SELECT r.artist_role_id,
                 r.slug      AS slug,
-                ra.ArtistID AS artist_id,
+                aa.ArtistID AS artist_id,
                 aa.AliasID  AS alias_id,
                 aa.Name     AS name
             FROM requests_artists AS ra

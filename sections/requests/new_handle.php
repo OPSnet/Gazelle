@@ -202,7 +202,7 @@ $request = (new Gazelle\Manager\Request())->create(
     groupId:         $tgroup?->id(),
 );
 if ($categoryName == 'Music') {
-    $request->artistRole()->set($artistRole, new Gazelle\Manager\Artist());
+    $request->artistRole()->set($artistRole, $Viewer, new Gazelle\Manager\Artist());
 }
 $request->setTagList(array_unique(array_map('trim', explode(',', $tags))), $Viewer, new Gazelle\Manager\Tag());
 $tgroup?->flush();

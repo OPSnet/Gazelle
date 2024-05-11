@@ -67,6 +67,7 @@ class RequestTest extends TestCase {
             1,
             $this->request->artistRole()->set(
                 [ARTIST_MAIN => [$artistName]],
+                $user,
                 new Gazelle\Manager\Artist()
             ),
             'request-add-artist-role'
@@ -368,6 +369,7 @@ class RequestTest extends TestCase {
         );
         $this->request->artistRole()->set(
             [ARTIST_MAIN => ['phpunit req ' . randomString(6)]],
+            $this->userList['user'],
             new Gazelle\Manager\Artist(),
         );
         $this->request->addTag((new Gazelle\Manager\Tag())->create('classical.era', $this->userList['admin']));
@@ -403,6 +405,7 @@ class RequestTest extends TestCase {
         );
         $this->request->artistRole()->set(
             [ARTIST_MAIN => ['phpunit req ' . randomString(6)]],
+            $this->userList['user'],
             new Gazelle\Manager\Artist(),
         );
         $this->request->addTag((new Gazelle\Manager\Tag())->create('funk', $this->userList['admin']));
@@ -444,6 +447,7 @@ class RequestTest extends TestCase {
         );
         $this->request->artistRole()->set(
             [ARTIST_MAIN => ['phpunit req ' . randomString(6)]],
+            $this->userList['user'],
             new Gazelle\Manager\Artist(),
         );
 

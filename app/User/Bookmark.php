@@ -181,12 +181,13 @@ class Bookmark extends \Gazelle\BaseUser {
 
     public function torrentArtistLeaderboard(\Gazelle\Manager\Artist $artistMan): array {
         self::$db->prepared_query("
-            SELECT ta.ArtistID AS id,
+            SELECT aa.ArtistID AS id,
                 count(*) AS total
             FROM bookmarks_torrents b
             INNER JOIN torrents_artists ta USING (GroupID)
+            INNER JOIN artists_alias aa USING (AliasID)
             WHERE b.userid = ?
-            GROUP BY ta.ArtistID
+            GROUP BY aa.ArtistID
             ORDER BY total DESC, id
             LIMIT 10
             ", $this->user->id()

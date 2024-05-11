@@ -24,11 +24,11 @@ if ($autoSuggest === false) {
             aa.Name
         FROM artists_group AS a
         INNER JOIN artists_alias AS aa ON (a.PrimaryAlias = aa.AliasID)
-        INNER JOIN torrents_artists AS ta ON (ta.ArtistID = a.ArtistID)
+        INNER JOIN torrents_artists AS ta ON (ta.AliasID = aa.AliasID)
         INNER JOIN torrents AS t ON (t.GroupID = ta.GroupID)
         INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
         WHERE aa.Name LIKE ?
-        GROUP BY ta.ArtistID
+        GROUP BY a.ArtistID
         ORDER BY tls.Snatched DESC
         LIMIT ?",
         str_replace('\\', '\\\\', $letters) . '%', $keySize === $maxKeySize ? 250 : 20

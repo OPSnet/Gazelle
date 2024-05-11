@@ -27,10 +27,11 @@ class Artist extends \Gazelle\BaseObject {
                     coalesce(sum(tls.Seeders), 0)  AS seeder_total,
                     coalesce(sum(tls.Snatched), 0) AS snatch_total
                 FROM torrents_artists           ta
+                INNER JOIN artists_alias        aa  ON (ta.AliasID = aa.AliasID)
                 INNER JOIN torrents_group       tg  ON (tg.ID = ta.GroupID)
                 INNER JOIN torrents             t   ON (t.GroupID = tg.ID)
                 INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
-                WHERE ta.ArtistID = ?
+                WHERE aa.ArtistID = ?
                 ", $this->id()
             );
             self::$cache->cache_value($key, $info, 3600);
