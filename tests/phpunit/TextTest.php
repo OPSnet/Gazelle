@@ -115,7 +115,7 @@ class TextTest extends TestCase {
             'text-collage-bb'
         );
         $this->assertEquals(
-            "<a href=\"" . SITE_URL . "/collages.php?id={$collage->id()}\">{$collage->name()}</a>",
+            "<a href=\"collages.php?id={$collage->id()}\">{$collage->name()}</a>",
             Text::full_format($collage->publicLocation()),
             'text-collage-url'
         );
@@ -144,7 +144,7 @@ class TextTest extends TestCase {
         );
         $this->assertInstanceOf(Gazelle\Forum::class, $forum, 'text-create-forum');
         $this->assertEquals(
-            "<a href=\"forums.php?action=viewforum&amp;forumid={$forum->id()}\">{$forum->name()}</a>",
+            "<a href=\"forums.php?action=viewforum&amp;forumid={$forum->id()}\" class=\"tooltip\" title=\"{$forum->name()}\">{$forum->name()}</a>",
             Text::full_format("[forum]{$forum->id()}[/forum]"),
             'text-forum'
         );
