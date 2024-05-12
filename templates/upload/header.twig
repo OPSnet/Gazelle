@@ -1,5 +1,6 @@
 {% from 'macro/form.twig' import disabled, selected %}
 <div class="thin">
+<h2>Upload</h2>
 {% if is_upload %}
     <div style="text-align: center;">
         Your personal announce URL is:<br />
@@ -7,7 +8,7 @@
     </div>
 {% endif %}
 {% if error %}
-    <p style="color: red; text-align: center;">{{ error|raw }}</p>
+    <p class="upload-error">{{ error|raw }}</p>
 {% endif %}
     <form class="create_form" name="torrent" action="" enctype="multipart/form-data" method="post" id="upload_table" onsubmit="$('#post').raw().disabled = 'disabled';">
         <input type="hidden" id="torrent-new" name="torrent-new" value="{{ (info is not iterable)|number_format }}" />
@@ -18,13 +19,13 @@
         <input type="hidden" name="torrentid" value="{{ info.ID }}" />
         <input type="hidden" name="type" id="edittype" value="{{ info.CategoryID }}" />
 {% else %}
-    {%- if info.GroupID %}
+{%  if info.GroupID %}
         <input type="hidden" name="groupid" value="{{ info.GroupID }}" />
-        <input type="hidden" name="type" value="{{ category_id }}" />
-    {%- endif %}
-    {%- if info.RequestID %}
+        <input type="hidden" name="type" value="{{ category_id - 1 }}" />
+{%  endif %}
+{%  if info.RequestID %}
         <input type="hidden" name="requestid" value="{{ info.RequestID }}" />
-    {%- endif %}
+{%  endif %}
 {% endif %}
 {% if is_upload %}
         <table cellpadding="3" cellspacing="1" border="0" class="layout border" width="100%">
@@ -44,10 +45,10 @@
             <tr>
                 <td class="label">Type:</td>
                 <td>
-                    <select id="categories" name="type" onchange="Categories()"{{ disabled(is_disabled) }}>
-    {%- for name in constant('CATEGORY') %}
+                    <select id="categories" name="type" onchange="Categories()"{{ disabled(is_uploaded) }}>
+{%  for name in constant('CATEGORY') %}
                         <option value="{{ loop.index0 }}"{{ selected(name == info.CategoryName) }}>{{ name }}</option>
-    {%- endfor %}
+{%  endfor %}
                     </select>
                 </td>
             </tr>

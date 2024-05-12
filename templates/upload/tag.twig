@@ -1,0 +1,19 @@
+{% from 'macro/form.twig' import autocomplete, disabled, selected %}
+    <tr>
+        <td class="label">Tags:</td>
+        <td>
+{%  for name in tag_list %}
+{%      if loop.first %}
+            <select id="genre_tags" name="genre_tags" onchange="add_tag(); return false;"{{ disabled(is_uploaded) }}>
+                <option>---</option>
+{%      endif %}
+                <option value="{{ name }}">{{ name }}</option>
+{%  if loop.last %}
+            </select>
+{%  endif %}
+{% endfor %}
+            <input type="text" id="tags" name="tags" size="40" value=""{{ autocomplete(user, 'other') }}{{ disabled(is_uploaded) }} />
+            <br />
+{% include 'rules/tag.twig' with {'on_upload': true} %}
+        </td>
+    </tr>

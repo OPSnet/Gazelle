@@ -88,7 +88,7 @@ function setAllowedFormat(formatField, bitrateField) {
     var fmt = $(formatField).val();
     var btr = $(bitrateField).val();
     $(formatField).empty().append(new Option('---', ''));
-    if ($('#upload_logs').length) {
+    if (document.getElementById('form-music-upload')) {
         var warning = $('#format_warning');
         if (media === '---') {
             $(bitrateField).empty().append(new Option('---', ''));
@@ -100,7 +100,7 @@ function setAllowedFormat(formatField, bitrateField) {
         $.each(AllowedMediaFormat[media], function(k) {
             $(formatField).append(new Option(AllowedMediaFormat[media][k], AllowedMediaFormat[media][k]));
         });
-    } else if ($('#form-audiobook').length) {
+    } else if (document.getElementById('form-audiobook-upload')) {
         $.each(AllowedAudiobookFormat, function(k) {
             $(formatField).append(new Option(AllowedAudiobookFormat[k], AllowedAudiobookFormat[k]));
         });
@@ -935,9 +935,9 @@ function audiobookFormInit() {
 }
 
 function uploadFormInit() {
-    if ($('#torrent-json-file').length) {
+    if (document.getElementById('form-music-upload')) {
         musicFormInit();
-    } else if ($('#form-audiobook').length) {
+    } else if (document.getElementById('form-audiobook-upload')) {
         audiobookFormInit();
     }
 }

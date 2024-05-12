@@ -3,12 +3,12 @@
 {% if public or unsourced %}
 <p>Your torrent has been uploaded; however, you must download your torrent from <a href="torrents.php?id={{ group_id }}">here</a> because:</p>
 <ul>
-    {% if public %}
+{%  if public %}
     <li><strong>You didn't make your torrent using the "private" option</strong></li>
-    {% endif %}
-    {% if unsourced %}
+{%  endif %}
+{%  if unsourced %}
     <li>The "source" flag was not set to OPS. Please read the <a href="/wiki.php?action=article&id={{ wiki_id }}">wiki page about source flags</a> to find out why this is important. </li>
-    {% endif %}
+{%  endif %}
 </ul>
 {% endif %}
 {% if clash > 1 %}

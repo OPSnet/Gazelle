@@ -1,0 +1,27 @@
+{% from 'macro/form.twig' import checked, class_hidden, selected %}
+    <tr id="bitrate_row">
+        <td class="label">Bitrate:</td>
+        <td>
+{% if bitrate in constant('ENCODING') %}
+{%  set current = bitrate %}
+{% elseif bitrate %}
+{%  set other_bitrate = true %}
+{%  if ' (VBR)' in bitrate %}
+{%    set current = bitrate|trim(' (VBR)', 'right') %}
+{%    set vbr = true %}
+{%  else %}
+{%    set current = bitrate %}
+{%  endif %}
+{% endif %}
+            <select id="bitrate" name="bitrate">
+                <option value="">---</option>
+{% for e in constant('ENCODING') %}
+                <option value="{{ e }}"{{ selected(e == current or (e == 'Other' and other_bitrate)) }}>{{ e }}</option>
+{% endfor %}
+            </select>
+            <span id="other_bitrate_span"{{ class_hidden(not other_bitrate) }}>
+                <input type="text" name="other_bitrate" size="5" id="other_bitrate"{% if other_bitrate and bitrate %} value="{{ current }}"{% endif %} onchange="AltBitrate()" />
+                <label><input type="checkbox" id="vbr" name="vbr"{{ checked(vbr) }} /> (VBR)</label>
+            </span>
+        </td>
+    </tr>

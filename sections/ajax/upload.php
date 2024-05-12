@@ -3,40 +3,39 @@
 // echo out the slice of the form needed for the selected upload type ($_GET['section']).
 
 $uploadForm = new Gazelle\Upload($Viewer);
-$uploadForm->setCategoryId((int)$_GET['categoryid'] + 1);
 $emitJS = isset($_GET['js']);
 
-switch (CATEGORY[$_GET['categoryid']]) {
-    case 'Music':
-        if ($emitJS) {
-            echo $uploadForm->albumReleaseJS();
-        } else {
-            echo $uploadForm->music_form(
-                (new Gazelle\Manager\Tag())->genreList(),
-                new Gazelle\Manager\TGroup(),
-            );
-        }
+switch (CATEGORY[(int)$_GET['categoryid']]) {
+    case 'Applications':
+        echo $emitJS ? $uploadForm->descriptionJS() : $uploadForm->application();
         break;
 
     case 'Audiobooks':
-    case 'Comedy':
-        if ($emitJS) {
-            echo $uploadForm->albumReleaseJS();
-        } else {
-            echo $uploadForm->audiobook_form();
-        }
+        echo $emitJS ? $uploadForm->albumReleaseJS() : $uploadForm->audiobook();
         break;
 
-    case 'Applications':
-    case 'Comics':
-    case 'E-Books':
-    case 'E-Learning Videos':
-        if ($emitJS) {
-            echo $uploadForm->descriptionJS();
-        } else {
-            echo $uploadForm->simple_form();
-        }
+    case 'Comedy':
+        echo $emitJS ? $uploadForm->albumReleaseJS() : $uploadForm->comedy();
         break;
+
+    case 'Comics':
+        echo $emitJS ? $uploadForm->descriptionJS() : $uploadForm->comic();
+        break;
+
+    case 'E-Books':
+        echo $emitJS ? $uploadForm->descriptionJS() : $uploadForm->ebook();
+        break;
+
+    case 'E-Learning Videos':
+        echo $emitJS ? $uploadForm->descriptionJS() : $uploadForm->elearning();
+        break;
+
+    case 'Music':
+        echo $emitJS
+            ? $uploadForm->albumReleaseJS()
+            : $uploadForm->music((new Gazelle\Manager\Tag())->genreList(), new Gazelle\Manager\TGroup());
+        break;
+
     default:
         echo 'Invalid action!';
 }
