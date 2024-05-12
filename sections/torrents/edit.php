@@ -76,15 +76,15 @@ if (!($torrent->isRemastered() && !$torrent->remasterYear()) || $Viewer->permitt
         ],
         $Err ?? false
     );
-    $uploadForm->setCategoryId($categoryId);
-    echo $uploadForm->head();
+    echo $uploadForm->head($categoryId);
     echo match ($categoryName) {
-        'Audiobooks', 'Comedy'                                   => $uploadForm->audiobook_form(),
-        'Applications', 'Comics', 'E-Books', 'E-Learning Videos' => $uploadForm->simple_form(),
-        default => $uploadForm->music_form(
-            [],
-            new Gazelle\Manager\TGroup(),
-        ),
+        'Audiobooks'        => $uploadForm->audiobook(),
+        'Comedy'            => $uploadForm->comedy(),
+        'Applications'      => $uploadForm->application(),
+        'Comics'            => $uploadForm->comic(),
+        'E-Books'           => $uploadForm->ebook(),
+        'E-Learning Videos' => $uploadForm->elearning(),
+        default => $uploadForm->music([], new Gazelle\Manager\TGroup()),
     };
     echo $uploadForm->foot(false);
 };

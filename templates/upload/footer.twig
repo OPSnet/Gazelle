@@ -6,15 +6,15 @@
         <td class="label">Leech Type</td>
         <td>
             <select name="leech_type">
-            {% for type in leech_type %}
+{%  for type in leech_type %}
                 <option value="{{ type.value }}"{{ selected(type.value == info.leech_type.value) }}>{{ type.label }}</option>
-            {% endfor %}
+{%  endfor %}
             </select>
             for
             <select name="leech_reason">
-            {% for reason in leech_reason %}
+{%      for reason in leech_reason %}
                 <option value="{{ reason.value }}"{{ selected(reason.value == info.leech_reason.value) }}>{{ reason.label }}</option>
-            {% endfor %}
+{%      endfor %}
             </select>
         </td>
     </tr>
@@ -35,6 +35,4 @@
 </table>
 </form>
 </div>
-{% if show_footer %}
-    {{- footer() }}
-{% endif %}
+{% if show_footer %}{{ footer() }}{% endif %}

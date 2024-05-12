@@ -1,0 +1,34 @@
+<table id="form-comedy-upload" cellpadding="3" cellspacing="1" border="0" class="layout border slice" width="100%">
+{% if not torrent %}
+    <tr id="title_tr">
+        <td class="label">Author - Title:</td>
+        <td>
+            <input type="text" id="title" name="title" size="60" value="" />
+            <p class="min_padding">Should only include the author if applicable.</p>
+        </td>
+    </tr>
+    <tr id="year_tr">
+        <td class="label">Year:</td>
+        <td><input type="text" id="year" name="year" size="5" value="" /></td>
+    </tr>
+{% endif %}
+{% include 'upload/format.twig' with {'format': torrent.Format} %}
+{% include 'upload/bitrate.twig' with {'bitrate': torrent.Bitrate} %}
+{% if not torrent %}
+{%  include 'upload/tag.twig' with {'tag_list': tag_list, 'user': user} %}
+    <tr>
+        <td class="label">Description:</td>
+        <td>
+            {{ description_album.emit|raw }}
+            <p class="min_padding">Contains information like the track listing, a review, a link to Discogs or MusicBrainz, etc.</p>
+        </td>
+    </tr>
+{% endif %}
+    <tr>
+        <td class="label">Release description (optional):</td>
+        <td>
+            {{ description_release.emit|raw }}
+            <p class="min_padding">Contains information like encoder settings. For analog rips, this frequently contains lineage information.</p>
+        </td>
+    </tr>
+</table>

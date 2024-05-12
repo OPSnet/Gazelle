@@ -1,0 +1,20 @@
+{% from 'macro/form.twig' import autocomplete %}
+<table id="form-elearning-upload" cellpadding="3" cellspacing="1" border="0" class="layout border slice" width="100%">
+    <tr id="name">
+{% if not torrent %}
+        <td class="label">Author - Title:</td>
+        <td><input type="text" id="title" name="title" size="60" value="" /></td>
+    </tr>
+    <tr>
+        <td class="label">Tags:</td>
+        <td><input type="text" id="tags" name="tags" size="60" value=""{{ autocomplete(user, 'other') }} /></td>
+    </tr>
+{%  include 'upload/cover.twig' with {'is_uploaded': is_uploaded} only %}
+    <tr>
+        <td class="label">Description:</td>
+        <td>
+            {{ description.emit|raw }}
+        </td>
+    </tr>
+{% endif %}
+</table>

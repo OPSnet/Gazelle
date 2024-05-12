@@ -151,7 +151,7 @@ pre {
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }
 
 .disable_grouping {
@@ -900,6 +900,11 @@ input[type="search"] {
   font-size: 14px;
   margin-top: 10px;
   font-weight: 600;
+}
+
+.upload-error {
+  color: red;
+  text-align: center;
 }
 
 .debug_table {

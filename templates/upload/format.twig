@@ -1,0 +1,13 @@
+{% from 'macro/form.twig' import selected %}
+    <tr>
+        <td class="label">Format:</td>
+        <td>
+            <select id="format" name="format">
+                <option value="">---</option>
+{% for f in constant('FORMAT') %}
+                <option value="{{ f }}"{{ selected(f == format) }}>{{ f }}</option>
+{% endfor %}
+            </select>
+            <span id="format_warning" class="important_text"></span>
+        </td>
+    </tr>

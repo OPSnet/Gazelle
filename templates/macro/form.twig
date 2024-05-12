@@ -1,3 +1,7 @@
+{%- macro autocomplete(user, type) -%}
+    {%- if user.hasAutocomplete(type) %} data-gazelle-autocomplete="true"{% endif -%}
+{%- endmacro %}
+
 {%- macro checked(flag) -%}
     {%- if flag %} checked="checked"{% endif -%}
 {%- endmacro %}

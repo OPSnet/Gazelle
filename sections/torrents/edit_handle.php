@@ -118,7 +118,6 @@ switch (CATEGORY[(int)($_POST['type'] ?? 0) - 1]) {
     case 'Audiobooks':
     case 'Comedy':
         $Validate->setFields([
-            ['year', true, 'number', 'The year of the release must be entered.'],
             ['format', true, 'inarray', 'Not a valid format.', ['inarray' => FORMAT]],
             ['bitrate', true, 'inarray', 'You must choose a bitrate.', ['inarray' => ENCODING]],
             ['release_desc', false, 'string', 'The release description has a minimum length of 10 characters.', ['rang' => [10, 1_000_000]]],
@@ -278,7 +277,7 @@ $db->commit();
 
 $torrent->group()->refresh();
 
-$changeLog = implode(', ', $change);
+$changeLog = shortenString(implode(', ', $change), 300);
 (new Gazelle\Log())->torrent($torrent, $Viewer, $changeLog)
     ->general("Torrent $TorrentID ({$torrent->group()->name()}) in group {$current['GroupID']} was edited by "
         . $Viewer->username() . " ($changeLog)");
