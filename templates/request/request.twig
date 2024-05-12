@@ -35,21 +35,21 @@
           <td class="label">Type</td>
           <td>
             <select id="categories" name="type" onchange="Categories();">
-  {%- for cat in constant('CATEGORY') -%}
+{%  for cat in constant('CATEGORY') -%}
               <option value="{{ cat }}"{{ selected(cat == category_name) }}>{{ cat }}</option>
-  {%- endfor -%}
+{%  endfor -%}
             </select>
           </td>
         </tr>
-  {%- if category_name == 'Music' -%}
+{%  if category_name == 'Music' -%}
         <tr id="releasetypes_tr">
           <td class="label">Release type</td>
           <td>
             <select id="releasetype" name="releasetype">
               <option value="0">---</option>
-    {%- for k, v in release_list -%}
+{%      for k, v in release_list -%}
               <option value="{{ k }}"{{ selected(k == release_type) }}>{{ v }}</option>
-    {%- endfor -%}
+{%      endfor -%}
             </select>
           </td>
         </tr>
@@ -57,8 +57,8 @@
           <td class="label">Artist(s)</td>
           <td id="artistfields">
             <p id="vawarning" class="hidden">Please use the multiple artists feature rather than adding "Various Artists" as an artist; read <a href="wiki.php?action=article&amp;id=64" target="_blank">this</a> for more information.</p>
-    {%- for role, name_list in artist_role -%}
-      {%- for idx, name in name_list -%}
+{%      for role, name_list in artist_role -%}
+{%          for idx, name in name_list -%}
             <input type="text" size="45" id="artist_{{ loop.index0 }}" name="artists[]"{{ autocomplete|raw }} value="{{ name }}" />
             <select id="importance" name="importance[]">
               <option value="{{ constant('ARTIST_MAIN') }}"{{ selected(role == constant('ARTIST_MAIN')) }}>Main</option>
@@ -70,12 +70,12 @@
               <option value="{{ constant('ARTIST_PRODUCER') }}"{{ selected(role == constant('ARTIST_PRODUCER')) }}>Producer</option>
               <option value="{{ constant('ARTIST_ARRANGER') }}"{{ selected(role == constant('ARTIST_ARRANGER')) }}>Arranger</option>
             </select>
-        {%- if loop.parent.loop.first and loop.first -%}
+{%          if loop.parent.loop.first and loop.first -%}
 <a href="#" onclick="AddArtistField(); return false;" class="brackets">+</a> <a href="#" onclick="RemoveArtistField(); return false;" class="brackets">&minus;</a>
             <br />
-        {%- endif -%}
-      {%- endfor -%}
-    {%- else -%}
+{%          endif -%}
+{%          endfor -%}
+{%      else -%}
             <input type="text" size="45" id="artist_0" name="artists[]"{{ autocomplete|raw }} onblur="CheckVA();" />
             <select id="importance" name="importance[]">
               <option value="{{ constant('ARTIST_MAIN') }}">Main</option>
@@ -88,15 +88,15 @@
               <option value="{{ constant('ARTIST_ARRANGER') }}">Arranger</option>
             </select>
             <a href="#" onclick="AddArtistField(); return false;" class="brackets">+</a> <a href="#" onclick="RemoveArtistField(); return false;" class="brackets">&minus;</a>
-    {%- endfor -%}
+{%      endfor -%}
           </td>
         </tr>
-  {%- endif -%}
+{%  endif -%}
         <tr>
           <td class="label">Title</td>
           <td><input type="text" name="title" size="45" value="{{ title }}" /></td>
         </tr>
-  {%- if category_name == 'Music' -%}
+{%  if category_name == 'Music' -%}
         <tr id="recordlabel_tr">
           <td class="label">Record label</td>
           <td><input type="text" name="recordlabel" size="45" value="{{ record_label }}" /></td>
@@ -109,7 +109,7 @@
           <td class="label">WorldCat (OCLC) ID</td>
           <td><input type="text" name="oclc" size="15" value="{{ oclc }}" /></td>
         </tr>
-  {%- endif -%}
+{%  endif -%}
         <tr id="year_tr">
           <td class="label">Year</td>
           <td><input type="text" name="year" size="5" value="{{ year == 0 ? '' : year }}" /></td>
@@ -118,10 +118,10 @@
           <td class="label">Image</td>
           <td>
             <input type="text" name="image" size="45" value="{{ image }}" />
-  {%- if constant('IMAGE_HOST_BANNED') -%}
+{%  if constant('IMAGE_HOST_BANNED') -%}
             <br /><b>Images hosted on <strong class="important_text">{{ constant('IMAGE_HOST_BANNED')|join(', ')
               }} are not allowed</strong>, please rehost first on one of {{ constant('IMAGE_HOST_RECOMMENDED')|join(', ') }}.</b>
-  {%- endif -%}
+{%  endif -%}
           </td>
         </tr>
 {% endif %}
@@ -145,34 +145,34 @@
         <tr id="formats_tr">
           <td class="label">Allowed formats</td>
           <td>
-            <label><input type="checkbox" name="all_formats" id="toggle_formats" onchange="Toggle('formats', {{ new ? 1 : 0 }});"{{ checked(format.all) }} /> All</label>
-  {%- for k, v in constant('FORMAT') -%}
-    {%- if loop.index % 8 == 0 %}<br />{% else %}&nbsp;&nbsp;{% endif -%}
-            <label><input type="checkbox" name="formats[]" value="{{ k }}" id="format_{{ k }}"{{ checked(format.exists(v)) }}
+            <label style="display: inline-block; width: 100px"><input type="checkbox" name="all_formats" id="toggle_formats" onchange="Toggle('formats', {{ new ? 1 : 0 }});"{{ checked(format.all) }} /> All</label>
+            <br />
+{%  for k, v in constant('FORMAT') %}
+            <label style="display: inline-block; width: 100px"><input type="checkbox" name="formats[]" value="{{ k }}" id="format_{{ k }}"{{ checked(format.exists(v)) }}
                 onchange="ToggleLogCue(); if (!this.checked) { $('#toggle_formats').raw().checked = false; }" /> {{ v }}</label>
-  {%- endfor -%}
+{%  endfor %}
           </td>
         </tr>
         <tr id="bitrates_tr">
           <td class="label">Allowed encodings</td>
           <td>
-            <label><input type="checkbox" name="all_bitrates" id="toggle_bitrates" onchange="Toggle('bitrates', {{ new ? 1 : 0 }});"{{ checked(encoding.all) }} /> All</label>
-  {%- for k, v in constant('ENCODING') -%}
-    {%- if loop.index % 8 == 0 %}<br />{% endif -%}
-            <label><input type="checkbox" name="bitrates[]" value="{{ k }}" id="bitrate_{{ k }}"{{ checked(encoding.exists(v)) }}
+            <label style="display: inline-block; width: 100px"><input type="checkbox" name="all_bitrates" id="toggle_bitrates" onchange="Toggle('bitrates', {{ new ? 1 : 0 }});"{{ checked(encoding.all) }} /> All</label>
+            <br />
+{%  for k, v in constant('ENCODING') %}
+            <label style="display: inline-block; width: 100px"><input type="checkbox" name="bitrates[]" value="{{ k }}" id="bitrate_{{ k }}"{{ checked(encoding.exists(v)) }}
             onchange="if (!this.checked) { $('#toggle_bitrates').raw().checked = false; }" /> {{ v }}</label>
-  {%- endfor -%}
+{%  endfor %}
           </td>
         </tr>
         <tr id="media_tr">
           <td class="label">Allowed media</td>
           <td>
-           <label><input type="checkbox" name="all_media" id="toggle_media" onchange="Toggle('media', {{ new ? 1 : 0 }});"{{ checked(media.all) }} /> All</label>
-  {%- for k, v in constant('MEDIA') -%}
-    {%- if loop.index % 8 == 0 %}<br />{% endif -%}
-            <label><input type="checkbox" name="media[]" value="{{ k }}" id="media_{{ k }}"{{ checked(media.exists(v)) }}
+            <label style="display: inline-block; width: 100px"><input type="checkbox" name="all_media" id="toggle_media" onchange="Toggle('media', {{ new ? 1 : 0 }});"{{ checked(media.all) }} /> All</label>
+            <br />
+{%  for k, v in constant('MEDIA') %}
+            <label style="display: inline-block; width: 100px"><input type="checkbox" name="media[]" value="{{ k }}" id="media_{{ k }}"{{ checked(media.exists(v)) }}
             onchange="ToggleLogCue(); if (!this.checked) { $('#toggle_media').raw().checked = false; }" /> {{ v }}</label>
-  {%- endfor -%}
+{%  endfor %}
           </td>
         </tr>
         <tr id="logcue_tr" class="hidden">
@@ -196,14 +196,14 @@
         <tr>
           <td class="label">Torrent group</td>
           <td>
-  {%- if new or viewer.permitted('site_moderate_requests') -%}
+{%  if new or viewer.permitted('site_moderate_requests') %}
             {{ constant('SITE_URL') }}/torrents.php?id=<input type="text" name="groupid" value="" size="15" /><br />
             If this request matches a torrent group <b>already existing</b> on the site, please indicate that here.
-  {%- else -%}
+{%  else %}
             {{ tgroup.link|raw }}<br />
             This request is associated with the above torrent group.
             <input type="hidden" name="groupid" value="{{ tgroup.id }}" />
-  {%- endif -%}
+{%  endif %}
           </td>
         </tr>
 {% endif %}
@@ -216,7 +216,9 @@
               <option value="mb"{{ selected(not unit_GiB) }}>MiB</option>
               <option value="gb"{{ selected(unit_GiB) }}>GiB</option>
             </select>
-  {%- if constant('REQUEST_TAX') > 0.0 %}<strong>{{ constant('REQUEST_TAX') * 100 }}% of this is deducted as tax by the system.</strong>{% endif %}
+{%  if constant('REQUEST_TAX') > 0.0 %}
+            <strong>{{ constant('REQUEST_TAX') * 100 }}% of this is deducted as tax by the system.</strong>
+{%  endif %}
             <p>Bounty must be greater than or equal to {{ constant('REQUEST_MIN') }} MiB.</p>
           </td>
         </tr>
@@ -228,11 +230,11 @@
             <input type="hidden" id="current_downloaded" value="{{ viewer.downloadedSize }}" />
             <input type="hidden" id="current_rr" value="{{ viewer.requiredRatio }}" />
             <input type='hidden' id='request_tax' value="{{ constant('REQUEST_TAX') }}" />
-  {%- if constant('REQUEST_TAX') > 0 %}
+{%  if constant('REQUEST_TAX') > 0 %}
               Bounty after tax: <strong><span id="bounty_after_tax">{{ (100 * (1 - constant('REQUEST_TAX')))|number_format(0) }} MiB</span></strong><br />
-  {%- else %}
+{%  else %}
               <span id="bounty_after_tax" style="display: none;">{{ (100 * (1 - constant('REQUEST_TAX')))|number_format(2) }} MiB</span>
-  {%- endif %}
+{%  endif %}
             If you add the entered <strong><span id="new_bounty">{{ constant('REQUEST_MIN')|number_format(0) }} MiB</span></strong> of bounty, your new stats will be: <br />
             Uploaded: <span id="new_uploaded">{{ viewer.uploadedSize|octet_size }}</span><br />
             Ratio: <span id="new_ratio">{{ ratio(viewer.uploadedsize, viewer.downloadedSize) }}</span>
@@ -249,4 +251,4 @@
     <script type="text/javascript">ToggleLogCue(); {% if new %}Calculate(); {% endif %}Categories();</script>
   </div>
 </div>
-{{ footer() -}}
+{{ footer() }}
