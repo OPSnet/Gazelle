@@ -11,11 +11,11 @@ $message = null;
 
 if (isset($_POST['id'])) {
     authorize();
-    $action = $_POST['perform'] ?? '';
-    $doComment = $action === 'comment';
+    $comment   = trim($_POST['comment'] ?? '');
+    $action    = $_POST['perform'] ?? '';
     $doDisable = $action === 'disable';
     $doInvites = $action === 'invites';
-    if (!($doComment || $doDisable || $doInvites)) {
+    if (!($comment || $doDisable || $doInvites)) {
         error("No maniplation action specified");
     }
     if (!$_POST['comment']) {
@@ -26,47 +26,15 @@ if (isset($_POST['id'])) {
     if (is_null($user)) {
         error(404);
     }
-    $username = $user->username();
 
-    $inviteTree = new Gazelle\User\InviteTree($user, $userMan);
-    if (!$inviteTree->treeId()) {
-        $message = "No invite tree exists for $username";
-    } else {
-        $inviteeList = $inviteTree->inviteeList();
-        $inviteeCount = count($inviteeList);
-        if (!$inviteeCount) {
-            $message = "No invitees for $username";
-        } else {
-            if ($doComment) {
-                $message = "Commented on";
-                $comment = " comment";
-            } elseif ($doDisable) {
-                $message = "Banned";
-                $comment = " disable";
-            } elseif ($doInvites) {
-                $message = "Removed invite privileges from";
-                $comment = " invites removed";
-            } else {
-                $comment = " ";
-            }
-            $message .= " entire tree ({$inviteeCount} user" . plural($inviteeCount) . ')';
-            $comment = date('Y-m-d H:i:s') . " - {$_POST['comment']}\nInvite Tree$comment on $username by " . $Viewer->username();
-            foreach ($inviteeList as $inviteeId) {
-                $invitee = $userMan->findById($inviteeId);
-                if (is_null($invitee)) {
-                    continue;
-                }
-                if ($doComment) {
-                    $invitee->addStaffNote($comment)->modify();
-                } elseif ($doDisable) {
-                    $userMan->disableUserList(new Gazelle\Tracker(), [$inviteeId], $comment, Gazelle\Manager\User::DISABLE_TREEBAN);
-                } elseif ($doInvites) {
-                    $invitee->toggleAttr('disable-invites', true);
-                    $invitee->addStaffNote($comment)->modify();
-                }
-            }
-        }
-    }
+    $message = (new Gazelle\User\InviteTree($user, $userMan))
+        ->manipulate(
+            $comment,
+            $doDisable,
+            $doInvites,
+            new \Gazelle\Tracker(),
+            $Viewer
+        );
 }
 
 echo $Twig->render('user/invite-tree-bulkedit.twig', [

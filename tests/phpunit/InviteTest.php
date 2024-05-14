@@ -21,8 +21,6 @@ class InviteTest extends TestCase {
     }
 
     public function testInvite(): void {
-        $this->user = Helper::makeUser('invite.' . randomString(6), 'invite');
-
         $this->assertFalse($this->user->disableInvites(), 'invite-not-disabled');
         $this->assertFalse($this->user->permitted('users_view_invites'),          'invite-users-view-invites');
         $this->assertFalse($this->user->permitted('site_send_unlimited_invites'), 'invite-site-send-unlimited-invites');
@@ -90,10 +88,132 @@ class InviteTest extends TestCase {
         $this->assertGreaterThan(0, $inviteTree->position(), 'invite-tree-position');
     }
 
+    public function testManipulate(): void {
+        $userMan = new \Gazelle\Manager\User();
+        $tracker = new \Gazelle\Tracker();
+
+        $this->assertEquals(
+            "No action specified",
+            (new Gazelle\User\InviteTree($this->user, $userMan))
+            ->manipulate(
+                "",
+                false,
+                false,
+                $tracker,
+                $this->user,
+            ),
+            'invite-tree-manip-none'
+        );
+
+        $this->assertEquals(
+            "No invitees for {$this->user->username()}",
+            (new Gazelle\User\InviteTree($this->user, $userMan))
+            ->manipulate(
+                "phpunit invite tree comment",
+                false,
+                false,
+                $tracker,
+                $this->user,
+            ),
+            'invite-tree-manip-comment'
+        );
+
+        $this->user
+            ->setField('PermissionID', MEMBER)
+            ->setField('Invites', 1)
+            ->modify();
+        $manager = new Gazelle\Manager\Invite();
+        $invite = $manager->create(
+            user:   $this->user,
+            email:  randomString(10) . "@tree.example.com",
+            notes:  'phpunit tree notes',
+            reason: '',
+            source: '',
+        );
+        $this->invitee = (new \Gazelle\UserCreator())
+            ->setUsername('create.' . randomString(6))
+            ->setEmail(randomString(6) . '@example.com')
+            ->setPassword(randomString(10))
+            ->setIpaddr('127.2.2.2')
+            ->setInviteKey($invite->key())
+            ->create();
+
+        $this->assertStringContainsString(
+            "Commented entire tree (1 user)",
+            (new Gazelle\User\InviteTree($this->user, $userMan))
+            ->manipulate(
+                "phpunit invite tree comment",
+                false,
+                false,
+                $tracker,
+                $this->user,
+            ),
+            'invite-tree-manip-comment'
+        );
+        $this->assertStringContainsString(
+            "Invite Tree comment on {$this->user->username()} by {$this->user->username()}\nphpunit invite tree comment\n",
+            $this->user->staffNotes(),
+            'invite-tree-manip-user-comment',
+        );
+        // need to flush to pick up the out-of-band changes
+        $this->assertStringContainsString(
+            "Invite Tree comment on {$this->user->username()} by {$this->user->username()}\nphpunit invite tree comment\n",
+            $this->invitee->flush()->staffNotes(),
+            'invite-tree-manip-inv-comment',
+        );
+
+        $this->assertStringContainsString(
+            "Revoked invites for entire tree (1 user)",
+            (new Gazelle\User\InviteTree($this->user, $userMan))
+            ->manipulate(
+                "",
+                false,
+                true,
+                $tracker,
+                $this->user,
+            ),
+            'invite-tree-manip-revoke'
+        );
+        $this->assertTrue($this->invitee->flush()->disableInvites(), 'invite-tree-inv-invites');
+        $this->assertStringContainsString(
+            "Invite Tree invites removed on {$this->user->username()} by {$this->user->username()}\n",
+            $this->user->staffNotes(),
+            'invite-tree-manip-user-revoke',
+        );
+        $this->assertStringContainsString(
+            "Invite Tree invites removed on {$this->user->username()} by {$this->user->username()}\n",
+            $this->invitee->staffNotes(),
+            'invite-tree-manip-inv-revoke',
+        );
+
+        $this->assertStringContainsString(
+            "Banned entire tree (1 user)",
+            (new Gazelle\User\InviteTree($this->user, $userMan))
+            ->manipulate(
+                "",
+                true,
+                false,
+                $tracker,
+                $this->user,
+            ),
+            'invite-tree-manip-revoke'
+        );
+        $this->assertTrue($this->invitee->flush()->isDisabled(), 'invite-tree-inv-disabled');
+        $this->assertStringContainsString(
+            "Invite Tree ban on {$this->user->username()} by {$this->user->username()}\n",
+            $this->user->staffNotes(),
+            'invite-tree-manip-user-ban',
+        );
+        $this->assertStringContainsString(
+            "Invite Tree ban on {$this->user->username()} by {$this->user->username()}\n",
+            $this->invitee->staffNotes(),
+            'invite-tree-manip-inv-ban',
+        );
+    }
+
     public function testInviteSource(): void {
         $inviteSourceMan = new Gazelle\Manager\InviteSource();
         $userMan = new Gazelle\Manager\User();
-        $this->user = Helper::makeUser('invite.' . randomString(6), 'invite');
         $this->user->setField('PermissionID', MEMBER)->modify();
         $this->user->addClasses([
             (int)current(array_filter($userMan->classList(), fn($class) => $class['Name'] == 'Recruiter'))['ID']
