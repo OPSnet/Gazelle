@@ -8,31 +8,44 @@
     <tr>
         <td class="label">Disable:</td>
         <td>
-            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisablePosting" id="DisablePosting"{{ checked(user.disablePosting) }} />
-            <label for="DisablePosting">Posting</label></span>
-            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisableForums" id="DisableForums"{{ checked(user.disableForums) }} />
-            <label for="DisableForums">Forums</label></span>
-            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisableIRC" id="DisableIRC"{{ checked(user.disableIRC) }} />
-            <label for="DisableIRC">IRC</label></span>
+            <span>
+                <label style="width: 110px; display: inline-block"><input type="checkbox" name="DisableForums" id="DisableForums"{{ checked(user.disableForums) }} /> Forums</label>
+            </span>
+            <span>
+                <label style="width: 110px; display: inline-block"><input type="checkbox" name="DisableIRC" id="DisableIRC"{{ checked(user.disableIRC) }} /> IRC</label>
+            </span>
+            <span>
 {% if viewer.permitted('users_disable_any') %}
-            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisableAvatar" id="DisableAvatar"{{ checked(user.disableAvatar) }} />
-            <label for="DisableAvatar">Avatar</label></span>
-            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisablePoints" id="DisablePoints"{{ checked(user.disableBonusPoints) }} />
-            <label for="DisablePoints">Bonus Points</label></span>
-            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisableInvites" id="DisableInvites"{{ checked(user.disableInvites) }} />
-            <label for="DisableInvites">Invites</label></span>
-            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisableLeech" id="DisableLeech"{{ checked((not user.canLeech)) }} />
-            <label for="DisableLeech">Leech</label></span>
-            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisablePM" id="DisablePM"{{ checked(user.disablePM) }} />
-            <label for="DisablePM">PM</label></span>
-            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisableRequests" id="DisableRequests"{{ checked(user.disableRequests) }} />
-            <label for="DisableRequests">Requests</label></span>
-            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisableUpload" id="DisableUpload"{{ checked(user.disableUpload) }} />
-            <label for="DisableUpload">Torrent upload</label></span>
-            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisableTagging" id="DisableTagging"{{ checked(user.disableTagging) }} />
-            <label for="DisableTagging" class="tooltip" title="This only disables a user's ability to delete tags.">Tagging</label></span>
-            <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="DisableWiki" id="DisableWiki"{{ checked(user.disableWiki) }} />
-            <label for="DisableWiki">Wiki</label></span>
+            <span>
+                <label style="width: 110px; display: inline-block"><input type="checkbox" name="DisableAvatar" id="DisableAvatar"{{ checked(user.disableAvatar) }} /> Avatar</label>
+            </span>
+            <span>
+                <label style="width: 110px; display: inline-block"><input type="checkbox" name="DisablePoints" id="DisablePoints"{{ checked(user.disableBonusPoints) }} /> Bonus Points</label>
+            </span>
+            <span>
+                <label style="width: 110px; display: inline-block"><input type="checkbox" name="DisableInvites" id="DisableInvites"{{ checked(user.disableInvites) }} /> Invites</label>
+            </span>
+            <span>
+                <label style="width: 110px; display: inline-block"><input type="checkbox" name="DisableLeech" id="DisableLeech"{{ checked((not user.canLeech)) }} /> Leech</label>
+            </span>
+            <span>
+                <label style="width: 110px; display: inline-block"><input type="checkbox" name="DisablePM" id="DisablePM"{{ checked(user.disablePM) }} /> PM</label>
+            </span>
+            <span>
+                <label style="width: 110px; display: inline-block"><input type="checkbox" name="DisableRequests" id="DisableRequests"{{ checked(user.disableRequests) }} /> Requests</label>
+            </span>
+            <span>
+                <label style="width: 110px; display: inline-block"><input type="checkbox" name="DisableUpload" id="DisableUpload"{{ checked(user.disableUpload) }} /> Torrent upload</label>
+            </span>
+            <span>
+                <label style="width: 110px; display: inline-block" class="tooltip" title="This only disables a user's ability to delete tags.">
+                <input type="checkbox" name="DisableTagging" id="DisableTagging"{{ checked(user.disableTagging) }} /> Tagging
+                </label>
+            </span>
+            <span>
+                <label style="width: 110px; display: inline-block"><input type="checkbox" name="DisableWiki" id="DisableWiki"{{ checked(user.disableWiki) }} /> Wiki</label>
+            </span>
+            <div><i>Note:</i> when setting invites to disabled, access to the invitations forum is restricted automatically. If you re-enable invites, you must explicitly remove (or maintain) the forum restriction.</div>
 {% endif %}
         </td>
     </tr>

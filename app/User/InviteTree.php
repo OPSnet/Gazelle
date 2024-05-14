@@ -142,6 +142,69 @@ class InviteTree extends \Gazelle\Base {
         return $affected;
     }
 
+    public function manipulate(
+        string           $comment,
+        bool             $doDisable,
+        bool             $doInvites,
+        \Gazelle\Tracker $tracker,
+        \Gazelle\User    $admin,
+    ): string {
+        if ($comment) {
+            $message = "Commented";
+            $action = "comment";
+        } elseif ($doDisable) {
+            $message = "Banned";
+            $action = "ban";
+        } elseif ($doInvites) {
+            $message = "Revoked invites for";
+            $action = "invites removed";
+        } else {
+            return "No action specified";
+        }
+
+        $inviteeList = $this->inviteeList();
+        $total = count($inviteeList);
+        if (!$total) {
+            return "No invitees for {$this->user->username()}";
+        }
+        $message .= " entire tree ({$total} user" . plural($total) . ')';
+        $staffNote = "Invite Tree $action on {$this->user->username()} by {$admin->username()}";
+        if ($comment) {
+            $staffNote .= "\n$comment";
+        }
+        $this->user->addStaffNote($staffNote)->modify();
+        $ban = [];
+        foreach ($inviteeList as $inviteeId) {
+            $invitee = $this->userMan->findById($inviteeId);
+            if (is_null($invitee)) {
+                continue;
+            }
+            if ($doDisable) {
+                $ban[] = $inviteeId;
+            } elseif ($doInvites) {
+                $invitee->toggleAttr('disable-invites', true);
+                $invitee->setField(
+                    'RestrictedForums',
+                    implode(',', array_unique([...$invitee->forbiddenForums(), INVITATION_FORUM_ID]))
+                );
+                if (in_array(INVITATION_FORUM_ID, $invitee->permittedForums())) {
+                    $invitee->setField(
+                        'PermittedForums',
+                        implode(',', array_filter(
+                            $invitee->permittedForums(),
+                            fn ($id) => $id != INVITATION_FORUM_ID
+                        ))
+                    );
+                }
+            }
+            $invitee->addStaffNote($staffNote)->modify();
+        }
+        if ($ban) {
+            $this->userMan->disableUserList($tracker, $ban, $comment, \Gazelle\Manager\User::DISABLE_TREEBAN);
+        }
+        return $message;
+    }
+
     public function details(\Gazelle\User $viewer): array {
         if (!$this->treeId()) {
             return [];

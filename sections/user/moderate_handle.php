@@ -351,22 +351,17 @@ if ($Viewer->permittedAny('users_promote_below', 'users_promote_to')) {
     }
 }
 
-$fMan = new Gazelle\Manager\Forum();
+$forumMan = new Gazelle\Manager\Forum();
 $restricted = array_map('intval', array_unique(explode(',', trim($_POST['RestrictedForums']))));
 sort($restricted);
 $restrictedIds = [];
 $restrictedNames = [];
 foreach ($restricted as $forumId) {
-    $forum = $fMan->findById($forumId);
-    if (!is_null($forum)) {
-        $restrictedIds[] = $forumId;
-        $restrictedNames[] = $forum->name() . "($forumId)";
+    $forum = $forumMan->findById($forumId);
+    if (!is_null($forum) && !isset($restrictedIds[$forumId])) {
+        $restrictedIds[$forumId] = true;
+        $restrictedNames[] = "{$forum->name()} ($forumId)";
     }
-}
-$restrictedForums = implode(',', $restrictedIds);
-if ($restrictedForums != $cur['RestrictedForums']) {
-    $user->setField('RestrictedForums', $restrictedForums);
-    $editSummary[] = "prohibited forum(s): " . ($restrictedForums == '' ? 'none' : implode(', ', $restrictedNames));
 }
 
 $permitted = array_map('intval', array_unique(explode(',', trim($_POST['PermittedForums']))));
@@ -374,20 +369,14 @@ sort($permitted);
 $permittedIds = [];
 $permittedNames = [];
 foreach ($permitted as $forumId) {
-    $forum = $fMan->findById($forumId);
-    if (!is_null($forum)) {
-        $permittedIds[] = $forumId;
-        $permittedNames[] = $forum->name() . "($forumId)";
+    $forum = $forumMan->findById($forumId);
+    if (!is_null($forum) && !isset($permittedIds[$forumId])) {
+        $permittedIds[$forumId] = true;
+        $permittedNames[] = "{$forum->name()} ($forumId)";
     }
-}
-$permittedForums = implode(',', $permittedIds);
-if ($permittedForums != $cur['PermittedForums']) {
-    $user->setField('PermittedForums', $permittedForums);
-    $editSummary[] = "permitted forum(s): " . ($permittedForums == '' ? 'none' : implode(', ', $permittedNames));
 }
 
 $privChange = [];
-
 if ($Viewer->permitted('users_disable_any')) {
     if ($disableLeech != $user->canLeech()) {
         $privChange[] = 'Your leeching privileges have been ' . revoked((bool)$disableLeech);
@@ -400,6 +389,11 @@ if ($Viewer->permitted('users_disable_any')) {
         $privChange[] = 'Your invite privileges have been ' . revoked($disableInvites);
         $editSummary[] = 'invites privileges ' . revoked($disableInvites);
         $user->toggleAttr('disable-invites', $disableInvites);
+        if ($disableInvites) {
+            unset($permittedIds[INVITATION_FORUM_ID]);
+            $restrictedIds[INVITATION_FORUM_ID] = true;
+            $restrictedNames[] = $forumMan->findById(INVITATION_FORUM_ID)->name() . " (" . INVITATION_FORUM_ID . ")";
+        }
     }
     if ($disableAvatar !== $user->disableAvatar()) {
         $privChange[] = 'Your avatar privileges have been ' . revoked($disableAvatar);
@@ -436,6 +430,17 @@ if ($Viewer->permitted('users_disable_any')) {
         $editSummary[] = 'request privileges ' . revoked($disableRequests);
         $user->toggleAttr('disable-requests', $disableRequests);
     }
+}
+
+$permittedForums = implode(',', array_keys($permittedIds));
+if ($permittedForums != $cur['PermittedForums']) {
+    $user->setField('PermittedForums', $permittedForums);
+    $editSummary[] = "permitted forum(s): " . ($permittedForums == '' ? 'none' : implode(', ', $permittedNames));
+}
+$restrictedForums = implode(',', array_keys($restrictedIds));
+if ($restrictedForums != $cur['RestrictedForums']) {
+    $user->setField('RestrictedForums', $restrictedForums);
+    $editSummary[] = "prohibited forum(s): " . ($restrictedForums == '' ? 'none' : implode(', ', $restrictedNames));
 }
 
 if ($Viewer->permitted('users_disable_posts')) {
