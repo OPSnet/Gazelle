@@ -17,7 +17,7 @@ namespace Gazelle;
 class ForumTransition extends BaseObject {
     final public const tableName     = 'forums_transitions';
     final public const pkName        = 'forums_transitions_id';
-    final public const CACHE_KEY     = 'ftrans_%d';
+    final public const CACHE_KEY     = 'ftransv2_%d';
 
     public function flush(): static {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
@@ -29,7 +29,7 @@ class ForumTransition extends BaseObject {
     public function location(): string { return "tools.php?action=forum_transitions"; }
 
     public function info(): array {
-        if (isset($this->info) && !empty($this->info)) {
+        if (isset($this->info)) {
             return $this->info;
         }
         $key  = sprintf(self::CACHE_KEY, $this->id);
@@ -48,9 +48,9 @@ class ForumTransition extends BaseObject {
                 ", $this->id
             );
             if ($info) {
-                $info['user_id_list'] = $info['user_ids'] ? explode(',', $info['user_ids']) : [];
-                $info['privilege_list'] = $info['permissions'] ? explode(',', $info['permissions']) : [];
-                $info['secondary_class_id_list'] = $info['permission_levels'] ? explode(',', $info['permission_levels']) : [];
+                $info['user_id_list'] = $info['user_ids'] ? array_map('intval', explode(',', $info['user_ids'])) : [];
+                $info['privilege_list'] = $info['permissions'] ? array_map('trim', explode(',', $info['permissions'])) : [];
+                $info['secondary_class_id_list'] = $info['permission_levels'] ? array_map('intval', explode(',', $info['permission_levels'])) : [];
                 unset(
                     $info['user_ids'],
                     $info['permissions'],
@@ -63,12 +63,29 @@ class ForumTransition extends BaseObject {
         return $this->info;
     }
 
+    /**
+     * From the control panel, a user may have a transition in a forum if
+     *  - their userclass is sufficiently high
+     *  - they are explicitly permitted via userid
+     *  - they belong to a permitted secondary class
+     */
     public function hasUser(User $user): bool {
         return $this->classLevel() <= $user->classLevel()
             || in_array($user->id(), $this->userIdList())
             || array_intersect(
                 array_keys((new User\Privilege($user))->secondaryClassList()),
                 $this->secondaryClassIdList()
+            );
+    }
+
+    /**
+     * A non-staff user cannot transition a thread if it is locked or pinned.
+     */
+    public function hasUserForThread(User $user, ForumThread $thread): bool {
+        return $this->hasUser($user)
+            && (
+                $user->permitted('site_admin_forums')
+                || (!$thread->isPinned() && !$thread->isLocked())
             );
     }
 

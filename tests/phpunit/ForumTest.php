@@ -160,8 +160,8 @@ class ForumTest extends TestCase {
         $this->assertEquals(0, $thread->pinnedPostId(), 'fthread-pinned-post-id');
 
         $this->assertFalse($thread->hasPoll(), 'fthread-has-poll-no');
-        $this->assertFalse($thread->isLocked(), 'fthread-is-locked');
-        $this->assertFalse($thread->isPinned(), 'fthread-is-pinned');
+        $this->assertFalse($thread->isLocked(), 'fthread-is-not-locked');
+        $this->assertFalse($thread->isPinned(), 'fthread-is-not-pinned');
 
         $this->assertEquals(1, $admin->stats()->forumThreadTotal(), 'fthread-user-stats-total');
         $this->assertCount(0, $this->userList['user']->forumLastReadList(1, $this->forum), 'fthread-user-unread');
@@ -575,6 +575,16 @@ class ForumTest extends TestCase {
             name:           'phpunit forum transition a',
             description:    'This is where it transitions',
         );
+        $threadMan = new \Gazelle\Manager\ForumThread();
+        $thread    = $threadMan->create($this->forum, $admin, 'thread title normal transition', 'this is a new thread normal transition');
+        $pinned    = $threadMan->create($this->forum, $admin, 'thread title pinned transition', 'this is a new thread pinned transition');
+        $locked    = $threadMan->create($this->forum, $admin, 'thread title locked transition', 'this is a new thread locked transition');
+
+        $this->assertEquals(1, $pinned->editThread($pinned->forum(), true, 10, false, $pinned->title()), 'fthread-edit-pin');
+        $this->assertEquals(1, $locked->editThread($locked->forum(), false, 0, true, $locked->title()), 'fthread-edit-lock');
+        $this->assertTrue($locked->isLocked(), 'fthread-is-locked');
+        $this->assertTrue($pinned->isPinned(), 'fthread-is-pinned');
+
         $this->extra = Helper::makeForum(
             user:           $admin,
             sequence:       153,
@@ -599,8 +609,8 @@ class ForumTest extends TestCase {
         $this->assertEquals($this->userList['admin']->classLevel(), $transition->classLevel(), 'forum-trans-class-level');
         $this->assertCount(0, $transition->secondaryClassIdList(), 'forum-trans-empty-secondary');
         $this->assertCount(0, $transition->userIdList(), 'forum-trans-empty-user-list');
-        $this->assertTrue($transition->hasUser($this->userList['admin']), 'forum-transition-has-admin');
-        $this->assertFalse($transition->hasUser($this->userList['user']), 'forum-transition-hasnt-user');
+        $this->assertTrue($transition->hasUserForThread($this->userList['admin'], $thread), 'forum-trans-has-admin');
+        $this->assertFalse($transition->hasUserForThread($this->userList['user'], $thread), 'forum-trans-hasnt-user');
         $this->assertEquals(1, $transition->remove(), 'forum-trans-remove');
 
         $this->userList['FLS'] = Helper::makeUser('fls.' . randomString(10), 'forum');
@@ -616,19 +626,29 @@ class ForumTest extends TestCase {
         );
         (new Gazelle\User\Privilege($this->userList['FLS']))->addSecondaryClass(FLS_TEAM);
         $this->assertTrue($this->userList['FLS']->isFLS(), 'user-is-fls');
-        $this->assertTrue($this->transitionList[0]->hasUser($this->userList['FLS']), 'forum-transition-has-fls');
-        $this->assertTrue($this->transitionList[0]->hasUser($this->userList['specific']), 'forum-transition-has-specific');
+        $this->assertTrue($this->transitionList[0]->hasUserForThread($this->userList['FLS'], $thread), 'forum-trans-has-fls');
+        $this->assertFalse($this->transitionList[0]->hasUserForThread($this->userList['FLS'], $pinned), 'forum-trans-fls-no-pinned');
+        $this->assertFalse($this->transitionList[0]->hasUserForThread($this->userList['FLS'], $locked), 'forum-trans-fls-no-locked');
+        $this->assertTrue($this->transitionList[0]->hasUserForThread($this->userList['specific'], $thread), 'forum-trans-has-specific');
+        $this->assertFalse($this->transitionList[0]->hasUserForThread($this->userList['specific'], $pinned), 'forum-trans-specific-no-pinned');
+        $this->assertFalse($this->transitionList[0]->hasUserForThread($this->userList['specific'], $locked), 'forum-trans-specific-no-locked');
+
         $this->assertCount(
             1,
             $manager->userTransitionList($this->userList['specific']),
             'forum-user-transition-list'
         );
-        $list = $manager->threadTransitionList($this->userList['FLS'], $this->forum);
+        $list = $manager->threadTransitionList($this->userList['FLS'], $thread);
         $this->assertCount(1, $list, 'thread-transition-list');
         $this->assertEquals(
             $this->transitionList[0]->id(),
             $list[$this->transitionList[0]->id()]->id(),
             'forum-thread-transition-list'
         );
+
+        $this->assertCount(0, $manager->threadTransitionList($this->userList['FLS'], $pinned), 'forum-trans-thread-fls-pinned');
+        $this->assertCount(0, $manager->threadTransitionList($this->userList['FLS'], $locked), 'forum-trans-thread-fls-locked');
+        $this->assertCount(0, $manager->threadTransitionList($this->userList['specific'], $pinned), 'forum-trans-thread-specific-pinned');
+        $this->assertCount(0, $manager->threadTransitionList($this->userList['specific'], $locked), 'forum-trans-thread-specific-locked');
     }
 }

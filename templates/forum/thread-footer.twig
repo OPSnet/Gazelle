@@ -1,25 +1,5 @@
 {% from 'macro/form.twig' import checked, class_hidden, selected -%}
-{% for t in transition_list %}
-    {% if loop.first %}
-<table class="layout border">
-    <tr>
-        <td class="label">Move thread</td>
-        <td>
-    {% endif %}
-            <form action="forums.php" method="post" style="display: inline-block">
-                <input type="hidden" name="action" value="mod_thread" />
-                <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-                <input type="hidden" name="threadid" value="{{ thread.id }}" />
-                <input type="hidden" name="page" value="{{ page }}" />
-                <input type="hidden" name="transition" value="{{ t.id }}" />
-                <input type="submit" value="{{ t.label }}" />
-            </form>
-    {% if loop.last %}
-        </td>
-    </tr>
-</table>
-    {% endif %}
-{% endfor %}
+{% include 'forum/thread-transition.twig' with {'thread': thread, 'transition_list': transition_list, 'viewer': viewer } only %}
 
 {% if viewer.permitted('site_moderate_forums') %}
 <br />
@@ -29,12 +9,12 @@
     <input type="hidden" name="auth" value="{{ viewer.auth }}" />
     <input type="hidden" name="threadid" value="{{ thread.id }}" />
     <table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border hidden" id="thread_notes_table">
-    {% for note in thread.threadNotes %}
+{%  for note in thread.threadNotes %}
         <tr>
             <td>{{ note.AuthorID|user_url }} ({{ note.AddedTime|time_diff(2) }})</td>
             <td>{{ note.Body|bb_format }}</td>
         </tr>
-    {% endfor %}
+{%  endfor %}
         <tr>
             <td colspan="2" class="center">
                 <div class="field_div textarea_wrap"><textarea id="topic_notes" name="body" cols="90" rows="3" onkeyup="resize('threadnotes');" style=" margin: 0px; width: 735px;"></textarea></div>
@@ -81,33 +61,33 @@
             <td class="label"><label for="move_thread_selector">Move thread</label></td>
             <td>
                 <select name="forumid" id="move_thread_selector" tabindex="8">
-    {% set prev = 0 %}
-    {% for forum in forum_list %}
-        {% if viewer.readAccess(forum) %}
-            {% if prev != forum.categoryId %}
-                {% if prev %}
+{%  set prev = 0 %}
+{%  for forum in forum_list %}
+{%      if viewer.readAccess(forum) %}
+{%          if prev != forum.categoryId %}
+{%              if prev %}
                 </optgroup>
-                {% endif %}
-                {% set prev = forum.categoryId %}
+{%              endif %}
+{%              set prev = forum.categoryId %}
                 <optgroup label="{{ forum.categoryName }}">
-            {% endif %}
+{%          endif %}
                     <option value="{{ forum.id }}"{{ selected(thread.forumId == forum.id) }}>{{ forum.name }}</option>
-        {% endif %}
-        {% if loop.last %}
+{%      endif %}
+{%      if loop.last %}
                 </optgroup>
-        {% endif %}
-    {% endfor %}
+{%      endif %}
+{%  endfor %}
                 </select>
             </td>
         </tr>
-    {% if viewer.permitted('site_admin_forums') %}
+{%  if viewer.permitted('site_admin_forums') %}
         <tr>
             <td class="label"><label for="delete_thread_checkbox">Delete thread</label></td>
             <td>
                 <input type="checkbox" id="delete_thread_checkbox" name="delete" tabindex="2" />
             </td>
         </tr>
-    {% endif %}
+{%  endif %}
         <tr>
             <td colspan="2" class="center">
                 <input type="submit" value="Edit thread" tabindex="3" />

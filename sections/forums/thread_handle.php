@@ -56,7 +56,7 @@ if (isset($_POST['transition'])) {
     if ($transId < 1) {
         error(0);
     }
-    $transitions = (new Gazelle\Manager\ForumTransition())->threadTransitionList($Viewer, $forum);
+    $transitions = (new Gazelle\Manager\ForumTransition())->threadTransitionList($Viewer, $thread);
     if (!isset($transitions[$transId])) {
         error(0);
     }

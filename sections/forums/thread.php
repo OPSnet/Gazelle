@@ -2,17 +2,6 @@
 
 use Gazelle\Enum\CacheBucket;
 
-/**********|| Page to show individual threads || ********************************\
-
-Things to expect in $_GET:
-    ThreadID: ID of the forum curently being browsed
-    page:    The page the user's on.
-    page = 1 is the same as no page
-
-********************************************************************************/
-
-//---------- Things to sort out before it can start printing/generating content
-
 $forumMan = new Gazelle\Manager\Forum();
 if (isset($_GET['postid'])) {
     $post = (new Gazelle\Manager\ForumPost())->findById((int)$_GET['postid']);
@@ -84,22 +73,19 @@ if ($isSubscribed) {
 $userMan = new Gazelle\Manager\User();
 $avatarFilter = Gazelle\Util\Twig::factory()->createTemplate('{{ user|avatar(viewer)|raw }}');
 
-$transitions = (new Gazelle\Manager\ForumTransition())->threadTransitionList($Viewer, $forum);
+$transitions = (new Gazelle\Manager\ForumTransition())->threadTransitionList($Viewer, $thread);
 $department = $forum->departmentList($Viewer);
 $auth = $Viewer->auth();
 
 View::show_header("Forums › $ForumName › {$thread->title()}",
      ['js' => 'comments,subscriptions,bbcode' . ($IsDonorForum ? ',donor_titles' : '')]
 );
-echo $Twig->render('forum/header-thread.twig', [
-    'auth'         => $auth,
-    'forum'        => $forum,
-    'dept_list'    => $forum->departmentList($Viewer),
-    'is_subbed'    => $isSubscribed,
-    'paginator'    => $paginator,
-    'thread_id'    => $threadId,
-    'thread_title' => $thread->title(),
-    'transition'   => $transitions,
+echo $Twig->render('forum/thread-header.twig', [
+    'is_subbed'       => $isSubscribed,
+    'paginator'       => $paginator,
+    'thread'          => $thread,
+    'transition_list' => $transitions,
+    'viewer'          => $Viewer,
 ]);
 
 echo $Twig->render('forum/poll.twig', [
@@ -254,7 +240,7 @@ if ($Viewer->permitted('site_moderate_forums') || ($Viewer->writeAccess($forum) 
     ]);
 }
 
-echo $Twig->render('forum/footer-thread.twig', [
+echo $Twig->render('forum/thread-footer.twig', [
     'forum_list'      => $forumMan->forumList(),
     'page'            => $Page,
     'thread'          => $thread,

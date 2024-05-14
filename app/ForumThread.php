@@ -7,12 +7,15 @@ class ForumThread extends BaseObject {
     final public const CACHE_KEY     = 'fthreadv2_%d';
     final public const CACHE_CATALOG = 'fthread_cat_%d_%d';
 
+    // We need to remember to which forum the thread belongs in order
+    // to adjust the forum after the thread is removed.
+    protected int $forumId;
+
     public function flush(): static {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
         self::$cache->delete_value("edit_forums_{$this->id}");
         (new Manager\Forum())->flushToc();
-        $last = $this->lastPage();
-        $this->flushCatalog($last, $last);
+        unset($this->info);
         return $this;
     }
 
@@ -33,7 +36,7 @@ class ForumThread extends BaseObject {
      * TODO: check if ever NumPosts != Posts
      */
     public function info(): array {
-        if (isset($this->info) && !empty($this->info)) {
+        if (isset($this->info)) {
             return $this->info;
         }
         $key = sprintf(self::CACHE_KEY, $this->id);
@@ -105,7 +108,8 @@ class ForumThread extends BaseObject {
     }
 
     public function forumId(): int {
-        return $this->info()['forum_id'];
+        // this will survive a flush()
+        return $this->forumId ??= $this->info()['forum_id'];
     }
 
     public function forum(): Forum {
@@ -254,7 +258,6 @@ class ForumThread extends BaseObject {
     }
 
     public function editThread(Forum $forum, bool $pinned, int $rank, bool $locked, string $title): int {
-        $oldForumId = $this->forumId();
         self::$db->prepared_query("
             UPDATE forums_topics SET
                 ForumID  = ?,
@@ -271,9 +274,6 @@ class ForumThread extends BaseObject {
             if ($locked && $this->hasPoll()) {
                 $this->poll()->close()->modify();
             }
-            if ($forum->id() != $oldForumId) {
-                $forum->adjust();
-            }
             $this->updateRoot(
                 ...self::$db->row("
                     SELECT AuthorID, ID
@@ -287,13 +287,18 @@ class ForumThread extends BaseObject {
             $this->forum()->adjust();
             $this->flushCatalog(0, $this->lastPage());
             $this->flush();
+            if ($this->forumId != $forum->id()) {
+                $forum->adjust();
+                $this->forumId = $forum->id();
+            }
         }
         return $affected;
     }
 
     public function remove(): int {
         // LastPostID is a chicken and egg situation when removing a thread,
-        // so foreign key constraints need to be igored temporarily.
+        // so foreign key constraints must be suspended temporarily.
+        $last = $this->lastPage();
         $db = new \Gazelle\DB();
         $db->relaxConstraints(true);
         self::$db->prepared_query("
@@ -323,6 +328,7 @@ class ForumThread extends BaseObject {
             // there will be no posts when the last thread is removed
             $this->updateRoot($previousPost['user_id'], $previousPost['post_id']);
         }
+        $this->flushCatalog($last, $last);
         $this->flush();
         return $affected;
     }
@@ -363,6 +369,8 @@ class ForumThread extends BaseObject {
             $this->updateRoot($user->id(), $postId);
             (new Manager\Forum())->flushToc();
             $this->forum()->flush();
+            $last = $this->lastPage();
+            $this->flushCatalog($last, $last);
             $this->flush();
         }
         return $affected;

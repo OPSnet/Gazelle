@@ -85,11 +85,22 @@ class ForumTransition extends \Gazelle\BaseManager {
         return $this->info;
     }
 
+    /**
+     * This is used in the control panel, where no thread context exists.
+     */
     public function userTransitionList(\Gazelle\User $user): array {
         return array_filter($this->transitionList(), fn ($t) => $t->hasUser($user));
     }
 
-    public function threadTransitionList(\Gazelle\User $user, \Gazelle\Forum $forum): array {
-        return array_filter($this->userTransitionList($user), fn ($t) => $t->sourceId() == $forum->id());
+    /**
+     * This is used in a thread, where we can check if it is pinned or locked and
+     * skip the transition if the viewer is not staff.
+     */
+    public function userThreadTransitionList(\Gazelle\User $user, \Gazelle\ForumThread $thread): array {
+        return array_filter($this->transitionList(), fn ($t) => $t->hasUserForThread($user, $thread));
+    }
+
+    public function threadTransitionList(\Gazelle\User $user, \Gazelle\ForumThread $thread): array {
+        return array_filter($this->userThreadTransitionList($user, $thread), fn ($t) => $t->sourceId() == $thread->forum()->id());
     }
 }
