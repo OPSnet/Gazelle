@@ -1,5 +1,7 @@
 <?php
 
+use Gazelle\Enum\CollageType;
+
 if (!$Viewer->permitted('site_collages_create') && !$Viewer->canCreatePersonalCollage()) {
     error(403);
 }
@@ -11,7 +13,7 @@ echo $Twig->render('collage/new.twig', [
     'description' => new Gazelle\Util\Textarea('description', $Description ?? '', 60, 10),
     'error'       => $Err ?? false,
     'name'        => $Name ?? '',
-    'no_name'     => !$Viewer->permitted('site_collages_renamepersonal') && (!$Viewer->permitted('site_collages_create') || ($Category ?? -1) === COLLAGE_PERSONAL_ID),
+    'no_name'     => !$Viewer->permitted('site_collages_renamepersonal') && (!$Viewer->permitted('site_collages_create') || ($Category ?? -1) === CollageType::personal->value),
     'tags'        => $Tags ?? '',
     'viewer'      => $Viewer,
 ]);

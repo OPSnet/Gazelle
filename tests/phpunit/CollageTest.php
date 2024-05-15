@@ -76,9 +76,11 @@ class CollageTest extends TestCase {
     }
 
     public function tearDown(): void {
-        foreach ($this->collageList as $collage) {
-            $collage->toggleAttr('sort-newest', false);
-            $collage->hardRemove();
+        if (isset($this->collageList)) {
+            foreach ($this->collageList as $collage) {
+                $collage->toggleAttr('sort-newest', false);
+                $collage->hardRemove();
+            }
         }
         foreach ($this->tgroupList as $tgroup) {
             $tgroup->remove($this->userList['u1']);
@@ -271,14 +273,18 @@ class CollageTest extends TestCase {
         $this->assertCount(1, $default, 'collage-default-add-acollage-added');
         $this->assertEquals($this->collageList[2]->id(), $default[0]->id(), 'collage-default-artist-suggestion');
 
+        $this->assertEquals(1, $this->collageList[1]->toggleSubscription($this->userList['u1']), 'collage-artist-subscribe');
         $this->collageList[1]->addEntry($artistList[2]->id(), $this->userList['u2']);
         $this->collageList[1]->addEntry($artistList[3]->id(), $this->userList['u3']);
 
         $this->assertEquals(3, $this->collageList[1]->numContributors(), 'collage-artist-contributor');
-        $summary = $manager->artistSummary($artistMan->findByName($this->artistName[2])->id());
+        $summary = $manager->artistSummary($artistMan->findByName($this->artistName[2]));
         $this->assertEquals(2, $summary['total'], 'collage-artist-summary-total');
         $this->assertCount(2, $summary['above'], 'collage-artist-summary-above');
         $this->assertCount(0, $summary['below'], 'collage-artist-summary-below');
+
+        $this->assertTrue($this->collageList[1]->isSubscribed($this->userList['u1']), 'collage-artist-catchup');
+        $this->assertCount(0, $manager->subscribedArtistCollageList($this->userList['u1'], false), 'collage-artist-unread');
 
         $this->assertStringStartsWith(
             date('Y-m-d '),
@@ -427,7 +433,7 @@ class CollageTest extends TestCase {
         foreach ($this->collageList as $collage) {
             $collage->addEntry($tgroupId, $user);
         }
-        $summary = $manager->tgroupPersonalSummary($tgroupId);
+        $summary = $manager->tgroupPersonalSummary($this->tgroupList[0]);
         $this->assertEquals(4, $summary['total'], 'collage-manager-personal-tgroup-total');
         $this->assertCount(COLLAGE_SAMPLE_THRESHOLD, $summary['above'], 'collage-manager-personal-tgroup-above');
         $this->assertEquals(COLLAGE_SAMPLE_THRESHOLD, count($this->collageList) - count($summary['below']), 'collage-manager-personal-tgroup-below');
@@ -540,11 +546,10 @@ class CollageTest extends TestCase {
         $autocomplete = $manager->autocomplete('phpunit collage auto');
         $this->assertEquals($nameList, array_column($autocomplete, 'value'), 'collage-manager-autocomplete');
 
-        $tgroupId = $this->tgroupList[0]->id();
         foreach ($this->collageList as $collage) {
-            $collage->addEntry($tgroupId, $this->userList['u3']);
+            $collage->addEntry($this->tgroupList[0]->id(), $this->userList['u3']);
         }
-        $summary = $manager->tgroupGeneralSummary($tgroupId);
+        $summary = $manager->tgroupGeneralSummary($this->tgroupList[0]);
         $this->assertEquals(5, $summary['total'], 'collage-manager-summary-tgroup-total');
         $this->assertCount(COLLAGE_SAMPLE_THRESHOLD, $summary['above'], 'collage-manager-summary-tgroup-above');
         $this->assertEquals(COLLAGE_SAMPLE_THRESHOLD, count($this->collageList) - count($summary['below']), 'collage-manager-summary-tgroup-below');
@@ -749,5 +754,25 @@ class CollageTest extends TestCase {
         );
         $response = json_decode($fail->response(), true);
         $this->assertEquals('locked', $response['error'], 'collage-ajax-error-locked');
+    }
+
+    public function testCollageType(): void {
+        $manager = new Gazelle\Manager\Collage();
+        $this->assertEquals(CollageType::personal, $manager->findType(CollageType::personal->value), 'collage-type-personal');
+        $this->assertEquals(CollageType::artist, $manager->findType(CollageType::artist->value), 'collage-type-artist');
+        $this->assertEquals(CollageType::genre, $manager->findType(2), 'collage-type-genre');
+    }
+
+    public function testCollageShuffle(): void {
+        $manager = new Gazelle\Manager\Collage();
+        $list = [10, 20, 30, 40];
+        $shuffle = $manager->listShuffle(3, $list);
+        $this->assertEquals(4, $shuffle['total'], 'shuffle-full-total');
+        $this->assertCount(3, $shuffle['above'], 'shuffle-full-above');
+        $this->assertCount(1, $shuffle['below'], 'shuffle-full-below');
+
+        $shuffle = $manager->listShuffle(5, $list);
+        $this->assertEquals(count($list), count($shuffle['above']), 'shuffle-partial-above');
+        $this->assertCount(0, $shuffle['below'], 'shuffle-partial-below');
     }
 }

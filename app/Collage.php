@@ -2,6 +2,7 @@
 
 namespace Gazelle;
 
+use Gazelle\Enum\CollageType;
 use Gazelle\Enum\LeechType;
 use Gazelle\Enum\LeechReason;
 
@@ -24,14 +25,11 @@ class Collage extends BaseObject {
 
     protected Collage\AbstractCollage $collage;
 
-    public function __construct(int $id) {
+    public function __construct(int $id, int $categoryId) {
         parent::__construct($id);
-        // NB: There is a chicken-and-egg problem here which could be made clearer
-        if ($this->isArtist()) {
-            $this->collage = new Collage\Artist($this);
-        } else {
-            $this->collage = new Collage\TGroup($this);
-        }
+        $this->collage = $categoryId === CollageType::artist->value
+            ? new Collage\Artist($this)
+            : new Collage\TGroup($this);
         $this->collage->load();
     }
 
@@ -102,9 +100,9 @@ class Collage extends BaseObject {
     public function isFeatured(): bool { return (bool)$this->info()['is_featured']; }
     public function isLocked(): bool { return $this->info()['is_locked'] == '1' || $this->lockedForUser; }
     public function isOwner(User $user): bool { return $this->info()['user_id'] === $user->id(); }
-    public function isPersonal(): bool { return $this->info()['category_id'] === 0; }
+    public function isPersonal(): bool { return $this->info()['category_id'] === CollageType::personal->value; }
 
-    public function isArtist(): bool { return $this->categoryId() === COLLAGE_ARTISTS_ID; }
+    public function isArtist(): bool { return $this->categoryId() === CollageType::artist->value; }
     public function contributors(): array { return $this->collage->contributorList(); }
 
     public function numContributors(): int { return count(array_keys($this->contributors())); }

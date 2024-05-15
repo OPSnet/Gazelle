@@ -248,7 +248,7 @@ echo ' selected="selected"'; } ?>>Prefer Bonus Tracks</option>
 <?= $Twig->render('collage/summary.twig', [
     'class'   => 'collage_rows',
     'object'  => 'artist',
-    'summary' => $collageMan->artistSummary($artistId),
+    'summary' => $collageMan->artistSummary($Artist),
 ]); ?>
 <div id="discog_table">
     <div class="box center">

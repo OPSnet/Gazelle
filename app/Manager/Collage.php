@@ -5,7 +5,7 @@ namespace Gazelle\Manager;
 use Gazelle\Enum\CollageType;
 
 class Collage extends \Gazelle\BaseManager {
-    final public const ID_KEY = 'zz_c_%d';
+    final public const ID_KEY = 'zz_cg_%d';
     final protected const CACHE_DEFAULT_ARTIST = 'collage_def_artist_%d';
     final protected const CACHE_DEFAULT_GROUP  = 'collage_def_tgroup_%d';
     final protected const TGROUP_GENERAL_KEY   = 'torrent_collages_%d';
@@ -48,22 +48,22 @@ class Collage extends \Gazelle\BaseManager {
         $user->stats()->increment('collage_total');
         (new \Gazelle\Stats\Collage())->increment();
         $logger->general("Collage $id ($name) was created by {$user->username()}");
-        return new \Gazelle\Collage($id);
+        return new \Gazelle\Collage($id, $categoryId);
     }
 
     public function findById(int $collageId): ?\Gazelle\Collage {
         $key = sprintf(self::ID_KEY, $collageId);
-        $id = self::$cache->get_value($key);
-        if ($id === false) {
-            $id = self::$db->scalar("
-                SELECT ID FROM collages WHERE ID = ?
+        $idCategory = self::$cache->get_value($key);
+        if ($idCategory === false) {
+            $idCategory = self::$db->row("
+                SELECT ID, CategoryID FROM collages WHERE ID = ?
                 ", $collageId
             );
-            if (!is_null($id)) {
-                self::$cache->cache_value($key, $id, 7200);
+            if ($idCategory) {
+                self::$cache->cache_value($key, $idCategory, 7200);
             }
         }
-        return $id ? new \Gazelle\Collage($id) : null;
+        return $idCategory ? new \Gazelle\Collage(...$idCategory) : null;
     }
 
     public function findByName(string $name): ?\Gazelle\Collage {
@@ -183,7 +183,7 @@ class Collage extends \Gazelle\BaseManager {
                     )
                 ORDER BY c.Updated DESC
                 LIMIT 5
-                ", $userId, COLLAGE_ARTISTS_ID, $artistId
+                ", $userId, CollageType::artist->value, $artistId
             );
             $default = self::$db->collect(0, false);
 
@@ -208,7 +208,7 @@ class Collage extends \Gazelle\BaseManager {
                 GROUP BY c.ID
                 ORDER BY max(ca.AddedOn) DESC
                 LIMIT 5
-                ", $userId, $userId, COLLAGE_ARTISTS_ID, $userId, $artistId
+                ", $userId, $userId, CollageType::artist->value, $userId, $artistId
             );
             $default = array_merge($default, self::$db->collect(0, false));
             self::$cache->cache_value($key, $default, 86400);
@@ -239,7 +239,7 @@ class Collage extends \Gazelle\BaseManager {
                         SELECT 1 FROM collages_torrents WHERE CollageID = c.ID AND GroupID = ?
                     )
                 ORDER BY c.Updated DESC
-                ", $user->id(), COLLAGE_PERSONAL_ID, $groupId
+                ", $user->id(), CollageType::personal->value, $groupId
             );
             $default = self::$db->collect(0, false);
 
@@ -263,7 +263,7 @@ class Collage extends \Gazelle\BaseManager {
                 GROUP BY c.ID
                 ORDER BY max(ca.AddedOn) DESC
                 LIMIT 5
-                ", $user->id(), COLLAGE_PERSONAL_ID, $user->id(), $groupId
+                ", $user->id(), CollageType::personal->value, $user->id(), $groupId
             );
             $default = array_merge($default, self::$db->collect(0, false));
             self::$cache->cache_value($key, $default, 86400);
@@ -309,7 +309,7 @@ class Collage extends \Gazelle\BaseManager {
                         AND Name LIKE concat('%', ?, '%')
                     ORDER BY NumTorrents DESC, Name
                     LIMIT 10
-                    ", COLLAGE_ARTISTS_ID, $stem
+                    ", CollageType::artist->value, $stem
                 );
             } else {
                 self::$db->prepared_query("
@@ -322,7 +322,7 @@ class Collage extends \Gazelle\BaseManager {
                         AND Name LIKE concat('%', ?, '%')
                     ORDER BY NumTorrents DESC, Name
                     LIMIT 10
-                    ", COLLAGE_ARTISTS_ID, COLLAGE_PERSONAL_ID, $stem
+                    ", CollageType::artist->value, CollageType::personal->value, $stem
                 );
             }
             $pairs = self::$db->to_pair('ID', 'Name', false);
@@ -407,8 +407,8 @@ class Collage extends \Gazelle\BaseManager {
      *
      * @return array [total results, array above, array below]
      */
-    public function tgroupGeneralSummary(int $tgroupId): array {
-        $key = sprintf(self::TGROUP_GENERAL_KEY, $tgroupId);
+    public function tgroupGeneralSummary(\Gazelle\TGroup $tgroup): array {
+        $key = sprintf(self::TGROUP_GENERAL_KEY, $tgroup->id());
         $list = self::$cache->get_value($key);
         if ($list === false) {
             self::$db->prepared_query("
@@ -421,7 +421,7 @@ class Collage extends \Gazelle\BaseManager {
                     AND CategoryID != ?
                     AND ct.GroupID = ?
                 ORDER BY c.updated DESC
-                ", COLLAGE_PERSONAL_ID, $tgroupId
+                ", CollageType::personal->value, $tgroup->id()
             );
             $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
             self::$cache->cache_value($key, $list, 3600 * 6);
@@ -436,8 +436,8 @@ class Collage extends \Gazelle\BaseManager {
      * @see \Gazelle\Manager\Collage::tgroupGeneralSummary()
      * @return array [total results, array above, array below]
      */
-    public function tgroupPersonalSummary(int $tgroupId): array {
-        $key = sprintf(self::TGROUP_PERSONAL_KEY, $tgroupId);
+    public function tgroupPersonalSummary(\Gazelle\TGroup $tgroup): array {
+        $key = sprintf(self::TGROUP_PERSONAL_KEY, $tgroup->id());
         $list = self::$cache->get_value($key);
         if ($list === false) {
             self::$db->prepared_query("
@@ -450,7 +450,7 @@ class Collage extends \Gazelle\BaseManager {
                     AND CategoryID = ?
                     AND ct.GroupID = ?
                 ORDER BY c.updated DESC
-                ", COLLAGE_PERSONAL_ID, $tgroupId
+                ", CollageType::personal->value, $tgroup->id()
             );
             $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
             self::$cache->cache_value($key, $list, 3600 * 6);
@@ -464,8 +464,8 @@ class Collage extends \Gazelle\BaseManager {
      * @see \Gazelle\Manager\Collage::tgroupGeneralSummary()
      * @return array [total results, array above, array below]
      */
-    public function artistSummary(int $artistId): array {
-        $key = sprintf(self::ARTIST_KEY, $artistId);
+    public function artistSummary(\Gazelle\Artist $artist): array {
+        $key = sprintf(self::ARTIST_KEY, $artist->id());
         $list = self::$cache->get_value($key);
         if ($list === false) {
             self::$db->prepared_query("
@@ -478,7 +478,7 @@ class Collage extends \Gazelle\BaseManager {
                     AND CategoryID = ?
                     AND ca.ArtistID = ?
                 ORDER BY c.updated DESC
-                ", COLLAGE_ARTISTS_ID, $artistId
+                ", CollageType::artist->value, $artist->id()
             );
             $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
             self::$cache->cache_value($key, $list, 3600 * 6);

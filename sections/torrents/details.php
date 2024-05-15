@@ -141,13 +141,13 @@ echo $Twig->render('tgroup/stats.twig', [
 echo $Twig->render('collage/summary.twig', [
     'class'   => 'collage_rows',
     'object'  => 'album',
-    'summary' => $collageMan->tgroupGeneralSummary($tgroupId),
+    'summary' => $collageMan->tgroupGeneralSummary($tgroup),
 ]);
 
 echo $Twig->render('collage/summary.twig', [
     'class'   => 'personal_rows',
     'object'  => 'album',
-    'summary' => $collageMan->tgroupPersonalSummary($tgroupId),
+    'summary' => $collageMan->tgroupPersonalSummary($tgroup),
 ]);
 ?>
         <table class="torrent_table details<?= $tgroup->isSnatched() ? ' snatched' : ''?> m_table" id="torrent_details">
