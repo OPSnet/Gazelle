@@ -1,11 +1,9 @@
 <?php
 
-$collageId = (int)$_GET['collageid'];
-if (!$collageId) {
+$collage = (new Gazelle\Manager\Collage())->findById((int)($_GET['collageid'] ?? 0));
+if (is_null($collage)) {
     error(404);
 }
-$collage = new Gazelle\Collage($collageId);
-
 if ($collage->isDeleted() && !$collage->isOwner($Viewer) && !$Viewer->permitted('site_collages_delete')) {
     error(403);
 }

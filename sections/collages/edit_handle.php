@@ -9,14 +9,12 @@ if (!$Viewer->permitted('site_edit_wiki')) {
 
 authorize();
 
-$id = (int)$_POST['collageid'];
-if (!$id) {
+$collageMan = new Gazelle\Manager\Collage();
+$collage    = $collageMan->findById((int)($_POST['collageid'] ?? 0));
+if (is_null($collage)) {
     error(404);
 }
-
-$collage = new Gazelle\Collage($id);
-$isPersonal = $collage->isPersonal();
-if (!$isPersonal) {
+if (!$collage->isPersonal()) {
     if (!$Viewer->permitted('site_collages_manage')) {
         error(403);
     }
@@ -25,7 +23,6 @@ if (!$isPersonal) {
     error(403);
 }
 
-$collageMan = new Gazelle\Manager\Collage();
 if (isset($_POST['name'])) {
     $name = trim($_POST['name']);
     $check = $collageMan->findByName($name);
