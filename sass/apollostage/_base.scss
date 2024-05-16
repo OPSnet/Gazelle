@@ -1,6 +1,6 @@
 /* ################################################################################ */
 /* APOLLOSTAGE THEME */
-/* version 2024.05.14 b15
+/* version 2024.05.16
 /* ################################################################################ */
 
 // SASS/SCSS NOTE
@@ -19,7 +19,7 @@
 /* */
 /* */
 
-/*  # 2024-05-14 - Updated by rubric_alert with hawkeye and community feedback. */
+/*  # 2024-05-16 - Updated by rubric_alert with hawkeye and community feedback. */
 /*  # Fix: mobile menu, category stripes;  
 /*  # Feature: Add SVGs, tag bubbles, italic fonts and more;
 /*  # Chore: Organized and documented the SCSS. */
@@ -69,6 +69,9 @@
 //    super long: this CSS doesn't have much structure in Desktop view.)
 //
 //   Feature: theme styling for all notification dialogs.
+//
+//   Feature: Add notification for upload errors [## 4.4, beta quality, 
+//    requires additional HTML support to to be fully functional.]
 //
 //   Fix: Album pages, additional artwork delete buttons [x] misplaced.
 //
