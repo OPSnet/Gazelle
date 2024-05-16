@@ -144,6 +144,7 @@
 /* ## 4.1 Changes for Mobile, Super Small Window */
 /* ## 4.2 Tag Bubble Appearance on Widescreen #Wideload */
 /* ## 4.3 I-Devices Telephone Number Prevention */
+/* ## 4.4 BETA ~ Upload warnings */
 
 /* */
 /* */
@@ -175,7 +176,6 @@
         --phone-screen-size: 575px; 
     }
     
-
 /* */
 /* */
 
@@ -3299,6 +3299,27 @@ table.torrent_table.cats.m_table td.td_info.big_info div.group_info.clear div.ta
 
 /* */
 /* */
+
+/* ## 4.4 BETA -- Upload warnings ## */
+
+ul#check:after {
+  content: 'BETA:  Warning!  There were one or more errors in your submission. Check below for error messages.';
+  font-weight: 700;
+  position: absolute;
+  top: calc(4*16px);
+  left: 50vw;
+  transform: translateX(-50%);
+  color: black;
+  border: thick solid orangered;
+  border-radius: .25rem;
+  padding: 2rem 1rem 2rem 48px;
+  background: color-mix(in srgb, lightyellow, transparent 20%);
+  background-image: url('https://wally-crunk.github.io/svg/gazelle/x.svg');
+  background-repeat:no-repeat;
+  background-position: 8px center;
+  background-size: 32px; 
+}
+
 /*# sourceMappingURL=styles.css.map */
 
 /* ####### */

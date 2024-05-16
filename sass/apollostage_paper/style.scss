@@ -166,10 +166,10 @@ body, textarea {
  font-family: "Merriweather Sans", Noto, "Noto Sans", sans-serif;
   font-optical-sizing: auto;
   font-style: normal;
-  font-weight: 200;
+  font-weight: 320;
   background-color: #EBEFF0;
   box-sizing: border-box;
-  color: #121321;
+  color: #243024;
   font-size: 12px;
   line-height: 1.6;
   margin: 0 8px;
@@ -185,24 +185,6 @@ h6,
     font-weight: 700;
  }
 
-ul#check:after {
-  content: 'BETA:  Warning!  There were one or more errors in your submission. Check below for error messages.';
-  font-weight: 700;
-  position: absolute;
-  top: calc(4*16px);
-  left: 50vw;
-  transform: translateX(-50%);
-  color: black;
-  border: thick solid orangered;
-  border-radius: .25rem;
-  padding: 2rem 1rem 2rem 48px;
-  background: color-mix(in srgb, lightyellow, transparent 20%);
-  background-image: url('https://wally-crunk.github.io/svg/gazelle/x.svg');
-  background-repeat:no-repeat;
-  background-position: 8px center;
-  background-size: 32px; 
-}
-
-/*1314*/
+/*0647*/
 // EOF
 
