@@ -68,6 +68,10 @@ class ForumPost extends BaseObject {
         return $this->info()['body'];
     }
 
+    public function created(): string {
+        return $this->info()['created'];
+    }
+
     public function isPinned(): bool {
         return (bool)$this->info()['is_pinned'];
     }
@@ -110,13 +114,7 @@ class ForumPost extends BaseObject {
         self::$db->commit();
 
         $this->flush();
-        $this->info();
-        $thread = $this->thread();
-        $postCatalogEntry = $thread->catalogEntry($this->page(), POSTS_PER_PAGE);
-        $finalCatalogEntry = $thread->catalogEntry($this->threadPageTotal(), POSTS_PER_PAGE);
-        if ($postCatalogEntry < $finalCatalogEntry) {
-            $this->thread()->flushCatalog($this->page() - 1, $this->page() - 1);
-        }
+        $this->thread()->flushPostCatalogue($this);
         $this->info['body'] = $body;
         return $affected;
     }
@@ -133,10 +131,27 @@ class ForumPost extends BaseObject {
             ", $set ? $this->id : 0, $this->thread()->id()
         );
         $affected = self::$db->affected_rows();
-        $this->thread()->flushCatalog(0, $this->thread()->lastPage());
+        $this->thread()->flushCatalogue();
         $this->flush();
         return $affected;
     }
+
+    /**
+     * Determine on which page a post falls in a thread
+     */
+    public function threadCatalogue(): int {
+        return (int)self::$db->scalar("
+            WITH list AS (
+                SELECT ID,
+                    TRUNCATE((row_number() OVER () - 1) / ?, 0) AS catalogue
+                FROM forums_posts
+                WHERE TopicID = ?
+            )
+            SELECT catalogue FROM list WHERE ID = ?
+            ", THREAD_CATALOGUE, $this->thread()->id(), $this->id
+        );
+    }
+
     /**
      * Remove a post from a thread
      */
@@ -192,12 +207,13 @@ class ForumPost extends BaseObject {
         $this->thread()->forum()->adjust();
         (new \Gazelle\Manager\Subscription())->flushPage('forums', $threadId);
 
+        $thread->flushPostCatalogue($this);
         $thread->flush();
-        $pageOffset = $this->page() - 1;
-        $lastOffset = $this->threadPageTotal() - 1;
-        if ($pageOffset || $pageOffset < $lastOffset) {
-            $thread->flushCatalog(begin: $pageOffset, end: $lastOffset);
-        }
         return true;
+    }
+
+    public function modify(): bool {
+        $this->thread()->flushPostCatalogue($this);
+        return parent::modify();
     }
 }

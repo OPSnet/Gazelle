@@ -148,7 +148,7 @@ class ForumTest extends TestCase {
         $this->assertEquals('this is a new thread', $thread->body(), 'fthread-body');
         $this->assertEquals(1, $thread->postTotal(), 'fthread-post-total');
         $this->assertEquals(0, $thread->lastPage(), 'fthread-last-page');
-        $this->assertEquals(0, $thread->lastCatalog(), 'fthread-last-catalog');
+        $this->assertEquals(0, $thread->lastCatalogue(), 'fthread-last-catalog');
         $this->assertEquals(1, $this->forum->numThreads(), 'fthread-admin-number-thread-total');
 
         $this->assertEquals($admin->id(), $thread->authorId(), 'fthread-author-id');
@@ -562,6 +562,44 @@ class ForumTest extends TestCase {
             ]),
             'forum-render-forum',
         );
+    }
+
+    public function testEditPost(): void {
+        $this->category = (new \Gazelle\Manager\ForumCategory())->create('phpunit category', 10011);
+        $user = $this->userList['user'];
+        $this->forum = Helper::makeForum(
+            user:           $user,
+            sequence:       154,
+            category:       $this->category,
+            name:           'phpunit forum twig',
+            description:    'This is where it twigs',
+        );
+        $manager = new \Gazelle\Manager\ForumThread();
+        $thread = $manager->create($this->forum, $user, 'thread title', 'this is a new thread');
+        $this->assertEquals(1, $thread->postTotalSummary(), 'fthread-post-total-summary');
+        $slice = $thread->slice(1, 1);
+        $post = (new Gazelle\Manager\ForumPost())->findById($slice[0]['ID']);
+        $this->assertEquals($thread->body(), $post->body(), 'thread-initial-body');
+        $post->setField('Body', 'edit')->modify();
+        // flush thread object to pick up out-of-band modification
+        $this->assertEquals('edit', $thread->flush()->body(), 'thread-edit-body');
+        $this->assertEquals($post->created(), $thread->lastPostTime(), 'thread-last-post-date');
+
+        $this->assertEquals(1, $thread->mergePost($post, $user, 'merge this'), 'thread-merge-post');
+        $newBody = "edit\n\nmerge this";
+        $this->assertEquals($newBody, $post->body());
+        $this->assertEquals(1, $thread->postTotalSummary(), 'fthread-merge-post-total-summary');
+
+        $slice = $thread->slice(1, 1);
+        $this->assertEquals($newBody, $slice[0]['Body'], 'thread-merge-post-slice');
+        $merged = (new Gazelle\Manager\ForumPost())->findById($slice[0]['ID']);
+        $this->assertEquals($newBody, $merged->body(), 'thread-merged-body');
+
+        $post = $thread->addPost($user, 'second');
+        $this->assertEquals(2, $thread->postTotalSummary(), 'fthread-merge-post-add-summary');
+        $this->assertEquals(1, $thread->mergePost($post, $user, 'merge more'), 'thread-merge-second-post');
+        $this->assertEquals(2, $thread->postTotalSummary(), 'fthread-merge-post-add-merge-summary');
+        $this->assertEquals($post->created(), $thread->lastPostTime(), 'thread-merge-last-post-date');
     }
 
     public function testForumTransition(): void {

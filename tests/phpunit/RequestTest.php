@@ -260,9 +260,12 @@ class RequestTest extends TestCase {
         $this->assertEquals($taxedBounty, $after['vote-size'] - $before['vote-size'], 'request-vote-size');
         $this->assertEquals(-$bounty, $after['uploaded'] - $before['uploaded'], 'request-subtract-bounty');
 
-        // add some bounty
+        // If this next test fails, first try re-running the suite. There is a microsecond
+        // race condition between requests.LastPostTime and requests.created that would be
+        // difficult to remove without adding a lot of complications to the code.
         $this->assertFalse($this->request->hasNewVote(), 'request-no-new-vote');
         sleep(1); // to ensure lastVoteDate() > created()
+        // add some bounty
         $this->assertTrue($this->request->vote($user, $bounty), 'request-more-bounty');
         $this->assertTrue($this->request->hasNewVote(), 'request-has-new-vote');
         $userVote = $this->request->userVote($user);

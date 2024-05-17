@@ -751,8 +751,9 @@ defined('FORUM_REVEAL_VOTE') or define('FORUM_REVEAL_VOTE', []);
 // Where trashed threads go.
 defined('TRASH_FORUM_ID') or define('TRASH_FORUM_ID', 4);
 
-// The Album of the Month (AotM) forum.
-defined('AOTM_FORUM_ID') or define('AOTM_FORUM_ID', 51);
+// The Album of the Month (AotM) forum. This is the Announcement forum
+// by default, but you might want to have a dedicated forum for this.
+defined('AOTM_FORUM_ID') or define('AOTM_FORUM_ID', 12);
 
 // The Showcase (Vanity House) forum.
 defined('SHOWCASE_FORUM_ID') or define('SHOWCASE_FORUM_ID', 18);

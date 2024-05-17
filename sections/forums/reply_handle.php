@@ -24,14 +24,14 @@ if ($body === '') {
 }
 
 if ($thread->lastAuthorId() == $Viewer->id() && isset($_POST['merge'])) {
-    $post = $thread->mergePost($Viewer, $body);
+    $post = (new Gazelle\Manager\ForumPost())->findById($thread->lastPostId());
+    $thread->mergePost($post, $Viewer, $body);
 } else {
     $post = $thread->addPost($Viewer, $body);
 }
-$postId = $post->id();
 
 (new Gazelle\User\Notification\Quote($Viewer))->create(
-    new Gazelle\Manager\User(), $body, $postId, 'forums', $threadId
+    new Gazelle\Manager\User(), $body, $post->id(), 'forums', $threadId
 );
 $subscription = new Gazelle\User\Subscription($Viewer);
 if (isset($_POST['subscribe']) && !$subscription->isSubscribed($threadId)) {
@@ -39,4 +39,4 @@ if (isset($_POST['subscribe']) && !$subscription->isSubscribed($threadId)) {
 }
 (new Gazelle\Manager\Subscription())->flushPage('forums', $threadId);
 
-header("Location: {$thread->location()}&postid=$postId#post$postId");
+header("Location: {$post->location()}");
