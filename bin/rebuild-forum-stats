@@ -1,0 +1,67 @@
+#! /usr/bin/env php
+<?php
+
+/**
+ * If ever the summary columns in the forums_topics tables get out of whack,
+ * this script can be used to reset them to the correct values.
+ * It performs the updates through the framework, so no particular care needs
+ * be taken to ensure the cache remains consistent.
+ * The two selects could be combined into a single query (and a single update)
+ * but the resulting select query is too clever to be easily understood.
+ */
+
+require_once(__DIR__ . '/../lib/bootstrap.php');
+$db = Gazelle\DB::DB();
+$manager = new Gazelle\Manager\ForumThread();
+
+$db->prepared_query("
+    SELECT ft.ID AS id,
+        count(fp.ID) as calculated_replies,
+        ft.NumPosts as total_replies
+    FROM forums_topics ft
+    INNER JOIN forums_posts fp ON (fp.TopicID = ft.ID)
+    GROUP BY ft.ID
+    HAVING total_replies != calculated_replies
+");
+foreach ($db->to_array(false, MYSQLI_ASSOC, false) as $row) {
+    printf("t %6d %6d\n", $row['id'], $row['calculated_replies']);
+    $thread = $manager->findById($row['id']);
+    $thread->setField('NumPosts', $row['calculated_replies'])->modify();
+}
+
+$db->prepared_query("
+    WITH last AS (
+        SELECT max(ID) AS ID
+        FROM forums_posts
+        GROUP BY TopicID
+    )
+    SELECT fp.TopicID AS thread_id,
+        fp.ID         AS post_id,
+        fp.AuthorID   AS user_id,
+        fp.AddedTime  AS created
+    FROM forums_posts fp
+    INNER JOIN last USING (ID)
+    INNER JOIN forums_topics ft ON (ft.ID = fp.TopicID)
+    WHERE (
+        ft.LastPostID != fp.ID
+        OR ft.LastPostAuthorID != fp.AuthorID
+        OR ft.LastPostTime != fp.AddedTime
+    )
+");
+foreach ($db->to_array(false, MYSQLI_ASSOC, false) as $row) {
+    printf("u %6d %6d\n", $row['thread_id'], $row['post_id']);
+    $thread = $manager->findById($row['thread_id']);
+    $thread->setField('LastPostID', $row['post_id'])
+        ->setField('LastPostAuthorID', $row['user_id'])
+        ->setField('LastPostTime', $row['created'])
+        ->modify();
+}
+
+$forumMan = new Gazelle\Manager\Forum();
+$db->prepared_query("
+    SELECT f.ID AS forum_id FROM forums f
+");
+foreach ($db->collect(0, false) as $forumId) {
+    echo "f $forumId\n";
+    $forumMan->findById($forumId)->adjust();
+}

@@ -19,11 +19,20 @@ class ForumThread extends BaseObject {
         return $this;
     }
 
-    public function flushCatalog(int $begin, int $end): void {
+    public function flushCatalogue(): void {
         self::$cache->delete_multi(
             array_map(
-                fn($c) => sprintf(self::CACHE_CATALOG, $this->id, (int)floor((POSTS_PER_PAGE * $c) / THREAD_CATALOGUE)),
-                range($begin, $end)
+                fn ($n) => sprintf(self::CACHE_CATALOG, $this->id, $n),
+                range(0, $this->lastCatalogue())
+            )
+        );
+    }
+
+    public function flushPostCatalogue(ForumPost $post): void {
+        self::$cache->delete_multi(
+            array_map(
+                fn ($n) => sprintf(self::CACHE_CATALOG, $this->id, $n),
+                range($post->threadCatalogue(), $this->lastCatalogue())
             )
         );
     }
@@ -176,17 +185,17 @@ class ForumThread extends BaseObject {
         return (int)floor($this->postTotal() / POSTS_PER_PAGE);
     }
 
-    public function lastCatalog(): int {
+    public function lastCatalogue(): int {
         return (int)floor($this->postTotal() / THREAD_CATALOGUE);
     }
 
-    public function catalogEntry(int $page, int $perPage): int {
+    public function catalogueEntry(int $page, int $perPage): int {
         return (int)floor($perPage * ($page - 1) / THREAD_CATALOGUE);
     }
 
     public function slice(int $page, int $perPage): array {
         // Cache catalogue from which the page is selected, allows block caches and future ability to specify posts per page
-        $catId = $this->catalogEntry(page: $page, perPage: $perPage);
+        $catId = $this->catalogueEntry(page: $page, perPage: $perPage);
         $key = sprintf(self::CACHE_CATALOG, $this->id, $catId);
         $catalogue = self::$cache->get_value($key);
         if ($catalogue === false) {
@@ -216,22 +225,15 @@ class ForumThread extends BaseObject {
         $this->info();
         $this->info['post_total_summary']++;
         $this->info['last_post_id']        = $post->id();
-        $this->info['last_post_author_id'] = $user->id();
+        $this->info['last_post_author_id'] = $post->userId();
 
-        $this->updateThread($user, $post->id());
+        $this->updateThread($post, 1);
         $user->stats()->increment('forum_post_total');
         return $post;
     }
 
-    public function mergePost(User $user, string $body): ForumPost {
-        [$postId, $oldBody] = self::$db->row("
-            SELECT ID, Body
-            FROM forums_posts
-            WHERE TopicID = ?
-                AND AuthorID = ?
-            ORDER BY ID DESC LIMIT 1
-            ", $this->id, $user->id()
-        );
+    public function mergePost(ForumPost $post, User $user, string $body): int {
+        $oldBody = $post->body();
 
         // Edit the post
         self::$db->begin_transaction();
@@ -241,20 +243,22 @@ class ForumThread extends BaseObject {
                 Body = CONCAT(Body, '\n\n', ?),
                 EditedTime = now()
             WHERE ID = ?
-            ", $user->id(), $body, $postId
+            ", $user->id(), $body, $post->id()
         );
+        $affected = self::$db->affected_rows();
 
         // Store edit history
         self::$db->prepared_query("
             INSERT INTO comments_edits
                    (EditUser, PostID, Body, Page)
             VALUES (?,        ?,      ?,   'forums')
-            ", $user->id(), $postId, $oldBody
+            ", $user->id(), $post->id(), $oldBody
         );
         self::$db->commit();
 
-        $this->updateThread($user, $postId);
-        return new ForumPost($postId);
+        $post->flush();
+        $this->updateThread($post, 0);
+        return $affected;
     }
 
     public function editThread(Forum $forum, bool $pinned, int $rank, bool $locked, string $title): int {
@@ -285,7 +289,7 @@ class ForumThread extends BaseObject {
                 )
             );
             $this->forum()->adjust();
-            $this->flushCatalog(0, $this->lastPage());
+            $this->flushCatalogue();
             $this->flush();
             if ($this->forumId != $forum->id()) {
                 $forum->adjust();
@@ -296,9 +300,10 @@ class ForumThread extends BaseObject {
     }
 
     public function remove(): int {
+        $this->flushCatalogue();
+
         // LastPostID is a chicken and egg situation when removing a thread,
         // so foreign key constraints must be suspended temporarily.
-        $last = $this->lastPage();
         $db = new \Gazelle\DB();
         $db->relaxConstraints(true);
         self::$db->prepared_query("
@@ -328,7 +333,6 @@ class ForumThread extends BaseObject {
             // there will be no posts when the last thread is removed
             $this->updateRoot($previousPost['user_id'], $previousPost['post_id']);
         }
-        $this->flushCatalog($last, $last);
         $this->flush();
         return $affected;
     }
@@ -354,25 +358,29 @@ class ForumThread extends BaseObject {
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
-    protected function updateThread(User $user, int $postId): int {
+    /**
+     * When updating the summary columns in the forums_topics rows, a new post
+     * will increase the number of replies whereas a merged post will leave the
+     * value untouched. Hence we pass in an increment value from the calling
+     * method to ensure the total remains correct.
+     * Note: NumPosts should really have been named NumReplies.
+     */
+    protected function updateThread(ForumPost $post, int $increment): int {
         self::$db->prepared_query("
             UPDATE forums_topics SET
-                NumPosts         = NumPosts + 1,
-                LastPostTime     = now(),
                 LastPostID       = ?,
-                LastPostAuthorID = ?
+                LastPostAuthorID = ?,
+                LastPostTime     = ?,
+                NumPosts         = NumPosts + ?
             WHERE ID = ?
-            ", $postId, $user->id(), $this->id()
+            ", $post->id(), $post->userId(), $post->created(), $increment, $this->id
         );
         $affected = self::$db->affected_rows();
-        if ($affected) {
-            $this->updateRoot($user->id(), $postId);
-            (new Manager\Forum())->flushToc();
-            $this->forum()->flush();
-            $last = $this->lastPage();
-            $this->flushCatalog($last, $last);
-            $this->flush();
-        }
+        $this->updateRoot($post->userId(), $post->id());
+        (new Manager\Forum())->flushToc();
+        $this->forum()->flush();
+        $this->flushPostCatalogue($post);
+        $this->flush();
         return $affected;
     }
 
@@ -408,8 +416,8 @@ class ForumThread extends BaseObject {
      *
      * @return array [post_id, author_id, added_time, body, editor_user_id, edited_time]
      */
-    public function threadCatalog(int $perPage, int $page): array {
-        $catId = $this->catalogEntry(page: $page, perPage: $perPage);
+    public function threadCatalogue(int $perPage, int $page): array {
+        $catId = $this->catalogueEntry(page: $page, perPage: $perPage);
         $key = sprintf(self::CACHE_CATALOG, $this->id, $catId);
         $catalogue = self::$cache->get_value($key);
         if ($catalogue === false) {
