@@ -265,7 +265,8 @@ if (!$torrentList) {
                             <br />Last active: <?= time_diff($torrent->lastActiveDate()); ?>
 <?php
         }
-        if ($torrent->isReseedRequestAllowed() || $Viewer->permitted('users_mod')
+        if (
+            $torrent->isReseedRequestAllowed() || $Viewer->permitted('users_mod')
         ) {
 ?>
                             <br /><a href="torrents.php?action=reseed&amp;torrentid=<?=$TorrentID?>&amp;groupid=<?=

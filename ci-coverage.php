@@ -24,7 +24,7 @@ class CoverageHelper {
      * ensure coverage is saved if die() is called somewhere
      */
 
-    const TARGET_DIR = '/tmp/coverage';
+    protected const TARGET_DIR = '/tmp/coverage';
     private CodeCoverage $coverage;
 
     public function __construct() {

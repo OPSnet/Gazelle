@@ -101,7 +101,7 @@ class TGroupVoteTest extends TestCase {
         $vote[1]->upvote($this->tgroupList[0]);
         $vote[2]->downvote($this->tgroupList[0]);
         $this->assertEquals(0.32115, round($vote[0]->score($this->tgroupList[0]), 5), 'tg-vote-3-1');
-        
+
         $top = $vote[0]->topVotes();
         $this->assertEquals(2, $top[$this->tgroupList[0]->id()]['Ups'], 'tgroup-downvote-top-up');
         $this->assertEquals(3, $top[$this->tgroupList[0]->id()]['Total'], 'tgroup-downvote-top-total');

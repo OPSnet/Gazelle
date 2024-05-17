@@ -16,10 +16,12 @@ class NotificationTicket {
     }
 
     public function findById(int $torrentId): ?\Gazelle\NotificationTicket {
-        if ($this->pg()->scalar("
-            select 1 from notification_ticket where id_torrent = ?
-            ", $torrentId
-        )) {
+        if (
+            $this->pg()->scalar("
+                select 1 from notification_ticket where id_torrent = ?
+                ", $torrentId
+            )
+        ) {
             return new \Gazelle\NotificationTicket($torrentId);
         }
         return null;

@@ -387,7 +387,7 @@ if ($search->canUnclaim($Viewer)) {
                         <?= $report->message() ?? '' ?>
                     </td>
                 </tr>
-<?php           if ($torrent ) { ?>
+<?php           if ($torrent) { ?>
                 <tr>
                     <td>&nbsp;</td>
                     <td>

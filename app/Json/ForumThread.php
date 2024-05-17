@@ -21,7 +21,8 @@ class ForumThread extends \Gazelle\Json {
             $lastPost = end($slice);
             $lastPostId = $lastPost['ID'];
             reset($slice);
-            if ($thread->postTotal() <= $paginator->perPage() * $paginator->page()
+            if (
+                $thread->postTotal() <= $paginator->perPage() * $paginator->page()
                 && $thread->pinnedPostId() > $lastPostId
             ) {
                 $lastPostId = $thread->pinnedPostId();

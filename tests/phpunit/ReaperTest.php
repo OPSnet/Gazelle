@@ -1,9 +1,5 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
-use Gazelle\Enum\ReaperNotify;
-use Gazelle\Enum\ReaperState;
-
 /**
  * Note to Developers/Testers
  * ==========================
@@ -22,6 +18,10 @@ use Gazelle\Enum\ReaperState;
  * will make the tests happy and everything should succeed. Any
  * other problems are your own.
  */
+
+use PHPUnit\Framework\TestCase;
+use Gazelle\Enum\ReaperNotify;
+use Gazelle\Enum\ReaperState;
 
 require_once(__DIR__ . '/../../lib/bootstrap.php');
 require_once(__DIR__ . '/../helper.php');

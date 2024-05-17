@@ -9,7 +9,8 @@ require_once(__DIR__ . '/../lib/bootstrap.php');
 
 $feed = new Gazelle\Feed();
 $user = (new Gazelle\Manager\User())->findById((int)($_GET['user'] ?? 0));
-if (!$user?->isEnabled()
+if (
+    !$user?->isEnabled()
     || empty($_GET['feed'])
     || md5($user->id() . RSS_HASH . ($_GET['passkey'] ?? 'NOTPASS')) !== ($_GET['auth'] ?? 'NOTAUTH')
 ) {

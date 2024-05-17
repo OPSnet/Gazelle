@@ -30,7 +30,8 @@ require_once(__DIR__ . '/lib/bootstrap.php');
 global $Cache, $Debug, $Twig;
 
 // Get the user's actual IP address if they're proxied.
-if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])
+if (
+    !empty($_SERVER['HTTP_X_FORWARDED_FOR'])
     && proxyCheck($_SERVER['REMOTE_ADDR'])
     && filter_var($_SERVER['HTTP_X_FORWARDED_FOR'], FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)
 ) {

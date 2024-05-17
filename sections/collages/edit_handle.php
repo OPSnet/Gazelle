@@ -53,7 +53,8 @@ if (!isset($_POST['regen-tags'])) {
 }
 $collage->setField('Description', trim($_POST['description']));
 
-if (isset($_POST['featured'])
+if (
+    isset($_POST['featured'])
     && (
         ($collage->isPersonal() && $collage->isOwner($Viewer))
         || $Viewer->permitted('site_collages_delete')
@@ -62,7 +63,8 @@ if (isset($_POST['featured'])
     $collage->setFeatured();
 }
 
-if (($collage->isPersonal() && $collage->isOwner($Viewer) && $Viewer->permitted('site_collages_renamepersonal'))
+if (
+    ($collage->isPersonal() && $collage->isOwner($Viewer) && $Viewer->permitted('site_collages_renamepersonal'))
     || $Viewer->permitted('site_collages_delete')
 ) {
     $collage->setField('Name', trim($_POST['name']));

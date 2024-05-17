@@ -14,4 +14,4 @@ enum LeechType: string {
             LeechType::Free    => 'Freeleech', /** @phpstan-ignore-line */
         };
     }
-};
+}

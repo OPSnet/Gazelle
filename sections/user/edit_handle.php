@@ -228,19 +228,21 @@ foreach ($notification as $n) {
 }
 (new Gazelle\User\Notification($user))->save($settings, ["PushKey" => $_POST['pushkey']], $_POST['pushservice'], $_POST['pushdevice']);
 
-foreach ([
-    'admin-error-reporting' => isset($_POST['error_reporting']),
-    'download-as-text'      => isset($_POST['downloadtext']),
-    'hide-tags'             => isset($_POST['hidetags']),
-    'hide-vote-history'     => !isset($_POST['pattr_hide_vote_history']),
-    'hide-vote-recent'      => !isset($_POST['pattr_hide_vote_recent']),
-    'no-fl-gifts'           => !isset($_POST['acceptfltoken']),
-    'no-pm-delete-download' => !isset($_POST['notifyondeletedownloaded']),
-    'no-pm-delete-seed'     => !isset($_POST['notifyondeleteseeding']),
-    'no-pm-delete-snatch'   => !isset($_POST['notifyondeletesnatched']),
-    'no-pm-unseeded-snatch' => !isset($_POST['notifyonunseededsnatch']),
-    'no-pm-unseeded-upload' => !isset($_POST['notifyonunseededupload']),
-] as $attr => $state) {
+foreach (
+    [
+        'admin-error-reporting' => isset($_POST['error_reporting']),
+        'download-as-text'      => isset($_POST['downloadtext']),
+        'hide-tags'             => isset($_POST['hidetags']),
+        'hide-vote-history'     => !isset($_POST['pattr_hide_vote_history']),
+        'hide-vote-recent'      => !isset($_POST['pattr_hide_vote_recent']),
+        'no-fl-gifts'           => !isset($_POST['acceptfltoken']),
+        'no-pm-delete-download' => !isset($_POST['notifyondeletedownloaded']),
+        'no-pm-delete-seed'     => !isset($_POST['notifyondeleteseeding']),
+        'no-pm-delete-snatch'   => !isset($_POST['notifyondeletesnatched']),
+        'no-pm-unseeded-snatch' => !isset($_POST['notifyonunseededsnatch']),
+        'no-pm-unseeded-upload' => !isset($_POST['notifyonunseededupload']),
+    ] as $attr => $state
+) {
     $user->toggleAttr($attr, $state);
 }
 

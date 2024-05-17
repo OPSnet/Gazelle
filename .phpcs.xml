@@ -29,14 +29,15 @@
         <exclude name="PSR2.Classes.PropertyDeclaration.SpacingAfterType" />
         <exclude name="PSR2.Methods.FunctionCallSignature" />
 
-        <exclude name="PSR12.Classes.ClosingBrace" />
-        <exclude name="PSR12.ControlStructures.ControlStructureSpacing" />
         <exclude name="PSR12.Traits.UseDeclaration" />
 
         <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing" />
         <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.BraceOnSameLine" />
+        <!-- function x() { return $x; } is ok -->
         <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.ContentAfterBrace" />
-        <exclude name="Squiz.WhiteSpace.ScopeClosingBrace" />
+        <exclude name="Squiz.WhiteSpace.ScopeClosingBrace.ContentBefore" />
+        <!-- <?php      } ?> is ok -->
+        <exclude name="Squiz.WhiteSpace.ScopeClosingBrace.Indent" />
     </rule>
 
     <rule ref="Generic.Arrays.DisallowLongArraySyntax" />

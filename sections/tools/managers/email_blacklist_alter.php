@@ -25,20 +25,24 @@ if ($_POST['submit'] === 'Delete') { // Delete
     }
 
     if ($_POST['submit'] === 'Edit') { // Edit
-        if (!$emailBlacklist->modify(
-            id:      (int)$_POST['id'],
-            domain:  $email,
-            comment: trim($_POST['comment']),
-            user:    $Viewer,
-        )) {
+        if (
+            !$emailBlacklist->modify(
+                id:      (int)$_POST['id'],
+                domain:  $email,
+                comment: trim($_POST['comment']),
+                user:    $Viewer,
+            )
+        ) {
             error(0);
         }
     } else { // Create
-        if (!$emailBlacklist->create(
-            domain:  $email,
-            comment: trim($_POST['comment']),
-            user:    $Viewer,
-        )) {
+        if (
+            !$emailBlacklist->create(
+                domain:  $email,
+                comment: trim($_POST['comment']),
+                user:    $Viewer,
+            )
+        ) {
             error(0);
         }
     }

@@ -81,10 +81,12 @@ class Stylesheet extends \Gazelle\BaseUser {
                 . base_convert((string)filemtime(SERVER_ROOT . '/sass/' . preg_replace('/\.css$/', '.scss', $this->cssName())), 10, 36);
         }
         $info = parse_url($url);
-        if (str_ends_with($info['path'] ?? '', '.css')
+        if (
+            str_ends_with($info['path'] ?? '', '.css')
                 && (($info['query'] ?? '') . ($info['fragment'] ?? '')) === ''
                 && ($info['host'] ?? '') === SITE_HOST
-                && file_exists(SERVER_ROOT . $info['path'])) {
+                && file_exists(SERVER_ROOT . $info['path'])
+        ) {
             $url .= '?v=' . filemtime(SERVER_ROOT . "/sass/{$info['path']}");
         }
         return $url;

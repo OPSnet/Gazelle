@@ -13,7 +13,8 @@ $torrent->setViewer($Viewer);
  * To prevent this retardation from blowing bandwidth etc., let's block it
  * if the .torrent file has been downloaded four times before.
  */
-if (preg_match('/^(BTWebClient|Python-urllib|python-requests|uTorrent)/', $_SERVER['HTTP_USER_AGENT'] ?? 'unknown')
+if (
+    preg_match('/^(BTWebClient|Python-urllib|python-requests|uTorrent)/', $_SERVER['HTTP_USER_AGENT'] ?? 'unknown')
     && $Viewer->torrentDownloadCount($torrent->id()) > 3
 ) {
     json_or_error('You have already downloaded this torrent file four times. If you need to download it again, please do so from your browser.');

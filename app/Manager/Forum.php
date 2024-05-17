@@ -105,7 +105,7 @@ class Forum extends \Gazelle\BaseManager {
      */
     public function tableOfContentsMain(): array {
         $toc = self::$cache->get_value(self::CACHE_TOC_MAIN);
-        if ($toc === false ) {
+        if ($toc === false) {
             self::$db->prepared_query("
                 SELECT cat.Name AS categoryName, cat.ID AS categoryId,
                     f.ID, f.Name, f.Description, f.NumTopics, f.NumPosts,

@@ -18,4 +18,4 @@ enum LeechReason: string {
             LeechReason::AlbumOfTheMonth => 'Album of the Month', /** @phpstan-ignore-line */
         };
     }
-};
+}

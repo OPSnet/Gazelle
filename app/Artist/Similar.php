@@ -135,28 +135,32 @@ class Similar extends \Gazelle\Base {
 
         // if the vote already exists in this direction: do nothing
         $vote = $upvote ? 'up' : 'down';
-        if ((bool)self::$db->scalar("
-            SELECT 1
-            FROM artists_similar_votes
-            WHERE SimilarID = ?
-                AND UserID = ?
-                AND Way = ?
-            ", $similarId, $user->id(), $vote
-        )) {
+        if (
+            (bool)self::$db->scalar("
+                SELECT 1
+                FROM artists_similar_votes
+                WHERE SimilarID = ?
+                    AND UserID = ?
+                    AND Way = ?
+                ", $similarId, $user->id(), $vote
+            )
+        ) {
             return false;
         }
 
         // if the new vote is in the opposite direction of the old one,
         // remove the previous vote
         $opposite = !$upvote ? 'up' : 'down';
-        if ((bool)self::$db->scalar("
+        if (
+            (bool)self::$db->scalar("
             SELECT 1
             FROM artists_similar_votes
             WHERE SimilarID = ?
                 AND UserID = ?
                 AND Way = ?
             ", $similarId, $user->id(), $opposite
-        )) {
+            )
+        ) {
             self::$db->begin_transaction();
             self::$db->prepared_query("
                 UPDATE artists_similar_scores SET

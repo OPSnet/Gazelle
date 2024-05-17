@@ -209,7 +209,7 @@ switch ($categoryName) {
             if (!$Properties['UnknownRelease']) {
                 $Validate->setField('remaster_year', true, 'number', 'Year of remaster/re-issue must be entered.');
             }
-            if ($Properties['Media'] == 'CD' ) {
+            if ($Properties['Media'] == 'CD') {
                 $Validate->setField('remaster_year', true, 'number', 'You have selected a year for an album that predates the media you say it was created on.',
                     ['minlength' => 1982]
                 );
@@ -443,7 +443,8 @@ foreach ($FileList as ['path' => $filename, 'size' => $size]) {
     if ($Properties['Encoding'] == "Lossless" && preg_match('/\.cue$/i', $filename)) {
         $hasCue = true;
     }
-    if ($Properties['Media'] == 'CD'
+    if (
+        $Properties['Media'] == 'CD'
         && $Properties['Encoding'] == "Lossless"
         && !in_array(strtolower($filename), IGNORE_AUDIO_LOGFILE)
         && preg_match('/\.log$/i', $filename)

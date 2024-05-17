@@ -38,7 +38,8 @@ class CollageFreeleechTest extends TestCase {
             logger:      new \Gazelle\Log(),
         );
         foreach ($this->tgroupList as $tgroup) {
-            foreach ([
+            foreach (
+                [
                     ['format' => 'FLAC', 'size' => 10_000_000],
                     ['format' => 'FLAC', 'size' => 15_000_000],
                     ['format' => 'MP3',  'size' =>  2_000_000],
