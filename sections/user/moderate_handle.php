@@ -176,8 +176,10 @@ if ($flTokens != $user->tokenCount() && ($editRatio || $Viewer->permitted('admin
 }
 
 $newBonusPoints = false;
-if (!in_array($bonusPoints, [$user->bonusPointsTotal(), (float)($_POST['OldBonusPoints'])])
-    && ($Viewer->permitted('users_edit_ratio') || ($Viewer->permitted('users_edit_own_ratio') && $ownProfile))) {
+if (
+    !in_array($bonusPoints, [$user->bonusPointsTotal(), (float)($_POST['OldBonusPoints'])])
+    && ($Viewer->permitted('users_edit_ratio') || ($Viewer->permitted('users_edit_own_ratio') && $ownProfile))
+) {
     $newBonusPoints = $bonusPoints;
     $editSummary[] = "bonus points changed from {$user->bonusPointsTotal()} to {$bonusPoints}";
 }
@@ -188,7 +190,8 @@ if ($unlimitedDownload !== $user->hasUnlimitedDownload() && $Viewer->permitted('
     }
 }
 
-if ($Collages != $user->paidPersonalCollages() && $Collages != (int)$_POST['OldCollages']
+if (
+    $Collages != $user->paidPersonalCollages() && $Collages != (int)$_POST['OldCollages']
     && ($Viewer->permitted('users_edit_ratio') || ($Viewer->permitted('users_edit_own_ratio') && $ownProfile))
 ) {
     $user->setField('collage_total', $Collages);
@@ -218,11 +221,13 @@ if ($editRatio) {
 if ($class) {
     $Classes = $userMan->classList();
     $newClass = $Classes[$class]['Level'];
-    if ($newClass != $user->classLevel()
+    if (
+        $newClass != $user->classLevel()
         && (
             ($newClass < $Viewer->classLevel() && $Viewer->permitted('users_promote_below'))
             || ($newClass <= $Viewer->classLevel() && $Viewer->permitted('users_promote_to'))
-    )) {
+        )
+    ) {
         $user->setField('PermissionID', $class);
         $editSummary[] = 'class changed to ' . $userMan->userclassName($class);
 

@@ -119,7 +119,7 @@ foreach ($slice as $Key => $Post) {
         (!$thread->isLocked() || $thread->isPinned())
             && $PostID > $lastRead
             && strtotime($AddedTime) > $Viewer->forumCatchupEpoch()
-        ) {
+    ) {
         $tableClass[] = 'forum_unread';
     }
     if (!$Viewer->showAvatars()) {

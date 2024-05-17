@@ -20,7 +20,7 @@ class Economic extends \Gazelle\Base {
             return $this->info;
         }
         $info = self::$cache->get_value(self::CACHE_KEY);
-        if ($info === false ) {
+        if ($info === false) {
             $info = self::$db->rowAssoc("
                 SELECT sum(uls.Uploaded) AS upload_total,
                     sum(uls.Downloaded)  AS download_total

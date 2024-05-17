@@ -124,7 +124,8 @@ class Collage extends BaseObject {
                 }
             }
             $groupsByUser = $this->contributors()[$this->viewer->id()] ?? 0;
-            if ($this->isLocked()
+            if (
+                $this->isLocked()
                 || ($this->maxGroups() > 0 && count($this->groupIds()) >= $this->maxGroups())
                 || ($this->maxGroupsPerUser() > 0 && $groupsByUser >= $this->maxGroupsPerUser())
             ) {
@@ -164,13 +165,15 @@ class Collage extends BaseObject {
 
     public function toggleSubscription(User $user): int {
         $affected = 0;
-        if ((bool)self::$db->scalar("
-            SELECT 1
-            FROM users_collage_subs
-            WHERE UserID = ?
-                AND CollageID = ?
+        if (
+            (bool)self::$db->scalar("
+                SELECT 1
+                FROM users_collage_subs
+                WHERE UserID = ?
+                    AND CollageID = ?
             ", $user->id(), $this->id
-        )) {
+            )
+        ) {
             self::$db->prepared_query("
                 DELETE FROM users_collage_subs
                 WHERE UserID = ?

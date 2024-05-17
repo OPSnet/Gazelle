@@ -37,10 +37,12 @@ class Bookmark extends \Gazelle\BaseUser {
      */
     public function create(string $type, int $id): bool {
         [$table, $column] = $this->schema($type);
-        if ((bool)self::$db->scalar("
-            SELECT 1 FROM $table WHERE UserID = ? AND $column = ?
-            ", $this->user->id(), $id
-        )) {
+        if (
+            (bool)self::$db->scalar("
+                SELECT 1 FROM $table WHERE UserID = ? AND $column = ?
+                ", $this->user->id(), $id
+            )
+        ) {
             // overbooked
             return false;
         }

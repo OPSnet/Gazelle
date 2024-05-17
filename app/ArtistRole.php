@@ -120,7 +120,8 @@ abstract class ArtistRole extends \Gazelle\Base {
                 }
             }
 
-            if ($composerCount > 0
+            if (
+                $composerCount > 0
                 && $mainCount > 1
                 && $conductorCount > 1
             ) {

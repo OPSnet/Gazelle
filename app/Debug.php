@@ -137,7 +137,8 @@ class Debug {
 
     public function analysis($Message, $Report = ''): void {
         $RequestURI = empty($_SERVER['REQUEST_URI']) ? '' : substr($_SERVER['REQUEST_URI'], 1);
-        if (PHP_SAPI === 'cli'
+        if (
+            PHP_SAPI === 'cli'
             || in_array($RequestURI, ['tools.php?action=db_sandbox'])
         ) {
             // Don't spam IRC from Boris or these pages

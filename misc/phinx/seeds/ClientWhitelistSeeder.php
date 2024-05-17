@@ -4,7 +4,8 @@ use Phinx\Seed\AbstractSeed;
 
 class ClientWhitelistSeeder extends AbstractSeed {
     public function run() {
-        foreach ([
+        foreach (
+            [
             ["Deluge 1.2.x",                "-DE12"],
             ["Deluge 1.3.x",                "-DE13"],
             ["Deluge 2.x",                  "-DE2"],
@@ -37,7 +38,8 @@ class ClientWhitelistSeeder extends AbstractSeed {
             ["uTorrent 3.5.5",               "-UT355"],
             ["uTorrent Mac 1.5.x",           "-UM15"],
             ["uTorrent Mac 1.8.x",           "-UM18"],
-        ] as $client) {
+            ] as $client
+        ) {
             $this->table('xbt_client_whitelist')->insert([
                 'vstring' => $client[0],
                 'peer_id' => $client[1],

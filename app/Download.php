@@ -33,7 +33,8 @@ class Download extends Base {
          */
         $user = $this->limiter->user();
         $userId = $user->id();
-        if ($this->torrent->uploaderId() == $userId
+        if (
+            $this->torrent->uploaderId() == $userId
             || $user->snatch()->isSnatched($this->torrent)
             || $user->isSeeding($this->torrent)
         ) {
@@ -62,7 +63,8 @@ class Download extends Base {
          * and they have already downloaded too many files recently, then
          * stop them. Exception: always allowed if they are using FL tokens.
          */
-        if (!$this->useToken
+        if (
+            !$this->useToken
             && $this->torrent->uploaderId() != $userId
             && $this->limiter->isOvershoot($this->torrent)
         ) {

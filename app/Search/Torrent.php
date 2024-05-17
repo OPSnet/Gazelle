@@ -5,10 +5,10 @@ namespace Gazelle\Search;
 use Gazelle\Enum\LeechType;
 
 class Torrent {
-    final const TAGS_ANY = 0;
-    final const TAGS_ALL = 1;
-    final const SPH_BOOL_AND = ' ';
-    final const SPH_BOOL_OR = ' | ';
+    final protected const TAGS_ANY = 0;
+    final protected const TAGS_ALL = 1;
+    final protected const SPH_BOOL_AND = ' ';
+    final protected const SPH_BOOL_OR = ' | ';
 
     /**
      * Map of sort mode => attribute name for ungrouped torrent page
@@ -185,7 +185,8 @@ class Torrent {
         protected int $PageSize,
         protected readonly bool $searchMany,
     ) {
-        if ($this->GroupResults && !isset(self::$SortOrdersGrouped[$OrderBy])
+        if (
+            $this->GroupResults && !isset(self::$SortOrdersGrouped[$OrderBy])
                 || !$this->GroupResults && !isset(self::$SortOrders[$OrderBy])
                 || !in_array($OrderWay, ['asc', 'desc'])
         ) {

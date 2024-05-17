@@ -66,7 +66,7 @@ if ($Properties['Remastered']) {
 //--------------- Validate data in edit form -----------------------------------//
 
 if (!$Viewer->permitted('edit_unknowns')) {
-    if ($Remastered && !$RemasterYear ) {
+    if ($Remastered && !$RemasterYear) {
         error("You must supply a remaster year for a remastered release");
     }
     if ($Properties['UnknownRelease'] && !($Remastered && !$RemasterYear)) { /** @phpstan-ignore-line *//* wtf is this logic */
@@ -221,14 +221,16 @@ if ($Viewer->permitted('users_mod')) {
         $args = array_merge($args, ['0', '0']);
     }
 
-    foreach ([
-        (object)['flag' => TorrentFlag::badFile,     'property' => 'BadFiles'],
-        (object)['flag' => TorrentFlag::badFolder,   'property' => 'BadFolders'],
-        (object)['flag' => TorrentFlag::badTag,      'property' => 'BadTags'],
-        (object)['flag' => TorrentFlag::cassette,    'property' => 'CassetteApproved'],
-        (object)['flag' => TorrentFlag::lossyMaster, 'property' => 'LossymasterApproved'],
-        (object)['flag' => TorrentFlag::lossyWeb,    'property' => 'LossywebApproved'],
-    ] as $f) {
+    foreach (
+        [
+            (object)['flag' => TorrentFlag::badFile,     'property' => 'BadFiles'],
+            (object)['flag' => TorrentFlag::badFolder,   'property' => 'BadFolders'],
+            (object)['flag' => TorrentFlag::badTag,      'property' => 'BadTags'],
+            (object)['flag' => TorrentFlag::cassette,    'property' => 'CassetteApproved'],
+            (object)['flag' => TorrentFlag::lossyMaster, 'property' => 'LossymasterApproved'],
+            (object)['flag' => TorrentFlag::lossyWeb,    'property' => 'LossywebApproved'],
+        ] as $f
+    ) {
         $exists = $torrent->hasFlag($f->flag);
         if (!$exists && $Properties[$f->property]) {
             $change[] = "{$f->flag->label()} checked";

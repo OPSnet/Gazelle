@@ -5,7 +5,8 @@ use Phinx\Seed\AbstractSeed;
 class EmailBlacklistSeeder extends AbstractSeed {
     public function run() {
         /* the first few domains from https://github.com/ivolo/disposable-email-domains/ */
-        foreach ([
+        foreach (
+            [
             "0-180.com", "0-30-24.com", "0-420.com", "0-900.com", "0-aa.com",
             "0-mail.com", "0-z.xyz", "00.pe", "000000pay.com", "000476.com",
             "000521.xyz", "00082aa.com", "00082cc.com", "00082ff.com",
@@ -29,7 +30,8 @@ class EmailBlacklistSeeder extends AbstractSeed {
             "01155555.com", "0124445.com", "0134445.com", "01502.monster",
             "0164445.com", "01689306707.mobi", "0174445.com", "0184445.com",
             "0188.info", "0188019.com", "01911.ru", "019352.com", "019625.com",
-        ] as $email) {
+            ] as $email
+        ) {
             $this->table('email_blacklist')->insert([
                 'Email'   => $email,
                 'Comment' => 'Initial seed',
