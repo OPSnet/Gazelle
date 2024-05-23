@@ -20,6 +20,45 @@
 	<key>OpenDocuments:jj</key>
 	<array>
 		<dict>
+			<key>BookmarkData</key>
+			<data>
+			Ym9va5wDAAAAAAQQMAAAAGfWOYPQnJliZZ6rJgQI3bhRWqLZf+wU
+			0bEo/A45FLZPjAIAAAQAAAADAwAAAAgAKAUAAAABAQAAVXNlcnMA
+			AAACAAAAAQEAAGpqAAAJAAAAAQEAAERvY3VtZW50cwAAAAgAAAAB
+			AQAAcHJvamVjdHMMAAAAAQEAAEdhemVsbGUtZ29ydAQAAAABAQAA
+			c2FzcwsAAAABAQAAYXBvbGxvc3RhZ2UADwAAAAEBAABfdmFyaWFi
+			bGVzLnNjc3MAIAAAAAEGAAAQAAAAIAAAACwAAABAAAAAUAAAAGQA
+			AABwAAAAhAAAAAgAAAAEAwAArGYAAAAAAAAIAAAABAMAAMyQAAAA
+			AAAACAAAAAQDAAC00uYCAAAAAAgAAAAEAwAARdjmAgAAAAAIAAAA
+			BAMAAIGwaQMAAAAACAAAAAQDAACWtmkDAAAAAAgAAAAEAwAAjb5p
+			AwAAAAAIAAAABAMAAOEE4QMAAAAAIAAAAAEGAADEAAAA1AAAAOQA
+			AAD0AAAABAEAABQBAAAkAQAANAEAAAgAAAAABAAAQcX7YAMEPsQY
+			AAAAAQIAAAEAAAAAAAAADwAAAAAAAAAAAAAAAAAAAAgAAAAEAwAA
+			BgAAAAAAAAAEAAAAAwMAAPUBAAAIAAAAAQkAAGZpbGU6Ly8vDAAA
+			AAEBAABNYWNpbnRvc2ggSEQIAAAABAMAAAAAhxE5AAAACAAAAAAE
+			AABBxcgdAAAAACQAAAABAQAAMzhGQjAzQUEtNjZCMC00RTU4LTky
+			NjgtNjRBMjZFNjhCNDJEGAAAAAECAACBAAAAAQAAAO8TAAABAAAA
+			AAAAAAAAAAABAAAAAQEAAC8AAAAAAAAAAQUAABoAAAABAQAATlNV
+			UkxEb2N1bWVudElkZW50aWZpZXJLZXkAAAQAAAADAwAASGwEANgA
+			AAD+////AQAAAAAAAAARAAAABBAAAJwAAAAAAAAABRAAAEQBAAAA
+			AAAAEBAAAHwBAAAAAAAAQBAAAGwBAAAAAAAAAiAAAEgCAAAAAAAA
+			BSAAALgBAAAAAAAAECAAAMgBAAAAAAAAESAAAPwBAAAAAAAAEiAA
+			ANwBAAAAAAAAEyAAAOwBAAAAAAAAICAAACgCAAAAAAAAMCAAAFQC
+			AAAAAAAAAcAAAJwBAAAAAAAAEcAAACAAAAAAAAAAEsAAAKwBAAAA
+			AAAAENAAAAQAAAAAAAAAXAIAgIACAAAAAAAA
+			</data>
+			<key>FileURL</key>
+			<string>file:///Users/jj/Documents/projects/Gazelle-gort/sass/apollostage/_variables.scss</string>
+			<key>HasSecurityScope</key>
+			<true/>
+			<key>RelativePath</key>
+			<string>./apollostage/_variables.scss</string>
+			<key>TypeID</key>
+			<string>_CFileLocator</string>
+			<key>Version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
 			<key>FileURL</key>
 			<string>file:///Users/jj/Library/Mobile%20Documents/.Trash/_base.scss</string>
 			<key>HasSecurityScope</key>
@@ -95,13 +134,13 @@
 	<array>
 		<dict>
 			<key>Date</key>
-			<date>2024-05-23T18:13:03Z</date>
+			<date>2024-05-23T18:17:58Z</date>
 			<key>Location</key>
 			<dict>
 				<key>BookmarkData</key>
 				<data>
-				Ym9va5wDAAAAAAQQMAAAAGGl0N9fxJDQGtMTDzPCB9Mr
-				TEdOzltxBVIugPss6QSljAIAAAQAAAADAwAAAAgAKAUA
+				Ym9va5wDAAAAAAQQMAAAAGfWOYPQnJliZZ6rJgQI3bhR
+				WqLZf+wU0bEo/A45FLZPjAIAAAQAAAADAwAAAAgAKAUA
 				AAABAQAAVXNlcnMAAAACAAAAAQEAAGpqAAAJAAAAAQEA
 				AERvY3VtZW50cwAAAAgAAAABAQAAcHJvamVjdHMMAAAA
 				AQEAAEdhemVsbGUtZ29ydAQAAAABAQAAc2FzcwsAAAAB
@@ -111,7 +150,7 @@
 				BAMAAMyQAAAAAAAACAAAAAQDAAC00uYCAAAAAAgAAAAE
 				AwAARdjmAgAAAAAIAAAABAMAAIGwaQMAAAAACAAAAAQD
 				AACWtmkDAAAAAAgAAAAEAwAAjb5pAwAAAAAIAAAABAMA
-				ABr7xgMAAAAAIAAAAAEGAADEAAAA1AAAAOQAAAD0AAAA
+				AOEE4QMAAAAAIAAAAAEGAADEAAAA1AAAAOQAAAD0AAAA
 				BAEAABQBAAAkAQAANAEAAAgAAAAABAAAQcX7YAMEPsQY
 				AAAAAQIAAAEAAAAAAAAADwAAAAAAAAAAAAAAAAAAAAgA
 				AAAEAwAABgAAAAAAAAAEAAAAAwMAAPUBAAAIAAAAAQkA
@@ -121,7 +160,7 @@
 				NjhCNDJEGAAAAAECAACBAAAAAQAAAO8TAAABAAAAAAAA
 				AAAAAAABAAAAAQEAAC8AAAAAAAAAAQUAABoAAAABAQAA
 				TlNVUkxEb2N1bWVudElkZW50aWZpZXJLZXkAAAQAAAAD
-				AwAAatwCANgAAAD+////AQAAAAAAAAARAAAABBAAAJwA
+				AwAASGwEANgAAAD+////AQAAAAAAAAARAAAABBAAAJwA
 				AAAAAAAABRAAAEQBAAAAAAAAEBAAAHwBAAAAAAAAQBAA
 				AGwBAAAAAAAAAiAAAEgCAAAAAAAABSAAALgBAAAAAAAA
 				ECAAAMgBAAAAAAAAESAAAPwBAAAAAAAAEiAAANwBAAAA
@@ -141,7 +180,7 @@
 		</dict>
 		<dict>
 			<key>Date</key>
-			<date>2024-05-23T18:13:03Z</date>
+			<date>2024-05-23T18:17:58Z</date>
 			<key>Location</key>
 			<dict>
 				<key>BookmarkData</key>
@@ -188,7 +227,7 @@
 		</dict>
 		<dict>
 			<key>Date</key>
-			<date>2024-05-23T18:13:03Z</date>
+			<date>2024-05-23T18:17:58Z</date>
 			<key>Location</key>
 			<dict>
 				<key>BookmarkData</key>
@@ -234,7 +273,7 @@
 		</dict>
 		<dict>
 			<key>Date</key>
-			<date>2024-05-23T18:13:03Z</date>
+			<date>2024-05-23T18:17:58Z</date>
 			<key>Location</key>
 			<dict>
 				<key>BookmarkData</key>
@@ -281,7 +320,7 @@
 		</dict>
 		<dict>
 			<key>Date</key>
-			<date>2024-05-23T18:13:03Z</date>
+			<date>2024-05-23T18:17:58Z</date>
 			<key>Location</key>
 			<dict>
 				<key>BookmarkData</key>
@@ -327,7 +366,7 @@
 		</dict>
 		<dict>
 			<key>Date</key>
-			<date>2024-05-23T18:13:03Z</date>
+			<date>2024-05-23T18:17:58Z</date>
 			<key>Location</key>
 			<dict>
 				<key>BookmarkData</key>
@@ -374,7 +413,7 @@
 		</dict>
 		<dict>
 			<key>Date</key>
-			<date>2024-05-23T18:13:03Z</date>
+			<date>2024-05-23T18:17:58Z</date>
 			<key>Location</key>
 			<dict>
 				<key>BookmarkData</key>
@@ -421,7 +460,7 @@
 		</dict>
 		<dict>
 			<key>Date</key>
-			<date>2024-05-23T18:13:03Z</date>
+			<date>2024-05-23T18:17:58Z</date>
 			<key>Location</key>
 			<dict>
 				<key>BookmarkData</key>
@@ -468,7 +507,7 @@
 		</dict>
 		<dict>
 			<key>Date</key>
-			<date>2024-05-23T18:13:03Z</date>
+			<date>2024-05-23T18:17:58Z</date>
 			<key>Location</key>
 			<dict>
 				<key>BookmarkData</key>
@@ -516,7 +555,7 @@
 		</dict>
 		<dict>
 			<key>Date</key>
-			<date>2024-05-23T18:13:03Z</date>
+			<date>2024-05-23T18:17:58Z</date>
 			<key>Location</key>
 			<dict>
 				<key>BookmarkData</key>
@@ -564,7 +603,7 @@
 		</dict>
 		<dict>
 			<key>Date</key>
-			<date>2024-05-23T18:13:03Z</date>
+			<date>2024-05-23T18:17:58Z</date>
 			<key>Location</key>
 			<dict>
 				<key>BookmarkData</key>
@@ -611,7 +650,7 @@
 		</dict>
 		<dict>
 			<key>Date</key>
-			<date>2024-05-23T18:13:03Z</date>
+			<date>2024-05-23T18:17:58Z</date>
 			<key>Location</key>
 			<dict>
 				<key>BookmarkData</key>
@@ -658,7 +697,7 @@
 		</dict>
 		<dict>
 			<key>Date</key>
-			<date>2024-05-23T18:13:03Z</date>
+			<date>2024-05-23T18:17:58Z</date>
 			<key>Location</key>
 			<dict>
 				<key>BookmarkData</key>
@@ -706,7 +745,7 @@
 		</dict>
 		<dict>
 			<key>Date</key>
-			<date>2024-05-23T18:13:03Z</date>
+			<date>2024-05-23T18:17:58Z</date>
 			<key>Location</key>
 			<dict>
 				<key>BookmarkData</key>
@@ -754,7 +793,7 @@
 		</dict>
 		<dict>
 			<key>Date</key>
-			<date>2024-05-23T18:13:03Z</date>
+			<date>2024-05-23T18:17:58Z</date>
 			<key>Location</key>
 			<dict>
 				<key>BookmarkData</key>
