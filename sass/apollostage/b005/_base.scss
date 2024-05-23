@@ -1,6 +1,6 @@
 /* ################################################################################ */
 /* APOLLOSTAGE THEME */
-/* version 2024.05.23
+/* version 2024.05.16
 /* ################################################################################ */
 
 // SASS/SCSS NOTE
@@ -99,19 +99,15 @@
 /* # 1 DESKTOP VIEW */
 /* ## 1.1 Desktop view, handling of all classes */
 /* ## 1.2 Reserved */
-/* ## 1.3 Reserved */
-/* ## 1.4 Reserved */
-/* ## 1.5 Discog Pages */
-/* ## 1.6 Tooltips */
-/* ## 1.7 Upload Category Decoration Striping */
-/* ## 1.8 Header and menu layout */
-/* ## 1.8.1 Menu Handling */
-/* ## 1.9 Headers Below Menu */
-/* ## 1.9.1 Searchbars */
-/* ## 1.9.2 Linkbox */
-/* ## 1.10 Notification Box */
-/* ## 1.11 Sidebar */
-/* ## 1.12 Upload form MusicBrainz popup */
+/* ## 1.3 Tooltips */
+/* ## 1.4 Upload Category Decoration Striping */
+/* ## 1.5 Header and menu layout */
+/* ## 1.5.1 Menu Handling */
+/* ## 1.6 Headers Below Menu */
+/* ## 1.6.1 Searchbars */
+/* ## 1.6.2 Linkbox */
+/* ## 1.7 Notification Box */
+/* ## 1.8 Sidebar */
 /* # 2 DOCUMENTATION OF MOBILE CLASSES */
 /* # 3 CHANGES FOR MOBILE VIEW */
 /* ## 3.1  Site Layout */
@@ -181,23 +177,12 @@
 /* END font loading */
 
 /* ## 0.2 Global variables */
-* {
-  /* recordkeeping only.  browsers do not allow vars in the CSS @media rule. */
-  --phone-screen-size: 575px; 
-}
+    * {
+        /* recordkeeping only.  browsers do not allow vars in the CSS @media rule. */
+        --phone-screen-size: 575px; 
+    }
     
-/* ## 0.3 Debugging */
-/* various 'debug' features are avail in this doc */
-#site_time:after, 
-li#nav_upload.brackets a:before {
-  content: $debug-slug;
-  border: thin solid orangered; 
-  border-radius: 1rem; 
-  color: orangered; 
-  padding: 0.03rem 0.5rem;
-  margin: 0rem 0.5rem; 
-}
-
+/* */
 /* */
 
 /* ################################################################################ */
@@ -209,7 +194,6 @@ li#nav_upload.brackets a:before {
 * {
     box-sizing: inherit;
 }
-
 
 body,
 button,
@@ -408,11 +392,6 @@ table
     background-color: $color-background-table;
 }
 
-table .rowa,
-table .rowb {
-    border-top: 2px solid $color-accent-border-tablerows;
-}
-
 table .rowa:nth-child(even),
 table .rowb:nth-child(even),
 #dnulist tr:not(.colhead, .colhead_dark):nth-child(even),
@@ -425,6 +404,11 @@ table {
     border-collapse: collapse;
     margin: 8px 0;
     width: 100%;
+}
+
+table .rowa,
+table .rowb {
+    border-top: 2px solid $color-background-table-secondary;
 }
 
 table .rowa:nth-child(odd),
@@ -440,7 +424,6 @@ table ul.options_list {
     padding: 0;
 }
 
-#content div.thin div.head,
 .colhead,
 .colhead_dark {
     background-color: $color-background-table-row-th;
@@ -480,11 +463,12 @@ td:last-child {
 form {
     background-color: $color-background-form;
 }
+˜√Ω
 form table td.label {
     color: $color-text-footer;
     padding-top: 9px;
     font-weight: 600;
-    text-align: left;   //#2024
+    text-align: right;
     width: 180px;
 }
 
@@ -535,7 +519,6 @@ input[type="text"]:focus,
 input[type="search"]:focus,
 select:focus,
 textarea:focus {
-    background: $color-background-input-active;
     border: 1px solid $color-accent-border-input-active;
     color: $color-text-input-active;
 }
@@ -694,14 +677,6 @@ table.box2 {
 .profileinfo::before {
     clear: both;
     display: table;
-}
-
-/* #2024 fix for 
-/* Sessions table should scroll */
-// override *both* have overflow set not to scroll
-.box.pad:has(.session_table.border),
-.box.pad .session_table.border {
-    overflow: scroll !important;
 }
 
 /* #2024 note: Many of these appear to be overridden by
@@ -981,11 +956,11 @@ div#flip_view_1 div#similar-artist .name {
 }
 
 .torrent_table {
-    background-color: $color-background-table-torrenttable;
+    background-color: $color-background-table-secondary;
 }
 
 .torrent_table tr:not(.colhead, .colhead_dark) {
-    border-top: 2px solid $color-accent-border-tablerows-torrent;
+    border-top: 2px solid $color-background-table-secondary;
 }
 
 .torrent_table tr .number_column:not(:last-child) {
@@ -1260,7 +1235,43 @@ ul.collage_images li a > span {
     max-width: 92%;
 }
 
+#discog_table > div.box.center .brackets::after,
+#discog_table > div.box.center .brackets::before,
+#quickreplytext br:last-child {
+    display: none;
+}
 
+/* #2024 style update for
+/* Discog table: for rows 'Albums', 'Compilations', 'Live Albums', etc. */
+#discog_table tr[id^=torrents_] {
+    background-color: $color-background-table-keyrows;
+}
+#discog_table tr[id^=torrents_] :not(a.tooltip.brackets) {
+    font-size: 125%;
+    color: $color-text-bold;
+}
+
+/* #2024 style update for
+/* Discog table: for names of albums, to help them stand out somewhat */
+#discog_table .discog strong a,
+#discog_table td.td_info.big_info div.group_info.clear strong a {
+    font-size:115%;
+    color: $color-text-table-discog-titles;
+}
+
+/* #2024 style update for
+/* Discog table:  for encodings, to get breathing room after the >> character */
+div#discog_table td.td_info:not(span.torrent_links_block) > a {
+    padding-inline-start: 1em;
+}
+
+/* #2024 fix for 
+/* Sessions table should scroll */
+// override *both* have overflow set not to scroll
+.box.pad:has(.session_table.border),
+.box.pad .session_table.border {
+    overflow: scroll !important;
+}
 
 #footer {
     width: 100%;
@@ -1278,8 +1289,14 @@ ul.collage_images li a > span {
     margin: 0 0 12px;
 }
 
-#quickreplytext br:last-child {
-    display: none;
+#discog_table > div.box.center {
+    background-color: $color-background-table-discog;
+    padding: 12px;
+    text-align: left;
+}
+
+#discog_table > div.box.center a {
+    margin: 0 8px;
 }
 
 .rule_summary {
@@ -1534,68 +1551,7 @@ blockquote {
 
 /* ************************************************ */
 
-/* # 1.3 Reserved [for more organization in the future]
-
-/* ************************************************ */
-
-/* # 1.4 Reserved [for more organization in the future]
-
-/* ************************************************ */
-
-/* # 1.5 Discography Pages
-
-/* Discog table: for rows 'Albums', 'Compilations', 'Live Albums', etc. */
-#discog_table tr[id^=torrents_] {
-    background-color: $color-background-table-keyrows;
-}
-#discog_table tr[id^=torrents_] :not(a.tooltip.brackets) strong{
-    font-size: large;
-    color: $color-text-bold;
-}
-
-/* Discog table: for names of albums, to help them stand out somewhat */
-#discog_table .discog strong a,
-#discog_table td.td_info.big_info div.group_info.clear strong a {
-    font-size:115%;
-    color: $color-text-table-discog-titles;
-}
-
-/* Discog table:  for encodings, to get breathing room after the >> character */
-div#discog_table td.td_info:not(span.torrent_links_block) > a {
-    padding-inline-start: 1em;
-}
-
-/* BEGIN Navbox on artist page ~ "jump down".. to navigate between Album/Live Album... */
-#discog_table > div.box.center {
-    background-color: $color-background-table-discog;
-    padding: 12px;
-    text-align: left;
-    padding-left: 11rem; 
-}
-
-#discog_table > div.box.center:before {
-  color:$color-text-bold !important;
-  font-size: large !important;
-  content: '\21E9  Jump to' !important;
-  font-weight: 600;
-  position: relative;
-  left: -24%;
-}
-
-#discog_table > div.box.center a {
-    margin: 0 8px;
-}
-
-#discog_table > div.box.center .brackets::after,
-#discog_table > div.box.center .brackets::before {
-    display: none;
-}
-
-/* END Navbox on artist page ~ "jump down".. to navigate between Album/Live Album... */
-
-/* ************************************************ */
-
-/* # 1.6 Tooltips */
+/* # 1.3 Tooltips */
 
 .tooltipster-base {
     box-shadow: 0 0 8px rgb(0 0 0 / 25%);
@@ -1630,7 +1586,7 @@ div#discog_table td.td_info:not(span.torrent_links_block) > a {
 
 /* ************************************************ */
 
-/* # 1.7 BEGIN UPLOAD CATEGORY DECORATION STRIPING */
+/* # 1.4 BEGIN UPLOAD CATEGORY DECORATION STRIPING */
 /* Begin category decorations for torrent-tables on torrent & collage pages */
 /* #2024 bugfix:*/
 /* Apollostage highlights different upload types,
@@ -1693,7 +1649,7 @@ body#collage .cats_music {
 
 /* ************************************************ */
 
-/* #1.8 HEADER AND MENU LAYOUT */
+/* #1.5 HEADER AND MENU LAYOUT */
 /* MENU AND TOP BAR, DESKTOP ONLY */
 
 .thin > .header .linkbox {
@@ -1966,23 +1922,27 @@ body#collage .cats_music {
 
 /* ************************************************ */
 
-/* ## 1.8.1 Menu handling */
+/* ## 1.5.1 Menu handling */
 /* horizontal menu */
 /* #2024 change to styled color instead of #fff to match vertical pulldown menu */
 /* menu hover colors */
 
-#menu > ul a:hover,
-#userinfo_minor:hover a:hover,
-#userinfo_username:hover a:hover {
-  background-color: $color-menu-fx-selection;
+#menu > ul a:hover, {
+    background-color: $color-menu-hover;
 }
 
+#userinfo_username:hover a:hover {
+    background-color: $color-menu-username-hover;
+}
 
-/* when menu pulled down and mouse over an entry */
+#userinfo_minor:hover a:hover {
+    background-color: $color-menu-userinfo-hover;
+}
+
 #menu > ul a:hover,
 #userinfo_minor:hover a,
 #userinfo_username:hover a {
-    color: $color-text-menu-hover; 
+    color: $color-text-anchor-hover;
 }
 
 /* Icon revealed when menu is open */
@@ -2012,11 +1972,11 @@ body#collage .cats_music {
 
 /* ************************************************ */
 
-/* ## 1.9 Headers Below Menu */
+/* ## 1.6 Headers Below Menu */
 
 /* ************************************************ */
 
-/* ## 1.9.1 SEARCHBARS */
+/* ## 1.6.1 SEARCHBARS */
 
 #searchbars > ul {
     align-items: center;
@@ -2055,11 +2015,12 @@ body#collage .cats_music {
 
 #searchbars .search_form input:focus {
     background: $color-background-searchbars-field-focus;
+    //$color-background-table-secondary;
 }
 
 /* ************************************************ */
 
-/* ## 1.9.2 Linkbox */
+/* ## 1.6.2 Linkbox */
 /* linkbox appears near the page h1 header and provides outbound links */
 .linkbox,
 .linkbox .center {
@@ -2082,7 +2043,7 @@ body#collage .cats_music {
 
 /* ************************************************ */
 
-/* # 1.10 BEGIN NOTIFICATION BOX */
+/* # 1.7 BEGIN NOTIFICATION BOX */
 
 /* basic positioning */
 #noty_bottomRight_layout_container {
@@ -2153,7 +2114,7 @@ body#collage .cats_music {
 /* */
 /* */
 
-/* # 1.11 BEGIN SIDEBAR */
+/* # 1.8 BEGIN SIDEBAR */
 
 .sidebar .pad ol,
 .sidebar .pad ul {
@@ -2176,7 +2137,7 @@ body#collage .cats_music {
 
 /* ************************************************ */
 
-/* # 1.12 Upload form MusicBrainz popup */
+/* # 1.9 Upload form MusicBrainz popup */
 
 #musicbrainz_popup {
     color: $color-text-popup;

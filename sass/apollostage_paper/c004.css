@@ -1,0 +1,28 @@
+/* APOLLOSTAGE PAPER THEME */
+/* 2024-05-16 */
+body, textarea {
+  font-family: "Merriweather Sans", Noto, "Noto Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-weight: 320;
+  background-color: #EBEFF0;
+  box-sizing: border-box;
+  color: #243024;
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 0 8px;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Merriweather", Noto, "Noto Sans", "Open Sans", Tahoma, sans-serif;
+  font-weight: 700;
+}
+
+/*0849*/
+
+/*# sourceMappingURL=c004.css.map */

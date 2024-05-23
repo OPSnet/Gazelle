@@ -1,0 +1,189 @@
+/* APOLLOSTAGE PAPER THEME */
+/* 2024-05-16 */
+
+// DEFINE THEME COLORS AND ICONS
+
+// import basic colors as a backup:
+
+@import '../apollostage/_variables';
+
+// and override as follows: -- palettte.app was helpful for this
+
+  $back-100: #EBEFF0;
+  $back-200: #DEE2E2;
+  $back-300: #D0D4D5;
+  $back-400: #C2C6C7;
+  $back-500: #B5B9BA;
+  $back-600: #A7ABAC;
+  $back-700: #9A9E9F;
+  $back-800: #8D9091;
+  $back-900: #808384;
+  $back-1000: #727576;
+   $foo: #000000;
+  $mid-100:  #70D2AA;
+  $mid-200:  #69DAAA;
+  $mid-300:  #69E2AF;
+  $mid-400:  #4ED59C;
+  $mid-500:  #2DC888;
+  $mid-600:  #28BC7E;
+  $mid-700:  #29AF77;
+  $mid-800:  #2BA271;
+  $mid-900:  #2C956A;
+  $mid-1000: #2E8962;
+    $foo: #020208;
+ $fore-100: #121321;
+ $fore-300: #0F2136;
+ $direct-fore-500: #112C49;
+ $fore-700: #13385F;
+ $fore-900: #134771;
+
+  
+// define theme colors
+
+$color-background-base: $back-100;
+$color-background-form: $back-200; 	// also boxes on frontpage
+$color-background-table: $back-400;	// primarily table-odd-rows
+$color-background-input: $back-500; 	// also table-even-rows
+$color-background-table-secondary: $back-700;	// also form field in focus
+
+$color-text-input: $fore-300;
+$color-text-mono: $fore-300;
+$color-text-base: $fore-100;
+$color-text-bold: $fore-300;
+$color-text-anchor: $fore-700;
+$color-text-anchor-hover: $fore-900;
+$color-text-button: $fore-300;
+
+$direct-accent-primary: $fore-700;	// for portions of headers
+$direct-accent-offset: $fore-900;
+
+// Ten color gradient:
+
+$color-menu-2:	$mid-100; // torrents
+$color-menu-3:	$mid-200; // collages
+$color-menu-5:	$mid-300; // requests
+$color-menu-5:	$mid-400; // forums
+$color-menu-6:	$mid-500; // irc
+$color-menu-7:	$mid-600; // top10
+$color-mobilemenu-closed:		$mid-700; // rules, also mobile menu header
+$color-menu-9:	$mid-800; // wiki
+$color-menu-username:		$mid-900; // username menu ~ closed
+$color-menu-username-hover:	$mid-700; // username menu ~ open
+$color-menu-userinfo:	$mid-1000; // VV pulldown menu ~ closed
+$color-menu-userinfo-hover:	$mid-700; // VV pulldown menu ~ open
+
+// mobile pulldown menu gradient
+
+$color-mobilemenu-userinfo-1: $mid-900; // mobile pulldown menu gradient 1
+$color-mobilemenu-userinfo-2: $mid-300; // mobile pulldown menu gradient 2
+
+// notification gradient
+
+$color-background-gradient-1: $mid-900;	// usually works well with 'third-child'
+$color-background-gradient-1: $mid-300;	// usually works well with 'seventh-child'
+$color-notification-background: -000000;
+
+// these are GNDN: goes nowhere, does nothing
+
+$menu-background-color-1: #880D1E;  // noop
+$menu-background-color-2: #DD2D4A;  // noop
+
+// formatting colors for page elements
+
+$color-background-blockquote: $mid-100;
+$color-background-torrent: $back-200;
+$color-accent-blockquote: $back-600;
+$color-background-box: $back-700;
+$box-border-color: $back-900; 
+$color-background-input: $back-500;	 
+$color-accent-border-active: $mid-700;
+$color-accent-border-active: $mid-900;
+$color-background-torrent: $back-700;
+$color-text-footer: $fore-300;
+$color-text-input: $back-1000;                   
+$color-obj-button-base-1: $back-200; 		// gradient from here to $color-text-anchor
+$color-obj-button-base-2: $back-600;
+$color-text-ratio-redzone: #a62929;
+$color-text-ratio-yellowzone: #e3ba65;
+$color-text-ratio-greenzone: #3aa63a;
+$color-accent-selection-background: $mid-1000;
+$color-accent-selection-text: $color-text-bold; // usually #fff or $color-text-bold
+$color-background-poll: rgb(131 228 166 / 10%);
+
+// overrides these colors when called: for more theme flavor?
+
+$color-text-span-green: #4eb44e;
+$color-text-span-blue: #4e4ee7;
+
+// accent color for upload categories (stripes)
+
+$color-accent-cats_music: #fd6659;
+$color-accent-cats_applications: #f02940;
+$color-accent-cats_audiobooks: #a54873;
+$color-accent-cats_comedy: #8b869c;
+$color-accent-cats_comics: #688187;
+$color-accent-cats_ebooks: #578f9d;
+$color-accent-cats_elearningvideos: #793555;
+
+// accent color for tag bubbles
+
+// These can equal "ninth" and "second"
+// or adjust contrast as desired to emphasize/de-emphaszie
+$color-obj-tag_bubble-background: $mid-300; 
+$color-obj-tag_bubble-foreground: $mid-900; 
+
+// Site header ~ need light background version
+
+$logo-site-lockup: url("https://wally-crunk.github.io/svg/orpheus/ops-logo-lockup-whiteusage.svg");
+
+// Forum icons
+
+$icon-message-unread: url("https://wally-crunk.github.io/svg/gazelle/document-round-000.svg");
+$icon-message-unread-locked: url("https://wally-crunk.github.io/svg/gazelle/lock-round-000.svg");
+$icon-message-unread-sticky: url("https://wally-crunk.github.io/svg/gazelle/pin-round-000.svg");
+$icon-message-unread-locked-sticky: url("https://wally-crunk.github.io/svg/gazelle/pin-and-lock-round-000.svg");
+
+$icon-message-read: url("https://wally-crunk.github.io/svg/gazelle/document-000.svg");
+$icon-message-read-locked: url("https://wally-crunk.github.io/svg/gazelle/lock-000.svg");
+$icon-message-read-sticky: url("https://wally-crunk.github.io/svg/gazelle/pin-000.svg");
+$icon-message-read-locked-sticky: url("https://wally-crunk.github.io/svg/gazelle/pin-and-lock-000.svg");
+
+// Header Pulldown Menu (hamburger/chevron icon)
+// not changing, still dark background
+
+// Used on Mobile
+$icon-number-snatches: url("https://wally-crunk.github.io/svg/gazelle/arrow-loop-000.svg");
+$icon-number-seeders: url("https://wally-crunk.github.io/svg/gazelle/arrow-up-round-000.svg");
+$icon-number-leechers: url("https://wally-crunk.github.io/svg/gazelle/arrow-down-round-000.svg");
+
+@import '../apollostage/_base';
+
+/* local overrides for this theme */
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Merriweather+Sans:ital,wght@0,300..800;1,300..800&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wdth,wght@0,87.5,300..800;1,87.5,300..800&display=swap');
+
+body, textarea {
+ font-family: "Merriweather Sans", Noto, "Noto Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-weight: 320;
+  background-color: #EBEFF0;
+  box-sizing: border-box;
+  color: #243024;
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 0 8px;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+ {
+    font-family: 'Merriweather', Noto, 'Noto Sans', 'Open Sans', Tahoma, sans-serif;
+    font-weight: 700;
+ }
+
+/*0849*/
+// EOF

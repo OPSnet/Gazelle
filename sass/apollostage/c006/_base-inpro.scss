@@ -1,6 +1,6 @@
 /* ################################################################################ */
 /* APOLLOSTAGE THEME */
-/* version 2024.05.23
+/* version 2024.05.16
 /* ################################################################################ */
 
 // SASS/SCSS NOTE
@@ -99,19 +99,12 @@
 /* # 1 DESKTOP VIEW */
 /* ## 1.1 Desktop view, handling of all classes */
 /* ## 1.2 Reserved */
-/* ## 1.3 Reserved */
-/* ## 1.4 Reserved */
-/* ## 1.5 Discog Pages */
-/* ## 1.6 Tooltips */
-/* ## 1.7 Upload Category Decoration Striping */
-/* ## 1.8 Header and menu layout */
-/* ## 1.8.1 Menu Handling */
-/* ## 1.9 Headers Below Menu */
-/* ## 1.9.1 Searchbars */
-/* ## 1.9.2 Linkbox */
-/* ## 1.10 Notification Box */
-/* ## 1.11 Sidebar */
-/* ## 1.12 Upload form MusicBrainz popup */
+/* ## 1.3 Tooltips */
+/* ## 1.4 Upload Category Decoration Striping */
+/* ## 1.5 Header and menu layout */
+/* ## 1.6 Menu Handling */
+/* ## 1.7 Notification Box */
+/* ## 1.8 Sidebar */
 /* # 2 DOCUMENTATION OF MOBILE CLASSES */
 /* # 3 CHANGES FOR MOBILE VIEW */
 /* ## 3.1  Site Layout */
@@ -181,23 +174,12 @@
 /* END font loading */
 
 /* ## 0.2 Global variables */
-* {
-  /* recordkeeping only.  browsers do not allow vars in the CSS @media rule. */
-  --phone-screen-size: 575px; 
-}
+    * {
+        /* recordkeeping only.  browsers do not allow vars in the CSS @media rule. */
+        --phone-screen-size: 575px; 
+    }
     
-/* ## 0.3 Debugging */
-/* various 'debug' features are avail in this doc */
-#site_time:after, 
-li#nav_upload.brackets a:before {
-  content: $debug-slug;
-  border: thin solid orangered; 
-  border-radius: 1rem; 
-  color: orangered; 
-  padding: 0.03rem 0.5rem;
-  margin: 0rem 0.5rem; 
-}
-
+/* */
 /* */
 
 /* ################################################################################ */
@@ -209,7 +191,6 @@ li#nav_upload.brackets a:before {
 * {
     box-sizing: inherit;
 }
-
 
 body,
 button,
@@ -228,9 +209,9 @@ textarea,
  }
 
 body {
-    background-color: $color-background-base;
+    background-color: $base-background-color;
     box-sizing: border-box;
-    color: $color-text-base;
+    color: $base-text-color;
     font-size: 12px;
     line-height: 1.6;
     margin: 0 8px;
@@ -241,7 +222,7 @@ pre,code {
     font-optical-sizing: auto;
     font-variant-ligatures: no-contextual;
     font-weight: 200;
-    color: $color-text-mono;
+    color: $mono-text-color;
 }
 
 h1,
@@ -250,7 +231,7 @@ h3,
 h4,
 h5,
 h6 {
-    color: $color-text-heading;
+    color: $bold-text-color;
     line-height: normal;
     margin: 8px 0;
     max-width: 100%;
@@ -262,7 +243,7 @@ h3 a,
 h4 a,
 h5 a,
 h6 a {
-    color: $color-text-heading-anchor;
+    color: $primary-accent-color;
 }
 
 h1,
@@ -284,12 +265,12 @@ h5 {
 }
 
 a {
-    color: $color-text-anchor;
+    color: $a-color;
     text-decoration: none;
 }
 
 a:hover {
-    color: $color-text-anchor-hover;
+    color: $a-hover-color;
 }
 
 a:active,
@@ -310,8 +291,8 @@ textarea:focus {
 // at the bottom which also uses this tag.
 .box .box.pad, 
 .main_column .box.pad:not(#reply_box) {
-    background-color: $color-background-box;
-    border: 2px solid $color-accent-border-box;
+    background-color: $box-background-color;
+    border: 2px solid $selection-background-color;
     margin: 8px;
     border-radius: .25rem;
 }
@@ -355,16 +336,16 @@ textarea:focus {
 }
 
 svg|a {
-    fill: $color-text-anchor;
+    fill: $a-color;
 }
 
 svg|a:hover {
-    fill: $color-text-anchor-hover;
+    fill: $a-hover-color;
 }
 
 b,
 strong {
-    color: $color-text-bold;
+    color: $bold-text-color;
     font-weight: 600;
 }
 
@@ -388,37 +369,28 @@ li:last-child {
 }
 
 blockquote {
-    background-color: $color-background-blockquote;
-    border: 1px dashed $color-accent-border-blockquote;
+    background-color: $blockquote-background-color;
+    border: 1px dashed $blockquote-border-color;
     margin: 12px;
     padding: 12px;
 }
 
 ::selection {
-    background-color: $color-accent-selection-background;
-    color: $color-accent-selection-text;
+    background-color: $selection-background-color;
+    color: $selection-foreground-color;
 }
 
 form input {
     vertical-align: sub;
 }
 
-table
- {
-    background-color: $color-background-table;
-}
-
-table .rowa,
-table .rowb {
-    border-top: 2px solid $color-accent-border-tablerows;
-}
-
+table,
 table .rowa:nth-child(even),
 table .rowb:nth-child(even),
-#dnulist tr:not(.colhead, .colhead_dark):nth-child(even),
+#dnulist tr:not(.colhead, .colhead_dark):nth-child(even)
 #upload tr:nth-child(even) 
  {
-    background-color: $color-background-table-row-even;
+    background-color: $table-background-color;
 }
 
 table {
@@ -427,12 +399,17 @@ table {
     width: 100%;
 }
 
+table .rowa,
+table .rowb {
+    border-top: 2px solid $secondary-table-background-color;
+}
+
 table .rowa:nth-child(odd),
 table .rowb:nth-child(odd),
-#dnulist tr:not(.colhead, .colhead_dark):nth-child(odd),
-#upload tr:nth-child(odd) 
+#dnulist tr:not(.colhead, .colhead_dark):nth-child(odd)
+#upload tr:nth-child(even) 
 {
-    background-color: $color-background-table-row-odd;
+    background-color: $input-background-color;
 }
 
 table ul.options_list {
@@ -440,10 +417,9 @@ table ul.options_list {
     padding: 0;
 }
 
-#content div.thin div.head,
 .colhead,
 .colhead_dark {
-    background-color: $color-background-table-row-th;
+    background-color: $input-background-color;
     line-height: 18px;
 }
 
@@ -478,13 +454,14 @@ td:last-child {
 }
 
 form {
-    background-color: $color-background-form;
+    background-color: $form-background-color;
 }
+
 form table td.label {
-    color: $color-text-footer;
+    color: $footer-color;
     padding-top: 9px;
     font-weight: 600;
-    text-align: left;   //#2024
+    text-align: right;
     width: 180px;
 }
 
@@ -497,12 +474,11 @@ textarea {
 
 button,
 input[type="button"],
-input[type="submit"], 
-#popup_close {
-    background: linear-gradient($color-obj-button-base-1, $color-obj-button-base-2);
+input[type="submit"] {
+    background: linear-gradient($button-base-color-1, $button-base-color-2);
     border: none;
     border-radius: 1.5px;
-    color: $color-text-button;
+    color: $button-text-color;
     cursor: pointer;
     font-weight: 600;
     height: 32px;
@@ -511,9 +487,8 @@ input[type="submit"],
 
 button:active,
 input[type="button"]:active,
-input[type="submit"]:active,
-#popup_close:active {
-    background: linear-gradient($color-obj-button-base-2, $color-obj-button-base-1);
+input[type="submit"]:active {
+    background: linear-gradient($button-base-color-2, $button-base-color-1);
 }
 
 input[type="email"],
@@ -522,9 +497,9 @@ input[type="text"],
 input[type="search"],
 select,
 textarea {
-    background: $color-background-input;
-    border: 1px solid $color-accent-border-input;
-    color: $color-text-input;
+    background: $input-background-color;
+    border: 1px solid $input-border-color;
+    color: $input-color;
     height: 32px;
     padding: 0 8px;
 }
@@ -535,9 +510,8 @@ input[type="text"]:focus,
 input[type="search"]:focus,
 select:focus,
 textarea:focus {
-    background: $color-background-input-active;
-    border: 1px solid $color-accent-border-input-active;
-    color: $color-text-input-active;
+    border: 1px solid $input-border-color-active;
+    color: $a-color;
 }
 
 textarea {
@@ -593,12 +567,12 @@ span.size10 {
 }
 
 strong.important_text {
-    color: $color-text-important;
+    color: $ratio-red-color;
 }
 
 /* used for anything? */
 strong.important_text_alt {
-    color: $color-text-important-alt;
+    color: $ratio-green-color;
 }
 
 .error,
@@ -609,7 +583,7 @@ strong.important_text_alt {
 .r02,
 .r03,
 .warning {
-    color: $color-text-ratio-redzone;
+    color: $ratio-red-color;
 }
 
 .r04,
@@ -618,7 +592,7 @@ strong.important_text_alt {
 .r07,
 .r08,
 .r09 {
-    color: $color-text-ratio-yellowzone;
+    color: $ratio-yellow-color;
 }
 
 .r10,
@@ -626,7 +600,7 @@ strong.important_text_alt {
 .r50,
 .r99,
 .vote_tag_up {
-    color: $color-text-ratio-greenzone;
+    color: $ratio-green-color;
 }
 
 .small_upvote,
@@ -635,7 +609,7 @@ strong.important_text_alt {
 .vote_artist_up,
 .vote_tag_up {
     font-weight: bolder;
-    color: $color-text-ratio-greenzone;
+    color: $ratio-green-color;
 }
 
 .small_downvote,
@@ -644,7 +618,7 @@ strong.important_text_alt {
 .vote_artist_down,
 .vote_tag_down {
     font-weight: bolder;
-    color: $color-text-ratio-redzone;
+    color: $ratio-red-color;
 }
 
 #wrapper {
@@ -665,7 +639,7 @@ strong.important_text_alt {
 
 .box,
 .box2 {
-    background-color: $color-background-form;
+    background-color: $form-background-color;
     margin-bottom: 8px;
     margin-top: 8px;
 }
@@ -676,7 +650,7 @@ table.box2 {
 }
 
 .head {
-    background-color: $color-background-input;
+    background-color: $input-background-color;
     line-height: 18px;
 }
 
@@ -696,19 +670,11 @@ table.box2 {
     display: table;
 }
 
-/* #2024 fix for 
-/* Sessions table should scroll */
-// override *both* have overflow set not to scroll
-.box.pad:has(.session_table.border),
-.box.pad .session_table.border {
-    overflow: scroll !important;
-}
-
 /* #2024 note: Many of these appear to be overridden by
  * global.css or auto-complete.css: your mileage may vary. */
  
 .autocomplete-suggestions {
-    background-color: $color-text-anchor;
+    background-color: $a-color;
     border: none;
     color: #26282e;
     margin-top: 4px;
@@ -720,7 +686,7 @@ table.box2 {
 }
 
 .autocomplete-suggestions .autocomplete-suggestion.autocomplete-selected {
-    background-color: $color-text-anchor-hover;
+    background-color: $a-hover-color;
 }
 
 .autocomplete-suggestions .autocomplete-suggestion strong {
@@ -728,7 +694,7 @@ table.box2 {
 }
 
 .forum_post.forum_unread {
-    border-top: 2px solid $color-accent-forum-unread;
+    border-top: 2px solid $offset-accent-color;
 }
 
 .forum_post .avatar {
@@ -776,8 +742,8 @@ table.box2 {
 }
 
 .last_read ::before {
-  content: '\27A4';  /* aka ➤ */
-  color: $color-accent-forum-inline-last-read;
+  content: '➤'; 
+  color: $offset-accent-color;
   display: inline-block;
 }
 
@@ -791,35 +757,225 @@ table.box2 {
 }
 
 .read {
-    background: $icon-message-read center no-repeat;
+    background: $read-icon center no-repeat;
 }
 
 .unread {
-    background: $icon-message-unread center no-repeat;
+    background: $unread-icon center no-repeat;
 }
 
 .read_locked {
-    background: $icon-message-read-locked center no-repeat;
+    background: $read-locked-icon center no-repeat;
 }
 
 .unread_locked {
-    background: $icon-message-unread-locked center no-repeat;
+    background: $unread-locked-icon center no-repeat;
 }
 
 .read_sticky {
-    background: $icon-message-read-sticky center no-repeat;
+    background: $read-sticky-icon center no-repeat;
 }
 
 .unread_sticky {
-    background: $icon-message-unread-sticky center no-repeat;
+    background: $unread-sticky-icon center no-repeat;
 }
 
 .read_locked_sticky {
-    background: $icon-message-read-locked-sticky center no-repeat;
+    background: $read-locked-sticky-icon center no-repeat;
 }
 
 .unread_locked_sticky {
-    background: $icon-message-unread-locked-sticky center no-repeat;
+    background: $unread-locked-sticky-icon center no-repeat;
+}
+
+#header,
+#userinfo {
+    position: relative;
+}
+
+#header ul {
+    margin: 0;
+    padding: 0;
+}
+
+#header li {
+    margin: 0;
+}
+@media only screen and (min-width: 575px)  /* var(--phone-screen-size) */ {
+    #logo {
+        box-sizing: content-box;
+        height: 42px;
+        padding: 24px 8px 16px;
+        width: 200px;
+    }
+    
+    /* main logo during desktop view */
+    #logo a {
+        background: $site-logo-lockup right no-repeat;
+     }
+    
+    #logo > a {
+        background-size: 200px;
+        display: block;
+        height: 100%;
+        margin-top: 0;
+    }
+}
+
+#menu > ul {
+    display: flex;
+    display: -ms-flexbox;
+    -ms-flex-flow: row nowrap;
+    flex-flow: row nowrap;
+    font-size: 13px;
+    overflow: hidden;
+    width: calc(100% - 149px);
+}
+
+#menu > ul li {
+    -ms-flex: 1 1 auto;
+    flex: 1 1 auto;
+}
+
+#menu > ul a {
+    display: block;
+    height: 100%;
+    line-height: 50px;
+    text-align: center;
+}
+
+#menu > ul a:hover,
+#userinfo_minor:hover a:hover,
+#userinfo_username:hover a:hover {
+    background-color: $a-hover-color;
+}
+
+#nav_index {
+    display: none;
+}
+
+#userinfo_minor:hover a,
+#userinfo_username:hover a {
+    display: block;
+}
+
+#userinfo_username #nav_userinfo > a {
+    display: block;
+    font-size: 13px;
+    line-height: 50px;
+    overflow: hidden;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100px;
+}
+
+.linkbox,
+.linkbox .center {
+    text-align: right;
+}
+
+#userinfo_major > li,
+#userinfo_stats > li,
+.linkbox .brackets {
+    margin-left: 8px;
+}
+
+#userinfo_major,
+#userinfo_stats {
+    display: flex;
+    display: -ms-flexbox;
+    -ms-flex-flow: row nowrap;
+    flex-flow: row nowrap;
+    position: absolute;
+    right: 8px;
+}
+
+#userinfo_major {
+    font-size: 13px;
+    right: 41px;
+    top: -53px;
+}
+
+#userinfo_stats {
+    font-size: 13px;
+    top: -31px;
+}
+
+#searchbars > ul {
+    align-items: center;
+    background-color: $input-background-color;
+    display: flex;
+    display: -ms-flexbox;
+    -ms-flex-align: center;
+    height: 50px;
+    padding: 0 9px;
+}
+
+#searchbars > ul li {
+    -ms-flex: 1 1 auto;
+    flex: 1 1 auto;
+    margin-right: 9px;
+}
+
+#searchbars > ul li:last-child {
+    margin-right: 0;
+}
+
+#searchbars > ul input {
+    background-color: $form-background-color;
+    width: 100%;
+}
+
+#menu li:nth-child(2) {
+    background-color: $menu-li-second-child-background-color;
+}
+
+#menu li:nth-child(3) {
+    background-color: $menu-li-third-child-background-color;
+}
+
+#menu li:nth-child(4) {
+    background-color: $menu-li-fourth-child-background-color;
+}
+
+#menu li:nth-child(5) {
+    background-color: $menu-li-fifth-child-background-color;
+}
+
+#menu li:nth-child(6) {
+    background-color: $menu-li-sixth-child-background-color;
+}
+
+#menu li:nth-child(7) {
+    background-color: $menu-li-seventh-child-background-color;
+}
+
+#menu li:nth-child(8) {
+    background-color: $header-background-color;
+}
+
+#menu li:nth-child(9) {
+    background-color: $menu-li-ninth-child-background-color;
+}
+
+#userinfo_username {
+    background-color: $userinfo-username-color;
+    right: 50px;
+}
+
+#menu {
+    border-radius: 5px 5px 0 0;
+    overflow: hidden;
+}
+
+.linkbox br {
+    display: block;
+    line-height: 4px;
+}
+
+.linkbox > strong {
+    color: $primary-accent-color;
 }
 
 #footer,
@@ -827,6 +983,18 @@ table.box2 {
     text-align: center;
 }
 
+.linkbox .brackets::after,
+.linkbox .brackets::before {
+    display: none;
+}
+
+.thin > .header {
+    display: flex;
+    display: -ms-flexbox;
+    -ms-flex-flow: row wrap;
+    flex-flow: row wrap;
+    width: 100%;
+}
 
 #covers .cover_seperator,
 #noty_bottomRight_layout_container .brackets::after,
@@ -841,6 +1009,14 @@ table.box2 {
     flex: 1 0 auto;
 }
 
+.thin > .header .linkbox {
+    align-self: flex-end;
+    flex: 1 0 auto;
+    -ms-flex: 1 0 auto;
+    -ms-flex-item-align: end;
+    margin-top: 8px;
+}
+
 #covers .pad,
 #covers p {
     margin: 0;
@@ -853,9 +1029,9 @@ table.box2 {
 }
 
 div#flip_view_1 div#similar-artist .name {
-    border: 1px solid $color-text-base;
+    border: 1px solid $base-text-color;
     background: rgb(60 60 60 / 70%);
-    color: $color-text-base;
+    color: $base-text-color;
     margin: 0;
     padding: 0 5px;
 }
@@ -981,11 +1157,11 @@ div#flip_view_1 div#similar-artist .name {
 }
 
 .torrent_table {
-    background-color: $color-background-table-torrenttable;
+    background-color: $secondary-table-background-color;
 }
 
 .torrent_table tr:not(.colhead, .colhead_dark) {
-    border-top: 2px solid $color-accent-border-tablerows-torrent;
+    border-top: 2px solid $secondary-table-background-color;
 }
 
 .torrent_table tr .number_column:not(:last-child) {
@@ -993,16 +1169,16 @@ div#flip_view_1 div#similar-artist .name {
 }
 
 .torrent_table .group {
-    background-color: $color-background-input;
+    background-color: $input-background-color;
 }
 
 .group_torrent {
-    background-color: $color-background-form;
+    background-color: $form-background-color;
 }
 
 .group_torrent.edition,
 .torrent {
-    background-color: $color-background-torrent;
+    background-color: $torrent-background-color;
 }
 
 .torrentdetails .linkbox {
@@ -1031,18 +1207,18 @@ div#flip_view_1 div#similar-artist .name {
 }
 
 .tags a {
-    color: $color-text-footer;
+    color: $footer-color;
     font-size: 11px;
 }
 
 .tags a:hover {
-    color: $color-text-anchor-hover;
+    color: $a-hover-color;
 }
 
 .group_info > span:first-child,
 .group_torrent td:first-child > span,
 .torrent_links_block {
-    color: $color-text-footer;
+    color: $footer-color;
     float: right;
     margin-right: 4px;
 }
@@ -1207,7 +1383,7 @@ ul.collage_images li a > span {
 
 #userform #settings_sections h2 a,
 .rule_short {
-    color: $color-text-anchor;
+    color: $a-color;
 }
 
 .poll li {
@@ -1215,14 +1391,14 @@ ul.collage_images li a > span {
 }
 
 .poll .graph {
-    background-color: $color-background-poll;
+    background-color: $poll-background-color;
     display: block;
     height: 8px;
     margin-bottom: 12px;
 }
 
 .poll .graph span {
-    background-color: $color-obj-poll;
+    background-color: $offset-accent-color;
     display: block;
     float: left;
     height: 8px;
@@ -1260,11 +1436,47 @@ ul.collage_images li a > span {
     max-width: 92%;
 }
 
+#discog_table > div.box.center .brackets::after,
+#discog_table > div.box.center .brackets::before,
+#quickreplytext br:last-child {
+    display: none;
+}
 
+/* #2024 style update for
+/* Discog table: for rows 'Albums', 'Compilations', 'Live Albums', etc. */
+#discog_table tr[id^=torrents_] {
+    background-color: $header-background-color;
+}
+#discog_table tr[id^=torrents_] :not(a.tooltip.brackets) {
+    font-size: 125%;
+    color: $bold-text-color;
+}
+
+/* #2024 style update for
+/* Discog table: for names of albums, to help them stand out somewhat */
+#discog_table .discog strong a,
+#discog_table td.td_info.big_info div.group_info.clear strong a {
+    font-size:115%;
+    color: $primary-accent-color
+}
+
+/* #2024 style update for
+/* Discog table:  for encodings, to get breathing room after the >> character */
+div#discog_table td.td_info:not(span.torrent_links_block) > a {
+    padding-inline-start: 1em;
+}
+
+/* #2024 fix for 
+/* Sessions table should scroll */
+// override *both* have overflow set not to scroll
+.box.pad:has(.session_table.border),
+.box.pad .session_table.border {
+    overflow: scroll !important;
+}
 
 #footer {
     width: 100%;
-    color: $color-text-footer;
+    color: $footer-color;
     font-synthesis: 11px;
     margin: 32px auto 16px;
 }
@@ -1278,8 +1490,14 @@ ul.collage_images li a > span {
     margin: 0 0 12px;
 }
 
-#quickreplytext br:last-child {
-    display: none;
+#discog_table > div.box.center {
+    background-color: $input-background-color;
+    padding: 12px;
+    text-align: left;
+}
+
+#discog_table > div.box.center a {
+    margin: 0 8px;
 }
 
 .rule_summary {
@@ -1295,6 +1513,23 @@ ul.collage_images li a > span {
     margin-bottom: 8px;
 }
 
+#musicbrainz_popup {
+    color: $base-background-color;
+    font-weight: 600;
+}
+
+#musicbrainz_popup a {
+    color: $base-background-color;
+}
+
+#musicbrainz_popup a:hover {
+    color: $primary-accent-color;
+}
+
+#musicbrainz_popup .brackets {
+    font-weight: 400;
+}
+
 #menu > ul,
 #userinfo_username .username,
 .album_votes .favoritecount {
@@ -1307,7 +1542,6 @@ ul.collage_images li a > span {
     width: 100% !important;
 }
 
-/* searchbox is not the searchbars */
 #searchbox {
     margin-bottom: 12px;
 }
@@ -1363,7 +1597,7 @@ ul.collage_images li a > span {
 }
 
 #userform #settings_sections h2 a:hover {
-    color: $color-text-anchor-hover;
+    color: $a-hover-color;
 }
 
 #userform #settings_sections input {
@@ -1433,20 +1667,20 @@ ul.collage_images li a > span {
 
 .box table:not(.layout),
 .box2 table:not(.layout) {
-    border: 2px solid $color-background-table-secondary;
+    border: 2px solid $secondary-table-background-color;
     margin: 8px 0;
 }
 
 span[style*='color: green'] {
-    color: $color-text-span-green !important;
+    color: $span-green-color !important;
 }
 
 span[style*='color: red'] {
-    color: $color-text-span-red !important;
+    color: $ratio-red-color !important;
 }
 
 span[style*='color: blue'] {
-    color: $color-text-span-blue !important;
+    color: $span-blue-color !important;
 }
 
 .filelist_table td,
@@ -1464,7 +1698,7 @@ blockquote {
 .reportinfo_table,
 .torrentdetails,
 blockquote {
-    background-color: $color-background-blockquote;
+    background-color: $input-background-color;
 }
 
 #bookmarks #torrent_table tr:not(.colhead, .colhead_dark) td:nth-child(2) {
@@ -1528,74 +1762,9 @@ blockquote {
 
 /* END desktop view, handling of classes */
 
-/* ************************************************ */
-
 /* # 1.2 Reserved [for more organization in the future]
 
-/* ************************************************ */
-
-/* # 1.3 Reserved [for more organization in the future]
-
-/* ************************************************ */
-
-/* # 1.4 Reserved [for more organization in the future]
-
-/* ************************************************ */
-
-/* # 1.5 Discography Pages
-
-/* Discog table: for rows 'Albums', 'Compilations', 'Live Albums', etc. */
-#discog_table tr[id^=torrents_] {
-    background-color: $color-background-table-keyrows;
-}
-#discog_table tr[id^=torrents_] :not(a.tooltip.brackets) strong{
-    font-size: large;
-    color: $color-text-bold;
-}
-
-/* Discog table: for names of albums, to help them stand out somewhat */
-#discog_table .discog strong a,
-#discog_table td.td_info.big_info div.group_info.clear strong a {
-    font-size:115%;
-    color: $color-text-table-discog-titles;
-}
-
-/* Discog table:  for encodings, to get breathing room after the >> character */
-div#discog_table td.td_info:not(span.torrent_links_block) > a {
-    padding-inline-start: 1em;
-}
-
-/* BEGIN Navbox on artist page ~ "jump down".. to navigate between Album/Live Album... */
-#discog_table > div.box.center {
-    background-color: $color-background-table-discog;
-    padding: 12px;
-    text-align: left;
-    padding-left: 11rem; 
-}
-
-#discog_table > div.box.center:before {
-  color:$color-text-bold !important;
-  font-size: large !important;
-  content: '\21E9  Jump to' !important;
-  font-weight: 600;
-  position: relative;
-  left: -24%;
-}
-
-#discog_table > div.box.center a {
-    margin: 0 8px;
-}
-
-#discog_table > div.box.center .brackets::after,
-#discog_table > div.box.center .brackets::before {
-    display: none;
-}
-
-/* END Navbox on artist page ~ "jump down".. to navigate between Album/Live Album... */
-
-/* ************************************************ */
-
-/* # 1.6 Tooltips */
+/* # 1.3 Tooltips */
 
 .tooltipster-base {
     box-shadow: 0 0 8px rgb(0 0 0 / 25%);
@@ -1603,34 +1772,33 @@ div#discog_table td.td_info:not(span.torrent_links_block) > a {
 }
 
 .tooltipster-default {
-    background-color: $color-background-base;
-    border: 0 solid $color-accent-border-tooltipster;
+    background-color: $base-background-color;
+    border: 0 solid $offset-accent-color;
     border-radius: 2.5px;
-    color: $color-text-tooltipster;
+    color: $mono-text-color;
 }
 
 .tooltipster-default .tooltipster-content {
-    background-color: $color-background-base;
-    color: $color-text-tooltipster;
+    background-color: $base-background-color;
+    color: $mono-text-color;
     font-size: 12px;
     line-height: 1.4;
     padding: 4px 6px;
 }
 
 .tooltipster-default .tooltipster-content a {
-    background-color: $color-background-base;
-    color: $color-text-tooltipster-anchor;
+    background-color: $base-background-color;
+    color: $mono-text-color;
     font-weight: 600;
 }
 
 .alertbar,
 .tooltipster-default .tooltipster-content a:hover {
-    color: $color-text-tooltipster-anchor-hover;
+    color: $offset-accent-color;
 }
 
-/* ************************************************ */
 
-/* # 1.7 BEGIN UPLOAD CATEGORY DECORATION STRIPING */
+/* # 1.4 BEGIN UPLOAD CATEGORY DECORATION STRIPING */
 /* Begin category decorations for torrent-tables on torrent & collage pages */
 /* #2024 bugfix:*/
 /* Apollostage highlights different upload types,
@@ -1691,181 +1859,8 @@ body#collage .cats_music {
 /* #2024 */
 /* END category decorations for torrent tables on torrent & collage pages */
 
-/* ************************************************ */
-
-/* #1.8 HEADER AND MENU LAYOUT */
+/* #1.5 HEADER AND MENU LAYOUT */
 /* MENU AND TOP BAR, DESKTOP ONLY */
-
-.thin > .header .linkbox {
-    align-self: flex-end;
-    flex: 1 0 auto;
-    -ms-flex: 1 0 auto;
-    -ms-flex-item-align: end;
-    margin-top: 8px;
-}
-
-.thin > .header {
-    display: flex;
-    display: -ms-flexbox;
-    -ms-flex-flow: row wrap;
-    flex-flow: row wrap;
-    width: 100%;
-}
-
-#header,
-#userinfo {
-    position: relative;
-}
-
-#header ul {
-    margin: 0;
-    padding: 0;
-}
-
-#header li {
-    margin: 0;
-}
-@media only screen and (min-width: 575px)  /* var(--phone-screen-size) */ {
-    #logo {
-        box-sizing: content-box;
-        height: 42px;
-        padding: 24px 8px 16px;
-        width: 200px;
-    }
-    
-    /* main logo during desktop view */
-    #logo a {
-        background: $logo-site-lockup right no-repeat;
-     }
-    
-    #logo > a {
-        background-size: 200px;
-        display: block;
-        height: 100%;
-        margin-top: 0;
-    }
-}
-
-#menu > ul {
-    display: flex;
-    display: -ms-flexbox;
-    -ms-flex-flow: row nowrap;
-    flex-flow: row nowrap;
-    font-size: 13px;
-    overflow: hidden;
-    width: calc(100% - 149px);
-}
-
-#menu > ul li {
-    -ms-flex: 1 1 auto;
-    flex: 1 1 auto;
-}
-
-#menu > ul a {
-    display: block;
-    height: 100%;
-    line-height: 50px;
-    text-align: center;
-}
-
-
-/* suppress menu-button-1 to go home */
-#nav_index {
-    display: none;
-}
-
-#userinfo_minor:hover a,
-#userinfo_username:hover a {
-    display: block;
-}
-
-#userinfo_username #nav_userinfo > a {
-    display: block;
-    font-size: 13px;
-    line-height: 50px;
-    overflow: hidden;
-    text-align: center;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    width: 100px;
-}
-
-#userinfo_major > li,
-#userinfo_stats > li,
-.linkbox .brackets {
-    margin-left: 8px;
-}
-
-#userinfo_major,
-#userinfo_stats {
-    display: flex;
-    display: -ms-flexbox;
-    -ms-flex-flow: row nowrap;
-    flex-flow: row nowrap;
-    position: absolute;
-    right: 8px;
-}
-
-#userinfo_major {
-    font-size: 13px;
-    right: 41px;
-    top: -53px;
-}
-
-#userinfo_stats {
-    font-size: 13px;
-    top: -31px;
-}
-
-#menu ul li:not(#nav_staff) a,
-#userinfo a.username {
-    color: $color-text-menu;
-    text-shadow: $color-accent-shadow-menutext;
-}
-
-/* menu li:nth-child(1) = Home button; is suppressed */
-
-#menu li:nth-child(2) {
-    background-color: $color-menu-2;
-}
-
-#menu li:nth-child(3) {
-    background-color: $color-menu-3;
-}
-
-#menu li:nth-child(4) {
-    background-color: $color-menu-4;
-}
-
-#menu li:nth-child(5) {
-    background-color: $color-menu-5;
-}
-
-#menu li:nth-child(6) {
-    background-color: $color-menu-6;
-}
-
-#menu li:nth-child(7) {
-    background-color: $color-menu-7;
-}
-
-#menu li:nth-child(8) {
-    background-color: $color-menu-8;
-}
-
-#menu li:nth-child(9) {
-    background-color: $color-menu-9;
-}
-
-#userinfo_username {
-    background-color: $color-menu-username;
-    right: 50px;
-}
-
-#menu {
-    border-radius: 5px 5px 0 0;
-    overflow: hidden;
-}
 
 @media (min-width: 575px)  /* var(--phone-screen-size) */ {
     .thin:last-child > :not(.two_columns) {
@@ -1898,7 +1893,7 @@ body#collage .cats_music {
 
     #menu > ul > #nav_staff > a:hover {
           background-color: transparent;
-          color: $color-text-anchor-hover;
+          color: $a-hover-color;
     }
 
     #userinfo_minor::before {
@@ -1925,7 +1920,7 @@ body#collage .cats_music {
     }
 
     #userinfo_minor {
-          background-color: $color-menu-userinfo;
+          background-color: $userinfo-minor-color;
           border-radius: 0 5px 0 0;
           right: 0;
     }
@@ -1947,11 +1942,11 @@ body#collage .cats_music {
     }
 
     #userinfo_minor:hover {
-          background-color: $color-menu-userinfo-hover;
+          background-color: $userinfo-minor-hover-background-color;
     }
 
     #userinfo_username:hover {
-          background-color: $color-menu-username-hover;
+          background-color: $userinfo-username-hover-background-color;
     }
 
     .settings_sidebar {
@@ -1964,25 +1959,17 @@ body#collage .cats_music {
 }
 /* END Menu and topbar, desktop only */
 
-/* ************************************************ */
-
-/* ## 1.8.1 Menu handling */
+/* # BEGIN Menu handling */
 /* horizontal menu */
 /* #2024 change to styled color instead of #fff to match vertical pulldown menu */
-/* menu hover colors */
-
-#menu > ul a:hover,
-#userinfo_minor:hover a:hover,
-#userinfo_username:hover a:hover {
-  background-color: $color-menu-fx-selection;
+#menu > ul a:hover {
+    color: $a-color;
 }
 
-
-/* when menu pulled down and mouse over an entry */
-#menu > ul a:hover,
+/* vertical pulldown menu */
 #userinfo_minor:hover a,
 #userinfo_username:hover a {
-    color: $color-text-menu-hover; 
+    color: $a-color;
 }
 
 /* Icon revealed when menu is open */
@@ -1991,12 +1978,25 @@ body#collage .cats_music {
     background-position: center;
     background-repeat: no-repeat;
     background-attachment: scroll;
-    background-image: $icon-menu-open-state;
+    background-image: $menu-open-state-icon;
     background-size: 30px;
     background-origin: padding-box;
     background-clip: border-box;
 }
 
+#searchbars .search_form {
+    background: 0 0;
+}
+
+#searchbars .search_form input {
+    border: none;
+    border-radius: 2.5px;
+    height: 30px;
+}
+
+#searchbars .search_form input:focus {
+    background: $secondary-table-background-color;
+}
 
 .sidebar {
     order: 5;
@@ -2010,79 +2010,12 @@ body#collage .cats_music {
 
 /* END MENU HANDLING */
 
-/* ************************************************ */
 
-/* ## 1.9 Headers Below Menu */
 
-/* ************************************************ */
+/* */
+/* */
 
-/* ## 1.9.1 SEARCHBARS */
-
-#searchbars > ul {
-    align-items: center;
-    background-color: $color-background-searchbars-surround;
-    display: flex;
-    display: -ms-flexbox;
-    -ms-flex-align: center;
-    height: 50px;
-    padding: 0 9px;
-}
-
-#searchbars > ul li {
-    -ms-flex: 1 1 auto;
-    flex: 1 1 auto;
-    margin-right: 9px;
-}
-
-#searchbars > ul li:last-child {
-    margin-right: 0;
-}
-
-#searchbars > ul input {
-    width: 100%;
-}
-
-#searchbars .search_form {
-    background: 0 0;
-}
-
-#searchbars .search_form input {
-    border: none;
-    border-radius: 2.5px;
-    height: 30px;
-    background: $color-background-searchbars;
-}
-
-#searchbars .search_form input:focus {
-    background: $color-background-searchbars-field-focus;
-}
-
-/* ************************************************ */
-
-/* ## 1.9.2 Linkbox */
-/* linkbox appears near the page h1 header and provides outbound links */
-.linkbox,
-.linkbox .center {
-    text-align: right;
-}
-
-.linkbox br {
-    display: block;
-    line-height: 4px;
-}
-
-.linkbox > strong {
-    color: $color-text-linkbox;
-}
-
-.linkbox .brackets::after,
-.linkbox .brackets::before {
-    display: none;
-}
-
-/* ************************************************ */
-
-/* # 1.10 BEGIN NOTIFICATION BOX */
+/* # 1.7 BEGIN NOTIFICATION BOX */
 
 /* basic positioning */
 #noty_bottomRight_layout_container {
@@ -2092,7 +2025,7 @@ body#collage .cats_music {
 
 #noty_bottomRight_layout_container > li {
   background: 0 0 !important;
-  border: 2px solid $color-menu-userinfo !important;
+  border: 2px solid $userinfo-minor-color !important;
   border-radius: 1px !important;
 }
 
@@ -2110,9 +2043,8 @@ body#collage .cats_music {
 /* first row of each box */
 #noty_bottomRight_layout_container .noty_message {
   background: radial-gradient(circle at top right, 
-    $color-background-notification-gradient-1,
-    $color-background-notification-gradient-2) !important;
-  color: $color-text-notification-words !important;
+    $gradient-color-1, $gradient-color-2) !important;
+  color: $a-color !important;
   font-weight: 700;
   padding: 0 !important;
 }
@@ -2125,14 +2057,14 @@ body#collage .cats_music {
 
 /* second row of each box */
 #noty_bottomRight_layout_container .noty_buttons {
-  background-color: $color-background-notification !important;
+  background-color: $notification-background-color !important;
   border: none !important;
   padding: 8px !important;
 }
 
 /* buttons */
 #noty_bottomRight_layout_container .noty_buttons a {
-  color: $color-obj-tag_bubble-foreground !important;
+  color: $tag-bubble-foreground-color !important;
   background-color: none;
   border: thin solid transparent; /* prevents button movement */
   border-radius: 14px;
@@ -2141,10 +2073,10 @@ body#collage .cats_music {
 }
 
 #noty_bottomRight_layout_container .noty_buttons a:hover {
-  color: $color-obj-tag_bubble-background !important;
-  background-color: $color-obj-tag_bubble-foreground;
+  color: $tag-bubble-background-color !important;
+  background-color: $tag-bubble-foreground-color;
   border-radius: 14px;
-  border: thin solid $color-obj-noty-buttons-hover;
+  border: thin solid $primary-accent-color;
   transition: all 0.15s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
@@ -2153,7 +2085,7 @@ body#collage .cats_music {
 /* */
 /* */
 
-/* # 1.11 BEGIN SIDEBAR */
+/* # 1.8 BEGIN SIDEBAR */
 
 .sidebar .pad ol,
 .sidebar .pad ul {
@@ -2174,36 +2106,6 @@ body#collage .cats_music {
 
 /* END SIDEBAR */
 
-/* ************************************************ */
-
-/* # 1.12 Upload form MusicBrainz popup */
-
-#musicbrainz_popup {
-    color: $color-text-popup;
-    background: $color-background-popup;
-    border: $color-accent-border-popup;
-    padding: 1rem;
-    font-weight: 600;
-}
-
-#musicbrainz_popup a {
-    color: $color-text-popup-anchor;
-}
-
-#musicbrainz_popup a:hover {
-    color: $color-text-popup-anchor-hover;
-}
-
-#musicbrainz_popup .brackets {
-    font-weight: 400;
-}
-
-#musicbrainz_popup #popup_close {
-    color: $color-text-button;
-}
-/*popup close button, see 'button'*/
-
-/* END upload form MusicBrainz popup */
 
 
 /* */
@@ -2565,8 +2467,8 @@ body#collage .cats_music {
     .td_snatched.m_td_right::before,
     .td_seeders.m_td_right::before,
     .td_leechers.m_td_right::before {
-          background: left / 10px no-repeat $icon-number-snatches;
-          color: $color-text-bold;
+          background: left / 10px no-repeat $number-snatches-icon;
+          color: $bold-text-color;
           content: ':';
           filter: brightness(80%);
           position: absolute;
@@ -2576,11 +2478,11 @@ body#collage .cats_music {
     }
 
     .td_seeders.m_td_right::before {
-          background-image: $icon-number-seeders;
+          background-image: $number-seeders-icon;
     }
 
     .td_leechers.m_td_right::before {
-          background-image: $icon-number-leechers;
+          background-image: $number-leechers-icon;
     }
 
     .m_table.checkboxes td:first-child {
@@ -2741,8 +2643,8 @@ body#collage .cats_music {
           font-weight: 400;
           font-size: 0.55rem;
           vertical-align: baseline;
-          color: $color-obj-tag_bubble-foreground; 
-          background: $color-obj-tag_bubble-background !important;
+          color: $tag-bubble-foreground-color; 
+          background: $tag-bubble-background-color !important;
           padding: 0.05rem 0.5rem;
           border: none !important;
           border-radius: 1rem;
@@ -2859,7 +2761,7 @@ body#collage .cats_music {
 
     .forum_post tr.colhead_dark span,
     .forum_post tr.colhead_dark strong {
-          color: $color-text-input;
+          color: $input-color;
     }
 
     .forum_post tr.colhead_dark div {
@@ -2942,7 +2844,7 @@ body#collage .cats_music {
     }
      
     #header {
-          background: $color-mobilemenu-closed;
+          background: $header-background-color;
           top: 0;
           height: 0;
           left: 0;
@@ -2961,8 +2863,8 @@ body#collage .cats_music {
            height: clamp(200px, calc(var(--row-height)*15), 100%);
            opacity: 1;
            transition: all 600ms cubic-bezier(1, 0.01, 0.3, 1.31);
-           border-bottom: groove $color-mobilemenu-closed;
-           box-shadow: 0px 50px 70px $color-mobilemenu-shadow, 0 160px 160px #080808;
+           border-bottom: groove $header-background-color;
+           box-shadow: 0px 50px 70px $gradient-color-1, 0 160px 160px #080808;
     }
 
     /* ## 3.17.3 Top Menubar */
@@ -2976,7 +2878,7 @@ body#collage .cats_music {
             opacity: 1!important;
             width: 25px;
             height: 25px;
-            background-image: $icon-menu-pulldown-mobile;
+            background-image: $mobile-pulldown-icon;
             background-size: contain;
             z-index:500;
             pointer-events: none;
@@ -2984,7 +2886,7 @@ body#collage .cats_music {
 
     /* topbar for mobile ~ "folder tab" when menu is closed */
     #extra4 {
-        background: $color-mobilemenu-closed;
+        background: $header-background-color;
         border-radius: 0 0 9px 9px;
         display: block;
         right: 0;
@@ -3059,7 +2961,7 @@ body#collage .cats_music {
     #userinfo_username > li, #logo {
         background: radial-gradient(
             circle at top left, 
-            $color-mobilemenu-userinfo-1,$color-mobilemenu-userinfo-2 );
+            $userinfo-background-color-1,$userinfo-background-color-2 );
             }
         
     #userinfo_username {
@@ -3085,7 +2987,7 @@ body#collage .cats_music {
 
         background: radial-gradient(
             circle at top left, 
-            $color-mobilemenu-userinfo-1,$color-mobilemenu-userinfo-2 );
+            $userinfo-background-color-1,$userinfo-background-color-2 );
     }
     
     #logo a {
@@ -3115,7 +3017,7 @@ body#collage .cats_music {
         right: 2vw;
         width: 60vw;
         margin: auto;
-        color: $color-text-base;
+        color: $fore-500;
         top: calc(100% - var(--row-height) * 10 - 125px);
         height: calc(2.4 * var(--row-height));
         flex-direction: column;
@@ -3136,7 +3038,7 @@ body#collage .cats_music {
     }
     #stats_ratio .tooltip {
         /* Provide a local background for the number to appear in color */
-        background-color: $color-background-form;
+        background-color: $form-background-color;
         border-radius: 0.45rem;
         padding-left: 0.45rem;
         padding-right: 0.45rem;
@@ -3147,8 +3049,7 @@ body#collage .cats_music {
     #menu ul {
         background: radial-gradient(
             circle at top left, 
-            $color-mobilemenu-userinfo-1,
-            $color-mobilemenu-userinfo-2 );
+            $userinfo-background-color-1,$userinfo-background-color-2 );
         bottom: calc(var(--row-height) * 7);
         position: absolute;
     }
@@ -3162,8 +3063,7 @@ body#collage .cats_music {
     #userinfo_minor {
         background: radial-gradient(
             circle at top left, 
-            $color-mobilemenu-userinfo-2,
-            $color-mobilemenu-userinfo-1 );
+            $userinfo-background-color-2,$userinfo-background-color-1 );
         bottom: calc(var(--row-height) * 3);
         position: absolute;
     }
@@ -3190,8 +3090,9 @@ body#collage .cats_music {
     }
     /* END searchboxes */
     
-    /* ## 3.17.10  Close button & legend at bottom */
-    /* TODO; for now, click outside the menu
+    /* ## 3.17.10   Close legend at bottom */
+    
+    /* todo */
   
     /* ## 3.18 Checkboxes ~ purpose undocumented */
     
@@ -3231,15 +3132,15 @@ body#collage .cats_music {
     
     #taglist tr.label {
         height: auto;
-        border: thick solid $color-obj-tag_bubble-foreground; 
+        border: thick solid $tag-bubble-foreground-color; 
     }
     
     #taglist tr.label td {
-        background: $color-obj-tag_bubble-background;
-        color: $color-obj-tag_bubble-foreground;
+        background: $tag-bubble-background-color;
+        color: $tag-bubble-foreground-color;
         align-content: center;
         text-align: center;
-        border: $color-obj-tag_bubble-foreground;
+        border: $tag-bubble-foreground-color;
         width: 100%;
     }
     
@@ -3259,8 +3160,8 @@ body#collage .cats_music {
           overflow: hidden;  text-overflow: ellipsis;
           font-style: italic; 
           vertical-align: baseline;
-          color: $color-obj-tag_bubble-foreground !important; /*$color-obj-tag_bubble-background;*/
-          background: $color-obj-tag_bubble-background; 
+          color: $tag-bubble-foreground-color !important; /*$tag-bubble-background-color;*/
+          background: $tag-bubble-background-color; 
           padding: 0.25rem ;
           border-radius: 1rem;
           margin-bottom: 0.1rem;
@@ -3327,8 +3228,8 @@ body#torrents div.box.box_tags li > a:first-child {
     font-weight: 700;
     font-size: 0.6rem;
     vertical-align: baseline;
-    color: $color-obj-tag_bubble-foreground; 
-    background: $color-obj-tag_bubble-background; 
+    color: $tag-bubble-foreground-color; 
+    background: $tag-bubble-background-color; 
     padding: 0 0.5rem;
     border-radius: 1rem;
     margin-bottom: 0.1rem;
@@ -3353,8 +3254,8 @@ table.torrent_table.cats.checkboxes.border.m_table td.td_info.big_info div.group
 table.torrent_table.cats.m_table td.td_info.big_info div.group_info.clear div.tags a:hover,
 /* This is for torrent group (album) pages in the sidebar */
 body#torrents div.box.box_tags li > a:first-child:hover {
-    color: $color-obj-tag_bubble-background !important; 
-    background: $color-obj-tag_bubble-foreground !important; 
+    color: $tag-bubble-background-color !important; 
+    background: $tag-bubble-foreground-color !important; 
     transition: all 0.15s cubic-bezier(0.25,0.8,0.25,1);
     box-shadow:
     rgb(0 0 0 / 25%) 0 14px 28px, 
@@ -3404,7 +3305,6 @@ table.torrent_table.cats.m_table td.td_info.big_info div.group_info.clear div.ta
 
 /* ## 4.4 BETA -- Upload warnings ## */
 
-div.upload-error:after,
 ul#check:after {
   content: 'BETA:  Warning!  There were one or more errors in your submission. Check below for error messages.';
   font-weight: 700;

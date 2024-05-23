@@ -32,7 +32,7 @@ $color-menu-7: #c47891;    // top10
 $color-mobilemenu-closed: #ab718d;                   // rules, also mobile menu header
 $color-menu-9: #8d6a87;      // wiki
 $color-menu-username: #6c6584;                	 // username menu ~ closed
-$color-menu-username-hover: #89849d;  // username menu ~ open
+$userinfo-username-hover-background-color: #89849d;  // username menu ~ open
 $color-menu-userinfo: #5c6086;                      // VV pulldown menu ~ closed
 $color-menu-userinfo-hover: #7d809e;     // VV pulldown menu ~ open
 
@@ -70,13 +70,13 @@ $color-text-span-blue: #5454ed;
 
 // accent color for upload categories (stripes)
 
-$color-accent-cats_music: #fd6659;
-$color-accent-cats_applications: #f02940;
-$color-accent-cats_audiobooks: #a54873;
-$color-accent-cats_comedy: #8b869c;
-$color-accent-cats_comics: #688187;
-$color-accent-cats_ebooks: #578f9d;
-$color-accent-cats_elearningvideos: #793555;
+$accent-color-cats_music: #fd6659;
+$accent-color-cats_applications: #f02940;
+$accent-color-cats_audiobooks: #a54873;
+$accent-color-cats_comedy: #8b869c;
+$accent-color-cats_comics: #688187;
+$accent-color-cats_ebooks: #578f9d;
+$accent-color-cats_elearningvideos: #793555;
 
 // accent color for tag bubbles
 

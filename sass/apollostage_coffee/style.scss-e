@@ -44,7 +44,6 @@ $color-text-mono: $text14;
 $color-text-base: $text15;
 $color-text-bold: $text16;
 $color-text-anchor: $text17;
-$color-text-menu: $text17;
 $color-text-anchor-hover: $text13;
 
 // Ten color gradient:
@@ -58,7 +57,7 @@ $color-menu-7: $level05;   // top10
 $color-mobilemenu-closed: $level04;                  // rules, also mobile menu header
 $color-menu-9: $level03;     // wiki
 $color-menu-username: $level02;                  // username menu ~ closed
-$color-menu-username-hover: $level02; // username menu ~ open
+$userinfo-username-hover-background-color: $level02; // username menu ~ open
 $color-menu-userinfo: $level01;                     // VV pulldown menu ~ closed
 $color-menu-userinfo-hover: $level03;    // VV pulldown menu ~ open
 
@@ -94,13 +93,13 @@ $color-text-span-blue: #4e4ee7;
 
 // accent color for upload categories (stripes)
 
-$color-accent-cats_music: #fd6659;
-$color-accent-cats_applications: #f02940;
-$color-accent-cats_audiobooks: #a54873;
-$color-accent-cats_comedy: #8b869c;
-$color-accent-cats_comics: #688187;
-$color-accent-cats_ebooks: #578f9d;
-$color-accent-cats_elearningvideos: #793555;
+$accent-color-cats_music: #fd6659;
+$accent-color-cats_applications: #f02940;
+$accent-color-cats_audiobooks: #a54873;
+$accent-color-cats_comedy: #8b869c;
+$accent-color-cats_comics: #688187;
+$accent-color-cats_ebooks: #578f9d;
+$accent-color-cats_elearningvideos: #793555;
 
 // accent color for tag bubbles
 
