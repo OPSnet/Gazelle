@@ -26,6 +26,14 @@ class StaffPMTest extends TestCase {
     }
 
     public function tearDown(): void {
+        $db = Gazelle\DB::DB();
+        $db->prepared_query("
+            DELETE spc, spm
+            FROM staff_pm_conversations spc
+            INNER JOIN staff_pm_messages spm ON (spm.ConvID = spc.ID)
+            WHERE spm.UserID IN (?, ?, ?, ?)
+            ", $this->fls->id(), $this->mod->id(), $this->sysop->id(), $this->user->id()
+        );
         $this->fls->remove();
         $this->mod->remove();
         $this->sysop->remove();
@@ -33,6 +41,8 @@ class StaffPMTest extends TestCase {
     }
 
     public function testCreate(): void {
+        $initialOpen     = $this->spMan->countByStatus($this->user, ['Open']);
+        $initialResolved = $this->spMan->countByStatus($this->sysop, ['Resolved']);
         $spm = $this->spMan->create($this->user, 0, 'for FLS', 'message handled by FLS');
         $this->assertNotNull($spm, 'spm-fls-create');
         $this->assertEquals(0, $spm->assignedUserId(), 'spm-fls-no-assignedUser');
@@ -50,7 +60,7 @@ class StaffPMTest extends TestCase {
         $this->assertFalse($spm->unassigned(), 'spm-fls-unassigned');
 
         $this->assertEquals($spm->id(), $this->spMan->findById($spm->id())?->id(), 'spm-fls-find');
-        $list = $this->spMan->findAllByUserId($this->user->id());
+        $list = $this->spMan->findAllByUser($this->user);
         $this->assertCount(1, $list, 'spm-user-list-total');
         $this->assertEquals($spm->subject(), $list[0]->subject(), 'spm-user-list-first');
 
@@ -80,8 +90,8 @@ class StaffPMTest extends TestCase {
         $this->assertFalse($spm->inProgress(), 'spm-fls-not-in-progress');
         $this->assertTrue($spm->isResolved(), 'spm-fls-is-resolved');
 
-        $this->assertEquals(0, $this->spMan->countByStatus($this->user, ['Open']), 'spm-user-status-open');
-        $this->assertEquals(1, $this->spMan->countByStatus($this->sysop, ['Resolved']), 'spm-user-status-resolved');
+        $this->assertEquals($initialOpen, $this->spMan->countByStatus($this->user, ['Open']), 'spm-user-status-open');
+        $this->assertEquals($initialResolved + 1, $this->spMan->countByStatus($this->sysop, ['Resolved']), 'spm-user-status-resolved');
 
         $this->assertEquals(1, $spm->unresolve($this->sysop), 'spm-unresolve');
         $this->assertTrue($spm->inProgress(), 'spm-fls-unresolved-in-progress');
@@ -96,38 +106,107 @@ class StaffPMTest extends TestCase {
     }
 
     public function testSysop(): void {
-        $spm = $this->spMan->create($this->fls, 1000, 'for sysop', 'message handled by SYSOP');
-        $this->assertEquals(1000, $spm->classLevel(), 'spm-sysop-classlevel-sysop');
+        $initial = $this->spMan->countAtLevel($this->sysop, ['Unanswered']);
+        $level   = (new Gazelle\Manager\User())->classList()[SYSOP]['Level'];
+        $spm     = $this->spMan->create($this->fls, $level, 'for sysop', 'message handled by SYSOP');
+        $this->assertEquals($level, $spm->classLevel(), 'spm-sysop-classlevel-sysop');
         $this->assertEquals('Sysop', $spm->userclassName(), 'spm-sysop-userclass');
         $this->assertFalse($spm->visible($this->user), 'spm-sysop-read-user');
         $this->assertTrue($spm->visible($this->fls), 'spm-sysop-read-fls');
         $this->assertFalse($spm->visible($this->mod), 'spm-sysop-read-mod');
         $this->assertTrue($spm->visible($this->sysop), 'spm-sysop-read-sysop');
-        $this->assertEquals(1, $this->spMan->countAtLevel($this->sysop, ['Unanswered']), 'spm-sysop-unanswered');
+        $this->assertEquals(
+            $initial + 1,
+            $this->spMan->countAtLevel($this->sysop, ['Unanswered']),
+            'spm-sysop-unanswered'
+        );
+    }
+
+    public function testFLS(): void {
+        $initialOpen       = $this->spMan->countByStatus($this->fls, ['Open']);
+        $initialUnanswered = $this->spMan->countByStatus($this->fls, ['Unanswered']);
+        $initialLevel      = $this->spMan->countAtLevel($this->fls, ['Unanswered']);
+        $level             = (new Gazelle\Manager\User())->classList()[FLS_TEAM]['Level'];
+        $spm               = $this->spMan->create($this->user, $level, 'for fls', 'message handled by fls');
+        $this->assertEquals($level, $spm->classLevel(), 'spm-fls-classlevel-sysop');
+        $this->assertEquals('First Line Support', $spm->userclassName(), 'spm-fls-userclass');
+        $this->assertEquals(
+            $initialLevel + 1,
+            $this->spMan->countAtLevel($this->fls, ['Unanswered']),
+            'spm-fls-level-unanswered'
+        );
+        $this->assertEquals(
+            $initialUnanswered + 1,
+            $this->spMan->countByStatus($this->fls, ['Unanswered']),
+            'spm-fls-status-unanswered'
+        );
+        $this->assertEquals($initialOpen, $this->spMan->countByStatus($this->fls, ['Open']), 'spm-fls-status-not-open');
+        $this->spMan->setSearchStatusList($this->fls, ['Unanswered']);
+        $this->assertCount($initialUnanswered + 1, $this->spMan->page($this->fls, 2, 0), 'spm-fls-page-count');
+
+        $spm->reply($this->fls, 'fls reply');
+        $this->assertEquals($initialOpen + 1, $this->spMan->countByStatus($this->fls, ['Open']), 'spm-fls-status-now-open');
+        $spm->reply($this->user, 'user reply');
+        $this->assertEquals($initialOpen + 0, $this->spMan->countByStatus($this->fls, ['Open']), 'spm-fls-status-no-longer-open');
+        $this->assertEquals(
+            $initialUnanswered + 1,
+            $this->spMan->countByStatus($this->fls, ['Unanswered']),
+            'spm-fls-status-again-unanswered'
+        );
+
+        $this->assertEquals(0, $this->spMan->countByStatus($this->fls, ['Resolved']), 'spm-fls-status-not-resolved');
+        $this->assertEquals(1, $spm->resolve($this->user), 'spm-user-resolve');
+        $this->assertEquals(1, $this->spMan->countByStatus($this->fls, ['Resolved']), 'spm-fls-status-now-resolved');
+        $this->spMan->setSearchStatusList($this->fls, ['Resolved']);
+        $list = $this->spMan->page($this->fls, 2, 0);
+        $this->assertEquals($spm->id(), $list[0]['id']);
+
+        $historyFls = $this->spMan->staffHistory($level, [$this->fls->id()], 1 /* day */);
+        $this->assertEquals(1, $historyFls[0]['total'], 'spm-fls-staff-history-message');
+        $this->assertEquals(0, $historyFls[0]['total2'], 'spm-fls-staff-history-conv');
+
+        $historyUser = $this->spMan->staffHistory($level, [$this->user->id()], 1 /* day */);
+        $this->assertEquals(2, $historyUser[0]['total'], 'spm-fls-user-history-message');
+        $this->assertEquals(1, $historyUser[0]['total2'], 'spm-fls-user-history-conv');
     }
 
     public function testMany(): void {
+        $initialUser  = $this->spMan->countByStatus($this->user, ['Unanswered']);
+        $initialFLS   = $this->spMan->countByStatus($this->fls, ['Unanswered']);
+        $initialLevel = $this->spMan->countAtLevel($this->fls, ['Unanswered']);
+        $level        = (new Gazelle\Manager\User())->classList()[FLS_TEAM]['Level'];
         $list = [
-            $this->spMan->create($this->user, 0, 'for fls', 'message handled by fls'),
-            $this->spMan->create($this->user, 0, 'for fls', 'message handled by fls'),
-            $this->spMan->create($this->user, 0, 'for fls', 'message handled by fls'),
-            $this->spMan->create($this->user, 0, 'for fls', 'message handled by fls'),
+            $this->spMan->create($this->user, $level, 'for fls', 'message handled by fls'),
+            $this->spMan->create($this->user, $level, 'for fls', 'message handled by fls'),
+            $this->spMan->create($this->user, $level, 'for fls', 'message handled by fls'),
+            $this->spMan->create($this->user, $level, 'for fls', 'message handled by fls'),
         ];
         foreach ($list as $spm) {
             $spm->assign($this->fls, $this->sysop);
         }
         $total = count($list);
-        $this->assertCount(0, $this->spMan->findAllByUserId($this->fls->id()), 'spm-many-assigned');
-        $this->assertEquals(0, $this->spMan->countByStatus($this->user, ['Unanswered']), 'spm-many-user-unanswered');
-        $this->assertEquals($total, $this->spMan->countByStatus($this->fls, ['Unanswered']), 'spm-many-fls-unanswered');
-
-        $this->assertEquals($total, $this->spMan->countAtLevel($this->fls, ['Unanswered']), 'spm-many-at-level');
+        $this->assertCount(0, $this->spMan->findAllByUser($this->fls), 'spm-many-assigned');
+        $this->assertEquals($initialUser, $this->spMan->countByStatus($this->user, ['Unanswered']), 'spm-many-user-unanswered');
+        $this->assertEquals(
+            $initialFLS + $total,
+            $this->spMan->countByStatus($this->fls, ['Unanswered']),
+            'spm-many-fls-unanswered'
+        );
+        $this->assertEquals(
+            $initialLevel + $total,
+            $this->spMan->countAtLevel($this->fls, ['Unanswered']),
+            'spm-many-at-level'
+        );
         $list[1]->resolve($this->fls);
-        $this->assertEquals($total - 1, $this->spMan->countByStatus($this->fls, ['Unanswered']), 'spm-many-fls-less');
+        $this->assertEquals(
+            $initialFLS + $total - 1,
+            $this->spMan->countByStatus($this->fls, ['Unanswered']),
+            'spm-many-fls-less'
+        );
     }
 
     public function testCommonAnswer(): void {
-        $this->assertCount(0, $this->spMan->commonAnswerList(), 'spm-common-0');
+        $initial = count($this->spMan->commonAnswerList());
         $answer = 'because we can';
         $first = $this->spMan->createCommonAnswer('why', $answer);
         $this->assertGreaterThan(0, $first, 'spm-common-add-1');
@@ -139,9 +218,9 @@ class StaffPMTest extends TestCase {
         $third = $this->spMan->createCommonAnswer('third', 'third common answer');
         $this->assertEquals($first + 2, $third, 'spm-common-add-3');
         $this->assertEquals(1, $this->spMan->modifyCommonAnswer($third, 'third', 'because we might'), 'spm-common-modify');
-        $this->assertCount(3, $this->spMan->commonAnswerList(), 'spm-common-list');
+        $this->assertCount($initial + 3, $this->spMan->commonAnswerList(), 'spm-common-list');
 
         $this->assertEquals(1, $this->spMan->removeCommonAnswer($second), 'spm-common-remove');
-        $this->assertCount(2, $this->spMan->commonAnswerList(), 'spm-common-list');
+        $this->assertCount($initial + 2, $this->spMan->commonAnswerList(), 'spm-common-list');
     }
 }
