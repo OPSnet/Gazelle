@@ -5,6 +5,9 @@ namespace Gazelle\Manager;
 class StaffPM extends \Gazelle\BaseManager {
     protected const ID_KEY = 'zz_spm_%d';
 
+    protected array $args;
+    protected array $cond;
+
     public function create(\Gazelle\User $user, int $level, string $subject, string $message): \Gazelle\StaffPM {
         self::$db->begin_transaction();
         self::$db->prepared_query("
@@ -39,17 +42,16 @@ class StaffPM extends \Gazelle\BaseManager {
         return $id ? new \Gazelle\StaffPM($id) : null;
     }
 
-    public function findAllByUserId(int $userId): array {
+    public function findAllByUser(\Gazelle\User $user): array {
         self::$db->prepared_query("
             SELECT ID
             FROM staff_pm_conversations
             WHERE UserID = ?
             ORDER BY Status, Date DESC
-            ", $userId
+            ", $user->id()
         );
         $result = [];
-        $list   = self::$db->collect(0, false);
-        foreach ($list as $id) {
+        foreach (self::$db->collect(0, false) as $id) {
             $spm = $this->findById($id);
             if ($spm) {
                 $result[] = $spm;
@@ -202,6 +204,78 @@ class StaffPM extends \Gazelle\BaseManager {
             GROUP BY um.ID
             ORDER BY total DESC, total2 DESC
         ", $interval, $interval, $classLevel, ...$userIds);
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
+    }
+
+    public function setSearchId(\Gazelle\User $user, int $id): static {
+        $this->cond = ['spc.Level <= ? AND spc.UserID = ? AND spc.status = ?'];
+        $this->args = [$user->privilege()->effectiveClassLevel(), $id, 'Resolved'];
+        return $this;
+    }
+
+    public function setSearchStatusList(\Gazelle\User $user, array $status): static {
+        $this->cond = ['(spc.Level <= ? OR spc.AssignedToUser = ?) AND spc.Status IN (' . placeholders($status) . ')'];
+        $this->args = [$user->privilege()->effectiveClassLevel(), $user->id(), ...$status];
+        return $this;
+    }
+
+    public function setUserclassLevel(int $level): static {
+        $this->cond[] = 'spc.Level >= ?';
+        $this->args[] = $level;
+        return $this;
+    }
+
+    public function searchTotalSql(): string {
+        $where = implode(' AND ', $this->cond);
+        return "SELECT count(*) FROM staff_pm_conversations AS spc WHERE $where";
+    }
+
+    public function searchTotal(): int {
+        return (int)self::$db->scalar($this->searchTotalSql(), ...$this->args);
+    }
+
+    public function pageSql(): string {
+        $where = implode(' AND ', $this->cond);
+        return "
+            SELECT spc.ID          AS id,
+                spc.Subject        AS subject,
+                spc.UserID         AS user_id,
+                spc.AssignedToUser AS assigned_user_id,
+                spc.ResolverID     AS resolver_user_id,
+                spc.Status         AS status,
+                spc.Date           AS created,
+                spc.Unread         AS is_unread,
+                spc.Level          AS userclass_level,
+                concat(
+                    coalesce(p.Name, 'First Line Support'),
+                    if(p.Level IS NULL OR p.Level = 1000 OR p.Secondary = 1, '', '+')
+                )                  AS userclass,
+                greatest(0, count(spm.ID) - 1)
+                                   AS reply_total,
+                (
+                    SELECT spmu.UserID
+                    FROM staff_pm_messages spmu
+                    WHERE spmu.ID = (
+                        SELECT max(last.ID)
+                        FROM staff_pm_messages last
+                        WHERE last.ConvID = spm.ConvID
+                    )
+                ) as last_user_id
+            FROM staff_pm_conversations spc
+            LEFT JOIN permissions p ON (p.Level = spc.Level)
+            LEFT JOIN staff_pm_messages spm ON (spm.ConvID = spc.ID)
+            WHERE $where
+            GROUP BY spc.ID
+            ORDER BY IF(AssignedToUser = ?, 0, 1) ASC, spc.Date DESC
+            LIMIT ? OFFSET ?
+            ";
+    }
+
+    public function page(\Gazelle\User $user, int $limit, int $offset): array {
+        self::$db->prepared_query(
+            $this->pageSql(),
+            ...[...$this->args, $user->id(), $limit, $offset]
+        );
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 }

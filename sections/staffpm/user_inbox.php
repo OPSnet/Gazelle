@@ -8,7 +8,7 @@ echo $Twig->render('staffpm/user-inbox.twig', [
         'mod'   => $classList[MOD]['Level'],
         'sysop' => $classList[SYSOP]['Level'],
     ],
-    'list'   => (new Gazelle\Manager\StaffPM())->findAllByUserId($Viewer->id()),
+    'list'   => (new Gazelle\Manager\StaffPM())->findAllByUser($Viewer),
     'max'    => 'Sysop',
     'reply'  => new Gazelle\Util\Textarea('quickpost', ''),
     'viewer' => $Viewer,
