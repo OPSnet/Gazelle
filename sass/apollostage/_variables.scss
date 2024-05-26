@@ -6,8 +6,11 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // SLUG
 
- $debug-slug: "1413"; // must include quots
-
+ $debug-identity: "ApolloStage"; // must include quots
+ $debug-slug: "1023"; // must include quots
+ $debug-deriv: "";
+ $debug-deriv-slug: "";
+ 
 // ////////////////////////////////////////////////////////////////////////////////
 // COLORS
 
@@ -15,7 +18,7 @@
 // and Token -> Raw value
 
 //Backs
- $back-100: #121616;
+ $back-100:  #121616;
  $back-200:  #181D1D;
  $back-300:  #1D2424;
  $back-400:  #222B2B;
@@ -49,28 +52,34 @@
  $fore-700: #C6D2C8;
  $fore-800: #D5E0D9;
  $fore-900: #E5EFE9;
- $fore-1000: #FAFFFC;
+ $fore-1000: #FDFFFD;
 
 //Direct-Specialty
+
  $ds-neutral-300: #dcdfe4;
  $ds-neutral-400: #b8b8b8;
  $ds-neutral-500: #8591a2;
+ $ds-neutral-000: #000;
  $ds-red: #b71010;
  $ds-green: #099909;
- $ds-yellow: #d8d82d;
+ $ds-yellow: #F9E340;
  $ds-fx-low: rgba(255, 255, 255, 0.08);
  $ds-fx-mid: rgba(255, 255, 255, 0.25);
+ $ds-gray-05: hsl(178, 2.5%, 05%);  
+ $ds-gray-62: hsl(181, 3.5%, 62%);  
+ $ds-gray-92: hsl(183, 4.0%, 92%);
 
-// DEFINE PHYSICAL LAYOUT TO TOKENS
+// DEFINE FROM LOGICAL LAYOUT TO TOKENS
 
 $color-background-base: $back-100;
-$color-background-blockquote: $back-300;
+$color-background-blockquote: $back-400;
 $color-background-box: $back-500;
-$color-background-form: $back-300; // also boxes on frontpage
-$color-background-input: $back-300;
+$color-background-form: $back-200; // also boxes on frontpage
+$color-background-input: $back-400;
 $color-background-input-active: $back-500;
 $color-background-poll: $back-500;
-$color-background-popup: $back-300;
+$color-background-popup: $back-300; // upload musicbrainz info
+$color-background-popup-warning: color-mix(in srgb, $ds-yellow, transparent 8%);
 $color-background-searchbars: $back-300;
 $color-background-searchbars-field-focus: $back-100;
 $color-background-searchbars-surround: $back-500;
@@ -80,26 +89,26 @@ $color-background-table-row-th: $back-500;
 $color-background-table-row-odd: $back-300;
 $color-background-table-row-even: $back-200;
 $color-background-table-keyrows: $mid-300; // navigation row ~ "jump up to.."
-$color-background-table-secondary: $mid-500; // also form field in focus
+$color-background-table-secondary: orangered; // no longer used
 $color-background-table-torrenttable: $back-300; // also form field in focus
 $color-background-table-torrents-group: $back-600;
 $color-background-torrent: $mid-200; // edition in group-list
 
 $color-text-anchor-hover: $mid-1000;
-$color-text-anchor: $fore-900;
-$color-text-base: $fore-800;
+$color-text-anchor: $fore-1000;
+$color-text-base: $fore-700;
 $color-text-bold: $fore-800;
-$color-text-button: $back-700;
+$color-text-button: $ds-gray-05;
 $color-text-footer: $ds-neutral-300;
 $color-text-heading-anchor: $mid-900;
 $color-text-heading: $fore-700;
 $color-text-important-alt: $ds-green;
 $color-text-important: $ds-red;
-$color-text-input: $fore-500; // for pre-populated inputs
+$color-text-input: $fore-600; // for pre-populated inputs
 $color-text-input-active: $fore-900;
-$color-text-linkbox: $fore-800;
+$color-text-linkbox: $mid-800; // links in linkbox
 $color-text-menu: $fore-1000;
-$color-text-menu-hover: $back-600;
+$color-text-menu-hover: $back-300; // during pulldown
 $color-text-mono: $fore-500;
 $color-text-notification-words: $fore-1000;
 $color-text-popup-anchor-hover: $mid-1000;
@@ -136,23 +145,26 @@ $color-mobilemenu-userinfo-2: $mid-900; // mobile pulldown menu gradient 2
 $color-mobilemenu-closed: $mid-700; // rules, also mobile menu header
 $color-mobilemenu-shadow: $mid-500; //mobile menu
 
-$color-background-notification-gradient-1: $mid-1000; // usually works well with 'third-child'
-$color-background-notification-gradient-2: $mid-400; // usually works well with 'seventh-child'
-$color-background-notification: #000;
+$color-background-notification-gradient-1: $mid-1000; // menu low/high suggested
+$color-background-notification-gradient-2: $mid-400;  // menu high/low suggested
+$color-background-notification: $ds-neutral-000;
 
-$color-obj-button-base-1: $ds-neutral-400;
-$color-obj-button-base-2: $fore-900;
+$color-obj-button-base-1: $ds-gray-62; 
+$color-obj-button-base-2: $ds-gray-92;
 $color-obj-noty-buttons-hover: $mid-900;
 $color-obj-poll: $mid-900; // poll active part of bargraph
-$color-obj-tag_bubble-background: $mid-400; // These can equal "ninth" and "second"
-$color-obj-tag_bubble-foreground: $mid-900; // These can equal "ninth" and "second"
 
-$color-accent-border-blockquote: $back-500;
-$color-accent-border-box: $back-700;
+$color-obj-tag_bubble-background: $mid-200; // menu-2 suggested
+$color-obj-tag_bubble-foreground: $mid-900; // menu-9 suggested
+$color-obj-tag_bubble_snatched-background: $back-600;
+
+$color-accent-border-blockquote: $back-900; // Dotted
+$color-accent-border-box: $back-900;
 $color-accent-border-input: $ds-fx-low;
 $color-accent-border-input-active: $ds-fx-mid;
 $color-accent-border-tooltipster: $mid-800;
 $color-accent-border-popup: $mid-800;
+$color-accent-border-tableouter: $back-600-mid;
 $color-accent-border-tablerows: $back-600-low;
 $color-accent-border-tablerows-torrent: $back-600-mid;
 $color-accent-shadow-menutext: initial; // provisioned for derivative themes
@@ -169,6 +181,10 @@ $color-accent-forum-unread: #fed100;
 
 $color-accent-selection-background: $mid-800;
 $color-accent-selection-text: $fore-700; // usually #fff or $color-text-bold
+
+$ds-shadow-heavy: 0 10px 18px rgba(0, 0, 0, 0.55), 0 7px 7px rgba(0, 0, 0, 0.52), 0px -5px 9px rgba(0,0,0,0.32);
+$ds-shadow-raised:  0 10px 18px rgba(0, 0, 0, 0.25), 0 7px 7px rgba(0, 0, 0, 0.22);
+$ds-shadow-raised-hover:  0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
 
 // ////////////////////////////////////////////////////////////////////////////////
 // ICONS
@@ -187,7 +203,7 @@ $icon-message-read-locked-sticky: url("https://wally-crunk.github.io/svg/gazelle
 
 // Header Pulldown Menu (hamburger/chevron icon)
 
-$icon-menu-open-state: url("https://wally-crunk.github.io/svg/gazelle/menu.svg");
+$icon-menu-open-state: url("https://wally-crunk.github.io/svg/gazelle/menu-000.svg");
 $icon-menu-closed-state: url("https://wally-crunk.github.io/svg/gazelle/chevrons-down.svg");
 $icon-menu-pulldown-mobile: url("https://wally-crunk.github.io/svg/gazelle/chevrons-down.svg");
 
@@ -202,4 +218,5 @@ $icon-number-seeders: url("https://wally-crunk.github.io/svg/gazelle/arrow-up-ro
 $icon-number-leechers: url("https://wally-crunk.github.io/svg/gazelle/arrow-down-round.svg");
 
 
-
+// EOF
+// ////////////////////////////////////////////////////////////////////////////////

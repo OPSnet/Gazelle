@@ -3106,15 +3106,17 @@ ul#check:after {
   top: 64px;
   left: 50vw;
   transform: translateX(-50%);
+  z-index: 900;
   color: black;
   border: thick solid orangered;
   border-radius: 0.25rem;
   padding: 2rem 1rem 2rem 48px;
-  background: color-mix(in srgb, #f4f480, transparent 15%);
+  background: color-mix(in srgb, #f4f480, transparent 8%);
   background-image: url("https://wally-crunk.github.io/svg/gazelle/x.svg");
   background-repeat: no-repeat;
   background-position: 8px center;
   background-size: 32px;
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.55), 0 7px 7px rgba(0, 0, 0, 0.52), 0px -5px 9px rgba(0, 0, 0, 0.32);
 }
 
 

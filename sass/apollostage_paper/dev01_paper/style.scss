@@ -68,6 +68,20 @@ $back-800: #8D9091;
 $back-900: #808384;
 $back-1000: #727576;
 
+$johndeere-n200: #1A3D05;
+$johndeere-n100: #164706;
+$johndeere-000: #155006;
+$johndeere-100: #105E07;
+$johndeere-200: #137008;
+$johndeere-300: #228709;
+$johndeere-400: #399D0A;
+$johndeere-500: #55B00A;
+$johndeere-600: #74C20A;
+$johndeere-700: #96D10A;
+$johndeere-800: #BCE00A;
+$johndeere-900: #DDE709;
+$johndeere-1000: #EDDB08;
+
 // Backs
 $back-100: #EBEFF0;
 $back-200: #DEE2E2;
@@ -80,17 +94,17 @@ $back-800: #8D9091;
 $back-900: #808384;
 $back-1000: #727576;
 
-//Mids
-$mid-100: #65BC98;
-$mid-200: #55AE88;
-$mid-300: #4BA67F;
-$mid-400: #429E77;
-$mid-500: #3B9972;
-$mid-600: #35956D;
-$mid-700: #308E67;
-$mid-800: #2A8760;
-$mid-900: #247D59;
-$mid-1000: #1D714D;
+//Special Mids
+$mid-100: $johndeere-100; 
+$mid-200: $johndeere-200; 
+$mid-300: $johndeere-300; 
+$mid-400: $johndeere-400; 
+$mid-500: $johndeere-500; 
+$mid-600: $johndeere-600; 
+$mid-700: $johndeere-700; 
+$mid-800: $johndeere-800; 
+$mid-900: $johndeere-900; 
+$mid-1000:$johndeere-1000;
 
 //Fores
 $fore-100: #8E9FB3;

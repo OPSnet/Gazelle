@@ -79,7 +79,7 @@ $color-background-input: $back-400;
 $color-background-input-active: $back-500;
 $color-background-poll: $back-500;
 $color-background-popup: $back-300; // upload musicbrainz info
-$color-background-popup-warning: $ds-yellow;
+$color-background-popup-warning: color-mix(in srgb, $ds-yellow, transparent 8%);
 $color-background-searchbars: $back-300;
 $color-background-searchbars-field-focus: $back-100;
 $color-background-searchbars-surround: $back-500;
@@ -181,6 +181,10 @@ $color-accent-forum-unread: #fed100;
 
 $color-accent-selection-background: $mid-800;
 $color-accent-selection-text: $fore-700; // usually #fff or $color-text-bold
+
+$ds-shadow-heavy: 0 10px 18px rgba(0, 0, 0, 0.55), 0 7px 7px rgba(0, 0, 0, 0.52), 0px -5px 9px rgba(0,0,0,0.32);
+$ds-shadow-raised:  0 10px 18px rgba(0, 0, 0, 0.25), 0 7px 7px rgba(0, 0, 0, 0.22);
+$ds-shadow-raised-hover:  0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
 
 // ////////////////////////////////////////////////////////////////////////////////
 // ICONS

@@ -1,0 +1,90 @@
+/* APOLLOSTAGE SUNSET THEME */
+
+// DEFINE THEME COLORS AND ICONS
+
+// import basic colors as a backup:
+
+@import '../apollostage/_variables';
+
+// and override as follows:
+
+// set theme colors
+
+$direct-accent-primary: #e69f90;
+$color-background-base: #211f25;
+
+$color-background-table: #302d34;
+$color-background-table-secondary: #29262d;
+
+$color-background-form: #302d34;
+$color-text-anchor: #f4f4f4;
+$color-text-anchor-hover: #fad5cd;
+$color-text-base: #C4BBC1;
+$color-text-mono: #CFB0B0;
+
+// Ten color gradient:
+$color-menu-2: #ffb0a0;     // torrents
+$color-menu-3: #ff9e98;      // collages
+$color-menu-5:  #fe8691;    // requests
+$color-menu-5:  #f07c8e;     // forums
+$color-menu-6: #da7c92;      // irc
+$color-menu-7: #c47891;    // top10
+$color-mobilemenu-closed: #ab718d;                   // rules, also mobile menu header
+$color-menu-9: #8d6a87;      // wiki
+$color-menu-username: #6c6584;                	 // username menu ~ closed
+$color-menu-username-hover: #89849d;  // username menu ~ open
+$color-menu-userinfo: #5c6086;                      // VV pulldown menu ~ closed
+$color-menu-userinfo-hover: #7d809e;     // VV pulldown menu ~ open
+
+// mobile pulldown menu gradient
+
+$color-mobilemenu-userinfo-1:  #875e80; // mobile pulldown menu gradient 1
+$color-mobilemenu-userinfo-2:  #ef959c; // mobile pulldown menu gradient 2
+
+// notification gradient
+
+$color-background-gradient-1: #ff9e98;    // usually works well with 'third-child'
+$color-background-gradient-1: #c47891;    // usually works well with 'seventh-child'
+
+// these are GNDN: goes nowhere, does nothing
+
+$menu-background-color-1: #880d1e;  // unused
+$menu-background-color-2: #c47891;  // unused
+
+// formatting colors for page elements
+
+$color-background-blockquote: #38363d;
+$color-background-input: #3f3e46;
+$color-background-torrent: #38363d;
+$color-text-footer: #a4a4a4;
+$color-text-input: #d1d1d1;
+$color-text-ratio-redzone: #ed5454;
+$color-text-ratio-yellowzone: #e8be69;
+$color-accent-selection-background: rgb(217 130 111 / 60%);
+$color-background-poll: rgb(230 159 144 / 10%);
+
+// overrides these colors when called: for more theme flavor?
+
+$color-text-span-green: #7ac792;
+$color-text-span-blue: #5454ed;
+
+// accent color for upload categories (stripes)
+
+$color-accent-cats_music: #fd6659;
+$color-accent-cats_applications: #f02940;
+$color-accent-cats_audiobooks: #a54873;
+$color-accent-cats_comedy: #8b869c;
+$color-accent-cats_comics: #688187;
+$color-accent-cats_ebooks: #578f9d;
+$color-accent-cats_elearningvideos: #793555;
+
+// accent color for tag bubbles
+
+// These can equal "ninth" and "second"
+// or adjust contrast as desired to emphasize/de-emphaszie
+$color-obj-tag_bubble-background:  #8d6a87;
+$color-obj-tag_bubble-foreground:  #ffb0a0;
+
+@import '../apollostage/_base';
+
+// EOF
