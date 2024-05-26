@@ -944,16 +944,6 @@ table.no_grouping > tbody > tr.colhead > td:first-child + td {
   outline: 0;
 }
 
-.hidden {
-  position: absolute;
-  left: -10000px;
-}
-
-input.hidden {
-  position: absolute;
-  display: none;
-}
-
 .thin {
   width: 900px;
   margin: 0 auto;

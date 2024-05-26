@@ -607,16 +607,6 @@ table.no_grouping > tbody > tr.colhead > td:first-child + td {
   outline: 0;
 }
 
-.hidden {
-  position: absolute;
-  left: -10000px;
-}
-
-input.hidden {
-  position: absolute;
-  display: none;
-}
-
 /* Layout (Artist page) */
 
 div#flip_view_1 div#similar-artist .name {

@@ -378,19 +378,6 @@ ul.thin li {
   text-decoration: none;
 }
 
-/* IE doesn't appear to like a simple display:none in our header.
- * Random things start fucking up pretty badly. */
-
-.hidden {
-  left: -10000px;
-  position: absolute;
-}
-
-input.hidden {
-  display: none;
-  position: absolute;
-}
-
 /* Layout (Any page) */
 
 .thin {
@@ -593,10 +580,6 @@ table.slice {
 
 .elem_error {
   border: 3px solid #b25d5d;
-}
-
-.hidden {
-  display: none;
 }
 
 /* Layout (artist page) */

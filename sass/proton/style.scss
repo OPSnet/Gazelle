@@ -101,7 +101,6 @@ a img {
 }
 
 /* GENERAL */
-.hidden,
 .hide {
   display: none;
 }
@@ -503,7 +502,7 @@ ul#userinfo_username {
   display: inline;
 }
 
-#wrapper h1.hidden {
+#wrapper .site_name {
   display: block;
   height: 80px;
   width: 118px;
