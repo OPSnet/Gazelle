@@ -29,13 +29,13 @@
                 <td>Log Validation Report</td>
                 <td colspan="2">
 {% for line in tlog.report %}
-    {% if loop.first %}
+{%  if loop.first %}
                     <ul>
-    {% endif %}
+{%  endif %}
                         <li>{{ line }}</li>
-    {% if loop.last %}
+{%  if loop.last %}
                     </ul>
-    {% endif %}
+{%  endif %}
 {% endfor %}
                 </td>
             </tr>
@@ -46,7 +46,7 @@
                 <td>Manually Adjusted</td>
                 <td colspan="2"><input type="checkbox" name="adjusted"{{ checked(tlog.isAdjusted) }} />
 {% if tlog.isAdjusted %}
-                    (By: {{ adjuster|raw }})
+                    by {{ adjuster|raw }}
 {% endif %}
                 </td>
             </tr>
@@ -56,7 +56,7 @@
             </tr>
             <tr>
                 <td>Checksum Valid</td>
-                <td colspan="2"><input type="checkbox" name="adjusted_checksum"{{ checked(tlog.isAdjustedChecksumOk) }} /></td>
+                <td colspan="2"><input type="checkbox" name="adjusted_checksum"{{ checked(tlog.isActualChecksumOk) }} /></td>
             </tr>
             <tr>
                 <td>Adjustment Reason</td>
@@ -83,19 +83,16 @@
                 <td><label><input type="checkbox" name="test_and_copy" {{ checked(tlog.adjustment('test_and_copy')) }} data-score="10" /> Test &amp; Copy not used (-10 points)</td>
             </tr>
             <tr>
-                <td rowspan="3">Track Deductions<br />(total tracks concerned)</td>
-                <td>CRC Mismatches (-30 each)</td>
-                <td><input type="number" size="3" name="crc_mismatches" value="{{ tlog.adjustmentTrack('crc_mismatches') }}" data-score="30"/></td>
+                <td rowspan="3">Track Deductions<br />(number of tracks concerned)</td>
+                <td colspan="2"><input type="number" size="5" name="crc_mismatches" value="{{ tlog.adjustmentTrack('crc_mismatches') }}" data-score="30"/> CRC Mismatches (-30 each)</td>
             </tr>
             <tr>
                 <td style="display:none"></td>
-                <td>Suspicious Positions (-20 each)</td>
-                <td><input type="number" size="3" name="suspicious_positions" value="{{ tlog.adjustmentTrack('suspicious_positions') }}" data-score="20"/></td>
+                <td colspan="2"><input type="number" size="5" name="suspicious_positions" value="{{ tlog.adjustmentTrack('suspicious_positions') }}" data-score="20"/> Suspicious Positions (-20 each)</td>
             </tr>
             <tr>
                 <td style="display:none"></td>
-                <td>Timing Problems (-20 each)</td>
-                <td><input type="number" size="3" name="timing_problems" value="{{ tlog.adjustmentTrack('timing_problems') }}" data-score="20"/></td>
+                <td colspan="2"><input type="number" size="5" name="timing_problems" value="{{ tlog.adjustmentTrack('timing_problems') }}" data-score="20"/> Timing Problems (-20 each)</td>
             </tr>
             <tr>
                 <td rowspan="2">Non-Audio Deductions</td>

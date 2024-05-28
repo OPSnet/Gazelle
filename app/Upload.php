@@ -79,9 +79,8 @@ class Upload extends \Gazelle\Base {
 
     public function application(): string {
         return self::$twig->render('upload/application.twig', [
-            'description' => $this->textarea('desc', ''),
+            'description' => $this->releaseDescription(),
             'is_uploaded' => $this->isUploaded,
-            'torrent'     => $this->Torrent,
             'user'        => $this->user,
         ]);
     }
@@ -108,27 +107,24 @@ class Upload extends \Gazelle\Base {
 
     public function comic(): string {
         return self::$twig->render('upload/comic.twig', [
-            'description' => $this->textarea('desc', ''),
+            'description' => $this->releaseDescription(),
             'is_uploaded' => $this->isUploaded,
-            'torrent'     => $this->Torrent,
             'user'        => $this->user,
         ]);
     }
 
     public function ebook(): string {
         return self::$twig->render('upload/ebook.twig', [
-            'description' => $this->textarea('desc', ''),
+            'description' => $this->releaseDescription(),
             'is_uploaded' => $this->isUploaded,
-            'torrent'     => $this->Torrent,
             'user'        => $this->user,
         ]);
     }
 
     public function elearning(): string {
         return self::$twig->render('upload/elearning.twig', [
-            'description' => $this->textarea('desc', ''),
+            'description' => $this->releaseDescription(),
             'is_uploaded' => $this->isUploaded,
-            'torrent'     => $this->Torrent,
             'user'        => $this->user,
         ]);
     }

@@ -1,11 +1,13 @@
 {% from 'macro/form.twig' import disabled, selected %}
 <div class="thin">
-<h2>Upload</h2>
 {% if is_upload %}
+<h2>Upload</h2>
     <div style="text-align: center;">
         Your personal announce URL is:<br />
         <div style="margin: 0 auto;"><input type="text" value="{{ user.announceUrl }}" size="71" onclick="this.select();" readonly="readonly" /></div>
     </div>
+{% else %}
+<h2>Edit <a href="torrents.php?id={{ info.GroupID }}&torrentid={{ info.ID }}#torrent{{ info.ID }}">{{ info.Title }}</a></h2>
 {% endif %}
 {% if error %}
     <p class="upload-error">{{ error|raw }}</p>

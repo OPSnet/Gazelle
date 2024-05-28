@@ -1,76 +1,80 @@
 {% set total = list|length %}
 {% for log in list %}
-    {% if loop.first %}
+{%  if loop.first %}
 <table>
 <tr class="colhead_dark" style="font-weight: bold">
     <td>This torrent has {{ total }} log{{ total|plural }} with a total score of {{ log_score }}/100
-        {% if total > 1 and viewer.permitted('torrents_delete') %}
+{%      if total > 1 and viewer.permitted('torrents_delete') %}
         <span style="float: right; font-weight: normal"><a class="brackets" onclick="return confirm('This is permanent and irreversible. Missing logs can still be uploaded.');"
             href="torrents.php?action=removelogs&amp;torrentid={{ id }}&amp;auth={{ viewer.auth }}">Remove all logs</a></span><br />
-        {% endif %}
+{%      endif %}
     </td>
 </tr>
-    {% endif %}
+{%  endif %}
 <tr class="log_section">
     <td>
-    {% if viewer.permitted('users_mod') %}
+{%  if viewer.permitted('users_mod') %}
         <div style="padding: 10px; float: right"><a class="brackets" href="torrents.php?action=editlog&amp;torrentid={{ id }}&amp;logid={{ log.id }}">Edit Log</a>
         <a class="brackets" onclick="return confirm('Are you sure you want to deleted this log? There is NO undo!');"
             href="torrents.php?action=removelog&amp;torrentid={{ id }}&amp;logid={{ log.id }}&amp;auth={{ viewer.auth }}">Delete Log</a>
 
         </div>
-    {% endif %}
-    {% if log.has_riplog %}
+{%  endif %}
+{%  if log.has_riplog %}
         <div style="padding: 10px; float: left"><a class="brackets" href="view.php?type=riplog&amp;id={{ id }}.{{ log.id }}" target="_blank">View Raw Log</a></div>
-    {% endif %}
+{%  endif %}
     <br />
-    <br />
+    <br clear="both" />
 
-    {% if (not log.adjusted and not log.checksum) or (log.adjusted and not log.adjusted_checksum) %}
-    <blockquote>
+{%  if (not log.adjusted and not log.checksum) or (log.adjusted and not log.adjusted_checksum) %}
+    <div style="margin-left: 40px">
         <strong>Trumpable For:</strong>
         <br /><br />
         Bad/No Checksum(s)
-    </blockquote>
-    {% endif %}
+    </div>
+{%  endif %}
 
-    {% if log.adjustment_details %}
-    <blockquote>Log adjusted by {{ log.AdjustedBy|user_url }} from score {{ log.Score }} to {{ log.AdjustedScore }}
-        {% if log.AdjustmentReason %}
-        <br />Reason: {{ log.AdjustmentReason }}
-        {% endif %}
-        <br /><strong>Adjustment Details:</strong>
-        <ul class="nobullet">
-        {% for label, detail in log.adjustment_details %}
-            {% if label != 'tracks' %}
+{%  if log.adjustment_details %}
+    <div style="margin-left: 40px">
+        <div style="margin-top: 10px">Log adjusted by {{ log.AdjustedBy|user_url }}.</div>
+{%      if log.AdjustedScore != log.Score %}
+        Score changed from {{ log.Score }} to {{ log.AdjustedScore }}
+{%       endif %}
+{%      if log.AdjustmentReason %}
+        <div>Reason: {{ log.AdjustmentReason }}</div>
+{%      endif %}
+        <div style="margin-top: 10px"><strong>Adjustment Details:</strong></div>
+        <ul style="margin-top: 0">
+{%      for label, detail in log.adjustment_details %}
+{%          if label != 'tracks' %}
             <li>{{ detail }}</li>
-            {% endif %}
-        {% endfor %}
+{%          endif %}
+{%      endfor %}
         </ul>
-    </blockquote>
-    {% endif %}
+    </div>
+{%  endif %}
 
-    {% if log.details %}
+{%  if log.details %}
     <blockquote><strong>{% if log.adjusted %}Final {% endif %}Log validation report:</strong>
     <ul class="nobullet">
-        {% for detail in log.details %}
+{%      for detail in log.details %}
             <li>{{ detail }}</li>
-        {% endfor %}
+{%      endfor %}
     </ul>
     </blockquote>
-    {% endif %}
+{%  endif %}
 
     <blockquote>
         <pre style="white-space:pre-wrap">{{ log.html_log|raw }}</pre>
     </blockquote>
     </td>
 </tr>
-    {% if loop.last %}
+{%  if loop.last %}
 </table>
-    {% endif %}
+{%  endif %}
 {% else %}
     No logs found!
-    {% if viewer.permitted('torrents_delete') %}
+{%  if viewer.permitted('torrents_delete') %}
 &nbsp;<a class="brackets" href="torrents.php?action=removelogs&amp;torrentid={{ id }}&amp;auth={{ viewer.auth }}">Repair DB</a>
-    {% endif %}
+{%  endif %}
 {% endfor %}

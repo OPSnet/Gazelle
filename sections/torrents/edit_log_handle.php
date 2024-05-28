@@ -13,14 +13,15 @@ if (is_null($torrent)) {
     error(404);
 }
 
-$Adjusted          = isset($_POST['adjusted']);
-$AdjustedChecksum  = isset($_POST['adjusted_checksum']);
-$AdjustmentReason  = $_POST['adjustment_reason'];
-$AdjustedScore     = 100;
-$AdjustmentDetails = [];
+$adjusted          = false;
+$adjustedChecksum  = isset($_POST['adjusted_checksum']);
+$adjustmentReason  = $_POST['adjustment_reason'];
+$adjustedScore     = 100;
+$adjustmentDetails = [];
 
-if ($AdjustedChecksum != $torrent->logChecksum()) {
-    $AdjustmentDetails['checksum'] = 'Checksum manually ' . ($AdjustedChecksum ? 'validated' : 'invalidated');
+if ($adjustedChecksum != $torrent->logChecksum()) {
+    $adjusted = true;
+    $adjustmentDetails['checksum'] = 'Checksum manually ' . ($adjustedChecksum ? 'validated' : 'invalidated');
 }
 
 $Deductions = [
@@ -42,11 +43,12 @@ $Deductions = [
 
 foreach ($Deductions as [$tag, $deduction, $label]) {
     if (isset($_POST[$tag])) {
-        $AdjustedScore -= $deduction;
+        $adjusted = true;
+        $adjustedScore -= $deduction;
         if ($deduction > 0) {
             $label .= " (-{$deduction} points)";
         }
-        $AdjustmentDetails[$tag] = $label;
+        $adjustmentDetails[$tag] = $label;
     }
 }
 
@@ -60,12 +62,13 @@ foreach ($TrackDeductions as [$tag, $deduction, $label]) {
     $n = (int)($_POST[$tag] ?? 0);
     if ($n > 0) {
         $score = $n * $deduction;
-        $AdjustmentDetails[$tag] = "$n $label (-{$score} points)";
-        $AdjustmentDetails['tracks'][$tag] = $n;
-        $AdjustedScore -= $score;
+        $adjustmentDetails[$tag] = "$n $label (-{$score} points)";
+        $adjustmentDetails['tracks'][$tag] = $n;
+        $adjustedScore -= $score;
+        $adjusted = true;
     }
 }
 
-$torrent->adjustLogscore($LogID, $Adjusted, max(0, $AdjustedScore), $AdjustedChecksum, $Viewer->id(), $AdjustmentReason, $AdjustmentDetails);
+$torrent->adjustLogscore($LogID, $adjusted, max(0, $adjustedScore), $adjustedChecksum, $Viewer->id(), $adjustmentReason, $adjustmentDetails);
 
 header('Location: ' . $torrent->location());
