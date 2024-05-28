@@ -184,20 +184,21 @@ foreach ($current as $key => $value) {
     }
 }
 
-$logfileSummary = new Gazelle\LogfileSummary($_FILES['logfiles']);
-
 //******************************************************************************//
 //--------------- Start database stuff -----------------------------------------//
 
 $db->begin_transaction(); // It's all or nothing
 
-if ($logfileSummary->total()) {
-    $torrentLogManager = new Gazelle\Manager\TorrentLog(new Gazelle\File\RipLog(), new Gazelle\File\RipLogHTML());
-    $checkerVersion = Logchecker::getLogcheckerVersion();
-    foreach ($logfileSummary->all() as $logfile) {
-        $torrentLogManager->create($torrent, $logfile, $checkerVersion);
+if (isset($_FILES['logfiles'])) {
+    $logfileSummary = new Gazelle\LogfileSummary($_FILES['logfiles']);
+    if ($logfileSummary->total()) {
+        $torrentLogManager = new Gazelle\Manager\TorrentLog(new Gazelle\File\RipLog(), new Gazelle\File\RipLogHTML());
+        $checkerVersion = Logchecker::getLogcheckerVersion();
+        foreach ($logfileSummary->all() as $logfile) {
+            $torrentLogManager->create($torrent, $logfile, $checkerVersion);
+        }
+        $torrent->modifyLogscore();
     }
-    $torrent->modifyLogscore();
 }
 
 // Update info for the torrent
