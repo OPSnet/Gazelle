@@ -58,7 +58,7 @@
                 onSelect: null,
                 width: 'auto',
                 minChars: 1,
-                maxHeight: 300,
+                maxHeight: 500,
                 deferRequestBy: 0,
                 params: {},
                 formatResult: Autocomplete.formatResult,
