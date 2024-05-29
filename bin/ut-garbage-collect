@@ -12,21 +12,19 @@ require_once(__DIR__ . '/../lib/bootstrap.php');
 $db = Gazelle\DB::DB();
 
 // clean artists
+
+$db->prepared_query("SET foreign_key_checks = 0");
 $db->prepared_query("
-    DELETE aha
-    FROM artists_group ag
-    INNER JOIN artists_alias aa ON (ag.PrimaryAlias = aa.AliasID)
-    INNER JOIN artist_has_attr aha ON (aha.artist_id = ag.ArtistID)
-    WHERE aa.Name like 'phpunit.%'
-        OR aa.Name like 'phpunit artist merge%'
+    DELETE aa, ag
+    FROM artists_alias aa
+    INNER JOIN artists_group ag on (
+        ag.ArtistID = aa.ArtistID
+        AND ag.PrimaryAlias = aa.AliasID
+    )
+    WHERE aa.name regexp '^(phpunit (?:req|artist merge) |(?:qqqq|qqqb|qqbb|qbbb|bbbb)\.phpunit\.)[a-z]{6}$'
 ");
-$db->prepared_query("
-    DELETE ag, aa
-    FROM artists_group ag
-    INNER JOIN artists_alias aa ON (ag.PrimaryAlias = aa.AliasID)
-    WHERE aa.Name like 'phpunit.%'
-        OR aa.Name like 'phpunit artist merge%'
-");
+$db->prepared_query("SET foreign_key_checks = 1");
+
 $db->prepared_query("
     DELETE FROM bookmarks_artists ba WHERE NOT EXISTS(
         SELECT 1 FROM artists_group ag WHERE ag.ArtistID = ba.ArtistID
@@ -116,7 +114,7 @@ $db->prepared_query("
     SELECT g.ID as gid, t.ID as tid
     FROM torrents_group g
     LEFT JOIN torrents t on (t.GroupID = g.ID)
-    WHERE g.Name regexp '^(?:phpunit (?:category new|collfree|notify|reaper|request|seedbox|tgvote|torman) [a-z]{6}|php(?: split title|unit artist merge[12]) [a-z]{10}|Some [a-z]{8} songs)$'
+    WHERE g.Name regexp '^(?:phpunit (?:category new|collfree|notify|reaper|request|seedbox|tgvote|torman|torrent) [a-z]{6}|php(?: split title|unit artist merge[12]) [a-z]{10}|Some [a-z]{8} songs)$'
 ");
 $groupList   = $db->collect('gid', false);
 $torrentList = $db->collect('tid', false);
@@ -160,7 +158,7 @@ foreach ($db->collect(0, false) as $collageId) {
 $db->prepared_query("
     SELECT um.ID
     FROM users_main um
-    WHERE um.Username regexp '^(?:(?:(?:admin|bb|bo(?:nus(?:g|r|stat))?|collage|create|donor|download|inbox\.(?:recv|send)|forum|friend[1-3]|invitee?|mod|priv[12]|sitelog|tag|text|tgroup\.[au]|trk(?:fl)?|u(?:[1-3]|pload|ser(?:hist)?)|wiki)\.[a-z]{6}|tag\.[a-z]{8}|(?:admin|art(?:2|ist|y)|backlog|blog|collfree|comment|dnu|dupip|email[1-3]?|enc\.med|feat|fls|invite|ipv4|merge|mod|new(?:\.grp|s)|phpunit|re(?:aper|clab|g[1-5]|lease|portg?|q)|sbox|searchrep|spec|tag(?:no|2(?:no|yes))?|text|tg(?:cat|vote|man)|token|torman|torrent|trk(?:down|fl|free)?|um[123]|uploader|user|year|xva)\.[a-z]{10}|notf(?:\.(new|enc))?\.[^.]+)|spm_(?:fls|mod|sysop|user)_[a-z]{10})$'
+    WHERE um.Username regexp '^(?:(?:(?:admin|bb|bo(?:nus(?:g|r|stat))?|collage|create|donor|download|inbox\.(?:recv|send)|forum|friend[1-3]|invitee?|mod|priv[12]|sitelog|tag|text|tgroup\.[au]|trk(?:fl)?|u(?:[1-3]|pload|ser(?:hist)?)|wiki)\.[a-z]{6}|tag\.[a-z]{8}|(?:admin|art(?:2|ist|y)|backlog|blog|collfree|comment|dnu|dupip|email[1-3]?|enc\.med|feat|fls|invite|ipv4|merge|mod|nav|new(?:\.grp|s)|phpunit|re(?:aper|clab|g[1-5]|lease|portg?|q)|sbox|searchrep|spec|tag(?:no|2(?:no|yes))?|text|tg(?:cat|vote|man)|token|torman|torrent|trk(?:down|fl|free)?|ulink|um[123]|uploader|user|year|xva)\.[a-z]{10}|notf(?:\.(new|enc))?\.[^.]+)|spm_(?:fls|mod|sysop|user)_[a-z]{10})$'
 ");
 $userMan = new Gazelle\Manager\User;
 
@@ -175,7 +173,9 @@ foreach ($db->collect(0, false) as $userId) {
         try {
             echo "user {$user->label()}\n";
             $user->remove();
-        } catch (\Error) {}
+        } catch (\Error $e) {
+            echo "   fail {$e->getMessage()}\n";
+        }
     }
 }
 

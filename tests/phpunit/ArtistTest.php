@@ -518,6 +518,38 @@ class ArtistTest extends TestCase {
         $this->assertIsArray($payload['statistics'], 'artist-payload-statistics');
     }
 
+    public function testArtistAutocomplete(): void {
+        $manager = new \Gazelle\Manager\Artist();
+        $composer = null;
+        foreach (['qqqq', 'qqqb', 'qqbb', 'qbbb', 'bbbb'] as $auto) {
+            $name = "$auto.phpunit." . randomString(6);
+            if (is_null($composer)) {
+                $composer = $name;
+            }
+            $artist = $manager->create($name);
+            $this->artistIdList[] = $artist->id();
+            $tgroup = Helper::makeTGroupMusic(
+                $this->user,
+                'phpunit artist autocomp ' . randomString(10),
+                [[ARTIST_MAIN], [$name]],
+                ['punk'],
+            );
+            Helper::makeTorrentMusic($tgroup, $this->user);
+            $this->tgroupList[] = $tgroup;
+        }
+        $this->tgroupList[0]
+            ->addArtists([ARTIST_COMPOSER], [$composer], $this->user, $manager, new Gazelle\Log());
+        global $Cache;
+        $Cache->delete_multi([
+            $manager->autocompleteKey("%"),
+            $manager->autocompleteKey("qq"),
+            $manager->autocompleteKey("qqqq"),
+        ]);
+        $this->assertCount(0, $manager->autocompleteList("%"), 'artist-autocomp-wildcard');
+        $this->assertCount(3, $manager->autocompleteList("qq"), 'artist-autocomp-2');
+        $this->assertCount(1, $manager->autocompleteList("qqqq"), 'artist-autocomp-4');
+    }
+
     public function testArtistBookmark(): void {
         $name = 'phpunit.' . randomString(12);
         $manager = new \Gazelle\Manager\Artist();

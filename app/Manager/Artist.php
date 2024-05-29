@@ -130,6 +130,38 @@ class Artist extends \Gazelle\BaseManager {
         );
     }
 
+    public function autocompleteKey(string $prefix): string {
+        return "artist_autocomp_" . base64_encode(mb_strtolower($prefix));
+    }
+
+    public function autocompleteList(string $prefix): array {
+        $prefix = trim($prefix);
+        if ($prefix == '') {
+            return [];
+        }
+        $key = $this->autocompleteKey($prefix);
+        $list = self::$cache->get($key);
+        if ($list === false) {
+            self::$db->prepared_query("
+                SELECT a.ArtistID AS data,
+                    aa.Name       AS value
+                FROM artists_group AS a
+                INNER JOIN artists_alias        aa  ON (a.PrimaryAlias = aa.AliasID)
+                INNER JOIN torrents_artists     ta  ON (ta.AliasID = aa.AliasID)
+                INNER JOIN torrents             t   ON (t.GroupID = ta.GroupID)
+                INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
+                WHERE aa.Name LIKE concat(?, '%')
+                GROUP BY a.ArtistID, aa.Name
+                ORDER BY sum(tls.Snatched) DESC
+                LIMIT 20",
+                str_replace("%", "\\%", $prefix)
+            );
+            $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
+            self::$cache->cache_value($key, $list, 3600);
+        }
+        return $list;
+    }
+
     public function aliasUseTotal(int $aliasId): int {
         return (int)self::$db->scalar("
             SELECT count(*)
