@@ -295,12 +295,7 @@ class NotificationUploadTest extends TestCase {
         // create the ticket and pretend it is seeding
         $ticketManager = new Gazelle\Manager\NotificationTicket();
         $ticket = $ticketManager->create($this->torrent);
-        Gazelle\DB::DB()->prepared_query("
-            INSERT INTO xbt_files_users
-                   (fid, uid, useragent, peer_id, active, remaining, ip, timespent, mtime)
-            VALUES (?,   ?,   ?,         ?,       1, 0, '127.0.0.1', 1, unix_timestamp(now() - interval 5 second))
-            ",  $this->torrent->id(), $this->torrent->uploaderId(), 'ua-' . randomString(12), randomString(20)
-        );
+        Helper::generateTorrentSeed($this->torrent, $this->torrent->uploader());
 
         // handle the ticket
         $manager = new Gazelle\Manager\Notification();
@@ -324,12 +319,7 @@ class NotificationUploadTest extends TestCase {
 
         $ticketManager = new Gazelle\Manager\NotificationTicket();
         $ticket = $ticketManager->create($this->torrent);
-        Gazelle\DB::DB()->prepared_query("
-            INSERT INTO xbt_files_users
-                   (fid, uid, useragent, peer_id, active, remaining, ip, timespent, mtime)
-            VALUES (?,   ?,   ?,         ?,       1, 0, '127.0.0.1', 1, unix_timestamp(now() - interval 5 second))
-            ",  $this->torrent->id(), $this->torrent->uploaderId(), 'ua-' . randomString(12), randomString(20)
-        );
+        Helper::generateTorrentSeed($this->torrent, $this->torrent->uploader());
 
         // look at the pending stats
         $manager = new Gazelle\Manager\Notification();
@@ -393,12 +383,7 @@ class NotificationUploadTest extends TestCase {
 
         $ticketManager = new Gazelle\Manager\NotificationTicket();
         $ticket        = $ticketManager->create($this->torrent);
-        Gazelle\DB::DB()->prepared_query("
-            INSERT INTO xbt_files_users
-                   (fid, uid, useragent, peer_id, active, remaining, ip, timespent, mtime)
-            VALUES (?,   ?,   ?,         ?,       1, 0, '127.0.0.1', 1, unix_timestamp(now() - interval 5 second))
-            ",  $this->torrent->id(), $this->torrent->uploaderId(), 'ua-' . randomString(12), randomString(20)
-        );
+        Helper::generateTorrentSeed($this->torrent, $this->torrent->uploader());
 
         // handle the ticket
         $manager = new Gazelle\Manager\Notification();
@@ -430,12 +415,7 @@ class NotificationUploadTest extends TestCase {
         );
 
         $ticket = $ticketManager->create($newTorrent);
-        Gazelle\DB::DB()->prepared_query("
-            INSERT INTO xbt_files_users
-                   (fid, uid, useragent, peer_id, active, remaining, ip, timespent, mtime)
-            VALUES (?,   ?,   ?,         ?,       1, 0, '127.0.0.1', 1, unix_timestamp(now() - interval 5 second))
-            ",  $newTorrent->id(), $newTorrent->uploaderId(), 'ua-' . randomString(12), randomString(20)
-        );
+        Helper::generateTorrentSeed($newTorrent, $newTorrent->uploader());
         $manager->handleTicket($ticket, $this->torMan);
 
         $notifier = new Gazelle\Notification\Torrent($this->userList['new.grp']->id());
@@ -483,12 +463,7 @@ class NotificationUploadTest extends TestCase {
 
         // process the notifications
         $ticket = (new Gazelle\Manager\NotificationTicket())->create($torrent);
-        Gazelle\DB::DB()->prepared_query("
-            INSERT INTO xbt_files_users
-                   (fid, uid, useragent, peer_id, active, remaining, ip, timespent, mtime)
-            VALUES (?,   ?,   ?,         ?,       1, 0, '127.0.0.1', 1, unix_timestamp(now() - interval 5 second))
-            ",  $torrent->id(), $torrent->uploaderId(), 'ua-' . randomString(12), randomString(20)
-        );
+        Helper::generateTorrentSeed($torrent, $torrent->uploader());
         (new Gazelle\Manager\Notification())->handleTicket($ticket, $this->torMan);
 
         $search = new Gazelle\User\NotificationSearch(

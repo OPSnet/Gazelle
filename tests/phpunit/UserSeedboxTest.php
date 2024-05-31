@@ -129,13 +129,7 @@ class UserSeedboxTest extends TestCase {
 
     public function testUserSeederList(): void {
         $torrent = $this->torrentList[0];
-        $db = Gazelle\DB::DB();
-        $db->prepared_query("
-            INSERT INTO xbt_files_users
-                   (fid, uid, useragent, peer_id, active, remaining, ip, timespent, mtime)
-            VALUES (?,   ?,   ?,         ?,       1, 0, '127.0.0.1', 1, unix_timestamp(now() - interval 5 second))
-            ",  $torrent->id(), $this->user->id(), 'ua-' . randomString(12), randomString(20)
-        );
+        Helper::generateTorrentSeed($torrent, $this->user);
         $seederList = $torrent->seederList($this->user, 1, 0);
         $this->assertCount(1, $seederList, 'seedbox-user-seederlist');
     }

@@ -60,21 +60,11 @@ class TorrentTest extends TestCase {
 
         // a snatcher
         $this->userList['snatcher'] = Helper::makeUser('torrent.' . randomString(10), 'rent', clearInbox: true);
-        $db = Gazelle\DB::DB();
-        $db->prepared_query("
-            INSERT INTO xbt_snatched (uid, fid, IP, seedtime, tstamp)
-            VALUES                   (?,   ?, '127.0.0.1', 1, unix_timestamp(now()))
-            ", $this->userList['snatcher']->id(), $torrent->id()
-        );
+        Helper::generateTorrentSnatch($torrent, $this->userList['snatcher']);
 
         // a seeder
         $this->userList['seeder'] = Helper::makeUser('torrent.' . randomString(10), 'rent', clearInbox: true);
-        Gazelle\DB::DB()->prepared_query("
-            INSERT INTO xbt_files_users
-                   (fid, uid, useragent, peer_id, active, remaining, ip, timespent, mtime)
-            VALUES (?,   ?,   ?,         ?,       1, 0, '127.0.0.1', 1, unix_timestamp(now() - interval 5 second))
-            ",  $torrent->id(), $this->userList['seeder']->id(), 'ua-' . randomString(12), randomString(20)
-        );
+        Helper::generateTorrentSeed($torrent, $this->userList['seeder']);
 
         $name = $torrent->fullName();
         $path = $torrent->path();
