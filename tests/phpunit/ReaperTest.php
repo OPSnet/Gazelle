@@ -70,29 +70,6 @@ class ReaperTest extends TestCase {
 
     // --- HELPER FUNCTIONS ----
 
-    protected function generateReseed(Gazelle\Torrent $torrent, Gazelle\User $user): void {
-        $db = Gazelle\DB::DB();
-        $db->prepared_query("
-            UPDATE torrents_leech_stats SET last_action = now() WHERE TorrentID = ?
-            ", $torrent->id()
-        );
-        $db->prepared_query("
-            INSERT INTO xbt_files_users
-                   (fid, uid, useragent, peer_id, active, remaining, ip, timespent, mtime)
-            VALUES (?,   ?,   ?,         ?,       1, 0, '127.0.0.1', 1, unix_timestamp(now() - interval 1 hour))
-            ",  $torrent->id(), $user->id(), 'ua-' . randomString(12), randomString(20)
-        );
-    }
-
-    protected function generateSnatch(Gazelle\Torrent $torrent, Gazelle\User $user): void {
-        Gazelle\DB::DB()->prepared_query("
-            INSERT INTO xbt_snatched
-                   (fid, uid, tstamp, IP, seedtime)
-            VALUES (?,   ?,   unix_timestamp(now()), '127.0.0.1', 1)
-            ", $torrent->id(), $user->id()
-        );
-    }
-
     protected function modifyLastAction(Gazelle\Torrent $torrent, int $interval): void {
         Gazelle\DB::DB()->prepared_query("
             UPDATE torrents_leech_stats SET
@@ -253,7 +230,7 @@ class ReaperTest extends TestCase {
         $pm->remove();
 
         // reseed one of the torrents by the uploader
-        $this->generateReseed($this->torrentList[0], $this->torrentList[0]->uploader());
+        Helper::generateTorrentSeed($this->torrentList[0], $this->torrentList[0]->uploader());
         $this->torrentList[1]->setField('created', date('Y-m-d H:i:s'))->modify();
 
         // reset the time of the remaing never seeded alert back in time to hit
@@ -324,7 +301,7 @@ class ReaperTest extends TestCase {
             $this->modifyLastAction($torrent, NOTIFY_UNSEEDED_INITIAL_HOUR + 2);
             // pretend they were snatched
             foreach ($this->userList as $user) {
-                $this->generateSnatch($torrent, $user);
+                Helper::generateTorrentSnatch($torrent, $user);
             }
         }
 
@@ -381,7 +358,7 @@ class ReaperTest extends TestCase {
 
         // snatcher reseeds the first upload
         $this->modifyUnseededInterval($this->torrentList[0], NOTIFY_UNSEEDED_INITIAL_HOUR + 3);
-        $this->generateReseed($this->torrentList[0], $this->userList[1]);
+        Helper::generateTorrentSeed($this->torrentList[0], $this->userList[1]);
 
         // and wins the glory
         $bonus = $this->userList[1]->bonusPointsTotal();
@@ -501,7 +478,7 @@ class ReaperTest extends TestCase {
             $hour = NOTIFY_UNSEEDED_INITIAL_HOUR + 1;
             $torrent->setField('created', date('Y-m-d H:i:s', strtotime("-{$hour} hours")))->modify();
             $this->modifyLastAction($torrent, NOTIFY_UNSEEDED_INITIAL_HOUR + 2);
-            $this->generateSnatch($torrent, $this->userList[1]);
+            Helper::generateTorrentSnatch($torrent, $this->userList[1]);
         }
 
         // look for unseeded

@@ -176,6 +176,28 @@ class Helper {
         return $db->affected_rows();
     }
 
+    public static function generateTorrentSeed(\Gazelle\Torrent $torrent, \Gazelle\User $user): int {
+        $db = \Gazelle\DB::DB();
+        $db->prepared_query("
+            INSERT INTO xbt_files_users
+                   (fid, uid, useragent, peer_id, active, remaining, ip, timespent, mtime)
+            VALUES (?,   ?,   ?,         ?,       1, 0, '127.0.0.1', 1, unix_timestamp(now() - interval 5 second))
+            ",  $torrent->id(), $user->id(), 'ua-' . randomString(12), randomString(20)
+        );
+        return $db->affected_rows();
+    }
+
+    public static function generateTorrentSnatch(\Gazelle\Torrent $torrent, \Gazelle\User $user): int {
+        $db = \Gazelle\DB::DB();
+        $db->prepared_query("
+            INSERT INTO xbt_snatched
+                   (fid, uid, tstamp, IP, seedtime)
+            VALUES (?,   ?,   unix_timestamp(now()), '127.0.0.1', 1)
+            ", $torrent->id(), $user->id()
+        );
+        return $db->affected_rows();
+    }
+
     public static function makeUser(string $username, string $tag, bool $enable = false, bool $clearInbox = false): \Gazelle\User {
         $_SERVER['HTTP_USER_AGENT'] = 'phpunit';
         $user = (new Gazelle\UserCreator())
