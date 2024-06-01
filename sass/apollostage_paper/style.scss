@@ -7,9 +7,9 @@
 // import basic colors as a backup:
 @import '../apollostage/_variables';
 
-// must be after import.
+// debug slugs: must be after import.
 $debug-deriv: "Paper";
-$debug-deriv-slug: "dev01.1750";
+$debug-deriv-slug: "0601.0721";
 
 // ////////////////////////////////////////////////////////////////////////////////
 // COLORS
@@ -18,55 +18,43 @@ $debug-deriv-slug: "dev01.1750";
 // and Token -> Raw value
 
 // and override as follows: -- palettte.app was helpful for this
-$bob-100: #EBEFF0;
-$bob-200: #DEE2E2;
-$bob-300: #D0D4D5;
-$bob-400: #C2C6C7;
-$bob-500: #B5B9BA;
-$bob-600: #A7ABAC;
-$bob-700: #9A9E9F;
-$bob-800: #8D9091;
-$bob-900: #808384;
-$bob-1000: #727576;
-$gary-1100: #727676;
-$gary-1200: #5C6464;
-$gary-1300: #475350;
-$gary-1400: #35423B;
-$gary-1500: #243026;
-$mike-100: #65BC98;
-$mike-200: #55AE88;
-$mike-300: #4BA67F;
-$mike-400: #429E77;
-$mike-500: #3B9972;
-$mike-600: #35956D;
-$mike-700: #308E67;
-$mike-800: #2A8760;
-$mike-900: #247D59;
-$mike-1000: #1D714D;
-$fran-000: #0E151C;
-$fran-100: #192E47;
-$fran-300: #103764;
-$fran-400: #0D4184;
-$fran-500: #144B9F;
-$fran-600: #1F58BB;
-$fran-700: #2478DB;
-$fran-800: #2884F0;
-$fran-900: #99C8FF;
-$fran-1000: #CAE3FF;
-$gray-300: #727576;
-$yellow-300: #e3ba65;
-
-// Backs
-$back-100: #EBEFF0;
-$back-200: #DEE2E2;
-$back-300: #D0D4D5;
-$back-400: #C2C6C7;
-$back-500: #B5B9BA;
-$back-600: #A7ABAC;
-$back-700: #9A9E9F;
-$back-800: #8D9091;
-$back-900: #808384;
-$back-1000: #727576;
+// $bob-100: #EBEFF0;
+// $bob-200: #DEE2E2;
+// $bob-300: #D0D4D5;
+// $bob-400: #C2C6C7;
+// $bob-500: #B5B9BA;
+// $bob-600: #A7ABAC;
+// $bob-700: #9A9E9F;
+// $bob-800: #8D9091;
+// $bob-900: #808384;
+// $bob-1000: #727576;
+// $gary-1100: #727676;
+// $gary-1200: #5C6464;
+// $gary-1300: #475350;
+// $gary-1400: #35423B;
+// $gary-1500: #243026;
+// $mike-100: #65BC98;
+// $mike-200: #55AE88;
+// $mike-300: #4BA67F;
+// $mike-400: #429E77;
+// $mike-500: #3B9972;
+// $mike-600: #35956D;
+// $mike-700: #308E67;
+// $mike-800: #2A8760;
+// $mike-900: #247D59;
+// $mike-1000: #1D714D;
+// $fran-000: #0E151C;
+// $fran-100: #192E47;
+// $fran-300: #103764;
+// $fran-400: #0D4184;
+// $fran-500: #144B9F;
+// $fran-600: #1F58BB;
+// $fran-700: #2478DB;
+// $fran-800: #2884F0;
+// $fran-900: #99C8FF;
+// $fran-1000: #CAE3FF;
+// $gray-300: #727576;
+// $yellow-300: #e3ba65;
 
 // Backs
 $back-100: #EBEFF0;
@@ -92,6 +80,18 @@ $mid-800: #2A8760;
 $mid-900: #247D59;
 $mid-1000: #1D714D;
 
+//Menutheme ~ for base apollostage, same as mids
+ $menutheme-100: #003D2D; 
+ $menutheme-200: #004B38;
+ $menutheme-300: #005943;
+ $menutheme-400: #00674E;
+ $menutheme-500: #00745A;
+ $menutheme-600: #008265;
+ $menutheme-700: #008D6D;
+ $menutheme-800: #009777;
+ $menutheme-900: #00A280;
+ $menutheme-1000: #00AD89;
+
 //Fores
 $fore-100: #8E9FB3;
 $fore-200: #577AA4;
@@ -102,7 +102,7 @@ $fore-600: #0D3167;
 $fore-700: #123058;
 $fore-800: #162E49;
 $fore-900: #17212E;
-$fore-1000: #0D1012;
+$fore-1000: #0E0F0F;
 
 //Direct-Specialty
 
@@ -115,9 +115,10 @@ $fore-1000: #0D1012;
  $ds-yellow: #c9a612;
  $ds-fx-low: rgba(0,0,0, 0.15);
  $ds-fx-mid: rgba(0,0,0, 0.25);
- $ds-gray-05: hsl(178, 2.5%, 5%);  
+ $ds-gray-05: hsl(178, 100%, 5.1%);
  $ds-gray-52: hsl(181, 3.5%, 52%);  
  $ds-gray-72: hsl(183, 4.0%, 72%);
+ $ds-gray-99: hsl(120, 100%, 99.6%);
  
 // DEFINE FROM LOGICAL LAYOUT TO TOKENS
 
@@ -139,7 +140,6 @@ $color-background-table-row-th: $back-500;
 $color-background-table-row-odd: $back-300;
 $color-background-table-row-even: $back-200;
 $color-background-table-keyrows: $mid-300; // navigation row ~ "jump up to.."
-$color-background-table-secondary: orangered; // no longer used
 $color-background-table-torrenttable: $back-300; // also form field in focus
 $color-background-table-torrents-group: $back-600;
 $color-background-torrent: $mid-200; // edition in group-list
@@ -157,8 +157,8 @@ $color-text-important: $ds-red;
 $color-text-input: $fore-600; // for pre-populated inputs
 $color-text-input-active: $fore-900;
 $color-text-linkbox: $color-text-heading-anchor; // links in linkbox
-$color-text-menu: $fore-1000;
-$color-text-menu-hover: $ds-gray-05; // during pulldown
+$color-text-menu: $ds-gray-99; // new
+$color-text-menu-hover: $ds-gray-05; //new // during pulldown
 $color-text-mono: $fore-500;
 $color-text-notification-words: $fore-1000;
 $color-text-popup-anchor-hover: $mid-1000;
@@ -175,15 +175,15 @@ $color-text-tooltipster: $fore-400;
 $color-text-tooltipster-anchor: $fore-900;
 $color-text-tooltipster-anchor-hover: $fore-200;
 
-$color-menu-1: $mid-1000; // unused (could be home)
-$color-menu-2: $mid-100; // torrents
-$color-menu-3: $mid-200; // collages
-$color-menu-4: $mid-300; // requests
-$color-menu-5: $mid-400; // forums
-$color-menu-6: $mid-500; // irc
-$color-menu-7: $mid-600; // top10
-$color-menu-8: $mid-700; // rules
-$color-menu-9: $mid-800; // wiki
+$color-menu-1: $menutheme-1000; // unused (could be home)
+$color-menu-2: $menutheme-100; // torrents
+$color-menu-3: $menutheme-200; // collages
+$color-menu-4: $menutheme-300; // requests
+$color-menu-5: $menutheme-400; // forums
+$color-menu-6: $menutheme-500; // irc
+$color-menu-7: $menutheme-600; // top10
+$color-menu-8: $menutheme-700; // rules
+$color-menu-9: $menutheme-800; // wiki
 $color-menu-username: $mid-900; // username menu ~ closed
 $color-menu-userinfo: $mid-1000; // VV pulldown menu ~ closed
 $color-menu-hover: $mid-300;
@@ -235,6 +235,7 @@ $color-accent-selection-text: $fore-700; // usually #fff or $color-text-bold
 // ////////////////////////////////////////////////////////////////////////////////
 // ICONS
 
+// changing to #000 black version
 $icon-message-unread: url("https://wally-crunk.github.io/svg/gazelle/document-round-000.svg");
 $icon-message-unread-locked: url("https://wally-crunk.github.io/svg/gazelle/lock-round-000.svg");
 $icon-message-unread-sticky: url("https://wally-crunk.github.io/svg/gazelle/pin-round-000.svg");
@@ -248,14 +249,13 @@ $icon-message-read-locked-sticky: url("https://wally-crunk.github.io/svg/gazelle
 // Header Pulldown Menu (hamburger/chevron icon)
 // not changing, still dark background
 
-
 // Used in Header
-
-$logo-site-lockup: url("https://wally-crunk.github.io/svg/orpheus/ops-logo-lockup-whiteusage.svg");
-$logo-site-square: url("https://wally-crunk.github.io/svg/orpheus/ops-logo-loop-whiteusage.svg");
-
+// changing to light mode version
+$logo-site-lockup: url("https://wally-crunk.github.io/svg/orpheus/ops-logo-lockup-lightmode.svg");
+$logo-site-square: url("https://wally-crunk.github.io/svg/orpheus/ops-logo-loop-lightmode.svg");
 
 // Used on Mobile
+// changing to #000 black version
 $icon-number-snatches: url("https://wally-crunk.github.io/svg/gazelle/arrow-loop-000.svg");
 $icon-number-seeders: url("https://wally-crunk.github.io/svg/gazelle/arrow-up-round-000.svg");
 $icon-number-leechers: url("https://wally-crunk.github.io/svg/gazelle/arrow-down-round-000.svg");

@@ -1,90 +1,185 @@
 /* APOLLOSTAGE SUNSET THEME */
 
-// DEFINE THEME COLORS AND ICONS
+// ////////////////////////////////////////////////////////////////////////////////
+// SLUG/SETUP
 
 // import basic colors as a backup:
-
 @import '../apollostage/_variables';
 
 // and override as follows:
 
-// set theme colors
+// debug slugs: must be after import.
+$debug-deriv: "Sunset";
+$debug-deriv-slug: "1330";
 
-$direct-accent-primary: #e69f90;
-$color-background-base: #211f25;
+  
+// ////////////////////////////////////////////////////////////////////////////////
+// COLORS
 
-$color-background-table: #302d34;
-$color-background-table-secondary: #29262d;
+//Backs -- 100-600 are used
 
-$color-background-form: #302d34;
-$color-text-anchor: #f4f4f4;
-$color-text-anchor-hover: #fad5cd;
-$color-text-base: #C4BBC1;
-$color-text-mono: #CFB0B0;
+//Menu
+$menutheme-100: #ffb0a0;   
+$menutheme-200: #ff9e98;   
+$menutheme-300: #fe8691;   
+$menutheme-400: #f07c8e;   
+$menutheme-500: #da7c92;   
+$menutheme-600: #c47891;   
+$menutheme-700: #ab718d;   
+$menutheme-800: #8d6a87;   
+$menutheme-900: #6c6584;   
+$menutheme-1000: #5c6086;  
 
-// Ten color gradient:
-$color-menu-2: #ffb0a0;     // torrents
-$color-menu-3: #ff9e98;      // collages
-$color-menu-5:  #fe8691;    // requests
-$color-menu-5:  #f07c8e;     // forums
-$color-menu-6: #da7c92;      // irc
-$color-menu-7: #c47891;    // top10
-$color-mobilemenu-closed: #ab718d;                   // rules, also mobile menu header
-$color-menu-9: #8d6a87;      // wiki
-$color-menu-username: #6c6584;                	 // username menu ~ closed
-$color-menu-username-hover: #89849d;  // username menu ~ open
-$color-menu-userinfo: #5c6086;                      // VV pulldown menu ~ closed
-$color-menu-userinfo-hover: #7d809e;     // VV pulldown menu ~ open
+$back-100: #19181A;
+$back-200: #2A242C;
+$back-300: #342A33;
+$back-400: #3B2F36;
+$back-500: #423438;
+$back-600: #493B3D;
 
-// mobile pulldown menu gradient
+$fore-400: #8D869D;
+$fore-500: #A595AF;
+$fore-600: #BCA5BE;
+$fore-700: #CDB6C5;
+$fore-800: #DBC8D5;
+$fore-900: #DADDEA;
+$fore-1000: #F9ECEC; //#e69f90; //#F9ECEC; 
 
-$color-mobilemenu-userinfo-1:  #875e80; // mobile pulldown menu gradient 1
-$color-mobilemenu-userinfo-2:  #ef959c; // mobile pulldown menu gradient 2
+// midtones ~ reduced brightness <400 for background accents
+// >500 used on black backgrounds
+$midtone-100: #674242; //unused
+$midtone-200: #7B4848;
+$midtone-300: #84464A;
+$midtone-400: #D97081;
+$midtone-500: #F78DA6;
+$midtone-600: #EB90AE;
+$midtone-700: #DE93B7;
+$midtone-800: #D19DC8;
+$midtone-900: #A196C4;
+$midtone-1000:#757AAB;
 
-// notification gradient
+$ds-fiji: #b43477;
+$ds-bali: #9c4366;
+$ds-neutral-300: #a4a4a4;
+$ds-black: #000;
 
-$color-background-gradient-1: #ff9e98;    // usually works well with 'third-child'
-$color-background-gradient-1: #c47891;    // usually works well with 'seventh-child'
+// // Standard except where marked:
+// DEFINE FROM LOGICAL LAYOUT TO TOKENS
 
-// these are GNDN: goes nowhere, does nothing
+$color-background-base: $back-100;
+$color-background-blockquote: $back-400;
+$color-background-box: $back-500;
+$color-background-form: $back-200; // also boxes on frontpage
+$color-background-input: $back-400;
+$color-background-input-active: $back-500;
+$color-background-poll: $back-500;
+$color-background-searchbars: $back-300;
+$color-background-searchbars-field-focus: $back-100;
+$color-background-searchbars-surround: $back-500;
+$color-background-table: $back-200; // tables/forms without odd-even treatment
+$color-background-table-row-th: $back-500;
+$color-background-table-row-odd: $back-300;
+$color-background-table-row-even: $back-200;
+$color-background-table-torrenttable: $back-300; // also form field in focus
+$color-background-table-torrents-group: $back-600;
 
-$menu-background-color-1: #880d1e;  // unused
-$menu-background-color-2: #c47891;  // unused
+$color-background-torrent: $midtone-200; // edition in group-list
+$color-background-table-discog: $midtone-300; // navigation row ~ "jump down to.."
+$color-background-table-keyrows: $midtone-300; // navigation row ~ "jump up to.."
 
-// formatting colors for page elements
+$color-menu-1: $menutheme-1000; 
+$color-menu-2: $menutheme-100; 
+$color-menu-3: $menutheme-200; 
+$color-menu-4: $menutheme-300; 
+$color-menu-5: $menutheme-400; 
+$color-menu-6: $menutheme-500; 
+$color-menu-7: $menutheme-600; 
+$color-menu-8: $menutheme-700; 
+$color-menu-9: $menutheme-800; 
+$color-menu-username: $menutheme-900; 
+$color-menu-userinfo: $menutheme-1000; 
+$color-menu-hover: $menutheme-300;
+$color-menu-username-hover: $menutheme-900; 
+$color-menu-userinfo-hover: $menutheme-900; 
+$color-menu-fx-selection: $ds-fx-menutheme;
+$color-mobilemenu-userinfo-1: $menutheme-300; 
+$color-mobilemenu-userinfo-2: $menutheme-600; 
+$color-mobilemenu-closed: $menutheme-700; 
+$color-mobilemenu-shadow: $menutheme-500; 
 
-$color-background-blockquote: #38363d;
-$color-background-input: #3f3e46;
-$color-background-torrent: #38363d;
-$color-text-footer: #a4a4a4;
-$color-text-input: #d1d1d1;
-$color-text-ratio-redzone: #ed5454;
-$color-text-ratio-yellowzone: #e8be69;
-$color-accent-selection-background: rgb(217 130 111 / 60%);
-$color-background-poll: rgb(230 159 144 / 10%);
+$color-text-anchor-hover: $midtone-1000;
+$color-text-anchor: $fore-1000;
+$color-text-base: $fore-700;
+$color-text-bold: $fore-800;
+$color-text-button: $ds-gray-05;
+$color-text-footer: $ds-neutral-300;
+$color-text-heading-anchor: $fore-900; // changed
+$color-text-heading: $fore-700;
+$color-text-important-alt: $ds-green;
+$color-text-important: $ds-red;
+$color-text-input: $fore-600; // for pre-populated inputs
+$color-text-input-active: $fore-900;
+$color-text-linkbox: $midtone-800; // links in linkbox
+$color-text-menu: $ds-black; // changed
+$color-text-menu-hover: $fore-700; // during pulldown // changed
+$color-text-mono: $fore-500;
+$color-text-notification-words: $ds-black; // changed
+$color-text-popup-anchor-hover: $midtone-1000;
+$color-text-popup-anchor: $fore-900;
+$color-text-popup: $fore-700;
+$color-text-ratio-greenzone: $ds-green;
+$color-text-ratio-redzone: $ds-red;
+$color-text-ratio-yellowzone: $ds-yellow;
+$color-text-span-blue: hsl(235, 90%, 85%);
+$color-text-span-green: hsl(145, 90%, 70%);
+$color-text-span-red: $ds-red;
+$color-text-table-discog-titles: $midtone-900;
+$color-text-tooltipster: $midtone-600;
+$color-text-tooltipster-anchor: $midtone-800;
+$color-text-tooltipster-anchor-hover: $midtone-1000;
 
-// overrides these colors when called: for more theme flavor?
+$color-background-notification-gradient-1: $menutheme-200; // menu low/high suggested // changed
+$color-background-notification-gradient-2: $menutheme-600;  // menu high/low suggested // changed
+$color-background-notification: $ds-neutral-000;
 
-$color-text-span-green: #7ac792;
-$color-text-span-blue: #5454ed;
+$color-obj-button-base-1: $ds-gray-62; 
+$color-obj-button-base-2: $ds-gray-92;
+$color-obj-noty-buttons-hover: $midtone-900;
+$color-obj-poll: $midtone-900; // poll active part of bargraph
 
-// accent color for upload categories (stripes)
+$color-obj-tag_bubble-background: $midtone-200; // menu-2 suggested
+$color-obj-tag_bubble-foreground: $midtone-900; // menu-9 suggested
+$color-obj-tag_bubble_snatched-background: $back-600;
 
-$color-accent-cats_music: #fd6659;
-$color-accent-cats_applications: #f02940;
-$color-accent-cats_audiobooks: #a54873;
-$color-accent-cats_comedy: #8b869c;
-$color-accent-cats_comics: #688187;
-$color-accent-cats_ebooks: #578f9d;
-$color-accent-cats_elearningvideos: #793555;
+$color-accent-border-blockquote: $back-900; // Dotted
+$color-accent-border-box: $back-900;
+$color-accent-border-input: $ds-fx-low;
+$color-accent-border-input-active: $ds-fx-mid;
+$color-accent-border-tooltipster: $midtone-800;
+$color-accent-border-popup: $midtone-800;
+$color-accent-border-tableouter: $back-600-mid;
+$color-accent-border-tablerows: $back-600-low;
+$color-accent-border-tablerows-torrent: $back-600-mid;
+$color-accent-shadow-menutext: initial; // provisioned for derivative themes
 
-// accent color for tag bubbles
+$color-accent-cats_applications: silver;
+$color-accent-cats_audiobooks: cornflowerblue;
+$color-accent-cats_comedy: deepskyblue;
+$color-accent-cats_comics: gold;
+$color-accent-cats_ebooks: chocolate;
+$color-accent-cats_elearningvideos: mediumpurple;
+$color-accent-cats_music: darkslategray;
+$color-accent-forum-inline-last-read: $ds-fiji; // changed
+$color-accent-forum-unread: $ds-fiji; // changed
 
-// These can equal "ninth" and "second"
-// or adjust contrast as desired to emphasize/de-emphaszie
-$color-obj-tag_bubble-background:  #8d6a87;
-$color-obj-tag_bubble-foreground:  #ffb0a0;
+$color-accent-selection-background: rgba(217,130,111,0.6);  //changed
+$color-accent-selection-text: #fff; // changed
+
+$ds-shadow-heavy: 0 10px 18px rgba(0, 0, 0, 0.55), 0 7px 7px rgba(0, 0, 0, 0.52), 0px -5px 9px rgba(0,0,0,0.32);
+$ds-shadow-raised:  0 10px 18px rgba(0, 0, 0, 0.25), 0 7px 7px rgba(0, 0, 0, 0.22);
+$ds-shadow-raised-hover:  0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
 
 @import '../apollostage/_base';
 
 // EOF
+

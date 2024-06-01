@@ -1,113 +1,179 @@
 /* APOLLOSTAGE COFFEE THEME */
 /* 2024-05-16 */
 
-// DEFINE THEME COLORS AND ICONS
+// ////////////////////////////////////////////////////////////////////////////////
+// SLUG/SETUP
 
 // import basic colors as a backup:
-
 @import '../apollostage/_variables';
 
-// and override as follows:
+// debug slugs: must be after import.
+$debug-deriv: "coffee";
+$debug-deriv-slug: "0930";
+  
+// ////////////////////////////////////////////////////////////////////////////////
+// COLORS
 
-  $levelbb: #272524;
-  $levelaa: #302C2B;
-  $level01: #3D2C29;
-  $level02: #45322E;
-  $level03: #4E3833;
-  $level04: #563E37;
-  $level05: #5F443B;
-  $level06: #674A3F;
-  $level07: #6F5042;
-  $level08: #785746;
-  $level09: #805D49;
-  $level10: #89644C;
-  $text11: #B4825D;
-  $text12: #C0906A;
-  $text13: #CBA079;
-  $text14: #D7B18B;
-  $text15: #E4C6A6;
-  $text16: #EFDAC1;
-  $text17: #fffacd;
+//Backs -- 100-600 are used
 
-// define theme colors
+$back-100:  #1d1c1c;
+$back-200:  #222020;
+$back-300:  #272423;
+$back-400:  #2d2928;
+$back-500:  #322e2c;
+$back-600:  #3e3837;
 
-$direct-accent-primary: $text16;
-$color-background-base: #1d1c1d;
+$menutheme-1000: #3D2C29;
+$menutheme-900: #45322E;
+$menutheme-800: #4E3833;
+$menutheme-700: #563E37;
+$menutheme-600: #5F443B;
+$menutheme-500: #674A3F;
+$menutheme-400: #6F5042;
+$menutheme-300: #785746;
+$menutheme-200: #805D49;
+$menutheme-100:  #89644C;
 
-$color-background-table: $levelbb;
-$color-background-table-secondary: $level01;	// also form field in focus
-$color-background-input: $levelaa; 	            // also table-even-rows
-$color-background-form: $levelbb; 				// also boxes on frontpage
+$midtone-100: #3D2C29;
+$midtone-200: #45322E;
+$midtone-300: #4E3833;
+$midtone-400: #563E37;
+$midtone-500: #5F443B;
+$midtone-600: #674A3F;
+$midtone-700: #6F5042;
+$midtone-800: #785746;
+$midtone-900: #805D49;
+$midtone-1000:  #89644C;
 
-$color-text-input: $text14;
-$color-text-mono: $text14;
-$color-text-base: $text15;
-$color-text-bold: $text16;
-$color-text-anchor: $text17;
-$color-text-menu: $text17;
-$color-text-anchor-hover: $text13;
 
-// Ten color gradient:
+//Fores -- 400-1000 are used
 
-$color-menu-2: $level10;    // torrents
-$color-menu-3: $level09;     // collages
-$color-menu-5: $level08;    // requests
-$color-menu-5: $level07;     // forums
-$color-menu-6: $level06;     // irc
-$color-menu-7: $level05;   // top10
-$color-mobilemenu-closed: $level04;                  // rules, also mobile menu header
-$color-menu-9: $level03;     // wiki
-$color-menu-username: $level02;                  // username menu ~ closed
-$color-menu-username-hover: $level02; // username menu ~ open
-$color-menu-userinfo: $level01;                     // VV pulldown menu ~ closed
-$color-menu-userinfo-hover: $level03;    // VV pulldown menu ~ open
+$fore-400:  #A47A5A;
+$fore-500:  #B38D6F;
+$fore-600:  #C2A285;
+$fore-700:  #D1B89E;
+$fore-800:  #E0CDB8;
+$fore-900:  #EFE3D5;
+$fore-1000: #FFFCF6;
 
-// mobile pulldown menu gradient
+ 
+$ds-rawsienna: #C98258;
 
-$color-mobilemenu-userinfo-1: $level09;    // mobile pulldown menu gradient 1
-$color-mobilemenu-userinfo-2: $level03;    // mobile pulldown menu gradient 2
+// DEFINE FROM LOGICAL LAYOUT TO TOKENS
 
-// notification gradient
+$color-background-base: $back-100;
+$color-background-blockquote: $back-400;
+$color-background-box: $back-500;
+$color-background-form: $back-200; // also boxes on frontpage
+$color-background-input: $back-400;
+$color-background-input-active: $back-500;
+$color-background-poll: $back-500;
+$color-background-searchbars: $back-300;
+$color-background-searchbars-field-focus: $back-100;
+$color-background-searchbars-surround: $back-500;
+$color-background-table: $back-200; // tables/forms without odd-even treatment
+$color-background-table-row-th: $back-500;
+$color-background-table-row-odd: $back-300;
+$color-background-table-row-even: $back-200;
+$color-background-table-secondary: orangered; // no longer used
+$color-background-table-torrenttable: $back-300; // also form field in focus
+$color-background-table-torrents-group: $back-600;
 
-$color-background-gradient-1: $level09;	// usually works well with 'third-child'
-$color-background-gradient-1: $level03;    // usually works well with 'seventh-child'
+$color-background-torrent: $midtone-200; // edition in group-list
+$color-background-table-discog: $midtone-300; // navigation row ~ "jump down to.."
+$color-background-table-keyrows: $midtone-300; // navigation row ~ "jump up to.."
 
-// these are GNDN: goes nowhere, does nothing
+$color-menu-1: $menutheme-1000; // unused (could be home)
+$color-menu-2: $menutheme-100; // torrents
+$color-menu-3: $menutheme-200; // collages
+$color-menu-4: $menutheme-300; // requests
+$color-menu-5: $menutheme-400; // forums
+$color-menu-6: $menutheme-500; // irc
+$color-menu-7: $menutheme-600; // top10
+$color-menu-8: $menutheme-700; // rules
+$color-menu-9: $menutheme-800; // wiki
+$color-menu-username: $menutheme-900; // username menu ~ closed
+$color-menu-userinfo: $menutheme-1000; // VV pulldown menu ~ closed
+$color-menu-hover: $menutheme-300;
+$color-menu-username-hover: $menutheme-900; // username menu ~ open
+$color-menu-userinfo-hover: $menutheme-900; // VV pulldown menu ~ open
+$color-menu-fx-selection: $ds-fx-menutheme;
+$color-mobilemenu-userinfo-1: $menutheme-400; // mobile pulldown menu gradient 1
+$color-mobilemenu-userinfo-2: $menutheme-900; // mobile pulldown menu gradient 2
+$color-mobilemenu-closed: $menutheme-700; // rules, also mobile menu header
+$color-mobilemenu-shadow: $menutheme-500; //mobile menu
 
-$menu-background-color-1: #880D1E;  // noop
-$menu-background-color-2: #DD2D4A;  // noop
+$color-text-anchor-hover: $midtone-1000;
+$color-text-anchor: $fore-1000;
+$color-text-base: $fore-700;
+$color-text-bold: $fore-800;
+$color-text-button: $ds-gray-05;
+$color-text-footer: $ds-neutral-300;
+$color-text-heading-anchor: $fore-400; //uniqueue
+$color-text-heading: $fore-700;
+$color-text-important-alt: $ds-green;
+$color-text-important: $ds-red;
+$color-text-input: $fore-600; // for pre-populated inputs
+$color-text-input-active: $fore-900;
+$color-text-linkbox: $midtone-800; // links in linkbox
+$color-text-menu: $fore-1000;
+$color-text-menu-hover: $fore-700; // during pulldown // changed
+$color-text-mono: $fore-500;
+$color-text-notification-words: $fore-1000;
+$color-text-popup-anchor-hover: $midtone-1000;
+$color-text-popup-anchor: $fore-900;
+$color-text-popup: $fore-700;
+$color-text-ratio-greenzone: $ds-green;
+$color-text-ratio-redzone: $ds-red;
+$color-text-ratio-yellowzone: $ds-yellow;
+$color-text-span-blue: hsl(235, 90%, 85%);
+$color-text-span-green: hsl(145, 90%, 70%);
+$color-text-span-red: $ds-red;
+$color-text-table-discog-titles: $midtone-900;
+$color-text-tooltipster: $midtone-600;
+$color-text-tooltipster-anchor: $midtone-800;
+$color-text-tooltipster-anchor-hover: $midtone-1000;
 
-// formatting colors for page elements
+$color-background-notification-gradient-1: $midtone-1000; // menu low/high suggested
+$color-background-notification-gradient-2: $midtone-400;  // menu high/low suggested
+$color-background-notification: $ds-neutral-000;
 
-$color-background-blockquote: $level01;
-$color-background-torrent: $levelaa;
-$color-text-footer: #949494;
-$color-text-ratio-redzone: #e74e4e;
-$color-text-ratio-yellowzone: #e1b661;
-$color-accent-selection-background: rgba(180, 160, 139, 0.6);
-$color-background-poll: rgba(197, 176, 155, 0.1);
+$color-obj-button-base-1: $ds-gray-62; 
+$color-obj-button-base-2: $ds-gray-92;
+$color-obj-noty-buttons-hover: $midtone-900;
+$color-obj-poll: $midtone-900; // poll active part of bargraph
 
-// overrides these colors when called: for more theme flavor?
+$color-obj-tag_bubble-background: $midtone-200; // menu-2 suggested
+$color-obj-tag_bubble-foreground: $midtone-900; // menu-9 suggested
+$color-obj-tag_bubble_snatched-background: $back-600;
 
-$color-text-span-green: #4eb44e;
-$color-text-span-blue: #4e4ee7;
+$color-accent-border-blockquote: $back-900; // Dotted
+$color-accent-border-box: $back-900;
+$color-accent-border-input: $ds-fx-low;
+$color-accent-border-input-active: $ds-fx-mid;
+$color-accent-border-tooltipster: $midtone-800;
+$color-accent-border-popup: $midtone-800;
+$color-accent-border-tableouter: $back-600-mid;
+$color-accent-border-tablerows: $back-600-low;
+$color-accent-border-tablerows-torrent: $back-600-mid;
+$color-accent-shadow-menutext: initial; // provisioned for derivative themes
 
-// accent color for upload categories (stripes)
+$color-accent-cats_applications: silver;
+$color-accent-cats_audiobooks: cornflowerblue;
+$color-accent-cats_comedy: deepskyblue;
+$color-accent-cats_comics: gold;
+$color-accent-cats_ebooks: chocolate;
+$color-accent-cats_elearningvideos: mediumpurple;
+$color-accent-cats_music: darkslategray;
+$color-accent-forum-inline-last-read: $ds-rawsienna; // changed
+$color-accent-forum-unread: $ds-rawsienna; // changed
 
-$color-accent-cats_music: #fd6659;
-$color-accent-cats_applications: #f02940;
-$color-accent-cats_audiobooks: #a54873;
-$color-accent-cats_comedy: #8b869c;
-$color-accent-cats_comics: #688187;
-$color-accent-cats_ebooks: #578f9d;
-$color-accent-cats_elearningvideos: #793555;
+$color-accent-selection-background: $midtone-800;
+$color-accent-selection-text: $fore-700; // usually #fff or $color-text-bold
 
-// accent color for tag bubbles
-
-// These can equal "ninth" and "second"
-// or adjust contrast as desired to emphasize/de-emphaszie
-$color-obj-tag_bubble-background: $level04; 
-$color-obj-tag_bubble-foreground: $text12; 
+$ds-shadow-heavy: 0 10px 18px rgba(0, 0, 0, 0.55), 0 7px 7px rgba(0, 0, 0, 0.52), 0px -5px 9px rgba(0,0,0,0.32);
+$ds-shadow-raised:  0 10px 18px rgba(0, 0, 0, 0.25), 0 7px 7px rgba(0, 0, 0, 0.22);
+$ds-shadow-raised-hover:  0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
 
 @import '../apollostage/_base';
 

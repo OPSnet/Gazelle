@@ -1,6 +1,6 @@
 /* ######################################################################## */
 /* APOLLOSTAGE THEME */
-/* version 2024.05.23
+/* version 2024.05.30
 /* ######################################################################## */
 
 // SASS/SCSS NOTE
@@ -19,9 +19,10 @@
 /* */
 /* */
 
-/*  # 2024-05-16 - Updated by rubric_alert with hawkeye and community feedback. */
+/*  # 2024-05-30 - Updated by rubric_alert with hawkeye and community feedback. */
 /*  # Fix: mobile menu, category stripes;  
 /*  # Feature: Add SVGs, tag bubbles, italic fonts and more;
+/*  # Feature: Added new light mode theme;
 /*  # Chore: Organized and documented the SCSS. */
 /*  For full changelog: see uncompiled SASS file. */
 
@@ -77,6 +78,10 @@
 //
 //   Fix: Artist pages, related artists voting buttons aligned incorrectly
 //
+//   Chore: Rewrote color support so all colors are defined by tokens in one place.
+//
+//   Feature:  Added 'Upload failure' warnings (both styling and popups).
+//
 //   Chore: Added comments where feasible.
 //   
 //   Chore: Changelog started.
@@ -93,6 +98,7 @@
 /* # 0 GENERAL SETUP */
 /* ## 0.1 Housekeeping and font loading */
 /* ## 0.2 Global variables */
+/* ## 0.3 Debugging tools */
 /* # 1 DESKTOP VIEW */
 /* ## 1.1 Desktop view, handling of all classes */
 /* ## 1.2 Reserved */
@@ -188,8 +194,8 @@
   --phone-screen-size: 575px; 
 }
     
-/* ## 0.3 Debugging */
-/* various 'debug' features are avail in this doc */
+/* ## 0.3 Debugging Tools */
+/* various 'debug' features are avail in this doc elsewhere */
 
 li#nav_upload.brackets a:before {
   content: $debug-slug + ' ' + $debug-deriv-slug;
@@ -1599,7 +1605,8 @@ div#discog_table td.td_info:not(span.torrent_links_block) > a {
   content: "⇩ Jump to" !important;
   font-weight: 600;
   position: absolute;
-  left: 4%;
+  margin-left: -9rem;
+  margin-top: -0.25rem;
 }
 
 #discog_table > div.box.center a {
@@ -2125,7 +2132,7 @@ body#collage .cats_music {
 
 #noty_bottomRight_layout_container:hover {
   box-shadow: $ds-shadow-raised-hover;
-  transform: translateY(-5px);
+  transform: translateY(-3.5px);
 }
 
 /* first row of each box */
@@ -3472,24 +3479,46 @@ tr.snatched_torrent div.tags:before {
 
 div.upload-error:after,
 ul#check:after {
-  content: 'Warning!  There were one or more errors in your submission. Check below for error messages.';
+  content: "Warning!  There were one or more errors in your submission. Check below for error messages.";
   font-weight: 700;
   position: absolute;
-  top: calc(4*16px);
+  top: 64px;
   left: 50vw;
   transform: translateX(-50%);
   z-index: 900;
   color: black;
-  border: thick solid orangered;
-  border-radius: .25rem;
-  padding: 2rem 1rem 2rem 48px;
-  background: $color-background-popup-warning;
-  background-image: url('https://wally-crunk.github.io/svg/gazelle/x.svg');
-  background-repeat:no-repeat;
+  border: thick solid $color-accent-border-error;
+  border-radius: 0.25rem;
+  padding: 1rem 1rem 1rem 48px;
+  background: $color-background-error;
+  background-image: url("https://wally-crunk.github.io/svg/gazelle/x.svg");
+  background-repeat: no-repeat;
   background-position: 8px center;
-  background-size: 32px; 
-  box-shadow: $ds-shadow-heavy;
+  background-size: 32px;
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.55), 0 7px 7px rgba(0, 0, 0, 0.52), 0px -5px 9px rgba(0, 0, 0, 0.32);
 }
+
+.upload-error,
+ul#check.nobullet > *
+{
+  border: thick solid $color-accent-border-error;
+  padding: 1rem 1rem 1rem 48px;
+  background: $color-background-error;
+  background-image: url("https://wally-crunk.github.io/svg/gazelle/x.svg");
+  background-repeat: no-repeat;
+  background-position: 8px center;
+  background-size: 32px;
+}
+
+.upload-error,
+ul#check.nobullet *,
+ul#check.nobullet > *
+{
+  color: $color-text-error !important;
+  font-size: 12px;
+  font-weight: 700;
+}
+ 
 
 /*# sourceMappingURL=styles.css.map */
 
