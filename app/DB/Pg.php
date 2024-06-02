@@ -60,6 +60,24 @@ class Pg {
         return $this->pdo->pgsqlCopyFromArray($table, $processedRows, $delimiter, addslashes($nullAs), implode(',', $colList));
     }
 
+    /**
+     * Perform an insert or update and return the RETURNING clause
+     * Returns `false` if the execute() failed
+     */
+    public function writeReturning(string $query, ...$args): bool|int|string|float {
+        $st = $this->prepare($query);
+        return $st->execute([...$args]) ? $st->fetch(\PDO::FETCH_NUM)[0] : false;
+    }
+
+    /**
+     * Perform an insert or update and return the RETURNING clause,
+     * when there is more than one item returned
+     */
+    public function writeReturningRow(string $query, ...$args): array {
+        $st = $this->prepare($query);
+        return $st->execute([...$args]) ? $st->fetch(\PDO::FETCH_NUM) : [];
+    }
+
     protected function fetchRow(string $query, int $mode, ...$args): array {
         $st = $this->pdo->prepare($query);
         if ($st !== false && $st->execute([...$args])) {

@@ -57,6 +57,7 @@ class Session extends \Gazelle\BaseUser {
             INSERT INTO user_last_access_delta (user_id) VALUES (?)
             ", $this->user->id()
         );
+        (new History($this->user))->registerSiteIp($ipaddr);
 
         self::$db->prepared_query("
             UPDATE users_sessions SET
@@ -71,6 +72,7 @@ class Session extends \Gazelle\BaseUser {
                $browser['OperatingSystem'], $browser['OperatingSystemVersion'],
                $this->user->id(), $sessionId
         );
+
         self::$cache->delete_value('users_sessions_' . $this->user->id());
         $this->info = [];
         return true;

@@ -19,7 +19,7 @@ final class IpHistory extends AbstractMigration {
             );
         ");
         $this->execute("
-            create table ip_history(
+            create table ip_history (
                 id_user int not null,
                 ip inet not null,
                 data_origin data_origin_t not null,

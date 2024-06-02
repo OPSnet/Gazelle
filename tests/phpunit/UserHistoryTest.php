@@ -69,4 +69,10 @@ class UserHistoryTest extends TestCase {
         $this->assertEquals(1, $history->resetEmail($email, '127.2.3.4'), 'email-reset-action');
         $this->assertEquals($email, $history->email(new \Gazelle\Search\ASN())[0]['email'], 'email-reset-address');
     }
+
+    public function testIpHistory(): void {
+        $history = new \Gazelle\User\History($this->userList[0]);
+        $this->assertEquals(1, $history->registerSiteIp('127.10.11.12'), 'ipadd-register');
+        $this->assertEquals(2, $history->registerSiteIp('127.10.11.12'), 'ipaddr-reregister');
+    }
 }
