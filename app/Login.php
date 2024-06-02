@@ -162,21 +162,14 @@ class Login extends Base {
                 values (?,       ?,  'login-fail')
                 on conflict (id_user, ip, data_origin) do update set
                     total = ip_history.total + 1,
-                    seen = tstzrange(lower(ip_history.seen), now())
+                    seen = tstzrange(lower(ip_history.seen), now(), '[]')
                 ", $user->id(), $this->ipaddr
             );
             return $userMan->findById($user->id());
         }
 
-        $this->pg()->prepared_query("
-            insert into ip_history
-                   (id_user, ip, data_origin)
-            values (?,       ?,  'site')
-            on conflict (id_user, ip, data_origin) do update set
-                total = ip_history.total + 1,
-                seen = tstzrange(lower(ip_history.seen), now())
-            ", $user->id(), $this->ipaddr
-        );
+        (new User\History($user))->registerSiteIp($this->ipaddr);
+
         // We have a user!
         return $user;
     }

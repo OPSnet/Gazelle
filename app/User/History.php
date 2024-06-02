@@ -153,6 +153,61 @@ class History extends \Gazelle\BaseUser {
         return $affected;
     }
 
+    public function registerSiteIp(string $ipaddr, int $delay = 86_400 * 120): int {
+        // I had initially hoped that it would be possible to do this:
+        //
+        // insert into ip_site_history (id_user, ip) values (2, '2.2.2.2')
+        // on conflict (id_user, ip) do update set
+        //    total = EXCLUDED.total + 1,
+        //    seen = EXCLUDED.seen
+        //        + case when upper(EXCLUDED.seen) > now() - '1 day'::interval
+        //        then tstzmultirange(tstzrange(upper(EXCLUDED.seen), now(), '[]'))
+        //        else tstzmultirange(tstzrange(now(), now(), '[]'))
+        //    end;
+        //
+        // but for some reason, total is never incremented beyond 2 and seen is
+        // clobbered by the last tstzrange. Some day I will figure this out, in
+        // the meantime, this roundabout technique will have to do – Spine
+
+        $this->pg()->pdo()->beginTransaction();
+        $recent = $this->pg()->scalar("
+            select upper(seen) > now() - '1 second'::interval * ? as recent
+            from ip_site_history
+            where id_user = ?
+                and ip = ?
+            ", $delay, $this->id(), $ipaddr
+        );
+        $total = match ($recent) {
+            true => $this->pg()->writeReturning("
+                update ip_site_history set
+                    seen = seen + tstzmultirange(tstzrange(upper(seen), now(), '[]')),
+                    total = total + 1
+                where id_user = ?
+                and ip = ?
+                returning total
+                ", $this->id(), $ipaddr
+            ),
+            false => $this->pg()->writeReturning("
+                update ip_site_history set
+                    seen = seen + tstzmultirange(tstzrange(now(), now(), '[]')),
+                    total = total + 1
+                where id_user = ?
+                and ip = ?
+                returning total
+                ", $this->id(), $ipaddr
+            ),
+            default => $this->pg()->writeReturning("
+                insert into ip_site_history
+                       (id_user, ip)
+                values (?,       ?)
+                returning total
+                ", $this->id(), $ipaddr
+            ),
+        };
+        $this->pg()->pdo()->commit();
+        return (int)$total;
+    }
+
     public function siteIPv4(\Gazelle\Search\ASN $asn): array {
         $dir = $this->direction === 'down' ? 'DESC' : 'ASC';
         $orderBy = match ($this->column) {
@@ -212,6 +267,10 @@ class History extends \Gazelle\BaseUser {
     public function resetIp(): int {
         $n = $this->pg()->prepared_query("
             delete from ip_history where id_user = ?
+            ", $this->id()
+        );
+        $n += $this->pg()->prepared_query("
+            delete from ip_site_history where id_user = ?
             ", $this->id()
         );
         self::$db->prepared_query("
