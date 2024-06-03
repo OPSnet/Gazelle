@@ -192,14 +192,15 @@ if (!$file || !preg_match('/^[a-z][a-z0-9_]+$/', $Document)) {
 try {
     require_once($file);
 } catch (Gazelle\DB\MysqlException $e) {
+    Gazelle\DB::DB()->rollback();  // if there was an ongoing transaction, abort it
     if (DEBUG_MODE || (isset($Viewer) && $Viewer->permitted('site_debug'))) {
         echo $Twig->render('error-db.twig', [
             'message' => $e->getMessage(),
             'trace'   => str_replace(SERVER_ROOT . '/', '', $e->getTraceAsString()),
         ]);
     } else {
-        $Debug->saveError($e);
-        error("That is not supposed to happen, please send a Staff Message to \"Staff\" for investigation.");
+        $id = $Debug->saveError($e);
+        error("That is not supposed to happen, please create a thread in the Bugs forum explaining what you were doing and referencing Error ID $id");
     }
 } catch (\Exception $e) {
     $Debug->saveError($e);
