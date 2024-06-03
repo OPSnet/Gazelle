@@ -335,7 +335,7 @@ class TGroup extends BaseObject {
 
     public function cover(): string {
         return is_null($this->image())
-            ? (STATIC_SERVER . '/common/noartwork/' . strtolower($this->categoryName()) . ".png")
+            ? (STATIC_SERVER . '/common/noartwork/' . CATEGORY_ICON[$this->categoryId() - 1])
             : $this->image();
     }
 
