@@ -155,8 +155,8 @@ class Debug {
         );
     }
 
-    public function saveError(\Exception $e): void {
-        $this->saveCase(
+    public function saveError(\Exception $e): int {
+        return $this->saveCase(
             $e->getMessage() . "\n"
             . str_replace(SERVER_ROOT . '/', '', $e->getTraceAsString())
         );
