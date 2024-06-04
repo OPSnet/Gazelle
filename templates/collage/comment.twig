@@ -10,10 +10,8 @@
     </div>
 
 {%- include 'comment/thread.twig' with {
-    'action':    'take_post',
-    'id':        collage.id,
+    'object':    collage,
     'comment':   comment,
-    'name':      'pageid',
     'paginator': paginator,
     'subbed':    is_subscribed,
     'textarea':  textarea,

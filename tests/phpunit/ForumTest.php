@@ -689,4 +689,23 @@ class ForumTest extends TestCase {
         $this->assertCount(0, $manager->threadTransitionList($this->userList['specific'], $pinned), 'forum-trans-thread-specific-pinned');
         $this->assertCount(0, $manager->threadTransitionList($this->userList['specific'], $locked), 'forum-trans-thread-specific-locked');
     }
+
+    public function testForumTwig(): void {
+        $this->category = (new \Gazelle\Manager\ForumCategory())->create('phpunit category', 10011);
+        $user = $this->userList['user'];
+        $this->forum = Helper::makeForum(
+            user:           $user,
+            sequence:       154,
+            category:       $this->category,
+            name:           'phpunit forum twig',
+            description:    'This is where it twigs',
+        );
+        $thread = (new \Gazelle\Manager\ForumThread())->create($this->forum, $user, 'thread title', 'this is a new thread');
+
+        $template = Gazelle\Util\Twig::factory()->createTemplate(
+            "{% if object is forum_thread %}yes{% else %}no{% endif %}"
+        );
+        $this->assertEquals('yes', $template->render(['object' => $thread]), 'forum-twig-thread');
+        $this->assertEquals('no', $template->render(['object' => $this->forum]), 'forum-twig-forum');
+    }
 }

@@ -326,10 +326,8 @@
         </div>
     <div id="request_comments">
 {% include 'comment/thread.twig' with {
-    'action':     'take_post',
-    'id':         request.id,
+    'object':     request,
     'comment':    comment_page,
-    'name':       'pageid',
     'paginator':  paginator,
     'subbed':     is_subscribed,
     'textarea':   reply,
