@@ -228,14 +228,10 @@ $lastPost = end($slice);
 
 if ($Viewer->permitted('site_moderate_forums') || ($Viewer->writeAccess($forum) && !$thread->isLocked())) {
     echo $Twig->render('reply.twig', [
-        'action'   => 'reply',
-        'forum'    => $forum->id(),
-        'id'       => $threadId,
+        'object'   => $thread,
         'merge'    => strtotime($lastPost['AddedTime']) > time() - 3600 && $lastPost['AuthorID'] == $Viewer->id(),
-        'name'     => 'threadid',
         'subbed'   => $isSubscribed,
         'textarea' => (new Gazelle\Util\Textarea('quickpost', '', 90, 8))->setPreviewManual(true),
-        'userMan'  => $userMan,
         'viewer'   => $Viewer,
     ]);
 }

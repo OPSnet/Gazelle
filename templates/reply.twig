@@ -4,7 +4,7 @@
 {% if viewer.disablePosting %}
     <h4>Your posting privileges have been removed</h3>
 {% else %}
-    <h3>{% if forum %}Post reply{% else %}Post comment{% endif %}</h3>
+    <h3>{% if object is forum_thread %}Post reply{% else %}Post comment{% endif %}</h3>
     <div class="box pad">
         <table class="forum_post box vertical_margin hidden preview_wrap" id="{{ textarea.previewId }}">
             <colgroup>
@@ -36,9 +36,9 @@
             </tr>
         </table>
         <form class="send_form center" name="reply" id="quickpostform" action="{{ url_stem }}" method="post"{% if not admin %} onsubmit="quickpostform.submit_button.disabled = true;"{% endif %}>
-            <input type="hidden" name="action" value="{{ action }}" />
+            <input type="hidden" name="action" value="{% if object is forum_thread %}reply{% else %}take_post{% endif %}" />
             <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-            <input type="hidden" name="{{ name }}" value="{{ id }}" />
+            <input type="hidden" name="{% if object is forum_thread %}threadid{% else %}pageid{% endif %}" value="{{ object.id }}" />
             <div id="quickreplytext">
                 {{ textarea.field|raw }}
                 <br />
@@ -51,11 +51,11 @@
 {% if merge %}
                 <input id="mergebox" type="checkbox" name="merge" tabindex="2" {{ checked(merge) }} />
                 <label for="mergebox">Merge</label>
-    {% if not viewer.option('DisableAutoSave') %}
+{%  if not viewer.option('DisableAutoSave') %}
                 <script type="application/javascript">
-                    var storedTempTextarea = new StoreText('quickpost', 'quickpostform', {{ id }});
+                    var storedTempTextarea = new StoreText('quickpost', 'quickpostform', {{ object.id }});
                 </script>
-    {% endif %}
+{%  endif %}
 {% endif %}
                 {{ textarea.button|raw }}
                 <input type="submit" value="Post reply" id="submit_button" tabindex="1" />

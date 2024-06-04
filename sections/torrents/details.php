@@ -241,10 +241,8 @@ echo $Twig->render('tgroup/similar.twig', [
         </div>
 
 <?= $Twig->render('comment/thread.twig', [
-    'action'    => 'take_post',
-    'id'        => $tgroupId,
+    'object'    => $tgroup,
     'comment'   => $commentPage,
-    'name'      => 'pageid',
     'paginator' => $paginator,
     'subbed'    => $isSubscribed,
     'textarea'  => (new Gazelle\Util\Textarea('quickpost', ''))->setPreviewManual(true),

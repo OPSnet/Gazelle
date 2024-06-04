@@ -518,7 +518,7 @@ $paginator->setAnchor('comments')->setTotal($commentPage->total())->removeParam(
 
 echo $Twig->render('comment/thread.twig', [
     'action'    => 'take_post',
-    'id'        => $artistId,
+    'object'    => $Artist,
     'name'      => 'pageid',
     'comment'   => $commentPage,
     'paginator' => $paginator,
