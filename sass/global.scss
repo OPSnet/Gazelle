@@ -126,6 +126,18 @@ ul.collage_images li a {
   text-decoration: underline;
 }
 
+body#log .log-removed {
+  color: crimson;
+}
+
+body#log .log-edited {
+  color: royalblue;
+}
+
+body#log .log-uploaded {
+  color: forestgreen;
+}
+
 .good {
   font-weight: bold;
   color: green;
