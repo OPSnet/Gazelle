@@ -90,15 +90,15 @@ class SiteLog extends \Gazelle\Base {
     }
 
     /**
-     * Parse the log messages and decorate where applicable with links and color
+     * Parse the log messages and decorate where applicable with links and class
      */
     public function decorate(array $in): array {
         $out = [];
         foreach ($in as [$id, $message, $created]) {
-            [$color, $message] = $this->colorize($message);
+            [$class, $message] = $this->colorize($message);
             $out[] = [
                 'id'      => $id,
-                'color'   => $color,
+                'class'   => $class,
                 'message' => $message,
                 'created' => $created,
             ];
@@ -114,7 +114,7 @@ class SiteLog extends \Gazelle\Base {
         $parts    = explode(' ', $message);
         $message = '';
         $colon = false;
-        $color = false;
+        $class = false;
         // need a C for loop because sometime we need to look at the next element of the message
         for ($i = 0, $n = count($parts); $i < $n; $i++) {
             if (str_starts_with($parts[$i], SITE_URL)) {
@@ -185,26 +185,26 @@ class SiteLog extends \Gazelle\Base {
                     $message .= " by $URL";
                     break;
                 case 'uploaded':
-                    if ($color === false) {
-                        $color = 'forestgreen';
+                    if ($class === false) {
+                        $class = 'log-uploaded';
                     }
                     $message .= " {$parts[$i]}";
                     break;
                 case 'deleted':
-                    if ($color === false || $color === 'forestgreen') {
-                        $color = 'crimson';
+                    if ($class === false || $class === 'log-uploaded') {
+                        $class = 'log-removed';
                     }
                     $message .= " {$parts[$i]}";
                     break;
                 case 'edited':
-                    if ($color === false) {
-                        $color = 'royalblue';
+                    if ($class === false) {
+                        $class = 'log-edited';
                     }
                     $message .= " {$parts[$i]}";
                     break;
                 case 'un-filled':
-                    if ($color === false) {
-                        $color = '';
+                    if ($class === false) {
+                        $class = '';
                     }
                     $message .= " {$parts[$i]}";
                     break;
@@ -222,7 +222,7 @@ class SiteLog extends \Gazelle\Base {
                     $message .= " {$parts[$i]}";
             }
         }
-        return [$color, trim($message)]; // strip off the leading space
+        return [$class, trim($message)]; // strip off the leading space
     }
 
     protected function usernameLookup(string $username): int|false {

@@ -42,9 +42,9 @@ class LogTest extends TestCase {
         $this->assertInstanceOf(\Gazelle\Manager\SiteLog::class, $sitelog, 'sitelog-manager');
         $result = $sitelog->page(1, 0, '');
         $latest = current($result);
-        $this->assertEquals(['id', 'color', 'message', 'created'], array_keys($latest), 'sitelog-latest-keys');
+        $this->assertEquals(['id', 'class', 'message', 'created'], array_keys($latest), 'sitelog-latest-keys');
         $this->assertEquals($message, $latest['message'], 'sitelog-latest-message');
-        $this->assertFalse($latest['color'], 'sitelog-latest-decorated');
+        $this->assertFalse($latest['class'], 'sitelog-latest-decorated');
     }
 
     public function testGroupLog(): void {

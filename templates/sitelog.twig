@@ -35,7 +35,7 @@
                 {{ event.created|time_diff }}
             </td>
             <td>
-                <span{% if event.color %} style="color: {{ event.color }}"{% endif %}>{{ event.message|raw }}</span>
+                <span{% if event.class %} class="{{ event.class }}"{% endif %}>{{ event.message|raw }}</span>
             </td>
         </tr>
     {% else %}
