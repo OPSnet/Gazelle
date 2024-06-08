@@ -9,7 +9,7 @@ if (is_null($user)) {
     error(404);
 }
 
-$column    = $_GET['col'] ?? 'ip';
+$column    = $_GET['col'] ?? 'first';
 $direction = $_GET['dir'] ?? 'up';
 
 echo $Twig->render('admin/user-info.twig', [
