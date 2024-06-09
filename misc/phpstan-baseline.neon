@@ -446,16 +446,6 @@ parameters:
 			path: ../sections/tools/development/clear_cache.php
 
 		-
-			message: "#^Variable \\$tableColumn might not be defined\\.$#"
-			count: 2
-			path: ../sections/tools/development/database_specifics.php
-
-		-
-			message: "#^Variable \\$where might not be defined\\.$#"
-			count: 1
-			path: ../sections/tools/development/database_specifics.php
-
-		-
 			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
 			count: 1
 			path: ../sections/tools/managers/ajax_take_enable_request.php

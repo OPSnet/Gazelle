@@ -1,0 +1,41 @@
+{{ header('Postgresql Inspector') }}
+<div class="linkbox">
+    <a href="tools.php?action=service_stats" class="brackets">Cache/DB stats</a>
+    <a href="tools.php?action=clear_cache" class="brackets">Cache inspector</a>
+    <a href="tools.php?action=db-mysql" class="brackets">Mysql inspector</a>
+    <a href="tools.php?action=db_sandbox" class="brackets">DB sandbox</a>
+</div>
+
+<div class="pad"><div class="box pad">
+    <h3>Rows read</h3>
+    <table>
+        <tr>
+            <th>{{ header|column('table_name') }}</th>
+            <th>{{ header|column('table_size') }}</th>
+            <th>{{ header|column('index_size') }}</th>
+            <th>{{ header|column('live') }}</th>
+            <th>{{ header|column('dead') }}</th>
+            <th>{{ header|column('dead_ratio') }}</th>
+            <th>{{ header|column('analyze_delta') }}</th>
+            <th>{{ header|column('analyze_total') }}</th>
+            <th>{{ header|column('vacuum_delta') }}</th>
+            <th>{{ header|column('vacuum_total') }}</th>
+        </tr>
+{% for r in list %}
+        <tr>
+            <td>{{ r.table_name }}</td>
+            <td>{{ r.table_size|octet_size }}</td>
+            <td>{{ r.index_size|octet_size }}</td>
+            <td>{{ r.live|number_format }}</td>
+            <td>{{ r.dead|number_format }}</td>
+            <td>{{ (100 * r.dead_ratio)|number_format(2) }}</td>
+            <td>{{ r.analyze_delta|time_diff }}</td>
+            <td>{{ r.analyze_total|number_format }}</td>
+            <td>{{ r.vacuum_delta|time_diff }}</td>
+            <td>{{ r.vacuum_total|number_format }}</td>
+        </tr>
+{% endfor %}
+    </table>
+</div></div>
+
+{{ footer() }}

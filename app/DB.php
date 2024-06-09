@@ -2,6 +2,8 @@
 
 namespace Gazelle;
 
+use Gazelle\Enum\Direction;
+
 class DB extends Base {
     public static function DB(): DB\Mysql {
         return self::$db ??= new DB\Mysql(SQLDB, SQLLOGIN, SQLPASS, SQLHOST, SQLPORT, SQLSOCK);
@@ -170,5 +172,12 @@ class DB extends Base {
             WHERE COMMAND NOT IN ('Sleep')
                 AND TIME > 1200;
         ");
+    }
+
+    public static function lookupDirection(string $direction): Direction {
+        return match ($direction) {
+            default                      => Direction::ascending,
+            Direction::descending->value => Direction::descending,
+        };
     }
 }

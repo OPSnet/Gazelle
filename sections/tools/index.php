@@ -294,8 +294,11 @@ switch ($_REQUEST['action']) {
     case 'analysis_list':
         require_once('development/analysis_list.php');
         break;
-    case 'database_specifics':
-        require_once('development/database_specifics.php');
+    case 'db-mysql':
+        require_once('development/mysql.php');
+        break;
+    case 'db-pg':
+        require_once('development/pg.php');
         break;
     case 'service_stats':
         require_once('development/service_stats.php');

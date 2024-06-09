@@ -1,12 +1,13 @@
-{{ header('Database Specifics') }}
+{{ header('Mysql Inspector') }}
 <div class="linkbox">
     <a href="tools.php?action=service_stats" class="brackets">Cache/DB stats</a>
     <a href="tools.php?action=clear_cache" class="brackets">Cache inspector</a>
+    <a href="tools.php?action=db-pg" class="brackets">Postgresql inspector</a>
     <a href="tools.php?action=db_sandbox" class="brackets">DB sandbox</a>
     <br />
-    <a href="tools.php?action=database_specifics&amp;mode=show" title="Tables of deleted data are shown separately" class="brackets">Show deleted data</a>
-    <a href="tools.php?action=database_specifics&amp;mode=merge" title="Stats of tables of deleted data are merged with their source table" class="brackets">Merge deleted data</a>
-    <a href="tools.php?action=database_specifics&amp;mode=exclude" title="Tables of deleted data are excluded" class="brackets">Exclude deleted data</a>
+    <a href="tools.php?action=db-mysql&amp;mode=show" title="Tables of deleted data are shown separately" class="brackets">Show deleted data</a>
+    <a href="tools.php?action=db-mysql&amp;mode=merge" title="Stats of tables of deleted data are merged with their source table" class="brackets">Merge deleted data</a>
+    <a href="tools.php?action=db-mysql&amp;mode=exclude" title="Tables of deleted data are excluded" class="brackets">Exclude deleted data</a>
 </div>
 <script src="{{ constant('STATIC_SERVER') }}/functions/highcharts.js"></script>
 <script src="{{ constant('STATIC_SERVER') }}/functions/highcharts_custom.js"></script>
@@ -77,7 +78,7 @@ Highcharts.chart('statistics', {
     {%- set total_index_dize = total_index_dize + t.index_length -%}
     {%- set total_free_size  = total_free_size  + t.data_free -%}
 <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
-    <td><a href="tools.php?action=database_specifics&amp;table={{ t.table_name }}" title="engine: {{ t.engine }}">
+    <td><a href="tools.php?action=db-mysql&amp;table={{ t.table_name }}" title="engine: {{ t.engine }}">
             {%- if t.engine != 'InnoDB' %}<span style="color: tomato;">{% endif -%}
             {{- t.table_name -}}
             {%- if t.engine != 'InnoDB' %}</span>{% endif -%}
