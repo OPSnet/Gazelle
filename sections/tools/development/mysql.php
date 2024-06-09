@@ -12,7 +12,7 @@ if (!empty($_GET['table']) && preg_match('/([\w-]+)/', $_GET['table'], $match)) 
     if (!$siteInfo->tableExists($tableName)) {
         error("No such table");
     }
-    echo $Twig->render('admin/db-table.twig', [
+    echo $Twig->render('admin/mysql-table.twig', [
         'definition' => $db->row('SHOW CREATE TABLE ' . $tableName)[1],
         'table_name' => $tableName,
         'table_read' => $siteInfo->tableRowsRead($tableName),
@@ -37,10 +37,6 @@ $orderDir = $header->getOrderDir();
 
 $mode = $_GET['mode'] ?? 'show';
 switch ($mode) {
-    case 'show':
-        $tableColumn = 'table_name';
-        $where = '';
-        break;
     case 'merge':
         $tableColumn = "replace(table_name, 'deleted_', '')";
         $where = '';
@@ -48,6 +44,10 @@ switch ($mode) {
     case 'exclude':
         $tableColumn = 'table_name';
         $where = "AND table_name NOT LIKE 'deleted%'";
+        break;
+    default:
+        $tableColumn = 'table_name';
+        $where = '';
         break;
 }
 
@@ -66,10 +66,10 @@ $db->prepared_query("
     ORDER by $orderBy $orderDir
     ", SQLDB
 );
-$Tables = $db->to_array('table_name', MYSQLI_ASSOC, false);
+$list = $db->to_array('table_name', MYSQLI_ASSOC, false);
 
 $data = [];
-foreach ($Tables as $name => $info) {
+foreach ($list as $name => $info) {
     if ($header->getSortKey() === 'freeratio') {
         $data[$name] = round($info['data_length'] == 0 ? 0 : $info['data_free'] / $info['data_length'], 2);
     } elseif ($header->getSortKey() === 'name') {
@@ -79,11 +79,11 @@ foreach ($Tables as $name => $info) {
     }
 }
 
-echo $Twig->render('admin/db-table-summary.twig', [
+echo $Twig->render('admin/mysql-table-summary.twig', [
     'graph' => [
         'data'  => $data,
         'title' => $header->current()['alt'],
     ],
     'header' => $header,
-    'list'   => $Tables,
+    'list'   => $list,
 ]);

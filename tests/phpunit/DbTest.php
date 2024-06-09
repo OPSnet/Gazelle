@@ -1,12 +1,19 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+use Gazelle\Enum\Direction;
 
 require_once(__DIR__ . '/../../lib/bootstrap.php');
 require_once(__DIR__ . '/../helper.php');
 
 class DbTest extends TestCase {
     use Gazelle\Pg;
+
+    public function testDirection(): void {
+        $this->assertEquals('asc',  Gazelle\DB::lookupDirection('asc')->value, 'db-direction-asc');
+        $this->assertEquals('desc', Gazelle\DB::lookupDirection('desc')->value, 'db-direction-desc');
+        $this->assertEquals('asc',  Gazelle\DB::lookupDirection('wut')->value, 'db-direction-default');
+    }
 
     public function testTableCoherency(): void {
         $db = Gazelle\DB::DB();
@@ -132,6 +139,34 @@ class DbTest extends TestCase {
         $this->pg()->prepared_query("
             drop table test_bytea
         ");
+    }
+
+    public function testPgWriteReturn(): void {
+        $this->pg()->prepared_query("
+            create temporary table test1 (
+                t_id int not null primary key
+            )
+        ");
+        $n = random_int(1000, 9999);
+        $value = $this->pg()->writeReturning("
+            insert into test1 (t_id) values (?) returning t_id
+            ", $n
+        );
+        $this->assertEquals($n, $value, 'db-pg-write-scalar');
+
+        $this->pg()->prepared_query("
+            create temporary table test2 (
+                t_id int not null primary key,
+                label text not null
+            )
+        ");
+        $n = random_int(1000, 9999);
+        $label = randomString();
+        $row = $this->pg()->writeReturningRow("
+            insert into test2 (t_id, label) values (?, ?) returning t_id, label
+            ", $n, $label
+        );
+        $this->assertEquals([$n, $label], $row, 'db-pg-write-row');
     }
 
     public function testPgByteaAll(): void {

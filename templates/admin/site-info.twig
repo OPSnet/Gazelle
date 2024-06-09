@@ -70,7 +70,7 @@ div#phpinfo hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}
     {% if loop.first %}
     <ul class="stats nobullet">
     {% endif %}
-        <li><a href="/tools.php?action=database_specifics&table={{ table }}">{{ table }}</a></li>
+        <li><a href="/tools.php?action=db-mysql&table={{ table }}">{{ table }}</a></li>
     {% if loop.last %}
     </ul>
     {% endif %}

@@ -112,7 +112,8 @@
 {{ _self.category('Development', [
     ['Cache/DB stats',        'tools.php?action=service_stats',            viewer.permitted('site_debug')],
     ['Cache Inspector',       'tools.php?action=clear_cache',              viewer.permitted('site_debug')],
-    ['Database schema info',  'tools.php?action=database_specifics',       viewer.permitted('site_database_specifics')],
+    ['Mysql Inspector',       'tools.php?action=db-mysql',                 viewer.permitted('site_database_specifics')],
+    ['Pg inspector',          'tools.php?action=db-pg',                    viewer.permitted('site_database_specifics')],
     ['Error Analysis',        'tools.php?action=analysis_list',            viewer.permitted('site_analysis')],
     ['PHP processes',         'tools.php?action=process_info',             viewer.permitted('admin_site_debug')],
     ['Scheduler',             'tools.php?action=periodic&amp;mode=view',   viewer.permitted('admin_periodic_task_view')],
