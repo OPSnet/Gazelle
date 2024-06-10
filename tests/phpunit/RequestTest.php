@@ -471,6 +471,9 @@ class RequestTest extends TestCase {
         $this->assertEquals($payload['timeAdded'], $payload['lastVote'], 'req-json-date');
         $this->assertEquals('', $payload['fillerName'], 'req-json-can-vote');
         $this->assertEquals('UA-7890', $payload['catalogueNumber'], 'req-json-catno');
+        $this->assertEquals(['Lossless'], $payload['bitrateList'], 'req-json-bitrate-list');
+        $this->assertEquals(['FLAC'], $payload['formatList'], 'req-json-format-list');
+        $this->assertEquals(['WEB'], $payload['mediaList'], 'req-json-media-list');
 
         $encoding = $this->request->encoding();
         $this->assertTrue($encoding->isValid(), 'req-enc-valid');
