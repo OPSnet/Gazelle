@@ -58,14 +58,14 @@ Highcharts.chart('statistics', {
 <br />
 <table>
 <tr class="colhead" style="text-align:right">
-    <td style="text-align:left" class="nobr">{{ header|column('name') }}</td>
-    <td style="text-align:right" class="nobr">{{ header|column('rows') }}</td>
-    <td style="text-align:right" class="nobr">{{ header|column('rowsize') }}</td>
-    <td style="text-align:right" class="nobr">{{ header|column('datasize') }}</td>
-    <td style="text-align:right" class="nobr">{{ header|column('indexsize') }}</td>
-    <td style="text-align:right" class="nobr">{{ header|column('datafree') }}</td>
-    <td style="text-align:right" class="nobr">{{ header|column('freeratio') }}</td>
-    <td style="text-align:right" class="nobr">{{ header|column('totalsize') }}</td>
+    <td style="text-align:left" class="nobr">{{ header|column('table_name') }}</td>
+    <td style="text-align:right" class="nobr">{{ header|column('table_rows') }}</td>
+    <td style="text-align:right" class="nobr">{{ header|column('avg_row_length') }}</td>
+    <td style="text-align:right" class="nobr">{{ header|column('data_length') }}</td>
+    <td style="text-align:right" class="nobr">{{ header|column('index_length') }}</td>
+    <td style="text-align:right" class="nobr">{{ header|column('data_free') }}</td>
+    <td style="text-align:right" class="nobr">{{ header|column('free_ratio') }}</td>
+    <td style="text-align:right" class="nobr">{{ header|column('total_length') }}</td>
 </tr>
 
 {% set total_rows       = 0 %}
@@ -75,7 +75,7 @@ Highcharts.chart('statistics', {
 {% for t in list -%}
     {%- set total_rows       = total_rows       + t.table_rows -%}
     {%- set total_data_size  = total_data_size  + t.data_length -%}
-    {%- set total_index_dize = total_index_dize + t.index_length -%}
+    {%- set total_index_size = total_index_size + t.index_length -%}
     {%- set total_free_size  = total_free_size  + t.data_free -%}
 <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
     <td><a href="tools.php?action=db-mysql&amp;table={{ t.table_name }}" title="engine: {{ t.engine }}">
@@ -88,8 +88,8 @@ Highcharts.chart('statistics', {
     <td class="number_column">{{ t.data_length|octet_size }}</td>
     <td class="number_column">{{ t.index_length|octet_size }}</td>
     <td class="number_column">{{ t.data_free|octet_size }}</td>
-    <td class="number_column"><b>{% if t.data_length %}{{ (t.data_free / t.data_length * 100)|number_format(2) }}{% else %}0{% endif %}</b></td>
-    <td class="number_column">{{ (t.data_length + t.index_length)|octet_size }}</td>
+    <td class="number_column">{{ t.free_ratio|number_format(2) }}</td>
+    <td class="number_column">{{ t.total_length|octet_size }}</td>
 </tr>
 {% endfor %}
 <tr>
