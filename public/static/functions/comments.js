@@ -53,8 +53,10 @@ function Quote(post, user, link) {
 
     var target = '';
     var requrl = '';
+    var elem = 'post';
     if (url.path == "inbox") {
         requrl = 'inbox.php?action=get_post&post=' + post;
+        elem = 'message';
     } else {
         requrl = 'comments.php?action=get&postid=' + post;
     }
@@ -89,7 +91,7 @@ function Quote(post, user, link) {
 
     // DOM element (non-jQuery) -> Bool
     function inPost(elt) {
-        return $.contains($('#post' + postid)[0],elt);
+        return $.contains($('#' + elem + postid)[0],elt);
     }
 
     // Str -> undefined
