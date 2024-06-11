@@ -29,12 +29,14 @@ if ($body != $artist->body()) {
 
 $image = trim($_POST['image']);
 if ($image != $artist->image()) {
-    if (!preg_match(IMAGE_REGEXP, $image)) {
-        error(display_str($image) . " does not look like a valid image url");
-    }
-    $banned = (new Gazelle\Util\ImageProxy($Viewer))->badHost($image);
-    if ($banned) {
-        error("Please rehost images from $banned elsewhere.");
+    if (!empty($image)) {
+        if (!preg_match(IMAGE_REGEXP, $image)) {
+            error(display_str($image) . " does not look like a valid image url");
+        }
+        $banned = (new Gazelle\Util\ImageProxy($Viewer))->badHost($image);
+        if ($banned) {
+            error("Please rehost images from $banned elsewhere.");
+        }
     }
     $artist->setField('image', $image);
 }

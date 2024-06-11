@@ -31,7 +31,7 @@ class ImageProxy {
      * Cover art thumbnail in browse, on artist pages etc.
      */
     public function tgroupThumbnail(\Gazelle\TGroup $tgroup): string {
-        $image = $tgroup->image() ?: STATIC_SERVER . '/common/noartwork/' . CATEGORY_ICON[$tgroup->categoryId() - 1];
+        $image = $tgroup->cover();
         return '<img src="' . html_escape(image_cache_encode($image, height: 150, width: 150))
             . '" width="90" height="90" loading="lazy" alt="Cover" onclick="lightbox.init(\'' . html_escape(image_cache_encode($image))
             . '\', 90)" data-origin-src="' . html_escape($image) . '" />';
