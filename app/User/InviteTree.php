@@ -149,15 +149,15 @@ class InviteTree extends \Gazelle\Base {
         \Gazelle\Tracker $tracker,
         \Gazelle\User    $admin,
     ): string {
-        if ($comment) {
-            $message = "Commented";
-            $action = "comment";
-        } elseif ($doDisable) {
+        if ($doDisable) {
             $message = "Banned";
             $action = "ban";
         } elseif ($doInvites) {
             $message = "Revoked invites for";
             $action = "invites removed";
+        } elseif ($comment) {
+            $message = "Commented";
+            $action = "comment";
         } else {
             return "No action specified";
         }
@@ -170,7 +170,7 @@ class InviteTree extends \Gazelle\Base {
         $message .= " entire tree ({$total} user" . plural($total) . ')';
         $staffNote = "Invite Tree $action on {$this->user->username()} by {$admin->username()}";
         if ($comment) {
-            $staffNote .= "\n$comment";
+            $staffNote .= "\nReason: $comment";
         }
         $this->user->addStaffNote($staffNote)->modify();
         $ban = [];
@@ -197,10 +197,12 @@ class InviteTree extends \Gazelle\Base {
                     );
                 }
             }
-            $invitee->addStaffNote($staffNote)->modify();
+            if (!$doDisable) {  // $this->userMan->disableUserList will add the staff note otherwise
+                $invitee->addStaffNote($staffNote)->modify();
+            }
         }
         if ($ban) {
-            $this->userMan->disableUserList($tracker, $ban, $comment, \Gazelle\Manager\User::DISABLE_TREEBAN);
+            $this->userMan->disableUserList($tracker, $ban, $staffNote, \Gazelle\Manager\User::DISABLE_TREEBAN);
         }
         return $message;
     }

@@ -151,13 +151,13 @@ class InviteTest extends TestCase {
             'invite-tree-manip-comment'
         );
         $this->assertStringContainsString(
-            "Invite Tree comment on {$this->user->username()} by {$this->user->username()}\nphpunit invite tree comment\n",
+            "Invite Tree comment on {$this->user->username()} by {$this->user->username()}\nReason: phpunit invite tree comment\n",
             $this->user->staffNotes(),
             'invite-tree-manip-user-comment',
         );
         // need to flush to pick up the out-of-band changes
         $this->assertStringContainsString(
-            "Invite Tree comment on {$this->user->username()} by {$this->user->username()}\nphpunit invite tree comment\n",
+            "Invite Tree comment on {$this->user->username()} by {$this->user->username()}\nReason: phpunit invite tree comment\n",
             $this->invitee->flush()->staffNotes(),
             'invite-tree-manip-inv-comment',
         );
