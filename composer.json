@@ -34,7 +34,7 @@
     "robmorgan/phinx": "^0.12.13",
     "robthree/twofactorauth": "^1.8.2",
     "twig/twig": "^3.8",
-    "whichbrowser/parser": "^2.1.7"
+    "whichbrowser/parser": "^2.1.8"
   },
   "require-dev": {
     "phpmd/phpmd": "@stable",
