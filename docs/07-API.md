@@ -274,19 +274,18 @@ If the request is invalid, or a problem occurs, the `status` will be `failure`. 
 
 ### Arguments
 
-#### `type`
-Specifies the type of top 10 list to retrieve. This parameter can be one of the following values:
+#### `type` - Specifies the type of top 10 list to retrieve
 
 - `torrents` (Default)
 - `users`
 - `tags`
 
-#### `details`
-Specifies the details for the selected `type`. The available options vary depending on the value of `type`.
+#### `details` - Category for the selected `type`. The available options vary depending on the value of `type`
 
 - `all`: Lists all categories for the selected type (Default)
 
 ##### When `type` = "torrents":
+
 - `day`: Most Active Torrents Uploaded in the Past Day
 - `week`: Most Active Torrents Uploaded in the Past Week
 - `month`: Most Active Torrents Uploaded in the Past Month
@@ -297,6 +296,7 @@ Specifies the details for the selected `type`. The available options vary depend
 - `seeded`: Best Seeded Torrents
 
 ##### When `type` = "users":
+
 - `ul`: Uploaders
 - `dl`: Downloaders
 - `numul`: Torrents Uploaded
@@ -304,13 +304,14 @@ Specifies the details for the selected `type`. The available options vary depend
 - `dls`: Fastest Downloaders
 
 ##### When `type` = "tags":
+
 - `ut`: Most Used Torrent Tags
 - `ur`: Most Used Request Tags
 - `v`: Most Highly Voted Tags
 
-#### `limit`
+#### `limit` - The maximum number of results to return per category. 
 
-Specifies the maximum number of results to return per category. Must be one of 10 (default), 100 or 250. When `type`="torrents" and `details`="all", only `limit`="10" is permitted.
+Must be one of 10 (default), 100 or 250. When `type`="torrents" and `details`="all", only `limit`="10" is permitted.
 
 ## Example Requests
 
