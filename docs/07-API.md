@@ -270,14 +270,53 @@ If the request is invalid, or a problem occurs, the `status` will be `failure`. 
 
 ## Top 10
 
-**URL:**
-`ajax.php?action=top10`
+**URL:** `ajax.php?action=top10`
 
-**Arguments:**
+### Arguments
 
-`type` - one of: torrents, tags, users (default: torrents)
+#### `type` - Specifies the type of top 10 list to retrieve
 
-`limit` - one of 10, 100, 250 (default: 10)
+- `torrents` (Default)
+- `users`
+- `tags`
+
+#### `details` - Category for the selected `type`. The available options vary depending on the value of `type`
+
+- `all`: Lists all categories for the selected type (Default)
+
+##### When `type` = "torrents":
+
+- `day`: Most Active Torrents Uploaded in the Past Day
+- `week`: Most Active Torrents Uploaded in the Past Week
+- `month`: Most Active Torrents Uploaded in the Past Month
+- `year`: Most Active Torrents Uploaded in the Past Year
+- `overall`: Most Active Torrents Uploaded of All Time
+- `snatched`: Most Snatched Torrents
+- `data`: Most Data Transferred Torrents
+- `seeded`: Best Seeded Torrents
+
+##### When `type` = "users":
+
+- `ul`: Uploaders
+- `dl`: Downloaders
+- `numul`: Torrents Uploaded
+- `uls`: Fastest Uploaders
+- `dls`: Fastest Downloaders
+
+##### When `type` = "tags":
+
+- `ut`: Most Used Torrent Tags
+- `ur`: Most Used Request Tags
+- `v`: Most Highly Voted Tags
+
+#### `limit` - The maximum number of results to return per category. 
+
+Must be one of 10 (default), 100 or 250. When `type`="torrents" and `details`="all", only `limit`="10" is permitted.
+
+## Example Requests
+
+### Example 1: Top 10 Torrents of the Week
+
 
 **Response format:**
 
