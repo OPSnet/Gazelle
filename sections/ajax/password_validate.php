@@ -1,3 +1,6 @@
 <?php
 
-echo (new Gazelle\Manager\User())->checkPassword($_REQUEST['password'] ?? '');
+echo (
+\Gazelle\Util\PasswordCheck::checkPasswordStrength($_REQUEST['password'] ?? '', $Viewer, false) ?
+    'true' : 'false'
+);

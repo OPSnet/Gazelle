@@ -14,7 +14,7 @@ class Curl {
     protected string|bool $result;
     protected bool $useProxy = true;
     protected array $option;
-    protected array $postData;
+    protected array|string $postData;
     protected CurlMethod $method = CurlMethod::GET;
 
     public function __construct() {
@@ -41,7 +41,7 @@ class Curl {
      * Implicity switches the HTTP method to POST and sets the content-type
      * to multipart/form-data.
      */
-    public function setPostData(array $postData): static {
+    public function setPostData(array|string $postData): static {
         $this->method   = CurlMethod::POST;
         $this->postData = $postData;
         return $this;

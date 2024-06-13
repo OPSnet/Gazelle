@@ -145,7 +145,6 @@ $Validate = new Gazelle\Util\Validator();
 $Validate->setFields([
     ['type', true, 'inarray', 'Please select a valid category.', ['inarray' => array_keys(CATEGORY)]],
     ['release_desc', false, 'string','The release description you entered is too long.', ['maxlength' => 1_000_000]],
-    ['rules', true,'require','Your torrent must abide by the rules.'],
 ]);
 
 if (!$isMusicUpload || !$Properties['GroupID']) {

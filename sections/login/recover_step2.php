@@ -13,7 +13,7 @@ $validator->setFields([
     ['verifypassword', true, 'compare', 'Your passwords did not match.', ['comparefield' => 'password']],
     ['password', true, 'regex',
         'You entered an invalid password. A strong password is 8 characters or longer, contains at least 1 lowercase and uppercase letter, and contains at least a number or symbol, or is 20 characters or longer',
-        ['regex' => '/(?=^.{8,}$)(?=.*[^a-zA-Z])(?=.*[A-Z])(?=.*[a-z]).*$|.{20,}/']
+        ['regex' => \Gazelle\Util\PasswordCheck::REGEXP]
     ],
 ]);
 
@@ -22,6 +22,8 @@ $success = false;
 if (!empty($_REQUEST['password'])) {
     if (!$validator->validate($_REQUEST)) {
         $error = $validator->errorMessage();
+    } elseif (!\Gazelle\Util\PasswordCheck::checkPasswordStrength($_REQUEST['password'], $userToken->user())) {
+        $error = \Gazelle\Util\PasswordCheck::ERROR_MSG;
     } else {
         // Form validates without error, try and use the token
         if (!$userToken->consume()) {
