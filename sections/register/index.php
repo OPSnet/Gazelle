@@ -31,18 +31,28 @@ if (isset($_REQUEST['confirm'])) {
     $validator->setFields([
         ['username', true, 'regex', 'You did not enter a valid username.', ['regex' => USERNAME_REGEXP]],
         ['email', true, 'email', 'You did not enter a valid email address.'],
-        ['password', true, 'regex', 'A strong password is 8 characters or longer, contains at least 1 lowercase and uppercase letter, and contains at least a number or symbol, or is 20 characters or longer', ['regex' => '/(?=^.{8,}$)(?=.*[^a-zA-Z])(?=.*[A-Z])(?=.*[a-z]).*$|.{20,}/']],
+        ['password', true, 'regex', 'A strong password is 8 characters or longer, contains at least 1 lowercase and uppercase letter, and contains at least a number or symbol, or is 20 characters or longer', ['regex' => \Gazelle\Util\PasswordCheck::REGEXP]],
         ['confirm_password', true, 'compare', 'Your passwords do not match.', ['comparefield' => 'password']],
         ['readrules', true, 'checkbox', 'You did not select the box that says you will read the rules.'],
         ['readwiki', true, 'checkbox', 'You did not select the box that says you will read the wiki.'],
         ['agereq', true, 'checkbox', 'You did not select the box that says you are 13 years of age or older.'],
     ]);
 
+    $error = false;
     if (isset($_POST['submit'])) {
-        $error = $validator->validate($_POST) ? false : $validator->errorMessage();
-        if (!$error) {
+        while (true) {
+            if (!$validator->validate($_POST)) {
+                $error = $validator->errorMessage();
+                break;
+            }
+
             $username = trim($_POST['username']);
             $email    = trim($_POST['email']);
+
+            if (!\Gazelle\Util\PasswordCheck::checkPasswordStrengthNoUser($_POST['password'], $username, $email)) {
+                $error = \Gazelle\Util\PasswordCheck::ERROR_MSG;
+                break;
+            }
 
             $creator = new Gazelle\UserCreator();
             $creator->setUsername($username)
@@ -91,10 +101,11 @@ if (isset($_REQUEST['confirm'])) {
             if (!$error) {
                 $newInstall = $creator->newInstall();
             }
+            break;  // never loop
         }
     }
     echo $Twig->render('register/create.twig', [
-        'error'     => $error ?? false,
+        'error'     => $error,
         'js'        => $validator->generateJS('registerform'),
         'sent'      => $emailSent ?? false,
         'invite'    => $_REQUEST['invite'] ?? null,

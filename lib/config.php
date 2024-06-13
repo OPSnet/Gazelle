@@ -108,6 +108,10 @@ defined('MONERO_DONATION_ADDRESS') or define ('MONERO_DONATION_ADDRESS', '');
 // also see the documentation on Gazelle\Donate\Bitcoin::__construct for more info.
 defined('BITCOIN_DONATION_XYZPUB') or define('BITCOIN_DONATION_XYZPUB', '');
 
+// An HTTP endpoint for the detection of known-compromised passwords.
+// The password is sent in the request body of a POST request as a 20 byte binary sha1 hash.
+defined('PASSWORD_CHECK_URL') or define('PASSWORD_CHECK_URL', '');
+
 // Top 10 history date. Previous days and weeks of Top 10 torrents are
 // recorded in a task. There is not point going back prior to the start
 // of recorded history.

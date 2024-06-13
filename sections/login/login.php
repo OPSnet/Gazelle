@@ -33,6 +33,13 @@ if (!empty($_POST['username']) && !empty($_POST['password'])) {
         }
 
         if ($user->isEnabled()) {
+            if (!\Gazelle\Util\PasswordCheck::checkPasswordStrength($_POST['password'], $user)) {
+                $user->addStaffNote("login prevented because of weak/compromised password")->modify();
+                $user->logoutEverywhere();
+                echo $Twig->render('login/weak-password.twig');
+                exit;
+            }
+
             $browser = parse_user_agent($_SERVER['HTTP_USER_AGENT']);
             if ($user->permitted('site_disable_ip_history')) {
                 $ipaddr = '127.0.0.1';

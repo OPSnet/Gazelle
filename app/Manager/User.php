@@ -1663,12 +1663,4 @@ class User extends \Gazelle\BaseManager {
         self::$db->commit();
         return $affected;
     }
-
-    public function checkPassword(string $password): string {
-        return $password === ''
-            || (bool)self::$db->scalar("
-                SELECT 1 FROM bad_passwords WHERE Password = ?
-                ", $password
-            ) ? 'false' : 'true';
-    }
 }

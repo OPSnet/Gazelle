@@ -119,11 +119,15 @@ class Validator {
     public function validate(array $ValidateArray): bool {
         reset($this->Fields);
         foreach ($this->Fields as $FieldKey => $Field) {
-            $ValidateVar = $ValidateArray[$FieldKey] ?? null;
+            if (!isset($ValidateArray[$FieldKey]) && $Field['Required']) {
+                $this->errorMessage = "$FieldKey is not specified";
+                break;
+            }
+            $ValidateVar = $ValidateArray[$FieldKey] ?? '';
 
-            if ($ValidateVar != '' || !empty($Field['Required']) || $Field['Type'] == 'date') {
+            if ($ValidateVar != '' || $Field['Required']) {
                 if ($Field['Type'] == 'string') {
-                    $ValidateVar = trim($ValidateVar );
+                    $ValidateVar = trim($ValidateVar);
                     if (isset($Field['range'])) {
                         [$MinLength, $MaxLength] = $Field['range'];
                     } else {
@@ -326,7 +330,7 @@ class Validator {
                 $DisplayError .= ",{$FieldKey}year";
                 $ValItemHold = '    if (!validDate($(\'#' . $FieldKey . 'month\').raw().value+\'/\'+' . $Day . '+\'/\'+$(\'#' . $FieldKey . 'year\').raw().value)) { return showError(\'' . $DisplayError . '\',\'' . $Field['ErrorMessage'] . '\'); }' . "\r\n";
 
-                if (empty($Field['Required'])) {
+                if (!$Field['Required']) {
                     $ValItem = '    if ($(\'#' . $FieldKey . 'month\').raw().value != ""';
                     if (isset($Field['minlength']) && $Field['minlength'] == 3) {
                         $ValItem .= ' || $(\'#' . $FieldKey . 'day\').raw().value != ""';
@@ -343,7 +347,7 @@ class Validator {
                 $ValItem = '    if ($(\'#' . $FieldKey . '\').raw().value!=$(\'#' . $Field['comparefield'] . '\').raw().value) { return showError(\'' . $FieldKey . ',' . $Field['comparefield'] . '\',\'' . $Field['ErrorMessage'] . '\'); }' . "\r\n";
             }
 
-            if (empty($Field['Required']) && $Field['Type'] != 'date') {
+            if (!$Field['Required'] && $Field['Type'] != 'date') {
                 $ReturnJS .= '    if ($(\'#' . $FieldKey . '\').raw().value!="") {' . "\r\n    ";
                 $ReturnJS .= $ValItem;
                 $ReturnJS .= "    }\r\n";
