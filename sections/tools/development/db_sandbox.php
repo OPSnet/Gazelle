@@ -1,5 +1,7 @@
 <?php
 
+use Gazelle\Enum\SourceDB;
+
 if (!$Viewer->permitted('admin_site_debug')) {
     error(403);
 }
@@ -23,13 +25,21 @@ if (isset($_GET['debug'])) {
     $textAreaRows = 8;
 }
 
+$src = ($_REQUEST['src'] ?? SourceDB::mysql->value) == SourceDB::mysql->value
+    ? SourceDB::mysql
+    : SourceDB::postgres;
 $error  = false;
 $result = [];
 if ($execute) {
     try {
-        $db = Gazelle\DB::DB();
-        $db->prepared_query($query);
-        $result = $db->to_array(false, MYSQLI_ASSOC, false);
+        if ($src == SourceDB::postgres) {
+            $db = new \Gazelle\DB\Pg(GZPG_DSN);
+            $result = $db->all($query);
+        } else {
+            $db = Gazelle\DB::DB();
+            $db->prepared_query($query);
+            $result = $db->to_array(false, MYSQLI_ASSOC, false);
+        }
     } catch (\Exception | \Error $e) {
         $error = $e->getMessage();
     }
@@ -39,5 +49,6 @@ echo $Twig->render('debug/db-sandbox.twig', [
     'query'  => $query,
     'rows'   => $textAreaRows,
     'result' => $result,
+    'source' => $src->value,
     'error'  => $error,
 ]);

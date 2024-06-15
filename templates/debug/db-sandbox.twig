@@ -1,3 +1,4 @@
+{% from 'macro/form.twig' import checked -%}
 {{ header('DB Sandbox') }}
 <div class="linkbox">
     <a href="tools.php?action=service_stats" class="brackets">Cache/DB stats</a>
@@ -5,15 +6,16 @@
     <a href="tools.php?action=db-mysql" class="brackets">Mysql inspector</a>
     <a href="tools.php?action=db-pg" class="brackets">Postgresql inspector</a>
 </div>
-<div class="header">
-    <h2>DB Sandbox</h2>
-</div>
 <div class="thin pad box">
+    <h3>DB Sandbox</h3>
     <div class="pad">Think about adding a <code>LIMIT 10</code> (or similar) on queries for which you are
     unsure how many rows will be returned. This is to avoid exhausting memory, as the resultset is buffered in memory.</div>
     <div class="pad">If two columns have the same name (e.g. <code>ID</code>), only the first column will be displayed.</div>
     <form action="tools.php?action=db_sandbox" method='POST'>
         <textarea style="width: 98%;" name="query" cols="90" rows="{{ rows }}">{{ query }}</textarea><br /><br />
+        Source
+        <label><input type="radio" name="src" value="mysql"{{ checked(source == 'mysql') }} /> Mysql</label>
+        <label><input type="radio" name="src" value="pg"{{ checked(source == 'pg') }} /> Postgres</label>
         <input type="submit" value="Query" />
     </form>
 </div>

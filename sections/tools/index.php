@@ -1,21 +1,6 @@
 <?php
 
-// TODO: Unify all the code standards and file names (tool_list.php,tool_add.php,tool_alter.php)
-
-if (isset($argv[1])) {
-    $_REQUEST['action'] = $argv[1];
-}
-
-if (!isset($_REQUEST['action'])) {
-    require_once('tools.php');
-    die();
-}
-
-if (preg_match('/^(?:sandbox|update_geoip)/', $_REQUEST['action']) && !isset($argv[1]) && !$Viewer->permitted('site_debug')) {
-    error(403);
-}
-
-switch ($_REQUEST['action']) {
+switch ($_REQUEST['action'] ?? '') {
     //Managers
     case 'asn_search':
         require_once('managers/asn_search.php');
@@ -294,26 +279,38 @@ switch ($_REQUEST['action']) {
     case 'analysis_list':
         require_once('development/analysis_list.php');
         break;
+    case 'bbcode_sandbox':
+        if (!$Viewer->permitted('users_mod')) {
+            error(403);
+        }
+        echo $Twig->render('admin/sandbox/bbcode.twig');
+        break;
+    case 'clear_cache':
+        require_once('development/clear_cache.php');
+        break;
     case 'db-mysql':
         require_once('development/mysql.php');
         break;
     case 'db-pg':
         require_once('development/pg.php');
         break;
-    case 'service_stats':
-        require_once('development/service_stats.php');
+    case 'db_sandbox':
+        require_once('development/db_sandbox.php');
         break;
-    case 'update_geoip':
-        require_once('development/update_geoip.php');
-        break;
-    case 'clear_cache':
-        require_once('development/clear_cache.php');
-        break;
-    case 'site_options':
-        require_once('development/site_options.php');
+    case 'notification_sandbox':
+        require_once('development/notification.php');
         break;
     case 'process_info':
         require_once('development/process_info.php');
+        break;
+    case 'referral_sandbox':
+        require_once('development/referral_sandbox.php');
+        break;
+    case 'service_stats':
+        require_once('development/service_stats.php');
+        break;
+    case 'site_options':
+        require_once('development/site_options.php');
         break;
 
     case 'periodic':
@@ -347,22 +344,6 @@ switch ($_REQUEST['action']) {
         break;
     case 'get_cc':
         require_once('services/get_cc.php');
-        break;
-
-    case 'bbcode_sandbox':
-        if (!$Viewer->permitted('users_mod')) {
-            error(403);
-        }
-        echo $Twig->render('admin/sandbox/bbcode.twig');
-        break;
-    case 'db_sandbox':
-        require_once('sandboxes/db_sandbox.php');
-        break;
-    case 'notification_sandbox':
-        require_once('sandboxes/notification.php');
-        break;
-    case 'referral_sandbox':
-        require_once('sandboxes/referral_sandbox.php');
         break;
 
     default:
