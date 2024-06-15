@@ -22,15 +22,15 @@ class Request extends \Gazelle\ArtistRole {
             INNER JOIN artists_alias aa USING (AliasID)
             WHERE ra.RequestID = ?
             GROUP BY aa.ArtistID
-            ", $this->id
+            ", $this->object->id()
         );
         self::$cache->delete_multi([
-            "request_artists_{$this->id}",
+            "request_artists_{$this->object->id()}",
             ...self::$db->collect(0, false)
         ]);
         self::$db->prepared_query("
             DELETE FROM requests_artists WHERE RequestID = ?
-            ", $this->id
+            ", $this->object->id()
         );
 
         // and (re)create
@@ -41,7 +41,7 @@ class Request extends \Gazelle\ArtistRole {
                     INSERT INTO requests_artists
                            (RequestID, UserID, AliasID, artist_role_id, Importance)
                     VALUES (?,         ?,      ?,       ?,              ?)
-                    ", $this->id, $user->id(), $artist->aliasId(), $role, (string)$role
+                    ", $this->object->id(), $user->id(), $artist->aliasId(), $role, (string)$role
                 );
                 $affected += self::$db->affected_rows();
                 self::$cache->delete_value("artists_requests_{$artist->id()}");
@@ -63,7 +63,7 @@ class Request extends \Gazelle\ArtistRole {
             INNER JOIN artists_alias AS aa USING (AliasID)
             WHERE ra.RequestID = ?
             ORDER BY r.artist_role_id ASC, aa.Name ASC
-            ", $this->id
+            ", $this->object->id()
         );
     }
 

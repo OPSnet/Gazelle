@@ -416,11 +416,10 @@ class Artist extends BaseObject {
         return array_values(array_map(fn($a) => $a['name'], $this->aliasList()));
     }
 
-    public function aliasInfo(): array {
     /**
      * Build the alias info. We want all the non-redirecting aliases at the top
      * level, and gather their aliases together, and having everything sorted
-     * alphabetically. This is harder than it seems.
+     * alphabetically.
      *  +---------+-----------+------------+
      *  | aliasId | aliasName | redirectId |
      *  +---------+-----------+------------+
@@ -430,59 +429,34 @@ class Artist extends BaseObject {
      *  |     122 | delta     |          0 |
      *  |     134 | echo      |         82 |
      *  |     135 | foxtrot   |        122 |
-     *  |      36 | golf      |        133 |
-     *  |     133 | hotel     |        134 |
      *  |     140 | india     |        136 |
      *  +---------+-----------+------------+
-     * alpha..delta are non-redirecting aliases. echo is an alias of bravo.
-     * golf is an alias of hotel, which is an alias of echo, which is an alias of bravo.
-     * This chaining will happen over time as aliases are added and removed and artists
-     * are merged or renamed. The golf-hotel-echo-bravo chain is a worst case example of
-     * an alias that points to another name that didn't exist when it was created.
-     * This means that the chains cannot be resolved in a single pass. I think the
-     * algorithm below covers all the edge cases.
+     *
      * In the end, the result is:
      *    alpha
      *      - india
      *    bravo
      *      - echo
-     *      - golf
-     *      - hotel
      *    charlie
      *    delta
      *      - foxtrot
      */
+    public function aliasInfo(): array {
         self::$db->prepared_query("
-            SELECT AliasID as aliasId, Name as aliasName, UserID as userId,  Redirect as redirectId
-            FROM artists_alias
-            WHERE ArtistID = ?
-            ORDER BY Redirect, Name
-            ", $this->id
+             SELECT AliasID as aliasId, Name as aliasName, UserID as userId,  Redirect as redirectId
+             FROM artists_alias
+             WHERE ArtistID = ?
+             ORDER BY Redirect, Name
+             ", $this->id
         );
         $result = self::$db->to_array('aliasId', MYSQLI_ASSOC, false);
-
-        // create the first level of redirections
-        $map = [];
-        foreach ($result as $aliasId => $info) {
-            $map[$aliasId] = $info['redirectId'];
-        }
-
-        // go through the list again, and resolve the redirect chains
-        foreach ($result as $aliasId => $info) {
-            $redirect = $info['redirectId'];
-            while (isset($map[$redirect]) && $map[$redirect] > 0) {
-                $redirect = $map[$redirect];
-            }
-            $map[$aliasId] = $redirect;
-        }
 
         // go through the list and tie the alias to its non-redirecting ancestor
         $userMan = new Manager\User();
         $alias = [$this->primaryAliasId() => null];  // ensure primary alias is always the first item
         foreach ($result as $aliasId => $info) {
             if ($info['redirectId']) {
-                $redirect = $map[$aliasId];
-                $alias[$redirect]['alias'][] = [
+                $alias[$info['redirectId']]['alias'][] = [
                     'alias_id' => $aliasId,
                     'name'     => $info['aliasName'],
                     'user'     => $userMan->findById($info['userId']),
@@ -725,12 +699,20 @@ class Artist extends BaseObject {
                 ", $this->primaryAliasId(), $old->primaryAliasId(), $old->primaryAliasId(), $newId
             );
             self::$db->prepared_query("
-                UPDATE torrents_artists SET AliasID = ?  WHERE AliasID = ?
+                UPDATE IGNORE torrents_artists SET AliasID = ?  WHERE AliasID = ?
             ", $this->primaryAliasId(), $old->primaryAliasId()
             );
             self::$db->prepared_query("
-                UPDATE requests_artists SET AliasID = ? WHERE AliasID = ?
+                UPDATE IGNORE requests_artists SET AliasID = ? WHERE AliasID = ?
             ", $this->primaryAliasId(), $old->primaryAliasId()
+            );
+            self::$db->prepared_query("
+                DELETE FROM torrents_artists WHERE AliasID = ?
+            ", $old->primaryAliasId()
+            );
+            self::$db->prepared_query("
+                DELETE FROM requests_artists WHERE AliasID = ?
+            ", $old->primaryAliasId()
             );
         }
 
@@ -768,17 +750,17 @@ class Artist extends BaseObject {
     /**
      * rename an alias
      */
-    public function renameAlias(int $aliasId, string $newName, User $user, Manager\Request $reqMan, Manager\TGroup $tgMan): int {
+    public function renameAlias(int $aliasId, string $newName, User $user, Manager\Request $reqMan, Manager\TGroup $tgMan): ?int {
         $alias = $this->aliasList()[$aliasId];
 
         if ($alias['redirect_id']) {
-            // renaming a redirect is not supported, just delete it
-            return $aliasId;
+            // renaming a redirect is not supported, should be deleted
+            return null;
         }
 
         $oldName = $alias['name'];
         if ($oldName === $newName) {
-            return $aliasId;
+            return null;
         }
 
         [$newId, $newArtistId, $newRedirect] = self::$db->row("
@@ -790,12 +772,12 @@ class Artist extends BaseObject {
 
         if ($newArtistId && $newArtistId !== $this->id) {
             // new name already set for different artist, don't do anything
-            return $aliasId;
+            return null;
         }
 
         self::$db->begin_transaction();
-        if (strcasecmp($oldName, $newName) === 0) {
-            // case-correction
+        if (strcasecmp($oldName, $newName) === 0 || $aliasId === $newId) {
+            // case-correction or diacritics change
             self::$db->prepared_query("
                 UPDATE artists_alias SET
                   Name = ?
@@ -807,7 +789,7 @@ class Artist extends BaseObject {
             // change this alias to a redirect to an existing NRA
             if ($newRedirect) {
                 // target alias has a redirect, clean up aliases first
-                return $aliasId;
+                return null;
             }
             self::$db->prepared_query("
                 UPDATE artists_alias SET

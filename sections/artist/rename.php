@@ -38,7 +38,7 @@ $result = $artist->renameAlias(
     new Gazelle\Manager\TGroup(),
 );
 
-if ($result === $aliasId && strcasecmp($newName, $oldName) !== 0) {
+if (is_null($result)) {
     error("The specified name is already in use.");
 }
 

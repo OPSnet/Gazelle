@@ -135,7 +135,6 @@ class TGroupTest extends TestCase {
         $first = current($main);
         $this->assertEquals($artistName, $first['name'], 'tgroup-artist-first-name');
 
-
         $foundByArtist = $this->manager->findByArtistReleaseYear(
             $this->tgroup->artistRole()->text(),
             $this->tgroup->name(),
@@ -162,6 +161,29 @@ class TGroupTest extends TestCase {
             ],
             $this->tgroup->artistRole()->nameList(),
             'tgroup-artist-name-list'
+        );
+
+        /* turn the two Main and Guest into DJs */
+        $roleList = $this->tgroup->artistRole()->roleList();
+        $roleAliasList = [
+            ...array_map(fn ($artist) => [ARTIST_MAIN, $artist['aliasid']], $roleList['main']),
+            ...array_map(fn ($artist) => [ARTIST_GUEST, $artist['aliasid']], $roleList['guest']),
+        ];
+        $this->assertEquals(
+            3,
+            $this->tgroup->artistRole()->modifyList($roleAliasList, ARTIST_DJ, $user, new Gazelle\Log()),
+            'tgroup-a-dj-saved-my-life'
+        );
+        $this->assertEquals('Various DJs', $this->tgroup->flush()->artistRole()->text(), 'tgroup-2manydjs');
+        $this->assertEquals(
+            1,
+            $this->tgroup->artistRole()->removeList([[ARTIST_DJ, $roleAliasList[0][1]]], $user, new Gazelle\Log()),
+            'tgroup-hang-the-dj'
+        );
+        $this->assertEquals(
+            "$artistName-2 and $artistName-guest",
+            $this->tgroup->flush()->artistRole()->text(),
+            'tgroup-dj-final'
         );
     }
 
