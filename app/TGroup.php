@@ -5,7 +5,9 @@ namespace Gazelle;
 use Gazelle\Enum\LeechReason;
 use Gazelle\Enum\LeechType;
 
-class TGroup extends BaseObject {
+use Gazelle\Intf\CategoryHasArtist;
+
+class TGroup extends BaseObject implements CategoryHasArtist {
     final public const tableName            = 'torrents_group';
     final public const CACHE_KEY            = 'tg_%d';
     final public const CACHE_TLIST_KEY      = 'tlist_%d';
@@ -304,7 +306,7 @@ class TGroup extends BaseObject {
             return null;
         }
         if (!isset($this->artistRole)) {
-            $this->artistRole = new ArtistRole\TGroup($this->id, new Manager\Artist());
+            $this->artistRole = new ArtistRole\TGroup($this, new Manager\Artist());
         }
         return $this->artistRole;
     }
@@ -462,6 +464,13 @@ class TGroup extends BaseObject {
 
     public function hashTag(): string {
         return implode(' ', array_map(fn($t) => htmlentities("#$t"), $this->tagNameList()));
+    }
+
+    /**
+     * To be consistent with requests
+     */
+    public function title(): string {
+        return $this->info()['Name'];
     }
 
     public function time(): string {

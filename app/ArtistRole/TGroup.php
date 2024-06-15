@@ -2,6 +2,8 @@
 
 namespace Gazelle\ArtistRole;
 
+use Gazelle\Intf\CategoryHasArtist;
+
 class TGroup extends \Gazelle\ArtistRole {
     protected const MAP = [
         1 => 'main',
@@ -24,7 +26,7 @@ class TGroup extends \Gazelle\ArtistRole {
             INNER JOIN artists_alias AS aa USING (AliasID)
             WHERE ta.GroupID = ?
             ORDER BY ta.GroupID, ta.Importance ASC, aa.Name ASC
-            ", $this->id
+            ", $this->object->id()
         );
     }
 
@@ -139,5 +141,57 @@ class TGroup extends \Gazelle\ArtistRole {
             }
         }
         return array_unique($matched);
+    }
+
+    public function modifyList(array $roleAliasList, int $role, \Gazelle\User $user, \Gazelle\Log $logger): int {
+        $aliasList = array_map(fn ($tuple) => $tuple[1], $roleAliasList);
+        self::$db->prepared_query("
+            UPDATE IGNORE torrents_artists SET
+                artist_role_id = ?,
+                Importance = ?
+            WHERE GroupID = ?
+                AND AliasID IN (" . placeholders($aliasList) . ")
+            ", $role, $role, $this->object->id(), ...$aliasList
+        );
+        $affected = 0;
+        foreach ($roleAliasList as [$oldRole, $aliasId]) {
+            // Don't bother logging artists whose importance hasn't changed
+            if ($oldRole === $role) {
+                continue;
+            }
+            $artist = $this->manager->findByAliasId($aliasId);
+            $change = "artist {$artist->id()} ({$artist->name()}) changed role from "
+                . ARTIST_TYPE[$oldRole] . " to " . ARTIST_TYPE[$role];
+            $logger->group($this->object, $user, $change)
+                ->general("$change in group {$this->object->id()} ({$this->object->title()}) by user " . $user->label());
+            ++$affected;
+        }
+        return $affected;
+    }
+
+    public function removeList(array $roleAliasList, \Gazelle\User $user, \Gazelle\Log $logger): int {
+        $changed  = [];
+        foreach ($roleAliasList as [$role, $aliasId]) {
+            self::$db->prepared_query("
+                DELETE FROM torrents_artists
+                WHERE GroupID = ?
+                    AND AliasID = ?
+                    AND Importance = ?
+                ", $this->object->id(), $aliasId, $role
+            );
+            if (self::$db->affected_rows()) {
+                $artist = $this->manager->findByAliasId($aliasId);
+                $changed[$artist->id()] = $artist;
+                $change = "artist {$artist->id()} ({$artist->name()}) removed as " . ARTIST_TYPE[$role];
+                $logger->group($this->object, $user, $change)
+                    ->general("$change in group {$this->object->id()} ({$this->object->title()}) by user {$user->label()}");
+            }
+        }
+        foreach ($changed as $artist) {
+            if (!$artist->usageTotal()) {
+                $artist->remove($user, $logger);
+            }
+        }
+        return count($changed);
     }
 }

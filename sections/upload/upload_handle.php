@@ -110,6 +110,9 @@ if (empty($_POST['artists'])) {
 } else {
     $Artists = $_POST['artists'];
     $Importance = $_POST['importance'];
+    if (count($Artists) !== count($Importance)) {
+        reportError("There is an error with how artists are specified.");
+    }
 }
 if (!empty($_POST['requestid'])) {
     $RequestID = $_POST['requestid'];

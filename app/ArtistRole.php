@@ -2,6 +2,8 @@
 
 namespace Gazelle;
 
+use Gazelle\Intf\CategoryHasArtist;
+
 abstract class ArtistRole extends \Gazelle\Base {
     protected const RENDER_TEXT = 1;
     protected const RENDER_HTML = 2;
@@ -15,7 +17,7 @@ abstract class ArtistRole extends \Gazelle\Base {
     abstract public function roleList(): array;
 
     public function __construct(
-        protected readonly int $id,
+        protected readonly CategoryHasArtist $object,
         protected readonly \Gazelle\Manager\Artist $manager,
     ) {}
 

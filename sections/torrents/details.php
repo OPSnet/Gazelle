@@ -86,7 +86,7 @@ if ($musicRelease) {
 <?php           if ($Viewer->permitted('torrents_edit')) { ?>
                     (<span class="tooltip" title="Artist alias ID"><?= $artist->aliasId()
                         ?></span>)&nbsp;<span class="remove remove_artist"><a href="javascript:void(0);" onclick="ajax.get('torrents.php?action=delete_alias&amp;auth='+authkey+'&amp;groupid=<?=
-                        $tgroupId ?>&amp;artistid=<?= $artist->id() ?>&amp;importance=<?=
+                        $tgroupId ?>&amp;aliasid=<?= $artist->aliasId() ?>&amp;importance=<?=
                         $s['id'] ?>'); this.parentNode.parentNode.style.display = 'none';" class="brackets tooltip" title="Remove <?=
                         $s['role'] ?>">X</a></span>
 <?php           } ?>

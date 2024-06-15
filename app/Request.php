@@ -2,7 +2,9 @@
 
 namespace Gazelle;
 
-class Request extends BaseObject {
+use Gazelle\Intf\CategoryHasArtist;
+
+class Request extends BaseObject implements CategoryHasArtist {
     final public const tableName         = 'requests';
     protected const CACHE_REQUEST = "request_%d";
     protected const CACHE_ARTIST  = "request_artists_%d";
@@ -91,7 +93,7 @@ class Request extends BaseObject {
         if ($this->categoryName() !== 'Music') {
             return null;
         }
-        return new ArtistRole\Request($this->id, new Manager\Artist());
+        return new ArtistRole\Request($this, new Manager\Artist());
     }
 
     public function hasArtistRole(): bool {

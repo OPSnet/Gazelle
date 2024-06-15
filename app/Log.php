@@ -2,6 +2,8 @@
 
 namespace Gazelle;
 
+use Gazelle\Intf\CategoryHasArtist;
+
 class Log extends Base {
     /**
      * Write a general message to the system log.
@@ -19,7 +21,7 @@ class Log extends Base {
     /**
      * Write a group entry
      */
-    public function group(TGroup $tgroup, ?User $user, string $message): static {
+    public function group(TGroup|CategoryHasArtist $tgroup, ?User $user, string $message): static {
         $qid = self::$db->get_query_id();
         self::$db->prepared_query("
             INSERT INTO group_log

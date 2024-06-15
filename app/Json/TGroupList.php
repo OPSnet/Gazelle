@@ -49,7 +49,7 @@ class TGroupList extends \Gazelle\Json {
                     $groupList[] = [
                         'torrentId'               => $torrent->id(),
                         'editionId'               => $EditionID,
-                        'artists'                 => (new \Gazelle\ArtistRole\TGroup($tgroup->id(), $this->artistMan))->roleList()['main'],
+                        'artists'                 => $tgroup->artistRole()->roleList()['main'],
                         'remastered'              => $torrent->isRemastered(),
                         'remasterYear'            => $torrent->remasterYear(),
                         'remasterRecordLabel'     => $torrent->remasterRecordLabel() ?? '',
