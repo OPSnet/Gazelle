@@ -25,7 +25,7 @@ broken legacy tags, you may need to check "Do not sanitize".</p>
 </div>
 <br />
 
-<form action="tools.php" method="get" name="tagform" id="tagform" onsubmit="return formVal();">
+<form action="tools.php" method="get" name="tagform" id="tagform">
     <input type="hidden" name="action" value="tags" />
     <table>
         <tr>
@@ -33,14 +33,14 @@ broken legacy tags, you may need to check "Do not sanitize".</p>
                 Tag to change:
             </td>
             <td style="vertical-align: top;">
-                <input type="text" name="tag" id="tag" />
+                <input type="text" name="tag" id="tag" minlength="2" maxlength="100" />
                 <br /><input type="checkbox" name="dirty" id="dirty" /> <label for="dirty">Do not sanitize (e.g. legacy double-dotted tags)</label>
             </td>
             <td style="vertical-align: top;">
                 Merge with tag:
             </td>
             <td>
-                <input type="text" name="replace" id="replace" />
+                <input type="text" name="replace" id="replace" minlength="2" maxlength="100" />
                 <br />If this tag does not exist, the tag to change will be renamed to this.
                 <br />Use commas to separate multiple replacements.
             </td>
@@ -50,7 +50,7 @@ broken legacy tags, you may need to check "Do not sanitize".</p>
                 <input type="checkbox" name="list" id="list" checked="checked" /> <label for="list">List affected items</label>
             </td>
             <td>
-                <input type="checkbox" name="alias" id="alias" /> <label for="alias">Create an permanent alias for this correction</label>
+                <input type="checkbox" name="alias" id="alias" /> <label for="alias">Create a permanent alias for this correction</label>
             </td>
             <td>
                 <input type="checkbox" name="official" id="official" /> <label for="official">Mark this tag as official</label>

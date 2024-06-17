@@ -11,8 +11,7 @@ $Val->setFields([
 ]);
 $tagMan = new Gazelle\Manager\Tag();
 
-View::show_header('Batch Tag Editor', ['js' => 'validate']);
-echo $Val->generateJS('tagform');
+View::show_header('Batch Tag Editor');
 ?>
 
 <div class="header">

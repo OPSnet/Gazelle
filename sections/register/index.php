@@ -106,7 +106,6 @@ if (isset($_REQUEST['confirm'])) {
     }
     echo $Twig->render('register/create.twig', [
         'error'     => $error,
-        'js'        => $validator->generateJS('registerform'),
         'sent'      => $emailSent ?? false,
         'invite'    => $_REQUEST['invite'] ?? null,
         'is_new'    => $newInstall ?? false,

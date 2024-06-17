@@ -28,7 +28,6 @@ $navList = (new Gazelle\Manager\UserNavigation())->fullList();
 
 echo $Twig->render('user/setting.twig', [
     'donor'           => $donor,
-    'js'              => (new Gazelle\Util\Validator())->generateJS('userform'),
     'lastfm_username' => (new Gazelle\Util\LastFM())->username($user),
     'nav_items'       => $navList,
     'nav_items_user'  => $user->navigationList(),

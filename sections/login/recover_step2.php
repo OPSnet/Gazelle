@@ -44,5 +44,4 @@ echo $Twig->render('login/new-password.twig', [
     'error'     => $error,
     'key'       => $_GET['key'],
     'success'   => $success,
-    'validator' => $validator,
 ]);
