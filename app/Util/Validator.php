@@ -2,7 +2,6 @@
 
 /*-- TODO ---------------------------//
 Add in support for form id checks
-Complete the number and date validation
 Finish the GenerateJS stuff
 //-----------------------------------*/
 
@@ -36,9 +35,9 @@ class Validator {
     /**
      * Add a new field to be validated (or used for JS form generation) from the associated array to be validated.
      * For each field, you need to give it a name (its key in the array), whether the field is required or not (fields
-     * that are not required and blank and not a date won't be checked, else it'll always be validated), the type of
-     * field (see below), the error message to show users if validation fails, and any options (while you can set
-     * all options, certain ones will only affect certain types).
+     * that are not required and blank won't be checked, else it'll always be validated), the type of field (see below),
+     * the error message to show users if validation fails, and any options (while you can set all options, certain ones
+     * will only affect certain types).
      *
      * Listed here are all the allowed field types, as well as then the options that are used for that particular type.
      * See below for how exactly each type is checked.
@@ -92,7 +91,7 @@ class Validator {
 
     /**
      * Given an associate array, iterate through each key checking to see if we've set the field to be validated. If
-     * the field is not blank or it's required or it's a date, then we must validate, else we can skip this field.
+     * the field is not blank or it's required, then we must validate, else we can skip this field.
      *
      * Note: Regular expression constants can be found in classes/regex.php
      * Note: All checks against length (value for number type) is inclusive of the Min/Max lengths
@@ -113,8 +112,6 @@ class Validator {
      *      where you have to input it twice, check that the second password equals the first one
      * - inarray: checks that the value specified in InArray option is in the field (which we assume is an array)
      * - regex: performs a preg_match of the value of Regex option and the field
-     *
-     * TODO: date fields are not actually validated, need to figure out what the proper validation syntax should be.
      */
     public function validate(array $ValidateArray): bool {
         reset($this->Fields);
@@ -245,116 +242,5 @@ class Validator {
 
     public function errorMessage(): ?string {
         return $this->errorMessage ?? null;
-    }
-
-    public function generateJS(string $FormID): string {
-        $ReturnJS = "<script type=\"text/javascript\" language=\"javascript\">\r\n"
-            . "//<![CDATA[\r\nfunction formVal() {\r\n    clearErrors('$FormID');\r\n";
-
-        reset($this->Fields);
-        foreach ($this->Fields as $FieldKey => $Field) {
-            $ValItem = '';
-            if ($Field['Type'] == 'string') {
-                $ValItem = '    if ($(\'#' . $FieldKey . '\').raw().value == ""';
-                if (!empty($Field['maxlength'])) {
-                    $ValItem .= ' || $(\'#' . $FieldKey . '\').raw().value.length > ' . $Field['maxlength'];
-                } else {
-                    $ValItem .= ' || $(\'#' . $FieldKey . '\').raw().value.length > 255';
-                }
-                if (!empty($Field['minlength'])) {
-                    $ValItem .= ' || $(\'#' . $FieldKey . '\').raw().value.length < ' . $Field['minlength'];
-                }
-                $ValItem .= ') { return showError(\'' . $FieldKey . '\',\'' . $Field['ErrorMessage'] . '\'); }' . "\r\n";
-            } elseif ($Field['Type'] == 'number') {
-                $Match = '0-9';
-                if (!empty($Field['allowperiod'])) {
-                    $Match .= '.';
-                }
-                if (!empty($Field['allowcomma'])) {
-                    $Match .= ',';
-                }
-
-                $ValItem = '    if ($(\'#' . $FieldKey . '\').raw().value.match(/[^' . $Match . ']/) || $(\'#' . $FieldKey . '\').raw().value.length < 1';
-                if (!empty($Field['maxlength'])) {
-                    $ValItem .= ' || $(\'#' . $FieldKey . '\').raw().value/1 > ' . $Field['maxlength'];
-                }
-                if (!empty($Field['minlength'])) {
-                    $ValItem .= ' || $(\'#' . $FieldKey . '\').raw().value/1 < ' . $Field['minlength'];
-                }
-                $ValItem .= ') { return showError(\'' . $FieldKey . '\',\'' . $Field['ErrorMessage'] . '\'); }' . "\r\n";
-            } elseif ($Field['Type'] == 'email') {
-                $ValItem = '    if (!validEmail($(\'#' . $FieldKey . '\').raw().value)';
-                if (!empty($Field['maxlength'])) {
-                    $ValItem .= ' || $(\'#' . $FieldKey . '\').raw().value.length > ' . $Field['maxlength'];
-                } else {
-                    $ValItem .= ' || $(\'#' . $FieldKey . '\').raw().value.length > 255';
-                }
-                if (!empty($Field['minlength'])) {
-                    $ValItem .= ' || $(\'#' . $FieldKey . '\').raw().value.length < ' . $Field['minlength'];
-                } else {
-                    $ValItem .= ' || $(\'#' . $FieldKey . '\').raw().value.length < 6';
-                }
-                $ValItem .= ') { return showError(\'' . $FieldKey . '\',\'' . $Field['ErrorMessage'] . '\'); }' . "\r\n";
-            } elseif ($Field['Type'] == 'link') {
-                $ValItem = '    if (!validLink($(\'#' . $FieldKey . '\').raw().value)';
-                if (!empty($Field['maxlength'])) {
-                    $ValItem .= ' || $(\'#' . $FieldKey . '\').raw().value.length > ' . $Field['maxlength'];
-                } else {
-                    $ValItem .= ' || $(\'#' . $FieldKey . '\').raw().value.length > 255';
-                }
-                if (!empty($Field['minlength'])) {
-                    $ValItem .= ' || $(\'#' . $FieldKey . '\').raw().value.length < ' . $Field['minlength'];
-                } else {
-                    $ValItem .= ' || $(\'#' . $FieldKey . '\').raw().value.length < 10';
-                }
-                $ValItem .= ') { return showError(\'' . $FieldKey . '\',\'' . $Field['ErrorMessage'] . '\'); }' . "\r\n";
-            } elseif ($Field['Type'] == 'username') {
-                $ValItem = '    if ($(\'#' . $FieldKey . '\').raw().value.match(/[^a-zA-Z0-9_\-]/)';
-                if (!empty($Field['maxlength'])) {
-                    $ValItem .= ' || $(\'#' . $FieldKey . '\').raw().value.length > ' . $Field['maxlength'];
-                }
-                if (!empty($Field['minlength'])) {
-                    $ValItem .= ' || $(\'#' . $FieldKey . '\').raw().value.length < ' . $Field['minlength'];
-                }
-                $ValItem .= ') { return showError(\'' . $FieldKey . '\',\'' . $Field['ErrorMessage'] . '\'); }' . "\r\n";
-            } elseif ($Field['Type'] == 'regex') {
-                $ValItem = '    if (!$(\'#' . $FieldKey . '\').raw().value.match(' . $Field['regex'] . ')) { return showError(\'' . $FieldKey . '\',\'' . $Field['ErrorMessage'] . '\'); }' . "\r\n";
-            } elseif ($Field['Type'] == 'date') {
-                $DisplayError = $FieldKey . 'month';
-                if (isset($Field['minlength']) && $Field['minlength'] == 3) {
-                    $Day = '$(\'#' . $FieldKey . 'day\').raw().value';
-                    $DisplayError .= ",{$FieldKey}day";
-                } else {
-                    $Day = '1';
-                }
-                $DisplayError .= ",{$FieldKey}year";
-                $ValItemHold = '    if (!validDate($(\'#' . $FieldKey . 'month\').raw().value+\'/\'+' . $Day . '+\'/\'+$(\'#' . $FieldKey . 'year\').raw().value)) { return showError(\'' . $DisplayError . '\',\'' . $Field['ErrorMessage'] . '\'); }' . "\r\n";
-
-                if (!$Field['Required']) {
-                    $ValItem = '    if ($(\'#' . $FieldKey . 'month\').raw().value != ""';
-                    if (isset($Field['minlength']) && $Field['minlength'] == 3) {
-                        $ValItem .= ' || $(\'#' . $FieldKey . 'day\').raw().value != ""';
-                    }
-                    $ValItem .= ' || $(\'#' . $FieldKey . 'year\').raw().value != "") {' . "\r\n";
-                    $ValItem .= $ValItemHold;
-                    $ValItem .= "    }\r\n";
-                } else {
-                    $ValItem .= $ValItemHold;
-                }
-            } elseif ($Field['Type'] == 'checkbox') {
-                $ValItem = '    if (!$(\'#' . $FieldKey . '\').checked) { return showError(\'' . $FieldKey . '\',\'' . $Field['ErrorMessage'] . '\'); }' . "\r\n";
-            } elseif ($Field['Type'] == 'compare') {
-                $ValItem = '    if ($(\'#' . $FieldKey . '\').raw().value!=$(\'#' . $Field['comparefield'] . '\').raw().value) { return showError(\'' . $FieldKey . ',' . $Field['comparefield'] . '\',\'' . $Field['ErrorMessage'] . '\'); }' . "\r\n";
-            }
-
-            if (!$Field['Required'] && $Field['Type'] != 'date') {
-                $ReturnJS .= '    if ($(\'#' . $FieldKey . '\').raw().value!="") {' . "\r\n    ";
-                $ReturnJS .= $ValItem;
-                $ReturnJS .= "    }\r\n";
-            } else {
-                $ReturnJS .= $ValItem;
-            }
-        }
-        return $ReturnJS . "}\r\n//]]>\r\n</script>\r\n";
     }
 }

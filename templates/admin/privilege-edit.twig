@@ -1,6 +1,5 @@
 {% from 'macro/form.twig' import checked, selected -%}
-{{ header('Manage Permissions', {'js': 'validate'}) }}
-{{ js|raw }}
+{{ header('Manage Permissions') }}
 <div class="header">
     <div class="linkbox">
         <a href="tools.php?action=userclass" class="brackets">Userclass List</a>
@@ -12,7 +11,7 @@
 {% if edited %}
     <div class="box thin"><div class="pad"><b>{{ edit_total }} user{{ edit_total|plural }} affected.</b></div></div>
 {% endif %}
-<form class="manage_form" name="permissions" id="permissionsform" method="post" action="" onsubmit="return formVal();">
+<form class="manage_form" name="permissions" id="permissionsform" method="post" action="">
     <input type="hidden" name="action" value="privilege-alter" />
     <input type="hidden" name="auth" value="{{ viewer.auth }}" />
 {% if privilege.id %}

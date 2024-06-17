@@ -138,7 +138,7 @@ function userform_submit() {
             return false;
         }
     }
-    return formVal();
+    return true;
 }
 
 function togglePassKey(key) {
