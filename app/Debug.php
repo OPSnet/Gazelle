@@ -73,7 +73,10 @@ class Debug {
         }
 
         if (isset($Reason[0])) {
-            $this->analysis(implode(', ', $Reason));
+            $this->analysis(
+                $user->requestContext()->module(),
+                implode(', ', $Reason)
+            );
             return true;
         }
 
@@ -135,23 +138,22 @@ class Debug {
         return $id;
     }
 
-    public function analysis($Message, $Report = ''): void {
-        $RequestURI = empty($_SERVER['REQUEST_URI']) ? '' : substr($_SERVER['REQUEST_URI'], 1);
+    public function analysis(string $module, string $message, string $report = ''): void {
+        $uri = empty($_SERVER['REQUEST_URI']) ? '' : substr($_SERVER['REQUEST_URI'], 1);
         if (
             PHP_SAPI === 'cli'
-            || in_array($RequestURI, ['tools.php?action=db_sandbox'])
+            || in_array($uri, ['tools.php?action=db_sandbox'])
         ) {
             // Don't spam IRC from Boris or these pages
             return;
         }
-        if (empty($Report)) {
-            $Report = $Message;
+        if (empty($report)) {
+            $report = $message;
         }
-        $case = $this->saveCase($Report);
-        global $Document;
-        Irc::sendMessage(IRC_CHAN_STATUS, "{$Message} $Document "
+        $case = $this->saveCase($report);
+        Irc::sendMessage(IRC_CHAN_STATUS, "{$message} $module "
             . SITE_URL . "/tools.php?action=analysis&case=$case "
-            . SITE_URL . '/' . $RequestURI
+            . SITE_URL . "/{$uri}"
         );
     }
 

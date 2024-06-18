@@ -337,8 +337,14 @@ class Text {
         }
         parse_str($info['query'] ?? '', $args);
 
-        if (isset($args['postid']) && isset($info['path']) && in_array($info['path'],
-                ['/artist.php', '/collages.php', '/requests.php', '/torrents.php'])) {
+        if (
+            isset($args['postid'])
+            && isset($info['path'])
+            && in_array(
+                $info['path'],
+                ['/artist.php', '/collages.php', '/requests.php', '/torrents.php']
+            )
+        ) {
             return self::bbcodeCommentUrl((int)$args['postid']);
         }
 
@@ -1207,8 +1213,8 @@ class Text {
      * that html_escape does.
      */
     public static function parse_html(string $Html): string {
-        $Document = new DOMDocument();
-        $Document->loadHTML(stripslashes($Html));
+        $dom = new DOMDocument();
+        $dom->loadHTML(stripslashes($Html));
 
         // For any manipulation that we do on the DOM tree, always go in reverse order or
         // else you end up with broken array pointers and missed elements
@@ -1222,42 +1228,42 @@ class Text {
             }
         };
 
-        $Elements = $Document->getElementsByTagName('div');
+        $Elements = $dom->getElementsByTagName('div');
         for ($i = $Elements->length - 1; $i >= 0; $i--) {
             /** @var \DOMElement $Element */
             $Element = $Elements->item($i);
             if (str_contains($Element->getAttribute('style'), 'text-align')) {
-                $NewElement = $Document->createElement('align');
+                $NewElement = $dom->createElement('align');
                 $CopyNode($Element, $NewElement);
                 $NewElement->setAttribute('align', str_replace('text-align: ', '', $Element->getAttribute('style')));
                 $Element->parentNode->replaceChild($NewElement, $Element);
             }
         }
 
-        $Elements = $Document->getElementsByTagName('span');
+        $Elements = $dom->getElementsByTagName('span');
         for ($i = $Elements->length - 1; $i >= 0; $i--) {
             /** @var \DOMElement $Element */
             $Element = $Elements->item($i);
             if (str_contains($Element->getAttribute('class'), 'size')) {
-                $NewElement = $Document->createElement('size');
+                $NewElement = $dom->createElement('size');
                 $CopyNode($Element, $NewElement);
                 $NewElement->setAttribute('size', str_replace('size', '', $Element->getAttribute('class')));
                 $Element->parentNode->replaceChild($NewElement, $Element);
             } elseif (str_contains($Element->getAttribute('style'), 'font-style: italic')) {
-                $NewElement = $Document->createElement('italic');
+                $NewElement = $dom->createElement('italic');
                 $CopyNode($Element, $NewElement);
                 $Element->parentNode->replaceChild($NewElement, $Element);
             } elseif (str_contains($Element->getAttribute('style'), 'text-decoration: underline')) {
-                $NewElement = $Document->createElement('underline');
+                $NewElement = $dom->createElement('underline');
                 $CopyNode($Element, $NewElement);
                 $Element->parentNode->replaceChild($NewElement, $Element);
             } elseif (str_contains($Element->getAttribute('style'), 'color: ')) {
-                $NewElement = $Document->createElement('color');
+                $NewElement = $dom->createElement('color');
                 $CopyNode($Element, $NewElement);
                 $NewElement->setAttribute('color', str_replace(['color: ', ';'], '', $Element->getAttribute('style')));
                 $Element->parentNode->replaceChild($NewElement, $Element);
             } elseif (preg_match("/display:[ ]*inline\-block;[ ]*padding:/", $Element->getAttribute('style')) !== false) {
-                $NewElement = $Document->createElement('pad');
+                $NewElement = $dom->createElement('pad');
                 $CopyNode($Element, $NewElement);
                 $Padding = explode(' ', trim(explode(':', (explode(';', $Element->getAttribute('style'))[1]))[1]));
                 $NewElement->setAttribute('pad', implode('|', array_map(fn($x) => rtrim($x, 'px'), $Padding)));
@@ -1265,44 +1271,44 @@ class Text {
             }
         }
 
-        $Elements = $Document->getElementsByTagName('ul');
+        $Elements = $dom->getElementsByTagName('ul');
         for ($i = 0; $i < $Elements->length; $i++) {
             /** @var \DOMElement $Element */
             $Element = $Elements->item($i);
             $InnerElements = $Element->getElementsByTagName('li');
             for ($j = $InnerElements->length - 1; $j >= 0; $j--) {
                 $Element = $InnerElements->item($j);
-                $NewElement = $Document->createElement('bullet');
+                $NewElement = $dom->createElement('bullet');
                 $CopyNode($Element, $NewElement);
                 $Element->parentNode->replaceChild($NewElement, $Element);
             }
         }
 
-        $Elements = $Document->getElementsByTagName('ol');
+        $Elements = $dom->getElementsByTagName('ol');
         for ($i = 0; $i < $Elements->length; $i++) {
             /** @var \DOMElement $Element */
             $Element = $Elements->item($i);
             $InnerElements = $Element->getElementsByTagName('li');
             for ($j = $InnerElements->length - 1; $j >= 0; $j--) {
                 $Element = $InnerElements->item($j);
-                $NewElement = $Document->createElement('number');
+                $NewElement = $dom->createElement('number');
                 $CopyNode($Element, $NewElement);
                 $Element->parentNode->replaceChild($NewElement, $Element);
             }
         }
 
-        $Elements = $Document->getElementsByTagName('strong');
+        $Elements = $dom->getElementsByTagName('strong');
         for ($i = $Elements->length - 1; $i >= 0; $i--) {
             /** @var \DOMElement $Element */
             $Element = $Elements->item($i);
             if (in_array('important_text', explode(' ', $Element->getAttribute('class')))) {
-                $NewElement = $Document->createElement('important');
+                $NewElement = $dom->createElement('important');
                 $CopyNode($Element, $NewElement);
                 $Element->parentNode->replaceChild($NewElement, $Element);
             }
         }
 
-        $Elements = $Document->getElementsByTagName('a');
+        $Elements = $dom->getElementsByTagName('a');
         for ($i = $Elements->length - 1; $i >= 0; $i--) {
             /** @var \DOMElement $Element */
             $Element = $Elements->item($i);
@@ -1311,14 +1317,16 @@ class Text {
                 $Element->removeAttribute('target');
                 if ($Element->getAttribute('href') === $Element->nodeValue) {
                     $Element->removeAttribute('href');
-                } elseif ($Element->getAttribute('href') === 'javascript:void(0);'
-                    && $Element->getAttribute('onclick') === 'BBCode.spoiler(this);') {
-                    $Spoilers = $Document->getElementsByTagName('blockquote');
+                } elseif (
+                    $Element->getAttribute('href') === 'javascript:void(0);'
+                    && $Element->getAttribute('onclick') === 'BBCode.spoiler(this);'
+                ) {
+                    $Spoilers = $dom->getElementsByTagName('blockquote');
                     for ($j = $Spoilers->length - 1; $j >= 0; $j--) {
                         /** @var \DOMElement $Spoiler */
                         $Spoiler = $Spoilers->item($j);
                         if ($Spoiler->hasAttribute('class') && $Spoiler->getAttribute('class') === 'hidden spoiler') {
-                            $NewElement = $Document->createElement('spoiler');
+                            $NewElement = $dom->createElement('spoiler');
                             $CopyNode($Spoiler, $NewElement);
                             $Element->parentNode->replaceChild($NewElement, $Element);
                             $Spoiler->parentNode->removeChild($Spoiler);
@@ -1326,18 +1334,18 @@ class Text {
                         }
                     }
                 } elseif (str_starts_with($Element->getAttribute('href'), 'artist.php?artistname=')) {
-                    $NewElement = $Document->createElement('artist');
+                    $NewElement = $dom->createElement('artist');
                     $CopyNode($Element, $NewElement);
                     $Element->parentNode->replaceChild($NewElement, $Element);
                 } elseif (str_starts_with($Element->getAttribute('href'), 'user.php?action=search&search=')) {
-                    $NewElement = $Document->createElement('user');
+                    $NewElement = $dom->createElement('user');
                     $CopyNode($Element, $NewElement);
                     $Element->parentNode->replaceChild($NewElement, $Element);
                 }
             }
         }
 
-        $Str = (string)$Document->saveHTML($Document->getElementsByTagName('body')->item(0));
+        $Str = (string)$dom->saveHTML($dom->getElementsByTagName('body')->item(0));
         $Str = str_replace(["<body>\n", "\n</body>", "<body>", "</body>"], "", $Str);
         $Str = str_replace(["\r\n", "\n"], "", $Str);
         $Str = preg_replace("/\<strong\>([a-zA-Z0-9 ]+)\<\/strong\>\: \<spoiler\>/", "[spoiler=\\1]", $Str);

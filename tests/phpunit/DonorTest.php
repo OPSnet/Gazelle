@@ -441,8 +441,7 @@ class DonorTest extends TestCase {
         ]);
         global $SessionID;
         $SessionID = $current['SessionID']; // more sadness
-        global $Document;
-        $Document = 'index'; // utter misery
+        Gazelle\Base::setRequestContext(new Gazelle\BaseRequestContext('/index.php', '127.0.0.1', ''));
 
         $paginator = (new Gazelle\Util\Paginator(USERS_PER_PAGE, 1))->setTotal($manager->rewardTotal());
         $render = (Gazelle\Util\Twig::factory())->render('donation/reward-list.twig', [

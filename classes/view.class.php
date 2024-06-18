@@ -14,11 +14,14 @@ class View {
      * @param array<string> $option
      */
     public static function header(string $pageTitle, array $option = []): string {
-        global $Document, $Twig, $Viewer;
         if ($pageTitle != '') {
             $pageTitle .= ' :: ';
         }
         $pageTitle .= SITE_NAME;
+        global $Viewer;
+        $module = is_null($Viewer)
+            ? 'index'
+            : $Viewer->requestContext()->module();
 
         $js = [
             'jquery',
@@ -34,6 +37,7 @@ class View {
             array_push($js, ...explode(',', $option['js']));
         }
 
+        global $Twig;
         if (!isset($Viewer) || $pageTitle == 'Recover Password :: ' . SITE_NAME) {
             $js[] = 'storage.class';
             echo $Twig->render('index/public-header.twig', [
@@ -63,7 +67,7 @@ class View {
             ->setStaffPM(new Gazelle\Manager\StaffPM());
 
         $notifier = new Gazelle\User\Notification($Viewer);
-        $alertList = $notifier->setDocument($Document, $_REQUEST['action'] ?? '')->alertList();
+        $alertList = $notifier->setDocument($module, $_REQUEST['action'] ?? '')->alertList();
         foreach ($alertList as $alert) {
             if (in_array($alert->display(), [Gazelle\User\Notification::DISPLAY_TRADITIONAL, Gazelle\User\Notification::DISPLAY_TRADITIONAL_PUSH])) {
                 $activity->setAlert(sprintf('<a href="%s">%s</a>', $alert->notificationUrl(), $alert->title()));
@@ -92,7 +96,7 @@ class View {
             }
         }
 
-        $PageID = [$Document, $_REQUEST['action'] ?? false, $_REQUEST['type'] ?? false];
+        $PageID = [$module, $_REQUEST['action'] ?? false, $_REQUEST['type'] ?? false];
         $navLinks = [];
         foreach ((new Gazelle\Manager\UserNavigation())->userControlList($Viewer) as $n) {
             [$ID, $Key, $Title, $Target, $Tests, $TestUser, $Mandatory] = array_values($n);
@@ -149,7 +153,7 @@ class View {
             'action_list' => $activity->actionList(),
             'alert_list'  => $activity->alertList(),
             'bonus'       => new Gazelle\User\Bonus($Viewer),
-            'document'    => $Document,
+            'document'    => $module,
             'dono_target' => $payMan->monthlyPercent(new Gazelle\Manager\Donation()),
             'nav_links'   => $navLinks,
             'user'        => $Viewer,
@@ -201,8 +205,12 @@ class View {
             $launch = SITE_LAUNCH_YEAR . "-$launch";
         }
 
-        global $Document;
-        $alertList = (new Gazelle\User\Notification($Viewer))->setDocument($Document, $_REQUEST['action'] ?? '')->alertList();
+        $alertList = (new Gazelle\User\Notification($Viewer))
+            ->setDocument(
+                $Viewer->requestContext()->module(),
+                $_REQUEST['action'] ?? ''
+            )
+            ->alertList();
         $notification = [];
         foreach ($alertList as $alert) {
             if (in_array($alert->display(), [Gazelle\User\Notification::DISPLAY_POPUP, Gazelle\User\Notification::DISPLAY_POPUP_PUSH])) {

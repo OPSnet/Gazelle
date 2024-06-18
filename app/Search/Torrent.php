@@ -192,7 +192,12 @@ class Torrent {
         ) {
             $ErrMsg = "Search\Torrent constructor arguments:\n" . print_r(func_get_args(), true);
             global $Debug;
-            $Debug->analysis('Bad arguments in Search\Torrent constructor', $ErrMsg, 3600 * 24);
+            $Debug->analysis(
+                $tgMan->requestContext()->module(),
+                'Bad arguments in Search\Torrent constructor',
+                $ErrMsg,
+                86_400,
+            );
             error('-1');
         }
         $this->Page = $searchMany ? $Page : min($Page, SPHINX_MAX_MATCHES / $PageSize);

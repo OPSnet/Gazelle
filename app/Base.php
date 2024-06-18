@@ -5,16 +5,25 @@ namespace Gazelle;
 abstract class Base {
     protected static DB\Mysql $db;
     protected static Cache $cache;
+    protected static BaseRequestContext $requestContext;
     protected static \Twig\Environment $twig;
 
     public static function initialize(Cache $cache, DB\Mysql $db, \Twig\Environment $twig): void {
-        self::$db    = $db;
-        self::$cache = $cache;
-        self::$twig  = $twig;
+        static::$db    = $db;
+        static::$cache = $cache;
+        static::$twig  = $twig;
+    }
+
+    public static function setRequestContext(BaseRequestContext $c): void {
+        static::$requestContext = $c;
+    }
+
+    public function requestContext(): BaseRequestContext {
+        return static::$requestContext;
     }
 
     public function enumList(string $table, string $column): array {
-        $columnType = (string)self::$db->scalar("
+        $columnType = (string)static::$db->scalar("
             SELECT column_type
             FROM information_schema.columns
             WHERE table_schema = ?
@@ -29,7 +38,7 @@ abstract class Base {
     }
 
     public function enumDefault(string $table, string $column): ?string {
-        $default = self::$db->scalar("
+        $default = static::$db->scalar("
             SELECT column_default
             FROM information_schema.columns
             WHERE table_schema = ?

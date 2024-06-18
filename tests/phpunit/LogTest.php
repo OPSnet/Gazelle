@@ -131,10 +131,9 @@ class LogTest extends TestCase {
 
         // FIXME: $Viewer should not be necessary
         $this->user = Helper::makeUser('sitelog.' . randomString(6), 'sitelog');
+        Gazelle\Base::setRequestContext(new Gazelle\BaseRequestContext('/index.php', '127.0.0.1', ''));
         global $Viewer;
         $Viewer = $this->user;
-        global $Document;
-        $Document = '';
         global $SessionID;
         $SessionID = 'phpunit';
         $html = (Gazelle\Util\Twig::factory())->render('sitelog.twig', [

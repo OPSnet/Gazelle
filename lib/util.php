@@ -355,10 +355,10 @@ function parse_user_agent(string $useragent): array {
  * $Log If true, the user is given a link to search $Log in the site log.
  */
 function error(int|string $Error, bool $NoHTML = false, bool $Log = false): never {
-    global $Debug, $Document, $Viewer, $Twig;
+    global $Debug, $Viewer, $Twig;
     require_once(__DIR__ . '/../sections/error/index.php');
     if (isset($Viewer)) {
-        $Debug->profile($Viewer, $Document);
+        $Debug->profile($Viewer, $Viewer->requestContext()->module());
     }
     exit;
 }

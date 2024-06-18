@@ -39,23 +39,21 @@ if (!empty($_POST['username']) && !empty($_POST['password'])) {
                 echo $Twig->render('login/weak-password.twig');
                 exit;
             }
-
-            $browser = parse_user_agent($_SERVER['HTTP_USER_AGENT']);
+            $useragent = $_SERVER['HTTP_USER_AGENT'] ?? '[no-useragent]';
+            $context = new Gazelle\BaseRequestContext(
+                $_SERVER['SCRIPT_NAME'],
+                $_SERVER['REMOTE_ADDR'],
+                $useragent,
+            );
             if ($user->permitted('site_disable_ip_history')) {
-                $ipaddr = '127.0.0.1';
-                $browser['BrowserVersion'] = null;
-                $browser['OperatingSystemVersion'] = null;
-                $full_ua = 'staff-browser';
-            } else {
-                $ipaddr = $_SERVER['REMOTE_ADDR'];
-                $full_ua = $_SERVER['HTTP_USER_AGENT'];
+                $context->anonymize();
             }
             $session = new Gazelle\User\Session($user);
             $current = $session->create([
                 'keep-logged' => $login->persistent() ? '1' : '0',
-                'browser'     => $browser,
-                'ipaddr'      => $ipaddr,
-                'useragent'   => $full_ua,
+                'browser'     => $context->ua(),
+                'ipaddr'      => $context->remoteAddr(),
+                'useragent'   => $useragent,
             ]);
             setcookie('session', $session->cookie($current['SessionID']), [
                 'expires'  => (int)$login->persistent() * (time() + 60 * 60 * 24 * 90),
