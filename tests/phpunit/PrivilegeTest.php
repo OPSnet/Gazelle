@@ -124,7 +124,7 @@ class PrivilegeTest extends TestCase {
             $userPriv->badgeList(),
             'privilege-badge-list',
         );
-        $this->assertGreaterThan(0, count($userPriv->secondaryPrivilegeList()), 'privilege-secondary-list');
+        $this->assertGreaterThan(0, count($userPriv->defaultPrivilegeList()), 'privilege-secondary-list');
         $flsList = array_values(array_filter($manager->usageList(), fn($p) => $p['id'] == FLS_TEAM));
         $this->assertEquals($total + 1, $flsList[0]['total'], 'privilege-one-new-fls');
     }

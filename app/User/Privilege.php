@@ -46,6 +46,7 @@ class Privilege extends \Gazelle\BaseUser {
             'badge'                 => [],
             'forum'                 => [],
             'privilege'             => [],
+            'custom'                => [],
             'secondary'             => [],
         ];
         foreach (unserialize($config['privileges']) ?: [] as $name => $value) {
@@ -94,7 +95,7 @@ class Privilege extends \Gazelle\BaseUser {
 
         // a custom privilege may revoke a primary or secondary grant
         foreach (unserialize($config['custom_privileges'] ?? '') ?: [] as $name => $value) {
-            $info['privilege'][$name] = (bool)$value;
+            $info['custom'][$name] = (bool)$value;
         }
 
         // user-level forum overrides
@@ -136,7 +137,7 @@ class Privilege extends \Gazelle\BaseUser {
     }
 
     public function permitted(string $privilege): bool {
-        return $this->info()['privilege'][$privilege] ?? false;
+        return $this->info()['custom'][$privilege] ?? $this->info()['privilege'][$privilege] ?? false;
     }
 
     public function effectiveClassLevel(): int {
@@ -193,7 +194,11 @@ class Privilege extends \Gazelle\BaseUser {
         return $this->info()['level_secondary'];
     }
 
-    public function secondaryPrivilegeList(): array {
+    public function customPrivilegeList(): array {
+        return $this->info()['custom'];
+    }
+
+    public function defaultPrivilegeList(): array {
         return $this->info()['privilege'];
     }
 
