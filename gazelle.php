@@ -5,27 +5,6 @@ use Gazelle\Util\Time;
 
 // 1. Basic sanity checks and initialization
 
-if (PHP_VERSION_ID < 80201) {
-    die("Gazelle (Orpheus fork) requires at least PHP version 8.2.1");
-}
-foreach (['memcached', 'mysqli'] as $e) {
-    if (!extension_loaded($e)) {
-        die("$e extension not loaded");
-    }
-}
-date_default_timezone_set('UTC');
-
-$PathInfo = pathinfo($_SERVER['SCRIPT_NAME']);
-$Document = $PathInfo['filename'];
-
-if ($PathInfo['dirname'] !== '/') { /** @phpstan-ignore-line */
-    exit;
-} elseif (in_array($Document, ['announce', 'scrape']) || (isset($_REQUEST['info_hash']) && isset($_REQUEST['peer_id']))) {
-    die("d14:failure reason40:Invalid .torrent, try downloading again.e");
-}
-
-// 2. Start the engine
-
 require_once(__DIR__ . '/lib/bootstrap.php');
 global $Cache, $Debug, $Twig;
 
@@ -37,9 +16,27 @@ if (
 ) {
     $_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_X_FORWARDED_FOR'];
 }
-if (!isset($_SERVER['HTTP_USER_AGENT'])) {
-    $_SERVER['HTTP_USER_AGENT'] = '[no-useragent]';
+
+$context = new Gazelle\BaseRequestContext(
+    $_SERVER['SCRIPT_NAME'],
+    $_SERVER['REMOTE_ADDR'],
+    $_SERVER['HTTP_USER_AGENT'] ?? '[no-useragent]',
+);
+if (!$context->isValid()) {
+    exit;
 }
+$module = $context->module();
+if (
+    in_array($module, ['announce', 'scrape'])
+    || (
+        isset($_REQUEST['info_hash'])
+        && isset($_REQUEST['peer_id'])
+    )
+) {
+    die("d14:failure reason40:Invalid .torrent, try downloading again.e");
+}
+
+// 2. Start the engine
 
 // 3. Do we have a viewer?
 
@@ -50,12 +47,12 @@ $userMan   = new Gazelle\Manager\User();
 Gazelle\Util\Twig::setUserMan($userMan);
 
 // Authorization header only makes sense for the ajax endpoint
-if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
-    if ($ipv4Man->isBanned($_SERVER['REMOTE_ADDR'])) {
+if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $module === 'ajax') {
+    if ($ipv4Man->isBanned($context->remoteAddr())) {
         header('Content-type: application/json');
         json_die('failure', 'your ip address has been banned');
     }
-    [$success, $result] = $userMan->findByAuthorization($ipv4Man, $_SERVER['HTTP_AUTHORIZATION'], $_SERVER['REMOTE_ADDR']);
+    [$success, $result] = $userMan->findByAuthorization($ipv4Man, $_SERVER['HTTP_AUTHORIZATION'], $context->remoteAddr());
     if ($success) {
         $Viewer = $result;
         define('AUTHED_BY_TOKEN', true);
@@ -66,7 +63,7 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
 } elseif (isset($_COOKIE['session'])) {
     $forceLogout = function (): never {
         setcookie('session', '', [
-            'expires'  => time() - 60 * 60 * 24 * 90,
+            'expires'  => time() - 86_400 * 90,
             'path'     => '/',
             'secure'   => !DEBUG_MODE,
             'httponly' => true,
@@ -84,7 +81,7 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
     if (is_null($Viewer)) {
         $forceLogout();
     }
-    if ($Viewer->isDisabled() && !in_array($Document, ['index', 'login'])) {
+    if ($Viewer->isDisabled() && !in_array($module, ['index', 'login'])) {
         $Viewer->logoutEverywhere();
         $forceLogout();
     }
@@ -93,26 +90,22 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
         $Viewer->logout($SessionID);
         $forceLogout();
     }
-    $browser = parse_user_agent($_SERVER['HTTP_USER_AGENT']);
     if ($Viewer->permitted('site_disable_ip_history')) {
-        $ipaddr = '127.0.0.1';
-        $browser['BrowserVersion'] = null;
-        $browser['OperatingSystemVersion'] = null;
-    } else {
-        $ipaddr = $_SERVER['REMOTE_ADDR'];
+        $context->anonymize();
+        $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
     }
-    $session->refresh($SessionID, $ipaddr, $browser);
-    unset($ipaddr, $browser, $session, $userId, $cookieData, $forceLogout);
-} elseif ($Document === 'torrents' && ($_REQUEST['action'] ?? '') == 'download' && isset($_REQUEST['torrent_pass'])) {
+    $session->refresh($SessionID, $context->remoteAddr(), $context->ua());
+    unset($browser, $session, $userId, $cookieData, $forceLogout);
+} elseif ($module === 'torrents' && ($_REQUEST['action'] ?? '') == 'download' && isset($_REQUEST['torrent_pass'])) {
     $Viewer = $userMan->findByAnnounceKey($_REQUEST['torrent_pass']);
     if (is_null($Viewer) || $Viewer->isDisabled() || $Viewer->isLocked()) {
         header('HTTP/1.1 403 Forbidden');
         exit;
     }
-} elseif (!in_array($Document, ['enable', 'index', 'login', 'recovery', 'register'])) {
+} elseif (!in_array($module, ['enable', 'index', 'login', 'recovery', 'register'])) {
     if (
         // Ocelot is allowed
-        !($Document === 'tools' && ($_GET['action'] ?? '') === 'ocelot' && ($_GET['key'] ?? '') === TRACKER_SECRET)
+        !($module === 'tools' && ($_GET['action'] ?? '') === 'ocelot' && ($_GET['key'] ?? '') === TRACKER_SECRET)
     ) {
         // but for everything else, we need a $Viewer
         header('Location: login.php');
@@ -126,22 +119,18 @@ if ($Viewer) {
     if ($Viewer->hasAttr('admin-error-reporting')) {
         error_reporting(E_ALL);
     }
-
-    // Because we <3 our staff
     if ($Viewer->permitted('site_disable_ip_history')) {
-        $_SERVER['REMOTE_ADDR']          = '127.0.0.1';
-        $_SERVER['HTTP_X_FORWARDED_FOR'] = '127.0.0.1';
-        $_SERVER['HTTP_X_REAL_IP']       = '127.0.0.1';
-        $_SERVER['HTTP_USER_AGENT']      = 'staff-browser';
+        $context->anonymize();
+        $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
     }
-    if ($Viewer->ipaddr() != $_SERVER['REMOTE_ADDR'] && !$Viewer->permitted('site_disable_ip_history')) {
-        if ($ipv4Man->isBanned($_SERVER['REMOTE_ADDR'])) {
+    if ($Viewer->ipaddr() != $context->remoteAddr() && !$Viewer->permitted('site_disable_ip_history')) {
+        if ($ipv4Man->isBanned($context->remoteAddr())) {
             error('Your IP address has been banned.');
         }
-        $ipv4Man->register($Viewer, $_SERVER['REMOTE_ADDR']);
+        $ipv4Man->register($Viewer, $context->remoteAddr());
     }
-    if ($Viewer->isLocked() && !in_array($Document, ['staffpm', 'ajax', 'locked', 'logout', 'login'])) {
-        $Document = 'locked';
+    if ($Viewer->isLocked() && !in_array($module, ['staffpm', 'ajax', 'locked', 'logout', 'login'])) {
+        $context->setModule('locked');
     }
 
     // To proxify images (or not), or e.g. not render the name of a thread
@@ -153,11 +142,12 @@ $Debug->set_flag('load page');
 if (DEBUG_MODE || ($Viewer && $Viewer->permitted('site_debug'))) {
     $Twig->addExtension(new Twig\Extension\DebugExtension());
 }
+Gazelle\Base::setRequestContext($context);
 
 // for sections/tools/development/process_info.php
 $Cache->cache_value('php_' . getmypid(), [
     'start'    => Time::sqlTime(),
-    'document' => $Document,
+    'document' => $module,
     'query'    => $_SERVER['QUERY_STRING'],
     'get'      => $_GET,
     'post'     => array_diff_key(
@@ -184,8 +174,8 @@ register_shutdown_function(
 header('Cache-Control: no-cache, must-revalidate, post-check=0, pre-check=0');
 header('Pragma: no-cache');
 
-$file = realpath(__DIR__ . "/sections/{$Document}/index.php");
-if (!$file || !preg_match('/^[a-z][a-z0-9_]+$/', $Document)) {
+$file = realpath(__DIR__ . "/sections/{$module}/index.php");
+if (!$file || !preg_match('/^[a-z][a-z0-9_]+$/', $module)) {
     error($Viewer ? 403 : 404);
 }
 
@@ -210,5 +200,5 @@ try {
 
 $Debug->set_flag('and send to user');
 if (!is_null($Viewer)) {
-    $Debug->profile($Viewer, $Document);
+    $Debug->profile($Viewer, $module);
 }

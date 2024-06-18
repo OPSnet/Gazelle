@@ -263,17 +263,28 @@ class Mysql {
         if ($this->LinkID === false) {
             return false;
         }
-        // In the event of a MySQL deadlock, we sleep allowing MySQL time to unlock, then attempt again for a maximum of 5 tries
+        // In the event of a MySQL deadlock, we sleep allowing MySQL time to unlock
+        // then attempt again for a maximum of 5 attempts
+        $sleep = 0.5;
         for ($i = 1; $i < 6; $i++) {
             $this->QueryID = $Closure();
             if (!in_array(mysqli_errno($this->LinkID), [1213, 1205])) {
                 break;
             }
-            global $Debug;
-            $Debug->analysis('Non-Fatal Deadlock:', $Query, 3600 * 24);
+            // if we have a viewer, we have a request context, otherwise, it must be script
+            global $Debug, $Viewer;
+            $Debug->analysis(
+                is_null($Viewer) && isset($_SERVER['argv'])
+                    ? ($_SERVER['argv'][0] ?? 'cli')
+                    : $Viewer->requestContext()->module(),
+                'Non-Fatal Deadlock:',
+                $Query,
+                86_400,
+            );
             trigger_error("Database deadlock, attempt $i");
 
-            sleep($i * random_int(2, 5)); // Wait longer as attempts increase
+            usleep((int)($sleep * 1e6));
+            $sleep *= 1.75;
         }
         $QueryEndTime = microtime(true);
         // Kills admin pages, and prevents Debug->analysis when the whole set exceeds 1 MB

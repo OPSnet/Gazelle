@@ -21,8 +21,7 @@ class UploadTest extends TestCase {
 
         $this->assertStringContainsString($this->user->auth(), $upload->head(0), 'upload-head');
 
-        global $Document;
-        $Document = '';
+        Gazelle\Base::setRequestContext(new Gazelle\BaseRequestContext('/upload.php', '127.0.0.1', ''));
         global $SessionID;
         $SessionID = '';
         global $Viewer;

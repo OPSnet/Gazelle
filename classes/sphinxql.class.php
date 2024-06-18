@@ -91,19 +91,23 @@ class Sphinxql extends mysqli {
 
     /**
      * Print a message to privileged users and optionally halt page processing
-     *
-     * @param string $Msg message to display
-     * @param bool $Halt halt page processing. Default is to continue processing the page
      */
-    public function error($Msg, $Halt = false) {
+    public function error(string $message, bool $halt = false) {
         global $Debug, $Viewer;
-        $ErrorMsg = 'SphinxQL (' . $this->Ident . '): ' . strval($Msg);
-        $Debug->analysis('SphinxQL Error', $ErrorMsg, 3600 * 24);
-        if ($Halt === true && (DEBUG_MODE || $Viewer->permitted('site_debug'))) {
-            echo '<pre>' . display_str($ErrorMsg) . '</pre>';
-            die();
-        } elseif ($Halt === true) {
-            error('-1');
+        $error = "SphinxQL ({$this->Ident}): $message";
+        $Debug->analysis(
+            $Viewer->requestContext()->module(),
+            'SphinxQL Error',
+            $error,
+            86_400,
+        );
+        if ($halt === true) {
+            if (DEBUG_MODE || $Viewer->permitted('site_debug')) {
+                echo '<pre>' . display_str($error) . '</pre>';
+                die();
+            } else {
+                error('-1');
+            }
         }
     }
 

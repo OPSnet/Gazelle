@@ -60,8 +60,8 @@ class FriendTest extends TestCase {
                 'ipaddr'      => '127.0.0.1',
                 'useragent'   => 'phpunit-browser',
             ]);
-            global $Document, $SessionID, $Viewer;
-            $Document  = 'friends';
+            Gazelle\Base::setRequestContext(new Gazelle\BaseRequestContext('/friends.php', '127.0.0.1', ''));
+            global $SessionID, $Viewer;
             $SessionID = $current['SessionID'];
             $Viewer    = $this->friend[0]->user();
 

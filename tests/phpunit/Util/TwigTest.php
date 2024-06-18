@@ -210,10 +210,9 @@ END;
     }
 
     public function testFunction(): void {
-        global $Document;
-        $Document = 'index';
+        Gazelle\Base::setRequestContext(new Gazelle\BaseRequestContext('/index.php', '127.0.0.1', ''));
         global $Viewer;
-        $Viewer  = $this->user;
+        $Viewer = $this->user;
         $this->assertStringStartsWith('<!DOCTYPE html>', self::twig('{{ header("page") }}')->render(), 'twig-function-header');
 
         $current = (new Gazelle\User\Session($Viewer))->create([

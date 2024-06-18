@@ -546,10 +546,11 @@ class ForumTest extends TestCase {
             description:    'This is where it renders',
         );
         $paginator = (new Gazelle\Util\Paginator(TOPICS_PER_PAGE, 1))->setTotal(1);
-        global $Document, $SessionID, $Viewer; // to render header()
-        $Document  = 'forum';
+        Gazelle\Base::setRequestContext(new Gazelle\BaseRequestContext('/forum.php', '127.0.0.1', ''));
+        global $SessionID; // to render header()
         $SessionID = 'phpunit';
-        $Viewer    = $admin;
+        global $Viewer;
+        $Viewer = $admin;
         $this->assertStringContainsString(
             "<a href=\"forums.php#$name\">$name</a>",
             (Gazelle\Util\Twig::factory())->render('forum/forum.twig', [
