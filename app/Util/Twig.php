@@ -235,21 +235,19 @@ class Twig {
             'UTF-8'
         )));
 
-        $twig->addFunction(new \Twig\TwigFunction('privilege', fn($default, $config, $key) => new \Twig\Markup(
-            ($default
-                ? sprintf(
-                    '<input id="%s" type="checkbox" disabled="disabled"%s />&nbsp;',
-                    "default_$key", (isset($default[$key]) && $default[$key] ? ' checked="checked"' : '')
-                )
-                : ''
-            )
-            . sprintf(
-                '<input type="checkbox" name="%s" id="%s" value="1"%s />&nbsp;<label title="%s" for="%s">%s</label><br />',
-                "perm_$key", $key, (empty($config[$key]) ? '' : ' checked="checked"'), $key, $key,
-                \Gazelle\Manager\Privilege::privilegeList()[$key] ?? "!unknown($key)!"
-            ),
-            'UTF-8'
-        )));
+        $twig->addFunction(new \Twig\TwigFunction('privilege', function ($default, $config, $key) {
+            $enabled = $config[$key] ?? $default[$key] ?? false;
+            $isOverride = isset($config[$key], $default) && $config[$key] !== ($default[$key] ?? null);
+            return new \Twig\Markup(
+                sprintf(
+                    '<input type="checkbox" name="%s" id="%s" value="1"%s />&nbsp;<label title="%s" for="%s"%s>%s</label><br />',
+                    "perm_$key", $key, $enabled ? ' checked="checked"' : '', $key, $key,
+                    $isOverride ? ' style="font-weight: bold;"' : '',
+                    \Gazelle\Manager\Privilege::privilegeList()[$key] ?? "!unknown($key)!"
+                ),
+                'UTF-8'
+            );
+        }));
 
         $twig->addFunction(new \Twig\TwigFunction('ratio',
             fn($up, $down) => new \Twig\Markup(ratio_html($up, $down), 'UTF-8'))

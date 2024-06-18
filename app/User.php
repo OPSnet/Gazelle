@@ -205,14 +205,6 @@ class User extends BaseObject {
         return $this->info()['NavItems'];
     }
 
-    /**
-     * Get the default permissions of this user
-     * (before any userlevel grants or revocations are considered).
-     */
-    public function defaultPermissionList(): array {
-        return $this->info()['defaultPermission'] ?? [];
-    }
-
     public function addCustomPrivilege(string $name): bool {
         $custom = (string)self::$db->scalar("
             SELECT CustomPermissions FROM users_main WHERE ID = ?
@@ -233,7 +225,7 @@ class User extends BaseObject {
      */
     public function modifyPrivilegeList(array $current): bool {
         $permissionList = array_keys(\Gazelle\Manager\Privilege::privilegeList());
-        $default = $this->defaultPermissionList();
+        $default = $this->privilege()->defaultPrivilegeList();
         $delta = [];
         foreach ($permissionList as $p) {
             $new = isset($current["perm_$p"]) ? 1 : 0;

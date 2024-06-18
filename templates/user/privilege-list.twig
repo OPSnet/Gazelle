@@ -26,8 +26,8 @@
     <input type="hidden" name="id" value="{{ user.id }}" />
 {% include 'admin/privilege-list.twig'
     with {
-        'default': user.defaultPermissionList,
-        'user': user.privilege.activeList,
+        'default': user.privilege.defaultPrivilegeList,
+        'user': user.privilege.customPrivilegeList,
     } only
 %}
 </form>
