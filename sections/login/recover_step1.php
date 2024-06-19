@@ -1,7 +1,5 @@
 <?php
 
-use Gazelle\Enum\UserTokenType;
-
 $validator = new Gazelle\Util\Validator();
 $validator->setField('email', true, 'email', 'You entered an invalid email address.');
 
@@ -12,18 +10,15 @@ if (isset($_REQUEST['expired'])) {
 } elseif (!empty($_REQUEST['email'])) {
     $error = $validator->validate($_REQUEST) ? false : $validator->errorMessage();
     if (!$error) {
+        $sent = true;
         $user = (new Gazelle\Manager\User())->findByEmail(trim($_REQUEST['email']));
-        if ($user) {
+        if ($user?->isEnabled()) {
             (new Gazelle\Manager\UserToken())->createPasswordResetToken($user);
-            $user->logoutEverywhere();
-            $sent = true;
         }
-        $error = "Email sent with further instructions.";
     }
 }
 
 echo $Twig->render('login/reset-password.twig', [
     'error' => $error,
-    'js'    => $validator->generateJS('recoverform'),
     'sent'  => $sent,
 ]);
