@@ -47,11 +47,11 @@ Please enable JavaScript in your browser.</span><br /><br /></noscript>
 <form class="auth_form" name="login" id="loginform" method="post" action="login.php" autocomplete="off">
     <div>
     <label for="username">Username</label>
-    <input type="text" name="username" id="username" class="inputtext" required="required" maxlength="20" pattern="[A-Za-z0-9_?\.]{1,20}" autofocus="autofocus" placeholder="Username" />
+    <input type="text" name="username" id="username" class="inputtext" required maxlength="20" pattern="[\w.]{1,20}" autofocus="autofocus" placeholder="Username" />
     </div>
     <div>
     <label for="password">Password</label>
-    <input type="password" name="password" id="password" class="inputtext" required="required" pattern=".{6,}" placeholder="Password" />
+    <input type="password" name="password" id="password" class="inputtext" required minlength="8" placeholder="Password" />
     <span id="password_toggle">&#x1FAE3;</span>
     </div>
     <div>
@@ -72,7 +72,7 @@ cookie.set('cookie_test', 1, 1);
 if (cookie.get('cookie_test') != null) {
     cookie.del('cookie_test');
 } else {
-    $('#no-cookies').gshow();
+    document.getElementById('no-cookies').classList.remove('hidden');
 }
 window.onload = function() {document.getElementById("username").focus();};
 </script>

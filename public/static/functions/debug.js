@@ -1,15 +1,36 @@
+"use strict";
 document.addEventListener('DOMContentLoaded', function () {
-    $("#debug-view-cache").click(function() { $(this).parents('.layout').next('#debug_cache').gtoggle(); return false;});
-    $("#debug-view-del-cache").click(function() { $(this).parents('.layout').next('#debug_cache').gtoggle(); return false;});
-    $("#debug-view-class").click(function() { $(this).parents('.layout').next('#debug_class').gtoggle(); return false;});
-    $("#debug-view-error").click(function() { $(this).parents('.layout').next('#debug_error').gtoggle(); return false;});
-    $("#debug-view-extension").click(function() { $(this).parents('.layout').next('#debug_extension').gtoggle(); return false;});
-    $("#debug-view-flag").click(function() { $(this).parents('.layout').next('#debug_flag').gtoggle(); return false;});
-    $("#debug-view-include").click(function() { $(this).parents('.layout').next('#debug_include').gtoggle(); return false;});
-    $("#debug-view-ocelot").click(function() { $(this).parents('.layout').next('#debug_ocelot').gtoggle(); return false;});
-    $("#debug-view-perf").click(function() { $(this).parents('.layout').next('#debug_perf').gtoggle(); return false;});
-    $("#debug-view-query").click(function() { $(this).parents('.layout').next('#debug_query').gtoggle(); return false;});
-    $("#debug-view-sphinxql").click(function() { $(this).parents('.layout').next('#debug_sphinxql').gtoggle(); return false;});
-    $("#debug-view-task").click(function() { $(this).parents('.layout').next('#debug_task').gtoggle(); return false;});
-    $("#debug-view-var").click(function() { $(this).parents('.layout').next('#debug_var').gtoggle(); return false;});
+    function get_debug_toggle(other_id) {
+        return ev => {
+            let el = ev.target;
+            while ((el = el.parentNode) && el !== document) {
+                if (el.matches('.layout')) {
+                    const nextEl = el.nextElementSibling;
+                    if (nextEl && nextEl.id === other_id) {
+                        nextEl.classList.toggle('hidden');
+                        return false;
+                    }
+                }
+            }
+            return false;
+        };
+    }
+    const elemIdMap = [
+        ['debug-view-cache', 'debug_cache'],
+        ['debug-view-del-cache', 'debug_cache'],
+        ['debug-view-class', 'debug_class'],
+        ['debug-view-error', 'debug_error'],
+        ['debug-view-extension', 'debug_extension'],
+        ['debug-view-flag', 'debug_flag'],
+        ['debug-view-include', 'debug_include'],
+        ['debug-view-ocelot', 'debug_ocelot'],
+        ['debug-view-perf', 'debug_perf'],
+        ['debug-view-query', 'debug_query'],
+        ['debug-view-sphinxql', 'debug_sphinxql'],
+        ['debug-view-task', 'debug_task'],
+        ['debug-view-var', 'debug_var'],
+    ];
+    elemIdMap.forEach(val => {
+        document.getElementById(val[0])?.addEventListener('click', get_debug_toggle(val[1]));
+    });
 });

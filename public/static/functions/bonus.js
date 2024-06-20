@@ -32,14 +32,3 @@ function ConfirmPurchase(event, item, next, element) {
     return true;
 
 }
-/**
- * @return {boolean}
- */
-function ConfirmOther(event, element) {
-    var name = prompt('Enter username to give tokens to:');
-    if (!name || name === '') {
-        return false;
-    }
-    $(element).attr('href', $(element).attr('href') + '&user=' + encodeURIComponent(name));
-    return true;
-}

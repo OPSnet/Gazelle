@@ -480,7 +480,7 @@ function ToggleUnknown() {
 }
 
 function GroupRemaster() {
-    var remasters = json.decode($('#json_remasters').raw().value);
+    var remasters = JSON.parse($('#json_remasters').raw().value);
     var index = $('#groupremasters').raw().options[$('#groupremasters').raw().selectedIndex].value;
     if (index != "") {
         $('#remaster_year').raw().value = remasters[index][1];
