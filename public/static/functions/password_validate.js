@@ -16,116 +16,98 @@ var MATCH_OLD_PASSWORD = 8;
 var USER_PATH = "/user.php";
 
 document.addEventListener('DOMContentLoaded', function() {
+    const new1 = document.getElementById('new_pass_1');
 
-    var old = $("#new_pass_1").val().length;
-    var password1;
-    var password2;
+    if (!new1) {
+        return;
+    }
 
-    $("#new_pass_1").keyup(function() {
-        password1 = $("#new_pass_1").val();
-        if (password1.length != old) {
+    const new2 = document.getElementById('new_pass_2');
+
+    let old = new1.value.length;
+    new1.addEventListener('keyup', () => {
+        const password1 = new1.value;
+        if (password1.length !== old) {
             disableSubmit();
             calculateComplexity(password1);
             old = password1.length;
         }
     });
 
-    $("#new_pass_1").change(function() {
-        password1 = $("#new_pass_1").val();
-        password2 = $("#new_pass_2").val();
-
-        if (password1.length == 0 && password2.length == 0) {
+    new1.addEventListener('change', async () => {
+        const password1 = new1.value;
+        const password2 = new2.value;
+        if (password1.length === 0 && password2.length === 0) {
             enableSubmit();
-        } else if (getStrong() == true) {
-            validatePassword(password1);
+        } else if (getStrong() === true) {
+            await validatePassword(password1);
         }
     });
 
-    $("#new_pass_1").focus(function() {
-        password1 = $("#new_pass_1").val();
-        password2 = $("#new_pass_2").val();
+    new1.addEventListener('focus', () => {
+        const password1 = new1.value;
+        const password2 = new2.value;
         if (password1.length > 0) {
             checkMatching(password1, password2);
         }
     });
 
-    $("#new_pass_2").keyup(function() {
-        password2 = $("#new_pass_2").val();
-        checkMatching(password1, password2);
-    });
-
-    $("#new_pass_1").blur(function() {
-        password1 = $("#new_pass_1").val();
-        password2 = $("#new_pass_2").val();
-        if (password1.length == 0 && password2.length == 0) {
+    new1.addEventListener('blur', () => {
+        const password1 = new1.value;
+        const password2 = new2.value;
+        if (password1.length === 0 && password2.length === 0) {
             enableSubmit();
         }
     });
+
+    new2.addEventListener('keyup', () => {
+        const password1 = new1.value;
+        const password2 = new2.value;
+        checkMatching(password1, password2);
+    });
 });
 
-function validatePassword(password) {
+async function validatePassword(password) {
     if (isUserPage()) {
-        $.ajax({
-            type: 'POST',
-            dataType: 'text',
-            url : 'ajax.php?action=password_validate',
-            data: 'password=' + password,
-            async: false,
-            success: function(value) {
-                if (value == 'false') {
-                    setStatus(COMMON);
-                }
-            }
+        const resp = await fetch('ajax.php?action=password_validate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'password=' + password
         });
+        if (await resp.json() === false) {
+            setStatus(COMMON);
+        }
     }
 }
 
 function calculateComplexity(password) {
-    var length = password.length;
-    var username;
-    var oldPassword;
+    const length = password.length;
+    let username, oldPassword, irckey;
 
     if (isUserPage()) {
-        username = $(".username").text();
-    }
-    else {
-        username = $("#username").val() || '';
-    }
-
-    var irckey;
-
-    if (isUserPage()) {
-        irckey = $("#irckey").val();
-        oldPassword =$("#password").val();
+        username = document.getElementsByClassName("username")[0].innerText;
+        irckey = document.getElementById('irckey').value;
+        oldPassword = document.getElementById('password').value;
+    } else {
+        username = document.getElementById('username')?.value;
     }
 
-    if (length >= 8 && length < 20) {
-        setStatus(WEAK);
-    }
-    if ((length >= 8 && isStrongPassword(password)) || length >= 20) {
-        setStatus(STRONG);
-    }
-    if (length > 0 && length < 8) {
-        setStatus(SHORT);
-    }
-    if (length == 0) {
+    if (length === 0) {
         setStatus(CLEAR);
-    }
-    if (isUserPage()) {
-        if (irckey.length > 0) {
-            if (password.toLowerCase() == irckey.toLowerCase()) {
-                setStatus(MATCH_IRCKEY);
-            }
-        }
-
-        if (oldPassword.length > 0 && password == oldPassword) {
-            setStatus(MATCH_OLD_PASSWORD);
-        }
-    }
-    if (username.length > 0) {
-         if (password.toLowerCase() == username.toLowerCase()) {
-            setStatus(MATCH_USERNAME);
-        }
+    } else if (length < 8) {
+        setStatus(SHORT);
+    } else if (username && password.toLowerCase() === username.toLowerCase()) {
+        setStatus(MATCH_USERNAME);
+    } else if (irckey && password.toLowerCase() === irckey.toLowerCase()) {
+        setStatus(MATCH_IRCKEY);
+    } else if (oldPassword && password === oldPassword) {
+        setStatus(MATCH_OLD_PASSWORD);
+    } else if (isStrongPassword(password) || length >= 20) {
+        setStatus(STRONG);
+    } else {
+        setStatus(WEAK);
     }
 }
 
@@ -134,70 +116,75 @@ function isStrongPassword(password) {
 }
 
 function checkMatching(password1, password2) {
+    const el = document.getElementById('pass_match');
     if (password2.length > 0) {
-        if (password1 == password2 && getStrong() == true) {
-             $("#pass_match").text("Passwords match").css("color", "green");
-             enableSubmit();
-        } else if (getStrong() == true) {
-            $("#pass_match").text("Passwords do not match").css("color", "red");
+        if (password1 === password2 && getStrong() === true) {
+            el.textContent = "Passwords match";
+            el.style.color = "green";
+            enableSubmit();
+        } else if (getStrong() === true) {
+            el.textContent = "Passwords do not match";
+            el.style.color = "red";
             disableSubmit();
         } else {
-            $("#pass_match").text("Password isn't strong").css("color", "red");
+            el.textContent = "Password isn't strong";
+            el.style.color = "red";
             disableSubmit();
         }
     } else {
-        $("#pass_match").text("");
+        el.textContent = "";
     }
 }
 
 function getStrong() {
-    return $("#pass_strength").text() == "Strong";
+    return document.getElementById('pass_strength').textContent === "Strong";
 }
 
 function setStatus(strength) {
-    if (strength == WEAK) {
+    const el = document.getElementById('pass_strength');
+    if (strength === WEAK) {
         disableSubmit();
-        $("#pass_strength").text("Weak").css("color", "red");
-    }
-    if (strength == STRONG) {
+        el.textContent = "Weak";
+        el.style.color = "red";
+    } else if (strength === STRONG) {
         disableSubmit();
-        $("#pass_strength").text("Strong").css("color", "green");
-    }
-    if (strength == SHORT) {
+        el.textContent = "Strong";
+        el.style.color = "green";
+    } else if (strength === SHORT) {
         disableSubmit();
-        $("#pass_strength").text("Too Short").css("color", "red");
-    }
-    if (strength == MATCH_IRCKEY) {
+        el.textContent = "Too Short";
+        el.style.color = "red";
+    } else if (strength === MATCH_IRCKEY) {
         disableSubmit();
-        $("#pass_strength").text("Password cannot match IRC Key").css("color", "red");
-    }
-    if (strength == MATCH_USERNAME) {
+        el.textContent = "Password cannot match IRC Key";
+        el.style.color = "red";
+    } else if (strength === MATCH_USERNAME) {
         disableSubmit();
-        $("#pass_strength").text("Password cannot match Username").css("color", "red");
-    }
-    if (strength == COMMON) {
-         disableSubmit();
-         $("#pass_strength").text("Password is too common").css("color", "red");
-    }
-    if (strength == MATCH_OLD_PASSWORD) {
+        el.textContent = "Password cannot match Username";
+        el.style.color = "red";
+    } else if (strength === COMMON) {
         disableSubmit();
-        $("#pass_strength").text("New password cannot match old password").css("color", "red");
-    }
-    if (strength == CLEAR) {
-        $("#pass_strength").text("");
+        el.textContent = "Password is too common";
+        el.style.color = "red";
+    } else if (strength === MATCH_OLD_PASSWORD) {
+        disableSubmit();
+        el.textContent = "New password cannot match old password";
+        el.style.color = "red";
+    } else if (strength === CLEAR) {
+        el.textContent = "";
     }
 }
 
 function disableSubmit() {
-    $('input[type="submit"]').attr('disabled','disabled');
+    document.querySelector('input[type="submit"]').disabled = true;
 }
 
 function enableSubmit() {
-    $('input[type="submit"]').removeAttr('disabled');
+    document.querySelector('input[type="submit"]').disabled = false;
 }
 
 function isUserPage() {
-    return window.location.pathname.indexOf(USER_PATH) != -1;
+    return window.location.pathname.indexOf(USER_PATH) !== -1;
 }
 
 })();

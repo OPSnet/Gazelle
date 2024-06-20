@@ -70,34 +70,6 @@ var lightbox = {
     }
 };
 
-/* Still some issues
-function caps_check(e) {
-    if (e === undefined) {
-        e = window.event;
-    }
-    if (e.which === undefined) {
-        e.which = e.keyCode;
-    }
-    if (e.which > 47 && e.which < 58) {
-        return;
-    }
-    if ((e.which > 64 && e.which < 91 && !e.shiftKey) || (e.which > 96 && e.which < 123 && e.shiftKey)) {
-        $('#capslock').gshow();
-    }
-}
-*/
-
-function hexify(str) {
-    str = str.replace(/rgb\(|\)/g, "").split(",");
-    str[0] = parseInt(str[0], 10).toString(16).toLowerCase();
-    str[1] = parseInt(str[1], 10).toString(16).toLowerCase();
-    str[2] = parseInt(str[2], 10).toString(16).toLowerCase();
-    str[0] = (str[0].length == 1) ? '0' + str[0] : str[0];
-    str[1] = (str[1].length == 1) ? '0' + str[1] : str[1];
-    str[2] = (str[2].length == 1) ? '0' + str[2] : str[2];
-    return (str.join(""));
-}
-
 function resize(id) {
     var textarea = document.getElementById(id);
     if (textarea.scrollHeight > textarea.clientHeight) {
@@ -124,21 +96,6 @@ function add_selection() {
 function remove_selection(index) {
     $('#list' + index).remove();
     $('#opt' + index).raw().disabled = '';
-}
-
-// Thank you http://stackoverflow.com/questions/4578398/selecting-all-text-within-a-div-on-a-single-left-click-with-javascript
-function select_all(el) {
-    if (typeof window.getSelection != "undefined" && typeof document.createRange != "undefined") {
-        var range = document.createRange();
-        range.selectNodeContents(el);
-        var sel = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(range);
-    } else if (typeof document.selection != "undefined" && typeof document.body.createTextRange != "undefined") {
-        var textRange = document.body.createTextRange();
-        textRange.moveToElementText(el);
-        textRange.select();
-    }
 }
 
 function toggle_display(selector) {

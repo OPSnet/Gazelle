@@ -23,29 +23,42 @@ class View {
             ? 'index'
             : $Viewer->requestContext()->module();
 
-        $js = [
-            'jquery',
-            'script_start',
-            'ajax.class',
-            'global',
-        ];
+        $js = [];
+
         if (DEBUG_MODE || $Viewer?->permitted('site_debug')) {
-            array_push($js, 'jquery-migrate', 'debug');
-        }
-        if (!empty($option['js'])) {
-            array_push($js, ...explode(',', $option['js']));
+            $js[] = 'debug';
         }
 
         global $Twig;
         if (!isset($Viewer) || $pageTitle == 'Recover Password :: ' . SITE_NAME) {
             $js[] = 'storage.class';
+            if (!empty($option['js'])) {
+                array_push($js, ...explode(',', $option['js']));
+            }
             echo $Twig->render('index/public-header.twig', [
                 'page_title' => $pageTitle,
                 'script'     => array_map(fn($s) => "$s.js", $js),
             ]);
             return '';
         }
-        array_push($js, 'autocomplete', 'jquery.autocomplete', 'jquery.countdown.min', 'katex-0.16.10.min');
+
+        array_push($js,
+            'jquery',
+            'script_start',
+            'ajax.class',
+            'autocomplete',
+            'jquery.autocomplete',
+            'jquery.countdown.min',
+            'global',
+            'katex-0.16.10.min'
+        );
+
+        if (DEBUG_MODE || $Viewer->permitted('site_debug')) {
+            $js[] = 'jquery-migrate';
+        }
+        if (!empty($option['js'])) {
+            array_push($js, ...explode(',', $option['js']));
+        }
 
         $cssList  = ['katex/katex-0.16.10.min.css'];
         $scssList = ['global.css'];

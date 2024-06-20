@@ -1,14 +1,15 @@
+"use strict";
 document.addEventListener('DOMContentLoaded', function() {
-    $('#password_toggle').click(function () {
-        for (name of ['password', 'new_pass_1', 'new_pass_2']) {
-            if (document.getElementById(name)) {
-                field = document.getElementById(name);
+    document.getElementById('password_toggle').addEventListener('click', ev => {
+        for (const name of ['password', 'new_pass_1', 'new_pass_2']) {
+            const field = document.getElementById(name);
+            if (field) {
                 if (field.getAttribute("type") === "password") {
                     field.setAttribute("type", "text");
-                    $('#password_toggle').raw().innerHTML ='&#x1F62E;';
+                    ev.target.innerHTML = '&#x1F62E;';
                 } else {
                     field.setAttribute("type", "password");
-                    $('#password_toggle').raw().innerHTML = '&#x1FAE3;';
+                    ev.target.innerHTML = '&#x1FAE3;';
                 }
             }
         }

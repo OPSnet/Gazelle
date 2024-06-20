@@ -1,26 +1,5 @@
 "use strict";
 
-/* Prototypes */
-if (!String.prototype.trim) {
-    String.prototype.trim = function () {
-        return this.replace(/^\s+|\s+$/g,'');
-    };
-}
-
-var listener = {
-    set: function (el,type,callback) {
-        if (document.addEventListener) {
-            el.addEventListener(type, callback, false);
-        } else {
-            // IE hack courtesy of http://blog.stchur.com/2006/10/12/fixing-ies-attachevent-failures
-            var f = function() {
-                callback.call(el);
-            };
-            el.attachEvent('on' + type, f);
-        }
-    }
-};
-
 /* Site wide functions */
 
 // http://www.thefutureoftheweb.com/blog/adddomloadevent
@@ -62,7 +41,7 @@ var addDOMLoadEvent = (
 
 //PHP ports
 function isset(variable) {
-    return (typeof(variable) === 'undefined') ? false : true;
+    return typeof (variable) !== 'undefined';
 }
 
 function is_array(input) {
@@ -201,26 +180,6 @@ function gazURL() {
     response['path'] = path;
     response['query'] = query;
     return response;
-}
-
-function isNumberKey(e) {
-    var charCode = (e.which) ? e.which : e.keyCode
-    if (charCode == 46) {
-        return true;
-    }
-    if (charCode > 31 && (charCode < 48 || charCode > 57)) {
-        return false;
-    }
-    return true;
-}
-
-function sleep(milliseconds) {
-    var start = new Date().getTime();
-    for (var i = 0; i < 1e7; i++) {
-        if ((new Date().getTime() - start) > milliseconds){
-            break;
-        }
-    }
 }
 
 $.fn.extend({

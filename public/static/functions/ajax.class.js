@@ -21,27 +21,9 @@
 
 */
 "use strict";
-var json = {
-    encode: function (object) {
-        try {
-            return JSON.stringify(object);
-        } catch (err) {
-            return '';
-        }
-    },
-    decode: function (string) {
-        if (window.JSON && JSON.parse) {
-            return JSON.parse(string);
-        } else {
-            return eval("(" + string + ")");
-            //return (new Function("return " + data))();
-        }
-    }
-};
-
 var ajax = {
     get: function (url, callback) {
-        var req = (typeof(window.ActiveXObject) === 'undefined') ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
+        var req = new XMLHttpRequest();
         if (callback !== undefined) {
             req.onreadystatechange = function () {
                 if (req.readyState !== 4 || req.status !== 200) {
@@ -54,7 +36,7 @@ var ajax = {
         req.send(null);
     },
     post: function (url, data, callback) {
-        var req = isset(window.ActiveXObject) ? new ActiveXObject("Microsoft.XMLHTTP") : new XMLHttpRequest();
+        var req = new XMLHttpRequest();
         var params = ajax.serialize(data);
         if (callback !== undefined) {
             req.onreadystatechange = function () {
