@@ -63,18 +63,15 @@ class Payment extends \Gazelle\Base {
             self::$cache->cache_value(self::LIST_KEY, $list, 86400);
         }
 
-        // update with latest forex rates
-        $XBT = new XBT();
+        $rates = [];
         foreach ($list as &$l) {
             $l['Active'] = (bool)$l['Active'];
             if ($l['cc'] == 'XBT') {
                 $l['fiatRate'] = 1.0;
                 $l['Rent'] = $l['btcRent'] = sprintf('%0.6f', $l['AnnualRent']);
             } else {
-                $l['fiatRate'] = $XBT->fetchRate($l['cc']);
-                if (!$l['fiatRate']) {
-                    // fallback to last known rate if there is one
-                    $l['fiatRate'] = self::$db->scalar("
+                if (!isset($rates[$l['cc']])) {
+                    $l['fiatRate'] = (float)self::$db->scalar("
                         SELECT rate
                         FROM xbt_forex
                         WHERE cc = ?
@@ -85,6 +82,9 @@ class Payment extends \Gazelle\Base {
                     if (!$l['fiatRate']) {
                         throw new PaymentFetchForexException(sprintf('XBT id=%d cc=%s', $l['ID'], $l['cc']));
                     }
+                    $rates[$l['cc']] = $l['fiatRate'];
+                } else {
+                    $l['fiatRate'] = $rates[$l['cc']];
                 }
                 $l['Rent'] = sprintf('%0.2f', $l['AnnualRent']);
                 $l['btcRent'] = sprintf('%0.6f', $l['AnnualRent'] / $l['fiatRate']);
