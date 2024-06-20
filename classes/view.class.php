@@ -25,7 +25,6 @@ class View {
 
         $js = [
             'jquery',
-            'katex-0.16.4.min',
             'script_start',
             'ajax.class',
             'global',
@@ -46,9 +45,9 @@ class View {
             ]);
             return '';
         }
-        array_push($js, 'autocomplete', 'jquery.autocomplete', 'jquery.countdown.min');
+        array_push($js, 'autocomplete', 'jquery.autocomplete', 'jquery.countdown.min', 'katex-0.16.10.min');
 
-        $cssList  = ['katex/katex-0.16.4.min.css'];
+        $cssList  = ['katex/katex-0.16.10.min.css'];
         $scssList = ['global.css'];
 
         if (!empty($option['css'])) {
