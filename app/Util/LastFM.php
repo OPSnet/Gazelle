@@ -82,8 +82,8 @@ class LastFM extends \Gazelle\Base {
         $response = self::$cache->get_value($key);
         if ($response === false) {
             $response = $this->fetch("user.getRecentTracks", ["user" => $username, "limit" => 1]);
-            if ($response === false) {
-                $response = ['none' => true];
+            if ($response === false || !isset($response['recenttracks']['track']) || !count($response['recenttracks']['track'])) {
+                $response = null;
             } else {
                 // Take the single last played track out of the response.
                 $info = $response['recenttracks']['track'][0];
@@ -104,7 +104,7 @@ class LastFM extends \Gazelle\Base {
         if ($response === false) {
             sleep(1);
             $response = $this->fetch("user.getTopAlbums", ["user" => $username, "limit" => $limit]);
-            if ($response === false) {
+            if ($response === false || !isset($response['topalbums']['album'])) {
                 $response = [];
             } else {
                 $top = [];
@@ -129,7 +129,7 @@ class LastFM extends \Gazelle\Base {
         if ($response === false) {
             sleep(1);
             $response = $this->fetch("user.getTopArtists", ["user" => $username, "limit" => $limit]);
-            if ($response === false) {
+            if ($response === false || !isset($response['topartists']['artist'])) {
                 $response = [];
             } else {
                 $top = [];
@@ -153,7 +153,7 @@ class LastFM extends \Gazelle\Base {
         if ($response === false) {
             sleep(1);
             $response = $this->fetch("user.getTopTracks", ["user" => $username, "limit" => $limit]);
-            if ($response === false) {
+            if ($response === false || !isset($response['toptracks']['track'])) {
                 $response = [];
             } else {
                 $top = [];
@@ -178,7 +178,7 @@ class LastFM extends \Gazelle\Base {
         $response = self::$cache->get_value($key);
         if ($response === false) {
             $response = $this->fetch("chart.getTopArtists", ["limit" => $limit]);
-            if ($response === false) {
+            if ($response === false || !isset($response['artists']['artist'])) {
                 $response = [];
             } else {
                 $top = [];
