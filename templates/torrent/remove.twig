@@ -1,0 +1,141 @@
+{% from 'macro/form.twig' import checked, selected %}
+{% set size = '(' ~ (torrent.size / (1024 * 1024))|number_format(2) ~ ' MiB)' %}
+{{ header('Delete torrent', {'js': 'reportsv2'}) }}
+<div class="thin">
+    <div class="box box2" style="width: 600px; margin-left: auto; margin-right: auto;">
+        <div class="head colhead">
+            Delete torrent
+        </div>
+        <div class="pad">
+            <form class="delete_form" name="torrent" action="torrents.php" method="post">
+                <input type="hidden" name="action" value="takedelete" />
+                <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+                <input type="hidden" name="torrentid" value="{{ torrent.id }}" />
+                <div class="field_div">
+                    <strong>Reason: </strong>
+                    <select name="reason">
+                        <option value="dupe">Dupe</option>
+                        <option value="trump">Trumped</option>
+                        <option value="other" selected="selected">Other</option>
+                    </select>
+                </div>
+                <div class="field_div">
+                    <strong>Extra info: </strong>
+                    <input type="text" name="extra" size="30" />
+                    <input value="Delete" type="submit" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% if viewer.permitted('admin_reports') %}
+<div id="all_reports" style="width: 80%; margin-left: auto; margin-right: auto;">
+<div id="report0" class="report">
+    <form class="create_form" name="report" id="reportform_0" action="reports.php" method="post">
+{# Some of these are for takeresolve, some for the JavaScript. #}
+        <div>
+            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+            <input type="hidden" id="reportid0" name="reportid" value="0" />
+            <input type="hidden" id="torrentid0" name="torrentid" value="{{ torrent.id }}" />
+            <input type="hidden" id="uploader0" name="uploader" value="{{ torrent.uploader.username }}" />
+            <input type="hidden" id="uploaderid0" name="uploaderid" value="{{ torrent.uploader.id }}" />
+            <input type="hidden" id="reporterid0" name="reporterid" value="{{ viewer.id }}" />
+            <input type="hidden" id="raw_name0" name="raw_name" value="{{ torrent.fullName ~ " " ~ size }}" />
+            <input type="hidden" id="type0" name="type" value="{{ report_type.type }}" />
+            <input type="hidden" id="categoryid0" name="categoryid" value="{{ torrent.group.categoryId }}" />
+            <input type="hidden" id="pm_type0" name="pm_type" value="Uploader" />
+            <input type="hidden" id="from_delete0" name="from_delete" value="{{ torrent.groupId }}" />
+        </div>
+        <table cellpadding="5" class="box layout">
+            <tr>
+                <td class="label">Torrent:</td>
+                <td colspan="3">
+                    {{ torrent.fullLink|raw }} {{ size }}
+                    <br />uploaded by {{ torrent.uploaderId|user_url }} {{ torrent.created|time_diff }}
+                    <br /><a href="torrents.php?action=download&amp;id={{ torrent.id }}&amp;torrent_pass={{ viewer.announceKey }}" class="brackets tooltip" title="Download">DL</a>
+                    <br />
+{%  set group_others = torrent.group.unresolvedReportsTotal %}
+{%  if group_others > 0 %}
+                        <div style="text-align: right;">
+                            <a href="reportsv2.php?view=group&amp;id={{ torrent.groupId }}">There
+{%      if group_others > 1 %} are {{ group_others }} reports{% else %} is 1 other report{% endif %} for torrent(s) in this group</a>
+                        </div>
+{%  endif %}
+{%  set uploader_others = torrent.uploader.stats.unresolvedReportsTotal %}
+{%  if uploader_others > 0 %}
+                        <div style="text-align: right;">
+                            <a href="reportsv2.php?view=uploader&amp;id={{ torrent.uploaderId }}">There
+{%  if uploader_others > 1 %} are {{ uploader_others }} reports{% else %} is 1 other report{% endif %} for torrent(s) uploaded by this user</a>
+                        </div>
+{%  endif %}
+{%  for request in request_list %}
+                        <div style="text-align: right;">
+                            <strong class="important_text">{{ request.fillerId|user_url }}
+                            used this torrent to fill <a href="requests.php?action=viewrequest&amp;id={{ request.id }}">this request</a>
+                            {{ request.fillDate|time_diff}} </strong>
+                        </div>
+{%  endfor %}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        <a href="javascript:Load('0')" class="tooltip" title="Click here to reset the resolution options to their default values.">Resolve:</a>
+                    </td>
+                    <td colspan="3">
+                        <select name="resolve_type" id="resolve_type0" onchange="ChangeResolve(0);">
+{%  for rt in report_category_list %}
+                            <option value="{{ rt.type }}"{{ selected(rt.type == report_type.type) }}>{{ rt.name }}</option>
+{%  endfor %}
+                        </select>
+                        <span id="options0">
+                            <span class="tooltip" title="Delete torrent?">
+                                <label for="delete0"><strong>Delete</strong></label>
+                                <input type="checkbox" name="delete" id="delete0"{{ checked(report_type.resolveDelete) }} />
+                            </span>
+                            <span class="tooltip" title="Warning length in weeks">
+                                <label for="warning0"><strong>Warning</strong></label>
+                                <select name="warning" id="warning0">
+{%  for week in range(0, 8) %}
+                                    <option value="{{ week }}"{{ selected(report_type.resolveWarn == week) }}>{{ week }}</option>
+{%  endfor %}
+                                </select>
+                            </span>
+                            <span class="tooltip" title="Remove upload privileges?">
+                                <label for="upload0"><strong>Remove upload privileges</strong></label>
+                                <input type="checkbox" name="upload" id="upload0"{{ checked(report_type.resolveUpload) }} />
+                            </span>
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">PM uploader:</td>
+                    <td colspan="3">
+                        <span class="tooltip" title="Appended to the regular message unless using &quot;Send now&quot;.">
+                            <textarea name="uploader_pm" id="uploader_pm0" cols="50" rows="1"></textarea>
+                        </span>
+                        <input type="button" value="Send now" onclick="SendPM(0);" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label"><strong>Extra</strong> log message:</td>
+                    <td>
+                        <input type="text" name="log_message" id="log_message0" size="40" />
+                    </td>
+                    <td class="label"><strong>Extra</strong> staff notes:</td>
+                    <td>
+                        <input type="text" name="admin_message" id="admin_message0" size="40" />
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4" style="text-align: center;">
+                        <input type="button" value="Submit" onclick="TakeResolve(0);" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+        <br />
+    </div>
+</div>
+{% endif %}
+{{ footer() }}
+

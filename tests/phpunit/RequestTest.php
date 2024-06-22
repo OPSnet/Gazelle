@@ -312,6 +312,7 @@ class RequestTest extends TestCase {
         $this->assertEquals($fillBefore['bounty-size'] + $taxedBounty * 2, $user->stats()->requestBountySize(), 'request-fill-receive-bounty');
         $this->assertEquals($fillBefore['bounty-total'] + 1, $user->stats()->requestBountyTotal(), 'request-fill-receive-total');
         $this->assertTrue(Helper::recentDate($this->request->fillDate()), 'request-fill-date');
+        $this->assertEquals($this->request->id(), $torrent->requestFills($requestMan)[0]->id(), 'request-torrent-fills');
 
         $statsReq->flush();
         $this->assertEquals($before['total'] + 1, $statsReq->total(), 'request-stats-now-total');

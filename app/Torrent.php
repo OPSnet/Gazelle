@@ -427,12 +427,19 @@ class Torrent extends TorrentAbstract {
     /**
      * Get the requests filled by this torrent.
      */
-    public function requestFills(): array {
+    public function requestFills(Manager\Request $manager): array {
         self::$db->prepared_query("
-            SELECT r.ID, r.FillerID, r.TimeFilled FROM requests AS r WHERE r.TorrentID = ?
+            SELECT ID FROM requests WHERE TorrentID = ?
             ", $this->id
         );
-        return self::$db->to_array(false, MYSQLI_NUM, false);
+        $result = [];
+        foreach (self::$db->collect(0, false) as $id) {
+            $request = $manager->findById($id);
+            if ($request) {
+                $result[] = $request;
+            }
+        }
+        return $result;
     }
 
     public function seederList(User $user, int $limit, int $offset): array {
