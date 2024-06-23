@@ -41,6 +41,25 @@ class DbTest extends TestCase {
         $this->assertIsString((new Gazelle\DB())->version(), 'db-version');
     }
 
+    public function testDebug(): void {
+        $db = Gazelle\DB::DB();
+        $initial = count($db->queryList());
+        $tableName = "phpunit_" . randomString(10);
+        $db->prepared_query("create temporary table if not exists $tableName (test int)");
+        $db->prepared_query("create temporary table if not exists $tableName (test int)");
+        $this->assertEquals(1, $db->loadPreviousWarning(), 'db-load-warning');
+        $this->assertGreaterThan(0.0, $db->elapsed(), 'db-elapsed');
+
+        $queryList = $db->queryList();
+        $this->assertEquals($initial + 2, count($queryList), 'db-querylist');
+        $last = end($queryList);
+        $this->assertIsArray($last['warning'], 'db-has-warning');
+        $warning = $last['warning'];
+        $this->assertCount(1, $warning, 'db-warning');
+        $this->assertEquals(1050, $warning[0]['code'], 'db-error-code');
+        $this->assertEquals("Table '$tableName' already exists", $warning[0]['message'], 'db-error-message');
+    }
+
     public function testGlobalStatus(): void {
         $status = (new Gazelle\DB())->globalStatus();
         $this->assertGreaterThan(500, count($status), 'db-global-status');

@@ -51,5 +51,6 @@ class CacheTest extends TestCase {
 
         $html = Gazelle\Util\Twig::factory()->render('debug/cache.twig', ['cache' => $cache]);
         $this->assertStringContainsString('<table id="debug_cache" class="debug_table hidden">', $html, 'cache-debug-render');
+        $this->assertStringContainsString('<table id="debug_cache_del" class="debug_table hidden">', $html, 'cache-del-debug-render');
     }
 }

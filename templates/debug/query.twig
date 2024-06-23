@@ -1,32 +1,45 @@
 {% set nr = list|length %}
-{% for query in list %}
-    {% if loop.first %}
+{% for q in list %}
+{%  if loop.first %}
 <table class="layout" width="100%">
     <tr>
         <td><strong><a href="#" id="debug-view-query" class="brackets">View</a>
-        {{ nr|number_format }} {% if nr == 1 %}Query{% else %}Queries{% endif %}
-        ({{ time|number_format(2) }} ms)</strong> (mean: {{ (time/nr)|number_format(5) }} ms):</td>
+        {{ list|length|number_format }} {% if list|length == 1 %}Query{% else %}Queries{% endif %}
+        ({{ elapsed|number_format(2) }} ms)</strong> (mean: {{ (elapsed/nr)|number_format(5) }} ms):</td>
     </tr>
 </table>
 <table id="debug_query" class="debug_table hidden">
-    {% endif %}
+{%  endif %}
     <tr valign="top">
-        <td class="debug_data debug_query_data">{{ query.0|raw }}
-        <br /><a class="brackets" href="tools.php?action=db_sandbox&amp;debug={{ query.0|replace({'<br />': "\n"})|b64 }}">Inspect</a></td>
-        <td class="rowa debug_info debug_query_time" style="width: 130px;">{{ query.1|number_format(5) }} ms</td>
-        <td class="rowa debug_info debug_query_warnings">
-        {% for warning in query.2 %}
-            {% if loop.first %}
-                <ul class="stats nobullet">
-            {% endif %}
-                    <li>{{ warning }}</li>
-            {% if loop.last %}
-                </ul>
-            {% endif %}
-         {% endfor %}
+        <td class="debug_data debug_query_data">{{ q.query|nl2br }}
+        <br /><a class="brackets" href="tools.php?action=db_sandbox&amp;debug={{ q.query|b64 }}">Inspect</a>
         </td>
+        <td class="rowa debug_info debug_query_time" style="width: 130px;">{{ q.elapsed|number_format(5) }} ms</td>
+{%      for w in q.warning %}
+{%          if loop.first %}
     </tr>
-    {% if loop.last %}
+    <tr valign="top">
+        <td colspan="2" class="row{{ cycle(['a', 'b'], loop.index0) }} debug_info debug_query_warnings">
+            <table>
+                <tr>
+                <td colspan="2"><strong class="important">Warnings</strong></td>
+                </tr>
+                <tr>
+                <td>Code</td>
+                <td>Message</td>
+                </tr>
+{%          endif %}
+                <tr>
+                    <td>{{ w.code }}</td>
+                    <td>{{ w.message }}</td>
+                </tr>
+{%          if loop.last %}
+            </table>
+        </td>
+{%          endif %}
+{%      endfor %}
+    </tr>
+{%  if loop.last %}
 </table>
-    {% endif %}
+{%  endif %}
 {% endfor %}

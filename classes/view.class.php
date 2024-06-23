@@ -233,7 +233,7 @@ class View {
         global $Cache, $Debug, $SessionID;
         return $Twig->render('index/private-footer.twig', [
             'cache'        => $Cache,
-            'db_time'      => Gazelle\DB::DB()->Time,
+            'db'           => Gazelle\DB::DB(),
             'debug'        => $Debug,
             'disclaimer'   => $showDisclaimer,
             'last_active'  => (new Gazelle\User\Session($Viewer))->lastActive($SessionID),
@@ -244,7 +244,7 @@ class View {
             'date'         => date('Y-m-d'),
             'textarea_js'  => Gazelle\Util\Textarea::activate(),
             'time'         => date('H:i'),
-            'time_ms'      => (microtime(true) - $Debug->startTime()) * 1000,
+            'time_ms'      => $Debug->duration() * 1000,
             'viewer'       => $Viewer,
             'sphinxql'     => class_exists('Sphinxql') && !empty(\Sphinxql::$Queries)
                 ? ['list'  => \Sphinxql::$Queries, 'time' => \Sphinxql::$Time]

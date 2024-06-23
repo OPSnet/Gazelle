@@ -408,8 +408,7 @@ function add_json_info(array $info): array {
     }
     global $Viewer;
     if (!isset($info['debug']) && $Viewer instanceof \Gazelle\User && $Viewer->permitted('site_debug')) {
-        global $Debug;
-        $info['debug'] = ['queries' => $Debug->get_queries()];
+        $info['debug'] = ['queries' => \Gazelle\DB::DB()->queryList()];
         if (class_exists('Sphinxql') && !empty(\Sphinxql::$Queries)) {
             $info['debug']['searches'] = \Sphinxql::$Queries;
         }
