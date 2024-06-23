@@ -12,8 +12,6 @@ foreach (['memcached', 'mysqli'] as $e) {
 }
 date_default_timezone_set('UTC');
 
-$now = microtime(true); // To track how long a page takes to create
-
 if (!defined('SITE_NAME')) {
     require_once(__DIR__ . '/config.php');
     require_once(__DIR__ . '/../lib/util.php');
@@ -23,10 +21,7 @@ if (!defined('SITE_NAME')) {
 global $Cache, $Debug, $Twig;
 
 $Cache = new Gazelle\Cache();
-$Twig  = Gazelle\Util\Twig::factory();
-Gazelle\Base::initialize($Cache, Gazelle\DB::DB(), $Twig);
-
 $Debug = new Gazelle\Debug($Cache, Gazelle\DB::DB());
-$Debug->setStartTime($now)
-    ->handle_errors()
-    ->set_flag('init');
+$Twig  = Gazelle\Util\Twig::factory();
+
+Gazelle\Base::initialize($Cache, Gazelle\DB::DB(), $Twig);

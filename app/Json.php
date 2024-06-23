@@ -80,10 +80,9 @@ abstract class Json extends Base {
         if (!isset($Viewer) || !$Viewer->permitted('site_debug')) {
             return [];
         }
-        global $Debug;
         $info = [
             'debug' => [
-                'queries' => isset($Debug) ? $Debug->get_queries() : [],
+                'queries' => \Gazelle\DB::DB()->queryList(),
             ],
         ];
         if (class_exists('Sphinxql')) {

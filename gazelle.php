@@ -3,7 +3,7 @@
 use Gazelle\Util\Crypto;
 use Gazelle\Util\Time;
 
-// 1. Basic sanity checks and initialization
+// 1. Initialization
 
 require_once(__DIR__ . '/lib/bootstrap.php');
 global $Cache, $Debug, $Twig;
@@ -36,9 +36,7 @@ if (
     die("d14:failure reason40:Invalid .torrent, try downloading again.e");
 }
 
-// 2. Start the engine
-
-// 3. Do we have a viewer?
+// 2. Do we have a viewer?
 
 $SessionID = false;
 $Viewer    = null;
@@ -113,7 +111,7 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $module === 'ajax') {
     }
 }
 
-// 4. We have a viewer (or this is a login or registration attempt)
+// 3. We have a viewer (or this is a login or registration attempt)
 
 if ($Viewer) {
     if ($Viewer->hasAttr('admin-error-reporting')) {
@@ -138,7 +136,7 @@ if ($Viewer) {
     \Text::setViewer($Viewer);
 }
 
-$Debug->set_flag('load page');
+$Debug->mark('load page');
 if (DEBUG_MODE || ($Viewer && $Viewer->permitted('site_debug'))) {
     $Twig->addExtension(new Twig\Extension\DebugExtension());
 }
@@ -169,7 +167,7 @@ register_shutdown_function(
     }
 );
 
-// 5. Display the page
+// 4. Display the page
 
 header('Cache-Control: no-cache, must-revalidate, post-check=0, pre-check=0');
 header('Pragma: no-cache');
@@ -196,9 +194,9 @@ try {
     $Debug->saveError($e);
 }
 
-// 6. Finish up
+// 5. Finish up
 
-$Debug->set_flag('and send to user');
+$Debug->mark('send to user');
 if (!is_null($Viewer)) {
     $Debug->profile($Viewer, $module);
 }

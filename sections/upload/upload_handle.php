@@ -474,7 +474,7 @@ if (count($TooLongPaths) > 0) {
             . '</ul><br />')
     );
 }
-$Debug->set_flag('upload: torrent decoded');
+$Debug->mark('upload: torrent decoded');
 
 $tgMan      = new Gazelle\Manager\TGroup();
 $tgroup     = null;
@@ -521,7 +521,7 @@ $hasLogInDB = $logfileSummary?->total() > 0;
 //--------------- Start database stuff -----------------------------------------//
 
 $log = new Gazelle\Log();
-$Debug->set_flag('upload: database begin transaction');
+$Debug->mark('upload: database begin transaction');
 $db = Gazelle\DB::DB();
 $db->begin_transaction();
 
@@ -640,7 +640,7 @@ if (!$torrentFiler->put($bencoder->getEncode(), $TorrentID)) {
     reportError("Internal error saving torrent file. Please report this in the bugs forum.");
 }
 $db->commit(); // We have a usable upload, any subsequent failures can be repaired ex post facto
-$Debug->set_flag('upload: database committed');
+$Debug->mark('upload: database committed');
 
 //******************************************************************************//
 //--------------- Finalize -----------------------------------------------------//

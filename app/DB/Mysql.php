@@ -114,8 +114,7 @@ class Mysql {
     protected string $PreparedQuery;
     protected \mysqli_stmt|false $Statement;
 
-    public array $Queries = [];
-    public float $Time = 0.0;
+    protected static array $queryList = [];
 
     public function __construct(
         protected readonly string $Database,
@@ -124,6 +123,7 @@ class Mysql {
         protected readonly string $Server,
         protected readonly int $Port,
         protected readonly string|null $Socket,
+        protected float $elapsed = 0.0,
     ) {}
 
     public function disableQueryLog(): void {
@@ -132,6 +132,14 @@ class Mysql {
 
     public function enableQueryLog(): void {
         $this->queryLog = true;
+    }
+
+    public function queryList(): array {
+        return static::$queryList;
+    }
+
+    public function elapsed(): float {
+        return $this->elapsed;
     }
 
     private function halt(string $Msg): void {
@@ -165,10 +173,7 @@ class Mysql {
          * Note that this means that we have to call $this->warnings manually
          * for the last query!
          */
-        if ($this->QueryID) {
-            $this->warnings();
-        }
-
+        $this->loadPreviousWarning();
         $this->connect();
     }
 
@@ -193,7 +198,10 @@ class Mysql {
         if ($this->Statement === false) {
             $this->Errno = $this->LinkID->errno;
             $this->Error = $this->LinkID->error;
-            $this->Queries[] = ["$Query /* ERROR: {$this->Error} */", 0, null];
+            static::$queryList[] = [
+                'query'   => "$Query /* ERROR: {$this->Error} */",
+                'elapsed' => 0,
+            ];
             $this->halt(sprintf("Invalid Query: %s(%d) [%s]", $this->Error, $this->Errno, $Query));
         }
         return $this->Statement;
@@ -259,7 +267,7 @@ class Mysql {
     }
 
     private function attempt_query(string $Query, callable $Closure): \mysqli_result|false {
-        $QueryStartTime = microtime(true);
+        $startTime = microtime(true);
         if ($this->LinkID === false) {
             return false;
         }
@@ -286,15 +294,18 @@ class Mysql {
             usleep((int)($sleep * 1e6));
             $sleep *= 1.75;
         }
-        $QueryEndTime = microtime(true);
+        $elapsed = (microtime(true) - $startTime) * 1000;
         // Kills admin pages, and prevents Debug->analysis when the whole set exceeds 1 MB
         if (($Len = strlen($Query)) > 16384) {
             $Query = substr($Query, 0, 16384) . '... ' . ($Len - 16384) . ' bytes trimmed';
         }
         if ($this->queryLog) {
-            $this->Queries[] = [$Query, ($QueryEndTime - $QueryStartTime) * 1000, null];
+            static::$queryList[] = [
+                'query'   => $Query,
+                'elapsed' => $elapsed,
+            ];
         }
-        $this->Time += ($QueryEndTime - $QueryStartTime) * 1000;
+        $this->elapsed += $elapsed;
 
         // Update/Insert/etc statements for prepared queries don't return a QueryID,
         // but mysqli_errno is also going to be 0 for no error
@@ -516,23 +527,30 @@ class Mysql {
 
     /**
      * This function determines whether the last query caused warning messages
-     * and stores them in $this->Queries.
+     * and stores them in the end entry of static::$queryList.
      */
-    public function warnings(): void {
-        $Warnings = [];
-        if ($this->LinkID !== false && mysqli_warning_count($this->LinkID)) {
-            $e = mysqli_get_warnings($this->LinkID);
-            if ($e !== false) {
-                do {
-                    if ($e->errno == 1592) {
-                        // 1592: Unsafe statement written to the binary log using statement format since BINLOG_FORMAT = STATEMENT.
-                        continue;
-                    }
-                    $Warnings[] = 'Code ' . $e->errno . ': ' . display_str($e->message);
-                } while ($e->next());
-            }
+    public function loadPreviousWarning(): int {
+        if ($this->LinkID === false) {
+            return 0;
         }
-        $this->Queries[count($this->Queries) - 1][2] = $Warnings;
+        $e = mysqli_get_warnings($this->LinkID);
+        $list = [];
+        if ($e !== false) {
+            do {
+                if ($e->errno == 1592) {
+                    // 1592: Unsafe statement written to the binary log using statement format since BINLOG_FORMAT = STATEMENT.
+                    continue;
+                }
+                $list[] = [
+                    'code'    => $e->errno,
+                    'message' => $e->message
+                ];
+            } while ($e->next());
+        }
+        if ($list) {
+            static::$queryList[count(static::$queryList) - 1]['warning'] = $list;
+        }
+        return count($list);
     }
 
     public function begin_transaction(): void {

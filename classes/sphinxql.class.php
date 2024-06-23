@@ -70,7 +70,7 @@ class Sphinxql extends mysqli {
             return;
         }
         global $Debug;
-        $Debug->set_flag("Connecting to Sphinx server $this->Ident");
+        $Debug->mark("Connecting to Sphinx server $this->Ident");
         for ($Attempt = 0; $Attempt < 3; $Attempt++) {
             parent::__construct($this->Server, '', '', '', $this->Port, $this->Socket);
             if (!$this->connect_errno) {
@@ -83,9 +83,9 @@ class Sphinxql extends mysqli {
             $Errno = $this->connect_errno;
             $Error = $this->connect_error;
             $this->error("Connection failed. (" . strval($Errno) . ": " . strval($Error) . ")");
-            $Debug->set_flag("Could not connect to Sphinx server $this->Ident. (" . strval($Errno) . ": " . strval($Error) . ")");
+            $Debug->mark("Could not connect to Sphinx server $this->Ident. (" . strval($Errno) . ": " . strval($Error) . ")");
         } else {
-            $Debug->set_flag("Connected to Sphinx server $this->Ident");
+            $Debug->mark("Connected to Sphinx server $this->Ident");
         }
     }
 

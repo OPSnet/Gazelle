@@ -2,20 +2,19 @@
 <div id="footer">
 {% if constant('DEBUG_MODE') or viewer.permitted('site_debug') %}
     <div id="site_debug">
-    {%- include 'debug/performance.twig' with {'list': debug.get_perf} only %}
-    {%- include 'debug/flag.twig' with {'list': debug.get_flags} only %}
-    {%- include 'debug/error.twig' with {'list': debug.get_errors} only %}
-    {%- if sphinxql %}
+{%-     include 'debug/performance.twig' with {'list': debug.perfInfo} only %}
+{%-     include 'debug/flag.twig' with {'list': debug.markList} only %}
+{%-     include 'debug/error.twig' with {'list': debug.errorList} only %}
+{%-     if sphinxql %}
         {%- include 'debug/sphinxql.twig' with {'list': sphinxql.list, 'time': sphinxql.time} only %}
-    {%- endif %}
-    {%- include 'debug/query.twig' with {
-        'list': debug.get_queries_br,
-        'time': db_time
+{%-     endif %}
+{%-     include 'debug/query.twig' with {
+        'list': db.queryList,
+        'elapsed': db.elapsed
         } only
-    %}
-    {%- include 'debug/cache.twig' with {'cache': cache} only %}
-    {%- include 'debug/var.twig' with {'list': debug.get_logged_vars} only %}
-    {%- include 'debug/ocelot.twig' with {'list': debug.requestList} only %}
+%}
+{%-     include 'debug/cache.twig' with {'cache': cache} only %}
+{%-     include 'debug/ocelot.twig' with {'list': debug.requestList} only %}
     </div>
 {% endif %}
 
