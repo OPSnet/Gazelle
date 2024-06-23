@@ -100,7 +100,9 @@ RUN apt-get update \
     # Python tools layer
     && pip3 install chardet eac-logchecker xld-logchecker
 
-COPY . /var/www
+COPY .docker/ /var/www/.docker
+COPY lib /var/www/lib
+COPY bin/ /var/www/bin
 COPY --from=composer:2.7.2 /usr/bin/composer /usr/local/bin/composer
 
 # Permissions and configuration layer
@@ -122,13 +124,7 @@ RUN useradd -ms /bin/bash gazelle \
     && perl /var/www/bin/generate-storage-dirs /var/lib/gazelle/riplog 2 100 \
     && perl /var/www/bin/generate-storage-dirs /var/lib/gazelle/riploghtml 2 100 \
     && chown -R gazelle:gazelle /var/lib/gazelle /var/www \
-    && npm install -g npm@10.4.0 \
-    && su gazelle -c 'composer --version \
-       && composer install --no-progress --optimize-autoloader \
-       && bin/local-patch \
-       && yarn \
-       && npx update-browserslist-db@latest \
-       && yarn dev'
+    && npm install -g npm@10.8.1
 
 EXPOSE 80/tcp
 EXPOSE 3306/tcp
