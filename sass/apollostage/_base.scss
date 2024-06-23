@@ -1,6 +1,6 @@
 /* ######################################################################## */
 /* APOLLOSTAGE THEME */
-/* version 2024.06.18
+/* version 2024.06.23
 /* ######################################################################## */
 
 // SASS/SCSS NOTE
@@ -28,7 +28,7 @@
 
 // FULL CHANGELOG:
 //
-//   Fix: Fixed the mobile view (media <480px) with big help from hawkeye. Mobile
+//   Fix: Fixed the mobile view (media <575px) with big help from hawkeye. Mobile
 //    menu includes an animation, handling to prevent keyboard from opening 
 //    on iPh--e and other mobile devices, and a link to the home page.
 //
@@ -100,6 +100,7 @@
 /* ## 0.1 Housekeeping and font loading */
 /* ## 0.2 Global variables */
 /* ## 0.3 Debugging tools */
+
 /* # 1 DESKTOP VIEW */
 /* ## 1.1 Desktop view, handling of all classes */
 /* ## 1.2 Reserved */
@@ -116,58 +117,62 @@
 /* ## 1.10 Notification Box */
 /* ## 1.11 Sidebar */
 /* ## 1.12 Upload form MusicBrainz popup */
-/* # 2 DOCUMENTATION OF MOBILE CLASSES */
-/* # 3 CHANGES FOR MOBILE VIEW */
-/* ## 3.1  Site Layout */
-/* ## 3.2  Notifications */
-/* ## 3.3  User Settings */
-/* ## 3.4  Forms */
-/* ## 3.5  General Tables */
-/* ## 3.6  Table Headers */
-/* ## 3.7  Table Bodies */
-/* ## 3.8  Right-Aligned Numerical Stats */
-/* ## 3.9  Torrent Table */
-/* ### 3.9.1  Expanded Torrent Group */
-/* ### 3.9.2  top10 */
-/* ## 3.10  Invite Table */
-/* ## 3.11  Collage Table */
-/* ## 3.11.1 Collage ~ Tag Bubble Appearance on Mobile */
-/* ## 3.11.2 Collage ~ Title of Collages on Mobile */
-/* ## 3.12  Requests */
-/* ## 3.13  Forums */
-/* ### 3.13.1  Forum Index */
-/* ### 3.13.2  Forum Table Structure */
-/* ### 3.13.3  Forum Headers */
-/* ## 3.14  Rules */
-/* ## 3.15 Reserved */
-/* ## 3.16 Handling for Sticky Table Headers on Mobile */
-/* ## 3.17 Site Header and Menu */
-/* ### 3.17.1  Delay Searchboxes So Keyboard Doesn't Open */
-/* ### 3.17.2  Mobile Menu Layout */
-/* ### 3.17.3  Top Menubar */
-/* ### 3.17.4  Mobile Menu When Open, Setup */
-/* ### 3.17.5  Menu When Open, Row One */
-/* ### 3.17.6  Menu When Open, Row Two (Has Subrows) */
-/* ### 3.17.7  Menu When Open, Row Three */
-/* ### 3.17.8  Menu When Open, Row Four */
-/* ### 3.17.9  Menu When Open, Row Five ~ Searchboxes */
-/* ## 3.18 Checkboxes ~ Purpose Undocumented */
-/* ## 3.19 Torrent Search, Handling for Tag Appearance */
 
-/* # 4 MISCELLANEOUS
-/* ## 4.1 Changes for Mobile, Super Small Window */
-/* ## 4.2 Tag Bubble Appearance on Widescreen #Wideload */
-/* ### 4.2.1  Full clickable appearance */
-/* ### 4.2.2  Hover effect */
-/* ### 4.2.3  Non-clickable appearance */
-/* ### 4.2.4  Other special cases
-/* ### 4.2.5  Snatched torrent indicators (BETA)
-/* ## 4.3 I-Devices Telephone Number Prevention */
-/* ## 4.4 Pop-up Warnings and Alerts ## */
-/* ### 4.4.1 Upload warnings ## */
-/* ### 4.4.2 Alertbar */
+/* # 2 MISCELLANEOUS
+/* ## 2.2 Tag Bubble Appearance on Widescreen #Wideload */
+/* ### 2.2.1  Full clickable appearance */
+/* ### 2.2.2  Hover effect */
+/* ### 2.2.3  Non-clickable appearance */
+/* ### 2.2.4  Other special cases
+/* ### 2.2.5  Snatched torrent indicators (BETA)
+/* ## 2.3 I-Devices Telephone Number Prevention */
+/* ## 2.4 Pop-up Warnings and Alerts ## */
+/* ### 2.4.1 Upload warnings ## */
+/* ### 2.4.2 Alertbar */
 
-/* # 5 CLOSING */
+/* # 3 DOCUMENTATION OF MOBILE CLASSES */
+
+/* # 4 CHANGES FOR MOBILE VIEW */
+/* ## 4.1  Site Layout */
+/* ## 4.2  Notifications */
+/* ## 4.3  User Settings */
+/* ## 4.4  Forms */
+/* ## 4.5  General Tables */
+/* ## 4.6  Table Headers */
+/* ## 4.7  Table Bodies */
+/* ## 4.8  Right-Aligned Numerical Stats */
+/* ## 4.9  Torrent Table */
+/* ### 4.9.1  Expanded Torrent Group */
+/* ### 4.9.2  top10 */
+/* ## 4.10  Invite Table */
+/* ## 4.11  Collage Table */
+/* ## 4.11.1 Collage ~ Tag Bubble Appearance on Mobile */
+/* ## 4.11.2 Collage ~ Title of Collages on Mobile */
+/* ## 4.12  Requests */
+/* ## 4.13  Forums */
+/* ### 4.13.1  Forum Index */
+/* ### 4.13.2  Forum Table Structure */
+/* ### 4.13.3  Forum Headers */
+/* ## 4.14  Rules */
+/* ## 4.15 Reserved */
+/* ## 4.16 Handling for Sticky Table Headers on Mobile */
+/* ## 4.17 Site Header and Menu */
+/* ### 4.17.1  Delay Searchboxes So Keyboard Doesn't Open */
+/* ### 4.17.2  Mobile Menu Layout */
+/* ### 4.17.3  Top Menubar */
+/* ### 4.17.4  Mobile Menu When Open, Setup */
+/* ### 4.17.5  Menu When Open, Row One */
+/* ### 4.17.6  Menu When Open, Row Two (Has Subrows) */
+/* ### 4.17.7  Menu When Open, Row Three */
+/* ### 4.17.8  Menu When Open, Row Four */
+/* ### 4.17.9  Menu When Open, Row Five ~ Searchboxes */
+/* ## 4.18 Checkboxes ~ Purpose Undocumented */
+/* ## 4.19 Torrent Search, Handling for Tag Appearance */
+
+/* # 5 CHANGES FOR MOBILE, SUPER SHORT VIEW */
+/* ## 5.1 Changes for Mobile, Super Small Window */
+
+/* # 6 CLOSING */
 
 /* */
 /* */
@@ -185,8 +190,11 @@
 /* */
 /* */
 /* ## 0.1 Housekeeping and font loading */
+
 @charset "UTF-8";
-/* Finally add WOFF and Italic support */
+
+/* Font loading */
+
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
 @namespace url("http://www.w3.org/1999/xhtml");
 @namespace svg url("http://www.w3.org/2000/svg");
@@ -194,32 +202,12 @@
 /* END font loading */
 
 /* ## 0.2 Global variables */
+
 * {
   /* recordkeeping only.  browsers do not allow vars in the CSS @media rule. */
   --phone-screen-size: 575px; 
 }
     
-/* ## 0.3 Debugging Tools */
-/* various 'debug' features are avail in this doc elsewhere */
-
-li#nav_upload.brackets a:before {
-  content: $debug-slug + ' ' + $debug-deriv-slug;
-  border: thin solid orangered; 
-  border-radius: 1rem; 
-  color: orangered; 
-  padding: 0.03rem 0.5rem;
-  margin: 0rem 0.5rem; 
-}
-
-#footer p:last-of-type:after {
-  content: $debug-identity + ' ' + $debug-slug + ' ' + $debug-deriv + ' ' + $debug-deriv-slug;
-  border: thin solid orangered; 
-  border-radius: 1rem; 
-  color: orangered; 
-  padding: 0.03rem 0.5rem;
-  margin: 0rem 0.5rem; 
-}
-
 /* */
 
 /* ######################################################################## */
@@ -2245,10 +2233,255 @@ body#collage .cats_music {
 /* END upload form MusicBrainz popup */
 
 
+
+
+/* ######################################################################## */
+/* # 2 MISCELLANEOUS
+/* ######################################################################## */
+
+/* ## 2.1 Reserved for future use */
+
+/* ## 2.2 Tag bubble appearance on widescreen */
+
+/* ### 2.2.1 Full clickable appearance */
+/* Applies to Torrent Pages, collage-listing pages, collage-discog pages. */
+.collage_table .td_info .tags :not(:empty),
+#torrent_table .group .tags :not(:empty),
+#discog_table .group .tags :not(:empty),
+#taglist td a,
+#request_table .tags,
+#top10 .tags,
+/* Artist page, sidebar, tags box */
+#artist .sidebar div.box.box_tags ul.stats.nobullet li a,
+/* User profile page, sidebar, for non-paranoid */
+#user div.sidebar .box_userinfo_activity ul.stats.nobullet li a,
+/* Subscribed collages ~ New addition to subscribed collages */
+#userhistory div.group_info.clear div.tags a,
+/* This monstrosity is for torrents.php?action=notify */
+table.torrent_table.cats.checkboxes.border.m_table td.td_info.big_info div.group_info.clear div.tags a,
+/* This monstrosity is for torrents.php?type=uploaded */
+table.torrent_table.cats.m_table td.td_info.big_info div.group_info.clear div.tags a,
+/* This is for torrent group (album) pages in the sidebar */
+body#torrents div.box.box_tags li > a:first-child {
+
+    visibility: visible;
+    box-sizing: border-box;
+    display: inline-block;
+    font-weight: 700;
+    font-size: 0.6rem;
+    vertical-align: baseline;
+    color: $color-obj-tag_bubble-foreground; 
+    background: $color-obj-tag_bubble-background; 
+    padding: 0 0.5rem;
+    border-radius: 1rem;
+    margin-bottom: 0.1rem;
+    transition: all 0.6s cubic-bezier(.25,.8,.25,1);
+}
+
+/* ### 2.2.2 Hover effect */
+/* The people have spoken. Applies only to pages with clickable tags. */
+.collage_table .td_info .tags :not(:empty):hover,
+#torrent_table .group .tags :not(:empty):hover,
+#discog_table .tags :hover,
+#taglist td a:hover,
+/*  Artist page, sidebar, tags box */ 
+#artist .sidebar div.box.box_tags ul.stats.nobullet li a:hover,
+/* User profile page, sidebar, for non-paranoid */
+#user div.sidebar .box_userinfo_activity ul.stats.nobullet li a:hover,
+/*  Subscribed collages ~ New addition to subscribed collages */
+#userhistory div.group_info.clear div.tags :hover,
+/*  This monstrosity is for torrents.php?action=notify */
+table.torrent_table.cats.checkboxes.border.m_table td.td_info.big_info div.group_info.clear div.tags a:hover,
+/*  This monstrosity is for torrents.php?type=uploaded */
+table.torrent_table.cats.m_table td.td_info.big_info div.group_info.clear div.tags a:hover,
+/* This is for torrent group (album) pages in the sidebar */
+body#torrents div.box.box_tags li > a:first-child:hover {
+    color: $color-obj-tag_bubble-background !important; 
+    background: $color-obj-tag_bubble-foreground !important; 
+    transition: all 0.15s cubic-bezier(0.25,0.8,0.25,1);
+    box-shadow:
+    rgb(0 0 0 / 25%) 0 14px 28px, 
+    rgb(0 0 0 / 22%) 0 10px 10px; 
+}
+
+/* ### 2.2.3 Non-clickable appearance */
+/* Applies to top10 and request_table pages, where tags are not clickable links. */
+#request_table .tags,
+#top10 .tags {
+    font-style: italic; 
+    font-weight: normal;
+    margin-inline: 1rem;
+}
+
+/* ### 2.2.4 Other special cases */
+/* remove commas between tag bubbles:
+/* only needed on torrent and collage-discog pages. */
+#torrent_table .tags,
+#discog_table .tags,
+#userhistory div.group_info.clear div.tags,
+/* This monstrosity is for torrents.php?action=notify */
+table.torrent_table.cats.checkboxes.border.m_table td.td_info.big_info div.group_info.clear div.tags,
+/* This monstrosity is for torrents.php?type=uploaded */
+table.torrent_table.cats.m_table td.td_info.big_info div.group_info.clear div.tags {
+  visibility: hidden;
+}
+
+/* This should not be necessary... */
+.tags a {
+    visibility: visible;
+}
+
+/* ### 2.2.5 Snatched torrent indicators (BETA)*/
+/* the following must be after 4.2.4 invisibility */
+
+tr.snatched_group div.tags:before {
+  content: "snatched group";
+  /* plus formatting below */
+}
+tr.snatched_torrent div.tags:before {
+  content: "snatched torrent";
+  /* plus formatting below */
+}
+
+tr.snatched_group div.tags:before, 
+tr.snatched_torrent div.tags:before {
+  visibility: visible;
+  background: $back-600;
+  border-radius: 1rem;
+  box-sizing: border-box;
+  display: inline-block;
+  font-size: 0.6rem;
+  font-style: italic;
+  font-weight: 200;
+  margin-bottom: 0.1rem;
+  padding: 0 0.5rem;
+  padding: 0rem 0.5rem;
+  vertical-align: baseline;
+}
+
+/* album pages */
+#torrent_details.snatched .group_torrent.snatched_torrent .torrent_label.tooltip.tl_snatched 
+{ 
+  background: $back-600;
+  border-radius: 1rem;
+  box-sizing: border-box;
+  display: inline-block;
+  font-size: 0.6rem;
+  font-style: italic;
+  font-weight: 400;
+  margin-bottom: 0.1rem;
+  margin-inline: 0.5rem;
+  padding: 0 0.5rem;
+  padding: 0rem 0.5rem;
+  vertical-align: baseline; 
+}
+
+/* */
+/* */
+
+/* ## 2.3 i-devices telephone number prevention */
+
+/* Prevent i-devices from converting long numbers to clickable telephone numbers. */
+
+*[x-apple-data-detectors] {
+    border-bottom: 0 !important;
+    cursor: default !important;
+    color: inherit !important;
+    text-decoration: none !important;
+}
+
+/* */
+/* */
+
+/* ## 2.4 Pop-up Warnings and Alerts ## */
+/* #### see also 1.10 Notifications */
+
+/* ### 2.4.1 Upload warnings ## */
+
+/* display a popup when any upload warning occurs inline on the page*/
+.upload-error:after,
+ul#check:after {
+  content: "Warning!  There were one or more errors in your submission. Check below for error messages.";
+  font-weight: 700;
+  position: absolute;
+  top: 64px;
+  left: 50vw;
+  transform: translateX(-50%);
+  z-index: 900;
+  color: black;
+  border: thick solid $color-accent-border-error;
+  border-radius: 0.25rem;
+  padding: 1rem 1rem 1rem 48px;
+  background: $color-background-error;
+  background-image: $icon-warning;
+  background-repeat: no-repeat;
+  background-position: 8px center;
+  background-size: 32px;
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.55), 0 7px 7px rgba(0, 0, 0, 0.52), 0px -5px 9px rgba(0, 0, 0, 0.32);
+}
+
+.upload-error,
+ul#check.nobullet > *
+{
+  border: thick solid $color-accent-border-error;
+  padding: 1rem 1rem 1rem 48px;
+  background: $color-background-error;
+  background-image: $icon-warning;
+  background-repeat: no-repeat;
+  background-position: 8px center;
+  background-size: 32px;
+}
+
+.upload-error,
+ul#check.nobullet *,
+ul#check.nobullet > *
+{
+  color: $color-text-error !important;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* Fix for post-upload 'Warning' (no private/source flag):
+/* the easily missed 'click here' warning shall be highlighted */
+/* CSS not yet available */
+
+// does not work: body#upload div#wrapper div#content p a
+// {
+//   color: $color-obj-tag_bubble-foreground;
+//   background-color:  $color-obj-tag_bubble-background;
+//   border: thick solid $color-obj-tag_bubble-foreground; 
+//   padding: .25rem 2rem .25rem 2rem; 
+//   margin: 1rem; 
+//   border-radius: 2.5rem;
+// }
+
+/* */
+/* */
+
+/* ### 2.4.2 Alertbar */
+
+/* ## alertbar occurs when User Settings: Notifications: "Traditional" is selected. */
+
+.alertbar {
+  border: thick solid $color-accent-border-alert;
+  padding: 1rem 1rem 1rem 48px;
+  background: $color-background-alert;
+  background-image: $icon-notification;
+  background-repeat: no-repeat;
+  background-position: 8px center;
+  background-size: 32px;
+  color: $color-text-alert !important;
+  font-size: 12px;
+  font-weight: 700;
+}
+.alertbar a {
+  color: $color-anchor-alert !important;
+}
+
 /* */
 /* */
 /* ######################################################################## */
-/* # 2 DOCUMENTATION OF MOBILE CLASSES */
+/* # 3 DOCUMENTATION OF MOBILE CLASSES */
 /* ######################################################################## */
 /* */
 /* */
@@ -2302,12 +2535,10 @@ body#collage .cats_music {
     }
 }
 
-
-
 /* */
 /* */
 /* ######################################################################## */
-/* # 3 CHANGES FOR MOBILE SITE
+/* # 4 CHANGES FOR MOBILE SITE
 /* ######################################################################## */
 /* */
 
@@ -2328,7 +2559,7 @@ body#collage .cats_music {
           max-width: 100% !important;
     }
 
-    /* ## 3.1 BEGIN site layout */
+    /* ## 4.1 BEGIN site layout */
     
     #wrapper {
           padding-top: 36px;
@@ -2359,7 +2590,7 @@ body#collage .cats_music {
     }
     /* END site layout */
 
-    /* ## 3.2 BEGIN notifications */
+    /* ## 4.2 BEGIN notifications */
     
     .i-am-new {
           width: calc(100% - 48px) !important;
@@ -2375,7 +2606,7 @@ body#collage .cats_music {
     }
     /* END notifications */
 
-    /* ## 3.3 BEGIN user settings */
+    /* ## 4.3 BEGIN user settings */
     #user #userform {
           align-items: stretch;
           display: flex;
@@ -2395,7 +2626,7 @@ body#collage .cats_music {
     }
     /* END user settings */
 
-    /* ## 3.4 BEGIN forms */
+    /* ## 4.4 BEGIN forms */
 
     input[type="search"],
     input[type="text"],
@@ -2427,7 +2658,7 @@ body#collage .cats_music {
     /* END forms */
     
 
-    /* ## 3.5 BEGIN general tables */
+    /* ## 4.5 BEGIN general tables */
     
     .m_table tbody,
     .m_table .colhead,
@@ -2444,7 +2675,7 @@ body#collage .cats_music {
     }
     /* END general tables */
 
-    /* ## 3.6 BEGIN table headers */
+    /* ## 4.6 BEGIN table headers */
     .m_table .colhead,
     .m_table .colhead_dark {
           flex-wrap: nowrap;
@@ -2489,7 +2720,7 @@ body#collage .cats_music {
     }
     /* END table headers */
 
-    /* ## 3.7 BEGIN table bodies */
+    /* ## 4.7 BEGIN table bodies */
     
     .m_table tr:not(.hidden, .colhead, .colhead_dark) {
           display: block;
@@ -2520,7 +2751,7 @@ body#collage .cats_music {
     }
     /* END table bodies */
 
-    /* ## 3.8 BEGIN right-aligned numerical stats */
+    /* ## 4.8 BEGIN right-aligned numerical stats */
     .m_td_right {
           margin: 0;
           padding: 0 !important;
@@ -2541,7 +2772,7 @@ body#collage .cats_music {
     }
     /* END right-aligned numerical stats */
 
-    /* ## 3.9 BEGIN torrent table */
+    /* ## 4.9 BEGIN torrent table */
     .torrent_table * {
           float: none;
     }
@@ -2626,7 +2857,7 @@ body#collage .cats_music {
           display: block;
     }
 
-    /* ## 3.9.1 BEGIN expanded torrent group */
+    /* ## 4.9.1 BEGIN expanded torrent group */
     .group_torrent:not(.edition, .hidden) {
           display: flex;
           flex-direction: column;
@@ -2682,7 +2913,7 @@ body#collage .cats_music {
     
     /* END special treatment of Sizes */
         
-    /* ## 3.9.2 BEGIN top10 */
+    /* ## 4.9.2 BEGIN top10 */
     
     /* 4 and 5 in colhead are hidden anyways */
     #top10 .td_size::before {
@@ -2695,7 +2926,7 @@ body#collage .cats_music {
     /* END top10 */
     /* END torrent table */
 
-    /* ## 3.10 BEGIN invite table */
+    /* ## 4.10 BEGIN invite table */
     .invite_table tr:not(.colhead) td:nth-child(3)::before {
           content: 'Joined: ';
     }
@@ -2717,7 +2948,7 @@ body#collage .cats_music {
     }
     /* END invite table */
 
-    /* ## 3.11 BEGIN collage table */
+    /* ## 4.11 BEGIN collage table */
     table.m_table.collage_table tr:not(.colhead):not(.colhead) {
           display: flex;
           flex-direction: column;
@@ -2773,7 +3004,7 @@ body#collage .cats_music {
     color: darkslategray
     }
     
-    /* ## 3.11.1 collage ~ tag bubble appearance on mobile */
+    /* ## 4.11.1 collage ~ tag bubble appearance on mobile */
     .collage_table .td_info .tags :not(:empty) {
           box-sizing: border-box;
           display: inline-block;
@@ -2792,13 +3023,13 @@ body#collage .cats_music {
           width:auto;
     }
   
-    /* ## 3.11.2 collage ~ title of collages on mobile */
+    /* ## 4.11.2 collage ~ title of collages on mobile */
     .collage_table .td_info {
           font-size: larger;
     }
     /* END collage table */
     
-    /* ## 3.12 BEGIN requests */
+    /* ## 4.12 BEGIN requests */
     /* TODO: still show the time the request was filled without taking up too much space */
 
     #requests .request_table tr:not(.colhead) td:nth-child(n+2) {
@@ -2830,8 +3061,8 @@ body#collage .cats_music {
     }
     /* END requests */
 
-    /* ## 3.13 BEGIN forums */
-    /* ## 3.13.1 BEGIN forum index */
+    /* ## 4.13 BEGIN forums */
+    /* ## 4.13.1 BEGIN forum index */
     .forum_index .last_read {
           float: none !important;
     }
@@ -2869,7 +3100,7 @@ body#collage .cats_music {
     }
     /* END forum index */
 
-    /* ## 3.13.2 BEGIN forum table structure */
+    /* ## 4.13.2 BEGIN forum table structure */
     /* this is copied from general tables. We put it here in case that changes
      in ways specific for tabular data */
 
@@ -2888,7 +3119,7 @@ body#collage .cats_music {
     }
     /* END forum table structure */
 
-    /* ## 3.13.3 BEGIN forum headers */
+    /* ## 4.13.3 BEGIN forum headers */
     /* remove dashes from forum post headers */
     .forum_post tr.colhead_dark {
           color: transparent;
@@ -2932,7 +3163,7 @@ body#collage .cats_music {
     /* END forum headers */
     /* END forums */
 
-    /* ## 3.14 BEGIN rules */
+    /* ## 4.14 BEGIN rules */
     #rules .m_th_left::before {
           content: 'Rules';
     }
@@ -2942,15 +3173,15 @@ body#collage .cats_music {
     }
     /* END rules */
 
-    /* ## 3.15 reserved */
+    /* ## 4.15 reserved */
 
-    /* ## 3.16 Handling for sticky table headers on Mobile */
+    /* ## 4.16 Handling for sticky table headers on Mobile */
     /* Deleted and burninated */
     
-    /* ## 3.17 SITE HEADER AND MENU */
+    /* ## 4.17 SITE HEADER AND MENU */
     /* Affectionately known as the hamburger bar on desktop */
 
-    /* ## 3.17.1 Delay searchboxes so keyboard doesn't open */
+    /* ## 4.17.1 Delay searchboxes so keyboard doesn't open */
 
     @keyframes delay-pointer-events {
           0% {
@@ -2974,7 +3205,7 @@ body#collage .cats_music {
 
     /* END Handling to prevent..*/
     
-    /* ## 3.17.2 BEGIN MOBILE MENU LAYOUT */
+    /* ## 4.17.2 BEGIN MOBILE MENU LAYOUT */
     
     #header {
         --row-height: 40px;
@@ -3004,7 +3235,7 @@ body#collage .cats_music {
            box-shadow: 0px 50px 70px $color-mobilemenu-shadow, 0 160px 160px #080808;
     }
 
-    /* ## 3.17.3 Top Menubar */
+    /* ## 4.17.3 Top Menubar */
 
     /* pulldown arrow icon for mobile view, top menu */
     #extra1{ 
@@ -3049,7 +3280,7 @@ body#collage .cats_music {
         top: 0;
     }
 
-    /* ## 3.17.4 Mobile Menu when Open, Setup */
+    /* ## 4.17.4 Mobile Menu when Open, Setup */
  
     /* debugging. remove the nonce words DEBUGGING to see how this works */
     #debugging #userinfo_major,
@@ -3091,7 +3322,7 @@ body#collage .cats_music {
     }
     /* end setup
     
-    /* ## 3.17.5  Menu when open, Row One */
+    /* ## 4.17.5  Menu when open, Row One */
 
     /* Right side ~ three items */
     
@@ -3136,7 +3367,7 @@ body#collage .cats_music {
     }
  
     
-    /*  ## 3.17.6  Menu when open, Row Two (has subrows) */
+    /*  ## 4.17.6  Menu when open, Row Two (has subrows) */
     
     #userinfo_major {
         left: 2vw;
@@ -3181,7 +3412,7 @@ body#collage .cats_music {
         padding-right: 0.45rem;
     }
 
-    /* ## 3.17.7  Menu when open, Row Three */
+    /* ## 4.17.7  Menu when open, Row Three */
     
     #menu ul {
         background: radial-gradient(
@@ -3196,7 +3427,7 @@ body#collage .cats_music {
     }
     /* END Row Three */
     
-    /* ## 3.17.8  Menu when open, Row four */
+    /* ## 4.17.8  Menu when open, Row four */
     
     #userinfo_minor {
         background: radial-gradient(
@@ -3207,7 +3438,7 @@ body#collage .cats_music {
         position: absolute;
     }
         
-    /* ## 3.17.9   Menu when open, Row five ~ searchboxes */
+    /* ## 4.17.9   Menu when open, Row five ~ searchboxes */
     
     #searchbars ul {
         bottom: 0;
@@ -3229,14 +3460,14 @@ body#collage .cats_music {
     }
     /* END searchboxes */
     
-    /* ## 3.17.10  Alerts */
+    /* ## 4.17.10  Alerts */
     /* Alertbar is part of the #header, so this is the least-worst place to put it. */
     
     #alerts {
     }
 
   
-    /* ## 3.18 Checkboxes ~ purpose undocumented */
+    /* ## 4.18 Checkboxes ~ purpose undocumented */
     
     #extracb1 {
         display: block;
@@ -3267,7 +3498,7 @@ body#collage .cats_music {
     /* END checked */
     /* END site header */
     
-    /* ## 3.19 Torrent search, handling for tag appearance */
+    /* ## 4.19 Torrent search, handling for tag appearance */
 
     /* 'Wordbank' of tags, displays on the torrent search form, */
     /* when tags are set to display in profile settings. */
@@ -3312,15 +3543,12 @@ body#collage .cats_music {
     
     /* END tag display for Torrent search form on Mobile, 
     /* when tags are set to display in profile settings */
-    
-
 }
 
-/* ######################################################################## */
-/* # 4 MISCELLANEOUS
-/* ######################################################################## */
+/********* */
 
-/* ## 4.1 Begin Changes for Mobile, SUPER SMALL window */
+
+/* ## 5.1 Begin Changes for Mobile, SUPER SMALL window */
 /* compact the Menu in two steps */
 
 @media (max-width: 575px)  /* var(--phone-screen-size) */ and (max-height: 600px) {
@@ -3340,243 +3568,30 @@ body#collage .cats_music {
   }
 } 
 
-/* #wideload */
-/* ## 4.2 tag bubble appearance on widescreen */
+/* # 6 CLOSING */
 
-/* ### 4.2.1 Full clickable appearance */
-/* Applies to Torrent Pages, collage-listing pages, collage-discog pages. */
-.collage_table .td_info .tags :not(:empty),
-#torrent_table .group .tags :not(:empty),
-#discog_table .group .tags :not(:empty),
-#taglist td a,
-#request_table .tags,
-#top10 .tags,
-/* Artist page, sidebar, tags box */
-#artist .sidebar div.box.box_tags ul.stats.nobullet li a,
-/* User profile page, sidebar, for non-paranoid */
-#user div.sidebar .box_userinfo_activity ul.stats.nobullet li a,
-/* Subscribed collages ~ New addition to subscribed collages */
-#userhistory div.group_info.clear div.tags a,
-/* This monstrosity is for torrents.php?action=notify */
-table.torrent_table.cats.checkboxes.border.m_table td.td_info.big_info div.group_info.clear div.tags a,
-/* This monstrosity is for torrents.php?type=uploaded */
-table.torrent_table.cats.m_table td.td_info.big_info div.group_info.clear div.tags a,
-/* This is for torrent group (album) pages in the sidebar */
-body#torrents div.box.box_tags li > a:first-child {
+/* ## 6.1 Debugging Tools */
+/* various 'debug' features are avail in this doc elsewhere */
 
-    visibility: visible;
-    box-sizing: border-box;
-    display: inline-block;
-    font-weight: 700;
-    font-size: 0.6rem;
-    vertical-align: baseline;
-    color: $color-obj-tag_bubble-foreground; 
-    background: $color-obj-tag_bubble-background; 
-    padding: 0 0.5rem;
-    border-radius: 1rem;
-    margin-bottom: 0.1rem;
-    transition: all 0.6s cubic-bezier(.25,.8,.25,1);
+li#nav_upload.brackets a:before {
+  content: $debug-slug + ' ' + $debug-deriv-slug;
+  border: thin solid orangered; 
+  border-radius: 1rem; 
+  color: orangered; 
+  padding: 0.03rem 0.5rem;
+  margin: 0rem 0.5rem; 
 }
 
-/* ### 4.2.2 Hover effect */
-/* The people have spoken. Applies only to pages with clickable tags. */
-.collage_table .td_info .tags :not(:empty):hover,
-#torrent_table .group .tags :not(:empty):hover,
-#discog_table .tags :hover,
-#taglist td a:hover,
-/*  Artist page, sidebar, tags box */ 
-#artist .sidebar div.box.box_tags ul.stats.nobullet li a:hover,
-/* User profile page, sidebar, for non-paranoid */
-#user div.sidebar .box_userinfo_activity ul.stats.nobullet li a:hover,
-/*  Subscribed collages ~ New addition to subscribed collages */
-#userhistory div.group_info.clear div.tags :hover,
-/*  This monstrosity is for torrents.php?action=notify */
-table.torrent_table.cats.checkboxes.border.m_table td.td_info.big_info div.group_info.clear div.tags a:hover,
-/*  This monstrosity is for torrents.php?type=uploaded */
-table.torrent_table.cats.m_table td.td_info.big_info div.group_info.clear div.tags a:hover,
-/* This is for torrent group (album) pages in the sidebar */
-body#torrents div.box.box_tags li > a:first-child:hover {
-    color: $color-obj-tag_bubble-background !important; 
-    background: $color-obj-tag_bubble-foreground !important; 
-    transition: all 0.15s cubic-bezier(0.25,0.8,0.25,1);
-    box-shadow:
-    rgb(0 0 0 / 25%) 0 14px 28px, 
-    rgb(0 0 0 / 22%) 0 10px 10px; 
+#footer p:last-of-type:after {
+  content: $debug-identity + ' ' + $debug-slug + ' ' + $debug-deriv + ' ' + $debug-deriv-slug;
+  border: thin solid orangered; 
+  border-radius: 1rem; 
+  color: orangered; 
+  padding: 0.03rem 0.5rem;
+  margin: 0rem 0.5rem; 
 }
 
-/* ### 4.2.3 Non-clickable appearance */
-/* Applies to top10 and request_table pages, where tags are not clickable links. */
-#request_table .tags,
-#top10 .tags {
-    font-style: italic; 
-    font-weight: normal;
-    margin-inline: 1rem;
-}
-
-/* ### 4.2.4 Other special cases */
-/* remove commas between tag bubbles:
-/* only needed on torrent and collage-discog pages. */
-#torrent_table .tags,
-#discog_table .tags,
-#userhistory div.group_info.clear div.tags,
-/* This monstrosity is for torrents.php?action=notify */
-table.torrent_table.cats.checkboxes.border.m_table td.td_info.big_info div.group_info.clear div.tags,
-/* This monstrosity is for torrents.php?type=uploaded */
-table.torrent_table.cats.m_table td.td_info.big_info div.group_info.clear div.tags {
-  visibility: hidden;
-}
-
-/* This should not be necessary... */
-.tags a {
-    visibility: visible;
-}
-
-/* ### 4.2.5 Snatched torrent indicators (BETA)*/
-/* the following must be after 4.2.4 invisibility */
-
-tr.snatched_group div.tags:before {
-  content: "snatched group";
-  /* plus formatting below */
-}
-tr.snatched_torrent div.tags:before {
-  content: "snatched torrent";
-  /* plus formatting below */
-}
-
-tr.snatched_group div.tags:before, 
-tr.snatched_torrent div.tags:before {
-  visibility: visible;
-  background: $back-600;
-  border-radius: 1rem;
-  box-sizing: border-box;
-  display: inline-block;
-  font-size: 0.6rem;
-  font-style: italic;
-  font-weight: 200;
-  margin-bottom: 0.1rem;
-  padding: 0 0.5rem;
-  padding: 0rem 0.5rem;
-  vertical-align: baseline;
-}
-
-/* album pages */
-#torrent_details.snatched .group_torrent.snatched_torrent .torrent_label.tooltip.tl_snatched 
-{ 
-  background: $back-600;
-  border-radius: 1rem;
-  box-sizing: border-box;
-  display: inline-block;
-  font-size: 0.6rem;
-  font-style: italic;
-  font-weight: 400;
-  margin-bottom: 0.1rem;
-  margin-inline: 0.5rem;
-  padding: 0 0.5rem;
-  padding: 0rem 0.5rem;
-  vertical-align: baseline; 
-}
-
-/* ## 4.3 i-devices telephone number prevention */
-/*
-/* Below prevents i-devices from converting long numbers to clickable telephone numbers. */
-
-*[x-apple-data-detectors] {
-    border-bottom: 0 !important;
-    cursor: default !important;
-    color: inherit !important;
-    text-decoration: none !important;
-}
-
-/* */
-/* */
-
-/* ## 4.4 Pop-up Warnings and Alerts ## */
-/* #### see also 1.10 Notifications */
-
-/* ### 4.4.1 Upload warnings ## */
-
-.upload-error:after,
-ul#check:after {
-  content: "Warning!  There were one or more errors in your submission. Check below for error messages.";
-  font-weight: 700;
-  position: absolute;
-  top: 64px;
-  left: 50vw;
-  transform: translateX(-50%);
-  z-index: 900;
-  color: black;
-  border: thick solid $color-accent-border-error;
-  border-radius: 0.25rem;
-  padding: 1rem 1rem 1rem 48px;
-  background: $color-background-error;
-  background-image: $icon-warning;
-  background-repeat: no-repeat;
-  background-position: 8px center;
-  background-size: 32px;
-  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.55), 0 7px 7px rgba(0, 0, 0, 0.52), 0px -5px 9px rgba(0, 0, 0, 0.32);
-}
-
-.upload-error,
-ul#check.nobullet > *
-{
-  border: thick solid $color-accent-border-error;
-  padding: 1rem 1rem 1rem 48px;
-  background: $color-background-error;
-  background-image: $icon-warning;
-  background-repeat: no-repeat;
-  background-position: 8px center;
-  background-size: 32px;
-}
-
-.upload-error,
-ul#check.nobullet *,
-ul#check.nobullet > *
-{
-  color: $color-text-error !important;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-/* Fix for post-upload 'Warning' (no private/source flag):
-/* the easily missed 'click here' warning shall be highlighted */
-/* CSS not yet available */
-
-// does not work: body#upload div#wrapper div#content p a
-// {
-//   color: $color-obj-tag_bubble-foreground;
-//   background-color:  $color-obj-tag_bubble-background;
-//   border: thick solid $color-obj-tag_bubble-foreground; 
-//   padding: .25rem 2rem .25rem 2rem; 
-//   margin: 1rem; 
-//   border-radius: 2.5rem;
-// }
-
-/* */
-/* */
-
-/* ### 4.4.2 Alertbar */
-
-/* ## alertbar occurs when User Settings: Notifications: "Traditional" is selected. */
-
-.alertbar {
-  border: thick solid $color-accent-border-alert;
-  padding: 1rem 1rem 1rem 48px;
-  background: $color-background-alert;
-  background-image: $icon-notification;
-  background-repeat: no-repeat;
-  background-position: 8px center;
-  background-size: 32px;
-  color: $color-text-alert !important;
-  font-size: 12px;
-  font-weight: 700;
-}
-.alertbar a {
-  color: $color-anchor-alert !important;
-}
-
-/* # 5 CLOSING */
-
-// debugging ~ assist only
+/* ## 6.2 hello viewers of source */
 
 debug { debug: $debug-slug }
 
