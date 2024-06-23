@@ -7,14 +7,15 @@
 // SLUG
 
  $debug-identity: "ApolloStage"; // must include quots
- $debug-slug: "b16 [0622]"; // must include quots
+ $debug-slug: "b16 [0619-1444]"; // must include quots
  $debug-deriv: "main"; // blank for main
  $debug-deriv-slug: ""; // blank for main
  
 // ////////////////////////////////////////////////////////////////////////////////
 // COLORS
 
-// physical_layout -> token, and token -> raw value.
+// PhysicalLayout -> token
+// and Token -> Raw value
 
 //Backgrounds -- 100-600 are used
  $back-100:  #121616;
@@ -85,6 +86,7 @@
  $ds-gray-92: hsl(183, 2.5%, 92%);
  $ds-black: #000;
  
+
 // DEFINE FROM LOGICAL LAYOUT TO TOKENS
 
 $color-background-base: $back-100;
@@ -241,13 +243,8 @@ $icon-number-seeders: url("https://wally-crunk.github.io/svg/std/arrow-up-round-
 $icon-number-leechers: url("https://wally-crunk.github.io/svg/std/arrow-down-round-ccc.svg");
 
 // Used on alerts
-
-// // standard: 
-// $icon-notification: url("https://wally-crunk.github.io/svg/std/notification-bell-333xccc.svg");
-// $icon-warning: url("https://wally-crunk.github.io/svg/std/x-c33.svg")
-// // Orpheus specific:
-$icon-notification: url("https://wally-crunk.github.io/svg/site/ops-icon-harp-ccc.svg");
-$icon-warning: url("https://wally-crunk.github.io/svg/site/ops-icon-triangle-000.svg"); // or X
+$icon-notification: url("https://wally-crunk.github.io/styles/apollostage/images/notification-bell-333xccc.svg");
+$icon-warning: url("https://wally-crunk.github.io/styles/apollostage/images/orpheus-harp-000.svg"); // or X
 
 // EOF
 // ////////////////////////////////////////////////////////////////////////////////

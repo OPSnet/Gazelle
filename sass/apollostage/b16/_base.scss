@@ -167,8 +167,6 @@
 /* ### 4.4.1 Upload warnings ## */
 /* ### 4.4.2 Alertbar */
 
-/* # 5 CLOSING */
-
 /* */
 /* */
 
@@ -3229,12 +3227,8 @@ body#collage .cats_music {
     }
     /* END searchboxes */
     
-    /* ## 3.17.10  Alerts */
-    /* Alertbar is part of the #header, so this is the least-worst place to put it. */
-    
-    #alerts {
-    }
-
+    /* ## 3.17.10  Close button & legend at bottom */
+    /* TODO; for now, click outside the menu
   
     /* ## 3.18 Checkboxes ~ purpose undocumented */
     
@@ -3573,8 +3567,6 @@ ul#check.nobullet > *
 .alertbar a {
   color: $color-anchor-alert !important;
 }
-
-/* # 5 CLOSING */
 
 // debugging ~ assist only
 

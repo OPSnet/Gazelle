@@ -9,12 +9,52 @@
 
 // debug slugs: must be after import.
 $debug-deriv: "Paper";
-$debug-deriv-slug: "[0621]";
+$debug-deriv-slug: "[0619-1444]";
 
 // ////////////////////////////////////////////////////////////////////////////////
 // COLORS
 
-// physical_layout -> token, and token -> raw value.
+// PhysicalLayout -> token
+// and Token -> Raw value
+
+// and override as follows: -- palettte.app was helpful for this
+// $bob-100: #EBEFF0;
+// $bob-200: #DEE2E2;
+// $bob-300: #D0D4D5;
+// $bob-400: #C2C6C7;
+// $bob-500: #B5B9BA;
+// $bob-600: #A7ABAC;
+// $bob-700: #9A9E9F;
+// $bob-800: #8D9091;
+// $bob-900: #808384;
+// $bob-1000: #727576;
+// $gary-1100: #727676;
+// $gary-1200: #5C6464;
+// $gary-1300: #475350;
+// $gary-1400: #35423B;
+// $gary-1500: #243026;
+// $mike-100: #65BC98;
+// $mike-200: #55AE88;
+// $mike-300: #4BA67F;
+// $mike-400: #429E77;
+// $mike-500: #3B9972;
+// $mike-600: #35956D;
+// $mike-700: #308E67;
+// $mike-800: #2A8760;
+// $mike-900: #247D59;
+// $mike-1000: #1D714D;
+// $fran-000: #0E151C;
+// $fran-100: #192E47;
+// $fran-300: #103764;
+// $fran-400: #0D4184;
+// $fran-500: #144B9F;
+// $fran-600: #1F58BB;
+// $fran-700: #2478DB;
+// $fran-800: #2884F0;
+// $fran-900: #99C8FF;
+// $fran-1000: #CAE3FF;
+// $gray-300: #727576;
+// $yellow-300: #e3ba65;
 
 // Backs
 $back-100: #EBEFF0;
@@ -41,16 +81,18 @@ $mid-900: #247D59;
 $mid-1000: #1D714D;
 
 //Menutheme ~ for base apollostage, same as mids
-$menutheme-100: #003D2D; 
-$menutheme-200: #004B38;
-$menutheme-300: #005943;
-$menutheme-400: #00674E;
-$menutheme-500: #00745A;
-$menutheme-600: #008265;
-$menutheme-700: #008D6D;
-$menutheme-800: #009777;
-$menutheme-900: #00A280;
-$menutheme-1000: #00AD89;
+ $menutheme-100: #003D2D; 
+ $menutheme-200: #004B38;
+ $menutheme-300: #005943;
+ $menutheme-400: #00674E;
+ $menutheme-500: #00745A;
+ $menutheme-600: #008265;
+ $menutheme-700: #008D6D;
+ $menutheme-800: #009777;
+ $menutheme-900: #00A280;
+ $menutheme-1000: #00AD89;
+
+
 
 //Fores
 $fore-100: #8E9FB3;
@@ -181,6 +223,10 @@ $color-mobilemenu-userinfo-2: $menutheme-900; // mobile pulldown menu gradient 2
 $color-mobilemenu-closed: $mid-700; // rules, also mobile menu header
 $color-mobilemenu-shadow: $mid-500; //mobile menu
 
+$color-background-notification-gradient-1: $mid-1000; // menu low/high suggested
+$color-background-notification-gradient-2: $mid-700;  // menu high/low suggested
+$color-background-notification: #fff;
+
 $color-obj-button-base-1: $ds-gray-72; 
 $color-obj-button-base-2: $ds-gray-52;
 $color-obj-poll: $mid-900; // poll active part of bargraph
@@ -212,11 +258,6 @@ $color-accent-forum-unread: $ds-yellow;
 
 $color-accent-selection-background: $mid-800;
 $color-accent-selection-text: #fff; // usually #fff or $color-text-bold
-
-// popup notifications
-$color-background-notification-gradient-1: $mid-1000; // menu low/high suggested
-$color-background-notification-gradient-2: $mid-700;  // menu high/low suggested
-$color-background-notification: #fff;
 
 // alerts (light mode style)
 $color-accent-border-alert: $midtone-500;
@@ -253,13 +294,6 @@ $logo-site-square: url("https://wally-crunk.github.io/svg/site/ops-logo-loop-lig
 $icon-number-snatches: url("https://wally-crunk.github.io/svg/std/arrow-loop-000.svg");
 $icon-number-seeders: url("https://wally-crunk.github.io/svg/std/arrow-up-round-000.svg");
 $icon-number-leechers: url("https://wally-crunk.github.io/svg/std/arrow-down-round-000.svg");
-
-// // standard: 
-// $icon-notification: url("https://wally-crunk.github.io/svg/std/notification-bell-000.svg");
-// $icon-warning: url("https://wally-crunk.github.io/svg/std/x-000.svg")
-// // Orpheus specific:
-$icon-notification: url("https://wally-crunk.github.io/svg/site/ops-icon-harp-000.svg");
-$icon-warning: url("https://wally-crunk.github.io/svg/site/ops-icon-triangle-000.svg"); // or X
 
 // EOF
 

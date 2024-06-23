@@ -167,8 +167,6 @@
 /* ### 4.4.1 Upload warnings ## */
 /* ### 4.4.2 Alertbar */
 
-/* # 5 CLOSING */
-
 /* */
 /* */
 
@@ -759,7 +757,9 @@ table.box2 {
 }
 
 .forum_post.wrap_overflow.box.vertical_margin td.body 
-{ /*foobar*/;
+{ border: thin dotted gold;
+  word-break: break-all;
+  hyphens: none;
 }
 
 .forum_post .avatar {
@@ -3229,12 +3229,8 @@ body#collage .cats_music {
     }
     /* END searchboxes */
     
-    /* ## 3.17.10  Alerts */
-    /* Alertbar is part of the #header, so this is the least-worst place to put it. */
-    
-    #alerts {
-    }
-
+    /* ## 3.17.10  Close button & legend at bottom */
+    /* TODO; for now, click outside the menu
   
     /* ## 3.18 Checkboxes ~ purpose undocumented */
     
@@ -3539,17 +3535,15 @@ ul#check.nobullet > *
 
 /* Fix for post-upload 'Warning' (no private/source flag):
 /* the easily missed 'click here' warning shall be highlighted */
-/* CSS not yet available */
-
-// does not work: body#upload div#wrapper div#content p a
-// {
-//   color: $color-obj-tag_bubble-foreground;
-//   background-color:  $color-obj-tag_bubble-background;
-//   border: thick solid $color-obj-tag_bubble-foreground; 
-//   padding: .25rem 2rem .25rem 2rem; 
-//   margin: 1rem; 
-//   border-radius: 2.5rem;
-// }
+body#upload div#wrapper div#content p a
+{
+  color: $color-obj-tag_bubble-foreground;
+  background-color:  $color-obj-tag_bubble-background;
+  border: thick solid $color-obj-tag_bubble-foreground; 
+  padding: .25rem 2rem .25rem 2rem; 
+  margin: 1rem; 
+  border-radius: 2.5rem;
+}
 
 /* */
 /* */
@@ -3573,8 +3567,6 @@ ul#check.nobullet > *
 .alertbar a {
   color: $color-anchor-alert !important;
 }
-
-/* # 5 CLOSING */
 
 // debugging ~ assist only
 

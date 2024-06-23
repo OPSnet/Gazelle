@@ -17,6 +17,19 @@ $debug-deriv-slug: "[0619-1444]";
 // COLORS
 
 //Backs -- 100-600 are used
+
+//Menu
+$menutheme-100: #ffb0a0;   
+$menutheme-200: #ff9e98;   
+$menutheme-300: #fe8691;   
+$menutheme-400: #f07c8e;   
+$menutheme-500: #da7c92;   
+$menutheme-600: #c47891;   
+$menutheme-700: #ab718d;   
+$menutheme-800: #8d6a87;   
+$menutheme-900: #6c6584;   
+$menutheme-1000: #5c6086;  
+
 $back-100: #19181A;
 $back-200: #2A242C;
 $back-300: #342A33;
@@ -32,8 +45,7 @@ $fore-800: #DBC8D5;
 $fore-900: #DADDEA;
 $fore-1000: #F9ECEC; //#e69f90; //#F9ECEC; 
 
-// midtones ~ reduced brightness 
-// <400 for background accents
+// midtones ~ reduced brightness <400 for background accents
 // >500 used on black backgrounds
 $midtone-100: #674242; //unused
 $midtone-200: #7B4848;
@@ -46,19 +58,6 @@ $midtone-800: #D19DC8;
 $midtone-900: #A196C4;
 $midtone-1000:#757AAB;
 
-//Menu
-$menutheme-100: #ffb0a0;   
-$menutheme-200: #ff9e98;   
-$menutheme-300: #fe8691;   
-$menutheme-400: #f07c8e;   
-$menutheme-500: #da7c92;   
-$menutheme-600: #c47891;   
-$menutheme-700: #ab718d;   
-$menutheme-800: #8d6a87;   
-$menutheme-900: #6c6584;   
-$menutheme-1000: #5c6086;  
-
-//Direct-specialty
 $ds-fiji: #b43477;
 $ds-bali: #9c4366;
 $ds-neutral-300: #a4a4a4;
@@ -139,6 +138,10 @@ $color-text-tooltipster: $midtone-600;
 $color-text-tooltipster-anchor: $midtone-800;
 $color-text-tooltipster-anchor-hover: $midtone-1000;
 
+$color-background-notification-gradient-1: $menutheme-200; // menu low/high suggested // changed
+$color-background-notification-gradient-2: $menutheme-600;  // menu high/low suggested // changed
+$color-background-notification: $ds-neutral-000;
+
 $color-obj-button-base-1: $ds-gray-62; 
 $color-obj-button-base-2: $ds-gray-92;
 $color-obj-poll: $midtone-900; // poll active part of bargraph
@@ -170,11 +173,6 @@ $color-accent-forum-unread: $ds-fiji; // changed
 
 $color-accent-selection-background: rgba(217,130,111,0.6);  //changed
 $color-accent-selection-text: #fff; // changed
-
-// popup notifications
-$color-background-notification-gradient-1: $menutheme-200; // menu low/high suggested // changed
-$color-background-notification-gradient-2: $menutheme-600;  // menu high/low suggested // changed
-$color-background-notification: $ds-neutral-000;
 
 // alerts
 $color-accent-border-alert: $midtone-500;
