@@ -7,6 +7,16 @@ run_service()
     service "$1" start || exit 1
 }
 
+if [ ! -e .docker-init-done ] ; then
+    composer --version
+    composer install --no-progress --optimize-autoloader
+    bin/local-patch
+    yarn
+    npx update-browserslist-db@latest
+    yarn dev
+    touch .docker-init-done
+fi
+
 while ! nc -z mysql 3306
 do
     echo "Waiting for MySQL..."

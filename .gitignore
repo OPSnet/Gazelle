@@ -33,6 +33,7 @@ __MACOSX/
 /yarn-error.log
 
 .docker/mysql-home/.mysql_history
+.docker-init-done
 !.docker/mysql-home/.my.cnf
 
 /public/static/styles/**/*.css
