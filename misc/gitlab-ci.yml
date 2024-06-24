@@ -45,7 +45,7 @@ phpstan:
         - .composer
   script:
     - composer install --no-progress
-    - /bin/sh bin/local-patch
+    - bin/local-patch
     - phpstan analyse --no-progress --configuration misc/phpstan.neon
 
 e2e-tests:

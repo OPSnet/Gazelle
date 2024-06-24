@@ -1,8 +1,6 @@
-#! /bin/bash
+#!/bin/sh
 
-set -euo pipefail
-
-for patch in "$(dirname $0)"/../misc/patch/*.patch 
+for patch in $(find "$(dirname $0)"/../misc/patch/ -name "*.patch" -print)
 do
-    patch -p1 < $patch
+    patch -p1 < $patch || exit 1
 done
