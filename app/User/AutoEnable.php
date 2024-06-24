@@ -189,7 +189,9 @@ class AutoEnable extends \Gazelle\BaseUser {
             ", $this->token()
         );
         if ($this->created() < Time::offset(-3600 * 48)) {
-            $this->user->addStaffNote("Tried to use an expired enable token from {$_SERVER['REMOTE_ADDR']}")->modify();
+            $this->user
+                ->addStaffNote("Tried to use an expired enable token from {$this->requestContext()->remoteAddr()}")
+                ->modify();
             $success = false;
         } else {
             $userId = $this->user->id();

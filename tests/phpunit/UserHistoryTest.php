@@ -28,7 +28,6 @@ class UserHistoryTest extends TestCase {
             1,
             $history->registerNewEmail(
                 $newEmail,
-                '127.1.2.3',
                 true,
                 new \Gazelle\Manager\IPv4(),
                 new \Gazelle\Util\Irc(),
@@ -50,7 +49,6 @@ class UserHistoryTest extends TestCase {
         $history = new \Gazelle\User\History($user);
         $history->registerNewEmail(
             $email,
-            '127.1.2.3',
             true,
             new \Gazelle\Manager\IPv4(),
             new \Gazelle\Util\Irc(),

@@ -5,8 +5,8 @@ if (isset($Viewer)) {
     exit;
 }
 
-$watch = new Gazelle\LoginWatch($_SERVER['REMOTE_ADDR']);
 $login = new Gazelle\Login();
+$watch = new Gazelle\LoginWatch($login->requestContext()->remoteAddr());
 
 if (!empty($_POST['username']) && !empty($_POST['password'])) {
     $user = $login->login(
@@ -71,7 +71,9 @@ if (!empty($_POST['username']) && !empty($_POST['password'])) {
 echo $Twig->render('login/login.twig', [
     'delta'    => $watch->bannedEpoch() - time(),
     'error'    => $login->error(),
-    'ip_addr'  => $_SERVER['REMOTE_ADDR'],
-    'tor_node' => (new Gazelle\Manager\Tor())->isExitNode($_SERVER['REMOTE_ADDR']),
+    'ip_addr'  => $login->requestContext()->remoteAddr(),
+    'tor_node' => (new Gazelle\Manager\Tor())->isExitNode(
+        $login->requestContext()->remoteAddr()
+    ),
     'watch'    => $watch,
 ]);

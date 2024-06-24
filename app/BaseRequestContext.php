@@ -10,7 +10,7 @@ class BaseRequestContext {
     public function __construct(
         protected readonly string $scriptName,
         protected string $remoteAddr,
-        string $useragent,
+        protected string $useragent,
     ) {
         $info = pathinfo($scriptName);
         if (!array_key_exists('dirname', $info)) {
@@ -27,12 +27,12 @@ class BaseRequestContext {
         return $this->ua;
     }
 
-    public function browser(): ?string {
-        return $this->ua()['Browser'];
+    public function browser(): string {
+        return (string)$this->ua()['Browser'];
     }
 
-    public function browserVersion(): ?string {
-        return $this->ua()['BrowserVersion'];
+    public function browserVersion(): string {
+        return (string)$this->ua()['BrowserVersion'];
     }
 
     public function isValid(): bool {
@@ -43,24 +43,29 @@ class BaseRequestContext {
         return $this->module;
     }
 
-    public function os(): ?string {
-        return $this->ua()['OperatingSystem'];
+    public function os(): string {
+        return (string)$this->ua()['OperatingSystem'];
     }
 
-    public function osVersion(): ?string {
-        return $this->ua()['OperatingSystemVersion'];
+    public function osVersion(): string {
+        return (string)$this->ua()['OperatingSystemVersion'];
     }
 
     public function remoteAddr(): string {
         return $this->remoteAddr;
     }
 
+    public function useragent(): string {
+        return $this->useragent;
+    }
+
     /**
      * Because we <3 our staff
      */
     public function anonymize(): static {
+        $this->useragent = 'staff-browser';
         $this->ua = [
-            'Browser'                => 'staff-browser',
+            'Browser'                => $this->useragent,
             'BrowserVersion'         => null,
             'OperatingSystem'        => null,
             'OperatingSystemVersion' => null,

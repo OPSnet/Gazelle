@@ -14,9 +14,6 @@ class UserCreateTest extends TestCase {
     }
 
     public function testCreate(): void {
-        $_SERVER['REMOTE_ADDR']     = '127.0.0.100';
-        $_SERVER['HTTP_USER_AGENT'] = 'phpunit';
-
         $name         = 'create.' . randomString(6);
         $email        = "$name@example.com";
         $password     = randomString(40);
@@ -26,7 +23,6 @@ class UserCreateTest extends TestCase {
             ->setUsername($name)
             ->setEmail($email)
             ->setPassword($password)
-            ->setIpaddr($_SERVER['REMOTE_ADDR'])
             ->setAdminComment($adminComment)
             ->create();
 
@@ -51,18 +47,14 @@ class UserCreateTest extends TestCase {
     }
 
     public function testLogin(): void {
-        $_SERVER['REMOTE_ADDR']     = '127.0.0.100';
-        $_SERVER['HTTP_USER_AGENT'] = 'phpunit';
-
         $this->user = (new \Gazelle\UserCreator())
             ->setUsername('phpunit.' . randomString(10))
             ->setEmail('email@example.com')
             ->setPassword('password')
-            ->setIpaddr($_SERVER['REMOTE_ADDR'])
             ->setAdminComment('phpunit test login')
             ->create();
         $login = new Gazelle\Login();
-        $watch = new Gazelle\LoginWatch($_SERVER['REMOTE_ADDR']);
+        $watch = new Gazelle\LoginWatch($login->requestContext()->remoteAddr());
         $watch->clearAttempts();
 
         $result = $login->login($this->user->username(), 'not-the-password!', $watch);
@@ -89,7 +81,6 @@ class UserCreateTest extends TestCase {
             ->setUsername('0')
             ->setEmail("test@example.com")
             ->setPassword(randomString(20))
-            ->setIpaddr('127.0.0.100')
             ->setAdminComment('Created by tests/phpunit/UserCreateTest.php');
 
         $this->expectException(Gazelle\Exception\UserCreatorException::class);
@@ -103,7 +94,6 @@ class UserCreateTest extends TestCase {
             ->setUsername(randomString(21))
             ->setEmail("test@example.com")
             ->setPassword(randomString(20))
-            ->setIpaddr('127.0.0.100')
             ->setAdminComment('Created by tests/phpunit/UserCreateTest.php');
 
         $this->expectException(Gazelle\Exception\UserCreatorException::class);
@@ -116,7 +106,6 @@ class UserCreateTest extends TestCase {
             ->setUsername(' ' . randomString(6))
             ->setEmail("test@example.com")
             ->setPassword(randomString(20))
-            ->setIpaddr('127.0.0.100')
             ->setAdminComment('Created by tests/phpunit/UserCreateTest.php')
             ->create();
 

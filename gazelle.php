@@ -50,7 +50,7 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $module === 'ajax') {
         header('Content-type: application/json');
         json_die('failure', 'your ip address has been banned');
     }
-    [$success, $result] = $userMan->findByAuthorization($ipv4Man, $_SERVER['HTTP_AUTHORIZATION'], $context->remoteAddr());
+    [$success, $result] = $userMan->findByAuthorization($ipv4Man, $_SERVER['HTTP_AUTHORIZATION']);
     if ($success) {
         $Viewer = $result;
         define('AUTHED_BY_TOKEN', true);
@@ -87,10 +87,6 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $module === 'ajax') {
     if (!$session->valid($SessionID)) {
         $Viewer->logout($SessionID);
         $forceLogout();
-    }
-    if ($Viewer->permitted('site_disable_ip_history')) {
-        $context->anonymize();
-        $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
     }
     $session->refresh($SessionID, $context->remoteAddr(), $context->ua());
     unset($browser, $session, $userId, $cookieData, $forceLogout);

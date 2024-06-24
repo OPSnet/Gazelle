@@ -4,13 +4,10 @@ use PHPUnit\Framework\TestCase;
 use Gazelle\Enum\UserStatus;
 
 require_once(__DIR__ . '/../../lib/bootstrap.php');
+require_once(__DIR__ . '/../helper.php');
 
 class BonusTest extends TestCase {
     protected array $userList;
-
-    public function setUp(): void {
-        $_SERVER['HTTP_USER_AGENT'] = 'phpunit';
-    }
 
     public function tearDown(): void {
         foreach ($this->userList as $user) {
@@ -19,24 +16,8 @@ class BonusTest extends TestCase {
     }
 
     public function testBonus(): void {
-        $creator = new Gazelle\UserCreator();
-        $this->userList['giver'] = $creator
-            ->setUsername('bonusg.' . randomString(6))
-            ->setEmail(randomString(6) . "@bonus.example.com")
-            ->setPassword(randomString())
-            ->setIpaddr('127.0.0.1')
-            ->setAdminComment('Created by tests/phpunit/BonusTest.php')
-            ->create();
-        $this->userList['receiver'] = $creator
-            ->setUsername('bonusr.' . randomString(6))
-            ->setEmail(randomString(6) . "@bonus.example.com")
-            ->setPassword(randomString())
-            ->setIpaddr('127.0.0.1')
-            ->setAdminComment('Created by tests/phpunit/BonusTest.php')
-            ->create();
-
-        $this->userList['giver']->setField('Enabled', UserStatus::enabled->value)->modify();
-        $this->userList['receiver']->setField('Enabled', UserStatus::enabled->value)->modify();
+        $this->userList['giver'] = Helper::makeUser('bonusg.' . randomString(6), 'bonus', true);
+        $this->userList['receiver'] = Helper::makeUser('bonusr.' . randomString(6), 'bonus', true);
         $startingPoints = 10000;
 
         $giver = new Gazelle\User\Bonus($this->userList['giver']);
@@ -139,14 +120,7 @@ class BonusTest extends TestCase {
         $total    = $eco->bonusTotal();
         $stranded = $eco->bonusStrandedTotal();
 
-        $this->userList['bonus'] = (new Gazelle\UserCreator())
-            ->setUsername('bonusstat.' . randomString(6))
-            ->setEmail(randomString(6) . "@bonus.example.com")
-            ->setPassword(randomString())
-            ->setIpaddr('127.0.0.1')
-            ->setAdminComment('Created by tests/phpunit/BonusTest.php')
-            ->create();
-        $this->userList['bonus']->setField('Enabled', UserStatus::enabled->value)->modify();
+        $this->userList['bonus'] = Helper::makeUser('bonusstat.' . randomString(6), 'bonus', true);
         $bonus = new Gazelle\User\Bonus($this->userList['bonus']);
         $bonus->addPoints(98765);
 

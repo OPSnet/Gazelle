@@ -13,22 +13,13 @@ class Login extends Base {
     protected int $error = self::NO_ERROR;
     protected bool $persistent = false;
     protected int $userId = 0;
-    protected string $ipaddr;
     protected string $password;
     protected string $twofa;
     protected string $username;
     protected LoginWatch $watch;
 
-    public function __construct() {
-        $this->ipaddr = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.2';
-    }
-
     public function error(): int {
         return $this->error;
-    }
-
-    public function ipaddr(): string {
-        return $this->ipaddr;
     }
 
     public function persistent(): bool {
@@ -60,8 +51,9 @@ class Login extends Base {
         $this->persistent = $persistent;
         $this->twofa      = trim($twofa);
 
-        $begin = microtime(true);
-        $user = $this->attemptLogin();
+        $begin  = microtime(true);
+        $user   = $this->attemptLogin();
+        $ipaddr = $this->requestContext()->remoteAddr();
         if ($user) {
             $this->watch->clearAttempts();
             $user->toggleAttr('inactive-warning-sent', false);
@@ -80,7 +72,7 @@ class Login extends Base {
                         (new User($this->userId))->inbox()->createSystem(
                             "Too many login attempts on your account",
                             self::$twig->render('login/too-many-failures.bbcode.twig', [
-                                'ipaddr' => $this->ipaddr,
+                                'ipaddr'   => $ipaddr,
                                 'username' => $this->username,
                             ])
                         );
@@ -93,7 +85,7 @@ class Login extends Base {
                 }
             } elseif ($this->watch->nrBans() > 3) {
                 (new Manager\IPv4())->createBan(
-                    null, $this->ipaddr, $this->ipaddr, 'Automated ban, too many failed login attempts'
+                    null, $ipaddr, $ipaddr, 'Automated ban, too many failed login attempts'
                 );
             }
         }
@@ -153,8 +145,14 @@ class Login extends Base {
         }
 
         // Did they come in over Tor?
-        if (BLOCK_TOR && !$user->permitted('can_use_tor') && (new Manager\Tor())->isExitNode($this->ipaddr)) {
-            $userMan->disableUserList(new Tracker(), [$user->id()], "Logged in via Tor ({$this->ipaddr})", Manager\User::DISABLE_TOR);
+        $ipaddr = $this->requestContext()->remoteAddr();
+        if (BLOCK_TOR && !$user->permitted('can_use_tor') && (new Manager\Tor())->isExitNode($ipaddr)) {
+            $userMan->disableUserList(
+                new Tracker(),
+                [$user->id()],
+                "Logged in via Tor ($ipaddr)",
+                Manager\User::DISABLE_TOR
+            );
             // return a newly disabled instance
             $this->pg()->prepared_query("
                 insert into ip_history
@@ -163,12 +161,12 @@ class Login extends Base {
                 on conflict (id_user, ip, data_origin) do update set
                     total = ip_history.total + 1,
                     seen = tstzrange(lower(ip_history.seen), now(), '[]')
-                ", $user->id(), $this->ipaddr
+                ", $user->id(), $ipaddr
             );
             return $userMan->findById($user->id());
         }
 
-        (new User\History($user))->registerSiteIp($this->ipaddr);
+        (new User\History($user))->registerSiteIp($ipaddr);
 
         // We have a user!
         return $user;

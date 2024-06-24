@@ -134,7 +134,6 @@ class InviteTest extends TestCase {
             ->setUsername('create.' . randomString(6))
             ->setEmail(randomString(6) . '@example.com')
             ->setPassword(randomString(10))
-            ->setIpaddr('127.2.2.2')
             ->setInviteKey($invite->key())
             ->create();
 
@@ -270,7 +269,6 @@ class InviteTest extends TestCase {
             ->setUsername('create.' . randomString(6))
             ->setEmail(randomString(6) . '@example.com')
             ->setPassword(randomString(10))
-            ->setIpaddr('127.3.3.3')
             ->setInviteKey($invite->key())
             ->create();
         $this->assertEquals(

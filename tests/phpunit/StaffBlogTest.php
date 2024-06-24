@@ -15,7 +15,6 @@ class StaffBlogTest extends TestCase {
     }
 
     public function testStaffBlog(): void {
-        $_SERVER['HTTP_USER_AGENT'] = 'phpunit';
         $this->userList['admin'] = Helper::makeUser('admin.' . randomString(6), 'staffblog');
         $this->userList['mod'] = Helper::makeUser('mod.' . randomString(6), 'staffblog');
 

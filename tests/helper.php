@@ -199,12 +199,10 @@ class Helper {
     }
 
     public static function makeUser(string $username, string $tag, bool $enable = false, bool $clearInbox = false): \Gazelle\User {
-        $_SERVER['HTTP_USER_AGENT'] = 'phpunit';
         $user = (new Gazelle\UserCreator())
             ->setUsername($username)
             ->setEmail(randomString(6) . "@{$tag}.example.com")
             ->setPassword(randomString())
-            ->setIpaddr('127.0.0.1')
             ->setAdminComment("Created by tests/helper/User($tag)")
             ->create();
         if ($enable) {
@@ -225,12 +223,10 @@ class Helper {
     }
 
     public static function makeUserByInvite(string $username, string $key): \Gazelle\User {
-        $_SERVER['HTTP_USER_AGENT'] = 'phpunit';
         return (new Gazelle\UserCreator())
             ->setUsername($username)
             ->setEmail(randomString(6) . "@key.invite.example.com")
             ->setPassword(randomString())
-            ->setIpaddr('127.0.0.1')
             ->setInviteKey($key)
             ->setAdminComment("Created by tests/helper/User(InviteKey)")
             ->create();

@@ -93,28 +93,29 @@ class History extends \Gazelle\BaseUser {
      */
     public function registerNewEmail(
         string $newEmail,
-        string $ipaddr,
         bool $notify,
         \Gazelle\Manager\IPv4 $ipv4,
         \Gazelle\Util\Irc $irc,
         \Gazelle\Util\Mail $mailer
     ): int {
+        $ipaddr = $this->requestContext()->remoteAddr();
+        $useragent = $this->requestContext()->useragent();
         self::$db->prepared_query("
             INSERT INTO users_history_emails
                    (UserID, Email, IP, useragent)
             VALUES (?,      ?,     ?,  ?)
-            ", $this->id(), $newEmail, $ipaddr, $_SERVER['HTTP_USER_AGENT']
+            ", $this->id(), $newEmail, $ipaddr, $useragent
         );
         $affected = self::$db->affected_rows();
         if ($notify) {
             $irc::sendMessage(
                 $this->user->username(),
-                "Security alert: Your email address was changed via $ipaddr with {$_SERVER['HTTP_USER_AGENT']}. Not you? Contact staff ASAP."
+                "Security alert: Your email address was changed via $ipaddr with $useragent. Not you? Contact staff ASAP."
             );
             if ($ipv4->setFilterIpaddr($ipaddr)->userTotal($this->user) == 0) {
                 $irc::sendMessage(
                     IRC_CHAN_STAFF,
-                    "Email address for {$this->user->username()} was changed from {$this->user->email()} to $newEmail from unusual address $ipaddr with UA={$_SERVER['HTTP_USER_AGENT']}."
+                    "Email address for {$this->user->username()} was changed from {$this->user->email()} to $newEmail from unusual address $ipaddr with UA=$useragent."
                 );
             }
             $mailer->send($this->user->email(), 'Email address changed information for ' . SITE_NAME,
@@ -122,7 +123,7 @@ class History extends \Gazelle\BaseUser {
                     'ipaddr'     => $ipaddr,
                     'new_email'  => $newEmail,
                     'now'        => date('Y-m-d H:i:s'),
-                    'user_agent' => $_SERVER['HTTP_USER_AGENT'],
+                    'user_agent' => $useragent,
                     'username'   => $this->user->username(),
                 ])
             );

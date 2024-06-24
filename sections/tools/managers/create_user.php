@@ -25,7 +25,6 @@ if (isset($_POST['Username'])) {
         $user = $creator->setUsername($username)
             ->setEmail($email)
             ->setPassword($password)
-            ->setIpaddr('127.0.0.1')
             ->setAdminComment('Created by ' . $Viewer->username() . ' via admin toolbox')
             ->create();
     } catch (Gazelle\Exception\UserCreatorException $e) {
