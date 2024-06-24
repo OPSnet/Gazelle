@@ -895,18 +895,6 @@ class User extends BaseObject {
         return self::$cache->delete_value(sprintf(self::USER_RECENT_UPLOAD, $this->id));
     }
 
-    protected function notifyPasswordChange(string $ipaddr, string $userAgent): void {
-        Irc::sendMessage($this->username(), "Security alert: Your password was changed via $ipaddr with $userAgent. Not you? Contact staff ASAP.");
-        (new Mail())->send($this->email(), 'Password changed information for ' . SITE_NAME,
-            self::$twig->render('email/password-change.twig', [
-                'ipaddr'     => $ipaddr,
-                'now'        => date('Y-m-d H:i:s'),
-                'user_agent' => $userAgent,
-                'username'   => $this->username(),
-            ])
-        );
-    }
-
     public function remove(): int {
         $id       = $this->id;
         $username = $this->username();
@@ -1190,17 +1178,32 @@ class User extends BaseObject {
     /**
      * Set a new user password. Requires calling modify() to persist new password.
      */
-    public function updatePassword(#[\SensitiveParameter] string $pw, string $ipaddr, string $userAgent, bool $notify): static {
+    public function updatePassword(#[\SensitiveParameter] string $pw, bool $notify): static {
         $this->setField('PassHash', UserCreator::hashPassword($pw));
-        self::$db->prepared_query('
+        $ipaddr    = $this->requestContext()->remoteAddr();
+        $useragent = $this->requestContext()->useragent();
+        self::$db->prepared_query("
             INSERT INTO users_history_passwords
                    (UserID, ChangerIP, useragent)
             VALUES (?,      ?,         ?)
-            ', $this->id, $ipaddr, $userAgent
+            ", $this->id, $ipaddr, $useragent
         );
         self::$cache->delete_value('user_pw_count_' . $this->id);
         if ($notify) {
-            $this->notifyPasswordChange($ipaddr, $userAgent);
+            Irc::sendMessage(
+                $this->username(),
+                "Security alert: Your password was changed via $ipaddr with $useragent"
+            );
+            (new Mail())->send(
+                $this->email(),
+                'Password changed information for ' . SITE_NAME,
+                self::$twig->render('email/password-change.twig', [
+                    'ipaddr'    => $ipaddr,
+                    'now'       => date('Y-m-d H:i:s'),
+                    'useragent' => $useragent,
+                    'username'  => $this->username(),
+                ])
+            );
         }
         return $this;
     }
@@ -1224,12 +1227,12 @@ class User extends BaseObject {
             && $this->uploadedSize() <= $this->downloadedSize() * $this->requiredRatio();
     }
 
-    public function modifyAnnounceKeyHistory(string $oldPasskey, string $newPasskey, string $ipaddr): int {
+    public function modifyAnnounceKeyHistory(string $oldPasskey, string $newPasskey): int {
         self::$db->prepared_query("
             INSERT INTO users_history_passkeys
                    (UserID, OldPassKey, NewPassKey, ChangerIP)
             VALUES (?,      ?,          ?,          ?)
-            ", $this->id, $oldPasskey, $newPasskey, $ipaddr
+            ", $this->id, $oldPasskey, $newPasskey, $this->requestContext()->remoteAddr()
         );
         $affected = self::$db->affected_rows();
         self::$cache->delete_value("user_passkey_count_{$this->id}");

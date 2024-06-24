@@ -73,7 +73,7 @@ class User extends \Gazelle\BaseManager {
      * If success is false, the result is the error message to be returned in the response
      * Otherwise the result is a Gazelle\User object.
      */
-    public function findByAuthorization(IPv4 $ipv4Man, string $authorization, string $ipaddr): array {
+    public function findByAuthorization(IPv4 $ipv4Man, string $authorization): array {
         $info = explode(" ", $authorization);
         // this first case is for compatibility with RED
         if (count($info) === 1) {
@@ -95,6 +95,7 @@ class User extends \Gazelle\BaseManager {
             // FIXME: should do some ip banning here too
             return [false, 'invalid token'];
         } elseif ($user->isDisabled() || $user->isLocked() || !$user->hasApiToken($token)) {
+            $ipaddr = $this->requestContext()->remoteAddr();
             $watch = new \Gazelle\LoginWatch($ipaddr);
             $watch->increment($userId, "[usertoken:$userId]");
             if ($watch->nrAttempts() >= 5) {

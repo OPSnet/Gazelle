@@ -162,7 +162,7 @@ if (!empty($_POST['password']) && !empty($_POST['new_pass_1']) && !empty($_POST[
         } elseif ($_POST['new_pass_1'] !== $_POST['new_pass_2']) {
             error('You did not enter the same password twice.');
         }
-        $user->updatePassword($_POST['new_pass_1'], $Viewer->ipaddr(), $_SERVER['HTTP_USER_AGENT'], true);
+        $user->updatePassword($_POST['new_pass_1'], true);
         $ResetPassword = true;
     }
 }
@@ -265,7 +265,7 @@ foreach (
 
 $history = new \Gazelle\User\History($user);
 if ($NewEmail) {
-    $history->registerNewEmail($NewEmail, $Viewer->ipaddr(), $ownProfile, new \Gazelle\Manager\IPv4(), $irc, new \Gazelle\Util\Mail());
+    $history->registerNewEmail($NewEmail, $ownProfile, new \Gazelle\Manager\IPv4(), $irc, new \Gazelle\Util\Mail());
 }
 
 if (isset($_POST['resetpasskey'])) {

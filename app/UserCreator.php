@@ -16,14 +16,10 @@ class UserCreator extends Base {
     protected int    $permissionId;
     protected string $announceKey;
     protected string $inviteKey;
-    protected string $ipaddr;
     protected string $passHash;
     protected string $username;
 
     public function create(): User {
-        if (!isset($this->ipaddr)) {
-            throw new UserCreatorException('ipaddr');
-        }
         if (!isset($this->passHash)) {
             throw new UserCreatorException('password');
         }
@@ -85,13 +81,14 @@ class UserCreator extends Base {
         }
 
         // create users_main row
+        $ipaddr = $this->requestContext()->remoteAddr();
         $this->announceKey = randomString();
         $mainFields = ['inviter_user_id', 'Username', 'Email', 'PassHash', 'torrent_pass', 'IP',
             'PermissionID', 'Enabled', 'Invites', 'ipcc', 'auth_key'
         ];
         $mainArgs = [
-            (int)$inviter?->id(), $this->username, current($this->email), $this->passHash, $this->announceKey, $this->ipaddr,
-            $this->permissionId, $this->permissionId == SYSOP ? UserStatus::enabled->value : UserStatus::unconfirmed->value, STARTING_INVITES, geoip($this->ipaddr), authKey()
+            (int)$inviter?->id(), $this->username, current($this->email), $this->passHash, $this->announceKey, $ipaddr,
+            $this->permissionId, $this->permissionId == SYSOP ? UserStatus::enabled->value : UserStatus::unconfirmed->value, STARTING_INVITES, geoip($ipaddr), authKey()
         ];
 
         if (isset($this->id)) {
@@ -145,13 +142,14 @@ class UserCreator extends Base {
 
         // Log the one or two email addresses known to be associated with the user.
         // Each additional previous email address is staggered one second back in the past.
-        $past = count($this->email);
+        $past      = count($this->email);
+        $useragent = $this->requestContext()->useragent();
         foreach ($this->email as $e) {
             self::$db->prepared_query('
                 INSERT INTO users_history_emails
                        (UserID, Email, IP, useragent, created)
                 VALUES (?,      ?,     ?,  ?,         now() - INTERVAL ? SECOND)
-                ', $this->id, $e, $this->ipaddr, $_SERVER['HTTP_USER_AGENT'], $past--
+                ', $this->id, $e, $ipaddr, $useragent, $past--
             );
         }
 
@@ -172,11 +170,11 @@ class UserCreator extends Base {
             insert into ip_history
                    (id_user, ip, data_origin)
             values (?,       ?,  'registration')
-            ", $this->id, $this->ipaddr
+            ", $this->id, $ipaddr
         );
         self::$db->prepared_query("
             INSERT INTO users_history_ips (UserID, IP) VALUES (?, ?)
-            ", $this->id, $this->ipaddr
+            ", $this->id, $ipaddr
         );
         self::$db->prepared_query("
             INSERT INTO users_leech_stats (UserID, Uploaded) VALUES (?, ?)
@@ -205,7 +203,6 @@ class UserCreator extends Base {
         unset($this->id);
         unset($this->announceKey);
         unset($this->inviteKey);
-        unset($this->ipaddr);
         unset($this->passHash);
         unset($this->permissionId);
         unset($this->username);
@@ -270,14 +267,6 @@ class UserCreator extends Base {
      */
     public function setInviteKey(string $inviteKey): static {
         $this->inviteKey = trim($inviteKey);
-        return $this;
-    }
-
-    /**
-     * Set the user IPv4 address.
-     */
-    public function setIpaddr(string $ipaddr): static {
-        $this->ipaddr = trim($ipaddr);
         return $this;
     }
 

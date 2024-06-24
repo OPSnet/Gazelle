@@ -513,7 +513,7 @@ if ($Viewer->permitted('users_edit_reset_keys')) {
     }
     if ($resetPasskey == 1) {
         $passkey = randomString();
-        $user->modifyAnnounceKeyHistory($user->announceKey(), $passkey, '0.0.0.0');
+        $user->modifyAnnounceKeyHistory($user->announceKey(), $passkey);
         $user->setField('torrent_pass', $passkey);
         $tracker->modifyPasskey(old: $user->announceKey(), new: $passkey);
         $editSummary[] = 'passkey reset';
@@ -574,7 +574,7 @@ if ($addedClasses) {
 }
 
 if ($changePassword && $Viewer->permitted('users_edit_password')) {
-    $user->updatePassword($_POST['ChangePassword'], '127.0.0.1', 'staff-browser', false);
+    $user->updatePassword($_POST['ChangePassword'], false);
     (new \Gazelle\User\Session($user))->dropAll();
 }
 

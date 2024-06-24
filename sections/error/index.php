@@ -3,13 +3,14 @@
 use Gazelle\Util\Irc;
 
 function notify($Viewer, $Channel, $Message) {
+    $ipaddr = $Viewer->requestContext()->remoteAddr();
     Irc::sendMessage($Channel,
         $Message . " error by "
         . ($Viewer
             ? $Viewer->publicLocation() . " (" . $Viewer->username() . ")"
-            : $_SERVER['REMOTE_ADDR']
+            : $ipaddr
         )
-        . " (" . geoip($_SERVER['REMOTE_ADDR']) . ")"
+        . " (" . geoip($ipaddr) . ")"
         . " accessing " . SITE_URL . $_SERVER['REQUEST_URI'] . ' (' . $_SERVER['REQUEST_METHOD'] . ')'
         . (!empty($_SERVER['HTTP_REFERER']) ? " from " . $_SERVER['HTTP_REFERER'] : '')
     );

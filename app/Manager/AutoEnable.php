@@ -23,13 +23,14 @@ class AutoEnable extends \Gazelle\BaseManager {
      */
     public function create(\Gazelle\User $user, string $email): ?\Gazelle\User\AutoEnable {
         $enabler = $this->findByUser($user);
+        $remoteAddr = $user->requestContext()->remoteAddr();
         if ($enabler) {
             if ($enabler->isRejected() && $enabler->createdAfter('-2 MONTH')) {
                 return null;
             }
             if ($enabler->isPending()) {
                 if ($enabler->createdBefore('-1 DAY')) {
-                    $user->addStaffNote("Additional enable request rejected from {$_SERVER['REMOTE_ADDR']}")->modify();
+                    $user->addStaffNote("Additional enable request rejected from $remoteAddr")->modify();
                 }
                 return $enabler;
             }
@@ -39,10 +40,10 @@ class AutoEnable extends \Gazelle\BaseManager {
             INSERT INTO users_enable_requests
                    (Email, IP, UserAgent, UserID, Timestamp)
             VALUES (?,     ?,  ?,         ?,      now())
-            ", $email, $_SERVER['REMOTE_ADDR'], $_SERVER['HTTP_USER_AGENT'], $user->id()
+            ", $email, $remoteAddr, $user->requestContext()->useragent(), $user->id()
         );
         $enablerId = self::$db->inserted_id();
-        $user->addStaffNote("Enable request $enablerId received from {$_SERVER['REMOTE_ADDR']}")->modify();
+        $user->addStaffNote("Enable request $enablerId received from {$remoteAddr}")->modify();
         self::$cache->delete_value(self::CACHE_TOTAL_OPEN);
 
         return $this->findById($enablerId);

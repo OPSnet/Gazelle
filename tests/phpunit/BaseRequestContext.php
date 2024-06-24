@@ -35,13 +35,13 @@ class BaseRequestContext extends TestCase {
         $context->anonymize();
         $this->assertEquals('127.0.0.1', $context->remoteAddr(), 'context-override-remoteaddr');
         $this->assertEquals('staff-browser', $context->browser(), 'context-override-browser');
-        $this->assertNull($context->os(), 'context-override-os');
+        $this->assertEquals('', $context->os(), 'context-override-os');
     }
 
     public function testBadRequest(): void {
         $context = new Gazelle\BaseRequestContext('', '', '');
         $this->assertFalse($context->isValid(), 'context-not-valid');
-        $this->assertNull($context->browser(), 'context-invalid-browser');
+        $this->assertEquals('', $context->browser(), 'context-invalid-browser');
     }
 
     // Any object that derives from Base has access to the request context
@@ -50,7 +50,7 @@ class BaseRequestContext extends TestCase {
             new Gazelle\BaseRequestContext(
                 '/phpunit.php',
                 '225.0.0.1',
-                'Lidarr/5.8.13 (windows 98)',
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.3',
             )
         );
         $this->assertEquals(
@@ -60,9 +60,24 @@ class BaseRequestContext extends TestCase {
         );
         $this->user = Helper::makeUser('base.' . randomString(6), 'base object');
         $this->assertEquals(
-            'Lidarr',
+            'Chrome',
             $this->user->requestContext()->browser(),
             'context-user-browser',
+        );
+        $this->assertEquals(
+            '125',
+            $this->user->requestContext()->browserVersion(),
+            'context-user-browser-version',
+        );
+        $this->assertEquals(
+            'Windows',
+            $this->user->requestContext()->os(),
+            'context-user-os',
+        );
+        $this->assertEquals(
+            '10',
+            $this->user->requestContext()->osVersion(),
+            'context-user-os-version',
         );
     }
 }

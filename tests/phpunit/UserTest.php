@@ -143,7 +143,7 @@ class UserTest extends TestCase {
 
     public function testPassword(): void {
         $password = randomString(30);
-        $this->user->updatePassword($password, '0.0.0.0', 'test-ua', true)->modify();
+        $this->user->updatePassword($password, true)->modify();
         $this->assertTrue($this->user->validatePassword($password), 'utest-password-validate-new');
         $this->assertCount(1, $this->user->passwordHistory(), 'utest-password-history');
         $this->assertEquals(1, $this->user->passwordCount(), 'utest-password-count');
@@ -363,13 +363,16 @@ class UserTest extends TestCase {
     }
 
     public function testLogin(): void {
-        $ipaddr = implode('.', ['127', random_int(0, 255), random_int(0, 255), random_int(0, 255)]);
-        $_SERVER['REMOTE_ADDR'] = $ipaddr;
+        $_SERVER['REMOTE_ADDR'] = '127.0.0.255';
+        Gazelle\Base::setRequestContext(new Gazelle\BaseRequestContext(
+            'phpunit', $_SERVER['REMOTE_ADDR'], 'whatever'
+        ));
+        $login  = new \Gazelle\Login();
+        $ipaddr = $_SERVER['REMOTE_ADDR'];
         $watch  = new \Gazelle\LoginWatch($ipaddr);
         $this->assertEquals(0, $watch->nrAttempts(), 'loginwatch-init-attempt');
         $this->assertEquals(0, $watch->nrBans(), 'loginwatch-init-ban');
 
-        $login  = new \Gazelle\Login();
         $result = $login->login(
             username: 'email@example.com',
             password: 'password',
@@ -378,7 +381,7 @@ class UserTest extends TestCase {
         $this->assertNull($result, 'login-bad-username');
         $this->assertEquals($login->error(), \Gazelle\Login::ERR_CREDENTIALS, 'login-error-username');
         $this->assertEquals('email@example.com', $login->username(), 'login-username');
-        $this->assertEquals($ipaddr, $login->ipaddr(), 'login-ipaddr');
+        $this->assertEquals($ipaddr, $login->requestContext()->remoteAddr(), 'login-ipaddr');
         $this->assertFalse($login->persistent(), 'login-persistent');
         $this->assertEquals(1, $watch->nrAttempts(), 'loginwatch-attempt');
 
@@ -399,8 +402,8 @@ class UserTest extends TestCase {
         $banId = $watch->setBan($this->user, 'phpunit ban', [$watch->id()], $ipv4man);
         $this->assertGreaterThan(0, $banId, 'loginwatch-ip-ban');
 
-        $this->assertTrue($ipv4man->isBanned($login->ipaddr()), 'loginwatch-ip-is-banned');
-        $ipv4man->setFilterIpaddr($login->ipaddr());
+        $this->assertTrue($ipv4man->isBanned($login->requestContext()->remoteAddr()), 'loginwatch-ip-is-banned');
+        $ipv4man->setFilterIpaddr($login->requestContext()->remoteAddr());
         $this->assertEquals(1, $ipv4man->total(), 'loginwatch-ip-total');
         $page = $ipv4man->page('ID', 'ASC', 2, 0);
         $this->assertCount(1, $page, 'loginwatch-ip-page');
@@ -426,14 +429,17 @@ class UserTest extends TestCase {
         $this->assertCount(0, $this->user->announceKeyHistory(), 'utest-announce-key-history');
 
         $new = randomString(32);
-        $ipaddr = '127.2.2.2';
-        $this->assertEquals(1, $this->user->modifyAnnounceKeyHistory($key, $new, $ipaddr), 'utest-announce-key-modify');
+        $this->assertEquals(1, $this->user->modifyAnnounceKeyHistory($key, $new), 'utest-announce-key-modify');
         $this->assertEquals(1, $this->user->announceKeyCount(), 'utest-announce-key-new-count');
         $this->assertCount(1, $this->user->announceKeyHistory(), 'utest-announce-key-new-history');
         $history = current($this->user->announceKeyHistory());
         $this->assertEquals($key, $history['old'], 'utest-announce-key-history-old');
         $this->assertEquals($new, $history['new'], 'utest-announce-key-history-new');
-        $this->assertEquals($ipaddr, $history['ipaddr'], 'utest-announce-key-history-ipaddr');
+        $this->assertEquals(
+            $this->user->requestContext()->remoteAddr(),
+            $history['ipaddr'],
+            'utest-announce-key-history-ipaddr'
+        );
         $this->assertTrue(Helper::recentDate($history['date']), 'utest-announce-key-history-date');
     }
 

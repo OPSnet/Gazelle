@@ -32,7 +32,7 @@ if (!empty($_REQUEST['password'])) {
         } else {
             // set new secret and password.
             $userToken->user()
-                ->updatePassword($_REQUEST['password'], $_SERVER['REMOTE_ADDR'], $_SERVER['HTTP_USER_AGENT'], true)
+                ->updatePassword($_REQUEST['password'], true)
                 ->modify();
             $userToken->user()->logoutEverywhere();
             $success = true;

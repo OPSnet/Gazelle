@@ -547,7 +547,7 @@ class Referral extends \Gazelle\Base {
             INSERT INTO referral_users
                    (Username, Site, IP, InviteKey)
             VALUES (?,        ?,    ?,  ?)
-            ", $username, $acc["Site"], $_SERVER["REMOTE_ADDR"], $inviteKey
+            ", $username, $acc["Site"], $this->requestContext()->remoteAddr(), $inviteKey
         );
 
         if (REFERRAL_SEND_EMAIL) {

@@ -14,7 +14,7 @@ $torrent->setViewer($Viewer);
  * if the .torrent file has been downloaded four times before.
  */
 if (
-    preg_match('/^(BTWebClient|Python-urllib|python-requests|uTorrent)/', $_SERVER['HTTP_USER_AGENT'] ?? 'unknown')
+    preg_match('/^(BTWebClient|Python-urllib|python-requests|uTorrent)/', $torrent->requestContext()->useragent())
     && $Viewer->torrentDownloadCount($torrent->id()) > 3
 ) {
     json_or_error('You have already downloaded this torrent file four times. If you need to download it again, please do so from your browser.');
@@ -36,7 +36,7 @@ if ($status == DownloadStatus::flood) {
         $Cache->cache_value($key, true, 3600);
         Irc::sendMessage(
             IRC_CHAN_STATUS,
-            "{$Viewer->publicLocation()} ({$Viewer->username()}) ({$_SERVER['REMOTE_ADDR']}) accessing "
+            "{$Viewer->publicLocation()} ({$Viewer->username()}) ({$Viewer->requestContext()->remoteAddr()}) accessing "
             . SITE_URL . $_SERVER['REQUEST_URI']
             . (!empty($_SERVER['HTTP_REFERER']) ? " from " . $_SERVER['HTTP_REFERER'] : '')
             . ' hit download rate limit'

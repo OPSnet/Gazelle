@@ -57,8 +57,7 @@ if (isset($_REQUEST['confirm'])) {
             $creator = new Gazelle\UserCreator();
             $creator->setUsername($username)
                 ->setEmail($email)
-                ->setPassword($_POST['password'])
-                ->setIpaddr($_SERVER['REMOTE_ADDR']);
+                ->setPassword($_POST['password']);
             if ($_REQUEST['invite']) {
                 $creator->setInviteKey($_REQUEST['invite']);
             }
@@ -67,7 +66,7 @@ if (isset($_REQUEST['confirm'])) {
                 $user = $creator->create();
                 (new Gazelle\Util\Mail())->send($user->email(), 'New account confirmation at ' . SITE_NAME,
                     $Twig->render('email/registration.twig', [
-                        'ipaddr' => $_SERVER['REMOTE_ADDR'],
+                        'ipaddr' => $user->requestContext()->remoteAddr(),
                         'user'   => $user,
                         'token'  => (new \Gazelle\Manager\UserToken())->create(UserTokenType::confirm, $user),
                     ])
