@@ -200,4 +200,13 @@ class StaffPM extends BaseObject {
         );
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
+
+    public function postBody(int $postId): ?string {
+        foreach ($this->thread() as $post) {
+            if ($post['id'] === $postId) {
+                return $post['body'];
+            }
+        }
+        return null;
+    }
 }

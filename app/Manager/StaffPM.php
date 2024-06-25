@@ -39,6 +39,14 @@ class StaffPM extends \Gazelle\BaseManager {
                 self::$cache->cache_value($key, $id, 7200);
             }
         }
+        return $id ? new \Gazelle\StaffPM((int)$id) : null;
+    }
+
+    public function findByPostId(int $postId): ?\Gazelle\StaffPM {
+        $id = (int)self::$db->scalar("
+            SELECT ConvID FROM staff_pm_messages WHERE ID = ?
+            ", $postId
+        );
         return $id ? new \Gazelle\StaffPM($id) : null;
     }
 
