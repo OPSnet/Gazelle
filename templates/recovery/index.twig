@@ -1,8 +1,5 @@
 {{ header('Recovery') }}
-
-<div id="logo">
-<a href="/" style="margin-left: 0;"><img src="{{ constant('STATIC_SERVER') }}/styles/public/images/loginlogo.png" title="{{ constant('SITE_NAME') }}" /></a>
-</div>
+{% include('logo.twig') %}
 
 <div style="width: 700px; margin: auto" class="box pad thin">
 {% if constant('RECOVERY') %}
@@ -97,10 +94,13 @@ same IP address.</p>
 
 </form>
 {% else %}
-<p>Recovery is currently closed.</p>
+<p>Recovery is closed.</p>
 
-<p>Please join <tt>{{ constant('IRC_HOSTAME') }}</tt> (port {{ constant('IRC_PORT_CLEARTEXT') }}  or +{{ constant('IRC_PORT') }} for SSL) for
-more information ({{ constant('IRC_CHAN_BLOCKED') }} channel).</p>
+    <p>
+        Recovery for users of our predecessor site is no longer possible. You can join {{ constant('SITE_NAME') }} by
+        <a href="https://interview.{{ constant('SITE_HOST') }}/">taking our interview</a> or receiving an invitation
+        from a member you know. An account from the previous site does not count as a duplicate.
+    </p>
 {% endif %}
 </div>
 
