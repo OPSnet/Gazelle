@@ -100,6 +100,7 @@ class Debug {
             $userId = (int)$Viewer?->id();
         }
 
+        $errorList = (string)json_encode(self::$Errors);
         $id = (new \Gazelle\Manager\ErrorLog())->create(
            uri:       $uri,
            userId:    $userId,
@@ -107,10 +108,10 @@ class Debug {
            memory:    memory_get_usage(true),
            nrQuery:   count($this->get_queries()),
            nrCache:   self::$cache->hitListTotal(),
-           digest:    md5($message, true),
+           digest:    hash('xxh3', $message . $errorList, true),
            trace:     $message,
            request:   (string)json_encode($_REQUEST),
-           errorList: (string)json_encode(self::$Errors),
+           errorList: $errorList,
            loggedVar: (string)json_encode(self::$LoggedVars),
         );
 
