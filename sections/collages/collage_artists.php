@@ -4,7 +4,7 @@
 
 $Collage->setViewer($Viewer);
 $CollageID       = $Collage->id();
-$CollageCovers   = (int)($Viewer->option('CollageCovers') ?: 25) * (1 - (int)$Viewer->option('HideCollage'));
+$CollageCovers   = (int)($Viewer->option('CollageCovers') ?? 25) * (1 - (int)$Viewer->option('HideCollage'));
 $CollagePages    = [];
 $NumGroups       = $Collage->numEntries();
 $Artists         = $Collage->artistList();
