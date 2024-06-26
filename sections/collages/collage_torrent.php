@@ -11,7 +11,7 @@ $vote          = new Gazelle\User\Vote($Viewer);
 
 $Collage->setViewer($Viewer);
 $CollageID     = $Collage->id();
-$CollageCovers = ($Viewer->option('CollageCovers') ?: 25) * (1 - (int)$Viewer->option('HideCollage'));
+$CollageCovers = ($Viewer->option('CollageCovers') ?? 25) * (1 - (int)$Viewer->option('HideCollage'));
 $CollagePages  = [];
 $NumGroups     = $Collage->numEntries();
 $snatcher      = $Viewer->snatch();
