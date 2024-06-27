@@ -11,7 +11,7 @@ class TorrentDeleted extends TorrentAbstract {
     public function location(): string { return "log.php?search=Torrent+" . $this->id; }
 
     public function infoRow(): ?array {
-        return self::$db->rowAssoc("
+        $info = self::$db->rowAssoc("
             SELECT t.GroupID,
                 t.UserID,
                 t.Media,
@@ -28,8 +28,7 @@ class TorrentDeleted extends TorrentAbstract {
                 t.HasLogDB,
                 t.LogScore,
                 t.LogChecksum,
-                hex(t.info_hash) AS info_hash,
-                t.info_hash      AS info_hash_raw,
+                t.info_hash,
                 t.FileCount,
                 t.FileList,
                 t.FilePath,
@@ -43,26 +42,24 @@ class TorrentDeleted extends TorrentAbstract {
                 0             AS Leechers,
                 0             AS Snatched,
                 NULL          AS last_action,
-                tbt.TorrentID AS BadTags,
-                tbf.TorrentID AS BadFolders,
-                tfi.TorrentID AS BadFiles,
-                mli.TorrentID AS MissingLineage,
-                cas.TorrentID AS CassetteApproved,
-                lma.TorrentID AS LossymasterApproved,
-                lwa.TorrentID AS LossywebApproved,
                 ''            AS ripLogIds
             FROM deleted_torrents t
-            LEFT JOIN deleted_torrents_bad_tags             AS tbt ON (tbt.TorrentID = t.ID)
-            LEFT JOIN deleted_torrents_bad_folders          AS tbf ON (tbf.TorrentID = t.ID)
-            LEFT JOIN deleted_torrents_bad_files            AS tfi ON (tfi.TorrentID = t.ID)
-            LEFT JOIN deleted_torrents_missing_lineage      AS mli ON (mli.TorrentID = t.ID)
-            LEFT JOIN deleted_torrents_cassette_approved    AS cas ON (cas.TorrentID = t.ID)
-            LEFT JOIN deleted_torrents_lossymaster_approved AS lma ON (lma.TorrentID = t.ID)
-            LEFT JOIN deleted_torrents_lossyweb_approved    AS lwa ON (lwa.TorrentID = t.ID)
             WHERE t.ID = ?
             GROUP BY t.ID
             ", $this->id
         );
+        if ($info) {
+            self::$db->prepared_query("
+                SELECT a.Name
+                FROM torrent_attr a JOIN deleted_torrent_has_attr ha ON (a.ID = ha.TorrentAttrID)
+                WHERE ha.TorrentID = ?
+            ", $this->id);
+            $info['attr'] = [];
+            foreach (self::$db->to_array(escape: false) as $row) {
+                $info['attr'][$row['Name']] = true;
+            }
+        }
+        return $info;
     }
 
     public function isDeleted(): bool {

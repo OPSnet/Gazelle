@@ -41,39 +41,36 @@ if ($Viewer->permitted('torrents_edit') && ($Viewer->permitted('users_mod') || $
 }
 
 if (!($torrent->isRemastered() && !$torrent->remasterYear()) || $Viewer->permitted('edit_unknowns')) {
+    $torrentInfo = [
+        'ID'                      => $torrent->id(),
+        'Media'                   => $torrent->media(),
+        'Format'                  => $torrent->format(),
+        'Bitrate'                 => $torrent->encoding(),
+        'RemasterYear'            => $torrent->remasterYear(),
+        'Remastered'              => $torrent->isRemastered(),
+        'RemasterTitle'           => $torrent->remasterTitle(),
+        'RemasterCatalogueNumber' => $torrent->remasterCatalogueNumber(),
+        'RemasterRecordLabel'     => $torrent->remasterRecordLabel(),
+        'Scene'                   => $torrent->isScene(),
+        'leech_reason'            => $torrent->leechReason(),
+        'leech_type'              => $torrent->leechType(),
+        'TorrentDescription'      => $torrent->description(),
+        'CategoryID'              => $categoryId,
+        'Title'                   => $tgroup->name(),
+        'Year'                    => $tgroup->year(),
+        'VanityHouse'             => $tgroup->isShowcase(),
+        'GroupID'                 => $tgroup->id(),
+        'UserID'                  => $torrent->uploaderId(),
+        'HasLog'                  => $torrent->hasLog(),
+        'HasCue'                  => $torrent->hasCue(),
+        'LogScore'                => $torrent->logScore(),
+    ];
+    foreach (\Gazelle\Enum\TorrentFlag::cases() as $flag) {
+        $torrentInfo[$flag->value] = $torrent->hasFlag($flag);
+    }
     $uploadForm = new Gazelle\Upload(
         $Viewer,
-        [
-            'ID'                      => $torrent->id(),
-            'Media'                   => $torrent->media(),
-            'Format'                  => $torrent->format(),
-            'Bitrate'                 => $torrent->encoding(),
-            'RemasterYear'            => $torrent->remasterYear(),
-            'Remastered'              => $torrent->isRemastered(),
-            'RemasterTitle'           => $torrent->remasterTitle(),
-            'RemasterCatalogueNumber' => $torrent->remasterCatalogueNumber(),
-            'RemasterRecordLabel'     => $torrent->remasterRecordLabel(),
-            'Scene'                   => $torrent->isScene(),
-            'leech_reason'            => $torrent->leechReason(),
-            'leech_type'              => $torrent->leechType(),
-            'TorrentDescription'      => $torrent->description(),
-            'CategoryID'              => $categoryId,
-            'Title'                   => $tgroup->name(),
-            'Year'                    => $tgroup->year(),
-            'VanityHouse'             => $tgroup->isShowcase(),
-            'GroupID'                 => $tgroup->id(),
-            'UserID'                  => $torrent->uploaderId(),
-            'HasLog'                  => $torrent->hasLog(),
-            'HasCue'                  => $torrent->hasCue(),
-            'LogScore'                => $torrent->logScore(),
-            'BadTags'                 => $torrent->hasBadTags(),
-            'BadFolders'              => $torrent->hasBadFolders(),
-            'BadFiles'                => $torrent->hasBadFiles(),
-            'MissingLineage'          => $torrent->hasMissingLineage(),
-            'CassetteApproved'        => $torrent->hasCassetteApproved(),
-            'LossymasterApproved'     => $torrent->hasLossymasterApproved(),
-            'LossywebApproved'        => $torrent->hasLossywebApproved(),
-        ],
+        $torrentInfo,
         $Err ?? false
     );
     echo $uploadForm->head($categoryId);

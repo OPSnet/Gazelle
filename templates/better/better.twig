@@ -28,6 +28,7 @@
                 <option value="tags"{{ selected(type == 'tags') }}>Bad Tags</option>
                 <option value="folders"{{ selected(type == 'folders') }}>Bad Folders</option>
                 <option value="files"{{ selected(type == 'files') }}>Bad Files</option>
+                <option value="trumpable"{{ selected(type == 'trumpable') }}>Trumpable</option>
                 <option value="lineage"{{ selected(type == 'lineage') }}>Missing Lineage</option>
                 <option value="artwork"{{ selected(type == 'artwork') }}>Missing Artwork</option>
                 <option value="artistimg"{{ selected(type == 'artistimg') }}>Missing Artist Images</option>
@@ -91,13 +92,13 @@
         {% if type != 'single' and viewer.permitted('admin_reports') %}
             <a href="better.php?method=missing&amp;type={{ type }}&amp;remove={{ item.id }}&amp;filter={{ filter }}&amp;search={{ item.search }}" title="Remove the {{ type }} flag" class="brackets">X</a>
         {% endif %}
-            <div class="tags">{{ item.group.tagList|map(tag => "\##{tag.name}")|join(', ') }}</div>i{{ item.size|octet_size }}
+            <div class="tags">{{ item.group.tagList|map(tag => "#{tag.name}")|join(', ') }}</div>{{ item.size|octet_size }}
         </td>
     </tr>
     {% elseif better.mode == 'group' %}
     <tr>
         <td><a href="torrents.php?id={{ item.id }}&amp;action=editgroup">[Edit]</a>&nbsp;&nbsp;{{ item.link|raw }}
-            <div class="tags">{{ item.tagList|map(tag => "\##{tag.name}")|join(', ') }}</div>
+            <div class="tags">{{ item.tagList|map(tag => "#{tag.name}")|join(', ') }}</div>
         </td>
     </tr>
     {% else %}

@@ -2,8 +2,6 @@
 
 namespace Gazelle;
 
-use Gazelle\Enum\TorrentFlag;
-
 class Torrent extends TorrentAbstract {
     use Pg;
 
@@ -16,7 +14,7 @@ class Torrent extends TorrentAbstract {
     public function location(): string { return "torrents.php?id={$this->groupId()}&torrentid={$this->id}#torrent{$this->id}"; }
 
     public function infoRow(): ?array {
-        return self::$db->rowAssoc("
+        $info = self::$db->rowAssoc("
             SELECT t.GroupID,
                 t.UserID,
                 t.Media,
@@ -33,8 +31,7 @@ class Torrent extends TorrentAbstract {
                 t.HasLogDB,
                 t.LogScore,
                 t.LogChecksum,
-                hex(t.info_hash) AS info_hash,
-                t.info_hash      AS info_hash_raw,
+                t.info_hash,
                 t.FileCount,
                 t.FileList,
                 t.FilePath,
@@ -48,28 +45,26 @@ class Torrent extends TorrentAbstract {
                 tls.Leechers,
                 tls.Snatched,
                 tls.last_action,
-                tbt.TorrentID          AS BadTags,
-                tbf.TorrentID          AS BadFolders,
-                tfi.TorrentID          AS BadFiles,
-                mli.TorrentID          AS MissingLineage,
-                cas.TorrentID          AS CassetteApproved,
-                lma.TorrentID          AS LossymasterApproved,
-                lwa.TorrentID          AS LossywebApproved,
                 group_concat(tl.LogID) AS ripLogIds
             FROM torrents t
             INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
-            LEFT JOIN torrents_bad_tags             AS tbt ON (tbt.TorrentID = t.ID)
-            LEFT JOIN torrents_bad_folders          AS tbf ON (tbf.TorrentID = t.ID)
-            LEFT JOIN torrents_bad_files            AS tfi ON (tfi.TorrentID = t.ID)
-            LEFT JOIN torrents_missing_lineage      AS mli ON (mli.TorrentID = t.ID)
-            LEFT JOIN torrents_cassette_approved    AS cas ON (cas.TorrentID = t.ID)
-            LEFT JOIN torrents_lossymaster_approved AS lma ON (lma.TorrentID = t.ID)
-            LEFT JOIN torrents_lossyweb_approved    AS lwa ON (lwa.TorrentID = t.ID)
-            LEFT JOIN torrents_logs                 AS tl  ON (tl.TorrentID  = t.ID)
+            LEFT JOIN torrents_logs      AS tl  ON (tl.TorrentID  = t.ID)
             WHERE t.ID = ?
             GROUP BY t.ID
             ", $this->id
         );
+        if ($info) {
+            self::$db->prepared_query("
+                SELECT a.Name
+                FROM torrent_attr a JOIN torrent_has_attr ha ON (a.ID = ha.TorrentAttrID)
+                WHERE ha.TorrentID = ?
+            ", $this->id);
+            $info['attr'] = [];
+            foreach (self::$db->to_array(escape: false) as $row) {
+                $info['attr'][$row['Name']] = true;
+            }
+        }
+        return $info;
     }
 
     /**
@@ -295,29 +290,6 @@ class Torrent extends TorrentAbstract {
         return count($notify);
     }
 
-    public function hasFlag(TorrentFlag $flag): bool {
-        return (bool)self::$db->scalar("
-            SELECT 1 FROM {$flag->value} WHERE TorrentID = ?
-            ", $this->id
-        );
-    }
-
-    public function addFlag(TorrentFlag $flag, User $user): int {
-        self::$db->prepared_query("
-            INSERT IGNORE INTO {$flag->value} (TorrentID, UserID) VALUES (?, ?)
-            ", $this->id, $user->id()
-        );
-        return self::$db->affected_rows();
-    }
-
-    public function removeFlag(TorrentFlag $flag): int {
-        self::$db->prepared_query("
-            DELETE FROM {$flag->value} WHERE TorrentID = ?
-            ", $this->id
-        );
-        return self::$db->affected_rows();
-    }
-
     /**
      * Remove a torrent.
      */
@@ -350,17 +322,9 @@ class Torrent extends TorrentAbstract {
             self::$db->rollback();
             return [false, $message];
         }
-        [$ok, $message] = $manager->softDelete(SQLDB, 'torrents', [['ID', $this->id]]);
+        $manager->softDelete(SQLDB, 'torrent_has_attr', [['TorrentID', $this->id]]);
+        $manager->softDelete(SQLDB, 'torrents', [['ID', $this->id]]);
         $manager->relaxConstraints(false);
-
-        $manager->softDelete(SQLDB, 'torrents_files',                  [['TorrentID', $this->id]]);
-        $manager->softDelete(SQLDB, 'torrents_bad_files',              [['TorrentID', $this->id]]);
-        $manager->softDelete(SQLDB, 'torrents_bad_folders',            [['TorrentID', $this->id]]);
-        $manager->softDelete(SQLDB, 'torrents_bad_tags',               [['TorrentID', $this->id]]);
-        $manager->softDelete(SQLDB, 'torrents_cassette_approved',      [['TorrentID', $this->id]]);
-        $manager->softDelete(SQLDB, 'torrents_lossymaster_approved',   [['TorrentID', $this->id]]);
-        $manager->softDelete(SQLDB, 'torrents_lossyweb_approved',      [['TorrentID', $this->id]]);
-        $manager->softDelete(SQLDB, 'torrents_missing_lineage',        [['TorrentID', $this->id]]);
 
         self::$db->prepared_query("
             DELETE FROM torrent_unseeded WHERE torrent_id = ?

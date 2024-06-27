@@ -13,10 +13,11 @@ class Bad extends AbstractBetter {
 
     public function setBadType(string $bad): static {
         $this->torrentFlag = match ($bad) { /** @phpstan-ignore-line */
-            'files'   => TorrentFlag::badFile,
-            'folders' => TorrentFlag::badFolder,
-            'lineage' => TorrentFlag::noLineage,
-            'tags'    => TorrentFlag::badTag,
+            'files'     => TorrentFlag::badFile,
+            'folders'   => TorrentFlag::badFolder,
+            'lineage'   => TorrentFlag::noLineage,
+            'tags'      => TorrentFlag::badTag,
+            'trumpable' => TorrentFlag::trumpable,
         };
         return $this;
     }
@@ -27,10 +28,11 @@ class Bad extends AbstractBetter {
 
     public function heading(): string {
         return match ($this->torrentFlag) { /** @phpstan-ignore-line */
-            TorrentFlag::badFile   => 'Releases with with bad filenames',
-            TorrentFlag::badFolder => 'Releases with with bad folders',
+            TorrentFlag::badFile   => 'Releases with bad filenames',
+            TorrentFlag::badFolder => 'Releases with bad folders',
             TorrentFlag::noLineage => 'Releases with missing lineage details',
-            TorrentFlag::badTag    => 'Releases with with bad tags',
+            TorrentFlag::badTag    => 'Releases with bad tags',
+            TorrentFlag::trumpable => 'Releases marked as trumpable',
         };
     }
 
@@ -38,10 +40,13 @@ class Bad extends AbstractBetter {
         $this->field     = 't.ID';
         $this->baseQuery = "
             FROM torrents t
-            INNER JOIN torrents_group tg ON (tg.ID = t.GroupID)
-            INNER JOIN {$this->torrentFlag->value} bad ON (bad.TorrentID = t.ID)
+            INNER JOIN torrents_group    tg ON (tg.ID = t.GroupID)
+            INNER JOIN torrent_has_attr bad ON (bad.TorrentID = t.ID)
+            INNER JOIN torrent_attr    attr ON (attr.ID = bad.TorrentAttrID)
             ";
-        $this->orderBy = "ORDER BY bad.TimeAdded ASC";
+        $this->orderBy = "ORDER BY bad.created ASC";
+        $this->where[] = "attr.Name = ?";
+        $this->args[] = $this->torrentFlag->value;
 
         if ($this->filter === 'snatched') {
             $this->where[] = "EXISTS (

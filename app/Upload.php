@@ -140,6 +140,7 @@ class Upload extends \Gazelle\Base {
             'tag_list'            => $GenreTags,
             'tgroup'              => $this->isUploaded && is_array($this->Torrent) ? $manager->findById($this->Torrent['GroupID']) : null,
             'torrent'             => $this->Torrent,
+            'torrent_flags'       => \Gazelle\Enum\TorrentFlag::cases(),
             'user'                => $this->user,
         ]);
     }
