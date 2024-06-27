@@ -23,7 +23,6 @@ abstract class TorrentAbstract extends BaseObject {
         return $this;
     }
 
-    abstract public function addFlag(TorrentFlag $flag, User $user): int;
     abstract public function infoRow(): ?array;
 
     public function link(): string {
@@ -92,9 +91,6 @@ abstract class TorrentAbstract extends BaseObject {
             }
             foreach (['LogChecksum', 'HasCue', 'HasLog', 'HasLogDB', 'Remastered', 'Scene'] as $zerotruth) {
                 $info[$zerotruth] = !($info[$zerotruth] == '0');
-            }
-            foreach (['BadFiles', 'BadFolders', 'BadTags', 'CassetteApproved', 'LossymasterApproved', 'LossywebApproved', 'MissingLineage'] as $emptytruth) {
-                $info[$emptytruth] = !($info[$emptytruth] == '');
             }
 
             $info['ripLogIds'] = empty($info['ripLogIds']) ? [] : array_map('intval', explode(',', $info['ripLogIds']));
@@ -318,14 +314,14 @@ abstract class TorrentAbstract extends BaseObject {
      * The infohash of this torrent
      */
     public function infohash(): string {
-        return $this->info()['info_hash'];
+        return bin2hex($this->info()['info_hash']);
     }
 
     /**
      * The infohash as expected by Ocelot
      */
     public function infohashEncoded(): string {
-        return rawurlencode($this->info()['info_hash_raw']);
+        return rawurlencode($this->info()['info_hash']);
     }
 
     public function isFreeleech(): bool {
@@ -604,32 +600,30 @@ abstract class TorrentAbstract extends BaseObject {
 
     /**** TORRENT FLAG TABLE METHODS ****/
 
-    public function hasBadFiles(): bool {
-        return $this->info()['BadFiles'];
+    public function hasFlag(TorrentFlag $flag): bool {
+        return isset($this->info()['attr'][$flag->value]);
     }
 
-    public function hasBadFolders(): bool {
-        return $this->info()['BadFolders'];
+    public function addFlag(TorrentFlag $flag, User $user): int {
+        self::$db->prepared_query("
+            INSERT IGNORE INTO torrent_has_attr
+                (TorrentID, TorrentAttrID, UserID)
+            VALUES (?, (SELECT ID FROM torrent_attr WHERE Name = ?), ?)
+            ", $this->id, $flag->value, $user->id()
+        );
+        $this->flush();
+        return self::$db->affected_rows();
     }
 
-    public function hasBadTags(): bool {
-        return $this->info()['BadTags'];
-    }
-
-    public function hasCassetteApproved(): bool {
-        return $this->info()['CassetteApproved'];
-    }
-
-    public function hasLossymasterApproved(): bool {
-        return $this->info()['LossymasterApproved'];
-    }
-
-    public function hasLossywebApproved(): bool {
-        return $this->info()['LossywebApproved'];
-    }
-
-    public function hasMissingLineage(): bool {
-        return $this->info()['MissingLineage'];
+    public function removeFlag(TorrentFlag $flag): int {
+        self::$db->prepared_query("
+            DELETE FROM torrent_has_attr
+            WHERE TorrentID = ?
+                AND TorrentAttrID = (SELECT ID FROM torrent_attr WHERE Name = ?)
+            ", $this->id, $flag->value
+        );
+        $this->flush();
+        return self::$db->affected_rows();
     }
 
     public function hasUploadLock(): bool {
@@ -723,26 +717,10 @@ abstract class TorrentAbstract extends BaseObject {
         if ($info['Media'] === 'CD' && $info['HasLog'] && $info['HasLogDB'] && !$info['LogChecksum']) {
             $extra[] = $this->labelElement('tl_notice', 'Bad/Missing Checksum');
         }
-        if ($this->hasBadTags()) {
-            $extra[] = $this->labelElement('tl_reported tl_bad_tags', 'Bad Tags');
-        }
-        if ($this->hasBadFolders()) {
-            $extra[] = $this->labelElement('tl_reported tl_bad_folders', 'Bad Folders');
-        }
-        if ($this->hasBadFiles()) {
-            $extra[] = $this->labelElement('tl_reported tl_bad_filenames', 'Bad File Names');
-        }
-        if ($this->hasMissingLineage()) {
-            $extra[] = $this->labelElement('tl_reported tl_missing_lineage', 'Missing Lineage');
-        }
-        if ($this->hasCassetteApproved()) {
-            $extra[] = $this->labelElement('tl_approved tl_cassette', 'Cassette Approved');
-        }
-        if ($this->hasLossymasterApproved()) {
-            $extra[] = $this->labelElement('tl_approved tl_lossy_master', 'Lossy Master Approved');
-        }
-        if ($this->hasLossywebApproved()) {
-            $extra[] = $this->labelElement('tl_approved tl_lossy_web', 'Lossy WEB Approved');
+        foreach (TorrentFlag::cases() as $flag) {
+            if ($this->hasFlag($flag)) {
+                $extra[] = $this->labelElement("tl_{$flag->labelClass()} tl_{$flag->value}", $flag->label());
+            }
         }
         if ($viewer && $this->reportTotal($viewer)) {
             $extra[] = $this->labelElement('tl_reported', 'Reported');

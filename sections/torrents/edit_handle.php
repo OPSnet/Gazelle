@@ -37,13 +37,6 @@ $Properties = [
     'HasLog'              => isset($_POST['flac_log']),
     'HasCue'              => isset($_POST['flac_cue']),
     'Remastered'          => isset($_POST['remaster']),
-    'BadTags'             => isset($_POST['bad_tags']),
-    'BadFolders'          => isset($_POST['bad_folders']),
-    'BadFiles'            => isset($_POST['bad_files']),
-    'Lineage'             => isset($_POST['missing_lineage']),
-    'CassetteApproved'    => isset($_POST['cassette_approved']),
-    'LossymasterApproved' => isset($_POST['lossymaster_approved']),
-    'LossywebApproved'    => isset($_POST['lossyweb_approved']),
 ];
 if (isset($_POST['album_desc'])) {
     $Properties['GroupDescription'] = trim($_POST['album_desc']);
@@ -60,6 +53,9 @@ if ($Properties['Remastered']) {
     $Properties['RemasterTitle']           = '';
     $Properties['RemasterRecordLabel']     = '';
     $Properties['RemasterCatalogueNumber'] = '';
+}
+foreach (TorrentFlag::cases() as $flag) {
+    $Properties[$flag->value] = isset($_POST[$flag->value]);
 }
 
 //******************************************************************************//
@@ -240,35 +236,18 @@ if ($Viewer->permitted('users_mod')) {
         }
     }
 
-    foreach (
-        [
-            (object)['flag' => TorrentFlag::badFile,     'property' => 'BadFiles'],
-            (object)['flag' => TorrentFlag::badFolder,   'property' => 'BadFolders'],
-            (object)['flag' => TorrentFlag::badTag,      'property' => 'BadTags'],
-            (object)['flag' => TorrentFlag::cassette,    'property' => 'CassetteApproved'],
-            (object)['flag' => TorrentFlag::lossyMaster, 'property' => 'LossymasterApproved'],
-            (object)['flag' => TorrentFlag::lossyWeb,    'property' => 'LossywebApproved'],
-        ] as $f
-    ) {
-        $exists = $torrent->hasFlag($f->flag);
-        if (!$exists && $Properties[$f->property]) {
-            $change[] = "{$f->flag->label()} checked";
-            $torrent->addFlag($f->flag, $Viewer);
-        } elseif ($exists && !$Properties[$f->property]) {
-            $change[] = "{$f->flag->label()} cleared";
-            $torrent->removeFlag($f->flag);
+    foreach (TorrentFlag::cases() as $flag) {
+        if ($flag->permission() && !$Viewer->permitted($flag->permission())) {
+            continue;
         }
-    }
-}
-if ($Viewer->permitted('site_edit_lineage')) {
-    $lineage = TorrentFlag::noLineage;
-    $exists = $torrent->hasFlag($lineage);
-    if (!$exists && $Properties['Lineage']) {
-        $change[] = "{$lineage->label()} checked";
-        $torrent->addFlag($lineage, $Viewer);
-    } elseif ($exists && !$Properties['Lineage']) {
-        $change[] = "{$lineage->label()} cleared";
-        $torrent->removeFlag($lineage);
+        $exists = $torrent->hasFlag($flag);
+        if (!$exists && $Properties[$flag->value]) {
+            $change[] = "{$flag->label()} checked";
+            $torrent->addFlag($flag, $Viewer);
+        } elseif ($exists && !$Properties[$flag->value]) {
+            $change[] = "{$flag->label()} cleared";
+            $torrent->removeFlag($flag);
+        }
     }
 }
 

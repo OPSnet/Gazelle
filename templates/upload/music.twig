@@ -227,59 +227,18 @@
             Check this box if the torrent has, or should have, a cue file.</label><br />
         </td>
     </tr>
+{% endif %}
+{% for flag in torrent_flags %}
+    {% if (not flag.permission or user.permitted(flag.permission)) and not add_format %}
     <tr>
-        <td class="label">Bad tags:</td>
+        <td class="label">{{ flag.label }}:</td>
         <td>
-            <label><input type="checkbox" id="bad_tags" name="bad_tags"{{ checked(torrent.BadTags) }} />
-            Check this box if the torrent has bad tags.</label>
+            <label><input type="checkbox" id="{{ flag.value }}" name="{{ flag.value }}"{{ checked(torrent[flag.value]) }} />
+            {{ flag.description }}</label>
         </td>
     </tr>
-    <tr>
-        <td class="label">Bad folder names:</td>
-        <td>
-            <label><input type="checkbox" id="bad_folders" name="bad_folders"{{ checked(torrent.BadFolders) }} />
-            Check this box if the torrent has bad folder names.</label>
-        </td>
-    </tr>
-    <tr>
-        <td class="label">Bad file names:</td>
-        <td>
-            <label><input type="checkbox" id="bad_files" name="bad_files"{{ checked(torrent.BadFiles) }} />
-            Check this box if the torrent has bad file names.</label>
-        </td>
-    </tr>
-    <tr>
-        <td class="label">Cassette approved:</td>
-        <td>
-            <label><input type="checkbox" id="cassette_approved" name="cassette_approved"{{ checked(torrent.CassetteApproved) }} />
-            Check this box if the torrent is an approved cassette rip.</label>
-        </td>
-    </tr>
-    <tr>
-        <td class="label">Lossy master approved:</td>
-        <td>
-            <label><input type="checkbox" id="lossymaster_approved" name="lossymaster_approved"{{ checked(torrent.LossymasterApproved) }} />
-            Check this box if the torrent is an approved lossy master.</label>
-        </td>
-    </tr>
-    <tr>
-        <td class="label">Lossy web approved:</td>
-        <td>
-            <label><input type="checkbox" id="lossyweb_approved" name="lossyweb_approved"{{ checked(torrent.LossywebApproved) }} />
-            Check this box if the torrent is an approved lossy WEB release.</label>
-        </td>
-    </tr>
-{%  endif %}
-{%  if user.permitted('site_edit_lineage') %}
-    <tr>
-        <td class="label">Missing lineage:</td>
-        <td>
-            <label><input type="checkbox" id="missing_lineage" name="missing_lineage"{{ checked(torrent.MissingLineage) }} />
-            Check this box if the torrent is missing lineage information.</label>
-        </td>
-    </tr>
-
-{%  endif %}
+    {% endif %}
+{% endfor %}
 {% endif %}
 {% if not torrent %}
 {%  include 'upload/tag.twig' with {'is_uploaded': is_uploaded, 'tag_list': tag_list, 'user': user} %}

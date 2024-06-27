@@ -26,7 +26,7 @@ $better = match ($type) {
     'artwork'       => new Gazelle\Better\Artwork($user, $filter, (new Gazelle\Manager\TGroup())->setViewer($Viewer)),
     'checksum'      => new Gazelle\Better\Checksum($user, $filter, (new Gazelle\Manager\Torrent())->setViewer($Viewer)),
     'single'        => new Gazelle\Better\SingleSeeded($user, $filter, (new Gazelle\Manager\Torrent())->setViewer($Viewer)),
-    'files', 'folders', 'lineage', 'tags'
+    'files', 'folders', 'lineage', 'tags', 'trumpable'
                     => (new Gazelle\Better\Bad($user, $filter, new Gazelle\Manager\Torrent()))->setBadType($type),
     default         => error(404),
 };
