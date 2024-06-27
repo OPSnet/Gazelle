@@ -136,7 +136,7 @@ class RequestTest extends TestCase {
         $this->assertEquals('jazz vapor_wave', $this->request->tagNameToSphinx(), 'request-tag-sphinx');
         $this->assertEquals(
             '<a href="requests.php?tags=jazz">jazz</a> <a href="requests.php?tags=vapor.wave">vapor.wave</a>',
-            $this->request->tagSearchLink(), 'request-tag-searchlink'
+            $this->request->tagLinkList(), 'request-tag-linklist'
         );
         $this->assertFalse($this->request->isFilled(), 'request-not-filled');
 

@@ -418,7 +418,7 @@ class Request extends BaseObject implements CategoryHasArtist {
         return $this->info()['release_type'];
     }
 
-    public function tagSearchLink(): string {
+    public function tagLinkList(): string {
         return implode(' ',
             array_map(
                 fn($tag) => "<a href=\"requests.php?tags=$tag\">$tag</a>",
