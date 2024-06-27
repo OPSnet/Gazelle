@@ -32,7 +32,7 @@
             <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
                 <td>
                     {{ request.smartLink|raw }}
-                    <div class="tags">{{ request.tagLinkList }}</div>
+                    <div class="tags">{{ request.tagLinkList|raw }}</div>
                 </td>
                 <td>
                     <span id="vote_count_{{ request.id }}">{{ request.userVotedTotal|number_format }}</span>&nbsp;&nbsp;
