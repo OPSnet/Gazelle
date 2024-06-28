@@ -9,7 +9,7 @@
 
 // debug slugs: must be after import.
 $debug-deriv: "Paper";
-$debug-deriv-slug: "[0621]";
+$debug-deriv-slug: "[23]";
 
 // ////////////////////////////////////////////////////////////////////////////////
 // COLORS
@@ -228,38 +228,38 @@ $color-anchor-alert: $ds-gray-05;
 // ICONS
 
 // changing to #000 black version
-$icon-message-unread: url("https://wally-crunk.github.io/svg/std/document-round-000.svg");
-$icon-message-unread-locked: url("https://wally-crunk.github.io/svg/std/lock-round-000.svg");
-$icon-message-unread-sticky: url("https://wally-crunk.github.io/svg/std/pin-round-000.svg");
-$icon-message-unread-locked-sticky: url("https://wally-crunk.github.io/svg/std/pin-and-lock-round-000.svg");
+$icon-message-unread: url("/svg/std/document-round-000.svg");
+$icon-message-unread-locked: url("/svg/std/lock-round-000.svg");
+$icon-message-unread-sticky: url("/svg/std/pin-round-000.svg");
+$icon-message-unread-locked-sticky: url("/svg/std/pin-and-lock-round-000.svg");
 
-$icon-message-read: url("https://wally-crunk.github.io/svg/std/document-000.svg");
-$icon-message-read-locked: url("https://wally-crunk.github.io/svg/std/lock-000.svg");
-$icon-message-read-sticky: url("https://wally-crunk.github.io/svg/std/pin-000.svg");
-$icon-message-read-locked-sticky: url("https://wally-crunk.github.io/svg/std/pin-and-lock-000.svg");
+$icon-message-read: url("/svg/std/document-000.svg");
+$icon-message-read-locked: url("/svg/std/lock-000.svg");
+$icon-message-read-sticky: url("/svg/std/pin-000.svg");
+$icon-message-read-locked-sticky: url("/svg/std/pin-and-lock-000.svg");
 
-$icon-notification: url("https://wally-crunk.github.io/styles/apollostage/images/notification-bell-000xeee.svg");
+$icon-notification: url("/styles/apollostage/images/notification-bell-000xeee.svg");
 
 // Header Pulldown Menu (hamburger/chevron icon)
 // not changing, still dark background
 
 // Used in Header
 // changing to light mode version
-$logo-site-lockup: url("https://wally-crunk.github.io/svg/site/ops-logo-lockup-lightmode.svg");
-$logo-site-square: url("https://wally-crunk.github.io/svg/site/ops-logo-loop-lightmode.svg");
+$logo-site-lockup: url("/svg/site/ops-logo-lockup-lightmode.svg");
+$logo-site-square: url("/svg/site/ops-logo-loop-lightmode.svg");
 
 // Used on Mobile
 // changing to #000 black version
-$icon-number-snatches: url("https://wally-crunk.github.io/svg/std/arrow-loop-000.svg");
-$icon-number-seeders: url("https://wally-crunk.github.io/svg/std/arrow-up-round-000.svg");
-$icon-number-leechers: url("https://wally-crunk.github.io/svg/std/arrow-down-round-000.svg");
+$icon-number-snatches: url("/svg/std/arrow-loop-000.svg");
+$icon-number-seeders: url("/svg/std/arrow-up-round-000.svg");
+$icon-number-leechers: url("/svg/std/arrow-down-round-000.svg");
 
 // // standard: 
-// $icon-notification: url("https://wally-crunk.github.io/svg/std/notification-bell-000.svg");
-// $icon-warning: url("https://wally-crunk.github.io/svg/std/x-000.svg")
+// $icon-notification: url("/svg/std/notification-bell-000.svg");
+// $icon-warning: url("/svg/std/x-000.svg")
 // // Orpheus specific:
-$icon-notification: url("https://wally-crunk.github.io/svg/site/ops-icon-harp-000.svg");
-$icon-warning: url("https://wally-crunk.github.io/svg/site/ops-icon-triangle-000.svg"); // or X
+$icon-notification: url("/svg/site/ops-icon-harp-000.svg");
+$icon-warning: url("/svg/site/ops-icon-triangle-000.svg"); // or X
 
 // EOF
 
@@ -267,10 +267,10 @@ $icon-warning: url("https://wally-crunk.github.io/svg/site/ops-icon-triangle-000
 
 /* local overrides for this theme */
 
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Merriweather+Sans:ital,wght@0,300..800;1,300..800&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wdth,wght@0,87.5,300..800;1,87.5,300..800&display=swap');
+@import url('/styles/apollostage_paper/fonts/fontcall.css');
 
 body, textarea {
- font-family: "Merriweather Sans", Noto, "Noto Sans", sans-serif;
+ font-family: "Merriweather Sans", Noto, "Noto Sans", "Microsoft Yahei", 	sans-serif;
   font-optical-sizing: auto;
   font-style: normal;
   font-weight: 320;
