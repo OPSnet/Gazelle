@@ -15,7 +15,6 @@ if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
 <form class="vote_form" name="poll" id="poll" action="">
     <input type="hidden" name="action" value="poll" />
     <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
-    <input type="hidden" name="large" value="<?=display_str($_POST['large'])?>" />
     <input type="hidden" name="threadid" value="<?= $poll->id() ?>" />
 <?php foreach ($vote as $i => $choice) { ?>
     <input type="radio" name="vote" id="answer_<?=$i?>" value="<?=$i?>" />

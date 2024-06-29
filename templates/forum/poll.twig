@@ -88,7 +88,6 @@
             <form class="vote_form" name="poll" id="poll" action="">
                 <input type="hidden" name="action" value="poll" />
                 <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-                <input type="hidden" name="large" value="1" />
                 <input type="hidden" name="threadid" value="{{ thread.id }}" />
                 <ul class="nobullet" id="poll_options">
     {% for response, choice in answer_list %}
