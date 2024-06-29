@@ -8,8 +8,7 @@
 @import '../apollostage/_variables';
 
 // debug slugs: must be after import.
-$debug-deriv: "Paper";
-$debug-deriv-slug: "[23]";
+$build-slug: "paper 24.06";
 
 // ////////////////////////////////////////////////////////////////////////////////
 // COLORS
@@ -289,15 +288,6 @@ h6,
     font-family: 'Merriweather', Noto, 'Noto Sans', 'Open Sans', Tahoma, sans-serif;
     font-weight: 700;
  }
-
-
-// tracer only
-debug { 
-    debug_1: $debug-identity;
-    debug_2: $debug-slug;
-    debug_3: $debug-deriv;
-    debug_4: $debug-deriv-slug;
-}
 
 // EOF
 // ////////////////////////////////////////////////////////////////////////////////

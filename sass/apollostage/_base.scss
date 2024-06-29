@@ -3359,7 +3359,7 @@ ul#check.nobullet > *
         position: absolute;
         left: 15%;
         width: 85% !important;
-        -debug-border: thick solid blue;
+        x-debug-border: thick solid blue;
     }
     
     #nav_userclass {
@@ -3612,27 +3612,9 @@ ul#check.nobullet > *
 /* ## 6.1 Debugging Tools */
 /* various 'debug' features are avail in this doc elsewhere */
 
-li#nav_upload.brackets a:before {
-  content: $debug-slug + ' ' + $debug-deriv-slug;
-  border: thin solid orangered; 
-  border-radius: 1rem; 
-  color: orangered; 
-  padding: 0.03rem 0.5rem;
-  margin: 0rem 0.5rem; 
-}
-
 #footer p:last-of-type:after {
-  content: $debug-identity + ' ' + $debug-slug + ' ' + $debug-deriv + ' ' + $debug-deriv-slug;
-  border: thin solid orangered; 
-  border-radius: 1rem; 
-  color: orangered; 
-  padding: 0.03rem 0.5rem;
-  margin: 0rem 0.5rem; 
+  content: ' | Apollostage build ' + $build-slug;
 }
-
-/* ## 6.2 hello viewers of source */
-
-debug_nonce { debug_nonce: $debug-slug }
 
 /*# sourceMappingURL=styles.css.map */
 
