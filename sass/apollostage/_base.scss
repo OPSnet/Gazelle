@@ -1,6 +1,6 @@
 /* ######################################################################## */
 /* APOLLOSTAGE THEME */
-/* version 2024.06.29
+/* version 2024-06-30
 /* ######################################################################## */
 
 // SASS/SCSS NOTE
@@ -125,7 +125,7 @@
 /* ### 2.2.3  Non-clickable appearance */
 /* ### 2.2.4  Other special cases
 /* ### 2.2.5  Snatched torrent indicators (BETA)
-/* ## 2.3 I-Devices Telephone Number Prevention */
+/* ## 2.3 Reserved */
 /* ## 2.4 Pop-up Warnings and Alerts ## */
 /* ### 2.4.1 Upload warnings ## */
 /* ### 2.4.2 Alertbar */
@@ -182,11 +182,9 @@
 /* # 0 GENERAL SETUP
 /* ######################################################################## */
 
-/* */
-/* Reminder: */
-/* slash-asterisk sass/scss comments are passed through to compiled css */
-// double-slash sass/scss comments ARE NOT passed through to compiled css //
-/* */
+// Reminder:
+// slash-asterisk sass/scss comments are passed through to compiled css 
+// double-slash sass/scss comments ARE NOT passed through to compiled css 
 
 /* */
 /* */
@@ -207,11 +205,8 @@
 
 /* ## 0.2 Global variables */
 
-* {
-  /* For future use. Now, for recordkeeping only.  
-  /* In 2024, browsers do not allow vars in the CSS @media rule. */
-  --phone-screen-size: 575px; 
-}
+// As of 2024, browsers do not allow vars in the CSS @media selector.
+// --phone-screen-size: 575px; 
     
 /* */
 
@@ -503,7 +498,7 @@ form table td.label {
     color: $color-text-footer;
     padding-top: 9px;
     font-weight: 600;
-    text-align: left;   //#2024
+    text-align: left;
     width: 180px;
 }
 
@@ -715,7 +710,6 @@ table.box2 {
     display: table;
 }
 
-/* #2024 fix for 
 /* Sessions table should scroll */
 // override *both* have overflow set not to scroll
 .box.pad:has(.session_table.border),
@@ -1023,10 +1017,11 @@ div#flip_view_1 div#similar-artist .name {
     background-color: $color-background-form;
 }
 
-/* #2024fix */
-/* Edition stripe appears on (1) individual album pages; */
-/* And (2) torrent/search listings when preceded by a Group */
-/* So not personal 'snatches, downloads,' etc. */
+/* Edition stripe appears on 
+/* (1) individual album pages, */
+/* (2) torrent/search listings when preceded by a Group */
+/* but NOT personal 'snatches, downloads,..' pages. */
+
 #torrents #torrent_details .group_torrent td.edition_info,
 group ~ .group_torrent.edition {
     background-color: $color-background-torrent;
@@ -1438,8 +1433,8 @@ ul.collage_images li a > span {
     margin: 8px 0;
 }
 
-/* #2024b14 only on desktop, not on mobile */
-@media (min-width: 575px)  /* var(--phone-screen-size) */ {
+/* only on desktop, not on mobile */
+@media (min-width: 575px)  {
     .search_form {
         overflow: hidden;
     }
@@ -1555,19 +1550,19 @@ blockquote {
 
 /* END desktop view, handling of classes */
 
-// ************************************************ 
+/* ************************************************ */
 
 /* # 1.2 Reserved [for more organization in the future]
 
-// ************************************************ 
+/* ************************************************ */
 
 /* # 1.3 Reserved [for more organization in the future]
 
-// ************************************************ 
+/* ************************************************ */
 
 /* # 1.4 Reserved [for more organization in the future]
 
-// ************************************************ 
+/* ************************************************ */
 
 /* # 1.5 Discography Pages
 
@@ -1621,7 +1616,7 @@ div#discog_table td.td_info:not(span.torrent_links_block) > a {
 
 /* END Navbox on artist page ~ "jump down".. to navigate between Album/Live Album... */
 
-// ************************************************ 
+/* ************************************************ */
 
 /* # 1.6 Tooltips */
 
@@ -1656,11 +1651,11 @@ div#discog_table td.td_info:not(span.torrent_links_block) > a {
     color: $color-text-tooltipster-anchor-hover;
 }
 
-// ************************************************ 
+/* ************************************************ */
 
 /* # 1.7 BEGIN UPLOAD CATEGORY DECORATION STRIPING */
 /* Begin category decorations for torrent-tables on torrent & collage pages */
-/* #2024 bugfix:*/
+
 /* Apollostage highlights different upload types,
 /* using not an icon but a small color-coded rectangle (done using a border).
 /* The line (border-right:) can be replaced by an image or other (content:) as needed. */
@@ -1716,10 +1711,10 @@ body#collage .cats_music {
 .cats_elearningvideos {
     border-right: thick solid mediumpurple;
 }
-/* #2024 */
+
 /* END category decorations for torrent tables on torrent & collage pages */
 
-// ************************************************ 
+/* ************************************************ */
 
 /* #1.8 HEADER AND MENU LAYOUT */
 /* MENU AND TOP BAR, DESKTOP ONLY */
@@ -1992,11 +1987,10 @@ body#collage .cats_music {
 }
 /* END Menu and topbar, desktop only */
 
-// ************************************************ 
+/* ************************************************ */
 
 /* ## 1.8.1 Menu handling */
 /* horizontal menu */
-/* #2024 change to styled color instead of #fff to match vertical pulldown menu */
 
 /* menu hover colors */
 #menu > ul a:hover,
@@ -2005,7 +1999,6 @@ body#collage .cats_music {
 #userinfo_minor:hover::before {
   background-color: $color-menu-fx-selection;
 }
-
 
 /* when menu pulled down and mouse over an entry */
 #menu > ul a:hover,
@@ -2025,7 +2018,6 @@ body#collage .cats_music {
     background-clip: border-box;
 }
 
-
 .sidebar {
     order: 5;
 }
@@ -2038,11 +2030,11 @@ body#collage .cats_music {
 
 /* END MENU HANDLING */
 
-// ************************************************ 
+/* ************************************************ */
 
 /* ## 1.9 Headers Below Menu */
 
-// ************************************************ 
+/* ************************************************ */
 
 /* ## 1.9.1 Searchbars */
 
@@ -2085,7 +2077,7 @@ body#collage .cats_music {
     background: $color-background-searchbars-field-focus;
 }
 
-// ************************************************ 
+/* ************************************************ */
 
 /* ## 1.9.2 Linkbox */
 /* linkbox appears near the page h1 header and provides outbound links */
@@ -2109,10 +2101,9 @@ body#collage .cats_music {
     display: none;
 }
 
+/* ************************************************ */
 
-// ************************************************ 
-
-/* # 1.10 BEGIN NOTIFICATION BOX */
+/* # 1.10 Notification Box */
 
 /* basic positioning */
 #noty_bottomRight_layout_container {
@@ -2181,8 +2172,7 @@ body#collage .cats_music {
 
 /* END NOTIFICATION BOX */
 
-/* */
-/* */
+/* ************************************************ */
 
 /* # 1.11 BEGIN SIDEBAR */
 
@@ -2205,7 +2195,7 @@ body#collage .cats_music {
 
 /* END SIDEBAR */
 
-// ************************************************ 
+/* ************************************************ */
 
 /* # 1.12 Upload form MusicBrainz popup */
 
@@ -2236,14 +2226,13 @@ body#collage .cats_music {
 
 /* END upload form MusicBrainz popup */
 
-
-
-
 /* ######################################################################## */
 /* # 2 MISCELLANEOUS
 /* ######################################################################## */
 
 /* ## 2.1 Reserved for future use */
+
+/* ************************************************ */
 
 /* ## 2.2 Tag bubble appearance on widescreen */
 
@@ -2332,7 +2321,7 @@ table.torrent_table.cats.m_table td.td_info.big_info div.group_info.clear div.ta
 }
 
 /* ### 2.2.5 Snatched torrent indicators (BETA)*/
-/* the following must be after 4.2.4 invisibility */
+/* the following must be after 2.2.4 invisibility */
 
 tr.snatched_group div.tags:before {
   content: "snatched group";
@@ -2377,21 +2366,12 @@ tr.snatched_torrent div.tags:before {
 }
 
 /* */
-/* */
 
-/* ## 2.3 i-devices telephone number prevention */
+/* ************************************************ */
 
-/* Prevent i-devices from converting long numbers to clickable telephone numbers. */
+/* ## 2.3 Reserved
 
-*[x-apple-data-detectors] {
-    border-bottom: 0 !important;
-    cursor: default !important;
-    color: inherit !important;
-    text-decoration: none !important;
-}
-
-/* */
-/* */
+/* ************************************************ */
 
 /* ## 2.4 Pop-up Warnings and Alerts ## */
 /* #### see also 1.10 Notifications */
@@ -2591,6 +2571,8 @@ ul#check.nobullet > *
     }
     /* END site layout */
 
+    /* ************************************************ */
+
     /* ## 4.2 BEGIN notifications */
     
     .i-am-new {
@@ -2623,6 +2605,8 @@ ul#check.nobullet > *
     }
     /* END user settings */
 
+    /* ************************************************ */
+    
     /* ## 4.4 BEGIN forms */
 
     input[type="search"],
@@ -2655,6 +2639,8 @@ ul#check.nobullet > *
     /* END forms */
     
 
+    /* ************************************************ */
+
     /* ## 4.5 BEGIN general tables */
     
     .m_table tbody,
@@ -2671,6 +2657,8 @@ ul#check.nobullet > *
           flex-direction: column;
     }
     /* END general tables */
+
+    /* ************************************************ */
 
     /* ## 4.6 BEGIN table headers */
     .m_table .colhead,
@@ -2717,6 +2705,8 @@ ul#check.nobullet > *
     }
     /* END table headers */
 
+    /* ************************************************ */
+
     /* ## 4.7 BEGIN table bodies */
     
     .m_table tr:not(.hidden, .colhead, .colhead_dark) {
@@ -2748,6 +2738,8 @@ ul#check.nobullet > *
     }
     /* END table bodies */
 
+    /* ************************************************ */
+
     /* ## 4.8 BEGIN right-aligned numerical stats */
     .m_td_right {
           margin: 0;
@@ -2768,6 +2760,8 @@ ul#check.nobullet > *
           top: 3em;
     }
     /* END right-aligned numerical stats */
+
+    /* ************************************************ */
 
     /* ## 4.9 BEGIN torrent table */
     .torrent_table * {
@@ -2922,6 +2916,8 @@ ul#check.nobullet > *
     /* END top10 */
     /* END torrent table */
 
+    /* ************************************************ */
+
     /* ## 4.10 BEGIN invite table */
     .invite_table tr:not(.colhead) td:nth-child(3)::before {
           content: 'Joined: ';
@@ -2943,6 +2939,8 @@ ul#check.nobullet > *
           content: 'R: ';
     }
     /* END invite table */
+
+    /* ************************************************ */
 
     /* ## 4.11 BEGIN collage table */
     table.m_table.collage_table tr:not(.colhead):not(.colhead) {
@@ -3024,6 +3022,8 @@ ul#check.nobullet > *
           font-size: larger;
     }
     /* END collage table */
+
+    /* ************************************************ */
     
     /* ## 4.12 BEGIN requests */
     /* TODO: still show the time the request was filled without taking up too much space */
@@ -3056,6 +3056,8 @@ ul#check.nobullet > *
           padding-bottom: 4px;
     }
     /* END requests */
+
+    /* ************************************************ */
 
     /* ## 4.13 BEGIN forums */
     /* ## 4.13.1 BEGIN forum index */
@@ -3159,6 +3161,8 @@ ul#check.nobullet > *
     /* END forum headers */
     /* END forums */
 
+    /* ************************************************ */
+
     /* ## 4.14 BEGIN rules */
     #rules .m_th_left::before {
           content: 'Rules';
@@ -3169,14 +3173,17 @@ ul#check.nobullet > *
     }
     /* END rules */
 
+    /* ************************************************ */
+
     /* ## 4.15 reserved */
+
+    /* ************************************************ */
 
     /* ## 4.16 Handling for sticky table headers on Mobile */
     /* Deleted and burninated */
-    
-    /* ** */
-    /* ** */
-    
+     
+    /* ************************************************ */
+   
     /* ## 4.17 SITE HEADER AND MOBILE MENU */
     /* ## 4.17.1 Mobile Menu When Closed, Setup */
     
@@ -3459,12 +3466,16 @@ ul#check.nobullet > *
     
     /* ## 4.17.10 Alerts */
     
-    /* Alertbar is part of the #header, which is designed to collapse on mobile. */
-    /* This is the least-worst position, avoids unwanted clicks when closed */
-    /* However, it blocks the 'settings' button until notifs are cleared. */
-    /* TODO: Find a better way.  Meantime, UNCOMMENT the block below to turn on. */
-
+/*  Alertbar is part of the DIV #header, which is designed to collapse on mobile. */
     #alerts {display:none}
+    
+/*     PROBLEM: if we allow it to be visible as part of the rolldown menu, */
+/*      wherever it's located, its links activate the 'open when hover'. */
+/*      Why isn't Alertbar hover disabled when the menu is closed? */
+/*     Possible solution: move hoverbar to the 1st row of menu. /*
+/*     However, it blocks the 'settings' button until notifs are cleared. */
+/*     TODO: Find a better way.  
+/*  Meantime, #fearless users: UNCOMMENT the block below to turn ON alertbar on mobile. */ 
 
     /* ==== */
     /*
@@ -3479,17 +3490,16 @@ ul#check.nobullet > *
     /*    z-index: 99999;
     /*    opacity: 1 !important;
     /*    }
-    /* on mobile, suppress any other non-alertbar alerts (if any) */
     /*
+    /*  /* on mobile, suppress any other non-alertbar alerts (if any) */
     /*  #alerts > :not(.alertbar) {
     /*    display: none;
     /*    }
     /*
     /* ==== */
-
-    /* ** */
-    /* ** */    
     
+    /* ************************************************ */
+
     /* ## 4.18 Checkboxes ~ purpose undocumented */
     
     #extracb1 {
@@ -3522,6 +3532,8 @@ ul#check.nobullet > *
     /* END checked */
     /* END site header */
     
+    /* ************************************************ */
+
     /* ## 4.19 Torrent search, handling for tag appearance */
 
     /* On the torrent search form, a 'Word bank' of tags is shown, */
