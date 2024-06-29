@@ -23,11 +23,11 @@ $seedbox = new Gazelle\User\Seedbox($user);
 if (isset($_POST['mode'])) {
     switch ($_POST['mode']) {
         case 'update':
-            $idList   = array_key_extract_suffix('id-', $_POST);
-            $ipList   = array_key_extract_suffix('ip-', $_POST);
-            $nameList = array_key_extract_suffix('name-', $_POST);
-            $sigList  = array_key_extract_suffix('sig-', $_POST);
-            $uaList   = array_key_extract_suffix('ua-', $_POST);
+            $idList   = array_key_filter_and_map('id-', $_POST);
+            $ipList   = array_key_filter_and_map('ip-', $_POST);
+            $nameList = array_key_filter_and_map('name-', $_POST);
+            $sigList  = array_key_filter_and_map('sig-', $_POST);
+            $uaList   = array_key_filter_and_map('ua-', $_POST);
             if (count($idList) != count($ipList)) {
                 error("id/ip mismatch");
             } elseif (count($idList) != count($nameList)) {
@@ -38,7 +38,7 @@ if (isset($_POST['mode'])) {
                 error("id/ua mismatch");
             }
             $update = [];
-            for ($i = 1, $end = count($nameList); $i <= $end; ++$i) {
+            foreach (array_keys($idList) as $i) {
                 if ($sigList[$i] != $seedbox->signature($ipList[$i], $uaList[$i])) {
                     error("ip/ua signature failed");
                 }
@@ -52,12 +52,7 @@ if (isset($_POST['mode'])) {
             $seedbox->updateNames($update);
             break;
         case 'remove':
-            $remove = [];
-            foreach (array_key_extract_suffix('rm-', $_POST) as $id) {
-                if (isset($_POST["rmid-$id"])) {
-                    $remove[] = $_POST["rmid-$id"];
-                }
-            }
+            $remove = array_key_extract_suffix('rm-', $_POST, false);
             $seedbox->removeNames($remove);
             break;
         default:

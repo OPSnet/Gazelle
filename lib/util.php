@@ -444,14 +444,30 @@ function array_trim_prefix(string $prefix, array $list): array {
  * In this case, array_key_extract_suffix("user-", $_POST) returns
  * [1010, 6189]
  */
-function array_key_extract_suffix(string $prefix, array $list): array {
+function array_key_extract_suffix(string $prefix, array $list, bool $cast = true): array {
     return array_map(
-        fn($v) => (int)explode('-', $v)[1],
-        array_filter(
+        fn($v) => $cast ? (int)explode('-', $v)[1] : explode('-', $v)[1],
+        array_values(array_filter(
             array_keys($list),
             fn($v) => str_starts_with($v, $prefix)
-        )
+        ))
     );
+}
+
+/**
+ * Similar to array_key_extract_suffix but makes the suffix the index key and retains the value.
+ * E.g.: ["user-123" => 3, "user-456" => 99, "other" => 33] will become [123 => 3, 456 => 99]
+ */
+function array_key_filter_and_map(string $prefix, array $list, bool $cast = true): array {
+    $out = [];
+    foreach ($list as $k => $v) {
+        if (!str_starts_with($k, $prefix)) {
+            continue;
+        }
+        $key = $cast ? (int)explode('-', $k, 2)[1] : explode('-', $k, 2)[1];
+        $out[$key] = $v;
+    }
+    return $out;
 }
 
 /**

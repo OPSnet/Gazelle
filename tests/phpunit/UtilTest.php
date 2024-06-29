@@ -36,6 +36,18 @@ class UtilTest extends TestCase {
             'array_extract_suffix-none'
         );
 
+        $this->assertEquals([], array_key_filter_and_map('zz-', []), 'array_filter_and_map-empty');
+        $this->assertEquals(
+            [14 => 12, 28 => 34],
+            array_key_filter_and_map('zz-', ['zz-14' => 12, 'zz-28' => 34, 'nope' => 11]),
+            'array_filter_and_map-mixed'
+        );
+        $this->assertEquals(
+            [],
+            array_key_filter_and_map('zz-', ['abc' => true, 'def' => true, 'nope' => true]),
+            'array_filter_and_map-none'
+        );
+
         $this->assertEquals(
             [],
             extract_torrent_id("abc"),

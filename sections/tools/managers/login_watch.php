@@ -9,10 +9,10 @@ if ($_POST) {
     $canBan = $Viewer->permitted('admin_manage_ipbans');
     $ban    = [];
     $clear  = [];
-    foreach (array_key_extract_suffix('admin-', $_POST) as $id) {
-        if ($canBan && $_POST["admin-$id"] == 'ban') {
+    foreach (array_key_filter_and_map('admin-', $_POST) as $id => $val) {
+        if ($canBan && $val === 'ban') {
             $ban[] = $id;
-        } elseif ($_POST["admin-$id"] == 'clear') {
+        } elseif ($val === 'clear') {
             $clear[] = $id;
         }
     }

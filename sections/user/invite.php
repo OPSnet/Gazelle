@@ -29,18 +29,17 @@ if ($inviteSourceMan && isset($_GET['edit'])) {
      */
 
     $update = [];
-    foreach (array_key_extract_suffix('user-', $_POST) as $userId) {
+    foreach (array_key_filter_and_map('user-', $_POST) as $userId => $source) {
         if (!isset($update[$userId])) {
             $update[$userId] = ['user_id' => $userId];
         }
-        $source = $_POST["user-$userId"];
-        $update[$userId]['source'] = $source === '---' ? 0 : explode('-', $source)[1];
+        $update[$userId]['source'] = $source === '---' ? 0 : explode('-', $source, 2)[1];
     }
-    foreach (array_key_extract_suffix('reason-', $_POST) as $userId) {
+    foreach (array_key_filter_and_map('reason-', $_POST) as $userId => $reason) {
         if (!isset($update[$userId])) {
             $update[$userId] = [];
         }
-        $update[$userId]['profile'] = trim($_POST["reason-$userId"]);
+        $update[$userId]['profile'] = trim($reason);
     }
 
     /**
