@@ -85,8 +85,7 @@
     <ul class="stats nobullet">
         {% endif %}
         <li>
-            <input type="checkbox" id="seedbox-rm-{{ loop.index }}" name="rm-{{ loop.index }}" />
-            <input type="hidden" id="rmid-{{ loop.index }}" name="rmid-{{ loop.index }}" value="{{ f.id }}" />
+            <input type="checkbox" id="seedbox-rm-{{ loop.index }}" name="rm-{{ f.id }}" />
             <label for="seedbox-rm-{{ loop.index }}">{{ f.name }}</label>
         </li>
         {% if loop.last %}

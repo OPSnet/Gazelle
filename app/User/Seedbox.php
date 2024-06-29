@@ -223,7 +223,7 @@ class Seedbox extends \Gazelle\BaseUser {
     /**
      * Remove the names pointed to by a list of ids owned by the user
      *
-     * @param array $remove Associate array of 'ipv4' => 'name'
+     * @param array $remove list of encoded seedbox ids
      */
     public function removeNames(array $remove): int {
         if (empty ($remove)) {
