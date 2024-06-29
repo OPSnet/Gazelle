@@ -9,7 +9,10 @@ if (empty($_GET['advanced']) || !$Viewer->permitted('site_advanced_top10')) {
     $limit = (int)($_GET['limit'] ?? 25);
 } else {
     $limit = 25;
-    $vote->setTopYearInterval((int)$_GET['year1'], (int)$_GET['year2']);
+    if (isset($_GET['year1'])) {
+        $year1 = (int)$_GET['year1'];
+        $vote->setTopYearInterval($year1, (int)($_GET['year2'] ?? $year1));
+    }
     if (isset($_GET['tags'])) {
         $list = explode(',', trim($_GET['tags']));
         $tags = [];
