@@ -60,7 +60,7 @@ class User extends \Gazelle\Json {
         return [
             'username'    => $user->username(),
             'avatar'      => $user->avatar(),
-            'isFriend'    => (new \Gazelle\User\Friend($user))->isFriend($viewer->id()),
+            'isFriend'    => (new \Gazelle\User\Friend($user))->isFriend($viewer),
             'profileText' => \Text::full_format($user->profileInfo()),
             'stats' => [
                 'joinedDate'    => $user->created(),

@@ -10,61 +10,57 @@ class Friend extends \Gazelle\BaseUser {
         return $this;
     }
 
-    public function isFriend(int $friendId): bool {
+    public function isFriend(\Gazelle\User $friend): bool {
         return (bool)self::$db->scalar("
             SELECT 1
             FROM friends
             WHERE UserID = ?
                 AND FriendID = ?
-            ", $this->user->id(), $friendId
+            ", $this->user->id(), $friend->id()
         );
     }
 
-    public function isMutual(int $friendId): bool {
+    public function isMutual(\Gazelle\User $friend): bool {
         return (bool)self::$db->scalar("
             SELECT 1
             FROM friends a
             INNER JOIN friends b ON (b.UserID = a.FriendID AND b.FriendID = ?)
             WHERE a.UserID = ?
                 AND a.FriendID = ?
-            ", $this->user->id(), $this->user->id(), $friendId
+            ", $this->user->id(), $this->user->id(), $friend->id()
         );
     }
 
-
-    public function add(int $friendId): int {
-        if ($friendId == $this->user->id()) {
-            return 0;
-        }
-        if (!(bool)self::$db->scalar("SELECT 1 FROM users_main WHERE ID = ?", $friendId)) {
-            return 0;
+    public function add(\Gazelle\User $friend): int {
+        if ($this->user->id() === $friend->id()) {
+            return -1;
         }
         self::$db->prepared_query("
             INSERT IGNORE INTO friends
                    (UserID, FriendID)
             VALUES (?,      ?)
-            ", $this->user->id(), $friendId
+            ", $this->user->id(), $friend->id()
         );
         return self::$db->affected_rows();
     }
 
-    public function addComment(int $friendId, string $comment): int {
+    public function addComment(\Gazelle\User $friend, string $comment): int {
         self::$db->prepared_query("
             UPDATE friends SET
                 Comment = ?
             WHERE UserID = ?
                 AND FriendID = ?
-            ", $comment, $this->user->id(), $friendId
+            ", $comment, $this->user->id(), $friend->id()
         );
         return self::$db->affected_rows();
     }
 
-    public function remove(int $friendId): int {
+    public function remove(\Gazelle\User $friend): int {
         self::$db->prepared_query("
             DELETE FROM friends
             WHERE UserID = ?
                 AND FriendID = ?
-            ", $this->user->id(), $friendId
+            ", $this->user->id(), $friend->id()
         );
         return self::$db->affected_rows();
     }
