@@ -19,8 +19,8 @@
         {% for badge, name in user.privilege.badgeList %}
             <span class="tooltip secondary_class" title="{{ name }}">{{ badge }}</span>
         {% endfor %}
-        {% if friend.isMutual(user.id) %}<span title="The feeling is mutual (awww!)">💕</span>
-        {%- elseif friend.isFriend(user.id) %}<span title="You like them (aww!)">💖</span>
+        {% if friend.isMutual(user) %}<span title="The feeling is mutual (awww!)">💕</span>
+        {%- elseif friend.isFriend(user) %}<span title="You like them (aww!)">💖</span>
         {%- endif %}
         {% if user.title -%}
             <span class="user_title">{{ user.title|raw }}</span></h2>
@@ -30,7 +30,7 @@
     <div class="linkbox">
 {% if not own_profile %}
         <a href="inbox.php?action=compose&amp;toid={{ user_id }}" class="brackets" title="Send a private message">Send PM</a>
-    {% if not user.isFriend(viewer_id) %}
+    {% if not friend.isFriend(user) %}
         <a href="friends.php?action=add&amp;friendid={{ user_id }}&amp;auth={{ viewer.auth }}" class="brackets">Add to friends</a>
     {% endif %}
         <a href="reports.php?action=report&amp;type=user&amp;id={{ user_id }}" class="brackets">Report user</a>
