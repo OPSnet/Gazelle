@@ -1,5 +1,305 @@
-@namespace url(http://www.w3.org/1999/xhtml);
-@namespace svg url(http://www.w3.org/2000/svg);
+/* ######################################################################## */
+/* APOLLOSTAGE THEME */
+/* version 2024-06-30
+/* ######################################################################## */
+
+// SASS/SCSS NOTE
+// This is one of three files for the main ApolloStage theme:
+//  - style.scss, _base.scss, _variables.scss
+//  - Reminder, this file is imported by the parent style.scss.
+// For the main ApolloStage theme: 
+//  - Colors & icons are all defined in _variables.scss.
+// For derivative themes:
+//  - The approach is similar, colors & icons are defined in the parent SCSS file.
+
+/* ######################################################################## */
+/* CHANGELOG */
+/* ######################################################################## */
+
+/* */
+/* */
+
+/*  # 2024-06-30 - Updated with community feedback. */
+/*  # Fix: mobile menu, category stripes;  
+/*  # Feature: Add SVGs, tag bubbles, italic fonts and more;
+/*  # Feature: Added new light mode theme;
+/*  # Chore: Organized and documented the SCSS. */
+/*  For full changelog: see uncompiled SASS file. */
+
+// FULL CHANGELOG:
+//
+//   Fix: Fixed the mobile view (media <575px) with big help from hawkeye. Mobile
+//    menu includes an animation, handling to prevent keyboard from opening 
+//    on iPh--e and other mobile devices, and a link to the home page.
+//
+//   Feature: Replaced all PNGs in the stylesheet with SVGs. SVGs are currently to
+//    be loaded from the gazelle edge server (or github repo), not encoded inline.
+//
+//   Feature: For SVGs, there is clear separation of 'gazelle' (universal) SVG
+//    images into one directory, and site-specific SVGs (like the site logo).
+//
+//   Feature: New 'apollostage_paper' light theme.
+//
+//   Fix: Messages with 'pre' were overrunning their box. Fixed with wrap.
+//
+//   Fix: Category decorations ~ Different categories (music, applications,
+//    Ebooks) have a colored stripe that was missing on desktop and 'floating'
+//    on collage views. Fixed.
+//
+//   Feature: Tag bubbles ~ tags now appear in roundrects on torrent, collage-listing,
+//    collage-discog and requests pages. Commas are suppressed.  
+//
+//   Feature: Tag bubbles have a hover effect on torrent, artist-discog, 
+//    collage-listing, and collage-discog pages. (Not available on request pages 
+//    because tags are not clickable on request pages.)  
+//
+//   Fix: On mobile, images in private inbox no longer overrun the width,
+//    just like other locations.
+//
+//   Style: adjusted some colors for clarity. (Apollostage, Coffee and Sunset).
+//
+//   Style: torrent discog pages have more visible headers.
+//
+//   Fix: sessions page did not scroll to the right on mobile.
+//
+//   Feature: add Italic support (replace oblique with Italic).  
+//
+//   Feature: specific font for Monospace (not system default).
+//
+//   Format: change log and table of contents and section numbering. (SECTION 1 is 
+//    super long: this CSS doesn't have much structure in Desktop view.)
+//
+//   Feature: theme styling for all notification dialogs.
+//
+//   Feature: Add notification for upload errors [## 4.4, beta quality, 
+//    requires additional HTML support to to be fully functional.]
+//
+//   Fix: Album pages, additional artwork delete buttons [x] misplaced.
+//
+//   Fix: Artist pages, related artists voting buttons aligned incorrectly
+//
+//   Chore: Rewrote color support so all colors are defined by tokens in one place.
+//
+//   Feature:  Added 'Upload failure' warnings (both styling and popups). 
+//     Added styling for inline 'traditional' notifications
+//
+//   Chore: Added comments where feasible.
+//   
+//   Chore: Changelog started.
+
+/*   Original version by burtoo and contributors.  */
+
+/* */
+/* */
+
+/* ######################################################################## */
+/* TABLE OF CONTENTS */
+/* ######################################################################## */
+
+/* # 0 GENERAL SETUP */
+/* ## 0.1 Housekeeping and font loading */
+/* ## 0.2 Global variables */
+/* ## 0.3 Debugging tools */
+
+/* # 1 DESKTOP VIEW */
+/* ## 1.1 Desktop view, handling of all classes */
+/* ## 1.2 Reserved */
+/* ## 1.3 Reserved */
+/* ## 1.4 Reserved */
+/* ## 1.5 Discog Pages */
+/* ## 1.6 Tooltips */
+/* ## 1.7 Upload Category Decoration Striping */
+/* ## 1.8 Header and menu layout */
+/* ## 1.8.1 Menu Handling */
+/* ## 1.9 Headers Below Menu */
+/* ### 1.9.1 Searchbars */
+/* ### 1.9.2 Linkbox */
+/* ## 1.10 Notification Box */
+/* ## 1.11 Sidebar */
+/* ## 1.12 Upload form MusicBrainz popup */
+
+/* # 2 MISCELLANEOUS
+/* ## 2.2 Tag Bubble Appearance on Widescreen #Wideload */
+/* ### 2.2.1  Full clickable appearance */
+/* ### 2.2.2  Hover effect */
+/* ### 2.2.3  Non-clickable appearance */
+/* ### 2.2.4  Other special cases
+/* ### 2.2.5  Snatched torrent indicators (BETA)
+/* ## 2.3 Reserved */
+/* ## 2.4 Pop-up Warnings and Alerts ## */
+/* ### 2.4.1 Upload warnings ## */
+/* ### 2.4.2 Alertbar */
+
+/* # 3 DOCUMENTATION OF MOBILE CLASSES */
+
+/* # 4 CHANGES FOR MOBILE VIEW */
+/* ## 4.1  Site Layout */
+/* ## 4.2  Notifications */
+/* ## 4.3  User Settings */
+/* ## 4.4  Forms */
+/* ## 4.5  General Tables */
+/* ## 4.6  Table Headers */
+/* ## 4.7  Table Bodies */
+/* ## 4.8  Right-Aligned Numerical Stats */
+/* ## 4.9  Torrent Table */
+/* ### 4.9.1  Expanded Torrent Group */
+/* ### 4.9.2  top10 */
+/* ## 4.10  Invite Table */
+/* ## 4.11  Collage Table */
+/* ## 4.11.1 Collage ~ Tag Bubble Appearance on Mobile */
+/* ## 4.11.2 Collage ~ Title of Collages on Mobile */
+/* ## 4.12  Requests */
+/* ## 4.13  Forums */
+/* ### 4.13.1  Forum Index */
+/* ### 4.13.2  Forum Table Structure */
+/* ### 4.13.3  Forum Headers */
+/* ## 4.14  Rules */
+/* ## 4.15 Reserved */
+/* ## 4.16 Handling for Sticky Table Headers on Mobile */
+/* ## 4.17 Site Header and Menu */
+/* ### 4.17.1  Mobile Menu Setup  */
+/* ### 4.17.2  Mobile Menu Layout */
+/* ### 4.17.3  Top Menubar */
+/* ### 4.17.4  Mobile Menu When Open, Setup */
+/* ### 4.17.5  Menu When Open, Row One */
+/* ### 4.17.6  Menu When Open, Row Two (Has Subrows) */
+/* ### 4.17.7  Menu When Open, Row Three */
+/* ### 4.17.8  Menu When Open, Row Four */
+/* ### 4.17.9  Menu When Open, Row Five ~ Searchboxes */
+/* ### 4.17.10  Alerts */
+/* ## 4.18 Checkboxes ~ Purpose Undocumented */
+/* ## 4.19 Torrent Search, Handling for Tag Appearance */
+
+/* # 5 CHANGES FOR MOBILE, SUPER SHORT VIEW */
+/* ## 5.1 Changes for Mobile, Super Small Window */
+
+/* # 6 CLOSING */
+
+/* */
+/* */
+
+/* ######################################################################## */
+/* # 0 GENERAL SETUP
+/* ######################################################################## */
+
+// Reminder:
+// slash-asterisk sass/scss comments are passed through to compiled css 
+// double-slash sass/scss comments ARE NOT passed through to compiled css 
+
+/* */
+/* */
+/* ## 0.1 Housekeeping and font loading */
+
+@charset "UTF-8";
+
+/* Font loading */
+
+// Deployers: in production, /public/static is root.
+
+@import url('/styles/apollostage/fonts/fontcall.css');
+
+@namespace url("http://www.w3.org/1999/xhtml");
+@namespace svg url("http://www.w3.org/2000/svg");
+
+/* END font loading */
+
+/* ## 0.2 Global variables */
+
+// As of 2024, browsers do not allow vars in the CSS @media selector.
+// --phone-screen-size: 575px; 
+    
+/* */
+
+/* ######################################################################## */
+/* # 1 DESKTOP VIEW */
+/* ######################################################################## */
+/* */
+/* ## 1.1 BEGIN desktop view, handling of classes */
+
+* {
+    box-sizing: inherit;
+}
+
+body,
+button,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+input,
+select,
+textarea,
+.tooltipster-default .tooltipster-content
+ {
+    font-family: 'Open Sans', Noto, 'Noto Sans', "Microsoft Yahei", sans-serif;
+ }
+
+body {
+    background-color: $color-background-base;
+    box-sizing: border-box;
+    color: $color-text-base;
+    font-size: 12px;
+    line-height: 1.6;
+    margin: 0 8px;
+}
+
+pre,code {
+    font-family: "JetBrains Mono", "Cascadia Code", Consolas, "Ubuntu Mono", Monaco, monospace;
+    font-optical-sizing: auto;
+    font-variant-ligatures: no-contextual;
+    font-weight: 200;
+    color: $color-text-mono;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: $color-text-heading;
+    line-height: normal;
+    margin: 8px 0;
+    max-width: 100%;
+}
+
+h1 a,
+h2 a,
+h3 a,
+h4 a,
+h5 a,
+h6 a {
+    color: $color-text-heading-anchor;
+}
+
+h1,
+h2 {
+    font-size: 23px;
+    font-weight: 600;
+}
+
+h3,
+h4 {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+h4,
+h5 {
+    font-size: 16px;
+    font-weight: 400;
+}
+
+a {
+    color: $color-text-anchor;
+    text-decoration: none;
+}
+
+a:hover {
+    color: $color-text-anchor-hover;
+}
 
 a:active,
 a:focus,
@@ -11,7 +311,18 @@ select:active,
 select:focus,
 textarea:active,
 textarea:focus {
-  outline: 0;
+    outline: 0;
+}
+
+/* formatting on .box.pad for the [box] bbcode tag */
+// Target main content only, so exclude the 'reply box' 
+// at the bottom which also uses this tag.
+.box .box.pad, 
+.main_column .box.pad:not(#reply_box) {
+    background-color: $color-background-box;
+    border: 2px solid $color-accent-border-box;
+    margin: 8px;
+    border-radius: .25rem;
 }
 
 #content > .thin,
@@ -19,43 +330,28 @@ textarea:focus {
 .box2,
 .main_column,
 .sidebar {
-  overflow: hidden;
+  overflow: hidden; 
 }
 
 .clear::after,
 .profileinfo::before {
-  content: '';
+    content: '';
 }
 
 #menu > ul a,
 .nobr {
-  white-space: nowrap;
+    white-space: nowrap;
 }
 
 #covers .stats .remove,
 .add_bookmark,
 .sidebar {
-  float: right;
-}
-
-.tooltipster-default .tooltipster-content,
-body,
-button,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-input,
-select,
-textarea {
-  font-family: 'Open Sans', Helvetica, Arial, Tahoma, "Microsoft Yahei", sans-serif;
+    float: right;
 }
 
 #header ul,
 .poll {
-  list-style: none;
+    list-style: none;
 }
 
 .body img,
@@ -64,313 +360,259 @@ textarea {
 .news_post:not(.head) img,
 .profileinfo:not(.head) img,
 .wiki_article img {
-  vertical-align: middle;
-}
-
-@font-face {
-  font-family: 'Open Sans';
-  font-style: normal;
-  font-weight: 400;
-  src: local('Open Sans'), local('OpenSans'), url(https://fonts.gstatic.com/s/opensans/v13/cJZKeOuBrn4kERxqtaUH3aCWcynf_cDxXwCLxiixG1c.ttf) format('truetype');
-}
-
-@font-face {
-  font-family: 'Open Sans';
-  font-style: normal;
-  font-weight: 600;
-  src: local('Open Sans Semibold'), local('OpenSans-Semibold'), url(https://fonts.gstatic.com/s/opensans/v13/MTP_ySUJH_bn48VBG8sNSonF5uFdDttMLvmWuJdhhgs.ttf) format('truetype');
-}
-
-* {
-  box-sizing: inherit;
-}
-
-body {
-  background-color: $base-background-color;
-  box-sizing: border-box;
-  color: $base-text-color;
-  font-size: 12px;
-  line-height: 1.6;
-  margin: 0 8px;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  color: #fff;
-  font-weight: 400;
-  line-height: normal;
-  margin: 8px 0;
-  max-width: 100%;
-}
-
-h1 a,
-h2 a,
-h3 a,
-h4 a,
-h5 a,
-h6 a {
-  color: $primary-accent-color;
-}
-
-h1,
-h2 {
-  font-size: 23px;
-}
-
-h3,
-h4 {
-  font-size: 18px;
-}
-
-h4,
-h5 {
-  font-size: 16px;
-}
-
-a {
-  color: $a-color;
-  text-decoration: none;
-}
-
-a:hover {
-  color: $a-hover-color;
+    vertical-align: middle;
 }
 
 svg|a {
-  fill: $a-color;
+    fill: $color-text-anchor;
 }
 
 svg|a:hover {
-  fill: $a-hover-color;
+    fill: $color-text-anchor-hover;
 }
 
 b,
 strong {
-  color: #fff;
-  font-weight: 600;
+    color: $color-text-bold;
+    font-weight: 600;
 }
 
 ol,
 ul {
-  margin: 12px;
-  padding-left: 16px;
+    margin: 12px;
+    padding-left: 16px;
 }
 
 ol.nobullet,
 ul.nobullet {
-  list-style-type: none;
+    list-style-type: none;
 }
 
 li {
-  margin-bottom: 4px;
+    margin-bottom: 4px;
 }
 
 li:last-child {
-  margin-bottom: 0;
+    margin-bottom: 0;
 }
 
 blockquote {
-  background-color: $blockquote-background-color;
-  border: 1px dashed rgba(255, 255, 255, 0.25);
-  margin: 12px;
-  padding: 12px;
+    background-color: $color-background-blockquote;
+    border: 1px dashed $color-accent-border-blockquote;
+    margin: 12px;
+    padding: 12px;
 }
 
 ::selection {
-  background-color: $selection-background-color;
-  color: #fff;
+    background-color: $color-accent-selection-background;
+    color: $color-accent-selection-text;
 }
 
 form input {
-  vertical-align: sub;
-}
-
-table,
-table .rowa:nth-child(even),
-table .rowb:nth-child(even) {
-  background-color: $table-background-color;
+    vertical-align: sub;
 }
 
 table {
-  border-collapse: collapse;
-  margin: 8px 0;
-  width: 100%;
+    background-color: $color-background-table;
 }
 
+// Inbox uses .a and .b instead of .rowa and .rowb.
+// WATCH: check for spurious borders 
 table .rowa,
-table .rowb {
-  border-top: 2px solid $secondary-table-background-color;
+table .rowb,
+table .a,
+table .b {
+    border-top: 2px solid $color-accent-border-tablerows;
+}
+
+table .rowa:nth-child(even),
+table .rowb:nth-child(even),
+#top10 tr.torrent.row.b,
+#dnulist tr:not(.colhead, .colhead_dark):nth-child(even),
+#upload tr:nth-child(even),
+#inbox .message_table tr.a  {
+    background-color: $color-background-table-row-even;
+}
+
+table {
+    border-collapse: collapse;
+    margin: 8px 0;
+    width: 100%;
 }
 
 table .rowa:nth-child(odd),
-table .rowb:nth-child(odd) {
-  background-color: $input-background-color;
+table .rowb:nth-child(odd),
+#top10 tr.torrent.row.a,
+#dnulist tr:not(.colhead, .colhead_dark):nth-child(odd),
+#upload tr:nth-child(odd),
+#inbox .message_table tr.b {
+    background-color: $color-background-table-row-odd;
 }
 
 table ul.options_list {
-  margin: 0;
-  padding: 0;
+    margin: 0;
+    padding: 0;
 }
 
+#content div.thin div.head,
 .colhead,
 .colhead_dark {
-  background-color: $input-background-color;
-  line-height: 18px;
+    background-color: $color-background-table-row-th;
+    line-height: 18px;
 }
 
 .colhead td,
 .colhead_dark td {
-  padding-bottom: 12px;
-  padding-top: 12px;
+    padding-bottom: 12px;
+    padding-top: 12px;
 }
 
 .colhead td.sign,
 .colhead_dark td.sign {
-  text-align: center !important;
+    text-align: center !important;
 }
 
 .colhead td.sign .tooltip,
 .colhead_dark td.sign .tooltip {
-  display: inline;
-  max-height: 13px;
-  max-width: 13px;
+    display: inline;
+    max-height: 13px;
+    max-width: 13px;
 }
 
 td {
-  padding: 4px 6px;
+    padding: 4px 6px;
 }
 
 td:first-child {
-  padding-left: 12px;
+    padding-left: 12px;
 }
 
 td:last-child {
-  padding-right: 12px;
+    padding-right: 12px;
 }
 
 form {
-  background-color: $form-background-color;
+    background-color: $color-background-form;
 }
-
 form table td.label {
-  color: $footer-color;
-  padding-top: 9px;
-  font-weight: 600;
-  text-align: right;
-  width: 180px;
+    color: $color-text-footer;
+    padding-top: 9px;
+    font-weight: 600;
+    text-align: left;
+    width: 180px;
 }
 
 button,
 input,
 select,
 textarea {
-  font-size: 12px;
+    font-size: 12px;
 }
 
 button,
-input[type=button],
-input[type=submit] {
-  background: linear-gradient($a-color, #b8b8b8);
-  border: none;
-  border-radius: 1.5px;
-  color: $input-background-color;
-  cursor: pointer;
-  font-weight: 600;
-  height: 32px;
-  padding: 0 12px;
+input[type="button"],
+input[type="submit"], 
+#popup_close {
+    background: linear-gradient($color-obj-button-base-1, $color-obj-button-base-2);
+    border: none;
+    border-radius: 1.5px;
+    color: $color-text-button;
+    cursor: pointer;
+    font-weight: 600;
+    height: 32px;
+    padding: 0 12px;
 }
 
 button:active,
-input[type=button]:active,
-input[type=submit]:active {
-  background: linear-gradient(#b8b8b8, $a-color);
+input[type="button"]:active,
+input[type="submit"]:active,
+#popup_close:active {
+    background: linear-gradient($color-obj-button-base-2, $color-obj-button-base-1);
 }
 
-input[type=email],
-input[type=password],
-input[type=text],
-input[type=search],
+input[type="email"],
+input[type="password"],
+input[type="text"],
+input[type="search"],
 select,
 textarea {
-  background: $input-background-color;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #c6c9c9;
-  height: 32px;
-  padding: 0 8px;
+    background: $color-background-input;
+    border: 1px solid $color-accent-border-input;
+    color: $color-text-input;
+    height: 32px;
+    padding: 0 8px;
 }
 
-input[type=email]:focus,
-input[type=password]:focus,
-input[type=text]:focus,
-input[type=search]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="text"]:focus,
+input[type="search"]:focus,
 select:focus,
 textarea:focus {
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: $a-color;
+    background: $color-background-input-active;
+    border: 1px solid $color-accent-border-input-active;
+    color: $color-text-input-active;
 }
 
 textarea {
-  min-height: 96px;
-  padding-top: 6px;
-  width: 100%;
+    min-height: 96px;
+    padding-top: 6px;
+    width: 100%;
 }
 
 .body,
 .head,
 .pad {
-  padding: 12px;
+    padding: 12px;
 }
 
 span.size1 {
-  font-size: 0.75em;
+    font-size: 0.75em;
 }
 
 span.size2 {
-  font-size: 1em;
+    font-size: 1em;
 }
 
 span.size3 {
-  font-size: 1.25em;
+    font-size: 1.25em;
 }
 
 span.size4 {
-  font-size: 1.5em;
+    font-size: 1.5em;
 }
 
 span.size5 {
-  font-size: 1.75em;
+    font-size: 1.75em;
 }
 
 span.size6 {
-  font-size: 2em;
+    font-size: 2em;
 }
 
 span.size7 {
-  font-size: 2.25em;
+    font-size: 2.25em;
 }
 
 span.size8 {
-  font-size: 2.5em;
+    font-size: 2.5em;
 }
 
 span.size9 {
-  font-size: 2.75em;
+    font-size: 2.75em;
 }
 
 span.size10 {
-  font-size: 3em;
+    font-size: 3em;
 }
 
 strong.important_text {
-  color: $ratio-red-color;
+    color: $color-text-important;
 }
 
+/* used for anything? */
 strong.important_text_alt {
-  color: #4fb650;
+    color: $color-text-important-alt;
 }
 
 .error,
@@ -381,7 +623,7 @@ strong.important_text_alt {
 .r02,
 .r03,
 .warning {
-  color: $ratio-red-color;
+    color: $color-text-ratio-redzone;
 }
 
 .r04,
@@ -390,7 +632,7 @@ strong.important_text_alt {
 .r07,
 .r08,
 .r09 {
-  color: $ratio-yellow-color;
+    color: $color-text-ratio-yellowzone;
 }
 
 .r10,
@@ -398,7 +640,7 @@ strong.important_text_alt {
 .r50,
 .r99,
 .vote_tag_up {
-  color: #4fb650;
+    color: $color-text-ratio-greenzone;
 }
 
 .small_upvote,
@@ -406,8 +648,8 @@ strong.important_text_alt {
 .vote_album_up,
 .vote_artist_up,
 .vote_tag_up {
-  font-weight: bolder;
-  color: #4fb650;
+    font-weight: bolder;
+    color: $color-text-ratio-greenzone;
 }
 
 .small_downvote,
@@ -415,515 +657,264 @@ strong.important_text_alt {
 .vote_album_down,
 .vote_artist_down,
 .vote_tag_down {
-  font-weight: bolder;
-  color: $ratio-red-color;
+    font-weight: bolder;
+    color: $color-text-ratio-redzone;
 }
 
 #wrapper {
-  align-items: stretch;
-  display: flex;
-  flex-direction: column;
-  margin: auto;
-  max-width: 1020px;
+    align-items: stretch;
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    max-width: 1020px;
 }
 
 .main_column {
-  flex: 3;
+    flex: 3;
 }
 
 .sidebar {
-  flex: 1;
+    flex: 1;
 }
 
 .box,
 .box2 {
-  background-color: $form-background-color;
-  margin-bottom: 8px;
-  margin-top: 8px;
+    background-color: $color-background-form;
+    margin-bottom: 8px;
+    margin-top: 8px;
 }
 
 table.box,
 table.box2 {
-  overflow: auto;
+    overflow: auto;
 }
 
 .head {
-  background-color: $input-background-color;
-  line-height: 18px;
+    background-color: $color-background-input;
+    line-height: 18px;
 }
 
 .min_padding {
-  margin: 0;
-  padding: 0;
+    margin: 0;
+    padding: 0;
 }
 
 .clear::after {
-  display: block;
-  height: 0;
-  visibility: visible;
+    display: block;
+    height: 0;
+    visibility: visible;
 }
 
 .profileinfo::before {
-  clear: both;
-  display: table;
+    clear: both;
+    display: table;
 }
 
+/* Sessions table should scroll */
+// override *both* have overflow set not to scroll
+.box.pad:has(.session_table.border),
+.box.pad .session_table.border {
+    overflow: scroll !important;
+}
+
+/* #2024 note: Many of these appear to be overridden by
+ * global.css or auto-complete.css: your mileage may vary. */
+ 
 .autocomplete-suggestions {
-  background-color: $a-color;
-  border: none;
-  color: #26282e;
-  margin-top: 4px;
+    background-color: $color-text-anchor;
+    border: none;
+    color: #26282e;
+    margin-top: 4px;
 }
 
 .autocomplete-suggestions .autocomplete-suggestion {
-  line-height: 24px;
-  padding: 0 8px;
+    line-height: 24px;
+    padding: 0 8px;
 }
 
 .autocomplete-suggestions .autocomplete-suggestion.autocomplete-selected {
-  background-color: $a-hover-color;
+    background-color: $color-text-anchor-hover;
 }
 
 .autocomplete-suggestions .autocomplete-suggestion strong {
-  color: #12a1e3;
+    color: #12a1e3;
 }
 
 .forum_post.forum_unread {
-  border-top: 2px solid $a-hover-color;
+    border-top: 2px solid $color-accent-forum-unread;
+}
+
+.forum_post.wrap_overflow.box.vertical_margin td.body 
+{ /*foobar*/;
 }
 
 .forum_post .avatar {
-  padding: 0;
-  width: 150px;
+    padding: 0;
+    width: 150px;
 }
 
 .forum_post .avatar img {
-  display: block;
-  height: auto;
-  max-height: 400px !important;
-  max-width: 150px !important;
-  min-width: 150px;
-  width: auto;
+    display: block;
+    height: auto;
+    max-height: 400px !important;
+    max-width: 150px !important;
+    min-width: 150px;
+    width: auto;
 }
 
 .forum_post .body img,
 .sidebar img {
-  max-width: 100%;
+    max-width: 100%;
 }
 
 @media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
-  .forum_post .body img {
-    max-width: 720px;
-  }
+    .forum_post .body img {
+          max-width: 720px;
+    }
 }
 
 .forum_index h4,
 .forum_list h4 {
-  font-size: 12px;
+    font-size: 12px;
 }
 
 .forum_index h3,
 .forum_list h3 {
-  margin-top: 24px;
+    margin-top: 24px;
 }
 
 .forum_index td[style*='width: 2%'],
 .forum_list td[style*='width: 2%'] {
-  width: 24px !important;
+    width: 24px !important;
 }
 
 .last_read {
-  margin-left: 8px;
+    margin-left: 8px;
 }
 
 .last_read ::before {
-  content: '➟';
+  content: '\27A4';  /* aka ➤ */
+  color: $color-accent-forum-inline-last-read;
   display: inline-block;
 }
 
 #userinfo_minor::before,
 .linkbox br {
-  content: '';
+    content: '';
 }
+
 #nav_logchecker {
-  display: block;
+    display: block;
 }
 
 .read {
-  background: $read-icon center no-repeat;
+    background: $icon-message-read center no-repeat;
 }
 
 .unread {
-  background: $unread-icon center no-repeat;
+    background: $icon-message-unread center no-repeat;
 }
 
 .read_locked {
-  background: $read-locked-icon center no-repeat;
+    background: $icon-message-read-locked center no-repeat;
 }
 
 .unread_locked {
-  background: $unread-locked-icon center no-repeat;
+    background: $icon-message-unread-locked center no-repeat;
 }
 
 .read_sticky {
-  background: $read-sticky-icon center no-repeat;
+    background: $icon-message-read-sticky center no-repeat;
 }
 
 .unread_sticky {
-  background: $unread-sticky-icon center no-repeat;
+    background: $icon-message-unread-sticky center no-repeat;
 }
 
 .read_locked_sticky {
-  background: $read-locked-sticky-icon center no-repeat;
+    background: $icon-message-read-locked-sticky center no-repeat;
 }
 
 .unread_locked_sticky {
-  background: $unread-locked-sticky-icon center no-repeat;
-}
-
-#header,
-#userinfo {
-  position: relative;
-}
-
-#header ul {
-  margin: 0;
-  padding: 0;
-}
-
-#header li {
-  margin: 0;
-}
-
-#logo {
-  box-sizing: content-box;
-  height: 42px;
-  padding: 24px 8px 16px;
-  width: 200px;
-}
-
-#logo a,
-#extra5 {
-  background: url('data:image/png;base64,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') right no-repeat;
-}
-
-#logo > a {
-  background-size: 200px;
-  display: block;
-  height: 100%;
-  margin-top: 0;
-}
-
-#menu > ul {
-  display: flex;
-  display: -ms-flexbox;
-  -ms-flex-flow: row nowrap;
-  flex-flow: row nowrap;
-  font-size: 13px;
-  overflow: hidden;
-  width: calc(100% - 149px);
-}
-
-#menu > ul li {
-  -ms-flex: 1 1 auto;
-  flex: 1 1 auto;
-}
-
-#menu > ul a {
-  display: block;
-  height: 100%;
-  line-height: 50px;
-  text-align: center;
-}
-
-#menu > ul a:hover,
-#userinfo_minor:hover a:hover,
-#userinfo_username:hover a:hover {
-  background-color: $a-hover-color;
-}
-
-#nav_index {
-  display: none;
-}
-
-#userinfo_minor:hover a,
-#userinfo_username:hover a {
-  display: block;
-}
-
-#userinfo_username #nav_userinfo > a {
-  display: block;
-  font-size: 13px;
-  line-height: 50px;
-  overflow: hidden;
-  text-align: center;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  width: 100px;
-}
-
-.linkbox,
-.linkbox .center {
-  text-align: right;
-}
-
-#userinfo_major > li,
-#userinfo_stats > li,
-.linkbox .brackets {
-  margin-left: 8px;
-}
-
-#userinfo_major,
-#userinfo_stats {
-  display: flex;
-  display: -ms-flexbox;
-  -ms-flex-flow: row nowrap;
-  flex-flow: row nowrap;
-  position: absolute;
-  right: 8px;
-}
-
-#userinfo_major {
-  font-size: 13px;
-  right: 41px;
-  top: -53px;
-}
-
-#userinfo_stats {
-  font-size: 13px;
-  top: -31px;
-}
-
-#searchbars > ul {
-  align-items: center;
-  background-color: $input-background-color;
-  display: flex;
-  display: -ms-flexbox;
-  -ms-flex-align: center;
-  height: 50px;
-  padding: 0 9px;
-}
-
-#searchbars > ul li {
-  -ms-flex: 1 1 auto;
-  flex: 1 1 auto;
-  margin-right: 9px;
-}
-
-#searchbars > ul li:last-child {
-  margin-right: 0;
-}
-
-#searchbars > ul input {
-  background-color: $form-background-color;
-  width: 100%;
-}
-
-#menu li:nth-child(2) {
-  background-color: $menu-li-second-child-background-color;
-}
-
-#menu li:nth-child(3) {
-  background-color: $menu-li-third-child-background-color;
-}
-
-#menu li:nth-child(4) {
-  background-color: $menu-li-fourth-child-background-color;
-}
-
-#menu li:nth-child(5) {
-  background-color: $menu-li-fifth-child-background-color;
-}
-
-#menu li:nth-child(6) {
-  background-color: $menu-li-sixth-child-background-color;
-}
-
-#menu li:nth-child(7) {
-  background-color: $menu-li-seventh-child-background-color;
-}
-
-#menu li:nth-child(8) {
-  background-color: $header-background-color;
-}
-
-#menu li:nth-child(9) {
-  background-color: $menu-li-ninth-child-background-color;
-}
-
-#userinfo_username {
-  background-color: $userinfo-username-color;
-  right: 50px;
-}
-
-#menu {
-  border-radius: 5px 5px 0 0;
-  overflow: hidden;
-}
-
-.linkbox br {
-  display: block;
-  line-height: 4px;
-}
-
-.linkbox > strong {
-  color: $primary-accent-color;
+    background: $icon-message-unread-locked-sticky center no-repeat;
 }
 
 #footer,
 .alertbar {
-  text-align: center;
+    text-align: center;
 }
 
-.linkbox .brackets::after,
-.linkbox .brackets::before {
-  display: none;
-}
-
-.thin > .header {
-  display: flex;
-  display: -ms-flexbox;
-  -ms-flex-flow: row wrap;
-  flex-flow: row wrap;
-  width: 100%;
-}
 
 #covers .cover_seperator,
 #noty_bottomRight_layout_container .brackets::after,
 #noty_bottomRight_layout_container .brackets::before {
-  display: none;
+    display: none;
 }
 
 .thin > .header h1,
 .thin > .header h2,
 .thin > .header h3 {
-  -ms-flex: 1 0 auto;
-  flex: 1 0 auto;
-}
-
-.thin > .header .linkbox {
-  align-self: flex-end;
-  flex: 1 0 auto;
-  -ms-flex: 1 0 auto;
-  -ms-flex-item-align: end;
-  margin-top: 8px;
-}
-
-#noty_bottomRight_layout_container {
-  bottom: 24px !important;
-  right: 24px !important;
-}
-
-#noty_bottomRight_layout_container > li {
-  background: 0 0 !important;
-  border: 2px solid $a-color !important;
-  border-radius: 0 !important;
-  box-shadow: 0 0 32px rgba(0, 0, 0, 0.25) !important;
-}
-
-#noty_bottomRight_layout_container .noty_message {
-  background-color: $a-color !important;
-  color: $base-background-color !important;
-  font-weight: 700;
-  padding: 0 !important;
-}
-
-#noty_bottomRight_layout_container .noty_message .noty_text {
-  line-height: 34px;
-  padding: 0 8px;
-}
-
-#noty_bottomRight_layout_container .noty_buttons {
-  background-color: $form-background-color !important;
-  border: none !important;
-  padding: 8px !important;
-}
-
-#noty_bottomRight_layout_container .noty_buttons a {
-  color: $a-color !important;
-}
-
-#noty_bottomRight_layout_container .noty_buttons a:hover {
-  color: $a-hover-color !important;
-}
-
-#noty_bottomRight_layout_container .brackets {
-  margin: 0 2px;
-}
-
-.sidebar .pad ol,
-.sidebar .pad ul {
-  margin-bottom: 0;
-  margin-top: 0;
-  padding-bottom: 0;
-}
-
-.sidebar ol.nobullet,
-.sidebar ul.nobullet {
-  padding-left: 0;
-}
-
-.sidebar img {
-  height: auto;
-  width: auto;
+    -ms-flex: 1 0 auto;
+    flex: 1 0 auto;
 }
 
 #covers .pad,
 #covers p {
-  margin: 0;
-  padding: 0;
+    margin: 0;
+    padding: 0;
 }
 
 #add_cover_div > div:first-child,
 #artist .sidebar .box_image div:last-child {
-  padding: 0 !important;
+    padding: 0 !important;
 }
 
 div#flip_view_1 div#similar-artist .name {
-  border: 1px solid $base-text-color;
-  background: rgba(60, 60, 60, 0.7);
-  color: $base-text-color;
-  margin: 0;
-  padding: 0 5px;
+    border: 1px solid $color-text-base;
+    background: rgb(60 60 60 / 70%);
+    color: $color-text-base;
+    margin: 0;
+    padding: 0 5px;
 }
 
 #covers img {
-  width: 100%;
+    width: 100%;
 }
 
 #covers .stats {
-  margin: 0 8px 8px;
+    margin: 0 8px 8px;
+    overflow: hidden;
 }
 
 #add_cover_div > div:first-child .additional_add_artists {
-  margin: 8px 12px;
+    margin: 8px 12px;
 }
 
-#add_cover_div .add_form input[type=text] {
-  margin-bottom: 8px;
-  width: 100%;
+#add_cover_div .add_form input[type="text"] {
+    margin-bottom: 8px;
+    width: 100%;
 }
 
 #artist .sidebar .box_image img {
-  max-width: 100% !important;
+    max-width: 100% !important;
 }
 
 .box_artists .brackets,
 .box_tags .edit_tags_votes .brackets {
-  margin: 0 4px;
+    margin: 0 4px;
 }
 
 .box_artists .brackets:last-child,
 .box_tags .edit_tags_votes .brackets:last-child {
-  margin-right: 0;
+    margin-right: 0;
 }
 
 .box_artists .brackets::after,
 .box_artists .brackets::before,
 .box_tags .edit_tags_votes .brackets::after,
 .box_tags .edit_tags_votes .brackets::before {
-  content: '';
-  display: none;
+    content: '';
+    display: none;
 }
 
 .box_addartists form,
@@ -931,283 +922,223 @@ div#flip_view_1 div#similar-artist .name {
 .box_addtag form,
 .box_search form,
 .box_zipdownload form {
-  display: -ms-flexbox;
-  display: flex;
-  -ms-flex-flow: row wrap;
-  flex-flow: row wrap;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-flow: row wrap;
+    flex-flow: row wrap;
 }
 
-.box_addartists input[type=text],
+.box_addartists input[type="text"],
 .box_addartists select,
-.box_addartists_similar input[type=text],
+.box_addartists_similar input[type="text"],
 .box_addartists_similar select,
-.box_addtag input[type=text],
+.box_addtag input[type="text"],
 .box_addtag select,
-.box_search input[type=text],
+.box_search input[type="text"],
 .box_search select,
-.box_zipdownload input[type=text],
+.box_zipdownload input[type="text"],
 .box_zipdownload select {
-  -ms-flex: 1 1 auto;
-  flex: 1 1 auto;
-  margin-right: 8px;
-  width: auto;
+    -ms-flex: 1 1 auto;
+    flex: 1 1 auto;
+    margin-right: 8px;
+    width: auto;
+}
+
+/* Artist page ~ ensure wrap after vote buttons */
+.box_artists ul.stats.nobullet li {
+    content: '';
+    display: block;
+    clear: both;
 }
 
 #AddArtists input,
 #AddArtists select {
-  margin-bottom: 8px;
-  width: 100%;
+    margin-bottom: 8px;
+    width: 100%;
 }
 
 .box_addtag .body strong {
-  display: block;
-  font-weight: 400;
-  margin-top: 8px;
+    display: block;
+    font-weight: 400;
+    margin-top: 8px;
 }
 
 .box_addtag .body br {
-  display: none;
+    display: none;
 }
 
 .add_torrent_container .field_div input {
-  width: 100%;
+    width: 100%;
 }
 
 .add_torrent_container form > span:last-child {
-  display: inline-block;
-  margin-top: 8px;
+    display: inline-block;
+    margin-top: 8px;
 }
 
 .box_zipdownload input,
 .box_zipdownload select {
-  margin-bottom: 8px;
-  margin-right: 0;
-  width: 100% !important;
+    margin-bottom: 8px;
+    margin-right: 0;
+    width: 100% !important;
 }
 
-.box_zipdownload input[type=submit] {
-  margin-bottom: 0;
+.box_zipdownload input[type="submit"] {
+    margin-bottom: 0;
 }
 
 .box_zipdownload #list {
-  margin: 0 0 8px;
-  width: 100%;
+    margin: 0 0 8px;
+    width: 100%;
 }
 
 .box_zipdownload #formats {
-  margin-right: 8px;
-  width: 170px !important;
+    margin-right: 8px;
+    width: 170px !important;
 }
 
 .torrent_table {
-  background-color: $secondary-table-background-color;
+    background-color: $color-background-table-torrenttable;
 }
 
-.torrent_table tr:not(.colhead):not(.colhead_dark) {
-  border-top: 2px solid $secondary-table-background-color;
+.torrent_table tr:not(.colhead, .colhead_dark) {
+    border-top: 2px solid $color-accent-border-tablerows-torrent;
 }
 
 .torrent_table tr .number_column:not(:last-child) {
-  padding-right: 6px;
+    padding-right: 6px;
 }
 
 .torrent_table .group {
-  background-color: $input-background-color;
+    background-color: $color-background-input;
 }
 
 .group_torrent {
-  background-color: $form-background-color;
+    background-color: $color-background-form;
 }
 
-.group_torrent.edition,
-.torrent {
-  background-color: $torrent-background-color;
+/* Edition stripe appears on 
+/* (1) individual album pages, */
+/* (2) torrent/search listings when preceded by a Group */
+/* but NOT personal 'snatches, downloads,..' pages. */
+
+#torrents #torrent_details .group_torrent td.edition_info,
+group ~ .group_torrent.edition {
+    background-color: $color-background-torrent;
 }
 
 .torrentdetails .linkbox {
-  margin-bottom: 6px;
+    margin-bottom: 6px;
 }
 
 .group_info {
-  word-break: break-all;
+    word-break: break-all;
 }
 
 .big_info {
-  padding-bottom: 0;
-  padding-top: 0;
+    padding-bottom: 0;
+    padding-top: 0;
 }
 
 .big_info .group_image {
-  margin-right: 8px;
+    margin-right: 8px;
 }
 
 .big_info .group_info {
-  margin: 4px;
+    margin: 4px;
 }
 
 .big_info .group_info::after {
-  display: none;
+    display: none;
 }
 
 .tags a {
-  color: $footer-color;
-  font-size: 11px;
+    color: $color-text-footer;
+    font-size: 11px;
 }
 
 .tags a:hover {
-  color: $a-hover-color;
+    color: $color-text-anchor-hover;
 }
 
 .group_info > span:first-child,
 .group_torrent td:first-child > span,
 .torrent_links_block {
-  color: $footer-color;
-  float: right;
-  margin-right: 4px;
+    color: $color-text-footer;
+    float: right;
+    margin-right: 4px;
 }
 
 .add_bookmark {
-  margin-right: 4px;
+    margin-right: 4px;
 }
 
 .group_torrent:not(.edition) td:first-child {
-  padding-left: 24px;
+    padding-left: 24px;
 }
 
 .torrent_table .group td:first-child {
-  padding-left: 4px;
+    padding-left: 4px;
 }
 
 .hide_torrents > a,
 .show_torrents > a {
-  display: block;
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 100%;
-  position: relative;
-  text-align: center;
-  width: 18px;
+    display: block;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 100%;
+    position: relative;
+    text-align: center;
+    width: 18px;
 }
 
 .show_torrents > a::after {
-  content: "▶";
+    content: "\25b6";
 }
 
 .hide_torrents > a::after {
-  content: "▼";
+    content: "\25bc";
 }
 
 .group_torrent .edition_info {
-  border-top: 1px solid transparent;
-  padding-left: 34px;
-  position: relative;
+    border-top: 1px solid transparent;
+    padding-left: 34px;
+    position: relative;
 }
 
 .group_torrent .edition_info a {
-  display: block;
-  font-size: 16px;
-  left: 0;
-  line-height: 27px;
-  position: absolute;
-  text-align: center;
-  top: 0;
-  width: 22px;
+    display: block;
+    font-size: 16px;
+    left: 0;
+    line-height: 27px;
+    position: absolute;
+    text-align: center;
+    top: 0;
+    width: 22px;
 }
 
 #artist .td_info > a {
-  margin-left: -8px;
+    margin-left: -8px;
 }
 
 .colhead td[width*='70%'],
 .colhead_dark td[width*='70%'] {
-  width: 100%;
+    width: 100%;
 }
 
 .colhead .cats_col,
 .colhead_dark .cats_col {
-  height: auto;
-  padding: 0;
+    height: auto;
+    padding: 0;
 }
 
-.cats_col {
-  border-top: 1px solid transparent;
-  height: 100%;
-  padding: 0;
-  position: relative;
-}
-
-.cats_applications,
-.cats_audiobooks,
-.cats_comedy,
-.cats_comics,
-.cats_ebooks,
-.cats_elearningvideos {
-  border-right: 2px solid $base-background-color;
-  bottom: 0;
-  left: auto;
-  opacity: 0.35;
-  position: absolute;
-  top: 0;
-  width: 6px;
-}
-
-.cats_applications {
-  background-color: #2b99ff;
-}
-
-.cats_audiobooks {
-  background-color: #ffe70f;
-}
-
-.cats_comedy {
-  background-color: #ff382b;
-}
-
-.cats_comics {
-  background-color: #b52bff;
-}
-
-.cats_ebooks {
-  background-color: #3fee23;
-}
-
-.cats_elearningvideos {
-  background-color: #22fad9;
+/* #2024 bugfix for messages with 'pre' that overrun the width of their message box. */
+pre {
+    white-space: pre-wrap;
 }
 
 .log_section pre {
-  line-height: 1.4;
-}
-
-.tooltipster-base {
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
-  width: auto !important;
-}
-
-.tooltipster-default {
-  background-color: $base-background-color;
-  border: 0 solid $primary-accent-color;
-  border-radius: 2.5px;
-  color: #c6c9c9;
-}
-
-.tooltipster-default .tooltipster-content {
-  background-color: $base-background-color;
-  color: #c6c9c9;
-  font-size: 12px;
-  line-height: 1.4;
-  padding: 4px 6px;
-}
-
-.tooltipster-default .tooltipster-content a {
-  background-color: $base-background-color;
-  color: #c6c9c9;
-  font-weight: 600;
-}
-
-.alertbar,
-.tooltipster-default .tooltipster-content a:hover {
-  color: $primary-accent-color;
+    line-height: 1.4;
 }
 
 #content .header > h1,
@@ -1216,330 +1147,302 @@ div#flip_view_1 div#similar-artist .name {
 #content .thin > h1,
 #content .thin > h2,
 #content .thin > h3 {
-  margin-bottom: 0;
-  margin-top: 16px;
+    margin-bottom: 0;
+    margin-top: 16px;
 }
 
 ul.collage_images {
-  margin: 0;
-  width: 100%;
+    margin: 0;
+    width: 100%;
 }
 
 ul.collage_images li {
-  display: block;
-  height: auto;
-  overflow: hidden;
-  position: relative;
-  width: 20%;
+    display: block;
+    height: auto;
+    overflow: hidden;
+    position: relative;
+    width: 20%;
 }
 
 ul.collage_images li a,
 ul.collage_images li a img {
-  height: 100%;
-  position: absolute;
-  width: 100%;
+    height: 100%;
+    position: absolute;
+    width: 100%;
 }
 
 ul.collage_images li::before {
-  content: '';
-  float: left;
-  padding-top: 100%;
+    content: '';
+    float: left;
+    padding-top: 100%;
 }
 
 ul.collage_images li a {
-  display: block;
-  left: 0;
-  top: 0;
+    display: block;
+    left: 0;
+    top: 0;
 }
 
 ul.collage_images li a > span {
-  height: auto;
-  left: 0;
-  margin: 6px;
-  position: absolute;
-  top: 0;
-  width: auto;
+    height: auto;
+    left: 0;
+    margin: 6px;
+    position: absolute;
+    top: 0;
+    width: auto;
 }
 
 .recent {
-  table-layout: fixed;
+    table-layout: fixed;
 }
 
-.recent tr:not(.colhead):not(.colhead_dark) > td {
-  padding: 0;
-  position: relative;
+.recent tr:not(.colhead, .colhead_dark) > td {
+    padding: 0;
+    position: relative;
 }
 
-.recent tr:not(.colhead):not(.colhead_dark) > td::before {
-  content: '';
-  float: left;
-  padding-top: 100%;
+.recent tr:not(.colhead, .colhead_dark) > td::before {
+    content: '';
+    float: left;
+    padding-top: 100%;
 }
 
-.recent tr:not(.colhead):not(.colhead_dark) > td a {
-  height: 100%;
-  left: 0;
-  overflow: hidden;
-  position: absolute;
-  top: 0;
-  width: 100%;
+.recent tr:not(.colhead, .colhead_dark) > td a {
+    height: 100%;
+    left: 0;
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    width: 100%;
 }
 
-.recent tr:not(.colhead):not(.colhead_dark) > td a img {
-  height: 100%;
-  position: absolute;
-  width: 100%;
+.recent tr:not(.colhead, .colhead_dark) > td a img {
+    height: 100%;
+    position: absolute;
+    width: 100%;
 }
 
 .alertbar {
-  font-size: 16px;
-  margin-top: 8px;
+    font-size: 16px;
+    margin-top: 8px;
 }
 
 #userform #settings_sections h2 a,
 .rule_short {
-  color: $a-color;
+    color: $color-text-anchor;
 }
 
 .poll li {
-  margin-bottom: 2px;
+    margin-bottom: 2px;
 }
 
 .poll .graph {
-  background-color: $poll-background-color;
-  display: block;
-  height: 8px;
-  margin-bottom: 12px;
+    background-color: $color-background-poll;
+    display: block;
+    height: 8px;
+    margin-bottom: 12px;
 }
 
 .poll .graph span {
-  background-color: $primary-accent-color;
-  display: block;
-  float: left;
-  height: 8px;
+    background-color: $color-obj-poll;
+    display: block;
+    float: left;
+    height: 8px;
 }
 
 .lightbox {
-  align-items: center;
-  background-color: rgba(0, 0, 0, 0.32);
-  bottom: 0;
-  cursor: pointer;
-  display: flex;
-  display: -ms-flexbox;
-  -ms-flex-align: center;
-  -ms-flex-flow: row nowrap;
-  flex-flow: row nowrap;
-  -ms-flex-pack: center;
-  justify-content: center;
-  left: 0;
-  margin: auto;
-  position: fixed;
-  right: 0;
-  top: 0;
-  user-select: none;
-  z-index: 1000;
+    align-items: center;
+    background-color: rgb(0 0 0 / 32%);
+    bottom: 0;
+    cursor: pointer;
+    display: flex;
+    display: -ms-flexbox;
+    -ms-flex-align: center;
+    -ms-flex-flow: row nowrap;
+    flex-flow: row nowrap;
+    -ms-flex-pack: center;
+    justify-content: center;
+    left: 0;
+    margin: auto;
+    position: fixed;
+    right: 0;
+    top: 0;
+    user-select: none;
+    z-index: 1000;
 }
 
 .lightbox.hidden {
-  display: none;
+    display: none;
 }
 
 .lightbox img {
-  box-shadow: 0 0 32px 6px rgba(0, 0, 0, 0.32);
-  display: block;
-  max-height: 92%;
-  max-width: 92%;
+    box-shadow: 0 0 32px 6px rgb(0 0 0 / 32%);
+    display: block;
+    max-height: 92%;
+    max-width: 92%;
 }
 
-#discog_table > div.box.center .brackets::after,
-#discog_table > div.box.center .brackets::before,
-#quickreplytext br:last-child {
-  display: none;
-}
+
 
 #footer {
-  width: 100%;
-  color: $footer-color;
-  font-synthesis: 11px;
-  margin: 32px auto 16px;
+    width: 100%;
+    color: $color-text-footer;
+    font-synthesis: 11px;
+    margin: 32px auto 16px;
 }
 
 #footer p {
-  margin: 0;
+    margin: 0;
 }
 
 #messageform textarea,
 #quickreplytext textarea {
-  margin: 0 0 12px;
+    margin: 0 0 12px;
 }
 
-#discog_table > div.box.center {
-  background-color: $input-background-color;
-  padding: 12px;
-  text-align: left;
-}
-
-#discog_table > div.box.center a {
-  margin: 0 8px;
+#quickreplytext br:last-child {
+    display: none;
 }
 
 .rule_summary {
-  padding: 24px !important;
+    padding: 24px !important;
 }
 
 .golden_rules {
-  margin: 0;
-  padding: 0;
+    margin: 0;
+    padding: 0;
 }
 
 .rule_wrap {
-  margin-bottom: 8px;
-}
-
-#musicbrainz_popup {
-  color: $base-background-color;
-  font-weight: 600;
-}
-
-#musicbrainz_popup a {
-  color: $base-background-color;
-}
-
-#musicbrainz_popup a:hover {
-  color: $primary-accent-color;
-}
-
-#musicbrainz_popup .brackets {
-  font-weight: 400;
+    margin-bottom: 8px;
 }
 
 #menu > ul,
 #userinfo_username .username,
 .album_votes .favoritecount {
-  font-weight: 600;
+    font-weight: 600;
 }
 
-#inbox #content .search_form input[type=search],
-#wiki #content .search_form input[type=search] {
-  margin-top: 8px;
-  width: 100% !important;
+#inbox #content .search_form input[type="search"],
+#wiki #content .search_form input[type="search"] {
+    margin-top: 8px;
+    width: 100% !important;
 }
 
+/* searchbox is not the searchbars */
 #searchbox {
-  margin-bottom: 12px;
+    margin-bottom: 12px;
 }
 
 #inbox .manage_form .box {
-  padding: 0;
+    padding: 0;
 }
 
 #inbox .unreadpm {
-  background: rgba(255, 255, 255, 0.25);
+    background: rgb(255 255 255 / 25%);
 }
 
 #wiki .navigation_list {
-  margin: 0;
-  padding: 0;
+    margin: 0;
+    padding: 0;
 }
 
 #wiki .box_info ul {
-  margin: 0;
+    margin: 0;
 }
 
 #rules #content .thin .header p {
-  display: block;
-  margin: 0 0 8px;
-  width: 100%;
+    display: block;
+    margin: 0 0 8px;
+    width: 100%;
 }
 
 .profileinfo img {
-  max-width: 100%;
+    max-width: 100%;
 }
 
 #user .box > .head {
-  height: auto !important;
+    height: auto !important;
 }
 
 #user .box > .head span[style='float: left;']:first-child {
-  float: none !important;
+    float: none !important;
 }
 
 #user .avatar_container img {
-  max-height: 400px;
-  max-width: 150px;
+    max-height: 400px;
+    max-width: 150px;
 }
 
 #user #userform {
-  background-color: transparent;
-  width: calc(100% - 248px);
+    background-color: transparent;
+    width: calc(100% - 248px);
 }
 
 #userform #settings_sections h2 {
-  font-size: 12px;
-  line-height: 1.6;
+    font-size: 12px;
+    line-height: 1.6;
 }
 
 #userform #settings_sections h2 a:hover {
-  color: $a-hover-color;
+    color: $color-text-anchor-hover;
 }
 
 #userform #settings_sections input {
-  margin-top: 8px;
-}
-
-#dnulist tr:not(.colhead):not(.colhead_dark):nth-child(even) {
-  background-color: #3d3336;
-}
-
-#dnulist tr:not(.colhead):not(.colhead_dark):nth-child(odd) {
-  background-color: $blockquote-background-color;
+    margin-top: 8px;
 }
 
 #menu > ul a:hover,
 #userinfo_minor:hover a:hover,
 #userinfo_username:hover a:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+    background-color: rgb(255 255 255 / 20%);
 }
 
 #torrents .filter_torrents .ft_submit {
-  display: -ms-flexbox;
-  display: flex;
-  -ms-flex-flow: row nowrap;
-  flex-flow: row nowrap;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-flow: row nowrap;
+    flex-flow: row nowrap;
 }
 
 #torrents .filter_torrents .ft_submit input {
-  margin-right: 4px;
+    margin-right: 4px;
 }
 
 #torrents .filter_torrents .ft_submit span {
-  -ms-flex-order: 2;
-  order: 2;
+    -ms-flex-order: 2;
+    order: 2;
 }
 
 #votes {
-  position: relative;
+    position: relative;
 }
 
 .album_votes {
-  line-height: normal;
+    line-height: normal;
 }
 
 #collages.collage_table .colhead td:last-child,
 #personal_collages .colhead td:last-child,
 .filelist_table .colhead_dark td:last-child,
 .forum_index .colhead td[style*='width: 7%'] {
-  text-align: right;
+    text-align: right;
 }
 
 .search_form {
-  margin: 8px 0;
-  overflow: hidden;
+    margin: 8px 0;
+}
+
+/* only on desktop, not on mobile */
+@media (min-width: 575px)  {
+    .search_form {
+        overflow: hidden;
+    }
 }
 
 .search_form div.submit {
-  margin: 12px;
-  text-align: center;
+    margin: 12px;
+    text-align: center;
 }
 
 .box.pad .search_form,
@@ -1547,25 +1450,25 @@ ul.collage_images li a > span {
 .search_form .filter_torrents div.submit,
 .searchbars .search_form,
 .sidebar .search_form {
-  margin: 0;
+    margin: 0;
 }
 
 .box table:not(.layout),
 .box2 table:not(.layout) {
-  border: 2px solid $secondary-table-background-color;
-  margin: 8px 0;
+    border: 2px solid $color-accent-border-tableouter;
+    margin: 8px 0;
 }
 
 span[style*='color: green'] {
-  color: $span-green-color !important;
+    color: $color-text-span-green !important;
 }
 
 span[style*='color: red'] {
-  color: $ratio-red-color !important;
+    color: $color-text-span-red !important;
 }
 
 span[style*='color: blue'] {
-  color: $span-blue-color !important;
+    color: $color-text-span-blue !important;
 }
 
 .filelist_table td,
@@ -1573,1037 +1476,2151 @@ span[style*='color: blue'] {
 .torrentdetails,
 .wrap_overflow,
 blockquote {
-  -webkit-hyphens: unset;
-  -ms-hyphens: unset;
-  hyphens: unset;
-  word-wrap: unset;
+    -webkit-hyphens: unset;
+    -ms-hyphens: unset;
+    hyphens: unset;
+    word-wrap: unset;
 }
 
 .filelist_table td,
 .reportinfo_table,
 .torrentdetails,
 blockquote {
-  background-color: $input-background-color;
+    background-color: $color-background-blockquote;
 }
 
-#bookmarks #torrent_table tr:not(.colhead):not(.colhead_dark) td:nth-child(2) {
-  border-top: 1px solid transparent;
-  height: 100%;
-  padding: 0;
-  position: relative;
+#bookmarks #torrent_table tr:not(.colhead, .colhead_dark) td:nth-child(2) {
+    border-top: 1px solid transparent;
+    height: 100%;
+    padding: 0;
+    position: relative;
 }
 
 #bookmarks .torrent_row td:nth-child(3) > span:first-child {
-  float: right;
+    float: right;
 }
 
 #quickpost {
-  width: 100% !important;
+    width: 100% !important;
 }
 
 .donation_info {
-  margin-left: 0;
-  margin-right: 0;
+    margin-left: 0;
+    margin-right: 0;
 }
 
-#messageform #buttons input[type=button],
+#messageform #buttons input[type="button"],
 #messageform #buttons label,
-#quickpostform .preview_submit input[type=button],
+#quickpostform .preview_submit input[type="button"],
 #quickpostform .preview_submit label,
-.forum_post .colhead_dark input[type=button],
+.forum_post .colhead_dark input[type="button"],
 .forum_post .colhead_dark label {
-  margin-right: 4px;
+    margin-right: 4px;
 }
 
-#userinfo_minor:hover::before {
-  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJBAMAAAASvxsjAAAAKlBMVEX////09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PTORHYwAAAADXRSTlMAAPcn8s3PMewwQO48zuZtxAAAADNJREFUeF5lyjENACAMBdEjJN1Z8VQzWEBB/VQFCeP3AivhhpsefyZtqK4JZay479kecgC28wcE2aUXfwAAAABJRU5ErkJggg==) 21px 20px no-repeat;
-}
 
-#menu > ul a:hover {
-  color: #fff;
-}
 
-#userinfo_minor:hover a,
-#userinfo_username:hover a {
-  color: $a-color;
-}
-
-#searchbars .search_form {
-  background: 0 0;
-}
-
-#searchbars .search_form input {
-  border: none;
-  border-radius: 2.5px;
-  height: 30px;
-}
-
-#searchbars .search_form input:focus {
-  background: $secondary-table-background-color;
-}
-
-.sidebar {
-  order: 5;
-}
-.thin:last-child {
-  display: flex;
-  flex-wrap: wrap;
-  margin: -4px;
-}
-
-/*
- * We want vertical flex unless there's a sidebar. However, CSS has no parent selectors.
- * So, instead, we set width: 100% on everything, which is basically the same as column
- * flex, and then just override that to be default if there is a sidebar.
- */
+/* */
+/* We want vertical flex unless there's a sidebar. However, CSS has no parent selectors.
+/* So, instead, we set width: 100% on everything, which is basically the same as column
+/* flex, and then just override that to be default if there is a sidebar.
+/* */
 
 .thin:not(.linkbox) > :not(.two_columns) {
-  width: 100%;
+    width: 100%;
 }
 
 .thin > table {
-  /* fuck css, dude. Still not sure why this actually happens. */
-  width: calc(100% - 8px);
+    /* Still not sure why this actually happens. */
+    width: calc(100% - 8px);
 }
 
 .thin > .sidebar ~ * {
-  width: auto;
+    width: auto;
 }
 
 #header {
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
 }
 
 #alerts {
-  order: 10;
-}
-
-/*
- * Documentation of mobile classes:
- * GENERAL:
- * .m_hidden: display: none on mobile
- * TABLES:
- * .m_table: table which will be mobilized
- * .m_th_left: which table header should be preserved on the left. It will be replaced with the word "Info". Only 1
- * .m_th_left_collapsable: extra padding applied to align right of the collapse button
- * .m_th_right: table headers that will be "floated" to the right. Max of 3
- * .m_td_left: will be left-aligned, and expanded vertically. Mainly for collapse button
- * .m_td_right: tables cells which will be put on the right with absolute positioning, to correspond with .m_th_right headers. Max of 3
- *
- * forum posts, although they share some of the styles, do not actually use
- * these classes, because:
- * - they are not tabular data, so for semantics
- * - they should not be compact the same way as a table
- * - they have much more uniform HTML across different places (comments and
- * "real" forum), so classes to simplify CSS aren't necessary
- */
-
-/*
- * Portrait phones, and sometimes landscape
- * TODO: currently, responsive is optimized for either desktop or portrait phone
- * We need to handle landscape phones as well
- *
- * this stuff can *probably* be mostly copy-pasted into other stylesheets
- * then tweaked a bit. Ideally, before that happens, the whole styling system
- * should be made to use a CSS preprocessor so that we can have reusable styles
- */
-
-/* this query is mostly copied from what used to be above
- * despite the fact that this exists, there are still many
- * rules above that are overridden by media queries, rather
- * than being put here like they should be
- */
-
-@media (min-width: 480px) {
-  .thin:last-child > :not(.two_columns) {
-    margin: 4px;
-  }
-
-  #nav_donate .tooltip::after {
-    color: red;
-    content: '❤️';
-    font-size: 75%;
-    vertical-align: top;
-  }
-
-  #nav_staff {
-    font-weight: 400;
-  }
-
-  #menu > ul > #nav_staff {
-    display: inline;
-    font-size: 13px;
-    position: absolute;
-    right: 8px;
-    top: 29px;
-  }
-
-  #menu > ul > #nav_staff > a {
-    line-height: 1.6;
-    padding: 0;
-  }
-
-  #menu > ul > #nav_staff > a:hover {
-    background-color: transparent;
-    color: $a-hover-color;
-  }
-
-  #userinfo_minor::before {
-    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJBAMAAAASvxsjAAAAKlBMVEX////09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PTORHYwAAAADXRSTlMAAPcn8s3PMewwQO48zuZtxAAAADNJREFUeF5lyjENACAMBdEjJN1Z8VQzWEBB/VQFCeP3AivhhpsefyZtqK4JZay479kecgC28wcE2aUXfwAAAABJRU5ErkJggg==) 21px 20px no-repeat;
-    display: block;
-    height: 50px;
-    line-height: 50px;
-    width: 50px;
-  }
-
-  #userinfo_minor a,
-  #userinfo_username a {
-    display: none;
-    line-height: 32px;
-    padding: 0 8px;
-    width: 150px;
-  }
-
-  #userinfo_minor:hover::before {
-    margin-left: 100px;
-  }
-
-  #userinfo_minor {
-    background-color: $userinfo-minor-color;
-    border-radius: 0 5px 0 0;
-    right: 0;
-  }
-
-  #userinfo_minor,
-  #userinfo_username {
-    position: absolute;
-    z-index: 900;
-  }
-
-  #userinfo_minor:hover,
-  #userinfo_username:hover {
-    z-index: 800;
-  }
-
-  #userinfo_username:hover {
-    border-radius: 0 10px 0 0;
-    right: 0;
-  }
-
-  #userinfo_minor:hover {
-    background-color: $userinfo-minor-hover-background-color;
-  }
-
-  #userinfo_username:hover {
-    background-color: $userinfo-username-hover-background-color;
-  }
-
-  .settings_sidebar {
-    margin-left: 8px;
-  }
-
-  #userform #settings_sections {
-    width: 240px;
-  }
-}
-
-@media only screen and (max-width: 768px) {
-  /* For mobile phones: */
-  #inbox input[type="submit"] {
-    font-size: 10px;
-    padding: 4px;
-  }
-
-  #forums input {
-    font-size: 10px;
-    padding: 4px;
-  }
-}
-
-@media (max-width: 480px) {
-  .m_hidden {
-    display: none !important;
-  }
-
-  /* override from earlier, it makes shit weird */
-  td:first-child {
-    padding-left: 6px;
-  }
-
-  /* BEGIN site layout */
-  #wrapper {
-    padding-top: 36px;
-  }
-
-  .thin {
-    flex-direction: column;
-    margin: auto;
-  }
-
-  /* the specificity goes up to 11 */
-  html > body div.thin > * {
-    width: 100%;
-  }
-
-  form table td.label {
-    width: 5rem;
-  }
-
-  .linkbox {
-    text-align: left;
-    width: 90%;
-  }
-
-  html body .scale_image,
-  #stats img {
-    max-width: 100%;
-  }
-  /* END site layout */
-
-  /* BEGIN notifications */
-  .i-am-new {
-    width: calc(100% - 48px) !important;
-  }
-
-  .i-am-new li {
-    width: 100% !important;
-  }
-  /* END notifications */
-
-  /* BEGIN user settings */
-  #user #userform {
-    align-items: stretch;
-    display: flex;
-    flex-direction: column;
-    margin-left: 0;
-    width: 100%;
-  }
-
-  .settings_sidebar {
-    flex: unset;
-    order: -1;
-  }
-
-  /* tired of specificity :( */
-  #settings_sections {
-    position: static !important;
-  }
-  /* END user settings */
-
-  /* BEGIN forms */
-  input[type=search],
-  input[type=text],
-  input[type=email],
-  input[type=password],
-  select {
-    width: 100%;
-  }
-
-  #upload .box {
-    width: 100% !important;
-  }
-
-  .cat_list tr {
-    display: flex;
-    flex-wrap: wrap;
-  }
-  /* END forms */
-
-  /* BEGIN general tables */
-  .m_table tbody,
-  .m_table .colhead,
-  .m_table .colhead_dark {
-    align-items: center;
-    display: flex;
-    flex-wrap: wrap;
-    width: 100%;
-  }
-
-  .m_table tbody {
-    align-items: stretch;
-    flex-direction: column;
-  }
-  /* END general tables */
-
-  /* BEGIN table headers */
-  .m_table .colhead,
-  .m_table .colhead_dark {
-    flex-wrap: nowrap;
-  }
-
-  .m_table .colhead td:not(.m_th_right):not(.m_th_left),
-  .m_table .colhead_dark td:not(.m_th_right):not(.m_th_left) {
-    display: none;
-  }
-
-  .m_table .colhead td,
-  .m_table .colhead_dark td {
-    width: auto !important;
-  }
-
-  .m_th_left {
-    visibility: hidden;
-  }
-
-  .m_th_left_collapsable {
-    padding-left: 34px;
-  }
-
-  .m_th_left::before {
-    color: white;
-    content: 'Info';
-    visibility: visible;
-  }
-
-  /* ghetto :first-of-class */
-  .m_th_right {
-    margin-left: auto;
-  }
-
-  .m_th_right + .m_th_right {
-    margin-left: unset;
-  }
-
-  .m_th_right + .m_th_right + .m_th_right {
-    margin-left: unset;
-    padding-right: 12px;
-  }
-  /* END table headers */
-
-  /* BEGIN table bodies */
-  .m_table tr:not(.hidden):not(.colhead):not(.colhead_dark) {
-    display: block;
-    line-height: 1.4;
-    padding-bottom: 3px;
-    /* for position:absolute children */
-    position: relative;
-    width: 100%;
-  }
-
-  .m_table td {
-    display: block;
-  }
-
-  .m_table tr:not(.colhead):not(.colhead_dark) td:not(.m_td_left):not(.m_td_right) {
-    padding-bottom: 0;
-    padding-top: 0;
-    text-align: left;
-    width: 81%;
-  }
-
-  td.m_td_left {
-    align-items: center;
-    display: flex;
-    float: left;
-    height: 100%;
-    width: 34px;
-  }
-  /* END table bodies */
-
-  /* BEGIN right-aligned numerical stats */
-  .m_td_right {
-    margin: 0;
-    padding: 0 !important;
-    position: absolute;
-    right: 16px;
-    /* this is for the first one only */
-    text-align: right;
-    top: 0.2rem;
-  }
-
-  /* specificity override will occur for third one, so this is fine */
-  .m_td_right + .m_td_right {
-    top: 1.6em;
-  }
-
-  .m_td_right + .m_td_right + .m_td_right {
-    top: 3em;
-  }
-  /* END right-aligned numerical stats */
-
-  /* BEGIN torrent table */
-  .torrent_table * {
-    float: none;
-  }
-
-  .torrent_table .remove_bookmark a,
-  .torrent_table .add_bookmark a {
-    float: none !important;
-  }
-
-  .torrent_table .cats_col:not(.m_cats_col) {
-    display: none;
-  }
-
-  /* on mobile, it wraps even on normal words, so better like this */
-  /* TODO: how to handle super long-words */
-  .group .group_info,
-  .torrent .group_info {
-    word-break: inherit;
-  }
-
-  .torrent .group_info span:first-child {
     order: 10;
-  }
+}
 
-  .group_info .tags {
-    order: 20;
-    width: 100%;
-  }
+/* END desktop view, handling of classes */
 
-  #wrapper .m_table .edition {
-    padding-top: 0;
-    padding-bottom: 0;
-  }
+/* ************************************************ */
 
-  .edition_info {
-    padding: 4px 12px 4px 32px !important;
-  }
+/* # 1.2 Reserved [for more organization in the future]
 
-  .group_torrent .edition_info a {
-    line-height: 23px;
-  }
+/* ************************************************ */
 
-  .edition_1 {
-    /* for the right aligned numbers */
-    min-height: 5em;
-  }
+/* # 1.3 Reserved [for more organization in the future]
 
-  .td_snatched.m_td_right,
-  .td_seeders.m_td_right,
-  .td_leechers.m_td_right {
-    min-width: 30px;
-    right: 4px;
+/* ************************************************ */
+
+/* # 1.4 Reserved [for more organization in the future]
+
+/* ************************************************ */
+
+/* # 1.5 Discography Pages
+
+/* Discog table: for rows 'Albums', 'Compilations', 'Live Albums', etc. */
+#discog_table tr[id^=torrents_] {
+    background-color: $color-background-table-keyrows;
+}
+#discog_table tr[id^=torrents_] :not(a.tooltip.brackets) strong{
+    font-size: large;
+    color: $color-text-bold;
+}
+
+/* Discog table: for names of albums, to help them stand out somewhat */
+#discog_table .discog strong a,
+#discog_table td.td_info.big_info div.group_info.clear strong a {
+    font-size:115%;
+    color: $color-text-table-discog-titles;
+}
+
+/* Discog table:  for encodings, to get breathing room after the >> character */
+div#discog_table td.td_info:not(span.torrent_links_block) > a {
+    padding-inline-start: 1em;
+}
+
+/* BEGIN Navbox on artist page ~ "jump down".. to navigate between Album/Live Album... */
+#discog_table > div.box.center {
+    background-color: $color-background-table-discog;
+    padding: 12px;
     text-align: left;
-  }
+    padding-left: 11rem; 
+}
 
-  .td_snatched.m_td_right::before,
-  .td_seeders.m_td_right::before,
-  .td_leechers.m_td_right::before {
-    background: left / 10px no-repeat url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAALPSURBVHjaxJdNaFxVFMd/L0mTpjW2GlOLBiyxIIYYFxZEEHeVunNT7KJbV110YzcFybJdSBfZFMRlQUFBpQgKwSriRpFAFy6UatNYSxMMNM1H02Tm5+a89uYybzKTDOTC5b25953zv+fc//mYQmU3RleH9DwRz6JVgZ4OAY8DZ4G7wJ/ADLAA/AasxoE2ubbokKuHgdlsbQFYivWb4d1zwG0A1Kq5v8lePrvUFbWWzXR8rg6XMlWK3ld/VZ9sEbhQbzcArqkb6iX1+VSmkZKTcfq6Oq0eaBH825DJgRfUp+Jwj75PWV0AbwATwN5YexX4vkW2/l6xfhA4n5MrB34XGIn3AlgBJlsk2C8hk4eowAfA4c2rj81/Qf0rIcOq+mEbBBsLuTX1svogc/l0ozvuChATNv6kHs3vpskcUtfVj9VB9aVEX6mzPwfeo15NyKE6ofa0YTHqBfWZ5LD/JsB19UwO/Ky6GJv1EBhtE5QIv9RD72XAP+as7klIUQC1yDztjsWMvVNJRAi8CHSnuboX6ItNgYfAfAdSaV/2uz8Pp94sDPqAeoeq3/3k3fIwJdgssJ4IPN2hktkTRpWuniuvolS+0sAlR3YI2g28nWTBArgBrOWZ68uECHXg4g6B68CbGdmuN8pc4w2S/NA2Qqqcx9XlJBPOq69VVae8stzcBmARRkxnmesb9bkq4NHs4zLH7msD+Jj6lbqUWLsW5bZpPf6ugeV/pG6q6EC61XfUnzMXP1Qnc5mqnqsWxEtjeRn4DPgiwmIpyFiydww4BQwkMhvA11EWZzYRrYkVdxq4vRwr4co59e/EsrS61dUr4ak9uf6t7uuTREmtopmrZVWtLDQfqS/HFdAuMOor6g9R2KtGPZ631Cn1tNrXrJa32ld3AW8BJ4DXgUNxtwORaq9F9vs0euh/tlK43YZ+MJL/CHAP+C+I1HJhKXbrT9v/AwCjMtXNZGhoXQAAAABJRU5ErkJggg==');
-    color: #fff;
-    content: ':';
-    filter: brightness(80%);
-    position: absolute;
-    right: calc(100% + 2px);
-    text-align: right;
-    width: 14px;
-  }
+#discog_table > div.box.center:before {
+  color:$color-text-bold !important;
+  font-size: large !important;
+  content: "⇩ Jump to" !important;
+  font-weight: 600;
+  position: absolute;
+  margin-left: -9rem;
+  margin-top: -0.25rem;
+}
 
-  .td_seeders.m_td_right::before {
-    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAeCAYAAAAo5+5WAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAAC7SURBVHja7NQxrgFBHMDh2afQ6V6r13OD5wTcwB04gztwA0dwAwfQK3VUJBufZhIJdo1dmpf9JZNJZub/lZMhJDaJ+zLpNVLWAGec0E+ZSUF/sXNrF89qwS2sPbaOd5XhueLmVeExLiXwBaN34R6OXneIb5PgDrbS28aZUjjDyvut4mwhPFO9aRE8RF4DzvF3D3exV799tEJAGxufa4N2wMLnW2Qlv1vqt5c9O/wJX6qBG7iBG/h/wtcBAOg295pvUXkVAAAAAElFTkSuQmCC');
-  }
+#discog_table > div.box.center a {
+    margin: 0 8px;
+}
 
-  .td_leechers.m_td_right::before {
-    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAeCAYAAAAo5+5WAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAADYSURBVHja7NaxTQMxFAbgd1Cko6OlTw8bwASwQXYgM2SHsEFGyAYZIH3KdFCBdMqXxpFOpzvH5EKD7pcsS8/+v9JyhehJ70ErVdfwJv4oIzzCIzzC/xdepre3vUrT1V0GJti4XjaYBAIP2F8B3ScrTnDgGfUAtMbLyWvCgfcB8LxpteEKqwvQVer2woE7bH+BblMnzsGBKT4L0K90N0rhwCsOGfSAt75+Dg4sMvAi1z0H32Ldga7T2cVw4B67BrpLsxgKBx7xjR88lXSqzKewnVnaP0ouHwcAK5Gr6If/uhgAAAAASUVORK5CYII=');
-  }
+#discog_table > div.box.center .brackets::after,
+#discog_table > div.box.center .brackets::before {
+    display: none;
+}
 
-  .m_table.checkboxes td:first-child {
-    display: block;
-  }
+/* END Navbox on artist page ~ "jump down".. to navigate between Album/Live Album... */
 
-  /* BEGIN expanded torrent group */
-  .group_torrent:not(.edition):not(.hidden) {
-    display: flex;
-    flex-direction: column;
-    padding: 5px 0 0 22px;
-  }
+/* ************************************************ */
 
-  /* it would be nice to use flex for all group_torrents, but we can't de display:flex
-   * on any old table cell. It only works here because our trs aren't using the normal
-   * table display anyways.
-   */
+/* # 1.6 Tooltips */
 
-  .torrent_table .group_torrent:not(.edition) td:first-child {
-    display: flex;
-    /* for those ones with a million buttons */
-    flex-wrap: wrap;
-    padding: 0;
-    width: 80%;
-  }
+.tooltipster-base {
+    box-shadow: 0 0 8px rgb(0 0 0 / 25%);
+    width: auto !important;
+}
 
-  .torrent_table .group_torrent:not(.edition) td:first-child span {
-    order: 5;
-    padding-left: 6px;
-  }
+.tooltipster-default {
+    background-color: $color-background-base;
+    border: 0 solid $color-accent-border-tooltipster;
+    border-radius: 2.5px;
+    color: $color-text-tooltipster;
+}
 
-  .td_file_count::before {
-    content: 'Files: ';
-  }
+.tooltipster-default .tooltipster-content {
+    background-color: $color-background-base;
+    color: $color-text-tooltipster;
+    font-size: 12px;
+    line-height: 1.4;
+    padding: 4px 6px;
+}
 
-  .torrent_table .group_torrent td:nth-child(4) {
-    padding-bottom: 5px;
-    text-align: left;
-  }
+.tooltipster-default .tooltipster-content a {
+    background-color: $color-background-base;
+    color: $color-text-tooltipster-anchor;
+    font-weight: 600;
+}
 
-  /* artist view page */
-  #torrents_album .edition_1 td:nth-child(n+2) {
-    padding-left: 15px;
-  }
-  /* END expanded torrent group */
+.alertbar,
+.tooltipster-default .tooltipster-content a:hover {
+    color: $color-text-tooltipster-anchor-hover;
+}
 
-  /* BEGIN top10 */
-  /* 4 and 5 in colhead are hidden anyways */
-  #top10 .td_size::before {
-    content: 'Size: ';
-  }
+/* ************************************************ */
 
-  .td_data::before {
-    content: 'Transferred: ';
-  }
-  /* END top10 */
-  /* END torrent table */
+/* # 1.7 BEGIN UPLOAD CATEGORY DECORATION STRIPING */
+/* Begin category decorations for torrent-tables on torrent & collage pages */
 
-  /* BEGIN invite table */
-  .invite_table tr:not(.colhead) td:nth-child(3)::before {
-    content: 'Joined: ';
-  }
+/* Apollostage highlights different upload types,
+/* using not an icon but a small color-coded rectangle (done using a border).
+/* The line (border-right:) can be replaced by an image or other (content:) as needed. */
 
-  .invite_table tr:not(.colhead) td:nth-child(4)::before {
-    content: 'Seen: ';
-  }
-
-  .td_dl.m_td_right::before {
-    content: 'D: ';
-  }
-
-  .td_up.m_td_right::before {
-    content: 'U: ';
-  }
-
-  .td_ratio.m_td_right::before {
-    content: 'R: ';
-  }
-  /* END invite table */
-
-  /* BEGIN collage table */
-  table.m_table.collage_table tr:not(.colhead):not(.colhead) {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .m_table .td_collage_category::before {
-    content: 'Category: ';
-  }
-
-  .m_table .td_collage_category {
-    order: 2;
-    padding-top: 0;
-  }
-
-  .collage_table .td_info {
-    padding-bottom: 0;
-  }
-
-  .collage_table .td_updated::before {
-    content: 'Updated: ';
-  }
-
-  .collage_table .td_updated {
-    order: 3;
-  }
-
-  .collage_table .td_author::before {
-    content: 'Author: ';
-  }
-
-  .collage_table .td_author {
-    order: 3;
-  }
-
-  .collage_table .td_torrent_count::before {
-    content: 'T: ';
-  }
-
-  .collage_table .td_subscribers::before {
-    content: 'S: ';
-  }
-  /* END collage table */
-
-  /* BEGIN requests */
-  /* TODO: still show the time the request was filled without taking up too much space */
-
-  #requests .request_table tr:not(.colhead) td:nth-child(n+2) {
-    padding: 0 6px;
-  }
-
-  #requests .request_table tr:not(.colhead) td:nth-child(5)::before {
-    content: 'Filler: ';
-  }
-
-  #requests .request_table tr:not(.colhead) td:nth-child(6)::before {
-    content: 'Requester: ';
-  }
-
-  #requests .request_table tr:not(.colhead) td:nth-child(6) {
-    padding: 0 6px;
-  }
-
-  #requests .request_table tr:not(.colhead) td:nth-child(7)::before {
-    content: 'Added: ';
-  }
-
-  #requests .request_table tr:not(.colhead) td:nth-child(8)::before {
-    content: 'Last Vote: ';
-  }
-
-  #requests .request_table tr:not(.colhead) td:nth-child(8) {
-    padding-bottom: 4px;
-  }
-  /* END requests */
-
-  /* BEGIN forums */
-  /* BEGIN forum index */
-  .forum_index .last_read {
-    float: none !important;
-  }
-
-  .forum_index .last_topic,
-  .forum_index .last_poster {
-    float: none !important;
-  }
-
-  .forum_index .last_topic {
-    display: block;
-  }
-
-  #wrapper .td_read {
-    float: left;
-    height: 12px;
-    margin: 3px 5px 0 5px;
-    width: 11px;
-  }
-
-  .td_topic_count.m_td_right::before {
-    content: 'T: ';
-  }
-
-  .td_post_count.m_td_right::before {
-    content: 'P: ';
-  }
-
-  .td_author::before {
-    content: 'Author: ';
-  }
-
-  .td_replies.m_td_right::before {
-    content: 'R: ';
-  }
-  /* END forum index */
-
-  /* BEGIN forum table structure */
-  /* this is copied from general tables. We put it here in case that changes
-   in ways specific for tabular data */
-
-  .forum_post tbody {
-    align-items: stretch;
-    display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
-    width: 100%;
-  }
-
-  .forum_post tr:not(.colhead_dark):not(.hidden) {
-    display: block;
-    position: relative;
-    width: 100%;
-  }
-  /* END forum table structure */
-
-  /* BEGIN forum headers */
-  /* remove dashes from forum post headers */
-  .forum_post tr.colhead_dark {
-    color: transparent;
-    min-height: 50px;
-    padding-left: 54px;
-  }
-
-  .forum_post tr.colhead_dark span,
-  .forum_post tr.colhead_dark strong {
-    color: #c6c9c9;
-  }
-
-  .forum_post tr.colhead_dark div {
-    display: inline;
-  }
-
-  .forum_post .time::after {
-    content: '\a';
-    white-space: pre;
-  }
-
-  .forum_post tr.colhead_dark div:nth-child(2) {
-    padding-left: 8px;
-  }
-
-  .forum_post .avatar {
-    left: 5px;
-    position: absolute;
-    top: -55px;
+.cats_applications,
+.cats_audiobooks,
+.cats_comedy,
+.cats_comics,
+.cats_ebooks,
+.cats_elearningvideos,
+.cats_music {
     width: 0;
-    word-break: break-all;
-  }
+    height: 80px;   // 'album cover' images are hard-coded to 90px
+}
 
-  .forum_post .avatar img {
-    max-height: 50px !important;
-    max-width: 50px !important;
-    min-height: 0;
-    min-width: 0;
-    position: absolute;
-  }
-  /* END forum headers */
-  /* END forums */
+/* collages do not include Images in their table rows, so they 
+/* need much less height. */
+body#collage .cats_applications,
+body#collage .cats_audiobooks,
+body#collage .cats_comedy,
+body#collage .cats_comics,
+body#collage .cats_ebooks,
+body#collage .cats_elearningvideos,
+body#collage .cats_music {
+    height: 2rem;
+}
+.cats_music {
+    /* Memo: If you desire NO decoration on music uploads,
+    /* turn this off. */
+    border-right: thin solid darkslategray;
+}
 
-  /* BEGIN rules */
-  #rules .m_th_left::before {
-    content: 'Rules';
-  }
+.cats_applications {
+    border-right: thick solid silver;
+}
 
-  .rule_table .nobr {
-    white-space: unset;
-  }
-  /* END rules */
+.cats_audiobooks {
+    border-right: thick solid cornflowerblue;
+}
 
-  /* BEGIN site header */
-  #header {
-    background: $header-background-color;
-    bottom: 120%;
-    height: 100%;
-    left: 0;
-    position: fixed;
-    transform: translateY(0);
-    transition: transform 200ms;
-    width: 100%;
-    z-index: 100;
-  }
+.cats_comedy {
+    border-right: thick solid deepskyblue;
+}
 
-  /* BEGIN hamburger bar */
-  #logo {
-    height: 2%;
-    left: 0;
-    padding: 0;
-    position: fixed;
-    top: 0;
-    /* it's OVER 9000! */
-    transform: translateY(6000%);
-    width: 20%;
-    z-index: 500;
-  }
+.cats_comics {
+    border-right: thick solid gold;
+}
 
-  #logo a {
-    background-image: none;
-    display: block;
-    height: 32px;
-    width: 100%;
-  }
+.cats_ebooks {
+    border-right: thick solid chocolate;
+}
 
-  #extra4 {
-    background: $header-background-color;
-    border-radius: 0 0 4px 4px;
-    display: block;
-    height: 32px;
-    position: fixed;
-    right: 0;
-    top: 0;
-    width: 100vw;
-  }
+.cats_elearningvideos {
+    border-right: thick solid mediumpurple;
+}
 
-  #extra5 {
-    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAmAAAAIACAMAAAASQSC4AAACtVBMVEX///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////8W+g2WAAAA53RSTlMACA4RExkdIVOCgY2yzOblyaxzZTkCCQsSGh8jL1Rhs0gEDzx4wLsFFxwlPlaDm5AHFUpt2tgrDBYnQGSPGyJLeqfNnhSFKU17qAMNJDWcICpCtBhOkixQkyguUZQGJkZ9wjB0qS3btjJJlWCqM3bPjEyhN6u3rqM6RZjnMWi4pJEQNmnQsIlBxTtDPW+dOFu8RHncUsaEX8h1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');
-    background-position: left;
-    background-size: auto 18px;
-    height: 32px;
-    left: 4px;
-    pointer-events: none;
-    position: fixed;
-    top: 0;
-    transform: translateZ(0);
-    width: 32px;
-    z-index: 400;
-  }
+/* END category decorations for torrent tables on torrent & collage pages */
 
-  #extra1,
-  #extra2,
-  #extra3 {
-    background: white;
-    height: 1px;
-    position: fixed;
-    right: 12px;
-    top: 10px;
-    transform-origin: center;
-    transition: all 200ms;
-    width: 20px;
-    z-index: 101;
-  }
+/* ************************************************ */
 
-  #extra2 {
-    top: 15px;
-  }
+/* #1.8 HEADER AND MENU LAYOUT */
+/* MENU AND TOP BAR, DESKTOP ONLY */
 
-  #extra3 {
-    top: 20px;
-  }
-  /* END hamburger bar */
+.thin > .header .linkbox {
+    align-self: flex-end;
+    flex: 1 0 auto;
+    -ms-flex: 1 0 auto;
+    -ms-flex-item-align: end;
+    margin-top: 8px;
+}
 
-  #header {
-    --row-height: 40px;
-  }
-
-  #header ul:not(#userinfo_major):not(#userinfo_stats) {
+.thin > .header {
     display: flex;
-    flex-wrap: wrap;
+    display: -ms-flexbox;
+    -ms-flex-flow: row wrap;
+    flex-flow: row wrap;
     width: 100%;
-  }
+}
 
-  #header ul:not(#userinfo_major):not(#userinfo_stats) li {
+#header,
+#userinfo {
+    position: relative;
+}
+
+#header ul {
     margin: 0;
-    width: 33.3%;
-  }
+    padding: 0;
+}
 
-  #header ul:not(#userinfo_major):not(#userinfo_stats) a {
-    line-height: var(--row-height);
-  }
+#header li {
+    margin: 0;
+}
+@media only screen and (min-width: 575px)  /* var(--phone-screen-size) */ {
+    #logo {
+        box-sizing: content-box;
+        height: 42px;
+        padding: 24px 8px 16px;
+        width: 200px;
+    }
+    
+    /* main logo during desktop view */
+    #logo a {
+        background: $logo-site-lockup right no-repeat;
+     }
+    
+    #logo > a {
+        background-size: 200px;
+        display: block;
+        height: 100%;
+        margin-top: 0;
+    }
+}
 
-  #alerts {
-    display: none;
-  }
+#menu > ul {
+    display: flex;
+    display: -ms-flexbox;
+    -ms-flex-flow: row nowrap;
+    flex-flow: row nowrap;
+    font-size: 13px;
+    overflow: hidden;
+    width: calc(100% - 149px);
+}
 
-  /* BEGIN searchboxes */
-  #searchbars ul {
-    bottom: 0;
-    height: unset;
-    padding: 0 0 0 6px;
-    position: absolute;
-  }
+#menu > ul li {
+    -ms-flex: 1 1 auto;
+    flex: 1 1 auto;
+}
 
-  #searchbars li {
-    height: var(--row-height);
-  }
-
-  #searchbars li:nth-child(-n+3) .search_form {
-    margin: 6px 6px 3px 0;
-  }
-
-  #searchbars li:nth-child(n+4) .search_form {
-    margin: 3px 6px 6px 0;
-  }
-
-  #header #searchbars input {
-    height: calc(var(--row-height) - 9px);
-  }
-  /* END searchboxes */
-
-  /* BEGIN userinfo */
-  #userinfo {
-    position: static;
-  }
-
-  #userinfo_major {
-    right: 12px;
-    top: calc(100% - var(--row-height) * 10 - 55px);
-  }
-
-  #userinfo_stats {
-    color: white;
-    line-height: 1.3;
-    right: 12px;
-    top: calc(100% - var(--row-height) * 10 - 38px);
-  }
-
-  #userinfo_stats span {
-    white-space: nowrap;
-  }
-
-  #stats_ratio {
-    color: $a-color;
-  }
-
-  #stats_ratio .tooltip {
-    color: white;
-  }
-
-  #userinfo_username {
-    background: radial-gradient(circle at top left, $userinfo-background-color-1, $userinfo-background-color-2);
-    bottom: calc(var(--row-height) * 2);
-    left: 0;
-    position: absolute;
-  }
-
-  #nav_userclass {
-    display: none;
-  }
-
-  #userinfo_minor {
-    background: radial-gradient(circle at top left, $userinfo-background-color-1, $userinfo-background-color-2);
-    bottom: calc(var(--row-height) * 3);
-    position: absolute;
-  }
-
-  /* S P E C I F I C I T Y */
-  html > body #userinfo_minor a,
-  html > body #userinfo_username a {
+#menu > ul a {
     display: block;
     height: 100%;
     line-height: 50px;
     text-align: center;
-  }
-
-  #userinfo_username #nav_userinfo a {
-    width: unset;
-  }
-  /* END userinfo */
-
-  /* BEGIN browse links */
-  #menu ul {
-    background: radial-gradient(circle at top left, #0999, #088);
-    bottom: calc(var(--row-height) * 7);
-    position: absolute;
-  }
-
-  #menu li {
-    background: transparent !important;
-  }
-  /* END browse links */
-
-  #extracb1 {
-    display: block;
-    height: 32px;
-    margin: 0;
-    opacity: 0;
-    position: fixed;
-    right: 0;
-    top: 0;
-    width: 50vw;
-    z-index: 999;
-  }
-
-  /* BEGIN checked */
-  #extracb1:checked ~ #wrapper #header {
-    transform: translateY(120%);
-  }
-
-  #extracb1:checked ~ #wrapper #logo {
-    transform: none;
-  }
-
-  #extracb1:checked ~ #extra1 {
-    transform: translateY(5px) rotate(45deg);
-  }
-
-  #extracb1:checked ~ #extra2 {
-    opacity: 0;
-  }
-
-  #extracb1:checked ~ #extra3 {
-    transform: translateY(-5px) rotate(-45deg);
-  }
-  /* END checked */
-  /* END site header */
 }
 
-@media (max-width: 480px) and (max-height: 480px) {
+
+/* suppress menu-button-1 to go home */
+#nav_index {
+    display: none;
+}
+
+#userinfo_minor:hover a,
+#userinfo_username:hover a {
+    display: block;
+}
+
+#userinfo_username #nav_userinfo > a {
+    display: block;
+    font-size: 13px;
+    line-height: 50px;
+    overflow: hidden;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100px;
+}
+
+#userinfo_major > li,
+#userinfo_stats > li,
+.linkbox .brackets {
+    margin-left: 8px;
+}
+
+#userinfo_major,
+#userinfo_stats {
+    display: flex;
+    display: -ms-flexbox;
+    -ms-flex-flow: row nowrap;
+    flex-flow: row nowrap;
+    position: absolute;
+    right: 8px;
+}
+
+#userinfo_major {
+    font-size: 13px;
+    right: 41px;
+    top: -53px;
+}
+
+#userinfo_stats {
+    font-size: 13px;
+    top: -31px;
+}
+
+#menu ul li:not(#nav_staff) a,
+#userinfo a.username {
+    color: $color-text-menu;
+    text-shadow: $color-accent-shadow-menutext;
+}
+
+/* menu li:nth-child(1) = Home button; is suppressed */
+
+#menu li:nth-child(2) {
+    background-color: $color-menu-2;
+}
+
+#menu li:nth-child(3) {
+    background-color: $color-menu-3;
+}
+
+#menu li:nth-child(4) {
+    background-color: $color-menu-4;
+}
+
+#menu li:nth-child(5) {
+    background-color: $color-menu-5;
+}
+
+#menu li:nth-child(6) {
+    background-color: $color-menu-6;
+}
+
+#menu li:nth-child(7) {
+    background-color: $color-menu-7;
+}
+
+#menu li:nth-child(8) {
+    background-color: $color-menu-8;
+}
+
+#menu li:nth-child(9) {
+    background-color: $color-menu-9;
+}
+
+#userinfo_username {
+    background-color: $color-menu-username;
+    right: 50px;
+}
+
+#menu {
+    border-radius: 5px 5px 0 0;
+    overflow: hidden;
+}
+
+@media (min-width: 575px)  /* var(--phone-screen-size) */ {
+    .thin:last-child > :not(.two_columns) {
+          margin: 4px;
+    }
+
+    #nav_donate .tooltip::after {
+          color: red;
+          content: '\2764\FE0F️';  // heart emoji symbol 
+          font-size: 75%;
+          vertical-align: top;
+    }
+
+    #nav_staff {
+          font-weight: 400;
+    }
+
+    #menu > ul > #nav_staff {
+          display: inline;
+          font-size: 13px;
+          position: absolute;
+          right: 8px;
+          top: 29px;
+    }
+
+    #menu > ul > #nav_staff > a {
+          line-height: 1.6;
+          padding: 0;
+    }
+
+    #menu > ul > #nav_staff > a:hover {
+          background-color: transparent;
+          color: $color-text-anchor-hover;
+    }
+
+    #userinfo_minor::before {
+          background: $icon-menu-closed-state no-repeat;
+          filter: brightness(200%);  /*force white */
+          background-size: 28px;
+          background-position: center;
+          display: block;
+          height: 50px;
+          line-height: 50px;
+          width: 50px;
+    }
+
+    #userinfo_minor a,
+    #userinfo_username a {
+          display: none;
+          line-height: 32px;
+          padding: 0 8px;
+          width: 150px;
+    }
+
+    #userinfo_minor:hover::before {
+          margin-left: 100px;
+    }
+
+    #userinfo_minor {
+          background-color: $color-menu-userinfo;
+          border-radius: 0 5px 0 0;
+          right: 0;
+    }
+
+    #userinfo_minor,
+    #userinfo_username {
+          position: absolute;
+          z-index: 900;
+    }
+
+    #userinfo_minor:hover,
+    #userinfo_username:hover {
+          z-index: 800;
+    }
+
+    #userinfo_username:hover {
+          border-radius: 0 10px 0 0;
+          right: 0;
+    }
+
+    #userinfo_minor:hover {
+          background-color: $color-menu-userinfo-hover;
+    }
+
+    #userinfo_username:hover {
+          background-color: $color-menu-username-hover;
+    }
+
+    .settings_sidebar {
+          margin-left: 8px;
+    }
+
+    #userform #settings_sections {
+          width: 240px;
+    }
+}
+/* END Menu and topbar, desktop only */
+
+/* ************************************************ */
+
+/* ## 1.8.1 Menu handling */
+/* horizontal menu */
+
+/* menu hover colors */
+#menu > ul a:hover,
+#userinfo_minor:hover a:hover,
+#userinfo_username:hover a:hover,
+#userinfo_minor:hover::before {
+  background-color: $color-menu-fx-selection;
+}
+
+/* when menu pulled down and mouse over an entry */
+#menu > ul a:hover,
+#userinfo_minor:hover a,
+#userinfo_username:hover a {
+    color: $color-text-menu-hover; 
+}
+
+/* Icon revealed when menu is open */
+#userinfo_minor:hover::before {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: scroll;
+    background-image: $icon-menu-open-state;
+    background-size: 30px;
+    background-origin: padding-box;
+    background-clip: border-box;
+}
+
+.sidebar {
+    order: 5;
+}
+
+.thin:last-child {
+    display: flex;
+    flex-wrap: wrap;
+    margin: -4px;
+}
+
+/* END MENU HANDLING */
+
+/* ************************************************ */
+
+/* ## 1.9 Headers Below Menu */
+
+/* ************************************************ */
+
+/* ## 1.9.1 Searchbars */
+
+#searchbars > ul {
+    align-items: center;
+    background-color: $color-background-searchbars-surround;
+    display: flex;
+    display: -ms-flexbox;
+    -ms-flex-align: center;
+    height: 50px;
+    padding: 0 9px;
+}
+
+#searchbars > ul li {
+    -ms-flex: 1 1 auto;
+    flex: 1 1 auto;
+    margin-right: 9px;
+}
+
+#searchbars > ul li:last-child {
+    margin-right: 0;
+}
+
+#searchbars > ul input {
+    width: 100%;
+}
+
+#searchbars .search_form {
+    background: 0 0;
+}
+
+#searchbars .search_form input {
+    border: none;
+    border-radius: 2.5px;
+    height: 30px;
+    background: $color-background-searchbars;
+}
+
+#searchbars .search_form input:focus {
+    background: $color-background-searchbars-field-focus;
+}
+
+/* ************************************************ */
+
+/* ## 1.9.2 Linkbox */
+/* linkbox appears near the page h1 header and provides outbound links */
+
+.linkbox,
+.linkbox .center {
+    text-align: right;
+}
+
+.linkbox br {
+    display: block;
+    line-height: 4px;
+}
+
+.linkbox > strong {
+    color: $color-text-linkbox;
+}
+
+.linkbox .brackets::after,
+.linkbox .brackets::before {
+    display: none;
+}
+
+/* ************************************************ */
+
+/* # 1.10 Notification Box */
+
+/* basic positioning */
+#noty_bottomRight_layout_container {
+  bottom: 24px !important;
+  right: 24px !important;
+}
+
+#noty_bottomRight_layout_container > li {
+  background: 0 0 !important;
+  border: 2px solid $color-menu-userinfo !important;
+  border-radius: 1px !important;
+}
+
+/* elevation & levitation */
+#noty_bottomRight_layout_container {
+  box-shadow: $ds-shadow-raised;
+  transition: all 0.25s cubic-bezier(.25,.8,.25,1);
+}
+
+#noty_bottomRight_layout_container:hover {
+  box-shadow: $ds-shadow-raised-hover;
+  transform: translateY(-3.5px);
+}
+
+/* first row of each box */
+#noty_bottomRight_layout_container .noty_message {
+  background: radial-gradient(circle at top right, 
+    $color-background-notification-gradient-1,
+    $color-background-notification-gradient-2) !important;
+  color: $color-text-notification-words !important;
+  font-weight: 700;
+  padding: 0 !important;
+  line-height: 2.2rem !important; // done here to override site html
+}
+
+/* first row words */
+#noty_bottomRight_layout_container .noty_message .noty_text {
+  line-height: 1.04rem;  // only needed on 2-line announcements
+  padding: 0 8px;
+}
+
+/* second row of each box */
+#noty_bottomRight_layout_container .noty_buttons {
+  background-color: $color-background-notification !important;
+  border: none !important;
+  padding: 8px !important;
+}
+
+/* buttons */
+#noty_bottomRight_layout_container .noty_buttons a {
+  background-color: none;
+  color: $color-obj-tag_bubble-foreground !important;
+  border: thin solid transparent; /* prevents button movement */
+  border-radius: 14px;
+  padding: 0 6px;
+  transition: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+#noty_bottomRight_layout_container .noty_buttons a:hover {
+  background-color: $color-obj-tag_bubble-foreground;
+  color: $color-obj-tag_bubble-background !important;
+  border: thin solid $color-obj-tag_bubble-background;
+  border-radius: 14px;
+  transition: all 0.15s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* END NOTIFICATION BOX */
+
+/* ************************************************ */
+
+/* # 1.11 BEGIN SIDEBAR */
+
+.sidebar .pad ol,
+.sidebar .pad ul {
+    margin-bottom: 0;
+    margin-top: 0;
+    padding-bottom: 0;
+}
+
+.sidebar ol.nobullet,
+.sidebar ul.nobullet {
+    padding-left: 0;
+}
+
+.sidebar img {
+    height: auto;
+    width: auto;
+}
+
+/* END SIDEBAR */
+
+/* ************************************************ */
+
+/* # 1.12 Upload form MusicBrainz popup */
+
+#musicbrainz_popup {
+    color: $color-text-popup;
+    background: $color-background-popup;
+    border: $color-accent-border-popup;
+    padding: 1rem;
+    font-weight: 600;
+}
+
+#musicbrainz_popup a {
+    color: $color-text-popup-anchor;
+}
+
+#musicbrainz_popup a:hover {
+    color: $color-text-popup-anchor-hover;
+}
+
+#musicbrainz_popup .brackets {
+    font-weight: 400;
+}
+
+#musicbrainz_popup #popup_close {
+    color: $color-text-button;
+}
+/*popup close button, see 'button'*/
+
+/* END upload form MusicBrainz popup */
+
+/* ######################################################################## */
+/* # 2 MISCELLANEOUS
+/* ######################################################################## */
+
+/* ## 2.1 Reserved for future use */
+
+/* ************************************************ */
+
+/* ## 2.2 Tag bubble appearance on widescreen */
+
+/* ### 2.2.1 Full clickable appearance */
+/* Applies to Torrent Pages, collage-listing pages, collage-discog pages. */
+.collage_table .td_info .tags :not(:empty),
+#torrent_table .group .tags :not(:empty),
+#discog_table .group .tags :not(:empty),
+#taglist td a,
+#request_table .tags,
+#top10 .tags,
+/* Artist page, sidebar, tags box */
+#artist .sidebar div.box.box_tags ul.stats.nobullet li a,
+/* User profile page, sidebar, for non-paranoid */
+#user div.sidebar .box_userinfo_activity ul.stats.nobullet li a,
+/* Subscribed collages ~ New addition to subscribed collages */
+#userhistory div.group_info.clear div.tags a,
+/* This monstrosity is for torrents.php?action=notify */
+table.torrent_table.cats.checkboxes.border.m_table td.td_info.big_info div.group_info.clear div.tags a,
+/* This monstrosity is for torrents.php?type=uploaded */
+table.torrent_table.cats.m_table td.td_info.big_info div.group_info.clear div.tags a,
+/* This is for torrent group (album) pages in the sidebar */
+body#torrents div.box.box_tags li > a:first-child {
+
+    visibility: visible;
+    box-sizing: border-box;
+    display: inline-block;
+    font-weight: 700;
+    font-size: 0.6rem;
+    vertical-align: baseline;
+    color: $color-obj-tag_bubble-foreground; 
+    background: $color-obj-tag_bubble-background; 
+    padding: 0 0.5rem;
+    border-radius: 1rem;
+    margin-bottom: 0.1rem;
+    transition: all 0.6s cubic-bezier(.25,.8,.25,1);
+}
+
+/* ### 2.2.2 Hover effect */
+/* The people have spoken. Applies only to pages with clickable tags. */
+.collage_table .td_info .tags :not(:empty):hover,
+#torrent_table .group .tags :not(:empty):hover,
+#discog_table .tags :hover,
+#taglist td a:hover,
+/*  Artist page, sidebar, tags box */ 
+#artist .sidebar div.box.box_tags ul.stats.nobullet li a:hover,
+/* User profile page, sidebar, for non-paranoid */
+#user div.sidebar .box_userinfo_activity ul.stats.nobullet li a:hover,
+/*  Subscribed collages ~ New addition to subscribed collages */
+#userhistory div.group_info.clear div.tags :hover,
+/*  This monstrosity is for torrents.php?action=notify */
+table.torrent_table.cats.checkboxes.border.m_table td.td_info.big_info div.group_info.clear div.tags a:hover,
+/*  This monstrosity is for torrents.php?type=uploaded */
+table.torrent_table.cats.m_table td.td_info.big_info div.group_info.clear div.tags a:hover,
+/* This is for torrent group (album) pages in the sidebar */
+body#torrents div.box.box_tags li > a:first-child:hover {
+    color: $color-obj-tag_bubble-background !important; 
+    background: $color-obj-tag_bubble-foreground !important; 
+    transition: all 0.15s cubic-bezier(0.25,0.8,0.25,1);
+    box-shadow:
+    rgb(0 0 0 / 25%) 0 14px 28px, 
+    rgb(0 0 0 / 22%) 0 10px 10px; 
+}
+
+/* ### 2.2.3 Non-clickable appearance */
+/* Applies to top10 and request_table pages, where tags are not clickable links. */
+#request_table .tags,
+#top10 .tags {
+    font-style: italic; 
+    font-weight: normal;
+    margin-inline: 1rem;
+}
+
+/* ### 2.2.4 Other special cases */
+/* commas between tags: currently (2024), gazelle provides this inconsistently. */
+/* only needed on torrent and collage-discog pages. */
+#torrent_table .tags,
+#discog_table .tags,
+#userhistory div.group_info.clear div.tags,
+/* This monstrosity is for torrents.php?action=notify */
+table.torrent_table.cats.checkboxes.border.m_table td.td_info.big_info div.group_info.clear div.tags,
+/* This monstrosity is for torrents.php?type=uploaded */
+table.torrent_table.cats.m_table td.td_info.big_info div.group_info.clear div.tags {
+   /* use alpha, not invisibility, to preserve copy & paste ability */
+   color: rgba(0,0,0,10%);
+}
+
+/* ### 2.2.5 Snatched torrent indicators (BETA)*/
+/* the following must be after 2.2.4 invisibility */
+
+tr.snatched_group div.tags:before {
+  content: "snatched group";
+  /* plus formatting below */
+}
+tr.snatched_torrent div.tags:before {
+  content: "snatched torrent";
+  /* plus formatting below */
+}
+
+tr.snatched_group div.tags:before, 
+tr.snatched_torrent div.tags:before {
+  visibility: visible;
+  background:  $color-obj-tag_bubble_snatched-background;
+  color: $color-obj-tag_bubble_snatched-foreground;
+  border-radius: 1rem;
+  box-sizing: border-box;
+  display: inline-block;
+  font-size: 0.6rem;
+  font-style: italic;
+  font-weight: 200;
+  margin-bottom: 0.1rem;
+  padding: 0 0.5rem;
+  padding: 0rem 0.5rem;
+  vertical-align: baseline;
+}
+
+/* album pages */
+#torrent_details.snatched .group_torrent.snatched_torrent .torrent_label.tooltip.tl_snatched 
+{ 
+  background: $back-600;
+  border-radius: 1rem;
+  box-sizing: border-box;
+  display: inline-block;
+  font-size: 0.6rem;
+  font-style: italic;
+  font-weight: 400;
+  margin-bottom: 0.1rem;
+  margin-inline: 0.5rem;
+  padding: 0 0.5rem;
+  padding: 0rem 0.5rem;
+  vertical-align: baseline; 
+}
+
+/* */
+
+/* ************************************************ */
+
+/* ## 2.3 Reserved
+
+/* ************************************************ */
+
+/* ## 2.4 Pop-up Warnings and Alerts ## */
+/* #### see also 1.10 Notifications */
+
+/* ### 2.4.1 Upload warnings ## */
+
+/* display a popup when any upload warning occurs inline on the page*/
+.upload-error:after,
+ul#check:after {
+  content: "Warning!  There were one or more errors in your submission. Check below for error messages.";
+  font-weight: 700;
+  position: absolute;
+  top: 64px;
+  left: 50vw;
+  transform: translateX(-50%);
+  z-index: 900;
+  color: black;
+  border: thick solid $color-accent-border-error;
+  border-radius: 0.25rem;
+  padding: 1rem 1rem 1rem 48px;
+  background: $color-background-error;
+  background-image: $icon-warning;
+  background-repeat: no-repeat;
+  background-position: 8px center;
+  background-size: 32px;
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.55), 0 7px 7px rgba(0, 0, 0, 0.52), 0px -5px 9px rgba(0, 0, 0, 0.32);
+}
+
+.upload-error,
+ul#check.nobullet > *
+{
+  border: thick solid $color-accent-border-error;
+  padding: 1rem 1rem 1rem 48px;
+  background: $color-background-error;
+  background-image: $icon-warning;
+  background-repeat: no-repeat;
+  background-position: 8px center;
+  background-size: 32px;
+}
+
+.upload-error,
+ul#check.nobullet *,
+ul#check.nobullet > *
+{
+  color: $color-text-error !important;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* Fix for post-upload 'Warning' (no private/source flag):
+/* the easily missed 'click here' warning shall be highlighted */
+/* CSS not yet available */
+
+// does not work: body#upload div#wrapper div#content p a
+// {
+//   color: $color-obj-tag_bubble-foreground;
+//   background-color:  $color-obj-tag_bubble-background;
+//   border: thick solid $color-obj-tag_bubble-foreground; 
+//   padding: .25rem 2rem .25rem 2rem; 
+//   margin: 1rem; 
+//   border-radius: 2.5rem;
+// }
+
+/* */
+/* */
+
+/* ### 2.4.2 Alertbar */
+
+/* ## alertbar occurs when User Settings: Notifications: "Traditional" is selected. */
+
+.alertbar {
+  border: thick solid $color-accent-border-alert;
+  padding: 1rem 1rem 1rem 48px;
+  background: $color-background-alert;
+  background-image: $icon-notification;
+  background-repeat: no-repeat;
+  background-position: 8px center;
+  background-size: 32px;
+  color: $color-text-alert !important;
+  font-size: 12px;
+  font-weight: 700;
+}
+.alertbar a {
+  color: $color-anchor-alert !important;
+}
+
+/* */
+/* */
+/* ######################################################################## */
+/* # 3 DOCUMENTATION OF MOBILE CLASSES */
+/* ######################################################################## */
+/* */
+/* */
+/* */
+/* Documentation of mobile classes:
+/* GENERAL:
+/* .m_hidden: display: none on mobile
+/* TABLES:
+/* .m_table: table which will be mobilized
+/* .m_th_left: which table header should be preserved on the left. It will be replaced with the word "Info". Only 1
+/* .m_th_left_collapsable: extra padding applied to align right of the collapse button
+/* .m_th_right: table headers that will be "floated" to the right. Max of 3
+/* .m_td_left: will be left-aligned, and expanded vertically. Mainly for collapse button
+/* .m_td_right: tables cells which will be put on the right with absolute positioning, to correspond with .m_th_right headers. Max of 3
+/*
+/* forum posts, although they share some of the styles, do not actually use
+/* these classes, because:
+/* - they are not tabular data, so for semantics
+/* - they should not be compact the same way as a table
+/* - they have much more uniform HTML across different places (comments and
+/* "real" forum), so classes to simplify CSS aren't necessary
+/*/
+
+/* Portrait phones, and sometimes landscape
+/* TODO: currently, responsive is optimized for either desktop or portrait phone
+/* We need to handle landscape phones as well
+/*
+/* this stuff can *probably* be mostly copy-pasted into other stylesheets
+/* then tweaked a bit. Ideally, before that happens, the whole styling system
+/* should be made to use a CSS preprocessor so that we can have reusable styles
+/*/
+
+/* */
+/* */
+
+/* this query is mostly copied from what used to be above
+/* despite the fact that this exists, there are still many
+/* rules above that are overridden by media queries, rather
+/* than being put here like they should be
+/*/
+
+@media only screen and (max-width: 575px) /* var(--phone-screen-size) */ {
+    /* For mobile phones: */
+    #inbox input[type="submit"] {
+          font-size: 10px;
+          padding: 4px;
+    }
+
+    #forums input {
+          font-size: 10px;
+          padding: 4px;
+    }
+}
+
+/* */
+/* */
+/* ######################################################################## */
+/* # 4 CHANGES FOR MOBILE SITE
+/* ######################################################################## */
+/* */
+
+/* Begin Changes for Mobile Site */
+
+@media (max-width: 575px)  /* var(--phone-screen-size) */ {
+    .m_hidden {
+          display: none !important;
+    }
+
+    /* override from earlier, it makes shit weird */
+    td:first-child {
+          padding-left: 6px;
+    }
+    
+    /* by request, limit inbox images to window size on mobile */
+    #inbox .body img {
+          max-width: 100% !important;
+    }
+
+    /* ## 4.1 BEGIN site layout */
+    
+    #wrapper {
+          padding-top: 36px;
+    }
+
+    .thin {
+          flex-direction: column;
+          margin: auto;
+    }
+
+    /* the specificity goes up to 11 */
+    html > body div.thin > * {
+          width: 100%;
+    }
+
+    form table td.label {
+          width: 5rem;
+    }
+
+    .linkbox {
+          text-align: left;
+          width: 90%;
+    }
+
+    html body .scale_image,
+    #stats img {
+          max-width: 100%;
+    }
+    /* END site layout */
+
+    /* ************************************************ */
+
+    /* ## 4.2 BEGIN notifications */
+    
+    .i-am-new {
+          width: calc(100% - 48px) !important;
+    }
+
+    .i-am-new li {
+          width: 100% !important;
+    }
+
+    /* END notifications */
+
+    /* ## 4.3 BEGIN user settings */
+    #user #userform {
+          align-items: stretch;
+          display: flex;
+          flex-direction: column;
+          margin-left: 0;
+          width: 100%;
+    }
+
+    .settings_sidebar {
+          flex: unset;
+          order: -1;
+    }
+
+    /* tired of specificity :( */
+    #settings_sections {
+          position: static !important;
+    }
+    /* END user settings */
+
+    /* ************************************************ */
+    
+    /* ## 4.4 BEGIN forms */
+
+    input[type="search"],
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    select {
+          width: 100%;
+    }
+
+    #upload .box {
+          width: 100% !important;
+    }
+
+    .cat_list tr {
+          display: flex;
+          flex-wrap: wrap;
+    }
+
+    /* readability improvement for checkboxes on torrent.php */    
+    /* specific improvement for a specific problem; apologies */
+    
+    .layout.cat_list.ft_cat_list {
+          flex-direction: row;
+          height: auto;
+    }
+    .layout.cat_list.ft_cat_list tr td { 
+          width: 40% !important;
+    }
+    /* END forms */
+    
+
+    /* ************************************************ */
+
+    /* ## 4.5 BEGIN general tables */
+    
+    .m_table tbody,
+    .m_table .colhead,
+    .m_table .colhead_dark {
+          align-items: center;
+          display: flex;
+          flex-wrap: wrap;
+          width: 100%;
+    }
+
+    .m_table tbody {
+          align-items: stretch;
+          flex-direction: column;
+    }
+    /* END general tables */
+
+    /* ************************************************ */
+
+    /* ## 4.6 BEGIN table headers */
+    .m_table .colhead,
+    .m_table .colhead_dark {
+          flex-wrap: nowrap;
+    }
+
+    .m_table .colhead td:not(.m_th_right, .m_th_left),
+    .m_table .colhead_dark td:not(.m_th_right, .m_th_left) {
+          display: none;
+    }
+
+    .m_table .colhead td,
+    .m_table .colhead_dark td {
+          width: auto !important;
+    }
+
+    .m_th_left {
+          visibility: hidden;
+    }
+
+    .m_th_left_collapsable {
+          padding-left: 34px;
+    }
+
+    .m_th_left::before {
+          color: white;
+          content: 'Info';
+          visibility: visible;
+    }
+
+    /* kludge for :first-of-class */
+    .m_th_right {
+          margin-left: auto;
+    }
+
+    .m_th_right + .m_th_right {
+          margin-left: unset;
+    }
+
+    .m_th_right + .m_th_right + .m_th_right {
+          margin-left: unset;
+          padding-right: 12px;
+    }
+    /* END table headers */
+
+    /* ************************************************ */
+
+    /* ## 4.7 BEGIN table bodies */
+    
+    .m_table tr:not(.hidden, .colhead, .colhead_dark) {
+          display: block;
+          line-height: 1.4;
+          padding-bottom: 3px;
+          /* for position:absolute children */
+          position: relative;
+          width: 100%;
+    }
+
+    .m_table td {
+          display: block;
+    }
+
+    .m_table tr:not(.colhead):not(.colhead_dark) td:not(.m_td_left):not(.m_td_right) {
+          padding-bottom: 0;
+          padding-top: 0;
+          text-align: left;
+          width: 81%; 
+    }
+
+    td.m_td_left {
+          align-items: center;
+          display: flex;
+          float: left;
+          height: 100%;
+          width: 34px;
+    }
+    /* END table bodies */
+
+    /* ************************************************ */
+
+    /* ## 4.8 BEGIN right-aligned numerical stats */
+    .m_td_right {
+          margin: 0;
+          padding: 0 !important;
+          position: absolute;
+          right: 16px;
+          /* this is for the first one only */
+          text-align: right;
+          top: 0.2rem;
+    }
+
+    /* specificity override will occur for third one, so this is fine */
+    .m_td_right + .m_td_right {
+          top: 1.6em;
+    }
+
+    .m_td_right + .m_td_right + .m_td_right {
+          top: 3em;
+    }
+    /* END right-aligned numerical stats */
+
+    /* ************************************************ */
+
+    /* ## 4.9 BEGIN torrent table */
+    .torrent_table * {
+          float: none;
+    }
+
+    .torrent_table .remove_bookmark a,
+    .torrent_table .add_bookmark a {
+          float: none !important;
+    }
+
+    .torrent_table .cats_col:not(.m_cats_col) {
+          display: none;
+    }
+
+    /* on mobile, it wraps even on normal words, so better like this */
+    .group .group_info,
+    .torrent .group_info {
+          word-break: inherit;
+          
+          /* On Torrent listings, prevent 'bookmark' and long titles
+          /* from overrunning the stats on the right */
+          margin-right: 40px;   
+    }
+
+    .torrent .group_info span:first-child {
+          order: 10;
+    }
+
+    .group_info .tags {
+          order: 20;
+          width: 100%;
+    }
+
+    #wrapper .m_table .edition {
+          padding-top: 0;
+          padding-bottom: 0;
+    }
+
+    .edition_info {
+          padding: 4px 12px 4px 32px !important;
+    }
+
+    .group_torrent .edition_info a {
+          line-height: 23px;
+    }
+
+    .edition_1 {
+          /* for the right aligned numbers */
+          min-height: 5em;
+    }
+
+    .td_snatched.m_td_right,
+    .td_seeders.m_td_right,
+    .td_leechers.m_td_right {
+          min-width: 30px;
+          right: 4px;
+          text-align: left;
+    }
+
+    .td_snatched.m_td_right::before,
+    .td_seeders.m_td_right::before,
+    .td_leechers.m_td_right::before {
+          background: left / 10px no-repeat $icon-number-snatches;
+          color: $color-text-bold;
+          content: ':';
+          filter: brightness(80%);
+          position: absolute;
+          right: calc(100% + 2px);
+          text-align: right;
+          width: 14px;
+    }
+
+    .td_seeders.m_td_right::before {
+          background-image: $icon-number-seeders;
+    }
+
+    .td_leechers.m_td_right::before {
+          background-image: $icon-number-leechers;
+    }
+
+    .m_table.checkboxes td:first-child {
+          display: block;
+    }
+
+    /* ## 4.9.1 BEGIN expanded torrent group */
+    .group_torrent:not(.edition, .hidden) {
+          display: flex;
+          flex-direction: column;
+          padding: 5px 0 0 22px;
+    }
+
+    /* it would be nice to use flex for all group_torrents, but we can't de display:flex
+     * on any old table cell. It only works here because our trs aren't using the normal
+     * table display anyways.
+     */
+
+    .torrent_table .group_torrent:not(.edition) td:first-child {
+          display: flex;
+          /* for those ones with a million buttons */
+          flex-wrap: wrap;
+          padding: 0;
+          width: 80%;
+    }
+
+    .torrent_table .group_torrent:not(.edition) td:first-child span {
+          order: 5;
+          padding-left: 6px;
+    }
+
+    .td_file_count::before {
+          content: 'Files: ';
+    }
+
+    .torrent_table .group_torrent td:nth-child(4) {
+          padding-bottom: 5px;
+          text-align: left;
+    }
+
+    /* artist view page */
+    #torrents_album .edition_1 td:nth-child(n+2) {
+          padding-left: 15px;
+    }
+    /* END expanded torrent group */
+
+    /* BEGIN special treatment of Sizes */
+    /* On Collage-discog and Bookmark pages, sizes need to be forced left */
+    /* Apologies for being ultra-specific here, but don't want any side-effects */
+    
+    table#discog_table.torrent_table.grouping.cats.m_table .number_column.td_size.nobr,
+    table#torrent_table.torrent_table.grouping.cats.m_table  td.number_column.td_size.nobr {
+          text-align: left;
+          margin-left:1rem;
+          
+          &::before {
+              content: "\1F4C1 ";
+          }
+    }
+    
+    /* END special treatment of Sizes */
+        
+    /* ## 4.9.2 BEGIN top10 */
+    
+    /* 4 and 5 in colhead are hidden anyways */
+    #top10 .td_size::before {
+          content: 'Size: ';
+    }
+
+    .td_data::before {
+          content: 'Transferred: ';
+    }
+    /* END top10 */
+    /* END torrent table */
+
+    /* ************************************************ */
+
+    /* ## 4.10 BEGIN invite table */
+    .invite_table tr:not(.colhead) td:nth-child(3)::before {
+          content: 'Joined: ';
+    }
+
+    .invite_table tr:not(.colhead) td:nth-child(4)::before {
+          content: 'Seen: ';
+    }
+
+    .td_dl.m_td_right::before {
+          content: 'D: ';
+    }
+
+    .td_up.m_td_right::before {
+          content: 'U: ';
+    }
+
+    .td_ratio.m_td_right::before {
+          content: 'R: ';
+    }
+    /* END invite table */
+
+    /* ************************************************ */
+
+    /* ## 4.11 BEGIN collage table */
+    table.m_table.collage_table tr:not(.colhead):not(.colhead) {
+          display: flex;
+          flex-direction: column;
+    }
+
+    .m_table .td_collage_category::before {
+          content: 'Category: ';
+    }
+
+    .m_table .td_collage_category {
+          order: 2;
+          padding-top: 0;
+    }
+
+    .collage_table .td_info {
+          padding-bottom: 0;
+    }
+
+    .collage_table .td_updated::before {
+          content: 'Updated: ';
+    }
+
+    .collage_table .td_updated {
+          order: 3;
+    }
+
+    .collage_table .td_author::before {
+          content: 'Author: ';
+    }
+
+    .collage_table .td_author {
+          order: 3;
+    }
+
+    .collage_table .td_torrent_count::before {
+          content: 'T: ';
+    }
+
+    .collage_table .td_subscribers::before {
+          content: 'S: ';
+    }
+
+    /* For mobile view */
+    .collage_table .td_collage_category,
+    .collage_table .td_updated,
+    .collage_table .td_author {
+          margin-left: 1rem;
+    }
+    
+    /* checkup needed */
+    .collage_table .td_info .tags a:hover {
+    background: slategray !important;
+    color: darkslategray
+    }
+    
+    /* ## 4.11.1 collage ~ tag bubble appearance on mobile */
+    .collage_table .td_info .tags :not(:empty) {
+          box-sizing: border-box;
+          display: inline-block;
+          font-weight: 400;
+          font-size: 0.55rem;
+          vertical-align: baseline;
+          color: $color-obj-tag_bubble-foreground; 
+          background: $color-obj-tag_bubble-background !important;
+          padding: 0.05rem 0.5rem;
+          border: none !important;
+          border-radius: 1rem;
+          transition: all .35s;
+    }
+    /* uniquely for top10 page */
+    #top10 .tags {
+          width:auto;
+    }
+  
+    /* ## 4.11.2 collage ~ title of collages on mobile */
+    .collage_table .td_info {
+          font-size: larger;
+    }
+    /* END collage table */
+
+    /* ************************************************ */
+    
+    /* ## 4.12 BEGIN requests */
+    /* TODO: still show the time the request was filled without taking up too much space */
+
+    #requests .request_table tr:not(.colhead) td:nth-child(n+2) {
+          padding: 0 6px;
+    }
+
+    #requests .request_table tr:not(.colhead) td:nth-child(5)::before {
+          content: 'Filler: ';
+    }
+
+    #requests .request_table tr:not(.colhead) td:nth-child(6)::before {
+          content: 'Requester: ';
+    }
+
+    #requests .request_table tr:not(.colhead) td:nth-child(6) {
+          padding: 0 6px;
+    }
+
+    #requests .request_table tr:not(.colhead) td:nth-child(7)::before {
+          content: 'Added: ';
+    }
+
+    #requests .request_table tr:not(.colhead) td:nth-child(8)::before {
+          content: 'Last Vote: ';
+    }
+
+    #requests .request_table tr:not(.colhead) td:nth-child(8) {
+          padding-bottom: 4px;
+    }
+    /* END requests */
+
+    /* ************************************************ */
+
+    /* ## 4.13 BEGIN forums */
+    /* ## 4.13.1 BEGIN forum index */
+    .forum_index .last_read {
+          float: none !important;
+    }
+
+    .forum_index .last_topic,
+    .forum_index .last_poster {
+          float: none !important;
+    }
+
+    .forum_index .last_topic {
+          display: block;
+    }
+
+    #wrapper .td_read {
+          float: left;
+          height: 12px;
+          margin: 3px 5px 0 5px;
+          width: 11px;
+    }
+
+    .td_topic_count.m_td_right::before {
+          content: 'T: ';
+    }
+
+    .td_post_count.m_td_right::before {
+          content: 'P: ';
+    }
+
+    .td_author::before {
+          content: 'Author: ';
+    }
+
+    .td_replies.m_td_right::before {
+          content: 'R: ';
+    }
+    /* END forum index */
+
+    /* ## 4.13.2 BEGIN forum table structure */
+    /* this is copied from general tables. We put it here in case that changes
+     in ways specific for tabular data */
+
+    .forum_post tbody {
+          align-items: stretch;
+          display: flex;
+          flex-direction: column;
+          flex-wrap: wrap;
+          width: 100%;
+    }
+
+    .forum_post tr:not(.colhead_dark):not(.hidden) {
+          display: block;
+          position: relative;
+          width: 100%;
+    }
+    /* END forum table structure */
+
+    /* ## 4.13.3 BEGIN forum headers */
+    /* remove dashes from forum post headers */
+    .forum_post tr.colhead_dark {
+          color: transparent;
+          min-height: 50px;
+          padding-left: 54px;
+    }
+
+    .forum_post tr.colhead_dark span,
+    .forum_post tr.colhead_dark strong {
+          color: $color-text-input;
+    }
+
+    .forum_post tr.colhead_dark div {
+          display: inline;
+    }
+
+    .forum_post .time::after {
+          content: '\a';
+          white-space: pre;
+    }
+
+    .forum_post tr.colhead_dark div:nth-child(2) {
+          padding-left: 8px;
+    }
+
+    .forum_post .avatar {
+          left: 5px;
+          position: absolute;
+          top: -55px;
+          width: 0;
+          word-break: break-all;
+    }
+
+    .forum_post .avatar img {
+          max-height: 50px !important;
+          max-width: 50px !important;
+          min-height: 0;
+          min-width: 0;
+          position: absolute;
+    }
+    /* END forum headers */
+    /* END forums */
+
+    /* ************************************************ */
+
+    /* ## 4.14 BEGIN rules */
+    #rules .m_th_left::before {
+          content: 'Rules';
+    }
+
+    .rule_table .nobr {
+          white-space: unset;
+    }
+    /* END rules */
+
+    /* ************************************************ */
+
+    /* ## 4.15 reserved */
+
+    /* ************************************************ */
+
+    /* ## 4.16 Handling for sticky table headers on Mobile */
+    /* Deleted and burninated */
+     
+    /* ************************************************ */
+   
+    /* ## 4.17 SITE HEADER AND MOBILE MENU */
+    /* ## 4.17.1 Mobile Menu When Closed, Setup */
+    
+    #header {
+        --row-height: 40px;
+    }
+    
+    /* Delay searchboxes so keyboard doesn't open */
+    @keyframes delay-pointer-events {
+          0% {
+              visibility: hidden;
+          }
+          50% {
+              visibility: hidden;
+          }
+          100% {
+              visibility: visible;
+          }
+    }
+    
+    #header:hover #searchbars input,
+    /* this may cause the search boxes to appear on a 1sec delay; not a bug */
+     #nav_userinfo, 
+     #nav_useredit, 
+     #nav_logout  {
+            animation: delay-pointer-events 2000ms linear;
+    }
+     
+    
+    #header {
+          background: $color-mobilemenu-closed;
+          top: 0;
+          height: 0;
+          left: 0;
+          position: fixed;
+          transform: translateY(0);
+          transition: 200ms;
+          width: 100%;
+          z-index: 1000;
+          padding-bottom: 32px;
+          opacity: 0;
+    }
+    #header a{
+          color: $color-text-menu;
+    }
+    /* ## 4.17.2 Mobile Menu opens on hover */
+    
+    // Developers: when debugging, remove hover to force the menu open //
+    #header:hover {
+           height: clamp(200px, calc(var(--row-height)*15), 100%);
+           opacity: 1;
+           transition: all 600ms cubic-bezier(1, 0.01, 0.3, 1.31);
+           border-bottom: groove $color-mobilemenu-closed;
+           box-shadow: 0px 50px 70px $color-mobilemenu-shadow, 0 160px 160px #080808;
+    }
+
+    /* ## 4.17.3 Top Menubar for Mobile */
+
+    /* topbar for mobile ~ pulldown arrow icon */
+    #extra1{ 
+            position: fixed;
+            top: 5px;
+            left: calc(50% - 12.5px);
+            display: block;
+            opacity: 1!important;
+            width: 25px;
+            height: 25px;
+            background-image: $icon-menu-pulldown-mobile;
+            background-size: contain;
+            z-index:500;
+            pointer-events: none;
+    }
+
+    /* topbar for mobile ~ "folder tab" when menu is closed */
+    #extra4 {
+        background: $color-mobilemenu-closed;
+        border-radius: 0 0 9px 9px;
+        display: block;
+        right: 0;
+        width: 100%;
+    }
+
+    /* topbar for mobile ~ site logo, upper left */
+    #extra5 {
+        background-image: url("https://wally-crunk.github.io/svg/orpheus/ops-logo-loop.svg");
+        background-position: 0;
+        background-size: auto 24px;
+        background-repeat: no-repeat;
+        left: 4px;
+        pointer-events: none;
+        transform: translateZ(0);
+        width: 32px;
+        z-index: 400;
+    }
+
+    #extra4, #extra5 {
+        height: 32px;
+        position: fixed;
+        top: 0;
+    }
+
+    /* ## 4.17.4 Mobile Menu when Open, Setup */
+ 
+    /* debugging. remove the nonce words DEBUGGING to see how this works */
+    #debugging #userinfo_major,
+    #debugging #userinfo_major > * {
+        border: thin dotted blue;
+        border-radius: 1rem;
+    }
+    #debugging #userinfo_stats,
+    #debugging #userinfo_stats > * {
+        border: thin dotted pink;
+        border-radius: 1rem;
+    }
+    /* end debugging */
+
+    /* Setup */  
+    #userinfo {
+        position: static;
+    }
+    
+    #userinfo_minor a,
+    #userinfo_username a {
+        display: block;
+        height: 100%; 
+        line-height: 50px; 
+        text-align: center;
+    }
+    
+    #header ul:not(#userinfo_major):not(#userinfo_stats) {
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+    }
+    #header ul:not(#userinfo_major):not(#userinfo_stats) li {
+        margin: 0;
+        width: 33.3%;
+    }
+    #header ul:not(#userinfo_major):not(#userinfo_stats) a {
+        line-height: var(--row-height);
+    }
+    /* end setup
+    
+    /* ## 4.17.5  Menu when open, Row One */
+    
+    /* Left side ~ site logo */
+    
+    #logo {
+        position: inherit;
+        height: var(--row-height); width:15%;
+        z-index:999;
+        text-align:center;
+
+        background: radial-gradient(
+            circle at top left, 
+            $color-mobilemenu-userinfo-1,$color-mobilemenu-userinfo-2 );
+    }
+    
+    #logo a {
+        display: inline-block;
+        background: url("https://wally-crunk.github.io/svg/orpheus/ops-logo-loop.svg") center no-repeat;
+        background-size: var(--row-height);
+        height: var(--row-height); width:var(--row-height);
+        
+    }
+ 
+    /* Right side ~ three items */
+    
+    #userinfo_username > li, #logo {
+        background: radial-gradient(circle at top left, 
+            $color-mobilemenu-userinfo-1,$color-mobilemenu-userinfo-2 );
+    }
+        
+    #userinfo_username {
+        position: absolute;
+        left: 15%;
+        width: 85% !important;
+        x-debug-border: thick solid blue;
+    }
+    
+    #nav_userclass {
+        display: none;
+    }
+    
+    #userinfo_username #nav_userinfo a {
+        width: unset;
+    }
+    
+    /*  ## 4.17.6  Menu when open, Row Two (has subrows) */
+    
+    #userinfo_major {
+        left: 2vw;
+        right: auto;
+        width: 60vw;
+        margin: auto;
+        top: calc(100% - var(--row-height) * 10 - 125px);
+        height: calc(2.4 * var(--row-height));
+        flex-direction: column;
+        justify-content: space-around;
+    }
+    
+    #userinfo_stats {
+        left: auto;
+        right: 2vw;
+        width: 60vw;
+        margin: auto;
+        color: $color-text-base;
+        top: calc(100% - var(--row-height) * 10 - 125px);
+        height: calc(2.4 * var(--row-height));
+        flex-direction: column;
+        justify-content: space-around;
+        text-align: right;
+    }
+    
+    #userinfo_stats a,
+    #userinfo_major a {
+        text-decoration-line: underline;
+        text-decoration-style: dashed;
+    }
+    
+    #userinfo_stats span {
+        white-space: nowrap;
+    }
+    
+    #stats_ratio {
+        /* No need to force a color here, but this is where you could. */
+    }
+    
+    #stats_ratio .tooltip {
+        /* Provide a local background for the number to appear in color */
+        background-color: $color-background-form;
+        border-radius: 0.45rem;
+        padding-left: 0.45rem;
+        padding-right: 0.45rem;
+    }
+
+    /* ## 4.17.7  Menu when open, Row Three [torrents..] */
+    
+    #menu ul {
+        background: radial-gradient(
+            circle at top left, 
+            $color-mobilemenu-userinfo-1,
+            $color-mobilemenu-userinfo-2 );
+        bottom: calc(var(--row-height) * 7);
+        position: absolute;
+    }
+    #menu li {
+        background: transparent !important;
+    }
+    /* END Row Three */
+    
+    /* ## 4.17.8  Menu when open, Row Four [inbox..] */
+    
+    #userinfo_minor {
+        background: radial-gradient(circle at top left, 
+            $color-mobilemenu-userinfo-2,$color-mobilemenu-userinfo-1 );
+        bottom: calc(var(--row-height) * 3);
+        position: absolute;
+    }
+        
+    /* ## 4.17.9   Menu when open, Row Five ~ searchboxes */
+    
+    #searchbars ul {
+        bottom: 0;
+        height: unset;
+        padding: 0 0 0 6px;
+        position: absolute;
+    }
+    #searchbars li {
+        height: var(--row-height);
+    }
+    #searchbars li:nth-child(-n+3) .search_form {
+        margin: 6px 6px 3px 0;
+    }
+    #searchbars li:nth-child(n+4) .search_form {
+        margin: 3px 6px 6px 0;
+    }
+    #header #searchbars input {
+        height: calc(var(--row-height) - 9px);
+    }
+    /* END searchboxes */
+    
+    /* ## 4.17.10 Alerts */
+    
+/*  Alertbar is part of the DIV #header, which is designed to collapse on mobile. */
+    #alerts {display:none}
+    
+/*     PROBLEM: if we allow it to be visible as part of the rolldown menu, */
+/*      wherever it's located, its links activate the 'open when hover'. */
+/*      Why isn't Alertbar hover disabled when the menu is closed? */
+/*     Possible solution: move hoverbar to the 1st row of menu. /*
+/*     However, it blocks the 'settings' button until notifs are cleared. */
+/*     TODO: Find a better way.  
+/*  Meantime, #fearless users: UNCOMMENT the block below to turn ON alertbar on mobile. */ 
+
+    /* ==== */
+    /*
+    /*  #alerts > .alertbar {
+    /*    display: inline-block;
+    /*    position: absolute;
+    /*    margin: 0;
+    /*    top: 0;
+    /*    left: 2%;
+    /*    width: 96%;
+    /*    height: auto;
+    /*    z-index: 99999;
+    /*    opacity: 1 !important;
+    /*    }
+    /*
+    /*  /* on mobile, suppress any other non-alertbar alerts (if any) */
+    /*  #alerts > :not(.alertbar) {
+    /*    display: none;
+    /*    }
+    /*
+    /* ==== */
+    
+    /* ************************************************ */
+
+    /* ## 4.18 Checkboxes ~ purpose undocumented */
+    
+    #extracb1 {
+        display: block;
+        height: 32px;
+        margin: 0;
+        opacity: 0;
+        position: fixed;
+        right: 0;
+        top: 0;
+        width: 50vw;
+        z-index: 999;
+    }
+    #extracb1:checked ~ #wrapper #header {
+        transform: translateY(120%);
+    }
+    #extracb1:checked ~ #wrapper #logo {
+        transform: none;
+    }
+    #extracb1:checked ~ #extra1 {
+        transform: translateY(5px) rotate(45deg);
+    }
+    #extracb1:checked ~ #extra2 {
+        opacity: 0;
+    }
+    #extracb1:checked ~ #extra3 {
+        transform: translateY(-5px) rotate(-45deg);
+    }
+    
+    /* END checked */
+    /* END site header */
+    
+    /* ************************************************ */
+
+    /* ## 4.19 Torrent search, handling for tag appearance */
+
+    /* On the torrent search form, a 'Word bank' of tags is shown, */
+    /* when tags are set to display in profile settings. */
+    
+    #taglist tr.label {
+        height: auto;
+        border: thick solid $color-obj-tag_bubble-foreground; 
+    }
+    
+    #taglist tr.label td {
+        background: $color-obj-tag_bubble-background;
+        color: $color-obj-tag_bubble-foreground;
+        align-content: center;
+        text-align: center;
+        border: $color-obj-tag_bubble-foreground;
+        width: 100%;
+    }
+    
+    #taglist tr.label td::after {
+        font-style: italic;
+        content: '\27A4 Use "Hide Tags" above or Profile Settings to hide this list of tags.';
+        border: dotted;
+    }
+ 
+    #taglist tr:not(.label) td {
+        border: 0.1px solid gray;
+        width:31% !important;
+           visibility: visible;
+          box-sizing: border-box;
+          display: inline-block;
+          font-weight: 200;
+          overflow: hidden;  text-overflow: ellipsis;
+          font-style: italic; 
+          vertical-align: baseline;
+          color: $color-obj-tag_bubble-foreground !important; 
+          background: $color-obj-tag_bubble-background; 
+          padding: 0.25rem ;
+          border-radius: 1rem;
+          margin-bottom: 0.1rem;
+          transition: all 0.6s cubic-bezier(.25,.8,.25,1);;
+    } 
+    
+    /* END tag display for Torrent search form on Mobile, 
+    /* when tags are set to display in profile settings */
+}
+
+/* ######################################################################## */
+/* # 5 CHANGES FOR MOBILE, SUPER SHORT VIEW */
+/* ######################################################################## */
+
+/* ## 5.1 Begin Changes for Mobile, SUPER SMALL window */
+/* compact the Menu in two steps */
+
+@media (max-width: 575px)  /* var(--phone-screen-size) */ and (max-height: 600px) {
   #header {
     --row-height: 35px;
   }
 }
+
+@media (max-width: 575px)  /* var(--phone-screen-size) */ and (max-height: 510px) {
+  #userinfo_major,
+  #userinfo_major > * {
+    display:none;
+  }
+  #userinfo_stats,
+  #userinfo_stats > * {
+    display:none;
+  }
+} 
+
+/* ######################################################################## */
+/* # 6 CLOSING */
+/* ######################################################################## */
+
+/* ## 6.1 Debugging Tools */
+/* various 'debug' features are avail in this doc elsewhere */
+
+#footer p:last-of-type:after {
+  content: ' | Apollostage build ' + $build-slug;
+}
+
+/*# sourceMappingURL=styles.css.map */
+
+/* ####### */
+/* # EOF # */
+/* ####### */
