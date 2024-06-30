@@ -7,9 +7,9 @@ if (is_null($collage)) {
 
 echo (new Gazelle\Json\Collage(
     $collage,
+    (int)($_GET['page'] ?? 1),
     $Viewer,
     new Gazelle\Manager\TGroup(),
     new Gazelle\Manager\Torrent()
 ))
-    ->setVersion(2)
     ->response();

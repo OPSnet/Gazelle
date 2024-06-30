@@ -59,13 +59,13 @@ class Artist extends AbstractCollage {
     }
 
     public function nameList(): array {
-        return array_map(
+        return array_values(array_map(
             fn($a) => [
                 'id'    => $a['id'],
                 'name'  => $a['name'],
                 'image' => $a['image'],
             ], $this->artists
-        );
+        ));
     }
 
     protected function flushTarget(int $artistId): void {

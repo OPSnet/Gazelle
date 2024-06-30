@@ -456,6 +456,7 @@ class CollageTest extends TestCase {
 
         $payload = (new Gazelle\Json\Collage(
                 $collage,
+                1,
                 $this->userList['u1'],
                 new Gazelle\Manager\TGroup(),
                 new Gazelle\Manager\Torrent(),

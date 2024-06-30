@@ -3,8 +3,12 @@
 namespace Gazelle\Json;
 
 class Collage extends \Gazelle\Json {
+    protected static int $ENTRIES_PER_PAGE = 25;
+    protected int $version = 3;
+
     public function __construct(
         protected \Gazelle\Collage         $collage,
+        protected int                      $page,
         protected \Gazelle\User            $user,
         protected \Gazelle\Manager\TGroup  $tgMan,
         protected \Gazelle\Manager\Torrent $torMan,
@@ -15,63 +19,25 @@ class Collage extends \Gazelle\Json {
     }
 
     public function tgroupPayload(): array {
-        $entryList = $this->collage->entryList();
+        $entryList = array_slice(
+            $this->collage->entryList(),
+            ($this->page - 1) * static::$ENTRIES_PER_PAGE,
+            static::$ENTRIES_PER_PAGE
+        );
         $payload = [];
         foreach ($entryList as $tgroupId) {
             $tgroup = $this->tgMan->findById($tgroupId);
             if (is_null($tgroup)) {
                 continue;
             }
-            $idList = $tgroup->torrentIdList();
-            $torrentList = [];
-            foreach ($idList as $torrentId) {
-                $torrent = $this->torMan->findById($torrentId);
-                if (is_null($torrent)) {
-                    continue;
-                }
-                $torrentList[] = [
-                    'torrentid'               => $torrentId,
-                    'media'                   => $torrent->media(),
-                    'format'                  => $torrent->format(),
-                    'encoding'                => $torrent->encoding(),
-                    'remastered'              => $torrent->isRemastered(),
-                    'remasterYear'            => $torrent->remasterYear(),
-                    'remasterTitle'           => $torrent->remasterTitle(),
-                    'remasterRecordLabel'     => $torrent->remasterRecordLabel(),
-                    'remasterCatalogueNumber' => $torrent->remasterCatalogueNumber(),
-                    'scene'                   => $torrent->isScene(),
-                    'hasLog'                  => $torrent->hasLog(),
-                    'hasCue'                  => $torrent->hasCue(),
-                    'logScore'                => $torrent->logScore(),
-                    'fileCount'               => $torrent->fileTotal(),
-                    'size'                    => $torrent->size(),
-                    'seeders'                 => $torrent->seederTotal(),
-                    'leechers'                => $torrent->leecherTotal(),
-                    'snatched'                => $torrent->snatchTotal(),
-                    'freeTorrent'             => $torrent->isFreeleech(),
-                    'reported'                => (bool)$torrent->reportTotal($this->user),
-                    'time'                    => $torrent->created(),
-                ];
-            }
-            $payload[] = [
-                'id'              => $tgroupId,
-                'name'            => $tgroup->name(),
-                'year'            => $tgroup->year(),
-                'categoryId'      => $tgroup->categoryId(),
-                'recordLabel'     => $tgroup->recordLabel(),
-                'catalogueNumber' => $tgroup->catalogueNumber(),
-                'vanityHouse'     => $tgroup->isShowcase(),
-                'tagList'         => array_values($tgroup->tagNameList()),
-                'releaseType'     => $tgroup->releaseType(),
-                'wikiImage'       => $tgroup->image(),
-                'musicInfo'       => $tgroup->artistRole()?->roleListByType(),
-                'torrents'        => $torrentList,
-            ];
+            $tgJson = new \Gazelle\Json\TGroup($tgroup, $this->user, $this->torMan);
+            $payload[] = $tgJson->payload();
         }
         return $payload;
     }
 
     public function payload(): array {
+        $entryList = $this->collage->entryList();
         return array_merge(
             [
                 'id'                  => $this->collage->id(),
@@ -87,7 +53,8 @@ class Collage extends \Gazelle\Json {
                 'maxGroupsPerUser'    => $this->collage->maxGroupsPerUser(),
                 'hasBookmarked'       => (new \Gazelle\User\Bookmark($this->user))->isCollageBookmarked($this->collage->id()),
                 'subscriberCount'     => $this->collage->numSubscribers(),
-                'torrentGroupIDList'  => $this->collage->entryList(),
+                'torrentGroupIDList'  => $entryList,
+                'pages'               => $this->collage->isArtist() ? 1 : ceil(count($entryList) / static::$ENTRIES_PER_PAGE),
             ],
             $this->collage->isArtist()
                 ? ['artists'       => $this->artistPayload()]
