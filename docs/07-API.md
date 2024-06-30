@@ -1696,24 +1696,51 @@ __Note__: Either `torrentid` or `link` must be used
 **Arguments:**
 
 `id` - collage's id
+`page` - page number for torrent groups (default: 1)
 
 **Response format:**
+
+version: 3
 
 ```json
 {
     "status": "success",
     "response": {
-        "id": 32,
-        "name": "Ninja Tune",
-        "description": "<div style=\"text-align: center;\"><img class=\"scale_image\" onclick=\"lightbox.init(this,500);\" alt=\"http:\/\/i33.tinypic.com\/16h6pox.gif\" src=\"http:\/\/i33.tinypic.com\/16h6pox.gif\" \/><br \/>\r\n<br \/>\r\nNinja Tune is a London-based independent record label started in 1991 by DJs Matt Black and Jonathan More, better known as Coldcut, with a strong leaning towards electronic, abstract hip hop, instrumental hip hop, nu jazz, drum and bass, and chillout music.<br \/>\r\n<br \/>\r\nThe label has developed a number of DJs, producers, and live acts. Ninja Tune&#39;s sister imprints, Ntone (now defunct) and Big Dada, specialise in experimental electronic music and hip-hop, respectively. The label has a satellite office in Montreal, Quebec, owned and managed by Jeff Waye.<br \/>\r\n______________________<br \/>\r\n<br \/>\r\nSee also<br \/>\r\n<a href=\"\/collages.php?id=7888\">Big Dada Recordings<\/a><br \/>\r\n<a href=\"\/collages.php?id=7540\">Counter Records<\/a><br \/>\r\n<a href=\"\/collages.php?id=7526\">Ntone<\/a><br \/>\r\n<a href=\"\/collages.php?id=10777\">Motion Audio<\/a><\/div>",
-        "creatorID": 30471,
-        "deleted": false,
-        "collageCategoryID": 4,
-        "locked": false,
-        "categoryID": 0,
-        "maxGroups": 0,
-        "maxGroupsPerUser": 0,
-        "hasBookmarked": false
+      "id": 13657,
+      "name": "The Five Star Collection",
+      "description": "The Five (5) Star Collection was a Compass Productions series made in cooperation with several major labels&apos; special markets divisions, including Sony Music Custom Marketing Group, Universal Music Special Markets and EMI Music Special Markets.<br />\r\n<br />\r\n<a rel=\"noreferrer\" target=\"_blank\" href=\"https://www.discogs.com/label/1127838-COLLECTION\">https://www.discogs.com/label/1127838-COLLECTION</a>",
+      "description_raw": "The Five (5) Star Collection was a Compass Productions series made in cooperation with several major labels' special markets divisions, including Sony Music Custom Marketing Group, Universal Music Special Markets and EMI Music Special Markets.\r\n\r\nhttps://www.discogs.com/label/1127838-COLLECTION",
+      "creatorID": 1212,
+      "deleted": false,
+      "collageCategoryID": 9,
+      "collageCategoryName": "Series",
+      "locked": false,
+      "maxGroups": 0,
+      "maxGroupsPerUser": 0,
+      "hasBookmarked": false,
+      "subscriberCount": 0,
+      "torrentGroupIDList": [
+        739530,
+        648671
+      ],
+      "pages": 1,
+      // for torrent collage:
+      "torrentgroups": [
+         // array of torrent groups as returned by action=torrentgroup
+      ],
+      // for artist collage:
+      "artists": [
+        {
+          "id": 70362,
+          "name": "Drago Mlinarec",
+          "image": "https://ptpimg.me/gsotu8.jpg"
+        },
+        {
+          "id": 812898,
+          "name": "Grupa Marina Škrgatića",
+          "image": "https://ptpimg.me/tpo6n0.jpg"
+        }
+      ]
     }
 }
 ```
