@@ -490,6 +490,7 @@ abstract class TorrentAbstract extends BaseObject {
     public function remasterTuple(): string {
         return implode('!!', [
             $this->media(),
+            $this->isRemastered(),
             $this->remasterTitle(),
             $this->remasterYear(),
             $this->remasterRecordLabel(),

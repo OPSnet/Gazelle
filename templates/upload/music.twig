@@ -107,9 +107,9 @@
     <tr>
         <td class="label">Edition information:</td>
         <td>
-            <input type="checkbox" id="remaster" name="remaster"{{ checked(torrent.Remastered or tgroup.remasterList) }} onclick="Remaster();{% if not torrent %}CheckYear();{% endif %}" />
+            <input type="checkbox" id="remaster" name="remaster"{{ checked(torrent.Remastered) }} onclick="Remaster();{% if not torrent %}CheckYear();{% endif %}" />
             <label for="remaster">Check this if this torrent is a different edition to the original, for example a remaster, country specific edition, or a release that includes additional bonus tracks or bonus discs.</label>
-            <div id="remaster_true"{{ class_hidden(not (torrent.Remastered or tgroup.remasterList)) }}>
+            <div id="remaster_true"{{ class_hidden(not (torrent.Remastered)) }}>
 {% set unknown_release = torrent.Remastered and not torrent.RemasterYear %}
 {% if user.permitted('edit_unknowns') or torrent.UserID == user.id %}
                 <br />

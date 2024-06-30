@@ -185,6 +185,7 @@ class TGroup extends \Gazelle\BaseManager {
             array_map(fn($id) => sprintf(\Gazelle\Torrent::CACHE_KEY, $id), self::$db->collect(0, false))
         );
 
+        self::$db->begin_transaction();
         self::$db->prepared_query("
             UPDATE torrents SET
                 GroupID = ?

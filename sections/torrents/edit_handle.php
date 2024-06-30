@@ -32,10 +32,10 @@ $Properties = [
     'Format'              => $_POST['format'],
     'Media'               => $_POST['media'] ?? '',
     'Encoding'            => $_POST['bitrate'],
-    'TorrentDescription'  => trim($_POST['release_desc'] ?? ''),
-    'Scene'               => isset($_POST['scene']) ? '1' : '0',
-    'HasLog'              => isset($_POST['flac_log']) ? '1' : '0',
-    'HasCue'              => isset($_POST['flac_cue']) ? '1' : '0',
+    'Description'         => trim($_POST['release_desc'] ?? ''),
+    'Scene'               => isset($_POST['scene']),
+    'HasLog'              => isset($_POST['flac_log']),
+    'HasCue'              => isset($_POST['flac_cue']),
     'Remastered'          => isset($_POST['remaster']),
     'BadTags'             => isset($_POST['bad_tags']),
     'BadFolders'          => isset($_POST['bad_folders']),
@@ -153,33 +153,44 @@ if (!$Err && isset($Properties['Image'])) { /** @phpstan-ignore-line */
     }
 }
 
-if ($Err) { // Show the upload form, with the data the user entered
+if ($Err) {
     error($Err);
 }
 
-//******************************************************************************//
-//--------------- Start database stuff -----------------------------------------//
+$propertyMap = [
+    'Media'                   => 'media',
+    'Format'                  => 'format',
+    'Encoding'                => 'encoding',
+    'Scene'                   => 'isScene',
+    'Description'             => 'description',
+    'RemasterYear'            => 'remasterYear',
+    'Remastered'              => 'isRemastered',
+    'RemasterTitle'           => 'remasterTitle',
+    'RemasterRecordLabel'     => 'remasterRecordLabel',
+    'RemasterCatalogueNumber' => 'remasterCatalogueNumber',
+];
 
-$db = Gazelle\DB::DB();
-$current = $db->rowAssoc("
-    SELECT GroupID, Media, Format, Encoding, Scene, Description AS TorrentDescription,
-        RemasterYear, Remastered, RemasterTitle, RemasterRecordLabel, RemasterCatalogueNumber
-    FROM torrents
-    WHERE ID = ?
-    ", $TorrentID
-);
-$current['Remastered'] = ($current['Remastered'] === '1');
 $change = [];
-foreach ($current as $key => $value) {
-    if ($key == 'GroupID') {
-        // Not needed here, used below
-        continue;
+foreach ($propertyMap as $field => $method) {
+    if (!method_exists($torrent, $method)) {
+        $Debug->saveCase("bad method $method in torrent edit id={$torrent->id()}");
+        error(0);
     }
-    if (isset($Properties[$key]) && $value !== $Properties[$key]) {
-        if (is_bool($Properties[$key])) {
-            $change[] = sprintf("%s %s \xE2\x86\x92 %s", $key, $value ? 'true' : 'false', $Properties[$key] ? 'true' : 'false');
+    $value = $torrent->$method();
+    // soft inequality, to match null versus ''
+    if (isset($Properties[$field]) && $value != $Properties[$field]) {
+        if (is_bool($Properties[$field])) {
+            $change[] = sprintf("$field %s → %s",
+                $value ? 'true' : 'false',
+                $Properties[$field] ? 'true' : 'false'
+            );
         } else {
-            $change[] = sprintf("%s %s \xE2\x86\x92 %s", $key, $value, $Properties[$key]);
+            $change[] = "$field $value → {$Properties[$field]}";
+        }
+        if (in_array($field, ['Remastered', 'Scene'])) {
+            $torrent->setField($field, $Properties[$field] ? '1' : '0');
+        } else {
+            $torrent->setField($field, $Properties[$field]);
         }
     }
 }
@@ -187,6 +198,7 @@ foreach ($current as $key => $value) {
 //******************************************************************************//
 //--------------- Start database stuff -----------------------------------------//
 
+$db = Gazelle\DB::DB();
 $db->begin_transaction(); // It's all or nothing
 
 if (isset($_FILES['logfiles'])) {
@@ -201,24 +213,31 @@ if (isset($_FILES['logfiles'])) {
     }
 }
 
-// Update info for the torrent
-$set = [
-    'Description = ?', 'Media = ?', 'Format = ?', 'Encoding = ?', 'Scene = ?',
-    'Remastered = ?', 'RemasterYear = ?', 'RemasterTitle = ?',
-    'RemasterRecordLabel = ?', 'RemasterCatalogueNumber = ?',
-];
-$args = [
-    $Properties['TorrentDescription'], $Properties['Media'], $Properties['Format'], $Properties['Encoding'], $Properties['Scene'],
-    $Properties['Remastered'] ? '1' : '0', $Properties['RemasterYear'], $Properties['RemasterTitle'],
-    $Properties['RemasterRecordLabel'], $Properties['RemasterCatalogueNumber'],
-];
-
 if ($Viewer->permitted('users_mod')) {
-    $set = array_merge($set, ['HasLog = ?', 'HasCue = ?']);
     if ($Properties['Format'] == 'FLAC' && $Properties['Media'] == 'CD') {
-        $args = array_merge($args, [$Properties['HasLog'], $Properties['HasCue']]);
+        if ($torrent->hasLog() != $Properties['HasLog']) {
+            $torrent->setField('HasLog', $Properties['HasLog'] ? '1' : '0');
+            $change[] = sprintf("HasLog %s → %s",
+                $torrent->hasLog() ? 'true' : 'false',
+                $Properties[$field] ? 'true' : 'false'
+            );
+        }
+        if ($torrent->hasCue() != $Properties['HasCue']) {
+            $torrent->setField('HasCue', $Properties['HasCue'] ? '1' : '0');
+            $change[] = sprintf("HasCue %s → %s",
+                $torrent->hasCue() ? 'true' : 'false',
+                $Properties[$field] ? 'true' : 'false'
+            );
+        }
     } else {
-        $args = array_merge($args, ['0', '0']);
+        if ($torrent->hasLog()) {
+            $torrent->setField('HasLog', '0');
+            $change[] = "HasLog cleared";
+        }
+        if ($torrent->hasCue()) {
+            $torrent->setField('HasCue', '0');
+            $change[] = "HasCue cleared";
+        }
     }
 
     foreach (
@@ -253,14 +272,6 @@ if ($Viewer->permitted('site_edit_lineage')) {
     }
 }
 
-$args[] = $TorrentID;
-$db->prepared_query("
-    UPDATE torrents SET
-    " . implode(', ', $set) . "
-    WHERE ID = ?
-    ", ...$args
-);
-
 if ($Viewer->permitted('torrents_freeleech')) {
     $reason    = $torMan->lookupLeechReason($_POST['leech_reason'] ?? LeechReason::Normal->value);
     $leechType = $torMan->lookupLeechType($_POST['leech_type'] ?? LeechType::Normal->value);
@@ -274,14 +285,16 @@ if ($Viewer->permitted('torrents_freeleech')) {
         );
     }
 }
-$db->commit();
 
+$torrent->modify();
 $torrent->group()->refresh();
+$torrent->flush();
+
+$db->commit();
 
 $changeLog = shortenString(implode(', ', $change), 300);
 (new Gazelle\Log())->torrent($torrent, $Viewer, $changeLog)
-    ->general("Torrent $TorrentID ({$torrent->group()->name()}) in group {$current['GroupID']} was edited by "
+    ->general("Torrent $TorrentID ({$torrent->group()->name()}) in group {$torrent->groupId()} was edited by "
         . $Viewer->username() . " ($changeLog)");
 
-$torrent->flush();
 header("Location: " . $torrent->location());
