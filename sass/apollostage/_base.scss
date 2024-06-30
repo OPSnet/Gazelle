@@ -3227,7 +3227,9 @@ ul#check.nobullet > *
           padding-bottom: 32px;
           opacity: 0;
     }
-    
+    #header a{
+          color: $color-text-menu;
+    }
     /* ## 4.17.2 Mobile Menu opens on hover */
     
     // Developers: when debugging, remove hover to force the menu open //
