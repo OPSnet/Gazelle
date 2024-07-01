@@ -3269,7 +3269,7 @@ ul#check.nobullet > *
 
     /* topbar for mobile ~ site logo, upper left */
     #extra5 {
-        background-image: url("https://wally-crunk.github.io/svg/orpheus/ops-logo-loop.svg");
+        background-image: url($logo-site-square);
         background-position: 0;
         background-size: auto 24px;
         background-repeat: no-repeat;
@@ -3345,7 +3345,7 @@ ul#check.nobullet > *
     
     #logo a {
         display: inline-block;
-        background: url("https://wally-crunk.github.io/svg/orpheus/ops-logo-loop.svg") center no-repeat;
+        background: url($logo-site-square) center no-repeat;
         background-size: var(--row-height);
         height: var(--row-height); width:var(--row-height);
         
