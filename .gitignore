@@ -35,8 +35,6 @@ __MACOSX/
 .docker/mysql-home/.mysql_history
 !.docker/mysql-home/.my.cnf
 
-/public/static/styles/**/*.css
-/public/static/styles/**/*.css.map
 !/public/static/styles/opendyslexic/style.css
 !/public/static/styles/tooltipster/custom.css
 !/public/static/styles/tooltipster/reset.css
