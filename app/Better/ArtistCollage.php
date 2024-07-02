@@ -17,10 +17,11 @@ class ArtistCollage extends AbstractBetter {
         $this->baseQuery = "
             FROM artists_group a
             INNER JOIN collages_artists ca USING (ArtistID)
-            LEFT JOIN wiki_artists wa USING (RevisionID)
-            LEFT JOIN artist_usage au ON (au.artist_id = a.ArtistID)";
+            INNER JOIN artists_alias    aa ON (a.PrimaryAlias = aa.AliasID)
+            LEFT JOIN wiki_artists      wa USING (RevisionID)
+            LEFT JOIN artist_usage      au ON (au.artist_id = a.ArtistID)";
 
         $this->where[] = "(wa.Image IS NULL OR wa.Image = '')";
-        $this->orderBy = "ORDER BY coalesce(au.uses, 0) DESC, a.Name ASC";
+        $this->orderBy = "ORDER BY coalesce(au.uses, 0) DESC, aa.Name ASC";
     }
 }

@@ -28,7 +28,7 @@ $better = match ($type) {
     'single'        => new Gazelle\Better\SingleSeeded($user, $filter, (new Gazelle\Manager\Torrent())->setViewer($Viewer)),
     'files', 'folders', 'lineage', 'tags'
                     => (new Gazelle\Better\Bad($user, $filter, new Gazelle\Manager\Torrent()))->setBadType($type),
-    default         => error(0),
+    default         => error(404),
 };
 
 if (isset($_GET['remove']) && $better instanceof Gazelle\Better\Bad && $Viewer->permitted('admin_reports')) {

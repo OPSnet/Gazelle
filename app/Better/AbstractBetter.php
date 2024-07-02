@@ -98,7 +98,7 @@ abstract class AbstractBetter extends \Gazelle\Base {
             if (isset($this->search)) {
                 switch ($this->mode()) {
                     case 'artist':
-                        $this->where[] = 'a.Name LIKE ?';
+                        $this->where[] = 'aa.Name LIKE ?';
                         $this->args[] = "%{$this->search}%";
                         break;
                     case 'group':
