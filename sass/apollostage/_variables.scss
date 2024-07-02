@@ -6,7 +6,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // SLUG
 
- $build-slug: "24.06"; // must include quots
+ $build-slug: "2024-07-01d"; // must include quots
  
 // ////////////////////////////////////////////////////////////////////////////////
 // COLORS
@@ -100,6 +100,7 @@ $color-background-table-row-odd: $back-300;
 $color-background-table-row-even: $back-200;
 $color-background-table-torrenttable: $back-300; // also form field in focus
 $color-background-table-torrents-group: $back-600;
+$color-background-fx-unread: $ds-fx-mid;
 
 $color-background-torrent: $midtone-200; // edition in group-list
 $color-background-table-discog: $midtone-300; // navigation row ~ "jump down to.."
@@ -139,7 +140,7 @@ $color-text-input: $fore-600; // for pre-populated inputs
 $color-text-input-active: $fore-900;
 $color-text-linkbox: $midtone-800; // links in linkbox
 $color-text-menu: $fore-1000;
-$color-text-menu-hover: $back-300; // during pulldown
+$color-text-menu-hover: $color-text-menu; // during pulldown
 $color-text-mono: $fore-500;
 $color-text-notification-words: $fore-1000;
 $color-text-ratio-greenzone: $ds-green;
