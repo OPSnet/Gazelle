@@ -295,7 +295,7 @@ class Collage extends \Gazelle\BaseManager {
             return [];
         }
         $stem = mb_strtolower(mb_substr($text, 0, $length));
-        $key = 'autocomp_collage_' . ($isArtist ? 'a_' : '') . "_$stem";
+        $key = 'collage_autocomp_' . ($isArtist ? 'a_' : '_') . base64_encode($stem);
         $autocomplete = self::$cache->get($key);
         if ($autocomplete === false) {
             if ($isArtist) {

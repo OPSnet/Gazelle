@@ -131,7 +131,7 @@ class Artist extends \Gazelle\BaseManager {
     }
 
     public function autocompleteKey(string $prefix): string {
-        return "artist_autocomp_" . base64_encode(mb_strtolower($prefix));
+        return "artist_autocomp_" . base64_encode(mb_strtolower(mb_substr($prefix, 0, 16)));
     }
 
     public function autocompleteList(string $prefix): array {
