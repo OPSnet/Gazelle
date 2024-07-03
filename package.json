@@ -21,10 +21,14 @@
   },
   "license": "Unlicense",
   "devDependencies": {
+    "@eslint/js": "^9.8.0",
+    "@stylistic/eslint-plugin-js": "^2.4.0",
     "browser-sync": "^2.27.5",
     "browser-sync-webpack-plugin": "^2.2.2",
     "cypress": "^12.0.2",
     "cypress-terminal-report": "^5.0.2",
+    "eslint": "^9.6.0",
+    "globals": "^15.8.0",
     "husky": "^8.0.1",
     "lint-staged": "^10.5.0",
     "stylelint": "^13.3.2",
@@ -43,6 +47,9 @@
     "webpack": "^4"
   },
   "lint-staged": {
+    "*.js": [
+      "eslint -c misc/eslint.config.mjs"
+    ],
     "*.php": [
       "vendor/bin/phpstan analyze --no-progress --configuration=misc/phpstan.neon --memory-limit 512M",
       "bin/phpcs",

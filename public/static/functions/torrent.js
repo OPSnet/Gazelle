@@ -21,8 +21,8 @@ function ArtistManager() {
     } else {
         GroupID = GroupID[1];
     }
-    let ArtistList = document.getElementById('artist_list');
-    let ArtistManager = document.getElementById('artistmanager');
+    const ArtistList = document.getElementById('artist_list');
+    const ArtistManager = document.getElementById('artistmanager');
     if (!ArtistList) {
         return false;
     } else if (ArtistManager) {
@@ -30,12 +30,12 @@ function ArtistManager() {
         ArtistList.classList.toggle('hidden');
     } else {
         MainArtistCount = 0;
-        let elArtistManager = document.createElement('div');
+        const elArtistManager = document.createElement('div');
         elArtistManager.id = 'artistmanager';
 
-        let elArtistList = ArtistList.cloneNode(true);
+        const elArtistList = ArtistList.cloneNode(true);
         elArtistList.id = 'artistmanager_list';
-        let artists = elArtistList.getElementsByClassName('artist_entry');
+        const artists = elArtistList.getElementsByClassName('artist_entry');
         for (let i = 0; i < artists.length; i++) {
             let importance;
             switch (artists[i].classList[0]) {
@@ -66,8 +66,8 @@ function ArtistManager() {
                 default:
                     continue;
             }
-            let AliasID = artists[i].dataset.aliasid;
-            let elBox = document.createElement('input');
+            const AliasID = artists[i].dataset.aliasid;
+            const elBox = document.createElement('input');
             elBox.type = 'checkbox';
             elBox.id = 'artistmanager_box' + i;
             elBox.name = 'artistmanager_box';
@@ -83,27 +83,32 @@ function ArtistManager() {
         var elArtistForm = document.createElement('form');
         elArtistForm.id = 'artistmanager_form';
         elArtistForm.method = 'post';
+
         var elGroupID = document.createElement('input');
         elGroupID.type = 'hidden';
         elGroupID.name = 'groupid';
         elGroupID.value = GroupID;
         elArtistForm.appendChild(elGroupID);
+
         var elAction = document.createElement('input');
         elAction.type = 'hidden';
         elAction.name = 'manager_action';
         elAction.id = 'manager_action';
         elAction.value = 'manage';
         elArtistForm.appendChild(elAction);
-        var elAction = document.createElement('input');
+
+        elAction = document.createElement('input');
         elAction.type = 'hidden';
         elAction.name = 'action';
         elAction.value = 'manage_artists';
         elArtistForm.appendChild(elAction);
+
         var elAuth = document.createElement('input');
         elAuth.type = 'hidden';
         elAuth.name = 'auth';
         elAuth.value = authkey;
         elArtistForm.appendChild(elAuth);
+
         var elSelection = document.createElement('input');
         elSelection.type = 'hidden';
         elSelection.id = 'artists_selection';
@@ -114,6 +119,7 @@ function ArtistManager() {
         var elImportance = document.createElement('select');
         elImportance.name = 'importance';
         elImportance.id = 'artists_importance';
+
         var elOpt = document.createElement('option');
         elOpt.value = 1;
         elOpt.innerHTML = 'Main artist';
@@ -178,10 +184,10 @@ function SelectArtist(e,obj) {
     if (!e.shiftKey || typeof StartBox == 'undefined') {
         StartBox = EndBox;
     }
-    let Dir = (EndBox > StartBox ? 1 : -1);
-    let checked = obj.checked;
+    const Dir = (EndBox > StartBox ? 1 : -1);
+    const checked = obj.checked;
     for (let i = StartBox; i !== EndBox; i += Dir) {
-        let el = document.getElementById('artistmanager_box' + i);
+        const el = document.getElementById('artistmanager_box' + i);
         if (el) {
             el.checked = checked;
         }

@@ -24,14 +24,14 @@
         $(document).on('click', "#lastfm_expand", function () {
             // Make hidden entries visible and remove the expand button.
             if ($(this).attr("href") == "#topartists") {
-                topArtists = topArtists.replace(/\ class="hidden"/g,"");
-                topArtists = topArtists.replace(/<li>\[<a\ href=\"#topartists.*\]<\/li>/,"");
+                topArtists = topArtists.replace(/ class="hidden"/g,"");
+                topArtists = topArtists.replace(/<li>\[<a href="#topartists.*]<\/li>/,"");
             } else if ($(this).attr("href") == "#topalbums") {
-                topAlbums = topAlbums.replace(/\ class="hidden"/g,"");
-                topAlbums = topAlbums.replace(/<li>\[<a\ href=\"#topalbums.*\]<\/li>/,"");
+                topAlbums = topAlbums.replace(/ class="hidden"/g,"");
+                topAlbums = topAlbums.replace(/<li>\[<a href="#topalbums.*]<\/li>/,"");
             } else if ($(this).attr("href") == "#toptracks") {
-                topTracks = topTracks.replace(/\ class="hidden"/g,"");
-                topTracks = topTracks.replace(/<li>\[<a\ href=\"#toptracks.*\]<\/li>/,"");
+                topTracks = topTracks.replace(/ class="hidden"/g,"");
+                topTracks = topTracks.replace(/<li>\[<a href="#toptracks.*]<\/li>/,"");
             }
             updateDivContents(div);
         });
@@ -52,7 +52,7 @@
         $.urlParam = function(name) {
             var results = new RegExp('[\\?&amp;]' + name + '=([^&amp;#]*)').exec(window.location.href);
             return results[1] || 0;
-        }
+        };
         $("#lastfm_reload").on('click', function () {
             // Clear the cache and the necessary variables.
             $.get('user.php?action=lastfm&mode=flush&username=' + username + '&uid=' + $.urlParam('id'), function (response) {});
@@ -152,7 +152,7 @@
                         for (i = 3; i < response.length; i++) {
                             html += topArtistEntry(response[i]);
                         }
-                        html += '<li><a href="#topartists" id="lastfm_expand" onclick="return false" class="brackets">Expand</a></li>'
+                        html += '<li><a href="#topartists" id="lastfm_expand" onclick="return false" class="brackets">Expand</a></li>';
                     }
                     topArtists = html + "</ul></li>";
                 }
@@ -199,7 +199,7 @@
 
     function topTrackEntry(info) {
         return '<li><a href="artist.php?artistname=' + escapeAmpUrl(info.artist) + '">' + escapeHtml(info.artist) + '</a> - <a href="torrents.php?artistname='
-            + escapeAmpUrl(info.artist) + '&filelist=' + escapeAmpUrl(info.name) + '">' + escapeHtml(info.name) + '</a> <i>(' + info.playcount + ')</i></li>'
+            + escapeAmpUrl(info.artist) + '&filelist=' + escapeAmpUrl(info.name) + '">' + escapeHtml(info.name) + '</a> <i>(' + info.playcount + ')</i></li>';
     }
 
     function getTopTracks(div) {

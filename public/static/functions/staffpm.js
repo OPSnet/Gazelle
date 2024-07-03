@@ -12,7 +12,7 @@ function UpdateMessage() {
 
     ajax.get("?action=get_response&plain=0&id=" + id, function (data) {
         $('#common_answers_body').raw().innerHTML = data;
-        $('#first_common_response').remove()
+        $('#first_common_response').remove();
     });
 }
 
@@ -106,9 +106,7 @@ function PreviewMessage() {
     }
 }
 
-function Quote(post, user) {
-    username = user;
-    postid = post;
+function Quote(postid, username) {
     ajax.get("?action=get_post&post=" + postid, function(response) {
         if ($('#quickpost').raw().value !== '') {
             $('#quickpost').raw().value = $('#quickpost').raw().value + "\n\n";

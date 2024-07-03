@@ -217,7 +217,7 @@ if (typeof Object.create !== 'function') {
                     if (self.options.maxVisible > 0 && self.options.dismissQueue) {
                         $.notyRenderer.render();
                     }
-                })
+                });
 
         }, // end close
 
@@ -547,4 +547,4 @@ window.noty = function noty(options) {
     // End of the BC
 
     return jQuery.notyRenderer.init(options);
-}
+};

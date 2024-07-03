@@ -104,7 +104,7 @@ function UpVoteGroup(groupid, authkey) {
     voteLock = true;
     ajax.get('ajax.php?action=votefavorite&do=vote&groupid=' + groupid + '&vote=up' + '&auth=' + authkey, function (response) {
         handleLinkAction(JSON.parse(response), +1);
-    })
+    });
     voteLock = false;
 }
 
@@ -115,6 +115,6 @@ function UnvoteGroup(groupid, authkey) {
     voteLock = true;
         ajax.get('ajax.php?action=votefavorite&do=unvote&groupid=' + groupid + '&auth=' + authkey, function (response) {
         handleLinkAction(JSON.parse(response), 0);
-    })
+    });
     voteLock = false;
 }

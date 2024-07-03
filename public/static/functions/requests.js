@@ -189,8 +189,7 @@ function Categories() {
 function add_tag() {
     if ($('#tags').raw().value == "") {
         $('#tags').raw().value = $('#genre_tags').raw().options[$('#genre_tags').raw().selectedIndex].value;
-    } else if ($('#genre_tags').raw().options[$('#genre_tags').raw().selectedIndex].value == "---") {
-    } else {
+    } else if (!($('#genre_tags').raw().options[$('#genre_tags').raw().selectedIndex].value == "---")) {
         $('#tags').raw().value = $('#tags').raw().value + ", " + $('#genre_tags').raw().options[$('#genre_tags').raw().selectedIndex].value;
     }
 }

@@ -182,7 +182,7 @@ function toggle_group(groupid, link, event) {
 
     let releaseType = null;
     if (allGroups) {
-        for (let className of clickedRow.classList) {
+        for (const className of clickedRow.classList) {
             if (className.startsWith('releases_')) {
                 releaseType = className;
                 break;
@@ -296,7 +296,7 @@ function toggleTorrentSearch(mode) {
         $('.ftr_basic').gshow();
         $('#ft_type').attr('onclick', "return toggleTorrentSearch('advanced')");
         $('#ft_type').raw().innerHTML = 'Switch to advanced';
-        $('#ft_action').attr('value', mode)
+        $('#ft_action').attr('value', mode);
     } else if (mode == 'advanced') {
         $('.fti_advanced').enable();
         $('.fti_basic').disable();
@@ -304,7 +304,7 @@ function toggleTorrentSearch(mode) {
         $('.ftr_basic').ghide();
         $('#ft_type').attr('onclick', "return toggleTorrentSearch('basic')");
         $('#ft_type').raw().innerHTML = 'Switch to basic';
-        $('#ft_action').attr('value', mode)
+        $('#ft_action').attr('value', mode);
     }
     return false;
 }

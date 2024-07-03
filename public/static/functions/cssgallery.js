@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function () {
         radiobutton.prop('checked', true);
         $('select#stylesheet').val(radiobutton.attr('value'));
         $('input#styleurl').val('');
-    })
+    });
     // If the drop-down is changed, select the appropriate item in gallery, clear the custom CSS field
     $('select#stylesheet').change(function() {
         var radiobutton = $('input[name="stylesheet_gallery"][value="' + $(this).val() + '"]');
@@ -23,20 +23,20 @@ document.addEventListener('DOMContentLoaded', function () {
         $('.preview_wrapper').removeClass('selected');
         radiobutton.parent().parent().addClass('selected');
         $('input#styleurl').val('');
-    })
+    });
     // If the custom CSS field is changed, clear radio buttons
     $('input#styleurl').keydown(function() {
         $('input[name="stylesheet_gallery"]').each(function() {
             $(this).prop('checked', false);
-        })
+        });
         $('.preview_wrapper').removeClass('selected');
-    })
+    });
     // If the input is empty, select appropriate gallery item again by the drop-down
     $('input#styleurl').keyup(function() {
         if (!$(this).val()){
             $('select#stylesheet').change();
         }
-    })
+    });
     // Allow the CSS gallery to be expanded/contracted
     $('#toggle_css_gallery').click(function (e) {
         e.preventDefault();

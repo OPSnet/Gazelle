@@ -1,7 +1,3 @@
-var username;
-var postid;
-var url = new gazURL();
-
 function QuoteJump(event, post) {
     var button = event.button;
     var url, pattern;
@@ -22,7 +18,7 @@ function QuoteJump(event, post) {
             default:
                 return;
         }
-        pattern = new RegExp(url + '\.php');
+        pattern = new RegExp(url + '\\.php');
         post = post.substr(1);
         url = 'comments.php?action=jump&postid=' + post;
     } else {
@@ -42,14 +38,10 @@ function QuoteJump(event, post) {
     }
 }
 
-function Quote(post, user) {
-    Quote(post, user, false)
-}
-
-var original_post;
-function Quote(post, user, link) {
-    username = user;
-    postid = post;
+function Quote(post, user, link = false) {
+    const username = user;
+    const postid = post;
+    const url = new gazURL();
 
     var target = '';
     var requrl = '';
@@ -121,11 +113,11 @@ function Quote(post, user, link) {
 
 
 function edit_post(id) {
-    let dataset = document.getElementById(id).dataset;
-    let postuserid = dataset.author;
-    let key = dataset.key;
-    let postid = id.substr(id.indexOf('-') + 1) // edit-1234 and #edit-1234 seen in the wild, want 1234
-    let is_forum = location.href.match(/forums\.php/);
+    const dataset = document.getElementById(id).dataset;
+    const postuserid = dataset.author;
+    const key = dataset.key;
+    const postid = id.substr(id.indexOf('-') + 1); // edit-1234 and #edit-1234 seen in the wild, want 1234
+    const is_forum = location.href.match(/forums\.php/);
 
     var boxWidth, inputname, pmbox;
     // If no edit is already underway or a previous edit was finished, make the necessary dom changes.
@@ -136,7 +128,6 @@ function edit_post(id) {
         pmbox = (postuserid != userid)
             ? '<span id="pmbox' + postid + '"><label>PM user on edit? <input type="checkbox" name="pm" value="1" /></label></span>'
             : '';
-        console.log([id, postid])
         $('#bar' + postid).raw().cancel = $('#content' + postid).raw().innerHTML;
         $('#bar' + postid).raw().oldbar = $('#bar' + postid).raw().innerHTML;
         $('#content' + postid).raw().innerHTML = "<div id=\"preview" + postid + "\"></div><form id=\"form" + postid + "\" method=\"post\" action=\"\">" + pmbox + "<input type=\"hidden\" name=\"auth\" value=\"" + authkey + "\" />&nbsp;<input type=\"hidden\" name=\"key\" value=\"" + key + "\" />&nbsp;<input type=\"hidden\" name=\"" + inputname + "\" value=\"" + postid + "\" /><textarea id=\"editbox" + postid + "\" onkeyup=\"resize('editbox" + postid + "');\" name=\"body\" cols=\"" + boxWidth + "\" rows=\"10\"></textarea></form>";
@@ -205,8 +196,7 @@ function Save_Edit(postid) {
     }
 }
 
-function Delete(post) {
-    postid = post;
+function Delete(postid) {
     if (confirm('Are you sure you wish to delete this post?') == true) {
         if (location.href.match(/forums\.php/)) {
             ajax.get("forums.php?action=delete&auth=" + authkey + "&postid=" + postid, function () {
@@ -247,7 +237,7 @@ function Newthread_Preview(mode) {
             $('#contentpreview').raw().innerHTML = response;
         });
         $('#newthreadtitle').raw().innerHTML = $('#title').raw().value;
-        var pollanswers = $('#answer_block').raw();
+        let pollanswers = $('#answer_block').raw();
         if (pollanswers && pollanswers.children.length > 4) {
             pollanswers = pollanswers.children;
             $('#pollquestion').raw().innerHTML = $('#pollquestionfield').raw().value;
@@ -255,7 +245,7 @@ function Newthread_Preview(mode) {
                 if (!pollanswers[i].value) {
                     continue;
                 }
-                var el = document.createElement('input');
+                let el = document.createElement('input');
                 el.id = 'answer_' + (i + 1);
                 el.type = 'radio';
                 el.name = 'vote';
@@ -274,9 +264,9 @@ function Newthread_Preview(mode) {
     } else { // Back to editor
         $('#pollpreview').ghide();
         $('#newthreadtitle').raw().innerHTML = 'New Topic';
-        var pollanswers = $('#pollanswers').raw();
+        const pollanswers = $('#pollanswers').raw();
         if (pollanswers) {
-            var el = document.createElement('div');
+            const el = document.createElement('div');
             el.id = 'pollanswers';
             pollanswers.parentNode.replaceChild(el, pollanswers);
         }

@@ -73,7 +73,7 @@ function NewReport(q, view, id) {
         } else {
             // No new reports at this time
             if (!$('.report').length && !$('#no_reports') == 0) {
-                $('#all_reports').append($('<div id="no_reports" class="box pad center"><strong>No new reports! \o/</strong></div>'));
+                $('#all_reports').append($('<div id="no_reports" class="box pad center"><strong>No new reports! \\o/</strong></div>'));
             }
         }
         if (--q > 0) {
@@ -202,7 +202,7 @@ function Switch(reportid, otherid) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    let reportType = document.getElementById('type');
+    const reportType = document.getElementById('type');
     if (reportType) {
         reportType.addEventListener('change', function() {
             ChangeReportType();
