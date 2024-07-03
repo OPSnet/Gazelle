@@ -1,14 +1,14 @@
 /* APOLLOSTAGE PAPER THEME */
-/* 2024-06-29 */
+/* 2024-07-03 */
 
 /// ////////////////////////////////////////////////////////////////////////////////
 // SLUG
 
 // import basic colors as a backup:
 @import '../apollostage/_variables';
-
 // debug slugs: must be after import.
-$build-slug: "paper 24.06";
+$build-slug: $build-slug + " " + "paper 2407";
+// and override as follows:
 
 // ////////////////////////////////////////////////////////////////////////////////
 // COLORS
@@ -247,6 +247,7 @@ $icon-notification: url("/styles/apollostage/images/notification-bell-000xeee.sv
 
 // Used in Header
 // changing to light mode version
+// // Orpheus specific:
 $logo-site-lockup: url("/svg/site/ops-logo-lockup-lightmode.svg");
 $logo-site-square: url("/svg/site/ops-logo-loop-lightmode.svg");
 
@@ -259,20 +260,23 @@ $icon-number-leechers: url("/svg/std/arrow-down-round-000.svg");
 // // standard: 
 // $icon-notification: url("/svg/std/notification-bell-000.svg");
 // $icon-warning: url("/svg/std/x-000.svg")
-// // Orpheus specific:
+// // Orpheus specific; other deployments, use the above.
 $icon-notification: url("/svg/site/ops-icon-harp-000.svg");
-$icon-warning: url("/svg/site/ops-icon-triangle-000.svg"); // or X
+$icon-warning: url("/svg/site/ops-icon-triangle-000.svg"); 
+
+@import '../apollostage/_base';
+@import '../apollostage/_fonts_base';
+@import '_fonts_paper';
 
 // EOF
 
-@import '../apollostage/_base';
+/* ****************************** */
+/* Local overrides for this theme */
 
-/* local overrides for this theme */
-
-@import url('/styles/apollostage_paper/fonts/fontcall.css');
+// For the 'paper' derivative theme, incremental fonts to the baseline theme.
 
 body, textarea {
- font-family: "Merriweather Sans", Noto, "Noto Sans", "Microsoft Yahei", 	sans-serif;
+ font-family: "Merriweather Sans", "Noto Sans", "Microsoft Yahei", Tahoma, sans-serif;
   font-optical-sizing: auto;
   font-style: normal;
   font-weight: 320;
@@ -281,16 +285,16 @@ body, textarea {
   line-height: 1.6;
   margin: 0 8px;
 }
+
 h1,
 h2,
 h3,
 h4,
 h5,
-h6,
- {
-    font-family: 'Merriweather', Noto, 'Noto Sans', 'Open Sans', Tahoma, sans-serif;
+h6 {
+    font-family: 'Merriweather', 'Noto Sans', 'Open Sans', Tahoma, sans-serif;
     font-weight: 700;
- }
+}
 
 // EOF
 // ////////////////////////////////////////////////////////////////////////////////

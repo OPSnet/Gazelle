@@ -1,0 +1,8 @@
+Thin|100-Thin
+ExtraLight|200-ExtraLight
+Light|300-Light
+Regular|400-Regular
+Medium|500-Medium
+SemiBold|600-SemiBold
+Bold|700-Bold
+ExtraBold|800-ExtraBold

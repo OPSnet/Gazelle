@@ -1,32 +1,34 @@
-/* ######################################################################## */
-/* APOLLOSTAGE THEME */
-/* version 2024-06-30
-/* ######################################################################## */
-
+// _base.scss for Apollostage
+// 2024-07-03
+//
 // SASS/SCSS NOTE
-// This is one of three files for the main ApolloStage theme:
-//  - style.scss, _base.scss, _variables.scss
-//  - Reminder, this file is imported by the parent style.scss.
+// This is one of four files for the main ApolloStage theme:
+//  - style.scss, _base.scss, _variables.scss, _fonts_base.scss.
+//  - This file is imported by the parent style.scss.
 // For the main ApolloStage theme: 
 //  - Colors & icons are all defined in _variables.scss.
+//  - Fonts are called in _fonts_base.scss.
 // For derivative themes:
 //  - The approach is similar, colors & icons are defined in the parent SCSS file.
+
+/* */
+/* */
 
 /* ######################################################################## */
 /* CHANGELOG */
 /* ######################################################################## */
 
-/* */
-/* */
-
-/*  # 2024-06-30 - Updated with community feedback. */
+/*  # 2024-07-03 - Updated with community feedback. */
 /*  # Fix: mobile menu, category stripes;  
 /*  # Feature: Add SVGs, tag bubbles, italic fonts and more;
 /*  # Feature: Added new light mode theme;
+/*  # Feature: Fonts hosted locally;
 /*  # Chore: Organized and documented the SCSS. */
 /*  For full changelog: see uncompiled SASS file. */
 
-// FULL CHANGELOG:
+// ######################################################################## 
+// FULL CHANGELOG 
+// ######################################################################## 
 //
 //   Fix: Fixed the mobile view (media <575px) with big help from hawkeye. Mobile
 //    menu includes an animation, handling to prevent keyboard from opening 
@@ -40,7 +42,8 @@
 //
 //   Feature: New 'apollostage_paper' light theme.
 //
-//   Fix: Messages with 'pre' were overrunning their box. Fixed with wrap.
+//   Fix: Messages with 'pre' were overrunning their box. Fixed with wrap. May
+//    still be broken on some edge-cases, especially on iPh--e.
 //
 //   Fix: Category decorations ~ Different categories (music, applications,
 //    Ebooks) have a colored stripe that was missing on desktop and 'floating'
@@ -69,25 +72,23 @@
 //   Format: change log and table of contents and section numbering. (SECTION 1 is 
 //    super long: this CSS doesn't have much structure in Desktop view.)
 //
-//   Feature: theme styling for all notification dialogs.
+//   Feature: theme styling for popup notification dialogs.
 //
-//   Feature: Add notification for upload errors [## 4.4, beta quality, 
-//    requires additional HTML support to to be fully functional.]
+//   Feature: theme styling for inline 'traditional' notifications (on desktop).
+//
+//   Feature: Added 'Upload failure' warnings (both styling and popups). 
 //
 //   Fix: Album pages, additional artwork delete buttons [x] misplaced.
 //
-//   Fix: Artist pages, related artists voting buttons aligned incorrectly
+//   Fix: Artist pages, related artists voting buttons aligned incorrectly.
 //
 //   Chore: Rewrote color support so all colors are defined by tokens in one place.
-//
-//   Feature:  Added 'Upload failure' warnings (both styling and popups). 
-//     Added styling for inline 'traditional' notifications
 //
 //   Chore: Added comments where feasible.
 //   
 //   Chore: Changelog started.
-
-/*   Original version by burtoo and contributors.  */
+//
+//   Original version by burtoo and contributors. 
 
 /* */
 /* */
@@ -194,9 +195,9 @@
 
 /* Font loading */
 
-// Deployers: in production, /public/static is root.
-
-@import url('/styles/apollostage/fonts/fontcall.css');
+// • Deployers: in production, /public/static is root.
+// • For baseline apollostage and all derivatives.
+@import url('/styles/apollostage/fonts/fontcall_v2.css');
 
 @namespace url("http://www.w3.org/1999/xhtml");
 @namespace svg url("http://www.w3.org/2000/svg");
@@ -3639,6 +3640,6 @@ ul#check.nobullet > *
 
 /*# sourceMappingURL=styles.css.map */
 
-/* ####### */
-/* # EOF # */
-/* ####### */
+/* ######################################################################## */
+/* # End of Section */
+/* ######################################################################## */

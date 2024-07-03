@@ -1,14 +1,14 @@
 /* APOLLOSTAGE COFFEE THEME */
-/* 2024-06-29 */
+/* 2024-07-03 */
 
 // ////////////////////////////////////////////////////////////////////////////////
 // SLUG/SETUP
 
 // import basic colors as a backup:
 @import '../apollostage/_variables';
-
 // debug slugs: must be after import.
-$build-slug: "coffee 24.06";
+$build-slug: $build-slug + " " + "coffee 2407";
+// and override as follows:
   
 // ////////////////////////////////////////////////////////////////////////////////
 // COLORS
@@ -186,6 +186,7 @@ $ds-shadow-raised-hover:  0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0
 $icon-menu-open-state: url("/svg/std/menu-ccc.svg"); // change to lighter version
 
 @import '../apollostage/_base';
+@import '../apollostage/_fonts_base';
 
 // EOF
 

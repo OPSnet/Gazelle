@@ -1,12 +1,10 @@
-//
 // APOLLOSTAGE THEME
 // DEFINE THEME COLORS AND ICONS
-// NEW FORMAT
 
 // ////////////////////////////////////////////////////////////////////////////////
 // SLUG
 
- $build-slug: "2024-07-01d"; // must include quots
+ $build-slug: "2407"; // must include quotes
  
 // ////////////////////////////////////////////////////////////////////////////////
 // COLORS
@@ -231,6 +229,7 @@ $icon-menu-closed-state: url("/svg/std/chevrons-down-ccc.svg");
 $icon-menu-pulldown-mobile: url("/svg/std/chevrons-down-ccc.svg");
 
 // Used in Header
+// Orpheus specific.  Other deployments, provide your own.
 $logo-site-lockup: url("/svg/orpheus/ops-logo-lockup-darkmode.svg");
 $logo-site-square: url("/svg/orpheus/ops-logo-loop-darkmode.svg");
 
@@ -244,9 +243,9 @@ $icon-number-leechers: url("/svg/std/arrow-down-round-ccc.svg");
 // // standard: 
 // $icon-notification: url("/svg/std/notification-bell-333xccc.svg");
 // $icon-warning: url("/svg/std/x-c33.svg")
-// // Orpheus specific:
+// // Orpheus specific; other deployments, use the above.
 $icon-notification: url("/svg/site/ops-icon-harp-ccc.svg");
-$icon-warning: url("/svg/site/ops-icon-triangle-000.svg"); // or X
+$icon-warning: url("/svg/site/ops-icon-triangle-000.svg"); 
 
 // EOF
 // ////////////////////////////////////////////////////////////////////////////////
