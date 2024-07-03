@@ -38,7 +38,7 @@ function submitAction(event) {
     const target = event.target;
     const ACTION = target.dataset.action;
     function on_success() {
-        let newAction = ACTION.startsWith('un') ? ACTION.slice(2) : 'un' + ACTION;
+        const newAction = ACTION.startsWith('un') ? ACTION.slice(2) : 'un' + ACTION;
         target.textContent = newAction.charAt(0).toUpperCase() + newAction.slice(1);
         target.dataset.action = newAction;
         target.disabled = false;

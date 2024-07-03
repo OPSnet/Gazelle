@@ -41,26 +41,23 @@ function claim(id) {
 }
 
 function unClaim(id) {
-    var post = new Array();
-    post['id'] = id;
-    post['remove'] = '1';
+    const post = {
+        id: id,
+        remove: 1,
+    };
     ajax.post('reports.php?action=unclaim', post, function (response) {
         var json = JSON.parse(response);
         if (json['status'] == 'success') {
-            $('#claimed_' + id).raw().innerHTML = '<a href="#" id="claim_' + id + '" onclick="claim(' + id + '); return false;" class="brackets">Claim</a>';
+            document.getElementById('claimed_' + id).innerHTML = '<a href="#" id="claim_' + id + '" onclick="claim(' + id + '); return false;" class="brackets">Claim</a>';
         }
     });
 }
 
 function resolve(id, claimer) {
-    var answer = true;
+    let answer = true;
     if (!claimer) {
-        if ($('#claimed_' + id).raw()) {
-            var answer = confirm("This is a claimed report. Are you sure you want to resolve it?");
-            if (answer)
-                answer = true;
-            else
-                answer = false;
+        if (document.getElementById('claimed_' + id)) {
+            answer = confirm("This is a claimed report. Are you sure you want to resolve it?");
         }
     }
     if (answer) {

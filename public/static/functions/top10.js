@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (jQuery().imagesLoaded && jQuery().wookmark) {
         $('.tiles').imagesLoaded(function() {
             $(".tiles img").each(function() {
-                var size = getResized(this.width, this.height, 252, 400)
+                var size = getResized(this.width, this.height, 252, 400);
                 $(this).width(size[0]);
                 $(this).height(size[1]);
             });

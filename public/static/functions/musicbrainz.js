@@ -10,7 +10,6 @@
 
 (function() {
 //global variables
-var $year_release_group;
 var $release_type;
 var $release_group_id;
 var $tags;
@@ -20,7 +19,6 @@ var $record_label;
 var $searched = false;
 // controls popup state
 var $popup_state = 0;
-var $musicbrainz_state = 0;
 
 document.addEventListener('DOMContentLoaded', function() {
     loadCSS();
@@ -121,7 +119,7 @@ function showReleaseGroups(xml) {
         var $type = $(this).attr("type");
         var $score = $(this).attr("ext:score");
         var $releaseId = $(this).attr("id");
-        var $result = $artist + " - " + $title + " [Type: " + $type + ", Score: " + $score + "]"
+        var $result = $artist + " - " + $title + " [Type: " + $type + ", Score: " + $score + "]";
         $('<a href="#null">' + $result + "<p />").attr("id", $releaseId).appendTo("#results1");
     });
 }
@@ -418,7 +416,7 @@ function controlPopup() {
 }
 
 function loadCSS() {
-    var $link = document.createElement('link')
+    var $link = document.createElement('link');
     // TODO: FIX_STATIC_SERVER
     $link.href = 'static/styles/musicbrainz.css';
     $link.rel = 'stylesheet';

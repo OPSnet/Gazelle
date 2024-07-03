@@ -66,7 +66,7 @@ function AlterParanoia() {
 
 function ParanoiaReset(checkbox, drops) {
     var selects = $('select');
-    for (var i = 0; i < selects.results(); i++) {
+    for (let i = 0; i < selects.results(); i++) {
         if (selects.raw(i).name.match(/^p_/)) {
             if (drops == 0) {
                 selects.raw(i).selectedIndex = 0;
@@ -79,7 +79,7 @@ function ParanoiaReset(checkbox, drops) {
         }
     }
     var checkboxes = $(':checkbox');
-    for (var i = 0; i < checkboxes.results(); i++) {
+    for (let i = 0; i < checkboxes.results(); i++) {
         if (checkboxes.raw(i).name.match(/^p_/) && (checkboxes.raw(i).name != 'p_lastseen')) {
             if (checkbox == 3) {
                 checkboxes.raw(i).checked = !(checkboxes.raw(i).name.match(/^p_list_/) || checkboxes.raw(i).name.match(/^p_l_/));
@@ -131,8 +131,8 @@ function fetchPushbulletDevices(apikey) {
           "apikey": apikey
         },
         type: 'GET',
-        success: function(data, textStatus, xhr) {
-            var data = jQuery.parseJSON(data);
+        success: function(raw_data, textStatus, xhr) {
+            const data = JSON.parse(raw_data);
             var field = $('#pushdevice');
             var value = field.val();
             if (data.error || textStatus !== 'success' ) {
@@ -266,7 +266,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('paranoid-all').addEventListener('click', () => { ParanoiaResetOn(); });
 
     Array.from(document.getElementsByClassName('paranoia-setting')).forEach((el) => {
-        el.addEventListener("change", () => { AlterParanoia() });
+        el.addEventListener("change", () => { AlterParanoia(); });
     });
 
     AlterParanoia();

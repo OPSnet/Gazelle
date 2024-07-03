@@ -11,8 +11,8 @@ document.addEventListener('DOMContentLoaded', function () {
         ['debug-view-sphinxql',  'debug_shinxql'],
     ];
     elemIdMap.forEach(val => {
-        let src    = document.getElementById(val[0]);
-        let target = document.getElementById(val[1]);
+        const src    = document.getElementById(val[0]);
+        const target = document.getElementById(val[1]);
         // NB: error, ocelot, sphinxql are not always present on a given page
         if (src && target) {
             src.addEventListener('click', e => {

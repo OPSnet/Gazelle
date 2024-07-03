@@ -19,6 +19,7 @@ help:
 	echo '  dump-torrent         - create a tarball of the rip logs'
 	echo '  git-submodules       - update the git submodules'
 	echo '  lint-css             - lint (style check) the CSS'
+	echo '  lint-js              - lint (style check) the Javascript'
 	echo '  lint-php             - lint (style check) the PHP'
 	echo '  lint-twig            - lint (style check) the Twig templates'
 	echo '  mysqldump            - dump mysql database from docker to misc/mysql-dump.sql'
@@ -69,6 +70,10 @@ git-submodules:
 lint-css:
 	yarn lint:css
 	yarn lint:css-checkstyle
+
+.PHONY: lint-js
+lint-js:
+	yarn run eslint -c misc/eslint.config.mjs public/static
 
 .PHONY: lint-php
 lint-php:

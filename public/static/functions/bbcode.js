@@ -13,8 +13,8 @@ var BBCode = {
             $(e).attr('rendered', true);
             katex.render(e.innerText, e, {
                 throwOnError: false, maxSize: 50
-            })
-        })
+            });
+        });
     },
     run_renderer: elem => {
         BBCode.render_tex(elem);
@@ -23,4 +23,4 @@ var BBCode = {
 
 document.addEventListener('DOMContentLoaded', () => {
     BBCode.run_renderer(document.body);
-})
+});

@@ -12,7 +12,7 @@ function toggleChecks(formElem, masterElem, elemSelector) {
     } else {
         $('#' + formElem + ' ' + elemSelector).each(function() {
             this.checked = !this.checked;
-        })
+        });
     }
 }
 
@@ -33,7 +33,7 @@ var lightbox = {
             image = new Image();
             image.onload = function() {
                 lightbox.box_async(image);
-            }
+            };
             image.src = src;
         }
         if (image.naturalWidth === undefined) {
@@ -350,11 +350,11 @@ function array_search(needle, haystack, strict) {
 
 var util = function (selector, context) {
     return new util.fn.init(selector, context);
-}
+};
 
 function gazURL() {
     var path = window.location.pathname.split('/');
-    var path = path[path.length - 1].split(".")[0];
+    path = path[path.length - 1].split(".")[0];
     var splitted = window.location.search.substr(1).split("&");
     var query = {};
     var length = 0;
@@ -364,9 +364,9 @@ function gazURL() {
             query[q[0]] = q[1];
             length++;
         }
-    };
+    }
     query['length'] = length;
-    var response = new Array();
+    var response = [];
     response['path'] = path;
     response['query'] = query;
     return response;
