@@ -20,6 +20,9 @@ class Dominator extends \Gazelle\Base {
     }
 
     public function emit(): string {
+        if (!self::$click) {
+            return '';
+        }
         $js = "<script type=\"text/javascript\">document.addEventListener('DOMContentLoaded', function() {\n";
         foreach (self::$click as $id => $code) {
             $js .= "\$('$id').click(function () {" . "$code});\n";
