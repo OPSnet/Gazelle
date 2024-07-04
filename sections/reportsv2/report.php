@@ -177,7 +177,7 @@ if (!empty($torrent->description())) {
                 <tr>
                     <td class="label">Reason:</td>
                     <td>
-                        <select id="type" name="type" onchange="ChangeReportType();">
+                        <select id="type" name="type">
 <?php foreach ($reportTypeList as $rt) { ?>
             <option value="<?= $rt->type() ?>"><?= $rt->name() ?></option>
 <?php } ?>
@@ -196,8 +196,6 @@ if (!empty($torrent->description())) {
                 <input id="track" type="hidden" name="track" size="8" value="<?= display_str($_POST['track'] ?? '') ?>" />
                 <input id="link" type="hidden" name="link" size="50" value="<?= display_str($_POST['link'] ?? '') ?>" />
                 <input id="extra" type="hidden" name="extra" value="<?= display_str($_POST['extra'] ?? '') ?>" />
-
-                <script type="text/javascript">ChangeReportType();</script>
             </div>
         </div>
     <input type="submit" value="Create report" />
