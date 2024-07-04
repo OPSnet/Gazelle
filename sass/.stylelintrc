@@ -1,0 +1,25 @@
+{
+    "extends": "stylelint-config-standard",
+    "plugins": [
+        "stylelint-scss"
+    ],
+    "rules": {
+        "at-rule-no-unknown": null,
+        "color-hex-case": null,
+        "color-hex-length": null,
+        "comment-empty-line-before": null,
+        "declaration-block-no-duplicate-properties": [true, {
+            "ignore": ["consecutive-duplicates-with-different-values"]
+        }],
+        "function-parentheses-newline-inside": null,
+        "function-whitespace-after": null,
+        "no-descending-specificity": null,
+        "no-duplicate-selectors": null,
+        "no-unknown-animations": true,
+        "property-no-unknown": null,
+        "rule-empty-line-before": null,
+        "shorthand-property-no-redundant-values": null,
+        "unit-whitelist": ["deg", "em", "ex", "ms", "rem", "%", "s", "px", "vw", "vh", "rad", "dppx", "dpi", "dpcm", "in", "pt"],
+        "scss/at-rule-no-unknown": true
+    }
+}

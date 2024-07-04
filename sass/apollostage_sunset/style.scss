@@ -9,7 +9,7 @@
 // debug slugs: must be after import.
 $build-slug: $build-slug + " " + "sunset 2407";
 // and override as follows:
-  
+
 // ////////////////////////////////////////////////////////////////////////////////
 // COLORS
 
@@ -27,12 +27,12 @@ $fore-600: #BCA5BE;
 $fore-700: #CDB6C5;
 $fore-800: #DBC8D5;
 $fore-900: #DADDEA;
-$fore-1000: #F9ECEC; 
+$fore-1000: #F9ECEC;
 
-// midtones ~ reduced brightness 
+// midtones ~ reduced brightness
 // <400 for background accents
 // >500 used on black backgrounds
-$midtone-100: #674242; 
+$midtone-100: #674242;
 $midtone-200: #7B4848;
 $midtone-300: #84464A;
 $midtone-400: #D97081;
@@ -44,16 +44,16 @@ $midtone-900: #A196C4;
 $midtone-1000:#757AAB;
 
 //Menu
-$menutheme-100: #ffb0a0;   
-$menutheme-200: #ff9e98;   
-$menutheme-300: #fe8691;   
-$menutheme-400: #f07c8e;   
-$menutheme-500: #da7c92;   
-$menutheme-600: #c47891;   
-$menutheme-700: #ab718d;   
-$menutheme-800: #8d6a87;   
-$menutheme-900: #6c6584;   
-$menutheme-1000: #5c6086;  
+$menutheme-100: #ffb0a0;
+$menutheme-200: #ff9e98;
+$menutheme-300: #fe8691;
+$menutheme-400: #f07c8e;
+$menutheme-500: #da7c92;
+$menutheme-600: #c47891;
+$menutheme-700: #ab718d;
+$menutheme-800: #8d6a87;
+$menutheme-900: #6c6584;
+$menutheme-1000: #5c6086;
 
 //Direct-specialty
 $ds-fiji: #b43477;
@@ -86,25 +86,25 @@ $color-background-torrent: $midtone-200; // edition in group-list
 $color-background-table-discog: $midtone-300; // navigation row ~ "jump down to.."
 $color-background-table-keyrows: $midtone-300; // navigation row ~ "jump up to.."
 
-$color-menu-1: $menutheme-1000; 
-$color-menu-2: $menutheme-100; 
-$color-menu-3: $menutheme-200; 
-$color-menu-4: $menutheme-300; 
-$color-menu-5: $menutheme-400; 
-$color-menu-6: $menutheme-500; 
-$color-menu-7: $menutheme-600; 
-$color-menu-8: $menutheme-700; 
-$color-menu-9: $menutheme-800; 
-$color-menu-username: $menutheme-900; 
-$color-menu-userinfo: $menutheme-1000; 
+$color-menu-1: $menutheme-1000;
+$color-menu-2: $menutheme-100;
+$color-menu-3: $menutheme-200;
+$color-menu-4: $menutheme-300;
+$color-menu-5: $menutheme-400;
+$color-menu-6: $menutheme-500;
+$color-menu-7: $menutheme-600;
+$color-menu-8: $menutheme-700;
+$color-menu-9: $menutheme-800;
+$color-menu-username: $menutheme-900;
+$color-menu-userinfo: $menutheme-1000;
 $color-menu-hover: $menutheme-300;
-$color-menu-username-hover: $menutheme-900; 
-$color-menu-userinfo-hover: $menutheme-900; 
+$color-menu-username-hover: $menutheme-900;
+$color-menu-userinfo-hover: $menutheme-900;
 $color-menu-fx-selection: $ds-fx-menutheme;
-$color-mobilemenu-userinfo-1: $menutheme-300; 
-$color-mobilemenu-userinfo-2: $menutheme-600; 
-$color-mobilemenu-closed: $menutheme-700; 
-$color-mobilemenu-shadow: $menutheme-500; 
+$color-mobilemenu-userinfo-1: $menutheme-300;
+$color-mobilemenu-userinfo-2: $menutheme-600;
+$color-mobilemenu-closed: $menutheme-700;
+$color-mobilemenu-shadow: $menutheme-500;
 
 $color-text-anchor-hover: $midtone-1000;
 $color-text-anchor: $fore-1000;
@@ -137,7 +137,7 @@ $color-text-tooltipster: $midtone-600;
 $color-text-tooltipster-anchor: $midtone-800;
 $color-text-tooltipster-anchor-hover: $midtone-1000;
 
-$color-obj-button-base-1: $ds-gray-62; 
+$color-obj-button-base-1: $ds-gray-62;
 $color-obj-button-base-2: $ds-gray-92;
 $color-obj-poll: $midtone-900; // poll active part of bargraph
 
@@ -167,7 +167,7 @@ $color-accent-cats_music: darkslategray;
 $color-accent-forum-inline-last-read: $ds-fiji; // changed
 $color-accent-forum-unread: $ds-fiji; // changed
 
-$color-accent-selection-background: rgba(217,130,111,0.6);  //changed
+$color-accent-selection-background: rgba(217, 130, 111, 0.6);  //changed
 $color-accent-selection-text: #fff; // changed
 
 // popup notifications
@@ -181,7 +181,7 @@ $color-background-alert: $midtone-100;
 $color-text-alert: $fore-700;
 $color-anchor-alert: $fore-1000;
 
-$ds-shadow-heavy: 0 10px 18px rgba(0, 0, 0, 0.55), 0 7px 7px rgba(0, 0, 0, 0.52), 0px -5px 9px rgba(0,0,0,0.32);
+$ds-shadow-heavy: 0 10px 18px rgba(0, 0, 0, 0.55), 0 7px 7px rgba(0, 0, 0, 0.52), 0 -5px 9px rgba(0, 0, 0, 0.32);
 $ds-shadow-raised:  0 10px 18px rgba(0, 0, 0, 0.25), 0 7px 7px rgba(0, 0, 0, 0.22);
 $ds-shadow-raised-hover:  0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
 
@@ -189,4 +189,3 @@ $ds-shadow-raised-hover:  0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0
 @import '../apollostage/_fonts_base';
 
 // EOF
-
