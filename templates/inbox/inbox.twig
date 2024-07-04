@@ -62,7 +62,7 @@
     {% endif %}
             </tr>
     {% for pm in messageList %}
-            <tr class="{% if pm.isUnread %}unreadpm{% else %}{{ cycle(['a', 'b'], loop.index0) }}{% endif %}">
+            <tr class="{% if pm.isUnread %}unreadpm{% else %}row{{ cycle(['a', 'b'], loop.index0) }}{% endif %}">
                 <td class="center"><input type="checkbox" name="messages[]" value="{{ pm.id }}" /></td>
                 <td>
         {% if pm.isRead %}<strong>{% endif %}
