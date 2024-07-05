@@ -811,3 +811,12 @@ function image_cache_valid(string $url, int|null $epoch = null, string $secret =
     [,,, $cache_bucket, $spec, $sig, $encode] = explode('/', $url, 7);
     return $sig === image_cache_signature($cache_bucket . '/' . $encode, $epoch, $secret);
 }
+
+function object_generator(\Gazelle\BaseManager $manager, array $idList): \Generator {
+    foreach ($idList as $id) {
+        $object = $manager->findById($id);
+        if ($object instanceof \Gazelle\Base) {
+            yield $object;
+        }
+    }
+}

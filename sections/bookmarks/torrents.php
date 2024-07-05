@@ -4,6 +4,7 @@ set_time_limit(0);
 
 //~~~~~~~~~~~ Main bookmarks page ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 
+$userMan = new Gazelle\Manager\User();
 if (empty($_GET['userid'])) {
     $user = $Viewer;
     $ownProfile = true;
@@ -11,18 +12,19 @@ if (empty($_GET['userid'])) {
     if (!$Viewer->permitted('users_override_paranoia')) {
         error(403);
     }
-    $user = (new Gazelle\Manager\User())->findById((int)($_GET['userid'] ?? 0));
+    $user = $userMan->findById((int)($_GET['userid'] ?? 0));
     if (is_null($user)) {
         error(404);
     }
     $ownProfile = ($user->id() === $Viewer->id());
 }
 
-$bookmark = new Gazelle\User\Bookmark($user);
-$snatcher = $Viewer->snatch();
-$tgMan    = (new Gazelle\Manager\TGroup())->setViewer($Viewer);
-$torMan   = (new Gazelle\Manager\Torrent())->setViewer($Viewer);
-$collMan  = (new Gazelle\Manager\Collage())->setImageProxy(new Gazelle\Util\ImageProxy($Viewer));
+$bookmark  = new Gazelle\User\Bookmark($user);
+$snatcher  = $Viewer->snatch();
+$reportMan = new Gazelle\Manager\Report($userMan);
+$tgMan     = (new Gazelle\Manager\TGroup())->setViewer($Viewer);
+$torMan    = (new Gazelle\Manager\Torrent())->setViewer($Viewer);
+$collMan   = (new Gazelle\Manager\Collage())->setImageProxy(new Gazelle\Util\ImageProxy($Viewer));
 
 $paginator = new Gazelle\Util\Paginator(200, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($bookmark->torrentTotal());
@@ -198,8 +200,8 @@ foreach ($bookmarkList as $bm) {
     if (is_null($tgroup)) {
         continue;
     }
+    $isSnatched = $tgroup->isSnatched();
     $torrentIdList = array_map('intval', explode(',', $bm['torrent_list']));
-    $SnatchedGroupClass = $tgroup->isSnatched() ? ' snatched_group' : '';
 
     if (count($torrentIdList) > 1 || $tgroup->categoryId() == 1) {
         $tagList = $tgroup->tagList();
@@ -226,49 +228,17 @@ foreach ($bookmarkList as $bm) {
             </td>
         </tr>
 <?php
-        $prev = '';
-        $EditionID = 0;
-        unset($FirstUnknown);
-
-        foreach ($torrentIdList as $torrentId) {
-            $torrent = $torMan->findById($torrentId);
-            if (!$torrent) {
-                continue;
-            }
-            if ($torrent->isRemasteredUnknown()) {
-                $FirstUnknown = !isset($FirstUnknown);
-            }
-            $SnatchedTorrentClass = $snatcher->showSnatch($torrent) ? ' snatched_torrent' : '';
-
-            $current = $torrent->remasterTuple();
-            if ($prev != $current || (isset($FirstUnknown) && $FirstUnknown)) {
-                $EditionID++;
-?>
-                <tr class="group_torrent groupid_<?= $tgroupId ?> edition<?= $SnatchedGroupClass . ($groupsClosed ? ' hidden' : '') ?>">
-                    <td colspan="7" class="edition_info"><strong><a href="#"
-                        onclick="toggle_edition(<?= $tgroupId ?>, <?= $EditionID ?>, this, event)"
-                        class="tooltip"
-                        title="Collapse this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all editions in this torrent group.">&minus;</a>
-                            <?= $torrent->edition() ?>
-                        </strong></td>
-                </tr>
-<?php
-            }
-            $prev = $current;
-?>
-            <tr class="group_torrent torrent_row groupid_<?= $tgroupId ?> edition_<?= $EditionID ?><?= $SnatchedTorrentClass . $SnatchedGroupClass . ($groupsClosed ? ' hidden' : '') ?>">
-                <td class="td_info" colspan="3">
-                <?= $Twig->render('torrent/action-v2.twig', [
-                    'pl'      => true,
-                    'torrent' => $torrent,
-                    'viewer'  => $Viewer,
-                ]) ?>
-                    &nbsp;&nbsp;&raquo;&nbsp;<?= $torrent->shortLabelLink() ?>
-                </td>
-                <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
-            </tr>
-<?php
-        }
+        echo $Twig->render('torrent/detail-torrentgroup.twig', [
+            'colspan_add'     => 2,
+            'hide'            => $groupsClosed,
+            'is_snatched_grp' => $isSnatched,
+            'report_man'      => $reportMan,
+            'snatcher'        => $snatcher,
+            'tgroup'          => $tgroup,
+            'torrent_list'    => object_generator($torMan, $torrentIdList),
+            'tor_man'         => $torMan,
+            'viewer'          => $Viewer,
+        ]);
     } else {
         // Viewing a type that does not require grouping
         $torrent = $torMan->findById(current($torrentIdList));
@@ -277,7 +247,7 @@ foreach ($bookmarkList as $bm) {
         }
         $SnatchedTorrentClass = $snatcher->showSnatch($torrent) ? ' snatched_torrent' : '';
 ?>
-        <tr class="torrent torrent_row<?= $SnatchedTorrentClass . $SnatchedGroupClass ?>" id="group_<?= $tgroupId ?>">
+        <tr class="torrent torrent_row<?= $SnatchedTorrentClass . ($isSnatched ? ' snatched_group' : '') ?>" id="group_<?= $tgroupId ?>">
             <td></td>
             <td class="center">
                 <div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>"></div>

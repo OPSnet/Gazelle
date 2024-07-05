@@ -9,11 +9,12 @@ $collMan = new Gazelle\Manager\Collage();
 $groupSubs  = $collMan->subscribedTGroupCollageList($Viewer, $viewAll);
 $artistSubs = $collMan->subscribedArtistCollageList($Viewer, $viewAll);
 
-$tgMan    = (new Gazelle\Manager\TGroup())->setViewer($Viewer);
-$torMan   = (new Gazelle\Manager\Torrent())->setViewer($Viewer);
-$imgProxy = new Gazelle\Util\ImageProxy($Viewer);
-$snatcher = $Viewer->snatch();
-$urlStem  = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
+$tgMan     = (new Gazelle\Manager\TGroup())->setViewer($Viewer);
+$torMan    = (new Gazelle\Manager\Torrent())->setViewer($Viewer);
+$imgProxy  = new Gazelle\Util\ImageProxy($Viewer);
+$reportMan = new Gazelle\Manager\Report(new Gazelle\Manager\User());
+$snatcher  = $Viewer->snatch();
+$urlStem   = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
 
 View::show_header('Subscribed collages', ['js' => 'browse,collage']);
 ?>
@@ -102,47 +103,21 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
 <?php } ?>
             <div class="group_info clear">
                 <strong><?= $tgroup->link() ?></strong>
-                <div class="tags"><?= implode(', ', $tgroup->torrentTagList()) ?></tags>
+                <div class="tags"><?= implode(', ', $tgroup->torrentTagList()) ?></div>
             </div>
         </td>
     </tr>
-
 <?php
-                $prev = '';
-                $EditionID = 0;
-                $FirstUnknown = false;
-                foreach ($torrentList as $torrentId) {
-                    $torrent = $torMan->findById($torrentId);
-                    if (is_null($torrent)) {
-                        continue;
-                    }
-                    if ($torrent->isRemasteredUnknown()) {
-                        $FirstUnknown = true;
-                    }
-                    $current = $torrent->remasterTuple();
-                    if ($prev != $current || $FirstUnknown) {
-                        $EditionID++;
-?>
-    <tr class="group_torrent groupid_<?= $s['collageId'] . $GroupID?> edition<?=$SnatchedGroupClass?> hidden">
-        <td colspan="6" class="edition_info"><strong><a href="#" onclick="toggle_edition(<?= $s['collageId'] . $GroupID?>, <?=$EditionID?>, this, event);" class="tooltip" title="Collapse this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all editions in this torrent group.">&minus;</a> <?= $torrent->edition() ?></strong></td>
-    </tr>
-<?php
-                    }
-                    $prev = $current;
-?>
-    <tr class="group_torrent groupid_<?= $s['collageId'] . $GroupID?> edition_<?=
-            $EditionID?> hidden<?= ($snatcher->showSnatch($torrent) ? ' snatched_torrent' : '') . $SnatchedGroupClass?>">
-        <td colspan="2">
-            <?= $Twig->render('torrent/action-v2.twig', [
-                'torrent' => $torrent,
-                'viewer'  => $Viewer,
-            ]) ?>
-            &nbsp;&nbsp;&raquo;&nbsp;<?= $torrent->shortLabelLink() ?>
-        </td>
-        <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
-    </tr>
-<?php
-                } /* foreach ($torrentList) */
+                echo $Twig->render('torrent/detail-torrentgroup.twig', [
+                    'colspan_add'     => 1,
+                    'is_snatched_grp' => $tgroup->isSnatched(),
+                    'report_man'      => $reportMan,
+                    'snatcher'        => $snatcher,
+                    'tgroup'          => $tgroup,
+                    'torrent_list'    => object_generator($torMan, $tgroup->torrentIdList()),
+                    'tor_man'         => $torMan,
+                    'viewer'          => $Viewer,
+                ]);
             } else {
                 // Viewing a type that does not require grouping
                 $torrent = $torMan->findById($torrentList[0]);

@@ -238,10 +238,13 @@ foreach ($entryList as $tgroupId) {
                 $EditionID++;
 ?>
                 <tr class="group_torrent groupid_<?= $tgroupId ?> edition<?= $SnatchedGroupClass . ($groupsClosed ? ' hidden' : '') ?>">
-                    <td colspan="7" class="edition_info"><strong><a href="#"
-                        onclick="toggle_edition(<?= $tgroupId ?>, <?= $EditionID ?>, this, event)"
-                        class="tooltip" title="Collapse this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all editions in this torrent group.">&minus;</a> <?= $torrent->edition() ?>
-                        </strong></td>
+                    <td colspan="7" class="edition_info">
+                        <?= $Twig->render('torrent/edition-header.twig', [
+                            'edition_id' => $EditionID,
+                            'tgroup'     => $tgroup,
+                            'torrent'    => $torrent,
+                        ]) ?>
+                    </td>
                 </tr>
 <?php
             }

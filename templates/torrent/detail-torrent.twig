@@ -1,9 +1,10 @@
 {% from 'macro/form.twig' import hidden %}
 {% set torrent_id = torrent.id %}
 {% set tgroup     = torrent.group %}
-            <tr class="torrent_row releases_{{ tgroup.releaseTypeName|lower }} groupid_{{ tgroup.id }} edition_{{ edition_id }} group_torrent{%
-                if snatcher.showSnatch(torrent) %} snatched_torrent{% endif %}" style="font-weight: normal;" id="torrent{{ torrent_id }}">
-                <td class="td_info">
+            <tr class="torrent_row releases_{{ tgroup.releaseType }} groupid_{{ tgroup.id }} edition_{{ edition_id }} group_torrent
+                    {%- if snatcher.showSnatch(torrent) %} snatched_torrent{% endif %}
+                    {%- if hide %} hidden{% endif %}" style="font-weight: normal;" id="torrent{{ torrent_id }}">
+                <td class="td_info" colspan="{{ 1 + colspan_add }}">
 {% include 'torrent/action-v2.twig' with {
     'edit':    true,
     'pl':      true,
@@ -13,12 +14,18 @@
     'viewer':  viewer
     } only
 %}
-                    <a href="#" onclick="$('#torrent_{{ torrent_id }}').gtoggle(); return false;">&#x25B6; {{ torrent.label(viewer)|raw }}</a>
+
+                {% if show_extended %}
+                    <a href="#" onclick="$('#torrent_{{ torrent_id }}').gtoggle(); return false;">▶ {{ torrent.label(viewer)|raw }}</a>
+                {% else %}
+                    <a href="{{ torrent.location }}">▶ {{ torrent.label(viewer)|raw }}</a>
+                {% endif %}
                 </td>
 {% include 'torrent/stats.twig' with {'torrent': torrent} %}
             </tr>
-            <tr id="torrent_{{ torrent_id }}" class="releases_{{ tgroup.releaseTypeName|lower }} groupid_{{ tgroup.id }} edition_{{ edition_id }} torrentdetails pad{{ hidden(not show_id) }}">
-                <td colspan="5">
+{% if show_extended %}
+            <tr id="torrent_{{ torrent_id }}" class="releases_{{ tgroup.releaseType }} groupid_{{ tgroup.id }} edition_{{ edition_id }} torrentdetails pad{{ hidden(torrent_id != show_id) }}">
+                <td colspan="{{ 5 + colspan_add }}">
                     <div id="release_{{ torrent_id }}" class="no_overflow">
                         <blockquote>
 {% if folder_clash|length > 1 %}
@@ -61,7 +68,8 @@
 {% endif %}
                         <a href="#" class="brackets tooltip" onclick="show_seeders('{{ torrent_id }}', 0); return false;" title="View the list of peers that are currently seeding this torrent.">View seeders</a>
                         <a href="#" class="brackets" onclick="show_files('{{ torrent_id }}'); return false;">View contents</a>
-{% set report_total = report_list|length %}
+{% set report_id_list = torrent.reportIdList(viewer) %}
+{% set report_total = report_id_list|length %}
 {% if report_total %}
                         <a href="#" class="brackets" onclick="show_reported('{{ torrent_id }}'); return false;">View report information</a>
 {% endif %}
@@ -90,7 +98,8 @@
 {% endfor %}
                         </table>
                     </div>
-{% for report in report_list %}
+{% for report_id in report_id_list %}
+{% set report = report_man.findById(report_id) %}
 {%  if loop.first %}
 <div id="reported_{{ torrent_id }}" class="hidden">
     <table class="reportinfo_table">
@@ -118,3 +127,4 @@
 {% endif %}
                 </td>
             </tr>
+{% endif %}{# show_extended #}

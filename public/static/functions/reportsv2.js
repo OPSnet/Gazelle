@@ -222,7 +222,7 @@ function Switch(reportid, otherid) {
 document.addEventListener('DOMContentLoaded', function () {
     let reportType = document.getElementById('type');
     if (reportType) {
-        reportType.addEventListener('click', function() {
+        reportType.addEventListener('change', function() {
             ChangeReportType();
         });
         ChangeReportType();

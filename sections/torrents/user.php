@@ -415,8 +415,8 @@ View::show_header($user->username() . "'s $action torrents", ['js' => 'voting'])
                     <td class="label"><strong>Tags:</strong></td>
                     <td>
                         <input type="search" name="tags" size="60" class="tooltip" title="Use !tag to exclude tag" value="<?= display_str($_GET['tags'] ?? '') ?>" />&nbsp;
-                        <input type="radio" name="tags_type" id="tags_type0" value="0"<?= ($_GET['tags_type'] ?? '') == '1' ? ' selected="selected"' : '' ?> /><label for="tags_type0"> Any</label>&nbsp;&nbsp;
-                        <input type="radio" name="tags_type" id="tags_type1" value="1"<?= ($_GET['tags_type'] ?? '') == '0' ? ' selected="selected"' : '' ?> /><label for="tags_type1"> All</label>
+                        <input type="radio" name="tags_type" id="tags_type0" value="0"<?= ($_GET['tags_type'] ?? '') == '0' ? ' checked' : '' ?> /><label for="tags_type0"> Any</label>&nbsp;&nbsp;
+                        <input type="radio" name="tags_type" id="tags_type1" value="1"<?= ($_GET['tags_type'] ?? '') == '1' ? ' checked' : '' ?> /><label for="tags_type1"> All</label>
                     </td>
                 </tr>
 

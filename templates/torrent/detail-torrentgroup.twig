@@ -1,0 +1,32 @@
+{% set prev = null %}
+{% set edition_id = 0 %}
+{% for torrent in torrent_list %}
+    {% set edition = torrent.remasterTuple %}
+    {% if tgroup.categoryGrouped and edition != prev %}
+        {% set edition_id = edition_id + 1 %}
+        <tr class="releases_{{ tgroup.releaseType }} groupid_{{ tgroup.id }} edition group_torrent
+                {%- if is_snatched_grp %} snatched_group{% endif %}
+                {%- if hide %} hidden{% endif %}">
+            <td colspan="{{ 5 + colspan_add }}" class="edition_info">
+                {% include 'torrent/edition-header.twig' with {
+                    'edition_id': edition_id,
+                    'torrent'   : torrent,
+                    'tgroup'    : tgroup,
+                } only %}
+            </td>
+        </tr>
+    {% endif %}
+    {% include 'torrent/detail-torrent.twig' with {
+        'colspan_add'  : colspan_add,
+        'edition_id'   : edition_id,
+        'folder_clash' : torMan.findAllByFoldername(torrent.path),
+        'hide'         : hide,
+        'report_man'   : report_man,
+        'show_extended': show_extended,
+        'show_id'      : show_id,
+        'snatcher'     : snatcher,
+        'torrent'      : torrent,
+        'viewer'       : viewer,
+    } only %}
+    {% set prev = edition %}
+{% endfor %}

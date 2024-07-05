@@ -51,6 +51,10 @@ if (isset($_GET['searchsubmit'])) {
     $GroupResults = (bool)$Viewer->option('DisableGrouping2') === false;
 }
 
+if (!isset($_GET['tags_type'])) {
+    $_GET['tags_type'] = '1';
+}
+
 $paginator = new Gazelle\Util\Paginator(TORRENTS_PER_PAGE, (int)($_GET['page'] ?? 1));
 $Search = new Gazelle\Search\Torrent(
     new Gazelle\Manager\TGroup(),
@@ -214,7 +218,13 @@ foreach ($Results as $Key => $GroupID) {
 
 ?>
     <tr class="group_torrent groupid_<?=$tgroup->id()?> edition<?=$SnatchedGroupClass . ($groupsClosed ? ' hidden' : '')?>">
-        <td colspan="9" class="edition_info"><strong><a href="#" onclick="toggle_edition(<?=$tgroup->id()?>, <?=$EditionID?>, this, event);" class="tooltip" title="Collapse this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all editions in this torrent group.">&minus;</a> <?= $torrent->edition() ?></strong></td>
+        <td colspan="9" class="edition_info">
+            <?= $Twig->render('torrent/edition-header.twig', [
+                'edition_id' => $EditionID,
+                'tgroup'     => $tgroup,
+                'torrent'    => $torrent,
+            ]) ?>
+        </td>
     </tr>
 <?php
             }
