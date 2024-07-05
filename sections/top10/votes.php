@@ -32,6 +32,7 @@ $vote->setTopLimit($limit);
 $bookmark     = new Gazelle\User\Bookmark($Viewer);
 $snatcher     = $Viewer->snatch();
 $imgProxy     = new Gazelle\Util\ImageProxy($Viewer);
+$reportMan    = new Gazelle\Manager\Report(new Gazelle\Manager\User());
 $tgMan        = (new Gazelle\Manager\TGroup())->setViewer($Viewer);
 $torMan       = (new Gazelle\Manager\Torrent())->setViewer($Viewer);
 $urlStem      = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
@@ -137,7 +138,8 @@ if (count($topVotes) === 0) { ?>
         $totalVotes = $result['Total'];
         $score      = $result['Score'];
         $downVotes  = $totalVotes - $upVotes;
-        $snatchedGroupClass = $tgroup->isSnatched() ? ' snatched_group' : '';
+        $isSnatched = $tgroup->isSnatched();
+        $snatchedGroupClass = $isSnatched ? ' snatched_group' : '';
 
         if (count($torrentIdList) > 1 || $tgroup->categoryGrouped()) {
             // Grouped torrents
@@ -188,51 +190,24 @@ echo ' [' . $tgroup->year() . ']'; } ?></strong>
         </td>
     </tr>
 <?php
-            $prev = '';
-            $editionID = 0;
-            unset($firstUnknown);
-
-            foreach ($torrentIdList as $torrentId) {
-                $torrent = $torMan->findById($torrentId);
-                if (is_null($torrent)) {
-                    continue;
-                }
-
-                $current = $torrent->remasterTuple();
-                if ($torrent->isRemasteredUnknown()) {
-                    $FirstUnknown = !isset($firstUnknown);
-                }
-                if ($prev != $current || isset($firstUnknown) && $firstUnknown) {
-                    $editionID++;
-?>
-    <tr class="group_torrent groupid_<?= $tgroupId ?> hidden edition_<?= $editionID ?><?= $snatchedGroupClass ?>">
-        <td colspan="7" class="edition_info"><strong><a href="#" onclick="toggle_edition(<?= $tgroupId ?>, <?= $editionID ?>, this, event)"
-            class="tooltip" title="Collapse this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all editions in this torrent group.">&minus;</a> <?= $torrent->edition() ?>
-            </strong></td>
-    </tr>
-<?php
-                }
-                $prev = $current;
-?>
-    <tr class="group_torrent torrent_row groupid_<?= $tgroupId ?> hidden edition_<?= $editionID ?><?= ($snatcher->showSnatch($torrent) ? ' snatched_torrent' : '') . $snatchedGroupClass ?>">
-        <td colspan="3">
-            <?= $Twig->render('torrent/action-v2.twig', [
-                'torrent' => $torrent,
-                'viewer'  => $Viewer,
-            ]) ?>
-            &nbsp;&nbsp;&raquo;&nbsp;<?= $torrent->shortLabelLink() ?>
-        </td>
-        <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
-    </tr>
-<?php
-            }
+            echo $Twig->render('torrent/detail-torrentgroup.twig', [
+                'colspan_add'     => 2,
+                'hide'            => true,
+                'is_snatched_grp' => $isSnatched,
+                'report_man'      => $reportMan,
+                'snatcher'        => $snatcher,
+                'tgroup'          => $tgroup,
+                'torrent_list'    => object_generator($torMan, $tgroup->torrentIdList()),
+                'tor_man'         => $torMan,
+                'viewer'          => $Viewer,
+            ]);
         } else {
             // Viewing a type that does not require grouping
             $torrentId = $torrentIdList[0];
             $torrent = $torMan->findById($torrentId);
 ?>
     <tr class="torrent torrent_row<?= ($snatcher->showSnatch($torrent) ? ' snatched_torrent' : '')
-        . $SnatchedGroupClass ?>" id="group_<?= $tgroupId ?>">
+        . $snatchedGroupClass ?>" id="group_<?= $tgroupId ?>">
         <td></td>
         <td class="td_collage_category center">
             <div title="<?= ucfirst($tgroup->primaryTag()) ?>"
@@ -244,9 +219,9 @@ echo ' [' . $tgroup->year() . ']'; } ?></strong>
                 'viewer'  => $Viewer,
             ]) ?>
             <strong><?= $tgroup->link() ?></strong>
-<?php   if (!$Viewer->option('NoVoteLinks') && $Viewer->permitted('site_album_votes')) { ?>
-            <?= $vote->links($tgroup) ?>
-<?php   } ?>
+<?php       if (!$Viewer->option('NoVoteLinks') && $Viewer->permitted('site_album_votes')) { ?>
+                <?= $vote->links($tgroup) ?>
+<?php       } ?>
             <div class="tags"><?= implode(', ', array_map(
                 fn($name) => "<a href=\"collages.php?action=search&tags=$name\">$name</a>", $tgroup->tagNameList()
                 )) ?></div>

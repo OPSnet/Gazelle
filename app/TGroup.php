@@ -4,7 +4,6 @@ namespace Gazelle;
 
 use Gazelle\Enum\LeechReason;
 use Gazelle\Enum\LeechType;
-
 use Gazelle\Intf\CategoryHasArtist;
 
 class TGroup extends BaseObject implements CategoryHasArtist {

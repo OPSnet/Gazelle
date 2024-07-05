@@ -6,10 +6,16 @@ require_once(__DIR__ . '/../../lib/bootstrap.php');
 require_once(__DIR__ . '/../helper.php');
 
 class BaseObjectTest extends TestCase {
-    protected \Gazelle\User $object;
+    protected array $objectList = [];
+
+    public function tearDown(): void {
+        foreach ($this->objectList as $object) {
+            $object->remove();
+        }
+    }
 
     public function testBaseObject(): void {
-        $object = Helper::makeUser('bo.' . randomString(6), 'base object');
+        $this->objectList[] = $object = Helper::makeUser('bo.' . randomString(6), 'base object');
 
         $this->assertFalse($object->dirty(), 'base-object-initial');
         $this->assertNull($object->field('phpunit'), 'base-object-no-field');
@@ -33,7 +39,20 @@ class BaseObjectTest extends TestCase {
         $this->assertTrue($object->setFieldNow('BanDate')->modify(), 'base-object-aux-now');
         $this->assertNotEquals($date, $object->banDate(), 'base-object-aux-remodified');
         $this->assertTrue(Helper::recentDate($object->banDate()), 'base-object-aux-recent');
+    }
 
-        $object->remove();
+    public function testObjectGenerator(): void {
+        $this->objectList[] = Helper::makeUser('bo.' . randomString(6), 'base object');
+        $this->objectList[] = Helper::makeUser('bo.' . randomString(6), 'base object');
+        $this->objectList[] = Helper::makeUser('bo.' . randomString(6), 'base object');
+
+        $idList = array_map(fn($obj) => $obj->id(), $this->objectList);
+        $gen = object_generator(new \Gazelle\Manager\User(), $idList);
+        $n = 0;
+        foreach ($gen as $user) {
+            $this->assertEquals($idList[$n], $user->id(), "base-object-generator-$n");
+            $n++;
+        }
+        $this->assertEquals(count($idList), $n, "base-object-generator-total");
     }
 }

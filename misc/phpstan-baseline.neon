@@ -476,11 +476,6 @@ parameters:
 			path: ../sections/tools/development/referral_sandbox.php
 
 		-
-			message: "#^Variable \\$SnatchedGroupClass might not be defined\\.$#"
-			count: 1
-			path: ../sections/top10/votes.php
-
-		-
 			message: "#^Function diff\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: ../sections/wiki/compare.php

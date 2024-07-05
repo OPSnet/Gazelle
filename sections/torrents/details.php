@@ -164,54 +164,30 @@ if (!$torrentList) {
     foreach ($removed as $info) {
         $mastering = implode('/', [$info['year'], $info['title'], $info['record_label'], $info['catalogue_number'], $info['media']]);
 ?>
-            <tr class="releases_<?= $tgroup->releaseTypeName() ?> groupid_<?=$tgroupId?> edition group_torrent">
+            <tr class="releases_<?= $tgroup->releaseType() ?> groupid_<?=$tgroupId?> edition group_torrent">
                 <td colspan="5" class="edition_info"><strong>[<?= html_escape($mastering) ?>]</strong></td>
             </tr>
             <tr>
                 <td><i>deleted</i></td>
-                <td class="td_size nobr">&ndash;</td>
-                <td class="td_snatched m_td_right">&ndash;</td>
-                <td class="td_seeders m_td_right">&ndash;</td>
-                <td class="td_leechers m_td_right">&ndash;</td>
+                <td class="td_size nobr">–</td>
+                <td class="td_snatched m_td_right">–</td>
+                <td class="td_seeders m_td_right">–</td>
+                <td class="td_leechers m_td_right">–</td>
             </tr>
 <?php
     }
 } else {
-    $prev           = false;
-    $EditionID      = 0;
-    $FirstUnknown   = false;
-
-    foreach ($torrentList as $torrentId) {
-        $torrent = $torMan->findById($torrentId);
-        if (is_null($torrent)) {
-            continue;
-        }
-
-        $current = $torrent->remasterTuple();
-        if ($torrent->isRemasteredUnknown()) {
-            $FirstUnknown = true;
-        }
-        if ($tgroup->categoryGrouped() && ($prev != $current || $FirstUnknown)) {
-            $EditionID++;
-?>
-            <tr class="releases_<?= $tgroup->releaseTypeName() ?> groupid_<?=$tgroupId?> edition group_torrent">
-                <td colspan="5" class="edition_info"><strong><a href="#" onclick="toggle_edition(<?=$tgroupId?>, <?=
-                    $EditionID?>, this, event);" title="Collapse this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all editions in this torrent group." class="tooltip">&ndash;</a> <?= html_escape($torrent->edition()) ?></strong></td>
-            </tr>
-<?php
-        }
-        $prev = $current;
-
-        echo $Twig->render('torrent/detail-torrent.twig', [
-            'folder_clash' => $musicRelease ? $torMan->findAllByFoldername($torrent->path()) : [],
-            'edition_id'   => $EditionID,
-            'report_list'  => array_map(fn ($id) => $reportMan->findById($id), $torrent->reportIdList($Viewer)),
-            'show_id'      => ($_GET['torrentid'] ?? '') == $torrentId,
-            'snatcher'     => $snatcher,
-            'torrent'      => $torrent,
-            'viewer'       => $Viewer,
+        echo $Twig->render('torrent/detail-torrentgroup.twig', [
+            'is_snatched_grp' => $tgroup->isSnatched(),
+            'report_man'      => $reportMan,
+            'show_extended'   => true,
+            'show_id'         => ($_GET['torrentid'] ?? ''),
+            'snatcher'        => $snatcher,
+            'tgroup'          => $tgroup,
+            'torrent_list'    => object_generator($torMan, $torrentList),
+            'tor_man'         => $torMan,
+            'viewer'          => $Viewer,
         ]);
-    }
 ?>
         </table>
 <?php

@@ -17,6 +17,7 @@ $tgMan      = (new Gazelle\Manager\TGroup())->setViewer($Viewer);
 $torMan     = (new Gazelle\Manager\Torrent())->setViewer($Viewer);
 $stats      = new Gazelle\Stats\Artist($artistId);
 $userMan    = new Gazelle\Manager\User();
+$reportMan  = new Gazelle\Manager\Report($userMan);
 $vote       = new Gazelle\User\Vote($Viewer);
 
 $authKey      = $Viewer->auth();
@@ -287,6 +288,7 @@ if ($sections = $Artist->sections()) {
 <?php
     $urlStem = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
     $groupsClosed = (bool)$Viewer->option('TorrentGrouping');
+    $snatcher = $Viewer->snatch();
 
     foreach ($sections as $sectionId => $groupList) {
         $sectionClosed = (bool)($sortHide[$sectionId] ?? 0);
@@ -340,49 +342,17 @@ if ($sections = $Artist->sections()) {
                 </td>
             </tr>
 <?php
-        $snatcher = $Viewer->snatch();
-        $SnatchedGroupClass = $tgroup->isSnatched() ? ' snatched_group' : '';
-        $prev = '';
-        $EditionID = 0;
-        $UnknownCounter = 0;
-
-        $torrentList = $tgroup->torrentIdList();
-        foreach ($torrentList as $torrentId) {
-            $torrent = $torMan->findById($torrentId);
-            if (is_null($torrent)) {
-                continue;
-            }
-            $current = $torrent->remasterTuple();
-            if ($torrent->isRemasteredUnknown()) {
-                $UnknownCounter++;
-            }
-
-            if ($prev != $current || $UnknownCounter === 1) {
-                $EditionID++;
-?>
-        <tr class="releases_<?= $sectionId ?> groupid_<?=$groupId?> edition group_torrent discog<?=$SnatchedGroupClass . $groupsHidden ?>">
-            <td colspan="6" class="edition_info"><strong><a href="#" onclick="toggle_edition(<?=$groupId?>, <?=$EditionID?>, this, event);" class="tooltip" title="Collapse this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all editions in this torrent group.">&minus;</a> <?= $torrent->edition() ?></strong></td>
-        </tr>
-<?php
-            }
-            $prev = $current;
-            $SnatchedTorrentClass = ($snatcher->showSnatch($torrent) ? ' snatched_torrent' : '');
-?>
-        <tr class="releases_<?=$sectionId?> torrent_row groupid_<?=$groupId?> edition_<?=$EditionID?> group_torrent discog<?= $SnatchedTorrentClass . $SnatchedGroupClass . $groupsHidden ?>">
-            <td class="td_info" colspan="2">
-                <?= $Twig->render('torrent/action-v2.twig', [
-                    'pl'      => true,
-                    'js'      => true,
-                    'torrent' => $torrent,
-                    'viewer'  => $Viewer,
-                ]) ?>
-                &nbsp;&nbsp;&raquo;&nbsp;<?= $torrent->shortLabelLink() ?>
-            </td>
-            <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
-        </tr>
-<?php
-            unset($torrent);
-        } /* torrents */
+        echo $Twig->render('torrent/detail-torrentgroup.twig', [
+            'colspan_add'     => 1,
+            'hide'            => $groupsClosed,
+            'is_snatched_grp' => $isSnatched,
+            'report_man'      => $reportMan,
+            'snatcher'        => $snatcher,
+            'tgroup'          => $tgroup,
+            'torrent_list'    => object_generator($torMan, $tgroup->torrentIdList()),
+            'tor_man'         => $torMan,
+            'viewer'          => $Viewer,
+        ]);
         unset($tgroup);
     } /* group */
     } /* section */
