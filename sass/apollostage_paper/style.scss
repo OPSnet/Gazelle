@@ -7,7 +7,7 @@
 // import basic colors as a backup:
 @import '../apollostage/_variables';
 // debug slugs: must be after import.
-$build-slug: $build-slug + " " + "paper 2407";
+$build-slug: $build-slug + " " + "paper 240707";
 // and override as follows:
 
 // ////////////////////////////////////////////////////////////////////////////////
@@ -277,12 +277,12 @@ $icon-warning: url("/svg/site/ops-icon-triangle-000.svg");
 
 body,
 textarea {
-  font-family: "Merriweather Sans", "Noto Sans", "Microsoft Yahei", Tahoma, sans-serif;
+  font-family: "Bitter", "Noto Sans", "Microsoft Yahei", Tahoma, sans-serif;
   font-optical-sizing: auto;
   font-style: normal;
-  font-weight: 320;
+  font-weight: 400;
   box-sizing: border-box;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.6;
   margin: 0 8px;
 }
@@ -293,7 +293,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: 'Merriweather', 'Noto Sans', 'Open Sans', Tahoma, sans-serif;
+  font-family: "Bitter", "Noto Sans", "Open Sans", Tahoma, sans-serif;
   font-weight: 700;
 }
 

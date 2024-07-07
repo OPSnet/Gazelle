@@ -1,13 +1,16 @@
+#!/usr/bin/env python3
 
 """
 # This is a development tool to see the colors in a stylesheet, via HTML in the browser.
 # Typical Usage: 
-#    python seepalette.py _variables.css
+#    python view-palette _variables.css
 # Copy and paste:
-#    python seepalette.py ../Gazelle-gort/sass/apollostage/_variables.scss
-#    python seepalette.py ../Gazelle-gort/sass/apollostage_paper/style.scss
-#    python seepalette.py ../Gazelle-gort/sass/apollostage_coffee/style.scss
-#    python seepalette.py ../Gazelle-gort/sass/apollostage_sunset/style.scss
+#    python view-palette ../Gazelle-repo/sass/apollostage/_variables.scss
+#    python view-palette ../Gazelle-repo/sass/apollostage_paper/style.scss
+#    python view-palette ../Gazelle-repo/sass/apollostage_coffee/style.scss
+#    python view-palette ../Gazelle-repo/sass/apollostage_sunset/style.scss
+
+Public domain via unlicense; see http://unlicense.org
 
 Requirements fulfilled by this code:
 1. The program takes a text file (like a CSS stylesheet) as a parameter from the command line, or if none is provided, prompts for a filename.
@@ -26,23 +29,26 @@ import re
 import os
 import colorsys
 
+
 def read_file(filename):
-    with open(filename, 'r') as file:
+    with open(filename, "r") as file:
         return file.readlines()
-        
+
+
 def hex_to_rgb(hex_code):
-    hex_code = hex_code.lstrip('#')
-    
+    hex_code = hex_code.lstrip("#")
+
     # Expand short color codes to full form if necessary
     if len(hex_code) == 3:
-        hex_code = ''.join([char * 2 for char in hex_code])
-    
-    if len(hex_code) == 6 and all(c in '0123456789ABCDEFabcdef' for c in hex_code):
+        hex_code = "".join([char * 2 for char in hex_code])
+
+    if len(hex_code) == 6 and all(c in "0123456789ABCDEFabcdef" for c in hex_code):
         # Check if hex_code is a valid 6-character hexadecimal string
-        return tuple(int(hex_code[i:i+2], 16) for i in (0, 2, 4))
+        return tuple(int(hex_code[i : i + 2], 16) for i in (0, 2, 4))
     else:
         print(f"Invalid hexadecimal color code: {hex_code}")
         return None  # Return None for invalid color codes
+
 
 def rgb_to_hsl(rgb):
     r, g, b = rgb[0] / 255.0, rgb[1] / 255.0, rgb[2] / 255.0
@@ -58,31 +64,33 @@ def rgb_to_hsl(rgb):
             s = delta / (2.0 - max_val - min_val)
         else:
             s = delta / (max_val + min_val)
-        
+
         if max_val == r:
             h = (g - b) / delta + (6 if g < b else 0)
         elif max_val == g:
             h = (b - r) / delta + 2
         elif max_val == b:
             h = (r - g) / delta + 4
-        
+
         h /= 6
 
-    h = h * 360 # Convert to degrees
-    s = s * 100 # Convert to percentage
-    l = l * 100 # Convert to percentage
-    
+    h = h * 360  # Convert to degrees
+    s = s * 100  # Convert to percentage
+    l = l * 100  # Convert to percentage
+
     return h, s, l
 
-def format_hsl(h_degrees,s_percent,l_percent):
+
+def format_hsl(h_degrees, s_percent, l_percent):
     h_degrees = round(h_degrees)
     s_percent = round(s_percent)
     l_percent = round(l_percent)
     return f"hsl({h_degrees}, {s_percent}%, {l_percent}%)"
 
+
 def format_rgb_255(rgb):
-	r, g, b = rgb
-	return f"rgb({r}, {g}, {b})"
+    r, g, b = rgb
+    return f"rgb({r}, {g}, {b})"
 
 
 def rgb_to_hsv(rgb):
@@ -114,21 +122,23 @@ def rgb_to_hsv(rgb):
     v = v * 100
     return h, s, v
 
+
 def format_hsv(h_degrees, s_percent, v_percent):
     h_degrees = round(h_degrees)
     s_percent = round(s_percent)
     v_percent = round(v_percent)
-    return f"hsv({h_degrees}, {s_percent}%, {v_percent}%)"    
+    return f"hsv({h_degrees}, {s_percent}%, {v_percent}%)"
+
 
 def split_around_first_hex_color_code(text):
     # Returns before, hex_code, after or text, None, None if no hex code is found
-    
+
     # Define the regex pattern for hex color codes
-    hex_color_pattern = r'#(?:[0-9a-fA-F]{3}){1,2}\b'
-    
+    hex_color_pattern = r"#(?:[0-9a-fA-F]{3}){1,2}\b"
+
     # Use re.search() to find the first match in the string
     match = re.search(hex_color_pattern, text)
-    
+
     if match:
         # Extract the start and end indices of the match
         start, end = match.span()
@@ -151,7 +161,7 @@ def parse_content(lines):
         line = line.strip()
         if not line:
             continue
-        
+
         before, hex_code, after = split_around_first_hex_color_code(line)
 
         if not hex_code:  # Line has no hex color code
@@ -166,16 +176,15 @@ def parse_content(lines):
 
                 line = after.strip()
                 before, hex_code, after = split_around_first_hex_color_code(line)
-    
+
     if current_label is not None and current_swatches:
         parsed_data.append((current_label, current_swatches))
 
     return parsed_data
 
 
-
 def generate_html(parsed_data, output_filename, input_filename):
-    html_content = '''
+    html_content = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -227,12 +236,12 @@ def generate_html(parsed_data, output_filename, input_filename):
     </script>
 
 
-'''
+"""
 
-    html_content += f'<h1>Input Filename: {input_filename}</h1>\n'
+    html_content += f"<h1>Input Filename: {input_filename}</h1>\n"
     for label, swatches in parsed_data:
-        html_content += f'<h2>{label}</h2>\n'
-        html_content += '<table>\n<tr valign=top>\n'
+        html_content += f"<h2>{label}</h2>\n"
+        html_content += "<table>\n<tr valign=top>\n"
         for color_name, swatch in swatches:
             rgb = hex_to_rgb(swatch)
             h, s, l = rgb_to_hsl(rgb)
@@ -240,27 +249,29 @@ def generate_html(parsed_data, output_filename, input_filename):
             h, s, v = rgb_to_hsv(rgb)
             hsv = format_hsv(h, s, v)
             rgb_255 = format_rgb_255(rgb)
-            html_content += f'<td>\n'
-            html_content += f'<div class="swatch" style="background-color: {swatch};"></div>\n'
+            html_content += f"<td>\n"
+            html_content += (
+                f'<div class="swatch" style="background-color: {swatch};"></div>\n'
+            )
             html_content += f'<div class="info">{rgb_255}</div>\n'
             html_content += f'<div class="info">{hsl}</div>\n'
             html_content += f'<div class="info">{hsv}</div>\n'
             html_content += f'<div class="info">{swatch}</div>\n'
             if color_name:
                 html_content += f'<div class="name">{color_name}</div>\n'
-            html_content += '</td>\n'
-        html_content += '</tr>\n</table>\n'
+            html_content += "</td>\n"
+        html_content += "</tr>\n</table>\n"
 
-    html_content += '''
+    html_content += """
 </body>
 </html>
-'''
+"""
 
-
-    with open(output_filename, 'w') as file:
+    with open(output_filename, "w") as file:
         file.write(html_content)
 
     print(f"HTML file generated: {output_filename}")
+
 
 def main():
     if len(sys.argv) > 1:
@@ -285,6 +296,7 @@ def main():
 
     generate_html(parsed_data, output_filename, input_filename)
     generate_html(parsed_data, "latest.html", input_filename)
-    
+
+
 if __name__ == "__main__":
     main()

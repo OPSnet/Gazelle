@@ -188,16 +188,8 @@
 
 @charset "UTF-8";
 
-/* Font loading */
-
-// • Deployers: in production, /public/static is root.
-// • For baseline apollostage and all derivatives.
-@import url("/styles/apollostage/fonts/fontcall_v2.css");
-
 @namespace url("http://www.w3.org/1999/xhtml");
 @namespace svg url("http://www.w3.org/2000/svg");
-
-/* END font loading */
 
 /* ## 0.2 Global variables */
 
@@ -235,7 +227,7 @@ input,
 select,
 textarea,
 .tooltipster-default .tooltipster-content {
-  font-family: "Open Sans", Noto, "Noto Sans", "Microsoft Yahei", sans-serif;
+  font-family: "Noto Sans", "Microsoft Yahei", sans-serif;
 }
 
 body {
@@ -258,7 +250,7 @@ code {
     monospace;
   font-optical-sizing: auto;
   font-variant-ligatures: no-contextual;
-  font-weight: 200;
+  font-weight: 300;
   color: $color-text-mono;
 }
 
@@ -298,7 +290,7 @@ h4 {
 h4,
 h5 {
   font-size: 16px;
-  font-weight: 400;
+  font-weight: 600;
 }
 
 a {
@@ -856,8 +848,7 @@ table.box2 {
   background: $icon-message-unread-locked-sticky center no-repeat;
 }
 
-#footer,
-.alertbar {
+#footer {
   text-align: center;
 }
 
@@ -1237,11 +1228,6 @@ ul.collage_images li a > span {
   height: 100%;
   position: absolute;
   width: 100%;
-}
-
-.alertbar {
-  font-size: 16px;
-  margin-top: 8px;
 }
 
 #userform #settings_sections h2 a,
@@ -1659,7 +1645,6 @@ div#discog_table td.td_info:not(span.torrent_links_block) > a {
   font-weight: 600;
 }
 
-.alertbar,
 .tooltipster-default .tooltipster-content a:hover {
   color: $color-text-tooltipster-anchor-hover;
 }
@@ -2465,9 +2450,12 @@ ul#check.nobullet > * {
   background-position: 8px center;
   background-size: 32px;
   color: $color-text-alert !important;
-  font-size: 12px;
   font-weight: 700;
+  font-size: 16px;
+  margin-top: 8px;
+  text-align: center;
 }
+
 .alertbar a {
   color: $color-anchor-alert !important;
 }
