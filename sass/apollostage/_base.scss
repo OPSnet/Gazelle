@@ -193,6 +193,8 @@
 
 /* ## 0.2 Global variables */
 
+/* CSS compiler will leave this section blank. */
+
 $phone-screen-size: 575px;
 $z-lightbox: 1000;
 $z-upload-error-popups: 900;
@@ -201,6 +203,7 @@ $z-mobilemenu_closed-tab: 400;
 $z-mobilemenu_closed-tab-icons: 500;
 $z-desktop-menu-open: 800;
 $z-desktop-menu-closed: 900;
+$height-mobilemenu_closed-tab: 32px;
 $wrapper-max-width: 1020px;
 
 /*
@@ -2530,14 +2533,19 @@ Documentation of mobile classes:
 ########################################################################
 */
 
-/* Begin Changes for Mobile Site */
+/* ## 4.1 BEGIN site changes */
 
 @media (max-width: $phone-screen-size) {
   .m_hidden {
     display: none !important;
   }
 
-  /* override from earlier, it makes shit weird */
+  /* intra-page links shouldn't hide behind the sticky top tab */
+  * {
+    scroll-margin-top: $height-mobilemenu_closed-tab;
+  }
+
+  /* override from earlier, avoids weird */
   td:first-child {
     padding-left: 6px;
   }
@@ -2546,8 +2554,6 @@ Documentation of mobile classes:
   #inbox .body img {
     max-width: 100% !important;
   }
-
-  /* ## 4.1 BEGIN site layout */
 
   #wrapper {
     padding-top: 36px;
@@ -2702,12 +2708,6 @@ Documentation of mobile classes:
     padding-left: 34px;
   }
 
-  .m_th_left::before {
-    color: white;
-    content: "Info";
-    visibility: visible;
-  }
-
   /* kludge for :first-of-class */
   .m_th_right {
     margin-left: auto;
@@ -2728,7 +2728,6 @@ Documentation of mobile classes:
     that show  Upload types: album', 'live album', 'compilation', etc. */
 
   body#artist div#discog_table .m_table tr.colhead_dark td.m_th_left {
-    font-size: larger;
     visibility: visible;
   }
 
@@ -3322,7 +3321,7 @@ Documentation of mobile classes:
 
   #extra4,
   #extra5 {
-    height: 32px;
+    height: $height-mobilemenu_closed-tab;
     position: fixed;
     top: 0;
   }
