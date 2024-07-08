@@ -409,10 +409,6 @@ blockquote {
   color: $color-accent-selection-text;
 }
 
-form input {
-  vertical-align: sub;
-}
-
 table {
   background-color: $color-background-table;
 }
@@ -1559,7 +1555,19 @@ blockquote {
 
 /* ************************************************ */
 
-/* # 1.4 Reserved [for more organization in the future]
+/* # 1.4 Sortable items */
+
+#sortable {
+  width: unset !important;
+}
+#sortable li {
+  word-break: break-all;
+}
+
+/* checkboxes */
+form input {
+  vertical-align: sub;
+}
 
 /* ************************************************ */
 

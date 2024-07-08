@@ -120,7 +120,6 @@ $color-text-linkbox: $midtone-800; // links in linkbox
 $color-text-menu: $fore-1000;
 $color-text-menu-hover: $fore-700; // during pulldown // changed
 $color-text-mono: $fore-500;
-$color-text-notification-words: $fore-1000;
 $color-text-popup-anchor-hover: $midtone-1000;
 $color-text-popup-anchor: $fore-900;
 $color-text-popup: $fore-700;
@@ -172,6 +171,7 @@ $color-accent-selection-text: $fore-700; // usually #fff or $color-text-bold
 $color-background-notification-gradient-1: $midtone-400; // menu low/high suggested
 $color-background-notification-gradient-2: $midtone-1000;  // menu high/low suggested
 $color-background-notification: $ds-neutral-000;
+$color-text-notification-words: $fore-1000;
 
 // alerts
 $color-accent-border-alert: $midtone-500;
