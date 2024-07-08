@@ -2480,6 +2480,7 @@ Documentation of mobile classes:
   TABLES:
   .m_table: table which will be mobilized
   .m_th_left: which table header should be preserved on the left. It will be replaced with the word "Info". Only 1
+     For artist discography pages, we won't honor this and will allow "upload types" also.
   .m_th_left_collapsable: extra padding applied to align right of the collapse button
   .m_th_right: table headers that will be "floated" to the right. Max of 3
   .m_td_left: will be left-aligned, and expanded vertically. Mainly for collapse button
@@ -2685,6 +2686,18 @@ Documentation of mobile classes:
     visibility: hidden;
   }
 
+  /* "Info" is allowed everywhere except artist pages; see 4.6.1 */
+  body:not(#artist) .m_th_left::before {
+    color: white;
+    content: "Info";
+    visibility: visible;
+  }
+
+  /* Artist page: preserve the column header for Requests */
+  #artist table#request_table tr.colhead_dark td.m_th_left {
+    visibility: visible;
+  }
+
   .m_th_left_collapsable {
     padding-left: 34px;
   }
@@ -2708,6 +2721,21 @@ Documentation of mobile classes:
     margin-left: unset;
     padding-right: 12px;
   }
+
+  /* ## 4.6.1  Override for artist pages */
+
+  /* Instead of using "Info" rows, We want to preserve Rows
+    that show  Upload types: album', 'live album', 'compilation', etc. */
+
+  body#artist div#discog_table .m_table tr.colhead_dark td.m_th_left {
+    font-size: larger;
+    visibility: visible;
+  }
+
+  body#artist div#discog_table .m_table tr.colhead_dark td.m_th_left a {
+    padding-inline: 1rem;
+  }
+
   /* END table headers */
 
   /* ************************************************ */
