@@ -27,11 +27,11 @@
     {% for article in list %}
     <div class="box vertical_space news_post">
         <div class="head">
-            <strong>{{ article.1 }}</strong> - posted {{ article.3|time_diff }}
-            - <a href="tools.php?action=editnews&amp;id={{ article.0 }}" class="brackets">Edit</a>
-            <a href="tools.php?action=deletenews&amp;id={{ article.0 }}&amp;auth={{ auth }}" class="brackets">Delete</a>
+            <strong>{{ article.title }}</strong> - posted {{ article.created|time_diff }}
+            - <a href="tools.php?action=editnews&amp;id={{ article.id }}" class="brackets">Edit</a>
+            <a href="tools.php?action=deletenews&amp;id={{ article.id }}&amp;auth={{ auth }}" class="brackets">Delete</a>
         </div>
-        <div class="pad">{{ article.2|bb_format }}</div>
+        <div class="pad">{{ article.body|bb_format }}</div>
     </div>
     {% endfor %}
     <div id="more_news" class="box">
