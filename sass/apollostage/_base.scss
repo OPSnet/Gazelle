@@ -1562,9 +1562,14 @@ blockquote {
 
 #sortable {
   width: unset !important;
+  cursor: move;
 }
 #sortable li {
   word-break: break-all;
+  cursor: move;
+}
+#sortable label {
+  cursor: move;
 }
 
 /* checkboxes */
