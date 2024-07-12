@@ -1,5 +1,5 @@
 // _base.scss for Apollostage
-// 2024-07-03
+// 2024-07-11
 //
 // SASS/SCSS NOTE
 // This is one of four files for the main ApolloStage theme:
@@ -17,7 +17,7 @@
    ########################################################################
 */
 
-/*  # 2024-07-03 - Updated with community feedback.
+/*  # 2024-07-11 - Updated with community feedback.
     # Fix: mobile menu, category stripes;
 /*  # Feature: Add SVGs, tag bubbles, italic fonts and more;
 /*  # Feature: Added new light mode theme;
@@ -2261,6 +2261,8 @@ body#collage .cats_music {
 #taglist td a,
 #request_table .tags,
 #top10 .tags,
+#better .tags,
+#user #requests .tags a,
 /* Artist page, sidebar, tags box */
 #artist .sidebar div.box.box_tags ul.stats.nobullet li a,
 /* User profile page, sidebar, for non-paranoid */
@@ -2293,6 +2295,7 @@ body#torrents div.box.box_tags li > a:first-child {
 #torrent_table .group .tags :not(:empty):hover,
 #discog_table .tags :hover,
 #taglist td a:hover,
+#user #requests .tags a:hover,
 /*  Artist page, sidebar, tags box */
 #artist .sidebar div.box.box_tags ul.stats.nobullet li a:hover,
 /* User profile page, sidebar, for non-paranoid */
@@ -2316,7 +2319,8 @@ body#torrents div.box.box_tags li > a:first-child:hover {
 /* ### 2.2.3 Non-clickable appearance
    Applies to top10 and request_table pages, where tags are not clickable links. */
 #request_table .tags,
-#top10 .tags {
+#top10 .tags,
+#better .tags {
   font-style: italic;
   font-weight: normal;
   margin-inline: 1rem;
