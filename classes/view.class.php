@@ -48,7 +48,6 @@ class View {
             'ajax.class',
             'autocomplete',
             'jquery.autocomplete',
-            'jquery.countdown.min',
             'global',
             'katex-0.16.10.min'
         );
