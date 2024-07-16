@@ -6,14 +6,17 @@ require_once(__DIR__ . '/../../../lib/bootstrap.php');
 require_once(__DIR__ . '/../../helper.php');
 
 class IPv4Test extends TestCase {
-    protected \Gazelle\User $user;
+    protected array $userList;
 
     public function setUp(): void {
-        $this->user = Helper::makeUser('ipv4.' . randomString(10), 'ipv4man');
+        $this->userList[] = Helper::makeUser('ipv4.' . randomString(10), 'ipv4man');
     }
 
     public function tearDown(): void {
-        $this->user->remove();
+        foreach ($this->userList as $user) {
+            $user->remove();
+        }
+        $this->userList = [];
     }
 
     public function testBan(): void {
@@ -21,7 +24,7 @@ class IPv4Test extends TestCase {
         $initial = $ipv4->total();
         // if the following fails, it is due to a previous unittest failure
         $this->assertFalse($ipv4->isBanned('127.9.9.55'), 'ipv4-is-not-banned');
-        $id = $ipv4->createBan($this->user, '127.9.9.50', '127.9.9.60', 'phpunit');
+        $id = $ipv4->createBan($this->userList[0], '127.9.9.50', '127.9.9.60', 'phpunit');
         $this->assertGreaterThan(0, $id, 'ipv4-ban-create');
         $this->assertTrue($ipv4->isBanned('127.9.9.55'), 'ipv4-is-banned');
         $this->assertEquals($initial + 1, $ipv4->total(), 'ipv4-total');
@@ -29,7 +32,7 @@ class IPv4Test extends TestCase {
         $this->assertFalse($ipv4->isBanned('127.9.9.61'), 'ipv4-outside-ban-range');
         $this->assertEquals(
             1,
-            $ipv4->modifyBan($this->user, $id, '127.9.9.50', '127.9.9.61', 'extend'),
+            $ipv4->modifyBan($this->userList[0], $id, '127.9.9.50', '127.9.9.61', 'extend'),
             'ipv4-extend'
         );
         $this->assertTrue($ipv4->isBanned('127.9.9.61'), 'ipv4-inside-ban-range');
@@ -45,27 +48,49 @@ class IPv4Test extends TestCase {
 
     public function testUserPage(): void {
         $ipv4 = new \Gazelle\Manager\IPv4();
-        $this->assertEquals(1, $ipv4->register($this->user, '127.1.0.1'), 'ipv4-create');
-        $this->assertEquals(2, $ipv4->userTotal($this->user), 'ipv4-user-total');
+        $user = $this->userList[0];
+        $this->assertEquals(1, $ipv4->register($user, '127.1.0.1'), 'ipv4-create');
+        $this->assertEquals(2, $ipv4->userTotal($user), 'ipv4-user-total');
         $this->assertEquals(
             ['127.0.0.1', '127.1.0.1'],
             array_map(
                 fn($h) => $h['ip_addr'],
-                $ipv4->userPage($this->user, 3, 0)
+                $ipv4->userPage($user, 3, 0)
             ),
             'ipv4-user-page',
         );
         $this->assertFalse($ipv4->isBanned('127.1.0.1'), 'ipv4-not-banned');
 
         $ipv4->setFilterIpaddrRegexp('^127\.0');
-        $this->assertEquals(1, $ipv4->userTotal($this->user), 'ipv4-user-filter-regexp');
+        $this->assertEquals(1, $ipv4->userTotal($user), 'ipv4-user-filter-regexp');
         $ipv4->setFilterIpaddrRegexp('^10\.0');
-        $this->assertEquals(0, $ipv4->userTotal($this->user), 'ipv4-user-fail-regexp');
+        $this->assertEquals(0, $ipv4->userTotal($user), 'ipv4-user-fail-regexp');
 
         $ipv4->flush();
         $ipv4->setFilterIpaddr('127.1.0.1');
-        $this->assertEquals(1, $ipv4->userTotal($this->user), 'ipv4-user-filter-ip');
+        $this->assertEquals(1, $ipv4->userTotal($user), 'ipv4-user-filter-ip');
         $ipv4->setFilterIpaddr('10.1.0.1');
-        $this->assertEquals(0, $ipv4->userTotal($this->user), 'ipv4-user-fail-ip');
+        $this->assertEquals(0, $ipv4->userTotal($user), 'ipv4-user-fail-ip');
+    }
+
+    public function testUserOther(): void {
+        $now = time();
+        $ip = '1.2.3.4';
+        $user2 = Helper::makeUser('ipv4.' . randomString(10), 'ipv4man');
+        $this->userList[] = $user2;
+        $ipOther = '4.3.2.1';
+        $user3 = Helper::makeUser('ipv4.' . randomString(10), 'ipv4man');
+        $this->userList[] = $user3;
+        $ipv4 = new \Gazelle\Manager\IPv4();
+        $ipv4->register($this->userList[0], $ip);
+        $ipv4->register($user2, $ip);
+        $ipv4->register($user3, $ipOther);
+
+        $ipv4->setFilterTime($now, time() + 1);
+        $ipv4->setFilterIpaddr($ip);
+        $this->assertEquals([$user2->id()], $ipv4->userOther($this->userList[0]), 'ipv4-other-success');
+
+        $ipv4->setFilterIpaddr($ipOther);
+        $this->assertCount(0, $ipv4->userOther($user3), 'ipv4-other-noresult');
     }
 }
