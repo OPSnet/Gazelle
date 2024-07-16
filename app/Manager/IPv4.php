@@ -15,6 +15,8 @@ class IPv4 extends \Gazelle\Base {
     protected string $filterNotes;
     protected string $filterIpaddr;
     protected string $filterIpaddrRegexp;
+    protected int $filterStart;
+    protected int $filterEnd;
 
     public function flush(): static {
         foreach (range(1, 223) as $n) {
@@ -24,6 +26,8 @@ class IPv4 extends \Gazelle\Base {
         unset($this->filterNotes);
         unset($this->filterIpaddr);
         unset($this->filterIpaddrRegexp);
+        unset($this->filterStart);
+        unset($this->filterEnd);
         return $this;
     }
 
@@ -83,6 +87,12 @@ class IPv4 extends \Gazelle\Base {
         return $this;
     }
 
+    public function setFilterTime(int $start, int $end): static {
+        $this->filterStart = $start;
+        $this->filterEnd = $end;
+        return $this;
+    }
+
     public function queryBase(): array {
         $cond = [];
         $args = [];
@@ -93,6 +103,10 @@ class IPv4 extends \Gazelle\Base {
         if (isset($this->filterIpaddr)) {
             $cond[] = "inet_aton(?) BETWEEN i.FromIP AND i.ToIP";
             $args[] = $this->filterIpaddr;
+        }
+        if (isset($this->filterStart)) {
+            $cond[] = "i.created BETWEEN FROM_UNIXTIME(?) AND FROM_UNIXTIME(?)";
+            array_push($args, $this->filterStart, $this->filterEnd);
         }
         return [
             "FROM ip_bans i" . (empty($cond) ? '' : (' WHERE ' . implode(' AND ', $cond))),
@@ -137,11 +151,41 @@ class IPv4 extends \Gazelle\Base {
             $cond[] = "uhi.IP = ?";
             $args[] = $this->filterIpaddr;
         }
+        if (isset($this->filterStart)) {
+            $cond[] = "uhi.StartTime BETWEEN FROM_UNIXTIME(?) AND FROM_UNIXTIME(?)";
+            array_push($args, $this->filterStart, $this->filterEnd);
+        }
         $where  = join(' AND ', $cond);
         return (int)self::$db->scalar("
             SELECT count(DISTINCT IP) FROM users_history_ips uhi WHERE $where
             ", ...$args
         );
+    }
+
+    /**
+     * returns array of userids that match filters, excluding specified user
+     */
+    public function userOther(\Gazelle\User $user): array {
+        $cond = ['uhi.UserID != ?'];
+        $args = [$user->id()];
+        if (isset($this->filterIpaddrRegexp)) {
+            $cond[] = "uhi.IP REGEXP ?";
+            $args[] = $this->filterIpaddrRegexp;
+        }
+        if (isset($this->filterIpaddr)) {
+            $cond[] = "uhi.IP = ?";
+            $args[] = $this->filterIpaddr;
+        }
+        if (isset($this->filterStart)) {
+            $cond[] = "uhi.StartTime BETWEEN FROM_UNIXTIME(?) AND FROM_UNIXTIME(?)";
+            array_push($args, $this->filterStart, $this->filterEnd);
+        }
+        $where  = join(' AND ', $cond);
+        self::$db->prepared_query("
+            SELECT DISTINCT UserID FROM users_history_ips uhi WHERE $where
+            ", ...$args
+        );
+        return array_map(fn($v) => $v['UserID'], self::$db->to_array(false, MYSQLI_ASSOC, false));
     }
 
     public function userPage(\Gazelle\User $user, int $limit, int $offset): array {

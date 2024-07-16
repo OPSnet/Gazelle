@@ -118,6 +118,14 @@ class LoginWatch extends Base {
         return self::$db->affected_rows();
     }
 
+    public function capture(): ?string {
+        /* @phpstan-ignore-next-line query cannot return bad type */
+        return self::$db->scalar("
+            SELECT capture FROM login_attempts WHERE ID = ?
+            ", $this->id
+        );
+    }
+
     /**
      * If the login was successful, clear prior attempts
      */
@@ -129,6 +137,10 @@ class LoginWatch extends Base {
             ", $this->id
         );
         return self::$db->affected_rows();
+    }
+
+    public function ipaddr(): string {
+        return $this->ipaddr;
     }
 
     /**
