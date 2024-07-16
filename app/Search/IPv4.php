@@ -122,7 +122,7 @@ class IPv4 extends \Gazelle\Base {
     }
 
     public function snatchList(int $limit, int $offset): array {
-        $column = ['from_unixtime(min(xs.tstamp))', 'from_unixtime(max(xs.tstamp))', 's.addr_n', 'count(*)'][$this->column];
+        $column = ['from_unixtime(min(xs.tstamp))', 'from_unixtime(max(xs.tstamp))', 'inet_aton(s.addr_n)', 'count(*)'][$this->column];
         $direction = ['ASC', 'DESC'][$this->direction];
 
         self::$db->prepared_query("
@@ -158,7 +158,7 @@ class IPv4 extends \Gazelle\Base {
     }
 
     public function trackerList(int $limit, int $offset): array {
-        $column = ['from_unixtime(min(xfu.mtime))', 'from_unixtime(max(xfu.mtime))', 's.addr_n', 'count(*)'][$this->column];
+        $column = ['from_unixtime(min(xfu.mtime))', 'from_unixtime(max(xfu.mtime))', 'inet_aton(s.addr_n)', 'count(*)'][$this->column];
         $direction = ['ASC', 'DESC'][$this->direction];
 
         self::$db->prepared_query("

@@ -240,9 +240,9 @@ class History extends \Gazelle\BaseUser {
     public function trackerIPv4(\Gazelle\Search\ASN $asn): array {
         $dir = $this->direction === 'down' ? 'DESC' : 'ASC';
         $orderBy = match ($this->column) {
-            'first' => "from_unixtime(min(tstamp)) $dir, IP $dir, from_unixtime(max(tstamp)) $dir",
-            'last'  => "from_unixtime(max(tstamp)) $dir, IP $dir, from_unixtime(min(tstamp)) $dir",
-            default => "IP $dir, from_unixtime(min(tstamp)) $dir, from_unixtime(max(tstamp)) $dir",
+            'first' => "from_unixtime(min(tstamp)) $dir, inet_aton(IP) $dir, from_unixtime(max(tstamp)) $dir",
+            'last'  => "from_unixtime(max(tstamp)) $dir, inet_aton(IP) $dir, from_unixtime(min(tstamp)) $dir",
+            default => "inet_aton(IP) $dir, from_unixtime(min(tstamp)) $dir, from_unixtime(max(tstamp)) $dir",
         };
         self::$db->prepared_query("
             SELECT IP                      AS ipv4,
@@ -250,7 +250,7 @@ class History extends \Gazelle\BaseUser {
                 from_unixtime(max(tstamp)) AS last_seen
             FROM xbt_snatched
             WHERE uid = ?
-            GROUP BY inet_aton(IP)
+            GROUP BY IP
             ORDER BY $orderBy
             ", $this->id()
         );
