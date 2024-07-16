@@ -1,5 +1,5 @@
 /* APOLLOSTAGE COFFEE THEME */
-/* 2024-07-03 */
+/* 2024-07-16 */
 
 // ////////////////////////////////////////////////////////////////////////////////
 // SLUG/SETUP
@@ -7,7 +7,7 @@
 // import basic colors as a backup:
 @import '../apollostage/_variables';
 // debug slugs: must be after import.
-$build-slug: $build-slug + " " + "coffee 2407";
+$build-slug: $build-slug + " " + "coffee";
 // and override as follows:
 
 // ////////////////////////////////////////////////////////////////////////////////
@@ -15,8 +15,7 @@ $build-slug: $build-slug + " " + "coffee 2407";
 
 // physical_layout -> token, and token -> raw value.
 
-//Backs -- 100-600 are used
-
+// Backgrounds -- 100-600 are used
 $back-100:  #1d1c1c;
 $back-200:  #222020;
 $back-300:  #272423;
@@ -24,7 +23,7 @@ $back-400:  #2d2928;
 $back-500:  #322e2c;
 $back-600:  #3e3837;
 
-//midtones
+// Mids
 $midtone-100: #3D2C29;
 $midtone-200: #45322E;
 $midtone-300: #4E3833;
@@ -36,7 +35,7 @@ $midtone-800: #785746;
 $midtone-900: #805D49;
 $midtone-1000: #89644C;
 
-//coffee theme runs runs from lighter to darker, for style reasons
+// coffee theme runs runs from lighter to darker, for style reasons
 $menutheme-100: #89644C;
 $menutheme-200: #805D49;
 $menutheme-300: #785746;
@@ -48,7 +47,7 @@ $menutheme-800: #4E3833;
 $menutheme-900: #45322E;
 $menutheme-1000: #3D2C29;
 
-//Foregrounds -- 400-1000 are used
+// Foregrounds -- 400-1000 are used
 $fore-400:  #A47A5A;
 $fore-500:  #B38D6F;
 $fore-600:  #C2A285;
@@ -57,7 +56,7 @@ $fore-800:  #E0CDB8;
 $fore-900:  #EFE3D5;
 $fore-1000: #FFFCF6;
 
-//direct-specialty
+// direct-specialty
 $ds-rawsienna: #C98258;
 
 // DEFINE FROM LOGICAL LAYOUT TO TOKENS
@@ -189,3 +188,4 @@ $icon-menu-open-state: url("/svg/std/menu-ccc.svg"); // change to lighter versio
 @import '../apollostage/_fonts_base';
 
 // EOF
+// ////////////////////////////////////////////////////////////////////////////////

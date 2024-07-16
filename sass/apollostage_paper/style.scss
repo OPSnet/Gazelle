@@ -1,13 +1,13 @@
 /* APOLLOSTAGE PAPER THEME */
-/* 2024-07-03 */
+/* 2024-07-16 */
 
-/// ////////////////////////////////////////////////////////////////////////////////
-// SLUG
+// ////////////////////////////////////////////////////////////////////////////////
+// SLUG/SETUP
 
 // import basic colors as a backup:
 @import '../apollostage/_variables';
 // debug slugs: must be after import.
-$build-slug: $build-slug + " " + "paper 2407";
+$build-slug: $build-slug + " " + "paper";
 // and override as follows:
 
 // ////////////////////////////////////////////////////////////////////////////////
@@ -15,7 +15,7 @@ $build-slug: $build-slug + " " + "paper 2407";
 
 // physical_layout -> token, and token -> raw value.
 
-// Backs
+// Backgrounds
 $back-100: #EBEFF0;
 $back-200: #DEE2E2;
 $back-300: #D0D4D5;
@@ -27,7 +27,7 @@ $back-800: #8D9091;
 $back-900: #808384;
 $back-1000: #727576;
 
-//Mids
+// Mids
 $mid-100: #00AD89;
 $mid-200: #00A280;
 $mid-300: #009777;
@@ -39,7 +39,7 @@ $mid-800: #005943;
 $mid-900: #004B38;
 $mid-1000: #003D2D;
 
-//Menutheme ~ for base apollostage, same as mids
+// Menutheme ~ for base apollostage, same as mids
 $menutheme-100: #003D2D;
 $menutheme-200: #004B38;
 $menutheme-300: #005943;
@@ -51,7 +51,7 @@ $menutheme-800: #009777;
 $menutheme-900: #00A280;
 $menutheme-1000: #00AD89;
 
-//Fores
+// Fores
 $fore-100: #8E9FB3;
 $fore-200: #577AA4;
 $fore-300: #2E5D95;
@@ -63,7 +63,7 @@ $fore-800: #162E49;
 $fore-900: #17212E;
 $fore-1000: #0E0F0F;
 
-//Neutrals (Ink)
+// Neutrals (Ink)
 $neutral-000: #FFFFFF;
 $neutral-100: #F7F8F9;
 $neutral-200: #F1F2F4;
@@ -77,7 +77,7 @@ $neutral-900: #2C3E5D;
 $neutral-1000: #172B4D;
 $neutral-1100: #091E42;
 
-//Blues
+// Blues
 $blue-000: #E9F2FF;
 $blue-100: #CCE0FF;
 $blue-200: #85B8FF;
@@ -89,7 +89,7 @@ $blue-700: #0055CC;
 $blue-800: #09326C;
 $blue-900: #1C2B41;
 
-//Direct-Specialty
+// Direct-Specialty
 $ds-neutral-300: #979a9c;
 $ds-neutral-400: #7f807f;
 $ds-neutral-500: #5d6670;

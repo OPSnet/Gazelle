@@ -1,5 +1,5 @@
 // _base.scss for Apollostage
-// 2024-07-11
+// 2024-07-16
 //
 // SASS/SCSS NOTE
 // This is one of four files for the main ApolloStage theme:
@@ -17,7 +17,7 @@
    ########################################################################
 */
 
-/*  # 2024-07-11 - Updated with community feedback.
+/*  # 2024-07-16 - Updated with community feedback.
     # Fix: mobile menu, category stripes;
 /*  # Feature: Add SVGs, tag bubbles, italic fonts and more;
 /*  # Feature: Added new light mode theme;
@@ -2152,21 +2152,19 @@ body#collage .cats_music {
     ) !important;
   color: $color-text-notification-words !important;
   font-weight: 700;
-  padding: 0 !important;
-  line-height: 2.2rem !important; // done here to override site html
+  padding: 0.8rem !important; //overriding site html
 }
 
 /* first row words */
 #noty_bottomRight_layout_container .noty_message .noty_text {
-  line-height: 1.04rem; // only needed on 2-line announcements
-  padding: 0 8px;
+  line-height: 1.1rem !important; // only needed on 2-line announcements
 }
 
 /* second row of each box */
 #noty_bottomRight_layout_container .noty_buttons {
   background-color: $color-background-notification !important;
   border: none !important;
-  padding: 8px !important;
+  padding: 0.6rem !important;
 }
 
 /* buttons */

@@ -1,5 +1,5 @@
 /* APOLLOSTAGE SUNSET THEME */
-/* 2024-07-03 */
+/* 2024-07-16 */
 
 // ////////////////////////////////////////////////////////////////////////////////
 // SLUG/SETUP
@@ -7,13 +7,15 @@
 // import basic colors as a backup:
 @import '../apollostage/_variables';
 // debug slugs: must be after import.
-$build-slug: $build-slug + " " + "sunset 2407";
+$build-slug: $build-slug + " " + "sunset";
 // and override as follows:
 
 // ////////////////////////////////////////////////////////////////////////////////
 // COLORS
 
-//Backs -- 100-600 are used
+// physical_layout -> token, and token -> raw value.
+
+// Backgrounds -- 100-600 are used
 $back-100: #19181A;
 $back-200: #2A242C;
 $back-300: #342A33;
@@ -43,7 +45,7 @@ $midtone-800: #D19DC8;
 $midtone-900: #A196C4;
 $midtone-1000:#757AAB;
 
-//Menu
+// Menu
 $menutheme-100: #ffb0a0;
 $menutheme-200: #ff9e98;
 $menutheme-300: #fe8691;
@@ -55,7 +57,7 @@ $menutheme-800: #8d6a87;
 $menutheme-900: #6c6584;
 $menutheme-1000: #5c6086;
 
-//Direct-specialty
+// Direct-specialty
 $ds-fiji: #b43477;
 $ds-bali: #9c4366;
 $ds-neutral-300: #a4a4a4;
@@ -189,3 +191,4 @@ $ds-shadow-raised-hover:  0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0
 @import '../apollostage/_fonts_base';
 
 // EOF
+// ////////////////////////////////////////////////////////////////////////////////
