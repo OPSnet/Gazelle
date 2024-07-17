@@ -26,89 +26,6 @@ function UncheckIfDisabled(checkbox) {
     }
 }
 
-function AlterParanoia() {
-    // Required Ratio is almost deducible from downloaded, the count of seeding and the count of snatched
-    // we will "warn" the user by automatically checking the required ratio box when they are
-    // revealing that information elsewhere
-    if (!$('input[name=p_ratio]').raw()) {
-        return;
-    }
-
-    $.each([
-        'requestsfilled', 'requestsvoted',
-    ], function(i,val) {
-        $('input[name=p_list_' + val + ']').raw().disabled = !($('input[name=p_count_' + val + ']').raw().checked && $('input[name=p_bounty_' + val + ']').raw().checked);
-    });
-
-    $.each([
-        'collagecontribs', 'collages', 'leeching', 'torrentcomments', 'perfectflacs', 'seeding', 'snatched', 'uniquegroups', 'uploads',
-    ], function(i,val) {
-        $('input[name=p_l_' + val + ']').raw().disabled = !$('input[name=p_c_' + val + ']').raw().checked;
-        UncheckIfDisabled($('input[name=p_l_' + val + ']').raw());
-    });
-
-    if ($('input[name=p_c_seeding]').raw().checked
-        && $('input[name=p_c_snatched]').raw().checked
-        && ($('input[name=p_downloaded]').raw().checked || ($('input[name=p_uploaded]').raw().checked && $('input[name=p_ratio]').raw().checked))
-    ) {
-        $('input[type=checkbox][name=p_requiredratio]').raw().checked = true;
-    } else {
-        $('input[type=checkbox][name=p_requiredratio]').raw().disabled = false;
-    }
-
-    // unique groups, "Perfect" FLACs and artists added are deducible from the list of uploads
-    if ($('input[name=p_l_uploads]').raw().checked) {
-        $('input[name=p_c_uniquegroups]').raw().checked = true;
-        $('input[name=p_c_uniquegroups]').raw().disabled = true;
-        $('input[name=p_l_uniquegroups]').raw().checked = true;
-        $('input[name=p_l_uniquegroups]').raw().disabled = true;
-        $('input[name=p_c_perfectflacs]').raw().checked = true;
-        $('input[name=p_c_perfectflacs]').raw().disabled = true;
-        $('input[name=p_l_perfectflacs]').raw().checked = true;
-        $('input[name=p_l_perfectflacs]').raw().disabled = true;
-        $('input[type=checkbox][name=p_artistsadded]').raw().checked = true;
-        $('input[type=checkbox][name=p_artistsadded]').raw().disabled = true;
-    } else {
-        $('input[name=p_c_uniquegroups]').raw().disabled = false;
-        $('input[name=p_c_perfectflacs]').raw().disabled = false;
-        $('input[type=checkbox][name=p_artistsadded]').raw().disabled = false;
-    }
-
-    if (!$('input[name=p_l_collagecontribs]').raw().checked) {
-        $('input[name=p_l_collages]').raw().checked = false;
-    }
-    UncheckIfDisabled($('input[name=p_l_collages]').raw());
-}
-
-function ParanoiaReset(checkbox, drops) {
-    var selects = $('select');
-    for (var i = 0; i < selects.results(); i++) {
-        if (selects.raw(i).name.match(/^p_/)) {
-            if (drops == 0) {
-                selects.raw(i).selectedIndex = 0;
-            } else if (drops == 1) {
-                selects.raw(i).selectedIndex = selects.raw(i).options.length - 2;
-            } else if (drops == 2) {
-                selects.raw(i).selectedIndex = selects.raw(i).options.length - 1;
-            }
-            AlterParanoia();
-        }
-    }
-    var checkboxes = $(':checkbox');
-    for (var i = 0; i < checkboxes.results(); i++) {
-        if (checkboxes.raw(i).name.match(/^p_/) && (checkboxes.raw(i).name != 'p_lastseen')) {
-            if (checkbox == 3) {
-                checkboxes.raw(i).checked = !(checkboxes.raw(i).name.match(/^p_list_/) || checkboxes.raw(i).name.match(/^p_l_/));
-            } else {
-                checkboxes.raw(i).checked = checkbox;
-            }
-            AlterParanoia();
-        }
-    }
-}
-
-addDOMLoadEvent(AlterParanoia);
-
 function ToggleWarningAdjust(selector) {
     if (selector.options[selector.selectedIndex].value == '---') {
         $('#ReduceWarningTR').gshow();
@@ -116,19 +33,6 @@ function ToggleWarningAdjust(selector) {
     } else {
         $('#ReduceWarningTR').ghide();
         $('#ReduceWarning').raw().disabled = true;
-    }
-}
-
-addDOMLoadEvent(ToggleIdenticons);
-function ToggleIdenticons() {
-    var disableAvatars = $('#disableavatars');
-    if (disableAvatars.length) {
-        var selected = disableAvatars[0].selectedIndex;
-        if (selected == 2 || selected == 3) {
-            $('#identicons').gshow();
-        } else {
-            $('#identicons').ghide();
-        }
     }
 }
 
