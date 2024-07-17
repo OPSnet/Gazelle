@@ -1,5 +1,6 @@
 {% macro paranoia_list(user, field) %}
-{% set extra = user.isParanoid(field ~ '+') %}
-<label><input type="checkbox" name="p_c_{{ field }}"{% if not extra %} checked="checked"{% endif %} onchange="AlterParanoia()" /> Show count</label>&nbsp;&nbsp;
-<label><input type="checkbox" name="p_l_{{ field }}"{% if not extra and not user.isParanoid(field) %} checked="checked"{% endif %} onchange="AlterParanoia()" /> Show list</label>
+{%  from 'macro/form.twig' import checked -%}
+{%  set extra = user.isParanoid(field ~ '+') %}
+<label><input type="checkbox" name="p_c_{{ field }}" class="paranoia-setting"{{ checked(not extra) }} /> Show count</label>&nbsp;&nbsp;
+<label><input type="checkbox" name="p_l_{{ field }}" class="paranoia-setting"{{ checked(not extra and not user.isParanoid(field)) }} /> Show list</label>
 {% endmacro %}

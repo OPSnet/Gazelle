@@ -5,7 +5,164 @@ var PUSHBULLET = 6;
 const userFormSelector = '#userform table.user_options';
 const searchSelector = userFormSelector + ' > tbody > tr';
 
-document.addEventListener('DOMContentLoaded', function() {
+function fuzzyMatch(str, pattern) {
+    pattern = pattern.split("").reduce(function(a,b){ return a+".*"+b; });
+    return new RegExp(pattern).test(str);
+}
+
+function AlterParanoia() {
+    // Required Ratio is almost deducible from downloaded, the count of seeding and the count of snatched
+    // we will "warn" the user by automatically checking the required ratio box when they are
+    // revealing that information elsewhere
+    if (!$('input[name=p_ratio]').raw()) {
+        return;
+    }
+
+    $.each([
+        'requestsfilled', 'requestsvoted',
+    ], function(i,val) {
+        $('input[name=p_list_' + val + ']').raw().disabled = !($('input[name=p_count_' + val + ']').raw().checked && $('input[name=p_bounty_' + val + ']').raw().checked);
+    });
+
+    $.each([
+        'collagecontribs', 'collages', 'leeching', 'torrentcomments', 'perfectflacs', 'seeding', 'snatched', 'uniquegroups', 'uploads',
+    ], function(i,val) {
+        $('input[name=p_l_' + val + ']').raw().disabled = !$('input[name=p_c_' + val + ']').raw().checked;
+        UncheckIfDisabled($('input[name=p_l_' + val + ']').raw());
+    });
+
+    if ($('input[name=p_c_seeding]').raw().checked
+        && $('input[name=p_c_snatched]').raw().checked
+        && ($('input[name=p_downloaded]').raw().checked || ($('input[name=p_uploaded]').raw().checked && $('input[name=p_ratio]').raw().checked))
+    ) {
+        $('input[type=checkbox][name=p_requiredratio]').raw().checked = true;
+    } else {
+        $('input[type=checkbox][name=p_requiredratio]').raw().disabled = false;
+    }
+
+    // unique groups, "Perfect" FLACs and artists added are deducible from the list of uploads
+    if ($('input[name=p_l_uploads]').raw().checked) {
+        $('input[name=p_c_uniquegroups]').raw().checked = true;
+        $('input[name=p_c_uniquegroups]').raw().disabled = true;
+        $('input[name=p_l_uniquegroups]').raw().checked = true;
+        $('input[name=p_l_uniquegroups]').raw().disabled = true;
+        $('input[name=p_c_perfectflacs]').raw().checked = true;
+        $('input[name=p_c_perfectflacs]').raw().disabled = true;
+        $('input[name=p_l_perfectflacs]').raw().checked = true;
+        $('input[name=p_l_perfectflacs]').raw().disabled = true;
+        $('input[type=checkbox][name=p_artistsadded]').raw().checked = true;
+        $('input[type=checkbox][name=p_artistsadded]').raw().disabled = true;
+    } else {
+        $('input[name=p_c_uniquegroups]').raw().disabled = false;
+        $('input[name=p_c_perfectflacs]').raw().disabled = false;
+        $('input[type=checkbox][name=p_artistsadded]').raw().disabled = false;
+    }
+
+    if (!$('input[name=p_l_collagecontribs]').raw().checked) {
+        $('input[name=p_l_collages]').raw().checked = false;
+    }
+    UncheckIfDisabled($('input[name=p_l_collages]').raw());
+}
+
+function ParanoiaReset(checkbox, drops) {
+    var selects = $('select');
+    for (var i = 0; i < selects.results(); i++) {
+        if (selects.raw(i).name.match(/^p_/)) {
+            if (drops == 0) {
+                selects.raw(i).selectedIndex = 0;
+            } else if (drops == 1) {
+                selects.raw(i).selectedIndex = selects.raw(i).options.length - 2;
+            } else if (drops == 2) {
+                selects.raw(i).selectedIndex = selects.raw(i).options.length - 1;
+            }
+            AlterParanoia();
+        }
+    }
+    var checkboxes = $(':checkbox');
+    for (var i = 0; i < checkboxes.results(); i++) {
+        if (checkboxes.raw(i).name.match(/^p_/) && (checkboxes.raw(i).name != 'p_lastseen')) {
+            if (checkbox == 3) {
+                checkboxes.raw(i).checked = !(checkboxes.raw(i).name.match(/^p_list_/) || checkboxes.raw(i).name.match(/^p_l_/));
+            } else {
+                checkboxes.raw(i).checked = checkbox;
+            }
+            AlterParanoia();
+        }
+    }
+}
+
+function ParanoiaResetStats() {
+    ParanoiaReset(3, 0);
+    $('input[name=p_l_collages]').raw().checked = false;
+}
+
+function ParanoiaResetOn() {
+    ParanoiaReset(false, 0);
+    $('input[name=p_c_collages]').raw().checked = false;
+    $('input[name=p_l_collages]').raw().checked = false;
+}
+
+function ParanoiaResetOff() {
+    ParanoiaReset(true, 0);
+}
+
+function ToggleIdenticons() {
+    var disableAvatars = $('#disableavatars');
+    if (disableAvatars.length) {
+        var selected = disableAvatars[0].selectedIndex;
+        if (selected == 2 || selected == 3) {
+            $('#identicons').gshow();
+        } else {
+            $('#identicons').ghide();
+        }
+    }
+}
+
+/**
+ * Gets device IDs from the pushbullet API
+ *
+ * @return array of dictionaries with devices
+ */
+function fetchPushbulletDevices(apikey) {
+    $.ajax({
+        url: 'ajax.php',
+        data: {
+          "action": 'pushbullet_devices',
+          "apikey": apikey
+        },
+        type: 'GET',
+        success: function(data, textStatus, xhr) {
+            var data = jQuery.parseJSON(data);
+            var field = $('#pushdevice');
+            var value = field.val();
+            if (data.error || textStatus !== 'success' ) {
+                if (data.error) {
+                    field.html('<option>' + data.error.message + '</option>');
+                } else {
+                    $('#pushdevice').html('<option>No devices fetched</option>');
+                }
+            } else {
+                if(data['devices'].length > 0) {
+                    field.html('');
+                }
+                for (var i = 0; i < data['devices'].length; i++) {
+                    var model = data['devices'][i]['extras']['model'];
+                    var nickname = data['devices'][i]['extras']['nickname'];
+                    var name = nickname !== undefined ? nickname : model;
+                    var option = new Option(name, data['devices'][i]['iden']);
+
+                    option.selected = (option.value == value);
+                    field[0].add(option);
+                }
+            }
+        },
+        error: function(data,textStatus,xhr) {
+            $('#pushdevice').html('<option>' + textStatus + '</option>');
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
     var top = $('#settings_sections').offset().top - parseFloat($('#settings_sections').css('marginTop').replace(/auto/, 0));
     $(window).scroll(function (event) {
         var y = $(this).scrollTop();
@@ -104,71 +261,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    $("#paranoid-none").click(function() { ParanoiaResetOff(); });
-    $("#paranoid-stats").click(function() { ParanoiaResetStats(); });
-    $("#paranoid-all").click(function() { ParanoiaResetOn(); });
-});
+    document.getElementById('paranoid-none').addEventListener('click', () => { ParanoiaResetOff(); });
+    document.getElementById('paranoid-stats').addEventListener('click', () => { ParanoiaResetStats(); });
+    document.getElementById('paranoid-all').addEventListener('click', () => { ParanoiaResetOn(); });
 
-function ParanoiaResetOff() {
-    ParanoiaReset(true, 0);
-}
-
-function ParanoiaResetStats() {
-    ParanoiaReset(3, 0);
-    $('input[name=p_l_collages]').raw().checked = false;
-}
-
-function ParanoiaResetOn() {
-    ParanoiaReset(false, 0);
-    $('input[name=p_c_collages]').raw().checked = false;
-    $('input[name=p_l_collages]').raw().checked = false;
-}
-
-function fuzzyMatch(str, pattern){
-    pattern = pattern.split("").reduce(function(a,b){ return a+".*"+b; });
-    return new RegExp(pattern).test(str);
-};
-
-/**
- * Gets device IDs from the pushbullet API
- *
- * @return array of dictionaries with devices
- */
-function fetchPushbulletDevices(apikey) {
-    $.ajax({
-        url: 'ajax.php',
-        data: {
-          "action": 'pushbullet_devices',
-          "apikey": apikey
-        },
-        type: 'GET',
-        success: function(data, textStatus, xhr) {
-            var data = jQuery.parseJSON(data);
-            var field = $('#pushdevice');
-            var value = field.val();
-            if (data.error || textStatus !== 'success' ) {
-                if (data.error) {
-                    field.html('<option>' + data.error.message + '</option>');
-                } else {
-                    $('#pushdevice').html('<option>No devices fetched</option>');
-                }
-            } else {
-                if(data['devices'].length > 0) {
-                    field.html('');
-                }
-                for (var i = 0; i < data['devices'].length; i++) {
-                    var model = data['devices'][i]['extras']['model'];
-                    var nickname = data['devices'][i]['extras']['nickname'];
-                    var name = nickname !== undefined ? nickname : model;
-                    var option = new Option(name, data['devices'][i]['iden']);
-
-                    option.selected = (option.value == value);
-                    field[0].add(option);
-                }
-            }
-        },
-        error: function(data,textStatus,xhr) {
-            $('#pushdevice').html('<option>' + textStatus + '</option>');
-        }
+    Array.from(document.getElementsByClassName('paranoia-setting')).forEach((el) => {
+        el.addEventListener("change", () => { AlterParanoia() });
     });
-}
+
+    AlterParanoia();
+    ToggleIdenticons();
+});
