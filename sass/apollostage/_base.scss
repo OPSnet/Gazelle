@@ -1,5 +1,5 @@
 // _base.scss for Apollostage
-// 2024-07-16
+// 2024-07-19
 //
 // SASS/SCSS NOTE
 // This is one of four files for the main ApolloStage theme:
@@ -17,7 +17,7 @@
    ########################################################################
 */
 
-/*  # 2024-07-16 - Updated with community feedback.
+/*  # 2024-07-19 - Updated with community feedback.
     # Fix: mobile menu, category stripes;
 /*  # Feature: Add SVGs, tag bubbles, italic fonts and more;
 /*  # Feature: Added new light mode theme;
@@ -39,7 +39,13 @@
 //   Feature: For SVGs, there is clear separation of 'gazelle' (universal) SVG
 //    images into one directory, and site-specific SVGs (like the site logo).
 //
-//   Feature: New 'apollostage_paper' light theme.
+//   Chore: Rewrote color support so all colors are defined by tokens.  Colors
+//    are defined in _variables.scss (and style.scss for derivative themes).
+//
+//   Feature: all fonts now hosted locally, via _fonts_base.scss.
+//
+//   Feature: New derivative theme, 'apollostage_paper' with light-mode. 
+//    By design, apollostage_paper uses and includes its own font stack.
 //
 //   Fix: Messages with 'pre' were overrunning their box. Fixed with wrap. May
 //    still be broken on some edge-cases, especially on iPh--e.
@@ -51,9 +57,11 @@
 //   Feature: Tag bubbles ~ tags now appear in roundrects on torrent, collage-listing,
 //    collage-discog and requests pages. Commas are suppressed.
 //
-//   Feature: Tag bubbles have a hover effect on torrent, artist-discog,
-//    collage-listing, and collage-discog pages. (Not available on request pages
-//    because tags are not clickable on request pages.)
+//   Feature: Tag bubbles have a hover effect on pages where they are clickable, 
+//    such as torrent, artist-discog, collage-listing, and collage-discog pages. 
+//    (Not available on pages where tags are not clickable, such as request pages.)
+//
+//   Feature: Added styling for snatched torrent/group (similar to tag styling).
 //
 //   Fix: On mobile, images in private inbox no longer overrun the width,
 //    just like other locations.
@@ -63,8 +71,6 @@
 //   Style: torrent discog pages have more visible headers.
 //
 //   Fix: sessions page did not scroll to the right on mobile.
-//
-//   Feature: add Italic support (replace oblique with Italic).
 //
 //   Feature: specific font for Monospace (not system default).
 //
@@ -81,8 +87,6 @@
 //
 //   Fix: Artist pages, related artists voting buttons aligned incorrectly.
 //
-//   Chore: Rewrote color support so all colors are defined by tokens in one place.
-//
 //   Chore: Added comments where feasible.
 //
 //   Chore: Changelog started.
@@ -95,7 +99,7 @@
 ######################################################################## */
 
 /* # 0 GENERAL SETUP
-   ## 0.1 Housekeeping and font loading
+   ## 0.1 Housekeeping
    ## 0.2 Global variables
    ## 0.3 Debugging tools */
 
@@ -122,11 +126,11 @@
    ### 2.2.2  Hover effect
    ### 2.2.3  Non-clickable appearance
    ### 2.2.4  Other special cases
-   ### 2.2.5  Snatched torrent indicators (BETA)
+   ### 2.2.5  Snatched torrent indicators
    ## 2.3 Reserved
    ## 2.4 Pop-up Warnings and Alerts ##
    ### 2.4.1 Upload warnings ##
-   ### 2.4.2 Alertbar */
+   ### 2.4.2 Alertbar and Alerts on Desktop */
 
 /* # 3 DOCUMENTATION OF MOBILE CLASSES */
 
@@ -165,7 +169,7 @@
    ### 4.17.7  Menu When Open, Row Three
    ### 4.17.8  Menu When Open, Row Four
    ### 4.17.9  Menu When Open, Row Five ~ Searchboxes
-   ### 4.17.10  Alerts
+   ### 4.17.10  Alertbar and Alerts on Mobile
    ## 4.18 Checkboxes ~ Purpose Undocumented
    ## 4.19 Torrent Search, Handling for Tag Appearance */
 
@@ -184,7 +188,7 @@
 // slash-asterisk sass/scss comments are passed through to compiled css
 // double-slash sass/scss comments ARE NOT passed through to compiled css
 
-/* ## 0.1 Housekeeping and font loading */
+/* ## 0.1 Housekeeping */
 
 @charset "UTF-8";
 
@@ -2339,7 +2343,7 @@ table.torrent_table.cats.m_table td.td_info.big_info div.group_info.clear div.ta
   color: rgba(0, 0, 0, 10%);
 }
 
-/* ### 2.2.5 Snatched torrent indicators (BETA)
+/* ### 2.2.5 Snatched torrent indicators 
    the following must be after 2.2.4 invisibility */
 
 tr.snatched_group div.tags::before {
@@ -3531,41 +3535,50 @@ Documentation of mobile classes:
   }
   /* END searchboxes */
 
-  /* ## 4.17.10 Alerts */
+  /* ## 4.17.10 Alertbar and Alerts on Mobile*/
 
   /*  Alertbar is part of the DIV #header, which is designed to collapse on mobile. */
   #alerts {
     display: none;
   }
 
-  /*     PROBLEM: if we allow it to be visible as part of the rolldown menu, */
-  /*      wherever it's located, its links activate the 'open when hover'. */
-  /*      Why isn't Alertbar hover disabled when the menu is closed? */
-  /*     Possible solution: move hoverbar to the 1st row of menu. /*
-/*     However, it blocks the 'settings' button until notifs are cleared. */
+  /*    TODO: Alertbar alerts are not visible on Mobile. 
+  /*    
+  /*    DETAILS: Per site code, #alerts and .alertbar are delivered in the 'header'
+  /*      group, which we restyle to be a pulldown menu.
+  /*      If we turn on .alertbar and position it inside the pulldown menu,
+  /*      for example hovering over row 2 (the statistics block), or 
+  /*      below the menu in the 'shadow' area, — then when the menu is closed,
+  /*      hovering over the invisible .alertbar position shouldn't do anything, 
+  /*      but it opens the menu, which is unacceptable.
+  /*      Why isn't Alertbar hover disabled when the menu is closed? 
+  /*     Possible solution: move hoverbar to the 1st row of menu and float (z-height)
+  /*      over what's ordinarily there.  That solution is not chosen because
+  /*      in the first row, it blocks the 'settings' button until notifs are cleared. 
   /*     TODO: Find a better way.
-/*  Meantime, #fearless users: UNCOMMENT the block below to turn ON alertbar on mobile. */
+  /*  Meantime, fearless users: UNCOMMENT the block below 
+  /*  to turn ON alertbar on mobile. Codeblock below requires debugging.
 
-  /* ==== */
+  /* =========== */
   /*
-    /*  #alerts > .alertbar {
-    /*    display: inline-block;
-    /*    position: absolute;
-    /*    margin: 0;
-    /*    top: 0;
-    /*    left: 2%;
-    /*    width: 96%;
-    /*    height: auto;
-    /*    z-index: 99999;
-    /*    opacity: 1 !important;
-    /*    }
-    /*
-    /*  /* on mobile, suppress any other non-alertbar alerts (if any) */
+  /*  #alerts > .alertbar {
+  /*    display: inline-block;
+  /*    position: absolute;
+  /*    margin: 0;
+  /*    top: 0;
+  /*    left: 2%;
+  /*    width: 96%;
+  /*    height: auto;
+  /*    z-index: 99999;
+  /*    opacity: 1 !important;
+  /*    }
+  /*
+  /*  /* on mobile, suppress any other non-alertbar alerts (if any) */
   /*  #alerts > :not(.alertbar) {
-    /*    display: none;
-    /*    }
-    /*
-    /* ==== */
+  /*    display: none;
+  /*    }
+  /*
+  /* =========== */
 
   /* ************************************************ */
 
@@ -3624,7 +3637,7 @@ Documentation of mobile classes:
 
   #taglist tr.label td::after {
     font-style: italic;
-    content: '\27A4 Use "Hide Tags" above or Profile Settings to hide this list of tags.';
+    content: '➤ Use "Hide Tags" above or Profile Settings to hide this list of tags.';
     border: dotted;
   }
 
