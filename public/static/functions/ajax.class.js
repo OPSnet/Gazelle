@@ -55,7 +55,7 @@ var ajax = {
             return new URLSearchParams(data).toString();
         }
         var query = '';
-        if (is_array(data)) {
+        if (typeof data === 'object' && data instanceof Array) {
             for (var key in data) {
                 query += key + '=' + encodeURIComponent(data[key]) + '&';
             }
@@ -63,7 +63,7 @@ var ajax = {
             var elements = document.getElementById(data).elements;
             for (var i = 0, il = elements.length; i < il; i++) {
                 var element = elements[i];
-                if (!isset(element) || element.disabled || element.name === '') {
+                if (element.disabled || element.name === '') {
                     continue;
                 }
                 switch (element.type) {

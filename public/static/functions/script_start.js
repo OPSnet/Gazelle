@@ -2,15 +2,6 @@
 
 /* Site wide functions */
 
-//PHP ports
-function isset(variable) {
-    return typeof (variable) !== 'undefined';
-}
-
-function is_array(input) {
-    return typeof(input) === 'object' && input instanceof Array;
-}
-
 function byte_format(size, precision) {
     if (precision === undefined) {
         precision = 2;
