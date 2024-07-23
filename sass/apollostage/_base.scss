@@ -1,5 +1,5 @@
 // _base.scss for Apollostage
-// 2024-07-19
+// 2024-07-23
 //
 // SASS/SCSS NOTE
 // This is one of four files for the main ApolloStage theme:
@@ -780,7 +780,7 @@ table.box2 {
   max-width: 100%;
 }
 
-@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+@media screen {
   .forum_post .body img {
     max-width: 720px;
   }
@@ -806,7 +806,7 @@ table.box2 {
 }
 
 .last_read ::before {
-  content: "\27A4"; /* aka ➤ */
+  content: "➤"; // \27A4
   color: $color-accent-forum-inline-last-read;
   display: inline-block;
 }
@@ -865,7 +865,6 @@ table.box2 {
 .thin > .header h1,
 .thin > .header h2,
 .thin > .header h3 {
-  -ms-flex: 1 0 auto;
   flex: 1 0 auto;
 }
 
@@ -933,9 +932,7 @@ div#flip_view_1 div#similar-artist .name {
 .box_addtag form,
 .box_search form,
 .box_zipdownload form {
-  display: -ms-flexbox;
   display: flex;
-  -ms-flex-flow: row wrap;
   flex-flow: row wrap;
 }
 
@@ -949,7 +946,6 @@ div#flip_view_1 div#similar-artist .name {
 .box_search select,
 .box_zipdownload input[type="text"],
 .box_zipdownload select {
-  -ms-flex: 1 1 auto;
   flex: 1 1 auto;
   margin-right: 8px;
   width: auto;
@@ -1104,11 +1100,11 @@ div#flip_view_1 div#similar-artist .name {
 }
 
 .show_torrents > a::after {
-  content: "\25b6";
+  content: "▶"; // \25b6
 }
 
 .hide_torrents > a::after {
-  content: "\25bc";
+  content: "▼"; // \25bc
 }
 
 .group_torrent .edition_info {
@@ -1263,11 +1259,7 @@ ul.collage_images li a > span {
   bottom: 0;
   cursor: pointer;
   display: flex;
-  display: -ms-flexbox;
-  -ms-flex-align: center;
-  -ms-flex-flow: row nowrap;
   flex-flow: row nowrap;
-  -ms-flex-pack: center;
   justify-content: center;
   left: 0;
   margin: auto;
@@ -1404,9 +1396,7 @@ ul.collage_images li a > span {
 }
 
 #torrents .filter_torrents .ft_submit {
-  display: -ms-flexbox;
   display: flex;
-  -ms-flex-flow: row nowrap;
   flex-flow: row nowrap;
 }
 
@@ -1415,7 +1405,6 @@ ul.collage_images li a > span {
 }
 
 #torrents .filter_torrents .ft_submit span {
-  -ms-flex-order: 2;
   order: 2;
 }
 
@@ -1481,8 +1470,6 @@ span[style*="color: blue"] {
 .torrentdetails,
 .wrap_overflow,
 blockquote {
-  -webkit-hyphens: unset;
-  -ms-hyphens: unset;
   hyphens: unset;
   word-wrap: unset;
 }
@@ -1741,15 +1728,11 @@ body#collage .cats_music {
 .thin > .header .linkbox {
   align-self: flex-end;
   flex: 1 0 auto;
-  -ms-flex: 1 0 auto;
-  -ms-flex-item-align: end;
   margin-top: 8px;
 }
 
 .thin > .header {
   display: flex;
-  display: -ms-flexbox;
-  -ms-flex-flow: row wrap;
   flex-flow: row wrap;
   width: 100%;
 }
@@ -1791,8 +1774,6 @@ body#collage .cats_music {
 
 #menu > ul {
   display: flex;
-  display: -ms-flexbox;
-  -ms-flex-flow: row nowrap;
   flex-flow: row nowrap;
   font-size: 13px;
   overflow: hidden;
@@ -1800,7 +1781,6 @@ body#collage .cats_music {
 }
 
 #menu > ul li {
-  -ms-flex: 1 1 auto;
   flex: 1 1 auto;
 }
 
@@ -1841,8 +1821,6 @@ body#collage .cats_music {
 #userinfo_major,
 #userinfo_stats {
   display: flex;
-  display: -ms-flexbox;
-  -ms-flex-flow: row nowrap;
   flex-flow: row nowrap;
   position: absolute;
   right: 8px;
@@ -1916,7 +1894,7 @@ body#collage .cats_music {
 
   #nav_donate .tooltip::after {
     color: red;
-    content: "\2764\FE0F️"; // heart emoji symbol
+    content: "❤️"; // \2764\FE0F
     font-size: 75%;
     vertical-align: top;
   }
@@ -2061,14 +2039,11 @@ body#collage .cats_music {
   align-items: center;
   background-color: $color-background-searchbars-surround;
   display: flex;
-  display: -ms-flexbox;
-  -ms-flex-align: center;
   height: 50px;
   padding: 0 9px;
 }
 
 #searchbars > ul li {
-  -ms-flex: 1 1 auto;
   flex: 1 1 auto;
   margin-right: 9px;
 }
@@ -2944,7 +2919,7 @@ Documentation of mobile classes:
     margin-left: 1rem;
 
     &::before {
-      content: "\1F4C1 ";
+      content: "📁 "; //\1F4C1
     }
   }
 
