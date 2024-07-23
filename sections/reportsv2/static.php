@@ -279,6 +279,10 @@ if ($search->canUnclaim($Viewer)) {
 <?php
             }
             if ($report->status() != 'Resolved') {
+                $logMessage = trim($report->message() ?? '');
+                if (!$logMessage) {
+                    $logMessage = join(' ', array_map(fn($id) => $torMan->findById($id)?->publicLocation() ?? '', $report->otherIdList()));
+                }
 ?>
                 <tr>
                     <td class="label">Report comment:</td>
@@ -337,7 +341,7 @@ if ($search->canUnclaim($Viewer)) {
                 <tr>
                     <td class="label"><strong>Extra</strong> log message:</td>
                     <td>
-                        <input type="text" name="log_message" id="log_message<?= $reportId ?>" size="40" value="<?= html_escape(trim($report->message() ?? '')) ?>" />
+                        <input type="text" name="log_message" id="log_message<?= $reportId ?>" size="40" value="<?= html_escape($logMessage) ?>" />
                     </td>
                 <tr>
                     <td class="label"><strong>Extra</strong> staff notes:</td>
