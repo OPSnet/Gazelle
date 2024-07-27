@@ -6,7 +6,7 @@
     <input type="hidden" id="reporterid{{ report.id }}" name="reporterid" value="{{ report.reporterId }}" />
     <input type="hidden" id="reportid{{ report.id }}" name="reportid" value="{{ report.id }}" />
     <input type="hidden" id="torrentid{{ report.id }}" name="torrentid" value="{{ torrent.id }}" />
-    <input type="hidden" id="type{{ report.id }}" name="type" value="{{ report.reportType.id }}" />
+    <input type="hidden" id="type{{ report.id }}" name="type" value="{{ report.reportType.type }}" />
     <input type="hidden" id="uploader{{ report.id }}" name="uploader" value="{{ torrent.uploader.username }}" />
     <input type="hidden" id="uploaderid{{ report.id }}" name="uploaderid" value="{{ torrent.uploaderId }}" />
 </div>

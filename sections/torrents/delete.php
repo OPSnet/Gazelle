@@ -133,25 +133,25 @@ if ($Viewer->permitted('admin_reports')) {
                     <td colspan="3">
                         <select name="resolve_type" id="resolve_type0" onchange="ChangeResolve(0);">
 <?php foreach ($reportTypeMan->categoryList($torrent->group()->categoryId()) as $rt) { ?>
-                            <option value="<?= $rt->type() ?>"<?= $rt->type() === $reportType->type() ? ' selected="selected"' : '' ?>><?= $rt->name() ?></option>
+                            <option value="<?= $rt->type() ?>"<?= $rt->type() === $reportType->type() ? ' selected' : '' ?>><?= $rt->name() ?></option>
 <?php } ?>
                         </select>
                         <span id="options0">
                             <span class="tooltip" title="Delete torrent?">
                                 <label for="delete0"><strong>Delete</strong></label>
-                                <input type="checkbox" name="delete" id="delete0"<?= $reportType->resolveDelete() ? ' checked="checked"' : '' ?> />
+                                <input type="checkbox" name="delete" id="delete0"<?= $reportType->doDeleteUpload() ? ' checked' : '' ?> />
                             </span>
                             <span class="tooltip" title="Warning length in weeks">
                                 <label for="warning0"><strong>Warning</strong></label>
                                 <select name="warning" id="warning0">
 <?php foreach (range(0, 8) as $week) { ?>
-                                    <option value="<?= $week ?>"<?= $reportType->resolveWarn() == $week ? ' selected="selected"' : '' ?>><?= $week ?></option>
+                                    <option value="<?= $week ?>"<?= $reportType->warnWeeks() === $week ? ' selected' : '' ?>><?= $week ?></option>
 <?php } ?>
                                 </select>
                             </span>
                             <span class="tooltip" title="Remove upload privileges?">
                                 <label for="upload0"><strong>Remove upload privileges</strong></label>
-                                <input type="checkbox" name="upload" id="upload0"<?= $reportType->resolveUpload() ? ' checked="checked"' : '' ?> />
+                                <input type="checkbox" name="upload" id="upload0"<?= $reportType->doRevokeUploadPrivs() ? ' checked' : '' ?> />
                             </span>
                         </span>
                     </td>

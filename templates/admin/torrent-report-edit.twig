@@ -106,18 +106,18 @@
     </tr>
     <tr>
         <td class="colhead">Delete on resolve</td>
-        <td>{{ config.resolveDelete|truth }} <input type="checkbox" name="resolve_delete"{{ checked(config.resolveDelete) }} />
+        <td>{{ config.doDeleteUpload|truth }} <input type="checkbox" name="resolve_delete"{{ checked(config.doDeleteUpload) }} />
         <br />Resolving a report of this type will delete the torrent (although this can always be changed when handling the report).</td>
     </tr>
     <tr>
         <td class="colhead">No Upload on resolve</td>
-        <td>{{ config.resolveUpload|truth }} <input type="checkbox" name="resolve_upload"{{ checked(config.resolveUpload) }} />
+        <td>{{ config.doRevokeUploadPrivs|truth }} <input type="checkbox" name="resolve_upload"{{ checked(config.doRevokeUploadPrivs) }} />
         <br />Resolving a report of this type will take away upload privileges from the uploader.</td>
     </tr>
     <tr>
         <td class="colhead">Weeks warned</td>
-        <td>{{ config.resolveWarn }}
-        <br /><input type="number" name="resolve_warn" size="4" value="{{ config.resolveWarn }}" />
+        <td>{{ config.warnWeeks }}
+        <br /><input type="number" name="resolve_warn" size="4" value="{{ config.warnWeeks }}" />
         <br />Resolving a report of this type will warn uploader for this many weeks.</td>
     </tr>
     <tr>

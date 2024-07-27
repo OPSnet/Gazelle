@@ -5,16 +5,15 @@ function ChangeReportType() {
 }
 
 function ChangeResolve(reportid) {
-    var url = 'reportsv2.php?action=ajax_change_resolve&id=' + reportid
-        + '&type=' + $('#resolve_type' + reportid).val()
-        + '&categoryid=' + $('#categoryid' + reportid).val();
+    const url = 'reportsv2.php?action=ajax_get_resolve_options&type='
+        + document.getElementById('resolve_type' + reportid).value;
     $.getJSON(url, function(x) {
-        $('#delete' + reportid).prop('checked', x[0] == true);
-        if ($('#uploaderid' + reportid).val() == $('#reporterid' + reportid).val()) {
+        $('#delete' + reportid).prop('checked', x[0]);
+        if ($('#uploaderid' + reportid).val() === $('#reporterid' + reportid).val()) {
             $('#upload' + reportid).prop('checked', false);
             $('#warning' + reportid).val('0');
         } else {
-            $('#upload' + reportid).prop('checked', x[1] == true);
+            $('#upload' + reportid).prop('checked', x[1]);
             $('#warning' + reportid).val(x[2]);
         }
         $('#update_resolve' + reportid).enable();
@@ -22,23 +21,8 @@ function ChangeResolve(reportid) {
 }
 
 function Load(reportid) {
-    var type = $('#type' + reportid).val();
-    $('#resolve_type' + reportid + ' option[value="'+type+'"]').prop('selected', true);
-    // Can't use ChangeResolve() because we need it to block to do the uploader==reporter part
-    var url = 'reportsv2.php?action=ajax_change_resolve&id=' + reportid
-        + '&type=' + $('#resolve_type' + reportid).val()
-        + '&categoryid=' + $('#categoryid' + reportid).val();
-    $.getJSON(url, function(x) {
-        $('#delete' + reportid).prop('checked', x[0] == true);
-        if ($('#uploaderid' + reportid).val() == $('#reporterid' + reportid).val()) {
-            $('#upload' + reportid).prop('checked', false);
-            $('#warning' + reportid).val('0');
-        } else {
-            $('#upload' + reportid).prop('checked', x[1] == true);
-            $('#warning' + reportid).val(x[2]);
-        }
-        $('#update_resolve' + reportid).enable();
-    });
+    document.getElementById('resolve_type' + reportid).value = document.getElementById('type' + reportid).value;
+    ChangeResolve(reportid);
 }
 
 function ErrorBox(reportid, message) {
@@ -46,9 +30,7 @@ function ErrorBox(reportid, message) {
 }
 
 function HideErrors() {
-    if ($('#error_box')) {
-        $('#error_box').remove();
-    }
+    document.getElementById('error_box')?.remove();
 }
 
 function TakeResolve(reportid) {

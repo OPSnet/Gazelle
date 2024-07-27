@@ -37,9 +37,9 @@
         <td>{{ r.needLink }}</td>
         <td>{{ r.needSitelink }}</td>
         <td>{{ r.needTrack }}</td>
-        <td>{{ r.resolveDelete|truth }}</td>
-        <td>{{ r.resolveUpload|truth }}</td>
-        <td>{{ r.resolveWarn }}</td>
+        <td>{{ r.doDeleteUpload|truth }}</td>
+        <td>{{ r.doRevokeUploadPrivs|truth }}</td>
+        <td>{{ r.warnWeeks }}</td>
     </tr>
 {% endfor %}
 </table>
