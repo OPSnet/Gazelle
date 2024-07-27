@@ -93,6 +93,14 @@ class ReportType extends \Gazelle\BaseObject {
         return $this->info()['category_id'];
     }
 
+    public function doDeleteUpload(): bool {
+        return $this->info()['resolve_delete'];
+    }
+
+    public function doRevokeUploadPrivs(): bool {
+        return $this->info()['resolve_upload'];
+    }
+
     public function explanation(): string {
         return $this->info()['explanation'];
     }
@@ -169,28 +177,16 @@ class ReportType extends \Gazelle\BaseObject {
         return $this->info()['tracker_reason'];
     }
 
-    public function resolveDelete(): bool {
-        return $this->info()['resolve_delete'];
-    }
-
     public function resolveLog(): ?string {
         return $this->info()['resolve_log'];
     }
 
     public function resolveOptions(): array {
         return [
-            $this->resolveDelete(),
-            $this->resolveUpload(),
-            $this->resolveWarn(),
+            $this->doDeleteUpload(),
+            $this->doRevokeUploadPrivs(),
+            $this->warnWeeks(),
         ];
-    }
-
-    public function resolveUpload(): bool {
-        return $this->info()['resolve_upload'];
-    }
-
-    public function resolveWarn(): int {
-        return $this->info()['resolve_warn'];
     }
 
     public function sequence(): int {
@@ -199,6 +195,10 @@ class ReportType extends \Gazelle\BaseObject {
 
     public function type(): string {
         return $this->info()['type'];
+    }
+
+    public function warnWeeks(): int {
+        return $this->info()['resolve_warn'];
     }
 
     public function setChangeset(\Gazelle\User $user, array $changeset): static {

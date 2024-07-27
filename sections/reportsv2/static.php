@@ -283,6 +283,7 @@ if ($search->canUnclaim($Viewer)) {
                 if (!$logMessage) {
                     $logMessage = join(' ', array_map(fn($id) => $torMan->findById($id)?->publicLocation() ?? '', $report->otherIdList()));
                 }
+                $reportType = $report->reportType();
 ?>
                 <tr>
                     <td class="label">Report comment:</td>
@@ -307,17 +308,17 @@ if ($search->canUnclaim($Viewer)) {
                                 <label for="warning<?= $reportId ?>"><strong>Warning</strong></label>
                                 <select name="warning" id="warning<?= $reportId ?>">
 <?php           foreach (range(0, 8) as $week) { ?>
-                                    <option value="<?= $week ?>"><?= $week ?></option>
+                                    <option value="<?= $week ?>"<?= $reportType->warnWeeks() === $week ? ' selected' : '' ?>><?= $week ?></option>
 <?php           } ?>
                                 </select>
                             </span> |
 <?php           if ($Viewer->permitted('users_mod')) { ?>
                             <span class="tooltip" title="Delete torrent?">
-                                <input type="checkbox" name="delete" id="delete<?= $reportId ?>" />&nbsp;<label for="delete<?= $reportId ?>"><strong>Delete</strong></label>
+                                <input type="checkbox" name="delete" id="delete<?= $reportId ?>"<?= $reportType->doDeleteUpload() ? ' checked' : '' ?> />&nbsp;<label for="delete<?= $reportId ?>"><strong>Delete</strong></label>
                             </span> |
 <?php           } ?>
                             <span class="tooltip" title="Remove upload privileges?">
-                                <input type="checkbox" name="upload" id="upload<?= $reportId ?>" />&nbsp;<label for="upload<?= $reportId ?>"><strong>Remove upload privileges</strong></label>
+                                <input type="checkbox" name="upload" id="upload<?= $reportId ?>"<?= $reportType->doRevokeUploadPrivs() ? ' checked' : '' ?> />&nbsp;<label for="upload<?= $reportId ?>"><strong>Remove upload privileges</strong></label>
                             </span> |
                             <span class="tooltip" title="Update resolve type">
                                 <input type="button" name="update_resolve" id="update_resolve<?= $reportId ?>" value="Update now" onclick="UpdateResolve(<?= $reportId ?>);" />
@@ -405,10 +406,6 @@ if ($search->canUnclaim($Viewer)) {
             </table>
         </form>
     </div>
-    <script type="text/javascript">//<![CDATA[
-        Load(<?= $reportId ?>);
-    //]]>
-    </script>
 <?php
         }
     }
