@@ -1,5 +1,5 @@
 // _base.scss for Apollostage
-// 2024-07-23
+// 2024-07-24
 //
 // SASS/SCSS NOTE
 // This is one of four files for the main ApolloStage theme:
@@ -107,7 +107,7 @@
    ## 1.1 Desktop view, handling of all classes
    ## 1.2 Reserved
    ## 1.3 Reserved
-   ## 1.4 Reserved
+   ## 1.4 Sortable Items
    ## 1.5 Discog Pages
    ## 1.6 Tooltips
    ## 1.7 Upload Category Decoration Striping
@@ -782,7 +782,7 @@ table.box2 {
 
 @media screen {
   .forum_post .body img {
-    max-width: 720px;
+    max-width: 100%;
   }
 }
 
@@ -1559,11 +1559,17 @@ blockquote {
 #sortable li {
   word-break: break-all;
   cursor: move;
+  border: transparent thin;
+  border-radius: 2rem;
 }
+
 #sortable label {
   cursor: move;
 }
 
+#sortable li:hover {
+  background-color: #00000022;
+}
 /* checkboxes */
 form input {
   vertical-align: center;
@@ -3672,6 +3678,12 @@ Documentation of mobile classes:
 
 #footer p:last-of-type::after {
   content: " | Apollostage build " + $build-slug;
+}
+
+/* ## 6.66 Emergency Fixes */
+
+.wrap_overflow {
+  word-break: break-word !important;
 }
 
 /* ########################################################################
