@@ -1543,6 +1543,11 @@ blockquote {
   order: 10;
 }
 
+/* wrap overflow word-wrap handling */
+.wrap_overflow {
+  word-break: break-word !important;
+}
+
 /* END desktop view, handling of classes */
 
 /* ************************************************ */
@@ -3683,12 +3688,6 @@ Documentation of mobile classes:
 
 #footer p:last-of-type::after {
   content: " | Apollostage build " + $build-slug;
-}
-
-/* ## 6.66 Emergency Fixes */
-
-.wrap_overflow {
-  word-break: break-word !important;
 }
 
 /* ########################################################################
