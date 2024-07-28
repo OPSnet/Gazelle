@@ -1,5 +1,5 @@
 // _base.scss for Apollostage
-// 2024-07-24
+// version 2024-07-27 #unfont
 //
 // SASS/SCSS NOTE
 // This is one of four files for the main ApolloStage theme:
@@ -210,16 +210,11 @@ $z-desktop-menu-closed: 900;
 $height-mobilemenu_closed-tab: 32px;
 $wrapper-max-width: 1020px;
 
-/*
-########################################################################
-# 1 DESKTOP VIEW
-########################################################################
-*/
+/* ## 0.3 Fonts */
 
-/* ## 1.1 BEGIN desktop view, handling of classes */
-
-* {
-  box-sizing: inherit;
+:root {
+  --system-ui: system-ui, "Segoe UI", "Roboto", "Ubuntu", "Roboto", "Oxygen-Sans", "Ubuntu", "Cantarell", "Helvetica", "Arial", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  --monospace-ui: "Cascadia Code", "Consolas", "Ubuntu Mono", "Fira Code", "Menlo", "Liberation Mono", "Monaco", monospace;
 }
 
 body,
@@ -234,7 +229,25 @@ input,
 select,
 textarea,
 .tooltipster-default .tooltipster-content {
-  font-family: "Noto Sans", "Microsoft Yahei", sans-serif;
+  font-family: var(--system-ui);
+}
+pre,
+code {
+  font-family: var(--monospace-ui);
+  font-optical-sizing: auto;
+  font-variant-ligatures: no-contextual;
+}
+
+/*
+########################################################################
+# 1 DESKTOP VIEW
+########################################################################
+*/
+
+/* ## 1.1 BEGIN desktop view, handling of classes */
+
+* {
+  box-sizing: inherit;
 }
 
 body {
@@ -248,16 +261,6 @@ body {
 
 pre,
 code {
-  font-family:
-    "JetBrains Mono",
-    "Cascadia Code",
-    Consolas,
-    "Ubuntu Mono",
-    Monaco,
-    monospace;
-  font-optical-sizing: auto;
-  font-variant-ligatures: no-contextual;
-  font-weight: 300;
   color: $color-text-mono;
 }
 
@@ -325,8 +328,10 @@ textarea:focus {
 /* formatting on .box.pad for the [box] bbcode tag */
 // Target main content only, so exclude the 'reply box'
 // at the bottom which also uses this tag.
+/* formatting on .box.pad for the [box] bbcode tag */
 .box .box.pad,
-.main_column .box.pad:not(#reply_box) {
+.main_column .box.pad:not(#reply_box),
+.body .box.pad:not(#reply_box) {
   background-color: $color-background-box;
   border: 2px solid $color-accent-border-box;
   margin: 8px;

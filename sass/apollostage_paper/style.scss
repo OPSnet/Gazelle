@@ -1,5 +1,5 @@
 /* APOLLOSTAGE PAPER THEME */
-/* 2024-07-23 */
+/* 2024-07-27 #unfont */
 
 // ////////////////////////////////////////////////////////////////////////////////
 // SLUG/SETUP
@@ -265,37 +265,13 @@ $icon-notification: url("/svg/site/ops-icon-harp-000.svg");
 $icon-warning: url("/svg/site/ops-icon-triangle-000.svg");
 
 @import '../apollostage/_base';
-@import '../apollostage/_fonts_base';
-@import '_fonts_paper';
 
 // EOF
 
 /* ****************************** */
 /* Local overrides for this theme */
 
-// For the 'paper' derivative theme, incremental fonts to the baseline theme.
-
-body,
-textarea {
-  font-family: "Bitter", "Noto Sans", "Microsoft Yahei", Tahoma, sans-serif;
-  font-optical-sizing: auto;
-  font-style: normal;
-  font-weight: 400;
-  box-sizing: border-box;
-  font-size: 13px;
-  line-height: 1.6;
-  margin: 0 8px;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: "Bitter", "Noto Sans", "Open Sans", Tahoma, sans-serif;
-  font-weight: 700;
-}
+/* no fonts */
 
 // EOF
 // ////////////////////////////////////////////////////////////////////////////////
