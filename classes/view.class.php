@@ -44,9 +44,6 @@ class View {
 
         array_push($js,
             'jquery',
-            'script_start',
-            'ajax.class',
-            'autocomplete',
             'jquery.autocomplete',
             'global',
             'katex-0.16.10.min'
