@@ -66,7 +66,7 @@ if (isset($_GET['forums']) && is_array($_GET['forums'])) {
 $paginator = new Gazelle\Util\Paginator(POSTS_PER_PAGE, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($search->totalHits());
 
-View::show_header('Forums › Search', ['js' => 'bbcode,forum_search,datetime_picker', 'css' => 'datetime_picker']);
+View::show_header('Forums › Search', ['js' => 'bbcode,forum_search']);
 ?>
 <div class="thin">
     <div class="header">
@@ -91,9 +91,9 @@ View::show_header('Forums › Search', ['js' => 'bbcode,forum_search,datetime_pi
                 <td><strong>Topic created:</strong></td>
                 <td>
                     After:
-                    <input type="text" class="date_picker" name="thread_created_after" id="thread_created_after" value="<?= $threadCreatedAfter ?>" />
+                    <input type="date" class="date_picker" name="thread_created_after" id="thread_created_after" value="<?= $threadCreatedAfter ?>" />
                     Before:
-                    <input type="text" class="date_picker" name="thread_created_before" id="thread_created_before" value="<?= $threadCreatedBefore ?>" />
+                    <input type="date" class="date_picker" name="thread_created_before" id="thread_created_before" value="<?= $threadCreatedBefore ?>" />
                 </td>
             </tr>
 <?php if (!$ThreadID) { ?>
@@ -113,9 +113,9 @@ echo "class='hidden'"; } ?>>
                 <td><strong>Post created:</strong></td>
                 <td>
                     After:
-                    <input type="text" class="date_picker" name="post_created_after" id="post_created_after" value="<?= $postCreatedAfter ?? '' ?>" />
+                    <input type="date" class="date_picker" name="post_created_after" id="post_created_after" value="<?= $postCreatedAfter ?? '' ?>" />
                     Before:
-                    <input type="text" class="date_picker" name="post_created_before" id="post_created_before" value="<?= $postCreatedBefore ?? '' ?>" />
+                    <input type="date" class="date_picker" name="post_created_before" id="post_created_before" value="<?= $postCreatedBefore ?? '' ?>" />
                 </td>
             </tr>
             <tr>
