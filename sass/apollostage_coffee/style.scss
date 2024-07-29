@@ -1,6 +1,6 @@
 /* ########################################################################
    APOLLOSTAGE COFFEE THEME
-   version 2024-07-28
+   version 2024-07-29
    ######################################################################## */
 
 // ////////////////////////////////////////////////////////////////////////////////
@@ -17,13 +17,17 @@ $build-slug: $build-slug + " " + "coffee";
 
 // physical_layout -> token, and token -> raw value.
 
-// Backgrounds -- 100-600 are used
+// Backgrounds (not all are used)
 $back-100:  #1d1c1c;
 $back-200:  #222020;
 $back-300:  #272423;
 $back-400:  #2d2928;
 $back-500:  #322e2c;
 $back-600:  #3e3837;
+$back-700:  #443B3A;
+$back-800:  #4A3E3C;
+$back-900:  #51413F;
+$back-1000: #574340;
 
 // Mids
 $midtone-100: #3D2C29;
