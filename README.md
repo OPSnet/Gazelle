@@ -39,8 +39,8 @@ In the root folder of the Gazelle repository, run the following command:
 
 `docker compose up -d`
 
-This will pull and build the needed images to run Gazelle on Debian
-Bullseye. A volume is mounted from the base of the git repository at
+This will pull and build the needed images to run Gazelle on Debian.
+A volume is mounted from the base of the git repository at
 `/var/www` in the container. Changes to the source code are
 immediately served without rebuilding or restarting.
 

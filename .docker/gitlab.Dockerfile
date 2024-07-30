@@ -1,10 +1,11 @@
-FROM debian:bullseye-slim
+FROM debian:bookworm-slim
 
 WORKDIR /var/www
 
-ENV DEBIAN_FRONTEND noninteractive
-ENV PHP_VER 8.2
-ENV NODE_VERSION 20
+ENV DEB_RELEASE=bookworm
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PHP_VER=8.3
+ENV NODE_VERSION=20
 
 # Uncomment to skip the chromium download when installing puppeteer. If you do,
 # you'll need to launch puppeteer with:
@@ -20,7 +21,7 @@ RUN apt-get update \
         gnupg2 \
     && mkdir -p /etc/apt/keyrings \
     && curl -sL https://packages.sury.org/php/apt.gpg | apt-key add - \
-    && echo "deb https://packages.sury.org/php/ bullseye main" | tee /etc/apt/sources.list.d/php.list \
+    && echo "deb https://packages.sury.org/php/ $DEB_RELEASE main" | tee /etc/apt/sources.list.d/php.list \
     && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
     && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_${NODE_VERSION}.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list \
     && curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
@@ -30,7 +31,7 @@ RUN apt-get update \
         make \
         mktorrent \
         nginx \
-        netcat \
+        netcat-openbsd \
         nodejs \
         php${PHP_VER}-cli \
         php${PHP_VER}-curl \
@@ -95,13 +96,13 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     # Python tools layer
-    && pip3 install chardet eac-logchecker xld-logchecker
+    && pip3 install --break-system-packages chardet eac-logchecker xld-logchecker
 
 # testing layer
 # backports needed for sphinx
 # sphinx needs its config that cannot be passed through a gitlab CI service
 # hence it is installed in this container
-RUN echo 'deb http://deb.debian.org/debian bullseye-backports main' > /etc/apt/sources.list.d/backports.list \
+RUN echo "deb http://deb.debian.org/debian ${DEB_RELEASE}-backports main" > /etc/apt/sources.list.d/backports.list \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
         postgresql-client \
@@ -132,7 +133,7 @@ RUN echo 'deb http://deb.debian.org/debian bullseye-backports main' > /etc/apt/s
 #    && rm /tmp/firefox.tar.bz2 \
 #    && ln -fs /opt/firefox/firefox /usr/bin/firefox
 
-COPY --from=composer:2.6.6 /usr/bin/composer /usr/local/bin/composer
+COPY --from=composer:2.7.7 /usr/bin/composer /usr/local/bin/composer
 COPY .docker /var/www/.docker
 
 # Permissions and configuration layer

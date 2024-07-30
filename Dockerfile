@@ -1,9 +1,9 @@
-FROM debian:bullseye-slim
+FROM debian:bookworm-slim
 
-ENV DEB_RELEASE bullseye
-ENV DEBIAN_FRONTEND noninteractive
-ENV PHP_VER 8.2
-ENV NODE_VERSION 20
+ENV DEB_RELEASE=bookworm
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PHP_VER=8.3
+ENV NODE_VERSION=20
 
 # Uncomment to skip the chromium download when installing puppeteer. If you do,
 # you'll need to launch puppeteer with:
@@ -31,7 +31,7 @@ RUN apt-get update \
         cron \
         make \
         nginx \
-        netcat \
+        netcat-openbsd \
         nodejs \
         php${PHP_VER}-cli \
         php${PHP_VER}-common \
@@ -98,12 +98,12 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     # Python tools layer
-    && pip3 install chardet eac-logchecker xld-logchecker
+    && pip3 install --break-system-packages chardet eac-logchecker xld-logchecker
 
 COPY .docker/ /var/www/.docker
 COPY lib /var/www/lib
 COPY bin/ /var/www/bin
-COPY --from=composer:2.7.2 /usr/bin/composer /usr/local/bin/composer
+COPY --from=composer:2.7.7 /usr/bin/composer /usr/local/bin/composer
 
 # Permissions and configuration layer
 RUN useradd -ms /bin/bash gazelle \
@@ -118,13 +118,12 @@ RUN useradd -ms /bin/bash gazelle \
     && grep '^disable_functions' /etc/php/${PHP_VER}/cli/php.ini \
         | sed -r 's/pcntl_(fork|signal|signal_dispatch|waitpid),//g' \
         > /etc/php/${PHP_VER}/cli/conf.d/99-boris.ini \
-    && .docker/web/generate-config.sh \
     && echo "Generate file storage directories..." \
     && perl /var/www/bin/generate-storage-dirs /var/lib/gazelle/torrent 2 100 \
     && perl /var/www/bin/generate-storage-dirs /var/lib/gazelle/riplog 2 100 \
     && perl /var/www/bin/generate-storage-dirs /var/lib/gazelle/riploghtml 2 100 \
     && chown -R gazelle:gazelle /var/lib/gazelle /var/www \
-    && npm install -g npm@10.8.1
+    && npm install -g npm@10.8.2
 
 EXPOSE 80/tcp
 EXPOSE 3306/tcp

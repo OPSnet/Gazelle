@@ -8,6 +8,7 @@ run_service()
 }
 
 if [ ! -e .docker-init-done ] ; then
+    .docker/web/generate-config.sh
     composer --version
     composer install --no-progress --optimize-autoloader
     bin/local-patch
