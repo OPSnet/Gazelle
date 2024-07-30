@@ -22,7 +22,7 @@ services:
     image: memcached:1.6.26-alpine
 
   pg:
-    image: postgres:16-bullseye
+    image: postgres:16-bookworm
     ports:
       - 127.0.0.1:54321:5432
     volumes:
