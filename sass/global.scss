@@ -547,6 +547,17 @@ tr.torrent .bookmark > a::after {
 .reportinfo_table {
   table-layout: fixed;
 }
+
+.user-reports {
+  table-layout: fixed;
+}
+
+.user-report-truncate {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
 /* Wrap release info for consistent DOM and to limit table expansion. */
 .no_overflow {
   width: 100%;

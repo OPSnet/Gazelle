@@ -73,3 +73,15 @@ function resolve(id, claimer) {
     }
     return false;
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    let reports = document.querySelectorAll(".user-report-reason");
+    reports.forEach((report) => {
+        if (report.scrollWidth > report.offsetWidth) {
+            report.addEventListener('click', () => {
+                report.classList.toggle('user-report-truncate');
+            });
+            report.title = "Click to expand";
+        }
+    });
+});
