@@ -7,10 +7,14 @@ require_once(__DIR__ . '/../../helper.php');
 
 class RenderUserTest extends TestCase {
     protected array $userList;
+    protected array $userReports;
 
     public function tearDown(): void {
         foreach ($this->userList as $user) {
             $user->remove();
+        }
+        foreach ($this->userReports as $report) {
+            $report->remove();
         }
     }
 
@@ -72,5 +76,17 @@ class RenderUserTest extends TestCase {
         $this->assertStringContainsString('<div class="box box_info box_userinfo_community">', $stats, 'user-header-stats-header');
         $this->assertStringContainsString('<li id="comm_collstart">', $stats, 'user-header-stats-id-collages');
         $this->assertStringNotContainsString('<li id="comm_downloaded">', $stats, 'user-header-stats-id-downloaded');
+
+        // Test reports displayed on profile
+        $reportMan = new Gazelle\Manager\Report(new \Gazelle\Manager\User());
+        $this->userReports[0] = $reportMan->create($this->userList['admin'], $this->userList['user']->id(), "user", randomString(6));
+        $this->userReports[1] =  $reportMan->create($this->userList['admin'], $this->userList['user']->id(), "user", randomString(500));
+        $reports = Gazelle\Util\Twig::factory()->render('admin/user-reports-list.twig', [
+            'list' => $reportMan->findByReportedUser($this->userList['user'])
+        ]);
+        $this->assertStringContainsString('<div class="box" id="user-reports-box">', $reports, 'user-reports-box');
+        $this->assertStringContainsString('-reason" class="user-report-reason user-report-truncate">', $reports, 'user-reports-reason');
+        $this->assertStringContainsString($this->userReports[0]->reason(), $reports, 'user-reports0-reason-text');
+        $this->assertStringContainsString($this->userReports[1]->reason(), $reports, 'user-reports1-reason-text');
     }
 }

@@ -42,6 +42,19 @@ class Report extends \Gazelle\BaseManager {
         return (new \Gazelle\Report($id))->setUserManager($this->userMan);
     }
 
+    public function findByReportedUser(\Gazelle\User $user): array {
+        self::$db->prepared_query("
+            SELECT ID
+            FROM reports
+            WHERE Type = 'user'
+                AND ThingID = ?
+            ORDER BY ID DESC
+            ", $user->id()
+        );
+        $reportList = self::$db->collect(0, false);
+        return array_map(fn($id) => $this->findById($id), $reportList);
+    }
+
     public function decorate(
         array $idList,
         \Gazelle\Manager\Collage     $collageMan,

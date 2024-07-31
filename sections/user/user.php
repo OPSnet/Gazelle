@@ -76,7 +76,8 @@ $DisplayCustomTitle = !empty($User->title())
 
 View::show_header($Username, [
     'js' => 'jquery.imagesloaded,jquery.wookmark,user,bbcode,requests,lastfm,comments,info_paster'
-        . ($Viewer->permitted('users_view_ips') ? ',resolve-ip' : ''),
+        . ($Viewer->permitted('users_view_ips') ? ',resolve-ip' : '')
+        . ($Viewer->permitted('users_mod') ? ',reports' : ''),
     'css' => 'tiles'
 ]);
 echo $Twig->render('user/header.twig', [
@@ -379,6 +380,15 @@ if ($Viewer->permitted('users_mod') || $Viewer->isStaffPMReader()) {
     echo $Twig->render('admin/staffpm-list.twig', [
         'list' => (new Gazelle\Staff($Viewer))->userStaffPmList($User),
     ]);
+}
+
+if ($Viewer->permitted('users_mod')) {
+    $reports = (new Gazelle\Manager\Report($userMan))->findByReportedUser($User);
+    if ($reports) {
+        echo $Twig->render('admin/user-reports-list.twig', [
+            'list' => $reports
+        ]);
+    }
 }
 
 // Displays a table of forum warnings viewable only to Forum Moderators
