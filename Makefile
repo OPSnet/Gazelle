@@ -33,7 +33,7 @@ help:
 
 .PHONY: build-css
 build-css:
-	yarn build:scss
+	docker-compose exec -T web webpack --no-progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js
 
 .PHONY: check-php
 check-php:
@@ -43,8 +43,8 @@ check-php:
 composer-dev-update:
 	composer update --optimize-autoloader
 
-.PHONY: composer-prod-update
-composer-prod-update:
+.PHONY: composer-live-update
+composer-live-update:
 	composer install --no-dev --optimize-autoloader --no-progress
 
 .PHONY: dump-all
@@ -68,8 +68,8 @@ git-submodules:
 
 .PHONY: lint-css
 lint-css:
-	yarn lint:css
-	yarn lint:css-checkstyle
+	docker-compose exec -T web node_modules/.bin/stylelint --config misc/stylelint.json --cache --cache-location cache/stylelint 'sass/**/*.scss'
+	docker-compose exec -T web node_modules/.bin/stylelint --config misc/stylelint.json --cache --cache-location cache/stylelint 'sass/**/*.scss' --custom-formatter ./node_modules/stylelint-checkstyle-formatter/index.js
 
 .PHONY: lint-js
 lint-js:
@@ -77,8 +77,8 @@ lint-js:
 
 .PHONY: lint-php
 lint-php:
-	yarn lint:php:internal
-	yarn lint:php:phpcs || exit 0
+	find . -path './vendor' -prune -o -path ./node_modules -prune -o -path './.docker' -prune -o -type f -name '*.php' -print0 | xargs -0 -n1 -P4 php -l -n | grep -v '^No syntax errors detected in' || true
+	vendor/bin/phpcs -p --report-width=256
 	vendor/bin/phpstan analyse --memory-limit=1024M --configuration=misc/phpstan.neon
 
 .PHONY: lint-twig
@@ -93,7 +93,7 @@ lint-twig:
 
 .PHONY: mysqldump
 mysqldump:
-	docker exec $(shell docker ps|awk '/percona:/ {print $$1}') mysqldump --defaults-file=~/mysqldump.cnf gazelle --single-transaction > misc/mysql-dump.sql
+	docker-compose exec -T mysql mysqldump --defaults-file=~/mysqldump.cnf gazelle --single-transaction > misc/mysql-dump.sql
 
 .PHONY: ocelot-reload-conf
 ocelot-reload-conf:
@@ -125,7 +125,7 @@ rector-dry-run:
 
 .PHONY: test
 test: lint-css lint-php lint-twig
-	composer test
+	docker-compose exec -T web vendor/bin/phpunit -c misc/phpunit.xml
 
 .PHONY: twig-flush
 twig-flush:

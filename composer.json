@@ -44,12 +44,5 @@
     "phpunit/phpunit": "^11",
     "rector/rector": "^1.0",
     "squizlabs/php_codesniffer": "^3.9"
-  },
-  "scripts": {
-    "phpstan": "phpstan analyse",
-    "test": [
-        "Composer\\Config::disableProcessTimeout",
-        "phpunit -c misc/phpunit.xml"
-    ]
   }
 }
