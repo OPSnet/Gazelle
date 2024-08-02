@@ -52,6 +52,9 @@ switch ($type) {
         break;
     case 'bookmarks':
         $Title = 'Your bookmarked requests';
+        if (is_null($user)) {
+            error("No user id given");
+        }
         $search->setBookmarker($user);
         $BookmarkView = true;
         break;

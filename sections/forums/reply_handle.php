@@ -25,6 +25,9 @@ if ($body === '') {
 
 if ($thread->lastAuthorId() == $Viewer->id() && isset($_POST['merge'])) {
     $post = (new Gazelle\Manager\ForumPost())->findById($thread->lastPostId());
+    if (is_null($post)) {
+        error("cannot find post #{$thread->lastPostId()} in thread {$thread->id()}");
+    }
     $thread->mergePost($post, $Viewer, $body);
 } else {
     $post = $thread->addPost($Viewer, $body);

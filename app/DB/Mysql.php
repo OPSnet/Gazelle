@@ -226,7 +226,7 @@ class Mysql {
         if (count($Parameters) > 0) {
             $Binders = "";
             foreach ($Parameters as $Parameter) {
-                if (is_integer($Parameter)) {
+                if (is_int($Parameter)) {
                     $Binders .= "i";
                 } elseif (is_double($Parameter)) {
                     $Binders .= "d";

@@ -18,12 +18,11 @@ return static function (RectorConfig $rectorConfig): void {
     ]);
 
     $rectorConfig->sets([
-        LevelSetList::UP_TO_PHP_82,
+        LevelSetList::UP_TO_PHP_84,
         SetList::DEAD_CODE,
     ]);
 
     $rectorConfig->skip([
-        JsonThrowOnErrorRector::class,
         NullToStrictStringFuncCallArgRector::class,
     ]);
 

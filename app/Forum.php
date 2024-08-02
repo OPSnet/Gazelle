@@ -263,7 +263,7 @@ class Forum extends BaseObject {
         }
         return array_filter(
             array_map(fn ($id) => $manager->findById($id), $idList),
-            fn ($t) => $t
+            fn ($t) => $t instanceof ForumThread
         );
     }
 

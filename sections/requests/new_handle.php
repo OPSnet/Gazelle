@@ -23,7 +23,6 @@ $media        = null;
 $releaseType  = null;
 $tags         = null;
 $tgroup       = null;
-$tgroup       = null;
 $title        = null;
 $year         = null;
 
@@ -184,7 +183,7 @@ if (isset($error)) {
 
 $request = (new Gazelle\Manager\Request())->create(
     user:            $Viewer,
-    bounty:          (int)($amount * $scale),
+    bounty:          $amount * $scale,
     categoryId:      $categoryId,
     year:            $year,
     title:           $title,

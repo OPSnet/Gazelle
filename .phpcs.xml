@@ -48,6 +48,8 @@
                 <element key="each" value="null"/>
                 <element key="eval" value="null"/>
                 <element key="extract" value="null"/>
+                <!-- alias for is_int() -->
+                <element key="is_integer" value="null"/>
             </property>
         </properties>
         <type>warning</type>

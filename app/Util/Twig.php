@@ -183,10 +183,10 @@ class Twig {
 
         $twig->addFilter(new \Twig\TwigFilter(
             'user_status',
-            function ($userId, $viewer): string {
+            function ($userId, $viewer): \Twig\Markup {
                 $user = self::$userMan->findById($userId);
                 if (is_null($user)) {
-                    return '';
+                    return new \Twig\Markup('', 'UTF-8');
                 }
                 $icon = [(new \Gazelle\User\Donor($user))->heart($viewer)];
                 if ($user->isWarned()) {

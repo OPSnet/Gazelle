@@ -104,7 +104,7 @@ class ApplicantRole extends BaseObject {
             ? []
             : array_filter(
                 array_map(fn($name) => $userMan->find($name)?->id(), $list),
-                fn($user) => $user
+                fn($user) => is_int($user)
             );
         sort($viewerList);
         if ($viewerList != $this->viewerList()) {

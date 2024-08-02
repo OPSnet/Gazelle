@@ -400,7 +400,7 @@ class Donor extends \Gazelle\BaseUser {
         }
         return implode(' ', array_filter(
             [$this->forumPrefix(), $this->user->username() . ($this->forumUseComma() ? ',' : ''), $this->forumSuffix()],
-            fn ($t) => $t
+            fn ($t) => is_string($t)
         ));
     }
 

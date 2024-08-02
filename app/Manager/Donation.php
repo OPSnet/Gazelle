@@ -120,7 +120,7 @@ class Donation extends \Gazelle\Base {
                     fn ($id) => $userMan->findById($id),
                     self::$db->collect(0, false)
                 ),
-                fn($u) => $u
+                fn($u) => $u instanceof \Gazelle\User
             )
         );
     }

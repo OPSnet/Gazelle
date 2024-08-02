@@ -136,22 +136,7 @@ parameters:
 			path: ../classes/sphinxql.class.php
 
 		-
-			message: "#^Property Sphinxql\\:\\:\\$Port has no type specified\\.$#"
-			count: 1
-			path: ../classes/sphinxql.class.php
-
-		-
 			message: "#^Property Sphinxql\\:\\:\\$Queries has no type specified\\.$#"
-			count: 1
-			path: ../classes/sphinxql.class.php
-
-		-
-			message: "#^Property Sphinxql\\:\\:\\$Server has no type specified\\.$#"
-			count: 1
-			path: ../classes/sphinxql.class.php
-
-		-
-			message: "#^Property Sphinxql\\:\\:\\$Socket has no type specified\\.$#"
 			count: 1
 			path: ../classes/sphinxql.class.php
 
@@ -281,37 +266,12 @@ parameters:
 			path: ../classes/sphinxqlresult.class.php
 
 		-
-			message: "#^Method SphinxqlResult\\:\\:get_result_info\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../classes/sphinxqlresult.class.php
-
-		-
 			message: "#^Method SphinxqlResult\\:\\:to_array\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: ../classes/sphinxqlresult.class.php
 
 		-
 			message: "#^Method SphinxqlResult\\:\\:to_pair\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../classes/sphinxqlresult.class.php
-
-		-
-			message: "#^Property SphinxqlResult\\:\\:\\$Errno has no type specified\\.$#"
-			count: 1
-			path: ../classes/sphinxqlresult.class.php
-
-		-
-			message: "#^Property SphinxqlResult\\:\\:\\$Error has no type specified\\.$#"
-			count: 1
-			path: ../classes/sphinxqlresult.class.php
-
-		-
-			message: "#^Property SphinxqlResult\\:\\:\\$Meta has no type specified\\.$#"
-			count: 1
-			path: ../classes/sphinxqlresult.class.php
-
-		-
-			message: "#^Property SphinxqlResult\\:\\:\\$Result has no type specified\\.$#"
 			count: 1
 			path: ../classes/sphinxqlresult.class.php
 
@@ -419,16 +379,6 @@ parameters:
 			message: "#^Function print_or_return\\(\\) has parameter \\$JsonMsg with no type specified\\.$#"
 			count: 1
 			path: ../sections/requests/take_fill.php
-
-		-
-			message: "#^Cannot access offset 'name' on array\\{name\\: string, passwd\\: string, gid\\: int, members\\: array\\<int, string\\>\\}\\|false\\.$#"
-			count: 1
-			path: ../sections/tools/data/site_info.php
-
-		-
-			message: "#^Cannot access offset 'name' on array\\|false\\.$#"
-			count: 1
-			path: ../sections/tools/data/site_info.php
 
 		-
 			message: "#^Argument of an invalid type array\\<int, string\\>\\|false supplied for foreach, only iterables are supported\\.$#"

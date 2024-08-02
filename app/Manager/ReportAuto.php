@@ -124,7 +124,7 @@ class ReportAuto extends \Gazelle\BaseManager {
     }
 
     protected function instantiateReportAuto(int $id, ?int $category): \Gazelle\ReportAuto {
-        $cls = $this->categories()[$category] ?? '\\Gazelle\\ReportAuto';
+        $cls = $this->categories()[$category] ?? \Gazelle\ReportAuto::class;
         return new $cls($id, $this->typeMan);  /* @phpstan-ignore-line */
     }
 }

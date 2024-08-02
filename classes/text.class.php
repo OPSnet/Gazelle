@@ -1113,6 +1113,7 @@ class Text {
             }
             switch ($Block['Type']) {
                 case 'headline':
+                case 'tex': //since this will never strip cleanly, just remove it
                     break;
                 case 'b':
                 case 'u':
@@ -1124,8 +1125,6 @@ class Text {
                 case 'align':
                 case 'pad':
                     $Str .= self::raw_text($Block['Val']);
-                    break;
-                case 'tex': //since this will never strip cleanly, just remove it
                     break;
                 case 'artist':
                 case 'user':

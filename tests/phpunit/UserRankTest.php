@@ -16,8 +16,8 @@ class UserRankTest extends TestCase {
                 'uploaded' => STARTING_UPLOAD,
             ],
         );
-        $this->assertSame(0, $userRank->score());
-        $this->assertSame(0, $userRank->rank('uploaded'));
-        $this->assertSame(STARTING_UPLOAD, $userRank->raw('uploaded'));
+        $this->assertSame(0, $userRank->score(), 'userrank-score');
+        $this->assertSame(0, $userRank->rank('uploaded'), 'userrank-uploaded');
+        $this->assertSame(STARTING_UPLOAD, $userRank->raw('uploaded'), 'userrank-raw-uploaded');
     }
 }

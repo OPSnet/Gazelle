@@ -503,12 +503,10 @@ if ($Viewer->permitted('users_mod') || $Viewer->isStaff()) { ?>
     }
 
     if ($Viewer->permittedAny('users_make_invisible', 'admin_tracker')) {
-        $isTraced = $Viewer->permitted('admin_tracker')
-            ? (new Gazelle\Tracker())->isTraced($User)
-            : false;
         echo $Twig->render('user/edit-peer-visibility.twig', [
             'is_visible' => $User->isVisible(),
-            'is_traced'  => $isTraced,
+            'is_traced'  => $Viewer->permitted('admin_tracker')
+                && (new Gazelle\Tracker())->isTraced($User),
             'viewer'     => $Viewer,
         ]);
     }

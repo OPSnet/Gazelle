@@ -537,7 +537,7 @@ class Torrent extends \Gazelle\BaseManager {
             // reinstantiate the list as Torrent objects
             $list = array_filter(
                 array_map(fn($id) => $this->findById($id), $latest),
-                fn($t) => $t?->group()?->image()
+                fn($t) => $t instanceof \Gazelle\Torrent && !is_null($t->group()->image())
             );
             if (count($list) == count($latest)) {
                 return $list;
@@ -700,7 +700,6 @@ class Torrent extends \Gazelle\BaseManager {
                 LastReseedRequest = NULL
             WHERE LastReseedRequest <= (now() - INTERVAL " . RESEED_TORRENT . " DAY)
         ");
-        $affected += self::$db->affected_rows();
-        return $affected;
+        return $affected + self::$db->affected_rows();
     }
 }

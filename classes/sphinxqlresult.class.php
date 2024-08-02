@@ -1,11 +1,6 @@
 <?php
 
 class SphinxqlResult {
-    private $Result;
-    private $Meta;
-    public $Errno;
-    public $Error;
-
     /**
      * Create Sphinxql result object
      *
@@ -14,11 +9,8 @@ class SphinxqlResult {
      * @param int $Errno error code returned by the query upon failure
      * @param string $Error error message returned by the query upon failure
      */
-    public function __construct($Result, $Meta, $Errno, $Error) {
-        $this->Result = $Result;
-        $this->Meta = $Meta;
-        $this->Errno = $Errno;
-        $this->Error = $Error;
+    public function __construct(private $Result, private $Meta, public $Errno, public $Error)
+    {
     }
 
     /**
@@ -83,7 +75,7 @@ class SphinxqlResult {
      * @param mixed $Keys scalar or array with keys to return. Default is false, which returns all meta data
      * @return mixed array with meta data if $Keys is false, else the value of the specified key(s)
      */
-    public function get_meta($Keys = false) {
+    public function get_meta(mixed $Keys = false) {
         if ($Keys !== false) {
             if (is_array($Keys)) {
                 $Return = [];
@@ -95,7 +87,7 @@ class SphinxqlResult {
                 }
                 return $Return;
             } else {
-                return isset($this->Meta[$Keys]) ? $this->Meta[$Keys] : false;
+                return $this->Meta[$Keys] ?? false;
             }
         } else {
             return $this->Meta;
@@ -106,9 +98,8 @@ class SphinxqlResult {
      * Return specified portions of the current Mysqli result object's information
      *
      * @param mixed $Keys scalar or array with keys to return. Default is false, which returns all available information
-     * @return array with result information
      */
-    public function get_result_info($Keys = false) {
+    public function get_result_info(mixed $Keys = false): mixed {
         if ($Keys !== false) {
             if (is_array($Keys)) {
                 $Return = [];
@@ -120,7 +111,7 @@ class SphinxqlResult {
                 }
                 return $Return;
             } else {
-                return isset($this->Result->$Keys) ? $this->Result->$Keys : false;
+                return $this->Result->$Keys ?? false;
             }
         } else {
             return $this->Result;

@@ -5,11 +5,13 @@ if (!$Viewer->permitted('admin_site_debug')) {
 }
 
 function uid(int $id): string {
-    return sprintf("%s(%d)", posix_getpwuid($id)['name'], $id);
+    $uid = posix_getpwuid($id);
+    return sprintf("%s(%d)", $uid === false ? '???' : $uid['name'], $id);
 }
 
 function gid(int $id): string {
-    return sprintf("%s(%d)", posix_getgrgid($id)['name'], $id);
+    $gid = posix_getgrgid($id);
+    return sprintf("%s(%d)", $gid === false ? '???' : $gid['name'], $id);
 }
 
 if (isset($_GET['mode']) && $_GET['mode'] === 'userrank') {

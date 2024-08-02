@@ -48,19 +48,19 @@ namespace Gazelle;
  */
 
 class UserRank extends Base {
-    protected array $dimension;
     protected array $rank;
     protected float $score = 0.0;
 
     final public const PREFIX = 'percentiles_'; // Prefix for memcache keys, to make life easier
 
-    public function __construct(protected \Gazelle\UserRank\Configuration $config, array $dimension) {
-        $this->dimension = $dimension;
+    public function __construct(protected \Gazelle\UserRank\Configuration $config, protected array $dimension) {
         $definition = $this->config->definition();
-
-        $dimension['uploaded'] -= STARTING_UPLOAD;
         foreach ($definition as $d) {
-            $this->rank[$d] = $this->config->instance($d)->rank($dimension[$d]);
+            $this->rank[$d] = $this->config->instance($d)->rank(
+                $d === 'uploaded'
+                    ? $dimension[$d] - STARTING_UPLOAD
+                    : $dimension[$d]
+            );
         }
 
         $totalWeight = 0.0;
@@ -71,12 +71,12 @@ class UserRank extends Base {
         }
         $this->score /= $totalWeight;
 
-        if ($dimension['downloaded'] == 0) {
+        if ($this->dimension['downloaded'] == 0) {
             $ratio = 1;
-        } elseif ($dimension['uploaded'] == 0) {
+        } elseif ($this->dimension['uploaded'] <= STARTING_UPLOAD) {
             $ratio = 0.5;
         } else {
-            $ratio = min(1, round($dimension['uploaded'] / $dimension['downloaded']));
+            $ratio = min(1, round($this->dimension['uploaded'] / $this->dimension['downloaded']));
         }
         $this->score *= $ratio;
     }

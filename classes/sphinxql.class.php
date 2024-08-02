@@ -6,9 +6,6 @@ if (!extension_loaded('mysqli')) {
 
 class Sphinxql extends mysqli {
     private static $Connections = [];
-    private $Server;
-    private $Port;
-    private $Socket;
     private $Ident;
     private $Connected = false;
 
@@ -23,11 +20,8 @@ class Sphinxql extends mysqli {
      * @param int $Port listening port
      * @param string $Socket Unix socket address, overrides $Server:$Port
      */
-    public function __construct($Server, $Port, $Socket) {
-        $this->Server = $Server;
-        $this->Port = $Port;
-        $this->Socket = $Socket;
-        $this->Ident = self::get_ident($Server, $Port, $Socket);
+    public function __construct(private $Server, private $Port, private $Socket) {
+        $this->Ident = self::get_ident($this->Server, $this->Port, $this->Socket);
     }
 
     /**

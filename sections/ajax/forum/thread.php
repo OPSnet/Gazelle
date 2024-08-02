@@ -32,7 +32,7 @@ $postNum = match (true) {
 $perPage = (int)($_GET['pp'] ?? $Viewer->postsPerPage());
 $paginator = new Gazelle\Util\Paginator(
     $perPage,
-    (int)(isset($_GET['page']) ? $_GET['page'] : ceil($postNum / $perPage)),
+    (int)($_GET['page'] ?? ceil($postNum / $perPage)),
 );
 
 echo (new Gazelle\Json\ForumThread(
