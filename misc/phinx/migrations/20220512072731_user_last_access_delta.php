@@ -15,26 +15,23 @@ final class UserLastAccessDelta extends AbstractMigration {
             ->save();
 
         $this->table('periodic_task')
-             ->insert([
-                 [
-                     'name' => 'UserLastAccess',
-                     'classname' => 'UserLastAccess',
-                     'description' => 'Update user last access deltas',
-                     'period' => 60 * 45,
-                 ],
-             ])
-             ->save();
+            ->insert([
+                [
+                    'name' => 'UserLastAccess',
+                    'classname' => 'UserLastAccess',
+                    'description' => 'Update user last access deltas',
+                    'period' => 60 * 45,
+                ],
+            ])
+            ->save();
     }
 
     public function down(): void {
-        $this->getQueryBuilder()
-            ->delete('periodic_task')
-            ->where(function ($exp) {
-                return $exp->in('classname', ['UserLastAccess']);
-            })
-            ->execute();
+        $this->execute("
+            DELETE FROM periodic_task WHERE classname = 'UserLastAccess'
+        ");
 
         // because foreign key
-        $this->table('user_last_access_delta')->drop()->update();
+        $this->table('user_last_access_delta')->drop()->save();
     }
 }

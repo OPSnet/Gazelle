@@ -18,9 +18,8 @@ final class UploadNotifier extends AbstractMigration {
     }
 
     public function down(): void {
-        $this->getQueryBuilder()
-            ->delete('periodic_task')
-            ->where(['classname' => 'UploadNotifier'])
-            ->execute();
+        $this->execute("
+            DELETE FROM periodic_task WHERE classname = 'UploadNotifier'
+        ");
     }
 }

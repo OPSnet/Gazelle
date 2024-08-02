@@ -29,27 +29,20 @@ final class UserAttrInactive extends AbstractMigration {
             ])
             ->save();
 
-        $this->query("
+        $this->execute("
             UPDATE periodic_task SET is_enabled = 0 WHERE Name = 'User Reaper'
-            ")->execute();
+        ");
     }
 
     public function down(): void {
-        $this->getQueryBuilder()
-            ->delete('user_attr')
-            ->where(['Name' => 'inactive-warning-sent'])
-            ->execute();
-
-        $this->getQueryBuilder()
-            ->delete('periodic_task')
-            ->where(fn($w) => $w->in('classname', [
-                'InactiveUserWarn',
-                'InactiveUserDeactivate',
-            ]))
-            ->execute();
-
-        $this->query("
+        $this->execute("
+            DELETE FROM user_attr WHERE Name = 'inactive-warning-sent'
+        ");
+        $this->execute("
+            DELETE FROM periodic_task WHERE classname IN ('InactiveUserWarn', 'InactiveUserDeactivate')
+        ");
+        $this->execute("
             UPDATE periodic_task SET is_enabled = 1 WHERE Name = 'User Reaper'
-            ")->execute();
+        ");
     }
 }

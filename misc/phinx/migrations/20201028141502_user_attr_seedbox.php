@@ -28,13 +28,11 @@ class UserAttrSeedbox extends AbstractMigration {
     }
 
     public function down(): void {
-        $this->getQueryBuilder()
-            ->delete('user_attr')
-            ->where(['Name' => 'feature-seedbox'])
-            ->execute();
-        $this->getQueryBuilder()
-            ->delete('bonus_item')
-            ->where(['Label' => 'seedbox'])
-            ->execute();
+        $this->execute("
+            DELETE FROM user_attr WHERE Name = 'feature-seedbox'
+        ");
+        $this->execute("
+            DELETE FROM bonus_item WHERE Label = 'seedbox'
+        ");
     }
 }

@@ -4,23 +4,20 @@ declare(strict_types=1);
 
 use Phinx\Migration\AbstractMigration;
 
-final class LogcheckerRename extends AbstractMigration
-{
-    public function up(): void
-    {
-        $this->getQueryBuilder()
-            ->update('nav_items')
-            ->set('title', 'Logchecker')
-            ->where(['tag' => 'logchecker'])
-            ->execute();
+final class LogcheckerRename extends AbstractMigration {
+    public function up(): void {
+        $this->execute("
+            UPDATE nav_items SET
+                title = 'Logchecker'
+            WHERE tag = 'logchecker'
+        ");
     }
 
-    public function down(): void
-    {
-        $this->getQueryBuilder()
-            ->update('nav_items')
-            ->set('title', 'Log Checker')
-            ->where(['tag' => 'logchecker'])
-            ->execute();
+    public function down(): void {
+        $this->execute("
+            UPDATE nav_items SET
+                title = 'Log Checker'
+            WHERE tag = 'logchecker'
+        ");
     }
 }

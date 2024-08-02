@@ -27,16 +27,15 @@ final class DropFirstBatchUserInfoColumns extends AbstractMigration {
             ->removeColumn('WarnedTimes')
             ->save();
 
-        $this->query("
+        $this->execute("
             DELETE FROM periodic_task_history
             WHERE periodic_task_id = (
                 SELECT periodic_task_id FROM periodic_task WHERE classname = 'RemoveExpiredWarnings'
             )
         ");
-        $this->getQueryBuilder()
-            ->delete('periodic_task')
-            ->where(['classname' => 'RemoveExpiredWarnings'])
-            ->execute();
+        $this->execute("
+            DELETE FROM periodic_task WHERE classname = 'RemoveExpiredWarnings'
+        ");
     }
 
     public function down(): void {

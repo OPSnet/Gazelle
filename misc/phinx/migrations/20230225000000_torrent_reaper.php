@@ -15,7 +15,7 @@ final class TorrentReaper extends AbstractMigration {
             ->addForeignKey('torrent_id', 'torrents', 'ID', ['delete' => 'CASCADE', 'update' => 'CASCADE'])
             ->addIndex(['torrent_id'], ['name' => 'tu_t_uidx', 'unique' => true])
             ->addIndex(['unseeded_date'], ['name' => 'tu_ud_idx'])
-            ->create();
+            ->save();
 
         $this->table('torrent_unseeded_claim', ['id' => false, 'primary_key' => ['torrent_id', 'user_id']])
             ->addColumn('torrent_id', 'integer')
@@ -24,17 +24,15 @@ final class TorrentReaper extends AbstractMigration {
             ->addForeignKey('torrent_id', 'torrents', 'ID', ['delete' => 'CASCADE', 'update' => 'CASCADE'])
             ->addForeignKey('user_id', 'users_main', 'ID', ['delete' => 'CASCADE', 'update' => 'CASCADE'])
             ->addIndex(['user_id'], ['name' => 'tuc_u_idx'])
-            ->create();
+            ->save();
 
-        $this->getQueryBuilder()
-            ->delete('periodic_task')
-            ->where(fn($w) => $w->in('classname', [
-                    'DeleteNeverSeededTorrents',
-                    'DeleteUnseededTorrents',
-                    'NotifyNonseedingUploaders',
-                ])
+        $this->execute("
+            DELETE FROM periodic_task WHERE classname IN (
+                'DeleteNeverSeededTorrents',
+                'DeleteUnseededTorrents',
+                'NotifyNonseedingUploaders'
             )
-            ->execute();
+        ");
 
         $this->table('periodic_task')
              ->insert([
@@ -55,19 +53,19 @@ final class TorrentReaper extends AbstractMigration {
     }
 
     public function down(): void {
-        $this->table('torrent_unseeded')->drop()->update();
-        $this->table('torrent_unseeded_claim')->drop()->update();
+        $this->table('torrent_unseeded')->drop()->save();
+        $this->table('torrent_unseeded_claim')->drop()->save();
 
-        $this->getQueryBuilder()
-            ->delete('periodic_task')
-            ->where(fn($w) => $w->in('classname', [
-                    'Reaper',
-                ])
-            )
-            ->execute();
+        $this->execute("
+            DELETE FROM periodic_task WHERE classname = 'Reaper'
+        ");
+
+        $this->execute("
+            DELETE FROM user_attr where Name IN ('no-pm-unseeded-snatch', 'no-pm-unseeded-upload')"
+        );
 
         $this->table('periodic_task')
-             ->insert([
+            ->insert([
                 [
                     'name' => 'Torrent Reaper - Never Seeded',
                     'classname' => 'DeleteNeverSeededTorrents',
@@ -88,7 +86,5 @@ final class TorrentReaper extends AbstractMigration {
                 ],
             ])
             ->save();
-
-        $this->execute("DELETE FROM user_attr where Name IN ('no-pm-unseeded-snatch', 'no-pm-unseeded-upload')");
     }
 }

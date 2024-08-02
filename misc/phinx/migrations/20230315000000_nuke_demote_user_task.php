@@ -6,13 +6,9 @@ use Phinx\Migration\AbstractMigration;
 
 final class NukeDemoteUserTask extends AbstractMigration {
     public function up(): void {
-        $this->getQueryBuilder()
-            ->delete('periodic_task')
-            ->where(fn($w) => $w->in('classname', [
-                'DemoteUsers',
-                'FrontPageStats',
-            ]))
-            ->execute();
+        $this->execute("
+            DELETE FROM periodic_task WHERE classname IN ('DemoteUsers', 'FrontPageStats')
+        ");
     }
 
     public function down(): void {

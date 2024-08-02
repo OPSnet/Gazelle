@@ -15,9 +15,8 @@ final class AdminErrorReporting extends AbstractMigration {
     }
 
     public function down(): void {
-        $this->getQueryBuilder()
-            ->delete('user_attr')
-            ->where(['Name' => 'admin-error-reporting'])
-            ->execute();
+        $this->execute("
+            DELETE FROM user_attr WHERE Name = 'admin-error-reporting'
+        ");
     }
 }

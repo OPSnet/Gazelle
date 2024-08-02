@@ -5,32 +5,28 @@ use Phinx\Migration\AbstractMigration;
 class SecondaryClassBadges extends AbstractMigration {
     public function up(): void {
         $this->table('permissions')
-             ->addColumn('badge', 'string', ['default' => '', 'limit' => 5])
-             ->update();
+            ->addColumn('badge', 'string', ['default' => '', 'limit' => 5])
+            ->save();
 
-        $classes = [
-            23 => 'FLS', // First Line Support
-            30 => 'IN', // Interviewer
-            31 => 'TC', // Torrent Celebrity
-            32 => 'D', // Designer
-            37 => 'AR', // Archive Team
-            36 => 'AT', // Alpha Team
-            48 => 'BT', // Beta TEam
-            38 => 'CT', // Charlie Team
-        ];
-
-        foreach ($classes as $id => $badge) {
-            $this->getQueryBuilder()
-                 ->update('permissions')
-                 ->set('badge', $badge)
-                 ->where(['ID' => $id])
-                 ->execute();
-        }
+        $this->execute("
+            UPDATE permissions SET
+                badge = CASE
+                    WHEN ID = 23 THEN 'FLS' -- First Line Support
+                    WHEN ID = 30 THEN 'IN'  -- Interviewer
+                    WHEN ID = 31 THEN 'TC'  -- Torrent Celebrity
+                    WHEN ID = 32 THEN 'D'   -- Designer
+                    WHEN ID = 36 THEN 'AT'  -- Alpha Team
+                    WHEN ID = 37 THEN 'AR'  -- Archive Team
+                    WHEN ID = 38 THEN 'CT'  -- Charlie Team
+                    WHEN ID = 48 THEN 'BT'  -- Beta Team
+                END
+            WHERE ID IN (23, 30, 31, 32, 36, 37, 38, 48)
+        ");
     }
 
     public function down(): void {
         $this->table('permissions')
-             ->removeColumn('badge')
-             ->update();
+            ->removeColumn('badge')
+            ->save();
     }
 }

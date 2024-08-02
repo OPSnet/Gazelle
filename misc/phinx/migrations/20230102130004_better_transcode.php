@@ -13,7 +13,7 @@ final class BetterTranscode extends AbstractMigration {
             ->addColumn('want_320', 'boolean')
             ->addColumn('edition', 'string', ['length' => 255]) // long enough to include concatenated Remaster* fields
             ->addIndex(['tgroup_id', 'edition'], ['name' => 'btm_tg_ed_idx'])
-            ->create();
+            ->save();
 
         $this->table('periodic_task')
              ->insert([
@@ -28,12 +28,9 @@ final class BetterTranscode extends AbstractMigration {
     }
 
     public function down(): void {
-        $this->getQueryBuilder()
-            ->delete('periodic_task')
-            ->where(function ($exp) {
-                return $exp->in('classname', ['BetterTranscode']);
-            })
-            ->execute();
+        $this->execute("
+            DELETE FROM periodic_task WHERE classname = 'BetterTranscode'
+        ");
         $this->table('better_transcode_music')
             ->drop()
             ->save();

@@ -19,9 +19,8 @@ final class ReseedRequestTask extends AbstractMigration
     }
 
     public function down(): void {
-        $this->getQueryBuilder()
-            ->delete('periodic_task')
-            ->where(['classname' => 'ReseedRequest'])
-            ->execute();
+        $this->execute("
+            DELETE FROM periodic_task WHERE classname = 'ReseedRequest'
+        ");
     }
 }
