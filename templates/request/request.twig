@@ -192,12 +192,24 @@
           <td class="label">Description</td>
           <td>{{ description.emit|raw }}</td>
         </tr>
-{% if tgroup %}
+{# the Torrent group field is show when
+   - creating a new request,
+   - staff is viewing,
+   - a request references an existing torrent group,
+   - the creator is looking at their request.
+#}
+{% if new or viewer.permitted('site_moderate_requests') or tgroup or request.userId == viewer.id %}
         <tr>
           <td class="label">Torrent group</td>
           <td>
-{%  if new or viewer.permitted('site_moderate_requests') %}
-            {{ constant('SITE_URL') }}/torrents.php?id=<input type="text" name="groupid" value="" size="15" /><br />
+{# the group id can be edited when
+   - creating a new request,
+   - staff is viewing,
+   - the creator is viewing and no tgroup is referenced.
+   Otherwise the existing value is shown and cannot be edited.
+#}
+{%  if new or viewer.permitted('site_moderate_requests') or (not tgroup and request.userId == viewer.id) %}
+            {{ constant('SITE_URL') }}/torrents.php?id=<input type="text" name="groupid" value="{{ tgroup.id }}" size="15" /><br />
             If this request matches a torrent group <b>already existing</b> on the site, please indicate that here.
 {%  else %}
             {{ tgroup.link|raw }}<br />

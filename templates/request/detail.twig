@@ -23,9 +23,9 @@
            <a href="reports.php?action=report&amp;type=request&amp;id={{ request.id }}" class="brackets">Report request</a>
 {% if not request.isFilled %}
             <a href="upload.php?request.id={{ request.id }}{% if request.tgroupId %}&amp;groupid={{ request.tgroupId }}{% endif %}" class="brackets">Upload request</a>
-    {% if request.categoryName == 'Music' and request.year == 0 %}
+{%  if request.categoryName == 'Music' and request.year == 0 %}
             <a href="reports.php?action=report&amp;type=request_update&amp;id={{ request.id }}" class="brackets">Request update</a>
-    {% endif %}
+{%  endif %}
 {% endif %}
 
 {% if request.categoryName == 'Music' %}
@@ -40,11 +40,11 @@
             <div id="covers">
                 <div class="pad"><p align="center">
 {% if request.image %}
-    {%- set image = request.image|image -%}
+{%  set image = request.image|image -%}
                     <img style="width: 100%;" src="{{ image }}" alt="album art" onclick="lightbox.init('{{ image }}', 220);" data-origin-src="{{ image }}" />
-{% else %}
+{%  else %}
                     <img style="width: 100%;" src="{{ request.categoryImage }}" alt="{{ request.categoryName }}" class="tooltip" title="{{ request.categoryName }}" height="220" border="0" />
-{% endif %}
+{%  endif %}
                 </p></div>
             </div>
         </div>
@@ -53,54 +53,54 @@
         <div class="box box_artists">
             <div class="head"><strong>Artists</strong></div>
             <ul class="stats nobullet">
-    {% for a in role_list.composer %}
-        {% if loop.first %}
+{%  for a in role_list.composer %}
+{%      if loop.first %}
                 <li class="artists_composer"><strong>Composers:</strong></li>
-        {% endif %}
+{%      endif %}
                 <li class="artists_composer">{{ a.artist.link|raw }}</li>
-    {% endfor %}
-    {% for a in role_list.dj %}
-        {% if loop.first %}
+{%  endfor %}
+{%  for a in role_list.dj %}
+{%      if loop.first %}
                 <li class="artists_dj"><strong>DJ / Compiler:</strong></li>
-        {% endif %}
+{%      endif %}
                 <li class="artists_dj">{{ a.artist.link|raw }}</li>
-    {% endfor %}
-    {% for a in role_list.main %}
-        {% if loop.first %}
+{%  endfor %}
+{%  for a in role_list.main %}
+{%      if loop.first %}
                 <li class="artists_main"><strong>{% if role_list.composer %}Performers{% else %}Artists{% endif %}</strong></li>
-        {% endif %}
+{%      endif %}
                 <li class="artists_main">{{ a.artist.link|raw }}</li>
-    {% endfor %}
-    {% for a in role_list.dj %}
-        {% if loop.first %}
+{%  endfor %}
+{%  for a in role_list.dj %}
+{%     if loop.first %}
                 <li class="artists_with"><strong>With:</strong></li>
-        {% endif %}
+{%     endif %}
                 <li class="artists_with">{{ a.artist.link|raw }}</li>
-    {% endfor %}
-    {% for a in role_list.dj %}
-        {% if loop.first %}
+{%  endfor %}
+{%  for a in role_list.dj %}
+{%     if loop.first %}
                 <li class="artists_conductor"><strong>Conducted by:</strong></li>
-        {% endif %}
+{%     endif %}
                 <li class="artists_conductor">{{ a.artist.link|raw }}</li>
-    {% endfor %}
-    {% for a in role_list.remixer %}
-        {% if loop.first %}
+{%  endfor %}
+{%  for a in role_list.remixer %}
+{%     if loop.first %}
                 <li class="artists_remix"><strong>Remixed by:</strong></li>
-        {% endif %}
+{%     endif %}
                 <li class="artists_remix">{{ a.artist.link|raw }}</li>
-    {% endfor %}
-    {% for a in role_list.producer %}
-        {% if loop.first %}
+{%  endfor %}
+{%  for a in role_list.producer %}
+{%     if loop.first %}
                 <li class="artists_producer"><strong>Produced by:</strong></li>
-        {% endif %}
+{%     endif %}
                 <li class="artists_producer">{{ a.artist.link|raw }}</li>
-    {% endfor %}
-    {% for a in role_list.arranger %}
-        {% if loop.first %}
+{%  endfor %}
+{%  for a in role_list.arranger %}
+{%     if loop.first %}
                 <li class="artists_arranger"><strong>Arranged by:</strong></li>
-        {% endif %}
+{%     endif %}
                 <li class="artists_arranger">{{ a.artist.link|raw }}</li>
-    {% endfor %}
+{%  endfor %}
             </ul>
         </div>
 {% endif %}
@@ -120,14 +120,14 @@
             <table class="layout" id="request_top_contrib">
 {% set seen = false %}
 {% for vote in vote_list %}
-    {% if vote.user_id == viewer.id %}
-        {% set seen = true %}
-        {% set bold_open = '<bold>' %}
-        {% set bold_close = '</bold>' %}
-    {% else %}
-        {% set bold_open = '' %}
-        {% set bold_close = '' %}
-    {% endif %}
+{%  if vote.user_id == viewer.id %}
+{%      set seen = true %}
+{%      set bold_open = '<bold>' %}
+{%      set bold_close = '</bold>' %}
+{%  else %}
+{%      set bold_open = '' %}
+{%      set bold_close = '' %}
+{%  endif %}
                 <tr>
                     <td>
                         <a href="user.php?id={{ vote['user_id'] }}">
@@ -140,8 +140,8 @@
                 </tr>
 {% endfor %}
 {% if not seen %}
-    {% set bounty = request.userBounty(viewer) %}
-    {% if bounty %}
+{%  set bounty = request.userBounty(viewer) %}
+{%  if bounty %}
                 <tr>
                     <td>
                         <a href="{{ viewer.location|raw }}"><strong>{{ viewer.username }}</strong></a>
@@ -169,18 +169,18 @@
                 </td>
             </tr>
 {% if request.categoryName == 'Music' %}
-    {% if request.recordLabel %}
+{%  if request.recordLabel %}
             <tr>
                 <td class="label">Record label</td>
                 <td>{{ request.recordLabel }}</td>
             </tr>
-    {% endif %}
-    {% if request.catalogueNumber %}
+{%  endif %}
+{%  if request.catalogueNumber %}
             <tr>
                 <td class="label">Catalogue number</td>
                 <td>{{ request.catalogueNumber }}</td>
             </tr>
-    {% endif %}
+{%  endif %}
             <tr>
                 <td class="label">Release type</td>
                 <td>{{ request.releaseTypeName }}</td>
@@ -197,7 +197,7 @@
                 <td class="label">Acceptable media</td>
                 <td>{{ request.descriptionMedia|default('Unknown, please read the description.') }}</td>
             </tr>
-    {% if request.needCue or request.needLog or request.needLogChecksum %}
+{%  if request.needCue or request.needLog or request.needLogChecksum %}
             <tr>
                 <td class="label">Required CD FLAC only extras</td>
                 <td>{{ request.descriptionLogCue }}</td>
@@ -206,7 +206,7 @@
                 <td class="label">Required CD FLAC checksum</td>
                 <td>{{ request.needLogChecksum ? 'yes' : 'no' }}</td>
             </tr>
-    {% endif %}
+{%  endif %}
 {% endif %}
 {% if request.oclc %}
             <tr>
@@ -214,10 +214,10 @@
                 <td>{{ request.oclc }}</td>
             </tr>
 {% endif %}
-{% if request.tgroupId %}
+{% if tgroup %}
             <tr>
                 <td class="label">Torrent group</td>
-                <td><a href="torrents.php?id={{ request.tgroupId }}">torrents.php?id={{ request.tgroupId }}</a></td>
+                <td>{{ tgroup.link|raw }}</td>
             </tr>
 {% endif %}
             <tr>
@@ -248,9 +248,9 @@
                         <option value="mb">MiB</option>
                         <option value="gb">GiB</option>
                     </select>
-    {% if constant('REQUEST_TAX') > 0 -%}
+{%  if constant('REQUEST_TAX') > 0 -%}
     <strong>{{ constant('REQUEST_TAX') * 100 }}% of this is deducted as tax by the system.</strong>
-    {%- endif %}
+{%  endif %}
                     <p>Bounty must be greater than or equal to {{ constant('REQUEST_MIN') }} MiB.</p>
                 </td>
             </tr>
@@ -267,11 +267,11 @@
                         <input type="hidden" id="current_downloaded" value="{{ viewer.downloadedSize }}" />
                         <input type="hidden" id="current_rr" value="{{ viewer.requiredRatio }}" />
                         <input id="total_bounty" type="hidden" value="{{ request.bountyTotal }}" />
-    {% if constant('REQUEST_TAX') > 0 %}
+{%  if constant('REQUEST_TAX') > 0 %}
                             Bounty after tax: <strong><span id="bounty_after_tax">{{ tax_rate }} MiB</span></strong><br />
-    {% else %}
+{%  else %}
                             <span id="bounty_after_tax" style="display: none;">{{ tax_rate }} MiB</span>
-    {% endif %}
+{%  endif %}
                         If you add the entered <strong><span id="new_bounty">0 MiB</span></strong> of bounty, your new stats will be: <br />
                         Uploaded: <span id="new_uploaded">{{ viewer.uploadedSize|octet_size }}</span><br />
                         Ratio: <span id="new_ratio">{{ ratio(viewer.uploadedSize, viewer.downloadedSize) }}</span>
@@ -307,11 +307,11 @@
                             <br />
                             <strong>Must be the permalink [PL] of the torrent<br />(e.g. {{ constant('SITE_URL') }}/torrents.php?torrentid=nnn).</strong>
                         </div>
-    {% if viewer.permitted('site_moderate_requests') %}
+{%  if viewer.permitted('site_moderate_requests') %}
                         <div class="field_div">
                             For user: <input type="text" size="25" name="user"{% if filler %} value="{{ filler.username}}"{% endif %} />
                         </div>
-    {% endif %}
+{%  endif %}
                         <div class="submit_div">
                             <input type="submit" value="Fill request" />
                         </div>

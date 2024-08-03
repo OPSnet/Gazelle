@@ -21,6 +21,7 @@ echo $Twig->render('request/detail.twig', [
     'reply'         => (new Gazelle\Util\Textarea('quickpost', '', 90, 8))->setPreviewManual(true),
     'request'       => $request,
     'tax_rate'      => sprintf("%0.2f", 100 * (1 - REQUEST_TAX)),
+    'tgroup'        => (new Gazelle\Manager\TGroup())->findById((int)$request->tgroupId()),
     'uri'           => $_SERVER['REQUEST_URI'],
     'user_man'      => $userMan,
     'viewer'        => $Viewer,
