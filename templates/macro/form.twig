@@ -3,11 +3,11 @@
 {%- endmacro %}
 
 {%- macro checked(flag) -%}
-    {%- if flag %} checked="checked"{% endif -%}
+    {%- if flag %} checked{% endif -%}
 {%- endmacro %}
 
 {%- macro disabled(flag) -%}
-    {%- if flag %} disabled="disabled"{% endif -%}
+    {%- if flag %} disabled{% endif -%}
 {%- endmacro %}
 
 {# used as an additional name in an element class declaration #}
@@ -20,5 +20,5 @@
 {%- endmacro %}
 
 {%- macro selected(flag) -%}
-    {%- if flag %} selected="selected"{% endif -%}
+    {%- if flag %} selected{% endif -%}
 {%- endmacro %}
