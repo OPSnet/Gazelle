@@ -7,17 +7,38 @@ if (isset($_GET['clearcache'])) {
 
 require_once(__DIR__ . '/../lib/bootstrap.php');
 
-$feed = new Gazelle\Feed();
 $user = (new Gazelle\Manager\User())->findById((int)($_GET['user'] ?? 0));
+if (is_null($user)) {
+    die((new Gazelle\Feed())->blocked());
+}
+
 if (
-    !$user?->isEnabled()
+    !empty($_SERVER['HTTP_X_FORWARDED_FOR'])
+    && proxyCheck($_SERVER['REMOTE_ADDR'])
+    && filter_var($_SERVER['HTTP_X_FORWARDED_FOR'], FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)
+) {
+    $_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_X_FORWARDED_FOR'];
+}
+$context = new Gazelle\BaseRequestContext(
+    $_SERVER['SCRIPT_NAME'],
+    $_SERVER['REMOTE_ADDR'],
+    $_SERVER['HTTP_USER_AGENT'] ?? '[no-useragent]',
+);
+if ($user->permitted('site_disable_ip_history')) {
+    $context->anonymize();
+    $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+}
+Gazelle\Base::setRequestContext($context);
+
+if (
+    !$user->isEnabled()
     || empty($_GET['feed'])
     || md5($user->id() . RSS_HASH . ($_GET['passkey'] ?? 'NOTPASS')) !== ($_GET['auth'] ?? 'NOTAUTH')
 ) {
-    echo $feed->blocked();
-    exit;
+    die((new Gazelle\Feed())->blocked());
 }
 
+$feed = new Gazelle\Feed();
 switch ($_GET['feed']) {
     case 'torrents_abooks':
     case 'torrents_all':
