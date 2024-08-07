@@ -550,6 +550,7 @@ input[type="email"],
 input[type="password"],
 input[type="text"],
 input[type="search"],
+input[type="date"],
 select,
 textarea {
   background: $color-background-input;
@@ -563,6 +564,7 @@ input[type="email"]:focus,
 input[type="password"]:focus,
 input[type="text"]:focus,
 input[type="search"]:focus,
+input[type="date"]:focus,
 select:focus,
 textarea:focus {
   background: $color-background-input-active;
