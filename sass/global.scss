@@ -946,6 +946,49 @@ input[type="search"] {
   text-align: center;
 }
 
+.warning-message {
+  position: fixed;
+  top: 64px;
+  left: 50vw;
+  transform: translateX(-50%);
+  z-index: 900;
+  border: thick solid #daa520;
+  border-radius: 0.25rem;
+  padding: 1rem 1rem 1rem 48px;
+  background-color: #eaebeb;
+  background-image: url("/svg/site/ops-icon-triangle-000.svg");
+  background-repeat: no-repeat;
+  background-position: 8px 1rem;
+  background-size: 32px;
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.55), 0 7px 7px rgba(0, 0, 0, 0.52), 0 -5px 9px rgba(0, 0, 0, 0.32);
+  font-weight: 700;
+  font-size: medium;
+  color: #000;
+  width: min(80ch, 92%);
+
+  > button {
+    margin: 1em;
+    border: 0.2em solid black;
+    padding: 0.5em;
+    background-color: #daa520;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  a {
+    color: #900;
+  }
+
+  a::after {
+    content: '↗︎';
+  }
+
+  ul li {
+    font-size: smaller;
+    font-weight: normal;
+  }
+}
+
 .debug_table {
   text-align: left;
   width: 100%;

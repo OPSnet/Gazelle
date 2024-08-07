@@ -54,7 +54,7 @@ if (!($torrent->isRemastered() && !$torrent->remasterYear()) || $Viewer->permitt
         'Year'                    => $tgroup->year(),
         'VanityHouse'             => $tgroup->isShowcase(),
         'GroupID'                 => $tgroup->id(),
-        'UserID'                  => $torrent->uploaderId(),
+        'UploaderID'              => $torrent->uploaderId(),
         'HasLog'                  => $torrent->hasLog(),
         'HasCue'                  => $torrent->hasCue(),
         'LogScore'                => $torrent->logScore(),

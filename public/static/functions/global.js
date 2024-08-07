@@ -372,6 +372,33 @@ function gazURL() {
     return response;
 }
 
+function showWarningMessage(content, button_cb=null) {
+    let el = document.querySelector('.warning-message');
+    if (!el) {
+        el = document.createElement('div');
+        el.classList.add('warning-message');
+
+        const button = document.createElement('button');
+        button.classList.add('warning-message-confirm');
+        button.type = 'button';
+        button.innerText = 'Ok';
+        button.addEventListener('click', () => {
+            if (button_cb) {
+                button_cb();
+            }
+            el.remove();
+        });
+
+        el.appendChild(button);
+        document.body.append(el);
+    }
+    el.prepend(content);
+}
+
+function clearWarningMessage() {
+    document.querySelector('.warning-message')?.remove();
+}
+
 $.fn.extend({
     results: function () {
         return this.length;

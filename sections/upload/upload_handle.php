@@ -16,15 +16,7 @@ if (!defined('AJAX')) {
 }
 
 function reportError(string $message): never {
-    if (defined('AJAX')) {
-        json_error($message);
-    } else {
-        // TODO: Repopulate the form correctly
-        $Err = $message;
-        global $Viewer;
-        require(__DIR__ . '/upload.php');
-        die();
-    }
+    json_error($message);
 }
 
 if (!$Viewer->permitted('site_upload')) {
@@ -47,6 +39,7 @@ $categoryName   = CATEGORY[$categoryId - 1];
 $isMusicUpload  = ($categoryName === 'Music');
 
 $Properties = [];
+$Properties['Artists'] = $ArtistForm;
 $Properties['Title'] = isset($_POST['title']) ? trim($_POST['title']) : null;
 $Properties['Remastered'] = isset($_POST['remaster']);
 if ($Properties['Remastered'] || !empty($_POST['unknown'])) {
@@ -80,20 +73,6 @@ $Properties['TagList'] = !empty($_POST['tags'])
     ? array_unique(array_map('trim', explode(',', $_POST['tags']))) // Musicbranes loves to send duplicates
     : [];
 $Properties['Image'] = trim($_POST['image'] ?? '');
-if ($Properties['Image']) {
-    // Strip out Amazon's padding
-    if (preg_match('/(http:\/\/ecx.images-amazon.com\/images\/.+)(\._.*_\.jpg)/i', $Properties['Image'], $match)) {
-        $Properties['Image'] = $match[1] . '.jpg';
-    }
-    if (!preg_match(IMAGE_REGEXP, $Properties['Image'])) {
-        reportError(display_str($Properties['Image']) . " does not look like a valid image url");
-    }
-    $banned = (new Gazelle\Util\ImageProxy($Viewer))->badHost($Properties['Image']);
-    if ($banned) {
-        reportError("Please rehost images from $banned elsewhere.");
-    }
-}
-
 $Properties['GroupDescription'] = trim($_POST['album_desc'] ?? '');
 $Properties['Description'] = trim($_POST['release_desc'] ?? '');
 if (isset($_POST['album_desc'])) {
@@ -103,22 +82,14 @@ if (isset($_POST['album_desc'])) {
 }
 $Properties['GroupID'] = $_POST['groupid'] ?? null;
 
-// The UserID field is not needed as part of the torrent creation
-// (the Viewer object is used for that), but it simplifies the
-// code if something errors out below and the upload form has to
-// be repopulated.
-$Properties['UserID'] = $Viewer->id();
-
 if (empty($_POST['artists'])) {
     $Artists = [];
     $Importance = [];
 } else {
     $Artists = $_POST['artists'];
     $Importance = $_POST['importance'];
-    if (count($Artists) !== count($Importance)) {
-        reportError("There is an error with how artists are specified.");
-    }
 }
+
 if (!empty($_POST['requestid'])) {
     $RequestID = $_POST['requestid'];
     $Properties['RequestID'] = $RequestID;
@@ -225,8 +196,66 @@ switch ($categoryName) {
         break;
 }
 
+if ($isMusicUpload && empty($Properties['GroupID'])) {
+    if (count($Artists) !== count($Importance)) {
+        reportError("There is an error with how artists are specified.");
+    }
+    // Multiple artists
+    $ArtistForm = [
+        ARTIST_MAIN      => [],
+        ARTIST_GUEST     => [],
+        ARTIST_REMIXER   => [],
+        ARTIST_COMPOSER  => [],
+        ARTIST_CONDUCTOR => [],
+        ARTIST_DJ        => [],
+        ARTIST_PRODUCER  => [],
+        ARTIST_ARRANGER  => [],
+    ];
+    $ArtistNameByRole = [
+        ARTIST_MAIN      => [],
+        ARTIST_GUEST     => [],
+        ARTIST_REMIXER   => [],
+        ARTIST_COMPOSER  => [],
+        ARTIST_CONDUCTOR => [],
+        ARTIST_DJ        => [],
+        ARTIST_PRODUCER  => [],
+        ARTIST_ARRANGER  => [],
+    ];
+    for ($i = 0, $end = count($Artists); $i < $end; $i++) {
+        $name = Gazelle\Artist::sanitize($Artists[$i]);
+        if ($name === '') {
+            continue;
+        }
+        $role = (int)$Importance[$i];
+        if (!in_array($name, $ArtistNameByRole[$role])) {
+            $ArtistNameByRole[$role][] = $name;
+            $ArtistForm[$role][] = ['name' => $name];
+            $ArtistRoleList[] = $role;
+            $ArtistNameList[] = $name;
+        }
+    }
+    $Properties['Artists'] = $ArtistForm;
+    if (empty($ArtistNameByRole[ARTIST_MAIN])) {
+        reportError('Please enter at least one main artist');
+    }
+}
+
 if (!$Validate->validate($_POST)) {
     reportError($Validate->errorMessage());
+}
+
+if ($Properties['Image']) {
+    // Strip out Amazon's padding
+    if (preg_match('/(http:\/\/ecx.images-amazon.com\/images\/.+)(\._.*_\.jpg)/i', $Properties['Image'], $match)) {
+        $Properties['Image'] = $match[1] . '.jpg';
+    }
+    if (!preg_match(IMAGE_REGEXP, $Properties['Image'])) {
+        reportError(display_str($Properties['Image']) . " does not look like a valid image url");
+    }
+    $banned = (new Gazelle\Util\ImageProxy($Viewer))->badHost($Properties['Image']);
+    if ($banned) {
+        reportError("Please rehost images from $banned elsewhere.");
+    }
 }
 
 $File = $_FILES['file_input']; // This is our torrent file
@@ -267,7 +296,6 @@ if ($checkName) {
 }
 
 $upload = [
-    'file'  => [], // details of logfiles in $_FILES
     'extra' => [], // details of the extra encodings
     'new'   => [], // list of newly created Torrent objects
 ];
@@ -275,21 +303,12 @@ $upload = [
 $torrentFiler = new Gazelle\File\Torrent();
 $torrent      = $torMan->findByInfohash(bin2hex($bencoder->getHexInfoHash()));
 if ($torrent) {
-    $torrentId = $torrent->id();
-    if ($torrentFiler->exists($torrentId)) {
-        reportError(
-            defined('AJAX')
-            ? "The exact same torrent file already exists on the site! (torrentid=$torrentId)"
-            : "<a href=\"torrents.php?torrentid=$torrentId\">The exact same torrent file already exists on the site!</a>"
-        );
+    if ($torrentFiler->exists($torrent->id())) {
+        reportError("The exact same torrent file already exists on the site! {$torrent->link()}");
     } else {
         // A lost torrent
-        $torrentFiler->put($bencoder->getEncode(), $torrentId);
-        reportError(
-            defined('AJAX')
-            ? "Thank you for fixing this torrent (torrentid=$torrentId)"
-            : "<a href=\"torrents.php?torrentid=$torrentId\">Thank you for fixing this torrent</a>"
-        );
+        $torrentFiler->put($bencoder->getEncode(), $torrent->id());
+        reportError("Thank you for fixing this torrent {$torrent->link()}");
     }
 }
 
@@ -336,20 +355,12 @@ if ($isMusicUpload) {
 
             $torrent = $torMan->findByInfohash(bin2hex($xbencoder->getHexInfoHash()));
             if ($torrent) {
-                $torrentId = $torrent->id();
-                if ($torrentFiler->exists($torrentId)) {
-                    reportError(
-                        defined('AJAX')
-                        ? "The exact same torrent file already exists on the site! (torrentid=$torrentId)"
-                        : "<a href=\"torrents.php?torrentid=$torrentId\">The exact same torrent file already exists on the site!</a>"
-                    );
+                if ($torrentFiler->exists($torrent->id())) {
+                    reportError("The exact same torrent file already exists on the site! {$torrent->link()}");
                 } else {
-                    $torrentFiler->put($ExtraTorData['TorEnc'], $torrentId);
-                    reportError(
-                        defined('AJAX')
-                        ? "Thank you for fixing this torrent (torrentid=$torrentId)"
-                        : "<a href=\"torrents.php?torrentid=$torrentId\">Thank you for fixing this torrent</a>"
-                    );
+                    // A lost torrent
+                    $torrentFiler->put($bencoder->getEncode(), $torrent->id());
+                    reportError("Thank you for fixing this torrent {$torrent->link()}");
                 }
             }
             if (!$xbencoder->isPrivate()) {
@@ -371,11 +382,7 @@ if ($isMusicUpload) {
                 }
                 if (mb_strlen($name, 'UTF-8') + mb_strlen($filePath, 'UTF-8') + 1 > MAX_FILENAME_LENGTH) {
                     $fullpath = "$filePath/$name";
-                    reportError(
-                        defined('AJAX')
-                            ? "The torrent contained one or more files with too long a name: $fullpath"
-                            : "The torrent contained one or more files with too long a name: <br />$fullpath"
-                    );
+                    reportError("The torrent contained one or more files with too long a name: " . html_escape($fullpath));
                 }
                 $fileList[] = $torMan->metaFilename($name, $size);
             }
@@ -390,48 +397,6 @@ if ($isMusicUpload) {
                 'TorEnc'      => $xbencoder->getEncode(),
                 'TotalSize'   => $totalSize,
             ];
-        }
-    }
-
-    // Multiple artists
-    if (empty($Properties['GroupID'])) {
-        $ArtistForm = [
-            ARTIST_MAIN      => [],
-            ARTIST_GUEST     => [],
-            ARTIST_REMIXER   => [],
-            ARTIST_COMPOSER  => [],
-            ARTIST_CONDUCTOR => [],
-            ARTIST_DJ        => [],
-            ARTIST_PRODUCER  => [],
-            ARTIST_ARRANGER  => [],
-        ];
-        $ArtistNameByRole = [
-            ARTIST_MAIN      => [],
-            ARTIST_GUEST     => [],
-            ARTIST_REMIXER   => [],
-            ARTIST_COMPOSER  => [],
-            ARTIST_CONDUCTOR => [],
-            ARTIST_DJ        => [],
-            ARTIST_PRODUCER  => [],
-            ARTIST_ARRANGER  => [],
-        ];
-        $ArtistRoleList = [];
-        $ArtistNameList = [];
-        for ($i = 0, $end = count($Artists); $i < $end; $i++) {
-            $name = Gazelle\Artist::sanitize($Artists[$i]);
-            if ($name === '') {
-                continue;
-            }
-            $role = (int)$Importance[$i];
-            if (!in_array($name, $ArtistNameByRole[$role])) {
-                $ArtistNameByRole[$role][] = $name;
-                $ArtistForm[$role][] = ['name' => $name];
-                $ArtistRoleList[] = $role;
-                $ArtistNameList[] = $name;
-            }
-        }
-        if (empty($ArtistNameByRole[ARTIST_MAIN])) {
-            reportError('Please enter at least one main artist');
         }
     }
 }
@@ -468,15 +433,9 @@ foreach ($FileList as ['path' => $filename, 'size' => $size]) {
     $TmpFileList[] = $torMan->metaFilename($filename, $size);
 }
 if (count($TooLongPaths) > 0) {
-    reportError(
-        defined('AJAX')
-        ? (string)json_encode(
-            ['The torrent contained one or more files with too long a name', ['list' => $TooLongPaths]],
-            JSON_INVALID_UTF8_SUBSTITUTE | JSON_PARTIAL_OUTPUT_ON_ERROR
-        )
-        : ('The torrent contained one or more files with too long a name: <ul>'
-            . implode('', array_map(fn($p) => "<li>$p</li>", $TooLongPaths))
-            . '</ul><br />')
+    reportError('The torrent contained one or more files with too long a name: <ul>'
+            . implode('', array_map(fn($p) => "<li>" . html_escape($p) . "</li>", $TooLongPaths))
+            . '</ul><br>'
     );
 }
 $Debug->mark('upload: torrent decoded');
@@ -544,6 +503,13 @@ if ($tgroup) {
         releaseType:     $Properties['ReleaseType'],
         showcase:        $Viewer->permitted('torrents_edit_vanityhouse') && isset($_POST['vanity_house']),
     );
+
+    // Tags
+    $tagMan = new Gazelle\Manager\Tag();
+    foreach ($Properties['TagList'] as $name) {
+        $tagMan->softCreate($name, $Viewer)?->addTGroup($tgroup, $Viewer, 10);
+    }
+
     if ($isMusicUpload) {
         $tgroup->addArtists($ArtistRoleList, $ArtistNameList, $Viewer, new Gazelle\Manager\Artist(), $log);
         $Cache->increment_value('stats_album_count', count($ArtistNameList));
@@ -556,17 +522,6 @@ $logName = $tgroup->text();
 // Description
 if ($NoRevision) {
     $tgroup->createRevision($Properties['GroupDescription'], $Properties['Image'], 'Uploaded new torrent', $Viewer);
-}
-
-// Tags
-if (!$Properties['GroupID']) {
-    $tagMan = new Gazelle\Manager\Tag();
-    foreach ($Properties['TagList'] as $name) {
-        $tag = $tagMan->softCreate($name, $Viewer);
-        if ($tag) {
-            $tag->addTGroup($tgroup, $Viewer, 10);
-        }
-    }
 }
 
 // Torrent
@@ -686,12 +641,21 @@ if ($Properties['Image'] != '') {
     $Cache->delete_value('user_recent_up_' . $Viewer->id());
 }
 
+$folderClash = 0;
+if ($isMusicUpload) {
+    foreach ($folderCheck as $foldername) {
+        // This also has the nice side effect of warming the cache immediately
+        $folderClash += max(0, count($torMan->findAllByFoldername($foldername)) - 1);
+    }
+}
+
 if (defined('AJAX')) {
     $Response = [
         'groupId' => $GroupID,
         'torrentId' => $TorrentID,
         'private' => !$PublicTorrent,
         'source' => !$UnsourcedTorrent,
+        'warnings' => [],
     ];
 
     if (isset($RequestID)) {
@@ -706,19 +670,25 @@ if (defined('AJAX')) {
         }
         $Response['fillRequest'] = $FillResponse;
     }
+
+    if ($PublicTorrent) {
+        $Response['warnings'][] = trim($Twig->render('upload/warnings/public.twig'));
+    }
+    if ($UnsourcedTorrent) {
+        $Response['warnings'][] = trim($Twig->render('upload/warnings/unsourced.twig'));
+    }
+    if ($PublicTorrent || $UnsourcedTorrent) {
+        $Response['warnings'][] = trim($Twig->render('upload/warnings/redownload.twig', ['torrent' => $torrent]));
+    }
+    if ($folderClash > 0) {
+        $Response['warnings'][] = trim($Twig->render('upload/warnings/folderclash.twig', ['clash' => $folderClash]));
+    }
     json_print('success', $Response);
     exit;
 }
 
-$folderClash = 0;
-if ($isMusicUpload) {
-    foreach ($folderCheck as $foldername) {
-        // This also has the nice side effect of warming the cache immediately
-        if (count($torMan->findAllByFoldername($foldername)) > 1) {
-            ++$folderClash;
-        }
-    }
-}
+// all uploads should go through ajax.php, but we keep this for backwards compatibility with old scripts
+
 if ($PublicTorrent || $UnsourcedTorrent || $folderClash) {
     echo $Twig->render('upload/result_warnings.twig', [
         'clash'     => $folderClash,

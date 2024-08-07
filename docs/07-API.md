@@ -1358,7 +1358,7 @@ Must use either API token or `$_POST['authkey']`
 
 ## Upload
 
-__NOTE__: Requires using the API token
+__NOTE__: Requires using the API token or authkey
 
 **URL:**
 `ajax.php?action=upload`
@@ -1451,7 +1451,10 @@ __NOTE__: If using `groupid`, may leave group details (e.g. `title`, `year`, etc
             "fillerId": 1,
             "fillerName": "hermes",
             "bounty": 1232452
-        }
+        },
+        "warnings": [
+            "non-critical html error messages"
+        ]
     }
 }
 ```

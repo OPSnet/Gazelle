@@ -111,7 +111,7 @@
             <label for="remaster">Check this if this torrent is a different edition to the original, for example a remaster, country specific edition, or a release that includes additional bonus tracks or bonus discs.</label>
             <div id="remaster_true"{{ class_hidden(not (torrent.Remastered)) }}>
 {% set unknown_release = torrent.Remastered and not torrent.RemasterYear %}
-{% if user.permitted('edit_unknowns') or torrent.UserID == user.id %}
+{% if user.permitted('edit_unknowns') or torrent.UploaderID is same as(user.id) %}
                 <br />
                 <label><input type="checkbox" id="unknown" name="unknown"{{ checked(unknown_release) }} onclick="{% if not torrent %}>CheckYear();{% endif %}ToggleUnknown();" />
                 Unknown Release</label>

@@ -55,7 +55,7 @@ class Tag extends \Gazelle\BaseManager {
         return $this->findById(
             (int)self::$db->scalar("
                 SELECT ID FROM tags WHERE Name = ?
-                ", $this->sanitize($name)
+                ", $this->resolve($this->sanitize($name))
             )
         );
     }
