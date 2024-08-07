@@ -638,40 +638,19 @@ class Donor extends \Gazelle\BaseUser {
         return $this->flush()->specialRank();
     }
 
-    public function setForumPrefix(string $prefix): bool {
+    public function setForumDecoration(string $prefix, string $suffix, bool $useComma): bool {
         if (!$this->hasForum()) {
             return false;
         }
         self::$db->prepared_query("
-            INSERT INTO donor_forum_usernames (UserID, Prefix) VALUES (?, ?)
-            ON DUPLICATE KEY UPDATE Prefix = ?
-            ", $this->id(), $prefix, $prefix
-        );
-        $this->flush();
-        return true;
-    }
-
-    public function setForumSuffix(string $suffix): bool {
-        if (!$this->hasForum()) {
-            return false;
-        }
-        self::$db->prepared_query("
-            INSERT INTO donor_forum_usernames (UserID, Suffix) VALUES (?, ?)
-            ON DUPLICATE KEY UPDATE Suffix = ?
-            ", $this->id(), $suffix, $suffix
-        );
-        $this->flush();
-        return true;
-    }
-
-    public function setForumUseComma(bool $use): bool {
-        if (!$this->hasForum()) {
-            return false;
-        }
-        self::$db->prepared_query("
-            INSERT INTO donor_forum_usernames (UserID, UseComma) VALUES (?, ?)
-            ON DUPLICATE KEY UPDATE UseComma = ?
-            ", $this->id(), (int)$use, (int)$use
+            INSERT INTO donor_forum_usernames
+                   (UserID, Prefix, Suffix, UseComma)
+            VALUES (?,      ?,      ?,      ?)
+            ON DUPLICATE KEY UPDATE
+                Prefix   = ?,
+                Suffix   = ?,
+                UseComma = ?
+            ", $this->id(), $prefix, $suffix, (int)$useComma, $prefix, $suffix, (int)$useComma
         );
         $this->flush();
         return true;

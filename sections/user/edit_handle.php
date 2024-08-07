@@ -282,22 +282,24 @@ $user->modify();
 $donor = new Gazelle\User\Donor($user);
 if ($donor->isDonor()) {
     $donor->setVisible(isset($_POST['p_donor_stats']));
-    $donor->setForumPrefix((string)$_POST['donor_title_prefix']);
-    $donor->setForumSuffix((string)$_POST['donor_title_suffix']);
-    $donor->setForumUseComma(isset($_POST['donor_title_comma']));
-    $donor->updateAvatarHover((string)$_POST['second_avatar'])
-        ->updateAvatarHoverText((string)$_POST['avatar_mouse_over_text'])
-        ->updateIcon((string)$_POST['donor_icon_custom_url'])
-        ->updateIconHoverText((string)$_POST['donor_icon_mouse_over_text'])
-        ->updateIconLink((string)$_POST['donor_icon_link'])
-        ->updateProfileInfo(1, (string)$_POST['profile_info_1'])
-        ->updateProfileInfo(2, (string)$_POST['profile_info_2'])
-        ->updateProfileInfo(3, (string)$_POST['profile_info_3'])
-        ->updateProfileInfo(4, (string)$_POST['profile_info_4'])
-        ->updateProfileTitle(1, (string)$_POST['profile_title_1'])
-        ->updateProfileTitle(2, (string)$_POST['profile_title_2'])
-        ->updateProfileTitle(3, (string)$_POST['profile_title_3'])
-        ->updateProfileTitle(4, (string)$_POST['profile_title_4'])
+    $donor->setForumDecoration(
+        $_POST['donor_title_prefix'] ?? '',
+        $_POST['donor_title_suffix'] ?? '',
+        isset($_POST['donor_title_comma']),
+    );
+    $donor->updateAvatarHover($_POST['second_avatar'] ?? '')
+        ->updateAvatarHoverText($_POST['avatar_mouse_over_text'] ?? '')
+        ->updateIcon($_POST['donor_icon_custom_url'] ?? '')
+        ->updateIconHoverText($_POST['donor_icon_mouse_over_text'] ?? '')
+        ->updateIconLink($_POST['donor_icon_link'] ?? '')
+        ->updateProfileInfo(1, $_POST['profile_info_1'] ?? '')
+        ->updateProfileInfo(2, $_POST['profile_info_2'] ?? '')
+        ->updateProfileInfo(3, $_POST['profile_info_3'] ?? '')
+        ->updateProfileInfo(4, $_POST['profile_info_4'] ?? '')
+        ->updateProfileTitle(1, $_POST['profile_title_1'] ?? '')
+        ->updateProfileTitle(2, $_POST['profile_title_2'] ?? '')
+        ->updateProfileTitle(3, $_POST['profile_title_3'] ?? '')
+        ->updateProfileTitle(4, $_POST['profile_title_4'] ?? '')
         ->modify();
 }
 

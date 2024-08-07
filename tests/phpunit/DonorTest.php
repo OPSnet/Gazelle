@@ -276,17 +276,16 @@ class DonorTest extends TestCase {
         $this->assertEquals('4 [Silver]', $donor->rankLabel(), 'donor-rank-label-4');
         $this->assertEquals('static/common/symbols/donor_4.png', $donor->heartIcon(), 'donor-heart-icon-4');
 
-        $this->assertTrue($donor->setForumPrefix('The'), 'donor-set-forum-prefix');
-        $this->assertEquals('The', $donor->forumPrefix(), 'donor-has-forum-prefix');
-        $this->assertTrue($donor->setForumSuffix('Person'), 'donor-set-forum-suffix');
-        $this->assertEquals('Person', $donor->forumSuffix(), 'donor-has-forum-suffix');
         $this->assertFalse($donor->forumUseComma(), 'donor-has-forum-comma');
+        $this->assertTrue($donor->setForumDecoration('The', 'Person', false), 'donor-set-forum-decoration');
+        $this->assertEquals('The', $donor->forumPrefix(), 'donor-has-forum-prefix');
+        $this->assertEquals('Person', $donor->forumSuffix(), 'donor-has-forum-suffix');
         $this->assertEquals('Person', $donor->forumSuffix(), 'donor-has-forum-suffix');
         $this->assertEquals("The {$donor->user()->username()} Person", $donor->username(decorated: true), 'donor-has-forum-comma-username');
-        $this->assertTrue($donor->setForumUseComma(use: true), 'donor-unset-forum-comma');
-        $this->assertTrue($donor->forumUseComma(), 'donor-has-no-forum-comma');
-        $this->assertEquals("The {$donor->user()->username()}, Person", $donor->username(true), 'donor-has-forum-comma-username');
-        $this->assertEquals($donor->user()->username(), $donor->username(false), 'donor-username');
+        $this->assertTrue($donor->setForumDecoration('The', 'Person', true), 'donor-set-forum-comma');
+        $this->assertTrue($donor->forumUseComma(), 'donor-has-forum-comma');
+        $this->assertEquals("The {$donor->user()->username()}, Person", $donor->username(decorated: true), 'donor-has-forum-comma-username');
+        $this->assertEquals($donor->user()->username(), $donor->username(decorated: false), 'donor-bare-username');
 
         $this->assertEquals(
             1,
