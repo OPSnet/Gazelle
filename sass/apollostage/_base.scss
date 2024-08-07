@@ -1,5 +1,4 @@
 // _base.scss for Apollostage
-// version 2024-07-30
 //
 // SASS/SCSS NOTE
 // This is one of four files for the main ApolloStage theme:
@@ -17,18 +16,19 @@
    ########################################################################
 */
 
-/*  # 2024-07-30 - Updated with community feedback.
+/*  # 2024-08-01 - Updated with community feedback.
     # Fix: mobile menu, category stripes;
-/*  # Feature: Add SVGs, tag bubbles, italic fonts and more;
-/*  # Feature: Added new light mode theme;
-/*  # Chore: Organized and documented the SCSS.
+    # Feature: Add SVGs, tag bubbles, system fonts and more;
+    # Feature: Added new light mode theme;
+    # Chore: Organized and documented the SCSS.
     For full changelog: see uncompiled SASS file. */
 
 // ########################################################################
 // FULL CHANGELOG
 // ########################################################################
 //
-//   Fix: Fixed the mobile view (media <575px) with big help from hawkeye. Mobile
+//  Updated 2024-08-01:
+//  Fix: Fixed the mobile view (media <575px) (thanks @hawkeye). Mobile
 //    menu includes an animation, handling to prevent keyboard from opening
 //    on iPh--e and other mobile devices, and a link to the home page.
 //
