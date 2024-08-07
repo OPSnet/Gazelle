@@ -209,7 +209,7 @@
         </td>
     </tr>
 
-{% if not torrent %}
+{% if not torrent or add_format %}
     <tr>
         <td class="label">Multi-format uploader:</td>
         <td><input type="button" value="+" id="add_format" />&nbsp;<input type="button" style="display: none;" value="-" id="remove_format" /></td>
@@ -217,7 +217,7 @@
     <tr id="placeholder_row_top"></tr>
     <tr id="extra_format_placeholder"></tr>
 {% else %}
-{%  if user.permitted('users_mod') and not add_format %}
+{%  if user.permitted('users_mod') %}
     <tr>
         <td class="label">Log/cue:</td>
         <td>
@@ -227,9 +227,9 @@
             Check this box if the torrent has, or should have, a cue file.</label><br />
         </td>
     </tr>
-{% endif %}
-{% for flag in torrent_flags %}
-    {% if (not flag.permission or user.permitted(flag.permission)) and not add_format %}
+{%  endif %}
+{%  for flag in torrent_flags %}
+{%      if (not flag.permission or user.permitted(flag.permission)) and not add_format %}
     <tr>
         <td class="label">{{ flag.label }}:</td>
         <td>
@@ -237,8 +237,8 @@
             {{ flag.description }}</label>
         </td>
     </tr>
-    {% endif %}
-{% endfor %}
+{%      endif %}
+{%  endfor %}
 {% endif %}
 {% if not torrent %}
 {%  include 'upload/tag.twig' with {'is_uploaded': is_uploaded, 'tag_list': tag_list, 'user': user} %}
