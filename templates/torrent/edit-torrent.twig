@@ -1,0 +1,121 @@
+{% from 'macro/form.twig' import selected %}
+{% set is_music = torrent.group.categoryName == 'Music' %}
+{% if viewer.permitted('torrents_edit') %}
+<div class="thin">
+{%  if is_music %}
+    <div class="header">
+        <h2><a name="group-change">Change group</a></h2>
+    </div>
+    <form class="edit_form" name="torrent_group" action="torrents.php" method="post">
+        <input type="hidden" name="action" value="editgroupid" />
+        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+        <input type="hidden" name="torrentid" value="{{ torrent.id }}" />
+        <input type="hidden" name="oldgroupid" value="{{ torrent.group.id }}" />
+        <table class="layout">
+            <tr>
+                <td class="label">Group ID</td>
+                <td>
+                    <input type="text" name="groupid" value="{{ torrent.group.id }}" size="10" />
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" class="center">
+                    <input type="submit" value="Change group ID" />
+                </td>
+            </tr>
+        </table>
+    </form>
+    <h2><a name="group-split">Split off into new group</a></h2>
+    <form class="split_form" name="torrent_group" action="torrents.php" method="post">
+        <input type="hidden" name="action" value="newgroup" />
+        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+        <input type="hidden" name="torrentid" value="{{ torrent.id }}" />
+        <input type="hidden" name="oldgroupid" value="{{ torrent.group.id }}" />
+        <table class="layout">
+            <tr>
+                <td class="label">Artist</td>
+                <td>
+                    <input type="text" name="artist" value="{{ artist.name }}" size="50" />
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Title</td>
+                <td>
+                    <input type="text" name="title" value="{{ torrent.group.name }}" size="50" />
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Year</td>
+                <td>
+                    <input type="text" name="year" value="{{ torrent.group.year }}" size="10" />
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" class="center">
+                    <input type="submit" value="Split off into new group" />
+                </td>
+            </tr>
+        </table>
+    </form>
+    <br />
+{%  endif %}
+{%  if viewer.permitted('users_mod') %}
+    <h2><a name="category-change">Change category</a></h2>
+    <form action="torrents.php" method="post">
+        <input type="hidden" name="action" value="changecategory" />
+        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+        <input type="hidden" name="torrentid" value="{{ torrent.id }}" />
+        <input type="hidden" name="oldgroupid" value="{{ torrent.group.id }}" />
+        <input type="hidden" name="oldartistid" value="{{ artist.id }}" />
+        <input type="hidden" name="oldcategoryid" value="{{ torrent.group.categoryId }}" />
+        <table>
+            <tr>
+                <td class="label">Change category</td>
+                <td>
+                    <select id="newcategoryid" name="newcategoryid" onchange="ChangeCategory(this.value);">
+{%      for id, name in constant('CATEGORY') %}
+                        <option value="{{ id + 1 }}"{{ selected(torrent.group.categoryId == id + 1) }}>{{ name }}</option>
+{%      endfor %}
+                    </select>
+                </td>
+            </tr>
+            <tr id="split_releasetype">
+                <td class="label">Release type</td>
+                <td>
+                    <select name="releasetype">
+{%      for id, name in release_type_list %}
+                        <option value="{{ id }}">{{ name }}</option>
+{%      endfor %}
+                    </select>
+                </td>
+            </tr>
+            <tr id="split_artist">
+                <td class="label">Artist</td>
+                <td>
+                    <input type="text" name="artist" value="{{ artist.name }}" size="50" />
+                </td>
+            </tr>
+            <tr id="split_title">
+                <td class="label">Title</td>
+                <td>
+                    <input type="text" name="title" value="{{ torrent.group.name }}" size="50" />
+                </td>
+            </tr>
+            <tr id="split_year">
+                <td class="label">Year</td>
+                <td>
+                    <input type="text" name="year" value="{{ torrent.group.year }}" size="10" />
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" class="center">
+                    <input type="submit" value="Change category" />
+                </td>
+            </tr>
+        </table>
+        <script type="text/javascript">ChangeCategory($('#newcategoryid').raw().value);</script>
+    </form>
+{%  endif %}
+</div>
+{% endif %}
+{{ footer() }}

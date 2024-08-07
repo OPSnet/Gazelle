@@ -198,7 +198,7 @@
     </tr>
 {% include 'upload/format.twig' with {'format': torrent.Format} %}
 {% include 'upload/bitrate.twig' with {'bitrate': torrent.Bitrate} %}
-    <tr id="upload_logs"{{ class_hidden(not torrent) }}>
+    <tr id="upload_logs"{{ class_hidden(not torrent or torrent.Media != 'CD') }}>
         <td class="label">
             Log files:<br /><a href="javascript:;" onclick="AddLogField('{{ logchecker_accept }}');" class="brackets">+</a> <a href="javascript:;" onclick="RemoveLogField();" class="brackets">&minus;</a>
         </td>
@@ -208,7 +208,6 @@
             <input id="logfile_1" type="file" accept="{{ logchecker_accept }}" multiple name="logfiles[]" size="50" />
         </td>
     </tr>
-
 {% if not torrent or add_format %}
     <tr>
         <td class="label">Multi-format uploader:</td>

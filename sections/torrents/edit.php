@@ -1,12 +1,4 @@
 <?php
-//**********************************************************************//
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Edit form ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-// This page relies on the Upload class. All it does is call the        //
-// necessary functions.                                                 //
-//----------------------------------------------------------------------//
-// At the bottom, there are grouping functions which are off limits to  //
-// most members.                                                        //
-//**********************************************************************//
 
 $torrent = (new Gazelle\Manager\Torrent())->findById((int)($_GET['id'] ?? 0));
 if (is_null($torrent)) {
@@ -18,11 +10,9 @@ if (($Viewer->id() != $torrent->uploaderId() && !$Viewer->permitted('torrents_ed
 }
 
 $tgroup       = $torrent->group();
-$categoryId   = $tgroup->categoryId();
 $categoryName = $tgroup->categoryName();
 $isMusic      = $categoryName === 'Music';
 $artist       = $isMusic ? $tgroup->primaryArtist() : null;
-$releaseTypes = (new Gazelle\ReleaseType())->list();
 
 View::show_header('Edit torrent', ['js' => 'upload,torrent']);
 
@@ -55,7 +45,7 @@ if (!($torrent->isRemastered() && !$torrent->remasterYear()) || $Viewer->permitt
         'leech_reason'            => $torrent->leechReason(),
         'leech_type'              => $torrent->leechType(),
         'TorrentDescription'      => $torrent->description(),
-        'CategoryID'              => $categoryId,
+        'CategoryID'              => $tgroup->categoryId(),
         'Title'                   => $tgroup->name(),
         'Year'                    => $tgroup->year(),
         'VanityHouse'             => $tgroup->isShowcase(),
@@ -73,7 +63,7 @@ if (!($torrent->isRemastered() && !$torrent->remasterYear()) || $Viewer->permitt
         $torrentInfo,
         $Err ?? false
     );
-    echo $uploadForm->head($categoryId);
+    echo $uploadForm->head($tgroup->categoryId());
     echo match ($categoryName) {
         'Audiobooks'        => $uploadForm->audiobook(),
         'Comedy'            => $uploadForm->comedy(),
@@ -85,127 +75,10 @@ if (!($torrent->isRemastered() && !$torrent->remasterYear()) || $Viewer->permitt
     };
     echo $uploadForm->foot(false);
 };
-if ($Viewer->permitted('torrents_edit') && ($Viewer->permitted('users_mod') || $isMusic)) {
-?>
-<div class="thin">
-<?php if ($isMusic) { ?>
-    <div class="header">
-        <h2><a name="group-change">Change group</a></h2>
-    </div>
-    <form class="edit_form" name="torrent_group" action="torrents.php" method="post">
-        <input type="hidden" name="action" value="editgroupid" />
-        <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
-        <input type="hidden" name="torrentid" value="<?= $torrent->id() ?>" />
-        <input type="hidden" name="oldgroupid" value="<?= $tgroup->id() ?>" />
-        <table class="layout">
-            <tr>
-                <td class="label">Group ID</td>
-                <td>
-                    <input type="text" name="groupid" value="<?= $tgroup->id() ?>" size="10" />
-                </td>
-            </tr>
-            <tr>
-                <td colspan="2" class="center">
-                    <input type="submit" value="Change group ID" />
-                </td>
-            </tr>
-        </table>
-    </form>
-    <h2><a name="group-split">Split off into new group</a></h2>
-    <form class="split_form" name="torrent_group" action="torrents.php" method="post">
-        <input type="hidden" name="action" value="newgroup" />
-        <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
-        <input type="hidden" name="torrentid" value="<?= $torrent->id() ?>" />
-        <input type="hidden" name="oldgroupid" value="<?= $tgroup->id() ?>" />
-        <table class="layout">
-            <tr>
-                <td class="label">Artist</td>
-                <td>
-                    <input type="text" name="artist" value="<?= $artist?->name() ?>" size="50" />
-                </td>
-            </tr>
-            <tr>
-                <td class="label">Title</td>
-                <td>
-                    <input type="text" name="title" value="<?= $tgroup->name() ?>" size="50" />
-                </td>
-            </tr>
-            <tr>
-                <td class="label">Year</td>
-                <td>
-                    <input type="text" name="year" value="<?= $tgroup->year() ?>" size="10" />
-                </td>
-            </tr>
-            <tr>
-                <td colspan="2" class="center">
-                    <input type="submit" value="Split off into new group" />
-                </td>
-            </tr>
-        </table>
-    </form>
-    <br />
-<?php
-    } /* Music category */
-    if ($Viewer->permitted('users_mod')) { ?>
-    <h2><a name="category-change">Change category</a></h2>
-    <form action="torrents.php" method="post">
-        <input type="hidden" name="action" value="changecategory" />
-        <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
-        <input type="hidden" name="torrentid" value="<?= $torrent->id() ?>" />
-        <input type="hidden" name="oldgroupid" value="<?= $tgroup->id() ?>" />
-        <input type="hidden" name="oldartistid" value="<?= $artist?->id() ?>" />
-        <input type="hidden" name="oldcategoryid" value="<?= $categoryId ?>" />
-        <table>
-            <tr>
-                <td class="label">Change category</td>
-                <td>
-                    <select id="newcategoryid" name="newcategoryid" onchange="ChangeCategory(this.value);">
-<?php   foreach (CATEGORY as $CatID => $CatName) { ?>
-                        <option value="<?= $CatID + 1 ?>"<?= $categoryId == $CatID + 1 ? ' selected="selected"' : '' ?>><?= $CatName ?></option>
-<?php   } ?>
-                    </select>
-                </td>
-            <tr id="split_releasetype">
-                <td class="label">Release type</td>
-                <td>
-                    <select name="releasetype">
-<?php
-        foreach ($releaseTypes as $RTID => $ReleaseType) {
-?>
-                        <option value="<?= $RTID ?>"><?= $ReleaseType ?></option>
-<?php   } ?>
-                    </select>
-                </td>
-            </tr>
-            <tr id="split_artist">
-                <td class="label">Artist</td>
-                <td>
-                    <input type="text" name="artist" value="<?= $artist?->name() ?>" size="50" />
-                </td>
-            </tr>
-            <tr id="split_title">
-                <td class="label">Title</td>
-                <td>
-                    <input type="text" name="title" value="<?= $tgroup->name() ?>" size="50" />
-                </td>
-            </tr>
-            <tr id="split_year">
-                <td class="label">Year</td>
-                <td>
-                    <input type="text" name="year" value="<?= $tgroup->year() ?>" size="10" />
-                </td>
-            </tr>
-            <tr>
-                <td colspan="2" class="center">
-                    <input type="submit" value="Change category" />
-                </td>
-            </tr>
-        </table>
-        <script type="text/javascript">ChangeCategory($('#newcategoryid').raw().value);</script>
-    </form>
-<?php } ?>
-</div>
-<?php
-} // if $Viewer->permitted('torrents_edit')
 
-View::show_footer();
+echo $Twig->render('torrent/edit-torrent.twig', [
+    'artist'            => $artist,
+    'release_type_list' => (new Gazelle\ReleaseType())->list(),
+    'torrent'           => $torrent,
+    'viewer'            => $Viewer,
+]);
