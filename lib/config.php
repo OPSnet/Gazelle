@@ -462,6 +462,11 @@ defined('STAFF_LEVEL') or define('STAFF_LEVEL', 820);
 // Threshold for detecting duplicate IP addresses.
 defined('IP_OVERLAPS') or define('IP_OVERLAPS', 5);
 
+// Interval in seconds that determines when a new historical ip
+// address extends the current range, or a new range is appended
+// to the multirange. One week by default.
+defined('IP_HISTORY_NEW_INTERVAL') or define('IP_HISTORY_NEW_INTERVAL', 3600 * 24 * 7);
+
 // Maximum length of a pathname in torrent files and zip archives.
 defined('MAX_PATH_LEN') or define('MAX_PATH_LEN', 200);
 

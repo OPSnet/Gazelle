@@ -154,7 +154,7 @@ class History extends \Gazelle\BaseUser {
         return $affected;
     }
 
-    public function registerSiteIp(string $ipaddr, int $delay = 86_400 * 120): int {
+    public function registerSiteIp(string $ipaddr, int $delay = IP_HISTORY_NEW_INTERVAL): int {
         // I had initially hoped that it would be possible to do this:
         //
         // insert into ip_site_history (id_user, ip) values (2, '2.2.2.2')
