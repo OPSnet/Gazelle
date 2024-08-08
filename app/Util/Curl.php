@@ -90,6 +90,10 @@ class Curl {
     }
 
     public function responseCode(): int {
-        return curl_getinfo($this->curl, CURLINFO_RESPONSE_CODE);
+        return $this->curlInfo(CURLINFO_RESPONSE_CODE);
+    }
+
+    public function curlInfo($option = null): mixed {
+        return curl_getinfo($this->curl, $option);
     }
 }

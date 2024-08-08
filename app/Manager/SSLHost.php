@@ -6,33 +6,41 @@ class SSLHost extends \Gazelle\Base {
     use \Gazelle\Pg;
 
     public function lookup(string $hostname, int $port): array {
-
         if (!preg_match('/^(?:[\w-]+)(?:\.[\w-]+)+$/', $hostname)) {
             return [];
         }
-        if ($port <= 0) {
+        if ($port <= 0 || $port > 0xffff) {
             return [];
         }
-        $notBefore = null;
-        $notAfter = null;
-        $output = explode("\n", trim((string)shell_exec(SERVER_ROOT . "/bin/ssl-check $hostname $port")));
-        if (count($output) != 2) {
+
+        // The following does not work:
+        // $cx = stream_context_create([
+        //      "ssl"  => [ "capture_peer_cert" => TRUE],
+        //      "http" => [ "proxy" => "tcp://proxy:3128", "request_fulluri" => true]
+        //  ]);
+        // $stream = stream_socket_client("ssl://some.where:443", $errno, $errstr, 30, STREAM_CLIENT_CONNECT, $cx);
+        // echo $errstr;
+        // → 'No route to host'
+        //
+        // That is, you cannot proxy a socket connection over Squid.
+        // Let us know if you can show otherwise.
+
+        $url  = "https://{$hostname}:{$port}";
+        $curl = (new \Gazelle\Util\Curl())
+            ->setOption(CURLOPT_CERTINFO, true)
+            ->setOption(CURLOPT_SSL_VERIFYPEER, true)
+            ->setOption(CURLOPT_SSL_VERIFYHOST, 2);
+
+        $curl->fetch($url);
+        $info = $curl->curlInfo(CURLINFO_CERTINFO);
+
+        if (!isset($info[0]['Start date'], $info[0]['Expire date'])) {
             return [];
         }
-        foreach ($output as $line) {
-            [$event, $date] = explode('=', $line);
-            $date = date('Y-m-d H:m:s', (int)strtotime($date));
-            switch ($event) {
-                case 'notAfter':
-                    $notAfter = $date;
-                    break;
-                case 'notBefore':
-                    $notBefore = $date;
-                    break;
-                default:
-                    break;
-            }
-        }
+
+        $notBefore = date('Y-m-d H:m:s', (int)strtotime($info[0]['Start date']));
+        $notAfter  = date('Y-m-d H:m:s', (int)strtotime($info[0]['Expire date']));
+
         return [$notBefore, $notAfter];
     }
 
