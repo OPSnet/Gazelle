@@ -7,9 +7,8 @@ use Gazelle\Enum\LeechReason;
 
 error_reporting(E_ALL);
 
-require_once(__DIR__ . '/lib/bootstrap.php');
-require_once(__DIR__ . '/vendor/d11wtq/boris/lib/autoload.php');
-require_once('tests/helper.php');
+require_once(__DIR__ . '/../lib/bootstrap.php');
+require_once(__DIR__ . '/../tests/helper.php');
 
 $remove = [];
 foreach (['pcntl_fork', 'pcntl_signal', 'pcntl_signal_dispatch', 'pcntl_waitpid'] as $function) {

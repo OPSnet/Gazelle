@@ -88,9 +88,7 @@ The following ports are forwarded:
 ## Going further
 If you want to poke around inside the web container, open a shell:
 
-`export WEBCONT=$(docker ps|awk '$2 ~ /web$/ {print $1}')`
-
-`docker exec -it $WEBCONT bash`
+`docker compose exec web bash`
 
 To keep an eye on PHP errors during development:
 
@@ -98,35 +96,34 @@ To keep an eye on PHP errors during development:
 
 To create a Phinx migration:
 
-`docker exec -it $WEBCONT vendor/bin/phinx create MyNewMigration`
+`docker compose exec -T web vendor/bin/phinx create MyNewMigration`
 
 Edit the resulting file and then apply it:
 
-`docker exec -it $WEBCONT vendor/bin/phinx migrate`
+`docker compose exec -T web vendor/bin/phinx migrate`
 
-For postgres add `-c ./misc/phinx-pg.php` to the END of the phinx commands
+For PostgreSQL tabales, append `-c ./misc/phinx-pg.php` to the phinx commands.
 
-To access the database, look at `.docker/mysql-home/.my.cnf`
+To access the database, look at `misc/docker/mysql-home/.my.cnf`
 The credentials should match those used in the `docker-compose.yml` file.
 
 And then:
 
-`docker exec -it $MYSQLCONT mysql`
+`docker compose exec mysql mysql`
 
 In the same vein, you can use `mysqldump` to perform a backup.
 
 To view the sphinx tables:
 
-`export SPHINXCONT=$(docker ps|awk '$2 ~ /sphinxsearch/ {print $1}')`
-`docker exec -it $SPHINXCONT  mysql -h 127.0.0.1 -P 9306`
+`docker compose exec sphinxsearch mysql -h 127.0.0.1 -P 9306`
 
 #### Boris
 You can run Boris directly:
 
-`docker exec -it $WEBCONT /var/www/boris`
+`docker compose exec web bin/boris`
 
 #### Gitlab CI testrunner
-`.docker/gitlab.Dockerfile` can be used to create a Docker container suitable for
+`misc/gitlab.Dockerfile` can be used to create a Docker container suitable for
 running the test suite in a Gitlab CI runner. The included `.gitlab-ci.yml`
 config runs unit tests with phpunit and afterwards end-to-end tests with
 cypress.
@@ -134,21 +131,20 @@ cypress.
 To build the container, get the sql files from the OPSnet/gazelle-e2e-testing-docker
 repo and place them alongside the `gitlab.Dockerfile`. Then run
 
-    docker build -f .docker/gitlab.Dockerfile -t gazelle-e2e-testing:latest --compress .
+    docker build -f misc/gitlab.Dockerfile -t gazelle-e2e-testing:latest --compress .
 
 in the gazelle repo's root directory (this one).
 
 Similarly, the phpstan container can be built with
 
-    docker build -t gazelle-phpstan:latest -f .docker/phpstan.Dockerfile --compress .docker
-
+    docker build -t gazelle-phpstan:latest -f misc/phpstan.Dockerfile --compress misc/docker
 
 ## Upgrading Postgresql
 Major Pg versions require a dump and restore. In the docker environment
 this means doing the following;
  - run 'make pgdump' to dump the current contents
  - stop the current postgresql container
- - mv .docker/data/pg .docker/data/pg.old
+ - mv misc/docker/data/pg misc/docker/data/pg.old
  - mkdir ./docker/data/pg
  - docker-compose stop && docker-compose up -d
  - import the dump to the docker pg container

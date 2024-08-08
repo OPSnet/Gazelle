@@ -19,6 +19,22 @@ class UserCreator extends Base {
     protected string $passHash;
     protected string $username;
 
+    /**
+     * Reset the internal state so that a new user may be created.
+     * Calling create() calls this as a side effect.
+     */
+    public function flush(): void {
+        $this->adminComment = [];
+        $this->email        = [];
+        unset($this->id);
+        unset($this->announceKey);
+        unset($this->inviteKey);
+        unset($this->newInstall);
+        unset($this->passHash);
+        unset($this->permissionId);
+        unset($this->username);
+    }
+
     public function create(): User {
         if (!isset($this->passHash)) {
             throw new UserCreatorException('password');
@@ -33,8 +49,7 @@ class UserCreator extends Base {
             throw new UserCreatorException('username-invalid');
         }
 
-        $this->newInstall = !(bool)self::$db->scalar("SELECT ID FROM users_main LIMIT 1");
-        if ($this->newInstall) {
+        if ($this->newInstall()) {
             $this->permissionId = SYSOP;
             $this->adminComment[] = 'Initial account created on first registration';
         } else {
@@ -211,33 +226,18 @@ class UserCreator extends Base {
 
         (new Tracker())->addUser($user);
 
-        $this->reset(); // So we can create another user
+        $this->flush(); // So we can create another user
         return $user;
     }
 
     /**
-     * Reset the internal state so that a new user may be created.
-     * Calling create() calls this as a side effect.
+     * This will return true on a new installation (no users in the user table)
+     * Note: this is semi-persistent until the flush() method is called, because
+     * the site code needs to know whether to redirect the user to the login page
+     * or tell them to check their email for a confirmation message.
      */
-    public function reset(): void {
-        $this->newInstall   = false;
-        $this->adminComment = [];
-        $this->email        = [];
-        unset($this->id);
-        unset($this->announceKey);
-        unset($this->inviteKey);
-        unset($this->passHash);
-        unset($this->permissionId);
-        unset($this->username);
-    }
-
-    /**
-     * Is this the first user created?
-     *
-     * @return bool True if this is the first account (hence, enabled Sysop)
-     */
-    public function newInstall(): bool {
-        return $this->newInstall;
+    function newInstall(): bool {
+        return $this->newInstall ??= !(bool)self::$db->scalar("SELECT ID FROM users_main LIMIT 1");
     }
 
     /**

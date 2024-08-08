@@ -31,7 +31,7 @@ class BonusPointPool extends AbstractMigration {
             ->save();
 
         $this->execute("
-            INSERT IGNORE INTO contest_type (Name) VALUES 'upload_flac_no_single'
+            INSERT IGNORE INTO contest_type (Name) VALUES ('upload_flac_no_single')
         ");
     }
 

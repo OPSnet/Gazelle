@@ -7,7 +7,7 @@
 
     <file>.</file>
     <exclude-pattern>cache/*</exclude-pattern>
-    <exclude-pattern>*/.docker/*</exclude-pattern>
+    <exclude-pattern>*/misc/docker/*</exclude-pattern>
     <exclude-pattern>*/.git/*</exclude-pattern>
     <exclude-pattern>*/node_modules/*</exclude-pattern>
     <exclude-pattern>*/sass/*</exclude-pattern>
@@ -29,6 +29,7 @@
         <exclude name="PSR2.Classes.PropertyDeclaration.SpacingAfterType" />
         <exclude name="PSR2.Methods.FunctionCallSignature" />
 
+        <exclude name="PSR12.Files.FileHeader.SpacingAfterBlock" /><!-- compact phpstan-var declarations -->
         <exclude name="PSR12.Traits.UseDeclaration" />
 
         <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing" />

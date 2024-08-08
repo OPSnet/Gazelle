@@ -2,8 +2,7 @@
 
 use Phinx\Migration\AbstractMigration;
 
-final class Init extends AbstractMigration
-{
+final class Init extends AbstractMigration {
     public function up(): void {
         $this->execute('CREATE EXTENSION IF NOT EXISTS pg_trgm');
         $this->execute('CREATE EXTENSION IF NOT EXISTS btree_gist');
@@ -32,6 +31,7 @@ final class Init extends AbstractMigration
         $this->execute("CREATE TABLE geo.asn_trg AS SELECT word FROM ts_stat('select to_tsvector(''simple'', name) FROM geo.asn');");
         $this->execute('CREATE INDEX asn_trg_idx ON geo.asn_trg USING gin (word gin_trgm_ops);');
     }
+
     public function down(): void {
         $this->table('geo.asn_trg')->drop()->save();
         $this->table('geo.ptr')->drop()->save();

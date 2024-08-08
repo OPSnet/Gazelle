@@ -4,9 +4,9 @@
 
 .DS_Store
 .bash_history
+.docker-init-done
 .cache/
 .config/
-.docker/data/
 .idea/
 .vscode/
 .local/
@@ -20,6 +20,7 @@
 __MACOSX/
 
 /cache
+/misc/docker/data/
 /misc/mysql-dump.sql
 /misc/postgresql-dump.sql
 /misc/phinx/seeded.txt
@@ -32,9 +33,8 @@ __MACOSX/
 /mix.js.map
 /yarn-error.log
 
-.docker/mysql-home/.mysql_history
-.docker-init-done
-!.docker/mysql-home/.my.cnf
+/misc/docker/mysql-home/.mysql_history
+!/misc/docker/mysql-home/.my.cnf
 
 /public/static/styles/**/*.css
 /public/static/styles/**/*.css.map

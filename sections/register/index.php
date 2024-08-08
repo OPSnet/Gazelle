@@ -64,7 +64,12 @@ if (isset($_REQUEST['confirm'])) {
             }
 
             try {
+                $newInstall = $creator->newInstall();
                 $user = $creator->create();
+                if ($newInstall) {
+                    header("Location: /login.php");
+                    exit;
+                }
                 (new Gazelle\Util\Mail())->send($user->email(), 'New account confirmation at ' . SITE_NAME,
                     $Twig->render('email/registration.twig', [
                         'ipaddr' => $user->requestContext()->remoteAddr(),

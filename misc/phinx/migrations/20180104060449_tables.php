@@ -34,7 +34,7 @@ DROP FUNCTION binomial_ci;");
         $this->execute("ALTER DATABASE CHARACTER SET 'utf8';");
         $this->execute("ALTER DATABASE COLLATE='utf8_swedish_ci';");
         $this->execute("
-CREATE FUNCTION `binomial_ci`(p int, n int) RETURNS float DETERMINISTIC
+CREATE FUNCTION IF NOT EXISTS binomial_ci(p int, n int) RETURNS float DETERMINISTIC
 RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668) / n) / (1 + 2.7067 / n));
 ");
 

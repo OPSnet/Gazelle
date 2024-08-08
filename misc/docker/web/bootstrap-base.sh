@@ -12,7 +12,7 @@ POSTGRES_USER_PASSWORD="$(dd if=/dev/urandom count=1 bs=12 status=none | base64)
 export COMPOSER_HOME
 export POSTGRES_USER_PASSWORD
 
-[ -f "${CI_PROJECT_DIR}/lib/override.config.php" ] || bash "${CI_PROJECT_DIR}/.docker/web/generate-config-testing.sh"
+[ -f "${CI_PROJECT_DIR}/lib/override.config.php" ] || bash "${CI_PROJECT_DIR}/misc/docker/web/generate-config-testing.sh"
 sed -i 's|gazelle\.php|ci-coverage.php|' "${CI_PROJECT_DIR}/public/index.php"
 
 if [ ! -f "/etc/php/${PHP_VER}/cli/conf.d/99-boris.ini" ]; then
@@ -52,10 +52,10 @@ if [ -z "${MYSQL_INIT_DB-}" ]; then
     echo "Restore mysql dump..."
     time mysql < /opt/gazelle/mysql_schema.sql || exit 1
     time mysql < /opt/gazelle/mysql_data.sql || exit 1
-    echo 'CREATE FUNCTION bonus_accrual(Size bigint, Seedtime float, Seeders integer)
+    echo 'CREATE FUNCTION IF NOT EXISTS bonus_accrual(Size bigint, Seedtime float, Seeders integer)
   RETURNS float DETERMINISTIC NO SQL
   RETURN Size / pow(1024, 3) * (0.0433 + (0.07 * ln(1 + Seedtime/24)) / pow(greatest(Seeders, 1), 0.35));
-CREATE FUNCTION `binomial_ci`(p int, n int)
+CREATE FUNCTION IF NOT EXISTS binomial_ci(p int, n int)
   RETURNS float DETERMINISTIC
   RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668) / n) / (1 + 2.7067 / n));' \
   | mysql -u root -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" || exit 1

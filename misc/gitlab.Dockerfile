@@ -134,19 +134,19 @@ RUN echo "deb http://deb.debian.org/debian ${DEB_RELEASE}-backports main" > /etc
 #    && ln -fs /opt/firefox/firefox /usr/bin/firefox
 
 COPY --from=composer:2.7.7 /usr/bin/composer /usr/local/bin/composer
-COPY .docker /var/www/.docker
+COPY misc/docker /var/www/misc/docker
 
 # Permissions and configuration layer
 RUN useradd -ms /bin/bash gazelle \
     && touch /var/log/php_error.log /var/log/xdebug.log \
     && chown -R gazelle:gazelle /var/www /var/log/php_error.log /var/log/xdebug.log \
-    && cp /var/www/.docker/web/php.ini /etc/php/${PHP_VER}/cli/10-php.ini \
-    && cp /var/www/.docker/web/php-cli.ini /etc/php/${PHP_VER}/cli/20-cli.ini \
-    && cp /var/www/.docker/web/php.ini /etc/php/${PHP_VER}/fpm/php.ini \
-    && cp /var/www/.docker/web/xdebug.ini /etc/php/${PHP_VER}/mods-available/xdebug.ini \
+    && cp /var/www/misc/docker/web/php.ini /etc/php/${PHP_VER}/cli/10-php.ini \
+    && cp /var/www/misc/docker/web/php-cli.ini /etc/php/${PHP_VER}/cli/20-cli.ini \
+    && cp /var/www/misc/docker/web/php.ini /etc/php/${PHP_VER}/fpm/php.ini \
+    && cp /var/www/misc/docker/web/xdebug.ini /etc/php/${PHP_VER}/mods-available/xdebug.ini \
     && sed -i 's|xdebug.mode=debug|\0,coverage|' /etc/php/${PHP_VER}/mods-available/xdebug.ini \
-    && cp /var/www/.docker/web/www.conf /etc/php/${PHP_VER}/fpm/pool.d/www.conf \
-    && cp /var/www/.docker/web/nginx.conf /etc/nginx/sites-available/gazelle.conf \
+    && cp /var/www/misc/docker/web/www.conf /etc/php/${PHP_VER}/fpm/pool.d/www.conf \
+    && cp /var/www/misc/docker/web/nginx.conf /etc/nginx/sites-available/gazelle.conf \
     && ln -s /etc/nginx/sites-available/gazelle.conf /etc/nginx/sites-enabled/gazelle.conf \
     && rm -f /etc/nginx/sites-enabled/default \
     && mkdir /opt/gazelle
@@ -155,4 +155,4 @@ COPY mysql_schema.sql mysql_data.sql /opt/gazelle/
 
 EXPOSE 80/tcp
 
-ENTRYPOINT [ "/bin/bash", "/var/www/.docker/web/entrypoint-testing.sh" ]
+ENTRYPOINT [ "/bin/bash", "/var/www/misc/docker/web/entrypoint-testing.sh" ]

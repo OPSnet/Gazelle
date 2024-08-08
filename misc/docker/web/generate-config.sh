@@ -2,9 +2,9 @@
 
 set -euo pipefail
 
-LIB_DIR="$(dirname "${BASH_SOURCE[0]}")/../../lib"
-SOURCE="${LIB_DIR}/devel.example.config.php"
-TARGET="${LIB_DIR}/override.config.php"
+MISC_DIR="$(dirname "$0")/../.."
+SOURCE="${MISC_DIR}/example.local.config.php"
+TARGET="${MISC_DIR}/../lib/override.config.php"
 
 [ -f ${TARGET} ] && exit 0
 echo "Generating configuration parameters..."

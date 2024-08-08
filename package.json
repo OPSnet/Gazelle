@@ -7,7 +7,7 @@
     "prod": "cross-env NODE_ENV=production yarn build",
     "build": "yarn build:scss && yarn build:previews",
     "build:scss": "webpack --no-progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
-    "build:previews": "node bin/render_styles_preview.js",
+    "build:previews": "node public/stylesheet-gallery/preview.js",
     "start": "yarn build:scss -- --watch"
   },
   "license": "Unlicense",

@@ -49,7 +49,7 @@ see expired unfetched activity.
 
     vendor/bin/phinx migrate
 
-7. Configure Sphinx - we recommend you use the included .docker/sphinxsearch/sphinx.conf
+7. Configure Sphinx - we recommend you use the included misc/docker/sphinxsearch/sphinx.conf
    You can copy this to /etc/sphinx/sphinx.conf. You need to fill in the
    details of the SQL server from lib/override.config.php and you may need to
    create the `/var/lib/sphinx` folder.
@@ -67,7 +67,7 @@ see expired unfetched activity.
 Note, generating the previews requires a Chrome instance on the host.
 
 9. Setup your web server. We recommend using nginx (https://www.nginx.com/).
-   A sample configuration for nginx can be found in .docker/web/nginx.conf.
+   A sample configuration for nginx can be found in misc/docker/web/nginx.conf.
 
 10. Set up the cronjobs for the background task scheduler and Sphinx updates.
 

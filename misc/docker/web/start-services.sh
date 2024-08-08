@@ -8,7 +8,7 @@ run_service()
 }
 
 # initialize sphinx
-cp "${CI_PROJECT_DIR}/.docker/sphinxsearch/sphinx.conf" /etc/sphinxsearch/sphinx.conf
+cp "${CI_PROJECT_DIR}/misc/docker/sphinxsearch/sphinx.conf" /etc/sphinxsearch/sphinx.conf
 sed -i "s|\(sql_user = \).*|\1${MYSQL_USER}|g" /etc/sphinxsearch/sphinx.conf
 sed -i "s|\(sql_pass = \).*|\1${MYSQL_PASSWORD}|g" /etc/sphinxsearch/sphinx.conf
 sed -i "s|\(sql_db = \).*|\1${MYSQL_DATABASE}|g" /etc/sphinxsearch/sphinx.conf

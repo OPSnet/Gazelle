@@ -2,9 +2,9 @@
 
 set -euo pipefail
 
-LIB_DIR="${CI_PROJECT_DIR}/lib"
-SOURCE="${LIB_DIR}/devel.example.config.php"
-TARGET="${LIB_DIR}/override.config.php"
+MISC_DIR="${CI_PROJECT_DIR}/misc"
+SOURCE="${MISC_DIR}/example.local.config.php"
+TARGET="${MISC_DIR}/../lib/override.config.php"
 
 [ -f ${TARGET} ] && exit 0
 echo "Generating configuration parameters..."
@@ -22,7 +22,7 @@ grep -q SQLDB "$TARGET" || echo "define('SQLDB', '$MYSQL_DATABASE');" >> "${TARG
 grep -q SQLLOGIN "$TARGET" || echo "define('SQLLOGIN', '$MYSQL_USER');" >> "${TARGET}"
 grep -q SQLPASS "$TARGET" || echo "define('SQLPASS', '$MYSQL_PASSWORD');" >> "${TARGET}"
 sed -i "s|sc5tlc9JSCC6|$MYSQL_ROOT_PASSWORD|g" "${TARGET}"
-# postgres
+# postgresql
 grep -q GZPG_HOST "$TARGET" || echo "define('GZPG_HOST', '$PGHOST');" >> "${TARGET}"
 grep -q GZPG_DB "$TARGET" || echo "define('GZPG_DB', '$POSTGRES_DATABASE');" >> "${TARGET}"
 grep -q GZPG_USER "$TARGET" || echo "define('GZPG_USER', '$POSTGRES_DB_USER');" >> "${TARGET}"

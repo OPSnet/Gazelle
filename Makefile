@@ -79,7 +79,7 @@ lint-js:
 
 .PHONY: lint-php
 lint-php:
-	find . -path './vendor' -prune -o -path ./node_modules -prune -o -path './.docker' -prune -o -type f -name '*.php' -print0 | xargs -0 -n1 -P4 php -l -n | grep -v '^No syntax errors detected in' || true
+	find . -path vendor -prune -o -path node_modules -prune -o -path misc/docker -prune -o -type f -name '*.php' -print0 | xargs -0 -n1 -P4 php -l -n | grep -v '^No syntax errors detected in' || true
 	vendor/bin/phpcs -p --report-width=256
 	vendor/bin/phpstan analyse --memory-limit=1024M --configuration=misc/phpstan.neon
 

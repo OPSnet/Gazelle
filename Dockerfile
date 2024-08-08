@@ -100,18 +100,18 @@ RUN apt-get update \
     # Python tools layer
     && pip3 install --break-system-packages chardet eac-logchecker xld-logchecker
 
-COPY .docker/ /var/www/.docker
+COPY misc/docker/ /var/www/misc/docker
 COPY lib /var/www/lib
 COPY bin/ /var/www/bin
 COPY --from=composer:2.7.7 /usr/bin/composer /usr/local/bin/composer
 
 # Permissions and configuration layer
 RUN useradd -ms /bin/bash gazelle \
-    && cp /var/www/.docker/web/php.ini /etc/php/${PHP_VER}/cli/php.ini \
-    && cp /var/www/.docker/web/php.ini /etc/php/${PHP_VER}/fpm/php.ini \
-    && cp /var/www/.docker/web/xdebug.ini /etc/php/${PHP_VER}/mods-available/xdebug.ini \
-    && cp /var/www/.docker/web/www.conf /etc/php/${PHP_VER}/fpm/pool.d/www.conf \
-    && cp /var/www/.docker/web/nginx.conf /etc/nginx/sites-available/gazelle.conf \
+    && cp /var/www/misc/docker/web/php.ini /etc/php/${PHP_VER}/cli/php.ini \
+    && cp /var/www/misc/docker/web/php.ini /etc/php/${PHP_VER}/fpm/php.ini \
+    && cp /var/www/misc/docker/web/xdebug.ini /etc/php/${PHP_VER}/mods-available/xdebug.ini \
+    && cp /var/www/misc/docker/web/www.conf /etc/php/${PHP_VER}/fpm/pool.d/www.conf \
+    && cp /var/www/misc/docker/web/nginx.conf /etc/nginx/sites-available/gazelle.conf \
     && ln -s /etc/nginx/sites-available/gazelle.conf /etc/nginx/sites-enabled/gazelle.conf \
     && rm -f /etc/nginx/sites-enabled/default \
     && echo "Initialize Boris..." \
@@ -129,4 +129,4 @@ EXPOSE 80/tcp
 EXPOSE 3306/tcp
 EXPOSE 34000/tcp
 
-ENTRYPOINT [ "/bin/bash", "/var/www/.docker/web/entrypoint.sh" ]
+ENTRYPOINT [ "/bin/bash", "/var/www/misc/docker/web/entrypoint.sh" ]

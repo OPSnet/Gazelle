@@ -5,7 +5,7 @@ const { join } = require('path');
 const puppeteer = require('puppeteer');
 const sharp = require('sharp');
 
-const rootPath = join(__dirname, '..');
+const rootPath = join(__dirname, '../..');
 const staticPath = join('public', 'static');
 const stylesPath = join(rootPath, staticPath, 'styles');
 const stylesPreviewPath = join(rootPath, staticPath, 'stylespreview');
@@ -40,7 +40,7 @@ async function buildPreview(browser, style) {
     var preview = join(stylesPath, style, 'preview.html');
     var output = join(stylesPreviewPath, `full_${style}.png`);
 
-    fs.copyFileSync(join(__dirname, 'preview_base.html'), preview);
+    fs.copyFileSync(join(__dirname, '../stylesheet-gallery/preview-base.html'), preview);
 
     const context = await browser.createIncognitoBrowserContext();
     const page = await context.newPage();
@@ -52,11 +52,8 @@ async function buildPreview(browser, style) {
     fs.unlinkSync(preview);
 }
 
-console.log('Building styles:\n');
-
 puppeteer.launch({args: ['--no-sandbox']}).then((browser) => {
     Promise.all(styles.map((style) => buildPreview(browser, style))).then(() => {
-        console.log('\nAll style previews built');
     }).catch((err) => {
         console.error(err);
         process.exitCode = 1;

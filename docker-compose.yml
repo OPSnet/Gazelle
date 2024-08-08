@@ -11,7 +11,7 @@ services:
       - pg
     volumes:
       - .:/var/www
-      - .docker/web/nginx.conf:/etc/nginx/sites-available/gazelle.conf
+      - ./misc/docker/web/nginx.conf:/etc/nginx/sites-available/gazelle.conf
     environment:
       - ENV=dev
       # These should match what you set for your mysql container below
@@ -54,13 +54,13 @@ services:
       - --default-authentication-plugin=mysql_native_password
 
   sphinxsearch:
-    build: ./.docker/sphinxsearch
+    build: misc/docker/sphinxsearch
     depends_on:
       - mysql
       - web
     volumes:
       - sphinx-data:/var/lib/sphinxsearch/data/
-      - ./.docker/sphinxsearch/sphinx.conf:/var/lib/sphinxsearch/conf/sphinx.conf
+      - ./misc/docker/sphinxsearch/sphinx.conf:/var/lib/sphinxsearch/conf/sphinx.conf
     environment:
       # These should match what you set for your mysql container above
       - MYSQL_USER=gazelle

@@ -98,6 +98,8 @@ class UserCreateTest extends TestCase {
 
         $this->expectException(Gazelle\Exception\UserCreatorException::class);
         $creator->create();
+
+        $this->assertFalse($creator->newInstall(), 'user-creator-not-new-install'); // simply to check the SQL
     }
 
     public function testNameTrim(): void {

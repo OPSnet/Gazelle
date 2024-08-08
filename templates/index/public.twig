@@ -19,7 +19,9 @@ Fall asleep, or hearing, die.</div>
 
 <div class="actions">
     <span class="action-bar">
+{% if not new %}
     <a href="/login.php">Enter</a>
+{% endif %}
 {% if new or constant('OPEN_REGISTRATION') %}
     <a title="Obtain an account by supplying a valid email address" href="register.php">Register</a>
 {% endif %}

@@ -6,8 +6,8 @@ class ForumEditPermissions extends AbstractMigration {
     public function up(): void {
         $this->table('forums_transitions', ['id' => false, 'primary_key' => 'forums_transitions_id'])
             ->addColumn('forums_transitions_id', 'integer', ['identity' => true])
-            ->addColumn('source',                'integer')
-            ->addColumn('destination',           'integer')
+            ->addColumn('source',                'integer', ['signed' => false])
+            ->addColumn('destination',           'integer', ['signed' => false])
             ->addColumn('label',                 'string', ['limit' => 20])
             ->addColumn('permission_levels',     'string', ['limit' => 50])
             ->addForeignKey('source',      'forums', 'ID', ['delete' => 'CASCADE', 'update' => 'CASCADE'])

@@ -54,9 +54,9 @@ e2e-tests:
     name: gazelle-e2e-testing
     entrypoint: [""]
   services:
-    - name: memcached:1.6.23-alpine
+    - name: memcached:1.6.29-alpine
       alias: memcached
-    - name: postgres:14.10-alpine
+    - name: postgres:16.3-alpine
       alias: postgres
     - name: percona:ps-8.0.29-21
       alias: mysql
@@ -98,17 +98,17 @@ e2e-tests:
         - node_modules
     - key:
         files:
-          - .docker/sphinxsearch/sphinx.conf
+          - misc/docker/sphinxsearch/sphinx.conf
         prefix: sphinx
       paths:
         - .sphinxsearch
   coverage: /^\s*Lines:\s*\d+.\d+\%/
   script:
-    - /bin/bash "${CI_PROJECT_DIR}/.docker/web/bootstrap-base.sh"
+    - /bin/bash "${CI_PROJECT_DIR}/misc/docker/web/bootstrap-base.sh"
     - su gazelle -c "bin/twig-parse \$(find templates -type f)"
-    - /bin/bash "${CI_PROJECT_DIR}/.docker/web/start-services.sh"
+    - /bin/bash "${CI_PROJECT_DIR}/misc/docker/web/start-services.sh"
     - su gazelle -c "composer exec -- phpunit --configuration misc/phpunit.xml --coverage-php /tmp/coverage/phpunit.cov --exclude-group no-ci"
-    - /bin/bash "${CI_PROJECT_DIR}/.docker/web/bootstrap-yarn.sh"
+    - /bin/bash "${CI_PROJECT_DIR}/misc/docker/web/bootstrap-yarn.sh"
     - su gazelle -c "make lint-js"
     - yarn run cypress run || test "$WAIT_ON_FINISH"
     # note: phpcov has problems if .cov files are somewhere in the src tree

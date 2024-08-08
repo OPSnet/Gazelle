@@ -8,7 +8,7 @@ run_service()
 }
 
 if [ ! -e .docker-init-done ] ; then
-    .docker/web/generate-config.sh
+    "$(dirname $0)"/generate-config.sh
     composer --version
     composer install --no-progress --optimize-autoloader
     bin/local-patch
@@ -52,6 +52,6 @@ run_service cron
 run_service nginx
 run_service php${PHP_VER}-fpm
 
-crontab /var/www/.docker/web/crontab
+crontab /var/www/misc/docker/web/crontab
 
 tail -f /var/log/nginx/access.log
