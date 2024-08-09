@@ -108,6 +108,7 @@ $color-mobilemenu-userinfo-1: $menutheme-300;
 $color-mobilemenu-userinfo-2: $menutheme-600;
 $color-mobilemenu-closed: $menutheme-700;
 $color-mobilemenu-shadow: $menutheme-500;
+$color-mobilemenu-closed-overlays: $menutheme-100; // bg for icons on the hedaer 
 
 $color-text-anchor-hover: $midtone-1000;
 $color-text-anchor: $fore-1000;
@@ -187,6 +188,9 @@ $color-anchor-alert: $fore-1000;
 $ds-shadow-heavy: 0 10px 18px rgba(0, 0, 0, 0.55), 0 7px 7px rgba(0, 0, 0, 0.52), 0 -5px 9px rgba(0, 0, 0, 0.32);
 $ds-shadow-raised:  0 10px 18px rgba(0, 0, 0, 0.25), 0 7px 7px rgba(0, 0, 0, 0.22);
 $ds-shadow-raised-hover:  0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+
+// icon
+$icon-mobile-rotate: url("/svg/std/notify-rotate-lightmode.svg"); //flip to lightmode
 
 @import '../apollostage/_base';
 

@@ -4,7 +4,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // SLUG
 
-$build-slug: "2408"; // must include quotes
+$build-slug: "Apollostage build 240808"; // must include quotes
 
 // ////////////////////////////////////////////////////////////////////////////////
 // COLORS
@@ -123,6 +123,7 @@ $color-mobilemenu-userinfo-1: $menutheme-400; // mobile pulldown menu gradient 1
 $color-mobilemenu-userinfo-2: $menutheme-900; // mobile pulldown menu gradient 2
 $color-mobilemenu-closed: $menutheme-700; // rules, also mobile menu header
 $color-mobilemenu-shadow: $menutheme-500; //mobile menu
+$color-mobilemenu-closed-overlays: $menutheme-100; // bg for icons on the hedaer 
 
 $color-text-anchor-hover: $midtone-1000;
 $color-text-anchor: $fore-1000;
@@ -153,7 +154,7 @@ $color-text-tooltipster-anchor-hover: $midtone-1000;
 
 // popup notifications
 $color-background-notification-gradient-1: $midtone-1000; // menu low/high suggested
-$color-background-notification-gradient-2: $midtone-400; // menu high/low suggested
+$color-background-notification-gradient-2: $midtone-500; // menu high/low suggested
 $color-background-notification: $ds-neutral-000;
 $color-text-notification-words: $fore-1000;
 
@@ -171,10 +172,6 @@ $color-obj-tag_bubble-background: $midtone-200; // menu-2 suggested
 $color-obj-tag_bubble-foreground: $midtone-900; // menu-9 suggested
 $color-obj-tag_bubble_snatched-background: $back-600;
 $color-obj-tag_bubble_snatched-foreground: $fore-800;
-
-$color-accent-border-error: $ds-goldenrod;
-$color-background-error: $ds-gray-92;
-$color-text-error: $ds-black;
 
 $color-accent-border-blockquote: $back-900; // Dotted
 $color-accent-border-box: $back-900;
@@ -216,6 +213,16 @@ $ds-shadow-raised-hover:
   0 14px 28px rgba(0, 0, 0, 0.25),
   0 10px 10px rgba(0, 0, 0, 0.22);
 
+$color-accent-border-error: $ds-goldenrod;
+$color-background-error: $ds-gray-92;
+$color-text-error: $ds-black;
+
+$color-accent-border-warning-1: hsl(348,99%,77%);
+$color-accent-border-warning-2: hsl(348,84%,51%);
+$color-background-warning: #633;
+$color-text-warning: $fore-700;
+$color-anchor-warning: $fore-1000;
+
 // ////////////////////////////////////////////////////////////////////////////////
 // ICONS
 
@@ -249,11 +256,14 @@ $icon-number-leechers: url("/svg/std/arrow-down-round-ccc.svg");
 // Used on alerts
 
 // // standard:
+$icon-mobile-rotate: url("/svg/std/notify-rotate-darkmode-ccc.svg");
 // $icon-notification: url("/svg/std/notification-bell-333xccc.svg");
 // $icon-warning: url("/svg/std/x-c33.svg")
+
 // // Orpheus specific; other deployments, use the above.
 $icon-notification: url("/svg/site/ops-icon-harp-ccc.svg");
 $icon-warning: url("/svg/site/ops-icon-triangle-000.svg");
+
 
 // EOF
 // ////////////////////////////////////////////////////////////////////////////////

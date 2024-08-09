@@ -13,10 +13,11 @@
 
 // import basic colors as a backup:
 @import '../apollostage/_variables';
-// debug slugs: must be after import.
-$build-slug: $build-slug + " " + "paper";
-// and override as follows:
 
+// debug slugs: must be after import.
+$build-slug: "Orpheus Paper build 240808";
+
+// override as follows:
 // ////////////////////////////////////////////////////////////////////////////////
 // COLORS
 
@@ -104,6 +105,7 @@ $ds-neutral-000: #000;
 $ds-red: #a41610;
 $ds-green: #11890e;
 $ds-yellow: #c9a612;
+$ds-orange: #ff8c00;
 $ds-fx-low: rgba(0, 0, 0, 0.15);
 $ds-fx-mid: rgba(0, 0, 0, 0.225);
 $ds-fx-blue: hsla(215, 90%, 56%, 0.3);
@@ -215,8 +217,8 @@ $color-accent-cats_comics: gold;
 $color-accent-cats_ebooks: chocolate;
 $color-accent-cats_elearningvideos: mediumpurple;
 $color-accent-cats_music: darkslategray;
-$color-accent-forum-inline-last-read: $ds-yellow;
-$color-accent-forum-unread: $ds-yellow;
+$color-accent-forum-inline-last-read: $ds-orange;
+$color-accent-forum-unread: $ds-orange;
 
 $color-accent-selection-background: $mid-800;
 $color-accent-selection-text: #fff; // usually #fff or $color-text-bold
