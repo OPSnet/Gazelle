@@ -91,16 +91,17 @@ class TextTest extends TestCase {
     }
 
     public function testImage(): void {
-        $image     = 'https://www.example.com/a.jpg';
-        $withCache = '@^<img class="scale_image" onclick=".*?" alt=".*?/i/full/[\w-]+/[\w-]+" src=".*?/i/full/[\w-]+/[\w-]+" data-origin-src="\Q' . $image . '\E" />$@';
-        $noCache   = "<img loading=\"lazy\" class=\"scale_image\" onclick=\"lightbox.init(this, \$(this).width());\" alt=\"$image\" src=\"$image\" />";
+        $bad = "[img=https://www.example.com/a.pdf]";
+        $this->assertEquals($bad, $bad, "text-image-bad");
 
-        $this->assertEquals($noCache, Text::full_format("[img=$image]"), 'text-image1-cache-implicit');
-        // $this->assertEquals($noCache, Text::full_format("[img=$image]", cache: false), 'text-image1-cache-false');
-        $this->assertEquals($noCache, Text::full_format("[img]{$image}[/img]"), 'text-image2-cache-implicit');
-        // $this->assertEquals($noCache, Text::full_format("[img]{$image}[/img]", cache: false), 'text-image2-cache-false');
-        // $this->assertMatchesRegularExpression($withCache, Text::full_format("[img=$image]", cache: true), 'text-image1-cache-true');
-        // $this->assertMatchesRegularExpression($withCache, Text::full_format("[img]{$image}[/img]", cache: true), 'text-image2-cache-true');
+        foreach (['avif', 'bmp', 'gif', 'jpg', 'jpeg', 'png', 'svg', 'tiff', 'webp'] as $ext) {
+            $image     = "https://www.example.com/a.jpg";
+            $withCache = '@^<img loading="lazy" class="scale_image" onclick=".*?" alt=".*?/i/full/[\w-]+/[\w-]+" src=".*?/i/full/[\w-]+/[\w-]+" data-origin-src="\Q' . $image . '\E" />$@';
+            $noCache   = "<img loading=\"lazy\" class=\"scale_image\" onclick=\"lightbox.init(this, \$(this).width());\" alt=\"$image\" src=\"$image\" />";
+
+            $this->assertEquals($noCache, Text::full_format("[img=$image]"), "text-image1-cache-implicit-$ext");
+            $this->assertEquals($noCache, Text::full_format("[img]{$image}[/img]"), "text-image2-cache-implicit-$ext");
+        }
     }
 
     public function testCollage(): void {
