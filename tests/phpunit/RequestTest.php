@@ -469,7 +469,8 @@ class RequestTest extends TestCase {
         $this->assertCount(39, $payload, 'req-json-payload');
         $this->assertTrue($payload['canVote'], 'req-json-can-vote');
         $this->assertFalse($payload['canEdit'], 'req-json-can-edit');
-        $this->assertEquals($payload['timeAdded'], $payload['lastVote'], 'req-json-date');
+        // request bounty is added in a separate db operation and the second may roll over
+        $this->assertLessThanOrEqual(1, abs(strtotime($payload['timeAdded']) - strtotime($payload['lastVote'])), 'req-json-date');
         $this->assertEquals('', $payload['fillerName'], 'req-json-can-vote');
         $this->assertEquals('UA-7890', $payload['catalogueNumber'], 'req-json-catno');
         $this->assertEquals(['Lossless'], $payload['bitrateList'], 'req-json-bitrate-list');
