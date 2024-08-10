@@ -1,0 +1,49 @@
+#! /usr/bin/env php
+<?php
+
+// Scan each torrent and make a note of what file extensions are present.
+// 1.6M torrents takes about 12 minutes, running in tmux is advised.
+
+require_once __DIR__ . '/../lib/bootstrap.php';
+
+$db  = Gazelle\DB::DB();
+$max = (int)$db->scalar("
+    select max(id) from torrents
+");
+$torMan = new Gazelle\Manager\Torrent();
+$seen   = [];
+$chunk  = 10000;
+$id     = 0;
+$n      = 0;
+
+while ($id < $max) {
+    $db->prepared_query("
+        SELECT t.ID
+        FROM torrents t
+        WHERE t.ID > ?
+        ORDER BY t.ID
+        LIMIT ?
+        ", $id, $chunk
+    );
+    foreach ($db->collect(0, false) as $tid) {
+        $torrent = $torMan->findById($tid);
+        if (is_null($torrent)) {
+            continue;
+        }
+        ++$n;
+        $category = $torrent->group()->categoryName();
+        if (!isset($seen[$category])) {
+            $seen[$category] = [];
+        }
+        foreach ($torrent->fileList() as $file) {
+            $ext = strtolower($file['ext']);
+            if (!isset($seen[$category][$ext])) {
+                $seen[$category][$ext] = 0;
+            }
+            ++$seen[$category][$ext];
+        }
+    }
+    $id = $tid;
+}
+
+print "n=$n\n" . json_encode($seen, JSON_PRETTY_PRINT);
