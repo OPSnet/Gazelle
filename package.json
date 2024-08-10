@@ -8,9 +8,7 @@
     "build": "yarn build:scss && yarn build:previews",
     "build:scss": "webpack --no-progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
     "build:previews": "node bin/render_styles_preview.js",
-    "start": "yarn build:scss -- --watch",
-    "lint:css-fix": "stylelint --config misc/stylelint.json --cache --cache-location cache/stylelint --fix \"sass/**/*.scss\" || exit 0",
-    "prepare": "husky install"
+    "start": "yarn build:scss -- --watch"
   },
   "license": "Unlicense",
   "devDependencies": {
@@ -22,8 +20,6 @@
     "cypress-terminal-report": "^5.0.2",
     "eslint": "^9.6.0",
     "globals": "^15.8.0",
-    "husky": "^8.0.1",
-    "lint-staged": "^10.5.0",
     "stylelint": "^13.3.2",
     "stylelint-checkstyle-formatter": "^0.1.2",
     "stylelint-config-recommended": "^3.0.0",
@@ -38,19 +34,6 @@
     "sass-loader": "^9.0.2",
     "sharp": "^0.32.6",
     "webpack": "^4"
-  },
-  "lint-staged": {
-    "*.js": [
-      "eslint -c misc/eslint.config.mjs"
-    ],
-    "*.php": [
-      "vendor/bin/phpstan analyze --no-progress --configuration=misc/phpstan.neon --memory-limit 512M",
-      "bin/phpcs",
-      "bin/phpcbf"
-    ],
-    "*.scss": [
-      "stylelint --config misc/stylelint.json --cache --cache-location cache/stylelint"
-    ]
   },
   "browserslist": [
     "ie 11",

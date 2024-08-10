@@ -19,7 +19,7 @@
         "property-no-unknown": null,
         "rule-empty-line-before": null,
         "shorthand-property-no-redundant-values": null,
-        "unit-whitelist": ["deg", "em", "ex", "ms", "rem", "%", "s", "px", "vw", "vh", "rad", "dppx", "dpi", "dpcm", "in", "pt", "fr"],
+        "unit-allowed-list": ["deg", "em", "ex", "ms", "rem", "%", "s", "px", "vw", "vh", "rad", "dppx", "dpi", "dpcm", "in", "pt", "fr"],
         "scss/at-rule-no-unknown": true
     }
 }

@@ -22,6 +22,8 @@ help:
 	echo '  lint-js              - lint (style check) the Javascript'
 	echo '  lint-php             - lint (style check) the PHP'
 	echo '  lint-twig            - lint (style check) the Twig templates'
+	echo '  lint-staged          - lint (style check) all staged changes'
+	echo '  reformat-staged      - reformat all staged changes'
 	echo '  mysqldump            - dump mysql database from docker to misc/mysql-dump.sql'
 	echo '  ocelot-reload-conf   - signal Ocelot to reload its configuration'
 	echo '  ocelot-reload-db     - signal Ocelot to reload from database'
@@ -84,6 +86,14 @@ lint-php:
 .PHONY: lint-twig
 lint-twig:
 	bin/twig-parse $(find templates -type f)
+
+.PHONY: lint-staged
+lint-staged:
+	bin/lint-staged
+
+.PHONY: reformat-staged
+reformat-staged:
+	bin/reformat-staged
 
 # defaults file must be chmod 0400 and look something like:
 #
