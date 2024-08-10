@@ -127,11 +127,11 @@
    ### 2.2.3  Non-clickable appearance
    ### 2.2.4  Other special cases
    ### 2.2.5  Snatched torrent indicators
-   ## 2.3 Alertbar and error handling 
-   ## 2.3.1 Base styling 
-   ## 2.3.2 additional treatment for messages that pop 
+   ## 2.3 Alertbar and error handling
+   ## 2.3.1 Base styling
+   ## 2.3.2 additional treatment for messages that pop
    ## 2.4 Upload warnings ##
-   ### 2.4.1 Post-Upload Download your Torrents Message 
+   ### 2.4.1 Post-Upload Download your Torrents Message
    ## 2.5 Toolboxes */
 
 /* # 3 DOCUMENTATION OF MOBILE CLASSES */
@@ -215,11 +215,30 @@ $wrapper-max-width: 1020px;
 /* ## 0.3 Fonts */
 
 :root {
-  --system-ui: system-ui, "Segoe UI", "Roboto", "Ubuntu", "Roboto",
-    "Oxygen-Sans", "Ubuntu", "Cantarell", "Helvetica", "Arial", sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-  --monospace-ui: "Cascadia Code", "Consolas", "Ubuntu Mono", "Fira Code",
-    "Menlo", "Liberation Mono", "Monaco", monospace;
+  --system-ui:
+    system-ui,
+    "Segoe UI",
+    "Roboto",
+    "Ubuntu",
+    "Roboto",
+    "Oxygen-Sans",
+    "Ubuntu",
+    "Cantarell",
+    "Helvetica",
+    "Arial",
+    sans-serif,
+    "Apple Color Emoji",
+    "Segoe UI Emoji",
+    "Segoe UI Symbol";
+  --monospace-ui:
+    "Cascadia Code",
+    "Consolas",
+    "Ubuntu Mono",
+    "Fira Code",
+    "Menlo",
+    "Liberation Mono",
+    "Monaco",
+    monospace;
 }
 
 body,
@@ -527,10 +546,11 @@ button,
 input[type="button"],
 input[type="submit"],
 #popup_close {
-  background: linear-gradient(
-    $color-obj-button-base-1,
-    $color-obj-button-base-2
-  );
+  background:
+    linear-gradient(
+      $color-obj-button-base-1,
+      $color-obj-button-base-2
+    );
   border: none;
   border-radius: 1.5px;
   color: $color-text-button;
@@ -544,10 +564,11 @@ button:active,
 input[type="button"]:active,
 input[type="submit"]:active,
 #popup_close:active {
-  background: linear-gradient(
-    $color-obj-button-base-2,
-    $color-obj-button-base-1
-  );
+  background:
+    linear-gradient(
+      $color-obj-button-base-2,
+      $color-obj-button-base-1
+    );
 }
 
 input[type="email"],
@@ -1266,16 +1287,13 @@ ul.collage_images li a > span {
 .lightbox {
   align-items: center;
   background-color: rgb(0 0 0 / 32%);
-  bottom: 0;
+  inset: 0 0 0 0;
   cursor: pointer;
   display: flex;
   flex-flow: row nowrap;
   justify-content: center;
-  left: 0;
   margin: auto;
   position: fixed;
-  right: 0;
-  top: 0;
   user-select: none;
   z-index: $z-lightbox;
 }
@@ -2147,11 +2165,12 @@ body#collage .cats_music {
 
 /* first row of each box */
 #noty_bottomRight_layout_container .noty_message {
-  background: radial-gradient(
-    circle at top right,
-    $color-background-notification-gradient-1,
-    $color-background-notification-gradient-2
-  ) !important;
+  background:
+    radial-gradient(
+      circle at top right,
+      $color-background-notification-gradient-1,
+      $color-background-notification-gradient-2
+    ) !important;
   color: $color-text-notification-words !important;
   font-weight: 700;
   padding: 0.6rem !important; //overriding site html
@@ -2304,22 +2323,16 @@ body#torrents div.box.box_tags li > a:first-child {
 
 @media screen and (prefers-reduced-motion: no-preference) {
   .collage_table .td_info .tags :not(:empty):hover,
-    #torrent_table .group .tags :not(:empty):hover,
-    #discog_table .tags :hover,
-    #taglist td a:hover,
-    #user #requests .tags a:hover,
-    /*  Artist page, sidebar, tags box */
-    #artist .sidebar div.box.box_tags ul.stats.nobullet li a:hover,
-    /* User profile page, sidebar, for non-paranoid */
-    #user div.sidebar .box_userinfo_activity ul.stats.nobullet li a:hover,
-    /*  Subscribed collages ~ New addition to subscribed collages */
-    #userhistory div.group_info.clear div.tags :hover,
-    /*  This monstrosity is for torrents.php?action=notify */
-    table.torrent_table.cats.checkboxes.border.m_table td.td_info.big_info div.group_info.clear div.tags a:hover,
-    /*  This monstrosity is for torrents.php?type=uploaded */
-    table.torrent_table.cats.m_table td.td_info.big_info div.group_info.clear div.tags a:hover,
-    /* This is for torrent group (album) pages in the sidebar */
-    body#torrents div.box.box_tags li > a:first-child:hover {
+  #torrent_table .group .tags :not(:empty):hover,
+  #discog_table .tags :hover,
+  #taglist td a:hover,
+  #user #requests .tags a:hover,
+  #artist .sidebar div.box.box_tags ul.stats.nobullet li a:hover,
+  #user div.sidebar .box_userinfo_activity ul.stats.nobullet li a:hover,
+  #userhistory div.group_info.clear div.tags :hover,
+  table.torrent_table.cats.checkboxes.border.m_table td.td_info.big_info div.group_info.clear div.tags a:hover,
+  table.torrent_table.cats.m_table td.td_info.big_info div.group_info.clear div.tags a:hover,
+  body#torrents div.box.box_tags li > a:first-child:hover {
     color: $color-obj-tag_bubble-background !important;
     background: $color-obj-tag_bubble-foreground !important;
     transition: all 0.15s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -2349,7 +2362,7 @@ table.torrent_table.cats.checkboxes.border.m_table td.td_info.big_info div.group
 /* This monstrosity is for torrents.php?type=uploaded */
 table.torrent_table.cats.m_table td.td_info.big_info div.group_info.clear div.tags {
   /* use alpha, not invisibility, to preserve copy & paste ability */
-  color: rgba(0, 0, 0, 10%);
+  color: rgb(0 0 0 / 10%);
 }
 
 /* ### 2.2.5 Snatched torrent indicators
@@ -2381,9 +2394,7 @@ tr.snatched_torrent div.tags::before {
 }
 
 /* album pages */
-#torrent_details.snatched
-  .group_torrent.snatched_torrent
-  .torrent_label.tooltip.tl_snatched {
+#torrent_details.snatched .group_torrent.snatched_torrent .torrent_label.tooltip.tl_snatched {
   background: $back-600;
   border-radius: 1rem;
   box-sizing: border-box;
@@ -2431,8 +2442,8 @@ tr.snatched_torrent div.tags::before {
   border: thick solid $color-accent-border-warning-2;
   padding: 1rem 1rem 1rem 48px;
   background-color: $color-background-warning;
-  background-image: url(/svg/site/ops-icon-triangle-ccc.svg);
-  background-image: url(https://wally-crunk.github.io/svg/site/ops-icon-triangle-ccc.svg);
+  background-image: url("/svg/site/ops-icon-triangle-ccc.svg");
+  background-image: url("https://wally-crunk.github.io/svg/site/ops-icon-triangle-ccc.svg");
   background-repeat: no-repeat;
   background-position: 8px;
   background-size: 32px;
@@ -2504,7 +2515,7 @@ ul#check.nobullet > * {
   font-weight: 700;
 }
 
-/* We also pop a message in header to draw attention 
+/* We also pop a message in header to draw attention
    when any upload warning occurs inline on the page */
 .upload-error::after,
 ul#check::after {
@@ -2525,9 +2536,9 @@ ul#check::after {
   background-position: 8px center;
   background-size: 32px;
   box-shadow:
-    0 10px 18px rgba(0, 0, 0, 0.55),
-    0 7px 7px rgba(0, 0, 0, 0.52),
-    0 -5px 9px rgba(0, 0, 0, 0.32);
+    0 10px 18px rgb(0 0 0 / 55%),
+    0 7px 7px rgb(0 0 0 / 52%),
+    0 -5px 9px rgb(0 0 0 / 32%);
 }
 
 /* ### 2.4.1 Post-Upload Download Message */
@@ -2891,9 +2902,7 @@ Documentation of mobile classes:
     display: block;
   }
 
-  .m_table
-    tr:not(.colhead):not(.colhead_dark)
-    td:not(.m_td_left):not(.m_td_right) {
+  .m_table tr:not(.colhead, .colhead_dark) td:not(.m_td_left, .m_td_right) {
     padding-bottom: 0;
     padding-top: 0;
     text-align: left;
@@ -3065,10 +3074,8 @@ Documentation of mobile classes:
    On Collage-discog and Bookmark pages, sizes need to be forced left
    Apologies for being ultra-specific here, but don't want any side-effects */
 
-  table#discog_table.torrent_table.grouping.cats.m_table
-    .number_column.td_size.nobr,
-  table#torrent_table.torrent_table.grouping.cats.m_table
-    td.number_column.td_size.nobr {
+  table#discog_table.torrent_table.grouping.cats.m_table .number_column.td_size.nobr,
+  table#torrent_table.torrent_table.grouping.cats.m_table td.number_column.td_size.nobr {
     text-align: left;
     margin-left: 1rem;
 
@@ -3121,7 +3128,7 @@ Documentation of mobile classes:
   /* ## 4.11 BEGIN collage table */
   /* ## 4.11.1 collage setup */
 
-  table.m_table.collage_table tr:not(.colhead):not(.colhead) {
+  table.m_table.collage_table tr:not(.colhead, .colhead) {
     display: flex;
     flex-direction: column;
   }
@@ -3284,12 +3291,11 @@ Documentation of mobile classes:
   .forum_post tbody {
     align-items: stretch;
     display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
+    flex-flow: column wrap;
     width: 100%;
   }
 
-  .forum_post tr:not(.colhead_dark):not(.hidden) {
+  .forum_post tr:not(.colhead_dark, .hidden) {
     display: block;
     position: relative;
     width: 100%;
@@ -3457,7 +3463,6 @@ Documentation of mobile classes:
     transform: translateZ(0);
     width: 15%;
     z-index: $z-mobilemenu_closed-tab-icons;
-    
   }
 
   #extra4,
@@ -3495,16 +3500,16 @@ Documentation of mobile classes:
     text-align: center;
   }
 
-  #header ul:not(#userinfo_major):not(#userinfo_stats) {
+  #header ul:not(#userinfo_major, #userinfo_stats) {
     display: flex;
     flex-wrap: wrap;
     width: 100%;
   }
-  #header ul:not(#userinfo_major):not(#userinfo_stats) li {
+  #header ul:not(#userinfo_major, #userinfo_stats) li {
     margin: 0;
     width: 33.3%;
   }
-  #header ul:not(#userinfo_major):not(#userinfo_stats) a {
+  #header ul:not(#userinfo_major, #userinfo_stats) a {
     line-height: var(--row-height);
   }
   /* end setup
@@ -3518,12 +3523,14 @@ Documentation of mobile classes:
     height: var(--row-height);
     width: 15%;
     text-align: center;
+
     // better without z-index
-    background: radial-gradient(
-      circle at top left,
-      $color-mobilemenu-userinfo-1,
-      $color-mobilemenu-userinfo-2
-    );
+    background:
+      radial-gradient(
+        circle at top left,
+        $color-mobilemenu-userinfo-1,
+        $color-mobilemenu-userinfo-2
+      );
   }
 
   #logo a {
@@ -3538,11 +3545,12 @@ Documentation of mobile classes:
 
   #userinfo_username > li,
   #logo {
-    background: radial-gradient(
-      circle at top left,
-      $color-mobilemenu-userinfo-1,
-      $color-mobilemenu-userinfo-2
-    );
+    background:
+      radial-gradient(
+        circle at top left,
+        $color-mobilemenu-userinfo-1,
+        $color-mobilemenu-userinfo-2
+      );
   }
 
   #userinfo_username {
@@ -3611,11 +3619,12 @@ Documentation of mobile classes:
   /* ## 4.17.7  Menu when open, Row Three [torrents..] */
 
   #menu ul {
-    background: radial-gradient(
-      circle at top left,
-      $color-mobilemenu-userinfo-1,
-      $color-mobilemenu-userinfo-2
-    );
+    background:
+      radial-gradient(
+        circle at top left,
+        $color-mobilemenu-userinfo-1,
+        $color-mobilemenu-userinfo-2
+      );
     bottom: calc(var(--row-height) * 7);
     position: absolute;
   }
@@ -3629,11 +3638,12 @@ Documentation of mobile classes:
   // reminder, $color-text-menu-hover will function here when hovering.
 
   #userinfo_minor {
-    background: radial-gradient(
-      circle at top left,
-      $color-mobilemenu-userinfo-2,
-      $color-mobilemenu-userinfo-1
-    );
+    background:
+      radial-gradient(
+        circle at top left,
+        $color-mobilemenu-userinfo-2,
+        $color-mobilemenu-userinfo-1
+      );
     bottom: calc(var(--row-height) * 3);
     position: absolute;
   }
@@ -3662,14 +3672,14 @@ Documentation of mobile classes:
 
   /* ## 4.17.10 Alerts for mobile users */
 
-  /*  Alertbar is part of the #header, which is shown as a pulldown on mobile. 
+  /*  Alertbar is part of the #header, which is shown as a pulldown on mobile.
       No room for alerts in the pulldown. */
   #alerts {
     display: none;
   }
 
   /* Notify user they have an alert & must rotate to see. */
-  #wrapper:has(#alerts):before {
+  #wrapper:has(#alerts)::before {
     content: "";
     background-image: $icon-mobile-rotate;
     background-color: $color-mobilemenu-closed-overlays;
@@ -3679,7 +3689,7 @@ Documentation of mobile classes:
     left: 15%;
     pointer-events: none;
     transform: translateZ(0);
-    width: calc(85% /3);
+    width: calc(85% / 3);
     z-index: 5000;
     height: 32px;
     position: fixed;
@@ -3783,7 +3793,7 @@ Documentation of mobile classes:
   }
 }
 
-@media (max-width: $phone-screen-size) and (max-height: 510px) {
+@media (max-width: $phone-screen-size) and (height <= 510px) {
   #userinfo_major,
   #userinfo_major > * {
     display: none;

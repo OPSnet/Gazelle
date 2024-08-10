@@ -106,14 +106,14 @@ $ds-red: #a41610;
 $ds-green: #11890e;
 $ds-yellow: #c9a612;
 $ds-orange: #ff8c00;
-$ds-fx-low: rgba(0, 0, 0, 0.15);
-$ds-fx-mid: rgba(0, 0, 0, 0.225);
-$ds-fx-blue: hsla(215, 90%, 56%, 0.3);
-$ds-gray-05: hsl(178, 100%, 5.1%);
-$ds-gray-13: hsl(180, 11%, 13%); //goes nowhere does nothing;
-$ds-gray-52: hsl(181, 3.5%, 52%);
-$ds-gray-72: hsl(183, 4%, 72%);
-$ds-gray-99: hsl(120, 100%, 99.6%);
+$ds-fx-low: rgb(0 0 0 / 15%);
+$ds-fx-mid: rgb(0 0 0 / 22.5%);
+$ds-fx-blue: hsl(215deg 90% 56% / 30%);
+$ds-gray-05: hsl(178deg 100% 5.1%);
+$ds-gray-13: hsl(180deg 11% 13%); //goes nowhere does nothing;
+$ds-gray-52: hsl(181deg 3.5% 52%);
+$ds-gray-72: hsl(183deg 4% 72%);
+$ds-gray-99: hsl(120deg 100% 99.6%);
 
 // DEFINE FROM LOGICAL LAYOUT TO TOKENS
 
@@ -139,7 +139,6 @@ $color-background-table-torrenttable: $back-300; // also form field in focus
 $color-background-table-torrents-group: $back-600;
 $color-background-torrent: $mid-200; // edition in group-list
 $color-background-fx-unread: $ds-fx-blue;
-
 $color-text-anchor-hover: $blue-800;
 $color-text-anchor: $blue-700;
 $color-text-base: $neutral-1000;
@@ -162,14 +161,13 @@ $color-text-popup: $neutral-1000;
 $color-text-ratio-greenzone: $ds-green;
 $color-text-ratio-redzone: $ds-red;
 $color-text-ratio-yellowzone: $ds-yellow;
-$color-text-span-blue: hsl(235, 90%, 55%); //x lower
-$color-text-span-green: hsl(145, 90%, 35%); //x lower
+$color-text-span-blue: hsl(235deg 90% 55%); //x lower
+$color-text-span-green: hsl(145deg 90% 35%); //x lower
 $color-text-span-red: $ds-red;
 $color-text-table-discog-titles: $fore-300;
 $color-text-tooltipster: $fore-400;
 $color-text-tooltipster-anchor: $fore-900;
 $color-text-tooltipster-anchor-hover: $fore-200;
-
 $color-menu-1: orangered; // unused (could be home)
 $color-menu-2: $menutheme-100; // torrents
 $color-menu-3: $menutheme-200; // collages
@@ -198,7 +196,6 @@ $color-obj-tag_bubble-background: $mid-200; // menu-2 suggested
 $color-obj-tag_bubble-foreground: $mid-900; // menu-9 suggested
 $color-obj-tag_bubble_snatched-background: $back-600;
 $color-obj-tag_bubble_snatched-foreground: $fore-800;
-
 $color-accent-border-blockquote: $back-900; // Dotted
 $color-accent-border-box: $back-900;
 $color-accent-border-input: $ds-fx-low;
@@ -219,7 +216,6 @@ $color-accent-cats_elearningvideos: mediumpurple;
 $color-accent-cats_music: darkslategray;
 $color-accent-forum-inline-last-read: $ds-orange;
 $color-accent-forum-unread: $ds-orange;
-
 $color-accent-selection-background: $mid-800;
 $color-accent-selection-text: #fff; // usually #fff or $color-text-bold
 
@@ -243,12 +239,10 @@ $icon-message-unread: url("/svg/std/document-round-000.svg");
 $icon-message-unread-locked: url("/svg/std/lock-round-000.svg");
 $icon-message-unread-sticky: url("/svg/std/pin-round-000.svg");
 $icon-message-unread-locked-sticky: url("/svg/std/pin-and-lock-round-000.svg");
-
 $icon-message-read: url("/svg/std/document-000.svg");
 $icon-message-read-locked: url("/svg/std/lock-000.svg");
 $icon-message-read-sticky: url("/svg/std/pin-000.svg");
 $icon-message-read-locked-sticky: url("/svg/std/pin-and-lock-000.svg");
-
 $icon-notification: url("/styles/apollostage/images/notification-bell-000xeee.svg");
 
 // Header Pulldown Menu (hamburger/chevron icon)

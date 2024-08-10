@@ -7,8 +7,10 @@
 
 // import basic colors as a backup:
 @import '../apollostage/_variables';
+
 // debug slugs: must be after import.
 $build-slug: $build-slug + " " + "sunset";
+
 // and override as follows:
 
 // ////////////////////////////////////////////////////////////////////////////////
@@ -23,7 +25,6 @@ $back-300: #342A33;
 $back-400: #3B2F36;
 $back-500: #423438;
 $back-600: #493B3D;
-
 $fore-400: #8D869D;
 $fore-500: #A595AF;
 $fore-600: #BCA5BE;
@@ -44,7 +45,7 @@ $midtone-600: #EB90AE;
 $midtone-700: #DE93B7;
 $midtone-800: #D19DC8;
 $midtone-900: #A196C4;
-$midtone-1000:#757AAB;
+$midtone-1000: #757AAB;
 
 // Menu
 $menutheme-100: #ffb0a0;
@@ -84,7 +85,6 @@ $color-background-table-row-odd: $back-300;
 $color-background-table-row-even: $back-200;
 $color-background-table-torrenttable: $back-300; // also form field in focus
 $color-background-table-torrents-group: $back-600;
-
 $color-background-torrent: $midtone-200; // edition in group-list
 $color-background-table-discog: $midtone-300; // navigation row ~ "jump down to.."
 $color-background-table-keyrows: $midtone-300; // navigation row ~ "jump up to.."
@@ -108,7 +108,7 @@ $color-mobilemenu-userinfo-1: $menutheme-300;
 $color-mobilemenu-userinfo-2: $menutheme-600;
 $color-mobilemenu-closed: $menutheme-700;
 $color-mobilemenu-shadow: $menutheme-500;
-$color-mobilemenu-closed-overlays: $menutheme-100; // bg for icons on the hedaer 
+$color-mobilemenu-closed-overlays: $menutheme-100; // bg for icons on the hedaer
 
 $color-text-anchor-hover: $midtone-1000;
 $color-text-anchor: $fore-1000;
@@ -132,14 +132,13 @@ $color-text-popup: $fore-700;
 $color-text-ratio-greenzone: $ds-green;
 $color-text-ratio-redzone: $ds-red;
 $color-text-ratio-yellowzone: $ds-yellow;
-$color-text-span-blue: hsl(235, 90%, 85%);
-$color-text-span-green: hsl(145, 90%, 70%);
+$color-text-span-blue: hsl(235deg 90% 85%);
+$color-text-span-green: hsl(145deg 90% 70%);
 $color-text-span-red: $ds-red;
 $color-text-table-discog-titles: $midtone-900;
 $color-text-tooltipster: $midtone-600;
 $color-text-tooltipster-anchor: $midtone-800;
 $color-text-tooltipster-anchor-hover: $midtone-1000;
-
 $color-obj-button-base-1: $ds-gray-62;
 $color-obj-button-base-2: $ds-gray-92;
 $color-obj-poll: $midtone-900; // poll active part of bargraph
@@ -170,7 +169,7 @@ $color-accent-cats_music: darkslategray;
 $color-accent-forum-inline-last-read: $ds-fiji; // changed
 $color-accent-forum-unread: $ds-fiji; // changed
 
-$color-accent-selection-background: rgba(217, 130, 111, 0.6);  //changed
+$color-accent-selection-background: rgb(217 130 111 / 60%);  //changed
 $color-accent-selection-text: #fff; // changed
 
 // popup notifications
@@ -184,10 +183,9 @@ $color-accent-border-alert: $midtone-500;
 $color-background-alert: $midtone-100;
 $color-text-alert: $fore-700;
 $color-anchor-alert: $fore-1000;
-
-$ds-shadow-heavy: 0 10px 18px rgba(0, 0, 0, 0.55), 0 7px 7px rgba(0, 0, 0, 0.52), 0 -5px 9px rgba(0, 0, 0, 0.32);
-$ds-shadow-raised:  0 10px 18px rgba(0, 0, 0, 0.25), 0 7px 7px rgba(0, 0, 0, 0.22);
-$ds-shadow-raised-hover:  0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+$ds-shadow-heavy: 0 10px 18px rgb(0 0 0 / 55%), 0 7px 7px rgb(0 0 0 / 52%), 0 -5px 9px rgb(0 0 0 / 32%);
+$ds-shadow-raised: 0 10px 18px rgb(0 0 0 / 25%), 0 7px 7px rgb(0 0 0 / 22%);
+$ds-shadow-raised-hover: 0 14px 28px rgb(0 0 0 / 25%), 0 10px 10px rgb(0 0 0 / 22%);
 
 // icon
 $icon-mobile-rotate: url("/svg/std/notify-rotate-lightmode.svg"); //flip to lightmode

@@ -72,12 +72,12 @@ $ds-red: #b71010;
 $ds-green: #099909;
 $ds-yellow: #f9e340;
 $ds-goldenrod: #daa520;
-$ds-fx-low: rgba(255, 255, 255, 0.08);
-$ds-fx-mid: rgba(255, 255, 255, 0.25);
-$ds-fx-menutheme: rgba(255, 255, 255, 0.25);
-$ds-gray-05: hsl(178, 2.5%, 05%);
-$ds-gray-62: hsl(181, 3.5%, 62%);
-$ds-gray-92: hsl(183, 2.5%, 92%);
+$ds-fx-low: rgb(255 255 255 / 8%);
+$ds-fx-mid: rgb(255 255 255 / 25%);
+$ds-fx-menutheme: rgb(255 255 255 / 25%);
+$ds-gray-05: hsl(178deg 2.5% 05%);
+$ds-gray-62: hsl(181deg 3.5% 62%);
+$ds-gray-92: hsl(183deg 2.5% 92%);
 $ds-black: #000;
 
 // DEFINE FROM LOGICAL LAYOUT TO TOKENS
@@ -99,7 +99,6 @@ $color-background-table-row-even: $back-200;
 $color-background-table-torrenttable: $back-300; // also form field in focus
 $color-background-table-torrents-group: $back-600;
 $color-background-fx-unread: $ds-fx-mid;
-
 $color-background-torrent: $midtone-200; // edition in group-list
 $color-background-table-discog: $midtone-300; // navigation row ~ "jump down to.."
 $color-background-table-keyrows: $midtone-300; // navigation row ~ "jump up to.."
@@ -123,7 +122,7 @@ $color-mobilemenu-userinfo-1: $menutheme-400; // mobile pulldown menu gradient 1
 $color-mobilemenu-userinfo-2: $menutheme-900; // mobile pulldown menu gradient 2
 $color-mobilemenu-closed: $menutheme-700; // rules, also mobile menu header
 $color-mobilemenu-shadow: $menutheme-500; //mobile menu
-$color-mobilemenu-closed-overlays: $menutheme-100; // bg for icons on the hedaer 
+$color-mobilemenu-closed-overlays: $menutheme-100; // bg for icons on the hedaer
 
 $color-text-anchor-hover: $midtone-1000;
 $color-text-anchor: $fore-1000;
@@ -144,8 +143,8 @@ $color-text-mono: $fore-500;
 $color-text-ratio-greenzone: $ds-green;
 $color-text-ratio-redzone: $ds-red;
 $color-text-ratio-yellowzone: $ds-yellow;
-$color-text-span-blue: hsl(235, 90%, 85%);
-$color-text-span-green: hsl(145, 90%, 70%);
+$color-text-span-blue: hsl(235deg 90% 85%);
+$color-text-span-green: hsl(145deg 90% 70%);
 $color-text-span-red: $ds-red;
 $color-text-table-discog-titles: $midtone-900;
 $color-text-tooltipster: $midtone-600;
@@ -157,13 +156,11 @@ $color-background-notification-gradient-1: $midtone-1000; // menu low/high sugge
 $color-background-notification-gradient-2: $midtone-500; // menu high/low suggested
 $color-background-notification: $ds-neutral-000;
 $color-text-notification-words: $fore-1000;
-
 $color-background-popup: $back-300; // upload musicbrainz info
 $color-text-popup-anchor-hover: $midtone-1000;
 $color-text-popup-anchor: $fore-900;
 $color-text-popup: $fore-700;
 $color-accent-border-popup: $midtone-800;
-
 $color-obj-button-base-1: $ds-gray-62;
 $color-obj-button-base-2: $ds-gray-92;
 $color-obj-poll: $midtone-900; // poll active part of bargraph
@@ -172,7 +169,6 @@ $color-obj-tag_bubble-background: $midtone-200; // menu-2 suggested
 $color-obj-tag_bubble-foreground: $midtone-900; // menu-9 suggested
 $color-obj-tag_bubble_snatched-background: $back-600;
 $color-obj-tag_bubble_snatched-foreground: $fore-800;
-
 $color-accent-border-blockquote: $back-900; // Dotted
 $color-accent-border-box: $back-900;
 $color-accent-border-input: $ds-fx-low;
@@ -192,7 +188,6 @@ $color-accent-cats_elearningvideos: mediumpurple;
 $color-accent-cats_music: darkslategray;
 $color-accent-forum-inline-last-read: #fed100; // arrow ➤
 $color-accent-forum-unread: #fed100;
-
 $color-accent-selection-background: $midtone-800;
 $color-accent-selection-text: $fore-700; // usually #fff or $color-text-bold
 
@@ -201,24 +196,21 @@ $color-accent-border-alert: $midtone-500;
 $color-background-alert: $midtone-100;
 $color-text-alert: $fore-700;
 $color-anchor-alert: $fore-1000;
-
 $ds-shadow-heavy:
-  0 10px 18px rgba(0, 0, 0, 0.55),
-  0 7px 7px rgba(0, 0, 0, 0.52),
-  0 -5px 9px rgba(0, 0, 0, 0.32);
+  0 10px 18px rgb(0 0 0 / 55%),
+  0 7px 7px rgb(0 0 0 / 52%),
+  0 -5px 9px rgb(0 0 0 / 32%);
 $ds-shadow-raised:
-  0 10px 18px rgba(0, 0, 0, 0.25),
-  0 7px 7px rgba(0, 0, 0, 0.22);
+  0 10px 18px rgb(0 0 0 / 25%),
+  0 7px 7px rgb(0 0 0 / 22%);
 $ds-shadow-raised-hover:
-  0 14px 28px rgba(0, 0, 0, 0.25),
-  0 10px 10px rgba(0, 0, 0, 0.22);
-
+  0 14px 28px rgb(0 0 0 / 25%),
+  0 10px 10px rgb(0 0 0 / 22%);
 $color-accent-border-error: $ds-goldenrod;
 $color-background-error: $ds-gray-92;
 $color-text-error: $ds-black;
-
-$color-accent-border-warning-1: hsl(348,99%,77%);
-$color-accent-border-warning-2: hsl(348,84%,51%);
+$color-accent-border-warning-1: hsl(348deg 99% 77%);
+$color-accent-border-warning-2: hsl(348deg 84% 51%);
 $color-background-warning: #633;
 $color-text-warning: $fore-700;
 $color-anchor-warning: $fore-1000;
@@ -232,7 +224,6 @@ $icon-message-unread: url("/svg/std/document-round-ccc.svg");
 $icon-message-unread-locked: url("/svg/std/lock-round-ccc.svg");
 $icon-message-unread-sticky: url("/svg/std/pin-round-ccc.svg");
 $icon-message-unread-locked-sticky: url("/svg/std/pin-and-lock-round-ccc.svg");
-
 $icon-message-read: url("/svg/std/document-ccc.svg");
 $icon-message-read-locked: url("/svg/std/lock-ccc.svg");
 $icon-message-read-sticky: url("/svg/std/pin-ccc.svg");
@@ -257,13 +248,13 @@ $icon-number-leechers: url("/svg/std/arrow-down-round-ccc.svg");
 
 // // standard:
 $icon-mobile-rotate: url("/svg/std/notify-rotate-darkmode-ccc.svg");
+
 // $icon-notification: url("/svg/std/notification-bell-333xccc.svg");
 // $icon-warning: url("/svg/std/x-c33.svg")
 
 // // Orpheus specific; other deployments, use the above.
 $icon-notification: url("/svg/site/ops-icon-harp-ccc.svg");
 $icon-warning: url("/svg/site/ops-icon-triangle-000.svg");
-
 
 // EOF
 // ////////////////////////////////////////////////////////////////////////////////
