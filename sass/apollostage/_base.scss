@@ -2607,7 +2607,7 @@ ul#check::after {
 /* sticky headers ~ mobile */
 @media (max-width: $phone-screen-size) {
   body {
-    --header-row-height: 32px;
+    --header-row-height: $height-mobilemenu_closed-tab;
   }
   .toolbox_container tr.colhead {
     position: sticky;
@@ -3373,6 +3373,8 @@ Documentation of mobile classes:
   /* ## 4.17.1 Mobile Menu When Closed, Setup */
 
   #header {
+    // base height for building blocks of the open menu.
+    // for the closed menu tab, see also $height-mobilemenu_closed-tab
     --row-height: 40px;
   }
 
@@ -3390,7 +3392,7 @@ Documentation of mobile classes:
   }
 
   #header:hover #searchbars input,
-  /* this may cause the search boxes to appear on a 1sec delay; not a bug */
+  /* this may cause the search boxes to appear on a 2sec delay; not a bug */
   #nav_userinfo,
   #nav_useredit,
   #nav_logout {
@@ -3415,7 +3417,8 @@ Documentation of mobile classes:
   }
   /* ## 4.17.2 Mobile Menu opens on hover */
 
-  // Developers: when debugging, remove hover to force the menu open //
+  // Developers: when debugging, remove hover to force the menu open 
+  // keyword: x-debug
   #header:hover {
     height: clamp(200px, calc(var(--row-height) * 15), 100%);
     opacity: 1;
@@ -3475,6 +3478,7 @@ Documentation of mobile classes:
   /* ## 4.17.4 Mobile Menu when Open, Setup */
 
   /* debugging. remove the nonce words DEBUGGING to see how this works */
+  /* keyword: x-debug */
   #debugging #userinfo_major,
   #debugging #userinfo_major > * {
     border: thin dotted blue;
@@ -3514,7 +3518,7 @@ Documentation of mobile classes:
   }
   /* end setup
 
-    /* ## 4.17.5  Menu when open, Row One */
+  /* ## 4.17.5  Menu when open, Row One */
 
   /* Left side ~ site logo */
 
@@ -3682,7 +3686,6 @@ Documentation of mobile classes:
   #wrapper:has(#alerts)::before {
     content: "";
     background-image: $icon-mobile-rotate;
-    background-color: $color-mobilemenu-closed-overlays;
     background-position: top center;
     background-size: auto 32px;
     background-repeat: no-repeat;
@@ -3690,7 +3693,7 @@ Documentation of mobile classes:
     pointer-events: none;
     transform: translateZ(0);
     width: calc(85% / 3);
-    z-index: 5000;
+    z-index: $z-mobilemenu_closed-tab-icons;
     height: 32px;
     position: fixed;
     top: 0;
@@ -3809,7 +3812,7 @@ Documentation of mobile classes:
    ######################################################################## */
 
 /* ## 6.1 Debugging Tools
-   various 'debug' features are avail in this doc elsewhere */
+   various 'debug' and x-debug features are avail in this doc elsewhere */
 
 #footer p:last-of-type::after {
   content: " | " + $build-slug;
