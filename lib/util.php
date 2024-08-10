@@ -738,25 +738,6 @@ function httpProxy(): ?string {
     return null;
 }
 
-/**
- * Geolocate an IP address using the database
- */
-function geoip(string $IP): string {
-    static $IPs = [];
-    if (isset($IPs[$IP])) {
-        return $IPs[$IP];
-    }
-    if (is_number($IP)) {
-        $Long = $IP;
-    } else {
-        $Long = sprintf('%u', ip2long($IP));
-    }
-    if (!$Long || $Long == 2_130_706_433) { // No need to check cc for 127.0.0.1
-        return 'XX';
-    }
-    return '?';
-}
-
 function urlencode_safe(string $string): string {
     return rtrim(strtr(base64_encode($string), '+/', '-_'), '=');
 }

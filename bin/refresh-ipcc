@@ -1,0 +1,24 @@
+#! /usr/bin/env php
+<?php
+
+require_once(__DIR__ . '/../lib/bootstrap.php');
+
+$db      = Gazelle\DB::DB();
+$geoip   = new Gazelle\Util\GeoIP(new Gazelle\Util\Curl());
+$userMan = new Gazelle\Manager\User();
+
+$db->prepared_query("
+    SELECT ID FROM users_main
+");
+
+$n = 0;
+foreach ($db->collect(0, false) as $id) {
+    $user = $userMan->findById($id);
+    if (is_null($user)) {
+        continue;
+    }
+    $user->setField('ipcc', $geoip->countryISO($user->ipaddr()))->modify();
+    ++$n;
+}
+
+echo "$n users processed\n";

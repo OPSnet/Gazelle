@@ -50,7 +50,7 @@ class IPv4 extends \Gazelle\Base {
         );
         $affected = self::$db->affected_rows();
         $user->setField('IP', $ipv4)
-            ->setField('ipcc', geoip($ipv4))
+            ->setField('ipcc', (new \Gazelle\Util\GeoIP(new \Gazelle\Util\Curl()))->countryISO($ipv4))
             ->modify();
         self::$cache->delete_value(sprintf('ipv4_dup_' . str_replace('-', '_', $ipv4)));
         $this->flush();

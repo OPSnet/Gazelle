@@ -43,6 +43,7 @@ parameters:
         - DEBUG_UPLOAD_NOTIFICATION
         - DEBUG_WARNINGS
         - FEATURE_EMAIL_REENABLE
+        - GEOIP_SERVER
         - HTTP_PROXY
         - IMAGE_HOST_BANNED
         - IMAGE_HOST_RECOMMENDED

@@ -10,7 +10,7 @@ function notify($Viewer, $Channel, $Message) {
             ? $Viewer->publicLocation() . " (" . $Viewer->username() . ")"
             : $ipaddr
         )
-        . " (" . geoip($ipaddr) . ")"
+        . " (" . (new \Gazelle\Util\GeoIP(new \Gazelle\Util\Curl()))->countryISO($ipaddr) . ")"
         . " accessing " . SITE_URL . $_SERVER['REQUEST_URI'] . ' (' . $_SERVER['REQUEST_METHOD'] . ')'
         . (!empty($_SERVER['HTTP_REFERER']) ? " from " . $_SERVER['HTTP_REFERER'] : '')
     );

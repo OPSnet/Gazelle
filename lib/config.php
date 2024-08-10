@@ -354,6 +354,11 @@ defined('PUSH_SOCKET_LISTEN_ADDRESS') or define('PUSH_SOCKET_LISTEN_ADDRESS', fa
 defined('PUSH_SOCKET_LISTEN_PORT') or define('PUSH_SOCKET_LISTEN_PORT', 6789);
 
 // ------------------------------------------------------------------------
+// GeoIP server settings
+
+defined('GEOIP_SERVER') or define('GEOIP_SERVER', false);
+
+// ------------------------------------------------------------------------
 // Site settings
 
 // Leaving these as is will work, but you will probably want to change them

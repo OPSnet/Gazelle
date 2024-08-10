@@ -83,12 +83,34 @@ class UserCreator extends Base {
         // create users_main row
         $ipaddr = $this->requestContext()->remoteAddr();
         $this->announceKey = randomString();
-        $mainFields = ['inviter_user_id', 'Username', 'Email', 'PassHash', 'torrent_pass', 'IP',
-            'PermissionID', 'Enabled', 'Invites', 'ipcc', 'auth_key'
+        $mainFields = [
+            'inviter_user_id',
+            'Username',
+            'Email',
+            'PassHash',
+            'torrent_pass',
+            'IP',
+            'PermissionID',
+            'Enabled',
+            'Invites',
+            'ipcc',
+            'auth_key'
         ];
         $mainArgs = [
-            (int)$inviter?->id(), $this->username, current($this->email), $this->passHash, $this->announceKey, $ipaddr,
-            $this->permissionId, $this->permissionId == SYSOP ? UserStatus::enabled->value : UserStatus::unconfirmed->value, STARTING_INVITES, geoip($ipaddr), authKey()
+            (int)$inviter?->id(),
+            $this->username,
+            current($this->email),
+            $this->passHash,
+            $this->announceKey,
+            $ipaddr,
+            $this->permissionId,
+            $this->permissionId == SYSOP
+                ? UserStatus::enabled->value
+                : UserStatus::unconfirmed->value,
+            STARTING_INVITES,
+            (new \Gazelle\Util\GeoIP(new \Gazelle\Util\Curl()))
+                ->countryISO($ipaddr),
+            authKey()
         ];
 
         if (isset($this->id)) {
@@ -101,7 +123,8 @@ class UserCreator extends Base {
         self::$db->prepared_query("
             INSERT INTO users_main
                    (" . implode(',', $mainFields) . ", stylesheet_id)
-            VALUES (" . placeholders($mainFields) . ", (SELECT s.ID FROM stylesheets s WHERE s.Default = '1' LIMIT 1))
+            VALUES (" . placeholders($mainFields) . ",
+                (SELECT s.ID FROM stylesheets s WHERE s.Default = '1' LIMIT 1))
             ", ...$mainArgs
         );
         if (!isset($this->id)) {
