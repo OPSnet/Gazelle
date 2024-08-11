@@ -820,6 +820,10 @@ defined('TAG_OFFICIAL_COLUMNS') or define('TAG_OFFICIAL_COLUMNS', 4);
 // delimited by this character
 defined('FILELIST_DELIM') or define('FILELIST_DELIM', "\xC3\xB7");
 
+// If there is an endpoint that should never be called any more
+// they may be listed here. The session will be logged out.
+defined('OBSOLETE_ENDPOINTS') or define('OBSOLETE_ENDPOINTS', []);
+
 // ------------------------------------------------------------------------
 // Upload configuration
 

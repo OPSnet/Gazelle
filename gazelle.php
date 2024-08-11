@@ -44,6 +44,18 @@ $ipv4Man   = new Gazelle\Manager\IPv4();
 $userMan   = new Gazelle\Manager\User();
 Gazelle\Util\Twig::setUserMan($userMan);
 
+$forceLogout = function (): never {
+    setcookie('session', '', [
+        'expires'  => time() - 86_400 * 90,
+        'path'     => '/',
+        'secure'   => !DEBUG_MODE,
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
+    header('Location: login.php');
+    exit;
+};
+
 // Authorization header only makes sense for the ajax endpoint
 if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $module === 'ajax') {
     if ($ipv4Man->isBanned($context->remoteAddr())) {
@@ -59,17 +71,6 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $module === 'ajax') {
         json_die('failure', $result);
     }
 } elseif (isset($_COOKIE['session'])) {
-    $forceLogout = function (): never {
-        setcookie('session', '', [
-            'expires'  => time() - 86_400 * 90,
-            'path'     => '/',
-            'secure'   => !DEBUG_MODE,
-            'httponly' => true,
-            'samesite' => 'Lax',
-        ]);
-        header('Location: login.php');
-        exit;
-    };
     $cookieData = Crypto::decrypt($_COOKIE['session'], ENCKEY);
     if ($cookieData === false) {
         $forceLogout();
@@ -89,7 +90,7 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $module === 'ajax') {
         $forceLogout();
     }
     $session->refresh($SessionID, $context->remoteAddr(), $context->ua());
-    unset($browser, $session, $userId, $cookieData, $forceLogout);
+    unset($browser, $session, $userId, $cookieData);
 } elseif ($module === 'torrents' && ($_REQUEST['action'] ?? '') == 'download' && isset($_REQUEST['torrent_pass'])) {
     $Viewer = $userMan->findByAnnounceKey($_REQUEST['torrent_pass']);
     if (is_null($Viewer) || $Viewer->isDisabled() || $Viewer->isLocked()) {
@@ -110,6 +111,11 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $module === 'ajax') {
 // 3. We have a viewer (or this is a login or registration attempt)
 
 if ($Viewer) {
+    // these endpoints do not exist
+    if (in_array($module, OBSOLETE_ENDPOINTS)) {
+        $Viewer->logoutEverywhere();
+        $forceLogout();
+    }
     if ($Viewer->hasAttr('admin-error-reporting')) {
         error_reporting(E_ALL);
     }
@@ -131,6 +137,7 @@ if ($Viewer) {
     // for a user who may lack the privileges to see it in the first place.
     \Text::setViewer($Viewer);
 }
+unset($forceLogout);
 
 $Debug->mark('load page');
 if (DEBUG_MODE || ($Viewer && $Viewer->permitted('site_debug'))) {
