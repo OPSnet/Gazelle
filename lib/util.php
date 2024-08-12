@@ -784,6 +784,24 @@ function image_cache_encode(
 }
 
 /**
+ * Country code table
+ * Used to make ALPHA-2 country codes to the country name.
+ */
+function ISO3166_2(): array {
+    $data = file_get_contents(__DIR__ . '/../misc/ISO-3166-2.json');
+    return $data === false ? [] : json_decode($data, true);
+}
+
+/**
+ * World topology details
+ * Used in HighCharts world maps
+ */
+function worldTopology(): array {
+    $data = file_get_contents(__DIR__ . '/../misc/world.topo.json');
+    return $data === false ? [] : json_decode($data, true);
+}
+
+/**
  * Test whether an image cache url is valid (check the signature)
  */
 function image_cache_valid(string $url, int|null $epoch = null, string $secret = IMAGE_CACHE_SECRET): bool {

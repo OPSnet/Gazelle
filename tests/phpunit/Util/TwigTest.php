@@ -52,12 +52,6 @@ END;
             'twig-bb-format'
         );
 
-        $this->assertStringStartsWith(
-            '<img loading="lazy" class="scale_image" onclick="lightbox.init(this, $(this).width());" alt="' . IMAGE_CACHE_HOST . '/f/full/',
-            self::twig('{{ text|bb_forum }}')->render(['text' => '[img=https://example.com/image.jpg]']),
-            'twig-bb-forum'
-        );
-
         $sth = new \Gazelle\Util\SortableTableHeader('alpha', [
             'alpha' => ['dbColumn' => 'one', 'defaultSort' => 'desc', 'text' => 'First'],
             'beta'  => ['dbColumn' => 'two', 'defaultSort' => 'desc', 'text' => 'Second'],
@@ -185,6 +179,12 @@ END;
             $imageCache->render(['image' => 'https://example.com/image.url', 'width' => 480]),
             'twig-image-width-480'
         );
+
+        $this->assertStringStartsWith(
+            '<img loading="lazy" class="scale_image" onclick="lightbox.init(this, $(this).width());" alt="' . IMAGE_CACHE_HOST . '/f/full/',
+            self::twig('{{ text|bb_forum }}')->render(['text' => '[img=https://example.com/image.jpg]']),
+            'twig-bb-forum'
+        );
     }
 
     public function testImageProxy(): void {
@@ -253,6 +253,12 @@ END;
             self::twig('{{ ratio(up, down) }}')->render(['up' => 50, 'down' => 0]),
             'twig-function-ratio-infin'
         );
+
+        $this->assertEquals(120, self::twig('{{ upscale(value) }}')->render(['value' => 120]), 'twig-upscale-120');
+        $this->assertEquals(130, self::twig('{{ upscale(value) }}')->render(['value' => 121]), 'twig-upscale-121');
+        $this->assertEquals(130, self::twig('{{ upscale(value) }}')->render(['value' => 129]), 'twig-upscale-129');
+
+        $this->assertEquals(48000, self::twig('{{ upscale(value) }}')->render(['value' => 47133]), 'twig-upscale-47133');
     }
 
     public function testTest(): void {

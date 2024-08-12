@@ -11,6 +11,8 @@ export default [
             "public/static/functions/jquery-migrate.js",
             "public/static/functions/jquery-ui.js",
             "public/static/functions/highcharts.js",
+            "public/static/functions/highcharts-accessibility.js",
+            "public/static/functions/highmaps.js",
             "public/static/functions/tooltipster.js",
             "public/static/functions/tagcanvas.js",
             "public/static/functions/noty/**/*.js",

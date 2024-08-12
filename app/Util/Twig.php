@@ -272,6 +272,17 @@ class Twig {
             'UTF-8'
         )));
 
+        // round up number to next closest power of 10 of n/10
+        // 120 => 120, but 121 => 130, 129 => 130
+        // All because Twig does not expose log10 as a function
+        $twig->addFunction(new \Twig\TwigFunction('upscale', fn($number) => new \Twig\Markup(
+            (function ($number) {
+                $scale = (10 ** floor(log10($number / 10)));
+                return ceil($number / $scale) * $scale;
+            })($number),
+            'UTF-8'
+        )));
+
         $twig->addTest(new \Twig\TwigTest('donor', fn($user) => !is_null($user) && $user::class === \Gazelle\User::class && (new \Gazelle\User\Donor($user))->isDonor()));
         $twig->addTest(new \Twig\TwigTest('forum_thread', fn($thread) => $thread instanceof \Gazelle\ForumThread));
 

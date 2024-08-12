@@ -7,6 +7,7 @@ use Gazelle\Enum\UserStatus;
 class Users extends \Gazelle\Base {
     protected const USER_BROWSER  = 'stat_u_browser';
     protected const USER_CLASS    = 'stat_u_class';
+    protected const USER_GEODIST  = 'stat_u_geodist';
     protected const USER_PLATFORM = 'stat_u_platform';
     protected const FLOW          = 'stat_u_flow';
 
@@ -16,6 +17,7 @@ class Users extends \Gazelle\Base {
         self::$cache->deleteMulti([
             self::USER_BROWSER,
             self::USER_CLASS,
+            self::USER_GEODIST,
             self::USER_PLATFORM,
             self::FLOW,
         ]);
@@ -162,47 +164,55 @@ class Users extends \Gazelle\Base {
     }
 
     /**
-     * Country aggregates.
-     * TODO: this is really fucked
+     * Country aggregates. For privacy, countries with less than 20 members
+     * are rounded up to 20, then increases by increments of 10.
+     * Precise numbers are made available for consumption by staff.
+     * If the $iso array is supplied, it is assumed to be a lookup
+     * table for ISO31660-1 to country name.
      */
-    public function geodistribution(): array {
-        if (![$Countries, $Rank, $CountryUsers, $CountryMax, $CountryMin, $LogIncrements] = self::$cache->get_value('geodistribution')) {
+    public function geodistribution(array $iso = []): array {
+        $info = self::$cache->get_value(self::USER_GEODIST);
+        if ($info === false) {
             self::$db->prepared_query("
-                SELECT Code, Users FROM users_geodistribution
-            ");
-            $Data = self::$db->to_array();
-            $Count = (int)self::$db->record_count() - 1;
-
-            if ($Count < 30) {
-                $CountryMinThreshold = $Count;
-            } else {
-                $CountryMinThreshold = 30;
+                WITH geo AS (
+                    SELECT ipcc,
+                        count(*)              AS total,
+                        greatest(count(*), ?) AS rounded
+                    FROM users_main
+                    GROUP BY ipcc
+                    ORDER BY total
+                )
+                SELECT geo.ipcc,
+                    geo.total                              AS staff,
+                    ceil(rounded / ?) * ?                  AS public,
+                    ntile(100) OVER (ORDER BY rounded ASC) AS n
+                FROM geo
+                ORDER BY n DESC,
+                    public DESC,
+                    staff DESC,
+                    ipcc
+                ", COUNTRY_MINIMUM, COUNTRY_STEP, COUNTRY_STEP
+            );
+            $info = [];
+            foreach (self::$db->to_array(false, MYSQLI_ASSOC, false) as $row) {
+                $row['public']  = (int)$row['public']; // ceil() returns a float
+                $row['country'] = isset($iso[$row['ipcc']]) ? "{$iso[$row['ipcc']]} [{$row['ipcc']}]" : "[{$row['ipcc']}]";
+                $info[]         = $row;
             }
-
-            $CountryMax = ceil(log(max(1, $Data[0][1])) / log(2)) + 1;
-            $CountryMin = floor(log(max(1, $Data[$CountryMinThreshold][1])) / log(2));
-
-            $CountryRegions = ['RS' => ['RS-KM']]; // Count Kosovo as Serbia as it doesn't have a TLD
-            foreach ($Data as $Key => $Item) {
-                [$Country, $UserCount] = $Item;
-                $Countries[] = $Country;
-                $CountryUsers[] = number_format((((log($UserCount) / log(2)) - $CountryMin) / ($CountryMax - $CountryMin)) * 100, 2);
-                $Rank[] = round((1 - ($Key / $Count)) * 100);
-
-                if (isset($CountryRegions[$Country])) {
-                    foreach ($CountryRegions[$Country] as $Region) {
-                        $Countries[] = $Region;
-                        $Rank[] = end($Rank);
-                    }
-                }
-            }
-
-            for ($i = $CountryMin; $i <= $CountryMax; $i++) {
-                $LogIncrements[] = human_format(2 ** $i);
-            }
-            self::$cache->cache_value('geodistribution', [$Countries, $Rank, $CountryUsers, $CountryMax, $CountryMin, $LogIncrements], 86400 * 3);
+            self::$cache->cache_value(self::USER_GEODIST, $info, 86400 * 2);
         }
-        return [$Countries, $Rank, $CountryUsers, $CountryMax, $CountryMin, $LogIncrements];
+        return $info;
+    }
+
+    public function geodistributionChart(\Gazelle\User $user): array {
+        return array_map(
+            fn ($c) => [
+                'ipcc'  => $c['ipcc'],
+                'name'  => $c['country'],
+                'value' => $user->isStaff() ? $c['staff'] : $c['public'],
+            ],
+            $this->geodistribution(ISO3166_2()),
+        );
     }
 
     public function peerStat(): array {

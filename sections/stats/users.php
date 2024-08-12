@@ -3,9 +3,6 @@
 $statsUser = new Gazelle\Stats\Users();
 $flow      = $statsUser->flow();
 
-[$Countries, $Rank, $CountryUsers, $CountryMax, $CountryMin, $LogIncrements]
-    = $statsUser->geodistribution();
-
 echo $Twig->render('stats/user.twig', [
     'distribution' => [
         'browser'  => $statsUser->browserDistribution(),
@@ -17,5 +14,10 @@ echo $Twig->render('stats/user.twig', [
         'add'   => array_values(array_map(fn($m) => $m['new'], $flow)),
         'del'   => array_values(array_map(fn($m) => -$m['disabled'], $flow)),
         'net'   => array_values(array_map(fn($m) => $m['new'] - $m['disabled'], $flow)),
+    ],
+    'geodist' => [
+        'iso'      => ISO3166_2(),
+        'list'     => $statsUser->geodistributionChart($Viewer),
+        'topology' => worldTopology(),
     ],
 ]);

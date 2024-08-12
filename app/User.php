@@ -448,7 +448,8 @@ class User extends BaseObject {
         if ($createdEpoch === false) {
             return 0.0;
         }
-        return $this->downloadedSize() / (time() - $createdEpoch);
+        $delta = (time() - $createdEpoch);
+        return $delta !== 0 ? $this->downloadedSize() / $delta : 0;
     }
 
     public function downloadedOnRatioWatch(): int {
@@ -547,7 +548,8 @@ class User extends BaseObject {
         if ($createdEpoch === false) {
             return 0.0;
         }
-        return ($this->uploadedSize() - STARTING_UPLOAD) / (time() - $createdEpoch);
+        $delta = (time() - $createdEpoch);
+        return $delta !== 0 ? ($this->uploadedSize() - STARTING_UPLOAD) / $delta : 0;
     }
 
     public function userclassName(): string {

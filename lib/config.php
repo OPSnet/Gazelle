@@ -356,7 +356,15 @@ defined('PUSH_SOCKET_LISTEN_PORT') or define('PUSH_SOCKET_LISTEN_PORT', 6789);
 // ------------------------------------------------------------------------
 // GeoIP server settings
 
+// The HTTP endpoint of the geoip service
 defined('GEOIP_SERVER') or define('GEOIP_SERVER', false);
+
+// Countries with less than this number of users is rounded up this value
+// for privacy, to avoid having countries with one user.
+defined('COUNTRY_MINIMUM') or define('COUNTRY_MINIMUM', 20);
+
+// Country membership numbers are rounded up to this amount
+defined('COUNTRY_STEP') or define('COUNTRY_STEP', 10);
 
 // ------------------------------------------------------------------------
 // Site settings
