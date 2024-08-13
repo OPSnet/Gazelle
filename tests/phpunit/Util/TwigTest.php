@@ -58,18 +58,6 @@ END;
             'twig-bb-forum'
         );
 
-        $checked = self::twig('{%- from "macro/form.twig" import checked -%}<input type="checkbox" name="test"{{ truth|checked }} />');
-        $this->assertEquals(
-            '<input type="checkbox" name="test" checked="checked" />',
-            $checked->render(['truth' => true]),
-            'twig-checked-true'
-        );
-        $this->assertEquals(
-            '<input type="checkbox" name="test" />',
-            $checked->render(['truth' => false]),
-            'twig-checked-false'
-        );
-
         $sth = new \Gazelle\Util\SortableTableHeader('alpha', [
             'alpha' => ['dbColumn' => 'one', 'defaultSort' => 'desc', 'text' => 'First'],
             'beta'  => ['dbColumn' => 'two', 'defaultSort' => 'desc', 'text' => 'Second'],

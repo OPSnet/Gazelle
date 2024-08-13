@@ -1,6 +1,6 @@
+{% from 'macro/form.twig' import checked %}
 {{ header('Register', {'js': 'password_validate'}) }}
 {% include 'logo.twig' %}
-
 <div style="width: 100%">
 <div style="width: 45%; margin: auto;">
 <form class="create_form" name="user" id="registerform" method="post" action="">
@@ -52,21 +52,21 @@ channel <code>#disabled</code>. Depending on the timezone you may have to wait, 
         <tr valign="top">
             <td></td>
             <td align="left">
-                <input type="checkbox" name="readrules" id="readrules" value="1"{{ readrules|checked }} />
+                <input type="checkbox" name="readrules" id="readrules" value="1"{{ checked(readrules) }} />
                 <label for="readrules">I will read and abide by the rules.</label>
             </td>
         </tr>
         <tr valign="top">
             <td></td>
             <td align="left">
-                <input type="checkbox" name="readwiki" id="readwiki" value="1"{{ readwiki|checked }} />
+                <input type="checkbox" name="readwiki" id="readwiki" value="1"{{ checked(readwiki) }} />
                 <label for="readwiki">I will read the wiki.</label>
             </td>
         </tr>
         <tr valign="top">
             <td></td>
             <td align="left">
-                <input type="checkbox" name="agereq" id="agereq" value="1"{{ agereq|checked }} />
+                <input type="checkbox" name="agereq" id="agereq" value="1"{{ checked(agereq) }} />
                 <label for="agereq">I am 13 years of age or older.</label>
             </td>
         </tr>

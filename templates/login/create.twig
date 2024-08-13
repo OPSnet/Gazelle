@@ -1,3 +1,4 @@
+{% from 'macro/form.twig' import checked %}
 <table class="layout" cellpadding="2" cellspacing="2" border="0" align="center">
     <tr valign="top">
         <td align="right">Username</td>
@@ -30,21 +31,21 @@
     <tr valign="top">
         <td></td>
         <td align="left">
-            <input type="checkbox" name="readrules" id="readrules" value="1"{{ readrules|checked }} />
+            <input type="checkbox" name="readrules" id="readrules" value="1"{{ checked(readrules) }} />
             <label for="readrules">I will read and abide by the rules.</label>
         </td>
     </tr>
     <tr valign="top">
         <td></td>
         <td align="left">
-            <input type="checkbox" name="readwiki" id="readwiki" value="1"{{ readwiki|checked }} />
+            <input type="checkbox" name="readwiki" id="readwiki" value="1"{{ checked(readwiki) }} />
             <label for="readwiki">I will read the wiki.</label>
         </td>
     </tr>
     <tr valign="top">
         <td></td>
         <td align="left">
-            <input type="checkbox" name="agereq" id="agereq" value="1"{{ agereq|checked }} />
+            <input type="checkbox" name="agereq" id="agereq" value="1"{{ checked(agereq) }} />
             <label for="agereq">I am 13 years of age or older.</label>
         </td>
     </tr>

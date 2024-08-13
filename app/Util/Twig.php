@@ -75,11 +75,6 @@ class Twig {
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
-            'checked',
-            fn($isChecked) => new \Twig\Markup($isChecked ? ' checked="checked"' : '', 'UTF-8')
-        ));
-
-        $twig->addFilter(new \Twig\TwigFilter(
             'column',
             fn(\Gazelle\Util\SortableTableHeader $header, string $name) => new \Twig\Markup($header->emit($name), 'UTF-8')
         ));
