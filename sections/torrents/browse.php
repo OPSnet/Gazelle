@@ -35,7 +35,7 @@ if (isset($_GET['setdefault'])) {
 } elseif (isset($_GET['cleardefault'])) {
     // Clearing default search options
     $Viewer->modifyOption('DefaultSearch', null);
-} elseif (empty($_SERVER['QUERY_STRING']) && $Viewer->option('DefaultSearch')) {
+} elseif ($Viewer->option('DefaultSearch') && (count($_GET) === 0 || (isset($_GET['page']) && count($_GET) === 1))) {
     // Use default search options
     $page = $_GET['page'] ?? false;
     parse_str($Viewer->option('DefaultSearch'), $_GET);
