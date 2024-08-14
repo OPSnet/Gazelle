@@ -38,15 +38,15 @@
 {%     endfor %}
 {% endif -%}
 
-<link rel="stylesheet" type="text/css" media="screen" href="{{ stylesheet.cssUrl }}" title="{{ stylesheet.name }}" />
 {% for sheet in scss_style %}
 {{ scss(sheet) }}
 {% endfor %}
 {% for sheet in css_style %}
 {{ css(sheet) }}
 {% endfor -%}
+<link rel="stylesheet" type="text/css" media="screen" href="{{ stylesheet.cssUrl }}" title="{{ stylesheet.name }}" />
 
-{%- for js in script %}
+{% for js in script %}
 {{ script(js) }}
 {% endfor %}
 <script type="text/javascript">
