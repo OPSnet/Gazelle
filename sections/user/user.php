@@ -466,7 +466,7 @@ if ($Viewer->permitted('users_mod') || $Viewer->isStaff()) { ?>
         ]);
     }
 
-    if ($Viewer->permitted('users_promote_below') || $Viewer->permitted('users_promote_to', $Viewer->classLevel() - 1)) {
+    if ($Viewer->permitted('users_promote_below') || $Viewer->permitted('users_promote_to')) {
 ?>
             <tr>
                 <td class="label">Primary class:</td>
@@ -474,15 +474,21 @@ if ($Viewer->permitted('users_mod') || $Viewer->isStaff()) { ?>
                     <select name="Class">
 <?php
         $ClassLevels = $userMan->classLevelList();
-        foreach ($ClassLevels as $CurClass) {
+        foreach ($ClassLevels as $level => $CurClass) {
             if ($CurClass['Secondary']) {
                 continue;
-            } elseif (!$OwnProfile && !$Viewer->permitted('users_promote_to', $Viewer->classLevel() - 1) && $CurClass['Level'] == $Viewer->privilege()->effectiveClassLevel()) {
+            } elseif (
+                !$OwnProfile
+                && !($Viewer->permitted('users_promote_to')
+                    && $level <= $Viewer->privilege()->effectiveClassLevel())
+                && !($Viewer->permitted('users_promote_below')
+                    && $level < $Viewer->privilege()->effectiveClassLevel())
+            ) {
                 break;
-            } elseif ($CurClass['Level'] > $Viewer->privilege()->effectiveClassLevel()) {
+            } elseif ($level > $Viewer->privilege()->effectiveClassLevel()) {
                 break;
             }
-            if ($User->classLevel() == $CurClass['Level']) {
+            if ($User->classLevel() == $level) {
                 $Selected = ' selected="selected"';
             } else {
                 $Selected = '';
@@ -499,6 +505,7 @@ if ($Viewer->permitted('users_mod') || $Viewer->isStaff()) { ?>
     if ($Viewer->permitted('users_promote_below') || $Viewer->permitted('users_promote_to')) {
         echo $Twig->render('user/edit-secondary-class.twig', [
             'permission' => $User->privilege()->secondaryClassesList(),
+            'max_level'  => $Viewer->privilege()->effectiveClassLevel() - ($Viewer->permitted('users_promote_up') ? 0 : 1),
         ]);
     }
 

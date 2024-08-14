@@ -209,7 +209,8 @@ class Privilege extends \Gazelle\BaseUser {
         self::$db->prepared_query("
             SELECT p.ID                AS permId,
                 p.Name                 AS permName,
-                (l.UserID IS NOT NULL) AS isSet
+                (l.UserID IS NOT NULL) AS isSet,
+                p.Level
             FROM permissions AS p
             LEFT JOIN users_levels AS l ON (l.PermissionID = p.ID AND l.UserID = ?)
             WHERE p.Secondary = 1

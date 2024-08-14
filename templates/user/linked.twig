@@ -42,7 +42,7 @@
                 <td colspan="5" align="left">
                     <div id="dupecomments" class="{{ list|length ? '' : 'hidden' }}">{{ comments|bb_format }}</div>
                     <div id="editdupecomments" class="{{ list|length ? 'hidden' : '' }}">
-                        <textarea name="dupecomments" onkeyup="resize('dupecommentsbox');" id="dupecommentsbox" cols="65" rows="5" style="width: 98%;"> {{ comments }}</textarea>
+                        <textarea name="dupecomments" onkeyup="resize('dupecommentsbox');" id="dupecommentsbox" cols="65" rows="5" style="width: 98%;">{{ comments }}</textarea>
                     </div>
                     {{- dom.click('#dupe-edit', "$('#dupecomments').gtoggle(); $('#editdupecomments').gtoggle(); resize('dupecommentsbox'); return false;") -}}
                     <span style="float: right;"><a id="dupe-edit" href="#" class="brackets">Edit linked account comments</a></span>
