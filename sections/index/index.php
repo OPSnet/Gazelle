@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var ?\Gazelle\User $Viewer */
 
 if (!isset($Viewer)) {
     require('public.php');

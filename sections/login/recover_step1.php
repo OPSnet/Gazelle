@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Twig\Environment $Twig */
 
 $validator = new Gazelle\Util\Validator();
 $validator->setField('email', true, 'email', 'You entered an invalid email address.');

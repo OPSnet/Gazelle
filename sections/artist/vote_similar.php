@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 $way = trim($_GET['way']);
 if (!in_array($way, ['up', 'down'])) {

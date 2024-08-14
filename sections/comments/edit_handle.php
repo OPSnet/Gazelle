@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 if ($Viewer->disablePosting()) {
     error('Your posting privileges have been removed.', true);

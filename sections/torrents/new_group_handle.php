@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Twig\Environment $Twig */
 
 /***************************************************************
 * This page handles the backend of the "new group" function

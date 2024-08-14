@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Twig\Environment $Twig */
 /*
  * $_REQUEST['action'] is artist, collages, requests or torrents (default torrents)
  * $_REQUEST['type'] depends on the page:

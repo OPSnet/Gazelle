@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 $artistMan  = new Gazelle\Manager\Artist();
 $revisionId = isset($_GET['revisionid']) ? (int)$_GET['revisionid'] : null;

@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 if (!$Viewer->permitted('admin_periodic_task_manage')) {
     error(403);

@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Twig\Environment $Twig */
 
 if (isset($_FILES['log']) && is_uploaded_file($_FILES['log']['tmp_name'])) {
     $file    = $_FILES['log'];

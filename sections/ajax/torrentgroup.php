@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 $groupId  = (int)($_GET['id'] ?? 0);
 $infohash = $_GET['hash'] ?? null;

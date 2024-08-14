@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Twig\Environment $Twig */
 
 $artist = (new Gazelle\Manager\Artist())->findById((int)($_GET['artistid'] ?? 0));
 if (is_null($artist)) {

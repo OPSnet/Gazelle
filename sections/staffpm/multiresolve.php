@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 $manager = new Gazelle\Manager\StaffPM();
 

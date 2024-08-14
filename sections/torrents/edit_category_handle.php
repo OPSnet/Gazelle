@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 if (!$Viewer->permitted('users_mod')) {
     error(403);

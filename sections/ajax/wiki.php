@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 $wikiMan = new Gazelle\Manager\Wiki();
 if (isset($_GET['id'])) {

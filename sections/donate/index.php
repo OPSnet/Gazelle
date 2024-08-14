@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Twig\Environment $Twig */
 
 if (MONERO_DONATION_ADDRESS) {
     $moneroDonation = new Gazelle\Donate\Monero();

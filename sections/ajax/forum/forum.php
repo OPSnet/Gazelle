@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 $forum = (new Gazelle\Manager\Forum())->findById((int)($_GET['forumid'] ?? 0));
 if (is_null($forum)) {

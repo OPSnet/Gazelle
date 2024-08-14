@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 require_once(__DIR__ . '/../forums/do_warn.php');
 

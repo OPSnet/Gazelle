@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Twig\Environment $Twig */
 
 $userMan = new Gazelle\Manager\User();
 $search = (new Gazelle\Search\Collage())->setLookup($_GET['type'] ?? 'name');

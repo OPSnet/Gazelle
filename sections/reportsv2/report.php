@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Twig\Environment $Twig */
 /*
  * This is the frontend of reporting a torrent, it's what users see when
  * they visit reportsv2.php?id=xxx

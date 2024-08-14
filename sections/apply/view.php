@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Twig\Environment $Twig */
 
 $appMan = new Gazelle\Manager\Applicant();
 if (isset($_REQUEST['id'])) {

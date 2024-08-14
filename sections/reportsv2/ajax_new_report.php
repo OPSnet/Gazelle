@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 /*
  * This is the AJAX page that gets called from the JavaScript
  * function NewReport(), any changes here should probably be

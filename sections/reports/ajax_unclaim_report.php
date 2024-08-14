@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 if (!$Viewer->permitted('site_moderate_forums') || empty($_POST['remove'])) {
     json_error('bad parameters');

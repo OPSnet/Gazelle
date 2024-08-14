@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Twig\Environment $Twig */
 
 $friend = new Gazelle\User\Friend($Viewer);
 $paginator = new Gazelle\Util\Paginator(FRIENDS_PER_PAGE, (int)($_GET['page'] ?? 1));

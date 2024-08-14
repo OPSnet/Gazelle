@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Twig\Environment $Twig */
 
 if (!$Viewer->permittedAny('admin_manage_permissions', 'users_mod')) {
     error(403);

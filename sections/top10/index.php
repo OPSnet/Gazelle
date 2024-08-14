@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Twig\Environment $Twig */
 
 if (!$Viewer->permitted('site_top10')) {
     $Twig->render('top10/dissabled.twig');

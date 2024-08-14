@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 $userMan = new Gazelle\Manager\User();
 $user = [$Viewer->id() => $Viewer];

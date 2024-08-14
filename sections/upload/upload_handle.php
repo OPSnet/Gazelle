@@ -1,4 +1,8 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Gazelle\Cache $Cache */
+/** @phpstan-var \Twig\Environment $Twig */
+/** @phpstan-var \Gazelle\Debug $Debug */
 
 use OrpheusNET\Logchecker\Logchecker;
 

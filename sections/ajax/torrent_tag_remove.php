@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Gazelle\Cache $Cache */
 
 authorize();
 if ($Viewer->disableTagging() || !$Viewer->permitted('site_delete_tag')) {

@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 $torrent = (new Gazelle\Manager\Torrent())->findById((int)($_GET['id'] ?? 0));
 if (is_null($torrent)) {

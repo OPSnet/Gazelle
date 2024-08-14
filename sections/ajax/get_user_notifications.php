@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 $alertList = (new Gazelle\User\Notification($Viewer))->alertList();
 

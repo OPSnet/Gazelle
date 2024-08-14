@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 if (!$Viewer->permitted('users_linked_users')) {
     error(403);

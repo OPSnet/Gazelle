@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 $newsMan = new Gazelle\Manager\News();
 $newsReader = new \Gazelle\WitnessTable\UserReadNews();

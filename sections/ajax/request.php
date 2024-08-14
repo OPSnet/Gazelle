@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 $request = (new Gazelle\Manager\Request())->findById((int)($_GET['id'] ?? 0));
 if (is_null($request)) {

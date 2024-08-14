@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 header('Content-Type: application/json; charset=utf-8');
 

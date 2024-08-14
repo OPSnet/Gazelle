@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 if (isset($_GET['id']) && isset($_GET['hash'])) {
     json_error('bad parameters');

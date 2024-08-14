@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 if (!$Viewer->permitted('zip_downloader')) {
     error(403);

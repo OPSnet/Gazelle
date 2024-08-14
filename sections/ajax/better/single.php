@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 echo (new Gazelle\Json\Better\SingleSeeded(
     $Viewer,

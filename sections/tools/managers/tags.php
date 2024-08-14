@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Twig\Environment $Twig */
 
 if (!$Viewer->permitted('users_mod')) {
     error(403);
@@ -73,7 +75,7 @@ while (isset($_GET['tag']) && isset($_GET['replace'])) {
     if (isset($_GET['official'])) {
         $madeOfficial = 0;
         foreach ($replacement as $r) {
-            $madeOfficial += $tagMan->officialize($r, $Viewer->id());
+            $madeOfficial += $tagMan->officialize($r, $Viewer);
         }
         $success[] = "<b>$madeOfficial tag" . plural($madeOfficial) . "</b> made official";
     }

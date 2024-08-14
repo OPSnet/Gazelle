@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 switch ($_GET['action'] ?? '') {
     case 'passkeys':

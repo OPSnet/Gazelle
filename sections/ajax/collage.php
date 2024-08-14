@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 $collage = (new Gazelle\Manager\Collage())->findById((int)($_GET['id'] ?? 0));
 if (is_null($collage)) {

@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Twig\Environment $Twig */
 
 $tgroup = (new Gazelle\Manager\TGroup())->findById((int)$_GET['id']);
 if (is_null($tgroup)) {

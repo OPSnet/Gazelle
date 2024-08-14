@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 $postId = (int)($_GET['post'] ?? 0);
 $pm = (new Gazelle\Manager\PM($Viewer))->findByPostId($postId);

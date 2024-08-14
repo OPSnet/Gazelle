@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Twig\Environment $Twig */
 
 $vote = new Gazelle\User\Vote($Viewer);
 $tagMan = new Gazelle\Manager\Tag();

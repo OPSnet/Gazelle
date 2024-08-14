@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Twig\Environment $Twig */
 
 use Gazelle\Enum\Direction;
 use Gazelle\Enum\MysqlInfoOrderBy;

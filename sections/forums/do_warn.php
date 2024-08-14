@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 // this file is used by sections/comments/take_warn.php and sections/forums/take_warn.php
 // @phpstan-ignore-next-line return type has no value type specified in iterable type array

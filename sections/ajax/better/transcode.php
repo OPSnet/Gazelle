@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 if (!in_array((int)($_GET['type'] ?? 0), range(0, 3))) {
     error(0);

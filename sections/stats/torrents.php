@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Twig\Environment $Twig */
 
 $statsTor = new Gazelle\Stats\Torrent();
 $flow = $statsTor->flow();

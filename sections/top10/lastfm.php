@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Twig\Environment $Twig */
 
 $category = $_GET['category'] ?? 'weekly';
 $category = in_array($category, ['all_time', 'weekly']) ? $category : 'weekly';

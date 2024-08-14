@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 $messageIds = array_filter(array_map('intval', $_POST['messages'] ?? []), fn($id) => $id > 0);
 

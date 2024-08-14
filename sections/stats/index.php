@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Twig\Environment $Twig */
 
 switch ($_REQUEST['action'] ?? null) {
     case 'users':

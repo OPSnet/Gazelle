@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var ?\Gazelle\User $Viewer */
+
 if ($Viewer) {
     header("Location: index.php");
     exit;

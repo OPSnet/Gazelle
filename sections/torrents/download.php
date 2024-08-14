@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Gazelle\Cache $Cache */
 
 use Gazelle\Enum\DownloadStatus;
 use Gazelle\Util\Irc;

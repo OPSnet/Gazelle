@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 switch ($_REQUEST['action'] ?? '') {
     case 'viewconv':

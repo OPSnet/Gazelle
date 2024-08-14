@@ -1,4 +1,7 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Gazelle\Cache $Cache */
+/** @phpstan-var \Twig\Environment $Twig */
 
 if (!$Viewer->permitted('admin_site_debug')) {
     error(403);

@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 // echo out the slice of the form needed for the selected upload type ($_GET['section']).
 

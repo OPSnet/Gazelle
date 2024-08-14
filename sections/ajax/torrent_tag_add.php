@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Gazelle\Cache $Cache */
 
 if ($Viewer->disableTagging()) {
     json_or_error('tagging disabled for your account', 403);

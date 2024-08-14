@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 require_once('do_warn.php');
 [$post, $body] = handleWarningRequest(new Gazelle\Manager\ForumPost());

@@ -40,6 +40,8 @@ function classList(int $Selected = 0): string {
     return $Return;
 }
 
+/** @phpstan-var \Gazelle\User $Viewer */
+
 if (!$Viewer->permitted('admin_manage_forums')) {
     error(403);
 }

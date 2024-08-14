@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Twig\Environment $Twig */
 
 $artistMan  = new Gazelle\Manager\Artist();
 $collageMan = new Gazelle\Manager\Collage();

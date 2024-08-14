@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 $user = (new Gazelle\Manager\User())->findById((int)($_GET['userid'] ?? 0));
 if (is_null($user)) {

@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Twig\Environment $Twig */
 
 $userId = (int)($_GET['user_id'] ?? $Viewer->id());
 $user = new Gazelle\User($userId);

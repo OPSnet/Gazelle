@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Twig\Environment $Twig */
 
 if (!$Viewer->permitted('admin_manage_ipbans')) {
     error(403);
@@ -27,7 +29,7 @@ if (isset($_POST['submit'])) {
         if ($id) {
             $IPv4Man->modifyBan($Viewer, $id, $_POST['start'], $_POST['end'], trim($_POST['notes']));
         } else {
-            $IPv4Man->createBan($Viewer->id(), $_POST['start'], $_POST['end'], trim($_POST['notes']));
+            $IPv4Man->createBan($Viewer, $_POST['start'], $_POST['end'], trim($_POST['notes']));
         }
     }
 }

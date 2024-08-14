@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\Debug $Debug */
 
 if (empty($_GET['aid']) || empty($_GET['token'])) {
     json_error('invalid parameters');

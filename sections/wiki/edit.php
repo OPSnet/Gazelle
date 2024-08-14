@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Twig\Environment $Twig */
 
 $article = (new Gazelle\Manager\Wiki())->findById((int)$_GET['id']);
 if (is_null($article)) {

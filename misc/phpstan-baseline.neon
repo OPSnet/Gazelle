@@ -381,11 +381,6 @@ parameters:
 			path: ../sections/requests/take_fill.php
 
 		-
-			message: "#^Argument of an invalid type array\\<int, string\\>\\|false supplied for foreach, only iterables are supported\\.$#"
-			count: 1
-			path: ../sections/tools/development/clear_cache.php
-
-		-
 			message: "#^Negated boolean expression is always false\\.$#"
 			count: 1
 			path: ../sections/tools/development/clear_cache.php

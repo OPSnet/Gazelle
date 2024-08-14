@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 authorize();
 if (!$Viewer->permitted('torrents_edit')) {

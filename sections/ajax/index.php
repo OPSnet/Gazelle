@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var ?\Gazelle\User $Viewer */
+/** @phpstan-var \Gazelle\Cache $Cache */
 
 define('AJAX', !isset($_POST['auth']));
 

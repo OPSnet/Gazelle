@@ -1,0 +1,12 @@
+#!/bin/bash
+
+declare -A map
+map=( ['$Viewer']='\\Gazelle\\User' ['$Cache']='\\Gazelle\\Cache' ['$Debug']='\\Gazelle\\Debug' ['$Twig']='\\Twig\\Environment' )
+
+for var in "${!map[@]}"; do
+    for file in $(find "$(dirname $0)/../sections" -name \*.php); do
+        fgrep --quiet "$var" "$file" \
+            && fgrep --quiet -v '/** @phpstan-var '"${map[$var]} $var"' */' "$file" \
+            && sed -i '0,/<\?php$/a /** @phpstan-var '"${map[$var]} $var"' */' "$file"
+    done
+done

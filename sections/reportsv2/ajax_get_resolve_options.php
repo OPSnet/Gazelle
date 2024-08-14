@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 /*
  * This is the page that gets the values of whether to delete/disable upload/warning duration

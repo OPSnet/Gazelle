@@ -1,4 +1,7 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Gazelle\Cache $Cache */
+/** @phpstan-var \Twig\Environment $Twig */
 
 if (!$Viewer->permitted('admin_clear_cache')) {
     error(403);
@@ -17,7 +20,7 @@ $result = [];
 $begin = microtime(true);
 if (!empty($_REQUEST['key'])) {
     $Keys = preg_split('/\s+/', trim($_REQUEST['key']));
-    if (isset($_REQUEST['flush']) && ($_REQUEST['check'] ?? '') === 'on') {
+    if ($Keys && isset($_REQUEST['flush']) && ($_REQUEST['check'] ?? '') === 'on') {
         if (!$Viewer->permitted('admin_clear_cache')) {
             error(403);
         }
@@ -26,7 +29,7 @@ if (!empty($_REQUEST['key'])) {
             $result[$key] = CACHE_RESPONSE[$response] ?? "retcode:$response";
         }
         $flushed = true;
-    } elseif (isset($_REQUEST['view']) || isset($_REQUEST['json'])) {
+    } elseif ($Keys && (isset($_REQUEST['view']) || isset($_REQUEST['json']))) {
         foreach ($Keys as $Key) {
             foreach (CACHE_PERMISSION as $name => $permission) {
                 if (str_contains($Key, $name) && !$Viewer->permitted($permission)) {

@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Twig\Environment $Twig */
 
 $request = (new Gazelle\Manager\Request())->findById((int)($_GET['id'] ?? 0));
 if (is_null($request)) {

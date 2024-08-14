@@ -53,6 +53,9 @@ function diff(string $OldText, string $NewText): array {
     return $Result;
 }
 
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Twig\Environment $Twig */
+
 $old = (int)($_GET['old'] ?? 0);
 $new = (int)($_GET['new'] ?? 0);
 if ($old >= $new) {

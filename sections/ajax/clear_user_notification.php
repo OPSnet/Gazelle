@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 $notifier = 'Gazelle\\User\\Notification\\' . $_POST['type'];
 if (!class_exists($notifier)) {

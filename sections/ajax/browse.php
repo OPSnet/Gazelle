@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 if (empty($_GET['order_by']) || !isset(Gazelle\Search\Torrent::$SortOrders[$_GET['order_by']])) {
     $OrderBy = 'time';

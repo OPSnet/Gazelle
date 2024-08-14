@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Twig\Environment $Twig */
 
 $staffpmMan = new Gazelle\Manager\StaffPM();
 $viewMap = [

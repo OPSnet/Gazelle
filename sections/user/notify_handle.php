@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Gazelle\Cache $Cache */
 
 if (!$Viewer->permitted('site_torrents_notify')) {
     error(403);

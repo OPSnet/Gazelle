@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 if (!$Viewer->permittedAny('admin_reports', 'site_moderate_forums')) {
     json_error('forbidden');

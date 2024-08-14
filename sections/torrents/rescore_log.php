@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 use OrpheusNET\Logchecker\Logchecker;
 

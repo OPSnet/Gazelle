@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Twig\Environment $Twig */
 
 $letter = isset($_GET['letter']) ? strtoupper(substr($_GET['letter'], 0, 1)) : '1';
 

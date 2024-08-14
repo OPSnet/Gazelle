@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Twig\Environment $Twig */
 
 $forum = (new Gazelle\Manager\Forum())->findById((int)($_GET['forumid'] ?? 0));
 if (!$forum) {

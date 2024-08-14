@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Twig\Environment $Twig */
 
 $page = !empty($_GET['page']) ? (int) $_GET['page'] : 1;
 $page = max(1, $page);

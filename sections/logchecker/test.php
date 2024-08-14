@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Twig\Environment $Twig */
 
 use OrpheusNET\Logchecker\Logchecker;
 

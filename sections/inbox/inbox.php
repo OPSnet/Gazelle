@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Twig\Environment $Twig */
 
 $inbox = $Viewer->inbox();
 $inbox->setFolder($_GET['section'] ?? $_GET['action'] ?? 'inbox');

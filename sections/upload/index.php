@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 if (!$Viewer->permitted('site_upload')) {
     error("Your userclass does not allow you to upload.");

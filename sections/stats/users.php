@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Twig\Environment $Twig */
 
 $statsUser = new Gazelle\Stats\Users();
 $flow      = $statsUser->flow();

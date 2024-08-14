@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 $search = new Gazelle\Search\Request(new Gazelle\Manager\Request());
 

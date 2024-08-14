@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Twig\Environment $Twig */
 
 $enabler = null;
 if (isset($_POST['username'])) {

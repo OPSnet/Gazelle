@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 if (!empty($_POST['action'])) {
     match ($_POST['action']) {

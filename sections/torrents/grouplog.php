@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Twig\Environment $Twig */
 
 $tgroupId = (int)($_GET['id'] ?? 0);
 if (!$tgroupId) {

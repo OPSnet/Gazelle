@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 $json = new Gazelle\Json\Inbox(
     $Viewer,

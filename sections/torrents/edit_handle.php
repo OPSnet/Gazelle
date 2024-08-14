@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Gazelle\Debug $Debug */
 
 use Gazelle\Enum\LeechType;
 use Gazelle\Enum\LeechReason;

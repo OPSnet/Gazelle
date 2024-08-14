@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 authorize();
 if (!(new Gazelle\User\Bonus($Viewer))->purchaseInvite()) {

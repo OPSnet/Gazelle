@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Twig\Environment $Twig */
 
 $detail = $_GET['details'] ?? 'all';
 $limit  = $_GET['limit'] ?? 10;

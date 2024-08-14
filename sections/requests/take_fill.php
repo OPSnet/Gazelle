@@ -8,6 +8,8 @@ function print_or_return($JsonMsg, $Error = null) {
     }
 }
 
+/** @phpstan-var \Gazelle\User $Viewer */
+
 if (!defined('AJAX')) {
     authorize();
 }

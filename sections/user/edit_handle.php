@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Twig\Environment $Twig */
 
 authorize();
 
@@ -271,9 +273,8 @@ if ($NewEmail) {
 if (isset($_POST['resetpasskey'])) {
     $oldPasskey = $user->announceKey();
     $newPasskey = randomString();
-    $ipaddr = $Viewer->ipaddr();
     $user->setField('torrent_pass', $newPasskey);
-    $user->modifyAnnounceKeyHistory($oldPasskey, $newPasskey, $ipaddr);
+    $user->modifyAnnounceKeyHistory($oldPasskey, $newPasskey);
     (new Gazelle\Tracker())->modifyPasskey(old: $oldPasskey, new: $newPasskey);
 }
 

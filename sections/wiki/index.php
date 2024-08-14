@@ -1,6 +1,7 @@
 <?php
 
 function class_list(int $Selected = 0): string {
+    /** @phpstan-var \Gazelle\User $Viewer */
     global $Viewer;
     $Return = '';
     $Classes = (new Gazelle\Manager\User())->classList();

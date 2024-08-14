@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Twig\Environment $Twig */
 
 $appRoleMan = new Gazelle\Manager\ApplicantRole();
 if ($Viewer->permitted('admin_manage_applicants')) {

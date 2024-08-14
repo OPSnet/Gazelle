@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 if ($Viewer->disableForums()) {
     json_error('You do not have access to the forums!');

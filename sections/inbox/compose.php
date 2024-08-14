@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Twig\Environment $Twig */
 
 $recipient = (new Gazelle\Manager\User())->findById((int)$_GET['toid']);
 if (is_null($recipient)) {

@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Twig\Environment $Twig */
 
 if (!($Viewer->permittedAny('users_mod', 'site_tag_aliases_read'))) {
     error(403);

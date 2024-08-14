@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 // Remove 2FA. Users have to enter their password, moderators skip this step.
 $user = (new Gazelle\Manager\User())->findById((int)($_GET['userid'] ?? 0));

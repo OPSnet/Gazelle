@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 $search = trim($_GET['search'] ?? '');
 if (!strlen($search)) {

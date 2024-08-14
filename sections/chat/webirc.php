@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Twig\Environment $Twig */
 
 if (!$Viewer->disableIRC() && !$Viewer->IRCKey()) {
     $ircKey = randomString(32);

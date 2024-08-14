@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 $post = (new Gazelle\Manager\ForumPost())->findById((int)($_GET['post'] ?? 0));
 if (is_null($post)) {

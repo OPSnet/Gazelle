@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Twig\Environment $Twig */
 
 $limit = (int)($_GET['limit'] ?? 10);
 $limit = in_array($limit, [10, 100, 250]) ? $limit : 10;

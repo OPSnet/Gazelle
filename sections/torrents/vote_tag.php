@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 authorize();
 $tgroup = (new Gazelle\Manager\TGroup())->findById((int)$_GET['groupid']);

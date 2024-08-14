@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 if (empty($_GET['query'])) {
     json_die("failure", "no query");

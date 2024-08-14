@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Twig\Environment $Twig */
 /*
  * This page is used for viewing reports in every viewpoint except auto.
  * It doesn't AJAX grab a new report when you resolve each one, use auto

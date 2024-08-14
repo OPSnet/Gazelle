@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Twig\Environment $Twig */
 
 if (!SHOW_PUBLIC_INDEX) {
     header('Location: login.php');

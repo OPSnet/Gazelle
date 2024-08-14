@@ -24,6 +24,7 @@ h5{padding-top:30px}
 <body>
 <div class="container">
 <?php
+/** @phpstan-var \Gazelle\Cache $Cache */
 
 $ipaddr     = $_SERVER['REMOTE_ADDR'];
 $key        = "apl-recovery.$ipaddr";

@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Twig\Environment $Twig */
 
 $torMan    = (new Gazelle\Manager\Torrent())->setViewer($Viewer);
 $reportMan = new Gazelle\Manager\Torrent\Report($torMan);

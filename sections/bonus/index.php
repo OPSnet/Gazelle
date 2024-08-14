@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 if ($Viewer->disableBonusPoints()) {
     error('Your bonus points have been deactivated.');

@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 authorize();
 $notifier = new Gazelle\Notification\Torrent($Viewer->id());

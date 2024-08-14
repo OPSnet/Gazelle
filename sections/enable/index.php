@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Twig\Environment $Twig */
 
 if (!FEATURE_EMAIL_REENABLE) {
     header("Location: index.php");

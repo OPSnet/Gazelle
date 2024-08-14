@@ -1,4 +1,5 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
 
 /*
  * This is the AJAX backend for the SendNow() function.

@@ -1,4 +1,6 @@
 <?php
+/** @phpstan-var \Gazelle\User $Viewer */
+/** @phpstan-var \Twig\Environment $Twig */
 
 $torrent = (new Gazelle\Manager\Torrent())->findById((int)$_GET['torrentid']);
 if (is_null($torrent)) {
