@@ -9,19 +9,31 @@ if (!($Viewer->permittedAny('users_mod', 'site_tag_aliases_read'))) {
 $tagMan = new Gazelle\Manager\Tag();
 $action = null;
 $result = null;
+$merge  = false;
 if ($Viewer->permitted('users_mod')) {
     if (isset($_POST['newalias'])) {
         $action = 'addition';
         $result = $tagMan->createAlias($_POST['badtag'], $_POST['aliastag']);
+        $merge  = true;
     }
     if (isset($_POST['changealias']) || isset($_POST['delete'])) {
         $aliasId = (int)$_POST['aliasid'];
         if ($_POST['save']) {
             $action = 'modification';
             $result = $tagMan->modifyAlias($aliasId, $_POST['badtag'], $_POST['aliastag']);
+            $merge  = true;
         } elseif ($_POST['delete']) {
             $action = 'removal';
             $result = $tagMan->removeAlias($aliasId);
+        }
+    }
+}
+if ($merge) {
+    $bad = $tagMan->findByName($_POST['badtag']);
+    if ($bad) {
+        $good = $tagMan->softCreate($_POST['aliastag'], $Viewer);
+        if ($good) {
+            $tagMan->rename($bad, [$good], $Viewer);
         }
     }
 }
@@ -43,7 +55,7 @@ View::show_header('Tag Aliases');
 </div>
 <?php if (!is_null($action)) { ?>
 <div class="box pad center">
-    Result: <?= $action ?> <strong><?= $result == 1 ? 'succeeded' : 'failed' ?></strong>.
+    Result: <?= $action ?> <strong><?= $result > 0 ? 'succeeded' : 'failed' ?></strong>.
 </div>
 <?php } ?>
 <table class="thin">

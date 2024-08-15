@@ -52,49 +52,115 @@ class TagTest extends TestCase {
     public function testCreate(): void {
         $manager = new Gazelle\Manager\Tag();
         $name    = self::PREFIX . randomString(5);
-        $this->assertNull($manager->lookup($name), 'tag-lookup-fail');
+        $this->assertNull($manager->findByName($name), 'tag-lookup-fail');
 
         $this->user = Helper::makeUser('tag.' . randomString(6), 'tag');
-        $tagId      = $manager->create($name, $this->user);
-        $tag        = $manager->findById($tagId);
+        $tag = $manager->create($name, $this->user);
         $this->assertInstanceOf(\Gazelle\Tag::class, $tag, 'tag-find-by-id');
-        $this->assertEquals($tagId, $tag->id(), 'tag-is-id');
-        $this->assertEquals($tagId, $manager->lookup($name), 'tag-method-lookup');
-        $this->assertEquals($name, $manager->name($tagId), 'tag-method-name');
-        $this->assertEquals($name, $manager->findByName($name)->name(), 'tag-find-by-name');
-        $this->assertEquals($tagId, $manager->create($name, $this->user), 'tag-create-again');
-        $this->assertEquals($tagId, $manager->lookup($name), 'tag-lookup-success');
+        $this->assertEquals($tag->id(), $manager->findByName($tag->name())->id(), 'tag-method-lookup');
+        $this->assertEquals($name, $tag->name(), 'tag-method-name');
+        $this->assertEquals($name, $manager->findByName($tag->name())->name(), 'tag-find-by-name');
+
+        $find = $manager->findById($tag->id());
+        $this->assertEquals($tag->id(), $find->id(), 'tag-find-by-id');
 
         // rename to a new tag
         $new = "$name." . randomString(4);
-        $this->assertNull($manager->lookup($new), 'tag-lookup-new-fail');
-        $this->assertEquals(1, $manager->rename($tagId, [$new], $this->user), 'tag-rename');
-        $this->assertEquals($tagId, $manager->lookup($new), 'tag-lookup-new-success');
+        $this->assertNull($manager->findByName($new), 'tag-lookup-new-fail');
+        $this->assertEquals(1, $manager->rename($tag, [$new], $this->user), 'tag-rename');
+        $find = $manager->findByName($new);
+        $this->assertInstanceOf(\Gazelle\Tag::class, $find, 'tag-find');
+        $this->assertEquals($tag->id(), $find->id(), 'tag-lookup-new-success');
 
         // rename to an existing tag
+        $this->user->addBounty(500 * 1024 ** 3);
         $this->request = Helper::makeRequestMusic($this->user, 'phpunit tag create request');
-        $this->request->addTag($tagId);
+        $tag->addRequest($this->request);
         $new   = "$name." . randomString(5);
-        $newId = $manager->create($new, $this->user);
-        $this->assertEquals(1, $manager->rename($tagId, [$new], $this->user), 'tag-existing-rename');
-        $this->assertEquals($newId, $manager->lookup($new), 'tag-lookup-existing-success');
+        $newTag = $manager->create($new, $this->user);
+        $this->assertEquals(1, $manager->rename($tag, [$newTag->name()], $this->user), 'tag-existing-rename');
+        $this->assertEquals($newTag->id(), $manager->findByName($newTag->name())->id(), 'tag-lookup-existing-success');
 
         // Is empty because vote counts below 10 are ignored,
         // but at least we know the SQL is syntactically valid.
         $this->assertCount(0, $manager->userTopTagList($this->user), 'tag-user-count');
     }
 
+    public function testSoftCreate(): void {
+        $manager    = new Gazelle\Manager\Tag();
+        $this->user = Helper::makeUser('tag.' . randomString(6), 'tag');
+        $valid      = 'phpunit.soft.' . randomString(6);
+
+        $this->assertTrue($manager->validName($valid), 'tag-valid-name');
+        $t1 = $manager->softCreate($valid, $this->user);
+        $t2 = $manager->softCreate($valid, $this->user);
+        $this->assertEquals($t1->id(), $t2->id(), 'tag-soft-create-valid');
+    }
+
     public function testAlias(): void {
         $manager    = new Gazelle\Manager\Tag();
         $this->user = Helper::makeUser('tag.' . randomString(6), 'tag');
 
-        $badId  = $manager->create(self::PREFIX . randomString(10), $this->user);
-        $goodId = $manager->create(self::PREFIX . randomString(10), $this->user);
-        $this->assertNotEquals($badId, $goodId, 'tag-just-try-again');
-        $bad  = $manager->findById($badId);
-        $good = $manager->findById($goodId);
+        $bad  = $manager->create(self::PREFIX . randomString(10), $this->user);
+        $good = $manager->create(self::PREFIX . randomString(10), $this->user);
+        $this->assertNotEquals($bad->id(), $good->id(), 'tag-just-try-again');
         $aliasId =  $manager->createAlias($bad->name(), $good->name());
         $this->assertEquals($aliasId, $manager->lookupBad($bad->name()), 'tag-lookup-bad');
+
+        $exclude    = $manager->create(self::PREFIX . randomString(10), $this->user);
+        $excludeBad = $manager->create(self::PREFIX . randomString(10), $this->user);
+        $manager->createAlias($excludeBad->name(), $exclude->name());
+        $this->assertEquals(
+            [
+                'include' => [str_replace('.', '_', $good->name())],
+                'exclude' => ['!' . str_replace('.', '_', $exclude->name())],
+            ],
+            $manager->replaceAliasList(
+            [
+                'include' => [str_replace('.', '_', $bad->name())],
+                'exclude' => ['!' . str_replace('.', '_', $excludeBad->name())],
+            ],
+            ),
+            'tag-replace-alias'
+        );
+        $tagList = [
+            'include' => [$good->name()],
+            'exclude' => ['!' . $exclude->name()],
+        ];
+        $input = "{$good->name()}, !{$exclude->name()}";
+        $this->assertEquals(
+            [
+                "input"     => $input,
+                "predicate" => "{$good->name()} !{$exclude->name()}",
+            ],
+            $manager->sphinxFilter($tagList, true, true),
+            'tag-sphinx-neg-all'
+        );
+        $this->assertEquals(
+            [
+                "input"     => $input,
+                "predicate" => "( {$good->name()} ) !{$exclude->name()}",
+            ],
+            $manager->sphinxFilter($tagList, true, false),
+            'tag-sphinx-neg-noall'
+        );
+        $this->assertEquals(
+            [
+                "input"     => $input,
+                "predicate" => "{$good->name()} \\\\!{$exclude->name()}",
+            ],
+            $manager->sphinxFilter($tagList, false, true),
+            'tag-sphinx-noneg-all'
+        );
+        $this->assertEquals(
+            [
+                "input"     => $input,
+                "predicate" => "( {$good->name()} | \\\\!{$exclude->name()} )",
+            ],
+            $manager->sphinxFilter($tagList, false, false),
+            'tag-sphinx-noneg-noall'
+        );
+
         $notgood = $good->name() . '.nope';
         $this->assertEquals(1, $manager->modifyAlias($aliasId, $notgood, $good->name()), 'tag-rename-alias');
         $list = array_filter(
@@ -109,24 +175,23 @@ class TagTest extends TestCase {
     public function testOfficial(): void {
         $manager    = new Gazelle\Manager\Tag();
         $this->user = Helper::makeUser('tag.' . randomString(6), 'tag');
-        $tagId      = $manager->create(self::PREFIX . randomString(10), $this->user);
-        $this->assertEquals($tagId, $manager->officialize($manager->name($tagId), $this->user), 'tag-officalize-existing');
-        $tagName = $manager->name($tagId);
-        $list = array_filter($manager->genreList(), fn($t) => $t == $tagName);
+        $tag        = $manager->create(self::PREFIX . randomString(10), $this->user);
+        $this->assertEquals($tag->id(), $manager->officialize($tag->name(), $this->user)->id(), 'tag-officalize-existing');
+        $list = array_filter($manager->genreList(), fn($t) => $t == $tag->name());
         $this->assertCount(1, $list, 'tag-genre-list');
 
-        $officialId = $manager->officialize(self::PREFIX . 'off.' . randomString(10), $this->user);
-        $this->assertNotEquals($tagId, $officialId, 'tag-officialize-new');
-        $officialName = $manager->name($officialId);
+        $official = $manager->officialize(self::PREFIX . 'off.' . randomString(10), $this->user);
+        $this->assertNotEquals($tag->id(), $official->id(), 'tag-officialize-new');
+        $officialName = $official->name();
         $list = array_filter(
             $manager->officialList(),
-            fn($t) => $t['name'] == $officialName
+            fn($t) => $t->name() == $officialName
         );
         $this->assertCount(1, $list, 'tag-official-list');
-        $this->assertEquals(1, $manager->unofficialize([$officialId]), 'tag-unofficialize');
+        $this->assertEquals(1, $manager->unofficialize([$official->id()]), 'tag-unofficialize');
         $this->assertCount(
             0,
-            array_filter($manager->officialList(), fn($t) => $t['name'] == $officialName),
+            array_filter($manager->officialList(), fn($t) => $t->name() == $officialName),
             'tag-empty-official-list'
         );
     }
@@ -145,49 +210,67 @@ class TagTest extends TestCase {
         );
 
         $manager = new Gazelle\Manager\Tag();
-        $folkId  = $manager->lookup('phpunit.folk');
+        $folk = $manager->findByName('phpunit.folk');
         $this->assertFalse(
-            $manager->torrentTagHasVote($folkId, $this->tgroup, $this->user),
+            $folk->hasVoteTGroup($this->tgroup, $this->user),
             'tag-has-no-vote'
         );
-        $result  = $manager->torrentLookup($manager->lookup('phpunit.electronic'));
-        $item    = current($result);
+        $tag    = $manager->findByName('phpunit.electronic');
+        $result = $tag->tgroupList();
+        $item   = current($result);
         $this->assertCount(1, $result, 'tag-torrent-lookup');
         $this->assertEquals($this->tgroup->id(), $item['torrentGroupId'], 'tag-found-tgroup');
         $this->assertEquals(
             1,
-            $manager->createTorrentTagVote($manager->lookup('phpunit.folk'), $this->tgroup, $this->user, 'up'),
+            $folk->voteTGroup($this->tgroup, $this->user, 'up'),
             'tag-tgroup-vote'
         );
         $db = Gazelle\DB::DB();
         $this->assertTrue(
-            $manager->torrentTagHasVote($folkId, $this->tgroup, $this->user),
+            $folk->hasVoteTGroup($this->tgroup, $this->user),
             'tag-has-no-vote'
         );
-        // not enough uses to have a meaninful result, but at least the query is run
+        // not enough uses to have a meaningful result, but at least the query is run
         $this->assertCount(0, $manager->autocompleteAsJson('phpun'), 'tag-autocomplete');
-        $this->assertCount(0, $manager->requestLookup($folkId), 'tag-request-lookup');
+        $this->assertCount(0, $folk->requestList(), 'tag-request-lookup');
     }
 
-    public function testSplitNew(): void {
-        $this->user = Helper::makeUser('tag.' . randomString(8), 'tag.split');
-        $manager = new Gazelle\Manager\Tag();
-        $name    = self::PREFIX . randomString(10);
-        $tagId   = $manager->create($name, $this->user);
-
-        $this->request = Helper::makeRequestMusic($this->user, 'phpunit tag split new request');
-        $this->request->addTag($tagId);
+    public function testReAdd(): void {
+        $this->user   = Helper::makeUser('tag.' . randomString(8), 'tag.readd');
+        $manager      = new Gazelle\Manager\Tag();
+        $name         = self::PREFIX . randomString(10);
+        $tag          = $manager->create($name, $this->user);
         $this->tgroup = Helper::makeTGroupMusic(
             name:       'phpunit tag ' . randomString(6),
             artistName: [[ARTIST_MAIN], ['Tag Girl ' . randomString(12)]],
             tagName:    [$name],
             user:       $this->user,
         );
+        $this->assertEquals(2, $tag->addTGroup($this->tgroup, $this->user, 0), 'tag-re-add');
+    }
+
+    public function testSplitNew(): void {
+        $this->user = Helper::makeUser('tag.' . randomString(8), 'tag.split');
+        $manager = new Gazelle\Manager\Tag();
+        $name    = self::PREFIX . randomString(10);
+        $tag     = $manager->create($name, $this->user);
+
+        $this->user->addBounty(500 * 1024 ** 3);
+        $this->request = Helper::makeRequestMusic($this->user, 'phpunit tag split new request');
+        $tag->addRequest($this->request);
+        $this->assertEquals(1, $tag->flush()->uses(), 'tag-instance-use-1');
+        $this->tgroup = Helper::makeTGroupMusic(
+            name:       'phpunit tag ' . randomString(6),
+            artistName: [[ARTIST_MAIN], ['Tag Girl ' . randomString(12)]],
+            tagName:    [$name],
+            user:       $this->user,
+        );
+        $this->assertEquals(2, $tag->flush()->uses(), 'tag-instance-use-2');
 
         // split tag into two new (indie.rock.alt.rock => indie.rock, alt.rock)
         $this->assertEquals(
             4, // 2 for each tgroup and request
-            $manager->rename($tagId, ["$name.1", "$name.2"], $this->user),
+            $manager->rename($tag, ["$name.1", "$name.2"], $this->user),
             'tag-new-split',
         );
         $this->assertEquals(
@@ -213,10 +296,11 @@ class TagTest extends TestCase {
         $this->user = Helper::makeUser('tag.' . randomString(8), 'tag.split');
         $manager = new Gazelle\Manager\Tag();
         $name    = self::PREFIX . randomString(10);
-        $tagId   = $manager->create($name, $this->user);
+        $tag     = $manager->create($name, $this->user);
 
+        $this->user->addBounty(500 * 1024 ** 3);
         $this->request = Helper::makeRequestMusic($this->user, 'phpunit user promote request');
-        $this->request->addTag($tagId);
+        $tag->addRequest($this->request);
         $this->tgroup = Helper::makeTGroupMusic(
             name:       'phpunit tag ' . randomString(6),
             artistName: [[ARTIST_MAIN], ['Tag Girl ' . randomString(12)]],
@@ -226,10 +310,10 @@ class TagTest extends TestCase {
 
         // split tag into two existing tags
         $nameList = ["$name.3", "$name.4"];
-        $idList = array_map(fn($n) => $manager->create($n, $this->user), $nameList);
+        $tagList = array_map(fn($n) => $manager->create($n, $this->user), $nameList);
         $this->assertEquals(
             4,
-            $manager->rename($tagId, ["$name.3", "$name.4"], $this->user),
+            $manager->rename($tag, ["$name.3", "$name.4"], $this->user),
             'tag-existing-split',
         );
         $this->assertEquals(
@@ -255,8 +339,7 @@ class TagTest extends TestCase {
         $this->user = Helper::makeUser('tag.' . randomString(8), 'tag.tgroup');
         $manager    = new Gazelle\Manager\Tag();
         $name       = self::PREFIX . randomString(10);
-        $tagId      = $manager->create($name, $this->user);
-        $tag        = $manager->findById($tagId);
+        $tag        = $manager->create($name, $this->user);
         $this->assertInstanceOf(\Gazelle\Tag::class, $tag, 'tag-instance-find');
         $this->assertEquals($name, $tag->name(), 'tag-instance-name');
         $this->assertEquals(
@@ -268,7 +351,6 @@ class TagTest extends TestCase {
         $this->assertEquals('other', $tag->type(), 'tag-instance-table-name');
         $manager->officialize($name, $this->user);
         $this->assertEquals('genre', $tag->flush()->type(), 'tag-instance-genre');
-        $this->assertEquals(1, $tag->uses(), 'tag-instance-uses');
         $this->assertEquals($this->user->id(), $tag->userId(), 'tag-instance-creator');
     }
 

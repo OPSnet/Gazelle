@@ -33,8 +33,16 @@ foreach ($Tags as $tagName) {
     if (empty($resolved)) {
         $rejected[] = $tagName;
     } else {
-        $tagId = $tagMan->create($resolved, $Viewer);
-        if ($tagMan->torrentTagHasVote($tagId, $tgroup, $Viewer)) {
+        $tag = $tagMan->softCreate($resolved, $Viewer);
+        if (is_null($tag)) {
+            // Trying to add a tag that is not allowed
+            if (defined('AJAX')) {
+                json_error('This tag is not allowed');
+            } else {
+                header('Location: ' . $tgroup->location());
+            }
+        }
+        if ($tag->hasVoteTGroup($tgroup, $Viewer)) {
             // User has already voted on this tag
             if (defined('AJAX')) {
                 json_error('you have already voted on this tag');
@@ -43,8 +51,8 @@ foreach ($Tags as $tagName) {
             }
             exit;
         }
-        $tagMan->createTorrentTag($tagId, $tgroup, $Viewer, 3);
-        $tagMan->createTorrentTagVote($tagId, $tgroup, $Viewer, 'up');
+        $tag->addTGroup($tgroup, $Viewer, 3);
+        $tag->voteTGroup($tgroup, $Viewer, 'up');
         $added[] = $resolved;
 
         (new Gazelle\Log())->group($tgroup, $Viewer, "Tag \"$resolved\" added to group");

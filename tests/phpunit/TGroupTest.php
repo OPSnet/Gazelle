@@ -217,27 +217,28 @@ class TGroupTest extends TestCase {
 
     public function testTGroupTag(): void {
         $user = $this->userList['admin'];
+        $name = 'phpunit.' . randomString(6);
 
         $tagMan = new Gazelle\Manager\Tag();
-        $tagId = $tagMan->create('synthetic.disco.punk', $user);
-        $this->assertGreaterThan(1, $tagId, 'tgroup-tag-create');
-        $this->assertEquals(1, $tagMan->createTorrentTag($tagId, $this->tgroup, $user, 10), 'tgroup-tag-add-one');
+        $tag = $tagMan->create($name, $user);
+        $this->assertGreaterThan(1, $tag->id(), 'tgroup-tag-create');
+        $this->assertEquals(1, $tag->addTGroup($this->tgroup, $user, 10), 'tgroup-tag-add-one');
 
-        $tag2 = $tagMan->create('acoustic.norwegian.black.metal', $user);
-        $this->assertEquals(1, $tagMan->createTorrentTag($tag2, $this->tgroup, $user, 5), 'tgroup-tag-add-two');
+        $tag2 = $tagMan->create('phpunit.' . randomString(6), $user);
+        $this->assertEquals(1, $tag2->addTGroup($this->tgroup, $user, 5), 'tgroup-tag-add-two');
         $this->tgroup->flush();
         $this->assertCount(2, $this->tgroup->tagNameList(), 'tgroup-tag-name-list');
-        $this->assertContains('synthetic.disco.punk', $this->tgroup->tagNameList(), 'tgroup-tag-name-find-one');
-        $this->assertNotContains('norwegian.black.metal', $this->tgroup->tagNameList(), 'tgroup-tag-name-find-not');
-        $this->assertEquals('#synthetic.disco.punk #acoustic.norwegian.black.metal', $this->tgroup->hashTag(), 'tgroup-tag-name-list');
+        $this->assertContains($name, $this->tgroup->tagNameList(), 'tgroup-tag-name-find-one');
+        $this->assertContains($tag2->name(), $this->tgroup->tagNameList(), 'tgroup-tag-name-find-not');
+        $this->assertEquals("#{$name} #{$tag2->name()}", $this->tgroup->hashTag(), 'tgroup-tag-name-list');
 
-        $this->assertEquals(1, $this->tgroup->addTagVote(2, $tagId, 'up'), 'tgroup-tag-upvote');
-        $this->assertEquals(1, $this->tgroup->addTagVote(2, $tag2, 'down'), 'tgroup-tag-downvote');
-        $this->assertEquals('Synthetic.disco.punk', $this->tgroup->primaryTag(), 'tgroup-tag-primary');
+        $this->assertEquals(1, $tag->voteTGroup($this->tgroup, $user, 'up'), 'tgroup-tag-upvote');
+        $this->assertEquals(1, $tag2->voteTGroup($this->tgroup, $user, 'down'), 'tgroup-tag-downvote');
+        $this->assertEquals(ucfirst($name), $this->tgroup->primaryTag(), 'tgroup-tag-primary');
 
-        $this->assertTrue($this->tgroup->removeTag(new Gazelle\Tag($tag2)), 'tgroup-tag-remove-exists');
-        $tag3 = $tagMan->create('disco', $user);
-        $this->assertFalse($this->tgroup->removeTag(new Gazelle\Tag($tag3)), 'tgroup-tag-remove-not-exists');
+        $this->assertTrue($tag2->removeTGroup($this->tgroup), 'tgroup-tag-remove-exists');
+        $tag3 = $tagMan->create('phpunit.' . randomString(6), $user);
+        $this->assertFalse($tag3->removeTGroup($this->tgroup), 'tgroup-tag-remove-not-exists');
     }
 
     public function testLatestUploads(): void {

@@ -13,7 +13,7 @@ $validator->setFields([
 ]);
 $tagMan = new Gazelle\Manager\Tag();
 
-$affectedTorrents = [];
+$affectedTGroups  = [];
 $affectedRequests = [];
 $failure          = [];
 $success          = [];
@@ -29,8 +29,8 @@ while (isset($_GET['tag']) && isset($_GET['replace'])) {
 
     // what are we merging
     $current = isset($_GET['dirty']) ? trim($_GET['tag']) : $tagMan->sanitize($_GET['tag']);
-    $currentId = $tagMan->lookup($current);
-    if (!$currentId) {
+    $tag = $tagMan->findByName($current);
+    if (is_null($tag)) {
         $failure[] = "No such tag: <b>$current</b>";
         break;
     }
@@ -48,7 +48,7 @@ while (isset($_GET['tag']) && isset($_GET['replace'])) {
     }
 
     // trying to merge tag with itself would create big problems
-    if (in_array($current, $replacement)) {
+    if (in_array($tag->name(), $replacement)) {
         $failure[] = "Cannot merge tag {$current} to itself";
     }
 
@@ -57,18 +57,18 @@ while (isset($_GET['tag']) && isset($_GET['replace'])) {
     }
 
     if (isset($_GET['list'])) {
-        $affectedTorrents = $tagMan->torrentLookup($currentId);
-        $affectedRequests = $tagMan->requestLookup($currentId);
+        $affectedTGroups  = $tag->tgroupList();
+        $affectedRequests = $tag->requestList();
     }
 
     if ($failure) {
         break;
     }
 
-    $changed = $tagMan->rename($currentId, $replacement, $Viewer);
+    $changed = $tagMan->rename($tag, $replacement, $Viewer);
 
     if (isset($_GET['alias'])) {
-        $madeAlias = $tagMan->createAlias($current, $replacement[0]);
+        $madeAlias = $tagMan->createAlias($tag->name(), $replacement[0]);
         $success[] = "<b>" . $replacement[0] . "</b> is now an alias for <b>" . $current . "</b>";
     }
 
@@ -86,6 +86,6 @@ echo $Twig->render('admin/tag-editor.twig', [
     'changed'      => $changed,
     'failure'      => $failure,
     'success'      => $success,
-    'torrent_list' => $affectedTorrents,
+    'torrent_list' => $affectedTGroups,
     'request_list' => $affectedRequests,
 ]);

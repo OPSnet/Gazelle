@@ -21,10 +21,25 @@ $db->prepared_query("
         ag.ArtistID = aa.ArtistID
         AND ag.PrimaryAlias = aa.AliasID
     )
-    WHERE aa.name regexp '^(phpunit (?:req|artist merge) |(?:qqqq|qqqb|qqbb|qbbb|bbbb)\.phpunit\.)[a-z]{6}$'
+    WHERE aa.name REGEXP '^(phpunit (?:req|artist merge) |(?:qqqq|qqqb|qqbb|qbbb|bbbb)\.phpunit\.)[a-z]{6}$'
+");
+$db->prepared_query("
+    DELETE aa, ag
+    FROM artists_alias aa
+    INNER JOIN artists_group ag on (
+        ag.ArtistID = aa.ArtistID
+        AND ag.PrimaryAlias = aa.AliasID
+    )
+    WHERE aa.name REGEXP '^(phpunit.|Tag Girl |Notify Man )'
 ");
 $db->prepared_query("SET foreign_key_checks = 1");
 
+$db->prepared_query("
+    DELETE FROM artists_alias aa
+    WHERE NOT EXISTS (
+        SELECT 1 FROM artists_group ag WHERE ag.artistid = aa.artistid
+    )
+");
 $db->prepared_query("
     DELETE FROM bookmarks_artists ba WHERE NOT EXISTS(
         SELECT 1 FROM artists_group ag WHERE ag.ArtistID = ba.ArtistID

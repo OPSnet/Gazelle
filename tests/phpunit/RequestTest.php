@@ -2,6 +2,8 @@
 
 use PHPUnit\Framework\TestCase;
 
+define('BUFFER_FOR_BOUNTY', 1024 ** 4); // some upload credit to allow request creation
+
 class RequestTest extends TestCase {
     protected Gazelle\Request $request;
     protected Gazelle\TGroup  $tgroup;
@@ -34,38 +36,23 @@ class RequestTest extends TestCase {
         $admin = $this->userList['admin'];
         $user  = $this->userList['user'];
 
-        $manager = new Gazelle\Manager\Request();
-        $title   = 'phpunit ' . randomString(6) . ' Test Sessions (bonus VIP)';
-        $image   = 'https://example.com/req.jpg';
-        $this->request = $manager->create(
-            user:            $admin,
-            bounty:          1024 ** 2 * REQUEST_MIN,
-            categoryId:      (new Gazelle\Manager\Category())->findIdByName('Music'),
-            year:            2018,
-            title:           $title,
-            image:           $image,
-            description:     'This is a unit test description',
-            recordLabel:     'Unitest Artists',
-            catalogueNumber: 'UA-7890',
-            releaseType:     1,
-            encodingList:    'Lossless|V0 (VBR)',
-            formatList:      'MP3|FLAC',
-            mediaList:       'CD|WEB',
-            logCue:          'Log (100%) + Cue',
-            checksum:        true,
-            oclc:            '123,456',
-        );
+        $admin->addBounty(BUFFER_FOR_BOUNTY);
+        $manager       = new Gazelle\Manager\Request();
+        $title         = 'phpunit ' . randomString(6) . ' Test Sessions (bonus VIP)';
+        $image         = 'https://example.com/req.jpg';
+        $this->request = Helper::makeRequestMusic($admin, $title, image: $image);
         $id = $this->request->id();
 
         $this->assertInstanceOf(Gazelle\Request::class, $this->request, 'request-create');
         $this->assertStringNotContainsString(' (bonus VIP)', $this->request->urlencodeTitle(), 'request-urlencode-title');
+        $artistMan  = new Gazelle\Manager\Artist();
         $artistName = 'phpunit req ' . randomString(6);
         $this->assertEquals(
             1,
             $this->request->artistRole()->set(
                 [ARTIST_MAIN => [$artistName]],
                 $user,
-                new Gazelle\Manager\Artist()
+                $artistMan,
             ),
             'request-add-artist-role'
         );
@@ -74,22 +61,22 @@ class RequestTest extends TestCase {
         $this->assertStringContainsString('+', $this->request->urlencodeArtist(), 'request-urlencode-artist');
 
         $this->assertCount(0, $this->request->tagNameList());
-        $tagMan = new Gazelle\Manager\Tag();
-        $tagId  = $tagMan->create('jazz', $admin);
-        $this->assertGreaterThan(0, $tagId, 'request-create-tag');
-        $this->assertEquals(1, $this->request->addTag($tagId), 'request-add-tag');
+        $nameList = ['phpunit.' . randomString(6), 'phpunit.' . randomString(6)];
+        $tagMan   = new Gazelle\Manager\Tag();
+        $tag      = $tagMan->create($nameList[0], $admin);
+        $this->assertEquals(1, $tag->addRequest($this->request), 'request-add-tag');
         $this->assertEquals(
             1,
-            $this->request->addTag($tagMan->create('vapor.wave', $admin)),
+            $tagMan->create($nameList[1], $admin)->addRequest($this->request),
             'request-add-second-tag',
         );
 
         // Request::info() will now succeed
         $this->assertEquals($admin->id(), $this->request->userId(), 'request-user-id');
         $this->assertEquals($admin->id(), $this->request->ajaxInfo()['requestorId'], 'request-ajax-user-id');
-        $this->assertEquals("$artistName – $title [2018]", $this->request->text(), 'request-text');
-
-        $find = $manager->findByArtist((new Gazelle\Manager\Artist())->findByName($artistName));
+        $year = date('Y');
+        $this->assertEquals("$artistName – $title [$year]", $this->request->text(), 'request-text');
+        $find = $manager->findByArtist($artistMan->findByName($artistName));
         $this->assertCount(1, $find, 'request-find-by-artist');
         $this->assertEquals($id, $find[0]->id(), 'request-find-id');
 
@@ -121,7 +108,7 @@ class RequestTest extends TestCase {
         $this->assertEquals($image, $this->request->image(), 'request-image');
         $this->assertEquals($title, $this->request->title(), 'request-title');
         $this->assertEquals('Album', $this->request->releaseTypeName(), 'request-release-type-name');
-        $this->assertEquals(2018, $this->request->year(), 'request-year');
+        $this->assertEquals($year, $this->request->year(), 'request-year');
         $this->assertNull($this->request->tgroupId(), 'request-no-tgroup');
         $this->assertEquals('UA-7890', $this->request->catalogueNumber(), 'request-can-no');
         $this->assertEquals('Unitest Artists', $this->request->recordLabel(), 'request-rec-label');
@@ -129,17 +116,22 @@ class RequestTest extends TestCase {
         $this->assertEquals('Music', $this->request->categoryName(), 'request-cat-name');
         $this->assertTrue($this->request->hasArtistRole(), 'request-has-artist-role');
         $this->assertInstanceOf(\Gazelle\ArtistRole\Request::class, $this->request->artistRole(), 'request-artist-role');
-        $this->assertEquals(['jazz', 'vapor.wave'], $this->request->flush()->tagNameList(), 'request-tag-list');
-        $this->assertEquals('jazz vapor_wave', $this->request->tagNameToSphinx(), 'request-tag-sphinx');
+        $this->assertEquals($nameList, $this->request->flush()->tagNameList(), 'request-tag-list');
+        $this->assertEquals(str_replace('.', '_', "{$nameList[0]} {$nameList[1]}"), $this->request->tagNameToSphinx(), 'request-tag-sphinx');
         $this->assertEquals(
-            '<a href="requests.php?tags=jazz">jazz</a> <a href="requests.php?tags=vapor.wave">vapor.wave</a>',
+            "<a href=\"requests.php?tags={$nameList[0]}\">{$nameList[0]}</a> <a href=\"requests.php?tags={$nameList[1]}\">{$nameList[1]}</a>",
             $this->request->tagLinkList(), 'request-tag-linklist'
         );
         $this->assertFalse($this->request->isFilled(), 'request-not-filled');
 
+        $more = ['phpunit.' . randomString(6), 'phpunit.' . randomString(6), 'phpunit.' . randomString(6)];
         $this->assertEquals(
             3,
-            $this->request->setTagList(['acoustic', 'electronic', 'electronic', 'metal'], $user, new Gazelle\Manager\Tag()),
+            $tagMan->replaceTagList(
+                $this->request,
+                [$more[0], $more[1], $more[1], $more[2]],
+                $user,
+            ),
             'request-set-tag'
         );
 
@@ -373,7 +365,7 @@ class RequestTest extends TestCase {
             $this->userList['user'],
             new Gazelle\Manager\Artist(),
         );
-        $this->request->addTag((new Gazelle\Manager\Tag())->create('classical.era', $this->userList['admin']));
+        (new Gazelle\Manager\Tag())->create('classical.era', $this->userList['admin'])->addRequest($this->request);
         $this->assertTrue(
             (new Gazelle\User\Bookmark($this->userList['user']))->create('request', $this->request->id()),
             'request-bookmark-add'
@@ -385,31 +377,16 @@ class RequestTest extends TestCase {
     }
 
     public function testReport(): void {
-        $manager = new Gazelle\Manager\Request();
-        $this->request = $manager->create(
-            user:            $this->userList['admin'],
-            bounty:          1024 ** 2 * REQUEST_MIN,
-            categoryId:      (new Gazelle\Manager\Category())->findIdByName('Music'),
-            year:            (int)date('Y'),
-            title:           'phpunit request report',
-            image:           '',
-            description:     'This is a unit test description',
-            recordLabel:     'Unitest Artists',
-            catalogueNumber: 'UA-7890',
-            releaseType:     1,
-            encodingList:    'Lossless',
-            formatList:      'FLAC',
-            mediaList:       'WEB',
-            checksum:        false,
-            logCue:          '',
-            oclc:            '',
-        );
+        $this->userList['admin']->addBounty(BUFFER_FOR_BOUNTY);
+        $this->request = Helper::makeRequestMusic($this->userList['admin'], 'phpunit request report');
         $this->request->artistRole()->set(
             [ARTIST_MAIN => ['phpunit req ' . randomString(6)]],
             $this->userList['user'],
             new Gazelle\Manager\Artist(),
         );
-        $this->request->addTag((new Gazelle\Manager\Tag())->create('funk', $this->userList['admin']));
+        (new Gazelle\Manager\Tag())
+            ->create('phpunit.' . randomString(6), $this->userList['admin'])
+            ->addRequest($this->request);
 
         $title = 'phpunit request report';
         $report = (new Gazelle\Manager\Report(new Gazelle\Manager\User()))->create(
@@ -428,31 +405,17 @@ class RequestTest extends TestCase {
     }
 
     public function testJson(): void {
-        $this->request = (new Gazelle\Manager\Request())->create(
-            user:            $this->userList['admin'],
-            bounty:          1024 ** 2 * REQUEST_MIN,
-            categoryId:      (new Gazelle\Manager\Category())->findIdByName('Music'),
-            year:            (int)date('Y'),
-            title:           'phpunit request json',
-            image:           '',
-            description:     'This is a unit test description',
-            recordLabel:     'Unitest Artists',
-            catalogueNumber: 'UA-7890',
-            releaseType:     1,
-            encodingList:    'Lossless',
-            formatList:      'FLAC',
-            mediaList:       'WEB',
-            checksum:        false,
-            logCue:          '',
-            oclc:            '',
-        );
+        $this->userList['admin']->addBounty(BUFFER_FOR_BOUNTY);
+        $this->request = Helper::makeRequestMusic($this->userList['admin'], 'phpunit request json');
+        $artistMan = new Gazelle\Manager\Artist();
         $this->request->artistRole()->set(
             [ARTIST_MAIN => ['phpunit req ' . randomString(6)]],
             $this->userList['user'],
-            new Gazelle\Manager\Artist(),
+            $artistMan,
         );
-
-        $this->request->addTag((new Gazelle\Manager\Tag())->create('jazz', $this->userList['admin']));
+        (new Gazelle\Manager\Tag())
+            ->create('phpunit.' . randomString(6), $this->userList['admin'])
+            ->addRequest($this->request);
         $this->assertInstanceOf(Gazelle\Request::class, $this->request, 'request-json-create');
 
         $json = new Gazelle\Json\Request(
@@ -470,9 +433,9 @@ class RequestTest extends TestCase {
         $this->assertLessThanOrEqual(1, abs(strtotime($payload['timeAdded']) - strtotime($payload['lastVote'])), 'req-json-date');
         $this->assertEquals('', $payload['fillerName'], 'req-json-can-vote');
         $this->assertEquals('UA-7890', $payload['catalogueNumber'], 'req-json-catno');
-        $this->assertEquals(['Lossless'], $payload['bitrateList'], 'req-json-bitrate-list');
-        $this->assertEquals(['FLAC'], $payload['formatList'], 'req-json-format-list');
-        $this->assertEquals(['WEB'], $payload['mediaList'], 'req-json-media-list');
+        $this->assertEquals(['Lossless', 'V0 (VBR)'], $payload['bitrateList'], 'req-json-bitrate-list');
+        $this->assertEquals(['MP3', 'FLAC'], $payload['formatList'], 'req-json-format-list');
+        $this->assertEquals(['CD', 'WEB'], $payload['mediaList'], 'req-json-media-list');
 
         $encoding = $this->request->encoding();
         $this->assertTrue($encoding->isValid(), 'req-enc-valid');
@@ -483,7 +446,7 @@ class RequestTest extends TestCase {
         $format = $this->request->format();
         $this->assertTrue($format->isValid(), 'req-for-valid');
         $this->assertFalse($format->all(), 'req-for-all');
-        $this->assertFalse($format->exists('MP3'), 'req-for-no-for');
+        $this->assertTrue($format->exists('MP3'), 'req-for-no-for');
         $this->assertTrue($format->exists('FLAC'), 'req-for-for');
 
         $media = $this->request->media();

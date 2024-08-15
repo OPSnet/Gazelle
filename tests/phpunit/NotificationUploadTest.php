@@ -26,9 +26,12 @@ class NotificationUploadTest extends TestCase {
         $tgroup->addArtists([ARTIST_MAIN], ['Notify Man ' . randomString(12)], $user, new Gazelle\Manager\Artist(), new Gazelle\Log());
 
         $tagMan = new Gazelle\Manager\Tag();
-        $tagMan->createTorrentTag($tagMan->create('electronic', $user), $tgroup, $user, 10);
-        $tagMan->createTorrentTag($tagMan->create('funk', $user), $tgroup, $user, 10);
-        $tagMan->createTorrentTag($tagMan->create('jazz', $user), $tgroup, $user, 10);
+        foreach (['electronic', 'funk', 'jazz'] as $name) {
+            $tag = $tagMan->softCreate($name, $user);
+            if ($tag) {
+                $tag->addTGroup($tgroup, $user, 10);
+            }
+        }
         $tgroup->refresh();
 
         $this->torMan = new \Gazelle\Manager\Torrent();

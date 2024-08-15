@@ -7,19 +7,33 @@ class Tag extends \Gazelle\BaseManager {
     protected const ALIAS_KEY = 'tag_aliases_search';
     protected const GENRE_KEY = 'tag_genre';
 
-    /**
-     * Create a tag. If the tag already exists its usage is incremented.
-     */
-    public function create(string $name, \Gazelle\User $user): int {
+    public function create(string $name, \Gazelle\User $user, string $type = 'other', int $uses = 0): \Gazelle\Tag {
         self::$db->prepared_query("
             INSERT INTO tags
-                   (Name, UserID)
-            VALUES (?,    ?)
-            ON DUPLICATE KEY UPDATE
-                Uses = Uses + 1
-            ", $this->resolve($this->sanitize($name)), $user->id()
+                   (Name, UserID, TagType, Uses)
+            VALUES (?,    ?,      ?,       ?)
+            ", $this->resolve($this->sanitize($name)),
+                $user->id(),
+                $type,
+                $uses,
         );
-        return self::$db->inserted_id();
+        return new \Gazelle\Tag(self::$db->inserted_id());
+    }
+
+    /**
+     * Attempt to create a tag. Firstly, it may already exist, in which case it
+     * can be instantiated. If it has not been seen, it could be because the
+     * name is not allowed: in this case null is returned. Otherwise a new tag
+     * is created.
+     */
+    public function softCreate(string $name, \Gazelle\User $user, string $type = 'other', int $uses = 0): ?\Gazelle\Tag {
+        $tag = $this->findByName($name);
+        if ($tag) {
+            return $tag;
+        }
+        return $this->validName($name)
+            ? $this->create($name, $user, $type, $uses)
+            : null;
     }
 
     public function findById(int $tagId): ?\Gazelle\Tag {
@@ -38,10 +52,20 @@ class Tag extends \Gazelle\BaseManager {
     }
 
     public function findByName(string $name): ?\Gazelle\Tag {
-        return $this->findById((int)self::$db->scalar("
-            SELECT ID FROM tags WHERE Name = ?
-            ", $name
-        ));
+        return $this->findById(
+            (int)self::$db->scalar("
+                SELECT ID FROM tags WHERE Name = ?
+                ", $this->sanitize($name)
+            )
+        );
+    }
+
+    /**
+     * Check whether this name is allowed. Some tags we never want to see again.
+     * TODO: implement
+     */
+    public function validName(string $name): bool {
+        return true;
     }
 
     /**
@@ -82,28 +106,6 @@ class Tag extends \Gazelle\BaseManager {
     }
 
     /**
-     * Get the ID of a tag, or null if no such tag
-     */
-    public function lookup(string $name): ?int {
-        $tagId = self::$db->scalar("
-            SELECT ID FROM tags WHERE Name = ?
-            ", $name
-        );
-        return is_null($tagId) ? null : (int)$tagId;
-    }
-
-    /**
-     * Get the name of an ID, or null if no such tag
-     */
-    public function name(int $tagId): ?string {
-        $name = self::$db->scalar("
-            SELECT Name FROM tags WHERE ID = ?
-            ", $tagId
-        );
-        return is_null($name) ? null : (string)$name;
-    }
-
-    /**
      * Resolve the alias of a tag.
      *
      * @see lookupBad()
@@ -134,29 +136,22 @@ class Tag extends \Gazelle\BaseManager {
      *
      * return id of the officialized tag.
      */
-    public function officialize(string $name, \Gazelle\User $user): int {
-        $name = $this->sanitize($name);
-        $tagId = $this->lookup($name);
-        if ($tagId) {
+    public function officialize(string $name, \Gazelle\User $user): \Gazelle\Tag {
+        $tag = $this->findByName($name);
+        if ($tag) {
             // Tag already exists
             self::$db->prepared_query("
                 UPDATE tags SET
                     TagType = 'genre'
                 WHERE ID = ?
-                ", $tagId
+                ", $tag->id()
             );
         } else {
             // Tag doesn't exist yet: create it
-            self::$db->prepared_query("
-                INSERT INTO tags
-                       (Name, UserID, TagType, Uses)
-                VALUES (?,    ?,      'genre', 0)
-                ", $name, $user->id()
-            );
-            $tagId = self::$db->inserted_id();
+            $tag = $this->create($name, $user, 'genre', 0);
         }
         self::$cache->delete_value(self::GENRE_KEY);
-        return $tagId;
+        return $tag;
     }
 
     /**
@@ -165,15 +160,16 @@ class Tag extends \Gazelle\BaseManager {
      * $tagId list of ids to unofficialize
      * return number of tags that were actually unofficialized
      */
-    public function unofficialize(array $tagId): int {
+    public function unofficialize(array $tagIdList): int {
         self::$db->prepared_query("
             UPDATE tags SET
                 TagType = 'other'
-            WHERE ID IN (" . placeholders($tagId) . ")
-            ", ...$tagId
+            WHERE ID IN (" . placeholders($tagIdList) . ")
+            ", ...$tagIdList
         );
+        $affected = self::$db->affected_rows();
         self::$cache->delete_value(self::GENRE_KEY);
-        return self::$db->affected_rows();
+        return $affected;
     }
 
     /**
@@ -182,15 +178,15 @@ class Tag extends \Gazelle\BaseManager {
      * return array [id, name, uses]
      */
     public function officialList($order = 'name'): array {
-        $orderBy = $order == 'name' ? '2, 3 DESC' : '3 DESC, 2';
+        $orderBy = $order == 'name' ? 'Name, Uses DESC' : 'Uses DESC, Name';
         self::$db->prepared_query("
-            SELECT ID AS id, Name AS name, Uses AS uses
+            SELECT ID
             FROM tags
             WHERE TagType = ?
             ORDER BY $orderBy
             ", 'genre'
         );
-        return self::$db->to_array(false, MYSQLI_ASSOC, false);
+        return array_map(fn($id) => $this->findById($id), self::$db->collect(0, false));
     }
 
     /**
@@ -213,10 +209,22 @@ class Tag extends \Gazelle\BaseManager {
         return $list;
     }
 
-    protected function replace(int $oldId, int $newId, \Gazelle\User $user): int {
+    protected function replace(\Gazelle\Tag $old, \Gazelle\Tag $new, \Gazelle\User $user): int {
         // When replacing a tag that exists, there is a chance that a tgroup or
         // request might already have the tag. We therefore only add the tag if
         // it is missing, and then we can remove the current tag uses.
+
+        self::$db->prepared_query("
+            SELECT DISTINCT RequestID FROM requests_tags WHERE TagID = ?
+            ", $old->id()
+        );
+        $affectedRequests = self::$db->collect(0, false);
+
+        self::$db->prepared_query("
+            SELECT DISTINCT GroupID FROM torrents_tags WHERE TagID = ?
+            ", $old->id()
+        );
+        $affectedTGroups = self::$db->collect(0, false);
 
         // If the torrent has the old tag, but not the replacement, add it,
         self::$db->prepared_query("
@@ -225,7 +233,7 @@ class Tag extends \Gazelle\BaseManager {
                 FROM torrents_tags curr
                 LEFT JOIN torrents_tags merge ON (merge.GroupID = curr.GroupID AND merge.TagID = ?)
                 WHERE curr.TagID = ? AND merge.TagID IS NULL
-            ", $newId, $user->id(), $newId, $oldId
+            ", $new->id(), $user->id(), $new->id(), $old->id()
         );
         $changed = self::$db->affected_rows();
 
@@ -236,7 +244,7 @@ class Tag extends \Gazelle\BaseManager {
                 FROM artists_tags curr
                 LEFT JOIN artists_tags merge ON (merge.ArtistID = curr.ArtistID AND merge.TagID = ?)
                 WHERE curr.TagID = ? AND merge.TagID IS NULL
-            ', $newId, $user->id(), $newId, $oldId
+            ', $new->id(), $user->id(), $new->id(), $old->id()
         );
         $changed += self::$db->affected_rows();
 
@@ -247,7 +255,7 @@ class Tag extends \Gazelle\BaseManager {
                 FROM requests_tags curr
                 LEFT JOIN requests_tags merge ON (merge.RequestID = curr.RequestID AND merge.TagID = ?)
                 WHERE curr.TagID = ? AND merge.TagID IS NULL
-            ", $newId, $newId, $oldId
+            ", $new->id(), $new->id(), $old->id()
         );
         $changed += self::$db->affected_rows();
 
@@ -260,8 +268,18 @@ class Tag extends \Gazelle\BaseManager {
                     + (SELECT count(*) FROM torrents_tags WHERE TagID = ?)
                 )
             WHERE ID = ?
-            ", $newId, $newId, $newId, $newId
+            ", $new->id(), $new->id(), $new->id(), $new->id()
         );
+
+        // update cache and sphinx
+        // (some of these may not have changed, skipping them would be a false optimization)
+        foreach ($affectedRequests as $id) {
+            (new \Gazelle\Request($id))->updateSphinx();
+        }
+        foreach ($affectedTGroups as $id) {
+            (new \Gazelle\TGroup($id))->refresh();
+        }
+
         return $changed;
     }
 
@@ -283,27 +301,26 @@ class Tag extends \Gazelle\BaseManager {
      * have (alt.rock.indie.rock and alt.rock) in which case only (indie.rock)
      * needs to be applied, and the old tag removed.
      */
-    public function rename(int $tagId, array $replacement, \Gazelle\User $user): int {
+    public function rename(\Gazelle\Tag $tag, array $replacement, \Gazelle\User $user): int {
         if (count($replacement) > 1) {
-            return $this->split($tagId, $replacement, $user);
+            return $this->split($tag, $replacement, $user);
         }
         $name = $replacement[0];
-        $replacementId = $this->lookup($name);
-        if (is_null($replacementId)) {
+        $replacement = $this->findByName($name);
+        if (is_null($replacement)) {
             // renaming a tag that does not yet exist is trivial
             self::$db->prepared_query("
                 UPDATE tags SET
                     Name = ?,
                     UserID = ?
                 WHERE ID = ?
-                ", $name, $user->id(), $tagId
+                ", $name, $user->id(), $tag->id()
             );
             return self::$db->affected_rows();
         }
 
         self::$db->begin_transaction();
-        $changed = $this->replace($tagId, $replacementId, $user);
-
+        $changed = $this->replace($tag, $replacement, $user);
         self::$db->prepared_query("
             DELETE t, at, rt, tt
             FROM tags t
@@ -311,30 +328,29 @@ class Tag extends \Gazelle\BaseManager {
             LEFT JOIN requests_tags rt ON (rt.TagID = t.ID)
             LEFT JOIN torrents_tags tt ON (tt.TagID = t.ID)
             WHERE t.ID = ?
-            ", $tagId
+            ", $tag->id()
         );
         self::$db->commit();
         return $changed;
     }
 
-    public function split(int $tagId, array $replacement, \Gazelle\User $user): int {
+    public function split(\Gazelle\Tag $tag, array $replacement, \Gazelle\User $user): int {
         $totalChanged = 0;
         $renamed = false;
         self::$db->begin_transaction();
-        foreach ($replacement as $r) {
-            $replacementId = $this->lookup($r);
-            if (is_null($replacementId)) {
+        foreach ($replacement as $name) {
+            $replacement = $this->findByName($name);
+            if (is_null($replacement)) {
                 // We can reuse the existing tag and just rename it.
                 if (!$renamed) {
-                    $totalChanged += $this->rename($tagId, [$r], $user);
+                    $totalChanged += $this->rename($tag, [$name], $user);
                     $renamed = true;
                     continue;
                 }
-                $replacementId = $this->create($r, $user);
+                $replacement = $this->create($name, $user);
                 ++$totalChanged;
             }
-
-            $totalChanged += $this->replace($tagId, $replacementId, $user);
+            $totalChanged += $this->replace($tag, $replacement, $user);
         }
 
         // If we have not reused the original tag by renaming it, get rid of it.
@@ -346,7 +362,7 @@ class Tag extends \Gazelle\BaseManager {
                 LEFT JOIN requests_tags rt ON (rt.TagID = t.ID)
                 LEFT JOIN torrents_tags tt ON (tt.TagID = t.ID)
                 WHERE t.ID = ?
-                ", $tagId
+                ", $tag->id()
             );
         }
         self::$db->commit();
@@ -382,6 +398,24 @@ class Tag extends \Gazelle\BaseManager {
         );
         $affected = self::$db->affected_rows();
         self::$cache->delete_value(self::ALIAS_KEY);
+        return $affected;
+    }
+
+    public function replaceTagList(\Gazelle\Request $request, array $tagList, \Gazelle\User $user): int {
+        self::$db->begin_transaction();
+        self::$db->prepared_query("
+            DELETE FROM requests_tags WHERE RequestID = ?
+            ", $request->id()
+        );
+        $affected = 0;
+        foreach (array_unique($tagList) as $name) {
+            $tag = $this->softCreate($name, $user);
+            if ($tag) {
+                $affected += $tag->addRequest($request);
+            }
+        }
+        self::$db->commit();
+        $request->updateSphinx();
         return $affected;
     }
 
@@ -427,37 +461,35 @@ class Tag extends \Gazelle\BaseManager {
     /**
      * Replace bad tags with tag aliases
      */
-    public function replaceAliasList(array $Tags): array {
-        $TagAliases = $this->aliasList();
+    public function replaceAliasList(array $tagList): array {
+        $aliasList = $this->aliasList();
 
-        if (isset($Tags['include'])) {
-            $End = count($Tags['include']);
-            for ($i = 0; $i < $End; $i++) {
-                foreach ($TagAliases as $TagAlias) {
-                    if ($Tags['include'][$i] === $TagAlias['BadTag']) {
-                        $Tags['include'][$i] = $TagAlias['AliasTag'];
+        if (isset($tagList['include'])) {
+            for ($i = 0, $end = count($tagList['include']); $i < $end; $i++) {
+                foreach ($aliasList as $alias) {
+                    if ($tagList['include'][$i] === $alias['BadTag']) {
+                        $tagList['include'][$i] = $alias['AliasTag'];
                         break;
                     }
                 }
             }
             // Only keep unique entries after unifying tag standard
-            $Tags['include'] = array_unique($Tags['include']);
+            $tagList['include'] = array_unique($tagList['include']);
         }
 
-        if (isset($Tags['exclude'])) {
-            $End = count($Tags['exclude']);
-            for ($i = 0; $i < $End; $i++) {
-                foreach ($TagAliases as $TagAlias) {
-                    if (substr($Tags['exclude'][$i], 1) === $TagAlias['BadTag']) {
-                        $Tags['exclude'][$i] = '!' . $TagAlias['AliasTag'];
+        if (isset($tagList['exclude'])) {
+            for ($i = 0, $end = count($tagList['exclude']); $i < $end; $i++) {
+                foreach ($aliasList as $alias) {
+                    if (substr($tagList['exclude'][$i], 1) === $alias['BadTag']) {
+                        $tagList['exclude'][$i] = '!' . $alias['AliasTag'];
                         break;
                     }
                 }
             }
             // Only keep unique entries after unifying tag standard
-            $Tags['exclude'] = array_unique($Tags['exclude']);
+            $tagList['exclude'] = array_unique($tagList['exclude']);
         }
-        return $Tags;
+        return $tagList;
     }
 
     /**
@@ -474,87 +506,6 @@ class Tag extends \Gazelle\BaseManager {
             ORDER BY $column
         ");
         return self::$db->to_array('id', MYSQLI_ASSOC, false);
-    }
-
-    /**
-     * Get the list of torrents matched by a tag
-     *
-     * @return array [artistId, artistName, torrentGroupId, torrentGroupName]
-     * (artist elements may be null)
-     */
-    public function torrentLookup(int $tagId): array {
-        self::$db->prepared_query("
-            SELECT
-                aa.ArtistID AS artistId,
-                aa.Name     AS artistName,
-                tg.ID       AS torrentGroupId,
-                tg.Name     AS torrentGroupName
-            FROM torrents_group        tg
-            INNER JOIN torrents_tags   t  ON (t.GroupID = tg.ID)
-            LEFT JOIN torrents_artists ta ON (ta.GroupID = tg.ID)
-            LEFT JOIN artists_group    ag ON (ag.PrimaryAlias = ta.AliasID)
-            LEFT JOIN artists_alias    aa ON (ag.PrimaryAlias = aa.AliasID)
-            WHERE t.TagID = ?
-            ", $tagId
-        );
-        return self::$db->to_array(false, MYSQLI_ASSOC, false);
-    }
-
-    /**
-     * Get the list of torrents matched by a tag
-     *
-     * @return array [artistId, artistName, requestId, requestName]
-     * (artist elements may be null)
-     */
-    public function requestLookup(int $tagId): array {
-        self::$db->prepared_query("
-            SELECT
-                aa.ArtistID  AS artistId,
-                aa.Name      AS artistName,
-                ra.RequestID AS requestId,
-                r.Title      AS requestName
-            FROM requests              r
-            INNER JOIN requests_tags   t  ON (t.RequestID = r.ID)
-            LEFT JOIN requests_artists ra ON (r.ID = ra.RequestID)
-            LEFT JOIN artists_group    ag ON (ag.PrimaryAlias = ra.AliasID)
-            LEFT JOIN artists_alias    aa ON (ag.PrimaryAlias = aa.AliasID)
-            WHERE t.TagID = ?
-            ", $tagId
-        );
-        return self::$db->to_array(false, MYSQLI_ASSOC, false);
-    }
-
-    public function createTorrentTag(int $tagId, \Gazelle\TGroup $tgroup, \Gazelle\User $user, int $weight): int {
-        self::$db->prepared_query("
-            INSERT INTO torrents_tags
-                   (TagID, GroupID, UserID, PositiveVotes)
-            VALUES (?,     ?,       ?,      ?)
-            ON DUPLICATE KEY UPDATE
-                PositiveVotes = PositiveVotes + 2
-            ", $tagId, $tgroup->id(), $user->id(), $weight
-        );
-        return self::$db->affected_rows();
-    }
-
-    public function createTorrentTagVote(int $tagId, \Gazelle\TGroup $tgroup, \Gazelle\User $user, string $vote): int {
-        self::$db->prepared_query("
-            INSERT INTO torrents_tags_votes
-                   (TagID, GroupID, UserID, Way)
-            VALUES (?,     ?,       ?,      ?)
-            ", $tagId, $tgroup->id(), $user->id(), $vote
-        );
-        return self::$db->affected_rows();
-    }
-
-    public function torrentTagHasVote(int $tagId, \Gazelle\TGroup $tgroup, \Gazelle\User $user): bool {
-        return (bool)self::$db->scalar("
-            SELECT 1
-            FROM torrents_tags_votes
-            WHERE TagID = ?
-                AND GroupID = ?
-                AND UserID = ?
-            ", $tagId, $tgroup->id(), $user->id()
-        );
     }
 
     /**
@@ -635,7 +586,9 @@ class Tag extends \Gazelle\BaseManager {
         }
 
         if ($allTags) {
-            $QueryParts[] = implode(' ', array_merge($Tags['include'], $Tags['exclude']));
+            $QueryParts[] = $EnableNegation
+                ? implode(' ', array_merge($Tags['include'], $Tags['exclude']))
+                : implode(' ', array_merge($Tags['include']));
         } else {
             // Any
             if (!empty($Tags['include'])) {

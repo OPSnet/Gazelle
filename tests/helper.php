@@ -34,6 +34,7 @@ class Helper {
         string        $title,
         int           $releaseType     = 1,
         string        $description     = 'This is a unit test description',
+        string        $image           = '',
         string        $recordLabel     = 'Unitest Artists',
         string        $catalogueNumber =  'UA-7890',
         string        $encodingList    = 'Lossless|V0 (VBR)',
@@ -48,7 +49,7 @@ class Helper {
             categoryId:      (new \Gazelle\Manager\Category())->findIdByName('Music'),
             year:            (int)date('Y'),
             title:           $title,
-            image:           '',
+            image:           $image,
             description:     $description,
             recordLabel:     $recordLabel,
             catalogueNumber: $catalogueNumber,
@@ -97,8 +98,11 @@ class Helper {
         );
         $tgroup->addArtists($artistName[0], $artistName[1], $user, new Gazelle\Manager\Artist(), new Gazelle\Log());
         $tagMan = new \Gazelle\Manager\Tag();
-        foreach ($tagName as $tag) {
-            $tagMan->createTorrentTag($tagMan->create($tag, $user), $tgroup, $user, 10);
+        foreach ($tagName as $name) {
+            $tag = $tagMan->softCreate($name, $user);
+            if ($tag) {
+                $tag->addTGroup($tgroup, $user, 10);
+            }
         }
         $tgroup->refresh();
         return $tgroup;

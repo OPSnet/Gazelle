@@ -238,10 +238,10 @@ if ($categoryName === 'Music' && $Viewer->permittedAny('site_edit_requests', 'si
     $request->artistRole()->set($artistRole, $Viewer, new Gazelle\Manager\Artist());
 }
 if (isset($_POST['tags'])) {
-    $request->setTagList(
+    (new Gazelle\Manager\Tag())->replaceTagList(
+        $request,
         array_unique(array_map('trim', explode(',', trim($_POST['tags'])))),
         $Viewer,
-        new Gazelle\Manager\Tag(),
     );
 }
 $request->updateSphinx();

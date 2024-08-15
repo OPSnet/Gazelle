@@ -201,7 +201,11 @@ $request = (new Gazelle\Manager\Request())->create(
 if ($categoryName == 'Music') {
     $request->artistRole()->set($artistRole, $Viewer, new Gazelle\Manager\Artist());
 }
-$request->setTagList(array_unique(array_map('trim', explode(',', $tags))), $Viewer, new Gazelle\Manager\Tag());
+(new Gazelle\Manager\Tag())->replaceTagList(
+    $request,
+    array_map('trim', explode(',', $tags)),
+    $Viewer
+);
 $tgroup?->flush();
 
 if ($Viewer->option('AutoSubscribe')) {

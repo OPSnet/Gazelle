@@ -558,12 +558,12 @@ if ($NoRevision) {
 }
 
 // Tags
-$tagMan = new Gazelle\Manager\Tag();
 if (!$Properties['GroupID']) {
-    foreach ($Properties['TagList'] as $tag) {
-        $tag = $tagMan->resolve($tagMan->sanitize($tag));
-        if (!empty($tag)) {
-            $tagMan->createTorrentTag($tagMan->create($tag, $Viewer), $tgroup, $Viewer, 10);
+    $tagMan = new Gazelle\Manager\Tag();
+    foreach ($Properties['TagList'] as $name) {
+        $tag = $tagMan->softCreate($name, $Viewer);
+        if ($tag) {
+            $tag->addTGroup($tgroup, $Viewer, 10);
         }
     }
 }

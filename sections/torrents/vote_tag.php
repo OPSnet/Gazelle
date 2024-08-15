@@ -3,12 +3,14 @@
 
 authorize();
 $tgroup = (new Gazelle\Manager\TGroup())->findById((int)$_GET['groupid']);
-$tagId  = (int)$_GET['tagid'];
+$tag    = (new Gazelle\Manager\Tag())->findById((int)$_GET['tagid']);
 $way    = $_GET['way'];
 
-if (is_null($tgroup) || !$tagId || !in_array($way, ['up', 'down'])) {
+if (is_null($tgroup) || is_null($tag) || !in_array($way, ['up', 'down'])) {
     error(404);
 }
-$tgroup->addTagVote($Viewer->id(), $tagId, $way);
+if (!$tag->hasVoteTGroup($tgroup, $Viewer)) {
+    $tag->voteTGroup($tgroup, $Viewer, $way);
+}
 
 header('Location: ' . redirectUrl($tgroup->location()));

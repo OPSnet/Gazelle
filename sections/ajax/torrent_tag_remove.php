@@ -16,8 +16,7 @@ if (is_null($tgroup) || is_null($tag)) {
 }
 $tagName = $tag->name();
 
-if ($tgroup->removeTag($tag)) {
-    $tgroup->refresh();
+if ($tag->removeTGroup($tgroup)) {
     $Cache->cache_value('deleted_tags_' . $tgroup->id() . '_' . $Viewer->id(), $tagName, 300);
 
     // Log the removal and if it was the last occurrence.

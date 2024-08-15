@@ -13,12 +13,12 @@ if ($_POST['oldtags'] ?? null) {
     authorize();
     $unofficialId = [];
     foreach ($_POST['oldtags'] as $tagId) {
-        $name = $tagMan->name($tagId);
-        if (is_null($name)) {
+        $tag = $tagMan->findById($tagId);
+        if (is_null($tag)) {
             error(403);
         }
-        $unofficialId[]   = (int)$tagId;
-        $unofficialName[] = $name;
+        $unofficialId[]   = $tag->id();
+        $unofficialName[] = $tag->name();
     }
     $tagMan->unofficialize($unofficialId);
 }
@@ -26,10 +26,7 @@ if ($_POST['oldtags'] ?? null) {
 $new = false;
 if ($_POST['newtag'] ?? null) {
     authorize();
-    $id = $tagMan->officialize($_POST['newtag'], $Viewer);
-    if ($id) {
-        $new = $tagMan->findById($id);
-    }
+    $new = $tagMan->officialize($_POST['newtag'], $Viewer);
 }
 
 echo $Twig->render('tag/official.twig', [

@@ -811,31 +811,6 @@ class Request extends BaseObject implements CategoryHasArtist {
         return $affected;
     }
 
-    public function addTag(int $tagId): int {
-        self::$db->prepared_query("
-            INSERT IGNORE INTO requests_tags
-                   (TagID, RequestID)
-            VALUES (?,     ?)
-            ", $tagId, $this->id
-        );
-        return self::$db->affected_rows();
-    }
-
-    public function setTagList(array $tagList, User $user, Manager\Tag $manager): int {
-        $affected = 0;
-        self::$db->begin_transaction();
-        self::$db->prepared_query("
-            DELETE FROM requests_tags WHERE RequestID = ?
-            ", $this->id()
-        );
-        foreach ($tagList as $tag) {
-            $affected += $this->addTag($manager->create($tag, $user));
-        }
-        self::$db->commit();
-        $this->flush();
-        return $affected;
-    }
-
     /**
      * Update the sphinx requests delta table.
      */
