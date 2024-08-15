@@ -1,6 +1,6 @@
 {% from 'macro/form.twig' import hidden %}
 {% for request in list %}
-    {% if loop.first %}
+{%  if loop.first %}
 <div class="hidden">
     <form>
     <input type="hidden" id="current_uploaded" value="{{ viewer.uploadedSize }}" />
@@ -28,7 +28,7 @@
                     <strong>Added</strong>
                 </td>
             </tr>
-    {% endif %}
+{%  endif %}
             <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
                 <td>
                     {{ request.smartLink|raw }}
@@ -36,14 +36,15 @@
                 </td>
                 <td>
                     <span id="vote_count_{{ request.id }}">{{ request.userVotedTotal|number_format }}</span>&nbsp;&nbsp;
-    {%- set vote = request.userVote(viewer) -%}
-    {%- if vote -%}
+{%  set vote = request.userVote(viewer) %}
+{%  if vote %}
                     <span title="You {% if request.isFilled %}contributed {% else %}have voted {% endif -%}{{
                         vote['bounty']|octet_size }} towards this request">&check;</span>
-    {%- elseif not request.isFilled and viewer.permitted('site_vote') -%}
-                    <span data-id="{{ request.id }}" data-bounty="{{ standard_bounty
-                        }}" class="request-vote tooltip brackets" data-n="{{ request.userVotedTotal }}" title="Add {{ standard_bounty|octet_size(0) }} bounty">Vote</span>
-    {%- endif -%}
+{%  elseif not request.isFilled and viewer.permitted('site_vote') %}
+                    <span class="request-vote tooltip brackets" data-id="{{ request.id
+                        }}" data-bounty="{{ bounty }}" data-n="{{ request.userVotedTotal
+                        }}" title="Add {{ bounty|octet_size }} bounty">Vote</span>
+{%  endif %}
                 </td>
                 <td>
                     <span id="bounty_{{ request.id }}">{{ request.bountyTotal|octet_size }}</span>
@@ -52,9 +53,9 @@
                     {{ request.created|time_diff }}
                 </td>
             </tr>
-    {% if loop.last %}
+{%  if loop.last %}
         </table>
     </div>
 </div>
-    {% endif %}
+{%  endif %}
 {% endfor %}

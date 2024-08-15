@@ -247,7 +247,7 @@
 {%  else %}
               <span id="bounty_after_tax" style="display: none;">{{ (100 * (1 - constant('REQUEST_TAX')))|number_format(2) }} MiB</span>
 {%  endif %}
-            If you add the entered <strong><span id="new_bounty">{{ constant('REQUEST_MIN')|number_format(0) }} MiB</span></strong> of bounty, your new stats will be: <br />
+            If you add the entered <strong><span id="new_bounty">{{ amount_box|number_format(2) }} {% if unit_GiB %}GiB{% else %}MiB{% endif %}</span></strong> of bounty, your new stats will be: <br />
             Uploaded: <span id="new_uploaded">{{ viewer.uploadedSize|octet_size }}</span><br />
             Ratio: <span id="new_ratio">{{ ratio(viewer.uploadedsize, viewer.downloadedSize) }}</span>
           </td>

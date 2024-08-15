@@ -363,9 +363,9 @@ if ($sections = $Artist->sections()) {
 
 <?php
 echo $Twig->render('request/list.twig', [
-    'list'            => $requestList,
-    'standard_bounty' => REQUEST_MIN * 1024 * 1024,
-    'viewer'          => $Viewer,
+    'bounty' => $Viewer->ordinal()->value('request-bounty-vote'),
+    'list'   => $requestList,
+    'viewer' => $Viewer,
 ]);
 
 $graph = $Artist->similar()->similarGraph(SIMILAR_WIDTH, SIMILAR_HEIGHT);

@@ -26,6 +26,17 @@ if (isset($_GET['artistid'])) {
     }
 }
 
+$bounty = $_POST['amount'] ?? $Viewer->ordinal()->value('request-bounty-create');
+[$amount, $unit] = array_values(byte_format_array($bounty));
+if (in_array($unit, ['GiB', 'TiB'])) {
+    $unitGiB = true;
+    if ($unit == 'TiB') {
+        // the bounty box only knows about MiB and GiB, so if someone
+        // uses a value > 1 TiB it needs to be scaled down.
+        $bounty *= 1024;
+    }
+}
+
 echo $Twig->render('request/request.twig', [
     'action'           => 'new',
     'category_name'    => $categoryName ?? 'Music',
@@ -34,9 +45,9 @@ echo $Twig->render('request/request.twig', [
     'viewer'           => $Viewer,
     'release_list'     => (new Gazelle\ReleaseType())->list(),
     'tag_list'         => (new Gazelle\Manager\Tag())->genreList(),
-    'amount'           => $amount          ?? REQUEST_MIN * 1024 ** 2,
+    'amount'           => $bounty,
     'amount_box'       => $amount          ?? REQUEST_MIN,
-    'unit_GiB'         => $unitGiB         ?? false,
+    'unit_GiB'         => isset($unitGiB),
     'artist_role'      => $artistRole      ?? [],
     'catalogue_number' => $catalogueNumber ?? '',
     'category_id'      => $categoryId      ?? null,

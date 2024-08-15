@@ -195,6 +195,7 @@ if (
     && ($Viewer->permitted('users_edit_ratio') || ($Viewer->permitted('users_edit_own_ratio') && $ownProfile))
 ) {
     $user->setField('collage_total', $Collages);
+    $user->ordinal()->set('personal-collage', $Collages);
     $EditSummary[] = "personal collages changed from {$user->paidPersonalCollages()} to {$Collages}";
 }
 

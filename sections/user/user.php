@@ -370,9 +370,9 @@ if ($Viewer->permitted('users_give_donor')) {
 
 if (!$Viewer->disableRequests() && $User->propertyVisible($previewer, 'requestsvoted_list')) {
     echo $Twig->render('request/user-unfilled.twig', [
-        'list'            => (new Gazelle\Manager\Request())->findUnfilledByUser($User, 100),
-        'standard_bounty' => REQUEST_MIN * 1024 * 1024,
-        'viewer'          => $Viewer,
+        'bounty' => $Viewer->ordinal()->value('request-bounty-vote'),
+        'list'   => (new Gazelle\Manager\Request())->findUnfilledByUser($User, 100),
+        'viewer' => $Viewer,
     ]);
 }
 

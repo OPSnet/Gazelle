@@ -53,28 +53,43 @@ function Vote(requestid, amount, votecount, upload, download, rr) {
 }
 
 function Calculate() {
-    var mul = (($('#unit').raw().options[$('#unit').raw().selectedIndex].value == 'mb') ? (1024*1024) : (1024*1024*1024));
-    var amt = Math.floor($('#amount_box').raw().value * mul);
-    var current_uploaded = document.getElementById('current_uploaded').value;
-    if (amt > current_uploaded) {
-        $('#new_uploaded').raw().innerHTML = "You can't afford that request!";
-        $('#new_bounty').raw().innerHTML = "0 MiB";
-        $('#bounty_after_tax').raw().innerHTML = "0 MiB";
-        $('#button').raw().disabled = true;
-    } else if (isNaN($('#amount_box').raw().value)
-            || (window.location.search.indexOf('action=new') != -1 && $('#amount_box').raw().value * mul < 100 * 1024 * 1024)
-            || (window.location.search.indexOf('action=view') != -1 && $('#amount_box').raw().value * mul < 100 * 1024 * 1024)) {
-        $('#new_uploaded').raw().innerHTML = byte_format(current_uploaded, 2);
-        $('#new_bounty').raw().innerHTML = "0 MiB";
-        $('#bounty_after_tax').raw().innerHTML = "0 MiB";
-        $('#button').raw().disabled = true;
+    const box_val = document.getElementById('amount_box').value;
+    const unit    = document.getElementById("unit");
+    const mul     = unit.options[unit.selectedIndex].value == 'mb' ? 1024 ** 2 : 1024 ** 3;
+    const amt     = Math.floor(box_val * mul);
+
+    const current_upload_val = document.getElementById('current_uploaded').value;
+    var bounty_after_tax     = document.getElementById('bounty_after_tax');
+    var new_bounty           = document.getElementById('new_bounty');
+    var new_uploaded         = document.getElementById('new_uploaded');
+    var button               = document.getElementById('button');
+
+    if (amt > current_upload_val) {
+        new_uploaded.innerHTML     = "You can't afford that request!";
+        new_bounty.innerHTML       = "0 MiB";
+        bounty_after_tax.innerHTML = "0 MiB";
+        button.disabled            = true;
+    } else if (isNaN(box_val
+        || (window.location.search.indexOf('action=new')  != -1 && amt < 100 * 1024 ** 2)
+        || (window.location.search.indexOf('action=view') != -1 && amt < 100 * 1024 ** 2)
+    )) {
+        new_uploaded.innerHTML     = byte_format(current_upload_val, 2);
+        new_bounty.innerHTML       = "0 MiB";
+        bounty_after_tax.innerHTML = "0 MiB";
+        button.disabled            = true;
     } else {
-        $('#button').raw().disabled = false;
-        $('#amount').raw().value = amt;
-        $('#new_uploaded').raw().innerHTML = byte_format(current_uploaded - amt, 2);
-        $('#new_ratio').raw().innerHTML = ratio(current_uploaded - amt, $('#current_downloaded').raw().value);
-        $('#new_bounty').raw().innerHTML = byte_format(mul * $('#amount_box').raw().value, 0);
-        $('#bounty_after_tax').raw().innerHTML = byte_format(mul * (1 - $('#request_tax').raw().value) * $('#amount_box').raw().value, 0);
+        new_uploaded.innerHTML     = byte_format(current_upload_val - amt, 2);
+        new_bounty.innerHTML       = byte_format(amt, 2);
+        bounty_after_tax.innerHTML = byte_format(
+            amt * (1 - document.getElementById("request_tax").value),
+            4
+        );
+        document.getElementById('amount').value = amt;
+        document.getElementById('new_ratio').innerHTML = ratio(
+            current_upload_val - amt,
+            document.getElementById('current_downloaded').value
+        );
+        button.disabled = false;
     }
 }
 
@@ -109,7 +124,7 @@ function AddArtistField() {
     x.appendChild(roleField);
 
     if ($("#artist_0").data("gazelle-autocomplete")) {
-        $(ArtistField).live('focus', function() {
+        $(ArtistField).live('focus', () => {
             $(ArtistField).autocomplete({
                 serviceUrl : 'artist.php?action=autocomplete'
             });
@@ -231,10 +246,10 @@ function ToggleLogScore() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
     const amountBox = document.getElementById('amount_box');
     if (amountBox) {
-        amountBox.addEventListener('input', function() {
+        amountBox.addEventListener('input', () => {
             Calculate();
         });
         Calculate();
@@ -243,38 +258,33 @@ document.addEventListener('DOMContentLoaded', function() {
     // from an individual request page
     const button = document.getElementById('button');
     if (button) {
-        button.addEventListener('click', function() {
-            var unit = document.getElementById('unit').value;
-            var scale = 0;
-            if (unit == "mb") {
-                scale = 1024 * 1024;
-            } else if (unit == "gb") {
-                scale = 1024 * 1024 * 1024;
+        button.addEventListener('click', () => {
+            const requestId = document.getElementById('requestid');
+            if (requestId != null) {
+                Vote(
+                    parseInt(requestId.value),
+                    parseFloat(document.getElementById('amount').value),
+                    parseInt(document.getElementById('votecount').textContent),
+                    parseInt(document.getElementById('current_uploaded').value),
+                    parseInt(document.getElementById('current_downloaded').value),
+                    parseFloat(document.getElementById('current_rr').value),
+                );
             }
-            Vote(
-                parseInt(document.getElementById('requestid').value),
-                parseInt(document.getElementById('amount_box').value) * scale,
-                parseInt(document.getElementById('votecount').textContent),
-                parseInt(document.getElementById('current_uploaded').value),
-                parseInt(document.getElementById('current_downloaded').value),
-                parseFloat(document.getElementById('current_rr').value),
-            );
         });
     }
 
     // from a page that lists requests
     const voter = document.querySelectorAll('.request-vote');
     voter.forEach(function(span) {
-        span.addEventListener('click', function() {
+        span.addEventListener('click', (e) => {
             Vote(
-                parseInt(this.dataset.id),
-                parseInt(this.dataset.bounty),
-                parseInt(this.dataset.n),
+                parseInt(e.target.dataset.id),
+                parseFloat(e.target.dataset.bounty),
+                parseInt(e.target.dataset.n),
                 parseInt(document.getElementById('current_uploaded').value),
                 parseInt(document.getElementById('current_downloaded').value),
                 parseFloat(document.getElementById('current_rr').value),
             );
         });
     });
-
 });

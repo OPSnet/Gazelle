@@ -13,6 +13,7 @@ $paginator->setAnchor('comments')->setTotal($commentPage->total())->removeParam(
 $userMan = new Gazelle\Manager\User();
 
 echo $Twig->render('request/detail.twig', [
+    'bounty'        => $Viewer->ordinal()->value('request-bounty-vote'),
     'comment_page'  => $commentPage,
     'filler'        => $userMan->findById($request->fillerId()),
     'is_bookmarked' => (new Gazelle\User\Bookmark($Viewer))->isRequestBookmarked($request->id()),

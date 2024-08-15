@@ -1,3 +1,4 @@
+{% from 'macro/form.twig' import selected %}
 {{ header("View request: " ~ request.text, {'js': 'comments,requests,bbcode,subscriptions'}) }}
 <div class="thin">
     <div class="header">
@@ -140,14 +141,14 @@
                 </tr>
 {% endfor %}
 {% if not seen %}
-{%  set bounty = request.userBounty(viewer) %}
-{%  if bounty %}
+{%  set user_bounty = request.userBounty(viewer) %}
+{%  if user_bounty %}
                 <tr>
                     <td>
                         <a href="{{ viewer.location|raw }}"><strong>{{ viewer.username }}</strong></a>
                     </td>
                     <td class="number_column">
-                        <strong>{{ bounty|octet_size }}</strong>
+                        <strong>{{ user_bounty|octet_size }}</strong>
                     </td>
                 </tr>
     {% endif %}
@@ -225,11 +226,10 @@
                 <td>
                     <span id="votecount">{{ request.userVotedTotal|number_format }} </span>
 {% if request.canVote(viewer) -%}
-                    &nbsp;&nbsp;<span data-id="{{ request.id }}" data-bounty="{{
-                        constant('REQUEST_MIN') * 1024 * 1024 }}" data-n="{{ 
-                        request.userVotedTotal }}" class="request-vote brackets tooltip" title="Add {{
-                        (constant('REQUEST_MIN') * 1024 * 1024)|octet_size }} bounty">Vote</span>
-                    <strong>Costs {{ constant('REQUEST_MIN') }} MiB</strong>
+                    &nbsp;&nbsp;<span class="request-vote brackets tooltip" data-id="{{
+                        request.id }}" data-bounty="{{ bounty }} " data-n="{{
+                        request.userVotedTotal }}">Vote</span>
+                    <strong>Costs {{ bounty|octet_size }}</strong> (you can change this default in your user settings).
 {% endif %}
                 </td>
             </tr>
@@ -241,11 +241,11 @@
 {% endif %}
 {% if request.canVote(viewer) %}
             <tr id="voting">
-                <td class="label tooltip" title="These units are in base 2, not base 10. For example, there are 1,024 MiB in 1 GiB.">Custom vote (MiB)</td>
+                <td class="label tooltip" title="These units are in base 2, not base 10. For example, there are 1,024 MiB in 1 GiB.">Custom vote</td>
                 <td>
-                    <input type="text" id="amount_box" size="8" />
+                    <input type="text" id="amount_box" size="8" value=""/>
                     <select id="unit" name="unit" onchange="Calculate();">
-                        <option value="mb">MiB</option>
+                        <option value="mb" selected>MiB</option>
                         <option value="gb">GiB</option>
                     </select>
 {%  if constant('REQUEST_TAX') > 0 -%}

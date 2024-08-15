@@ -103,6 +103,7 @@ $paginator->setTotal($search->total());
 
 echo $Twig->render('request/index.twig', [
     'bookmark_view'   => $bookmarkView,
+    'bounty'          => $Viewer->ordinal()->value('request-bounty-vote'),
     'filter_cat'      => $_GET['filter_cat'] ?? [],
     'bitrate_strict'  => $_GET['bitrate_strict'] ?? null,
     'formats_strict'  => $_GET['formats_strict'] ?? null,
@@ -118,7 +119,6 @@ echo $Twig->render('request/index.twig', [
     'filtering'       => true, // false on artist page
     'show_filled'     => $_GET['show_filled'] ?? null,
     'show_old'        => $_GET['showall'] ?? null,
-    'standard_bounty' => REQUEST_MIN * 1024 * 1024,
     'type'            => $_GET['type'] ?? null,
     'user'            => $user,
     'viewer'          => $Viewer,

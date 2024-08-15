@@ -163,6 +163,32 @@
             <label for="httpstracker">Enable HTTPs tracker for announce URL</label>
         </td>
     </tr>
+    <tr id="req-bounty-create">
+        <td class="label tooltip" title="This is the default amount of bounty you offer when creating requests">
+            <strong>Request creation</strong>
+        </td>
+        <td>
+            <input type="input" size="4" name="req-create" id="req-create" value="{{ user.requestCreationInfo.value|replace({',': ' '}) }}" />
+            <label><input type="radio" name="req-c-unit" value="MiB"{{ checked(user.requestCreationInfo.unit == "MiB") }} /> MiB</label>
+            <label><input type="radio" name="req-c-unit" value="GiB"{{ checked(user.requestCreationInfo.unit == "GiB") }} /> GiB</label>
+            <label><input type="radio" name="req-c-unit" value="TiB"{{ checked(user.requestCreationInfo.unit == "TiB") }} /> TiB</label>
+            <br />
+            <label for="req-create">Amount of bounty to offer when creating a request. Value between 100 MiB and 2 TiB.</label>
+        </td>
+    </tr>
+    <tr id="req-bounty-vote">
+        <td class="label tooltip" title="This is the default amount of bounty you offer when voting on requests">
+            <strong>Request vote</strong>
+        </td>
+        <td>
+            <label><input type="input" size="4" name="req-vote" id="req-vote" value="{{ user.requestVoteInfo.value|replace({',': ' '}) }}" />
+            <label><input type="radio" name="req-v-unit" value="MiB"{{ checked(user.requestVoteInfo.unit == "MiB") }} /> MiB</label>
+            <label><input type="radio" name="req-v-unit" value="GiB"{{ checked(user.requestVoteInfo.unit == "GiB") }} /> GiB</label>
+            <label><input type="radio" name="req-v-unit" value="TiB"{{ checked(user.requestVoteInfo.unit == "TiB") }} /> TiB</label>
+            <br />
+            <label for="req-vote">Amount of bounty to offer when voting in a request. Value between 100 MiB and 1 TiB.</label>
+        </td>
+    </tr>
 </table>
 </div>
 <script type="text/javascript" id="sortable_default">

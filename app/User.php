@@ -26,6 +26,7 @@ class User extends BaseObject {
 
     protected Stats\User     $stats;
     protected User\Invite    $invite;
+    protected User\Ordinal   $ordinal;
     protected User\Privilege $privilege;
     protected User\Snatch    $snatch;
 
@@ -41,10 +42,7 @@ class User extends BaseObject {
         ]);
         $this->stats()->flush();
         $this->privilege()->flush();
-        unset($this->info);
-        unset($this->privilege);
-        unset($this->stats);
-        unset($this->tokenCache);
+        unset($this->info, $this->ordinal, $this->privilege, $this->stats, $this->tokenCache);
         return $this;
     }
     public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), html_escape($this->username())); }
@@ -65,6 +63,10 @@ class User extends BaseObject {
      */
     public function invite(): User\Invite {
         return $this->invite ??= new User\Invite($this);
+    }
+
+    public function ordinal(): User\Ordinal {
+        return $this->ordinal ??= new User\Ordinal($this);
     }
 
     public function privilege(): User\Privilege {
@@ -509,6 +511,22 @@ class User extends BaseObject {
 
     public function profileTitle(): string {
         return $this->info()['profile_title'] ?: 'Profile';
+    }
+
+    public function requestCreationInfo(): array {
+        return byte_format_array($this->requestCreationValue());
+    }
+
+    public function requestCreationValue(): int {
+        return $this->ordinal()->value('request-bounty-create');
+    }
+
+    public function requestVoteInfo(): array {
+        return byte_format_array($this->requestVoteValue());
+    }
+
+    public function requestVoteValue(): int {
+        return $this->ordinal()->value('request-bounty-vote');
     }
 
     public function requiredRatio(): float {

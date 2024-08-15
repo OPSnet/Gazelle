@@ -47,10 +47,7 @@ $catalogueNumber = trim($_POST['cataloguenumber'] ?? '');
 $recordLabel     = trim($_POST['recordlabel'] ?? '');
 $oclc            = trim($_POST['oclc'] ?? '');
 $year            = (int)$_POST['year'];
-
-$amount  = (int)$_POST['amount_box'];
-$unitGiB = ($_POST['unit'] ?? 'mb') == 'gb';
-$scale   = 1024 ** ($unitGiB ? 3 : 2);
+$amount          = (int)$_POST['amount'];
 
 while (true) { // break early on error
     if ($categoryName !== 'Music') {
@@ -159,15 +156,15 @@ while (true) { // break early on error
         break;
     }
 
-    if ($amount * $scale < REQUEST_MIN * 1024 * 1024) {
+    if ($amount < REQUEST_MIN * 1024 * 1024) {
         $error = 'Minimum bounty is ' . REQUEST_MIN . ' MiB.';
         break;
     }
 
     // in case the Javascript check is ignored
-    if ($amount * $scale > $Viewer->uploadedSize()) {
-        $units = $unitGiB ? 'GiB' : 'MiB';
-        $error = "You do not have enough buffer to offer a bounty of $amount $units";
+    if ($amount > $Viewer->uploadedSize()) {
+        $units = ($_POST['unit'] ?? 'mb') == 'gb' ? 'GiB' : 'MiB';
+        $error = "You do not have enough buffer to offer a bounty of {$_POST['amount_box']} $units";
     }
 
     break; // everything validated!
@@ -183,7 +180,7 @@ if (isset($error)) {
 
 $request = (new Gazelle\Manager\Request())->create(
     user:            $Viewer,
-    bounty:          $amount * $scale,
+    bounty:          $amount,
     categoryId:      $categoryId,
     year:            $year,
     title:           $title,

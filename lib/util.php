@@ -187,16 +187,17 @@ function get_url(array $Exclude = [], bool $Escape = true, bool $Sort = false, a
     return $Escape ? display_str($NewQuery) : $NewQuery;
 }
 
-/**
- * Format a size in bytes as a human readable string in KiB/MiB/...
- *        Note: KiB, MiB, etc. are the IEC units, which are in base 2.
- *            KB, MB are the SI units, which are in base 10.
+/* Format a byte value into a scaled value and its unit.
+ * We need to have the components available separately for the
+ * user settings page.
  *
- * @param int $levels Number of decimal places. Defaults to 2, unless the size >= 1TB, in which case it defaults to 4.
- *                    or 0 in the case of bytes.
+ * Note: KiB, MiB, etc. are the IEC units, which are in base 2.
+ *       KB, MB are the SI units, which are in base 10.
+ *
+ * @param int $levels Number of decimal places.
+ *    Defaults to 0 if size <= 1024, 4 if size >= 1TB, otherwise 2.
  */
-function byte_format(float|int|null $size, int $levels = 2): string {
-    $units = [' B', ' KiB', ' MiB', ' GiB', ' TiB', ' PiB', ' EiB', ' ZiB', ' YiB'];
+function byte_format_array(float|int|null $size, int $levels = 2): array {
     $size = (float)$size;
     for ($steps = 0; abs($size) >= 1024; $steps++) {
         $size /= 1024;
@@ -207,7 +208,42 @@ function byte_format(float|int|null $size, int $levels = 2): string {
     if ($steps == 0) {
         $levels = 0;
     }
-    return number_format($size, $levels) . $units[$steps];
+    $units = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+    return [
+        'value' => number_format($size, $levels),
+        'unit'  => $units[$steps]
+    ];
+}
+
+/**
+ * Format a size in bytes as a human readable string in KiB/MiB/...
+ */
+function byte_format(float|int|null $size, int $levels = 2): string {
+    // need to maintain the number of args for the default smart formatting
+    $format = func_num_args() == 1
+        ? byte_format_array($size)
+        : byte_format_array($size, $levels);
+    return "{$format['value']} {$format['unit']}";
+}
+
+/**
+ * Return the integer value of a formatted byte representation
+ * E.g. 200 'MiB' => 209715200
+ */
+function byte_unformat(float $value, string $unit): int {
+    return (int)(
+        $value * match($unit) {
+            'KiB'   => 1024,
+            'MiB'   => 1024 ** 2,
+            'GiB'   => 1024 ** 3,
+            'TiB'   => 1024 ** 4,
+            'PiB'   => 1024 ** 5,
+            'EiB'   => 1024 ** 6, // here on out overflows 64 bit ints, so good luck with that
+            'ZiB'   => 1024 ** 7,
+            'YiB'   => 1024 ** 8,
+            default => 1,
+        }
+    );
 }
 
 /**

@@ -1,4 +1,4 @@
-{% from 'macro/form.twig' import checked %}
+{% from 'macro/form.twig' import autocomplete, checked %}
 {{ header(search.text, {'js': 'requests'}) }}
 <div class="thin">
     <div class="header">
@@ -11,28 +11,28 @@
         <a href="bookmarks.php?type=collages" class="brackets">Collages</a>
         <a href="bookmarks.php?type=requests" class="brackets">Requests</a>
 {% else %}
-    {% if viewer.permitted('site_submit_requests') %}
+{%  if viewer.permitted('site_submit_requests') %}
         <a href="requests.php?action=new" class="brackets">New request</a>
         <a href="requests.php?type=created" class="brackets">My requests</a>
-    {% endif %}
-    {% if viewer.permitted('site_vote') %}
+{%  endif %}
+{%  if viewer.permitted('site_vote') %}
         <a href="requests.php?type=voted" class="brackets">Requests I've voted on</a>
-    {% endif %}
+{%  endif %}
         <a href="bookmarks.php?type=requests" class="brackets">Bookmarked requests</a>
 {% endif %}
     </div>
 {% if not bookmark_view %}
     <form class="search_form" name="requests" action="" method="get">
-    {% if bookmark_view %}
+{%  if bookmark_view %}
         <input type="hidden" name="action" value="view" />
         <input type="hidden" name="type" value="requests" />
-    {% elseif type %}
+{%  elseif type %}
         <input type="hidden" name="type" value="{{ type }}" />
-    {% endif %}
+{%  endif %}
         <input type="hidden" name="submit" value="true" />
-    {% if user.id != viewer.id %}
+{%  if user.id != viewer.id %}
         <input type="hidden" name="userid" value="{{ user.id }}" />
-    {% endif %}
+{%  endif %}
         <table cellpadding="6" cellspacing="1" border="0" class="layout border" width="100%">
             <tr id="search_terms">
                 <td class="label">Search terms:</td>
@@ -43,8 +43,7 @@
             <tr id="tagfilter">
                 <td class="label">Tags (comma-separated):</td>
                 <td>
-                    <input type="search" name="tags" id="tags" size="60" value="{{ search.tagList }}"{%
-                        if viewer.hasAutocomplete('other') %} data-gazelle-autocomplete="true" {% endif %} />&nbsp;
+                    <input type="search" name="tags" id="tags" size="60" value="{{ search.tagList }}"{{ autocomplete(user, 'other') }} />&nbsp;
                     <label><input type="radio" name="tag_mode" value="any"{{ checked(tag_mode == 'any') }} /> Any</label>&nbsp;&nbsp;
                     <label><input type="radio" name="tag_mode" value="all"{{ checked(tag_mode == 'all') }} /> All</label>
                 </td>
@@ -61,24 +60,16 @@
                     <input type="checkbox" id="include_old_box" name="showall"{{ checked(show_old or initial) }} />
                 </td>
             </tr>
-{#
-            <tr>
-                <td class="label">Requested by:</td>
-                <td>
-                    <input type="search" name="requestor" size="75" value="{{ requestor.username }}" />
-                </td>
-            </tr>
-#}
         </table>
         <table class="layout">
             <tr id="cat_list">
                 <td class="label">Categories</td>
                 <td>
-    {% for key, name in constant('CATEGORY') %}
+{%  for key, name in constant('CATEGORY') %}
                     <label class="req-choice">
                     <input type="checkbox" name="filter_cat[{{ key + 1 }}]" id="cat_{{ key + 1 }}" value="1"{{ 
                         checked(key + 1 in filter_cat|keys or initial) }} /> {{ name }}</label>
-    {% endfor %}
+{%  endfor %}
                 </td>
             </tr>
 
@@ -89,12 +80,12 @@
                         checked(search.releaseTypeList|length in [0, release_types|length] or initial)
                        }} /> <label for="toggle_releases">All</label>
                     <br />
-    {% for key, name in release_types %}
+{%  for key, name in release_types %}
                     <label class="req-choice">
                     <input type="checkbox" name="releases[]" value="{{ key }}" id="release_{{ key }}"{{
                         checked(not search.releaseTypeList or key in search.releaseTypeList or initial)
                         }} /> {{ name }}</label>
-    {% endfor %}
+{%  endfor %}
                 </td>
             </tr>
 
@@ -107,12 +98,12 @@
                     <input type="checkbox" id="formats_strict" name="formats_strict"{{ checked('formats_strict') }} />
                     <label for="formats_strict">Only specified</label>
                     <br />
-    {% for key, name in constant('FORMAT') %}
+{%  for key, name in constant('FORMAT') %}
                     <label class="req-choice">
                     <input type="checkbox" name="formats[]" value="{{ key }}" id="format_{{ key }}" {{
                         checked(not search.formatList or name|lower in search.formatList or initial)
                         }} /> {{ name }}</label>
-    {% endfor %}
+{%  endfor %}
                 </td>
             </tr>
 
@@ -125,12 +116,12 @@
                     <input type="checkbox" id="bitrate_strict" name="bitrate_strict"{{ checked('bitrate_strict') }} />
                     <label for="bitrate_strict">Only specified</label>
                     <br />
-    {% for key, name in constant('ENCODING') %}
+{%  for key, name in constant('ENCODING') %}
                     <label class="req-choice">
                     <input type="checkbox" name="bitrates[]" value="{{ key }}" id="bitrate_{{ key }}"{{
                         checked(not search.encodingList or name|lower in search.encodingList or initial)
                         }} /> {{ name }}</label>
-    {% endfor %}
+{%  endfor %}
                 </td>
             </tr>
 
@@ -143,11 +134,11 @@
                     <input type="checkbox" id="media_strict" name="media_strict"{{ checked('media_strict') }} />
                     <label for="media_strict">Only specified</label>
                     <br />
-    {% for key, name in constant('MEDIA') %}
+{%  for key, name in constant('MEDIA') %}
                     <label class="req-choice">
                     <input type="checkbox" name="media[]" value="{{ key }}" id="media_{{ key }}"{{
                         checked(not search.mediaList or name|lower in search.mediaList or initial) }} /> {{ name }}</label>
-    {% endfor %}
+{%  endfor %}
                 </td>
             </tr>
             <tr>
@@ -161,12 +152,12 @@
 
 {% include 'request/list.twig'
     with {
-        'filtering':       filtering,
-        'header':          header,
-        'list':            search.list,
-        'paginator':       paginator,
-        'standard_bounty': standard_bounty,
-        'viewer':          viewer,
+        'bounty'    : bounty,
+        'filtering' : filtering,
+        'header'    : header,
+        'list'      : search.list,
+        'paginator' : paginator,
+        'viewer'    : viewer,
     }
     only
 %}

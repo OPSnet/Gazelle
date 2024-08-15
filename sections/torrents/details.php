@@ -195,9 +195,9 @@ if (!$torrentList) {
 
 if (!$Viewer->disableRequests()) {
     echo $Twig->render('request/torrent.twig', [
-        'list'            => $requestMan->findByTGroup($tgroup),
-        'standard_bounty' => REQUEST_MIN,
-        'viewer'          => $Viewer,
+        'bounty' => $Viewer->ordinal()->value('request-bounty-vote'),
+        'list'   => $requestMan->findByTGroup($tgroup),
+        'viewer' => $Viewer,
     ]);
 }
 

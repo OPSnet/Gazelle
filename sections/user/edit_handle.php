@@ -279,6 +279,28 @@ if (isset($_POST['resetpasskey'])) {
 
 $user->modify();
 
+$ordinal = $user->ordinal();
+$requestBountyCreate = max(
+    REQUEST_MIN * 1024 * 1024, // never go below request minimum
+    min(
+        2 * 1024 ** 4, // do not exceed 2 TiB
+        byte_unformat($_POST['req-create'], $_POST['req-c-unit'])
+    )
+);
+if ($requestBountyCreate != $ordinal->value('request-bounty-create')) {
+    $ordinal->set('request-bounty-create', $requestBountyCreate);
+}
+$requestBountyVote = max(
+    REQUEST_MIN * 1024 * 1024, // never go below request minimum
+    min(
+        1024 ** 4, // do not exceed 1 TiB
+        byte_unformat($_POST['req-vote'], $_POST['req-v-unit'])
+    )
+);
+if ($requestBountyVote != $ordinal->value('request-bounty-vote')) {
+    $ordinal->set('request-bounty-vote', $requestBountyVote);
+}
+
 $donor = new Gazelle\User\Donor($user);
 if ($donor->isDonor()) {
     $donor->setVisible(isset($_POST['p_donor_stats']));

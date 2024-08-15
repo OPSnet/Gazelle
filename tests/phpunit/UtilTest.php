@@ -189,6 +189,15 @@ class UtilTest extends TestCase {
         $this->assertEquals(5_497_558_138_880,  get_bytes('5.00t'), 'format-bytes-5-00t');
         $this->assertEquals(5_552_533_720_269,  get_bytes('5.05t'), 'format-bytes-5-05t');
 
+        $this->assertEquals(['value' => '1,023', 'unit' => 'B'], byte_format_array(1023), 'format-array-1023');
+        $this->assertEquals(['value' => 1.00, 'unit' => 'KiB'],  byte_format_array(1024), 'format-array-1K');
+        $this->assertEquals(['value' => 10.00, 'unit' => 'KiB'], byte_format_array(1024 * 10), 'format-array-10K');
+        $this->assertEquals(['value' => 1.00, 'unit' => 'MiB'],  byte_format_array(1024 ** 2), 'format-array-1M');
+        $this->assertEquals(['value' => 2.00, 'unit' => 'GiB'],  byte_format_array(2 * 1024 ** 3), 'format-array-2G');
+        $this->assertEquals(['value' => 4.200, 'unit' => 'PiB'], byte_format_array(4.2 * 1024 ** 5), 'format-array-4.2P');
+        $this->assertEquals(['value' => 4.2, 'unit' => 'PiB'],   byte_format_array(4.2 * 1024 ** 5, 1), 'format-array-4.2P-1');
+        $this->assertEquals(['value' => 8.500, 'unit' => 'EiB'], byte_format_array(8.5 * 1024 ** 6), 'format-array-8.5E');
+
         $this->assertEquals('1,023 B',   byte_format(1023), 'format-size-1023');
         $this->assertEquals('1.00 KiB',  byte_format(1024), 'format-size-1K');
         $this->assertEquals('10.00 KiB', byte_format(1024 * 10), 'format-size-10K');
@@ -196,6 +205,14 @@ class UtilTest extends TestCase {
         $this->assertEquals('2.00 GiB',  byte_format(2 * 1024 ** 3), 'format-size-2G');
         $this->assertEquals('4.200 PiB', byte_format(4.2 * 1024 ** 5), 'format-size-4.2P');
         $this->assertEquals('8.500 EiB', byte_format(8.5 * 1024 ** 6), 'format-size-8.5E');
+        $this->assertEquals('8.5 EiB',   byte_format(8.5 * 1024 ** 6, 1), 'format-size-8.5E-1');
+
+        $this->assertEquals(1023,       byte_unformat(1023, 'garbage'), 'unformat-1023');
+        $this->assertEquals(1023,       byte_unformat(1023, 'B'), 'unformat-B');
+        $this->assertEquals(1024,       byte_unformat(1.0, 'KiB'), 'unformat-1.0KiB');
+        $this->assertEquals(1034,       byte_unformat(1.01, 'KiB'), 'unformat-1.01KiB');
+        $this->assertEquals(104857600,  byte_unformat(100, 'MiB'), 'unformat-100MiB');
+        $this->assertEquals(2684354560, byte_unformat(2.5, 'GiB'), 'unformat-2.5GiB');
 
         $this->assertEquals('1.02k',  human_format(1023), 'format-human-1023');
         $this->assertEquals('1.03k',  human_format(1025), 'format-human-1K');
