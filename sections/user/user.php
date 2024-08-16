@@ -385,7 +385,7 @@ if ($Viewer->permitted('users_mod') || $Viewer->isStaffPMReader()) {
     ]);
 }
 
-if ($Viewer->permitted('users_mod')) {
+if ($Viewer->permitted('admin_reports')) {
     $reports = (new Gazelle\Manager\Report($userMan))->findByReportedUser($User);
     if ($reports) {
         echo $Twig->render('admin/user-reports-list.twig', [

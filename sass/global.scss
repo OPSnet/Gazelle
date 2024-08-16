@@ -547,12 +547,28 @@ tr.torrent .bookmark > a::after {
 
 .user-reports {
   table-layout: fixed;
+  border: none;
+  line-height: 1.2em;
 }
 
-.user-report-truncate {
-  text-overflow: ellipsis;
+.user-reports {
+  tr {
+    vertical-align: top;
+  }
+  th,
+  td {
+    padding: 0.7em;
+  }
+}
+
+.user-report-reason {
+  display: block;
   overflow: hidden;
-  white-space: nowrap;
+  max-height: 3.6em;
+}
+
+.pre-wrap {
+  white-space: pre-wrap;
 }
 
 /* Wrap release info for consistent DOM and to limit table expansion. */

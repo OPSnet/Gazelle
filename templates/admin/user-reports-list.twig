@@ -1,43 +1,31 @@
 <div class="box" id="user-reports-box">
     <div class="head">
-        User Reports&nbsp;
-        {{- dom.click('#toggle-user-reports', "$('#user-reports').gtoggle(); return false;") -}}
-        <a href="#" id="toggle-user-reports" class="brackets">Toggle</a>
+        User Reports ({{ list|length }})&nbsp;
+        <a href="#" onclick="$('#user-reports').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets">Show</a>
     </div>
-    <table width="100%" id="user-reports" class="user-reports">
-        {%- for report in list -%}
-            <tr>
-                <td width="15%" id="report-{{ report.id }}-created">
-                    <a href='{{ report.location }}'>{{ report.created|time_diff(1) }}</a>
-                </td>
-                <td width="65%" id="report-{{ report.id }}-reason" class="user-report-reason user-report-truncate">
-                    {%- if report.status == "Resolved" -%}
-                        <s>
-                        {%- endif -%}
-                        {{-report.reason-}}
-                        {%- if report.status == "Resolved" -%}
-                        </s>
-                    {%- endif -%}
-                </td>
-                <td width="10%" id="report-{{ report.id }}-status">
-                    {%- if report.status == "New" -%}
-                        <b>
-                        {%- endif -%}
-                        {{- report.status -}}
-                        {%- if report.status == "New" -%}
-                        </b>
-                    {%- endif -%}
-                </td>
-                <td id="report-{{ report.id }}-staff">
-                    {%- if report.resolver -%}
-                        {{- report.resolver.id|user_url -}}
-                    {%- elseif report.claimer -%}
-                        {{- report.claimer.id|user_url -}}
-                    {%- else -%}
-                        unclaimed
-                    {%- endif -%}
-                </td>
-            </tr>
-        {% endfor %}
+    <table id="user-reports" class="user-reports layout hidden">
+{% for report in list %}
+        <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+            <td width="15%">
+                <div id="report-{{ report.id }}-metadata">
+                    <a href='{{ report.location }}'>{{ report.created|time_diff(1) }}</a><br>
+{%  if report.status == "New" %}<b>{% endif %}
+                    {{- report.status -}}
+{%  if report.status == "New" -%}</b>{% endif %}
+                    <br>
+{%  if report.resolver %}
+                    {{- report.resolver.id|user_url -}}
+{%  elseif report.claimer %}
+                    {{- report.claimer.id|user_url -}}
+{%  else %}
+                    unclaimed
+{%  endif %}
+                </div>
+            </td>
+            <td width="85%">
+                <div id="report-{{ report.id }}-reason" class="user-report-reason wrap_overflow">{{ report.reason|bb_format }}</div>
+            </td>
+        </tr>
+{% endfor %}
     </table>
 </div>
