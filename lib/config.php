@@ -319,7 +319,6 @@ defined('DEBUG_TRACE') or define('DEBUG_TRACE', '');
 defined('DISABLE_IRC')             or define('DISABLE_IRC', false);
 defined('IRC_HOSTNAME')            or define('IRC_HOSTNAME', 'irc.' . SITE_HOST);
 defined('IRC_PORT')                or define('IRC_PORT', 7000);
-defined('IRC_PORT_CLEARTEXT')      or define('IRC_PORT_CLEARTEXT', 6669);
 defined('IRC_BOT')                 or define('IRC_BOT', 'Rippy');
 defined('IRC_HTTP_SOCKET_ADDRESS') or define('IRC_HTTP_SOCKET_ADDRESS', 'http://localhost:51011/');
 

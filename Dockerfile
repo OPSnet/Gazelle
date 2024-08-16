@@ -38,6 +38,7 @@ RUN apt-get update \
         php${PHP_VER}-curl \
         php${PHP_VER}-fpm \
         php${PHP_VER}-gd \
+        php${PHP_VER}-iconv \
         php${PHP_VER}-mbstring \
         php${PHP_VER}-memcached \
         php${PHP_VER}-mysql \

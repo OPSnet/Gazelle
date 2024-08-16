@@ -3,5 +3,5 @@
 FROM ghcr.io/phpstan/phpstan:latest-php8.3
 
 RUN apk add gmp-dev patch \
-  && docker-php-ext-install mysqli pcntl bcmath gmp \
+  && docker-php-ext-install mysqli pcntl bcmath gmp iconv \
   && rm -rf /var/cache/apk/* /var/tmp/* /tmp/*

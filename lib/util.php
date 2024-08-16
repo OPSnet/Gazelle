@@ -653,6 +653,19 @@ function proxyCheck(string $IP): bool {
     return false;
 }
 
+function sanitize_irc_nick(string $nick): string {
+    $nick = iconv("UTF-8", "ASCII//TRANSLIT", $nick);
+    if (!$nick) {
+        return '';
+    }
+    $nick = str_replace(['.', ':', '#', ' '], ['[dot]', '[col]', '[hash]', '_'], $nick);
+    $nick = preg_replace('/[^a-z0-9\[\]|_-]/i', '', $nick);
+    if (is_numeric(substr($nick, 0, 1))) {
+        $nick = '_' . $nick;
+    }
+    return $nick;
+}
+
 /*** Time and date functions ***/
 
 /*

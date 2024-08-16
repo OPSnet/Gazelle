@@ -97,7 +97,7 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $module === 'ajax') {
         header('HTTP/1.1 403 Forbidden');
         exit;
     }
-} elseif (!in_array($module, ['enable', 'index', 'login', 'recovery', 'register'])) {
+} elseif (!in_array($module, ['chat', 'enable', 'index', 'login', 'recovery', 'register'])) {
     if (
         // Ocelot is allowed
         !($module === 'tools' && ($_GET['action'] ?? '') === 'ocelot' && ($_GET['key'] ?? '') === TRACKER_SECRET)
@@ -129,7 +129,7 @@ if ($Viewer) {
         }
         $ipv4Man->register($Viewer, $context->remoteAddr());
     }
-    if ($Viewer->isLocked() && !in_array($module, ['staffpm', 'ajax', 'locked', 'logout', 'login'])) {
+    if ($Viewer->isLocked() && !in_array($module, ['chat', 'staffpm', 'ajax', 'locked', 'logout', 'login'])) {
         $context->setModule('locked');
     }
 

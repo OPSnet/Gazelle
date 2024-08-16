@@ -34,7 +34,7 @@ on {{ constant('IRC_HOSTNAME') }}
 {% else %}
 <p class="warning-login">
 Your account has been disabled.<br />
-This is either due to inactivity or rule violation(s).</p>
+This is either due to inactivity, ongoing investigations or rule violation(s).</p>
 
 <div style="width: 100%">
 <div style="width: 65%; margin: 0 auto;">
@@ -51,17 +51,25 @@ cannot do so, please see below.</p>
     <input type="submit" value="Enable" />
     <input type="hidden" name="username" value="{{ username }}" />
 </form>
-<br />
+<br>
     {% endif %}
 
-<p>If you are unsure why your account is disabled, or you wish to
+<p>
+    If you are unsure why your account is disabled, or you wish to
 discuss this with staff, come to our IRC network at
-<b>{{ constant('IRC_HOSTNAME') }}</b> and join the
-<b>{{ constant('IRC_CHAN_BLOCKED') }}</b>&nbsp;channel. Use of Mibbit is
-<i>not</i> recommended. If nobody is online when you join, after a
-time your session will be disconnected and you will never receive
-a reply and will have to connect again. It could be a while before
-you manage to move forward.</p>
+    <br><br>
+    IRC Server: <b>{{ constant('IRC_HOSTNAME') }}</b><br>
+    Port: <b>+{{ constant('IRC_PORT') }}</b> (SSL/TLS)<br>
+    Channel: <b>{{ constant('IRC_CHAN_BLOCKED') }}</b><br>
+    <br><br>
+    or use our chat interface at <a href="chat.php?nick={{ username }}">chat.php</a>
+    <br><br>
+    If your account was disabled for investigation you will almost certainly have to drop by on IRC.
+</p>
+<p>
+    Use of Mibbit or mobile clients is <i>not</i> recommended. The connection will frequently interrupt,
+    lowering your chances of successfully contacting us.
+</p>
 
 <p><strong>Be honest.</strong> At this point, lying will get you
 nowhere.</p>
@@ -70,7 +78,7 @@ nowhere.</p>
 style="color: gold;">Golden Rules</span> right
 <a style="color: #1464F4;" href="#" onclick="toggle_visibility('golden_rules')">here</a>.</strong>
 
-<br /><br />
+<br><br>
 
 <div id="golden_rules" class="rule_summary" style="width: 90%; display: none; text-align: left;">
 {% include 'rules/golden.twig' %}

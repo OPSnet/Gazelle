@@ -58,7 +58,7 @@
         "tls": true,
         "direct": true,
         "nick": "{{ irc_nick }}",
-        "channel": "#orpheus",
+        "channel": "{{ constant(user ? 'IRC_CHAN' : 'IRC_CHAN_BLOCKED') }}",
         "greetingText": "Welcome to {{ constant('SITE_NAME') }} IRC",
         "buttonText": "Join",
         "showPassword": true
@@ -73,7 +73,8 @@
         "show_hostnames": true,
         "who_loop": false,
         "nicklist_avatars": false
-    },
+    }
+    {%- if user %},
     "plugins": [
         {"name": "hermes_join", "url": "{{ constant('STATIC_SERVER') }}/assets/kiwi/plugins/hermes_join.js"}
     ],
@@ -81,6 +82,7 @@
         "ircuser": "{{ user.username }}",
         "irckey":  "{{ user.IRCKey }}"
     }
+    {% endif %}
 }
 </script>
 <div id="app"></div>

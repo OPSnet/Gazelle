@@ -4,7 +4,16 @@
 </div>
 {% if viewer.isLocked %}
 <div class="box pad">
-    <p>Your account has been locked. Please send a <a href="staffpm.php">Staff PM</a> to find out how this happened.</p>
+    <p>
+        Your account has been locked for investigation. Please send a <a href="staffpm.php">Staff PM</a>
+        to find out how to resolve this or visit our IRC server at
+        <br><br>
+        IRC Server: <b>{{ constant('IRC_HOSTNAME') }}</b><br>
+        Port: <b>+{{ constant('IRC_PORT') }}</b> (SSL/TLS)<br>
+        Channel: <b>{{ constant('IRC_CHAN_BLOCKED') }}</b><br>
+        <br><br>
+        or use our chat interface at <a href="chat.php?nick={{ viewer.username }}">chat.php</a>
+    </p>
 </div>
 {% endif %}
 {{ footer() }}

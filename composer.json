@@ -20,6 +20,7 @@
   "require": {
     "php": "^8.2",
     "ext-curl": "*",
+    "ext-iconv": "*",
     "ext-json": "*",
     "ext-mysqli": "*",
     "ext-openssl": "*",
