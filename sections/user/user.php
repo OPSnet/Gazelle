@@ -2,6 +2,8 @@
 /** @phpstan-var \Gazelle\User $Viewer */
 /** @phpstan-var \Gazelle\Cache $Cache */
 /** @phpstan-var \Twig\Environment $Twig */
+// phpcs:disable Generic.WhiteSpace.ScopeIndent.IncorrectExact
+// phpcs:disable Generic.WhiteSpace.ScopeIndent.Incorrect
 
 use Gazelle\Enum\UserTokenType;
 use Gazelle\User\Vote;

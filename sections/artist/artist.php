@@ -1,6 +1,8 @@
 <?php
 /** @phpstan-var \Gazelle\User $Viewer */
 /** @phpstan-var \Twig\Environment $Twig */
+// phpcs:disable Generic.WhiteSpace.ScopeIndent.IncorrectExact
+// phpcs:disable Generic.WhiteSpace.ScopeIndent.Incorrect
 
 $RevisionID = (int)($_GET['revisionid'] ?? 0);
 $artistMan = new Gazelle\Manager\Artist();

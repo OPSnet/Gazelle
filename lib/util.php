@@ -232,7 +232,7 @@ function byte_format(float|int|null $size, int $levels = 2): string {
  */
 function byte_unformat(float $value, string $unit): int {
     return (int)(
-        $value * match($unit) {
+        $value * match ($unit) {
             'KiB'   => 1024,
             'MiB'   => 1024 ** 2,
             'GiB'   => 1024 ** 3,

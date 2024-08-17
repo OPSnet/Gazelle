@@ -1,6 +1,8 @@
 <?php
 /** @phpstan-var \Gazelle\User $Viewer */
 /** @phpstan-var \Twig\Environment $Twig */
+// phpcs:disable Generic.WhiteSpace.ScopeIndent.IncorrectExact
+// phpcs:disable Generic.WhiteSpace.ScopeIndent.Incorrect
 
 $torrent = (new Gazelle\Manager\Torrent())->findById((int)($_GET['id'] ?? 0));
 if (is_null($torrent)) {

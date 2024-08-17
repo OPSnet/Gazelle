@@ -1,8 +1,9 @@
 <?php
 /** @phpstan-var \Gazelle\User $Viewer */
 /** @phpstan-var \Twig\Environment $Twig */
-
 /** @var Gazelle\Collage $Collage required from collage.php */
+// phpcs:disable Generic.WhiteSpace.ScopeIndent.IncorrectExact
+// phpcs:disable Generic.WhiteSpace.ScopeIndent.Incorrect
 
 $Collage->setViewer($Viewer);
 $CollageID       = $Collage->id();
@@ -57,9 +58,7 @@ echo $Twig->render('collage/sidebar.twig', [
 ?>
     </div>
     <div class="main_column">
-<?php
-if ($CollageCovers != 0) {
-?>
+<?php if ($CollageCovers != 0) { ?>
         <div id="coverart" class="box">
             <div class="head" id="coverhead"><strong>Cover Art</strong></div>
             <ul class="collage_images" id="collage_page0">
@@ -71,8 +70,7 @@ if ($CollageCovers != 0) {
 ?>
             </ul>
         </div>
-<?php
-    if ($NumGroups > $CollageCovers) { ?>
+<?php if ($NumGroups > $CollageCovers) { ?>
         <div class="linkbox pager" style="clear: left;" id="pageslinksdiv">
             <span id="firstpage" class="invisible"><a href="#" class="pageslink" onclick="collageShow.page(0); return false;"><strong>&laquo; First</strong></a> | </span>
             <span id="prevpage" class="invisible"><a href="#" class="pageslink" onclick="collageShow.prevPage(); return false;"><strong>&lsaquo; Prev</strong></a> | </span>

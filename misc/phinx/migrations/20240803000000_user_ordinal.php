@@ -7,12 +7,12 @@ use Phinx\Migration\AbstractMigration;
 /************************************************************
 
 To initialize a running database, execute the following query
-once the code has been deployed. 
+once the code has been deployed.
 
 BEGIN;
 
 DELETE FROM user_has_ordinal
-WHERE user_ordinal_id = 
+WHERE user_ordinal_id =
     (SELECT user_ordinal_id FROM user_ordinal WHERE name = 'personal-collage');
 
 INSERT INTO user_has_ordinal (user_ordinal_id, user_id, value)

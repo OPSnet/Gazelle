@@ -35,7 +35,7 @@ class Artist extends \Gazelle\Json {
             }
             $artists = $tgroup->artistRole()->legacyList();
             $artists = $artists[1] ?? null;
-            $Found = $this->search_array($artists, 'id', $artistId);
+            $Found = $this->searchList($artists, 'id', $artistId);
             if ($this->releasesOnly && empty($Found)) {
                 continue;
             }
@@ -148,14 +148,14 @@ class Artist extends \Gazelle\Json {
         ];
     }
 
-    protected function search_array(mixed $Array, string $Key, mixed $Value): array {
+    protected function searchList(mixed $Array, string $Key, mixed $Value): array {
         $results = [];
         if (is_array($Array)) {
             if (isset($Array[$Key]) && $Array[$Key] == $Value) {
                 $results[] = $Array;
             }
             foreach ($Array as $subarray) {
-                $results = array_merge($results, $this->search_array($subarray, $Key, $Value));
+                $results = array_merge($results, $this->searchList($subarray, $Key, $Value));
             }
         }
         return $results;

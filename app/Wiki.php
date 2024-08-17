@@ -105,9 +105,11 @@ class Wiki extends BaseObject {
         return $this->info()['title'];
     }
 
+    // phpcs:disable PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function ToC(): string {
         return $this->info()['toc'] ?? '';
     }
+    // phpcs:enable
 
     public function editable(User $user): bool {
         return $this->minClassEdit() <= $user->privilege()->effectiveClassLevel();

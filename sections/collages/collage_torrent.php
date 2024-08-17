@@ -1,6 +1,8 @@
 <?php
 /** @phpstan-var \Gazelle\User $Viewer */
 /** @phpstan-var \Twig\Environment $Twig */
+// phpcs:disable Generic.WhiteSpace.ScopeIndent.IncorrectExact
+// phpcs:disable Generic.WhiteSpace.ScopeIndent.Incorrect
 
 $tgMan         = (new Gazelle\Manager\TGroup())->setViewer($Viewer);
 $torMan        = (new Gazelle\Manager\Torrent())->setViewer($Viewer);

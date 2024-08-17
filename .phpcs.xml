@@ -19,11 +19,9 @@
         <exclude name="Generic.Files.LineLength" />
         <exclude name="Generic.Functions.FunctionCallArgumentSpacing.TooMuchSpaceAfterComma" />
         <exclude name="Generic.NamingConventions.UpperCaseConstantName" />
-        <exclude name="Generic.WhiteSpace.ScopeIndent" />
 
         <exclude name="PSR1.Classes.ClassDeclaration" />
         <exclude name="PSR1.Files.SideEffects" />
-        <exclude name="PSR1.Methods.CamelCapsMethodName" />
 
         <exclude name="PSR2.Classes.ClassDeclaration.OpenBraceNewLine" />
         <exclude name="PSR2.Classes.PropertyDeclaration.SpacingAfterType" />

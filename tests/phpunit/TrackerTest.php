@@ -81,7 +81,7 @@ class TrackerTest extends TestCase {
     public function testTrackerUser(): void {
         $tracker = new \Gazelle\Tracker();
         $info = $tracker->info();
-        $this->assertFalse($tracker->last_error(), 'tracker-init');
+        $this->assertFalse($tracker->lastError(), 'tracker-init');
 
         $this->user = Helper::makeUser('trk.' . randomString(10), 'tracker');
         $this->assertEquals(

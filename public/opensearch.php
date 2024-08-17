@@ -1,5 +1,8 @@
 <?php
 
+// phpcs:disable Generic.WhiteSpace.ScopeIndent.IncorrectExact
+// phpcs:disable Generic.WhiteSpace.ScopeIndent.Incorrect
+
 header('Content-type: application/opensearchdescription+xml');
 
 require_once(__DIR__ . '/../lib/config.php');

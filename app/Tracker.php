@@ -18,7 +18,7 @@ class Tracker extends Base {
         return self::$Requests;
     }
 
-    public function last_error(): string|false {
+    public function lastError(): string|false {
         return $this->error;
     }
 

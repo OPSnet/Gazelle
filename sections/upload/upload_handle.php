@@ -280,7 +280,7 @@ if ($torrent) {
             defined('AJAX')
             ? "The exact same torrent file already exists on the site! (torrentid=$torrentId)"
             : "<a href=\"torrents.php?torrentid=$torrentId\">The exact same torrent file already exists on the site!</a>"
-       );
+        );
     } else {
         // A lost torrent
         $torrentFiler->put($bencoder->getEncode(), $torrentId);

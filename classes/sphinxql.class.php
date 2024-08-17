@@ -1,4 +1,5 @@
 <?php
+// phpcs:disable PSR1.Methods.CamelCapsMethodName.NotCamelCaps
 
 if (!extension_loaded('mysqli')) {
     error('Mysqli Extension not loaded.');

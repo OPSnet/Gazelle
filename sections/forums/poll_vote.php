@@ -1,5 +1,7 @@
 <?php
 /** @phpstan-var \Gazelle\User $Viewer */
+// phpcs:disable Generic.WhiteSpace.ScopeIndent.IncorrectExact
+// phpcs:disable Generic.WhiteSpace.ScopeIndent.Incorrect
 
 $poll = (new Gazelle\Manager\ForumPoll())->findById((int)($_POST['threadid'] ?? 0));
 if (is_null($poll)) {

@@ -1,6 +1,9 @@
 <?php
 /** @phpstan-var \Gazelle\User $Viewer */
 /** @phpstan-var \Twig\Environment $Twig */
+// phpcs:disable Generic.WhiteSpace.ScopeIndent.IncorrectExact
+// phpcs:disable Generic.WhiteSpace.ScopeIndent.Incorrect
+
 /*
  * $_REQUEST['action'] is artist, collages, requests or torrents (default torrents)
  * $_REQUEST['type'] depends on the page:

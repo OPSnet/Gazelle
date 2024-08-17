@@ -46,7 +46,7 @@ if ($Viewer->permitted('admin_manage_blog')) {
                 header('Location: staffblog.php');
                 exit;
 
-           default:
+            default:
                 error(403);
         }
     }

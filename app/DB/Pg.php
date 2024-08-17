@@ -17,6 +17,7 @@ class Pg {
         return $this->pdo->prepare($query);
     }
 
+    // phpcs:disable PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function prepared_query(string $query, ...$args): int {
         $st = $this->prepare($query);
         if ($st->execute([...$args])) {
@@ -25,6 +26,7 @@ class Pg {
             return 0;
         }
     }
+    // phpcs:enable
 
     public function insert(string $query, ...$args): int {
         $st = $this->prepare($query);

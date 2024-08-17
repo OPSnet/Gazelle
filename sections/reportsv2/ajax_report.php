@@ -1,4 +1,7 @@
 <?php
+// phpcs:disable Generic.WhiteSpace.ScopeIndent.IncorrectExact
+// phpcs:disable Generic.WhiteSpace.ScopeIndent.Incorrect
+
 /*
  * The backend to changing the report type when making a report.
  * It prints out the relevant report_messages from the array, then

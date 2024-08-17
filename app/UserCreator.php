@@ -236,7 +236,7 @@ class UserCreator extends Base {
      * the site code needs to know whether to redirect the user to the login page
      * or tell them to check their email for a confirmation message.
      */
-    function newInstall(): bool {
+    public function newInstall(): bool {
         return $this->newInstall ??= !(bool)self::$db->scalar("SELECT ID FROM users_main LIMIT 1");
     }
 

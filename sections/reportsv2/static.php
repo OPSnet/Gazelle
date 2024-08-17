@@ -1,6 +1,9 @@
 <?php
 /** @phpstan-var \Gazelle\User $Viewer */
 /** @phpstan-var \Twig\Environment $Twig */
+// phpcs:disable Generic.WhiteSpace.ScopeIndent.IncorrectExact
+// phpcs:disable Generic.WhiteSpace.ScopeIndent.Incorrect
+
 /*
  * This page is used for viewing reports in every viewpoint except auto.
  * It doesn't AJAX grab a new report when you resolve each one, use auto

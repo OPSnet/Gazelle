@@ -179,51 +179,51 @@ class Quote extends \Gazelle\BaseUser {
         foreach ($quoteList as $q) {
             $context = [];
             switch ($q['Page']) {
-            case 'artist':
-                $artist = $artistMan->findById($q['PageID']);
-                $context = [
-                    'jump'  => "artist.php?id={$q['PageID']}&amp;postid={$q['PostID']}#post{$q['PostID']}",
-                    'link'  => $artist->link(),
-                    'title' => 'Artist',
-                ];
-                break;
-            case 'collages':
-                $context = [
-                    'jump'  => "collages.php?action=comments&amp;collageid={$q['PageID']}&amp;postid={$q['PostID']}#post{$q['PostID']}",
-                    'link'  => sprintf('<a href="collages.php?id=%d">%s</a>', $q['PageID'], display_str($q['CollageName'])),
-                    'title' => 'Collage',
-                ];
-                break;
-            case 'forums':
-                $post = $postMan->findById($q['PostID']);
-                $context = [
-                    'jump'  => $post->url(),
-                    'link'  => $post->thread()->forum()->link() . ' &rsaquo; ' . $post->thread()->link() . ' &rsaquo; ' . $post->link(),
-                    'title' => 'Forums',
-                ];
-                break;
-            case 'requests':
-                $request = $reqMan->findById($q['PageID']);
-                if (is_null($request)) {
-                    continue 2;
-                }
-                $context = [
-                    'jump'  => $request->url() . "&amp;postid={$q['PostID']}#post{$q['PostID']}",
-                    'link'  => $request->smartLink(),
-                    'title' => 'Request',
-                ];
-                break;
-            case 'torrents':
-                $tgroup = $tgMan->findById($q['PageID']);
-                if (is_null($tgroup)) {
-                    continue 2;
-                }
-                $context = [
-                    'jump' => "torrents.php?id={$q['PageID']}&amp;postid={$q['PostID']}#post{$q['PostID']}",
-                    'link' => $tgroup->link(),
-                    'title' => 'Torrent',
-                ];
-                break;
+                case 'artist':
+                    $artist = $artistMan->findById($q['PageID']);
+                    $context = [
+                        'jump'  => "artist.php?id={$q['PageID']}&amp;postid={$q['PostID']}#post{$q['PostID']}",
+                        'link'  => $artist->link(),
+                        'title' => 'Artist',
+                    ];
+                    break;
+                case 'collages':
+                    $context = [
+                        'jump'  => "collages.php?action=comments&amp;collageid={$q['PageID']}&amp;postid={$q['PostID']}#post{$q['PostID']}",
+                        'link'  => sprintf('<a href="collages.php?id=%d">%s</a>', $q['PageID'], display_str($q['CollageName'])),
+                        'title' => 'Collage',
+                    ];
+                    break;
+                case 'forums':
+                    $post = $postMan->findById($q['PostID']);
+                    $context = [
+                        'jump'  => $post->url(),
+                        'link'  => $post->thread()->forum()->link() . ' &rsaquo; ' . $post->thread()->link() . ' &rsaquo; ' . $post->link(),
+                        'title' => 'Forums',
+                    ];
+                    break;
+                case 'requests':
+                    $request = $reqMan->findById($q['PageID']);
+                    if (is_null($request)) {
+                        continue 2;
+                    }
+                    $context = [
+                        'jump'  => $request->url() . "&amp;postid={$q['PostID']}#post{$q['PostID']}",
+                        'link'  => $request->smartLink(),
+                        'title' => 'Request',
+                    ];
+                    break;
+                case 'torrents':
+                    $tgroup = $tgMan->findById($q['PageID']);
+                    if (is_null($tgroup)) {
+                        continue 2;
+                    }
+                    $context = [
+                        'jump' => "torrents.php?id={$q['PageID']}&amp;postid={$q['PostID']}#post{$q['PostID']}",
+                        'link' => $tgroup->link(),
+                        'title' => 'Torrent',
+                    ];
+                    break;
             }
             $page[] = array_merge(
                 $context,
