@@ -155,58 +155,41 @@ class History extends \Gazelle\BaseUser {
     }
 
     public function registerSiteIp(string $ipaddr, int $delay = IP_HISTORY_NEW_INTERVAL): int {
-        // I had initially hoped that it would be possible to do this:
-        //
-        // insert into ip_site_history (id_user, ip) values (2, '2.2.2.2')
-        // on conflict (id_user, ip) do update set
-        //    total = EXCLUDED.total + 1,
-        //    seen = EXCLUDED.seen
-        //        + case when upper(EXCLUDED.seen) > now() - '1 day'::interval
-        //        then tstzmultirange(tstzrange(upper(EXCLUDED.seen), now(), '[]'))
-        //        else tstzmultirange(tstzrange(now(), now(), '[]'))
-        //    end;
-        //
-        // but for some reason, total is never incremented beyond 2 and seen is
-        // clobbered by the last tstzrange. Some day I will figure this out, in
-        // the meantime, this roundabout technique will have to do – Spine
-
-        $this->pg()->pdo()->beginTransaction();
-        $recent = $this->pg()->scalar("
-            select upper(seen) > now() - '1 second'::interval * ? as recent
-            from ip_site_history
-            where id_user = ?
-                and ip = ?
-            ", $delay, $this->id(), $ipaddr
+        return (int)$this->pg()->writeReturning("
+            with cur as (
+                select ?::int id_user,
+                    ?::inet as ip,
+                    total,
+                    upper(seen) as recent
+                from ip_site_history
+                where id_user = ?
+                    and ip = ?::inet
+            ),
+            ins as (
+                select
+                    coalesce((select id_user from cur), ?)   as id_user,
+                    coalesce((select ip from cur), ?::inet)  as ip,
+                    coalesce((select total + 1 from cur), 1) as total,
+                    tstzmultirange(
+                        tstzrange(
+                            case when (select recent from cur) > now() - '1 second'::interval * ?
+                                then (select recent from cur)
+                                else now()
+                            end,
+                            now(),
+                            '[]'
+                        )
+                    ) as seen
+            )
+            insert into ip_site_history as s
+                  (id_user, ip, total, seen)
+            select id_user, ip, total, seen from ins
+            on conflict (id_user, ip) do update set
+                total = EXCLUDED.total,
+                seen  = s.seen + EXCLUDED.seen
+            returning total
+            ", $this->id(), $ipaddr, $this->id(), $ipaddr, $this->id(), $ipaddr, $delay
         );
-        $total = match ($recent) {
-            true => $this->pg()->writeReturning("
-                update ip_site_history set
-                    seen = seen + tstzmultirange(tstzrange(upper(seen), now(), '[]')),
-                    total = total + 1
-                where id_user = ?
-                and ip = ?
-                returning total
-                ", $this->id(), $ipaddr
-            ),
-            false => $this->pg()->writeReturning("
-                update ip_site_history set
-                    seen = seen + tstzmultirange(tstzrange(now(), now(), '[]')),
-                    total = total + 1
-                where id_user = ?
-                and ip = ?
-                returning total
-                ", $this->id(), $ipaddr
-            ),
-            default => $this->pg()->writeReturning("
-                insert into ip_site_history
-                       (id_user, ip)
-                values (?,       ?)
-                returning total
-                ", $this->id(), $ipaddr
-            ),
-        };
-        $this->pg()->pdo()->commit();
-        return (int)$total;
     }
 
     public function siteIPv4(\Gazelle\Search\ASN $asn): array {
