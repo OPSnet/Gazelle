@@ -3,9 +3,6 @@
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 
-require_once(__DIR__ . '/../../lib/bootstrap.php');
-require_once(__DIR__ . '/../helper.php');
-
 define('FAKE_LEVEL', 666);
 
 /**

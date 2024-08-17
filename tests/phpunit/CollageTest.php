@@ -3,14 +3,10 @@
 use PHPUnit\Framework\TestCase;
 use Gazelle\Enum\CollageType;
 
-require_once(__DIR__ . '/../../lib/bootstrap.php');
-require_once(__DIR__ . '/../helper.php');
-
 /**
  * Note: these tests are not interested in how a collage was acquired.
  * Look at, for instance, the tests for donors and bonus points for that.
  */
-
 
 class CollageTest extends TestCase {
     protected array $collageList;

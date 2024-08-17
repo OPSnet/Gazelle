@@ -2,8 +2,6 @@
 
 use PHPUnit\Framework\TestCase;
 
-require_once(__DIR__ . '/../../lib/bootstrap.php');
-
 class UserCreateTest extends TestCase {
     protected Gazelle\User $user;
 

@@ -2,8 +2,6 @@
 
 use PHPUnit\Framework\TestCase;
 
-require_once(__DIR__ . '/../../lib/bootstrap.php');
-
 class CounterTest extends TestCase {
     public function testCounter(): void {
         $name    = "phpunit-" . randomString(10);

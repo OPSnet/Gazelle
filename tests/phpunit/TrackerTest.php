@@ -5,9 +5,6 @@ use PHPUnit\Framework\Attributes\Group;
 use Gazelle\Enum\DownloadStatus;
 use Gazelle\Enum\LeechType;
 
-require_once(__DIR__ . '/../../lib/bootstrap.php');
-require_once(__DIR__ . '/../helper.php');
-
 class TrackerTest extends TestCase {
     protected \Gazelle\Torrent $torrent;
     protected \Gazelle\User    $user;

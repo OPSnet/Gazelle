@@ -2,8 +2,6 @@
 
 use PHPUnit\Framework\TestCase;
 
-require_once(__DIR__ . '/../../../lib/bootstrap.php');
-
 class RequestManagerTest extends TestCase {
     protected \Gazelle\Manager\Request $manager;
 

@@ -4,9 +4,6 @@ use PHPUnit\Framework\TestCase;
 use Gazelle\Enum\DownloadStatus;
 use Gazelle\Enum\TorrentFlag;
 
-require_once(__DIR__ . '/../../lib/bootstrap.php');
-require_once(__DIR__ . '/../helper.php');
-
 class TorrentTest extends TestCase {
     protected \Gazelle\Torrent $torrent;
     protected \Gazelle\User    $user;

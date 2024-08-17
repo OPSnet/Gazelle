@@ -5,9 +5,6 @@ namespace phpunit\manager;
 use Helper;
 use PHPUnit\Framework\TestCase;
 
-require_once(__DIR__ . '/../../../lib/bootstrap.php');
-require_once(__DIR__ . '/../../helper.php');
-
 class ReportAutoTest extends TestCase {
     protected static \Gazelle\Manager\ReportAutoType $ratMan;
     protected static \Gazelle\Manager\ReportAuto $raMan;

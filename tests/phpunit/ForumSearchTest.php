@@ -2,9 +2,6 @@
 
 use PHPUnit\Framework\TestCase;
 
-require_once(__DIR__ . '/../../lib/bootstrap.php');
-require_once(__DIR__ . '/../helper.php');
-
 class ForumSearchTest extends TestCase {
     protected Gazelle\ForumCategory $category;
     protected Gazelle\Forum         $forum;

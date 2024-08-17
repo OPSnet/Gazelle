@@ -5,9 +5,6 @@ use Gazelle\Enum\Direction;
 use Gazelle\Enum\MysqlInfoOrderBy;
 use Gazelle\Enum\MysqlTableMode;
 
-require_once(__DIR__ . '/../../lib/bootstrap.php');
-require_once(__DIR__ . '/../helper.php');
-
 class MysqlInfoTest extends TestCase {
     public function testDirection(): void {
         $this->assertEquals(MysqlInfoOrderBy::totalLength, Gazelle\DB\MysqlInfo::lookupOrderby('total_length'), 'mysqlfo-orderby-totallength');

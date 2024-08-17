@@ -3,9 +3,6 @@
 use PHPUnit\Framework\TestCase;
 use Gazelle\Enum\TorrentFlag;
 
-require_once(__DIR__ . '/../../../lib/bootstrap.php');
-require_once(__DIR__ . '/../../helper.php');
-
 class TorrentReportManagerTest extends TestCase {
     protected array $userList   = [];
     protected \Gazelle\TGroup $tgroup;

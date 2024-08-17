@@ -2,8 +2,6 @@
 
 use PHPUnit\Framework\TestCase;
 
-require_once(__DIR__ . '/../../../lib/bootstrap.php');
-
 class UserclassRateLimitTest extends TestCase {
     public function testUserclassRateLimit(): void {
         $limiter = new Gazelle\Manager\UserclassRateLimit();

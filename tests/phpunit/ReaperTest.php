@@ -23,9 +23,6 @@ use PHPUnit\Framework\TestCase;
 use Gazelle\Enum\ReaperNotify;
 use Gazelle\Enum\ReaperState;
 
-require_once(__DIR__ . '/../../lib/bootstrap.php');
-require_once(__DIR__ . '/../helper.php');
-
 class ReaperTest extends TestCase {
     protected string $tgroupName;
     protected array $torrentList = [];

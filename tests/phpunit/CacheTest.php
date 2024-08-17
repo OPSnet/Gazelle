@@ -2,8 +2,6 @@
 
 use PHPUnit\Framework\TestCase;
 
-require_once(__DIR__ . '/../../lib/bootstrap.php');
-
 class CacheTest extends TestCase {
     public function testCache(): void {
         $cache = new Gazelle\Cache();

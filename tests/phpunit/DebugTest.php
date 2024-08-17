@@ -2,9 +2,6 @@
 
 use PHPUnit\Framework\TestCase;
 
-require_once(__DIR__ . '/../../lib/bootstrap.php');
-require_once(__DIR__ . '/../helper.php');
-
 class DebugTest extends TestCase {
     public function testDebugGeneral(): void {
         global $Debug;

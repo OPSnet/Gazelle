@@ -2,8 +2,6 @@
 
 use PHPUnit\Framework\TestCase;
 
-require_once(__DIR__ . '/../../lib/bootstrap.php');
-
 class FileStorageTest extends TestCase {
     public function testTorrentPath(): void {
         $filer = new Gazelle\File\Torrent();

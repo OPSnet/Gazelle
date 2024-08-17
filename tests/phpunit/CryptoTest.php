@@ -2,8 +2,6 @@
 
 use PHPUnit\Framework\TestCase;
 
-require_once(__DIR__ . '/../../lib/bootstrap.php');
-
 class CryptoTest extends TestCase {
     public function testCryptoSanity(): void {
         $payload = "someteststring!";

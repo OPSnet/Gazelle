@@ -3,8 +3,6 @@
 use PHPUnit\Framework\TestCase;
 use Gazelle\Enum\CacheBucket;
 
-require_once(__DIR__ . '/../../lib/bootstrap.php');
-
 class UtilTest extends TestCase {
     public function testBasic(): void {
         $this->assertEquals(2,    article(2),       'article-2-a');

@@ -2,8 +2,6 @@
 
 namespace phpunit\manager;
 
-require_once(__DIR__ . '/../../../lib/bootstrap.php');
-
 use PHPUnit\Framework\TestCase;
 
 class ReportAutoTypeTest extends TestCase {

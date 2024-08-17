@@ -3,10 +3,6 @@
 use PHPUnit\Framework\TestCase;
 use Gazelle\Enum\DownloadStatus;
 
-require_once(__DIR__ . '/../../lib/bootstrap.php');
-require_once(__DIR__ . '/../helper.php');
-
-
 class DownloadTest extends TestCase {
     protected \Gazelle\Torrent $torrent;
     protected array $userList;

@@ -3,8 +3,6 @@
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\Group;
 
-require_once(__DIR__ . '/../../lib/bootstrap.php');
-
 class SiteInfoTest extends TestCase {
     public function testSiteInfo(): void {
         $info = new Gazelle\SiteInfo();

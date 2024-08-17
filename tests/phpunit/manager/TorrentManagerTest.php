@@ -4,9 +4,6 @@ use PHPUnit\Framework\TestCase;
 use Gazelle\Enum\LeechType;
 use Gazelle\Enum\LeechReason;
 
-require_once(__DIR__ . '/../../../lib/bootstrap.php');
-require_once(__DIR__ . '/../../helper.php');
-
 class TorrentManagerTest extends TestCase {
     protected array         $torrentList = [];
     protected array         $topTenList = [];

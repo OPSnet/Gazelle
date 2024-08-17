@@ -2,8 +2,6 @@
 
 use PHPUnit\Framework\TestCase;
 
-require_once(__DIR__ . '/../../../lib/bootstrap.php');
-
 class EconomicTest extends TestCase {
     public function testEconomic(): void {
         $eco = new \Gazelle\Stats\Economic();

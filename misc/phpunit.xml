@@ -1,5 +1,10 @@
 <?xml version="1.0"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.3/phpunit.xsd" colors="true" bootstrap="../vendor/autoload.php" cacheDirectory="../cache/phpunit">
+<phpunit
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.3/phpunit.xsd"
+    bootstrap="phpunit-autoload.php"
+    cacheDirectory="../cache/phpunit"
+>
   <coverage/>
   <testsuites>
     <testsuite name="unit">

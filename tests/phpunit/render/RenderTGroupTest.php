@@ -2,8 +2,6 @@
 
 use PHPUnit\Framework\TestCase;
 
-require_once(__DIR__ . '/../../../lib/bootstrap.php');
-
 class RenderTGroupTest extends TestCase {
     public function testRequest(): void {
         $tgroupId = (int)Gazelle\DB::DB()->scalar('SELECT ID from torrents_group');

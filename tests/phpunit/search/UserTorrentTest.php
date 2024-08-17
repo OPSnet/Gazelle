@@ -3,9 +3,6 @@
 use PHPUnit\Framework\TestCase;
 use Gazelle\Enum\UserTorrentSearch;
 
-require_once(__DIR__ . '/../../../lib/bootstrap.php');
-require_once(__DIR__ . '/../../helper.php');
-
 class UserTorrentTest extends TestCase {
     protected array $torrentList;
     protected \Gazelle\User $user;

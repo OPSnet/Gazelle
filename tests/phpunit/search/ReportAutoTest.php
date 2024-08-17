@@ -6,9 +6,6 @@ use Gazelle\Enum\ReportAutoState;
 use Helper;
 use PHPUnit\Framework\TestCase;
 
-require_once(__DIR__ . '/../../../lib/bootstrap.php');
-require_once(__DIR__ . '/../../helper.php');
-
 class ReportAutoTest extends TestCase {
     protected static \Gazelle\Manager\User $userMan;
     protected static \Gazelle\Manager\ReportAutoType $ratMan;

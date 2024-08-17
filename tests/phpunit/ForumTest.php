@@ -2,9 +2,6 @@
 
 use PHPUnit\Framework\TestCase;
 
-require_once(__DIR__ . '/../../lib/bootstrap.php');
-require_once(__DIR__ . '/../helper.php');
-
 /**
  * In the original Gazelle implementation, two sets of developers implemented
  * two distinct methods of keeping track of unread posts by users. As the code

@@ -2,8 +2,6 @@
 
 use PHPUnit\Framework\TestCase;
 
-require_once(__DIR__ . '/../../lib/bootstrap.php');
-
 class ApiTest extends TestCase {
     public function testUserId(): void {
         $api = new Gazelle\API\User([]);

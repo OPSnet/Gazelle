@@ -3,8 +3,9 @@
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 
-require_once(__DIR__ . '/../../lib/bootstrap.php');
+// phpcs:disable PSR1.Files.SideEffects.FoundWithSymbols
 ini_set('memory_limit', '1G');
+// phpcs:enable
 
 class SchedulerTest extends TestCase {
     public function testRun(): void {

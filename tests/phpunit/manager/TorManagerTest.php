@@ -2,8 +2,6 @@
 
 use PHPUnit\Framework\TestCase;
 
-require_once(__DIR__ . '/../../../lib/bootstrap.php');
-
 class TorManagerTest extends TestCase {
     public function testTor(): void {
         $manager = new \Gazelle\Manager\Tor();

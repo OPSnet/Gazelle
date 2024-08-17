@@ -2,8 +2,6 @@
 
 use PHPUnit\Framework\TestCase;
 
-require_once(__DIR__ . '/../../lib/bootstrap.php');
-
 class ClientWhitelistTest extends TestCase {
     public function testWhitelist(): void {
         $manager = new Gazelle\Manager\ClientWhitelist();

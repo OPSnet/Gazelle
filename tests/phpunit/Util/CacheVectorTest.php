@@ -2,8 +2,6 @@
 
 use PHPUnit\Framework\TestCase;
 
-require_once(__DIR__ . '/../../../lib/bootstrap.php');
-
 define('TEST_NAME', 'phpunit_bitvec_' . randomString(20));
 define('TEST_LENGTH', 4); // bits 0..31
 define('TEST_EXPIRY', 3600);

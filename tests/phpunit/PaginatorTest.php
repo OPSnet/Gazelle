@@ -5,8 +5,6 @@ namespace phpunit;
 use Gazelle;
 use PHPUnit\Framework\TestCase;
 
-require_once(__DIR__ . '/../../lib/bootstrap.php');
-
 class PaginatorTest extends TestCase {
     public function testPageCountSingle(): void {
         $perPage = 9;

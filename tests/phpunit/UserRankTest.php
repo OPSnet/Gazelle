@@ -4,8 +4,6 @@ namespace Gazelle;
 
 use PHPUnit\Framework\TestCase;
 
-require_once(__DIR__ . '/../../lib/bootstrap.php');
-
 class UserRankTest extends TestCase {
     public function testUserRank(): void {
         $weights = array_intersect_key(RANKING_WEIGHT, ['uploaded' => 1, 'downloaded' => 1]);
