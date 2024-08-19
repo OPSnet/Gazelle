@@ -29,6 +29,7 @@
 
         <exclude name="PSR12.Files.FileHeader.SpacingAfterBlock" /><!-- compact phpstan-var declarations -->
         <exclude name="PSR12.Traits.UseDeclaration" />
+        
 
         <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing" />
         <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.BraceOnSameLine" />

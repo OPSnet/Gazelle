@@ -36,21 +36,24 @@
     <li>Passkey: <a href="#" id="passkey" class="brackets">View</a></li>
 {% endif %}
 
-{%- if viewer.permitted('users_view_invites') %}
+{% if viewer.permitted('users_view_invites') %}
     <li>Invited by:
-    {%- if not user.inviterId %}
+{%  if not user.inviterId %}
         <i>Nobody</i>
-    {%- else %}
-        {%- set inviter = user.inviter %}
-        {{ inviter.id|user_url -}}
-        {%- if viewer.permitted('admin_manage_invite_source') -%}
-            {%- if not invite_source and (inviter.isInterviewer or inviter.isRecruiter) %} <i>unconfirmed</i>{% endif -%}
-            {%- if invite_source %} from {{ invite_source -}}
-                {%- set profile = user.externalProfile.profile -%}
-                {%- if profile %}<br /><tt>{{ profile }}</tt>{% endif -%}
-            {%- endif -%}
-        {% endif -%}
-    {% endif -%}
+{%  else %}
+{%      set current = user %}
+{%      for parent in ancestry %}
+{%          if not loop.first %}&nbsp;&nbsp;↳ {% endif %}
+{{          parent.id|user_url }}
+{%          if parent.isDisabled %}<span title="disabled"> ⛔️<span>{% endif %}
+{%          if parent.disableInvites %}<span title="invites revoked"> 🚫</span>{% endif %}
+{%          set source = invite_source.findSourceNameByUser(current) %}
+{%          if not source and (inviter.isInterviewer or inviter.isRecruiter) %} (unconfirmed){% endif %}
+{%          if source %} from {{ source }}{% endif %}
+{%          set current = parent %}
+    <br />
+{%      endfor %}
+{%  endif %}
     </li>
 {% endif %}
 

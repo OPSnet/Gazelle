@@ -8,6 +8,7 @@ use Gazelle\Util\Time;
 class User extends \Gazelle\BaseManager {
     final public const ID_KEY             = 'zz_u_%d';
     final public const USERNAME_KEY       = 'zz_unam_%s';
+    final public const ANCESTRY_KEY       = 'zz_uanc_%d';
     final public const DISABLE_MANUAL     = 1;
     final public const DISABLE_TOR        = 2;
     final public const DISABLE_INACTIVITY = 3;
@@ -183,6 +184,37 @@ class User extends \Gazelle\BaseManager {
             self::$cache->cache_value(self::CACHE_STAFF, $list, 86400);
         }
         return $list;
+    }
+
+    /**
+     * Return the inviter ancestry.
+     * List is ordered as parent, grandparent, great-grandparent...
+     */
+    public function ancestry(\Gazelle\User $user): array {
+        $key = sprintf(self::ANCESTRY_KEY, $user->id());
+        $ancestry = self::$cache->get_value($key);
+        if ($ancestry === false) {
+            self::$db->prepared_query("
+                WITH RECURSIVE ancestor  AS (
+                    SELECT um.ID as user_id,
+                        um.inviter_user_id
+                    FROM users_main um
+                    WHERE um.ID = ?
+                UNION ALL
+                    SELECT um.ID as user_id,
+                        um.inviter_user_id
+                    FROM ancestor
+                    INNER JOIN users_main um ON (um.ID = ancestor.inviter_user_id)
+                )
+                SELECT ancestor.user_id
+                FROM ancestor
+                WHERE ancestor.user_id != ? /* exclude self */
+                ", $user->id(), $user->id()
+            );
+            $ancestry = self::$db->collect(0, false);
+            self::$cache->cache_value($key, $ancestry, 0);
+        }
+        return array_map(fn ($id) => $this->findById($id), $ancestry);
     }
 
     /**

@@ -12,13 +12,22 @@
 {%- if not user.inviterId -%}
     Nobody
 {%- else %}
-    {%- set inviter = user.inviter %}
-    {{- inviter.id|user_url }} {{ inviter.publicLocation -}}
-    {%- if not source and (inviter.isInterviewer or inviter.isRecruiter) %} (unconfirmed){% endif -%}
-    {%- if source %} from {{ source }}
-    {%- endif -%}
+{%  set current = user %}
+{%  for parent in ancestry %}
+{%      if not loop.first %}&nbsp;&nbsp;↳ {% endif %}
+{{      parent.id|user_url }}
+{%      if parent.isDisabled %}<span title="disabled"> ⛔️<span>{% endif %}
+{%      if parent.disableInvites %}<span title="invites revoked"> 🚫</span>{% endif %}
+&nbsp;{{ parent.publicLocation -}}
+{%      set source = invite_source.findSourceNameByUser(current) %}
+{%      if not source and (inviter.isInterviewer or inviter.isRecruiter) %} (unconfirmed){% endif %}
+{%      if source %} from {{ source }}
     <tt> {{ user.externalProfile.profile }}</tt>
-{% endif -%}
+{%      endif %}
+{%      set current = parent %}
+    <br />
+{%  endfor %}
+{% endif %}
 </td></tr>
 
 {% include 'admin/user-info-email.twig' with {'info': hist.email(asn),       'title': 'Email History' } only %}

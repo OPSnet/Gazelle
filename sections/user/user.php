@@ -5,6 +5,8 @@
 // phpcs:disable Generic.WhiteSpace.ScopeIndent.IncorrectExact
 // phpcs:disable Generic.WhiteSpace.ScopeIndent.Incorrect
 
+declare(strict_types=1);
+
 use Gazelle\Enum\UserTokenType;
 use Gazelle\User\Vote;
 
@@ -101,9 +103,10 @@ echo $Twig->render('user/header.twig', [
 ]);
 
 echo $Twig->render('user/sidebar.twig', [
+    'ancestry'      => $userMan->ancestry($User),
     'applicant'     => new Gazelle\Manager\Applicant(),
     'invite_source' => $Viewer->permitted('admin_manage_invite_source')
-        ? (new Gazelle\Manager\InviteSource())->findSourceNameByUser($User) : null,
+        ? new Gazelle\Manager\InviteSource() : null,
     'next_class'    => $nextClass = $User->nextClass($userMan),
     'user'          => $User,
     'viewer'        => $Viewer,

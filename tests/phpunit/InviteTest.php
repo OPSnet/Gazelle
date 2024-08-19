@@ -85,6 +85,34 @@ class InviteTest extends TestCase {
         $this->assertGreaterThan(0, $inviteTree->position(), 'invite-tree-position');
     }
 
+    public function testAncestry(): void {
+        $manager = new Gazelle\Manager\Invite();
+        $userMan = new \Gazelle\Manager\User();
+
+        $this->user->setField('PermissionID', MEMBER)
+            ->setField('Invites', 1)
+            ->modify();
+        $invite = $manager->create(
+            user:   $this->user,
+            email:  randomString(10) . "@tree.example.com",
+            notes:  'phpunit tree notes',
+            reason: '',
+            source: '',
+        );
+        $this->invitee = (new \Gazelle\UserCreator())
+            ->setUsername('create.' . randomString(6))
+            ->setEmail(randomString(6) . '@example.com')
+            ->setPassword(randomString(10))
+            ->setInviteKey($invite->key())
+            ->create();
+
+        $this->assertEquals(
+            $this->user->username(),
+            $userMan->ancestry($this->invitee)[0]->username(),
+            'invite-ancestry'
+        );
+    }
+
     public function testManipulate(): void {
         $userMan = new \Gazelle\Manager\User();
         $tracker = new \Gazelle\Tracker();
