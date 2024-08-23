@@ -27,7 +27,23 @@
 // FULL CHANGELOG
 // ########################################################################
 //
+//  Updated 2024-08-22:
+//
+//  Feature:  Add styling for autocompletes to match theme, and prevent
+//    white-on-white. Section 2.6.
+//
+//  Fix: Styling and legibility improvements for tooltips.
+//
+//  Fix: Sticky headers on most tables where it's possible.
+//
+//  Formatting: Minor color adjustments to enable the above.
+//
+//  Feature:  Add new "Orpheus Haze" stylesheet, replacing Linohaze.
+//    This stylesheet includes 'haze' effects which respect are disabled for
+//    when the user/operating system requests for high-contrast.
+//
 //  Updated 2024-08-01:
+//
 //  Fix: Fixed the mobile view (media <575px) (thanks @hawkeye). Mobile
 //    menu includes an animation, handling to prevent keyboard from opening
 //    on iPh--e and other mobile devices, and a link to the home page.
@@ -41,7 +57,7 @@
 //   Chore: Rewrote color support so all colors are defined by tokens.  Colors
 //    are defined in _variables.scss (and style.scss for derivative themes).
 //
-//   Feature: all fonts now hosted locally, via _fonts_base.scss.
+//   Feature: now using system font stack.
 //
 //   Feature: New derivative theme, 'apollostage_paper' with light-mode.
 //    By design, apollostage_paper uses and includes its own font stack.
@@ -132,7 +148,8 @@
    ## 2.3.2 additional treatment for messages that pop
    ## 2.4 Upload warnings ##
    ### 2.4.1 Post-Upload Download your Torrents Message
-   ## 2.5 Toolboxes */
+   ## 2.5 Toolboxes
+   ## 2.6 Autocompletes */
 
 /* # 3 DOCUMENTATION OF MOBILE CLASSES */
 
@@ -159,9 +176,9 @@
    ### 4.13.2  Forum Table Structure
    ### 4.13.3  Forum Headers
    ## 4.14  Rules
-   ## 4.15 Reserved
-   ## 4.16 Handling for Sticky Table Headers on Mobile
-   ## 4.17 Site Header and Menu
+   ## 4.15  Friend List
+   ## 4.16  Handling for Sticky Table Headers on Mobile
+   ## 4.17  Site Header and Menu
    ### 4.17.1  Mobile Menu Setup
    ### 4.17.2  Mobile Menu Layout
    ### 4.17.3  Top Menubar
@@ -209,6 +226,8 @@ $z-mobilemenu_closed-tab: 400;
 $z-mobilemenu_closed-tab-icons: 500;
 $z-desktop-menu-open: 800;
 $z-desktop-menu-closed: 900;
+$z-sticky-table-headers: 1;
+$z-avatar-mobile: 1;
 $height-mobilemenu_closed-tab: 32px;
 $wrapper-max-width: 1020px;
 
@@ -362,11 +381,19 @@ textarea:focus {
   border-radius: 0.25rem;
 }
 
-#content > .thin,
+/* #developmentlife; #TODO additional bug checks on this. */
+/* The following overflow: hidden will be defeated when table is present;
+   sticky headers don't work inside overflow: hidden. */
+
+/* TODO: user settings page sticky 'sections box' floats & that does not work
+   with stickys and is exempted. */
+
+#content > .thin:not(:has(table)),
 .box,
 .box2,
-.main_column,
-.sidebar {
+.main_column:not(:has(table)),
+.sidebar,
+body#user .main_column {
   overflow: hidden;
 }
 
@@ -483,6 +510,9 @@ table ul.options_list {
 .colhead_dark {
   background-color: $color-background-table-row-th;
   line-height: 18px;
+  position: sticky;
+  top: 0;
+  z-index: $z-sticky-table-headers;
 }
 
 .colhead td,
@@ -519,7 +549,7 @@ form {
   background-color: $color-background-form;
 }
 form table td.label {
-  color: $color-text-footer;
+  color: $color-text-base;
   padding-top: 9px;
   font-weight: 600;
   text-align: left;
@@ -749,30 +779,6 @@ table.box2 {
 .box.pad:has(.session_table.border),
 .box.pad .session_table.border {
   overflow: scroll !important;
-}
-
-/* #2024 note: Many of these appear to be overridden by
- * global.css or auto-complete.css: your mileage may vary. */
-
-.autocomplete-suggestions {
-  background-color: $color-text-anchor;
-  border: none;
-  color: #26282e;
-  margin-top: 4px;
-}
-
-.autocomplete-suggestions .autocomplete-suggestion {
-  line-height: 24px;
-  padding: 0 8px;
-}
-
-.autocomplete-suggestions .autocomplete-suggestion.autocomplete-selected {
-  background-color: $color-accent-selection-background;
-  color: $color-accent-selection-text;
-}
-
-.autocomplete-suggestions .autocomplete-suggestion strong {
-  color: #12a1e3;
 }
 
 .forum_post.forum_unread {
@@ -1491,8 +1497,7 @@ blockquote {
 
 .filelist_table td,
 .reportinfo_table,
-.torrentdetails,
-blockquote {
+.torrentdetails {
   background-color: $color-background-blockquote;
 }
 
@@ -1659,22 +1664,22 @@ div#discog_table td.td_info:not(span.torrent_links_block) > a {
 }
 
 .tooltipster-default {
-  background-color: $color-background-base;
-  border: 0 solid $color-accent-border-tooltipster;
+  background-color: $color-background-tooltipster;
+  border: 4px solid $color-accent-border-tooltipster;
   border-radius: 2.5px;
   color: $color-text-tooltipster;
 }
 
 .tooltipster-default .tooltipster-content {
-  background-color: $color-background-base;
+  background-color: $color-background-tooltipster;
   color: $color-text-tooltipster;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.4;
   padding: 4px 6px;
 }
 
 .tooltipster-default .tooltipster-content a {
-  background-color: $color-background-base;
+  background-color: $color-background-tooltipster;
   color: $color-text-tooltipster-anchor;
   font-weight: 600;
 }
@@ -1717,31 +1722,31 @@ body#collage .cats_music {
 .cats_music {
   /* Memo: If you desire NO decoration on music uploads,
     /* turn this off. */
-  border-right: thin solid darkslategray;
+  border-right: thin solid $color-accent-cats_music;
 }
 
 .cats_applications {
-  border-right: thick solid silver;
+  border-right: thick solid $color-accent-cats_applications;
 }
 
 .cats_audiobooks {
-  border-right: thick solid cornflowerblue;
+  border-right: thick solid $color-accent-cats_audiobooks;
 }
 
 .cats_comedy {
-  border-right: thick solid deepskyblue;
+  border-right: thick solid $color-accent-cats_comedy;
 }
 
 .cats_comics {
-  border-right: thick solid gold;
+  border-right: thick solid $color-accent-cats_comics;
 }
 
 .cats_ebooks {
-  border-right: thick solid chocolate;
+  border-right: thick solid $color-accent-cats_ebooks;
 }
 
 .cats_elearningvideos {
-  border-right: thick solid mediumpurple;
+  border-right: thick solid $color-accent-cats_elearningvideos;
 }
 
 /* END category decorations for torrent tables on torrent & collage pages */
@@ -2481,6 +2486,8 @@ tr.snatched_torrent div.tags::before {
   }
 }
 
+/* ************************************************ */
+
 /* ## 2.4 Upload warnings ## */
 
 .upload-error,
@@ -2494,7 +2501,19 @@ ul#check.nobullet > * {
   background-size: 32px;
 }
 
+.upload-error a,
+ul#check.nobullet > * a {
+  color: $color-text-anchor-error !important;
+  text-decoration-line: underline;
+}
+
+.upload-error a::after,
+ul#check.nobullet > * a::after {
+  content: '↗︎';
+}
+
 .upload-error,
+.upload-error *,
 ul#check.nobullet *,
 ul#check.nobullet > * {
   color: $color-text-error !important;
@@ -2504,6 +2523,9 @@ ul#check.nobullet > * {
 
 /* We also pop a message in header to draw attention
    when any upload warning occurs inline on the page */
+/* TODO: When HTML becomes available for this message,
+   content attribute will be deleted. */
+
 .upload-error::after,
 ul#check::after {
   content: "Warning!  There were one or more errors in your submission. Check below for error messages.";
@@ -2522,10 +2544,7 @@ ul#check::after {
   background-repeat: no-repeat;
   background-position: 8px center;
   background-size: 32px;
-  box-shadow:
-    0 10px 18px rgb(0 0 0 / 55%),
-    0 7px 7px rgb(0 0 0 / 52%),
-    0 -5px 9px rgb(0 0 0 / 32%);
+  box-shadow: $ds-shadow-heavy;
 }
 
 /* ### 2.4.1 Post-Upload Download Message */
@@ -2545,6 +2564,8 @@ ul#check::after {
 //   margin: 1rem;
 //   border-radius: 2.5rem;
 // }
+
+/* ************************************************ */
 
 /* ## 2.5 Toolboxes ## */
 
@@ -2593,15 +2614,65 @@ ul#check::after {
 
 /* sticky headers ~ mobile */
 @media (max-width: $phone-screen-size) {
-  body {
-    --header-row-height: $height-mobilemenu_closed-tab;
-  }
+
+  #dnulist tr.colhead,
   .toolbox_container tr.colhead {
     position: sticky;
-    top: calc(var(--header-row-height) * 1);
+    top: $height-mobilemenu_closed-tab;
     font-size: 120%;
     font-weight: bold;
   }
+}
+
+/* ************************************************ */
+
+/* ## 2.6 Autocompletes */
+
+/* foo */
+
+/* Complete list of matches */
+.autocomplete-suggestions {
+  margin-top: 5px;
+  background: $color-background-autocompletes !important;
+  color: #888;  //does nothing
+  width: auto !important;
+  text-align: left;
+  cursor: default;
+  border: 1px solid $midtone-300; //midtone-300
+  border-top: 1px dashed $midtone-300; //midtone-300
+  box-shadow: 3px 3px 9px rgba(0, 0, 0, 0.8) !important;
+
+  /* core styles should not be changed */
+  position: absolute;
+  display: none;
+  z-index: $z-desktop-menu-open;
+  max-height: min(80vw, 254px);
+  overflow: hidden;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+/* Each match in the list of matches */
+.autocomplete-suggestions .autocomplete-suggestion {
+  cursor: pointer;
+  position: relative;
+  padding: 0 6px;
+  line-height: 1.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: $color-text-input !important; //$color-text-input
+}
+
+/* Portion that matches */
+.autocomplete-suggestions .autocomplete-suggestion strong {
+  font-weight: 400;
+  color: $color-text-autocomplete-highlight-match !important; // fore-1000
+}
+
+/* When one match is highlighted by mouse */
+.autocomplete-suggestions .autocomplete-suggestion.autocomplete-selected {
+  background-color: $color-menu-fx-selection !important;
 }
 
 /* ########################################################################
@@ -2747,7 +2818,6 @@ Documentation of mobile classes:
     order: -1;
   }
 
-  /* tired of specificity :( */
   #settings_sections {
     position: static !important;
   }
@@ -3329,7 +3399,9 @@ Documentation of mobile classes:
     min-height: 0;
     min-width: 0;
     position: absolute;
+    z-index: $z-avatar-mobile;
   }
+
   /* END forum headers */
   /* END forums */
 
@@ -3347,12 +3419,24 @@ Documentation of mobile classes:
 
   /* ************************************************ */
 
-  /* ## 4.15 reserved */
+  /* ## 4.15 friend list */
+  /* TODO: Site HTML support to mobilize this table. */
+
+  body#friends div.avatar_container img {
+    display: none;
+  }
 
   /* ************************************************ */
 
   /* ## 4.16 Handling for sticky table headers on Mobile */
-  /* Deleted and burninated */
+
+  .colhead,
+  .colhead_dark {
+    position: sticky;
+    top: $height-mobilemenu_closed-tab;
+    font-size: 120%;
+    font-weight: bold;
+  }
 
   /* ************************************************ */
 
@@ -3404,7 +3488,7 @@ Documentation of mobile classes:
   }
   /* ## 4.17.2 Mobile Menu opens on hover */
 
-  // Developers: when debugging, remove hover to force the menu open 
+  // Developers: when debugging, remove hover to force the menu open
   // keyword: x-debug
   #header:hover {
     height: clamp(200px, calc(var(--row-height) * 15), 100%);
@@ -3779,11 +3863,11 @@ Documentation of mobile classes:
 
 @media (max-width: $phone-screen-size) and (max-height: $phone-screen-size) {
   #header {
-    --row-height: 35px;
+    --row-height: 2rem;
   }
 }
 
-@media (max-width: $phone-screen-size) and (height <= 510px) {
+@media (max-width: $phone-screen-size) and (height <= calc(0.875 * $phone-screen-size)) {
   #userinfo_major,
   #userinfo_major > * {
     display: none;
@@ -3799,7 +3883,7 @@ Documentation of mobile classes:
    ######################################################################## */
 
 /* ## 6.1 Debugging Tools
-   various 'debug' and x-debug features are avail in this doc elsewhere */
+   variou 'debug' and x-debug features are avail in this doc elsewhere */
 
 #footer p:last-of-type::after {
   content: " | " + $build-slug;

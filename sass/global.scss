@@ -296,7 +296,6 @@ td.colhead_dark,
 .colhead_dark th {
   top: 0;
   position: sticky;
-  position: -webkit-sticky;
   z-index: 10;
 }
 
@@ -842,7 +841,7 @@ tr.torrent .bookmark > a::after {
 
 /* make Safari treat <input type="search" /> as a regular text box */
 input[type="search"] {
-  -webkit-appearance: textfield;
+  appearance: textfield;
   /* font-size: medium;
     background: #fff; */
 }
@@ -889,7 +888,7 @@ input[type="search"] {
   margin-right: 150px;
 }
 
-@media only screen and (min-width: 768px) {
+@media only screen and (width >= 768px) {
   .avatar_container > :last-child {
     margin-right: 150px;
   }

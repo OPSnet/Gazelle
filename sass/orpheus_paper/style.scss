@@ -15,7 +15,7 @@
 @import '../apollostage/_variables';
 
 // debug slugs: must be after import.
-$build-slug: "Orpheus Paper build 240808";
+$build-slug: $build-slug + " " + "paper";
 
 // override as follows:
 // ////////////////////////////////////////////////////////////////////////////////
@@ -34,6 +34,7 @@ $back-700: #9A9E9F;
 $back-800: #8D9091;
 $back-900: #808384;
 $back-1000: #727576;
+$back-800-low: #8D909155;
 
 // Mids
 $mid-100: #00AD89;
@@ -118,8 +119,8 @@ $ds-gray-99: hsl(120deg 100% 99.6%);
 // DEFINE FROM LOGICAL LAYOUT TO TOKENS
 
 $color-background-base: $back-100;
-$color-background-blockquote: $back-400;
-$color-background-box: $back-500;
+$color-background-blockquote: $back-800-low;
+$color-background-box: $back-800-low;
 $color-background-form: $back-200; // also boxes on frontpage
 $color-background-input: $back-400;
 $color-background-input-active: $back-500;
@@ -131,14 +132,17 @@ $color-background-searchbars-field-focus: $back-100;
 $color-background-searchbars-surround: $back-500;
 $color-background-table: $back-200; // tables/forms without odd-even treatment
 $color-background-table-discog: $mid-300; // navigation row ~ "jump down to.."
-$color-background-table-row-th: $back-500;
-$color-background-table-row-odd: $back-300;
-$color-background-table-row-even: $back-200;
+$color-background-table-row-th: $back-700;
+$color-background-table-row-odd: $back-500;
+$color-background-table-row-even: $back-300;
 $color-background-table-keyrows: $mid-300; // navigation row ~ "jump up to.."
 $color-background-table-torrenttable: $back-300; // also form field in focus
+$color-background-table-details: $back-400; // equal to blockquote
 $color-background-table-torrents-group: $back-600;
+$color-background-tooltipster: $back-100;
 $color-background-torrent: $mid-200; // edition in group-list
 $color-background-fx-unread: $ds-fx-blue;
+
 $color-text-anchor-hover: $blue-800;
 $color-text-anchor: $blue-700;
 $color-text-base: $neutral-1000;
@@ -165,9 +169,10 @@ $color-text-span-blue: hsl(235deg 90% 55%); //x lower
 $color-text-span-green: hsl(145deg 90% 35%); //x lower
 $color-text-span-red: $ds-red;
 $color-text-table-discog-titles: $fore-300;
-$color-text-tooltipster: $fore-400;
+$color-text-tooltipster: $fore-700;
 $color-text-tooltipster-anchor: $fore-900;
-$color-text-tooltipster-anchor-hover: $fore-200;
+$color-text-tooltipster-anchor-hover: $fore-800;
+
 $color-menu-1: orangered; // unused (could be home)
 $color-menu-2: $menutheme-100; // torrents
 $color-menu-3: $menutheme-200; // collages
@@ -196,6 +201,13 @@ $color-obj-tag_bubble-background: $mid-200; // menu-2 suggested
 $color-obj-tag_bubble-foreground: $mid-900; // menu-9 suggested
 $color-obj-tag_bubble_snatched-background: $back-600;
 $color-obj-tag_bubble_snatched-foreground: $fore-800;
+
+// Autocompletes
+$color-background-autocompletes: $color-background-searchbars;
+$color-accent-border-autocompletes: $midtone-300;
+$color-text-autocomplete: $color-text-input;
+$color-text-autocomplete-highlight-match: $fore-1000;
+
 $color-accent-border-blockquote: $back-900; // Dotted
 $color-accent-border-box: $back-900;
 $color-accent-border-input: $ds-fx-low;

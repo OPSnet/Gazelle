@@ -29,6 +29,7 @@ $back-700: #443B3A;
 $back-800: #4A3E3C;
 $back-900: #51413F;
 $back-1000: #574340;
+$back-500-low: rgba(140.7, 125.3, 112, 0.15);
 
 // Mids
 $midtone-100: #3D2C29;
@@ -69,8 +70,8 @@ $ds-rawsienna: #C98258;
 // DEFINE FROM LOGICAL LAYOUT TO TOKENS
 
 $color-background-base: $back-100;
-$color-background-blockquote: $back-400;
-$color-background-box: $back-500;
+$color-background-blockquote: $back-500-low;
+$color-background-box: $back-500-low;
 $color-background-form: $back-200; // also boxes on frontpage
 $color-background-input: $back-400;
 $color-background-input-active: $back-500;
@@ -79,12 +80,14 @@ $color-background-searchbars: $back-300;
 $color-background-searchbars-field-focus: $back-100;
 $color-background-searchbars-surround: $back-500;
 $color-background-table: $back-200; // tables/forms without odd-even treatment
-$color-background-table-row-th: $back-500;
-$color-background-table-row-odd: $back-300;
-$color-background-table-row-even: $back-200;
+$color-background-table-row-th: $back-700;
+$color-background-table-row-odd: $back-500;
+$color-background-table-row-even: $back-300;
 $color-background-table-secondary: orangered; // no longer used
 $color-background-table-torrenttable: $back-300; // also form field in focus
+$color-background-table-details: $back-400; // equal to blockquote
 $color-background-table-torrents-group: $back-600;
+$color-background-tooltipster: $back-100;
 $color-background-torrent: $midtone-200; // edition in group-list
 $color-background-table-discog: $midtone-300; // navigation row ~ "jump down to.."
 $color-background-table-keyrows: $midtone-300; // navigation row ~ "jump up to.."
@@ -136,9 +139,9 @@ $color-text-span-blue: hsl(235deg 90% 85%);
 $color-text-span-green: hsl(145deg 90% 70%);
 $color-text-span-red: $ds-red;
 $color-text-table-discog-titles: $midtone-900;
-$color-text-tooltipster: $midtone-600;
-$color-text-tooltipster-anchor: $midtone-800;
-$color-text-tooltipster-anchor-hover: $midtone-1000;
+$color-text-tooltipster: $fore-700;
+$color-text-tooltipster-anchor: $fore-900;
+$color-text-tooltipster-anchor-hover: $fore-800;
 $color-obj-button-base-1: $ds-gray-62;
 $color-obj-button-base-2: $ds-gray-92;
 $color-obj-poll: $midtone-900; // poll active part of bargraph
@@ -147,11 +150,18 @@ $color-obj-tag_bubble-background: $midtone-700; // changed
 $color-obj-tag_bubble-foreground: $fore-600; // changed
 $color-obj-tag_bubble_snatched-background: $back-600;
 $color-obj-tag_bubble_snatched-foreground: $fore-800;
+
+// Autocompletes
+$color-background-autocompletes: $color-background-searchbars;
+$color-accent-border-autocompletes: $midtone-300;
+$color-text-autocomplete: $color-text-input;
+$color-text-autocomplete-highlight-match: $fore-1000;
+
 $color-accent-border-blockquote: $back-900; // Dotted
 $color-accent-border-box: $back-900;
 $color-accent-border-input: $ds-fx-low;
 $color-accent-border-input-active: $ds-fx-mid;
-$color-accent-border-tooltipster: $midtone-800;
+$color-accent-border-tooltipster: $fore-500;
 $color-accent-border-popup: $midtone-800;
 $color-accent-border-tableouter: $back-600-mid;
 $color-accent-border-tablerows: $back-600-low;

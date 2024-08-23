@@ -4,7 +4,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // SLUG
 
-$build-slug: "Apollostage build 240808"; // must include quotes
+$build-slug: "Apollostage build 240906"; // must include quotes
 
 // ////////////////////////////////////////////////////////////////////////////////
 // COLORS
@@ -22,6 +22,7 @@ $back-700: #324041;
 $back-800: #384749;
 $back-900: #3c4d50;
 $back-1000: #405256;
+$back-500-low: rgba(110.7, 149, 169, 0.15);
 $back-600-low: #2d393a54;
 $back-600-mid: #2d393a88;
 
@@ -83,8 +84,8 @@ $ds-black: #000;
 // DEFINE FROM LOGICAL LAYOUT TO TOKENS
 
 $color-background-base: $back-100;
-$color-background-blockquote: $back-400;
-$color-background-box: $back-500;
+$color-background-blockquote: $back-500-low;
+$color-background-box: $back-500-low;
 $color-background-form: $back-200; // also boxes on frontpage
 $color-background-input: $back-400;
 $color-background-input-active: $back-500;
@@ -93,11 +94,13 @@ $color-background-searchbars: $back-300;
 $color-background-searchbars-field-focus: $back-100;
 $color-background-searchbars-surround: $back-500;
 $color-background-table: $back-200; // tables/forms without odd-even treatment
-$color-background-table-row-th: $back-500;
-$color-background-table-row-odd: $back-300;
-$color-background-table-row-even: $back-200;
+$color-background-table-details: $back-400; // equal to blockquote
+$color-background-table-row-th: $back-700;
+$color-background-table-row-odd: $back-500;
+$color-background-table-row-even: $back-300;
 $color-background-table-torrenttable: $back-300; // also form field in focus
 $color-background-table-torrents-group: $back-600;
+$color-background-tooltipster: $back-100;
 $color-background-fx-unread: $ds-fx-mid;
 $color-background-torrent: $midtone-200; // edition in group-list
 $color-background-table-discog: $midtone-300; // navigation row ~ "jump down to.."
@@ -147,9 +150,9 @@ $color-text-span-blue: hsl(235deg 90% 85%);
 $color-text-span-green: hsl(145deg 90% 70%);
 $color-text-span-red: $ds-red;
 $color-text-table-discog-titles: $midtone-900;
-$color-text-tooltipster: $midtone-600;
-$color-text-tooltipster-anchor: $midtone-800;
-$color-text-tooltipster-anchor-hover: $midtone-1000;
+$color-text-tooltipster: $fore-700;
+$color-text-tooltipster-anchor: $fore-900;
+$color-text-tooltipster-anchor-hover: $fore-800;
 
 // popup notifications
 $color-background-notification-gradient-1: $midtone-1000; // menu low/high suggested
@@ -169,6 +172,13 @@ $color-obj-tag_bubble-background: $midtone-200; // menu-2 suggested
 $color-obj-tag_bubble-foreground: $midtone-900; // menu-9 suggested
 $color-obj-tag_bubble_snatched-background: $back-600;
 $color-obj-tag_bubble_snatched-foreground: $fore-800;
+
+// Autocompletes
+$color-background-autocompletes: $color-background-searchbars;
+$color-accent-border-autocompletes: $midtone-300;
+$color-text-autocomplete: $color-text-input;
+$color-text-autocomplete-highlight-match: $fore-1000;
+
 $color-accent-border-blockquote: $back-900; // Dotted
 $color-accent-border-box: $back-900;
 $color-accent-border-input: $ds-fx-low;
@@ -196,6 +206,7 @@ $color-accent-border-alert: $midtone-500;
 $color-background-alert: $midtone-100;
 $color-text-alert: $fore-700;
 $color-anchor-alert: $fore-1000;
+
 $ds-shadow-heavy:
   0 10px 18px rgb(0 0 0 / 55%),
   0 7px 7px rgb(0 0 0 / 52%),
@@ -206,9 +217,12 @@ $ds-shadow-raised:
 $ds-shadow-raised-hover:
   0 14px 28px rgb(0 0 0 / 25%),
   0 10px 10px rgb(0 0 0 / 22%);
+
 $color-accent-border-error: $ds-goldenrod;
 $color-background-error: $ds-gray-92;
 $color-text-error: $ds-black;
+$color-text-anchor-error: $ds-red;
+
 $color-accent-border-warning-1: hsl(348deg 99% 77%);
 $color-accent-border-warning-2: hsl(348deg 84% 51%);
 $color-background-warning: #633;
