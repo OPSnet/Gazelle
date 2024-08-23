@@ -2,8 +2,9 @@
 
 """
 # This is a development tool to see the colors in a stylesheet, via HTML in the browser.
+# Works best on SCSS files or any textfile that defines colors.
 # Typical Usage: 
-#    python view-palette _variables.css
+#    python view-palette _variables.scss
 # Copy and paste:
 #    python view-palette ../Gazelle-repo/sass/apollostage/_variables.scss
 #    python view-palette ../Gazelle-repo/sass/apollostage_paper/style.scss

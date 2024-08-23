@@ -18,13 +18,18 @@ $build-slug: $build-slug + " " + "sunset";
 
 // physical_layout -> token, and token -> raw value.
 
-// Backgrounds -- 100-600 are used
-$back-100: #19181A;
-$back-200: #2A242C;
-$back-300: #342A33;
-$back-400: #3B2F36;
-$back-500: #423438;
-$back-600: #493B3D;
+// Backgrounds -- not all are used;
+$back-100: #1E1D1F;
+$back-200: #252026;
+$back-300: #2E232D;
+$back-400: #352930;
+$back-500: #3C2F33;
+$back-600: #433437;
+$back-700: #4A3A3F;
+$back-800: #514048;
+$back-900: #594653;
+$back-1000: #5B4B60;
+
 $fore-400: #8D869D;
 $fore-500: #A595AF;
 $fore-600: #BCA5BE;
@@ -80,11 +85,12 @@ $color-background-searchbars: $back-300;
 $color-background-searchbars-field-focus: $back-100;
 $color-background-searchbars-surround: $back-500;
 $color-background-table: $back-200; // tables/forms without odd-even treatment
-$color-background-table-row-th: $back-500;
+$color-background-table-row-th: $back-700;
 $color-background-table-row-odd: $back-300;
 $color-background-table-row-even: $back-200;
 $color-background-table-torrenttable: $back-300; // also form field in focus
 $color-background-table-torrents-group: $back-600;
+$color-background-tooltipster: $back-100;
 $color-background-torrent: $midtone-200; // edition in group-list
 $color-background-table-discog: $midtone-300; // navigation row ~ "jump down to.."
 $color-background-table-keyrows: $midtone-300; // navigation row ~ "jump up to.."
@@ -136,9 +142,10 @@ $color-text-span-blue: hsl(235deg 90% 85%);
 $color-text-span-green: hsl(145deg 90% 70%);
 $color-text-span-red: $ds-red;
 $color-text-table-discog-titles: $midtone-900;
-$color-text-tooltipster: $midtone-600;
-$color-text-tooltipster-anchor: $midtone-800;
-$color-text-tooltipster-anchor-hover: $midtone-1000;
+$color-text-tooltipster: $fore-700;
+$color-text-tooltipster-anchor: $fore-900;
+$color-text-tooltipster-anchor-hover: $fore-800;
+
 $color-obj-button-base-1: $ds-gray-62;
 $color-obj-button-base-2: $ds-gray-92;
 $color-obj-poll: $midtone-900; // poll active part of bargraph
@@ -147,6 +154,12 @@ $color-obj-tag_bubble-background: $midtone-200; // menu-2 suggested
 $color-obj-tag_bubble-foreground: $midtone-900; // menu-9 suggested
 $color-obj-tag_bubble_snatched-background: $back-600;
 $color-obj-tag_bubble_snatched-foreground: $midtone-1000; // Changed for sunset
+
+// Autocompletes
+$color-background-autocompletes: $color-background-searchbars;
+$color-accent-border-autocompletes: $midtone-300;
+$color-text-autocomplete: $color-text-input;
+$color-text-autocomplete-highlight-match: $fore-1000;
 
 $color-accent-border-blockquote: $back-900; // Dotted
 $color-accent-border-box: $back-900;

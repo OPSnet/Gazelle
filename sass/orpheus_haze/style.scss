@@ -1,20 +1,20 @@
 /* ########################################################################
-   APOLLOSTAGE COFFEE THEME
+   ORPHEUS HAZE THEME
    ######################################################################## */
 
 // ////////////////////////////////////////////////////////////////////////////////
 // SLUG/SETUP
 
 // import basic colors as a backup:
-@import '../apollostage/_variables';
+@import "../apollostage/_variables";
 
 // debug slugs: must be after import.
-$build-slug: $build-slug + " " + "coffee";
+$build-slug: $build-slug + " " + "240822a haze";
 
 // and override as follows:
 
 // ////////////////////////////////////////////////////////////////////////////////
-// COLORS
+// COLOR TOKENS
 
 // physical_layout -> token, and token -> raw value.
 
@@ -25,47 +25,53 @@ $back-300: #272423;
 $back-400: #2d2928;
 $back-500: #322e2c;
 $back-600: #3e3837;
-$back-700: #443B3A;
-$back-800: #4A3E3C;
-$back-900: #51413F;
+$back-700: #443b3a;
+$back-800: #4a3e3c;
+$back-900: #51413f;
 $back-1000: #574340;
 
 // Mids
-$midtone-100: #3D2C29;
-$midtone-200: #45322E;
-$midtone-300: #4E3833;
-$midtone-400: #563E37;
-$midtone-500: #5F443B;
-$midtone-600: #674A3F;
-$midtone-700: #6F5042;
-$midtone-800: #785746;
-$midtone-900: #805D49;
-$midtone-1000: #89644C;
+$midtone-100: #444342;
+$midtone-200: #4d4c4c;
+$midtone-300: #575555;
+$midtone-400: #615f5e;
+$midtone-500: #6a6867;
+$midtone-600: #747171;
+$midtone-700: #7e7b7a;
+$midtone-800: #888483;
+$midtone-900: #918d8c;
+$midtone-1000: #9b9695;
 
-// coffee theme runs runs from lighter to darker, for style reasons
-$menutheme-100: #89644C;
-$menutheme-200: #805D49;
-$menutheme-300: #785746;
-$menutheme-400: #6F5042;
-$menutheme-500: #674A3F;
-$menutheme-600: #5F443B;
-$menutheme-700: #563E37;
-$menutheme-800: #4E3833;
-$menutheme-900: #45322E;
-$menutheme-1000: #3D2C29;
+// haze theme is darker than spinal tap listening to jay-z with metallica
+$menutheme-100: #101313;
+$menutheme-200: #101313;
+$menutheme-300: #101313;
+$menutheme-400: #101313;
+$menutheme-500: #101313;
+$menutheme-600: #101313;
+$menutheme-700: #101313;
+$menutheme-800: #101313;
+$menutheme-900: #101313;
+$menutheme-1000: #101313;
 
 // Foregrounds -- 400-1000 are used
-$fore-400: #A47A5A;
-$fore-500: #B38D6F;
-$fore-600: #C2A285;
-$fore-700: #D1B89E;
-$fore-800: #E0CDB8;
-$fore-900: #EFE3D5;
-$fore-1000: #FFFCF6;
+$fore-400: #313333;
+$fore-500: #4e5253;
+$fore-600: #6b7173;
+$fore-700: #879092;
+$fore-800: #a6afb2;
+$fore-900: #c7cfd2;
+$fore-1000: #f2f9fc;
 
 // direct-specialty
-$ds-rawsienna: #C98258;
+$ds-bone-83: #e3dac9;
+$ds-haze-gold-12: hsl(45, 13%, 12%);
+$ds-haze-gold-40: hsl(51, 100%, 40%);
+$ds-haze-gold-fx-44: hsla(67, 18%, 55%, 0.44);
+$ds-haze-gold-fx-80: hsla(58, 24%, 67%, 0.8);
+$ds-haze-gold-pattern: url("data:image/svg+xml,%3Csvg id='patternId' width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='a' patternUnits='userSpaceOnUse' width='70' height='8' patternTransform='scale(1) rotate(0)'%3E%3Crect x='0' y='0' width='100%25' height='100%25' fill='hsla(0,0%25,100%25,0)'/%3E%3Cpath d='M-.02 22c8.373 0 11.938-4.695 16.32-9.662C20.785 7.258 25.728 2 35 2c9.272 0 14.215 5.258 18.7 10.338C58.082 17.305 61.647 22 70.02 22M-.02 14.002C8.353 14 11.918 9.306 16.3 4.339 20.785-.742 25.728-6 35-6 44.272-6 49.215-.742 53.7 4.339c4.382 4.967 7.947 9.661 16.32 9.664M70 6.004c-8.373-.001-11.918-4.698-16.3-9.665C49.215-8.742 44.272-14 35-14c-9.272 0-14.215 5.258-18.7 10.339C11.918 1.306 8.353 6-.02 6.002' stroke-width='1' stroke='hsla(33, 15%25, 35%25, 0.25)' fill='none'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='800%25' height='800%25' transform='translate(0,0)' fill='url(%23a)'/%3E%3C/svg%3E");
 
+// ////////////////////////////////////////////////////////////////////////////////
 // DEFINE FROM LOGICAL LAYOUT TO TOKENS
 
 $color-background-base: $back-100;
@@ -75,7 +81,7 @@ $color-background-form: $back-200; // also boxes on frontpage
 $color-background-input: $back-400;
 $color-background-input-active: $back-500;
 $color-background-poll: $back-500;
-$color-background-searchbars: $back-300;
+$color-background-searchbars: $menutheme-100; //changed for tap
 $color-background-searchbars-field-focus: $back-100;
 $color-background-searchbars-surround: $back-500;
 $color-background-table: $back-200; // tables/forms without odd-even treatment
@@ -113,11 +119,11 @@ $color-mobilemenu-closed-overlays: $menutheme-100; // bg for icons on the hedaer
 
 $color-text-anchor-hover: $midtone-1000;
 $color-text-anchor: $fore-1000;
-$color-text-base: $fore-700;
+$color-text-base: $fore-800;
 $color-text-bold: $fore-800;
 $color-text-button: $ds-gray-05;
 $color-text-footer: $ds-neutral-300;
-$color-text-heading-anchor: $fore-400; //uniqueue
+$color-text-heading-anchor: $fore-1000; //uniqueue
 $color-text-heading: $fore-700;
 $color-text-important-alt: $ds-green;
 $color-text-important: $ds-red;
@@ -126,10 +132,10 @@ $color-text-input-active: $fore-900;
 $color-text-linkbox: $midtone-800; // links in linkbox
 $color-text-menu: $fore-1000;
 $color-text-menu-hover: $fore-700; // during pulldown // changed
-$color-text-mono: $fore-500;
+$color-text-mono: $fore-700;
 $color-text-popup-anchor-hover: $midtone-1000;
-$color-text-popup-anchor: $fore-900;
-$color-text-popup: $fore-700;
+$color-text-popup-anchor: $fore-500;
+$color-text-popup: $fore-400; // white background
 $color-text-ratio-greenzone: $ds-green;
 $color-text-ratio-redzone: $ds-red;
 $color-text-ratio-yellowzone: $ds-yellow;
@@ -140,16 +146,18 @@ $color-text-table-discog-titles: $midtone-900;
 $color-text-tooltipster: $fore-700;
 $color-text-tooltipster-anchor: $fore-900;
 $color-text-tooltipster-anchor-hover: $fore-800;
+
 $color-obj-button-base-1: $ds-gray-62;
 $color-obj-button-base-2: $ds-gray-92;
 $color-obj-poll: $midtone-900; // poll active part of bargraph
 
-$color-obj-tag_bubble-background: $midtone-700; // changed
-$color-obj-tag_bubble-foreground: $fore-600; // changed
-$color-obj-tag_bubble_snatched-background: $back-600;
-$color-obj-tag_bubble_snatched-foreground: $fore-800;
+$color-obj-tag_bubble-background: $midtone-200; // changed
+$color-obj-tag_bubble-foreground: $midtone-1000; // changed
+$color-obj-tag_bubble_snatched-background: $midtone-1000;
+$color-obj-tag_bubble_snatched-foreground: $midtone-200;
 
 // Autocompletes
+
 $color-background-autocompletes: $color-background-searchbars;
 $color-accent-border-autocompletes: $midtone-300;
 $color-text-autocomplete: $color-text-input;
@@ -159,7 +167,7 @@ $color-accent-border-blockquote: $back-900; // Dotted
 $color-accent-border-box: $back-900;
 $color-accent-border-input: $ds-fx-low;
 $color-accent-border-input-active: $ds-fx-mid;
-$color-accent-border-tooltipster: $fore-500;
+$color-accent-border-tooltipster: $midtone-800;
 $color-accent-border-popup: $midtone-800;
 $color-accent-border-tableouter: $back-600-mid;
 $color-accent-border-tablerows: $back-600-low;
@@ -167,22 +175,22 @@ $color-accent-border-tablerows-torrent: $back-600-mid;
 $color-accent-shadow-menutext: initial; // provisioned for derivative themes
 
 $color-accent-cats_applications: silver;
-$color-accent-cats_audiobooks: cornflowerblue;
-$color-accent-cats_comedy: deepskyblue;
-$color-accent-cats_comics: gold;
-$color-accent-cats_ebooks: chocolate;
-$color-accent-cats_elearningvideos: mediumpurple;
-$color-accent-cats_music: darkslategray;
-$color-accent-forum-inline-last-read: $ds-rawsienna; // changed
-$color-accent-forum-unread: $ds-rawsienna; // changed
+$color-accent-cats_audiobooks: #3e4042;
+$color-accent-cats_comedy: #046; //blue
+$color-accent-cats_comics: #999060; //gold
+$color-accent-cats_ebooks: #523e2c;
+$color-accent-cats_elearningvideos: #483d4d;
+$color-accent-cats_music: #1f2829;
+$color-accent-forum-inline-last-read: $ds-bone-83; // changed
+$color-accent-forum-unread: $ds-bone-83; // changed
 
-$color-accent-selection-background: $midtone-800;
-$color-accent-selection-text: $fore-700; // usually #fff or $color-text-bold
+$color-accent-selection-background: $midtone-900;
+$color-accent-selection-text: $menutheme-100; // usually #fff or $color-text-bold
 
 // popup notifications
 $color-background-notification-gradient-1: $midtone-400; // menu low/high suggested
-$color-background-notification-gradient-2: $midtone-1000;  // menu high/low suggested
-$color-background-notification: $ds-neutral-000;
+$color-background-notification-gradient-2: $midtone-700; // menu high/low suggested
+$color-background-notification: $midtone-500;
 $color-text-notification-words: $fore-1000;
 
 // alerts
@@ -190,12 +198,71 @@ $color-accent-border-alert: $midtone-500;
 $color-background-alert: $midtone-100;
 $color-text-alert: $fore-700;
 $color-anchor-alert: $fore-1000;
-$ds-shadow-heavy: 0 10px 18px rgb(0 0 0 / 55%), 0 7px 7px rgb(0 0 0 / 52%), 0 -5px 9px rgb(0 0 0 / 32%);
+$ds-shadow-heavy: 0 10px 18px rgb(0 0 0 / 55%), 0 7px 7px rgb(0 0 0 / 52%),
+  0 -5px 9px rgb(0 0 0 / 32%);
 $ds-shadow-raised: 0 10px 18px rgb(0 0 0 / 25%), 0 7px 7px rgb(0 0 0 / 22%);
-$ds-shadow-raised-hover: 0 14px 28px rgb(0 0 0 / 25%), 0 10px 10px rgb(0 0 0 / 22%);
+$ds-shadow-raised-hover: 0 14px 28px rgb(0 0 0 / 25%),
+  0 10px 10px rgb(0 0 0 / 22%);
 $icon-menu-open-state: url("/svg/std/menu-ccc.svg"); // change to lighter version
 
-@import '../apollostage/_base';
+// ////////////////////////////////////////////////////////////////////////////////
+// WITH ALL VARIABLES SET, NOW IMPORT THE BASE CODE
+
+@import "../apollostage/_base";
+
+// ////////////////////////////////////////////////////////////////////////////////
+// CUSTOM OVERRIDES
+
+/*  Custom Override for 1.8.1 Menu Handling */
+
+/*  Active Tab */
+html body div#wrapper div#header div#menu ul li.active a {
+  background-color: $ds-haze-gold-12;
+  background-image: $ds-haze-gold-pattern;
+  border-bottom: solid thick $ds-haze-gold-40; /* fallback */
+  border-image-slice: 1;
+  border-width: 5px;
+  border-image-source: linear-gradient(to left, $ds-haze-gold-fx-44, $ds-haze-gold-fx-80);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+}
+
+/*  #################################################### */
+
+/*  Custom Override for 1.10 Notifications */
+
+/*  Only for desktop, and respect user preference */
+@media only screen and (min-width: 575px) and (prefers-contrast: no-preference) {
+  /* Provide Haze Effect */
+  #noty_bottomRight_layout_container li {
+    box-shadow: unset !important;
+    background: unset !important;
+    box-shadow:
+      2.3px 2.3px 1.9px rgba(0, 0, 0, 0.1),
+      9.7px 9.7px 7.7px rgba(0, 0, 0, 0.15),
+      26.5px 26.5px 21.2px rgba(0, 0, 0, 0.2),
+      100px 100px 80px rgba(0, 0, 0, 0.33) !important;
+    backdrop-filter: blur(2.75px);
+    /* 2024 status */
+    -webkit-backdrop-filter: blur(2.75px);
+  }
+
+  /* first row of each box */
+  #noty_bottomRight_layout_container .noty_message {
+    background:
+      radial-gradient(
+        circle at top right,
+        rgba(126, 123, 122, 0.23),
+        rgba(155, 150, 149, 0.23)
+      ) !important;
+  }
+
+  /* second row of each box */
+  #noty_bottomRight_layout_container .noty_buttons {
+    background-color: rgba(97, 95, 94, 0.42) !important;
+  }
+}
 
 // EOF
 // ////////////////////////////////////////////////////////////////////////////////
