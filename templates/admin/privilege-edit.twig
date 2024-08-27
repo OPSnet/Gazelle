@@ -33,12 +33,19 @@
         <tr>
             <td class="label">Show on staff page</td>
             <td>
+{% for id, group in group_list %}
+{%  if loop.first %}
                 <input type="checkbox" name="displaystaff" value="1"{{ checked(privilege.displayStaff) }} />
                 in <select name="staffgroup" id="staffgroup">
-{% for id, name in group_list %}
-                    <option value="{{ id }}"{{ selected(id == privilege.staffGroupId) }}>{{ name }}</option>
+{%  endif %}
+                    <option value="{{ id }}"{{ selected(id == privilege.staffGroupId) }}>{{ group.name }}</option>
+{%  if loop.last %}
+                </select> group.
+{%  endif %}
+{% else %}
+                There are no staff groups defined.
 {% endfor %}
-                </select>
+                <br /><a class="brackets" href="/tools.php?action=staff_groups">Manage staff groups</a>
             </td>
         </tr>
         <tr>
