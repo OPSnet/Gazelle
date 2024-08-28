@@ -224,5 +224,7 @@ class StaffPMTest extends TestCase {
 
         $this->assertEquals(1, $this->spMan->removeCommonAnswer($second), 'spm-common-remove');
         $this->assertCount($initial + 2, $this->spMan->commonAnswerList(), 'spm-common-list');
+
+        $this->assertEquals(1, $this->spMan->removeCommonAnswer($third), 'spm-common-tidy');
     }
 }

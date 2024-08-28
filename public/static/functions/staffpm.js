@@ -38,22 +38,15 @@ function SaveMessage(id) {
     );
 }
 
-function DeleteMessage(id) {
-    const div = '#response_' + id;
-    const ajax_message = 'ajax_message_' + id;
-
-    let ToPost = [];
-    ToPost['id'] = id;
-
-    ajax.post("?action=delete_response", ToPost, function (data) {
-        $(div).ghide();
-        if (data == '1') {
-            document.getElementById(ajax_message).textContent = 'Response successfully deleted.';
-        } else {
-            document.getElementById(ajax_message).textContent = 'Something went wrong.';
-        }
-        $('#'+ajax_message).gshow();
-        setTimeout("$('#" + ajax_message + "').ghide()", 2000);
+function DeleteMessage(id, auth) {
+    ajax.post("?action=delete_response", {'id': id, 'auth': auth}, function (data) {
+        document.getElementById('response_' + id).classList.add('hidden');
+        let ajax_message = document.getElementById('ajax_message_' + id);
+        ajax_message.textContent = (data == '1') 
+            ? 'Response successfully deleted.'
+            : 'Something went wrong.';
+        ajax_message.classList.remove('hidden');
+        setTimeout(() => { ajax_message.classList.add('hidden'); }, 2000);
     });
 }
 

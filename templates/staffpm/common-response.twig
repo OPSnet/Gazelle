@@ -42,7 +42,7 @@
                         rows="10" cols="87"
                         id="response_message_0">New message</textarea>
                     <br />
-                    <input type="button" value="Save" id="save_0" onclick="SaveMessage(0);" />
+                    <input type="button" value="Save" id="save_0" onclick="SaveMessage(0)" />
                 </div>
             </form>
         </div>
@@ -68,9 +68,9 @@
                     </div>
                     <textarea rows="10" cols="87" id="response_message_{{ answer.id }}" name="message">{{ answer.message }}</textarea>
                     <br />
-                    <input type="button" value="Toggle preview" onclick="PreviewResponse({{ answer.id }});" />
-                    <input type="button" value="Delete" onclick="DeleteMessage({{ answer.id }});" />
-                    <input type="button" value="Save" id="save_{{ answer.id }}" onclick="SaveMessage({{ answer.id }});" />
+                    <input type="button" value="Toggle preview" onclick="PreviewResponse({{ answer.id }})" />
+                    <input type="button" value="Delete" onclick="DeleteMessage({{ answer.id }}, '{{ viewer.auth }}')" />
+                    <input type="button" value="Save" id="save_{{ answer.id }}" onclick="SaveMessage({{ answer.id }})" />
                 </div>
             </form>
         </div>
