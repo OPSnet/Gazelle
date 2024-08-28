@@ -1,12 +1,12 @@
 (function() {
-    var ids = Array();
+    let ids = Array();
     document.addEventListener('DOMContentLoaded', function() {
         $("input[id^=check_all]").click(function() {
             // Check or uncheck all requests
-            var checked = ($(this).attr('checked') == 'checked') ? true : false;
+            const checked = ($(this).attr('checked') == 'checked') ? true : false;
             $("input[id^=multi]").each(function() {
                 $(this).attr('checked', checked);
-                var id = $(this).data('id');
+                const id = $(this).data('id');
                 if (checked && $.inArray(id, ids) == -1) {
                     ids.push(id);
                 } else if (!checked && $.inArray(id, ids) != -1) {
@@ -18,8 +18,8 @@
         });
         $("input[id^=multi]").click(function() {
             // Put the ID in the array if checked, or removed if unchecked
-            var checked = ($(this).attr('checked') == 'checked') ? true : false;
-            var id = $(this).data('id');
+            const checked = ($(this).attr('checked') == 'checked') ? true : false;
+            const id = $(this).data('id');
             if (checked && $.inArray(id, ids) == -1) {
                 ids.push(id);
             } else if (!checked && $.inArray(id, ids) != -1) {
@@ -32,11 +32,13 @@
             if ($(this).val() != 'Discard' && !confirm('Are you sure you wish to do this? This cannot be undone!')) {
                 return false;
             }
-            var id = $(this).data('id');
+            const id = $(this).data('id');
+            let resolveIDs;
+            let comment;
             if (id !== undefined) {
                 // Only resolving one row
                 resolveIDs = [id];
-                var comment = $("input[id^=comment" + id + "]").val();
+                comment = $("input[id^=comment" + id + "]").val();
             } else {
                 resolveIDs = ids;
                 comment = '';
@@ -54,7 +56,7 @@
                 }
             }).done(function(response) {
                 if (response['status'] == 'success') {
-                    for (var i = 0; i < resolveIDs.length; i++) {
+                    for (let i = 0; i < resolveIDs.length; i++) {
                         $("#row_" + resolveIDs[i]).remove();
                     }
                 } else {
@@ -63,7 +65,7 @@
             });
         });
         $("a[id^=unresolve]").click(function() {
-            var id = $(this).data('id');
+            const id = $(this).data('id');
             if (id !== undefined) {
                 $.ajax({
                     type: "GET",
@@ -87,7 +89,7 @@
 })();
 
 function ChangeDateSearch(rangeVariable, dateTwoID) {
-    var fullID = "#" + dateTwoID;
+    let fullID = "#" + dateTwoID;
     if (rangeVariable === 'between') {
         $(fullID).show();
     } else {

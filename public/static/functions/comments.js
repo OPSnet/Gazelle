@@ -1,6 +1,7 @@
 function QuoteJump(event, post) {
-    var button = event.button;
-    var url, pattern;
+    const button  = event.button;
+    let url     = '';
+    let pattern = '';
     if (isNaN(post.charAt(0))) {
         switch (post.charAt(0)) {
             case 'a': // artist comment
@@ -26,7 +27,7 @@ function QuoteJump(event, post) {
         url = 'forums.php?action=viewthread&postid=' + post;
         pattern = /forums\.php/;
     }
-    var hash = "#post" + post;
+    let hash = "#post" + post;
     if (button == 0) {
         if ($(hash).raw() != null && location.href.match(pattern)) {
             window.location.hash = hash;
@@ -43,9 +44,9 @@ function Quote(post, user, link = false) {
     const postid = post;
     const url = new gazURL();
 
-    var target = '';
-    var requrl = '';
-    var elem = 'post';
+    let target = '';
+    let requrl = '';
+    let elem = 'post';
     if (url.path == "inbox") {
         requrl = 'inbox.php?action=get_post&post=' + post;
         elem = 'message';
@@ -119,12 +120,11 @@ function edit_post(id) {
     const postid = id.substr(id.indexOf('-') + 1); // edit-1234 and #edit-1234 seen in the wild, want 1234
     const is_forum = location.href.match(/forums\.php/);
 
-    var boxWidth, inputname, pmbox;
     // If no edit is already underway or a previous edit was finished, make the necessary dom changes.
     if (!$('#editbox' + postid).results() || $('#editbox' + postid + '.hidden').results()) {
         $('#reply_box').ghide();
-        boxWidth = location.href.match(/(artist|torrents)\.php/) ? "50" : "80";
-        inputname = is_forum ? "post" : "postid";
+        const boxWidth = location.href.match(/(artist|torrents)\.php/) ? "50" : "80";
+        const inputname = is_forum ? "post" : "postid";
         pmbox = (postuserid != userid)
             ? '<span id="pmbox' + postid + '"><label>PM user on edit? <input type="checkbox" name="pm" value="1" /></label></span>'
             : '';
@@ -149,7 +149,7 @@ function edit_post(id) {
 }
 
 function Cancel_Edit(postid) {
-    var answer = confirm("Are you sure you want to cancel?");
+    const answer = confirm("Are you sure you want to cancel?");
     if (answer) {
         $('#reply_box').gshow();
         $('#bar' + postid).raw().innerHTML = $('#bar' + postid).raw().oldbar;
@@ -211,7 +211,6 @@ function Delete(postid) {
 }
 
 function Quick_Preview() {
-    var quickreplybuttons;
     $('#post_preview').raw().value = "Make changes";
     $('#post_preview').raw().preview = true;
     ajax.post("ajax.php?action=preview", "quickpostform", function(response) {
@@ -222,7 +221,6 @@ function Quick_Preview() {
 }
 
 function Quick_Edit() {
-    var quickreplybuttons;
     $('#post_preview').raw().value = "Preview";
     $('#post_preview').raw().preview = false;
     $('#quickreplypreview').ghide();
@@ -241,7 +239,7 @@ function Newthread_Preview(mode) {
         if (pollanswers && pollanswers.children.length > 4) {
             pollanswers = pollanswers.children;
             $('#pollquestion').raw().innerHTML = $('#pollquestionfield').raw().value;
-            for (var i = 0; i < pollanswers.length; i += 2) {
+            for (let i = 0; i < pollanswers.length; i += 2) {
                 if (!pollanswers[i].value) {
                     continue;
                 }
@@ -284,40 +282,43 @@ function LoadEdit(type, post, depth) {
 }
 
 function AddPollOption(id) {
-    var list = $('#poll_options').raw();
-    var item = document.createElement("li");
-        var form = document.createElement("form");
-        form.method = "POST";
-            var auth = document.createElement("input");
-            auth.type = "hidden";
-            auth.name = "auth";
-            auth.value = authkey;
-            form.appendChild(auth);
+    let form    = document.createElement("form");
+    form.method = "POST";
 
-            var action = document.createElement("input");
-            action.type = "hidden";
-            action.name = "action";
-            action.value = "add_poll_option";
-            form.appendChild(action);
+    let auth   = document.createElement("input");
+    auth.type  = "hidden";
+    auth.name  = "auth";
+    auth.value = authkey;
+    form.appendChild(auth);
 
-            var threadid = document.createElement("input");
-            threadid.type = "hidden";
-            threadid.name = "threadid";
-            threadid.value = id;
-            form.appendChild(threadid);
+    let action   = document.createElement("input");
+    action.type  = "hidden";
+    action.name  = "action";
+    action.value = "add_poll_option";
+    form.appendChild(action);
 
-            var input = document.createElement("input");
-            input.type = "text";
-            input.name = "new_option";
-            input.size = "50";
-            form.appendChild(input);
+    let threadid   = document.createElement("input");
+    threadid.type  = "hidden";
+    threadid.name  = "threadid";
+    threadid.value = id;
+    form.appendChild(threadid);
 
-            var submit = document.createElement("input");
-            submit.type = "submit";
-            submit.id = "new_submit";
-            submit.value = "Add";
-            form.appendChild(submit);
-        item.appendChild(form);
+    let input  = document.createElement("input");
+    input.type = "text";
+    input.name = "new_option";
+    input.size = "50";
+    form.appendChild(input);
+
+    let submit   = document.createElement("input");
+    submit.type  = "submit";
+    submit.id    = "new_submit";
+    submit.value = "Add";
+    form.appendChild(submit);
+
+    let item = document.createElement("li");
+    item.appendChild(form);
+
+    let list = $('#poll_options').raw();
     list.appendChild(item);
 }
 
@@ -354,7 +355,7 @@ StoreText.prototype = {
         return window.sessionStorage && typeof window.sessionStorage === 'object';
     },
     retrieve : function () {
-        var r = sessionStorage.getItem(this.key);
+        const r = sessionStorage.getItem(this.key);
         if (this.topic === +sessionStorage.getItem(this.keyID) && r) {
             this.field.value = r;
         }
@@ -371,7 +372,7 @@ StoreText.prototype = {
         $(this.field).on(this.getInputEvent(), $.proxy(this.save, this));
     },
     getInputEvent : function () {
-        var e;
+        let e = '';
         if ('oninput' in this.field) {
             e = 'input';
         } else if (document.body.addEventListener) {

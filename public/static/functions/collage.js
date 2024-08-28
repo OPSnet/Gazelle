@@ -11,22 +11,22 @@ function Add(input) {
 }
 
 function checkCollageCats(value) {
-    var e = document.getElementsByClassName('collagecat');
-    for(var i = 0; i < e.length; i++) {
+    let e = document.getElementsByClassName('collagecat');
+    for (let i = 0; i < e.length; i++) {
         e[i].checked = value;
     }
 }
 
 function invertCollageCats() {
-    var e = document.getElementsByClassName('collagecat');
-    for(var i = 0; i < e.length; i++) {
+    let e = document.getElementsByClassName('collagecat');
+    for (let i = 0; i < e.length; i++) {
         e[i].checked = !e[i].checked;
     }
 }
 
 function Cancel() {
-    var e=document.getElementsByTagName("input");
-    for (i = 0; i < e.length; i++) {
+    let e = document.getElementsByTagName("input");
+    for (let i = 0; i < e.length; i++) {
         if (e[i].type == "checkbox") {
             e[i].checked = false;
         }
@@ -36,7 +36,7 @@ function Cancel() {
 
 function CollageSubscribe(collageid) {
     ajax.get("userhistory.php?action=collage_subscribe&collageid=" + collageid + "&auth=" + authkey, function() {
-        var subscribeLink = $("#subscribelink" + collageid).raw();
+        let subscribeLink = $("#subscribelink" + collageid).raw();
         if (subscribeLink) {
             subscribeLink.firstChild.nodeValue = subscribeLink.firstChild.nodeValue.charAt(0) == 'U'
                 ? "Subscribe"
@@ -45,7 +45,7 @@ function CollageSubscribe(collageid) {
     });
 }
 
-var collageShow = {
+let collageShow = {
     pg:0,
     pages:false,
     wrap:false,
@@ -58,7 +58,7 @@ var collageShow = {
         return $('.linkbox .selected').raw();
     },
     createUL:function(data) {
-        var ul = document.createElement('ul');
+        let ul = document.createElement('ul');
         $(ul).add_class('collage_images');
         ul.id = 'collage_page' + this.pg;
         $(ul).html(data);
@@ -81,22 +81,20 @@ var collageShow = {
         return ul;
     },
     page:function(num, el) {
-        var ul = $('#collage_page' + num).raw();
-        var s = this.selected();
-        var covers, lists, i;
-
         this.pg = num;
 
+        let ul = $('#collage_page' + num).raw();
         if (!ul) {
-            covers = this.pages[num];
+            let covers = this.pages[num];
             if (covers) {
                 ul = this.createUL(covers);
             }
         }
 
         $('.collage_images').ghide();
-
         $(ul).gshow();
+
+        let s = this.selected();
         if (s) {
             $(s).remove_class('selected');
         }
@@ -109,18 +107,17 @@ var collageShow = {
         }
 
         // Toggle the page number links
-        first = Math.max(0, this.pg - 2);
-        if (this.max - this.pg < 2) {
-            first = Math.max(this.max - 4, 0);
-        }
-        last = Math.min(first + 4, this.max);
-        for (i = 0; i < first; i++) {
+        let first = (this.max - this.pg < 2)
+            ? Math.max(0, this.pg - 2)
+            : Math.max(this.max - 4, 0);
+        let last = Math.min(first + 4, this.max);
+        for (let i = 0; i < first; i++) {
             $('#pagelink' + i).ghide();
         }
-        for (i = first; i <= last; i++) {
+        for (let i = first; i <= last; i++) {
             $('#pagelink' + i).gshow();
         }
-        for (i = last + 1; i <= this.max; i++) {
+        for (let i = last + 1; i <= this.max; i++) {
             $('#pagelink' + i).ghide();
         }
 

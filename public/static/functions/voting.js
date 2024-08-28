@@ -1,4 +1,4 @@
-var voteLock = false;
+let voteLock = false;
 
 function handleBoxAction(info, direction) {
 console.log(info);
@@ -36,7 +36,7 @@ function handleLinkAction(info, direction) {
     if (info.status != 'success') {
         return;
     }
-    groupid = info.response.id;
+    const groupid = info.response.id;
     $('#votescore-' + groupid).raw().innerHTML = (info.response.score * 100).toFixed(1);
     if (direction == 0) {
         $('#vote_clear_' + groupid).ghide();

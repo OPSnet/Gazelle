@@ -8,13 +8,13 @@ function Vote(requestid, amount, votecount, upload, download, rr) {
     ajax.get('requests.php?action=takevote&id=' + requestid + '&auth=' + authkey + '&amount=' + amount, function (response) {
         response = JSON.parse(response);
         if (response.status == 'success') {
-            vote_count = document.getElementById('vote_count_' + response.id);
+            let vote_count = document.getElementById('vote_count_' + response.id);
             if (!vote_count) {
                 // we are an individual request page
                 vote_count = document.getElementById('votecount');
             }
             vote_count.textContent = response.total.toLocaleString('en-US');
-            vote_link = document.querySelectorAll('[data-id="' + response.id + '"]');
+            let vote_link = document.querySelectorAll('[data-id="' + response.id + '"]');
             if (vote_link) {
                 vote_link[0].onClick = null;
                 vote_link[0].innerHTML = "&check;";
@@ -35,9 +35,9 @@ function Vote(requestid, amount, votecount, upload, download, rr) {
         }
 
         if ($('#total_bounty').results() > 0) {
-            totalBounty = parseInt($('#total_bounty').raw().value);
+            let totalBounty = parseInt($('#total_bounty').raw().value);
             totalBounty += (amount * (1 - $('#request_tax').raw().value));
-            var requestTax = $('#request_tax').raw().value;
+            let requestTax = $('#request_tax').raw().value;
             $('#total_bounty').raw().value = totalBounty;
             $('#formatted_bounty').raw().innerHTML = byte_format(totalBounty);
             if (requestTax > 0) {
@@ -59,10 +59,10 @@ function Calculate() {
     const amt     = Math.floor(box_val * mul);
 
     const current_upload_val = document.getElementById('current_uploaded').value;
-    var bounty_after_tax     = document.getElementById('bounty_after_tax');
-    var new_bounty           = document.getElementById('new_bounty');
-    var new_uploaded         = document.getElementById('new_uploaded');
-    var button               = document.getElementById('button');
+    let bounty_after_tax     = document.getElementById('bounty_after_tax');
+    let new_bounty           = document.getElementById('new_bounty');
+    let new_uploaded         = document.getElementById('new_uploaded');
+    let button               = document.getElementById('button');
 
     if (amt > current_upload_val) {
         new_uploaded.innerHTML     = "You can't afford that request!";
@@ -94,18 +94,18 @@ function Calculate() {
 }
 
 function AddArtistField() {
-    var ArtistCount = document.getElementsByName("artists[]").length;
+    let ArtistCount = document.getElementsByName("artists[]").length;
     if (ArtistCount >= 200) {
         return;
     }
-    var ArtistField = document.createElement("input");
+    let ArtistField = document.createElement("input");
     ArtistField.type = "text";
     ArtistField.id = "artist_" + ArtistCount;
     ArtistField.name = "artists[]";
     ArtistField.size = 45;
     ArtistField.onblur = CheckVA;
 
-    var roleField = document.createElement("select");
+    let roleField = document.createElement("select");
     roleField.id = "importance";
     roleField.name = "importance[]";
     roleField.options[0] = new Option("Main", "1");
@@ -117,7 +117,7 @@ function AddArtistField() {
     roleField.options[6] = new Option("Producer", "7");
     roleField.options[7] = new Option("Arranger", "8");
 
-    var x = $('#artistfields').raw();
+    let x = $('#artistfields').raw();
     x.appendChild(document.createElement("br"));
     x.appendChild(ArtistField);
     x.appendChild(document.createTextNode('\n'));
@@ -133,10 +133,10 @@ function AddArtistField() {
 }
 
 function CheckVA () {
-    var ArtistCount = document.getElementsByName("artists[]").length;
-    var shown = false;
-    for (var i = 0; i < ArtistCount; i++) {
-        var artistId = "#artist_" + i;
+    let ArtistCount = document.getElementsByName("artists[]").length;
+    let shown = false;
+    for (let i = 0; i < ArtistCount; i++) {
+        let artistId = "#artist_" + i;
         if ($(artistId).raw().value.toLowerCase().trim().match(/^(va|various(\sa|a)rtis(t|ts)|various)$/)) {
             $('#vawarning').gshow();
             shown = true;
@@ -149,11 +149,11 @@ function CheckVA () {
 }
 
 function RemoveArtistField() {
-    var ArtistCount = document.getElementsByName("artists[]").length;
+    let ArtistCount = document.getElementsByName("artists[]").length;
     if (ArtistCount === 1) {
         return;
     }
-    var x = $('#artistfields').raw();
+    let x = $('#artistfields').raw();
 
     while (x.lastChild.tagName !== "INPUT") {
         x.removeChild(x.lastChild);
@@ -164,7 +164,7 @@ function RemoveArtistField() {
 }
 
 function Categories() {
-    var cat = $('#categories').raw().options[$('#categories').raw().selectedIndex].value;
+    let cat = $('#categories').raw().options[$('#categories').raw().selectedIndex].value;
     if (cat == "Music") {
         $('#artist_tr').gshow();
         $('#releasetypes_tr').gshow();
@@ -210,9 +210,9 @@ function add_tag() {
 }
 
 function Toggle(id, disable) {
-    var arr = document.getElementsByName(id + '[]');
-    var master = $('#toggle_' + id).raw().checked;
-    for (var x in arr) {
+    let arr = document.getElementsByName(id + '[]');
+    let master = $('#toggle_' + id).raw().checked;
+    for (let x in arr) {
         arr[x].checked = master;
         if (disable == 1) {
             arr[x].disabled = master;
@@ -225,10 +225,10 @@ function Toggle(id, disable) {
 }
 
 function ToggleLogCue() {
-    var formats = document.getElementsByName('formats[]');
-    var media   = document.getElementsByName('media[]');
-    var flac    = formats[1].checked;
-    var cd      = media[0].checked;
+    let formats = document.getElementsByName('formats[]');
+    let media   = document.getElementsByName('media[]');
+    let flac    = formats[1].checked;
+    let cd      = media[0].checked;
 
     if (flac && cd) {
         $('#logcue_tr').gshow();

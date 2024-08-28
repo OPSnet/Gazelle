@@ -1,8 +1,7 @@
-//Couldn't use an associative array because JavaScript sorting is stupid http://dev-answers.blogspot.com/2012/03/javascript-object-keys-being-sorted-in.html
 
 document.addEventListener('DOMContentLoaded', function() {
-    var serialize = function () {
-        var a = [];
+    let serialize = function () {
+        let a = [];
         $('#sortable input').each(function () {
             a.push($(this).attr('id'));
         });
@@ -11,13 +10,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     serialize();
 
+    // Couldn't use an associative array because JavaScript sorting is stupid
+    // https://dev-answers.blogspot.com/2012/03/javascript-object-keys-being-sorted-in.html
     $('#sortable')
         .on('click', 'input', function () {
             // the + converts the boolean to either 1 or 0
-            var c = +$(this).is(':checked'),
-                old_id = $(this).attr('id'),
-                new_id = old_id.slice(0, -1) + c;
-            $(this).attr('id', new_id);
+            const old_id = $(this).attr('id');
+            $(this).attr('id', old_id.slice(0, -1) + $(this).is(':checked'));
             serialize();
         })
         .sortable({

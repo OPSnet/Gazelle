@@ -3,9 +3,9 @@ function show_downloads_load (torrentid, page) {
     $.ajax({
         url: 'torrents.php?action=downloadlist&page=' + page + '&torrentid=' + torrentid,
         success: function(json) {
-            var response = JSON.parse(json);
+            let response = JSON.parse(json);
             $('#downloads_' + torrentid).gshow().raw().innerHTML = response.html;
-            for (p = 1; p <= response.pages; ++p) {
+            for (let p = 1; p <= response.pages; ++p) {
                 if (p != response.page) {
                     $('.pager-' + p).attr(
                         'onclick',
@@ -22,9 +22,9 @@ function show_snatches_load (torrentid, page) {
     $.ajax({
         url: 'torrents.php?action=snatchlist&page=' + page + '&torrentid=' + torrentid,
         success: function(json) {
-            var response = JSON.parse(json);
+            let response = JSON.parse(json);
             $('#snatches_' + torrentid).gshow().raw().innerHTML = response.html;
-            for (p = 1; p <= response.pages; ++p) {
+            for (let p = 1; p <= response.pages; ++p) {
                 if (p != response.page) {
                     $('.pager-' + p).attr(
                         'onclick',
@@ -41,9 +41,9 @@ function show_seeders_load (torrentid, page) {
     $.ajax({
         url: 'torrents.php?action=peerlist&page=' + page + '&torrentid=' + torrentid,
         success: function(json) {
-            var response = JSON.parse(json);
+            let response = JSON.parse(json);
             $('#peers_' + torrentid).gshow().raw().innerHTML = response.html;
-            for (p = 1; p <= response.pages; ++p) {
+            for (let p = 1; p <= response.pages; ++p) {
                 if (p != response.page) {
                     $('.pager-' + p).attr(
                         'onclick',
@@ -170,13 +170,13 @@ function openAll(event) {
 }
 
 function toggle_group(groupid, link, event) {
-    var showRow = true;
-    var clickedRow = link;
+    let showRow = true;
+    let clickedRow = link;
     while (clickedRow.nodeName != 'TR') {
         clickedRow = clickedRow.parentNode;
     }
-    var group_rows = clickedRow.parentNode.children;
-    var showing = link.parentNode.classList.contains('show_torrents');
+    let group_rows = clickedRow.parentNode.children;
+    let showing = link.parentNode.classList.contains('show_torrents');
 
     const allGroups = openAll(event);
 
@@ -190,8 +190,8 @@ function toggle_group(groupid, link, event) {
         }
     }
 
-    for (var i = 0; i < group_rows.length; i++) {
-        var row = $(group_rows[i]);
+    for (let i = 0; i < group_rows.length; i++) {
+        let row = $(group_rows[i]);
         if (row.has_class('colhead_dark')) {
             continue;
         }
@@ -211,13 +211,10 @@ function toggle_group(groupid, link, event) {
         }
 
         if (row.has_class('group')) {
-            var section;
-            if (location.pathname.search('/artist.php$') !== -1) {
-                section = 'in this release type.';
-            } else {
-                section = 'on this page.';
-            }
-            var tooltip = showing
+            let section = (location.pathname.search('/artist.php$') !== -1) 
+                ? 'in this release type.'
+                : 'on this page.';
+            let tooltip = showing
                 ? 'Collapse this group. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all groups '+section
                 : 'Expand this group. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to expand all groups '+section;
             $('a.show_torrents_link', row).updateTooltip(tooltip);
@@ -245,20 +242,19 @@ function toggle_group(groupid, link, event) {
 }
 
 function toggle_edition(groupid, editionid, lnk, event) {
-    var clickedRow = lnk;
+    let clickedRow = lnk;
     while (clickedRow.nodeName != 'TR') {
         clickedRow = clickedRow.parentNode;
     }
-    //var showing = has_class(nextElementSibling(clickedRow), 'hidden');
-    var showing = $(clickedRow).nextElementSibling().has_class('hidden');
+    let showing = $(clickedRow).nextElementSibling().has_class('hidden');
 
     const allEditions = openAll(event);
 
-    var group_rows = $('tr.groupid_' + groupid);
-    for (var i = 0; i < group_rows.results(); i++) {
-        var row = $(group_rows.raw(i));
+    let group_rows = $('tr.groupid_' + groupid);
+    for (let i = 0; i < group_rows.results(); i++) {
+        let row = $(group_rows.raw(i));
         if (row.has_class('edition') && (allEditions || row.raw(0) == clickedRow)) {
-            var tooltip = showing
+            let tooltip = showing
                 ? 'Collapse this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all editions in this torrent group.'
                 : 'Expand this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to expand all editions in this torrent group.';
             $('a', row).raw().innerHTML = (showing) ? '&minus;' : '+';
@@ -279,7 +275,7 @@ function toggle_edition(groupid, editionid, lnk, event) {
 
 function toggleTorrentSearch(mode) {
     if (mode == 0) {
-        var link = $('#ft_toggle').raw();
+        let link = $('#ft_toggle').raw();
         $('#ft_container').gtoggle();
         if (link.textContent.substr(0, 4) == 'Hide') {
             link.innerHTML = 'Show search form';
@@ -309,13 +305,13 @@ function toggleTorrentSearch(mode) {
     return false;
 }
 
-var ArtistFieldCount = 1;
+let ArtistFieldCount = 1;
 
 function AddArtistField() {
     if (ArtistFieldCount >= 100) {
         return;
     }
-    var mapping = {
+    let mapping = {
         1: 0,
         2: 1,
         4: 2,
@@ -325,16 +321,16 @@ function AddArtistField() {
         7: 6,
         8: 7,
     };
-    selected = mapping[$("#AddArtists select:last-child").val()];
-    var x = $('#AddArtists').raw();
+    let selected = mapping[$("#AddArtists select:last-child").val()];
+    let x = $('#AddArtists').raw();
     x.appendChild(document.createElement("br"));
-    var ArtistField = document.createElement("input");
+    let ArtistField = document.createElement("input");
     ArtistField.type = "text";
     ArtistField.name = "aliasname[]";
     ArtistField.size = "17";
     x.appendChild(ArtistField);
     x.appendChild(document.createTextNode(' '));
-    var Importance = document.createElement("select");
+    let Importance = document.createElement("select");
     Importance.name = "importance[]";
     Importance.innerHTML = '<option value="1">Main</option><option value="2">Guest</option><option value="4">Composer</option><option value="5">Conductor</option><option value="6">DJ / Compiler</option><option value="3">Remixer</option><option value="7">Producer</option><option value="8">Arranger</option>';
     Importance.selectedIndex = selected;
@@ -349,22 +345,22 @@ function AddArtistField() {
     ArtistFieldCount++;
 }
 
-var coverFieldCount = 0;
-var hasCoverAddButton = false;
+let coverFieldCount = 0;
+let hasCoverAddButton = false;
 
 function addCoverField() {
     if (coverFieldCount >= 100) {
         return;
     }
-    var x = $('#add_cover').raw();
+    let x = $('#add_cover').raw();
     x.appendChild(document.createElement("br"));
-    var field = document.createElement("input");
+    let field = document.createElement("input");
     field.type = "text";
     field.name = "image[]";
     field.placeholder = "URL";
     x.appendChild(field);
     x.appendChild(document.createTextNode(' '));
-    var summary = document.createElement("input");
+    let summary = document.createElement("input");
     summary.type = "text";
     summary.name = "summary[]";
     summary.placeholder = "Summary";
@@ -388,8 +384,8 @@ function ToggleEditionRows() {
 }
 
 function add_to_collage() {
-    var field = document.forms['add-to-collage'].elements;
-    var post = {
+    let field = document.forms['add-to-collage'].elements;
+    let post = {
         'auth':       authkey,
         'name':       field['collage_ref'].value,
         'entry_id':   Number(field['entryid'].value),
@@ -397,7 +393,7 @@ function add_to_collage() {
     };
     $('#add-result').raw().innerHTML = '...';
     ajax.post('collages.php?action=ajax_add', post, function (response) {
-        var result = JSON.parse(response);
+        let result = JSON.parse(response);
         $('#add-result').raw().innerHTML = (result['status'] == 'success')
             ? 'Added to <b>' + result['response']['link'] + '</b>'
             : 'Failed to add! (' + result['error'] + ')';

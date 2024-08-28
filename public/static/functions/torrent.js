@@ -234,16 +234,13 @@ function Vote(amount, requestid) {
          amount = 20 * 1024 * 1024;
     }
 
-    var index;
     var votecount;
     if (!requestid) {
         requestid = $('#requestid').raw().value;
         votecount = $('#votecount').raw();
-        index = false;
     } else {
         votecount = $('#vote_count_' + requestid).raw();
         bounty = $('#bounty_' + requestid).raw();
-        index = true;
     }
 
     ajax.get('requests.php?action=takevote&id=' + requestid + '&auth=' + authkey + '&amount=' + amount, function (response) {

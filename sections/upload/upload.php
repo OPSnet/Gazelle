@@ -90,7 +90,7 @@ $dnu     = new Gazelle\Manager\DNU();
 $dnuNew  = $dnu->hasNewForUser($Viewer);
 $dnuHide = !$dnuNew && $Viewer->permitted('torrents_hide_dnu');
 
-View::show_header('Upload', ['js' => 'upload,validate_upload,valid_tags,musicbrainz,bbcode']);
+View::show_header('Upload', ['js' => 'upload,validate_upload,musicbrainz,bbcode']);
 ?>
 <div class="<?= $Viewer->permitted('torrents_hide_dnu') ? 'box pad' : '' ?>" style="margin: 0px auto; width: 700px;">
     <h3 id="dnu_header">Do Not Upload List</h3>

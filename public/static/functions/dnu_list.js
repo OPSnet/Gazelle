@@ -1,24 +1,21 @@
-document.addEventListener('DOMContentLoaded', function ($) {
-    // Helper function to preserve table cell dimentions
-    var fixDimentions = function (unused, elements) {
-        // Iterate through each table cell and correct width
-        elements.children().each(function () {
-            $(this).width($(this).width());
-        });
-        return elements;
-    };
-
-    // Make table sortable
+document.addEventListener('DOMContentLoaded', () => {
+    // Reorder table rows through drag'n'drop
     $('#dnu tbody').sortable({
-        helper: fixDimentions,
         cancel: 'input, .colhead, .rowa',
-        update: function (event, ui) {
+        helper: function (_unused, elements) {
+            // Iterate through each table cell and correct width
+            elements.children().each(function () {
+                $(this).width($(this).width());
+            });
+            return elements;
+        },
+        update: function () {
             request = $.ajax({
                 url: 'tools.php',
                 type: "post",
-                data: 'action=dnu_alter&auth=' + authkey + '&' + $(this).sortable('serialize') + '&submit=Reorder'
+                data: 'action=dnu_alter&auth=' + authkey + '&submit=Reorder&' + $(this).sortable('serialize'),
             });
-            request.done(function (response, textStatus, jqXHR) {
+            request.done(function () {
             });
         }
     });

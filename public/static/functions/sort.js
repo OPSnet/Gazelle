@@ -8,7 +8,7 @@ $(function () {
     // sorts dates placed in the title attribute of a td
     $.tablesorter.addParser({
         id: 'relativeTime',
-        is: function (s) {
+        is: function () {
             return false;
         },
         format: function (str, table, td) {

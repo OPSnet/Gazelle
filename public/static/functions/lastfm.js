@@ -1,18 +1,18 @@
 (function() {
-    var username;
+    let username;
     // How many entries to show per category before expanding
-    var initialCount = 3;
-    var lastPlayedTrack = "";
-    var topArtists = "";
-    var topAlbums = "";
-    var topTracks = "";
-    var expanded = false;
+    let initialCount = 3;
+    let lastPlayedTrack = "";
+    let topArtists = "";
+    let topAlbums = "";
+    let topTracks = "";
+    let expanded = false;
     document.addEventListener('DOMContentLoaded', function () {
         // Avoid conflicting with other jQuery instances (userscripts et al).
 //        $.noConflict(); // Why is this needed?
         // Fetch the username (appended from php) to base all get requests on.
         username = $('#lastfm_username').text();
-        var div = $('#lastfm_stats');
+        let div = $('#lastfm_stats');
         // Fetch the required data.
         // If data isn't cached, delays are issued in the class to avoid too many parallel requests to Last.fm
         getLastPlayedTrack(div);
@@ -50,12 +50,12 @@
         $("#lastfm_reload_container").addClass("hidden");
         // Allow reloading the data manually.
         $.urlParam = function(name) {
-            var results = new RegExp('[\\?&amp;]' + name + '=([^&amp;#]*)').exec(window.location.href);
+            let results = new RegExp('[\\?&amp;]' + name + '=([^&amp;#]*)').exec(window.location.href);
             return results[1] || 0;
         };
         $("#lastfm_reload").on('click', function () {
             // Clear the cache and the necessary variables.
-            $.get('user.php?action=lastfm&mode=flush&username=' + username + '&uid=' + $.urlParam('id'), function (response) {});
+            $.get('user.php?action=lastfm&mode=flush&username=' + username + '&uid=' + $.urlParam('id'), function () {});
             lastPlayedTrack = "";
             topArtists = "";
             topAlbums = "";
@@ -134,7 +134,7 @@
             return;
         }
         $.get('user.php?action=lastfm&mode=top_artists&username=' + username, function (response) {
-            var html;
+            let html;
             if (!response) {
                 topArtists = " ";
             } else {
@@ -144,12 +144,12 @@
                     topArtists = " ";
                 } else {
                     html = "<li>Top Artists:</li><li><ul class=\"nobullet\">";
-                    n = Math.min(initialCount, 3);
-                    for (var i = 0; i < n; i++) {
+                    let n = Math.min(initialCount, 3);
+                    for (let i = 0; i < n; i++) {
                         html += topArtistEntry(response[i]);
                     }
                     if (response.length > 3) {
-                        for (i = 3; i < response.length; i++) {
+                        for (let i = 3; i < response.length; i++) {
                             html += topArtistEntry(response[i]);
                         }
                         html += '<li><a href="#topartists" id="lastfm_expand" onclick="return false" class="brackets">Expand</a></li>';
@@ -172,7 +172,7 @@
             return;
         }
         $.get('user.php?action=lastfm&mode=top_albums&username=' + username, function (response) {
-            var html;
+            let html;
             if (!response) {
                 topAlbums = " ";
             } else {
@@ -180,12 +180,12 @@
                     topAlbums = " ";
                 } else {
                     html = "<li>Top Albums:</li><li><ul class=\"nobullet\">";
-                    n = Math.min(initialCount, 3);
-                    for (var i = 0; i < n; i++) {
+                    let n = Math.min(initialCount, 3);
+                    for (let i = 0; i < n; i++) {
                         html += topAlbumEntry(response[i]);
                     }
                     if (response.length > 3) {
-                        for (i = 3; i < response.length; i++) {
+                        for (let i = 3; i < response.length; i++) {
                             html += topAlbumEntry(response[i]);
                         }
                         html += '<li><a href="#topalbums" id="lastfm_expand" onclick="return false" class="brackets">Expand</a></li>';
@@ -207,7 +207,7 @@
             return;
         }
         $.get('user.php?action=lastfm&mode=top_tracks&username=' + username, function (response) {
-            var html;
+            let html;
             if (!response) {
                 topTracks = " ";
             } else {
@@ -215,12 +215,12 @@
                     topTracks = " ";
                 } else {
                     html = "<li>Top Tracks:</li><li><ul class=\"nobullet\">";
-                    n = Math.min(initialCount, 3);
-                    for (var i = 0; i < n; i++) {
+                    let n = Math.min(initialCount, 3);
+                    for (let i = 0; i < n; i++) {
                         html += topTrackEntry(response[i]);
                     }
                     if (response.length > 3) {
-                        for (i = 3; i < response.length; i++) {
+                        for (let i = 3; i < response.length; i++) {
                             html += topTrackEntry(response[i]);
                         }
                         html += '<li><a href="#toptracks" id="lastfm_expand" onclick="return false" class="brackets">Expand</a></li>';

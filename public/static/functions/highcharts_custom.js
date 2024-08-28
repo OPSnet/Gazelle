@@ -1,18 +1,20 @@
 function initialiseChart(target, title, series, opt) {
-    var options = {
+    let options = {
         bytes: false
     };
     Object.assign(options, opt);
 
     if (options.bytes) {
         var tickPositioner = function(min, max) {
-            var interval = Math.pow(2, Math.ceil(Math.log(this.tickInterval) / Math.log(2)));
-
-            return this.getLinearTickPositions(interval, min, max);
+            return this.getLinearTickPositions(
+                Math.pow(2, Math.ceil(Math.log(this.tickInterval) / Math.log(2))),
+                min,
+                max
+            );
         };
 
-        var toBytes = function(val) {
-            var units = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+        let toBytes = function(val) {
+            let units = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
             let steps = 0;
             for (; Math.abs(val) >= 1024; steps++) {
                 val /= 1024.0;
@@ -75,7 +77,7 @@ function initialiseChart(target, title, series, opt) {
 
 function initialiseBarChart(target, title, series, opt) {
     let categories;
-    options = {
+    let options = {
         categories: 'auto'
     };
     Object.assign(options, opt);

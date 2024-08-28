@@ -1,4 +1,4 @@
-var AllowedMediaFormat = {
+let AllowedMediaFormat = {
     WEB:        ['FLAC', 'MP3', 'AAC'],
     CD:         ['FLAC', 'MP3', 'AAC'],
     SACD:       ['FLAC', 'MP3', 'AAC'],
@@ -10,9 +10,9 @@ var AllowedMediaFormat = {
     Cassette:   ['FLAC', 'MP3', 'AAC'],
 };
 
-var AllowedAudiobookFormat = ['FLAC', 'MP3', 'AAC'];
+let AllowedAudiobookFormat = ['FLAC', 'MP3', 'AAC'];
 
-var AllowedBitrate = {
+let AllowedBitrate = {
     FLAC: {
         list: ['24bit Lossless', 'Lossless'],
         rank: [1, 0],
@@ -26,16 +26,15 @@ var AllowedBitrate = {
     DTS: { list: ['Other'], rank: [0] },
 };
 
-var MAX_EXTRA_FORMATS = 5;
-var MAX_RIPLOGS = 400;
+let MAX_EXTRA_FORMATS = 5;
+let MAX_RIPLOGS = 400;
 
-var ArtistCount      = 0;
-var ArtistJsonCount  = 0;
-var ExtraFormatCount = 0;
+let ArtistCount      = 0;
+let ArtistJsonCount  = 0;
+let ExtraFormatCount = 0;
 
 // the form starts with one logfile field
-var LogCount         = 1;
-
+let LogCount         = 1;
 
 function MBhide() {
     document.getElementById("musicbrainz_popup").style.display = "none";
@@ -47,7 +46,7 @@ function MBshow() {
 }
 
 function Categories() {
-    var dynamic_form = $('#dynamic_form');
+    let dynamic_form = $('#dynamic_form');
     $.when(
         $.ajax({url: 'ajax.php?action=upload_section&categoryid=' + $('#categories').raw().value, dataType: 'text'}),
         $.ajax({url: 'ajax.php?action=upload_section&js=1&categoryid=' + $('#categories').raw().value, dataType: 'text'})
@@ -59,7 +58,7 @@ function Categories() {
             }
             dynamic_form.raw().innerHTML = resp1[0];
             uploadFormInit();
-            script = document.createElement('script', {'type': 'text/javascript'});
+            let script = document.createElement('script', {'type': 'text/javascript'});
             script.innerHTML = resp2[0];
             document.body.append(script);
             dynamic_form.data('loaded', true);
@@ -84,17 +83,15 @@ function changeMedia() {
 }
 
 function setAllowedFormat(formatField, bitrateField) {
-    var media = $('#media').val();
-    var fmt = $(formatField).val();
-    var btr = $(bitrateField).val();
+    let media = $('#media').val();
+    let fmt = $(formatField).val();
     $(formatField).empty().append(new Option('---', ''));
     if (document.getElementById('form-music-upload')) {
-        var warning = $('#format_warning');
         if (media === '---') {
             $(bitrateField).empty().append(new Option('---', ''));
             $('#upload_logs').ghide();
             $('#other_bitrate_span').ghide();
-            warning.raw().innerHTML = '';
+            $('#format_warning').raw().innerHTML = '';
             return;
         }
         $.each(AllowedMediaFormat[media], function(k) {
@@ -120,25 +117,23 @@ function setAllowedFormat(formatField, bitrateField) {
         else {
             $('#upload_logs').ghide();
         }
-        if ($(formatField).val() === 'AAC') {
-            warning.raw().innerHTML = 'AAC torrents may only be uploaded if they represent editions unavailable on Orpheus in any other format sourced from the same medium and edition <a href="rules.php?p=upload#r2.1.21" target="_blank">(2.1.21)</a>';
-        } else {
-            warning.raw().innerHTML = '';
-        }
+        $('#format_warning').raw().innerHTML = ($(formatField).val() === 'AAC')
+            ? 'AAC torrents may only be uploaded if they represent editions unavailable on Orpheus in any other format sourced from the same medium and edition <a href="rules.php?p=upload#r2.1.21" target="_blank">(2.1.21)</a>'
+            : '';
     }
     setAllowedBitrate(formatField, bitrateField);
 }
 
 function setAllowedBitrate(formatField, bitrateField) {
-    var media = $('#media').val();
-    var fmt = $(formatField).val();
-    var btr = $(bitrateField).val();
+    let media = $('#media').val();
+    let fmt = $(formatField).val();
+    let btr = $(bitrateField).val();
     $(bitrateField).empty().append(new Option('---', ''));
     if (media === '---' || fmt === '---') {
         $('#other_bitrate_span').ghide();
         return;
     }
-    var allowed = AllowedBitrate[fmt];
+    let allowed = AllowedBitrate[fmt];
     $.each(allowed.list, function(k) {
         if (!(media == 'CD' && allowed.list[k] == '24bit Lossless')) {
             $(bitrateField).append(new Option(allowed.list[k], allowed.list[k]));
@@ -175,7 +170,7 @@ function addFormatRow() {
     const formatFieldNum = ExtraFormatCount;
     $("#remove_format").show();
 
-    var master = $(document.createElement("tr"))
+    let master = $(document.createElement("tr"))
         .attr({
             id: 'extra_format_row_' + formatFieldNum
         })
@@ -185,7 +180,7 @@ function addFormatRow() {
         .addClass('label')
         .html("Extra format " + formatFieldNum + ":")
         .appendTo(master);
-    var row = $(document.createElement("td"))
+    let row = $(document.createElement("td"))
         .appendTo(master);
     $(document.createElement("input"))
         .attr({
@@ -200,7 +195,7 @@ function addFormatRow() {
         .html("&nbsp;&nbsp;&nbsp;&nbsp;Format: ")
         .appendTo(row);
 
-    var formatSelect = $(document.createElement("select"))
+    let formatSelect = $(document.createElement("select"))
         .attr({
             id: "format_" + formatFieldNum,
             name: 'extra_format[]'
@@ -208,7 +203,7 @@ function addFormatRow() {
         .change(function () {
             setAllowedBitrate('#format_' + formatFieldNum, '#bitrate_' + formatFieldNum);
         });
-    var used = getUsedPairs();
+    let used = getUsedPairs();
     $.each(AllowedBitrate, function(k,v) {
         if (!(k in used) || used[k].length < AllowedBitrate[k].list.length) {
             formatSelect.append(new Option(k, k));
@@ -218,7 +213,7 @@ function addFormatRow() {
 
     // bitrates
     $(document.createElement("span")).html("&nbsp;&nbsp;&nbsp;&nbsp;Bitrate: ").appendTo(row);
-    var bitrateSelect = $(document.createElement("select"))
+    let bitrateSelect = $(document.createElement("select"))
         .attr({
             id:"bitrate_" + formatFieldNum,
             name:'extra_bitrate[]'
@@ -229,7 +224,7 @@ function addFormatRow() {
             bitrateSelect.append(new Option(v, v));
         }
     });
-    var nf;
+    let nf;
     if (!used.MP3 || used.MP3.indexOf('320') == -1) { nf = 0; }
     else if (used.MP3.indexOf('V0 (VBR)') == -1) { nf = 1; }
     else if (used.MP3.indexOf('V2 (VBR)') == -1) { nf = 2; }
@@ -243,7 +238,7 @@ function addFormatRow() {
     }).appendTo(row);
 
     // release description
-    var desc_row = $(document.createElement("tr"))
+    let desc_row = $(document.createElement("tr"))
         .attr({ id: "desc_row"})
         .css('cursor', 'pointer')
         .appendTo(row);
@@ -283,13 +278,13 @@ function removeFormatRow() {
 
 function getUsedPairs() {
     // fetch the format/bitrate combinations already used in the form
-    var fmt = $('#format').val();
-    var btr = $('#bitrate').val();
-    var used = {};
+    let fmt = $('#format').val();
+    let btr = $('#bitrate').val();
+    let used = {};
     if (fmt !== '' && btr !== '' && AllowedBitrate[fmt].list.indexOf(btr) != -1) {
         used[fmt] = [btr];
     }
-    for (e = 1; e < ExtraFormatCount; e++) {
+    for (let e = 1; e < ExtraFormatCount; e++) {
         fmt = $("#format_" + e).val();
         btr = $("#bitrate_" + e).val();
         if (fmt !== '' && btr !== '' && AllowedBitrate[fmt].list.indexOf(btr) != -1) {
@@ -317,14 +312,14 @@ function AddLogField(acceptTypes) {
         return;
     }
     LogCount++;
-    var LogField = document.createElement("input");
+    let LogField = document.createElement("input");
     LogField.type = "file";
     LogField.id = "logfile_" + LogCount;
     LogField.name = "logfiles[]";
     LogField.accept = acceptTypes;
     LogField.multiple = true;
     LogField.size = 50;
-    var x = $('#logfields').raw();
+    let x = $('#logfields').raw();
     x.appendChild(document.createElement("br"));
     x.appendChild(LogField);
 }
@@ -333,12 +328,12 @@ function AddExtraLogField(id) {
     if (LogCount > MAX_RIPLOGS) {
         return;
     }
-    var LogField = document.createElement("input");
+    let LogField = document.createElement("input");
     LogField.type = "file";
     LogField.id = "file_" + id;
     LogField.name = "logfile_" + id + "[]";
     LogField.size = 50;
-    var x = $('#logfields_' + id).raw();
+    let x = $('#logfields_' + id).raw();
     x.appendChild(document.createElement("br"));
     x.appendChild(LogField);
     LogCount++;
@@ -348,8 +343,8 @@ function RemoveLogField() {
     if (LogCount === 1) {
         return;
     }
-    var x = $('#logfields').raw();
-    for (i = 0; i < 2; i++) {
+    let x = $('#logfields').raw();
+    for (let i = 0; i < 2; i++) {
         x.removeChild(x.lastChild);
     }
     LogCount--;
@@ -360,14 +355,14 @@ function AddArtistField() {
         return;
     }
     ArtistCount++;
-    var ArtistField = document.createElement("input");
+    let ArtistField = document.createElement("input");
     ArtistField.type = "text";
     ArtistField.id = "artist_" + ArtistCount;
     ArtistField.name = "artists[]";
     ArtistField.size = 45;
     ArtistField.onblur = CheckVA;
 
-    var RoleField = document.createElement("select");
+    let RoleField = document.createElement("select");
     RoleField.id = "importance_" + ArtistCount;
     RoleField.name = "importance[]";
     RoleField.options[0] = new Option("Main", "1");
@@ -378,7 +373,7 @@ function AddArtistField() {
     RoleField.options[5] = new Option("Remixer", "3");
     RoleField.options[6] = new Option("Producer", "7");
     RoleField.options[7] = new Option("Arranger", "8");
-    var mapping = {
+    let mapping = {
         1: 0,
         2: 1,
         4: 2,
@@ -390,7 +385,7 @@ function AddArtistField() {
     };
     RoleField.selectedIndex = mapping[$("#importance_" + (ArtistCount - 1)).val()];
 
-    var x = $('#artistfields').raw();
+    let x = $('#artistfields').raw();
     x.appendChild(document.createElement("br"));
     x.appendChild(ArtistField);
     x.append(' ');
@@ -409,8 +404,8 @@ function RemoveArtistField() {
     if (ArtistCount === 0) {
         return;
     }
-    var x = $('#artistfields').raw();
-    for (i = 0; i < 3; i++) {
+    let x = $('#artistfields').raw();
+    for (let i = 0; i < 3; i++) {
         x.removeChild(x.lastChild);
     }
     ArtistCount--;
@@ -418,9 +413,9 @@ function RemoveArtistField() {
 
 
 function CheckVA () {
-    var shown = false;
-    for (var i = 0; i < ArtistCount; i++) {
-        var artistId = "#artist_" + i;
+    let shown = false;
+    for (let i = 0; i < ArtistCount; i++) {
+        let artistId = "#artist_" + i;
         if ($(artistId).raw().value.toLowerCase().trim().match(/^(va|various(\sa|a)rtis(t|ts)|various)$/)) {
             $('#vawarning').gshow();
             shown = true;
@@ -433,10 +428,10 @@ function CheckVA () {
 }
 
 function CheckYear() {
-    var media = $('#media').raw().options[$('#media').raw().selectedIndex].text;
-    var mediaOld = (media == "---" || media == "Vinyl" || media == "Soundboard" || media == "Cassette");
-    var year = $('#year').val();
-    var unknown = $('#unknown').prop('checked');
+    let media = $('#media').raw().options[$('#media').raw().selectedIndex].text;
+    let mediaOld = (media == "---" || media == "Vinyl" || media == "Soundboard" || media == "Cassette");
+    let year = $('#year').val();
+    let unknown = $('#unknown').prop('checked');
     if (year < 1982 && year != '' && !mediaOld && !unknown) {
         $('#yearwarning').gshow();
         $('#remaster').raw().checked = true;
@@ -479,8 +474,8 @@ function ToggleUnknown() {
 }
 
 function GroupRemaster() {
-    var remasters = JSON.parse($('#json_remasters').raw().value);
-    var index = $('#groupremasters').raw().options[$('#groupremasters').raw().selectedIndex].value;
+    let remasters = JSON.parse($('#json_remasters').raw().value);
+    let index = $('#groupremasters').raw().options[$('#groupremasters').raw().selectedIndex].value;
     if (index != "") {
         $('#remaster_year').raw().value = remasters[index][1];
         $('#remaster_title').raw().value = remasters[index][2];
@@ -490,7 +485,7 @@ function GroupRemaster() {
 }
 
 function loadThumbnail() {
-    var url = $('#image').val();
+    let url = $('#image').val();
     if (url === '') {
         $('#thumbnail').attr('src', '').hide();
     } else {
@@ -507,7 +502,7 @@ function loadThumbnail() {
  * @param data
  */
 function jsonFill(source, mapping) {
-    for (var prop in mapping) {
+    for (let prop in mapping) {
         // skip releasetype, it is a special case
         if (!mapping.hasOwnProperty(prop) || prop === 'releasetype') {
             continue;
@@ -535,7 +530,7 @@ function fillEncodingField(encoding) {
 }
 
 function fillArtist(artistlist, role) {
-    for (var i = 0; i < artistlist.length; i++) {
+    for (let i = 0; i < artistlist.length; i++) {
         if (artistlist[i]['name']) {
             if (ArtistJsonCount++ > 0) {
                 AddArtistField();
@@ -549,7 +544,7 @@ function fillArtist(artistlist, role) {
 function fillMusicForm(group, torrent, source) {
     if (group['musicInfo']) {
         // JSON property to HTML value for artist role
-        var mapping = {
+        let mapping = {
             artists: 1,
             with: 2,
             composers: 4,
@@ -559,7 +554,7 @@ function fillMusicForm(group, torrent, source) {
             producer: 7,
             arranger: 8,
         };
-        for (var prop in group['musicInfo']) {
+        for (let prop in group['musicInfo']) {
             if (group['musicInfo'].hasOwnProperty(prop)) {
                 fillArtist(group['musicInfo'][prop], mapping[prop]);
             }
@@ -674,14 +669,14 @@ function fillForm(group, torrent, source) {
     }
 
     // reset the file input
-    var el = $('#torrent-json-file');
+    let el = $('#torrent-json-file');
     el.wrap('<form>').closest('form').get(0).reset();
     el.unwrap();
 }
 
 function WaitForCategory(callback) {
     setTimeout(function() {
-        var dynamic_form = $('#dynamic_form');
+        let dynamic_form = $('#dynamic_form');
         if (dynamic_form.data('loaded') === true) {
             dynamic_form.data('loaded', false);
             callback();
@@ -808,11 +803,11 @@ function htmlDecode(string) {
 }
 
 function checkFields() {
-    var error = 0;
+    let error = 0;
     // When your DOM is historically fucked up...
-    var is_new = $("#torrent-new").val() == "1";
-    var is_music = (typeof($('#categories').val()) != "undefined" && $('#categories').val() == "0");
-    var is_edit = (typeof($('#edittype').val()) != "undefined" && $('#edittype').val() == "1");
+    let is_new = $("#torrent-new").val() == "1";
+    let is_music = (typeof($('#categories').val()) != "undefined" && $('#categories').val() == "0");
+    let is_edit = (typeof($('#edittype').val()) != "undefined" && $('#edittype').val() == "1");
     $("#check").empty();
     if (!is_edit && (is_new && !$('#file').val())) {
         ++error;
@@ -852,8 +847,8 @@ function checkFields() {
             $("#check").append('<li>Bitrate (Lossless, 320, V0 (VBR), ...) not specified.</li>');
         }
         if (LogCount > 1 && !$('#upload_logs')[0].classList.contains('hidden')) {
-            missing = 0;
-            for (i = 1; i <= LogCount; i++) {
+            let missing = 0;
+            for (let i = 1; i <= LogCount; i++) {
                 if (!$('#logfile_' + i).val()) {
                     ++missing;
                 }
