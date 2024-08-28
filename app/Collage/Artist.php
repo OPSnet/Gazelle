@@ -52,10 +52,7 @@ class Artist extends AbstractCollage {
     }
 
     public function entryList(): array {
-        if (!isset($this->artists)) {
-            $this->load();
-        }
-        return array_keys($this->artists);
+        return array_keys($this->artistList());
     }
 
     public function nameList(): array {
@@ -64,7 +61,7 @@ class Artist extends AbstractCollage {
                 'id'    => $a['id'],
                 'name'  => $a['name'],
                 'image' => $a['image'],
-            ], $this->artists
+            ], $this->artistList()
         ));
     }
 

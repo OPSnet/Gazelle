@@ -30,7 +30,6 @@ class Collage extends BaseObject {
         $this->collage = $categoryId === CollageType::artist->value
             ? new Collage\Artist($this)
             : new Collage\TGroup($this);
-        $this->collage->load();
     }
 
     public function flush(): static {

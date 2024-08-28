@@ -5,7 +5,7 @@ namespace Gazelle\Collage;
 class TGroup extends AbstractCollage {
     protected array $groupIds;
     protected array $sequence = [];
-    protected array $torrentTags = [];
+    protected array $torrentTags;
 
     public function entryTable(): string { return 'collages_torrents'; }
     public function entryColumn(): string { return 'GroupID'; }
@@ -18,6 +18,9 @@ class TGroup extends AbstractCollage {
     }
 
     public function torrentTagList(): array {
+        if (!isset($this->torrentTags)) {
+            $this->load();
+        }
         return $this->torrentTags;
     }
 
