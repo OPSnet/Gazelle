@@ -1,0 +1,24 @@
+    <tr>
+        <td class="label">Resolver:</td>
+        <td>{{ report.resolverId|user_url }}</td>
+    </tr>
+    <tr>
+        <td class="label">Resolved:</td>
+        <td>{{ report.modified|time_diff }}</td>
+    </tr>
+    <tr>
+        <td class="label">Report comments:</td>
+        <td>{{ report.comment }}</td>
+    </tr>
+    <tr>
+        <td class="label">Log message:</td>
+        <td>{{ report.message }}</td>
+    </tr>
+{% if torrent %}
+    <tr>
+        <td>&nbsp;</td>
+        <td>
+            <input id="grab{{ report.id }}" type="button" value="Claim" onclick="Grab({{ report.id }});" />
+        </td>
+    </tr>
+{% endif %}

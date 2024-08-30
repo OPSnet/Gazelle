@@ -372,40 +372,12 @@ if ($search->canUnclaim($Viewer)) {
                         | <input type="button" id="submit_<?= $reportId ?>" value="Submit" onclick="TakeResolve(<?= $reportId ?>);" />
                     </td>
                 </tr>
-<?php       } else { ?>
-                <tr>
-                    <td class="label">Resolver:</td>
-                    <td>
-                        <a href="user.php?id=<?=$resolverId?>"><?= html_escape($resolverName) ?></a>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="label">Resolve time:</td>
-                    <td>
-                        <?= time_diff($report->modified()) ?>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="label">Report comments:</td>
-                    <td>
-                        <?= display_str($report->comment() ?? '') ?>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="label">Log message:</td>
-                    <td>
-                        <?= $report->message() ?? '' ?>
-                    </td>
-                </tr>
-<?php           if ($torrent) { ?>
-                <tr>
-                    <td>&nbsp;</td>
-                    <td>
-                        <input id="grab<?= $reportId ?>" type="button" value="Claim" onclick="Grab(<?= $reportId ?>);" />
-                    </td>
-                </tr>
 <?php
-                }
+            } else {
+                echo $Twig->render('reportsv2/resolved.twig', [
+                    'report'  => $report,
+                    'torrent' => $torrent,
+                ]);
             }
 ?>
             </table>
