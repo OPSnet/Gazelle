@@ -91,7 +91,7 @@
         <td>
             <input type="text" class="wide_input_text" name="RestrictedForums" value="{{ user.forbiddenForums|join(', ') }}" />
             {% if forum.restricted_names %}
-            <br />{{ forum.restricted_names }}
+            <br />{{ forum.restricted_names|join(', ') }}
             {% endif %}
         </td>
     </tr>
@@ -100,7 +100,7 @@
         <td>
             <input type="text" class="wide_input_text" name="PermittedForums" value="{{ user.permittedForums|join(', ') }}" />
             {% if forum.permitted_names %}
-            <br />{{ forum.permitted_names }}
+            <br />{{ forum.permitted_names|join(', ') }}
             {% endif %}
         </td>
     </tr>

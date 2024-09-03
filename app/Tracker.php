@@ -83,7 +83,7 @@ class Tracker extends Base {
     }
 
     public function isTraced(User $user): bool {
-        return (bool)$this->userReport($user)['traced'];
+        return (bool)($this->userReport($user)['traced'] ?? false);
     }
 
     public function removeUser(User $user): bool {

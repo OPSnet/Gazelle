@@ -54,16 +54,6 @@ class Forum extends \Gazelle\BaseManager {
         return $id ? new \Gazelle\Forum($id) : null;
     }
 
-    /**
-     * Get list of forum names
-     */
-    public function nameList(): array {
-        self::$db->prepared_query("
-            SELECT ID AS id, Name FROM forums ORDER BY Sort
-        ");
-        return self::$db->to_array('id', MYSQLI_ASSOC, false);
-    }
-
     public function forumList(): array {
         $list = self::$cache->get_value(self::CACHE_LIST);
         if ($list === false) {
@@ -201,6 +191,14 @@ class Forum extends \Gazelle\BaseManager {
             self::CACHE_LIST,
         ]);
         return $this;
+    }
+
+    /**
+     * Transform a list of forum ids into forum names (returning the id as-is if
+     * the forum does not exist. Main use is in templates.
+     */
+    public function nameList(array $idList): array {
+        return array_map(fn ($id) => $this->findById($id)?->name() ?? $id, $idList);
     }
 
     /**

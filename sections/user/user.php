@@ -11,25 +11,25 @@ use Gazelle\Enum\UserTokenType;
 use Gazelle\User\Vote;
 
 $userMan = new Gazelle\Manager\User();
-$User = $userMan->findById((int)$_GET['id']);
-if (is_null($User)) {
+$user = $userMan->findById((int)$_GET['id']);
+if (is_null($user)) {
     header("Location: log.php?search=User+" . (int)$_GET['id']);
     exit;
 }
 
-$UserID      = $User->id();
-$Username    = $User->username();
-$Class       = $User->primaryClass();
-$donor       = new Gazelle\User\Donor($User);
-$userBonus   = new Gazelle\User\Bonus($User);
+$userId      = $user->id();
+$username    = $user->username();
+$Class       = $user->primaryClass();
+$donor       = new Gazelle\User\Donor($user);
+$userBonus   = new Gazelle\User\Bonus($user);
 $viewerBonus = new Gazelle\User\Bonus($Viewer);
-$history     = new Gazelle\User\History($User);
-$limiter     = new Gazelle\User\UserclassRateLimit($User);
+$history     = new Gazelle\User\History($user);
+$limiter     = new Gazelle\User\UserclassRateLimit($user);
 $donorMan    = new Gazelle\Manager\Donation();
 $ipv4        = new Gazelle\Manager\IPv4();
 $tgMan       = (new Gazelle\Manager\TGroup())->setViewer($Viewer);
 $resetToken  = $Viewer->permitted('users_mod')
-    ? (new Gazelle\Manager\UserToken())->findByUser($User, UserTokenType::password)
+    ? (new Gazelle\Manager\UserToken())->findByUser($user, UserTokenType::password)
     : false;
 
 if (!empty($_POST)) {
@@ -45,43 +45,43 @@ if (!empty($_POST)) {
     if (!preg_match('/^fl-(other-[1-4])$/', $_POST['fltype'], $match)) {
         error(403);
     }
-    $FL_OTHER_tokens = $viewerBonus->purchaseTokenOther($User, $match[1], $_POST['message'] ?? '');
+    $FL_OTHER_tokens = $viewerBonus->purchaseTokenOther($user, $match[1], $_POST['message'] ?? '');
     if (!$FL_OTHER_tokens) {
         error('Purchase of tokens not concluded. Either you lacked funds or they have chosen to decline FL tokens.');
     }
 }
 
-if ($UserID == $Viewer->id()) {
+if ($userId == $Viewer->id()) {
     $Preview = (bool)($_GET['preview'] ?? false);
     $OwnProfile = !$Preview;
-    $User->forceCacheFlush(true);
+    $user->forceCacheFlush(true);
 } else {
     $OwnProfile = false;
     // Don't allow any kind of previewing on other profiles
     $Preview = false;
 }
 $previewer = $Preview ? $userMan->findById(PARANOIA_PREVIEW_USER) : $Viewer;
-$Paranoia  = $Preview ? explode(',', $_GET['paranoia']) : $User->paranoia();
+$Paranoia  = $Preview ? explode(',', $_GET['paranoia']) : $user->paranoia();
 
 function check_paranoia_here(?string $Setting): int|false {
-    global $Paranoia, $Class, $UserID, $Preview;
+    global $Paranoia, $Class, $userId, $Preview;
     if (!$Setting) {
         return PARANOIA_ALLOWED;
     }
     if ($Preview) {
         return check_paranoia($Setting, $Paranoia ?? [], $Class);
     } else {
-        return check_paranoia($Setting, $Paranoia ?? [], $Class, $UserID);
+        return check_paranoia($Setting, $Paranoia ?? [], $Class, $userId);
     }
 }
 
 // Image proxy CTs
-$DisplayCustomTitle = !empty($User->title())
+$DisplayCustomTitle = !empty($user->title())
     ? preg_replace_callback('/src=("?)(http.+?)(["\s>])/',
-        fn ($m) => 'src=' . $m[1] . image_cache_encode($m[2]) . $m[3], $User->title())
-    : $User->title();
+        fn ($m) => 'src=' . $m[1] . image_cache_encode($m[2]) . $m[3], $user->title())
+    : $user->title();
 
-View::show_header($Username, [
+View::show_header($username, [
     'js' => 'jquery.imagesloaded,jquery.wookmark,user,bbcode,requests,lastfm,comments,info_paster'
         . ($Viewer->permitted('users_view_ips') ? ',resolve-ip' : '')
         . ($Viewer->permitted('users_mod') ? ',reports' : ''),
@@ -93,43 +93,43 @@ echo $Twig->render('user/header.twig', [
     'freeleech'  => [
         'item'   => $OwnProfile ? [] : $viewerBonus->otherList(),
         'other'  => $FL_OTHER_tokens ?? null,
-        'latest' => $viewerBonus->otherLatest($User),
+        'latest' => $viewerBonus->otherLatest($user),
     ],
     'friend'       => new Gazelle\User\Friend($Viewer),
     'preview_user' => $previewer,
-    'user'         => $User,
+    'user'         => $user,
     'userMan'      => $userMan,
     'viewer'       => $Viewer,
 ]);
 
 echo $Twig->render('user/sidebar.twig', [
-    'ancestry'      => $userMan->ancestry($User),
+    'ancestry'      => $userMan->ancestry($user),
     'applicant'     => new Gazelle\Manager\Applicant(),
     'invite_source' => $Viewer->permitted('admin_manage_invite_source')
-        ? new Gazelle\Manager\InviteSource() : null,
-    'next_class'    => $nextClass = $User->nextClass($userMan),
-    'user'          => $User,
+        ? (new Gazelle\Manager\InviteSource())->findSourceNameByUser($user) : null,
+    'next_class'    => $user->nextClass($userMan),
+    'user'          => $user,
     'viewer'        => $Viewer,
 ]);
 
 // Last.fm statistics and comparability
-$lastfmInfo = (new Gazelle\Util\LastFM())->userInfo($User);
+$lastfmInfo = (new Gazelle\Util\LastFM())->userInfo($user);
 if ($lastfmInfo) {
     echo $Twig->render('user/lastfm.twig', [
-        'can_reload'  => ($OwnProfile && $Cache->get_value("lastfm_clear_cache_$UserID") === false) || $Viewer->permitted('users_mod'),
+        'can_reload'  => ($OwnProfile && $Cache->get_value("lastfm_clear_cache_$userId") === false) || $Viewer->permitted('users_mod'),
         'info'        => $lastfmInfo,
         'own_profile' => $OwnProfile,
     ]);
 }
 
-$vote             = new Vote($User);
-$stats            = $User->stats();
+$vote             = new Vote($user);
+$stats            = $user->stats();
 $Uploads          = check_paranoia_here('uploads+') ? $stats->uploadTotal() : 0;
 $rank = new Gazelle\UserRank(
     new Gazelle\UserRank\Configuration(RANKING_WEIGHT),
     [
-        'uploaded'   => $User->uploadedSize(),
-        'downloaded' => $User->downloadedSize(),
+        'uploaded'   => $user->uploadedSize(),
+        'downloaded' => $user->downloadedSize(),
         'uploads'    => $Uploads,
         'requests'   => $stats->requestBountyTotal(),
         'posts'      => $stats->forumPostTotal(),
@@ -174,11 +174,11 @@ if ($OwnProfile || $Viewer->permitted('admin_bp_history')) { ?>
                 <li class="tooltip<?= !$OwnProfile && $Viewer->permitted('admin_bp_history') ? ' paranoia_override' : '' ?>" title="<?=number_format($rank->raw('bonus')) ?> spent">Bonus points spent: <?= $rank->rank('bonus') ?></li>
 <?php
 }
-if ($User->propertyVisibleMulti($previewer, ['artistsadded', 'collagecontribs+', 'downloaded', 'requestsfilled_count', 'requestsvoted_bounty', 'torrentcomments++', 'uploaded', 'uploads+', ])) {
+if ($user->propertyVisibleMulti($previewer, ['artistsadded', 'collagecontribs+', 'downloaded', 'requestsfilled_count', 'requestsvoted_bounty', 'torrentcomments++', 'uploaded', 'uploads+', ])) {
 ?>
-                <li<?= $User->classLevel() >= 900 ? ' title="Infinite"' : '' ?>><strong>Overall rank: <?= is_null($rank->score())
+                <li<?= $user->classLevel() >= 900 ? ' title="Infinite"' : '' ?>><strong>Overall rank: <?= is_null($rank->score())
                     ? 'Server busy'
-                    : ($User->classLevel() >= 900 ? '&nbsp;&infin;' : number_format($rank->score() * $User->rankFactor())) ?></strong></li>
+                    : ($user->classLevel() >= 900 ? '&nbsp;&infin;' : number_format($rank->score() * $user->rankFactor())) ?></strong></li>
 <?php } ?>
             </ul>
         </div>
@@ -187,20 +187,20 @@ if ($User->propertyVisibleMulti($previewer, ['artistsadded', 'collagecontribs+',
             <div class="head colhead_dark">History</div>
             <ul class="stats nobullet">
 <?php if ($Viewer->permitted('users_view_email')) { ?>
-                <li>Emails: <?=number_format($history->emailTotal())?> <a href="userhistory.php?action=email&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
+                <li>Emails: <?=number_format($history->emailTotal())?> <a href="userhistory.php?action=email&amp;userid=<?=$userId?>" class="brackets">View</a></li>
 <?php
     }
     if ($Viewer->permitted('users_view_ips')) {
 ?>
-                <li>IPs: <?=number_format($ipv4->userTotal($User))?> <a href="userhistory.php?action=ips&amp;userid=<?=$UserID?>" class="brackets">View</a>&nbsp;<a href="userhistory.php?action=ips&amp;userid=<?=$UserID?>&amp;usersonly=1" class="brackets">View users</a></li>
+                <li>IPs: <?=number_format($ipv4->userTotal($user))?> <a href="userhistory.php?action=ips&amp;userid=<?=$userId?>" class="brackets">View</a>&nbsp;<a href="userhistory.php?action=ips&amp;userid=<?=$userId?>&amp;usersonly=1" class="brackets">View users</a></li>
 <?php   if ($Viewer->permitted('users_mod')) { ?>
-                <li>Tracker IPs: <?=number_format($User->trackerIPCount())?> <a href="userhistory.php?action=tracker_ips&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
+                <li>Tracker IPs: <?=number_format($user->trackerIPCount())?> <a href="userhistory.php?action=tracker_ips&amp;userid=<?=$userId?>" class="brackets">View</a></li>
 <?php
         }
     }
     if ($Viewer->permitted('users_view_keys')) {
 ?>
-                <li>Announce keys: <?=number_format($User->announceKeyCount())?> <a href="userhistory.php?action=passkeys&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
+                <li>Announce keys: <?=number_format($user->announceKeyCount())?> <a href="userhistory.php?action=passkeys&amp;userid=<?=$userId?>" class="brackets">View</a></li>
 <?php
     }
     if ($Viewer->permitted('users_mod')) {
@@ -208,8 +208,8 @@ if ($User->propertyVisibleMulti($previewer, ['artistsadded', 'collagecontribs+',
 ?>
                 <li><span class="tooltip" title="User requested a password reset by email">Password reset expiry: <?= time_diff($resetToken->expiry()) ?></li>
 <?php   } ?>
-                <li>Password history: <?=number_format($User->passwordCount())?> <a href="userhistory.php?action=passwords&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
-                <li>Stats: N/A <a href="userhistory.php?action=stats&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
+                <li>Password history: <?=number_format($user->passwordCount())?> <a href="userhistory.php?action=passwords&amp;userid=<?=$userId?>" class="brackets">View</a></li>
+                <li>Stats: N/A <a href="userhistory.php?action=stats&amp;userid=<?=$userId?>" class="brackets">View</a></li>
 <?php } ?>
             </ul>
         </div>
@@ -219,14 +219,14 @@ if ($User->propertyVisibleMulti($previewer, ['artistsadded', 'collagecontribs+',
 
 if (check_paranoia_here('snatched')) {
     echo $Twig->render('user/tag-snatch.twig', [
-        'user' => $User,
+        'user' => $user,
     ]);
 }
 
 echo $Twig->render('user/sidebar-stats.twig', [
     'prl'            => $limiter,
     'upload_total'   => $Uploads,
-    'user'           => $User,
+    'user'           => $user,
     'viewer'         => $Viewer,
     'visible'        => [
         'collages+'             => check_paranoia_here('collages+'),
@@ -268,19 +268,19 @@ if ($Viewer->permitted("users_mod") || $OwnProfile || $donor->isVisible()) {
     </div>
     <div class="main_column">
 <?php
-if ($Viewer->permitted('users_mod') && $User->onRatioWatch()) {
+if ($Viewer->permitted('users_mod') && $user->onRatioWatch()) {
     echo $Twig->render('user/ratio-watch.twig', [
-        'user' => $User,
+        'user' => $user,
     ]);
 }
 ?>
         <div class="box">
             <div class="head">
-                <?= html_escape($User->profileTitle()) ?>
+                <?= html_escape($user->profileTitle()) ?>
                 <span style="float: right;"><a href="#" onclick="$('#profilediv').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets">Hide</a></span>&nbsp;
             </div>
             <div class="pad profileinfo" id="profilediv">
-                <?= $User->profileInfo() ? Text::full_format($User->profileInfo()) : 'This profile is currently empty.' ?>
+                <?= $user->profileInfo() ? Text::full_format($user->profileInfo()) : 'This profile is currently empty.' ?>
             </div>
         </div>
 <?php
@@ -301,8 +301,8 @@ foreach (range(1, 4) as $level) {
 
 if (check_paranoia_here('snatched')) {
     echo $Twig->render('user/recent.twig', [
-        'id'     => $UserID,
-        'recent' => array_map(fn ($id) => $tgMan->findById($id), $User->snatch()->recentSnatchList()),
+        'id'     => $userId,
+        'recent' => array_map(fn ($id) => $tgMan->findById($id), $user->snatch()->recentSnatchList()),
         'title'  => 'Snatches',
         'type'   => 'snatched',
         'thing'  => 'snatches',
@@ -311,24 +311,24 @@ if (check_paranoia_here('snatched')) {
 
 if (check_paranoia_here('uploads')) {
     echo $Twig->render('user/recent.twig', [
-        'id'     => $UserID,
-        'recent' => array_map(fn ($id) => $tgMan->findById($id), $User->recentUploadList()),
+        'id'     => $userId,
+        'recent' => array_map(fn ($id) => $tgMan->findById($id), $user->recentUploadList()),
         'title'  => 'Uploads',
         'type'   => 'uploaded',
         'thing'  => 'uploads',
     ]);
 }
 
-if ($OwnProfile || !$User->hasAttr('hide-vote-recent') || $Viewer->permitted('view-release-votes')) {
+if ($OwnProfile || !$user->hasAttr('hide-vote-recent') || $Viewer->permitted('view-release-votes')) {
     echo $Twig->render('user/recent-vote.twig', [
         'recent'    => $vote->recent($tgMan),
-        'show_link' => $OwnProfile || !$User->hasAttr('hide-vote-history') || $Viewer->permitted('view-release-votes'),
-        'user_id'   => $UserID,
+        'show_link' => $OwnProfile || !$user->hasAttr('hide-vote-history') || $Viewer->permitted('view-release-votes'),
+        'user_id'   => $userId,
     ]);
 }
 
 echo $Twig->render('user/collage-list.twig', [
-    'list'    => (new Gazelle\Manager\Collage())->findPersonalByUser($User),
+    'list'    => (new Gazelle\Manager\Collage())->findPersonalByUser($user),
     'manager' => $tgMan,
 ]);
 
@@ -339,19 +339,19 @@ echo $Twig->render('user/collage-list.twig', [
 
 // Linked accounts
 if ($Viewer->permitted('users_linked_users')) {
-    [$linkGroupId, $comments, $list] = (new Gazelle\Manager\UserLink($User))->info();
+    [$linkGroupId, $comments, $list] = (new Gazelle\Manager\UserLink($user))->info();
     echo $Twig->render('user/linked.twig', [
         'auth'     => $Viewer->auth(),
         'comments' => $comments,
         'group_id' => $linkGroupId,
         'hash'     => sha1($comments ?? ''),
         'list'     => $list,
-        'user_id'  => $UserID,
+        'user_id'  => $userId,
     ]);
 }
 
 if ($Viewer->permitted('users_view_invites')) {
-    $tree = new Gazelle\User\InviteTree($User, $userMan);
+    $tree = new Gazelle\User\InviteTree($user, $userMan);
     if ($tree->hasInvitees()) {
 ?>
         <div class="box" id="invitetree_box">
@@ -361,7 +361,7 @@ if ($Viewer->permitted('users_view_invites')) {
             <div id="invitetree" class="hidden">
                 <?= $Twig->render('user/invite-tree.twig', [
                     ...$tree->details($Viewer),
-                    'user'   => $User,
+                    'user'   => $user,
                     'viewer' => $Viewer,
                 ]) ?>
             </div>
@@ -376,22 +376,22 @@ if ($Viewer->permitted('users_give_donor')) {
     ]);
 }
 
-if (!$Viewer->disableRequests() && $User->propertyVisible($previewer, 'requestsvoted_list')) {
+if (!$Viewer->disableRequests() && $user->propertyVisible($previewer, 'requestsvoted_list')) {
     echo $Twig->render('request/user-unfilled.twig', [
         'bounty' => $Viewer->ordinal()->value('request-bounty-vote'),
-        'list'   => (new Gazelle\Manager\Request())->findUnfilledByUser($User, 100),
+        'list'   => (new Gazelle\Manager\Request())->findUnfilledByUser($user, 100),
         'viewer' => $Viewer,
     ]);
 }
 
 if ($Viewer->permitted('users_mod') || $Viewer->isStaffPMReader()) {
     echo $Twig->render('admin/staffpm-list.twig', [
-        'list' => (new Gazelle\Staff($Viewer))->userStaffPmList($User),
+        'list' => (new Gazelle\Staff($Viewer))->userStaffPmList($user),
     ]);
 }
 
 if ($Viewer->permitted('admin_reports')) {
-    $reports = (new Gazelle\Manager\Report($userMan))->findByReportedUser($User);
+    $reports = (new Gazelle\Manager\Report($userMan))->findByReportedUser($user);
     if ($reports) {
         echo $Twig->render('admin/user-reports-list.twig', [
             'list' => $reports
@@ -401,7 +401,7 @@ if ($Viewer->permitted('admin_reports')) {
 
 // Displays a table of forum warnings viewable only to Forum Moderators
 if ($Viewer->permitted('users_warn')) {
-    $ForumWarnings = $User->forumWarning();
+    $ForumWarnings = $user->forumWarning();
     if ($ForumWarnings) {
 ?>
 <div class="box">
@@ -417,204 +417,26 @@ if ($Viewer->permitted('users_warn')) {
 if ($Viewer->permitted('users_auto_reports')) {
     $raTypeMan = new \Gazelle\Manager\ReportAutoType();
     $raSearch = new Gazelle\Search\ReportAuto(new \Gazelle\Manager\ReportAuto($raTypeMan), $raTypeMan);
-    $openReports = $raSearch->setUser($User)->setState(\Gazelle\Enum\ReportAutoState::open)->userTotalList($userMan);
+    $openReports = $raSearch->setUser($user)->setState(\Gazelle\Enum\ReportAutoState::open)->userTotalList($userMan);
     if ($openReports && $openReports[0][1]) { ?>
 <div class="box">
     <div class="head">
-        <a href="report_auto.php?userid=<?=$User->id()?>"><?=$openReports[0][1]?> open automated report<?=plural($openReports[0][1])?></a>
+        <a href="report_auto.php?userid=<?=$user->id()?>"><?=$openReports[0][1]?> open automated report<?=plural($openReports[0][1])?></a>
     </div>
 </div>
 <?php
     }
 }
 
-if ($Viewer->permitted('users_mod') || $Viewer->isStaff()) { ?>
-        <form class="manage_form" name="user" id="form" action="user.php" method="post">
-        <input type="hidden" name="action" value="moderate" />
-        <input type="hidden" name="userid" value="<?=$UserID?>" />
-        <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
-
-        <div class="box box2" id="staff_notes_box">
-            <div class="head">
-                Staff Notes
-                <a href="#" name="admincommentbutton" onclick="ChangeTo('text'); return false;" class="brackets">Edit</a>
-                <a href="#" onclick="$('#staffnotes').gtoggle(); return false;" class="brackets">Toggle</a>
-            </div>
-            <div id="staffnotes" class="pad">
-                <input type="hidden" name="comment_hash" value="<?= $User->info()['CommentHash'] ?>" />
-                <div id="admincommentlinks" class="AdminComment" style="width: 98%;"><?=Text::full_format($User->staffNotes())?></div>
-                <textarea id="admincomment" name="admincomment" onkeyup="resize('admincomment');"
-                          class="AdminComment hidden" name="AdminComment" cols="65" rows="26" style="width: 98%;"><?=
-                    html_escape($User->staffNotes())?></textarea>
-                <a href="#" name="admincommentbutton" onclick="ChangeTo('text'); return false;"
-                   class="brackets">Toggle edit</a>
-                <script type="text/javascript">
-                    resize('admincomment');
-                </script>
-            </div>
-        </div>
-
-<table class="layout" id="user_info_box">
-    <tr class="colhead">
-        <td colspan="2">
-            User Information
-        </td>
-    </tr>
-
-<?php
-    if ($Viewer->permitted('users_edit_usernames')) {
-        echo $Twig->render('user/edit-username.twig', [
-            'username' => $Username,
-        ]);
-    }
-
-    if ($Viewer->permitted('users_edit_titles')) {
-        echo $Twig->render('user/edit-title.twig', [
-            'title' => $User->title(),
-        ]);
-    }
-
-    if ($Viewer->permitted('users_promote_below') || $Viewer->permitted('users_promote_to')) {
-?>
-            <tr>
-                <td class="label">Primary class:</td>
-                <td>
-                    <select name="Class">
-<?php
-        $ClassLevels = $userMan->classLevelList();
-        foreach ($ClassLevels as $level => $CurClass) {
-            if ($CurClass['Secondary']) {
-                continue;
-            } elseif (
-                !$OwnProfile
-                && !($Viewer->permitted('users_promote_to')
-                    && $level <= $Viewer->privilege()->effectiveClassLevel())
-                && !($Viewer->permitted('users_promote_below')
-                    && $level < $Viewer->privilege()->effectiveClassLevel())
-            ) {
-                break;
-            } elseif ($level > $Viewer->privilege()->effectiveClassLevel()) {
-                break;
-            }
-            if ($User->classLevel() == $level) {
-                $Selected = ' selected="selected"';
-            } else {
-                $Selected = '';
-            }
-?>
-                        <option value="<?=$CurClass['ID']?>"<?=$Selected?>><?=$CurClass['Name'] . ' (' . $CurClass['Level'] . ')'?></option>
-<?php        } ?>
-                    </select>
-                </td>
-            </tr>
-<?php
-    }
-
-    if ($Viewer->permitted('users_promote_below') || $Viewer->permitted('users_promote_to')) {
-        echo $Twig->render('user/edit-secondary-class.twig', [
-            'permission' => $User->privilege()->secondaryClassesList(),
-            'max_level'  => $Viewer->privilege()->effectiveClassLevel() - ($Viewer->permitted('users_promote_up') ? 0 : 1),
-        ]);
-    }
-
-    if ($Viewer->permittedAny('users_make_invisible', 'admin_tracker')) {
-        echo $Twig->render('user/edit-peer-visibility.twig', [
-            'is_visible' => $User->isVisible(),
-            'is_traced'  => $Viewer->permitted('admin_tracker')
-                && (new Gazelle\Tracker())->isTraced($User),
-            'viewer'     => $Viewer,
-        ]);
-    }
-
-    if ($Viewer->permitted('admin_rate_limit_manage')) {
-        echo $Twig->render('user/edit-rate-limit.twig', [
-            'prl'  => $limiter,
-            'user' => $User,
-        ]);
-    }
-
-    if ($Viewer->permitted('users_edit_ratio') || ($Viewer->permitted('users_edit_own_ratio') && $OwnProfile)) {
-        echo $Twig->render('user/edit-buffer.twig', [
-            'user'  => $User,
-            'donor' => $donor,
-        ]);
-    }
-
-    if ($Viewer->permitted('users_edit_invites')) {
-        echo $Twig->render('user/edit-invite.twig', [
-            'amount' => $User->unusedInviteTotal(),
-        ]);
-    }
-
-    if ($Viewer->permitted('admin_manage_user_fls')) {
-        echo $Twig->render('user/edit-fltoken.twig', [
-            'amount' => $User->tokenCount(),
-        ]);
-    }
-
-    if ($Viewer->permitted('admin_manage_fls') || ($Viewer->permitted('users_mod') && $OwnProfile)) {
-        echo $Twig->render('user/edit-remark.twig', [
-            'user' => $User,
-        ]);
-    }
-
-    if ($Viewer->permitted('users_edit_reset_keys')) {
-        echo $Twig->render('user/edit-reset.twig');
-    }
-
-    if ($Viewer->permitted('users_edit_password')) {
-        echo $Twig->render('user/edit-password.twig', [
-            'user' => $User,
-        ]);
-    }
-?>
-</table>
-
-<?php
-    if ($Viewer->permitted('users_disable_posts') || $Viewer->permitted('users_disable_any')) {
-        $fm = new Gazelle\Manager\Forum();
-        echo $Twig->render('user/edit-privileges.twig', [
-            'asn'     => new Gazelle\Search\ASN(),
-            'history' => $history,
-            'user'    => $User,
-            'viewer'  => $Viewer,
-            'forum'   => [
-                'restricted_names' => implode(', ', array_map(fn ($id) => $fm->findById($id)?->name() ?? $id, $User->forbiddenForums())),
-                'permitted_names'  => implode(', ', array_map(fn ($id) => $fm->findById($id)?->name() ?? $id, $User->permittedForums())),
-            ],
-        ]);
-    }
-
-    if ($User->isInterviewer() || $User->isRecruiter() || $User->isStaff()) {
-        echo $Twig->render('user/edit-invite-sources.twig', [
-            'list' => (new \Gazelle\Manager\InviteSource())->inviterConfiguration($User),
-        ]);
-    }
-
-    if ($Viewer->permitted('users_give_donor')) {
-        echo $Twig->render('donation/admin-panel.twig', [
-            'donor' => $donor,
-        ]);
-    }
-
-    if ($Viewer->permitted('users_warn')) {
-        echo $Twig->render('user/edit-warn.twig', [
-            'user' => $User,
-        ]);
-    }
-
-    if ($Viewer->permitted('users_disable_any')) {
-        echo $Twig->render('user/edit-lock.twig', [
-            'user'   => $User,
-            'viewer' => $Viewer,
-        ]);
-    }
-
-    echo $Twig->render('user/edit-submit.twig');
-?>
-        </form>
-<?php } /* $Viewer->permitted('users_mod') */ ?>
-    </div>
-</div>
-<?php
-View::show_footer();
+echo $Twig->render('user/main-column.twig', [
+    'asn'           => new Gazelle\Search\ASN(),
+    'class_list'    => $userMan->classLevelList(),
+    'donor'         => $donor,
+    'forum_man'     => new Gazelle\Manager\Forum(),
+    'history'       => $history,
+    'invite_source' => (new Gazelle\Manager\InviteSource())->inviterConfiguration($user),
+    'is_traced'     => $Viewer->permitted('admin_tracker') && (new Gazelle\Tracker())->isTraced($user),
+    'prl'           => $limiter,
+    'user'          => $user,
+    'viewer'        => $Viewer,
+]);

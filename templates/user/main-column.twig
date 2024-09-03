@@ -1,0 +1,193 @@
+{% from 'macro/form.twig' import selected %}
+{% set own_profile = user.id == viewer.id %}
+{% if viewer.isStaff %}
+        <form class="manage_form" name="user" id="form" action="user.php" method="post">
+        <input type="hidden" name="action" value="moderate" />
+        <input type="hidden" name="userid" value="{{ user.id }}" />
+        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+
+        <div class="box box2" id="staff_notes_box">
+            <div class="head">
+                Staff Notes
+                <a href="#" name="admincommentbutton" onclick="ChangeTo('text'); return false;" class="brackets">Edit</a>
+                <a href="#" onclick="$('#staffnotes').gtoggle(); return false;" class="brackets">Toggle</a>
+            </div>
+            <div id="staffnotes" class="pad">
+                <input type="hidden" name="comment_hash" value="{{ user.info.CommentHash }}" />
+                <div id="admincommentlinks" class="AdminComment" style="width: 98%;">{{ user.staffNotes|bb_format }}</div>
+                <textarea id="admincomment" name="admincomment" onkeyup="resize('admincomment');" class="AdminComment hidden" cols="65" rows="26" style="width: 98%;">{{
+                    user.staffNotes }}</textarea>
+                <a href="#" name="admincommentbutton" onclick="ChangeTo('text'); return false;"
+                   class="brackets">Toggle edit</a>
+                <script type="text/javascript">
+                    resize('admincomment');
+                </script>
+            </div>
+        </div>
+
+<table class="layout" id="user_info_box">
+    <tr class="colhead">
+        <td colspan="2">
+            User Information
+        </td>
+    </tr>
+
+{%  if viewer.permitted('users_edit_usernames') %}
+{%      include 'user/edit-username.twig' with {'username': user.username } only %}
+{%  endif %}
+
+{%  if viewer.permitted('users_edit_titles') %}
+{%      include 'user/edit-title.twig' with {'title': user.title } only %}
+{%  endif %}
+
+{%  if viewer.permittedAny('users_promote_below', 'users_promote_to') %}
+            <tr>
+                <td class="label">Primary class:</td>
+                <td>
+                    <select name="Class">
+{%      for level, userclass in class_list %}
+{%          if userclass.Secondary == '0'
+                and not own_profile
+                and (
+                    (viewer.permitted('users_promote_to') and level <= viewer.privilege.effectiveClassLevel)
+                    or
+                    (viewer.permitted('users_promote_below') and level < viewer.privilege.effectiveClassLevel)
+                )
+%}
+                        <option value="{{ userclass.ID }}"{{ selected(user.classLevel == level)
+                            }}>{{ userclass.Name }} ({{ userclass.Level }})</option>
+{%          endif %}
+{%      endfor %}
+                    </select>
+                </td>
+            </tr>
+{%      include 'user/edit-secondary-class.twig' with {
+            'permission' : user.privilege.secondaryClassesList,
+            'max_level'  : viewer.privilege.effectiveClassLevel - (viewer.permitted('users_promote_up') ? 0 : 1),
+        } only %}
+{%  endif %}
+
+{%  if viewer.permittedAny('users_make_invisible', 'admin_tracker') %}
+{%      include 'user/edit-peer-visibility.twig' with {
+            'is_visible' : user.isVisible,
+            'is_traced'  : is_traced,
+            'viewer'     : viewer,
+        } only %}
+{%  endif %}
+
+{%  if viewer.permitted('admin_rate_limit_manage') %}
+{%      include 'user/edit-rate-limit.twig' with {
+            'prl'  : prl,
+            'user' : user,
+        } only %}
+{%  endif %}
+
+{%  if viewer.permitted('users_edit_ratio') or (own_profile and viewer.permitted('users_edit_own_ratio')) %}
+{%      include 'user/edit-buffer.twig' with {
+            'user'  : user,
+            'donor' : donor,
+        } only %}
+{%  endif %}
+
+{%  if viewer.permitted('users_edit_invites') %}
+{%      include 'user/edit-invite.twig' with {'amount': user.unusedInviteTotal} only %}
+{%  endif %}
+
+{%  if viewer.permitted('admin_manage_user_fls') %}
+{%      include 'user/edit-fltoken.twig' with {'amount' : user.tokenCount} only %}
+{%  endif %}
+
+{%  if viewer.permitted('admin_manage_fls') or (own_profile and viewer.permitted('users_mod')) %}
+{%      include 'user/edit-remark.twig' with {'user': user} only %}
+{%  endif %}
+
+{%  if viewer.permitted('users_edit_reset_keys') %}
+<tr>
+    <td class="label">Reset:</td>
+    <td>
+        <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="ResetRatioWatch" id="ResetRatioWatch" />
+        <label for="ResetRatioWatch">Ratio watch</label></span>
+        <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="ResetPasskey" id="ResetPasskey" />
+        <label for="ResetPasskey">Passkey</label></span>
+        <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="ResetAuthkey" id="ResetAuthkey" />
+        <label for="ResetAuthkey">Authkey</label></span>
+        <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="ResetIPHistory" id="ResetIPHistory" />
+        <label for="ResetIPHistory">IP history</label></span>
+        <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="ResetEmailHistory" id="ResetEmailHistory" />
+        <label for="ResetEmailHistory">Email history</label></span>
+        <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="ResetSnatchList" id="ResetSnatchList" />
+        <label for="ResetSnatchList">Snatch list</label></span>
+        <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="ResetDownloadList" id="ResetDownloadList" />
+        <label for="ResetDownloadList">Download list</label></span>
+    </td>
+</tr>
+{%  endif %}
+
+{%  if viewer.permitted('users_edit_password') %}
+{%      include 'user/edit-password.twig' with {'user': user} only %}
+{%  endif %}
+
+</table>
+
+{%  if viewer.permittedAny('users_disable_posts', 'users_disable_any') %}
+{%      include 'user/edit-privileges.twig' with {
+            'asn'     : asn,
+            'history' : history,
+            'user'    : user,
+            'viewer'  : viewer,
+            'forum'   : {
+                'restricted_names' : forum_man.nameList(user.forbiddenForums),
+                'permitted_names'  : forum_man.nameList(user.permittedForums),
+            }
+        } only %}
+{%  endif %}
+
+{%  if user.isInterviewer or user.isRecruiter or user.isStaff %}
+{%      include 'user/edit-invite-sources.twig' with {'list': invite_source} only %}
+{%  endif %}
+
+{%  if viewer.permitted('users_give_donor') %}
+{%      include 'donation/admin-panel.twig' with {'donor': donor} only %}
+{%  endif %}
+
+{%  if viewer.permitted('users_warn') %}
+{%      include 'user/edit-warn.twig' with {'user': user} only %}
+{%  endif %}
+
+{%  if viewer.permitted('users_disable_any') %}
+{%      include 'user/edit-lock.twig' with {
+            'user'   : user,
+            'viewer' : viewer,
+        } only %}
+{%  endif %}
+
+<table class="layout" id="submit_box">
+    <tr class="colhead">
+        <td colspan="2">
+            Submit
+        </td>
+    </tr>
+    <tr>
+        <td class="label">Paste user stats:</td>
+        <td>
+            <button type="button" id="paster">Paste</button>
+        </td>
+    </tr>
+    <tr>
+        <td class="label tooltip" title="This message will be entered into staff notes only.">Reason:</td>
+        <td>
+            <textarea rows="1" cols="35" class="wide_input_text" name="Reason" id="Reason" onkeyup="resize('Reason');"></textarea>
+        </td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td>
+            <input type="submit" value="Save changes" />
+        </td>
+    </tr>
+</table>
+</form>
+{% endif %}
+    </div>
+</div>
+{{ footer() }}

@@ -71,7 +71,7 @@ class ForumTest extends TestCase {
 
         // Forums
         $forumMan     = new \Gazelle\Manager\Forum();
-        $initial      = count($forumMan->nameList());
+        $initial      = count($forumMan->forumList());
         $tocTotal     = count($forumMan->tableOfContentsMain());
         $admin        = $this->userList['admin'];
         $user         = $this->userList['user'];
@@ -127,17 +127,18 @@ class ForumTest extends TestCase {
             autoLockWeeks:  52,
         );
 
-        $nameList = $forumMan->nameList();
-        $this->assertCount($initial + 2, $nameList, 'forum-name-list');
-        $this->assertEquals($forumName, $nameList[$this->forum->id()]['Name'], 'forum-name-list-name-0');
-        $this->assertEquals($this->extra->id(), $nameList[$this->extra->id()]['id'], 'forum-name-list-id-1');
-
         $forumList = $forumMan->forumList();
         $idList = array_map(fn ($f) => $f->id(), $forumList);
         $this->assertCount($initial + 2, $idList, 'forum-id-list-count');
         $this->assertTrue(in_array($this->extra->id(), $idList), 'forum-id-list-sequence');
         $this->assertCount($userTocTotal + 1, $forumMan->tableOfContents($user), 'forum-test-toc-user');
         $this->assertEquals(0, $forumMan->subscribedForumTotal($user), 'forum-subscribed-total-user');
+
+        $this->assertEquals(
+            [$forumName, 'phpunit announcements'],
+            $forumMan->nameList([$this->forum->id(), $this->extra->id()]),
+            'forum-name-list'
+        );
 
         // Forum Threads
         $threadMan = new \Gazelle\Manager\ForumThread();
