@@ -113,12 +113,12 @@ class ReportAuto extends BasePgObject {
     }
 
     /**
-     * returns bbcode string with details about the report
+     * returns html string with details about the report
      *
      * you will want to override this in a custom class for most report types
      */
     public function details(): string {
-        return '[pre]' . json_encode($this->data(), JSON_PRETTY_PRINT) . '[/pre]';
+        return \Text::full_format('[pre]' . json_encode($this->data(), JSON_PRETTY_PRINT) . '[/pre]');
     }
 
     /**

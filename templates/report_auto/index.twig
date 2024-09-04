@@ -64,7 +64,7 @@
                             by {{ report.ownerId|user_url }}</span>
                         {% endif %}
                     </div>
-                    <div class="details">{{ report.details|bb_format }}</div>
+                    <div class="details">{{ report.details|raw }}</div>
                     <div class="buttons">
                         {% if report.isResolved %}
                             <button class="action_button" data-action="unresolve" data-id="{{ report.id }}">Unresolve</button>
