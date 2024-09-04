@@ -25,7 +25,7 @@ if ($inviteSourceMan && isset($_GET['edit'])) {
     /**
      * We have:
      *  {
-     *      "user-9112": "s-17",
+     *      "user-9112": "17",
      *      "reason-9112": "https:\/\/whe.re\/user\/4567",
      *  },
      */
@@ -35,7 +35,7 @@ if ($inviteSourceMan && isset($_GET['edit'])) {
         if (!isset($update[$userId])) {
             $update[$userId] = ['user_id' => $userId];
         }
-        $update[$userId]['source'] = $source === '---' ? 0 : explode('-', $source, 2)[1];
+        $update[$userId]['source'] = (int)$source;
     }
     foreach (array_key_filter_and_map('reason-', $_POST) as $userId => $reason) {
         if (!isset($update[$userId])) {

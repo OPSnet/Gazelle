@@ -1,9 +1,9 @@
-{% from 'macro/form.twig' import selected -%}
+{% from 'macro/form.twig' import checked, selected -%}
 {%- macro select_invite_source(user_id, config, source) -%}
 <select name="user-{{ user_id }}">
-    <option name="s-none">---</option>
+    <option value="none">---</option>
     {%- for c in config -%}
-    <option value="s-{{ c.invite_source_id }}"{{ selected(c.invite_source_id == source[user_id].invite_source_id) }}>{{ c.name }}</option>
+    <option value="{{ c.invite_source_id }}"{{ selected(c.invite_source_id == source[user_id].invite_source_id) }}>{{ c.name }}</option>
     {%- endfor -%}
 </select>
 {%- endmacro %}
@@ -85,12 +85,14 @@
                 (E.g. <tt>{{ constant('SITE_URL') }}/user.php?id={{ user.id }}</tt>).
             </div>
         </div>
+        {% if user.isRecruiter or user.isStaff %}
         <div class="field_div">
             <div class="label">Profile information:</div>
             <div class="input">
-                <input type="text" name="reason" size="40" maxlength="255" />
+                <input type="text" name="profile_info" size="40" maxlength="255" />
             </div>
         </div>
+        {% endif %}
         {% if user.isInterviewer or user.isStaff %}
         <div class="field_div">
             <div class="label">Additional notes:</div>
@@ -103,7 +105,7 @@
         <div class="field_div">
             <div class="label">&nbsp;</div>
             <div class="input">
-                <label><input type="checkbox" name="agreement" /> I have read and agree to the information written above.</label>
+                <label><input type="checkbox" name="agreement"{{ checked(is_site_inviter) }} /> I have read and agree to the information written above.</label>
             </div>
         </div>
         <div class="field_div">

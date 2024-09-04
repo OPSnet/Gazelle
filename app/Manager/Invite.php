@@ -18,8 +18,8 @@ class Invite extends \Gazelle\Base {
             ", $user->id(), $inviteKey, $email, $notes, $reason
         );
         $invite = new \Gazelle\Invite($inviteKey);
-        if (preg_match('/^s-(\d+)$/', $source, $match)) {
-            (new \Gazelle\Manager\InviteSource())->createPendingInviteSource((int)$match[1], $inviteKey);
+        if (is_number($source)) {
+            (new \Gazelle\Manager\InviteSource())->createPendingInviteSource((int)$source, $inviteKey);
         }
         self::$db->commit();
         return $invite;
