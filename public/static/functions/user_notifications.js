@@ -1,3 +1,5 @@
+/* global gazURL, noty */
+
 document.addEventListener('DOMContentLoaded', function() {
     var skip = getSkippedPage();
     $('.noty-notification').each(function() {

@@ -1,3 +1,5 @@
+/* global Highcharts */
+
 function initialiseChart(target, title, series, opt) {
     let options = {
         bytes: false

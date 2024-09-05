@@ -37,7 +37,6 @@ export default [
             '@stylistic/js': stylisticJs,  // provides checks for whitespace
         },
         rules: {  // degrade these errors to warnings as a rudimentary baseline
-            "no-undef": "warn",
             "no-unused-vars": "warn",
             "no-prototype-builtins": "warn",
         },

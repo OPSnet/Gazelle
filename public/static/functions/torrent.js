@@ -1,3 +1,8 @@
+/* global ajax, byte_format, error_message, save_message */
+
+let MainArtistCount = 0;
+let StartBox;
+
 function ChangeCategory(catid) {
     if (catid == 1) {
         $('#split_releasetype').gshow();
@@ -234,13 +239,12 @@ function Vote(amount, requestid) {
          amount = 20 * 1024 * 1024;
     }
 
-    var votecount;
+    let votecount;
     if (!requestid) {
         requestid = $('#requestid').raw().value;
         votecount = $('#votecount').raw();
     } else {
         votecount = $('#vote_count_' + requestid).raw();
-        bounty = $('#bounty_' + requestid).raw();
     }
 
     ajax.get('requests.php?action=takevote&id=' + requestid + '&auth=' + authkey + '&amount=' + amount, function (response) {
@@ -261,7 +265,7 @@ function Vote(amount, requestid) {
             }
 
             if ($('#total_bounty').results() > 0) {
-                totalBounty = parseInt($('#total_bounty').raw().value);
+                let totalBounty = parseInt($('#total_bounty').raw().value);
                 totalBounty += (amount * (1 - $('#request_tax').raw().value));
                 $('#total_bounty').raw().value = totalBounty;
                 $('#formatted_bounty').raw().innerHTML = byte_format(totalBounty);

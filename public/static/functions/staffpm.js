@@ -1,3 +1,5 @@
+/* global ajax, resize */
+
 function SetMessage() {
     const id = document.getElementById('common_answers_select').value;
 

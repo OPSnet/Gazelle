@@ -1,3 +1,5 @@
+/* global BBCode */
+
 var TextareaPreview;
 document.addEventListener('DOMContentLoaded', function () {
     'use strict';

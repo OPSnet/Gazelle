@@ -1,3 +1,5 @@
+/* global ajax */
+
 let voteLock = false;
 
 function handleBoxAction(info, direction) {

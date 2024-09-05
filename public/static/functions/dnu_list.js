@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return elements;
         },
         update: function () {
-            request = $.ajax({
+            let request = $.ajax({
                 url: 'tools.php',
                 type: "post",
                 data: 'action=dnu_alter&auth=' + authkey + '&submit=Reorder&' + $(this).sortable('serialize'),

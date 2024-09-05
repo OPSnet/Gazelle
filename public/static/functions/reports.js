@@ -1,3 +1,5 @@
+/* global ajax */
+
 function toggleNotes(id) {
     var style = $('#notes_div_' + id).raw().style.display;
     if (style == "none") {

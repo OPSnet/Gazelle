@@ -1,6 +1,6 @@
 (function() {
 
-var LIMIT = 10;
+const LIMIT = 10;
 var artistId, artistName;
 var artistTags;
 document.addEventListener('DOMContentLoaded', function() {
@@ -17,15 +17,15 @@ function initArtistCloud() {
 
 function loadArtists() {
     $.getJSON('ajax.php?action=similar_artists&id='+artistId+'&limit='+LIMIT, function(response) {
-        var first = true;
-        var ratio;
-        data = response['response'];
+        let first = true;
+        let ratio;
+        let data = response['response'];
         $.each(data, function(key, val) {
             if (first) {
                 ratio = val['score'] / 300;
                 first = false;
             }
-            var score = val['score'] / ratio;
+            let score = val['score'] / ratio;
             score = score <= 150 ? 150 : score;
             addArtist(val['artist_id'], val['name'], score);
         });
@@ -34,7 +34,7 @@ function loadArtists() {
 }
 
 function addArtist(id, name, score) {
-    var item = $('<li><a style="color:#007DC6;" data-weight="' + score + '">' + name + '</a></li>');
+    let item = $('<li><a style="color:#007DC6;" data-weight="' + score + '">' + name + '</a></li>');
     $(item).click(function(e) {
         e.preventDefault();
         reinit(id, name);
@@ -43,7 +43,7 @@ function addArtist(id, name, score) {
 }
 
 function addArtistMain(name) {
-    var item = $('<li><a style="color: #007DC6;" data-weight="350">' + name + '</a></li>');
+    let item = $('<li><a style="color: #007DC6;" data-weight="350">' + name + '</a></li>');
     $("#currentArtist").attr('href', 'artist.php?id=' + artistId);
     $("#currentArtist").text(artistName);
     $(item).click(function(e) {

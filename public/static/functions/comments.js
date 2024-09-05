@@ -1,3 +1,5 @@
+/* global ajax, BBCode, gazURL, resize */
+
 function QuoteJump(event, post) {
     const button  = event.button;
     let url     = '';
@@ -125,7 +127,7 @@ function edit_post(id) {
         $('#reply_box').ghide();
         const boxWidth = location.href.match(/(artist|torrents)\.php/) ? "50" : "80";
         const inputname = is_forum ? "post" : "postid";
-        pmbox = (postuserid != userid)
+        const pmbox = (postuserid != userid)
             ? '<span id="pmbox' + postid + '"><label>PM user on edit? <input type="checkbox" name="pm" value="1" /></label></span>'
             : '';
         $('#bar' + postid).raw().cancel = $('#content' + postid).raw().innerHTML;

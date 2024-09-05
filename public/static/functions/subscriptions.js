@@ -1,3 +1,5 @@
+/* global ajax */
+
 function Subscribe(threadid) {
     ajax.get("userhistory.php?action=thread_subscribe&threadid=" + threadid + "&auth=" + authkey, function() {
         var subscribeLink = $("#subscribelink" + threadid).raw();

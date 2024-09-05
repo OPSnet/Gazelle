@@ -1,3 +1,5 @@
+/* global ajax */
+
 function show_downloads_load (torrentid, page) {
     $('#downloads_' + torrentid).gshow().raw().innerHTML = '<h4>Loading...</h4>';
     $.ajax({

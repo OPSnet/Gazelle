@@ -1,3 +1,5 @@
+/* global ajax, resize, irckey */
+
 function ChangeTo(to) {
     if (to == "text") {
         $('#admincommentlinks').ghide();

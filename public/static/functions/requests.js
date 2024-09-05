@@ -1,3 +1,5 @@
+/* global ajax, byte_format, error_message, ratio, save_message */
+
 function Vote(requestid, amount, votecount, upload, download, rr) {
     if (amount > 100 * 1024 * 1024 && amount > 0.3 * (upload - rr * download)) {
         if (!confirm('This vote is more than 30% of your buffer. Please confirm that you wish to place this large of a vote.')) {

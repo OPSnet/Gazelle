@@ -1,6 +1,8 @@
+/* global gazURL */
+
 document.addEventListener('DOMContentLoaded', function() {
-    var url = new gazURL();
-    var query = url.query;
+    let url = new gazURL();
+    let query = url.query;
     switch (url.path) {
         case "forums":
             if (query['action'] == "new") {

@@ -1,3 +1,5 @@
+/* global ajax */
+
 //Using this instead of comments as comments has pertty damn strict requirements on the variable names required
 
 function Quick_Preview() {

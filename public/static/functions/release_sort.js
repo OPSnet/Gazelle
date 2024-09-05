@@ -1,3 +1,4 @@
+/* global sortable_list_default */
 
 document.addEventListener('DOMContentLoaded', function() {
     let serialize = function () {

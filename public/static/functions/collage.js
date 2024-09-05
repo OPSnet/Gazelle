@@ -1,3 +1,5 @@
+/* global ajax, tooltip_delay */
+
 function Add(input) {
     if (input.checked == false) {
         Cancel();

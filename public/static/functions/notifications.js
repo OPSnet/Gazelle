@@ -1,3 +1,5 @@
+/* global ajax */
+
 function clearItem(torrentId) {
     ajax.get("?action=notify_clear_item&torrentid=" + torrentId + "&auth=" + authkey, function() {
             $("#torrent" + torrentId).remove();

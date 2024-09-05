@@ -1,3 +1,5 @@
+/* global UncheckIfDisabled */
+
 var PUSHOVER = 5;
 var TOASTY = 4;
 var PUSHBULLET = 6;
