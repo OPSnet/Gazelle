@@ -29,6 +29,7 @@ $back-700: #4A3A3F;
 $back-800: #514048;
 $back-900: #594653;
 $back-1000: #5B4B60;
+$back-500-low: rgba(230, 149, 164.3, 0.15);
 
 $fore-400: #8D869D;
 $fore-500: #A595AF;
@@ -75,8 +76,8 @@ $ds-menu-white: #fff8f8;
 // DEFINE FROM LOGICAL LAYOUT TO TOKENS
 
 $color-background-base: $back-100;
-$color-background-blockquote: $back-400;
-$color-background-box: $back-500;
+$color-background-blockquote: $back-500-low;
+$color-background-box: $back-500-low;
 $color-background-form: $back-200; // also boxes on frontpage
 $color-background-input: $back-400;
 $color-background-input-active: $back-500;
@@ -89,6 +90,7 @@ $color-background-table-row-th: $back-700;
 $color-background-table-row-odd: $back-300;
 $color-background-table-row-even: $back-200;
 $color-background-table-torrenttable: $back-300; // also form field in focus
+$color-background-table-details: $back-400; // equal to blockquote
 $color-background-table-torrents-group: $back-600;
 $color-background-tooltipster: $back-100;
 $color-background-torrent: $midtone-200; // edition in group-list

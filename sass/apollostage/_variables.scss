@@ -22,6 +22,7 @@ $back-700: #324041;
 $back-800: #384749;
 $back-900: #3c4d50;
 $back-1000: #405256;
+$back-500-low: rgba(110.7, 149, 169, 0.15);
 $back-600-low: #2d393a54;
 $back-600-mid: #2d393a88;
 
@@ -83,8 +84,8 @@ $ds-black: #000;
 // DEFINE FROM LOGICAL LAYOUT TO TOKENS
 
 $color-background-base: $back-100;
-$color-background-blockquote: $back-400;
-$color-background-box: $back-500;
+$color-background-blockquote: $back-500-low;
+$color-background-box: $back-500-low;
 $color-background-form: $back-200; // also boxes on frontpage
 $color-background-input: $back-400;
 $color-background-input-active: $back-500;
@@ -93,6 +94,7 @@ $color-background-searchbars: $back-300;
 $color-background-searchbars-field-focus: $back-100;
 $color-background-searchbars-surround: $back-500;
 $color-background-table: $back-200; // tables/forms without odd-even treatment
+$color-background-table-details: $back-400; // equal to blockquote
 $color-background-table-row-th: $back-700;
 $color-background-table-row-odd: $back-500;
 $color-background-table-row-even: $back-300;

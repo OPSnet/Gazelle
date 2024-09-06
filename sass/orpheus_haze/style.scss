@@ -29,6 +29,7 @@ $back-700: #443b3a;
 $back-800: #4a3e3c;
 $back-900: #51413f;
 $back-1000: #574340;
+$back-500-low: rgba(169, 148, 134.7, 0.07);
 
 // Mids
 $midtone-100: #444342;
@@ -75,8 +76,8 @@ $ds-haze-gold-pattern: url("data:image/svg+xml,%3Csvg id='patternId' width='100%
 // DEFINE FROM LOGICAL LAYOUT TO TOKENS
 
 $color-background-base: $back-100;
-$color-background-blockquote: $back-400;
-$color-background-box: $back-500;
+$color-background-blockquote: $back-500-low;
+$color-background-box: $back-500-low;
 $color-background-form: $back-200; // also boxes on frontpage
 $color-background-input: $back-400;
 $color-background-input-active: $back-500;
@@ -90,6 +91,7 @@ $color-background-table-row-odd: $back-500;
 $color-background-table-row-even: $back-300;
 $color-background-table-secondary: orangered; // no longer used
 $color-background-table-torrenttable: $back-300; // also form field in focus
+$color-background-table-details: $back-400; // equal to blockquote
 $color-background-table-torrents-group: $back-600;
 $color-background-tooltipster: $back-100;
 $color-background-torrent: $midtone-200; // edition in group-list

@@ -1509,8 +1509,7 @@ blockquote {
 
 .filelist_table td,
 .reportinfo_table,
-.torrentdetails,
-blockquote {
+.torrentdetails {
   background-color: $color-background-blockquote;
 }
 
@@ -2346,6 +2345,7 @@ body#torrents div.box.box_tags li > a:first-child {
       rgb(0 0 0 / 22%) 0 10px 10px;
   }
 }
+
 /* ### 2.2.3 Non-clickable appearance
    Applies to top10 and request_table pages, where tags are not clickable links. */
 #request_table .tags,
@@ -2426,7 +2426,7 @@ tr.snatched_torrent div.tags::before {
 .save_message {
   border: thick solid $color-accent-border-alert;
   padding: 1rem 1rem 1rem 48px;
-  background: $color-background-alert;
+  background-color: $color-background-alert;
   background-image: $icon-notification;
   background-repeat: no-repeat;
   background-position: 8px center;
@@ -2448,7 +2448,6 @@ tr.snatched_torrent div.tags::before {
   padding: 1rem 1rem 1rem 48px;
   background-color: $color-background-warning;
   background-image: url("/svg/site/ops-icon-triangle-ccc.svg");
-  background-image: url("https://wally-crunk.github.io/svg/site/ops-icon-triangle-ccc.svg");
   background-repeat: no-repeat;
   background-position: 8px;
   background-size: 32px;
@@ -2550,7 +2549,7 @@ ul#check::after {
   border: thick solid $color-accent-border-error;
   border-radius: 0.25rem;
   padding: 1rem 1rem 1rem 48px;
-  background: $color-background-error;
+  background-color: $color-background-error;
   background-image: $icon-warning;
   background-repeat: no-repeat;
   background-position: 8px center;
@@ -3887,7 +3886,7 @@ Documentation of mobile classes:
    ######################################################################## */
 
 /* ## 6.1 Debugging Tools
-   various 'debug' and x-debug features are avail in this doc elsewhere */
+   variou 'debug' and x-debug features are avail in this doc elsewhere */
 
 #footer p:last-of-type::after {
   content: " | " + $build-slug;
