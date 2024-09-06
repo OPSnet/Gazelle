@@ -1,16 +1,15 @@
 <?php
 
-namespace phpunit\Util;
+namespace Gazelle;
 
-use Helper;
 use PHPUnit\Framework\TestCase;
 use Gazelle\Util\PasswordCheck;
 
 class PasswordCheckTest extends TestCase {
-    protected \Gazelle\User $user;
+    protected User $user;
 
     public function setUp(): void {
-        $this->user = Helper::makeUser('Pas5wd' . randomString(12), 'passwordStrength');
+        $this->user = \GazelleUnitTest\Helper::makeUser('Pas5wd' . randomString(12), 'passwordStrength');
     }
 
     public function tearDown(): void {

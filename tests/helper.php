@@ -1,5 +1,7 @@
 <?php
 
+namespace GazelleUnitTest;
+
 use Gazelle\Enum\UserStatus;
 
 class Helper {
@@ -15,7 +17,7 @@ class Helper {
         bool                   $autoLock       = false,
         int                    $autoLockWeeks  = 42,
     ): \Gazelle\Forum {
-        return (new Gazelle\Manager\Forum())->create(
+        return (new \Gazelle\Manager\Forum())->create(
             user:           $user,
             sequence:       $sequence,
             categoryId:     $category->id(),
@@ -96,7 +98,7 @@ class Helper {
             recordLabel:     'Unitest Artists Corporation',
             catalogueNumber: 'UA-' . random_int(10000, 99999),
         );
-        $tgroup->addArtists($artistName[0], $artistName[1], $user, new Gazelle\Manager\Artist(), new Gazelle\Log());
+        $tgroup->addArtists($artistName[0], $artistName[1], $user, new \Gazelle\Manager\Artist(), new \Gazelle\Log());
         $tagMan = new \Gazelle\Manager\Tag();
         foreach ($tagName as $name) {
             $tag = $tagMan->softCreate($name, $user);
@@ -203,7 +205,7 @@ class Helper {
     }
 
     public static function makeUser(string $username, string $tag, bool $enable = false, bool $clearInbox = false): \Gazelle\User {
-        $user = (new Gazelle\UserCreator())
+        $user = (new \Gazelle\UserCreator())
             ->setUsername($username)
             ->setEmail(randomString(6) . "@{$tag}.example.com")
             ->setPassword(randomString())
@@ -227,7 +229,7 @@ class Helper {
     }
 
     public static function makeUserByInvite(string $username, string $key): \Gazelle\User {
-        return (new Gazelle\UserCreator())
+        return (new \Gazelle\UserCreator())
             ->setUsername($username)
             ->setEmail(randomString(6) . "@key.invite.example.com")
             ->setPassword(randomString())

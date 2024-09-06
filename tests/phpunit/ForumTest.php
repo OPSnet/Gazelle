@@ -1,26 +1,28 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 /**
- * In the original Gazelle implementation, two sets of developers implemented
+ * In the original \Gazelle implementation, two sets of developers implemented
  * two distinct methods of keeping track of unread posts by users. As the code
  * has migrated away from sections/forum to this class, the contradiction
  * becomes more apparent. At some point these approaches will converge.
  */
 
 class ForumTest extends TestCase {
-    protected Gazelle\ForumCategory $category;
-    protected Gazelle\Forum         $forum;
-    protected Gazelle\Forum         $extra;
+    protected ForumCategory $category;
+    protected Forum         $forum;
+    protected Forum         $extra;
     protected array                 $userList;
     protected array                 $threadList;
     protected array                 $transitionList;
 
     public function setUp(): void {
         $this->userList = [
-            'admin' => Helper::makeUser('admin.' . randomString(10), 'forum'),
-            'user'  => Helper::makeUser('user.' . randomString(10), 'forum'),
+            'admin' => \GazelleUnitTest\Helper::makeUser('admin.' . randomString(10), 'forum'),
+            'user'  => \GazelleUnitTest\Helper::makeUser('user.' . randomString(10), 'forum'),
         ];
         $this->userList['admin']->setField('PermissionID', SYSOP)->modify();
     }
@@ -48,12 +50,12 @@ class ForumTest extends TestCase {
 
     public function testForumCreate(): void {
         // Forum Categories
-        $fcatMan = new \Gazelle\Manager\ForumCategory();
+        $fcatMan = new Manager\ForumCategory();
         $initial = count($fcatMan->forumCategoryList()); // from phinx seeds
 
         // If you hit a duplicate key error here it is due to an aborted previous test run
         $this->category = $fcatMan->create('phpunit category', 10001);
-        $this->assertInstanceOf(\Gazelle\ForumCategory::class, $this->category, 'forum-cat-is-forum-cat');
+        $this->assertInstanceOf(ForumCategory::class, $this->category, 'forum-cat-is-forum-cat');
         $this->assertEquals(0, $this->category->forumTotal(), 'forum-category-forum-none');
 
         $categoryEphemeral = $fcatMan->create('phpunit other', 10002);
@@ -70,14 +72,14 @@ class ForumTest extends TestCase {
         $this->assertCount($initial + 1, $fcatMan->usageList(), 'forum-cat-usage-removed');
 
         // Forums
-        $forumMan     = new \Gazelle\Manager\Forum();
+        $forumMan     = new Manager\Forum();
         $initial      = count($forumMan->forumList());
         $tocTotal     = count($forumMan->tableOfContentsMain());
         $admin        = $this->userList['admin'];
         $user         = $this->userList['user'];
         $userTocTotal = count($forumMan->tableOfContents($user));
         $forumName    = 'phpunit first forum';
-        $this->forum  = Helper::makeForum(
+        $this->forum  = \GazelleUnitTest\Helper::makeForum(
             user:           $admin,
             sequence:       150,
             category:       $this->category,
@@ -88,7 +90,7 @@ class ForumTest extends TestCase {
             minClassCreate: 300,
         );
         $this->assertEquals(1, $this->category->forumTotal(), 'forum-category-forum-total');
-        $this->assertInstanceOf(\Gazelle\Forum::class, $this->forum, 'forum-is-forum');
+        $this->assertInstanceOf(Forum::class, $this->forum, 'forum-is-forum');
         $this->assertEquals(0, $this->category->remove(), 'forum-cat-remove-in-use');
         // If you hit a mismatch here it is due to an aborted previous test run
         $this->assertCount($tocTotal + 1, $forumMan->tableOfContentsMain(), 'forum-test-toc-main');
@@ -114,7 +116,7 @@ class ForumTest extends TestCase {
         $find = $forumMan->findById($this->forum->id());
         $this->assertEquals($this->forum->id(), $find->id(), 'forum-forum-find');
 
-        $this->extra = Helper::makeForum(
+        $this->extra = \GazelleUnitTest\Helper::makeForum(
             user:           $this->userList['admin'],
             sequence:       100,
             category:       $this->category,
@@ -141,7 +143,7 @@ class ForumTest extends TestCase {
         );
 
         // Forum Threads
-        $threadMan = new \Gazelle\Manager\ForumThread();
+        $threadMan = new Manager\ForumThread();
         $thread    = $threadMan->create($this->forum, $admin, 'thread title', 'this is a new thread');
         $this->assertEquals('this is a new thread', $thread->body(), 'fthread-body');
         $this->assertEquals(1, $thread->postTotal(), 'fthread-post-total');
@@ -175,7 +177,7 @@ class ForumTest extends TestCase {
 
         // Forum ACLs
         $secretLevel = $admin->privilege()->effectiveClassLevel();
-        $secret = Helper::makeForum(
+        $secret = \GazelleUnitTest\Helper::makeForum(
             user:           $admin,
             sequence:       200,
             category:       $this->category,
@@ -202,7 +204,7 @@ class ForumTest extends TestCase {
         $this->assertEquals(1, $secret->remove(), 'forum-secret-remove');
 
         // Forum Posts
-        $userSub = new \Gazelle\User\Subscription($user);
+        $userSub = new User\Subscription($user);
         $this->assertFalse($userSub->isSubscribed($thread->id()), 'fpost-user-is-not-subbed');
 
         $userSub->subscribe($thread->id());
@@ -219,12 +221,12 @@ class ForumTest extends TestCase {
         $this->assertEquals($post->id(), $this->forum->flush()->lastPostId(), 'fpost-is-last-post');
 
         /* post first reply */
-        $postMan = new \Gazelle\Manager\ForumPost();
+        $postMan = new Manager\ForumPost();
         $this->assertEquals($message, $post->body(), 'fpost-first-post');
         $this->assertEquals(2, $this->forum->numPosts(), 'fpost-forum-post-total');
 
         $this->assertEquals(1, $userSub->unread(), 'fpost-subscriptions-user-unread');
-        $adminSub = new \Gazelle\User\Subscription($admin); // now sub them
+        $adminSub = new User\Subscription($admin); // now sub them
         $this->assertEquals(0, $adminSub->unread(), 'fpost-subscriptions-admin-unread');
         $adminSub->subscribe($thread->id());
 
@@ -232,19 +234,19 @@ class ForumTest extends TestCase {
         $body = "good job @{$admin->username()}";
         $reply = $thread->addPost($user, $body);
         // Should the following actions (quote and subscription handling) be performed by the addPost() method?
-        (new Gazelle\User\Notification\Quote($admin))->create(
-            new Gazelle\Manager\User(),
+        (new User\Notification\Quote($admin))->create(
+            new Manager\User(),
             $body,
             $reply->id(),
             'forums',
             $thread->id(),
         );
-        (new Gazelle\Manager\Subscription())->flushPage('forums', $thread->id());
+        (new Manager\Subscription())->flushPage('forums', $thread->id());
 
         $this->assertEquals(1, $forumMan->unreadSubscribedForumTotal($admin), 'fpost-subscriptions-admin-forum-man-unread');
         $this->assertEquals(1, $adminSub->flush()->unread(), 'fpost-subscriptions-admin-new-unread');
 
-        $quote = new Gazelle\User\Quote($admin);
+        $quote = new User\Quote($admin);
         $this->assertEquals(1, $quote->total(), 'fpost-quote-admin-total');
         $this->assertEquals(1, $quote->unreadTotal(), 'fpost-quote-admin-unread-total');
 
@@ -284,8 +286,8 @@ class ForumTest extends TestCase {
     }
 
     public function testForumAutoSub(): void {
-        $this->category = (new \Gazelle\Manager\ForumCategory())->create('phpunit category', 10010);
-        $this->forum    = Helper::makeForum(
+        $this->category = (new Manager\ForumCategory())->create('phpunit category', 10010);
+        $this->forum    = \GazelleUnitTest\Helper::makeForum(
             user:        $this->userList['admin'],
             sequence:    151,
             category:    $this->category,
@@ -304,7 +306,7 @@ class ForumTest extends TestCase {
         $user->addCustomPrivilege('site_forum_autosub');
         $this->assertEquals([$this->forum->id()], $this->forum->autoSubscribeForUserList($user), 'forum-autosub-forum-list');
 
-        $threadMan = new \Gazelle\Manager\ForumThread();
+        $threadMan = new Manager\ForumThread();
         $this->threadList[] = $threadMan->create($this->forum, $this->userList['admin'], 'phpunit thread title', 'this is a new thread');
         $this->threadList[] = $threadMan->create($this->forum, $this->userList['admin'], 'phpunit thread title 2', 'this is also a new thread');
         $this->assertEquals(2, $this->forum->userCatchup($user), 'forum-user-autosub-catchup');
@@ -315,8 +317,8 @@ class ForumTest extends TestCase {
     }
 
     public function testForumForbidden(): void {
-        $this->category = (new \Gazelle\Manager\ForumCategory())->create('phpunit category', 10002);
-        $forumMan       = new \Gazelle\Manager\Forum();
+        $this->category = (new Manager\ForumCategory())->create('phpunit category', 10002);
+        $forumMan       = new Manager\Forum();
         $user           = $this->userList['user'];
         $this->forum    = $forumMan->create(
             user:           $this->userList['admin'],
@@ -341,9 +343,9 @@ class ForumTest extends TestCase {
     }
 
     public function testForumJson(): void {
-        $this->category = (new \Gazelle\Manager\ForumCategory())->create('phpunit category', 10002);
-        $forumMan       = new \Gazelle\Manager\Forum();
-        $this->forum    = Helper::makeForum(
+        $this->category = (new Manager\ForumCategory())->create('phpunit category', 10002);
+        $forumMan       = new Manager\Forum();
+        $this->forum    = \GazelleUnitTest\Helper::makeForum(
             user:        $this->userList['admin'],
             sequence:    151,
             category:    $this->category,
@@ -351,15 +353,15 @@ class ForumTest extends TestCase {
             description: 'This is where it json',
         );
 
-        $json = (new Gazelle\Json\Forum(
+        $json = (new Json\Forum(
             $this->forum,
             $this->userList['user'],
-            new Gazelle\Manager\ForumThread(),
-            new Gazelle\Manager\User(),
+            new Manager\ForumThread(),
+            new Manager\User(),
             1,
             1,
         ));
-        $this->assertInstanceOf(Gazelle\Json::class, $json, 'forum-json-class');
+        $this->assertInstanceOf(Json::class, $json, 'forum-json-class');
         $response = json_decode($json->response(), true);
         $info = $response['response'];
         $this->assertEquals($this->forum->name(), $info['forumName'], 'forum-json-name');
@@ -367,7 +369,7 @@ class ForumTest extends TestCase {
         $this->assertEquals(1, $info['currentPage'], 'forum-json-current-pages');
         $this->assertCount(0, $info['threads'], 'forum-json-threads');
 
-        (new \Gazelle\Manager\ForumThread())
+        (new Manager\ForumThread())
             ->create($this->forum, $this->userList['admin'], 'thread title', 'this is a new thread');
         $response = json_decode($json->response(), true);
         $info = $response['response'];
@@ -376,9 +378,9 @@ class ForumTest extends TestCase {
     }
 
     public function testForumThreadJson(): void {
-        $this->category = (new \Gazelle\Manager\ForumCategory())->create('phpunit category', 10002);
-        $forumMan       = new \Gazelle\Manager\Forum();
-        $this->forum    = Helper::makeForum(
+        $this->category = (new Manager\ForumCategory())->create('phpunit category', 10002);
+        $forumMan       = new Manager\Forum();
+        $this->forum    = \GazelleUnitTest\Helper::makeForum(
             user:        $this->userList['admin'],
             sequence:    151,
             category:    $this->category,
@@ -386,7 +388,7 @@ class ForumTest extends TestCase {
             description: 'This is where it thread json',
         );
 
-        $threadMan = new \Gazelle\Manager\ForumThread();
+        $threadMan = new Manager\ForumThread();
         $thread    = $threadMan->create(
             $this->forum,
             $this->userList['admin'],
@@ -394,14 +396,14 @@ class ForumTest extends TestCase {
             'this is a new json thread'
         );
 
-        $json = (new Gazelle\Json\ForumThread(
+        $json = (new Json\ForumThread(
             $thread,
             $this->userList['user'],
-            new Gazelle\Util\Paginator(25, 1),
+            new Util\Paginator(25, 1),
             true,
-            new Gazelle\Manager\User(),
+            new Manager\User(),
         ));
-        $this->assertInstanceOf(Gazelle\Json::class, $json, 'forum-json-class');
+        $this->assertInstanceOf(Json::class, $json, 'forum-json-class');
         $response = json_decode($json->response(), true);
         $result = $response['response'];
         $this->assertEquals($thread->forumId(), $result['forumId'], 'json-thread-forum-id');
@@ -413,26 +415,26 @@ class ForumTest extends TestCase {
     }
 
     public function testForumWarn(): void {
-        $this->category = (new \Gazelle\Manager\ForumCategory())->create('phpunit category', 10002);
-        $forumMan       = new \Gazelle\Manager\Forum();
+        $this->category = (new Manager\ForumCategory())->create('phpunit category', 10002);
+        $forumMan       = new Manager\Forum();
         $admin          = $this->userList['admin'];
         $user           = $this->userList['user'];
-        $this->forum    = Helper::makeForum(
+        $this->forum    = \GazelleUnitTest\Helper::makeForum(
             user:        $admin,
             sequence:    151,
             category:    $this->category,
             name:        'phpunit warn forum',
             description: 'This is where it warns',
         );
-        $pmMan = new Gazelle\Manager\PM($user);
+        $pmMan = new Manager\PM($user);
         foreach ($user->inbox()->messageList($pmMan, 1, 0) as $pm) {
             $pm->remove();
         }
 
         // TODO: move more warning functionality out of sections/...
         $this->threadList[] = $thread
-            = (new \Gazelle\Manager\ForumThread())->create($this->forum, $user, 'user thread title', 'this is a new thread by a user');
-        $thread  = (new \Gazelle\Manager\ForumThread())->create($this->forum, $user, 'user thread title', 'this is a new thread by a user');
+            = (new Manager\ForumThread())->create($this->forum, $user, 'user thread title', 'this is a new thread by a user');
+        $thread  = (new Manager\ForumThread())->create($this->forum, $user, 'user thread title', 'this is a new thread by a user');
         $post    = $thread->addPost($user, 'offensive content');
         $week    = 2;
         $message = "phpunit forum warn test " . randomString(10);
@@ -444,7 +446,7 @@ class ForumTest extends TestCase {
         $this->assertStringEndsWith($message, $user->forumWarning(), 'forum-user-warning-history-end'); /** @phpstan-ignore-line */
 
         $inbox = $user->inbox();
-        $pmReceiverManager = new Gazelle\Manager\PM($inbox->user());
+        $pmReceiverManager = new Manager\PM($inbox->user());
         $this->assertEquals(1, $inbox->messageTotal(), 'warn-user-inbox-total');
         $pm = $inbox->messageList($pmReceiverManager, 1, 0)[0];
         $this->assertEquals('You have been warned', $pm->subject(), 'warn-user-inbox-pm-subject');
@@ -459,10 +461,10 @@ class ForumTest extends TestCase {
     }
 
     public function testForumPoll(): void {
-        $this->category = (new \Gazelle\Manager\ForumCategory())->create('phpunit category', 10002);
+        $this->category = (new Manager\ForumCategory())->create('phpunit category', 10002);
         $admin          = $this->userList['admin'];
         $user           = $this->userList['user'];
-        $this->forum    = Helper::makeForum(
+        $this->forum    = \GazelleUnitTest\Helper::makeForum(
             user:           $admin,
             sequence:       151,
             category:       $this->category,
@@ -471,12 +473,12 @@ class ForumTest extends TestCase {
         );
 
         $this->threadList[] = $thread
-            = (new \Gazelle\Manager\ForumThread())->create($this->forum, $user, 'phpunit post pin', 'this is a new thread for post pins');
+            = (new Manager\ForumThread())->create($this->forum, $user, 'phpunit post pin', 'this is a new thread for post pins');
 
         $answer  = ['apple', 'banana', 'carrot'];
-        $pollMan = new \Gazelle\Manager\ForumPoll();
+        $pollMan = new Manager\ForumPoll();
         $poll    = $pollMan->create($thread->id(), 'Best food', $answer);
-        $this->assertInstanceOf(\Gazelle\ForumPoll::class, $poll, 'forum-poll-is-forum-poll');
+        $this->assertInstanceOf(ForumPoll::class, $poll, 'forum-poll-is-forum-poll');
         $this->assertFalse($poll->isClosed(), 'forum-poll-is-not-closed');
         $this->assertFalse($poll->hasRevealVotes(), 'forum-poll-is-not-featured');
         $this->assertFalse($poll->isFeatured(), 'forum-poll-is-not-featured');
@@ -510,10 +512,10 @@ class ForumTest extends TestCase {
     }
 
     public function testPostPin(): void {
-        $this->category = (new \Gazelle\Manager\ForumCategory())->create('phpunit category', 10002);
+        $this->category = (new Manager\ForumCategory())->create('phpunit category', 10002);
         $admin          = $this->userList['admin'];
         $user           = $this->userList['user'];
-        $this->forum    = Helper::makeForum(
+        $this->forum    = \GazelleUnitTest\Helper::makeForum(
             user:           $admin,
             sequence:       151,
             category:       $this->category,
@@ -522,7 +524,7 @@ class ForumTest extends TestCase {
         );
 
         $this->threadList[] = $thread
-            = (new \Gazelle\Manager\ForumThread())->create($this->forum, $user, 'unittest post pin', 'this is a new thread for post pins');
+            = (new Manager\ForumThread())->create($this->forum, $user, 'unittest post pin', 'this is a new thread for post pins');
         $post = $thread->addPost($user, 'pinnable content');
 
         $this->assertFalse($post->isPinned(), 'forum-post-is-not-pinned');
@@ -534,24 +536,24 @@ class ForumTest extends TestCase {
 
     public function testForumRender(): void {
         $name = 'phpunit category ' . randomString(6);
-        $this->category = (new \Gazelle\Manager\ForumCategory())->create($name, 10002);
+        $this->category = (new Manager\ForumCategory())->create($name, 10002);
         $admin          = $this->userList['admin'];
-        $this->forum    = Helper::makeForum(
+        $this->forum    = \GazelleUnitTest\Helper::makeForum(
             user:           $admin,
             sequence:       153,
             category:       $this->category,
             name:           'phpunit render forum',
             description:    'This is where it renders',
         );
-        $paginator = (new Gazelle\Util\Paginator(TOPICS_PER_PAGE, 1))->setTotal(1);
-        Gazelle\Base::setRequestContext(new Gazelle\BaseRequestContext('/forum.php', '127.0.0.1', ''));
+        $paginator = (new Util\Paginator(TOPICS_PER_PAGE, 1))->setTotal(1);
+        Base::setRequestContext(new BaseRequestContext('/forum.php', '127.0.0.1', ''));
         global $SessionID; // to render header()
         $SessionID = 'phpunit';
         global $Viewer;
         $Viewer = $admin;
         $this->assertStringContainsString(
             "<a href=\"forums.php#$name\">$name</a>",
-            (Gazelle\Util\Twig::factory())->render('forum/forum.twig', [
+            (Util\Twig::factory())->render('forum/forum.twig', [
                 'dept_list'   => $this->forum->departmentList($admin),
                 'donor_forum' => false,
                 'forum'       => $this->forum,
@@ -564,20 +566,20 @@ class ForumTest extends TestCase {
     }
 
     public function testEditPost(): void {
-        $this->category = (new \Gazelle\Manager\ForumCategory())->create('phpunit category', 10011);
+        $this->category = (new Manager\ForumCategory())->create('phpunit category', 10011);
         $user = $this->userList['user'];
-        $this->forum = Helper::makeForum(
+        $this->forum = \GazelleUnitTest\Helper::makeForum(
             user:           $user,
             sequence:       154,
             category:       $this->category,
             name:           'phpunit forum twig',
             description:    'This is where it twigs',
         );
-        $manager = new \Gazelle\Manager\ForumThread();
+        $manager = new Manager\ForumThread();
         $thread = $manager->create($this->forum, $user, 'thread title', 'this is a new thread');
         $this->assertEquals(1, $thread->postTotalSummary(), 'fthread-post-total-summary');
         $slice = $thread->slice(1, 1);
-        $post = (new Gazelle\Manager\ForumPost())->findById($slice[0]['ID']);
+        $post = (new Manager\ForumPost())->findById($slice[0]['ID']);
         $this->assertEquals($thread->body(), $post->body(), 'thread-initial-body');
         $post->setField('Body', 'edit')->modify();
         // flush thread object to pick up out-of-band modification
@@ -591,7 +593,7 @@ class ForumTest extends TestCase {
 
         $slice = $thread->slice(1, 1);
         $this->assertEquals($newBody, $slice[0]['Body'], 'thread-merge-post-slice');
-        $merged = (new Gazelle\Manager\ForumPost())->findById($slice[0]['ID']);
+        $merged = (new Manager\ForumPost())->findById($slice[0]['ID']);
         $this->assertEquals($newBody, $merged->body(), 'thread-merged-body');
 
         $post = $thread->addPost($user, 'second');
@@ -604,15 +606,15 @@ class ForumTest extends TestCase {
     public function testForumTransition(): void {
         $admin = $this->userList['admin'];
         $user  = $this->userList['user'];
-        $this->category = (new \Gazelle\Manager\ForumCategory())->create('phpunit forum transition', 10005);
-        $this->forum = Helper::makeForum(
+        $this->category = (new Manager\ForumCategory())->create('phpunit forum transition', 10005);
+        $this->forum = \GazelleUnitTest\Helper::makeForum(
             user:           $admin,
             sequence:       153,
             category:       $this->category,
             name:           'phpunit forum transition a',
             description:    'This is where it transitions',
         );
-        $threadMan = new \Gazelle\Manager\ForumThread();
+        $threadMan = new Manager\ForumThread();
         $thread    = $threadMan->create($this->forum, $admin, 'thread title normal transition', 'this is a new thread normal transition');
         $pinned    = $threadMan->create($this->forum, $admin, 'thread title pinned transition', 'this is a new thread pinned transition');
         $locked    = $threadMan->create($this->forum, $admin, 'thread title locked transition', 'this is a new thread locked transition');
@@ -622,14 +624,14 @@ class ForumTest extends TestCase {
         $this->assertTrue($locked->isLocked(), 'fthread-is-locked');
         $this->assertTrue($pinned->isPinned(), 'fthread-is-pinned');
 
-        $this->extra = Helper::makeForum(
+        $this->extra = \GazelleUnitTest\Helper::makeForum(
             user:           $admin,
             sequence:       153,
             category:       $this->category,
             name:           'phpunit forum transition b',
             description:    'This is where it also transitions',
         );
-        $manager = new Gazelle\Manager\ForumTransition();
+        $manager = new Manager\ForumTransition();
         $transition = $manager->create(
            source:           $this->forum,
            destination:      $this->extra,
@@ -639,7 +641,7 @@ class ForumTest extends TestCase {
            privileges:       '',
            userIds:          '',
         );
-        $this->assertInstanceOf(\Gazelle\ForumTransition::class, $transition, 'forum-trans-create');
+        $this->assertInstanceOf(ForumTransition::class, $transition, 'forum-trans-create');
         $this->assertEquals('phpunit', $transition->label(), 'forum-trans-label');
         $this->assertEquals($this->forum->id(), $transition->sourceId(), 'forum-trans-source');
         $this->assertEquals($this->extra->id(), $transition->destinationId(), 'forum-trans-dest');
@@ -650,8 +652,8 @@ class ForumTest extends TestCase {
         $this->assertFalse($transition->hasUserForThread($this->userList['user'], $thread), 'forum-trans-hasnt-user');
         $this->assertEquals(1, $transition->remove(), 'forum-trans-remove');
 
-        $this->userList['FLS'] = Helper::makeUser('fls.' . randomString(10), 'forum');
-        $this->userList['specific'] = Helper::makeUser('spec.' . randomString(10), 'forum');
+        $this->userList['FLS'] = \GazelleUnitTest\Helper::makeUser('fls.' . randomString(10), 'forum');
+        $this->userList['specific'] = \GazelleUnitTest\Helper::makeUser('spec.' . randomString(10), 'forum');
         $this->transitionList[] = $manager->create(
            source:           $this->forum,
            destination:      $this->extra,
@@ -661,7 +663,7 @@ class ForumTest extends TestCase {
            privileges:       '',
            userIds:          (string)$this->userList['specific']->id(),
         );
-        (new Gazelle\User\Privilege($this->userList['FLS']))->addSecondaryClass(FLS_TEAM);
+        (new User\Privilege($this->userList['FLS']))->addSecondaryClass(FLS_TEAM);
         $this->assertTrue($this->userList['FLS']->isFLS(), 'user-is-fls');
         $this->assertTrue($this->transitionList[0]->hasUserForThread($this->userList['FLS'], $thread), 'forum-trans-has-fls');
         $this->assertFalse($this->transitionList[0]->hasUserForThread($this->userList['FLS'], $pinned), 'forum-trans-fls-no-pinned');
@@ -690,18 +692,18 @@ class ForumTest extends TestCase {
     }
 
     public function testForumTwig(): void {
-        $this->category = (new \Gazelle\Manager\ForumCategory())->create('phpunit category', 10011);
+        $this->category = (new Manager\ForumCategory())->create('phpunit category', 10011);
         $user = $this->userList['user'];
-        $this->forum = Helper::makeForum(
+        $this->forum = \GazelleUnitTest\Helper::makeForum(
             user:           $user,
             sequence:       154,
             category:       $this->category,
             name:           'phpunit forum twig',
             description:    'This is where it twigs',
         );
-        $thread = (new \Gazelle\Manager\ForumThread())->create($this->forum, $user, 'thread title', 'this is a new thread');
+        $thread = (new Manager\ForumThread())->create($this->forum, $user, 'thread title', 'this is a new thread');
 
-        $template = Gazelle\Util\Twig::factory()->createTemplate(
+        $template = Util\Twig::factory()->createTemplate(
             "{% if object is forum_thread %}yes{% else %}no{% endif %}"
         );
         $this->assertEquals('yes', $template->render(['object' => $thread]), 'forum-twig-thread');

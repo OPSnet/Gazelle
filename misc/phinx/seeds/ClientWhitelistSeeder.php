@@ -3,7 +3,7 @@
 use Phinx\Seed\AbstractSeed;
 
 class ClientWhitelistSeeder extends AbstractSeed {
-    public function run() {
+    public function run(): void {
         foreach (
             [
             ["Deluge 1.2.x",                "-DE12"],

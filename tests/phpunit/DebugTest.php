@@ -1,5 +1,7 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 class DebugTest extends TestCase {
@@ -9,11 +11,11 @@ class DebugTest extends TestCase {
         $this->assertGreaterThan(0.0, $Debug->cpuElapsed(), 'debug-cpu-elapsed');
         $this->assertGreaterThan(0, $Debug->epochStart(), 'debug-epoch-start');
         $this->assertGreaterThan(350, count($Debug->includeList()), 'debug-include-list');
-        $this->assertTrue(Helper::recentDate(date('Y-m-d H:i:s', (int)$Debug->epochStart()), 180), 'debug-recent-start');
+        $this->assertTrue(\GazelleUnitTest\Helper::recentDate(date('Y-m-d H:i:s', (int)$Debug->epochStart()), 180), 'debug-recent-start');
     }
 
     public function testCase(): void {
-        $manager = new Gazelle\Manager\ErrorLog();
+        $manager = new Manager\ErrorLog();
         global $Debug;
         $id = $Debug->saveCase('phpunit-case-1');
         $case = $manager->findById($id);
@@ -26,8 +28,8 @@ class DebugTest extends TestCase {
         $this->assertEquals(1, $case->seen(), 'debug-case-seen');
         $this->assertEquals('cli', $case->uri(), 'debug-case-uri');
         $this->assertEquals(0, $case->userId(), 'debug-case-user-id');
-        $this->assertTrue(Helper::recentDate($case->created()), 'debug-case-created');
-        $this->assertTrue(Helper::recentDate($case->updated()), 'debug-case-updated');
+        $this->assertTrue(\GazelleUnitTest\Helper::recentDate($case->created()), 'debug-case-created');
+        $this->assertTrue(\GazelleUnitTest\Helper::recentDate($case->updated()), 'debug-case-updated');
         $case->remove();
     }
 

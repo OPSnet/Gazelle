@@ -1,5 +1,7 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 class StaffBlogTest extends TestCase {
@@ -12,18 +14,18 @@ class StaffBlogTest extends TestCase {
     }
 
     public function testStaffBlog(): void {
-        $this->userList['admin'] = Helper::makeUser('admin.' . randomString(6), 'staffblog');
-        $this->userList['mod'] = Helper::makeUser('mod.' . randomString(6), 'staffblog');
+        $this->userList['admin'] = \GazelleUnitTest\Helper::makeUser('admin.' . randomString(6), 'staffblog');
+        $this->userList['mod'] = \GazelleUnitTest\Helper::makeUser('mod.' . randomString(6), 'staffblog');
 
         $this->userList['admin']->setField('PermissionID', SYSOP)->modify();
         $this->userList['mod']->setField('PermissionID', MOD)->modify();
 
         $this->assertEquals('Moderator', $this->userList['mod']->userclassName(), 'mod-userclass-check');
 
-        $manager = new Gazelle\Manager\StaffBlog();
+        $manager = new Manager\StaffBlog();
 
         $blog = $manager->create($this->userList['admin'], 'phpunit staff blog', 'body text');
-        $this->assertInstanceOf(Gazelle\StaffBlog::class, $blog, 'staff-blog-create');
+        $this->assertInstanceOf(StaffBlog::class, $blog, 'staff-blog-create');
         $this->assertEquals('phpunit staff blog', $blog->title(), 'staff-blog-title');
         $this->assertEquals('body text', $blog->body(), 'staff-blog-text');
         $this->assertEquals($this->userList['admin']->id(), $blog->userId(), 'staff-blog-user-id');

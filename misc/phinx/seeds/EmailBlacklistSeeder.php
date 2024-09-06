@@ -3,7 +3,7 @@
 use Phinx\Seed\AbstractSeed;
 
 class EmailBlacklistSeeder extends AbstractSeed {
-    public function run() {
+    public function run(): void {
         /* the first few domains from https://github.com/ivolo/disposable-email-domains/ */
         foreach (
             [

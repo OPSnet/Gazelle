@@ -1,5 +1,7 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 
@@ -9,8 +11,8 @@ class WikiTest extends TestCase {
 
     public function setUp(): void {
         $this->userList = [
-            'admin' => Helper::makeUser('wiki.' . randomString(6), 'wiki'),
-            'user'  => Helper::makeUser('wiki.' . randomString(6), 'wiki'),
+            'admin' => \GazelleUnitTest\Helper::makeUser('wiki.' . randomString(6), 'wiki'),
+            'user'  => \GazelleUnitTest\Helper::makeUser('wiki.' . randomString(6), 'wiki'),
         ];
         $this->userList['admin']->setField('PermissionID', SYSOP)->modify();
     }
@@ -37,13 +39,13 @@ class WikiTest extends TestCase {
 
     #[DataProvider('providerAlias')]
     public function testNormalizeAlias(string $expected, string $input, string $message): void {
-        $this->assertEquals($expected, \Gazelle\Wiki::normalizeAlias($input), $message);
+        $this->assertEquals($expected, Wiki::normalizeAlias($input), $message);
     }
 
     public function testWikiCreate(): void {
-        $manager = new \Gazelle\Manager\Wiki();
+        $manager = new Manager\Wiki();
         $title   = 'phpunit title ' . randomString(6);
-        $alias   = \Gazelle\Wiki::normalizeAlias($title);
+        $alias   = Wiki::normalizeAlias($title);
         $article = $manager->create(
             $title,
             'wiki body',
@@ -51,12 +53,12 @@ class WikiTest extends TestCase {
             $this->userList['user']->privilege()->effectiveClassLevel(),
             $this->userList['admin']
         );
-        $this->assertInstanceOf(\Gazelle\Wiki::class, $article, 'wiki-create-open');
+        $this->assertInstanceOf(Wiki::class, $article, 'wiki-create-open');
 
         $this->assertEquals($article->id(), $manager->findById($article->id())->id(), 'wiki-find-by-id');
         $this->assertEquals($article->id(), $manager->findByTitle($article->title())->id(), 'wiki-find-by-title');
 
-        $this->assertInstanceOf(\Gazelle\Wiki::class, $article->flush(), 'wiki-flush');
+        $this->assertInstanceOf(Wiki::class, $article->flush(), 'wiki-flush');
         $this->assertEquals("<a href=\"{$article->url()}\">{$article->title()}</a>", $article->link(), 'wiki-link');
         $this->assertEquals("wiki.php?action=article&id={$article->id()}", $article->location(), 'wiki-location');
         $this->assertEquals($alias, array_keys($article->alias())[0], 'wiki-alias');
@@ -76,9 +78,9 @@ class WikiTest extends TestCase {
     }
 
     public function testWikiAlias(): void {
-        $manager = new \Gazelle\Manager\Wiki();
+        $manager = new Manager\Wiki();
         $title   = 'phpunit title ' . randomString(6);
-        $alias   = \Gazelle\Wiki::normalizeAlias($title);
+        $alias   = Wiki::normalizeAlias($title);
         $article = $manager->create(
             $title,
             'wiki body',
@@ -88,7 +90,7 @@ class WikiTest extends TestCase {
         );
         $this->articleList[] = $article;
 
-        $newAlias = \Gazelle\Wiki::normalizeAlias('alias' . randomString(20));
+        $newAlias = Wiki::normalizeAlias('alias' . randomString(20));
         $this->assertEquals(0, $article->removeAlias($newAlias), 'wiki-remove-missing-alias');
         $this->assertEquals(1, $article->addAlias($newAlias, $this->userList['admin']), 'wiki-add-alias');
         $this->assertCount(2, $article->alias(), 'wiki-alias-list');
@@ -97,9 +99,9 @@ class WikiTest extends TestCase {
     }
 
     public function testWikiException(): void {
-        $manager = new \Gazelle\Manager\Wiki();
+        $manager = new Manager\Wiki();
         $title   = 'phpunit title ' . randomString(6);
-        $alias   = \Gazelle\Wiki::normalizeAlias($title);
+        $alias   = Wiki::normalizeAlias($title);
         $article = $manager->create(
             $title,
             'wiki body',
@@ -109,20 +111,20 @@ class WikiTest extends TestCase {
         );
         $this->articleList[] = $article;
 
-        $newAlias = \Gazelle\Wiki::normalizeAlias('alias' . randomString(20));
+        $newAlias = Wiki::normalizeAlias('alias' . randomString(20));
         $this->assertEquals(1, $article->addAlias($newAlias, $this->userList['admin']), 'wiki-add-ok-alias');
 
-        $this->expectException(\Gazelle\DB\MysqlDuplicateKeyException::class);
+        $this->expectException(DB\MysqlDuplicateKeyException::class);
         $article->addAlias($newAlias, $this->userList['admin']);
     }
 
     public function testWikiList(): void {
-        $classList = (new \Gazelle\Manager\User())->classList();
+        $classList = (new Manager\User())->classList();
         $level = [
             USER  => $classList[USER]['Level'],
             SYSOP => $classList[SYSOP]['Level'],
         ];
-        $manager = new \Gazelle\Manager\Wiki();
+        $manager = new Manager\Wiki();
         $initial = [
             USER  => count($manager->articles($level[USER])),
             SYSOP => count($manager->articles($level[SYSOP])),
@@ -141,9 +143,9 @@ class WikiTest extends TestCase {
     }
 
     public function testWikiRevision(): void {
-        $manager = new \Gazelle\Manager\Wiki();
+        $manager = new Manager\Wiki();
         $title   = 'phpunit title ' . randomString(6);
-        $alias   = \Gazelle\Wiki::normalizeAlias($title);
+        $alias   = Wiki::normalizeAlias($title);
         $article = $manager->create(
             $title,
             'wiki body',
@@ -163,7 +165,7 @@ class WikiTest extends TestCase {
     }
 
     public function testConfigureAccess(): void {
-        $manager = new \Gazelle\Manager\Wiki();
+        $manager = new Manager\Wiki();
         $access = $manager->configureAccess(
             user:    $this->userList['user'],
             minRead: $this->userList['user']->privilege()->effectiveClassLevel(),

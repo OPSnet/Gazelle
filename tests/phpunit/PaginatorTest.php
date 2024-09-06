@@ -1,15 +1,15 @@
 <?php
 
-namespace phpunit;
+namespace Gazelle;
 
-use Gazelle;
 use PHPUnit\Framework\TestCase;
+use Gazelle;
 
 class PaginatorTest extends TestCase {
     public function testPageCountSingle(): void {
         $perPage = 9;
         $currentPage = 1;
-        $paginator = new Gazelle\Util\Paginator($perPage, $currentPage);
+        $paginator = new Util\Paginator($perPage, $currentPage);
 
         $paginator->setTotal(5);
         $this->assertEquals(5, $paginator->total(), 'paginatior-1page-total');
@@ -22,7 +22,7 @@ class PaginatorTest extends TestCase {
     public function testPageCountFirst(): void {
         $perPage = 9;
         $currentPage = 1;
-        $paginator = new Gazelle\Util\Paginator($perPage, $currentPage);
+        $paginator = new Util\Paginator($perPage, $currentPage);
 
         $paginator->setTotal(55);
         $this->assertEquals(55, $paginator->total(), 'paginatior-first-total');
@@ -35,7 +35,7 @@ class PaginatorTest extends TestCase {
     public function testPageCountLast(): void {
         $perPage = 9;
         $currentPage = 7;
-        $paginator = new Gazelle\Util\Paginator($perPage, $currentPage);
+        $paginator = new Util\Paginator($perPage, $currentPage);
 
         $paginator->setTotal(55);
         $this->assertEquals(55, $paginator->total(), 'paginatior-last-total');
@@ -48,7 +48,7 @@ class PaginatorTest extends TestCase {
     public function testPageCountLastFull(): void {
         $perPage = 9;
         $currentPage = 6;
-        $paginator = new Gazelle\Util\Paginator($perPage, $currentPage);
+        $paginator = new Util\Paginator($perPage, $currentPage);
 
         $paginator->setTotal(54);
         $this->assertEquals(54, $paginator->total(), 'paginatior-last-total');
@@ -61,7 +61,7 @@ class PaginatorTest extends TestCase {
     public function testLinkboxAnchor(): void {
         $perPage = 9;
         $currentPage = 1;
-        $paginator = new Gazelle\Util\Paginator($perPage, $currentPage);
+        $paginator = new Util\Paginator($perPage, $currentPage);
 
         $paginator->setTotal(15)->setAnchor('phpunit');
         $_SERVER['REQUEST_URI'] = SITE_URL . '/paginator_test.php';
@@ -77,7 +77,7 @@ class PaginatorTest extends TestCase {
         $perPage = 9;
         $currentPage = 1;
 
-        $paginator = new Gazelle\Util\Paginator($perPage, $currentPage);
+        $paginator = new Util\Paginator($perPage, $currentPage);
         $paginator->setTotal(15)->removeParam('remove');
         $_SERVER['REQUEST_URI'] = SITE_URL . '/paginator_test.php?remove=yes&stay=on';
 
@@ -86,12 +86,12 @@ class PaginatorTest extends TestCase {
             '|<a href="[^"]+/paginator_test\.php\?stay=on&amp;page=2"><strong>10-15|',
             $linkbox, 'paginator-linkbox-remparam-1');
 
-        $paginator = new Gazelle\Util\Paginator($perPage, $currentPage);
+        $paginator = new Util\Paginator($perPage, $currentPage);
         $paginator->setTotal(15)->removeParam('remove');
         $_SERVER['REQUEST_URI'] = SITE_URL . '/paginator_test.php?stay=on&remove=yes';
         $this->assertEquals($linkbox, $paginator->linkbox(), 'paginator-linkbox-remparam-2');
 
-        $paginator = new Gazelle\Util\Paginator($perPage, $currentPage);
+        $paginator = new Util\Paginator($perPage, $currentPage);
         $paginator->setTotal(15)->removeParam('remove');
         $_SERVER['REQUEST_URI'] = SITE_URL . '/paginator_test.php?remove=yes';
         $this->assertMatchesRegularExpression(
@@ -103,7 +103,7 @@ class PaginatorTest extends TestCase {
         $perPage = 9;
         $currentPage = 1;
 
-        $paginator = new Gazelle\Util\Paginator($perPage, $currentPage);
+        $paginator = new Util\Paginator($perPage, $currentPage);
         $paginator->setTotal(15)->setParam('new5', '1')->setParam('morenew', 'yes');
         $_SERVER['REQUEST_URI'] = SITE_URL . '/paginator_test.php?stay=on';
 
@@ -111,7 +111,7 @@ class PaginatorTest extends TestCase {
             '|<a href="[^"]+/paginator_test\.php\?stay=on&amp;page=2&amp;new5=1&amp;morenew=yes"><strong>10-15|',
             $paginator->linkbox(), 'paginator-linkbox-setparam-1');
 
-        $paginator = new Gazelle\Util\Paginator($perPage, $currentPage);
+        $paginator = new Util\Paginator($perPage, $currentPage);
         $paginator->setTotal(15)->setParam('new5', '1')->setParam('morenew', 'yes');
         $_SERVER['REQUEST_URI'] = SITE_URL . '/paginator_test.php';
         $this->assertMatchesRegularExpression(
@@ -123,7 +123,7 @@ class PaginatorTest extends TestCase {
         $perPage = 9;
         $currentPage = 2;
 
-        $paginator = new Gazelle\Util\Paginator($perPage, $currentPage);
+        $paginator = new Util\Paginator($perPage, $currentPage);
         $paginator->setTotal(18);
         $_SERVER['REQUEST_URI'] = SITE_URL . '/paginator_test.php';
 
@@ -132,7 +132,7 @@ class PaginatorTest extends TestCase {
         $this->assertDoesNotMatchRegularExpression(
             '|<a href="[^"]+/paginator_test\.php\?page=3|', $linkbox, 'paginator-linkbox-full-2');
 
-        $paginator = new Gazelle\Util\Paginator($perPage, 1);
+        $paginator = new Util\Paginator($perPage, 1);
         $paginator->setTotal(18);
         $linkbox = $paginator->linkbox();
         $this->assertMatchesRegularExpression('|<strong>1-9</strong> |', $linkbox, 'paginator-linkbox-full-3');

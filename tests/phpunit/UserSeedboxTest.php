@@ -1,18 +1,20 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 class UserSeedboxTest extends TestCase {
-    protected Gazelle\User $user;
+    protected User $user;
     protected string $tgroupName;
     protected array $torrentList = [];
 
     public function setUp(): void {
-        $this->user = Helper::makeUser('sbox.' . randomString(10), 'seedbox');
+        $this->user = \GazelleUnitTest\Helper::makeUser('sbox.' . randomString(10), 'seedbox');
         $this->user->toggleAttr('feature-seedbox', true);
 
         $this->tgroupName = 'phpunit seedbox ' . randomString(6);
-        $tgroup = Helper::makeTGroupMusic(
+        $tgroup = \GazelleUnitTest\Helper::makeTGroupMusic(
             name:       $this->tgroupName,
             artistName: [[ARTIST_MAIN], ['Seed Box ' . randomString(12)]],
             tagName:    ['metal'],
@@ -20,7 +22,7 @@ class UserSeedboxTest extends TestCase {
         );
 
         $this->torrentList = array_map(fn($info) =>
-            Helper::makeTorrentMusic(
+            \GazelleUnitTest\Helper::makeTorrentMusic(
                 tgroup: $tgroup,
                 user:   $this->user,
                 title:  $info['title'],
@@ -34,8 +36,8 @@ class UserSeedboxTest extends TestCase {
     }
 
     public function tearDown(): void {
-        Helper::removeTGroup($this->torrentList[0]->group(), $this->user);
-        Gazelle\DB::DB()->prepared_query("
+        \GazelleUnitTest\Helper::removeTGroup($this->torrentList[0]->group(), $this->user);
+        DB::DB()->prepared_query("
             DELETE us, xfu
             FROM user_seedbox us
             LEFT JOIN xbt_files_users xfu ON (xfu.uid = us.user_id)
@@ -45,8 +47,8 @@ class UserSeedboxTest extends TestCase {
         $this->user->remove();
     }
 
-    protected function generateSeed(Gazelle\Torrent $torrent, string $ua, string $peerId, string $ip): void {
-        Gazelle\DB::DB()->prepared_query("
+    protected function generateSeed(Torrent $torrent, string $ua, string $peerId, string $ip): void {
+        DB::DB()->prepared_query("
             INSERT INTO xbt_files_users
                    (fid, uid, useragent, peer_id, ip, active, remaining, timespent, mtime)
             VALUES (?,   ?,   ?,         ?,       ?,  1, 0, 1, unix_timestamp(now() - interval 1 hour))
@@ -55,13 +57,13 @@ class UserSeedboxTest extends TestCase {
     }
 
     public function testSeedbox(): void {
-        $seedbox = new Gazelle\User\Seedbox($this->user);
+        $seedbox = new User\Seedbox($this->user);
         $this->assertEquals($this->user->link(), $seedbox->link(), 'seedbox-link');
         $this->assertEquals($this->user->location(), $seedbox->location(), 'seedbox-location');
         $this->assertCount(0, $seedbox->hostList(), 'seedbox-initial-hostlist');
         $this->assertCount(0, $seedbox->freeList(), 'seedbox-initial-freelist');
         $seedbox->setViewByPath();
-        $this->assertEquals(Gazelle\User\Seedbox::VIEW_BY_PATH, $seedbox->viewBy(), 'seedbox-view-by');
+        $this->assertEquals(User\Seedbox::VIEW_BY_PATH, $seedbox->viewBy(), 'seedbox-view-by');
 
         $ua1   = 'ua-' . randomString(10);
         $pid1  = 'pi-' . randomString(10);
@@ -120,13 +122,13 @@ class UserSeedboxTest extends TestCase {
         $seedbox->setSource($hostList[$key2]['id'])->setTarget($hostList[$key1]['id']);
         $this->assertEquals([$this->torrentList[2]->id(), $this->torrentList[3]->id()], $seedbox->idList(), 'seedbox-2-not-1');
 
-        $list = $seedbox->torrentList(new Gazelle\Manager\Torrent(), 3, 0);
+        $list = $seedbox->torrentList(new Manager\Torrent(), 3, 0);
         $this->assertEquals([$this->torrentList[2]->id(), $this->torrentList[3]->id()], array_map(fn($t) => $t['id'], $list), 'seedbox-list');
     }
 
     public function testUserSeederList(): void {
         $torrent = $this->torrentList[0];
-        Helper::generateTorrentSeed($torrent, $this->user);
+        \GazelleUnitTest\Helper::generateTorrentSeed($torrent, $this->user);
         $seederList = $torrent->seederList($this->user, 1, 0);
         $this->assertCount(1, $seederList, 'seedbox-user-seederlist');
     }

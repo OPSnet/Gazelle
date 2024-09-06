@@ -1,6 +1,6 @@
 <?php
 
-namespace GazelleUnitTest;
+namespace Gazelle;
 
 use PHPUnit\Framework\TestCase;
 
@@ -14,20 +14,20 @@ class UserLinkTest extends TestCase {
     }
 
     public function testUserLinkBasic(): void {
-        $this->userList[] = \Helper::makeUser('ul1.' . randomString(10), 'userlink');
-        $linker = new \Gazelle\User\UserLink($this->userList[0]);
+        $this->userList[] = \GazelleUnitTest\Helper::makeUser('ul1.' . randomString(10), 'userlink');
+        $linker = new User\UserLink($this->userList[0]);
 
-        $this->assertInstanceOf(\Gazelle\User\UserLink::class, $linker->flush(), 'user-link-flush');
+        $this->assertInstanceOf(User\UserLink::class, $linker->flush(), 'user-link-flush');
         $this->assertEquals($this->userList[0]->link(), $linker->link(), 'user-link-html-link');
         $this->assertEquals($this->userList[0]->location(), $linker->location(), 'user-link-html-location');
     }
 
     public function testUserLinkInfo(): void {
         $this->userList = [
-            \Helper::makeUser('ul1.' . randomString(10), 'userlink'),
-            \Helper::makeUser('ul2.' . randomString(10), 'userlink'),
+            \GazelleUnitTest\Helper::makeUser('ul1.' . randomString(10), 'userlink'),
+            \GazelleUnitTest\Helper::makeUser('ul2.' . randomString(10), 'userlink'),
         ];
-        $linker = new \Gazelle\User\UserLink($this->userList[0]);
+        $linker = new User\UserLink($this->userList[0]);
 
         $this->assertTrue(
             $linker->dupe($this->userList[1], $this->userList[0], true),
@@ -68,18 +68,18 @@ class UserLinkTest extends TestCase {
         );
         $this->assertEquals(
             [$this->userList[0]->id() => $this->userList[0]->username()],
-            (new \Gazelle\User\UserLink($this->userList[1]))->info()['list'],
+            (new User\UserLink($this->userList[1]))->info()['list'],
             'user-link-info-other-user'
         );
     }
 
     public function testUserLinkLifeCycle(): void {
         $this->userList = [
-            \Helper::makeUser('ul1.' . randomString(10), 'userlink'),
-            \Helper::makeUser('ul2.' . randomString(10), 'userlink'),
-            \Helper::makeUser('ul3.' . randomString(10), 'userlink'),
+            \GazelleUnitTest\Helper::makeUser('ul1.' . randomString(10), 'userlink'),
+            \GazelleUnitTest\Helper::makeUser('ul2.' . randomString(10), 'userlink'),
+            \GazelleUnitTest\Helper::makeUser('ul3.' . randomString(10), 'userlink'),
         ];
-        $linker = new \Gazelle\User\UserLink($this->userList[0]);
+        $linker = new User\UserLink($this->userList[0]);
         $linker->dupe($this->userList[1], $this->userList[0], true);
 
         $groupId = $linker->groupId($this->userList[0]);
@@ -97,19 +97,19 @@ class UserLinkTest extends TestCase {
 
     public function testUserLinkMergeGroup(): void {
         $this->userList = [
-            \Helper::makeUser('ul0.' . randomString(10), 'userlink'), // the admin
-            \Helper::makeUser('ul1.' . randomString(10), 'userlink'),
-            \Helper::makeUser('ul2.' . randomString(10), 'userlink'),
-            \Helper::makeUser('ul3.' . randomString(10), 'userlink'),
-            \Helper::makeUser('ul4.' . randomString(10), 'userlink'),
+            \GazelleUnitTest\Helper::makeUser('ul0.' . randomString(10), 'userlink'), // the admin
+            \GazelleUnitTest\Helper::makeUser('ul1.' . randomString(10), 'userlink'),
+            \GazelleUnitTest\Helper::makeUser('ul2.' . randomString(10), 'userlink'),
+            \GazelleUnitTest\Helper::makeUser('ul3.' . randomString(10), 'userlink'),
+            \GazelleUnitTest\Helper::makeUser('ul4.' . randomString(10), 'userlink'),
         ];
 
         // link 1 and 2
-        $linka = new \Gazelle\User\UserLink($this->userList[1]);
+        $linka = new User\UserLink($this->userList[1]);
         $linka->dupe($this->userList[2], $this->userList[0], true);
 
         // link 3 and 4
-        $linkb = new \Gazelle\User\UserLink($this->userList[3]);
+        $linkb = new User\UserLink($this->userList[3]);
         $linkb->dupe($this->userList[4], $this->userList[0], true);
         $linkb->dupe($this->userList[2], $this->userList[0], true);
 
@@ -137,7 +137,7 @@ class UserLinkTest extends TestCase {
                 $this->userList[2]->id() => $this->userList[2]->username(),
                 $this->userList[3]->id() => $this->userList[3]->username(),
             ],
-            (new \Gazelle\User\UserLink($this->userList[4]))->info()['list'],
+            (new User\UserLink($this->userList[4]))->info()['list'],
             'user-link-merged-4'
         );
     }

@@ -1,32 +1,34 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 class SearchReportTest extends TestCase {
     protected array $reportList = [];
     protected array $userList   = [];
-    protected \Gazelle\Collage $collage;
-    protected \Gazelle\Request $request;
+    protected Collage $collage;
+    protected Request $request;
 
     public function setUp(): void {
         $this->userList = [
-            Helper::makeUser('searchrep.' . randomString(10), 'searchrep', enable: true, clearInbox: true),
-            Helper::makeUser('searchrep.' . randomString(10), 'searchrep', enable: true, clearInbox: true),
+            \GazelleUnitTest\Helper::makeUser('searchrep.' . randomString(10), 'searchrep', enable: true, clearInbox: true),
+            \GazelleUnitTest\Helper::makeUser('searchrep.' . randomString(10), 'searchrep', enable: true, clearInbox: true),
         ];
 
-        $this->collage = (new \Gazelle\Manager\Collage())->create(
+        $this->collage = (new Manager\Collage())->create(
             user:        $this->userList[0],
             categoryId:  2,
             name:        'phpunit search report ' . randomString(20),
             description: 'phpunit search report description',
             tagList:     'disco funk metal',
-            logger:      new \Gazelle\Log(),
+            logger:      new Log(),
         );
 
-        $this->request = (new \Gazelle\Manager\Request())->create(
+        $this->request = (new Manager\Request())->create(
             user:            $this->userList[1],
             bounty:          REQUEST_MIN * 1024 * 1024,
-            categoryId:      (new \Gazelle\Manager\Category())->findIdByName('Music'),
+            categoryId:      (new Manager\Category())->findIdByName('Music'),
             year:            (int)date('Y'),
             title:           'phpunit request report',
             image:           '',
@@ -42,7 +44,7 @@ class SearchReportTest extends TestCase {
             oclc:            '',
         );
 
-        $manager = new \Gazelle\Manager\Report(new \Gazelle\Manager\User());
+        $manager = new Manager\Report(new Manager\User());
         $this->reportList['collage'] = $manager->create($this->userList[0], $this->collage->id(), 'collage', 'phpunit search collage report');
         sleep(1);
         $this->reportList['request'] = $manager->create($this->userList[0], $this->request->id(), 'request', 'phpunit search request report');
@@ -62,9 +64,9 @@ class SearchReportTest extends TestCase {
     }
 
     public function testSearchReportId(): void {
-        $search = new \Gazelle\Search\Report();
+        $search = new Search\Report();
         $this->assertEquals(
-            \Gazelle\Enum\SearchReportOrder::createdDesc,
+            Enum\SearchReportOrder::createdDesc,
             $search->order(),
             'search-report-default-order'
         );
@@ -82,7 +84,7 @@ class SearchReportTest extends TestCase {
     }
 
     public function testSearchReportList(): void {
-        $search = new \Gazelle\Search\Report();
+        $search = new Search\Report();
         $search->setStatus(['New']);
 
         $this->assertEquals(
@@ -95,7 +97,7 @@ class SearchReportTest extends TestCase {
             'search-report-page-list'
         );
 
-        $this->reportList['request']->resolve($this->userList[0], new \Gazelle\Manager\Report(new \Gazelle\Manager\User()));
+        $this->reportList['request']->resolve($this->userList[0], new Manager\Report(new Manager\User()));
         $this->assertEquals(
             [
                 $this->reportList['user']->id(),

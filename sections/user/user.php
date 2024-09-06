@@ -1,9 +1,10 @@
 <?php
+// phpcs:disable PSR1.Files.SideEffects.FoundWithSymbols
+// phpcs:disable Generic.WhiteSpace.ScopeIndent.IncorrectExact
+// phpcs:disable Generic.WhiteSpace.ScopeIndent.Incorrect
 /** @phpstan-var \Gazelle\User $Viewer */
 /** @phpstan-var \Gazelle\Cache $Cache */
 /** @phpstan-var \Twig\Environment $Twig */
-// phpcs:disable Generic.WhiteSpace.ScopeIndent.IncorrectExact
-// phpcs:disable Generic.WhiteSpace.ScopeIndent.Incorrect
 
 declare(strict_types=1);
 

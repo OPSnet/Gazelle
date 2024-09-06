@@ -1,5 +1,7 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 define('TEST_NAME', 'phpunit_bitvec_' . randomString(20));
@@ -8,8 +10,8 @@ define('TEST_EXPIRY', 3600);
 
 class CacheVectorTest extends TestCase {
     public function testCacheVector(): void {
-        $bitvec = new Gazelle\Util\CacheVector(TEST_NAME, TEST_LENGTH, TEST_EXPIRY);
-        $this->assertInstanceOf(Gazelle\Util\CacheVector::class, $bitvec, 'bitvec-ctor');
+        $bitvec = new Util\CacheVector(TEST_NAME, TEST_LENGTH, TEST_EXPIRY);
+        $this->assertInstanceOf(Util\CacheVector::class, $bitvec, 'bitvec-ctor');
         $this->assertTrue($bitvec->isEmpty(), 'bitvec-new-empty');
 
         $truth = [1, 5, 8, 20, 27];
@@ -32,7 +34,7 @@ class CacheVectorTest extends TestCase {
         $bitvec->persist();
         $this->assertTrue($bitvec->set(4), 'bitvec-set-4');
 
-        $new = new Gazelle\Util\CacheVector(TEST_NAME, TEST_LENGTH, TEST_EXPIRY);
+        $new = new Util\CacheVector(TEST_NAME, TEST_LENGTH, TEST_EXPIRY);
         $this->assertTrue($new->get(8), 'new-get-8');
         $this->assertTrue($new->get(17), 'new-get-17');
         $this->assertFalse($new->get(4), 'new-get-4');

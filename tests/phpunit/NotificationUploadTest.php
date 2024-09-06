@@ -1,20 +1,22 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 use Gazelle\Enum\NotificationTicketState;
 
 class NotificationUploadTest extends TestCase {
-    use Gazelle\Pg;
+    use Pg;
 
-    protected Gazelle\Manager\Torrent $torMan;
-    protected Gazelle\Torrent         $torrent;
+    protected Manager\Torrent $torMan;
+    protected Torrent         $torrent;
     protected array                   $userList;
 
     public function setUp(): void {
-        $user = Helper::makeUser('uploader.' . randomString(10), 'notification-ticket');
-        $tgroup = (new Gazelle\Manager\TGroup())->create(
+        $user = \GazelleUnitTest\Helper::makeUser('uploader.' . randomString(10), 'notification-ticket');
+        $tgroup = (new Manager\TGroup())->create(
             categoryId:      1,
-            releaseType:     (new Gazelle\ReleaseType())->findIdByName('Compilation'),
+            releaseType:     (new ReleaseType())->findIdByName('Compilation'),
             name:            'phpunit notify ' . randomString(6),
             description:     'phpunit notify description',
             image:           '',
@@ -23,9 +25,9 @@ class NotificationUploadTest extends TestCase {
             catalogueNumber: 'UA-246',
             showcase:        false,
         );
-        $tgroup->addArtists([ARTIST_MAIN], ['Notify Man ' . randomString(12)], $user, new Gazelle\Manager\Artist(), new Gazelle\Log());
+        $tgroup->addArtists([ARTIST_MAIN], ['Notify Man ' . randomString(12)], $user, new Manager\Artist(), new Log());
 
-        $tagMan = new Gazelle\Manager\Tag();
+        $tagMan = new Manager\Tag();
         foreach (['electronic', 'funk', 'jazz'] as $name) {
             $tag = $tagMan->softCreate($name, $user);
             if ($tag) {
@@ -34,7 +36,7 @@ class NotificationUploadTest extends TestCase {
         }
         $tgroup->refresh();
 
-        $this->torMan = new \Gazelle\Manager\Torrent();
+        $this->torMan = new Manager\Torrent();
         $this->torrent = $this->torMan->create(
             tgroup:                  $tgroup,
             user:                    $user,
@@ -57,7 +59,7 @@ class NotificationUploadTest extends TestCase {
 
     public function tearDown(): void {
         $user = $this->torrent->uploader();
-        Helper::removeTGroup($this->torrent->group(), $user);
+        \GazelleUnitTest\Helper::removeTGroup($this->torrent->group(), $user);
         $user->remove();
         foreach ($this->userList as $user) {
             $user->remove();
@@ -70,21 +72,21 @@ class NotificationUploadTest extends TestCase {
         // In other words, if you want to add a new combination to check, you need
         // to create user here.
         $this->userList = [
-            'artist'  => Helper::makeUser('artist.' . randomString(10), 'notification-ticket'),
-            'enc.med' => Helper::makeUser('enc.med.' . randomString(10), 'notification-ticket'),
-            'release' => Helper::makeUser('release.' . randomString(10), 'notification-ticket'),
-            'tag'     => Helper::makeUser('tag.' . randomString(10), 'notification-ticket'),
-            'tag2yes' => Helper::makeUser('tag2yes.' . randomString(10), 'notification-ticket'),
-            'tag2no'  => Helper::makeUser('tag2no.' . randomString(10), 'notification-ticket'),
-            'tagno'   => Helper::makeUser('tagno.' . randomString(10), 'notification-ticket'),
-            'user'    => Helper::makeUser('user.' . randomString(10), 'notification-ticket'),
-            'xva'     => Helper::makeUser('xva.' . randomString(10), 'notification-ticket'),
-            'year'    => Helper::makeUser('year.' . randomString(10), 'notification-ticket'),
+            'artist'  => \GazelleUnitTest\Helper::makeUser('artist.' . randomString(10), 'notification-ticket'),
+            'enc.med' => \GazelleUnitTest\Helper::makeUser('enc.med.' . randomString(10), 'notification-ticket'),
+            'release' => \GazelleUnitTest\Helper::makeUser('release.' . randomString(10), 'notification-ticket'),
+            'tag'     => \GazelleUnitTest\Helper::makeUser('tag.' . randomString(10), 'notification-ticket'),
+            'tag2yes' => \GazelleUnitTest\Helper::makeUser('tag2yes.' . randomString(10), 'notification-ticket'),
+            'tag2no'  => \GazelleUnitTest\Helper::makeUser('tag2no.' . randomString(10), 'notification-ticket'),
+            'tagno'   => \GazelleUnitTest\Helper::makeUser('tagno.' . randomString(10), 'notification-ticket'),
+            'user'    => \GazelleUnitTest\Helper::makeUser('user.' . randomString(10), 'notification-ticket'),
+            'xva'     => \GazelleUnitTest\Helper::makeUser('xva.' . randomString(10), 'notification-ticket'),
+            'year'    => \GazelleUnitTest\Helper::makeUser('year.' . randomString(10), 'notification-ticket'),
         ];
 
         // create some notification filters for the users
         $artistName = $this->torrent->group()->artistRole()->idList()[ARTIST_MAIN][0]['name'];
-        $artistFilter = (new Gazelle\Notification\Filter())
+        $artistFilter = (new Notification\Filter())
             ->setLabel('Artists')
             ->setMultiLine('artist', $artistName);
         $this->assertTrue($artistFilter->isConfigured(), 'filter-artist-configured');
@@ -94,7 +96,7 @@ class NotificationUploadTest extends TestCase {
 
         // encoding+media
         $this->assertEquals($nextFilter++,
-            $filter['enc.med'] = (new Gazelle\Notification\Filter())
+            $filter['enc.med'] = (new Notification\Filter())
                 ->setLabel('Format+Media')
                 ->setMultiLine('artist', '') // TODO: INSERT fails on not null assertion
                 ->setMultiValue('encoding', ['Lossless', '24bit Lossless'])
@@ -105,7 +107,7 @@ class NotificationUploadTest extends TestCase {
 
         // exclude VA (Compilation)
         $this->assertEquals($nextFilter++,
-            $filter['xva'] = (new Gazelle\Notification\Filter())
+            $filter['xva'] = (new Notification\Filter())
                 ->setLabel('No compilations')
                 ->setMultiLine('artist', '')
                 ->setBoolean('exclude_va', true)
@@ -115,7 +117,7 @@ class NotificationUploadTest extends TestCase {
 
         // release type Album
         $this->assertEquals($nextFilter++,
-            $filter['release'] = (new Gazelle\Notification\Filter())
+            $filter['release'] = (new Notification\Filter())
                 ->setLabel('Release')
                 ->setMultiLine('artist', '')
                 ->setMultiLine('release_type', "Single")
@@ -125,7 +127,7 @@ class NotificationUploadTest extends TestCase {
 
         // one tag present
         $this->assertEquals($nextFilter++,
-            $filter['tag'] = (new Gazelle\Notification\Filter())
+            $filter['tag'] = (new Notification\Filter())
                 ->setLabel('Tags')
                 ->setMultiLine('artist', '')
                 ->setMultiLine('tag', "electronic\n\n")
@@ -135,7 +137,7 @@ class NotificationUploadTest extends TestCase {
 
         // two tags present
         $this->assertEquals($nextFilter++,
-            $filter['tag2yes'] = (new Gazelle\Notification\Filter())
+            $filter['tag2yes'] = (new Notification\Filter())
                 ->setLabel('Two Tags')
                 ->setMultiLine('artist', '')
                 ->setMultiLine('tag', "jazz\nelectronic\n")
@@ -145,7 +147,7 @@ class NotificationUploadTest extends TestCase {
 
         // no tags present
         $this->assertEquals($nextFilter++,
-            $filter['tag2no'] = (new Gazelle\Notification\Filter())
+            $filter['tag2no'] = (new Notification\Filter())
                 ->setLabel('Two Tags+')
                 ->setMultiLine('artist', '')
                 ->setMultiLine('tag', "jazz.rock\nhard.bop\n")
@@ -155,7 +157,7 @@ class NotificationUploadTest extends TestCase {
 
         // these are not the tags you are looking for
         $this->assertEquals($nextFilter++,
-            $filter['tagno'] = (new Gazelle\Notification\Filter())
+            $filter['tagno'] = (new Notification\Filter())
                 ->setLabel('Not these tags')
                 ->setMultiLine('artist', '')
                 ->setMultiLine('not_tag', "funk\nfolk\n")
@@ -165,17 +167,17 @@ class NotificationUploadTest extends TestCase {
 
         // uploads by user
         $this->assertEquals($nextFilter++,
-            $filter['user'] = (new Gazelle\Notification\Filter())
+            $filter['user'] = (new Notification\Filter())
                 ->setLabel('Users')
                 ->setMultiLine('artist', '')
-                ->setUsers(new Gazelle\Manager\User(), $this->torrent->uploader()->username())
+                ->setUsers(new Manager\User(), $this->torrent->uploader()->username())
                 ->create($this->userList['user']->id()),
             'filter-users-created'
         );
 
         // category Music
         $this->assertEquals($nextFilter++,
-            $filter['user.self'] = (new Gazelle\Notification\Filter())
+            $filter['user.self'] = (new Notification\Filter())
                 ->setLabel('Tags')
                 ->setMultiLine('artist', '')
                 ->setMultiLine('category', "Music")
@@ -185,7 +187,7 @@ class NotificationUploadTest extends TestCase {
 
         // in some year
         $this->assertEquals($nextFilter++,
-            $filter['year'] = (new Gazelle\Notification\Filter())
+            $filter['year'] = (new Notification\Filter())
                 ->setLabel('Year')
                 ->setMultiLine('artist', '')
                 ->setYears(2020, 2022)
@@ -194,9 +196,9 @@ class NotificationUploadTest extends TestCase {
         );
 
         // create a ticket for this new torrent
-        $ticketManager = new Gazelle\Manager\NotificationTicket();
+        $ticketManager = new Manager\NotificationTicket();
         $ticket = $ticketManager->create($this->torrent);
-        $this->assertInstanceOf(Gazelle\NotificationTicket::class, $ticket, 'we-haz-notification-ticket');
+        $this->assertInstanceOf(NotificationTicket::class, $ticket, 'we-haz-notification-ticket');
         $this->assertEquals($ticket->created(), $ticket->modified(), 'ntick-new');
         $this->assertEquals(NotificationTicketState::Pending, $ticket->state(), 'ntick-state');
 
@@ -206,17 +208,17 @@ class NotificationUploadTest extends TestCase {
         $this->assertEquals($this->torrent->id(), $ticket->torrentId(), 'ntick-pending-torrent-id');
         $ticket->setActive();
         $this->assertEquals($ticket->state(), NotificationTicketState::Active, 'ntick-active-value');
-        $this->assertEquals(1, (new Gazelle\Manager\Notification())->ticketStats()['active']['total'], 'notifier-ticket-stats-now-active');
+        $this->assertEquals(1, (new Manager\Notification())->ticketStats()['active']['total'], 'notifier-ticket-stats-now-active');
 
         // send the IRC notification
-        $notification = new Gazelle\Notification\Upload($this->torMan->findById($ticket->torrentId()));
+        $notification = new Notification\Upload($this->torMan->findById($ticket->torrentId()));
         $message = $notification->ircNotification();
         $this->assertStringContainsString($this->torrent->group()->name(), $message, 'ntick-irc-tgroup-name');
         $this->assertStringContainsString(implode(',', $this->torrent->group()->tagNameList()), $message, 'ntick-irc-tgroup-taglist');
         $this->assertStringContainsString("[{$this->torrent->group()->releaseTypeName()}]", $message, 'ntick-irc-release-type');
 
         // look at the conditions to be met for a notification from this upload
-        $notification = new Gazelle\Notification\Upload($this->torrent);
+        $notification = new Notification\Upload($this->torrent);
         $this->assertEquals(11, $notification->configure(), 'notif-configured');
         $condition = $notification->cond();
         $this->assertIsInt(array_search($artistName, $notification->args()), 'notif-args-artist');
@@ -260,7 +262,7 @@ class NotificationUploadTest extends TestCase {
         $this->assertEquals(0, $this->userList['release']->removeNotificationFilter($filter['tag']), 'user-remove-other-filter');
 
         // look for an unread user notification
-        $notifier = new Gazelle\Notification\Torrent($this->userList['artist']->id());
+        $notifier = new Notification\Torrent($this->userList['artist']->id());
         $this->assertEquals(1, $notifier->total(), 'notifier-artist-total');
         $unreadList = $notifier->unreadList(1, 0);
         $this->assertCount(1, $unreadList, 'notifier-artist-unread-list');
@@ -268,13 +270,13 @@ class NotificationUploadTest extends TestCase {
 
         // catch notifications
         unset($notifier);
-        $notifier = new Gazelle\Notification\Torrent($this->userList['enc.med']->id());
+        $notifier = new Notification\Torrent($this->userList['enc.med']->id());
         $this->assertEquals(1, $notifier->catchup(), 'notifier-encmed-catchup');
         $this->assertCount(1, $notifier->unreadList(1, 0), 'notifier-encmed-unread'); // FIXME: it's actually read+unread
 
         // clear unread user notifications
         unset($notifier);
-        $notifier = new Gazelle\Notification\Torrent($this->userList['tag']->id());
+        $notifier = new Notification\Torrent($this->userList['tag']->id());
         $this->assertEquals(1, $notifier->catchupFilter($filter['tag']), 'notifier-tag-catchup-filter');
         $this->assertCount(1, $notifier->unreadList(1, 0), 'notifier-tag-catchup-unread');
         $this->assertEquals(1, $notifier->clearFilter($filter['tag']), 'notifier-tag-clear-filter');
@@ -284,21 +286,21 @@ class NotificationUploadTest extends TestCase {
     public function testHandle(): void {
         // create a user and a notification filter
         $this->userList = [
-            'record.label' => Helper::makeUser('reclab.' . randomString(10), 'notification-ticket'),
+            'record.label' => \GazelleUnitTest\Helper::makeUser('reclab.' . randomString(10), 'notification-ticket'),
         ];
-        $filter = (new Gazelle\Notification\Filter())
+        $filter = (new Notification\Filter())
             ->setLabel('Record Labels')
             ->setMultiLine('artist', '') // TODO: INSERT fails on not null assertion
             ->setMultiLine('record.label', "Unitest Artists Corporation")
             ->create($this->userList['record.label']->id());
 
         // create the ticket and pretend it is seeding
-        $ticketManager = new Gazelle\Manager\NotificationTicket();
+        $ticketManager = new Manager\NotificationTicket();
         $ticket = $ticketManager->create($this->torrent);
-        Helper::generateTorrentSeed($this->torrent, $this->torrent->uploader());
+        \GazelleUnitTest\Helper::generateTorrentSeed($this->torrent, $this->torrent->uploader());
 
         // handle the ticket
-        $manager = new Gazelle\Manager\Notification();
+        $manager = new Manager\Notification();
         $this->assertTrue($manager->handleTicket($ticket, $this->torMan), 'ntick-is-handled');
 
         // ticket has been handled
@@ -309,20 +311,20 @@ class NotificationUploadTest extends TestCase {
 
     public function testProcessBacklog(): void {
         $this->userList = [
-            'backlog' => Helper::makeUser('backlog.' . randomString(10), 'notification-ticket'),
+            'backlog' => \GazelleUnitTest\Helper::makeUser('backlog.' . randomString(10), 'notification-ticket'),
         ];
-        $filter = (new Gazelle\Notification\Filter())
+        $filter = (new Notification\Filter())
             ->setLabel('Backlog')
             ->setMultiLine('artist', '') // TODO: INSERT fails on not null assertion
             ->setMultiLine('record.label', "Unitest Artists Corporation")
             ->create($this->userList['backlog']->id());
 
-        $ticketManager = new Gazelle\Manager\NotificationTicket();
+        $ticketManager = new Manager\NotificationTicket();
         $ticket = $ticketManager->create($this->torrent);
-        Helper::generateTorrentSeed($this->torrent, $this->torrent->uploader());
+        \GazelleUnitTest\Helper::generateTorrentSeed($this->torrent, $this->torrent->uploader());
 
         // look at the pending stats
-        $manager = new Gazelle\Manager\Notification();
+        $manager = new Manager\Notification();
         $pending = $manager->ticketPendingStats();
         $lastHour = end($pending);
         $this->assertEquals(1, $lastHour['total'], 'notif-stats-pending');
@@ -335,7 +337,7 @@ class NotificationUploadTest extends TestCase {
         $ticket = $ticketManager->findById($this->torrent->id());
         $this->assertTrue($ticket->isDone(), 'backlog-is-done');
 
-        $rss  = (new Gazelle\Feed())->byFeedName($this->userList['backlog'], 'torrents_music');
+        $rss  = (new Feed())->byFeedName($this->userList['backlog'], 'torrents_music');
         $link = SITE_URL . "/torrents.php?id={$this->torrent->groupId()}&amp;torrentid={$this->torrent->id()}&amp;action=download&amp;torrent_pass={$this->userList['backlog']->announceKey()}";
         $tags = implode(',', $this->torrent->group()->tagNameList());
         $this->assertStringContainsString("<guid>$link</guid>", $rss, 'notif-rss-guid');
@@ -345,17 +347,17 @@ class NotificationUploadTest extends TestCase {
 
     public function testStale(): void {
         $this->userList = [
-            'backlog' => Helper::makeUser('backlog.' . randomString(10), 'notification-ticket'),
+            'backlog' => \GazelleUnitTest\Helper::makeUser('backlog.' . randomString(10), 'notification-ticket'),
         ];
-        $filter = (new Gazelle\Notification\Filter())
+        $filter = (new Notification\Filter())
             ->setLabel('Stale')
             ->setMultiLine('artist', '') // TODO: INSERT fails on not null assertion
             ->setMultiLine('record.label', "Unitest Artists Corporation")
             ->create($this->userList['backlog']->id());
 
-        $ticketManager = new Gazelle\Manager\NotificationTicket();
+        $ticketManager = new Manager\NotificationTicket();
         $ticket        = $ticketManager->create($this->torrent);
-        $manager       = new Gazelle\Manager\Notification();
+        $manager       = new Manager\Notification();
         foreach (range(1, 59) as $try) {
             $manager->processBacklog($ticketManager, $this->torMan);
         }
@@ -372,24 +374,24 @@ class NotificationUploadTest extends TestCase {
 
     public function testNewGroup(): void {
         $this->userList = [
-            'new.grp' => Helper::makeUser('new.grp.' . randomString(10), 'notification-ticket'),
+            'new.grp' => \GazelleUnitTest\Helper::makeUser('new.grp.' . randomString(10), 'notification-ticket'),
         ];
         // FIXME: this should return an object, not an id
-        $filter = (new Gazelle\Notification\Filter())
+        $filter = (new Notification\Filter())
             ->setLabel('New Group')
             ->setMultiLine('artist', '') // TODO: INSERT fails on not null assertion
             ->setBoolean('new_groups_only', true)
             ->create($this->userList['new.grp']->id());
 
-        $ticketManager = new Gazelle\Manager\NotificationTicket();
+        $ticketManager = new Manager\NotificationTicket();
         $ticket        = $ticketManager->create($this->torrent);
-        Helper::generateTorrentSeed($this->torrent, $this->torrent->uploader());
+        \GazelleUnitTest\Helper::generateTorrentSeed($this->torrent, $this->torrent->uploader());
 
         // handle the ticket
-        $manager = new Gazelle\Manager\Notification();
+        $manager = new Manager\Notification();
         $manager->handleTicket($ticket, $this->torMan);
 
-        $notifier = new Gazelle\Notification\Torrent($this->userList['new.grp']->id());
+        $notifier = new Notification\Torrent($this->userList['new.grp']->id());
         $this->assertEquals(1, $notifier->total(), 'notifier-new-group-1-total');
         $this->assertEquals(1, $notifier->catchupFilter($filter), 'notifier-new-group-catchup');
         $this->assertEquals(1, $notifier->clearFilter($filter), 'notifier-new-group-clear');
@@ -415,10 +417,10 @@ class NotificationUploadTest extends TestCase {
         );
 
         $ticket = $ticketManager->create($newTorrent);
-        Helper::generateTorrentSeed($newTorrent, $newTorrent->uploader());
+        \GazelleUnitTest\Helper::generateTorrentSeed($newTorrent, $newTorrent->uploader());
         $manager->handleTicket($ticket, $this->torMan);
 
-        $notifier = new Gazelle\Notification\Torrent($this->userList['new.grp']->id());
+        $notifier = new Notification\Torrent($this->userList['new.grp']->id());
         $this->assertEquals(0, $notifier->total(), 'notifier-no-new-group-2-total');
 
         $stats = $manager->ticketStats();
@@ -432,11 +434,11 @@ class NotificationUploadTest extends TestCase {
 
     public function testNotificationSearch(): void {
         $this->userList = [
-            'uploader' => Helper::makeUser('artist.' . randomString(10), 'notification-search'),
-            'search'   => Helper::makeUser('artist.' . randomString(10), 'notification-up'),
+            'uploader' => \GazelleUnitTest\Helper::makeUser('artist.' . randomString(10), 'notification-search'),
+            'search'   => \GazelleUnitTest\Helper::makeUser('artist.' . randomString(10), 'notification-up'),
         ];
         // look for Compilation
-        $filter = (new Gazelle\Notification\Filter())
+        $filter = (new Notification\Filter())
             ->setLabel('Search')
             ->setMultiLine('release_type', "Compilation")
             ->setMultiLine('artist', '')
@@ -462,11 +464,11 @@ class NotificationUploadTest extends TestCase {
         );
 
         // process the notifications
-        $ticket = (new Gazelle\Manager\NotificationTicket())->create($torrent);
-        Helper::generateTorrentSeed($torrent, $torrent->uploader());
-        (new Gazelle\Manager\Notification())->handleTicket($ticket, $this->torMan);
+        $ticket = (new Manager\NotificationTicket())->create($torrent);
+        \GazelleUnitTest\Helper::generateTorrentSeed($torrent, $torrent->uploader());
+        (new Manager\Notification())->handleTicket($ticket, $this->torMan);
 
-        $search = new Gazelle\User\NotificationSearch(
+        $search = new User\NotificationSearch(
             $this->userList['search'],
             $this->torMan,
             'unt.TorrentID',

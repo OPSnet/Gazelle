@@ -1,11 +1,13 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\Group;
 
 class SiteInfoTest extends TestCase {
     public function testSiteInfo(): void {
-        $info = new Gazelle\SiteInfo();
+        $info = new SiteInfo();
 
         $this->assertIsString($info->phpinfo(), 'siteinfo-phpinfo');
         $this->assertCount(2, $info->uptime(), 'siteinfo-uptime');
@@ -23,7 +25,7 @@ class SiteInfoTest extends TestCase {
 
     #[Group('no-ci')]
     public function testGitInfo(): void {
-        $info = new Gazelle\SiteInfo();
+        $info = new SiteInfo();
         $this->assertIsString($info->gitBranch(), 'siteinfo-git-branch');
         $this->assertIsString($info->gitHash(), 'siteinfo-git-hash-local');
 

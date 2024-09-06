@@ -1,4 +1,5 @@
 <?php
+// phpcs:disable PSR1.Files.SideEffects.FoundWithSymbols
 
 function print_or_return($JsonMsg, $Error = null) {
     if (defined('NO_AJAX_ERROR')) {

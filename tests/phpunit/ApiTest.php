@@ -1,10 +1,12 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 class ApiTest extends TestCase {
     public function testUserId(): void {
-        $api = new Gazelle\API\User([]);
+        $api = new API\User([]);
 
         $_GET['user_id'] = 1;
         $_GET['req']     = 'stats';
@@ -12,7 +14,7 @@ class ApiTest extends TestCase {
     }
 
     public function testUsername(): void {
-        $api = new Gazelle\API\User([]);
+        $api = new API\User([]);
 
         $_GET['username'] = 'admin';
         $_GET['req']      = 'stats';

@@ -4,7 +4,7 @@ use Phinx\Seed\AbstractSeed;
 
 class UserAttrHideVote extends AbstractSeed
 {
-    public function run()
+    public function run(): void
     {
         foreach (
             [

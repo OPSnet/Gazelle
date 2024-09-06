@@ -30,7 +30,7 @@ help:
 	echo '  pgdump               - dump postgresql database from docker to misc/postgresql-dump.sql'
 	echo '  phpstan-analyse      - run phpstan over the code'
 	echo '  phpstan-baseline     - generate a new phpstan baseline'
-	echo '  test                 - run all linters and unit test suite'
+	echo '  test                 - run unit test suite'
 	echo '  twig-flush           - purge the Twig cache'
 
 .PHONY: build-css
@@ -39,7 +39,7 @@ build-css:
 
 .PHONY: check-php
 check-php:
-	git status | awk '/(modified|new file):/ {print $$NF}' | xargs -n1 php -l
+	git status | awk '/(modified|new file):.*\.php$$/ {print $$NF}' | xargs -n1 php -l
 
 .PHONY: composer-dev-update
 composer-dev-update:
@@ -134,7 +134,7 @@ rector-dry-run:
 	vendor/bin/rector process --dry-run --config misc/rector.php
 
 .PHONY: test
-test: lint-css lint-php lint-twig
+test:
 	docker-compose exec -T web vendor/bin/phpunit -c misc/phpunit.xml
 
 .PHONY: twig-flush

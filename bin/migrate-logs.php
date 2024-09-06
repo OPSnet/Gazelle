@@ -1,4 +1,5 @@
 <?php
+// phpcs:disable PSR1.Files.SideEffects.FoundWithSymbols
 
 /* The torrents_logs.Log column no longer exists as of this commit.
  * This script is left for historical purposes and for people who

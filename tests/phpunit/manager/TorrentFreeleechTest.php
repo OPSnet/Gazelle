@@ -1,5 +1,7 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 use Gazelle\Enum\LeechType;
 use Gazelle\Enum\LeechReason;
@@ -8,15 +10,15 @@ class TorrentFreeleechTest extends TestCase {
     protected array $torrentList;
 
     public function setUp(): void {
-        $user = Helper::makeUser('torman.' . randomString(10), 'torrent.manager');
-        $tgroup = Helper::makeTGroupMusic(
+        $user = \GazelleUnitTest\Helper::makeUser('torman.' . randomString(10), 'torrent.manager');
+        $tgroup = \GazelleUnitTest\Helper::makeTGroupMusic(
             name:       'phpunit torman ' . randomString(6),
             artistName: [[ARTIST_MAIN], ['DJ Torman ' . randomString(12)]],
             tagName:    ['hip.hop'],
             user:       $user,
         );
         $this->torrentList = array_map(fn($info) =>
-            Helper::makeTorrentMusic(
+            \GazelleUnitTest\Helper::makeTorrentMusic(
                 tgroup: $tgroup,
                 format: $info['format'],
                 size:   $info['size'],
@@ -35,7 +37,7 @@ class TorrentFreeleechTest extends TestCase {
     public function tearDown(): void {
         $tgroup = $this->torrentList[0]->group();
         $user   = $this->torrentList[0]->uploader();
-        $torMan = new Gazelle\Manager\Torrent();
+        $torMan = new Manager\Torrent();
         foreach ($this->torrentList as $torrent) {
             $torrent->remove($user, 'torman unit test');
         }
@@ -47,8 +49,8 @@ class TorrentFreeleechTest extends TestCase {
         $this->assertEquals(
             4,
             $this->torrentList[0]->group()->setFreeleech(
-                torMan:    new \Gazelle\Manager\Torrent(),
-                tracker:   new \Gazelle\Tracker(),
+                torMan:    new Manager\Torrent(),
+                tracker:   new Tracker(),
                 user:      $this->torrentList[0]->uploader(),
                 leechType: LeechType::Free,
                 reason:    LeechReason::StaffPick,
@@ -66,8 +68,8 @@ class TorrentFreeleechTest extends TestCase {
         $this->assertEquals(
             4,
             $this->torrentList[0]->group()->setFreeleech(
-                torMan:    new \Gazelle\Manager\Torrent(),
-                tracker:   new \Gazelle\Tracker(),
+                torMan:    new Manager\Torrent(),
+                tracker:   new Tracker(),
                 user:      $this->torrentList[0]->uploader(),
                 leechType: LeechType::Normal,
                 reason:    LeechReason::Normal,
@@ -86,8 +88,8 @@ class TorrentFreeleechTest extends TestCase {
         $this->assertEquals(
             5,
             $this->torrentList[0]->group()->setFreeleech(
-                torMan:    new \Gazelle\Manager\Torrent(),
-                tracker:   new \Gazelle\Tracker(),
+                torMan:    new Manager\Torrent(),
+                tracker:   new Tracker(),
                 user:      $this->torrentList[0]->uploader(),
                 leechType: LeechType::Free,
                 reason:    LeechReason::StaffPick,

@@ -1,14 +1,14 @@
 <?php
 
-namespace phpunit\manager;
+namespace Gazelle;
 
 use PHPUnit\Framework\TestCase;
 
 class ReportAutoTypeTest extends TestCase {
-    protected \Gazelle\Manager\ReportAutoType $ratMan;
+    protected Manager\ReportAutoType $ratMan;
 
     public function setUp(): void {
-        $this->ratMan = new \Gazelle\Manager\ReportAutoType();
+        $this->ratMan = new Manager\ReportAutoType();
     }
 
     public function testfindByNull(): void {

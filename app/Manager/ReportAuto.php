@@ -4,6 +4,7 @@ namespace Gazelle\Manager;
 
 class ReportAuto extends \Gazelle\BaseManager {
     use \Gazelle\Pg;
+
     protected array $reportCategories;
 
     public function __construct(

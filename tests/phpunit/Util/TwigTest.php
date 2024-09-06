@@ -1,15 +1,17 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 use Gazelle\Enum\AvatarDisplay;
 use Gazelle\Enum\AvatarSynthetic;
 
 class TwigTest extends TestCase {
-    protected \Gazelle\User $user;
+    protected User $user;
 
     public function setUp(): void {
-        Gazelle\Util\Twig::setUserMan(new Gazelle\Manager\User());
-        $this->user = Helper::makeUser('user.' . randomString(6), 'user');
+        Util\Twig::setUserMan(new Manager\User());
+        $this->user = \GazelleUnitTest\Helper::makeUser('user.' . randomString(6), 'user');
         $this->user->setField('PermissionID', SYSOP)->modify();
     }
 
@@ -18,12 +20,12 @@ class TwigTest extends TestCase {
     }
 
     protected static function twig(string $template): \Twig\TemplateWrapper {
-        return Gazelle\Util\Twig::factory()->createTemplate($template);
+        return Util\Twig::factory()->createTemplate($template);
     }
 
     public function testDominator(): void {
-        (new \Gazelle\Util\Dominator())->flush(); // in case anything has already been set
-        $twig = Gazelle\Util\Twig::factory();
+        (new Util\Dominator())->flush(); // in case anything has already been set
+        $twig = Util\Twig::factory();
         $twig->createTemplate("{{ dom.click('#id', \"$('#id').frob(); return false;\") }}")->render();
         $expected = <<<END
 <script type="text/javascript">document.addEventListener('DOMContentLoaded', function() {
@@ -48,7 +50,7 @@ END;
             'twig-bb-format'
         );
 
-        $sth = new \Gazelle\Util\SortableTableHeader('alpha', [
+        $sth = new Util\SortableTableHeader('alpha', [
             'alpha' => ['dbColumn' => 'one', 'defaultSort' => 'desc', 'text' => 'First'],
             'beta'  => ['dbColumn' => 'two', 'defaultSort' => 'desc', 'text' => 'Second'],
         ]);
@@ -135,7 +137,7 @@ END;
             self::twig('{{ user_id|user_url }}')->render(['user_id' => $this->user->id()]),
             'twig-user-url'
         );
-        (new Gazelle\User\Donor($this->user))->donate(
+        (new User\Donor($this->user))->donate(
             amount:  20,
             xbtRate: 0.05,
             source: 'phpunit twig source',
@@ -194,12 +196,12 @@ END;
     }
 
     public function testFunction(): void {
-        Gazelle\Base::setRequestContext(new Gazelle\BaseRequestContext('/index.php', '127.0.0.1', ''));
+        Base::setRequestContext(new BaseRequestContext('/index.php', '127.0.0.1', ''));
         global $Viewer;
         $Viewer = $this->user;
         $this->assertStringStartsWith('<!DOCTYPE html>', self::twig('{{ header("page") }}')->render(), 'twig-function-header');
 
-        $current = (new Gazelle\User\Session($Viewer))->create([
+        $current = (new User\Session($Viewer))->create([
             'keep-logged' => '0',
             'browser'     => [
                'Browser'                => 'phpunit',
@@ -262,7 +264,7 @@ END;
 
         $this->assertEquals(
             'yes',
-            self::twig('{% if value is request_fill %}yes{% endif %}')->render(['value' => new Gazelle\Contest\RequestFill(0, '', '')]),
+            self::twig('{% if value is request_fill %}yes{% endif %}')->render(['value' => new Contest\RequestFill(0, '', '')]),
             'twig-test-contest-request-fill'
         );
     }

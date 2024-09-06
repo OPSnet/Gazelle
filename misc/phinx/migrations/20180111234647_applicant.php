@@ -1,7 +1,7 @@
 <?php
 
-use Phinx\Db\Adapter\MysqlAdapter;
 use Phinx\Migration\AbstractMigration;
+use Phinx\Db\Adapter\MysqlAdapter;
 
 class Applicant extends AbstractMigration {
     public function up(): void {

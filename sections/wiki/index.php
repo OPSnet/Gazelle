@@ -1,4 +1,5 @@
 <?php
+// phpcs:disable PSR1.Files.SideEffects.FoundWithSymbols
 
 function class_list(int $Selected = 0): string {
     /** @phpstan-var \Gazelle\User $Viewer */

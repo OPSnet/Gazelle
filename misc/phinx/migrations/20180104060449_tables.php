@@ -1,8 +1,9 @@
 <?php
 
+use Phinx\Migration\AbstractMigration;
 use Phinx\Db\Adapter\MysqlAdapter;
 
-class Tables extends Phinx\Migration\AbstractMigration {
+class Tables extends AbstractMigration {
     public function down(): void {
         $this->execute("
 SET FOREIGN_KEY_CHECKS = 0;

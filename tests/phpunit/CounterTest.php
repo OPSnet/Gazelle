@@ -1,11 +1,13 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 class CounterTest extends TestCase {
     public function testCounter(): void {
         $name    = "phpunit-" . randomString(10);
-        $manager = new Gazelle\Manager\Counter();
+        $manager = new Manager\Counter();
         $counter = $manager->create($name, 'phpunit description');
 
         $this->assertEquals($name, $counter->name(), 'counter-name');

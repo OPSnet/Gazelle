@@ -1,16 +1,18 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 class UserManagerTest extends TestCase {
     protected array $userList;
-    protected \Gazelle\Request $request;
+    protected Request $request;
 
     public function setUp(): void {
         $this->userList = [
-            Helper::makeUser('um1.' . randomString(10), 'userman', enable: true, clearInbox: true),
-            Helper::makeUser('um2.' . randomString(10), 'userman', enable: true, clearInbox: true),
-            Helper::makeUser('um3.' . randomString(10), 'userman', enable: true, clearInbox: true),
+            \GazelleUnitTest\Helper::makeUser('um1.' . randomString(10), 'userman', enable: true, clearInbox: true),
+            \GazelleUnitTest\Helper::makeUser('um2.' . randomString(10), 'userman', enable: true, clearInbox: true),
+            \GazelleUnitTest\Helper::makeUser('um3.' . randomString(10), 'userman', enable: true, clearInbox: true),
         ];
     }
 
@@ -24,9 +26,9 @@ class UserManagerTest extends TestCase {
     }
 
     public function testCycleAuthKeys(): void {
-        $userMan = new Gazelle\Manager\User();
+        $userMan = new Manager\User();
         $this->assertEquals(
-            (int)\Gazelle\DB::DB()->scalar("
+            (int)DB::DB()->scalar("
                 SELECT count(*) FROM users_main
             "),
             $userMan->cycleAuthKeys(),
@@ -35,10 +37,10 @@ class UserManagerTest extends TestCase {
     }
 
     public function testDisableUserList(): void {
-        $userMan = new Gazelle\Manager\User();
+        $userMan = new Manager\User();
         $idList  = array_map(fn($u) => $u->id(), $this->userList);
 
-        $this->assertEquals(3, $userMan->disableUserList(new \Gazelle\Tracker(), $idList, 'phpunit mass disable', 3), 'uman-mass-disable');
+        $this->assertEquals(3, $userMan->disableUserList(new Tracker(), $idList, 'phpunit mass disable', 3), 'uman-mass-disable');
         $this->userList[2]->flush();
         $this->assertTrue($this->userList[2]->isDisabled(), 'uman-disabled-user2');
         $this->assertFalse($this->userList[2]->isEnabled(), 'uman-enabled-user2');
@@ -46,7 +48,7 @@ class UserManagerTest extends TestCase {
     }
 
     public function testModifyUserAttr(): void {
-        $userMan = new Gazelle\Manager\User();
+        $userMan = new Manager\User();
         $idList  = array_map(fn($u) => $u->id(), $this->userList);
         $this->assertFalse($this->userList[0]->hasAttr('hide-tags'), 'uman-attr-no-attr');
 
@@ -55,7 +57,7 @@ class UserManagerTest extends TestCase {
     }
 
     public function testModifyUserMassToken(): void {
-        $userMan = new Gazelle\Manager\User();
+        $userMan = new Manager\User();
         $idList  = array_map(fn($u) => $u->id(), $this->userList);
         $this->assertEquals(0, $this->userList[0]->tokenCount(), 'uman-masstoken-initial');
 
@@ -95,7 +97,7 @@ class UserManagerTest extends TestCase {
 
         $this->assertEquals(
             1,
-            $userMan->disableUserList(new \Gazelle\Tracker(), [$this->userList[2]->id()], 'phpunit fltoken', \Gazelle\Manager\User::DISABLE_MANUAL),
+            $userMan->disableUserList(new Tracker(), [$this->userList[2]->id()], 'phpunit fltoken', Manager\User::DISABLE_MANUAL),
             'uman-masstoken-disable'
         );
         $userMan->clearMassTokens(18, allowLeechDisabled: false, excludeDisabled: true);
@@ -132,14 +134,14 @@ class UserManagerTest extends TestCase {
     }
 
     public function testUserclassPromotion(): void {
-        $userMan = new \Gazelle\Manager\User();
+        $userMan = new Manager\User();
         $this->assertEquals(0, $userMan->promote(), 'uman-promote-initial');
         $this->assertEquals(0, $userMan->demote(), 'uman-demote-initial');
 
         // back date user creation
         $user0 = $this->userList[0];
         $user1 = $this->userList[1];
-        $db = Gazelle\DB::DB();
+        $db = DB::DB();
         $db->prepared_query("
             UPDATE users_main SET
                 created = created - INTERVAL 8 DAY
@@ -152,28 +154,28 @@ class UserManagerTest extends TestCase {
 
         $inbox = $user0->inbox()->setUnreadFirst(true);
         $this->assertEquals(1, $inbox->messageTotal(), 'uman-promote-inbox-total');
-        $list = $inbox->messageList(new Gazelle\Manager\PM($user0), 1, 0);
+        $list = $inbox->messageList(new Manager\PM($user0), 1, 0);
         $this->assertEquals('You have been promoted to Member', $list[0]->subject(), 'uman-promote-pm-subject');
 
         $user0->setField('leech_upload', 9 * 1024 ** 3)->modify();
         $this->assertEquals(1, $userMan->demote(), 'uman-user-member-demotion');
         $this->assertEquals(2, $inbox->messageTotal(), 'uman-promote-inbox-total');
-        $list = $inbox->messageList(new Gazelle\Manager\PM($user0), 2, 0);
+        $list = $inbox->messageList(new Manager\PM($user0), 2, 0);
         $this->assertEquals('You have been demoted to User', $list[0]->subject(), 'uman-demote-pm-subject');
 
         // 11GiB and create a request for 5GiB to be eligible for User => Member promotion
         $user1->setField('leech_upload', 11 * 1024 ** 3)->modify();
-        $this->request = Helper::makeRequestMusic($user1, 'phpunit user promote request');
+        $this->request = \GazelleUnitTest\Helper::makeRequestMusic($user1, 'phpunit user promote request');
         $this->assertTrue($this->request->vote($user1, 5 * 1024 ** 3), 'uman-user-member-req-vote');
 
         // recompute user request stats
-        $stats = new Gazelle\Stats\Users();
+        $stats = new Stats\Users();
         $stats->refresh();
         $this->assertEquals(1, $userMan->promote(), 'uman-user-member-req-promotion');
 
         $inbox = $user1->inbox();
         $this->assertEquals(1, $inbox->messageTotal(), 'uman-promote-req-inbox-total');
-        $list = $inbox->messageList(new Gazelle\Manager\PM($user1), 2, 0);
+        $list = $inbox->messageList(new Manager\PM($user1), 2, 0);
         $this->assertEquals('You have been promoted to Member', $list[0]->subject(), 'uman-promote-req-pm-subject');
 
         $this->request->remove();
@@ -181,14 +183,14 @@ class UserManagerTest extends TestCase {
         $user1->flush();   // resync user's cache with reality
 
         $this->assertEquals(1, $userMan->demote(), 'uman-user-member-req-demotion');
-        $list = $inbox->messageList(new Gazelle\Manager\PM($user1), 3, 0);
+        $list = $inbox->messageList(new Manager\PM($user1), 3, 0);
         $this->assertEquals('You have been demoted to User', $list[0]->subject(), 'uman-demote-req-pm-subject');
     }
 
     public function testUserRatioWatch(): void {
-        $db      = \Gazelle\DB::DB();
-        $tracker = new \Gazelle\Tracker();
-        $userMan = new \Gazelle\Manager\User();
+        $db      = DB::DB();
+        $tracker = new Tracker();
+        $userMan = new Manager\User();
         $idList  = array_map(fn($u) => $u->id(), $this->userList);
 
         // put users onto ratio watch
@@ -213,7 +215,7 @@ class UserManagerTest extends TestCase {
         }
 
         $receiver = $this->userList[0]->inbox();
-        $pmMan    = new \Gazelle\Manager\PM($receiver->user());
+        $pmMan    = new Manager\PM($receiver->user());
         $this->assertEquals(1, $receiver->messageTotal(), 'uman-ratiowatch-pm-count');
         $list = $receiver->messageList($pmMan, 2, 0);
         $this->assertEquals('You have been put on Ratio Watch', $list[0]->subject(), 'uman-ratiowatch-pm-subject');
@@ -221,7 +223,7 @@ class UserManagerTest extends TestCase {
         // nuke the recent pms
         foreach ($this->userList as $user) {
             $user->setField('Enabled', '1')->modify();
-            $pmMan = new Gazelle\Manager\PM($user);
+            $pmMan = new Manager\PM($user);
             foreach ($user->inbox()->messageList($pmMan, 1, 0) as $pm) {
                 $pm->remove();
             }
@@ -243,7 +245,7 @@ class UserManagerTest extends TestCase {
         $this->userList[0]->flush();
 
         $receiver = $this->userList[0]->inbox();
-        $pmMan    = new \Gazelle\Manager\PM($receiver->user());
+        $pmMan    = new Manager\PM($receiver->user());
         $this->assertEquals(1, $receiver->messageTotal(), 'uman-ratiowatch-pm-block-count');
         $list = $receiver->messageList($pmMan, 2, 0);
         $this->assertEquals('Your download privileges have been removed', $list[0]->subject(), 'uman-ratiowatch-pm-block-subject');
@@ -275,7 +277,7 @@ class UserManagerTest extends TestCase {
         $this->userList[1]->flush();
 
         $receiver = $this->userList[1]->inbox();
-        $pmMan    = new \Gazelle\Manager\PM($receiver->user());
+        $pmMan    = new Manager\PM($receiver->user());
         $this->assertEquals(1, $receiver->messageTotal(), 'uman-ratiowatch-pm-clear-count');
         $list = $receiver->messageList($pmMan, 2, 0);
         $this->assertEquals('You have been taken off Ratio Watch', $list[0]->subject(), 'uman-ratiowatch-pm-clear-subject');
@@ -288,7 +290,7 @@ class UserManagerTest extends TestCase {
         $this->userList[2]->flush();
 
         $receiver = $this->userList[2]->inbox();
-        $pmMan    = new \Gazelle\Manager\PM($receiver->user());
+        $pmMan    = new Manager\PM($receiver->user());
         $this->assertEquals(1, $receiver->messageTotal(), 'uman-ratiowatch-pm-engage-count');
         $list = $receiver->messageList($pmMan, 2, 0);
         $this->assertEquals('Your downloading privileges have been suspended', $list[0]->subject(), 'uman-ratiowatch-pm-engage-subject');
@@ -296,7 +298,7 @@ class UserManagerTest extends TestCase {
     }
 
     public function testSendCustomPM(): void {
-        $userMan = new \Gazelle\Manager\User();
+        $userMan = new Manager\User();
         $this->assertEquals(
             2,
             $userMan->sendCustomPM(
@@ -309,7 +311,7 @@ class UserManagerTest extends TestCase {
         );
 
         $receiver = $this->userList[2]->inbox();
-        $pmMan    = new \Gazelle\Manager\PM($receiver->user());
+        $pmMan    = new Manager\PM($receiver->user());
         $this->assertEquals(1, $receiver->messageTotal(), 'uman-custom-pm-count');
         $list = $receiver->messageList($pmMan, 2, 0);
         $this->assertEquals('phpunit sendCustomPMTest', $list[0]->subject(), 'uman-custom-pm-subject');
@@ -320,7 +322,7 @@ class UserManagerTest extends TestCase {
     }
 
     public function testUserclassFlush(): void {
-        $userMan = new \Gazelle\Manager\User();
+        $userMan = new Manager\User();
         $administratorId = (int)current(array_filter($userMan->classList(), fn($class) => $class['Name'] == 'Administrator'))['ID'];
         $alphaTeamId = (int)current(array_filter($userMan->classList(), fn($class) => $class['Name'] == 'Alpha Team'))['ID'];
 
@@ -331,7 +333,7 @@ class UserManagerTest extends TestCase {
     }
 
     public function testUserflow(): void {
-        $userflow = (new \Gazelle\Manager\User())->userflow();
+        $userflow = (new Manager\User())->userflow();
         $this->assertIsArray($userflow, 'uman-userflow-is-array');
         $recent = end($userflow);
         $this->assertIsArray($recent, 'uman-userflow-recent-is-array');

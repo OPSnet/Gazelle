@@ -1,19 +1,21 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 use Gazelle\Enum\Direction;
 
 class DbTest extends TestCase {
-    use Gazelle\Pg;
+    use Pg;
 
     public function testDirection(): void {
-        $this->assertEquals('asc',  Gazelle\DB::lookupDirection('asc')->value, 'db-direction-asc');
-        $this->assertEquals('desc', Gazelle\DB::lookupDirection('desc')->value, 'db-direction-desc');
-        $this->assertEquals('asc',  Gazelle\DB::lookupDirection('wut')->value, 'db-direction-default');
+        $this->assertEquals('asc',  DB::lookupDirection('asc')->value, 'db-direction-asc');
+        $this->assertEquals('desc', DB::lookupDirection('desc')->value, 'db-direction-desc');
+        $this->assertEquals('asc',  DB::lookupDirection('wut')->value, 'db-direction-default');
     }
 
     public function testTableCoherency(): void {
-        $db = Gazelle\DB::DB();
+        $db = DB::DB();
         $db->prepared_query($sql = "
              SELECT replace(table_name, 'deleted_', '') as table_name
              FROM information_schema.tables
@@ -22,7 +24,7 @@ class DbTest extends TestCase {
             ", SQLDB
         );
 
-        $dbMan = new Gazelle\DB();
+        $dbMan = new DB();
         foreach ($db->collect(0, false) as $tableName) {
             [$ok, $message] = $dbMan->checkStructureMatch(SQLDB, $tableName, "deleted_$tableName");
             $this->assertTrue($ok, "mismatch -- $message");
@@ -30,16 +32,16 @@ class DbTest extends TestCase {
     }
 
     public function testDbTime(): void {
-        $this->assertTrue(Helper::recentDate((new Gazelle\DB())->now()), 'db-current-date');
+        $this->assertTrue(\GazelleUnitTest\Helper::recentDate((new DB())->now()), 'db-current-date');
     }
 
     public function testDbVersion(): void {
         // to check the executability of the SQL inside
-        $this->assertIsString((new Gazelle\DB())->version(), 'db-version');
+        $this->assertIsString((new DB())->version(), 'db-version');
     }
 
     public function testDebug(): void {
-        $db = Gazelle\DB::DB();
+        $db = DB::DB();
         $initial = count($db->queryList());
         $tableName = "phpunit_" . randomString(10);
         $db->prepared_query("create temporary table if not exists $tableName (test int)");
@@ -58,19 +60,19 @@ class DbTest extends TestCase {
     }
 
     public function testGlobalStatus(): void {
-        $status = (new Gazelle\DB())->globalStatus();
+        $status = (new DB())->globalStatus();
         $this->assertGreaterThan(500, count($status), 'db-global-status');
         $this->assertEquals('server-cert.pem', $status['Current_tls_cert']['Value'], 'db-current-tls-cert');
     }
 
     public function testGlobalVariables(): void {
-        $list = (new Gazelle\DB())->globalVariables();
+        $list = (new DB())->globalVariables();
         $this->assertGreaterThan(500, count($list), 'db-global-variables');
         $this->assertEquals('ON', $list['foreign_key_checks']['Value'], 'db-foreign-key-checks-on');
     }
 
     public function testLongRunning(): void {
-        $this->assertEquals(0, (new Gazelle\DB())->longRunning(), 'db-long-running');
+        $this->assertEquals(0, (new DB())->longRunning(), 'db-long-running');
     }
 
     public function testPg(): void {

@@ -1,12 +1,14 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 class UserNavigationTest extends TestCase {
-    protected Gazelle\User $user;
+    protected User $user;
 
     public function setUp(): void {
-        $this->user = Helper::makeUser('user.' . randomString(10), 'forum');
+        $this->user = \GazelleUnitTest\Helper::makeUser('user.' . randomString(10), 'forum');
     }
 
     public function tearDown(): void {
@@ -14,7 +16,7 @@ class UserNavigationTest extends TestCase {
     }
 
     public function testNavigationBasic(): void {
-        $manager = new Gazelle\Manager\UserNavigation();
+        $manager = new Manager\UserNavigation();
         $fullList = $manager->fullList();
         $this->assertCount(12, $fullList, 'user-nav-manager-full');
 

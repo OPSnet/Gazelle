@@ -1,4 +1,5 @@
 <?php
+// phpcs:disable PSR1.Files.SideEffects.FoundWithSymbols
 
 use Gazelle\Util\Crypto;
 use Gazelle\Util\Time;

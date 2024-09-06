@@ -1,22 +1,21 @@
 <?php
 
-namespace phpunit\search;
+namespace Gazelle;
 
 use Gazelle\Enum\ReportAutoState;
-use Helper;
 use PHPUnit\Framework\TestCase;
 
-class ReportAutoTest extends TestCase {
-    protected static \Gazelle\Manager\User $userMan;
-    protected static \Gazelle\Manager\ReportAutoType $ratMan;
-    protected static \Gazelle\Manager\ReportAuto $raMan;
-    protected static \Gazelle\User $user1;
-    protected static \Gazelle\User $user2;
-    protected static \Gazelle\ReportAuto\Type $type1;
-    protected static \Gazelle\ReportAuto\Type $type2;
-    protected static \Gazelle\ReportAuto $report;
+class SearchReportAutoTest extends TestCase {
+    protected static Manager\User $userMan;
+    protected static Manager\ReportAutoType $ratMan;
+    protected static Manager\ReportAuto $raMan;
+    protected static User $user1;
+    protected static User $user2;
+    protected static ReportAuto\Type $type1;
+    protected static ReportAuto\Type $type2;
+    protected static ReportAuto $report;
 
-    protected static function createReports(int $n, \Gazelle\User $user, \Gazelle\ReportAuto\Type $type, \Gazelle\User $owner): array {
+    protected static function createReports(int $n, User $user, ReportAuto\Type $type, User $owner): array {
         $reports = [];
         for ($i = 0; $i < $n; $i++) {
             $reports[] = self::$raMan->create($user, $type, ["i" => $i]);
@@ -27,13 +26,13 @@ class ReportAutoTest extends TestCase {
     }
 
     public static function setUpBeforeClass(): void {
-        self::$userMan = new \Gazelle\Manager\User();
-        self::$ratMan = new \Gazelle\Manager\ReportAutoType();
-        self::$raMan = new \Gazelle\Manager\ReportAuto(self::$ratMan);
-        self::$user1 = Helper::makeUser('user.' . randomString(10), 'reportautosearch', enable: true, clearInbox: true);
-        self::$user2 = Helper::makeUser('user.' . randomString(10), 'reportautosearch', enable: true, clearInbox: true);
-        self::$type1 = self::$ratMan->create('rasearch test type1', '');
-        self::$type2 = self::$ratMan->create('rasearch test type2', '');
+        self::$userMan = new Manager\User();
+        self::$ratMan = new Manager\ReportAutoType();
+        self::$raMan = new Manager\ReportAuto(self::$ratMan);
+        self::$user1 = \GazelleUnitTest\Helper::makeUser('user.' . randomString(10), 'reportautosearch', enable: true, clearInbox: true);
+        self::$user2 = \GazelleUnitTest\Helper::makeUser('user.' . randomString(10), 'reportautosearch', enable: true, clearInbox: true);
+        self::$type1 = self::$ratMan->create('rasearch test type1' . randomString(10), '');
+        self::$type2 = self::$ratMan->create('rasearch test type2' . randomString(10), '');
 
         self::createReports(3, self::$user1, self::$type1, self::$user2);
         self::createReports(5, self::$user2, self::$type1, self::$user1);
@@ -50,7 +49,7 @@ class ReportAutoTest extends TestCase {
         self::$user2->remove();
     }
 
-    protected function matchThingList(array $thingList, \Gazelle\User|\Gazelle\ReportAuto\Type $matcher, int $n, string $msg): void {
+    protected function matchThingList(array $thingList, User|ReportAuto\Type $matcher, int $n, string $msg): void {
         foreach ($thingList as $list) {
             match ($list[0]->id()) {
                 $matcher->id() => $this->assertEquals($n, $list[1], "rasearch-$msg"),
@@ -60,7 +59,7 @@ class ReportAutoTest extends TestCase {
     }
 
     public function testAll(): void {
-        $search = new \Gazelle\Search\ReportAuto(self::$raMan, self::$ratMan);
+        $search = new Search\ReportAuto(self::$raMan, self::$ratMan);
 
         foreach ($search->typeTotalList() as $typeList) {
             match ($typeList[0]) {
@@ -80,8 +79,8 @@ class ReportAutoTest extends TestCase {
     }
 
     public function testStateOpen(): void {
-        $search = new \Gazelle\Search\ReportAuto(self::$raMan, self::$ratMan);
-        $search->setState(\Gazelle\Enum\ReportAutoState::open);
+        $search = new Search\ReportAuto(self::$raMan, self::$ratMan);
+        $search->setState(Enum\ReportAutoState::open);
         $search->setType(self::$type1);
 
         $this->matchThingList($search->typeTotalList(), self::$type1, 3 + 5 - 2, 'state');
@@ -93,24 +92,24 @@ class ReportAutoTest extends TestCase {
     }
 
     public function testStateInprogress(): void {
-        $search = new \Gazelle\Search\ReportAuto(self::$raMan, self::$ratMan);
-        $search->setState(\Gazelle\Enum\ReportAutoState::in_progress);
+        $search = new Search\ReportAuto(self::$raMan, self::$ratMan);
+        $search->setState(Enum\ReportAutoState::in_progress);
         $search->setType(self::$type2);
 
         $this->matchThingList($search->typeTotalList(), self::$type2, 3, 'state-inprogress');
     }
 
     public function testStateClosed(): void {
-        $search = new \Gazelle\Search\ReportAuto(self::$raMan, self::$ratMan);
-        $search->setState(\Gazelle\Enum\ReportAutoState::closed);
+        $search = new Search\ReportAuto(self::$raMan, self::$ratMan);
+        $search->setState(Enum\ReportAutoState::closed);
         $search->setType(self::$type2);
 
         $this->matchThingList($search->typeTotalList(), self::$type2, 4, 'state-closed');
     }
 
     public function testUnclaimed(): void {
-        $search = new \Gazelle\Search\ReportAuto(self::$raMan, self::$ratMan);
-        $search->setState(\Gazelle\Enum\ReportAutoState::open);
+        $search = new Search\ReportAuto(self::$raMan, self::$ratMan);
+        $search->setState(Enum\ReportAutoState::open);
         $search->setOwner(null);
         $search->setType(self::$type2);
 
@@ -118,16 +117,16 @@ class ReportAutoTest extends TestCase {
     }
 
     public function testClosed1(): void {
-        $search = new \Gazelle\Search\ReportAuto(self::$raMan, self::$ratMan);
-        $search->setState(\Gazelle\Enum\ReportAutoState::closed);
+        $search = new Search\ReportAuto(self::$raMan, self::$ratMan);
+        $search->setState(Enum\ReportAutoState::closed);
         $search->setOwner(self::$user1);
 
         $this->matchThingList($search->userTotalList(self::$userMan), self::$user2, 2, 'closed-1');
     }
 
     public function testClosed2(): void {
-        $search = new \Gazelle\Search\ReportAuto(self::$raMan, self::$ratMan);
-        $search->setState(\Gazelle\Enum\ReportAutoState::closed);
+        $search = new Search\ReportAuto(self::$raMan, self::$ratMan);
+        $search->setState(Enum\ReportAutoState::closed);
         $search->setOwner(self::$user2);
 
         foreach ($search->userTotalList(self::$userMan) as $userList) {
@@ -140,8 +139,8 @@ class ReportAutoTest extends TestCase {
     }
 
     public function testClaimed1(): void {
-        $search = new \Gazelle\Search\ReportAuto(self::$raMan, self::$ratMan);
-        $search->setState(\Gazelle\Enum\ReportAutoState::in_progress);
+        $search = new Search\ReportAuto(self::$raMan, self::$ratMan);
+        $search->setState(Enum\ReportAutoState::in_progress);
         $search->setOwner(self::$user2);
 
         foreach ($search->userTotalList(self::$userMan) as $userList) {
@@ -154,8 +153,8 @@ class ReportAutoTest extends TestCase {
     }
 
     public function testClaimed2(): void {
-        $search = new \Gazelle\Search\ReportAuto(self::$raMan, self::$ratMan);
-        $search->setState(\Gazelle\Enum\ReportAutoState::in_progress);
+        $search = new Search\ReportAuto(self::$raMan, self::$ratMan);
+        $search->setState(Enum\ReportAutoState::in_progress);
         $search->setOwner(self::$user2);
         $search->setType(self::$type1);
 
@@ -163,22 +162,22 @@ class ReportAutoTest extends TestCase {
     }
 
     public function testUser(): void {
-        $search = new \Gazelle\Search\ReportAuto(self::$raMan, self::$ratMan);
-        $search->setState(\Gazelle\Enum\ReportAutoState::open);
+        $search = new Search\ReportAuto(self::$raMan, self::$ratMan);
+        $search->setState(Enum\ReportAutoState::open);
         $search->setUser(self::$user1);
 
         $this->matchThingList($search->userTotalList(self::$userMan), self::$user1, 3 + 7 - 2, 'user-open');
     }
 
     public function testId(): void {
-        $search = new \Gazelle\Search\ReportAuto(self::$raMan, self::$ratMan);
+        $search = new Search\ReportAuto(self::$raMan, self::$ratMan);
         $search->setId(self::$report->id());
 
         $this->matchThingList($search->typeTotalList(), self::$ratMan->findById(self::$report->typeId()), 1, 'id-1');
     }
 
     public function testIdNoExist(): void {
-        $search = new \Gazelle\Search\ReportAuto(self::$raMan, self::$ratMan);
+        $search = new Search\ReportAuto(self::$raMan, self::$ratMan);
         $search->setId(12345);
         $this->assertEquals(0, $search->total(), 'rasearch-id-2');
     }

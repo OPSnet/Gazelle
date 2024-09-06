@@ -1,21 +1,23 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 class StaffPMTest extends TestCase {
-    protected \Gazelle\Manager\StaffPM $spMan;
+    protected Manager\StaffPM $spMan;
 
-    protected \Gazelle\User $fls;
-    protected \Gazelle\User $mod;
-    protected \Gazelle\User $sysop;
-    protected \Gazelle\User $user;
+    protected User $fls;
+    protected User $mod;
+    protected User $sysop;
+    protected User $user;
 
     public function setUp(): void {
-        $this->spMan = new \Gazelle\Manager\StaffPM();
-        $this->fls   = Helper::makeUser('spm_fls_' . randomString(10), 'staffpm');
-        $this->mod   = Helper::makeUser('spm_mod_' . randomString(10), 'staffpm');
-        $this->sysop = Helper::makeUser('spm_sysop_' . randomString(10), 'staffpm');
-        $this->user  = Helper::makeUser('spm_user_' . randomString(10), 'staffpm');
+        $this->spMan = new Manager\StaffPM();
+        $this->fls   = \GazelleUnitTest\Helper::makeUser('spm_fls_' . randomString(10), 'staffpm');
+        $this->mod   = \GazelleUnitTest\Helper::makeUser('spm_mod_' . randomString(10), 'staffpm');
+        $this->sysop = \GazelleUnitTest\Helper::makeUser('spm_sysop_' . randomString(10), 'staffpm');
+        $this->user  = \GazelleUnitTest\Helper::makeUser('spm_user_' . randomString(10), 'staffpm');
 
         $this->fls->addClasses([FLS_TEAM]);
         $this->mod->setField('PermissionID', MOD)->modify();
@@ -23,7 +25,7 @@ class StaffPMTest extends TestCase {
     }
 
     public function tearDown(): void {
-        $db = Gazelle\DB::DB();
+        $db = DB::DB();
         $db->prepared_query("
             DELETE spc, spm
             FROM staff_pm_conversations spc
@@ -85,7 +87,7 @@ class StaffPMTest extends TestCase {
 
         $last = end($thread);
         $pm = $this->spMan->findByPostId($last['id']);
-        $this->assertInstanceOf(\Gazelle\StaffPM::class, $pm, 'spm-find-by-post-id');
+        $this->assertInstanceOf(StaffPM::class, $pm, 'spm-find-by-post-id');
         $this->assertEquals('mod reply', $pm->postBody($last['id']), 'spm-post-body');
 
         $this->assertEquals(1, $spm->resolve($this->sysop), 'spm-resolve-by-sysop');
@@ -109,7 +111,7 @@ class StaffPMTest extends TestCase {
 
     public function testSysop(): void {
         $initial = $this->spMan->countAtLevel($this->sysop, ['Unanswered']);
-        $level   = (new Gazelle\Manager\User())->classList()[SYSOP]['Level'];
+        $level   = (new Manager\User())->classList()[SYSOP]['Level'];
         $spm     = $this->spMan->create($this->fls, $level, 'for sysop', 'message handled by SYSOP');
         $this->assertEquals($level, $spm->classLevel(), 'spm-sysop-classlevel-sysop');
         $this->assertEquals('Sysop', $spm->userclassName(), 'spm-sysop-userclass');
@@ -128,7 +130,7 @@ class StaffPMTest extends TestCase {
         $initialOpen       = $this->spMan->countByStatus($this->fls, ['Open']);
         $initialUnanswered = $this->spMan->countByStatus($this->fls, ['Unanswered']);
         $initialLevel      = $this->spMan->countAtLevel($this->fls, ['Unanswered']);
-        $level             = (new Gazelle\Manager\User())->classList()[FLS_TEAM]['Level'];
+        $level             = (new Manager\User())->classList()[FLS_TEAM]['Level'];
         $spm               = $this->spMan->create($this->user, $level, 'for fls', 'message handled by fls');
         $this->assertEquals($level, $spm->classLevel(), 'spm-fls-classlevel-sysop');
         $this->assertEquals('First Line Support', $spm->userclassName(), 'spm-fls-userclass');
@@ -176,7 +178,7 @@ class StaffPMTest extends TestCase {
         $initialUser  = $this->spMan->countByStatus($this->user, ['Unanswered']);
         $initialFLS   = $this->spMan->countByStatus($this->fls, ['Unanswered']);
         $initialLevel = $this->spMan->countAtLevel($this->fls, ['Unanswered']);
-        $level        = (new Gazelle\Manager\User())->classList()[FLS_TEAM]['Level'];
+        $level        = (new Manager\User())->classList()[FLS_TEAM]['Level'];
         $list = [
             $this->spMan->create($this->user, $level, 'for fls', 'message handled by fls'),
             $this->spMan->create($this->user, $level, 'for fls', 'message handled by fls'),

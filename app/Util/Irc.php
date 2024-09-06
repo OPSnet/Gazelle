@@ -2,6 +2,9 @@
 
 namespace Gazelle\Util;
 
+use Gazelle\Util\Curl;
+use Gazelle\Enum\CurlMethod;
+
 class Irc {
     public static function render(mixed ...$list): string {
         return implode('', array_map(

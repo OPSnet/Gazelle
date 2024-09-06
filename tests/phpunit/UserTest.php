@@ -1,24 +1,26 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 use Gazelle\Enum\AvatarDisplay;
 use Gazelle\Enum\AvatarSynthetic;
 use Gazelle\Enum\UserStatus;
 
 class UserTest extends TestCase {
-    protected \Gazelle\User $user;
+    protected User $user;
 
     public function setUp(): void {
-        $this->user = Helper::makeUser('user.' . randomString(6), 'user');
+        $this->user = \GazelleUnitTest\Helper::makeUser('user.' . randomString(6), 'user');
     }
 
     public function tearDown(): void {
         if (isset($this->user)) {
-            \Gazelle\DB::DB()->prepared_query("
+            DB::DB()->prepared_query("
                 DELETE FROM user_read_forum WHERE user_id = ?
                 ", $this->user->id()
             );
-            \Gazelle\DB::DB()->prepared_query("
+            DB::DB()->prepared_query("
                 DELETE FROM users_stats_daily WHERE UserID = ?
                 ", $this->user->id()
             );
@@ -34,7 +36,7 @@ class UserTest extends TestCase {
     }
 
     public function testUserFind(): void {
-        $userMan = new \Gazelle\Manager\User();
+        $userMan = new Manager\User();
         $admin = $userMan->find('@' . $this->user->username());
         $this->user->setField('PermissionID', SYSOP)->modify();
         $this->assertTrue($admin->isStaff(), 'admin-is-admin');
@@ -45,7 +47,7 @@ class UserTest extends TestCase {
     }
 
     public function testFindById(): void {
-        $userMan = new \Gazelle\Manager\User();
+        $userMan = new Manager\User();
         $user = $userMan->findById($this->user->id());
         $this->assertFalse($user->isStaff(), 'user-is-not-admin');
         $this->assertStringStartsWith('user.', $user->username(), 'user-username');
@@ -57,8 +59,8 @@ class UserTest extends TestCase {
         $id       = $this->user->id();
         $username = $this->user->username();
         $this->assertEquals(1, $this->user->remove(), 'user-remove');
-        $this->assertNull((new \Gazelle\Manager\User())->findById($id), 'user-is-removed');
-        $this->assertNull((new \Gazelle\Manager\User())->findByUsername($username), 'username-is-removed');
+        $this->assertNull((new Manager\User())->findById($id), 'user-is-removed');
+        $this->assertNull((new Manager\User())->findByUsername($username), 'username-is-removed');
         unset($this->user);
     }
 
@@ -125,7 +127,7 @@ class UserTest extends TestCase {
     }
 
     public function testExternalProfile(): void {
-        $externalProfile = new \Gazelle\User\ExternalProfile($this->user);
+        $externalProfile = new User\ExternalProfile($this->user);
         $this->assertEquals('', $externalProfile->profile(), 'user-profile-new');
         $this->assertEquals(1, $externalProfile->modifyProfile('phpunit'), 'user-profile-create');
         $this->assertEquals('phpunit', $externalProfile->profile(), 'user-profile-set');
@@ -163,7 +165,7 @@ class UserTest extends TestCase {
         $this->assertEquals(0.0, $this->user->requiredRatio(), 'utest-required-ratio');
         $this->assertEquals('', $this->user->forbiddenForumsList(), 'utest-forbidden-forum-list');
         $this->assertEquals([], $this->user->tagSnatchCounts(), 'utest-tag-snatch-counts');
-        $this->assertEquals([], $this->user->tokenList(new \Gazelle\Manager\Torrent(), 0, 0), 'utest-token-list');
+        $this->assertEquals([], $this->user->tokenList(new Manager\Torrent(), 0, 0), 'utest-token-list');
         $this->assertEquals([], $this->user->navigationList(), 'utest-navigation-list');
         $this->assertEquals(USER, $this->user->primaryClass(), 'utest-primary-class');
 
@@ -195,7 +197,7 @@ class UserTest extends TestCase {
 
         $this->assertEquals([], $this->user->snatch()->recentSnatchList(), 'utest-recent-snatch');
         $this->assertEquals([], $this->user->recentUploadList(), 'utest-recent-upload');
-        $this->assertInstanceOf(Gazelle\User\Snatch::class, $this->user->snatch()->flush(), 'utest-flush-recent-snatch');
+        $this->assertInstanceOf(User\Snatch::class, $this->user->snatch()->flush(), 'utest-flush-recent-snatch');
         $this->assertTrue($this->user->flushRecentUpload(), 'utest-flush-recent-upload');
 
         $this->assertEquals(0, $this->user->tokenCount(), 'utest-token-count');
@@ -238,7 +240,7 @@ class UserTest extends TestCase {
     }
 
     public function testAvatar(): void {
-        $userMan = new \Gazelle\Manager\User();
+        $userMan = new Manager\User();
         $this->assertEquals('', $this->user->avatar(), 'utest-avatar-blank');
         $this->assertEquals(
             [
@@ -282,11 +284,11 @@ class UserTest extends TestCase {
     }
 
     public function testNextClass(): void {
-        $this->assertEquals(\Gazelle\Enum\UserStatus::unconfirmed, $this->user->userStatus(), 'utest-user-status-unconfirmed');
+        $this->assertEquals(Enum\UserStatus::unconfirmed, $this->user->userStatus(), 'utest-user-status-unconfirmed');
         $this->user->setField('Enabled', UserStatus::enabled->value)->modify();
-        $this->assertEquals(\Gazelle\Enum\UserStatus::enabled, $this->user->userStatus(), 'utest-user-status-enabled');
+        $this->assertEquals(Enum\UserStatus::enabled, $this->user->userStatus(), 'utest-user-status-enabled');
 
-        $manager = new Gazelle\Manager\User();
+        $manager = new Manager\User();
         $next = $this->user->nextClass($manager);
         $this->assertEquals('Member', $next['class'], 'user-next-class-is-member');
 
@@ -315,14 +317,14 @@ class UserTest extends TestCase {
     }
 
     public function testStylesheet(): void {
-        $manager = new \Gazelle\Manager\Stylesheet();
+        $manager = new Manager\Stylesheet();
         $list = $manager->list();
         $this->assertGreaterThan(5, $list, 'we-can-haz-stylesheets');
         $this->assertEquals(count($list), count($manager->usageList('name', 'ASC')), 'stylesheet-list-usage');
 
         $first = current($list);
         $url   = SITE_URL . 'static/bogus.css';
-        $stylesheet = new \Gazelle\User\Stylesheet($this->user);
+        $stylesheet = new User\Stylesheet($this->user);
         $this->assertNull($stylesheet->styleUrl(), 'stylesheet-no-external-url');
         $this->assertEquals(1, $stylesheet->modifyInfo($first['id'], null), 'stylesheet-modify');
         $this->assertEquals($first['css_name'], $stylesheet->cssName(), 'stylesheet-css-name');
@@ -338,15 +340,15 @@ class UserTest extends TestCase {
     }
 
     public function testWarning(): void {
-        $warned = new \Gazelle\User\Warning($this->user);
+        $warned = new User\Warning($this->user);
         $this->assertFalse($warned->isWarned(), 'utest-warn-initial');
         $end = $warned->add(reason: 'phpunit 1', interval: '1 hour', warner: $this->user);
-        $this->assertTrue(Helper::recentDate($end, -60 * 60 + 60), 'utest-warn-1-hour'); // one hour - 60 seconds
+        $this->assertTrue(\GazelleUnitTest\Helper::recentDate($end, -60 * 60 + 60), 'utest-warn-1-hour'); // one hour - 60 seconds
         $this->assertTrue($warned->isWarned(), 'utest-is-warned');
         $this->assertEquals(1, $warned->total(), 'utest-warn-total');
 
         $end = $this->user->warn(2, "phpunit warning", $this->user, "phpunit");
-        $this->assertTrue(Helper::recentDate($end, strtotime('+2 weeks') - 60), 'utest-warn-in-future'); // two weeks - 60 seconds
+        $this->assertTrue(\GazelleUnitTest\Helper::recentDate($end, strtotime('+2 weeks') - 60), 'utest-warn-in-future'); // two weeks - 60 seconds
         $this->assertEquals(2, $warned->total(), 'utest-warn-total');
         $warningList = $warned->warningList();
         $this->assertCount(2, $warningList, 'utest-warn-list');
@@ -360,12 +362,12 @@ class UserTest extends TestCase {
 
     public function testLogin(): void {
         $_SERVER['REMOTE_ADDR'] = '127.0.0.255';
-        Gazelle\Base::setRequestContext(new Gazelle\BaseRequestContext(
+        Base::setRequestContext(new BaseRequestContext(
             'phpunit', $_SERVER['REMOTE_ADDR'], 'whatever'
         ));
-        $login  = new \Gazelle\Login();
+        $login  = new Login();
         $ipaddr = $_SERVER['REMOTE_ADDR'];
-        $watch  = new \Gazelle\LoginWatch($ipaddr);
+        $watch  = new LoginWatch($ipaddr);
         $this->assertEquals(0, $watch->nrAttempts(), 'loginwatch-init-attempt');
         $this->assertEquals(0, $watch->nrBans(), 'loginwatch-init-ban');
 
@@ -375,7 +377,7 @@ class UserTest extends TestCase {
             watch:    $watch,
         );
         $this->assertNull($result, 'login-bad-username');
-        $this->assertEquals($login->error(), \Gazelle\Login::ERR_CREDENTIALS, 'login-error-username');
+        $this->assertEquals($login->error(), Login::ERR_CREDENTIALS, 'login-error-username');
         $this->assertEquals('email@example.com', $login->username(), 'login-username');
         $this->assertEquals($ipaddr, $login->requestContext()->remoteAddr(), 'login-ipaddr');
         $this->assertFalse($login->persistent(), 'login-persistent');
@@ -387,14 +389,14 @@ class UserTest extends TestCase {
             watch:    $watch,
         );
         $this->assertNull($result, 'login-bad-password');
-        $this->assertEquals($login->error(), \Gazelle\Login::ERR_CREDENTIALS, 'login-error-password');
+        $this->assertEquals($login->error(), Login::ERR_CREDENTIALS, 'login-error-password');
         $this->assertEquals(2, $watch->nrAttempts(), 'loginwatch-more-attempt');
 
         $this->assertGreaterThan(0, count($watch->activeList('1', 'ASC', 10, 0)), 'loginwatch-active-list');
         $this->assertGreaterThan(0, $watch->clearAttempts(), 'loginwatch-clear');
         $this->assertEquals(0, $watch->nrAttempts(), 'loginwatch-no-attempts');
 
-        $ipv4man = new \Gazelle\Manager\IPv4();
+        $ipv4man = new Manager\IPv4();
         $banId = $watch->setBan($this->user, 'phpunit ban', [$watch->id()], $ipv4man);
         $this->assertGreaterThan(0, $banId, 'loginwatch-ip-ban');
 
@@ -436,12 +438,12 @@ class UserTest extends TestCase {
             $history['ipaddr'],
             'utest-announce-key-history-ipaddr'
         );
-        $this->assertTrue(Helper::recentDate($history['date']), 'utest-announce-key-history-date');
+        $this->assertTrue(\GazelleUnitTest\Helper::recentDate($history['date']), 'utest-announce-key-history-date');
     }
 
     public function testInactive(): void {
-        $userMan = new \Gazelle\Manager\User();
-        $db      = \Gazelle\DB::DB();
+        $userMan = new Manager\User();
+        $db      = DB::DB();
 
         $this->user->setField('Enabled', UserStatus::enabled->value)->modify();
         $db->prepared_query("
@@ -449,20 +451,20 @@ class UserTest extends TestCase {
             ", $this->user->id(), INACTIVE_USER_WARN_DAYS + 1
         );
         $this->user->flush();
-        $this->assertEquals(1, $userMan->inactiveUserWarn(new \Gazelle\Util\Mail()), 'utest-one-user-inactive-warned');
+        $this->assertEquals(1, $userMan->inactiveUserWarn(new Util\Mail()), 'utest-one-user-inactive-warned');
         $this->assertTrue($this->user->hasAttr('inactive-warning-sent'), 'utest-inactive-warned');
 
         $db->prepared_query("
             UPDATE user_last_access SET last_access = now() - INTERVAL ? DAY WHERE user_id = ?
             ", INACTIVE_USER_DEACTIVATE_DAYS + 1, $this->user->id()
         );
-        $this->assertEquals(1, $userMan->inactiveUserDeactivate(new \Gazelle\Tracker()), 'utest-one-user-inactive-deactivated');
+        $this->assertEquals(1, $userMan->inactiveUserDeactivate(new Tracker()), 'utest-one-user-inactive-deactivated');
         $this->user->flush();
         $this->assertTrue($this->user->isDisabled(), 'utest-inactive-deactivated');
     }
 
     public function testLastFM(): void {
-        $lastfm   = new \Gazelle\Util\LastFM();
+        $lastfm   = new Util\LastFM();
         $username = 'phpunit.' . randomString(6);
         $this->assertNull($lastfm->username($this->user), 'lastfm-no-username');
         $this->assertEquals(1, $lastfm->modifyUsername($this->user, $username), 'lastfm-create-username');
@@ -486,8 +488,8 @@ class UserTest extends TestCase {
     }
 
     public function testUserRank(): void {
-        $rank = new Gazelle\UserRank(
-            new Gazelle\UserRank\Configuration(RANKING_WEIGHT),
+        $rank = new UserRank(
+            new UserRank\Configuration(RANKING_WEIGHT),
             [
                 'uploaded'   => STARTING_UPLOAD,
                 'downloaded' => 1,

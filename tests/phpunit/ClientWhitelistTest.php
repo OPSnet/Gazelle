@@ -1,10 +1,12 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 class ClientWhitelistTest extends TestCase {
     public function testWhitelist(): void {
-        $manager = new Gazelle\Manager\ClientWhitelist();
+        $manager = new Manager\ClientWhitelist();
         $initial = $manager->list();
         $this->assertIsArray($initial, 'cwl-initial');
 

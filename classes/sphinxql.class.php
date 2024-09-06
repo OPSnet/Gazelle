@@ -1,4 +1,5 @@
 <?php
+// phpcs:disable PSR1.Files.SideEffects.FoundWithSymbols
 // phpcs:disable PSR1.Methods.CamelCapsMethodName.NotCamelCaps
 
 if (!extension_loaded('mysqli')) {

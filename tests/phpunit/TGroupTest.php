@@ -1,11 +1,13 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 class TGroupTest extends TestCase {
-    protected Gazelle\TGroup $tgroup;
-    protected Gazelle\TGroup $tgroupExtra;
-    protected Gazelle\Manager\TGroup $manager;
+    protected TGroup $tgroup;
+    protected TGroup $tgroupExtra;
+    protected Manager\TGroup $manager;
     protected string $name;
     protected int $year;
     protected string $recordLabel;
@@ -14,8 +16,8 @@ class TGroupTest extends TestCase {
 
     public function setUp(): void {
         $this->userList = [
-            'admin' => Helper::makeUser('tgroup.a.' . randomString(6), 'forum'),
-            'user'  => Helper::makeUser('tgroup.u.' . randomString(6), 'forum'),
+            'admin' => \GazelleUnitTest\Helper::makeUser('tgroup.a.' . randomString(6), 'forum'),
+            'user'  => \GazelleUnitTest\Helper::makeUser('tgroup.u.' . randomString(6), 'forum'),
         ];
         $this->userList['admin']->setField('PermissionID', MOD)->modify();
 
@@ -23,7 +25,7 @@ class TGroupTest extends TestCase {
         $this->year            = (int)date('Y');
         $this->recordLabel     = randomString(6) . ' Records';
         $this->catalogueNumber = randomString(3) . '-' . random_int(1000, 2000);
-        $this->manager         = new Gazelle\Manager\TGroup();
+        $this->manager         = new Manager\TGroup();
         $this->tgroup      = $this->manager->create(
             categoryId:      1,
             name:            $this->name,
@@ -32,24 +34,24 @@ class TGroupTest extends TestCase {
             catalogueNumber: $this->catalogueNumber,
             description:     "Description of {$this->name}",
             image:           '',
-            releaseType:     (new Gazelle\ReleaseType())->findIdByName('Live album'),
+            releaseType:     (new ReleaseType())->findIdByName('Live album'),
             showcase:        false,
         );
 
         // and add some torrents to the group
-        Helper::makeTorrentMusic(
+        \GazelleUnitTest\Helper::makeTorrentMusic(
             tgroup:          $this->tgroup,
             user:            $this->userList['user'],
             catalogueNumber: 'UA-TG-1',
         );
-        Helper::makeTorrentMusic(
+        \GazelleUnitTest\Helper::makeTorrentMusic(
             tgroup:          $this->tgroup,
             user:            $this->userList['user'],
             catalogueNumber: 'UA-TG-1',
             format:          'MP3',
             encoding:        'V0',
         );
-        Helper::makeTorrentMusic(
+        \GazelleUnitTest\Helper::makeTorrentMusic(
             tgroup:          $this->tgroup,
             user:            $this->userList['user'],
             catalogueNumber: 'UA-TG-2',
@@ -59,9 +61,9 @@ class TGroupTest extends TestCase {
 
     public function tearDown(): void {
         if (isset($this->tgroupExtra)) {
-            Helper::removeTGroup($this->tgroupExtra, $this->userList['admin']);
+            \GazelleUnitTest\Helper::removeTGroup($this->tgroupExtra, $this->userList['admin']);
         }
-        Helper::removeTGroup($this->tgroup, $this->userList['admin']);
+        \GazelleUnitTest\Helper::removeTGroup($this->tgroup, $this->userList['admin']);
         foreach ($this->userList as $user) {
             $user->remove();
         }
@@ -92,27 +94,27 @@ class TGroupTest extends TestCase {
 
         $this->assertNull($this->manager->findById(-666), 'tgroup-no-instance-of');
         $find = $this->manager->findById($this->tgroup->id());
-        $this->assertInstanceOf(Gazelle\TGroup::class, $find, 'tgroup-instance-of');
+        $this->assertInstanceOf(TGroup::class, $find, 'tgroup-instance-of');
         $this->assertEquals($this->tgroup->id(), $find->id(), 'tgroup-create-find');
 
-        $torMan = new \Gazelle\Manager\Torrent();
+        $torMan = new Manager\Torrent();
         $torrent = $torMan->findById($this->tgroup->torrentIdList()[0]);
         $this->assertEquals(1, $torrent->tokenCount(), 'tgroup-torrent-fl-cost');
         $this->assertFalse($this->userList['user']->canSpendFLToken($torrent), 'tgroup-user-no-fltoken');
 
-        $bonus = (new \Gazelle\User\Bonus($this->userList['user']));
+        $bonus = (new User\Bonus($this->userList['user']));
         $this->assertEquals(1, $bonus->addPoints(10000), 'tgroup-user-add-bp');
         $this->assertEquals(1, $bonus->purchaseToken('token-1'), 'tgroup-user-buy-token');
         $this->assertTrue($this->userList['user']->canSpendFLToken($torrent), 'tgroup-user-fltoken');
 
-        (new Gazelle\Stats\Users())->refresh();
+        (new Stats\Users())->refresh();
         $this->assertEquals(3, $this->userList['user']->stats()->uploadTotal(), 'tgroup-user-stats-upload');
         $this->assertEquals(1, $this->userList['user']->stats()->uniqueGroupTotal(), 'tgroup-user-stats-unique');
     }
 
     public function testTGroupArtist(): void {
-        $artMan = new Gazelle\Manager\Artist();
-        $logger = new Gazelle\Log();
+        $artMan = new Manager\Artist();
+        $logger = new Log();
         $user   = $this->userList['admin'];
         $artistName = 'phpunit ' . randomString(6) . ' band';
         $this->assertEquals(1, $this->tgroup->addArtists([ARTIST_MAIN], [$artistName], $user, $artMan, $logger), 'tgroup-artist-add');
@@ -168,13 +170,13 @@ class TGroupTest extends TestCase {
         ];
         $this->assertEquals(
             3,
-            $this->tgroup->artistRole()->modifyList($roleAliasList, ARTIST_DJ, $user, new Gazelle\Log()),
+            $this->tgroup->artistRole()->modifyList($roleAliasList, ARTIST_DJ, $user, new Log()),
             'tgroup-a-dj-saved-my-life'
         );
         $this->assertEquals('Various DJs', $this->tgroup->flush()->artistRole()->text(), 'tgroup-2manydjs');
         $this->assertEquals(
             1,
-            $this->tgroup->artistRole()->removeList([[ARTIST_DJ, $roleAliasList[0][1]]], $user, new Gazelle\Log()),
+            $this->tgroup->artistRole()->removeList([[ARTIST_DJ, $roleAliasList[0][1]]], $user, new Log()),
             'tgroup-hang-the-dj'
         );
         $this->assertEquals(
@@ -185,10 +187,10 @@ class TGroupTest extends TestCase {
     }
 
     public function testTGroupCoverArt(): void {
-        $coverId = $this->tgroup->addCoverArt('https://www.example.com/cover.jpg', 'cover art summary', $this->userList['user'], new Gazelle\Log());
+        $coverId = $this->tgroup->addCoverArt('https://www.example.com/cover.jpg', 'cover art summary', $this->userList['user'], new Log());
         $this->assertGreaterThan(0, $coverId, 'tgroup-cover-art-add');
-        $this->assertEquals(1, $this->tgroup->removeCoverArt($coverId, $this->userList['user'], new Gazelle\Log()), 'tgroup-cover-art-del-ok');
-        $this->assertEquals(0, $this->tgroup->removeCoverArt(9999999, $this->userList['user'], new Gazelle\Log()), 'tgroup-cover-art-del-nok');
+        $this->assertEquals(1, $this->tgroup->removeCoverArt($coverId, $this->userList['user'], new Log()), 'tgroup-cover-art-del-ok');
+        $this->assertEquals(0, $this->tgroup->removeCoverArt(9999999, $this->userList['user'], new Log()), 'tgroup-cover-art-del-nok');
     }
 
     public function testTGroupRevision(): void {
@@ -202,11 +204,11 @@ class TGroupTest extends TestCase {
     }
 
     public function testTGroupSubscription(): void {
-        $sub = new Gazelle\User\Subscription($this->userList['user']);
+        $sub = new User\Subscription($this->userList['user']);
         $this->assertTrue($sub->subscribeComments('torrents', $this->tgroup->id()));
 
         $text       = 'phpunit tgroup subscribe ' . randomString();
-        $commentMan = new Gazelle\Manager\Comment();
+        $commentMan = new Manager\Comment();
         $comment    = $commentMan->create($this->userList['admin'], 'torrents', 0, $text);
         // TODO: should this be 1?
         $this->assertEquals(0, $comment->pageNum(), 'tgroup-comment-page-num');
@@ -219,7 +221,7 @@ class TGroupTest extends TestCase {
         $user = $this->userList['admin'];
         $name = 'phpunit.' . randomString(6);
 
-        $tagMan = new Gazelle\Manager\Tag();
+        $tagMan = new Manager\Tag();
         $tag = $tagMan->create($name, $user);
         $this->assertGreaterThan(1, $tag->id(), 'tgroup-tag-create');
         $this->assertEquals(1, $tag->addTGroup($this->tgroup, $user, 10), 'tgroup-tag-add-one');
@@ -243,7 +245,7 @@ class TGroupTest extends TestCase {
 
     public function testLatestUploads(): void {
         // we can at least test the SQL
-        $this->assertIsArray((new \Gazelle\Manager\Torrent())->latestUploads(5), 'tgroup-latest-uploads');
+        $this->assertIsArray((new Manager\Torrent())->latestUploads(5), 'tgroup-latest-uploads');
     }
 
     public function testTGroupMerge(): void {
@@ -257,10 +259,10 @@ class TGroupTest extends TestCase {
             catalogueNumber: $this->catalogueNumber,
             description:     "Description of {$this->name} merge",
             image:           '',
-            releaseType:     (new Gazelle\ReleaseType())->findIdByName('Live album'),
+            releaseType:     (new ReleaseType())->findIdByName('Live album'),
             showcase:        false,
         );
-        Helper::makeTorrentMusic(
+        \GazelleUnitTest\Helper::makeTorrentMusic(
             tgroup:          $this->tgroupExtra,
             user:            $user,
             catalogueNumber: 'UA-MG-1',
@@ -268,10 +270,10 @@ class TGroupTest extends TestCase {
         $oldId   = $this->tgroupExtra->id();
         $oldName = $this->tgroupExtra->name();
 
-        (new Gazelle\User\Bookmark($admin))->create('torrent', $oldId);
-        (new Gazelle\Manager\Comment())->create($user, 'torrents', $oldId, 'phpunit comment ' . randomString(10));
-        $adminVote = new \Gazelle\User\Vote($admin);
-        $userVote = new \Gazelle\User\Vote($user);
+        (new User\Bookmark($admin))->create('torrent', $oldId);
+        (new Manager\Comment())->create($user, 'torrents', $oldId, 'phpunit comment ' . randomString(10));
+        $adminVote = new User\Vote($admin);
+        $userVote = new User\Vote($user);
         $adminVote->upvote($this->tgroupExtra);
         $userVote->downvote($this->tgroupExtra);
 
@@ -280,14 +282,14 @@ class TGroupTest extends TestCase {
                 $this->tgroupExtra,
                 $this->tgroup,
                 $this->userList['admin'],
-                new \Gazelle\Manager\User(),
-                new \Gazelle\Manager\Vote(),
-                new \Gazelle\Log(),
+                new Manager\User(),
+                new Manager\Vote(),
+                new Log(),
             ),
             'tgroup-music-merge'
         );
 
-        $sitelog = new \Gazelle\Manager\SiteLog(new \Gazelle\Manager\User());
+        $sitelog = new Manager\SiteLog(new Manager\User());
         $list = $sitelog->tgroupLogList($this->tgroup->id());
         $event = end($list);
         $this->assertStringContainsString("($oldName)", $event['info'], 'tgroup-merge-old-name');
@@ -301,17 +303,17 @@ class TGroupTest extends TestCase {
         );
 
         $this->assertTrue(
-            (new \Gazelle\User\Bookmark($admin))->isTorrentBookmarked($this->tgroup->id()),
+            (new User\Bookmark($admin))->isTorrentBookmarked($this->tgroup->id()),
             'tgroup-merge-bookmark'
         );
 
-        $comment = new Gazelle\Comment\Torrent($this->tgroup->id(), 1, 0);
+        $comment = new Comment\Torrent($this->tgroup->id(), 1, 0);
 
         // create new vote objects to pick up the state change
         unset($adminVote);
         unset($userVote);
-        $adminVote = new \Gazelle\User\Vote($admin);
-        $userVote = new \Gazelle\User\Vote($user);
+        $adminVote = new User\Vote($admin);
+        $userVote = new User\Vote($user);
 
         $this->assertEquals(1, $adminVote->flush()->vote($this->tgroup), 'tgroup-merge-upvote');
         $this->assertEquals(-1, $userVote->flush()->vote($this->tgroup), 'tgroup-merge-downvote');
@@ -320,28 +322,28 @@ class TGroupTest extends TestCase {
     public function testTGroupSplit(): void {
         $list = $this->tgroup->torrentIdList();
         $this->assertCount(3, $list, 'tgroup-has-torrents');
-        $torrent = (new \Gazelle\Manager\Torrent())->findById($list[1]);
-        $this->assertInstanceOf(\Gazelle\Torrent::class, $torrent, 'tgroup-id-is-a-torrent');
+        $torrent = (new Manager\Torrent())->findById($list[1]);
+        $this->assertInstanceOf(Torrent::class, $torrent, 'tgroup-id-is-a-torrent');
         $suffix = randomString(10);
-        $this->tgroupExtra = (new \Gazelle\Manager\TGroup())->createFromTorrent(
+        $this->tgroupExtra = (new Manager\TGroup())->createFromTorrent(
             $torrent,
             "phpunit split artist $suffix",
             "php split title $suffix",
             (int)date('Y'),
-            new \Gazelle\Manager\Artist(),
-            new \Gazelle\Manager\Bookmark(),
-            new \Gazelle\Manager\Comment(),
-            new \Gazelle\Manager\Vote(),
-            new \Gazelle\Log(),
+            new Manager\Artist(),
+            new Manager\Bookmark(),
+            new Manager\Comment(),
+            new Manager\Vote(),
+            new Log(),
             $this->userList['admin'],
         );
-        $this->assertInstanceOf(\Gazelle\TGroup::class, $this->tgroupExtra, 'tgroup-is-split');
+        $this->assertInstanceOf(TGroup::class, $this->tgroupExtra, 'tgroup-is-split');
         $this->assertCount(2, $this->tgroup->flush()->torrentIdList(), 'tgroup-has-one-less-torrent');
         $this->assertCount(1, $this->tgroupExtra->torrentIdList(), 'tgroup-split-has-one-torrent');
     }
 
     public function testStatsRefresh(): void {
-        $this->assertIsInt((new \Gazelle\Stats\TGroups())->refresh(), 'tgroup-stats-refresh');
+        $this->assertIsInt((new Stats\TGroups())->refresh(), 'tgroup-stats-refresh');
     }
 
     public function testRemasterList(): void {
@@ -356,7 +358,7 @@ class TGroupTest extends TestCase {
     }
 
     public function testTGroupStats(): void {
-        (new \Gazelle\Stats\TGroups())->refresh();
+        (new Stats\TGroups())->refresh();
 
         $stats = $this->tgroup->stats();
         $this->assertIsInt($stats->downloadTotal(), 'tgroup-stats-download');
@@ -367,10 +369,10 @@ class TGroupTest extends TestCase {
         // test increment
         $total = $stats->bookmarkTotal();
         $this->assertIsInt($stats->bookmarkTotal(), 'tgroup-stats-bookmark');
-        $bookmark = new \Gazelle\User\Bookmark($this->userList['user']);
+        $bookmark = new User\Bookmark($this->userList['user']);
         $bookmark->create('torrent', $this->tgroup->id());
 
-        (new \Gazelle\Stats\TGroups())->refresh();
+        (new Stats\TGroups())->refresh();
         $stats->flush();
         $this->assertEquals($total + 1, $stats->bookmarkTotal(), 'tgroup-stats-update-bookmark');
     }

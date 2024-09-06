@@ -1,13 +1,15 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 class TagTest extends TestCase {
     protected const PREFIX = 'phpunit.';
 
-    protected \Gazelle\User    $user;
-    protected \Gazelle\TGroup  $tgroup;
-    protected \Gazelle\Request $request;
+    protected User    $user;
+    protected TGroup  $tgroup;
+    protected Request $request;
 
     public function tearDown(): void {
         if (isset($this->request)) {
@@ -15,11 +17,11 @@ class TagTest extends TestCase {
         }
         if (isset($this->user)) {
             if (isset($this->tgroup)) {
-                Helper::removeTGroup($this->tgroup, $this->user);
+                \GazelleUnitTest\Helper::removeTGroup($this->tgroup, $this->user);
             }
             $this->user->remove();
         }
-        $db = \Gazelle\DB::DB();
+        $db = DB::DB();
         $db->prepared_query("
             DELETE FROM tag_aliases WHERE BadTag LIKE 'phpunit.%'
         ");
@@ -33,7 +35,7 @@ class TagTest extends TestCase {
     }
 
     public function testSanitize(): void {
-        $manager = new Gazelle\Manager\Tag();
+        $manager = new Manager\Tag();
         $this->assertEquals('trim', $manager->sanitize(' trim '), 'tag-sanitize-trim');
         $this->assertEquals('lower', $manager->sanitize('Lower'), 'tag-sanitize-lower');
         $this->assertEquals('heavy.metal', $manager->sanitize('heavy metal'), 'tag-sanitize-internal-space');
@@ -43,20 +45,20 @@ class TagTest extends TestCase {
     }
 
     public function testNormalize(): void {
-        $manager = new Gazelle\Manager\Tag();
+        $manager = new Manager\Tag();
         $this->assertEquals('dub', $manager->normalize('Dub dub  DUB! '), 'tag-normalize-dup');
         $this->assertEquals('neo.folk', $manager->normalize('neo...folk neo-folk'), 'tag-normalize-more');
         $this->assertEquals('pop rock', $manager->normalize(' pop rock rock pop Rock'), 'tag-normalize-two');
     }
 
     public function testCreate(): void {
-        $manager = new Gazelle\Manager\Tag();
+        $manager = new Manager\Tag();
         $name    = self::PREFIX . randomString(5);
         $this->assertNull($manager->findByName($name), 'tag-lookup-fail');
 
-        $this->user = Helper::makeUser('tag.' . randomString(6), 'tag');
+        $this->user = \GazelleUnitTest\Helper::makeUser('tag.' . randomString(6), 'tag');
         $tag = $manager->create($name, $this->user);
-        $this->assertInstanceOf(\Gazelle\Tag::class, $tag, 'tag-find-by-id');
+        $this->assertInstanceOf(Tag::class, $tag, 'tag-find-by-id');
         $this->assertEquals($tag->id(), $manager->findByName($tag->name())->id(), 'tag-method-lookup');
         $this->assertEquals($name, $tag->name(), 'tag-method-name');
         $this->assertEquals($name, $manager->findByName($tag->name())->name(), 'tag-find-by-name');
@@ -65,7 +67,7 @@ class TagTest extends TestCase {
         $this->assertEquals($tag->id(), $find->id(), 'tag-find-by-id');
 
         $this->user->addBounty(500 * 1024 ** 3);
-        $this->request = Helper::makeRequestMusic($this->user, 'phpunit tag create request');
+        $this->request = \GazelleUnitTest\Helper::makeRequestMusic($this->user, 'phpunit tag create request');
         $tag->addRequest($this->request);
 
         // rename to a new tag
@@ -93,8 +95,8 @@ class TagTest extends TestCase {
     }
 
     public function testSoftCreate(): void {
-        $manager    = new Gazelle\Manager\Tag();
-        $this->user = Helper::makeUser('tag.' . randomString(6), 'tag');
+        $manager    = new Manager\Tag();
+        $this->user = \GazelleUnitTest\Helper::makeUser('tag.' . randomString(6), 'tag');
         $valid      = 'phpunit.soft.' . randomString(6);
 
         $this->assertTrue($manager->validName($valid), 'tag-valid-name');
@@ -104,8 +106,8 @@ class TagTest extends TestCase {
     }
 
     public function testAlias(): void {
-        $manager    = new Gazelle\Manager\Tag();
-        $this->user = Helper::makeUser('tag.' . randomString(6), 'tag');
+        $manager    = new Manager\Tag();
+        $this->user = \GazelleUnitTest\Helper::makeUser('tag.' . randomString(6), 'tag');
 
         $bad  = $manager->create(self::PREFIX . randomString(10), $this->user);
         $good = $manager->create(self::PREFIX . randomString(10), $this->user);
@@ -179,8 +181,8 @@ class TagTest extends TestCase {
     }
 
     public function testOfficial(): void {
-        $manager    = new Gazelle\Manager\Tag();
-        $this->user = Helper::makeUser('tag.' . randomString(6), 'tag');
+        $manager    = new Manager\Tag();
+        $this->user = \GazelleUnitTest\Helper::makeUser('tag.' . randomString(6), 'tag');
         $tag        = $manager->create(self::PREFIX . randomString(10), $this->user);
         $this->assertEquals($tag->id(), $manager->officialize($tag->name(), $this->user)->id(), 'tag-officalize-existing');
         $list = array_filter($manager->genreList(), fn($t) => $t == $tag->name());
@@ -203,19 +205,19 @@ class TagTest extends TestCase {
     }
 
     public function testTGroup(): void {
-        $this->user   = Helper::makeUser('tag.' . randomString(8), 'tag.tgroup');
-        $this->tgroup = Helper::makeTGroupMusic(
+        $this->user   = \GazelleUnitTest\Helper::makeUser('tag.' . randomString(8), 'tag.tgroup');
+        $this->tgroup = \GazelleUnitTest\Helper::makeTGroupMusic(
             name:       'phpunit tag ' . randomString(6),
             artistName: [[ARTIST_MAIN], ['Tag Girl ' . randomString(12)]],
             tagName:    ['phpunit.electronic', 'phpunit.folk', 'phpunit.disco'],
             user:       $this->user,
         );
-        Helper::makeTorrentMusic(
+        \GazelleUnitTest\Helper::makeTorrentMusic(
             tgroup: $this->tgroup,
             user:   $this->user,
         );
 
-        $manager = new Gazelle\Manager\Tag();
+        $manager = new Manager\Tag();
         $folk = $manager->findByName('phpunit.folk');
         $this->assertFalse(
             $folk->hasVoteTGroup($this->tgroup, $this->user),
@@ -231,7 +233,7 @@ class TagTest extends TestCase {
             $folk->voteTGroup($this->tgroup, $this->user, 'up'),
             'tag-tgroup-vote'
         );
-        $db = Gazelle\DB::DB();
+        $db = DB::DB();
         $this->assertTrue(
             $folk->hasVoteTGroup($this->tgroup, $this->user),
             'tag-has-no-vote'
@@ -242,11 +244,11 @@ class TagTest extends TestCase {
     }
 
     public function testReAdd(): void {
-        $this->user   = Helper::makeUser('tag.' . randomString(8), 'tag.readd');
-        $manager      = new Gazelle\Manager\Tag();
+        $this->user   = \GazelleUnitTest\Helper::makeUser('tag.' . randomString(8), 'tag.readd');
+        $manager      = new Manager\Tag();
         $name         = self::PREFIX . randomString(10);
         $tag          = $manager->create($name, $this->user);
-        $this->tgroup = Helper::makeTGroupMusic(
+        $this->tgroup = \GazelleUnitTest\Helper::makeTGroupMusic(
             name:       'phpunit tag ' . randomString(6),
             artistName: [[ARTIST_MAIN], ['Tag Girl ' . randomString(12)]],
             tagName:    [$name],
@@ -256,16 +258,16 @@ class TagTest extends TestCase {
     }
 
     public function testSplitNew(): void {
-        $this->user = Helper::makeUser('tag.' . randomString(8), 'tag.split');
-        $manager = new Gazelle\Manager\Tag();
+        $this->user = \GazelleUnitTest\Helper::makeUser('tag.' . randomString(8), 'tag.split');
+        $manager = new Manager\Tag();
         $name    = self::PREFIX . randomString(10);
         $tag     = $manager->create($name, $this->user);
 
         $this->user->addBounty(500 * 1024 ** 3);
-        $this->request = Helper::makeRequestMusic($this->user, 'phpunit tag split new request');
+        $this->request = \GazelleUnitTest\Helper::makeRequestMusic($this->user, 'phpunit tag split new request');
         $tag->addRequest($this->request);
         $this->assertEquals(1, $tag->flush()->uses(), 'tag-instance-use-1');
-        $this->tgroup = Helper::makeTGroupMusic(
+        $this->tgroup = \GazelleUnitTest\Helper::makeTGroupMusic(
             name:       'phpunit tag ' . randomString(6),
             artistName: [[ARTIST_MAIN], ['Tag Girl ' . randomString(12)]],
             tagName:    [$name],
@@ -306,15 +308,15 @@ class TagTest extends TestCase {
     }
 
     public function testSplitExisting(): void {
-        $this->user = Helper::makeUser('tag.' . randomString(8), 'tag.split');
-        $manager = new Gazelle\Manager\Tag();
+        $this->user = \GazelleUnitTest\Helper::makeUser('tag.' . randomString(8), 'tag.split');
+        $manager = new Manager\Tag();
         $name    = self::PREFIX . randomString(10);
         $tag     = $manager->create($name, $this->user);
 
         $this->user->addBounty(500 * 1024 ** 3);
-        $this->request = Helper::makeRequestMusic($this->user, 'phpunit user promote request');
+        $this->request = \GazelleUnitTest\Helper::makeRequestMusic($this->user, 'phpunit user promote request');
         $tag->addRequest($this->request);
-        $this->tgroup = Helper::makeTGroupMusic(
+        $this->tgroup = \GazelleUnitTest\Helper::makeTGroupMusic(
             name:       'phpunit tag ' . randomString(6),
             artistName: [[ARTIST_MAIN], ['Tag Girl ' . randomString(12)]],
             tagName:    [$name],
@@ -356,11 +358,11 @@ class TagTest extends TestCase {
     }
 
     public function testTag(): void {
-        $this->user = Helper::makeUser('tag.' . randomString(8), 'tag.tgroup');
-        $manager    = new Gazelle\Manager\Tag();
+        $this->user = \GazelleUnitTest\Helper::makeUser('tag.' . randomString(8), 'tag.tgroup');
+        $manager    = new Manager\Tag();
         $name       = self::PREFIX . randomString(10);
         $tag        = $manager->create($name, $this->user);
-        $this->assertInstanceOf(\Gazelle\Tag::class, $tag, 'tag-instance-find');
+        $this->assertInstanceOf(Tag::class, $tag, 'tag-instance-find');
         $this->assertEquals($name, $tag->name(), 'tag-instance-name');
         $this->assertEquals(
             "<a href=\"torrents.php?taglist=$name\">$name</a>",
@@ -375,12 +377,12 @@ class TagTest extends TestCase {
     }
 
     public function testTop10(): void {
-        $manager = new Gazelle\Manager\Tag();
+        $manager = new Manager\Tag();
         $this->assertIsArray($manager->topTGroupList(1), 'tag-top10-tgroup');
         $this->assertIsArray($manager->topRequestList(1), 'tag-top10-request');
         $this->assertIsArray($manager->topVotedList(1), 'tag-top10-voted');
 
-        $ajax = new Gazelle\Json\Top10\Tag(
+        $ajax = new Json\Top10\Tag(
             details: 'all',
             limit: 10,
             manager: $manager,
@@ -391,6 +393,6 @@ class TagTest extends TestCase {
         $this->assertEquals('ur', $payload[1]['tag'], 'tag-top10-payload-ur');
         $this->assertEquals('v', $payload[2]['tag'], 'tag-top10-payload-v');
 
-        $this->assertCount(0, (new Gazelle\Json\Top10\Tag('bogus', 1, $manager))->payload(), 'tag-top10-bogus-payload');
+        $this->assertCount(0, (new Json\Top10\Tag('bogus', 1, $manager))->payload(), 'tag-top10-bogus-payload');
     }
 }

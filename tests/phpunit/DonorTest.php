@@ -1,13 +1,15 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 class DonorTest extends TestCase {
-    protected Gazelle\User\Donor $donor;
+    protected User\Donor $donor;
 
     public function setUp(): void {
-        $this->donor = new Gazelle\User\Donor(
-            Helper::makeUser('donor.' . randomString(6), 'donor', clearInbox: true)
+        $this->donor = new User\Donor(
+            \GazelleUnitTest\Helper::makeUser('donor.' . randomString(6), 'donor', clearInbox: true)
         );
     }
 
@@ -58,9 +60,9 @@ class DonorTest extends TestCase {
 
         $inbox = $donor->user()->inbox();
         $this->assertEquals(1, $inbox->messageTotal(), 'donor-inbox-small-total');
-        $list = $inbox->messageList(new Gazelle\Manager\PM($donor->user()), 1, 0);
+        $list = $inbox->messageList(new Manager\PM($donor->user()), 1, 0);
         $this->assertStringContainsString('Your contribution has been received and credited', $list[0]->subject(), 'inbox-pm-subject');
-        Helper::clearInbox($donor->user());
+        \GazelleUnitTest\Helper::clearInbox($donor->user());
 
         // second donation
         $this->assertEquals(
@@ -73,7 +75,7 @@ class DonorTest extends TestCase {
             ),
             'donor-2nd-point'
         );
-        $list = $inbox->messageList(new Gazelle\Manager\PM($donor->user()), 2, 0);
+        $list = $inbox->messageList(new Manager\PM($donor->user()), 2, 0);
         $this->assertEquals(1, $donor->rank(), 'donor-rank-1');
         $this->assertEquals(1, $donor->totalRank(), 'donor-total-rank-1');
         $this->assertEquals(0, $donor->specialRank(), 'donor-not-special-rank-1');
@@ -306,7 +308,7 @@ class DonorTest extends TestCase {
         $this->assertFalse($donor->updateAvatarHover('https://www.example.com/example.jpg')->modify(), 'donor-no-set-avatar-hover');
 
         // expire a donation
-        $db = Gazelle\DB::DB();
+        $db = DB::DB();
         $db->prepared_query("
             UPDATE users_donor_ranks SET
                 RankExpirationTime = now() - INTERVAL 767 HOUR
@@ -315,7 +317,7 @@ class DonorTest extends TestCase {
         );
         $this->assertEquals(1, $db->affected_rows(), 'donor-found-expirable');
 
-        $manager = new Gazelle\Manager\Donation();
+        $manager = new Manager\Donation();
         $this->assertEquals(1, $manager->expireRanks(), 'donor-expiry');
         $donor->flush();
         $this->assertEquals(5, $donor->rank(), 'donor-rank-now-5');
@@ -383,7 +385,7 @@ class DonorTest extends TestCase {
     }
 
     public function testDonorManager(): void {
-        $manager = new Gazelle\Manager\Donation();
+        $manager = new Manager\Donation();
         $initial = $manager->rewardTotal();
         $initialGrand = $manager->grandTotal();
 
@@ -407,7 +409,7 @@ class DonorTest extends TestCase {
             'donor-manager-grand-total'
         );
 
-        $this->assertGreaterThan(0, $manager->topDonorList(100, new Gazelle\Manager\User()), 'donor-top-donor');
+        $this->assertGreaterThan(0, $manager->topDonorList(100, new Manager\User()), 'donor-top-donor');
         $this->assertGreaterThan($initial + DONOR_RANK_PRICE, $manager->totalMonth(1), 'donor-manager-month');
         $username = $this->donor->user()->username();
         $entry = array_values(array_filter($manager->rewardPage(null, 100, 0), fn($d) => $d['user_id'] == $this->donor->id()))[0];
@@ -424,7 +426,7 @@ class DonorTest extends TestCase {
 
         global $Viewer;
         $Viewer = $this->donor->user(); // sadness
-        $current = (new Gazelle\User\Session($Viewer))->create([
+        $current = (new User\Session($Viewer))->create([
             'keep-logged' => '0',
             'browser'     => [
                'Browser'                => 'phpunit',
@@ -437,10 +439,10 @@ class DonorTest extends TestCase {
         ]);
         global $SessionID;
         $SessionID = $current['SessionID']; // more sadness
-        Gazelle\Base::setRequestContext(new Gazelle\BaseRequestContext('/index.php', '127.0.0.1', ''));
+        Base::setRequestContext(new BaseRequestContext('/index.php', '127.0.0.1', ''));
 
-        $paginator = (new Gazelle\Util\Paginator(USERS_PER_PAGE, 1))->setTotal($manager->rewardTotal());
-        $render = (Gazelle\Util\Twig::factory())->render('donation/reward-list.twig', [
+        $paginator = (new Util\Paginator(USERS_PER_PAGE, 1))->setTotal($manager->rewardTotal());
+        $render = (Util\Twig::factory())->render('donation/reward-list.twig', [
             'paginator' => $paginator,
             'user'      => $manager->rewardPage(null, $paginator->limit(), $paginator->offset()),
             'search'    => null,
@@ -450,7 +452,7 @@ class DonorTest extends TestCase {
 
     public function testDonorTwig(): void {
         $user = $this->donor->user();
-        $twig = Gazelle\Util\Twig::factory();
+        $twig = Util\Twig::factory();
         $template = $twig->createTemplate('{% if user is donor %}yes{% else %}no{% endif %}');
         $this->assertEquals('no', $template->render(['user' => $user]), 'twig-test-not-donor');
 

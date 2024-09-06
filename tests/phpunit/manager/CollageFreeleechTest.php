@@ -1,37 +1,39 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 use Gazelle\Enum\LeechType;
 use Gazelle\Enum\LeechReason;
 
 class CollageFreeleechTest extends TestCase {
-    protected \Gazelle\Collage $collage;
-    protected \Gazelle\User    $user;
+    protected Collage $collage;
+    protected User    $user;
     protected array            $tgroupList;
 
     public function setUp(): void {
-        $this->user = Helper::makeUser('collfree.' . randomString(10), 'collage.manager');
+        $this->user = \GazelleUnitTest\Helper::makeUser('collfree.' . randomString(10), 'collage.manager');
         $this->tgroupList = [
-            Helper::makeTGroupMusic(
+            \GazelleUnitTest\Helper::makeTGroupMusic(
                 name:       'phpunit collfree ' . randomString(6),
                 artistName: [[ARTIST_MAIN], ['Dr Collfree ' . randomString(12)]],
                 tagName:    ['hip.hop'],
                 user:       $this->user,
             ),
-            Helper::makeTGroupMusic(
+            \GazelleUnitTest\Helper::makeTGroupMusic(
                 name:       'phpunit collfree ' . randomString(6),
                 artistName: [[ARTIST_MAIN], ['Dr Collfree ' . randomString(12)]],
                 tagName:    ['hip.hop'],
                 user:       $this->user,
             ),
         ];
-        $this->collage = (new Gazelle\Manager\Collage())->create(
+        $this->collage = (new Manager\Collage())->create(
             user:        $this->user,
             categoryId:  2,
             name:        'phpunit collfree ' . randomString(10),
             description: 'phpunit collfree',
             tagList:     'pop',
-            logger:      new \Gazelle\Log(),
+            logger:      new Log(),
         );
         foreach ($this->tgroupList as $tgroup) {
             foreach (
@@ -41,7 +43,7 @@ class CollageFreeleechTest extends TestCase {
                     ['format' => 'MP3',  'size' =>  2_000_000],
                 ] as $info
             ) {
-                $torrent = Helper::makeTorrentMusic(
+                $torrent = \GazelleUnitTest\Helper::makeTorrentMusic(
                     tgroup: $tgroup,
                     format: $info['format'],
                     size:   $info['size'],
@@ -53,7 +55,7 @@ class CollageFreeleechTest extends TestCase {
     }
 
     public function tearDown(): void {
-        $torMan = new Gazelle\Manager\Torrent();
+        $torMan = new Manager\Torrent();
         foreach ($this->tgroupList as $tgroup) {
             $this->collage->removeEntry($tgroup->id());
             foreach ($tgroup->torrentIdList() as $torrentId) {
@@ -66,14 +68,14 @@ class CollageFreeleechTest extends TestCase {
     }
 
     public function testCollageFreeleech(): void {
-        $torMan = new \Gazelle\Manager\Torrent();
+        $torMan = new Manager\Torrent();
         $idList = $this->collage->entryFlacList();
         $this->assertCount(4, $idList, 'collfree-flac-list');
         $this->assertEquals(
             4,
             $this->collage->setFreeleech(
                 torMan:    $torMan,
-                tracker:   new \Gazelle\Tracker(),
+                tracker:   new Tracker(),
                 user:      $this->user,
                 leechType: LeechType::Free,
                 reason:    LeechReason::Permanent,
@@ -96,7 +98,7 @@ class CollageFreeleechTest extends TestCase {
             4,
             $this->collage->setFreeleech(
                 torMan:    $torMan,
-                tracker:   new \Gazelle\Tracker(),
+                tracker:   new Tracker(),
                 user:      $this->user,
                 leechType: LeechType::Normal,
                 reason:    LeechReason::Normal,

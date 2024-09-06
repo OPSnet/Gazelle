@@ -1,5 +1,7 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 class DuplicateIpTest extends TestCase {
@@ -8,17 +10,17 @@ class DuplicateIpTest extends TestCase {
     public function setUp(): void {
         $ip = '169.254.0.1';
         $this->userList = [
-            Helper::makeUser('dupip.' . randomString(10), 'duplicate.ip')->setField('IP', $ip)->setField('Enabled', '1'),
-            Helper::makeUser('dupip.' . randomString(10), 'duplicate.ip')->setField('IP', $ip)->setField('Enabled', '1'),
-            Helper::makeUser('dupip.' . randomString(10), 'duplicate.ip')->setField('IP', $ip)->setField('Enabled', '1'),
-            Helper::makeUser('dupip.' . randomString(10), 'duplicate.ip')->setField('IP', $ip)->setField('Enabled', '1'),
-            Helper::makeUser('dupip.' . randomString(10), 'duplicate.ip')->setField('IP', $ip)->setField('Enabled', '1'),
+            \GazelleUnitTest\Helper::makeUser('dupip.' . randomString(10), 'duplicate.ip')->setField('IP', $ip)->setField('Enabled', '1'),
+            \GazelleUnitTest\Helper::makeUser('dupip.' . randomString(10), 'duplicate.ip')->setField('IP', $ip)->setField('Enabled', '1'),
+            \GazelleUnitTest\Helper::makeUser('dupip.' . randomString(10), 'duplicate.ip')->setField('IP', $ip)->setField('Enabled', '1'),
+            \GazelleUnitTest\Helper::makeUser('dupip.' . randomString(10), 'duplicate.ip')->setField('IP', $ip)->setField('Enabled', '1'),
+            \GazelleUnitTest\Helper::makeUser('dupip.' . randomString(10), 'duplicate.ip')->setField('IP', $ip)->setField('Enabled', '1'),
         ];
         foreach ($this->userList as $user) {
             $user->modify();
         }
 
-        \Gazelle\DB::DB()->prepared_query("
+        DB::DB()->prepared_query("
             INSERT INTO users_history_ips (UserID, IP, StartTime, EndTime) VALUES
                 (?, '$ip', now() - interval 10 day, now() - interval 1 day),
                 (?, '$ip', now() - interval 10 day, now() - interval 1 day),
@@ -31,7 +33,7 @@ class DuplicateIpTest extends TestCase {
 
     public function tearDown(): void {
         $idList = array_map(fn($u) => $u->id(), $this->userList);
-        \Gazelle\DB::DB()->prepared_query("
+        DB::DB()->prepared_query("
             DELETE FROM users_history_ips WHERE UserID IN (" . placeholders($idList) . ")
             ", ...$idList
         );
@@ -41,7 +43,7 @@ class DuplicateIpTest extends TestCase {
     }
 
     public function testDuplicateIpTotal(): void {
-        $dup = new \Gazelle\Manager\DuplicateIP();
+        $dup = new Manager\DuplicateIP();
         $total = $dup->total(5);
         $this->assertGreaterThan(1, $total, 'duplicate-ip-total');
 

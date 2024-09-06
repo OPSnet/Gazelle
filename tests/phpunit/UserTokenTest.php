@@ -1,29 +1,31 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 use Gazelle\Enum\UserTokenType;
 
 class UserTokenTest extends TestCase {
-    use \Gazelle\Pg;
+    use Pg;
 
-    protected \Gazelle\User $user;
+    protected User $user;
 
     public function setUp(): void {
-        $this->user = Helper::makeUser('token.' . randomString(10), 'token');
+        $this->user = \GazelleUnitTest\Helper::makeUser('token.' . randomString(10), 'token');
     }
 
     public function tearDown(): void {
-        (new \Gazelle\Manager\UserToken())->removeUser($this->user);
+        (new Manager\UserToken())->removeUser($this->user);
         $this->user->remove();
     }
 
     public function testUserTokenCreate(): void {
-        $manager = new \Gazelle\Manager\UserToken();
+        $manager = new Manager\UserToken();
         $userToken = $manager->create(UserTokenType::password, $this->user);
-        $this->assertTrue(Helper::recentDate($userToken->expiry()), 'usertoken-expiry');
+        $this->assertTrue(\GazelleUnitTest\Helper::recentDate($userToken->expiry()), 'usertoken-expiry');
 
-        $this->assertInstanceOf(\Gazelle\User\Token::class, $manager->findById($userToken->id()), 'usertoken-find-by-id');
-        $this->assertInstanceOf(\Gazelle\User\Token::class, $manager->findByToken($userToken->value()), 'usertoken-find-by-token');
+        $this->assertInstanceOf(User\Token::class, $manager->findById($userToken->id()), 'usertoken-find-by-id');
+        $this->assertInstanceOf(User\Token::class, $manager->findByToken($userToken->value()), 'usertoken-find-by-token');
         $this->assertEquals(UserTokenType::password, $userToken->type(), 'usertoken-type');
         $this->assertTrue($userToken->isValid(), 'usertoken-create');
 
@@ -35,19 +37,19 @@ class UserTokenTest extends TestCase {
     }
 
     public function testUserTokenPermanent(): void {
-        $manager = new \Gazelle\Manager\UserToken();
+        $manager = new Manager\UserToken();
         $userToken = $manager->create(UserTokenType::mfa, $this->user);
         $this->assertEquals('infinity', $userToken->expiry(), 'usertoken-permanent');
     }
 
     public function testUserTokenExists(): void {
-        $manager = new \Gazelle\Manager\UserToken();
+        $manager = new Manager\UserToken();
         $userToken = $manager->create(UserTokenType::confirm, $this->user);
-        $this->assertInstanceOf(\Gazelle\User\Token::class, $manager->findByUser($userToken->user(), UserTokenType::confirm), 'usertoken-find-by-user');
+        $this->assertInstanceOf(User\Token::class, $manager->findByUser($userToken->user(), UserTokenType::confirm), 'usertoken-find-by-user');
     }
 
     public function testPasswordToken(): void {
-        $manager = new \Gazelle\Manager\UserToken();
+        $manager = new Manager\UserToken();
         $userToken = $manager->createPasswordResetToken($this->user);
         $this->assertEquals('1 day', UserTokenType::confirm->interval(), 'usertoken-confirm-interval');
 
@@ -65,12 +67,12 @@ class UserTokenTest extends TestCase {
     }
 
     public function testUserTokenMissing(): void {
-        $manager = new \Gazelle\Manager\UserToken();
+        $manager = new Manager\UserToken();
         $this->assertNull($manager->findByUser($this->user, UserTokenType::mfa), 'usertoken-missing');
     }
 
     public function testMFA(): void {
-        $manager = new \Gazelle\Manager\UserToken();
+        $manager = new Manager\UserToken();
         $this->assertCount(0, $this->user->list2FA(), 'utest-no-mfa');
         $this->assertEquals(1, $this->user->create2FA($manager, randomString(16)), 'utest-setup-mfa');
         $recovery = $this->user->list2FA();

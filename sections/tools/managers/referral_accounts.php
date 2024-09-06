@@ -1,4 +1,7 @@
 <?php
+// phpcs:disable Generic.WhiteSpace.ScopeIndent.IncorrectExact
+// phpcs:disable Generic.WhiteSpace.ScopeIndent.Incorrect
+// phpcs:disable PSR1.Files.SideEffects.FoundWithSymbols
 
 function type_list(array $Types, int $Selected = 0): string {
     $Ret = '';
@@ -13,8 +16,6 @@ function type_list(array $Types, int $Selected = 0): string {
 }
 
 /** @phpstan-var \Gazelle\User $Viewer */
-// phpcs:disable Generic.WhiteSpace.ScopeIndent.IncorrectExact
-// phpcs:disable Generic.WhiteSpace.ScopeIndent.Incorrect
 
 if (!$Viewer->permitted('admin_manage_referrals')) {
     error(403);

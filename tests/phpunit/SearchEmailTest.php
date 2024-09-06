@@ -1,5 +1,7 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 class SearchEmailTest extends TestCase {
@@ -7,9 +9,9 @@ class SearchEmailTest extends TestCase {
 
     public function setUp(): void {
         $this->userList = [
-            Helper::makeUser('email1.' . randomString(10), 'email-search'),
-            Helper::makeUser('email2.' . randomString(10), 'email-search'),
-            Helper::makeUser('email3.' . randomString(10), 'email-search'),
+            \GazelleUnitTest\Helper::makeUser('email1.' . randomString(10), 'email-search'),
+            \GazelleUnitTest\Helper::makeUser('email2.' . randomString(10), 'email-search'),
+            \GazelleUnitTest\Helper::makeUser('email3.' . randomString(10), 'email-search'),
         ];
     }
 
@@ -20,7 +22,7 @@ class SearchEmailTest extends TestCase {
     }
 
     public function testSearchEmail(): void {
-        $search = new \Gazelle\Search\Email(new \Gazelle\Search\ASN());
+        $search = new Search\Email(new Search\ASN());
         $search->create(randomString());
 
         $text = "chaff {$this->userList[0]->email()} chaff {$this->userList[1]->email()} chaff {$this->userList[2]->email()} dup {$this->userList[0]->email()} ";

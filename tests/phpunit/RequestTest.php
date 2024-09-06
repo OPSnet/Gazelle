@@ -1,19 +1,21 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 define('BUFFER_FOR_BOUNTY', 1024 ** 4); // some upload credit to allow request creation
 
 class RequestTest extends TestCase {
-    protected Gazelle\Request $request;
-    protected Gazelle\TGroup  $tgroup;
+    protected Request $request;
+    protected TGroup  $tgroup;
     protected array           $userList;
 
     public function setUp(): void {
         // we need two users, one who uploads and one who snatches
         $this->userList = [
-            'admin' => Helper::makeUser('req.' . randomString(10), 'request'),
-            'user'  => Helper::makeUser('req.' . randomString(10), 'request'),
+            'admin' => \GazelleUnitTest\Helper::makeUser('req.' . randomString(10), 'request'),
+            'user'  => \GazelleUnitTest\Helper::makeUser('req.' . randomString(10), 'request'),
         ];
         $this->userList['admin']->setField('Enabled', '1')->setField('PermissionID', SYSOP)->modify();
         $this->userList['user']->setField('Enabled', '1')->modify();
@@ -25,7 +27,7 @@ class RequestTest extends TestCase {
             $this->request->remove();
         }
         if (isset($this->tgroup)) {
-            Helper::removeTGroup($this->tgroup, $this->userList['admin']);
+            \GazelleUnitTest\Helper::removeTGroup($this->tgroup, $this->userList['admin']);
             foreach ($this->userList as $user) {
                 $user->remove();
             }
@@ -37,15 +39,15 @@ class RequestTest extends TestCase {
         $user  = $this->userList['user'];
 
         $admin->addBounty(BUFFER_FOR_BOUNTY);
-        $manager       = new Gazelle\Manager\Request();
+        $manager       = new Manager\Request();
         $title         = 'phpunit ' . randomString(6) . ' Test Sessions (bonus VIP)';
         $image         = 'https://example.com/req.jpg';
-        $this->request = Helper::makeRequestMusic($admin, $title, image: $image);
+        $this->request = \GazelleUnitTest\Helper::makeRequestMusic($admin, $title, image: $image);
         $id = $this->request->id();
 
-        $this->assertInstanceOf(Gazelle\Request::class, $this->request, 'request-create');
+        $this->assertInstanceOf(Request::class, $this->request, 'request-create');
         $this->assertStringNotContainsString(' (bonus VIP)', $this->request->urlencodeTitle(), 'request-urlencode-title');
-        $artistMan  = new Gazelle\Manager\Artist();
+        $artistMan  = new Manager\Artist();
         $artistName = 'phpunit req ' . randomString(6);
         $this->assertEquals(
             1,
@@ -56,13 +58,13 @@ class RequestTest extends TestCase {
             ),
             'request-add-artist-role'
         );
-        $this->assertInstanceOf(Gazelle\ArtistRole\Request::class, $this->request->artistRole(), 'request-artist-role');
-        $this->assertInstanceOf(Gazelle\Request\LogCue::class, $this->request->logCue(), 'request-log-cue');
+        $this->assertInstanceOf(ArtistRole\Request::class, $this->request->artistRole(), 'request-artist-role');
+        $this->assertInstanceOf(Request\LogCue::class, $this->request->logCue(), 'request-log-cue');
         $this->assertStringContainsString('+', $this->request->urlencodeArtist(), 'request-urlencode-artist');
 
         $this->assertCount(0, $this->request->tagNameList());
         $nameList = ['phpunit.' . randomString(6), 'phpunit.' . randomString(6)];
-        $tagMan   = new Gazelle\Manager\Tag();
+        $tagMan   = new Manager\Tag();
         $tag      = $tagMan->create($nameList[0], $admin);
         $this->assertEquals(1, $tag->addRequest($this->request), 'request-add-tag');
         $this->assertEquals(
@@ -104,7 +106,7 @@ class RequestTest extends TestCase {
             'request-smart-link'
         );
 
-        $this->assertTrue(Helper::recentDate($this->request->created()), 'request-created');
+        $this->assertTrue(\GazelleUnitTest\Helper::recentDate($this->request->created()), 'request-created');
         $this->assertEquals($image, $this->request->image(), 'request-image');
         $this->assertEquals($title, $this->request->title(), 'request-title');
         $this->assertEquals('Album', $this->request->releaseTypeName(), 'request-release-type-name');
@@ -115,7 +117,7 @@ class RequestTest extends TestCase {
         $this->assertEquals(1, $this->request->categoryId(), 'request-cat-id');
         $this->assertEquals('Music', $this->request->categoryName(), 'request-cat-name');
         $this->assertTrue($this->request->hasArtistRole(), 'request-has-artist-role');
-        $this->assertInstanceOf(\Gazelle\ArtistRole\Request::class, $this->request->artistRole(), 'request-artist-role');
+        $this->assertInstanceOf(ArtistRole\Request::class, $this->request->artistRole(), 'request-artist-role');
         $this->assertEquals($nameList, $this->request->flush()->tagNameList(), 'request-tag-list');
         $this->assertEquals(str_replace('.', '_', "{$nameList[0]} {$nameList[1]}"), $this->request->tagNameToSphinx(), 'request-tag-sphinx');
         $this->assertEquals(
@@ -186,7 +188,7 @@ class RequestTest extends TestCase {
     }
 
     public function testFill(): void {
-        $statsReq = new Gazelle\Stats\Request();
+        $statsReq = new Stats\Request();
         $statsReq->flush();
         $admin  = $this->userList['admin'];
         $user   = $this->userList['user'];
@@ -200,13 +202,13 @@ class RequestTest extends TestCase {
             'total-filled'  => $statsReq->filledTotal(),
         ];
 
-        $requestMan = new Gazelle\Manager\Request();
+        $requestMan = new Manager\Request();
         $title  = 'phpunit req fill ' . randomString(6);
         $bounty = 1024 ** 2 * REQUEST_MIN;
         $this->request = $requestMan->create(
             user:            $admin,
             bounty:          $bounty,
-            categoryId:      (new Gazelle\Manager\Category())->findIdByName('Music'),
+            categoryId:      (new Manager\Category())->findIdByName('Music'),
             year:            2018,
             title:           $title,
             image:           '',
@@ -226,7 +228,7 @@ class RequestTest extends TestCase {
         $this->assertEquals($before['total'] + 1, $statsReq->total(), 'request-stats-new-total');
         $this->assertEquals($before['total-filled'], $statsReq->filledTotal(), 'request-stats-new-filled');
 
-        $statsUser = new Gazelle\Stats\Users();
+        $statsUser = new Stats\Users();
         $statsUser->refresh();
 
         $admin->flush();
@@ -262,7 +264,7 @@ class RequestTest extends TestCase {
         $this->assertEquals($taxedBounty, $userVote['bounty'], 'request-user-vote-bounty');
         $this->assertEquals(2, $this->request->userVotedTotal(), 'request-total-voted');
         $this->assertEquals(2 * $taxedBounty, $this->request->bountyTotal(), 'request-total-bounty-added');
-        $this->assertTrue(Helper::recentDate($this->request->lastVoteDate()), 'request-last-vote-date');
+        $this->assertTrue(\GazelleUnitTest\Helper::recentDate($this->request->lastVoteDate()), 'request-last-vote-date');
         $this->assertEquals(2, $this->request->userVotedTotal(), 'request-user-voted-total');
         $this->assertEquals(
             [$admin->id(), $user->id()],
@@ -281,26 +283,26 @@ class RequestTest extends TestCase {
 
         // make a torrent to fill the request
         $tgroupName = 'phpunit request ' . randomString(6);
-        $this->tgroup = Helper::makeTGroupMusic(
+        $this->tgroup = \GazelleUnitTest\Helper::makeTGroupMusic(
             name:       $tgroupName,
             artistName: [[ARTIST_MAIN], ['Request Girl ' . randomString(12)]],
             tagName:    ['electronic'],
             user:       $user,
         );
-        Helper::makeTorrentMusic(
+        \GazelleUnitTest\Helper::makeTorrentMusic(
             tgroup: $this->tgroup,
             user:   $user,
             title:  'Deluxe Edition',
         );
         $torrentId = current($this->tgroup->torrentIdList());
-        $torrent = (new Gazelle\Manager\Torrent())->findById($torrentId);
-        $this->assertInstanceOf(Gazelle\Torrent::class, $torrent, 'request-torrent-filler');
+        $torrent = (new Manager\Torrent())->findById($torrentId);
+        $this->assertInstanceOf(Torrent::class, $torrent, 'request-torrent-filler');
 
         $this->assertCount(0, $this->request->validate($torrent), 'request-validate');
         $this->assertEquals(1, $this->request->fill($user, $torrent), 'request-fill');
         $this->assertEquals($fillBefore['bounty-size'] + $taxedBounty * 2, $user->stats()->requestBountySize(), 'request-fill-receive-bounty');
         $this->assertEquals($fillBefore['bounty-total'] + 1, $user->stats()->requestBountyTotal(), 'request-fill-receive-total');
-        $this->assertTrue(Helper::recentDate($this->request->fillDate()), 'request-fill-date');
+        $this->assertTrue(\GazelleUnitTest\Helper::recentDate($this->request->fillDate()), 'request-fill-date');
         $this->assertEquals($this->request->id(), $torrent->requestFills($requestMan)[0]->id(), 'request-torrent-fills');
 
         $statsReq->flush();
@@ -310,12 +312,12 @@ class RequestTest extends TestCase {
         $this->assertTrue($this->request->isFilled(), 'request-now-filled');
 
         // and now unfill it
-        $this->assertEquals(1, $this->request->unfill($this->userList['admin'], 'unfill unittest', new Gazelle\Manager\Torrent()), 'request-unfill');
+        $this->assertEquals(1, $this->request->unfill($this->userList['admin'], 'unfill unittest', new Manager\Torrent()), 'request-unfill');
         $this->assertEquals($fillBefore['uploaded'], $this->userList['user']->flush()->uploadedSize(), 'request-fill-unfill-user');
         $this->assertEquals($fillBefore['bounty-total'], $this->userList['user']->stats()->requestBountyTotal(), 'request-fill-unfill-total');
         $this->assertFalse($this->request->isFilled(), 'request-unfilled');
 
-        $log = new Gazelle\Manager\SiteLog(new Gazelle\Manager\User());
+        $log = new Manager\SiteLog(new Manager\User());
         $page = $log->page(2, 0, $this->request->title(), bypassSphinx: true);
         $this->assertStringStartsWith(
             "Request <a href=\"{$this->request->url()}\">{$this->request->id()}</a> ({$this->request->title()})",
@@ -341,11 +343,11 @@ class RequestTest extends TestCase {
     }
 
     public function testBookmark(): void {
-        $manager = new Gazelle\Manager\Request();
+        $manager = new Manager\Request();
         $this->request = $manager->create(
             user:            $this->userList['admin'],
             bounty:          1024 ** 2 * REQUEST_MIN,
-            categoryId:      (new Gazelle\Manager\Category())->findIdByName('Music'),
+            categoryId:      (new Manager\Category())->findIdByName('Music'),
             year:            (int)date('Y'),
             title:           'phpunit request bookmark',
             image:           '',
@@ -363,11 +365,11 @@ class RequestTest extends TestCase {
         $this->request->artistRole()->set(
             [ARTIST_MAIN => ['phpunit req ' . randomString(6)]],
             $this->userList['user'],
-            new Gazelle\Manager\Artist(),
+            new Manager\Artist(),
         );
-        (new Gazelle\Manager\Tag())->create('classical.era', $this->userList['admin'])->addRequest($this->request);
+        (new Manager\Tag())->create('classical.era', $this->userList['admin'])->addRequest($this->request);
         $this->assertTrue(
-            (new Gazelle\User\Bookmark($this->userList['user']))->create('request', $this->request->id()),
+            (new User\Bookmark($this->userList['user']))->create('request', $this->request->id()),
             'request-bookmark-add'
         );
         $this->assertEquals(1, $this->request->updateBookmarkStats(), 'request-bookmark-update');
@@ -378,22 +380,22 @@ class RequestTest extends TestCase {
 
     public function testReport(): void {
         $this->userList['admin']->addBounty(BUFFER_FOR_BOUNTY);
-        $this->request = Helper::makeRequestMusic($this->userList['admin'], 'phpunit request report');
+        $this->request = \GazelleUnitTest\Helper::makeRequestMusic($this->userList['admin'], 'phpunit request report');
         $this->request->artistRole()->set(
             [ARTIST_MAIN => ['phpunit req ' . randomString(6)]],
             $this->userList['user'],
-            new Gazelle\Manager\Artist(),
+            new Manager\Artist(),
         );
-        (new Gazelle\Manager\Tag())
+        (new Manager\Tag())
             ->create('phpunit.' . randomString(6), $this->userList['admin'])
             ->addRequest($this->request);
 
         $title = 'phpunit request report';
-        $report = (new Gazelle\Manager\Report(new Gazelle\Manager\User()))->create(
+        $report = (new Manager\Report(new Manager\User()))->create(
             $this->userList['user'], $this->request->id(), 'request', $title
         );
         $this->assertEquals('phpunit request report', $report->reason(), 'request-report-reason');
-        $requestReport = new Gazelle\Report\Request($report->id(), $this->request);
+        $requestReport = new Report\Request($report->id(), $this->request);
         $this->assertStringStartsWith('Request Report: ', $requestReport->title(), 'request-report-title');
         $this->assertEquals('report/request.twig', $requestReport->template(), 'request-report-template');
         $this->assertEquals(
@@ -406,24 +408,24 @@ class RequestTest extends TestCase {
 
     public function testJson(): void {
         $this->userList['admin']->addBounty(BUFFER_FOR_BOUNTY);
-        $this->request = Helper::makeRequestMusic($this->userList['admin'], 'phpunit request json');
-        $artistMan = new Gazelle\Manager\Artist();
+        $this->request = \GazelleUnitTest\Helper::makeRequestMusic($this->userList['admin'], 'phpunit request json');
+        $artistMan = new Manager\Artist();
         $this->request->artistRole()->set(
             [ARTIST_MAIN => ['phpunit req ' . randomString(6)]],
             $this->userList['user'],
             $artistMan,
         );
-        (new Gazelle\Manager\Tag())
+        (new Manager\Tag())
             ->create('phpunit.' . randomString(6), $this->userList['admin'])
             ->addRequest($this->request);
-        $this->assertInstanceOf(Gazelle\Request::class, $this->request, 'request-json-create');
+        $this->assertInstanceOf(Request::class, $this->request, 'request-json-create');
 
-        $json = new Gazelle\Json\Request(
+        $json = new Json\Request(
             $this->request,
             $this->userList['user'],
-            new Gazelle\User\Bookmark($this->userList['user']),
-            new Gazelle\Comment\Request($this->request->id(), 1, 0),
-            new Gazelle\Manager\User(),
+            new User\Bookmark($this->userList['user']),
+            new Comment\Request($this->request->id(), 1, 0),
+            new Manager\User(),
         );
         $payload = $json->payload();
         $this->assertCount(39, $payload, 'req-json-payload');
@@ -457,17 +459,17 @@ class RequestTest extends TestCase {
     }
 
     public function testEncodingValue(): void {
-        $allEncoding = new Gazelle\Request\Encoding();
+        $allEncoding = new Request\Encoding();
         $this->assertFalse($allEncoding->isValid(), 'req-enc-all-invalid');
         $this->assertFalse($allEncoding->exists('Lossless'), 'req-enc-invalid-exists');
 
-        $allEncoding = new Gazelle\Request\Encoding(true);
+        $allEncoding = new Request\Encoding(true);
         $this->assertTrue($allEncoding->isValid(), 'req-enc-all-valid');
         $this->assertTrue($allEncoding->exists('Lossless'), 'req-enc-all-flac');
         $this->assertTrue($allEncoding->exists('Morse'), 'req-enc-all-morse'); // because of all encodings shortcut
         $this->assertEquals('Any', $allEncoding->dbValue(), 'req-enc-all-value');
 
-        $some = new Gazelle\Request\Encoding(false, [1, 2]); // 24bit Lossless, V0 (VBR)
+        $some = new Request\Encoding(false, [1, 2]); // 24bit Lossless, V0 (VBR)
         $this->assertTrue($some->isValid(), 'req-enc-some-valid');
         $this->assertTrue($some->exists('24bit Lossless'), 'req-enc-some-lossless');
         $this->assertFalse($some->exists('Morse'), 'req-enc-some-morse');
@@ -475,42 +477,42 @@ class RequestTest extends TestCase {
     }
 
     public function testFormatValue(): void {
-        $allFormat = new Gazelle\Request\Format();
+        $allFormat = new Request\Format();
         $this->assertFalse($allFormat->isValid(), 'req-fmt-all-invalid');
         $this->assertFalse($allFormat->exists('MP3'), 'req-fmt-invalid-exists');
 
-        $allFormat = new Gazelle\Request\Format(true);
+        $allFormat = new Request\Format(true);
         $this->assertTrue($allFormat->isValid(), 'req-fmt-all-valid');
         $this->assertTrue($allFormat->exists('FLAC'), 'req-fmt-all-flac');
         $this->assertEquals('Any', $allFormat->dbValue(), 'req-fmt-all-value');
 
-        $some = new Gazelle\Request\Format(false, [0, 1]); // FLAC, MP3
+        $some = new Request\Format(false, [0, 1]); // FLAC, MP3
         $this->assertTrue($some->isValid(), 'req-fmt-some-valid');
         $this->assertTrue($some->exists('FLAC'), 'req-fmt-some-flac');
         $this->assertEquals("MP3|FLAC", $some->dbValue(), 'req-fmt-some-value');
 
-        $also = new Gazelle\Request\Format(false, [1, 0]);
+        $also = new Request\Format(false, [1, 0]);
         $this->assertEquals("MP3|FLAC", $also->dbValue(), 'req-fmt-same-value');
     }
 
     public function testMediaValue(): void {
-        $allMedia = new Gazelle\Request\Media();
+        $allMedia = new Request\Media();
         $this->assertFalse($allMedia->isValid(), 'req-med-all-invalid');
         $this->assertFalse($allMedia->exists('BD'), 'req-med-invalid-exists');
 
-        $allMedia = new Gazelle\Request\Media(true);
+        $allMedia = new Request\Media(true);
         $this->assertTrue($allMedia->isValid(), 'req-med-all-valid');
         $this->assertTrue($allMedia->exists('CD'), 'req-med-all-cd');
         $this->assertEquals('Any', $allMedia->dbValue(), 'req-med-all-value');
 
-        $some = new Gazelle\Request\Media(false, [8, 0, 1, 2]); // Cassette, CD, WEB, Vinyl
+        $some = new Request\Media(false, [8, 0, 1, 2]); // Cassette, CD, WEB, Vinyl
         $this->assertTrue($some->isValid(), 'req-med-some-valid');
         $this->assertTrue($some->exists('Vinyl'), 'req-med-some-vinyl');
         $this->assertEquals("CD|WEB|Vinyl|Cassette", $some->dbValue(), 'req-med-some-value');
     }
 
     public function testLogCueValue(): void {
-        $none = new Gazelle\Request\LogCue();
+        $none = new Request\LogCue();
         $this->assertTrue($none->isValid(), 'req-none-valid');
         $this->assertEquals(0, $none->minScore(), 'req-none-min-score');
         $this->assertFalse($none->needLogChecksum(), 'req-none-need-checksum');
@@ -518,37 +520,37 @@ class RequestTest extends TestCase {
         $this->assertFalse($none->needLog(), 'req-none-need-log');
         $this->assertEquals('', $none->dbValue(), 'req-none-value');
 
-        $cksum = new Gazelle\Request\LogCue(needLogChecksum: true);
+        $cksum = new Request\LogCue(needLogChecksum: true);
         $this->assertTrue($cksum->isValid(), 'req-cksum-valid');
         $this->assertTrue($cksum->needLogChecksum(), 'req-cksum-need');
 
-        $cue = new Gazelle\Request\LogCue(needCue: true);
+        $cue = new Request\LogCue(needCue: true);
         $this->assertTrue($cue->isValid(), 'req-cue-valid');
         $this->assertEquals('Cue', $cue->dbValue(), 'req-cue-value');
 
-        $log = new Gazelle\Request\LogCue(needLog: true);
+        $log = new Request\LogCue(needLog: true);
         $this->assertTrue($log->isValid(), 'req-log-valid');
         $this->assertEquals('Log', $log->dbValue(), 'req-log-value');
 
-        $logcue = new Gazelle\Request\LogCue(needCue: true, needLog: true);
+        $logcue = new Request\LogCue(needCue: true, needLog: true);
         $this->assertTrue($logcue->isValid(), 'req-log-cue-valid');
         $this->assertEquals('Log + Cue', $logcue->dbValue(), 'req-log-cue-value');
 
-        $logmin = new Gazelle\Request\LogCue(needCue: true, needLog: true, minScore: 50);
+        $logmin = new Request\LogCue(needCue: true, needLog: true, minScore: 50);
         $this->assertTrue($logmin->isValid(), 'req-log-min-valid');
         $this->assertEquals(50, $logmin->minScore(), 'req-log-min-min-score');
         $this->assertTrue($logmin->needCue(), 'req-log-min-need-cue');
         $this->assertTrue($logmin->needLog(), 'req-log-min-need-log');
         $this->assertEquals('Log (>= 50%) + Cue', $logmin->dbValue(), 'req-log-min-value');
 
-        $logmax = new Gazelle\Request\LogCue(needCue: true, needLog: true, minScore: 100);
+        $logmax = new Request\LogCue(needCue: true, needLog: true, minScore: 100);
         $this->assertTrue($logmax->isValid(), 'req-log-max-valid');
         $this->assertEquals('Log (100%) + Cue', $logmax->dbValue(), 'req-log-max-value');
 
-        $over = new Gazelle\Request\LogCue(needCue: true, needLog: true, minScore: 101);
+        $over = new Request\LogCue(needCue: true, needLog: true, minScore: 101);
         $this->assertFalse($over->isValid(), 'req-log-score-over');
 
-        $under = new Gazelle\Request\LogCue(needCue: true, needLog: true, minScore: -1);
+        $under = new Request\LogCue(needCue: true, needLog: true, minScore: -1);
         $this->assertFalse($under->isValid(), 'req-log-score-under');
     }
 }

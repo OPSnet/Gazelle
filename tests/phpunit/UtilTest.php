@@ -1,5 +1,7 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 use Gazelle\Enum\CacheBucket;
 
@@ -260,6 +262,6 @@ class UtilTest extends TestCase {
     }
 
     public function testZip(): void {
-        $this->assertInstanceOf(\ZipStream\ZipStream::class, \Gazelle\Util\Zip::make("phpunit"), 'zip-object');
+        $this->assertInstanceOf(\ZipStream\ZipStream::class, Util\Zip::make("phpunit"), 'zip-object');
     }
 }

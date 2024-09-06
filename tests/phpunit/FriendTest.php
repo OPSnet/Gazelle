@@ -1,5 +1,7 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 class FriendTest extends TestCase {
@@ -12,11 +14,11 @@ class FriendTest extends TestCase {
     }
 
     public function testFriend(): void {
-        $manager = new Gazelle\Manager\User();
+        $manager = new Manager\User();
         $this->friend = [
-            new Gazelle\User\Friend(Helper::makeUser('friend1.' . randomString(6), 'friend1')),
-            new Gazelle\User\Friend(Helper::makeUser('friend2.' . randomString(6), 'friend2')),
-            new Gazelle\User\Friend(Helper::makeUser('friend3.' . randomString(6), 'friend3')),
+            new User\Friend(\GazelleUnitTest\Helper::makeUser('friend1.' . randomString(6), 'friend1')),
+            new User\Friend(\GazelleUnitTest\Helper::makeUser('friend2.' . randomString(6), 'friend2')),
+            new User\Friend(\GazelleUnitTest\Helper::makeUser('friend3.' . randomString(6), 'friend3')),
         ];
 
         // in the beginning
@@ -51,21 +53,21 @@ class FriendTest extends TestCase {
         if (getenv('CI') === false) {
             // FIXME: figure out why causes Twig footer() to fail when running in CI
             // FIXME
-            $current = (new Gazelle\User\Session($this->friend[0]->user()))->create([
+            $current = (new User\Session($this->friend[0]->user()))->create([
                 'keep-logged' => '0',
                 'browser'     => ['BrowserVersion' => null, 'OperatingSystemVersion' => null],
                 'ipaddr'      => '127.0.0.1',
                 'useragent'   => 'phpunit-browser',
             ]);
-            Gazelle\Base::setRequestContext(new Gazelle\BaseRequestContext('/friends.php', '127.0.0.1', ''));
+            Base::setRequestContext(new BaseRequestContext('/friends.php', '127.0.0.1', ''));
             global $SessionID, $Viewer;
             $SessionID = $current['SessionID'];
             $Viewer    = $this->friend[0]->user();
 
             // render
-            $paginator = new Gazelle\Util\Paginator(FRIENDS_PER_PAGE, 1);
+            $paginator = new Util\Paginator(FRIENDS_PER_PAGE, 1);
             $paginator->setTotal($this->friend[0]->total());
-            $html = Gazelle\Util\Twig::factory()->render('user/friend.twig', [
+            $html = Util\Twig::factory()->render('user/friend.twig', [
                 'list'      => $this->friend[0]->page($manager, $paginator->limit(), $paginator->offset()),
                 'paginator' => $paginator,
                 'viewer'    => $this->friend[0]->user(),

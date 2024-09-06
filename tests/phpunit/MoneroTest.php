@@ -1,5 +1,7 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 class MoneroTest extends TestCase {
@@ -7,9 +9,9 @@ class MoneroTest extends TestCase {
         $cn = new \MoneroIntegrations\MoneroPhp\Cryptonote();
         $mainAddress = "4AdUndXHHZ6cfufTMvppY6JwXNouMBzSkbLYfpAV5Usx3skxNgYeYTRj5UzqtReoS44qo9mtmXCqY45DJ852K5Jv2684Rge";
         $mainDecoded = $cn->decode_address($mainAddress);
-        $m = new Gazelle\Donate\Monero($mainAddress);
+        $m = new Donate\Monero($mainAddress);
 
-        $user = Helper::makeUser('user.' . randomString(10), 'monero');
+        $user = \GazelleUnitTest\Helper::makeUser('user.' . randomString(10), 'monero');
         $addr = $m->address($user->id());
         $addr2 = $m->address($user->id());
 
@@ -22,7 +24,7 @@ class MoneroTest extends TestCase {
         $this->assertEquals('13', $addrDecoded['networkByte'], 'monero-verify-network-byte');
 
         // man, this lib is very barebone; and why is it using hex everywhere?
-        $decoded = (new MoneroIntegrations\MoneroPhp\base58())->decode($addr);
+        $decoded = (new \MoneroIntegrations\MoneroPhp\base58())->decode($addr);
         $paymentId = substr($decoded, 64 + 66, 16);
 
         $this->assertEquals($user->id(), $m->findUserIdbyPaymentId($paymentId), 'monero-lookup-payment-id');

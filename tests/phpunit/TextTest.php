@@ -1,5 +1,7 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 
@@ -16,7 +18,7 @@ class TextTest extends TestCase {
 
     #[DataProvider('dataTeX')]
     public function testTeX(string $name, string $bbcode, string $expected): void {
-        $this->assertEquals($expected, Text::full_format($bbcode), $name);
+        $this->assertEquals($expected, \Text::full_format($bbcode), $name);
     }
 
     public static function dataTeX(): array {
@@ -29,9 +31,9 @@ class TextTest extends TestCase {
 
     #[DataProvider('dataBB')]
     public function testBB(string $name, string $bbcode, string $expected): void {
-        $this->userList['user'] = Helper::makeUser('bb.' . randomString(6), 'text');
-        Text::setViewer($this->userList['user']);
-        $this->assertEquals($expected, Text::full_format($bbcode), $name);
+        $this->userList['user'] = \GazelleUnitTest\Helper::makeUser('bb.' . randomString(6), 'text');
+        \Text::setViewer($this->userList['user']);
+        $this->assertEquals($expected, \Text::full_format($bbcode), $name);
     }
 
     public static function dataBB(): array {
@@ -96,91 +98,91 @@ class TextTest extends TestCase {
             $withCache = '@^<img loading="lazy" class="scale_image" onclick=".*?" alt=".*?/i/full/[\w-]+/[\w-]+" src=".*?/i/full/[\w-]+/[\w-]+" data-origin-src="\Q' . $image . '\E" />$@';
             $noCache   = "<img loading=\"lazy\" class=\"scale_image\" onclick=\"lightbox.init(this, \$(this).width());\" alt=\"$image\" src=\"$image\" />";
 
-            $this->assertEquals($noCache, Text::full_format("[img=$image]"), "text-image1-cache-implicit-$ext");
-            $this->assertEquals($noCache, Text::full_format("[img]{$image}[/img]"), "text-image2-cache-implicit-$ext");
+            $this->assertEquals($noCache, \Text::full_format("[img=$image]"), "text-image1-cache-implicit-$ext");
+            $this->assertEquals($noCache, \Text::full_format("[img]{$image}[/img]"), "text-image2-cache-implicit-$ext");
         }
     }
 
     public function testCollage(): void {
-        $this->userList['admin'] = Helper::makeUser('collage.' . randomString(6), 'text');
+        $this->userList['admin'] = \GazelleUnitTest\Helper::makeUser('collage.' . randomString(6), 'text');
         $this->userList['admin']->setField('PermissionID', SYSOP)->modify();
         $name    = 'collage ' . randomString(6);
-        $collage = (new Gazelle\Manager\Collage())->create($this->userList['admin'], 1, $name, 'phpunit collage', 'jazz,disco', new Gazelle\Log());
-        $this->assertInstanceOf(Gazelle\Collage::class, $collage, 'text-create-collage');
+        $collage = (new Manager\Collage())->create($this->userList['admin'], 1, $name, 'phpunit collage', 'jazz,disco', new Log());
+        $this->assertInstanceOf(Collage::class, $collage, 'text-create-collage');
         $this->assertEquals(
             "<a href=\"collages.php?id={$collage->id()}\">{$collage->name()}</a>",
-            Text::full_format("[collage]{$collage->id()}[/collage]"),
+            \Text::full_format("[collage]{$collage->id()}[/collage]"),
             'text-collage-bb'
         );
         $this->assertEquals(
             "<a href=\"collages.php?id={$collage->id()}\">{$collage->name()}</a>",
-            Text::full_format($collage->publicLocation()),
+            \Text::full_format($collage->publicLocation()),
             'text-collage-url'
         );
-        $commentMan = new Gazelle\Manager\Comment();
+        $commentMan = new Manager\Comment();
         $comment    = $commentMan->create($this->userList['admin'], 'collages', $collage->id(), "nice collage!");
         $this->assertEquals(
             "<a href=\"{$comment->url()}\">Collages Comment #{$comment->id()}</a>",
-            Text::full_format($comment->publicLocation()),
+            \Text::full_format($comment->publicLocation()),
             'text-collage-comment-link'
         );
         $this->assertEquals(1, $collage->hardRemove(), 'text-remove-collage');
     }
 
     public function testForum(): void {
-        $this->userList['admin'] = Helper::makeUser('forum.' . randomString(6), 'text');
+        $this->userList['admin'] = \GazelleUnitTest\Helper::makeUser('forum.' . randomString(6), 'text');
         $this->userList['admin']->setField('PermissionID', SYSOP)->modify();
-        Text::setViewer($this->userList['admin']);
+        \Text::setViewer($this->userList['admin']);
         $name  = 'forum ' . randomString(6);
-        $category = (new \Gazelle\Manager\ForumCategory())->create($name, 10003);
-        $forum = Helper::makeForum(
+        $category = (new Manager\ForumCategory())->create($name, 10003);
+        $forum = \GazelleUnitTest\Helper::makeForum(
             user:        $this->userList['admin'],
             sequence:    999,
             category:    $category,
             name:        $name,
             description: 'phpunit forum test',
         );
-        $this->assertInstanceOf(Gazelle\Forum::class, $forum, 'text-create-forum');
+        $this->assertInstanceOf(Forum::class, $forum, 'text-create-forum');
         $this->assertEquals(
             "<a href=\"forums.php?action=viewforum&amp;forumid={$forum->id()}\" class=\"tooltip\" title=\"{$forum->name()}\">{$forum->name()}</a>",
-            Text::full_format("[forum]{$forum->id()}[/forum]"),
+            \Text::full_format("[forum]{$forum->id()}[/forum]"),
             'text-forum'
         );
 
-        $thread = (new Gazelle\Manager\ForumThread())->create(
+        $thread = (new Manager\ForumThread())->create(
             $forum, $this->userList['admin'], "phpunit thread title", "phpunit thread body"
         );
 
-        $postId = (int)Gazelle\DB::DB()->scalar("
+        $postId = (int)DB::DB()->scalar("
             SELECT min(fp.ID)
             FROM forums_posts fp
             INNER JOIN forums_topics ft ON (ft.ID = fp.TopicID)
         ");
-        $post = (new Gazelle\Manager\ForumPost())->findById($postId);
+        $post = (new Manager\ForumPost())->findById($postId);
         $threadId = $post->thread()->id();
         $title    = $post->thread()->title();
 
         $this->assertMatchesRegularExpression(
             "@^<a href=\"forums\.php\?action=viewthread&amp;threadid={$threadId}\">\Q{$title}\E</a>$@",
-            Text::full_format("[thread]{$threadId}[/thread]"),
+            \Text::full_format("[thread]{$threadId}[/thread]"),
             'text-forum-thread'
         );
 
         $this->assertMatchesRegularExpression(
             "@^<a href=\"forums\.php\?action=viewthread&amp;threadid={$threadId}&amp;postid={$postId}#post{$postId}\">\Q{$title}\E \(Post #{$postId}\)</a>$@",
-            Text::full_format("[thread]{$threadId}:{$postId}[/thread]"),
+            \Text::full_format("[thread]{$threadId}:{$postId}[/thread]"),
             'text-forum-post'
         );
 
         $this->assertMatchesRegularExpression(
             "@^<a href=\"forums\.php\?action=viewthread&amp;threadid={$threadId}\">\Q{$title}\E</a>$@",
-            Text::full_format(SITE_URL . "/forums.php?action=viewthread&threadid={$threadId}"),
+            \Text::full_format(SITE_URL . "/forums.php?action=viewthread&threadid={$threadId}"),
             'text-forum-thread-link'
         );
 
         $this->assertMatchesRegularExpression(
             "@^<a href=\"forums\.php\?action=viewthread&amp;threadid={$threadId}&amp;postid={$postId}#post{$postId}\">\Q{$title}\E \(Post #{$postId}\)</a>$@",
-            Text::full_format(SITE_URL . "/forums.php?action=viewthread&threadid={$threadId}&postid={$postId}#post{$postId}"),
+            \Text::full_format(SITE_URL . "/forums.php?action=viewthread&threadid={$threadId}&postid={$postId}#post{$postId}"),
             'text-forum-post-link'
         );
 
@@ -254,21 +256,21 @@ END_HTML],
 
     #[DataProvider('dataList')]
     public function testList(string $name, string $bbcode, string $expected): void {
-        $this->assertEquals($expected, Text::full_format($bbcode), $name);
+        $this->assertEquals($expected, \Text::full_format($bbcode), $name);
     }
 
     public function testStrip(): void {
         $url = 'https://www.example.com';
         $this->assertEquals(
             'https://www.example.com/a.png https://www.example.com/b.png https://www.example.com here',
-            Text::strip_bbcode("[img]{$url}/a.png[/img] [img={$url}/b.png] [url]{$url}[/url] [url={$url}]here[/url]"),
+            \Text::strip_bbcode("[img]{$url}/a.png[/img] [img={$url}/b.png] [url]{$url}[/url] [url={$url}]here[/url]"),
             'text-strip-bb'
         );
     }
 
     public function testTOC(): void {
-        Text::$TOC = true;
-        $html = Text::full_format(<<<END_BB
+        \Text::$TOC = true;
+        $html = \Text::full_format(<<<END_BB
 ==== BIG ====
 
 abc
@@ -294,15 +296,15 @@ END_BB);
 <ol>
 <li><a href="#_3033085760"> BIG </a></li></ol></li><li><a href="#_1538387464"> Big </a></li><li><a href="#_175084667"> Also Big </a></li></ol></li><li><a href="#_3540668408"> Smaller </a></li><li><a href="#_442279556"> Small </a></li></ol>
 END_HTML;
-        $this->assertEquals($expected, Text::parse_toc(), 'text-toc-default');
+        $this->assertEquals($expected, \Text::parse_toc(), 'text-toc-default');
 
         $expected = <<<END_HTML
 <ul><li><ul><li>
 <ul>
 <li><a href="#_3033085760"> BIG </a></li></ul></li><li><a href="#_1538387464"> Big </a></li><li><a href="#_175084667"> Also Big </a></li></ul></li><li><a href="#_3540668408"> Smaller </a></li><li><a href="#_442279556"> Small </a></li></ul>
 END_HTML;
-        $this->assertEquals($expected, Text::parse_toc(3, true), 'text-toc-3-true');
-        Text::$TOC = false;
+        $this->assertEquals($expected, \Text::parse_toc(3, true), 'text-toc-3-true');
+        \Text::$TOC = false;
     }
 
     public static function dataSpan(): array {
@@ -321,23 +323,23 @@ END_HTML;
 
     #[DataProvider('dataSpan')]
     public function testSpanText(string $name, string $bbcode, string $expected): void {
-        $this->assertEquals($expected, Text::span_format($bbcode), $name);
+        $this->assertEquals($expected, \Text::span_format($bbcode), $name);
     }
 
     public function testUser(): void {
         $username = 'text.' . randomString(6);
-        $this->userList['user'] = Helper::makeUser($username, 'text');
-        Text::setViewer($this->userList['user']);
+        $this->userList['user'] = \GazelleUnitTest\Helper::makeUser($username, 'text');
+        \Text::setViewer($this->userList['user']);
 
-        $this->assertEquals("<a href=\"user.php?action=search&amp;search=$username\">$username</a>", Text::full_format("[user]{$username}[/user]"), "text-user-1");
+        $this->assertEquals("<a href=\"user.php?action=search&amp;search=$username\">$username</a>", \Text::full_format("[user]{$username}[/user]"), "text-user-1");
 
         $url = "<a href=\"user.php?id={$this->userList['user']->id()}\">@$username</a>";
-        $this->assertEquals($url, Text::full_format("@$username"), "text-user-2");
-        $this->assertEquals("$url.", Text::full_format("@$username."), "text-user-3");
+        $this->assertEquals($url, \Text::full_format("@$username"), "text-user-2");
+        $this->assertEquals("$url.", \Text::full_format("@$username."), "text-user-3");
 
         $this->assertEquals(
             "<span class=\"mature_blocked\" style=\"font-style: italic;\"><a href=\"wiki.php?action=article&amp;id=1063\">Mature content</a> has been blocked. You can choose to view mature content by editing your <a href=\"user.php?action=edit&amp;id=me\">settings</a>.</span>",
-            Text::full_format("[mature]titties[/mature]"),
+            \Text::full_format("[mature]titties[/mature]"),
             "text-mature",
         );
     }

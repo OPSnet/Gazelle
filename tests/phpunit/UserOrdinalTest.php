@@ -1,12 +1,14 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 class UserOrdinalTest extends TestCase {
-    protected \Gazelle\User $user;
+    protected User $user;
 
     public function setUp(): void {
-        $this->user = Helper::makeUser('ord.' . randomString(10), 'ord');
+        $this->user = \GazelleUnitTest\Helper::makeUser('ord.' . randomString(10), 'ord');
     }
 
     public function tearDown(): void {
@@ -37,7 +39,7 @@ class UserOrdinalTest extends TestCase {
 
     public function testMissing(): void {
         $ordinal = $this->user->ordinal();
-        $this->expectException(TypeError::class);
+        $this->expectException(\TypeError::class);
         $this->user->ordinal()->defaultValue('@nope@');
     }
 

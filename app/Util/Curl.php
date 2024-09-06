@@ -2,12 +2,7 @@
 
 namespace Gazelle\Util;
 
-enum CurlMethod {
-    case GET;
-    case HEAD;
-    case POST;
-    case PUT;
-}
+use Gazelle\Enum\CurlMethod;
 
 class Curl {
     protected \CurlHandle $curl;

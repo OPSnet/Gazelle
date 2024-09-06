@@ -1,27 +1,29 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 use Gazelle\Enum\TorrentFlag;
 
 class TorrentReportManagerTest extends TestCase {
     protected array $userList   = [];
-    protected \Gazelle\TGroup $tgroup;
+    protected TGroup $tgroup;
 
     public function setUp(): void {
         $this->userList = [
-            Helper::makeUser('reportg.' . randomString(10), 'reportg'),
-            Helper::makeUser('reportg.' . randomString(10), 'reportg'),
+            \GazelleUnitTest\Helper::makeUser('reportg.' . randomString(10), 'reportg'),
+            \GazelleUnitTest\Helper::makeUser('reportg.' . randomString(10), 'reportg'),
         ];
 
         // create a torrent group
-        $this->tgroup = Helper::makeTGroupMusic(
+        $this->tgroup = \GazelleUnitTest\Helper::makeTGroupMusic(
             name:       'phpunit torrent report ' . randomString(6),
             artistName: [[ARTIST_MAIN], ['Report Dog ' . randomString(12)]],
             tagName:    ['electronic'],
             user:       $this->userList[0],
         );
 
-        Helper::makeTorrentMusic(
+        \GazelleUnitTest\Helper::makeTorrentMusic(
             tgroup: $this->tgroup,
             user:   $this->userList[0],
             title:  'torrent report',
@@ -29,26 +31,26 @@ class TorrentReportManagerTest extends TestCase {
     }
 
     public function tearDown(): void {
-        Helper::removeTGroup($this->tgroup, $this->userList[0]);
+        \GazelleUnitTest\Helper::removeTGroup($this->tgroup, $this->userList[0]);
         foreach ($this->userList as $user) {
             $user->remove();
         }
     }
 
     public function testWorkflowReport(): void {
-        $torMan = new \Gazelle\Manager\Torrent();
+        $torMan = new Manager\Torrent();
         $torrent = $torMan->findById($this->tgroup->torrentIdList()[0]);
-        $this->assertInstanceOf(\Gazelle\Torrent::class, $torrent, 'report-torrent-is-torrent');
-        $report = (new \Gazelle\Manager\Torrent\Report($torMan))->create(
+        $this->assertInstanceOf(Torrent::class, $torrent, 'report-torrent-is-torrent');
+        $report = (new Manager\Torrent\Report($torMan))->create(
             torrent:     $torrent,
             user:        $this->userList[1],
-            reportType:  (new \Gazelle\Manager\Torrent\ReportType())->findByName('other'),
+            reportType:  (new Manager\Torrent\ReportType())->findByName('other'),
             reason:      'phpunit other report',
             otherIdList: '123 234',
-            irc:         new Gazelle\Util\Irc(),
+            irc:         new Util\Irc(),
         );
 
-        $this->assertTrue(Helper::recentDate($report->created()), 'torrent-report-created');
+        $this->assertTrue(\GazelleUnitTest\Helper::recentDate($report->created()), 'torrent-report-created');
         $this->assertCount(0, $report->externalLink(), 'torrent-report-external-link');
         $this->assertCount(0, $report->trackList(), 'torrent-report-track-list');
         $this->assertStringEndsWith("id={$report->id()}", $report->location(), 'torrent-report-location');
@@ -78,42 +80,42 @@ class TorrentReportManagerTest extends TestCase {
     }
 
     public function testModeratorResolve(): void {
-        $torMan = new \Gazelle\Manager\Torrent();
+        $torMan = new Manager\Torrent();
         $torrent = $torMan->findById($this->tgroup->torrentIdList()[0]);
-        $this->assertInstanceOf(\Gazelle\Torrent::class, $torrent, 'report-torrent-is-torrent');
-        $report = (new \Gazelle\Manager\Torrent\Report($torMan))->create(
+        $this->assertInstanceOf(Torrent::class, $torrent, 'report-torrent-is-torrent');
+        $report = (new Manager\Torrent\Report($torMan))->create(
             torrent:     $torrent,
             user:        $this->userList[1],
-            reportType:  (new \Gazelle\Manager\Torrent\ReportType())->findByName('other'),
+            reportType:  (new Manager\Torrent\ReportType())->findByName('other'),
             reason:      'phpunit other report',
             otherIdList: '123 234',
-            irc:         new Gazelle\Util\Irc(),
+            irc:         new Util\Irc(),
         );
         $this->assertEquals(1, $report->moderatorResolve($this->userList[0], 'phpunit moderator resolve'), 'torrent-report-moderator-resolve');
         $this->assertEquals('phpunit moderator resolve', $report->comment(), 'torrent-report-final-comment');
     }
 
     public function testModifyReport(): void {
-        $reportType = (new \Gazelle\Manager\Torrent\ReportType())->findByName('other');
+        $reportType = (new Manager\Torrent\ReportType())->findByName('other');
         $reportType->setChangeset($this->userList[0], [['field' => 'is_admin', 'old' => $reportType->isAdmin(), 'new' => 0]]);
         $this->assertFalse($reportType->setField('is_admin', false)->modify(), 'torrent-report-modify');
     }
 
     public function testUrgentReport(): void {
-        $torMan = new \Gazelle\Manager\Torrent();
+        $torMan = new Manager\Torrent();
         $torMan->setViewer($this->userList[0]);
-        $type = (new \Gazelle\Manager\Torrent\ReportType())->findByName('urgent');
-        $this->assertInstanceOf(\Gazelle\Torrent\ReportType::class, $type, 'torrent-report-instance-urgent');
+        $type = (new Manager\Torrent\ReportType())->findByName('urgent');
+        $this->assertInstanceOf(Torrent\ReportType::class, $type, 'torrent-report-instance-urgent');
 
         $torrentId = $this->tgroup->torrentIdList()[0];
         $torrent = $torMan->findById($torrentId);
-        $report = (new \Gazelle\Manager\Torrent\Report($torMan))->create(
+        $report = (new Manager\Torrent\Report($torMan))->create(
             torrent:     $torrent,
             user:        $this->userList[1],
             reportType:  $type,
             reason:      'phpunit urgent report',
             otherIdList: '',
-            irc:         new Gazelle\Util\Irc(),
+            irc:         new Util\Irc(),
         );
         $this->assertEquals([], $torrent->labelList($this->userList[0]), 'uploader-report-label');
 

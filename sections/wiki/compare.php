@@ -1,4 +1,5 @@
 <?php
+// phpcs:disable PSR1.Files.SideEffects.FoundWithSymbols
 
 //Diff function by Leto of StC.
 function diff(string $OldText, string $NewText): array {

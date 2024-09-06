@@ -1,16 +1,18 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 class LogTest extends TestCase {
     protected const PREFIX = 'phpunit-logtest ';
 
-    protected \Gazelle\TGroup $tgroup;
-    protected \Gazelle\TGroup $tgroupNew;
-    protected \Gazelle\User   $user;
+    protected TGroup $tgroup;
+    protected TGroup $tgroupNew;
+    protected User   $user;
 
     public function tearDown(): void {
-        $db = \Gazelle\DB::DB();
+        $db = DB::DB();
         $db->prepared_query("
             DELETE FROM log WHERE Message REGEXP ?
             ", '^' . self::PREFIX
@@ -31,12 +33,12 @@ class LogTest extends TestCase {
     }
 
     public function testGeneralLog(): void {
-        $logger = new \Gazelle\Log();
+        $logger = new Log();
         $message = self::PREFIX . "general " . randomString();
         $logger->general($message);
 
-        $sitelog = new \Gazelle\Manager\SiteLog(new \Gazelle\Manager\User());
-        $this->assertInstanceOf(\Gazelle\Manager\SiteLog::class, $sitelog, 'sitelog-manager');
+        $sitelog = new Manager\SiteLog(new Manager\User());
+        $this->assertInstanceOf(Manager\SiteLog::class, $sitelog, 'sitelog-manager');
         $result = $sitelog->page(1, 0, '');
         $latest = current($result);
         $this->assertEquals(['id', 'class', 'message', 'created'], array_keys($latest), 'sitelog-latest-keys');
@@ -45,9 +47,9 @@ class LogTest extends TestCase {
     }
 
     public function testGroupLog(): void {
-        $logger = new \Gazelle\Log();
-        $this->user = Helper::makeUser('sitelog.' . randomString(6), 'sitelog');
-        $this->tgroup = Helper::makeTGroupMusic(
+        $logger = new Log();
+        $this->user = \GazelleUnitTest\Helper::makeUser('sitelog.' . randomString(6), 'sitelog');
+        $this->tgroup = \GazelleUnitTest\Helper::makeTGroupMusic(
             $this->user,
             'phpunit log ' . randomString(6),
             [[ARTIST_MAIN], ['phpunit log artist ' . randomString(6)]],
@@ -56,7 +58,7 @@ class LogTest extends TestCase {
         $tgroupId = $this->tgroup->id();
         $logger->group($this->tgroup, $this->user, self::PREFIX . "group first " . randomString());
 
-        $sitelog = new \Gazelle\Manager\SiteLog(new \Gazelle\Manager\User());
+        $sitelog = new Manager\SiteLog(new Manager\User());
         $this->assertCount(2, $sitelog->tgroupLogList($tgroupId), 'grouplog-intial');
         $result = $sitelog->tgroupLogList($tgroupId);
         $latest = current($result);
@@ -68,7 +70,7 @@ class LogTest extends TestCase {
         $this->assertEquals(1, $latest['deleted'], 'grouplog-latest-is-deleted');
         $this->assertEquals(0, $latest['torrent_id'], 'grouplog-latest-no-torrent-id');
 
-        $this->tgroupNew = Helper::makeTGroupMusic(
+        $this->tgroupNew = \GazelleUnitTest\Helper::makeTGroupMusic(
             $this->user,
             'phpunit log ' . randomString(6),
             [[ARTIST_MAIN], ['phpunit log artist ' . randomString(6)]],
@@ -91,22 +93,22 @@ class LogTest extends TestCase {
     }
 
     public function testTorrentlLog(): void {
-        $logger = new \Gazelle\Log();
-        $this->user = Helper::makeUser('sitelog.' . randomString(6), 'sitelog');
-        $this->tgroup = Helper::makeTGroupMusic(
+        $logger = new Log();
+        $this->user = \GazelleUnitTest\Helper::makeUser('sitelog.' . randomString(6), 'sitelog');
+        $this->tgroup = \GazelleUnitTest\Helper::makeTGroupMusic(
             $this->user,
             'phpunit log ' . randomString(6),
             [[ARTIST_MAIN], ['phpunit log artist ' . randomString(6)]],
             ['log.jam']
         );
-        $torrent = Helper::makeTorrentMusic(
+        $torrent = \GazelleUnitTest\Helper::makeTorrentMusic(
             tgroup: $this->tgroup,
             user:  $this->user,
             title: randomString(10),
         );
         $logger->torrent($torrent, $this->user, self::PREFIX . "torrent " . randomString());
 
-        $sitelog = new \Gazelle\Manager\SiteLog(new \Gazelle\Manager\User());
+        $sitelog = new Manager\SiteLog(new Manager\User());
         $this->assertCount(2, $sitelog->tgroupLogList($this->tgroup->id()), 'torrentlog-has-log');
 
         $torrent->remove($this->user, 'phpunit log delete');
@@ -119,21 +121,21 @@ class LogTest extends TestCase {
 
     public function testRenderLog(): void {
         $message = self::PREFIX . "general " . randomString();
-        (new \Gazelle\Log())->general($message);
+        (new Log())->general($message);
 
-        $sitelog   = new \Gazelle\Manager\SiteLog(new \Gazelle\Manager\User());
-        $paginator = new \Gazelle\Util\Paginator(LOG_ENTRIES_PER_PAGE, 1);
+        $sitelog   = new Manager\SiteLog(new Manager\User());
+        $paginator = new Util\Paginator(LOG_ENTRIES_PER_PAGE, 1);
         $page      = $sitelog->page($paginator->page(), $paginator->offset(), '');
         $paginator->setTotal($sitelog->totalMatches());
 
         // FIXME: $Viewer should not be necessary
-        $this->user = Helper::makeUser('sitelog.' . randomString(6), 'sitelog');
-        Gazelle\Base::setRequestContext(new Gazelle\BaseRequestContext('/index.php', '127.0.0.1', ''));
+        $this->user = \GazelleUnitTest\Helper::makeUser('sitelog.' . randomString(6), 'sitelog');
+        Base::setRequestContext(new BaseRequestContext('/index.php', '127.0.0.1', ''));
         global $Viewer;
         $Viewer = $this->user;
         global $SessionID;
         $SessionID = 'phpunit';
-        $html = (Gazelle\Util\Twig::factory())->render('sitelog.twig', [
+        $html = (Util\Twig::factory())->render('sitelog.twig', [
             'search'    => '',
             'paginator' => $paginator,
             'page'      => $page,

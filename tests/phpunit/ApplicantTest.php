@@ -1,5 +1,7 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 class ApplicantTest extends TestCase {
@@ -8,7 +10,7 @@ class ApplicantTest extends TestCase {
 
     public function setUp(): void {
         $this->userList = [
-            'admin' => Helper::makeUser('admin.' . randomString(10), 'applicant'),
+            'admin' => \GazelleUnitTest\Helper::makeUser('admin.' . randomString(10), 'applicant'),
         ];
         $this->userList['admin']->addCustomPrivilege('admin_manage_applicants');
         $this->userList['admin']->setField('PermissionID', SYSOP)->modify();
@@ -19,7 +21,7 @@ class ApplicantTest extends TestCase {
             $role->remove();
         }
         foreach ($this->userList as $user) {
-            \Gazelle\DB::DB()->prepared_query("
+            DB::DB()->prepared_query("
                 DELETE FROM thread_note WHERE UserID = ?
                 ", $user->id()
             );
@@ -28,7 +30,7 @@ class ApplicantTest extends TestCase {
     }
 
     public function testRoleApply(): void {
-        $roleManager = new \Gazelle\Manager\ApplicantRole();
+        $roleManager = new Manager\ApplicantRole();
         $this->assertIsArray($roleManager->publishedList(), 'role-manager-list-published-is-array');
         $total = count($roleManager->list());
         $totalPublished = count($roleManager->publishedList());
@@ -36,7 +38,7 @@ class ApplicantTest extends TestCase {
         $title = 'published-' . randomString(6);
         $published = $this->roleList[]
             = $roleManager->create($title, 'this is a phpunit role', true, $this->userList['admin']);
-        $this->assertInstanceOf(Gazelle\ApplicantRole::class, $published, 'applicant-role-instance');
+        $this->assertInstanceOf(ApplicantRole::class, $published, 'applicant-role-instance');
         $this->assertEquals('apply.php?action=view&id=' . $published->id(), $published->location(), 'applicant-role-location');
         $this->assertStringContainsString(html_escape($published->location()), $published->link(), 'applicant-role-link');
         $this->assertIsString($published->created(), 'applicant-role-created');
@@ -48,15 +50,15 @@ class ApplicantTest extends TestCase {
         $this->assertCount($totalPublished + 1, $roleManager->publishedList(), 'applicant-role-total-published');
         $this->assertCount($total + 1, $roleManager->list(), 'applicant-role-total-all');
 
-        $this->userList['user'] = Helper::makeUser('user.' . randomString(10), 'applicant');
-        $manager = new \Gazelle\Manager\Applicant();
+        $this->userList['user'] = \GazelleUnitTest\Helper::makeUser('user.' . randomString(10), 'applicant');
+        $manager = new Manager\Applicant();
         // YUCK
         global $Viewer;
         $Viewer = $this->userList['user'];
         $apply  = $published->apply($this->userList['user'], 'application message');
 
-        $this->assertInstanceOf(Gazelle\Applicant::class, $apply, 'applicant-instance');
-        $this->assertInstanceOf(Gazelle\Thread::class, $apply->thread(), 'applicant-thread');
+        $this->assertInstanceOf(Applicant::class, $apply, 'applicant-instance');
+        $this->assertInstanceOf(Thread::class, $apply->thread(), 'applicant-thread');
         $this->assertTrue($manager->userIsApplicant($this->userList['user']), 'applicant-user-applied');
         $this->assertEquals('apply.php?action=view&id=' . $apply->id(), $apply->location(), 'applicant-location');
         $this->assertStringContainsString(html_escape($apply->location()), $apply->link(), 'applicant-link');
@@ -73,19 +75,19 @@ class ApplicantTest extends TestCase {
     }
 
     public function testApplicantNote(): void {
-        $this->userList['mod'] = Helper::makeUser('mod.' . randomString(10), 'applicant');
+        $this->userList['mod'] = \GazelleUnitTest\Helper::makeUser('mod.' . randomString(10), 'applicant');
         $this->userList['mod']->setField('PermissionID', MOD)->modify();
-        $manager = new \Gazelle\Manager\Applicant();
+        $manager = new Manager\Applicant();
         $new = [
             'admin' => $manager->newReplyTotal($this->userList['admin']),
             'mod'   => $manager->newReplyTotal($this->userList['mod']),
         ];
 
-        $roleManager = new \Gazelle\Manager\ApplicantRole();
+        $roleManager = new Manager\ApplicantRole();
         $this->roleList[] = $role =
             $roleManager->create('phpunit ' . randomString(6), 'this is a phpunit role', true, $this->userList['admin']);
 
-        $this->userList['user'] = Helper::makeUser('user.' . randomString(10), 'applicant');
+        $this->userList['user'] = \GazelleUnitTest\Helper::makeUser('user.' . randomString(10), 'applicant');
         $apply = $role->apply($this->userList['user'], 'applicant message');
         $this->assertTrue($role->isStaffViewer($this->userList['admin']), 'applicant-note-admin-is-viewer');
         $this->assertFalse($role->isStaffViewer($this->userList['user']), 'applicant-note-user-is-not-viewer');
@@ -106,15 +108,15 @@ class ApplicantTest extends TestCase {
     }
 
     public function testRoleViewer(): void {
-        $this->userList['mod'] = Helper::makeUser('mod.' . randomString(10), 'applicant');
+        $this->userList['mod'] = \GazelleUnitTest\Helper::makeUser('mod.' . randomString(10), 'applicant');
         $this->userList['mod']->setField('PermissionID', MOD)->modify();
 
-        $manager = new \Gazelle\Manager\Applicant();
+        $manager = new Manager\Applicant();
         $new = [
             'admin' => $manager->newTotal($this->userList['admin']),
             'mod'   => $manager->newTotal($this->userList['mod']),
         ];
-        $roleManager = new \Gazelle\Manager\ApplicantRole();
+        $roleManager = new Manager\ApplicantRole();
         $this->roleList[] = $basic =
             $roleManager->create('phpunit ' . randomString(6), 'this is a phpunit basic role', true, $this->userList['admin']);
         $basic->setField('viewer_list', '@' . $this->userList['mod']->username());
@@ -124,12 +126,12 @@ class ApplicantTest extends TestCase {
         $this->roleList[] = $admin =
             $roleManager->create('phpunit ' . randomString(6), 'this is a phpunit admin role', true, $this->userList['admin']);
 
-        $this->userList['user'] = Helper::makeUser('user.' . randomString(10), 'applicant');
+        $this->userList['user'] = \GazelleUnitTest\Helper::makeUser('user.' . randomString(10), 'applicant');
         global $Viewer;
         $Viewer = $this->userList['user'];
         $applyBasic = $basic->apply($this->userList['user'], 'application message');
 
-        $this->userList['another'] = Helper::makeUser('user.' . randomString(10), 'applicant');
+        $this->userList['another'] = \GazelleUnitTest\Helper::makeUser('user.' . randomString(10), 'applicant');
         $this->assertTrue($applyBasic->isViewable($this->userList['admin']), 'application-is-viewable-admin');
         $this->assertTrue($applyBasic->isViewable($this->userList['mod']), 'application-is-viewable-mod');
         $this->assertTrue($applyBasic->isViewable($this->userList['user']), 'application-is-viewable-user');
@@ -147,7 +149,7 @@ class ApplicantTest extends TestCase {
     }
 
     public function testUnpublishedRole(): void {
-        $roleManager = new \Gazelle\Manager\ApplicantRole();
+        $roleManager = new Manager\ApplicantRole();
         $total = count($roleManager->list());
         $totalPublished = count($roleManager->publishedList());
 
@@ -157,7 +159,7 @@ class ApplicantTest extends TestCase {
         $this->assertCount($totalPublished + 0, $roleManager->publishedList(), 'applicant-role-total-published');
         $this->assertCount($total + 1, $roleManager->list(), 'applicant-role-total-unpublished');
 
-        $this->userList['user'] = Helper::makeUser('user.' . randomString(10), 'applicant');
+        $this->userList['user'] = \GazelleUnitTest\Helper::makeUser('user.' . randomString(10), 'applicant');
         $this->assertFalse($unpublished->isViewable($this->userList['user']), 'applicant-not-published-is-invisible');
         $unpublished->setField('Published', 1)->modify();
         $this->assertTrue($unpublished->isViewable($this->userList['user']), 'applicant-published-is-visible');

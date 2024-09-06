@@ -1,18 +1,20 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 use Gazelle\Enum\DownloadStatus;
 use Gazelle\Enum\TorrentFlag;
 
 class TorrentTest extends TestCase {
-    protected \Gazelle\Torrent $torrent;
-    protected \Gazelle\User    $user;
+    protected Torrent $torrent;
+    protected User    $user;
     protected array            $userList;
 
     public function setUp(): void {
-        $this->user    = Helper::makeUser('torrent.' . randomString(10), 'rent', clearInbox: true);
-        $this->torrent = Helper::makeTorrentMusic(
-            tgroup: Helper::makeTGroupMusic(
+        $this->user    = \GazelleUnitTest\Helper::makeUser('torrent.' . randomString(10), 'rent', clearInbox: true);
+        $this->torrent = \GazelleUnitTest\Helper::makeTorrentMusic(
+            tgroup: \GazelleUnitTest\Helper::makeTGroupMusic(
                 name:       'phpunit torrent ' . randomString(6),
                 artistName: [[ARTIST_MAIN], ['phpunit torrent ' . randomString(12)]],
                 tagName:    ['jazz'],
@@ -24,7 +26,7 @@ class TorrentTest extends TestCase {
     }
 
     public function tearDown(): void {
-        Helper::removeTGroup($this->torrent->group(), $this->user);
+        \GazelleUnitTest\Helper::removeTGroup($this->torrent->group(), $this->user);
         $this->user->remove();
         if (isset($this->userList)) {
             foreach ($this->userList as $user) {
@@ -44,30 +46,30 @@ class TorrentTest extends TestCase {
     }
 
     public function testRemovalPm(): void {
-        $torrent = Helper::makeTorrentMusic(
+        $torrent = \GazelleUnitTest\Helper::makeTorrentMusic(
             tgroup: $this->torrent->group(),
             user:   $this->user,
             title:  randomString(10),
         );
 
         // a downloader
-        $this->userList['downloader'] = Helper::makeUser('torrent.' . randomString(10), 'rent', clearInbox: true);
-        $status = new Gazelle\Download($torrent, new \Gazelle\User\UserclassRateLimit($this->userList['downloader']), false);
+        $this->userList['downloader'] = \GazelleUnitTest\Helper::makeUser('torrent.' . randomString(10), 'rent', clearInbox: true);
+        $status = new Download($torrent, new User\UserclassRateLimit($this->userList['downloader']), false);
         $this->assertEquals(DownloadStatus::ok, $status->status(), 'torrent-removal-download');
 
         // a snatcher
-        $this->userList['snatcher'] = Helper::makeUser('torrent.' . randomString(10), 'rent', clearInbox: true);
-        Helper::generateTorrentSnatch($torrent, $this->userList['snatcher']);
+        $this->userList['snatcher'] = \GazelleUnitTest\Helper::makeUser('torrent.' . randomString(10), 'rent', clearInbox: true);
+        \GazelleUnitTest\Helper::generateTorrentSnatch($torrent, $this->userList['snatcher']);
 
         // a seeder
-        $this->userList['seeder'] = Helper::makeUser('torrent.' . randomString(10), 'rent', clearInbox: true);
-        Helper::generateTorrentSeed($torrent, $this->userList['seeder']);
+        $this->userList['seeder'] = \GazelleUnitTest\Helper::makeUser('torrent.' . randomString(10), 'rent', clearInbox: true);
+        \GazelleUnitTest\Helper::generateTorrentSeed($torrent, $this->userList['seeder']);
 
         $name = $torrent->fullName();
         $path = $torrent->path();
         $this->assertEquals(
             4,
-            (new \Gazelle\Manager\User())->sendRemovalPm(
+            (new Manager\User())->sendRemovalPm(
                 $this->user,
                 $torrent->id(),
                 $name,
@@ -82,7 +84,7 @@ class TorrentTest extends TestCase {
         // uploader
         $inbox = $this->user->inbox();
         $this->assertEquals(1, $inbox->messageTotal(), 'torrent-removal-uploader-message-count');
-        $list = $inbox->messageList(new Gazelle\Manager\PM($this->user), 2, 0);
+        $list = $inbox->messageList(new Manager\PM($this->user), 2, 0);
         $pm = $list[0];
         $this->assertStringStartsWith(
             "Uploaded torrent deleted: $name",
@@ -99,7 +101,7 @@ class TorrentTest extends TestCase {
         // downloader
         $inbox = $this->userList['downloader']->inbox();
         $this->assertEquals(1, $inbox->messageTotal(), 'torrent-removal-downloader-message-count');
-        $list = $inbox->messageList(new Gazelle\Manager\PM($this->userList['downloader']), 2, 0);
+        $list = $inbox->messageList(new Manager\PM($this->userList['downloader']), 2, 0);
         $pm = $list[0];
         $this->assertStringStartsWith(
             "Downloaded torrent deleted: $name",
@@ -116,7 +118,7 @@ class TorrentTest extends TestCase {
         // snatcher
         $inbox = $this->userList['snatcher']->inbox();
         $this->assertEquals(1, $inbox->messageTotal(), 'torrent-removal-snatcher-message-count');
-        $list = $inbox->messageList(new Gazelle\Manager\PM($this->userList['snatcher']), 2, 0);
+        $list = $inbox->messageList(new Manager\PM($this->userList['snatcher']), 2, 0);
         $pm = $list[0];
         $this->assertStringStartsWith(
             "Snatched torrent deleted: $name",
@@ -133,7 +135,7 @@ class TorrentTest extends TestCase {
         // seeder
         $inbox = $this->userList['seeder']->inbox();
         $this->assertEquals(1, $inbox->messageTotal(), 'torrent-removal-seeder-message-count');
-        $list = $inbox->messageList(new Gazelle\Manager\PM($this->userList['seeder']), 2, 0);
+        $list = $inbox->messageList(new Manager\PM($this->userList['seeder']), 2, 0);
         $pm = $list[0];
         $this->assertStringStartsWith(
             "Seeded torrent deleted: $name",
@@ -153,9 +155,9 @@ class TorrentTest extends TestCase {
             0,
             $this->torrent->removeAllLogs(
                 $this->user,
-                new Gazelle\File\RipLog(),
-                new Gazelle\File\RipLogHTML(),
-                new Gazelle\Log(),
+                new File\RipLog(),
+                new File\RipLogHTML(),
+                new Log(),
             ),
             'torrent-remove-all-logs'
         );
@@ -167,24 +169,24 @@ class TorrentTest extends TestCase {
 
         $torrentRegexp = "^<a href=\"artist\.php\?id=\d+\" dir=\"ltr\">.*</a> – <a title=\".*?\" href=\"/torrents\.php\?id={$tgroupId}&torrentid={$torrentId}#torrent{$torrentId}\">.* \[\d+ .*?\]</a>";
         $this->assertMatchesRegularExpression("@{$torrentRegexp} .*$@",
-            Text::full_format("[pl]{$torrentId}[/pl]"),
+            \Text::full_format("[pl]{$torrentId}[/pl]"),
             'text-pl'
         );
 
         // FIXME: we generate torrent urls in two different ways
         $torrentRegexp = "^<a href=\"artist\.php\?id=\d+\" dir=\"ltr\">.*</a> – <a href=\"torrents\.php\?id={$tgroupId}&amp;torrentid={$torrentId}#torrent{$torrentId}\" dir=\"ltr\">.*</a> \[\d+ .*?\]";
         $this->assertMatchesRegularExpression("@{$torrentRegexp}@",
-            Text::full_format(SITE_URL . "/{$this->torrent->location()}"),
+            \Text::full_format(SITE_URL . "/{$this->torrent->location()}"),
             "text-torrent-url tg={$tgroupId} t={$torrentId}"
         );
 
         $tgroupRegexp = "<a href=\"artist\.php\?id=\d+\" dir=\"ltr\">.*?</a> – <a href=\"torrents.php\?id={$tgroupId}\" title=\".*?\" dir=\"ltr\">.*?</a> \[\d+ \S+\]";
         $this->assertMatchesRegularExpression("@{$tgroupRegexp}@",
-            Text::full_format("[torrent]{$tgroupId}[/torrent]"),
+            \Text::full_format("[torrent]{$tgroupId}[/torrent]"),
             'text-tgroup-id'
         );
         $this->assertMatchesRegularExpression("@{$tgroupRegexp}@",
-            Text::full_format(SITE_URL . "/{$this->torrent->group()->location()}"),
+            \Text::full_format(SITE_URL . "/{$this->torrent->group()->location()}"),
             'text-tgroup-url'
         );
     }

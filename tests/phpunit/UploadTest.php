@@ -1,12 +1,14 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 class UploadTest extends TestCase {
-    protected \Gazelle\User $user;
+    protected User $user;
 
     public function setUp(): void {
-        $this->user = Helper::makeUser('upload.' . randomString(6), 'upload');
+        $this->user = \GazelleUnitTest\Helper::makeUser('upload.' . randomString(6), 'upload');
     }
 
     public function tearDown(): void {
@@ -14,11 +16,11 @@ class UploadTest extends TestCase {
     }
 
     public function testUpload(): void {
-        $upload = new \Gazelle\Upload($this->user);
+        $upload = new Upload($this->user);
 
         $this->assertStringContainsString($this->user->auth(), $upload->head(0), 'upload-head');
 
-        Gazelle\Base::setRequestContext(new Gazelle\BaseRequestContext('/upload.php', '127.0.0.1', ''));
+        Base::setRequestContext(new BaseRequestContext('/upload.php', '127.0.0.1', ''));
         global $SessionID;
         $SessionID = '';
         global $Viewer;
@@ -60,7 +62,7 @@ class UploadTest extends TestCase {
         $this->assertStringStartsWith('<table id="form-elearning-upload"', $form, 'upload-elearning-begin');
         $this->assertStringEndsWith("</table>\n", $form, 'upload-elearning-end');
 
-        $form = $upload->music(['acoustic', 'baroque.era', 'chillout'], new \Gazelle\Manager\TGroup());
+        $form = $upload->music(['acoustic', 'baroque.era', 'chillout'], new Manager\TGroup());
         $this->assertStringStartsWith('<div id="musicbrainz_popup"', $form, 'upload-music-popup');
         $this->assertStringContainsString('table id="form-music-upload"', $form, 'upload-music-begin');
         $this->assertStringContainsString('chillout', $form, 'upload-music-form');

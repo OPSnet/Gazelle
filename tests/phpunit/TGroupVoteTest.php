@@ -1,5 +1,7 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 class TGroupVoteTest extends TestCase {
@@ -8,18 +10,18 @@ class TGroupVoteTest extends TestCase {
 
     public function setUp(): void {
         $this->userList = [
-            Helper::makeUser('tgvote.' . randomString(10), 'vote'),
-            Helper::makeUser('tgvote.' . randomString(10), 'vote'),
-            Helper::makeUser('tgvote.' . randomString(10), 'vote'),
+            \GazelleUnitTest\Helper::makeUser('tgvote.' . randomString(10), 'vote'),
+            \GazelleUnitTest\Helper::makeUser('tgvote.' . randomString(10), 'vote'),
+            \GazelleUnitTest\Helper::makeUser('tgvote.' . randomString(10), 'vote'),
         ];
         $this->tgroupList = [
-            Helper::makeTGroupMusic(
+            \GazelleUnitTest\Helper::makeTGroupMusic(
                 name:       'phpunit tgvote ' . randomString(6),
                 artistName: [[ARTIST_MAIN], ['phpunit tgvote ' . randomString(12)]],
                 tagName:    ['jazz'],
                 user:       $this->userList[0],
             ),
-            Helper::makeTGroupMusic(
+            \GazelleUnitTest\Helper::makeTGroupMusic(
                 name:       'phpunit tgvote ' . randomString(6),
                 artistName: [[ARTIST_MAIN], ['phpunit tgvote ' . randomString(12)]],
                 tagName:    ['metal'],
@@ -30,7 +32,7 @@ class TGroupVoteTest extends TestCase {
 
     public function tearDown(): void {
         foreach ($this->tgroupList as $tgroup) {
-            Helper::removeTGroup($tgroup, $this->userList[0]);
+            \GazelleUnitTest\Helper::removeTGroup($tgroup, $this->userList[0]);
         }
         foreach ($this->userList as $user) {
             $user->remove();
@@ -46,7 +48,7 @@ class TGroupVoteTest extends TestCase {
             "top10_votes_",
         ]);
 
-        $vote = array_map(fn ($u) => new Gazelle\User\Vote($u), $this->userList);
+        $vote = array_map(fn ($u) => new User\Vote($u), $this->userList);
         $n = 0;
         foreach ($vote as $v) {
             $v->upvote($this->tgroupList[0]);
@@ -70,7 +72,7 @@ class TGroupVoteTest extends TestCase {
         $this->assertCount(2, $vote[1]->userVotes(), 'tgroup-vote-user-count');
 
         // at least check the SQL
-        $manager = new Gazelle\Manager\TGroup();
+        $manager = new Manager\TGroup();
         $this->assertCount(0, $manager->similarVote($this->tgroupList[1]), 'tgroup-vote-similar');
     }
 
@@ -78,7 +80,7 @@ class TGroupVoteTest extends TestCase {
         global $Cache;
         $Cache->delete_value("top10_votes_");
 
-        $vote = array_map(fn ($u) => new Gazelle\User\Vote($u), $this->userList);
+        $vote = array_map(fn ($u) => new User\Vote($u), $this->userList);
         $this->assertEquals(0, $vote[0]->score($this->tgroupList[0]), 'tg-vote-0-0');
         $result = $vote[0]->upvote($this->tgroupList[0]);
         $this->assertTrue($result[0], 'tg-upvote-result');

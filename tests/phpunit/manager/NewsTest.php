@@ -1,5 +1,7 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 class NewsTest extends TestCase {
@@ -8,14 +10,14 @@ class NewsTest extends TestCase {
 
     public function setUp(): void {
         $this->userList = [
-            Helper::makeUser('news.' . randomString(10), 'news'),
-            Helper::makeUser('news.' . randomString(10), 'news'),
+            \GazelleUnitTest\Helper::makeUser('news.' . randomString(10), 'news'),
+            \GazelleUnitTest\Helper::makeUser('news.' . randomString(10), 'news'),
         ];
     }
 
     public function tearDown(): void {
         if (isset($this->news)) {
-            (new \Gazelle\Manager\News())->remove($this->news);
+            (new Manager\News())->remove($this->news);
         }
         foreach ($this->userList as $user) {
             $user->remove();
@@ -23,7 +25,7 @@ class NewsTest extends TestCase {
     }
 
     public function testNewsCreate(): void {
-        $manager = new \Gazelle\Manager\News();
+        $manager = new Manager\News();
         $initial = $manager->headlines();
         $this->news = $manager->create(
             $this->userList[0],
@@ -39,21 +41,21 @@ class NewsTest extends TestCase {
     }
 
     public function testNewsWitness(): void {
-        $manager    = new \Gazelle\Manager\News();
+        $manager    = new Manager\News();
         $this->news = $manager->create(
             $this->userList[0],
             'phpunit news witness',
             'phpunit news witness body',
         );
 
-        $witness = new \Gazelle\WitnessTable\UserReadNews();
+        $witness = new WitnessTable\UserReadNews();
         $this->assertNull($witness->lastRead($this->userList[1]), 'news-user-not-read');
         $this->assertTrue($witness->witness($this->userList[1]));
         $this->assertEquals($this->news, $witness->lastRead($this->userList[1]), 'news-user-read');
     }
 
     public function testNewsNotification(): void {
-        $manager    = new \Gazelle\Manager\News();
+        $manager    = new Manager\News();
         $title      = 'phpunit news notif';
         $this->news = $manager->create(
             $this->userList[0],
@@ -61,7 +63,7 @@ class NewsTest extends TestCase {
             'phpunit news notif body',
         );
 
-        $notifier = new Gazelle\User\Notification($this->userList[1]);
+        $notifier = new User\Notification($this->userList[1]);
         // if this fails, the CI database has drifted (or another UT has clobbered the expected value here)
         $this->assertTrue($notifier->isActive('News'), 'activity-notified-news');
 
@@ -69,7 +71,7 @@ class NewsTest extends TestCase {
         $this->assertArrayHasKey('News', $alertList, 'alert-has-news');
 
         $alertNews = $alertList['News'];
-        $this->assertInstanceOf(Gazelle\User\Notification\News::class, $alertNews, 'alert-news-instance');
+        $this->assertInstanceOf(User\Notification\News::class, $alertNews, 'alert-news-instance');
         $this->assertEquals('News', $alertNews->type(), 'alert-news-type');
         $this->assertEquals("Announcement: $title", $alertNews->title(), 'alert-news-title');
         $this->assertEquals($this->news, $alertNews->context(), 'alert-news-context-is-news');

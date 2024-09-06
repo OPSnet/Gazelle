@@ -1,12 +1,14 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 class DnuTest extends TestCase {
-    protected Gazelle\User $user;
+    protected User $user;
 
     public function setup(): void {
-        $this->user = Helper::makeUser('dnu.' . randomString(10), 'dnu');
+        $this->user = \GazelleUnitTest\Helper::makeUser('dnu.' . randomString(10), 'dnu');
     }
 
     public function tearDown(): void {
@@ -14,7 +16,7 @@ class DnuTest extends TestCase {
     }
 
     public function testDnu(): void {
-        $manager = new Gazelle\Manager\DNU();
+        $manager = new Manager\DNU();
 
         $initial = $manager->dnuList();
         $dnu = $manager->create('phpunit ' . randomString(10), 'phpunit description', $this->user);
@@ -48,7 +50,7 @@ class DnuTest extends TestCase {
     }
 
     public function testReorder(): void {
-        $manager = new Gazelle\Manager\DNU();
+        $manager = new Manager\DNU();
         $idList = array_map(fn ($x) => $x['id'], $manager->dnuList());
 
         $first  = $manager->create('phpunit first ' . randomString(10), 'phpunit description', $this->user);

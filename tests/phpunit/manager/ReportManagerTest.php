@@ -1,17 +1,19 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 class ReportManagerTest extends TestCase {
     protected array $reportList = [];
     protected array $userList   = [];
-    protected \Gazelle\Collage $collage;
-    protected \Gazelle\Request $request;
+    protected Collage $collage;
+    protected Request $request;
 
     public function setUp(): void {
         $this->userList = [
-            Helper::makeUser('report.' . randomString(10), 'report', enable: true, clearInbox: true),
-            Helper::makeUser('report.' . randomString(10), 'report', enable: true, clearInbox: true),
+            \GazelleUnitTest\Helper::makeUser('report.' . randomString(10), 'report', enable: true, clearInbox: true),
+            \GazelleUnitTest\Helper::makeUser('report.' . randomString(10), 'report', enable: true, clearInbox: true),
         ];
     }
 
@@ -31,15 +33,15 @@ class ReportManagerTest extends TestCase {
     }
 
     public function testReportCollage(): void {
-        $this->collage = (new Gazelle\Manager\Collage())->create(
+        $this->collage = (new Manager\Collage())->create(
             user:        $this->userList[0],
             categoryId:  2,
             name:        'phpunit collage report ' . randomString(20),
             description: 'phpunit collage report description',
             tagList:     'disco funk metal',
-            logger:      new Gazelle\Log(),
+            logger:      new Log(),
         );
-        $manager = new Gazelle\Manager\Report(new Gazelle\Manager\User());
+        $manager = new Manager\Report(new Manager\User());
         $report = $manager->create($this->userList[1], $this->collage->id(), 'collage', 'phpunit collage report');
         $this->reportList[] = $report;
         $this->assertEquals("phpunit collage report", $report->reason(), 'collage-report-reason');
@@ -48,10 +50,10 @@ class ReportManagerTest extends TestCase {
     }
 
     public function testReportRequest(): void {
-        $this->request = (new Gazelle\Manager\Request())->create(
+        $this->request = (new Manager\Request())->create(
             user:            $this->userList[1],
             bounty:          REQUEST_MIN * 1024 * 1024,
-            categoryId:      (new Gazelle\Manager\Category())->findIdByName('Comics'),
+            categoryId:      (new Manager\Category())->findIdByName('Comics'),
             year:            (int)date('Y'),
             title:           'phpunit request report',
             image:           '',
@@ -67,7 +69,7 @@ class ReportManagerTest extends TestCase {
             oclc:            '',
         );
 
-        $manager = new Gazelle\Manager\Report(new Gazelle\Manager\User());
+        $manager = new Manager\Report(new Manager\User());
         $initial = $manager->remainingTotal();
 
         $report = $manager->create($this->userList[1], $this->request->id(), 'request', 'phpunit report');
@@ -91,7 +93,7 @@ class ReportManagerTest extends TestCase {
         $this->assertFalse($report->isClaimed(), 'request-report-not-yet-claimed');
 
         // report specifics
-        $reqReport = new Gazelle\Report\Request($report->id(), $this->request);
+        $reqReport = new Report\Request($report->id(), $this->request);
         $this->assertTrue($reqReport->needReason(), 'request-report-not-an-update');
         $this->assertEquals(
             'Request Report: ' . display_str($this->request->title()),
@@ -117,21 +119,21 @@ class ReportManagerTest extends TestCase {
         // search
         $this->assertCount(
             1,
-            (new Gazelle\Search\Report())->setId($report->id())->page(2, 0),
+            (new Search\Report())->setId($report->id())->page(2, 0),
             'request-report-search-id'
         );
         $this->assertEquals(
             1,
-            (new Gazelle\Search\Report())->setStatus(['InProgress'])->total(),
+            (new Search\Report())->setStatus(['InProgress'])->total(),
             'request-report-search-in-progress-total'
         );
         $this->assertEquals(
             0,
-            (new Gazelle\Search\Report())->setStatus(['InProgress'])->restrictForumMod()->total(),
+            (new Search\Report())->setStatus(['InProgress'])->restrictForumMod()->total(),
             'request-report-search-fmod-in-progress-total'
         );
 
-        $search = new Gazelle\Search\Report();
+        $search = new Search\Report();
         $total  = $search->setStatus(['InProgress'])->total();
         $page   = $search->page($total, 0);
         $this->assertEquals($total, count($page), 'request-report-page-list');
@@ -148,11 +150,11 @@ class ReportManagerTest extends TestCase {
     }
 
     public function testReportUser(): void {
-        $manager = new \Gazelle\Manager\Report(new Gazelle\Manager\User());
+        $manager = new Manager\Report(new Manager\User());
         $report = $manager->create($this->userList[0], $this->userList[1]->id(), 'user', 'phpunit user report');
         $this->reportList[] = $report;
 
-        $this->assertInstanceOf(\Gazelle\Report::class, $report, 'report-user-create');
+        $this->assertInstanceOf(Report::class, $report, 'report-user-create');
         $this->assertEquals(
             "<a href=\"{$report->url()}\">Report #{$report->id()}</a>",
             $report->link(),
@@ -180,15 +182,15 @@ class ReportManagerTest extends TestCase {
     }
 
     public function testDecorate(): void {
-        $manager = new \Gazelle\Manager\Report(new Gazelle\Manager\User());
+        $manager = new Manager\Report(new Manager\User());
 
-        $this->collage = (new Gazelle\Manager\Collage())->create(
+        $this->collage = (new Manager\Collage())->create(
             user:        $this->userList[0],
             categoryId:  2,
             name:        'phpunit collage report ' . randomString(20),
             description: 'phpunit collage report description',
             tagList:     'disco funk metal',
-            logger:      new Gazelle\Log(),
+            logger:      new Log(),
         );
         $report = $manager->create($this->userList[1], $this->collage->id(), 'collage', 'phpunit collage report');
         $this->reportList[] = $report;
@@ -197,11 +199,11 @@ class ReportManagerTest extends TestCase {
 
         $list = $manager->decorate(
             array_map(fn($r) => $r->id(), $this->reportList),
-            new Gazelle\Manager\Collage(),
-            new Gazelle\Manager\Comment(),
-            new Gazelle\Manager\ForumThread(),
-            new Gazelle\Manager\ForumPost(),
-            new Gazelle\Manager\Request(),
+            new Manager\Collage(),
+            new Manager\Comment(),
+            new Manager\ForumThread(),
+            new Manager\ForumPost(),
+            new Manager\Request(),
         );
         $this->assertCount(2, $list, 'report-decorate-list');
         $this->assertEquals('collage', $list[0]['label'], 'report-list-label');

@@ -1,4 +1,6 @@
 <?php
+// phpcs:disable PSR1.Classes.ClassDeclaration.MissingNamespace
+// phpcs:disable PSR1.Files.SideEffects.FoundWithSymbols
 
 require_once(__DIR__ . '/vendor/autoload.php');
 

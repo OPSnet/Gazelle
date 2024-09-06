@@ -1,25 +1,27 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 use Gazelle\Enum\FeaturedAlbumType;
 use Gazelle\Enum\LeechType;
 use Gazelle\Enum\LeechReason;
 
 class FeaturedAlbumTest extends TestCase {
-    protected Gazelle\TGroup      $tgroup;
-    protected Gazelle\ForumThread $thread;
-    protected Gazelle\User        $user;
+    protected TGroup      $tgroup;
+    protected ForumThread $thread;
+    protected User        $user;
 
     public function setUp(): void {
-        $this->user = Helper::makeUser('feat.' . randomString(10), 'featured');
-        $this->tgroup = Helper::makeTGroupMusic(
+        $this->user = \GazelleUnitTest\Helper::makeUser('feat.' . randomString(10), 'featured');
+        $this->tgroup = \GazelleUnitTest\Helper::makeTGroupMusic(
             name:       'phpunit feat ' . randomString(6),
             artistName: [[ARTIST_MAIN], ['DJ Feature ' . randomString(12)]],
             tagName:    ['opera'],
             user:       $this->user,
         );
-        $this->thread = (new \Gazelle\Manager\ForumThread())->create(
-            new Gazelle\Forum(AOTM_FORUM_ID),
+        $this->thread = (new Manager\ForumThread())->create(
+            new Forum(AOTM_FORUM_ID),
             $this->user,
             'phpunit aotm ' . $this->tgroup->text(),
             'this is an aotm thread'
@@ -27,27 +29,27 @@ class FeaturedAlbumTest extends TestCase {
     }
 
     public function tearDown(): void {
-        $db = \Gazelle\DB::DB();
-        (new Gazelle\Manager\News())->remove(
+        $db = DB::DB();
+        (new Manager\News())->remove(
             (int)$db->scalar("
                 SELECT ID FROM news WHERE UserID = ?
                 ", $this->user->id()
             )
         );
-        (new Gazelle\Manager\FeaturedAlbum())->findById($this->tgroup->id())?->remove();
+        (new Manager\FeaturedAlbum())->findById($this->tgroup->id())?->remove();
         $this->tgroup->remove($this->user);
         $this->thread->remove();
         $this->user->remove();
     }
 
     public function testFeaturedAotm(): void {
-        $manager = new Gazelle\Manager\FeaturedAlbum();
+        $manager = new Manager\FeaturedAlbum();
         $aotm = $manager->create(
             featureType: FeaturedAlbumType::AlbumOfTheMonth,
-            news:        new \Gazelle\Manager\News(),
-            tgMan:       new \Gazelle\Manager\TGroup(),
-            torMan:      new \Gazelle\Manager\Torrent(),
-            tracker:     new \Gazelle\Tracker(),
+            news:        new Manager\News(),
+            tgMan:       new Manager\TGroup(),
+            torMan:      new Manager\Torrent(),
+            tracker:     new Tracker(),
             tgroup:      $this->tgroup,
             forumThread: $this->thread,
             title:       'AOTM phpunit feature ' . date('Y-m-d H:i:s'),
@@ -74,13 +76,13 @@ class FeaturedAlbumTest extends TestCase {
     }
 
     public function testFeaturedShowcase(): void {
-        $manager = new Gazelle\Manager\FeaturedAlbum();
+        $manager = new Manager\FeaturedAlbum();
         $showcase = $manager->create(
             featureType: FeaturedAlbumType::Showcase,
-            news:        new \Gazelle\Manager\News(),
-            tgMan:       new \Gazelle\Manager\TGroup(),
-            torMan:      new \Gazelle\Manager\Torrent(),
-            tracker:     new \Gazelle\Tracker(),
+            news:        new Manager\News(),
+            tgMan:       new Manager\TGroup(),
+            torMan:      new Manager\Torrent(),
+            tracker:     new Tracker(),
             tgroup:      $this->tgroup,
             forumThread: $this->thread,
             title:       'Showcase phpunit feature ' . date('Y-m-d H:i:s'),

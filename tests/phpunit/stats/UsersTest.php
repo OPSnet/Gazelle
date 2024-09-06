@@ -1,5 +1,7 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 use Gazelle\Enum\UserStatus;
 
@@ -10,7 +12,7 @@ class UsersTest extends TestCase {
         if (isset($this->userList)) {
             foreach ($this->userList as $user) {
                 if (isset($user)) {
-                    \Gazelle\DB::DB()->prepared_query("
+                    DB::DB()->prepared_query("
                         DELETE FROM users_stats_daily WHERE UserID = ?
                         ", $user->id()
                     );
@@ -21,7 +23,7 @@ class UsersTest extends TestCase {
     }
 
     public function testUserStats(): void {
-        $stats = new \Gazelle\Stats\Users();
+        $stats = new Stats\Users();
 
         /* not easy to test precise results, but at least the SQL can be exercised */
         $this->assertIsArray($stats->browserDistribution(), 'users-stats-browser');
@@ -55,12 +57,12 @@ class UsersTest extends TestCase {
     }
 
     public function testGeodistribution(): void {
-        $stats = new \Gazelle\Stats\Users();
+        $stats = new Stats\Users();
         $stats->flush();
-        $this->userList[] = Helper::makeUser('geodist.' . randomString(10), 'user');
+        $this->userList[] = \GazelleUnitTest\Helper::makeUser('geodist.' . randomString(10), 'user');
         $this->userList[0]->setField('ipcc', 'XA')->setField('PermissionID', SYSOP)->modify();
         foreach (range(1, COUNTRY_MINIMUM + 1) as $n) {
-            $user = Helper::makeUser('geodist.' . randomString(10), 'user');
+            $user = \GazelleUnitTest\Helper::makeUser('geodist.' . randomString(10), 'user');
             $user->setField('ipcc', 'XB')->modify();
             $this->userList[] = $user;
         }
@@ -86,15 +88,15 @@ class UsersTest extends TestCase {
     }
 
     public function testNewUsersAllowed(): void {
-        $stats = new \Gazelle\Stats\Users();
-        $this->userList[] = Helper::makeUser('stats.' . randomString(6), 'user', enable: true);
+        $stats = new Stats\Users();
+        $this->userList[] = \GazelleUnitTest\Helper::makeUser('stats.' . randomString(6), 'user', enable: true);
         $this->assertTrue($stats->newUsersAllowed($this->userList[0]), 'user-stats-new-users');
     }
 
     public function testTop(): void {
-        $stats = new \Gazelle\Stats\Users();
-        $this->assertInstanceOf(Gazelle\Stats\Users::class, $stats->flush(), 'users-stats-flush');
-        $this->assertInstanceOf(Gazelle\Stats\Users::class, $stats->flushTop(10), 'users-stats-top-flush');
+        $stats = new Stats\Users();
+        $this->assertInstanceOf(Stats\Users::class, $stats->flush(), 'users-stats-flush');
+        $this->assertInstanceOf(Stats\Users::class, $stats->flushTop(10), 'users-stats-top-flush');
         $this->assertIsArray($stats->topDownloadList(10), 'users-stats-top-download');
         $this->assertIsArray($stats->topDownSpeedList(10), 'users-stats-top-downspeed');
         $this->assertIsArray($stats->topUploadList(10), 'users-stats-top-upload');
@@ -103,36 +105,36 @@ class UsersTest extends TestCase {
     }
 
     public function testAjaxTop10(): void {
-        $bogus = new Gazelle\Json\Top10\User(
+        $bogus = new Json\Top10\User(
             'bogus',
             10,
-            new \Gazelle\Stats\Users(),
-            new \Gazelle\Manager\User(),
+            new Stats\Users(),
+            new Manager\User(),
         );
         $this->assertCount(0, $bogus->payload(), 'user-ajax-top10-bogus');
 
-        $all = new Gazelle\Json\Top10\User(
+        $all = new Json\Top10\User(
             'all',
             10,
-            new \Gazelle\Stats\Users(),
-            new \Gazelle\Manager\User(),
+            new Stats\Users(),
+            new Manager\User(),
         );
         $this->assertCount(5, $all->payload(), 'user-ajax-top10-all');
 
-        $ul = new Gazelle\Json\Top10\User(
+        $ul = new Json\Top10\User(
             'ul',
             10,
-            new \Gazelle\Stats\Users(),
-            new \Gazelle\Manager\User(),
+            new Stats\Users(),
+            new Manager\User(),
         );
         $this->assertCount(1, $ul->payload(), 'user-ajax-top10-ul');
     }
 
     public function testEcoStats(): void {
-        $stats = new \Gazelle\Stats\Users();
-        $this->userList[0] = Helper::makeUser('stats.' . randomString(6), 'user', enable: true);
+        $stats = new Stats\Users();
+        $this->userList[0] = \GazelleUnitTest\Helper::makeUser('stats.' . randomString(6), 'user', enable: true);
 
-        $eco = new \Gazelle\Stats\Economic();
+        $eco = new Stats\Economic();
         $eco->flush();
 
         $total    = $eco->tokenTotal();

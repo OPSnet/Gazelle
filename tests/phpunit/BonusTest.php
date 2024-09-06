@@ -1,5 +1,7 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 use Gazelle\Enum\UserStatus;
 
@@ -13,11 +15,11 @@ class BonusTest extends TestCase {
     }
 
     public function testBonus(): void {
-        $this->userList['giver'] = Helper::makeUser('bonusg.' . randomString(6), 'bonus', true);
-        $this->userList['receiver'] = Helper::makeUser('bonusr.' . randomString(6), 'bonus', true);
+        $this->userList['giver'] = \GazelleUnitTest\Helper::makeUser('bonusg.' . randomString(6), 'bonus', true);
+        $this->userList['receiver'] = \GazelleUnitTest\Helper::makeUser('bonusr.' . randomString(6), 'bonus', true);
         $startingPoints = 10000;
 
-        $giver = new Gazelle\User\Bonus($this->userList['giver']);
+        $giver = new User\Bonus($this->userList['giver']);
         $this->assertEquals(0.0, $giver->hourlyRate(), 'bonus-per-hour');
         $this->assertEquals(0, $giver->user()->bonusPointsTotal(), 'bonus-points-initial');
         $this->assertEquals(0, $giver->user()->tokenCount(), 'bonus-fltokens-intial');
@@ -41,7 +43,7 @@ class BonusTest extends TestCase {
         $giver->setPoints($startingPoints);
         $this->assertEquals($startingPoints, $giver->user()->bonusPointsTotal(), 'bonus-set-points');
 
-        $itemList = (new Gazelle\Manager\Bonus())->itemList();
+        $itemList = (new Manager\Bonus())->itemList();
         $this->assertArrayHasKey('token-1', $itemList, 'item-token-1');
         $token = $giver->item('token-1');
         $price = $token['Price'];
@@ -111,14 +113,14 @@ class BonusTest extends TestCase {
     }
 
     public function testStats(): void {
-        $eco = new \Gazelle\Stats\Economic();
+        $eco = new Stats\Economic();
         $eco->flush();
 
         $total    = $eco->bonusTotal();
         $stranded = $eco->bonusStrandedTotal();
 
-        $this->userList['bonus'] = Helper::makeUser('bonusstat.' . randomString(6), 'bonus', true);
-        $bonus = new Gazelle\User\Bonus($this->userList['bonus']);
+        $this->userList['bonus'] = \GazelleUnitTest\Helper::makeUser('bonusstat.' . randomString(6), 'bonus', true);
+        $bonus = new User\Bonus($this->userList['bonus']);
         $bonus->addPoints(98765);
 
         $eco->flush();

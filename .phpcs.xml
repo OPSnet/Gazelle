@@ -6,41 +6,46 @@
     <arg value="s"/>
 
     <file>.</file>
+    <exclude-pattern>.git/*</exclude-pattern>
     <exclude-pattern>cache/*</exclude-pattern>
-    <exclude-pattern>*/misc/docker/*</exclude-pattern>
-    <exclude-pattern>*/.git/*</exclude-pattern>
-    <exclude-pattern>*/node_modules/*</exclude-pattern>
-    <exclude-pattern>*/sass/*</exclude-pattern>
-    <exclude-pattern>*/static/*</exclude-pattern>
-    <exclude-pattern>*/templates/*</exclude-pattern>
-    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>misc/docker/*</exclude-pattern>
+    <exclude-pattern>node_modules/*</exclude-pattern>
+    <exclude-pattern>sass/*</exclude-pattern>
+    <exclude-pattern>static/*</exclude-pattern>
+    <exclude-pattern>templates/*</exclude-pattern>
+    <exclude-pattern>vendor/*</exclude-pattern>
 
     <rule ref="PSR12">
         <exclude name="Generic.Files.LineLength" />
         <exclude name="Generic.Functions.FunctionCallArgumentSpacing.TooMuchSpaceAfterComma" />
         <exclude name="Generic.NamingConventions.UpperCaseConstantName" />
 
-        <exclude name="PSR1.Classes.ClassDeclaration" />
-        <exclude name="PSR1.Files.SideEffects" />
-
         <exclude name="PSR2.Classes.ClassDeclaration.OpenBraceNewLine" />
         <exclude name="PSR2.Classes.PropertyDeclaration.SpacingAfterType" />
         <exclude name="PSR2.Methods.FunctionCallSignature" />
 
-        <exclude name="PSR12.Files.FileHeader.SpacingAfterBlock" /><!-- compact phpstan-var declarations -->
-        <exclude name="PSR12.Traits.UseDeclaration" />
-        
+        <!-- compact phpstan-var declarations -->
+        <exclude name="PSR12.Files.FileHeader.SpacingAfterBlock" />
 
+        <!-- protected bool $var         = false, align ='s in argument defaults -->
         <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing" />
+        <!-- K&R function x() { is fine -->
         <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.BraceOnSameLine" />
         <!-- function x() { return $x; } is ok -->
         <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.ContentAfterBrace" />
+        <!-- <?php      if (...) {} ?> is ok -->
         <exclude name="Squiz.WhiteSpace.ScopeClosingBrace.ContentBefore" />
         <!-- <?php      } ?> is ok -->
         <exclude name="Squiz.WhiteSpace.ScopeClosingBrace.Indent" />
     </rule>
 
     <rule ref="Generic.Arrays.DisallowLongArraySyntax" />
+
+    <rule ref="PSR1.Classes.ClassDeclaration.MissingNamespace">
+        <exclude-pattern>classes/*</exclude-pattern>
+        <exclude-pattern>misc/phinx/*</exclude-pattern>
+        <exclude-pattern>misc/phinx-pg/*</exclude-pattern>
+    </rule>
 
     <rule ref="Generic.PHP.ForbiddenFunctions">
         <properties>
@@ -50,6 +55,8 @@
                 <element key="extract" value="null"/>
                 <!-- alias for is_int() -->
                 <element key="is_integer" value="null"/>
+                <!-- use string equality instead: $x == $y -->
+                <element key="strcmp" value="null"/>
             </property>
         </properties>
         <type>warning</type>

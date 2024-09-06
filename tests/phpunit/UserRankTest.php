@@ -8,7 +8,7 @@ class UserRankTest extends TestCase {
     public function testUserRank(): void {
         $weights = array_intersect_key(RANKING_WEIGHT, ['uploaded' => 1, 'downloaded' => 1]);
         $userRank = new UserRank(
-            new \Gazelle\UserRank\Configuration($weights),
+            new UserRank\Configuration($weights),
             [
                 'downloaded' => 0,
                 'uploaded' => STARTING_UPLOAD,

@@ -1,10 +1,12 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 class CategoryTest extends TestCase {
     public function testCategory(): void {
-        $manager = new Gazelle\Manager\Category();
+        $manager = new Manager\Category();
 
         $this->assertEquals(1, $manager->findIdByName('Music'), 'cat-name-comics');
         $this->assertEquals(7, $manager->findIdByName('Comics'), 'cat-name-comics');
@@ -19,16 +21,16 @@ class CategoryTest extends TestCase {
     }
 
     public function testChangeCategory(): void {
-        $tgMan  = new Gazelle\Manager\TGroup();
-        $torMan = new Gazelle\Manager\Torrent();
-        $user   = Helper::makeUser('tgcat.' . randomString(10), 'tgroup-cat');
-        $tgroup = Helper::makeTGroupEBook(
+        $tgMan  = new Manager\TGroup();
+        $torMan = new Manager\Torrent();
+        $user   = \GazelleUnitTest\Helper::makeUser('tgcat.' . randomString(10), 'tgroup-cat');
+        $tgroup = \GazelleUnitTest\Helper::makeTGroupEBook(
             name: 'phpunit category change ' . randomString(6),
             user: $user,
         );
         $this->assertFalse($tgroup->hasArtistRole(), 'tgroup-cat-non-music');
         $torrentList = array_map(fn($info) =>
-            Helper::makeTorrentEBook(
+            \GazelleUnitTest\Helper::makeTorrentEBook(
                 tgroup:      $tgroup,
                 user:        $user,
                 description: $info['description'],
@@ -44,18 +46,18 @@ class CategoryTest extends TestCase {
         $new = $tgMan->changeCategory(
             old:         $tgroup,
             torrent:     $torrentList[1],
-            categoryId:  (new Gazelle\Manager\Category())->findIdByName('Music'),
+            categoryId:  (new Manager\Category())->findIdByName('Music'),
             name:        'phpunit category new ' . randomString(6),
             year:        (int)date('Y'),
             artistName:  $artistName,
-            releaseType: (new Gazelle\ReleaseType())->findIdByName('EP'),
-            artistMan:   new Gazelle\Manager\Artist(),
-            logger:      new Gazelle\Log(),
+            releaseType: (new ReleaseType())->findIdByName('EP'),
+            artistMan:   new Manager\Artist(),
+            logger:      new Log(),
             user:        $user,
         );
-        $this->assertInstanceOf(Gazelle\TGroup::class, $new, 'cat-change-to-music');
+        $this->assertInstanceOf(TGroup::class, $new, 'cat-change-to-music');
         $this->assertTrue($new->hasArtistRole(), 'tgroup-cat-is-music');
-        $artist = (new Gazelle\Manager\Artist())->findByName($artistName);
+        $artist = (new Manager\Artist())->findByName($artistName);
         $this->assertEquals($artistName, $artist->name(), 'cat-new-artist');
         $this->assertEquals(
             [
@@ -83,9 +85,9 @@ class CategoryTest extends TestCase {
             name:        'phpunit category new ' . randomString(6),
             year:        (int)date('Y'),
             artistName:  'new artist ' . randomString(6),
-            releaseType: (new Gazelle\ReleaseType())->findIdByName('EP'),
-            artistMan:   new Gazelle\Manager\Artist(),
-            logger:      new Gazelle\Log(),
+            releaseType: (new ReleaseType())->findIdByName('EP'),
+            artistMan:   new Manager\Artist(),
+            logger:      new Log(),
             user:        $user,
         );
         $this->assertNull($new, 'cat-change-to-same');
@@ -95,16 +97,16 @@ class CategoryTest extends TestCase {
         $new = $tgMan->changeCategory(
             old:         $tgroup,
             torrent:     $torrentList[0],
-            categoryId:  (new Gazelle\Manager\Category())->findIdByName('Comedy'),
+            categoryId:  (new Manager\Category())->findIdByName('Comedy'),
             name:        'phpunit category new ' . randomString(6),
             year:        (int)date('Y'),
             artistName:  null,
             releaseType: null,
-            artistMan:   new Gazelle\Manager\Artist(),
-            logger:      new Gazelle\Log(),
+            artistMan:   new Manager\Artist(),
+            logger:      new Log(),
             user:        $user,
         );
-        $this->assertInstanceOf(Gazelle\TGroup::class, $new, 'cat-change-to-comedy');
+        $this->assertInstanceOf(TGroup::class, $new, 'cat-change-to-comedy');
         $this->assertNull($tgMan->findById($tgroupId), 'cat-old-tgroup-removed');
 
         $torrentList = array_map(fn($id) => $torMan->findById($id), $idList);
@@ -114,7 +116,7 @@ class CategoryTest extends TestCase {
             $torrent->remove($user, 'phpunit');
         }
         $tgroup->remove($user);
-        $this->assertEquals(0, (int)Gazelle\DB::DB()->scalar("
+        $this->assertEquals(0, (int)DB::DB()->scalar("
             SELECT count(*) FROM torrents_artists WHERE GroupID = ?
             ", $tgroupId),
             'cat-old-group-no-artists'

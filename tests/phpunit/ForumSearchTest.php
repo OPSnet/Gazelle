@@ -1,15 +1,17 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 class ForumSearchTest extends TestCase {
-    protected Gazelle\ForumCategory $category;
-    protected Gazelle\Forum         $forum;
-    protected Gazelle\ForumThread   $thread;
-    protected Gazelle\User          $user;
+    protected ForumCategory $category;
+    protected Forum         $forum;
+    protected ForumThread   $thread;
+    protected User          $user;
 
     public function setUp(): void {
-        $this->user = Helper::makeUser('user.' . randomString(10), 'forum');
+        $this->user = \GazelleUnitTest\Helper::makeUser('user.' . randomString(10), 'forum');
     }
 
     public function tearDown(): void {
@@ -20,8 +22,8 @@ class ForumSearchTest extends TestCase {
     }
 
     public function testForumSearchThread(): void {
-        $this->category = (new \Gazelle\Manager\ForumCategory())->create('phpunit category', 10001);
-        $this->forum  = Helper::makeForum(
+        $this->category = (new Manager\ForumCategory())->create('phpunit category', 10001);
+        $this->forum  = \GazelleUnitTest\Helper::makeForum(
             user:        $this->user,
             sequence:    250,
             category:    $this->category,
@@ -30,11 +32,11 @@ class ForumSearchTest extends TestCase {
         );
         $title        = 'search thread ' . randomString(10);
         $body         = 'search body ' . randomString(10);
-        $threadMan    = new \Gazelle\Manager\ForumThread();
+        $threadMan    = new Manager\ForumThread();
         $this->thread = $threadMan->create($this->forum, $this->user, $title, $body);
 
-        $search = new \Gazelle\Search\Forum($this->user);
-        $this->assertInstanceOf(\Gazelle\Search\Forum::class, $search, 'forum-search-new');
+        $search = new Search\Forum($this->user);
+        $this->assertInstanceOf(Search\Forum::class, $search, 'forum-search-new');
         $this->assertFalse($search->isBodySearch(), 'forum-search-title');
 
         $search->setSearchText('textnotfound ' . randomString(40));
@@ -49,7 +51,7 @@ class ForumSearchTest extends TestCase {
         $search->setSearchText($body);
         $this->assertEquals(1, $search->totalHits(), 'forum-search-body-hit');
 
-        $resultList = $search->results(new \Gazelle\Util\Paginator(25, 1));
+        $resultList = $search->results(new Util\Paginator(25, 1));
         $this->assertCount(1, $resultList, 'forum-search-body-result');
         $result = current($resultList);
         $this->assertEquals($this->thread->id(), $result[0], 'forum-search-body-thread-id');
@@ -63,8 +65,8 @@ class ForumSearchTest extends TestCase {
     }
 
     public function testForumSearchAuthor(): void {
-        $this->category = (new \Gazelle\Manager\ForumCategory())->create('phpunit category', 10001);
-        $this->forum  = Helper::makeForum(
+        $this->category = (new Manager\ForumCategory())->create('phpunit category', 10001);
+        $this->forum  = \GazelleUnitTest\Helper::makeForum(
             user:        $this->user,
             sequence:    250,
             category:    $this->category,
@@ -73,11 +75,11 @@ class ForumSearchTest extends TestCase {
         );
         $title        = 'search thread ' . randomString(10);
         $body         = 'search body ' . randomString(10);
-        $threadMan    = new \Gazelle\Manager\ForumThread();
+        $threadMan    = new Manager\ForumThread();
         $this->thread = $threadMan->create($this->forum, $this->user, $title, $body);
 
-        $search = new \Gazelle\Search\Forum($this->user);
-        $this->assertInstanceOf(\Gazelle\Search\Forum::class, $search->setAuthor($this->user->username()), 'forum-search-author');
+        $search = new Search\Forum($this->user);
+        $this->assertInstanceOf(Search\Forum::class, $search->setAuthor($this->user->username()), 'forum-search-author');
         $this->assertEquals(1, $search->totalHits(), 'forum-search-user-hit');
 
         $search->setAuthor('nobody-by-this-name!');

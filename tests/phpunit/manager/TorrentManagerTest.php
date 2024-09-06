@@ -1,5 +1,7 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 use Gazelle\Enum\LeechType;
 use Gazelle\Enum\LeechReason;
@@ -7,14 +9,14 @@ use Gazelle\Enum\LeechReason;
 class TorrentManagerTest extends TestCase {
     protected array         $torrentList = [];
     protected array         $topTenList = [];
-    protected \Gazelle\User $user;
+    protected User $user;
 
     public function setUp(): void {
-        $this->user = Helper::makeUser('torman.' . randomString(10), 'torman');
+        $this->user = \GazelleUnitTest\Helper::makeUser('torman.' . randomString(10), 'torman');
         $this->user->setField('Enabled', '1')->modify();
         $this->torrentList = [
-            Helper::makeTorrentMusic(
-                tgroup: Helper::makeTGroupMusic(
+            \GazelleUnitTest\Helper::makeTorrentMusic(
+                tgroup: \GazelleUnitTest\Helper::makeTGroupMusic(
                     name:       'phpunit torman ' . randomString(6),
                     artistName: [[ARTIST_MAIN], ['phpunit torman ' . randomString(12)]],
                     tagName:    ['folk'],
@@ -23,8 +25,8 @@ class TorrentManagerTest extends TestCase {
                 user:  $this->user,
                 title: randomString(10),
             ),
-            Helper::makeTorrentMusic(
-                tgroup: Helper::makeTGroupMusic(
+            \GazelleUnitTest\Helper::makeTorrentMusic(
+                tgroup: \GazelleUnitTest\Helper::makeTGroupMusic(
                     name:       'phpunit torman ' . randomString(6),
                     artistName: [[ARTIST_MAIN], ['phpunit torman ' . randomString(12)]],
                     tagName:    ['funk'],
@@ -39,15 +41,15 @@ class TorrentManagerTest extends TestCase {
         // first torrent is two days ago, second torrent is yesterday
         $day = 2;
         foreach ($this->torrentList as $torrent) {
-            $created = (new DateTime($torrent->created()))
-               ->sub(new DateInterval("P{$day}D"))->format('Y-m-d H:i:s');
+            $created = (new \DateTime($torrent->created()))
+               ->sub(new \DateInterval("P{$day}D"))->format('Y-m-d H:i:s');
             $torrent->setField('created', $created)->modify();
             $day--;
         }
     }
 
     public function tearDown(): void {
-        $db = Gazelle\DB::DB();
+        $db = DB::DB();
         foreach ($this->topTenList as $id) {
             $db->prepared_query("
                 DELETE FROM top10_history_torrents WHERE HistoryID = ?
@@ -59,18 +61,18 @@ class TorrentManagerTest extends TestCase {
             );
         }
         foreach ($this->torrentList as $torrent) {
-            Helper::removeTGroup($torrent->group(), $this->user);
+            \GazelleUnitTest\Helper::removeTGroup($torrent->group(), $this->user);
         }
         $this->user->remove();
     }
 
     public function testLatestUploads(): void {
-        $manager = new \Gazelle\Manager\Torrent();
+        $manager = new Manager\Torrent();
         $list = $manager->latestUploads(5);
         $latestTotal = count($list);
         $this->assertGreaterThanOrEqual(2, $latestTotal, 'latest-uploads-two-plus');
         $remove = array_shift($this->torrentList);
-        Helper::removeTGroup($remove->group(), $this->user);
+        \GazelleUnitTest\Helper::removeTGroup($remove->group(), $this->user);
         $this->assertEquals(
             $latestTotal - 1,
             count($manager->latestUploads(5)),
@@ -83,9 +85,9 @@ class TorrentManagerTest extends TestCase {
             // here we need them to be created today
             $torrent->setFieldNow('created')->modify();
         }
-        Helper::addTorrentTraffic($this->torrentList[0], 1, 2, 2);
-        Helper::addTorrentTraffic($this->torrentList[1], 0, 3, 3);
-        $manager = new \Gazelle\Manager\Torrent();
+        \GazelleUnitTest\Helper::addTorrentTraffic($this->torrentList[0], 1, 2, 2);
+        \GazelleUnitTest\Helper::addTorrentTraffic($this->torrentList[1], 0, 3, 3);
+        $manager = new Manager\Torrent();
         $this->topTenList[] = $manager->storeTop10('Daily', 1);
         $this->topTenList[] = $manager->storeTop10('Weekly', 7);
 
@@ -111,14 +113,14 @@ class TorrentManagerTest extends TestCase {
     }
 
     public function testReseedGracePeriod(): void {
-        $db = Gazelle\DB::DB();
+        $db = DB::DB();
 
         // Torrent created today never active
         $this->assertFalse($this->torrentList[1]->isReseedRequestAllowed());
 
         // Torrent created RESEED_NEVER_ACTIVE_TORRENT days ago never active
-        $created = (new DateTime())
-            ->sub(new DateInterval("P3D"))->format('Y-m-d H:i:s');
+        $created = (new \DateTime())
+            ->sub(new \DateInterval("P3D"))->format('Y-m-d H:i:s');
         $this->torrentList[1]->setField('created', $created)->modify();
         $this->assertTrue($this->torrentList[1]->isReseedRequestAllowed());
 
@@ -139,8 +141,8 @@ class TorrentManagerTest extends TestCase {
         $this->torrentList[1]->setField('LastReseedRequest', null)->modify();
 
         // Torrent was active RESEED_TORRENT days ago
-        $lastActive = (new DateTime($created))
-            ->sub(new DateInterval("P15D"))->format('Y-m-d H:i:s');
+        $lastActive = (new \DateTime($created))
+            ->sub(new \DateInterval("P15D"))->format('Y-m-d H:i:s');
         $db->prepared_query("
             UPDATE torrents_leech_stats SET last_action = ? WHERE TorrentID = ?
         ", $lastActive, $this->torrentList[1]->id());
@@ -153,7 +155,7 @@ class TorrentManagerTest extends TestCase {
     }
 
     public function testTorrentLeechReason(): void {
-        $manager = new \Gazelle\Manager\Torrent();
+        $manager = new Manager\Torrent();
 
         $this->assertEquals(LeechReason::Normal,    $manager->lookupLeechReason('0'), 'torman-leechreason-normal');
         $this->assertEquals(LeechReason::StaffPick, $manager->lookupLeechReason('1'), 'torman-leechreason-staffpick');
@@ -167,7 +169,7 @@ class TorrentManagerTest extends TestCase {
     }
 
     public function testTorrentLeechType(): void {
-        $manager = new \Gazelle\Manager\Torrent();
+        $manager = new Manager\Torrent();
 
         $this->assertEquals(LeechType::Normal,  $manager->lookupLeechType('0'), 'torman-leechtype-normal');
         $this->assertEquals(LeechType::Free,    $manager->lookupLeechType('1'), 'torman-leechtype-free');
@@ -186,8 +188,8 @@ class TorrentManagerTest extends TestCase {
          * some other time).
          * We just want to exercise the code and show that it works
          */
-        $stats = new \Gazelle\Stats\Torrent();
-        $this->assertInstanceOf(\Gazelle\Stats\Torrent::class, $stats->flush(), 'torrents-stats-flush');
+        $stats = new Stats\Torrent();
+        $this->assertInstanceOf(Stats\Torrent::class, $stats->flush(), 'torrents-stats-flush');
         $this->assertIsInt($stats->torrentTotal(), 'torrent-stats-torrent-total');
         $this->assertIsInt($stats->totalFiles(), 'torrent-stats-file-total');
         $this->assertIsInt($stats->totalSize(), 'torrent-stats-size-total');

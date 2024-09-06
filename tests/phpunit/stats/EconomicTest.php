@@ -1,10 +1,12 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 class EconomicTest extends TestCase {
     public function testEconomic(): void {
-        $eco = new \Gazelle\Stats\Economic();
+        $eco = new Stats\Economic();
 
         $this->assertIsInt($eco->bountyAvailable(), 'eco-stats-bounty-available');
         $this->assertIsInt($eco->bountyTotal(), 'eco-stats-bounty-total');

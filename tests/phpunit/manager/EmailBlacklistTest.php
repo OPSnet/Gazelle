@@ -1,12 +1,14 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 class EmailBlacklistTest extends TestCase {
-    protected \Gazelle\User $user;
+    protected User $user;
 
     public function setUp(): void {
-        $this->user = Helper::makeUser('email.' . randomString(10), 'email.blacklist');
+        $this->user = \GazelleUnitTest\Helper::makeUser('email.' . randomString(10), 'email.blacklist');
     }
 
     public function tearDown(): void {
@@ -14,7 +16,7 @@ class EmailBlacklistTest extends TestCase {
     }
 
     public function testCreate(): void {
-        $manager = new \Gazelle\Manager\EmailBlacklist();
+        $manager = new Manager\EmailBlacklist();
         $total   = $manager->total();
 
         $stem = randomString(10);

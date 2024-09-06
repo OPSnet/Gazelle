@@ -1,10 +1,12 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 class CacheTest extends TestCase {
     public function testCache(): void {
-        $cache = new Gazelle\Cache();
+        $cache = new Cache();
         $this->assertCount(0, $cache->hitList(), 'cache-hit-list-empty');
         $this->assertCount(0, $cache->deleteList(), 'cache-del-list-empty');
 
@@ -47,7 +49,7 @@ class CacheTest extends TestCase {
 
         $this->assertIsArray($cache->server_status(), 'cache-server-status');
 
-        $html = Gazelle\Util\Twig::factory()->render('debug/cache.twig', ['cache' => $cache]);
+        $html = Util\Twig::factory()->render('debug/cache.twig', ['cache' => $cache]);
         $this->assertStringContainsString('<table id="debug_cache" class="debug_table hidden">', $html, 'cache-debug-render');
         $this->assertStringContainsString('<table id="debug_cache_del" class="debug_table hidden">', $html, 'cache-del-debug-render');
     }

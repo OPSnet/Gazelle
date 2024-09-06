@@ -1,12 +1,14 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 class IPv4Test extends TestCase {
     protected array $userList;
 
     public function setUp(): void {
-        $this->userList[] = Helper::makeUser('ipv4.' . randomString(10), 'ipv4man');
+        $this->userList[] = \GazelleUnitTest\Helper::makeUser('ipv4.' . randomString(10), 'ipv4man');
     }
 
     public function tearDown(): void {
@@ -17,7 +19,7 @@ class IPv4Test extends TestCase {
     }
 
     public function testBan(): void {
-        $ipv4 = new \Gazelle\Manager\IPv4();
+        $ipv4 = new Manager\IPv4();
         $initial = $ipv4->total();
         // if the following fails, it is due to a previous unittest failure
         $this->assertFalse($ipv4->isBanned('127.9.9.55'), 'ipv4-is-not-banned');
@@ -44,7 +46,7 @@ class IPv4Test extends TestCase {
     }
 
     public function testUserPage(): void {
-        $ipv4 = new \Gazelle\Manager\IPv4();
+        $ipv4 = new Manager\IPv4();
         $user = $this->userList[0];
         $this->assertEquals(1, $ipv4->register($user, '127.1.0.1'), 'ipv4-create');
         $this->assertEquals(2, $ipv4->userTotal($user), 'ipv4-user-total');
@@ -73,12 +75,12 @@ class IPv4Test extends TestCase {
     public function testUserOther(): void {
         $now = time();
         $ip = '1.2.3.4';
-        $user2 = Helper::makeUser('ipv4.' . randomString(10), 'ipv4man');
+        $user2 = \GazelleUnitTest\Helper::makeUser('ipv4.' . randomString(10), 'ipv4man');
         $this->userList[] = $user2;
         $ipOther = '4.3.2.1';
-        $user3 = Helper::makeUser('ipv4.' . randomString(10), 'ipv4man');
+        $user3 = \GazelleUnitTest\Helper::makeUser('ipv4.' . randomString(10), 'ipv4man');
         $this->userList[] = $user3;
-        $ipv4 = new \Gazelle\Manager\IPv4();
+        $ipv4 = new Manager\IPv4();
         $ipv4->register($this->userList[0], $ip);
         $ipv4->register($user2, $ip);
         $ipv4->register($user3, $ipOther);

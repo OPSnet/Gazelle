@@ -1,11 +1,20 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 class TorManagerTest extends TestCase {
+    public function setup(): void {
+    }
+
     public function testTor(): void {
-        $manager = new \Gazelle\Manager\Tor();
-        $list = array_map(fn($n) => $n['ipv4'], $manager->exitNodeList());
+        $manager = new Manager\Tor();
+        $list = array_filter(
+            array_map(fn($n) => $n['ipv4'], $manager->exitNodeList()),
+            // filter out values from an aborted previous run
+            fn ($ip) => !in_array($ip, ['169.254.100.110', '169.254.110.120'])
+        );
         $this->assertIsArray($list, 'tornode-has-list');
         $this->assertFalse($manager->isExitNode('0.0.0.0'), 'tornode-0000-exit-node');
 

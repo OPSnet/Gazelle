@@ -108,9 +108,9 @@ class Bitcoin {
 
     public function invalidate(int $userId): bool {
         return $this->pg()->prepared_query("
-                DELETE FROM donate_bitcoin
-                WHERE id_user = ?
-                ", $userId
+            DELETE FROM donate_bitcoin
+            WHERE id_user = ?
+            ", $userId
         ) === 1;
     }
 }

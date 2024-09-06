@@ -1,5 +1,7 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
 class InboxTest extends TestCase {
@@ -13,8 +15,8 @@ class InboxTest extends TestCase {
 
     public function testInbox(): void {
         $this->userList = [
-            'sender'   => Helper::makeUser('inbox.send.' . randomString(6), 'inbox', clearInbox: true),
-            'receiver' => Helper::makeUser('inbox.recv.' . randomString(6), 'inbox', clearInbox: true),
+            'sender'   => \GazelleUnitTest\Helper::makeUser('inbox.send.' . randomString(6), 'inbox', clearInbox: true),
+            'receiver' => \GazelleUnitTest\Helper::makeUser('inbox.recv.' . randomString(6), 'inbox', clearInbox: true),
         ];
         $senderId = $this->userList['sender']->id();
         $receiverId = $this->userList['receiver']->id();
@@ -44,8 +46,8 @@ class InboxTest extends TestCase {
         $this->assertEquals(0, $senderInbox->messageTotal(), 'inbox-still-0-message-count');
 
         // details of the PM
-        $pmSenderManager = new Gazelle\Manager\PM($senderInbox->user());
-        $this->assertInstanceOf(\Gazelle\PM::class, $pmSent, 'inbox-have-a-pm');
+        $pmSenderManager = new Manager\PM($senderInbox->user());
+        $this->assertInstanceOf(PM::class, $pmSent, 'inbox-have-a-pm');
         $this->assertEquals($subject, $pmSent->subject(), 'inbox-pm-subject');
         $postList = $pmSent->postList(2, 0);
         $this->assertCount(1, $postList, 'inbox-pm-one-post');
@@ -53,7 +55,7 @@ class InboxTest extends TestCase {
         $this->assertEquals([$receiverId, $senderId], $pmSent->recipientList(), 'pm-recipient-list');
 
         // receive the PM
-        $pmReceiverManager = new Gazelle\Manager\PM($receiverInbox->user());
+        $pmReceiverManager = new Manager\PM($receiverInbox->user());
         $this->assertEquals(1, $receiverInbox->messageTotal(), 'inbox-initial-message-count');
         $list = $receiverInbox->messageList($pmReceiverManager, 2, 0);
         $this->assertCount(1, $list, 'inbox-recv-list');
@@ -81,7 +83,7 @@ class InboxTest extends TestCase {
         // It could be as simple as $pm->reply('body');
 
         // reply
-        $userMan  = new Gazelle\Manager\User();
+        $userMan  = new Manager\User();
         $replyBody = 'reply two ' . randomString(10);
         $replyId = $userMan->replyPM($senderId, $receiverId, $subject, 'reply one', $pmSent->id());
         $replyId = $userMan->replyPM($senderId, $receiverId, $subject, $replyBody, $pmSent->id());
@@ -176,7 +178,7 @@ class InboxTest extends TestCase {
         );
         $this->assertEquals(3, $receiverInbox->messageTotal(), 'inbox-after-remove');
 
-        $json = new Gazelle\Json\Inbox($receiverInbox->user(), 'inbox', 1, true, $userMan);
+        $json = new Json\Inbox($receiverInbox->user(), 'inbox', 1, true, $userMan);
         $payload = $json->payload();
         $this->assertCount(3, $payload, 'inbox-json-payload');
         $this->assertEquals(1, $payload['currentPage'], 'inbox-json-current-page');
@@ -187,7 +189,7 @@ class InboxTest extends TestCase {
 
     public function testSystem(): void {
         $this->userList = [
-            Helper::makeUser('inbox.recv.' . randomString(6), 'inbox'),
+            \GazelleUnitTest\Helper::makeUser('inbox.recv.' . randomString(6), 'inbox'),
         ];
         $pm = $this->userList[0]->inbox()->createSystem('system', 'body');
         $this->assertEquals(0, $pm->senderId(), 'inbox-system-sender-id');

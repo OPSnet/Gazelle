@@ -1,4 +1,7 @@
 <?php
+// phpcs:disable Generic.WhiteSpace.ScopeIndent.IncorrectExact
+// phpcs:disable Generic.WhiteSpace.ScopeIndent.Incorrect
+// phpcs:disable PSR1.Files.SideEffects.FoundWithSymbols
 
 function forumList(array $list, int $selected = 0): string {
     $return = '';
@@ -41,8 +44,6 @@ function classList(int $Selected = 0): string {
 }
 
 /** @phpstan-var \Gazelle\User $Viewer */
-// phpcs:disable Generic.WhiteSpace.ScopeIndent.IncorrectExact
-// phpcs:disable Generic.WhiteSpace.ScopeIndent.Incorrect
 
 if (!$Viewer->permitted('admin_manage_forums')) {
     error(403);

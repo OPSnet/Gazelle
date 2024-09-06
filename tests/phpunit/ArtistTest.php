@@ -1,23 +1,25 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 use Gazelle\Enum\CollageType;
 
 class ArtistTest extends TestCase {
-    protected Gazelle\Artist  $artist;
-    protected Gazelle\Collage $collage;
-    protected array           $tgroupList;
-    protected Gazelle\User    $user;
-    protected Gazelle\User    $extra;
-    protected array           $artistIdList = [];
+    protected Artist  $artist;
+    protected Collage $collage;
+    protected array            $tgroupList;
+    protected User    $user;
+    protected User    $extra;
+    protected array            $artistIdList = [];
 
     public function setUp(): void {
-        $this->user = Helper::makeUser('arty.' . randomString(10), 'artist');
+        $this->user = \GazelleUnitTest\Helper::makeUser('arty.' . randomString(10), 'artist');
     }
 
     public function tearDown(): void {
-        $logger  = new \Gazelle\Log();
-        $manager = new \Gazelle\Manager\Artist();
+        $logger  = new Log();
+        $manager = new Manager\Artist();
         foreach ($this->artistIdList as $artistId) {
             $artist = $manager->findById($artistId);
             if ($artist) {
@@ -33,20 +35,20 @@ class ArtistTest extends TestCase {
         }
         if (isset($this->tgroupList)) {
             foreach ($this->tgroupList as $tgroup) {
-                Helper::removeTGroup($tgroup, $this->user);
+                \GazelleUnitTest\Helper::removeTGroup($tgroup, $this->user);
             }
         }
         $this->user->remove();
     }
 
     public function testArtistCreate(): void {
-        $manager = new \Gazelle\Manager\Artist();
+        $manager = new Manager\Artist();
         $this->assertNull($manager->findById(-666), 'artist-find-fail');
 
         $artist = $manager->create('phpunit.' . randomString(12));
         $this->artistIdList[] = $artist->id();
 
-        (Gazelle\DB::DB())->prepared_query("
+        (DB::DB())->prepared_query("
             INSERT INTO artist_usage
                    (artist_id, role, uses)
             VALUES (?,         ?,    ?)
@@ -54,14 +56,14 @@ class ArtistTest extends TestCase {
         );
         // If the following test fails locally:
         // before test run: TRUNCATE TABLE artist_usage;
-        // after test run: (new \Gazelle\Stats\Artists)->updateUsage();
+        // after test run: (new Stats\Artists)->updateUsage();
         $this->assertEquals($artist->id(), $manager->findRandom()->id(), 'artist-find-random');
         $this->assertNull($manager->findByIdAndRevision($artist->id(), -666), 'artist-find-revision-fail');
 
         $this->assertGreaterThan(0, $artist->id(), 'artist-create-artist-id');
         $this->assertGreaterThan(0, $artist->aliasId(), 'artist-create-alias-id');
         $artist = $manager->findById($artist->id());
-        $this->assertInstanceOf(\Gazelle\Artist::class, $artist, 'artist-is-an-artist');
+        $this->assertInstanceOf(Artist::class, $artist, 'artist-is-an-artist');
 
         $this->assertNull($manager->findByIdAndRevision($artist->id(), -1), 'artist-is-an-unrevised-artist');
         // empty, but at least it tests the SQL
@@ -69,7 +71,7 @@ class ArtistTest extends TestCase {
     }
 
     public function testArtistInfo(): void {
-        $manager = new \Gazelle\Manager\Artist();
+        $manager = new Manager\Artist();
         $artist = $manager->create('phpunit.' . randomString(12));
         $this->artistIdList[] = $artist->id();
 
@@ -83,7 +85,7 @@ class ArtistTest extends TestCase {
     }
 
     public function testArtistRevision(): void {
-        $manager = new \Gazelle\Manager\Artist();
+        $manager = new Manager\Artist();
         $artist = $manager->create('phpunit.' . randomString(12));
         $this->artistIdList[] = $artist->id();
 
@@ -122,8 +124,8 @@ class ArtistTest extends TestCase {
     }
 
     public function testArtistAlias(): void {
-        $manager = new \Gazelle\Manager\Artist();
-        $logger  = new \Gazelle\Log();
+        $manager = new Manager\Artist();
+        $logger  = new Log();
         $artist = $manager->create('phpunit.' . randomString(12));
         $this->artistIdList[] = $artist->id();
 
@@ -131,7 +133,7 @@ class ArtistTest extends TestCase {
         $this->assertEquals($artist->id(), $manager->findByName($artist->name())->id(), 'artist-find-by-alias-name');
         $this->assertEquals($artist->aliasId(), $manager->findByName($artist->name())->aliasId(), 'artist-find-aliasid-by-alias-name');
         $this->assertEquals(1, $manager->aliasUseTotal($artist->aliasId()), 'artist-sole-alias');
-        $this->assertCount(0, $manager->tgroupList($artist->aliasId(), new Gazelle\Manager\TGroup()), 'artist-no-tgroup');
+        $this->assertCount(0, $manager->tgroupList($artist->aliasId(), new Manager\TGroup()), 'artist-no-tgroup');
 
         $aliasName = $artist->name() . '-alias';
         $newId = $artist->addAlias($aliasName, 0, $this->user, $logger);
@@ -146,8 +148,8 @@ class ArtistTest extends TestCase {
     }
 
     public function testArtistNonRedirAlias(): void {
-        $manager = new \Gazelle\Manager\Artist();
-        $logger  = new \Gazelle\Log();
+        $manager = new Manager\Artist();
+        $logger  = new Log();
         $artist = $manager->create('phpunit.' . randomString(12));
         $this->artistIdList[] = $artist->id();
 
@@ -157,7 +159,7 @@ class ArtistTest extends TestCase {
     }
 
     public function testArtistMerge(): void {
-        $manager = new \Gazelle\Manager\Artist();
+        $manager = new Manager\Artist();
         $oldName = 'phpunit.artist.' . randomString(12);
         $old = $manager->create($oldName);
         $oldAliasId = $old->aliasId();
@@ -167,22 +169,22 @@ class ArtistTest extends TestCase {
         $new = $manager->create($newName);
         $this->artistIdList[] = $new->id();
 
-        $userBk = new Gazelle\User\Bookmark($this->user);
+        $userBk = new User\Bookmark($this->user);
         $userBk->create('artist', $old->id());
 
-        $commentMan = new \Gazelle\Manager\Comment();
+        $commentMan = new Manager\Comment();
         $postList = [
             $commentMan->create($this->user, 'artist', $old->id(), 'phpunit merge ' . randomString(6)),
             $commentMan->create($this->user, 'artist', $new->id(), 'phpunit merge ' . randomString(6)),
         ];
 
-        $this->extra = Helper::makeUser('merge.' . randomString(10), 'merge');
-        $extraBk = new Gazelle\User\Bookmark($this->extra);
+        $this->extra = \GazelleUnitTest\Helper::makeUser('merge.' . randomString(10), 'merge');
+        $extraBk = new User\Bookmark($this->extra);
         $extraBk->create('artist', $old->id());
         $extraBk->create('artist', $new->id());
 
-        $log = new Gazelle\Log();
-        $collMan = new Gazelle\Manager\Collage();
+        $log = new Log();
+        $collMan = new Manager\Collage();
         $this->collage = $collMan->create(
             user:        $this->user,
             categoryId:  CollageType::artist->value,
@@ -194,13 +196,13 @@ class ArtistTest extends TestCase {
         $this->collage->addEntry($old->id(), $this->user);
 
         $this->tgroupList = [
-            Helper::makeTGroupMusic(
+            \GazelleUnitTest\Helper::makeTGroupMusic(
                 $this->user,
                 'phpunit artist merge1 ' . randomString(10),
                 [[ARTIST_MAIN], [$oldName]],
                 ['hip.hop'],
             ),
-            Helper::makeTGroupMusic(
+            \GazelleUnitTest\Helper::makeTGroupMusic(
                 $this->user,
                 'phpunit artist merge2 ' . randomString(10),
                 [[ARTIST_MAIN], [$oldName, $newName]],
@@ -214,10 +216,10 @@ class ArtistTest extends TestCase {
                 $old,
                 false,
                 $this->user,
-                new Gazelle\Manager\Collage(),
-                new Gazelle\Manager\Comment(),
-                new Gazelle\Manager\Request(),
-                new Gazelle\Manager\TGroup(),
+                new Manager\Collage(),
+                new Manager\Comment(),
+                new Manager\Request(),
+                new Manager\TGroup(),
                 $log,
             ),
             'artist-merge-n',
@@ -231,7 +233,7 @@ class ArtistTest extends TestCase {
         $merged = $collMan->findById($this->collage->id());
         $this->assertEquals([$new->id()], $merged->entryList(), 'art-merge-collage');
 
-        $comment = new \Gazelle\Comment\Artist($new->id(), 1, 0);
+        $comment = new Comment\Artist($new->id(), 1, 0);
         $comment->load(); // FIXME: load() should not be necessary
         $this->assertEquals(
             [$postList[0]->id(), $postList[1]->id()],
@@ -252,7 +254,7 @@ class ArtistTest extends TestCase {
     }
 
     public function testArtistModify(): void {
-        $manager = new \Gazelle\Manager\Artist();
+        $manager = new Manager\Artist();
         $artist = $manager->create('phpunit.' . randomString(12));
         $this->artistIdList[] = $artist->id();
 
@@ -278,7 +280,7 @@ class ArtistTest extends TestCase {
     }
 
     public function testArtistRename(): void {
-        $manager = new \Gazelle\Manager\Artist();
+        $manager = new Manager\Artist();
         $artist = $manager->create('phpunit.' . randomString(12));
         $this->artistIdList[] = $artist->id();
 
@@ -286,7 +288,7 @@ class ArtistTest extends TestCase {
         $rename = $artist->name() . '-rename';
         $this->assertEquals(
             $artist->aliasId() + 1,
-            $artist->renameAlias($artist->aliasId(), $rename, $this->user, new Gazelle\Manager\Request(), new Gazelle\Manager\TGroup()),
+            $artist->renameAlias($artist->aliasId(), $rename, $this->user, new Manager\Request(), new Manager\TGroup()),
             'alias-rename'
         );
         $this->assertContains($rename, $artist->aliasNameList(), 'alias-is-renamed');
@@ -296,18 +298,18 @@ class ArtistTest extends TestCase {
     }
 
     public function testArtistRenamePrimary(): void {
-        $manager = new \Gazelle\Manager\Artist();
+        $manager = new Manager\Artist();
         $artist = $manager->create('phpunit.' . randomString(12));
         $this->artistIdList[] = $artist->id();
 
-        $commentMan = new \Gazelle\Manager\Comment();
+        $commentMan = new Manager\Comment();
         $post = $commentMan->create($this->user, 'artist', $artist->id(), 'phpunit smart rename ' . randomString(6));
 
-        $requestMan = new Gazelle\Manager\Request();
+        $requestMan = new Manager\Request();
         $request = $requestMan->create(
             user:            $this->user,
             bounty:          100 * 1024 ** 2,
-            categoryId:      (new Gazelle\Manager\Category())->findIdByName('Music'),
+            categoryId:      (new Manager\Category())->findIdByName('Music'),
             year:            (int)date('Y'),
             title:           'phpunit smart rename ' . randomString(6),
             image:           '',
@@ -325,11 +327,11 @@ class ArtistTest extends TestCase {
         $request->artistRole()->set(
             [ARTIST_MAIN => [$artist->name()]],
             $this->user,
-            new Gazelle\Manager\Artist(),
+            new Manager\Artist(),
         );
 
         $this->tgroupList = [
-            Helper::makeTGroupMusic(
+            \GazelleUnitTest\Helper::makeTGroupMusic(
                 $this->user,
                 'phpunit artist smart rename ' . randomString(10),
                 [[ARTIST_MAIN], [$artist->name()]],
@@ -343,13 +345,13 @@ class ArtistTest extends TestCase {
             $name,
             $this->user,
             $requestMan,
-            new \Gazelle\Manager\TGroup(),
+            new Manager\TGroup(),
         );
         $this->assertEquals($name, $artist->name(), 'artist-is-smart-renamed');
 
-        $commentPage = new Gazelle\Comment\Artist($artist->id(), 1, 0);
+        $commentPage = new Comment\Artist($artist->id(), 1, 0);
         $commentPage->load();
-        $threadList = $commentPage->threadList(new Gazelle\Manager\User());
+        $threadList = $commentPage->threadList(new Manager\User());
         $this->assertCount(1, $threadList, 'artist-renamed-comments');
         $this->assertEquals($post->id(), $threadList[0]['postId'], 'artist-renamed-comments');
 
@@ -364,10 +366,10 @@ class ArtistTest extends TestCase {
     }
 
     public function testRenameAliasCapchange(): void {
-        $artistMan = new \Gazelle\Manager\Artist();
-        $reqMan = new Gazelle\Manager\Request();
-        $tgMan = new \Gazelle\Manager\TGroup();
-        $logger  = new \Gazelle\Log();
+        $artistMan = new Manager\Artist();
+        $reqMan = new Manager\Request();
+        $tgMan = new Manager\TGroup();
+        $logger  = new Log();
         $mainName = 'phpunit.' . randomString(12);
         $artist = $artistMan->create($mainName);
         $mainAliasId = $artist->aliasId();
@@ -383,10 +385,10 @@ class ArtistTest extends TestCase {
     }
 
     public function testRenameAliasNraMerge(): void {
-        $artistMan = new \Gazelle\Manager\Artist();
-        $reqMan = new Gazelle\Manager\Request();
-        $tgMan = new \Gazelle\Manager\TGroup();
-        $logger  = new \Gazelle\Log();
+        $artistMan = new Manager\Artist();
+        $reqMan = new Manager\Request();
+        $tgMan = new Manager\TGroup();
+        $logger  = new Log();
         $mainName = 'phpunit.' . randomString(12);
         $artist = $artistMan->create($mainName);
         $mainAliasId = $artist->aliasId();
@@ -432,10 +434,10 @@ class ArtistTest extends TestCase {
     }
 
     public function testArtistSimilar(): void {
-        $manager = new \Gazelle\Manager\Artist();
+        $manager = new Manager\Artist();
         $artist = $manager->create('phpunit.artsim.' . randomString(12));
         $this->artistIdList[] = $artist->id();
-        $this->extra = Helper::makeUser('art2.' . randomString(10), 'artist');
+        $this->extra = \GazelleUnitTest\Helper::makeUser('art2.' . randomString(10), 'artist');
 
         $other1 = $manager->create('phpunit.other1.' . randomString(12));
         $other2 = $manager->create('phpunit.other2.' . randomString(12));
@@ -445,7 +447,7 @@ class ArtistTest extends TestCase {
 
         $this->assertFalse($artist->similar()->voteSimilar($this->extra, $artist, true), 'artist-vote-self');
 
-        $logger  = new \Gazelle\Log();
+        $logger  = new Log();
         $this->assertEquals(1, $artist->similar()->addSimilar($other1, $this->user, $logger), 'artist-add-other1');
         $this->assertEquals(0, $artist->similar()->addSimilar($other1, $this->user, $logger), 'artist-read-other1');
         $this->assertEquals(1, $artist->similar()->addSimilar($other2, $this->user, $logger), 'artist-add-other2');
@@ -484,26 +486,26 @@ class ArtistTest extends TestCase {
         $this->assertEquals($other2->id(), $graph[$other1->id()]['related'][0], 'artist-sim-related');
         $this->assertLessThan($graph[$other1->id()]['proportion'], $graph[$other2->id()]['proportion'], 'artist-sim-proportion');
 
-        $requestMan = new \Gazelle\Manager\Request();
+        $requestMan = new Manager\Request();
         $this->assertFalse($artist->similar()->removeSimilar($artist, $this->extra, $logger), 'artist-remove-similar-self');
         $this->assertTrue($artist->similar()->removeSimilar($other2, $this->extra, $logger), 'artist-remove-other');
         $this->assertFalse($artist->similar()->removeSimilar($other2, $this->extra, $logger), 'artist-re-remove-other');
     }
 
     public function testArtistJson(): void {
-        $manager = new \Gazelle\Manager\Artist();
+        $manager = new Manager\Artist();
         $artist = $manager->create('phpunit.' . randomString(12));
         $this->artistIdList[] = $artist->id();
 
-        $json = (new \Gazelle\Json\Artist(
+        $json = (new Json\Artist(
             $artist,
             $this->user,
-            new Gazelle\User\Bookmark($this->user),
-            new Gazelle\Manager\Request(),
-            new Gazelle\Manager\TGroup(),
-            new Gazelle\Manager\Torrent(),
+            new User\Bookmark($this->user),
+            new Manager\Request(),
+            new Manager\TGroup(),
+            new Manager\Torrent(),
         ));
-        $this->assertInstanceOf(\Gazelle\Json\Artist::class, $json->setReleasesOnly(true), 'artist-json-set-releases');
+        $this->assertInstanceOf(Json\Artist::class, $json->setReleasesOnly(true), 'artist-json-set-releases');
         $payload = $json->payload();
         $this->assertIsArray($payload, 'artist-json-payload');
         $this->assertEquals($artist->id(), $payload['id'], 'artist-payload-id');
@@ -516,7 +518,7 @@ class ArtistTest extends TestCase {
     }
 
     public function testArtistAutocomplete(): void {
-        $manager = new \Gazelle\Manager\Artist();
+        $manager = new Manager\Artist();
         $composer = null;
         foreach (['qqqq', 'qqqb', 'qqbb', 'qbbb', 'bbbb'] as $auto) {
             $name = "$auto.phpunit." . randomString(6);
@@ -525,17 +527,17 @@ class ArtistTest extends TestCase {
             }
             $artist = $manager->create($name);
             $this->artistIdList[] = $artist->id();
-            $tgroup = Helper::makeTGroupMusic(
+            $tgroup = \GazelleUnitTest\Helper::makeTGroupMusic(
                 $this->user,
                 'phpunit artist autocomp ' . randomString(10),
                 [[ARTIST_MAIN], [$name]],
                 ['punk'],
             );
-            Helper::makeTorrentMusic($tgroup, $this->user);
+            \GazelleUnitTest\Helper::makeTorrentMusic($tgroup, $this->user);
             $this->tgroupList[] = $tgroup;
         }
         $this->tgroupList[0]
-            ->addArtists([ARTIST_COMPOSER], [$composer], $this->user, $manager, new Gazelle\Log());
+            ->addArtists([ARTIST_COMPOSER], [$composer], $this->user, $manager, new Log());
         global $Cache;
         $Cache->delete_multi([
             $manager->autocompleteKey("%"),
@@ -549,12 +551,12 @@ class ArtistTest extends TestCase {
 
     public function testArtistBookmark(): void {
         $name = 'phpunit.' . randomString(12);
-        $manager = new \Gazelle\Manager\Artist();
+        $manager = new Manager\Artist();
         $artist = $manager->create($name);
         $this->artistIdList[] = $artist->id();
 
-        (new Gazelle\User\Bookmark($this->user))->create('artist', $artist->id());
-        $json = new Gazelle\Json\Bookmark\Artist(new Gazelle\User\Bookmark($this->user));
+        (new User\Bookmark($this->user))->create('artist', $artist->id());
+        $json = new Json\Bookmark\Artist(new User\Bookmark($this->user));
         $this->assertEquals(
             [[
                 'artistId'   => $artist->id(),
@@ -566,12 +568,12 @@ class ArtistTest extends TestCase {
     }
 
     public function testArtistDiscogs(): void {
-        $manager = new \Gazelle\Manager\Artist();
+        $manager = new Manager\Artist();
         $artist = $manager->create('phpunit.' . randomString(12));
         $this->artistIdList[] = $artist->id();
 
         $id = -100000 + random_int(1, 100000);
-        $discogs = new Gazelle\Util\Discogs(
+        $discogs = new Util\Discogs(
             id: $id,
             stem: 'discogs phpunit',
             name: 'discogs phpunit',

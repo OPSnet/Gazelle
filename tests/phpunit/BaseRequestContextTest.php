@@ -1,9 +1,11 @@
 <?php
 
+namespace Gazelle;
+
 use PHPUnit\Framework\TestCase;
 
-class BaseRequestContext extends TestCase {
-    protected \Gazelle\User $user;
+class BaseRequestContextTest extends TestCase {
+    protected User $user;
 
     public function tearDown(): void {
         if (isset($this->user)) {
@@ -12,7 +14,7 @@ class BaseRequestContext extends TestCase {
     }
 
     public function testBaseRequestContext(): void {
-        $context = new Gazelle\BaseRequestContext(
+        $context = new BaseRequestContext(
             '/phpunit.php',
             '224.0.0.1',
             'Lidarr/3.5.8 (windows 98)',
@@ -36,15 +38,15 @@ class BaseRequestContext extends TestCase {
     }
 
     public function testBadRequest(): void {
-        $context = new Gazelle\BaseRequestContext('', '', '');
+        $context = new BaseRequestContext('', '', '');
         $this->assertFalse($context->isValid(), 'context-not-valid');
         $this->assertEquals('', $context->browser(), 'context-invalid-browser');
     }
 
     // Any object that derives from Base has access to the request context
     public function testObject(): void {
-        Gazelle\Base::setRequestContext(
-            new Gazelle\BaseRequestContext(
+        Base::setRequestContext(
+            new BaseRequestContext(
                 '/phpunit.php',
                 '225.0.0.1',
                 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.3',
@@ -52,10 +54,10 @@ class BaseRequestContext extends TestCase {
         );
         $this->assertEquals(
             '225.0.0.1',
-            (new Gazelle\Manager\TGroup())->requestContext()->remoteAddr(),
+            (new Manager\TGroup())->requestContext()->remoteAddr(),
             'context-manager-ip',
         );
-        $this->user = Helper::makeUser('base.' . randomString(6), 'base object');
+        $this->user = \GazelleUnitTest\Helper::makeUser('base.' . randomString(6), 'base object');
         $this->assertEquals(
             'Chrome',
             $this->user->requestContext()->browser(),
