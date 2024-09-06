@@ -2,6 +2,8 @@
 
 namespace Gazelle\Collage;
 
+use Gazelle\Intf\CollageEntry;
+
 abstract class AbstractCollage extends \Gazelle\Base {
     protected int   $id; // hold a local copy of our ID to save time
     protected array $artists;
@@ -14,7 +16,7 @@ abstract class AbstractCollage extends \Gazelle\Base {
     abstract public function load(): int;
     abstract public function rebuildTagList(): array;
 
-    abstract protected function flushTarget(int $targetId): void;
+    abstract protected function flushTarget(CollageEntry $target): void;
 
     public function __construct(protected \Gazelle\Collage $holder) {
         $this->id = $holder->id();
@@ -34,31 +36,31 @@ abstract class AbstractCollage extends \Gazelle\Base {
         return $this->contributors;
     }
 
-    public function entryCreated(int $entryId): string {
+    public function entryCreated(CollageEntry $entry): string {
         if (!isset($this->created)) {
             $this->load();
         }
-        return $this->created[$entryId];
+        return $this->created[$entry->id()];
     }
 
     /**
      * Does the entry already exist in this collage
      */
-    public function hasEntry(int $entryId): bool {
+    public function hasEntry(CollageEntry $entry): bool {
         return (bool)self::$db->scalar("
             SELECT 1
             FROM {$this->entryTable()}
             WHERE CollageID = ?  AND {$this->entryColumn()} = ?
-            ", $this->id, $entryId
+            ", $this->id, $entry->id()
         );
     }
 
-    public function entryUserId(int $entryId): int {
+    public function entryUserId(CollageEntry $entry): int {
         return (int)self::$db->scalar("
             SELECT UserID FROM {$this->entryTable()}
             WHERE CollageID = ?
                 AND {$this->entryColumn()} = ?
-            ", $this->id, $entryId
+            ", $this->id, $entry->id()
         );
     }
 
@@ -107,8 +109,8 @@ abstract class AbstractCollage extends \Gazelle\Base {
     /**
      * Add an entry to a collage.
      */
-    public function addEntry(int $entryId, \Gazelle\User $user): int {
-        if ($this->hasEntry($entryId)) {
+    public function addEntry(CollageEntry $entry, \Gazelle\User $user): int {
+        if ($this->hasEntry($entry)) {
             return 0;
         }
         self::$db->begin_transaction();
@@ -128,7 +130,7 @@ abstract class AbstractCollage extends \Gazelle\Base {
                     WHERE ca.CollageID = ?
                 )
             )
-            ", $this->id, $user->id(), $entryId, $mult, $this->id
+            ", $this->id, $user->id(), $entry->id(), $mult, $this->id
 
         );
         $affected = self::$db->affected_rows();
@@ -138,20 +140,20 @@ abstract class AbstractCollage extends \Gazelle\Base {
         }
         $this->recalcTotal();
         self::$db->commit();
-        $this->flushTarget($entryId);
+        $this->flushTarget($entry);
         return $affected;
     }
 
     /**
      * Remove an entry from a collage
      */
-    public function removeEntry(int $entryId): int {
+    public function removeEntry(CollageEntry $entry): int {
         self::$db->begin_transaction();
         self::$db->prepared_query("
             DELETE FROM {$this->entryTable()}
             WHERE CollageID = ?
                 AND {$this->entryColumn()} = ?
-            ", $this->id, $entryId
+            ", $this->id, $entry->id()
         );
         $affected = self::$db->affected_rows();
         if ($affected === 0) {
@@ -160,7 +162,7 @@ abstract class AbstractCollage extends \Gazelle\Base {
         }
         $this->recalcTotal();
         self::$db->commit();
-        $this->flushTarget($entryId);
+        $this->flushTarget($entry);
         $this->load();
         return $affected;
     }
@@ -191,13 +193,13 @@ abstract class AbstractCollage extends \Gazelle\Base {
         return $affected;
     }
 
-    public function updateSequenceEntry(int $entryId, int $sequence): int {
+    public function updateSequenceEntry(CollageEntry $entry, int $sequence): int {
         self::$db->prepared_query("
             UPDATE {$this->entryTable()} SET
                 Sort = ?
             WHERE CollageID = ?
                 AND {$this->entryColumn()} = ?
-            ", $sequence, $this->id, $entryId
+            ", $sequence, $this->id, $entry->id()
         );
         $affected = self::$db->affected_rows();
         $this->load();

@@ -180,10 +180,10 @@ abstract class TorrentAbstract extends BaseObject {
     protected function filenameParse(string $metaname): array {
         if (preg_match('/^(\..*?) s(\d+)s (.+) (?:&divide;|' . FILELIST_DELIM . ')$/', $metaname, $match)) {
             return [
-                'ext'  => $match[1] ?? null,
+                'ext'  => $match[1],
                 'size' => (int)$match[2],
                 // transform leading blanks into hard blanks so that it shows up in HTML
-                'name' => preg_replace_callback('/^(\s+)/', fn($s) => str_repeat('&nbsp;', strlen($s[1])), $match[3] ?? ''),
+                'name' => preg_replace_callback('/^(\s+)/', fn($s) => str_repeat('&nbsp;', strlen($s[1])), $match[3]),
             ];
         }
         return [

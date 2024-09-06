@@ -9,7 +9,7 @@ if (!$Viewer->permitted('admin_site_debug')) {
 
 $proc = [];
 if (preg_match('/.*\/(.*)/', PHP_BINARY, $match, PREG_UNMATCHED_AS_NULL)) {
-    $binary = $match[1] ?? 'php-fpm';
+    $binary = $match[1];
     $ps = trim(`ps -C {$binary} -o pid --no-header`);
     $pidList = explode("\n", $ps);
     foreach ($pidList as $pid) {

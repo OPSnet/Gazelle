@@ -2,6 +2,8 @@
 
 namespace Gazelle\Collage;
 
+use Gazelle\Intf\CollageEntry;
+
 class Artist extends AbstractCollage {
     public function entryTable(): string { return 'collages_artists'; }
     public function entryColumn(): string { return 'ArtistID'; }
@@ -65,10 +67,10 @@ class Artist extends AbstractCollage {
         ));
     }
 
-    protected function flushTarget(int $artistId): void {
+    protected function flushTarget(CollageEntry $entry): void {
         $this->flushAll([
-            "artists_collages_$artistId",
-            "artists_collages_personal_$artistId",
+            "artists_collages_{$entry->id()}",
+            "artists_collages_personal_{$entry->id()}",
         ]);
     }
 

@@ -2,6 +2,8 @@
 
 namespace Gazelle\Collage;
 
+use Gazelle\Intf\CollageEntry;
+
 class TGroup extends AbstractCollage {
     protected array $groupIds;
     protected array $sequence = [];
@@ -102,10 +104,10 @@ class TGroup extends AbstractCollage {
         return $this->sequence[$entryId] ?? 0;
     }
 
-    protected function flushTarget(int $tgroupId): void {
+    protected function flushTarget(CollageEntry $entry): void {
         $this->flushAll([
-            "torrent_collages_$tgroupId",
-            "torrent_collages_personal_$tgroupId",
+            "torrent_collages_{$entry->id()}",
+            "torrent_collages_personal_{$entry->id()}",
         ]);
         unset($this->groupIds);
     }

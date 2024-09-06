@@ -61,34 +61,34 @@ if ($_REQUEST['action'] == 'add_torrent') {
 
 /* check that they correspond to torrent pages */
 $tgroupMan = new Gazelle\Manager\TGroup();
-$groupIds = [];
+$list = [];
 foreach ($URL as $u) {
     preg_match(TGROUP_REGEXP, $u, $match);
     $tgroup = $tgroupMan->findById((int)($match['id'] ?? 0));
     if (is_null($tgroup)) {
         error("The torrent " . htmlspecialchars($u) . " does not exist.");
     }
-    $groupIds[] = $tgroup->id();
+    $list[] = $tgroup;
 }
 
 if (!$Viewer->permitted('site_collages_delete')) {
     $maxGroupsPerUser = $collage->maxGroupsPerUser();
     if ($maxGroupsPerUser > 0) {
-        if ($collage->contributionTotal($Viewer) + count($groupIds) > $maxGroupsPerUser) {
+        if ($collage->contributionTotal($Viewer) + count($list) > $maxGroupsPerUser) {
             $entry = $maxGroupsPerUser === 1 ? 'entry' : 'entries';
             error("You may add no more than $maxGroupsPerUser $entry to this collage.");
         }
     }
 
     $maxGroups = $collage->maxGroups();
-    if ($maxGroups > 0 && ($collage->numEntries() + count($groupIds) > $maxGroups)) {
+    if ($maxGroups > 0 && ($collage->numEntries() + count($list) > $maxGroups)) {
         $entry = $maxGroupsPerUser === 1 ? 'entry' : 'entries';
         error("This collage can hold only $maxGroups $entry.");
     }
 }
 
-foreach ($groupIds as $groupId) {
-    $collage->addEntry($groupId, $Viewer);
+foreach ($list as $tgroup) {
+    $collage->addEntry($tgroup, $Viewer);
 }
 $collageMan->flushDefaultGroup($Viewer);
 header('Location: ' . $collage->location());

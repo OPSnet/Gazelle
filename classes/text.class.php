@@ -872,9 +872,7 @@ class Text {
                     case 'torrent':
                         $GroupID = 0;
                         if (preg_match(TGROUP_REGEXP, $Block['Val'], $match)) {
-                            if (isset($match['id'])) {
-                                $GroupID = $match['id'];
-                            }
+                            $GroupID = $match['id'];
                         } elseif ((int)$Block['Val']) {
                             $GroupID = $Block['Val'];
                         }

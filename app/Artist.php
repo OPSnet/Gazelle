@@ -2,7 +2,9 @@
 
 namespace Gazelle;
 
-class Artist extends BaseObject {
+use Gazelle\Intf\CollageEntry;
+
+class Artist extends BaseObject implements CollageEntry {
     final public const pkName               = 'ArtistID';
     final public const tableName            = 'artists_group';
     final public const CACHE_REQUEST_ARTIST = 'artists_requests_%d';

@@ -7,8 +7,8 @@ if (!$Viewer->permitted('site_collages_create')) {
 
 authorize();
 
-$artistId = (int)$_POST['artistid'];
-if (!$artistId) {
+$artist = (new Gazelle\Manager\Artist())->findById((int)($_POST['artistid'] ?? 0));
+if (is_null($artist)) {
     error(404);
 }
 $collage = (new Gazelle\Manager\Collage())->findById((int)$_POST['collageid']);
@@ -20,7 +20,7 @@ if (!$collage->isArtist()) {
 }
 
 if ($_POST['submit'] === 'Remove') {
-    $collage->removeEntry($artistId);
+    $collage->removeEntry($artist);
 } elseif (isset($_POST['drag_drop_collage_sort_order'])) {
     $collage->updateSequence($_POST['drag_drop_collage_sort_order']);
 } else {
@@ -28,8 +28,8 @@ if ($_POST['submit'] === 'Remove') {
     if (!$sequence) {
         error(404);
     }
-    $collage->updateSequenceEntry($artistId, $sequence);
+    $collage->updateSequenceEntry($artist, $sequence);
 }
 $collage->flush();
 
-header("Location: collages.php?action=manage_artists&collageid=" . $collage->id());
+header("Location: collages.php?action=manage_artists&collageid={$collage->id()}");

@@ -193,7 +193,7 @@ class ArtistTest extends TestCase {
             tagList:     'jazz',
             logger:      $log,
         );
-        $this->collage->addEntry($old->id(), $this->user);
+        $this->collage->addEntry($old, $this->user);
 
         $this->tgroupList = [
             \GazelleUnitTest\Helper::makeTGroupMusic(

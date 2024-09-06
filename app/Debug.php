@@ -206,12 +206,12 @@ class Debug {
         $Tracer = debug_backtrace();
 
         // This is in case something in this function goes wrong and we get stuck with an infinite loop
-        if (isset($Tracer[$Steps]['function'], $Tracer[$Steps]['class']) && $Tracer[$Steps]['function'] == 'errorHandler' && $Tracer[$Steps]['class'] == 'DEBUG') { /** @phpstan-ignore-line */
+        if (($Tracer[$Steps]['class'] ?? '') === 'Gazelle\\Debug' && $Tracer[$Steps]['function'] === 'errorHandler') {
             return true;
         }
 
         //If this error was thrown, we return the function which threw it
-        if (isset($Tracer[$Steps]['function']) && $Tracer[$Steps]['function'] == 'trigger_error') {
+        if ($Tracer[$Steps]['function'] == 'trigger_error') {
             $Steps++;
             $File = $Tracer[$Steps]['file']; /** @phpstan-ignore-line */
             $Line = $Tracer[$Steps]['line']; /** @phpstan-ignore-line */

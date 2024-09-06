@@ -132,7 +132,7 @@ if ($musicRelease) {
 }
 
 echo $Twig->render('tgroup/stats.twig', [
-    'collage_list' => $collageMan->addToCollageDefault($tgroupId, $Viewer),
+    'collage_list' => $collageMan->addToCollageDefault($tgroup, $Viewer),
     'featured'     => (new Gazelle\Manager\FeaturedAlbum())->findById($tgroupId),
     'tag_undo'     => $Cache->get_value("deleted_tags_{$tgroupId}_{$Viewer->id()}"),
     'tgroup'       => $tgroup,

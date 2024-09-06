@@ -5,6 +5,7 @@ namespace Gazelle;
 use Gazelle\Enum\CollageType;
 use Gazelle\Enum\LeechType;
 use Gazelle\Enum\LeechReason;
+use Gazelle\Intf\CollageEntry;
 
 class Collage extends BaseObject {
     /**
@@ -154,12 +155,12 @@ class Collage extends BaseObject {
         return $this->contributors()[$user->id()] ?? 0;
     }
 
-    public function entryCreated(int $entryId): string {
-        return $this->collage->entryCreated($entryId);
+    public function entryCreated(CollageEntry $entry): string {
+        return $this->collage->entryCreated($entry);
     }
 
-    public function entryUserId(int $entryId): int {
-        return $this->collage->entryUserId($entryId);
+    public function entryUserId(CollageEntry $entry): int {
+        return $this->collage->entryUserId($entry);
     }
 
     public function toggleSubscription(User $user): int {
@@ -341,16 +342,16 @@ class Collage extends BaseObject {
 
     /*** UPDATE METHODS ***/
 
-    public function addEntry(int $entryId, User $user): int {
-        return $this->collage->addEntry($entryId, $user);
+    public function addEntry(CollageEntry $entry, User $user): int {
+        return $this->collage->addEntry($entry, $user);
     }
 
-    public function hasEntry(int $entryId): bool {
-        return $this->collage->hasEntry($entryId);
+    public function hasEntry(CollageEntry $entry): bool {
+        return $this->collage->hasEntry($entry);
     }
 
-    public function removeEntry(int $entryId): int {
-        return $this->collage->removeEntry($entryId);
+    public function removeEntry(CollageEntry $entry): int {
+        return $this->collage->removeEntry($entry);
     }
 
     public function rebuildTagList(): array {
@@ -361,8 +362,8 @@ class Collage extends BaseObject {
         return $this->collage->updateSequence($series);
     }
 
-    public function updateSequenceEntry(int $entryId, int $sequence): int {
-        return $this->collage->updateSequenceEntry($entryId, $sequence);
+    public function updateSequenceEntry(CollageEntry $entry, int $sequence): int {
+        return $this->collage->updateSequenceEntry($entry, $sequence);
     }
 
     public function remove(): int {

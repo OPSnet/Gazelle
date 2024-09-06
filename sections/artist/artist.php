@@ -156,7 +156,7 @@ foreach ($sections as $sectionId => $groupList) {
 <?php
 if ($Viewer->permitted('site_collages_manage') || $Viewer->activePersonalCollages()) {
     echo $Twig->render('artist/collage-add.twig', [
-        'collage_list' => $collageMan->addToArtistCollageDefault($artistId, $Viewer),
+        'collage_list' => $collageMan->addToArtistCollageDefault($Artist, $Viewer),
         'artist_id'    => $artistId,
         'viewer'       => $Viewer,
     ]);

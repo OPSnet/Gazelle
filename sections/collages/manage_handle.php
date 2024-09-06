@@ -7,8 +7,8 @@ if (!$Viewer->permitted('site_collages_manage')) {
 
 authorize();
 
-$groupId = (int)$_POST['groupid'];
-if (!$groupId) {
+$tgroup = (new Gazelle\Manager\TGroup())->findById((int)($_POST['groupid'] ?? 0));
+if (is_null($tgroup)) {
     error(404);
 }
 $collage = (new Gazelle\Manager\Collage())->findById((int)($_POST['collageid']));
@@ -20,9 +20,9 @@ if ($collage->isPersonal() && !$collage->isOwner($Viewer) && !$Viewer->permitted
 }
 
 if (($_POST['submit'] ?? '') === 'Remove') {
-    $userId = $collage->entryUserId($groupId);
-    if ($collage->removeEntry($groupId)) {
-        (new Gazelle\Log())->general(sprintf("Collage %d (%s) group entry $groupId (added by user $userId) removed by %s",
+    $userId = $collage->entryUserId($tgroup);
+    if ($collage->removeEntry($tgroup)) {
+        (new Gazelle\Log())->general(sprintf("Collage %d (%s) group entry {$tgroup->id()} (added by user $userId) removed by %s",
             $collage->id(), $collage->name(), $Viewer->username()
         ));
     }
@@ -33,8 +33,8 @@ if (($_POST['submit'] ?? '') === 'Remove') {
     if (!$sequence) {
         error(404);
     }
-    $collage->updateSequenceEntry($groupId, $sequence);
+    $collage->updateSequenceEntry($tgroup, $sequence);
 }
 $collage->flush();
 
-header('Location: ' . $collage->location() . '&action=manage');
+header("Location: {$collage->location()}&action=manage");

@@ -3,6 +3,7 @@
 namespace Gazelle\Manager;
 
 use Gazelle\Enum\CollageType;
+use Gazelle\Intf\CollageEntry;
 
 class Collage extends \Gazelle\BaseManager {
     final public const ID_KEY = 'zz_cg_%d';
@@ -165,7 +166,7 @@ class Collage extends \Gazelle\BaseManager {
         return $new;
     }
 
-    public function addToArtistCollageDefault(int $artistId, \Gazelle\User $user): array {
+    public function addToArtistCollageDefault(CollageEntry $entry, \Gazelle\User $user): array {
         $userId  = $user->id();
         $key     = sprintf(self::CACHE_DEFAULT_ARTIST, $userId);
         $default = self::$cache->get_value($key);
@@ -183,7 +184,7 @@ class Collage extends \Gazelle\BaseManager {
                     )
                 ORDER BY c.Updated DESC
                 LIMIT 5
-                ", $userId, CollageType::artist->value, $artistId
+                ", $userId, CollageType::artist->value, $entry->id()
             );
             $default = self::$db->collect(0, false);
 
@@ -208,7 +209,7 @@ class Collage extends \Gazelle\BaseManager {
                 GROUP BY c.ID
                 ORDER BY max(ca.AddedOn) DESC
                 LIMIT 5
-                ", $userId, $userId, CollageType::artist->value, $userId, $artistId
+                ", $userId, $userId, CollageType::artist->value, $userId, $entry->id()
             );
             $default = array_merge($default, self::$db->collect(0, false));
             self::$cache->cache_value($key, $default, 86400);
@@ -223,7 +224,7 @@ class Collage extends \Gazelle\BaseManager {
         return $list;
     }
 
-    public function addToCollageDefault(int $groupId, \Gazelle\User $user): array {
+    public function addToCollageDefault(CollageEntry $entry, \Gazelle\User $user): array {
         $key = sprintf(self::CACHE_DEFAULT_GROUP, $user->id());
         $default = self::$cache->get_value($key);
         if ($default === false) {
@@ -239,7 +240,7 @@ class Collage extends \Gazelle\BaseManager {
                         SELECT 1 FROM collages_torrents WHERE CollageID = c.ID AND GroupID = ?
                     )
                 ORDER BY c.Updated DESC
-                ", $user->id(), CollageType::personal->value, $groupId
+                ", $user->id(), CollageType::personal->value, $entry->id()
             );
             $default = self::$db->collect(0, false);
 
@@ -263,7 +264,7 @@ class Collage extends \Gazelle\BaseManager {
                 GROUP BY c.ID
                 ORDER BY max(ca.AddedOn) DESC
                 LIMIT 5
-                ", $user->id(), CollageType::personal->value, $user->id(), $groupId
+                ", $user->id(), CollageType::personal->value, $user->id(), $entry->id()
             );
             $default = array_merge($default, self::$db->collect(0, false));
             self::$cache->cache_value($key, $default, 86400);

@@ -5,8 +5,9 @@ namespace Gazelle;
 use Gazelle\Enum\LeechReason;
 use Gazelle\Enum\LeechType;
 use Gazelle\Intf\CategoryHasArtist;
+use Gazelle\Intf\CollageEntry;
 
-class TGroup extends BaseObject implements CategoryHasArtist {
+class TGroup extends BaseObject implements CategoryHasArtist, CollageEntry {
     final public const tableName            = 'torrents_group';
     final public const CACHE_KEY            = 'tg_%d';
     final public const CACHE_TLIST_KEY      = 'tlist_%d';

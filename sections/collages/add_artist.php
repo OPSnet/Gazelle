@@ -64,33 +64,34 @@ if ($_REQUEST['action'] == 'add_artist') {
 
 /* check that they correspond to artist pages */
 $artistMan = new Gazelle\Manager\Artist();
-$ID = [];
+$list = [];
 foreach ($URL as $u) {
-    preg_match(ARTIST_REGEXP, $u, $match);
-    $artist = $artistMan->findById((int)$match['id']);
+    $artist = preg_match(ARTIST_REGEXP, $u, $match)
+        ? $artistMan->findById((int)$match['id'])
+        : null;
     if (is_null($artist)) {
         error("The artist " . htmlspecialchars($u) . " does not exist.");
     }
-    $ID[] = $artist->id();
+    $list[] = $artist;
 }
 
 /* would the addition overshoot the allowed number of entries? */
 if (!$Viewer->permitted('site_collages_delete')) {
     $maxGroupsPerUser = $collage->maxGroupsPerUser();
     if ($maxGroupsPerUser > 0) {
-        if ($collage->contributionTotal($Viewer) + count($ID) > $maxGroupsPerUser) {
+        if ($collage->contributionTotal($Viewer) + count($list) > $maxGroupsPerUser) {
             error("You may add no more than $maxGroupsPerUser entries to this collage.");
         }
     }
 
     $maxGroups = $collage->maxGroups();
-    if ($maxGroups > 0 && ($collage->numEntries() + count($ID) > $maxGroups)) {
+    if ($maxGroups > 0 && ($collage->numEntries() + count($list) > $maxGroups)) {
         error("This collage can hold only $maxGroups entries.");
     }
 }
 
-foreach ($ID as $artistId) {
-    $collage->addEntry($artistId, $Viewer);
+foreach ($list as $artist) {
+    $collage->addEntry($artist, $Viewer);
 }
 $collageMan->flushDefaultArtist($Viewer);
 header('Location: ' . $collage->location());
