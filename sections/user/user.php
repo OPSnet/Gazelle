@@ -339,14 +339,11 @@ echo $Twig->render('user/collage-list.twig', [
 
 // Linked accounts
 if ($Viewer->permitted('users_linked_users')) {
-    [$linkGroupId, $comments, $list] = (new Gazelle\Manager\UserLink($user))->info();
     echo $Twig->render('user/linked.twig', [
-        'auth'     => $Viewer->auth(),
-        'comments' => $comments,
-        'group_id' => $linkGroupId,
-        'hash'     => sha1($comments ?? ''),
-        'list'     => $list,
-        'user_id'  => $userId,
+        'hash'      => sha1($comments ?? ''),
+        'user_link' => (new Gazelle\User\UserLink($user))->info(),
+        'user'      => $user,
+        'viewer'    => $Viewer,
     ]);
 }
 

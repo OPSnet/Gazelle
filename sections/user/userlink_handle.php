@@ -6,16 +6,16 @@ if (!$Viewer->permitted('users_linked_users')) {
 }
 authorize();
 
-$userId = (int)$_REQUEST['userid'];
-if (!$userId) {
+$userMan = new Gazelle\Manager\User();
+$source  = $userMan->findById((int)$_REQUEST['userid']);
+if (is_null($source)) {
     error(404);
 }
-$source = new Gazelle\User($userId);
-$userLink = new Gazelle\Manager\UserLink($source);
+$userLink = new Gazelle\User\UserLink($source);
 
 switch ($_REQUEST['dupeaction'] ?? '') {
     case 'remove':
-        $userLink->remove(new Gazelle\User($_REQUEST['removeid']), $Viewer->username());
+        $userLink->removeUser($userMan->findById($_REQUEST['removeid']), $Viewer);
         break;
 
     case 'update':
@@ -23,17 +23,17 @@ switch ($_REQUEST['dupeaction'] ?? '') {
 
         if ($_REQUEST['target']) {
             $username = trim($_REQUEST['target']);
-            $target = (new Gazelle\Manager\User())->findByUsername($username);
+            $target = $userMan->find($username);
             if (is_null($target)) {
                 error("User '" . display_str($username) . "' not found.");
             } elseif ($source->id() === $target->id()) {
                 error("Cannot link a user to themselves");
             }
-            $userLink->dupe($target, $Viewer->username(), $updateNote);
+            $userLink->dupe($target, $Viewer, $updateNote);
         }
 
         if ($_REQUEST['dupecomments']) {
-            $userLink->addGroupComments($_REQUEST['dupecomments'], $Viewer->username(), $updateNote);
+            $userLink->addGroupComment($_REQUEST['dupecomments'], $Viewer, $updateNote);
         }
         break;
 

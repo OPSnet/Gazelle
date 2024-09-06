@@ -33,7 +33,7 @@ switch ($_REQUEST['action'] ?? '') {
         require_once('2fa/index.php');
         break;
     case 'dupes':
-        require_once('manage_linked.php');
+        require_once('userlink_handle.php');
         break;
     case 'invitetree':
         require_once('invitetree.php');

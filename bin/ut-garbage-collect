@@ -173,7 +173,7 @@ foreach ($db->collect(0, false) as $collageId) {
 $db->prepared_query("
     SELECT um.ID
     FROM users_main um
-    WHERE um.Username regexp '^(?:(?:(?:admin|bb|bo(?:nus(?:g|r|stat))?|collage|create|donor|download|inbox\.(?:recv|send)|forum|friend[1-3]|invitee?|mod|priv[12]|sitelog|tag|text|tgroup\.[au]|trk(?:fl)?|u(?:[1-3]|pload|ser(?:hist)?)|wiki)\.[a-z]{6}|tag\.[a-z]{8}|(?:admin|art(?:2|ist|y)|backlog|blog|collfree|comment|dnu|dupip|email[1-3]?|enc\.med|feat|fls|invite|ipv4|merge|mod|nav|new(?:\.grp|s)|phpunit|re(?:aper|clab|g[1-5]|lease|portg?|q)|sbox|searchrep|spec|tag(?:no|2(?:no|yes))?|text|tg(?:cat|vote|man)|token|torman|torrent|trk(?:down|fl|free)?|ulink|um[123]|uploader|user|year|xva)\.[a-z]{10}|notf(?:\.(new|enc))?\.[^.]+)|spm_(?:fls|mod|sysop|user)_[a-z]{10})$'
+    WHERE um.Username regexp '^(?:(?:(?:admin|bb|bo(?:nus(?:g|r|stat))?|collage|create|donor|download|inbox\.(?:recv|send)|forum|friend[1-3]|invitee?|mod|priv[12]|sitelog|tag|text|tgroup\.[au]|trk(?:fl)?|u(?:[1-3]|pload|ser(?:hist)?)|wiki)\.[a-z]{6}|tag\.[a-z]{8}|(?:admin|art(?:2|ist|y)|backlog|blog|collfree|comment|dnu|dupip|email[1-3]?|enc\.med|feat|fls|invite|ipv4|merge|mod|nav|new(?:\.grp|s)|phpunit|re(?:aper|clab|g[1-5]|lease|portg?|q)|sbox|searchrep|spec|tag(?:no|2(?:no|yes))?|text|tg(?:cat|vote|man)|token|torman|torrent|trk(?:down|fl|free)?|ul[1-3]|um[123]|uploader|user|year|xva)\.[a-z]{10}|notf(?:\.(new|enc))?\.[^.]+)|spm_(?:fls|mod|sysop|user)_[a-z]{10})$'
 ");
 $userMan = new Gazelle\Manager\User;
 
