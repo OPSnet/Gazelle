@@ -14,6 +14,34 @@ class DebugTest extends TestCase {
         $this->assertTrue(\GazelleUnitTest\Helper::recentDate(date('Y-m-d H:i:s', (int)$Debug->epochStart()), 180), 'debug-recent-start');
     }
 
+    public function testCreate(): void {
+        $manager = new Manager\ErrorLog();
+        $uri     = '/phpunit.php';
+        $id      = $manager->create(
+            uri:       $uri,
+            userId:    0,
+            duration:  0.0,
+            memory:    0,
+            nrQuery:   0,
+            nrCache:   0,
+            digest:    randomString(10),
+            trace:     "a\nb",
+            request:   json_encode([]), /** @phpstan-ignore-line result is not false */
+            errorList: json_encode([]), /** @phpstan-ignore-line result is not false */
+            loggedVar: json_encode([]), /** @phpstan-ignore-line result is not false */
+        );
+
+        $this->assertGreaterThan(0, $id, 'errorlog-create');
+        $case = $manager->findById($id);
+        $this->assertInstanceOf(ErrorLog::class, $case, 'errorlog-find');
+        $this->assertEquals($uri, $case->uri(), 'errorlog-uri');
+        $this->assertEquals([], $case->request(), 'errorlog-request');
+        $this->assertEquals([], $case->errorList(), 'errorlog-errrolist');
+        $this->assertEquals(["a", "b"], $case->trace(), 'errorlog-trace');
+
+        $this->assertEquals(1, $case->remove(), 'errorlog-remove');
+    }
+
     public function testCase(): void {
         $manager = new Manager\ErrorLog();
         global $Debug;
