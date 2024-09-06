@@ -238,7 +238,6 @@ html body div#wrapper div#header div#menu ul li.active a {
 @media only screen and (min-width: 575px) and (prefers-contrast: no-preference) {
   /* Provide Haze Effect */
   #noty_bottomRight_layout_container li {
-    box-shadow: unset !important;
     background: unset !important;
     box-shadow:
       2.3px 2.3px 1.9px rgba(0, 0, 0, 0.1),
