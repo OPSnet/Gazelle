@@ -305,22 +305,9 @@ class Tag extends \Gazelle\BaseManager {
         if (count($replacement) > 1) {
             return $this->split($tag, $replacement, $user);
         }
-        $name = $replacement[0];
-        $replacement = $this->findByName($name);
-        if (is_null($replacement)) {
-            // renaming a tag that does not yet exist is trivial
-            self::$db->prepared_query("
-                UPDATE tags SET
-                    Name = ?,
-                    UserID = ?
-                WHERE ID = ?
-                ", $name, $user->id(), $tag->id()
-            );
-            return self::$db->affected_rows();
-        }
 
         self::$db->begin_transaction();
-        $changed = $this->replace($tag, $replacement, $user);
+        $changed = $this->replace($tag, $replacement[0], $user);
         self::$db->prepared_query("
             DELETE t, at, rt, tt
             FROM tags t
@@ -336,35 +323,20 @@ class Tag extends \Gazelle\BaseManager {
 
     public function split(\Gazelle\Tag $tag, array $replacement, \Gazelle\User $user): int {
         $totalChanged = 0;
-        $renamed = false;
         self::$db->begin_transaction();
         foreach ($replacement as $name) {
-            $replacement = $this->findByName($name);
-            if (is_null($replacement)) {
-                // We can reuse the existing tag and just rename it.
-                if (!$renamed) {
-                    $totalChanged += $this->rename($tag, [$name], $user);
-                    $renamed = true;
-                    continue;
-                }
-                $replacement = $this->create($name, $user);
-                ++$totalChanged;
-            }
-            $totalChanged += $this->replace($tag, $replacement, $user);
+            $totalChanged += $this->replace($tag, $name, $user);
         }
 
-        // If we have not reused the original tag by renaming it, get rid of it.
-        if (!$renamed) {
-            self::$db->prepared_query("
-                DELETE t, at, rt, tt
-                FROM tags t
-                LEFT JOIN artists_tags  at ON (at.TagID = t.ID)
-                LEFT JOIN requests_tags rt ON (rt.TagID = t.ID)
-                LEFT JOIN torrents_tags tt ON (tt.TagID = t.ID)
-                WHERE t.ID = ?
-                ", $tag->id()
-            );
-        }
+        self::$db->prepared_query("
+            DELETE t, at, rt, tt
+            FROM tags t
+            LEFT JOIN artists_tags  at ON (at.TagID = t.ID)
+            LEFT JOIN requests_tags rt ON (rt.TagID = t.ID)
+            LEFT JOIN torrents_tags tt ON (tt.TagID = t.ID)
+            WHERE t.ID = ?
+            ", $tag->id()
+        );
         self::$db->commit();
         return $totalChanged;
     }

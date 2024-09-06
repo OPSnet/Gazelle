@@ -64,22 +64,28 @@ class TagTest extends TestCase {
         $find = $manager->findById($tag->id());
         $this->assertEquals($tag->id(), $find->id(), 'tag-find-by-id');
 
-        // rename to a new tag
-        $new = "$name." . randomString(4);
-        $this->assertNull($manager->findByName($new), 'tag-lookup-new-fail');
-        $this->assertEquals(1, $manager->rename($tag, [$new], $this->user), 'tag-rename');
-        $find = $manager->findByName($new);
-        $this->assertInstanceOf(\Gazelle\Tag::class, $find, 'tag-find');
-        $this->assertEquals($tag->id(), $find->id(), 'tag-lookup-new-success');
-
-        // rename to an existing tag
         $this->user->addBounty(500 * 1024 ** 3);
         $this->request = Helper::makeRequestMusic($this->user, 'phpunit tag create request');
         $tag->addRequest($this->request);
-        $new   = "$name." . randomString(5);
-        $newTag = $manager->create($new, $this->user);
-        $this->assertEquals(1, $manager->rename($tag, [$newTag->name()], $this->user), 'tag-existing-rename');
-        $this->assertEquals($newTag->id(), $manager->findByName($newTag->name())->id(), 'tag-lookup-existing-success');
+
+        // rename to a new tag
+        $new = "$name." . randomString(4);
+        $this->assertNull($manager->findByName($new), 'tag-lookup-new-fail');
+        $newTag = $manager->softCreate($new, $this->user);
+        $this->assertEquals(
+            1,
+            $manager->rename( $tag, [$newTag], $this->user),
+            'tag-rename'
+        );
+        $find = $manager->findByName($new);
+        $this->assertInstanceOf(\Gazelle\Tag::class, $find, 'tag-find');
+        $this->assertEquals($find->id(), $newTag->id(), 'tag-lookup-new-success');
+
+        // rename to an existing tag
+        $new2    = "$name." . randomString(5);
+        $new2Tag = $manager->create($new2, $this->user);
+        $this->assertEquals(1, $manager->rename($newTag, [$new2Tag], $this->user), 'tag-existing-rename');
+        $this->assertEquals($new2Tag->id(), $manager->findByName($new2Tag->name())->id(), 'tag-lookup-existing-success');
 
         // Is empty because vote counts below 10 are ignored,
         // but at least we know the SQL is syntactically valid.
@@ -270,7 +276,14 @@ class TagTest extends TestCase {
         // split tag into two new (indie.rock.alt.rock => indie.rock, alt.rock)
         $this->assertEquals(
             4, // 2 for each tgroup and request
-            $manager->rename($tag, ["$name.1", "$name.2"], $this->user),
+            $manager->rename(
+                $tag,
+                [
+                    $manager->softCreate("$name.1", $this->user),
+                    $manager->softCreate("$name.2", $this->user),
+                ],
+                $this->user
+            ),
             'tag-new-split',
         );
         $this->assertEquals(
@@ -313,7 +326,14 @@ class TagTest extends TestCase {
         $tagList = array_map(fn($n) => $manager->create($n, $this->user), $nameList);
         $this->assertEquals(
             4,
-            $manager->rename($tag, ["$name.3", "$name.4"], $this->user),
+            $manager->rename(
+                $tag,
+                [
+                    $manager->softCreate("$name.3", $this->user),
+                    $manager->softCreate("$name.4", $this->user),
+                ],
+                $this->user,
+            ),
             'tag-existing-split',
         );
         $this->assertEquals(

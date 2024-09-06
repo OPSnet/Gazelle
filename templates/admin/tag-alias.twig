@@ -1,0 +1,73 @@
+{{ header('Tag Aliases') }}
+<div class="header">
+    <div class="linkbox">
+        <a href="tools.php?action=tags" class="brackets">Batch Tag Editor</a>
+        <a href="tools.php?action=tags_aliases" class="brackets">Tag Aliases</a>
+        <a href="tools.php?action=tags_official" class="brackets">Official Tags</a>
+    </div>
+    <h2>Tag Aliases</h2>
+    <div class="linkbox">
+        <a href="tools.php?action=tags_aliases&amp;order=goodtags" class="brackets">Sort by good tags</a>
+        <a href="tools.php?action=tags_aliases&amp;order=badtags" class="brackets">Sort by bad tags</a>
+    </div>
+</div>
+{% if action %}
+<div class="box pad center">
+    Result: {{ action }} <strong>{% if result > 0 %}succeeded{% else %}failed{% endif %}</strong>.
+</div>
+{% endif %}
+<table class="thin">
+    <tr class="colhead">
+        <td>Proper tag</td>
+        <td>Renamed from</td>
+{% if is_admin %}
+        <td>Submit</td>
+{% endif %}
+    </tr>
+    <tr />
+    <tr>
+        <form class="add_form" name="aliases" method="post" action="">
+            <input type="hidden" name="newalias" value="1" />
+            <td>
+                <input type="text" name="aliastag" />
+            </td>
+            <td>
+                <input type="text" name="badtag" />
+            </td>
+{% if is_admin %}
+            <td>
+                <input type="submit" value="Add alias" />
+            </td>
+{% endif %}
+        </form>
+    </tr>
+{% for name, a in list %}
+    <tr>
+        <form class="manage_form" name="aliases" method="post" action="">
+            <input type="hidden" name="changealias" value="1" />
+            <input type="hidden" name="aliasid" value="{{ a.id }}>" />
+            <td>
+{%  if is_admin %}
+                <input type="text" name="aliastag" value="{{ a.alias }}" />
+{%  else %}
+                {{ a.alias }}
+{%  endif %}
+            </td>
+            <td>
+{%  if is_admin %}
+                <input type="text" name="badtag" value="{{ a.bad }}" />
+{%  else %}
+                {{ a.bad }}
+{%  endif %}
+            </td>
+{%  if is_admin %}
+            <td>
+                <input type="submit" name="save" value="Save alias" />
+                <input type="submit" name="delete" value="Delete alias" />
+            </td>
+{%  endif %}
+        </form>
+    </tr>
+{% endfor %}
+</table>
+{{ footer() }}
