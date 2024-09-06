@@ -53,11 +53,10 @@
             <ul>
 {% for name, user_id in article.alias %}
                 <li id="alias_{{ name }}"><a href="wiki.php?action=article&amp;name={{ name }}">{{ article.shortName(name) }}</a>
-    {% if viewer.permitted('admin_manage_wiki') %}
-    {{- dom.click('#wiki-remove-alias-' ~ name, "Remove_Alias('" ~ name ~ "'); return false;") -}}
-    <a id="wiki-remove-alias-{{ name }}" href="#" class="brackets tooltip" title="Delete alias">X</a>
+{%  if viewer.permitted('admin_manage_wiki') %}
+    <a href="#" data-name="{{ name }}" data-auth="{{ viewer.auth }}" class="wiki-remove-alias brackets tooltip" title="Delete alias">X</a>
     <a href="user.php?id={{ user_id }}" class="brackets tooltip" title="View user">U</a>
-    {% endif %}
+{%  endif %}
                 </li>
 {% endfor %}
             </ul>
