@@ -15,7 +15,7 @@
 @import '../apollostage/_variables';
 
 // debug slugs: must be after import.
-$build-slug: "Orpheus Paper build 240808";
+$build-slug: $build-slug + " " + "paper";
 
 // override as follows:
 // ////////////////////////////////////////////////////////////////////////////////
@@ -34,6 +34,7 @@ $back-700: #9A9E9F;
 $back-800: #8D9091;
 $back-900: #808384;
 $back-1000: #727576;
+$back-800-low: #8D909155;
 
 // Mids
 $mid-100: #00AD89;
@@ -118,8 +119,8 @@ $ds-gray-99: hsl(120deg 100% 99.6%);
 // DEFINE FROM LOGICAL LAYOUT TO TOKENS
 
 $color-background-base: $back-100;
-$color-background-blockquote: $back-400;
-$color-background-box: $back-500;
+$color-background-blockquote: $back-800-low;
+$color-background-box: $back-800-low;
 $color-background-form: $back-200; // also boxes on frontpage
 $color-background-input: $back-400;
 $color-background-input-active: $back-500;
