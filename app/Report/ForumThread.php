@@ -16,7 +16,11 @@ class ForumThread extends AbstractReport {
         return "the forum thread [thread]{$this->subject->id()}[/thread]";
     }
 
+    public function titlePrefix(): string {
+        return 'Forum Thread Report: ';
+    }
+
     public function title(): string {
-        return 'Forum Thread Report: ' . display_str($this->subject->title());
+        return $this->subject->title();
     }
 }

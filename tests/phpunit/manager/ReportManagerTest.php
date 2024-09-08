@@ -47,6 +47,12 @@ class ReportManagerTest extends TestCase {
         $this->assertEquals("phpunit collage report", $report->reason(), 'collage-report-reason');
         $this->assertEquals($this->collage->id(), $report->subjectId(), 'collage-report-subject-id');
         $this->assertEquals(1, $report->resolve($this->userList[0]));
+
+        $reportSubject = new Report\Collage($report->id(), $this->collage);
+        $this->assertFileExists(TEMPLATE_PATH . $reportSubject->template(), 'collage-report-template');
+        $this->assertStringContainsString($this->collage->url(), $reportSubject->bbLink(), 'collage-report-bblink');
+        $this->assertEquals('Collage Report: ', $reportSubject->titlePrefix(), 'collage-report-title-prefix');
+        $this->assertEquals($this->collage->name(), $reportSubject->title(), 'collage-report-title');
     }
 
     public function testReportRequest(): void {
@@ -94,12 +100,11 @@ class ReportManagerTest extends TestCase {
 
         // report specifics
         $reqReport = new Report\Request($report->id(), $this->request);
+        $this->assertFileExists(TEMPLATE_PATH . $reqReport->template(), 'request-report-template');
+        $this->assertStringContainsString($this->request->url(), $reqReport->bbLink(), 'request-report-bblink');
+        $this->assertEquals('Request Report: ', $reqReport->titlePrefix(), 'request-report-title-prefix');
+        $this->assertEquals($this->request->title(), $reqReport->title(), 'request-report-not-an-update-title');
         $this->assertTrue($reqReport->needReason(), 'request-report-not-an-update');
-        $this->assertEquals(
-            'Request Report: ' . display_str($this->request->title()),
-            $reqReport->title(),
-            'request-report-not-an-update'
-        );
 
         // note
         $note = "abc<br />def<br />ghi";
@@ -179,6 +184,12 @@ class ReportManagerTest extends TestCase {
         $this->assertEquals('phpunit add note', $report->notes(), 'report-add-notes');
 
         $this->assertEquals($report->id(), $manager->findById($report->id())->id(), 'report-user-find');
+
+        $reportSubject = new Report\User($report->id(), $this->userList[1]);
+        $this->assertFileExists(TEMPLATE_PATH . $reportSubject->template(), 'user-report-template');
+        $this->assertStringContainsString($this->userList[1]->username(), $reportSubject->bbLink(), 'user-report-bblink');
+        $this->assertEquals('User Report: ', $reportSubject->titlePrefix(), 'user-report-title-prefix');
+        $this->assertEquals($this->userList[1]->username(), $reportSubject->title(), 'user-report-title');
     }
 
     public function testDecorate(): void {

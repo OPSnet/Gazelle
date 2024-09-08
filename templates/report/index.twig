@@ -36,28 +36,28 @@
     </div>
 {{ paginator.linkbox|raw }}
 {% for item in list %}
-    {%- set report = item.report %}
+{% set report = item.report %}
         <div id="report_{{ report.id }}" style="margin-bottom: 1em;" class="pending_report_v1">
             <table cellpadding="5" id="report_{{ report.id }}">
                 <tr>
                     <td><strong>{{ report.link|raw }}</strong></td>
                     <td>
                         <strong>{{ type[report.subjectType].title }}</strong> was reported by {{ report.reporter.id|user_url }} {{ report.created|time_diff }}
-    {%- if report.reporter.id != viewer.id %}
+{%  if report.reporter.id != viewer.id %}
                         <a href="reports.php?action=compose&amp;toid={{ report.reporter.id }}&amp;reportid={{ report.id }}&amp;type={{ report.subjectType }}&amp;thingid={{ report.subjectId }}" class="brackets">Contact</a>
-    {%- endif %}
+{%  endif %}
                     </td>
                 </tr>
                 <tr>
                     <td class="center" colspan="2">
                         <strong>
-    {%- if item.link -%}
-        {{ item.link|raw }}
-    {%- elseif item.subject -%}
-        {{ item.subject.link|raw }}
-    {%- else -%}
+{%  if item.link %}
+{{      item.link|raw }}
+{%  elseif item.subject %}
+{{      item.subject.link|raw }}
+{%  else %}
         No {{ item.label }} with the reported ID found
-    {%- endif -%}
+{%  endif %}
                         </strong>
                     </td>
                 </tr>
@@ -66,13 +66,13 @@
                 </tr>
                 <tr>
                     <td colspan="2">
-    {% if report.claimer.id == viewer.id %}
+{%  if report.claimer.id == viewer.id %}
                         <span id="claimed_{{ report.id }}">Claimed by {{ report.claimer.id|user_url }} <a href="#" onclick="unClaim({{ report.id }}); return false;" class="brackets">Unclaim</a></span>
-    {% elseif report.claimer.id %}
+{%  elseif report.claimer.id %}
                         <span id="claimed_{{ report.id }}">Claimed by {{ report.claimer.id|user_url }}</span>
-    {% else %}
+{%  else %}
                         <a href="#" id="claim_{{ report.id }}" onclick="claim({{ report.id }}); return false;" class="brackets">Claim</a>
-    {% endif %}
+{%  endif %}
                         &nbsp;&nbsp;
                         <a href="#" onclick="toggleNotes({{ report.id }}); return false;" class="brackets">Toggle notes</a>
                         <div id="notes_div_{{ report.id }}" style="display: {% if report.notes %}block{% else %}none{% endif %};">
@@ -82,24 +82,25 @@
                         </div>
                     </td>
                 </tr>
-    {% if report.status != 'Resolved' %}
+{%  if report.status != 'Resolved' %}
                 <tr>
                     <td class="center" colspan="2">
                         <form id="report_form_{{ report.id }}" action="">
                             <input type="hidden" name="reportid" value="{{ report.id }}" />
                             <input type="hidden" name="auth" value="{{ viewer.auth }}" />
                             <input type="submit" onclick="return resolve({{ report.id }},
-        {%- if not report.claimer or report.claimer.id == viewer.id %}true{% else %}false{% endif %})" name="submit" value="Resolve" />
+{%      if not report.claimer
+            or report.claimer.id == viewer.id %}true{% else %}false{% endif %})" name="submit" value="Resolve" />
                         </form>
                     </td>
                 </tr>
-    {% else %}
+{%  else %}
                 <tr>
                     <td colspan="2">
                         Resolved by {{ report.resolver.id|user_url }} {{ report.resolved|time_diff }}
                     </td>
                 </tr>
-    {% endif %}
+{%  endif %}
             </table>
         </div>
 {% else %}

@@ -16,7 +16,11 @@ class User extends AbstractReport {
         return "the user [user]{$this->subject->username()}[/user]";
     }
 
+    public function titlePrefix(): string {
+        return 'User Report: ';
+    }
+
     public function title(): string {
-        return 'User Report: ' . display_str($this->subject->username());
+        return $this->subject->username();
     }
 }

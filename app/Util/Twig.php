@@ -13,7 +13,7 @@ class Twig {
 
     public static function factory(): \Twig\Environment {
         $twig = new \Twig\Environment(
-            new \Twig\Loader\FilesystemLoader(__DIR__ . '/../../templates'), [
+            new \Twig\Loader\FilesystemLoader(__DIR__ . '/../../' . TEMPLATE_PATH), [
                 'debug' => DEBUG_MODE,
                 'cache' => __DIR__ . '/../../cache/twig'
             ]);

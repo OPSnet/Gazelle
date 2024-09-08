@@ -18,12 +18,12 @@
             <td class="colhead_dark">Username</td>
             <td class="colhead_dark number_column">Reports</td>
         </tr>
-    {% for result in stats.day(1) %}
+{%  for result in stats.day(1) %}
         <tr{% if result.user_id == viewer.id %} class="rowa"{% endif %}>
             <td>{{ result.user_id|user_url }}</td>
             <td class="number_column">{{ result.total|number_format }}</td>
         </tr>
-    {% endfor %}
+{%  endfor %}
     </table>
 
     <h3><strong>Reports resolved in the last week</strong></h3>
@@ -32,12 +32,12 @@
             <td class="colhead_dark">Username</td>
             <td class="colhead_dark number_column">Reports</td>
         </tr>
-    {% for result in stats.day(7) %}
+{%  for result in stats.day(7) %}
         <tr{% if result.user_id == viewer.id %} class="rowa"{% endif %}>
             <td>{{ result.user_id|user_url }}</td>
             <td class="number_column">{{ result.total|number_format }}</td>
         </tr>
-    {% endfor %}
+{%  endfor %}
     </table>
 
     <h3><strong>Reports resolved in the last month</strong></h3>
@@ -46,12 +46,12 @@
             <td class="colhead_dark">Username</td>
             <td class="colhead_dark number_column">Reports</td>
         </tr>
-    {% for result in stats.day(30) %}
+{%  for result in stats.day(30) %}
         <tr{% if result.user_id == viewer.id %} class="rowa"{% endif %}>
             <td>{{ result.user_id|user_url }}</td>
             <td class="number_column">{{ result.total|number_format }}</td>
         </tr>
-    {% endfor %}
+{%  endfor %}
     </table>
 
     <h3><strong>Reports resolved all time</strong></h3>
@@ -60,12 +60,12 @@
             <td class="colhead_dark">Username</td>
             <td class="colhead_dark number_column">Reports</td>
         </tr>
-    {% for result in stats.allTime %}
+{%  for result in stats.allTime %}
         <tr{% if result.user_id == viewer.id %} class="rowa"{% endif %}>
             <td>{{ result.user_id|user_url }}</td>
             <td class="number_column">{{ result.total|number_format }}</td>
         </tr>
-    {% endfor %}
+{%  endfor %}
     </table>
 {% endif %}
 </div>

@@ -16,7 +16,11 @@ class ForumPost extends AbstractReport {
         return "[thread]{$this->subject->thread()->id()}:{$this->subject->id()}[/thread]";
     }
 
+    public function titlePrefix(): string {
+        return "Forum Post Report: ";
+    }
+
     public function title(): string {
-        return "Forum Post Report: Post ID #{$this->subject->id()}";
+        return "Post ID #{$this->subject->id()}";
     }
 }

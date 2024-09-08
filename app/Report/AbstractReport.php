@@ -14,6 +14,7 @@ abstract class AbstractReport extends \Gazelle\Base {
     abstract public function template(): string;
     abstract public function bbLink(): string;
     abstract public function title(): string;
+    abstract public function titlePrefix(): string;
 
     public function subject(): \Gazelle\Base {
         return $this->subject; /** @phpstan-ignore-line */

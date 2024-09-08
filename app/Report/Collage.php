@@ -16,7 +16,11 @@ class Collage extends AbstractReport {
         return "the collage [url={$this->subject->url()}]" . display_str($this->subject->name()) . '[/url]';
     }
 
+    public function titlePrefix(): string {
+        return 'Collage Report: ';
+    }
+
     public function title(): string {
-        return 'Collage Report: ' . display_str($this->subject->name());
+        return $this->subject->name();
     }
 }

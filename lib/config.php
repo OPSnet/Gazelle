@@ -562,6 +562,9 @@ defined('RESEED_NEVER_ACTIVE_TORRENT') or define('RESEED_NEVER_ACTIVE_TORRENT', 
 // How many days to wait until a previously active torrent can be requested for reseed
 defined('RESEED_TORRENT') or define('RESEED_TORRENT', 14);
 
+// Where are the Twig templates found (relative to the root directory)
+defined('TEMPLATE_PATH') or define('TEMPLATE_PATH', 'templates/');
+
 // ------------------------------------------------------------------------
 // Inactivity reaper settings
 //

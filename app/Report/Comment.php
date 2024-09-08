@@ -21,7 +21,11 @@ class Comment extends AbstractReport {
         return "[url={$this->subject->url()}]this comment[/url]";
     }
 
+    public function titlePrefix(): string {
+        return "Comment Report: #{$this->subject->id()} ";
+    }
+
     public function title(): string {
-        return "Comment Report: #{$this->subject->id()} " . shortenString($this->subject->body(), 50);
+        return shortenString($this->subject->body(), 50);
     }
 }

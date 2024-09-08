@@ -379,6 +379,7 @@ class RequestTest extends TestCase {
     }
 
     public function testReport(): void {
+        // FIXME: this duplicates tests in tests/phpunit/manager/ReportManagerTest.php
         $this->userList['admin']->addBounty(BUFFER_FOR_BOUNTY);
         $this->request = \GazelleUnitTest\Helper::makeRequestMusic($this->userList['admin'], 'phpunit request report');
         $this->request->artistRole()->set(
@@ -396,7 +397,7 @@ class RequestTest extends TestCase {
         );
         $this->assertEquals('phpunit request report', $report->reason(), 'request-report-reason');
         $requestReport = new Report\Request($report->id(), $this->request);
-        $this->assertStringStartsWith('Request Report: ', $requestReport->title(), 'request-report-title');
+        $this->assertStringStartsWith('Request Report: ', $requestReport->titlePrefix(), 'request-report-title');
         $this->assertEquals('report/request.twig', $requestReport->template(), 'request-report-template');
         $this->assertEquals(
             "the request [url=requests.php?action=view&amp;id={$this->request->id()}]{$title}[/url]",

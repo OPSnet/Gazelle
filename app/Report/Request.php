@@ -18,8 +18,12 @@ class Request extends AbstractReport {
         return "the request [url={$this->subject->url()}]" . display_str($this->subject->title()) . '[/url]';
     }
 
+    public function titlePrefix(): string {
+        return 'Request Report: ';
+    }
+
     public function title(): string {
-        return 'Request Report: ' . display_str($this->subject->title());
+        return $this->subject->title();
     }
 
     public function isUpdate(bool $isUpdate): static {
