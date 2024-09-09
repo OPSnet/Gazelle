@@ -176,9 +176,9 @@
    ### 4.13.2  Forum Table Structure
    ### 4.13.3  Forum Headers
    ## 4.14  Rules
-   ## 4.15 Reserved
-   ## 4.16 Handling for Sticky Table Headers on Mobile
-   ## 4.17 Site Header and Menu
+   ## 4.15  Friend List
+   ## 4.16  Handling for Sticky Table Headers on Mobile
+   ## 4.17  Site Header and Menu
    ### 4.17.1  Mobile Menu Setup
    ### 4.17.2  Mobile Menu Layout
    ### 4.17.3  Top Menubar
@@ -3414,7 +3414,7 @@ Documentation of mobile classes:
     position: absolute;
     z-index: $z-avatar-mobile;
   }
-  
+
   /* END forum headers */
   /* END forums */
 
@@ -3432,11 +3432,11 @@ Documentation of mobile classes:
 
   /* ************************************************ */
 
-  /* ## 4.15 friend list */  
+  /* ## 4.15 friend list */
   /* TODO: Site HTML support to mobilize this table. */
-  
+
   body#friends div.avatar_container img {
-    display:none
+    display: none;
   }
 
   /* ************************************************ */
