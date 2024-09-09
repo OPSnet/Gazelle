@@ -227,6 +227,7 @@ $z-mobilemenu_closed-tab-icons: 500;
 $z-desktop-menu-open: 800;
 $z-desktop-menu-closed: 900;
 $z-sticky-table-headers: 1;
+$z-avatar-mobile: 1;
 $height-mobilemenu_closed-tab: 32px;
 $wrapper-max-width: 1020px;
 
@@ -2513,13 +2514,15 @@ ul#check.nobullet > * {
   background-size: 32px;
 }
 
-.upload-error a {
+.upload-error a,
+ul#check.nobullet > * a {
   color: $color-text-anchor-error !important;
   text-decoration-line: underline;
 }
 
-.upload-error a::after {
-  content: ' ↗︎';
+.upload-error a::after,
+ul#check.nobullet > * a::after {
+  content: '↗︎';
 }
 
 .upload-error,
@@ -3409,7 +3412,9 @@ Documentation of mobile classes:
     min-height: 0;
     min-width: 0;
     position: absolute;
+    z-index: $z-avatar-mobile;
   }
+  
   /* END forum headers */
   /* END forums */
 
@@ -3427,7 +3432,12 @@ Documentation of mobile classes:
 
   /* ************************************************ */
 
-  /* ## 4.15 reserved */
+  /* ## 4.15 friend list */  
+  /* TODO: Site HTML support to mobilize this table. */
+  
+  body#friends div.avatar_container img {
+    display:none
+  }
 
   /* ************************************************ */
 
