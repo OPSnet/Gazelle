@@ -35,4 +35,16 @@ class PgInfoTest extends TestCase {
         $list = $pgInfo->info();
         $this->assertEquals('public.user_warning', $list[0]['table_name'], 'pginfo-list');
     }
+
+    public function testCheckpointInfo(): void {
+        $info = $this->pg()->checkpointInfo();
+        $this->assertCount(3, $info);
+        $this->assertIsInt($info['checkpoints_timed'], 'pg-checkpoint-timed');
+        $this->assertIsInt($info['checkpoints_req'], 'pg-checkpoint-req');
+        $this->assertIsFloat($info['percent'], 'pg-checkpoint-percent');
+    }
+
+    public function testPgVersion(): void {
+        $this->assertIsString($this->pg()->version(), 'pg-version');
+    }
 }

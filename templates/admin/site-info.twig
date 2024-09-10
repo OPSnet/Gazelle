@@ -57,6 +57,35 @@ div#phpinfo hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}
         Version: {{ mysql_version }}
     </div>
 
+    <h3>Postgresql</h3>
+    <div class="box pad">
+        Version: {{ pg_version }}<br /><br />
+        <h4>Checkpointing</h4>
+        <div class="pg-checkpoint">
+            <div>Ratio</div>
+            <div>Timed</div>
+            <div>Requested</div>
+            <div class="
+{%- if pg_checkpoint.percent > 99.99 %}r99
+{%- elseif pg_checkpoint.percent > 99.8 %}r50
+{%- elseif pg_checkpoint.percent > 99.7 %}r20
+{%- elseif pg_checkpoint.percent > 99.6 %}r10
+{%- elseif pg_checkpoint.percent > 99.5 %}r09
+{%- elseif pg_checkpoint.percent > 99.4 %}r08
+{%- elseif pg_checkpoint.percent > 99.3 %}r07
+{%- elseif pg_checkpoint.percent > 99.2 %}r06
+{%- elseif pg_checkpoint.percent > 99.1 %}r05
+{%- elseif pg_checkpoint.percent > 99.0 %}r04
+{%- elseif pg_checkpoint.percent > 98.0 %}r03
+{%- elseif pg_checkpoint.percent > 97.0 %}r02
+{%- elseif pg_checkpoint.percent > 95.0 %}r01
+{%- else %}r00{% endif -%}
+                ">{{ pg_checkpoint.percent }}</div>
+            <div>{{ pg_checkpoint.checkpoints_timed|number_format }}</div>
+            <div>{{ pg_checkpoint.checkpoints_req|number_format }}</div>
+        </div>
+    </div>
+
     <h3>Git</h3>
     <div class="box pad">
         <span style="width: 150px; display: inline-block;">Branch:</span> {{ site_info.gitBranch }}<br />

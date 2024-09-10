@@ -156,4 +156,25 @@ class Pg {
         }
         return $st->fetchAll(\PDO::FETCH_COLUMN);
     }
+
+    public function checkpointInfo(): array {
+        $info = $this->rowAssoc("
+            select checkpoints_timed,
+                checkpoints_req,
+                case when checkpoints_timed + checkpoints_req = 0
+                    then 0
+                    else round(
+                        (checkpoints_timed::float / (checkpoints_timed + checkpoints_req) * 100)::numeric,
+                        4
+                    )
+                end as percent
+            from pg_stat_bgwriter
+        ");
+        $info['percent'] = (float)$info['percent'];
+        return $info;
+    }
+
+    public function version(): string {
+        return $this->scalar('select version()');
+    }
 }

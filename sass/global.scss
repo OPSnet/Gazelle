@@ -952,6 +952,13 @@ input[type="search"] {
   width: 100%;
 }
 
+.pg-checkpoint {
+  padding-top: 10px;
+  display: grid;
+  grid-template-columns: 100px 100px 100px;
+  row-gap: 2px;
+}
+
 .xdebug-error {
   font-size: 12px;
   width: 95%;

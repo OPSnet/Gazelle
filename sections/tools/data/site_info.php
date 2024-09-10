@@ -35,6 +35,7 @@ if (isset($_GET['mode']) && $_GET['mode'] === 'userrank') {
 } else {
     $random = openssl_random_pseudo_bytes(8, $strong);
     $db = new Gazelle\DB();
+    $pg = new Gazelle\DB\Pg(GZPG_DSN);
     echo $Twig->render('admin/site-info.twig', [
         'uid'              => uid(posix_getuid()),
         'gid'              => gid(posix_getgid()),
@@ -42,6 +43,8 @@ if (isset($_GET['mode']) && $_GET['mode'] === 'userrank') {
         'egid'             => gid(posix_getegid()),
         'openssl_strong'   => $strong,
         'mysql_version'    => $db->version(),
+        'pg_checkpoint'    => $pg->checkpointInfo(),
+        'pg_version'       => $pg->version(),
         'php_version'      => phpversion(),
         'site_info'        => new Gazelle\SiteInfo(),
         'timestamp_php'    => date('Y-m-d H:i:s'),
