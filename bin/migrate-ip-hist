@@ -1,0 +1,98 @@
+#! /usr/bin/env php
+<?php
+
+require_once(__DIR__ . "/../lib/bootstrap.php");
+
+// length of interval between two records to extend the date range
+define('INTERVAL_DAYS', 8);
+
+$db = Gazelle\DB::DB();
+$pg = new \Gazelle\DB\Pg(GZPG_DSN);
+
+$db->prepared_query("
+    SELECT ID FROM users_main ORDER BY 1
+");
+$list = $db->collect(0, false);
+
+foreach ($list as $userId) {
+    $db->prepared_query('
+        SELECT IP                        AS "ip",
+            StartTime                    AS "begin",
+            coalesce(EndTime, StartTime) AS "end",
+            coalesce(
+                timestampdiff(
+                    day,
+                    lag(EndTime) OVER (PARTITION BY IP ORDER BY EndTime),
+                    StartTime
+                ), 0
+            ) AS day_gap_prev
+        FROM users_history_ips
+        WHERE UserID = ?
+        ORDER BY inet_aton(IP), StartTime;
+        ', $userId
+    );
+
+    $total = 0;
+    $prev  = ''; // keep track of when the IP address changes
+    $range = []; // date ranges of this IP
+    foreach ($db->to_array(false, MYSQLI_ASSOC, false) as $row) {
+        if ($prev and $prev != $row['ip']) {
+            persist($pg, $userId, $prev, $total, $range);
+            $range = [];
+            $total = 0;
+        }
+        $gap = $row['day_gap_prev'];
+        if ($gap <= INTERVAL_DAYS && count($range)) {
+            // close by, extend previous range
+            $range[count($range) - 1]['end'] = $row['end'];
+        } else {
+            // too far away or a new ip, create a new range
+            $range[] = [
+                'begin' => $row['begin'],
+                'end'   => $row['end'],
+            ];
+        }
+        $prev = $row['ip'];
+        $total++;
+    }
+
+    persist($pg, $userId, $prev, $total, $range);
+}
+
+function persist(\Gazelle\DB\Pg $pg, int $userId, string $ip, int $total, array $range): void {
+    $pg->pdo()->beginTransaction();
+    $seen = 'tstzmultirange('
+        . implode(',', array_map(
+            fn ($r) => "tstzrange('{$r['begin']}','{$r['end']}', '[]')",
+            $range
+        ))
+        . ')';
+
+    $exists = $pg->scalar("
+        select 1
+        from ip_site_history
+        where id_user = ?
+            and ip = ?
+        ", $userId, $ip
+    );
+    if ($exists) {
+        echo "$userId $ip append\n";
+        $pg->prepared_query("
+            update ip_site_history set
+                seen = seen + $seen,
+                total = total + ?
+            where id_user = ?
+            and ip = ?
+            ", $total, $userId, $ip
+        );
+    } else {
+        echo "$userId $ip create\n";
+        $pg->prepared_query("
+            insert into ip_site_history
+                   (id_user, ip, total, seen)
+            values (?,       ?,  ?,    $seen)
+            ", $userId, $ip, $total
+        );
+    }
+    $pg->pdo()->commit();
+}
