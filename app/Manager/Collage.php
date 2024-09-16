@@ -308,9 +308,9 @@ class Collage extends \Gazelle\BaseManager {
                         AND Deleted = '0'
                         AND CategoryID = ?
                         AND Name LIKE concat('%', ?, '%')
-                    ORDER BY NumTorrents DESC, Name
+                    ORDER BY Name != ?, NumTorrents DESC, Name
                     LIMIT 10
-                    ", CollageType::artist->value, $stem
+                    ", CollageType::artist->value, $stem, $stem
                 );
             } else {
                 self::$db->prepared_query("
@@ -321,9 +321,9 @@ class Collage extends \Gazelle\BaseManager {
                         AND Deleted = '0'
                         AND CategoryID NOT IN (?, ?)
                         AND Name LIKE concat('%', ?, '%')
-                    ORDER BY NumTorrents DESC, Name
+                    ORDER BY Name != ?, NumTorrents DESC, Name
                     LIMIT 10
-                    ", CollageType::artist->value, CollageType::personal->value, $stem
+                    ", CollageType::artist->value, CollageType::personal->value, $stem, $stem
                 );
             }
             $pairs = self::$db->to_pair('ID', 'Name', false);

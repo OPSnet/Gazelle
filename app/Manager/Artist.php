@@ -152,9 +152,11 @@ class Artist extends \Gazelle\BaseManager {
                 INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
                 WHERE aa.Name LIKE concat(?, '%')
                 GROUP BY a.ArtistID, aa.Name
-                ORDER BY sum(tls.Snatched) DESC
-                LIMIT 20",
-                str_replace("%", "\\%", $prefix)
+                ORDER BY aa.Name != ?,
+                    sum(tls.Snatched) DESC
+                LIMIT 20
+                ", str_replace("%", "\\%", $prefix),
+                $prefix,
             );
             $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
             self::$cache->cache_value($key, $list, 3600);
