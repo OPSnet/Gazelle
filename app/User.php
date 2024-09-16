@@ -3,6 +3,7 @@
 namespace Gazelle;
 
 use Gazelle\Enum\AvatarDisplay;
+use Gazelle\Enum\UserAuditEvent;
 use Gazelle\Enum\UserStatus;
 use Gazelle\Enum\UserTokenType;
 use Gazelle\Util\Irc;
@@ -24,11 +25,12 @@ class User extends BaseObject {
     protected array $forumWarning = [];
     protected array $staffNote = [];
 
-    protected Stats\User     $stats;
-    protected User\Invite    $invite;
-    protected User\Ordinal   $ordinal;
-    protected User\Privilege $privilege;
-    protected User\Snatch    $snatch;
+    protected Stats\User      $stats;
+    protected User\AuditTrail $auditTrail;
+    protected User\Invite     $invite;
+    protected User\Ordinal    $ordinal;
+    protected User\Privilege  $privilege;
+    protected User\Snatch     $snatch;
 
     public function flush(): static {
         self::$cache->delete_multi([
@@ -49,6 +51,14 @@ class User extends BaseObject {
     public function location(): string { return 'user.php?id=' . $this->id; }
 
     /**
+     * Delegate privilege methods to the User\AuditTrail class
+     * This delegation is stateful.
+     */
+    public function auditTrail(): User\AuditTrail {
+        return $this->auditTrail ??= new User\AuditTrail($this);
+    }
+
+    /**
      * Delegate snatch status methods to the User\Inbox class.
      * A new object is instantiated each time. This is nearly
      * always what you need, if just creating a new conversation.
@@ -57,10 +67,6 @@ class User extends BaseObject {
         return new User\Inbox($this);
     }
 
-    /**
-     * Delegate privilege methods to the User\Invite class
-     * This delegation is stateful.
-     */
     public function invite(): User\Invite {
         return $this->invite ??= new User\Invite($this);
     }
@@ -606,6 +612,7 @@ class User extends BaseObject {
         foreach ($recovery as $value) {
             $manager->create(UserTokenType::mfa, user: $this, value: $value);
         }
+        $this->auditTrail()->addEvent(UserAuditEvent::mfa, 'configured');
         $this->flush();
         return $affected;
     }
@@ -637,10 +644,15 @@ class User extends BaseObject {
             WHERE ID = ?
             ', count($list) === 0 ? null : serialize($list), $this->id
         );
-        return self::$db->affected_rows() === 1;
+        $burnt = self::$db->affected_rows() === 1;
+        if ($burnt) {
+            $this->auditTrail()->addEvent(UserAuditEvent::mfa, "used token $key");
+        }
+        return $burnt;
     }
 
     public function remove2FA(): static {
+        $this->auditTrail()->addEvent(UserAuditEvent::mfa, "removed");
         return $this->setField('2FA_Key', null)
             ->setField('Recovery', null);
     }
@@ -942,7 +954,7 @@ class User extends BaseObject {
     }
 
     /**
-     * Record a staff not for this user
+     * Record a staff note for this user
      */
     public function addStaffNote(string $note): static {
         $this->staffNote[] = $note;

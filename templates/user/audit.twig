@@ -1,0 +1,46 @@
+{{ header(user.username ~ ' › Audit Trail') }}
+<div class="header">
+<h2>{{ user.id|user_url }} › Audit Trail</h2>
+</div>
+<style>
+#audit {
+  align-items: start;
+  gap: 2px 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 125px 10fr;
+  justify-items: start;
+}
+
+#audit .auhead {
+  font-weight: 900;
+  padding: 2px;
+}
+#audit .aubody {
+  padding: 2px;
+}
+#audit .id {
+  justify-self: end;
+}
+
+</style>
+
+<div id="audit">
+{% for e in user.auditTrail.eventList %}
+{%  if loop.first %}
+<div class="auhead id">#</div>
+<div class="auhead event">Event</div>
+<div class="auhead date">Date</div>
+<div class="auhead note">Note</div>
+{%  endif %}
+<div class="aubody id">{{ e.id_user_audit_trail }}</div>
+<div class="aubody event">{{ e.event }}</div>
+<div class="aubody date">{{ e.created|replace({'+00': ''}) }}</div>
+<div class="aubody note">{{ e.note|bb_format }}</div>
+{%  if loop.last %}
+{%  endif %}
+{% else %}
+<div class="thin pad box">Audit trail is empty</div>
+{% endfor %}
+</div>
+
+{{ footer() }}

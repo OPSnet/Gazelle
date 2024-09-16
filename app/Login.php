@@ -2,6 +2,8 @@
 
 namespace Gazelle;
 
+use Gazelle\Enum\UserAuditEvent;
+
 class Login extends Base {
     use Pg;
 
@@ -150,6 +152,7 @@ class Login extends Base {
             $userMan->disableUserList(
                 new Tracker(),
                 [$user->id()],
+                UserAuditEvent::activity,
                 "Logged in via Tor ($ipaddr)",
                 Manager\User::DISABLE_TOR
             );

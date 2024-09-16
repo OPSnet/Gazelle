@@ -2,6 +2,7 @@
 
 namespace Gazelle\Manager;
 
+use Gazelle\Enum\UserAuditEvent;
 use Gazelle\Enum\UserStatus;
 use Gazelle\Util\Time;
 
@@ -739,6 +740,10 @@ class User extends \Gazelle\BaseManager {
             if (is_null($user)) {
                 continue;
             }
+            $user->auditTrail()->addEvent(
+                UserAuditEvent::activity,
+                "Disabled for inactivity (never logged in)",
+            );
             $user->flush();
             $task?->debug("Disabled {$user->label()}", $userId);
         }
@@ -817,7 +822,13 @@ class User extends \Gazelle\BaseManager {
         foreach (self::$db->collect(0, false) as $userId) {
             $user = $this->findById($userId);
             if ($user) {
-                $this->disableUserList($tracker, [$userId], 'Disabled for inactivity.', self::DISABLE_INACTIVITY);
+                $this->disableUserList(
+                    $tracker,
+                    [$userId],
+                    UserAuditEvent::activity,
+                    'Disabled for inactivity.',
+                    self::DISABLE_INACTIVITY,
+                );
                 $processed++;
             }
             $this->flushEnabledUsersCount();
@@ -830,7 +841,7 @@ class User extends \Gazelle\BaseManager {
      *
      * @return int number of users disabled
      */
-    public function disableUserList(\Gazelle\Tracker $tracker, array $idList, string $comment, int $reason): int {
+    public function disableUserList(\Gazelle\Tracker $tracker, array $idList, UserAuditEvent $event, string $comment, int $reason): int {
         self::$db->begin_transaction();
         self::$db->prepared_query("
             UPDATE users_main um
@@ -860,6 +871,7 @@ class User extends \Gazelle\BaseManager {
         foreach ($idList as $userId) {
             $user = $this->findById($userId);
             if ($user) {
+                $user->auditTrail()->addEvent($event, $comment);
                 $user->flush();
             }
         }
@@ -1041,6 +1053,7 @@ class User extends \Gazelle\BaseManager {
                 $user->setField('PermissionID', $level['To'])
                     ->addStaffNote("Class changed to $toClass by System")
                     ->modify();
+                $user->auditTrail()->addEvent(UserAuditEvent::userclass, "Promoted to $toClass");
                 $user->inbox()->createSystem(
                     "You have been promoted to $toClass",
                     "Congratulations on your promotion to $toClass!\n\nTo read more about "
@@ -1103,6 +1116,7 @@ class User extends \Gazelle\BaseManager {
                 $user->setField('PermissionID', $level['From'])
                     ->addStaffNote("Class changed to $toClass by System")
                     ->modify();
+                $user->auditTrail()->addEvent(UserAuditEvent::userclass, "Demoted to $toClass");
                 $user->inbox()->createSystem(
                     "You have been demoted to $toClass",
                     "You now only qualify for the \"$toClass\" user class.\n\nTo read more about "
@@ -1428,6 +1442,10 @@ class User extends \Gazelle\BaseManager {
             $user->setField('can_leech', 0)
                 ->addStaffNote("Leeching privileges suspended by ratio watch system (required ratio: $ratio) for downloading more than 10 GBs on ratio watch.")
                 ->modify();
+            $user->auditTrail()->addEvent(
+                UserAuditEvent::ratio,
+                "Leeching privileges suspended by ratio watch system (required ratio: $ratio) for downloading more than 10 GBs on ratio watch."
+            );
             $user->inbox()->createSystem(
                 'Your download privileges have been removed',
                 'You have downloaded more than 10 GB while on Ratio Watch. Your leeching privileges have been suspended. Please reread the rules and refer to this guide on [url=wiki.php?action=article&name=ratiotips]how to improve your ratio[/url]',
@@ -1467,6 +1485,10 @@ class User extends \Gazelle\BaseManager {
                 continue;
             }
             $user->flush();
+            $user->auditTrail()->addEvent(
+                UserAuditEvent::ratio,
+                "Taken off ratio watch by adequate ratio.",
+            );
             $user->inbox()->createSystem(
                 'You have been taken off Ratio Watch',
                 "Congratulations! Feel free to begin downloading again.\n To ensure that you do not get put on ratio watch again, please read the rules located [url=rules.php?p=ratio]here[/url].\n"
@@ -1499,8 +1521,12 @@ class User extends \Gazelle\BaseManager {
             }
             $ratio = number_format($user->requiredRatio(), 2);
             $user->setField('can_leech', 0)
-                ->addStaffNote("Leeching ability suspended by ratio watch system (required ratio: $ratio)")
+                ->addStaffNote("Leeching privileges suspended by ratio watch system (required ratio: $ratio)")
                 ->modify();
+            $user->auditTrail()->addEvent(
+                UserAuditEvent::ratio,
+                "Leeching privileges suspended by ratio watch system (required ratio: $ratio)",
+            );
             $user->inbox()->createSystem(
                 'Your downloading privileges have been suspended',
                 "As you did not raise your ratio in time, your downloading privileges have been revoked. You will not be able to download any torrents until your ratio is above your new required ratio."

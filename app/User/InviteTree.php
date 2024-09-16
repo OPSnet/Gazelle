@@ -2,6 +2,8 @@
 
 namespace Gazelle\User;
 
+use Gazelle\Enum\UserAuditEvent;
+
 /* The invite tree is a bodge because Mysql cannot do recursive tree queries.
  * When looking at the Invite Tree page, position() represents how long ago
  * the user was invited (the lower, the more recent the creation), and
@@ -173,6 +175,7 @@ class InviteTree extends \Gazelle\Base {
             $staffNote .= "\nReason: $comment";
         }
         $this->user->addStaffNote($staffNote)->modify();
+        $this->user->auditTrail()->addEvent(UserAuditEvent::invite, $staffNote);
         $ban = [];
         foreach ($inviteeList as $inviteeId) {
             $invitee = $this->userMan->findById($inviteeId);
@@ -199,10 +202,17 @@ class InviteTree extends \Gazelle\Base {
             }
             if (!$doDisable) {  // $this->userMan->disableUserList will add the staff note otherwise
                 $invitee->addStaffNote($staffNote)->modify();
+                $invitee->auditTrail()->addEvent(UserAuditEvent::invite, $staffNote);
             }
         }
         if ($ban) {
-            $this->userMan->disableUserList($tracker, $ban, $staffNote, \Gazelle\Manager\User::DISABLE_TREEBAN);
+            $this->userMan->disableUserList(
+                $tracker,
+                $ban,
+                UserAuditEvent::invite,
+                $staffNote,
+                \Gazelle\Manager\User::DISABLE_TREEBAN,
+            );
         }
         return $message;
     }

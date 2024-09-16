@@ -333,11 +333,6 @@ echo $Twig->render('user/collage-list.twig', [
     'manager' => $tgMan,
 ]);
 
-?>
-    <!-- for the "jump to staff tools" button -->
-    <a id="staff_tools"></a>
-<?php
-
 // Linked accounts
 if ($Viewer->permitted('users_linked_users')) {
     echo $Twig->render('user/linked.twig', [

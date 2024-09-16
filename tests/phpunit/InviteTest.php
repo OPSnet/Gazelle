@@ -3,6 +3,7 @@
 namespace Gazelle;
 
 use PHPUnit\Framework\TestCase;
+use Gazelle\Enum\UserAuditEvent;
 
 class InviteTest extends TestCase {
     protected User $user;
@@ -224,6 +225,13 @@ class InviteTest extends TestCase {
             ),
             'invite-tree-manip-revoke'
         );
+        $eventList = array_values(array_filter(
+            $this->invitee->auditTrail()->eventList(),
+            fn ($e) => $e['event'] === UserAuditEvent::invite->value,
+        ));
+        $this->assertStringContainsString('Invite Tree ban on ', $eventList[0]['note'], 'invite-tree-event-0');
+        $this->assertStringContainsString('Invite Tree invites removed on ', $eventList[1]['note'], 'invite-tree-event-1');
+        $this->assertStringContainsString('Invite Tree comment on ', $eventList[2]['note'], 'invite-tree-event-2');
         $this->assertTrue($this->invitee->flush()->isDisabled(), 'invite-tree-inv-disabled');
         $this->assertStringContainsString(
             "Invite Tree ban on {$this->user->username()} by {$this->user->username()}\n",

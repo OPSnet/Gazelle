@@ -4,6 +4,7 @@
 /** @phpstan-var \Gazelle\Cache $Cache */
 /** @phpstan-var \Twig\Environment $Twig */
 
+use Gazelle\Enum\UserAuditEvent;
 use Gazelle\Enum\UserStatus;
 use Gazelle\Util\Mail;
 use Gazelle\Util\Time;
@@ -490,7 +491,13 @@ $userStatus = match ($_POST['UserStatus']) {
 if ($userStatus != $user->userStatus() && $Viewer->permitted('users_disable_users')) {
     $enableStr = "account status {$user->userStatus()->label()} → {$userStatus->label()}";
     if ($userStatus == UserStatus::disabled) {
-        $userMan->disableUserList($tracker, [$userId], "Disabled via moderation", Gazelle\Manager\User::DISABLE_MANUAL);
+        $userMan->disableUserList(
+            $tracker,
+            [$userId],
+            UserAuditEvent::activity,
+            "Disabled via moderation",
+            Gazelle\Manager\User::DISABLE_MANUAL,
+        );
         $needTrackerRefresh = false;
     } elseif ($userStatus == UserStatus::enabled) {
         $needTrackerAdd = true;
@@ -499,7 +506,8 @@ if ($userStatus != $user->userStatus() && $Viewer->permitted('users_disable_user
                 ->setField('RatioWatchEnds', null)
                 ->setField('RatioWatchDownload', 0);
         } else {
-            $enableStr .= ' (Ratio: ' . ratio_html($user->uploadedSize(), $user->downloadedSize(), false) . ', RR: ' . number_format($user->requiredRatio(), 2) . ')';
+            $enableStr .= ' (Ratio: ' . ratio_html($user->uploadedSize(), $user->downloadedSize(), false)
+                . ', RR: ' . number_format($user->requiredRatio(), 2) . ')';
             if ($cur['RatioWatchEnds']) {
                 $user->setField('can_leech', 1)
                     ->setField('RatioWatchDownload', $user->downloadedSize())
@@ -532,7 +540,13 @@ if ($sendHackedMail && $Viewer->permitted('users_disable_any')) {
             'user' => $user
         ])
     );
-    $userMan->disableUserList($tracker, [$userId], "Disabled via hacked email", Gazelle\Manager\User::DISABLE_MANUAL);
+    $userMan->disableUserList(
+        $tracker,
+        [$userId],
+        UserAuditEvent::activity,
+        "Disabled via hacked email",
+        Gazelle\Manager\User::DISABLE_MANUAL,
+    );
     $editSummary[] = "hacked account email sent to $hackedEmail";
 }
 
@@ -565,11 +579,15 @@ if (!(count($editSummary)) && $reason) {
 // that change, but until we never decode stuff coming out of the DB, not much can be done.
 
 if ($editSummary) {
-    $summary = implode(', ', $editSummary) . ' by ' . $Viewer->username();
+    $summary = implode(', ', $editSummary) . " by {$Viewer->username()}";
+    if ($reason) {
+        $summary .= "\nReason: $reason";
+    }
     $user->setField(
         'AdminComment',
-        Time::sqlTime() . ' - ' . ucfirst($summary) . ($reason ? "\nReason: $reason" : '') . "\n\n$adminComment"
+        Time::sqlTime() . ' - ' . ucfirst($summary) . "\n\n$adminComment"
     );
+    $user->auditTrail()->addEvent(UserAuditEvent::staffNote, ucfirst($summary), $Viewer);
 } elseif ($adminComment !== $cur['admincomment']) {
     $user->setField('AdminComment', $adminComment);
 }

@@ -3,6 +3,7 @@
 namespace Gazelle;
 
 use PHPUnit\Framework\TestCase;
+use Gazelle\Enum\UserAuditEvent;
 
 class UserManagerTest extends TestCase {
     protected array $userList;
@@ -40,7 +41,17 @@ class UserManagerTest extends TestCase {
         $userMan = new Manager\User();
         $idList  = array_map(fn($u) => $u->id(), $this->userList);
 
-        $this->assertEquals(3, $userMan->disableUserList(new Tracker(), $idList, 'phpunit mass disable', 3), 'uman-mass-disable');
+        $this->assertEquals(
+            3,
+            $userMan->disableUserList
+                (new Tracker(),
+                $idList,
+                UserAuditEvent::activity,
+                'phpunit mass disable',
+                3
+            ),
+            'uman-mass-disable'
+        );
         $this->userList[2]->flush();
         $this->assertTrue($this->userList[2]->isDisabled(), 'uman-disabled-user2');
         $this->assertFalse($this->userList[2]->isEnabled(), 'uman-enabled-user2');
@@ -97,7 +108,13 @@ class UserManagerTest extends TestCase {
 
         $this->assertEquals(
             1,
-            $userMan->disableUserList(new Tracker(), [$this->userList[2]->id()], 'phpunit fltoken', Manager\User::DISABLE_MANUAL),
+            $userMan->disableUserList(
+                new Tracker(),
+                [$this->userList[2]->id()],
+                UserAuditEvent::activity,
+                'phpunit fltoken',
+                \Gazelle\Manager\User::DISABLE_MANUAL,
+            ),
             'uman-masstoken-disable'
         );
         $userMan->clearMassTokens(18, allowLeechDisabled: false, excludeDisabled: true);

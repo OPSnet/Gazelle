@@ -28,15 +28,15 @@
     </div>
 
     <div class="linkbox">
-{% if not own_profile %}
-        <a href="inbox.php?action=compose&amp;toid={{ user_id }}" class="brackets" title="Send a private message">Send PM</a>
-    {% if not friend.isFriend(user) %}
-        <a href="friends.php?action=add&amp;friendid={{ user_id }}&amp;auth={{ viewer.auth }}" class="brackets">Add to friends</a>
-    {% endif %}
-        <a href="reports.php?action=report&amp;type=user&amp;id={{ user_id }}" class="brackets">Report user</a>
-{% endif %}
 {% if own_profile or viewer.permitted('users_edit_profiles') %}
         <a href="user.php?action=edit&amp;id={{ user_id }}" class="brackets">Settings</a>
+{% endif %}
+{% if not own_profile %}
+        <a href="inbox.php?action=compose&amp;toid={{ user_id }}" class="brackets" title="Send a private message">Send PM</a>
+{%  if not friend.isFriend(user) %}
+        <a href="friends.php?action=add&amp;friendid={{ user_id }}&amp;auth={{ viewer.auth }}" class="brackets">Add to friends</a>
+{%  endif %}
+        <a href="reports.php?action=report&amp;type=user&amp;id={{ user_id }}" class="brackets">Report user</a>
 {% endif %}
 {% if own_profile %}
         <a href="friends.php" class="brackets">Friends</a>
@@ -55,18 +55,18 @@
 {% endif %}
 {% if own_profile or viewer.permittedAny('users_logout', 'users_view_ips') %}
         <a href="user.php?id={{ user_id }}&amp;action=sessions" class="brackets">Sessions</a>
-    {% if viewer.permittedAny('users_logout', 'users_view_ips') %}
+{%  if viewer.permittedAny('users_logout', 'users_view_ips') %}
         <a href="tools.php?action=user_info&amp;userid={{ user_id }}" class="brackets">Email/IP info</a>
-    {% endif %}
+{%  endif %}
+{% endif %}
+{% if viewer.permitted('users_mod') %}
+        <a href="user.php?id={{ user_id }}&amp;action=audit" class="brackets">Audit</a>
 {% endif %}
 {% if viewer.permitted('admin_clear_cache') and viewer.permitted('users_override_paranoia') %}
         <a href="user.php?action=clearcache&amp;id={{ user_id }}" class="brackets">Clear cache</a>
 {% endif %}
 {% if viewer.permitted('admin_manage_permissions') %}
-        <a href="user.php?action=permissions&amp;userid={{ user_id }}" class="brackets">Permissions</a>
-{% endif %}
-{% if viewer.permitted('users_mod') %}
-        <a href="#staff_tools" class="brackets">Staff tools</a>
+        <a href="user.php?action=permissions&amp;userid={{ user_id }}" class="brackets">Custom Privileges</a>
 {% endif %}
     </div>
 
@@ -81,35 +81,35 @@
 
 {% if user.isEnabled and user.hasAcceptFL and (freeleech.item or freeleech.other) %}
 <div class="box box_info box_userinfo_give_FL">
-    {% if freeleech.other %}
+{%  if freeleech.other %}
     <div class="head colhead_dark">Freeleech Tokens Given</div>
     <ul class="stats nobullet">
-        {% if freeleech.other > 0 %}
+{%      if freeleech.other > 0 %}
     <li>You gave {{ freeleech.other }} token{{ freeleech.other|plural }} to {{ user.username }}. Your generosity is most appreciated!</li>
-        {% else %}
+{%      else %}
     <li>You attempted to give some tokens to {{ user.username }} but something didn't work out.
     No points were spent.</li>
-        {% endif %}
+{%      endif %}
             </ul>
-    {% else %}
+{%  else %}
     <div class="head colhead_dark">Give Freeleech Tokens</div>
     <form class="fl_form" name="user" id="fl_form" action="user.php?id={{ user_id }}" method="post">
         <ul class="stats nobullet">
-            {% for f in freeleech.item %}
+{%      for f in freeleech.item %}
                 <li><input type="radio" name="fltype" id="fl-{{ f.Label }}" value="fl-{{ f.Label }}" />
                 <label title="This costs {{ f.Price|number_format }} BP, which will leave you with {{ f.After|number_format
                     }} afterwards" for="fl-{{ f.Label }}"> {{ f.Name }}</label></li>
-            {% endfor %}
+{%      endfor %}
             <li><input type="text" id="message" name="message" placeholder="Message"/> <br /></li>
             <li><input type="submit" name="flsubmit" value="Send" /></li>
-            {% if freeleech.latest %}
+{%      if freeleech.latest %}
             <li>(You gave them {{ freeleech.latest.title|trim(' to Other') }} {{ freeleech.latest.purchase_date|time_diff }})</li>
-            {% endif %}
+{%      endif %}
         </ul>
         <input type="hidden" name="action" value="fltoken" />
         <input type="hidden" name="auth" value="{{ viewer.auth }}" />
     </form>
-    {% endif %}
+{%  endif %}
 </div>
 {% endif %}
 
@@ -128,9 +128,9 @@
 {% if visible %}
         <li{{ class_override(visible) }}>Last seen: {% if viewer.id == user.id or viewer.isStaff -%}
     {{- user.lastAccessRealtime|time_diff -}}
-    {%- else -%}
+{%  else %}
     {{- user.lastAccess|time_diff -}}
-    {%- endif -%}
+{%  endif %}
     </li>
 {% endif %}
 
@@ -146,7 +146,7 @@
 
 {% set visible = min(user.propertyVisible(preview_user, 'downloaded'), user.propertyVisible(preview_user, 'uploaded')) %}
 {% if visible %}
-    {% set buffer = user.buffer[1] %}
+{%  set buffer = user.buffer[1] %}
         <li class="tooltip{{ override(visible) }}" title="{{ buffer|octet_size(5) }}">Buffer: {{ buffer|octet_size }}</li>
 {% endif %}
 
@@ -156,41 +156,41 @@
 {% endif %}
 
 {% if own_profile or viewer.permitted('users_mod') %}
-    {% set recovered = user.recoveryFinalSize %}
-    {% if recovered %}
+{%  set recovered = user.recoveryFinalSize %}
+{%  if recovered %}
         <li class="tooltip" title="Recovered from previous site: {{ recovered|octet_size(5) }}">Recovered: {{ recovered|octet_size }}</li>
-    {% elseif viewer.permitted('users_mod') %}
+{%  elseif viewer.permitted('users_mod') %}
         <li class="tooltip paranoia_override">Recovered: no record</li>
-    {% endif %}
+{%  endif %}
 {% endif %}
 
 {% set visible = user.propertyVisible(preview_user, 'requiredratio') %}
 {% if visible %}
-    {% set required = user.buffer[0] %}
+{%  set required = user.buffer[0] %}
         <li{{ class_override(visible) }}>Required Ratio: <span class="tooltip" title="{{ user.requiredRatio|number_format(5) }}">{{ user.requiredRatio|number_format(2) }}</span></li>
         <li{{ class_override(visible) }}>Required Class Ratio: <span class="tooltip" title="{{ required|number_format(5) }}">{{ required|number_format(2) }}</span></li>
 {% endif %}
 
 {% set visible = user.propertyVisible(preview_user, 'requiredratio') %}
 {% if visible %}
-    {% set size = user.seedingSize %}
+{%  set size = user.seedingSize %}
         <li class="tooltip{{ override(visible) }}" title="{{ size|number_format }}">Seeding Size: {{ size|octet_size }}</li>
 {% endif %}
 
 {% set visible = user.propertyVisible(preview_user, 'bonuspoints') %}
 {% if visible %}
-    {% if viewer.permitted('admin_bp_history') %}
+{%  if viewer.permitted('admin_bp_history') %}
         <li{{ class_override(visible) }}>Bonus Points: {{ user.bonusPointsTotal|number_format }}
             <a href="bonus.php?action=history&amp;userid={{ user_id }}" class="brackets">History</a></li>
         <li{{ class_override(visible) }}><a href="bonus.php?action=bprates&amp;userid={{ user_id }}">Points Per Hour</a>: {{ bonus.hourlyRate|number_format(2) }}
-    {% elseif own_profile %}
+{%  elseif own_profile %}
         <li{{ class_override(visible) }}>Bonus Points: {{ user.bonusPointsTotal|number_format }}
             <a href="bonus.php?action=history" class="brackets">History</a></li>
         <li{{ class_override(visible) }}><a href="bonus.php?action=bprates">Points Per Hour</a>: {{ bonus.hourlyRate|number_format(2) }}
-    {% else %}
+{%  else %}
         <li{{ class_override(visible) }}>Bonus Points: {{ user.bonusPointsTotal|number_format }}</li>
         <li{{ class_override(visible) }}>Points Per Hour: {{ bonus.hourlyRate|number_format(2) }}
-    {% endif %}
+{%  endif %}
 {% endif %}
 
 {% if own_profile or viewer.permitted('users_mod') %}
