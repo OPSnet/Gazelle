@@ -245,4 +245,48 @@ class Torrent extends \Gazelle\Base {
         }
         return $total;
     }
+
+    /* Recent download statistics */
+
+    public function recentDownloadTotal(): array {
+        self::$db->prepared_query("
+            SELECT count(*) as total,
+                CASE
+                    WHEN Time < now() - INTERVAL 2 HOUR THEN 2
+                    WHEN Time < now() - INTERVAL 1 HOUR THEN 1
+                    ELSE 0
+                END as hour_offset
+            FROM users_downloads
+            WHERE Time > now() - INTERVAL 3 HOUR
+            GROUP BY CASE
+                    WHEN Time < now() - INTERVAL 2 HOUR THEN 2
+                    WHEN Time < now() - INTERVAL 1 HOUR THEN 1
+                    ELSE 0
+                END
+            ORDER BY 2
+        ");
+        $list = [
+            0 => ['total' => 0],
+            1 => ['total' => 0],
+            2 => ['total' => 0],
+        ];
+        foreach (self::$db->to_array(false, MYSQLI_ASSOC, false) as $row) {
+            $list[$row['hour_offset']]['total'] = $row['total'];
+        }
+        return $list;
+    }
+
+    public function topUserDownload(int $top, int $interval): array {
+        self::$db->prepared_query("
+            SELECT count(*) AS total,
+                UserID AS user_id
+            FROM users_downloads
+            WHERE Time >= now() - INTERVAL ? DAY
+            GROUP BY UserID
+            ORDER BY total DESC, UserID
+            LIMIT ?
+            ", $interval, $top
+        );
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
+    }
 }

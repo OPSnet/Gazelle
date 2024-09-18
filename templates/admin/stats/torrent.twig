@@ -1,4 +1,4 @@
-{{ header('Torrents') }}
+{{ header('Torrents', {'js': 'user-hover'}) }}
 <div class="thin">
     <div class="box">
         <div class="head">Overall stats</div>
@@ -9,22 +9,23 @@
                 <td style="padding-left:50px">Mean torrents per user:</td><td class="number_column">
                     {{- (torr_stat.torrentTotal / user_stat.enabledUserTotal)|number_format(2) }}</td>
                 <td style="padding-left:50px">Mean files per torrent:</td><td class="number_column">
-                    {{- (torr_stat.totalFiles / torr_stat.torrentTotal)|number_format(2) }}</td>
+                    {{- (torr_stat.torrentTotal == 0 ? 0 : (torr_stat.totalFiles / torr_stat.torrentTotal))|number_format(2) }}</td>
             </tr>
             <tr>
                 <td>Total size:</td><td class="number_column">{{ torr_stat.totalSize|octet_size }}</td>
                 <td style="padding-left:50px">Mean torrent size:</td><td class="number_column">
-                    {{- (torr_stat.totalSize / torr_stat.torrentTotal)|octet_size }}</td>
+                    {{- (torr_stat.torrentTotal == 0 ? 0 : (torr_stat.totalSize / torr_stat.torrentTotal))|octet_size }}</td>
                 <td style="padding-left:50px">Mean filesize:</td><td class="number_column">
-                    {{- (torr_stat.totalSize / torr_stat.totalFiles)|octet_size }}</td>
+                    {{- (torr_stat.torrentFiles == 0 ? 0 : (torr_stat.totalSize / torr_stat.totalFiles))|octet_size }}</td>
             </tr>
             <tr>
                 <td>Total files:</td><td class="number_column">{{ torr_stat.totalFiles|number_format }}</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
             </tr>
             </table>
         </div>
     </div>
-
     <br />
     <div class="box">
         <div class="head">Upload frequency</div>
@@ -40,6 +41,7 @@
                 <th>This quarter</th>
                 <th>Per day this quarter</th>
                 </tr>
+
                 <tr>
                 <th>Torrents</th>
                 <td class="number_column">{{ torr_stat.amount('day')|number_format }}</td>
@@ -74,6 +76,58 @@
         </div>
     </div>
 
+    <div class="box">
+        <div class="head">Download frequency</div>
+        <div class="pad">
+            <table>
+                <tr>
+                <th>User (d)</th>
+                <th>Today</th>
+                <th>User (w)</th>
+                <th>This week</th>
+                <th>Per day<br />this week</th>
+                <th>User (m)</th>
+                <th>This month</th>
+                <th>Per day<br />this month</th>
+                <th>User (q)</th>
+                <th>This quarter</th>
+                <th>Per day<br />this quarter</th>
+                </tr>
+{% set day     = torr_stat.topUserDownload(20,   1, user_man) %}
+{% set week    = torr_stat.topUserDownload(20,   7, user_man) %}
+{% set month   = torr_stat.topUserDownload(20,  30, user_man) %}
+{% set quarter = torr_stat.topUserDownload(20, 120, user_man) %}
+{% for n in range(0, 19) %}
+{%  set d = day[n].total|default(0) %}
+{%  set w = week[n].total|default(0) %}
+{%  set m = month[n].total|default(0) %}
+{%  set q = quarter[n].total|default(0) %}
+                <tr>
+                <td class="user-hover" data-id="{{ day[n].user_id }}">
+                    {%- if day[n].user_id %}{{ day[n].user_id|user_url }}{% else %}—{% endif -%}
+                </td>
+                <td class="number_column">{{ d|number_format }}</td>
+                <td class="user-hover" data-id="{{ week[n].user_id }}">
+                    {%- if week[n].user_id %}{{ week[n].user_id|user_url }}{% else %}—{% endif -%}
+                </td>
+                <td class="number_column">{{ w|number_format }}</td>
+                <td class="number_column">{% if w > 0 %}{{ (w / 7)|number_format(2) }}{% else %}—{% endif %}</td>
+                <td class="user-hover" data-id="{{ month[n].user_id }}">
+                    {%- if month[n].user_id %}{{ month[n].user_id|user_url }}{% else %}—{% endif -%}
+                </td>
+                <td class="number_column">{{ m|number_format }}</td>
+                <td class="number_column">{% if m > 0 %}{{ (m / 30)|number_format(2) }}{% else %}—{% endif %}</td>
+                <td class="user-hover" data-id="{{ quarter[n].user_id }}">
+                    {%- if quarter[n].user_id %}{{ quarter[n].user_id|user_url }}{% else %}—{% endif -%}
+                </td>
+                <td class="number_column">{{ q|number_format }}</td>
+                <td class="number_column">{% if q > 0 %}{{ (q / 120)|number_format(2) }}{% else %}—{% endif %}</td>
+                </tr>
+{% endfor %}
+            </table>
+        </div>
+    </div>
+
     <br />
     <div class="box">
         <div class="head">Notification tickets</div>
@@ -104,10 +158,10 @@
                 </tr>
 {% for n in range(0, pending|length / 6 - 1) %}
                 <tr>
-    {% for h in range(0, 5) %}
+{%  for h in range(0, 5) %}
                 <th>{{ pending[n + h * 12]['hour']|replace({':00+00': ''}) }}</th>
                 <th>{{ pending[n + h * 12]['total']|number_format }}</th>
-    {% endfor %}
+{%  endfor %}
                 </tr>
 {% endfor %}
             </table>

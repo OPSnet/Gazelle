@@ -88,7 +88,7 @@ class View {
 
         $payMan = new Gazelle\Manager\Payment();
         if ($Viewer->permitted('users_mod')) {
-            $raTypeMan = new \Gazelle\Manager\ReportAutoType();
+            $raTypeMan = new Gazelle\Manager\ReportAutoType();
             $activity->setStaff(new Gazelle\Staff($Viewer))
                 ->setReport(new Gazelle\Stats\Report())
                 ->setPayment($payMan)
@@ -96,9 +96,13 @@ class View {
                 ->setDb(new Gazelle\DB())
                 ->setScheduler(new Gazelle\TaskScheduler())
                 ->setSSLHost(new Gazelle\Manager\SSLHost())
-                ->setAutoReport(new Gazelle\Search\ReportAuto(new \Gazelle\Manager\ReportAuto($raTypeMan),
-                                                              $raTypeMan))
-                ;
+                ->setStats(new Gazelle\Stats\Torrent())
+                ->setAutoReport(
+                    new Gazelle\Search\ReportAuto(
+                        new Gazelle\Manager\ReportAuto($raTypeMan),
+                        $raTypeMan
+                    )
+                );
 
             if (OPEN_EXTERNAL_REFERRALS) {
                 $activity->setReferral(new Gazelle\Manager\Referral());

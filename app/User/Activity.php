@@ -63,6 +63,16 @@ class Activity extends \Gazelle\BaseUser {
         return $this;
     }
 
+    public function setAutoReport(\Gazelle\Search\ReportAuto $ru): static {
+        if ($this->user->permitted('users_auto_reports')) {
+            $open = $ru->setOwner(null)->setState(\Gazelle\Enum\ReportAutoState::open)->total();
+            if ($open > 0) {
+                $this->setAction('<a class="nobr" href="report_auto.php">' . $open . " Auto report" . plural($open) . "</a>");
+            }
+        }
+        return $this;
+    }
+
     public function setDb(\Gazelle\DB $dbMan): static {
         if ($this->user->permitted('admin_site_debug')) {
             $longRunning = $dbMan->longRunning();
@@ -158,7 +168,8 @@ class Activity extends \Gazelle\BaseUser {
         if (FEATURE_EMAIL_REENABLE) {
             $total = (new \Gazelle\Manager\AutoEnable())->openTotal();
             if ($total > 0) {
-                $this->setAction('<a class="nobr" href="tools.php?action=enable_requests">' . $total . " Enable request" . plural($total) . "</a>");
+                $this->setAction('<a class="nobr" href="tools.php?action=enable_requests">'
+                    . $total . " Enable request" . plural($total) . "</a>");
             }
         }
         return $this;
@@ -168,17 +179,22 @@ class Activity extends \Gazelle\BaseUser {
         $total = $spm->countAtLevel($this->user, ['Unanswered']);
         if ($total > 0) {
             $this->showStaffInbox = true;
-            $this->setAction('<a class="nobr" href="staffpm.php">' . $total . ' Staff PM' . plural($total) . '</a>');
+            $this->setAction('<a class="nobr" href="staffpm.php">' . $total
+                . ' Staff PM' . plural($total) . '</a>');
         }
         return $this;
     }
 
-    public function setAutoReport(\Gazelle\Search\ReportAuto $ru): static {
-        if ($this->user->permitted('users_auto_reports')) {
-            $open = $ru->setOwner(null)->setState(\Gazelle\Enum\ReportAutoState::open)->total();
-            if ($open > 0) {
-                $this->setAction('<a class="nobr" href="report_auto.php">' . $open . " Auto report" . plural($open) . "</a>");
-            }
+    public function setStats(\Gazelle\Stats\Torrent $stats): static {
+        if ($this->user->permitted('admin_site_debug')) {
+            $this->setAction(
+                '<a href="tools.php?action=torrent_stats" title="Downloads over past three hours">'
+                . implode('/', array_map(
+                    fn ($s) => number_format($s['total']),
+                    $stats->recentDownloadTotal()
+                ))
+                . "</a>"
+            );
         }
         return $this;
     }
