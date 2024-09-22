@@ -1,5 +1,7 @@
 /* global ajax, BBCode, gazURL, resize */
 
+"use strict";
+
 function QuoteJump(event, post) {
     const button  = event.button;
     let url     = '';
@@ -43,7 +45,6 @@ function QuoteJump(event, post) {
 
 function Quote(post, user, link = false) {
     const username = user;
-    const postid = post;
     const url = new gazURL();
 
     let target = '';
@@ -86,7 +87,7 @@ function Quote(post, user, link = false) {
 
     // DOM element (non-jQuery) -> Bool
     function inPost(elt) {
-        return $.contains($('#' + elem + postid)[0],elt);
+        return $.contains($('#' + elem + post)[0],elt);
     }
 
     // Str -> undefined
@@ -114,44 +115,49 @@ function Quote(post, user, link = false) {
     }
 }
 
-function edit_post(id) {
-    const dataset = document.getElementById(id).dataset;
-    const postuserid = dataset.author;
-    const key = dataset.key;
-    const postid = id.substr(id.indexOf('-') + 1); // edit-1234 and #edit-1234 seen in the wild, want 1234
+async function edit_post(id) {
+    const dataset  = document.getElementById('edit-' + id).dataset;
     const is_forum = location.href.match(/forums\.php/);
 
     // If no edit is already underway or a previous edit was finished, make the necessary dom changes.
-    if (!$('#editbox' + postid).results() || $('#editbox' + postid + '.hidden').results()) {
+    if (!$('#editbox' + id).results() || $('#editbox' + id + '.hidden').results()) {
         $('#reply_box').ghide();
         const boxWidth = location.href.match(/(artist|torrents)\.php/) ? "50" : "80";
         const inputname = is_forum ? "post" : "postid";
-        const pmbox = (postuserid != document.body.dataset.id)
-            ? '<span id="pmbox' + postid + '"><label>PM user on edit? <input type="checkbox" name="pm" value="1" /></label></span>'
+        const pmbox = (dataset.author != document.body.dataset.id)
+            ? '<span id="pmbox' + id + '"><label>PM user on edit? <input type="checkbox" name="pm" value="1" /></label></span>'
             : '';
-        $('#bar' + postid).raw().cancel = $('#content' + postid).raw().innerHTML;
-        $('#bar' + postid).raw().oldbar = $('#bar' + postid).raw().innerHTML;
-        $('#content' + postid).raw().innerHTML = "<div id=\"preview" + postid + "\"></div><form id=\"form" + postid + "\" method=\"post\" action=\"\">" + pmbox + "<input type=\"hidden\" name=\"auth\" value=\"" + document.body.dataset.auth + "\" />&nbsp;<input type=\"hidden\" name=\"key\" value=\"" + key + "\" />&nbsp;<input type=\"hidden\" name=\"" + inputname + "\" value=\"" + postid + "\" /><textarea id=\"editbox" + postid + "\" onkeyup=\"resize('editbox" + postid + "');\" name=\"body\" cols=\"" + boxWidth + "\" rows=\"10\"></textarea></form>";
-        $('#bar' + postid).raw().innerHTML = '<input type="button" value="Preview" onclick="Preview_Edit(' + postid + ');" />&nbsp;<input type="button" value="Post" onclick="Save_Edit(' + postid + ')" />&nbsp;<input type="button" value="Cancel" onclick="Cancel_Edit(' + postid + ');" />';
-        $('#postcontrol-' + postid).ghide();
+        $('#bar' + id).raw().cancel = $('#content' + id).raw().innerHTML;
+        $('#bar' + id).raw().oldbar = $('#bar' + id).raw().innerHTML;
+        $('#content' + id).raw().innerHTML = "<div id=\"preview" + id
+            + "\"></div><form id=\"form" + id + "\" method=\"post\" action=\"\">"
+            + pmbox + "<input type=\"hidden\" name=\"auth\" value=\""
+            + document.body.dataset.auth + "\" />&nbsp;<input type=\"hidden\" name=\"key\" value=\""
+            + dataset.key + "\" />&nbsp;<input type=\"hidden\" name=\""
+            + inputname + "\" value=\"" + id + "\" /><textarea id=\"editbox"
+            + id + "\" onkeyup=\"resize('editbox"
+            + id + "');\" name=\"body\" cols=\"" + boxWidth + "\" rows=\"10\"></textarea></form>";
+        $('#bar' + id).raw().innerHTML = '<input type="button" value="Preview" onclick="Preview_Edit('
+            + id + ');" />&nbsp;<input type="button" value="Post" onclick="Save_Edit('
+            + id + ')" />&nbsp;<input type="button" value="Cancel" onclick="Cancel_Edit('
+            + id + ');" />';
+        $('#postcontrol-' + id).ghide();
     }
 
     /* If it's the initial edit, fetch the post content to be edited.
      * If editing is already underway and edit is pressed again, reset the post
      * (keeps current functionality, move into brackets to stop from happening).
      */
-    ajax.get(
-        (is_forum ? "?action=get_post&post=" : "comments.php?action=get&postid=") + postid,
-        function(response) {
-            $('#editbox' + postid).raw().value = response;
-            resize('editbox' + postid);
-        }
-    );
+    let response = await fetch(new Request(
+        (is_forum ? "?action=get_post&post=" : "comments.php?action=get&postid=") + id,
+    ));
+    const box = 'editbox' + id;
+    document.getElementById(box).value = await response.text();
+    resize(box);
 }
 
 function Cancel_Edit(postid) {
-    const answer = confirm("Are you sure you want to cancel?");
-    if (answer) {
+    if (confirm("Are you sure you want to cancel?")) {
         $('#reply_box').gshow();
         $('#bar' + postid).raw().innerHTML = $('#bar' + postid).raw().oldbar;
         $('#content' + postid).raw().innerHTML = $('#bar' + postid).raw().cancel;
@@ -197,89 +203,23 @@ function Save_Edit(postid) {
     }
 }
 
-function Delete(postid) {
+async function delete_post(id) {
     if (confirm('Are you sure you wish to delete this post?') == true) {
-        if (location.href.match(/forums\.php/)) {
-            ajax.get("forums.php?action=delete&auth=" + document.body.dataset.auth + "&postid=" + postid, function () {
-                $('#post' + postid).ghide();
-            });
-        } else {
-            ajax.get("comments.php?action=take_delete&auth=" + document.body.dataset.auth + "&postid=" + postid, function () {
-                $('#post' + postid).ghide();
-            });
-        }
+        await fetch(new Request(
+            (location.href.match(/forums\.php/)
+                ? "forums.php?action=delete&auth="
+                : "comments.php?action=take_delete&auth=" 
+            ) + document.body.dataset.auth + "&postid=" + id
+        ));
+        document.getElementById('post' + id).classList.add('hidden');
     }
 }
 
-function Quick_Preview() {
-    $('#post_preview').raw().value = "Make changes";
-    $('#post_preview').raw().preview = true;
-    ajax.post("ajax.php?action=preview", "quickpostform", function(response) {
-        $('#quickreplypreview').gshow();
-        $('#contentpreview').raw().innerHTML = response;
-        $('#quickreplytext').ghide();
-    });
-}
-
-function Quick_Edit() {
-    $('#post_preview').raw().value = "Preview";
-    $('#post_preview').raw().preview = false;
-    $('#quickreplypreview').ghide();
-    $('#quickreplytext').gshow();
-}
-
-function Newthread_Preview(mode) {
-    $('#newthreadpreviewbutton').gtoggle();
-    $('#newthreadeditbutton').gtoggle();
-    if (mode) { // Preview
-        ajax.post("ajax.php?action=preview", "newthreadform", function(response) {
-            $('#contentpreview').raw().innerHTML = response;
-        });
-        $('#newthreadtitle').raw().innerHTML = $('#title').raw().value;
-        let pollanswers = $('#answer_block').raw();
-        if (pollanswers && pollanswers.children.length > 4) {
-            pollanswers = pollanswers.children;
-            $('#pollquestion').raw().innerHTML = $('#pollquestionfield').raw().value;
-            for (let i = 0; i < pollanswers.length; i += 2) {
-                if (!pollanswers[i].value) {
-                    continue;
-                }
-                let el = document.createElement('input');
-                el.id = 'answer_' + (i + 1);
-                el.type = 'radio';
-                el.name = 'vote';
-                $('#pollanswers').raw().appendChild(el);
-                $('#pollanswers').raw().appendChild(document.createTextNode(' '));
-                el = document.createElement('label');
-                el.htmlFor = 'answer_' + (i + 1);
-                el.innerHTML = pollanswers[i].value;
-                $('#pollanswers').raw().appendChild(el);
-                $('#pollanswers').raw().appendChild(document.createElement('br'));
-            }
-            if ($('#pollanswers').raw().children.length > 4) {
-                $('#pollpreview').gshow();
-            }
-        }
-    } else { // Back to editor
-        $('#pollpreview').ghide();
-        $('#newthreadtitle').raw().innerHTML = 'New Topic';
-        const pollanswers = $('#pollanswers').raw();
-        if (pollanswers) {
-            const el = document.createElement('div');
-            el.id = 'pollanswers';
-            pollanswers.parentNode.replaceChild(el, pollanswers);
-        }
-    }
-    $('#newthreadtext').gtoggle();
-    $('#newthreadpreview').gtoggle();
-    $('#subscribediv').gtoggle();
-}
-
-function LoadEdit(type, post, depth) {
-    ajax.get("ajax.php?action=post_edit&postid=" + post + "&depth=" + depth + "&type=" + type, function(response) {
-            $('#content' + post).raw().innerHTML = response;
-        }
-    );
+async function LoadEdit(type, post, depth) {
+    let response = await fetch(new Request(
+        "ajax.php?action=post_edit&postid=" + post + "&depth=" + depth + "&type=" + type
+    ));
+    document.getElementById('content' + post).innerHTML = await response.text();
 }
 
 function AddPollOption(id) {
@@ -388,8 +328,16 @@ StoreText.prototype = {
     }
 };
 
-document.addEventListener('DOMContentLoaded', function () {
-    $('.edit-post').click(function() {
-        edit_post(this.id);
+document.addEventListener('DOMContentLoaded', () => {
+    Array.from(document.getElementsByClassName('delete-post')).forEach((del) => {
+        del.addEventListener('click', () => {
+            delete_post(del.dataset.id);
+        });
+    });
+
+    Array.from(document.getElementsByClassName('edit-post')).forEach((edit) => {
+        edit.addEventListener('click', () => {
+            edit_post(edit.id.substr(edit.id.indexOf('edit-') + 5)); // edit-123 => 123
+        });
     });
 });

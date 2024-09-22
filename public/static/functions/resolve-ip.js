@@ -4,15 +4,16 @@
  * e.g.: <span class="resolve-ipv4" data-ip="127.0.0.1">Waiting...</span>
  */
 
-/* global ajax */
+"use strict";
 
-document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('.resolve-ipv4').forEach(function(element) {
-        ajax.get("tools.php?action=get_host&ip=" + element.dataset.ip, function(response) {
-            response = JSON.parse(response);
-            document.querySelectorAll('[data-ip="' + response.ip + '"]').forEach(function(ipaddr) {
-                ipaddr.textContent = response.hostname;
-            });
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.resolve-ipv4').forEach(async (e) => {
+        const response = await fetch(new Request(
+            'tools.php?action=get_host&ip=' + e.dataset.ip
+        ));
+        const data = await response.json();
+        document.querySelectorAll('[data-ip="' + data.ip + '"]').forEach((ipaddr) => {
+            ipaddr.textContent = data.hostname;
         });
     });
 });

@@ -23,8 +23,7 @@
                 <a href="reports.php?action=report&amp;type=comment&amp;id={{ id }}" class="brackets">Report</a>
 {% if viewer.permitted('site_admin_forums') %}
 {%    if viewer.permitted('site_forum_post_delete') %}
-                {{- dom.click('#remove-' ~ id, "Delete('" ~ id ~ "')") -}}
-                - <a href="#post{{ id }}" id="remove-{{ id }}" class="brackets">Delete</a>
+                - <a href="#" data-id="{{ id }}" class="brackets delete-post">Delete</a>
 {%    endif %}
 {%    if not own_comment and viewer.permitted('users_warn') and viewer.classLevel >= author.classLevel %}
                 <form class="manage_form hidden" name="user" id="warn{{ id }}" action="comments.php" method="post">

@@ -1,38 +1,43 @@
 {% from 'macro/paginator.twig' import pager %}
 {% set result %}
 {% for download in list %}
-    {% if loop.first %}
+{%  if loop.first %}
 <h4 class="tooltip" title="List of users that have clicked the [DL] button">List of Downloaders</h4>
-{% set linkbox %}
+{%  set linkbox %}
 <div class="linkbox">{{ pager('show_downloads', torrent_id, paginator.page, paginator.pages)|raw }}</div>
 {% endset %}
-{{ linkbox|raw }}
+{{  linkbox|raw }}
 <table>
     <tr class="colhead_dark" style="font-weight: bold;">
-        {% for n in range(1, 2) %}
+{%      for n in range(1, 2) %}
         <td>User</td>
-        <td title="Earliest">Time</td>
-        <td>Time</td>
+        <td>First</td>
+        <td>Last</td>
         <td>Copies</td>
         <td><img src="{{ url_stem|raw }}snatched.png" class="tooltip" alt="Snatched?" title="Snatched?" /></td>
         <td><img src="{{ url_stem|raw }}seeders.png" class="tooltip" alt="Seeding?" title="Seeding?" /></td>
-        {% endfor %}
+{%      endfor %}
     </tr>
     <tr>
-    {% elseif loop.index0 % 2 == 0 %}
+{%  elseif loop.index0 % 2 == 0 %}
     </tr>
     <tr>
-    {% endif %}
+{%  endif %}
         <td>{{ download.user_id|user_url }}</td>
-        <td>{{ download.timestamp|time_diff }}</td>
+        <td>{{ download.timestamp_min|time_diff }}</td>
+        <td>
+{%- if download.timestamp_max == download.timestamp_min %}—
+{%- else %}{{ download.timestamp_max|time_diff }}
+{%- endif -%}
+        </td>
         <td>{{ download.total|number_format }}</td>
         <td>{% if download.is_snatched %}<span class="tooltip" title="Snatched!" style="color: #f57c00">{{ constant('ICON_STAR') }} </span>{% else %}&nbsp;{% endif %}</td>
         <td>{% if download.is_seeding %}<span class="tooltip" title="Seeding!" style="color: #388e3c">{{ constant('ICON_STAR') }} </span>{% else %}&nbsp;{% endif %}</td>
-    {% if loop.last %}
+{%  if loop.last %}
     </tr>
 </table>
 {{ linkbox|raw }}
-    {% endif %}
+{%  endif %}
 {% else %}
 <div style="text-align: center">No downloads recorded</div>
 {% endfor %}

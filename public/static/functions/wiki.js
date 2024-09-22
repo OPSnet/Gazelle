@@ -1,5 +1,3 @@
-/* global ajax */
-
 "use strict";
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -16,16 +14,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.querySelectorAll('.wiki-remove-alias').forEach((a) => {  
-        a.addEventListener('click', (e) => {
+        a.addEventListener('click', async (e) => {
             const name = e.target.dataset.name;
-            ajax.get(
+            await fetch(new Request(
                 'wiki.php?action=delete_alias&auth=' + e.target.dataset.auth
                     + '&alias=' + name,
-                () => {
-                    document.getElementById('alias_' + name).classList.toggle('hidden');
-                }
-            );
+            ));
+            document.getElementById('alias_' + name).classList.toggle('hidden');
             e.preventDefault();
-        }, false);
+        });
     });
 });

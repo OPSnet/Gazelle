@@ -496,7 +496,11 @@ class Torrent extends TorrentAbstract {
                 LEFT JOIN (SELECT DISTINCT UserID FROM users_downloads WHERE TorrentID = ?) downloader
                     ON (downloader.UserID = xfu.uid)
                 LEFT JOIN (SELECT DISTINCT uid FROM xbt_snatched WHERE fid = ?) snatcher USING (uid)
-                LEFT JOIN user_seedbox sx ON (xfu.ip = inet_ntoa(sx.ipaddr) AND xfu.useragent = sx.useragent AND xfu.uid = ?)
+                LEFT JOIN user_seedbox sx
+                    ON (xfu.ip = inet_ntoa(sx.ipaddr)
+                        AND xfu.useragent = sx.useragent
+                        AND xfu.uid = ?
+                )
                 WHERE um.Visible = '1'
                     AND xfu.fid = ?
                 ORDER BY xfu.uid != ?, xfu.uploaded DESC

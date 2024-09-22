@@ -1,150 +1,186 @@
-/* global ajax */
+"use strict";
 
-function show_downloads_load (torrentid, page) {
-    $('#downloads_' + torrentid).gshow().raw().innerHTML = '<h4>Loading...</h4>';
-    $.ajax({
-        url: 'torrents.php?action=downloadlist&page=' + page + '&torrentid=' + torrentid,
-        success: function(json) {
-            let response = JSON.parse(json);
-            $('#downloads_' + torrentid).gshow().raw().innerHTML = response.html;
-            for (let p = 1; p <= response.pages; ++p) {
-                if (p != response.page) {
-                    $('.pager-' + p).attr(
-                        'onclick',
-                        "show_downloads(" + torrentid + ", " + $('.pager-' + p).raw().innerHTML + ")"
-                    );
-                }
+async function show_downloads_load(torrentid, page) {
+    let e = document.getElementById('downloads_' + torrentid);
+    e.innerHTML = '<h4>Loading...</h4>';
+    e.classList.remove('hidden');
+    const response = await fetch(
+        'torrents.php?action=downloadlist&page=' + page + '&torrentid=' + torrentid,
+    );
+    const data = await response.json();
+    e.innerHTML = data.html;
+    if (data.pages > 1) {
+        Array.from(document.getElementsByClassName('pager-link')).forEach((p) => {
+            const page = p.innerHTML;
+            if (page != data.page) {
+                p.addEventListener('click', () => {
+                    show_downloads(torrentid, page);
+                });
             }
-        }
-    });
+        });
+    }
 }
 
-function show_snatches_load (torrentid, page) {
-    $('#snatches_' + torrentid).gshow().raw().innerHTML = '<h4>Loading...</h4>';
-    $.ajax({
-        url: 'torrents.php?action=snatchlist&page=' + page + '&torrentid=' + torrentid,
-        success: function(json) {
-            let response = JSON.parse(json);
-            $('#snatches_' + torrentid).gshow().raw().innerHTML = response.html;
-            for (let p = 1; p <= response.pages; ++p) {
-                if (p != response.page) {
-                    $('.pager-' + p).attr(
-                        'onclick',
-                        "show_snatches(" + torrentid + ", " + $('.pager-' + p).raw().innerHTML + ")"
-                    );
-                }
+async function show_snatches_load(torrentid, page) {
+    let e = document.getElementById('snatches_' + torrentid);
+    e.innerHTML = '<h4>Loading...</h4>';
+    e.classList.remove('hidden');
+    const response = await fetch(
+        'torrents.php?action=snatchlist&page=' + page + '&torrentid=' + torrentid,
+    );
+    const data = await response.json();
+    e.innerHTML = data.html;
+    if (data.pages > 1) {
+        Array.from(document.getElementsByClassName('pager-link')).forEach((p) => {
+            const page = p.innerHTML;
+            if (page != data.page) {
+                p.addEventListener('click', () => {
+                    show_snatches(torrentid, page);
+                });
             }
-        }
-    });
+        });
+    }
 }
 
-function show_seeders_load (torrentid, page) {
-    $('#peers_' + torrentid).gshow().raw().innerHTML = '<h4>Loading...</h4>';
-    $.ajax({
-        url: 'torrents.php?action=peerlist&page=' + page + '&torrentid=' + torrentid,
-        success: function(json) {
-            let response = JSON.parse(json);
-            $('#peers_' + torrentid).gshow().raw().innerHTML = response.html;
-            for (let p = 1; p <= response.pages; ++p) {
-                if (p != response.page) {
-                    $('.pager-' + p).attr(
-                        'onclick',
-                        "show_seeders(" + torrentid + ", " + $('.pager-' + p).raw().innerHTML + ")"
-                    );
-                }
+async function show_seeders_load(torrentid, page) {
+    let e = document.getElementById('peers_' + torrentid);
+    e.innerHTML = '<h4>Loading...</h4>';
+    e.classList.remove('hidden');
+    let response = await fetch(
+        'torrents.php?action=peerlist&page=' + page + '&torrentid=' + torrentid,
+    );
+    const data = await response.json();
+    e.innerHTML = data.html;
+    if (data.pages > 1) {
+        Array.from(document.getElementsByClassName('pager-link')).forEach((p) => {
+            const page = p.innerHTML;
+            if (page != data.page) {
+                p.addEventListener('click', () => {
+                    show_seeders(torrentid, page);
+                });
             }
-        }
-    });
+        });
+    }
 }
 
-function show_downloads (TorrentID, Page) {
+function show_downloads(tid, Page) {
     if (Page > 0) {
-        show_downloads_load(TorrentID, Page);
+        show_downloads_load(tid, Page);
     } else {
-        if ($('#downloads_' + TorrentID).raw().innerHTML === '') {
-            $('#downloads_' + TorrentID).gshow().raw().innerHTML = '<h4>Loading...</h4>';
-            show_downloads_load(TorrentID, 1);
+        let e = document.getElementById('downloads_' + tid);
+        if (!e.classList.contains('hidden')) {
+            e.classList.add('hidden');
+        } else if (e.innerHTML === '') {
+            show_downloads_load(tid, 1);
         } else {
-            $('#downloads_' + TorrentID).gtoggle();
+            e.classList.remove('hidden');
         }
     }
-    $('#viewlog_' + TorrentID).ghide();
-    $('#peers_' + TorrentID).ghide();
-    $('#snatches_' + TorrentID).ghide();
-    $('#files_' + TorrentID).ghide();
-    $('#reported_' + TorrentID).ghide();
+    document.getElementById('viewlog_' + tid).classList.add('hidden');
+    document.getElementById('peers_' + tid).classList.add('hidden');
+    document.getElementById('snatches_' + tid).classList.add('hidden');
+    document.getElementById('files_' + tid).classList.add('hidden');
+    let r = document.getElementById('reported_' + tid);
+    if (r) {
+        r.classList.add('hidden');
+    }
 }
 
-function show_snatches (TorrentID, Page) {
+function show_snatches(tid, Page) {
     if (Page > 0) {
-        show_snatches_load(TorrentID, Page);
+        show_snatches_load(tid, Page);
     } else {
-        if ($('#snatches_' + TorrentID).raw().innerHTML === '') {
-            $('#snatches_' + TorrentID).gshow().raw().innerHTML = '<h4>Loading...</h4>';
-            show_snatches_load(TorrentID, 1);
+        let e = document.getElementById('snatches_' + tid);
+        if (!e.classList.contains('hidden')) {
+            e.classList.add('hidden');
+        } else if (e.innerHTML === '') {
+            show_snatches_load(tid, 1);
         } else {
-            $('#snatches_' + TorrentID).gtoggle();
+            e.classList.remove('hidden');
         }
     }
-    $('#viewlog_' + TorrentID).ghide();
-    $('#peers_' + TorrentID).ghide();
-    $('#downloads_' + TorrentID).ghide();
-    $('#files_' + TorrentID).ghide();
-    $('#reported_' + TorrentID).ghide();
+    document.getElementById('viewlog_' + tid).classList.add('hidden');
+    document.getElementById('peers_' + tid).classList.add('hidden');
+    document.getElementById('downloads_' + tid).classList.add('hidden');
+    document.getElementById('files_' + tid).classList.add('hidden');
+    let r = document.getElementById('reported_' + tid);
+    if (r) {
+        r.classList.add('hidden');
+    }
 }
 
-function show_seeders (TorrentID, Page) {
+function show_seeders(tid, Page) {
     if (Page > 0) {
-        show_seeders_load(TorrentID, Page);
+        show_seeders_load(tid, Page);
     } else {
-        if ($('#peers_' + TorrentID).raw().innerHTML === '') {
-            $('#peers_' + TorrentID).gshow().raw().innerHTML = '<h4>Loading...</h4>';
-            show_seeders_load(TorrentID, 1);
+        let e = document.getElementById('peers_' + tid);
+        if (!e.classList.contains('hidden')) {
+            e.classList.add('hidden');
+        } else if (e.innerHTML === '') {
+            show_seeders_load(tid, 1);
         } else {
-            $('#peers_' + TorrentID).gtoggle();
+            e.classList.remove('hidden');
         }
     }
-    $('#viewlog_' + TorrentID).ghide();
-    $('#snatches_' + TorrentID).ghide();
-    $('#downloads_' + TorrentID).ghide();
-    $('#files_' + TorrentID).ghide();
-    $('#reported_' + TorrentID).ghide();
+    document.getElementById('viewlog_' + tid).classList.add('hidden');
+    document.getElementById('snatches_' + tid).classList.add('hidden');
+    document.getElementById('downloads_' + tid).classList.add('hidden');
+    document.getElementById('files_' + tid).classList.add('hidden');
+    let r = document.getElementById('reported_' + tid);
+    if (r) {
+        r.classList.add('hidden');
+    }
 }
 
-function show_logs (TorrentID, HasLogDB, LogScore) {
+async function show_logs(tid, HasLogDB, LogScore) {
     if (HasLogDB === 1) {
-        if ($('#viewlog_' + TorrentID).raw().innerHTML === '') {
-            $('#viewlog_' + TorrentID).gshow().raw().innerHTML = '<h4>Loading...</h4>';
-            ajax.get('torrents.php?action=viewlog&logscore=' + LogScore + '&torrentid=' + TorrentID, function(response) {
-                $('#viewlog_' + TorrentID).gshow().raw().innerHTML = response;
-            });
+        let e = document.getElementById('viewlog_' + tid);
+        if (e.innerHTML === '') {
+            const response = await fetch(
+                'torrents.php?action=viewlog&logscore=' + LogScore + '&torrentid=' + tid
+            );
+            e.innerHTML = await response.text();
+        }
+        if (e.classList.contains('hidden')) {
+            e.classList.remove('hidden');
         } else {
-            $('#viewlog_' + TorrentID).gtoggle();
+            e.classList.add('hidden');
         }
     }
-    $('#peers_' + TorrentID).ghide();
-    $('#snatches_' + TorrentID).ghide();
-    $('#downloads_' + TorrentID).ghide();
-    $('#files_' + TorrentID).ghide();
-    $('#reported_' + TorrentID).ghide();
+    document.getElementById('peers_' + tid).classList.add('hidden');
+    document.getElementById('snatches_' + tid).classList.add('hidden');
+    document.getElementById('downloads_' + tid).classList.add('hidden');
+    document.getElementById('files_' + tid).classList.add('hidden');
+    let r = document.getElementById('reported_' + tid);
+    if (r) {
+        r.classList.add('hidden');
+    }
 }
 
-function show_files(TorrentID) {
-    $('#files_' + TorrentID).gtoggle();
-    $('#viewlog_' + TorrentID).ghide();
-    $('#peers_' + TorrentID).ghide();
-    $('#snatches_' + TorrentID).ghide();
-    $('#downloads_' + TorrentID).ghide();
-    $('#reported_' + TorrentID).ghide();
+function show_files(tid) {
+    let e = document.getElementById('files_' + tid);
+    if (e.classList.contains('hidden')) {
+        e.classList.remove('hidden');
+    } else {
+        e.classList.add('hidden');
+    }
+    document.getElementById('viewlog_' + tid).classList.add('hidden');
+    document.getElementById('peers_' + tid).classList.add('hidden');
+    document.getElementById('snatches_' + tid).classList.add('hidden');
+    document.getElementById('downloads_' + tid).classList.add('hidden');
+    let r = document.getElementById('reported_' + tid);
+    if (r) {
+        r.classList.add('hidden');
+    }
 }
 
-function show_reported(TorrentID) {
-    $('#files_' + TorrentID).ghide();
-    $('#viewlog_' + TorrentID).ghide();
-    $('#peers_' + TorrentID).ghide();
-    $('#snatches_' + TorrentID).ghide();
-    $('#downloads_' + TorrentID).ghide();
-    $('#reported_' + TorrentID).gtoggle();
+function show_reported(tid) {
+    document.getElementById('files_' + tid).classList.add('hidden');
+    document.getElementById('viewlog_' + tid).classList.add('hidden');
+    document.getElementById('peers_' + tid).classList.add('hidden');
+    document.getElementById('snatches_' + tid).classList.add('hidden');
+    document.getElementById('downloads_' + tid).classList.add('hidden');
+    document.getElementById('reported_' + tid).classList.remove('hidden');
 }
 
 function add_tag(tag) {
@@ -338,7 +374,7 @@ function AddArtistField() {
     Importance.selectedIndex = selected;
     x.appendChild(Importance);
     if ($("#artist").data("gazelle-autocomplete")) {
-        $(ArtistField).live('focus', function() {
+        $(ArtistField).live('focus', () => {
             $(ArtistField).autocomplete({
                 serviceUrl : 'artist.php?action=autocomplete'
             });
@@ -385,19 +421,25 @@ function ToggleEditionRows() {
     $('#edition_catalogue').gtoggle();
 }
 
-function add_to_collage() {
+async function add_to_collage() {
     let field = document.forms['add-to-collage'].elements;
-    let post = {
-        'auth':       document.body.dataset.auth,
-        'name':       field['collage_ref'].value,
-        'entry_id':   Number(field['entryid'].value),
-        'collage_id': field['collage-select'] === undefined ? 0 : Number(field['collage-select'].value),
-    };
-    $('#add-result').raw().innerHTML = '...';
-    ajax.post('collages.php?action=ajax_add', post, function (response) {
-        let result = JSON.parse(response);
-        $('#add-result').raw().innerHTML = (result['status'] == 'success')
-            ? 'Added to <b>' + result['response']['link'] + '</b>'
-            : 'Failed to add! (' + result['error'] + ')';
-    });
+    let form  = new FormData();
+    form.append('auth', document.body.authset.id);
+    form.append('name', field['collage_ref'].value);
+    form.append('entry_id', Number(field['entryid'].value));
+    form.append('collage_id', field['collage-select'] === undefined
+        ? 0
+        : Number(field['collage-select'].value));
+    let add = document.getElementById('add-result');
+    add.innerHTML = '...';
+    const response = await fetch(
+        'collages.php?action=ajax_add', {
+            'method': "POST",
+            'body': form,
+        }
+    );
+    const data = await response.json();
+    add.innerHTML = (data.status === 'success')
+        ? 'Added to <b>' + data.response.link + '</b>'
+        : 'Failed to add! (' + data.error + ')';
 }
