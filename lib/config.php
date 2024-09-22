@@ -140,6 +140,9 @@ defined('SEEDBOX_SALT') or define('SEEDBOX_SALT', 'changeme');
 // User avatars are hashed with this salt.
 defined('AVATAR_SALT') or define('AVATAR_SALT', 'changeme');
 
+// Arbitrary text can be hashed and signed using this salt.
+defined('USER_HASH_SALT') or define('USER_HASH_SALT', 'changeme');
+
 // ------------------------------------------------------------------------
 // MySQL settings
 

@@ -1560,6 +1560,15 @@ class User extends BaseObject {
         return (int)$this->info()['inviter_user_id'];
     }
 
+    /**
+     * This can be used to add a signature to a URL to prevent tampering with the parameter list.
+     */
+    public function hashHmac(string $topic, string $message): string {
+        return urlencode_safe(
+            hash_hmac('sha3-256', $message, USER_HASH_SALT . "$topic|{$this->auth()}", true)
+        );
+    }
+
     public function unusedInviteTotal(): int {
         return $this->disableInvites() ? 0 : $this->info()['Invites'];
     }

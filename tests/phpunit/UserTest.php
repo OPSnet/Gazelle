@@ -507,4 +507,15 @@ class UserTest extends TestCase {
         $this->assertEquals(0, $rank->score(), 'userrank-score');
         $this->assertEquals(1, $rank->rank('downloaded'), 'userrank-rank');
     }
+
+    public function testUserHash(): void {
+        // ensure the same text hashed by two users is different
+        $second = \GazelleUnitTest\Helper::makeUser('user.' . randomString(6), 'user');
+        $this->assertNotEquals(
+            $this->user->hashHmac('topic', 'phpunit'),
+            $second->hashHmac('topic', 'phpunit'),
+            'user-hash-user-distinct'
+        );
+        $second->remove();
+    }
 }

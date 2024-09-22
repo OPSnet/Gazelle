@@ -11,7 +11,7 @@ class TwigTest extends TestCase {
 
     public function setUp(): void {
         Util\Twig::setUserMan(new Manager\User());
-        $this->user = \GazelleUnitTest\Helper::makeUser('user.' . randomString(6), 'user');
+        $this->user = \GazelleUnitTest\Helper::makeUser('twig.' . randomString(6), 'twig');
         $this->user->setField('PermissionID', SYSOP)->modify();
     }
 

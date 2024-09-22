@@ -12,6 +12,9 @@ $title = trim($_GET['title']);
 
 switch ($title) {
     case 'better':
+        if ($Viewer->hashHmac('collector', $_GET['ids']) !== ($_GET['sig'] ?? '')) {
+            error('Better signature mismatch');
+        }
         $ids = array_filter(explode(',', $_GET['ids'] ?? '0'), fn($id) => (int)$id > 0);
         break;
     case 'seedbox':
@@ -38,7 +41,7 @@ if (!$ids) {
 $collector = new Gazelle\Collector\TList($Viewer, new Gazelle\Manager\Torrent(), $title, 0);
 $collector->setList($ids);
 if (!$collector->prepare([])) {
-    error("Nothing to gather, choose some encodings and bitrates!");
+    error("Nothing to gather, choose some encodings and media!");
 }
 
 $collector->emitZip(Gazelle\Util\Zip::make($title));

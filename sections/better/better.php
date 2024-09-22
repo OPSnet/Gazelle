@@ -12,7 +12,7 @@ if (isset($_GET['userid']) && $Viewer->permitted('users_override_paranoia')) {
     $user = $Viewer;
 }
 
-if ($_GET['method'] === 'single') {
+if (($_GET['method'] ?? '') === 'single') {
     $filter = 'all';
     $type   = 'single';
 } else {

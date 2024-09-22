@@ -1,5 +1,5 @@
 {% from 'macro/form.twig' import selected -%}
-{{ header('Missing Search') }}
+{{ header('Missing Search', {'js': 'better'}) }}
 <div class="thin">
 <h2>{% if type == 'single' %}Single seeded{% else %}Attaining perfection{% endif %}</h2>
 {% include 'better/links.twig' only %}
@@ -54,58 +54,52 @@
 <div class="box pad">
     <div class="torrent">
         <h3>{{ better.heading }}</h3>
-    {% if better.mode != 'torrent' %}
-        <h4>There {% if better.total == 1 %}is{% else %}are{% endif %} {{ better.total }} {{ better.mode }}{% if better.total != 1 %}s{% endif %} remaining</h4>
-    {% elseif better.total > 1 and viewer.permitted('zip_downloader') %}
+{%  if better.mode != 'torrent' %}
+        <h4>There {% if better.total == 1 %}is{% else %}are{% endif %} {{ better.total }} {{ better.mode }}{{ better.total|plural }} remaining</h4>
+{%  elseif better.total > 1 and viewer.permitted('zip_downloader') %}
         <h4>Here are {{ list_total }}{% if type == 'single' and better.total > 50 %} random{% endif %} torrent{{ list_total|plural }}
-        {% if better.total > 50 %} of {{ better.total }} remaining{% endif %}
+{%      if better.total > 50 %} of {{ better.total }} remaining{% endif %}
+{%          set id_list = list|map(t => "#{t.id}")|join(',') %}
             <span class="torrents_links_block">
-                <a class="brackets" href="torrents.php?action=collector&amp;title=better&amp;ids={{
-                    list|map(t => "#{t.id}")|join(',')
-                }}" onclick="return confirm('If you do not have the content, your ratio WILL be affected; be sure to check the size of all torrents before downloading.');">Download All</a>
+                <a id="collector-list" class="brackets" href="torrents.php?action=collector&amp;title=better&amp;ids={{
+                    id_list }}&amp;sig={{ viewer.hashHmac('collector', id_list) }}">Download All</a>
                 <br />(size: {{ size|octet_size }})
             </span>
         </h4>
-    {% endif %}
+{%  endif %}
     </div>
 {{ paginator.linkbox|raw }}
 <table width"=100%" class="torrent_table">
 {% for item in list %}
-    {% if better.mode == 'torrent' %}
+{%  if better.mode == 'torrent' %}
     <tr class="torrent row{{ cycle(['a', 'b'], loop.index0) }}">
         <td>
             <span class="torrent_links_block">
             <a href="torrents.php?action=download&amp;id={{ item.id }}&amp;torrent_pass={{ viewer.announceKey }}" class="brackets tooltip" title="Download">DL</a>
-        {% if viewer.canSpendFLToken(item) %}
-            {% set token_count = item.tokenCount %}
-            {% set token_amount = token_count == 1 ? '1 token' : token_count ~ ' tokens' %}
-            | <a href="torrents.php?action=download&amp;id={{ item.id }}&amp;torrent_pass={{ viewer.announceKey }}&amp;usetoken=1" class="brackets tooltip" title="Use a FL Token" onclick="return confirm('
-            {%- if item.seederTotal == 0 -%}
-                Warning! This torrent is not seeded at the moment, are you sure you want to use {{ token_amount }} here?
-            {%- else -%}
-                Use {{ token_amount }} here?
-            {%- endif -%}
-            ');">FL</a>
-        {% endif %}
+{%      if viewer.canSpendFLToken(item) %}
+            | <a class="brackets tooltip fl" title="Use a FL Token" href="torrents.php?action=download&amp;id={{ item.id
+                }}&amp;torrent_pass={{ viewer.announceKey }}&amp;usetoken=1" data-n="{{ item.tokenCount
+                }}" data-seed="{{ item.seederTotal }}">FL</a>
+{%      endif %}
             </span>
-        {{ item.fullLink|raw }}
-        {% if type != 'single' and viewer.permitted('admin_reports') %}
+{{      item.fullLink|raw }}
+{%      if type != 'single' and viewer.permitted('admin_reports') %}
             <a href="better.php?method=missing&amp;type={{ type }}&amp;remove={{ item.id }}&amp;filter={{ filter }}&amp;search={{ item.search }}" title="Remove the {{ type }} flag" class="brackets">X</a>
-        {% endif %}
+{%      endif %}
             <div class="tags">{{ item.group.tagList|map(tag => "#{tag.name}")|join(', ') }}</div>{{ item.size|octet_size }}
         </td>
     </tr>
-    {% elseif better.mode == 'group' %}
+{%  elseif better.mode == 'group' %}
     <tr>
         <td><a href="torrents.php?id={{ item.id }}&amp;action=editgroup">[Edit]</a>&nbsp;&nbsp;{{ item.link|raw }}
             <div class="tags">{{ item.tagList|map(tag => "#{tag.name}")|join(', ') }}</div>
         </td>
     </tr>
-    {% else %}
+{%  else %}
     <tr>
         <td><a href="artist.php?artistid={{ item.id }}&amp;action=edit">[Edit]</a>&nbsp;&nbsp;{{ item.link|raw }}</td>
     </tr>
-    {% endif %}
+{%  endif %}
 {% endfor %}
 </table>
 {{ paginator.linkbox|raw }}
