@@ -9,7 +9,7 @@ $Payment = new Gazelle\Manager\Payment();
 
 if ($_POST['submit'] == 'Delete') {
     if (!is_number($_POST['id']) || $_POST['id'] == '') {
-        error(0);
+        error('Unknown payment id for delete');
     }
     $Payment->remove($_POST['id']);
 } else {

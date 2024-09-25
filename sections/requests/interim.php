@@ -20,7 +20,7 @@ switch ($action) {
         }
         break;
     default:
-        error(0);
+        error('Unknown request action specified');
 }
 
 echo $Twig->render('request/interim.twig', [

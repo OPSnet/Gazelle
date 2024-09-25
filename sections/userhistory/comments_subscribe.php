@@ -2,7 +2,7 @@
 /** @phpstan-var \Gazelle\User $Viewer */
 
 if (!in_array($_GET['page'], ['artist', 'collages', 'requests', 'torrents']) || !(int)($_GET['pageid'] ?? 0)) {
-    error(0);
+    error('Unknown comments subscription target');
 }
 authorize();
 

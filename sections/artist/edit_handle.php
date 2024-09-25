@@ -16,7 +16,7 @@ if (($_GET['action'] ?? '') === 'revert') { // if we're reverting to a previous 
     authorize();
     $revisionId = (int)$_GET['revisionid'];
     if (!$revisionId) {
-        error(0);
+        error('No revision given to revert');
     }
     $artist->revertRevision($revisionId, $Viewer);
     header("Location: " . $artist->location());

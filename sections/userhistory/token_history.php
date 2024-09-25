@@ -7,7 +7,7 @@ if (!isset($_GET['userid'])) {
 } else {
     $user = (new Gazelle\Manager\User())->findById((int)$_GET['userid']);
     if (is_null($user)) {
-        error(0);
+        error(404);
     }
     if ($user->id() !== $Viewer->id() && !$Viewer->permitted('admin_fl_history')) {
         error(403);

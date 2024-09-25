@@ -17,7 +17,7 @@ $artistName = trim($_POST['artist']);
 $title      = trim($_POST['title']);
 $year       = (int)$_POST['year'];
 if (!$year || empty($title) || empty($artistName)) {
-    error(0);
+    error('Missing parameters to set up new group');
 }
 
 $torrent = (new Gazelle\Manager\Torrent())->findById((int)($_POST['torrentid'] ?? 0));

@@ -2,7 +2,7 @@
 /** @phpstan-var \Gazelle\User $Viewer */
 
 if (!in_array((int)($_GET['type'] ?? 0), range(0, 3))) {
-    error(0);
+    json_error('Unknown transcode type');
 }
 
 $search = new Gazelle\Search\Transcode($Viewer, (new Gazelle\Manager\Torrent())->setViewer($Viewer));

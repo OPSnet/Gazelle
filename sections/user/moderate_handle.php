@@ -36,15 +36,16 @@ $userId = $user->id();
 $ownProfile = $userId === $Viewer->id();
 
 // Variables for database input
-$class = (int)($_POST['Class'] ?? 0);
-$title = trim($_POST['Title']);
-$adminComment = trim($_POST['admincomment'] ?? '');
-$visible = isset($_POST['Visible']) ? '1' : '0';
+$class             = (int)($_POST['Class'] ?? 0);
+$title             = trim($_POST['Title']);
+$adminComment      = trim($_POST['admincomment'] ?? '');
+$visible           = isset($_POST['Visible']) ? '1' : '0';
 $unlimitedDownload = isset($_POST['unlimitedDownload']);
-$invites = (int)$_POST['Invites'];
-$slogan = trim($_POST['slogan']);
-$changePassword = !empty($_POST['ChangePassword']);
-$uploaded = $downloaded = $bonusPoints = null;
+$invites           = (int)$_POST['Invites'];
+$slogan            = trim($_POST['slogan']);
+$changePassword    = !empty($_POST['ChangePassword']);
+$uploaded          = $downloaded = $bonusPoints = null;
+
 if (isset($_POST['Uploaded']) && isset($_POST['Downloaded'])) {
     $uploaded = ($_POST['Uploaded'] === '' ? 0 : $_POST['Uploaded']);
     if ($arithmetic = strpbrk($uploaded, '+-')) {
@@ -55,7 +56,7 @@ if (isset($_POST['Uploaded']) && isset($_POST['Downloaded'])) {
         $downloaded += max(-$downloaded, get_bytes($arithmetic));
     }
     if (!is_number($uploaded) || !is_number($downloaded)) {
-        error(0);
+        error('Invalid upload/download amounts');
     }
 }
 if (isset($_POST['BonusPoints'])) {

@@ -25,8 +25,8 @@ switch ($_REQUEST['action']) {
     case 'takeeditnews':
         authorize();
         $id = (int)$_REQUEST['id'];
-        if ($id < 1) {
-            error(0);
+        if (!$id) {
+            error('Unknown id for handle news item edit');
         }
         $newsMan->modify($id, $_POST['title'], $_POST['body']);
         header('Location: index.php');
@@ -34,16 +34,16 @@ switch ($_REQUEST['action']) {
 
     case 'editnews':
         $id = (int)$_REQUEST['id'];
-        if ($id < 1) {
-            error(0);
+        if (!$id) {
+            error('Unknown id for news item edit');
         }
         [$title, $body] = $newsMan->fetch($id);
         break;
 
     case 'deletenews':
         $id = (int)$_REQUEST['id'];
-        if ($id < 1) {
-            error(0);
+        if (!$id) {
+            error('Unknown id for news item delete');
         }
         $newsMan->remove($id);
         header('Location: index.php');
@@ -54,7 +54,7 @@ switch ($_REQUEST['action']) {
         break;
 
     default:
-        error(0);
+        error('Unknown news action');
 }
 echo $Twig->render('admin/news.twig', [
     'auth'    => $Viewer->auth(),

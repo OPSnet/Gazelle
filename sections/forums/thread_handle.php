@@ -55,18 +55,18 @@ if (!$newPinned && $newRank > 0) {
 if (isset($_POST['transition'])) {
     $transId = (int)$_POST['transition'];
     if ($transId < 1) {
-        error(0);
+        error('No forum transition ID specified');
     }
     $transitions = (new Gazelle\Manager\ForumTransition())->threadTransitionList($Viewer, $thread);
     if (!isset($transitions[$transId])) {
-        error(0);
+        error('Forum transition not found');
     }
     $transition = $transitions[$transId];
-    $newForum  = $forumMan->findById($transition->destinationId());
-    $locked    = $thread->isLocked();
-    $newPinned = $thread->isPinned();
-    $newRank   = $thread->pinnedRanking();
-    $newTitle  = $thread->title();
+    $newForum   = $forumMan->findById($transition->destinationId());
+    $locked     = $thread->isLocked();
+    $newPinned  = $thread->isPinned();
+    $newRank    = $thread->pinnedRanking();
+    $newTitle   = $thread->title();
 }
 
 if ($locked && $Viewer->permitted('site_moderate_forums')) {

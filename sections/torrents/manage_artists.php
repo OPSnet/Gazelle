@@ -15,7 +15,7 @@ foreach (explode(',', $_POST['artists'] ?? '') as $roleAliasId) {
     }
 }
 if (!$roleAliasList) {
-    error(0);
+    error('No artists to manage');
 }
 
 $tgroup = (new Gazelle\Manager\TGroup())->findById((int)($_POST['groupid'] ?? 0));
@@ -28,7 +28,7 @@ if (($_POST['manager_action'] ?? '') == 'delete') {
 } else {
     $newRole = (int)($_POST['importance'] ?? 0);
     if ($newRole === 0 || !isset(ARTIST_TYPE[$newRole])) {
-        error(0);
+        error('Unknown new artist role');
     }
     $tgroup->artistRole()->modifyList($roleAliasList, $newRole, $Viewer, new Gazelle\Log());
 }

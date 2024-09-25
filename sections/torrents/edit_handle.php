@@ -172,7 +172,7 @@ $change = [];
 foreach ($propertyMap as $field => $method) {
     if (!method_exists($torrent, $method)) {
         $Debug->saveCase("bad method $method in torrent edit id={$torrent->id()}");
-        error(0);
+        error('Cannot proceed with torrent edit');
     }
     $value = $torrent->$method();
     // soft inequality, to match null versus ''

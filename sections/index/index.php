@@ -8,8 +8,8 @@ if (!isset($Viewer)) {
         require('private.php');
     } else {
         match ($_REQUEST['action']) {
-            'poll' => require(__DIR__ . '/../forums/poll_vote.php'),
-            default => error(0),
+            'poll'  => require(__DIR__ . '/../forums/poll_vote.php'),
+            default => error('Unknown action requested'),
         };
     }
 }

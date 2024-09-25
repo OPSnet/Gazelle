@@ -173,7 +173,7 @@ switch ($Action) {
         }
         break;
     default:
-        error(0);
+        error('What are you trying to comment on?');
 }
 
 $Join[] = "INNER JOIN comments C ON (C.Page = ? AND C.PageID = $idField)";

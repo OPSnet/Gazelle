@@ -58,7 +58,7 @@ if ($_POST['submit'] == 'Delete') {
             ->setField('initial', $_POST['default'] == 'on')
             ->modify();
     } else {
-        error(0);
+        error('Unknown forum navigation action specified');
     }
 }
 

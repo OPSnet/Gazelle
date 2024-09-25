@@ -19,7 +19,7 @@ if ($Viewer->disablePosting()) {
 authorize();
 
 if (!isset($_POST['forum'])) {
-    error(0);
+    error('Forum ID not specified');
 }
 $forum = (new Gazelle\Manager\Forum())->findById((int)$_POST['forum']);
 if (is_null($forum)) {

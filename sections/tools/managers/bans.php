@@ -13,7 +13,7 @@ if (isset($_POST['submit'])) {
     $id = (int)($_POST['id'] ?? 0);
     if ($_POST['submit'] == 'Delete') { //Delete
         if (!$id) {
-            error(0);
+            error('Unknown id for ip ban removal');
         }
         $IPv4Man->removeBan($id);
     } else { //Edit & Create, Shared Validation

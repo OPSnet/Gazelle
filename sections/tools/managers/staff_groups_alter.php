@@ -11,7 +11,7 @@ $staffGroup = $manager->findById((int)($_POST['id'] ?? 0));
 
 if ($_POST['submit'] == 'Delete') {
     if (is_null($staffGroup)) {
-        error(0);
+        error('Staff Group not found for delete');
     }
     $staffGroup->remove();
 } else {

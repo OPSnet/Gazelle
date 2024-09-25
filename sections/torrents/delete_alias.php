@@ -8,7 +8,7 @@ if (!$Viewer->permitted('torrents_edit')) {
 
 $role = (int)$_GET['importance'];
 if (!$role) {
-    error(0);
+    error('No role specified to delete');
 }
 $tgMan = new Gazelle\Manager\TGroup();
 $tgroup = $tgMan->findById((int)$_GET['groupid']);

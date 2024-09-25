@@ -71,7 +71,7 @@ foreach ($Results as &$result) {
             }
             break;
         default:
-            error(0);
+            error('Unknown comment history target');
     }
     if (!empty($result['LastReadBody'])) {
         $result['avatar'] = $avatarFilter->render(['user' => new Gazelle\User($result['LastReadUserID']), 'viewer' => $Viewer]);

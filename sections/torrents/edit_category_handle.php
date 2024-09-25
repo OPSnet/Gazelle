@@ -45,6 +45,6 @@ $new = $tgMan->changeCategory(
 );
 
 if (is_null($new)) {
-    error(0);
+    error("Unable to change category to $newName");
 }
 header('Location: ' . $new->location());

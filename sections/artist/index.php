@@ -10,7 +10,7 @@ if (!empty($_POST['action'])) {
         'rename'          => require_once('rename.php'),
         'edit'            => require_once('edit_handle.php'),
         'takeeditrequest' => require_once('edit_request_handle.php'),
-        default           => error(0),
+        default           => error('Missing artist POST action'),
     };
 } elseif (!empty($_GET['action'])) {
     match ($_GET['action']) {
@@ -26,7 +26,7 @@ if (!empty($_POST['action'])) {
         'notifyremove'    => require_once('notify_remove.php'),
         'revert'          => require_once('edit_handle.php'),
         'vote_similar'    => require_once('vote_similar.php'),
-        default           => error(0),
+        default           => error('Missing artist action'),
     };
 } else {
     if (!empty($_GET['id'])) {

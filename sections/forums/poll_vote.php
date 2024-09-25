@@ -5,10 +5,10 @@
 
 $poll = (new Gazelle\Manager\ForumPoll())->findById((int)($_POST['threadid'] ?? 0));
 if (is_null($poll)) {
-    error(404, true);
+    error(404);
 }
 if ($poll->isClosed()) {
-    error(403, true);
+    error(403);
 }
 
 $vote = $poll->vote();
@@ -31,7 +31,7 @@ if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
     authorize();
     $response = (int)$_POST['vote'];
     if (!$poll->addVote($Viewer, $response)) {
-        error(0, true);
+        error('Cannot add your vote to the poll');
     }
     $vote = $poll->vote(); // need to refresh the results to take the vote into account
 

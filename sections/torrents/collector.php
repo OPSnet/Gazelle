@@ -6,7 +6,7 @@ if (!$Viewer->permitted('zip_downloader')) {
 }
 
 if (empty($_GET['title'])) {
-    error(0);
+    error('Collector type not specified');
 }
 $title = trim($_GET['title']);
 
@@ -28,11 +28,11 @@ switch ($title) {
         $title = "$title-" . $user->username();
         break;
     default:
-        error(0);
+        error('Unknown collector type');
 }
 
 if (!$ids) {
-    error(0);
+    error('No groups found to collect');
 }
 
 $collector = new Gazelle\Collector\TList($Viewer, new Gazelle\Manager\Torrent(), $title, 0);

@@ -30,11 +30,11 @@ foreach ($_POST as $k => $v) {
                 continue;
             }
             if (!in_array($v, ['refund', 'remove'])) {
-                error(0);
+                error('Unknown bounty action');
             }
             $action[(int)$match[2]] = $v;
         } else {
-            error(0);
+            error('Unknown bounty edit requested');
         }
     }
 }

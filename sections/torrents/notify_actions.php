@@ -13,7 +13,7 @@ switch ($_GET['action']) {
     case 'notify_catchup_filter':
         $filterId = (int)$_GET['filterid'];
         if (!$filterId) {
-            error(0);
+            error('Notification filter not found for catch up');
         }
         $notifier->catchupFilter($filterId);
         header('Location: torrents.php?action=notify');
@@ -27,7 +27,7 @@ switch ($_GET['action']) {
     case 'notify_clear_filter':
         $filterId = (int)$_GET['filterid'];
         if (!$filterId) {
-            error(0);
+            error('Notification filter not found for clear');
         }
         $notifier->clearFilter($filterId);
         header('Location: torrents.php?action=notify');
@@ -36,7 +36,7 @@ switch ($_GET['action']) {
     case 'notify_clear_item':
         $torrentId = (int)$_GET['torrentid'];
         if (!$torrentId) {
-            error(0);
+            error('Torrent id not found for clear');
         }
         $notifier->clearTorrentList([$torrentId]);
         break;
@@ -46,10 +46,10 @@ switch ($_GET['action']) {
             fn($n) => (int)$n, explode(',', $_GET['torrentids'] ?? '')
         ));
         if (!$cleared) {
-            error(0);
+            error('Unable to clear marked torrents');
         }
         break;
 
     default:
-        error(0);
+        error('Unknown notification action');
 }

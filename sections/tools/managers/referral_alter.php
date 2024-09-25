@@ -12,7 +12,7 @@ $ReferralManager = new Gazelle\Manager\Referral();
 if ($_POST['submit'] == 'Delete') {
     $id = (int)$_POST['id'];
     if (!$id) {
-        error(0);
+        error('No referral id for delete');
     }
     $ReferralManager->deleteAccount($id);
 } else {
@@ -37,8 +37,8 @@ if ($_POST['submit'] == 'Delete') {
             $_POST['active'] == 'on', $_POST['type'], $_POST['cookie']);
     } elseif ($_POST['submit'] === 'Edit') {
         $id = (int)$_POST['id'];
-        if (!$id || !$ReferralManager->getAccount($id)) {
-            error(0);
+        if (!$ReferralManager->getAccount($id)) {
+            error('No referral id for edit');
         }
 
         $ReferralManager->updateAccount($_POST['id'], $_POST['site'], $_POST['url'], $_POST['user'],

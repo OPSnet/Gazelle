@@ -21,7 +21,7 @@ if (($_GET['action'] ?? '') == 'revert') {
     // we're reverting to a previous revision
     $RevisionID = (int)$_GET['revisionid'];
     if (!$RevisionID) {
-        error(0);
+        error('No revision specified to revert');
     }
     if (empty($_GET['confirm'])) {
         echo $Twig->render('tgroup/revert-confirm.twig', [

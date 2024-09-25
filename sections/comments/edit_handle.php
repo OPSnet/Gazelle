@@ -2,25 +2,25 @@
 /** @phpstan-var \Gazelle\User $Viewer */
 
 if ($Viewer->disablePosting()) {
-    error('Your posting privileges have been removed.', true);
+    error('Your posting privileges have been removed.');
 }
 authorize();
 
 $body = trim($_POST['body'] ?? '');
 if (!strlen($body)) {
-    error(404, true);
+    error(404);
 }
 
 $comment = (new Gazelle\Manager\Comment())->findById((int)($_REQUEST['postid'] ?? 0));
 if (is_null($comment)) {
-    error(404, true);
+    error(404);
 }
 if ($comment->userId() != $Viewer->id() && !$Viewer->permitted('site_moderate_forums')) {
-    error(403, true);
+    error(403);
 }
 $user = (new Gazelle\Manager\User())->findById($comment->userId());
 if (is_null($user)) {
-    error(0, true);
+    error(404);
 }
 
 $comment->setField('Body', $body)->setField('EditedUserID', $Viewer->id())->modify();

@@ -10,7 +10,7 @@ authorize();
 $forumMan = new Gazelle\Manager\Forum();
 $forum = $forumMan->findById((int)($_POST['id'] ?? 0));
 if (is_null($forum) && in_array($_POST['submit'], ['Edit', 'Delete'])) {
-    error(0);
+    error('Unknown forum alter action');
 }
 if ($_POST['submit'] == 'Delete') {
     $forum->remove();

@@ -10,7 +10,7 @@ $emailBlacklist = new Gazelle\Manager\EmailBlacklist();
 
 if ($_POST['submit'] === 'Delete') { // Delete
     if (!$emailBlacklist->remove((int)$_POST['id'])) {
-        error(0);
+        error('Unknown id for email blacklist removal');
     }
 } else { // Edit & Create, Shared Validation
     $validator = new Gazelle\Util\Validator();
@@ -25,7 +25,7 @@ if ($_POST['submit'] === 'Delete') { // Delete
         error(html_escape($email) . " is not a valid regular expression");
     }
 
-    if ($_POST['submit'] === 'Edit') { // Edit
+    if ($_POST['submit'] === 'Edit') {
         if (
             !$emailBlacklist->modify(
                 id:      (int)$_POST['id'],
@@ -34,9 +34,9 @@ if ($_POST['submit'] === 'Delete') { // Delete
                 user:    $Viewer,
             )
         ) {
-            error(0);
+            error('Unable to edit email blacklist entry');
         }
-    } else { // Create
+    } else {
         if (
             !$emailBlacklist->create(
                 domain:  $email,
@@ -44,7 +44,7 @@ if ($_POST['submit'] === 'Delete') { // Delete
                 user:    $Viewer,
             )
         ) {
-            error(0);
+            error('Unable to create email blacklist entry');
         }
     }
 }

@@ -12,7 +12,7 @@ $scheduler = new Gazelle\TaskScheduler();
 
 if ($p['submit'] == 'Delete') {
     if (!is_number($p['id']) || $p['id'] == '') {
-        error(0);
+        error('Unknown or missing task id for delete');
     }
 
     $scheduler->deleteTask($p['id']);
@@ -40,16 +40,16 @@ if ($p['submit'] == 'Delete') {
             isset($p['enabled']), isset($p['sane']), isset($p['debug']));
     } elseif ($p['submit'] == 'Edit') {
         if (!is_number($p['id']) || $p['id'] == '') {
-            error(0);
+            error('Unknown or missing task id for edit');
         }
 
         $task = $scheduler->getTask($p['id']);
         if ($task == null) {
-            error(0);
+            error('Task not found');
         }
 
         $scheduler->updateTask(intval($p['id']), $p['name'], $p['classname'], $p['description'],
-            intval($p['interval']), isset($p['enabled']), isset($p['sane']), isset($p['debug']));
+            (int)$p['interval'], isset($p['enabled']), isset($p['sane']), isset($p['debug']));
     }
 }
 

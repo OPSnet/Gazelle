@@ -33,15 +33,6 @@ switch ($Error) {
         $Title = "Error 429";
         $Description = "You tried to do something too frequently.";
         break;
-    case '0':
-        $Title = "Invalid Input";
-        $Description = "Something was wrong with the input provided with your request, and the server is refusing to fulfill it.";
-        notify($Viewer, IRC_CHAN_STATUS, 'PHP');
-        break;
-    case '-1':
-        $Title = "Invalid request";
-        $Description = "Something was wrong with your request, and the server is refusing to fulfill it.";
-        break;
     default:
         if (empty($Error)) {
             $Title = "Unexpected Error";
