@@ -178,7 +178,6 @@ $option['AutoSubscribe']       = (!empty($_POST['autosubscribe']) ? 1 : 0);
 $option['DisableSmileys']      = (int)isset($_POST['disablesmileys']);
 $option['EnableMatureContent'] = (!empty($_POST['enablematurecontent']) ? 1 : 0);
 $option['UseOpenDyslexic']     = (!empty($_POST['useopendyslexic']) ? 1 : 0);
-$option['Tooltipster']         = (!empty($_POST['usetooltipster']) ? 1 : 0);
 $option['DisableAvatars']      = (int)($_POST['disableavatars'] ?? 0);
 $option['Identicons']          = (int)($_POST['identicons'] ?? 0);
 $option['DisablePMAvatars']    = (!empty($_POST['disablepmavatars']) ? 1 : 0);

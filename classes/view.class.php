@@ -47,7 +47,9 @@ class View {
             'jquery',
             'jquery.autocomplete',
             'global',
-            'katex-0.16.10.min'
+            'katex-0.16.10.min',
+            'tooltipster',
+            'tooltipster_settings',
         );
 
         if (DEBUG_MODE || $Viewer->permitted('site_debug')) {
@@ -58,14 +60,10 @@ class View {
         }
 
         $cssList  = ['katex/katex-0.16.10.min.css'];
-        $scssList = ['global.css'];
+        $scssList = ['global.css', 'tooltipster/style.css'];
 
         if (!empty($option['css'])) {
             array_push($scssList, ...array_map(fn($s) => "$s/style.css", explode(',', $option['css'])));
-        }
-        if ($Viewer->option('Tooltipster') ?? 1) {
-            array_push($js, 'tooltipster', 'tooltipster_settings');
-            $scssList[] = 'tooltipster/style.css';
         }
         if ($Viewer->option('UseOpenDyslexic')) {
             $scssList[] = 'opendyslexic/style.css';
