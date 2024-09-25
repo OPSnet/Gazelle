@@ -42,7 +42,7 @@
                 <div class="pad"><p align="center">
 {% if request.image %}
 {%  set image = request.image|image -%}
-                    <img style="width: 100%;" src="{{ image }}" alt="album art" onclick="lightbox.init('{{ image }}', 220);" data-origin-src="{{ image }}" />
+                    <img style="width: 100%;" src="{{ image }}" alt="album art" onclick="lightbox.init('{{ image }}', 220);" data-origin-src="{{ request.image }}" />
 {%  else %}
                     <img style="width: 100%;" src="{{ request.categoryImage }}" alt="{{ request.categoryName }}" class="tooltip" title="{{ request.categoryName }}" height="220" border="0" />
 {%  endif %}
