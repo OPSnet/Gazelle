@@ -9,7 +9,7 @@
         <td class="label">Tags:</td>
         <td><input type="text" id="tags" name="tags" size="60" value=""{{ autocomplete(user, 'other') }} /></td>
     </tr>
-{%  include 'upload/cover.twig' with {'is_uploaded': is_uploaded} only %}
+{%  include 'upload/cover.twig' with {'is_uploaded': is_uploaded, 'image': torrent.Image} only %}
 {% endif %}
     <tr>
         <td class="label">Description:</td>

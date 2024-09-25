@@ -23,7 +23,7 @@
             <a href="#" id="subscribelink_requests{{ request.id }}" class="brackets" onclick="SubscribeComments('requests',{{ request.id }});return false;">{% if is_subscribed %}Unsubscribe{% else %}Subscribe{% endif %}</a>
            <a href="reports.php?action=report&amp;type=request&amp;id={{ request.id }}" class="brackets">Report request</a>
 {% if not request.isFilled %}
-            <a href="upload.php?request.id={{ request.id }}{% if request.tgroupId %}&amp;groupid={{ request.tgroupId }}{% endif %}" class="brackets">Upload request</a>
+            <a href="upload.php?requestid={{ request.id }}{% if request.tgroupId %}&amp;groupid={{ request.tgroupId }}{% endif %}" class="brackets">Upload request</a>
 {%  if request.categoryName == 'Music' and request.year == 0 %}
             <a href="reports.php?action=report&amp;type=request_update&amp;id={{ request.id }}" class="brackets">Request update</a>
 {%  endif %}

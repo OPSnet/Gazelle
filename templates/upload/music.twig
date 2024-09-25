@@ -25,7 +25,7 @@
             <br />Please take the time to fill this out correctly (especially when adding Compilations and Anthologies). Need help? Try reading <a href="wiki.php?action=article&amp;id=58" target="_blank">this wiki article</a> or searching <a href="https://musicbrainz.org/search" target="_blank">MusicBrainz</a>.
         </td>
     </tr>
-{%  include 'upload/cover.twig' with {'is_uploaded': is_uploaded} only %}
+{%  include 'upload/cover.twig' with {'is_uploaded': is_uploaded, 'image': torrent.Image} only %}
     <tr id="artist_tr">
     <td class="label">Artist(s):</td>
     <td id="artistfields">
@@ -208,7 +208,7 @@
             <input id="logfile_1" type="file" accept="{{ logchecker_accept }}" multiple name="logfiles[]" size="50" />
         </td>
     </tr>
-{% if not torrent or add_format %}
+{% if not tgroup or add_format %}
     <tr>
         <td class="label">Multi-format uploader:</td>
         <td><input type="button" value="+" id="add_format" />&nbsp;<input type="button" style="display: none;" value="-" id="remove_format" /></td>
@@ -239,8 +239,13 @@
 {%      endif %}
 {%  endfor %}
 {% endif %}
-{% if not torrent %}
-{%  include 'upload/tag.twig' with {'is_uploaded': is_uploaded, 'tag_list': tag_list, 'user': user} %}
+{% if not tgroup %}
+{%  include 'upload/tag.twig' with {
+    'active_tags': torrent.TagList,
+    'is_uploaded': is_uploaded,
+    'tag_list':    tag_list,
+    'user':        user,
+}%}
     <tr>
         <td class="label">Album description:</td>
         <td>

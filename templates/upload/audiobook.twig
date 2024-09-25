@@ -14,8 +14,10 @@
 {% endif %}
 {% include 'upload/format.twig' with {'format': torrent.Format} %}
 {% include 'upload/bitrate.twig' with {'bitrate': torrent.Bitrate} %}
+{% if not is_uploaded %}
+{%  include 'upload/tag.twig' with {'active_tags': torrent.TagList, 'tag_list': tag_list, 'user': user} %}
+{% endif %}
 {% if not torrent %}
-{%  include 'upload/tag.twig' with {'is_uploaded': is_uploaded, 'tag_list': tag_list, 'user': user} %}
     <tr>
         <td class="label">Description:</td>
         <td>

@@ -1,7 +1,7 @@
 {% from 'macro/form.twig' import disabled %}
     <tr>
         <td class="label">Image (optional):</td>
-        <td><input type="text" id="image" name="image" size="60" value=""{{ disabled(is_uploaded) }} />
+        <td><input type="text" id="image" name="image" size="60" value="{{ image }}"{{ disabled(is_uploaded) }} />
         <br />Artwork helps improve the quality of the catalog. Please try to find a decent sized image (500x500).
 {%  if constant('IMAGE_HOST_BANNED') %}
         <br />Images hosted on <strong class="important_text">{{ constant('IMAGE_HOST_BANNED')|join(', ') }}</strong> are not allowed, please rehost first on one of {{ constant('IMAGE_HOST_RECOMMENDED')|join(', ') }}
