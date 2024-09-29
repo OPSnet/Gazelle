@@ -12,21 +12,21 @@ if (is_null($tgroup)) {
 }
 $vote = new Gazelle\User\Vote($Viewer);
 
-if ($_REQUEST['do'] == 'unvote') {
-    [$ok, $message] = $vote->clear($tgroup);
-} elseif ($_REQUEST['do'] == 'vote') {
-    switch ($_REQUEST['vote']) {
-        case 'up':
-            [$ok, $message] = $vote->upvote($tgroup);
-            break;
-        case 'down':
-            [$ok, $message] = $vote->downvote($tgroup);
-            break;
-        default:
-            json_error('bad vote');
-    }
-} else {
-    error(0);
+if ($_REQUEST['do'] != 'vote') {
+    json_error('bad args');
+}
+switch ($_REQUEST['vote']) {
+    case 'up':
+        [$ok, $message] = $vote->upvote($tgroup);
+        break;
+    case 'down':
+        [$ok, $message] = $vote->downvote($tgroup);
+        break;
+    case 'clear':
+        [$ok, $message] = $vote->clear($tgroup);
+        break;
+    default:
+        json_error('bad vote');
 }
 
 if (!$ok) {

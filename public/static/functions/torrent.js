@@ -111,7 +111,7 @@ function ArtistManager() {
         var elAuth = document.createElement('input');
         elAuth.type = 'hidden';
         elAuth.name = 'auth';
-        elAuth.value = authkey;
+        elAuth.value = document.body.dataset.auth;
         elArtistForm.appendChild(elAuth);
 
         var elSelection = document.createElement('input');
@@ -247,7 +247,7 @@ function Vote(amount, requestid) {
         votecount = $('#vote_count_' + requestid).raw();
     }
 
-    ajax.get('requests.php?action=takevote&id=' + requestid + '&auth=' + authkey + '&amount=' + amount, function (response) {
+    ajax.get('requests.php?action=takevote&id=' + requestid + '&auth=' + document.body.dataset.auth + '&amount=' + amount, function (response) {
             if (response == 'bankrupt') {
                 error_message("You do not have sufficient upload credit to add " + byte_format(amount) + " to this request");
                 return;

@@ -1,6 +1,6 @@
 "use strict";
 
-(function (window) {
+(function () {
 function submitComment(event) {
     event.preventDefault();
 
@@ -59,7 +59,7 @@ function doAction(event, success_cb) {
     const target = event.target;
     const ACTION = target.dataset.action;
     const ACTION_ID = target.dataset.id;
-    let URL = "report_auto.php?action=" + ACTION + "&id=" + ACTION_ID + "&auth=" + window.authkey;
+    let URL = "report_auto.php?action=" + ACTION + "&id=" + ACTION_ID + "&auth=" + document.body.dataset.auth;
     if ("typeid" in target.dataset) {
         URL += "&type=" + target.dataset.typeid;
     }
@@ -98,4 +98,4 @@ document.addEventListener("DOMContentLoaded", () => {
         forEach(x => x.addEventListener("click", submitAllAction));
 });
 
-})(window);
+})();

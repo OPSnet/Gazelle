@@ -42,5 +42,4 @@ document.addEventListener('DOMContentLoaded', function() {
             field.val(Math.max(0, field.data('actual')));
         });
     });
-    console.log(field.data('actual'));
 });

@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let request = $.ajax({
                 url: 'tools.php',
                 type: "post",
-                data: 'action=dnu_alter&auth=' + authkey + '&submit=Reorder&' + $(this).sortable('serialize'),
+                data: 'action=dnu_alter&auth=' + document.body.dataset.auth + '&submit=Reorder&' + $(this).sortable('serialize'),
             });
             request.done(function () {
             });

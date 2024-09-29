@@ -1,122 +1,83 @@
-/* global ajax */
+"use strict";
 
-let voteLock = false;
-
-function handleBoxAction(info, direction) {
-console.log(info);
+async function handleLinkAction(action, gid) {
+    const response = await fetch(new Request(
+        'ajax.php?action=votefavorite&do=vote&vote=' + action
+            + '&groupid=' + gid
+            + '&auth=' + document.body.dataset.auth
+    ));
+    const info = await response.json();
     if (info.status != 'success') {
         return;
     }
-    $('#upvotes').raw().innerHTML = info.response.up;
-    $('#downvotes').raw().innerHTML = info.response.down;
-    $('#totalvotes').raw().innerHTML = info.response.total;
-    $('#votescore').raw().innerHTML = (info.response.score * 100).toFixed(1);
-    if (info.response.total == 0) {
-        $('#votepercent').raw().innerHTML = '&mdash;';
-    } else {
-        $('#votepercent').raw().innerHTML = ((info.response.up / info.response.total) * 100).toFixed(1) + '%';
-    }
-    if (direction == 0) {
-        $('#vote_message').gshow();
-        $('#unvote_message').ghide();
-        $('#upvoted').ghide();
-        $('#downvoted').ghide();
-    } else {
-        $('#vote_message').ghide();
-        $('#unvote_message').gshow();
-        if (direction == 1) {
-            $('#upvoted').gshow();
-            $('#downvoted').ghide();
+
+    let percent = document.getElementById('votepercent');
+    if (percent === null) {
+        // on a list page
+        document.getElementById('votescore-' + gid).innerHTML
+            = (info.response.score * 100).toFixed(1);
+        const data_id = '[data-id="' + gid + '"]';
+        if (action == 'clear') {
+            document.querySelector('.small_clearvote' + data_id).classList.add('hidden');
+            document.querySelector('.small_upvote' + data_id).classList.remove('hidden');
+            document.querySelector('.small_downvote' + data_id).classList.remove('hidden');
+            document.getElementById('voted_up_' + gid).classList.add('hidden');
+            document.getElementById('voted_down_' + gid).classList.add('hidden');
         } else {
-            $('#upvoted').ghide();
-            $('#downvoted').gshow();
+            document.querySelector('.small_clearvote' + data_id).classList.remove('hidden');
+            document.querySelector('.small_upvote' + data_id).classList.add('hidden');
+            document.querySelector('.small_downvote' + data_id).classList.add('hidden');
+            document.getElementById('voted_' + action + '_' + gid).classList.remove('hidden');
+        }
+    } else {
+        // on a torrent group page
+        percent.innerHTML = (info.response.total == 0)
+            ? '—'
+            : ((info.response.up / info.response.total) * 100).toFixed(1) + '%';
+        document.getElementById('votescore').innerHTML
+            = (info.response.score * 100).toFixed(1);
+        document.getElementById('upvotes').innerHTML = info.response.up;
+        document.getElementById('downvotes').innerHTML = info.response.down;
+        document.getElementById('totalvotes').innerHTML = info.response.total;
+        if (action == 'clear') {
+            document.getElementById('vote_message').classList.remove('hidden');
+            document.getElementById('unvote_message').classList.add('hidden');
+            document.getElementById('upvoted').classList.add('hidden');
+            document.getElementById('downvoted').classList.add('hidden');
+        } else {
+            document.getElementById('vote-clear').classList.remove('hidden');
+            document.getElementById('vote_message').classList.add('hidden');
+            document.getElementById('unvote_message').classList.remove('hidden');
+            if (action == 'up') {
+                document.getElementById('upvoted').classList.remove('hidden');
+                document.getElementById('downvoted').classList.add('hidden');
+            } else {
+                document.getElementById('upvoted').classList.add('hidden');
+                document.getElementById('downvoted').classList.remove('hidden');
+            }
         }
     }
 }
 
-function handleLinkAction(info, direction) {
-    if (info.status != 'success') {
-        return;
-    }
-    const groupid = info.response.id;
-    $('#votescore-' + groupid).raw().innerHTML = (info.response.score * 100).toFixed(1);
-    if (direction == 0) {
-        $('#vote_clear_' + groupid).ghide();
-        $('#vote_up_' + groupid).gshow();
-        $('#vote_down_' + groupid).gshow();
-        $('#voted_up_' + groupid).ghide();
-        $('#voted_down_' + groupid).ghide();
-    } else {
-        $('#vote_clear_' + groupid).gshow();
-        $('#vote_up_' + groupid).ghide();
-        $('#vote_down_' + groupid).ghide();
-        if (direction == 1) {
-            $('#voted_up_' + groupid).gshow();
-        } else {
-            $('#voted_down_' + groupid).gshow();
-        }
-    }
-}
-
-function DownVoteBox(groupid, authkey) {
-    if (!voteLock) {
-        voteLock = true;
-        ajax.get('ajax.php?action=votefavorite&do=vote&groupid=' + groupid + '&vote=down' + '&auth=' + authkey, function (response) {
-            handleBoxAction(JSON.parse(response), -1);
+document.addEventListener('DOMContentLoaded', () => {
+    Array.from(document.querySelectorAll('.small_upvote, #vote-up')).forEach(function(a) {
+        a.addEventListener('click', (e) => {
+            handleLinkAction('up', a.dataset.id);
+            e.preventDefault();
         });
-        voteLock = false;
-    }
-}
+    });
 
-function UpVoteBox(groupid, authkey) {
-    if (!voteLock) {
-        voteLock = true;
-        ajax.get('ajax.php?action=votefavorite&do=vote&groupid=' + groupid + '&vote=up' + '&auth=' + authkey, function (response) {
-            handleBoxAction(JSON.parse(response), +1);
+    Array.from(document.querySelectorAll('.small_downvote, #vote-down')).forEach(function(a) {
+        a.addEventListener('click', (e) => {
+            handleLinkAction('down', a.dataset.id);
+            e.preventDefault();
         });
-        voteLock = false;
-    }
-}
+    });
 
-function UnvoteBox(groupid, authkey) {
-    if (!voteLock) {
-        voteLock = true;
-        ajax.get('ajax.php?action=votefavorite&do=unvote&groupid=' + groupid + '&auth=' + authkey, function (response) {
-                handleBoxAction(JSON.parse(response), 0);
+    Array.from(document.querySelectorAll('.small_clearvote, #vote-clear')).forEach(function(a) {
+        a.addEventListener('click', (e) => {
+            handleLinkAction('clear', a.dataset.id);
+            e.preventDefault();
         });
-        voteLock = false;
-    }
-}
-
-function DownVoteGroup(groupid, authkey) {
-    if (voteLock) {
-        return;
-    }
-    voteLock = true;
-    ajax.get('ajax.php?action=votefavorite&do=vote&groupid=' + groupid + '&vote=down' + '&auth=' + authkey, function (response) {
-        handleLinkAction(JSON.parse(response), -1);
     });
-    voteLock = false;
-}
-
-function UpVoteGroup(groupid, authkey) {
-    if (voteLock) {
-        return;
-    }
-    voteLock = true;
-    ajax.get('ajax.php?action=votefavorite&do=vote&groupid=' + groupid + '&vote=up' + '&auth=' + authkey, function (response) {
-        handleLinkAction(JSON.parse(response), +1);
-    });
-    voteLock = false;
-}
-
-function UnvoteGroup(groupid, authkey) {
-    if (voteLock) {
-        return;
-    }
-    voteLock = true;
-        ajax.get('ajax.php?action=votefavorite&do=unvote&groupid=' + groupid + '&auth=' + authkey, function (response) {
-        handleLinkAction(JSON.parse(response), 0);
-    });
-    voteLock = false;
-}
+});

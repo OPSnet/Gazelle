@@ -114,7 +114,6 @@ function Quote(post, user, link = false) {
     }
 }
 
-
 function edit_post(id) {
     const dataset = document.getElementById(id).dataset;
     const postuserid = dataset.author;
@@ -127,12 +126,12 @@ function edit_post(id) {
         $('#reply_box').ghide();
         const boxWidth = location.href.match(/(artist|torrents)\.php/) ? "50" : "80";
         const inputname = is_forum ? "post" : "postid";
-        const pmbox = (postuserid != userid)
+        const pmbox = (postuserid != document.body.dataset.id)
             ? '<span id="pmbox' + postid + '"><label>PM user on edit? <input type="checkbox" name="pm" value="1" /></label></span>'
             : '';
         $('#bar' + postid).raw().cancel = $('#content' + postid).raw().innerHTML;
         $('#bar' + postid).raw().oldbar = $('#bar' + postid).raw().innerHTML;
-        $('#content' + postid).raw().innerHTML = "<div id=\"preview" + postid + "\"></div><form id=\"form" + postid + "\" method=\"post\" action=\"\">" + pmbox + "<input type=\"hidden\" name=\"auth\" value=\"" + authkey + "\" />&nbsp;<input type=\"hidden\" name=\"key\" value=\"" + key + "\" />&nbsp;<input type=\"hidden\" name=\"" + inputname + "\" value=\"" + postid + "\" /><textarea id=\"editbox" + postid + "\" onkeyup=\"resize('editbox" + postid + "');\" name=\"body\" cols=\"" + boxWidth + "\" rows=\"10\"></textarea></form>";
+        $('#content' + postid).raw().innerHTML = "<div id=\"preview" + postid + "\"></div><form id=\"form" + postid + "\" method=\"post\" action=\"\">" + pmbox + "<input type=\"hidden\" name=\"auth\" value=\"" + document.body.dataset.auth + "\" />&nbsp;<input type=\"hidden\" name=\"key\" value=\"" + key + "\" />&nbsp;<input type=\"hidden\" name=\"" + inputname + "\" value=\"" + postid + "\" /><textarea id=\"editbox" + postid + "\" onkeyup=\"resize('editbox" + postid + "');\" name=\"body\" cols=\"" + boxWidth + "\" rows=\"10\"></textarea></form>";
         $('#bar' + postid).raw().innerHTML = '<input type="button" value="Preview" onclick="Preview_Edit(' + postid + ');" />&nbsp;<input type="button" value="Post" onclick="Save_Edit(' + postid + ')" />&nbsp;<input type="button" value="Cancel" onclick="Cancel_Edit(' + postid + ');" />';
         $('#postcontrol-' + postid).ghide();
     }
@@ -201,11 +200,11 @@ function Save_Edit(postid) {
 function Delete(postid) {
     if (confirm('Are you sure you wish to delete this post?') == true) {
         if (location.href.match(/forums\.php/)) {
-            ajax.get("forums.php?action=delete&auth=" + authkey + "&postid=" + postid, function () {
+            ajax.get("forums.php?action=delete&auth=" + document.body.dataset.auth + "&postid=" + postid, function () {
                 $('#post' + postid).ghide();
             });
         } else {
-            ajax.get("comments.php?action=take_delete&auth=" + authkey + "&postid=" + postid, function () {
+            ajax.get("comments.php?action=take_delete&auth=" + document.body.dataset.auth + "&postid=" + postid, function () {
                 $('#post' + postid).ghide();
             });
         }
@@ -290,7 +289,7 @@ function AddPollOption(id) {
     let auth   = document.createElement("input");
     auth.type  = "hidden";
     auth.name  = "auth";
-    auth.value = authkey;
+    auth.value = document.body.dataset.auth;
     form.appendChild(auth);
 
     let action   = document.createElement("input");

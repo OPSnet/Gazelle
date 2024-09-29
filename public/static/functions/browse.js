@@ -388,7 +388,7 @@ function ToggleEditionRows() {
 function add_to_collage() {
     let field = document.forms['add-to-collage'].elements;
     let post = {
-        'auth':       authkey,
+        'auth':       document.body.dataset.auth,
         'name':       field['collage_ref'].value,
         'entry_id':   Number(field['entryid'].value),
         'collage_id': field['collage-select'] === undefined ? 0 : Number(field['collage-select'].value),

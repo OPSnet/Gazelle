@@ -207,7 +207,7 @@ var ajax = {
 function Bookmark(type, id, newName) {
     var bmLinks = $('#bookmarklink_' + type + '_' + id + ', .bookmarklink_' + type + '_' + id);
     var oldName = bmLinks.html();
-    ajax.get("bookmarks.php?action=add&type=" + type + "&auth=" + authkey + "&id=" + id, function() {
+    ajax.get("bookmarks.php?action=add&type=" + type + "&auth=" + document.body.dataset.auth + "&id=" + id, function() {
         bmLinks.parent('.remove_bookmark, .add_bookmark').toggleClass('add_bookmark remove_bookmark');
         bmLinks.html(newName).attr('title', 'Remove bookmark').removeAttr('onclick').off('click').click(function() {
             Unbookmark(type, id, oldName);
@@ -218,7 +218,7 @@ function Bookmark(type, id, newName) {
 
 function Unbookmark(type, id, newName) {
     if (window.location.pathname.indexOf('bookmarks.php') != -1) {
-        ajax.get("bookmarks.php?action=remove&type=" + type + "&auth=" + authkey + "&id=" + id, function() {
+        ajax.get("bookmarks.php?action=remove&type=" + type + "&auth=" + document.body.dataset.auth + "&id=" + id, function() {
             $('#group_' + id).remove();
             $('.groupid_' + id).remove();
             $('.bookmark_' + id).remove();
@@ -226,7 +226,7 @@ function Unbookmark(type, id, newName) {
     } else {
         var bmLinks = $('#bookmarklink_' + type + '_' + id + ', .bookmarklink_' + type + '_' + id);
         var oldName = bmLinks.html();
-        ajax.get("bookmarks.php?action=remove&type=" + type + "&auth=" + authkey + "&id=" + id, function() {
+        ajax.get("bookmarks.php?action=remove&type=" + type + "&auth=" + document.body.dataset.auth + "&id=" + id, function() {
             bmLinks.parent('.remove_bookmark, .add_bookmark').toggleClass('add_bookmark remove_bookmark');
             bmLinks.html(newName).attr('title', 'Add bookmark').removeAttr('onclick').off('click').click(function() {
                 Bookmark(type, id, oldName);
@@ -548,7 +548,7 @@ $.fn.extend({
     }
 });
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
     // autocomplete
     var url = new gazURL();
     var ARTIST_AUTOCOMPLETE_URL  = 'artist.php?action=autocomplete';

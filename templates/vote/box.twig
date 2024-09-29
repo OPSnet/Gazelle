@@ -1,14 +1,15 @@
-{% set total = vote.total(tgroup) %}
-{% set up    = vote.totalUp(tgroup) %}
-{% set down  = vote.totalDown(tgroup) %}
-{% set score = vote.score(tgroup) * 100 %}
-{% set way   = vote.vote(tgroup) %}
+{% from 'macro/form.twig' import class_hidden, hidden -%}
+{% set total = vote.total(tgroup) -%}
+{% set up    = vote.totalUp(tgroup) -%}
+{% set down  = vote.totalDown(tgroup) -%}
+{% set score = vote.score(tgroup) * 100 -%}
+{% set way   = vote.vote(tgroup) -%}
 <div class="box" id="votes">
     <div class="head"><strong>Album Votes</strong></div>
     <div class="album_votes body">
-        <span class="favoritecount tooltip" title="{{ up }} upvote{% if up != 1 %}s{% endif %}"><span id="upvotes">{{ up|number_format }}</span> <span class="vote_album_up">&#x25b2;</span></span>
+        <span class="favoritecount tooltip" title="{{ up|number_format }} upvote{{ up|plural }}"><span id="upvotes">{{ up|number_format }}</span> <span class="vote_album_up">▲</span></span>
         &nbsp;&nbsp;
-        <span class="favoritecount tooltip" title="{{ down }} downvote{% if down != 1 %}s{% endif %}"><span id="downvotes">{{ down|number_format }}</span> <span class="vote_album_down">&#x25bc;</span></span>
+        <span class="favoritecount tooltip" title="{{ down|number_format }} downvote{{ down|plural }}"><span id="downvotes">{{ down|number_format }}</span> <span class="vote_album_down">▼</span></span>
         &nbsp;&nbsp;
         <span class="favoritecount" id="totalvotes">{{ total|number_format }}</span> Total
         <br /><br />
@@ -22,17 +23,14 @@
 {%- endif -%}</span> positive
 {% if not viewer.option('NoVoteLinks') %}
         <br />
-        <span id="upvoted"{% if way  != 1 %} class="hidden"{% endif %}>You have upvoted.<br /><br /></span>
-        <span id="downvoted"{% if way  != -1 %} class="hidden"{% endif %}>You have downvoted.<br /><br /></span>
+        <span id="upvoted"{{ class_hidden(way != 1) }}>You have upvoted.<br /><br /></span>
+        <span id="downvoted"{{ class_hidden(way  != -1) }}>You have downvoted.<br /><br /></span>
     {% if viewer.permitted('site_album_votes') %}
-        {{- dom.click('#vote-up', "UpVoteBox(" ~ tgroup.id ~ ", '" ~ viewer.auth ~ "'); return false;") -}}
-        {{- dom.click('#vote-down', "DownVoteBox(" ~ tgroup.id ~ ", '" ~ viewer.auth ~ "'); return false;") -}}
-        <span{% if way  %} class="hidden"{% endif %} id="vote_message"><a href="#" id="vote-up" class="brackets upvote">Upvote</a>
-        - <a href="#" id="vote-down" class="brackets downvote">Downvote</a></span>
-        <span{% if not way  %} class="hidden"{% endif %} id="unvote_message">Changed your mind?
+        <span id="vote_message"><a href="#" id="vote-up" data-id="{{ tgroup.id }}" class="brackets upvote{{ hidden(way) }}">Upvote</a>
+        - <a href="#" id="vote-down" data-id="{{ tgroup.id }}" class="brackets downvote{{ hidden(way) }}">Downvote</a></span>
+        <span{{ class_hidden(not way) }} id="unvote_message">Changed your mind?
             <br />
-            {{- dom.click('#vote-clear', "UnvoteBox(" ~ tgroup.id ~ ", '" ~ viewer.auth ~ "'); return false;") -}}
-            <a href="#" id="vote-clear" class="brackets">Clear your vote</a>
+            <a href="#" id="vote-clear" data-id="{{ tgroup.id }}" class="brackets{{ hidden(not way) }}">Clear your vote</a>
     {% endif %}
 {% endif %}
         </span>

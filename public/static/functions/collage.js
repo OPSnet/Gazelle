@@ -37,7 +37,7 @@ function Cancel() {
 }
 
 function CollageSubscribe(collageid) {
-    ajax.get("userhistory.php?action=collage_subscribe&collageid=" + collageid + "&auth=" + authkey, function() {
+    ajax.get("userhistory.php?action=collage_subscribe&collageid=" + collageid + "&auth=" + document.body.dataset.auth, function() {
         let subscribeLink = $("#subscribelink" + collageid).raw();
         if (subscribeLink) {
             subscribeLink.firstChild.nodeValue = subscribeLink.firstChild.nodeValue.charAt(0) == 'U'

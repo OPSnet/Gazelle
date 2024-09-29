@@ -6,7 +6,7 @@
 {% endmacro -%}
 {% set auth = user.auth -%}
 </head>
-<body id="{% if document == 'collages' %}collage{% else %}{{ document }}{% endif %}">
+<body data-id="{{ user.id }}" data-auth="{{ auth }}" id="{% if document == 'collages' %}collage{% else %}{{ document }}{% endif %}">
 <form id="extra-hidden">
 <input id="extracb1" class="hidden" type="checkbox">
 <input id="extracb2" class="hidden" type="checkbox">

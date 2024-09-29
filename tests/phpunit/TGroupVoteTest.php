@@ -85,7 +85,11 @@ class TGroupVoteTest extends TestCase {
         $result = $vote[0]->upvote($this->tgroupList[0]);
         $this->assertTrue($result[0], 'tg-upvote-result');
         $this->assertEquals("voted", $result[1], 'tg-upvote-text');
-        $this->assertStringContainsString("id=\"vote_up_{$this->tgroupList[0]->id()}\"", $vote[0]->links($this->tgroupList[0]), 'tgroup-vote-link');
+        $this->assertStringContainsString(
+            "<a href=\"#\" data-id=\"{$this->tgroupList[0]->id()}\" class=\"tooltip small_upvote hidden\" title=\"Upvote\">",
+            $vote[0]->links($this->tgroupList[0]),
+            'tgroup-vote-link'
+        );
         $this->assertEquals(0.37838, round($vote[0]->score($this->tgroupList[0]), 5), 'tg-vote-1-1');
 
         $result = $vote[0]->upvote($this->tgroupList[0]);

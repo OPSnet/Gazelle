@@ -1,7 +1,7 @@
 /* global ajax */
 
 function Subscribe(threadid) {
-    ajax.get("userhistory.php?action=thread_subscribe&threadid=" + threadid + "&auth=" + authkey, function() {
+    ajax.get("userhistory.php?action=thread_subscribe&threadid=" + threadid + "&auth=" + document.body.dataset.auth, function() {
         var subscribeLink = $("#subscribelink" + threadid).raw();
         if (subscribeLink) {
             if (subscribeLink.firstChild.nodeValue.charAt(0) == '[') {
@@ -18,7 +18,7 @@ function Subscribe(threadid) {
 }
 
 function SubscribeComments(page, pageid) {
-    ajax.get('userhistory.php?action=comments_subscribe&page=' + page + '&pageid=' + pageid + '&auth=' + authkey, function() {
+    ajax.get('userhistory.php?action=comments_subscribe&page=' + page + '&pageid=' + pageid + '&auth=' + document.body.dataset.auth, function() {
         var subscribeLink = $("#subscribelink_" + page + pageid).raw();
         if (subscribeLink) {
             subscribeLink.firstChild.nodeValue = subscribeLink.firstChild.nodeValue.charAt(0) == 'U'
@@ -43,10 +43,10 @@ function Collapse() {
 
 function autosub(forumid) {
     var post = new Array();
-    post['auth']   = authkey;
+    post['auth']   = document.body.dataset.auth;
     post['id']     = forumid;
     post['active'] = document.getElementById("autosub").text.charAt(0) == 'A' ? 1 : 0;
-    ajax.post("forums.php?id=" + forumid + "&action=autosub&auth=" + authkey, post, function(response) {
+    ajax.post("forums.php?id=" + forumid + "&action=autosub&auth=" + document.body.dataset.auth, post, function(response) {
         var result = JSON.parse(response);
         if (result['status'] == 'success') {
             document.getElementById("autosub").innerHTML = result['response']['autosub'] ? "Cancel autosubscribe" : "Auto subscribe";

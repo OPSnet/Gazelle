@@ -7,7 +7,7 @@ function Vote(requestid, amount, votecount, upload, download, rr) {
         }
     }
 
-    ajax.get('requests.php?action=takevote&id=' + requestid + '&auth=' + authkey + '&amount=' + amount, function (response) {
+    ajax.get('requests.php?action=takevote&id=' + requestid + '&auth=' + document.body.dataset.auth + '&amount=' + amount, function (response) {
         response = JSON.parse(response);
         if (response.status == 'success') {
             let vote_count = document.getElementById('vote_count_' + response.id);

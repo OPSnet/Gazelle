@@ -1,7 +1,7 @@
 /* global ajax */
 
 function clearItem(torrentId) {
-    ajax.get("?action=notify_clear_item&torrentid=" + torrentId + "&auth=" + authkey, function() {
+    ajax.get("?action=notify_clear_item&torrentid=" + torrentId + "&auth=" + document.body.dataset.auth, function() {
             $("#torrent" + torrentId).remove();
         });
 }
@@ -19,7 +19,7 @@ function clearSelected(filterId) {
             checkedBoxes.push(checkBoxes[i].value);
         }
     }
-    ajax.get("?action=notify_clear_items&torrentids=" + checkedBoxes.join(',') + "&auth=" + authkey, function() {
+    ajax.get("?action=notify_clear_items&torrentids=" + checkedBoxes.join(',') + "&auth=" + document.body.dataset.auth, function() {
         for (var i = checkedBoxes.length - 1; i >= 0; i--) {
             $('#torrent' + checkedBoxes[i]).remove();
         }

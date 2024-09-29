@@ -186,7 +186,7 @@ function Switch(reportid, otherid) {
     Dismiss(reportid);
 
     var report = {
-        auth: authkey,
+        auth: document.body.dataset.auth,
         reportid: reportid,
         otherid: otherid,
     };
