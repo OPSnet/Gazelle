@@ -10,6 +10,9 @@ $user = (new Gazelle\Manager\User())->findById((int)($_GET['userid'] ?? 0));
 if (is_null($user)) {
     error(404);
 }
+if ($user->id() != $Viewer->id() && !$Viewer->isStaff()) {
+    error(403);
+}
 
 switch ($_GET['type']) {
     case 'seeding':

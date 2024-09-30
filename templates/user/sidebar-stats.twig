@@ -103,7 +103,7 @@
         <li id="comm_upload"{{ _self.class_override(visible['uploads+']) }}>Uploaded: {{ upload_total|number_format }}
     {% if upload_total and visible['uploads'] %}
             <a href="torrents.php?type=uploaded&amp;userid={{ user.id }}" class="brackets{{ _self.override(visible['uploads']) }}">View</a>
-        {% if viewer.permitted('zip_downloader') %}
+        {% if viewer.permitted('zip_downloader') and (user.id == viewer.id or viewer.isStaff) %}
             <a id="collect-upload" href="torrents.php?action=redownload&amp;type=uploads&amp;userid={{
                 user.id }}" class="brackets{{ _self.override(visible['uploads']) }}">Download</a>
         {% endif %}
@@ -152,7 +152,7 @@
     {% if stats.snatchTotal != stats.snatchUnique %} ({{ stats.snatchUnique|number_format }} unique){% endif %}
     {% if stats.snatchUnique and visible['snatched'] %}
             <a href="torrents.php?type=snatched&amp;userid={{ user.id }}" class="brackets{{ _self.override(visible['snatched']) }}">View</a>
-        {% if viewer.permitted('zip_downloader') %}
+        {% if viewer.permitted('zip_downloader') and (user.id == viewer.id or viewer.isStaff) %}
             <a id="collect-snatch" href="torrents.php?action=redownload&amp;type=snatches&amp;userid={{ user.id }}" class="brackets">Download</a>
         {% endif %}
     {% endif %}
@@ -163,7 +163,7 @@
         <li id="comm_seeding"{{ _self.class_override(visible['seeding+']) }}>Seeding: {{ stats.seedingTotal|number_format }}
     {% if stats.seedingTotal and visible['seeding'] %}
             <a href="torrents.php?type=seeding&amp;userid={{ user.id }}" class="brackets{{ _self.override(visible['seeding']) }}">View</a>
-        {% if viewer.permitted('zip_downloader') %}
+        {% if viewer.permitted('zip_downloader') and (user.id == viewer.id or viewer.isStaff) %}
             <a id="collect-seeding" href="torrents.php?action=redownload&amp;type=seeding&amp;userid={{ user.id }}" class="brackets">Download</a>
         {%- endif -%}
     {% endif -%}
