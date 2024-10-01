@@ -275,18 +275,4 @@ class Torrent extends \Gazelle\Base {
         }
         return $list;
     }
-
-    public function topUserDownload(int $top, int $interval): array {
-        self::$db->prepared_query("
-            SELECT count(*) AS total,
-                UserID AS user_id
-            FROM users_downloads
-            WHERE Time >= now() - INTERVAL ? DAY
-            GROUP BY UserID
-            ORDER BY total DESC, UserID
-            LIMIT ?
-            ", $interval, $top
-        );
-        return self::$db->to_array(false, MYSQLI_ASSOC, false);
-    }
 }

@@ -77,7 +77,9 @@
     </div>
 
     <div class="box">
-        <div class="head">Download frequency</div>
+        <div class="head">Download frequency
+            <br /><small>Users in <b>bold</b> are subject to the download factor</small>
+        </div>
         <div class="pad">
             <table>
                 <tr>
@@ -93,32 +95,48 @@
                 <th>This quarter</th>
                 <th>Per day<br />this quarter</th>
                 </tr>
-{% set day     = torr_stat.topUserDownload(20,   1, user_man) %}
-{% set week    = torr_stat.topUserDownload(20,   7, user_man) %}
-{% set month   = torr_stat.topUserDownload(20,  30, user_man) %}
-{% set quarter = torr_stat.topUserDownload(20, 120, user_man) %}
+{% set day     = user_stat.topTotalDownloadList(20,   1) %}
+{% set week    = user_stat.topTotalDownloadList(20,   7) %}
+{% set month   = user_stat.topTotalDownloadList(20,  30) %}
+{% set quarter = user_stat.topTotalDownloadList(20, 120) %}
 {% for n in range(0, 19) %}
 {%  set d = day[n].total|default(0) %}
 {%  set w = week[n].total|default(0) %}
 {%  set m = month[n].total|default(0) %}
 {%  set q = quarter[n].total|default(0) %}
                 <tr>
-                <td class="user-hover" data-id="{{ day[n].user_id }}">
-                    {%- if day[n].user_id %}{{ day[n].user_id|user_url }}{% else %}—{% endif -%}
+                <td class="user-hover{% if day[n].limited %} user-limited{% endif %}" data-id="{{ day[n].user_id }}">
+{%  if day[n].user_id %}{{ day[n].user_id|user_url -}}
+{%-     if day[n].disabled %} ⛔️
+{%-     endif -%} 
+{%- else -%}—
+{%- endif %}
                 </td>
                 <td class="number_column">{{ d|number_format }}</td>
-                <td class="user-hover" data-id="{{ week[n].user_id }}">
-                    {%- if week[n].user_id %}{{ week[n].user_id|user_url }}{% else %}—{% endif -%}
+                <td class="user-hover{% if week[n].limited %} user-limited{% endif %}" data-id="{{ week[n].user_id }}">
+{%  if week[n].user_id %}{{ week[n].user_id|user_url -}}
+{%-     if week[n].disabled %} ⛔️
+{%-     endif -%} 
+{%- else -%}—
+{%- endif %}
                 </td>
                 <td class="number_column">{{ w|number_format }}</td>
                 <td class="number_column">{% if w > 0 %}{{ (w / 7)|number_format(2) }}{% else %}—{% endif %}</td>
-                <td class="user-hover" data-id="{{ month[n].user_id }}">
-                    {%- if month[n].user_id %}{{ month[n].user_id|user_url }}{% else %}—{% endif -%}
+                <td class="user-hover{% if month[n].limited %} user-limited{% endif %}" data-id="{{ month[n].user_id }}">
+{%  if month[n].user_id %}{{ month[n].user_id|user_url -}}
+{%-     if month[n].disabled %} ⛔️
+{%-     endif -%} 
+{%- else -%}—
+{%- endif %}
                 </td>
                 <td class="number_column">{{ m|number_format }}</td>
                 <td class="number_column">{% if m > 0 %}{{ (m / 30)|number_format(2) }}{% else %}—{% endif %}</td>
-                <td class="user-hover" data-id="{{ quarter[n].user_id }}">
-                    {%- if quarter[n].user_id %}{{ quarter[n].user_id|user_url }}{% else %}—{% endif -%}
+                <td class="user-hover{% if quarter[n].limited %} user-limited{% endif %}" data-id="{{ quarter[n].user_id }}">
+{%  if quarter[n].user_id %}{{ quarter[n].user_id|user_url -}}
+{%-     if quarter[n].disabled %} ⛔️
+{%-     endif -%} 
+{%- else -%}—
+{%- endif %}
                 </td>
                 <td class="number_column">{{ q|number_format }}</td>
                 <td class="number_column">{% if q > 0 %}{{ (q / 120)|number_format(2) }}{% else %}—{% endif %}</td>

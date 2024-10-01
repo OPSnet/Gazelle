@@ -772,4 +772,22 @@ class Users extends \Gazelle\Base {
         }
         return $top;
     }
+
+    public function topTotalDownloadList(int $top, int $interval): array {
+        self::$db->prepared_query("
+            SELECT count(*) AS total,
+                ud.UserID AS user_id,
+                CASE WHEN prl.permission_id IS NOT NULL THEN 1 ELSE 0 END as limited,
+                CASE WHEN um.Enabled = ? THEN 1 ELSE 0 END as disabled
+            FROM users_downloads ud
+            INNER JOIN users_main um ON (um.ID = ud.UserID)
+            LEFT JOIN permission_rate_limit prl ON (prl.permission_id = um.PermissionID)
+            WHERE ud.Time >= now() - INTERVAL ? DAY
+            GROUP BY user_id, limited
+            ORDER BY total DESC, ud.UserID
+            LIMIT ?
+            ", UserStatus::disabled->value, $interval, $top
+        );
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
+    }
 }

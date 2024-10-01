@@ -107,16 +107,23 @@ class DownloadTest extends TestCase {
 
     public function testRecentTotal(): void {
         $user = $this->userList['down'];
-        $stats = new Stats\Torrent();
-        $initial = $stats->recentDownloadTotal();
+        $tstats = new Stats\Torrent();
+        $initial = $tstats->recentDownloadTotal();
         $this->assertCount(3, $initial, 'down-stats-recent-initial');
 
         $download = new Download($this->torrent, new User\UserclassRateLimit($user), false);
         $this->assertEquals(DownloadStatus::ok, $download->status(), 'down-stats-ok');
-        $current = $stats->recentDownloadTotal();
+        $current = $tstats->recentDownloadTotal();
         $this->assertEquals($initial[0]['total'] + 1, $current[0]['total'], 'down-stats-increment');
 
         // there will be one user (or more) in the past day
-        $this->assertCount(1, $stats->topUserDownload(1, 1), 'down-stats-top-user');
+        $ustats = new Stats\Users();
+        $recent = $ustats->topTotalDownloadList(1, 1);
+        $this->assertCount(1, $recent, 'down-stats-top-user');
+        $this->assertEquals(
+            ["total", "user_id", "limited", "disabled"],
+            array_keys($recent[0]),
+            'down-stats-user-keys'
+        );
     }
 }
