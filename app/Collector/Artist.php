@@ -39,8 +39,9 @@ class Artist extends \Gazelle\Collector {
         return self::$db->has_results();
     }
 
-    public function fillZip(\ZipStream\ZipStream $zip): void {
+    public function fillZip(\ZipStream\ZipStream $zip): int {
         $releaseMan = new \Gazelle\ReleaseType();
+        $n = 0;
         while (($downloadList = $this->process('GroupID')) != null) {
             foreach ($downloadList as $download) {
                 $torrent = $this->torMan->findById($download['TorrentID']);
@@ -65,7 +66,9 @@ class Artist extends \Gazelle\Collector {
                         default          => 'Other-' . $this->roleList[$tgroup->id()],
                     }
                 );
+                ++$n;
             }
         }
+        return $n;
     }
 }

@@ -5,11 +5,12 @@ namespace Gazelle;
 use PHPUnit\Framework\TestCase;
 use Gazelle\Enum\DownloadStatus;
 use Gazelle\Enum\TorrentFlag;
+use Gazelle\Enum\UserTorrentSearch;
 
 class TorrentTest extends TestCase {
     protected Torrent $torrent;
     protected User    $user;
-    protected array            $userList;
+    protected array   $userList;
 
     public function setUp(): void {
         $this->user    = \GazelleUnitTest\Helper::makeUser('torrent.' . randomString(10), 'rent', clearInbox: true);
@@ -188,6 +189,24 @@ class TorrentTest extends TestCase {
         $this->assertMatchesRegularExpression("@{$tgroupRegexp}@",
             \Text::full_format(SITE_URL . "/{$this->torrent->group()->location()}"),
             'text-tgroup-url'
+        );
+    }
+
+    public function testTorrentCollector(): void {
+        $title = 'phpunit-zip';
+        $collector = new Collector\TList($this->user, new Manager\Torrent(), $title, 0);
+        $userTorrent = new Search\UserTorrent($this->user, UserTorrentSearch::uploaded);
+        $this->assertCount(1, $userTorrent->idList(), 'torrent-search-upload');
+        $collector->setList($userTorrent->idList());
+        $this->assertTrue($collector->prepare([]), 'collect-tlist-prepare');
+
+        $zip = Util\Zip::make($title);
+        $this->assertInstanceOf(\ZipStream\ZipStream::class, $zip, 'collect-zipper');
+        $this->assertEquals(1, $collector->fillZip($zip), 'collect-tlist-fill');
+        $this->assertStringContainsString(
+            "Torrent groups scanned: 1\n",
+            $collector->summary(),
+            "collector-tlist-summary",
         );
     }
 }

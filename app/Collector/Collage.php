@@ -23,7 +23,8 @@ class Collage extends \Gazelle\Collector {
         return self::$db->has_results();
     }
 
-    public function fillZip(\ZipStream\ZipStream $zip): void {
+    public function fillZip(\ZipStream\ZipStream $zip): int {
+        $n = 0;
         while (($downloadList = $this->process('GroupID')) != null) {
             foreach ($downloadList as $download) {
                 $torrent = $this->torMan->findById($download['TorrentID']);
@@ -33,7 +34,9 @@ class Collage extends \Gazelle\Collector {
                 $info =& $downloadList[$torrent->groupId()];
                 $info['Artist'] = $torrent->group()->artistRole()?->text();
                 $this->addZip($zip, $info);
+                ++$n;
             }
         }
+        return $n;
     }
 }

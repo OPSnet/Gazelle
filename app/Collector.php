@@ -57,7 +57,7 @@ abstract class Collector extends Base  {
     protected float $startTime;
 
     abstract public function prepare(array $list): bool;
-    abstract public function fillZip(\ZipStream\ZipStream $zip): void;
+    abstract public function fillZip(\ZipStream\ZipStream $zip): int;
 
     public function __construct(
         protected \Gazelle\User $user,
@@ -149,18 +149,31 @@ abstract class Collector extends Base  {
                 $this->idBoundary = self::$db->to_pair($Key, 'TorrentID', false);
             }
         }
-        $found = 0;
         $downloadList = [];
+        $insertArgs = [];
         while ($row = self::$db->next_record(MYSQLI_ASSOC, false)) {
             if (!$this->idBoundary || $row['TorrentID'] == $this->idBoundary[$row[$Key]]) {
-                $found++;
                 $downloadList[$row[$Key]] = $row;
-                if ($found >= self::CHUNK_SIZE) {
+                array_push($insertArgs, $this->user->id(), $row['TorrentID']);
+                if (count($downloadList) >= self::CHUNK_SIZE) {
                     break;
                 }
             }
         }
+        $found = (int)(count($insertArgs) / 2);
         $this->totalFound += $found;
+
+        if ($insertArgs) {
+            // Record the files as having been downloaded, in order to take them
+            // into account in the download factor. Ideally the entire collector
+            // operation should take place in a transaction, in case of an abort
+            // half way through. Maybe some other day.
+            self::$db->prepared_query(
+                "INSERT INTO users_downloads (UserID, TorrentID) VALUES"
+                . implode(',', array_fill(0, $found, '(?,?)')),
+                ...$insertArgs
+            );
+        }
         self::$db->set_query_id($saveQid);
         return $this->totalFound > 0 ? $downloadList : null;
     }

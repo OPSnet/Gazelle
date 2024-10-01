@@ -22,7 +22,8 @@ class TList extends \Gazelle\Collector {
         return self::$db->has_results();
     }
 
-    public function fillZip(\ZipStream\ZipStream $zip): void {
+    public function fillZip(\ZipStream\ZipStream $zip): int {
+        $n = 0;
         while (($downloadList = $this->process('TorrentID')) != null) {
             foreach ($downloadList as $download) {
                 $torrent = $this->torMan->findById($download['TorrentID']);
@@ -31,7 +32,9 @@ class TList extends \Gazelle\Collector {
                 }
                 $download['Artist'] = $torrent->group()->artistRole()?->text();
                 $this->addZip($zip, $download);
+                ++$n;
             }
         }
+        return $n;
     }
 }
