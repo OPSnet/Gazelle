@@ -2,23 +2,20 @@
 /** @phpstan-var \Gazelle\User $Viewer */
 
 switch ($_REQUEST['action'] ?? '') {
+    case 'assign':
+        require('assign.php');
+        break;
     case 'viewconv':
         require('viewconv.php');
         break;
     case 'takepost':
-        require('post_handle.php');
-        break;
-    case 'resolve':
-        require('resolve.php');
+        require('viewconv_handle.php');
         break;
     case 'unresolve':
         require('unresolve.php');
         break;
     case 'multiresolve':
         require('multiresolve.php');
-        break;
-    case 'assign':
-        require('assign.php');
         break;
     case 'responses':
         require('common_responses.php');

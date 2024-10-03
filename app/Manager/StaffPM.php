@@ -113,7 +113,14 @@ class StaffPM extends \Gazelle\BaseManager {
             FROM staff_pm_responses
             ORDER BY Name
         ");
-        return self::$db->to_array('id', MYSQLI_ASSOC, false);
+        $list = [];
+        foreach (self::$db->to_array(false, MYSQLI_ASSOC, false) as $answer) {
+            $answer['editor'] = new \Gazelle\Util\Textarea(
+                "answer-{$answer['id']}", $answer['message'], 87, 10
+            );
+            $list[] = $answer;
+        }
+        return $list;
     }
 
     public function countByStatus(\Gazelle\User $viewer, array $status): int {

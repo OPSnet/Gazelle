@@ -10,5 +10,8 @@ if (!$pm->visible($Viewer)) {
     error(403);
 }
 
-header('Content-type: text/plain');
-echo $pm->postBody($postId);
+header('Content-Type: application/json; charset=utf-8');
+echo json_encode([
+    'username' => (new Gazelle\Manager\User())->findById((int)$pm->postUserId($postId))?->username(),
+    'body'     => $pm->postBody($postId),
+]);

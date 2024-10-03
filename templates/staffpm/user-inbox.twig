@@ -1,7 +1,7 @@
 {{ header('Staff PMs', {'js': 'staffpm'}) }}
 <div class="thin">
     <div class="header">
-        <h2>Staff PMs &rsaquo; Your Inbox</h2>
+        <h2>Staff PMs › Your Inbox</h2>
         <div class="linkbox">
 {% if viewer.isFLS %}
             <a href="staffpm.php" class="brackets">Main Staff Inbox</a>
@@ -48,7 +48,7 @@
 {%      endif %}
 {%  endif %}
                 <tr class="{% if spm.isUnread %}unreadpm{% else %}row{{ cycle(['a', 'b'], loop.index0) }}{% endif %}">
-{%  if resolved %}
+{%  if spm.isResolved %}
                     <td class="center"></td>
 {%  else %}
                     <td class="center"><input type="checkbox" name="id[]" value="{{ spm.id }}" /></td>
@@ -56,11 +56,12 @@
                     <td><a href="staffpm.php?action=viewconv&amp;id={{ spm.id }}">{{ spm.subject }}</a></td>
                     <td>{{ spm.date|time_diff }}</td>
                     <td>
-{%  if not spm.classLevel %}
+{%  if not spm.classLevel -%}
         First Line Support
-{%  else %}
+{%  else -%}
         {{ spm.userclassName }}{% if spm.userclassName != max %}+{% endif %}
-{%  endif %}
+{%  endif -%}
+                    </id>
                 </tr>
 {%  if loop.last %}
             </table>

@@ -2,11 +2,6 @@
 /** @phpstan-var \Gazelle\User $Viewer */
 /** @phpstan-var \Twig\Environment $Twig */
 
-if (!isset($_GET['id'])) {
-    header('Location: staffpm.php');
-    exit;
-}
-
 $manager = new Gazelle\Manager\StaffPM();
 $staffPM = $manager->findById((int)($_GET['id'] ?? 0));
 if (is_null($staffPM)) {

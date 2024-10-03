@@ -3,8 +3,7 @@
 
 $spm = (new Gazelle\Manager\StaffPM())->findById((int)($_GET['id'] ?? 0));
 if (is_null($spm)) {
-    header('Location: staffpm.php');
-    exit;
+    error(404);
 }
 if (!$spm->visible($Viewer)) {
     error(403);
@@ -12,4 +11,4 @@ if (!$spm->visible($Viewer)) {
 
 $spm->unresolve($Viewer);
 
-header('Location: staffpm.php');
+header("Location: {$spm->location()}");

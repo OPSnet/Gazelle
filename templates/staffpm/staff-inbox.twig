@@ -1,20 +1,20 @@
 {{ header('Staff Inbox') }}
 {% set view_resolved = view_map[view].title == 'Resolved' %}
-{% set view_staff_open = not view_resolved and viewer.isStaff %}
+{% set view_staff_open = not view_resolved and viewer.isStaffPMReader %}
 <div class="thin">
     <div class="header">
-        <h2>Staff PMs &rsaquo; {{ view_map[view].title }}</h2>
+        <h2>Staff PMs › {{ view_map[view].title }}</h2>
         <div class="linkbox">
 {% for section, info in view_map %}
 {%  if view_map[section].count %}
-{%      set title = info.title ~ " (" ~ view_map[section].count ~ ")" %}
+{%      set title %}{{ info.title }} ({{view_map[section].count }}){% endset %}
 {%  elseif section is empty %}
-{%      set title = info.title ~ " (" ~ paginator.total ~ ")" %}
+{%      set title %}{{ info.title }} ({{ paginator.total }}){% endset %}
 {%  else %}
 {%      set title = info.title %}
 {%  endif %}
         <a href="staffpm.php{% if section %}?view={{ section }}{% endif %}" class="brackets">
-{%- if section == view %}<strong>{% endif %} {{ title }}</a>{% if section == view %}</strong>{% endif -%}
+{%- if section == view %}<strong>{% endif %}{{ title }}</a>{% if section == view %}</strong>{% endif -%}
         </a>
 {% endfor %}
 

@@ -2,15 +2,15 @@
 {{ header('Staff PM', {'js': 'staffpm,bbcode'}) }}
 <div class="thin">
     <div class="header">
-        <h2>Staff PM &rsaquo; {{ pm.subject }}</h2>
+        <h2>Staff PM › {{ pm.subject }}{% if pm.isResolved %} (Resolved){% endif %}</h2>
         <div class="linkbox">
 {% for view in heading %}
-            <a href="staffpm.php{{ view.link }}" class="brackets">{{ view.title }}{% if view.count %} ({{ view.count }}){% endif %}</a>&nbsp;
+        <a href="staffpm.php{{ view.link }}" class="brackets">{{ view.title }}{% if view.count %} ({{ view.count }}){% endif %}</a>&nbsp;
 {% endfor %}
 
 {% if viewer.permitted('admin_staffpm_stats') %}
-            <a href="staffpm.php?action=scoreboard&amp;view=user" class="brackets">View user scoreboard</a>
-            <a href="staffpm.php?action=scoreboard&amp;view=staff" class="brackets">View staff scoreboard</a>
+        <a href="staffpm.php?action=scoreboard&amp;view=user" class="brackets">View user scoreboard</a>
+        <a href="staffpm.php?action=scoreboard&amp;view=staff" class="brackets">View staff scoreboard</a>
 {% endif %}
 {% if viewer.isFLS %}
         <a href="staffpm.php" class="brackets">Main Staff Inbox</a>
@@ -28,10 +28,9 @@
         <div class="head">
             <a class="postid" href="staffpm.php?action=viewconv&amp;id={{ pm.id }}#post{{ message.id }}" style="font-weight: normal;">#{{ message.id }}</a>
             <strong>{{ message.user_id|user_full|raw }}</strong> {{ message.sent_date|time_diff }}
-    {% if pm.inProgress %}
-            {{- dom.click('#quote-action', "Quote('" ~ message.id ~ "', '" ~ author.username ~ "');") -}}
-            - <a id="quote-action" href="#quickpost" class="brackets">Quote</a>
-    {% endif %}
+{%  if pm.inProgress %}
+            - <a href="#quickpost" class="brackets quote-action" data-id="{{ message.id }}" class="brackets">Quote</a>
+{%  endif %}
         </div>
         <div class="body">{{ message.body|bb_format|raw }}</div>
     </div>
@@ -54,22 +53,21 @@
                 <select id="assign_to" name="assign">
                     <optgroup label="User classes">
                         <option value="class_0"{{ selected(pm.unassigned and pm.classLevel == 0) }}>First Line Support</option>
-    {% for class in staff_level %}
-                        <option value="class_{{ class.Level }}"{{ selected(class.Level == pm.class_level) }}>{{ class.Name }}</option>
-    {% endfor %}
+{%  for class in staff_level %}
+                        <option value="class_{{ class.Level }}"{{ selected(not pm.assignedUserId and class.Name == pm.userclassName) }}>{{ class.Name }}</option>
+{%  endfor %}
                     </optgroup>
                     <optgroup label="Staff">
-    {% for u in staff %}
-                        <option value="user_{{ u.id }}"{{ selected(not pm.unassigned and pm.assignedUserId == u.id) }}>{{ u.username }}</option>
-    {% endfor %}
+{%  for u in staff %}
+                        <option value="user_{{ u.id }}"{{ selected(pm.assignedUserId == u.id) }}>{{ u.username }}</option>
+{%  endfor %}
                     </optgroup>
                     <optgroup label="First Line Support">
-    {% for u in fls %}
-                        <option value="user_{{ u.id }}"{{ selected(not pm.unassigned and pm.assignedUserId == u.id) }}>{{ u.username }}</option>
-    {% endfor %}
+{%  for u in fls %}
+                        <option value="user_{{ u.id }}"{{ selected(pm.assignedUserId == u.id) }}>{{ u.username }}</option>
+{%  endfor %}
                     </optgroup>
                 </select>
-                {{- dom.click('#assign', "Assign();") -}}
                 <input type="button" id="assign" value="Assign" />
 {% endif %}
 
@@ -77,50 +75,41 @@
                 {{- dom.click('#unresolve', "location.href='staffpm.php?action=unresolve&id=" ~ pm.id ~ "';") -}}
                 <input type="button" id="unresolve" value="Unresolve" />
 {% else %}
-                {{- dom.click('#resolve', "location.href='staffpm.php?action=resolve&id=" ~ pm.id ~ "';") -}}
-                <input type="button" id="resolve" value="Resolve" />&nbsp;
-    {% if viewer.isStaffPMReader %}
-                {{- dom.click('#common', "$('#common_answers').gtoggle();") -}}
+{%  if viewer.isStaffPMReader %}
                 <input type="button" id="common" title="Create, edit and use canned replies" value="Common answers" />
-    {% endif %}
+{%  endif %}
                 {{ textarea.button|raw }}
                 <input type="submit" value="Reply" />
+                <label><input type="checkbox" name="resolve" /> Resolve?</label>
 {% endif %}
                 <input type="hidden" name="action" value="takepost" />
                 <input type="hidden" name="convid" value="{{ pm.id }}" id="convid" />
             </form>
 
 {% if viewer.isStaffPMReader %}
-    {% if pm.inProgress %}
+{%  if pm.inProgress %}
     <br />
     <div id="common_answers" class="hidden">
         <h3>Retrieve a common answer for the reply</h3>
         <div class="pad">
-            {{- dom.click('#common_answers_select', "UpdateMessage()") -}}
             <select id="common_answers_select"> 
                 <option id="first_common_response">Select a message</option>
-        {% for answer in common %}
+{%      for answer in common %}
                 <option value="{{ answer.id }}">{{ answer.name }}</option>
-        {% endfor %}
+{%      endfor %}
             </select>
-            {{- dom.click('#common-set', "SetMessage()") -}}
-            <input type="button" id="common-set" title="Use this message as the basis for your reply" value="Use this draft" onclick="SetMessage();" />
-            <input type="button" title="Use this message as the basis for your reply" value="Use this draft" />
-            {{- dom.click('#common-edit', "location.href='staffpm.php?action=responses&convid=" ~ pm.id ~ "';") -}}
-            <input id="common-edit" type="button" value="Create new/Edit Common Response" />
+            <input type="button" id="common-ans-set" title="Use this message as the basis for your reply" value="Use this draft" />
         </div>
         <br />
         <div class="box vertical_space">
             <h3>Answer preview</h3>
             <div id="common_answers_body" class="body">Select an answer from the drop-down to view it.</div>
         </div>
-        <h3>Create a new common answer</h3>
         <div class="pad">
-            If none of the above answers work: 
-            <input type="button" value="Create new/Edit Common Response" onclick="location.href='staffpm.php?action=responses&amp;convid={{ pm.id }}';" />
+            or <a href="staffpm.php?action=responses&amp;convid={{ pm.id }}">Create/Edit Common Answers</a>.
         </div>
     </div>
-    {% endif %}
+{%  endif %}
     <div id="ajax_message" class="hidden alertbar"></div>
 {% endif %}
         </div>

@@ -209,4 +209,13 @@ class StaffPM extends BaseObject {
         }
         return null;
     }
+
+    public function postUserId(int $postId): ?int {
+        foreach ($this->thread() as $post) {
+            if ($post['id'] === $postId) {
+                return $post['user_id'];
+            }
+        }
+        return null;
+    }
 }

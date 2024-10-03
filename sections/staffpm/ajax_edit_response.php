@@ -17,8 +17,8 @@ $spmMan = new Gazelle\Manager\StaffPM();
 $answer = $spmMan->commonAnswer($id);
 if (is_null($answer)) {
     $spmMan->createCommonAnswer($name, $message);
-    echo 2;
+    echo 1;
 } else {
     $spmMan->modifyCommonAnswer($id, $name, $message);
-    echo 1;
+    echo 2;
 }
