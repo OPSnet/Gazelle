@@ -14,7 +14,7 @@ $paginator = new Gazelle\Util\Paginator(PEERS_PER_PAGE, (int)($_GET['page'] ?? 1
 $paginator->setTotal($torrent->snatchTotal());
 
 echo $Twig->render('torrent/snatchlist.twig', [
-    'list'       => $torrent->snatchList($paginator->limit(), $paginator->offset()),
+    'list'       => $torrent->snatchList($Viewer, $paginator->limit(), $paginator->offset()),
     'paginator'  => $paginator,
     'torrent_id' => $torrent->id(),
     'url_stem'   => (new Gazelle\User\Stylesheet($Viewer))->imagePath(),

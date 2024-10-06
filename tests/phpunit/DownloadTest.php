@@ -36,8 +36,27 @@ class DownloadTest extends TestCase {
     }
 
     public function testBasic(): void {
-        $uploader = new Download($this->torrent, new User\UserclassRateLimit($this->userList['up']), false);
+        $user     = $this->userList['up'];
+        $uploader = new Download($this->torrent, new User\UserclassRateLimit($user), false);
         $this->assertEquals(DownloadStatus::ok, $uploader->status(), 'download-uploader-ok');
+        $this->assertEquals(1, $this->torrent->downloadTotal(), 'download-torrent-total');
+        $list = $this->torrent->downloadList($user, 2, 0);
+        $this->assertCount(1, $list, 'download-torrent-list');
+        $this->assertEquals(
+            ['user_id', 'timestamp_min', 'timestamp_max', 'is_seeding', 'is_snatched', 'total'],
+            array_keys($list[0]),
+            'download-torrent-keys'
+        );
+        \GazelleUnitTest\Helper::generateTorrentSeed($this->torrent, $user);
+        $list = $this->torrent->seederList($user, 2, 0);
+        $this->assertCount(1, $list, 'seeder-torrent-list');
+        $this->assertEquals(
+            ['active', 'connectable', 'remaining', 'uploaded', 'useragent',
+                'ipv4addr', 'user_id', 'size', 'seedbox', 'is_download', 'is_snatched'],
+            array_keys($list[0]),
+            'snatch-torrent-keys'
+        );
+        // torrent snatch list is handled in another test
 
         $ratelimit = new User\UserclassRateLimit($this->userList['down']);
         $this->assertFalse(is_nan($ratelimit->userclassFactor()), 'download-ratelimit-userclass-factor');
@@ -94,6 +113,14 @@ class DownloadTest extends TestCase {
         $this->assertEquals(1, $this->torrent->expireToken($user), 'redown-expire-token');
         $this->assertFalse($user->flush()->hasToken($this->torrent), 'redown-user-no-more-token');
         $this->assertFalse($this->torrent->isFreeleechPersonal(), 'redown-torrent-is-not-pfl');
+
+        $list = $this->torrent->snatchList($user, 2, 0);
+        $this->assertCount(1, $list, 'snatch-torrent-list');
+        $this->assertEquals(
+            ['user_id', 'timestamp', 'is_download', 'is_seeding'],
+            array_keys($list[0]),
+            'snatch-torrent-keys'
+        );
 
         // download again without token
         $redownload = new Download($this->torrent, $limiter, false);

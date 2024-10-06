@@ -442,6 +442,35 @@ class Torrent extends TorrentAbstract {
         return $result;
     }
 
+    public function downloadTotal(): int {
+        return (int)self::$db->scalar("
+            SELECT count(DISTINCT UserID) FROM users_downloads WHERE TorrentID = ?
+            ", $this->id
+        );
+    }
+
+    public function downloadList(User $user, int $limit, int $offset): array {
+        self::$db->prepared_query("
+            SELECT ud.UserID             AS user_id,
+                min(ud.Time)             AS timestamp_min,
+                max(ud.Time)             AS timestamp_max,
+                seeder.uid   IS NOT NULL AS is_seeding,
+                snatcher.uid IS NOT NULL AS is_snatched,
+                count(*)                 AS total
+            FROM users_downloads ud
+            LEFT JOIN (SELECT DISTINCT uid FROM xbt_files_users  WHERE fid = ?) seeder
+                ON (seeder.uid = ud.UserID)
+            LEFT JOIN (SELECT DISTINCT uid FROM xbt_snatched WHERE fid = ?) snatcher
+                ON (snatcher.uid = ud.UserID)
+            WHERE ud.TorrentID = ?
+            GROUP BY user_id, is_snatched, is_seeding
+            ORDER BY user_id != ?, ud.Time DESC, ud.UserID
+            LIMIT ? OFFSET ?
+            ", $this->id, $this->id, $this->id, $user->id(), $limit, $offset
+        );
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
+    }
+
     public function seederList(User $user, int $limit, int $offset): array {
         $key = sprintf(self::CACHE_KEY_PEERLIST_PAGE, $this->id, $offset);
         $list = self::$cache->get_value($key);
@@ -455,21 +484,24 @@ class Torrent extends TorrentAbstract {
                     xfu.remaining,
                     xfu.uploaded,
                     xfu.useragent,
-                    xfu.ip           AS ipv4addr,
-                    xfu.uid          AS user_id,
-                    t.Size           AS size,
-                    sx.name          AS seedbox,
-                    EXISTS(SELECT 1 FROM users_downloads ud WHERE ud.UserID = xfu.uid AND ud.TorrentID = xfu.fid) AS is_download,
-                    EXISTS(SELECT 1 FROM xbt_snatched xs WHERE xs.uid = xfu.uid AND xs.fid = xfu.fid) AS is_snatched
+                    xfu.ip                        AS ipv4addr,
+                    xfu.uid                       AS user_id,
+                    t.Size                        AS size,
+                    sx.name                       AS seedbox,
+                    downloader.UserID IS NOT NULL AS is_download,
+                    snatcher.uid      IS NOT NULL AS is_snatched
                 FROM xbt_files_users AS xfu
                 INNER JOIN users_main AS um ON (um.ID = xfu.uid)
                 INNER JOIN torrents AS t ON (t.ID = xfu.fid)
+                LEFT JOIN (SELECT DISTINCT UserID FROM users_downloads WHERE TorrentID = ?) downloader
+                    ON (downloader.UserID = xfu.uid)
+                LEFT JOIN (SELECT DISTINCT uid FROM xbt_snatched WHERE fid = ?) snatcher USING (uid)
                 LEFT JOIN user_seedbox sx ON (xfu.ip = inet_ntoa(sx.ipaddr) AND xfu.useragent = sx.useragent AND xfu.uid = ?)
                 WHERE um.Visible = '1'
                     AND xfu.fid = ?
-                ORDER BY xfu.uid = ? DESC, xfu.uploaded DESC
+                ORDER BY xfu.uid != ?, xfu.uploaded DESC
                 LIMIT ? OFFSET ?
-                ", $user->id(), $this->id, $user->id(), $limit, $offset
+                ", $this->id, $this->id, $user->id(), $this->id, $user->id(), $limit, $offset
             );
             $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
             self::$cache->cache_value($key, $list, 300);
@@ -477,41 +509,20 @@ class Torrent extends TorrentAbstract {
         return $list;
     }
 
-    public function downloadTotal(): int {
-        return (int)self::$db->scalar("
-            SELECT count(DISTINCT UserID) FROM users_downloads WHERE TorrentID = ?
-            ", $this->id
-        );
-    }
-
-    public function downloadList(int $limit, int $offset): array {
-        self::$db->prepared_query("
-            SELECT ud.UserID AS user_id,
-                min(ud.Time) AS timestamp,
-                count(*)     AS total,
-                EXISTS(SELECT 1 FROM xbt_snatched xs WHERE xs.uid = ud.UserID AND xs.fid = ud.TorrentID) AS is_snatched,
-                EXISTS(SELECT 1 FROM xbt_files_users xfu WHERE xfu.uid = ud.UserID AND xfu.fid = ud.TorrentID) AS is_seeding
-            FROM users_downloads ud
-            WHERE ud.TorrentID = ?
-            GROUP BY user_id, is_snatched, is_seeding
-            ORDER BY ud.Time DESC, ud.UserID
-            LIMIT ? OFFSET ?
-            ", $this->id, $limit, $offset
-        );
-        return self::$db->to_array(false, MYSQLI_ASSOC, false);
-    }
-
-    public function snatchList(int $limit, int $offset): array {
+    public function snatchList(User $user, int $limit, int $offset): array {
         self::$db->prepared_query("
             SELECT xs.uid AS user_id,
-                from_unixtime(xs.tstamp) AS timestamp,
-                EXISTS(SELECT 1 FROM users_downloads ud WHERE ud.UserID = xs.uid AND ud.TorrentID = xs.fid) AS is_download,
-                EXISTS(SELECT 1 FROM xbt_files_users xfu WHERE xfu.uid = xs.uid AND xfu.fid = xs.fid) AS is_seeding
+                from_unixtime(xs.tstamp)      AS timestamp,
+                downloader.UserID IS NOT NULL AS is_download,
+                seeder.uid        IS NOT NULL AS is_seeding
             FROM xbt_snatched xs
+            LEFT JOIN (SELECT DISTINCT UserID FROM users_downloads WHERE TorrentID = ?) downloader
+                ON (downloader.UserID = xs.uid)
+            LEFT JOIN (SELECT DISTINCT uid FROM xbt_files_users WHERE fid = ?) seeder USING (uid)
             WHERE xs.fid = ?
-            ORDER BY xs.tstamp DESC
+            ORDER BY xs.uid != ?, xs.tstamp DESC, xs.uid
             LIMIT ? OFFSET ?
-            ", $this->id, $limit, $offset
+            ", $this->id, $this->id, $this->id, $user->id(), $limit, $offset
         );
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
