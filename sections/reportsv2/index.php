@@ -11,7 +11,7 @@ require_once(match ($_REQUEST['action'] ?? '') {
     'ajax_update_comment'      => 'ajax_update_comment.php',
     'ajax_update_resolve'      => 'ajax_update_resolve.php',
     'new'                      => 'reports.php',
-    'report'                   => 'report.php',
+    'report'                   => 'create.php',
     'search'                   => 'search.php',
     'takereport'               => 'report_handle.php',
     'takeresolve'              => 'resolve_handle.php',
