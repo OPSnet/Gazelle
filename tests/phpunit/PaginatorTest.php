@@ -68,9 +68,9 @@ class PaginatorTest extends TestCase {
 
         $linkbox = $paginator->linkbox();
         $this->assertMatchesRegularExpression(
-            '|<a href="[^"]+/paginator_test\.php\?page=2#phpunit"><strong>10-15|',
+            '|<a href="[^"]+/paginator_test\.php\?page=2#phpunit"><b>10-15|',
             $linkbox, 'paginator-linkbox-anchor');
-        $this->assertMatchesRegularExpression('|<strong>1-9</strong>|', $linkbox, 'paginator-linkbox-anchor-page');
+        $this->assertMatchesRegularExpression('|<b>1-9</b>|', $linkbox, 'paginator-linkbox-anchor-page');
     }
 
     public function testLinkboxRemoveParam(): void {
@@ -83,7 +83,7 @@ class PaginatorTest extends TestCase {
 
         $linkbox = $paginator->linkbox();
         $this->assertMatchesRegularExpression(
-            '|<a href="[^"]+/paginator_test\.php\?stay=on&amp;page=2"><strong>10-15|',
+            '|<a href="[^"]+/paginator_test\.php\?stay=on&amp;page=2"><b>10-15|',
             $linkbox, 'paginator-linkbox-remparam-1');
 
         $paginator = new Util\Paginator($perPage, $currentPage);
@@ -95,7 +95,7 @@ class PaginatorTest extends TestCase {
         $paginator->setTotal(15)->removeParam('remove');
         $_SERVER['REQUEST_URI'] = SITE_URL . '/paginator_test.php?remove=yes';
         $this->assertMatchesRegularExpression(
-            '|<a href="[^"]+/paginator_test\.php\?page=2"><strong>10-15|',
+            '|<a href="[^"]+/paginator_test\.php\?page=2"><b>10-15|',
             $paginator->linkbox(), 'paginator-linkbox-remparam-bare');
     }
 
@@ -108,14 +108,14 @@ class PaginatorTest extends TestCase {
         $_SERVER['REQUEST_URI'] = SITE_URL . '/paginator_test.php?stay=on';
 
         $this->assertMatchesRegularExpression(
-            '|<a href="[^"]+/paginator_test\.php\?stay=on&amp;page=2&amp;new5=1&amp;morenew=yes"><strong>10-15|',
+            '|<a href="[^"]+/paginator_test\.php\?stay=on&amp;page=2&amp;new5=1&amp;morenew=yes"><b>10-15|',
             $paginator->linkbox(), 'paginator-linkbox-setparam-1');
 
         $paginator = new Util\Paginator($perPage, $currentPage);
         $paginator->setTotal(15)->setParam('new5', '1')->setParam('morenew', 'yes');
         $_SERVER['REQUEST_URI'] = SITE_URL . '/paginator_test.php';
         $this->assertMatchesRegularExpression(
-            '|<a href="[^"]+/paginator_test\.php\?page=2&amp;new5=1&amp;morenew=yes"><strong>10-15|',
+            '|<a href="[^"]+/paginator_test\.php\?page=2&amp;new5=1&amp;morenew=yes"><b>10-15|',
             $paginator->linkbox(), 'paginator-linkbox-setparam-2');
     }
 
@@ -128,14 +128,14 @@ class PaginatorTest extends TestCase {
         $_SERVER['REQUEST_URI'] = SITE_URL . '/paginator_test.php';
 
         $linkbox = $paginator->linkbox();
-        $this->assertMatchesRegularExpression('| <strong>10-18</strong>|', $linkbox, 'paginator-linkbox-full-1');
+        $this->assertMatchesRegularExpression('| <b>10-18</b>|', $linkbox, 'paginator-linkbox-full-1');
         $this->assertDoesNotMatchRegularExpression(
             '|<a href="[^"]+/paginator_test\.php\?page=3|', $linkbox, 'paginator-linkbox-full-2');
 
         $paginator = new Util\Paginator($perPage, 1);
         $paginator->setTotal(18);
         $linkbox = $paginator->linkbox();
-        $this->assertMatchesRegularExpression('|<strong>1-9</strong> |', $linkbox, 'paginator-linkbox-full-3');
+        $this->assertMatchesRegularExpression('|<b>1-9</b> |', $linkbox, 'paginator-linkbox-full-3');
         $this->assertDoesNotMatchRegularExpression(
             '|<a href="[^"]+/paginator_test\.php\?page=3|', $linkbox, 'paginator-linkbox-full-4');
     }

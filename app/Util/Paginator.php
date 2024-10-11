@@ -107,26 +107,27 @@ class Paginator {
 
             $paramList = $this->param ? ('&amp;' . http_build_query($this->param, '', '&amp;')) : '';
             if ($this->page > 1) {
-                $this->linkbox = "<a href=\"{$uri}page=1{$paramList}{$this->anchor}\"><strong>&laquo; First</strong></a> "
-                    . "<a href=\"{$uri}page=" . ($this->page - 1) . $paramList . $this->anchor . '" class="pager_prev"><strong>&lsaquo; Prev</strong></a> | ';
+                $this->linkbox = "<a href=\"{$uri}page=1{$paramList}{$this->anchor}\"><b>First</b></a> « <a href=\"{$uri}page="
+                    . ($this->page - 1)
+                    . "{$paramList}{$this->anchor}\" class=\"pager_prev\"><b>Prev</b></a> ‹ ";
             }
 
             for ($i = $firstPage; $i <= $lastPage; $i++) {
                 if ($i != $this->page) {
                     $this->linkbox .= "<a href=\"{$uri}page=$i{$paramList}{$this->anchor}\">";
                 }
-                $this->linkbox .= '<strong>';
+                $this->linkbox .= '<b>';
                 $firstEntry = (($i - 1) * $this->perPage) + 1;
                 if ($i * $this->perPage > $this->total) {
                     if ($firstEntry == $this->total) {
                         $this->linkbox .= $this->total;
                     } else {
-                        $this->linkbox .= "$firstEntry-" . $this->total;
+                        $this->linkbox .= "$firstEntry-{$this->total}";
                     }
                 } else {
                     $this->linkbox .= "$firstEntry-" . ($i * $this->perPage);
                 }
-                $this->linkbox .= '</strong>';
+                $this->linkbox .= '</b>';
 
                 if ($i != $this->page) {
                     $this->linkbox .= '</a>';
@@ -138,10 +139,9 @@ class Paginator {
             }
 
             if ($this->page && $this->page < $pageCount) {
-                $this->linkbox .= " | <a href=\"{$uri}page=" . ($this->page + 1) . $paramList . $this->anchor
-                    . '" class="pager_next"><strong>Next &rsaquo;</strong></a>'
-                    . " <a href=\"{$uri}page=" . $pageCount . $paramList . $this->anchor
-                    . "\"><strong> Last &raquo;</strong></a>";
+                $this->linkbox .= " › <a href=\"{$uri}page=" . ($this->page + 1)
+                    . "{$paramList}{$this->anchor}\" class=\"pager_next\"> <b>Next</b></a> » <a href=\"{$uri}page="
+                    . "{$pageCount}{$paramList}{$this->anchor}\"><b>Last</b></a>";
             }
         }
         if (strlen($this->linkbox)) {
