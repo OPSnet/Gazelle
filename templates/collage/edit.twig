@@ -7,7 +7,7 @@
 
 <div class="thin">
     <div class="header">
-        <h2>Edit collage {{ collage.link|raw }}</h2>
+        <h2>{{ collage.link|raw }} › Edit</h2>
     </div>
     <form class="edit_form" name="collage" action="collages.php" method="post">
         <input type="hidden" name="action" value="edit_handle" />
@@ -25,11 +25,11 @@
                 <td class="label"><strong>Category</strong></td>
                 <td>
                     <select name="category">
-    {% for id, name in constant('COLLAGE') %}
-        {% if id > 0 or (id == 0 and viewer.permitted('site_collages_delete')) %}
+{%  for id, name in constant('COLLAGE') %}
+{%      if id > 0 or (id == 0 and viewer.permitted('site_collages_delete')) %}
         <option value="{{ id }}"{{ selected(id == collage.categoryId) }}>{{ name }}</option>
-        {% endif %}
-    {% endfor %}
+{%      endif %}
+{%  endfor %}
                     </select>
                 </td>
             </tr>
@@ -87,7 +87,7 @@
             </tr>
 {% endif %}
 {% if viewer.permitted('admin_freeleech') %}
-    {% from 'macro/torrent.twig' import freeleech %}
+{%  from 'macro/torrent.twig' import freeleech %}
             <tr>
                 <td class="label">Leech status</td>
                 <td>{{ freeleech(constant('NEUTRAL_LEECH_THRESHOLD'), constant('NEUTRAL_LEECH_UNIT'), leech_type, leech_reason) }}</td>

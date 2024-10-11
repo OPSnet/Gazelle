@@ -1,16 +1,6 @@
-/* global ajax, tooltip_delay */
+/* global tooltip_delay */
 
-function Add(input) {
-    if (input.checked == false) {
-        Cancel();
-    } else {
-        if (document.getElementById("choices").raw().value == "") {
-            document.getElementById("choices").raw().value += input.name;
-        } else {
-            document.getElementById("choices").raw().value += "|" + input.name;
-        }
-    }
-}
+"use strict";
 
 function checkCollageCats(value) {
     let e = document.getElementsByClassName('collagecat');
@@ -26,25 +16,18 @@ function invertCollageCats() {
     }
 }
 
-function Cancel() {
-    let e = document.getElementsByTagName("input");
-    for (let i = 0; i < e.length; i++) {
-        if (e[i].type == "checkbox") {
-            e[i].checked = false;
-        }
+async function CollageSubscribe(id) {
+    await fetch(
+        "userhistory.php?action=collage_subscribe&collageid=" + id
+        + "&auth=" + document.body.dataset.auth
+    );
+    let subscribeLink = document.getElementById("subscribelink" + id);
+    if (subscribeLink) {
+        subscribeLink.firstChild.nodeValue = 
+            (subscribeLink.firstChild.nodeValue.charAt(0) == 'U')
+            ? "Subscribe"
+            : "Unsubscribe";
     }
-    document.getElementById("choices").raw().value = "";
-}
-
-function CollageSubscribe(collageid) {
-    ajax.get("userhistory.php?action=collage_subscribe&collageid=" + collageid + "&auth=" + document.body.dataset.auth, function() {
-        let subscribeLink = $("#subscribelink" + collageid).raw();
-        if (subscribeLink) {
-            subscribeLink.firstChild.nodeValue = subscribeLink.firstChild.nodeValue.charAt(0) == 'U'
-                ? "Subscribe"
-                : "Unsubscribe";
-        }
-    });
 }
 
 let collageShow = {
@@ -164,3 +147,26 @@ let collageShow = {
         this.page(this.pg, $('#pagelink' + this.pg).raw().firstChild);
     }
 };
+
+document.addEventListener('DOMContentLoaded', () => {
+    let all = document.getElementById('cat-all');
+    if (all) {
+        all.addEventListener('click', () => {
+            checkCollageCats(true);
+        });
+    }
+
+    let none = document.getElementById('cat-none');
+    if (none) {
+        none.addEventListener('click', () => {
+            checkCollageCats(false);
+        });
+    }
+
+    let inv = document.getElementById('cat-invert');
+    if (inv) {
+        inv.addEventListener('click', () => {
+            invertCollageCats();
+        });
+    }
+});

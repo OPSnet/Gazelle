@@ -11,11 +11,11 @@
 {% if is_bookmark %}
         <h2>{{ search.userLink|raw }} &rsaquo; Bookmarked collages</h2>
 {% else %}
-    {% if search.userLink %}
+{%  if search.userLink %}
         <h2>{{ search.userLink|raw }} &rsaquo; {% if search.isContributor %}Collage contributions{% else %}Collages{% endif %}</h2>
-    {% else %}
+{%  else %}
         <h2>{% if search.isFilteredView %}Collage contributions{% else %}Collages{% endif %}</h2>
-    {% endif %}
+{%  endif %}
 {% endif %}
     </div>
 {% if is_bookmark %}
@@ -55,14 +55,14 @@
                 <tr id="categories">
                     <td class="label">Categories:</td>
                     <td>
-    {% for id, name in constant('COLLAGE')|sort %}
+{%  for id, name in constant('COLLAGE')|sort %}
                         <label class="cat-choice"><input type="checkbox" class="collagecat" value="1" name="cats[{{ id }}]"{{ checked(search.isSelectedCategory(id)) }} /> {{ name }}</label>
-        {% if loop.index % 5 %}&nbsp;&nbsp;&nbsp;{% else %}<br />{% endif %}
-    {% endfor %}
+{%      if loop.index % 5 %}&nbsp;&nbsp;&nbsp;{% else %}<br />{% endif %}
+{%  endfor %}
                         <br />
-                        <a href="#" title="Select all collage categories" onclick="javascript:checkCollageCats(true); return false;">{{ constant('ICON_ALL') }}</a>
-                        <a href="#" title="Clear all collage categories (but at least one will have to be checked)" onclick="javascript:checkCollageCats(false); return false;">{{ constant('ICON_NONE') }}</a>
-                        <a href="#" title="Toggle the select categories" onclick="javascript:invertCollageCats(); return false;">{{ constant('ICON_TOGGLE') }}</a>
+                        <a href="#" id="cat-all" title="Select all collage categories">✅</a>
+                        <a href="#" id="cat-none" title="Clear all collage categories (but at least one will have to be checked)">🚫</a>
+                        <a href="#" id="cat-invert" title="Toggle the select categories">🔁</a>
                     </td>
                 </tr>
                 <tr id="order_by">
@@ -93,23 +93,23 @@
 
     <div class="linkbox">
 {% if not is_bookmark %}
-    {% if viewer.canCreatePersonalCollage or viewer.permitted('site_collages_create') %}
+{%  if viewer.canCreatePersonalCollage or viewer.permitted('site_collages_create') %}
         <a href="collages.php?action=new" class="brackets">New collage</a>
-    {% endif %}
-    {% set active = personal|length %}
-    {% if active == 1 %}
+{%  endif %}
+{%  set active = personal|length %}
+{%  if active == 1 %}
         <a href="collages.php?id={{ personal[0].id }}" class="brackets">Personal collage</a>
-    {% elseif active > 1 %}
+{%  elseif active > 1 %}
         <a href="collages.php?action=mine" class="brackets">Personal collages</a>
-    {% endif %}
-    {% if viewer.permitted('site_collages_subscribe') %}
+{%  endif %}
+{%  if viewer.permitted('site_collages_subscribe') %}
         <a href="userhistory.php?action=subscribed_collages" class="brackets">Subscribed collages</a>
-    {% endif %}
+{%  endif %}
         <a href="bookmarks.php?type=collages" class="brackets">Bookmarked collages</a>
         <a href="random.php?action=collage" class="brackets">Random collage</a>
-    {% if viewer.permitted('site_collages_recover') %}
+{%  if viewer.permitted('site_collages_recover') %}
         <a href="collages.php?action=recover" class="brackets">Recover collage</a>
-    {% endif %}
+{%  endif %}
         <br />
 {% endif %}
 {% if viewer.permittedAny('site_collages_create') %}
@@ -120,12 +120,12 @@
 
 {% if not page %}
 <div class="box pad" align="center">
-    {% if is_bookmark %}
+{%  if is_bookmark %}
     <h2>You have not bookmarked any collages.</h2>
-    {%  else %}
+{%  else %}
     <h2>Your search did not match anything.</h2>
     <p>Make sure all names are spelled correctly, or try making your search less specific.</p>
-    {% endif %}
+{%  endif %}
 </div>
 {% else %}
 {{ paginator.linkbox|raw }}
@@ -138,22 +138,22 @@
         <td class="nobr">{{ search.header.emit('updated')|raw }}</td>
         <td>Author</td>
     </tr>
-    {% for c in page %}
+{%  for c in page %}
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }}{% if is_bookmark %} bookmark_{{ c.id }}{% endif %}">
         <td class="td_collage_category">
             <a href="collages.php?action=search&amp;cats[{{ c.category_id }}]=1">{{ constant('COLLAGE')[c.category_id] }}</a>
         </td>
         <td class="td_info">
             <a href="collages.php?id={{ c.id }}">{{ c.name }}</a>
-        {% if is_bookmark %}
+{%      if is_bookmark %}
             <span style="float: right;">
                 <a href="#" onclick="Unbookmark('collage', {{ c.id }}, ''); return false;" class="brackets">Remove bookmark</a>
             </span>
-        {% endif %}
+{%      endif %}
             <div class="tags">
-        {% for name in c.tag %}
+{%      for name in c.tag %}
             <a href="collages.php?action=search&amp;tags={{ name }}">{{ name }}</a>
-        {% endfor %}
+{%      endfor %}
             </div>
         </td>
         <td class="td_torrent_count m_td_right number_column">{{ c.total|number_format }}</td>
@@ -161,7 +161,7 @@
         <td class="td_updated nobr">{{ c.updated|time_diff }}</td>
         <td class="td_author">{{ c.user_id|user_url }}</td>
     </tr>
-    {% endfor %}
+{%  endfor %}
 </table>
 {{ paginator.linkbox|raw }}
 {% endif %}

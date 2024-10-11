@@ -1091,8 +1091,6 @@ defined('USERNAME_REGEXP') or define('USERNAME_REGEXP', '/\b(?:[01]$(*PRUNE)(*FA
 // Common icons (emoji)
 
 defined('ICON_ALL')          or define('ICON_ALL',          "\xe2\x9c\x85");
-defined('ICON_NONE')         or define('ICON_NONE',         "\xf0\x9f\x9a\xab");
-defined('ICON_TOGGLE')       or define('ICON_TOGGLE',       "\xf0\x9f\x94\x81");
 defined('ICON_PADLOCK')      or define('ICON_PADLOCK',      "\xF0\x9F\x94\x92");
 defined('ICON_STAR')         or define('ICON_STAR',         "\xE2\x98\x85");
 
