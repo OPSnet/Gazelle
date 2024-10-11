@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   ocelot:
     image: ocelot:latest
