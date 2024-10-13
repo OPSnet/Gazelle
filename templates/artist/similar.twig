@@ -1,18 +1,19 @@
+{% from 'macro/form.twig' import autocomplete %}
 <div class="box box_artists">
     <div class="head"><strong>Similar Artists</strong></div>
     <ul class="stats nobullet">
-{% for s in similar.info %}
+{% for s in artist.similar.info %}
         <li>
             <span class="tooltip" title="{{ s.score/100 }}"><a href="artist.php?id={{ s.artist_id }}" style="float: left; display: block;">{{ s.name }}</a></span>
             <div style="float: right; display: block; letter-spacing: -1px;">
-                <a href="artist.php?action=vote_similar&amp;artistid={{ similar.artist.id }}&amp;similarid={{
-                    s.artist_id }}&amp;way=up" class="tooltip brackets vote_artist_up" title="Vote up this similar artist. Use this when you feel that the two artists are quite similar.">&#x25b2;</a>
-                <a href="artist.php?action=vote_similar&amp;artistid={{ similar.artist.id }}&amp;similarid={{
-                    s.artist_id }}&amp;way=down" class="tooltip brackets vote_artist_down" title="Vote down this similar artist. Use this when you feel that the two artists are not all that similar.">&#x25bc;</a>
-    {% if viewer.permitted('site_delete_tag') -%}
-                <span class="remove remove_artist"><a href="artist.php?action=delete_similar&amp;artistid={{ similar.artist.id }}&amp;similarid={{
-                    s.artist_id }}&amp;auth={{ viewer.auth }}" class="tooltip brackets" title="Remove this similar artist">&#x2715;</a></span>
-    {% endif -%}
+                <a href="artist.php?action=vote_similar&amp;artistid={{ artist.id }}&amp;similarid={{
+                    s.artist_id }}&amp;way=up" class="tooltip brackets vote_artist_up" title="Vote up this similar artist. Use this when you feel that the two artists are quite similar.">▲</a>
+                <a href="artist.php?action=vote_similar&amp;artistid={{ artist.id }}&amp;similarid={{
+                    s.artist_id }}&amp;way=down" class="tooltip brackets vote_artist_down" title="Vote down this similar artist. Use this when you feel that the two artists are not all that similar.">▼</a>
+{%  if viewer.permitted('site_delete_tag') -%}
+                <span class="remove remove_artist"><a href="artist.php?action=delete_similar&amp;artistid={{ artist.id }}&amp;similarid={{
+                    s.artist_id }}&amp;auth={{ viewer.auth }}" class="tooltip brackets" title="Remove this similar artist">✕</a></span>
+{%  endif -%}
             </div>
             <br />
         </li>
@@ -28,8 +29,8 @@
             <form class="add_form" name="similar_artists" action="artist.php" method="post">
                 <input type="hidden" name="action" value="add_similar" />
                 <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-                <input type="hidden" name="artistid" value="{{ similar.artist.id }}" />
-                <input type="text" autocomplete="off" id="artistsimilar" name="artistname" size="20"{% if viewer.hasAutocomplete('other') %} data-gazelle-autocomplete="true"{% endif %} />
+                <input type="hidden" name="artistid" value="{{ artist.id }}" />
+                <input type="text" autocomplete="off" id="artistsimilar" name="artistname" size="20"{{ autocomplete(viewer, 'other') }} />
                 <input type="submit" value="+" />
             </form>
         </li>

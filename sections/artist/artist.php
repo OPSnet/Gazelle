@@ -29,7 +29,7 @@ $isSubscribed = (new Gazelle\User\Subscription($Viewer))->isSubscribedComments('
 $name         = $Artist->name();
 $requestList  = $Viewer->disableRequests() ? [] : (new Gazelle\Manager\Request())->findByArtist($Artist);
 
-View::show_header($name, ['js' => 'browse,requests,bbcode,comments,voting,subscriptions']);
+View::show_header($name, ['js' => 'artist_cloud,browse,requests,bbcode,comments,tagcanvas,voting,subscriptions']);
 ?>
 <div class="thin">
     <div class="header">
@@ -178,8 +178,8 @@ if ($Viewer->permitted('site_collages_manage') || $Viewer->activePersonalCollage
 
 <?php
 echo $Twig->render('artist/similar.twig', [
-    'similar'      => $Artist->similar(),
-    'viewer'       => $Viewer,
+    'artist' => $Artist,
+    'viewer' => $Viewer,
 ]);
 
 if ($Viewer->permitted('zip_downloader')) {
@@ -372,116 +372,25 @@ echo $Twig->render('request/list.twig', [
     'viewer' => $Viewer,
 ]);
 
-$graph = $Artist->similar()->similarGraph(SIMILAR_WIDTH, SIMILAR_HEIGHT);
-if ($graph) {
+echo $Twig->render('artist/similar-graph.twig', [
+    'artist' => $Artist,
+]);
 ?>
-    <div id="similar_artist_map" class="box">
-      <div id="flipper_head" class="head">
-        <a href="#">&uarr;</a>&nbsp;
-        <strong id="flipper_title">Similar Artist Map</strong>
-        <a id="flip_to" class="brackets" href="#" onclick="flipView(); return false;">Switch to cloud</a>
-      </div>
-      <div id="flip_view_1" style="width: <?= SIMILAR_WIDTH ?>px; height: <?= SIMILAR_HEIGHT ?>px;">
-        <div id="similar-artist" style=" top: <?= SIMILAR_HEIGHT / 2 - 25 ?>px; left: <?= SIMILAR_WIDTH / 2 - mb_strlen($Artist->name()) * 4 ?>px;">
-          <span class="name"><?= html_escape($Artist->name()) ?></span>
-        </div>
-        <div class="similar-artist-graph" style="padding-top: <?= SIMILAR_HEIGHT / SIMILAR_WIDTH * 100 ?>%;">
-        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMinYMin meet" viewBox="0 0 <?=
-            SIMILAR_WIDTH ?> <?= SIMILAR_HEIGHT ?>" style="display: inline-block; position: absolute; top: 0; left: 0;">
-<?php
-    $names = '';
-    foreach ($graph as $s) {
-        if ($s['proportion'] <= 0.2) {
-            $pt = 8;
-        } elseif ($s['proportion'] <= 0.3) {
-            $pt = 9;
-        } elseif ($s['proportion'] <= 0.4) {
-            $pt = 10;
-        } else {
-            $pt = 11;
-        }
-        $xPos = max(3, $s['x'] - ($s['x'] < SIMILAR_WIDTH * 0.85 ? 0 : (int)(mb_strlen($s['artist_name']) * $pt * 0.6)));
-        $yPos = max(3, $s['y'] + ($s['y'] < SIMILAR_HEIGHT * 0.5 ? -2 : 10));
-        $names .= "<a xlink:href=\"artist.php?id={$s['artist_id']}\"><text x=\"{$xPos}\" y=\"{$yPos}\" >" . html_escape($s['artist_name']) . "</text></a>";
-        foreach ($s['related'] as $r) {
-            if ($r >= $s['artist_id']) {
-?>
-          <line x1="<?= $graph[$r]['x'] ?>" y1="<?= $graph[$r]['y'] ?>" x2="<?= $s['x'] ?>" y2="<?=
-            $s['y'] ?>" style="stroke:rgb(0,153,0);stroke-width:1" />
-<?php
-            }
-        }
-?>
-          <line x1="<?= SIMILAR_WIDTH / 2 ?>" y1="<?= SIMILAR_HEIGHT / 2 ?>" x2="<?= $s['x'] ?>" y2="<?=
-            $s['y'] ?>" style="stroke:rgb(77,153,0);stroke-width:<?= (int)ceil($s['proportion'] * 4) + 1 ?>" />
-<?php
-    }
-?>
-          <?= $names // last, to overlay text on graph ?>
-        </svg>
-      </div>
-    </div>
+
     <div id="flip_view_2" style="display: none; position: relative; width: <?= SIMILAR_WIDTH ?>px; height: <?= SIMILAR_HEIGHT ?>px;">
       <canvas id="similarArtistsCanvas" style="position: absolute;" width="<?= SIMILAR_WIDTH - 20 ?>px" height="<?= SIMILAR_HEIGHT - 20 ?>px"></canvas>
       <div id="artistTags" style="display: none;"><ul><li></li></ul></div>
       <strong><br /><a id="currentArtist" style="position: relative; margin-left: 15px" href="#null">Loading...</a></strong>
     </div>
-  </div>
-
-<script type="text/javascript">//<![CDATA[
-var cloudLoaded = false;
-function flipView() {
-    if (document.getElementById('flip_view_1').style.display == 'block') {
-        document.getElementById('flip_view_1').style.display = 'none';
-        document.getElementById('flip_view_2').style.display = 'block';
-        document.getElementById('flipper_title').innerHTML = 'Similar Artist Cloud';
-        document.getElementById('flip_to').innerHTML = 'switch to map';
-        if (!cloudLoaded) {
-            require("<?= STATIC_SERVER ?>/functions/tagcanvas.js", function () {
-                require("<?= STATIC_SERVER ?>/functions/artist_cloud.js", function () {});
-            });
-            cloudLoaded = true;
-        }
-    } else {
-        document.getElementById('flip_view_1').style.display = 'block';
-        document.getElementById('flip_view_2').style.display = 'none';
-        document.getElementById('flipper_title').innerHTML = 'Similar Artist Map';
-        document.getElementById('flip_to').innerHTML = 'switch to cloud';
-    }
-}
-
-//TODO move this to global, perhaps it will be used elsewhere in the future
-//http://stackoverflow.com/questions/7293344/load-javascript-dynamically
-function require(file, callback) {
-    var script = document.getElementsByTagName('script')[0],
-    newjs = document.createElement('script');
-
-    // IE
-    newjs.onreadystatechange = function () {
-        if (newjs.readyState === 'loaded' || newjs.readyState === 'complete') {
-            newjs.onreadystatechange = null;
-            callback();
-        }
-    };
-    // others
-    newjs.onload = function () {
-        callback();
-    };
-    newjs.src = file;
-    script.parentNode.insertBefore(newjs, script);
-}
-//]]>
-</script>
-<?php } // if $graph ?>
-
-        <div id="artist_information" class="box">
-            <div id="info" class="head">
-                <a href="#">&uarr;</a>&nbsp;
-                <strong>Artist Information</strong>
-                <a href="#" class="brackets" onclick="$('#body').gtoggle(); return false;">Toggle</a>
-            </div>
-            <div id="body" class="body"><?=Text::full_format($Artist->body())?></div>
+<!--  </div> ?? -->
+    <div id="artist_information" class="box">
+        <div id="info" class="head">
+            <a href="#">&uarr;</a>&nbsp;
+            <strong>Artist Information</strong>
+            <a href="#" class="brackets" onclick="$('#body').gtoggle(); return false;">Toggle</a>
         </div>
+        <div id="body" class="body"><?=Text::full_format($Artist->body())?></div>
+    </div>
     <div id="artistcomments">
 <?php
 $commentPage = new Gazelle\Comment\Artist($artistId, (int)($_GET['page'] ?? 0), (int)($_GET['postid'] ?? 0));

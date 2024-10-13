@@ -1,0 +1,48 @@
+{% set H = constant('SIMILAR_HEIGHT') %}
+{% set W = constant('SIMILAR_WIDTH') %}
+{% set graph = artist.similar.similarGraph(W, H) %}
+{% for s in graph %}
+{%  if loop.first %}
+{%  set names = '' %}
+<div id="similar_artist_map" class="box">
+  <div id="flipper_head" class="head">
+    <a href="#">↑</a>&nbsp;
+    <strong id="flipper_title">Similar Artist Map</strong>
+    <a id="flip_to" class="brackets" href="#">Switch to cloud</a>
+  </div>
+  <div id="flip_view_1" style="width: {{ W }}px; height: {{ H }}px;">
+    <div id="similar-artist" style=" top: {{ H / 2 - 25 }}px; left: {{ W / 2 - artist.name|length * 4 }}px;">
+      <span class="name">{{ artist.name }}</span>
+    </div>
+    <div class="similar-artist-graph" style="padding-top: {{ H / W * 100 }}%;">
+    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMinYMin meet" viewBox="0 0 {{ W }} {{ H }}" style="display: inline-block; position: absolute; top: 0; left: 0;">
+{%  endif %}
+{%  if s.proportion <= 0.2 %}
+{%      set pt = 8 %}
+{%  elseif s.proportion <= 0.3 %}
+{%      set pt = 9 %}
+{%  elseif s.proportion <= 0.4 %}
+{%      set pt = 10 %}
+{%  else %}
+{%      set pt = 11 %}
+{%  endif %}
+{%  set xPos = max(3, s.x - (s.x < W * 0.85 ? 0 : s.artist_name|length * pt * 0.6)) %}
+{%  set yPos = max(3, s.y + (s.y < H * 0.5 ? -2 : 10)) %}
+{%  set names %}{{ names }}<a xlink:href="artist.php?id={{ s.artist_id
+    }}"><text x="{{ xPos }}" y="{{ yPos }}" >{{ s.artist_name }}</text></a>
+{%  endset %}
+{%  for r in s.related %}
+{%      if r >= s.artist_id %}
+      <line x1="{{ graph[r].x }}" y1="{{ graph[r].y }}" x2="{{ s.x }}" y2="{{ s.y
+        }}" style="stroke:rgb(0,153,0);stroke-width:1" />
+{%      endif %}
+{%  endfor %}
+      <line x1="{{ W / 2 }}" y1="{{ H / 2 }}" x2="{{ s.x }}" y2="{{ s.y
+        }}" style="stroke:rgb(77,153,0);stroke-width:{{ (s.proportion * 4 + 1)|round(0) }}" />
+{%  if loop.last %}
+      {{ names|raw }}{# last, to overlay text on graph #}
+    </svg>
+  </div>
+</div>
+{%  endif %}
+{% endfor %}
