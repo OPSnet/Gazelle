@@ -138,10 +138,11 @@ class Request extends BaseObject implements CategoryHasArtist {
         );
 
         self::$db->prepared_query("
-            SELECT rv.UserID AS user_id,
-                rv.Bounty    AS bounty
+            SELECT rv.UserID   AS user_id,
+                SUM(rv.Bounty) AS bounty
             FROM requests_votes AS rv
             WHERE rv.RequestID = ?
+            GROUP BY rv.UserID
             ORDER BY rv.Bounty DESC
             ", $this->id
         );
@@ -467,11 +468,6 @@ class Request extends BaseObject implements CategoryHasArtist {
         return $this->info()['user_vote_list'];
     }
 
-    public function userVote(User $user): ?array {
-        $vote =  array_filter($this->userIdVoteList(), fn ($r) => $r['user_id'] === $user->id());
-        return $vote ? current($vote) : null;
-    }
-
     public function userVoteList(Manager\User $manager): array {
         $list = $this->userIdVoteList();
         foreach ($list as &$user) {
@@ -559,8 +555,7 @@ class Request extends BaseObject implements CategoryHasArtist {
             INSERT INTO requests_votes
                    (RequestID, UserID, Bounty)
             VALUES (?,         ?,      ?)
-            ON DUPLICATE KEY UPDATE Bounty = Bounty + ?
-            ", $this->id(), $user->id(), $bounty, $bounty
+            ", $this->id(), $user->id(), $bounty
         );
         self::$db->prepared_query("
             UPDATE requests SET
@@ -571,11 +566,11 @@ class Request extends BaseObject implements CategoryHasArtist {
         self::$db->prepared_query("
             INSERT INTO user_summary (user_id, request_vote_size, request_vote_total)
                 SELECT rv.UserID,
-                    coalesce(sum(rv.Bounty), 0) AS size,
+                    sum(rv.Bounty) AS size,
                     count(*) AS total
                 FROM requests_votes rv
                 INNER JOIN requests r ON (r.ID = rv.RequestID)
-                WHERE r.UserID != r.FillerID
+                WHERE rv.UserID != r.FillerID
                     AND rv.UserID = ?
                 GROUP BY rv.UserID
             ON DUPLICATE KEY UPDATE
@@ -590,6 +585,22 @@ class Request extends BaseObject implements CategoryHasArtist {
         $user->flush();
 
         return true;
+    }
+
+    /**
+     * get all individual votes on this request
+     */
+    public function voteList(): array {
+        self::$db->prepared_query("
+            SELECT UserID AS user_id,
+                Bounty    AS bounty,
+                created
+            FROM requests_votes
+            WHERE RequestID = ?
+            ORDER BY created DESC, requests_votes_id DESC
+            ", $this->id
+        );
+        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     public function fill(User $user, Torrent $torrent): int {
@@ -618,7 +629,7 @@ class Request extends BaseObject implements CategoryHasArtist {
         $message = "One of your requests — [url={$this->location()}]{$name}[/url] — has been filled."
                    . " You can view it here: [pl]{$torrent->id()}[/pl]";
         self::$db->prepared_query("
-            SELECT UserID FROM requests_votes WHERE RequestID = ?
+            SELECT DISTINCT UserID FROM requests_votes WHERE RequestID = ?
             ", $this->id
         );
         foreach (self::$db->collect(0, false) as $userId) {
@@ -687,19 +698,15 @@ class Request extends BaseObject implements CategoryHasArtist {
 
     /**
      * Get the bounty of request, by user
-     * TODO: redundant, given userIdVoteList()
      *
      * @return array keyed by user ID
      */
     public function bounty(): array {
-        self::$db->prepared_query("
-            SELECT UserID, Bounty
-            FROM requests_votes
-            WHERE RequestID = ?
-            ORDER BY Bounty DESC, UserID DESC
-            ", $this->id
-        );
-        return self::$db->to_array('UserID', MYSQLI_ASSOC, false);
+        $votes = [];
+        foreach ($this->userIdVoteList() as $vote) {
+            $votes[$vote['user_id']] = ['UserID' => $vote['user_id'], 'Bounty' => $vote['bounty']];
+        }
+        return $votes;
     }
 
     /**
@@ -827,7 +834,7 @@ class Request extends BaseObject implements CategoryHasArtist {
                 Year, ReleaseType, CatalogueNumber, RecordLabel, BitrateList,
                 FormatList, MediaList, LogCue, FillerID, TorrentID,
                 UNIX_TIMESTAMP(TimeFilled) AS TimeFilled, Visible,
-                COUNT(rv.UserID) AS Votes, SUM(rv.Bounty) >> 10 AS Bounty,
+                COUNT(DISTINCT rv.UserID) AS Votes, SUM(rv.Bounty) >> 10 AS Bounty,
                 ?, ?
             FROM requests AS r
             LEFT JOIN requests_votes AS rv ON (rv.RequestID = r.ID)

@@ -63,7 +63,7 @@ class Request extends \Gazelle\BaseManager {
      */
     public function findUnfilledByUser(\Gazelle\User $user, int $limit): array {
         self::$db->prepared_query("
-            SELECT r.ID
+            SELECT DISTINCT r.ID
             FROM requests r
             INNER JOIN requests_votes v ON (v.RequestID = r.ID)
             WHERE r.TorrentID = 0
@@ -81,7 +81,7 @@ class Request extends \Gazelle\BaseManager {
         $requestList = self::$cache->get_value($key);
         if ($requestList === false) {
             self::$db->prepared_query("
-                SELECT r.ID
+                SELECT DISTINCT r.ID
                 FROM requests AS r
                 INNER JOIN requests_votes v ON (v.RequestID = r.ID)
                 INNER JOIN requests_artists AS ra ON (ra.RequestID = r.ID)

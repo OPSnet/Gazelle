@@ -53,5 +53,22 @@
             </table>
         </form>
     </div>
+    <div class="box pad">
+        <p>Request vote overview</p>
+        <table class="request_votes">
+            <tr>
+                <th>time</th>
+                <th>user</th>
+                <th>amount</th>
+            </tr>
+{% for vote in request.voteList %}
+            <tr>
+                <td>{{ vote.created|date("Y-m-d H:i:s") }}</td>
+                <td>{{ vote.user_id|user_url }}</td>
+                <td>{{ vote.bounty|octet_size }}</td>
+            </tr>
+{% endfor %}
+        </table>
+    </div>
 </div>
 {{ footer() }}

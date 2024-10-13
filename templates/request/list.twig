@@ -43,10 +43,10 @@
             </td>
             <td class="m_td_right nobr">
                 <span id="vote_count_{{ request.id }}">{{ request.userVotedTotal|number_format }}</span>&nbsp;&nbsp;
-{%  set vote = request.userVote(viewer) %}
+{%  set vote = request.userBounty(viewer) %}
 {%  if vote %}
                 <span title="You {% if request.isFilled %}contributed {% else %}have voted {% endif
-                    -%}{{ vote['bounty']|octet_size }} towards this request">&check;</span>
+                    -%}{{ vote|octet_size }} towards this request">&check;</span>
 {%  elseif not request.isFilled and viewer.permitted('site_vote') %}
                 <span class="request-vote tooltip brackets" data-id="{{ request.id
                     }}" data-bounty="{{ bounty }}" data-n="{{ request.userVotedTotal

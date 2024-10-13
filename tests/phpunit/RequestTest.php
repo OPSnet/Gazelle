@@ -9,7 +9,7 @@ define('BUFFER_FOR_BOUNTY', 1024 ** 4); // some upload credit to allow request c
 class RequestTest extends TestCase {
     protected Request $request;
     protected TGroup  $tgroup;
-    protected array           $userList;
+    protected array   $userList;
 
     public function setUp(): void {
         // we need two users, one who uploads and one who snatches
@@ -259,9 +259,6 @@ class RequestTest extends TestCase {
         // add some bounty
         $this->assertTrue($this->request->vote($user, $bounty), 'request-more-bounty');
         $this->assertTrue($this->request->hasNewVote(), 'request-has-new-vote');
-        $userVote = $this->request->userVote($user);
-        $this->assertEquals($user->id(), $userVote['user_id'], 'request-user-vote-user-id');
-        $this->assertEquals($taxedBounty, $userVote['bounty'], 'request-user-vote-bounty');
         $this->assertEquals(2, $this->request->userVotedTotal(), 'request-total-voted');
         $this->assertEquals(2 * $taxedBounty, $this->request->bountyTotal(), 'request-total-bounty-added');
         $this->assertTrue(\GazelleUnitTest\Helper::recentDate($this->request->lastVoteDate()), 'request-last-vote-date');
@@ -340,6 +337,49 @@ class RequestTest extends TestCase {
 
         $this->assertEquals(1, $this->request->refundBounty($this->userList['user'], $admin->username()), 'request-bounty-refund');
         $this->assertEquals(1, $this->request->removeBounty($admin, $admin->username()), 'request-bounty-remove');
+    }
+
+    public function testVotes(): void {
+        $user = $this->userList['user'];
+        $user->addBounty(BUFFER_FOR_BOUNTY);
+        $user2 = \GazelleUnitTest\Helper::makeUser('req.' . randomString(10), 'request');
+        $this->userList['user2'] = $user2;
+        $user2->setField('Enabled', '1')->modify();
+        $user2->addBounty(BUFFER_FOR_BOUNTY);
+
+        $requestMan = new Manager\Request();
+        $title  = 'phpunit req fill ' . randomString(6);
+        $bounty = 1024 ** 2 * REQUEST_MIN;
+        $this->request = $requestMan->create(
+            user:            $user,
+            bounty:          $bounty,
+            categoryId:      (new Manager\Category())->findIdByName('Music'),
+            year:            2018,
+            title:           $title,
+            image:           '',
+            description:     'This is a unit test description',
+            recordLabel:     'Unitest Artists',
+            catalogueNumber: 'UA-7890',
+            releaseType:     1,
+            encodingList:    'Lossless|V0 (VBR)',
+            formatList:      'MP3|FLAC',
+            mediaList:       'CD|WEB',
+            logCue:          'Log (100%) + Cue',
+            checksum:        true,
+            oclc:            '123,456',
+        );
+
+        $this->request->vote($user2, $bounty + 1);
+        $this->request->vote($user2, $bounty + 7);
+        $this->request->vote($user, $bounty + 15);
+
+        $votes = $this->request->voteList();
+        $this->assertCount(4, $votes, 'request-votes-count');
+        $this->assertGreaterThanOrEqual($votes[0]['created'], $votes[1]['created'], 'request-vote-order');
+        $this->assertEquals($bounty + 15, $votes[0]['bounty'], 'request-vote-bounty1');
+        $this->assertEquals($bounty + 1, $votes[2]['bounty'], 'request-vote-bounty2');
+        $this->assertEquals($user->id(), $votes[0]['user_id'], 'request-vote-user1');
+        $this->assertEquals($user2->id(), $votes[2]['user_id'], 'request-vote-user2');
     }
 
     public function testBookmark(): void {
