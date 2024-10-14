@@ -1,29 +1,30 @@
-let AnswerCount = 1;
+"use strict";
 
-function AddAnswerField() {
-    if (AnswerCount >= 25) {
-        return;
-    }
-    let AnswerField = document.createElement("input");
-    AnswerField.type = "text";
-    AnswerField.id = "answer_"+AnswerCount;
-    AnswerField.className = "required";
-    AnswerField.name = "answers[]";
-    AnswerField.style.width = "90%";
+document.addEventListener('DOMContentLoaded', () => {
+    let total = 1;
+    let block = document.getElementById('answer_block');
 
-    let x = $('#answer_block').raw();
-    x.appendChild(document.createElement("br"));
-    x.appendChild(AnswerField);
-    AnswerCount++;
-}
+    document.getElementById('poll-add').addEventListener('click', (e) => {
+        e.preventDefault();
+        if (total >= 25) {
+            return;
+        }
+        block.appendChild(document.createElement("br"));
+        let input         = document.createElement("input");
+        input.type        = "text";
+        input.id          = "answer_" + total++;
+        input.className   = "required";
+        input.name        = "answers[]";
+        input.style.width = "90%";
+        block.appendChild(input);
+    });
 
-function RemoveAnswerField() {
-    if (AnswerCount == 1) {
-        return;
-    }
-    let x = $('#answer_block').raw();
-    for (let i = 0; i < 2; i++) {
-        x.removeChild(x.lastChild);
-    }
-    AnswerCount--;
-}
+    document.getElementById('poll-remove').addEventListener('click', (e) => {
+        e.preventDefault();
+        if (total-- == 1) {
+            return;
+        }
+        block.removeChild(block.lastChild);
+        block.removeChild(block.lastChild);
+    });
+});
