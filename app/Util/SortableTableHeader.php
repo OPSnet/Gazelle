@@ -30,7 +30,7 @@ class SortableTableHeader {
     public function __construct(
         string $defaultSortKey,
         private readonly array $labelMap,
-        private readonly array $arrowMap = ['asc' => '&darr;', 'desc' => '&uarr;', '' => ''],
+        private readonly array $arrowMap = ['asc' => '↓', 'desc' => '↑', '' => ''],
         array $request = []
     ) {
         if ($request === []) {

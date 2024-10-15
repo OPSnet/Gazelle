@@ -356,7 +356,7 @@ class Donor extends \Gazelle\BaseUser {
      */
     public function rankLabel(bool $showOverflow = false): string {
         if ($this->hasMaxSpecialRank()) {
-            return '&infin; [Diamond]';
+            return '∞ [Diamond]';
         }
         $rank = $this->rank();
         $label = min($rank, MAX_RANK);

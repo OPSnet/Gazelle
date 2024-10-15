@@ -31,8 +31,8 @@
 {%- endif -%}
         </td>
         <td>{{ download.total|number_format }}</td>
-        <td>{% if download.is_snatched %}<span class="tooltip" title="Snatched!" style="color: #f57c00">{{ constant('ICON_STAR') }} </span>{% else %}&nbsp;{% endif %}</td>
-        <td>{% if download.is_seeding %}<span class="tooltip" title="Seeding!" style="color: #388e3c">{{ constant('ICON_STAR') }} </span>{% else %}&nbsp;{% endif %}</td>
+        <td>{% if download.is_snatched %}<span class="tooltip" title="Snatched!" style="color: #f57c00">★</span>{% else %}&nbsp;{% endif %}</td>
+        <td>{% if download.is_seeding %}<span class="tooltip" title="Seeding!" style="color: #388e3c">★</span>{% else %}&nbsp;{% endif %}</td>
 {%  if loop.last %}
     </tr>
 </table>

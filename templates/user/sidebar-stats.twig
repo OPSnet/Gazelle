@@ -179,7 +179,7 @@
 {% if user.id == viewer.id or viewer.isStaff %}
         <li id="comm_dl_factor">Download factor:
     {% if prl.userFactor is nan %}
-            <span class="tooltip" style="color: red" title="No snatched or seeding downloads!">&infin;</span>
+            <span class="tooltip" style="color: red" title="No snatched or seeding downloads!">∞</span>
     {% else %}
         {% set snatches = user.stats.snatchUnique %}
         {% set seeding = user.stats.seedingTotal %}

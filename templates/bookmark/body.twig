@@ -3,9 +3,9 @@
     {% if loop.first %}
 <div class="thin">
 <div class="header">
-    <h2>{{ user.id|user_url }} &rsaquo; <a href="bookmarks.php?type=torrents
+    <h2>{{ user.id|user_url }} › <a href="bookmarks.php?type=torrents
         {%- if user.id != viewer.id %}&amp;user_id={{ user.id }}{% endif -%}
-        ">Torrent Bookmarks</a> &rsaquo; Manage</h2>
+        ">Torrent Bookmarks</a> › Manage</h2>
 </div>
 <table width="100%" class="layout">
     <tr class="colhead"><td id="sorting_head">Sorting</td></tr>

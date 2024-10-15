@@ -24,7 +24,7 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
 ?>
 <div class="thin">
     <div class="header">
-        <h2><?= $Viewer->link() ?> &rsaquo; Subscribed collages<?=($viewAll ? '' : ' with new additions')?></h2>
+        <h2><?= $Viewer->link() ?> › Subscribed collages<?=($viewAll ? '' : ' with new additions')?></h2>
         <div class="linkbox">
 <?php if ($viewAll) { ?>
             <br /><br />

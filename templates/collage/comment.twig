@@ -1,7 +1,7 @@
 {{ header("Comments for collage " ~ collage.name, {'js': 'comments,bbcode,subscriptions'}) }}
 <div class="thin">
     <div class="header">
-        <h2><a href="collages.php">Collages</a> &rsaquo; {{ collage.link|raw }}</h2>
+        <h2><a href="collages.php">Collages</a> › {{ collage.link|raw }}</h2>
         <div class="linkbox">
             <a href="#" id="subscribelink_collages{{ collage.id }}" class="brackets" onclick="SubscribeComments('collages', {{ collage.id }}); return false;">
             {%- if is_subscribed %}Unsubscribe{% else %}Subscribe{% endif -%}

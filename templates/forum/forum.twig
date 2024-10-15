@@ -4,7 +4,7 @@
 {{ header('Forums › ' ~ forum.name, {'js': 'subscriptions'}) }}
 {% endif %}
 <div class="thin">
-    <h2><a href="forums.php">Forums</a> &rsaquo; <a href="forums.php#{{ forum.categoryName }}">{{ forum.categoryName }}</a> &rsaquo; {{ forum.name }}</h2>
+    <h2><a href="forums.php">Forums</a> › <a href="forums.php#{{ forum.categoryName }}">{{ forum.categoryName }}</a> › {{ forum.name }}</h2>
     <div class="linkbox">
 {% for d in dept_list %}
         <a class="brackets" href="forums.php?action=viewforum&amp;forumid={{ d.forum_id }}">

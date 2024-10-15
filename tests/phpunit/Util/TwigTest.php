@@ -55,7 +55,7 @@ END;
             'beta'  => ['dbColumn' => 'two', 'defaultSort' => 'desc', 'text' => 'Second'],
         ]);
         $heading = self::twig('{{ heading|column("alpha") }}');
-        $this->assertEquals('<a href="?order=alpha&amp;sort=asc">First</a> &uarr;', $heading->render(['heading' => $sth]), 'twig-heading');
+        $this->assertEquals('<a href="?order=alpha&amp;sort=asc">First</a> ↑', $heading->render(['heading' => $sth]), 'twig-heading');
 
         $linkify = self::twig('{{ url|linkify }}');
         $this->assertEquals(

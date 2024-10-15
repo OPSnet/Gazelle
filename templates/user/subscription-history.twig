@@ -3,7 +3,7 @@
 {{ header('Subscriptions', {'js': 'subscriptions,comments,bbcode'}) }}
 <div class="thin">
     <div class="header">
-        <h2>{{ viewer.link|raw }}</a> &rsaquo; Subscriptions
+        <h2>{{ viewer.link|raw }}</a> › Subscriptions
 {%- if show_unread %} with unread posts{% endif -%}
 {%- if paginator.total %} {{ paginator.total }} new{% endif %}</h2>
         <div class="linkbox">
@@ -51,7 +51,7 @@
                 <span id="bar_{{ result.Page }}{{ result.PageID }}" style="float: right;">
                     <a href="#" onclick="SubscribeComments('{{ result.Page }}', {{ result.PageID }}); return false;" id="subscribelink_{{ result.Page }}{{ result.PageID }}" class="brackets">Unsubscribe</a>
     {% endif -%}
-                    &nbsp;<a href="#">&uarr;</a>
+                    &nbsp;<a href="#">↑</a>
                 </span>
             </td>
         </tr>

@@ -194,7 +194,7 @@ foreach ($slice as $Key => $Post) {
                 - <a href="#" onclick="$('#warn<?=$PostID?>').raw().submit(); return false;" class="brackets">Warn</a>
 <?php } ?>
                 &nbsp;
-                <a href="#">&uarr;</a>
+                <a href="#">↑</a>
             </span>
         </td>
     </tr>
@@ -225,7 +225,7 @@ echo ' colspan="2"'; } ?>>
 </table>
 <?php } ?>
 <div class="breadcrumbs">
-    <a href="forums.php">Forums</a> &rsaquo; <?= $forum->link() ?> &rsaquo; <?= display_str($thread->title()) ?>
+    <a href="forums.php">Forums</a> › <?= $forum->link() ?> › <?= display_str($thread->title()) ?>
 </div>
 <?php
 echo $paginator->linkbox();

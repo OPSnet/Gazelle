@@ -2,7 +2,7 @@
 {{ header("View request: " ~ request.text, {'js': 'comments,requests,bbcode,subscriptions'}) }}
 <div class="thin">
     <div class="header">
-        <h2><a href="requests.php">Requests</a> &rsaquo; {{ request.categoryName }} &rsaquo; {{ request.selfLink|raw }}</h2>
+        <h2><a href="requests.php">Requests</a> › {{ request.categoryName }} › {{ request.selfLink|raw }}</h2>
         <div class="linkbox">
 {% if request.canEdit(viewer) %}
             <a href="requests.php?action=edit&amp;id={{ request.id }}" class="brackets">Edit</a>

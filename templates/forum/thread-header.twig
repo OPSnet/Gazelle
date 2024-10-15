@@ -1,6 +1,6 @@
 <div class="thin">
     <h2>
-        <a href="forums.php">Forums</a> &rsaquo; {{ thread.forum.link|raw }} &rsaquo; {{ thread.title }}
+        <a href="forums.php">Forums</a> › {{ thread.forum.link|raw }} › {{ thread.title }}
     </h2>
     <div class="linkbox">
 {% for d in thread.forum.departmentList(viewer) %}

@@ -198,7 +198,7 @@ class Quote extends \Gazelle\BaseUser {
                     $post = $postMan->findById($q['PostID']);
                     $context = [
                         'jump'  => $post->url(),
-                        'link'  => $post->thread()->forum()->link() . ' &rsaquo; ' . $post->thread()->link() . ' &rsaquo; ' . $post->link(),
+                        'link'  => "{$post->thread()->forum()->link()} › {$post->thread()->link()} › {$post->link()}",
                         'title' => 'Forums',
                     ];
                     break;

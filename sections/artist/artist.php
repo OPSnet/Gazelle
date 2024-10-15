@@ -300,7 +300,7 @@ if ($sections = $Artist->sections()) {
 ?>
                 <tr class="colhead_dark" id="torrents_<?= $artistMan->sectionLabel($sectionId) ?>">
                     <td class="small"><!-- expand/collapse --></td>
-                    <td class="m_th_left m_th_left_collapsable" width="70%"><a href="#">&uarr;</a>&nbsp;<strong><?=
+                    <td class="m_th_left m_th_left_collapsable" width="70%"><a href="#">↑</a>&nbsp;<strong><?=
                         $artistMan->sectionTitle($sectionId) ?></strong> <a href="#" class="tooltip brackets" onclick="$('.releases_<?=
                         $sectionId ?>').gtoggle(true); return false;" title="Show/hide this section">Toggle</a></td>
                     <td>Size</td>
@@ -385,7 +385,7 @@ echo $Twig->render('artist/similar-graph.twig', [
 <!--  </div> ?? -->
     <div id="artist_information" class="box">
         <div id="info" class="head">
-            <a href="#">&uarr;</a>&nbsp;
+            <a href="#">↑</a>&nbsp;
             <strong>Artist Information</strong>
             <a href="#" class="brackets" onclick="$('#body').gtoggle(); return false;">Toggle</a>
         </div>

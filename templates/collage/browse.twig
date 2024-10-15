@@ -9,10 +9,10 @@
 <div class="thin">
     <div class="header">
 {% if is_bookmark %}
-        <h2>{{ search.userLink|raw }} &rsaquo; Bookmarked collages</h2>
+        <h2>{{ search.userLink|raw }} › Bookmarked collages</h2>
 {% else %}
 {%  if search.userLink %}
-        <h2>{{ search.userLink|raw }} &rsaquo; {% if search.isContributor %}Collage contributions{% else %}Collages{% endif %}</h2>
+        <h2>{{ search.userLink|raw }} › {% if search.isContributor %}Collage contributions{% else %}Collages{% endif %}</h2>
 {%  else %}
         <h2>{% if search.isFilteredView %}Collage contributions{% else %}Collages{% endif %}</h2>
 {%  endif %}

@@ -1088,13 +1088,6 @@ defined('EMAIL_REGEXP')    or define('EMAIL_REGEXP',    '/^[\w-]+(?:\.[\w-]+)*(?
 defined('USERNAME_REGEXP') or define('USERNAME_REGEXP', '/\b(?:[01]$(*PRUNE)(*FAIL)|(?P<username>[\w.]{1,20}))\b/');
 
 // ------------------------------------------------------------------------
-// Common icons (emoji)
-
-defined('ICON_ALL')          or define('ICON_ALL',          "\xe2\x9c\x85");
-defined('ICON_PADLOCK')      or define('ICON_PADLOCK',      "\xF0\x9F\x94\x92");
-defined('ICON_STAR')         or define('ICON_STAR',         "\xE2\x98\x85");
-
-// ------------------------------------------------------------------------
 // Donor forum descriptions
 
 defined('DONOR_FORUM_DESCRIPTION') or define('DONOR_FORUM_DESCRIPTION', [

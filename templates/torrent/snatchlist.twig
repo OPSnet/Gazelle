@@ -23,8 +23,8 @@
     {% endif %}
         <td>{{ snatch.user_id|user_full }}</td>
         <td>{{ snatch.timestamp|time_diff }}</td>
-        <td>{% if snatch.is_download %}<span class="tooltip" title="Downloaded!" style="color: #f57c00">{{ constant('ICON_STAR') }} </span>{% else %}&nbsp;{% endif %}</td>
-        <td>{% if snatch.is_seeding %}<span class="tooltip" title="Seeding!" style="color: #388e3c">{{ constant('ICON_STAR') }} </span>{% else %}&nbsp;{% endif %}</td>
+        <td>{% if snatch.is_download %}<span class="tooltip" title="Downloaded!" style="color: #f57c00">★</span>{% else %}&nbsp;{% endif %}</td>
+        <td>{% if snatch.is_seeding %}<span class="tooltip" title="Seeding!" style="color: #388e3c">★</span>{% else %}&nbsp;{% endif %}</td>
     {% if loop.last %}
     </tr>
 </table>

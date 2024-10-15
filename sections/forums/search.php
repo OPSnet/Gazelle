@@ -12,7 +12,7 @@ $search->setSearchType($_GET['type'] ?? 'title')
 // Searching for posts in a specific thread
 $ThreadID = (int)($_GET['threadid'] ?? 0);
 if (!$ThreadID) {
-    $Title = " &rsaquo; &ldquo;" . display_str($search->searchText()) . "&rdquo;";
+    $Title = " › “" . display_str($search->searchText()) . "”";
 } else {
     $Title = $search->threadTitle($ThreadID);
     if (is_null($Title)) {
@@ -20,7 +20,7 @@ if (!$ThreadID) {
         error(403);
     }
     $search->setSearchType('body');
-    $Title = " &rsaquo; <a href=\"forums.php?action=viewthread&amp;threadid=$ThreadID\">$Title</a>";
+    $Title = " › <a href=\"forums.php?action=viewthread&amp;threadid=$ThreadID\">$Title</a>";
     $search->setThreadId($ThreadID);
 }
 
@@ -73,7 +73,7 @@ View::show_header('Forums › Search', ['js' => 'bbcode,forum_search']);
 ?>
 <div class="thin">
     <div class="header">
-        <h2><a href="forums.php">Forums</a> &rsaquo; Search<?=$Title?></h2>
+        <h2><a href="forums.php">Forums</a> › Search<?=$Title?></h2>
     </div>
     <form class="search_form" name="forums" action="" method="get">
         <input type="hidden" name="action" value="search" />

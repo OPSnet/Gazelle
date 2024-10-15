@@ -2,7 +2,7 @@
 <div class="thin">
     <div class="header">
         <h2>
-            <a href="{{ user.location }}">{{ user.username }}</a> &rsaquo; Quote notifications
+            <a href="{{ user.location }}">{{ user.username }}</a> › Quote notifications
             {% if paginator.total and not show_all %} ({{ paginator.total }} new){% endif %}
         </h2>
         <div class="linkbox pager">
@@ -25,12 +25,12 @@
     <table class="forum_post box vertical_margin noavatar">
         <tr class="colhead_dark notify_{{ quote.page }}">
             <td colspan="2">
-                <span style="float: left;">{{ quote.title }} &rsaquo; {{ quote.link|raw }}
-                    &rsaquo; quoted by {{ quote.quoter_id|user_url }} {{ quote.date|time_diff }}
+                <span style="float: left;">{{ quote.title }} › {{ quote.link|raw }}
+                    › quoted by {{ quote.quoter_id|user_url }} {{ quote.date|time_diff }}
                     {% if quote.unread %} <span class="new">(New!)</span>{% endif %}
                 </span>
                 <span style="float: left;" class="tooltip last_read" title="Jump to quote"> <a href="{{ quote.jump|raw }}"></a></span>
-                <span style="float: right;"><a href="#">&uarr;</a></span>
+                <span style="float: right;"><a href="#">↑</a></span>
             </td>
         </tr>
     </table>

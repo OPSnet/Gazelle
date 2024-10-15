@@ -1436,9 +1436,9 @@ class Text {
 
         if ($postId) {
             return sprintf('<a href="forums.php?action=viewthread&amp;threadid=%d&amp;postid=%s#post%s">%s%s (Post #%s)</a>',
-                $threadId, $postId, $postId, ($thread->isLocked() ? ICON_PADLOCK . ' ' : ''), $thread->title(), $postId);
+                $threadId, $postId, $postId, ($thread->isLocked() ? "🔒 " : ''), $thread->title(), $postId);
         }
         return sprintf('<a href="forums.php?action=viewthread&amp;threadid=%d">%s%s</a>',
-            $threadId, ($thread->isLocked() ? ICON_PADLOCK . ' ' : ''), $thread->title());
+            $threadId, ($thread->isLocked() ? "🔒 " : ''), $thread->title());
     }
 }

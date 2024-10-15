@@ -92,8 +92,7 @@ class Report extends \Gazelle\BaseManager {
                         'label'   => 'forum thread',
                         'subject' => $thread,
                         'link'    => $thread
-                            ? ($thread->forum()->link() . ' &rsaquo; ' . $thread->link()
-                                . ' created by ' . ($thread->author()->link()))
+                            ? "{$thread->forum()->link()} › {$thread->link()} created by {$thread->author()->link()}"
                             : null,
                     ];
                     break;
@@ -102,8 +101,8 @@ class Report extends \Gazelle\BaseManager {
                     $link  = null;
                     if ($post) {
                         $thread = $post->thread();
-                        $link = $thread->forum()->link() . ' &rsaquo; ' . $thread->link() . ' &rsaquo; ' . $post->link()
-                            . ' posted by ' . ($this->userMan->findById($post->userId())?->link() ?? 'System');
+                        $link = "{$thread->forum()->link()} › {$thread->link()} › {$post->link()} posted by "
+                            . ($this->userMan->findById($post->userId())?->link() ?? 'System');
                     }
                     $context = [
                         'label'   => 'forum post',

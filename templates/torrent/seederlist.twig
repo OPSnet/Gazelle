@@ -47,8 +47,8 @@
         <td>{{ peer.useragent }}</td>
     {% endif %}
     {% if is_admin %}
-        <td>{% if peer.is_download %}<span class="tooltip" title="Downloaded!" style="color: #f57c00">{{ constant('ICON_STAR') }} </span>{% else %}&nbsp;{% endif %}</td>
-        <td>{% if peer.is_snatched %}<span class="tooltip" title="Snatched!" style="color: #388e3c">{{ constant('ICON_STAR') }} </span>{% else %}&nbsp;{% endif %}</td>
+        <td>{% if peer.is_download %}<span class="tooltip" title="Downloaded!" style="color: #f57c00">★</span>{% else %}&nbsp;{% endif %}</td>
+        <td>{% if peer.is_snatched %}<span class="tooltip" title="Snatched!" style="color: #388e3c">★</span>{% else %}&nbsp;{% endif %}</td>
     {% endif %}
     </tr>
     {% if loop.last %}

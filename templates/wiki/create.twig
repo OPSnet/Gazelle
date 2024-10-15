@@ -7,9 +7,9 @@
 <div class="thin">
     <div class="box pad">
 {% if action == 'create' %}
-        <h3><a href="wiki.php">Wiki</a> &rsaquo; Create new article</h3>
+        <h3><a href="wiki.php">Wiki</a> › Create new article</h3>
 {% else %}
-        <h3><a href="wiki.php">Wiki</a> &rsaquo; Edit &rsaquo; <a href="{{ article.location }}">{{ article.title }}</a></h3>
+        <h3><a href="wiki.php">Wiki</a> › Edit › <a href="{{ article.location }}">{{ article.title }}</a></h3>
 {% endif %}
         <form class="create_form" name="wiki_article" action="wiki.php" method="post">
             <input type="hidden" name="action" value="{{ action }}" />

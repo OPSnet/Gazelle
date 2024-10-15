@@ -75,8 +75,8 @@ switch ($Action) {
                 array_push($condition, "cl.UserID = ?", "C.AuthorID != ?");
                 array_push($condArgs, $UserID, $UserID);
                 $TypeLinks = [
-                    [$BaseLink, "$Username &rsaquo; Collage comments"],
-                    ["$BaseLink&amp;type=contributed", "$Username &rsaquo; Contributed collage comments"],
+                    [$BaseLink, "$Username › Collage comments"],
+                    ["$BaseLink&amp;type=contributed", "$Username › Contributed collage comments"],
                 ];
                 break;
             case 'contributed':
@@ -87,8 +87,8 @@ switch ($Action) {
                     SELECT DISTINCT CollageID FROM collages_artists ca WHERE ca.UserID = ?)";
                 $condArgs = array_merge($condArgs, [$UserID, $UserID, $UserID]);
                 $TypeLinks = [
-                    [$BaseLink, "$Username &rsaquo; Collage comments"],
-                    ["$BaseLink&amp;type=created", "$Username &rsaquo; Comments on their collages"],
+                    [$BaseLink, "$Username › Collage comments"],
+                    ["$BaseLink&amp;type=created", "$Username › Comments on their collages"],
                 ];
                 break;
             default:
@@ -96,8 +96,8 @@ switch ($Action) {
                 $condition[] = "C.AuthorID = ?";
                 $condArgs[]  = $UserID;
                 $TypeLinks = [
-                    ["$BaseLink&amp;type=contributed", "$Username &rsaquo; Contributed collage comments"],
-                    ["$BaseLink&amp;type=created", "$Username &rsaquo; Comments on their collages"],
+                    ["$BaseLink&amp;type=contributed", "$Username › Contributed collage comments"],
+                    ["$BaseLink&amp;type=created", "$Username › Comments on their collages"],
                 ];
                 break;
         }
@@ -114,8 +114,8 @@ switch ($Action) {
                 array_push($condition, "r.UserID = ?", "C.AuthorID != ?");
                 array_push($condArgs, $UserID, $UserID);
                 $TypeLinks = [
-                    [$BaseLink, "$Username &rsaquo; Request comments"],
-                    ["$BaseLink&amp;type=contributed", "$Username &rsaquo; Voted-on request comments"],
+                    [$BaseLink, "$Username › Request comments"],
+                    ["$BaseLink&amp;type=contributed", "$Username › Voted-on request comments"],
                 ];
                 break;
             case 'voted':
@@ -124,8 +124,8 @@ switch ($Action) {
                 array_push($condition, "rv.UserID = ?", "C.AuthorID != ?");
                 array_push($condArgs, $UserID, $UserID);
                 $TypeLinks = [
-                    [$BaseLink, "$Username &rsaquo; Request comments"],
-                    ["$BaseLink&amp;type=created", "$Username &rsaquo; Created request comments"],
+                    [$BaseLink, "$Username › Request comments"],
+                    ["$BaseLink&amp;type=created", "$Username › Created request comments"],
                 ];
                 break;
             default:
@@ -138,8 +138,8 @@ switch ($Action) {
                         ["$BaseLink&amp;type=contributed", "Your comments on requests"],
                     ]
                     : [
-                        ["$BaseLink&amp;type=created", "$Username &rsaquo; Created request comments"],
-                        ["$BaseLink&amp;type=contributed", "$Username &rsaquo; Request comments"],
+                        ["$BaseLink&amp;type=created", "$Username › Created request comments"],
+                        ["$BaseLink&amp;type=contributed", "$Username › Request comments"],
                     ];
                 break;
         }
@@ -158,7 +158,7 @@ switch ($Action) {
                 array_push($condArgs, $UserID, $UserID);
                 $TypeLinks[] = [
                     $BaseLink,
-                    $ownProfile ? "Your torrent comments" : "$Username &rsaquo; Torrent comments"
+                    $ownProfile ? "Your torrent comments" : "$Username › Torrent comments"
                 ];
                 break;
             default:
@@ -167,7 +167,7 @@ switch ($Action) {
                 $condArgs[] = $UserID;
                 $TypeLinks[] = [
                     "$BaseLink&amp;type=uploaded",
-                    $ownProfile ? "Comments on your uploads" : "$Username &rsaquo; Comments on their uploads"
+                    $ownProfile ? "Comments on your uploads" : "$Username › Comments on their uploads"
                 ];
                 break;
         }

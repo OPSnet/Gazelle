@@ -211,7 +211,7 @@ echo $Twig->render('tgroup/similar.twig', [
 ]);
 ?>
         <div class="box torrent_description">
-            <div class="head"><a href="#">&uarr;</a>&nbsp;<strong><?= $tgroup->releaseTypeName() ? $tgroup->releaseTypeName() . ' info' : 'Info' ?></strong></div>
+            <div class="head"><a href="#">↑</a>&nbsp;<strong><?= $tgroup->releaseTypeName() ? $tgroup->releaseTypeName() . ' info' : 'Info' ?></strong></div>
             <div class="body">
 <?php if (!empty($tgroup->description())) { ?>
                 <?= Text::full_format($tgroup->description(), cache: IMAGE_CACHE_ENABLED, bucket: CacheBucket::tgroup) ?>

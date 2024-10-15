@@ -43,7 +43,7 @@
     </li>
     <li id="nav_invite" class="brackets{{ _self.active_class(document == 'user' and action == 'invite') }}">
         <a href="user.php?action=invite" class='tooltip' title="Invite a friend!">Invite
-        {% if user.permitted('site_send_unlimited_invites') %} (&infin;){% elseif user.unusedInviteTotal %} ({{ user.unusedInviteTotal }}){% endif %}</a>
+        {% if user.permitted('site_send_unlimited_invites') %} (∞){% elseif user.unusedInviteTotal %} ({{ user.unusedInviteTotal }}){% endif %}</a>
     </li>
     <li id="nav_donate" class="brackets{{ _self.active_class(document == 'donate') }}">
         <a href="donate.php" class='tooltip' title="Donate">Donate ({{ dono_target }}%)</a>

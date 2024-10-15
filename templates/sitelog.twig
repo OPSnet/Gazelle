@@ -23,7 +23,7 @@
         <tr class="colhead">
             <th>Event</th>
             <th>Time</th>
-            <th>{% if search %}Filtering on &ldquo;{{ search }}&rdquo;{% endif %}</th>
+            <th>{% if search %}Filtering on “{{ search }}”{% endif %}</th>
         </tr>
 {% if sitelog.error %}
     <tr class="nobr"><td colspan="2">Search request failed ({{ siteLog.errorMessage }}).</td></tr>

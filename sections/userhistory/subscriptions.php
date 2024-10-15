@@ -30,7 +30,7 @@ foreach ($Results as &$result) {
             if ($artist) {
                 $result = $result + [
                     'jump' => $artist->url() . $postLink,
-                    'link' => 'Artist &rsaquo; ' . $artist->link(),
+                    'link' => 'Artist › ' . $artist->link(),
                 ];
             }
             break;
@@ -39,7 +39,7 @@ foreach ($Results as &$result) {
             if ($collage) {
                 $result = $result + [
                     'jump' => $collage->url() . $postLink,
-                    'link' => 'Collage &rsaquo; ' . $collage->link(),
+                    'link' => "Collage › {$collage->link()}",
                 ];
             }
             break;
@@ -48,7 +48,7 @@ foreach ($Results as &$result) {
             if ($request) {
                 $result = $result + [
                     'jump' => $request->url() . $postLink,
-                    'link' => 'Request &rsaquo; ' . $request->smartLink(),
+                    'link' => "Request › {$request->smartLink()}",
                 ];
             }
             break;
@@ -57,7 +57,7 @@ foreach ($Results as &$result) {
             if ($tgroup) {
                 $result = $result + [
                     'jump' => $tgroup->url() . $postLink,
-                    'link' => 'Torrent &rsaquo; ' . $tgroup->link(),
+                    'link' => "Torrent › {$tgroup->link()}",
                 ];
             }
             break;
@@ -66,7 +66,7 @@ foreach ($Results as &$result) {
             if ($thread) {
                 $result = $result + [
                     'jump' => $thread->url() . $postLink,
-                    'link' => 'Forums &rsaquo; ' . $thread->forum()->link() .  ' &rsaquo; ' . $thread->link(),
+                    'link' => "Forums › {$thread->forum()->link()} › {$thread->link()}",
                 ];
             }
             break;

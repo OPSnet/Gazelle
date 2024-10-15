@@ -21,7 +21,7 @@
                     - <a href="#quickpost" onclick="Quote('{{ post.id }}','{{ sender_list[post.sender_id].username }}');" class="brackets">Quote</a>
     {% endif %}
             </div>
-            <div style="float: right;"><a href="#">&uarr;</a> <a href="#messageform">&darr;</a></div>
+            <div style="float: right;"><a href="#">↑</a> <a href="#messageform">↓</a></div>
         </div>
         <div class="body" id="message{{ post.id }}">
             {{ post.body|bb_format }}

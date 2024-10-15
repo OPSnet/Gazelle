@@ -1,7 +1,7 @@
 {% from 'macro/form.twig' import checked %}
 {{ header('Forums › ' ~ name ~ ' › New Thread', {'js': 'comments,bbcode,jquery.validate,form_validate,newpoll'}) }}
 <div class="thin">
-    <h2><a href="forums.php">Forums</a> &rsaquo; <a href="forums.php?action=viewforum&amp;forumid={{ id }}">{{ name }}</a> &rsaquo; <span id="newthreadtitle">New Thread</span></h2>
+    <h2><a href="forums.php">Forums</a> › <a href="forums.php?action=viewforum&amp;forumid={{ id }}">{{ name }}</a> › <span id="newthreadtitle">New Thread</span></h2>
     <div class="hidden" id="newthreadpreview">
         <table class="forum_post box vertical_margin" style="text-align: left;">
             <colgroup>

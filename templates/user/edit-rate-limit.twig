@@ -15,7 +15,7 @@
     <ul class="nobullet">
     <li>{{ user.username }} has {{ snatches|number_format }} unique snatch{{ snatches|plural('es') }} and is seeding {{ user.stats.seedingTotal }} versus {{
         downloads|number_format }} unique download{{ downloads|plural }} which give a factor of
-        {% if prl.userFactor is nan %}&infin;{% else %}{{ prl.userFactor|number_format(2) }}{% endif %}.
+        {% if prl.userFactor is nan %}∞{% else %}{{ prl.userFactor|number_format(2) }}{% endif %}.
         {{ user.userclassName }} factor is {{ prl.userclassFactor }}, which represents {{
          limit|number_format(0) }} download{{ downloads|plural }}.
      {% if downloads > limit %}(deficit = {{ (downloads - limit)|number_format }}){% endif %}

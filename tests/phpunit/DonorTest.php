@@ -164,7 +164,7 @@ class DonorTest extends TestCase {
         $this->assertTrue($donor->hasRankAbove(0), 'donor-mod-has-rank');
         $this->assertTrue($donor->hasMaxSpecialRank(), 'donor-mod-has-max-special');
         $this->assertEquals('Never', $donor->rankExpiry(), 'donor-mod-rank-expiry');
-        $this->assertEquals('&infin; [Diamond]', $donor->rankLabel(), 'donor-mod-rank-label');
+        $this->assertEquals('∞ [Diamond]', $donor->rankLabel(), 'donor-mod-rank-label');
         $this->assertEquals('static/common/symbols/donor_6.png', $donor->heartIcon(), 'donor-mod-heart-icon');
         $this->assertEquals('', $donor->profileInfo(1), 'donor-mod-profile1-info');
         $this->assertEquals('', $donor->profileTitle(1), 'donor-mod-profile1-title');
@@ -367,7 +367,7 @@ class DonorTest extends TestCase {
         );
         $this->assertEquals(3, $donor->specialRank(), 'donor-special-rank-3');
         $this->assertTrue($donor->hasMaxSpecialRank(), 'donor-has-max-special-rank');
-        $this->assertEquals('&infin; [Diamond]', $donor->rankLabel(), 'donor-rank-label-infin');
+        $this->assertEquals('∞ [Diamond]', $donor->rankLabel(), 'donor-rank-label-infin');
         $this->assertEquals('Never', $donor->rankExpiry(), 'donor-rank-expire-never');
 
         $this->assertTrue($donor->updateProfileTitle(1, 'phpunit donor title 1')->modify(), 'donor-info-title-1');

@@ -50,7 +50,7 @@ View::show_header($user->username() . " › Bookmarked torrent groups", ['js' =>
             $Viewer->rssAuth() ?>&amp;passkey=<?= $Viewer->announceKey() ?>&amp;authkey=<?=
             $Viewer->auth()?>&amp;name=<?=urlencode(SITE_NAME . ': Bookmarked Torrents')?>"><img src="<?=
             STATIC_SERVER?>/common/symbols/rss.png" alt="RSS feed" /></a>&nbsp;<?php } ?>
-            <?= $user->link() ?> &rsaquo; Bookmarked torrent groups
+            <?= $user->link() ?> › Bookmarked torrent groups
         </h2>
         <div class="linkbox">
             <a href="bookmarks.php?type=torrents" class="brackets">Torrents</a>
@@ -158,7 +158,7 @@ if ($CollageCovers !== 0) { ?>
                 ($i !== (int)ceil($NumGroups / $CollageCovers) - 1) ? ' | ' : '' ?></span>
 <?php   } ?>
             <!--<span id="nextbar" class="<?=(($NumGroups / $CollageCovers > 5) ? 'hidden' : '')?>"> | </span>-->
-            <span id="nextpage"><a href="#" class="pageslink" onclick="collageShow.nextPage(); return false;">Next &rsaquo;</a></span>
+            <span id="nextpage"><a href="#" class="pageslink" onclick="collageShow.nextPage(); return false;">Next</a> ›</span>
             <span id="lastpage" class="<?=((int)ceil($NumGroups / $CollageCovers) === 2 ? 'invisible' : '')?>"> | <a href="#" id="lastpage" class="pageslink" onclick="collageShow.page(<?=(ceil($NumGroups / $CollageCovers) - 1)?>); return false;">Last &raquo;</a></span>
         </div>
         <script type="text/javascript">
