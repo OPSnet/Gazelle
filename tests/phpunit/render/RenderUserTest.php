@@ -33,7 +33,7 @@ class RenderUserTest extends TestCase {
             'viewer'        => $Viewer,
         ]);
         $this->assertEquals(
-            substr_count($sidebar, '<li>') + substr_count($sidebar, '<li class="paranoia_override">'),
+            substr_count($sidebar, '<li>') + substr_count($sidebar, '<li class="paranoia_override"'),
             substr_count($sidebar, '</li>'),
             'user-sidebar-general'
         );

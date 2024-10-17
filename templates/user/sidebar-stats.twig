@@ -5,6 +5,15 @@
 {% if val == constant('PARANOIA_OVERRIDDEN') %} paranoia_override{% endif %}
 {% endmacro %}
 {% set stats = user.stats %}
+{% if viewer.isStaff %}
+<div class="hidden info-paster">
+Uploaded: {{ upload_total|number_format }} (perfect {{ stats.perfectFlacTotal|number_format }})
+Downloaded: {{ stats.downloadTotal|number_format }}
+Leeching: {{ stats.leechTotal|number_format }}
+Snatched: {{ stats.snatchTotal|number_format }}
+Seeding: {{ stats.seedingTotal|number_format }}
+</div>
+{% endif %}
 <div class="box box_info box_userinfo_community">
     <div class="head colhead_dark">Community</div>
     <ul class="stats nobullet">
