@@ -201,7 +201,7 @@ class Torrent {
             );
             error('-1');
         }
-        $this->Page = $searchMany ? $Page : min($Page, SPHINX_MAX_MATCHES / $PageSize);
+        $this->Page = $searchMany ? $Page : min($Page, SPHINX_MAX_MATCHES / $PageSize); /** @phpstan-ignore-line sphinx must die */
 
         $ResultLimit = $PageSize;
         $this->SphQL = new \SphinxqlQuery();
@@ -230,7 +230,7 @@ class Torrent {
         $Offset = ($this->Page - 1) * $ResultLimit;
         $MaxMatches = $Offset + $ResultLimit;
         $this->SphQL->from('torrents, delta')
-            ->limit($Offset, $ResultLimit, $MaxMatches);
+            ->limit($Offset, $ResultLimit, $MaxMatches); /** @phpstan-ignore-line sphinx must die */
     }
 
     /**
@@ -349,9 +349,9 @@ class Torrent {
     private function process_search_terms(array $Terms): void {
         foreach ($Terms as $Key => $Term) {
             if (isset(self::$Fields[$Key])) {
-                $this->process_field($Key, $Term);
+                $this->process_field($Key, $Term); /** @phpstan-ignore-line sphinx must die */
             } elseif (isset(self::$Attributes[$Key])) {
-                $this->process_attribute($Key, $Term);
+                $this->process_attribute($Key, $Term); /** @phpstan-ignore-line sphinx must die */
             }
             $this->RawTerms[$Key] = $Term;
         }
@@ -420,7 +420,7 @@ class Torrent {
                     foreach (array_keys($Value) as $Category) {
                         if (is_number($Category)) {
                             $CategoryFilter[] = $Category;
-                        } else {
+                        } elseif (is_string($Category)) {
                             $ValidValues = array_map('strtolower', CATEGORY);
                             if (($CategoryID = array_search(strtolower($Category), $ValidValues)) !== false) {
                                 $CategoryFilter[] = $CategoryID + 1;
@@ -689,7 +689,7 @@ class Torrent {
         $this->SphQLTor = new \SphinxqlQuery();
         $this->SphQLTor->select('id')->from('torrents, delta');
         foreach ($this->UsedTorrentFields as $Field => $Term) {
-            $this->SphQLTor->where_match($Term, $Field, false);
+            $this->SphQLTor->where_match($Term, $Field, false); /** @phpstan-ignore-line sphinx must die */
         }
         $this->SphQLTor->copy_attributes_from($this->SphQL);
         $this->SphQLTor->where('id', array_keys($AllTorrents))->limit(0, $TorrentCount, $TorrentCount);

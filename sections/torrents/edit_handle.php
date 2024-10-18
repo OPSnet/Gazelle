@@ -175,20 +175,22 @@ foreach ($propertyMap as $field => $method) {
         error('Cannot proceed with torrent edit');
     }
     $value = $torrent->$method();
-    // soft inequality, to match null versus ''
-    if (isset($Properties[$field]) && $value != $Properties[$field]) {
-        if (is_bool($Properties[$field])) {
-            $change[] = sprintf("$field %s → %s",
-                $value ? 'true' : 'false',
-                $Properties[$field] ? 'true' : 'false'
-            );
-        } else {
-            $change[] = "$field $value → {$Properties[$field]}";
-        }
-        if (in_array($field, ['Remastered', 'Scene'])) {
-            $torrent->setField($field, $Properties[$field] ? '1' : '0');
-        } else {
-            $torrent->setField($field, $Properties[$field]);
+    if (isset($Properties[$field])) {
+        // soft inequality, to match null versus ''
+        if ($value != $Properties[$field]) {
+            if (is_bool($Properties[$field])) {
+                $change[] = sprintf("$field %s → %s",
+                    $value ? 'true' : 'false',
+                    $Properties[$field] ? 'true' : 'false'
+                );
+            } else {
+                $change[] = "$field $value → {$Properties[$field]}";
+            }
+            if (in_array($field, ['Remastered', 'Scene'])) {
+                $torrent->setField($field, $Properties[$field] ? '1' : '0');
+            } else {
+                $torrent->setField($field, $Properties[$field]);
+            }
         }
     }
 }
@@ -217,14 +219,14 @@ if ($Viewer->permitted('users_mod')) {
             $torrent->setField('HasLog', $Properties['HasLog'] ? '1' : '0');
             $change[] = sprintf("HasLog %s → %s",
                 $torrent->hasLog() ? 'true' : 'false',
-                $Properties[$field] ? 'true' : 'false'
+                $Properties['HasLog'] ? 'true' : 'false'
             );
         }
         if ($torrent->hasCue() != $Properties['HasCue']) {
             $torrent->setField('HasCue', $Properties['HasCue'] ? '1' : '0');
             $change[] = sprintf("HasCue %s → %s",
                 $torrent->hasCue() ? 'true' : 'false',
-                $Properties[$field] ? 'true' : 'false'
+                $Properties['HasCue'] ? 'true' : 'false'
             );
         }
     } else {

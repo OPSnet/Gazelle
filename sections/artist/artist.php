@@ -274,7 +274,7 @@ if ($sections = $Artist->sections()) {
     }
     $sections = $reorderedSections;
 
-    foreach (array_keys($sections) as $sectionId) {
+    foreach (array_map('intval', array_keys($sections)) as $sectionId) {
         $collapseSection = ($sortHide[$sectionId] ?? 0) == 1;
 ?>
         <a href="#torrents_<?= $artistMan->sectionLabel($sectionId) ?>" class="brackets"<?=
@@ -298,10 +298,10 @@ if ($sections = $Artist->sections()) {
         $sectionClosed = (bool)($sortHide[$sectionId] ?? 0);
         $groupsHidden = ($groupsClosed || $sectionClosed) ? ' hidden' : '';
 ?>
-                <tr class="colhead_dark" id="torrents_<?= $artistMan->sectionLabel($sectionId) ?>">
+                <tr class="colhead_dark" id="torrents_<?= $artistMan->sectionLabel((int)$sectionId) ?>">
                     <td class="small"><!-- expand/collapse --></td>
                     <td class="m_th_left m_th_left_collapsable" width="70%"><a href="#">↑</a>&nbsp;<strong><?=
-                        $artistMan->sectionTitle($sectionId) ?></strong> <a href="#" class="tooltip brackets" onclick="$('.releases_<?=
+                        $artistMan->sectionTitle((int)$sectionId) ?></strong> <a href="#" class="tooltip brackets" onclick="$('.releases_<?=
                         $sectionId ?>').gtoggle(true); return false;" title="Show/hide this section">Toggle</a></td>
                     <td>Size</td>
                     <td class="sign snatches"><img src="<?= $urlStem ?>snatched.png" class="tooltip" alt="Snatches" title="Snatches" /></td>

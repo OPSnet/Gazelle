@@ -147,7 +147,7 @@ class Seedbox extends \Gazelle\BaseUser {
         $info = self::$db->to_array('fid', MYSQLI_ASSOC, false);
 
         $list = [];
-        foreach (array_keys($info) as $tid) {
+        foreach (array_map('intval', array_keys($info)) as $tid) {
             $torrent = $torMan->findById($tid);
             if (is_null($torrent)) {
                 continue;

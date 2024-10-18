@@ -34,7 +34,7 @@ class Reaper extends \Gazelle\Base {
     public function process(array $userList, ReaperState $state, ReaperNotify $notify): int {
         $processed = 0;
         foreach ($userList as $userId => $ids) {
-            $user = $this->userMan->findById($userId);
+            $user = $this->userMan->findById((int)$userId);
             if ($user?->isEnabled()) {
                 $this->notifySeeder($user, $ids, $state, $notify);
             }
@@ -118,7 +118,7 @@ class Reaper extends \Gazelle\Base {
         // Send an alert to each snatcher listing all the uploads that they could reseed
         $snatchList = $this->expand(NOTIFY_REAPER_MAX_PER_USER, self::$db->to_array(false, MYSQLI_NUM, false));
         foreach ($snatchList as $userId => $torrentIds) {
-            $user = $this->userMan->findById($userId);
+            $user = $this->userMan->findById((int)$userId);
             // cannot say !$user?->hasAttr() because !null is true
             if ($user && !$user->hasAttr(ReaperState::UNSEEDED->notifyAttr())) {
                 $this->notifySnatcher($user, $torrentIds);
@@ -359,7 +359,7 @@ class Reaper extends \Gazelle\Base {
 
             if ($notes) {
                 $total = count($notes);
-                $user = $this->userMan->findById($userId);
+                $user = $this->userMan->findById((int)$userId);
                 if (is_null($user)) {
                     continue;
                 }

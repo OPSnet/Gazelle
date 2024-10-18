@@ -49,8 +49,9 @@ if (isset($_GET['type'])) {
 $paginator = new Gazelle\Util\Paginator(REPORTS_PER_PAGE, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($search->total());
 
-$baseUri = strpos($_SERVER['REQUEST_URI'], '?') ? $_SERVER['REQUEST_URI'] : $_SERVER['REQUEST_URI'] . '?';
-$baseUri = rtrim(preg_replace('/(\?|&)page=[0-9]+(\&|$)/', '$1', $baseUri), '&');
+$requestUri = (string)$_SERVER['REQUEST_URI'];
+$baseUri = strpos($requestUri, '?') ? $requestUri : "$requestUri?";
+$baseUri = rtrim(preg_replace('/[?&]page=\d+(?:\&|$)/', '$1', $baseUri), '&');
 
 echo $Twig->render('report_auto/index.twig', [
     'auto_reports' => $search->page($paginator->limit(), $paginator->offset()),

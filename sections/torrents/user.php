@@ -492,7 +492,7 @@ foreach (CATEGORY as $catKey => $catName) {
     $vote = new Gazelle\User\Vote($Viewer);
 
     foreach ($torrentsInfo as $torrentID => $info) {
-        $torrent = $torMan->findById($torrentID);
+        $torrent = $torMan->findById((int)$torrentID);
         if (is_null($torrent)) {
             continue;
         }

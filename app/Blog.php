@@ -64,7 +64,7 @@ class Blog extends BaseObject {
      * The creation epoch of the blog
      */
     public function createdEpoch(): int {
-        return strtotime($this->info()['created']);
+        return (int)strtotime($this->info()['created']);
     }
 
     /**

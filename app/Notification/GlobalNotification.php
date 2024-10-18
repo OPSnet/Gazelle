@@ -46,7 +46,9 @@ class GlobalNotification extends \Gazelle\Base {
      */
     public function remaining(): int {
         $alert = $this->alert();
-        return is_null($alert) ? 1 : ($alert['created'] + $alert['expiry'] * 60) - time();
+        return is_null($alert)
+            ? 1
+            : (int)(($alert['created'] + $alert['expiry'] * 60) - time());
     }
 
     public function remove(): int {

@@ -215,13 +215,8 @@ class Mysql {
      * Variables that are passed into the function will have their
      * type automatically set for how to bind it to the query (either
      * integer (i), double (d), or string (s)).
-     *
-     * @return \mysqli_result|bool Returns a mysqli_result object
-     *                            for successful SELECT queries,
-     *                            or TRUE for other successful DML queries
-     *                            or FALSE on failure.
      */
-    public function execute(mixed ...$Parameters): \mysqli_result|bool {
+    public function execute(mixed ...$Parameters): \mysqli_result|false {
         /** @var \mysqli_stmt $Statement */
         $Statement = &$this->Statement;
 
@@ -239,7 +234,7 @@ class Mysql {
             $Statement->bind_param($Binders, ...$Parameters);
         }
 
-        $Closure = function () use ($Statement) {
+        $Closure = function () use ($Statement): \mysqli_result|false {
             try {
                 $Statement->execute();
                 return $Statement->get_result();
@@ -248,6 +243,7 @@ class Mysql {
                     throw new MysqlDuplicateKeyException();
                 }
             }
+            return false;
         };
 
         $Query = $this->PreparedQuery . ' -- ' . json_encode($Parameters);
@@ -263,11 +259,14 @@ class Mysql {
      * multiple times with different bound parameters, you'll want to call
      * the two functions separately instead of this function.
      */
-    public function prepared_query(string $Query, mixed ...$Parameters): bool|\mysqli_result {
+    public function prepared_query(string $Query, mixed ...$Parameters): \mysqli_result|false {
         $this->prepare($Query);
         return $this->execute(...$Parameters);
     }
 
+    /**
+     * @param callable(): (\mysqli_result|false) $Closure
+     */
     private function attempt_query(string $Query, callable $Closure): \mysqli_result|false {
         $startTime = microtime(true);
         if ($this->LinkID === false) {

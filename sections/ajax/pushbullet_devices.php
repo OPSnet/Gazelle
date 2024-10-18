@@ -7,8 +7,12 @@ if (!isset($_GET['apikey']) || empty($_GET['apikey'])) {
 
 $ApiKey = $_GET['apikey'];
 
-
-curl_setopt_array($Ch = curl_init(), [
+$Ch = curl_init();
+if ($Ch === false) {
+    echo '[]';
+    exit;
+}
+curl_setopt_array($Ch, [
     CURLOPT_URL => 'https://api.pushbullet.com/api/devices',
     CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
     CURLOPT_RETURNTRANSFER => true,

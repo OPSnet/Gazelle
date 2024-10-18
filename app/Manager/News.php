@@ -116,6 +116,6 @@ class News extends \Gazelle\Base {
      */
     public function latestEpoch(): int {
         $latest = $this->headlines();
-        return isset($latest['created']) ? strtotime($latest['created']) : 0;
+        return isset($latest['created']) ? (int)strtotime($latest['created']) : 0;
     }
 }

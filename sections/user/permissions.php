@@ -16,7 +16,7 @@ $userId = $user->id();
 if (isset($_POST['action'])) {
     authorize();
     $user->modifyPrivilegeList(
-        array_filter($_POST, fn($p) => str_starts_with($p, 'perm_'), ARRAY_FILTER_USE_KEY)
+        array_filter($_POST, fn(string $p): bool => str_starts_with($p, 'perm_'), ARRAY_FILTER_USE_KEY)
     );
 }
 

@@ -13,7 +13,7 @@ class Curl {
     protected CurlMethod $method = CurlMethod::GET;
 
     public function __construct() {
-        $this->curl = curl_init();
+        $this->curl = curl_init();  /** @phpstan-ignore-line if this is false there are bigger problems */
     }
 
     public function __destruct() {

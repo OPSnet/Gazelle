@@ -6,12 +6,21 @@ parameters:
     checkAlwaysTrueCheckTypeFunctionCall: true
     checkAlwaysTrueInstanceof: true
     checkAlwaysTrueStrictComparison: true
+    checkBenevolentUnionTypes: true
+    checkDynamicProperties: true
+    checkExplicitMixedMissingReturn: true
     checkFunctionNameCase: true
     checkInternalClassCaseSensitivity: true
+    checkMissingCallableSignature: true
     checkTooWideReturnTypesInProtectedAndPublicMethods: true
+    polluteScopeWithAlwaysIterableForeach: false
+    polluteScopeWithLoopInitialAssignments: false
+    rememberPossiblyImpureFunctionValues: true
     reportAlwaysTrueInLastCondition: true
+    reportAnyTypeWideningInVarTag: true
     reportMaybesInMethodSignatures: true
     reportStaticMethodSignatures: true
+    reportWrongPhpDocTypeInVarTag: true
     errorFormat: table
     stubFiles:
         - ../lib/stub/memcached.stub

@@ -196,7 +196,7 @@ class Artist extends BaseObject implements CollageEntry {
     }
 
     public function groupIds(): array {
-        if (!isset($this->groupIds)) {
+        if (!isset($this->groupRole)) {
             $this->loadArtistRole();
         }
         return array_keys($this->groupRole);

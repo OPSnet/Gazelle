@@ -247,8 +247,11 @@ class Text {
         $Str = preg_replace('/' . $URLPrefix . '\s+/i', '$1', $Str);
         $Str = preg_replace('/(?<!' . $URLPrefix . ')http(s)?:\/\//i', '$1[inlineurl]http$2://', $Str);
         // For anonym.to and archive.org links, remove any [inlineurl] in the middle of the link
-        $callback = fn($m) => str_replace('[inlineurl]', '', $m[0]);
-        $Str = preg_replace_callback('/(?<=\[inlineurl\]|' . $URLPrefix . ')(\S*\[inlineurl\]\S*)/m', $callback, $Str);
+        $Str = preg_replace_callback(
+            '/(?<=\[inlineurl\]|' . $URLPrefix . ')(\S*\[inlineurl\]\S*)/m',
+            fn($m) => str_replace('[inlineurl]', '', $m[0]),
+            $Str,
+        );
 
         if (self::$TOC) {
             $Str = preg_replace('/(\={5})([^=].*)\1/i', '[headline=4]$2[/headline]', $Str);
@@ -604,7 +607,7 @@ class Text {
                         $n = $matches[2];
                         $text = '';
                         if ($n < 5 && $n > 0) {
-                            $e = str_repeat('=', $matches[2] + 1);
+                            $e = str_repeat('=', (int)$matches[2] + 1);
                             $text = $e . $matches[3] . $e;
                         }
                         return $text;
@@ -932,7 +935,7 @@ class Text {
                         $text = self::to_html($Block['Val'], $Rules, $cache, $bucket);
                         $raw = self::raw_text($Block['Val']);
                         if (!in_array($Block['Attr'], self::$HeadlineLevels)) {
-                            $Str .= sprintf('%1$s%2$s%1$s', str_repeat('=', $Block['Attr'] + 1), $text);
+                            $Str .= sprintf('%1$s%2$s%1$s', str_repeat('=', (int)$Block['Attr'] + 1), $text);
                         } else {
                             $id = '_' . crc32($raw . self::$HeadlineID);
                             if (self::$InQuotes === 0) {

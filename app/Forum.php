@@ -156,7 +156,7 @@ class Forum extends BaseObject {
     }
 
     public function lastPostEpoch(): int {
-        return $this->info()['last_post_time'] ? strtotime($this->info()['last_post_time']) : 0;
+        return $this->info()['last_post_time'] ? (int)strtotime($this->info()['last_post_time']) : 0;
     }
 
     public function lastPostTime(): ?string {
@@ -262,7 +262,7 @@ class Forum extends BaseObject {
             }
         }
         return array_filter(
-            array_map(fn ($id) => $manager->findById($id), $idList),
+            array_map(fn(int $id) => $manager->findById($id), $idList),
             fn ($t) => $t instanceof ForumThread
         );
     }

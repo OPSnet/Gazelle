@@ -64,7 +64,10 @@ class BonusTest extends TestCase {
         // not enough point to buy a fifty
         $this->assertFalse($giver->purchaseToken('token-50'), 'item-purchase-token-50');
 
-        $giver->addPoints($giver->item('other-1')['Price'] + $giver->item('other-3')['Price']);
+        $giver->addPoints(
+            (float)($giver->item('other-1')['Price'])
+            + (float)($giver->item('other-3')['Price'])
+        );
         $this->assertEquals(
             $giver->item('other-3')['Amount'],
             $giver->purchaseTokenOther($this->userList['receiver'], 'other-3', 'phpunit gift'),

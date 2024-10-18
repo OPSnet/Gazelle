@@ -63,7 +63,7 @@ $collage = $collageMan->create(
     $categoryId,
     $name,
     $_POST['description'],
-    (new Gazelle\Manager\Tag())->normalize(str_replace(',', ' ', $_POST['tags'])),
+    (new Gazelle\Manager\Tag())->normalize(str_replace(',', ' ', (string)$_POST['tags'])),
     new Gazelle\Log()
 );
 

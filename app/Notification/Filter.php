@@ -29,7 +29,7 @@ class Filter extends \Gazelle\Base {
         foreach ($this->fieldMap as $field => $column) {
             if (isset($this->field[$field])) {
                 $set[] = $column;
-                $args[] = $this->arg($field);
+                $args[] = $this->arg((string)$field);
             }
         }
         self::$db->prepared_query("
@@ -127,7 +127,7 @@ class Filter extends \Gazelle\Base {
                 $set[] = "$column = " . (in_array($field, ['from_year', 'to_year']) ? "0" : "''");
             } else {
                 $set[] = "$column = ?";
-                $args[] = $this->arg($field);
+                $args[] = $this->arg((string)$field);
             }
         }
         $args[] = $userId;

@@ -60,7 +60,7 @@ class CacheVector extends \Gazelle\Base {
     public function init(int $offset, array $list): int {
         $total = 0;
         foreach ($list as $value) {
-            if ($value && $this->set($value - $offset)) {
+            if (is_int($value) && $this->set($value - $offset)) {
                 ++$total;
             }
         }

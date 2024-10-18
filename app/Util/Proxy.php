@@ -22,6 +22,9 @@ class Proxy {
         );
 
         $curl = curl_init();
+        if ($curl === false) {
+            return '';
+        }
         curl_setopt($curl, CURLOPT_TIMEOUT, 30);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_URL, $this->bouncer);

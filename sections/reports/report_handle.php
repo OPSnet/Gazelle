@@ -15,7 +15,7 @@ require_once('array.php');
 if (!array_key_exists($_POST['type'], $Types)) {
     error(403);
 }
-$subjectType = $_POST['type'];
+$subjectType = (string)$_POST['type'];
 
 if ($subjectType !== 'request_update') {
     $reason = $_POST['reason'];

@@ -60,8 +60,8 @@ if (isset($_REQUEST['submit'])) {
     $badge        = $secondary ? ($_REQUEST['badge'] ?? '') : '';
     $values       = [];
     foreach ($_REQUEST as $key => $perm) {
-        if (str_starts_with($key, 'perm_')) {
-            $values[substr($key, 5)] = (int)$perm;
+        if (str_starts_with($key, 'perm_')) { /** @phpstan-ignore-line $key is always a string */
+            $values[substr($key, 5)] = (int)$perm; /** @phpstan-ignore-line ditto */
         }
     }
 

@@ -14,7 +14,7 @@ class Pg {
     }
 
     public function prepare(string $query): \PDOStatement {
-        return $this->pdo->prepare($query);
+        return $this->pdo->prepare($query); /** @phpstan-ignore-line let it blow up downstream */
     }
 
     // phpcs:disable PSR1.Methods.CamelCapsMethodName.NotCamelCaps

@@ -38,7 +38,7 @@ $bookmarkList      = $bookmark->torrentList($paginator->limit(), $paginator->off
 $NumGroups         = count($bookmarkList);
 $artistLeaderboard = $bookmark->torrentArtistLeaderboard(new Gazelle\Manager\Artist());
 $tagLeaderboard    = $bookmark->torrentTagLeaderboard();
-$CollageCovers     = $Viewer->option('CollageCovers') ?? 25;
+$CollageCovers     = (int)($Viewer->option('CollageCovers') ?? 25);
 
 View::show_header($user->username() . " › Bookmarked torrent groups", ['js' => 'browse,collage']);
 ?>

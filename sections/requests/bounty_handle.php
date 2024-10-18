@@ -22,7 +22,7 @@ foreach ($_POST as $k => $v) {
      * 'check-4'   => 'on'
      * 'action-2'  => 'keep'
      */
-    if (preg_match('/^(action|check)-(\d+)$/', $k, $match)) {
+    if (preg_match('/^(action|check)-(\d+)$/', (string)$k, $match)) {
         if ($match[1] == 'check' && $v) {
             $check[(int)$match[2]] = true;
         } elseif ($match[1] == 'action') {

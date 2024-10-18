@@ -28,10 +28,11 @@ if (isset($_REQUEST['id'])) {
     // see what report types were set on the form
     $formTypeList = array_values(
         array_map(
-            fn($type) => explode('-', $type)[1],
+            fn(string $type): string => explode('-', $type)[1],
             array_filter(
                 array_keys($_REQUEST),
-                fn($checkbox) => (bool)preg_match('/^type-(?:collage|comment|post|request|thread|user)+$/', $checkbox)
+                fn(string $checkbox): bool
+                    => (bool)preg_match('/^type-(?:collage|comment|post|request|thread|user)+$/', $checkbox)
             )
         )
     );

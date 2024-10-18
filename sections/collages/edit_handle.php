@@ -45,7 +45,11 @@ if (isset($_POST['name'])) {
 }
 
 if (!isset($_POST['regen-tags'])) {
-    $collage->setField('TagList', (new Gazelle\Manager\Tag())->normalize(str_replace(',', ' ', $_POST['tags'])));
+    $collage->setField(
+        'TagList',
+        (new Gazelle\Manager\Tag())
+            ->normalize(str_replace(',', ' ', (string)$_POST['tags']))
+    );
 } else {
     $tagList = $collage->rebuildTagList();
     if (count($tagList) > 2) {

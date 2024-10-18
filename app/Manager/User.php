@@ -854,7 +854,7 @@ class User extends \Gazelle\BaseManager {
             WHERE um.ID IN (" . placeholders($idList) . ")
             ", "$comment\n\n", $reason, ...$idList
         );
-        $n = self::$db->affected_rows() / 2; // there are two rows, in users_main and users_info
+        $n = (int)(self::$db->affected_rows() / 2); // there are two rows, in users_main and users_info
 
         self::$db->prepared_query("
             SELECT concat('session_', SessionID) as cacheKey

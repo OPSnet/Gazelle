@@ -38,7 +38,7 @@ class Crypto {
         $key = static::hash($key);
         $iv = substr($data, 0, $iv_size);
         $tag = substr($data, $iv_size, static::GCM_TAG_SIZE);
-        return openssl_decrypt(substr($data, $iv_size + static::GCM_TAG_SIZE),
+        return openssl_decrypt(substr($data, (int)($iv_size + static::GCM_TAG_SIZE)),
             static::ENC_ALGO, $key, OPENSSL_RAW_DATA, $iv, $tag, $aad);
     }
 

@@ -207,7 +207,7 @@ abstract class Collector extends Base  {
         $zip->addFile("$folder$name", $contents);
 
         $this->totalAdded++;
-        $this->totalSize += $info['Size'];
+        $this->totalSize += (int)$info['Size'];
         $this->totalTokens += (int)ceil($info['Size'] / BYTES_PER_FREELEECH_TOKEN);
     }
 

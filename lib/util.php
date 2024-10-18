@@ -199,8 +199,10 @@ function get_url(array $Exclude = [], bool $Escape = true, bool $Sort = false, a
  */
 function byte_format_array(float|int|null $size, int $levels = 2): array {
     $size = (float)$size;
-    for ($steps = 0; abs($size) >= 1024; $steps++) {
+    $steps = 0;
+    while (abs($size) >= 1024) {
         $size /= 1024;
+        $steps++;
     }
     if (func_num_args() == 1 && $steps >= 4) {
         $levels++;
@@ -479,13 +481,15 @@ function array_trim_prefix(string $prefix, array $list): array {
  * the first checkbox is unchecked and the remaining two are checked.
  * In this case, array_key_extract_suffix("user-", $_POST) returns
  * [1010, 6189]
+
+ * @param array<string, true> $list
  */
 function array_key_extract_suffix(string $prefix, array $list, bool $cast = true): array {
     return array_map(
-        fn($v) => $cast ? (int)explode('-', $v)[1] : explode('-', $v)[1],
+        fn(string $v): int|string => $cast ? (int)explode('-', $v)[1] : explode('-', $v)[1],
         array_values(array_filter(
             array_keys($list),
-            fn($v) => str_starts_with($v, $prefix)
+            fn(string $v) => str_starts_with($v, $prefix)
         ))
     );
 }
@@ -493,6 +497,8 @@ function array_key_extract_suffix(string $prefix, array $list, bool $cast = true
 /**
  * Similar to array_key_extract_suffix but makes the suffix the index key and retains the value.
  * E.g.: ["user-123" => 3, "user-456" => 99, "other" => 33] will become [123 => 3, 456 => 99]
+ *
+ * @param array<string, int|true> $list
  */
 function array_key_filter_and_map(string $prefix, array $list, bool $cast = true): array {
     $out = [];
@@ -500,7 +506,7 @@ function array_key_filter_and_map(string $prefix, array $list, bool $cast = true
         if (!str_starts_with($k, $prefix)) {
             continue;
         }
-        $key = $cast ? (int)explode('-', $k, 2)[1] : explode('-', $k, 2)[1];
+        $key = $cast ? (int)explode('-', (string)$k, 2)[1] : explode('-', (string)$k, 2)[1];
         $out[$key] = $v;
     }
     return $out;

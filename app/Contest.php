@@ -52,7 +52,7 @@ class Contest extends BaseObject {
             $info['bonus_pool'] = new BonusPool($info['bonus_pool_id']);
             // calculate the ratios of how the bonus pool is carved up
             // sum(bonusUser + bonusContest + bonusPerEntry) == 1.0
-            $bonusClaimSum = (int)floor($info['bonus_user'] + $info['bonus_contest'] + $info['bonus_per_entry']);
+            $bonusClaimSum = (int)floor($info['bonus_user'] + $info['bonus_contest'] + $info['bonus_per_entry']); /** @phpstan-ignore-line */
             $info['bonus_user_ratio']      = $info['bonus_user'] / $bonusClaimSum;
             $info['bonus_contest_ratio']   = $info['bonus_contest'] / $bonusClaimSum;
             $info['bonus_per_entry_ratio'] = 1 - ($info['bonus_user_ratio'] + $info['bonus_contest_ratio']);

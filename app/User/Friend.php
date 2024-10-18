@@ -86,8 +86,8 @@ class Friend extends \Gazelle\BaseUser {
             ", $this->user->id(), $this->user->id(), $limit, $offset
         );
         $list = self::$db->to_array('id', MYSQLI_ASSOC, false);
-        foreach (array_keys($list) as $id) {
-            $list[$id]['user']   = $userMan->findById($id);
+        foreach (array_map('intval', array_keys($list)) as $id) {
+            $list[$id]['user'] = $userMan->findById($id);
         }
         return $list;
     }

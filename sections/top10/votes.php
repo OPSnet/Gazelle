@@ -128,6 +128,7 @@ if (count($topVotes) === 0) { ?>
 <?php
 } else {
     foreach ($topVotes as $tgroupId => $result) {
+        $tgroupId = (int)$tgroupId;
         $tgroup = $tgMan->findById($tgroupId);
         if (is_null($tgroup)) {
             continue;

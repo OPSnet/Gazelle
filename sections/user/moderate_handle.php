@@ -348,11 +348,11 @@ if ($Viewer->permittedAny('users_promote_below', 'users_promote_to')) {
         $removedClasses = array_diff($currentClasses, $secondaryClasses);
         $addedClasses   = array_diff($secondaryClasses, $currentClasses);
         if (!empty($removedClasses)) {
-            $names = array_map(fn ($c) => $userMan->userclassName($c), $removedClasses);
+            $names = array_map(fn (int $c): string => $userMan->userclassName($c), $removedClasses);
             $editSummary[] = 'secondary classes dropped: ' . implode(', ', $names);
         }
         if (!empty($addedClasses)) {
-            $names = array_map(fn ($c) => $userMan->userclassName($c), $addedClasses);
+            $names = array_map(fn (int $c): string => $userMan->userclassName($c), $addedClasses);
             $editSummary[] = "secondary classes added: " . implode(', ', $names);
         }
     }

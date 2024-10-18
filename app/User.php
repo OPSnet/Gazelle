@@ -1902,7 +1902,7 @@ class User extends BaseObject {
         }
         if (isset($criteria['Extra'])) {
             foreach ($criteria['Extra'] as $req => $info) {
-                $query = $info['Query'];
+                $query = (string)$info['Query'];
                 $query = (str_starts_with($query, 'us.'))
                     ? "SELECT $query FROM user_summary us WHERE user_id = ?"
                     : str_replace('um.ID', '?', $query);

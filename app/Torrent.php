@@ -269,7 +269,7 @@ class Torrent extends TorrentAbstract {
         $torrentId = $this->id;
 
         foreach ($notify as $userId => $info) {
-            $user = $userMan->findById($userId);
+            $user = $userMan->findById((int)$userId);
             if (is_null($user)) {
                 continue;
             }

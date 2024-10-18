@@ -286,8 +286,10 @@ class Upload extends \Gazelle\Base {
             ", $tgroup->id()
         );
         foreach (self::$db->collect(0, false) as $subFeed) {
-            $n++;
-            $feed->populate($rss, $subFeed);
+            foreach ($this->rss as $rss) {
+                $n++;
+                $feed->populate($rss, $subFeed);
+            }
         }
         return $n;
     }

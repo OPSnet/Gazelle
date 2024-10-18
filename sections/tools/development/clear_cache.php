@@ -49,7 +49,13 @@ if (!empty($_REQUEST['key'])) {
             array_intersect(array_keys($_REQUEST), array_keys($definitions))
         );
         if (isset($_REQUEST["$namespace-free"]) && str_contains($_REQUEST["$namespace-free"], '*')) {
-            $shape = array_merge($shape, preg_split('/\s+/', str_replace('*', '%d', $_REQUEST["$namespace-free"])));
+            $shape = array_merge(
+                $shape,
+                preg_split(
+                    '/\s+/',
+                    str_replace('*', '%d', (string)$_REQUEST["$namespace-free"])
+                )
+            );
         }
         $result = [$namespace => $flusher->multiFlush($namespace, $shape)];
         $flushed = true;

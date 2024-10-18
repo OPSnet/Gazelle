@@ -68,7 +68,7 @@ class Bonus extends \Gazelle\BaseUser {
     public function effectivePrice(string $label): int {
         $item = $this->items()[$label];
         if (preg_match('/^collage-\d$/', $label)) {
-            return $item['Price'] * 2 ** $this->user->paidPersonalCollages();
+            return (int)($item['Price'] * 2 ** $this->user->paidPersonalCollages());
         }
         return $this->user->privilege()->effectiveClassLevel() >= $item['FreeClass'] ? 0 : (int)$item['Price'];
     }
@@ -77,7 +77,7 @@ class Bonus extends \Gazelle\BaseUser {
         $balance = $this->user->bonusPointsTotal();
         $other   = [];
         foreach ($this->items() as $label => $item) {
-            if (preg_match('/^other-\d$/', $label) && $balance >= $item['Price']) {
+            if (preg_match('/^other-\d$/', (string)$label) && $balance >= $item['Price']) {
                 $other[] = [
                     'Label' => $item['Label'],
                     'Name'  => $item['Title'],

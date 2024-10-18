@@ -26,6 +26,9 @@ class Discogs extends \Gazelle\Base {
             return $this->info;
         }
         $curl = curl_init();
+        if ($curl === false) {
+            return [];
+        }
         curl_setopt_array($curl, [
             CURLOPT_URL            => sprintf(self::DISCOGS_API_URL, $this->id),
             CURLOPT_RETURNTRANSFER => true,

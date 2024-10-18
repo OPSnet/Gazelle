@@ -236,7 +236,7 @@ class ForumPoll extends BaseObject {
         );
         $result = self::$db->to_pair('user_id', 'response', false);
         foreach ($result as $userId => $response) {
-            $vote[$response ?? 'missing']['who'][] = $userMan->findById($userId);
+            $vote[$response ?? 'missing']['who'][] = $userMan->findById((int)$userId);
         }
         return $vote;
     }

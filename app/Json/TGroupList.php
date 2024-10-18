@@ -100,7 +100,7 @@ class TGroupList extends \Gazelle\Json {
                     $torrent = $this->torMan->findById(current($torrentIdList));
                 } else {
                     // $Key is the torrentID in this case
-                    $torrent = $this->torMan->findById($Key);
+                    $torrent = $this->torMan->findById((int)$Key);
                 }
                 if (is_null($torrent)) {
                     continue;
