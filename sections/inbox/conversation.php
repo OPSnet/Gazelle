@@ -13,6 +13,7 @@ $paginator = new Gazelle\Util\Paginator(POSTS_PER_PAGE, (int)($_GET['page'] ?? c
 $paginator->setTotal($postTotal);
 
 echo $Twig->render('inbox/conversation.twig', [
+    'body'       => new Gazelle\Util\Textarea('body', '', 90, 10),
     'inbox'      => $Viewer->inbox()->setFolder($_GET['section'] ?? 'inbox'),
     'paginator'  => $paginator,
     'pm'         => $pm,

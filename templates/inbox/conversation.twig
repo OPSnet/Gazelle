@@ -1,4 +1,5 @@
-{{ header("View conversation " ~ pm.subject, {'js': 'comments,inbox,bbcode,jquery.validate,form_validate'}) }}
+{% from 'macro/form.twig' import checked -%}
+{{ header("View conversation " ~ pm.subject, {'js': 'comments,bbcode,jquery.validate,form_validate'}) }}
 <div class="thin">
     <h2>{{ pm.subject }}{% if pm.forwardedTo is not null %} (Forwarded to {{ pm.forwardedTo.username }}){% endif %}</h2>
     <div class="linkbox">
@@ -14,12 +15,12 @@
         <div class="head" style="overflow: hidden;">
             <div style="float: left;">
                 <strong>
-    {% if sender_list[post.sender_id] is null %}
+{%  if sender_list[post.sender_id] is null %}
                 System</strong> {{ post.sent_date|time_diff }}
-    {% else %}
-                {{ post.sender_id|user_url }}</strong> {{ post.sent_date|time_diff }}
+{%  else %}
+{{      post.sender_id|user_url }}</strong> {{ post.sent_date|time_diff }}
                     - <a href="#quickpost" onclick="Quote('{{ post.id }}','{{ sender_list[post.sender_id].username }}');" class="brackets">Quote</a>
-    {% endif %}
+{%  endif %}
             </div>
             <div style="float: right;"><a href="#">↑</a> <a href="#messageform">↓</a></div>
         </div>
@@ -38,10 +39,10 @@
             <input type="hidden" name="auth" value="{{ viewer.auth }}" />
             <input type="hidden" name="toid" value="{{ pm.recipientList|filter(v => v != viewer.id)|join(',') }}" />
             <input type="hidden" name="convid" value="{{ pm.id }}" />
-            <textarea id="quickpost" class="required" name="body" cols="90" rows="10" onkeyup="resize('quickpost');"></textarea> <br />
-            <div id="preview" class="box vertical_space body hidden"></div>
+            {{ body.preview|raw }}
+            {{ body.field|raw }}
             <div id="buttons" class="center">
-                <input type="button" value="Preview" onclick="Quick_Preview();" />
+                {{ body.button|raw }}
                 <input type="submit" value="Send message" />
             </div>
         </div>
@@ -53,12 +54,11 @@
             <input type="hidden" name="action" value="takeedit" />
             <input type="hidden" name="convid" value="{{ pm.id }}" />
             <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-
             <table class="layout" width="100%">
                 <tr>
                     <td class="label"><label for="pin">Pinned</label></td>
                     <td>
-                        <input type="checkbox" id="pin" name="pin"{% if pm.isPinned %} checked="checked"{% endif %} />
+                        <input type="checkbox" id="pin" name="pin"{{ checked(pm.isPinned) }} />
                     </td>
                     <td class="label"><label for="mark_unread">Mark as unread</label></td>
                     <td>
@@ -84,11 +84,11 @@
             <input type="hidden" name="auth" value="{{ viewer.auth }}" />
             <label for="receiverid">Forward to</label>
             <select id="receiverid" name="receiverid">
-    {% for staff_id, staff_name in staff_list %}
-        {% if staff_id != viewer.id and staff_id not in pm.recipientlist %}
+{%  for staff_id, staff_name in staff_list %}
+{%      if staff_id != viewer.id and staff_id not in pm.recipientlist %}
                 <option value="{{ staff_id }}">{{ staff_name }}</option>
-        {% endif %}
-    {% endfor %}
+{%      endif %}
+{%  endfor %}
             </select>
             <input type="submit" value="Forward" />
         </div>

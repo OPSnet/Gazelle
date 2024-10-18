@@ -9,13 +9,12 @@ if (is_null($recipient)) {
 if ($Viewer->disablePm() && !$recipient->isStaff()) {
     error(403);
 }
-if (!isset($Return) && $recipient->id() == $Viewer->id()) {
+if ($recipient->id() == $Viewer->id()) {
     error('You cannot start a conversation with yourself!');
 }
 
 echo $Twig->render('inbox/compose.twig', [
-    'auth'      => $Viewer->auth(),
-    'body'      => $Body ?? '',
-    'subject'   => $Subject ?? '',
+    'body'      => new Gazelle\Util\Textarea('body', '', 95, 10),
     'recipient' => $recipient,
+    'viewer'    => $Viewer,
 ]);

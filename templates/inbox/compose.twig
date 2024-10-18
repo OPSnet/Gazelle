@@ -1,22 +1,18 @@
-{{ header('Compose message', {'js': 'inbox,bbcode,jquery.validate,form_validate'}) }}
+{{ header('Compose message', {'js': 'bbcode,jquery.validate,form_validate'}) }}
 <div class="thin">
     <div class="header">
-        <h2>Send a message to {{ recipient.id|user_url }}</a></h2>
+        <h2>{{ recipient.id|user_url }} › Send private message</a></h2>
     </div>
     <form class="send_form" name="message" action="inbox.php" method="post" id="messageform">
         <div class="box pad">
             <input type="hidden" name="action" value="takecompose" />
             <input type="hidden" name="toid" value="{{ recipient.id }}" />
-            <input type="hidden" name="auth" value="{{ auth }}" />
+            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
             <div id="quickpost">
                 <h3>Subject</h3>
-                <input type="text" class="required" name="subject" size="95" value="{{ subject }}" /><br />
+                <input type="text" class="required" name="subject" size="95" /><br />
                 <h3>Body</h3>
-                <textarea id="body" class="required" name="body" cols="95" rows="10" onkeyup="resize('body')">{{ body }}</textarea>
-            </div>
-            <div id="preview" class="hidden"></div>
-            <div id="buttons" class="center">
-                <input type="button" value="Preview" onclick="Quick_Preview();" />
+                {{ body.emit|raw }}
                 <input type="submit" value="Send message" />
             </div>
         </div>
