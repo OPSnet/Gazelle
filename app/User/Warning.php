@@ -15,23 +15,25 @@ class Warning extends \Gazelle\BaseUser {
     }
 
     public function add(string $reason, string $interval, \Gazelle\User $warner): string {
-        $args = [$this->id(), $warner->id(), $reason];
-        $oldExpire = $this->warningExpiry();
-        if ($oldExpire) {
-            $tsrange = 'tstzrange(?::timestamptz, ?::timestamptz + ?::interval)';
-            array_push($args, $oldExpire, $oldExpire);
-        } else {
-            $tsrange = 'tstzrange(now(), now() + ?::interval)';
-        }
-        $args[] = $interval;
         $end = (string)$this->pg()->scalar("
+            with cte as (
+                select max(upper(warning)) as warning_end
+                from user_warning
+                where id_user = ? and now() < upper(warning)
+            )
             insert into user_warning
                    (id_user, id_user_warner, reason, warning)
-            values (?,       ?,              ?,      $tsrange)
+            values (?,       ?,              ?,      tstzrange(
+                coalesce((select warning_end from cte), now()),
+                coalesce((select warning_end from cte), now()) + ?::interval
+            ))
             returning to_char(upper(warning), 'YYYY-MM-DD HH24:MI')
-            ", ...$args
+            ", $this->id(), $this->id(), $warner->id(), $reason, $interval
         );
-        $this->user()->addStaffNote("Warned for $interval (expiry $end) by {$warner->username()}. Reason: $reason")->modify();
+        $this->user()->auditTrail()->addEvent(
+            \Gazelle\Enum\UserAuditEvent::warning,
+            "Warned for $interval (expiry $end) by {$warner->username()}\nReason: $reason"
+        );
         $this->flush();
         return $end;
     }
@@ -41,7 +43,7 @@ class Warning extends \Gazelle\BaseUser {
             $expiry = $this->pg()->scalar("
                 select max(upper(warning))
                 from user_warning
-                where now() <@ warning
+                where now() < upper(warning)
                     and id_user = ?
                 ", $this->id()
             );

@@ -297,9 +297,13 @@ if ($Viewer->permitted('users_warn')) {
             "Your warning has been reduced to $reduce $duration",
             $body,
         );
+        $editSummary[] = "warning reduced by $reduce $duration";
     } elseif ($weeks || $extend) {
         $staffReason = $reason ?: ($extend ? 'warning extension' : 'no reason');
-        $user->warn($extend ?: $weeks, $staffReason, $Viewer, $_POST['WarnReason'] ?? 'none given');
+        $weeks = $extend ?: $weeks;
+        $user->warn($weeks, $staffReason, $Viewer, $_POST['WarnReason'] ?? 'none given');
+        $duration = 'week' . plural($weeks);
+        $editSummary[] = "warned for $weeks $duration";
     }
 }
 

@@ -14,4 +14,5 @@ enum UserAuditEvent: string {
     case mfa        = 'mfa';
     case ratio      = 'ratio';
     case userclass  = 'userclass';
+    case warning    = 'warning';
 }
