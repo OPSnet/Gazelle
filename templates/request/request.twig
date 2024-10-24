@@ -34,7 +34,7 @@
         <tr>
           <td class="label">Type</td>
           <td>
-            <select id="categories" name="type" onchange="Categories();">
+            <select id="categories" name="type">
 {%  for cat in constant('CATEGORY') -%}
               <option value="{{ cat }}"{{ selected(cat == category_name) }}>{{ cat }}</option>
 {%  endfor -%}
@@ -56,12 +56,15 @@
         <tr id="artist_tr">
           <td class="label">Artist(s)</td>
           <td id="artistfields">
-            <p id="vawarning" class="hidden">Please use the multiple artists feature rather than adding "Various Artists" as an artist; read <a href="wiki.php?action=article&amp;id=64" target="_blank">this</a> for more information.</p>
+            <p id="vawarning" class="hidden"><strong class="important">Please use
+            the multiple artists feature rather than adding "Various Artists" as
+            an artist; read <a href="wiki.php?action=article&amp;id=64"
+            target="_blank">this</a> for more information.</p>
 {%      for role, name_list in artist_role -%}
 {%          for idx, name in name_list -%}
-            <input type="text" size="45" id="artist_{{ loop.index0 }}" name="artists[]"{{ autocomplete|raw }} value="{{ name }}" />
-            <select id="importance" name="importance[]">
-              <option value="{{ constant('ARTIST_MAIN') }}"{{ selected(role == constant('ARTIST_MAIN')) }}>Main</option>
+            <input type="text" size="45" id="artist_{{ loop.parent.loop.index0 }}" name="artists[]"{{ autocomplete|raw }} value="{{ name }}" />
+            <select id="importance_{{ loop.parent.loop.index0 }}" name="importance[]">
+              <option value="{{ constant('ARTIST_MAIN') }}"{{ selected(role == constant('ARTIST_MAIN')) }}>Main {{ loop.parent.loop.index0 }}</option>
               <option value="{{ constant('ARTIST_GUEST') }}"{{ selected(role == constant('ARTIST_GUEST')) }}>Guest</option>
               <option value="{{ constant('ARTIST_COMPOSER') }}"{{ selected(role == constant('ARTIST_COMPOSER')) }}>Composer</option>
               <option value="{{ constant('ARTIST_CONDUCTOR') }}"{{ selected(role == constant('ARTIST_CONDUCTOR')) }}>Conductor</option>
@@ -71,13 +74,13 @@
               <option value="{{ constant('ARTIST_ARRANGER') }}"{{ selected(role == constant('ARTIST_ARRANGER')) }}>Arranger</option>
             </select>
 {%          if loop.parent.loop.first and loop.first -%}
-<a href="#" onclick="AddArtistField(); return false;" class="brackets">+</a> <a href="#" onclick="RemoveArtistField(); return false;" class="brackets">&minus;</a>
+<a href="#" id="artist-add" class="brackets">+</a> <a href="#" id="artist-remove" class="brackets">−</a>
             <br />
 {%          endif -%}
 {%          endfor -%}
 {%      else -%}
-            <input type="text" size="45" id="artist_0" name="artists[]"{{ autocomplete|raw }} onblur="CheckVA();" />
-            <select id="importance" name="importance[]">
+            <input type="text" size="45" id="artist_0" name="artists[]"{{ autocomplete|raw }} />
+            <select id="importance_0" name="importance[]">
               <option value="{{ constant('ARTIST_MAIN') }}">Main</option>
               <option value="{{ constant('ARTIST_GUEST') }}">Guest</option>
               <option value="{{ constant('ARTIST_COMPOSER') }}">Composer</option>
@@ -87,7 +90,7 @@
               <option value="{{ constant('ARTIST_PRODUCER') }}">Producer</option>
               <option value="{{ constant('ARTIST_ARRANGER') }}">Arranger</option>
             </select>
-            <a href="#" onclick="AddArtistField(); return false;" class="brackets">+</a> <a href="#" onclick="RemoveArtistField(); return false;" class="brackets">&minus;</a>
+            <a href="#" id="artist-add" class="brackets">+</a> <a href="#" id="artist-remove" class="brackets">−</a>
 {%      endfor -%}
           </td>
         </tr>
@@ -128,7 +131,7 @@
         <tr>
           <td class="label">Tags</td>
           <td>
-            <select id="genre_tags" name="genre_tags" onchange="add_tag(); return false;">
+            <select id="genre_tags" name="genre_tags">
               <option>---</option>
 {% for tag in tag_list %}
               <option value="{{ tag }}">{{ tag }}</option>
@@ -145,33 +148,30 @@
         <tr id="formats_tr">
           <td class="label">Allowed formats</td>
           <td>
-            <label style="display: inline-block; width: 100px"><input type="checkbox" name="all_formats" id="toggle_formats" onchange="Toggle('formats', {{ new ? 1 : 0 }});"{{ checked(format.all) }} /> All</label>
+            <label style="display: inline-block; width: 100px"><input type="checkbox" name="all_formats" id="toggle_formats" {{ checked(format.all) }} /> All</label>
             <br />
 {%  for k, v in constant('FORMAT') %}
-            <label style="display: inline-block; width: 100px"><input type="checkbox" name="formats[]" value="{{ k }}" id="format_{{ k }}"{{ checked(format.exists(v)) }}
-                onchange="ToggleLogCue(); if (!this.checked) { $('#toggle_formats').raw().checked = false; }" /> {{ v }}</label>
+            <label style="display: inline-block; width: 100px"><input type="checkbox" name="formats[]" value="{{ k }}" id="format_{{ k }}"{{ checked(format.exists(v)) }} /> {{ v }}</label>
 {%  endfor %}
           </td>
         </tr>
         <tr id="bitrates_tr">
           <td class="label">Allowed encodings</td>
           <td>
-            <label style="display: inline-block; width: 100px"><input type="checkbox" name="all_bitrates" id="toggle_bitrates" onchange="Toggle('bitrates', {{ new ? 1 : 0 }});"{{ checked(encoding.all) }} /> All</label>
+            <label style="display: inline-block; width: 100px"><input type="checkbox" name="all_bitrates" id="toggle_bitrates" {{ checked(encoding.all) }} /> All</label>
             <br />
 {%  for k, v in constant('ENCODING') %}
-            <label style="display: inline-block; width: 100px"><input type="checkbox" name="bitrates[]" value="{{ k }}" id="bitrate_{{ k }}"{{ checked(encoding.exists(v)) }}
-            onchange="if (!this.checked) { $('#toggle_bitrates').raw().checked = false; }" /> {{ v }}</label>
+            <label style="display: inline-block; width: 100px"><input type="checkbox" name="bitrates[]" value="{{ k }}" id="bitrate_{{ k }}"{{ checked(encoding.exists(v)) }} /> {{ v }}</label>
 {%  endfor %}
           </td>
         </tr>
         <tr id="media_tr">
           <td class="label">Allowed media</td>
           <td>
-            <label style="display: inline-block; width: 100px"><input type="checkbox" name="all_media" id="toggle_media" onchange="Toggle('media', {{ new ? 1 : 0 }});"{{ checked(media.all) }} /> All</label>
+            <label style="display: inline-block; width: 100px"><input type="checkbox" name="all_media" id="toggle_media"{{ checked(media.all) }} /> All</label>
             <br />
 {%  for k, v in constant('MEDIA') %}
-            <label style="display: inline-block; width: 100px"><input type="checkbox" name="media[]" value="{{ k }}" id="media_{{ k }}"{{ checked(media.exists(v)) }}
-            onchange="ToggleLogCue(); if (!this.checked) { $('#toggle_media').raw().checked = false; }" /> {{ v }}</label>
+            <label style="display: inline-block; width: 100px"><input type="checkbox" name="media[]" value="{{ k }}" id="media_{{ k }}"{{ checked(media.exists(v)) }}" /> {{ v }}</label>
 {%  endfor %}
           </td>
         </tr>
@@ -179,7 +179,7 @@
           <td class="label">Log / Checksum / Cue<br />(CD FLAC only)</td>
           <td>
             <span style="float: right;"><strong>Note: You can only require a log or cue when FLAC is an allowed format</strong></span>
-            <label><input type="checkbox" id="needlog" name="needlog" onchange="ToggleLogScore()"{{ checked(log_cue.needLog) }} /> Require log</label>
+            <label><input type="checkbox" id="needlog" name="needlog" {{ checked(log_cue.needLog) }} /> Require log</label>
             <span id="minlogscore_span" class="hidden">&nbsp;<input type="text" name="minlogscore" id="minlogscore" size="4" value="{{ log_cue.minScore ? log_cue.minScore : ''}}" /> Minimum log score</span>
             <br />
             <label><input type="checkbox" id="needcksum" name="needcksum"{{ checked(log_cue.needLogChecksum) }} /> Require checksum</label>
@@ -224,7 +224,7 @@
           <td class="label">Bounty (MiB)</td>
           <td>
             <input type="text" id="amount_box" name="amount_box" size="8" value="{{ amount_box }}" />
-            <select id="unit" name="unit" onchange="Calculate();">
+            <select id="unit" name="unit">
               <option value="mb"{{ selected(not unit_GiB) }}>MiB</option>
               <option value="gb"{{ selected(unit_GiB) }}>GiB</option>
             </select>
@@ -260,7 +260,6 @@
         </tr>
       </table>
     </form>
-    <script type="text/javascript">ToggleLogCue(); {% if new %}Calculate(); {% endif %}Categories();</script>
   </div>
 </div>
 {{ footer() }}

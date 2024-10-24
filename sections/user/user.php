@@ -83,7 +83,7 @@ $DisplayCustomTitle = !empty($user->title())
     : $user->title();
 
 View::show_header($username, [
-    'js' => 'jquery.imagesloaded,jquery.wookmark,user,bbcode,requests,lastfm,comments'
+    'js' => 'bbcode,comments,jquery.imagesloaded,jquery.wookmark,lastfm,requests,user'
         . ($Viewer->isStaff() ? ',info_paster' : '')
         . ($Viewer->permitted('users_view_ips') ? ',resolve-ip' : '')
         . ($Viewer->permitted('users_mod') ? ',reports' : ''),

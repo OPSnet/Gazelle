@@ -242,15 +242,13 @@ function byte_format(size, precision) {
     if (precision === undefined) {
         precision = 2;
     }
-    var steps = 0;
+    let steps = 0;
     while (steps < 8 && size >= 1024) {
         steps++;
         size = size / 1024;
     }
-    var ext;
+    let ext;
     switch (steps) {
-        case 0: ext = ' B';
-                break;
         case 1: ext = ' KiB';
                 break;
         case 2: ext = ' MiB';
@@ -266,6 +264,8 @@ function byte_format(size, precision) {
         case 7: ext = ' ZiB';
                 break;
         case 8: ext = ' YiB';
+                break;
+        default: ext = ' B';
                 break;
     }
     return (size.toFixed(precision) + ext);

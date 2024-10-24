@@ -1,85 +1,88 @@
-/* global ajax, byte_format, error_message, ratio, save_message */
+/* global byte_format, error_message, ratio, save_message */
 
-function Vote(requestid, amount, votecount, upload, download, rr) {
-    if (amount > 100 * 1024 * 1024 && amount > 0.3 * (upload - rr * download)) {
-        if (!confirm('This vote is more than 30% of your buffer. Please confirm that you wish to place this large of a vote.')) {
-            return false;
+"use strict";
+
+(function() {
+    const DETAIL_PAGE = 1;
+    const VOTE_PAGE   = 2;
+
+    async function add_bounty(source, requestid, amount, votecount, upload, download, rr) {
+        if (amount > 100 * 1024 * 1024 && amount > 0.3 * (upload - rr * download)) {
+            if (!confirm(
+                'This vote is more than 30% of your buffer. Please confirm that you wish to place this large of a vote.'
+            )) {
+                return false;
+            }
         }
-    }
 
-    ajax.get('requests.php?action=takevote&id=' + requestid + '&auth=' + document.body.dataset.auth + '&amount=' + amount, function (response) {
-        response = JSON.parse(response);
-        if (response.status == 'success') {
-            let vote_count = document.getElementById('vote_count_' + response.id);
-            if (!vote_count) {
-                // we are an individual request page
-                vote_count = document.getElementById('votecount');
-            }
-            vote_count.textContent = response.total.toLocaleString('en-US');
-            let vote_link = document.querySelectorAll('[data-id="' + response.id + '"]');
-            if (vote_link) {
-                vote_link[0].onClick = null;
-                vote_link[0].innerHTML = "&check;";
-                vote_link[0].classList.remove('brackets');
-            }
-        } else if (response.status == 'bankrupt') {
-            error_message("You do not have sufficient upload credit to add " + byte_format(amount, 0) + " to this request");
+        let response = await fetch('requests.php?action=takevote&id=' + requestid
+            + '&auth=' + document.body.dataset.auth + '&amount=' + amount
+            );
+        let data = await response.json();
+        if (data.status === 'bankrupt') {
+            error_message("You do not have sufficient upload credit to add "
+                + byte_format(amount, 0) + " to this request"
+            );
             return;
-        } else if (response.status == 'missing') {
+        }
+        if (data.status === 'missing') {
             error_message("Cannot find this request");
             return;
-        } else if (response.status == 'filled') {
+        }
+        if (data.status === 'filled') {
             error_message("This request has already been filled");
             return;
-        } else {
+        } else if (data.status !== 'success') {
             error_message("Error on saving request vote. Please try again later.");
             return;
         }
 
-        if ($('#total_bounty').results() > 0) {
-            let totalBounty = parseInt($('#total_bounty').raw().value);
-            totalBounty += (amount * (1 - $('#request_tax').raw().value));
-            let requestTax = $('#request_tax').raw().value;
-            $('#total_bounty').raw().value = totalBounty;
-            $('#formatted_bounty').raw().innerHTML = byte_format(totalBounty);
-            if (requestTax > 0) {
-                save_message("Your vote of " + byte_format(amount, 0) + ", adding a " + byte_format(amount * (1 - requestTax), 0) + " bounty, has been added");
-            } else {
-                save_message("Your vote of " + byte_format(amount, 0) + " has been added");
-            }
-            $('#button').raw().disabled = true;
+        let vote_id = false;
+        if (source === DETAIL_PAGE) {
+            document.getElementById('button').disabled = true;
+            document.getElementById('formatted_bounty').innerHTML = byte_format(data.bounty);
+            document.getElementById('new_bounty').innerHTML = byte_format(amount, 0);
+            const tax_rate = document.getElementById('request_tax').value;
+            const final    = amount * (1 - tax_rate);
+            save_message(
+                "Your vote of " + byte_format(amount, 0)
+                + (tax_rate > 0
+                    ?  ", adding a " + byte_format(final, 0) + " bounty,"
+                    :  ''
+                )
+                + ' has been added'
+            );
+            vote_id = 'votecount';
         } else {
-            save_message("Your vote of " + byte_format(amount, 0) + " has been added");
+            let vote_link = document.querySelector('[data-id="' + data.id + '"]');
+            vote_link.onClick = null;
+            vote_link.innerHTML = '✓';
+            vote_link.classList.remove('brackets');
+            vote_id = 'vote_count_' + data.id;
         }
-    });
-}
+        document.getElementById(vote_id).textContent = data.total.toLocaleString('en-US');
+    }
 
-function Calculate() {
-    const box_val = document.getElementById('amount_box').value;
-    const unit    = document.getElementById("unit");
-    const mul     = unit.options[unit.selectedIndex].value == 'mb' ? 1024 ** 2 : 1024 ** 3;
-    const amt     = Math.floor(box_val * mul);
+    function recalculate_bounty() {
+        const box_val = document.getElementById('amount_box').value;
+        const unit    = document.getElementById("unit");
+        const mul     = unit.options[unit.selectedIndex].value == 'mb' ? 1024 ** 2 : 1024 ** 3;
+        const amt     = Math.floor(box_val * mul);
 
-    const current_upload_val = document.getElementById('current_uploaded').value;
-    let bounty_after_tax     = document.getElementById('bounty_after_tax');
-    let new_bounty           = document.getElementById('new_bounty');
-    let new_uploaded         = document.getElementById('new_uploaded');
-    let button               = document.getElementById('button');
+        const current_upload_val = document.getElementById('current_uploaded').value;
+        let bounty_after_tax     = document.getElementById('bounty_after_tax');
+        let new_bounty           = document.getElementById('new_bounty');
+        let new_uploaded         = document.getElementById('new_uploaded');
+        let button               = document.getElementById('button');
 
-    if (amt > current_upload_val) {
-        new_uploaded.innerHTML     = "You can't afford that request!";
-        new_bounty.innerHTML       = "0 MiB";
-        bounty_after_tax.innerHTML = "0 MiB";
-        button.disabled            = true;
-    } else if (isNaN(box_val
-        || (window.location.search.indexOf('action=new')  != -1 && amt < 100 * 1024 ** 2)
-        || (window.location.search.indexOf('action=view') != -1 && amt < 100 * 1024 ** 2)
-    )) {
-        new_uploaded.innerHTML     = byte_format(current_upload_val, 2);
-        new_bounty.innerHTML       = "0 MiB";
-        bounty_after_tax.innerHTML = "0 MiB";
-        button.disabled            = true;
-    } else {
+        if (amt > current_upload_val) {
+            new_uploaded.innerHTML     = "You can't afford that request!";
+            new_bounty.innerHTML       = "0 MiB";
+            bounty_after_tax.innerHTML = "0 MiB";
+            button.disabled            = true;
+            return;
+        }
+
         new_uploaded.innerHTML     = byte_format(current_upload_val - amt, 2);
         new_bounty.innerHTML       = byte_format(amt, 2);
         bounty_after_tax.innerHTML = byte_format(
@@ -93,177 +96,204 @@ function Calculate() {
         );
         button.disabled = false;
     }
-}
 
-function AddArtistField() {
-    let ArtistCount = document.getElementsByName("artists[]").length;
-    if (ArtistCount >= 200) {
-        return;
-    }
-    let ArtistField = document.createElement("input");
-    ArtistField.type = "text";
-    ArtistField.id = "artist_" + ArtistCount;
-    ArtistField.name = "artists[]";
-    ArtistField.size = 45;
-    ArtistField.onblur = CheckVA;
+    function artist_add() {
+        const total = document.getElementsByName('artists[]').length;
+        if (total >= 200) {
+            return;
+        }
 
-    let roleField = document.createElement("select");
-    roleField.id = "importance";
-    roleField.name = "importance[]";
-    roleField.options[0] = new Option("Main", "1");
-    roleField.options[1] = new Option("Guest", "2");
-    roleField.options[2] = new Option("Composer", "4");
-    roleField.options[3] = new Option("Conductor", "5");
-    roleField.options[4] = new Option("DJ / Compiler", "6");
-    roleField.options[5] = new Option("Remixer", "3");
-    roleField.options[6] = new Option("Producer", "7");
-    roleField.options[7] = new Option("Arranger", "8");
+        let artistList = document.getElementById('artistfields');
+        artistList.appendChild(document.createElement('br'));
 
-    let x = $('#artistfields').raw();
-    x.appendChild(document.createElement("br"));
-    x.appendChild(ArtistField);
-    x.appendChild(document.createTextNode('\n'));
-    x.appendChild(roleField);
-
-    if ($("#artist_0").data("gazelle-autocomplete")) {
-        $(ArtistField).live('focus', () => {
-            $(ArtistField).autocomplete({
+        let field    = document.createElement('input');
+        field.type   = 'text';
+        field.id     = 'artist_' + total;
+        field.name   = 'artists[]';
+        field.size   = 45;
+        field.onblur = check_various_artists;
+        artistList.appendChild(field);
+        if (document.getElementById('artist_0').dataset.gazelleAutocomplete) {
+            field.setAttribute('data-gazelle-autocomplete', 'true');
+            $("#artist_" + total).autocomplete({
+                deferRequestBy: 300,
                 serviceUrl : 'artist.php?action=autocomplete'
             });
-        });
-    }
-}
-
-function CheckVA () {
-    let ArtistCount = document.getElementsByName("artists[]").length;
-    let shown = false;
-    for (let i = 0; i < ArtistCount; i++) {
-        let artistId = "#artist_" + i;
-        if ($(artistId).raw().value.toLowerCase().trim().match(/^(va|various(\sa|a)rtis(t|ts)|various)$/)) {
-            $('#vawarning').gshow();
-            shown = true;
-            break;
         }
-    }
-    if (!shown) {
-        $('#vawarning').ghide();
-    }
-}
 
-function RemoveArtistField() {
-    let ArtistCount = document.getElementsByName("artists[]").length;
-    if (ArtistCount === 1) {
-        return;
+        artistList.appendChild(document.createTextNode('\n'));
+        let role   = document.createElement('select');
+        role.options[0] = new Option('Main', '1');
+        role.options[1] = new Option('Guest', '2');
+        role.options[2] = new Option('Composer', '4');
+        role.options[3] = new Option('Conductor', '5');
+        role.options[4] = new Option('DJ / Compiler', '6');
+        role.options[5] = new Option('Remixer', '3');
+        role.options[6] = new Option('Producer', '7');
+        role.options[7] = new Option('Arranger', '8');
+        role.id    = 'importance_' + total;
+        role.name  = 'importance[]';
+        role.value = document.getElementById('importance_' + (total - 1)).value;
+        artistList.appendChild(role);
     }
-    let x = $('#artistfields').raw();
 
-    while (x.lastChild.tagName !== "INPUT") {
-        x.removeChild(x.lastChild);
+    function artist_remove() {
+        if (document.getElementsByName('artists[]').length === 1) {
+            return;
+        }
+        let artistList = document.getElementById('artistfields');
+        while (artistList.lastChild.tagName !== "INPUT") { // <select>
+            artistList.removeChild(artistList.lastChild);
+        }
+        artistList.removeChild(artistList.lastChild); // <input>
+        artistList.removeChild(artistList.lastChild); // <br>
     }
-    x.removeChild(x.lastChild);
-    x.removeChild(x.lastChild); //Remove trailing new line.
-    ArtistCount--;
-}
 
-function Categories() {
-    let cat = $('#categories').raw().options[$('#categories').raw().selectedIndex].value;
-    if (cat == "Music") {
-        $('#artist_tr').gshow();
-        $('#releasetypes_tr').gshow();
-        $('#formats_tr').gshow();
-        $('#bitrates_tr').gshow();
-        $('#media_tr').gshow();
-        ToggleLogCue();
-        $('#year_tr').gshow();
-        $('#cataloguenumber_tr').gshow();
-        $('#recordlabel_tr').gshow();
-        $('#oclc_tr').gshow();
-    } else if (cat == "Audiobooks" || cat == "Comedy") {
-        $('#year_tr').gshow();
-        $('#artist_tr').ghide();
-        $('#releasetypes_tr').ghide();
-        $('#formats_tr').ghide();
-        $('#bitrates_tr').ghide();
-        $('#media_tr').ghide();
-        $('#logcue_tr').ghide();
-        $('#cataloguenumber_tr').ghide();
-        $('#recordlabel_tr').ghide();
-        $('#oclc_tr').ghide();
-    } else {
-        $('#artist_tr').ghide();
-        $('#releasetypes_tr').ghide();
-        $('#formats_tr').ghide();
-        $('#bitrates_tr').ghide();
-        $('#media_tr').ghide();
-        $('#logcue_tr').ghide();
-        $('#year_tr').ghide();
-        $('#cataloguenumber_tr').ghide();
-        $('#recordlabel_tr').ghide();
-        $('#oclc_tr').ghide();
-    }
-}
-
-function add_tag() {
-    if ($('#tags').raw().value == "") {
-        $('#tags').raw().value = $('#genre_tags').raw().options[$('#genre_tags').raw().selectedIndex].value;
-    } else if (!($('#genre_tags').raw().options[$('#genre_tags').raw().selectedIndex].value == "---")) {
-        $('#tags').raw().value = $('#tags').raw().value + ", " + $('#genre_tags').raw().options[$('#genre_tags').raw().selectedIndex].value;
-    }
-}
-
-function Toggle(id, disable) {
-    let arr = document.getElementsByName(id + '[]');
-    let master = $('#toggle_' + id).raw().checked;
-    for (let x in arr) {
-        arr[x].checked = master;
-        if (disable == 1) {
-            arr[x].disabled = master;
+    function check_various_artists() {
+        let shown = false;
+        Array.from(document.getElementsByName('artists[]')).forEach((input) => {
+            if (input.value.toLowerCase().trim().match(/^va(rious(\s?a(rtists?)))?$/)) {
+                document.getElementById('vawarning').classList.remove('hidden');
+                shown = true;
+                return;
+            }
+        });
+        if (!shown) {
+            document.getElementById('vawarning').classList.add('hidden');
         }
     }
 
-    if (id === "formats" || id === "media") {
-        ToggleLogCue();
+    function configure_category_form() {
+        const cat = document.getElementById('categories').selectedOptions[0].value;
+        if (cat == "Music") {
+            ['artist', 'bitrates', 'cataloguenumber', 'formats', 'media', 'oclc',
+                'recordlabel', 'releasetypes', 'year'
+            ].forEach((input) => {
+                document.getElementById(input + '_tr').classList.remove('hidden');
+            });
+            toggle_log_cue();
+        } else if (["Audiobooks", "Comedy"].includes(cat)) {
+            ['artist', 'bitrates', 'cataloguenumber', 'formats', 'logcue', 'media',
+                'oclc', 'recordlabel', 'releasetypes'
+            ].forEach((input) => {
+                document.getElementById(input + '_tr').classList.add('hidden');
+            });
+            document.getElementById('year_tr').classList.remove('hidden');
+        } else {
+            ['artist', 'bitrates', 'cataloguenumber', 'formats', 'logcue', 'media',
+                'oclc', 'recordlabel', 'releasetypes', 'year'
+            ].forEach((input) => {
+                document.getElementById(input + '_tr').classList.add('hidden');
+            });
+        }
     }
-}
 
-function ToggleLogCue() {
-    let formats = document.getElementsByName('formats[]');
-    let media   = document.getElementsByName('media[]');
-    let flac    = formats[1].checked;
-    let cd      = media[0].checked;
-
-    if (flac && cd) {
-        $('#logcue_tr').gshow();
-    } else {
-        $('#logcue_tr').ghide();
+    function add_tag() {
+        let tags     = document.getElementById('tags');
+        const name   = tags.value;
+        const chosen = document.getElementById('genre_tags').selectedOptions[0].value;
+        if (name == '') {
+            tags.value = chosen;
+        } else if (chosen != '---') {
+            tags.value = tags.value + ', ' + chosen;
+        }
     }
-    ToggleLogScore();
-}
 
-function ToggleLogScore() {
-    if ($('#needlog').raw().checked) {
-        $('#minlogscore_span').gshow();
-    } else {
-        $('#minlogscore_span').ghide();
-    }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    const amountBox = document.getElementById('amount_box');
-    if (amountBox) {
-        amountBox.addEventListener('input', () => {
-            Calculate();
+    function toggle_group(group, disable) {
+        const all_check = document.getElementById('toggle_' + group).checked;
+        Array.from(document.getElementsByName(group + '[]')).forEach((cb) => {
+            cb.checked = all_check;
+            if (disable) {
+                cb.disabled = all_check;
+            }
         });
-        Calculate();
+
+        if (["formats", "media"].includes(group)) {
+            toggle_log_cue();
+        }
     }
 
-    // from an individual request page
-    const button = document.getElementById('button');
-    if (button) {
-        button.addEventListener('click', () => {
+    function toggle_log_cue() {
+        let logcue_tr = document.getElementById('logcue_tr');
+        if (
+            document.getElementsByName('formats[]')[1].checked // FLAC
+            &&
+            document.getElementsByName('media[]')[0].checked   // CD
+        ) {
+            logcue_tr.classList.remove('hidden');
+        } else {
+            logcue_tr.classList.add('hidden');
+        }
+        toggle_log_score();
+    }
+
+    function toggle_log_score() {
+        if (document.getElementById('needlog').checked) {
+            document.getElementById('minlogscore_span').classList.remove('hidden');
+        } else {
+            document.getElementById('minlogscore_span').classList.add('hidden');
+        }
+    }
+
+    function init_input() {
+        document.getElementById('artist-add').addEventListener('click', (e) => {
+            artist_add();
+            e.preventDefault();
+        });
+        document.getElementById('artist-remove').addEventListener('click', (e) => {
+            artist_remove();
+            e.preventDefault();
+        });
+        document.getElementById('artist_0').addEventListener('blur', () => {
+            check_various_artists();
+        });
+
+        document.getElementById('categories').addEventListener('change', () => {
+            configure_category_form();
+        });
+        document.getElementById('genre_tags').addEventListener('change', () => {
+            add_tag();
+        });
+        document.getElementById('needlog').addEventListener('click', () => {
+            toggle_log_score();
+        });
+        Array.from(document.getElementsByName('format[]')).forEach((format) => {
+            format.addEventListener('change', () => {
+                toggle_log_cue();
+            });
+        });
+        Array.from(document.getElementsByName('media[]')).forEach((media) => {
+            media.addEventListener('change', () => {
+                toggle_log_cue();
+            });
+        });
+
+        document.getElementById('toggle_formats').addEventListener('change', () => {
+            toggle_group('formats', 1);
+        });
+        document.getElementById('toggle_bitrates').addEventListener('change', () => {
+            toggle_group('bitrates', 1);
+        });
+        document.getElementById('toggle_media').addEventListener('change', () => {
+            toggle_group('media', 1);
+        });
+
+        toggle_log_cue();
+        configure_category_form();
+    }
+
+    function init_vote() {
+        document.getElementById('amount_box').addEventListener('input', () => {
+            recalculate_bounty();
+        });
+        document.getElementById('unit').addEventListener('input', () => {
+            recalculate_bounty();
+        });
+        document.getElementById('button').addEventListener('click', () => {
             const requestId = document.getElementById('requestid');
             if (requestId != null) {
-                Vote(
+                add_bounty(
+                    DETAIL_PAGE,
                     parseInt(requestId.value),
                     parseFloat(document.getElementById('amount').value),
                     parseInt(document.getElementById('votecount').textContent),
@@ -273,20 +303,38 @@ document.addEventListener('DOMContentLoaded', () => {
                 );
             }
         });
+
+        recalculate_bounty();
     }
 
-    // from a page that lists requests
-    const voter = document.querySelectorAll('.request-vote');
-    voter.forEach(function(span) {
-        span.addEventListener('click', (e) => {
-            Vote(
-                parseInt(e.target.dataset.id),
-                parseFloat(e.target.dataset.bounty),
-                parseInt(e.target.dataset.n),
-                parseInt(document.getElementById('current_uploaded').value),
-                parseInt(document.getElementById('current_downloaded').value),
-                parseFloat(document.getElementById('current_rr').value),
-            );
-        });
+    function init_request_page(action) {
+        if (['edit', 'new'].includes(action)) {
+            init_input();
+        }
+
+        if (['view', 'new'].includes(action)) {
+            init_vote();
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const page = window.location.href.match(/\brequests\.php.*?action=(edit|new|view)/);
+        if (page) {
+            init_request_page(page[1]);
+        } else {
+            Array.from(document.querySelectorAll('.request-vote')).forEach((span) => {
+                span.addEventListener('click', (e) => {
+                    add_bounty(
+                        VOTE_PAGE,
+                        parseInt(e.target.dataset.id),
+                        parseFloat(e.target.dataset.bounty),
+                        parseInt(e.target.dataset.n),
+                        parseInt(document.getElementById('current_uploaded').value),
+                        parseInt(document.getElementById('current_downloaded').value),
+                        parseFloat(document.getElementById('current_rr').value),
+                    );
+                });
+            });
+        }
     });
-});
+}());

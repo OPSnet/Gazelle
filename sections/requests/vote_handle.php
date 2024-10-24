@@ -16,6 +16,7 @@ if (is_null($request)) {
     $result = ['status' => 'bankrupt'];
 } else {
     $result = [
+        'bounty' => $request->bountyTotal(),
         'id'     => $request->id(),
         'status' => 'success',
         'total'  => $request->userVotedTotal(),

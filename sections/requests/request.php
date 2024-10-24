@@ -14,8 +14,21 @@ $paginator = new Gazelle\Util\Paginator(TORRENT_COMMENTS_PER_PAGE, $commentPage-
 $paginator->setAnchor('comments')->setTotal($commentPage->total())->removeParam('postid');
 $userMan = new Gazelle\Manager\User();
 
+$bounty = $Viewer->ordinal()->value('request-bounty-create');
+[$amount, $unit] = array_values(byte_format_array($bounty));
+if (in_array($unit, ['GiB', 'TiB'])) {
+    $unitGiB = true;
+    if ($unit == 'TiB') {
+        // the bounty box only knows about MiB and GiB, so if someone
+        // uses a value > 1 TiB it needs to be scaled down.
+        $bounty *= 1024;
+    }
+}
+
 echo $Twig->render('request/detail.twig', [
-    'bounty'        => $Viewer->ordinal()->value('request-bounty-vote'),
+    'amount'        => $bounty,
+    'amount_box'    => $amount,
+    'unit_GiB'      => isset($unitGiB),
     'comment_page'  => $commentPage,
     'filler'        => $userMan->findById($request->fillerId()),
     'is_bookmarked' => (new Gazelle\User\Bookmark($Viewer))->isRequestBookmarked($request->id()),

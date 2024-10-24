@@ -1,5 +1,5 @@
 {% from 'macro/form.twig' import selected %}
-{{ header("View request: " ~ request.text, {'js': 'comments,requests,bbcode,subscriptions'}) }}
+{{ header("View request: " ~ request.text, {'js': 'bbcode,comments,requests,subscriptions'}) }}
 <div class="thin">
     <div class="header">
         <h2><a href="requests.php">Requests</a> › {{ request.categoryName }} › {{ request.selfLink|raw }}</h2>
@@ -226,7 +226,7 @@
                 <td>
                     <span id="votecount">{{ request.userVotedTotal|number_format }} </span>
 {% if request.canVote(viewer) -%}
-                    &nbsp;&nbsp;<span class="request-vote brackets tooltip" data-id="{{
+                    &nbsp;&nbsp;<span class="brackets request-vote tooltip" data-id="{{
                         request.id }}" data-bounty="{{ bounty }} " data-n="{{
                         request.userVotedTotal }}">Vote</span>
                     <strong>Costs {{ bounty|octet_size }}</strong> (you can change this default in your user settings).
@@ -243,10 +243,10 @@
             <tr id="voting">
                 <td class="label tooltip" title="These units are in base 2, not base 10. For example, there are 1,024 MiB in 1 GiB.">Custom vote</td>
                 <td>
-                    <input type="text" id="amount_box" size="8" value=""/>
-                    <select id="unit" name="unit" onchange="Calculate();">
-                        <option value="mb" selected>MiB</option>
-                        <option value="gb">GiB</option>
+                    <input type="text" id="amount_box" size="8" value="{{ amount_box }}"/>
+                    <select id="unit" name="unit">
+                        <option value="mb"{{ selected(not unit_GiB) }}>MiB</option>
+                        <option value="gb"{{ selected(unit_GiB) }}>GiB</option>
                     </select>
 {%  if constant('REQUEST_TAX') > 0 -%}
     <strong>{{ constant('REQUEST_TAX') * 100 }}% of this is deducted as tax by the system.</strong>
