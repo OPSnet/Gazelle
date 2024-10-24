@@ -32,8 +32,7 @@
 {% endif %}
 
 {%- if own_profile or viewer.permitted('users_view_keys') %}
-    {{- dom.click("#passkey", "togglePassKey('" ~ user.announceKey ~ "'); return false;") -}}
-    <li>Passkey: <a href="#" id="passkey" class="brackets">View</a></li>
+    <li>Passkey: <a href="#" id="passkey" data-key="{{ user.announceKey }}" class="brackets">View</a></li>
 {% endif %}
 
 {% if viewer.permitted('users_view_invites') %}

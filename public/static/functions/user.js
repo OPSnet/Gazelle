@@ -1,85 +1,68 @@
-/* global ajax, resize, irckey */
+"use strict";
 
-function ChangeTo(to) {
-    if (to == "text") {
-        $('#admincommentlinks').ghide();
-        $('#admincomment').gshow();
-        resize('admincomment');
-        var buttons = document.getElementsByName('admincommentbutton');
-        for (var i = 0; i < buttons.length; i++) {
-            buttons[i].setAttribute('onclick',"ChangeTo('links'); return false;");
+document.addEventListener('DOMContentLoaded', () => {
+    async function toggle_editor() {
+        let button = document.getElementById('admincommentbutton');
+        let edit   = document.getElementById('admincomment');
+        let view   = document.getElementById('admincommentlinks');
+        if (edit.classList.contains('hidden')) {
+            button.innerHTML = 'View';
+            view.classList.add('hidden');
+            edit.classList.remove('hidden');
+        } else if (view.classList.contains('hidden')) {
+            button.innerHTML = 'Edit';
+            let form = new FormData();
+            form.append('admincomment', edit.value);
+            const response = await fetch(
+                'ajax.php?action=preview', {
+                    'method': "POST",
+                    'body': form,
+                }
+            );
+            view.innerHTML = await response.text();
+            edit.classList.add('hidden');
+            view.classList.remove('hidden');
         }
-    } else if (to == "links") {
-        ajax.post("ajax.php?action=preview", "form", function(response) {
-            $('#admincommentlinks').raw().innerHTML = response;
-            $('#admincomment').ghide();
-            $('#admincommentlinks').gshow();
-            var buttons = document.getElementsByName('admincommentbutton');
-            for (var i = 0; i < buttons.length; i++) {
-                buttons[i].setAttribute('onclick',"ChangeTo('text'); return false;");
+    }
+
+    document.getElementById('admincommentbutton')?.addEventListener('click', (e) => {
+        toggle_editor();
+        e.preventDefault();
+    });
+
+    let passkey = document.getElementById('passkey');
+    passkey.addEventListener('click', (e) => {
+        passkey.innerHTML = (passkey.innerHTML == 'View')
+            ? passkey.dataset.key
+            : 'View';
+        e.preventDefault();
+    });
+
+    document.getElementById('gen-password').addEventListener('click', () => {
+        document.getElementById('change_password').value = Array(32)
+            .fill('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz')
+            .map((str) => { return str[Math.floor(Math.random() * str.length)]; })
+            .join('');
+    });
+
+    function download_warning() {
+        return confirm('If you no longer have the content, your ratio WILL be affected; be sure to check the cumulative size of all torrents before redownloading!');
+    }
+
+    document.getElementById('collect-upload')?.addEventListener('click', () => { return download_warning(); });
+    document.getElementById('collect-snatch')?.addEventListener('click', () => { return download_warning(); });
+    document.getElementById('collect-seeding')?.addEventListener('click', () => { return download_warning(); });
+
+    let adjuster = document.getElementById('warning-adjust');
+    if (adjuster) {
+        adjuster.addEventListener('click', () => {
+            if (adjuster.options[adjuster.selectedIndex].value == '---') {
+                document.getElementById('ReduceWarningTR').classList.remove('hidden');
+                document.getElementsByName('ReduceWarning')[0].disabled = false;
+            } else {
+                document.getElementById('ReduceWarningTR').classList.add('hidden');
+                document.getElementsByName('ReduceWarning')[0].disabled = true;
             }
         });
     }
-}
-
-function UncheckIfDisabled(checkbox) {
-    if (checkbox.disabled) {
-        checkbox.checked = false;
-    }
-}
-
-function ToggleWarningAdjust(selector) {
-    if (selector.options[selector.selectedIndex].value == '---') {
-        $('#ReduceWarningTR').gshow();
-        $('#ReduceWarning').raw().disabled = false;
-    } else {
-        $('#ReduceWarningTR').ghide();
-        $('#ReduceWarning').raw().disabled = true;
-    }
-}
-
-function userform_submit() {
-    if ($('#resetpasskey').is(':checked')) {
-        if (!confirm('Are you sure you want to reset your passkey?')) {
-            return false;
-        }
-    }
-    return true;
-}
-
-function togglePassKey(key) {
-    if ($('#passkey').raw().innerHTML == 'View') {
-        $('#passkey').raw().innerHTML = key;
-    } else {
-        $('#passkey').raw().innerHTML = 'View';
-    }
-
-}
-
-function RandomIRCKey() {
-    var irckeyChars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-    var randIRCKeyLen = 32;
-    var randIRCKey = Array(randIRCKeyLen).fill(irckeyChars).map(function(x) { return x[Math.floor(Math.random() * x.length)]; }).join('');
-    irckey.value = randIRCKey;
-}
-
-function download_warning() {
-    return confirm('If you no longer have the content, your ratio WILL be affected; be sure to check the cumulative size of all torrents before redownloading!');
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    $("#random_password").click(function() {
-        var length = 32,
-            charset = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ0123456789",
-            password = "";
-        for (var i = 0, n = charset.length; i < length; ++i) {
-            password += charset.charAt(Math.floor(Math.random() * n));
-        }
-        $('#change_password').val(password);
-    });
-
-    $("#collect-upload").click(function() { return download_warning(); });
-    $("#collect-snatch").click(function() { return download_warning(); });
-    $("#collect-seeding").click(function() { return download_warning(); });
-    $("#gen-irc-key").click(function() { RandomIRCKey(); });
 });

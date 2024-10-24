@@ -9,7 +9,7 @@
         <div class="box box2" id="staff_notes_box">
             <div class="head">
                 Staff Notes
-                <a href="#" name="admincommentbutton" onclick="ChangeTo('text'); return false;" class="brackets">Edit</a>
+                <a href="#" id="admincommentbutton" name="admincommentbutton" class="brackets">Edit</a>
                 <a href="#" onclick="$('#staffnotes').gtoggle(); return false;" class="brackets">Toggle</a>
             </div>
             <div id="staffnotes" class="pad">
@@ -17,8 +17,7 @@
                 <div id="admincommentlinks" class="AdminComment" style="width: 98%;">{{ user.staffNotes|bb_format }}</div>
                 <textarea id="admincomment" name="admincomment" onkeyup="resize('admincomment');" class="AdminComment hidden" cols="65" rows="26" style="width: 98%;">{{
                     user.staffNotes }}</textarea>
-                <a href="#" name="admincommentbutton" onclick="ChangeTo('text'); return false;"
-                   class="brackets">Toggle edit</a>
+                <a href="#" name="admincommentbutton" class="brackets">Toggle edit</a>
                 <script type="text/javascript">
                     resize('admincomment');
                 </script>

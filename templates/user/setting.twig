@@ -1,4 +1,4 @@
-{{ header(user.username ~ " › Settings", {'js': 'bbcode,cssgallery,donor_titles,jquery-ui,password,password_validate,preview_paranoia,release_sort,user,user_settings'}) }}
+{{ header(user.username ~ " › Settings", {'js': 'bbcode,cssgallery,donor_titles,jquery-ui,password,password_validate,preview_paranoia,release_sort,user_settings'}) }}
 <div class="thin">
     <div class="header">
         <h2>{{ user.id|user_url }} › Settings</h2>
@@ -38,12 +38,10 @@
                     <h2><a href="#" class="tooltip" title="These settings control your login and access details for {{ constant('SITE_NAME') }}, the site's IRC network, and the tracker.">Access Settings</a></h2>
                 </li>
                 <li data-gazelle-section-id="live_search">
-                    <input type="text" id="settings_search" placeholder="Live Search" />
-                </li>
-                <li>
-                    <input type="submit" id="submit" value="Save profile" />
+                    <input type="text" id="settings_search" title="Type a part of a setting name to filter display" placeholder="Filter settings" />
                 </li>
             </ul>
+            <input type="submit" id="save-profile" value="Save profile" />
         </div>
     </div>
     <div class="main_column">
