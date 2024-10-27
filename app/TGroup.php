@@ -418,13 +418,13 @@ class TGroup extends BaseObject implements CategoryHasArtist, CollageEntry {
                 AND RemasterYear != 0
                 AND GroupID = ?
             GROUP BY RemasterYear,
-                RemasterTitle,
-                RemasterRecordLabel,
-                RemasterCatalogueNumber
+                cast(RemasterTitle AS binary),
+                cast(RemasterRecordLabel AS binary),
+                cast(RemasterCatalogueNumber AS binary)
             ORDER BY RemasterYear DESC,
-                RemasterTitle ASC,
-                RemasterRecordLabel ASC,
-                RemasterCatalogueNumber ASC
+                cast(RemasterTitle AS binary) ASC,
+                cast(RemasterRecordLabel AS binary) ASC,
+                cast(RemasterCatalogueNumber AS binary) ASC
             ", $this->id
         );
         $list = [];
