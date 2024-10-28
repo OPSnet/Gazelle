@@ -151,6 +151,24 @@ class TorrentTest extends TestCase {
         );
     }
 
+    public function testFileList(): void {
+        // create a list of files larger than 1 MiB (30 * 34 - 1 > 1024 ** 2)
+        $count = 34;
+        $fileList = implode(
+            "\n",
+            array_fill(0, $count, ".flac s1234s ABCDEFGH.flac " . FILELIST_DELIM)
+        );
+        $this->torrent->setField('FileList', $fileList)->modify();
+        $list = $this->torrent->fileList();
+        $this->assertCount($count, $list, 'torrent-large-filelist');
+        // if things do not line up then there is an off-by-one somewhere
+        for ($n = 0; $n < $count; $n++) {
+            $this->assertEquals('ABCDEFGH.flac', $list[$n]['name'], "torrent-filelist-name-$n");
+            $this->assertEquals('.flac',         $list[$n]['ext'],  "torrent-filelist-ext-$n");
+            $this->assertEquals(1234,            $list[$n]['size'], "torrent-filelist-size-$n");
+        }
+    }
+
     public function testRemoveAllLogs(): void {
         $this->assertEquals(
             0,

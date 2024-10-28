@@ -33,7 +33,6 @@ class Torrent extends TorrentAbstract {
                 t.LogChecksum,
                 t.info_hash,
                 t.FileCount,
-                t.FileList,
                 t.FilePath,
                 t.Size,
                 t.FreeTorrent,

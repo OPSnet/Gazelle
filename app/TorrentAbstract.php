@@ -7,14 +7,17 @@ use Gazelle\Enum\LeechType;
 use Gazelle\Enum\TorrentFlag;
 
 abstract class TorrentAbstract extends BaseObject {
-    final public const CACHE_LOCK       = 'torrent_lock_%d';
-    final public const CACHE_REPORTLIST = 't_rpt2_%d';
+    final public const CACHE_LOCK           = 'torrent_lock_%d';
+    final public const CACHE_REPORTLIST     = 't_rpt2_%d';
+    final public const CACHE_FILELIST_COUNT = 't_filelist_t_%d';
+    final public const CACHE_FILELIST_CHUNK = 't_filelist_c_%d_%d';
 
     protected TGroup $tgroup;
     protected User   $viewer;
 
     public function flush(): static {
         self::$cache->delete_multi([
+            sprintf(self::CACHE_FILELIST_COUNT, $this->id),
             sprintf(Torrent::CACHE_KEY, $this->id),
             sprintf(TorrentDeleted::CACHE_KEY, $this->id),
         ]);
@@ -95,7 +98,6 @@ abstract class TorrentAbstract extends BaseObject {
 
             $info['ripLogIds'] = empty($info['ripLogIds']) ? [] : array_map('intval', explode(',', $info['ripLogIds']));
             $info['LogCount'] = count($info['ripLogIds']);
-            $info['FileList'] = explode("\n", $info['FileList']);
             if (!$this->isDeleted()) {
                 self::$cache->cache_value($key, $info, ($info['Seeders'] ?? 0) > 0 ? 600 : 3600);
             }
@@ -183,7 +185,10 @@ abstract class TorrentAbstract extends BaseObject {
                 'ext'  => $match[1],
                 'size' => (int)$match[2],
                 // transform leading blanks into hard blanks so that it shows up in HTML
-                'name' => preg_replace_callback('/^(\s+)/', fn($s) => str_repeat('&nbsp;', strlen($s[1])), $match[3]),
+                'name' => preg_replace_callback(
+                    '/^(\s+)/',
+                    fn($s) => str_repeat('&nbsp;', strlen($s[1])), $match[3]
+                ),
             ];
         }
         return [
@@ -198,7 +203,56 @@ abstract class TorrentAbstract extends BaseObject {
      * @return array of ['file', 'ext', 'size'] for each file
      */
     public function fileList(): array {
-        return array_map(fn ($f) => $this->filenameParse($f), $this->info()['FileList']);
+        return $this->info['file_list'] ??= $this->rebuildFileList();
+    }
+
+    /**
+     * The list of files in very large torrents (e.g. Applications) can
+     * exceed 1 MiB, which is beyond the default size of objects cached
+     * by memcached. To work around this, file lists are sliced up into
+     * 1 MiB chunks, and then rebuilt upon request.
+     */
+    protected function rebuildFileList(): array {
+        $fileList = '';
+        $rebuild  = true;
+        $count    = self::$cache->get_value(sprintf(self::CACHE_FILELIST_COUNT, $this->id));
+        if ($count !== false) {
+            // we have evidence that the file list has been stored, attempt to retrieve it
+            $rebuild = false;
+            for ($c = 0; $c < $count; $c++) {
+                $chunk = self::$cache->get_value(sprintf(self::CACHE_FILELIST_CHUNK, $this->id, $c));
+                if ($chunk === false) {
+                    // chunk has been evicted or expired
+                    $rebuild = true;
+                    break;
+                }
+                $fileList .= $chunk;
+            }
+        }
+        if ($rebuild) {
+            $fileList = (string)self::$db->scalar("
+                SELECT FileList FROM torrents WHERE ID = ?
+                ", $this->id
+            );
+            $chunkSize  = (int)(1024 ** 2);
+            $chunkTotal = (int)ceil(strlen($fileList) / $chunkSize);
+            for ($c = 0; $c < $chunkTotal; $c++) {
+                self::$cache->cache_value(
+                    sprintf(self::CACHE_FILELIST_CHUNK, $this->id, $c),
+                    substr($fileList, $c * $chunkSize, $chunkSize),
+                    0
+                );
+            }
+            self::$cache->cache_value(
+                sprintf(self::CACHE_FILELIST_COUNT, $this->id),
+                $chunkTotal,
+                0
+            );
+        }
+        return array_map(
+            fn ($f) => $this->filenameParse($f),
+            explode("\n", $fileList)
+        );
     }
 
     /**
