@@ -15,11 +15,11 @@
     } only
 %}
 
-                {% if show_extended %}
+{% if show_extended %}
                     <a href="#" onclick="$('#torrent_{{ torrent_id }}').gtoggle(); return false;">▶ {{ torrent.label(viewer)|raw }}</a>
-                {% else %}
+{% else %}
                     <a href="{{ torrent.location }}">▶ {{ torrent.label(viewer)|raw }}</a>
-                {% endif %}
+{% endif %}
                 </td>
 {% include 'torrent/stats.twig' with {'torrent': torrent} %}
             </tr>
@@ -49,57 +49,37 @@
                             <br />Last active: {% if torrent.lastActiveDate %}{{ torrent.lastActiveDate|time_diff }}{% else %}Never{% endif %}
 {% endif %}
 {% if torrent.isReseedRequestAllowed or viewer.permitted('users_mod') %}
-                            <br /><a href="{{ torrent.url('action=reseed')|raw }}" class="brackets" onclick="return confirm('Are you sure you want to request a re-seed of this torrent?');">Request re-seed</a>
+                            <br /><a href="{{ torrent.url('action=reseed')|raw }}" class="brackets request-reseed">Request re-seed</a>
+{% endif %}
+{% if viewer.permitted('site_moderate_requests') %}
+                        <a href="{{ torrent.url('action=masspm')|raw }}" class="brackets">Mass PM snatchers</a>
 {% endif %}
                             <br /><br />If you download this, your ratio will become {{ ratio(viewer.uploadedSize, viewer.downloadedSize + torrent.size) }}.
                         </blockquote>
                     </div>
-                    <div class="linkbox">
-{% if viewer.permitted('site_moderate_requests') %}
-                        <a href="{{ torrent.url('action=masspm')|raw }}" class="brackets">Mass PM snatchers</a>
-{% endif %}
+                    <div class="linkbox" data-id="{{ torrent_id }}">
 {% if torrent.media == 'CD' and torrent.hasLogDb %}
-                        <a href="#" class="brackets" onclick="show_logs('{{ torrent_id }}', {{ torrent.hasLogDb }}, '{{ torrent.logScore
-                            }}'); return false;">View log{{ torrent.ripLogIdList|length|plural }}</a>
+                        <a href="#" class="brackets view-riplog">View log{{ torrent.ripLogIdList|length|plural }}</a>
 {% endif %}
 {% if viewer.permitted('site_view_torrent_snatchlist') %}
-                        <a href="#" class="brackets tooltip" onclick="show_downloads('{{ torrent_id }}', 0); return false;" title="View the list of users that have clicked the &quot;DL&quot; button.">View downloaders</a>
-                        <a href="#" class="brackets tooltip" onclick="show_snatches('{{ torrent_id }}', 0); return false;" title="View the list of users that have reported a snatch to the tracker.">View snatchers</a>
+                        <a href="#" class="brackets tooltip view-download" title="View the list of users that have clicked the &quot;DL&quot; button.">View downloaders</a>
+                        <a href="#" class="brackets tooltip view-snatch" title="View the list of users that have reported a snatch to the tracker.">View snatchers</a>
 {% endif %}
-                        <a href="#" class="brackets tooltip" onclick="show_seeders('{{ torrent_id }}', 0); return false;" title="View the list of peers that are currently seeding this torrent.">View seeders</a>
-                        <a href="#" class="brackets" onclick="show_files('{{ torrent_id }}'); return false;">View contents</a>
+                        <a href="#" class="brackets tooltip view-seeder" title="View the list of peers that are currently seeding this torrent.">View seeders</a>
+                        <a href="#" class="brackets tooltip view-filelist" title="View the list of files in this torrent">View contents</a>
 {% set report_id_list = torrent.reportIdList(viewer) %}
 {% set report_total = report_id_list|length %}
 {% if report_total %}
-                        <a href="#" class="brackets" onclick="show_reported('{{ torrent_id }}'); return false;">View report information</a>
+                        <a href="#" class="brackets tooltip view-report" title="View the open report(s) for this upload">View report information</a>
 {% endif %}
                     </div>
                     <div id="viewlog_{{ torrent_id }}" class="hidden"></div>
                     <div id="peers_{{ torrent_id }}" class="hidden"></div>
                     <div id="downloads_{{ torrent_id }}" class="hidden"></div>
                     <div id="snatches_{{ torrent_id }}" class="hidden"></div>
-                    <div id="files_{{ torrent_id }}" class="hidden">
-                        <table class="filelist_table">
-                            <tr class="colhead_dark">
-                                <td>
-                                    <div class="filelist_title" style="float: left;">File Names
-{% if viewer.permitted('users_mod') %}
-            <a href="torrents.php?action=regen_filelist&amp;torrentid={{ torrent_id }}" class="brackets">Regenerate</a>
-{% endif %}
-                                    </div>
-                                    <div class="filelist_path" style="float: right;">{% if torrent.path %}{{ torrent.path }}/{% endif %}</div>
-                                </td>
-                                <td class="nobr" style="text-align: right">
-                                    <strong>Size</strong>
-                                </td>
-                            </tr>
-{% for file in torrent.fileList %}
-                            <tr><td>{{ file.name }}</td><td class="number_column nobr">{{ file.size|octet_size }}</td></tr>
-{% endfor %}
-                        </table>
-                    </div>
+                    <div id="files_{{ torrent_id }}" class="hidden"></div>
 {% for report_id in report_id_list %}
-{% set report = report_man.findById(report_id) %}
+{%  set report = report_man.findById(report_id) %}
 {%  if loop.first %}
 <div id="reported_{{ torrent_id }}" class="hidden">
     <table class="reportinfo_table">

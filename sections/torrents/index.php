@@ -36,6 +36,9 @@ if (!empty($_REQUEST['action'])) {
         case 'take_editlog':
             require_once('edit_log_handle.php');
             break;
+        case 'filelist':
+            require_once('filelist.php');
+            break;
         case 'rescore_log':
             require_once('rescore_log.php');
             break;

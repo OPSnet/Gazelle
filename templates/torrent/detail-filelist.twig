@@ -1,0 +1,18 @@
+<table class="filelist_table">
+    <tr class="colhead_dark">
+        <td>
+            <div class="filelist_title" style="float: left;">File Names
+{% if viewer.permitted('users_mod') %}
+<a href="torrents.php?action=regen_filelist&amp;torrentid={{ torrent.id }}" class="brackets">Regenerate</a>
+{% endif %}
+            </div>
+            <div class="filelist_path" style="float: right;">{% if torrent.path %}{{ torrent.path }}/{% endif %}</div>
+        </td>
+        <td class="nobr" style="text-align: right">
+            <strong>Size</strong>
+        </td>
+    </tr>
+{% for file in torrent.fileList %}
+    <tr><td>{{ file.name }}</td><td class="number_column nobr">{{ file.size|octet_size }}</td></tr>
+{% endfor %}
+</table>

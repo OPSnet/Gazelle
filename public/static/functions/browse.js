@@ -1,11 +1,11 @@
 "use strict";
 
-async function show_downloads_load(torrentid, page) {
-    let e = document.getElementById('downloads_' + torrentid);
+async function show_downloads_load(tid, page) {
+    let e = document.getElementById('downloads_' + tid);
     e.innerHTML = '<h4>Loading...</h4>';
     e.classList.remove('hidden');
     const response = await fetch(
-        'torrents.php?action=downloadlist&page=' + page + '&torrentid=' + torrentid,
+        'torrents.php?action=downloadlist&page=' + page + '&torrentid=' + tid,
     );
     const data = await response.json();
     e.innerHTML = data.html;
@@ -14,19 +14,28 @@ async function show_downloads_load(torrentid, page) {
             const page = p.innerHTML;
             if (page != data.page) {
                 p.addEventListener('click', () => {
-                    show_downloads(torrentid, page);
+                    show_downloads(tid, page);
                 });
             }
         });
     }
 }
 
-async function show_snatches_load(torrentid, page) {
-    let e = document.getElementById('snatches_' + torrentid);
+async function show_filelist_load(div) {
+    div.innerHTML = '<h4>Loading...</h4>';
+    div.classList.remove('hidden');
+    const response = await fetch(
+        'torrents.php?action=filelist&id=' + div.id.replace('files_', '')
+    );
+    div.innerHTML = await response.json();
+}
+
+async function show_snatches_load(tid, page) {
+    let e = document.getElementById('snatches_' + tid);
     e.innerHTML = '<h4>Loading...</h4>';
     e.classList.remove('hidden');
     const response = await fetch(
-        'torrents.php?action=snatchlist&page=' + page + '&torrentid=' + torrentid,
+        'torrents.php?action=snatchlist&page=' + page + '&torrentid=' + tid,
     );
     const data = await response.json();
     e.innerHTML = data.html;
@@ -35,19 +44,19 @@ async function show_snatches_load(torrentid, page) {
             const page = p.innerHTML;
             if (page != data.page) {
                 p.addEventListener('click', () => {
-                    show_snatches(torrentid, page);
+                    show_snatches(tid, page);
                 });
             }
         });
     }
 }
 
-async function show_seeders_load(torrentid, page) {
-    let e = document.getElementById('peers_' + torrentid);
+async function show_seeders_load(tid, page) {
+    let e = document.getElementById('peers_' + tid);
     e.innerHTML = '<h4>Loading...</h4>';
     e.classList.remove('hidden');
     let response = await fetch(
-        'torrents.php?action=peerlist&page=' + page + '&torrentid=' + torrentid,
+        'torrents.php?action=peerlist&page=' + page + '&torrentid=' + tid,
     );
     const data = await response.json();
     e.innerHTML = data.html;
@@ -56,7 +65,7 @@ async function show_seeders_load(torrentid, page) {
             const page = p.innerHTML;
             if (page != data.page) {
                 p.addEventListener('click', () => {
-                    show_seeders(torrentid, page);
+                    show_seeders(tid, page);
                 });
             }
         });
@@ -132,20 +141,18 @@ function show_seeders(tid, Page) {
     }
 }
 
-async function show_logs(tid, HasLogDB, LogScore) {
-    if (HasLogDB === 1) {
-        let e = document.getElementById('viewlog_' + tid);
-        if (e.innerHTML === '') {
-            const response = await fetch(
-                'torrents.php?action=viewlog&logscore=' + LogScore + '&torrentid=' + tid
-            );
-            e.innerHTML = await response.text();
-        }
-        if (e.classList.contains('hidden')) {
-            e.classList.remove('hidden');
-        } else {
-            e.classList.add('hidden');
-        }
+async function show_logs(tid) {
+    let e = document.getElementById('viewlog_' + tid);
+    if (e.innerHTML === '') {
+        const response = await fetch(
+            'torrents.php?action=viewlog&torrentid=' + tid
+        );
+        e.innerHTML = await response.text();
+    }
+    if (e.classList.contains('hidden')) {
+        e.classList.remove('hidden');
+    } else {
+        e.classList.add('hidden');
     }
     document.getElementById('peers_' + tid).classList.add('hidden');
     document.getElementById('snatches_' + tid).classList.add('hidden');
@@ -157,12 +164,14 @@ async function show_logs(tid, HasLogDB, LogScore) {
     }
 }
 
-function show_files(tid) {
-    let e = document.getElementById('files_' + tid);
-    if (e.classList.contains('hidden')) {
-        e.classList.remove('hidden');
+function show_filelist(tid) {
+    let div = document.getElementById('files_' + tid);
+    if (div.innerHTML === '') {
+        show_filelist_load(div);
+    } else if (div.classList.contains('hidden')) {
+        div.classList.remove('hidden');
     } else {
-        e.classList.add('hidden');
+        div.classList.add('hidden');
     }
     document.getElementById('viewlog_' + tid).classList.add('hidden');
     document.getElementById('peers_' + tid).classList.add('hidden');
@@ -180,7 +189,12 @@ function show_reported(tid) {
     document.getElementById('peers_' + tid).classList.add('hidden');
     document.getElementById('snatches_' + tid).classList.add('hidden');
     document.getElementById('downloads_' + tid).classList.add('hidden');
-    document.getElementById('reported_' + tid).classList.remove('hidden');
+    let r = document.getElementById('reported_' + tid);
+    if (r.classList.contains('hidden')) {
+        r.classList.remove('hidden');
+    } else {
+        r.classList.add('hidden');
+    }
 }
 
 function add_tag(tag) {
@@ -192,7 +206,6 @@ function add_tag(tag) {
 }
 
 /**
- *
  * @param {Event} event
  */
 function openAll(event) {
@@ -258,7 +271,9 @@ function toggle_group(groupid, link, event) {
             $('a.show_torrents_link', row).updateTooltip(tooltip);
             $('a.show_torrents_link', row).raw().parentNode.className = (showing) ? 'hide_torrents' : 'show_torrents';
         } else {
-            if (showing) {
+            if (!showing) {
+                row.ghide();
+            } else {
                 // show the row depending on whether the edition it's in is collapsed or not
                 if (row.has_class('edition')) {
                     row.gshow();
@@ -270,8 +285,6 @@ function toggle_group(groupid, link, event) {
                         row.ghide();
                     }
                 }
-            } else {
-                row.ghide();
             }
         }
     }
@@ -443,3 +456,59 @@ async function add_to_collage() {
         ? 'Added to <b>' + data.response.link + '</b>'
         : 'Failed to add! (' + data.error + ')';
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    let button = document.getElementById('collage-add');
+    if (button) {
+        button.addEventListener('click', () => {
+            add_to_collage();
+        })
+    }
+
+    Array.from(document.querySelectorAll('.request-reseed')).forEach((reseed) => {
+        reseed.addEventListener('click', (e) => {
+            if (!confirm(
+                'Are you sure you want to request a re-seed of this torrent?'
+            )) {
+                e.preventDefault();
+            }
+        });
+    });
+
+    Array.from(document.querySelectorAll('.view-filelist')).forEach((view) => {
+        view.addEventListener('click', (e) => {
+            show_filelist(view.parentNode.dataset.id);
+            e.preventDefault();
+        });
+    });
+    Array.from(document.querySelectorAll('.view-riplog')).forEach((view) => {
+        view.addEventListener('click', (e) => {
+            show_logs(view.parentNode.dataset.id);
+            e.preventDefault();
+        });
+    });
+    Array.from(document.querySelectorAll('.view-download')).forEach((view) => {
+        view.addEventListener('click', (e) => {
+            show_downloads(view.parentNode.dataset.id);
+            e.preventDefault();
+        });
+    });
+    Array.from(document.querySelectorAll('.view-report')).forEach((view) => {
+        view.addEventListener('click', (e) => {
+            show_reported(view.parentNode.dataset.id);
+            e.preventDefault();
+        });
+    });
+    Array.from(document.querySelectorAll('.view-seeder')).forEach((view) => {
+        view.addEventListener('click', (e) => {
+            show_seeders(view.parentNode.dataset.id);
+            e.preventDefault();
+        });
+    });
+    Array.from(document.querySelectorAll('.view-snatch')).forEach((view) => {
+        view.addEventListener('click', (e) => {
+            show_snatches(view.parentNode.dataset.id);
+            e.preventDefault();
+        });
+    });
+});

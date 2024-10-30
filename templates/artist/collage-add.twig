@@ -21,9 +21,7 @@
             <input type="hidden" name="userid" value="{{ viewer.id }}" />
             <input type="hidden" name="auth" value="{{ viewer.auth }}" />
             <br />
-            <input type="submit" value="Add &amp; Go" />
-            {{- dom.click('#collage-add', "add_to_collage()") -}}
-            &nbsp;<input type="button" id="collage-add" value="Add" />
+            <input type="submit" value="Add &amp; Go" />&nbsp;<input type="button" id="collage-add" value="Add" />
             <div id="add-result"></div>
             </form>
     </div>
