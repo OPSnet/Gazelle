@@ -26,7 +26,7 @@ fi
 
 if [ -n "$JS" ]; then
     echo "Linting JS"
-    docker-compose exec -T web yarn run eslint -c misc/eslint.config.mjs $JS
+    docker-compose exec -T web yarn run eslint -c misc/eslint.config.mjs --no-warn-ignored $JS
 fi
 
 if [ -n "$CSS" ]; then
