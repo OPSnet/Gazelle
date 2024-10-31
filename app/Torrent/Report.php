@@ -92,6 +92,16 @@ class Report extends \Gazelle\BaseObject {
         return $list ? array_map('intval', $list) : [];
     }
 
+    public function otherTorrentList(): array {
+        return array_filter(
+            array_map(
+                fn($id) => $this->torMan->findById($id),
+                $this->otherIdList()
+            ),
+            fn($t) => $t instanceof \Gazelle\Torrent
+        );
+    }
+
     public function reason(): string {
         return $this->info()['reason'] ?? '-No reason given-';
     }

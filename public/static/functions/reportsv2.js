@@ -1,3 +1,5 @@
+"use strict";
+
 function ChangeReportType() {
     $.post("reportsv2.php?action=ajax_report", $('#reportform').serialize(), function(response) {
         $('#dynamic_form').html(response);
@@ -52,7 +54,7 @@ function TakeResolve(reportid) {
 }
 
 function NewReport(q, view, id) {
-    var url = 'reportsv2.php?action=ajax_new_report&uniqurl=' + q;
+    let url = 'reportsv2.php?action=ajax_new_report&uniqurl=' + q;
     if (view) {
         url += '&view=' + view;
     }
@@ -61,8 +63,8 @@ function NewReport(q, view, id) {
     }
     $.get(url, function (response) {
         if (response) {
-            var div = $(response);
-            var id = div.data("reportid");
+            const div = $(response);
+            const id = div.data("reportid");
             if (!$('#report'+id).length) {
                 $('#all_reports').append(div);
                 $('#no_reports').remove();
@@ -74,6 +76,7 @@ function NewReport(q, view, id) {
             // No new reports at this time
             if (!$('.report').length && !$('#no_reports') == 0) {
                 $('#all_reports').append($('<div id="no_reports" class="box pad center"><strong>No new reports! \\o/</strong></div>'));
+                return;
             }
         }
         if (--q > 0) {
@@ -85,8 +88,8 @@ function NewReport(q, view, id) {
 
 function AddMore(view, id) {
     // Function will add the amount of reports in the input box unless that will take it over 50
-    var num = parseInt($('#repop_amount').val()) || 10;
-    var curCount = $('.report').length;
+    const num = parseInt($('#repop_amount').val()) || 10;
+    const curCount = $('.report').length;
     if (curCount < 50) {
         NewReport(Math.min(num, 50 - curCount), view, id);
     }
@@ -136,10 +139,6 @@ function Dismiss(reportid) {
     TakeResolve(reportid);
 }
 
-function ClearReport(reportid) {
-    $('#report' + reportid).remove();
-}
-
 function Grab(reportid) {
     if (reportid) {
         $.get("reportsv2.php?action=ajax_claim&id=" + reportid, function(response) {
@@ -151,7 +150,7 @@ function Grab(reportid) {
         });
     } else {
         $('#all_reports input[name="reportid"]').each(function() {
-            var reportid = this.value;
+            const reportid = this.value;
             $.get("reportsv2.php?action=ajax_claim&id=" + reportid, function(response) {
                 if (response == 1) {
                     $('#grab' + reportid).disable();
@@ -170,7 +169,7 @@ function MultiResolve() {
 }
 
 function UpdateResolve(reportid) {
-    var url = 'reportsv2.php?action=ajax_update_resolve&reportid=' + reportid
+    const url = 'reportsv2.php?action=ajax_update_resolve&reportid=' + reportid
         + "&auth=" + $('input[name="auth"]').val()
         + "&newresolve=" + $('#resolve_type' + reportid).val()
         + "&categoryid=" + $('#categoryid' + reportid).val();
@@ -185,7 +184,7 @@ function Switch(reportid, otherid) {
     // This entails invalidating the current report and creating a new with the correct preset.
     Dismiss(reportid);
 
-    var report = {
+    const report = {
         auth: document.body.dataset.auth,
         reportid: reportid,
         otherid: otherid,
@@ -201,12 +200,18 @@ function Switch(reportid, otherid) {
     });
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-    const reportType = document.getElementById('type');
+document.addEventListener('DOMContentLoaded', () => {
+    let reportType = document.getElementById('type');
     if (reportType) {
-        reportType.addEventListener('change', function() {
+        reportType.addEventListener('change', () => {
             ChangeReportType();
         });
         ChangeReportType();
     }
+
+    Array.from(document.getElementsByClassName('report-clear')).forEach((clear) => {
+        clear.addEventListener("click", () => {
+            document.getElementById('report' + clear.parentNode.dataset.reportid).remove();
+        });
+    });
 });

@@ -40,13 +40,30 @@ class TorrentReportManagerTest extends TestCase {
     public function testWorkflowReport(): void {
         $torMan = new Manager\Torrent();
         $torrent = $torMan->findById($this->tgroup->torrentIdList()[0]);
+        $title = [
+            'torrent extra 1 ' . randomString(10),
+            'torrent extra 2 ' . randomString(10),
+        ];
+        $extra = [
+            \GazelleUnitTest\Helper::makeTorrentMusic(
+                tgroup: $this->tgroup,
+                user:   $this->userList[0],
+                title:  $title[0],
+            ),
+            \GazelleUnitTest\Helper::makeTorrentMusic(
+                tgroup: $this->tgroup,
+                user:   $this->userList[0],
+                title:  $title[1],
+            ),
+        ];
+        $extraIdList = [$extra[0]->id(), $extra[1]->id()];
         $this->assertInstanceOf(Torrent::class, $torrent, 'report-torrent-is-torrent');
         $report = (new Manager\Torrent\Report($torMan))->create(
             torrent:     $torrent,
             user:        $this->userList[1],
             reportType:  (new Manager\Torrent\ReportType())->findByName('other'),
             reason:      'phpunit other report',
-            otherIdList: '123 234',
+            otherIdList: implode(' ', $extraIdList),
             irc:         new Util\Irc(),
         );
 
@@ -55,13 +72,25 @@ class TorrentReportManagerTest extends TestCase {
         $this->assertCount(0, $report->trackList(), 'torrent-report-track-list');
         $this->assertStringEndsWith("id={$report->id()}", $report->location(), 'torrent-report-location');
         $this->assertEquals('phpunit other report', $report->reason(), 'torrent-report-reason');
-        $this->assertEquals([123, 234], $report->otherIdList(), 'torrent-report-other-id-list');
         $this->assertEquals($this->userList[1]->id(), $report->reporterId(), 'torrent-report-reporter-id');
         $this->assertEquals('New', $report->status(), 'torrent-report-report-status');
         $this->assertEquals('Other', $report->reportType()->name(), 'torrent-report-report-type-name');
         $this->assertEquals('other', $report->type(), 'torrent-report-name');
-        $this->assertEquals($this->tgroup->torrentIdList()[0], $report->torrentId(), 'torrent-report-torrent-id');
-        $this->assertEquals($this->tgroup->torrentIdList()[0], $report->torrent()->id(), 'torrent-report-torrent-object');
+        $this->assertEquals($this->tgroup->torrentIdList()[2], $report->torrentId(), 'torrent-report-torrent-id');
+        $this->assertEquals($this->tgroup->torrentIdList()[2], $report->torrent()->id(), 'torrent-report-torrent-object');
+        $this->assertEquals(
+            $extraIdList,
+            $report->otherIdList(),
+            'torrent-report-other-id-list'
+        );
+        $this->assertEquals(
+            $title,
+            array_map(
+                fn ($t) => $t->remasterTitle(),
+                $report->otherTorrentList(),
+            ),
+            'torrent-report-other-torrent-list'
+        );
 
         $this->assertEquals(1, $report->claim($this->userList[0]), 'torrent-report-claim');
         $this->assertEquals('InProgress', $report->status(), 'torrent-report-report-open-status');

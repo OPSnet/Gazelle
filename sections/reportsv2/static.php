@@ -95,30 +95,31 @@ if ($search->canUnclaim($Viewer)) {
                 'total_torrent'  => $reportMan->totalReportsTorrent($torrent),
                 'viewer'         => $Viewer,
             ]);
-            if ($report->otherIdList()) {
+            $otherTorrentList = $report->otherTorrentList();
+            if ($otherTorrentList) {
 ?>
                 <tr>
                     <td class="label">Relevant other torrents:</td>
                     <td>
 <?php
     $n = 0;
-    foreach ($report->otherIdList() as $extraId) {
-        $extra = $torMan->findById($extraId)?->setViewer($Viewer);
+    foreach ($otherTorrentList as $extra) {
         if ($extra) {
+            $extra->setViewer($Viewer);
 ?>
             <?= $n++ == 0 ? '' : '<br />' ?>
             <?= $extra->group()->link() ?> <?= $extra->shortLabelLink() ?> (<?= byte_format($extra->size()) ?>)
                         <br /><?= $extra->edition() ?>
-                        <br /><a href="torrents.php?action=download&amp;id=<?= $extraId ?>&amp;torrent_pass=<?= $Viewer->announceKey() ?>" title="Download" class="brackets tooltip">DL</a>
-                        <a href="#" class="brackets tooltip" onclick="show_downloads('<?= $extraId ?>', 0); return false;" title="View the list of users that have clicked the &quot;DL&quot; button.">Downloaders</a>
-                        <a href="#" class="brackets tooltip" onclick="show_snatches('<?= $extraId ?>', 0); return false;" title="View the list of users that have reported a snatch to the tracker.">Snatchers</a>
-                        <a href="#" class="brackets" onclick="show_seeders('<?= $extraId ?>', 0); return false;">Seeders</a>
-                        <a href="#" class="brackets" onclick="show_files('<?= $extraId ?>'); return false;">Contents</a>
-                        <div id="viewlog_<?= $extraId ?>" class="hidden"></div>
-                        <div id="peers_<?= $extraId ?>" class="hidden"></div>
-                        <div id="downloads_<?= $extraId ?>" class="hidden"></div>
-                        <div id="snatches_<?= $extraId ?>" class="hidden"></div>
-                        <div id="files_<?= $extraId ?>" class="hidden">
+                        <br /><a href="torrents.php?action=download&amp;id=<?= $extra->id() ?>&amp;torrent_pass=<?= $Viewer->announceKey() ?>" title="Download" class="brackets tooltip">DL</a>
+                        <a href="#" class="brackets tooltip" onclick="show_downloads('<?= $extra->id() ?>', 0); return false;" title="View the list of users that have clicked the &quot;DL&quot; button.">Downloaders</a>
+                        <a href="#" class="brackets tooltip" onclick="show_snatches('<?= $extra->id() ?>', 0); return false;" title="View the list of users that have reported a snatch to the tracker.">Snatchers</a>
+                        <a href="#" class="brackets" onclick="show_seeders('<?= $extra->id() ?>', 0); return false;">Seeders</a>
+                        <a href="#" class="brackets" onclick="show_files('<?= $extra->id() ?>'); return false;">Contents</a>
+                        <div id="viewlog_<?= $extra->id() ?>" class="hidden"></div>
+                        <div id="peers_<?= $extra->id() ?>" class="hidden"></div>
+                        <div id="downloads_<?= $extra->id() ?>" class="hidden"></div>
+                        <div id="snatches_<?= $extra->id() ?>" class="hidden"></div>
+                        <div id="files_<?= $extra->id() ?>" class="hidden">
                             <table class="filelist_table">
                                 <tr class="colhead_dark">
                                     <td>
@@ -203,10 +204,10 @@ if ($search->canUnclaim($Viewer)) {
                                 </ul>
                             </td>
                             <td width="50%" style="vertical-align: top; max-width: 500px;">
-                        <?php
-                            $log = new Gazelle\Torrent\Log($extraId);
+<?php
+                            $log = new Gazelle\Torrent\Log($extra->id());
                             $details = $log->logDetails();
-                        ?>
+?>
                                 <ul class="nobullet logdetails">
                         <?php                       if (!count($details)) { ?>
                                 <li class="nobr">No logs</li>
@@ -230,7 +231,7 @@ if ($search->canUnclaim($Viewer)) {
 <?php                               } ?>
                                 <li>
                                     <span class="nobr"><strong>Raw logfile #<?= $logId ?></strong>: </span>
-                                    <a href="javascript:void(0);" onclick="BBCode.spoiler(this);" class="brackets">Show</a><pre class="hidden"><?= $ripFiler->get([$extraId, $logId]) ?></pre>
+                                    <a href="javascript:void(0);" onclick="BBCode.spoiler(this);" class="brackets">Show</a><pre class="hidden"><?= $ripFiler->get([$extra->id(), $logId]) ?></pre>
                                 </li>
                                 <li>
                                     <span class="nobr"><strong>HTML logfile #<?= $logId ?></strong>: </span>
@@ -248,7 +249,7 @@ if ($search->canUnclaim($Viewer)) {
                         <?php                   } ?>
                 <tr>
                     <td class="label">Switch:</td>
-                    <td><a href="#" onclick="Switch(<?= $reportId ?>, <?= $extraId ?>); return false;" class="brackets">Switch</a> the source and target torrents (you become the report owner).
+                    <td><a href="#" onclick="Switch(<?= $reportId ?>, <?= $extra->id() ?>); return false;" class="brackets">Switch</a> the source and target torrents (you become the report owner).
 <?php
         }
     }
