@@ -151,6 +151,66 @@ function fetchPushbulletDevices(apikey) {
     });
 }
 
+function init_css_gallery() {
+    let gallery = Array.from(
+        document.querySelectorAll('input[name="stylesheet_gallery"]')
+    );
+
+    let stylesheet = document.querySelector('select#stylesheet');
+    function update_radio() {
+        let radio = gallery[
+            gallery.findIndex((g) => { return g.value == stylesheet.value; })
+        ];
+        radio.click();
+        radio.parentNode.parentNode.classList.add('selected');
+    }
+
+    stylesheet.addEventListener('change', () => {
+        // select the appropriate gallery item, clear the external url
+        update_radio();
+        external_url.value = '';
+    });
+
+    // If no custom stylesheet, select the current gallery
+    let external_url = document.querySelector('input#styleurl');
+    if (external_url.value === '') {
+        update_radio();
+    }
+    external_url.addEventListener('keydown', () => {
+        // If the custom CSS field is changed, clear radio buttons
+        gallery.forEach((g) => {
+            g.checked = false;
+        });
+    });
+    external_url.addEventListener('keyup', (e) => {
+        // If the field is empty, select appropriate gallery item again by the drop-down
+        if (e.target.value === "") {
+            update_radio();
+        }
+    });
+
+    // When a gallery radio is clicked, update the drop-down
+    gallery.forEach((g) => {
+        g.addEventListener('change', () => {
+            stylesheet.value = g.value;
+            external_url.value = '';
+        });
+    });
+
+    // gallery visibility can be toggled
+    let toggle = document.getElementById('toggle_css_gallery');
+    toggle.addEventListener('click', (e) => {
+        if (toggle.innerHTML === 'Hide gallery') {
+            toggle.innerHTML = 'Show gallery';
+            document.getElementById('css_gallery').style.display = 'none';
+        } else {
+            toggle.innerHTML = 'Hide gallery';
+            document.getElementById('css_gallery').style.display = 'block';
+        }
+        e.preventDefault();
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     Array.from(document.querySelectorAll("#settings_sections li"))
         .filter((li) => { return li.dataset.gazelleSectionId != 'live_search'; })
@@ -276,4 +336,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     refresh_paranoia();
     toggle_identicons();
+    init_css_gallery();
 });
