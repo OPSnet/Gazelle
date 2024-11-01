@@ -3,9 +3,10 @@
 namespace Gazelle;
 
 class ForumThread extends BaseObject {
-    final public const tableName     = 'forums_topics';
-    final public const CACHE_KEY     = 'fthreadv2_%d';
-    final public const CACHE_CATALOG = 'fthread_cat_%d_%d';
+    final public const tableName        = 'forums_topics';
+    final public const CACHE_KEY        = 'fthreadv2_%d';
+    final public const CACHE_CATALOG    = 'fthread_cat_%d_%d';
+    final protected const ID_THREAD_KEY = 'zz_ft_%d';
 
     // We need to remember to which forum the thread belongs in order
     // to adjust the forum after the thread is removed.
@@ -334,6 +335,7 @@ class ForumThread extends BaseObject {
             $this->updateRoot($previousPost['user_id'], $previousPost['post_id']);
         }
         $this->flush();
+        self::$cache->delete_value(sprintf(self::ID_THREAD_KEY, $this->id));
         return $affected;
     }
 

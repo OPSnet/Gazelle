@@ -6,8 +6,6 @@ class Forum extends \Gazelle\BaseManager {
     protected const CACHE_TOC_MAIN   = 'forum_toc_main';
     protected const CACHE_LIST       = 'forum_list';
     protected const ID_KEY           = 'zz_f_%d';
-    protected const ID_THREAD_KEY    = 'zz_ft_%d';
-    protected const ID_POST_KEY      = 'zz_fp_%d';
 
     /**
      * Create a forum
