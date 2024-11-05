@@ -16,8 +16,9 @@ class TGroupTest extends TestCase {
 
     public function setUp(): void {
         $this->userList = [
-            'admin' => \GazelleUnitTest\Helper::makeUser('tgroup.a.' . randomString(6), 'forum'),
-            'user'  => \GazelleUnitTest\Helper::makeUser('tgroup.u.' . randomString(6), 'forum'),
+            'admin' => \GazelleUnitTest\Helper::makeUser('tgroup.a.' . randomString(6), 'tgroup'),
+            'user'  => \GazelleUnitTest\Helper::makeUser('tgroup.u.' . randomString(6), 'tgroup'),
+            'nope'  => \GazelleUnitTest\Helper::makeUser('tgroup.n.' . randomString(6), 'tgroup'),
         ];
         $this->userList['admin']->setField('PermissionID', MOD)->modify();
 
@@ -33,7 +34,7 @@ class TGroupTest extends TestCase {
             recordLabel:     $this->recordLabel,
             catalogueNumber: $this->catalogueNumber,
             description:     "Description of {$this->name}",
-            image:           '',
+            image:           'https://example.com/' . randomString(10) . '.jpg',
             releaseType:     (new ReleaseType())->findIdByName('Live album'),
             showcase:        false,
         );
@@ -46,7 +47,7 @@ class TGroupTest extends TestCase {
         );
         \GazelleUnitTest\Helper::makeTorrentMusic(
             tgroup:          $this->tgroup,
-            user:            $this->userList['user'],
+            user:            $this->userList['admin'],
             catalogueNumber: 'UA-TG-1',
             format:          'MP3',
             encoding:        'V0',
@@ -80,17 +81,18 @@ class TGroupTest extends TestCase {
         $this->assertEquals('Music', $this->tgroup->categoryName(), 'tgroup-create-category-name');
         $this->assertEquals('cats_music', $this->tgroup->categoryCss(), 'tgroup-create-category-ss');
         $this->assertEquals('Live album', $this->tgroup->releaseTypeName(), 'tgroup-create-release-type-name');
-        $this->assertEquals('static/common/noartwork/music.png', $this->tgroup->image(), 'tgroup-create-image');
         $this->assertEquals($this->name, $this->tgroup->name(), 'tgroup-create-name');
         $this->assertEquals($this->year, $this->tgroup->year(), 'tgroup-create-year');
         $this->assertEquals($this->recordLabel, $this->tgroup->recordLabel(), 'tgroup-create-record-label');
         $this->assertEquals($this->catalogueNumber, $this->tgroup->catalogueNumber(), 'tgroup-create-catalogue-number');
-        $this->assertEquals(STATIC_SERVER . '/common/noartwork/music.png', $this->tgroup->cover(), 'tgroup-create-cover');
         $this->assertEquals(0, $this->tgroup->unresolvedReportsTotal(), 'tgroup-create-unresolved-reports');
         $this->assertEquals($this->tgroup->name(), $this->tgroup->flush()->name(), 'tgroup-create-flush');
+        $this->assertStringStartsWith('https://example.com/', $this->tgroup->image(), 'tgroup-create-image');
+        $this->assertStringStartsWith('https://example.com/', $this->tgroup->cover(), 'tgroup-create-cover');
 
         $this->assertTrue($this->tgroup->isOwner($this->userList['user']), 'tgroup-user-is-owner');
-        $this->assertFalse($this->tgroup->isOwner($this->userList['admin']), 'tgroup-user-not-owner');
+        $this->assertTrue($this->tgroup->isOwner($this->userList['admin']), 'tgroup-admin-is-owner');
+        $this->assertFalse($this->tgroup->isOwner($this->userList['nope']), 'tgroup-nope-not-owner');
 
         $this->assertNull($this->manager->findById(-666), 'tgroup-no-instance-of');
         $find = $this->manager->findById($this->tgroup->id());
@@ -108,8 +110,9 @@ class TGroupTest extends TestCase {
         $this->assertTrue($this->userList['user']->canSpendFLToken($torrent), 'tgroup-user-fltoken');
 
         (new Stats\Users())->refresh();
-        $this->assertEquals(3, $this->userList['user']->stats()->uploadTotal(), 'tgroup-user-stats-upload');
+        $this->assertEquals(2, $this->userList['user']->stats()->uploadTotal(), 'tgroup-user-stats-upload');
         $this->assertEquals(1, $this->userList['user']->stats()->uniqueGroupTotal(), 'tgroup-user-stats-unique');
+        $this->assertEquals(1, $this->userList['admin']->stats()->uploadTotal(), 'tgroup-user-admin-upload');
     }
 
     public function testTGroupArtist(): void {
@@ -201,6 +204,57 @@ class TGroupTest extends TestCase {
             $this->userList['admin'],
         );
         $this->assertGreaterThan(0, $revisionId, 'tgroup-revision-add');
+    }
+
+    public function testTGroupJson(): void {
+        $json = new Json\TGroup(
+            $this->tgroup,
+            $this->userList['user'],
+            new Manager\Torrent(),
+        );
+        $this->assertIsArray($json->payload());
+        ['group' => $group, 'torrents' => $torrentList] = $json->payload();
+        $this->assertEquals(
+            ["wikiBody", "wikiBBcode", "wikiImage", "proxyImage", "id", "name",
+             "year", "recordLabel", "catalogueNumber", "releaseType",
+             "releaseTypeName", "categoryId", "categoryName", "time",
+             "vanityHouse", "isBookmarked", "tags", "musicInfo"
+            ],
+            array_keys($group),
+            'tgroup-json-group'
+        );
+        $this->assertCount(3, $torrentList, 'tgroup-json-torrent-total');
+        $this->assertEquals(
+            ["infoHash", "id", "media", "format", "encoding", "remastered",
+             "remasterYear", "remasterTitle", "remasterRecordLabel",
+             "remasterCatalogueNumber", "scene", "hasLog", "hasCue", "logScore",
+             "logChecksum", "logCount", "ripLogIds", "fileCount", "size",
+             "seeders", "leechers", "snatched", "freeTorrent", "reported",
+             "time", "description", "fileList", "filePath", "userId",
+             "username"
+            ],
+            array_keys($torrentList[0]),
+            'tgroup-json-torrent'
+        );
+
+        $nope = new Json\TGroup(
+            $this->tgroup,
+            $this->userList['nope'],
+            new Manager\Torrent(),
+        );
+        // no infohash if not uploader
+        $this->assertEquals(
+            ["id", "media", "format", "encoding", "remastered",
+             "remasterYear", "remasterTitle", "remasterRecordLabel",
+             "remasterCatalogueNumber", "scene", "hasLog", "hasCue", "logScore",
+             "logChecksum", "logCount", "ripLogIds", "fileCount", "size",
+             "seeders", "leechers", "snatched", "freeTorrent", "reported",
+             "time", "description", "fileList", "filePath", "userId",
+             "username"
+            ],
+            array_keys($nope->payload()['torrents'][0]),
+            'tgroup-json-nope-torrent'
+        );
     }
 
     public function testTGroupSubscription(): void {

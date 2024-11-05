@@ -16,5 +16,9 @@ if (is_null($tgroup)) {
     json_error('bad parameters');
 }
 
-echo (new Gazelle\Json\TGroup($tgroup, $Viewer, (new \Gazelle\Manager\Torrent())->setViewer($Viewer)))
+echo (new Gazelle\Json\TGroup(
+        $tgroup,
+        $Viewer,
+        (new \Gazelle\Manager\Torrent())->setViewer($Viewer))
+    )->setVersion(2)
     ->response();

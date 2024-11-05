@@ -2,7 +2,7 @@ From: itismadness
 To: Developers
 Date: 2021-08-21
 Subject: Orpheus Development Papers #7 - API Documentation
-Version: 1
+Version: 2 (2024-11-06)
 
 The JSON API provides an easily parseable interface to Gazelle. The API comes standard in public Gazelle and works out
 of the box. Below is the list of information available, the arguments that can be passed to it, and the format of the
@@ -16,7 +16,7 @@ will respond with a cookie that is then used for subsequent requests to the API.
 
 2. API Token
 After generating a token on your user profile, you can use it by sending a request with the header
-`Authorization: token ${api_token}` or `Authorization: ${api_token}`
+`Authorization: token ${api_token}` or `Authorization: ${api_token}` (deprecated).
 
 NOTE: For the API token, please be aware we heavily discourage people from using the latter form and that it only
 exists for the sake of interopability and may go away in the future.
@@ -1132,6 +1132,12 @@ Artists:
 
 **Response format:**
 
+The `proxyImage` field was introduced in version 2 of this endpoint.
+
+Note: the `proxyImage` value has a short lifespan. Depending on (bad) luck,
+it may expire (404) one second after the response. It is provided in order
+to rehost the image elsewhere when the origin image is no longer available.
+
 ```json
 {
     "status": "success",
@@ -1139,6 +1145,7 @@ Artists:
         "group": {
             "wikiBody": "",
             "wikiImage": "http://whatimg.com/i/ralpc.jpg",
+            "proxyImage": "http://proxy.com/xyz/abc.jpg",
             "id": 72189681,
             "name": "Fear Not",
             "year": 2012,
@@ -1287,6 +1294,7 @@ Must use either API token or `$_POST['authkey']`
             "wikiBody": "<strong>Best album!</strong>",
             "wikiBBcode": "[b]Best album![/b]",
             "wikiImage": "http://whatimg.com/i/ralpc.jpg",
+            "proxyImage": "http://proxy.com/xyz/abc.jpg",
             "id": 72189681,
             "name": "Fear Not",
             "year": 2012,
