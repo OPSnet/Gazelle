@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\User;
 
 class Activity extends \Gazelle\BaseUser {
@@ -185,16 +187,25 @@ class Activity extends \Gazelle\BaseUser {
         return $this;
     }
 
-    public function setStats(\Gazelle\Stats\Torrent $stats): static {
+    public function setStats(int $threshold, \Gazelle\Stats\Torrent $stats): static {
         if ($this->user->permitted('admin_site_debug')) {
-            $this->setAction(
-                '<a href="tools.php?action=torrent_stats" title="Downloads over past three hours">'
-                . implode('/', array_map(
-                    fn ($s) => number_format($s['total']),
+            $total = array_reduce(
+                array_map(
+                    fn ($h) => $h['total'],
                     $stats->recentDownloadTotal()
-                ))
-                . "</a>"
+                ),
+                fn ($total, $hour) => $total += $hour
             );
+            if ($total > $threshold) {
+                $this->setAction(
+                    '<span class="sys-warning">Downloads: <a href="tools.php?action=torrent_stats" title="Downloads over past three hours">'
+                    . implode('/', array_map(
+                        fn ($s) => number_format($s['total']),
+                        $stats->recentDownloadTotal()
+                    ))
+                    . "</a></span>"
+                );
+            }
         }
         return $this;
     }

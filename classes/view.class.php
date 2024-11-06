@@ -94,13 +94,18 @@ class View {
                 ->setDb(new Gazelle\DB())
                 ->setScheduler(new Gazelle\TaskScheduler())
                 ->setSSLHost(new Gazelle\Manager\SSLHost())
-                ->setStats(new Gazelle\Stats\Torrent())
                 ->setAutoReport(
                     new Gazelle\Search\ReportAuto(
                         new Gazelle\Manager\ReportAuto($raTypeMan),
                         $raTypeMan
                     )
                 );
+
+            $threshold = (new \Gazelle\Manager\SiteOption())
+                ->findValueByName('download-warning-threshold');
+            if ($threshold) {
+                $activity->setStats((int)$threshold, new Gazelle\Stats\Torrent());
+            }
 
             if (OPEN_EXTERNAL_REFERRALS) {
                 $activity->setReferral(new Gazelle\Manager\Referral());
