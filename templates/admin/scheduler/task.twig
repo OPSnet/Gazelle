@@ -1,6 +1,6 @@
-{{ header('Periodic Task Details') }}
+{{ header('Task ' ~ task.name, {'js': 'vendor/highcharts,vendor/highcharts_custom'}) }}
 <div class="header">
-<h2>Periodic Task Details - {{ task.name }}</h2>
+<h2>Periodic Task Details › {{ task.name }}</h2>
 </div>
 {% include 'admin/scheduler/links.twig' with {'can_edit': viewer.permitted('admin_periodic_task_manage')} only %}
 {{ paginator.linkbox|raw }}
@@ -60,9 +60,6 @@
     {% if loop.last %}
 </table>
 {{ paginator.linkbox|raw }}
-
-<script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/functions/highcharts.js"></script>
-<script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/functions/highcharts_custom.js"></script>
 <script type="text/javascript">
 document.addEventListener('DOMContentLoaded', function() {
     initialiseChart('daily-totals', 'Daily', [

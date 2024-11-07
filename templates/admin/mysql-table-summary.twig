@@ -1,4 +1,4 @@
-{{ header('Mysql Inspector') }}
+{{ header('Mysql Inspector', {'js': 'vendor/highcharts,vendor/highcharts_custom'}) }}
 <div class="linkbox">
     <a href="tools.php?action=service_stats" class="brackets">Cache/DB stats</a>
     <a href="tools.php?action=clear_cache" class="brackets">Cache inspector</a>
@@ -9,8 +9,6 @@
     <a href="tools.php?action=db-mysql&amp;mode=merge" title="Stats of tables of deleted data are merged with their source table" class="brackets">Merge deleted data</a>
     <a href="tools.php?action=db-mysql&amp;mode=exclude" title="Tables of deleted data are excluded" class="brackets">Exclude deleted data</a>
 </div>
-<script src="{{ constant('STATIC_SERVER') }}/functions/highcharts.js"></script>
-<script src="{{ constant('STATIC_SERVER') }}/functions/highcharts_custom.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 Highcharts.chart('statistics', {

@@ -27,7 +27,7 @@ if (!empty($_POST['username']) && !empty($_POST['password'])) {
                     'path'     => '/',
                     'secure'   => !DEBUG_MODE,
                     'httponly' => true,
-                    'samesite' => 'Lax',
+                    'samesite' => 'Strict',
                 ]);
             }
             header("Location: login.php?action=disabled");

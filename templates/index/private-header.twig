@@ -5,7 +5,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width" />
 <meta name="referrer" content="same-origin" />
-<title>{{ page_title }}</title>
+<title>{{ page_title }} ⠶ {{ constant('SITE_NAME') }}</title>
 <link rel="shortcut icon" href="/favicon.ico" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 <link rel="search" type="application/opensearchdescription+xml" title="{{ constant('SITE_NAME') }} Torrents" href="opensearch.php?type=torrents" />
@@ -38,19 +38,40 @@
 {%     endfor %}
 {% endif -%}
 
+{{ scss('global.css') }}
+{{ scss('tooltipster/style.css') }}
 {% for sheet in scss_style %}
 {{ scss(sheet) }}
 {% endfor %}
+<link rel="stylesheet" type="text/css" media="screen" href="{{ constant('STATIC_SERVER') }}/styles/katex/katex-0.16.10.min.css?v={{ mtime_css('katex/katex-0.16.10.min.css') }}" />
 {% for sheet in css_style %}
 {{ css(sheet) }}
 {% endfor -%}
+{% if viewer.option('UseOpenDyslexic') %}
+{{ scss('opendyslexic/style.css') }}
+{% endif %}
 <link rel="stylesheet" type="text/css" media="screen" href="{{ stylesheet.cssUrl }}" title="{{ stylesheet.name }}" />
-
+<script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/vendor/jquery.js?v={{ mtime('vendor/jquery.js') }}"></script>
+<script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/vendor/jquery.autocomplete.js?v={{ mtime('vendor/jquery.autocomplete.js') }}"></script>
+<script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/vendor/katex-0.16.10.min.js?v={{ mtime('vendor/katex-0.16.10.min.js') }}"></script>
+<script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/vendor/tooltipster.js?v={{ mtime('vendor/tooltipster.js') }}"></script>
+<script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/vendor/tooltipster_settings.js?v={{ mtime('vendor/tooltipster_settings.js') }}"></script>
+{% if use_noty %}
+<script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/vendor/noty/noty.js?v={{ mtime('vendor/noty/noty.js') }}"></script>
+<script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/vendor/noty/noty.layout.bottomRight.js?v={{ mtime('vendor/noty/noty.layout.bottomRight.js') }}"></script>
+<script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/vendor/noty/noty.theme.default.js?v={{ mtime('vendor/noty/noty.theme.default.js') }}"></script>
+{% endif %}
+{% if constant('DEBUG_MODE') or viewer.permitted('site_debug') %}
+<script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/vendor/jquery-migrate.js?v={{ mtime('vendor/jquery-migrate.js') }}"></script>
+<script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/functions/debug.js?v={{ mtime('functions/debug.js') }}"></script>
+{% endif %}
+<script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/functions/global.js?v={{ mtime('functions/global.js') }}"></script>
 {% for js in script %}
 {{ script(js) }}
 {% endfor %}
+{% if use_noty %}
+{{ script('user_notifications.js') }}
+{% endif %}
 <script type="text/javascript">
-//<![CDATA[
 var authkey="{{ viewer.auth }}";var userid={{ viewer.id }};
-//]]>
 </script>

@@ -1,5 +1,5 @@
 {% from 'macro/form.twig' import checked -%}
-{{ header("View conversation " ~ pm.subject, {'js': 'comments,bbcode,jquery.validate,form_validate'}) }}
+{{ header("View conversation " ~ pm.subject, {'js': 'vendor/jquery.validate,comments,bbcode,form_validate'}) }}
 <div class="thin">
     <h2>{{ pm.subject }}{% if pm.forwardedTo is not null %} (Forwarded to {{ pm.forwardedTo.username }}){% endif %}</h2>
     <div class="linkbox">

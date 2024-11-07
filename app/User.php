@@ -96,7 +96,7 @@ class User extends BaseObject {
             'path'     => '/',
             'secure'   => !DEBUG_MODE,
             'httponly' => true,
-            'samesite' => 'Lax',
+            'samesite' => 'Strict',
         ]);
         if ($sessionId) {
             (new User\Session($this))->drop($sessionId);

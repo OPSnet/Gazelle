@@ -7,5 +7,6 @@
 {%- endmacro -%}
 
 {%- macro script(filename) -%}
-<script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/functions/{{ filename }}?v={{ mtime('functions/' ~ filename) }}"></script>
+{% set path %}{% if not (filename starts with 'vendor/') %}/functions{% endif %}{% endset %}
+<script type="text/javascript" src="{{ constant('STATIC_SERVER') }}{{ path }}/{{ filename }}?v={{ mtime(path ~ '/' ~ filename) }}"></script>
 {%- endmacro -%}

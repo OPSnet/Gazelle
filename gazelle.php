@@ -51,7 +51,7 @@ $forceLogout = function (): never {
         'path'     => '/',
         'secure'   => !DEBUG_MODE,
         'httponly' => true,
-        'samesite' => 'Lax',
+        'samesite' => 'Strict',
     ]);
     header('Location: login.php');
     exit;

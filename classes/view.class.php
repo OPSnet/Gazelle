@@ -15,73 +15,27 @@ class View {
      * @param array<string> $option
      */
     public static function header(string $pageTitle, array $option = []): string {
-        if ($pageTitle != '') {
-            $pageTitle .= ' :: ';
-        }
-        $pageTitle .= SITE_NAME;
+        $js = isset($option['js']) ? array_map(fn($s) => "$s.js", explode(',', $option['js'])) : [];
         global $Viewer;
-        $module = is_null($Viewer)
-            ? 'index'
-            : $Viewer->requestContext()->module();
-
-        $js = [];
-
-        if (DEBUG_MODE || $Viewer?->permitted('site_debug')) {
-            $js[] = 'debug';
-        }
-
         global $Twig;
-        if (!isset($Viewer) || $pageTitle == 'Recover Password :: ' . SITE_NAME) {
-            $js[] = 'storage.class';
-            if (!empty($option['js'])) {
-                array_push($js, ...explode(',', $option['js']));
-            }
-            echo $Twig->render('index/public-header.twig', [
+        if (!isset($Viewer)) {
+            return $Twig->render('index/public-header.twig', [
                 'page_title' => $pageTitle,
-                'script'     => array_map(fn($s) => "$s.js", $js),
+                'script'     => $js,
             ]);
-            return '';
-        }
-
-        array_push($js,
-            'jquery',
-            'jquery.autocomplete',
-            'global',
-            'katex-0.16.10.min',
-            'tooltipster',
-            'tooltipster_settings',
-        );
-
-        if (DEBUG_MODE || $Viewer->permitted('site_debug')) {
-            $js[] = 'jquery-migrate';
-        }
-        if (!empty($option['js'])) {
-            array_push($js, ...explode(',', $option['js']));
-        }
-
-        $cssList  = ['katex/katex-0.16.10.min.css'];
-        $scssList = ['global.css', 'tooltipster/style.css'];
-
-        if (!empty($option['css'])) {
-            array_push($scssList, ...array_map(fn($s) => "$s/style.css", explode(',', $option['css'])));
-        }
-        if ($Viewer->option('UseOpenDyslexic')) {
-            $scssList[] = 'opendyslexic/style.css';
         }
 
         $activity = new Gazelle\User\Activity($Viewer);
         $activity->configure()
             ->setStaffPM(new Gazelle\Manager\StaffPM());
 
-        $notifier = new Gazelle\User\Notification($Viewer);
+        $notifier  = new Gazelle\User\Notification($Viewer);
+        $module    = $Viewer->requestContext()->module();
         $alertList = $notifier->setDocument($module, $_REQUEST['action'] ?? '')->alertList();
         foreach ($alertList as $alert) {
             if (in_array($alert->display(), [Gazelle\User\Notification::DISPLAY_TRADITIONAL, Gazelle\User\Notification::DISPLAY_TRADITIONAL_PUSH])) {
                 $activity->setAlert(sprintf('<a href="%s">%s</a>', $alert->notificationUrl(), $alert->title()));
             }
-        }
-        if ($notifier->useNoty()) {
-            array_push($js, 'noty/noty', 'noty/layouts/bottomRight', 'noty/themes/default', 'user_notifications');
         }
 
         $payMan = new Gazelle\Manager\Payment();
@@ -158,10 +112,11 @@ class View {
         return $Twig->render('index/private-header.twig', [
             'auth_args'    => "&amp;user={$Viewer->id()}&amp;passkey={$Viewer->announceKey()}&amp;authkey={$Viewer->auth()}&amp;auth={$Viewer->rssAuth()}",
             'page_title'   => $pageTitle,
-            'script'       => array_map(fn($s) => "$s.js", $js),
-            'css_style'    => $cssList,
-            'scss_style'   => $scssList,
+            'script'       => $js,
+            'scss_style'   => isset($option['css'])
+                ? array_map(fn($s) => "$s/style.css", explode(',', $option['css'])) : [],
             'stylesheet'   => new \Gazelle\User\Stylesheet($Viewer),
+            'use_noty'     => $notifier->useNoty(),
             'viewer'       => $Viewer,
         ])
         . $Twig->render('index/page-header.twig', [

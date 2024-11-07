@@ -6,19 +6,7 @@ export default [
     {
         ignores: [
             "public/static/assets/**",
-            "public/static/functions/jquery.js",
-            "public/static/functions/jquery.*.js",
-            "public/static/functions/jquery-migrate.js",
-            "public/static/functions/jquery-ui.js",
-            "public/static/functions/katex*.min.js",
-            "public/static/functions/highcharts.js",
-            "public/static/functions/highcharts-accessibility.js",
-            "public/static/functions/highmaps.js",
-            "public/static/functions/tooltipster.js",
-            "public/static/functions/tagcanvas.js",
-            "public/static/functions/noty/**/*.js",
-            "public/static/vendor/*.js",
-            "public/static/vendor/**/*.js",
+            "public/static/vendor/**",
         ]
     },
     js.configs.recommended,

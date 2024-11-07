@@ -12,7 +12,7 @@ if (isset($_POST['username'])) {
                 'path'     => '/',
                 'secure'   => !DEBUG_MODE,
                 'httponly' => true,
-                'samesite' => 'Lax',
+                'samesite' => 'Strict',
             ]);
         }
     }

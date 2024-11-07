@@ -29,7 +29,7 @@ $isSubscribed = (new Gazelle\User\Subscription($Viewer))->isSubscribedComments('
 $name         = $Artist->name();
 $requestList  = $Viewer->disableRequests() ? [] : (new Gazelle\Manager\Request())->findByArtist($Artist);
 
-View::show_header($name, ['js' => 'artist_cloud,bbcode,browse,comments,requests,subscriptions,tagcanvas,voting']);
+View::show_header($name, ['js' => 'vendor/tagcanvas,artist_cloud,bbcode,browse,comments,requests,subscriptions,voting']);
 ?>
 <div class="thin">
     <div class="header">
