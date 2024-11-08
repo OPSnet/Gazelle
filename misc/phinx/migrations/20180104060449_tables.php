@@ -8920,12 +8920,9 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
         ])->save();
 
         $this->table('wiki_articles')->insert([
-          ['Title' => 'Wiki', 'Body' => 'Welcome to your new wiki! Hope this works.', 'MinClassRead' => 100, 'MinClassEdit' => 475, 'Date' => '2019-01-01 12:59:59', 'Author' => 1]
+          ['Title' => 'Wiki', 'Body' => 'Welcome to your new wiki! Hope this works.', 'MinClassRead' => 100, 'MinClassEdit' => 475, 'Date' => date('Y-m-d H:i:s'), 'Author' => 1]
         ])->save();
         $this->table('wiki_aliases')->insert([['Alias' => 'wiki', 'UserID' => 1, 'ArticleID' => 1]])->save();
-        $this->table('wiki_revisions')->insert([
-          ['ID' => 1, 'Revision' => 1, 'Title' => 'Wiki', 'Body' => 'Welcome to your new wiki! Hope this works.', 'Date' => '2019-01-01 12:59:59', 'Author' => 1]
-        ])->save();
 
         $this->table('stylesheets')->insert([
             ['Name' => 'Layer cake', 'Description' => 'Grey stylesheet by Emm'],
