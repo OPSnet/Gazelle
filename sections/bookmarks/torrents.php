@@ -191,7 +191,8 @@ $urlStem = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
                 <td><!-- expand/collapse --></td>
                 <td><!-- Category --></td>
                 <td class="m_th_left m_th_left_collapsable" width="70%"><strong>Torrents</strong></td>
-                <td>Size</td>
+                <td class="number_column nobr">Files</td>
+                <td class="number_column nobr">Size</td>
                 <td class="sign snatches"><img src="<?= $urlStem ?>snatched.png" class="tooltip" alt="Snatches" title="Snatches" /></td>
                 <td class="sign seeders"><img src="<?= $urlStem ?>seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>
                 <td class="sign leechers"><img src="<?= $urlStem ?>leechers.png" class="tooltip" alt="Leechers" title="Leechers" /></td>
@@ -217,7 +218,7 @@ foreach ($bookmarkList as $bm) {
             <td class="m_hidden center">
                 <div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>"></div>
             </td>
-            <td class="td_info" colspan="5">
+            <td class="td_info" colspan="6">
                 <strong><?= $tgroup->link() ?></strong>
                 <span style="text-align: right;" class="float_right">
  <?php if ($ownProfile) { ?>
@@ -273,7 +274,7 @@ foreach ($bookmarkList as $bm) {
                 <span class="float_right float_clear"><?= time_diff($bm['added']); ?></span>
 
             </td>
-            <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
+            <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent, 'user' => $Viewer]) ?>
         </tr>
 <?php
     }

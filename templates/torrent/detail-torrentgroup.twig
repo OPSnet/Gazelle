@@ -1,26 +1,28 @@
 {% set prev = null %}
 {% set edition_id = 0 %}
 {% for torrent in torrent_list %}
-    {% set edition = torrent.remasterTuple %}
-    {% if tgroup.categoryGrouped and edition != prev %}
-        {% set edition_id = edition_id + 1 %}
+{%  set edition = torrent.remasterTuple %}
+{%  if tgroup.categoryGrouped and edition != prev %}
+{%      set edition_id = edition_id + 1 %}
+{%      set prev_primary = null %}
         <tr class="releases_{{ tgroup.releaseType }} groupid_{{ tgroup.id }} edition group_torrent
-                {%- if is_snatched_grp %} snatched_group{% endif %}
-                {%- if hide %} hidden{% endif %}">
-            <td colspan="{{ 5 + colspan_add }}" class="edition_info">
-                {% include 'torrent/edition-header.twig' with {
-                    'edition_id': edition_id,
-                    'torrent'   : torrent,
-                    'tgroup'    : tgroup,
-                } only %}
+{%      if is_snatched_grp %} snatched_group{% endif %}
+{%      if hide %} hidden{% endif %}">
+            <td colspan="{{ 6 + colspan_add }}" class="edition_info">
+{%      include 'torrent/edition-header.twig' with {
+            'edition_id': edition_id,
+            'torrent'   : torrent,
+            'tgroup'    : tgroup,
+        } only %}
             </td>
         </tr>
-    {% endif %}
-    {% include 'torrent/detail-torrent.twig' with {
+{%  endif %}
+{%  include 'torrent/detail-torrent.twig' with {
         'colspan_add'  : colspan_add,
         'edition_id'   : edition_id,
         'folder_clash' : torMan.findAllByFoldername(torrent.path),
         'hide'         : hide,
+        'prev_primary' : prev_primary,
         'report_man'   : report_man,
         'show_extended': show_extended,
         'show_id'      : show_id,
@@ -28,5 +30,6 @@
         'torrent'      : torrent,
         'viewer'       : viewer,
     } only %}
-    {% set prev = edition %}
+{%  set prev = edition %}
+{%  set prev_primary = torrent.fileListPrimaryTotal %}
 {% endfor %}

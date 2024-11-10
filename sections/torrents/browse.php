@@ -140,9 +140,9 @@ echo $paginator->linkbox();
 <?php    } ?>
         <td class="small cats_col"></td>
         <td class="m_th_left m_th_left_collapsable nobr" width="100%">Name / <?= $header->emit('year') ?></td>
-        <td>Files</td>
         <td class="nobr"><?= $header->emit('time') ?></td>
-        <td class="nobr"><?= $header->emit('size') ?></td>
+        <td class="number_column">Files</td>
+        <td class="number_column nobr"><?= $header->emit('size') ?></td>
         <td class="sign nobr snatches"><?= $headerIcons->emit('snatched') ?></td>
         <td class="sign nobr seeders"><?= $headerIcons->emit('seeders') ?></td>
         <td class="sign nobr leechers"><?= $headerIcons->emit('leechers') ?></td>
@@ -195,17 +195,18 @@ foreach ($Results as $Key => $GroupID) {
                     ) ?></div>
             </div>
         </td>
-        <td></td>
         <td class="td_time nobr"><?=time_diff($tgroup->mostRecentUpload(), 1)?></td>
+        <td></td>
         <td class="td_size number_column nobr"><?= byte_format($tgroup->maxTorrentSize()) ?> (Max)</td>
         <td class="td_snatched number_column m_td_right"><?=number_format($tgroup->stats()->snatchTotal())?></td>
         <td class="td_seeders number_column<?= $tgroup->stats()->seedingTotal() == 0 ? ' r00' : '' ?> m_td_right"><?=number_format($tgroup->stats()->seedingTotal())?></td>
         <td class="td_leechers number_column m_td_right"><?=number_format($tgroup->stats()->leechTotal())?></td>
     </tr>
 <?php
-        $prev = '';
-        $EditionID = 0;
+        $prev           = '';
+        $EditionID      = 0;
         $UnknownCounter = 0;
+        $prevPrimaryTotal = null;
 
         foreach ($torrentList as $torrentId) {
             $torrent = $torMan->findById($torrentId);
@@ -245,11 +246,15 @@ foreach ($Results as $Key => $GroupID) {
             ]) ?>
             &raquo; <?= $torrent->shortLabelLink() ?>
         </td>
-        <td class="td_file_count"><?=$torrent->fileTotal()?></td>
         <td class="td_time nobr"><?=time_diff($torrent->created(), 1)?></td>
-        <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
+<?= $Twig->render('torrent/stats.twig', [
+    'prev_primary' => $prevPrimaryTotal,
+    'torrent'      => $torrent,
+    'user'         => $Viewer
+]) ?>
     </tr>
 <?php
+            $prevPrimaryTotal = $torrent->fileListPrimaryTotal();
         }
     } else {
         // Viewing a type that does not require grouping
@@ -285,9 +290,8 @@ foreach ($Results as $Key => $GroupID) {
                     ) ?></div>
             </div>
         </td>
-        <td class="td_file_count"><?= $torrent->fileTotal() ?></td>
         <td class="td_time nobr"><?=time_diff($torrent->created(), 1)?></td>
-        <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
+        <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent, 'user' => $Viewer]) ?>
     </tr>
 <?php
         }

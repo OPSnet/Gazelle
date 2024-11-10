@@ -846,6 +846,13 @@ defined('OBSOLETE_ENDPOINTS') or define('OBSOLETE_ENDPOINTS', []);
 // ------------------------------------------------------------------------
 // Upload configuration
 
+// The name of the primary media this tracker focuses on (audio, movie, comics, ...)
+defined('PRIMARY_MEDIA') or define('PRIMARY_MEDIA', 'audio');
+
+// Define the primary media extensions the site in interested in.
+// This is used to indicate torrents containing large amounts of "uninteresting" content.
+defined('PRIMARY_EXT_REGEXP') or define('PRIMARY_EXT_REGEXP', '(?:a(?:ac|c3)|d(?:[fs]f|ts)|flac|m(?:4a|p3))');
+
 // Upload categories.
 defined('CATEGORY') or define('CATEGORY', [
     'Music',

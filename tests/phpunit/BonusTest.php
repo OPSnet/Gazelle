@@ -76,8 +76,18 @@ class BonusTest extends TestCase {
         $other = $giver->otherList();
         $this->assertEquals('other-1', $other[0]['Label'], 'item-all-I-can-give');
 
+        // buy file count feature
+        $giver->addPoints(
+            (float)($giver->item('file-count')['Price'])
+        );
+        $this->assertTrue($giver->purchaseFeatureFilecount(), 'item-purchase-file-count');
+        $this->assertTrue($giver->user()->hasAttr('feature-seedbox'), 'giver-has-file-count');
+
         $this->assertEquals(
-            $giver->item('token-1')['Price'] + $giver->item('other-3')['Price'] + $giver->item('seedbox')['Price'],
+            $giver->item('token-1')['Price']
+                + $giver->item('other-3')['Price']
+                + $giver->item('seedbox')['Price']
+                + $giver->item('file-count')['Price'],
             $giver->pointsSpent(),
             'bonus-points-spent'
         );
@@ -97,14 +107,15 @@ class BonusTest extends TestCase {
         $this->assertTrue($giver->purchaseCollage('collage-1'), 'item-purchase-collage');
 
         $history = $giver->history(10, 0);
-        $this->assertCount(6, $history, 'bonus-history-final');
+        $this->assertCount(7, $history, 'bonus-history-final');
 
         $this->assertEquals(
             [
-                'nr' => 6,
+                'nr' => 7,
                 'total' => $giver->item('token-1')['Price']
                     + $giver->item('other-3')['Price']
                     + $giver->item('seedbox')['Price']
+                    + $giver->item('file-count')['Price']
                     + $giver->item('collage-1')['Price']
                     + $giver->item('title-bb-y')['Price']
                     + $giver->item('title-bb-n')['Price']

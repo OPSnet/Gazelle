@@ -45,7 +45,7 @@
         <br />uploaded by {{ torrent.uploaderId|user_url }} on <span title="{{ torrent.created|time_diff(3, false) }}">{{ torrent.created }}</span>
         <br />Last action: {{ torrent.lastActiveDate|default('Never') }}
         <br /><span class="report_torrent_file_ext">Audio files present:
-{% for ext, total in torrent.fileListAudioMap -%}
+{% for ext, total in torrent.fileListPrimaryMap -%}
     {%- if loop.first %}<span class="file_ext_map">{% else %}, {% endif -%}
         {{ ext }}: {{ total|number_format }}
     {%- if loop.last %}</span>{% endif -%}

@@ -151,7 +151,7 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
                     ) ?></div>
             </div>
         </td>
-        <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
+        <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent, 'user' => $Viewer]) ?>
     </tr>
 <?php
             }

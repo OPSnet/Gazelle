@@ -43,6 +43,7 @@ class User extends BaseObject {
             sprintf('users_tokens_%d', $this->id),
         ]);
         $this->stats()->flush();
+        $this->ordinal()->flush();
         $this->privilege()->flush();
         unset($this->info, $this->ordinal, $this->privilege, $this->stats, $this->tokenCache);
         return $this;

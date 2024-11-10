@@ -2,6 +2,15 @@
 
 namespace Gazelle\User;
 
+/**
+ * Note: there is no userHasItem() method to check if a user has bought a
+ * particular item in the shop. Due to the wide disparity between items that can
+ * be bought only once (such as the seedbox viewer) and items that can be bought
+ * tens of thousands of times, adding an index to the (user, item) tuple would
+ * be enormously wasteful. Instead, a user attribute is used (whose index
+ * replies very efficiently to a yes/no has user purchased item question).
+ */
+
 class Bonus extends \Gazelle\BaseUser {
     final public const tableName          = 'bonus_history';
     final protected const CACHE_PURCHASE     = 'bonus_purchase_%d';
@@ -34,6 +43,8 @@ class Bonus extends \Gazelle\BaseUser {
         $allowed = [];
         foreach ($items as $item) {
             if ($item['Label'] === 'seedbox' && $this->user->hasAttr('feature-seedbox')) {
+                continue;
+            } elseif ($item['Label'] === 'file-count' && $this->user->hasAttr('feature-file-count')) {
                 continue;
             } elseif (
                 $item['Label'] === 'invite'
@@ -302,6 +313,39 @@ class Bonus extends \Gazelle\BaseUser {
                        (UserID, UserAttrID)
                 VALUES (?,      (SELECT ID FROM user_attr WHERE Name = ?))
                 ", $this->id(), 'feature-seedbox'
+            );
+        } catch (\Gazelle\DB\MysqlDuplicateKeyException) {
+            // no point in buying a second time
+            self::$db->rollback();
+            return false;
+        }
+        self::$db->commit();
+        $this->addPurchaseHistory($item['ID'], $price);
+        $this->flush();
+        return true;
+    }
+
+    public function purchaseFeatureFilecount(): bool {
+        $item  = $this->items()['file-count'];
+        $price = $this->effectivePrice('file-count');
+        self::$db->begin_transaction();
+        self::$db->prepared_query('
+            UPDATE user_bonus ub SET
+                ub.points = ub.points - ?
+            WHERE ub.points >= ?
+                AND ub.user_id = ?
+            ', $price, $price, $this->id()
+        );
+        if (self::$db->affected_rows() != 1) {
+            self::$db->rollback();
+            return false;
+        }
+        try {
+            self::$db->prepared_query("
+                INSERT INTO user_has_attr
+                       (UserID, UserAttrID)
+                VALUES (?,      (SELECT ID FROM user_attr WHERE Name = ?))
+                ", $this->id(), 'feature-file-count'
             );
         } catch (\Gazelle\DB\MysqlDuplicateKeyException) {
             // no point in buying a second time

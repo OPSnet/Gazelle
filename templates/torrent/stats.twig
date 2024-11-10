@@ -1,4 +1,46 @@
-<td class="number_column td_size nobr">{{ torrent.size|octet_size }}</td>
+{% if user.hasAttr('feature-file-count') %}
+{%  set display_mode = user.ordinal.value('file-count-display') %}
+{%  set warn_open = '' %}
+{%  set warn_close = '' %}
+{%  if display_mode > 0 %}
+{%      set primary_total = torrent.fileListPrimaryTotal %}
+{%      if display_mode == 1 %}
+{%          set display = torrent.fileTotal|number_format %}
+{%      elseif display_mode == 2 %}
+{%          set display %}{{ primary_total|number_format }}/{{
+                torrent.fileTotal|number_format }}{% endset %}
+{%      elseif display_mode == 3 %}
+{%          set display %}{{ primary_total|number_format }}+{{
+                (torrent.fileTotal - primary_total)|number_format }}{% endset %}
+{%      elseif display_mode == 4 %}
+{%          set display = primary_total|number_format %}
+{%      endif %}
+{%      if prev_primary is not null and prev_primary != primary_total %}
+{%          set warn_open %}
+<strong class="important_text tooltip" title="{{
+    constant('PRIMARY_MEDIA')|ucfirst }} file counts differ ({{
+    prev_primary }} ≠ {{ primary_total }})">
+{%          endset %}
+{%          set warn_close = '</strong>' %}
+{%      endif %}
+{%  else %}
+{%      set display = torrent.fileTotal|number_format %}
+{%  endif %}
+{%  if user.ordinal.value('non-primary-threshold') > 0
+        and user.ordinal.value('non-primary-threshold') * 1024 * 1024
+            <= torrent.fileListNonPrimarySize
+%}
+{%      set non_primary = torrent.fileListNonPrimarySize %}
+{%  else %}
+{%      set non_primary = 0 %}
+{%  endif %}
+{% else %}
+{%  set display = torrent.fileTotal|number_format %}
+{% endif %}
+<td class="number_column td_filecount nobr">{{ warn_open|raw }}{{ display }}{{ warn_close|raw }}</td>
+<td class="number_column td_size nobr"
+{% if non_primary %} style="background-color: #f5b041" title="Extra: {{ non_primary|octet_size }}"{% endif %}
+>{{ torrent.size|octet_size }}</td>
 <td class="number_column m_td_right td_snatched">{{ torrent.snatchTotal|number_format }}</td>
 <td class="number_column m_td_right td_seeders{% if torrent.seederTotal == 0 %} r00{% endif %}">{{ torrent.seederTotal|number_format }}</td>
 <td class="number_column m_td_right td_leechers">{{ torrent.leecherTotal|number_format }}</td>

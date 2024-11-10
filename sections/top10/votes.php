@@ -115,7 +115,8 @@ echo display_str($_GET['year2']);} ?>" />
         <td><!-- expand/collapse --></td>
         <td class="cats_col"><!-- category --></td>
         <td class="m_th_left" width="70%">Torrents</td>
-        <td>Size</td>
+        <td class="number_column nobr">Files</td>
+        <td class="number_column nobr">Size</td>
         <td class="sign snatches"><img src="<?= $urlStem ?>snatched.png" alt="Snatches" title="Snatches" class="tooltip" /></td>
         <td class="sign seeders"><img src="<?= $urlStem ?>seeders.png" alt="Seeders" title="Seeders" class="tooltip" /></td>
         <td class="sign leechers"><img src="<?= $urlStem ?>leechers.png" alt="Leechers" title="Leechers" class="tooltip" /></td>
@@ -173,7 +174,7 @@ echo ' [' . $tgroup->year() . ']'; } ?></strong>
                     )) ?></div>
             </div>
         </td>
-        <td colspan="4" class="votes_info_td">
+        <td colspan="5" class="votes_info_td">
             <?= $Twig->render('bookmark/action.twig', [
                 'class'         => 'torrent',
                 'id'            => $tgroupId,
@@ -231,7 +232,7 @@ echo ' [' . $tgroup->year() . ']'; } ?></strong>
                 fn($name) => "<a href=\"collages.php?action=search&tags=$name\">$name</a>", $tgroup->tagNameList()
                 )) ?></div>
         </td>
-        <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
+        <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent, 'user' => $Viewer]) ?>
     </tr>
 <?php
         }

@@ -280,6 +280,11 @@ if (isset($_POST['resetpasskey'])) {
 $user->modify();
 
 $ordinal = $user->ordinal();
+if ($user->hasAttr('feature-file-count') || $Viewer->isStaff()) {
+    $ordinal->set('file-count-display', (int)$_POST['file-count-display']);
+    $ordinal->set('non-primary-threshold', (int)$_POST['non-primary-threshold']);
+}
+
 $requestBountyCreate = max(
     REQUEST_MIN * 1024 * 1024, // never go below request minimum
     min(

@@ -1,14 +1,14 @@
 {% for item in list %}
-{% if loop.first %}
+{%  if loop.first %}
 <div class="thin">
-    {% if discount %}
+{%      if discount %}
     <h3 style="text-align: center; color: lime;">All prices currently {{ min(100, max(0, discount)) }}% off &mdash; Hurry, sale ends soon &mdash; While stocks last!</h3>
-    {% endif %}
-    {% if admin %}
+{%      endif %}
+{%      if admin %}
     <div class="pad box">
         <div class="thin">NB: Bonus Shop discounts are set in the <a href="/tools.php?action=site_options">Site Options</a>.</div>
     </div>
-    {% endif %}
+{%      endif %}
     <table>
         <thead>
             <tr class="colhead">
@@ -18,27 +18,27 @@
             </tr>
         </thead>
         <tbody>
-{% endif %}
-{% if item.MinClass <= class %}
+{%  endif %}
+{%  if item.MinClass <= class %}
             <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
-                <td>{{ item.Title }}</td>
+                <td>{{ item.Title }}</pre></td>
                 <td style="text-align:right">{{ item.Price|number_format }}</td>
                 <td>
-    {% if points >= item.Price %}
+{%      if points >= item.Price %}
                     <a id="bonusconfirm" href="bonus.php?action=purchase&amp;label={{ item.Label
-                        }}&amp;auth={{ auth }}" onclick="{{ item.JS_on_click }}(event, '{{ item.Title }}', {{ item.JS_next_function }}, this);">Purchase</a>
-    {% else %}
+                        }}&amp;auth={{ auth }}" onclick="{{ item.JS_on_click }}(event, '{{ item.Title }}', {{ item.JS_next_function|default('null') }}, this);">Purchase</a>
+{%      else %}
                     <span style="font-style: italic">Too Expensive</span>
 
-    {% endif %}
-{% endif %}
+{%      endif %}
+{%  endif %}
                 </td>
     </tr>
-{% if loop.last %}
+{%  if loop.last %}
         </tbody>
     </table>
     <br />
 </div>
-{% endif %}
+{%  endif %}
 {% endfor %}
 {{ footer() }}

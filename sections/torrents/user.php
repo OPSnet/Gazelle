@@ -23,7 +23,7 @@ $imgTag = '<img loading="lazy" src="' . (new Gazelle\User\Stylesheet($Viewer))->
     . '%s.png" class="tooltip" alt="%s" title="%s"/>';
 $headerMap = [
     'name'     => ['dbColumn' => 'tg.Name', 'defaultSort' => 'asc',  'text' => 'Torrent'],
-    'time'     => ['dbColumn' => 'Time',    'defaultSort' => 'desc', 'text' => 'Time'],
+    'time'     => ['dbColumn' => 'Time',    'defaultSort' => 'desc', 'text' => 'Created'],
     'size'     => ['dbColumn' => 't.Size',  'defaultSort' => 'desc', 'text' => 'Size'],
     'snatched' => [
         'dbColumn'      => 'tls.Snatched',
@@ -482,7 +482,8 @@ foreach (CATEGORY as $catKey => $catName) {
             <td class="cats_col"></td>
             <td class="m_th_left nobr"><?= $header->emit('name') ?></td>
             <td class="nobr"><?= $header->emit('time') ?></td>
-            <td class="nobr"><?= $header->emit('size') ?></td>
+            <td class="number_column nobr">Files</td>
+            <td class="number_column nobr"><?= $header->emit('size') ?></td>
             <td class="sign nobr snatches m_th_right"><?= $headerIcons->emit('snatched') ?></td>
             <td class="sign nobr seeders m_th_right"><?= $headerIcons->emit('seeders') ?></td>
             <td class="sign nobr leechers m_th_right"><?= $headerIcons->emit('leechers') ?></td>
@@ -528,7 +529,7 @@ foreach (CATEGORY as $catKey => $catName) {
                 </div>
             </td>
             <td class="td_time nobr"><?=time_diff($info['Time'], 1)?></td>
-            <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
+            <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent, 'user' => $Viewer]) ?>
         </tr>
 <?php
     } /* foreach */ ?>

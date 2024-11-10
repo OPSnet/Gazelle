@@ -159,10 +159,44 @@
             <strong>Use HTTPS Tracker</strong>
         </td>
         <td>
-            <input type="checkbox" name="httpstracker" id="httpstracker"{{ checked(user.option('HttpsTracker')) }} />
-            <label for="httpstracker">Enable HTTPs tracker for announce URL</label>
+            <label><input type="checkbox" name="httpstracker" id="httpstracker"{{ checked(user.option('HttpsTracker')) }} />
+            Enable HTTPs tracker for announce URL</label>
         </td>
     </tr>
+{% if user.hasAttr('feature-file-count') %}
+    <tr id="filecount_tr">
+        <td class="label tooltip" title="Show file counts in torrent listings">
+            <strong>File count display</strong>
+        </td>
+        <td>
+            <label><input type="radio" name="file-count-display" value="0"{{
+                checked(user.ordinal.value('file-count-display') == 0) }} />
+            None</label><br />
+            <label><input type="radio" name="file-count-display" value="1"{{
+                checked(user.ordinal.value('file-count-display') == 1) }} />
+            Total files</label><br />
+            <label><input type="radio" name="file-count-display" value="2"{{
+                checked(user.ordinal.value('file-count-display') == 2) }} />
+            {{ constant('PRIMARY_MEDIA')|ucfirst }} files / Total files</label><br />
+            <label><input type="radio" name="file-count-display" value="3"{{
+                checked(user.ordinal.value('file-count-display') == 3) }} />
+            {{ constant('PRIMARY_MEDIA')|ucfirst }} files + Non-{{
+                constant('PRIMARY_MEDIA') }} files</label><br />
+            <label><input type="radio" name="file-count-display" value="4"{{
+                checked(user.ordinal.value('file-count-display') == 4) }} />
+            {{ constant('PRIMARY_MEDIA')|ucfirst }} files only</label><br />
+        </td>
+    </tr>
+    <tr id="nonprimary_size_tr">
+        <td class="label tooltip" title="Highlight torrents with excessive non-{{ constant('PRIMARY_MEDIA') }} files">
+            <strong>Non-{{ constant('PRIMARY_MEDIA') }} threshold</strong>
+        </td>
+        <td>
+            <label><input type="input" size="4" name="non-primary-threshold" value="{{ user.ordinal.value('non-primary-threshold') }}" />
+            Highlight torrents with excessive non-{{ constant('PRIMARY_MEDIA') }} content (in MiB)</label>
+        </td>
+    </tr>
+{% endif %}
     <tr id="req-bounty-create">
         <td class="label tooltip" title="This is the default amount of bounty you offer when creating requests">
             <strong>Request creation</strong>

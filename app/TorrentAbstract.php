@@ -256,18 +256,18 @@ abstract class TorrentAbstract extends BaseObject {
     }
 
     /**
-     * Aggregate the audio files per audio type
+     * Aggregate the primary media file types per extension
      *
-     * @return array of array of [ac3, flac, m4a, mp3] => count
+     * @return array of array of [ac3, flac, m4a, mp3, ...] => count
      */
-    public function fileListAudioMap(): array {
+    public function fileListPrimaryMap(): array {
         $map = [];
         foreach ($this->fileList() as $file) {
             if (is_null($file['ext'])) {
                 continue;
             }
             $ext = substr($file['ext'], 1); // skip over period
-            if (in_array($ext, ['ac3', 'flac', 'm4a', 'mp3'])) {
+            if (preg_match('/^' . PRIMARY_EXT_REGEXP . '$/', $ext)) {
                 if (!isset($map[$ext])) {
                     $map[$ext] = 0;
                 }
@@ -275,6 +275,23 @@ abstract class TorrentAbstract extends BaseObject {
             }
         }
         return $map;
+    }
+
+    public function fileListPrimaryTotal(): int {
+        return (int)array_reduce(
+            array_values($this->fileListPrimaryMap()),
+            fn ($total, $n) => $total += $n
+        );
+    }
+
+    public function fileListNonPrimarySize(): int {
+        $size = 0;
+        foreach ($this->fileList() as $file) {
+            if (!preg_match('/^\.' . PRIMARY_EXT_REGEXP . '$/', (string)$file['ext'])) {
+                $size += (int)$file['size'];
+            }
+        }
+        return $size;
     }
 
     /**

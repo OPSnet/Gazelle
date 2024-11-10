@@ -140,7 +140,7 @@ if ($search->canUnclaim($Viewer)) {
                         <br />Last action: <?= $extra->lastActiveDate() ?: 'Never' ?>
                         <br /><span>Audio files present:
 <?php
-                        $extMap = $extra->fileListAudioMap();
+                        $extMap = $extra->fileListPrimaryMap();
                         if (count($extMap) == 0) {
 ?>
                             <span class="file_ext_none">none</span>

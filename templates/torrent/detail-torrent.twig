@@ -14,18 +14,24 @@
     'viewer':  viewer
     } only
 %}
-
-{% if show_extended %}
-                    <a href="#" onclick="$('#torrent_{{ torrent_id }}').gtoggle(); return false;">▶ {{ torrent.label(viewer)|raw }}</a>
-{% else %}
-                    <a href="{{ torrent.location }}">▶ {{ torrent.label(viewer)|raw }}</a>
-{% endif %}
+                    <a href=
+{%- if show_extended -%}
+                    "#" onclick="$('#torrent_{{ torrent_id }}').gtoggle(); return false;">
+{%- else -%}
+                    "{{ torrent.location }}">
+{%- endif -%}
+                    ▶ {{ torrent.label(viewer)|raw }}</a>
                 </td>
-{% include 'torrent/stats.twig' with {'torrent': torrent} %}
+{% include 'torrent/stats.twig' with {
+    'prev_primary' : prev_primary,
+    'torrent'      : torrent,
+    'user'         : viewer,
+    } only
+%}
             </tr>
 {% if show_extended %}
             <tr id="torrent_{{ torrent_id }}" class="releases_{{ tgroup.releaseType }} groupid_{{ tgroup.id }} edition_{{ edition_id }} torrentdetails pad{{ hidden(torrent_id != show_id) }}">
-                <td colspan="{{ 5 + colspan_add }}">
+                <td colspan="{{ 6 + colspan_add }}">
                     <div id="release_{{ torrent_id }}" class="no_overflow">
                         <blockquote>
 {% if folder_clash|length > 1 %}

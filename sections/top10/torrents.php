@@ -186,11 +186,12 @@ foreach ($context as $c) {
         <td class="center" style="width: 15px;"></td>
         <td class="cats_col"></td>
         <td class="m_th_left m_th_left_collapsable">Name</td>
-        <td style="text-align: right;">Size</td>
-        <td style="text-align: right;" class="sign snatches"><img src="<?= $urlStem ?>snatched.png" alt="Snatches" title="Snatches" class="tooltip" /></td>
-        <td style="text-align: right;" class="sign seeders"><img src="<?= $urlStem ?>seeders.png" alt="Seeders" title="Seeders" class="tooltip" /></td>
-        <td style="text-align: right;" class="sign leechers"><img src="<?= $urlStem ?>leechers.png" alt="Leechers" title="Leechers" class="tooltip" /></td>
-        <td style="text-align: right;">Transferred</td>
+        <td class="number_column nobr">Files</td>
+        <td class="number_column nobr">Size</td>
+        <td class="sign snatches"><img src="<?= $urlStem ?>snatched.png" alt="Snatches" title="Snatches" class="tooltip" /></td>
+        <td class="sign seeders"><img src="<?= $urlStem ?>seeders.png" alt="Seeders" title="Seeders" class="tooltip" /></td>
+        <td class="sign leechers"><img src="<?= $urlStem ?>leechers.png" alt="Leechers" title="Leechers" class="tooltip" /></td>
+        <td class="number_column nobr">Transferred</td>
     </tr>
 <?php if (!$details) { ?>
         <tr class="rowb">
@@ -242,7 +243,7 @@ foreach ($context as $c) {
                 <div class="tags"><?= implode(', ', $tgroup->tagNameList()) ?></div>
             </div>
         </td>
-        <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
+        <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent, 'user' => $Viewer]) ?>
         <td class="td_data number_column nobr"><?= byte_format($data) ?></td>
     </tr>
 <?php } ?>

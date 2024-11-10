@@ -24,7 +24,7 @@ switch ($_GET['action'] ?? '') {
             }
             require_once(match ($Label) {
                 'invite'                                   => 'invite.php',
-                'collage-1', 'seedbox'                     => 'purchase.php',
+                'collage-1', 'seedbox', 'file-count'       => 'purchase.php',
                 'title-bb-y', 'title-bb-n', 'title-off'    => 'title.php',
                 'token-1', 'token-2', 'token-3', 'token-4' => 'tokens.php',
                 'other-1', 'other-2', 'other-3', 'other-4' => 'token_other.php',

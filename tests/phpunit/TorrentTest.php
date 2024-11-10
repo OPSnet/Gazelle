@@ -46,6 +46,66 @@ class TorrentTest extends TestCase {
         $this->assertFalse($this->torrent->hasFlag(TorrentFlag::badFile), 'torrent-no-more--bad-file-flag');
     }
 
+    public function testContents(): void {
+        $bencoder = new \OrpheusNET\BencodeTorrent\BencodeTorrent();
+        $bencoder->decodeFile(__DIR__ . '/../cypress/files/valid_torrent.torrent');
+        $info = $bencoder->getData();
+        $this->assertIsArray($info, 'torrent-file-data-array');
+        $torrentFiler = new File\Torrent();
+        $this->assertTrue(
+            $torrentFiler->put($bencoder->getEncode(), $this->torrent->id()),
+            'torrent-file-put'
+        );
+        $this->assertTrue(
+            $torrentFiler->exists($this->torrent->id()),
+            'torrent-file-exists'
+        );
+
+        ['total_size' => $totalSize, 'files' => $fileList] = $bencoder->getFileList();
+        $torMan = new Manager\Torrent();
+        ['path' => $filename, 'size' => $size] = $fileList[0];
+        $this->assertEquals(
+            ".flac s2056192s 1 track1.flac ÷",
+            $torMan->metaFilename($filename, $size),
+            'torrent-file-meta-filename',
+        );
+
+        $dbFileList = [];
+        foreach ($fileList as ['path' => $filename, 'size' => $size]) {
+            $dbFileList[] = $torMan->metaFilename($filename, $size);
+        }
+        $this->torrent->setField('FileList', implode("\n", $dbFileList))
+            ->modify();
+
+        $this->assertEquals(
+            ['flac' => 2],
+            $this->torrent->fileListPrimaryMap(),
+            'torrent-file-primary-map'
+        );
+        $this->assertEquals(
+            2,
+            $this->torrent->fileListPrimaryTotal(),
+            'torrent-file-primary-total'
+        );
+        $this->assertEquals(
+            7228,
+            $this->torrent->fileListNonPrimarySize(),
+            'torrent-file-non-primary-size'
+        );
+        $this->assertEquals(
+            "1 track1.flac{{{2056192}}}|||2 track2.flac{{{6152192}}}|||Test Album.log{{{7228}}}",
+            $this->torrent->fileListLegacyAPI(),
+            'torrent-file-legacy-list'
+        );
+
+        $this->assertEquals(8215612, $totalSize, 'torrent-file-total-size');
+        $this->assertCount(3, $fileList, 'torrent-file-list');
+        $this->assertTrue(
+            $torrentFiler->remove($this->torrent->id()),
+            'torrent-file-remove'
+        );
+    }
+
     public function testRemovalPm(): void {
         $torrent = \GazelleUnitTest\Helper::makeTorrentMusic(
             tgroup: $this->torrent->group(),

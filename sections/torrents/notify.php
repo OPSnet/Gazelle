@@ -25,7 +25,7 @@ $imgTag = '<img loading="lazy" src="' . (new Gazelle\User\Stylesheet($Viewer))->
     . '%s.png" class="tooltip" alt="%s" title="%s"/>';
 $headerMap = [
     'year'     => ['dbColumn' => 'tg.Year',       'defaultSort' => 'desc', 'text' => 'Year'],
-    'time'     => ['dbColumn' => 'unt.TorrentID', 'defaultSort' => 'desc', 'text' => 'Time'],
+    'time'     => ['dbColumn' => 'unt.TorrentID', 'defaultSort' => 'desc', 'text' => 'Created'],
     'size'     => ['dbColumn' => 't.Size',        'defaultSort' => 'desc', 'text' => 'Size'],
     'snatched' => ['dbColumn' => 'tls.Snatched',  'defaultSort' => 'desc', 'text' => sprintf($imgTag, 'snatched', 'Snatches', 'Snatches')],
     'seeders'  => ['dbColumn' => 'tls.Seeders',   'defaultSort' => 'desc', 'text' => sprintf($imgTag, 'seeders', 'Seeders', 'Seeders')],
@@ -99,9 +99,9 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
         <td style="text-align: center;"><input type="checkbox" name="toggle" onclick="toggleChecks('notificationform_<?=$filterId?>', this, '.notify_box')" /></td>
         <td class="small cats_col"></td>
         <td style="width: 100%;" class="nobr">Name<?= ' / ' . $header->emit('year') ?></td>
-        <td>Files</td>
         <td class="nobr"><?= $header->emit('time') ?></td>
-        <td class="nobr"><?= $header->emit('size') ?></td>
+        <td class="number_column">Files</td>
+        <td class="nobr number_column"><?= $header->emit('size') ?></td>
         <td class="sign nobr snatches"><?= $headerIcons->emit('snatched') ?></td>
         <td class="sign nobr seeders"><?= $headerIcons->emit('seeders') ?></td>
         <td class="sign nobr leechers"><?= $headerIcons->emit('leechers') ?></td>
@@ -158,9 +158,8 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
                 <?= display_str($match ? 'Caught by filter for ' . implode(', ', $match) : '') ?>
             </div>
         </td>
-        <td class="td_file_count"><?= $torrent->fileTotal() ?></td>
         <td class="td_time nobr"><?= time_diff($torrent->created(), 1) ?></td>
-        <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent]) ?>
+        <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent, 'user' => $Viewer]) ?>
     </tr>
 <?php   } ?>
 </table>
