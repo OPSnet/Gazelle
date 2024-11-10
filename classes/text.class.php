@@ -360,10 +360,7 @@ class Text {
                 return self::bbcodeCollageUrl((int)($args['id'] ?? $args['collageid']));
 
             case '/forums.php':
-                if (!isset($args['action'])) {
-                    return null;
-                }
-                return match ($args['action']) {
+                return match ($args['action'] ?? '') {
                     'viewforum' => self::bbcodeForumUrl((int)$args['forumid']),
                     'viewthread' => (function ($args) {
                         if (isset($args['postid'])) {
@@ -381,6 +378,21 @@ class Text {
                     return (new \Gazelle\Manager\Torrent())->findById((int)$args['torrentid'])?->link();
                 } elseif (isset($args['id'])) {
                     return (new \Gazelle\Manager\TGroup())->findById((int)$args['id'])?->link();
+                }
+                return null;
+
+            case '/wiki.php':
+                if (($args['action'] ?? '') === 'article') {
+                    $wikiMan = new \Gazelle\Manager\Wiki();
+                    $article = null;
+                    if (isset($args['id'])) {
+                        $article = $wikiMan->findById((int)$args['id']);
+                    } elseif (is_string($args['name'])) {
+                        $article = $wikiMan->findByAlias($args['name']);
+                    }
+                    if ($article?->readable(self::$viewer)) {
+                        return "<a href=\"wiki.php\">Wiki</a> › {$article->link()}";
+                    }
                 }
                 return null;
 
@@ -893,7 +905,8 @@ class Text {
                         break;
 
                     case 'wiki':
-                        $Str .= '<a href="wiki.php?action=article&amp;name=' . urlencode($Block['Val']) . '">' . $Block['Val'] . '</a>';
+                        $Str .= '<a href="wiki.php">Wiki</a> › <a href="wiki.php?action=article&amp;name='
+                            . urlencode($Block['Val']) . '">' . $Block['Val'] . '</a>';
                         break;
                     case 'tex':
                         $Str .= '<katex>' . $Block['Val'] . '</katex>';

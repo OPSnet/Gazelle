@@ -343,4 +343,36 @@ END_HTML;
             "text-mature",
         );
     }
+
+    public function testWiki(): void {
+        $manager = new Manager\Wiki();
+        $title   = 'phpunit bbwiki ' . randomString(6);
+        $alias   = Wiki::normalizeAlias($title);
+        $this->userList['user'] = \GazelleUnitTest\Helper::makeUser('wiki.' . randomString(6), 'text');
+        \Text::setViewer($this->userList['user']);
+        $article = $manager->create(
+            $title,
+            'wiki bbcode body',
+            $this->userList['user']->privilege()->effectiveClassLevel(),
+            $this->userList['user']->privilege()->effectiveClassLevel(),
+            $this->userList['user'],
+        );
+        $this->assertInstanceOf(Wiki::class, $article, 'wiki-create-open');
+        $this->assertEquals(
+            "<a href=\"wiki.php\">Wiki</a> › <a href=\"wiki.php?action=article&amp;name=$alias\">$alias</a>",
+            \Text::full_format("[[$alias]]"),
+            'text-wiki-dbl-square-bracket',
+        );
+        $this->assertEquals(
+            "<a href=\"wiki.php\">Wiki</a> › <a href=\"wiki.php?action=article&amp;id={$article->id()}\">$title</a>",
+            \Text::full_format(SITE_URL . "/wiki.php?action=article&name=$alias"),
+            'text-wiki-name-location',
+        );
+        $this->assertEquals(
+            "<a href=\"wiki.php\">Wiki</a> › <a href=\"wiki.php?action=article&amp;id={$article->id()}\">$title</a>",
+            \Text::full_format("{$article->publicLocation()}"),
+            'text-wiki-id-location',
+        );
+        $article->remove();
+    }
 }
