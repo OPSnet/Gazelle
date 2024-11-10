@@ -1,3 +1,5 @@
+@use "variables";
+
 // _base.scss for Apollostage
 //
 // SASS/SCSS NOTE
@@ -294,9 +296,9 @@ code {
 }
 
 body {
-  background-color: $color-background-base;
+  background-color: variables.$color-background-base;
   box-sizing: border-box;
-  color: $color-text-base;
+  color: variables.$color-text-base;
   font-size: 12px;
   line-height: 1.6;
   margin: 0 8px;
@@ -304,7 +306,7 @@ body {
 
 pre,
 code {
-  color: $color-text-mono;
+  color: variables.$color-text-mono;
 }
 
 h1,
@@ -313,7 +315,7 @@ h3,
 h4,
 h5,
 h6 {
-  color: $color-text-heading;
+  color: variables.$color-text-heading;
   line-height: normal;
   margin: 8px 0;
   max-width: 100%;
@@ -325,7 +327,7 @@ h3 a,
 h4 a,
 h5 a,
 h6 a {
-  color: $color-text-heading-anchor;
+  color: variables.$color-text-heading-anchor;
 }
 
 h1,
@@ -347,12 +349,12 @@ h5 {
 }
 
 a {
-  color: $color-text-anchor;
+  color: variables.$color-text-anchor;
   text-decoration: none;
 }
 
 a:hover {
-  color: $color-text-anchor-hover;
+  color: variables.$color-text-anchor-hover;
 }
 
 a:active,
@@ -375,8 +377,8 @@ textarea:focus {
 .box .box.pad,
 .main_column .box.pad:not(#reply_box),
 .body .box.pad:not(#reply_box) {
-  background-color: $color-background-box;
-  border: 2px solid $color-accent-border-box;
+  background-color: variables.$color-background-box;
+  border: 2px solid variables.$color-accent-border-box;
   margin: 8px;
   border-radius: 0.25rem;
 }
@@ -428,16 +430,16 @@ body#user .main_column {
 }
 
 svg|a {
-  fill: $color-text-anchor;
+  fill: variables.$color-text-anchor;
 }
 
 svg|a:hover {
-  fill: $color-text-anchor-hover;
+  fill: variables.$color-text-anchor-hover;
 }
 
 b,
 strong {
-  color: $color-text-bold;
+  color: variables.$color-text-bold;
   font-weight: 600;
 }
 
@@ -461,31 +463,31 @@ li:last-child {
 }
 
 blockquote {
-  background-color: $color-background-blockquote;
-  border: 1px dashed $color-accent-border-blockquote;
+  background-color: variables.$color-background-blockquote;
+  border: 1px dashed variables.$color-accent-border-blockquote;
   margin: 12px;
   padding: 12px;
 }
 
 ::selection {
-  background-color: $color-accent-selection-background;
-  color: $color-accent-selection-text;
+  background-color: variables.$color-accent-selection-background;
+  color: variables.$color-accent-selection-text;
 }
 
 table {
-  background-color: $color-background-table;
+  background-color: variables.$color-background-table;
 }
 
 // WATCH: check for spurious borders
 table .rowa,
 table .rowb {
-  border-top: 2px solid $color-accent-border-tablerows;
+  border-top: 2px solid variables.$color-accent-border-tablerows;
 }
 
 table .rowa:nth-child(even),
 table .rowb:nth-child(even),
 #upload tr:nth-child(even) {
-  background-color: $color-background-table-row-even;
+  background-color: variables.$color-background-table-row-even;
 }
 
 table {
@@ -497,7 +499,7 @@ table {
 table .rowa:nth-child(odd),
 table .rowb:nth-child(odd),
 #upload tr:nth-child(odd) {
-  background-color: $color-background-table-row-odd;
+  background-color: variables.$color-background-table-row-odd;
 }
 
 table ul.options_list {
@@ -508,7 +510,7 @@ table ul.options_list {
 #content div.thin div.head,
 .colhead,
 .colhead_dark {
-  background-color: $color-background-table-row-th;
+  background-color: variables.$color-background-table-row-th;
   line-height: 18px;
   position: sticky;
   top: 0;
@@ -546,10 +548,10 @@ td:last-child {
 }
 
 form {
-  background-color: $color-background-form;
+  background-color: variables.$color-background-form;
 }
 form table td.label {
-  color: $color-text-base;
+  color: variables.$color-text-base;
   padding-top: 9px;
   font-weight: 600;
   text-align: left;
@@ -569,12 +571,12 @@ input[type="submit"],
 #popup_close {
   background:
     linear-gradient(
-      $color-obj-button-base-1,
-      $color-obj-button-base-2
+      variables.$color-obj-button-base-1,
+      variables.$color-obj-button-base-2
     );
   border: none;
   border-radius: 1.5px;
-  color: $color-text-button;
+  color: variables.$color-text-button;
   cursor: pointer;
   font-weight: 600;
   height: 32px;
@@ -587,8 +589,8 @@ input[type="submit"]:active,
 #popup_close:active {
   background:
     linear-gradient(
-      $color-obj-button-base-2,
-      $color-obj-button-base-1
+      variables.$color-obj-button-base-2,
+      variables.$color-obj-button-base-1
     );
 }
 
@@ -599,9 +601,9 @@ input[type="search"],
 input[type="date"],
 select,
 textarea {
-  background: $color-background-input;
-  border: 1px solid $color-accent-border-input;
-  color: $color-text-input;
+  background: variables.$color-background-input;
+  border: 1px solid variables.$color-accent-border-input;
+  color: variables.$color-text-input;
   height: 32px;
   padding: 0 8px;
 }
@@ -613,9 +615,9 @@ input[type="search"]:focus,
 input[type="date"]:focus,
 select:focus,
 textarea:focus {
-  background: $color-background-input-active;
-  border: 1px solid $color-accent-border-input-active;
-  color: $color-text-input-active;
+  background: variables.$color-background-input-active;
+  border: 1px solid variables.$color-accent-border-input-active;
+  color: variables.$color-text-input-active;
 }
 
 textarea {
@@ -671,12 +673,12 @@ span.size10 {
 }
 
 strong.important_text {
-  color: $color-text-important;
+  color: variables.$color-text-important;
 }
 
 /* used for anything? */
 strong.important_text_alt {
-  color: $color-text-important-alt;
+  color: variables.$color-text-important-alt;
 }
 
 .error,
@@ -687,7 +689,7 @@ strong.important_text_alt {
 .r02,
 .r03,
 .warning {
-  color: $color-text-ratio-redzone;
+  color: variables.$color-text-ratio-redzone;
 }
 
 .r04,
@@ -696,7 +698,7 @@ strong.important_text_alt {
 .r07,
 .r08,
 .r09 {
-  color: $color-text-ratio-yellowzone;
+  color: variables.$color-text-ratio-yellowzone;
 }
 
 .r10,
@@ -704,7 +706,7 @@ strong.important_text_alt {
 .r50,
 .r99,
 .vote_tag_up {
-  color: $color-text-ratio-greenzone;
+  color: variables.$color-text-ratio-greenzone;
 }
 
 .small_upvote,
@@ -713,7 +715,7 @@ strong.important_text_alt {
 .vote_artist_up,
 .vote_tag_up {
   font-weight: bolder;
-  color: $color-text-ratio-greenzone;
+  color: variables.$color-text-ratio-greenzone;
 }
 
 .small_downvote,
@@ -722,7 +724,7 @@ strong.important_text_alt {
 .vote_artist_down,
 .vote_tag_down {
   font-weight: bolder;
-  color: $color-text-ratio-redzone;
+  color: variables.$color-text-ratio-redzone;
 }
 
 #wrapper {
@@ -743,7 +745,7 @@ strong.important_text_alt {
 
 .box,
 .box2 {
-  background-color: $color-background-form;
+  background-color: variables.$color-background-form;
   margin-bottom: 8px;
   margin-top: 8px;
 }
@@ -754,7 +756,7 @@ table.box2 {
 }
 
 .head {
-  background-color: $color-background-input;
+  background-color: variables.$color-background-input;
   line-height: 18px;
 }
 
@@ -782,7 +784,7 @@ table.box2 {
 }
 
 .forum_post.forum_unread {
-  border-top: 2px solid $color-accent-forum-unread;
+  border-top: 2px solid variables.$color-accent-forum-unread;
 }
 
 .forum_post.wrap_overflow.box.vertical_margin td.body {
@@ -835,7 +837,7 @@ table.box2 {
 
 .last_read ::before {
   content: "➤"; // \27A4
-  color: $color-accent-forum-inline-last-read;
+  color: variables.$color-accent-forum-inline-last-read;
   display: inline-block;
 }
 
@@ -849,35 +851,35 @@ table.box2 {
 }
 
 .read {
-  background: $icon-message-read center no-repeat;
+  background: variables.$icon-message-read center no-repeat;
 }
 
 .unread {
-  background: $icon-message-unread center no-repeat;
+  background: variables.$icon-message-unread center no-repeat;
 }
 
 .read_locked {
-  background: $icon-message-read-locked center no-repeat;
+  background: variables.$icon-message-read-locked center no-repeat;
 }
 
 .unread_locked {
-  background: $icon-message-unread-locked center no-repeat;
+  background: variables.$icon-message-unread-locked center no-repeat;
 }
 
 .read_sticky {
-  background: $icon-message-read-sticky center no-repeat;
+  background: variables.$icon-message-read-sticky center no-repeat;
 }
 
 .unread_sticky {
-  background: $icon-message-unread-sticky center no-repeat;
+  background: variables.$icon-message-unread-sticky center no-repeat;
 }
 
 .read_locked_sticky {
-  background: $icon-message-read-locked-sticky center no-repeat;
+  background: variables.$icon-message-read-locked-sticky center no-repeat;
 }
 
 .unread_locked_sticky {
-  background: $icon-message-unread-locked-sticky center no-repeat;
+  background: variables.$icon-message-unread-locked-sticky center no-repeat;
 }
 
 #footer {
@@ -908,9 +910,9 @@ table.box2 {
 }
 
 div#flip_view_1 div#similar-artist .name {
-  border: 1px solid $color-text-base;
+  border: 1px solid variables.$color-text-base;
   background: rgb(60 60 60 / 70%);
-  color: $color-text-base;
+  color: variables.$color-text-base;
   margin: 0;
   padding: 0 5px;
 }
@@ -1033,11 +1035,11 @@ div#flip_view_1 div#similar-artist .name {
 }
 
 .torrent_table {
-  background-color: $color-background-table-torrenttable;
+  background-color: variables.$color-background-table-torrenttable;
 }
 
 .torrent_table tr:not(.colhead, .colhead_dark) {
-  border-top: 2px solid $color-accent-border-tablerows-torrent;
+  border-top: 2px solid variables.$color-accent-border-tablerows-torrent;
 }
 
 .torrent_table tr .number_column:not(:last-child) {
@@ -1045,11 +1047,11 @@ div#flip_view_1 div#similar-artist .name {
 }
 
 .torrent_table .group {
-  background-color: $color-background-input;
+  background-color: variables.$color-background-input;
 }
 
 .group_torrent {
-  background-color: $color-background-form;
+  background-color: variables.$color-background-form;
 }
 
 /* Edition stripe appears on
@@ -1059,7 +1061,7 @@ div#flip_view_1 div#similar-artist .name {
 
 #torrents #torrent_details .group_torrent td.edition_info,
 .group ~ .group_torrent.edition {
-  background-color: $color-background-torrent;
+  background-color: variables.$color-background-torrent;
 }
 
 .torrentdetails .linkbox {
@@ -1088,18 +1090,18 @@ div#flip_view_1 div#similar-artist .name {
 }
 
 .tags a {
-  color: $color-text-footer;
+  color: variables.$color-text-footer;
   font-size: 11px;
 }
 
 .tags a:hover {
-  color: $color-text-anchor-hover;
+  color: variables.$color-text-anchor-hover;
 }
 
 .group_info > span:first-child,
 .group_torrent td:first-child > span,
 .torrent_links_block {
-  color: $color-text-footer;
+  color: variables.$color-text-footer;
   float: right;
   margin-right: 4px;
 }
@@ -1260,7 +1262,7 @@ ul.collage_images li a > span {
 
 #userform #settings_sections h2 a,
 .rule_short {
-  color: $color-text-anchor;
+  color: variables.$color-text-anchor;
 }
 
 .poll li {
@@ -1268,14 +1270,14 @@ ul.collage_images li a > span {
 }
 
 .poll .graph {
-  background-color: $color-background-poll;
+  background-color: variables.$color-background-poll;
   display: block;
   height: 8px;
   margin-bottom: 12px;
 }
 
 .poll .graph span {
-  background-color: $color-obj-poll;
+  background-color: variables.$color-obj-poll;
   display: block;
   float: left;
   height: 8px;
@@ -1304,7 +1306,7 @@ ul.collage_images li a > span {
 
 #footer {
   width: 100%;
-  color: $color-text-footer;
+  color: variables.$color-text-footer;
   font-synthesis: 11px;
   margin: 32px auto 16px;
 }
@@ -1357,7 +1359,7 @@ ul.collage_images li a > span {
 }
 
 #inbox .unreadpm {
-  background: $color-background-fx-unread;
+  background: variables.$color-background-fx-unread;
 }
 
 #wiki .navigation_list {
@@ -1403,7 +1405,7 @@ ul.collage_images li a > span {
 }
 
 #userform #settings_sections h2 a:hover {
-  color: $color-text-anchor-hover;
+  color: variables.$color-text-anchor-hover;
 }
 
 #userform #settings_sections input {
@@ -1470,20 +1472,20 @@ ul.collage_images li a > span {
 
 .box table:not(.layout),
 .box2 table:not(.layout) {
-  border: 2px solid $color-accent-border-tableouter;
+  border: 2px solid variables.$color-accent-border-tableouter;
   margin: 8px 0;
 }
 
 span[style*="color: green"] {
-  color: $color-text-span-green !important;
+  color: variables.$color-text-span-green !important;
 }
 
 span[style*="color: red"] {
-  color: $color-text-span-red !important;
+  color: variables.$color-text-span-red !important;
 }
 
 span[style*="color: blue"] {
-  color: $color-text-span-blue !important;
+  color: variables.$color-text-span-blue !important;
 }
 
 .filelist_table td,
@@ -1498,7 +1500,7 @@ blockquote {
 .filelist_table td,
 .reportinfo_table,
 .torrentdetails {
-  background-color: $color-background-blockquote;
+  background-color: variables.$color-background-blockquote;
 }
 
 #bookmarks #torrent_table tr:not(.colhead, .colhead_dark) td:nth-child(2) {
@@ -1606,18 +1608,18 @@ form input {
 
 /* Discog table: for rows 'Albums', 'Compilations', 'Live Albums', etc. */
 #discog_table tr[id^="torrents_"] {
-  background-color: $color-background-table-keyrows;
+  background-color: variables.$color-background-table-keyrows;
 }
 #discog_table tr[id^="torrents_"] :not(a.tooltip.brackets) strong {
   font-size: large;
-  color: $color-text-bold;
+  color: variables.$color-text-bold;
 }
 
 /* Discog table: for names of albums, to help them stand out somewhat */
 #discog_table .discog strong a,
 #discog_table td.td_info.big_info div.group_info.clear strong a {
   font-size: 115%;
-  color: $color-text-table-discog-titles;
+  color: variables.$color-text-table-discog-titles;
 }
 
 /* Discog table:  for encodings, to get breathing room after the >> character */
@@ -1627,14 +1629,14 @@ div#discog_table td.td_info:not(span.torrent_links_block) > a {
 
 /* BEGIN Navbox on artist page ~ "jump down".. to navigate between Album/Live Album... */
 #discog_table > div.box.center {
-  background-color: $color-background-table-discog;
+  background-color: variables.$color-background-table-discog;
   padding: 12px;
   text-align: left;
   padding-left: 11rem;
 }
 
 #discog_table > div.box.center::before {
-  color: $color-text-bold !important;
+  color: variables.$color-text-bold !important;
   font-size: large !important;
   content: "⇩ Jump to" !important;
   font-weight: 600;
@@ -1664,28 +1666,28 @@ div#discog_table td.td_info:not(span.torrent_links_block) > a {
 }
 
 .tooltipster-default {
-  background-color: $color-background-tooltipster;
-  border: 4px solid $color-accent-border-tooltipster;
+  background-color: variables.$color-background-tooltipster;
+  border: 4px solid variables.$color-accent-border-tooltipster;
   border-radius: 2.5px;
-  color: $color-text-tooltipster;
+  color: variables.$color-text-tooltipster;
 }
 
 .tooltipster-default .tooltipster-content {
-  background-color: $color-background-tooltipster;
-  color: $color-text-tooltipster;
+  background-color: variables.$color-background-tooltipster;
+  color: variables.$color-text-tooltipster;
   font-size: 13px;
   line-height: 1.4;
   padding: 4px 6px;
 }
 
 .tooltipster-default .tooltipster-content a {
-  background-color: $color-background-tooltipster;
-  color: $color-text-tooltipster-anchor;
+  background-color: variables.$color-background-tooltipster;
+  color: variables.$color-text-tooltipster-anchor;
   font-weight: 600;
 }
 
 .tooltipster-default .tooltipster-content a:hover {
-  color: $color-text-tooltipster-anchor-hover;
+  color: variables.$color-text-tooltipster-anchor-hover;
 }
 
 /* ************************************************ */
@@ -1722,31 +1724,31 @@ body#collage .cats_music {
 .cats_music {
   /* Memo: If you desire NO decoration on music uploads,
     /* turn this off. */
-  border-right: thin solid $color-accent-cats_music;
+  border-right: thin solid variables.$color-accent-cats_music;
 }
 
 .cats_applications {
-  border-right: thick solid $color-accent-cats_applications;
+  border-right: thick solid variables.$color-accent-cats_applications;
 }
 
 .cats_audiobooks {
-  border-right: thick solid $color-accent-cats_audiobooks;
+  border-right: thick solid variables.$color-accent-cats_audiobooks;
 }
 
 .cats_comedy {
-  border-right: thick solid $color-accent-cats_comedy;
+  border-right: thick solid variables.$color-accent-cats_comedy;
 }
 
 .cats_comics {
-  border-right: thick solid $color-accent-cats_comics;
+  border-right: thick solid variables.$color-accent-cats_comics;
 }
 
 .cats_ebooks {
-  border-right: thick solid $color-accent-cats_ebooks;
+  border-right: thick solid variables.$color-accent-cats_ebooks;
 }
 
 .cats_elearningvideos {
-  border-right: thick solid $color-accent-cats_elearningvideos;
+  border-right: thick solid variables.$color-accent-cats_elearningvideos;
 }
 
 /* END category decorations for torrent tables on torrent & collage pages */
@@ -1792,7 +1794,7 @@ body#collage .cats_music {
 
   /* main logo during desktop view */
   #logo a {
-    background: $logo-site-lockup right no-repeat;
+    background: variables.$logo-site-lockup right no-repeat;
   }
 
   #logo > a {
@@ -1870,46 +1872,46 @@ body#collage .cats_music {
 
 #menu ul li:not(#nav_staff) a,
 #userinfo a.username {
-  color: $color-text-menu;
-  text-shadow: $color-accent-shadow-menutext;
+  color: variables.$color-text-menu;
+  text-shadow: variables.$color-accent-shadow-menutext;
 }
 
 /* menu li:nth-child(1) = Home button; is suppressed */
 
 #menu li:nth-child(2) {
-  background-color: $color-menu-2;
+  background-color: variables.$color-menu-2;
 }
 
 #menu li:nth-child(3) {
-  background-color: $color-menu-3;
+  background-color: variables.$color-menu-3;
 }
 
 #menu li:nth-child(4) {
-  background-color: $color-menu-4;
+  background-color: variables.$color-menu-4;
 }
 
 #menu li:nth-child(5) {
-  background-color: $color-menu-5;
+  background-color: variables.$color-menu-5;
 }
 
 #menu li:nth-child(6) {
-  background-color: $color-menu-6;
+  background-color: variables.$color-menu-6;
 }
 
 #menu li:nth-child(7) {
-  background-color: $color-menu-7;
+  background-color: variables.$color-menu-7;
 }
 
 #menu li:nth-child(8) {
-  background-color: $color-menu-8;
+  background-color: variables.$color-menu-8;
 }
 
 #menu li:nth-child(9) {
-  background-color: $color-menu-9;
+  background-color: variables.$color-menu-9;
 }
 
 #userinfo_username {
-  background-color: $color-menu-username;
+  background-color: variables.$color-menu-username;
   right: 50px;
 }
 
@@ -1949,11 +1951,11 @@ body#collage .cats_music {
 
   #menu > ul > #nav_staff > a:hover {
     background-color: transparent;
-    color: $color-text-anchor-hover;
+    color: variables.$color-text-anchor-hover;
   }
 
   #userinfo_minor::before {
-    background: $icon-menu-closed-state no-repeat;
+    background: variables.$icon-menu-closed-state no-repeat;
     filter: brightness(200%); /* force white */
     background-size: 28px;
     background-position: center;
@@ -1976,7 +1978,7 @@ body#collage .cats_music {
   }
 
   #userinfo_minor {
-    background-color: $color-menu-userinfo;
+    background-color: variables.$color-menu-userinfo;
     border-radius: 0 5px 0 0;
     right: 0;
   }
@@ -1998,11 +2000,11 @@ body#collage .cats_music {
   }
 
   #userinfo_minor:hover {
-    background-color: $color-menu-userinfo-hover;
+    background-color: variables.$color-menu-userinfo-hover;
   }
 
   #userinfo_username:hover {
-    background-color: $color-menu-username-hover;
+    background-color: variables.$color-menu-username-hover;
   }
 
   .settings_sidebar {
@@ -2025,14 +2027,14 @@ body#collage .cats_music {
 #userinfo_minor:hover a:hover,
 #userinfo_username:hover a:hover,
 #userinfo_minor:hover::before {
-  background-color: $color-menu-fx-selection;
+  background-color: variables.$color-menu-fx-selection;
 }
 
 /* when menu pulled down and mouse over an entry */
 #menu > ul a:hover,
 #userinfo_minor:hover a,
 #userinfo_username:hover a {
-  color: $color-text-menu-hover;
+  color: variables.$color-text-menu-hover;
 }
 
 /* Icon revealed when menu is open */
@@ -2040,7 +2042,7 @@ body#collage .cats_music {
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: scroll;
-  background-image: $icon-menu-open-state;
+  background-image: variables.$icon-menu-open-state;
   background-size: 30px;
   background-origin: padding-box;
   background-clip: border-box;
@@ -2068,7 +2070,7 @@ body#collage .cats_music {
 
 #searchbars > ul {
   align-items: center;
-  background-color: $color-background-searchbars-surround;
+  background-color: variables.$color-background-searchbars-surround;
   display: flex;
   height: 50px;
   padding: 0 9px;
@@ -2095,11 +2097,11 @@ body#collage .cats_music {
   border: none;
   border-radius: 2.5px;
   height: 30px;
-  background: $color-background-searchbars;
+  background: variables.$color-background-searchbars;
 }
 
 #searchbars .search_form input:focus {
-  background: $color-background-searchbars-field-focus;
+  background: variables.$color-background-searchbars-field-focus;
 }
 
 /* ************************************************ */
@@ -2118,7 +2120,7 @@ body#collage .cats_music {
 }
 
 .linkbox > strong {
-  color: $color-text-linkbox;
+  color: variables.$color-text-linkbox;
 }
 
 .linkbox .brackets::after,
@@ -2138,19 +2140,19 @@ body#collage .cats_music {
 
 #noty_bottomRight_layout_container > li {
   background: 0 0 !important;
-  border: 2px solid $color-menu-userinfo !important;
+  border: 2px solid variables.$color-menu-userinfo !important;
   border-radius: 1px !important;
 }
 
 /* elevation & levitation */
 @media screen and (prefers-reduced-motion: no-preference) {
   #noty_bottomRight_layout_container {
-    box-shadow: $ds-shadow-raised;
+    box-shadow: variables.$ds-shadow-raised;
     transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
   }
 
   #noty_bottomRight_layout_container:hover {
-    box-shadow: $ds-shadow-raised-hover;
+    box-shadow: variables.$ds-shadow-raised-hover;
     transform: translateY(-3.5px);
   }
 }
@@ -2160,10 +2162,10 @@ body#collage .cats_music {
   background:
     radial-gradient(
       circle at top right,
-      $color-background-notification-gradient-1,
-      $color-background-notification-gradient-2
+      variables.$color-background-notification-gradient-1,
+      variables.$color-background-notification-gradient-2
     ) !important;
-  color: $color-text-notification-words !important;
+  color: variables.$color-text-notification-words !important;
   font-weight: 700;
   padding: 0.6rem !important; //overriding site html
 }
@@ -2175,7 +2177,7 @@ body#collage .cats_music {
 
 /* second row of each box */
 #noty_bottomRight_layout_container .noty_buttons {
-  background-color: $color-background-notification !important;
+  background-color: variables.$color-background-notification !important;
   border: none !important;
   padding: 0.4rem !important;
 }
@@ -2183,7 +2185,7 @@ body#collage .cats_music {
 /* buttons */
 #noty_bottomRight_layout_container .noty_buttons a {
   background-color: none;
-  color: $color-obj-tag_bubble-foreground !important;
+  color: variables.$color-obj-tag_bubble-foreground !important;
   border: thin solid transparent; /* prevents button movement */
   border-radius: 14px;
   padding: 0 6px;
@@ -2196,9 +2198,9 @@ body#collage .cats_music {
 }
 
 #noty_bottomRight_layout_container .noty_buttons a:hover {
-  background-color: $color-obj-tag_bubble-foreground;
-  color: $color-obj-tag_bubble-background !important;
-  border: thin solid $color-obj-tag_bubble-background;
+  background-color: variables.$color-obj-tag_bubble-foreground;
+  color: variables.$color-obj-tag_bubble-background !important;
+  border: thin solid variables.$color-obj-tag_bubble-background;
   border-radius: 14px;
 }
 
@@ -2238,19 +2240,19 @@ body#collage .cats_music {
 /* # 1.12 Upload form MusicBrainz popup */
 
 #musicbrainz_popup {
-  color: $color-text-popup;
-  background: $color-background-popup;
-  border: $color-accent-border-popup;
+  color: variables.$color-text-popup;
+  background: variables.$color-background-popup;
+  border: variables.$color-accent-border-popup;
   padding: 1rem;
   font-weight: 600;
 }
 
 #musicbrainz_popup a {
-  color: $color-text-popup-anchor;
+  color: variables.$color-text-popup-anchor;
 }
 
 #musicbrainz_popup a:hover {
-  color: $color-text-popup-anchor-hover;
+  color: variables.$color-text-popup-anchor-hover;
 }
 
 #musicbrainz_popup .brackets {
@@ -2258,7 +2260,7 @@ body#collage .cats_music {
 }
 
 #musicbrainz_popup #popup_close {
-  color: $color-text-button;
+  color: variables.$color-text-button;
 }
 /* popup close button, see 'button' */
 
@@ -2302,8 +2304,8 @@ body#torrents div.box.box_tags li > a:first-child {
   font-weight: 700;
   font-size: 0.6rem;
   vertical-align: baseline;
-  color: $color-obj-tag_bubble-foreground;
-  background: $color-obj-tag_bubble-background;
+  color: variables.$color-obj-tag_bubble-foreground;
+  background: variables.$color-obj-tag_bubble-background;
   padding: 0 0.5rem;
   border-radius: 1rem;
   margin-bottom: 0.1rem;
@@ -2325,8 +2327,8 @@ body#torrents div.box.box_tags li > a:first-child {
   table.torrent_table.cats.checkboxes.border.m_table td.td_info.big_info div.group_info.clear div.tags a:hover,
   table.torrent_table.cats.m_table td.td_info.big_info div.group_info.clear div.tags a:hover,
   body#torrents div.box.box_tags li > a:first-child:hover {
-    color: $color-obj-tag_bubble-background !important;
-    background: $color-obj-tag_bubble-foreground !important;
+    color: variables.$color-obj-tag_bubble-background !important;
+    background: variables.$color-obj-tag_bubble-foreground !important;
     transition: all 0.15s cubic-bezier(0.25, 0.8, 0.25, 1);
     box-shadow:
       rgb(0 0 0 / 25%) 0 14px 28px,
@@ -2373,8 +2375,8 @@ tr.snatched_torrent div.tags::before {
 tr.snatched_group div.tags::before,
 tr.snatched_torrent div.tags::before {
   visibility: visible;
-  background: $color-obj-tag_bubble_snatched-background;
-  color: $color-obj-tag_bubble_snatched-foreground;
+  background: variables.$color-obj-tag_bubble_snatched-background;
+  color: variables.$color-obj-tag_bubble_snatched-foreground;
   border-radius: 1rem;
   box-sizing: border-box;
   display: inline-block;
@@ -2388,7 +2390,7 @@ tr.snatched_torrent div.tags::before {
 
 /* album pages */
 #torrent_details.snatched .group_torrent.snatched_torrent .torrent_label.tooltip.tl_snatched {
-  background: $back-600;
+  background: variables.$back-600;
   border-radius: 1rem;
   box-sizing: border-box;
   display: inline-block;
@@ -2412,14 +2414,14 @@ tr.snatched_torrent div.tags::before {
 .alertbar,
 .sys_error,
 .save_message {
-  border: thick solid $color-accent-border-alert;
+  border: thick solid variables.$color-accent-border-alert;
   padding: 1rem 1rem 1rem 48px;
-  background-color: $color-background-alert;
-  background-image: $icon-notification;
+  background-color: variables.$color-background-alert;
+  background-image: variables.$icon-notification;
   background-repeat: no-repeat;
   background-position: 8px center;
   background-size: 32px;
-  color: $color-text-alert !important;
+  color: variables.$color-text-alert !important;
   font-weight: 700;
   font-size: 16px;
   margin-top: 8px;
@@ -2427,26 +2429,26 @@ tr.snatched_torrent div.tags::before {
 }
 
 .alertbar a {
-  color: $color-anchor-alert !important;
+  color: variables.$color-anchor-alert !important;
 }
 
 /* occurs on failure, for example failed request votes */
 .error_message {
-  border: thick solid $color-accent-border-warning-2;
+  border: thick solid variables.$color-accent-border-warning-2;
   padding: 1rem 1rem 1rem 48px;
-  background-color: $color-background-warning;
+  background-color: variables.$color-background-warning;
   background-image: url("/svg/site/ops-icon-triangle-ccc.svg");
   background-repeat: no-repeat;
   background-position: 8px;
   background-size: 32px;
-  color: $color-text-warning !important;
+  color: variables.$color-text-warning !important;
   font-weight: 700;
   font-size: 16px;
   margin-top: 8px;
   text-align: center;
 }
 .error_message a {
-  color: $color-anchor-warning !important;
+  color: variables.$color-anchor-warning !important;
 }
 
 /* ## 2.3.2 additional treatment for messages that pop */
@@ -2454,25 +2456,25 @@ tr.snatched_torrent div.tags::before {
 @media screen and (prefers-reduced-motion: no-preference) {
   @keyframes fx-borderpop-bad {
     0% {
-      border: thick solid $ds-yellow;
+      border: thick solid variables.$ds-yellow;
     }
     70% {
-      border: thick solid $color-accent-border-warning-1;
+      border: thick solid variables.$color-accent-border-warning-1;
     }
     100% {
-      border: thick solid $color-accent-border-warning-2;
+      border: thick solid variables.$color-accent-border-warning-2;
     }
   }
 
   @keyframes fx-borderpop-good {
     0% {
-      border: thick solid $ds-green;
+      border: thick solid variables.$ds-green;
     }
     70% {
-      border: thick solid $color-background-notification-gradient-2;
+      border: thick solid variables.$color-background-notification-gradient-2;
     }
     100% {
-      border: thick solid $color-accent-border-alert;
+      border: thick solid variables.$color-accent-border-alert;
     }
   }
 
@@ -2492,10 +2494,10 @@ tr.snatched_torrent div.tags::before {
 
 .upload-error,
 ul#check.nobullet > * {
-  border: thick solid $color-accent-border-error;
+  border: thick solid variables.$color-accent-border-error;
   padding: 1rem 1rem 1rem 48px;
-  background: $color-background-error;
-  background-image: $icon-warning;
+  background: variables.$color-background-error;
+  background-image: variables.$icon-warning;
   background-repeat: no-repeat;
   background-position: 8px center;
   background-size: 32px;
@@ -2503,7 +2505,7 @@ ul#check.nobullet > * {
 
 .upload-error a,
 ul#check.nobullet > * a {
-  color: $color-text-anchor-error !important;
+  color: variables.$color-text-anchor-error !important;
   text-decoration-line: underline;
 }
 
@@ -2516,7 +2518,7 @@ ul#check.nobullet > * a::after {
 .upload-error *,
 ul#check.nobullet *,
 ul#check.nobullet > * {
-  color: $color-text-error !important;
+  color: variables.$color-text-error !important;
   font-size: 12px;
   font-weight: 700;
 }
@@ -2536,15 +2538,15 @@ ul#check::after {
   transform: translateX(-50%);
   z-index: $z-upload-error-popups;
   color: black;
-  border: thick solid $color-accent-border-error;
+  border: thick solid variables.$color-accent-border-error;
   border-radius: 0.25rem;
   padding: 1rem 1rem 1rem 48px;
-  background-color: $color-background-error;
-  background-image: $icon-warning;
+  background-color: variables.$color-background-error;
+  background-image: variables.$icon-warning;
   background-repeat: no-repeat;
   background-position: 8px center;
   background-size: 32px;
-  box-shadow: $ds-shadow-heavy;
+  box-shadow: variables.$ds-shadow-heavy;
 }
 
 /* ### 2.4.1 Post-Upload Download Message */
@@ -2633,13 +2635,13 @@ ul#check::after {
 /* Complete list of matches */
 .autocomplete-suggestions {
   margin-top: 5px;
-  background: $color-background-autocompletes !important;
+  background: variables.$color-background-autocompletes !important;
   color: #888;  //does nothing
   width: auto !important;
   text-align: left;
   cursor: default;
-  border: 1px solid $midtone-300; //midtone-300
-  border-top: 1px dashed $midtone-300; //midtone-300
+  border: 1px solid variables.$midtone-300; //midtone-300
+  border-top: 1px dashed variables.$midtone-300; //midtone-300
   box-shadow: 3px 3px 9px rgba(0, 0, 0, 0.8) !important;
 
   /* core styles should not be changed */
@@ -2661,18 +2663,18 @@ ul#check::after {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: $color-text-input !important; //$color-text-input
+  color: variables.$color-text-input !important; //$color-text-input
 }
 
 /* Portion that matches */
 .autocomplete-suggestions .autocomplete-suggestion strong {
   font-weight: 400;
-  color: $color-text-autocomplete-highlight-match !important; // fore-1000
+  color: variables.$color-text-autocomplete-highlight-match !important; // fore-1000
 }
 
 /* When one match is highlighted by mouse */
 .autocomplete-suggestions .autocomplete-suggestion.autocomplete-selected {
-  background-color: $color-menu-fx-selection !important;
+  background-color: variables.$color-menu-fx-selection !important;
 }
 
 /* ########################################################################
@@ -3062,8 +3064,8 @@ Documentation of mobile classes:
   .td_snatched.m_td_right::before,
   .td_seeders.m_td_right::before,
   .td_leechers.m_td_right::before {
-    background: left / 10px no-repeat $icon-number-snatches;
-    color: $color-text-bold;
+    background: left / 10px no-repeat variables.$icon-number-snatches;
+    color: variables.$color-text-bold;
     content: ":";
     filter: brightness(80%);
     position: absolute;
@@ -3073,11 +3075,11 @@ Documentation of mobile classes:
   }
 
   .td_seeders.m_td_right::before {
-    background-image: $icon-number-seeders;
+    background-image: variables.$icon-number-seeders;
   }
 
   .td_leechers.m_td_right::before {
-    background-image: $icon-number-leechers;
+    background-image: variables.$icon-number-leechers;
   }
 
   .m_table.checkboxes td:first-child {
@@ -3247,8 +3249,8 @@ Documentation of mobile classes:
     font-weight: 400;
     font-size: 0.55rem;
     vertical-align: baseline;
-    color: $color-obj-tag_bubble-foreground;
-    background: $color-obj-tag_bubble-background !important;
+    color: variables.$color-obj-tag_bubble-foreground;
+    background: variables.$color-obj-tag_bubble-background !important;
     padding: 0.05rem 0.5rem;
     border: none !important;
     border-radius: 1rem;
@@ -3369,7 +3371,7 @@ Documentation of mobile classes:
 
   .forum_post tr.colhead_dark span,
   .forum_post tr.colhead_dark strong {
-    color: $color-text-input;
+    color: variables.$color-text-input;
   }
 
   .forum_post tr.colhead_dark div {
@@ -3471,7 +3473,7 @@ Documentation of mobile classes:
   }
 
   #header {
-    background: $color-mobilemenu-closed;
+    background: variables.$color-mobilemenu-closed;
     top: 0;
     height: 0;
     left: 0;
@@ -3484,7 +3486,7 @@ Documentation of mobile classes:
     opacity: 0;
   }
   #header a {
-    color: $color-text-menu;
+    color: variables.$color-text-menu;
   }
   /* ## 4.17.2 Mobile Menu opens on hover */
 
@@ -3494,9 +3496,9 @@ Documentation of mobile classes:
     height: clamp(200px, calc(var(--row-height) * 15), 100%);
     opacity: 1;
     transition: all 600ms cubic-bezier(1, 0.01, 0.3, 1.31);
-    border-bottom: groove $color-mobilemenu-closed;
+    border-bottom: groove variables.$color-mobilemenu-closed;
     box-shadow:
-      0 50px 70px $color-mobilemenu-shadow,
+      0 50px 70px variables.$color-mobilemenu-shadow,
       0 160px 160px #080808;
   }
 
@@ -3511,7 +3513,7 @@ Documentation of mobile classes:
     opacity: 1 !important;
     width: 25px;
     height: 25px;
-    background-image: $icon-menu-pulldown-mobile;
+    background-image: variables.$icon-menu-pulldown-mobile;
     background-size: contain;
     z-index: $z-mobilemenu_closed-tab-icons;
     pointer-events: none;
@@ -3519,7 +3521,7 @@ Documentation of mobile classes:
 
   /* topbar for mobile ~ "folder tab" when menu is closed */
   #extra4 {
-    background: $color-mobilemenu-closed;
+    background: variables.$color-mobilemenu-closed;
     border-radius: 0 0 9px 9px;
     display: block;
     right: 0;
@@ -3529,7 +3531,7 @@ Documentation of mobile classes:
 
   /* topbar for mobile ~ site logo, upper left */
   #extra5 {
-    background-image: $logo-site-square;
+    background-image: variables.$logo-site-square;
     background-position: left center;
     background-size: auto 30px;
     background-repeat: no-repeat;
@@ -3603,14 +3605,14 @@ Documentation of mobile classes:
     background:
       radial-gradient(
         circle at top left,
-        $color-mobilemenu-userinfo-1,
-        $color-mobilemenu-userinfo-2
+        variables.$color-mobilemenu-userinfo-1,
+        variables.$color-mobilemenu-userinfo-2
       );
   }
 
   #logo a {
     display: inline-block;
-    background: $logo-site-square center no-repeat;
+    background: variables.$logo-site-square center no-repeat;
     background-size: var(--row-height);
     height: var(--row-height);
     width: var(--row-height);
@@ -3623,8 +3625,8 @@ Documentation of mobile classes:
     background:
       radial-gradient(
         circle at top left,
-        $color-mobilemenu-userinfo-1,
-        $color-mobilemenu-userinfo-2
+        variables.$color-mobilemenu-userinfo-1,
+        variables.$color-mobilemenu-userinfo-2
       );
   }
 
@@ -3661,7 +3663,7 @@ Documentation of mobile classes:
     right: 2vw;
     width: 60vw;
     margin: auto;
-    color: $color-text-base;
+    color: variables.$color-text-base;
     top: calc(100% - var(--row-height) * 10 - 125px);
     height: calc(2.4 * var(--row-height));
     flex-direction: column;
@@ -3685,7 +3687,7 @@ Documentation of mobile classes:
 
   #stats_ratio .tooltip {
     /* Provide a local background for the number to appear in color */
-    background-color: $color-background-form;
+    background-color: variables.$color-background-form;
     border-radius: 0.45rem;
     padding-left: 0.45rem;
     padding-right: 0.45rem;
@@ -3697,8 +3699,8 @@ Documentation of mobile classes:
     background:
       radial-gradient(
         circle at top left,
-        $color-mobilemenu-userinfo-1,
-        $color-mobilemenu-userinfo-2
+        variables.$color-mobilemenu-userinfo-1,
+        variables.$color-mobilemenu-userinfo-2
       );
     bottom: calc(var(--row-height) * 7);
     position: absolute;
@@ -3716,8 +3718,8 @@ Documentation of mobile classes:
     background:
       radial-gradient(
         circle at top left,
-        $color-mobilemenu-userinfo-2,
-        $color-mobilemenu-userinfo-1
+        variables.$color-mobilemenu-userinfo-2,
+        variables.$color-mobilemenu-userinfo-1
       );
     bottom: calc(var(--row-height) * 3);
     position: absolute;
@@ -3756,7 +3758,7 @@ Documentation of mobile classes:
   /* Notify user they have an alert & must rotate to see. */
   #wrapper:has(#alerts)::before {
     content: "";
-    background-image: $icon-mobile-rotate;
+    background-image: variables.$icon-mobile-rotate;
     background-position: top center;
     background-size: auto 32px;
     background-repeat: no-repeat;
@@ -3813,15 +3815,15 @@ Documentation of mobile classes:
 
   #taglist tr.label {
     height: auto;
-    border: thick solid $color-obj-tag_bubble-foreground;
+    border: thick solid variables.$color-obj-tag_bubble-foreground;
   }
 
   #taglist tr.label td {
-    background: $color-obj-tag_bubble-background;
-    color: $color-obj-tag_bubble-foreground;
+    background: variables.$color-obj-tag_bubble-background;
+    color: variables.$color-obj-tag_bubble-foreground;
     align-content: center;
     text-align: center;
-    border: $color-obj-tag_bubble-foreground;
+    border: variables.$color-obj-tag_bubble-foreground;
     width: 100%;
   }
 
@@ -3842,8 +3844,8 @@ Documentation of mobile classes:
     text-overflow: ellipsis;
     font-style: italic;
     vertical-align: baseline;
-    color: $color-obj-tag_bubble-foreground !important;
-    background: $color-obj-tag_bubble-background;
+    color: variables.$color-obj-tag_bubble-foreground !important;
+    background: variables.$color-obj-tag_bubble-background;
     padding: 0.25rem;
     border-radius: 1rem;
     margin-bottom: 0.1rem;
@@ -3886,7 +3888,7 @@ Documentation of mobile classes:
    variou 'debug' and x-debug features are avail in this doc elsewhere */
 
 #footer p:last-of-type::after {
-  content: " | " + $build-slug;
+  content: " | " + variables.$build-slug;
 }
 
 /* ########################################################################

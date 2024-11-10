@@ -29,8 +29,6 @@ __MACOSX/
 /public/static/local/
 /vendor
 /lib/override.config.php
-/mix-manifest.json
-/mix.js.map
 /yarn-error.log
 
 /misc/docker/mysql-home/.mysql_history

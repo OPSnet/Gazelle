@@ -12,10 +12,10 @@
 // SLUG/SETUP
 
 // import basic colors as a backup:
-@import '../apollostage/_variables';
+@use '../apollostage/_variables';
 
 // debug slugs: must be after import.
-$build-slug: $build-slug + " " + "paper";
+variables.$build-slug: variables.$build-slug + " " + "paper";
 
 // override as follows:
 // ////////////////////////////////////////////////////////////////////////////////
@@ -24,16 +24,16 @@ $build-slug: $build-slug + " " + "paper";
 // physical_layout -> token, and token -> raw value.
 
 // Backgrounds
-$back-100: #EBEFF0;
-$back-200: #DEE2E2;
-$back-300: #D0D4D5;
-$back-400: #C2C6C7;
-$back-500: #B5B9BA;
-$back-600: #A7ABAC;
-$back-700: #9A9E9F;
-$back-800: #8D9091;
-$back-900: #808384;
-$back-1000: #727576;
+variables.$back-100: #EBEFF0;
+variables.$back-200: #DEE2E2;
+variables.$back-300: #D0D4D5;
+variables.$back-400: #C2C6C7;
+variables.$back-500: #B5B9BA;
+variables.$back-600: #A7ABAC;
+variables.$back-700: #9A9E9F;
+variables.$back-800: #8D9091;
+variables.$back-900: #808384;
+variables.$back-1000: #727576;
 $back-800-low: #8D909155;
 
 // Mids
@@ -49,28 +49,28 @@ $mid-900: #004B38;
 $mid-1000: #003D2D;
 
 // Menutheme ~ for base apollostage, same as mids
-$menutheme-100: #003D2D;
-$menutheme-200: #004B38;
-$menutheme-300: #005943;
-$menutheme-400: #00674E;
-$menutheme-500: #00745A;
-$menutheme-600: #008265;
-$menutheme-700: #008D6D;
-$menutheme-800: #009777;
-$menutheme-900: #00A280;
-$menutheme-1000: #00AD89;
+variables.$menutheme-100: #003D2D;
+variables.$menutheme-200: #004B38;
+variables.$menutheme-300: #005943;
+variables.$menutheme-400: #00674E;
+variables.$menutheme-500: #00745A;
+variables.$menutheme-600: #008265;
+variables.$menutheme-700: #008D6D;
+variables.$menutheme-800: #009777;
+variables.$menutheme-900: #00A280;
+variables.$menutheme-1000: #00AD89;
 
 // Fores
-$fore-100: #8E9FB3;
-$fore-200: #577AA4;
-$fore-300: #2E5D95;
-$fore-400: #174A86;
-$fore-500: #0C3376;
-$fore-600: #0D3167;
-$fore-700: #123058;
-$fore-800: #162E49;
-$fore-900: #17212E;
-$fore-1000: #0E0F0F;
+variables.$fore-100: #8E9FB3;
+variables.$fore-200: #577AA4;
+variables.$fore-300: #2E5D95;
+variables.$fore-400: #174A86;
+variables.$fore-500: #0C3376;
+variables.$fore-600: #0D3167;
+variables.$fore-700: #123058;
+variables.$fore-800: #162E49;
+variables.$fore-900: #17212E;
+variables.$fore-1000: #0E0F0F;
 
 // Neutrals (Ink)
 $neutral-000: #FFFFFF;
@@ -99,18 +99,18 @@ $blue-800: #09326C;
 $blue-900: #1C2B41;
 
 // Direct-Specialty
-$ds-neutral-300: #979a9c;
-$ds-neutral-400: #7f807f;
-$ds-neutral-500: #5d6670;
-$ds-neutral-000: #000;
-$ds-red: #a41610;
-$ds-green: #11890e;
-$ds-yellow: #c9a612;
+variables.$ds-neutral-300: #979a9c;
+variables.$ds-neutral-400: #7f807f;
+variables.$ds-neutral-500: #5d6670;
+variables.$ds-neutral-000: #000;
+variables.$ds-red: #a41610;
+variables.$ds-green: #11890e;
+variables.$ds-yellow: #c9a612;
 $ds-orange: #ff8c00;
-$ds-fx-low: rgb(0 0 0 / 15%);
-$ds-fx-mid: rgb(0 0 0 / 22.5%);
+variables.$ds-fx-low: rgb(0 0 0 / 15%);
+variables.$ds-fx-mid: rgb(0 0 0 / 22.5%);
 $ds-fx-blue: hsl(215deg 90% 56% / 30%);
-$ds-gray-05: hsl(178deg 100% 5.1%);
+variables.$ds-gray-05: hsl(178deg 100% 5.1%);
 $ds-gray-13: hsl(180deg 11% 13%); //goes nowhere does nothing;
 $ds-gray-52: hsl(181deg 3.5% 52%);
 $ds-gray-72: hsl(183deg 4% 72%);
@@ -118,144 +118,143 @@ $ds-gray-99: hsl(120deg 100% 99.6%);
 
 // DEFINE FROM LOGICAL LAYOUT TO TOKENS
 
-$color-background-base: $back-100;
-$color-background-blockquote: $back-800-low;
-$color-background-box: $back-800-low;
-$color-background-form: $back-200; // also boxes on frontpage
-$color-background-input: $back-400;
-$color-background-input-active: $back-500;
-$color-background-poll: $back-500;
-$color-background-popup: $back-300; // upload musicbrainz info
-$color-background-popup-warning: $ds-yellow;
-$color-background-searchbars: $back-300;
-$color-background-searchbars-field-focus: $back-100;
-$color-background-searchbars-surround: $back-500;
-$color-background-table: $back-200; // tables/forms without odd-even treatment
-$color-background-table-discog: $mid-300; // navigation row ~ "jump down to.."
-$color-background-table-row-th: $back-700;
-$color-background-table-row-odd: $back-500;
-$color-background-table-row-even: $back-300;
-$color-background-table-keyrows: $mid-300; // navigation row ~ "jump up to.."
-$color-background-table-torrenttable: $back-300; // also form field in focus
-$color-background-table-details: $back-400; // equal to blockquote
-$color-background-table-torrents-group: $back-600;
-$color-background-tooltipster: $back-100;
-$color-background-torrent: $mid-200; // edition in group-list
-$color-background-fx-unread: $ds-fx-blue;
+variables.$color-background-base: variables.$back-100;
+variables.$color-background-blockquote: $back-800-low;
+variables.$color-background-box: $back-800-low;
+variables.$color-background-form: variables.$back-200; // also boxes on frontpage
+variables.$color-background-input: variables.$back-400;
+variables.$color-background-input-active: variables.$back-500;
+variables.$color-background-poll: variables.$back-500;
+variables.$color-background-popup: variables.$back-300; // upload musicbrainz info
+$color-background-popup-warning: variables.$ds-yellow;
+variables.$color-background-searchbars: variables.$back-300;
+variables.$color-background-searchbars-field-focus: variables.$back-100;
+variables.$color-background-searchbars-surround: variables.$back-500;
+variables.$color-background-table: variables.$back-200; // tables/forms without odd-even treatment
+variables.$color-background-table-discog: $mid-300; // navigation row ~ "jump down to.."
+variables.$color-background-table-row-th: variables.$back-700;
+variables.$color-background-table-row-odd: variables.$back-500;
+variables.$color-background-table-row-even: variables.$back-300;
+variables.$color-background-table-keyrows: $mid-300; // navigation row ~ "jump up to.."
+variables.$color-background-table-torrenttable: variables.$back-300; // also form field in focus
+variables.$color-background-table-details: variables.$back-400; // equal to blockquote
+variables.$color-background-table-torrents-group: variables.$back-600;
+variables.$color-background-tooltipster: variables.$back-100;
+variables.$color-background-torrent: $mid-200; // edition in group-list
+variables.$color-background-fx-unread: $ds-fx-blue;
 
-$color-text-anchor-hover: $blue-800;
-$color-text-anchor: $blue-700;
-$color-text-base: $neutral-1000;
-$color-text-bold: $neutral-1100;
-$color-text-button: $ds-gray-05;  //xx checkme
-$color-text-footer: $ds-neutral-300;
-$color-text-heading-anchor: $blue-700; //x
-$color-text-heading: $fore-700;
-$color-text-important-alt: $ds-green;
-$color-text-important: $ds-red;
-$color-text-input: $fore-600; // for pre-populated inputs
-$color-text-input-active: $fore-900;
-$color-text-linkbox: $blue-700; // links in linkbox
-$color-text-menu: $ds-gray-99; // new
-$color-text-menu-hover: $ds-gray-99; //new // during pulldown
-$color-text-mono: $fore-500;
-$color-text-popup-anchor-hover: $blue-800;
-$color-text-popup-anchor: $blue-700;
-$color-text-popup: $neutral-1000;
-$color-text-ratio-greenzone: $ds-green;
-$color-text-ratio-redzone: $ds-red;
-$color-text-ratio-yellowzone: $ds-yellow;
-$color-text-span-blue: hsl(235deg 90% 55%); //x lower
-$color-text-span-green: hsl(145deg 90% 35%); //x lower
-$color-text-span-red: $ds-red;
-$color-text-table-discog-titles: $fore-300;
-$color-text-tooltipster: $fore-700;
-$color-text-tooltipster-anchor: $fore-900;
-$color-text-tooltipster-anchor-hover: $fore-800;
+variables.$color-text-anchor-hover: $blue-800;
+variables.$color-text-anchor: $blue-700;
+variables.$color-text-base: $neutral-1000;
+variables.$color-text-bold: $neutral-1100;
+variables.$color-text-button: variables.$ds-gray-05;  //xx checkme
+variables.$color-text-footer: variables.$ds-neutral-300;
+variables.$color-text-heading-anchor: $blue-700; //x
+variables.$color-text-heading: variables.$fore-700;
+variables.$color-text-important-alt: variables.$ds-green;
+variables.$color-text-important: variables.$ds-red;
+variables.$color-text-input: variables.$fore-600; // for pre-populated inputs
+variables.$color-text-input-active: variables.$fore-900;
+variables.$color-text-linkbox: $blue-700; // links in linkbox
+variables.$color-text-menu: $ds-gray-99; // new
+variables.$color-text-menu-hover: $ds-gray-99; //new // during pulldown
+variables.$color-text-mono: variables.$fore-500;
+variables.$color-text-popup-anchor-hover: $blue-800;
+variables.$color-text-popup-anchor: $blue-700;
+variables.$color-text-popup: $neutral-1000;
+variables.$color-text-ratio-greenzone: variables.$ds-green;
+variables.$color-text-ratio-redzone: variables.$ds-red;
+variables.$color-text-ratio-yellowzone: variables.$ds-yellow;
+variables.$color-text-span-blue: hsl(235deg 90% 55%); //x lower
+variables.$color-text-span-green: hsl(145deg 90% 35%); //x lower
+variables.$color-text-span-red: variables.$ds-red;
+variables.$color-text-table-discog-titles: variables.$fore-300;
+variables.$color-text-tooltipster: variables.$fore-700;
+variables.$color-text-tooltipster-anchor: variables.$fore-900;
+variables.$color-text-tooltipster-anchor-hover: variables.$fore-800;
 
-$color-menu-1: orangered; // unused (could be home)
-$color-menu-2: $menutheme-100; // torrents
-$color-menu-3: $menutheme-200; // collages
-$color-menu-4: $menutheme-300; // requests
-$color-menu-5: $menutheme-400; // forums
-$color-menu-6: $menutheme-500; // irc
-$color-menu-7: $menutheme-600; // top10
-$color-menu-8: $menutheme-700; // rules
-$color-menu-9: $menutheme-800; // wiki
-$color-menu-username: $menutheme-900; // username menu ~ closed
-$color-menu-userinfo: $menutheme-1000; // VV pulldown menu ~ closed
-$color-menu-hover: $menutheme-300;
-$color-menu-username-hover: $menutheme-900; // username menu ~ open
-$color-menu-userinfo-hover: $menutheme-900; // VV pulldown menu ~ open
-$color-menu-fx-selection: $ds-fx-menutheme;
-$color-mobilemenu-userinfo-1: $menutheme-400; // mobile pulldown menu gradient 1
-$color-mobilemenu-userinfo-2: $menutheme-900; // mobile pulldown menu gradient 2
-$color-mobilemenu-closed: $mid-700; // rules, also mobile menu header
-$color-mobilemenu-shadow: $mid-500; //mobile menu
+variables.$color-menu-1: orangered; // unused (could be home)
+variables.$color-menu-2: variables.$menutheme-100; // torrents
+variables.$color-menu-3: variables.$menutheme-200; // collages
+variables.$color-menu-4: variables.$menutheme-300; // requests
+variables.$color-menu-5: variables.$menutheme-400; // forums
+variables.$color-menu-6: variables.$menutheme-500; // irc
+variables.$color-menu-7: variables.$menutheme-600; // top10
+variables.$color-menu-8: variables.$menutheme-700; // rules
+variables.$color-menu-9: variables.$menutheme-800; // wiki
+variables.$color-menu-username: variables.$menutheme-900; // username menu ~ closed
+variables.$color-menu-userinfo: variables.$menutheme-1000; // VV pulldown menu ~ closed
+variables.$color-menu-hover: variables.$menutheme-300;
+variables.$color-menu-username-hover: variables.$menutheme-900; // username menu ~ open
+variables.$color-menu-userinfo-hover: variables.$menutheme-900; // VV pulldown menu ~ open
+variables.$color-menu-fx-selection: variables.$ds-fx-menutheme;
+variables.$color-mobilemenu-userinfo-1: variables.$menutheme-400; // mobile pulldown menu gradient 1
+variables.$color-mobilemenu-userinfo-2: variables.$menutheme-900; // mobile pulldown menu gradient 2
+variables.$color-mobilemenu-closed: $mid-700; // rules, also mobile menu header
+variables.$color-mobilemenu-shadow: $mid-500; //mobile menu
 
-$color-obj-button-base-1: $ds-gray-72;
-$color-obj-button-base-2: $ds-gray-52;
-$color-obj-poll: $mid-900; // poll active part of bargraph
+variables.$color-obj-button-base-1: $ds-gray-72;
+variables.$color-obj-button-base-2: $ds-gray-52;
+variables.$color-obj-poll: $mid-900; // poll active part of bargraph
 
-$color-obj-tag_bubble-background: $mid-200; // menu-2 suggested
-$color-obj-tag_bubble-foreground: $mid-900; // menu-9 suggested
-$color-obj-tag_bubble_snatched-background: $back-600;
-$color-obj-tag_bubble_snatched-foreground: $fore-800;
+variables.$color-obj-tag_bubble-background: $mid-200; // menu-2 suggested
+variables.$color-obj-tag_bubble-foreground: $mid-900; // menu-9 suggested
+variables.$color-obj-tag_bubble_snatched-background: variables.$back-600;
+variables.$color-obj-tag_bubble_snatched-foreground: variables.$fore-800;
 
 // Autocompletes
-$color-background-autocompletes: $color-background-searchbars;
-$color-accent-border-autocompletes: $midtone-300;
-$color-text-autocomplete: $color-text-input;
-$color-text-autocomplete-highlight-match: $fore-1000;
+variables.$color-background-autocompletes: variables.$color-background-searchbars;
+variables.$color-accent-border-autocompletes: variables.$midtone-300;
+variables.$color-text-autocomplete: variables.$color-text-input;
+variables.$color-text-autocomplete-highlight-match: variables.$fore-1000;
 
-$color-accent-border-blockquote: $back-900; // Dotted
-$color-accent-border-box: $back-900;
-$color-accent-border-input: $ds-fx-low;
-$color-accent-border-input-active: $ds-fx-mid;
-$color-accent-border-tooltipster: $mid-800;
-$color-accent-border-popup: $mid-800;
-$color-accent-border-tableouter: $back-600-mid;
-$color-accent-border-tablerows: $back-600-low;
-$color-accent-border-tablerows-torrent: $back-600-mid;
-$color-accent-shadow-menutext: initial; // provisioned for derivative themes
+variables.$color-accent-border-blockquote: variables.$back-900; // Dotted
+variables.$color-accent-border-box: variables.$back-900;
+variables.$color-accent-border-input: variables.$ds-fx-low;
+variables.$color-accent-border-input-active: variables.$ds-fx-mid;
+variables.$color-accent-border-tooltipster: $mid-800;
+variables.$color-accent-border-popup: $mid-800;
+variables.$color-accent-border-tableouter: variables.$back-600-mid;
+variables.$color-accent-border-tablerows: variables.$back-600-low;
+variables.$color-accent-border-tablerows-torrent: variables.$back-600-mid;
+variables.$color-accent-shadow-menutext: initial; // provisioned for derivative themes
 
-$color-accent-cats_applications: silver;
-$color-accent-cats_audiobooks: cornflowerblue;
-$color-accent-cats_comedy: deepskyblue;
-$color-accent-cats_comics: gold;
-$color-accent-cats_ebooks: chocolate;
-$color-accent-cats_elearningvideos: mediumpurple;
-$color-accent-cats_music: darkslategray;
-$color-accent-forum-inline-last-read: $ds-orange;
-$color-accent-forum-unread: $ds-orange;
-$color-accent-selection-background: $mid-800;
-$color-accent-selection-text: #fff; // usually #fff or $color-text-bold
+variables.$color-accent-cats_applications: silver;
+variables.$color-accent-cats_audiobooks: cornflowerblue;
+variables.$color-accent-cats_comedy: deepskyblue;
+variables.$color-accent-cats_comics: gold;
+variables.$color-accent-cats_ebooks: chocolate;
+variables.$color-accent-cats_elearningvideos: mediumpurple;
+variables.$color-accent-cats_music: darkslategray;
+variables.$color-accent-forum-inline-last-read: $ds-orange;
+variables.$color-accent-forum-unread: $ds-orange;
+variables.$color-accent-selection-background: $mid-800;
+variables.$color-accent-selection-text: #fff; // usually #fff or $color-text-bold
 
 // popup notifications
-$color-background-notification-gradient-1: $mid-1000; // menu low/high suggested
-$color-background-notification-gradient-2: $mid-500;  // menu high/low suggested
-$color-background-notification: #fff;
-$color-text-notification-words: #fff;
+variables.$color-background-notification-gradient-1: $mid-1000; // menu low/high suggested
+variables.$color-background-notification-gradient-2: $mid-500;  // menu high/low suggested
+variables.$color-background-notification: #fff;
+variables.$color-text-notification-words: #fff;
 
 // alerts (light mode style)
-$color-accent-border-alert: $midtone-500;
-$color-background-alert: $ds-gray-92;
-$color-text-alert: $ds-black;
-$color-anchor-alert: $ds-gray-05;
+variables.$color-accent-border-alert: variables.$midtone-500;
+variables.$color-background-alert: variables.$ds-gray-92;
+variables.$color-text-alert: variables.$ds-black;
+variables.$color-anchor-alert: variables.$ds-gray-05;
 
 // ////////////////////////////////////////////////////////////////////////////////
 // ICONS
 
 // changing to #000 black version
-$icon-message-unread: url("/svg/std/document-round-000.svg");
-$icon-message-unread-locked: url("/svg/std/lock-round-000.svg");
-$icon-message-unread-sticky: url("/svg/std/pin-round-000.svg");
-$icon-message-unread-locked-sticky: url("/svg/std/pin-and-lock-round-000.svg");
-$icon-message-read: url("/svg/std/document-000.svg");
-$icon-message-read-locked: url("/svg/std/lock-000.svg");
-$icon-message-read-sticky: url("/svg/std/pin-000.svg");
-$icon-message-read-locked-sticky: url("/svg/std/pin-and-lock-000.svg");
-$icon-notification: url("/styles/apollostage/images/notification-bell-000xeee.svg");
+variables.$icon-message-unread: url("/svg/std/document-round-000.svg");
+variables.$icon-message-unread-locked: url("/svg/std/lock-round-000.svg");
+variables.$icon-message-unread-sticky: url("/svg/std/pin-round-000.svg");
+variables.$icon-message-unread-locked-sticky: url("/svg/std/pin-and-lock-round-000.svg");
+variables.$icon-message-read: url("/svg/std/document-000.svg");
+variables.$icon-message-read-locked: url("/svg/std/lock-000.svg");
+variables.$icon-message-read-sticky: url("/svg/std/pin-000.svg");
+variables.$icon-message-read-locked-sticky: url("/svg/std/pin-and-lock-000.svg");
 
 // Header Pulldown Menu (hamburger/chevron icon)
 // not changing, still dark background
@@ -263,23 +262,23 @@ $icon-notification: url("/styles/apollostage/images/notification-bell-000xeee.sv
 // Used in Header
 // changing to light mode version
 // // Orpheus specific:
-$logo-site-lockup: url("/svg/site/ops-logo-lockup-lightmode.svg");
-$logo-site-square: url("/svg/site/ops-logo-loop-lightmode.svg");
+variables.$logo-site-lockup: url("/svg/site/ops-logo-lockup-lightmode.svg");
+variables.$logo-site-square: url("/svg/site/ops-logo-loop-lightmode.svg");
 
 // Used on Mobile
 // changing to #000 black version
-$icon-number-snatches: url("/svg/std/arrow-loop-000.svg");
-$icon-number-seeders: url("/svg/std/arrow-up-round-000.svg");
-$icon-number-leechers: url("/svg/std/arrow-down-round-000.svg");
+variables.$icon-number-snatches: url("/svg/std/arrow-loop-000.svg");
+variables.$icon-number-seeders: url("/svg/std/arrow-up-round-000.svg");
+variables.$icon-number-leechers: url("/svg/std/arrow-down-round-000.svg");
 
 // // standard:
 // $icon-notification: url("/svg/std/notification-bell-000.svg");
 // $icon-warning: url("/svg/std/x-000.svg")
 // // Orpheus specific; other deployments, use the above.
-$icon-notification: url("/svg/site/ops-icon-harp-000.svg");
-$icon-warning: url("/svg/site/ops-icon-triangle-000.svg");
+variables.$icon-notification: url("/svg/site/ops-icon-harp-000.svg");
+variables.$icon-warning: url("/svg/site/ops-icon-triangle-000.svg");
 
-@import '../apollostage/_base';
+@use '../apollostage/_base';
 
 // EOF
 
