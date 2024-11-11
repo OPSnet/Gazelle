@@ -35,7 +35,7 @@ help:
 
 .PHONY: build-css
 build-css:
-	docker-compose exec -T web ./node_modules/.bin/webpack --no-progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js
+	docker-compose exec -T web yarn build:scss
 
 .PHONY: check-php
 check-php:
