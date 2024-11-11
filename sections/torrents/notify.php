@@ -100,7 +100,9 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
         <td class="small cats_col"></td>
         <td style="width: 100%;" class="nobr">Name<?= ' / ' . $header->emit('year') ?></td>
         <td class="nobr"><?= $header->emit('time') ?></td>
+<?php if ($Viewer->ordinal()->value('file-count-display')) { ?>
         <td class="number_column">Files</td>
+<?php } ?>
         <td class="nobr number_column"><?= $header->emit('size') ?></td>
         <td class="sign nobr snatches"><?= $headerIcons->emit('snatched') ?></td>
         <td class="sign nobr seeders"><?= $headerIcons->emit('seeders') ?></td>
@@ -159,7 +161,7 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
             </div>
         </td>
         <td class="td_time nobr"><?= time_diff($torrent->created(), 1) ?></td>
-        <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent, 'user' => $Viewer]) ?>
+        <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent, 'viewer' => $Viewer]) ?>
     </tr>
 <?php   } ?>
 </table>

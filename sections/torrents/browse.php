@@ -141,7 +141,9 @@ echo $paginator->linkbox();
         <td class="small cats_col"></td>
         <td class="m_th_left m_th_left_collapsable nobr" width="100%">Name / <?= $header->emit('year') ?></td>
         <td class="nobr"><?= $header->emit('time') ?></td>
+<?php if ($Viewer->ordinal()->value('file-count-display')) { ?>
         <td class="number_column">Files</td>
+<?php } ?>
         <td class="number_column nobr"><?= $header->emit('size') ?></td>
         <td class="sign nobr snatches"><?= $headerIcons->emit('snatched') ?></td>
         <td class="sign nobr seeders"><?= $headerIcons->emit('seeders') ?></td>
@@ -196,7 +198,9 @@ foreach ($Results as $Key => $GroupID) {
             </div>
         </td>
         <td class="td_time nobr"><?=time_diff($tgroup->mostRecentUpload(), 1)?></td>
+<?php if ($Viewer->ordinal()->value('file-count-display')) { ?>
         <td></td>
+<?php } ?>
         <td class="td_size number_column nobr"><?= byte_format($tgroup->maxTorrentSize()) ?> (Max)</td>
         <td class="td_snatched number_column m_td_right"><?=number_format($tgroup->stats()->snatchTotal())?></td>
         <td class="td_seeders number_column<?= $tgroup->stats()->seedingTotal() == 0 ? ' r00' : '' ?> m_td_right"><?=number_format($tgroup->stats()->seedingTotal())?></td>
@@ -223,7 +227,7 @@ foreach ($Results as $Key => $GroupID) {
 
 ?>
     <tr class="group_torrent groupid_<?=$tgroup->id()?> edition<?=$SnatchedGroupClass . ($groupsClosed ? ' hidden' : '')?>">
-        <td colspan="9" class="edition_info">
+        <td colspan="<?= $Viewer->ordinal()->value('file-count-display') ? 9 : 8 ?>" class="edition_info">
             <?= $Twig->render('torrent/edition-header.twig', [
                 'edition_id' => $EditionID,
                 'tgroup'     => $tgroup,
@@ -250,7 +254,7 @@ foreach ($Results as $Key => $GroupID) {
 <?= $Twig->render('torrent/stats.twig', [
     'prev_primary' => $prevPrimaryTotal,
     'torrent'      => $torrent,
-    'user'         => $Viewer
+    'viewer'       => $Viewer,
 ]) ?>
     </tr>
 <?php
@@ -291,7 +295,7 @@ foreach ($Results as $Key => $GroupID) {
             </div>
         </td>
         <td class="td_time nobr"><?=time_diff($torrent->created(), 1)?></td>
-        <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent, 'user' => $Viewer]) ?>
+        <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent, 'viewer' => $Viewer]) ?>
     </tr>
 <?php
         }

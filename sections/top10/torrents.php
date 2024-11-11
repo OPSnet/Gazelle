@@ -186,7 +186,9 @@ foreach ($context as $c) {
         <td class="center" style="width: 15px;"></td>
         <td class="cats_col"></td>
         <td class="m_th_left m_th_left_collapsable">Name</td>
+<?php if ($Viewer->ordinal()->value('file-count-display')) { ?>
         <td class="number_column nobr">Files</td>
+<?php } ?>
         <td class="number_column nobr">Size</td>
         <td class="sign snatches"><img src="<?= $urlStem ?>snatched.png" alt="Snatches" title="Snatches" class="tooltip" /></td>
         <td class="sign seeders"><img src="<?= $urlStem ?>seeders.png" alt="Seeders" title="Seeders" class="tooltip" /></td>
@@ -195,7 +197,7 @@ foreach ($context as $c) {
     </tr>
 <?php if (!$details) { ?>
         <tr class="rowb">
-            <td colspan="9" class="center">
+            <td colspan="<?= $Viewer->ordinal()->value('file-count-display') ? 10 : 9 ?>" class="center">
                 Found no torrents matching the criteria.
             </td>
         </tr>
@@ -243,7 +245,7 @@ foreach ($context as $c) {
                 <div class="tags"><?= implode(', ', $tgroup->tagNameList()) ?></div>
             </div>
         </td>
-        <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent, 'user' => $Viewer]) ?>
+        <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent, 'viewer' => $Viewer]) ?>
         <td class="td_data number_column nobr"><?= byte_format($data) ?></td>
     </tr>
 <?php } ?>

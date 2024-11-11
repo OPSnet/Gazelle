@@ -1,5 +1,5 @@
-{% if user.hasAttr('feature-file-count') %}
-{%  set display_mode = user.ordinal.value('file-count-display') %}
+{% if viewer.hasAttr('feature-file-count') %}
+{%  set display_mode = viewer.ordinal.value('file-count-display') %}
 {%  set warn_open = '' %}
 {%  set warn_close = '' %}
 {%  if display_mode > 0 %}
@@ -26,18 +26,18 @@
 {%  else %}
 {%      set display = torrent.fileTotal|number_format %}
 {%  endif %}
-{%  if user.ordinal.value('non-primary-threshold') > 0
-        and user.ordinal.value('non-primary-threshold') * 1024 * 1024
+{%  if viewer.ordinal.value('non-primary-threshold') > 0
+        and viewer.ordinal.value('non-primary-threshold') * 1024 * 1024
             <= torrent.fileListNonPrimarySize
 %}
 {%      set non_primary = torrent.fileListNonPrimarySize %}
 {%  else %}
 {%      set non_primary = 0 %}
 {%  endif %}
-{% else %}
-{%  set display = torrent.fileTotal|number_format %}
 {% endif %}
+{% if viewer.ordinal.value('file-count-display') %}
 <td class="number_column td_filecount nobr">{{ warn_open|raw }}{{ display }}{{ warn_close|raw }}</td>
+{% endif %}
 <td class="number_column td_size nobr"
 {% if non_primary %} style="background-color: #f5b041" title="Extra: {{ non_primary|octet_size }}"{% endif %}
 >{{ torrent.size|octet_size }}</td>

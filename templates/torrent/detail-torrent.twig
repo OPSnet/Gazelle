@@ -25,13 +25,13 @@
 {% include 'torrent/stats.twig' with {
     'prev_primary' : prev_primary,
     'torrent'      : torrent,
-    'user'         : viewer,
+    'viewer'       : viewer,
     } only
 %}
             </tr>
 {% if show_extended %}
             <tr id="torrent_{{ torrent_id }}" class="releases_{{ tgroup.releaseType }} groupid_{{ tgroup.id }} edition_{{ edition_id }} torrentdetails pad{{ hidden(torrent_id != show_id) }}">
-                <td colspan="{{ 6 + colspan_add }}">
+                <td colspan="{{ 5 + colspan_add + (viewer.ordinal.value('file-count-display') ? 1 : 0) }}">
                     <div id="release_{{ torrent_id }}" class="no_overflow">
                         <blockquote>
 {% if folder_clash|length > 1 %}

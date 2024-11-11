@@ -482,7 +482,9 @@ foreach (CATEGORY as $catKey => $catName) {
             <td class="cats_col"></td>
             <td class="m_th_left nobr"><?= $header->emit('name') ?></td>
             <td class="nobr"><?= $header->emit('time') ?></td>
+<?php if ($Viewer->ordinal()->value('file-count-display')) { ?>
             <td class="number_column nobr">Files</td>
+<?php } ?>
             <td class="number_column nobr"><?= $header->emit('size') ?></td>
             <td class="sign nobr snatches m_th_right"><?= $headerIcons->emit('snatched') ?></td>
             <td class="sign nobr seeders m_th_right"><?= $headerIcons->emit('seeders') ?></td>
@@ -529,7 +531,7 @@ foreach (CATEGORY as $catKey => $catName) {
                 </div>
             </td>
             <td class="td_time nobr"><?=time_diff($info['Time'], 1)?></td>
-            <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent, 'user' => $Viewer]) ?>
+            <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent, 'viewer' => $Viewer]) ?>
         </tr>
 <?php
     } /* foreach */ ?>

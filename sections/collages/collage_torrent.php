@@ -176,7 +176,9 @@ echo ' selected="selected"'; } ?>>Prefer Bonus Tracks</option>
                 <td><!-- expand/collapse --></td>
                 <td><!-- Category --></td>
                 <td class="m_th_left" width="70%"><strong>Torrents</strong></td>
+<?php if ($Viewer->ordinal()->value('file-count-display')) { ?>
                 <td class="number_column nobr">Files</td>
+<?php } ?>
                 <td class="number_column nobr">Size</td>
                 <td class="sign snatches"><img src="<?= $urlStem ?>snatched.png" class="tooltip" alt="Snatches" title="Snatches" /></td>
                 <td class="sign seeders"><img src="<?= $urlStem ?>seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>
@@ -213,7 +215,7 @@ foreach ($entryList as $tgroupId) {
                 <td class="center">
                     <div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>"></div>
                 </td>
-                <td colspan="6">
+                <td colspan="<?= $Viewer->ordinal()->value('file-count-display') ? 6 : 5 ?>">
                     <strong><?= $Number ?> – <?= $tgroup->link() ?></strong>
                         <span class="float_right">
 <?php
@@ -243,7 +245,7 @@ foreach ($entryList as $tgroupId) {
                 $EditionID++;
 ?>
                 <tr class="group_torrent groupid_<?= $tgroupId ?> edition<?= $SnatchedGroupClass . ($groupsClosed ? ' hidden' : '') ?>">
-                    <td colspan="8" class="edition_info">
+                    <td colspan="<?= $Viewer->ordinal()->value('file-count-display') ? 8 : 7 ?>" class="edition_info">
                         <?= $Twig->render('torrent/edition-header.twig', [
                             'edition_id' => $EditionID,
                             'tgroup'     => $tgroup,
@@ -286,7 +288,7 @@ foreach ($entryList as $tgroupId) {
                     </div>
     <?php } ?>
                 </td>
-                <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent, 'user' => $Viewer]) ?>
+                <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent, 'viewer' => $Viewer]) ?>
             </tr>
 <?php
     }

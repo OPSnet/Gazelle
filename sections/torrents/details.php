@@ -158,7 +158,9 @@ echo $Twig->render('collage/summary.twig', [
         <table class="torrent_table details<?= $tgroup->isSnatched() ? ' snatched' : ''?> m_table" id="torrent_details">
             <tr class="colhead_dark">
                 <td class="m_th_left" width="80%"><strong>Torrents</strong></td>
+<?php if ($Viewer->ordinal()->value('file-count-display')) { ?>
                 <td class="number_column"><strong>Files</strong></td>
+<?php } ?>
                 <td class="number_column"><strong>Size</strong></td>
                 <td class="m_th_right sign snatches"><img src="<?= $urlStem ?>snatched.png" class="tooltip" alt="Snatches" title="Snatches" /></td>
                 <td class="m_th_right sign seeders"><img src="<?= $urlStem ?>seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>
@@ -171,7 +173,7 @@ if (!$torrentList) {
         $mastering = implode('/', [$info['year'], $info['title'], $info['record_label'], $info['catalogue_number'], $info['media']]);
 ?>
             <tr class="releases_<?= $tgroup->releaseType() ?> groupid_<?=$tgroupId?> edition group_torrent">
-                <td colspan="6" class="edition_info"><strong>[<?= html_escape($mastering) ?>]</strong></td>
+                <td colspan="<?= $Viewer->ordinal()->value('file-count-display') ? 6 : 5 ?>" class="edition_info"><strong>[<?= html_escape($mastering) ?>]</strong></td>
             </tr>
             <tr>
                 <td><i>deleted</i></td>

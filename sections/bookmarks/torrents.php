@@ -191,7 +191,9 @@ $urlStem = (new Gazelle\User\Stylesheet($Viewer))->imagePath();
                 <td><!-- expand/collapse --></td>
                 <td><!-- Category --></td>
                 <td class="m_th_left m_th_left_collapsable" width="70%"><strong>Torrents</strong></td>
+<?php if ($Viewer->ordinal()->value('file-count-display')) { ?>
                 <td class="number_column nobr">Files</td>
+<?php } ?>
                 <td class="number_column nobr">Size</td>
                 <td class="sign snatches"><img src="<?= $urlStem ?>snatched.png" class="tooltip" alt="Snatches" title="Snatches" /></td>
                 <td class="sign seeders"><img src="<?= $urlStem ?>seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>
@@ -218,10 +220,10 @@ foreach ($bookmarkList as $bm) {
             <td class="m_hidden center">
                 <div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>"></div>
             </td>
-            <td class="td_info" colspan="6">
+            <td class="td_info" colspan="<?= $Viewer->ordinal()->value('file-count-display') ? 6 : 5 ?>">
                 <strong><?= $tgroup->link() ?></strong>
                 <span style="text-align: right;" class="float_right">
- <?php if ($ownProfile) { ?>
+<?php if ($ownProfile) { ?>
         <a href="#group_<?= $tgroupId ?>" class="brackets remove_bookmark"
            onclick="Unbookmark('torrent', <?= $tgroupId ?>, ''); return false;">Remove bookmark</a>
         <br/>
@@ -274,7 +276,7 @@ foreach ($bookmarkList as $bm) {
                 <span class="float_right float_clear"><?= time_diff($bm['added']); ?></span>
 
             </td>
-            <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent, 'user' => $Viewer]) ?>
+            <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent, 'viewer' => $Viewer]) ?>
         </tr>
 <?php
     }

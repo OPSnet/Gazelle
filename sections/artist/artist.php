@@ -303,7 +303,9 @@ if ($sections = $Artist->sections()) {
                     <td class="m_th_left m_th_left_collapsable" width="70%"><a href="#">↑</a>&nbsp;<strong><?=
                         $artistMan->sectionTitle((int)$sectionId) ?></strong> <a href="#" class="tooltip brackets" onclick="$('.releases_<?=
                         $sectionId ?>').gtoggle(true); return false;" title="Show/hide this section">Toggle</a></td>
+<?php if ($Viewer->ordinal()->value('file-count-display')) { ?>
                     <td class="number_column">Files</td>
+<?php } ?>
                     <td class="number_column">Size</td>
                     <td class="sign snatches"><img src="<?= $urlStem ?>snatched.png" class="tooltip" alt="Snatches" title="Snatches" /></td>
                     <td class="sign seeders"><img src="<?= $urlStem ?>seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>
@@ -321,7 +323,7 @@ if ($sections = $Artist->sections()) {
 ?>
             <tr class="releases_<?= $sectionId ?> group groupid_<?= $groupId ?>_header discog<?= ($sectionClosed ? ' hidden' : '') . ($isSnatched ? ' snatched_group' : '') ?>">
 <?= $Twig->render('tgroup/collapse-tgroup.twig', [ 'closed' => $groupsClosed, 'id' => $groupId ]) ?>
-                <td colspan="6" class="td_info big_info">
+                <td colspan="<?= $Viewer->ordinal()->value('file-count-display') ? 7 : 6 ?>" class="td_info big_info">
 <?php   if ($Viewer->option('CoverArt')) { ?>
                     <div class="group_image float_left clear">
                         <?= $imgProxy->tgroupThumbnail($tgroup) ?>
