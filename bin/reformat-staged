@@ -11,24 +11,24 @@ if [ -z "$JS" ] && [ -z "$PHP" ] && [ -z "$CSS" ]; then
     exit 0
 fi
 
-if ! docker-compose ps web > /dev/null 2>&1; then
+if ! docker compose ps web > /dev/null 2>&1; then
     echo "The web container isn't running, but we need it for reformatting."
     exit 1
 fi
 
 if [ -n "$JS" ]; then
     echo "Reformatting JS"
-    docker-compose exec -T web yarn run eslint --fix -c misc/eslint.config.mjs $JS
+    docker compose exec -T web yarn run eslint --fix -c misc/eslint.config.mjs $JS
 fi
 
 if [ -n "$PHP" ]; then
     echo "Reformatting PHP"
-    docker-compose exec -T web vendor/bin/phpcbf $PHP
+    docker compose exec -T web vendor/bin/phpcbf $PHP
 fi
 
 if [ -n "$CSS" ]; then
     echo "Reformatting CSS"
-    docker-compose exec -T web yarn stylelint --fix --config misc/stylelint.json --cache --cache-location cache/stylelint $CSS
+    docker compose exec -T web yarn stylelint --fix --config misc/stylelint.json --cache --cache-location cache/stylelint $CSS
 fi
 
 if [ -n "$STAGED" ]; then

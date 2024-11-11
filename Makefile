@@ -35,7 +35,7 @@ help:
 
 .PHONY: build-css
 build-css:
-	docker-compose exec -T web yarn build:scss
+	docker compose exec -T web yarn build:scss
 
 .PHONY: check-php
 check-php:
@@ -70,8 +70,8 @@ git-submodules:
 
 .PHONY: lint-css
 lint-css:
-	docker-compose exec -T web node_modules/.bin/stylelint --config misc/stylelint.json --cache --cache-location cache/stylelint 'sass/**/*.scss'
-	docker-compose exec -T web node_modules/.bin/stylelint --config misc/stylelint.json --cache --cache-location cache/stylelint 'sass/**/*.scss' --custom-formatter ./node_modules/stylelint-checkstyle-formatter/index.js
+	docker compose exec -T web node_modules/.bin/stylelint --config misc/stylelint.json --cache --cache-location cache/stylelint 'sass/**/*.scss'
+	docker compose exec -T web node_modules/.bin/stylelint --config misc/stylelint.json --cache --cache-location cache/stylelint 'sass/**/*.scss' --custom-formatter ./node_modules/stylelint-checkstyle-formatter/index.js
 
 .PHONY: lint-js
 lint-js:
@@ -103,7 +103,7 @@ reformat-staged:
 
 .PHONY: mysqldump
 mysqldump:
-	docker-compose exec -T mysql mysqldump --defaults-file=~/mysqldump.cnf gazelle --single-transaction > misc/mysql-dump.sql
+	docker compose exec -T mysql mysqldump --defaults-file=~/mysqldump.cnf gazelle --single-transaction > misc/mysql-dump.sql
 
 .PHONY: ocelot-reload-conf
 ocelot-reload-conf:
@@ -135,7 +135,7 @@ rector-dry-run:
 
 .PHONY: test
 test:
-	docker-compose exec -T web vendor/bin/phpunit -c misc/phpunit.xml
+	docker compose exec -T web vendor/bin/phpunit -c misc/phpunit.xml
 
 .PHONY: twig-flush
 twig-flush:

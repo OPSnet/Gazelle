@@ -34,6 +34,21 @@ proxies, and tuning TCP configs to obtain proper performance and privacy.
 Docker is used to develop Gazelle. See https://docs.docker.com/engine/install/
 for more information on getting Docker set up locally.
 
+### Docker on WSL
+By default, Windows Subsystem for Linux (WSL) does not support the use of
+`docker compose`. As root, you should to run the following command
+
+```
+apt-get install ca-certificates curl \
+  && install -m 0755 -d /etc/apt/keyrings \
+  && curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+  && chmod a+r /etc/apt/keyrings/docker.asc \
+  && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
+    > /etc/apt/sources.list.d/docker.list \
+  && apt-get update \
+  && apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
+
 ### Gazelle
 In the root folder of the Gazelle repository, run the following command:
 
@@ -146,7 +161,7 @@ this means doing the following;
  - stop the current postgresql container
  - mv misc/docker/data/pg misc/docker/data/pg.old
  - mkdir ./docker/data/pg
- - docker-compose stop && docker-compose up -d
+ - docker compose stop && docker compose up -d
  - import the dump to the docker pg container
 
 ## Contact and Discussion

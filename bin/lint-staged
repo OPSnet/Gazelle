@@ -13,7 +13,7 @@ if [ -z "$JS" ] && [ -z "$PHP" ] && [ -z "$CSS" ] && [ -z "$TWIG" ]; then
     exit 0
 fi
 
-if ! docker-compose ps web > /dev/null 2>&1; then
+if ! docker compose ps web > /dev/null 2>&1; then
     echo "The web container isn't running, but we need it for linting."
     echo "Start the web container or commit with --no-verify."
     exit 1
@@ -21,21 +21,21 @@ fi
 
 if [ -n "$TWIG" ]; then
     echo "Linting Twig"
-    docker-compose exec -T web bin/twig-parse $TWIG
+    docker compose exec -T web bin/twig-parse $TWIG
 fi
 
 if [ -n "$JS" ]; then
     echo "Linting JS"
-    docker-compose exec -T web yarn run eslint -c misc/eslint.config.mjs --no-warn-ignored $JS
+    docker compose exec -T web yarn run eslint -c misc/eslint.config.mjs --no-warn-ignored $JS
 fi
 
 if [ -n "$CSS" ]; then
     echo "Linting CSS"
-    docker-compose exec -T web yarn stylelint --config misc/stylelint.json --cache --cache-location cache/stylelint $CSS
+    docker compose exec -T web yarn stylelint --config misc/stylelint.json --cache --cache-location cache/stylelint $CSS
 fi
 
 if [ -n "$PHP" ]; then
     echo "Linting PHP"
-    docker-compose exec -T web sh -c \
+    docker compose exec -T web sh -c \
         "vendor/bin/phpcs $PHP && vendor/bin/phpstan analyze --no-progress --configuration=misc/phpstan.neon --memory-limit 512M $PHP"
 fi
