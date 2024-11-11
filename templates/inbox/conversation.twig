@@ -18,7 +18,7 @@
 {%  if sender_list[post.sender_id] is null %}
                 System</strong> {{ post.sent_date|time_diff }}
 {%  else %}
-{{      post.sender_id|user_url }}</strong> {{ post.sent_date|time_diff }}
+{{      post.sender_id|user_full }}</strong> {{ post.sent_date|time_diff }}
                     - <a href="#quickpost" onclick="Quote('{{ post.id }}','{{ sender_list[post.sender_id].username }}');" class="brackets">Quote</a>
 {%  endif %}
             </div>
