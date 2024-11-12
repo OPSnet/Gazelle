@@ -30,7 +30,7 @@
     "maennchen/zipstream-php": "^3.1",
     "monero-integrations/monerophp": "dev-master#25d4c5838b35cbf1fb55170b831e895681a7410a",
     "orpheusnet/bencode-torrent": "^1.3.0",
-    "orpheusnet/logchecker": "^0.13.0",
+    "orpheusnet/logchecker": "^0.14.0",
     "protonlabs/bitcoin": "^1.0",
     "robmorgan/phinx": "^0.12.13",
     "robthree/twofactorauth": "^1.8.2",

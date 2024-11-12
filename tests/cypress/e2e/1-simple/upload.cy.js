@@ -1,3 +1,5 @@
+/* global Cypress, beforeEach, cy, describe, expect, it */
+
 describe('uploading torrent', () => {
     beforeEach(() => {
         cy.loginUser();
@@ -6,7 +8,7 @@ describe('uploading torrent', () => {
     it('upload music torrent', () => {
         cy.visit('/upload.php');
         cy.ensureFooter();
-        cy.get('#file').selectFile('tests/cypress/files/valid_torrent.torrent')
+        cy.get('#file').selectFile('tests/fixture/valid_torrent.torrent')
         cy.get("#categories").select('Music');
         cy.get("#releasetype").select('Album');
         cy.get("#image").type('https://coolimagehost.example.com/a/b/c/image.jpg');
@@ -25,7 +27,7 @@ describe('uploading torrent', () => {
         cy.get('#media').select('CD');
         cy.get('#format').select('FLAC');
         cy.get('#bitrate').select('Lossless');
-        cy.get('#logfile_1').selectFile('tests/cypress/files/valid_log_eac.log')
+        cy.get('#logfile_1').selectFile('tests/fixture/valid_log_eac.log')
         cy.get('#tags').type('test, rock, some.stuff');
         cy.get('#album_desc').type('test album description with some text to not make upload.php sad');
         cy.get('#release_desc').type('test release description');
@@ -45,7 +47,7 @@ describe('uploading torrent', () => {
     it('upload torrent to existing group', () => {
         cy.visit('/upload.php');
         cy.ensureFooter();
-        cy.get('#file').selectFile('tests/cypress/files/valid_torrent_2.torrent')
+        cy.get('#file').selectFile('tests/fixture/valid_torrent_2.torrent')
         cy.get("#categories").select('Music');
         cy.get("#releasetype").select('Album');
         cy.get('#artistfields a[href="#"]:first').click();
@@ -119,7 +121,7 @@ describe('uploading torrent', () => {
         cy.contains('Log (100%)').should('not.exist');
         cy.visit(`/torrents.php?action=edit&id=${torrent_id}`);
         cy.ensureFooter();
-        cy.get('#logfile_1').selectFile('tests/cypress/files/valid_log_eac.log');
+        cy.get('#logfile_1').selectFile('tests/fixture/valid_log_eac.log');
         cy.get('input[value="Edit torrent"]').click();
 
         // verify
@@ -162,7 +164,7 @@ describe('uploading torrent', () => {
 
         // upload log
         cy.get('.box2 > .pad > strong').invoke('text').then((api_key) => {
-        cy.fixture('../files/valid_log_eac.log', 'binary').then( (log_bin) => {
+        cy.fixture('../../fixture/valid_log_eac.log', 'binary').then( (log_bin) => {
             // File in binary format gets converted to blob so it can be sent as Form data
             const blob = Cypress.Blob.binaryStringToBlob(log_bin, 'application/octet-stream');
             const formData = new FormData();
@@ -182,7 +184,7 @@ describe('uploading torrent', () => {
                 try {
                     body = JSON.parse(body);
                 } catch (e) {
-                    cy.logCli("bad response body: " + body);
+                    cy.logCli("bad response body: " + body + ' exception:' + e);
                 }
                 expect(body).to.have.property('status', 'success');
             });

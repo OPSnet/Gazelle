@@ -48,7 +48,7 @@ class TorrentTest extends TestCase {
 
     public function testContents(): void {
         $bencoder = new \OrpheusNET\BencodeTorrent\BencodeTorrent();
-        $bencoder->decodeFile(__DIR__ . '/../cypress/files/valid_torrent.torrent');
+        $bencoder->decodeFile(__DIR__ . '/../fixture/valid_torrent.torrent');
         $info = $bencoder->getData();
         $this->assertIsArray($info, 'torrent-file-data-array');
         $torrentFiler = new File\Torrent();
