@@ -92,8 +92,8 @@ e2e-tests:
     - key:
         files:
           - package.json
-          - yarn.lock
-        prefix: yarn
+          - package-lock.json
+        prefix: npm
       paths:
         - node_modules
     - key:
@@ -108,9 +108,9 @@ e2e-tests:
     - su gazelle -c "bin/twig-parse \$(find templates -type f)"
     - /bin/bash "${CI_PROJECT_DIR}/misc/docker/web/start-services.sh"
     - su gazelle -c "composer exec -- phpunit --configuration misc/phpunit.xml --coverage-php /tmp/coverage/phpunit.cov --exclude-group no-ci"
-    - /bin/bash "${CI_PROJECT_DIR}/misc/docker/web/bootstrap-yarn.sh"
+    - /bin/bash "${CI_PROJECT_DIR}/misc/docker/web/bootstrap-npm.sh"
     - su gazelle -c "make lint-js"
-    - yarn run cypress run || test "$WAIT_ON_FINISH"
+    - npx cypress run || test "$WAIT_ON_FINISH"
     # note: phpcov has problems if .cov files are somewhere in the src tree
     - su gazelle -c 'vendor/bin/phpcov merge "/tmp/coverage" --text "/tmp/coverage/coverage.txt" && cat "/tmp/coverage/coverage.txt"'
     - test "$WAIT_ON_FINISH" && sleep 3600 || exit 0

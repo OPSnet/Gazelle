@@ -18,7 +18,7 @@ fi
 
 if [ -n "$JS" ]; then
     echo "Reformatting JS"
-    docker compose exec -T web yarn run eslint --fix -c misc/eslint.config.mjs $JS
+    docker compose exec -T web npx eslint --fix -c misc/eslint.config.mjs $JS
 fi
 
 if [ -n "$PHP" ]; then
@@ -28,7 +28,7 @@ fi
 
 if [ -n "$CSS" ]; then
     echo "Reformatting CSS"
-    docker compose exec -T web yarn stylelint --fix --config misc/stylelint.json --cache --cache-location cache/stylelint $CSS
+    docker compose exec -T web npx stylelint --fix --config misc/stylelint.json --cache --cache-location cache/stylelint $CSS
 fi
 
 if [ -n "$STAGED" ]; then

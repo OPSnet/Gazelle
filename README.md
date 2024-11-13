@@ -75,7 +75,7 @@ page and tick everything for the Sysop class.
 
 Once the Gazelle container has been built successfully, it may be
 stopped and subsequently restarted without requiring connectivity
-with the outside world. This also means that composer and yarn are
+with the outside world. This also means that composer and npm are
 not automatically updated during a container restart and is a manual
 chore to perform periodically.
 

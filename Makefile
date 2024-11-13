@@ -35,7 +35,7 @@ help:
 
 .PHONY: build-css
 build-css:
-	docker compose exec -T web yarn build:scss
+	docker compose exec -T web npm run build:scss
 
 .PHONY: check-php
 check-php:
@@ -75,7 +75,7 @@ lint-css:
 
 .PHONY: lint-js
 lint-js:
-	yarn run eslint -c misc/eslint.config.mjs public/static
+	npx eslint -c misc/eslint.config.mjs public/static
 
 .PHONY: lint-php
 lint-php:

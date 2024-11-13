@@ -12,9 +12,9 @@ if [ ! -e .docker-init-done ] ; then
     composer --version
     composer install --no-progress --optimize-autoloader
     bin/local-patch
-    yarn
+    npm install
     npx update-browserslist-db@latest
-    yarn dev
+    npm run dev
     touch .docker-init-done
 fi
 

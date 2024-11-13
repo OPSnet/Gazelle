@@ -3,12 +3,12 @@
   "version": "0.0.0",
   "description": "",
   "scripts": {
-    "dev": "yarn build",
-    "prod": "cross-env NODE_ENV=production yarn build",
-    "build": "yarn build:scss && yarn build:previews",
+    "dev": "npm run build",
+    "prod": "cross-env NODE_ENV=production npm run build",
+    "build": "npm run build:scss && npm run build:previews",
     "build:scss": "node bin/build-scss.mjs",
     "build:previews": "node public/stylesheet-gallery/preview.js",
-    "start": "yarn build:scss -- --watch"
+    "start": "npm run build:scss -- --watch"
   },
   "license": "Unlicense",
   "devDependencies": {

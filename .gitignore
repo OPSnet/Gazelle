@@ -29,6 +29,7 @@ __MACOSX/
 /public/static/local/
 /vendor
 /lib/override.config.php
+/npm-debug.log
 /yarn-error.log
 
 /misc/docker/mysql-home/.mysql_history

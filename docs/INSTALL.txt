@@ -16,7 +16,7 @@ to do this by hand.
 1. First, install the PHP and JS dependencies to setup and run the site.
 
 composer install
-yarn install
+npm install
 
 2. Install and setup the following services:
     * MySQL
@@ -62,7 +62,7 @@ see expired unfetched activity.
 
 8. Generate stylesheets and their previews by running the following:
 
-    yarn build
+    npm run build
 
 Note, generating the previews requires a Chrome instance on the host.
 
