@@ -50,15 +50,15 @@ psql -U "$POSTGRES_USER" postgres -c "create database ${POSTGRES_DATABASE} with 
 
 if [ -z "${MYSQL_INIT_DB-}" ]; then
     echo "Restore mysql dump..."
-    time mysql < /opt/gazelle/mysql_schema.sql || exit 1
-    time mysql < /opt/gazelle/mysql_data.sql || exit 1
-    echo 'CREATE FUNCTION IF NOT EXISTS bonus_accrual(Size bigint, Seedtime float, Seeders integer)
+    (
+        cat /opt/gazelle/mysql_schema.sql /opt/gazelle/mysql_data.sql
+        echo 'CREATE FUNCTION IF NOT EXISTS bonus_accrual(Size bigint, Seedtime float, Seeders integer)
   RETURNS float DETERMINISTIC NO SQL
   RETURN Size / pow(1024, 3) * (0.0433 + (0.07 * ln(1 + Seedtime/24)) / pow(greatest(Seeders, 1), 0.35));
 CREATE FUNCTION IF NOT EXISTS binomial_ci(p int, n int)
   RETURNS float DETERMINISTIC
   RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668) / n) / (1 + 2.7067 / n));' \
-  | mysql -u root -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" || exit 1
+    ) | mysql -u root -p"$MYSQL_ROOT_PASSWORD" || exit 1
 fi
 
 echo "Run mysql migrations..."

@@ -131,7 +131,7 @@ RUN echo "deb http://deb.debian.org/debian ${DEB_RELEASE}-backports main" > /etc
 #    && rm /tmp/firefox.tar.bz2 \
 #    && ln -fs /opt/firefox/firefox /usr/bin/firefox
 
-COPY --from=composer:2.7.7 /usr/bin/composer /usr/local/bin/composer
+COPY --from=composer:2.8.2 /usr/bin/composer /usr/local/bin/composer
 COPY misc/docker /var/www/misc/docker
 
 # Permissions and configuration layer
