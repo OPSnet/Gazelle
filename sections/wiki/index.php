@@ -18,7 +18,7 @@ function class_list(int $Selected = 0): string {
     return $Return;
 }
 
-require_once(match ($_REQUEST['action'] ?? '') {
+require_once match ($_REQUEST['action'] ?? '') {
     'add_alias'    => 'add_alias.php',
     'browse'       => 'wiki_browse.php',
     'compare'      => 'compare.php',
@@ -29,4 +29,4 @@ require_once(match ($_REQUEST['action'] ?? '') {
     'revisions'    => 'revisions.php',
     'search'       => 'search.php',
     default        => 'article.php',
-});
+};

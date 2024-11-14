@@ -6,8 +6,7 @@ use Phinx\Migration\AbstractMigration;
 
 final class UserDownloadPk extends AbstractMigration
 {
-    public function up(): void
-    {
+    public function up(): void {
         $this->execute("
             ALTER TABLE users_downloads
                 DROP PRIMARY KEY,
@@ -16,8 +15,7 @@ final class UserDownloadPk extends AbstractMigration
         ");
     }
 
-    public function down(): void
-    {
+    public function down(): void {
         $this->execute("
             ALTER TABLE users_downloads
                 DROP PRIMARY KEY,

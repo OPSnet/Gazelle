@@ -15,8 +15,14 @@ class ForumPoll extends BaseObject {
         unset($this->info);
         return $this;
     }
-    public function link(): string { return $this->thread()->link(); }
-    public function location(): string { return "forums.php?action=viewthread&threadid={$this->id}"; }
+
+    public function link(): string {
+        return $this->thread()->link();
+    }
+
+    public function location(): string {
+        return "forums.php?action=viewthread&threadid={$this->id}";
+    }
 
     public function thread(): ForumThread {
         return new ForumThread($this->id);

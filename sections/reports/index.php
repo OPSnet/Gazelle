@@ -1,6 +1,6 @@
 <?php
 
-require_once(match ($_REQUEST['action'] ?? '') {
+require_once match ($_REQUEST['action'] ?? '') {
     'add_notes'   => 'ajax_add_notes.php',
     'claim'       => 'ajax_claim_report.php',
     'compose'     => 'compose.php',
@@ -12,4 +12,4 @@ require_once(match ($_REQUEST['action'] ?? '') {
     'takeresolve' => 'resolve_handle.php',
     'unclaim'     => 'ajax_unclaim_report.php',
     default       => 'reports.php',
-});
+};

@@ -26,6 +26,7 @@ class Pg {
             return 0;
         }
     }
+
     // phpcs:enable
 
     public function insert(string $query, ...$args): int {

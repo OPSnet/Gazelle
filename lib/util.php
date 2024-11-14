@@ -392,14 +392,17 @@ function parse_user_agent(string $useragent): array {
  * $NoHTML If true, the header/footer won't be shown, just the description.
  * $Log If true, the user is given a link to search $Log in the site log.
  */
+// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 function error(int|string $Error, bool $NoHTML = false, bool $Log = false): never {
     global $Debug, $Viewer, $Twig;
-    require_once(__DIR__ . '/../sections/error/index.php');
+    include_once __DIR__ . '/../sections/error/index.php';
     if (isset($Viewer)) {
         $Debug->profile($Viewer, $Viewer->requestContext()->module());
     }
     exit;
 }
+
+// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 
 /**
  * Print JSON status result with an optional message and die.

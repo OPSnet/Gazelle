@@ -4,8 +4,7 @@ use Phinx\Seed\AbstractSeed;
 
 class BonusDiscount extends AbstractSeed
 {
-    public function run(): void
-    {
+    public function run(): void {
         $this->table('site_options')->insert([
             'Name'    => 'bonus-discount',
             'Value'   => 0,

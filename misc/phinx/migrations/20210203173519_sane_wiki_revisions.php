@@ -7,8 +7,7 @@ use Phinx\Db\Adapter\MysqlAdapter;
 
 final class SaneWikiRevisions extends AbstractMigration
 {
-    public function up(): void
-    {
+    public function up(): void {
         $this->table('wiki_revisions')
             ->changeColumn('Revision', 'integer', ['null' => false, 'limit' => '10', 'default' => 1])
             ->changeColumn('Title', 'string', ['null' => false, 'collation' => 'utf8mb4_unicode_ci', 'encoding' => 'utf8mb4'])
@@ -20,8 +19,7 @@ final class SaneWikiRevisions extends AbstractMigration
         $this->execute("ALTER TABLE wiki_revisions ADD PRIMARY KEY (ID, Revision)");
     }
 
-    public function down(): void
-    {
+    public function down(): void {
         $this->execute("ALTER TABLE wiki_revisions DROP PRIMARY KEY");
         $this->table('wiki_revisions')
             ->changeColumn('Revision', 'integer', ['null' => false, 'limit' => '10'])

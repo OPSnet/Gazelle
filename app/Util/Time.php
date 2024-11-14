@@ -210,7 +210,6 @@ class Time {
         }
     }
 
-
     /**
      * Converts a numeric amount of seconds (though we round down via floor for all levels) into a more human readeable
      * string representing the number of weeks, days, hours, minutes, seconds.

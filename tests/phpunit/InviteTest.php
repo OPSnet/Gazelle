@@ -352,7 +352,7 @@ class InviteTest extends TestCase {
         ];
         $this->assertEquals(
             2,
-            $inviteSourceMan->modifyInviteeSource($this->user, $new),
+            $inviteSourceMan->modifyInviteeSource($new),
             'invite-modify-invitee'
         );
         $this->assertEquals($newProfile, $this->invitee->externalProfile()->profile(), 'invite-source-new-profile');

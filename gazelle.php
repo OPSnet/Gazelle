@@ -6,7 +6,7 @@ use Gazelle\Util\Time;
 
 // 1. Initialization
 
-require_once(__DIR__ . '/lib/bootstrap.php');
+require_once __DIR__ . '/lib/bootstrap.php';
 global $Cache, $Debug, $Twig;
 
 // Get the user's actual IP address if they're proxied.
@@ -161,7 +161,7 @@ $Cache->cache_value('php_' . getmypid(), [
 register_shutdown_function(
     function () {
         if (preg_match(DEBUG_URI, $_SERVER['REQUEST_URI'])) {
-            require(DEBUG_TRACE);
+            include DEBUG_TRACE;
         }
         $error = error_get_last();
         if ($error['type'] ?? 0 == E_ERROR) {
@@ -182,7 +182,7 @@ if (!$file || !preg_match('/^[a-z][a-z0-9_]+$/', $module)) {
 }
 
 try {
-    require_once($file);
+    include_once $file;
 } catch (Gazelle\DB\MysqlException $e) {
     Gazelle\DB::DB()->rollback();  // if there was an ongoing transaction, abort it
     if (DEBUG_MODE || (isset($Viewer) && $Viewer->permitted('site_debug'))) {

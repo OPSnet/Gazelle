@@ -16,7 +16,6 @@ class Report extends \Gazelle\Base {
         protected \Gazelle\Manager\User $userMan,
     ) {}
 
-
     protected function configure(): void {
         if (isset($this->cond)) {
             return;

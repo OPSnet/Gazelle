@@ -9,8 +9,14 @@ class StaffPM extends BaseObject {
         $this->info = [];
         return $this;
     }
-    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->subject())); }
-    public function location(): string { return 'staffpm.php?action=viewconv&id=' . $this->id; }
+
+    public function link(): string {
+        return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->subject()));
+    }
+
+    public function location(): string {
+        return 'staffpm.php?action=viewconv&id=' . $this->id;
+    }
 
     public function flushUser(User $user): static {
         self::$cache->delete_multi([

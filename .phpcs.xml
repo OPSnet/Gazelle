@@ -39,8 +39,6 @@
         <exclude name="Squiz.WhiteSpace.ScopeClosingBrace.Indent" />
     </rule>
 
-    <rule ref="Generic.Arrays.DisallowLongArraySyntax" />
-
     <rule ref="PSR1.Classes.ClassDeclaration.MissingNamespace">
         <exclude-pattern>classes/*</exclude-pattern>
         <exclude-pattern>misc/phinx/*</exclude-pattern>
@@ -62,5 +60,34 @@
         <type>warning</type>
     </rule>
 
+    <rule ref="Generic.Arrays.DisallowLongArraySyntax" />
+    <rule ref="Generic.CodeAnalysis.EmptyStatement" />
+    <rule ref="Generic.CodeAnalysis.ForLoopShouldBeWhileLoop" />
+    <rule ref="Generic.CodeAnalysis.JumbledIncrementer" />
+    <rule ref="Generic.CodeAnalysis.UnconditionalIfStatement" />
+    <rule ref="Generic.CodeAnalysis.UnusedFunctionParameter" />
+    <rule ref="Generic.CodeAnalysis.UselessOverridingMethod" />
+    <rule ref="Generic.Files.LineEndings" />
+    <rule ref="Generic.Files.OneClassPerFile" />
+    <rule ref="Generic.Formatting.NoSpaceAfterCast" />
+    <rule ref="Generic.Functions.OpeningFunctionBraceKernighanRitchie" />
     <rule ref="Generic.PHP.Syntax" />
+
+    <rule ref="PEAR.Files.IncludingFile" />
+
+    <rule ref="Squiz.ControlStructures.ForEachLoopDeclaration" />
+    <rule ref="Squiz.ControlStructures.ForLoopDeclaration" />
+    <rule ref="Squiz.PHP.NonExecutableCode" />
+    <rule ref="Squiz.WhiteSpace.SemicolonSpacing" />
+    <rule ref="Squiz.WhiteSpace.SuperfluousWhitespace" />
+
+    <rule ref="Squiz.WhiteSpace.FunctionSpacing">
+        <properties>
+            <property name="spacing" value="1" />
+            <property name="spacingBeforeFirst" value="0" />
+            <property name="spacingAfterLast" value="0" />
+        </properties>
+    </rule>
+
+    <rule ref="Zend.Files.ClosingTag" />
 </ruleset>

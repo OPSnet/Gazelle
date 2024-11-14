@@ -12,8 +12,14 @@ class ForumCategory extends BaseObject {
         unset($this->info);
         return $this;
     }
-    public function link(): string { return "<a href=\"{$this->location()}\">Forum Categories</a>"; }
-    public function location(): string { return "tools.php?action=categories"; }
+
+    public function link(): string {
+        return "<a href=\"{$this->location()}\">Forum Categories</a>";
+    }
+
+    public function location(): string {
+        return "tools.php?action=categories";
+    }
 
     public function info(): array {
         if (isset($this->info)) {

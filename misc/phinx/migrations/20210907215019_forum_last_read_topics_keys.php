@@ -6,8 +6,7 @@ use Phinx\Migration\AbstractMigration;
 
 final class ForumLastReadTopicsKeys extends AbstractMigration
 {
-    public function up(): void
-    {
+    public function up(): void {
         $this->table('forums_last_read_topics')
             ->changeColumn('UserID', 'integer', ['signed' => false])
             ->addForeignKey('PostID', 'forums_posts', 'ID', ['delete' => 'CASCADE', 'update' => 'CASCADE'])
@@ -16,8 +15,7 @@ final class ForumLastReadTopicsKeys extends AbstractMigration
             ->save();
     }
 
-    public function down(): void
-    {
+    public function down(): void {
         $this->table('forums_last_read_topics')
             ->dropForeignKey('PostID')
             ->dropForeignKey('TopicID')

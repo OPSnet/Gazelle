@@ -11,6 +11,6 @@ if ($Collage->isDeleted()) {
     exit;
 }
 
-require_once($Collage->isArtist() ? 'collage_artists.php' : 'collage_torrent.php');
+require_once $Collage->isArtist() ? 'collage_artists.php' : 'collage_torrent.php';
 
 View::show_footer();

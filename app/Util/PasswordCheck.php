@@ -8,7 +8,6 @@ class PasswordCheck {
     public const REGEXP = '/(?=^.{8,}$)(?=.*[^a-zA-Z])(?=.*[A-Z])(?=.*[a-z]).*$|.{20,}/';
     public const ERROR_MSG = 'You have specified a weak or known-compromised password.';
 
-
     public static function checkPasswordStrength(#[\SensitiveParameter] string $password, ?User $user, bool $skipRegex = true): bool {
         return static::checkPasswordStrengthNoUser($password, $user?->username(), $user?->email(), $skipRegex);
     }

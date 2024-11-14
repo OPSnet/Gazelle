@@ -10,6 +10,8 @@ abstract class AbstractContest extends \Gazelle\Base {
     ) {}
 
     abstract public function ranker(): array;
+
     abstract public function participationStats(): array;
+
     abstract public function userPayout(int $enabledUserBonus, int $contestBonus, int $perEntryBonus): array;
 }

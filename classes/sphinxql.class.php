@@ -14,7 +14,6 @@ class Sphinxql extends mysqli {
     public static $Queries = [];
     public static $Time = 0.0;
 
-
     /**
      * Initialize Sphinxql object
      *

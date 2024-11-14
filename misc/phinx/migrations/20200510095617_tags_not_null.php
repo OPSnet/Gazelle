@@ -13,6 +13,7 @@ class TagsNotNull extends AbstractMigration {
             ALTER TABLE tags MODIFY Name varchar(100) NOT NULL
         ');
     }
+
     public function down(): void {
         $this->execute('
             ALTER TABLE tags MODIFY Name varchar(100) NULL

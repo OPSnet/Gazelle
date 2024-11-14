@@ -48,7 +48,9 @@ class TGroup extends BaseObject implements CategoryHasArtist, CollageEntry {
         };
     }
 
-    public function location(): string { return "torrents.php?id={$this->id}"; }
+    public function location(): string {
+        return "torrents.php?id={$this->id}";
+    }
 
     public function torrentLink(int $torrentId): string {
         $url = '<a href="' . $this->url() . "&amp;torrentid={$torrentId}#torrent{$torrentId}\" dir=\"ltr\">"
@@ -966,7 +968,7 @@ class TGroup extends BaseObject implements CategoryHasArtist, CollageEntry {
         return true;
     }
 
-    public function rename(string $name, User $user, Manager\TGroup $manager, Log $logger): bool {
+    public function rename(string $name, User $user, Log $logger): bool {
         $oldName = $this->name();
         $success = $this->setField('Name', $name)->modify();
         if ($success) {

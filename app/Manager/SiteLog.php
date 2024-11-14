@@ -11,8 +11,13 @@ class SiteLog extends \Gazelle\Base {
         protected \Gazelle\Manager\User $userMan,
     ) {}
 
-    public function totalMatches(): int { return $this->totalMatches; }
-    public function result(): array { return $this->result; }
+    public function totalMatches(): int {
+        return $this->totalMatches;
+    }
+
+    public function result(): array {
+        return $this->result;
+    }
 
     public function page(int $perPage, int $offset, string $searchTerm, bool $bypassSphinx = false): array {
         if ($searchTerm === '' || $bypassSphinx) {

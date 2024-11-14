@@ -16,8 +16,14 @@ class TorrentLog extends BaseObject {
         $this->torrent->flush();
         return $this;
     }
-    public function link(): string { return $this->torrent->link(); }
-    public function location(): string { return $this->torrent->location(); }
+
+    public function link(): string {
+        return $this->torrent->link();
+    }
+
+    public function location(): string {
+        return $this->torrent->location();
+    }
 
     public function torrentId(): int {
         return $this->torrent->id();

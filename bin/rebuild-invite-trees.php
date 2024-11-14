@@ -1,6 +1,6 @@
 <?php
 
-require_once(__DIR__ . '/../lib/bootstrap.php');
+require_once __DIR__ . '/../lib/bootstrap.php';
 $db = Gazelle\DB::DB();
 
 $db->prepared_query("

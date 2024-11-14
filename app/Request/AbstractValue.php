@@ -4,6 +4,7 @@ namespace Gazelle\Request;
 
 abstract class AbstractValue {
     protected array $label;
+
     public function __construct(
         protected bool  $all  = false,
         protected array $list = [],

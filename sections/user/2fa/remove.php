@@ -15,7 +15,7 @@ if (!$Viewer->permitted('users_edit_password')) {
     if ($userId !== $Viewer->id()) {
         error(403);
     } elseif (empty($_POST['password'])) {
-        require_once('confirm.php');
+        include_once 'confirm.php';
         exit;
     } elseif (!$user->validatePassword($_POST['password'])) {
         header('Location: user.php?action=2fa&do=confirm=invalid&userid=' . $userId);

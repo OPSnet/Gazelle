@@ -7,7 +7,7 @@ if (!$id) {
     error(404);
 }
 
-require_once('array.php');
+require_once 'array.php';
 if (!isset($Types[$_GET['type'] ?? ''])) {
     error(403);
 }

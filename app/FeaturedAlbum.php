@@ -20,8 +20,14 @@ class FeaturedAlbum extends BaseObject {
         self::$cache->delete_value(sprintf(self::FEATURED, $this->type->value, $this->id));
         return $this;
     }
-    public function link(): string {return $this->thread()->link();}
-    public function location(): string {return $this->thread()->location();}
+
+    public function link(): string {
+        return $this->thread()->link();
+    }
+
+    public function location(): string {
+        return $this->thread()->location();
+    }
 
     public function info(): array {
         if (!isset($this->info)) {

@@ -27,8 +27,14 @@ class User extends \Gazelle\BaseObject {
         ]);
         return $this;
     }
-    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), 'Stats'); }
-    public function location(): string { return 'user.php?action=stats&userid=' . $this->id; }
+
+    public function link(): string {
+        return sprintf('<a href="%s">%s</a>', $this->url(), 'Stats');
+    }
+
+    public function location(): string {
+        return 'user.php?action=stats&userid=' . $this->id;
+    }
 
     /**
      * Get the total number of comments made by page type

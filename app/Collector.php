@@ -57,6 +57,7 @@ abstract class Collector extends Base  {
     protected float $startTime;
 
     abstract public function prepare(array $list): bool;
+
     abstract public function fillZip(\ZipStream\ZipStream $zip): int;
 
     public function __construct(

@@ -57,7 +57,7 @@ if ($inviteSourceMan && isset($_GET['edit'])) {
 
     if ($update) {
         authorize();
-        $inviteSourceMan->modifyInviteeSource($user, $update);
+        $inviteSourceMan->modifyInviteeSource($update);
     }
 }
 

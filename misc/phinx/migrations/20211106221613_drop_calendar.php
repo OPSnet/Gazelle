@@ -7,13 +7,11 @@ use Phinx\Db\Adapter\MysqlAdapter;
 
 final class DropCalendar extends AbstractMigration
 {
-    public function up(): void
-    {
+    public function up(): void {
         $this->table('calendar')->drop()->save();
     }
 
-    public function down(): void
-    {
+    public function down(): void {
         $this->table('calendar', [
                 'id' => false,
                 'primary_key' => ['ID'],

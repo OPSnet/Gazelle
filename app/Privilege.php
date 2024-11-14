@@ -9,8 +9,14 @@ class Privilege extends BaseObject {
         $this->info = [];
         return $this;
     }
-    public function location(): string { return ''; }
-    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), $this->url()); }
+
+    public function location(): string {
+        return '';
+    }
+
+    public function link(): string {
+        return sprintf('<a href="%s">%s</a>', $this->url(), $this->url());
+    }
 
     public function info(): array {
         if (isset($this->info) && !empty($this->info)) {

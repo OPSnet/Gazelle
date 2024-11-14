@@ -6,8 +6,7 @@ use Phinx\Migration\AbstractMigration;
 
 final class CollageForeignKeys extends AbstractMigration
 {
-    public function up(): void
-    {
+    public function up(): void {
         $this->table('collages')
             ->changeColumn('UserID', 'integer', ['signed' => false])
             ->addForeignKey('UserID', 'users_main', 'ID', ['delete' => 'CASCADE', 'update' => 'CASCADE'])
@@ -40,8 +39,7 @@ final class CollageForeignKeys extends AbstractMigration
             ->save();
     }
 
-    public function down(): void
-    {
+    public function down(): void {
 
         $this->table('collages')
             ->dropForeignKey('UserID')

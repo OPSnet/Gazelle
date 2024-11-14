@@ -6,8 +6,7 @@ use Phinx\Migration\AbstractMigration;
 
 final class TorrentsFkey extends AbstractMigration
 {
-    public function up(): void
-    {
+    public function up(): void {
         $this->table('torrents')
             ->changeColumn('UserID', 'integer', ['limit' => 10, 'signed' => false])
             ->addForeignKey('GroupID', 'torrents_group', 'ID')
@@ -16,8 +15,7 @@ final class TorrentsFkey extends AbstractMigration
             ->save();
     }
 
-    public function down(): void
-    {
+    public function down(): void {
         $this->table('torrents')
             ->dropForeignKey('GroupID')
             ->dropForeignKey('UserID')

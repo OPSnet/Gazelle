@@ -137,7 +137,7 @@ class DB extends Base {
                 return [false, "condition selected 0 rows"];
             }
         } catch (DB\MysqlDuplicateKeyException) {
-            // do nothing, for some reason it was already deleted
+            ; // do nothing, for some reason it was already deleted
         }
 
         if (!$delete) {

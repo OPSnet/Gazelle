@@ -2,7 +2,7 @@
 // phpcs:disable PSR1.Classes.ClassDeclaration.MissingNamespace
 // phpcs:disable PSR1.Files.SideEffects.FoundWithSymbols
 
-require_once(__DIR__ . '/vendor/autoload.php');
+require_once __DIR__ . '/vendor/autoload.php';
 
 use SebastianBergmann\CodeCoverage\Filter;
 use SebastianBergmann\CodeCoverage\Driver\Selector;
@@ -10,7 +10,10 @@ use SebastianBergmann\CodeCoverage\CodeCoverage;
 use SebastianBergmann\CodeCoverage\Report\PHP as PhpReport;
 use SebastianBergmann\CodeCoverage\Util\Filesystem;
 
-function filenameList(string $path): array { /** @phpstan-ignore-line */
+/**
+ * @return array<string>
+ */
+function filenameList(string $path): array {
     $list = [];
     foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path)) as $entry) {
         $filename = $entry->getPathname();
@@ -56,4 +59,4 @@ class CoverageHelper {
 }
 
 $coverage_helper = new CoverageHelper();
-require_once(__DIR__ . '/gazelle.php');
+require_once __DIR__ . '/gazelle.php';

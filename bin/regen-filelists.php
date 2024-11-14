@@ -1,6 +1,6 @@
 <?php
 
-require_once(__DIR__ . '/../lib/bootstrap.php');
+require_once __DIR__ . '/../lib/bootstrap.php';
 $Cache->disableLocalCache();
 
 $torMan  = new Gazelle\Manager\Torrent();

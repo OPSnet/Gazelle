@@ -8,8 +8,7 @@ use Phinx\Util\Literal;
 
 final class DeletedTorrentGroup extends AbstractMigration
 {
-    public function up(): void
-    {
+    public function up(): void {
         $this->table('deleted_torrents_group', ['id' => false, 'primary_key' => 'ID'])
             ->addColumn('ID', 'integer', ['length' => 10, 'identity' => true])
             ->addColumn('CategoryID', 'integer', ['length' => 3])
@@ -37,8 +36,8 @@ final class DeletedTorrentGroup extends AbstractMigration
             MODIFY WikiBody mediumtext
         ");
     }
-    public function down(): void
-    {
+
+    public function down(): void {
         // because "You can't delete all columns with ALTER TABLE; use DROP TABLE instead"
         $this->table('deleted_torrents_group')->drop()->save();
     }

@@ -13,8 +13,13 @@ class ForumPost extends BaseObject {
         return $this;
     }
 
-    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), "Post #{$this->id}"); }
-    public function location(): string { return "forums.php?action=viewthread&threadid={$this->threadId()}&postid={$this->id}#post{$this->id}"; }
+    public function link(): string {
+        return sprintf('<a href="%s">%s</a>', $this->url(), "Post #{$this->id}");
+    }
+
+    public function location(): string {
+        return "forums.php?action=viewthread&threadid={$this->threadId()}&postid={$this->id}#post{$this->id}";
+    }
 
     /**
      * Get information about a post

@@ -6,8 +6,7 @@ use Phinx\Migration\AbstractMigration;
 
 final class ForumTopicForeignKeys extends AbstractMigration
 {
-    public function up(): void
-    {
+    public function up(): void {
         $this->table('forums_topics')
             ->changeColumn('ForumID', 'integer', ['signed' => false])
             ->changeColumn('AuthorID', 'integer', ['signed' => false])
@@ -19,8 +18,7 @@ final class ForumTopicForeignKeys extends AbstractMigration
             ->save();
     }
 
-    public function down(): void
-    {
+    public function down(): void {
         $this->table('forums_topics')
             ->dropForeignKey('ForumID')
             ->dropForeignKey('AuthorID')

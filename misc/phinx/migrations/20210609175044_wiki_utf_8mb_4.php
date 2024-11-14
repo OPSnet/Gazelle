@@ -7,8 +7,7 @@ use Phinx\Db\Adapter\MysqlAdapter;
 
 final class WikiUtf8mb4 extends AbstractMigration
 {
-    public function up(): void
-    {
+    public function up(): void {
         $this->table('wiki_articles')
             ->changeColumn('Title', 'string', ['null' => false, 'limit' => 100, 'collation' => 'utf8mb4_unicode_ci', 'encoding' => 'utf8mb4'])
             ->changeColumn('Body', 'text', ['null' => false, 'default' => null, 'collation' => 'utf8mb4_unicode_ci', 'encoding' => 'utf8mb4', 'limit' => MysqlAdapter::TEXT_MEDIUM])
@@ -19,8 +18,7 @@ final class WikiUtf8mb4 extends AbstractMigration
             ->save();
     }
 
-    public function down(): void
-    {
+    public function down(): void {
         $this->table('wiki_articles')
             ->changeColumn('Title', 'string', ['null' => true, 'limit' => 100, 'collation' => 'utf8_general_ci', 'encoding' => 'utf8'])
             ->changeColumn('Body', 'text', ['null' => true, 'default' => null, 'collation' => 'utf8_general_ci', 'encoding' => 'utf8', 'limit' => MysqlAdapter::TEXT_MEDIUM])

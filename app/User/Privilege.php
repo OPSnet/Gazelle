@@ -118,9 +118,18 @@ class Privilege extends \Gazelle\BaseUser {
     public function isSecondary(int $privilegeId): bool {
         return isset($this->info()['secondary'][$privilegeId]);
     }
-    public function isFLS(): bool         { return $this->isSecondary(FLS_TEAM); }
-    public function isInterviewer(): bool { return $this->isSecondary(INTERVIEWER); }
-    public function isRecruiter(): bool   { return $this->isSecondary(RECRUITER); }
+
+    public function isFLS(): bool {
+        return $this->isSecondary(FLS_TEAM);
+    }
+
+    public function isInterviewer(): bool {
+        return $this->isSecondary(INTERVIEWER);
+    }
+
+    public function isRecruiter(): bool {
+        return $this->isSecondary(RECRUITER);
+    }
 
     public function allowedForumList(): array {
         return $this->info()['forum'];

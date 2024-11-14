@@ -13,9 +13,9 @@ foreach (['memcached', 'mysqli'] as $e) {
 date_default_timezone_set('UTC');
 
 if (!defined('SITE_NAME')) {
-    require_once(__DIR__ . '/config.php');
-    require_once(__DIR__ . '/../lib/util.php');
-    require_once(__DIR__ . '/../vendor/autoload.php');
+    include_once __DIR__ . '/config.php';
+    include_once __DIR__ . '/../lib/util.php';
+    include_once __DIR__ . '/../vendor/autoload.php';
 }
 
 global $Cache, $Debug, $Twig;

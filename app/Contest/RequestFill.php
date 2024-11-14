@@ -5,10 +5,13 @@ namespace Gazelle\Contest;
 /* how many requests filled */
 
 class RequestFill extends AbstractContest {
+    // phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundInExtendedClassAfterLastUsed
     public function leaderboard(int $limit, int $offset): array {
         // TODO
         return [];
     }
+
+    // phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundInExtendedClassAfterLastUsed
 
     public function ranker(): array {
         return [

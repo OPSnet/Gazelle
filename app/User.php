@@ -48,8 +48,14 @@ class User extends BaseObject {
         unset($this->info, $this->ordinal, $this->privilege, $this->stats, $this->tokenCache);
         return $this;
     }
-    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), html_escape($this->username())); }
-    public function location(): string { return 'user.php?id=' . $this->id; }
+
+    public function link(): string {
+        return sprintf('<a href="%s">%s</a>', $this->url(), html_escape($this->username()));
+    }
+
+    public function location(): string {
+        return 'user.php?id=' . $this->id;
+    }
 
     /**
      * Delegate privilege methods to the User\AuditTrail class
@@ -1449,18 +1455,49 @@ class User extends BaseObject {
         return $change;
     }
 
-    public function isUnconfirmed(): bool { return $this->info()['Enabled'] == UserStatus::unconfirmed->value; }
-    public function isEnabled(): bool     { return $this->info()['Enabled'] == UserStatus::enabled->value; }
-    public function isDisabled(): bool    { return $this->info()['Enabled'] == UserStatus::disabled->value; }
-    public function isLocked(): bool      { return !is_null($this->info()['locked_account']); }
-    public function isVisible(): bool     { return $this->info()['Visible'] == '1'; }
-    public function isWarned(): bool      { return !is_null($this->warningExpiry()); }
+    public function isUnconfirmed(): bool {
+        return $this->info()['Enabled'] == UserStatus::unconfirmed->value;
+    }
 
-    public function isStaff(): bool         { return $this->info()['isStaff']; }
-    public function isFLS(): bool           { return $this->privilege()->isFLS(); }
-    public function isInterviewer(): bool   { return $this->privilege()->isInterviewer(); }
-    public function isRecruiter(): bool     { return $this->privilege()->isRecruiter(); }
-    public function isStaffPMReader(): bool { return $this->isFLS() || $this->isStaff(); }
+    public function isEnabled(): bool {
+        return $this->info()['Enabled'] == UserStatus::enabled->value;
+    }
+
+    public function isDisabled(): bool {
+        return $this->info()['Enabled'] == UserStatus::disabled->value;
+    }
+
+    public function isLocked(): bool {
+        return !is_null($this->info()['locked_account']);
+    }
+
+    public function isVisible(): bool {
+        return $this->info()['Visible'] == '1';
+    }
+
+    public function isWarned(): bool {
+        return !is_null($this->warningExpiry());
+    }
+
+    public function isStaff(): bool {
+        return $this->info()['isStaff'];
+    }
+
+    public function isFLS(): bool {
+        return $this->privilege()->isFLS();
+    }
+
+    public function isInterviewer(): bool {
+        return $this->privilege()->isInterviewer();
+    }
+
+    public function isRecruiter(): bool {
+        return $this->privilege()->isRecruiter();
+    }
+
+    public function isStaffPMReader(): bool {
+        return $this->isFLS() || $this->isStaff();
+    }
 
     public function warningExpiry(): ?string {
         return $this->info()['warning_expiry'];
@@ -1753,8 +1790,7 @@ class User extends BaseObject {
             && !$torrent->isFreeleech()
             && !$torrent->isFreeleechPersonal()
             && (STACKABLE_FREELEECH_TOKENS || $torrent->tokenCount() == 1)
-            && $this->tokenCount() >= $torrent->tokenCount()
-            ;
+            && $this->tokenCount() >= $torrent->tokenCount();
     }
 
     /**
@@ -1974,6 +2010,7 @@ class User extends BaseObject {
                 );
                 return $token;
             } catch (\Gazelle\DB\MysqlDuplicateKeyException) {
+                ;
             }
         }
     }

@@ -6,8 +6,7 @@ use Phinx\Migration\AbstractMigration;
 
 final class BookmarkTorrentFkey extends AbstractMigration
 {
-    public function up(): void
-    {
+    public function up(): void {
         $this->table('bookmarks_torrents')
             ->changeColumn('UserID', 'integer', ['limit' => 10, 'signed' => false])
             ->addForeignKey('GroupID', 'torrents_group', 'ID')
@@ -15,8 +14,7 @@ final class BookmarkTorrentFkey extends AbstractMigration
             ->save();
     }
 
-    public function down(): void
-    {
+    public function down(): void {
         $this->table('bookmarks_torrents')
             ->dropForeignKey('GroupID')
             ->dropForeignKey('UserID')

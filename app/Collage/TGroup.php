@@ -9,8 +9,13 @@ class TGroup extends AbstractCollage {
     protected array $sequence = [];
     protected array $torrentTags;
 
-    public function entryTable(): string { return 'collages_torrents'; }
-    public function entryColumn(): string { return 'GroupID'; }
+    public function entryTable(): string {
+        return 'collages_torrents';
+    }
+
+    public function entryColumn(): string {
+        return 'GroupID';
+    }
 
     public function groupIdList(): array {
         if (!isset($this->groupIds)) {

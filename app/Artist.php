@@ -53,8 +53,13 @@ class Artist extends BaseObject implements CollageEntry {
         return $this;
     }
 
-    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->name())); }
-    public function location(): string { return 'artist.php?id=' . $this->id; }
+    public function link(): string {
+        return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->name()));
+    }
+
+    public function location(): string {
+        return 'artist.php?id=' . $this->id;
+    }
 
     public function info(): array {
         $cacheKey = $this->cacheKey();
@@ -909,6 +914,7 @@ class Artist extends BaseObject implements CollageEntry {
     }
 
     /* STATIC METHODS - for when you do not yet have an ID, e.g. during creation */
+
     /**
      * Collapse whitespace and directional markers, because people copypaste carelessly.
      * TODO: make stricter, e.g. on all whitespace characters or Unicode normalisation

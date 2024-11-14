@@ -9,9 +9,9 @@ if ($Viewer->disableUpload()) {
 }
 
 if (isset($_GET['action']) && $_GET['action'] == 'parse_html') {
-    require_once('parse_html.php');
+    include_once 'parse_html.php';
 } elseif (!empty($_POST['submit'])) {
-    require_once('upload_handle.php');
+    include_once 'upload_handle.php';
 } else {
-    require_once('upload.php');
+    include_once 'upload.php';
 }

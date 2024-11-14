@@ -18,7 +18,9 @@ abstract class BaseObject extends Base {
     ) {}
 
     abstract public function flush(): static;
+
     abstract public function link(): string;
+
     abstract public function location(): string;
 
     public function id(): int {

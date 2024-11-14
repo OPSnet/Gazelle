@@ -4,8 +4,7 @@ use Phinx\Seed\AbstractSeed;
 
 class UserAttrHideVote extends AbstractSeed
 {
-    public function run(): void
-    {
+    public function run(): void {
         foreach (
             [
             ['hide-vote-recent', 'Do not show recent votes on profile page'],

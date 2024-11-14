@@ -10,9 +10,12 @@ class SphinxqlResult {
      * @param int $Errno error code returned by the query upon failure
      * @param string $Error error message returned by the query upon failure
      */
-    public function __construct(private $Result, private $Meta, public $Errno, public $Error)
-    {
-    }
+    public function __construct(
+        private $Result,
+        private $Meta,
+        public $Errno,
+        public $Error,
+    ) {}
 
     /**
      * Did the query find anything?

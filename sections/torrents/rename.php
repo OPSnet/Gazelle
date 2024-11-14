@@ -18,5 +18,5 @@ if (is_null($tgroup)) {
     error(404);
 }
 
-$tgroup->rename($name, $Viewer, $tgMan, new Gazelle\Log());
+$tgroup->rename($name, $Viewer, new Gazelle\Log());
 header("Location: {$tgroup->location()}");

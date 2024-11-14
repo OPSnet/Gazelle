@@ -1,3 +1,3 @@
 <?php
 
-require_once(__DIR__ . '/../gazelle.php');
+require_once __DIR__ . '/../gazelle.php';

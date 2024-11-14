@@ -13,11 +13,7 @@ class Inbox extends \Gazelle\BaseUser {
     protected string $searchField = 'user';
     protected string $searchTerm;
 
-    public function __construct(\Gazelle\User $user) {
-        parent::__construct($user);
-    }
-
-    public function flush(): static  {
+    public function flush(): static {
         self::$cache->delete_value(sprintf(self::CACHE_NEW, $this->id()));
         $this->user->flush();
         return $this;

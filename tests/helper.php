@@ -66,8 +66,7 @@ class Helper {
     }
 
     public static function makeTGroupEBook(
-        string        $name,
-        \Gazelle\User $user,
+        string $name,
     ): \Gazelle\TGroup {
         return (new \Gazelle\Manager\TGroup())->create(
             categoryId:      (new \Gazelle\Manager\Category())->findIdByName('E-Books'),

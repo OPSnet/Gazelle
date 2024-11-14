@@ -12,9 +12,11 @@ class UserNavigation extends BaseObject {
         unset($this->info);
         return $this;
     }
+
     public function link(): string {
         return "<a href=\"{$this->location()}\">User Link Editor</a>";
     }
+
     public function location(): string {
         return "tools.php?action=navigation";
     }

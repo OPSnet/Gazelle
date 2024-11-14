@@ -83,4 +83,4 @@ if (isset($_REQUEST['submit'])) {
     $usersAffected = (new Gazelle\Manager\User())->flushUserclass($privilege->id());
 }
 
-require_once('userclass_edit.php');
+require_once 'userclass_edit.php';

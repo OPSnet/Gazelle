@@ -94,166 +94,166 @@ switch ($Action) {
     // things (that may be) used on the site
     case 'upload_section':
         // Gets one of the upload forms
-        require_once('upload.php');
+        include_once 'upload.php';
         break;
     case 'preview':
-        require_once('preview.php');
+        include_once 'preview.php';
         break;
     case 'torrent_info':
-        require_once('torrent_info.php');
+        include_once 'torrent_info.php';
         break;
     case 'add_tag':
-        require_once('torrent_tag_add.php');
+        include_once 'torrent_tag_add.php';
         break;
     case 'delete_tag':
-        require_once('torrent_tag_remove.php');
+        include_once 'torrent_tag_remove.php';
         break;
     case 'stats':
-        require_once('stats.php');
+        include_once 'stats.php';
         break;
     case 'checkprivate':
-        include('checkprivate.php');
+        include 'checkprivate.php';
         break;
 
     // things not yet used on the site
     case 'torrent':
-        require_once('torrent.php');
+        include_once 'torrent.php';
         break;
     case 'torrentgroup':
-        require_once('torrentgroup.php');
+        include_once 'torrentgroup.php';
         break;
     case 'torrentgroupalbumart':        // so the album art script can function without breaking the ratelimit
-        require_once('torrentgroupalbumart.php');
+        include_once 'torrentgroupalbumart.php';
         break;
     case 'torrent_remove_cover_art':
-        require_once('torrent_remove_cover_art.php');
+        include_once 'torrent_remove_cover_art.php';
         break;
     case 'tcomments':
-        require_once('tcomments.php');
+        include_once 'tcomments.php';
         break;
     case 'user':
-        require_once('user.php');
+        include_once 'user.php';
         break;
     case 'forum':
-        require_once('forum/index.php');
+        include_once 'forum/index.php';
         break;
     case 'post_edit':
-        require_once('post_edit.php');
+        include_once 'post_edit.php';
         break;
     case 'top10':
-        require_once('top10/index.php');
+        include_once 'top10/index.php';
         break;
     case 'browse':
-        require_once('browse.php');
+        include_once 'browse.php';
         break;
     case 'usersearch':
-        require_once('usersearch.php');
+        include_once 'usersearch.php';
         break;
     case 'requests':
-        require_once('requests.php');
+        include_once 'requests.php';
         break;
     case 'artist':
-        require_once('artist.php');
+        include_once 'artist.php';
         break;
     case 'add_similar':
-        require_once(__DIR__ . '/../artist/add_similar.php');
+        include_once __DIR__ . '/../artist/add_similar.php';
         break;
     case 'inbox':
-        require_once('inbox/index.php');
+        include_once 'inbox/index.php';
         break;
     case 'subscriptions':
-        require_once('subscriptions.php');
+        include_once 'subscriptions.php';
         break;
     case 'index':
-        require_once('info.php');
+        include_once 'info.php';
         break;
     case 'bookmarks':
-        require_once('bookmarks/index.php');
+        include_once 'bookmarks/index.php';
         break;
     case 'announcements':
-        require_once('announcements.php');
+        include_once 'announcements.php';
         break;
     case 'request':
-        require_once('request.php');
+        include_once 'request.php';
         break;
     case 'loadavg':
-        require_once('loadavg.php');
+        include_once 'loadavg.php';
         break;
     case 'better':
-        require_once('better/index.php');
+        include_once 'better/index.php';
         break;
     case 'password_validate':
-        require_once('password_validate.php');
+        include_once 'password_validate.php';
         break;
     case 'similar_artists':
-        require_once('similar_artists.php');
+        include_once 'similar_artists.php';
         break;
     case 'userhistory':
         match ($_GET['type'] ?? '') {
-            'posts' => require_once('userhistory/post_history.php'),
+            'posts' => include_once 'userhistory/post_history.php',
             default => json_error('bad type'),
         };
         break;
     case 'votefavorite':
-        require_once('vote_handle.php');
+        include_once 'vote_handle.php';
         break;
     case 'wiki':
-        require_once('wiki.php');
+        include_once 'wiki.php';
         break;
     case 'get_friends':
         echo json_encode((new Gazelle\User\Friend($Viewer))->userList());
         break;
     case 'news_ajax':
-        require_once('news_ajax.php');
+        include_once 'news_ajax.php';
         break;
     case 'user_recents':
-        require_once('user_recents.php');
+        include_once 'user_recents.php';
         break;
     case 'collage':
-        require_once('collage.php');
+        include_once 'collage.php';
         break;
     case 'raw_bbcode':
-        require_once('raw_bbcode.php');
+        include_once 'raw_bbcode.php';
         break;
     case 'notifications':
-        require_once('notifications.php');
+        include_once 'notifications.php';
         break;
     case 'get_user_notifications':
-        require_once('get_user_notifications.php');
+        include_once 'get_user_notifications.php';
         break;
     case 'clear_user_notification':
-        require_once('clear_user_notification.php');
+        include_once 'clear_user_notification.php';
         break;
     case 'pushbullet_devices':
-        require_once('pushbullet_devices.php');
+        include_once 'pushbullet_devices.php';
         break;
     case 'loggy':
-        require_once('loggy.php');
+        include_once 'loggy.php';
         break;
     case 'user_stats':
-        require_once('stats/users.php');
+        include_once 'stats/users.php';
         break;
     case 'torrent_stats':
-        require_once('stats/torrents.php');
+        include_once 'stats/torrents.php';
         break;
     case 'logchecker':
-        require_once('logchecker.php');
+        include_once 'logchecker.php';
         break;
     case 'riplog':
-        require_once('riplog.php');
+        include_once 'riplog.php';
         break;
 
     case 'upload':
-        require_once(__DIR__ . '/../upload/upload_handle.php');
+        include_once __DIR__ . '/../upload/upload_handle.php';
         break;
     case 'download':
-        require_once(__DIR__ . '/../torrents/download.php');
+        include_once __DIR__ . '/../torrents/download.php';
         break;
     case 'request_fill':
-        json_print('success', require_once(__DIR__ . '/../requests/take_fill.php'));
+        json_print('success', include_once __DIR__ . '/../requests/take_fill.php');
         break;
     case 'add_log':
-        require_once(__DIR__ . '/add_log.php');
+        include_once __DIR__ . '/add_log.php';
         break;
     default:
         // If they're screwing around with the query string

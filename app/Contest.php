@@ -16,8 +16,14 @@ class Contest extends BaseObject {
         $this->info = [];
         return $this;
     }
-    public function link(): string { return "<a href=\"{$this->url()}\">{$this->name()}</a>"; }
-    public function location(): string { return "contest.php?id={$this->id}"; }
+
+    public function link(): string {
+        return "<a href=\"{$this->url()}\">{$this->name()}</a>";
+    }
+
+    public function location(): string {
+        return "contest.php?id={$this->id}";
+    }
 
     public function info(): array {
         if (isset($this->info) && !empty($this->info)) {

@@ -1,7 +1,7 @@
 <?php
 
-require_once(__DIR__ . '/../lib/bootstrap.php');
-require_once(__DIR__ . '/../tests/helper.php');
+require_once __DIR__ . '/../lib/bootstrap.php';
+require_once __DIR__ . '/../tests/helper.php';
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);

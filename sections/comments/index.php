@@ -1,6 +1,6 @@
 <?php
 
-require_once(match ($_REQUEST['action'] ?? null) {
+require_once match ($_REQUEST['action'] ?? null) {
     'get'         => 'get.php',
     'jump'        => 'jump.php',
     'take_delete' => 'delete_handle.php',
@@ -9,4 +9,4 @@ require_once(match ($_REQUEST['action'] ?? null) {
     'take_warn'   => 'warn_handle.php',
     'warn'        => 'warn.php',
     default       => 'comments.php',
-});
+};

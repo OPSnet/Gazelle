@@ -6,8 +6,8 @@ if ($Viewer->disableForums()) {
 }
 
 match ($_GET['type'] ?? 'main') {
-    'main'       => require_once('main.php'),
-    'viewforum'  => require_once('forum.php'),
-    'viewthread' => require_once('thread.php'),
+    'main'       => include_once 'main.php',
+    'viewforum'  => include_once 'forum.php',
+    'viewthread' => include_once 'thread.php',
     default      => json_error('type'),
 };

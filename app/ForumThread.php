@@ -38,8 +38,13 @@ class ForumThread extends BaseObject {
         );
     }
 
-    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->title())); }
-    public function location(): string { return "forums.php?action=viewthread&threadid={$this->id}"; }
+    public function link(): string {
+        return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->title()));
+    }
+
+    public function location(): string {
+        return "forums.php?action=viewthread&threadid={$this->id}";
+    }
 
     /**
      * Get information about a thread

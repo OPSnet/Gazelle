@@ -5,8 +5,13 @@ namespace Gazelle\Collage;
 use Gazelle\Intf\CollageEntry;
 
 class Artist extends AbstractCollage {
-    public function entryTable(): string { return 'collages_artists'; }
-    public function entryColumn(): string { return 'ArtistID'; }
+    public function entryTable(): string {
+        return 'collages_artists';
+    }
+
+    public function entryColumn(): string {
+        return 'ArtistID';
+    }
 
     public function load(): int {
         self::$db->prepared_query("

@@ -10,7 +10,7 @@ if (!$subjectId || empty($_POST['type']) || ($_POST['type'] !== 'request_update'
     error(404);
 }
 
-require_once('array.php');
+require_once 'array.php';
 /** @var array $Types */
 if (!array_key_exists($_POST['type'], $Types)) {
     error(403);

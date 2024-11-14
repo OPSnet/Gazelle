@@ -54,7 +54,7 @@ if ($Err) {
     $Category = $categoryId;
     $Tags = $_POST['tags'];
     $Description = $_POST['description'];
-    require('new.php');
+    include 'new.php';
     exit;
 }
 

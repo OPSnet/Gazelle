@@ -12,14 +12,21 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
     protected array $thread = []; // the page of comments
 
     abstract public function page(): string;
+
     abstract public function pageUrl(): string;
 
     public function flush(): static {
         // No-op: There is no such thing as an individual comment cache
         return $this;
     }
-    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), "Comment #" . $this->id); }
-    public function location(): string { return $this->pageUrl() . "{$this->pageId}&postid={$this->id}#post{$this->id}"; }
+
+    public function link(): string {
+        return sprintf('<a href="%s">%s</a>', $this->url(), "Comment #" . $this->id);
+    }
+
+    public function location(): string {
+        return $this->pageUrl() . "{$this->pageId}&postid={$this->id}#post{$this->id}";
+    }
 
     public function __construct(
         protected int $pageId,

@@ -6,8 +6,7 @@ use Phinx\Migration\AbstractMigration;
 
 final class MoreTableDefaults extends AbstractMigration
 {
-    public function up(): void
-    {
+    public function up(): void {
         $this->table('forums_topics')
             ->changeColumn('Title', 'string', ['length' => 255, 'null' => false])
             ->save();
@@ -37,8 +36,7 @@ final class MoreTableDefaults extends AbstractMigration
             ->save();
     }
 
-    public function down(): void
-    {
+    public function down(): void {
         $this->table('forums_topics')
             ->changeColumn('Title', 'string', ['length' => 255, 'null' => true])
             ->save();

@@ -12,8 +12,11 @@ abstract class AbstractReport extends \Gazelle\Base {
     protected array $context = [];
 
     abstract public function template(): string;
+
     abstract public function bbLink(): string;
+
     abstract public function title(): string;
+
     abstract public function titlePrefix(): string;
 
     public function subject(): \Gazelle\Base {

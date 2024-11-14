@@ -6,8 +6,7 @@ use Phinx\Migration\AbstractMigration;
 
 final class RecoveryBuffer extends AbstractMigration
 {
-    public function change(): void
-    {
+    public function change(): void {
         $this->table('recovery_buffer', ['id' => false, 'primary_key' => ['user_id']])
             ->addColumn('user_id',     'integer', ['limit' => 10, 'signed' => false, 'identity' => true])
             ->addColumn('prev_id',     'integer', ['limit' => 10, 'signed' => false])

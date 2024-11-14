@@ -9,8 +9,14 @@ class StaffBlog extends BaseObject {
         $this->info = [];
         return $this;
     }
-    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->title())); }
-    public function location(): string { return 'staffblog.php#blog' . $this->id; }
+
+    public function link(): string {
+        return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->title()));
+    }
+
+    public function location(): string {
+        return 'staffblog.php#blog' . $this->id;
+    }
 
     public function info(): array {
         if (isset($this->info) && !empty($this->info)) {

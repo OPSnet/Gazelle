@@ -64,9 +64,12 @@ class Tag extends \Gazelle\BaseManager {
      * Check whether this name is allowed. Some tags we never want to see again.
      * TODO: implement
      */
+    // phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundInExtendedClass
     public function validName(string $name): bool {
         return true;
     }
+
+    // phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundInExtendedClass
 
     /**
      * Get a tag ready for database input and display.
@@ -414,7 +417,7 @@ class Tag extends \Gazelle\BaseManager {
             ");
             $aliasList = self::$db->to_array(false, MYSQLI_ASSOC, false);
             // Unify tag aliases to be in_this_format as tags not in.this.format
-            array_walk_recursive($aliasList, function (&$val, $key) {
+            array_walk_recursive($aliasList, function (&$val) {
                 $val = strtr($val, '.', '_');
             });
             // Clean up the array for smaller cache size

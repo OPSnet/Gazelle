@@ -1,6 +1,6 @@
 <?php
 
-require_once(match ($_REQUEST['action'] ?? '') {
+require_once match ($_REQUEST['action'] ?? '') {
     'ajax_claim'               => 'ajax_claim.php',
     'ajax_get_resolve_options' => 'ajax_get_resolve_options.php',
     'ajax_new_report'          => 'ajax_new_report.php',
@@ -16,4 +16,4 @@ require_once(match ($_REQUEST['action'] ?? '') {
     'takereport'               => 'report_handle.php',
     'takeresolve'              => 'resolve_handle.php',
     default                    => isset($_GET['view']) ? 'static.php' : 'views.php',
-});
+};

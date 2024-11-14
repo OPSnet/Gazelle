@@ -2,13 +2,13 @@
 /** @phpstan-var ?\Gazelle\User $Viewer */
 
 if (!isset($Viewer)) {
-    require('public.php');
+    include 'public.php';
 } else {
     if (!isset($_REQUEST['action'])) {
-        require('private.php');
+        include 'private.php';
     } else {
         match ($_REQUEST['action']) {
-            'poll'  => require(__DIR__ . '/../forums/poll_vote.php'),
+            'poll'  => include __DIR__ . '/../forums/poll_vote.php',
             default => error('Unknown action requested'),
         };
     }

@@ -79,7 +79,9 @@ class Seedbox extends \Gazelle\BaseUser {
         );
     }
 
-    public function viewBy(): int { return $this->viewBy; }
+    public function viewBy(): int {
+        return $this->viewBy;
+    }
 
     /**
      * Generate a signature of the useragent and IP address.
@@ -208,7 +210,7 @@ class Seedbox extends \Gazelle\BaseUser {
                         ", mb_substr($name, 0, 100), $this->user->id(), $this->hashid->decode($seedbox['id'])[0]
                     );
                 } catch (\Gazelle\DB\MysqlDuplicateKeyException) {
-                    // do nothing
+                    ; // do nothing
                 } finally {
                     $n += self::$db->affected_rows();
                 }

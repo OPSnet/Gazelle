@@ -8,7 +8,7 @@
  * longer exists.
  */
 
-require_once(__DIR__ . '/../lib/bootstrap.php');
+require_once __DIR__ . '/../lib/bootstrap.php';
 
 ini_set('max_execution_time', -1);
 

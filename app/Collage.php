@@ -39,8 +39,14 @@ class Collage extends BaseObject {
         unset($this->info);
         return $this;
     }
-    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->name())); }
-    public function location(): string { return 'collages.php?id=' . $this->id; }
+
+    public function link(): string {
+        return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->name()));
+    }
+
+    public function location(): string {
+        return 'collages.php?id=' . $this->id;
+    }
 
     public function info(): array {
         if (isset($this->info)) {
@@ -83,36 +89,97 @@ class Collage extends BaseObject {
         return $this->info;
     }
 
-    public function categoryId(): int { return $this->info()['category_id']; }
-    public function description(): string { return $this->info()['description']; }
-    public function maxGroups(): int { return $this->info()['group_max']; }
-    public function maxGroupsPerUser(): int { return $this->info()['group_max_per_user']; }
-    public function name(): string { return $this->info()['name']; }
-    public function numSubscribers(): int { return $this->info()['subscriber_total']; }
-    public function ownerId(): int { return $this->info()['user_id']; }
-    public function tags(): array { return $this->info()['tag_list']; }
-    public function updated(): ?string { return $this->info()['updated']; }
+    public function categoryId(): int {
+        return $this->info()['category_id'];
+    }
 
-    public function numEntries(): int { return $this->info()['torrent_total']; }
-    public function groupIds(): array { return $this->collage->groupIdList(); /** @phpstan-ignore-line */ }
+    public function description(): string {
+        return $this->info()['description'];
+    }
 
-    public function isDeleted(): bool { return $this->info()['is_deleted'] === '1'; }
-    public function isFeatured(): bool { return (bool)$this->info()['is_featured']; }
-    public function isLocked(): bool { return $this->info()['is_locked'] == '1' || $this->lockedForUser; }
-    public function isOwner(User $user): bool { return $this->info()['user_id'] === $user->id(); }
-    public function isPersonal(): bool { return $this->info()['category_id'] === CollageType::personal->value; }
+    public function maxGroups(): int {
+        return $this->info()['group_max'];
+    }
 
-    public function isArtist(): bool { return $this->categoryId() === CollageType::artist->value; }
-    public function contributors(): array { return $this->collage->contributorList(); }
+    public function maxGroupsPerUser(): int {
+        return $this->info()['group_max_per_user'];
+    }
 
-    public function numContributors(): int { return count(array_keys($this->contributors())); }
-    public function numArtists(): int { return count($this->collage->artistList()); }
-    public function sequence(int $entryId): int { return $this->collage->sequence($entryId); /** @phpstan-ignore-line */ }
+    public function name(): string {
+        return $this->info()['name'];
+    }
+
+    public function numSubscribers(): int {
+        return $this->info()['subscriber_total'];
+    }
+
+    public function ownerId(): int {
+        return $this->info()['user_id'];
+    }
+
+    public function tags(): array {
+        return $this->info()['tag_list'];
+    }
+
+    public function updated(): ?string {
+        return $this->info()['updated'];
+    }
+
+    public function numEntries(): int {
+        return $this->info()['torrent_total'];
+    }
+
+    public function groupIds(): array {
+        return $this->collage->groupIdList(); /** @phpstan-ignore-line */
+    }
+
+    public function isDeleted(): bool {
+        return $this->info()['is_deleted'] === '1';
+    }
+
+    public function isFeatured(): bool {
+        return (bool)$this->info()['is_featured'];
+    }
+
+    public function isLocked(): bool {
+        return $this->info()['is_locked'] == '1' || $this->lockedForUser;
+    }
+
+    public function isOwner(User $user): bool {
+        return $this->info()['user_id'] === $user->id();
+    }
+
+    public function isPersonal(): bool {
+        return $this->info()['category_id'] === CollageType::personal->value;
+    }
+
+    public function isArtist(): bool {
+        return $this->categoryId() === CollageType::artist->value;
+    }
+
+    public function contributors(): array {
+        return $this->collage->contributorList();
+    }
+
+    public function numContributors(): int {
+        return count(array_keys($this->contributors()));
+    }
+
+    public function numArtists(): int {
+        return count($this->collage->artistList());
+    }
+
+    public function sequence(int $entryId): int {
+        return $this->collage->sequence($entryId); /** @phpstan-ignore-line */
+    }
 
     public function hasAttr(string $name): bool {
         return isset($this->info()['attr'][$name]);
     }
-    public function sortNewest(): bool { return $this->hasAttr('sort-newest'); }
+
+    public function sortNewest(): bool {
+        return $this->hasAttr('sort-newest');
+    }
 
     public function setViewer(User $viewer): static {
         $this->viewer = $viewer;

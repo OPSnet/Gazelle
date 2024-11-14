@@ -5,7 +5,7 @@ if ($Viewer->disableForums()) {
     error(403);
 }
 
-require_once(match ($_REQUEST['action'] ?? '') {
+require_once match ($_REQUEST['action'] ?? '') {
     'add_poll_option'    => 'add_poll_option.php',
     'autosub'            => 'autosub.php',
     'catchup'            => 'catchup.php',
@@ -28,4 +28,4 @@ require_once(match ($_REQUEST['action'] ?? '') {
     'viewtopic'          => 'thread.php',
     'warn'               => 'warn.php',
     default              => 'main.php',
-});
+};

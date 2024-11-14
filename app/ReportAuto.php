@@ -18,8 +18,14 @@ class ReportAuto extends BasePgObject {
         unset($this->info);
         return $this;
     }
-    public function link(): string { return sprintf('<a href="%s">Auto Report #%d</a>', $this->url(), $this->id()); }
-    public function location(): string { return "report_auto.php?id={$this->id}#report{$this->id}"; }
+
+    public function link(): string {
+        return sprintf('<a href="%s">Auto Report #%d</a>', $this->url(), $this->id());
+    }
+
+    public function location(): string {
+        return "report_auto.php?id={$this->id}#report{$this->id}";
+    }
 
     public function info(): array {
         if (isset($this->info)) {

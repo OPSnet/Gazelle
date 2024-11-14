@@ -18,8 +18,7 @@ final class UseArtistRole extends AbstractMigration
      * Remember to call "create()" or "update()" and NOT "save()" when working
      * with the Table class.
      */
-    public function change(): void
-    {
+    public function change(): void {
         $this->table('torrents_artists')
             ->addColumn('artist_role_id', 'integer', ['null' => true, 'limit' => MysqlAdapter::INT_TINY])
             ->addForeignKey('artist_role_id', 'artist_role', 'artist_role_id',

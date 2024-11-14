@@ -10,6 +10,7 @@ class ArtistNameSort extends AbstractMigration {
                 ADD PRIMARY KEY (GroupID, Importance, ArtistID)
         ');
     }
+
     public function down(): void {
         $this->execute('
             ALTER TABLE torrents_artists

@@ -6,8 +6,7 @@ use Phinx\Migration\AbstractMigration;
 
 final class NukeUsersInfoColumns extends AbstractMigration
 {
-    public function up(): void
-    {
+    public function up(): void {
         $this->table('users_info')
             ->removeColumn('BitcoinAddress')
             ->removeColumn('HideCountryChanges')
@@ -15,8 +14,7 @@ final class NukeUsersInfoColumns extends AbstractMigration
             ->save();
     }
 
-    public function down(): void
-    {
+    public function down(): void {
         $this->table('users_info')
             ->addColumn('BitcoinAddress', 'string', ['limit' => 34])
             ->addColumn('HideCountryChanges', 'enum', ['values' => ['0', '1'], 'default' => '0'])

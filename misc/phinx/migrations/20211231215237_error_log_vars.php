@@ -6,8 +6,7 @@ use Phinx\Migration\AbstractMigration;
 
 final class ErrorLogVars extends AbstractMigration
 {
-    public function up(): void
-    {
+    public function up(): void {
         $this->table('error_log')
             ->addColumn('logged_var', 'json', ['null' => true])
             ->save();
@@ -17,8 +16,7 @@ final class ErrorLogVars extends AbstractMigration
             ->save();
     }
 
-    public function down(): void
-    {
+    public function down(): void {
         $this->table('error_log')
             ->removeColumn('logged_var')
             ->save();

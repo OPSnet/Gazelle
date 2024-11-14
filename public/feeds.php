@@ -5,7 +5,7 @@ if (isset($_GET['clearcache'])) {
     unset($_GET['clearcache']);
 }
 
-require_once(__DIR__ . '/../lib/bootstrap.php');
+require_once __DIR__ . '/../lib/bootstrap.php';
 
 $user = (new Gazelle\Manager\User())->findById((int)($_GET['user'] ?? 0));
 if (is_null($user)) {

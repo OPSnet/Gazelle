@@ -510,6 +510,8 @@ class Text {
             // Thus, we have to handle these before we handle the majority of tags
 
             //5a) Different for different types of tag. Some tags don't close, others are weird like [*]
+            // phpcs:disable Generic.CodeAnalysis.EmptyStatement.DetectedIf
+            // phpcs:disable Generic.CodeAnalysis.EmptyStatement.DetectedElseif
             if ($i >= strlen($Str)) {
                 // document end, tag unclosed
             } elseif ($TagName == 'img' && !empty($Tag[3][0])) { //[img=...]
@@ -591,6 +593,8 @@ class Text {
 
                 $i = $CloseTag + strlen($TagName) + 3; // 5d) Move the pointer past the end of the [/close] tag.
             }
+            // phpcs:enable Generic.CodeAnalysis.EmptyStatement.DetectedIf
+            // phpcs:enable Generic.CodeAnalysis.EmptyStatement.DetectedElseif
 
             // 6) Depending on what type of tag we're dealing with, create an array with the attribute and block.
             switch ($TagName) {

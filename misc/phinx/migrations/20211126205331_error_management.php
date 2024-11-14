@@ -7,8 +7,7 @@ use Phinx\Db\Adapter\MysqlAdapter;
 
 final class ErrorManagement extends AbstractMigration
 {
-    public function change(): void
-    {
+    public function change(): void {
         $this->table('error_log', ['id' => false, 'primary_key' => 'error_log_id', 'encoding' => 'utf8mb4'])
              ->addColumn('error_log_id', 'integer', ['limit' => 10, 'signed' => false, 'identity' => true])
              ->addColumn('duration', 'float', ['default' => 0])

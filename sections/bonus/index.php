@@ -15,31 +15,31 @@ switch ($_GET['action'] ?? '') {
             $Label = $_REQUEST['label'];
             $Item = $viewerBonus->item($Label);
             if (!$Item) {
-                require_once(DEFAULT_PAGE);
+                include_once DEFAULT_PAGE;
                 break;
             }
             $Price = $viewerBonus->effectivePrice($Label);
             if ($Price > $Viewer->bonusPointsTotal()) {
                 error('You cannot afford this item.');
             }
-            require_once(match ($Label) {
+            include_once match ($Label) {
                 'invite'                                   => 'invite.php',
                 'collage-1', 'seedbox', 'file-count'       => 'purchase.php',
                 'title-bb-y', 'title-bb-n', 'title-off'    => 'title.php',
                 'token-1', 'token-2', 'token-3', 'token-4' => 'tokens.php',
                 'other-1', 'other-2', 'other-3', 'other-4' => 'token_other.php',
                 default                                    => DEFAULT_PAGE,
-            });
+            };
         }
         break;
     case 'bprates':
-        require_once('bprates.php');
+        include_once 'bprates.php';
         break;
     case 'title':
-        require_once('title.php');
+        include_once 'title.php';
         break;
     case 'history':
-        require_once('history.php');
+        include_once 'history.php';
         break;
     case 'cacheflush':
         (new \Gazelle\Manager\Bonus())->flushPriceCache();
@@ -47,6 +47,6 @@ switch ($_GET['action'] ?? '') {
         exit;
     case 'donate':
     default:
-        require_once(DEFAULT_PAGE);
+        include_once DEFAULT_PAGE;
         break;
 }

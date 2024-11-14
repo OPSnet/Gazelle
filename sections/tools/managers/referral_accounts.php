@@ -131,4 +131,4 @@ if (!$ReferralManager->readOnly) {
 </table>
 <?php
     View::show_footer();
-?>
+

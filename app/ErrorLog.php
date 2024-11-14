@@ -5,9 +5,17 @@ namespace Gazelle;
 class ErrorLog extends BaseObject {
     final public const tableName = 'error_log';
 
-    public function flush(): static { return $this; }
-    public function link(): string { return ''; }
-    public function location(): string { return ''; }
+    public function flush(): static {
+        return $this;
+    }
+
+    public function link(): string {
+        return '';
+    }
+
+    public function location(): string {
+        return '';
+    }
 
     public function info(): array {
         if (isset($this->info) && !empty($this->info)) {

@@ -26,7 +26,10 @@ where table_schema = 'gazelle'
  * with different collations.
  */
 
-function tableList(): array { /** @phpstan-ignore-line */
+/**
+ * @return non-empty-array<string, string>
+ */
+function tableList(): array {
     return [
         'applicant_role_has_user' => 'utf8mb3_general_ci',
         'better_transcode_music' => 'utf8mb3_general_ci',
@@ -182,7 +185,10 @@ function tableList(): array { /** @phpstan-ignore-line */
     ];
 }
 
-function colCharset(): array { /** @phpstan-ignore-line */
+/**
+ * @return non-empty-array<string, array>
+ */
+function colCharset(): array {
     return [
         'api_applications' => [
             ['Token char(32)', 'NOT NULL', 'utf8mb4', 'utf8mb4_unicode_ci'],
@@ -879,7 +885,7 @@ final class TableCollation0900 extends AbstractMigration {
         ");
     }
 
-    public function down(): void{
+    public function down(): void {
         foreach (tableList() as $tableName => $collate) {
             $this->query("
                 ALTER TABLE $tableName COLLATE $collate

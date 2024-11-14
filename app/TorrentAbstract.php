@@ -115,7 +115,6 @@ abstract class TorrentAbstract extends BaseObject {
         return $this->info;
     }
 
-
     /**
      * Assume a torrent has not been deleted. This function is
      * overridden in TorrentDeleted

@@ -16,12 +16,21 @@ class ReportType extends \Gazelle\BaseObject {
         self::$cache->delete_value(sprintf(\Gazelle\Manager\Torrent\ReportType::TYPE_KEY, $this->id));
         return $this;
     }
-    public function link(): string { return ''; }
-    public function location(): string { return "tools.php?action=torrent_report_edit&id=" . $this->id; }
 
+    public function link(): string {
+        return '';
+    }
+
+    public function location(): string {
+        return "tools.php?action=torrent_report_edit&id=" . $this->id;
+    }
+
+    // phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundInExtendedClass
     public function url(string|null $param = null): string {
         return htmlentities($this->location());
     }
+
+    // phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundInExtendedClass
 
     public function info(): array {
         $key = sprintf(self::CACHE_KEY, $this->id);

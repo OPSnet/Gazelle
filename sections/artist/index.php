@@ -3,34 +3,34 @@
 
 if (!empty($_POST['action'])) {
     match ($_POST['action']) {
-        'add_similar'     => require_once('add_similar.php'),
-        'add_alias'       => require_once('add_alias.php'),
-        'change_artistid' => require_once('change_artistid.php'),
-        'download'        => require_once('download.php'),
-        'rename'          => require_once('rename.php'),
-        'edit'            => require_once('edit_handle.php'),
-        'takeeditrequest' => require_once('edit_request_handle.php'),
+        'add_similar'     => include_once 'add_similar.php',
+        'add_alias'       => include_once 'add_alias.php',
+        'change_artistid' => include_once 'change_artistid.php',
+        'download'        => include_once 'download.php',
+        'rename'          => include_once 'rename.php',
+        'edit'            => include_once 'edit_handle.php',
+        'takeeditrequest' => include_once 'edit_request_handle.php',
         default           => error('Missing artist POST action'),
     };
 } elseif (!empty($_GET['action'])) {
     match ($_GET['action']) {
-        'autocomplete'    => require_once('autocomplete.php'),
-        'change_artistid' => require_once('change_artistid.php'),
-        'delete'          => require_once('delete.php'),
-        'delete_alias'    => require_once('delete_alias.php'),
-        'delete_similar'  => require_once('delete_similar.php'),
-        'edit'            => require_once('edit.php'),
-        'editrequest'     => require_once('edit_request.php'),
-        'history'         => require_once('history.php'),
-        'notify'          => require_once('notify.php'),
-        'notifyremove'    => require_once('notify_remove.php'),
-        'revert'          => require_once('edit_handle.php'),
-        'vote_similar'    => require_once('vote_similar.php'),
+        'autocomplete'    => include_once 'autocomplete.php',
+        'change_artistid' => include_once 'change_artistid.php',
+        'delete'          => include_once 'delete.php',
+        'delete_alias'    => include_once 'delete_alias.php',
+        'delete_similar'  => include_once 'delete_similar.php',
+        'edit'            => include_once 'edit.php',
+        'editrequest'     => include_once 'edit_request.php',
+        'history'         => include_once 'history.php',
+        'notify'          => include_once 'notify.php',
+        'notifyremove'    => include_once 'notify_remove.php',
+        'revert'          => include_once 'edit_handle.php',
+        'vote_similar'    => include_once 'vote_similar.php',
         default           => error('Missing artist action'),
     };
 } else {
     if (!empty($_GET['id'])) {
-        require_once('artist.php');
+        include_once 'artist.php';
     } elseif (empty($_GET['artistname'])) {
         header('Location: torrents.php');
     } else {

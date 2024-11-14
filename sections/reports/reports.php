@@ -8,7 +8,7 @@ if (!$Viewer->permittedAny('admin_reports', 'site_moderate_forums')) {
     error(403);
 }
 
-require_once('array.php');
+require_once 'array.php';
 
 $search    = new Gazelle\Search\Report();
 $paginator = new Gazelle\Util\Paginator(REPORTS_PER_PAGE, (int)($_REQUEST['page'] ?? 1));

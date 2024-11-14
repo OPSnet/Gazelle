@@ -12,8 +12,13 @@ class Wiki extends BaseObject {
         return $this;
     }
 
-    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->title())); }
-    public function location(): string { return 'wiki.php?action=article&id=' . $this->id; }
+    public function link(): string {
+        return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->title()));
+    }
+
+    public function location(): string {
+        return 'wiki.php?action=article&id=' . $this->id;
+    }
 
     public function info(): array {
         if (isset($this->info)) {
@@ -109,6 +114,7 @@ class Wiki extends BaseObject {
     public function ToC(): string {
         return $this->info()['toc'] ?? '';
     }
+
     // phpcs:enable
 
     public function editable(User $user): bool {

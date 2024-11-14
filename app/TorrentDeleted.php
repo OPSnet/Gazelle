@@ -8,7 +8,9 @@ class TorrentDeleted extends TorrentAbstract {
     final public const tableName = 'deleted_torrents';
     final public const CACHE_KEY = 'tdel_%d';
 
-    public function location(): string { return "log.php?search=Torrent+" . $this->id; }
+    public function location(): string {
+        return "log.php?search=Torrent+" . $this->id;
+    }
 
     public function infoRow(): ?array {
         $info = self::$db->rowAssoc("
@@ -64,9 +66,5 @@ class TorrentDeleted extends TorrentAbstract {
 
     public function isDeleted(): bool {
         return true;
-    }
-
-    public function addFlag(TorrentFlag $flag, User $user): int {
-        return 0;
     }
 }

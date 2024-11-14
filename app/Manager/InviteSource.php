@@ -203,7 +203,7 @@ class InviteSource extends \Gazelle\Base {
      *      "profile" => <new profile> or '' to remove,
      *   ]
      */
-    public function modifyInviteeSource(\Gazelle\User $user, array $sourceList): int {
+    public function modifyInviteeSource(array $sourceList): int {
         self::$db->begin_transaction();
         $affected = 0;
         foreach ($sourceList as $source) {

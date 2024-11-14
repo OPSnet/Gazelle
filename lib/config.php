@@ -33,7 +33,7 @@
  */
 
 if (file_exists(__DIR__ . '/override.config.php')) {
-    require_once(__DIR__ . '/override.config.php');
+    include_once __DIR__ . '/override.config.php';
 }
 
 // ------------------------------------------------------------------------

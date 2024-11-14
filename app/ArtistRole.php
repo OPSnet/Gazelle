@@ -13,7 +13,9 @@ abstract class ArtistRole extends \Gazelle\Base {
     protected array $idList;
 
     abstract protected function artistListQuery(): \mysqli_result|bool;
+
     abstract public function idList(): array;
+
     abstract public function roleList(): array;
 
     public function __construct(

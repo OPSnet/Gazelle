@@ -6,8 +6,7 @@ use Phinx\Migration\AbstractMigration;
 
 final class UserCatchupDisableAttr extends AbstractMigration
 {
-    public function change(): void
-    {
+    public function change(): void {
         $this->query("
             INSERT IGNORE INTO user_has_attr (UserID, UserAttrID)
                 SELECT ID, (SELECT ID FROM user_attr WHERE Name = 'disable-leech') FROM users_main where can_leech != 1

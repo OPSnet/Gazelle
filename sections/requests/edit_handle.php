@@ -210,7 +210,7 @@ while (true) {
 }
 
 if (!empty($error)) {
-    require_once('edit.php');
+    include_once 'edit.php';
     exit;
 }
 

@@ -19,8 +19,14 @@ class TGroup extends \Gazelle\BaseObject {
         self::$cache->delete_value(sprintf(self::CACHE_GENERAL, $this->id));
         return $this;
     }
-    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), 'Stats'); }
-    public function location(): string { return 'torrents.php?id=' . $this->id; }
+
+    public function link(): string {
+        return sprintf('<a href="%s">%s</a>', $this->url(), 'Stats');
+    }
+
+    public function location(): string {
+        return 'torrents.php?id=' . $this->id;
+    }
 
     /**
      * @see \Gazelle\Stats\TGroups::refresh()

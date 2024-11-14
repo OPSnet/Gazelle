@@ -6,8 +6,7 @@ use Phinx\Migration\AbstractMigration;
 
 final class AddDisableUserAttrs extends AbstractMigration
 {
-    public function up(): void
-    {
+    public function up(): void {
          $rows = [
             ['Name' => 'disable-avatar', 'Description' => 'This user has avatar privileges disabled'],
             ['Name' => 'disable-forums', 'Description' => 'This user has forum privileges disabled'],
@@ -25,8 +24,7 @@ final class AddDisableUserAttrs extends AbstractMigration
          $this->table('user_attr')->insert($rows)->save();
     }
 
-    public function down(): void
-    {
+    public function down(): void {
          $this->execute("DELETE FROM user_attr where Name = 'disable-avatar'");
          $this->execute("DELETE FROM user_attr where Name = 'disable-forums'");
          $this->execute("DELETE FROM user_attr where Name = 'disable-invites'");

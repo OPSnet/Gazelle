@@ -13,7 +13,7 @@ if (!$reportId || !$id || is_null($type)) {
     error(403);
 }
 
-require_once('array.php');
+require_once 'array.php';
 /** @var array $Types */
 $reportType = $Types[$type];
 

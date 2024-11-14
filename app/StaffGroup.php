@@ -11,8 +11,14 @@ class StaffGroup extends BaseObject {
         unset($this->info);
         return $this;
     }
-    public function link(): string { return sprintf('<a href="%s" class="tooltip" title="%s">%s</a>', $this->url(), 'Staff groups', 'Staff groups'); }
-    public function location(): string { return 'tools.php?action=staff_groups'; }
+
+    public function link(): string {
+        return sprintf('<a href="%s" class="tooltip" title="%s">%s</a>', $this->url(), 'Staff groups', 'Staff groups');
+    }
+
+    public function location(): string {
+        return 'tools.php?action=staff_groups';
+    }
 
     /**
      * A staff group object is so trival that it never needs to be instantiated,

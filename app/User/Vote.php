@@ -396,7 +396,7 @@ class Vote extends \Gazelle\BaseUser {
             WHERE v.GroupID = ?
             ", $tgroup->id()
         );
-        return [$total, (int)$ups, $this->calcScore($total, (int)$ups)] ;
+        return [$total, (int)$ups, $this->calcScore($total, (int)$ups)];
     }
 
     /**

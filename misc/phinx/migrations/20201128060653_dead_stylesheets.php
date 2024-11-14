@@ -9,8 +9,7 @@ use Phinx\Migration\AbstractMigration;
  */
 final class DeadStylesheets extends AbstractMigration
 {
-    public function up(): void
-    {
+    public function up(): void {
         $removedStylesheets = [
             'Hydro',
             'Anorex',
@@ -33,8 +32,7 @@ final class DeadStylesheets extends AbstractMigration
         }
     }
 
-    public function down(): void
-    {
+    public function down(): void {
         $this->query("DELETE FROM stylesheets WHERE `Name` = 'Dark Cake'");
     }
 }

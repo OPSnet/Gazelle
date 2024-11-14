@@ -14,11 +14,19 @@ abstract class AbstractNotification extends \Gazelle\BaseUser {
         $this->user()->flush();
         return $this;
     }
-    public function link(): string { return $this->user()->link(); }
-    public function location(): string { return $this->user()->location(); }
+
+    public function link(): string {
+        return $this->user()->link();
+    }
+
+    public function location(): string {
+        return $this->user()->location();
+    }
 
     abstract public function className(): string;
+
     abstract public function clear(): int;
+
     abstract public function load(): bool;
 
     public function context(): int {

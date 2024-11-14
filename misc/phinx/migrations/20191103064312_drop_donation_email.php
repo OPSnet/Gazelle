@@ -36,6 +36,7 @@ class DropDonationEmail extends AbstractMigration
         ");
         */
     }
+
     public function down(): void {
         $this->execute("
             ALTER TABLE users_donor_ranks ADD COLUMN Email varchar(255)

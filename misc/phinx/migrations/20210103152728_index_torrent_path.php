@@ -17,8 +17,7 @@ final class IndexTorrentPath extends AbstractMigration
      * Remember to call "create()" or "update()" and NOT "save()" when working
      * with the Table class.
      */
-    public function change(): void
-    {
+    public function change(): void {
         $this->table('torrents')
             ->addIndex(['FilePath'], ['name' => 't_filepath_idx'])
             ->update();

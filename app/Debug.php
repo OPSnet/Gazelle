@@ -199,6 +199,8 @@ class Debug {
         return implode(', ', $Return);
     }
 
+    // phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundBeforeLastUsed
+    // for $Level
     public function errorHandler(int $Level, string $Error, string $File, int $Line): bool {
         $Steps = 1; //Steps to go up in backtrace, default one
         $Call = '';
@@ -253,6 +255,8 @@ class Debug {
         }
         return true;
     }
+
+    // phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundBeforeLastUsed
 
     /* Data wrappers */
 

@@ -116,8 +116,7 @@ abstract class AbstractBetter extends \Gazelle\Base {
         return "SELECT " . ($this->distinct ? 'DISTINCT ' : '') . $this->field
             . " " . $this->buildQuery()
             . " " . $this->orderBy
-            . " LIMIT ? OFFSET ?"
-        ;
+            . " LIMIT ? OFFSET ?";
     }
 
     public function list(int $limit, int $offset): array {

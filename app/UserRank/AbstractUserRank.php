@@ -11,6 +11,7 @@ namespace Gazelle\UserRank;
 
 abstract class AbstractUserRank extends \Gazelle\Base {
     abstract public function cacheKey(): string;
+
     abstract public function selector(): string;
 
     /**

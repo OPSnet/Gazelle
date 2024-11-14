@@ -10,8 +10,14 @@ class Artist extends \Gazelle\BaseObject {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
         return $this;
     }
-    public function link(): string { return sprintf('<a href="%s">artist %d</a>', $this->url(), $this->id()); }
-    public function location(): string { return 'artist.php?id=' . $this->id; }
+
+    public function link(): string {
+        return sprintf('<a href="%s">artist %d</a>', $this->url(), $this->id());
+    }
+
+    public function location(): string {
+        return 'artist.php?id=' . $this->id;
+    }
 
     public function info(): array {
         if (isset($this->info)) {

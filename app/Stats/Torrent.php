@@ -110,16 +110,45 @@ class Torrent extends \Gazelle\Base {
         return $this->info;
     }
 
-    public function torrentTotal(): int           { return $this->info()['torrent-total']; }
-    public function totalFiles(): int             { return $this->info()['total-files']; }
-    public function totalSize(): int              { return $this->info()['total-size']; }
-    public function amount(string $interval): int { return $this->info()[$interval]['count']; }
-    public function files(string $interval): int  { return $this->info()[$interval]['files']; }
-    public function size(string $interval): int   { return $this->info()[$interval]['size']; }
-    public function category(): array             { return $this->info()['category']; }
-    public function format(): array               { return $this->info()['format']; }
-    public function formatMonth(): array          { return $this->info()['format-month']; }
-    public function media(): array                { return $this->info()['media']; }
+    public function torrentTotal(): int {
+        return $this->info()['torrent-total'];
+    }
+
+    public function totalFiles(): int {
+        return $this->info()['total-files'];
+    }
+
+    public function totalSize(): int {
+        return $this->info()['total-size'];
+    }
+
+    public function amount(string $interval): int {
+        return $this->info()[$interval]['count'];
+    }
+
+    public function files(string $interval): int {
+        return $this->info()[$interval]['files'];
+    }
+
+    public function size(string $interval): int {
+        return $this->info()[$interval]['size'];
+    }
+
+    public function category(): array {
+        return $this->info()['category'];
+    }
+
+    public function format(): array {
+        return $this->info()['format'];
+    }
+
+    public function formatMonth(): array {
+        return $this->info()['format-month'];
+    }
+
+    public function media(): array {
+        return $this->info()['media'];
+    }
 
     /**
      * Yearly torrent flows (added, removed and net per month)

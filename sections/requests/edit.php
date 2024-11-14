@@ -11,8 +11,9 @@ if (!$request->canEdit($Viewer)) {
 }
 $requestId  = $request->id();
 $ownRequest = $request->userId() == $Viewer->id();
-
+// phpcs:disable Generic.CodeAnalysis.EmptyStatement.DetectedIf
 if (isset($returnEdit)) {
+// phpcs:enable Generic.CodeAnalysis.EmptyStatement.DetectedIf
     // if we are coming back from an edit, these were already initialized in take_new_edit
     /** @var string $categoryName */
     /** @var array $artistRole */

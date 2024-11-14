@@ -45,6 +45,7 @@ class PkBookmarksCollages extends AbstractMigration {
                 DROP KEY CollageID
         ');
     }
+
     public function down(): void {
         $this->execute('
             ALTER TABLE bookmarks_collages

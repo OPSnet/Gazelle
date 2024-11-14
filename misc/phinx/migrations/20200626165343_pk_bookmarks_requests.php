@@ -15,6 +15,7 @@ class PkBookmarksRequests extends AbstractMigration {
                 DROP KEY RequestID
         ');
     }
+
     public function down(): void {
         $this->execute('
             ALTER TABLE bookmarks_requests

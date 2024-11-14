@@ -11,8 +11,14 @@ class ApplicantRole extends BaseObject {
         unset($this->info);
         return $this;
     }
-    public function link(): string { return sprintf('<a href="%s">%s</a>', $this->url(), html_escape($this->title())); }
-    public function location(): string { return 'apply.php?action=view&id=' . $this->id; }
+
+    public function link(): string {
+        return sprintf('<a href="%s">%s</a>', $this->url(), html_escape($this->title()));
+    }
+
+    public function location(): string {
+        return 'apply.php?action=view&id=' . $this->id;
+    }
 
     public function info(): array {
         if (isset($this->info)) {

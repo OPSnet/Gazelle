@@ -6,7 +6,7 @@ use Phinx\Migration\AbstractMigration;
 use Phinx\Db\Adapter\MysqlAdapter;
 
 // phpcs:disable PSR1.Files.SideEffects.FoundWithSymbols
-require_once(__DIR__ . '/../../../lib/config.php'); // for SITE_NAME
+require_once __DIR__ . '/../../../lib/config.php'; // for SITE_NAME
 // phpcs:enable PSR1.Files.SideEffects.FoundWithSymbols
 
 final class ReportTypes extends AbstractMigration {

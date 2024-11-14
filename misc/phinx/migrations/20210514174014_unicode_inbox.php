@@ -7,8 +7,7 @@ use Phinx\Db\Adapter\MysqlAdapter;
 
 final class UnicodeInbox extends AbstractMigration
 {
-    public function up(): void
-    {
+    public function up(): void {
         $this->table('pm_conversations')
             ->changeColumn('Subject', 'string', ['null' => false, 'limit' => 255, 'collation' => 'utf8mb4_unicode_ci', 'encoding' => 'utf8mb4'])
             ->save();
@@ -35,8 +34,7 @@ final class UnicodeInbox extends AbstractMigration
             ->save();
     }
 
-    public function down(): void
-    {
+    public function down(): void {
         $this->table('pm_conversations')
             ->changeColumn('Subject', 'string', ['null' => true, 'limit' => 255, 'collation' => 'utf8_general_ci', 'encoding' => 'utf8'])
             ->save();

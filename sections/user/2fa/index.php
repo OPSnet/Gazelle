@@ -14,15 +14,15 @@ switch ($_GET['do'] ?? '') {
         if ($user->TFAKey()) {
             error($Viewer->permitted('users_edit_password') ? '2FA is already configured' : 404);
         }
-        require_once('configure.php');
+        include_once 'configure.php';
         break;
 
     case 'complete':
-        require_once('complete.php');
+        include_once 'complete.php';
         break;
 
     case 'remove':
-        require_once('remove.php');
+        include_once 'remove.php';
         break;
 
     default:

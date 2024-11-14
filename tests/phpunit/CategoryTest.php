@@ -26,7 +26,6 @@ class CategoryTest extends TestCase {
         $user   = \GazelleUnitTest\Helper::makeUser('tgcat.' . randomString(10), 'tgroup-cat');
         $tgroup = \GazelleUnitTest\Helper::makeTGroupEBook(
             name: 'phpunit category change ' . randomString(6),
-            user: $user,
         );
         $this->assertFalse($tgroup->hasArtistRole(), 'tgroup-cat-non-music');
         $torrentList = array_map(fn($info) =>

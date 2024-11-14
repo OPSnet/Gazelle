@@ -6,8 +6,7 @@ use Phinx\Migration\AbstractMigration;
 
 final class UserDefaultVisible extends AbstractMigration
 {
-    public function up(): void
-    {
+    public function up(): void {
         $this->table('users_main')
             ->changeColumn('Visible', 'enum', [
                 'default' => '1',
@@ -16,8 +15,7 @@ final class UserDefaultVisible extends AbstractMigration
             ->save();
     }
 
-    public function down(): void
-    {
+    public function down(): void {
         $this->table('users_main')
             ->changeColumn('Visible', 'enum', [
                 'null'    => true,

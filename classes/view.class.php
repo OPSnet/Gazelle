@@ -136,7 +136,7 @@ class View {
      * @param array<mixed> $Target
      * @param array<mixed> $Tests
      */
-    protected static function add_active(array $Target, array $Tests, bool $UserIDKey = false): bool {
+    protected static function add_active(array $Target, array $Tests): bool {
         if (!is_array($Tests[0])) {
             // Test all values in vectors
             foreach ($Tests as $Type => $Part) {

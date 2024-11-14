@@ -175,7 +175,7 @@ if (isset($error)) {
     if ($year == 0) {
         $year = null;
     }
-    require_once('new.php');
+    include_once 'new.php';
     exit;
 }
 

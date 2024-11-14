@@ -1,6 +1,6 @@
 <?php
 
-require_once(match ($_REQUEST['action'] ?? '') {
+require_once match ($_REQUEST['action'] ?? '') {
     'add_torrent',
     'add_torrent_batch'     => 'add_torrent.php',
     'add_artist',
@@ -21,4 +21,4 @@ require_once(match ($_REQUEST['action'] ?? '') {
     'new_handle'            => 'new_handle.php',
     'recover'               => 'recover.php',
     default                 => empty($_GET['id']) ? 'browse.php' : 'collage.php',
-});
+};

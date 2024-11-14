@@ -10,6 +10,7 @@ class AnnualRentFloat extends AbstractMigration {
                 MODIFY `cc` enum('BTC', 'EUR','USD') NOT NULL DEFAULT 'USD'
         ");
     }
+
     public function down(): void {
         $this->execute("
             ALTER TABLE payment_reminders

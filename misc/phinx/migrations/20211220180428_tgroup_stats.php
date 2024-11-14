@@ -6,8 +6,7 @@ use Phinx\Migration\AbstractMigration;
 
 final class TgroupStats extends AbstractMigration
 {
-    public function change(): void
-    {
+    public function change(): void {
         $this->table('tgroup_summary', ['id' => false, 'primary_key' => 'tgroup_id'])
              ->addColumn('tgroup_id', 'integer', ['limit' => 10])
              ->addColumn('bookmark_total', 'integer', ['limit' => 10, 'default' => 0])

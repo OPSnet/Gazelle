@@ -79,7 +79,7 @@ div#preview {display: none;}
             <div>
 <?php
 if (str_contains($response['response'], '<html')) {
-    $response['response'] = 'HTML body';
+        $response['response'] = 'HTML body';
 }
 var_dump($response)
 ?>
@@ -193,4 +193,4 @@ var_dump($response)
 </div>
 <?php
 View::show_footer();
-?>
+

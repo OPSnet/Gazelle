@@ -25,8 +25,13 @@ class ForumTransition extends BaseObject {
         return $this;
     }
 
-    public function link(): string { return ""; }
-    public function location(): string { return "tools.php?action=forum_transitions"; }
+    public function link(): string {
+        return "";
+    }
+
+    public function location(): string {
+        return "tools.php?action=forum_transitions";
+    }
 
     public function info(): array {
         if (isset($this->info)) {

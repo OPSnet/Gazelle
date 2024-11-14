@@ -12,6 +12,7 @@ final class DropUserMainSecret extends AbstractMigration {
             MODIFY SiteOptions mediumtext
         ');
     }
+
     public function down(): void {
         $this->table('users_main')->removeColumn('Secret')->save();
         $this->query('ALTER TABLE users_info

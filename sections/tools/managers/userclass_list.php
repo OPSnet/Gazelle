@@ -7,7 +7,7 @@ if (!$Viewer->permitted('admin_manage_permissions')) {
 }
 
 if (isset($_REQUEST['id']) && $_REQUEST['id'] === 'new') {
-    require_once('userclass_edit.php');
+    include_once 'userclass_edit.php';
     exit;
 }
 

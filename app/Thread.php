@@ -17,8 +17,14 @@ class Thread extends BaseObject {
         unset($this->info);
         return $this;
     }
-    public function link(): string { return ''; }
-    public function location(): string { return ''; }
+
+    public function link(): string {
+        return '';
+    }
+
+    public function location(): string {
+        return '';
+    }
 
     public function info(): array {
         if (isset($this->info)) {

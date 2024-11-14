@@ -2,7 +2,7 @@
 
 /* A script to import the old WhatCD wiki articles from the 10th birthday release */
 
-require_once(__DIR__ . '/../lib/bootstrap.php');
+require_once __DIR__ . '/../lib/bootstrap.php';
 
 $in = fopen($argv[1], 'r');
 if ($in === false) {

@@ -6,8 +6,7 @@ use Phinx\Migration\AbstractMigration;
 
 final class UserReadTables extends AbstractMigration
 {
-    public function change(): void
-    {
+    public function change(): void {
         $this->table('user_read_blog', ['id' => false, 'primary_key' => 'user_id'])
             ->addColumn('user_id', 'integer',  ['limit' => 10, 'signed' => false])
             ->addColumn('blog_id', 'integer', ['limit' => 10, 'signed' => false])

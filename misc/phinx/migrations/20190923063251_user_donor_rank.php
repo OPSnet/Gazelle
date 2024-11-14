@@ -29,10 +29,10 @@ class UserDonorRank extends AbstractMigration
      * Remember to call "create()" or "update()" and NOT "save()" when working
      * with the Table class.
      */
-
     public function up(): void {
         $this->execute("ALTER TABLE users_donor_ranks CHANGE InvitesRecievedRank InvitesReceivedRank tinyint(4) DEFAULT '0'");
     }
+
     public function down(): void {
         $this->execute("ALTER TABLE users_donor_ranks CHANGE InvitesReceivedRank InvitesRecievedRank tinyint(4) DEFAULT '0'");
     }

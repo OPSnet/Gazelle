@@ -4,6 +4,7 @@ namespace Gazelle\Stats;
 
 class Collage extends \Gazelle\Base {
     protected const CACHE_KEY = 'stats_collages';
+
     public function collageTotal(): int {
         $count = self::$cache->get_value(self::CACHE_KEY);
         if ($count === false) {

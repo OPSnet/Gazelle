@@ -6,12 +6,18 @@ class PM extends \Gazelle\BaseUser {
     final public const tableName  = 'pm_conversations_users';
     protected const ID_KEY = 'zz_pm_%d_%d';
 
-    public function flush(): static     {
+    public function flush(): static {
         $this->user()->flush();
         return $this;
     }
-    public function link(): string      { return $this->user()->link(); }
-    public function location(): string  { return $this->user()->location(); }
+
+    public function link(): string {
+        return $this->user()->link();
+    }
+
+    public function location(): string {
+        return $this->user()->location();
+    }
 
     public function findById(int $pmId): ?\Gazelle\PM {
         $key = sprintf(self::ID_KEY, $pmId, $this->user->id());

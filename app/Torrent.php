@@ -11,7 +11,9 @@ class Torrent extends TorrentAbstract {
     final public const CACHE_KEY_PEERLIST_PAGE = 'peerlist_page_%d_%d';
     final public const USER_RECENT_UPLOAD      = 'u_recent_up_%d';
 
-    public function location(): string { return "torrents.php?id={$this->groupId()}&torrentid={$this->id}#torrent{$this->id}"; }
+    public function location(): string {
+        return "torrents.php?id={$this->groupId()}&torrentid={$this->id}#torrent{$this->id}";
+    }
 
     public function infoRow(): ?array {
         $info = self::$db->rowAssoc("

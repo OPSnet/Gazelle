@@ -11,8 +11,14 @@ class Report extends BaseObject {
         $this->info = [];
         return $this;
     }
-    public function link(): string { return sprintf('<a href="%s">Report #%d</a>', $this->url(), $this->id()); }
-    public function location(): string { return "reports.php?id={$this->id}#report{$this->id}"; }
+
+    public function link(): string {
+        return sprintf('<a href="%s">Report #%d</a>', $this->url(), $this->id());
+    }
+
+    public function location(): string {
+        return "reports.php?id={$this->id}#report{$this->id}";
+    }
 
     public function setUserManager(Manager\User $userMan): static {
         $this->userMan = $userMan;

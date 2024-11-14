@@ -101,9 +101,6 @@ set_query_id($ResultSet)
 -------------------------------------------------------------------------------------
 *///---------------------------------------------------------------------------------
 
-class MysqlException extends \Exception {}
-class MysqlDuplicateKeyException extends MysqlException {}
-
 class Mysql {
     public \mysqli|false $LinkID = false;
     protected \mysqli_result|false|null $QueryID = false;

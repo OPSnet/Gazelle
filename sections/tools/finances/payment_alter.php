@@ -22,7 +22,7 @@ if ($_POST['submit'] == 'Delete') {
     ]);
     if (!$Validator->validate($_POST)) {
         $Err = $Validator->errorMessage();
-        require_once('payment_list.php');
+        include_once 'payment_list.php';
         exit;
     }
 

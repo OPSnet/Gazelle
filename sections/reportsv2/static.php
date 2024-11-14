@@ -37,7 +37,7 @@ View::show_header('Torrent Reports', ['js' => 'reportsv2,bbcode,browse,torrent']
 ?>
 <div class="header">
     <h2><?= $search->title() ?></h2>
-<?php require_once('header.php'); ?>
+<?php require_once 'header.php'; ?>
 </div>
 <div class="buttonbox pad center">
 <?php if ($search->mode() !== 'resolved') { ?>
@@ -101,13 +101,13 @@ if ($search->canUnclaim($Viewer)) {
                     <td class="label">Relevant other torrents:</td>
                     <td>
 <?php
-                $n = 0;
-                foreach ($report->otherIdList() as $extraId) {
-                    $extra = $torMan->findById($extraId)?->setViewer($Viewer);
-                    if ($extra) {
+    $n = 0;
+    foreach ($report->otherIdList() as $extraId) {
+        $extra = $torMan->findById($extraId)?->setViewer($Viewer);
+        if ($extra) {
 ?>
-                        <?= $n++ == 0 ? '' : '<br />' ?>
-                        <?= $extra->group()->link() ?> <?= $extra->shortLabelLink() ?> (<?= byte_format($extra->size()) ?>)
+            <?= $n++ == 0 ? '' : '<br />' ?>
+            <?= $extra->group()->link() ?> <?= $extra->shortLabelLink() ?> (<?= byte_format($extra->size()) ?>)
                         <br /><?= $extra->edition() ?>
                         <br /><a href="torrents.php?action=download&amp;id=<?= $extraId ?>&amp;torrent_pass=<?= $Viewer->announceKey() ?>" title="Download" class="brackets tooltip">DL</a>
                         <a href="#" class="brackets tooltip" onclick="show_downloads('<?= $extraId ?>', 0); return false;" title="View the list of users that have clicked the &quot;DL&quot; button.">Downloaders</a>
@@ -135,13 +135,13 @@ if ($search->canUnclaim($Viewer)) {
                         </table>
                         </div>
                         <br />uploaded by <?= $extra->uploader()->link() ?> on <span title="<?=
-                            time_diff($extra->created(), 3, false) ?>"><?= $extra->created() ?> (<?=
-                            strtotime($extra->created()) < strtotime($torrent?->created() ?? '2000-01-01 00:00:00') ? 'older upload' : 'more recent upload' ?>)</span>
+                time_diff($extra->created(), 3, false) ?>"><?= $extra->created() ?> (<?=
+                strtotime($extra->created()) < strtotime($torrent?->created() ?? '2000-01-01 00:00:00') ? 'older upload' : 'more recent upload' ?>)</span>
                         <br />Last action: <?= $extra->lastActiveDate() ?: 'Never' ?>
                         <br /><span>Audio files present:
 <?php
-                        $extMap = $extra->fileListPrimaryMap();
-                        if (count($extMap) == 0) {
+            $extMap = $extra->fileListPrimaryMap();
+            if (count($extMap) == 0) {
 ?>
                             <span class="file_ext_none">none</span>
 <?php                   } else { ?>
@@ -162,32 +162,32 @@ if ($search->canUnclaim($Viewer)) {
 <?php
                             $log = new Gazelle\Torrent\Log( $torrentId );
                             $details = $log->logDetails();
-?>
+                        ?>
                                 <ul class="nobullet logdetails">
-<?php                       if (!count($details)) { ?>
+                        <?php                       if (!count($details)) { ?>
                                 <li class="nobr">No logs</li>
 <?php
                             } else {
-                                foreach ($details as $logId => $info) {
-                                    if ($info['adjustment']) {
-                                        $adj = $info['adjustment'];
-                                        $adjUser = $userMan->findById($adj['userId']);
-?>
+        foreach ($details as $logId => $info) {
+                                            if ($info['adjustment']) {
+                            $adj = $info['adjustment'];
+                            $adjUser = $userMan->findById($adj['userId']);
+            ?>
                                 <li>Log adjusted <?= $adjUser ? "by {$adjUser->link()}" : '' ?> from score <?= $adj['score']
-                                    ?> to <?= $adj['adjusted'] . ($adj['reason'] ? ', reason: ' .  $adj['reason'] : '') ?></li>
-<?php
-                                    }
-                                    if (isset($info['status']['tracks'])) {
-                                        $info['status']['tracks'] = implode(', ', array_keys($info['status']['tracks']));
-                                    }
-                                    foreach ($info['status'] as $s) {
-                                        if ($s) {
-?>
+                        ?> to <?= $adj['adjusted'] . ($adj['reason'] ? ', reason: ' .  $adj['reason'] : '') ?></li>
+            <?php
+                                            }
+                                            if (isset($info['status']['tracks'])) {
+                $info['status']['tracks'] = implode(', ', array_keys($info['status']['tracks']));
+                                            }
+                                            foreach ($info['status'] as $s) {
+                if ($s) {
+                                                    ?>
                                 <li><?= $s ?></li>
-<?php
-                                        }
-                                    }
-?>
+                                                            <?php
+                }
+                                            }
+                                ?>
                                 <li>
                                     <span class="nobr"><strong>Logfile #<?= $logId ?></strong>: </span>
                                     <a href="javascript:void(0);" onclick="BBCode.spoiler(this);" class="brackets">Show</a><pre class="hidden"><?= $ripFiler->get([ $torrentId , $logId]) ?></pre>
@@ -196,36 +196,36 @@ if ($search->canUnclaim($Viewer)) {
                                     <span class="nobr"><strong>HTML logfile #<?= $logId ?></strong>: </span>
                                     <a href="javascript:void(0);" onclick="BBCode.spoiler(this);" class="brackets">Show</a><pre class="hidden"><?= $info['log'] ?></pre>
                                 </li>
-<?php
-                                }
+                                        <?php
+        }
                             }
-?>
+                        ?>
                                 </ul>
                             </td>
                             <td width="50%" style="vertical-align: top; max-width: 500px;">
-<?php
+                        <?php
                             $log = new Gazelle\Torrent\Log($extraId);
                             $details = $log->logDetails();
-?>
+                        ?>
                                 <ul class="nobullet logdetails">
-<?php                       if (!count($details)) { ?>
+                        <?php                       if (!count($details)) { ?>
                                 <li class="nobr">No logs</li>
 <?php
                             } else {
-                                foreach ($details as $logId => $info) {
-                                    if ($info['adjustment']) {
-                                        $adj = $info['adjustment'];
-                                        $adjUser = $userMan->findById($adj['userId']);
-?>
+        foreach ($details as $logId => $info) {
+                                            if ($info['adjustment']) {
+                            $adj = $info['adjustment'];
+                            $adjUser = $userMan->findById($adj['userId']);
+            ?>
                                 <li>Log adjusted <?= $adjUser ? "by {$adjUser->link()}" : '' ?> from score <?= $adj['score']
-                                    ?> to <?= $adj['adjusted'] . ($adj['reason'] ? ', reason: ' .  $adj['reason'] : '') ?></li>
-<?php
-                                    }
-                                    if (isset($info['status']['tracks'])) {
-                                        $info['status']['tracks'] = implode(', ', array_keys($info['status']['tracks']));
-                                    }
-                                    foreach ($info['status'] as $s) {
-?>
+                        ?> to <?= $adj['adjusted'] . ($adj['reason'] ? ', reason: ' .  $adj['reason'] : '') ?></li>
+            <?php
+                                            }
+                                            if (isset($info['status']['tracks'])) {
+                $info['status']['tracks'] = implode(', ', array_keys($info['status']['tracks']));
+                                            }
+                                            foreach ($info['status'] as $s) {
+            ?>
                                 <li><?= $s ?></li>
 <?php                               } ?>
                                 <li>
@@ -236,22 +236,22 @@ if ($search->canUnclaim($Viewer)) {
                                     <span class="nobr"><strong>HTML logfile #<?= $logId ?></strong>: </span>
                                     <a href="javascript:void(0);" onclick="BBCode.spoiler(this);" class="brackets">Show</a><pre class="hidden"><?= $info['log'] ?></pre>
                                 </li>
-<?php
-                                }
+                    <?php
+        }
                             }
-?>
+                        ?>
                                 </ul>
                             </td>
                         </tr></table>
                     </td>
                 </tr>
-<?php                   } ?>
+                        <?php                   } ?>
                 <tr>
                     <td class="label">Switch:</td>
                     <td><a href="#" onclick="Switch(<?= $reportId ?>, <?= $extraId ?>); return false;" class="brackets">Switch</a> the source and target torrents (you become the report owner).
 <?php
-                    }
-                }
+        }
+    }
 ?>
                     </td>
                 </tr>
@@ -263,7 +263,7 @@ if ($search->canUnclaim($Viewer)) {
                     <td class="label">Relevant images:</td>
                     <td>
 <?php
-                foreach ($report->image() as $image) {
+    foreach ($report->image() as $image) {
 ?>
                         <img style="max-width: 200px;" onclick="lightbox.init(this, 200);" src="<?= html_escape(image_cache_encode($image)) ?>" alt="Relevant image" />
 <?php           } ?>
@@ -306,7 +306,7 @@ if ($search->canUnclaim($Viewer)) {
 <?php           foreach ($reportTypeMan->categoryList((int)$torrent?->group()?->categoryId()) as $rt) {
                             $selected = $rt->type() === $report->type() ? ' selected' : '';
                             ?><option value="<?= $rt->type() ?>"<?= $selected ?>><?= $rt->name() ?></option>
-<?php           } ?>
+                                <?php           } ?>
                         </select>
                         | <span id="options<?= $reportId ?>">
                             <span class="tooltip" title="Warning length in weeks">
@@ -314,14 +314,14 @@ if ($search->canUnclaim($Viewer)) {
                                 <select name="warning" id="warning<?= $reportId ?>">
 <?php           foreach (range(0, 8) as $week) { ?>
                                     <option value="<?= $week ?>"<?= $reportType->warnWeeks() === $week ? ' selected' : '' ?>><?= $week ?></option>
-<?php           } ?>
+                                <?php           } ?>
                                 </select>
                             </span> |
 <?php           if ($Viewer->permitted('users_mod')) { ?>
                             <span class="tooltip" title="Delete torrent?">
                                 <input type="checkbox" name="delete" id="delete<?= $reportId ?>"<?= $reportType->doDeleteUpload() ? ' checked' : '' ?> />&nbsp;<label for="delete<?= $reportId ?>"><strong>Delete</strong></label>
                             </span> |
-<?php           } ?>
+                                <?php           } ?>
                             <span class="tooltip" title="Remove upload privileges?">
                                 <input type="checkbox" name="upload" id="upload<?= $reportId ?>"<?= $reportType->doRevokeUploadPrivs() ? ' checked' : '' ?> />&nbsp;<label for="upload<?= $reportId ?>"><strong>Remove upload privileges</strong></label>
                             </span> |
@@ -363,9 +363,9 @@ if ($search->canUnclaim($Viewer)) {
                         | <input type="button" value="Resolve report manually" onclick="ManualResolve(<?= $reportId ?>);" />
 <?php           if ($report->status() == 'InProgress' && $Viewer->id() == $resolverId) { ?>
                         | <input type="button" value="Unclaim" onclick="GiveBack(<?= $reportId ?>);" />
-<?php           } else { ?>
+                                <?php           } else { ?>
                         | <input id="grab<?= $reportId ?>" type="button" value="Claim" onclick="Grab(<?= $reportId ?>);" />
-<?php           } ?>
+                <?php           } ?>
                         | <span class="tooltip" title="All checked reports will be resolved via the Multi-resolve button">
                             <input type="checkbox" name="multi" id="multi<?= $reportId ?>" />&nbsp;<label for="multi">Multi-resolve</label>
                           </span>

@@ -6,8 +6,7 @@ use Phinx\Migration\AbstractMigration;
 
 final class ArtistAttribute extends AbstractMigration
 {
-    public function change(): void
-    {
+    public function change(): void {
         $this->table('artist_attr', ['id' => false, 'primary_key' => 'artist_attr_id'])
              ->addColumn('artist_attr_id', 'integer', ['limit' => 6, 'identity' => true])
              ->addColumn('name', 'string', ['limit' => 24])

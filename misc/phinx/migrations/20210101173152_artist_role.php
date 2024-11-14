@@ -7,8 +7,7 @@ use Phinx\Db\Adapter\MysqlAdapter;
 
 final class ArtistRole extends AbstractMigration
 {
-    public function change(): void
-    {
+    public function change(): void {
         $this->table('artist_role', ['id' => false, 'primary_key' => ['artist_role_id']])
             ->addColumn('artist_role_id', 'integer', ['identity' => true, 'limit' => MysqlAdapter::INT_TINY])
             ->addColumn('sequence', 'integer')

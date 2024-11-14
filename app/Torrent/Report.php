@@ -20,8 +20,14 @@ class Report extends \Gazelle\BaseObject {
         unset($this->info);
         return $this;
     }
-    public function link(): string { return sprintf('<a href="%s">Report #%d</a>', $this->url(), $this->id()); }
-    public function location(): string { return "reportsv2.php?view=report&id=" . $this->id; }
+
+    public function link(): string {
+        return sprintf('<a href="%s">Report #%d</a>', $this->url(), $this->id());
+    }
+
+    public function location(): string {
+        return "reportsv2.php?view=report&id=" . $this->id;
+    }
 
     public function info(): array {
         return $this->info ??= self::$db->rowAssoc("

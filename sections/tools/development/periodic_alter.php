@@ -31,7 +31,7 @@ if ($p['submit'] == 'Delete') {
     }
 
     if ($err) {
-        require_once('periodic_edit.php');
+        include_once 'periodic_edit.php';
         exit;
     }
 

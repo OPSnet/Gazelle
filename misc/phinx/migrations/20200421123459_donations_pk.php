@@ -12,6 +12,7 @@ class DonationsPk extends AbstractMigration {
                 ADD KEY don_userid_time_idx (UserID, Time)
         ');
     }
+
     public function down(): void {
         $this->execute('
             ALTER TABLE donations

@@ -6,8 +6,7 @@ use Phinx\Migration\AbstractMigration;
 
 final class MoreUserStats extends AbstractMigration
 {
-    public function change(): void
-    {
+    public function change(): void {
         $this->table('user_summary', ['id' => false, 'primary_key' => 'user_id'])
              ->addColumn('user_id', 'integer', ['limit' => 10, 'signed' => false])
              ->addColumn('artist_added_total', 'integer', ['limit' => 10, 'default' => 0])

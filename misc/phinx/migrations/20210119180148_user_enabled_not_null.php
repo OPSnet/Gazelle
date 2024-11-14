@@ -6,8 +6,7 @@ use Phinx\Migration\AbstractMigration;
 
 final class UserEnabledNotNull extends AbstractMigration
 {
-    public function up(): void
-    {
+    public function up(): void {
         $this->table('users_main')
             ->changeColumn('Enabled', 'enum', [
                 'default' => '0',
@@ -16,8 +15,7 @@ final class UserEnabledNotNull extends AbstractMigration
             ->save();
     }
 
-    public function down(): void
-    {
+    public function down(): void {
         $this->table('users_main')
             ->changeColumn('Enabled', 'enum', [
                 'null'    => true,

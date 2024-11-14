@@ -6,8 +6,7 @@ use Phinx\Migration\AbstractMigration;
 
 final class ArtistArranger extends AbstractMigration
 {
-    public function up(): void
-    {
+    public function up(): void {
         $this->table('requests_artists')
             ->changeColumn('Importance', 'enum', [
                 'null' => false, 'values' => ['1', '2', '3', '4', '5', '6', '7', '8'],
@@ -20,8 +19,7 @@ final class ArtistArranger extends AbstractMigration
             ->save();
     }
 
-    public function down(): void
-    {
+    public function down(): void {
         $this->table('requests_artists')
             ->changeColumn('Importance', 'enum', [
                 'null' => true, 'values' => ['1', '2', '3', '4', '5', '6', '7'],

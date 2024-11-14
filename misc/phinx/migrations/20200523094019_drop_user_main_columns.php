@@ -15,6 +15,7 @@ class DropUserMainColumns extends AbstractMigration {
                 DROP COLUMN Invites_Given
         ');
     }
+
     public function down(): void {
         $this->execute("
             ALTER TABLE users_main
