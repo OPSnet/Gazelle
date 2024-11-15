@@ -77,7 +77,7 @@ class User extends \Gazelle\Json {
                     is_null($uploaded) || is_null($downloaded)
                                  => null,
                     !$downloaded => 0.0,
-                    default      => round($uploaded / $downloaded, 2, PHP_ROUND_HALF_DOWN),
+                    default      => (float)ratio($uploaded, $downloaded, 5),
                 },
             ],
             'ranks' => [
