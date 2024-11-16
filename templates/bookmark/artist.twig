@@ -1,7 +1,7 @@
 {{ header(user.username ~ ' › Bookmarked artists', {'js': 'browse'}) }}
 <div class="thin">
     <div class="header">
-        <h2>{{ user.username }} › Bookmarked artists</h2>
+        <h2>{{ user.id|user_url }} › Bookmarked artists</h2>
         <div class="linkbox">
             <a href="bookmarks.php?type=torrents" class="brackets">Torrents</a>
             <a href="bookmarks.php?type=artists" class="brackets">Artists</a>
@@ -11,33 +11,42 @@
     </div>
     <div class="pad">
 {% set own_profile = user.id == viewer.id %}
-{% for id, name in list %}
-    {% if loop.first %}
+{% for item in list %}
+{%  if loop.first %}
 <table class="artist_table">
     <tr class="colhead">
         <td>Artist</td>
+        <td width="15%">Created</td>
+        <td width="{{
+            max(5,
+                (viewer.permitted('site_torrents_notify') ? 15 : 0)
+                + (own_profile ? 15 : 0)
+            )
+        }}%">Action</td>
     </tr>
-    {% endif %}
+{%  endif %}
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }} bookmark_{{ id }}">
         <td>
-            <a href="artist.php?id={{ id }}">{{ name }}</a>
-            <span style="float: right;">
-    {% if viewer.permitted('site_torrents_notify') %}
-        {% if not viewer.hasArtistNotification(name) %}
-                <a href="artist.php?action=notify&amp;artistid={{ id }}&amp;auth={{ viewer.auth }}" class="brackets">Notify of new uploads</a>
-        {% else %}
-                <a href="artist.php?action=notifyremove&amp;artistid={{ id }}&amp;auth={{ viewer.auth }}" class="brackets">Do not notify of new uploads</a>
-        {% endif %}
-    {% endif %}
-    {% if own_profile %}
-                <a href="#" id="bookmarklink_artist_{{ id }}" onclick="Unbookmark('artist', {{ id }}, 'Bookmark'); return false;" class="brackets">Remove bookmark</a>
-    {% endif %}
-            </span>
+            <a href="artist.php?id={{ item.artist_id }}">{{ item.artist_name }}</a>
+
+        </td>
+        <td>{{ item.created|time_diff }}
+        <td>
+{%  if own_profile %}
+                <a href="#" id="bookmarklink_artist_{{ item.artist_id }}" onclick="Unbookmark('artist', {{ item.artist_id }}, 'Bookmark'); return false;" class="brackets">Remove bookmark</a>
+{%  endif %}
+{%  if viewer.permitted('site_torrents_notify') %}
+{%      if not viewer.hasArtistNotification(item.artist_name) %}
+                <a href="artist.php?action=notify&amp;artistid={{ item.artist_id }}&amp;auth={{ viewer.auth }}" class="brackets">Notify of new uploads</a>
+{%      else %}
+                <a href="artist.php?action=notifyremove&amp;artistid={{ item.artist_id }}&amp;auth={{ viewer.auth }}" class="brackets">Do not notify of new uploads</a>
+{%      endif %}
+{%  endif %}
         </td>
     </tr>
-    {% if loop.last %}
+{%  if loop.last %}
 </table>
-    {% endif %}
+{%  endif %}
 {% else %}
      <h2>No bookmarked artists</h2>
 {% endfor %}
