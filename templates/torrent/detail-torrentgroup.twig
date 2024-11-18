@@ -5,7 +5,7 @@
 {%  if tgroup.categoryGrouped and edition != prev %}
 {%      set edition_id = edition_id + 1 %}
 {%      set prev_primary = null %}
-        <tr class="releases_{{ tgroup.releaseType }} groupid_{{ tgroup.id }} edition group_torrent
+        <tr class="releases_{{ section_id ?? tgroup.releaseType }} groupid_{{ tgroup.id }} edition group_torrent
 {%      if is_snatched_grp %} snatched_group{% endif %}
 {%      if hide %} hidden{% endif %}">
             <td colspan="{{ 6 + colspan_add + (viewer.ordinal.value('file-count-display') ? 1 : 0) }}" class="edition_info">
@@ -27,6 +27,7 @@
         'show_extended': show_extended,
         'show_id'      : show_id,
         'snatcher'     : snatcher,
+        'section_id'   : section_id,
         'torrent'      : torrent,
         'viewer'       : viewer,
     } only %}

@@ -355,6 +355,7 @@ if ($sections = $Artist->sections()) {
             'is_snatched_grp' => $isSnatched,
             'report_man'      => $reportMan,
             'snatcher'        => $snatcher,
+            'section_id'      => $sectionId,
             'tgroup'          => $tgroup,
             'torrent_list'    => object_generator($torMan, $tgroup->torrentIdList()),
             'tor_man'         => $torMan,

@@ -1,7 +1,7 @@
 {% from 'macro/form.twig' import hidden %}
 {% set torrent_id = torrent.id %}
 {% set tgroup     = torrent.group %}
-            <tr class="torrent_row releases_{{ tgroup.releaseType }} groupid_{{ tgroup.id }} edition_{{ edition_id }} group_torrent
+            <tr class="torrent_row releases_{{ section_id ?? tgroup.releaseType }} groupid_{{ tgroup.id }} edition_{{ edition_id }} group_torrent
                     {%- if snatcher.showSnatch(torrent) %} snatched_torrent{% endif %}
                     {%- if hide %} hidden{% endif %}" style="font-weight: normal;" id="torrent{{ torrent_id }}">
                 <td class="td_info" colspan="{{ 1 + colspan_add }}">
@@ -30,7 +30,7 @@
 %}
             </tr>
 {% if show_extended %}
-            <tr id="torrent_{{ torrent_id }}" class="releases_{{ tgroup.releaseType }} groupid_{{ tgroup.id }} edition_{{ edition_id }} torrentdetails pad{{ hidden(torrent_id != show_id) }}">
+            <tr id="torrent_{{ torrent_id }}" class="releases_{{ section_id ?? tgroup.releaseType }} groupid_{{ tgroup.id }} edition_{{ edition_id }} torrentdetails pad{{ hidden(torrent_id != show_id) }}">
                 <td colspan="{{ 5 + colspan_add + (viewer.ordinal.value('file-count-display') ? 1 : 0) }}">
                     <div id="release_{{ torrent_id }}" class="no_overflow">
                         <blockquote>
