@@ -310,7 +310,11 @@ function redirectUrl(string $fallback): string {
  * Generate a random authentication key for a user
  */
 function authKey(): string {
-    return substr(strtr(base64_encode(hash('sha256', hash('sha256', randomString(64), true), true)), '+/', '-_'), 0, 32);
+    return substr(
+        urlencode_safe(signature(randomString(64), USER_AUTH_SALT)),
+        0,
+        32,
+    );
 }
 
 /**
@@ -319,8 +323,10 @@ function authKey(): string {
  */
 function authorize(bool $Ajax = false): void {
     global $Viewer;
-    if ($Viewer->auth() === ($_REQUEST['auth'] ?? $_REQUEST['authkey'] ?? '')) {
-        return;
+    foreach (['auth', 'authkey'] as $auth) {
+        if (isset($_REQUEST[$auth]) && $Viewer->auth() === $_REQUEST[$auth]) {
+            return;
+        }
     }
     Irc::sendMessage(IRC_CHAN_STATUS,
         "{$Viewer->username()} authorize failed on {$_SERVER['REQUEST_URI']}"
@@ -415,7 +421,7 @@ function json_die(array|string $status, array|string $message = "bad parameters"
 /**
  * Print JSON status result with an optional message.
  */
-function json_print(array|string $status, array|int|string $message = null): void {
+function json_print(array|string $status, array|int|string|null $message = null): void {
     if (is_string($status) && $status == 'success' && $message) {
         $response = ['status' => $status, 'response' => $message];
     } elseif ($message) {
@@ -804,9 +810,13 @@ function urldecode_safe(string $string): string {
     return base64_decode(str_pad(strtr($string, '-_', '+/'), strlen($string) % 4, '=', STR_PAD_RIGHT));
 }
 
+function signature(string $data, string $salt): string {
+    return urlencode_safe(hash_hmac(DIGEST_ALGO, $data, $salt, binary: true));
+}
+
 function image_cache_signature(string $url, int|null $epoch = null, string $secret = IMAGE_CACHE_SECRET): string {
     return urlencode_safe(substr(
-        hash_hmac('sha256', $url, $secret . date('YW', $epoch ?? time()), binary: true),
+        hash_hmac(DIGEST_ALGO, $url, $secret . date('YW', $epoch ?? time()), binary: true),
         0, 12)
     );
 }

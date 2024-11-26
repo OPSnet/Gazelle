@@ -1,12 +1,31 @@
 {%- macro scss(filename) -%}
-<link rel="stylesheet" type="text/css" media="screen" href="{{ constant('STATIC_SERVER') }}/styles/{{ filename }}?v={{ mtime_scss(filename) }}" />
+<link rel="stylesheet" type="text/css" media="screen" href="{{
+    constant('STATIC_SERVER') }}/styles/{{ filename }}?v={{ mtime_scss(filename) }}" />
 {%- endmacro -%}
 
 {%- macro css(filename) -%}
-<link rel="stylesheet" type="text/css" media="screen" href="{{ constant('STATIC_SERVER') }}/styles/{{ filename }}?v={{ mtime_css(filename) }}" />
+<link rel="stylesheet" type="text/css" media="screen" href="{{
+    constant('STATIC_SERVER') }}/styles/{{ filename }}?v={{ mtime_css(filename) }}" />
+{%- endmacro -%}
+
+{%- macro rss_href(viewer, feed) -%}
+    feeds.php?feed={{ feed }}&amp;auth={{ viewer.rssAuth(feed) }}&amp;passkey={{ viewer.announceKey }}
+{%- endmacro -%}
+
+{%- macro rss_link(viewer, feed, description) -%}
+<link rel="alternate" type="application/rss+xml" title="{{
+    constant('SITE_NAME') }} – {{ description }}" href="{{
+    _self.rss_href(viewer, feed) }}" />
+{%- endmacro -%}
+
+{%- macro rss_a(viewer, feed, description) -%}
+    <a title="RSS {{ description }} feed" href="{{ _self.rss_href(viewer, feed)
+        }}"><img src="{{ constant('STATIC_SERVER') }}/common/symbols/rss.png" alt="RSS {{
+        description }} feed" /></a> {{ description }}
 {%- endmacro -%}
 
 {%- macro script(filename) -%}
 {% set path %}{% if not (filename starts with 'vendor/') %}/functions{% endif %}{% endset %}
-<script type="text/javascript" src="{{ constant('STATIC_SERVER') }}{{ path }}/{{ filename }}?v={{ mtime(path ~ '/' ~ filename) }}"></script>
+<script type="text/javascript" src="{{ constant('STATIC_SERVER') }}{{ path }}/{{
+    filename }}?v={{ mtime(path ~ '/' ~ filename) }}"></script>
 {%- endmacro -%}

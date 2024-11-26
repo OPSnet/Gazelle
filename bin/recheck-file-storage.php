@@ -22,7 +22,7 @@ $allConfig = [
     '-html' => [
         'CHECK' => 'SELECT Log FROM torrents_logs WHERE TorrentID = ? AND LogID = ?',
         'FILER' => new Gazelle\File\RipLogHTML(),
-        'MD5'   => 'SELECT Log AS digest FROM torrents_logs WHERE TorrentID = ? AND LogID = ?',
+        'HASH'  => 'SELECT Log AS digest FROM torrents_logs WHERE TorrentID = ? AND LogID = ?',
         'PIPE'  => '/usr/bin/find ' . STORAGE_PATH_RIPLOGHTML . ' -type f',
         'MATCH' => '~/(\d+)_(\d+)\.html$~',
         'NEWLN' => true,
@@ -30,7 +30,7 @@ $allConfig = [
     '-log' => [
         'CHECK' => 'SELECT 1 FROM torrents_logs WHERE TorrentID = ? AND LogID = ?',
         'FILER' => new Gazelle\File\RipLog(),
-        'MD5'   => null,
+        'HASH'  => null,
         'PIPE'  => '/usr/bin/find ' . STORAGE_PATH_RIPLOG . ' -type f',
         'MATCH' => '~/(\d+)_(\d+)\.log$~',
         'NEWLN' => false,
@@ -38,7 +38,7 @@ $allConfig = [
     '-torrent' => [
         'CHECK' => 'SELECT 1 FROM torrents WHERE ID = ?',
         'FILER' => new Gazelle\File\Torrent(),
-        'MD5'   => 'SELECT File AS digest FROM torrents_files WHERE TorrentID = ?',
+        'HASH'  => 'SELECT File AS digest FROM torrents_files WHERE TorrentID = ?',
         'PIPE'  => '/usr/bin/find ' . STORAGE_PATH_TORRENT . ' -type f',
         'MATCH' => '~/(\d+)\.torrent$~',
         'NEWLN' => false,
@@ -80,11 +80,11 @@ while (($file = fgets($find)) !== false) {
         continue;
     }
 
-    if (is_null($config['MD5'])) {
+    if (is_null($config['HASH'])) {
         continue;
     }
-    $db_digest = md5($db->scalar($config['MD5'], ...array_slice($match, 1)) . ($config['NEWLN'] ? "\n" : ''));
-    $file_digest = md5((string)file_get_contents($file));
+    $db_digest = hash(DIGEST_ALGO, $db->scalar($config['HASH'], ...array_slice($match, 1)) . ($config['NEWLN'] ? "\n" : ''));
+    $file_digest = hash_file(DIGEST_ALGO, $file);
     if ($db_digest != $file_digest) {
         echo "$file contents $file_digest does not match db $db_digest\n";
         ++$mismatch;

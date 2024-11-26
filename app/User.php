@@ -184,7 +184,7 @@ class User extends BaseObject {
             return $this->info;
         }
 
-        $this->info['CommentHash'] = sha1($this->info['AdminComment']);
+        $this->info['CommentHash'] = signature($this->info['AdminComment'], USER_EDIT_SALT);
         $this->info['nav_list']    = json_decode($this->info['nav_list'] ?? '[]', true);
         $this->info['NavItems']    = empty($this->info['NavItems']) ? [] : explode(',', $this->info['NavItems']);
         $this->info['ParanoiaRaw'] = $this->info['Paranoia'];
@@ -560,8 +560,8 @@ class User extends BaseObject {
         return $this->info()['RequiredRatio'];
     }
 
-    public function rssAuth(): string {
-        return md5($this->id . RSS_HASH . $this->announceKey());
+    public function rssAuth(string $name): string {
+        return signature("{$this->id}/{$this->announceKey()}/$name", RSS_HASH);
     }
 
     public function showAvatars(): bool {
@@ -1151,7 +1151,7 @@ class User extends BaseObject {
      */
     public function validatePassword(#[\SensitiveParameter] string $plaintext): bool {
         $hash = $this->info()['PassHash'];
-        $success = password_verify(hash('sha256', $plaintext), $hash);
+        $success = password_verify(hash(PASSWORD_ALGO, $plaintext), $hash);
         if (password_needs_rehash($hash, PASSWORD_DEFAULT)) {
             self::$db->prepared_query("
                 UPDATE users_main SET

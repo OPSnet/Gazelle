@@ -13,7 +13,7 @@ class SyntheticAvatar extends \Gazelle\BaseUser {
     }
 
     public function avatar(string $username): string {
-        $hash = md5(AVATAR_SALT . $username);
+        $hash = hash(DIGEST_ALGO, AVATAR_SALT . $username);
         $size = AVATAR_WIDTH;
         return match ((int)$this->user->option('Identicons')) {
             AvatarSynthetic::monster->value => "https://secure.gravatar.com/avatar/{$hash}?s={$size}&r=pg&d=monsterid",

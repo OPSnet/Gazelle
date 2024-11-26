@@ -51,8 +51,14 @@
                 <element key="each" value="null"/>
                 <element key="eval" value="null"/>
                 <element key="extract" value="null"/>
-                <!-- alias for is_int() -->
+                <!-- use is_int() instead -->
                 <element key="is_integer" value="null"/>
+                <!-- use hash('sha256', ...) instead -->
+                <element key="md5" value="null"/>
+                <element key="sha1" value="null"/>
+                <element key="uniqid" value="null"/>
+                <!-- use hash_file('sha256', ...) instead -->
+                <element key="sha1file" value="null"/>
                 <!-- use string equality instead: $x == $y -->
                 <element key="strcmp" value="null"/>
             </property>

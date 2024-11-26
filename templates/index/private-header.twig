@@ -1,5 +1,4 @@
-{%- from 'macro/header.twig' import scss, css, script -%}
-{% set viewer_args = '&passkey=' ~ viewer.announceKey ~ '&auth=' ~ viewer.rssAuth %}
+{%- from 'macro/header.twig' import scss, css, rss_link, script -%}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,29 +15,28 @@
 <link rel="search" type="application/opensearchdescription+xml" title="{{ constant('SITE_NAME') }} Log" href="opensearch.php?type=log" />
 <link rel="search" type="application/opensearchdescription+xml" title="{{ constant('SITE_NAME') }} Users" href="opensearch.php?type=users" />
 <link rel="search" type="application/opensearchdescription+xml" title="{{ constant('SITE_NAME') }} Wiki" href="opensearch.php?type=wiki" />
-<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=feed_news{{ viewer_args }}" title="{{ constant('SITE_NAME') }} - News" />
-<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=feed_blog{{ viewer_args }}" title="{{ constant('SITE_NAME') }} - Blog" />
-<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=feed_changelog{{ viewer_args }}" title="{{ constant('SITE_NAME') }} - Change Log" />
-<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_notify_{{ viewer.announceKey }}{{ viewer_args }}" title="{{ constant('SITE_NAME') }} - Personal Torrent Notifications" />
-<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_all{{ viewer_args }}" title="{{ constant('SITE_NAME') }} - All Torrents" />
-<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_music{{ viewer_args }}" title="{{ constant('SITE_NAME') }} - Music Torrents" />
-<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_apps{{ viewer_args }}" title="{{ constant('SITE_NAME') }} - Application Torrents" />
-<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_ebooks{{ viewer_args }}" title="{{ constant('SITE_NAME') }} - E-Book Torrents" />
-<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_abooks{{ viewer_args }}" title="{{ constant('SITE_NAME') }} - Audiobooks Torrents" />
-<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_evids{{ viewer_args }}" title="{{ constant('SITE_NAME') }} - E-Learning Video Torrents" />
-<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_comedy{{ viewer_args }}" title="{{ constant('SITE_NAME') }} - Comedy Torrents" />
-<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_comics{{ viewer_args }}" title="{{ constant('SITE_NAME') }} - Comic Torrents" />
-<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_mp3{{ viewer_args }}" title="{{ constant('SITE_NAME') }} - MP3 Torrents" />
-<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_flac{{ viewer_args }}" title="{{ constant('SITE_NAME') }} - FLAC Torrents" />
-<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_vinyl{{ viewer_args }}" title="{{ constant('SITE_NAME') }} - Vinyl Sourced Torrents" />
-<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_lossless{{ viewer_args }}" title="{{ constant('SITE_NAME') }} - Lossless Torrents" />
-<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_lossless24{{ viewer_args }}" title="{{ constant('SITE_NAME') }} - 24bit Lossless Torrents" />
+{{ rss_link(viewer, "feed_news", "News") }}
+{{ rss_link(viewer, "feed_blog", "Blog") }}
+{{ rss_link(viewer, "feed_changelog", "Change Log") }}
+{{ rss_link(viewer, "torrents_notify_" ~ viewer.announceKey, "Personal Torrent Notifications") }}
+{{ rss_link(viewer, "torrents_all", "All Torrents") }}
+{{ rss_link(viewer, "torrents_music", "Music Torrents") }}
+{{ rss_link(viewer, "torrents_apps", "Application Torrents") }}
+{{ rss_link(viewer, "torrents_ebooks", "E-Book Torrents") }}
+{{ rss_link(viewer, "torrents_abooks", "Audiobooks Torrents") }}
+{{ rss_link(viewer, "torrents_evids", "E-Learning Video Torrents") }}
+{{ rss_link(viewer, "torrents_comedy", "Comedy Torrents") }}
+{{ rss_link(viewer, "torrents_comics", "Comic Torrents") }}
+{{ rss_link(viewer, "torrents_mp3", "MP3 Torrents") }}
+{{ rss_link(viewer, "torrents_flac", "FLAC Torrents") }}
+{{ rss_link(viewer, "torrents_vinyl", "Vinyl Sourced Torrents") }}
+{{ rss_link(viewer, "torrents_lossless", "Lossless Torrents") }}
+{{ rss_link(viewer, "torrents_lossless24", "24bit Lossless Torrents") }}
 {% if viewer.permitted('site_torrents_notify') %}
 {%     for id, name in viewer.notifyFilters %}
-<link rel="alternate" type="application/rss+xml" href="feeds.php?feed=torrents_notify_{{ id }}_{{ viewer.announceKey }}{{ viewer_args }}&amp;name={{ name }}" title="{{ constant('SITE_NAME') }} - {{ name }}" />
+{{          rss_link(viewer, "torrents_notify_" ~ id ~ "_" ~ viewer.announceKey, name) }}
 {%     endfor %}
 {% endif -%}
-
 {{ scss('global.css') }}
 {{ scss('tooltipster/style.css') }}
 {% for sheet in scss_style %}

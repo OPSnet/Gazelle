@@ -22,7 +22,8 @@ class Torrent extends \Gazelle\Base {
     ) {}
 
     public function getTopTorrents($getParameters, $details = 'all', $limit = 10): array {
-        $cacheKey = 'top10_v2_' . $details . '_' . md5(implode('', $getParameters)) . '_' . $limit;
+        $cacheKey = "top10_{$details}_{$limit}_"
+            . trim(signature(implode('', $getParameters), TOP10_SALT), '=');
         $topTorrents = self::$cache->get_value($cacheKey);
 
         if ($topTorrents !== false) {

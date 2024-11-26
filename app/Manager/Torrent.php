@@ -11,7 +11,6 @@ class Torrent extends \Gazelle\BaseManager {
 
     final public const CACHE_KEY_LATEST_UPLOADS = 'latest_up_%d';
     final protected const CACHE_FOLDERNAME      = 'foldername_%s';
-    final protected const FOLDER_SALT           = "v1\x01";
 
     protected \Gazelle\User $viewer;
 
@@ -126,7 +125,7 @@ class Torrent extends \Gazelle\BaseManager {
         if ($folder === '') {
             return [];
         }
-        $key = sprintf(self::CACHE_FOLDERNAME, md5(self::FOLDER_SALT . $folder));
+        $key = sprintf(self::CACHE_FOLDERNAME, signature($folder, FOLDER_CLASH_SALT));
         $list = self::$cache->get_value($key);
         if ($list === false) {
             self::$db->prepared_query("
@@ -186,7 +185,7 @@ class Torrent extends \Gazelle\BaseManager {
     }
 
     public function flushFoldernameCache(string $folder): void {
-        self::$cache->delete_value(sprintf(self::CACHE_FOLDERNAME, md5($folder)));
+        self::$cache->delete_value(sprintf(self::CACHE_FOLDERNAME, signature($folder, FOLDER_CLASH_SALT)));
     }
 
     public function missingLogfiles(int $userId): array {

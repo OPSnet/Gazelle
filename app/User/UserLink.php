@@ -134,13 +134,16 @@ class UserLink extends \Gazelle\BaseUser {
     public function addGroupComment(string $comments, \Gazelle\User $admin, bool $updateNote): bool {
         self::$db->begin_transaction();
         $groupId = $this->groupId($this->user);
-        $oldHash = self::$db->scalar("
-            SELECT sha1(Comments) AS CommentHash
-            FROM dupe_groups
-            WHERE ID = ?
-            ", $groupId
+        $oldHash = signature(
+            (string)self::$db->scalar("
+                SELECT Comments AS CommentHash
+                FROM dupe_groups
+                WHERE ID = ?
+                ", $groupId
+            ),
+            USER_EDIT_SALT
         );
-        if ($oldHash === sha1($comments)) {
+        if ($oldHash === signature($comments, USER_EDIT_SALT)) {
             return false;
         }
         self::$db->prepared_query("

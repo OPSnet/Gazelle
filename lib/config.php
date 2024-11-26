@@ -140,8 +140,25 @@ defined('SEEDBOX_SALT') or define('SEEDBOX_SALT', 'changeme');
 // User avatars are hashed with this salt.
 defined('AVATAR_SALT') or define('AVATAR_SALT', 'changeme');
 
+// Salt for folder clashes. Changing this after site launch will
+// invalidate cache keys that will be regenerated on next call.
+defined('FOLDER_CLASH_SALT') or define('FOLDER_CLASH_SALT', 'changeme');
+
+// Salt for custom Top 10 lists. Changing this after site launch will
+// invalidate cache keys that will be regenerated on next call.
+defined('TOP10_SALT') or define('TOP10_SALT', 'changeme');
+
+// Salt for authorizing page handlers. Changing this after site launch
+// will invalidate cache keys and break any ongoing edits. Retrying
+// the operation with a fresh pageload will be necessary.
+defined('USER_AUTH_SALT') or define('USER_AUTH_SALT', 'changeme');
+
 // Arbitrary text can be hashed and signed using this salt.
 defined('USER_HASH_SALT') or define('USER_HASH_SALT', 'changeme');
+
+// Salt for user admin edits. Changing this after site launch will
+// invalidate cache keys that will be regenerated on next call.
+defined('USER_EDIT_SALT') or define('USER_EDIT_SALT', 'changeme');
 
 // ------------------------------------------------------------------------
 // MySQL settings
@@ -427,6 +444,16 @@ defined('DEBUG_UPLOAD_NOTIFICATION') or define('DEBUG_UPLOAD_NOTIFICATION', fals
 // Results are always written to TMPDIR/payout-contest-<id>.txt
 // If true, no PMs sent to users, no db updates performed.
 defined('DEBUG_CONTEST_PAYOUT') or define('DEBUG_CONTEST_PAYOUT', false);
+
+// The cryptographic algorithm used to sign secrets. Switch to sha384
+// or sha512 when machines become more powerful.
+defined('DIGEST_ALGO') or define('DIGEST_ALGO', 'sha256');
+
+// The cryptographic algorithm used to hash passwords. Switch to sha384
+// or sha512 when machines become more powerful. Changing after site
+// launch will break all user passwords. You must plan for a password
+// migration strategy.
+defined('PASSWORD_ALGO') or define('PASSWORD_ALGO', 'sha256');
 
 // if false, no attempt will be made to contact the last.fm website.
 defined('LASTFM_API_KEY') or define('LASTFM_API_KEY', false);

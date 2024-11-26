@@ -97,7 +97,7 @@ class Recovery extends \Gazelle\Base {
         if ($file['size'] > 10 * 1024 * 1024) {
             return [false, "File was too large, please make sure it is less than 10MB in size."];
         }
-        $filename = sha1(RECOVERY_SALT . random_int(0, 10_000_000) . sha1_file($file['tmp_name']));
+        $filename = hash(DIGEST_ALGO, RECOVERY_SALT . random_int(0, 10_000_000) . hash_file(DIGEST_ALGO, $file['tmp_name']));
         $destination = sprintf('%s/%s/%s/%s/%s',
             RECOVERY_PATH, substr($filename, 0, 1), substr($filename, 1, 1), substr($filename, 2, 1), $filename
         );

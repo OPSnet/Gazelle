@@ -8,13 +8,18 @@ if (isset($_GET['clearcache'])) {
 require_once __DIR__ . '/../lib/bootstrap.php';
 
 $user = (new Gazelle\Manager\User())->findByAnnounceKey($_GET['passkey'] ?? '');
+$feed = new Gazelle\Feed();
 if (
     !$user?->isEnabled()
     || empty($_GET['feed'])
     || empty($_GET['auth'])
-    || md5($user->id() . RSS_HASH . $_GET['passkey']) !== $_GET['auth']
+    || $user->rssAuth($_GET['feed']) !== $_GET['auth']
 ) {
-    die((new Gazelle\Feed())->blocked());
+    // phpcs:disable Generic.PHP.ForbiddenFunctions.Found
+    if (md5($user->id() . RSS_HASH . $_GET['passkey']) !== $_GET['auth']) {
+        die($feed->blocked());
+    }
+    // phpcs:enable Generic.PHP.ForbiddenFunctions.Found
 }
 
 if (
@@ -35,7 +40,6 @@ if ($user->permitted('site_disable_ip_history')) {
 }
 Gazelle\Base::setRequestContext($context);
 
-$feed = new Gazelle\Feed();
 switch ($_GET['feed']) {
     case 'torrents_abooks':
     case 'torrents_all':

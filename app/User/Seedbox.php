@@ -83,19 +83,6 @@ class Seedbox extends \Gazelle\BaseUser {
         return $this->viewBy;
     }
 
-    /**
-     * Generate a signature of the useragent and IP address.
-     *
-     * The useragent and ip address are posted to a client-side form
-     * When reading the response to match useragent and IP address to a name,
-     * we need to ensure the information was not altered.
-     *
-     * @return string base64 SHA2556 digest
-     */
-    public function signature(string $ipv4addr, string $useragent): string {
-        return base64_encode(hash('sha256', implode('/', [$ipv4addr, $useragent, SEEDBOX_SALT]), true));
-    }
-
     protected function buildFrom(): string {
         $has = $this->isUnion ? 'IN' : 'NOT IN';
         return "FROM user_seedbox sx
@@ -282,7 +269,7 @@ class Seedbox extends \Gazelle\BaseUser {
         // otherwise fallback to ip/useragent as a name.
         $this->host = [];
         foreach ($client as $clientId => $seedbox) {
-            $seedbox['sig'] = $this->signature($seedbox['ipv4addr'], $seedbox['useragent']);
+            $seedbox['sig'] = signature("{$seedbox['ipv4addr']}/{$seedbox['useragent']}", SEEDBOX_SALT);
             if (isset($nameList[$clientId])) {
                 $seedbox['name'] = $nameList[$clientId]['name'];
                 $seedbox['id'] = $nameList[$clientId]['id'];

@@ -337,7 +337,7 @@ echo $Twig->render('user/collage-list.twig', [
 // Linked accounts
 if ($Viewer->permitted('users_linked_users')) {
     echo $Twig->render('user/linked.twig', [
-        'hash'      => sha1($comments ?? ''),
+        'hash'      => signature($comments ?? '', USER_EDIT_SALT),
         'user_link' => (new Gazelle\User\UserLink($user))->info(),
         'user'      => $user,
         'viewer'    => $Viewer,

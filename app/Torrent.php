@@ -545,7 +545,9 @@ class Torrent extends TorrentAbstract {
     }
 
     public function flushFoldernameCache(): void {
-        self::$cache->delete_value(sprintf(self::CACHE_FOLDERNAME, md5($this->path())));
+        self::$cache->delete_value(
+            sprintf(self::CACHE_FOLDERNAME, signature($this->path(), FOLDER_CLASH_SALT))
+        );
     }
 
     /**

@@ -45,13 +45,15 @@ View::show_header($user->username() . " › Bookmarked torrent groups", ['js' =>
 <div class="thin">
     <div class="header">
         <h2>
-<?php if ($ownProfile) { ?>
-            <a href="feeds.php?feed=torrents_bookmarks_t_<?= $Viewer->announceKey()
+<?php
+if ($ownProfile) {
+    $feed = "torrents_bookmarks_t_" . $Viewer->announceKey();
+?>
+            <a href="feeds.php?feed=<?= $feed
             ?>&amp;passkey=<?= $Viewer->announceKey()
-            ?>&amp;auth=<?= $Viewer->rssAuth()
+            ?>&amp;auth=<?= $Viewer->rssAuth($feed)
             ?>&amp;name=<?= urlencode(SITE_NAME . ': Bookmarked Torrents')
-            ?>">
-            <img src="<?=STATIC_SERVER?>/common/symbols/rss.png" alt="RSS feed" /></a>&nbsp;
+            ?>"><img src="<?=STATIC_SERVER?>/common/symbols/rss.png" alt="RSS feed" /></a>&nbsp;
 <?php } ?>
             <?= $user->link() ?> › Bookmarked torrent groups
         </h2>

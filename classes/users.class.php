@@ -5,7 +5,6 @@ class Users {
     /**
      * Returns a username string for display
      *
-     * @param int|string $UserID
      * @param boolean $Badges whether or not badges (donor, warned, enabled) should be shown
      * @param boolean $IsWarned -- TODO: Why the fuck do we need this?
      * @param boolean $IsEnabled -- TODO: Why the fuck do we need this?
@@ -14,8 +13,8 @@ class Users {
      * @param boolean $IsDonorForum for displaying donor forum honorific prefixes and suffixes
      * @return string HTML formatted username
      */
-    public static function format_username($UserID, $Badges = false, $IsWarned = true, $IsEnabled = true, $Class = false, $Title = false, $IsDonorForum = false) {
-        if ($UserID == 0) {
+    public static function format_username(?int $UserID, bool $Badges = false, bool $IsWarned = true, bool $IsEnabled = true, bool $Class = false, bool $Title = false, bool $IsDonorForum = false): string {
+        if (!$UserID) {
             return 'System';
         }
         $userMan = new Gazelle\Manager\User();
@@ -26,13 +25,6 @@ class Users {
         $donor = new Gazelle\User\Donor($user);
 
         global $Viewer; // FIXME this is wrong
-        $Classes = $userMan->classList();
-        if ($user->primaryClass() < $Classes[MOD]['Level']) {
-            $OverrideParanoia = $Viewer->permitted('users_override_paranoia', $user->primaryClass());
-        } else {
-            // Don't override paranoia for mods who don't want to show their donor heart
-            $OverrideParanoia = false;
-        }
 
         $username = $donor->username($IsDonorForum);
         if ($Title) {

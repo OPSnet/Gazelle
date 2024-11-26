@@ -266,11 +266,6 @@ parameters:
 			path: ../classes/sphinxqlresult.class.php
 
 		-
-			message: "#^Parameter \\#1 \\$userId of method Gazelle\\\\Manager\\\\User\\:\\:findById\\(\\) expects int, int\\|string given\\.$#"
-			count: 1
-			path: ../classes/users.class.php
-
-		-
 			message: "#^Parameter \\#2 \\$timestamp of function date expects int\\|null, int\\|false given\\.$#"
 			count: 1
 			path: ../classes/users.class.php

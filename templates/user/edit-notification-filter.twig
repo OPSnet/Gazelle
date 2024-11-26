@@ -1,4 +1,5 @@
 {% from 'macro/form.twig' import checked -%}
+{% from 'macro/header.twig' import rss_a -%}
 {{ header('Manage notifications', {'js': 'vendor/jquery.validate,form_validate'}) }}
 <div class="thin">
     <div class="header">
@@ -7,8 +8,6 @@
             <a href="torrents.php?action=notify" class="brackets">View notifications</a>
         </div>
     </div>
-{% set viewer_args = '&passkey=' ~ viewer.announceKey ~ '&auth=' ~ viewer.rssAuth %}
-{% set img = '<img src="' ~ constant('STATIC_SERVER') ~ '/common/symbols/rss.png" alt="RSS feed" />' %}
 {% for filter in list %}
     {% set new = filter.ID is same as(false) %}
     {% if new and list|length > 1 %}
@@ -16,8 +15,7 @@
     <h3>Create a new notification filter</h3>
     {% elseif list|length > 1 %}
     <h3>
-        <a href="feeds.php?feed=torrents_notify_{{ filter.ID }}_{{ viewer.announceKey }}{{ viewer_args }}&amp;name={{ filter.Label|url_encode }}">{{ img|raw }}</a>
-        {{ filter.Label }}
+        {{ rss_a(viewer, "torrents_notify_" ~ filter.ID ~ '_' ~ viewer.announceKey, filter.Label) }}
         <a href="user.php?action=notify_delete&amp;id={{ filter.ID }}&amp;auth={{ viewer.auth() }}" onclick="return confirm('Are you sure you want to delete this notification filter?')" class="brackets">Delete</a>
         <a href="#" onclick="$('#filter_{{ filter.ID }}').gtoggle(); return false;" class="brackets">Show</a>
     </h3>
