@@ -20,7 +20,7 @@ class DropFileStorageTables extends AbstractMigration {
             ])
             ->addColumn('TorrentID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('File', 'blob', [
                 'null' => false,

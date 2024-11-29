@@ -15,10 +15,10 @@ class NukeQuestions extends AbstractMigration
                 'id' => false, 'primary_key' => ['QuestionID', 'UserID'],
             ])
             ->addColumn('QuestionID', 'integer', [
-                'null' => false, 'limit' => '10',
+                'null' => false, 'limit' => 10,
             ])
             ->addColumn('UserID', 'integer', [
-                'null' => false, 'limit' => '10',
+                'null' => false, 'limit' => 10,
             ])
             ->addColumn('Answer', 'text', [
                 'null' => true, 'default' => null, 'limit' => MysqlAdapter::TEXT_MEDIUM,
@@ -34,13 +34,13 @@ class NukeQuestions extends AbstractMigration
                 'id' => false, 'primary_key' => ['ID'],
             ])
             ->addColumn('ID', 'integer', [
-                'null' => false, 'limit' => '10', 'identity' => 'enable',
+                'null' => false, 'limit' => 10, 'identity' => true,
             ])
             ->addColumn('Question', 'text', [
                 'null' => false, 'limit' => MysqlAdapter::TEXT_MEDIUM,
             ])
             ->addColumn('UserID', 'integer', [
-                'null' => false, 'limit' => '10',
+                'null' => false, 'limit' => 10,
             ])
             ->addColumn('Date', 'datetime', [
                 'null' => false,

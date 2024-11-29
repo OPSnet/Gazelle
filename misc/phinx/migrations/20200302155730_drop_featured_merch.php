@@ -14,7 +14,7 @@ class DropFeaturedMerch extends AbstractMigration
             ])
             ->addColumn('ProductID', 'integer', [
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Title', 'string', [
                 'default' => '',
@@ -33,7 +33,7 @@ class DropFeaturedMerch extends AbstractMigration
             ->addColumn('ArtistID', 'integer', [
                 'null' => true,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->create();

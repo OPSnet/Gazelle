@@ -50,7 +50,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('Username', 'string', [
@@ -78,7 +78,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('TimesUsed', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->create();
         $this->table('sphinx_requests_delta', [
@@ -92,25 +92,25 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('TimeAdded', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '12',
+                'limit' => 12,
                 'signed' => false,
             ])
             ->addColumn('LastVote', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '12',
+                'limit' => 12,
                 'signed' => false,
             ])
             ->addColumn('CategoryID', 'integer', [
@@ -135,7 +135,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('Year', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '4',
+                'limit' => 4,
             ])
             ->addColumn('ArtistList', 'string', [
                 'null' => true,
@@ -187,19 +187,19 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('FillerID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('TorrentID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('TimeFilled', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '12',
+                'limit' => 12,
                 'signed' => false,
             ])
             ->addColumn('Visible', 'binary', [
@@ -215,7 +215,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('Votes', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('RecordLabel', 'string', [
@@ -274,8 +274,8 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('Amount', 'decimal', [
                 'null' => false,
-                'precision' => '24',
-                'scale' => '8',
+                'precision' => 24,
+                'scale' => 8,
             ])
             ->addIndex(['BitcoinAddress', 'Amount'], [
                 'name' => 'BitcoinAddress',
@@ -294,7 +294,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('UserID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('IconMouseOverText', 'string', [
                 'null' => false,
@@ -391,13 +391,13 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
-                'identity' => 'enable',
+                'identity' => true,
             ])
             ->addColumn('Level', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('Name', 'string', [
@@ -450,11 +450,11 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('TorrentID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Time', 'datetime', [
                 'null' => false,
@@ -471,7 +471,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('Uses', 'integer', [
                 'null' => false,
                 'default' => '1',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addIndex(['Time'], [
                 'name' => 'Time',
@@ -493,13 +493,13 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
-                'identity' => 'enable',
+                'limit' => 10,
+                'identity' => true,
             ])
             ->addColumn('Revision', 'integer', [
                 'null' => false,
                 'default' => '1',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Title', 'string', [
                 'null' => true,
@@ -518,12 +518,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('MinClassRead', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '4',
+                'limit' => 4,
             ])
             ->addColumn('MinClassEdit', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '4',
+                'limit' => 4,
             ])
             ->addColumn('Date', 'datetime', [
                 'null' => true,
@@ -532,7 +532,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('Author', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->create();
         $this->table('artists_similar_votes', [
@@ -546,11 +546,11 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('SimilarID', 'integer', [
                 'null' => false,
-                'limit' => '12',
+                'limit' => 12,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Way', 'enum', [
                 'null' => false,
@@ -571,12 +571,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('RequestID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Bounty', 'biginteger', [
                 'null' => false,
@@ -606,11 +606,11 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('QuoterID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Page', 'enum', [
                 'null' => false,
@@ -619,11 +619,11 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('PageID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('PostID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('UnRead', 'boolean', [
                 'null' => false,
@@ -646,12 +646,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('ArtistID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('SimilarID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '12',
+                'limit' => 12,
             ])
             ->addIndex(['ArtistID', 'SimilarID'], [
                 'name' => 'ArtistID',
@@ -669,12 +669,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('AliasID', 'integer', [
                 'null' => false,
-                'limit' => '10',
-                'identity' => 'enable',
+                'limit' => 10,
+                'identity' => true,
             ])
             ->addColumn('ArtistID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Name', 'string', [
                 'null' => true,
@@ -686,12 +686,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('Redirect', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addIndex(['ArtistID', 'Name'], [
@@ -710,11 +710,11 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('TorrentID', 'integer', [
                 'null' => false,
-                'limit' => '1',
+                'limit' => 1,
             ])
             ->addColumn('Time', 'datetime', [
                 'null' => false,
@@ -739,9 +739,9 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
-                'identity' => 'enable',
+                'identity' => true,
             ])
             ->addColumn('Message', 'string', [
                 'null' => false,
@@ -768,12 +768,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('TorrentID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('TimeAdded', 'datetime', [
                 'null' => true,
@@ -793,11 +793,11 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Revision', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Title', 'string', [
                 'null' => true,
@@ -820,7 +820,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('Author', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addIndex(['ID', 'Revision'], [
                 'name' => 'ID_Revision',
@@ -838,13 +838,13 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
-                'identity' => 'enable',
+                'identity' => true,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('Title', 'string', [
@@ -927,16 +927,16 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
-                'identity' => 'enable',
+                'limit' => 10,
+                'identity' => true,
             ])
             ->addColumn('TopicID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('AuthorID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('AddedTime', 'datetime', [
                 'null' => true,
@@ -951,7 +951,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('EditedUserID', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('EditedTime', 'datetime', [
                 'null' => true,
@@ -977,15 +977,15 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('GroupID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('TagID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Way', 'enum', [
                 'null' => false,
@@ -1006,7 +1006,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('UserID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Inbox', 'boolean', [
                 'null' => true,
@@ -1086,7 +1086,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('UserID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Prefix', 'string', [
                 'null' => false,
@@ -1119,7 +1119,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('SessionID', 'char', [
                 'null' => false,
@@ -1229,7 +1229,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Page', 'enum', [
                 'null' => false,
@@ -1238,11 +1238,11 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('PageID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('PostID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addIndex(['Page', 'PageID'], [
                 'name' => 'Page',
@@ -1260,12 +1260,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('GroupID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addIndex(['UserID'], [
@@ -1288,11 +1288,11 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('TopicID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->create();
         $this->table('do_not_upload', [
@@ -1306,8 +1306,8 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
-                'identity' => 'enable',
+                'limit' => 10,
+                'identity' => true,
             ])
             ->addColumn('Name', 'string', [
                 'null' => false,
@@ -1323,7 +1323,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Time', 'datetime', [
                 'null' => true,
@@ -1348,9 +1348,9 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('id', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
-                'identity' => 'enable',
+                'identity' => true,
             ])
             ->addColumn('peer_id', 'string', [
                 'null' => true,
@@ -1443,11 +1443,11 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('CollageID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Time', 'datetime', [
                 'null' => false,
@@ -1472,8 +1472,8 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ArtistID', 'integer', [
                 'null' => false,
-                'limit' => '10',
-                'identity' => 'enable',
+                'limit' => 10,
+                'identity' => true,
             ])
             ->addColumn('Name', 'string', [
                 'null' => true,
@@ -1485,7 +1485,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('RevisionID', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '12',
+                'limit' => 12,
             ])
             ->addColumn('VanityHouse', 'boolean', [
                 'null' => false,
@@ -1494,7 +1494,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('LastCommentID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addIndex(['Name', 'RevisionID'], [
                 'name' => 'Name',
@@ -1512,7 +1512,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('TorrentID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('File', 'blob', [
                 'null' => false,
@@ -1572,13 +1572,13 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
-                'identity' => 'enable',
+                'identity' => true,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('IP', 'string', [
@@ -1592,7 +1592,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('Attempts', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('BannedUntil', 'datetime', [
@@ -1600,7 +1600,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('Bans', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addIndex(['UserID'], [
@@ -1623,7 +1623,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->create();
         $this->table('email_blacklist', [
@@ -1637,12 +1637,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
-                'identity' => 'enable',
+                'limit' => 10,
+                'identity' => true,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Email', 'string', [
                 'null' => false,
@@ -1671,7 +1671,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Enable', 'boolean', [
                 'null' => true,
@@ -1715,7 +1715,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('GroupID', 'integer', [
                 'null' => false,
@@ -1746,7 +1746,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('Year', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '4',
+                'limit' => 4,
             ])
             ->addColumn('CatalogueNumber', 'string', [
                 'null' => true,
@@ -1770,7 +1770,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('Time', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '12',
+                'limit' => 12,
             ])
             ->addColumn('ReleaseType', 'integer', [
                 'null' => true,
@@ -1784,22 +1784,22 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('Snatched', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Seeders', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Leechers', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('LogScore', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '3',
+                'limit' => 3,
             ])
             ->addColumn('Scene', 'boolean', [
                 'null' => false,
@@ -1917,7 +1917,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('IP', 'string', [
                 'null' => false,
@@ -1961,12 +1961,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
-                'identity' => 'enable',
+                'limit' => 10,
+                'identity' => true,
             ])
             ->addColumn('GroupID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Image', 'string', [
                 'null' => false,
@@ -1985,7 +1985,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('UserID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Time', 'datetime', [
                 'null' => true,
@@ -2007,8 +2007,8 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '12',
-                'identity' => 'enable',
+                'limit' => 12,
+                'identity' => true,
             ])
             ->addColumn('Subject', 'string', [
                 'null' => true,
@@ -2029,16 +2029,16 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
-                'identity' => 'enable',
+                'limit' => 10,
+                'identity' => true,
             ])
             ->addColumn('TopicID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('AuthorID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('AddedTime', 'datetime', [
                 'null' => false,
@@ -2070,12 +2070,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('TorrentID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('TimeAdded', 'datetime', [
                 'null' => true,
@@ -2095,11 +2095,11 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('RequestID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Time', 'datetime', [
                 'null' => false,
@@ -2124,13 +2124,13 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '12',
-                'identity' => 'enable',
+                'limit' => 12,
+                'identity' => true,
             ])
             ->addColumn('ConvID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '12',
+                'limit' => 12,
             ])
             ->addColumn('SentDate', 'datetime', [
                 'null' => true,
@@ -2138,7 +2138,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('SenderID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Body', 'text', [
                 'null' => true,
@@ -2163,11 +2163,11 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('CollageID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('LastVisit', 'datetime', [
                 'null' => true,
@@ -2189,7 +2189,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('Comment', 'text', [
@@ -2210,19 +2210,19 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('FilterID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('GroupID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('TorrentID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('UnRead', 'integer', [
                 'null' => false,
@@ -2274,12 +2274,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
-                'identity' => 'enable',
+                'limit' => 10,
+                'identity' => true,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Token', 'char', [
                 'null' => false,
@@ -2305,9 +2305,9 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
-                'identity' => 'enable',
+                'identity' => true,
             ])
             ->addColumn('FromIP', 'integer', [
                 'null' => false,
@@ -2378,13 +2378,13 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('upspeed', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('downspeed', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('corrupt', 'biginteger', [
@@ -2394,7 +2394,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('timespent', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('useragent', 'string', [
@@ -2458,8 +2458,8 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
-                'identity' => 'enable',
+                'limit' => 10,
+                'identity' => true,
             ])
             ->addColumn('BadTag', 'string', [
                 'null' => true,
@@ -2495,8 +2495,8 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
-                'identity' => 'enable',
+                'limit' => 10,
+                'identity' => true,
             ])
             ->addColumn('Title', 'string', [
                 'null' => true,
@@ -2532,7 +2532,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('AddedBy', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Date', 'datetime', [
                 'null' => true,
@@ -2558,26 +2558,26 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('TagID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('ArtistID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('PositiveVotes', 'integer', [
                 'null' => false,
                 'default' => '1',
-                'limit' => '6',
+                'limit' => 6,
             ])
             ->addColumn('NegativeVotes', 'integer', [
                 'null' => false,
                 'default' => '1',
-                'limit' => '6',
+                'limit' => 6,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addIndex(['TagID', 'ArtistID', 'PositiveVotes', 'NegativeVotes', 'UserID'], [
                 'name' => 'TagID',
@@ -2595,7 +2595,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('HistoryID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Rank', 'integer', [
                 'null' => false,
@@ -2605,7 +2605,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('TorrentID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('TitleString', 'string', [
                 'null' => false,
@@ -2633,7 +2633,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Page', 'enum', [
                 'null' => false,
@@ -2642,7 +2642,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('PageID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->create();
         $this->table('group_log', [
@@ -2656,21 +2656,21 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
-                'identity' => 'enable',
+                'limit' => 10,
+                'identity' => true,
             ])
             ->addColumn('GroupID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('TorrentID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Info', 'text', [
                 'null' => true,
@@ -2711,20 +2711,20 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
-                'identity' => 'enable',
+                'identity' => true,
             ])
             ->addColumn('ReporterID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('TorrentID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('Type', 'string', [
@@ -2744,7 +2744,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('ResolverID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('Status', 'enum', [
@@ -2808,7 +2808,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addIndex(['Type'], [
                 'name' => 'Type',
                 'unique' => false,
-                'limit' => '1',
+                'limit' => 1,
             ])
             ->addIndex(['LastChangeTime'], [
                 'name' => 'LastChangeTime',
@@ -2834,7 +2834,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('Type', 'boolean', [
@@ -2854,27 +2854,27 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('UserID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('InviterID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('TreePosition', 'integer', [
                 'null' => false,
                 'default' => '1',
-                'limit' => '8',
+                'limit' => 8,
             ])
             ->addColumn('TreeID', 'integer', [
                 'null' => false,
                 'default' => '1',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('TreeLevel', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '3',
+                'limit' => 3,
             ])
             ->addIndex(['InviterID'], [
                 'name' => 'InviterID',
@@ -2910,12 +2910,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('PostID', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('EditUser', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('EditTime', 'datetime', [
                 'null' => true,
@@ -2948,7 +2948,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('ProductID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Title', 'string', [
                 'null' => false,
@@ -2973,7 +2973,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('ArtistID', 'integer', [
                 'null' => true,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->create();
@@ -3010,11 +3010,11 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('GroupID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Time', 'datetime', [
                 'null' => true,
@@ -3036,7 +3036,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('ID', 'integer', [
                 'null' => false,
                 'limit' => MysqlAdapter::INT_REGULAR,
-                'identity' => 'enable',
+                'identity' => true,
             ])
             ->addColumn('Name', 'string', [
                 'null' => false,
@@ -3077,7 +3077,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('ID', 'integer', [
                 'null' => false,
                 'limit' => MysqlAdapter::INT_REGULAR,
-                'identity' => 'enable',
+                'identity' => true,
             ])
             ->addColumn('Time', 'datetime', [
                 'null' => true,
@@ -3106,15 +3106,15 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('TopicID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('PostID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addIndex(['TopicID'], [
                 'name' => 'TopicID',
@@ -3132,9 +3132,9 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
-                'identity' => 'enable',
+                'identity' => true,
             ])
             ->addColumn('Name', 'string', [
                 'null' => false,
@@ -3166,28 +3166,28 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('TimeAdded', 'integer', [
                 'null' => false,
-                'limit' => '12',
+                'limit' => 12,
                 'signed' => false,
             ])
             ->addColumn('LastVote', 'integer', [
                 'null' => false,
-                'limit' => '12',
+                'limit' => 12,
                 'signed' => false,
             ])
             ->addColumn('CategoryID', 'integer', [
                 'null' => false,
-                'limit' => '3',
+                'limit' => 3,
             ])
             ->addColumn('Title', 'string', [
                 'null' => true,
@@ -3199,7 +3199,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('Year', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '4',
+                'limit' => 4,
             ])
             ->addColumn('ArtistList', 'string', [
                 'null' => true,
@@ -3250,18 +3250,18 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('FillerID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('TorrentID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('TimeFilled', 'integer', [
                 'null' => false,
-                'limit' => '12',
+                'limit' => 12,
                 'signed' => false,
             ])
             ->addColumn('Visible', 'binary', [
@@ -3277,7 +3277,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('Votes', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('RecordLabel', 'string', [
@@ -3331,16 +3331,16 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('TorrentID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Points', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->create();
         $this->table('wiki_aliases', [
@@ -3360,12 +3360,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('ArticleID', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->create();
         $this->table('users_history_emails', [
@@ -3378,7 +3378,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Email', 'string', [
                 'null' => true,
@@ -3414,7 +3414,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('PushService', 'boolean', [
                 'null' => false,
@@ -3439,7 +3439,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('GroupName', 'string', [
                 'null' => true,
@@ -3465,7 +3465,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('Year', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '4',
+                'limit' => 4,
             ])
             ->addColumn('CatalogueNumber', 'string', [
                 'null' => true,
@@ -3489,7 +3489,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('Time', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '12',
+                'limit' => 12,
             ])
             ->addColumn('ReleaseType', 'integer', [
                 'null' => true,
@@ -3503,22 +3503,22 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('Snatched', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Seeders', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Leechers', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('LogScore', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '3',
+                'limit' => 3,
             ])
             ->addColumn('Scene', 'boolean', [
                 'null' => false,
@@ -3569,7 +3569,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('RemasterYear', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '4',
+                'limit' => 4,
             ])
             ->addColumn('RemasterTitle', 'string', [
                 'null' => true,
@@ -3611,13 +3611,13 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('SimilarID', 'integer', [
                 'null' => false,
-                'limit' => '12',
-                'identity' => 'enable',
+                'limit' => 12,
+                'identity' => true,
             ])
             ->addColumn('Score', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addIndex(['Score'], [
                 'name' => 'Score',
@@ -3635,17 +3635,17 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('NextHour', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '2',
+                'limit' => 2,
             ])
             ->addColumn('NextDay', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '2',
+                'limit' => 2,
             ])
             ->addColumn('NextBiWeekly', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '2',
+                'limit' => 2,
             ])
             ->create();
         $this->table('collages_artists', [
@@ -3659,20 +3659,20 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('CollageID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('ArtistID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Sort', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('AddedOn', 'datetime', [
                 'null' => true,
@@ -3720,16 +3720,16 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('RequestID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('ArtistID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('AliasID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Importance', 'enum', [
                 'null' => true,
@@ -3749,12 +3749,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('TorrentID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addIndex(['UserID'], [
@@ -3773,18 +3773,18 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('GroupID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Ups', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('Total', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('Score', 'float', [
@@ -3807,9 +3807,9 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '6',
+                'limit' => 6,
                 'signed' => false,
-                'identity' => 'enable',
+                'identity' => true,
             ])
             ->addColumn('CategoryID', 'integer', [
                 'null' => false,
@@ -3818,7 +3818,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('Sort', 'integer', [
                 'null' => false,
-                'limit' => '6',
+                'limit' => 6,
                 'signed' => false,
             ])
             ->addColumn('Name', 'string', [
@@ -3838,42 +3838,42 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('MinClassRead', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '4',
+                'limit' => 4,
             ])
             ->addColumn('MinClassWrite', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '4',
+                'limit' => 4,
             ])
             ->addColumn('MinClassCreate', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '4',
+                'limit' => 4,
             ])
             ->addColumn('NumTopics', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('NumPosts', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('LastPostID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('LastPostAuthorID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('LastPostTopicID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('LastPostTime', 'datetime', [
                 'null' => true,
@@ -3887,7 +3887,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('AutoLockWeeks', 'integer', [
                 'null' => false,
                 'default' => '4',
-                'limit' => '3',
+                'limit' => 3,
                 'signed' => false,
             ])
             ->addIndex(['Sort'], [
@@ -3910,11 +3910,11 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('QuestionID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->create();
         $this->table('reports_email_blacklist', [
@@ -3928,8 +3928,8 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
-                'identity' => 'enable',
+                'limit' => 10,
+                'identity' => true,
             ])
             ->addColumn('Type', 'integer', [
                 'null' => false,
@@ -3938,7 +3938,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Time', 'datetime', [
                 'null' => true,
@@ -3951,7 +3951,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('ResolverID', 'integer', [
                 'null' => true,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Email', 'string', [
                 'null' => false,
@@ -4010,8 +4010,8 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
-                'identity' => 'enable',
+                'limit' => 10,
+                'identity' => true,
             ])
             ->addColumn('Date', 'datetime', [
                 'null' => true,
@@ -4033,11 +4033,11 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('ArtistID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Time', 'datetime', [
                 'null' => false,
@@ -4089,12 +4089,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('UserID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('ConvID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '12',
+                'limit' => 12,
             ])
             ->addColumn('InInbox', 'enum', [
                 'null' => false,
@@ -4127,7 +4127,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('ForwardedTo', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '12',
+                'limit' => 12,
             ])
             ->addIndex(['InInbox'], [
                 'name' => 'InInbox',
@@ -4173,12 +4173,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('TorrentID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('TimeAdded', 'datetime', [
                 'null' => true,
@@ -4199,13 +4199,13 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('RevisionID', 'integer', [
                 'null' => false,
-                'limit' => '12',
-                'identity' => 'enable',
+                'limit' => 12,
+                'identity' => true,
             ])
             ->addColumn('PageID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Body', 'text', [
                 'null' => true,
@@ -4217,7 +4217,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('UserID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Summary', 'string', [
                 'null' => true,
@@ -4261,7 +4261,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('ID', 'integer', [
                 'null' => false,
                 'limit' => MysqlAdapter::INT_REGULAR,
-                'identity' => 'enable',
+                'identity' => true,
             ])
             ->addColumn('Message', 'text', [
                 'null' => true,
@@ -4289,20 +4289,20 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('CollageID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('GroupID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Sort', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('AddedOn', 'datetime', [
                 'null' => true,
@@ -4343,8 +4343,8 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
-                'identity' => 'enable',
+                'limit' => 10,
+                'identity' => true,
             ])
             ->addColumn('Page', 'enum', [
                 'null' => false,
@@ -4353,11 +4353,11 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('PageID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('AuthorID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('AddedTime', 'datetime', [
                 'null' => true,
@@ -4372,7 +4372,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('EditedUserID', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('EditedTime', 'datetime', [
                 'null' => true,
@@ -4405,8 +4405,8 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('Rate', 'decimal', [
                 'null' => true,
                 'default' => null,
-                'precision' => '9',
-                'scale' => '4',
+                'precision' => 9,
+                'scale' => 4,
             ])
             ->addColumn('Time', 'datetime', [
                 'null' => true,
@@ -4424,7 +4424,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('TopicID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('Question', 'string', [
@@ -4460,11 +4460,11 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('GroupID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Points', 'boolean', [
                 'null' => false,
@@ -4491,13 +4491,13 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('NumTorrents', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '6',
+                'limit' => 6,
                 'signed' => false,
             ])
             ->addColumn('SumTime', 'biginteger', [
@@ -4508,7 +4508,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('SeedingAvg', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '6',
+                'limit' => 6,
                 'signed' => false,
             ])
             ->create();
@@ -4523,11 +4523,11 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('GroupID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Time', 'datetime', [
                 'null' => false,
@@ -4562,7 +4562,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('ID', 'integer', [
                 'null' => false,
                 'limit' => MysqlAdapter::INT_REGULAR,
-                'identity' => 'enable',
+                'identity' => true,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => true,
@@ -4597,14 +4597,14 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
-                'identity' => 'enable',
+                'identity' => true,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('TimeAdded', 'datetime', [
@@ -4616,7 +4616,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('CategoryID', 'integer', [
                 'null' => false,
-                'limit' => '3',
+                'limit' => 3,
             ])
             ->addColumn('Title', 'string', [
                 'null' => true,
@@ -4628,7 +4628,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('Year', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '4',
+                'limit' => 4,
             ])
             ->addColumn('Image', 'string', [
                 'null' => true,
@@ -4685,13 +4685,13 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('FillerID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('TorrentID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('TimeFilled', 'datetime', [
@@ -4712,7 +4712,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('GroupID', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('OCLC', 'string', [
                 'null' => false,
@@ -4770,12 +4770,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('UserID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('StyleID', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('StyleURL', 'string', [
                 'null' => true,
@@ -4898,7 +4898,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('remident', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('description', 'text', [
@@ -4929,7 +4929,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('InviterID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('InviteKey', 'char', [
                 'null' => false,
@@ -4973,13 +4973,13 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
-                'identity' => 'enable',
+                'identity' => true,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('Title', 'string', [
@@ -5000,7 +5000,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('ThreadID', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('Important', 'integer', [
@@ -5028,12 +5028,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('GroupID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Type', 'enum', [
                 'null' => true,
@@ -5073,13 +5073,13 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('RevisionID', 'integer', [
                 'null' => false,
-                'limit' => '12',
-                'identity' => 'enable',
+                'limit' => 12,
+                'identity' => true,
             ])
             ->addColumn('PageID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Body', 'text', [
                 'null' => true,
@@ -5091,7 +5091,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('UserID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Summary', 'string', [
                 'null' => true,
@@ -5134,17 +5134,17 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('NumTorrents', 'integer', [
                 'null' => false,
-                'limit' => '6',
+                'limit' => 6,
                 'signed' => false,
             ])
             ->addColumn('Date', 'integer', [
                 'null' => false,
-                'limit' => '8',
+                'limit' => 8,
                 'signed' => false,
             ])
             ->addColumn('Time', 'integer', [
@@ -5190,13 +5190,13 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
-                'identity' => 'enable',
+                'identity' => true,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('Title', 'string', [
@@ -5234,8 +5234,8 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
-                'identity' => 'enable',
+                'limit' => 10,
+                'identity' => true,
             ])
             ->addColumn('Name', 'string', [
                 'null' => false,
@@ -5253,12 +5253,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('UserID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('NumTorrents', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '4',
+                'limit' => 4,
             ])
             ->addColumn('Deleted', 'enum', [
                 'null' => true,
@@ -5275,7 +5275,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('CategoryID', 'integer', [
                 'null' => false,
                 'default' => '1',
-                'limit' => '2',
+                'limit' => 2,
             ])
             ->addColumn('TagList', 'string', [
                 'null' => false,
@@ -5287,12 +5287,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('MaxGroups', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('MaxGroupsPerUser', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Featured', 'integer', [
                 'null' => false,
@@ -5302,7 +5302,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('Subscribers', 'integer', [
                 'null' => true,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('updated', 'datetime', [
                 'null' => false,
@@ -5331,13 +5331,13 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('LogID', 'integer', [
                 'null' => false,
-                'limit' => '10',
-                'identity' => 'enable',
+                'limit' => 10,
+                'identity' => true,
             ])
             ->addColumn('TorrentID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Log', 'text', [
                 'null' => false,
@@ -5360,7 +5360,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('Score', 'integer', [
                 'null' => false,
-                'limit' => '3',
+                'limit' => 3,
             ])
             ->addColumn('Checksum', 'enum', [
                 'null' => false,
@@ -5376,7 +5376,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('AdjustedScore', 'integer', [
                 'null' => false,
-                'limit' => '3',
+                'limit' => 3,
             ])
             ->addColumn('AdjustedChecksum', 'enum', [
                 'null' => false,
@@ -5387,7 +5387,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('AdjustedBy', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('AdjustmentReason', 'text', [
                 'null' => true,
@@ -5419,12 +5419,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('StyleID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('StyleURL', 'string', [
@@ -5530,7 +5530,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('Inviter', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('BitcoinAddress', 'string', [
                 'null' => true,
@@ -5542,7 +5542,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('WarnedTimes', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '2',
+                'limit' => 2,
             ])
             ->addColumn('DisableAvatar', 'enum', [
                 'null' => false,
@@ -5633,7 +5633,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('LastReadNews', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('HideCountryChanges', 'enum', [
                 'null' => false,
@@ -5670,7 +5670,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('LastReadBlog', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('InfoTitle', 'string', [
                 'null' => false,
@@ -5717,7 +5717,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addIndex(['BitcoinAddress'], [
                 'name' => 'BitcoinAddress',
                 'unique' => false,
-                'limit' => '4',
+                'limit' => 4,
             ])
             ->addIndex(['AuthKey'], [
                 'name' => 'AuthKey',
@@ -5739,18 +5739,18 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
-                'identity' => 'enable',
+                'limit' => 10,
+                'identity' => true,
             ])
             ->addColumn('ArtistID', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('CategoryID', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '3',
+                'limit' => 3,
             ])
             ->addColumn('Name', 'string', [
                 'null' => true,
@@ -5762,7 +5762,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('Year', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '4',
+                'limit' => 4,
             ])
             ->addColumn('CatalogueNumber', 'string', [
                 'null' => false,
@@ -5795,7 +5795,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('RevisionID', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '12',
+                'limit' => 12,
             ])
             ->addColumn('WikiBody', 'text', [
                 'null' => false,
@@ -5825,7 +5825,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addIndex(['Name'], [
                 'name' => 'Name',
                 'unique' => false,
-                'limit' => '255',
+                'limit' => 255,
             ])
             ->addIndex(['Year'], [
                 'name' => 'Year',
@@ -5852,12 +5852,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('TagID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('RequestID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addIndex(['TagID'], [
                 'name' => 'TagID',
@@ -5879,13 +5879,13 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('NumSnatches', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addIndex(['NumSnatches'], [
@@ -5904,11 +5904,11 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('QuestionID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Answer', 'text', [
                 'null' => true,
@@ -5936,9 +5936,9 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
-                'identity' => 'enable',
+                'identity' => true,
             ])
             ->addColumn('Comments', 'text', [
                 'null' => true,
@@ -5959,11 +5959,11 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('AppID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Token', 'char', [
                 'null' => false,
@@ -6004,7 +6004,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('Users', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->create();
         $this->table('featured_albums', [
@@ -6018,12 +6018,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('GroupID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('ThreadID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Title', 'string', [
                 'null' => false,
@@ -6050,9 +6050,9 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
-                'identity' => 'enable',
+                'identity' => true,
             ])
             ->addColumn('Username', 'string', [
                 'null' => false,
@@ -6145,12 +6145,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('Invites', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('PermissionID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('CustomPermissions', 'text', [
@@ -6189,17 +6189,17 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('FLTokens', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('FLT_Given', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Invites_Given', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('2FA_Key', 'string', [
                 'null' => true,
@@ -6284,7 +6284,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('ID', 'integer', [
                 'null' => false,
                 'limit' => MysqlAdapter::INT_REGULAR,
-                'identity' => 'enable',
+                'identity' => true,
             ])
             ->addColumn('Subject', 'text', [
                 'null' => true,
@@ -6348,12 +6348,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('PermissionID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addIndex(['PermissionID'], [
@@ -6372,8 +6372,8 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
-                'identity' => 'enable',
+                'limit' => 10,
+                'identity' => true,
             ])
             ->addColumn('Title', 'string', [
                 'null' => false,
@@ -6383,7 +6383,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('AuthorID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('IsLocked', 'enum', [
                 'null' => false,
@@ -6399,28 +6399,28 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ForumID', 'integer', [
                 'null' => false,
-                'limit' => '3',
+                'limit' => 3,
             ])
             ->addColumn('NumPosts', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('LastPostID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('LastPostTime', 'datetime', [
                 'null' => true,
             ])
             ->addColumn('LastPostAuthorID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('StickyPostID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Ranking', 'integer', [
                 'null' => true,
@@ -6466,12 +6466,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('TopicID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('Vote', 'integer', [
@@ -6490,8 +6490,8 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
-                'identity' => 'enable',
+                'limit' => 10,
+                'identity' => true,
             ])
             ->addColumn('Name', 'string', [
                 'null' => true,
@@ -6509,12 +6509,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('Uses', 'integer', [
                 'null' => false,
                 'default' => '1',
-                'limit' => '12',
+                'limit' => 12,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addIndex(['Name'], [
                 'name' => 'Name_2',
@@ -6598,12 +6598,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('TorrentID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('TimeAdded', 'datetime', [
                 'null' => true,
@@ -6636,7 +6636,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('Sort', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '6',
+                'limit' => 6,
                 'signed' => false,
             ])
             ->addIndex(['Sort'], [
@@ -6656,7 +6656,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('ID', 'integer', [
                 'null' => false,
                 'limit' => MysqlAdapter::INT_REGULAR,
-                'identity' => 'enable',
+                'identity' => true,
             ])
             ->addColumn('ContestTypeID', 'integer', [
                 'null' => false,
@@ -6718,11 +6718,11 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('TorrentID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('GroupID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('balance', 'biginteger', [
                 'null' => false,
@@ -6760,8 +6760,8 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('DriveID', 'integer', [
                 'null' => false,
-                'limit' => '10',
-                'identity' => 'enable',
+                'limit' => 10,
+                'identity' => true,
             ])
             ->addColumn('Name', 'string', [
                 'null' => false,
@@ -6791,17 +6791,17 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
-                'identity' => 'enable',
+                'limit' => 10,
+                'identity' => true,
             ])
             ->addColumn('GroupID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Media', 'string', [
                 'null' => true,
@@ -6833,7 +6833,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('RemasterYear', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '4',
+                'limit' => 4,
             ])
             ->addColumn('RemasterTitle', 'string', [
                 'null' => false,
@@ -6883,7 +6883,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('LogScore', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '6',
+                'limit' => 6,
             ])
             ->addColumn('LogChecksum', 'enum', [
                 'null' => false,
@@ -6897,7 +6897,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('FileCount', 'integer', [
                 'null' => false,
-                'limit' => '6',
+                'limit' => 6,
             ])
             ->addColumn('FileList', 'text', [
                 'null' => false,
@@ -6914,17 +6914,17 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('Size', 'biginteger', [
                 'null' => false,
-                'limit' => '12',
+                'limit' => 12,
             ])
             ->addColumn('Leechers', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '6',
+                'limit' => 6,
             ])
             ->addColumn('Seeders', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '6',
+                'limit' => 6,
             ])
             ->addColumn('last_action', 'datetime', [
                 'null' => true,
@@ -6954,7 +6954,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('Snatched', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('balance', 'biginteger', [
@@ -6967,12 +6967,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('TranscodedFrom', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addIndex(['info_hash'], [
                 'name' => 'InfoHash',
                 'unique' => true,
-                'limit' => '40',
+                'limit' => 40,
             ])
             ->addIndex(['GroupID'], [
                 'name' => 'GroupID',
@@ -7042,11 +7042,11 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('RequestID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Points', 'boolean', [
                 'null' => false,
@@ -7073,12 +7073,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '12',
-                'identity' => 'enable',
+                'limit' => 12,
+                'identity' => true,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Label', 'string', [
                 'null' => false,
@@ -7150,12 +7150,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('FromYear', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '4',
+                'limit' => 4,
             ])
             ->addColumn('ToYear', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '4',
+                'limit' => 4,
             ])
             ->addColumn('ExcludeVA', 'enum', [
                 'null' => false,
@@ -7200,20 +7200,20 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('GroupID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('ArtistID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('AliasID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('Importance', 'enum', [
@@ -7253,7 +7253,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('ChangeTime', 'datetime', [
                 'null' => true,
@@ -7282,12 +7282,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('TorrentID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('TimeAdded', 'datetime', [
                 'null' => true,
@@ -7350,20 +7350,20 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
-                'identity' => 'enable',
+                'identity' => true,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('ThingID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('Type', 'string', [
@@ -7383,7 +7383,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('ResolverID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('Status', 'enum', [
@@ -7407,7 +7407,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('ClaimerID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('Notes', 'text', [
@@ -7444,8 +7444,8 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
-                'identity' => 'enable',
+                'limit' => 10,
+                'identity' => true,
             ])
             ->addColumn('Question', 'text', [
                 'null' => false,
@@ -7455,7 +7455,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Date', 'datetime', [
                 'null' => false,
@@ -7475,12 +7475,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Amount', 'decimal', [
                 'null' => false,
-                'precision' => '6',
-                'scale' => '2',
+                'precision' => 6,
+                'scale' => 2,
             ])
             ->addColumn('Email', 'string', [
                 'null' => false,
@@ -7514,17 +7514,17 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('Rank', 'integer', [
                 'null' => true,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('AddedBy', 'integer', [
                 'null' => true,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('TotalRank', 'integer', [
                 'null' => true,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addIndex(['UserID'], [
                 'name' => 'UserID',
@@ -7572,12 +7572,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('FriendID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('Comment', 'text', [
@@ -7606,8 +7606,8 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
-                'identity' => 'enable',
+                'limit' => 10,
+                'identity' => true,
             ])
             ->addColumn('Title', 'string', [
                 'null' => true,
@@ -7639,7 +7639,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('AddedBy', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Importance', 'boolean', [
                 'null' => true,
@@ -7663,8 +7663,8 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
-                'identity' => 'enable',
+                'limit' => 10,
+                'identity' => true,
             ])
             ->addColumn('BadLabel', 'string', [
                 'null' => false,
@@ -7697,7 +7697,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('OldPassKey', 'string', [
                 'null' => true,
@@ -7736,13 +7736,13 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('ForumID', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '6',
+                'limit' => 6,
                 'signed' => false,
             ])
             ->addColumn('ThreadID', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->create();
         $this->table('users_donor_ranks', [
@@ -7757,7 +7757,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('UserID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Rank', 'integer', [
                 'null' => false,
@@ -7776,7 +7776,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('TotalRank', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('SpecialRank', 'integer', [
                 'null' => true,
@@ -7821,11 +7821,11 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('ID', 'integer', [
                 'null' => false,
                 'limit' => MysqlAdapter::INT_REGULAR,
-                'identity' => 'enable',
+                'identity' => true,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('Email', 'string', [
@@ -7864,7 +7864,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('CheckedBy', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('Outcome', 'boolean', [
@@ -7893,7 +7893,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('Time', 'datetime', [
@@ -7921,12 +7921,12 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('PostID', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('EditUser', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('EditTime', 'datetime', [
                 'null' => true,
@@ -7960,27 +7960,27 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('TagID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('GroupID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('PositiveVotes', 'integer', [
                 'null' => false,
                 'default' => '1',
-                'limit' => '6',
+                'limit' => 6,
             ])
             ->addColumn('NegativeVotes', 'integer', [
                 'null' => false,
                 'default' => '1',
-                'limit' => '6',
+                'limit' => 6,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addIndex(['TagID'], [
                 'name' => 'TagID',
@@ -8015,15 +8015,15 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('ID', 'integer', [
                 'null' => false,
                 'limit' => MysqlAdapter::INT_REGULAR,
-                'identity' => 'enable',
+                'identity' => true,
             ])
             ->addColumn('ConcertID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('TopicID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addIndex(['ConcertID'], [
                 'name' => 'ConcertID',
@@ -8046,7 +8046,7 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ->addColumn('ID', 'integer', [
                 'null' => false,
                 'limit' => MysqlAdapter::INT_REGULAR,
-                'identity' => 'enable',
+                'identity' => true,
             ])
             ->addColumn('Name', 'string', [
                 'null' => false,

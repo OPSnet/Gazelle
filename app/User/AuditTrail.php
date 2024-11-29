@@ -12,7 +12,7 @@ class AuditTrail extends \Gazelle\BaseUser {
         return $this;
     }
 
-    public function addEvent(UserAuditEvent $event, string $note, ?\Gazelle\User $creator = null): int {
+    public function addEvent(UserAuditEvent $event, string $note, \Gazelle\User|null $creator = null): int {
         return $this->pg()->insert("
             insert into user_audit_trail
                    (id_user, event, note, id_user_creator)

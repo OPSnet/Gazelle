@@ -17,7 +17,7 @@ final class TorrentLogAdjustedScore extends AbstractMigration {
         $this->table('torrents_logs')
             ->changeColumn('AdjustedScore', 'integer', [
                 'null' => false,
-                'limit' => '3',
+                'limit' => 3,
             ])
             ->save();
     }

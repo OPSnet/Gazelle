@@ -20,11 +20,11 @@ class NukeRecommendations extends AbstractMigration {
             ])
             ->addColumn('GroupID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Time', 'datetime', [
                 'null' => true,
@@ -45,7 +45,7 @@ class NukeRecommendations extends AbstractMigration {
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Enable', 'boolean', [
                 'null' => true,

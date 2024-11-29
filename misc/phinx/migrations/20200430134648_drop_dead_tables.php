@@ -40,12 +40,12 @@ class DropDeadTables extends AbstractMigration {
             ->addColumn('PostID', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('EditUser', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('EditTime', 'datetime', [
                 'null' => true,
@@ -80,15 +80,15 @@ class DropDeadTables extends AbstractMigration {
             ->addColumn('ID', 'integer', [
                 'null' => false,
                 'limit' => MysqlAdapter::INT_REGULAR,
-                'identity' => 'enable',
+                'identity' => true,
             ])
             ->addColumn('ConcertID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('TopicID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addIndex(['ConcertID'], [
                 'name' => 'ConcertID',
@@ -118,8 +118,8 @@ class DropDeadTables extends AbstractMigration {
             ->addColumn('Rate', 'decimal', [
                 'null' => true,
                 'default' => null,
-                'precision' => '9',
-                'scale' => '4',
+                'precision' => 9,
+                'scale' => 4,
             ])
             ->addColumn('Time', 'datetime', [
                 'null' => true,
@@ -138,7 +138,7 @@ class DropDeadTables extends AbstractMigration {
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->create();
 
@@ -211,7 +211,7 @@ class DropDeadTables extends AbstractMigration {
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('GroupName', 'string', [
                 'null' => true,
@@ -237,7 +237,7 @@ class DropDeadTables extends AbstractMigration {
             ->addColumn('Year', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '4',
+                'limit' => 4,
             ])
             ->addColumn('CatalogueNumber', 'string', [
                 'null' => true,
@@ -261,7 +261,7 @@ class DropDeadTables extends AbstractMigration {
             ->addColumn('Time', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '12',
+                'limit' => 12,
             ])
             ->addColumn('ReleaseType', 'integer', [
                 'null' => true,
@@ -275,22 +275,22 @@ class DropDeadTables extends AbstractMigration {
             ->addColumn('Snatched', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Seeders', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Leechers', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('LogScore', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '3',
+                'limit' => 3,
             ])
             ->addColumn('Scene', 'boolean', [
                 'null' => false,
@@ -341,7 +341,7 @@ class DropDeadTables extends AbstractMigration {
             ->addColumn('RemasterYear', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '4',
+                'limit' => 4,
             ])
             ->addColumn('RemasterTitle', 'string', [
                 'null' => true,
@@ -384,11 +384,11 @@ class DropDeadTables extends AbstractMigration {
             ])
             ->addColumn('QuestionID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->create();
 
@@ -404,12 +404,12 @@ class DropDeadTables extends AbstractMigration {
             ->addColumn('UserID', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('StyleID', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('StyleURL', 'string', [
                 'null' => true,
@@ -435,11 +435,11 @@ class DropDeadTables extends AbstractMigration {
             ])
             ->addColumn('TorrentID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('GroupID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('balance', 'biginteger', [
                 'null' => false,
@@ -478,11 +478,11 @@ class DropDeadTables extends AbstractMigration {
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('GroupID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Points', 'boolean', [
                 'null' => false,
@@ -510,11 +510,11 @@ class DropDeadTables extends AbstractMigration {
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('RequestID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Points', 'boolean', [
                 'null' => false,
@@ -542,13 +542,13 @@ class DropDeadTables extends AbstractMigration {
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('NumSnatches', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addIndex(['NumSnatches'], [
@@ -568,13 +568,13 @@ class DropDeadTables extends AbstractMigration {
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('NumTorrents', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '6',
+                'limit' => 6,
                 'signed' => false,
             ])
             ->addColumn('SumTime', 'biginteger', [
@@ -585,7 +585,7 @@ class DropDeadTables extends AbstractMigration {
             ->addColumn('SeedingAvg', 'integer', [
                 'null' => false,
                 'default' => '0',
-                'limit' => '6',
+                'limit' => 6,
                 'signed' => false,
             ])
             ->create();
@@ -601,12 +601,12 @@ class DropDeadTables extends AbstractMigration {
             ])
             ->addColumn('TorrentID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addColumn('UserID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
                 'signed' => false,
             ])
             ->addIndex(['UserID'], [

@@ -88,7 +88,7 @@ class Curl {
         return $this->curlInfo(CURLINFO_RESPONSE_CODE);
     }
 
-    public function curlInfo($option = null): mixed {
+    public function curlInfo(int $option): mixed {
         return curl_getinfo($this->curl, $option);
     }
 }

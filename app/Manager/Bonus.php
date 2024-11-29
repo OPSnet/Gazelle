@@ -140,7 +140,7 @@ class Bonus extends \Gazelle\Base {
         return $this->addMultiPoints($points, self::$db->collect('ID', false));
     }
 
-    public function givePoints(\Gazelle\Task $task = null): int {
+    public function givePoints(\Gazelle\Task|null $task = null): int {
         //------------------------ Update Bonus Points -------------------------//
         // calculation:
         // Size * (0.0754 + (0.1207 * ln(1 + seedtime)/ (seeders ^ 0.55)))

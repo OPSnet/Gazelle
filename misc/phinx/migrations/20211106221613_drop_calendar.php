@@ -23,8 +23,8 @@ final class DropCalendar extends AbstractMigration
             ])
             ->addColumn('ID', 'integer', [
                 'null' => false,
-                'limit' => '10',
-                'identity' => 'enable',
+                'limit' => 10,
+                'identity' => true,
             ])
             ->addColumn('Title', 'string', [
                 'null' => true,
@@ -56,7 +56,7 @@ final class DropCalendar extends AbstractMigration
             ->addColumn('AddedBy', 'integer', [
                 'null' => true,
                 'default' => null,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->addColumn('Importance', 'boolean', [
                 'null' => true,

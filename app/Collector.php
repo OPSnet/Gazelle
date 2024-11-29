@@ -187,7 +187,7 @@ abstract class Collector extends Base  {
      * $info file info stored as an array with at least the keys
      *     Artist, Name, Year, Media, Format, Encoding and TorrentID
      */
-    public function addZip(\ZipStream\ZipStream $zip, array $info, string $folderName = null): void {
+    public function addZip(\ZipStream\ZipStream $zip, array $info, string|null $folderName = null): void {
         if ($info['sequence'] == 100) {
             $this->skip($info);
             return;

@@ -443,7 +443,7 @@ class Bonus extends \Gazelle\BaseUser {
         );
     }
 
-    private function addPurchaseHistory(int $itemId, int $price, $otherUserId = null): int {
+    private function addPurchaseHistory(int $itemId, int $price, int|null $otherUserId = null): int {
         self::$cache->delete_multi([
             sprintf(self::CACHE_PURCHASE, $this->id()),
             sprintf(self::CACHE_SUMMARY, $this->id()),

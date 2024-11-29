@@ -359,7 +359,7 @@ class Recovery extends \Gazelle\Base {
         );
     }
 
-    protected function userDetailsSql($schema = null): string {
+    protected function userDetailsSql(string|null $schema = null): string {
         if ($schema) {
             $permission_t = "$schema.permissions";
             $users_main_t = "$schema.users_main";

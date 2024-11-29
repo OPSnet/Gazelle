@@ -30,7 +30,7 @@ class ReportAuto extends \Gazelle\BaseManager {
         return $this->reportCategories;
     }
 
-    public function create(\Gazelle\User $user, \Gazelle\ReportAuto\Type $type, array $data, string $time = null): \Gazelle\ReportAuto {
+    public function create(\Gazelle\User $user, \Gazelle\ReportAuto\Type $type, array $data, string|null $time = null): \Gazelle\ReportAuto {
         $args = [$user->id(), $type->id(), json_encode($data)];
         if ($time) {
             // time is an iso timestring

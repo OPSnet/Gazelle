@@ -78,7 +78,7 @@ class UserclassRateLimit extends \Gazelle\BaseUser {
         return $this->recentDownloadTotal() > $userclassOvershoot;
     }
 
-    public function isOvershoot(?\Gazelle\Torrent $torrent = null): bool {
+    public function isOvershoot(\Gazelle\Torrent|null $torrent = null): bool {
         if ($this->hasExceededFactor() && $this->hasExceededTotal()) {
             if ($torrent) {
                 $this->register($torrent);

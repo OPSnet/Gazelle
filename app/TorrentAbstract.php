@@ -768,7 +768,7 @@ abstract class TorrentAbstract extends BaseObject {
         return "<a href=\"{$this->url()}\">[$short]</a>";
     }
 
-    public function labelList(?User $viewer = null): array {
+    public function labelList(User|null $viewer = null): array {
         $info = $this->info();
         $extra = [];
         if ($viewer?->snatch()?->showSnatch($this)) {
@@ -798,7 +798,7 @@ abstract class TorrentAbstract extends BaseObject {
         return $extra;
     }
 
-    public function label(?User $viewer = null): string {
+    public function label(User|null $viewer = null): string {
         $short = $this->shortLabel();
         $extra = $this->labelList($viewer);
         if ($short) {

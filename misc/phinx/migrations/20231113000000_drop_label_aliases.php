@@ -11,7 +11,7 @@ final class DropLabelAliases extends AbstractMigration {
 
     public function down(): void {
         $this->table('label_aliases', ['id' => false, 'primary_key' => ['ID']])
-            ->addColumn('ID', 'integer', ['null' => false, 'identity' => 'enable'])
+            ->addColumn('ID', 'integer', ['null' => false, 'identity' => true])
             ->addColumn('BadLabel', 'string', ['limit' => 100])
             ->addColumn('AliasLabel', 'string', ['limit' => 100])
             ->addIndex(['BadLabel'], ['name' => 'BadLabel', 'unique' => false])

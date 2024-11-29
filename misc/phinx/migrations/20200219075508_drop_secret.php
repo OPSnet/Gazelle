@@ -124,7 +124,7 @@ class DropSecret extends AbstractMigration {
         $this->table('forums_topics')
             ->changeColumn('LastPostID', 'integer', [
                 'null' => false,
-                'limit' => '10',
+                'limit' => 10,
             ])
             ->update();
 

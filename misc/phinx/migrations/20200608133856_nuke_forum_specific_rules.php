@@ -10,10 +10,10 @@ class NukeForumSpecificRules extends AbstractMigration {
     public function down(): void {
         $this->table('forums_specific_rules', ['id' => false])
             ->addColumn('ForumID', 'integer', [
-                'null' => true, 'default' => null, 'limit' => '6', 'signed' => false
+                'null' => true, 'default' => null, 'limit' => 6, 'signed' => false
             ])
             ->addColumn('ThreadID', 'integer', [
-                'null' => true, 'default' => null, 'limit' => '10'
+                'null' => true, 'default' => null, 'limit' => 10
             ])
             ->create();
     }

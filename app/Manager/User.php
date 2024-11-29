@@ -703,7 +703,7 @@ class User extends \Gazelle\BaseManager {
         return count($seen) + count($ids);
     }
 
-    public function disableUnconfirmedUsers(\Gazelle\Task $task = null): int {
+    public function disableUnconfirmedUsers(\Gazelle\Task|null $task = null): int {
         // get a list of user IDs for clearing cache keys
         self::$db->prepared_query("
             SELECT ID
@@ -1010,7 +1010,7 @@ class User extends \Gazelle\BaseManager {
         return $criteria;
     }
 
-    public function promote(\Gazelle\Task $task = null, bool $commit = true): int {
+    public function promote(\Gazelle\Task|null $task = null, bool $commit = true): int {
         $processed = 0;
         foreach ($this->promotionCriteria() as $level) {
             $fromClass = $this->userclassName($level['From']);
@@ -1065,7 +1065,7 @@ class User extends \Gazelle\BaseManager {
         return $processed;
     }
 
-    public function demote(\Gazelle\Task $task = null, bool $commit = true): int {
+    public function demote(\Gazelle\Task|null $task = null, bool $commit = true): int {
         $processed = 0;
         foreach (array_reverse($this->promotionCriteria()) as $level) {
             $fromClass = $this->userclassName($level['To']);  // note: To/From are reversed
@@ -1342,7 +1342,7 @@ class User extends \Gazelle\BaseManager {
         ");
     }
 
-    public function ratioWatchAudit(\Gazelle\Tracker $tracker, ?\Gazelle\Task $task = null): int {
+    public function ratioWatchAudit(\Gazelle\Tracker $tracker, \Gazelle\Task|null $task = null): int {
         // Take users off ratio watch and enable leeching
         return $this->ratioWatchClear($tracker, $task)
             + $this->ratioWatchSet($task);
@@ -1425,7 +1425,7 @@ class User extends \Gazelle\BaseManager {
     /**
      * Remove leeching privileges from users who were put on ratio watch and did not improve their situation in time
      */
-    public function ratioWatchBlock(\Gazelle\Tracker $tracker, ?\Gazelle\Task $task = null): int {
+    public function ratioWatchBlock(\Gazelle\Tracker $tracker, \Gazelle\Task|null $task = null): int {
         $idList = $this->ratioWatchBlockList();
         if (!$idList) {
             return 0;
@@ -1461,7 +1461,7 @@ class User extends \Gazelle\BaseManager {
     /**
      * Clear users who were on ratio watch and have since improved their situtation
      */
-    public function ratioWatchClear(\Gazelle\Tracker $tracker, ?\Gazelle\Task $task = null): int {
+    public function ratioWatchClear(\Gazelle\Tracker $tracker, \Gazelle\Task|null $task = null): int {
         $idList = $this->ratioWatchClearList();
         if (!$idList) {
             return 0;
@@ -1501,7 +1501,7 @@ class User extends \Gazelle\BaseManager {
         return $processed;
     }
 
-    public function ratioWatchEngage(\Gazelle\Tracker $tracker, \Gazelle\Task $task = null): int {
+    public function ratioWatchEngage(\Gazelle\Tracker $tracker, \Gazelle\Task|null $task = null): int {
         $idList = $this->ratioWatchEngageList();
         if (!$idList) {
             return 0;
@@ -1542,7 +1542,7 @@ class User extends \Gazelle\BaseManager {
     /**
      * Mark all users on ratio watch who have downloaded beyond what their required ratio allows.
      */
-    public function ratioWatchSet(?\Gazelle\Task $task = null): int {
+    public function ratioWatchSet(\Gazelle\Task|null $task = null): int {
         $idList = $this->ratioWatchSetList();
         if (!$idList) {
             return 0;

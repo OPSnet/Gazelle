@@ -44,7 +44,7 @@ class ReportAutoType extends \Gazelle\BaseManager {
     /**
      * returns newly created type, null on error or if type with name already exists
      */
-    public function create(string $name, string $description, ?string $category = null): ?\Gazelle\ReportAuto\Type {
+    public function create(string $name, string $description, string|null $category = null): ?\Gazelle\ReportAuto\Type {
         if ($category) {
             $catId = $this->findCategory($category);
             if (!$catId) {

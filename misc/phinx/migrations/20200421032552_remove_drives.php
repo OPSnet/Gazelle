@@ -19,8 +19,8 @@ class RemoveDrives extends AbstractMigration {
         ])
         ->addColumn('DriveID', 'integer', [
             'null' => false,
-            'limit' => '10',
-            'identity' => 'enable',
+            'limit' => 10,
+            'identity' => true,
         ])
         ->addColumn('Name', 'string', [
             'null' => false,

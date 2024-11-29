@@ -117,7 +117,7 @@ class Invite extends \Gazelle\Base {
     /**
      * Expire unused invitations
      */
-    public function expire(\Gazelle\Task $task = null): int {
+    public function expire(\Gazelle\Task|null $task = null): int {
         self::$db->begin_transaction();
         self::$db->prepared_query("SELECT InviterID FROM invites WHERE Expires < now()");
         $list = self::$db->collect(0, false);

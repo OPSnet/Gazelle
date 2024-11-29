@@ -7,7 +7,7 @@ use Gazelle\Enum\UserTokenType;
 class UserToken extends \Gazelle\BaseManager {
     use \Gazelle\Pg;
 
-    public function create(UserTokenType $type, \Gazelle\User $user, ?string $value = null): \Gazelle\User\Token {
+    public function create(UserTokenType $type, \Gazelle\User $user, string|null $value = null): \Gazelle\User\Token {
         $field = ['type',       'id_user'];
         $args  = [$type->value, $user->id()];
         if (!empty($value)) {

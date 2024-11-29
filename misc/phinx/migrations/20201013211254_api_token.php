@@ -21,8 +21,8 @@ class ApiToken extends AbstractMigration {
 
     public function down(): void {
         $this->table('api_users', ['id' => false, 'primary_key' => ['UserID', 'AppID']])
-            ->addColumn('UserID', 'integer', ['null' => false, 'limit' => '10'])
-            ->addColumn('AppID', 'integer', ['null' => false, 'limit' => '10'])
+            ->addColumn('UserID', 'integer', ['null' => false, 'limit' => 10])
+            ->addColumn('AppID', 'integer', ['null' => false, 'limit' => 10])
             ->addColumn('Token', 'char', ['null' => false, 'limit' => 32, 'collation' => 'utf8_general_ci', 'encoding' => 'utf8'])
             ->addColumn('State', 'enum', ['null' => false, 'default' => '0', 'limit' => 1, 'values' => ['0', '1', '2']])
             ->addColumn('Time', 'timestamp', ['null' => false, 'default' => 'CURRENT_TIMESTAMP'])
