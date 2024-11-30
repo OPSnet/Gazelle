@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let serialize = function () {
         let a = [];
         $('#sortable input').each(function () {
-            a.push($(this).attr('id'));
+            a.push(this.id);
         });
         $('#sorthide').val(JSON.stringify(a));
     };
@@ -16,8 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
     $('#sortable')
         .on('click', 'input', function () {
             // the + converts the boolean to either 1 or 0
-            const old_id = $(this).attr('id');
-            $(this).attr('id', old_id.slice(0, -1) + $(this).is(':checked'));
+            this.id = this.id.slice(0, -1) + +this.checked;
             serialize();
         })
         .sortable({
