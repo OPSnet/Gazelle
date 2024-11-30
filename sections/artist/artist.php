@@ -264,17 +264,17 @@ if ($sections = $Artist->sections()) {
     $reorderedSections = [];
     foreach (array_keys($sortHide) as $reltype) {
         if (isset($artistReleaseType[$reltype])) {
-            $reorderedSections[$reltype] = $sections[$reltype];
+            $reorderedSections[(int)$reltype] = $sections[$reltype];
             unset($artistReleaseType[$reltype]);
         }
     }
     /* Any left-over release types */
     foreach (array_keys($artistReleaseType) as $reltype) {
-        $reorderedSections[$reltype] = $sections[$reltype];
+        $reorderedSections[(int)$reltype] = $sections[$reltype];
     }
     $sections = $reorderedSections;
 
-    foreach (array_map('intval', array_keys($sections)) as $sectionId) {
+    foreach (array_keys($sections) as $sectionId) {
         $collapseSection = ($sortHide[$sectionId] ?? 0) == 1;
 ?>
         <a href="#torrents_<?= $artistMan->sectionLabel($sectionId) ?>" class="brackets"<?=
@@ -298,10 +298,10 @@ if ($sections = $Artist->sections()) {
         $sectionClosed = (bool)($sortHide[$sectionId] ?? 0);
         $groupsHidden = ($groupsClosed || $sectionClosed) ? ' hidden' : '';
 ?>
-                <tr class="colhead_dark" id="torrents_<?= $artistMan->sectionLabel((int)$sectionId) ?>">
+                <tr class="colhead_dark" id="torrents_<?= $artistMan->sectionLabel($sectionId) ?>">
                     <td class="small"><!-- expand/collapse --></td>
                     <td class="m_th_left m_th_left_collapsable" width="70%"><a href="#">↑</a>&nbsp;<strong><?=
-                        $artistMan->sectionTitle((int)$sectionId) ?></strong> <a href="#" class="tooltip brackets" onclick="$('.releases_<?=
+                        $artistMan->sectionTitle($sectionId) ?></strong> <a href="#" class="tooltip brackets" onclick="$('.releases_<?=
                         $sectionId ?>').gtoggle(true); return false;" title="Show/hide this section">Toggle</a></td>
 <?php if ($Viewer->ordinal()->value('file-count-display')) { ?>
                     <td class="number_column">Files</td>
@@ -351,7 +351,7 @@ if ($sections = $Artist->sections()) {
 <?php
         echo $Twig->render('torrent/detail-torrentgroup.twig', [
             'colspan_add'     => 1,
-            'hide'            => $groupsClosed,
+            'hide'            => $groupsClosed || $sectionClosed,
             'is_snatched_grp' => $isSnatched,
             'report_man'      => $reportMan,
             'snatcher'        => $snatcher,
