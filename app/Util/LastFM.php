@@ -212,7 +212,8 @@ class LastFM extends \Gazelle\Base {
         }
         $curl = new Curl();
         if ($curl->fetch($url . "&format=json&api_key=" . LASTFM_API_KEY)) {
-            return json_decode($curl->result(), true);
+            $result = $curl->result();
+            return is_null($result) ? false : json_decode($result, true);
         }
         self::$cache->cache_value($recentFailsKey, $recentFails + 1, 1800);
         return false;

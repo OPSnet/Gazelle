@@ -80,7 +80,7 @@ class Curl {
         return $this->result !== false || $this->responseCode() === 200;
     }
 
-    public function result(): ?string {
+    public function result(): string|null {
         return $this->result === false ? null : (string)$this->result;
     }
 

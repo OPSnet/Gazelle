@@ -22,7 +22,7 @@ class Request extends \Gazelle\BaseManager {
         string $logCue,
         bool $checksum,
         string $oclc,
-        int $groupId = null,
+        int|null $groupId = null,
     ): \Gazelle\Request {
         self::$db->prepared_query('
             INSERT INTO requests (

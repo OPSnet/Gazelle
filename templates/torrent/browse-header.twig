@@ -10,14 +10,14 @@
     <div class="head">
         <span style="float: right;">
 {% if not show_search %}
-    {% if viewer.permitted('site_advanced_search') %}
+{%  if viewer.permitted('site_advanced_search') %}
             <a id="ft_type" href="#" class="brackets tooltip hidden" title="The default behaviour here can be specified in your settings" onclick="return toggleTorrentSearch('{{ search_toggle }}');">Switch to {{ search_toggle }}</a>
-    {% endif %}
+{%  endif %}
             <a href="#" id="ft_toggle" class="brackets tooltip" title="The default behaviour here can be specified in your settings" onclick="return toggleTorrentSearch(0);">Show search form</a>
 {% else %}
-    {% if viewer.permitted('site_advanced_search') %}
+{%  if viewer.permitted('site_advanced_search') %}
             <a id="ft_type" href="#" class="brackets tooltip" title="The default behaviour here can be specified in your settings" onclick="return toggleTorrentSearch('{{ search_toggle }}');">Switch to {{ search_toggle }}</a>
-    {% endif %}
+{%  endif %}
             <a href="#" id="ft_toggle" class="brackets tooltip" title="The default behaviour here can be specified in your settings" onclick="return toggleTorrentSearch(0);">Hide search form</a>
 {% endif %}</span>&nbsp;
     </div>
@@ -210,8 +210,8 @@
     </table>
 
 {% if not viewer.hasAttr('hide-tags') %}
-    {% set n = 7 %}
-    {% set width = 100 / n %}
+{%  set n = 7 %}
+{%  set width = 100 / n %}
     <div>
     <span style="float: right">
         {{- dom.click('#tag-toggle', "$('#taglist').gtoggle(); this.innerHTML = (this.innerHTML == 'Show tags' ? 'Hide tags' : 'Show tags'); return false;") -}}
@@ -225,16 +225,16 @@
             </td>
         </tr>
         <tr>
-    {% for tag in tag_default %}
-        {% if loop.index0 and not loop.index0 % n %}
+{%  for tag in tag_default %}
+{%      if loop.index0 and not (loop.index0 % n) %}
         </tr>
         <tr>
-        {% endif %}
+{%      endif %}
             <td style="width:{{ width }}%"><a href="#" onclick="add_tag('{{ tag }}'); return false;">{{ tag }}</a></td>
-    {% endfor %}
-    {% if tag_default|length % n %}
+{%  endfor %}
+{%  if tag_default|length % n %}
             <td colspan="{{ n - (tag_default|length % n) }}">&nbsp;</td>
-    {% endif %}
+{%  endif %}
         </tr>
     </table>
     </div>
