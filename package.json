@@ -7,35 +7,32 @@
     "prod": "cross-env NODE_ENV=production npm run build",
     "build": "npm run build:scss && npm run build:previews",
     "build:scss": "node bin/build-scss.mjs",
-    "build:previews": "node public/stylesheet-gallery/preview.js",
+    "build:previews": "node bin/build-stylesheet-gallery.mjs",
     "start": "npm run build:scss -- --watch"
   },
   "license": "Unlicense",
   "devDependencies": {
-    "@eslint/js": "^9.8.0",
-    "@stylistic/eslint-plugin-js": "^2.4.0",
-    "cypress": "^12.0.2",
-    "cypress-terminal-report": "^5.0.2",
-    "eslint": "^9.6.0",
-    "globals": "^15.8.0",
-    "stylelint": "^13.3.2",
+    "@eslint/js": "^9.14",
+    "@stylistic/eslint-plugin-js": "^2.10",
+    "cypress": "^13.15",
+    "cypress-terminal-report": "^7.0.4",
+    "eslint": "^9.14",
+    "globals": "^15.12",
+    "stylelint": "^16.9",
     "stylelint-checkstyle-formatter": "^0.1.2",
-    "stylelint-config-recommended": "^3.0.0",
-    "stylelint-config-standard": "^20.0.0",
-    "stylelint-scss": "^3.16.1"
+    "stylelint-config-recommended": "^14.0.1",
+    "stylelint-config-standard": "^36.0.1",
+    "stylelint-scss": "^6.9",
+    "update-browserslist-db": "1.1.1"
   },
   "dependencies": {
-    "cross-env": "^7.0.2",
-    "puppeteer": "^2.1.1",
-    "sass": "^1.80.6",
-    "sharp": "^0.32.6"
+    "cross-env": "^7.0",
+    "puppeteer": "^23.8",
+    "sass": "^1.80.7",
+    "sharp": "^0.33.5"
   },
   "browserslist": [
-    "ie 11",
-    "safari >= 10",
-    "ios >= 10",
-    "android >= 6",
-    "Firefox ESR",
-    "last 2 years and > 0.1%"
+    "last 3 versions",
+    "not dead"
   ]
 }
