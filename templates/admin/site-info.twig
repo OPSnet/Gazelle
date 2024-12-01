@@ -81,8 +81,8 @@ div#phpinfo hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}
 {%- elseif pg_checkpoint.percent > 95.0 %}r01
 {%- else %}r00{% endif -%}
                 ">{{ pg_checkpoint.percent }}</div>
-            <div>{{ pg_checkpoint.checkpoints_timed|number_format }}</div>
-            <div>{{ pg_checkpoint.checkpoints_req|number_format }}</div>
+            <div>{{ pg_checkpoint.num_timed|number_format }}</div>
+            <div>{{ pg_checkpoint.num_requested|number_format }}</div>
         </div>
     </div>
 

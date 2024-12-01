@@ -159,9 +159,13 @@ class Pg {
     }
 
     public function checkpointInfo(): array {
-        $info = $this->rowAssoc("
-            select checkpoints_timed,
-                checkpoints_req,
+        $version = (int)$this->scalar("
+            select current_setting('server_version_num')
+        ");
+        $query = $version < 170000
+            ? '
+            select checkpoints_timed as num_timed,
+                checkpoints_req as num_requested,
                 case when checkpoints_timed + checkpoints_req = 0
                     then 0
                     else round(
@@ -170,7 +174,20 @@ class Pg {
                     )
                 end as percent
             from pg_stat_bgwriter
-        ");
+            '
+            : '
+            select num_timed,
+                num_requested,
+                case when num_timed + num_requested = 0
+                    then 0
+                    else round(
+                        (num_timed::float / (num_timed + num_requested) * 100)::numeric,
+                        4
+                    )
+                end as percent
+            from pg_stat_checkpointer
+            ';
+        $info = $this->rowAssoc($query);
         $info['percent'] = (float)$info['percent'];
         return $info;
     }

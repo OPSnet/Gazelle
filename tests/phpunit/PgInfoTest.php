@@ -39,8 +39,8 @@ class PgInfoTest extends TestCase {
     public function testCheckpointInfo(): void {
         $info = $this->pg()->checkpointInfo();
         $this->assertCount(3, $info);
-        $this->assertIsInt($info['checkpoints_timed'], 'pg-checkpoint-timed');
-        $this->assertIsInt($info['checkpoints_req'], 'pg-checkpoint-req');
+        $this->assertIsInt($info['num_timed'], 'pg-checkpoint-timed');
+        $this->assertIsInt($info['num_requested'], 'pg-checkpoint-req');
         $this->assertIsFloat($info['percent'], 'pg-checkpoint-percent');
     }
 
