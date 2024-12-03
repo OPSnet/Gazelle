@@ -7,7 +7,7 @@
             <a href="torrents.php?action=notify" class="brackets">View notifications</a>
         </div>
     </div>
-{% set viewer_args = '&user=' ~ viewer.id ~ '&auth=' ~ viewer.rssAuth ~ '&passkey=' ~ viewer.announceKey ~ '&authkey=' ~ viewer.auth %}
+{% set viewer_args = '&passkey=' ~ viewer.announceKey ~ '&auth=' ~ viewer.rssAuth %}
 {% set img = '<img src="' ~ constant('STATIC_SERVER') ~ '/common/symbols/rss.png" alt="RSS feed" />' %}
 {% for filter in list %}
     {% set new = filter.ID is same as(false) %}

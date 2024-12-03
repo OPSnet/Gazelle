@@ -110,7 +110,6 @@ class View {
         }
 
         return $Twig->render('index/private-header.twig', [
-            'auth_args'    => "&amp;user={$Viewer->id()}&amp;passkey={$Viewer->announceKey()}&amp;authkey={$Viewer->auth()}&amp;auth={$Viewer->rssAuth()}",
             'page_title'   => $pageTitle,
             'script'       => $js,
             'scss_style'   => isset($option['css'])

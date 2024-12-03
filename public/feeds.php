@@ -7,8 +7,13 @@ if (isset($_GET['clearcache'])) {
 
 require_once __DIR__ . '/../lib/bootstrap.php';
 
-$user = (new Gazelle\Manager\User())->findById((int)($_GET['user'] ?? 0));
-if (is_null($user)) {
+$user = (new Gazelle\Manager\User())->findByAnnounceKey($_GET['passkey'] ?? '');
+if (
+    !$user?->isEnabled()
+    || empty($_GET['feed'])
+    || empty($_GET['auth'])
+    || md5($user->id() . RSS_HASH . $_GET['passkey']) !== $_GET['auth']
+) {
     die((new Gazelle\Feed())->blocked());
 }
 
@@ -29,14 +34,6 @@ if ($user->permitted('site_disable_ip_history')) {
     $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
 }
 Gazelle\Base::setRequestContext($context);
-
-if (
-    !$user->isEnabled()
-    || empty($_GET['feed'])
-    || md5($user->id() . RSS_HASH . ($_GET['passkey'] ?? 'NOTPASS')) !== ($_GET['auth'] ?? 'NOTAUTH')
-) {
-    die((new Gazelle\Feed())->blocked());
-}
 
 $feed = new Gazelle\Feed();
 switch ($_GET['feed']) {
