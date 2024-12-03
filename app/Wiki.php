@@ -118,7 +118,8 @@ class Wiki extends BaseObject {
     // phpcs:enable
 
     public function editable(User $user): bool {
-        return $this->minClassEdit() <= $user->privilege()->effectiveClassLevel();
+        return $this->minClassEdit() <= $user->privilege()->effectiveClassLevel()
+            || $user->hasAttr('wiki-edit-readable');
     }
 
     public function readable(User $user): bool {

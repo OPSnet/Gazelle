@@ -80,10 +80,11 @@ class Wiki extends \Gazelle\BaseManager {
      * The error entry will be non-null in case of an error and read and edit will be null.
      */
     public function configureAccess(\Gazelle\User $user, int $minRead, int $minEdit) {
-        $isAdmin = $user->permitted('admin_manage_wiki');
-        $class = $user->privilege()->effectiveClassLevel();
+        $isAdmin  = $user->permitted('admin_manage_wiki');
+        $isEditor = $user->hasAttr('wiki-edit-readable');
+        $class    = $user->privilege()->effectiveClassLevel();
 
-        if (!$isAdmin) {
+        if (!($isAdmin || $isEditor)) {
             return [100, 100, null];
         }
         if (!$minRead) {
@@ -97,7 +98,7 @@ class Wiki extends \Gazelle\BaseManager {
             if ($minEdit < $minRead) {
                 $minEdit = $minRead;
             }
-            if ($minEdit > $class) {
+            if ($minEdit > $class && !$isEditor) {
                 return [null, null, 'You cannot restrict edits above your own level'];
             }
         }

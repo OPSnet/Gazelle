@@ -66,25 +66,26 @@ if (isset($_POST['BonusPoints'])) {
 $Collages = (int)($_POST['Collages'] ?? 0);
 $flTokens = (int)($_POST['FLTokens'] ?? 0);
 
-$userReason      = trim($_POST['UserReason']);
-$disableAvatar   = isset($_POST['DisableAvatar']);
-$disableInvites  = isset($_POST['DisableInvites']);
-$disablePosting  = isset($_POST['DisablePosting']);
-$disablePoints   = isset($_POST['DisablePoints']);
-$disableForums   = isset($_POST['DisableForums']);
-$disableTagging  = isset($_POST['DisableTagging']);
-$disableUpload   = isset($_POST['DisableUpload']);
-$disableWiki     = isset($_POST['DisableWiki']);
-$disablePM       = isset($_POST['DisablePM']);
-$disableIRC      = isset($_POST['DisableIRC']);
-$disableRequests = isset($_POST['DisableRequests']);
-$disableLeech    = isset($_POST['DisableLeech']) ? 0 : 1;
-$resetRatioWatch = $_POST['ResetRatioWatch'] ?? 0 ? 1 : 0;
-$resetIPHistory  = $_POST['ResetIPHistory'] ?? 0;
-$resetPasskey    = isset($_POST['ResetPasskey']) ? 1 : 0;
-$resetAuthkey    = isset($_POST['ResetAuthkey']) ? 1 : 0;
-$logoutSession   = isset($_POST['Logout']) ? 1 : 0;
-$sendHackedMail  = isset($_POST['SendHackedMail']) ? 1 : 0;
+$userReason           = trim($_POST['UserReason']);
+$disableAvatar        = isset($_POST['DisableAvatar']);
+$disableInvites       = isset($_POST['DisableInvites']);
+$disablePosting       = isset($_POST['DisablePosting']);
+$disablePoints        = isset($_POST['DisablePoints']);
+$disableForums        = isset($_POST['DisableForums']);
+$disableTagging       = isset($_POST['DisableTagging']);
+$disableUpload        = isset($_POST['DisableUpload']);
+$disableWiki          = isset($_POST['DisableWiki']);
+$disablePM            = isset($_POST['DisablePM']);
+$disableIRC           = isset($_POST['DisableIRC']);
+$disableRequests      = isset($_POST['DisableRequests']);
+$disableLeech         = isset($_POST['DisableLeech']) ? 0 : 1;
+$editWikiEditReadable = isset($_POST['wiki-edit-readable']);
+$resetRatioWatch      = $_POST['ResetRatioWatch'] ?? 0 ? 1 : 0;
+$resetIPHistory       = $_POST['ResetIPHistory'] ?? 0;
+$resetPasskey         = isset($_POST['ResetPasskey']) ? 1 : 0;
+$resetAuthkey         = isset($_POST['ResetAuthkey']) ? 1 : 0;
+$logoutSession        = isset($_POST['Logout']) ? 1 : 0;
+$sendHackedMail       = isset($_POST['SendHackedMail']) ? 1 : 0;
 if ($sendHackedMail && !empty(trim($_POST['HackedEmail']))) {
     $hackedEmail = trim($_POST['HackedEmail']);
 } else {
@@ -440,6 +441,10 @@ if ($Viewer->permitted('users_disable_any')) {
         $privChange[] = 'Your request privileges have been ' . revoked($disableRequests);
         $editSummary[] = 'request privileges ' . revoked($disableRequests);
         $user->toggleAttr('disable-requests', $disableRequests);
+    }
+    if ($editWikiEditReadable !== $user->hasAttr('wiki-edit-readable')) {
+        $editSummary[] = 'edit any wiki article ' . revoked($editWikiEditReadable);
+        $user->toggleAttr('wiki-edit-readable', $editWikiEditReadable);
     }
 }
 

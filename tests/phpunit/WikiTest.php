@@ -142,6 +142,24 @@ class WikiTest extends TestCase {
         $this->assertCount(2, $manager->articles($level[SYSOP], 'x'), 'wiki-list-sysop-x');
     }
 
+    public function testEditReadable(): void {
+        $admin   = $this->userList['admin'];
+        $user    = $this->userList['user'];
+        $manager = new Manager\Wiki();
+        $article = $manager->create(
+            title:   'wiki edit readable ' . randomString(10),
+            body:    'wiki body phpunit',
+            minRead: $user->privilege()->effectiveClassLevel(),
+            minEdit: $admin->privilege()->effectiveClassLevel(),
+            user:    $admin,
+        );
+        $this->assertFalse($article->editable($user), 'readable article cannot be edited');
+        $user->toggleAttr('wiki-edit-readable', true);
+        $this->assertTrue($article->editable($user), 'readable article can be edited');
+        $user->toggleAttr('wiki-edit-readable', false);
+        $this->assertFalse($article->editable($user), 'readable article can no longer be edited');
+    }
+
     public function testWikiRevision(): void {
         $manager = new Manager\Wiki();
         $title   = 'phpunit title ' . randomString(6);
@@ -166,28 +184,30 @@ class WikiTest extends TestCase {
 
     public function testConfigureAccess(): void {
         $manager = new Manager\Wiki();
+        $admin = $this->userList['admin'];
+        $user  = $this->userList['user'];
         $access = $manager->configureAccess(
-            user:    $this->userList['user'],
-            minRead: $this->userList['user']->privilege()->effectiveClassLevel(),
-            minEdit: $this->userList['admin']->privilege()->effectiveClassLevel(),
+            user:    $user,
+            minRead: $user->privilege()->effectiveClassLevel(),
+            minEdit: $admin->privilege()->effectiveClassLevel(),
         );
         $this->assertEquals(
             [
-                $this->userList['user']->privilege()->effectiveClassLevel(),
-                $this->userList['user']->privilege()->effectiveClassLevel(),
+                $user->privilege()->effectiveClassLevel(),
+                $user->privilege()->effectiveClassLevel(),
                 null,
             ],
             $access,
             'wiki-access-user'
         );
 
-        $this->userList['user']->addCustomPrivilege('admin_manage_wiki');
-        $this->userList['user']->modify();
+        $user->addCustomPrivilege('admin_manage_wiki');
+        $user->modify();
 
         $access = $manager->configureAccess(
-            user:    $this->userList['user'],
+            user:    $user,
             minRead: 0,
-            minEdit: $this->userList['user']->privilege()->effectiveClassLevel(),
+            minEdit: $user->privilege()->effectiveClassLevel(),
         );
         $this->assertEquals(
             [
@@ -200,8 +220,8 @@ class WikiTest extends TestCase {
         );
 
         $access = $manager->configureAccess(
-            user:    $this->userList['user'],
-            minRead: $this->userList['user']->privilege()->effectiveClassLevel(),
+            user:    $user,
+            minRead: $user->privilege()->effectiveClassLevel(),
             minEdit: 0,
         );
         $this->assertEquals(
@@ -215,9 +235,9 @@ class WikiTest extends TestCase {
         );
 
         $access = $manager->configureAccess(
-            user:    $this->userList['user'],
-            minRead: $this->userList['admin']->privilege()->effectiveClassLevel(),
-            minEdit: $this->userList['user']->privilege()->effectiveClassLevel(),
+            user:    $user,
+            minRead: $admin->privilege()->effectiveClassLevel(),
+            minEdit: $user->privilege()->effectiveClassLevel(),
         );
         $this->assertEquals(
             [
@@ -230,9 +250,9 @@ class WikiTest extends TestCase {
         );
 
         $access = $manager->configureAccess(
-            user:    $this->userList['user'],
-            minRead: $this->userList['user']->privilege()->effectiveClassLevel(),
-            minEdit: $this->userList['admin']->privilege()->effectiveClassLevel(),
+            user:    $user,
+            minRead: $user->privilege()->effectiveClassLevel(),
+            minEdit: $admin->privilege()->effectiveClassLevel(),
         );
         $this->assertEquals(
             [
@@ -245,14 +265,14 @@ class WikiTest extends TestCase {
         );
 
         $access = $manager->configureAccess(
-            user:    $this->userList['admin'],
-            minRead: $this->userList['user']->privilege()->effectiveClassLevel(),
-            minEdit: $this->userList['admin']->privilege()->effectiveClassLevel(),
+            user:    $admin,
+            minRead: $user->privilege()->effectiveClassLevel(),
+            minEdit: $admin->privilege()->effectiveClassLevel(),
         );
         $this->assertEquals(
             [
-                $this->userList['user']->privilege()->effectiveClassLevel(),
-                $this->userList['admin']->privilege()->effectiveClassLevel(),
+                $user->privilege()->effectiveClassLevel(),
+                $admin->privilege()->effectiveClassLevel(),
                 null,
             ],
             $access,
