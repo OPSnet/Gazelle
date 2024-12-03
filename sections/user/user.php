@@ -350,14 +350,9 @@ if ($Viewer->permitted('users_view_invites')) {
 ?>
         <div class="box" id="invitetree_box">
             <div class="head">
-                Invite Tree <a href="#" onclick="$('#invitetree').gtoggle(); return false;" class="brackets">View</a>
+                Invite Tree <a href="#" data-id="<?= $user->id() ?>" class="user-invite-tree brackets">View</a>
             </div>
             <div id="invitetree" class="hidden">
-                <?= $Twig->render('user/invite-tree.twig', [
-                    ...$tree->details($Viewer),
-                    'user'   => $user,
-                    'viewer' => $Viewer,
-                ]) ?>
             </div>
         </div>
 <?php

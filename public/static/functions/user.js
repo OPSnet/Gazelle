@@ -1,5 +1,33 @@
 "use strict";
 
+function init_invitetree_toggle(toggle) {
+    let invitetree = document.getElementById('invitetree');
+    toggle.addEventListener('click', async (e) => {
+        e.preventDefault();
+        if (!invitetree.classList.contains('hidden')) {
+            invitetree.classList.add('hidden');
+            toggle.innerHTML = 'View';
+        } else if (invitetree.innerHTML.trim() !== "") {
+            invitetree.classList.remove('hidden');
+            toggle.innerHTML = 'Hide';
+        } else {
+            invitetree.innerHTML = "Loading...";
+            invitetree.classList.remove('hidden');
+            let form = new FormData();
+            form.append('id', toggle.dataset.id);
+            form.append('auth', document.body.dataset.auth);
+            const response = await fetch(
+                '?action=load-invitetree', {
+                    'method': "POST",
+                    'body': form,
+                },
+            );
+            invitetree.innerHTML = await response.json();
+            toggle.innerHTML = 'Hide';
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     async function toggle_editor() {
         let button = document.getElementById('admincommentbutton');
@@ -65,4 +93,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    let invitetree_toggle = document.querySelector('.user-invite-tree');
+    if (invitetree_toggle) {
+        init_invitetree_toggle(invitetree_toggle);
+     }
 });

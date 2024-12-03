@@ -29,6 +29,9 @@ switch ($_REQUEST['action'] ?? '') {
     case 'delete_invite':
         include_once 'delete_invite.php';
         break;
+    case 'load-invitetree':
+        include_once 'load-invitetree.php';
+        break;
     case 'lastfm':
         include_once 'lastfm.php';
         break;
