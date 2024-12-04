@@ -82,9 +82,10 @@
     <tr id="acc_2fa_tr">
         <td class="label"><strong>Two-factor Authentication</strong></td>
         <td>
-            Two-factor authentication is currently <strong class="{{ user.TFAKey ? 'r99' : 'warning' }}">{{ user.TFAKey ? 'enabled' : 'disabled' }}</strong> for your account.
+{% set has_mfa = user.MFA.enabled %}
+            Two-factor authentication is currently <strong class="{{ has_mfa ? 'r99' : 'warning' }}">{{ has_mfa ? 'enabled' : 'disabled' }}</strong> for your account.
             <br><br>
-            <a href="user.php?action=2fa&amp;do={{ user.TFAKey ? 'remove' : 'configure' }}&amp;userid={{ user.id }}">Click here to {{ user.TFAKey ? 'remove' : 'configure' }}</a>
+            <a href="user.php?action=2fa&amp;do={{ has_mfa ? 'remove' : 'configure' }}&amp;userid={{ user.id }}">Click here to {{ has_mfa ? 'remove' : 'configure' }}</a>
         </td>
     </tr>
 

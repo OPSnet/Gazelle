@@ -6,7 +6,7 @@ $user = (new Gazelle\Manager\User())->findById((int)($_GET['userid'] ?? 0));
 if (is_null($user)) {
     error(404);
 }
-if (!$user->TFAKey()) {
+if (!$user->MFA()->enabled()) {
     error($Viewer->permitted('users_edit_password') ? 'No 2FA configured' : 404);
 }
 
@@ -22,6 +22,6 @@ if (!$Viewer->permitted('users_edit_password')) {
         exit;
     }
 }
-$user->remove2FA()->modify();
+$user->MFA()->remove($Viewer);
 
 header("Location: {$user->location()}");

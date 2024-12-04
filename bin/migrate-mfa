@@ -1,0 +1,33 @@
+#! /usr/bin/env php
+<?php
+
+require_once(__DIR__ . "/../lib/bootstrap.php");
+
+function genPlaceholders(int $num, string $val) {
+    for ($i = 1; $i <= $num; $i++) {
+        yield $val;
+    }
+}
+
+$db = Gazelle\DB::DB();
+$pg = new \Gazelle\DB\Pg(GZPG_DSN);
+
+$values = [];
+
+$db->prepared_query("
+    SELECT ID, 2FA_Key FROM users_main WHERE 2FA_Key IS NOT NULL AND 2FA_Key != '' ORDER BY ID
+");
+while ($row = $db->next_row(MYSQLI_ASSOC)) {
+    array_push($values, $row['ID'], $row['2FA_Key']);
+}
+
+$pg->prepared_query('
+    insert into multi_factor_auth
+           (id_user, secret, ip, created)
+    values ' . implode(', ', iterator_to_array(genPlaceholders(
+            count($values) / 2,
+            "(?, ?, '0.0.0.0', '1970-01-01 00:00')"))),
+    ...$values
+);
+
+$db->prepared_query("UPDATE users_main SET 2FA_Key = ''");

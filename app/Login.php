@@ -120,25 +120,15 @@ class Login extends Base {
         }
 
         // password checks out, if they have 2FA, does that check out?
-        $TFAKey = $user->TFAKey();
-        if ($TFAKey && !$this->twofa || !$TFAKey && $this->twofa) {
+        $mfa = $user->MFA();
+        if (
+            $mfa->enabled() && !(
+                $this->twofa && $mfa->verify($this->twofa)
+            )
+            || !$mfa->enabled() && $this->twofa
+        ) {
             $this->error = self::ERR_CREDENTIALS;
             return null;
-        }
-        if ($TFAKey) {
-            $tfa = new \RobThree\Auth\TwoFactorAuth();
-            if (!$tfa->verifyCode($TFAKey, $this->twofa, 2)) {
-                // They have 2FA but the device key did not match
-                // Fallback to considering it as a recovery key.
-                $userToken = (new Manager\UserToken())->findByToken($this->twofa);
-                if ($userToken) {
-                    $userToken->consume();
-                }
-                if (!$user->burn2FARecovery($this->twofa)) {
-                    $this->error = self::ERR_CREDENTIALS;
-                    return null;
-                }
-            }
         }
 
         if ($user->isUnconfirmed()) {

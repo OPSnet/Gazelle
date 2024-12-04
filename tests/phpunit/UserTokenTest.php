@@ -72,34 +72,6 @@ class UserTokenTest extends TestCase {
         $this->assertNull($manager->findByUser($this->user, UserTokenType::mfa), 'usertoken-missing');
     }
 
-    public function testMFA(): void {
-        $manager = new Manager\UserToken();
-        $this->assertCount(0, $this->user->list2FA(), 'utest-no-mfa');
-        $this->assertEquals(1, $this->user->create2FA($manager, randomString(16)), 'utest-setup-mfa');
-        $this->assertTrue($this->user->auditTrail()->hasEvent(UserAuditEvent::mfa), 'utest-mfa-audit');
-        $recovery = $this->user->list2FA();
-        $this->assertCount(10, $recovery, 'utest-list-mfa');
-
-        $burn = array_pop($recovery);
-        $this->assertFalse($this->user->burn2FARecovery('no such key'), 'utest-no-burn-mfa');
-        $this->assertTrue($this->user->burn2FARecovery($burn), 'utest-burn-mfa');
-        $this->assertCount(9, $this->user->list2FA(), 'utest-less-mfa');
-        $this->assertNotNull($this->user->TFAKey(), 'utest-has-mfa-key');
-
-        $this->user->remove2FA()->modify();
-        $this->assertCount(0, $this->user->list2FA(), 'utest-remove-mfa');
-        $mfaList = array_filter(
-            $this->user->auditTrail()->eventList(),
-            fn ($e) => $e['event'] === UserAuditEvent::mfa->value
-
-        );
-        $this->assertCount(3, $mfaList, 'utest-audit-mfa-list');
-        $this->assertEquals('removed', $mfaList[0]['note'], 'utest-audit-mfa-0');
-        $this->assertEquals("used token $burn", $mfaList[1]['note'], 'utest-audit-mfa-1');
-        $this->assertEquals('configured', $mfaList[2]['note'], 'utest-audit-mfa-2');
-        $this->assertNull($this->user->TFAKey(), 'utest-no-mfa-key');
-    }
-
     public function testApiToken(): void {
         $this->assertCount(0, $this->user->apiTokenList(), 'user-token-none-creted');
         $this->assertFalse($this->user->hasApiToken('no such token'), 'user-token-missing');

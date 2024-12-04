@@ -1,4 +1,6 @@
 {% from 'macro/form.twig' import selected -%}
+{% from 'macro/ipv4.twig' import ip_search %}
+{% set mfa = user.MFA.details %}
 {{ header(user.username ~ ' › Email and IP summary', {'js': 'resolve-ip'}) }}
 <div class="box pad center">
 <h2>{{ user.id|user_url }} › Email and IP summary</h2>
@@ -16,7 +18,7 @@
 {%  for parent in ancestry %}
 {%      if not loop.first %}&nbsp;&nbsp;↳ {% endif %}
 {{      parent.id|user_url }}
-{%      if parent.isDisabled %}<span title="disabled"> ⛔️<span>{% endif %}
+{%      if parent.isDisabled %}<span title="disabled"> ⛔️</span>{% endif %}
 {%      if parent.disableInvites %}<span title="invites revoked"> 🚫</span>{% endif %}
 &nbsp;{{ parent.publicLocation -}}
 {%      set source = invite_source.findSourceNameByUser(current) %}
@@ -28,6 +30,10 @@
     <br />
 {%  endfor %}
 {% endif %}
+</td></tr>
+<tr><th>2FA</th><td colspan="6">{% if mfa -%}
+    enabled since {{ mfa.created }} from {{ ip_search(mfa.ip) }}
+    {%- else %}disabled{% endif -%}
 </td></tr>
 
 {% include 'admin/user-info-email.twig' with {'info': hist.email(asn),       'title': 'Email History' } only %}

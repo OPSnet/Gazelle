@@ -3,9 +3,8 @@
 namespace Gazelle;
 
 use Gazelle\Enum\AvatarDisplay;
-use Gazelle\Enum\UserAuditEvent;
 use Gazelle\Enum\UserStatus;
-use Gazelle\Enum\UserTokenType;
+use Gazelle\User\MultiFactorAuth;
 use Gazelle\Util\Irc;
 use Gazelle\Util\Mail;
 use Gazelle\Util\Time;
@@ -154,7 +153,6 @@ class User extends BaseObject {
                 um.Title,
                 um.torrent_pass,
                 um.Visible,
-                um.2FA_Key,
                 ui.AdminComment,
                 ui.BanDate,
                 ui.NavItems,
@@ -562,10 +560,6 @@ class User extends BaseObject {
         return $this->info()['AdminComment'];
     }
 
-    public function TFAKey(): ?string {
-        return $this->info()['2FA_Key'];
-    }
-
     public function title(): ?string {
         return $this->info()['Title'];
     }
@@ -591,77 +585,16 @@ class User extends BaseObject {
         return $this->info()['Username'];
     }
 
+    public function MFA(): MultiFactorAuth {
+        return new MultiFactorAuth($this);
+    }
+
     public function userStatus(): UserStatus {
         return match ($this->info()['Enabled']) {
             '1'     => UserStatus::enabled,
             '2'     => UserStatus::disabled,
             default => UserStatus::unconfirmed,
         };
-    }
-
-    /**
-     * Create the recovery keys for the user
-     */
-    public function create2FA(Manager\UserToken $manager, string $key): int {
-        $unique = [];
-        while (count($unique) < 10) {
-            $unique[randomString(20)] = 1;
-        }
-        $recovery = array_keys($unique);
-        self::$db->prepared_query("
-            UPDATE users_main SET
-                2FA_Key = ?,
-                Recovery = ?
-            WHERE ID = ?
-            ", $key, serialize($recovery), $this->id
-        );
-        $affected = self::$db->affected_rows();
-        foreach ($recovery as $value) {
-            $manager->create(UserTokenType::mfa, user: $this, value: $value);
-        }
-        $this->auditTrail()->addEvent(UserAuditEvent::mfa, 'configured');
-        $this->flush();
-        return $affected;
-    }
-
-    public function list2FA(): array {
-        return unserialize((string)self::$db->scalar("
-            SELECT Recovery FROM users_main WHERE ID = ?
-            ", $this->id
-        )) ?: [];
-    }
-
-    /**
-     * A user is attempting to login with 2FA via a recovery key
-     * If we have the key on record, burn it and let them in.
-     *
-     * @param string $key Recovery key from user
-     * @return bool Valid key, they may log in.
-     */
-    public function burn2FARecovery(string $key): bool {
-        $list = $this->list2FA();
-        $index = array_search($key, $list);
-        if ($index === false) {
-            return false;
-        }
-        unset($list[$index]);
-        self::$db->prepared_query('
-            UPDATE users_main SET
-                Recovery = ?
-            WHERE ID = ?
-            ', count($list) === 0 ? null : serialize($list), $this->id
-        );
-        $burnt = self::$db->affected_rows() === 1;
-        if ($burnt) {
-            $this->auditTrail()->addEvent(UserAuditEvent::mfa, "used token $key");
-        }
-        return $burnt;
-    }
-
-    public function remove2FA(): static {
-        $this->auditTrail()->addEvent(UserAuditEvent::mfa, "removed");
-        return $this->setField('2FA_Key', null)
-            ->setField('Recovery', null);
     }
 
     public function paranoia(): array {

@@ -6,7 +6,7 @@ $user = (new Gazelle\Manager\User())->findById((int)($_REQUEST['userid'] ?? 0));
 if (is_null($user)) {
     error(404);
 }
-if ($user->TFAKey()) {
+if ($user->MFA()->enabled()) {
     error($Viewer->permitted('users_edit_password') ? '2FA is already configured' : 404);
 }
 
@@ -17,7 +17,10 @@ if (empty($_SESSION['private_key'])) {
     error(404);
 }
 
-$user->create2FA(new Gazelle\Manager\UserToken(), $_SESSION['private_key']);
+$recoveryKeys = $user->MFA()->create(new Gazelle\Manager\UserToken(), $_SESSION['private_key'], $Viewer);
+if (!$recoveryKeys) {
+    error('failed to create 2FA');
+}
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -26,5 +29,5 @@ unset($_SESSION['private_key']);
 session_write_close();
 
 echo $Twig->render('user/2fa/complete.twig', [
-    'keys' => $user->list2FA(),
+    'keys' => $recoveryKeys,
 ]);

@@ -5,6 +5,8 @@ namespace Gazelle\Stats;
 use Gazelle\Enum\UserStatus;
 
 class Economic extends \Gazelle\Base {
+    use \Gazelle\Pg;
+
     final public const CACHE_KEY = 'stats_eco';
 
     protected array $info;
@@ -88,10 +90,8 @@ class Economic extends \Gazelle\Base {
                     AND active = 1
             ");
 
-            $info['user_mfa_total'] = (int)self::$db->scalar("
-                SELECT count(*)
-                FROM users_main
-                WHERE 2FA_Key IS NOT NULL AND 2FA_Key != ''
+            $info['user_mfa_total'] = (int)$this->pg()->scalar("
+                select count(*) from multi_factor_auth
             ");
             $info = array_map('intval', $info); // some db results are stringified
             self::$cache->cache_value(self::CACHE_KEY, $info, 3600);

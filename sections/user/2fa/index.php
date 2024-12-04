@@ -11,7 +11,7 @@ if ($user->id() != $Viewer->id() && !$Viewer->permitted('users_mod')) {
 
 switch ($_GET['do'] ?? '') {
     case 'configure':
-        if ($user->TFAKey()) {
+        if ($user->MFA()->enabled()) {
             error($Viewer->permitted('users_edit_password') ? '2FA is already configured' : 404);
         }
         include_once 'configure.php';
