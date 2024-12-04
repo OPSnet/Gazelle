@@ -64,8 +64,10 @@ RUN apt-get update \
         libcairo2 \
         libcups2 \
         libdbus-1-3 \
+        libdrm2 \
         libexpat1 \
         libfontconfig1 \
+        libgbm1 \
         libgcc1 \
         libgconf-2-4 \
         libgdk-pixbuf2.0-0 \
@@ -101,7 +103,7 @@ RUN apt-get update \
 COPY misc/docker/ /var/www/misc/docker
 COPY lib /var/www/lib
 COPY bin/ /var/www/bin
-COPY --from=composer:2.8.2 /usr/bin/composer /usr/local/bin/composer
+COPY --from=composer:2.8.3 /usr/bin/composer /usr/local/bin/composer
 
 # Permissions and configuration layer
 RUN useradd -ms /bin/bash gazelle \

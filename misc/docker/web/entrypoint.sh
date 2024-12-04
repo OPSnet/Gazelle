@@ -14,6 +14,7 @@ if [ ! -e .docker-init-done ] ; then
     bin/local-patch
     npm install
     npx update-browserslist-db@latest
+    npx puppeteer browsers install chrome
     npm run dev
     touch .docker-init-done
 fi

@@ -1,7 +1,6 @@
-FROM debian:buster-slim
+FROM debian:bookworm-slim
 
 ENV SPHINX_VERSION 2.2.11
-
 ENV SPHINX_FULL_STRING ${SPHINX_VERSION}-release
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -10,9 +9,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         default-libmysqlclient-dev \
         mariadb-client \
         sphinxsearch \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN mkdir -pv /var/lib/sphinxsearch/data/ /var/lib/sphinxsearch/conf/
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir -pv /var/lib/sphinxsearch/data/ /var/lib/sphinxsearch/conf/
 
 VOLUME /var/lib/sphinxsearch/data/
 VOLUME /var/lib/sphinxsearch/conf/

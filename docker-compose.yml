@@ -17,10 +17,10 @@ services:
       - MYSQL_PASSWORD=password
 
   memcached:
-    image: memcached:1.6.26-alpine
+    image: memcached:1.6.32-alpine
 
   pg:
-    image: postgres:16-bookworm
+    image: postgres:17-bookworm
     ports:
       - 127.0.0.1:54321:5432
     volumes:
