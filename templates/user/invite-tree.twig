@@ -1,90 +1,97 @@
-{% if info.total == 0 %}
-<p>Nobody turned up to the gig.</p>
-{% else %}
-{% set invitee_total = info.total %}
-<p>
-    This tree has {{ invitee_total|number_format }} entries, {{ info.branch|number_format }} branches, and a height of {{ height }}.
+{% set summary       = tree.summary %}
+{% set max_depth     = summary.depth %}
+{% set prev_depth    = summary.depth %}
+{% set invitee_total = summary.total %}
+{% set override      = viewer.isStaff or viewer.id == tree.user.id %}
+{% for invitee in tree.inviteTree %}
+{%  if loop.first %}
+<p>This tree has {{ invitee_total|number_format }} {%
+    if invitee_total == 1 %}entry{% else %}entries{% endif %}, {{
+    summary.branch|number_format }} branch{{
+    summary.branch|plural('es') }}, and a height of {{
+    summary.depth }}.
     It has
-{%- for class_name, total in classes -%}
-        {{ loop.last ? ' and' : (loop.first ? '' : ',') }}
-        {{ total }}
-        {% if total == 1 -%}
-            {{ class_name }}
-        {%- else -%}
-            {%- if class_name == 'Torrent Celebrity' -%}
-                Torrent Celebrities
-            {%- else -%}
-                {{ class_name }}s
-            {%- endif -%}
-        {%- endif %}
-        ({{ (total / invitee_total * 100)|number_format }}%)
-{%- endfor -%}.
-
-{{ info.disabled }}{% if info.disabled == 1 %} user is {% else %} users are {% endif %}
-disabled ({{ (info.disabled / invitee_total * 100)|number_format }}%)
-and {{ info.donor }}{% if info.donor == 1 %} user has {% else %} users have {% endif %}
-donated ({{ (info.donor / invitee_total * 100)|number_format }}%).
+{%-     for userclass, total in summary.userclass -%}
+{{          loop.last and invitee_total > 1 ? ' and' : (loop.first ? '' : ',') }}
+{{          total|number_format }}
+{%          if total == 1 -%}
+{{              userclass -}}
+{%          else -%}
+{%              if userclass == 'Torrent Celebrity' %}Torrent Celebrities{% else %}{{ userclass }}s{% endif -%}
+{%          endif %} ({{ (total / invitee_total * 100)|number_format }}%)
+{%-     endfor -%}.
+{{      summary.disabled|number_format }}{% if summary.disabled == 1 %} user is {%
+            else %} users are {% endif -%} disabled ({{
+            (summary.disabled / invitee_total * 100)|number_format }}%) and {{
+            summary.donor|number_format }}{% if summary.donor == 1 %} user has{%
+            else %} users have{% endif %} donated ({{
+            (summary.donor / invitee_total * 100)|number_format }}%).
 </p>
-
 <p>
-    The amount uploaded by direct invitees is {{ info.upload_top|octet_size }};
-    the amount downloaded by direct invitees is {{ info.download_top|octet_size }} and the
-    aggregate ratio is <span class="stat">{{ ratio(info.upload_top, info.download_top) }}</span>.
+    The amount uploaded by direct invitees is {{ summary.direct.up|octet_size }};
+    the amount downloaded by direct invitees is {{ summary.direct.down|octet_size }} and the
+    aggregate ratio is <span class="stat">{{ ratio(summary.direct.up, summary.direct.down) }}</span>.
 </p>
 
-{% if height > 1 %}
+{%      if summary.depth > 1 %}
 <p>
-    The total amount uploaded by the entire tree is {{ info.upload_total|octet_size }};
-    the total amount downloaded is {{ info.download_total|octet_size }} and the
-    aggregate ratio is <span class="stat">{{ ratio(info.upload_total, info.download_total) }}</span>.
+    The total amount uploaded by the entire tree is {{ summary.uploaded|octet_size }};
+    the total amount downloaded is {{ summary.downloaded|octet_size }} and the
+    aggregate ratio is <span class="stat">{{ ratio(summary.uploaded, summary.downloaded) }}</span>.
 </p>
-{% endif %}
+{%      endif %}
 
-{% if info.paranoid %}
+{%      if info.paranoid %}
 <p style="font-weight: bold;">
-{{ info.paranoid }} user{{ info.paranoid|plural }} ({{ (info.paranoid / invitee_total * 100)|number_format }}%)
-{{ info.paranoid == 1 ? 'is' : 'are' }} too paranoid to have their stats shown here,
-and {{ info.paranoid == 1 ? 'was' : 'were' }} not factored into the upload and download totals.
+{{          summary.paranoid|number_format }} user{{summary.paranoid|plural }} ({{ (summary.paranoid / invitee_total * 100)|number_format }}%)
+{{          summary.paranoid == 1 ? 'is' : 'are' }} too paranoid to have their stats shown here,
+and {{ summary.paranoid == 1 ? 'was' : 'were' }} not factored into the upload and download totals.
 </p>
-{% endif %}
-
-{% set max_depth  = depth %}
-{% set prev_depth = depth %}
-
-{% for invitee in info.tree %}
-    {% if invitee.depth > prev_depth %}
-        {{ '<ul class="invitetree"><li>'|repeat(invitee.depth - prev_depth)|raw }}
-    {% elseif invitee.depth < prev_depth %}
-        {{ '</li></ul>'|repeat(prev_depth - invitee.depth)|raw }}
-        </li>
-        <li>
-    {% else %}
-        </li>
-        <li>
-    {% endif %}
-    <strong>{{ invitee.user.id|user_full }}</strong>
-    {% if max_depth < invitee.depth %}
-        {% set max_depth = invitee.depth %}
-    {% endif %}
-    {% set prev_depth = invitee.depth %}
-
-    {% set paranoia = invitee.user.propertyVisibleMulti(viewer, ['uploaded', 'downloaded']) -%}
-    {% if paranoia == constant('PARANOIA_HIDE') -%}
-        &nbsp;Hidden
-    {%- else -%}
-        {% if paranoia == constant('PARANOIA_OVERRIDDEN') %}<i>{% endif %}
-        Uploaded:&nbsp;<strong>{{ invitee.user.uploadedSize|octet_size }}</strong>
-        Downloaded:&nbsp;<strong>{{ invitee.user.downloadedSize|octet_size }}</strong>
-        Ratio:&nbsp;<strong>{{ ratio(invitee.user.uploadedSize, invitee.user.downloadedSize) }}</strong>
-        <span title="Required ratio"{%
-            if invitee.user.onRatioWatch %} style="color:crimson"{% endif
-            %}>({{ invitee.user.requiredRatio|number_format(2) }})</span>,
-        {% if paranoia == constant('PARANOIA_OVERRIDDEN') %}</i>{% endif %}
-        joined: {{ invitee.user.created|time_diff(1) -}}
-        {% if invitee.user.propertyVisible(viewer, 'lastseen') -%}
-            , last seen {{ invitee.user.lastAccessRealtime|time_diff(1) }}
+{%      endif %}
+<hr />
+{%  endif %}
+{%  if invitee.depth > prev_depth %}
+{{      '<ul class="invitetree"><li>'|repeat(invitee.depth - prev_depth)|raw }}
+{%  elseif invitee.depth < prev_depth %}
+{{      '</li></ul>'|repeat(prev_depth - invitee.depth)|raw }}
+    </li>
+    <li>
+{%  else %}
+    </li>
+    <li>
+{%  endif %}
+    <strong><a href="user.php?id={{ invitee.user_id }}">{{ invitee.username }}</a></strong>
+{%  if invitee.disabled %} <a href="rules.php"><img src="{{ constant('STATIC_SERVER')
+    }}/common/symbols/disabled.png" alt="Banned" title="Disabled" class="tooltip" /></a>{% endif %}
+{%  if max_depth < invitee.depth %}
+{%      set max_depth = invitee.depth %}
+{%  endif %}
+{%  set prev_depth = invitee.depth %}
+{%  if invitee.paranoid_up %}<i>{% endif %}
+        uploaded&nbsp;<strong>{% if override %}{{ invitee.uploaded|octet_size }}{% else %}Hidden{% endif %}</strong>
+{%- if invitee.paranoid_up %}</i>{% endif %},
+{%  if invitee.paranoid_down %}<i>{% endif %}
+        downloaded&nbsp;<strong>{% if override %}{{ invitee.downloaded|octet_size }}{% else %}Hidden{% endif %}</strong>
+{%- if invitee.paranoid_down %}</i>{% endif %},
+        ratio&nbsp;<strong>
+{%- if invitee.paranoid_down or invitee.paranoid_up %}
+{%      if override -%}
+            <i>{{ ratio(invitee.uploaded, invitee.downloaded) }}</i>
+{%      else -%}
+            Hidden
+{%      endif -%}
+{%  else -%}
+{{          ratio(invitee.uploaded, invitee.downloaded) }}
+{%  endif -%}
+        </strong>
+        <span title="Required ratio"{% if invitee.on_ratio_watch %} style="color:crimson"{% endif %}>({{ invitee.required_ratio|number_format(2) }})</span>,
+        joined: {{ invitee.created|time_diff(1) -}}
+        {% if not invitee.paranoia_last_seen -%}
+            , last seen {{ invitee.last_seen|time_diff(1) }}
         {% endif %}
-    {%- endif -%}
+{%  if loop.last %}
+{{      '</li></ul>'|repeat(prev_depth - invitee.depth)|raw }}
+{%  endif %}
+{% else %}
+<p>Nobody turned up to the gig.</p>
 {% endfor %}
-{{ '</li></ul>'|repeat(prev_depth - depth)|raw }}
-{% endif %}

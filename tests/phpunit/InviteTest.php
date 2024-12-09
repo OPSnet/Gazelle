@@ -20,7 +20,7 @@ class InviteTest extends TestCase {
         $this->user->remove();
     }
 
-    public function testInvite(): void {
+    public function testInviter(): void {
         $this->assertFalse($this->user->disableInvites(), 'invite-not-disabled');
         $this->assertFalse($this->user->permitted('users_view_invites'),          'invite-users-view-invites');
         $this->assertFalse($this->user->permitted('site_send_unlimited_invites'), 'invite-site-send-unlimited-invites');
@@ -74,18 +74,34 @@ class InviteTest extends TestCase {
         $this->assertEquals($this->invitee->id(), $inviteList[0], 'invite-list-has-invitee');
 
         $this->assertTrue($this->invitee->isUnconfirmed(), 'invitee-unconfirmed');
-        $this->assertInstanceOf(User::class, (new Manager\User())->findByAnnounceKey($this->invitee->announceKey()), 'invitee-confirmable');
+        $this->assertInstanceOf(
+            User::class,
+            (new Manager\User())->findByAnnounceKey($this->invitee->announceKey()),
+            'invitee-confirmable'
+        );
 
         // invite tree functionality
-        $inviteTree = new User\InviteTree($this->user, new Manager\User());
+        $inviteTree = new User\InviteTree($this->user);
         $this->assertInstanceOf(User\InviteTree::class, $inviteTree, 'invite-tree-ctor');
-        $this->assertGreaterThan(0, $inviteTree->treeId(), 'invite-tree-new-id');
         $this->assertTrue($inviteTree->hasInvitees(), 'invite-tree-has-invitees');
-        $this->assertEquals(0, $inviteTree->depth(), 'invite-tree-depth');
         $list = $inviteTree->inviteeList();
         $this->assertCount(1, $list, 'invite-tree-list');
         $this->assertEquals($this->invitee->id(), $list[0], 'invite-tree-user-id');
-        $this->assertGreaterThan(0, $inviteTree->position(), 'invite-tree-position');
+
+        // new invite tree functionality
+        $summary = $inviteTree->summary();
+        $this->assertCount(10, array_keys($summary), 'invite-tree-summary-keys');
+        $this->assertEquals(1, $summary['branch'], 'invite-tree-branch');
+        $this->assertEquals(1, $summary['depth'], 'invite-tree-depth');
+        $this->assertEquals(1, $summary['total'], 'invite-tree-total');
+        $this->assertEquals(0, $summary['disabled'], 'invite-tree-disabled');
+        $this->assertEquals(0, $summary['donor'], 'invite-tree-donor');
+        $this->assertEquals(0, $summary['downloaded'], 'invite-tree-downloaded');
+        $this->assertEquals(0, $summary['paranoid'], 'invite-tree-paranoid');
+        $this->assertEquals(STARTING_UPLOAD, $summary['direct']['up'], 'invite-tree-direct-up');
+        $this->assertEquals(STARTING_UPLOAD, $summary['uploaded'], 'invite-tree-uploaded');
+        $this->assertEquals(['User' => 1], $summary['userclass'], 'invite-tree-userclass');
+        $this->assertCount(1, $inviteTree->inviteTree(), 'invite-tree-tree');
     }
 
     public function testAncestry(): void {
@@ -122,26 +138,28 @@ class InviteTest extends TestCase {
 
         $this->assertEquals(
             "No action specified",
-            (new User\InviteTree($this->user, $userMan))
+            (new User\InviteTree($this->user))
             ->manipulate(
                 "",
                 false,
                 false,
                 $tracker,
                 $this->user,
+                $userMan,
             ),
             'invite-tree-manip-none'
         );
 
         $this->assertEquals(
             "No invitees for {$this->user->username()}",
-            (new User\InviteTree($this->user, $userMan))
+            (new User\InviteTree($this->user))
             ->manipulate(
                 "phpunit invite tree comment",
                 false,
                 false,
                 $tracker,
                 $this->user,
+                $userMan,
             ),
             'invite-tree-manip-comment'
         );
@@ -167,13 +185,14 @@ class InviteTest extends TestCase {
 
         $this->assertStringContainsString(
             "Commented entire tree (1 user)",
-            (new User\InviteTree($this->user, $userMan))
+            (new User\InviteTree($this->user))
             ->manipulate(
                 "phpunit invite tree comment",
                 false,
                 false,
                 $tracker,
                 $this->user,
+                $userMan,
             ),
             'invite-tree-manip-comment'
         );
@@ -191,13 +210,14 @@ class InviteTest extends TestCase {
 
         $this->assertStringContainsString(
             "Revoked invites for entire tree (1 user)",
-            (new User\InviteTree($this->user, $userMan))
+            (new User\InviteTree($this->user))
             ->manipulate(
                 "",
                 false,
                 true,
                 $tracker,
                 $this->user,
+                $userMan,
             ),
             'invite-tree-manip-revoke'
         );
@@ -215,13 +235,14 @@ class InviteTest extends TestCase {
 
         $this->assertStringContainsString(
             "Banned entire tree (1 user)",
-            (new User\InviteTree($this->user, $userMan))
+            (new User\InviteTree($this->user))
             ->manipulate(
                 "",
                 true,
                 false,
                 $tracker,
                 $this->user,
+                $userMan,
             ),
             'invite-tree-manip-revoke'
         );

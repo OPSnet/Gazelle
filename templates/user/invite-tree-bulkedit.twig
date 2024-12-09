@@ -7,7 +7,7 @@
 {% endif %}
     <form class="manage_form" name="user" action="" method="post">
         <input type="hidden" id="action" name="action" value="manipulate_tree" />
-        <input type="hidden" name="auth" value="{{ auth }}" />
+        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
         <table class="layout">
             <tr>
                 <td class="label"><strong>UserID or @username</strong></td>

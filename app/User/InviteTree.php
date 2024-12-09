@@ -11,145 +11,177 @@ use Gazelle\Enum\UserAuditEvent;
  * between the ancestor inviter and the invitee).
  */
 
-class InviteTree extends \Gazelle\Base {
+class InviteTree extends \Gazelle\BaseUser {
     protected array $info;
-
-    public function __construct(
-        protected \Gazelle\User $user,
-        protected \Gazelle\Manager\User $userMan,
-    ) {}
+    protected array $tree;
 
     public function flush(): static {
-        unset($this->info);
+        unset($this->info, $this->tree);
         return $this;
     }
 
-    public function info(): array {
+    protected function calculate(): void {
+        $width = (int)self::$db->scalar("
+            select ceil(log10(max(id))) from users_main
+        ");
+        /* Ordinarily, list queries are usually written to return only
+         * an id, and a manager is used to hydrate the object. Amongst
+         * other benefits, this simplifies cache invalidation. In the
+         * case of invite trees, for some origin users there can be
+         * tens of thousands of results. As a consequence, this is one
+         * of the few cases where the all the required fields are
+         * returned by a query. The management of paranoia is
+         * particularly ghastly.
+         */
+        self::$db->prepared_query("
+            WITH RECURSIVE r AS (
+                SELECT um.inviter_user_id    AS inviter_user_id,
+                    um.ID                    AS user_id,
+                    0                        AS depth,
+                    cast(lpad(um.ID, ?, '0') AS char(5000)) AS path
+                FROM users_main um
+                WHERE um.ID = ?
+                UNION ALL
+                SELECT c.inviter_user_id,
+                    c.ID,
+                    depth + 1,
+                    concat(r.path, lpad(c.ID, ?, '0'))
+                FROM r,
+                    users_main AS c
+                WHERE r.user_id = c.inviter_user_id
+            )
+            SELECT r.user_id,
+                r.inviter_user_id,
+                um.created,
+                r.path,
+                ula.last_access             AS last_seen,
+                if(locate('s:8:\"lastseen\";', um.Paranoia) > 0, 1, 0)
+                                            AS paranoid_last_seen,
+                um.Username                 AS username,
+                um.RequiredRatio            AS required_ratio,
+                if(ui.RatioWatchEnds IS NOT NULL
+                    AND ui.RatioWatchEnds < now()
+                    AND uls.Uploaded <= uls.Downloaded * um.RequiredRatio,
+                    1, 0)                   AS on_ratio_watch,
+                if(um.Enabled = '2', 1, 0)  AS disabled,
+                p.Name                      AS userclass,
+                p.Level                     AS userlevel,
+                uls.Uploaded                AS uploaded,
+                if(locate('s:10:\"uploaded\";', um.Paranoia) > 0, 1, 0)
+                                            AS paranoid_up,
+                uls.Downloaded              AS downloaded,
+                if(locate('s:10:\"downloaded\";', um.Paranoia) > 0, 1, 0)
+                                            AS paranoid_down,
+                if(ul.UserID IS NULL, 0, 1) AS donor,
+                r.depth                     AS depth
+            FROM r
+            INNER JOIN users_main um ON (um.ID = r.user_id)
+            INNER JOIN users_info ui ON (um.ID = ui.UserID)
+            INNER JOIN permissions p ON (p.ID = um.PermissionID)
+            INNER JOIN users_leech_stats uls ON (uls.UserID = um.ID)
+            LEFT JOIN user_last_access ula ON (ula.user_id = um.ID)
+            LEFT JOIN users_levels ul ON (
+                ul.UserID = um.ID
+                AND ul.PermissionID = (
+                    SELECT ID from permissions WHERE Name = 'donor'
+                )
+            )
+            WHERE r.user_id != ?
+            ORDER BY path
+            ", $width, $this->id(), $width, $this->id()
+        );
+        $userclassMap = []; // how many people per userclass
+        $userlevelMap = []; // sort userclasses by level rather than name
+        $this->info = [
+            'branch'     => 0,
+            'downloaded' => 0,
+            'depth'      => 0,
+            'direct'     => [
+                'down' => 0,
+                'up'   => 0,
+            ],
+            'disabled'   => 0,
+            'donor'      => 0,
+            'paranoid'   => 0,
+            'uploaded'   => 0,
+            'userclass'  => [],
+        ];
+        $this->tree = [];
+        $prev_depth = 0;
+        foreach (self::$db->to_array(false, MYSQLI_ASSOC, false) as $row) {
+            $this->info['downloaded'] += $row['downloaded'];
+            $this->info['uploaded']   += $row['uploaded'];
+            if ($row['depth'] == 1) {
+                $this->info['direct']['down'] += $row['downloaded'];
+                $this->info['direct']['up']   += $row['uploaded'];
+            }
+            if ($row['depth'] > $prev_depth) {
+                // we have to go deeper
+                $this->info['branch']++;
+            }
+            if (!isset($userlevelMap[$row['userclass']])) {
+                $userlevelMap[$row['userclass']] = $row['userlevel'];
+            }
+            if (!isset($userclassMap[$row['userclass']])) {
+                $userclassMap[$row['userclass']] = 0;
+            }
+            $userclassMap[$row['userclass']]++;
+            if (!isset($this->info['userclass'][$row['userclass']])) {
+                $this->info['userclass'][$row['userclass']] = 0;
+            }
+            $this->info['userclass'][$row['userclass']]++;
+            if ($this->info['depth'] < $row['depth']) {
+                $this->info['depth'] = $row['depth'];
+            }
+            if ($row['disabled']) {
+                $this->info['disabled']++;
+            }
+            if ($row['donor']) {
+                $this->info['donor']++;
+            }
+            if ($row['paranoid_down'] || $row['paranoid_up']) {
+                $this->info['paranoid']++;
+            }
+            $this->tree[] = $row;
+            $prev_depth   = $row['depth'];
+        }
+        uksort($userclassMap, fn($a, $b) => $userlevelMap[$a] <=> $userlevelMap[$b]);
+        $this->info['userclass'] = $userclassMap;
+        $this->info['total'] = count($this->tree);
+    }
+
+    public function summary(): array {
         if (!isset($this->info)) {
-            $this->info = self::$db->rowAssoc("
-                SELECT
-                    t1.TreeID        AS tree_id,
-                    t1.TreeLevel     AS depth,
-                    t1.TreePosition  AS position,
-                    (
-                        SELECT t2.TreePosition
-                        FROM invite_tree AS t2
-                        WHERE t2.TreeID = t1.TreeID
-                            AND t2.TreeLevel = t1.TreeLevel
-                            AND t2.TreePosition > t1.TreePosition
-                        ORDER BY t2.TreePosition
-                        LIMIT 1
-                    ) AS max_position
-                FROM invite_tree AS t1
-                WHERE t1.UserID = ?
-                ", $this->user->id()
-            ) ?? [
-               'tree_id'      => 0,
-               'depth'        => null,
-               'position'     => null,
-               'max_position' => null,
-            ];
+            $this->calculate();
         }
         return $this->info;
     }
 
-    public function treeId(): int {
-        return $this->info()['tree_id'];
-    }
-
-    public function depth(): ?int {
-        return $this->info()['depth'];
-    }
-
-    public function position(): ?int {
-        return $this->info()['position'];
-    }
-
-    public function maxPosition(): ?int {
-        return $this->info()['max_position'];
+    public function inviteTree(): array {
+        if (!isset($this->tree)) {
+            $this->calculate();
+        }
+        return $this->tree;
     }
 
     public function hasInvitees(): bool {
-        return (bool)self::$db->scalar("
-            SELECT 1
-            FROM invite_tree
-            WHERE InviterId = ?
-            LIMIT 1
-            ", $this->user->id()
-        );
+        return $this->summary()['total'] > 0;
     }
 
     public function inviteeList(): array {
-        self::$db->prepared_query("
-            SELECT UserID
-            FROM invite_tree
-            WHERE TreeID = ?
-                AND TreeLevel > ?
-                AND TreePosition > ?
-                AND TreePosition < coalesce(?, 100000000)
-            ORDER BY TreePosition
-            ", $this->treeId(), $this->depth(), $this->position(), $this->maxPosition()
+        return array_map(
+            fn ($u) => $u['user_id'],
+            $this->inviteTree()
         );
-        return self::$db->collect('UserID');
-    }
-
-    public function add(\Gazelle\User $user): int {
-        if (!$this->treeId()) {
-            // Not everyone is created by the genesis user. Invite trees may be disconnected.
-            self::$db->prepared_query("
-                INSERT INTO invite_tree
-                       (UserID, TreeID)
-                VALUES (?, (SELECT coalesce(max(it.TreeID), 0) + 1 FROM invite_tree AS it))
-                ", $this->user->id()
-            );
-            $this->flush();
-        }
-        $nextPosition = self::$db->scalar("
-            SELECT TreePosition
-            FROM invite_tree
-            WHERE TreeID = ?
-                AND TreePosition > ?
-                AND TreeLevel <= ?
-            ORDER BY TreePosition LIMIT 1
-            ", $this->treeId(), $this->position(), $this->depth()
-        );
-        if (!$nextPosition) {
-            // Tack them on the end of the list.
-            $nextPosition = self::$db->scalar("
-                SELECT max(TreePosition) + 1
-                FROM invite_tree
-                WHERE TreeID = ?
-                ", $this->treeId()
-            );
-        } else {
-            // Someone invited Alice and then Bob. Later on, Alice invites Carol,
-            // so Bob and others have to "pushed down" a row so that Carol can
-            // be lodged under Alice.
-            self::$db->prepared_query("
-                UPDATE invite_tree SET
-                    TreePosition = TreePosition + 1
-                WHERE TreeID = ?
-                    AND TreePosition >= ?
-                ", $this->treeId(), $nextPosition
-            );
-        }
-        self::$db->prepared_query("
-            INSERT INTO invite_tree
-                   (UserID, InviterID, TreeID, TreePosition, TreeLevel)
-            VALUES (?,      ?,         ?,      ?,            ?)
-            ", $user->id(), $this->user->id(), $this->treeId(), $nextPosition, $this->depth() + 1
-        );
-        $affected = self::$db->affected_rows();
-        $this->flush();
-        return $affected;
     }
 
     public function manipulate(
-        string           $comment,
-        bool             $doDisable,
-        bool             $doInvites,
-        \Gazelle\Tracker $tracker,
-        \Gazelle\User    $admin,
+        string                $comment,
+        bool                  $doDisable,
+        bool                  $doInvites,
+        \Gazelle\Tracker      $tracker,
+        \Gazelle\User         $admin,
+        \Gazelle\Manager\User $userMan,
     ): string {
         if ($doDisable) {
             $message = "Banned";
@@ -178,7 +210,7 @@ class InviteTree extends \Gazelle\Base {
         $this->user->auditTrail()->addEvent(UserAuditEvent::invite, $staffNote);
         $ban = [];
         foreach ($inviteeList as $inviteeId) {
-            $invitee = $this->userMan->findById($inviteeId);
+            $invitee = $userMan->findById($inviteeId);
             if (is_null($invitee)) {
                 continue;
             }
@@ -200,13 +232,13 @@ class InviteTree extends \Gazelle\Base {
                     );
                 }
             }
-            if (!$doDisable) {  // $this->userMan->disableUserList will add the staff note otherwise
+            if (!$doDisable) {  // $userMan->disableUserList will add the staff note otherwise
                 $invitee->addStaffNote($staffNote)->modify();
                 $invitee->auditTrail()->addEvent(UserAuditEvent::invite, $staffNote);
             }
         }
         if ($ban) {
-            $this->userMan->disableUserList(
+            $userMan->disableUserList(
                 $tracker,
                 $ban,
                 UserAuditEvent::invite,
@@ -215,115 +247,5 @@ class InviteTree extends \Gazelle\Base {
             );
         }
         return $message;
-    }
-
-    public function details(\Gazelle\User $viewer): array {
-        if (!$this->treeId()) {
-            return [];
-        }
-
-        $maxDepth = $this->depth(); // The deepest level (this increases when an invitee invites someone else)
-
-        $args = [$this->treeId(), $this->position(), $this->depth()];
-        $maxPosition = self::$db->scalar("
-            SELECT TreePosition
-            FROM invite_tree
-            WHERE TreeID = ?
-                AND TreePosition > ?
-                AND TreeLevel = ?
-            ORDER BY TreePosition ASC
-            LIMIT 1
-            ", ...$args
-        );
-        if (is_null($maxPosition)) {
-            $maxCond = '/* no max pos */';
-        } else {
-            $maxCond = 'AND it.TreePosition < ?';
-            $args[] = $maxPosition;
-        }
-        self::$db->prepared_query("
-            SELECT
-                it.UserID,
-                it.TreePosition,
-                it.TreeLevel
-            FROM invite_tree AS it
-            WHERE it.TreeID = ?
-                AND it.TreePosition > ?
-                AND it.TreeLevel > ?
-                $maxCond
-            ORDER BY it.TreePosition
-            ", ...$args
-        );
-        $inviteeList = self::$db->to_array(false, MYSQLI_NUM, false);
-
-        $info = [
-            'tree'           => [],
-            'total'          => 0,
-            'branch'         => 0,
-            'disabled'       => 0,
-            'donor'          => 0,
-            'paranoid'       => 0,
-            'upload_total'   => 0,
-            'download_total' => 0,
-            'upload_top'     => 0,
-            'download_top'   => 0,
-        ];
-        $classSummary = [];
-        foreach ($inviteeList as [$inviteeId, /* $position -- unused */, $depth]) {
-            $invitee = $this->userMan->findById($inviteeId);
-            if (is_null($invitee)) {
-                continue;
-            }
-
-            $info['total']++;
-            $info['tree'][] = [
-                'user'  => $invitee,
-                'depth' => $depth,
-            ];
-            if ($invitee->isDisabled()) {
-                $info['disabled']++;
-            }
-            if ((new Donor($invitee))->isDonor()) {
-                $info['donor']++;
-            }
-
-            $paranoid = $invitee->propertyVisibleMulti($viewer, ['uploaded', 'downloaded']) === PARANOIA_HIDE;
-            if ($depth == $this->depth() + 1) {
-                $info['branch']++;
-                if (!$paranoid) {
-                    $info['upload_top']   += $invitee->uploadedSize();
-                    $info['download_top'] += $invitee->downloadedSize();
-                }
-            }
-            if ($paranoid) {
-                $info['paranoid']++;
-            } else {
-                $info['upload_total']   += $invitee->uploadedSize();
-                $info['download_total'] += $invitee->downloadedSize();
-            }
-
-            $primaryClass = $invitee->primaryClass();
-            if (!isset($classSummary[$primaryClass])) {
-                $classSummary[$primaryClass] = 0;
-            }
-            $classSummary[$primaryClass]++;
-
-            if ($maxDepth < $depth) {
-                $maxDepth = $depth;
-            }
-        }
-        return $info['total'] === 0
-            ? []
-            : [ 'classes' =>
-                array_merge(
-                    ...array_map(
-                        fn($c) => [$this->userMan->userclassName($c) => $classSummary[$c]],
-                        array_keys($classSummary)
-                    )
-                ),
-                'depth'  => $this->depth(),
-                'height' => $maxDepth - $this->depth(),
-                'info'   => $info,
-            ];
     }
 }

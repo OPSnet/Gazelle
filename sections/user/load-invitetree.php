@@ -17,9 +17,8 @@ if (is_null($user)) {
     json_die("Not found");
 }
 
-$tree = new Gazelle\User\InviteTree($user, $userMan);
 echo json_encode($Twig->render('user/invite-tree.twig', [
-    ...$tree->details($Viewer),
+    'tree'   => new Gazelle\User\InviteTree($user),
     'user'   => $user,
     'viewer' => $Viewer,
 ]));

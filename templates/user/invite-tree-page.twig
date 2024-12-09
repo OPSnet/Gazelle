@@ -6,12 +6,9 @@
     <div class="box pad">
         <div class="invitetree pad">
 {% include 'user/invite-tree.twig' with {
-    'classes': classes,
-    'depth':   depth,
-    'height':  height,
-    'info':    info,
-    'user':    user,
-    'viewer':  viewer,
+    'tree'   : tree,
+    'user'   : user,
+    'viewer' : viewer,
 } only %}
        </div>
    </div>

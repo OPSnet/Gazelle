@@ -157,7 +157,6 @@ class UserCreator extends Base {
 
         if ($inviter) {
             (new Manager\InviteSource())->resolveInviteSource($this->inviteKey, $user);
-            (new User\InviteTree($inviter, $manager))->add($user);
             $inviter->stats()->increment('invited_total');
             $user->externalProfile()->modifyProfile($inviterReason);
             self::$db->prepared_query("

@@ -29,17 +29,18 @@ if (isset($_POST['id'])) {
         error(404);
     }
 
-    $message = (new Gazelle\User\InviteTree($user, $userMan))
+    $message = (new Gazelle\User\InviteTree($user))
         ->manipulate(
             $comment,
             $doDisable,
             $doInvites,
             new \Gazelle\Tracker(),
-            $Viewer
+            $Viewer,
+            $userMan,
         );
 }
 
 echo $Twig->render('user/invite-tree-bulkedit.twig', [
-    'auth'    => $Viewer->auth(),
+    'viewer'  => $Viewer,
     'message' => $message,
 ]);

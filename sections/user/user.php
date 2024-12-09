@@ -345,7 +345,7 @@ if ($Viewer->permitted('users_linked_users')) {
 }
 
 if ($Viewer->permitted('users_view_invites')) {
-    $tree = new Gazelle\User\InviteTree($user, $userMan);
+    $tree = new Gazelle\User\InviteTree($user);
     if ($tree->hasInvitees()) {
 ?>
         <div class="box" id="invitetree_box">
