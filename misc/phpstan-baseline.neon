@@ -66,16 +66,6 @@ parameters:
 			path: ../app/File/RipLogHTML.php
 
 		-
-			message: "#^Parameter \\#2 \\$property of method Gazelle\\\\Json\\\\User\\:\\:valueOrNull\\(\\) expects bool, string given\\.$#"
-			count: 23
-			path: ../app/Json/User.php
-
-		-
-			message: "#^Parameter \\#2 \\$property of method Gazelle\\\\User\\:\\:propertyVisible\\(\\) expects string, bool given\\.$#"
-			count: 1
-			path: ../app/Json/User.php
-
-		-
 			message: "#^Parameter \\#1 \\$id of class Gazelle\\\\Contest constructor expects int, float\\|int\\<min, \\-1\\>\\|int\\<1, max\\>\\|string\\|true given\\.$#"
 			count: 1
 			path: ../app/Manager/Contest.php

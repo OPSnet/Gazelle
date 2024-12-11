@@ -10,7 +10,7 @@ class User extends \Gazelle\Json {
         protected \Gazelle\User $viewer,
     ) {}
 
-    protected function valueOrNull(int $value, bool $property): ?int {
+    protected function valueOrNull(int $value, string $property): ?int {
         return $this->user->propertyVisible($this->viewer, $property) ? $value : null;
     }
 
