@@ -1,5 +1,5 @@
 {% from 'macro/form.twig' import selected %}
-{{ header('Staff PM', {'js': 'staffpm,bbcode'}) }}
+{{ header('Staff PM', {'js': 'bbcode,comments,staffpm'}) }}
 <div class="thin">
     <div class="header">
         <h2>Staff PM › {{ pm.subject }}{% if pm.isResolved %} (Resolved){% endif %}</h2>
@@ -24,12 +24,12 @@
 <br />
 <div id="inbox">
 {% for message in pm.thread %}
-    <div class="box vertical_space" id="post{{ messsage.id }}">
+    <div class="box vertical_space" id="post{{ message.id }}">
         <div class="head">
             <a class="postid" href="staffpm.php?action=viewconv&amp;id={{ pm.id }}#post{{ message.id }}" style="font-weight: normal;">#{{ message.id }}</a>
             <strong>{{ message.user_id|user_full|raw }}</strong> {{ message.sent_date|time_diff }}
 {%  if pm.inProgress %}
-            - <a href="#quickpost" class="brackets quote-action" data-id="{{ message.id }}" class="brackets">Quote</a>
+            - <a href="#quickpost" class="brackets quotable" data-id="{{ message.id }}" data-author="{{ message.username }}">Quote</a>
 {%  endif %}
         </div>
         <div class="body">{{ message.body|bb_format|raw }}</div>

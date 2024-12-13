@@ -151,7 +151,7 @@ foreach ($slice as $Key => $Post) {
                 <?=time_diff($AddedTime, 2); ?>
                 <span id="postcontrol-<?= $PostID ?>">
 <?php if (!$thread->isLocked() && !$Viewer->disablePosting()) { ?>
-                - <a href="#quickpost" id="quote_<?=$PostID?>" onclick="Quote('<?=$PostID?>', '<?= $author->username() ?>', true);" title="Select text to quote" class="brackets">Quote</a>
+                - <a href="#quickpost" class="brackets quotable" id="quote_<?=$PostID?>" data-id="<?=$PostID?>" data-author="<?= $author->username() ?>" title="Select text to quote">Quote</a>
 <?php
     }
     if ((!$thread->isLocked() && $Viewer->writeAccess($forum) && $AuthorID == $Viewer->id()) && !$Viewer->disablePosting() || $Viewer->permitted('site_moderate_forums')) {

@@ -5,57 +5,65 @@
         {%- if post.ID > comment.lastRead %} forum_unread{% endif -%}
         ">
         <colgroup>
-    {%- if viewer.showAvatars -%}
+{%  if viewer.showAvatars %}
             <col class="col_avatar" />
-    {%- endif -%}
+{%  endif %}
             <col class="col_post_body" />
         </colgroup>
         <tr class="colhead_dark">
             <td colspan="{{ viewer.showAvatars ? 2 : 1 }}">
-                <div style="float: left;"><a class="post_id" href="{{ "#{url}&postid=#{post.ID}#post#{post.ID}" }}">#{{ post.ID }}</a>
-                    <strong>{{ post.AuthorID|user_full }}</strong> {{ post.AddedTime|time_diff }}
+                <div style="float: left;"><a class="post_id" href="{{
+                    "#{url}&postid=#{post.ID}#post#{post.ID}" }}">#{{ post.ID }}</a>
+                    <strong>{{ post.AuthorID|user_full }}</strong> {{
+                        post.AddedTime|time_diff }}
                     <span id="postcontrol-{{ post.ID }}">
-                    - <a href="#quickpost" onclick="Quote('{{ post.ID }}','{{ post.author_name }}', true);" class="brackets">Quote</a>
-    {% if (viewer.permitted('site_moderate_forums')) or (post.AuthorID == viewer.Id) %}
-                    - <a href="#post{{ post.ID }}" id="edit-{{ post.ID }}" data-author="{{ post.AuthorID }}" data-key="{{ key }}" class="edit-post brackets">Edit</a>
-    {% endif %}
+                    - <a href="#quickpost" class="brackets quotable" data-id="{{
+                        post.ID }}" data-author="{{ post.author_name }}">Quote</a>
+{%  if viewer.permitted('site_moderate_forums') or (post.AuthorID == viewer.Id) %}
+                    - <a href="#post{{ post.ID }}" id="edit-{{ post.ID }}" data-author="{{
+                        post.AuthorID }}" data-key="{{ key }}" class="edit-post brackets">Edit</a>
+{%  endif %}
                     </span>
                 </div>
                 <div id="bar{{ post.ID }}" style="float: right;">
-                    <a href="reports.php?action=report&amp;type=comment&amp;id={{ post.ID }}" class="brackets">Report</a>
-    {% if viewer.permitted('site_admin_forums') %}
-        {% if viewer.permitted('site_forum_post_delete') %}
+                    <a href="reports.php?action=report&amp;type=comment&amp;id={{
+                        post.ID }}" class="brackets">Report</a>
+{%  if viewer.permitted('site_admin_forums') %}
+{%      if viewer.permitted('site_forum_post_delete') %}
                     - <a href="#" data-id="{{ post.ID }}" class="brackets delete-post">Delete</a>
-        {% endif %}
-        {% if (viewer.permitted('users_warn')) or (post.AuthorID == viewer.Id) or (viewer.classLevel >= userMan.findById(post.AuthorID).classLevel)  %}
-                    <form class="manage_form hidden" name="user" id="warn{{ post.ID }}" action="comments.php" method="post">
+{%      endif %}
+{%      if (viewer.permitted('users_warn'))
+            or (post.AuthorID == viewer.Id)
+            or (viewer.classLevel >= userMan.findById(post.AuthorID).classLevel) %}
+                    <form class="manage_form hidden" name="user" id="warn{{
+                        post.ID }}" action="comments.php" method="post">
                         <input type="hidden" name="action" value="warn" />
                         <input type="hidden" name="postid" value="{{ post.ID }}" />
                     </form>
                     - <a href="#" onclick="$('#warn{{ post.ID }}').raw().submit(); return false;" class="brackets">Warn</a>
-        {% endif %}
-    {% endif %}
+{%      endif %}
+{%  endif %}
                         &nbsp;
                     <a href="#">↑</a>
                 </div>
             </td>
         </tr>
         <tr>
-    {% if viewer.showAvatars %}
+{%  if viewer.showAvatars %}
             <td class="avatar" valign="top">{{ userMan.findById(post.AuthorID)|avatar(viewer)|raw }}</td>
-    {% endif %}
+{%  endif %}
             <td class="body" valign="top">
                 <div id="content{{ post.ID }}">
                     {{ post.Body|bb_format }}
-    {% if post.EditedUserID %}
+{%  if post.EditedUserID %}
                     <br />
                     <br />
                     <span class="last_edited">
-    {%    if viewer.permitted('site_admin_forums') %}
-                    <a href="#content{{ post.ID }}" onclick="LoadEdit('{{ comment.page }}', {{ post.ID }}, 1); return false;">&laquo;</a>
-    {%    endif %}
+{%      if viewer.permitted('site_admin_forums') %}
+                    <a href="#content{{ post.ID }}" onclick="LoadEdit('{{ comment.page }}', {{ post.ID }}, 1); return false;">«</a>
+{%      endif %}
                     Last edited by {{ post.EditedUserID|user_url }} {{ post.EditedTime|time_diff }}</span>
-    {% endif %}
+{%  endif %}
                 </div>
             </td>
         </tr>

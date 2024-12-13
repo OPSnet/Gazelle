@@ -19,7 +19,8 @@
                 System</strong> {{ post.sent_date|time_diff }}
 {%  else %}
 {{      post.sender_id|user_full }}</strong> {{ post.sent_date|time_diff }}
-                    - <a href="#quickpost" onclick="Quote('{{ post.id }}','{{ sender_list[post.sender_id].username }}');" class="brackets">Quote</a>
+                    - <a href="#quickpost" class="brackets quotable" data-id="{{
+                        post.id }}" data-author="{{ sender_list[post.sender_id].username }}">Quote</a>
 {%  endif %}
             </div>
             <div style="float: right;"><a href="#">↑</a> <a href="#messageform">↓</a></div>
@@ -40,7 +41,7 @@
             <input type="hidden" name="toid" value="{{ pm.recipientList|filter(v => v != viewer.id)|join(',') }}" />
             <input type="hidden" name="convid" value="{{ pm.id }}" />
             {{ body.preview|raw }}
-            {{ body.field|raw }}
+            <a name="quickpost">{{ body.field|raw }}</a>
             <div id="buttons" class="center">
                 {{ body.button|raw }}
                 <input type="submit" value="Send message" />

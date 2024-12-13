@@ -12,8 +12,6 @@
             <div style="float: left;"><a class="post_id" href="{{ url }}">#{{ id }}</a>
                 <strong>{{ author.id|user_full }}</strong> {{ added_time|time_diff }} on {{ heading|raw }}
                 <span id="postcontrol-{{ id }}">
-                {{- dom.click('#quote-' ~ id, "Quote('" ~ id ~ "','" ~ author.username ~ "', true)") -}}
-                - <a href="#quickpost" id="quote-{{ id }}" class="brackets">Quote</a>
 {%    if own_comment or viewer.permitted('site_moderate_forums') %}
                 - <a href="#post{{ id }}" id="edit-{{ id }}" data-author="{{ author.id }}" data-key="{{ key }}" class="edit-post brackets">Edit</a>
 {%    endif %}

@@ -195,13 +195,15 @@ class StaffPM extends BaseObject {
 
     public function thread(): array {
         self::$db->prepared_query("
-            SELECT ID    AS id,
-                UserID   AS user_id,
-                SentDate AS sent_date,
-                Message  AS body
-            FROM staff_pm_messages
-            WHERE ConvID = ?
-            ORDER BY SentDate
+            SELECT spm.ID    AS id,
+                spm.UserID   AS user_id,
+                um.Username  AS username,
+                spm.SentDate AS sent_date,
+                spm.Message  AS body
+            FROM staff_pm_messages spm
+            INNER JOIN users_main um ON (um.ID = spm.UserID)
+            WHERE spm.ConvID = ?
+            ORDER BY spm.SentDate
             ", $this->id
         );
         return self::$db->to_array(false, MYSQLI_ASSOC, false);

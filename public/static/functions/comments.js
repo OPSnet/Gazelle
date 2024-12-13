@@ -1,4 +1,4 @@
-/* global ajax, BBCode, gazURL, resize */
+/* global ajax, BBCode, resize */
 
 "use strict";
 
@@ -43,82 +43,68 @@ function QuoteJump(event, post) {
     }
 }
 
-function Quote(post, user, link = false) {
-    const username = user;
-    const url = new gazURL();
+async function quote_source(input, source_url) {
+    const s = getSelection();
+    if (s.toString().length > 0 && input.contains(s.anchorNode) && input.contains(s.focusNode)) {
+        // If any text inside a post body is selected, use that instead of the
+        // full body. Unfortunately, this strips the bbcode in the quote. This
+        // is an unfortunate necessity, because isolating the section from the
+        // full bbcoded markup is non-trivial.
+        return s.toString();
+    }
+    const response = await fetch(source_url);
+    if (source_url.startsWith('/staffpm.php')) {
+        const data = await response.json();
+        return data.body;
+    }
+    return await response.text();
+}
 
-    let target = '';
-    let requrl = '';
-    let elem = 'post';
-    if (url.path == "inbox") {
-        requrl = 'inbox.php?action=get_post&post=' + post;
-        elem = 'message';
+async function quote(post) {
+    // This is all a bit of mess, due to historical differences in
+    // how quoting was implemented in various parts of the site.
+    const path    = document.location.pathname;
+    const post_id = post.dataset.id;
+    let username  = post.dataset.author;
+    let dest      = false;
+    let field     = false;
+    let requrl    = false;
+    if (path == "/inbox.php") {
+        dest   = 'body';
+        field  = 'message' + post_id;
+        requrl = '/inbox.php?action=get_post&post=' + post_id;
+    } else if (path == "/forums.php") {
+        dest   = 'quickpost';
+        field  = 'post' + post_id;
+        requrl = '/forums.php?action=get_post&post=' + post_id;
+    } else if (path == "/staffpm.php") {
+        dest   = 'quickpost';
+        field  = 'post' + post_id;
+        requrl  = '/staffpm.php?action=get_post&post=' + post_id;
     } else {
-        requrl = 'comments.php?action=get&postid=' + post;
-    }
-    if (link == true) {
-        if (url.path == "artist") {
-            // artist comment
-            target = 'a';
-        } else if (url.path == "torrents") {
-            // torrent comment
-            target = 't';
-        } else if (url.path == "collages") {
-            // collage comment
-            target = 'c';
-        } else if (url.path == "requests") {
-            // request comment
-            target = 'r';
-        } else {
-            // forum post
-            requrl = 'forums.php?action=get_post&post=' + post;
+        dest   = 'quickpost';
+        field  = 'post' + post_id;
+        requrl = '/comments.php?action=get&postid=' + post_id;
+        const page = path.match('^/(?:artist|collages|requests|torrents).php$');
+        if (page) {
+            username += '|' + page[0].charAt(1) + post_id;
         }
-        target += post;
     }
-
-    // if any text inside of a forum post body is selected, use that instead of Ajax result.
-    // unfortunately, this will not preserve bbcode in the quote. This is an unfortunate necessity, as
-    // doing some sort of weird grepping through the Ajax bbcode for the selected text is overkill.
-    if (getSelection().toString() && inPost(getSelection().anchorNode) && inPost(getSelection().focusNode)) {
-        insertQuote(getSelection().toString());
-    } else {
-        ajax.get(requrl, insertQuoteDecoded);
+    let destination = document.getElementById(dest);
+    if (destination.value !== '') {
+        destination.value += "\n\n";
     }
-
-    // DOM element (non-jQuery) -> Bool
-    function inPost(elt) {
-        return $.contains($('#' + elem + post)[0],elt);
-    }
-
-    // Str -> undefined
-    function insertQuote(response) {
-        if ($('#quickpost').raw().value !== '') {
-            $('#quickpost').raw().value += "\n\n";
-        }
-        $('#quickpost').raw().value = $('#quickpost').raw().value
-            + "[quote=" + username + (link == true ? "|" + target : "") + "]"
-            + response
-            + "[/quote]";
-        resize('quickpost');
-    }
-
-    // Str -> undefined
-    function insertQuoteDecoded(response) {
-        if ($('#quickpost').raw().value !== '') {
-            $('#quickpost').raw().value += "\n\n";
-        }
-        $('#quickpost').raw().value = $('#quickpost').raw().value
-            + "[quote=" + username + (link == true ? "|" + target : "") + "]"
-            + response
-            + "[/quote]";
-        resize('quickpost');
+    destination.value += "[quote=" + username + "]"
+        + await quote_source(document.getElementById(field), requrl) + "[/quote]";
+    if (destination.scrollHeight > destination.clientHeight) {
+        destination.style.height =
+            Math.min(1000, destination.scrollHeight + destination.style.fontSize) + 'px';
     }
 }
 
 async function edit_post(id) {
     const dataset  = document.getElementById('edit-' + id).dataset;
-    const is_forum = location.href.match(/forums\.php/);
-
+    const is_forum = document.location.pathname.startsWith('/forums.php');
     // If no edit is already underway or a previous edit was finished, make the necessary dom changes.
     if (!$('#editbox' + id).results() || $('#editbox' + id + '.hidden').results()) {
         $('#reply_box').ghide();
@@ -334,10 +320,14 @@ document.addEventListener('DOMContentLoaded', () => {
             delete_post(del.dataset.id);
         });
     });
-
     Array.from(document.getElementsByClassName('edit-post')).forEach((edit) => {
         edit.addEventListener('click', () => {
             edit_post(edit.id.substr(edit.id.indexOf('edit-') + 5)); // edit-123 => 123
+        });
+    });
+    Array.from(document.getElementsByClassName('quotable')).forEach((post) => {
+        post.addEventListener('click', () => {
+            quote(post);
         });
     });
 });

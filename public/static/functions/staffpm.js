@@ -1,5 +1,3 @@
-/* global resize */
-
 "use strict";
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -127,21 +125,4 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
-    // used on templates/staffpm/message.twig
-    // quote the post being replied to
-    Array.from(document.querySelectorAll('.quote-action')).forEach((quote) => {
-        quote.addEventListener('click', async (e) => {
-            const id       = e.target.dataset.id;
-            const response = await fetch(new Request(
-                '?action=get_post&post=' + id
-            ));
-            const data    = await response.json();
-            let quickpost = document.getElementById('quickpost');
-            quickpost.value = quickpost.value
-                + (quickpost.value !== '' ? "\n\n" : '')
-                + '[quote=' + data.username + ']' + data.body + '[/quote]';
-            resize('quickpost');
-        });
-    });
 });
