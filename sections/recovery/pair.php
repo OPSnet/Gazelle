@@ -6,11 +6,12 @@ if (!$Viewer->permitted('admin_recovery')) {
     error(403);
 }
 
+$prev     = false;
 $prevId   = false;
 $currId   = false;
 $result   = false;
 $confirm  = false;
-$messsage = false;
+$message  = false;
 $recovery = new Gazelle\Manager\Recovery();
 
 if (isset($_POST['curr']) && isset($_POST['prev'])) {

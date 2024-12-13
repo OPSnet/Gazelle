@@ -346,16 +346,6 @@ parameters:
 			path: ../sections/error/index.php
 
 		-
-			message: "#^Variable \\$message might not be defined\\.$#"
-			count: 1
-			path: ../sections/recovery/pair.php
-
-		-
-			message: "#^Variable \\$prev might not be defined\\.$#"
-			count: 1
-			path: ../sections/recovery/pair.php
-
-		-
 			message: "#^Variable \\$info might not be defined\\.$#"
 			count: 1
 			path: ../sections/recovery/save.php
