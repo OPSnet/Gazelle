@@ -62,7 +62,7 @@
     ['Referral accounts',    'tools.php?action=referral_accounts', viewer.permitted('admin_manage_referrals') and constant('OPEN_EXTERNAL_REFERRALS')],
     ['Referred users',       'tools.php?action=referral_users',    viewer.permitted('admin_view_referrals')],
     ['Registration log',     'tools.php?action=registration_log',  viewer.permitted('users_view_email')],
-    ['Send custom PM',       'tools.php?action=custom_pm',         viewer.permitted('site_debug')],
+    ['Send custom PM',       'tools.php?action=custom_pm',         viewer.permitted('admin_site_debug')],
     ['User flow',            'tools.php?action=user_flow',         viewer.permitted('site_view_flow')],
 ]) }}
 

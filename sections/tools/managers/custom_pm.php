@@ -2,7 +2,7 @@
 /** @phpstan-var \Gazelle\User $Viewer */
 /** @phpstan-var \Twig\Environment $Twig */
 
-if (!$Viewer->permitted('site_debug')) {
+if (!$Viewer->permitted('admin_site_debug')) {
     error(403);
 }
 
@@ -64,7 +64,6 @@ if (isset($_POST['query'])) {
         }
     }
 }
-
 
 echo $Twig->render('admin/custom-pm.twig', [
     'error'     => $error,
