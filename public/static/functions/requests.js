@@ -163,7 +163,7 @@
         }
     }
 
-    function configure_category_form() {
+    function init_category_form() {
         const cat = document.getElementById('categories').selectedOptions[0].value;
         if (cat == "Music") {
             ['artist', 'bitrates', 'cataloguenumber', 'formats', 'media', 'oclc',
@@ -199,15 +199,12 @@
         }
     }
 
-    function toggle_group(group, disable) {
-        const all_check = document.getElementById('toggle_' + group).checked;
-        Array.from(document.getElementsByName(group + '[]')).forEach((cb) => {
+    function toggle_group(group) {
+        const all_check  = document.getElementById('toggle_' + group).checked;
+        const group_name = (group === 'cat') ? 'filter_cat[]' : (group + '[]');
+        Array.from(document.getElementsByName(group_name)).forEach((cb) => {
             cb.checked = all_check;
-            if (disable) {
-                cb.disabled = all_check;
-            }
         });
-
         if (["formats", "media"].includes(group)) {
             toggle_log_cue();
         }
@@ -215,6 +212,9 @@
 
     function toggle_log_cue() {
         let logcue_tr = document.getElementById('logcue_tr');
+        if (!logcue_tr) {
+            return;
+        }
         if (
             document.getElementsByName('formats[]')[1].checked // FLAC
             &&
@@ -235,6 +235,17 @@
         }
     }
 
+    function recheck_all(group) {
+        let all_checked = true;
+        const name = (group === 'cat') ? 'filter_cat[]' : (group + '[]');
+        Array.from(document.getElementsByName(name)).forEach((e) => {
+            if (!e.checked) {
+                all_checked = false;
+            }
+        });
+        document.getElementById('toggle_' + group).checked = all_checked;
+    }
+
     function init_input() {
         document.getElementById('artist-add').addEventListener('click', (e) => {
             artist_add();
@@ -249,7 +260,7 @@
         });
 
         document.getElementById('categories').addEventListener('change', () => {
-            configure_category_form();
+            init_category_form();
         });
         document.getElementById('genre_tags').addEventListener('change', () => {
             add_tag();
@@ -257,29 +268,42 @@
         document.getElementById('needlog').addEventListener('click', () => {
             toggle_log_score();
         });
-        Array.from(document.getElementsByName('format[]')).forEach((format) => {
+
+        init_checkbox_all();
+        init_category_form();
+        toggle_log_cue();
+    }
+
+    function init_checkbox_all() {
+        Array.from(document.getElementsByName('bitrates[]')).forEach((encoding) => {
+            encoding.addEventListener('change', () => {
+                document.getElementById('toggle_bitrates').checked = false;
+                recheck_all('bitrates');
+            });
+        });
+        Array.from(document.getElementsByName('formats[]')).forEach((format) => {
             format.addEventListener('change', () => {
+                document.getElementById('toggle_formats').checked = false;
+                recheck_all('formats');
                 toggle_log_cue();
             });
         });
         Array.from(document.getElementsByName('media[]')).forEach((media) => {
             media.addEventListener('change', () => {
+                document.getElementById('toggle_media').checked = false;
                 toggle_log_cue();
+                recheck_all('media');
             });
         });
-
         document.getElementById('toggle_formats').addEventListener('change', () => {
-            toggle_group('formats', 1);
+            toggle_group('formats');
         });
         document.getElementById('toggle_bitrates').addEventListener('change', () => {
-            toggle_group('bitrates', 1);
+            toggle_group('bitrates');
         });
         document.getElementById('toggle_media').addEventListener('change', () => {
-            toggle_group('media', 1);
+            toggle_group('media');
         });
-
-        toggle_log_cue();
-        configure_category_form();
     }
 
     function init_vote() {
@@ -311,16 +335,39 @@
         if (['edit', 'new'].includes(action)) {
             init_input();
         }
-
         if (['view', 'new'].includes(action)) {
             init_vote();
         }
+    }
+
+    function init_index_page() {
+        init_checkbox_all();
+        document.getElementById('toggle_cat').addEventListener('change', () => {
+            toggle_group('cat');
+        });
+        document.getElementById('toggle_releases').addEventListener('change', () => {
+            toggle_group('releases');
+        });
+        Array.from(document.getElementsByName('filter_cat[]')).forEach((cat) => {
+            cat.addEventListener('change', () => {
+                document.getElementById('toggle_cat').checked = false;
+                recheck_all('cat');
+            });
+        });
+        Array.from(document.getElementsByName('releases[]')).forEach((release) => {
+            release.addEventListener('change', () => {
+                document.getElementById('toggle_releases').checked = false;
+                recheck_all('releases');
+            });
+        });
     }
 
     document.addEventListener('DOMContentLoaded', () => {
         const page = window.location.href.match(/\brequests\.php.*?action=(edit|new|view)/);
         if (page) {
             init_request_page(page[1]);
+        } else if (window.location.pathname == '/requests.php') {
+            init_index_page();
         } else {
             Array.from(document.querySelectorAll('.request-vote')).forEach((span) => {
                 span.addEventListener('click', (e) => {

@@ -65,10 +65,14 @@
             <tr id="cat_list">
                 <td class="label">Categories</td>
                 <td>
+                    <label><input type="checkbox" id="toggle_cat" {{
+                        checked(filter_cat|length in [0, constant('CATEGORY')|length])
+                       }} /> All</label>
+                    <br />
 {%  for key, name in constant('CATEGORY') %}
                     <label class="req-choice">
-                    <input type="checkbox" name="filter_cat[{{ key + 1 }}]" id="cat_{{ key + 1 }}" value="1"{{ 
-                        checked(key + 1 in filter_cat|keys or initial) }} /> {{ name }}</label>
+                    <input type="checkbox" name="filter_cat[]" id="cat_{{ key }}" value="{{ key }}"{{ 
+                        checked(key in filter_cat or initial) }} /> {{ name }}</label>
 {%  endfor %}
                 </td>
             </tr>
@@ -76,9 +80,9 @@
             <tr id="release_list">
                 <td class="label">Release types</td>
                 <td>
-                    <input type="checkbox" id="toggle_releases" onchange="Toggle('releases', 0);"{{
-                        checked(search.releaseTypeList|length in [0, release_types|length] or initial)
-                       }} /> <label for="toggle_releases">All</label>
+                    <label><input type="checkbox" id="toggle_releases" {{
+                        checked(search.releaseTypeList|length in [0, release_types|length])
+                       }} /> All</label>
                     <br />
 {%  for key, name in release_types %}
                     <label class="req-choice">
@@ -89,19 +93,43 @@
                 </td>
             </tr>
 
+            <tr id="media_list">
+                <td class="label">Media</td>
+                <td>
+                    <label><input type="checkbox" id="toggle_media" {{ 
+                        checked(search.mediaList|length in [0, constant('MEDIA')|length])
+                    }} />
+                    All</label>
+                    <label class="tooltip" title="Requests that also specify other media will be excluded from the results">
+                    <input type="checkbox" id="media_strict" name="media_strict"{{
+                        checked(media_strict) }} />
+                    Only specified</label>
+                    <br />
+{%  for key, name in constant('MEDIA') %}
+                    <label class="req-choice">
+                    <input type="checkbox" name="media[]" value="{{ key }}" id="media_{{ key }}"{{
+                        checked(not search.mediaList or key in search.mediaList or initial)
+                        }} /> {{ name }}</label>
+{%  endfor %}
+                </td>
+            </tr>
+
             <tr id="format_list">
                 <td class="label">Formats</td>
                 <td>
-                    <input type="checkbox" id="toggle_formats" onchange="Toggle('formats', 0);"{{ 
-                        checked(search.formatList|length in [0, constant('FORMAT')] or initial) }} />
-                    <label for="toggle_formats">All</label>
-                    <input type="checkbox" id="formats_strict" name="formats_strict"{{ checked('formats_strict') }} />
-                    <label for="formats_strict">Only specified</label>
+                    <label><input type="checkbox" id="toggle_formats" {{ 
+                        checked(search.formatList|length in [0, constant('FORMAT')|length])
+                    }} />
+                    All</label>
+                    <label class="tooltip" title="Requests that also specify other formats will be excluded from the results">
+                    <input type="checkbox" id="formats_strict" name="formats_strict"{{
+                        checked(format_strict) }} />
+                    Only specified</label>
                     <br />
 {%  for key, name in constant('FORMAT') %}
                     <label class="req-choice">
                     <input type="checkbox" name="formats[]" value="{{ key }}" id="format_{{ key }}" {{
-                        checked(not search.formatList or name|lower in search.formatList or initial)
+                        checked(not search.formatList or key in search.formatList or initial)
                         }} /> {{ name }}</label>
 {%  endfor %}
                 </td>
@@ -110,37 +138,24 @@
             <tr id="bitrate_list">
                 <td class="label">Encoding</td>
                 <td>
-                    <input type="checkbox" id="toggle_bitrates" onchange="Toggle('bitrates', 0);"{{ 
-                        checked(search.encodingList|length in [0, constant('ENCODING')] or initial) }} />
-                    <label for="toggle_bitrates">All</label>
-                    <input type="checkbox" id="bitrate_strict" name="bitrate_strict"{{ checked('bitrate_strict') }} />
-                    <label for="bitrate_strict">Only specified</label>
+                    <label><input type="checkbox" id="toggle_bitrates" {{ 
+                        checked(search.encodingList|length in [0, constant('ENCODING')|length])
+                    }} />
+                    All</label>
+                    <label class="tooltip" title="Requests that also specify other encodings will be excluded from the results">
+                    <input type="checkbox" id="bitrates_strict" name="bitrates_strict"{{
+                        checked(encoding_strict) }} />
+                    Only specified</label>
                     <br />
 {%  for key, name in constant('ENCODING') %}
                     <label class="req-choice">
                     <input type="checkbox" name="bitrates[]" value="{{ key }}" id="bitrate_{{ key }}"{{
-                        checked(not search.encodingList or name|lower in search.encodingList or initial)
+                        checked(not search.encodingList or key in search.encodingList or initial)
                         }} /> {{ name }}</label>
 {%  endfor %}
                 </td>
             </tr>
 
-            <tr id="media_list">
-                <td class="label">Media</td>
-                <td>
-                    <input type="checkbox" id="toggle_media" onchange="Toggle('media', 0);"{{ 
-                        checked(search.mediaList|length in [0, constant('MEDIA')] or initial) }} />
-                    <label for="toggle_media">All</label>
-                    <input type="checkbox" id="media_strict" name="media_strict"{{ checked('media_strict') }} />
-                    <label for="media_strict">Only specified</label>
-                    <br />
-{%  for key, name in constant('MEDIA') %}
-                    <label class="req-choice">
-                    <input type="checkbox" name="media[]" value="{{ key }}" id="media_{{ key }}"{{
-                        checked(not search.mediaList or name|lower in search.mediaList or initial) }} /> {{ name }}</label>
-{%  endfor %}
-                </td>
-            </tr>
             <tr>
                 <td colspan="2" class="center">
                     <input type="submit" value="Search requests" />

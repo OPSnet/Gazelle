@@ -38,9 +38,9 @@ class Request extends \Gazelle\Base {
             return $this;
         }
         $term = [];
-        foreach (array_keys($categoryList) as $idx) {
-            if (isset(CATEGORY[$idx - 1])) {
-                $term[] = $idx;
+        foreach ($categoryList as $idx) {
+            if (isset(CATEGORY[$idx])) {
+                $term[] = $idx + 1;
             }
         }
         if ($term) {
@@ -67,20 +67,10 @@ class Request extends \Gazelle\Base {
         if (in_array(count($encodingList), [0, count(ENCODING)])) {
             return $this;
         }
-        $term = [];
-        foreach ($encodingList as $idx) {
-            if (isset(ENCODING[$idx])) {
-                $term[] = '"' . strtr(\Sphinxql::sph_escape_string(ENCODING[$idx]), '-.', '  ') . '"';
-            }
-        }
-        if ($term) {
-            $this->encodingList = $term;
-            $this->negate = true;
-            if (!$strict) {
-                $term[] = 'any';
-            }
-            $this->sphinxq->where_match('(' . implode(' | ', $term) . ')', 'bitratelist', false);
-        }
+        [$args, $term] = $this->setResourceFilter(ENCODING, $encodingList, $strict);
+        $this->encodingList = $args;
+        $this->negate      = true;
+        $this->sphinxq->where_match(implode(' ', $term), 'bitratelist', false);
         return $this;
     }
 
@@ -88,43 +78,55 @@ class Request extends \Gazelle\Base {
         if (in_array(count($formatList), [0, count(FORMAT)])) {
             return $this;
         }
-        $term = [];
-        foreach ($formatList as $idx) {
-            if (isset(FORMAT[$idx])) {
-                $term[] = '"' . strtr(\Sphinxql::sph_escape_string(FORMAT[$idx]), '-.', '  ') . '"';
-            }
-        }
-        if ($term) {
-            $this->formatList = $term;
-            $this->negate = true;
-            if (!$strict) {
-                $term[] = 'any';
-            }
-            $this->sphinxq->where_match('(' . implode(' | ', $term) . ')', 'formatlist', false);
-        }
+        [$args, $term] = $this->setResourceFilter(FORMAT, $formatList, $strict);
+        $this->formatList = $args;
+        $this->negate     = true;
+        $this->sphinxq->where_match(implode(' ', $term), 'formatlist', false);
         return $this;
     }
 
     public function setMedia(array $mediaList, bool $strict): static {
-        $format = [];
         if (in_array(count($mediaList), [0, count(MEDIA)])) {
             return $this;
         }
-        $term = [];
-        foreach ($mediaList as $idx) {
-            if (isset(MEDIA[$idx])) {
-                $term[] = '"' . strtr(\Sphinxql::sph_escape_string(MEDIA[$idx]), '-.', '  ') . '"';
-            }
-        }
-        if ($term) {
-            $this->mediaList = $term;
-            $this->negate = true;
-            if (!$strict) {
-                $format[] = 'any';
-            }
-            $this->sphinxq->where_match('(' . implode(' | ', $term) . ')', 'medialist', false);
-        }
+        [$args, $term] = $this->setResourceFilter(MEDIA, $mediaList, $strict);
+        $this->mediaList = $args;
+        $this->negate    = true;
+        $this->sphinxq->where_match(implode(' ', $term), 'medialist', false);
         return $this;
+    }
+
+    /**
+     * @return array<array>
+     */
+    protected function setResourceFilter(array $source, array $selected, bool $strict): array {
+        $args = [];
+        $term = [];
+        if (!$strict) {
+            $term[] = 'any';
+        }
+        foreach ($source as $idx => $value) {
+            if (in_array($idx, $selected)) {
+                $args[] = $idx;
+                $term[] = strtolower($value);
+            }
+        }
+        $term = [
+            '(',
+            implode(
+                ' | ',
+                array_map(fn ($t) => "\"$t\"", $term)
+            ),
+            ')'
+        ];
+        if ($strict) {
+            foreach ($source as $idx => $value) {
+                if (!in_array($idx, $selected)) {
+                    $term[] = '-"' . strtolower($value) . '"';
+                }
+            }
+        }
+        return [$args, $term];
     }
 
     public function setReleaseType(array $releaseTypeList, array $allReleaseType): static {
@@ -310,15 +312,15 @@ class Request extends \Gazelle\Base {
     }
 
     public function encodingList(): array {
-        return isset($this->encodingList) ? array_map(fn ($t) => str_replace('"', '', $t), $this->encodingList) : [];
+        return $this->encodingList ?? [];
     }
 
     public function formatList(): array {
-        return isset($this->formatList) ? array_map(fn ($t) => str_replace('"', '', $t), $this->formatList) : [];
+        return $this->formatList ?? [];
     }
 
     public function mediaList(): array {
-        return isset($this->mediaList) ? array_map(fn ($t) => str_replace('"', '', $t), $this->mediaList) : [];
+        return $this->mediaList ?? [];
     }
 
     public function releaseTypeList(): array {

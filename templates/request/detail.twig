@@ -60,6 +60,12 @@
 {%      endif %}
                 <li class="artists_composer">{{ a.artist.link|raw }}</li>
 {%  endfor %}
+{%  for a in role_list.conductor %}
+{%      if loop.first %}
+                <li class="artists_conductor"><strong>Conducted by:</strong></li>
+{%      endif %}
+                <li class="artists_conductor">{{ a.artist.link|raw }}</li>
+{%  endfor %}
 {%  for a in role_list.dj %}
 {%      if loop.first %}
                 <li class="artists_dj"><strong>DJ / Compiler:</strong></li>
@@ -68,7 +74,7 @@
 {%  endfor %}
 {%  for a in role_list.main %}
 {%      if loop.first %}
-                <li class="artists_main"><strong>{% if role_list.composer %}Performers{% else %}Artists{% endif %}</strong></li>
+                <li class="artists_main"><strong>{% if role_list.composer %}Performers{% else %}Artists{% endif %}:</strong></li>
 {%      endif %}
                 <li class="artists_main">{{ a.artist.link|raw }}</li>
 {%  endfor %}
@@ -77,12 +83,6 @@
                 <li class="artists_with"><strong>With:</strong></li>
 {%     endif %}
                 <li class="artists_with">{{ a.artist.link|raw }}</li>
-{%  endfor %}
-{%  for a in role_list.dj %}
-{%     if loop.first %}
-                <li class="artists_conductor"><strong>Conducted by:</strong></li>
-{%     endif %}
-                <li class="artists_conductor">{{ a.artist.link|raw }}</li>
 {%  endfor %}
 {%  for a in role_list.remixer %}
 {%     if loop.first %}

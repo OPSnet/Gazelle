@@ -13,7 +13,7 @@
     </div>
 {% endif %}
   <div class="box pad">
-    <form action="" method="post" id="request_form" onsubmit="Calculate();">
+    <form action="" method="post" id="request_form">
       <div>
 {% if not new %}
         <input type="hidden" name="requestid" value="{{ request.id }}" />
@@ -64,7 +64,7 @@
 {%          for idx, name in name_list -%}
             <input type="text" size="45" id="artist_{{ loop.parent.loop.index0 }}" name="artists[]"{{ autocomplete|raw }} value="{{ name }}" />
             <select id="importance_{{ loop.parent.loop.index0 }}" name="importance[]">
-              <option value="{{ constant('ARTIST_MAIN') }}"{{ selected(role == constant('ARTIST_MAIN')) }}>Main {{ loop.parent.loop.index0 }}</option>
+              <option value="{{ constant('ARTIST_MAIN') }}"{{ selected(role == constant('ARTIST_MAIN')) }}>Main</option>
               <option value="{{ constant('ARTIST_GUEST') }}"{{ selected(role == constant('ARTIST_GUEST')) }}>Guest</option>
               <option value="{{ constant('ARTIST_COMPOSER') }}"{{ selected(role == constant('ARTIST_COMPOSER')) }}>Composer</option>
               <option value="{{ constant('ARTIST_CONDUCTOR') }}"{{ selected(role == constant('ARTIST_CONDUCTOR')) }}>Conductor</option>
@@ -145,6 +145,16 @@
           </td>
         </tr>
 {% if new or viewer.permitted('site_moderate_requests') %}
+        <tr id="media_tr">
+          <td class="label">Allowed media</td>
+          <td>
+            <label style="display: inline-block; width: 100px"><input type="checkbox" name="all_media" id="toggle_media"{{ checked(media.all) }} /> All</label>
+            <br />
+{%  for k, v in constant('MEDIA') %}
+            <label style="display: inline-block; width: 100px"><input type="checkbox" name="media[]" value="{{ k }}" id="media_{{ k }}"{{ checked(media.exists(v)) }} /> {{ v }}</label>
+{%  endfor %}
+          </td>
+        </tr>
         <tr id="formats_tr">
           <td class="label">Allowed formats</td>
           <td>
@@ -152,26 +162,6 @@
             <br />
 {%  for k, v in constant('FORMAT') %}
             <label style="display: inline-block; width: 100px"><input type="checkbox" name="formats[]" value="{{ k }}" id="format_{{ k }}"{{ checked(format.exists(v)) }} /> {{ v }}</label>
-{%  endfor %}
-          </td>
-        </tr>
-        <tr id="bitrates_tr">
-          <td class="label">Allowed encodings</td>
-          <td>
-            <label style="display: inline-block; width: 100px"><input type="checkbox" name="all_bitrates" id="toggle_bitrates" {{ checked(encoding.all) }} /> All</label>
-            <br />
-{%  for k, v in constant('ENCODING') %}
-            <label style="display: inline-block; width: 100px"><input type="checkbox" name="bitrates[]" value="{{ k }}" id="bitrate_{{ k }}"{{ checked(encoding.exists(v)) }} /> {{ v }}</label>
-{%  endfor %}
-          </td>
-        </tr>
-        <tr id="media_tr">
-          <td class="label">Allowed media</td>
-          <td>
-            <label style="display: inline-block; width: 100px"><input type="checkbox" name="all_media" id="toggle_media"{{ checked(media.all) }} /> All</label>
-            <br />
-{%  for k, v in constant('MEDIA') %}
-            <label style="display: inline-block; width: 100px"><input type="checkbox" name="media[]" value="{{ k }}" id="media_{{ k }}"{{ checked(media.exists(v)) }}" /> {{ v }}</label>
 {%  endfor %}
           </td>
         </tr>
@@ -185,6 +175,16 @@
             <label><input type="checkbox" id="needcksum" name="needcksum"{{ checked(log_cue.needLogChecksum) }} /> Require checksum</label>
             <br />
             <label><input type="checkbox" id="needcue" name="needcue"{{ checked(log_cue.needCue) }} /> Require cue file</label>
+          </td>
+        </tr>
+        <tr id="bitrates_tr">
+          <td class="label">Allowed encodings</td>
+          <td>
+            <label style="display: inline-block; width: 100px"><input type="checkbox" name="all_bitrates" id="toggle_bitrates" {{ checked(encoding.all) }} /> All</label>
+            <br />
+{%  for k, v in constant('ENCODING') %}
+            <label style="display: inline-block; width: 100px"><input type="checkbox" name="bitrates[]" value="{{ k }}" id="bitrate_{{ k }}"{{ checked(encoding.exists(v)) }} /> {{ v }}</label>
+{%  endfor %}
           </td>
         </tr>
 {% endif %}

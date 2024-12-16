@@ -60,14 +60,25 @@ if (!$initial && empty($_GET['showall'])) {
 if (($initial && !isset($_GET['type'])) || (!$initial && !isset($_GET['show_filled']))) {
     $search->showUnfilled();
 }
-$releaseTypes = (new \Gazelle\ReleaseType())->list();
-$search->setFormat($_GET['formats'] ?? [], isset($_GET['formats_strict']))
-    ->setMedia($_GET['media'] ?? [], isset($_GET['media_strict']))
-    ->setEncoding($_GET['bitrates'] ?? [], isset($_GET['bitrate_strict']))
-    ->setText($_GET['search'] ?? '')
+$releaseTypes   = (new \Gazelle\ReleaseType())->list();
+$encodingStrict = isset($_GET['bitrates_strict']);
+$formatStrict   = isset($_GET['formats_strict']);
+$mediaStrict    = isset($_GET['media_strict']);
+$categoryList   = array_map(fn ($c) => (int)$c, $_GET['filter_cat'] ?? []);
+
+$search->setCategory($categoryList)
     ->setTag($_GET['tags'] ?? '', $_GET['tag_mode'] ?? 'all')
-    ->setCategory($_GET['filter_cat'] ?? [])
-    ->setReleaseType($_GET['releases'] ?? [], $releaseTypes);
+    ->setText($_GET['search'] ?? '');
+
+if (in_array(CATEGORY_MUSIC - 1, $categoryList)) {
+    $search->setFormat($_GET['formats'] ?? [], $formatStrict)
+        ->setEncoding($_GET['bitrates'] ?? [], $encodingStrict)
+        ->setMedia($_GET['media'] ?? [], $mediaStrict)
+        ->setReleaseType($_GET['releases'] ?? [], $releaseTypes);
+} elseif (in_array(4, $categoryList) || in_array(7, $categoryList)) { // Audiobooks, Comedy
+    $search->setFormat($_GET['formats'] ?? [], $formatStrict)
+        ->setEncoding($_GET['bitrates'] ?? [], $encodingStrict);
+}
 
 if (isset($_GET['requestor'])) {
     $requestor = (int)$_GET['requestor'];
@@ -106,10 +117,10 @@ $paginator->setTotal($search->total());
 echo $Twig->render('request/index.twig', [
     'bookmark_view'   => $bookmarkView,
     'bounty'          => $Viewer->ordinal()->value('request-bounty-vote'),
-    'filter_cat'      => $_GET['filter_cat'] ?? [],
-    'bitrate_strict'  => $_GET['bitrate_strict'] ?? null,
-    'formats_strict'  => $_GET['formats_strict'] ?? null,
-    'media_strict'    => $_GET['media_strict'] ?? null,
+    'filter_cat'      => $categoryList,
+    'encoding_strict' => $encodingStrict,
+    'format_strict'   => $formatStrict,
+    'media_strict'    => $mediaStrict,
     'header'          => $header,
     'initial'         => $initial,
     'release_types'   => $releaseTypes,

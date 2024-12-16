@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function () {
         ['debug-view-ocelot',    'debug_ocelot'],
         ['debug-view-perf',      'debug_perf'],
         ['debug-view-query',     'debug_query'],
-        ['debug-view-sphinxql',  'debug_shinxql'],
+        ['debug-view-sphinxql',  'debug_sphinxql'],
     ];
     elemIdMap.forEach(val => {
         const src    = document.getElementById(val[0]);
