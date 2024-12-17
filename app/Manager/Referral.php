@@ -84,16 +84,13 @@ class Referral extends \Gazelle\Base {
     }
 
     public function getFullAccount(int $id): ?array {
-        self::$db->prepared_query("
+        $account = self::$db->rowAssoc("
             SELECT ID, Site, URL, User, Password, Active, Type, Cookie
             FROM referral_accounts
             WHERE ID = ?
             ", $id
         );
-
-        $account = null;
-        if (self::$db->has_results()) {
-            $account = self::$db->next_record();
+        if ($account) {
             foreach (['URL', 'User', 'Password', 'Cookie'] as $key) {
                 if (array_key_exists($key, $account)) {
                     $account[$key] = Crypto::dbDecrypt($account[$key]);
@@ -102,29 +99,25 @@ class Referral extends \Gazelle\Base {
             $account["Cookie"] = json_decode($account["Cookie"], true);
             $account["UserIsId"] = in_array($account["Type"], self::ID_TYPES);
         }
-
         return $account;
     }
 
     public function getFullAccounts(): array {
         self::$db->prepared_query("
             SELECT ID, Site, URL, User, Password, Active, Type, Cookie
-            FROM referral_accounts");
-
-        if (self::$db->has_results()) {
-            $accounts = self::$db->to_array('ID', MYSQLI_ASSOC);
-            foreach ($accounts as &$account) {
-                foreach (['URL', 'User', 'Password', 'Cookie'] as $key) {
-                    if (array_key_exists($key, $account)) {
-                        $account[$key] = Crypto::dbDecrypt($account[$key]);
-                    }
+            FROM referral_accounts
+        ");
+        $accounts = self::$db->to_array('ID', MYSQLI_ASSOC, false);
+        foreach ($accounts as &$account) {
+            foreach (['URL', 'User', 'Password', 'Cookie'] as $key) {
+                if (array_key_exists($key, $account)) {
+                    $account[$key] = Crypto::dbDecrypt($account[$key]);
                 }
-                $account["Cookie"] = json_decode($account["Cookie"], true);
-                $account["UserIsId"] = in_array($account["Type"], self::ID_TYPES);
             }
-            return $accounts;
+            $account["Cookie"] = json_decode($account["Cookie"], true);
+            $account["UserIsId"] = in_array($account["Type"], self::ID_TYPES);
         }
-        return [];
+        return $accounts;
     }
 
     public function createAccount(string $site, string $url, string $user, string $password, bool $active, int $type, string $cookie): void {
@@ -159,8 +152,8 @@ class Referral extends \Gazelle\Base {
         }
 
         self::$db->prepared_query("
-            UPDATE referral_accounts
-            SET Cookie = ?
+            UPDATE referral_accounts SET
+                Cookie = ?
             WHERE ID = ?
             ", Crypto::dbEncrypt((string)json_encode($cookie)), $id
         );
@@ -204,7 +197,6 @@ class Referral extends \Gazelle\Base {
 
     public function deleteAccount(int $id): void {
         self::$db->prepared_query("DELETE FROM referral_accounts WHERE ID = ?", $id);
-
         self::$cache->delete_value(self::CACHE_ACCOUNTS);
     }
 
@@ -526,7 +518,8 @@ class Referral extends \Gazelle\Base {
         $existing = self::$db->scalar("
             SELECT Username
             FROM referral_users
-            WHERE Username = ? AND Site = ?
+            WHERE Username = ?
+                AND Site = ?
             ", $username, $acc["Site"]
         );
 

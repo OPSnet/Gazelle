@@ -11,7 +11,9 @@
 <tr><th>Joined</th><td colspan="6">{{ user.created }}</td></tr>
 <tr><th>URL</th><td colspan="6">{{ user.publicLocation }}</td></tr>
 <tr><th>Invited by</th><td colspan="6">
-{%- if not user.inviterId -%}
+{%- if user.referral -%}
+    self from {{ user.referral }}
+{%- elseif not user.inviterId -%}
     Nobody
 {%- else %}
 {%  set current = user %}

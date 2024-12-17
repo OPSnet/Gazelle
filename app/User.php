@@ -13,6 +13,7 @@ class User extends BaseObject {
     final public const tableName             = 'users_main';
     final protected const CACHE_KEY          = 'u2_%d';
     final protected const CACHE_NOTIFY       = 'u_notify_%d';
+    final protected const CACHE_REFERRAL     = 'u_refer_%d';
     final protected const USER_RECENT_UPLOAD = 'u_recent_up_%d';
 
     protected bool $forceCacheFlush = false;
@@ -522,6 +523,21 @@ class User extends BaseObject {
 
     public function profileTitle(): string {
         return $this->info()['profile_title'] ?: 'Profile';
+    }
+
+    public function referral(): string {
+        $key      = sprintf(self::CACHE_REFERRAL, $this->id);
+        $referral = self::$cache->get_value($key);
+        if ($referral === false) {
+            $referral = (string)self::$db->scalar("
+                SELECT concat(Username, '@', Site)
+                FROM referral_users
+                WHERE UserID = ?
+                ", $this->id
+            );
+            self::$cache->cache_value($key, $referral, 0);
+        }
+        return $referral;
     }
 
     public function requestCreationInfo(): array {

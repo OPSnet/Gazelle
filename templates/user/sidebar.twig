@@ -37,7 +37,9 @@
 
 {% if viewer.permitted('users_view_invites') %}
     <li>Invited by:
-{%  if not user.inviterId %}
+{%  if user.referral %}
+        self from {{ user.referral }}.
+{%  elseif not user.inviterId %}
         <i>Nobody</i>
 {%  else %}
 {%      set current = user %}
