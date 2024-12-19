@@ -3,6 +3,7 @@
 namespace Gazelle;
 
 use PHPUnit\Framework\TestCase;
+use GazelleUnitTest\Helper;
 
 define('BUFFER_FOR_BOUNTY', 1024 ** 4); // some upload credit to allow request creation
 
@@ -14,8 +15,8 @@ class RequestTest extends TestCase {
     public function setUp(): void {
         // we need two users, one who uploads and one who snatches
         $this->userList = [
-            'admin' => \GazelleUnitTest\Helper::makeUser('req.' . randomString(10), 'request'),
-            'user'  => \GazelleUnitTest\Helper::makeUser('req.' . randomString(10), 'request'),
+            'admin' => Helper::makeUser('req.' . randomString(10), 'request'),
+            'user'  => Helper::makeUser('req.' . randomString(10), 'request'),
         ];
         $this->userList['admin']->setField('Enabled', '1')->setField('PermissionID', SYSOP)->modify();
         $this->userList['user']->setField('Enabled', '1')->modify();
@@ -27,10 +28,10 @@ class RequestTest extends TestCase {
             $this->request->remove();
         }
         if (isset($this->tgroup)) {
-            \GazelleUnitTest\Helper::removeTGroup($this->tgroup, $this->userList['admin']);
-            foreach ($this->userList as $user) {
-                $user->remove();
-            }
+            Helper::removeTGroup($this->tgroup, $this->userList['admin']);
+        }
+        foreach ($this->userList as $user) {
+            $user->remove();
         }
     }
 
@@ -42,7 +43,7 @@ class RequestTest extends TestCase {
         $manager       = new Manager\Request();
         $title         = 'phpunit ' . randomString(6) . ' Test Sessions (bonus VIP)';
         $image         = 'https://example.com/req.jpg';
-        $this->request = \GazelleUnitTest\Helper::makeRequestMusic($admin, $title, image: $image);
+        $this->request = Helper::makeRequestMusic($admin, $title, image: $image);
         $id = $this->request->id();
 
         $this->assertInstanceOf(Request::class, $this->request, 'request-create');
@@ -106,7 +107,7 @@ class RequestTest extends TestCase {
             'request-smart-link'
         );
 
-        $this->assertTrue(\GazelleUnitTest\Helper::recentDate($this->request->created()), 'request-created');
+        $this->assertTrue(Helper::recentDate($this->request->created()), 'request-created');
         $this->assertEquals($image, $this->request->image(), 'request-image');
         $this->assertEquals($title, $this->request->title(), 'request-title');
         $this->assertEquals('Album', $this->request->releaseTypeName(), 'request-release-type-name');
@@ -261,7 +262,7 @@ class RequestTest extends TestCase {
         $this->assertTrue($this->request->hasNewVote(), 'request-has-new-vote');
         $this->assertEquals(2, $this->request->userVotedTotal(), 'request-total-voted');
         $this->assertEquals(2 * $taxedBounty, $this->request->bountyTotal(), 'request-total-bounty-added');
-        $this->assertTrue(\GazelleUnitTest\Helper::recentDate($this->request->lastVoteDate()), 'request-last-vote-date');
+        $this->assertTrue(Helper::recentDate($this->request->lastVoteDate()), 'request-last-vote-date');
         $this->assertEquals(2, $this->request->userVotedTotal(), 'request-user-voted-total');
         $this->assertEquals(
             [$admin->id(), $user->id()],
@@ -280,13 +281,13 @@ class RequestTest extends TestCase {
 
         // make a torrent to fill the request
         $tgroupName = 'phpunit request ' . randomString(6);
-        $this->tgroup = \GazelleUnitTest\Helper::makeTGroupMusic(
+        $this->tgroup = Helper::makeTGroupMusic(
             name:       $tgroupName,
             artistName: [[ARTIST_MAIN], ['Request Girl ' . randomString(12)]],
             tagName:    ['electronic'],
             user:       $user,
         );
-        \GazelleUnitTest\Helper::makeTorrentMusic(
+        Helper::makeTorrentMusic(
             tgroup: $this->tgroup,
             user:   $user,
             title:  'Deluxe Edition',
@@ -295,11 +296,10 @@ class RequestTest extends TestCase {
         $torrent = (new Manager\Torrent())->findById($torrentId);
         $this->assertInstanceOf(Torrent::class, $torrent, 'request-torrent-filler');
 
-        $this->assertCount(0, $this->request->validate($torrent), 'request-validate');
         $this->assertEquals(1, $this->request->fill($user, $torrent), 'request-fill');
         $this->assertEquals($fillBefore['bounty-size'] + $taxedBounty * 2, $user->stats()->requestBountySize(), 'request-fill-receive-bounty');
         $this->assertEquals($fillBefore['bounty-total'] + 1, $user->stats()->requestBountyTotal(), 'request-fill-receive-total');
-        $this->assertTrue(\GazelleUnitTest\Helper::recentDate($this->request->fillDate()), 'request-fill-date');
+        $this->assertTrue(Helper::recentDate($this->request->fillDate()), 'request-fill-date');
         $this->assertEquals($this->request->id(), $torrent->requestFills($requestMan)[0]->id(), 'request-torrent-fills');
 
         $statsReq->flush();
@@ -339,10 +339,108 @@ class RequestTest extends TestCase {
         $this->assertEquals(1, $this->request->removeBounty($admin, $admin->username()), 'request-bounty-remove');
     }
 
+    public function testValidate(): void {
+        $user = $this->userList['user'];
+        $user->addBounty(BUFFER_FOR_BOUNTY);
+        $user2 = Helper::makeUser('req.' . randomString(10), 'request');
+        $this->userList['user2'] = $user2;
+
+        $this->request = Helper::makeRequestMusic(
+            user:         $user,
+            title:        'phpunit req validate ' . randomString(6),
+            encodingList: 'Lossless',
+            formatList:   'FLAC',
+            mediaList:    'CD',
+            logCue:       'Log (80%) + Cue',
+        );
+        $this->tgroup = Helper::makeTGroupMusic(
+            name:       'phpunit request validate ' . randomString(6),
+            artistName: [[ARTIST_MAIN], ['Request Girl ' . randomString(12)]],
+            tagName:    ['electronic'],
+            user:       $user2,
+        );
+        $torrent = Helper::makeTorrentMusic(
+            tgroup:   $this->tgroup,
+            user:     $user2,
+            title:    'Deluxe Edition',
+            media:    'WEB',
+            format:   'MP3',
+            encoding: '320',
+        );
+
+        $this->assertEquals(
+            ["There is a one hour grace period for new uploads to allow the uploader ({$user2->username()}) to fill the request."],
+            $this->request->validate($torrent, $user, false),
+            'req-fill-bad-user',
+        );
+
+        $this->assertEquals(
+            [
+                "WEB is not an allowed media for this request.",
+                "MP3 is not an allowed format for this request.",
+                "320 is not an allowed encoding for this request.",
+            ],
+            $this->request->validate($torrent, $user2, false),
+            'req-fill-web-mp3-320',
+        );
+
+        $torrent->setField('Encoding', 'Lossless')->setField('Format', 'FLAC')->modify();
+        $this->assertEquals(
+            ["WEB is not an allowed media for this request."],
+            $this->request->validate($torrent, $user2, false),
+            'req-fill-web-flac-lossless',
+        );
+
+        $torrent->setField('Media', 'CD')->modify();
+        $this->assertEquals(
+            [
+                "This request requires a cue file.",
+                "This request requires a valid logfile and none was uploaded with this torrent",
+
+            ],
+            $this->request->validate($torrent, $user2, false),
+            'req-fill-cd-flac-lossless',
+        );
+
+        $torrent->setField('HasCue', '1')->setField('HasLogDb', '1')->modify();
+        $this->assertEquals(
+            ["This request requires a logfile with a valid checksum"],
+            $this->request->validate($torrent, $user2, false),
+            'req-fill-has-cue-log',
+        );
+
+        $torrent->setField('LogChecksum', '1')->modify();
+        $this->assertEquals(
+            ["This request requires a logfile with a score of 80 or better"],
+            $this->request->validate($torrent, $user2, false),
+            'req-fill-has-low-score',
+        );
+
+        $torrent->setField('LogScore', 80)->modify();
+        $this->assertEquals(
+            [],
+            $this->request->validate($torrent, $user, true),
+            'req-fill-ok',
+        );
+
+        $this->assertEquals(
+            [],
+            $this->request->validate($torrent, $user, true),
+            'req-fill-override-user',
+        );
+
+        $torrent->group()->setField('CategoryID', 2)->modify();
+        $this->assertEquals(
+            ["This torrent is of a different category than the request. If the request is actually miscategorized, please contact staff."],
+            $this->request->validate($torrent, $user, true),
+            'req-fill-category',
+        );
+    }
+
     public function testVotes(): void {
         $user = $this->userList['user'];
         $user->addBounty(BUFFER_FOR_BOUNTY);
-        $user2 = \GazelleUnitTest\Helper::makeUser('req.' . randomString(10), 'request');
+        $user2 = Helper::makeUser('req.' . randomString(10), 'request');
         $this->userList['user2'] = $user2;
         $user2->setField('Enabled', '1')->modify();
         $user2->addBounty(BUFFER_FOR_BOUNTY);
@@ -421,7 +519,7 @@ class RequestTest extends TestCase {
     public function testReport(): void {
         // FIXME: this duplicates tests in tests/phpunit/manager/ReportManagerTest.php
         $this->userList['admin']->addBounty(BUFFER_FOR_BOUNTY);
-        $this->request = \GazelleUnitTest\Helper::makeRequestMusic($this->userList['admin'], 'phpunit request report');
+        $this->request = Helper::makeRequestMusic($this->userList['admin'], 'phpunit request report');
         $this->request->artistRole()->set(
             [ARTIST_MAIN => ['phpunit req ' . randomString(6)]],
             $this->userList['user'],
@@ -449,7 +547,7 @@ class RequestTest extends TestCase {
 
     public function testJson(): void {
         $this->userList['admin']->addBounty(BUFFER_FOR_BOUNTY);
-        $this->request = \GazelleUnitTest\Helper::makeRequestMusic($this->userList['admin'], 'phpunit request json');
+        $this->request = Helper::makeRequestMusic($this->userList['admin'], 'phpunit request json');
         $artistMan = new Manager\Artist();
         $this->request->artistRole()->set(
             [ARTIST_MAIN => ['phpunit req ' . randomString(6)]],

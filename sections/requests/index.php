@@ -14,7 +14,7 @@ require_once match ($_REQUEST['action'] ?? null) {
     'takenew'             => 'new_handle.php',
     'takebounty'          => 'bounty_handle.php',
     'takedelete'          => 'delete_handle.php',
-    'takefill'            => 'take_fill.php',
+    'takefill'            => 'fill_handle.php',
     'takeunfill'          => 'unfill_handle.php',
     'takevote'            => 'vote_handle.php',
     'view', 'viewrequest' => 'request.php',

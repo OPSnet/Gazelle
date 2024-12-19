@@ -661,7 +661,7 @@ if (defined('AJAX')) {
     if (isset($RequestID)) {
         define('NO_AJAX_ERROR', true);
         $_REQUEST['torrentid'] = $TorrentID;
-        $FillResponse = include_once __DIR__ . '/../requests/take_fill.php';
+        $FillResponse = include_once __DIR__ . '/../requests/fill_handle.php';
         if (!isset($FillResponse['requestId'])) {
             $FillResponse = [
                 'status' => 400,

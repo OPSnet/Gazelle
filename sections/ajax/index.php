@@ -254,7 +254,7 @@ switch ($Action) {
         include_once __DIR__ . '/../torrents/download.php';
         break;
     case 'request_fill':
-        json_print('success', include_once __DIR__ . '/../requests/take_fill.php');
+        json_print('success', include_once __DIR__ . '/../requests/fill_handle.php');
         break;
     case 'add_log':
         include_once __DIR__ . '/add_log.php';

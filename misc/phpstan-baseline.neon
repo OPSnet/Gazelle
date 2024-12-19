@@ -348,17 +348,7 @@ parameters:
 		-
 			message: "#^Function print_or_return\\(\\) has no return type specified\\.$#"
 			count: 1
-			path: ../sections/requests/take_fill.php
-
-		-
-			message: "#^Function print_or_return\\(\\) has parameter \\$Error with no type specified\\.$#"
-			count: 1
-			path: ../sections/requests/take_fill.php
-
-		-
-			message: "#^Function print_or_return\\(\\) has parameter \\$JsonMsg with no type specified\\.$#"
-			count: 1
-			path: ../sections/requests/take_fill.php
+			path: ../sections/requests/fill_handle.php
 
 		-
 			message: "#^Negated boolean expression is always false\\.$#"

@@ -169,18 +169,26 @@
           <td class="label">Log / Checksum / Cue<br />(CD FLAC only)</td>
           <td>
             <span style="float: right;"><strong>Note: You can only require a log or cue when FLAC is an allowed format</strong></span>
-            <label><input type="checkbox" id="needlog" name="needlog" {{ checked(log_cue.needLog) }} /> Require log</label>
-            <span id="minlogscore_span" class="hidden">&nbsp;<input type="text" name="minlogscore" id="minlogscore" size="4" value="{{ log_cue.minScore ? log_cue.minScore : ''}}" /> Minimum log score</span>
+            <label><input type="checkbox" id="needlog" name="needlog" {{
+                checked(new or log_cue.needLog) }} /> Require log</label>
+            <span id="minlogscore_span" class="hidden">&nbsp;<input type="text" name="minlogscore" id="minlogscore" size="4" value="
+{%- if new %}100
+{%- elseif log_cue.minScore %}{{ log_cue.minScore -}}
+{%- endif -%}
+                " /> Minimum log score</span>
             <br />
-            <label><input type="checkbox" id="needcksum" name="needcksum"{{ checked(log_cue.needLogChecksum) }} /> Require checksum</label>
+            <label><input type="checkbox" id="needcksum" name="needcksum"{{
+                checked(new or log_cue.needLogChecksum) }} /> Require checksum</label>
             <br />
-            <label><input type="checkbox" id="needcue" name="needcue"{{ checked(log_cue.needCue) }} /> Require cue file</label>
+            <label><input type="checkbox" id="needcue" name="needcue"{{
+                checked(new or log_cue.needCue) }} /> Require cue file</label>
           </td>
         </tr>
         <tr id="bitrates_tr">
           <td class="label">Allowed encodings</td>
           <td>
-            <label style="display: inline-block; width: 100px"><input type="checkbox" name="all_bitrates" id="toggle_bitrates" {{ checked(encoding.all) }} /> All</label>
+            <label style="display: inline-block; width: 100px"><input type="checkbox" name="all_bitrates" id="toggle_bitrates" {{
+                checked(encoding.all) }} /> All</label>
             <br />
 {%  for k, v in constant('ENCODING') %}
             <label style="display: inline-block; width: 100px"><input type="checkbox" name="bitrates[]" value="{{ k }}" id="bitrate_{{ k }}"{{ checked(encoding.exists(v)) }} /> {{ v }}</label>
