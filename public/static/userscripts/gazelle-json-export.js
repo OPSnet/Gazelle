@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name         Gazelle - Torrentpage JSON export
 // @namespace    http://tampermonkey.net/
-// @version      0.7
+// @version      0.7.1
 // @description  Add JSON export buttons to torrents
 // @author       Flacstradamus@notwhat
 // @author       itismadness@orpheus
-// @include      http*://redacted.ch/torrents.php?id=*
-// @include      http*://redacted.ch/artist.php?id=*
+// @include      http*://redacted.sh/torrents.php?id=*
+// @include      http*://redacted.sh/artist.php?id=*
 // @include      http*://hydra.zone/torrents.php?id=*
 // @include      http*://hydra.zone/artist.php?id=*
 // @include      http*://libble.me/torrents.php?id=*
