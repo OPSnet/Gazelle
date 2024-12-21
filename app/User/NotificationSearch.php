@@ -89,7 +89,7 @@ class NotificationSearch extends \Gazelle\BaseUser {
             }
         }
         if ($unread) {
-            $this->clearUnread($unread);
+            $this->clearUnread(array_keys($unread));
         }
         return $list;
     }

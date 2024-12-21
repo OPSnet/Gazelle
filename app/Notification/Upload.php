@@ -28,6 +28,7 @@ class Upload extends \Gazelle\Base {
         // to ensure their personal RSS feeds are updated.
         $this->sendRssNotification();
         $this->sendIrcNotification();
+        $this->sendPushNotification();
         return $total;
     }
 
@@ -359,5 +360,13 @@ class Upload extends \Gazelle\Base {
                 SITE_URL . '/' . preg_replace('/#.*$/', '', $torrent->location()) . '&action=download',
             ),
         };
+    }
+
+    public function sendPushNotification(): void {
+        $torrent  = $this->torrent;
+        $notifMan = new \Gazelle\Manager\Notification();
+        $pushIds = array_column($this->userFilterList(), 'user_id');
+        $pushTokens = $notifMan->pushableTokensById($pushIds, \Gazelle\Enum\NotificationType::TORRENTS);
+        $notifMan->push($pushTokens, "New torrent uploaded", $torrent->name(), SITE_URL . '/' . preg_replace('/#.*$/', '', $torrent->location()));
     }
 }

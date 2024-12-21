@@ -353,8 +353,14 @@ defined('IRC_CHAN_STATUS ') or define('IRC_CHAN_STATUS', '#gazelle-status');
 // ------------------------------------------------------------------------
 // Push server settings
 
-defined('PUSH_SOCKET_LISTEN_ADDRESS') or define('PUSH_SOCKET_LISTEN_ADDRESS', false);
-defined('PUSH_SOCKET_LISTEN_PORT') or define('PUSH_SOCKET_LISTEN_PORT', 6789);
+// The ntfy server used to send push notifications
+defined('PUSH_SERVER_HOST') or define('PUSH_SERVER_HOST', '');
+
+// The access token used to authenticate to the ntfy server
+defined('PUSH_SERVER_SECRET') or define('PUSH_SERVER_SECRET', 'changeme');
+
+// The wiki page id for the push notifcation user guide
+defined('PUSH_SETTINGS_WIKI_PAGE_ID') or define('PUSH_SETTINGS_WIKI_PAGE_ID', 0);
 
 // ------------------------------------------------------------------------
 // GeoIP server settings

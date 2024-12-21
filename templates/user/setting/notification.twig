@@ -1,7 +1,7 @@
 {% from 'macro/form.twig' import checked, selected %}
 {% macro check_popup(name, value) %}
     <label>
-        <input type="checkbox" name="notifications_{{ name }}_popup" id="notifications_{{ name }}_popup"{{ checked(value in [
+        <input class="notification-popup" type="checkbox" name="notifications_{{ name }}_popup" id="notifications_{{ name }}_popup"{{ checked(value in [
             constant('\\Gazelle\\User\\Notification::DISPLAY_POPUP'),
             constant('\\Gazelle\\User\\Notification::DISPLAY_POPUP_PUSH'),
         ]) }} /> Pop-up
@@ -9,7 +9,7 @@
 {% endmacro %}
 {% macro check_push(name, value) %}
     <label>
-        <input type="checkbox" name="notifications_{{ name }}_push" id="notifications_{{ name }}_push"{{ checked(value in [
+        <input class="notification-push" type="checkbox" name="notifications_{{ name }}_push" id="notifications_{{ name }}_push"{{ checked(value in [
             constant('\\Gazelle\\User\\Notification::DISPLAY_PUSH'),
             constant('\\Gazelle\\User\\Notification::DISPLAY_POPUP_PUSH'),
             constant('\\Gazelle\\User\\Notification::DISPLAY_TRADITIONAL_PUSH'),
@@ -18,7 +18,7 @@
 {% endmacro %}
 {% macro check_trad(name, value) %}
     <label>
-        <input type="checkbox" name="notifications_{{ name }}_traditional" id="notifications_{{ name }}_traditional"{{ checked(value in [
+        <input class="notification-trad" type="checkbox" name="notifications_{{ name }}_traditional" id="notifications_{{ name }}_traditional"{{ checked(value in [
             constant('\\Gazelle\\User\\Notification::DISPLAY_TRADITIONAL'),
             constant('\\Gazelle\\User\\Notification::DISPLAY_TRADITIONAL_PUSH'),
         ]) }} /> Traditional
@@ -89,25 +89,18 @@
     <tr>
         <td class="label"><strong>Push notifications</strong></td>
         <td>
-            <select name="pushservice" id="pushservice">
-                <option value="0"{{ selected(service is empty or service == 0) }}>No push notifications</option>
-                <!-- RIP Notify My Android -->
-                <option value="2"{{ selected(service == 2) }}>Prowl</option>
-                <!-- RIP notifo -->
-                <option value="4"{{ selected(service == 4) }}>Super Toasty</option>
-                <option value="5"{{ selected(service == 5) }}>Pushover</option>
-                <option value="6"{{ selected(service == 6) }}>PushBullet</option>
-            </select>
-            <div id="pushsettings" style="display: none;">
-                <label id="pushservice_title" for="pushkey">API key</label>
-                <input type="text" size="50" name="pushkey" id="pushkey" value="{{ option.PushKey }}" />
-                <label class="pushdeviceid" id="pushservice_device" for="pushdevice">Device ID</label>
-                <select class="pushdeviceid" name="pushdevice" id="pushdevice">
-                    <option value="{{ option.PushDevice }}" selected="selected">{{ option.PushDevice }}</option>
-                </select>
-                <br />
-                <a href="user.php?action=take_push&amp;push=1&amp;userid={{ viewer.id }}&amp;auth={{ viewer.auth }}" class="brackets">Test push</a>
-                <a href="wiki.php?action=article&amp;id=113" class="brackets">View wiki guide</a>
+            <div id="pushsettings">
+{% if topic %}
+                <span id="push-topic">{{ topic }}</span></br>
+                <a id="send-test-push" class="brackets">Test push</a>
+{% else %}
+                <span id="push-topic">Cycle topic to initalize</span></br>
+                <a id="send-test-push" class="brackets" hidden>Test push</a>
+{% endif %}
+                <a id="cycle-push-topic" class="brackets">Cycle topic</a>
+{% if constant('PUSH_SETTINGS_WIKI_PAGE_ID') %}
+                <a href="/wiki.php?action=article&id={{ constant('PUSH_SETTINGS_WIKI_PAGE_ID') }}" class="brackets">View wiki guide</a>
+{% endif %}
             </div>
         </td>
     </tr>
@@ -118,6 +111,7 @@
         </td>
         <td>
             {{ _self.check_popup("News", settings.News) }}
+            {{ _self.check_trad("News", settings.News) }}
             {{ _self.check_push("News", settings.News) }}
         </td>
     </tr>
@@ -127,6 +121,7 @@
         </td>
         <td>
             {{ _self.check_popup("Blog", settings.Blog) }}
+            {{ _self.check_trad("Blog", settings.Blog) }}
             {{ _self.check_push("Blog", settings.Blog) }}
         </td>
     </tr>
@@ -146,6 +141,8 @@
         </td>
         <td>
             {{ _self.check_popup("StaffPM", settings.StaffPM) }}
+            {{ _self.check_trad("StaffPM", settings.StaffPM) }}
+            {{ _self.check_push("StaffPM", settings.StaffPM) }}
         </td>
     </tr>
     <tr>
@@ -154,6 +151,8 @@
         </td>
         <td>
             {{ _self.check_popup("Subscription", settings.Subscription) }}
+            {{ _self.check_trad("Subscription", settings.Subscription) }}
+            <!-- TODO implement collection of subscription events -->
         </td>
     </tr>
     <tr>
@@ -162,6 +161,7 @@
         </td>
         <td>
             {{ _self.check_popup("Quote", settings.Quote) }}
+            {{ _self.check_trad("Quote", settings.Quote) }}
             {{ _self.check_push("Quote", settings.Quote) }}
         </td>
     </tr>
@@ -173,6 +173,7 @@
         <td>
             {{ _self.check_popup("Torrent", settings.Torrent) }}
             {{ _self.check_trad("Torrent", settings.Torrent) }}
+            {{ _self.check_push("Torrent", settings.Torrent) }}
         </td>
     </tr>
 {% endif %}
@@ -182,6 +183,8 @@
         </td>
         <td>
             {{ _self.check_popup("Collage", settings.Collage) }}
+            {{ _self.check_trad("Collage", settings.Collage) }}
+            {{ _self.check_push("Collage", settings.Collage) }}
         </td>
     </tr>
 </table>

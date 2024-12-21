@@ -1,0 +1,89 @@
+#! /usr/bin/env php
+<?php
+
+require_once(__DIR__ . '/../lib/bootstrap.php');
+
+$db = Gazelle\DB::DB();
+$pg = new \Gazelle\DB\Pg(GZPG_DSN);
+$userCount = 0;
+$db->prepared_query("
+    SELECT ID FROM users_main ORDER BY ID
+");
+
+$list = $db->collect(0, false);
+
+foreach ($list as $userId) {
+    $userCount++;
+    $typePreferences = $db->rowAssoc("
+        SELECT Inbox, StaffPM, News, Blog, Torrents, Collages, Quotes, Subscriptions
+        FROM users_notifications_settings
+        WHERE UserID = ?
+        ", $userId
+    );
+
+    $rename = [
+        'Collages'      => 'Collage',
+        'Quotes'        => 'Quote',
+        'Subscriptions' => 'Subscription',
+        'Torrents'      => 'Torrent',
+    ];
+
+    foreach ($typePreferences as $type => $value) {
+        $type  = $rename[$type] ?? $type;
+        $prefix = strtolower($type);
+        switch((int) $value) {
+            case 0:
+                // All notifications of this type are disabled, do nothing
+                break;
+            case 1:
+                // Pop only
+                $pg->prepared_query("
+                    insert into user_has_attr (id_user, id_user_attr)
+                    values (?,( select id from user_attr where name = ?))
+                    on conflict do nothing
+                    ", $userId, "{$prefix}_pop");
+                break;
+            case 2:
+                // Traditional only
+                $pg->prepared_query("
+                    insert into user_has_attr (id_user, id_user_attr)
+                    values (?,( select id from user_attr where name = ?))
+                    on conflict do nothing
+                    ", $userId, "{$prefix}_trad");
+                break;
+            case 3:
+                // Push only
+                $pg->prepared_query("
+                    insert into user_has_attr (id_user, id_user_attr)
+                    values (?,( select id from user_attr where name = ?))
+                    on conflict do nothing
+                    ", $userId, "{$prefix}_push");
+                break;
+            case 4:
+                // Pop-up & Push
+                $pg->prepared_query("
+                    insert into user_has_attr (id_user, id_user_attr)
+                    values
+                        (?,(select id from user_attr where name = ?)),
+                        (?,(select id from user_attr where name = ?))
+                    on conflict do nothing
+                    ", $userId, "{$prefix}_pop", $userId, "{$prefix}_push");
+                break;
+            case 5:
+                // Traditional & Push
+                $pg->prepared_query("
+                insert into user_has_attr (id_user, id_user_attr)
+                values
+                    (?,(select id from user_attr where name = ?)),
+                    (?,(select id from user_attr where name = ?))
+                on conflict do nothing
+                ", $userId, "{$prefix}_trad", $userId, "{$prefix}_push");
+            break;
+            default:
+                // Anything else shouldn't be possible
+                printf("user %d has unknown notification preference %d for %s\n",$userId,$value,$type);
+                break;
+        }
+    }
+}
+printf("done, modified %d users",$userCount);

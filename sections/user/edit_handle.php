@@ -223,28 +223,10 @@ $user->setField('nav_list', $navList);
 
 (new Gazelle\Util\LastFM())->modifyUsername($user, trim($_POST['lastfm_username'] ?? ''));
 
-/* transform
- *   'notifications_News_popup'
- *   'notifications_Blog_popup'
- *   'notifications_Inbox_traditional'
- * into
- *   [
- *     'News'  => 'popup',
- *     'Blog'  => 'popup',
- *     'Inbox' => 'traditional',
- *   ];
- */
-$notification = array_values(
-    array_map(
-        fn($s) => explode('_', $s),
-        preg_grep('/^notifications_[^_]+_/', array_keys($_POST)) /** @phpstan-ignore-line */
-    )
-);
-$settings = [];
-foreach ($notification as $n) {
-    $settings[$n[1]] = $n[2];
+$notification = preg_grep('/^notifications_[^_]+_/', array_keys($_POST));
+if ($notification) {
+    (new Gazelle\User\Notification($user))->save($notification);
 }
-(new Gazelle\User\Notification($user))->save($settings, ["PushKey" => $_POST['pushkey']], $_POST['pushservice'], $_POST['pushdevice']);
 
 foreach (
     [

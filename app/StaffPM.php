@@ -167,6 +167,11 @@ class StaffPM extends BaseObject {
         $this->flush();
         $this->flushUser($user);
         self::$cache->delete_value("staff_pm_new_{$this->userId()}");
+
+        $notifMan = new \Gazelle\Manager\Notification();
+        $pushToken = $notifMan->pushableTokensById([$this->userId()], \Gazelle\Enum\NotificationType::STAFFPM);
+        $notifMan->push($pushToken,
+            "Someone replied to your Staff PM", $this->subject(), SITE_URL . '/' . $this->location());
         return $affected;
     }
 

@@ -1,7 +1,3 @@
-var PUSHOVER = 5;
-var TOASTY = 4;
-var PUSHBULLET = 6;
-
 const PARANOIA_STATS   = 3;
 const userFormSelector = '#userform table.user_options';
 const searchSelector   = userFormSelector + ' > tbody > tr';
@@ -107,50 +103,6 @@ function toggle_identicons() {
     }
 }
 
-/**
- * Gets device IDs from the pushbullet API
- *
- * @return array of dictionaries with devices
- */
-function fetchPushbulletDevices(apikey) {
-    $.ajax({
-        url: 'ajax.php',
-        data: {
-          "action": 'pushbullet_devices',
-          "apikey": apikey
-        },
-        type: 'GET',
-        success: function(raw_data, textStatus, xhr) {
-            var data = JSON.parse(raw_data);
-            var field = $('#pushdevice');
-            var value = field.val();
-            if (data.error || textStatus !== 'success' ) {
-                if (data.error) {
-                    field.html('<option>' + data.error.message + '</option>');
-                } else {
-                    $('#pushdevice').html('<option>No devices fetched</option>');
-                }
-            } else {
-                if(data['devices'].length > 0) {
-                    field.html('');
-                }
-                for (var i = 0; i < data['devices'].length; i++) {
-                    var model = data['devices'][i]['extras']['model'];
-                    var nickname = data['devices'][i]['extras']['nickname'];
-                    var name = nickname !== undefined ? nickname : model;
-                    var option = new Option(name, data['devices'][i]['iden']);
-
-                    option.selected = (option.value == value);
-                    field[0].add(option);
-                }
-            }
-        },
-        error: function(data,textStatus,xhr) {
-            $('#pushdevice').html('<option>' + textStatus + '</option>');
-        }
-    });
-}
-
 function init_css_gallery() {
     let gallery = Array.from(
         document.querySelectorAll('input[name="stylesheet_gallery"]')
@@ -254,60 +206,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    if ($("#pushservice").val() > 0) {
-        $('.pushdeviceid').hide();
-        $('#pushsettings').show();
-        if ($('#pushservice').val() == PUSHBULLET) {
-            fetchPushbulletDevices($('#pushkey').val());
-            $('.pushdeviceid').show();
-        }
+    const pop = document.getElementsByClassName("notification-popup");
+    const trad = document.getElementsByClassName("notification-trad");
+    for (let e of pop) {
+        e.addEventListener('click', () => {
+            document.getElementById(e.id.replace("popup","traditional")).checked = false;
+        });
     }
 
-    $("#pushservice").change(function() {
-        if ($(this).val() > 0) {
-            $('#pushsettings').show(500);
-
-            if ($(this).val() == TOASTY) {
-                $('#pushservice_title').text("Device ID");
-            } else if ($(this).val() == PUSHOVER) {
-                $('#pushservice_title').text("User Key");
-            } else {
-                $('#pushservice_title').text("API Key");
-            }
-        } else {
-            $('#pushsettings').hide(500);
-        }
-
-        if ($(this).val() == PUSHBULLET) {
-            fetchPushbulletDevices($('#pushkey').val());
-            $('.pushdeviceid').show(500);
-        } else {
-            $('.pushdeviceid').hide(500);
-        }
-    });
-
-    $("#pushkey").blur(function() {
-        if($("#pushservice").val() == PUSHBULLET) {
-            fetchPushbulletDevices($(this).val());
-        }
-    });
-
-    document.getElementById('disableavatars').addEventListener('change', () => {
-        toggle_identicons();
-    });
-
-    document.getElementById('notifications_Inbox_traditional').addEventListener('click', () => {
-        document.getElementById('notifications_Inbox_popup').checked = false;
-    });
-    document.getElementById('notifications_Inbox_popup').addEventListener('click', () => {
-        document.getElementById('notifications_Inbox_traditional').checked = false;
-    });
-    document.getElementById('notifications_Torrent_traditional').addEventListener('click', () => {
-        document.getElementById('notifications_Torrent_popup').checked = false;
-    });
-    document.getElementById('notifications_Torrent_popup').addEventListener('click', () => {
-        document.getElementById('notifications_Torrent_traditional').checked = false;
-    });
+    for (let e of trad) {
+        e.addEventListener('click', () => {
+            document.getElementById(e.id.replace("traditional","popup")).checked = false;
+        });
+    };
 
     document.getElementById('gen-irc-key').addEventListener('click', () => {
         document.getElementById('irckey').value = Array(32)
@@ -337,4 +248,18 @@ document.addEventListener('DOMContentLoaded', () => {
     refresh_paranoia();
     toggle_identicons();
     init_css_gallery();
+    
+    const sendTestPush = document.getElementById("send-test-push");
+    sendTestPush.addEventListener("click", async () => {
+        await fetch("ajax.php?action=push_test", {method: "POST"});
+    });
+
+    document.getElementById("cycle-push-topic").addEventListener("click", async () => {
+        if (sendTestPush.hidden || confirm("This will invalidate your previous push notification topic. Continue?")) {
+            const response = await fetch("ajax.php?action=push_cycle_topic", {method: "POST"});
+            const responseJson = await response.json();
+            document.getElementById("push-topic").innerHTML = responseJson.response;
+            sendTestPush.hidden = false;
+        }
+    });
 });

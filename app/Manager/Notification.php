@@ -3,6 +3,7 @@
 namespace Gazelle\Manager;
 
 use Gazelle\Enum\NotificationTicketState;
+use Gazelle\Enum\NotificationType;
 
 class Notification extends \Gazelle\Base {
     use \Gazelle\Pg;
@@ -11,13 +12,6 @@ class Notification extends \Gazelle\Base {
     final public const OPT_PUSH             = 3;
     final public const OPT_POPUP_PUSH       = 4;
     final public const OPT_TRADITIONAL_PUSH = 5;
-
-    // Types. These names must correspond to column names in users_notifications_settings
-    final public const NEWS         = 'News';
-    final public const BLOG         = 'Blog';
-    final public const INBOX        = 'Inbox';
-    final public const QUOTES       = 'Quotes';
-    final public const GLOBALNOTICE = 'Global';
 
     /**
      * This method is called from a scheduled task. Its job is to look
@@ -119,88 +113,51 @@ class Notification extends \Gazelle\Base {
     /**
      * Send a push notification to a user
      */
-    public function push(array $UserIDs, string $Title, string $Body, string $URL = '', string $Type = self::GLOBALNOTICE): void {
-        if (!PUSH_SOCKET_LISTEN_ADDRESS) {
-            return;
+    public function push(array $pushTokens, string $title, string $body, string $url = ''): bool {
+        if (!PUSH_SERVER_HOST) {
+            return false;
         }
-        foreach ($UserIDs as $UserID) {
-            $UserID = (int)$UserID;
-            $QueryID = self::$db->get_query_id();
-            $SQL = "
-                SELECT
-                    p.PushService, p.PushOptions
-                FROM users_notifications_settings AS n
-                    JOIN users_push_notifications AS p ON n.UserID = p.UserID
-                WHERE n.UserID = '$UserID'
-                AND p.PushService != 0";
-            if ($Type != self::GLOBALNOTICE) {
-                $SQL .= " AND n.$Type IN (" . self::OPT_PUSH . "," . self::OPT_POPUP_PUSH . "," . self::OPT_TRADITIONAL_PUSH . ")";
-            }
-            self::$db->prepared_query($SQL);
 
-            if (self::$db->has_results()) {
-                [$PushService, $PushOptions] = self::$db->next_record(MYSQLI_NUM, false);
-                $PushOptions = unserialize($PushOptions);
-                if (empty($PushOptions['PushKey'])) {
-                    continue;
-                }
-                switch ($PushService) {
-                    // Case 1 is missing because NMA is dead.
-                    case '2':
-                        $Service = "Prowl";
-                        break;
-                    // Case 3 is missing because notifo is dead.
-                    case '4':
-                        $Service = "Toasty";
-                        break;
-                    case '5':
-                        $Service = "Pushover";
-                        break;
-                    case '6':
-                        $Service = "PushBullet";
-                        break;
-                    default:
-                        continue 2;
-                }
-                $Options = [
-                    "service" => strtolower($Service),
-                    "user"    => ["key" => $PushOptions['PushKey']],
-                    "message" => ["title" => $Title, "body" => $Body, "url" => $URL]
-                ];
-
-                if ($Service === 'PushBullet') {
-                    $Options["user"]["device"] = $PushOptions['PushDevice'];
-                }
-
-                self::$db->prepared_query("
-                    INSERT INTO push_notifications_usage
-                           (PushService, TimesUsed)
-                    VALUES (?,           1)
-                    ON DUPLICATE KEY UPDATE
-                        TimesUsed = TimesUsed + 1
-                    ", $Service
-                );
-                $sock = fsockopen(PUSH_SOCKET_LISTEN_ADDRESS, PUSH_SOCKET_LISTEN_PORT); /** @phpstan-ignore-line */
-                if ($sock !== false) {
-                    fwrite($sock, (string)json_encode($Options, JSON_INVALID_UTF8_SUBSTITUTE));
-                    fclose($sock);
-                }
-            }
-            self::$db->set_query_id($QueryID);
+        foreach ($pushTokens as $pushToken) {
+            $curl = new \Gazelle\Util\Curl();
+            $curl->setUseProxy(false);
+            $curl->setPostData($body . "\n" . $url);
+            $curl->setOption(CURLOPT_HTTPHEADER, [
+                'Title: ' . str_replace(["\r\n", "\n", "\r"], "", $title),
+                'Tags: musical_note',
+                'Authorization: Bearer ' . PUSH_SERVER_SECRET
+            ]
+            );
+            $curl->fetch(PUSH_SERVER_HOST . $pushToken);
         }
+        return true;
     }
 
-    /**
-     * Gets users who have push notifications enabled
-     */
-    public function pushableUsers(int $userId): array {
-        self::$db->prepared_query("
-            SELECT UserID
-            FROM users_push_notifications
-            WHERE PushService != 0
-                AND UserID != ?
-            ", $userId
-        );
-        return self::$db->collect("UserID", false);
+    public function allTokens(): array {
+        return $this->pg()->column("
+        SELECT push_token
+        FROM user_push_options");
+    }
+
+    public function pushableTokens(NotificationType $type): array {
+        return $this->pg()->column("
+           SELECT po.push_token
+           FROM user_push_options po
+           JOIN user_has_attr ha ON po.id_user=ha.id_user
+           JOIN user_attr ua ON ha.id_user_attr = ua.id
+           WHERE ua.name = ?;
+        ", strtolower($type->toString()) . '_push');
+    }
+
+    public function pushableTokensById(array $userIds, NotificationType $type): array {
+        $token = $this->pg()->scalar("
+        SELECT po.push_token
+        FROM user_push_options po
+        JOIN user_has_attr ha ON po.id_user=ha.id_user
+        JOIN user_attr ua ON ha.id_user_attr = ua.id
+        WHERE ua.name = ?
+        AND ha.id_user = ANY(?::INT[]);
+   ", strtolower($type->toString()) . '_push', "{" . implode(',', $userIds) . "}");
+        return $token ? [$token] : [];
     }
 }

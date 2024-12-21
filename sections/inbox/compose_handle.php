@@ -28,12 +28,4 @@ if ($pm) {
     }
     $pm = $recipient->inbox()->create($Viewer, $subject, $body);
 }
-
-(new Gazelle\Manager\Notification())->push([$recipient->id()],
-    "Message from " . $Viewer->username() . ", Subject: " . $pm->subject(),
-    $body,
-    SITE_URL . '/inbox.php',
-    Gazelle\Manager\Notification::INBOX
-);
-
 header("Location: inbox.php");

@@ -55,6 +55,7 @@ $preload = [
     'trepMan'     => new Gazelle\Manager\Torrent\Report($torMan),
     'trepTypeMan' => new Gazelle\Manager\Torrent\ReportType,
     'userMan'     => $userMan,
+    'notifMan'    => new Gazelle\Manager\Notification(),
 ];
 
 printf("** preloaded objects:\n** %s\n", implode(', ', array_keys($preload)));

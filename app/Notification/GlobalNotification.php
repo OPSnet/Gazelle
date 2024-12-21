@@ -30,6 +30,11 @@ class GlobalNotification extends \Gazelle\Base {
             ],
             $expiry * 60
         );
+
+        $notifMan = new \Gazelle\Manager\Notification();
+        $notifMan->push($notifMan->allTokens(),
+            "Global Notification", $title, $url);
+
         return true;
     }
 

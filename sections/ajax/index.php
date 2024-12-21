@@ -38,6 +38,7 @@ $LimitedPages = [
     'usersearch'      => [5, 60],
     'votefavorite'    => [5, 10],
     'wiki'            => [5, 60],
+    'push_test'       => [2, 5],
 ];
 $RequireTokenPages = [
     'download',
@@ -224,8 +225,11 @@ switch ($Action) {
     case 'clear_user_notification':
         include_once 'clear_user_notification.php';
         break;
-    case 'pushbullet_devices':
-        include_once 'pushbullet_devices.php';
+    case 'push_cycle_topic':
+        include_once 'push_cycle_topic.php';
+        break;
+    case 'push_test':
+        include_once 'push_test.php';
         break;
     case 'loggy':
         include_once 'loggy.php';

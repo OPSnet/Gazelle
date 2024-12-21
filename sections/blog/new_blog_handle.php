@@ -39,7 +39,7 @@ if ($thread && isset($_POST['subscribe'])) {
     (new Gazelle\User\Subscription($Viewer))->subscribe($thread->id());
 }
 $notification = new Gazelle\Manager\Notification();
-$notification->push($notification->pushableUsers($Viewer->id()), $blog->title(), $blog->body(), SITE_URL . '/index.php', Gazelle\Manager\Notification::BLOG);
+$notification->push($notification->pushableTokens(Gazelle\Enum\NotificationType::BLOG), "New blog article", $blog->title(), $blog->publicLocation());
 
 Gazelle\Util\Irc::sendMessage(IRC_CHAN, "New blog article: " . $blog->title());
 

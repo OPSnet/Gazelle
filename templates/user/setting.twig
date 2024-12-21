@@ -52,8 +52,7 @@
 {% include 'user/setting/notification.twig'
     with {
         'settings': notify_config,
-        'service': notify_config.PushService,
-        'option': notify_config.PushOptions,
+        'topic': push_topic,
         'user': user,
         'viewer': viewer,
     } only

@@ -20,6 +20,17 @@ class Quote extends \Gazelle\BaseUser {
             VALUES (?,      ?,        ?,    ?,      ?)
             ', $this->user->id(), $quoterId, $page, $pageId, $postId
         );
+
+        $userMan = new \Gazelle\Manager\User();
+        $notifMan = new \Gazelle\Manager\Notification();
+        $postMan = new \Gazelle\Manager\ForumPost();
+
+        $quoterName = $userMan->findById($quoterId)->username();
+        $post = $postMan->findById($postId);
+        $pushTokens = $notifMan->pushableTokensById([$this->user->id()], \Gazelle\Enum\NotificationType::INBOX);
+        $notifMan->push($pushTokens,
+            "$quoterName quoted you on the forum", "", SITE_URL . '/' . $post->location());
+
         $this->flush();
         return self::$db->affected_rows();
     }

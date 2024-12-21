@@ -2,6 +2,7 @@
 
 namespace Gazelle\Manager;
 
+use Gazelle\Enum\NotificationType;
 use Gazelle\Enum\UserAuditEvent;
 use Gazelle\Enum\UserStatus;
 use Gazelle\Util\Time;
@@ -550,9 +551,11 @@ class User extends \Gazelle\BaseManager {
             SELECT Username FROM users_main WHERE ID = ?
             ", $fromId
         );
-        (new Notification())->push([$toId],
-            "Message from $senderName, Subject: $subject", $body, SITE_URL . '/inbox.php', Notification::INBOX
-        );
+
+        $notifMan = new \Gazelle\Manager\Notification();
+        $pushTokens = $notifMan->pushableTokensById([$toId], NotificationType::INBOX);
+        $notifMan->push($pushTokens,
+            "Message from $senderName", "Subject: $subject", SITE_URL . '/inbox.php');
     }
 
     public function sendCustomPM(?\Gazelle\User $sender, string $subject, string $template, array $idList): int {

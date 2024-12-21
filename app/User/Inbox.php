@@ -2,6 +2,8 @@
 
 namespace Gazelle\User;
 
+use Gazelle\Enum\NotificationType;
+
 class Inbox extends \Gazelle\BaseUser {
     final public const tableName = 'pm_conversations_users';
 
@@ -64,10 +66,12 @@ class Inbox extends \Gazelle\BaseUser {
         self::$db->set_query_id($qid);
 
         $senderName = $from?->username() ?? 'System';
-        (new \Gazelle\Manager\Notification())->push(
-            [$this->id()],
-            "Message from $senderName, Subject: $subject", $body, SITE_URL . '/inbox.php', \Gazelle\Manager\Notification::INBOX,
-        );
+
+        $notifMan = new \Gazelle\Manager\Notification();
+        $pushTokens = $notifMan->pushableTokensById([$this->id()], NotificationType::INBOX);
+        $notifMan->push($pushTokens,
+            "Message from $senderName", "Subject: $subject", SITE_URL . '/inbox.php');
+
         $this->flush();
         self::$cache->delete_multi([
             sprintf(\Gazelle\PM::CACHE_KEY, $convId, $fromId),

@@ -3,9 +3,10 @@
 namespace Gazelle\User;
 
 class Notification extends \Gazelle\BaseUser {
+    use \Gazelle\Pg;
+
     final public const tableName     = 'users_notifications_settings';
     protected const CACHE_KEY = 'u_notif_%d';
-
     final public const DISPLAY_DISABLED = 0;
     final public const DISPLAY_POPUP = 1;
     final public const DISPLAY_TRADITIONAL = 2;
@@ -15,6 +16,7 @@ class Notification extends \Gazelle\BaseUser {
 
     protected array  $alert;
     protected array  $config;
+    protected string $pushToken;
     protected string $document;
     protected string $action;
 
@@ -24,18 +26,6 @@ class Notification extends \Gazelle\BaseUser {
     protected string $baseQuery;
     protected array $cond = [];
     protected array $args = [];
-
-    // TODO: methodize
-    protected static array $Types = [
-        'Blog',
-        'Collages',
-        'Inbox',
-        'News',
-        'Quotes',
-        'StaffPM',
-        'Subscriptions',
-        'Torrents',
-    ];
 
     public function flush(): static {
         $this->user()->flush();
@@ -48,33 +38,50 @@ class Notification extends \Gazelle\BaseUser {
         }
         $key = sprintf(self::CACHE_KEY, $this->user->id());
         $config = self::$cache->get_value($key);
-        // TODO allow caching
-        $config = self::$db->rowAssoc("
-                SELECT Blog       AS Blog,
-                    Collages      AS Collage,
-                    Inbox         AS Inbox,
-                    News          AS News,
-                    Quotes        AS Quote,
-                    StaffPM       AS StaffPM,
-                    Subscriptions AS Subscription,
-                    Torrents      AS Torrent
-                FROM users_notifications_settings AS n
-                WHERE n.UserID = ?
+        if ($config === false) {
+            $attributes = $this->pg()->column("
+                SELECT ua.name
+                FROM user_attr ua
+                JOIN user_has_attr uh ON ua.id = uh.id_user_attr
+                WHERE (ua.name LIKE '%_pop' OR ua.name LIKE '%_push' OR ua.name LIKE '%_trad')
+                AND uh.id_user = ?;
                 ", $this->user->id()
-        ) ?? [
-            'Blog'          => 0,
-            'Collages'      => 0,
-            'Inbox'         => 0,
-            'News'          => 0,
-            'Quotes'        => 0,
-            'StaffPM'       => 0,
-            'Subscriptions' => 0,
-            'Torrents'      => 0,
-        ];
-        $config = array_map('intval', $config);
-        self::$cache->cache_value($key, $config, 0);
-        $this->config = $config;
-        return $this->config;
+            );
+
+            $typeConfig = [];
+            foreach (\Gazelle\Enum\NotificationType::cases() as $type) {
+                $type = $type->toString();
+                $typeConfig += [$type => 0];
+                $lowerType = strtolower($type);
+                $pop = in_array("{$lowerType}_pop", $attributes);
+                $trad = in_array("{$lowerType}_trad", $attributes);
+                $push = in_array("{$lowerType}_push", $attributes);
+                if ($trad && $push) {
+                    $typeConfig[$type] = 5;
+                } elseif ($pop && $push) {
+                    $typeConfig[$type] = 4;
+                } elseif ($push) {
+                    $typeConfig[$type] = 3;
+                } elseif ($trad) {
+                    $typeConfig[$type] = 2;
+                } elseif ($pop) {
+                    $typeConfig[$type] = 1;
+                }
+            }
+            $config = $typeConfig;
+            self::$cache->cache_value($key, $config, 0);
+            $this->config = $config;
+        }
+        return $config;
+    }
+
+    public function pushToken(): string {
+        return $this->pushToken ??= (string)$this->pg()->scalar("
+            SELECT push_token
+            FROM user_push_options AS pn
+            WHERE pn.id_user = ?
+            ", $this->user->id()
+        );
     }
 
     public function isActive(string $alertType): bool {
@@ -138,68 +145,43 @@ class Notification extends \Gazelle\BaseUser {
             fn ($a) => in_array($a->display(), [self::DISPLAY_POPUP, self::DISPLAY_POPUP_PUSH])));
     }
 
-    public function save(array $settings, array $options, int $service, $device): int {
-        $set = [];
-        $args = [];
-        $rename = [
-            'Collages'      => 'Collage',
-            'Quotes'        => 'Quote',
-            'Subscriptions' => 'Subscription',
-            'Torrents'      => 'Torrent',
-        ];
-        foreach (self::$Types as $column) {
-            $set[] = "$column = ?";
-            $name  = $rename[$column] ?? $column;
-            $popup = ($settings[$name] ?? '') === 'popup';
-            $trad  = ($settings[$name] ?? '') === 'traditional';
-            if (($settings[$name] ?? '') === 'push') {
-                if ($popup) {
-                    $args[] = self::DISPLAY_POPUP_PUSH;
-                } elseif ($trad) {
-                    $args[] = self::DISPLAY_TRADITIONAL_PUSH;
-                } else {
-                    $args[] = self::DISPLAY_PUSH;
-                }
-            } elseif ($trad) {
-                $args[] = self::DISPLAY_TRADITIONAL;
-            } elseif ($popup) {
-                $args[] = self::DISPLAY_POPUP;
-            } else {
-                $args[] = self::DISPLAY_DISABLED;
-            }
-        }
-        $set = implode(",", $set);
-        $args[] = $this->user->id();
+    public function save(array $settings): int {
+        $selected = [];
+        $unselected = [];
 
-        self::$db->prepared_query("
-            UPDATE users_notifications_settings SET
-                $set
-            WHERE UserID = ?
-            ", ...$args
-        );
-        $affected = self::$db->affected_rows();
+        foreach (\Gazelle\Enum\NotificationType::cases() as $type) {
+            $type = $type->toString();
+            // check settings for this type
+            $push   = in_array('notifications_' . $type . '_push', $settings);
+            $trad  = in_array('notifications_' . $type . '_traditional', $settings);
+            $popup = in_array('notifications_' . $type . '_popup', $settings);
+            $type = strtolower($type);
 
-        if (!$service) {
-            self::$db->prepared_query("
-                UPDATE users_push_notifications SET PushService = 0 WHERE UserID = ?
-                ", $this->user->id()
-            );
-        } else {
-            if ($service == 6) { //pushbullet
-                $options['PushDevice'] = $device;
-            }
-            $options = serialize($options);
-            self::$db->prepared_query("
-                INSERT INTO users_push_notifications
-                       (UserID, PushService, PushOptions)
-                VALUES (?,      ?,           ?)
-                ON DUPLICATE KEY UPDATE
-                    PushService = ?,
-                    PushOptions = ?
-                ", $this->user->id(), $service, $options,
-                    $service, $options
-            );
+            // write settings to selected[] or unselected[]
+            $push ? $selected[] = $type . "_push" : $unselected[] = $type . "_push";
+            $trad ? $selected[] = $type . "_trad" : $unselected[] = $type . "_trad";
+            $popup ? $selected[] = $type . "_pop" : $unselected[] = $type . "_pop";
         }
+
+        $userId = $this->user->id();
+
+        $affected = 0;
+        foreach ($selected as $attr) {
+            $affected += $this->pg()->prepared_query("
+                insert into user_has_attr (id_user, id_user_attr)
+                values (?, (select id from user_attr where name like ?))
+                on conflict do nothing;
+            ", $userId, $attr);
+        }
+
+        foreach ($unselected as $attr) {
+            $affected += $this->pg()->prepared_query("
+                delete from user_has_attr
+                where id_user = ? and id_user_attr = 
+                    (select id from user_attr where name like ?);
+            ", $userId, $attr);
+        }
+
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->user->id()));
         return $affected;
     }
@@ -263,5 +245,15 @@ class Notification extends \Gazelle\BaseUser {
             $f['Users'] = implode("\n", $usernames);
         }
         return $list;
+    }
+
+    public function setPushTopic(string $newTopic): bool {
+        return $this->pg()->prepared_query("
+            insert into user_push_options
+            values (?, ?, default)
+            on conflict (id_user)
+            do update set push_token = excluded.push_token;
+            ", $this->user->id, $newTopic
+        ) === 1;
     }
 }

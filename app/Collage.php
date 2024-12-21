@@ -6,6 +6,7 @@ use Gazelle\Enum\CollageType;
 use Gazelle\Enum\LeechType;
 use Gazelle\Enum\LeechReason;
 use Gazelle\Intf\CollageEntry;
+use Pg;
 
 class Collage extends BaseObject {
     /**
@@ -407,9 +408,21 @@ class Collage extends BaseObject {
         return count($regular) + count($large);
     }
 
+    public function subscribers(): array {
+        self::$db->prepared_query("
+                    SELECT UserID FROM users_collage_subs WHERE CollageID = ?
+                    ", $this->id
+                );
+        return self::$db->collect(0, false);
+    }
+
     /*** UPDATE METHODS ***/
 
     public function addEntry(CollageEntry $entry, User $user): int {
+        $notifMan = new \Gazelle\Manager\Notification();
+        $pushTokens = $notifMan->pushableTokensById($this->subscribers(), \Gazelle\Enum\NotificationType::COLLAGES);
+        $notifMan->push($pushTokens,
+            "New entry for '" . $this->name() . "'", "", SITE_URL . '/' . $this->location());
         return $this->collage->addEntry($entry, $user);
     }
 

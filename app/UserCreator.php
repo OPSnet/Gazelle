@@ -217,10 +217,15 @@ class UserCreator extends Base {
             INSERT INTO users_leech_stats (UserID, Uploaded) VALUES (?, ?)
             ", $this->id, STARTING_UPLOAD
         );
-        self::$db->prepared_query("
-            INSERT INTO users_notifications_settings (UserID) VALUES (?)
-            ", $this->id
-        );
+        foreach (\Gazelle\Enum\NotificationType::cases() as $attr) {
+            $attr = strtolower($attr->toString());
+            $this->pg()->prepared_query("
+                insert into user_has_attr (id_user, id_user_attr)
+                values (?, (select id from user_attr where name like ?))
+                on conflict do nothing;
+            ", $this->id, "{$attr}_pop");
+        }
+
         self::$db->commit();
 
         (new Tracker())->addUser($user);

@@ -27,6 +27,7 @@ foreach (range(1, 4) as $level) {
     }
 }
 $navList = (new Gazelle\Manager\UserNavigation())->fullList();
+$pushToken = (new Gazelle\User\Notification($user))->pushToken();
 
 echo $Twig->render('user/setting.twig', [
     'donor'           => $donor,
@@ -34,6 +35,7 @@ echo $Twig->render('user/setting.twig', [
     'nav_items'       => $navList,
     'nav_items_user'  => $user->navigationList(),
     'notify_config'   => (new Gazelle\User\Notification($user))->config(),
+    'push_topic'      => $pushToken,
     'profile'         => $profile,
     'release_order'   => $user->releaseOrder((new Gazelle\ReleaseType())->extendedList()),
     'stylesheet'      => new Gazelle\User\Stylesheet($user),
