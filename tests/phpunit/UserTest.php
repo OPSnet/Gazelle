@@ -324,13 +324,13 @@ class UserTest extends TestCase {
         $this->assertEquals(count($list), count($manager->usageList('name', 'ASC')), 'stylesheet-list-usage');
 
         $first = current($list);
-        $url   = SITE_URL . 'static/bogus.css';
+        $url   = STATIC_SERVER . '/bogus.css';
         $stylesheet = new User\Stylesheet($this->user);
         $this->assertNull($stylesheet->styleUrl(), 'stylesheet-no-external-url');
         $this->assertEquals(1, $stylesheet->modifyInfo($first['id'], null), 'stylesheet-modify');
         $this->assertEquals($first['css_name'], $stylesheet->cssName(), 'stylesheet-css-name');
-        $this->assertStringStartsWith("static/styles/{$first['css_name']}/style.css?v=", $stylesheet->cssUrl(), 'stylesheet-css-url');
-        $this->assertEquals("static/styles/{$first['css_name']}/images/", $stylesheet->imagePath(), 'stylesheet-image-path');
+        $this->assertStringStartsWith("/static/styles/{$first['css_name']}/style.css?v=", $stylesheet->cssUrl(), 'stylesheet-css-url');
+        $this->assertEquals("/static/styles/{$first['css_name']}/images/", $stylesheet->imagePath(), 'stylesheet-image-path');
         $this->assertEquals($first['name'], $stylesheet->name(), 'stylesheet-name');
         $this->assertEquals($first['id'], $stylesheet->styleId(), 'stylesheet-style-id');
         $this->assertEquals($first['theme'], $stylesheet->theme(), 'stylesheet-theme');

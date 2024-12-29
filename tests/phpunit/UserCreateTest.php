@@ -31,7 +31,7 @@ class UserCreateTest extends TestCase {
         $this->assertStringContainsString($adminComment, $this->user->staffNotes(), 'user-create-staff-notes');
         $this->assertTrue($this->user->isUnconfirmed(), 'user-create-unconfirmed');
         $this->assertStringStartsWith(
-            'static/styles/apollostage/style.css?v=',
+            '/static/styles/apollostage/style.css?v=',
             (new User\Stylesheet($this->user))->cssUrl(),
             'user-create-stylesheet'
         );

@@ -71,7 +71,7 @@ defined('STORAGE_PATH_RIPLOGHTML') or define('STORAGE_PATH_RIPLOGHTML', '/var/li
 
 // Host static assets (images, css, js) on another server.
 // In development it is just a folder
-defined('STATIC_SERVER') or define('STATIC_SERVER', 'static');
+defined('STATIC_SERVER') or define('STATIC_SERVER', '/static');
 
 // Where is the repository physically stored (and hence where the document
 // root lives). This is needed so that Gazelle knows where static assets are,

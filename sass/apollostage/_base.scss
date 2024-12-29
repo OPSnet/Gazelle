@@ -2437,7 +2437,7 @@ tr.snatched_torrent div.tags::before {
   border: thick solid variables.$color-accent-border-warning-2;
   padding: 1rem 1rem 1rem 48px;
   background-color: variables.$color-background-warning;
-  background-image: url("/svg/site/ops-icon-triangle-ccc.svg");
+  background-image: url(config('STATIC_SERVER') + "/svg/site/ops-icon-triangle-ccc.svg");
   background-repeat: no-repeat;
   background-position: 8px;
   background-size: 32px;

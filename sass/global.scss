@@ -964,7 +964,7 @@ input[type="search"] {
   border-radius: 0.25rem;
   padding: 1rem 1rem 1rem 48px;
   background-color: #eaebeb;
-  background-image: url("/svg/site/ops-icon-triangle-000.svg");
+  background-image: url(config('STATIC_SERVER') + "/svg/site/ops-icon-triangle-000.svg");
   background-repeat: no-repeat;
   background-position: 8px 1rem;
   background-size: 32px;

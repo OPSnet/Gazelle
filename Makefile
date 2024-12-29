@@ -13,6 +13,7 @@ help:
 	echo '  check-php            - check that the modified PHP files are syntactically correct'
 	echo '  composer-dev-update  - run local composer update'
 	echo '  composer-live-update - run production composer install from composer.lock'
+	echo '  config-css           - generate the configuration variables to build the CSS files'
 	echo '  dump-all             - create tarballs of the following:'
 	echo '  dump-riplog          - create a tarball of the rip logs'
 	echo '  dump-riploghtml      - create a tarball of the HTMLified rip logs'
@@ -35,6 +36,7 @@ help:
 
 .PHONY: build-css
 build-css:
+	docker compose exec -T web bin/config-css /tmp/config-css.js
 	docker compose exec -T web npm run build:scss
 
 .PHONY: check-php

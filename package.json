@@ -6,7 +6,7 @@
     "dev": "npm run build",
     "prod": "cross-env NODE_ENV=production npm run build",
     "build": "npm run build:scss && npm run build:previews",
-    "build:scss": "node bin/build-scss.mjs",
+    "build:scss": "node bin/build-scss.mjs /tmp/config-css.js",
     "build:previews": "node bin/build-stylesheet-gallery.mjs",
     "start": "npm run build:scss -- --watch"
   },

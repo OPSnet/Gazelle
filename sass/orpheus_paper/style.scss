@@ -247,14 +247,14 @@ variables.$color-anchor-alert: variables.$ds-gray-05;
 // ICONS
 
 // changing to #000 black version
-variables.$icon-message-unread: url("/svg/std/document-round-000.svg");
-variables.$icon-message-unread-locked: url("/svg/std/lock-round-000.svg");
-variables.$icon-message-unread-sticky: url("/svg/std/pin-round-000.svg");
-variables.$icon-message-unread-locked-sticky: url("/svg/std/pin-and-lock-round-000.svg");
-variables.$icon-message-read: url("/svg/std/document-000.svg");
-variables.$icon-message-read-locked: url("/svg/std/lock-000.svg");
-variables.$icon-message-read-sticky: url("/svg/std/pin-000.svg");
-variables.$icon-message-read-locked-sticky: url("/svg/std/pin-and-lock-000.svg");
+variables.$icon-message-unread: url(config('STATIC_SERVER') + "/svg/std/document-round-000.svg");
+variables.$icon-message-unread-locked: url(config('STATIC_SERVER') + "/svg/std/lock-round-000.svg");
+variables.$icon-message-unread-sticky: url(config('STATIC_SERVER') + "/svg/std/pin-round-000.svg");
+variables.$icon-message-unread-locked-sticky: url(config('STATIC_SERVER') + "/svg/std/pin-and-lock-round-000.svg");
+variables.$icon-message-read: url(config('STATIC_SERVER') + "/svg/std/document-000.svg");
+variables.$icon-message-read-locked: url(config('STATIC_SERVER') + "/svg/std/lock-000.svg");
+variables.$icon-message-read-sticky: url(config('STATIC_SERVER') + "/svg/std/pin-000.svg");
+variables.$icon-message-read-locked-sticky: url(config('STATIC_SERVER') + "/svg/std/pin-and-lock-000.svg");
 
 // Header Pulldown Menu (hamburger/chevron icon)
 // not changing, still dark background
@@ -262,21 +262,21 @@ variables.$icon-message-read-locked-sticky: url("/svg/std/pin-and-lock-000.svg")
 // Used in Header
 // changing to light mode version
 // // Orpheus specific:
-variables.$logo-site-lockup: url("/svg/site/ops-logo-lockup-lightmode.svg");
-variables.$logo-site-square: url("/svg/site/ops-logo-loop-lightmode.svg");
+variables.$logo-site-lockup: url(config('STATIC_SERVER') + "/svg/site/ops-logo-lockup-lightmode.svg");
+variables.$logo-site-square: url(config('STATIC_SERVER') + "/svg/site/ops-logo-loop-lightmode.svg");
 
 // Used on Mobile
 // changing to #000 black version
-variables.$icon-number-snatches: url("/svg/std/arrow-loop-000.svg");
-variables.$icon-number-seeders: url("/svg/std/arrow-up-round-000.svg");
-variables.$icon-number-leechers: url("/svg/std/arrow-down-round-000.svg");
+variables.$icon-number-snatches: url(config('STATIC_SERVER') + "/svg/std/arrow-loop-000.svg");
+variables.$icon-number-seeders: url(config('STATIC_SERVER') + "/svg/std/arrow-up-round-000.svg");
+variables.$icon-number-leechers: url(config('STATIC_SERVER') + "/svg/std/arrow-down-round-000.svg");
 
 // // standard:
-// $icon-notification: url("/svg/std/notification-bell-000.svg");
-// $icon-warning: url("/svg/std/x-000.svg")
+// $icon-notification: url(config('STATIC_SERVER') + "/svg/std/notification-bell-000.svg");
+// $icon-warning: url(config('STATIC_SERVER') + "/svg/std/x-000.svg")
 // // Orpheus specific; other deployments, use the above.
-variables.$icon-notification: url("/svg/site/ops-icon-harp-000.svg");
-variables.$icon-warning: url("/svg/site/ops-icon-triangle-000.svg");
+variables.$icon-notification: url(config('STATIC_SERVER') + "/svg/site/ops-icon-harp-000.svg");
+variables.$icon-warning: url(config('STATIC_SERVER') + "/svg/site/ops-icon-triangle-000.svg");
 
 @use '../apollostage/_base';
 

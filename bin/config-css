@@ -1,0 +1,21 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+require_once __DIR__ . '/../lib/bootstrap.php';
+
+$out = fopen($argv[1], 'w');
+if ($out === false) {
+    die("Cannot open {$argv[1]} for writing\n");
+}
+
+fprintf($out,
+    json_encode([
+        'SITE_HOST'     => SITE_HOST,
+        'SITE_NAME'     => SITE_NAME,
+        'SITE_URL'      => SITE_URL,
+        'STATIC_SERVER' => STATIC_SERVER,
+    ]) . "\n"
+);
+fclose($out);
