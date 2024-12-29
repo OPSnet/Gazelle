@@ -1,6 +1,6 @@
     <div class="main_column">
 {% if contest %}
-        <div id="contest-info" class="box news_post" style="text-align:center">
+        <div id="contest-info" class="box" style="text-align:center">
     {% if contest.banner %}
             <br /><a href="/contest.php?action=leaderboard">
                 <img src="{{ contest.banner }}" alt="{{ contest.name }}" title="{{ contest.name }}" />
@@ -10,7 +10,7 @@
         </div>
 {% endif %}
 
-        <div id="last_uploads" class="box news_post">
+        <div id="last_uploads" class="box">
             <div class="head">
                 <strong>Latest Uploads</strong>
             </div>
@@ -47,7 +47,7 @@
 
         <div id="more_news" class="box">
             <div class="head">
-                {{- dom.click('#more-news-loader', "news_ajax(event, 3, 5, " ~ admin ~ ", false); return false;") -}}
+                {{- dom.click('#more-news-loader', "news_ajax(3, " ~ admin ~ ", false); return false;") -}}
                 <em><span id="more-news-loader">Click to load more news.</span> To browse old news posts, <a href="forums.php?action=viewforum&amp;forumid=12">click here</a>.</em>
             </div>
         </div>
