@@ -816,7 +816,7 @@ function signature(string $data, string $salt): string {
 
 function image_cache_signature(string $url, int|null $epoch = null, string $secret = IMAGE_CACHE_SECRET): string {
     return urlencode_safe(substr(
-        hash_hmac(DIGEST_ALGO, $url, $secret . date('YW', $epoch ?? time()), binary: true),
+        hash_hmac(DIGEST_ALGO, $url, $secret . date('oW', $epoch ?? time()), binary: true),
         0, 12)
     );
 }
