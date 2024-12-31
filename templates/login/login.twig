@@ -46,26 +46,28 @@ Please enable JavaScript in your browser.</span><br /><br /></noscript>
 {% if delta <= 0 %}
 <form class="auth_form" name="login" id="loginform" method="post" action="login.php" autocomplete="off">
     <div>
-    <label for="username">Username</label>
-    <input type="text" name="username" id="username" class="inputtext" required maxlength="20" pattern="[\w.]{1,20}" autofocus="autofocus" placeholder="Username" />
+        <label for="username">Username</label>
+        <input type="text" name="username" id="username" class="inputtext" required maxlength="20" pattern="[\w.]{1,20}" autofocus="autofocus" placeholder="Username" />
     </div>
     <div>
-    <label for="password">Password</label>
-    <input type="password" name="password" id="password" class="inputtext" required minlength="8" placeholder="Password" />
-    <span id="password_toggle">&#x1FAE3;</span>
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password" class="inputtext" required minlength="8" placeholder="Password" />
+        <span id="password_toggle">&#x1FAE3;</span>
     </div>
     <div>
-    <label title="2FA key (or recovery key), if configured" for="keeplogged">2FA Key</label>
-    <input type="text" name="twofa" id="twofa" class="inputtext" placeholder="2FA key (or recovery code) if required" />
+        <label title="2FA key (or recovery key), if configured" for="keeplogged">2FA Key</label>
+        <input type="text" name="twofa" id="twofa" class="inputtext" placeholder="2FA key (or recovery code) if required" />
     </div>
     <div>
-    <label title="Keep me logged in for 90 days" for="keeplogged">Remember me</label>
-    <input title="Keep me logged in for 90 days" type="checkbox" id="keeplogged" name="keeplogged" value="1"{{ checked(keep_logged) }} />
+        <label title="Keep me logged in for 90 days" for="keeplogged">Remember me</label>
+        <input title="Keep me logged in for 90 days" type="checkbox" id="keeplogged" name="keeplogged" value="1"{{ checked(keep_logged) }} />
     </div>
-    <div>
-    <input type="submit" name="login" value="Log in" class="submit" />
+    <div id="login_buttons">
+        <div>
+            <input style="margin: auto" type="submit" name="login" value="Log in" class="submit" />
+        </div>
+        <a href="login.php?action=recover" class="tooltip" title="I forgot my password :-(">Password recovery</a>
     </div>
-    <a href="login.php?action=recover" class="tooltip" title="I forgot my password :-(">Password recovery</a>
 </form>
 <script type="text/javascript">
 cookie.set('cookie_test', 1, 1);

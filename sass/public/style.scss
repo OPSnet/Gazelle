@@ -192,3 +192,18 @@ a:hover {
   margin: 50px 0;
   text-align: center;
 }
+
+#password_toggle {
+  display: inline-block;
+  width: 21px;
+  cursor: pointer;
+  text-align: center;
+}
+
+#login_buttons {
+  text-align: center;
+}
+
+#login_buttons a {
+  margin: 10px 0px;
+}
