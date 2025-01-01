@@ -481,6 +481,10 @@ defined('NEUTRAL_LEECH_UNIT') or define('NEUTRAL_LEECH_UNIT', 'm');
 // Size of the the neutral leech threshold (in terms of the units specified above.
 defined('NEUTRAL_LEECH_THRESHOLD') or define('NEUTRAL_LEECH_THRESHOLD', 1024);
 
+// How much much extra download on ratio watch before leeching privileges
+// are suspended?
+defined('RATIO_GAMBLE') or define('RATIO_GAMBLE', 10 * 1024 ** 3); // 10 GiB
+
 // How much buffer does a request vote represent?
 defined('REQUEST_MIN') or define('REQUEST_MIN', 100); // in MiB
 

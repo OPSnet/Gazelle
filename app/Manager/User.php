@@ -1353,7 +1353,11 @@ class User extends \Gazelle\BaseManager {
 
     /**
      * The list of ids of user whose leeching privileges need to be taken away
-     * (Gambled more than 10GiB after being put on ratio watch)
+     * (Gambled more than the authorized amount after being put on ratio watch)
+     *
+     * Fields need to cast to signed in case there is a download amnesty,
+     * in which case uls.Downloaded may be smaller than
+     * ui.RatioWatchDownload and the expression becomes negative.
      */
     public function ratioWatchBlockList(): array {
         self::$db->prepared_query("
@@ -1364,8 +1368,9 @@ class User extends \Gazelle\BaseManager {
             WHERE um.can_leech = 1
                 AND ui.RatioWatchEnds IS NOT NULL
                 AND um.Enabled = ?
-                AND uls.Downloaded - ui.RatioWatchDownload > ?
-            ", UserStatus::enabled->value, 10 * 1_105_507_304
+                AND cast(uls.Downloaded AS SIGNED INTEGER)
+                    - cast(ui.RatioWatchDownload AS SIGNED INTEGER) > ?
+            ", UserStatus::enabled->value, RATIO_GAMBLE
         );
         return self::$db->collect(0, false);
     }
