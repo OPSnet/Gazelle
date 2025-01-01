@@ -138,9 +138,9 @@ class UtilTest extends TestCase {
         $this->assertEquals('10.000',  ratio(40, 4, 3),  'format-ratio-40-4-3');
         $this->assertEquals('0.00',    ratio(-2, 4),     'format-ratio--2-4-x');
 
-        $this->assertEquals('0.4999',  ratio(20000, 40001, 4), 'format-ratio-20k-hi');
-        $this->assertEquals('0.5000',  ratio(20000, 39999, 4), 'format-ratio-20k-lo-1');
-        $this->assertEquals('0.5001',  ratio(20000, 39990, 4), 'format-ratio-20k-lo-2');
+        $this->assertEquals('0.4999', ratio(20000, 40001, 4), 'format-ratio-20k-hi');
+        $this->assertEquals('0.5000', ratio(20000, 39999, 4), 'format-ratio-20k-lo-1');
+        $this->assertEquals('0.5001', ratio(20000, 39990, 4), 'format-ratio-20k-lo-2');
 
         $this->assertEquals('r00', ratio_css(0.0999), 'format-get-ratio-css-r00');
         $this->assertEquals('r01', ratio_css(0.1000), 'format-get-ratio-css-r01-lo');

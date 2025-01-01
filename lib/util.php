@@ -91,7 +91,11 @@ function ratio(int $uploaded, int $downloaded, int $digits = 2): string|false {
     return match (true) {
         $downloaded == 0 && $uploaded == 0 => false,
         $downloaded == 0 => '∞',
-        default => number_format(max($uploaded / $downloaded - (0.5 / 10 ** $digits), 0), $digits),
+        $uploaded <= 0  => number_format(0.0, $digits),
+        default => number_format(
+            (floor(($uploaded / $downloaded) * 10 ** $digits) / 10 ** $digits),
+            $digits
+        ),
     };
 }
 
