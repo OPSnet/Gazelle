@@ -208,6 +208,15 @@ class Twig {
             'UTF-8'
         )));
 
+        $twig->addFunction(new \Twig\TwigFunction('build_url', function (string $base, array $args): string {
+            $delim = str_contains($base, '?') ? '&' : '?';
+            foreach ($args as $k => $v) {
+                $base .= $delim . $k . '=' . $v;
+                $delim = '&';
+            }
+            return $base;
+        }));
+
         $twig->addFunction(new \Twig\TwigFunction('donor_icon', fn($icon) => new \Twig\Markup(image_cache_encode($icon), 'UTF-8')));
 
         $twig->addFunction(new \Twig\TwigFunction('ipaddr', fn(string $ipaddr) => new \Twig\Markup(

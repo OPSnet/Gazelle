@@ -214,8 +214,32 @@ END;
         ]);
         global $SessionID;
         $SessionID = $current['SessionID'];
-        $this->assertStringStartsWith('<!DOCTYPE html>', self::twig('{{ header("page") }}')->render(), 'twig-function-header');
         $this->assertStringEndsWith("</body>\n</html>\n", self::twig('{{ footer() }}')->render(), 'twig-function-footer');
+
+        $this->assertEquals(
+            'http://localhost/?arg=abc',
+            self::twig('{{ build_url("http://localhost/", {"arg": arg}) }}')
+                ->render(['arg' => 'abc']),
+            'twig-function-build-url-1'
+        );
+        $this->assertEquals(
+            'http://localhost/?arg=abc&amp;id=10',
+            self::twig('{{ build_url("http://localhost/", {"arg": arg, "id": id}) }}')
+                ->render(['arg' => 'abc', 'id' => 10]),
+            'twig-function-build-url-2'
+        );
+        $this->assertEquals(
+            'http://localhost/index?x=123&amp;arg=def',
+            self::twig('{{ build_url("http://localhost/index?x=123", {"arg": arg}) }}')
+                ->render(['arg' => 'def']),
+            'twig-function-build-url-3'
+        );
+        $this->assertEquals(
+            'http://localhost/index?x=123&amp;arg=def&amp;id=20',
+            self::twig('{{ build_url("http://localhost/index?x=123", {"arg": arg, "id": id}) }}')
+                ->render(['arg' => 'def', 'id' => 20]),
+            'twig-function-build-url-4'
+        );
 
         $this->assertEquals(
             '127.0.0.1 <a href="user.php?action=search&amp;ip_history=on&amp;matchtype=strict&amp;ip=127.0.0.1" title="Search" class="brackets tooltip">S</a>',

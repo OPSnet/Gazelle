@@ -11,7 +11,7 @@
             <p>Reports by type</p>
             <ul>
             {% for item in type_count %}
-                <li><a href="{{ base_uri }}&amp;type={{ item[0].id }}">{{ item[1] }} {{ item[0].name }}</a></li>
+                <li><a href="{{ build_url(base_uri, {'type': item[0].id}) }}">{{ item[1] }} {{ item[0].name }}</a></li>
             {% endfor %}
             </ul>
         </td></tr></table>
@@ -21,7 +21,7 @@
             <p>Reports by user</p>
             <ul>
             {% for item in user_count %}
-                <li><a href="{{ base_uri }}&amp;userid={{ item[0].id }}">{{ item[1] }} {{ item[0].username }}</a></li>
+                <li><a href="{{ build_url(base_uri, {'userid': item[0].id}) }}">{{ item[1] }} {{ item[0].username }}</a></li>
             {% endfor %}
             </ul>
         </td></tr></table>
