@@ -4,7 +4,7 @@ WORKDIR /var/www
 
 ENV DEB_RELEASE=bookworm
 ENV DEBIAN_FRONTEND=noninteractive
-ENV PHP_VER=8.3
+ENV PHP_VER=8.4
 ENV NODE_VERSION=20
 
 # Uncomment to skip the chromium download when installing puppeteer. If you do,
@@ -46,7 +46,7 @@ RUN apt-get update \
         php${PHP_VER}-dev \
         php${PHP_VER}-bcmath \
         php${PHP_VER}-gmp \
-        php${PHP_VER}-xdebug \
+        php-xdebug \
         python3 \
         python3-pip \
         python3-setuptools \
@@ -131,7 +131,7 @@ RUN echo "deb http://deb.debian.org/debian ${DEB_RELEASE}-backports main" > /etc
 #    && rm /tmp/firefox.tar.bz2 \
 #    && ln -fs /opt/firefox/firefox /usr/bin/firefox
 
-COPY --from=composer:2.8.2 /usr/bin/composer /usr/local/bin/composer
+COPY --from=composer:2.8.4 /usr/bin/composer /usr/local/bin/composer
 COPY misc/docker /var/www/misc/docker
 
 # Permissions and configuration layer

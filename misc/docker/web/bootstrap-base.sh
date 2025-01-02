@@ -22,6 +22,9 @@ if [ ! -f "/etc/php/${PHP_VER}/cli/conf.d/99-boris.ini" ]; then
         > "/etc/php/${PHP_VER}/cli/conf.d/99-boris.ini"
 fi
 
+composer --version && composer install --no-progress
+bin/local-patch
+
 cat > ~/.my.cnf <<EOF
 [client]
 user = $MYSQL_USER
@@ -37,16 +40,23 @@ do
     sleep 1
 done
 
-composer --version && composer install --no-progress
-bin/local-patch
-
 echo "Create postgres database..."
+cat > ~/.pgpass << EOF
 #hostname:port:database:username:password
-echo "${PGHOST}:5432:postgres:${POSTGRES_USER}:${POSTGRES_PASSWORD}" > ~/.pgpass
-echo "${PGHOST}:5432:${POSTGRES_DATABASE}:${POSTGRES_DB_USER}:${POSTGRES_USER_PASSWORD}" >> ~/.pgpass
+${PGHOST}:5432:*:${POSTGRES_USER}:${POSTGRES_PASSWORD}
+${PGHOST}:5432:*:${POSTGRES_DB_USER}:${POSTGRES_USER_PASSWORD}
+EOF
 chmod 600 ~/.pgpass
-psql -U "$POSTGRES_USER" postgres -c "create role ${POSTGRES_DB_USER} with password '${POSTGRES_USER_PASSWORD}' login;"
-psql -U "$POSTGRES_USER" postgres -c "create database ${POSTGRES_DATABASE} with owner ${POSTGRES_DB_USER};"
+
+cat << EOF | psql -d postgres -U ${POSTGRES_USER} 
+create role ${POSTGRES_DB_USER} with password '${POSTGRES_USER_PASSWORD}' login;
+create database ${POSTGRES_DATABASE} with owner ${POSTGRES_DB_USER};
+EOF
+
+cat << EOF | psql "${POSTGRES_DATABASE}" "${POSTGRES_USER}"
+create extension mysql_fdw;
+grant all on foreign data wrapper mysql_fdw to ${POSTGRES_DB_USER};
+EOF
 
 if [ -z "${MYSQL_INIT_DB-}" ]; then
     echo "Restore mysql dump..."

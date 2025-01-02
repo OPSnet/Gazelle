@@ -20,7 +20,10 @@ services:
     image: memcached:1.6.32-alpine
 
   pg:
-    image: postgres:17-bookworm
+    image: postgres:orpheus
+    build:
+      context: .
+      dockerfile: misc/pg.Dockerfile
     ports:
       - 127.0.0.1:54321:5432
     volumes:
@@ -29,6 +32,7 @@ services:
       - POSTGRES_USER=nyala
       - POSTGRES_PASSWORD=nyalapw
       - POSTGRES_DB=gz
+
   mysql:
     image: percona:ps-8.0
     ports:

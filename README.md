@@ -98,6 +98,7 @@ Ocelot can be launched by specifying an additional configuration file:
 The following ports are forwarded:
 * 80 -> 7001 (web)
 * 3306 -> 36000 (mysql)
+* 5432 -> 54321 (postgresql)
 * 34000 -> 34000 (ocelot if present)
 
 ## Going further

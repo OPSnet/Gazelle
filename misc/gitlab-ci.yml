@@ -56,7 +56,7 @@ e2e-tests:
   services:
     - name: memcached:1.6.29-alpine
       alias: memcached
-    - name: postgres:16.3-alpine
+    - name: postgres-orpheus
       alias: postgres
     - name: percona:ps-8.0.29-21
       alias: mysql
