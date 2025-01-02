@@ -95,11 +95,12 @@ function paranoia_none() {
 }
 
 function toggle_identicons() {
-    let disable_avatars = document.getElementById('disableavatars');
-    if (['2', '3'].includes(disable_avatars.value)) {
-        disable_avatars.classList.remove('hidden');
+    const disable_avatars = document.getElementById('disableavatars').value;
+    const identicons_elem = document.getElementById('identicons');
+    if (['2', '3'].includes(disable_avatars)) {
+        identicons_elem.classList.remove('hidden');
     } else {
-        disable_avatars.classList.add('hidden');
+        identicons_elem.classList.add('hidden');
     }
 }
 
@@ -247,8 +248,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     refresh_paranoia();
     toggle_identicons();
+    document.getElementById('disableavatars').addEventListener('change', () => { toggle_identicons(); });
     init_css_gallery();
-    
+
     const sendTestPush = document.getElementById("send-test-push");
     sendTestPush.addEventListener("click", async () => {
         await fetch("ajax.php?action=push_test", {method: "POST"});
