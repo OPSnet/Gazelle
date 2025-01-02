@@ -266,7 +266,7 @@ abstract class TorrentAbstract extends BaseObject {
                 continue;
             }
             $ext = substr($file['ext'], 1); // skip over period
-            if (preg_match('/^' . PRIMARY_EXT_REGEXP . '$/', $ext)) {
+            if (preg_match('/^' . PRIMARY_EXT_REGEXP . '$/i', $ext)) {
                 if (!isset($map[$ext])) {
                     $map[$ext] = 0;
                 }
@@ -286,7 +286,7 @@ abstract class TorrentAbstract extends BaseObject {
     public function fileListNonPrimarySize(): int {
         $size = 0;
         foreach ($this->fileList() as $file) {
-            if (!preg_match('/^\.' . PRIMARY_EXT_REGEXP . '$/', (string)$file['ext'])) {
+            if (!preg_match('/^\.' . PRIMARY_EXT_REGEXP . '$/i', (string)$file['ext'])) {
                 $size += (int)$file['size'];
             }
         }
