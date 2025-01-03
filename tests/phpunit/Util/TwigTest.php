@@ -137,7 +137,8 @@ END;
             self::twig('{{ user_id|user_url }}')->render(['user_id' => $this->user->id()]),
             'twig-user-url'
         );
-        (new User\Donor($this->user))->donate(
+        $donor = new User\Donor($this->user);
+        $donor->donate(
             amount:  20,
             xbtRate: 0.05,
             source: 'phpunit twig source',
@@ -151,6 +152,7 @@ END;
 
         $status = self::twig('{{ user_id|user_status(viewer) }}');
         $this->assertIsString($status->render(['user_id' => $this->user->id(), 'viewer' => $this->user]), 'twig-user-status');
+        $donor->remove();
     }
 
     public function testImageCache(): void {

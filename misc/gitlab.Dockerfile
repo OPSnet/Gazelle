@@ -122,7 +122,7 @@ RUN echo "deb http://deb.debian.org/debian ${DEB_RELEASE}-backports main" > /etc
     && apt-get autoremove \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
-    && sed -i 's|START=no|START=yes|' /etc/default/sphinxsearch
+    && sed -i 's/START=no/START=yes/' /etc/default/sphinxsearch
 
 # add firefox for cypress
 # command from https://github.com/cypress-io/cypress-docker-images/blob/master/browsers/node16.16.0-chrome107-ff107/Dockerfile
@@ -139,10 +139,9 @@ RUN useradd -ms /bin/bash gazelle \
     && touch /var/log/php_error.log /var/log/xdebug.log \
     && chown -R gazelle:gazelle /var/www /var/log/php_error.log /var/log/xdebug.log \
     && cp /var/www/misc/docker/web/php.ini /etc/php/${PHP_VER}/cli/10-php.ini \
-    && cp /var/www/misc/docker/web/php-cli.ini /etc/php/${PHP_VER}/cli/20-cli.ini \
     && cp /var/www/misc/docker/web/php.ini /etc/php/${PHP_VER}/fpm/php.ini \
-    && cp /var/www/misc/docker/web/xdebug.ini /etc/php/${PHP_VER}/mods-available/xdebug.ini \
-    && sed -i 's|xdebug.mode=debug|\0,coverage|' /etc/php/${PHP_VER}/mods-available/xdebug.ini \
+    && cp /var/www/misc/docker/web/php-cli.ini /etc/php/${PHP_VER}/cli/20-cli.ini \
+    && sed 's/xdebug.mode=.*/xdebug.mode=coverage/' /var/www/misc/docker/web/xdebug.ini > /etc/php/${PHP_VER}/mods-available/xdebug.ini \
     && cp /var/www/misc/docker/web/www.conf /etc/php/${PHP_VER}/fpm/pool.d/www.conf \
     && cp /var/www/misc/docker/web/nginx.conf /etc/nginx/sites-available/gazelle.conf \
     && ln -s /etc/nginx/sites-available/gazelle.conf /etc/nginx/sites-enabled/gazelle.conf \

@@ -26,17 +26,23 @@ if ($_POST['submit'] == 'Delete') {
         exit;
     }
 
-    $values = [
-        'text'   => trim($_POST['text']),
-        'expiry' => $_POST['expiry'],
-        'rent'   => $_POST['rent'],
-        'cc'     => $_POST['cc'],
-        'active' => isset($_POST['active']) && $_POST['active'] == 'on' ? 1 : 0,
-    ];
     if ($_POST['submit'] == 'Create') {
-        $Payment->create($values);
+        $Payment->create(
+            trim($_POST['text']),
+            $_POST['expiry'],
+            $_POST['rent'],
+            $_POST['cc'],
+            isset($_POST['active']),
+        );
     } else {
-        $Payment->modify($_POST['id'], $values);
+        $Payment->modify(
+            $_POST['id'],
+            trim($_POST['text']),
+            $_POST['expiry'],
+            $_POST['rent'],
+            $_POST['cc'],
+            isset($_POST['active']),
+        );
     }
 }
 

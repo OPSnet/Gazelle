@@ -14,36 +14,52 @@ class Payment extends \Gazelle\Base {
         return $this;
     }
 
-    public function create(array $val): int {
+    public function create(
+        string $text,
+        string $expiry,
+        float  $rent,
+        string $cc,
+        bool   $active,
+    ): int {
         self::$db->prepared_query('
             INSERT INTO payment_reminders
                    (Text, Expiry, AnnualRent, cc, Active)
             VALUES (?,    ?,      ?,          ?,  ?)
-            ', $val['text'], $val['expiry'], $val['rent'], $val['cc'], $val['active']
+            ', $text, $expiry, $rent, $cc, $active ? 1 : 0
         );
+        $id = self::$db->inserted_id();
         $this->flush();
-        return self::$db->inserted_id();
+        return $id;
     }
 
-    public function modify($id, array $val): int {
+    public function modify(
+        int    $id,
+        string $text,
+        string $expiry,
+        float  $rent,
+        string $cc,
+        bool   $active,
+    ): int {
         self::$db->prepared_query("
             UPDATE payment_reminders SET
                 Text = ?, Expiry = ?, AnnualRent = ?, cc = ?, Active = ?
             WHERE ID = ?
-            ", $val['text'], $val['expiry'], $val['rent'], $val['cc'], $val['active'],
+            ", $text, $expiry, $rent, $cc, $active ? 1 : 0,
             $id
         );
+        $affected = self::$db->affected_rows();
         $this->flush();
-        return self::$db->affected_rows();
+        return $affected;
     }
 
-    public function remove($id): int {
+    public function remove(int $id): int {
         self::$db->prepared_query('
             DELETE FROM payment_reminders WHERE ID = ?
             ', $id
         );
+        $affected = self::$db->affected_rows();
         $this->flush();
-        return self::$db->affected_rows();
+        return $affected;
     }
 
     public function list(): array {

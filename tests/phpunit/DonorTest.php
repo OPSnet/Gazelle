@@ -2,6 +2,7 @@
 
 namespace Gazelle;
 
+use GazelleUnitTest\Helper;
 use PHPUnit\Framework\TestCase;
 
 class DonorTest extends TestCase {
@@ -409,6 +410,7 @@ class DonorTest extends TestCase {
             'donor-manager-grand-total'
         );
 
+        Helper::flushDonationMonth(1);
         $this->assertGreaterThan(0, $manager->topDonorList(100, new Manager\User()), 'donor-top-donor');
         $this->assertGreaterThan($initial + DONOR_RANK_PRICE, $manager->totalMonth(1), 'donor-manager-month');
         $username = $this->donor->user()->username();
@@ -459,8 +461,8 @@ class DonorTest extends TestCase {
         $this->donor->donate(
             amount: DONOR_RANK_PRICE,
             xbtRate: 0.06125,
-            source: 'phpunit twig source',
-            reason: 'phpunit twig reason',
+            source: 'phpunit donor source',
+            reason: 'phpunit donor reason',
         );
         $this->assertEquals('yes', $template->render(['user' => $user]), 'twig-test-not-donor');
 

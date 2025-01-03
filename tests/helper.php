@@ -256,4 +256,10 @@ class Helper {
         }
         return time() - $epoch < $tolerance;
     }
+
+    /* payments and donations can interfere with each other */
+    public static function flushDonationMonth(int $month): void {
+        global $Cache;
+        $Cache->delete_value("donations_month_$month");
+    }
 }
