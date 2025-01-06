@@ -5,7 +5,7 @@ namespace Gazelle\API;
 use Gazelle\Util\Mail;
 
 class GenerateInvite extends AbstractAPI {
-    public function run() {
+    public function run(): array {
         $userMan = new \Gazelle\Manager\User();
         $interviewer = null;
         if (isset($_GET['interviewer_id'])) {

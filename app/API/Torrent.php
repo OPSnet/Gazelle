@@ -3,7 +3,7 @@
 namespace Gazelle\API;
 
 class Torrent extends AbstractAPI {
-    public function run() {
+    public function run(): array {
         switch ($_GET['req']) {
             case 'group':
                 return $this->tgroup((int)($_GET['group_id'] ?? 0));
@@ -15,9 +15,6 @@ class Torrent extends AbstractAPI {
 
     protected function torrent(int $id): array {
         $torrent = (new \Gazelle\Manager\Torrent())->findById($id);
-        if (is_null($torrent)) {
-            json_error('Torrent not found');
-        }
         if (is_null($torrent)) {
             json_error('Torrent not found');
         }

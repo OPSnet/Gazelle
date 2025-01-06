@@ -1,51 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Method Gazelle\\\\API\\\\AbstractAPI\\:\\:run\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/API/AbstractAPI.php
-
-		-
-			message: "#^Method Gazelle\\\\API\\\\Artist\\:\\:run\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/API/Artist.php
-
-		-
-			message: "#^Method Gazelle\\\\API\\\\Collage\\:\\:run\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/API/Collage.php
-
-		-
-			message: "#^Method Gazelle\\\\API\\\\Forum\\:\\:run\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/API/Forum.php
-
-		-
-			message: "#^Method Gazelle\\\\API\\\\GenerateInvite\\:\\:run\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/API/GenerateInvite.php
-
-		-
-			message: "#^Method Gazelle\\\\API\\\\Request\\:\\:run\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/API/Request.php
-
-		-
-			message: "#^Call to function is_null\\(\\) with Gazelle\\\\Torrent will always evaluate to false\\.$#"
-			count: 1
-			path: ../app/API/Torrent.php
-
-		-
-			message: "#^Method Gazelle\\\\API\\\\Torrent\\:\\:run\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/API/Torrent.php
-
-		-
-			message: "#^Method Gazelle\\\\API\\\\Wiki\\:\\:run\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: ../app/API/Wiki.php
-
-		-
 			message: "#^Match expression does not handle remaining value\\: string$#"
 			count: 2
 			path: ../app/Feed.php

@@ -3,7 +3,7 @@
 namespace Gazelle\API;
 
 class Artist extends AbstractAPI {
-    public function run() {
+    public function run(): array {
         if (empty($_GET['artist_id'])) {
             json_error('Missing artist id');
         }

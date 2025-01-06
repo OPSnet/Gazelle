@@ -3,24 +3,22 @@
 namespace Gazelle\API;
 
 class Collage extends AbstractAPI {
-    public function run() {
+    public function run(): array {
         if (!isset($_GET['collage_id'])) {
             json_error('Missing collage id');
         }
 
-        self::$db->prepared_query("
-            SELECT
-                ID,
+        $collage = self::$db->rowAssoc("
+            SELECT ID,
                 Name,
                 CategoryID
-            FROM
-                collages
-            WHERE
-                ID = ?", $_GET['collage_id']);
-        if (!self::$db->has_results()) {
+            FROM collages
+            WHERE ID = ?
+            ", $_GET['collage_id']
+        );
+        if (is_null($collage)) {
             json_error('Collage not found');
         }
-        $collage = self::$db->next_record(MYSQLI_ASSOC, false);
         $collage['Category'] = $this->config['CollageCats'][$collage['CategoryID']];
 
         return $collage;

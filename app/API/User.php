@@ -25,7 +25,7 @@ class User extends AbstractAPI {
             $cond =  "um.Username = ?";
             $arg = $this->username;
         }
-        self::$db->prepared_query("
+        $user = self::$db->rowAssoc("
             SELECT
                 um.ID,
                 um.Username,
@@ -47,9 +47,7 @@ class User extends AbstractAPI {
             WHERE $cond
             ", $arg
         );
-
-        $user = self::$db->next_record(MYSQLI_ASSOC, ['IRCKey', 'Paranoia']);
-        if (empty($user['Username'])) {
+        if (is_null($user)) {
             json_error("User not found");
         }
 

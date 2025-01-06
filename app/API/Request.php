@@ -3,7 +3,7 @@
 namespace Gazelle\API;
 
 class Request extends AbstractAPI {
-    public function run() {
+    public function run(): array {
         $request = (new \Gazelle\Manager\Request())->findById((int)($_GET['request_id'] ?? 0));
         if (is_null($request)) {
             json_error('Missing request id');

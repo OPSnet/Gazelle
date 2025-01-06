@@ -7,5 +7,5 @@ abstract class AbstractAPI extends \Gazelle\Base {
         protected array $config,
     ) {}
 
-    abstract public function run();
+    abstract public function run(): array;
 }
