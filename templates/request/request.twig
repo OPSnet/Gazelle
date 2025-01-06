@@ -191,7 +191,10 @@
                 checked(encoding.all) }} /> All</label>
             <br />
 {%  for k, v in constant('ENCODING') %}
-            <label style="display: inline-block; width: 100px"><input type="checkbox" name="bitrates[]" value="{{ k }}" id="bitrate_{{ k }}"{{ checked(encoding.exists(v)) }} /> {{ v }}</label>
+{%      if not (new and v == 'Other') %}
+            <label style="display: inline-block; width: 100px"><input type="checkbox" name="bitrates[]" value="{{
+                k }}" id="bitrate_{{ k }}"{{ checked(encoding.exists(v)) }} /> {{ v }}</label>
+{%      endif %}
 {%  endfor %}
           </td>
         </tr>

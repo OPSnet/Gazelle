@@ -517,16 +517,10 @@ class Request extends BaseObject implements CategoryHasArtist {
         if (!$this->format()->exists($torrent->format())) {
             $error[] = "{$torrent->format()} is not an allowed format for this request.";
         }
-        if ($this->needEncoding("Other")) {
-            if (
-                in_array($torrent->encoding(), [
-                    "24bit Lossless", "Lossless", "V0 (VBR)", "V1 (VBR)",
-                    "V2 (VBR)", "APS (VBR)", "APX (VBR)", "256", "320"
-                ])
-            ) {
-                $error[] = "{$torrent->encoding()} is not an allowed encoding for this request.";
-            }
-        } elseif (!$this->encoding()->exists($torrent->encoding())) {
+        if (
+            $this->descriptionEncoding() !== "Other"
+            && !$this->encoding()->exists($torrent->encoding())
+        ) {
             $error[] = "{$torrent->encoding()} is not an allowed encoding for this request.";
         }
 
