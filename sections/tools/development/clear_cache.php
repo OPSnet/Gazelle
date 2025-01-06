@@ -20,10 +20,7 @@ $result = [];
 $begin = microtime(true);
 if (!empty($_REQUEST['key'])) {
     $Keys = preg_split('/\s+/', trim($_REQUEST['key']));
-    if ($Keys && isset($_REQUEST['flush']) && ($_REQUEST['check'] ?? '') === 'on') {
-        if (!$Viewer->permitted('admin_clear_cache')) {
-            error(403);
-        }
+    if ($Keys && isset($_REQUEST['flush']) && isset($_REQUEST['check'])) {
         $delete = $Cache->delete_multi($Keys);
         foreach ($delete as $key => $response) {
             $result[$key] = CACHE_RESPONSE[$response] ?? "retcode:$response";
@@ -49,13 +46,13 @@ if (!empty($_REQUEST['key'])) {
             array_intersect(array_keys($_REQUEST), array_keys($definitions))
         );
         if (isset($_REQUEST["$namespace-free"]) && str_contains($_REQUEST["$namespace-free"], '*')) {
-            $shape = array_merge(
-                $shape,
-                preg_split(
-                    '/\s+/',
-                    str_replace('*', '%d', (string)$_REQUEST["$namespace-free"])
-                )
+            $freeform = preg_split(
+                '/\s+/',
+                str_replace('*', '%d', (string)$_REQUEST["$namespace-free"])
             );
+            if (is_array($freeform)) {
+                $shape = array_merge($shape, $freeform);
+            }
         }
         $result = [$namespace => $flusher->multiFlush($namespace, $shape)];
         $flushed = true;

@@ -346,16 +346,6 @@ parameters:
 			path: ../sections/requests/fill_handle.php
 
 		-
-			message: "#^Negated boolean expression is always false\\.$#"
-			count: 1
-			path: ../sections/tools/development/clear_cache.php
-
-		-
-			message: "#^Parameter \\#2 \\.\\.\\.\\$arrays of function array_merge expects array, array\\<int, string\\>\\|false given\\.$#"
-			count: 1
-			path: ../sections/tools/development/clear_cache.php
-
-		-
 			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
 			count: 1
 			path: ../sections/tools/managers/ajax_take_enable_request.php
