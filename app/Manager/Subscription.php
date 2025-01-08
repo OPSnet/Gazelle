@@ -35,7 +35,6 @@ class Subscription extends \Gazelle\Base {
         );
         $list = self::$db->collect('UserID', false);
 
-        new User();
         foreach ($list as $userId) {
             (new \Gazelle\User\Quote(new \Gazelle\User($userId)))->flush();
         }

@@ -94,12 +94,6 @@ switch ($_REQUEST['action'] ?? '') {
     case 'ip_search':
         include_once 'managers/ip_search.php';
         break;
-    case 'irc':
-        include_once 'managers/irc_list.php';
-        break;
-    case 'irc_alter':
-        include_once 'managers/irc_alter.php';
-        break;
 
     case 'login_watch':
         include_once 'managers/login_watch.php';

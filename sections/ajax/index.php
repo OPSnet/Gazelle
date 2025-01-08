@@ -100,9 +100,6 @@ switch ($Action) {
     case 'preview':
         include_once 'preview.php';
         break;
-    case 'torrent_info':
-        include_once 'torrent_info.php';
-        break;
     case 'add_tag':
         include_once 'torrent_tag_add.php';
         break;
@@ -111,9 +108,6 @@ switch ($Action) {
         break;
     case 'stats':
         include_once 'stats.php';
-        break;
-    case 'checkprivate':
-        include 'checkprivate.php';
         break;
 
     // things not yet used on the site

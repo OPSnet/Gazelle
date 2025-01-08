@@ -72,7 +72,6 @@ class Torrent extends \Gazelle\Base {
 
         $innerQuery .= " WHERE " . implode(" AND ", $filteredWhere);
         $innerQuery = $innerQuery . (isset($getParameters['groups']) && $getParameters['groups'] == 'show' ? ' GROUP BY g.ID ' : '');
-        $this->orderBy($details);
 
         $query = sprintf($this->baseQuery,
             $innerQuery,

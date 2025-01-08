@@ -80,7 +80,7 @@ echo $Twig->render('admin/tracker-info.twig', [
     'action'       => $_REQUEST['action'],
     'delay'        => $tracker->delay(),
     'main_stats'   => $info,
-    'mem_stats'    => ($_GET['status'] ?? '' == 'memory') ? $tracker->infoMemoryAlloc() : null,
+    'mem_stats'    => ($_GET['status'] ?? '') == 'memory' ? $tracker->infoMemoryAlloc() : null,
     'reannounce'   => [
         'active'  => isset($_POST['tlist']),
         'total'   => $reannounceTotal,

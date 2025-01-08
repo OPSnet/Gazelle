@@ -6,7 +6,6 @@ if (!$Viewer->permitted('site_top10')) {
 }
 
 match ($_GET['type'] ?? 'torrents') {
-    'history'  => include_once 'history.php',
     'tags'     => include_once 'tags.php',
     'torrents' => include_once 'torrents.php',
     'users'    => include_once 'users.php',

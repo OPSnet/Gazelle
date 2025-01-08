@@ -167,7 +167,7 @@ class Pg {
     public function all(string $query, ...$args): array {
         $begin = microtime(true);
         $st = $this->pdo->prepare($query);
-        if ($st === false or !$st->execute([...$args])) {
+        if ($st === false || !$st->execute([...$args])) {
             $this->stats->error($query);
             return [];
         }
@@ -209,7 +209,7 @@ class Pg {
     public function column(string $query, ...$args): array {
         $begin = microtime(true);
         $st = $this->pdo->prepare($query);
-        if ($st === false or !$st->execute([...$args])) {
+        if ($st === false || !$st->execute([...$args])) {
             $this->stats->error($query);
             return [];
         }

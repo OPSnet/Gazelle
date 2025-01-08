@@ -20,7 +20,7 @@ if (!$Viewer->permitted('admin_reports')) {
 
 if (isset($_REQUEST['id'])) {
     $search->setId((int)$_GET['id']);
-} elseif (!($_REQUEST['view'] ?? '' == 'old') && !isset($_REQUEST['order'])) {
+} elseif (!($_REQUEST['view'] ?? '') == 'old' && !isset($_REQUEST['order'])) {
     $search->setStatus(['New', 'InProgress']);
 } else {
     $search->setStatus(['Resolved']);
