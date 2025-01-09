@@ -71,7 +71,7 @@
                         <a href="#" class="brackets tooltip view-download" title="View the list of users that have clicked the &quot;DL&quot; button.">View downloaders</a>
                         <a href="#" class="brackets tooltip view-snatch" title="View the list of users that have reported a snatch to the tracker.">View snatchers</a>
 {% endif %}
-                        <a href="#" class="brackets tooltip view-seeder" title="View the list of peers that are currently seeding this torrent.">View seeders</a>
+                        <a href="#" class="brackets tooltip view-seeder" title="View the list of peers in this torrent's swarm.">View peers</a>
                         <a href="#" class="brackets tooltip view-filelist" title="View the list of files in this torrent">View contents</a>
 {% set report_id_list = torrent.reportIdList(viewer) %}
 {% set report_total = report_id_list|length %}

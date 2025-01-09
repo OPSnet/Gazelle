@@ -2,7 +2,7 @@
 {% set result %}
 {% for peer in list %}
     {% if loop.first %}
-<h4>List of Seeders</h4>
+<h4>List of Peers</h4>
 {% set linkbox %}
 <div class="linkbox">{{ pager('show_seeders', torrent_id, paginator.page, paginator.pages)|raw }}</div>
 {% endset %}
@@ -11,7 +11,6 @@
     <tr class="colhead_dark" style="font-weight: bold;">
         <td>User</td>
         <td>Active</td>
-        <td>Connectable</td>
         <td class="number_column">Up (this session)</td>
         <td class="number_column">Available %</td>
         <td>IP Address</td>
@@ -29,7 +28,6 @@
         <td>Peer</td>
     {% endif %}
         <td>{% if peer.active %}<span style="color: green;">Yes</span>{% else %}<span style="color: red;">No</span>{% endif %}</td>
-        <td>{% if peer.connectable %}<span style="color: green;">Yes</span>{% else %}<span style="color: red;">No</span>{% endif %}</td>
         <td class="number_column">{{ peer.uploaded|octet_size }}</td>
         <td class="number_column">{{ ((peer.size - peer.remaining) / peer.size * 100)|number_format(2) }}</td>
     {% if peer.user_id == user_id %}
@@ -56,7 +54,7 @@
 {{ linkbox|raw }}
     {% endif %}
 {% else %}
-<div style="text-align: center">No current seeders</div>
+<div style="text-align: center">No current peers</div>
 {% endfor %}
 {% endset %}
 {{ {'page': paginator.page, 'pages': paginator.pages, 'debug': list, 'html': result}|json_encode|raw }}
