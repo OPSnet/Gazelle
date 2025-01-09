@@ -3,76 +3,68 @@
 namespace Gazelle\Manager;
 
 class SiteLog extends \Gazelle\Base {
-    protected int $totalMatches = 0;
-    protected array $result     = [];
+    use \Gazelle\Pg;
+
+    final protected const CACHE_TERM  = 'site_log_';
+
     protected array $usernames  = [];
 
     public function __construct(
+        // the User manager is only needed for the page() method, but
+        // it is a major hassle to pass it in at that point and then
+        // carry it down to the method that actually needs it.
         protected \Gazelle\Manager\User $userMan,
     ) {}
 
-    public function totalMatches(): int {
-        return $this->totalMatches;
+    protected function configure(string $searchTerm): array {
+        return $searchTerm === ''
+            ? [
+                'where'  => '',
+                'args'   => [],
+            ]
+            : [
+                'where'  => "where note_ts @@ websearch_to_tsquery('simple', ?)",
+                'args'   => [$searchTerm],
+            ];
     }
 
-    public function result(): array {
-        return $this->result;
-    }
-
-    public function page(int $perPage, int $offset, string $searchTerm, bool $bypassSphinx = false): array {
-        if ($searchTerm === '' || $bypassSphinx) {
-            // either no search term or realtime query
-            $args = [$offset, $perPage];
-            if ($searchTerm === '') {
-                $where = '';
-            } else {
-                $where = " WHERE Message LIKE concat('%', ?, '%')";
-                array_unshift($args, $searchTerm);
-            }
-            self::$db->prepared_query("
-                SELECT ID   AS id,
-                    Message AS message,
-                    Time    AS created
-                FROM log$where
-                ORDER BY ID DESC
-                LIMIT ?, ?
-                ", ...$args
+    public function total(string $searchTerm): int {
+        if ($searchTerm === '') {
+            return (int)$this->pg()->scalar("
+                select total from table_row_count where table_name = 'site_log'
+            ");
+        }
+        $key   = self::CACHE_TERM . \Gazelle\Util\Text::base64UrlEncode($searchTerm);
+        $total = self::$cache->get_value($key);
+        if ($total === false) {
+            $conf  = $this->configure($searchTerm);
+            $total = (int)$this->pg()->scalar("
+                select count(*) from site_log {$conf['where']}
+                ", ...$conf['args']
             );
-            $this->totalMatches = (int)self::$db->record_count();
-            if ($this->totalMatches < $perPage) {
-                $this->totalMatches += $offset;
-            } else {
-                $result = (new \SphinxqlQuery())->select('id')->from('log, log_delta')->limit(0, 1, 1)->sphinxquery();
-                $this->totalMatches = $result
-                    ? min(SPHINX_MAX_MATCHES, (int)$result->get_meta('total_found'))
-                    : 0;
-            }
-            return $this->decorate(self::$db->to_array(false, MYSQLI_NUM, false));
+            self::$cache->cache_value($key, $total, 3600);
         }
-        $sq = new \SphinxqlQuery();
-        $sq->select('id')
-            ->from('log, log_delta')
-            ->order_by('id', 'DESC')
-            ->limit($offset, $perPage, $offset + $perPage);
-        foreach (explode(' ', $searchTerm) as $s) {
-            $sq->where_match($s, 'message');
-        }
-        $result = $sq->sphinxquery();
-        if (!$result || $result->Errno) {
+        return $total;
+    }
+
+    public function page(int $limit, int $offset, string $searchTerm): array {
+        $conf = $this->configure($searchTerm);
+        $st   = $this->pg()->pdo()->prepare("
+            select id_site_log,
+                note,
+                created
+            from site_log {$conf['where']}
+            order by id_site_log desc
+            limit ? offset ?
+        ");
+        array_push($conf['args'], $limit, $offset);
+
+        if ($st === false || !$st->execute($conf['args'])) {
             return [];
         }
-        $this->totalMatches = min(SPHINX_MAX_MATCHES, $result->get_meta('total_found'));
-        $logIds = $result->collect('id') ?: [0];
-        self::$db->prepared_query("
-            SELECT ID   AS id,
-                Message AS message,
-                Time    AS created
-            FROM log
-            WHERE ID IN (" . placeholders($logIds) . ")
-            ORDER BY ID DESC
-            ", ...$logIds
+        return $this->decorate(
+            $st->fetchAll(\PDO::FETCH_NUM)
         );
-        return $this->decorate(self::$db->to_array(false, MYSQLI_NUM, false));
     }
 
     public function tgroupLogList($tgroupId): array {
@@ -236,5 +228,37 @@ class SiteLog extends \Gazelle\Base {
             $this->usernames[$username] = $user?->id() ?? false;
         }
         return $this->usernames[$username];
+    }
+
+    /**
+     * Relay records from Mysql to Postgres
+     */
+    public function relay(): int {
+        $total  = 0;
+        $insert = $this->pg()->prepare('
+            insert into site_log
+                (id_site_log, created, note)
+            select "ID",
+                "Time",
+                "Message"
+            FROM relay.log
+            WHERE "ID" > ?
+            ORDER BY "ID"
+            LIMIT 1000
+        ');
+
+        while (true) {
+            $insert->execute([
+                (int)$this->pg()->scalar("
+                    select max(id_site_log) from site_log
+                ")
+            ]);
+            $relayed = $insert->rowCount();
+            if ($relayed === 0) {
+                break;
+            }
+            $total += $relayed;
+        }
+        return $total;
     }
 }

@@ -343,13 +343,14 @@ class TGroupTest extends TestCase {
             'tgroup-music-merge'
         );
 
-        $sitelog = new Manager\SiteLog(new Manager\User());
-        $list = $sitelog->tgroupLogList($this->tgroup->id());
+        $siteLog = new Manager\SiteLog(new Manager\User());
+        $siteLog->relay();
+        $list = $siteLog->tgroupLogList($this->tgroup->id());
         $event = end($list);
         $this->assertStringContainsString("($oldName)", $event['info'], 'tgroup-merge-old-name');
         $this->assertStringContainsString("({$this->tgroup->name()})", $event['info'], 'tgroup-merge-new-name');
 
-        $general = current($sitelog->page(1, 0, ''));
+        $general = current($siteLog->page(1, 0, ''));
         $this->assertEquals(
             "Group <a href=\"torrents.php?id=$oldId\">$oldId</a> deleted following merge to {$this->tgroup->id()}.",
             $general['message'],

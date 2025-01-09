@@ -523,6 +523,9 @@ defined('IP_HISTORY_NEW_INTERVAL') or define('IP_HISTORY_NEW_INTERVAL', 3600 * 2
 // Maximum length of a pathname in torrent files and zip archives.
 defined('MAX_PATH_LEN') or define('MAX_PATH_LEN', 200);
 
+// How far can users crawl the site logs?
+defined('MAX_LOG_DEPTH') or define('MAX_LOG_DEPTH', 10_000);
+
 // How many collages to list on a group page when it appears in many collages.
 defined('COLLAGE_SAMPLE_THRESHOLD') or define('COLLAGE_SAMPLE_THRESHOLD', 4);
 

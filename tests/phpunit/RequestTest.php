@@ -314,8 +314,9 @@ class RequestTest extends TestCase {
         $this->assertEquals($fillBefore['bounty-total'], $this->userList['user']->stats()->requestBountyTotal(), 'request-fill-unfill-total');
         $this->assertFalse($this->request->isFilled(), 'request-unfilled');
 
-        $log = new Manager\SiteLog(new Manager\User());
-        $page = $log->page(2, 0, $this->request->title(), bypassSphinx: true);
+        $siteLog = new Manager\SiteLog(new Manager\User());
+        $siteLog->relay();
+        $page = $siteLog->page(2, 0, $this->request->title());
         $this->assertStringStartsWith(
             "Request <a href=\"{$this->request->url()}\">{$this->request->id()}</a> ({$this->request->title()})",
             $page[0]['message'],
@@ -505,7 +506,7 @@ class RequestTest extends TestCase {
             $this->userList['user'],
             new Manager\Artist(),
         );
-        (new Manager\Tag())->create('classical.era', $this->userList['admin'])->addRequest($this->request);
+        (new Manager\Tag())->softCreate('classical.era', $this->userList['admin'])->addRequest($this->request);
         $this->assertTrue(
             (new User\Bookmark($this->userList['user']))->create('request', $this->request->id()),
             'request-bookmark-add'

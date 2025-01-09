@@ -12,6 +12,9 @@
                     <input type="search" name="search" size="60" value="{{ search }}" />
                     &nbsp;
                     <input type="submit" value="Search log" />
+                    <br />
+                    <br />
+                    Tips on searching: {{ "[[searchfulltext]]" | bb_format }}
                 </td>
             </tr>
         </table>
@@ -23,7 +26,7 @@
         <tr class="colhead">
             <th>Event</th>
             <th>Time</th>
-            <th>{% if search %}Filtering on “{{ search }}”{% endif %}</th>
+            <th>{{ paginator.total|number_format }} entries{% if search %} for “{{ search }}”{% endif %}</th>
         </tr>
 {% if sitelog.error %}
     <tr class="nobr"><td colspan="2">Search request failed ({{ siteLog.errorMessage }}).</td></tr>

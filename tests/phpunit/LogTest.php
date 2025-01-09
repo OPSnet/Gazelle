@@ -33,16 +33,22 @@ class LogTest extends TestCase {
     }
 
     public function testGeneralLog(): void {
+        $siteLog = new Manager\SiteLog(new Manager\User());
+        $this->assertIsInt($siteLog->relay(), 'sitelog-relay-init');
         $logger = new Log();
-        $message = self::PREFIX . "general " . randomString();
+        $message = self::PREFIX . "general torrent 123457890 " . randomString();
         $logger->general($message);
 
-        $sitelog = new Manager\SiteLog(new Manager\User());
-        $this->assertInstanceOf(Manager\SiteLog::class, $sitelog, 'sitelog-manager');
-        $result = $sitelog->page(1, 0, '');
+        $this->assertEquals(1, $siteLog->relay(), 'sitelog-relay-update');
+
+        $result = $siteLog->page(1, 0, '');
         $latest = current($result);
         $this->assertEquals(['id', 'class', 'message', 'created'], array_keys($latest), 'sitelog-latest-keys');
-        $this->assertEquals($message, $latest['message'], 'sitelog-latest-message');
+        $this->assertStringContainsString(
+            '<a href="torrents.php?torrentid=123457890">123457890</a>',
+            $latest['message'],
+            'sitelog-latest-decorated'
+        );
         $this->assertFalse($latest['class'], 'sitelog-latest-decorated');
     }
 
@@ -58,9 +64,9 @@ class LogTest extends TestCase {
         $tgroupId = $this->tgroup->id();
         $logger->group($this->tgroup, $this->user, self::PREFIX . "group first " . randomString());
 
-        $sitelog = new Manager\SiteLog(new Manager\User());
-        $this->assertCount(2, $sitelog->tgroupLogList($tgroupId), 'grouplog-intial');
-        $result = $sitelog->tgroupLogList($tgroupId);
+        $siteLog = new Manager\SiteLog(new Manager\User());
+        $this->assertCount(2, $siteLog->tgroupLogList($tgroupId), 'grouplog-intial');
+        $result = $siteLog->tgroupLogList($tgroupId);
         $latest = current($result);
         $this->assertEquals(
             ["torrent_id", "user_id", "info", "created", "media", "format", "encoding", "deleted"],
@@ -82,7 +88,7 @@ class LogTest extends TestCase {
 
         $messageList = array_map(
             fn($m) => $m['info'],
-            $sitelog->tgroupLogList($this->tgroupNew->id()),
+            $siteLog->tgroupLogList($this->tgroupNew->id()),
         );
 
         $this->assertStringStartsWith(self::PREFIX . 'group merge ', $messageList[0], 'grouplog-merge-line-0');
@@ -108,11 +114,11 @@ class LogTest extends TestCase {
         );
         $logger->torrent($torrent, $this->user, self::PREFIX . "torrent " . randomString());
 
-        $sitelog = new Manager\SiteLog(new Manager\User());
-        $this->assertCount(2, $sitelog->tgroupLogList($this->tgroup->id()), 'torrentlog-has-log');
+        $siteLog = new Manager\SiteLog(new Manager\User());
+        $this->assertCount(2, $siteLog->tgroupLogList($this->tgroup->id()), 'torrentlog-has-log');
 
         $torrent->remove($this->user, 'phpunit log delete');
-        $result = $sitelog->tgroupLogList($this->tgroup->id());
+        $result = $siteLog->tgroupLogList($this->tgroup->id());
         $latest = current($result);
         $this->assertEquals(1, $latest['deleted'], 'torrentlog-latest-is-deleted');
         $this->assertEquals($torrent->id(), $latest['torrent_id'], 'torrentlog-latest-torrent-id');
@@ -123,10 +129,11 @@ class LogTest extends TestCase {
         $message = self::PREFIX . "general " . randomString();
         (new Log())->general($message);
 
-        $sitelog   = new Manager\SiteLog(new Manager\User());
+        $siteLog   = new Manager\SiteLog(new Manager\User());
+        $siteLog->relay();
         $paginator = new Util\Paginator(LOG_ENTRIES_PER_PAGE, 1);
-        $page      = $sitelog->page($paginator->page(), $paginator->offset(), '');
-        $paginator->setTotal($sitelog->totalMatches());
+        $page      = $siteLog->page($paginator->page(), $paginator->offset(), '');
+        $paginator->setTotal($siteLog->total(''));
 
         // FIXME: $Viewer should not be necessary
         $this->user = \GazelleUnitTest\Helper::makeUser('sitelog.' . randomString(6), 'sitelog');
