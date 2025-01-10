@@ -1,7 +1,7 @@
 FROM debian:bookworm-slim
 
-ENV SPHINX_VERSION 2.2.11
-ENV SPHINX_FULL_STRING ${SPHINX_VERSION}-release
+ENV SPHINX_VERSION=2.2.11
+ENV SPHINX_FULL_STRING=${SPHINX_VERSION}-release
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         cron \
