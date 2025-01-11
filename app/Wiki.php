@@ -47,11 +47,6 @@ class Wiki extends BaseObject {
                 explode(',', $info['aliases']),
                 array_map('intval', explode(',', $info['users']))
             );
-            $saveToc = \Text::$TOC;
-            \Text::$TOC = true;
-            \Text::full_format($info['body'], false);
-            $info['toc'] = \Text::parse_toc(0);
-            \Text::$TOC = $saveToc;
             self::$cache->cache_value($key, $info, 0);
         }
         $this->info = $info;
@@ -112,7 +107,16 @@ class Wiki extends BaseObject {
 
     // phpcs:disable PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function ToC(): string {
-        return $this->info()['toc'] ?? '';
+        if (!isset($this->info['toc'])) {
+            $saveToc = \Text::$TOC;
+            \Text::$TOC = true;
+            \Text::full_format($this->info()['body'], false);
+            $this->info['toc'] = \Text::parse_toc(0);
+            \Text::$TOC = $saveToc;
+            $key = sprintf(self::CACHE_KEY, $this->id);
+            self::$cache->cache_value($key, $this->info, 0);
+        }
+        return $this->info['toc'];
     }
 
     // phpcs:enable

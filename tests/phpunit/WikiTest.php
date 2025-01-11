@@ -77,6 +77,43 @@ class WikiTest extends TestCase {
         $this->assertEquals(1, $article->remove(), 'wiki-remove-open');
     }
 
+    public function testBBCodeWiki(): void {
+        $manager = new Manager\Wiki();
+        $title   = 'phpunit bbwiki ' . randomString(6);
+        $alias   = Wiki::normalizeAlias($title);
+        $this->userList['user'] = \GazelleUnitTest\Helper::makeUser('wiki.' . randomString(6), 'text');
+        $article = $manager->create(
+            $title,
+            'wiki bbcode body',
+            $this->userList['user']->privilege()->effectiveClassLevel(),
+            $this->userList['user']->privilege()->effectiveClassLevel(),
+            $this->userList['user'],
+        );
+        $this->articleList[] = $article;
+        \Text::setViewer($this->userList['user']);
+
+        $this->assertEquals(
+            "<a href=\"wiki.php\">Wiki</a> › <a href=\"wiki.php?action=article&amp;id={$article->id()}\">$title</a>",
+            \Text::full_format(SITE_URL . "/wiki.php?action=article&name=$alias"),
+            'text-wiki-name-location',
+        );
+        $this->assertEquals(
+            "<a href=\"wiki.php\">Wiki</a> › <a href=\"wiki.php?action=article&amp;id={$article->id()}\">$title</a>",
+            \Text::full_format("{$article->publicLocation()}"),
+            'text-wiki-id-location',
+        );
+        $this->assertEquals(
+            "<a href=\"wiki.php\">Wiki</a> › <a href=\"wiki.php?action=article&amp;id={$article->id()}\">$title</a>",
+            \Text::full_format("[[{$alias}]]"),
+            'wiki-bbcode-alias'
+        );
+        $this->assertEquals(
+            "<a href=\"wiki.php\">Wiki</a> › [[x$alias ???]]",
+            \Text::full_format("[[x$alias]]"),
+            'wiki-bbcode-bad-alias'
+        );
+    }
+
     public function testWikiAlias(): void {
         $manager = new Manager\Wiki();
         $title   = 'phpunit title ' . randomString(6);
@@ -278,5 +315,19 @@ class WikiTest extends TestCase {
             $access,
             'wiki-access-edit-above'
         );
+    }
+
+    public function testWikiSelfrefRegression(): void {
+        $manager = new Manager\Wiki();
+        $title   = 'phpunit title ' . randomString(6);
+        $article = $manager->create(
+            $title,
+            'wiki body',
+            $this->userList['user']->privilege()->effectiveClassLevel(),
+            $this->userList['user']->privilege()->effectiveClassLevel(),
+            $this->userList['admin']
+        );
+        $article->setField('Body', 'stuff ' . $article->publicLocation() . ' stuff')->modify();
+        $this->assertStringContainsString($article->location(), $article->body(), 'wiki-reg-selfref');
     }
 }

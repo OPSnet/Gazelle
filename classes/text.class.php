@@ -450,6 +450,7 @@ class Text {
         $StrLC = strtolower($Str);
         $ListId = 1;
         $MaxAttribs = 0;
+        $wikiMan = new \Gazelle\Manager\Wiki();
 
         while ($i < $Len) {
             $Block = '';
@@ -476,8 +477,10 @@ class Text {
             // 2) See if it's a [[wiki-link]] or an ordinary tag, and get the tag name
             if (!empty($Tag[4][0])) { // Wiki-link
                 $WikiLink = true;
-                $TagName = substr($Tag[4][0], 2, -2);
-                $Attrib = '';
+                $alias = substr($Tag[4][0], 2, -2);
+                $article = $wikiMan->findByAlias($alias);
+                $TagName = urlencode($alias);
+                $Attrib = ($article instanceof \Gazelle\Wiki) ? $article : urlencode($alias);
             } else { // 3) If it's not a wiki link:
                 $WikiLink = false;
                 $TagName = strtolower(substr($Tag[2][0], 1));
@@ -541,7 +544,7 @@ class Text {
                 $i += $CloseTag; // 5d) Move the pointer past the end of the [/close] tag.
             } elseif ($WikiLink == true || $TagName == 'n') {
                 // Don't need to do anything - empty tag with no closing
-            } elseif ($TagName[0] === '*' || $TagName[0] === '#') {
+            } elseif (in_array($TagName, ['*', '#'])) {
                 // We're in a list. Find where it ends
                 $NewLine = $i;
                 do { // Look for \n[*]
@@ -677,7 +680,11 @@ class Text {
                     $Array[$ArrayPos] = ['Type' => $TagName, 'Attr' => $Attrib, 'Val' => self::parse($Block)];
                     break;
                 case 'quote':
-                    $Array[$ArrayPos] = ['Type' => 'quote', 'Attr' => self::parse($Attrib), 'Val' => self::parse($Block)];
+                    $Array[$ArrayPos] = [
+                        'Type' => 'quote',
+                        'Attr' => is_object($Attrib) ? $Attrib : self::parse($Attrib),
+                        'Val'  => self::parse($Block),
+                    ];
                     break;
                 case 'url':
                     $Array[$ArrayPos] = ['Type' => 'img', 'Attr' => $Attrib, 'Val' => $Block];
@@ -699,7 +706,7 @@ class Text {
                     $Array[$ArrayPos]['ListType'] = $TagName[0] === '*' ? 'ul' : 'ol';
                     $Array[$ArrayPos]['Tag'] = $TagName;
                     $ChildPrefix = $ListPrefix === '' ? $ListId : $ListPrefix;
-                    if ($Attrib !== '') {
+                    if ($Attrib !== '' && !is_object($Attrib)) {
                         $ChildPrefix = $Attrib;
                     }
                     foreach ($Array[$ArrayPos]['Val'] as $Key => $Val) {
@@ -718,11 +725,15 @@ class Text {
                     break;
                 default:
                     if ($WikiLink == true) {
-                        $Array[$ArrayPos] = ['Type' => 'wiki','Val' => $TagName];
+                        $Array[$ArrayPos] = [
+                            'Type' => 'wiki',
+                            'Val'  => $TagName,
+                            'Attr' => $Attrib,
+                        ];
                     } else {
                         // Basic tags, like [b] or [size=5]
                         $Array[$ArrayPos] = ['Type' => $TagName, 'Val' => self::parse($Block)];
-                        if (!empty($Attrib) && $MaxAttribs > 0) {
+                        if (!is_object($Attrib) && $MaxAttribs > 0) {
                             $Array[$ArrayPos]['Attr'] = strtolower($Attrib);
                         }
                     }
@@ -909,8 +920,11 @@ class Text {
                         break;
 
                     case 'wiki':
-                        $Str .= '<a href="wiki.php">Wiki</a> › <a href="wiki.php?action=article&amp;name='
-                            . urlencode($Block['Val']) . '">' . $Block['Val'] . '</a>';
+                        $Str .= "<a href=\"wiki.php\">Wiki</a> › "
+                            . ($Block['Attr'] instanceof \Gazelle\Wiki
+                                ? $Block['Attr']->link()
+                                : "[[{$Block['Attr']} ???]]"
+                            );
                         break;
                     case 'tex':
                         $Str .= '<katex>' . $Block['Val'] . '</katex>';
