@@ -40,7 +40,7 @@ END;
         $this->assertEquals('a', $article->render(['word' => 'consonant']), 'twig-article-a');
         $this->assertEquals('an', $article->render(['word' => 'anticonsonant']), 'twig-article-an');
 
-        $this->assertEquals('YmxvYg==', self::twig('{{ b|b64 }}')->render(['b' => 'blob']), 'twig-b64');
+        $this->assertEquals('YmxvYg', self::twig('{{ b|b64 }}')->render(['b' => 'blob']), 'twig-b64');
 
         // badge_list is weird
 

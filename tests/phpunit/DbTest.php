@@ -75,7 +75,7 @@ class DbTest extends TestCase {
         $this->assertEquals(0, (new DB())->longRunning(), 'db-long-running');
     }
 
-    public function testPg(): void {
+    public function testPgBasic(): void {
         $this->assertInstanceOf(\PDO::class, $this->pg()->pdo(), 'db-pg-pdo');
         $num = random_int(100, 999);
         $this->assertEquals($num, $this->pg()->scalar("select ?", $num), 'db-pg-scalar-int');
@@ -132,6 +132,39 @@ class DbTest extends TestCase {
             ),
             'db-pg-prepared-update'
         );
+    }
+
+    public function testPgStats(): void {
+        $this->pg()->stats()->flush();
+        $this->pg()->prepared_query('select now()');
+        usleep(1000);
+        $this->pg()->prepared_query('select now()');
+        $this->pg()->prepared_query("
+            select now() + ? * '1 day'::interval
+            ", 3
+        );
+
+        $queryList = $this->pg()->stats()->queryList();
+        $this->assertCount(3, $queryList, 'db-pg-query-count');
+        $this->assertGreaterThan(
+            $queryList[0]['epoch'],
+            $queryList[1]['epoch'],
+            'db-pg-stats-epoch'
+        );
+        $last = end($queryList);
+        $this->assertEquals(
+            "select now() + ? * '1 day'::interval",
+            trim($last['query']),
+            'pg-stats-query',
+        );
+        $this->assertEquals([3], $last['args'], 'pg-stats-args');
+        $this->assertEquals(1, $last['metric'], 'pg-stats-metric');
+
+        $this->pg()->stats()->error('computer says no');
+        $errorList = $this->pg()->stats()->errorList();
+        $this->assertCount(1, $errorList, 'db-pg-error-count');
+        $this->assertEquals('computer says no', $errorList[0]['query'], 'db-pg-error-query');
+        $this->assertArrayHasKey('epoch', $errorList[0], 'db-pg-error-epoch');
     }
 
     public function testPgByteaScalar(): void {

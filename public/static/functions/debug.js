@@ -7,7 +7,8 @@ document.addEventListener('DOMContentLoaded', function () {
         ['debug-view-flag',      'debug_flag'],
         ['debug-view-ocelot',    'debug_ocelot'],
         ['debug-view-perf',      'debug_perf'],
-        ['debug-view-query',     'debug_query'],
+        ['debug-view-query-my',  'debug-query-my'],
+        ['debug-view-query-pg',  'debug-query-pg'],
         ['debug-view-sphinxql',  'debug_sphinxql'],
     ];
     elemIdMap.forEach(val => {

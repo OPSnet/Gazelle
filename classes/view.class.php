@@ -2,6 +2,8 @@
 // phpcs:disable PSR1.Methods.CamelCapsMethodName.NotCamelCaps
 
 class View {
+    use \Gazelle\Pg;
+
     /**
      * Display the page header
      * @param array<string> $option
@@ -199,9 +201,8 @@ class View {
             'load'         => sys_getloadavg(),
             'notification' => $notification,
             'memory'       => memory_get_usage(true),
-            'date'         => date('Y-m-d'),
+            'pg'           => self::pgStatic()->stats(),
             'textarea_js'  => Gazelle\Util\Textarea::activate(),
-            'time'         => date('H:i'),
             'time_ms'      => $Debug->duration() * 1000,
             'viewer'       => $Viewer,
             'sphinxql'     => class_exists('Sphinxql') && !empty(\Sphinxql::$Queries)

@@ -2,19 +2,22 @@
 <div id="footer">
 {% if constant('DEBUG_MODE') or viewer.permitted('site_debug') %}
     <div id="site_debug">
-{%-     include 'debug/performance.twig' with {'list': debug.perfInfo} only %}
-{%-     include 'debug/flag.twig' with {'list': debug.markList} only %}
-{%-     include 'debug/error.twig' with {'list': debug.errorList} only %}
-{%-     if sphinxql %}
-        {%- include 'debug/sphinxql.twig' with {'list': sphinxql.list, 'time': sphinxql.time} only %}
-{%-     endif %}
-{%-     include 'debug/query.twig' with {
+{%  include 'debug/performance.twig' with {'list': debug.perfInfo} only %}
+{%  include 'debug/flag.twig' with {'list': debug.markList} only %}
+{%  include 'debug/error.twig' with {'list': debug.errorList} only %}
+{%  if pg %}
+{%      include 'debug/pg.twig' with {'pg': pg} only %}
+{%  endif %}
+{%  include 'debug/mysql.twig' with {
         'list': db.queryList,
         'elapsed': db.elapsed
-        } only
+    } only
 %}
-{%-     include 'debug/cache.twig' with {'cache': cache} only %}
-{%-     include 'debug/ocelot.twig' with {'list': debug.requestList} only %}
+{%  if sphinxql %}
+{%      include 'debug/sphinxql.twig' with {'list': sphinxql.list, 'time': sphinxql.time} only %}
+{%  endif %}
+{%  include 'debug/cache.twig' with {'cache': cache} only %}
+{%  include 'debug/ocelot.twig' with {'list': debug.requestList} only %}
     </div>
 {% endif %}
 
@@ -41,7 +44,7 @@ actions of it.</div>
 <strong>Time:</strong> <span>{{ time_ms|number_format(5) }} ms</span>
 <strong>Used:</strong> <span>{{ memory|octet_size }}</span>
 <strong>Load:</strong> <span>{{ load.0|number_format(2) }} {{ load.1|number_format(2) }} {{ load.2|number_format(2) }}</span>
-<strong>Date:</strong> <span id="site_date">{{ date }}</span> <span id="site_time">{{ time }}</span>
+<strong>Date:</strong> <span id="site_date">{{ 'now'|date('Y-m-d') }}</span> <span id="site_time">{{ 'now'|date('H:i') }}</span>
 </p>
 <p>Site and design &copy; {{ launch }} {{ constant('SITE_NAME') }} | <a href='https://github.com/OPSnet/Gazelle'>Project Gazelle</a></p>
 </div>

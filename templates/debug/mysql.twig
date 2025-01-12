@@ -3,18 +3,20 @@
 {%  if loop.first %}
 <table class="layout" width="100%">
     <tr>
-        <td><strong><a href="#" id="debug-view-query" class="brackets">View</a>
-        {{ list|length|number_format }} {% if list|length == 1 %}Query{% else %}Queries{% endif %}
-        ({{ elapsed|number_format(2) }} ms)</strong> (mean: {{ (elapsed/nr)|number_format(5) }} ms):</td>
+        <td><strong><a href="#" id="debug-view-query-my" class="brackets">View</a>
+        {{ list|length|number_format }} Mysql {% if list|length == 1 %}query{% else %}queries{% endif %}
+        ({{ elapsed|number_format(2) }} ms)</strong> (mean: {{ (elapsed/nr)|number_format(5) }} ms)</td>
     </tr>
 </table>
-<table id="debug_query" class="debug_table hidden">
+<table id="debug-query-my" class="debug_table hidden">
 {%  endif %}
     <tr valign="top">
         <td class="debug_data debug_query_data">{{ q.query|nl2br }}
-        <br /><a class="brackets" href="tools.php?action=db_sandbox&amp;debug={{ q.query|b64 }}">Inspect</a>
+        <br /><a class="brackets" href="tools.php?action=db_sandbox&amp;debug={{
+            {"query": q.query}|json_encode|b64 }}">Inspect</a>
         </td>
-        <td class="rowa debug_info debug_query_time" style="width: 130px;">{{ q.elapsed|number_format(5) }} ms</td>
+        <td class="rowa debug_info debug_query_time" style="width: 130px;">{{
+            q.elapsed|number_format(5) }} ms</td>
 {%      for w in q.warning %}
 {%          if loop.first %}
     </tr>

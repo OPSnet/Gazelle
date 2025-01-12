@@ -1,0 +1,55 @@
+{% set nr = pg.queryList|length %}
+{% for q in pg.queryList %}
+{%  if loop.first %}
+<table class="layout" width="100%">
+    <tr>
+        <td colspan="3"><strong><a href="#" id="debug-view-query-pg" class="brackets">View</a>
+        {{ pg.queryList|length|number_format }} Postgresql {% if pg.queryList|length == 1 %}query{% else %}queries{% endif %}
+        ({{ pg.totalDuration|number_format(2) }} ms)</strong> (mean: {{ (pg.totalDuration/nr)|number_format(5) }} ms)</td>
+    </tr>
+</table>
+<table id="debug-query-pg" class="debug_table hidden">
+{%  endif %}
+{%  if loop.first %}
+    <tr class="colhead">
+        <td>Query</td>
+        <td>Metric</td>
+        <td>Duration</td>
+    </tr>
+{%  endif %}
+    <tr valign="top" class="row{{ cycle(['a', 'b'], loop.index0) }}">
+        <td class="debug_data debug_query_data"><pre>{{ q.query|nl2br }}
+{%  if q.args|length %}
+        -- {{ q.args|join(', ') }}
+{%  endif %}
+        </pre>
+        <br /><a class="brackets" href="tools.php?action=db_sandbox&amp;src=pg&amp;debug={{
+            {"query": q.query, "args": q.args}|json_encode|b64 }}">Inspect</a>
+        </td>
+        <td class="debug_info style="width: 130px;">{{ q.metric }}</td>
+        <td class="debug_info debug_query_time" style="width: 130px;">{{ q.duration|number_format(5) }} ms</td>
+    </tr>
+{%  if loop.last %}
+</table>
+{%  endif %}
+{% endfor %}
+{% for e in pg.errorLig %}
+{%  if loop.first %}
+<table class="layout" width="100%">
+    <tr>
+        <td colspan="3"><strong><a href="#" id="debug-view-query" class="brackets">View</a>
+        {{ pg.queryList|length|number_format }} Postgresql error{{ pg.queryList|length|plural }}</strong></td>
+    </tr>
+</table>
+<table id="debug-query-pg" class="debug_table hidden">
+    <tr class="colhead">
+        <td>Error</td>
+    </tr>
+{%  endif %}
+    <tr valign="top" class="row{{ cycle(['a', 'b'], loop.index0) }}">
+        <td class="debug_data debug_query_data"><pre>{{ q.query|nl2br }}</td>
+    </tr>
+{%  if loop.last %}
+</table>
+{%  endif %}
+{% endfor %}

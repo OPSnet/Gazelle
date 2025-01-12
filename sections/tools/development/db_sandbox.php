@@ -3,14 +3,24 @@
 /** @phpstan-var \Twig\Environment $Twig */
 
 use Gazelle\Enum\SourceDB;
+use Gazelle\Util\Text;
 
 if (!$Viewer->permitted('admin_site_debug')) {
     error(403);
 }
 
+$src = ($_REQUEST['src'] ?? SourceDB::mysql->value) == SourceDB::mysql->value
+    ? SourceDB::mysql
+    : SourceDB::postgres;
+
 $execute = false;
+
 if (isset($_GET['debug'])) {
-    $query = html_entity_decode(base64_decode($_GET['debug']));
+    $data = json_decode(Text::base64UrlDecode($_GET['debug']), true);
+    $query = trim($data['query']);
+    if ($src === SourceDB::postgres && !empty($data['args'])) {
+        $query .= "\n-- " . implode(', ', $data['args']);
+    }
     $textAreaRows = max(8, substr_count($query, "\n") + 2);
 } elseif (isset($_GET['table'])) {
     $query = (new Gazelle\DB())->selectQuery($_GET['table']);
@@ -27,9 +37,6 @@ if (isset($_GET['debug'])) {
     $textAreaRows = 8;
 }
 
-$src = ($_REQUEST['src'] ?? SourceDB::mysql->value) == SourceDB::mysql->value
-    ? SourceDB::mysql
-    : SourceDB::postgres;
 $error  = false;
 $result = [];
 if ($execute) {

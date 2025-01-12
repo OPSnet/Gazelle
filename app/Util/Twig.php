@@ -56,7 +56,7 @@ class Twig {
 
         $twig->addFilter(new \Twig\TwigFilter(
             'b64',
-            fn(string $binary) => base64_encode($binary)
+            fn(string $data) => \Gazelle\Util\Text::base64UrlEncode($data)
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(

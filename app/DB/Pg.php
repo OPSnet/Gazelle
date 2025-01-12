@@ -2,15 +2,23 @@
 
 namespace Gazelle\DB;
 
+use Gazelle\DB\Pg\Stats;
+
 class Pg {
-    protected \PDO $pdo;
+    protected \PDO  $pdo;
+    protected Stats $stats;
 
     public function __construct(#[\SensitiveParameter] string $dsn) {
-        $this->pdo = new \PDO($dsn);
+        $this->pdo   = new \PDO($dsn);
+        $this->stats = new Stats();
     }
 
     public function pdo(): \PDO {
         return $this->pdo;
+    }
+
+    public function stats(): Stats {
+        return $this->stats;
     }
 
     public function prepare(string $query): \PDOStatement {
@@ -19,19 +27,29 @@ class Pg {
 
     // phpcs:disable PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function prepared_query(string $query, ...$args): int {
+        $begin = microtime(true);
         $st = $this->prepare($query);
         if ($st->execute([...$args])) {
-            return $st->rowCount();
-        } else {
-            return 0;
+            $rowCount = $st->rowCount();
+            $this->stats->register($query, $rowCount, $begin, [...$args]);
+            return $rowCount;
         }
+        $this->stats->error($query);
+        return 0;
     }
 
     // phpcs:enable
 
     public function insert(string $query, ...$args): int {
+        $begin = microtime(true);
         $st = $this->prepare($query);
-        return $st->execute([...$args]) ? (int)$this->pdo->lastInsertId() : 0;
+        if ($st->execute([...$args])) {
+            $id = (int)$this->pdo->lastInsertId();
+            $this->stats->register($query, $id, $begin, [...$args]);
+            return $id;
+        }
+        $this->stats->error($query);
+        return 0;
     }
 
     /**
@@ -42,6 +60,7 @@ class Pg {
             return false;
         }
         static $delimiter = "\t", $nullAs = '\\N';
+        $begin = microtime(true);
         $processedRows = [];
         foreach ($rows as $row) {
             $vals = [];
@@ -49,7 +68,11 @@ class Pg {
                 if (is_null($val)) {
                     $vals[] = $nullAs;
                 } elseif (is_string($val)) {
-                    $vals[] = str_replace(["\\", "\n", "\r", $delimiter], ["\\\\", "\\\n", "\\\r", "\\" . $delimiter], $val);
+                    $vals[] = str_replace(
+                        ["\\",   "\n",   "\r",   $delimiter],
+                        ["\\\\", "\\\n", "\\\r", "\\" . $delimiter],
+                        $val
+                    );
                 } elseif (is_bool($val)) {
                     $vals[] = $val ? 't' : 'f';
                 } elseif (is_int($val) || is_float($val)) {
@@ -60,16 +83,31 @@ class Pg {
             }
             $processedRows[] = implode($delimiter, $vals);
         }
-        return $this->pdo->pgsqlCopyFromArray($table, $processedRows, $delimiter, addslashes($nullAs), implode(',', $colList));
+        $success = $this->pdo->pgsqlCopyFromArray(
+            $table,
+            $processedRows,
+            $delimiter,
+            addslashes($nullAs),
+            implode(',', $colList)
+        );
+        $this->stats->register("copy $table", count($processedRows), $begin, $colList);
+        return $success;
     }
 
     /**
      * Perform an insert or update and return the RETURNING clause
      * Returns `false` if the execute() failed
      */
-    public function writeReturning(string $query, ...$args): bool|int|string|float {
+    public function writeReturning(string $query, ...$args): int|string|float|false {
+        $begin = microtime(true);
         $st = $this->prepare($query);
-        return $st->execute([...$args]) ? $st->fetch(\PDO::FETCH_NUM)[0] : false;
+        if ($st->execute([...$args])) {
+            $result = $st->fetch(\PDO::FETCH_NUM)[0];
+            $this->stats->register($query, (int)$result, $begin, [...$args]);
+            return $result;
+        }
+        $this->stats->error($query);
+        return false;
     }
 
     /**
@@ -77,31 +115,44 @@ class Pg {
      * when there is more than one item returned
      */
     public function writeReturningRow(string $query, ...$args): array {
+        $begin = microtime(true);
         $st = $this->prepare($query);
-        return $st->execute([...$args]) ? $st->fetch(\PDO::FETCH_NUM) : [];
+        if ($st->execute([...$args])) {
+            $row = $st->fetch(\PDO::FETCH_NUM);
+            $this->stats->register($query, count($row), $begin, [...$args]);
+            return $row;
+        }
+        $this->stats->error($query);
+        return [];
     }
 
     protected function fetchRow(string $query, int $mode, ...$args): array {
+        $begin = microtime(true);
         $st = $this->pdo->prepare($query);
         if ($st !== false && $st->execute([...$args])) {
-            $result = $st->fetch($mode);
-            if ($result) {
-                return $result;
+            $row = $st->fetch($mode);
+            if ($row) {
+                $this->stats->register($query, count($row), $begin, [...$args]);
+                return $row;
             }
         }
+        $this->stats->error($query);
         return [];
     }
 
     public function scalar(string $query, ...$args): mixed {
+        $begin = microtime(true);
         $st = $this->pdo->prepare($query);
         if ($st !== false && $st->execute([...$args])) {
             $result = $st->fetch(\PDO::FETCH_NUM);
             if ($result) {
+                $this->stats->register($query, 0, $begin, [...$args]);
                 return $st->getColumnMeta(0)['native_type'] == 'bytea' /** @phpstan-ignore-line */
                     ? stream_get_contents($result[0])
                     : $result[0];
             }
         }
+        $this->stats->error($query);
         return null;
     }
 
@@ -114,8 +165,10 @@ class Pg {
     }
 
     public function all(string $query, ...$args): array {
+        $begin = microtime(true);
         $st = $this->pdo->prepare($query);
-        if (!$st->execute([...$args])) {
+        if ($st === false or !$st->execute([...$args])) {
+            $this->stats->error($query);
             return [];
         }
         // If any columns are of datatype bytea then we get the contents
@@ -130,7 +183,9 @@ class Pg {
             }
         }
         if (!$needStream) {
-            return $st->fetchAll(\PDO::FETCH_ASSOC);
+            $result = $st->fetchAll(\PDO::FETCH_ASSOC);
+            $this->stats->register($query, count($result), $begin, [...$args]);
+            return $result;
         }
         $result = [];
         foreach ($st->fetchAll(\PDO::FETCH_ASSOC) as $row) {
@@ -139,6 +194,7 @@ class Pg {
             }
             $result[] = $row;
         }
+        $this->stats->register($query, count($result), $begin, [...$args]);
         return $result;
     }
 
@@ -151,11 +207,15 @@ class Pg {
     }
 
     public function column(string $query, ...$args): array {
+        $begin = microtime(true);
         $st = $this->pdo->prepare($query);
-        if (!$st->execute([...$args])) {
+        if ($st === false or !$st->execute([...$args])) {
+            $this->stats->error($query);
             return [];
         }
-        return $st->fetchAll(\PDO::FETCH_COLUMN);
+        $result = $st->fetchAll(\PDO::FETCH_COLUMN);
+        $this->stats->register($query, count($result), $begin, [...$args]);
+        return $result;
     }
 
     public function checkpointInfo(): array {
