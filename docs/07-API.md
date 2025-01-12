@@ -1356,7 +1356,7 @@ Must use either API token or `$_POST['authkey']`
 }
 ```
 
-## Upload
+### Upload
 
 __NOTE__: Requires using the API token
 
@@ -1460,7 +1460,7 @@ __NOTE__: If `private` or `source` is `false`, then you will need to [download](
 
 __NOTE__: If the provided `requestid` is invalid, then `fillRequest` in the response will have a key `error` that will designate what went wrong.
 
-## Download
+### Download
 
 __NOTE__: Requires using the API token
 
