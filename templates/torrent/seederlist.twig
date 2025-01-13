@@ -1,60 +1,62 @@
 {% from 'macro/paginator.twig' import pager %}
 {% set result %}
-{% for peer in list %}
-    {% if loop.first %}
+{%  for peer in list %}
+{%      if loop.first %}
 <h4>List of Peers</h4>
-{% set linkbox %}
+{%          set linkbox %}
 <div class="linkbox">{{ pager('show_seeders', torrent_id, paginator.page, paginator.pages)|raw }}</div>
-{% endset %}
+{%          endset %}
 {{ linkbox|raw }}
 <table>
     <tr class="colhead_dark" style="font-weight: bold;">
         <td>User</td>
         <td>Active</td>
         <td class="number_column">Up (this session)</td>
+        <td class="number_column">Down (this session)</td>
         <td class="number_column">Available %</td>
         <td>IP Address</td>
         <td>Useragent</td>
-        {% if is_admin %}
+{%          if is_admin %}
         <td><img src="{{ url_stem|raw }}leechers.png" class="tooltip" alt="Downloaded?" title="Downloaded?" /></td>
         <td><img src="{{ url_stem|raw }}snatched.png" class="tooltip" alt="Snatched?" title="Snatched?" /></td>
-        {% endif %}
+{%          endif %}
     </tr>
-    {% endif %}
+{%      endif %}
     <tr>
-    {% if is_admin or peer.user_id == user_id %}
+{%      if is_admin or peer.user_id == user_id %}
         <td>{{ peer.user_id|user_url }}</td>
-    {% else %}
+{%      else %}
         <td>Peer</td>
-    {% endif %}
+{%      endif %}
         <td>{% if peer.active %}<span style="color: green;">Yes</span>{% else %}<span style="color: red;">No</span>{% endif %}</td>
         <td class="number_column">{{ peer.uploaded|octet_size }}</td>
+        <td class="number_column">{{ peer.downloaded|octet_size }}</td>
         <td class="number_column">{{ ((peer.size - peer.remaining) / peer.size * 100)|number_format(2) }}</td>
-    {% if peer.user_id == user_id %}
-        {% if peer.seedbox %}
-        <td title="IP: {{  peer.ipv4addr }}, Useragent: {{  peer.useragent }}" colspan="2">Seedbox: <b>{{  peer.seedbox }}</b></td>
-        {% else %}
-        <td>&mdash;</td>
-        <td>{{ peer.useragent }}</td>
-        {% endif %}
-    {% elseif is_admin %}
+{%      if peer.user_id == user_id %}
+{%          if peer.seedbox %}
+        <td title="IP: {{ peer.ipv4addr }}, Useragent: {{ peer.useragent }}" colspan="2">Seedbox: <b>{{ peer.seedbox }}</b></td>
+{%          else %}
         <td>{{ peer.ipv4addr }}</td>
         <td>{{ peer.useragent }}</td>
-    {% else %}
-        <td>&mdash;</td>
+{%          endif %}
+{%      elseif is_admin %}
+        <td>{{ peer.ipv4addr }}</td>
         <td>{{ peer.useragent }}</td>
-    {% endif %}
-    {% if is_admin %}
+{%      else %}
+        <td>—</td>
+        <td>{{ peer.useragent }}</td>
+{%      endif %}
+{%      if is_admin %}
         <td>{% if peer.is_download %}<span class="tooltip" title="Downloaded!" style="color: #f57c00">★</span>{% else %}&nbsp;{% endif %}</td>
         <td>{% if peer.is_snatched %}<span class="tooltip" title="Snatched!" style="color: #388e3c">★</span>{% else %}&nbsp;{% endif %}</td>
-    {% endif %}
+{%      endif %}
     </tr>
-    {% if loop.last %}
+{%      if loop.last %}
 </table>
 {{ linkbox|raw }}
-    {% endif %}
-{% else %}
+{%      endif %}
+{%  else %}
 <div style="text-align: center">No current peers</div>
-{% endfor %}
+{%  endfor %}
 {% endset %}
 {{ {'page': paginator.page, 'pages': paginator.pages, 'debug': list, 'html': result}|json_encode|raw }}
