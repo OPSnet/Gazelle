@@ -1,5 +1,6 @@
 {% from 'macro/torrent.twig' import freeleech %}
-{{ header('Feature an Album') }}
+{% from 'macro/admin.twig' import news_pitch %}
+{{ header('Feature an Album', {'js': 'admin'}) }}
 <div class="header">
     <h2>Feature an Album</h2>
 </div>
@@ -45,6 +46,8 @@ The current Showcase is {{ current.showcase.tgroup.link|raw }}
         {{ body.emit|raw }}
         <br /><br />
         {{ freeleech(size, unit, leech_type, leech_reason) }}
+        {{ news_pitch() }}
+        <br />
         <input type="submit" name="submit" value="Feature" class="submit" />
     </div>
 </form>

@@ -8,12 +8,25 @@ class News extends \Gazelle\Base {
     /**
      * Create a news article
      */
-    public function create(\Gazelle\User $user, string $title, string $body): int {
+    public function create(
+        \Gazelle\User  $user,
+        string         $title,
+        string         $body,
+        string         $pitch,
+        \Gazelle\Forum $forum,
+        ForumThread    $threadMan,
+    ): int {
+        $body   = trim($body);
+        $title  = trim($title);
+        $pitch  = trim($pitch);
+        $thread = $threadMan->create($forum, $user, $title, $body);
+
+        $body .= "\n\n[url=/forums.php?action=viewthread&threadid={$thread->id()}]{$pitch}[/url]";
         self::$db->prepared_query("
             INSERT INTO news
                    (UserID, Title, Body)
             VALUES (?,      ?,     ?)
-            ", $user->id(), trim($title), trim($body)
+            ", $user->id(), $title, $body
         );
         $id = self::$db->inserted_id();
         self::$cache->delete_multi(['feed_news', self::CACHE_KEY]);
@@ -30,18 +43,6 @@ class News extends \Gazelle\Base {
                 Body = ?
             WHERE ID = ?
             ", trim($title), trim($body), $id
-        );
-        self::$cache->delete_multi(['feed_news', self::CACHE_KEY]);
-        return self::$db->affected_rows();
-    }
-
-    /**
-     * Remove an existing news article
-     */
-    public function remove(int $id): int {
-        self::$db->prepared_query("
-            DELETE FROM news WHERE ID = ?
-            ", $id
         );
         self::$cache->delete_multi(['feed_news', self::CACHE_KEY]);
         return self::$db->affected_rows();
@@ -117,5 +118,17 @@ class News extends \Gazelle\Base {
     public function latestEpoch(): int {
         $latest = $this->headlines();
         return isset($latest['created']) ? (int)strtotime($latest['created']) : 0;
+    }
+
+    /**
+     * Remove an existing news article
+     */
+    public function remove(int $id): int {
+        self::$db->prepared_query("
+            DELETE FROM news WHERE ID = ?
+            ", $id
+        );
+        self::$cache->delete_multi(['feed_news', self::CACHE_KEY]);
+        return self::$db->affected_rows();
     }
 }

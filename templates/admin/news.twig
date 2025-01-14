@@ -1,4 +1,5 @@
-{{ header('Manage news', {'js': 'bbcode,news_ajax'}) }}
+{% from 'macro/admin.twig' import news_pitch %}
+{{ header('Manage news', {'js': 'admin,bbcode,news_ajax'}) }}
 <div class="thin">
     <div class="header">
         <h2>{% if create %}Create a{% else %}edit{% endif %} news post</h2>
@@ -11,20 +12,22 @@
             <input type="hidden" name="id" value="{{ id }}" />
 {% endif %}
             <h3>Title</h3>
-            <input type="text" name="title" size="95" value="{{ title }}" />
+            <input type="text" name="title" size="72" value="{{ title }}" />
             <br />
             <h3>Body</h3>
-                {{ body.preview|raw }}
-                {{ body.field|raw }}
-            <div class="center">
-                {{ body.button|raw }}
-                <input type="submit" value="{% if create %}Create{% else %}Edit{% endif %} news post" />
-            </div>
+            {{ body.preview|raw }}
+            {{ body.field|raw }}
+            {{ body.button|raw }}
+            {{ news_pitch() }}
+            <br />
+            <input type="submit" value="{% if create %}Create{% else %}Edit{% endif %} news post" />
         </div>
     </form>
 {% if create %}
+{%  for article in list %}
+{%      if loop.first %}
     <h2>News archive</h2>
-    {% for article in list %}
+{%      endif %}
     <div class="box vertical_space news_post">
         <div class="head">
             <strong>{{ article.title }}</strong> - posted {{ article.created|time_diff }}
@@ -33,13 +36,15 @@
         </div>
         <div class="pad">{{ article.body|bb_format }}</div>
     </div>
-    {% endfor %}
+{%      if loop.last and loop.index > 0 %}
     <div id="more_news" class="box">
         <div class="head">
             {{- dom.click('#more-news-loader', "news_ajax(3, 1, authkey); return false;") -}}
             <em><span id="more-news-loader">Click to load more news.</span></em>
         </div>
     </div>
+{%      endif %}
+{%  endfor %}
 {% endif %}
 </div>
 {{ footer() }}

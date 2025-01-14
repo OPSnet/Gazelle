@@ -68,25 +68,23 @@ if (isset($_POST['groupid'])) {
         news:        new Gazelle\Manager\News(),
         tgMan:       $tgMan,
         torMan:      $torMan,
+        threadMan:   new Gazelle\Manager\ForumThread(),
         tracker:     new Gazelle\Tracker(),
         tgroup:      $tgroup,
-        forumThread: (new Gazelle\Manager\ForumThread())->create(
-            forum: new Gazelle\Forum($featureType->forumId()),
-            user:  $Viewer,
-            title: $tgroup->text(),
-            body:  trim($_POST['body']),
-        ),
-        leechType: $leechType,
-        threshold: $threshold,
-        title:     $title,
-        user:      $Viewer,
+        forum:       new Gazelle\Forum($featureType->forumId()),
+        leechType:   $leechType,
+        threshold:   $threshold,
+        title:       $title,
+        body:        $_POST['body'],
+        pitch:       trim($_POST['pitch'] ?? '') ?: 'Discuss this post',
+        user:        $Viewer,
     );
 
     header("Location: " . $featuredAlbum->location());
     exit;
 }
 
-echo  $Twig->render('tgroup/feature.twig', [
+echo  $Twig->render('admin/feature-album.twig', [
     'body'         => new Gazelle\Util\Textarea('body', '', 80, 20),
     'current'      => [
         'aotm'     => $manager->findByType(FeaturedAlbumType::AlbumOfTheMonth),

@@ -6,13 +6,15 @@ use PHPUnit\Framework\TestCase;
 
 class NewsTest extends TestCase {
     protected array $userList;
-    protected int $news;
+    protected int   $news;
+    protected Forum $forum;
 
     public function setUp(): void {
         $this->userList = [
             \GazelleUnitTest\Helper::makeUser('news.' . randomString(10), 'news'),
             \GazelleUnitTest\Helper::makeUser('news.' . randomString(10), 'news'),
         ];
+        $this->forum = (new Manager\Forum())->findById(ANNOUNCEMENT_FORUM_ID);
     }
 
     public function tearDown(): void {
@@ -20,18 +22,30 @@ class NewsTest extends TestCase {
             (new Manager\News())->remove($this->news);
         }
         foreach ($this->userList as $user) {
+            // note: removing a user removes their forum threads
             $user->remove();
         }
     }
 
     public function testNewsCreate(): void {
-        $manager = new Manager\News();
-        $initial = $manager->headlines();
+        $manager    = new Manager\News();
+        $threadMan  = new Manager\ForumThread();
+        $body       = 'phpunit news body';
+        $title      = 'phpunit news ' . randomString(10);
+        $initial    = $manager->headlines();
         $this->news = $manager->create(
             $this->userList[0],
-            'phpunit news',
-            'phpunit news body',
+            $title,
+            $body,
+            'phpunit discuss me',
+            $this->forum,
+            $threadMan,
         );
+        $thread = $threadMan->findById($this->forum->lastThreadId());
+        $this->assertInstanceOf(ForumThread::class, $thread, 'news-announcement-thread');
+        $this->assertEquals($this->userList[0]->id(), $thread->authorId(), 'news-thread-author-id');
+        $this->assertEquals($body, $thread->body(), 'news-thread-body');
+        $this->assertEquals($title, $thread->title(), 'news-thread-title');
 
         $this->assertEquals(1 + count($initial), count($manager->headlines()), 'news-headlines');
         $this->assertEquals($this->news, $manager->latestId(), 'news-id-latest');
@@ -46,6 +60,9 @@ class NewsTest extends TestCase {
             $this->userList[0],
             'phpunit news witness',
             'phpunit news witness body',
+            'phpunit news discuss',
+            $this->forum,
+            new Manager\ForumThread(),
         );
 
         $witness = new WitnessTable\UserReadNews();
@@ -61,6 +78,9 @@ class NewsTest extends TestCase {
             $this->userList[0],
             $title,
             'phpunit news notif body',
+            'phpunit notif discuss',
+            $this->forum,
+            new Manager\ForumThread(),
         );
 
         $notifier = new User\Notification($this->userList[1]);

@@ -13,17 +13,20 @@ class FeaturedAlbum extends \Gazelle\BaseManager {
      * will automatically be set as neutral leech.
      */
     public function create(
-        FeaturedAlbumType        $featureType,
-        \Gazelle\Manager\News    $news,
-        \Gazelle\Manager\TGroup  $tgMan,
-        \Gazelle\Manager\Torrent $torMan,
-        \Gazelle\Tracker         $tracker,
-        \Gazelle\TGroup          $tgroup,
-        \Gazelle\ForumThread     $forumThread,
-        \Gazelle\User            $user,
-        LeechType                $leechType,
-        string                   $title,
-        int                      $threshold = 0,
+        FeaturedAlbumType $featureType,
+        News              $news,
+        TGroup            $tgMan,
+        Torrent           $torMan,
+        ForumThread       $threadMan,
+        \Gazelle\Forum    $forum,
+        \Gazelle\Tracker  $tracker,
+        \Gazelle\TGroup   $tgroup,
+        \Gazelle\User     $user,
+        LeechType         $leechType,
+        string            $title,
+        string            $body,
+        string            $pitch,
+        int               $threshold = 0,
     ): \Gazelle\FeaturedAlbum {
         self::$db->begin_transaction();
 
@@ -52,6 +55,15 @@ class FeaturedAlbum extends \Gazelle\BaseManager {
             ", $featureType->value
         );
 
+        $news->create(
+            user:      $user,
+            title:     trim($title),
+            body:      trim($body),
+            pitch:     trim($pitch),
+            forum:     $forum,
+            threadMan: $threadMan,
+        );
+
         // create new featured album
         self::$db->prepared_query("
             INSERT INTO featured_albums
@@ -60,7 +72,7 @@ class FeaturedAlbum extends \Gazelle\BaseManager {
             ON DUPLICATE KEY UPDATE
                 Started = now(),
                 Ended = NULL
-            ", $tgroup->id(), $forumThread->id(), $featureType->value
+            ", $tgroup->id(), $forum->lastThreadId(), $featureType->value
         );
         $tgroup->setFreeleech(
             tracker:   $tracker,
@@ -69,12 +81,6 @@ class FeaturedAlbum extends \Gazelle\BaseManager {
             leechType: $leechType,
             reason:    $featureType->leechReason(),
             threshold: $threshold,
-        );
-
-        $news->create(
-            user:  $user,
-            title: trim($title),
-            body:  $forumThread->body() . "\r\n\r\n[url={$forumThread->url()}]Come join the discussion[/url]",
         );
 
         self::$db->commit();

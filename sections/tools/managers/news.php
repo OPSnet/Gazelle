@@ -16,7 +16,15 @@ $id      = false;
 
 switch ($_REQUEST['action']) {
     case 'takenewnews':
-        $newsMan->create($Viewer, $_POST['title'], $_POST['body']);
+        $newsMan->create(
+            $Viewer,
+            $_POST['title'],
+            $_POST['body'],
+            trim($_POST['pitch'] ?? '') ?: 'Discuss this post',
+            (new Gazelle\Manager\Forum())->findById(ANNOUNCEMENT_FORUM_ID),
+            new Gazelle\Manager\ForumThread(),
+
+        );
         $notification = new Notification();
         $notification->push($notification->pushableTokens(Gazelle\Enum\NotificationType::NEWS), $_POST['title'], $_POST['body'], SITE_URL . '/index.php');
         header('Location: index.php');

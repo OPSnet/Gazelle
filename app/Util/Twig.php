@@ -168,12 +168,12 @@ class Twig {
 
         $twig->addFilter(new \Twig\TwigFilter(
             'user_url',
-            fn($userId) => new \Twig\Markup(\Users::format_username($userId, false, false, false), 'UTF-8')
+            fn($userId) => new \Twig\Markup(\Users::format_username((int)$userId, false, false, false), 'UTF-8')
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
             'user_full',
-            fn($userId) => new \Twig\Markup(\Users::format_username($userId, true, true, true, true), 'UTF-8')
+            fn($userId) => new \Twig\Markup(\Users::format_username((int)$userId, true, true, true, true), 'UTF-8')
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(

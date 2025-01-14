@@ -9,7 +9,6 @@ use Gazelle\Enum\LeechReason;
 
 class FeaturedAlbumTest extends TestCase {
     protected TGroup      $tgroup;
-    protected ForumThread $thread;
     protected User        $user;
 
     public function setUp(): void {
@@ -19,12 +18,6 @@ class FeaturedAlbumTest extends TestCase {
             artistName: [[ARTIST_MAIN], ['DJ Feature ' . randomString(12)]],
             tagName:    ['opera'],
             user:       $this->user,
-        );
-        $this->thread = (new Manager\ForumThread())->create(
-            new Forum(AOTM_FORUM_ID),
-            $this->user,
-            'phpunit aotm ' . $this->tgroup->text(),
-            'this is an aotm thread'
         );
     }
 
@@ -38,7 +31,6 @@ class FeaturedAlbumTest extends TestCase {
         );
         (new Manager\FeaturedAlbum())->findById($this->tgroup->id())?->remove();
         $this->tgroup->remove($this->user);
-        $this->thread->remove();
         $this->user->remove();
     }
 
@@ -48,19 +40,18 @@ class FeaturedAlbumTest extends TestCase {
             featureType: FeaturedAlbumType::AlbumOfTheMonth,
             news:        new Manager\News(),
             tgMan:       new Manager\TGroup(),
+            threadMan:   new Manager\ForumThread(),
             torMan:      new Manager\Torrent(),
             tracker:     new Tracker(),
+            forum:       new Forum(AOTM_FORUM_ID),
             tgroup:      $this->tgroup,
-            forumThread: $this->thread,
             title:       'AOTM phpunit feature ' . date('Y-m-d H:i:s'),
+            body:        'this is an aotm body',
+            pitch:       'phpunit discuss aotm',
             user:        $this->user,
             leechType:   LeechType::Free,
             threshold:   20000,
         );
-        $this->assertEquals($this->thread->id(), $aotm->thread()->id(), 'aotm-thread-id');
-        $this->assertEquals($this->thread->link(), $aotm->link(), 'aotm-link');
-        $this->assertEquals($this->thread->location(), $aotm->location(), 'aotm-location');
-        $this->assertEquals($this->thread->title(), $aotm->thread()->title(), 'aotm-thread-title');
         $this->assertEquals($this->tgroup->id(), $aotm->tgroupId(), 'aotm-tgroupid');
         $this->assertEquals($this->tgroup->id(), $aotm->tgroup()->id(), 'aotm-tgroup-id');
 
@@ -81,16 +72,18 @@ class FeaturedAlbumTest extends TestCase {
             featureType: FeaturedAlbumType::Showcase,
             news:        new Manager\News(),
             tgMan:       new Manager\TGroup(),
+            threadMan:   new Manager\ForumThread(),
             torMan:      new Manager\Torrent(),
             tracker:     new Tracker(),
+            forum:       new Forum(AOTM_FORUM_ID),
             tgroup:      $this->tgroup,
-            forumThread: $this->thread,
             title:       'Showcase phpunit feature ' . date('Y-m-d H:i:s'),
+            body:        'this is a showcase body',
+            pitch:       'phpunit discuss showcase',
             user:        $this->user,
             leechType:   LeechType::Free,
             threshold:   20000,
         );
-        $this->assertEquals($this->thread->id(), $showcase->thread()->id(), 'showcase-thread-id');
         $this->assertEquals($this->tgroup->id(), $showcase->tgroupId(), 'showcase-tgroupid');
 
         $find = $manager->findByType(FeaturedAlbumType::Showcase);
