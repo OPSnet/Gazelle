@@ -31,6 +31,8 @@ if (!isset($_POST['type'])) {
 $artistRole = [];
 $tags       = null;
 $tgroup     = null;
+$format     = null;
+$media      = null;
 
 while (true) {
     $validator = new Gazelle\Util\Validator();
@@ -97,9 +99,7 @@ while (true) {
         }
     }
 
-    if (!isset($_POST['formats'])) {
-        $format = null;
-    } else {
+    if (isset($_POST['formats']) && $Viewer->permitted('site_moderate_requests')) {
         $format = new Gazelle\Request\Format(isset($_POST['all_formats']), $_POST['formats'] ?? []);
         if (!$format->isValid()) {
             $error = 'You must require at least one valid format';
@@ -123,9 +123,7 @@ while (true) {
         }
     }
 
-    if (!isset($_POST['media'])) {
-        $media = null;
-    } else {
+    if (isset($_POST['media']) && $Viewer->permitted('site_moderate_requests')) {
         $media = new Gazelle\Request\Media(isset($_POST['all_media']), $_POST['media'] ?? []);
         if (!$media->isValid()) {
             $error = 'You must require at least one valid media';
@@ -136,21 +134,23 @@ while (true) {
         }
     }
 
-    if (!($format?->exists('FLAC') && $media?->exists('CD'))) {
-        $request->setField('Checksum', 0);
-        $request->setField('LogCue', '');
-    } else {
-        $logCue = new Gazelle\Request\LogCue(
-            needCue:         isset($_POST['needcue']),
-            needLog:         isset($_POST['needlog']),
-            needLogChecksum: isset($_POST['needcksum']),
-            minScore:        (int)($_POST['minlogscore'] ?? $request->needLogScore()),
-        );
-        if ($logCue->needLogChecksum() != $request->needLogChecksum()) {
-            $request->setField('Checksum', (int)$logCue->needLogChecksum());
-        }
-        if ($logCue->dbValue() != $request->descriptionLogCue()) {
-            $request->setField('LogCue', $logCue->dbValue());
+    if ($Viewer->permitted('site_moderate_requests')) {
+        if (!($format?->exists('FLAC') && $media?->exists('CD'))) {
+            $request->setField('Checksum', 0);
+            $request->setField('LogCue', '');
+        } else {
+            $logCue = new Gazelle\Request\LogCue(
+                needCue:         isset($_POST['needcue']),
+                needLog:         isset($_POST['needlog']),
+                needLogChecksum: isset($_POST['needcksum']),
+                minScore:        (int)($_POST['minlogscore'] ?? $request->needLogScore()),
+            );
+            if ($logCue->needLogChecksum() != $request->needLogChecksum()) {
+                $request->setField('Checksum', (int)$logCue->needLogChecksum());
+            }
+            if ($logCue->dbValue() != $request->descriptionLogCue()) {
+                $request->setField('LogCue', $logCue->dbValue());
+            }
         }
     }
 
