@@ -467,12 +467,19 @@ function add_json_info(array $info): array {
     return $info;
 }
 
-function dump(mixed $data): void {
-    echo "<pre>" . json_encode($data, JSON_PRETTY_PRINT) . "</pre>";
+function json_encode_pretty(mixed ...$data): string {
+    return (string)json_encode(
+        (count([...$data]) === 1) ? [...$data][0] : [...$data],
+        JSON_PRETTY_PRINT
+    );
 }
 
-function show(mixed $data): void {
-    echo json_encode($data, JSON_PRETTY_PRINT) . "\n";
+function dump(mixed ...$data): void {
+    echo "<pre>" . json_encode_pretty(...$data) . "</pre>";
+}
+
+function show(mixed ...$data): void {
+    echo json_encode_pretty(...$data) . "\n";
 }
 
 /**

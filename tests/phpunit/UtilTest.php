@@ -3,6 +3,7 @@
 namespace Gazelle;
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Gazelle\Enum\CacheBucket;
 
 class UtilTest extends TestCase {
@@ -259,6 +260,43 @@ class UtilTest extends TestCase {
             image_cache_encode("https://example_url/img.jpg", epoch: 1640730000, secret: "1234", proxy: true, width: 512),
             'image-cache-proxied-ignore-resize-reference-vector'
         );
+    }
+
+    public static function dataOutput(): array {
+        return [
+            ['util-show-1', "false", false],
+            ['util-show-2', "null",  null],
+            [
+                'util-show-3',
+                "[\n    1,\n    2\n]",
+                1, 2
+            ],
+            [
+                'util-show-4',
+                "[\n    1,\n    [\n        2,\n        3\n    ],\n    4\n]",
+                1, [2, 3], 4
+            ],
+            [
+                'util-show-5',
+                "{\n    \"ab\": 12,\n    \"cd\": 34\n}",
+                ['ab' => 12, 'cd' => 34],
+            ],
+        ];
+    }
+
+    #[DataProvider('dataOutput')]
+    public function testOutputJsonPretty(string $name, string $expected, mixed ...$data): void {
+        $this->assertEquals($expected, json_encode_pretty(...$data), $name);
+    }
+
+    public function testOutputDump(): void {
+        $this->expectOutputString("<pre>123</pre>");
+        dump(123);
+    }
+
+    public function testOutputShow(): void {
+        $this->expectOutputString("1.25\n");
+        show(1.25);
     }
 
     public function testZip(): void {
