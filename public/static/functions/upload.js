@@ -506,7 +506,7 @@ function loadThumbnail() {
 function jsonFill(source, mapping) {
     for (let prop in mapping) {
         // skip releasetype, it is a special case
-        if (!mapping.hasOwnProperty(prop) || prop === 'releasetype') {
+        if (prop === 'releasetype' || !Object.prototype.hasOwnProperty.call(mapping, prop)) {
             continue;
         }
         if (source[mapping[prop]] && source[mapping[prop]] !== '') {
@@ -557,7 +557,7 @@ function fillMusicForm(group, torrent, source) {
             arranger: 8,
         };
         for (let prop in group['musicInfo']) {
-            if (group['musicInfo'].hasOwnProperty(prop)) {
+            if (Object.prototype.hasOwnProperty.call(group['musicInfo'], prop)) {
                 fillArtist(group['musicInfo'][prop], mapping[prop]);
             }
         }

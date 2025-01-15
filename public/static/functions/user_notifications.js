@@ -19,7 +19,7 @@ function getSkippedPage() {
     var skip, url = new gazURL();
     switch(url.path) {
         case "inbox":
-            if (url.query.length == 0 || (url.query.length == 1 && url.query.hasOwnProperty('sort'))) {
+            if (url.query.length == 0 || (url.query.length == 1 && Object.prototype.hasOwnProperty.call(url.query, 'sort'))) {
                 skip = "Inbox";
             }
             break;
