@@ -553,7 +553,7 @@ class ForumTest extends TestCase {
         $Viewer = $admin;
         $this->assertStringContainsString(
             "<a href=\"forums.php#$name\">$name</a>",
-            (Util\Twig::factory())->render('forum/forum.twig', [
+            (Util\Twig::factory(new Manager\User()))->render('forum/forum.twig', [
                 'dept_list'   => $this->forum->departmentList($admin),
                 'donor_forum' => false,
                 'forum'       => $this->forum,
@@ -703,7 +703,7 @@ class ForumTest extends TestCase {
         );
         $thread = (new Manager\ForumThread())->create($this->forum, $user, 'thread title', 'this is a new thread');
 
-        $template = Util\Twig::factory()->createTemplate(
+        $template = Util\Twig::factory(new Manager\User())->createTemplate(
             "{% if object is forum_thread %}yes{% else %}no{% endif %}"
         );
         $this->assertEquals('yes', $template->render(['object' => $thread]), 'forum-twig-thread');

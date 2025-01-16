@@ -3,7 +3,7 @@
 
 require_once(__DIR__ . '/../lib/bootstrap.php');
 
-$twig = Gazelle\Util\Twig::factory();
+$twig = Gazelle\Util\Twig::factory(new \Gazelle\Manager\User());
 
 // there is no dump() in production
 $twig->addFunction(new \Twig\TwigFunction('dump', function ($value) { return ''; }));

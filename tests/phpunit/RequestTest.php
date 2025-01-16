@@ -474,7 +474,10 @@ class RequestTest extends TestCase {
 
         $votes = $this->request->voteList();
         $this->assertCount(4, $votes, 'request-votes-count');
-        $this->assertGreaterThanOrEqual($votes[0]['created'], $votes[1]['created'], 'request-vote-order');
+        $first = new \DateTime($votes[0]['created']);
+        $added = new \DateTime($votes[1]['created']);
+        // can be 1 second later
+        $this->assertLessThan(2, abs($first->getTimestamp() - $added->getTimestamp()), 'request-vote-order');
         $this->assertEquals($bounty + 15, $votes[0]['bounty'], 'request-vote-bounty1');
         $this->assertEquals($bounty + 1, $votes[2]['bounty'], 'request-vote-bounty2');
         $this->assertEquals($user->id(), $votes[0]['user_id'], 'request-vote-user1');
@@ -571,8 +574,11 @@ class RequestTest extends TestCase {
         $this->assertCount(39, $payload, 'req-json-payload');
         $this->assertTrue($payload['canVote'], 'req-json-can-vote');
         $this->assertFalse($payload['canEdit'], 'req-json-can-edit');
-        // request bounty is added in a separate db operation and the second may roll over
-        $this->assertLessThanOrEqual(1, abs(strtotime($payload['timeAdded']) - strtotime($payload['lastVote'])), 'req-json-date');
+
+        $added = new \DateTime($payload['timeAdded']);
+        $voted = new \DateTime($payload['lastVote']);
+        // can be 1 second later
+        $this->assertLessThan(2, abs($voted->getTimestamp() - $added->getTimestamp()), 'req-json-date');
         $this->assertEquals('', $payload['fillerName'], 'req-json-can-vote');
         $this->assertEquals('UA-7890', $payload['catalogueNumber'], 'req-json-catno');
         $this->assertEquals(['Lossless', 'V0 (VBR)'], $payload['bitrateList'], 'req-json-bitrate-list');

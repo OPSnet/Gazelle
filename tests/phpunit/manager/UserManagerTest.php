@@ -4,6 +4,7 @@ namespace Gazelle;
 
 use PHPUnit\Framework\TestCase;
 use Gazelle\Enum\UserAuditEvent;
+use Gazelle\Enum\UserStatus;
 
 class UserManagerTest extends TestCase {
     protected array $userList;
@@ -56,6 +57,30 @@ class UserManagerTest extends TestCase {
         $this->assertTrue($this->userList[2]->isDisabled(), 'uman-disabled-user2');
         $this->assertFalse($this->userList[2]->isEnabled(), 'uman-enabled-user2');
         $this->assertFalse($this->userList[2]->isUnconfirmed(), 'uman-unconfirmed-user2');
+    }
+
+    public function testDisplayUsername(): void {
+        $userMan = new Manager\User();
+        $this->userList[1]->privilege()->addSecondaryClass(FLS_TEAM);
+        $this->userList[2]->setField('Enabled', UserStatus::disabled->value)->modify();
+
+        $this->assertEquals(
+            "<a href=\"user.php?id={$this->userList[1]->id()}\">{$this->userList[1]->username()}</a>",
+            $userMan->displayUsername($this->userList[1]->id(), $this->userList[0]),
+            'uman-display-user-short'
+        );
+        $this->assertEquals(
+            "<a class=\"username\" href=\"user.php?id={$this->userList[1]->id()}\">{$this->userList[1]->username()}</a>&nbsp;<span class=\"tooltip secondary_class\" title=\"First Line Support\">FLS</span> (User)",
+            $userMan->displayUsername($this->userList[1]->id(), $this->userList[0], true),
+            'uman-display-user-secondary'
+        );
+        $this->assertEquals(
+            "<a class=\"username\" href=\"user.php?id={$this->userList[2]->id()}\">{$this->userList[2]->username()}</a><a href=\"rules.php\"><img loading=\"lazy\" class=\"tooltip\" src=\""
+                . STATIC_SERVER
+                . "/common/symbols/disabled.png\" alt=\"Banned\" title=\"Disabled\" /></a> (User)",
+            $userMan->displayUsername($this->userList[2]->id(), $this->userList[0], true),
+            'uman-display-user-disabled'
+        );
     }
 
     public function testModifyUserAttr(): void {

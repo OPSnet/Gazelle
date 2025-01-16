@@ -19,7 +19,7 @@ $paginator->setTotal(
         : $forumMan->subscribedForumTotal($Viewer) + $subscriber->commentTotal()
 );
 
-$avatarFilter = Gazelle\Util\Twig::factory()->createTemplate('{{ user|avatar(viewer)|raw }}');
+$avatarFilter = Gazelle\Util\Twig::factory($userMan)->createTemplate('{{ user|avatar(viewer)|raw }}');
 
 $Results = (new Gazelle\User\Subscription($Viewer))->latestSubscriptionList($showUnread, $paginator->limit(), $paginator->offset());
 foreach ($Results as &$result) {

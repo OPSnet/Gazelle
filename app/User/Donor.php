@@ -9,6 +9,10 @@ class Donor extends \Gazelle\BaseUser {
 
     protected bool $isDonor;
 
+    public function link(): string {
+        return sprintf('<a class="username" href="%s">%s</a>', $this->user->url(), html_escape($this->user->username()));
+    }
+
     public function flush(): static {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id()));
         unset($this->isDonor);

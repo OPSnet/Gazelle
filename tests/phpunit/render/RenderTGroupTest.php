@@ -15,7 +15,7 @@ class RenderTGroupTest extends TestCase {
         $reqMan = new Manager\Request();
         $tgMan  = new Manager\TGroup();
         $this->assertIsString(
-            Util\Twig::factory()->render('request/torrent.twig', [
+            Util\Twig::factory(new Manager\User())->render('request/torrent.twig', [
                 'list' => $reqMan->findByTGroup($tgMan->findById($tgroupId))
             ]),
             'render-tgroup-request-list'

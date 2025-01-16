@@ -67,7 +67,8 @@ class FriendTest extends TestCase {
             // render
             $paginator = new Util\Paginator(FRIENDS_PER_PAGE, 1);
             $paginator->setTotal($this->friend[0]->total());
-            $html = Util\Twig::factory()->render('user/friend.twig', [
+            Util\Twig::setViewer($this->friend[0]->user());
+            $html = Util\Twig::factory($manager)->render('user/friend.twig', [
                 'list'      => $this->friend[0]->page($manager, $paginator->limit(), $paginator->offset()),
                 'paginator' => $paginator,
                 'viewer'    => $this->friend[0]->user(),

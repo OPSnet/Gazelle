@@ -142,7 +142,7 @@ class LogTest extends TestCase {
         $Viewer = $this->user;
         global $SessionID;
         $SessionID = 'phpunit';
-        $html = (Util\Twig::factory())->render('sitelog.twig', [
+        $html = Util\Twig::factory(new Manager\User())->render('sitelog.twig', [
             'search'    => '',
             'paginator' => $paginator,
             'page'      => $page,

@@ -6,12 +6,20 @@ use Gazelle\Enum\CacheBucket;
 
 class Twig {
     protected static \Gazelle\Manager\User $userMan;
+    protected static \Gazelle\User         $viewer;
 
-    public static function setUserMan(\Gazelle\Manager\User $userMan): void {
-        self::$userMan = $userMan;
+    public static function setViewer(\Gazelle\User $viewer): void {
+        self::$viewer = $viewer;
     }
 
-    public static function factory(): \Twig\Environment {
+    public static function viewer(): \Gazelle\User {
+        return self::$viewer;
+    }
+
+    public static function factory(
+        \Gazelle\Manager\User $userMan,
+    ): \Twig\Environment {
+        self::$userMan = $userMan;
         $twig = new \Twig\Environment(
             new \Twig\Loader\FilesystemLoader(__DIR__ . '/../../' . TEMPLATE_PATH), [
                 'debug' => DEBUG_MODE,
@@ -168,12 +176,18 @@ class Twig {
 
         $twig->addFilter(new \Twig\TwigFilter(
             'user_url',
-            fn($userId) => new \Twig\Markup(\Users::format_username((int)$userId, false, false, false), 'UTF-8')
+            fn($userId) => new \Twig\Markup(
+                self::$userMan->displayUsername((int)$userId, \Gazelle\Util\Twig::viewer()),
+                'UTF-8',
+            )
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
             'user_full',
-            fn($userId) => new \Twig\Markup(\Users::format_username((int)$userId, true, true, true, true), 'UTF-8')
+            fn($userId) => new \Twig\Markup(
+                self::$userMan->displayUsername((int)$userId, \Gazelle\Util\Twig::viewer(), showFull: true),
+                'UTF-8',
+            )
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(

@@ -76,7 +76,7 @@ if ($isSubscribed) {
 }
 
 $userMan = new Gazelle\Manager\User();
-$avatarFilter = Gazelle\Util\Twig::factory()->createTemplate('{{ user|avatar(viewer)|raw }}');
+$avatarFilter = Gazelle\Util\Twig::factory($userMan)->createTemplate('{{ user|avatar(viewer)|raw }}');
 
 $transitions = (new Gazelle\Manager\ForumTransition())->threadTransitionList($Viewer, $thread);
 $department = $forum->departmentList($Viewer);
@@ -145,9 +145,20 @@ foreach ($slice as $Key => $Post) {
         <col class="col_post_body" />
     </colgroup>
     <tr class="colhead_dark">
-        <td colspan="<?= $Viewer->showAvatars() ? 2 : 1 ?>">
+        <td class="forum-post-head" colspan="<?= $Viewer->showAvatars() ? 2 : 1 ?>">
             <span style="float: left;"><a class="post_id" href="forums.php?action=viewthread&amp;threadid=<?=$threadId?>&amp;postid=<?=$PostID?>#post<?=$PostID?>">#<?=$PostID?></a>
-                <?=Users::format_username($AuthorID, true, true, true, true, true, $IsDonorForum) ?>
+                <?= $userMan->displayUsername($AuthorID, $Viewer, showFull: true, isDonorForum: $IsDonorForum) ?>
+<?php
+$userTitle = $author->title();
+if (!empty($userTitle)) {
+    $userTitle = preg_replace_callback(
+        '/src=("?)(http.+?)(["\s>])/',
+        fn ($match) => 'src=' . $match[1] . image_cache_encode($match[2]) . $match[3],
+        $userTitle
+    );
+?> <span class="user_title">(<?= $userTitle ?>)</span><?php
+}
+?>
                 <?=time_diff($AddedTime, 2); ?>
                 <span id="postcontrol-<?= $PostID ?>">
 <?php if (!$thread->isLocked() && !$Viewer->disablePosting()) { ?>
@@ -216,7 +227,7 @@ echo ' colspan="2"'; } ?>>
                 <a href="#content<?=$PostID?>" onclick="LoadEdit('forums', <?=$PostID?>, 1); return false;">&laquo;</a>
 <?php       } ?>
                 Last edited by
-                <?=Users::format_username($EditedUserID, false, false, false, false, false, $IsDonorForum) ?> <?=time_diff($EditedTime, 2)?>
+                <?= $userMan->displayUsername($EditedUserID, $Viewer, isDonorForum: $IsDonorForum) ?> <?=time_diff($EditedTime, 2)?>
                 </span>
 <?php    } ?>
             </div>

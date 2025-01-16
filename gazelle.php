@@ -43,7 +43,6 @@ $SessionID = false;
 $Viewer    = null;
 $ipv4Man   = new Gazelle\Manager\IPv4();
 $userMan   = new Gazelle\Manager\User();
-Gazelle\Util\Twig::setUserMan($userMan);
 
 $forceLogout = function (): never {
     setcookie('session', '', [
@@ -137,6 +136,7 @@ if ($Viewer) {
     // To proxify images (or not), or e.g. not render the name of a thread
     // for a user who may lack the privileges to see it in the first place.
     \Text::setViewer($Viewer);
+    \Gazelle\Util\Twig::setViewer($Viewer);
 }
 unset($forceLogout);
 

@@ -142,6 +142,43 @@ class User extends \Gazelle\BaseManager {
         );
     }
 
+    public function displayUsername(int $userId, \Gazelle\User $viewer, bool $showFull = false, bool $isDonorForum = false): string {
+        if ($userId == 0) {
+            return 'System';
+        }
+        $user = $this->findById($userId);
+        if (is_null($user)) {
+            return $viewer->isStaff() ? "[Unknown $userId]" : '[Unknown]';
+        }
+
+        $donor    = new \Gazelle\User\Donor($user);
+        $username = $donor->username($isDonorForum);
+        if (!$showFull) {
+            return "<a href=\"user.php?id=$userId\">$username</a>";
+        }
+
+        $display = "<a class=\"username\" href=\"user.php?id=$userId\">$username</a>{$donor->heart($viewer)}";
+        if ($user->warningExpiry()) {
+            $display .= '<a href="wiki.php?action=article&amp;name=warnings"><img loading="lazy" class="tooltip" src="'
+                . STATIC_SERVER . '/common/symbols/warned.png" alt="Warned" title="Warned'
+                . ($viewer->id() == $userId
+                    ? ' - Expires ' . date('Y-m-d H:i', (int)strtotime($user->warningExpiry()))
+                    : '')
+                . '" /></a>';
+        }
+        if ($user->isDisabled()) {
+            $display .= '<a href="rules.php"><img loading="lazy" class="tooltip" src="'
+                . STATIC_SERVER . '/common/symbols/disabled.png" alt="Banned" title="Disabled" /></a>';
+        }
+
+        $privilege = new \Gazelle\User\Privilege($user);
+        foreach ($privilege->badgeList() as $badge => $name) {
+            $display .= "&nbsp;<span class=\"tooltip secondary_class\" title=\"$name\">$badge</span>";
+        }
+
+        return "$display ({$this->userclassName($user->primaryClass())})";
+    }
+
     /**
      * Bulk update a user attribute for a list of user ids.
      * Note: the user cache is not updated, the calling code is

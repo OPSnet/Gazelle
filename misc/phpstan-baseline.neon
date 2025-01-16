@@ -221,11 +221,6 @@ parameters:
 			path: ../classes/sphinxqlresult.class.php
 
 		-
-			message: "#^Parameter \\#2 \\$timestamp of function date expects int\\|null, int\\|false given\\.$#"
-			count: 1
-			path: ../classes/users.class.php
-
-		-
 			message: "#^Function payload\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: ../sections/ajax/top10/torrents.php

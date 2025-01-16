@@ -5,13 +5,13 @@ namespace Gazelle;
 use PHPUnit\Framework\TestCase;
 use Gazelle\Enum\AvatarDisplay;
 use Gazelle\Enum\AvatarSynthetic;
+use GazelleUnitTest\Helper;
 
 class TwigTest extends TestCase {
     protected User $user;
 
     public function setUp(): void {
-        Util\Twig::setUserMan(new Manager\User());
-        $this->user = \GazelleUnitTest\Helper::makeUser('twig.' . randomString(6), 'twig');
+        $this->user = Helper::makeUser('twig.' . randomString(6), 'twig');
         $this->user->setField('PermissionID', SYSOP)->modify();
     }
 
@@ -20,12 +20,12 @@ class TwigTest extends TestCase {
     }
 
     protected static function twig(string $template): \Twig\TemplateWrapper {
-        return Util\Twig::factory()->createTemplate($template);
+        return Util\Twig::factory(new Manager\User())->createTemplate($template);
     }
 
     public function testDominator(): void {
         (new Util\Dominator())->flush(); // in case anything has already been set
-        $twig = Util\Twig::factory();
+        $twig = Util\Twig::factory(new Manager\User());
         $twig->createTemplate("{{ dom.click('#id', \"$('#id').frob(); return false;\") }}")->render();
         $expected = <<<END
 <script type="text/javascript">document.addEventListener('DOMContentLoaded', function() {
@@ -50,12 +50,42 @@ END;
             'twig-bb-format'
         );
 
+        if (IMAGE_CACHE_ENABLED) {
+            $this->assertStringStartsWith(
+                '<img loading="lazy" class="scale_image" onclick="lightbox.init(this, $(this).width());" alt="' . IMAGE_CACHE_HOST . '/f/full/',
+                self::twig('{{ text|bb_forum }}')->render(['text' => '[img=https://example.com/image.jpg]']),
+                'twig-bb-forum'
+            );
+        } else {
+            $this->assertStringStartsWith(
+                '<img loading="lazy" class="scale_image" onclick="lightbox.init(this, $(this).width());" alt="https://example.com/image.jpg"',
+                self::twig('{{ text|bb_forum }}')->render(['text' => '[img=https://example.com/image.jpg]']),
+                'twig-bb-forum'
+            );
+        }
+
+        $checked = self::twig('{%- from "macro/form.twig" import checked -%}<input type="checkbox" name="test"{{ checked(truth) }} />');
+        $this->assertEquals(
+            '<input type="checkbox" name="test" checked />',
+            $checked->render(['truth' => true]),
+            'twig-checked-true'
+        );
+        $this->assertEquals(
+            '<input type="checkbox" name="test" />',
+            $checked->render(['truth' => false]),
+            'twig-checked-false'
+        );
+
         $sth = new Util\SortableTableHeader('alpha', [
             'alpha' => ['dbColumn' => 'one', 'defaultSort' => 'desc', 'text' => 'First'],
             'beta'  => ['dbColumn' => 'two', 'defaultSort' => 'desc', 'text' => 'Second'],
         ]);
         $heading = self::twig('{{ heading|column("alpha") }}');
-        $this->assertEquals('<a href="?order=alpha&amp;sort=asc">First</a> ↑', $heading->render(['heading' => $sth]), 'twig-heading');
+        $this->assertEquals(
+            '<a href="?order=alpha&amp;sort=asc">First</a> ↑',
+            $heading->render(['heading' => $sth]),
+            'twig-heading'
+        );
 
         $linkify = self::twig('{{ url|linkify }}');
         $this->assertEquals(
@@ -129,9 +159,7 @@ END;
         $this->assertEquals('First time', self::twig('{{ value|ucfirst }}')->render(['value' => 'first time']), 'twig-ucfirst-1');
         $this->assertEquals('A Day In The Life', self::twig('{{ value|ucfirstall }}')->render(['value' => 'a day in the life']), 'twig-ucfirstall');
 
-        // yuck
-        global $Viewer;
-        $Viewer = $this->user;
+        Util\Twig::setViewer($this->user);
         $this->assertEquals(
             "<a href=\"user.php?id={$this->user->id()}\">{$this->user->username()}</a>",
             self::twig('{{ user_id|user_url }}')->render(['user_id' => $this->user->id()]),
@@ -145,7 +173,7 @@ END;
             reason: 'phpunit twig reason',
         );
         $this->assertMatchesRegularExpression(
-            "@^<a href=\"user.php\?id={$this->user->id()}\">{$this->user->username()}</a><a target=\"_blank\" href=\"[^\"]+\"><img class=\"donor_icon tooltip\" src=\"[^\"]+\" (?:alt=\"[^\"]+\" )?(?:title=\"[^\"]+\" )?/></a> \(Sysop\)$@",
+            "@^<a class=\"username\" href=\"user.php\?id={$this->user->id()}\">{$this->user->username()}</a><a target=\"_blank\" href=\"[^\"]+\"><img class=\"donor_icon tooltip\" src=\"[^\"]+\" (?:alt=\"[^\"]+\" )?(?:title=\"[^\"]+\" )?/></a> \(Sysop\)$@",
             self::twig('{{ user_id|user_full }}')->render(['user_id' => $this->user->id()]),
             'twig-user-full'
         );
@@ -153,6 +181,7 @@ END;
         $status = self::twig('{{ user_id|user_status(viewer) }}');
         $this->assertIsString($status->render(['user_id' => $this->user->id(), 'viewer' => $this->user]), 'twig-user-status');
         $donor->remove();
+        Helper::flushDonationMonth(1);
     }
 
     public function testImageCache(): void {

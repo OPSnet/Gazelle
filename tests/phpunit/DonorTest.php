@@ -84,7 +84,7 @@ class DonorTest extends TestCase {
         $this->assertEquals('1 [Red]', $donor->rankLabel(), 'donor-rank-label-1');
         $this->assertEquals(1, $donor->collageTotal(), 'donor-collage-1');
         $this->assertEquals('Donor', $donor->iconHoverText(), 'donor-icon-hover-text-1');
-        $this->assertEquals('/static/common/symbols/donor.png', $donor->heartIcon(), 'donor-heart-icon-1');
+        $this->assertEquals(STATIC_SERVER . '/common/symbols/donor.png', $donor->heartIcon(), 'donor-heart-icon-1');
         $this->assertGreaterThan(0, $donor->leaderboardRank(), 'donor-leaderboard-rank-1');
 
         $this->assertFalse($donor->avatarHover(), 'donor-avatar-hover-1');
@@ -166,7 +166,7 @@ class DonorTest extends TestCase {
         $this->assertTrue($donor->hasMaxSpecialRank(), 'donor-mod-has-max-special');
         $this->assertEquals('Never', $donor->rankExpiry(), 'donor-mod-rank-expiry');
         $this->assertEquals('∞ [Diamond]', $donor->rankLabel(), 'donor-mod-rank-label');
-        $this->assertEquals('/static/common/symbols/donor_6.png', $donor->heartIcon(), 'donor-mod-heart-icon');
+        $this->assertEquals(STATIC_SERVER . '/common/symbols/donor_6.png', $donor->heartIcon(), 'donor-mod-heart-icon');
         $this->assertEquals('', $donor->profileInfo(1), 'donor-mod-profile1-info');
         $this->assertEquals('', $donor->profileTitle(1), 'donor-mod-profile1-title');
         $this->assertEquals('', $donor->profileInfo(2), 'donor-mod-profile2-info');
@@ -202,7 +202,7 @@ class DonorTest extends TestCase {
         $this->assertEquals('donate.php', $donor->iconLink(), 'donor-icon-link-2');
         $this->assertEquals('donate.php', $donor->iconLink(), 'donor-icon-link-2');
         $this->assertEquals('Donor', $donor->iconHoverText(), 'donor-icon-hover-text-2');
-        $this->assertEquals('/static/common/symbols/donor_2.png', $donor->heartIcon(), 'donor-heart-icon-2');
+        $this->assertEquals(STATIC_SERVER . '/common/symbols/donor_2.png', $donor->heartIcon(), 'donor-heart-icon-2');
         $this->assertTrue($donor->hasForum(), 'donor-has-forum-2');
 
         $this->assertTrue($donor->hasRankAbove(1), 'donor-has-above-rank1-2');
@@ -233,7 +233,7 @@ class DonorTest extends TestCase {
         $this->assertEquals(3, $donor->collageTotal(), 'donor-collage-3');
         $this->assertEquals('3 [Bronze]', $donor->rankLabel(), 'donor-rank-label-2');
         $this->assertEquals(4, $donor->invitesReceived(), 'donor-received-3-for-4-invites');
-        $this->assertEquals('/static/common/symbols/donor_3.png', $donor->heartIcon(), 'donor-heart-icon-3');
+        $this->assertEquals(STATIC_SERVER . '/common/symbols/donor_3.png', $donor->heartIcon(), 'donor-heart-icon-3');
         $this->assertTrue($donor->updateProfileInfo(2, 'phpunit donor info 2')->modify(), 'donor-profile2-info-2');
         $this->assertEquals('', $donor->avatarHoverText(), 'donor-no-avatar-hover-text-2');
         $this->assertTrue($donor->updateAvatarHoverText('avatar hover')->modify(), 'donor-update-avatar-hover-2');
@@ -254,7 +254,7 @@ class DonorTest extends TestCase {
         $this->assertEquals(0, $donor->specialRank(), 'donor-not-special-rank-4');
         $this->assertEquals(4, $donor->collageTotal(), 'donor-collage-4');
         $this->assertEquals('4 [Silver]', $donor->rankLabel(), 'donor-rank-label-2');
-        $this->assertEquals('/static/common/symbols/donor_4.png', $donor->heartIcon(), 'donor-heart-icon-4');
+        $this->assertEquals(STATIC_SERVER . '/common/symbols/donor_4.png', $donor->heartIcon(), 'donor-heart-icon-4');
         $this->assertTrue($donor->updateProfileInfo(3, 'phpunit donor info 3')->modify(), 'donor-profile3-info-2');
         $this->assertTrue($donor->updateIconLink('https://example.com/')->modify(), 'donor-update-icon-link-2');
         $this->assertEquals('https://example.com/', $donor->iconLink(), 'donor-icon-link-2');
@@ -274,7 +274,7 @@ class DonorTest extends TestCase {
         $this->assertEquals(0, $donor->specialRank(), 'donor-not-special-rank-5');
         $this->assertEquals(5, $donor->collageTotal(), 'donor-collage-5');
         $this->assertEquals('4 [Silver]', $donor->rankLabel(), 'donor-rank-label-4');
-        $this->assertEquals('/static/common/symbols/donor_4.png', $donor->heartIcon(), 'donor-heart-icon-4');
+        $this->assertEquals(STATIC_SERVER . '/common/symbols/donor_4.png', $donor->heartIcon(), 'donor-heart-icon-4');
 
         $this->assertFalse($donor->forumUseComma(), 'donor-has-forum-comma');
         $this->assertTrue($donor->setForumDecoration('The', 'Person', false), 'donor-set-forum-decoration');
@@ -302,7 +302,7 @@ class DonorTest extends TestCase {
         $this->assertEquals(0, $donor->specialRank(), 'donor-not-special-rank-5');
         $this->assertEquals(5, $donor->collageTotal(), 'donor-collage-6-is-5');
         $this->assertEquals('5 [Gold]', $donor->rankLabel(), 'donor-rank-label-5');
-        $this->assertEquals('/static/common/symbols/donor_5.png', $donor->heartIcon(), 'donor-heart-icon-5');
+        $this->assertEquals(STATIC_SERVER . '/common/symbols/donor_5.png', $donor->heartIcon(), 'donor-heart-icon-5');
         $this->assertCount(5, $donor->historyList(), 'donor-history-list');
         $this->assertFalse($donor->hasDonorPick(), 'donor-has-no-donor-pick');
         $this->assertFalse($donor->avatarHover(), 'donor-has-no-avatar-hover');
@@ -387,6 +387,7 @@ class DonorTest extends TestCase {
 
     public function testDonorManager(): void {
         $manager = new Manager\Donation();
+        $userMan = new Manager\User();
         $initial = $manager->rewardTotal();
         $initialGrand = $manager->grandTotal();
 
@@ -411,7 +412,7 @@ class DonorTest extends TestCase {
         );
 
         Helper::flushDonationMonth(1);
-        $this->assertGreaterThan(0, $manager->topDonorList(100, new Manager\User()), 'donor-top-donor');
+        $this->assertGreaterThan(0, $manager->topDonorList(100, $userMan), 'donor-top-donor');
         $this->assertGreaterThan($initial + DONOR_RANK_PRICE, $manager->totalMonth(1), 'donor-manager-month');
         $username = $this->donor->user()->username();
         $entry = array_values(array_filter($manager->rewardPage(null, 100, 0), fn($d) => $d['user_id'] == $this->donor->id()))[0];
@@ -444,7 +445,8 @@ class DonorTest extends TestCase {
         Base::setRequestContext(new BaseRequestContext('/index.php', '127.0.0.1', ''));
 
         $paginator = (new Util\Paginator(USERS_PER_PAGE, 1))->setTotal($manager->rewardTotal());
-        $render = (Util\Twig::factory())->render('donation/reward-list.twig', [
+        Util\Twig::setViewer($Viewer);
+        $render = (Util\Twig::factory($userMan))->render('donation/reward-list.twig', [
             'paginator' => $paginator,
             'user'      => $manager->rewardPage(null, $paginator->limit(), $paginator->offset()),
             'search'    => null,
@@ -454,7 +456,7 @@ class DonorTest extends TestCase {
 
     public function testDonorTwig(): void {
         $user = $this->donor->user();
-        $twig = Util\Twig::factory();
+        $twig = Util\Twig::factory(new Manager\User());
         $template = $twig->createTemplate('{% if user is donor %}yes{% else %}no{% endif %}');
         $this->assertEquals('no', $template->render(['user' => $user]), 'twig-test-not-donor');
 

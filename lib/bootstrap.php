@@ -22,7 +22,7 @@ global $Cache, $Debug, $Twig;
 
 $Cache = new Gazelle\Cache();
 $Debug = new Gazelle\Debug($Cache, Gazelle\DB::DB());
-$Twig  = Gazelle\Util\Twig::factory();
+$Twig  = Gazelle\Util\Twig::factory(new Gazelle\Manager\User());
 
 Gazelle\Base::initialize($Cache, Gazelle\DB::DB(), $Twig);
 
