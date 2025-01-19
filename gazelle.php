@@ -89,6 +89,9 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $module === 'ajax') {
         $Viewer->logout($SessionID);
         $forceLogout();
     }
+    if ($Viewer->permitted('site_disable_ip_history')) {
+        $context->anonymize();
+    }
     $session->refresh($SessionID, $context->remoteAddr(), $context->ua());
     unset($browser, $session, $userId, $cookieData);
 } elseif ($module === 'torrents' && ($_REQUEST['action'] ?? '') == 'download' && isset($_REQUEST['torrent_pass'])) {

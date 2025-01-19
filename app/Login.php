@@ -159,7 +159,9 @@ class Login extends Base {
             return $userMan->findById($user->id());
         }
 
-        (new User\History($user))->registerSiteIp($ipaddr);
+        if (!$user->permitted('site_disable_ip_history')) {
+            (new User\History($user))->registerSiteIp($ipaddr);
+        }
 
         // We have a user!
         return $user;

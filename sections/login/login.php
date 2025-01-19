@@ -55,7 +55,7 @@ if (!empty($_POST['username']) && !empty($_POST['password'])) {
                 'keep-logged' => $login->persistent() ? '1' : '0',
                 'browser'     => $context->ua(),
                 'ipaddr'      => $context->remoteAddr(),
-                'useragent'   => $useragent,
+                'useragent'   => $context->useragent(),
             ]);
             setcookie('session', $session->cookie($current['SessionID']), [
                 'expires'  => (int)$login->persistent() * (time() + 60 * 60 * 24 * 90),
