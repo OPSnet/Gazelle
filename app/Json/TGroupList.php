@@ -128,7 +128,7 @@ class TGroupList extends \Gazelle\Json {
 
         return [
             'currentPage' => $this->page,
-            'pages'       => (int)ceil($this->page / TORRENTS_PER_PAGE),
+            'pages'       => (int)ceil($this->total / TORRENTS_PER_PAGE),
             'results'     => $list,
         ];
     }
