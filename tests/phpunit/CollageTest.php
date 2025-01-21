@@ -209,13 +209,18 @@ class CollageTest extends TestCase {
 
         $this->assertEquals(1, $collage->addEntry($this->tgroupList[0], $this->userList['u3'], 'collage-add-entry'));
         $this->assertEquals(0, $collage->addEntry($this->tgroupList[0], $this->userList['u2'], 'collage-add-dupe-entry'));
-        $unread = $manager->subscribedTGroupCollageList($this->userList['u2'], false);
+        $tgMan = new Manager\TGroup();
+        $unread = $manager->subscribedTGroupCollageList($this->userList['u2'], $tgMan, false);
         $this->assertCount(1, $unread, 'collage-one-unread');
 
         // catchup
         // TODO: this relies on a side effect in isSubscribed(), the clearing should be more explicit
         $this->assertTrue($collage->isSubscribed($this->userList['u2']), 'collage-catchup');
-        $this->assertCount(0, $manager->subscribedTGroupCollageList($this->userList['u2'], false), 'collage-none-unread');
+        $this->assertCount(
+            0,
+            $manager->subscribedTGroupCollageList($this->userList['u2'], $tgMan, false),
+            'collage-none-unread'
+        );
 
         $this->assertEquals(1, $collage->toggleSubscription($this->userList['u2']), 'collage-unsubscribe');
         $this->assertFalse($collage->isSubscribed($this->userList['u2']), 'collage-is-no-longer-subcribed');
@@ -282,7 +287,11 @@ class CollageTest extends TestCase {
         $this->assertCount(0, $summary['below'], 'collage-artist-summary-below');
 
         $this->assertTrue($this->collageList[1]->isSubscribed($this->userList['u1']), 'collage-artist-catchup');
-        $this->assertCount(0, $manager->subscribedArtistCollageList($this->userList['u1'], false), 'collage-artist-unread');
+        $this->assertCount(
+            0,
+            $manager->subscribedArtistCollageList($this->userList['u1'], $artistMan, false),
+            'collage-artist-unread'
+        );
 
         $this->assertStringStartsWith(
             date('Y-m-d '),

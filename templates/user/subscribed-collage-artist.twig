@@ -1,0 +1,36 @@
+{% from 'macro/form.twig' import hidden -%}
+<h3>Artist collages</h3>
+{% for sub in artist_list %}
+{%  set new = view_all ? 0 : sub.artist_list|length %}
+<table class="subscribed-collages-table">
+    <tr class="colhead_dark">
+        <td>
+            <span style="float: left;">
+                <strong><a href="collages.php?id={{ sub.collageId }}">{{ sub.name }}</a></strong>
+{%- if new %} ({{ new }} new artist{{ new|plural }}){% endif %}
+            </span>
+            <span style="float: right;">
+{%  if new %}
+                <a href="#" onclick="$('#discog_table_{{ sub.collageId }}').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets">{% if view_all %}Show{% else %}Hide{% endif %}</a>
+                &nbsp;&nbsp;&nbsp;
+                <a href="userhistory.php?action=catchup_collages&amp;auth={{ viewer.auth }}&amp;collageid={{ sub.collageId }}" class="brackets">Catch up</a>
+                &nbsp;&nbsp;&nbsp;
+{%  endif %}
+                <a href="#" onclick="CollageSubscribe({{ sub.collageId }}); return false;" id="subscribelink{{ sub.collageId }}" class="brackets">Unsubscribe</a>
+            </span>
+        </td>
+    </tr>
+</table>
+<table class="artist_table{{ hidden(view_all) }} m_table" id="discog_table_{{ sub.collageId }}">
+{%  for artist in sub.artist_list %}
+    <tr class="colhead">
+        <td>{{ artist.link|raw }}</td>
+    </tr>
+{%  endfor %}
+</table>
+{% else %}
+<div>
+{%  if view_all %}You have no artist collage subscriptions{% else %}No artist collages with new additions{% endif %}</div>
+{% endfor %}
+</div>
+{{ footer() }}

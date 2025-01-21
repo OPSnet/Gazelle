@@ -336,7 +336,7 @@ class Collage extends \Gazelle\BaseManager {
         return $autocomplete;
     }
 
-    public function subscribedTGroupCollageList(\Gazelle\User $user, bool $viewAll): array {
+    public function subscribedTGroupCollageList(\Gazelle\User $user, TGroup $manager, bool $viewAll): array {
         $cond = ['s.UserID = ?'];
         $args = [$user->id()];
         if ($viewAll) {
@@ -361,12 +361,25 @@ class Collage extends \Gazelle\BaseManager {
         );
         $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
         foreach ($list as &$entry) {
-            $entry['groupIds'] = is_null($entry['groupIds']) ? [] : explode(',', $entry['groupIds']);
+            $entry['groupIds'] = is_null($entry['groupIds'])
+                ? []
+                : array_map('intval', explode(',', $entry['groupIds']));
+            $entry['tgroup_list'] = array_filter(
+                array_map(
+                    fn ($id) => $manager->findById($id),
+                    $entry['groupIds']
+                ),
+                fn ($t) => $t instanceof \Gazelle\TGroup
+            );
         }
         return $list;
     }
 
-    public function subscribedArtistCollageList(\Gazelle\User $user, bool $viewAll): array {
+    public function subscribedArtistCollageList(
+        \Gazelle\User $user,
+        Artist $manager,
+        bool $viewAll
+    ): array {
         $cond = ['s.UserID = ?'];
         $args = [$user->id()];
         if ($viewAll) {
@@ -391,7 +404,16 @@ class Collage extends \Gazelle\BaseManager {
         );
         $list = self::$db->to_array(false, MYSQLI_ASSOC, false);
         foreach ($list as &$entry) {
-            $entry['artistIds'] = is_null($entry['artistIds']) ? [] : explode(',', $entry['artistIds']);
+            $entry['artistIds'] = is_null($entry['artistIds'])
+                ? []
+                : array_map('intval', explode(',', $entry['artistIds']));
+            $entry['artist_list'] = array_filter(
+                array_map(
+                    fn ($id) => $manager->findById($id),
+                    $entry['artistIds']
+                ),
+                fn ($a) => $a instanceof \Gazelle\Artist
+            );
         }
         return $list;
     }
