@@ -571,7 +571,7 @@ class RequestTest extends TestCase {
             new Manager\User(),
         );
         $payload = $json->payload();
-        $this->assertCount(39, $payload, 'req-json-payload');
+        $this->assertCount(43, $payload, 'req-json-payload');
         $this->assertTrue($payload['canVote'], 'req-json-can-vote');
         $this->assertFalse($payload['canEdit'], 'req-json-can-edit');
 
@@ -584,6 +584,10 @@ class RequestTest extends TestCase {
         $this->assertEquals(['Lossless', 'V0 (VBR)'], $payload['bitrateList'], 'req-json-bitrate-list');
         $this->assertEquals(['MP3', 'FLAC'], $payload['formatList'], 'req-json-format-list');
         $this->assertEquals(['CD', 'WEB'], $payload['mediaList'], 'req-json-media-list');
+        $this->assertTrue($payload['needCue'], 'req-json-needlog');
+        $this->assertTrue($payload['needLog'], 'req-json-needcue');
+        $this->assertTrue($payload['needLogChecksum'], 'req-json-needlogchecksum');
+        $this->assertEquals(100, $payload['minLogScore'], 'req-json-minlogscore');
 
         $encoding = $this->request->encoding();
         $this->assertTrue($encoding->isValid(), 'req-enc-valid');

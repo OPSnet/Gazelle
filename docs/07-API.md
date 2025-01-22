@@ -1629,12 +1629,21 @@ __NOTE__: `checksum` field can have the following values: `checksum_ok`, `checks
             "producer": []
         },
         "catalogueNumber": "",
-        "releaseType": 0,
-        "releaseName": "Unknown",
-        "bitrateList": "1",
-        "formatList": "24bit Lossless",
-        "mediaList": "FLAC",
-        "logCue": "Vinyl",
+        "releaseType": 1,
+        "releaseTypeName": "Album",
+        "bitrateList": [
+          "Lossless"
+        ],
+        "formatList": [
+          "FLAC"
+        ],
+        "mediaList": [
+          "CD"
+        ],
+        "needCue": true,
+        "needLog": true,
+        "needLogChecksum": true,
+        "minLogScore": 90,
         "isFilled": false,
         "fillerId": 0,
         "fillerName": "0",

@@ -199,7 +199,11 @@ class Request extends BaseObject implements CategoryHasArtist {
             'bitrateList'     => array_values($this->currentEncoding()),
             'formatList'      => array_values($this->currentFormat()),
             'mediaList'       => array_values($this->currentMedia()),
-            'logCue'          => $info['log_cue'],
+            'logCue'          => $info['log_cue'],  // deprecated, remove some time
+            'needCue'         => $this->needCue(),
+            'needLog'         => $this->needLog(),
+            'needLogChecksum' => $this->needLogChecksum(),
+            'minLogScore'     => $this->needLogScore(),
             'isFilled'        => $info['torrent_id'] > 0,
             'fillerId'        => (int)$info['filler_id'],
             'torrentId'       => $info['torrent_id'],
