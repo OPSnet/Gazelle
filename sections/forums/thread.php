@@ -151,11 +151,6 @@ foreach ($slice as $Key => $Post) {
 <?php
 $userTitle = $author->title();
 if (!empty($userTitle)) {
-    $userTitle = preg_replace_callback(
-        '/src=("?)(http.+?)(["\s>])/',
-        fn ($match) => 'src=' . $match[1] . image_cache_encode($match[2]) . $match[3],
-        $userTitle
-    );
 ?> <span class="user_title">(<?= $userTitle ?>)</span><?php
 }
 ?>
@@ -240,9 +235,9 @@ echo ' colspan="2"'; } ?>>
 </div>
 <?php
 echo $paginator->linkbox();
-$lastPost = end($slice);
 
 if ($Viewer->permitted('site_moderate_forums') || ($Viewer->writeAccess($forum) && !$thread->isLocked())) {
+    $lastPost = end($slice);
     echo $Twig->render('reply.twig', [
         'object'   => $thread,
         'merge'    => strtotime($lastPost['AddedTime']) > time() - 3600 && $lastPost['AuthorID'] == $Viewer->id(),

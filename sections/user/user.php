@@ -76,12 +76,6 @@ function check_paranoia_here(?string $Setting): int|false {
     }
 }
 
-// Image proxy CTs
-$DisplayCustomTitle = !empty($user->title())
-    ? preg_replace_callback('/src=("?)(http.+?)(["\s>])/',
-        fn ($m) => 'src=' . $m[1] . image_cache_encode($m[2]) . $m[3], $user->title())
-    : $user->title();
-
 View::show_header($username, [
     'js' => 'vendor/jquery.imagesloaded,vendor/jquery.wookmark,bbcode,comments,lastfm,requests,user'
         . ($Viewer->isStaff() ? ',info_paster' : '')

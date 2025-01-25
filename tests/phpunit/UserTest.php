@@ -227,7 +227,7 @@ class UserTest extends TestCase {
         $this->user->modify();
         $this->assertEquals('custom title', $this->user->title(), 'utest-title');
         $this->assertTrue($this->user->removeTitle()->modify(), 'utest-remove-title');
-        $this->assertNull($this->user->title(), 'utest-null-title');
+        $this->assertEquals('', $this->user->title(), 'utest-null-title');
     }
 
     public function testUpDown(): void {

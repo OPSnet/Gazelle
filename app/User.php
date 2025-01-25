@@ -576,8 +576,12 @@ class User extends BaseObject {
         return $this->info()['AdminComment'];
     }
 
-    public function title(): ?string {
-        return $this->info()['Title'];
+    public function title(): string {
+        return preg_replace_callback(
+            '/src=("?)(http.+?)(["\s>])/',
+            fn ($match) => 'src=' . $match[1] . image_cache_encode($match[2]) . $match[3],
+            (string)$this->info()['Title'],
+        );
     }
 
     public function uploadedSize(): int {
