@@ -26,7 +26,7 @@
         <br /><a class="brackets" href="tools.php?action=db_sandbox&amp;src=pg&amp;debug={{
             {"query": q.query, "args": q.args}|json_encode|b64 }}">Inspect</a>
         </td>
-        <td class="debug_info style="width: 130px;">{{ q.metric }}</td>
+        <td class="debug_info" style="width: 130px;">{{ q.metric }}</td>
         <td class="debug_info debug_query_time" style="width: 130px;">{{ q.duration|number_format(5) }} ms</td>
     </tr>
 {%  if loop.last %}
