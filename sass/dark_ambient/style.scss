@@ -404,45 +404,44 @@ ul#userinfo_username,
 }
 
 #menu ul {
-  z-index: 7;
   padding-left: 150px;
   padding-bottom: 0;
+  z-index: 7;
 }
 
 ul#userinfo_major {
-  z-index: 3;
   padding-left: 530px;
   width: 365px;
+  z-index: 3;
 }
 
 ul#userinfo_minor {
-  z-index: 5;
-  padding-top: 17px;
   padding-left: 320px;
+  padding-top: 17px;
+  z-index: 5;
 }
 
 ul#userinfo_stats {
-  z-index: 4;
   margin-top: 17px;
   padding-left: 530px;
   width: 430px;
+  z-index: 4;
 }
 
 ul#userinfo_username {
-  z-index: 6;
   padding-left: 320px;
   width: 185px;
+  z-index: 6;
 }
 
 .username {
-  text-overflow: ellipsis;
   max-width: 60px;
+  text-overflow: ellipsis;
 }
 
 #alerts {
+  margin: -126px 0 0 510px;
   z-index: 2;
-  padding-left: 530px;
-  padding-top: 34px;
 }
 
 /* SEARCH BARS */

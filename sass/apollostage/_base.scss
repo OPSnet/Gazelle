@@ -1556,10 +1556,6 @@ blockquote {
   flex-direction: column;
 }
 
-#alerts {
-  order: 10;
-}
-
 /* wrap overflow word-wrap handling */
 .wrap_overflow {
   word-break: break-word !important;
@@ -1728,27 +1724,27 @@ body#collage .cats_music {
 }
 
 .cats_applications {
-  border-right: thick solid variables.$color-accent-cats_applications;
+  border-right: thin solid variables.$color-accent-cats_applications;
 }
 
 .cats_audiobooks {
-  border-right: thick solid variables.$color-accent-cats_audiobooks;
+  border-right: thin solid variables.$color-accent-cats_audiobooks;
 }
 
 .cats_comedy {
-  border-right: thick solid variables.$color-accent-cats_comedy;
+  border-right: thin solid variables.$color-accent-cats_comedy;
 }
 
 .cats_comics {
-  border-right: thick solid variables.$color-accent-cats_comics;
+  border-right: thin solid variables.$color-accent-cats_comics;
 }
 
 .cats_ebooks {
-  border-right: thick solid variables.$color-accent-cats_ebooks;
+  border-right: thin solid variables.$color-accent-cats_ebooks;
 }
 
 .cats_elearningvideos {
-  border-right: thick solid variables.$color-accent-cats_elearningvideos;
+  border-right: thin solid variables.$color-accent-cats_elearningvideos;
 }
 
 /* END category decorations for torrent tables on torrent & collage pages */
@@ -2409,23 +2405,32 @@ tr.snatched_torrent div.tags::before {
 
 /* ## 2.3.1 Base styling */
 
+#alerts {
+  border: 2px solid variables.$color-accent-border-alert;  /* varies by stylesheet */
+  border-radius: 5px;
+  margin: 10px auto 0 auto;
+  max-width: fit-content;
+  min-width: 40%;
+}
+
 /* Alertbar occurs when User Settings: Notifications: "Traditional" is selected. */
 /* Save_message can occur on request votes. */
 .alertbar,
 .sys_error,
 .save_message {
-  border: thick solid variables.$color-accent-border-alert;
-  padding: 1rem 1rem 1rem 48px;
-  background-color: variables.$color-background-alert;
-  background-image: variables.$icon-notification;
-  background-repeat: no-repeat;
-  background-position: 8px center;
-  background-size: 32px;
-  color: variables.$color-text-alert !important;
-  font-weight: 700;
-  font-size: 16px;
-  margin-top: 8px;
+  background-color: variables.$color-background-alert;  /* varies by stylesheet */
+  color: variables.$color-text-base !important;  /* varies by stylesheet */
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 10px 10px 48px;
   text-align: center;
+}
+
+.alertbar:first-of-type {
+  background-image: url(config('STATIC_SERVER') + "/svg/site/ops-icon-harp-ccc.svg");
+  background-position: 8px center;
+  background-repeat: no-repeat;
+  background-size: 32px;
 }
 
 .alertbar a {
@@ -2434,17 +2439,17 @@ tr.snatched_torrent div.tags::before {
 
 /* occurs on failure, for example failed request votes */
 .error_message {
-  border: thick solid variables.$color-accent-border-warning-2;
-  padding: 1rem 1rem 1rem 48px;
   background-color: variables.$color-background-warning;
   background-image: url(config('STATIC_SERVER') + "/svg/site/ops-icon-triangle-ccc.svg");
-  background-repeat: no-repeat;
   background-position: 8px;
+  background-repeat: no-repeat;
   background-size: 32px;
+  border: thick solid variables.$color-accent-border-warning-2;
   color: variables.$color-text-warning !important;
-  font-weight: 700;
   font-size: 16px;
+  font-weight: 700;
   margin-top: 8px;
+  padding: 1rem 1rem 1rem 48px;
   text-align: center;
 }
 .error_message a {
@@ -3746,33 +3751,6 @@ Documentation of mobile classes:
     height: calc(var(--row-height) - 9px);
   }
   /* END searchboxes */
-
-  /* ## 4.17.10 Alerts for mobile users */
-
-  /*  Alertbar is part of the #header, which is shown as a pulldown on mobile.
-      No room for alerts in the pulldown. */
-  #alerts {
-    display: none;
-  }
-
-  /* Notify user they have an alert & must rotate to see. */
-  #wrapper:has(#alerts)::before {
-    content: "";
-    background-image: variables.$icon-mobile-rotate;
-    background-position: top center;
-    background-size: auto 32px;
-    background-repeat: no-repeat;
-    left: 15%;
-    pointer-events: none;
-    transform: translateZ(0);
-    width: calc(85% / 3);
-    z-index: $z-mobilemenu_closed-tab-icons;
-    height: 32px;
-    position: fixed;
-    top: 0;
-    box-sizing: content-box;
-  }
-  /* ************************************************ */
 
   /* ## 4.18 Checkboxes ~ purpose undocumented */
 

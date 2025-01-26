@@ -41,10 +41,10 @@ actions of it.</div>
 {% endif %}
 
 <p>
-<strong>Time:</strong> <span>{{ time_ms|number_format(5) }} ms</span>
-<strong>Used:</strong> <span>{{ memory|octet_size }}</span>
-<strong>Load:</strong> <span>{{ load.0|number_format(2) }} {{ load.1|number_format(2) }} {{ load.2|number_format(2) }}</span>
-<strong>Date:</strong> <span id="site_date">{{ 'now'|date('Y-m-d') }}</span> <span id="site_time">{{ 'now'|date('H:i') }}</span>
+<span class="footer-stats"><strong>Time:</strong> <span>{{ time_ms|number_format(5) }} ms</span></span>
+<span class="footer-stats"><strong>Used:</strong> <span>{{ memory|octet_size }}</span></span>
+<span class="footer-stats"><strong>Load:</strong> <span>{{ load.0|number_format(2) }} {{ load.1|number_format(2) }} {{ load.2|number_format(2) }}</span></span>
+<span class="footer-stats"><strong>Date:</strong> <span id="site_date">{{ 'now'|date('Y-m-d') }}</span> <span id="site_time">{{ 'now'|date('H:i') }}</span></span>
 </p>
 <p>Site and design &copy; {{ launch }} {{ constant('SITE_NAME') }} | <a href='https://github.com/OPSnet/Gazelle'>Project Gazelle</a></p>
 </div>

@@ -1,26 +1,20 @@
 {{ header('Chat') }}
 {% if user.disableIRC %}
 <div class="thin">
-    <div class="header">
-        <h3 id="irc">IRC Privileges Disabled</h3>
-    </div>
+    <h3 id="irc">IRC Privileges Disabled</h3>
     <div class="box pad" style="padding: 10px 10px 10px 20px;">
         <strong>Your IRC privileges are disabled.</strong>
     </div>
 </div>
 {% else %}
 <div class="thin">
-    <div class="header">
-        <h3 id="irc">IRC Rules - Please read these carefully!</h3>
-    </div>
+    <h3 id="irc">IRC Rules - Please read these carefully!</h3>
     <div class="box pad" style="padding: 10px 10px 10px 20px;">
         {% include 'rules/irc.twig' %}
     </div>
 </div>
 <div class="thin">
-    <div class="header">
-        <h3 id="general">Join the Chat</h3>
-    </div>
+    <h3 id="general">Join the Chat</h3>
     <div class="box pad" style="padding: 10px 0px 10px 0px;">
         <div style="padding: 0px 10px 10px 20px;">
             <p>If you have an IRC client, refer to <a href="wiki.php?action=article&amp;name=irc">

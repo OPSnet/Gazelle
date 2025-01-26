@@ -340,27 +340,23 @@ ul.thin li {
   display: inline;
 }
 
-#alerts {
-  background: #383c4a;
-  margin-bottom: -95px;
-  margin-top: 95px;
-  padding: 20px 0;
-}
-
 #cat-selector ul {
   width: 100%;
 }
 
 #cat-selector ul li {
   display: inline;
-  // float: left;
-  // height: 1em;
-  // width: 12em;
 }
 
+#alerts {
+  background: #383c4a;
+  margin-top: 7px;
+}
 .alertbar {
   background-color: #4b5162;
-  border: 1px solid #5294e2;
+  border-bottom: 1px solid #5294e2;
+  border-left: 1px solid #5294e2;
+  border-right: 1px solid #5294e2;
   color: #a7adb9;
   text-align: center;
   font-size: 0.95em;
@@ -368,6 +364,9 @@ ul.thin li {
   margin: 0 auto;
   padding: 10px;
   width: 350px;
+}
+.alertbar:first-of-type {
+  border-top: 1px solid #5294e2;
 }
 .alertbar a {
   color: #a7adb9;

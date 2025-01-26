@@ -1,8 +1,8 @@
 {% macro active(t) -%}
-    {%- if t %} class="active"{% endif -%}
+{%-  if t %} class="active"{% endif -%}
 {% endmacro %}
 {% macro active_class(t) %}
-    {%- if t %} active{% endif -%}
+{%-  if t %} active{% endif -%}
 {% endmacro -%}
 {% set auth = user.auth -%}
 </head>
@@ -100,17 +100,6 @@
 </ul>
 </div>
 
-{% if alert_list or action_list %}
-<div id="alerts">
-{% if alert_list %}
-<div class="alertbar">{{ alert_list|join(' &sdot; ')|raw }}</div>
-{% endif %}
-{% if action_list %}
-<div class="alertbar blend">{{ action_list|join(' &sdot; ')|raw }}</div>
-{% endif %}
-</div>
-{% endif %}
-
 <div id="searchbars">
 <ul>
 <li id="searchbar_torrents">
@@ -170,3 +159,13 @@
 </div>
 </div>
 <div id="content">
+{% if alert_list or action_list %}
+<div id="alerts">
+{%  if alert_list %}
+<div class="alertbar">{{ alert_list|join(' &sdot; ')|raw }}</div>
+{%  endif %}
+{%  if action_list %}
+<div class="alertbar blend">{{ action_list|join(' &sdot; ')|raw }}</div>
+{%  endif %}
+</div>
+{% endif %}

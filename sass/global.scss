@@ -32,7 +32,7 @@ pre br {
 .cat-choice {
   display: inline-block;
   text-align: left;
-  width: 110px;
+  width: 117px;
 }
 
 ul.rules {
@@ -841,6 +841,10 @@ tr.torrent .bookmark > a::after {
 
 #reportsv2 .manage_form img {
   max-width: 616px;
+}
+
+#footer .footer-stats {
+  white-space: nowrap;
 }
 
 /* make Safari treat <input type="search" /> as a regular text box */

@@ -289,13 +289,6 @@ ul.thin li {
   overflow: hidden;
 }
 
-#alerts {
-  background: transparent url('images/content.png');
-  padding: 4px 9px;
-  margin: -19px auto 0 auto;
-  box-shadow: 1px 3px rgba(0, 0, 0, 0.5);
-}
-
 #footer {
   background: transparent url('images/bg_footer.png');
   margin-top: 40px;
@@ -531,11 +524,14 @@ ul.thin li {
 }
 
 #alerts {
-  width: 230px;
-  margin: 75px 0 0 338px;
+  background: transparent url('images/content.png');
+  box-shadow: 1px 3px rgba(0, 0, 0, 0.5);
+  color: #FFF;
+  margin: -151px 0 0 327px;
+  padding: 4px 9px;
   position: absolute;
   text-align: center;
-  color: #FFF;
+  width: 320px;
 }
 
 #cat-selector ul {

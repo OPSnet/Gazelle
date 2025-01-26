@@ -4,7 +4,7 @@
 /* GLOBAL */
 // TODO: FIX_STATIC_SERVER
 body {
-  background: #c4c4c4 url('images/what_bg.jpg') top left repeat-x;
+  background: #c4c4c4 url(config('STATIC_SERVER') + '/styles/proton/images/what_bg.jpg') top left repeat-x;
   font-family: Arial, sans-serif;
   font-size: 0.7em;
   margin-bottom: 0;
@@ -37,46 +37,35 @@ a img {
 }
 
 #wrapper {
-  width: 1000px;
   margin: 0 auto;
+  width: 1000px;
 }
 
 #footer {
-  padding: 42px 0 20px 0;
-  color: #a5a5a5;
-  text-align: left;
-  background: #575757 url('images/footer_bg.png') top left repeat-x;
-  position: relative;
-  margin: -22px auto 20px auto;
-  z-index: 1;
+  background: #575757 url(config('STATIC_SERVER') + '/styles/proton/images/footer_bg.png') top left repeat-x;
   border-radius: 11px;
-  overflow: hidden;
   clear: both;
-  width: 950px;
+  color: #a5a5a5;
+  margin: -22px auto 20px auto;
+  overflow: hidden;
+  padding: 42px 0 20px 0;
+  position: relative;
+  text-align: left;
+  width: 1000px;
+  z-index: 1;
 }
 
 #footer p {
-  width: 235px;
-  height: 36px;
-  border-left: 1px solid #6f6f6f;
-  margin: 0 20px 0 0;
-  padding: 0 0 0 20px;
+  border-right: 1px solid #6f6f6f;
   display: table-cell;
+  height: 36px;
+  text-align: center;
   vertical-align: middle;
+  width: 333px;
 }
 
-#footer p strong {
-  padding-left: 3px;
-}
-
-#footer p:first-child {
-  border: 0;
-  width: 180px;
-}
-
-#footer p:last-child {
-  margin: 0;
-  width: 295px;
+#footer p:last-of-type {
+  border-right: none;
 }
 
 #footer a {
@@ -159,7 +148,7 @@ input,
 textarea {
   color: #999999;
   padding: 3px;
-  background: white url('images/inputbg.png') top left repeat-x;
+  background: white url(config('STATIC_SERVER') + '/styles/proton/images/inputbg.png') top left repeat-x;
 }
 
 input[type="file"] {
@@ -255,6 +244,7 @@ ul#userinfo_minor {
 
 ul#userinfo_minor {
   width: 200px;
+  height: 66px;
 }
 
 #menu ul li,
@@ -314,8 +304,8 @@ ul#userinfo_major li a:hover {
 }
 
 ul#userinfo_stats li {
-  font-weight: normal;
   color: #575757;
+  font-weight: normal;
 }
 
 ul#userinfo_stats li a {
@@ -323,27 +313,26 @@ ul#userinfo_stats li a {
   color: #575757;
 }
 
+#alerts {
+  left: 498px;
+  padding: 6px 8px;
+  position: absolute;
+  top: -130px;
+  max-width: 500px;
+}
+
+.sys-error {
+  background-color: #cccccc;
+}
+
 .alertbar {
   font-weight: normal;
-  background-color: #007dc6;
-  padding: 3px 5px;
+  padding: 0 5px;
 }
 
 .alertbar a {
-  color: white;
   font-weight: bold;
-}
-
-.alertbar:hover {
-  background-color: #0070b7;
-}
-
-.alertbar:first-of-type {
-  padding-top: 4px;
-}
-
-.alertbar:last-of-type {
-  padding-bottom: 4px;
+  padding: 2px;
 }
 
 .blend {
@@ -351,16 +340,14 @@ ul#userinfo_stats li a {
   color: #626262;
 }
 
-.blend:hover a {
-  color: white;
-}
-
 .blend a {
   color: #575757;
+  padding: 2px;
 }
 
 .blend a:hover {
   background-color: #575757;
+  border-radius: 3px;
   color: #e6e6e6;
 }
 
@@ -400,61 +387,55 @@ ul#userinfo_minor a:hover {
 #logo {
   width: 120px;
   height: 80px;
-  z-index: 7;
   position: absolute;
+  z-index: 7;
 }
 
 #logo a {
+  background: url(config('STATIC_SERVER') + '/styles/proton/images/logo.png') no-repeat top left;
   display: block;
   height: 110px;
-  background: url('images/logo.png') no-repeat top left;
-  margin-left: -28px;
-  margin-top: -18px;
+  margin-left: -20px;
+  margin-top: -16px;
 }
 
 #menu ul,
 ul#userinfo_major,
 ul#userinfo_minor,
 ul#userinfo_stats,
-ul#userinfo_username,
-#alerts {
+ul#userinfo_username {
   position: absolute;
 }
 
 #menu ul {
-  z-index: 6;
+  height: 82px;
   padding-left: 120px;
   padding-bottom: 0;
+  z-index: 6;
 }
 
 ul#userinfo_major {
-  z-index: 2;
   padding-left: 510px;
-  width: 300px;
+  width: 400px;
+  z-index: 2;
 }
 
 ul#userinfo_minor {
-  z-index: 4;
-  padding-top: 17px;
   padding-left: 290px;
+  padding-top: 17px;
+  z-index: 4;
 }
 
 ul#userinfo_stats {
-  z-index: 3;
   margin-top: 17px;
   padding-left: 510px;
+  z-index: 3;
 }
 
 ul#userinfo_username {
-  z-index: 5;
   padding-left: 290px;
   width: 200px;
-}
-
-#alerts {
-  z-index: 1;
-  padding-left: 508px;
-  padding-top: 36px;
+  z-index: 5;
 }
 
 /* SEARCH BARS */
@@ -463,10 +444,10 @@ ul#userinfo_username {
 }
 
 #searchbars ul {
+  display: block;
+  list-style: none;
   padding: 20px 0 0 0;
   margin: 0;
-  list-style: none;
-  display: block;
 }
 
 #searchbars ul li {
@@ -475,15 +456,15 @@ ul#userinfo_username {
 }
 
 #searchbars ul li ul {
-  display: block;
-  position: absolute;
-  top: 1em;
-  left: 0;
-  z-index: 1000;
   background-color: #F0F0F0;
   border: 1px solid #CCC !important;
+  display: block;
+  left: 0;
   margin-top: 12px;
   padding: 0;
+  position: absolute;
+  top: 1em;
+  z-index: 1000;
 }
 
 #searchbars ul li ul li {
@@ -645,7 +626,7 @@ table {
   width: 50%;
   margin: 0 auto;
   padding: 20px;
-  background: transparent url('images/convo.png') 50% 37px no-repeat;
+  background: transparent url(config('STATIC_SERVER') + '/styles/proton/images/convo.png') 50% 37px no-repeat;
 }
 
 #inbox .vertical_space:not(#preview) .head {
@@ -666,7 +647,7 @@ table {
 
 #inbox #preview {
   padding: 20px;
-  background: transparent url('images/convo.png') 50% 0 no-repeat;
+  background: transparent url(config('STATIC_SERVER') + '/styles/proton/images/convo.png') 50% 0 no-repeat;
   margin-left: 180px;
   width: 471px;
 }
@@ -706,7 +687,7 @@ table {
 #blog blockquote {
   border: 1px dotted #dcdcdc;
   padding: 6px;
-  background: white url('images/quote_bg.png') -10px -5px no-repeat;
+  background: white url(config('STATIC_SERVER') + '/styles/proton/images/quote_bg.png') -10px -5px no-repeat;
   margin-left: 25px;
   margin-right: 25px;
 }
@@ -851,7 +832,7 @@ strong.quoteheader {
   border: 1px solid #dcdcdc;
   border-radius: 7px;
   padding: 8px;
-  background: #f3f3f3 url('images/filter.png') -30px -30px no-repeat;
+  background: #f3f3f3 url(config('STATIC_SERVER') + '/styles/proton/images/filter.png') -30px -30px no-repeat;
 }
 
 #torrents .filter_torrents h3 {
@@ -932,11 +913,11 @@ strong.quoteheader {
 }
 
 .show_torrents {
-  background: url('images/what_show.gif') no-repeat center center;
+  background: url(config('STATIC_SERVER') + '/styles/proton/images/what_show.gif') no-repeat center center;
 }
 
 .hide_torrents {
-  background: url('images/what_hide.gif') no-repeat center center;
+  background: url(config('STATIC_SERVER') + '/styles/proton/images/what_hide.gif') no-repeat center center;
 }
 
 .group {
@@ -1020,11 +1001,11 @@ tr.torrent .bookmark > a::after {
 
 .torrent_table .pad td {
   padding: 20px !important;
-  background: url('images/download.png') top left no-repeat;
+  background: url(config('STATIC_SERVER') + '/styles/proton/images/download.png') top left no-repeat;
 }
 
 .torrent_table .pad {
-  background: url('images/download_bottom.png') bottom left no-repeat;
+  background: url(config('STATIC_SERVER') + '/styles/proton/images/download_bottom.png') bottom left no-repeat;
 }
 
 .torrent_table .pad td td {
@@ -1219,12 +1200,12 @@ div#flip_view_1 div#similar-artist .name {
 }
 
 .main_column .group {
-  background: #c2c2c2 url('images/discogbglightshadow.png') top left repeat-x;
+  background: #c2c2c2 url(config('STATIC_SERVER') + '/styles/proton/images/discogbglightshadow.png') top left repeat-x;
 }
 
 .main_column .group td {
   color: #878787;
-  background: transparent url('images/discogbglight.png') top right repeat-y;
+  background: transparent url(config('STATIC_SERVER') + '/styles/proton/images/discogbglight.png') top right repeat-y;
   border: 0 !important;
 }
 
@@ -1241,7 +1222,7 @@ div#flip_view_1 div#similar-artist .name {
 }
 
 .main_column .group .tags {
-  background: url('images/tags.png') 0 60% no-repeat;
+  background: url(config('STATIC_SERVER') + '/styles/proton/images/tags.png') 0 60% no-repeat;
   padding: 0 0 0 19px;
 }
 
@@ -1313,11 +1294,11 @@ div#flip_view_1 div#similar-artist .name {
 
 .poll .graph .left_poll {
   width: 9px;
-  background: url('images/poll_left.png') top left no-repeat;
+  background: url(config('STATIC_SERVER') + '/styles/proton/images/poll_left.png') top left no-repeat;
 }
 
 .poll .graph .center_poll {
-  background: url('images/poll_middle.png') top left repeat-x;
+  background: url(config('STATIC_SERVER') + '/styles/proton/images/poll_middle.png') top left repeat-x;
   max-width: 865px;
 }
 
@@ -1327,7 +1308,7 @@ div#flip_view_1 div#similar-artist .name {
 
 .poll .graph .right_poll {
   width: 11px;
-  background: url('images/poll_right.png') top left no-repeat;
+  background: url(config('STATIC_SERVER') + '/styles/proton/images/poll_right.png') top left no-repeat;
 }
 
 /* MISC */
