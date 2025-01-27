@@ -80,7 +80,7 @@ class DNU extends \Gazelle\Base {
 
     public function hasNewForUser(\Gazelle\User $user): bool {
         return (bool)self::$db->scalar("
-            SELECT if(max(Time) IS NULL OR max(Time) < ?, 1, 0)
+            SELECT if(max(created) IS NULL OR max(created) < ?, 1, 0)
             FROM torrents
             WHERE UserID = ?
             ", $this->latest(), $user->id()
