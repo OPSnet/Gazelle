@@ -73,7 +73,7 @@ class Warning extends \Gazelle\BaseUser {
                 reason
             from user_warning
             where id_user = ?
-            order by lower(warning)
+            order by id_user_warning
             ", $this->id()
         );
     }
@@ -84,9 +84,9 @@ class Warning extends \Gazelle\BaseUser {
     public function clear(): int {
         $affected = $this->pg()->prepared_query("
             update user_warning set
-                warning = tstzrange(lower(warning), greatest(lower(warning), now()))
+                warning = NULL
             where upper(warning) > now()
-                and id_user = ?
+                and id_user = ?       
             ", $this->id()
         );
         $this->flush();
