@@ -159,8 +159,18 @@
             <strong>Use HTTPS Tracker</strong>
         </td>
         <td>
+{% if user.option('HttpsTracker') %}
+            HTTPS tracker announces are enabled
+            <span class="tooltip" style="color: #00ff00" title="HTTPS enabled!"> ✔</span>
+{% else %}
             <label><input type="checkbox" name="httpstracker" id="httpstracker"{{ checked(user.option('HttpsTracker')) }} />
-            Enable HTTPs tracker for announce URL</label>
+            Enable HTTPS tracker announce URLs
+            <br />
+            <strong class="important_text">WARNING: your announce url uses the
+            plaintext <code>http</code> protocol!
+            <br />This functionality will be
+            retired on 2025-07-01 (in {{ '2025-07-01 00:00:00'|time_diff }}).</strong>
+{% endif %}
         </td>
     </tr>
 {% if user.hasAttr('feature-file-count') %}

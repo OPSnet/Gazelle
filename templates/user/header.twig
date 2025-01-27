@@ -126,7 +126,7 @@ Torrent clients: {{ user.clients|join('; ') }}</div>
     <ul class="stats nobullet">
         <li>Joined: {{ user.created|time_diff }}
             {%- if (own_profile or viewer.permitted('users_mod')) and user.MFA.enabled -%}
-            <span class="tooltip" style="color: #008000" title="2FA enabled!"> &#x2714;</span>
+            <span class="tooltip" style="color: #008000" title="2FA enabled!"> ✔</span>
             {%- endif -%}
         </li>
 {% set visible = user.propertyVisible(preview_user, 'lastseen') %}

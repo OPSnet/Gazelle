@@ -3,8 +3,17 @@
 {% if is_upload %}
 <h2>Upload</h2>
     <div style="text-align: center;">
-        Your personal announce URL is:<br />
-        <div style="margin: 0 auto;"><input type="text" value="{{ user.announceUrl }}" size="71" onclick="this.select();" readonly="readonly" /></div>
+        Your personal announce url is:<br />
+        <div style="margin: 0 auto;">
+            <input type="text" value="{{ user.announceUrl }}" size="71" onclick="this.select();" readonly="readonly" />
+{%  if not user.option('HttpsTracker') %}
+            <br />
+            <strong style="font-size: 15pt" class="important_text">WARNING: your announce url uses the
+            <a href="/user.php?action=edit&id=me#torrent">plaintext <code>http</code> protocol!</a>
+            <br />This functionality will be retired on 2025-07-01 (in
+            {{ '2025-07-01 00:00:00'|time_diff }}).</strong>
+{%  endif %}
+        </div>
     </div>
 {% else %}
 <h2>Edit <a href="torrents.php?id={{ info.GroupID }}&torrentid={{ info.ID }}#torrent{{ info.ID }}">{{ info.Title }}</a></h2>

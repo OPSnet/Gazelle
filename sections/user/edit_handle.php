@@ -9,6 +9,9 @@ $userMan = new Gazelle\Manager\User();
 if (!isset($_REQUEST['id'])) {
     $ownProfile = true;
     $user = $Viewer;
+} elseif ($_REQUEST['id'] === 'me') {
+    $ownProfile = true;
+    $user = $Viewer;
 } else {
     $user = $userMan->findById((int)$_REQUEST['id']);
     if (is_null($user)) {
@@ -188,14 +191,18 @@ $option['NoVoteLinks']         = (!empty($_POST['novotelinks']) ? 1 : 0);
 $option['CoverArt']            = (int)!empty($_POST['coverart']);
 $option['ShowExtraCovers']     = (int)!empty($_POST['show_extra_covers']);
 $option['AutoComplete']        = $_POST['autocomplete'];
-$option['HttpsTracker']        = (!empty($_POST['httpstracker']) ? 1 : 0);
 
+// user options
 foreach (['DefaultSearch', 'DisableFreeTorrentTop10'] as $opt) {
     if ($user->option($opt)) {
         $option[$opt] = $user->option($opt);
     }
 }
-
+if ($user->option('HttpsTracker') == 1) {
+    $option['HttpsTracker'] = 1;
+} else {
+    $option['HttpsTracker'] = !empty($_POST['httpstracker']) ? 1 : 0;
+}
 if (empty($_POST['sorthide'])) {
     $option['SortHide'] = [];
 } else {
@@ -205,7 +212,6 @@ if (empty($_POST['sorthide'])) {
         $option['SortHide'][$E[0]] = $E[1];
     }
 }
-
 if ($Viewer->permitted('site_advanced_search')) {
     $option['SearchType'] = (int)!empty($_POST['search_type_advanced']);
 } else {
