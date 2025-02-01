@@ -42,7 +42,7 @@ for (const item of fs.readdirSync(sassDir, { withFileTypes: true })) {
   let sourceFile;
   let outputFile;
   let outputSourcemap;
-  if (skipItems.includes(item.name)) {
+  if (skipItems.includes(item.name) || item.name.endsWith('.swp')) {
     continue;
   }
   if (item.isDirectory()) {

@@ -253,16 +253,22 @@ class Twig {
             'UTF-8'
         )));
 
-        $twig->addFunction(new \Twig\TwigFunction('privilege', function ($default, $config, $key) {
-            $enabled = $config[$key] ?? $default[$key] ?? false;
-            $isOverride = isset($config[$key], $default) && $config[$key] !== ($default[$key] ?? null);
+        $twig->addFunction(new \Twig\TwigFunction('privilege', function (array|null $default, array $config, string $name): \Twig\Markup {
+            $label = \Gazelle\Manager\Privilege::privilegeList()[$name] ?? "!unknown($name)!";
+            if (is_null($default)) {
+                return new \Twig\Markup(
+                    "<input type=\"checkbox\" name=\"perm_$name\" id=\"$name\" title=\"$name\""
+                    . (isset($config[$name]) ? ' checked' : '')
+                    . " />&nbsp;<label title=\"$name\" for=\"$name\" class=\"single\">$label</label>",
+                    'UTF-8'
+                );
+            }
             return new \Twig\Markup(
-                sprintf(
-                    '<input type="checkbox" name="%s" id="%s" value="1"%s />&nbsp;<label title="%s" for="%s"%s>%s</label><br />',
-                    "perm_$key", $key, $enabled ? ' checked="checked"' : '', $key, $key,
-                    $isOverride ? ' style="font-weight: bold;"' : '',
-                    \Gazelle\Manager\Privilege::privilegeList()[$key] ?? "!unknown($key)!"
-                ),
+                "<input type=\"checkbox\" name=\"default_$name\" disabled"
+                . (isset($default[$name]) ? ' checked' : '')
+                . " /> <input type=\"checkbox\" class=\"double\" name=\"perm_$name\" id=\"$name\" title=\"$name\""
+                . ($config[$name] ?? $default[$name] ?? false ? ' checked' : '')
+                . " />&nbsp;<label title=\"$name\" for=\"$name\" class=\"double\">$label</label>",
                 'UTF-8'
             );
         }));

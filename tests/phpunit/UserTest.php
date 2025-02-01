@@ -122,7 +122,7 @@ class UserTest extends TestCase {
         $this->assertFalse($this->user->permitted($privilege), 'user-permitted-custom-no');
         $this->assertTrue($this->user->addCustomPrivilege($privilege), 'user-permitted-custom-modify');
         $this->assertTrue($this->user->permitted($privilege), 'user-permitted-custom-yes');
-        $this->assertTrue($this->user->modifyPrivilegeList([]), 'user-permitted-custom-none');
+        $this->assertEquals(1, $this->user->modifyPrivilegeList([]), 'user-permitted-custom-none');
         $this->assertFalse($this->user->permitted($privilege), 'user-permitted-custom-removed');
     }
 

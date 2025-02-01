@@ -123,8 +123,69 @@ class PrivilegeTest extends TestCase {
             $userPriv->badgeList(),
             'privilege-badge-list',
         );
-        $this->assertGreaterThan(0, count($userPriv->defaultPrivilegeList()), 'privilege-secondary-list');
+        $this->assertGreaterThan(0, count($userPriv->defaultList()), 'privilege-secondary-list');
         $flsList = array_values(array_filter($manager->usageList(), fn($p) => $p['id'] == FLS_TEAM));
         $this->assertEquals($total + 1, $flsList[0]['total'], 'privilege-one-new-fls');
+    }
+
+    public function testCustomPrivilege(): void {
+        $admin = $this->userList['admin'];
+        $user  = $this->userList['user'];
+
+        $this->assertFalse(
+            $user->permitted('site_debug'),
+            'privilege-custom-baseline-user'
+        );
+        $this->assertEquals(
+            1,
+            $user->privilege()->modifyCustomList(['site_debug' => true]),
+            'privilege-custom-user-add'
+        );
+        $this->assertArrayHasKey(
+            'site_debug',
+            $user->privilege()->customList(),
+            'privilege-custom-user-list'
+        );
+        $this->assertTrue(
+            $user->permitted('site_debug'),
+            'privilege-custom-user-true'
+        );
+        $this->assertEquals(
+            1,
+            $user->privilege()->modifyCustomList(['site_debug' => false]),
+            'privilege-custom-user-remove'
+        );
+        $this->assertFalse(
+            $user->permitted('site_debug'),
+            'privilege-custom-user-false'
+        );
+
+        $this->assertTrue(
+            $admin->permitted('site_debug'),
+            'privilege-custom-admin-baseline'
+        );
+        $this->assertEquals(
+            1,
+            $admin->privilege()->modifyCustomList(['site_debug' => false]),
+            'privilege-custom-admin-add'
+        );
+        $this->assertArrayHasKey(
+            'site_debug',
+            $admin->privilege()->customList(),
+            'privilege-custom-admin-list'
+        );
+        $this->assertFalse(
+            $admin->permitted('site_debug'),
+            'privilege-custom-admin-false'
+        );
+        $this->assertEquals(
+            1,
+            $admin->privilege()->modifyCustomList([]),
+            'privilege-custom-admin-reset'
+        );
+        $this->assertTrue(
+            $admin->permitted('site_debug'),
+            'privilege-custom-admin-true'
+        );
     }
 }

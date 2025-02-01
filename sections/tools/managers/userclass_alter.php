@@ -49,24 +49,33 @@ if (isset($_REQUEST['submit'])) {
         }
     }
 
-    $name         = $_REQUEST['name'];
-    $forums       = $_REQUEST['forums'];
-    $displayStaff = isset($_REQUEST['displaystaff']);
-    $staffGroupId = $displayStaff
+    $name          = $_REQUEST['name'];
+    $forums        = $_REQUEST['forums'];
+    $displayStaff  = isset($_REQUEST['displaystaff']);
+    $staffGroupId  = $displayStaff
         ? (new Gazelle\Manager\StaffGroup())->findById((int)($_REQUEST['staffgroup'] ?? 0))?->id()
         : null;
-    $level        = (int)$_REQUEST['level'];
-    $secondary    = (int)isset($_REQUEST['secondary']);
-    $badge        = $secondary ? ($_REQUEST['badge'] ?? '') : '';
-    $values       = [];
-    foreach ($_REQUEST as $key => $perm) {
-        if (str_starts_with($key, 'perm_')) { /** @phpstan-ignore-line $key is always a string */
-            $values[substr($key, 5)] = (int)$perm; /** @phpstan-ignore-line ditto */
+    $level         = (int)$_REQUEST['level'];
+    $secondary     = (int)isset($_REQUEST['secondary']);
+    $badge         = $secondary ? ($_REQUEST['badge'] ?? '') : '';
+    $privilegeList = [];
+    foreach (array_map('strval', array_keys($_POST)) as $key) {
+        if (str_starts_with($key, 'perm_')) {
+            $privilegeList[substr($key, 5)] = true;
         }
     }
 
     if (!$edit) {
-        $privMan->create($name, $level, $secondary, $forums, $values, $staffGroupId, $badge, $displayStaff);
+        $privMan->create(
+            $name,
+            $level,
+            $secondary,
+            $forums,
+            $privilegeList,
+            $staffGroupId,
+            $badge,
+            $displayStaff
+        );
         header("Location: tools.php?action=permissions");
         exit;
     }
@@ -77,7 +86,7 @@ if (isset($_REQUEST['submit'])) {
         ->setField('Secondary', $secondary)
         ->setField('PermittedForums', $forums)
         ->setField('StaffGroup', $staffGroupId)
-        ->setField('`Values`', serialize($values))
+        ->setField('`Values`', serialize($privilegeList))
         ->modify();
 
     $usersAffected = (new Gazelle\Manager\User())->flushUserclass($privilege->id());

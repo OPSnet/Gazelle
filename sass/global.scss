@@ -1009,6 +1009,22 @@ td.forum-post-head a.username {
   }
 }
 
+.permission_container label.single {
+  display: block;
+  padding: 4px;
+  margin: -3.6ex 0 0 2.6ex;
+}
+
+.permission_container label.double {
+  display: block;
+  padding: 4px;
+  margin: -3.6ex 0 0 5.5ex;
+}
+
+.permission_container input.double {
+  margin-left: -4px;
+}
+
 .debug_table {
   text-align: left;
   width: 100%;

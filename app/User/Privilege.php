@@ -95,7 +95,9 @@ class Privilege extends \Gazelle\BaseUser {
 
         // a custom privilege may revoke a primary or secondary grant
         foreach (unserialize($config['custom_privileges'] ?? '') ?: [] as $name => $value) {
-            $info['custom'][$name] = (bool)$value;
+            if (!is_null($value)) {
+                $info['custom'][$name] = (bool)$value;
+            }
         }
 
         // user-level forum overrides
@@ -203,11 +205,11 @@ class Privilege extends \Gazelle\BaseUser {
         return $this->info()['level_secondary'];
     }
 
-    public function customPrivilegeList(): array {
+    public function customList(): array {
         return $this->info()['custom'];
     }
 
-    public function defaultPrivilegeList(): array {
+    public function defaultList(): array {
         return $this->info()['privilege'];
     }
 
@@ -256,6 +258,44 @@ class Privilege extends \Gazelle\BaseUser {
             WHERE UserID = ?
                 AND PermissionID = ?
             ", $this->id(), $userclassId
+        );
+        $affected = self::$db->affected_rows();
+        $this->flush();
+        return $affected;
+    }
+
+    /**
+     * Set the custom permissions for this user
+     *
+     * @return int was there a change?
+     */
+    public function modifyCustomList(array $current): int {
+        if ($current === []) {
+            // clear out all custom perms
+            self::$db->prepared_query("
+                UPDATE users_main SET
+                    CustomPermissions = NULL
+                WHERE ID = ?
+                ", $this->id()
+            );
+            $affected = self::$db->affected_rows();
+            $this->flush();
+            return $affected;
+        }
+        $default = $this->defaultList();
+        $delta = [];
+        foreach (array_keys(\Gazelle\Manager\Privilege::privilegeList()) as $p) {
+            if (($default[$p] ?? false) && ($current[$p] ?? false) === false) {
+                $delta[$p] = 0;
+            } elseif (!isset($default[$p]) && ($current[$p] ?? false)) {
+                $delta[$p] = 1;
+            }
+        }
+        self::$db->prepared_query("
+            UPDATE users_main SET
+                CustomPermissions = ?
+            WHERE ID = ?
+            ", count($delta) ? serialize($delta) : null, $this->id()
         );
         $affected = self::$db->affected_rows();
         $this->flush();

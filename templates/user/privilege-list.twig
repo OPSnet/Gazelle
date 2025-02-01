@@ -22,12 +22,12 @@
 <br />
 <form class="manage_form" name="permissions" id="permissionsform" method="post" action="">
     <input type="hidden" name="action" value="permissions" />
-    <input type="hidden" name="auth" value="{{ auth }}" />
+    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
     <input type="hidden" name="id" value="{{ user.id }}" />
 {% include 'admin/privilege-list.twig'
     with {
-        'default': user.privilege.defaultPrivilegeList,
-        'user': user.privilege.customPrivilegeList,
+        'default': user.privilege.defaultList,
+        'user': user.privilege.customList,
     } only
 %}
 </form>
