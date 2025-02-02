@@ -135,28 +135,28 @@ class Notification extends \Gazelle\Base {
 
     public function allTokens(): array {
         return $this->pg()->column("
-        SELECT push_token
-        FROM user_push_options");
+            select push_token from user_push_options
+        ");
     }
 
     public function pushableTokens(NotificationType $type): array {
         return $this->pg()->column("
-           SELECT po.push_token
-           FROM user_push_options po
-           JOIN user_has_attr ha ON po.id_user=ha.id_user
-           JOIN user_attr ua ON ha.id_user_attr = ua.id
-           WHERE ua.name = ?;
+           select po.push_token
+           from user_push_options po
+           inner join user_has_attr ha using (id_user)
+           inner join user_attr ua using (id_user_attr)
+           where ua.name = ?
         ", strtolower($type->toString()) . '_push');
     }
 
     public function pushableTokensById(array $userIds, NotificationType $type): array {
         $token = $this->pg()->scalar("
-        SELECT po.push_token
-        FROM user_push_options po
-        JOIN user_has_attr ha ON po.id_user=ha.id_user
-        JOIN user_attr ua ON ha.id_user_attr = ua.id
-        WHERE ua.name = ?
-        AND ha.id_user = ANY(?::INT[]);
+        select po.push_token
+        from user_push_options po
+        inner join user_has_attr ha using (id_user)
+        inner join user_attr ua using (id_user_attr)
+        where ua.name = ?
+        and ha.id_user = ANY(?::INT[])
    ", strtolower($type->toString()) . '_push', "{" . implode(',', $userIds) . "}");
         return $token ? [$token] : [];
     }

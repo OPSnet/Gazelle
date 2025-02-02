@@ -39,45 +39,45 @@ foreach ($list as $userId) {
                 // Pop only
                 $pg->prepared_query("
                     insert into user_has_attr (id_user, id_user_attr)
-                    values (?,( select id from user_attr where name = ?))
+                    values (?, (select id_user_attr from user_attr where name = ?))
                     on conflict do nothing
-                    ", $userId, "{$prefix}_pop");
+                    ", $userId, "{$prefix}-pop");
                 break;
             case 2:
                 // Traditional only
                 $pg->prepared_query("
                     insert into user_has_attr (id_user, id_user_attr)
-                    values (?,( select id from user_attr where name = ?))
+                    values (?, (select id_user_attr from user_attr where name = ?))
                     on conflict do nothing
-                    ", $userId, "{$prefix}_trad");
+                    ", $userId, "{$prefix}-trad");
                 break;
             case 3:
                 // Push only
                 $pg->prepared_query("
                     insert into user_has_attr (id_user, id_user_attr)
-                    values (?,( select id from user_attr where name = ?))
+                    values (?, (select id_user_attr from user_attr where name = ?))
                     on conflict do nothing
-                    ", $userId, "{$prefix}_push");
+                    ", $userId, "{$prefix}-push");
                 break;
             case 4:
                 // Pop-up & Push
                 $pg->prepared_query("
                     insert into user_has_attr (id_user, id_user_attr)
                     values
-                        (?,(select id from user_attr where name = ?)),
-                        (?,(select id from user_attr where name = ?))
+                        (?, (select id_user_attr from user_attr where name = ?)),
+                        (?, (select id_user_attr from user_attr where name = ?))
                     on conflict do nothing
-                    ", $userId, "{$prefix}_pop", $userId, "{$prefix}_push");
+                    ", $userId, "{$prefix}-pop", $userId, "{$prefix}-push");
                 break;
             case 5:
                 // Traditional & Push
                 $pg->prepared_query("
                 insert into user_has_attr (id_user, id_user_attr)
                 values
-                    (?,(select id from user_attr where name = ?)),
-                    (?,(select id from user_attr where name = ?))
+                    (?, (select id_user_attr from user_attr where name = ?)),
+                    (?, (select id_user_attr from user_attr where name = ?))
                 on conflict do nothing
-                ", $userId, "{$prefix}_trad", $userId, "{$prefix}_push");
+                ", $userId, "{$prefix}-trad", $userId, "{$prefix}-push");
             break;
             default:
                 // Anything else shouldn't be possible

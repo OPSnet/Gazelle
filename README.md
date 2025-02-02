@@ -118,7 +118,19 @@ Edit the resulting file and then apply it:
 
 `docker compose exec -T web vendor/bin/phinx migrate`
 
-For PostgreSQL tabales, append `-c ./misc/phinx-pg.php` to the phinx commands.
+For PostgreSQL tables, append `-c ./misc/phinx-pg.php` to the phinx
+commands. The following bash function makes it much easier to work with
+phinx:
+
+```
+function pg-phinx { docker compose exec web vendor/bin/phinx $@ -c misc/phinx-pg.php; }
+
+pg-phinx status
+pg-phinx create MyNewMigration
+pg-phinx migrate
+pg-phinx rollback
+```
+
 
 To access the database, look at `misc/docker/mysql-home/.my.cnf`
 The credentials should match those used in the `docker-compose.yml` file.

@@ -2,6 +2,7 @@
 
 namespace Gazelle;
 
+use Gazelle\Enum\NotificationType;
 use Gazelle\Enum\UserStatus;
 use Gazelle\Exception\UserCreatorException;
 use Gazelle\Util\Time;
@@ -217,13 +218,12 @@ class UserCreator extends Base {
             INSERT INTO users_leech_stats (UserID, Uploaded) VALUES (?, ?)
             ", $this->id, STARTING_UPLOAD
         );
-        foreach (\Gazelle\Enum\NotificationType::cases() as $attr) {
+        foreach (NotificationType::cases() as $attr) {
             $attr = strtolower($attr->toString());
             $this->pg()->prepared_query("
                 insert into user_has_attr (id_user, id_user_attr)
-                values (?, (select id from user_attr where name like ?))
-                on conflict do nothing;
-            ", $this->id, "{$attr}_pop");
+                values (?, (select id_user_attr from user_attr where name like ?))
+            ", $this->id, "{$attr}-pop");
         }
 
         self::$db->commit();

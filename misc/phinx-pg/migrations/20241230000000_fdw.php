@@ -88,17 +88,15 @@ final class Fdw extends AbstractMigration {
     ];
 
     public function up(): void {
-        $host  = SQLHOST;
-        $port  = SQLPORT;
-        $db    = SQLDB;
-        $login = SQLLOGIN;
-        $pass  = SQLPASS;
-
-        $relay   = 'relayer';
+        $host    = SQLHOST;
+        $port    = SQLPORT;
+        $db      = SQLDB;
+        $login   = SQLLOGIN;
+        $pass    = SQLPASS;
         $pg_user = GZPG_USER;
 
         $this->query("
-            create server $relay
+            create server relayer
             foreign data wrapper mysql_fdw
             options (
                 host '$host',
@@ -107,7 +105,7 @@ final class Fdw extends AbstractMigration {
         ");
         $this->query("
             create user mapping for $pg_user
-            server $relay
+            server relayer
             options (
                 username '$login',
                 password '$pass'
@@ -124,7 +122,7 @@ final class Fdw extends AbstractMigration {
             create schema if not exists relay authorization $pg_user
         ");
         $this->query("
-            import foreign schema $db from server $relay into relay;
+            import foreign schema $db from server relayer into relay;
         ");
     }
 
@@ -135,5 +133,8 @@ final class Fdw extends AbstractMigration {
         foreach ($this->enum as $e) {
             $this->query("drop type {$e[0]}");
         }
+        $this->query("
+            drop server relayer cascade
+        ");
     }
 }

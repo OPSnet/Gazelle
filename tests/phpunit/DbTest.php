@@ -16,7 +16,7 @@ class DbTest extends TestCase {
 
     public function testTableCoherency(): void {
         $db = DB::DB();
-        $db->prepared_query($sql = "
+        $db->prepared_query("
              SELECT replace(table_name, 'deleted_', '') as table_name
              FROM information_schema.tables
              WHERE table_schema = ?
@@ -28,6 +28,88 @@ class DbTest extends TestCase {
         foreach ($db->collect(0, false) as $tableName) {
             [$ok, $message] = $dbMan->checkStructureMatch(SQLDB, $tableName, "deleted_$tableName");
             $this->assertTrue($ok, "mismatch -- $message");
+        }
+    }
+
+    public function testAttrCoherency(): void {
+        $db = DB::DB();
+        $db->prepared_query("
+            select table_name
+            from information_schema.tables
+            where table_schema = ?
+                and table_name regexp ?
+            order by 1
+            ", SQLDB, '(?<!_has)_attr$'
+        );
+        $mysqlAttrTableList = $db->collect(0, false);
+
+        $pgAttrTableList = $this->pg()->column("
+            select table_name
+            from information_schema.tables
+            where table_schema = ?
+                and table_name ~ ?
+            order by 1
+            ", 'public', '(?<!_has)_attr$'
+        );
+
+        // Do we have the right number of tables?
+        $this->assertCount(5, $mysqlAttrTableList, 'db-mysql-attr-table-total');
+        $this->assertCount(1, $pgAttrTableList, 'db-pg-attr-table-total');
+
+        // Are the tables the same?
+        $this->assertEquals(
+            [
+                // TODO: migrate these tables
+                'artist_attr',
+                'collage_attr',
+                'torrent_attr',
+                'torrent_group_attr'
+            ],
+            array_diff($mysqlAttrTableList, $pgAttrTableList),
+            'db-mysql-has-pg-attr-tables'
+        );
+        $this->assertEquals(
+            [],
+            array_diff($pgAttrTableList, $mysqlAttrTableList),
+            'db-pg-has-mysql-attr-tables'
+        );
+
+        // For each table, are the id and name values identical?
+        foreach ($pgAttrTableList as $table) {
+            $sql = in_array($table, ['artist_attr'])
+                ? "
+                    select {$table}_id as id, Name as name
+                    from $table
+                    order by 1
+                " : "
+                    select ID as id, Name as name
+                    from $table
+                    order by 1
+                ";
+            $db->prepared_query($sql);
+            $mysql = $db->to_array(false, MYSQLI_ASSOC, false);
+            $pg    = $this->pg()->all("
+                select id_$table as id, name
+                from $table
+                order by 1
+            ");
+
+            $this->assertEquals(
+                [],
+                array_diff(
+                    array_map(fn ($t) => $t['id'], $mysql),
+                    array_map(fn ($t) => $t['id'], $pg),
+                ),
+                "db-attr-identical-id-$table",
+            );
+            $this->assertEquals(
+                [],
+                array_diff(
+                    array_map(fn ($t) => $t['name'], $mysql),
+                    array_map(fn ($t) => $t['name'], $pg),
+                ),
+                "db-attr-identical-name-$table",
+            );
         }
     }
 

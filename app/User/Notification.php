@@ -5,13 +5,14 @@ namespace Gazelle\User;
 class Notification extends \Gazelle\BaseUser {
     use \Gazelle\Pg;
 
-    final public const tableName     = 'users_notifications_settings';
-    protected const CACHE_KEY = 'u_notif_%d';
-    final public const DISPLAY_DISABLED = 0;
-    final public const DISPLAY_POPUP = 1;
-    final public const DISPLAY_TRADITIONAL = 2;
-    final public const DISPLAY_PUSH = 3;
-    final public const DISPLAY_POPUP_PUSH = 4;
+    final public const tableName    = 'users_notifications_settings';
+    final protected const CACHE_KEY = 'u_notif2_%d';
+
+    final public const DISPLAY_DISABLED         = 0;
+    final public const DISPLAY_POPUP            = 1;
+    final public const DISPLAY_TRADITIONAL      = 2;
+    final public const DISPLAY_PUSH             = 3;
+    final public const DISPLAY_POPUP_PUSH       = 4;
     final public const DISPLAY_TRADITIONAL_PUSH = 5;
 
     protected array  $alert;
@@ -40,12 +41,12 @@ class Notification extends \Gazelle\BaseUser {
         $config = self::$cache->get_value($key);
         if ($config === false) {
             $attributes = $this->pg()->column("
-                SELECT ua.name
-                FROM user_attr ua
-                JOIN user_has_attr uh ON ua.id = uh.id_user_attr
-                WHERE (ua.name LIKE '%_pop' OR ua.name LIKE '%_push' OR ua.name LIKE '%_trad')
-                AND uh.id_user = ?;
-                ", $this->user->id()
+                select ua.name
+                from user_attr ua
+                inner join user_has_attr uha using (id_user_attr)
+                inner join user_attr_notification uhan using (id_user_attr)
+                where uha.id_user = ?;
+                ", $this->id()
             );
 
             $typeConfig = [];
@@ -53,19 +54,19 @@ class Notification extends \Gazelle\BaseUser {
                 $type = $type->toString();
                 $typeConfig += [$type => 0];
                 $lowerType = strtolower($type);
-                $pop = in_array("{$lowerType}_pop", $attributes);
-                $trad = in_array("{$lowerType}_trad", $attributes);
-                $push = in_array("{$lowerType}_push", $attributes);
+                $pop = in_array("{$lowerType}-pop", $attributes);
+                $trad = in_array("{$lowerType}-trad", $attributes);
+                $push = in_array("{$lowerType}-push", $attributes);
                 if ($trad && $push) {
-                    $typeConfig[$type] = 5;
+                    $typeConfig[$type] = self::DISPLAY_TRADITIONAL_PUSH;
                 } elseif ($pop && $push) {
-                    $typeConfig[$type] = 4;
+                    $typeConfig[$type] = self::DISPLAY_POPUP_PUSH;
                 } elseif ($push) {
-                    $typeConfig[$type] = 3;
+                    $typeConfig[$type] = self::DISPLAY_PUSH;
                 } elseif ($trad) {
-                    $typeConfig[$type] = 2;
+                    $typeConfig[$type] = self::DISPLAY_TRADITIONAL;
                 } elseif ($pop) {
-                    $typeConfig[$type] = 1;
+                    $typeConfig[$type] = self::DISPLAY_POPUP;
                 }
             }
             $config = $typeConfig;
@@ -152,15 +153,15 @@ class Notification extends \Gazelle\BaseUser {
         foreach (\Gazelle\Enum\NotificationType::cases() as $type) {
             $type = $type->toString();
             // check settings for this type
-            $push   = in_array('notifications_' . $type . '_push', $settings);
+            $push  = in_array('notifications_' . $type . '_push', $settings);
             $trad  = in_array('notifications_' . $type . '_traditional', $settings);
             $popup = in_array('notifications_' . $type . '_popup', $settings);
-            $type = strtolower($type);
+            $type  = strtolower($type);
 
             // write settings to selected[] or unselected[]
-            $push ? $selected[] = $type . "_push" : $unselected[] = $type . "_push";
-            $trad ? $selected[] = $type . "_trad" : $unselected[] = $type . "_trad";
-            $popup ? $selected[] = $type . "_pop" : $unselected[] = $type . "_pop";
+            $push ? $selected[] = $type . "-push" : $unselected[] = $type . "-push";
+            $trad ? $selected[] = $type . "-trad" : $unselected[] = $type . "-trad";
+            $popup ? $selected[] = $type . "-pop" : $unselected[] = $type . "-pop";
         }
 
         $userId = $this->user->id();
@@ -169,7 +170,7 @@ class Notification extends \Gazelle\BaseUser {
         foreach ($selected as $attr) {
             $affected += $this->pg()->prepared_query("
                 insert into user_has_attr (id_user, id_user_attr)
-                values (?, (select id from user_attr where name like ?))
+                values (?, (select id_user_attr from user_attr where name = ?))
                 on conflict do nothing;
             ", $userId, $attr);
         }
@@ -177,8 +178,8 @@ class Notification extends \Gazelle\BaseUser {
         foreach ($unselected as $attr) {
             $affected += $this->pg()->prepared_query("
                 delete from user_has_attr
-                where id_user = ? and id_user_attr = 
-                    (select id from user_attr where name like ?);
+                where id_user = ?
+                    and id_user_attr = (select id_user_attr from user_attr where name = ?);
             ", $userId, $attr);
         }
 
