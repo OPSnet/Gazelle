@@ -226,7 +226,7 @@
         </tr>
         <tr>
 {%  for tag in tag_default %}
-{%      if loop.index0 and not (loop.index0 % n) %}
+{%      if loop.index0 and (not (loop.index0 % n)) %}
         </tr>
         <tr>
 {%      endif %}
