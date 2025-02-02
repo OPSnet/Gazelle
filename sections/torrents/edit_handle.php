@@ -31,9 +31,9 @@ if ($Viewer->id() != $UserID && !$Viewer->permitted('torrents_edit')) {
 
 $Properties = [
     'Name'                => trim($_POST['title'] ?? ''),
-    'Format'              => $_POST['format'],
+    'Format'              => $_POST['format'] ?? null,
     'Media'               => $_POST['media'] ?? '',
-    'Encoding'            => $_POST['bitrate'],
+    'Encoding'            => $_POST['bitrate'] ?? null,
     'Description'         => trim($_POST['release_desc'] ?? ''),
     'Scene'               => isset($_POST['scene']),
     'HasLog'              => isset($_POST['flac_log']),

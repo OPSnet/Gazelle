@@ -37,25 +37,27 @@ if (($_GET['action'] ?? '') == 'revert') {
     }
     [$Body, $Image] = $revert;
 } else {
-    // edit, variables are passed via POST
-    $ReleaseType = (int)$_POST['releasetype'];
-    $rt = new Gazelle\ReleaseType();
-    $newReleaseTypeName = $rt->findNameById($ReleaseType);
-    if ($tgroup->categoryId() == 1 && !$newReleaseTypeName || $tgroup->categoryId() != 1 && $ReleaseType) {
-        error(403);
-    }
-    if ($ReleaseType != $tgroup->releaseType()) {
-        $tgroup->setField('ReleaseType', $ReleaseType);
-        $logInfo[] = "Release type changed from "
-            . $rt->findNameById($tgroup->releaseType())
-            . " to $newReleaseTypeName";
-    }
+    if ($tgroup->categoryName() === 'Music') {
+        // edit, variables are passed via POST
+        $ReleaseType = (int)$_POST['releasetype'];
+        $rt = new Gazelle\ReleaseType();
+        $newReleaseTypeName = $rt->findNameById($ReleaseType);
+        if (!$newReleaseTypeName) {
+            error(403);
+        }
+        if ($ReleaseType != $tgroup->releaseType()) {
+            $tgroup->setField('ReleaseType', $ReleaseType);
+            $logInfo[] = "Release type changed from "
+                . $rt->findNameById($tgroup->releaseType())
+                . " to $newReleaseTypeName";
+        }
 
-    if ($Viewer->permitted('torrents_edit_vanityhouse')) {
-        $showcase = isset($_POST['vanity_house']) ? 1 : 0;
-        if ($tgroup->isShowcase() != $showcase) {
-            $tgroup->setField('VanityHouse', $showcase);
-            $logInfo[] = 'Vanity House status changed to ' . ($showcase ? 'true' : 'false');
+        if ($Viewer->permitted('torrents_edit_vanityhouse')) {
+            $showcase = isset($_POST['vanity_house']) ? 1 : 0;
+            if ($tgroup->isShowcase() != $showcase) {
+                $tgroup->setField('VanityHouse', $showcase);
+                $logInfo[] = 'Vanity House status changed to ' . ($showcase ? 'true' : 'false');
+            }
         }
     }
 
@@ -72,7 +74,7 @@ if (($_GET['action'] ?? '') == 'revert') {
         }
     }
 
-    $Body = $_POST['body'];
+    $Body = trim($_POST['body']);
     if ($_POST['summary']) {
         $logInfo[] = "summary: " . trim($_POST['summary']);
     }
