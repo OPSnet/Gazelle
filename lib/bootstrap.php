@@ -2,8 +2,8 @@
 
 /* require this file to have a fully-initialized Gazelle runtime */
 
-if (PHP_VERSION_ID < 80201) {
-    die("Gazelle (Orpheus fork) requires at least PHP version 8.2.1");
+if (PHP_VERSION_ID < 80403) {
+    die("Gazelle (Orpheus fork) requires at least PHP version 8.4.3");
 }
 foreach (['memcached', 'mysqli'] as $e) {
     if (!extension_loaded($e)) {
@@ -13,9 +13,11 @@ foreach (['memcached', 'mysqli'] as $e) {
 date_default_timezone_set('UTC');
 
 if (!defined('SITE_NAME')) {
+    ob_start();
     include_once __DIR__ . '/config.php';
     include_once __DIR__ . '/../lib/util.php';
     include_once __DIR__ . '/../vendor/autoload.php';
+    ob_end_clean();
 }
 
 global $Cache, $Debug, $Twig;
