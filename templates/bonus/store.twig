@@ -1,10 +1,36 @@
-{% for item in list %}
+{{ header('Bonus Points Shop', {'js': 'bonus'}) }}
+<div class="header">
+    <h2>Bonus Points Shop</h2>
+</div>
+<div class="linkbox">
+    <a href="wiki.php?action=article&amp;name=bonuspoints" class="brackets">About Bonus Points</a>
+    <a href="bonus.php?action=bprates" class="brackets">Bonus Point Rates</a>
+    <a href="bonus.php?action=history" class="brackets">History</a>
+{% if viewer.permitted('admin_bp_history') %}
+    <a href="bonus.php?action=cacheflush" title="Trigger price recalculation after changing 'bonus-discount' site option" class="brackets">Cache flush</a>
+{% endif %}
+</div>
+{% if purchase %}
+<div class="alertbar blend">{{ purchase }} purchased!</div>
+{% endif %}
+{% if donate %}
+<div class="alertbar blend">{{ donate }}</div>
+{% endif %}
+{% if pool %}
+{%  include 'bonus/bonus-pool.twig' with {
+        pool   : pool,
+        viewer : viewer,
+    } only
+%}
+{% endif %}
+{% for item in bonus.itemList %}
 {%  if loop.first %}
 <div class="thin">
 {%      if discount %}
-    <h3 style="text-align: center; color: lime;">All prices currently {{ min(100, max(0, discount)) }}% off &mdash; Hurry, sale ends soon &mdash; While stocks last!</h3>
+    <h3 style="text-align: center; color: lime;">All prices currently {{ min(100, max(0, discount))
+        }}% off &mdash; Hurry, sale ends soon &mdash; While stocks last!</h3>
 {%      endif %}
-{%      if admin %}
+{%      if viewer.permitted('admin_bp_history') %}
     <div class="pad box">
         <div class="thin">NB: Bonus Shop discounts are set in the <a href="/tools.php?action=site_options">Site Options</a>.</div>
     </div>
@@ -19,14 +45,16 @@
         </thead>
         <tbody>
 {%  endif %}
-{%  if item.MinClass <= class %}
+{%  if item.MinClass <= viewer.classLevel %}
             <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
                 <td>{{ item.Title }}</pre></td>
                 <td style="text-align:right">{{ item.Price|number_format }}</td>
                 <td>
-{%      if points >= item.Price %}
+{%      if viewer.bonusPointsTotal >= item.Price %}
                     <a id="bonusconfirm" href="bonus.php?action=purchase&amp;label={{ item.Label
-                        }}&amp;auth={{ auth }}" onclick="{{ item.JS_on_click }}(event, '{{ item.Title }}', {{ item.JS_next_function|default('null') }}, this);">Purchase</a>
+                        }}&amp;auth={{ viewer.auth }}" onclick="{{ item.JS_on_clic
+                        }}(event, '{{ item.Title }}', {{ item.JS_next_function|default('null')
+                        }}, this);">Purchase</a>
 {%      else %}
                     <span style="font-style: italic">Too Expensive</span>
 

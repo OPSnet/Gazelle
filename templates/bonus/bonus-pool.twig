@@ -12,11 +12,11 @@
                 <thead>
                 <tbody>
                     <tr>
-                        <td>{{ points|number_format }}</td>
+                        <td>{{ viewer.bonusPointsTotal|number_format(0) }}</td>
                         <td><input type="text" width="10" name="donate" />
                             <input type="hidden" name="poolid" value="{{ pool.bonus_pool_id }}"/>
-                            <input type="hidden" name="userid" value="{{ user_id }}"/>
-                            <input type="hidden" name="auth" value="{{ auth }}"/>
+                            <input type="hidden" name="userid" value="{{ viewer.id }}"/>
+                            <input type="hidden" name="auth" value="{{ viewer.auth }}"/>
                         </td>
                     </tr>
                     <tr>
