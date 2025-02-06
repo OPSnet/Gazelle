@@ -1,0 +1,85 @@
+{{ header(artist.name, {'js': 'vendor/tagcanvas,artist_cloud,bbcode,browse,comments,requests,subscriptions,voting'}) }}
+<div class="thin">
+    <div class="header">
+        <h2>{{ artist.name }}
+{%- if revision_id %} (Revision #{{ revision_id }}){% endif %}
+{%- if artist.isShowcase %} [Showcase]{% endif -%}
+        </h2>
+        <div class="linkbox">
+{% if viewer.permitted('torrents_edit') %}
+            <a href="artist.php?action=edit&amp;artistid={{ artist.id }}" class="brackets">Edit</a>
+{% endif %}
+            <a href="artist.php?action=editrequest&amp;artistid={{ artist.id }}" class="brackets">Request an Edit</a>
+            <a href="upload.php?artistid={{ artist.id }}" class="brackets">Add upload</a>
+{% if viewer.permitted('site_submit_requests') %}
+            <a href="requests.php?action=new&amp;artistid={{ artist.id }}" class="brackets">Add request</a>
+{% endif %}
+{% if viewer.permitted('site_torrents_notify') %}
+{%  if viewer.hasArtistNotification(artist.name)%}
+            <a href="artist.php?artistid={{ artist.id }}&amp;auth={{ viewer.auth
+            }}&amp;action=notifyremove" class="brackets">Do not notify of new uploads</a>
+{%  else %}
+            <a href="artist.php?artistid={{ artist.id }}&amp;auth={{ viewer.auth
+            }}&amp;action=notify" class="brackets">Notify of new uploads</a>
+{%  endif %}
+{% endif %}
+{% include 'bookmark/action.twig' with {
+        'class'         : 'artist',
+        'id'            : artist.id,
+        'is_bookmarked' : is_bookmarked,
+    }
+%}
+            <a href="#" id="subscribelink_artist{{ artist.id
+                }}" class="brackets" onclick="SubscribeComments('artist', {{ artist.id
+                }});return false;">{% if is_subscribed %}Unsubscribe{% else %}Subscribe{% endif %}</a>
+{% if revision_id and viewer.permitted('site_edit_wiki') %}
+            <a href="artist.php?action=revert&amp;artistid={{ artist.id
+                }}&amp;revisionid={{ revision_id }}&amp;auth={{ viewer.auth
+                }}" class="brackets">Revert to this revision</a>
+{% endif %}
+            <a href="artist.php?id={{ artist.id }}#info" class="brackets">Info</a>
+            <a href="artist.php?id={{ artist.id }}#artistcomments" class="brackets">Comments</a>
+            <a href="artist.php?action=history&amp;artistid={{ artist.id }}" class="brackets">View history</a>
+{% if viewer.permitted('site_delete_artist') and viewer.permitted('torrents_delete') %}
+            &nbsp;&nbsp;&nbsp;<a href="artist.php?action=delete&amp;artistid={{
+                artist.id }}&amp;auth={{ viewer.auth }}" class="brackets">Delete</a>
+{% endif %}
+        </div>
+    </div>
+    <div class="sidebar">
+{% if artist.image %}
+        <div class="box box_image">
+            <div class="head"><strong>{{ artist.name }}</strong></div>
+            <div style="text-align: center; padding: 10px 0px;">
+                <img loading="eager" style="max-width: 220px;" src="{{ artist.image|image_cache }}" alt="artist image"
+                     onclick="lightbox.init('{{ artist.image|image_cache }}', 220);"
+                     data-origin-src="{{ artist.image }}" />
+            </div>
+        </div>
+{% endif %}
+        <div class="box box_search">
+            <div class="head"><strong>Song Search</strong></div>
+            <ul class="nobullet" style="padding-bottom: 2px">
+                <li>
+                    <form class="search_form" name="filelists" action="torrents.php">
+                        <input type="hidden" name="artistname" value="{{ artist.name }}" />
+                        <input type="hidden" name="action" value="advanced" />
+                        <input type="text" autocomplete="off" id="filelist" name="filelist" size="24" placeholder="Find a specific song or track..." spellcheck="false" />
+                        <input type="submit" value="🔎" />
+                    </form>
+                </li>
+            </ul>
+        </div>
+
+        <div class="box box_tags">
+            <div class="head"><strong>Tags</strong></div>
+            <ul class="stats nobullet">
+{% for tag in artist.tagLeaderboard %}
+{%  if loop.index <= 5 or (loop.index > 5 and viewer.primaryClass != constant('USER')) %}
+                <li><a href="torrents.php?taglist={{ tag.name }}">{{ tag.name }}</a> ({{ tag.total|number_format }})</li>
+{%  endif %}
+{% else %}
+                <li><i>No tags</i></li>
+{% endfor %}
+            </ul>
+        </div>

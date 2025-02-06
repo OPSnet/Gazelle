@@ -4,16 +4,16 @@
 // phpcs:disable Generic.WhiteSpace.ScopeIndent.IncorrectExact
 // phpcs:disable Generic.WhiteSpace.ScopeIndent.Incorrect
 
-$RevisionID = (int)($_GET['revisionid'] ?? 0);
+$revisionId = (int)($_GET['revisionid'] ?? 0);
 $artistMan = new Gazelle\Manager\Artist();
-$Artist = $RevisionID
-    ? $artistMan->findByIdAndRevision((int)($_GET['id'] ?? 0), $RevisionID)
+$artist = $revisionId
+    ? $artistMan->findByIdAndRevision((int)($_GET['id'] ?? 0), $revisionId)
     : $artistMan->findById((int)($_GET['id'] ?? 0));
-if (is_null($Artist)) {
+if (is_null($artist)) {
     error(404);
 }
-$Artist->loadArtistRole();
-$artistId = $Artist->id();
+$artist->loadArtistRole();
+$artistId = $artist->id();
 
 $bookmark   = new Gazelle\User\Bookmark($Viewer);
 $collageMan = new Gazelle\Manager\Collage();
@@ -23,119 +23,27 @@ $stats      = new Gazelle\Stats\Artist($artistId);
 $userMan    = new Gazelle\Manager\User();
 $reportMan  = new Gazelle\Manager\Report($userMan);
 $vote       = new Gazelle\User\Vote($Viewer);
+$imgProxy   = new Gazelle\Util\ImageProxy($Viewer);
 
-$authKey      = $Viewer->auth();
 $isSubscribed = (new Gazelle\User\Subscription($Viewer))->isSubscribedComments('artist', $artistId);
-$name         = $Artist->name();
-$requestList  = $Viewer->disableRequests() ? [] : (new Gazelle\Manager\Request())->findByArtist($Artist);
-
-View::show_header($name, ['js' => 'vendor/tagcanvas,artist_cloud,bbcode,browse,comments,requests,subscriptions,voting']);
-?>
-<div class="thin">
-    <div class="header">
-        <h2><?=html_escape($name)?><?= $RevisionID ? " (Revision #$RevisionID)" : '' ?><?= $Artist->isShowcase() ? ' [Showcase]' : '' ?></h2>
-        <div class="linkbox">
-<?php if ($Viewer->permitted('torrents_edit')) { ?>
-            <a href="artist.php?action=edit&amp;artistid=<?= $artistId ?>" class="brackets">Edit</a>
-<?php } ?>
-            <a href="artist.php?action=editrequest&amp;artistid=<?=$artistId?>" class="brackets">Request an Edit</a>
-            <a href="upload.php?artistid=<?= $artistId ?>" class="brackets">Add upload</a>
-<?php if ($Viewer->permitted('site_submit_requests')) { ?>
-            <a href="requests.php?action=new&amp;artistid=<?=$artistId?>" class="brackets">Add request</a>
-<?php
-}
-
-if ($Viewer->permitted('site_torrents_notify')) {
-    $urlStem = sprintf('artist.php?artistid=%d&amp;auth=%s', $artistId, $authKey);
-    if ($Viewer->hasArtistNotification($name)) {
-?>
-            <a href="<?= $urlStem ?>&amp;action=notifyremove" class="brackets">Do not notify of new uploads</a>
-<?php } else { ?>
-            <a href="<?= $urlStem ?>&amp;action=notify" class="brackets">Notify of new uploads</a>
-<?php
-    }
-}
-echo $Twig->render('bookmark/action.twig', [
-    'class'         => 'artist',
-    'id'            => $artistId,
-    'is_bookmarked' => $bookmark->isArtistBookmarked($artistId),
-]);
-?>
-            <a href="#" id="subscribelink_artist<?= $artistId ?>" class="brackets" onclick="SubscribeComments('artist', <?=
-                $artistId ?>);return false;"><?= $isSubscribed ? 'Unsubscribe' : 'Subscribe'?></a>
-
-<?php if ($RevisionID && $Viewer->permitted('site_edit_wiki')) { ?>
-            <a href="artist.php?action=revert&amp;artistid=<?=$artistId?>&amp;revisionid=<?=$RevisionID?>&amp;auth=<?= $authKey ?>" class="brackets">Revert to this revision</a>
-<?php } ?>
-            <a href="artist.php?id=<?=$artistId?>#info" class="brackets">Info</a>
-            <a href="artist.php?id=<?=$artistId?>#artistcomments" class="brackets">Comments</a>
-            <a href="artist.php?action=history&amp;artistid=<?= $artistId ?>" class="brackets">View history</a>
-<?php if ($Viewer->permitted('site_delete_artist') && $Viewer->permitted('torrents_delete')) { ?>
-            &nbsp;&nbsp;&nbsp;<a href="artist.php?action=delete&amp;artistid=<?=$artistId?>&amp;auth=<?= $authKey ?>" class="brackets">Delete</a>
-<?php } ?>
-        </div>
-    </div>
-
-    <div class="sidebar">
-<?php
-$imgProxy = new Gazelle\Util\ImageProxy($Viewer);
-if ($Artist->image()) {
-    $image = html_escape(image_cache_encode($Artist->image()));
-?>
-        <div class="box box_image">
-            <div class="head"><strong><?= html_escape($name) ?></strong></div>
-            <div style="text-align: center; padding: 10px 0px;">
-                <img loading="eager" style="max-width: 220px;" src="<?= $image ?>" alt="artist image"
-                     onclick="lightbox.init('<?= $image ?>', 220);"
-                     data-origin-src="<?= html_escape($Artist->image()) ?>" />
-            </div>
-        </div>
-<?php } ?>
-
-        <div class="box box_search">
-            <div class="head"><strong>Song Search</strong></div>
-            <ul class="nobullet" style="padding-bottom: 2px">
-                <li>
-                    <form class="search_form" name="filelists" action="torrents.php">
-                        <input type="hidden" name="artistname" value="<?= html_escape($name) ?>" />
-                        <input type="hidden" name="action" value="advanced" />
-                        <input type="text" autocomplete="off" id="filelist" name="filelist" size="24" placeholder="Find a specific song or track..." spellcheck="false" />
-                        <input type="submit" value="&#x1f50e;" />
-                    </form>
-                </li>
-            </ul>
-        </div>
-        <div class="box box_tags">
-            <div class="head"><strong>Tags</strong></div>
-<?php
-$tagLeaderboard = $Artist->tagLeaderboard();
-if ($tagLeaderboard) {
-?>
-            <ul class="stats nobullet">
-<?php
-    $n = 0;
-    foreach ($tagLeaderboard as $tag) {
-        if (++$n > 5 && $Viewer->primaryClass() === USER) {
-            break;
-        }
-?>
-                <li><a href="torrents.php?taglist=<?= $tag['name'] ?>"><?= $tag['name'] ?></a> (<?= $tag['total'] ?>)</li>
-<?php
-    }
-} else {
-?>
-            <ul class="stats nobullet">
-                <li><i>No tags</i></li>
-<?php } ?>
-            </ul>
-        </div>
-<?php
-if (count($Artist->groupIds()) > 1000) {
+$requestList  = $Viewer->disableRequests() ? [] : (new Gazelle\Manager\Request())->findByArtist($artist);
+if (count($artist->groupIds()) > 1000) {
     // prevent OOMs
     Gazelle\DB::DB()->disableQueryLog();
 }
+
+echo $Twig->render('artist/header.twig', [
+    'artist'        => $artist,
+    'is_bookmarked' => $bookmark->isArtistBookmarked($artist->id()),
+    'is_subscribed' => $isSubscribed,
+    'revision_id'   => $revisionId,
+    'viewer'        => $Viewer,
+]);
+?>
+
+<?php
 $artistReleaseType = [];
-$sections = $Artist->sections();
+$sections = $artist->sections();
 foreach ($sections as $sectionId => $groupList) {
     if (!isset($artistReleaseType[$sectionId])) {
         $artistReleaseType[$sectionId] = 0;
@@ -156,7 +64,7 @@ foreach ($sections as $sectionId => $groupList) {
 <?php
 if ($Viewer->permitted('site_collages_manage') || $Viewer->activePersonalCollages()) {
     echo $Twig->render('artist/collage-add.twig', [
-        'collage_list' => $collageMan->addToArtistCollageDefault($Artist, $Viewer),
+        'collage_list' => $collageMan->addToArtistCollageDefault($artist, $Viewer),
         'artist_id'    => $artistId,
         'viewer'       => $Viewer,
     ]);
@@ -165,20 +73,20 @@ if ($Viewer->permitted('site_collages_manage') || $Viewer->activePersonalCollage
         <div class="box box_info box_metadata_artist">
             <div class="head"><strong>Metadata</strong></div>
             <ul class="stats nobullet">
-<?php if (!$Artist->discogs()->id()) { ?>
+<?php if (!$artist->discogs()->id()) { ?>
                 <li>Discogs ID: <i>not set</i></li>
 <?php } else { ?>
-                <li>Discogs ID: <?= $Artist->discogs()->id() ?></li>
-                <li>Name: <?= html_escape($Artist->discogs()->name()) ?><?= $Artist->discogsIsPreferred()
+                <li>Discogs ID: <?= $artist->discogs()->id() ?></li>
+                <li>Name: <?= html_escape($artist->discogs()->name()) ?><?= $artist->discogsIsPreferred()
                     ? '<span title="This artist does not need to display a sequence number for disambiguation">' . " \xE2\x98\x85</span>" : '' ?></li>
-                <li><span title="Artists having the same name">Synonyms: <?= $Artist->homonymCount() - 1 ?></span></li>
+                <li><span title="Artists having the same name">Synonyms: <?= $artist->homonymCount() - 1 ?></span></li>
 <?php } ?>
             </ul>
         </div>
 
 <?php
 echo $Twig->render('artist/similar.twig', [
-    'artist' => $Artist,
+    'artist' => $artist,
     'viewer' => $Viewer,
 ]);
 
@@ -196,7 +104,7 @@ if ($Viewer->permitted('zip_downloader')) {
             <div class="pad">
                 <form class="download_form" name="zip" action="artist.php" method="post">
                     <input type="hidden" name="action" value="download" />
-                    <input type="hidden" name="auth" value="<?=$authKey?>" />
+                    <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
                     <input type="hidden" name="artistid" value="<?=$artistId?>" />
                     <ul id="list" class="nobullet">
 <?php foreach ($ZIPList as $ListItem) { ?>
@@ -253,12 +161,12 @@ echo ' selected="selected"'; } ?>>Prefer Bonus Tracks</option>
 <?= $Twig->render('collage/summary.twig', [
     'class'   => 'collage_rows',
     'object'  => 'artist',
-    'summary' => $collageMan->artistSummary($Artist),
+    'summary' => $collageMan->artistSummary($artist),
 ]); ?>
 <div id="discog_table">
     <div class="box center">
 <?php
-if ($sections = $Artist->sections()) {
+if ($sections = $artist->sections()) {
     /* Move the sections to the way the viewer wants to see them. */
     $sortHide = $Viewer->option('SortHide') ?? [];
     $reorderedSections = [];
@@ -377,7 +285,7 @@ echo $Twig->render('request/list.twig', [
 ]);
 
 echo $Twig->render('artist/similar-graph.twig', [
-    'artist' => $Artist,
+    'artist' => $artist,
 ]);
 ?>
 
@@ -393,7 +301,7 @@ echo $Twig->render('artist/similar-graph.twig', [
             <strong>Artist Information</strong>
             <a href="#" class="brackets" onclick="$('#body').gtoggle(); return false;">Toggle</a>
         </div>
-        <div id="body" class="body"><?=Text::full_format($Artist->body())?></div>
+        <div id="body" class="body"><?=Text::full_format($artist->body())?></div>
     </div>
     <div id="artistcomments">
 <?php
@@ -405,7 +313,7 @@ $paginator->setAnchor('comments')->setTotal($commentPage->total())->removeParam(
 
 echo $Twig->render('comment/thread.twig', [
     'action'    => 'take_post',
-    'object'    => $Artist,
+    'object'    => $artist,
     'name'      => 'pageid',
     'comment'   => $commentPage,
     'paginator' => $paginator,
