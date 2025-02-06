@@ -107,7 +107,7 @@ class TextTest extends TestCase {
         $this->userList['admin'] = \GazelleUnitTest\Helper::makeUser('collage.' . randomString(6), 'text');
         $this->userList['admin']->setField('PermissionID', SYSOP)->modify();
         $name    = 'collage ' . randomString(6);
-        $collage = (new Manager\Collage())->create($this->userList['admin'], 1, $name, 'phpunit collage', 'jazz,disco', new Log());
+        $collage = (new Manager\Collage())->create($this->userList['admin'], 1, $name, 'phpunit collage', 'jazz,disco');
         $this->assertInstanceOf(Collage::class, $collage, 'text-create-collage');
         $this->assertEquals(
             "<a href=\"collages.php?id={$collage->id()}\">{$collage->name()}</a>",

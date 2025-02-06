@@ -97,7 +97,7 @@ class Helper {
             recordLabel:     'Unitest Artists Corporation',
             catalogueNumber: 'UA-' . random_int(10000, 99999),
         );
-        $tgroup->addArtists($artistName[0], $artistName[1], $user, new \Gazelle\Manager\Artist(), new \Gazelle\Log());
+        $tgroup->addArtists($artistName[0], $artistName[1], $user, new \Gazelle\Manager\Artist());
         $tagMan = new \Gazelle\Manager\Tag();
         foreach ($tagName as $name) {
             $tag = $tagMan->softCreate($name, $user);

@@ -117,10 +117,9 @@ class TGroupTest extends TestCase {
 
     public function testTGroupArtist(): void {
         $artMan = new Manager\Artist();
-        $logger = new Log();
         $user   = $this->userList['admin'];
         $artistName = 'phpunit ' . randomString(6) . ' band';
-        $this->assertEquals(1, $this->tgroup->addArtists([ARTIST_MAIN], [$artistName], $user, $artMan, $logger), 'tgroup-artist-add');
+        $this->assertEquals(1, $this->tgroup->addArtists([ARTIST_MAIN], [$artistName], $user, $artMan), 'tgroup-artist-add');
         $this->assertEquals("$artistName – {$this->tgroup->name()} [{$this->tgroup->year()} Live album]", $this->tgroup->text(), 'tgroup-artist-text');
 
         $this->assertNotNull($this->tgroup->primaryArtist(), 'tgroup-artist-primary');
@@ -152,7 +151,6 @@ class TGroupTest extends TestCase {
                 ["$artistName-2", "$artistName-guest"],
                 $user,
                 $artMan,
-                $logger,
             ),
             'tgroup-artist-add-2'
         );
@@ -173,13 +171,13 @@ class TGroupTest extends TestCase {
         ];
         $this->assertEquals(
             3,
-            $this->tgroup->artistRole()->modifyList($roleAliasList, ARTIST_DJ, $user, new Log()),
+            $this->tgroup->artistRole()->modifyList($roleAliasList, ARTIST_DJ, $user),
             'tgroup-a-dj-saved-my-life'
         );
         $this->assertEquals('Various DJs', $this->tgroup->flush()->artistRole()->text(), 'tgroup-2manydjs');
         $this->assertEquals(
             1,
-            $this->tgroup->artistRole()->removeList([[ARTIST_DJ, $roleAliasList[0][1]]], $user, new Log()),
+            $this->tgroup->artistRole()->removeList([[ARTIST_DJ, $roleAliasList[0][1]]], $user),
             'tgroup-hang-the-dj'
         );
         $this->assertEquals(
@@ -190,10 +188,10 @@ class TGroupTest extends TestCase {
     }
 
     public function testTGroupCoverArt(): void {
-        $coverId = $this->tgroup->addCoverArt('https://www.example.com/cover.jpg', 'cover art summary', $this->userList['user'], new Log());
+        $coverId = $this->tgroup->addCoverArt('https://www.example.com/cover.jpg', 'cover art summary', $this->userList['user']);
         $this->assertGreaterThan(0, $coverId, 'tgroup-cover-art-add');
-        $this->assertEquals(1, $this->tgroup->removeCoverArt($coverId, $this->userList['user'], new Log()), 'tgroup-cover-art-del-ok');
-        $this->assertEquals(0, $this->tgroup->removeCoverArt(9999999, $this->userList['user'], new Log()), 'tgroup-cover-art-del-nok');
+        $this->assertEquals(1, $this->tgroup->removeCoverArt($coverId, $this->userList['user']), 'tgroup-cover-art-del-ok');
+        $this->assertEquals(0, $this->tgroup->removeCoverArt(9999999, $this->userList['user']), 'tgroup-cover-art-del-nok');
     }
 
     public function testTGroupRevision(): void {
@@ -338,7 +336,6 @@ class TGroupTest extends TestCase {
                 $this->userList['admin'],
                 new Manager\User(),
                 new Manager\Vote(),
-                new Log(),
             ),
             'tgroup-music-merge'
         );
@@ -389,7 +386,6 @@ class TGroupTest extends TestCase {
             new Manager\Bookmark(),
             new Manager\Comment(),
             new Manager\Vote(),
-            new Log(),
             $this->userList['admin'],
         );
         $this->assertInstanceOf(TGroup::class, $this->tgroupExtra, 'tgroup-is-split');

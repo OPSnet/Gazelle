@@ -26,8 +26,8 @@ if ($request->userId() !== $Viewer->id()) {
 $requestId = $request->id();
 $request->remove();
 
-(new Gazelle\Log())->general("Request $requestId ($title) was deleted by user "
-    . $Viewer->label() . " for the reason: $reason"
+$Viewer->logger()->general(
+    "Request $requestId ($title) was deleted by user {$Viewer->label()} for the reason: $reason"
 );
 
 header('Location: requests.php');

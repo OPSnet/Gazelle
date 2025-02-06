@@ -22,7 +22,6 @@ class SearchReportTest extends TestCase {
             name:        'phpunit search report ' . randomString(20),
             description: 'phpunit search report description',
             tagList:     'disco funk metal',
-            logger:      new Log(),
         );
 
         $this->request = (new Manager\Request())->create(

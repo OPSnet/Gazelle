@@ -14,5 +14,5 @@ if (is_null($artist) || is_null($similar)) {
     error(404);
 }
 
-$artist->similar()->removeSimilar($similar, $Viewer, new Gazelle\Log());
+$artist->similar()->removeSimilar($similar, $Viewer);
 header("Location: " . redirectUrl($artist->location()));

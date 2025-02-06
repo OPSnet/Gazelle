@@ -18,13 +18,12 @@ class ArtistTest extends TestCase {
     }
 
     public function tearDown(): void {
-        $logger  = new Log();
         $manager = new Manager\Artist();
         foreach ($this->artistIdList as $artistId) {
             $artist = $manager->findById($artistId);
             if ($artist) {
                 $artist->toggleAttr('locked', false);
-                $artist->remove($this->user, $logger);
+                $artist->remove($this->user);
             }
         }
         if (isset($this->extra)) {
@@ -125,7 +124,6 @@ class ArtistTest extends TestCase {
 
     public function testArtistAlias(): void {
         $manager = new Manager\Artist();
-        $logger  = new Log();
         $artist = $manager->create('phpunit.' . randomString(12));
         $this->artistIdList[] = $artist->id();
 
@@ -136,7 +134,7 @@ class ArtistTest extends TestCase {
         $this->assertCount(0, $manager->tgroupList($artist->aliasId(), new Manager\TGroup()), 'artist-no-tgroup');
 
         $aliasName = $artist->name() . '-alias';
-        $newId = $artist->addAlias($aliasName, 0, $this->user, $logger);
+        $newId = $artist->addAlias($aliasName, 0, $this->user);
         $this->assertEquals($artist->aliasId() + 1, $newId, 'artist-new-alias');
         $this->assertEquals(2, $manager->aliasUseTotal($artist->aliasId()), 'artist-two-alias');
 
@@ -144,17 +142,16 @@ class ArtistTest extends TestCase {
         $this->assertEquals($artist->id(), $artist->id(), 'artist-fetch-artist-id');
         $this->assertEquals($newId, $artist->aliasId(), 'artist-fetch-alias-id');
 
-        $this->assertEquals(1, $artist->removeAlias($newId, $this->user, $logger), 'artist-remove-alias');
+        $this->assertEquals(1, $artist->removeAlias($newId, $this->user), 'artist-remove-alias');
     }
 
     public function testArtistNonRedirAlias(): void {
         $manager = new Manager\Artist();
-        $logger  = new Log();
         $artist = $manager->create('phpunit.' . randomString(12));
         $this->artistIdList[] = $artist->id();
 
         $aliasName = $artist->name() . '-reformed';
-        $newId = $artist->addAlias($aliasName, $artist->id(), $this->user, $logger);
+        $newId = $artist->addAlias($aliasName, $artist->id(), $this->user);
         $this->assertEquals($artist->aliasId() + 1, $newId, 'artist-new-non-redirect');
     }
 
@@ -183,7 +180,6 @@ class ArtistTest extends TestCase {
         $extraBk->create('artist', $old->id());
         $extraBk->create('artist', $new->id());
 
-        $log = new Log();
         $collMan = new Manager\Collage();
         $this->collage = $collMan->create(
             user:        $this->user,
@@ -191,7 +187,6 @@ class ArtistTest extends TestCase {
             name:        'phpunit merge artist ' . randomString(10),
             description: 'phpunit merge artist description',
             tagList:     'jazz',
-            logger:      $log,
         );
         $this->collage->addEntry($old, $this->user);
 
@@ -220,7 +215,6 @@ class ArtistTest extends TestCase {
                 new Manager\Comment(),
                 new Manager\Request(),
                 new Manager\TGroup(),
-                $log,
             ),
             'artist-merge-n',
         );
@@ -369,12 +363,11 @@ class ArtistTest extends TestCase {
         $artistMan = new Manager\Artist();
         $reqMan = new Manager\Request();
         $tgMan = new Manager\TGroup();
-        $logger  = new Log();
         $mainName = 'phpunit.' . randomString(12);
         $artist = $artistMan->create($mainName);
         $mainAliasId = $artist->aliasId();
         $aliasName = 'phpunit.' . randomString(12) . '-alias';
-        $artist->addAlias($aliasName, null, $this->user, $logger);
+        $artist->addAlias($aliasName, null, $this->user);
 
         $aliasUpper = strtoupper($aliasName);
         $aliasId = $artist->getAlias($aliasName);
@@ -388,22 +381,21 @@ class ArtistTest extends TestCase {
         $artistMan = new Manager\Artist();
         $reqMan = new Manager\Request();
         $tgMan = new Manager\TGroup();
-        $logger  = new Log();
         $mainName = 'phpunit.' . randomString(12);
         $artist = $artistMan->create($mainName);
         $mainAliasId = $artist->aliasId();
 
         // create NRA
         $a1Name = 'phpunit.' . randomString(12) . '-alias';
-        $a1Id = $artist->addAlias($a1Name, null, $this->user, $logger);
+        $a1Id = $artist->addAlias($a1Name, null, $this->user);
 
         // add RA
         $raAliasName = $a1Name . '-raalias';
-        $raId = $artist->addAlias($raAliasName, $a1Id, $this->user, $logger);
+        $raId = $artist->addAlias($raAliasName, $a1Id, $this->user);
 
         // create second NRA
         $a2Name = 'phpunit.' . randomString(12) . '-alias';
-        $a2Id = $artist->addAlias($a2Name, null, $this->user, $logger);
+        $a2Id = $artist->addAlias($a2Name, null, $this->user);
 
         $this->assertEquals($a2Id, $artist->renameAlias($a1Id, $a2Name, $this->user, $reqMan, $tgMan), 'artist-rename-nramerge-1');
 
@@ -447,11 +439,10 @@ class ArtistTest extends TestCase {
 
         $this->assertFalse($artist->similar()->voteSimilar($this->extra, $artist, true), 'artist-vote-self');
 
-        $logger  = new Log();
-        $this->assertEquals(1, $artist->similar()->addSimilar($other1, $this->user, $logger), 'artist-add-other1');
-        $this->assertEquals(0, $artist->similar()->addSimilar($other1, $this->user, $logger), 'artist-read-other1');
-        $this->assertEquals(1, $artist->similar()->addSimilar($other2, $this->user, $logger), 'artist-add-other2');
-        $this->assertEquals(1, $other1->similar()->addSimilar($other2, $this->user, $logger), 'artist-other1-add-other2');
+        $this->assertEquals(1, $artist->similar()->addSimilar($other1, $this->user), 'artist-add-other1');
+        $this->assertEquals(0, $artist->similar()->addSimilar($other1, $this->user), 'artist-read-other1');
+        $this->assertEquals(1, $artist->similar()->addSimilar($other2, $this->user), 'artist-add-other2');
+        $this->assertEquals(1, $other1->similar()->addSimilar($other2, $this->user), 'artist-other1-add-other2');
 
         $this->assertTrue($artist->similar()->voteSimilar($this->extra, $other1, true), 'artist-vote-up-other1');
         $this->assertFalse($artist->similar()->voteSimilar($this->extra, $other1, true), 'artist-revote-up-other1');
@@ -487,9 +478,9 @@ class ArtistTest extends TestCase {
         $this->assertLessThan($graph[$other1->id()]['proportion'], $graph[$other2->id()]['proportion'], 'artist-sim-proportion');
 
         $requestMan = new Manager\Request();
-        $this->assertFalse($artist->similar()->removeSimilar($artist, $this->extra, $logger), 'artist-remove-similar-self');
-        $this->assertTrue($artist->similar()->removeSimilar($other2, $this->extra, $logger), 'artist-remove-other');
-        $this->assertFalse($artist->similar()->removeSimilar($other2, $this->extra, $logger), 'artist-re-remove-other');
+        $this->assertFalse($artist->similar()->removeSimilar($artist, $this->extra), 'artist-remove-similar-self');
+        $this->assertTrue($artist->similar()->removeSimilar($other2, $this->extra), 'artist-remove-other');
+        $this->assertFalse($artist->similar()->removeSimilar($other2, $this->extra), 'artist-re-remove-other');
     }
 
     public function testArtistJson(): void {

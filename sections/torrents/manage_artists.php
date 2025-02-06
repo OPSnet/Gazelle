@@ -24,13 +24,13 @@ if (is_null($tgroup)) {
 }
 
 if (($_POST['manager_action'] ?? '') == 'delete') {
-    $tgroup->artistRole()->removeList($roleAliasList, $Viewer, new Gazelle\Log());
+    $tgroup->artistRole()->removeList($roleAliasList, $Viewer);
 } else {
     $newRole = (int)($_POST['importance'] ?? 0);
     if ($newRole === 0 || !isset(ARTIST_TYPE[$newRole])) {
         error('Unknown new artist role');
     }
-    $tgroup->artistRole()->modifyList($roleAliasList, $newRole, $Viewer, new Gazelle\Log());
+    $tgroup->artistRole()->modifyList($roleAliasList, $newRole, $Viewer);
 }
 $tgroup->refresh();
 

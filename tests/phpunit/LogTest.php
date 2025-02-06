@@ -35,9 +35,8 @@ class LogTest extends TestCase {
     public function testGeneralLog(): void {
         $siteLog = new Manager\SiteLog(new Manager\User());
         $this->assertIsInt($siteLog->relay(), 'sitelog-relay-init');
-        $logger = new Log();
         $message = self::PREFIX . "general torrent 123457890 " . randomString();
-        $logger->general($message);
+        $siteLog->logger()->general($message);
 
         $this->assertEquals(1, $siteLog->relay(), 'sitelog-relay-update');
 
@@ -53,8 +52,8 @@ class LogTest extends TestCase {
     }
 
     public function testGroupLog(): void {
-        $logger = new Log();
         $this->user = \GazelleUnitTest\Helper::makeUser('sitelog.' . randomString(6), 'sitelog');
+        $logger = $this->user->logger();
         $this->tgroup = \GazelleUnitTest\Helper::makeTGroupMusic(
             $this->user,
             'phpunit log ' . randomString(6),
@@ -99,8 +98,8 @@ class LogTest extends TestCase {
     }
 
     public function testTorrentlLog(): void {
-        $logger = new Log();
         $this->user = \GazelleUnitTest\Helper::makeUser('sitelog.' . randomString(6), 'sitelog');
+        $logger = $this->user->logger();
         $this->tgroup = \GazelleUnitTest\Helper::makeTGroupMusic(
             $this->user,
             'phpunit log ' . randomString(6),
@@ -126,8 +125,10 @@ class LogTest extends TestCase {
     }
 
     public function testRenderLog(): void {
+        $this->user = \GazelleUnitTest\Helper::makeUser('sitelog.' . randomString(6), 'sitelog');
+        $logger = $this->user->logger();
         $message = self::PREFIX . "general " . randomString();
-        (new Log())->general($message);
+        $logger->general($message);
 
         $siteLog   = new Manager\SiteLog(new Manager\User());
         $siteLog->relay();
@@ -136,7 +137,6 @@ class LogTest extends TestCase {
         $paginator->setTotal($siteLog->total(''));
 
         // FIXME: $Viewer should not be necessary
-        $this->user = \GazelleUnitTest\Helper::makeUser('sitelog.' . randomString(6), 'sitelog');
         Base::setRequestContext(new BaseRequestContext('/index.php', '127.0.0.1', ''));
         global $Viewer;
         $Viewer = $this->user;

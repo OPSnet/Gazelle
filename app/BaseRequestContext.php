@@ -4,8 +4,9 @@ namespace Gazelle;
 
 class BaseRequestContext {
     protected string $module; // previously known as global $Document
-    protected bool $isValid;
-    protected array $ua;
+    protected bool   $isValid;
+    protected array  $ua;
+    protected Log    $logger;
 
     public function __construct(
         protected readonly string $scriptName,
@@ -20,7 +21,8 @@ class BaseRequestContext {
             $this->module  = $info['filename'];
             $this->isValid = $info['dirname'] === '/';
         }
-        $this->ua = \parse_user_agent($useragent);
+        $this->ua     = \parse_user_agent($useragent);
+        $this->logger = new Log();
     }
 
     public function ua(): array {
@@ -37,6 +39,10 @@ class BaseRequestContext {
 
     public function isValid(): bool {
         return $this->isValid;
+    }
+
+    public function logger(): Log {
+        return $this->logger;
     }
 
     public function module(): string {

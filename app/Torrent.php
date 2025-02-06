@@ -113,7 +113,15 @@ class Torrent extends TorrentAbstract {
         return $tor->getEncode();
     }
 
-    public function adjustLogscore(int $logId, bool $adjusted, int $adjScore, bool $adjChecksum, int $adjBy, $adjReason, array $adjDetails): int {
+    public function adjustLogscore(
+        int    $logId,
+        bool   $adjusted,
+        int    $adjScore,
+        bool   $adjChecksum,
+        int    $adjBy,
+        string $adjReason,
+        array  $adjDetails,
+    ): int {
         self::$db->prepared_query("
             UPDATE torrents_logs SET
                 Adjusted = ?, AdjustedScore = ?, AdjustedChecksum = ?, AdjustedBy = ?, AdjustmentReason = ?, AdjustmentDetails = ?
@@ -198,7 +206,11 @@ class Torrent extends TorrentAbstract {
      *
      * @return int number of logfiles removed
      */
-    public function removeAllLogs(User $user, File\RipLog $ripLog, File\RipLogHTML $ripLogHtml, Log $logger): int {
+    public function removeAllLogs(
+        User $user,
+        File\RipLog $ripLog,
+        File\RipLogHTML $ripLogHtml,
+    ): int {
         self::$db->begin_transaction();
         self::$db->prepared_query("
             DELETE FROM torrents_logs WHERE TorrentID = ?
@@ -214,7 +226,7 @@ class Torrent extends TorrentAbstract {
             WHERE ID = ?
             ", $this->id
         );
-        $logger->torrent($this, $user, "All logs removed from torrent");
+        $this->logger()->torrent($this, $user, "All logs removed from torrent");
         self::$db->commit();
         $this->flush();
 
@@ -389,9 +401,15 @@ class Torrent extends TorrentAbstract {
         }
 
         $userInfo = $user ? " by " . $user->username() : '';
-        (new Log())->general(
-            "Torrent {$this->id} ($name) [$edition] ($sizeMB $infohash) was deleted$userInfo for reason: $reason")
-            ->torrent($this, $user, "deleted torrent [$edition] ($media/$format/$encoding $sizeMB $infohash) for reason: $reason");
+        $this->logger()
+            ->torrent(
+                $this,
+                $user,
+                "deleted torrent [$edition] ($media/$format/$encoding $sizeMB $infohash) for reason: $reason"
+            )
+            ->general(
+                "Torrent {$this->id} ($name) [$edition] ($sizeMB $infohash) was deleted$userInfo for reason: $reason"
+            );
         self::$db->commit();
 
         array_push($deleteKeys, "zz_t_" . $this->id, sprintf(self::CACHE_KEY, $this->id), "torrent_group_" . $groupId);

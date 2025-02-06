@@ -143,7 +143,7 @@ class TGroup extends \Gazelle\ArtistRole {
         return array_unique($matched);
     }
 
-    public function modifyList(array $roleAliasList, int $role, \Gazelle\User $user, \Gazelle\Log $logger): int {
+    public function modifyList(array $roleAliasList, int $role, \Gazelle\User $user): int {
         $aliasList = array_map(fn ($tuple) => $tuple[1], $roleAliasList);
         self::$db->prepared_query("
             UPDATE IGNORE torrents_artists SET
@@ -162,14 +162,21 @@ class TGroup extends \Gazelle\ArtistRole {
             $artist = $this->manager->findByAliasId($aliasId);
             $change = "artist {$artist->id()} ({$artist->name()}) changed role from "
                 . ARTIST_TYPE[$oldRole] . " to " . ARTIST_TYPE[$role];
-            $logger->group($this->object, $user, $change)
-                ->general("$change in group {$this->object->id()} ({$this->object->title()}) by user " . $user->label());
+            $this->logger()
+                ->group(
+                    $this->object,
+                    $user,
+                    $change
+                )
+                ->general(
+                    "$change in group {$this->object->id()} ({$this->object->title()}) by user {$user->label()}"
+                );
             ++$affected;
         }
         return $affected;
     }
 
-    public function removeList(array $roleAliasList, \Gazelle\User $user, \Gazelle\Log $logger): int {
+    public function removeList(array $roleAliasList, \Gazelle\User $user): int {
         $changed  = [];
         foreach ($roleAliasList as [$role, $aliasId]) {
             self::$db->prepared_query("
@@ -183,13 +190,20 @@ class TGroup extends \Gazelle\ArtistRole {
                 $artist = $this->manager->findByAliasId($aliasId);
                 $changed[$artist->id()] = $artist;
                 $change = "artist {$artist->id()} ({$artist->name()}) removed as " . ARTIST_TYPE[$role];
-                $logger->group($this->object, $user, $change)
-                    ->general("$change in group {$this->object->id()} ({$this->object->title()}) by user {$user->label()}");
+                $this->logger()
+                    ->group(
+                        $this->object,
+                        $user,
+                        $change
+                    )
+                    ->general(
+                        "$change in group {$this->object->id()} ({$this->object->title()}) by user {$user->label()}"
+                    );
             }
         }
         foreach ($changed as $artist) {
             if (!$artist->usageTotal()) {
-                $artist->remove($user, $logger);
+                $artist->remove($user);
             }
         }
         return count($changed);

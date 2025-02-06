@@ -660,7 +660,7 @@ class Request extends BaseObject implements CategoryHasArtist {
             (new User($userId))->inbox()->createSystem("The request \"$name\" has been filled", $message);
         }
 
-        (new Log())->general(
+        $this->logger()->general(
             "Request {$this->id} ($name) was filled by user {$user->label()} with the torrent {$torrent->id()} for a "
             . byte_format($bounty) . ' bounty.'
         );
@@ -712,7 +712,8 @@ class Request extends BaseObject implements CategoryHasArtist {
             );
         }
 
-        (new Log())->general("Request {$this->id} ({$this->title()}), with a " . byte_format($bounty)
+        $this->logger()->general(
+            "Request {$this->id} ({$this->title()}), with a " . byte_format($bounty)
             . " bounty, was unfilled by user {$admin->label()} for the reason: $reason"
         );
 

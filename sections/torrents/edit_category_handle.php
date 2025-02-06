@@ -40,7 +40,6 @@ $new = $tgMan->changeCategory(
     releaseType: (int)($_POST['releasetype'] ?? 0),
     year:        (int)($_POST['year'] ?? 0),
     artistMan:   new Gazelle\Manager\Artist(),
-    logger:      new Gazelle\Log(),
     user:        $Viewer,
 );
 

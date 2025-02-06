@@ -11,7 +11,7 @@ if (!$coverId || is_null($tgroup)) {
     json_die('failure', 'bad parameters');
 }
 
-if ($tgroup->removeCoverArt($coverId, $Viewer, new Gazelle\Log())) {
+if ($tgroup->removeCoverArt($coverId, $Viewer)) {
     json_print("success", ['id' => $coverId]);
 } else {
     json_die('failure', 'bad coverId');

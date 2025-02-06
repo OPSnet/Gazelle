@@ -276,7 +276,7 @@ $torrent->flush();
 $db->commit();
 
 $changeLog = shortenString(implode(', ', $change), 300);
-(new Gazelle\Log())->torrent($torrent, $Viewer, $changeLog)
+$torrent->logger()->torrent($torrent, $Viewer, $changeLog)
     ->general("Torrent $TorrentID ({$torrent->group()->name()}) in group {$torrent->groupId()} was edited by "
         . $Viewer->username() . " ($changeLog)");
 

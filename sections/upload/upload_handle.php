@@ -484,7 +484,6 @@ $hasLogInDB = $logfileSummary?->total() > 0;
 //******************************************************************************//
 //--------------- Start database stuff -----------------------------------------//
 
-$log = new Gazelle\Log();
 $Debug->mark('upload: database begin transaction');
 $db = Gazelle\DB::DB();
 $db->begin_transaction();
@@ -511,7 +510,7 @@ if ($tgroup) {
     }
 
     if ($isMusicUpload) {
-        $tgroup->addArtists($ArtistRoleList, $ArtistNameList, $Viewer, new Gazelle\Manager\Artist(), $log);
+        $tgroup->addArtists($ArtistRoleList, $ArtistNameList, $Viewer, new Gazelle\Manager\Artist());
         $Cache->increment_value('stats_album_count', count($ArtistNameList));
     }
     $Viewer->stats()->increment('unique_group_total');
@@ -577,7 +576,7 @@ foreach ($upload['extra'] as $info) {
     $size            = number_format($extra->size() / (1024 * 1024), 2);
     $upload['new'][] = $extra;
     $torrentFiler->put($info['TorEnc'], $extra->id());
-    $log->torrent($extra, $Viewer, "uploaded ($size MiB)")
+    $extra->logger()->torrent($extra, $Viewer, "uploaded ($size MiB)")
         ->general("Torrent {$extra->id()} ($logName) ($size MiB) was uploaded by " . $Viewer->username());
 }
 
@@ -593,7 +592,7 @@ if ($logfileSummary?->total()) {
 }
 
 $size = number_format($TotalSize / (1024 * 1024), 2);
-$log->torrent($torrent, $Viewer, "uploaded ($size MiB)")
+$torrent->logger()->torrent($torrent, $Viewer, "uploaded ($size MiB)")
     ->general("Torrent $TorrentID ($logName) ($size MiB) was uploaded by " . $Viewer->username());
 
 if (!$torrentFiler->put($bencoder->getEncode(), $TorrentID)) {

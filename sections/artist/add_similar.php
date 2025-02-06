@@ -25,7 +25,7 @@ if (is_null($other)) {
         }
     }
 }
-$artist->similar()->addSimilar($other, $Viewer, new Gazelle\Log());
+$artist->similar()->addSimilar($other, $Viewer);
 
 if (defined('AJAX')) {
     json_print('success', [

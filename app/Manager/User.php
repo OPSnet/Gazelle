@@ -627,8 +627,9 @@ class User extends \Gazelle\BaseManager {
             }
         }
         $total = count($snatchers);
-        (new \Gazelle\Log())->general($viewer->username() . " sent a mass PM to $total snatcher" . plural($total)
-            . " of torrent " . $torrent->id() . " (" . $torrent->group()->text() . ")"
+        $this->logger()->general(
+            $viewer->username() . " sent a mass PM to $total snatcher" . plural($total)
+            . " of torrent {$torrent->id()} ({$torrent->group()->text()})"
         );
         return $total;
     }

@@ -82,7 +82,7 @@ class Similar extends \Gazelle\Base {
         return $artist[0]['similar_id'] ?? 0;
     }
 
-    public function addSimilar(\Gazelle\Artist $other, \Gazelle\User $user, \Gazelle\Log $logger): int {
+    public function addSimilar(\Gazelle\Artist $other, \Gazelle\User $user): int {
         $thisId = $this->id();
         $otherId = $other->id();
         self::$db->begin_transaction();
@@ -112,7 +112,9 @@ class Similar extends \Gazelle\Base {
                 VALUES (?, ?), (?, ?)
                 ", $thisId, $findId, $otherId, $findId
             );
-            $logger->general("User {$user->label()} set artist {$this->artist()->label()} similar to artist {$other->label()}");
+            $this->logger()->general(
+                "User {$user->label()} set artist {$this->artist()->label()} similar to artist {$other->label()}"
+            );
         }
         self::$db->prepared_query("
             INSERT IGNORE INTO artists_similar_votes
@@ -199,7 +201,7 @@ class Similar extends \Gazelle\Base {
         return true;
     }
 
-    public function removeSimilar(\Gazelle\Artist $other, \Gazelle\User $user, \Gazelle\Log $logger): bool {
+    public function removeSimilar(\Gazelle\Artist $other, \Gazelle\User $user): bool {
         $similarId = $this->findSimilarId($other);
         if (!$similarId) {
             return false;
@@ -208,7 +210,9 @@ class Similar extends \Gazelle\Base {
             DELETE FROM artists_similar_scores WHERE SimilarID = ?
             ", $similarId
         );
-        $logger->general("User {$user->label()} removed artist {$this->artist()->label()} similar to artist {$other->label()}");
+        $this->logger()->general(
+            "User {$user->label()} removed artist {$this->artist()->label()} similar to artist {$other->label()}"
+        );
         $this->flush();
         $other->flush();
         return true;

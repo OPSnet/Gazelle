@@ -13,7 +13,7 @@ if (is_null($torrent) || !$logId) {
 }
 
 (new Gazelle\File\RipLog())->remove([$torrent->id(), $logId]);
-(new Gazelle\Log())->torrent($torrent, $Viewer, "Riplog ID $logId removed from torrent {$torrent->id()}");
+$torrent->logger()->torrent($torrent, $Viewer, "Riplog ID $logId removed from torrent {$torrent->id()}");
 $torrent->clearLog($logId);
 
 header('Location: ' . $torrent->location());

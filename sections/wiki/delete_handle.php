@@ -1,6 +1,10 @@
 <?php
 /** @phpstan-var \Gazelle\User $Viewer */
 
+if (!$Viewer->permitted('admin_manage_wiki')) {
+    error(403);
+}
+
 authorize();
 
 $wikiMan = new Gazelle\Manager\Wiki();
@@ -9,13 +13,11 @@ if (is_null($article)) {
     error(404);
 }
 
-if (!$Viewer->permitted('admin_manage_wiki')) {
-    error(403);
-}
-
 $id    = $article->id();
 $title = $article->title();
 $article->remove();
-(new Gazelle\Log())->general("Wiki article $id \"$title\" was removed by {$Viewer->username()}");
+$article->logger()->general(
+    "Wiki article $id \"$title\" was removed by {$Viewer->username()}"
+);
 
 header('Location: wiki.php');

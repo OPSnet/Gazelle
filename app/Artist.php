@@ -371,7 +371,7 @@ class Artist extends BaseObject implements CollageEntry {
         return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
-    public function addAlias(string $name, ?int $redirect, User $user, Log $logger): int {
+    public function addAlias(string $name, ?int $redirect, User $user): int {
         self::$db->prepared_query("
             INSERT INTO artists_alias
                    (ArtistID, Name, Redirect, UserID)
@@ -379,7 +379,7 @@ class Artist extends BaseObject implements CollageEntry {
             ", $this->id, $name, $redirect ?? 0, $user->id()
         );
         $aliasId = self::$db->inserted_id();
-        $logger->general(
+        $this->logger()->general(
             "The alias $aliasId ($name) was added to the artist {$this->label()} by user {$user->label()}"
         );
         $this->flush();
@@ -396,7 +396,7 @@ class Artist extends BaseObject implements CollageEntry {
         return empty($alias) ? null : current($alias);  // @phpstan-ignore-line ?phpstan bug should return int|null but returns int|string|null.
     }
 
-    public function removeAlias(int $aliasId, User $user, Log $logger): int {
+    public function removeAlias(int $aliasId, User $user): int {
         if ($this->aliasId === $aliasId) {
             $this->aliasId = $this->primaryAliasId();
         }
@@ -408,7 +408,7 @@ class Artist extends BaseObject implements CollageEntry {
         $affected = self::$db->affected_rows();
         if ($affected) {
             $this->flush();
-            $logger->general(
+            $this->logger()->general(
                 "The alias $aliasId ({$alias['name']}) for the artist {$this->label()}  was removed by user {$user->label()}"
             );
         }
@@ -614,7 +614,6 @@ class Artist extends BaseObject implements CollageEntry {
         Manager\Comment $commMan,
         Manager\Request $reqMan,
         Manager\TGroup  $tgMan,
-        Log             $logger,
     ): int {
         self::$db->begin_transaction();
 
@@ -745,8 +744,10 @@ class Artist extends BaseObject implements CollageEntry {
         );
         $affected = self::$db->affected_rows();
         self::$db->commit();
-        $logger->general(
-            "The artist $oldId ($oldName) was made into a " . ($redirect ? "" : "non-") . "redirecting alias of artist $newId ({$this->name()}) by user {$user->label()}"
+        $this->logger()->general(
+            "The artist $oldId ($oldName) was made into a "
+            . ($redirect ? "" : "non-")
+            . "redirecting alias of artist $newId ({$this->name()}) by user {$user->label()}"
         );
         self::$cache->delete_value("zz_a_$oldId");
         $this->flush();
@@ -886,7 +887,7 @@ class Artist extends BaseObject implements CollageEntry {
      * Deletes an artist and their wiki and tags.
      * Does NOT delete their requests or torrents.
      */
-    public function remove(User $user, Log $logger): int {
+    public function remove(User $user): int {
         $qid  = self::$db->get_query_id();
         $id   = $this->id;
         $name = $this->name();
@@ -903,7 +904,9 @@ class Artist extends BaseObject implements CollageEntry {
         $db->relaxConstraints(false);
 
         (new \Gazelle\Manager\Comment())->remove('artist', $id);
-        $logger->general("Artist $id ($name) was deleted by " . $user->username());
+        $this->logger()->general(
+            "Artist $id ($name) was deleted by {$user->username()}"
+        );
         self::$db->commit();
 
         self::$cache->delete_value('zz_a_' . $id);

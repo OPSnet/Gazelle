@@ -64,7 +64,6 @@ $collage = $collageMan->create(
     $name,
     $_POST['description'],
     (new Gazelle\Manager\Tag())->normalize(str_replace(',', ' ', (string)$_POST['tags'])),
-    new Gazelle\Log()
 );
 
 if ($Viewer->option('AutoSubscribe')) {

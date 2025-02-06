@@ -40,7 +40,6 @@ $tgMan->merge(
     $Viewer,
     new \Gazelle\Manager\User(),
     new \Gazelle\Manager\Vote(),
-    new Gazelle\Log()
 );
 
 header('Location: ' . $new->location());

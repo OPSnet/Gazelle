@@ -37,7 +37,6 @@ class Collage extends \Gazelle\BaseManager {
         string $name,
         string $description,
         string $tagList,
-        \Gazelle\Log $logger
     ): \Gazelle\Collage {
         self::$db->prepared_query("
             INSERT INTO collages
@@ -48,7 +47,9 @@ class Collage extends \Gazelle\BaseManager {
         $id = self::$db->inserted_id();
         $user->stats()->increment('collage_total');
         (new \Gazelle\Stats\Collage())->increment();
-        $logger->general("Collage $id ($name) was created by {$user->username()}");
+        $this->logger()->general(
+            "Collage $id ($name) was created by {$user->username()}"
+        );
         return new \Gazelle\Collage($id, $categoryId);
     }
 

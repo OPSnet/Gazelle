@@ -337,7 +337,6 @@ class Torrent extends \Gazelle\BaseManager {
         $affected = self::$db->affected_rows();
 
         $refresh = [];
-        $log     = new \Gazelle\Log();
         foreach ($idList as $torrentId) {
             $torrent = $this->findById($torrentId)->flush();
             $tracker->modifyTorrent($torrent, $leechType);
@@ -345,8 +344,15 @@ class Torrent extends \Gazelle\BaseManager {
             if (!isset($refresh[$tgroupId])) {
                 $refresh[$tgroupId] = $torrent->group();
             }
-            $log->torrent($torrent, $user, "marked as freeleech type {$reason->label()}")
-                ->general($user->username() . " marked torrent $torrentId freeleech type {$reason->label()}");
+            $this->logger()
+                ->torrent(
+                    $torrent,
+                    $user,
+                    "marked as freeleech type {$reason->label()}"
+                )
+                ->general(
+                    "{$user->username()} marked torrent $torrentId freeleech type {$reason->label()}"
+                );
         }
         foreach ($refresh as $tgroup) {
             $tgroup->refresh();
@@ -604,7 +610,15 @@ class Torrent extends \Gazelle\BaseManager {
         );
     }
 
-    protected static function metaPL(string $media, string $format, string $encoding, bool $hasCue, bool $hasLog, bool $hasLogDb, int $logScore): string {
+    protected static function metaPL(
+        string $media,
+        string $format,
+        string $encoding,
+        bool $hasCue,
+        bool $hasLog,
+        bool $hasLogDb,
+        int $logScore,
+    ): string {
         $meta = [$media, $format, $encoding];
         if ($hasCue) {
             $meta[] = 'Cue';

@@ -18,7 +18,6 @@ if (is_null($tgroup)) {
 }
 
 $imgProxy = new Gazelle\Util\ImageProxy($Viewer);
-$logger   = new Gazelle\Log();
 
 foreach ($imageList as $n => $image) {
     $image = trim($image);
@@ -29,7 +28,7 @@ foreach ($imageList as $n => $image) {
     if ($banned) {
         error("Please rehost images from $banned elsewhere.");
     }
-    $tgroup->addCoverArt($image, trim($summaryList[$n]), $Viewer, $logger);
+    $tgroup->addCoverArt($image, trim($summaryList[$n]), $Viewer);
 }
 
 header('Location: ' . redirectUrl($tgroup->location()));

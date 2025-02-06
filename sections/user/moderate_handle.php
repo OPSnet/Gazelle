@@ -112,7 +112,9 @@ $needTrackerRefresh = false;
 
 // If we're deleting the user, we can ignore all the other crap
 if ($_POST['UserStatus'] === 'delete' && $Viewer->permitted('users_delete_users')) {
-    (new Gazelle\Log())->general("User account {$user->label()} was deleted by " . $Viewer->username());
+    $tracker->logger()->general(
+        "User account {$user->label()} was deleted by {$Viewer->username()}"
+    );
     $tracker->removeUser($user);
     $user->remove();
     header("Location: log.php?search=User+$userId");

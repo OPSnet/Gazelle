@@ -97,7 +97,7 @@ if ($noCoverArt != $tgroup->hasNoCoverArt()) {
     $logInfo[] = "No cover art exception " . ($noCoverArt ? 'added' : 'removed');
 }
 if ($logInfo) {
-    (new Gazelle\Log())->group($tgroup, $Viewer, implode(', ', $logInfo));
+    $tgroup->logger()->group($tgroup, $Viewer, implode(', ', $logInfo));
 }
 
 header('Location: ' . $tgroup->location());

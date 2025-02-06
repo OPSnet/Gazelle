@@ -51,7 +51,6 @@ class CategoryTest extends TestCase {
             artistName:  $artistName,
             releaseType: (new ReleaseType())->findIdByName('EP'),
             artistMan:   new Manager\Artist(),
-            logger:      new Log(),
             user:        $user,
         );
         $this->assertInstanceOf(TGroup::class, $new, 'cat-change-to-music');
@@ -86,7 +85,6 @@ class CategoryTest extends TestCase {
             artistName:  'new artist ' . randomString(6),
             releaseType: (new ReleaseType())->findIdByName('EP'),
             artistMan:   new Manager\Artist(),
-            logger:      new Log(),
             user:        $user,
         );
         $this->assertNull($new, 'cat-change-to-same');
@@ -102,7 +100,6 @@ class CategoryTest extends TestCase {
             artistName:  null,
             releaseType: null,
             artistMan:   new Manager\Artist(),
-            logger:      new Log(),
             user:        $user,
         );
         $this->assertInstanceOf(TGroup::class, $new, 'cat-change-to-comedy');

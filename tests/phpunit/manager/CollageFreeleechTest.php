@@ -33,7 +33,6 @@ class CollageFreeleechTest extends TestCase {
             name:        'phpunit collfree ' . randomString(10),
             description: 'phpunit collfree',
             tagList:     'pop',
-            logger:      new Log(),
         );
         foreach ($this->tgroupList as $tgroup) {
             foreach (

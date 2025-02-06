@@ -38,6 +38,6 @@ if (empty($_POST['confirm'])) {
 
 authorize();
 
-$new->absorb($torrent, $Viewer, new Gazelle\Log());
+$new->absorb($torrent, $Viewer);
 
 header('Location: ' . $new->location());

@@ -39,7 +39,6 @@ class ReportManagerTest extends TestCase {
             name:        'phpunit collage report ' . randomString(20),
             description: 'phpunit collage report description',
             tagList:     'disco funk metal',
-            logger:      new Log(),
         );
         $manager = new Manager\Report(new Manager\User());
         $report = $manager->create($this->userList[1], $this->collage->id(), 'collage', 'phpunit collage report');
@@ -201,7 +200,6 @@ class ReportManagerTest extends TestCase {
             name:        'phpunit collage report ' . randomString(20),
             description: 'phpunit collage report description',
             tagList:     'disco funk metal',
-            logger:      new Log(),
         );
         $report = $manager->create($this->userList[1], $this->collage->id(), 'collage', 'phpunit collage report');
         $this->reportList[] = $report;

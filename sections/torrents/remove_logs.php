@@ -15,6 +15,5 @@ $torrent->removeAllLogs(
     $Viewer,
     new Gazelle\File\RipLog(),
     new Gazelle\File\RipLogHTML(),
-    new Gazelle\Log(),
 );
 header('Location: ' . $torrent->location());

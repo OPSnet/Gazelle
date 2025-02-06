@@ -55,7 +55,7 @@ foreach ($Tags as $tagName) {
         $tag->voteTGroup($tgroup, $Viewer, 'up');
         $added[] = $resolved;
 
-        (new Gazelle\Log())->group($tgroup, $Viewer, "Tag \"$resolved\" added to group");
+        $tag->logger()->group($tgroup, $Viewer, "Tag \"$resolved\" added to group");
     }
 }
 

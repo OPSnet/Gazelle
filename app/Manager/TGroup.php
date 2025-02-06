@@ -44,7 +44,6 @@ class TGroup extends \Gazelle\BaseManager {
         \Gazelle\Manager\Bookmark $bookmarkMan,
         \Gazelle\Manager\Comment  $commentMan,
         \Gazelle\Manager\Vote     $voteMan,
-        \Gazelle\Log              $logger,
         \Gazelle\User             $user,
     ): \Gazelle\TGroup {
         self::$db->prepared_query("
@@ -55,7 +54,7 @@ class TGroup extends \Gazelle\BaseManager {
         );
         $newId = self::$db->inserted_id();
         $new = $this->findById($newId);
-        $new->addArtists([ARTIST_MAIN], [$artistName], $user, $artistMan, $logger);
+        $new->addArtists([ARTIST_MAIN], [$artistName], $user, $artistMan);
 
         self::$db->prepared_query('
             UPDATE torrents SET
@@ -74,12 +73,14 @@ class TGroup extends \Gazelle\BaseManager {
             $bookmarkMan->merge($old, $new);
             $commentMan->merge('torrents', $oldId, $newId);
             $voteMan->merge($old, $new, new \Gazelle\Manager\User());
-            $logger->merge($old, $new);
+            $this->logger()->merge($old, $new);
             $old->remove($user);
         }
 
-        $logger->group($new, $user, "split from group $oldId")
-            ->general("Torrent {$torrent->id()} was split out from group $oldId to $newId by {$user->label()}");
+        $this->logger()->group($new, $user, "split from group $oldId")
+            ->general(
+                "Torrent {$torrent->id()} was split out from group $oldId to $newId by {$user->label()}"
+            );
 
         $new->flush()->refresh();
         $torrent->flush();
@@ -177,7 +178,6 @@ class TGroup extends \Gazelle\BaseManager {
         \Gazelle\User $user,
         \Gazelle\Manager\User $userManager,
         \Gazelle\Manager\Vote $voteManager,
-        \Gazelle\Log $log,
     ): bool {
         // GroupIDs
         self::$db->prepared_query("SELECT ID FROM torrents WHERE GroupID = ?", $old->id());
@@ -246,8 +246,15 @@ class TGroup extends \Gazelle\BaseManager {
         $oldId    = $old->id();
         $oldLabel = $old->label();
         $old->remove($user);
-        $log->general("Group $oldId deleted following merge to {$new->id()}.")
-            ->group($new, $user, "Merged Group $oldLabel to {$new->label()}")
+        $this->logger()
+            ->group(
+                $new,
+                $user,
+                "Merged Group $oldLabel to {$new->label()}"
+            )
+            ->general(
+                "Group $oldId deleted following merge to {$new->id()}."
+            )
             ->merge($old, $new);
 
         self::$db->commit();
@@ -344,7 +351,6 @@ class TGroup extends \Gazelle\BaseManager {
         \Gazelle\Torrent        $torrent,
         \Gazelle\Manager\Artist $artistMan,
         \Gazelle\User           $user,
-        \Gazelle\Log            $logger,
     ): ?\Gazelle\TGroup {
         if ($old->categoryId() === $categoryId) {
             return null;
@@ -387,7 +393,7 @@ class TGroup extends \Gazelle\BaseManager {
             catalogueNumber: null,
         );
         if ($new->hasArtistRole()) {
-            $new->addArtists([ARTIST_MAIN], [$artistName], $user, $artistMan, $logger);
+            $new->addArtists([ARTIST_MAIN], [$artistName], $user, $artistMan);
         }
         $torrent->setField('GroupID', $new->id())->modify();
 
@@ -398,15 +404,20 @@ class TGroup extends \Gazelle\BaseManager {
             (new \Gazelle\Manager\Bookmark())->merge($old, $new);
             (new \Gazelle\Manager\Comment())->merge('torrents', $old->id(), $new->id());
             (new \Gazelle\Manager\Vote())->merge($old, $new, new \Gazelle\Manager\User());
-            $logger->merge($old, $new);
+            $this->logger()->merge($old, $new);
             $old->remove($user);
         }
         $new->refresh();
 
-        $logger->group($new, $user,
-            "category changed from {$old->categoryId()} to {$new->categoryId()}, merged from group {$old->id()}"
+        $this->logger()
+            ->group(
+                $new,
+                $user,
+                "category changed from {$old->categoryId()} to {$new->categoryId()}, merged from group {$old->id()}"
             )
-            ->general("Torrent {$torrent->id()} was changed to category {$new->categoryId()} by {$user->label()}");
+            ->general(
+                "Torrent {$torrent->id()} was changed to category {$new->categoryId()} by {$user->label()}"
+            );
         return $new;
     }
 }

@@ -48,4 +48,8 @@ abstract class Base {
         );
         return $default ? (string)$default : null;
     }
+
+    public function logger(): Log {
+        return $this->requestContext()->logger();
+    }
 }

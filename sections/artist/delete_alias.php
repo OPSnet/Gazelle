@@ -32,6 +32,6 @@ if ($tgroupList) {
     exit;
 }
 
-$artist->removeAlias($aliasId, $Viewer, new Gazelle\Log());
+$artist->removeAlias($aliasId, $Viewer);
 
 header("Location: " . redirectUrl("artist.php?action=edit&artistid={$artist->id()}"));

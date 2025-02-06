@@ -22,9 +22,9 @@ if (($_POST['submit'] ?? '') === 'Remove') {
     }
     $userId = $collage->entryUserId($tgroup);
     if ($collage->removeEntry($tgroup)) {
-        (new Gazelle\Log())->general(sprintf("Collage %d (%s) group entry {$tgroup->id()} (added by user $userId) removed by %s",
-            $collage->id(), $collage->name(), $Viewer->username()
-        ));
+        $collage->logger()->general(
+            "Collage {$collage->id()} ({$collage->name()}) group entry {$tgroup->id()} (added by user $userId) removed by {$Viewer->username()}"
+        );
     }
 } elseif (isset($_POST['sort'])) {
     if (is_null($tgroup)) {

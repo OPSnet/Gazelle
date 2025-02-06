@@ -38,7 +38,6 @@ if (isset($_POST['confirm'])) {
         new \Gazelle\Manager\Comment(),
         new \Gazelle\Manager\Request(),
         new \Gazelle\Manager\TGroup(),
-        new \Gazelle\Log(),
     );
     header("Location: artist.php?action=edit&artistid={$new->id()}");
     exit;

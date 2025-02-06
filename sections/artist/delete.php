@@ -28,7 +28,7 @@ if (count($tgroupList) + count($requestList) > 0) {
 }
 
 $name = $artist->name();
-$artist->remove($Viewer, new Gazelle\Log());
+$artist->remove($Viewer);
 
 echo $Twig->render('artist/remove-success.twig', [
     'name' => $name,

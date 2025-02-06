@@ -44,6 +44,6 @@ if ($redirectId) {
     }
 }
 
-$artist->addAlias($newName, $redirectId, $Viewer, new Gazelle\Log());
+$artist->addAlias($newName, $redirectId, $Viewer);
 
 header("Location:" . redirectUrl("artist.php?action=edit&artistid={$artist->id()}"));

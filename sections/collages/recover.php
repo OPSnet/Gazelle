@@ -24,7 +24,7 @@ if (!empty($_POST['id']) || $_POST['name'] !== '') {
         error('Collage is completely deleted');
     } else {
         $collageId = $collage->flush()->id();
-        (new Gazelle\Log())->general("Collage $collageId was recovered by " . $Viewer->username());
+        $collage->logger()->general("Collage $collageId was recovered by " . $Viewer->username());
         header('Location: ' . $collage->location());
         exit;
     }

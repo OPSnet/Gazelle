@@ -236,7 +236,6 @@ class TorrentTest extends TestCase {
                 $this->user,
                 new File\RipLog(),
                 new File\RipLogHTML(),
-                new Log(),
             ),
             'torrent-remove-all-logs'
         );

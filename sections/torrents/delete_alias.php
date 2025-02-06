@@ -24,11 +24,10 @@ if (is_null($artist)) {
 $artistId = $artist->id();
 $artistName = $artist->name();
 
-$logger = new Gazelle\Log();
-if ($tgroup->removeArtist($artist, $role, $Viewer, $logger)) {
+if ($tgroup->removeArtist($artist, $role, $Viewer)) {
     $tgroup->refresh();
     $label = "$artistId ($artistName) [" . ARTIST_TYPE[$role] . "]";
-    $logger->group($tgroup, $Viewer, "removed artist $label")
+    $tgroup->logger()->group($tgroup, $Viewer, "removed artist $label")
         ->general("Artist $label removed from group " . $tgroup->label() . " by user " . $Viewer->label());
 }
 

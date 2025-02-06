@@ -20,10 +20,9 @@ if ($tag->removeTGroup($tgroup)) {
     $Cache->cache_value('deleted_tags_' . $tgroup->id() . '_' . $Viewer->id(), $tagName, 300);
 
     // Log the removal and if it was the last occurrence.
-    $logger = new Gazelle\Log();
-    $logger->group($tgroup, $Viewer, "Tag \"$tagName\" removed");
+    $tag->logger()->group($tgroup, $Viewer, "Tag \"$tagName\" removed");
     if (!$tagMan->findById($tag->id())) {
-        $logger->general("Unused tag \"$tagName\" removed by user {$Viewer->label()}");
+        $tag->logger()->general("Unused tag \"$tagName\" removed by user {$Viewer->label()}");
     }
 }
 header('Location: ' . redirectUrl($tgroup->location()));

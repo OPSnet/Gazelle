@@ -37,7 +37,6 @@ class CollageTest extends TestCase {
 
         $this->tgroupList = [];
         $artistMan = new Manager\Artist();
-        $log       = new Log();
         $user      = $this->userList['u1'];
         $this->tgroupList = [
             \GazelleUnitTest\Helper::makeTGroupMusic(
@@ -95,7 +94,6 @@ class CollageTest extends TestCase {
             name:        'phpunit collage lock ' . randomString(20),
             description: 'phpunit collage lock description',
             tagList:     implode(' ', $this->tagList(3)),
-            logger:      new Log(),
         );
         $collage = $this->collageList[0];
         // NB: These objects should never be instantiated directly
@@ -140,7 +138,6 @@ class CollageTest extends TestCase {
             name:        $name,
             description: $description,
             tagList:     implode(' ', $tagList),
-            logger:      new Log(),
         );
         $collage = $this->collageList[0];
 
@@ -184,7 +181,6 @@ class CollageTest extends TestCase {
             name:        'phpunit collage add ' . randomString(20),
             description: 'phpunit collage add description',
             tagList:     implode(' ', $this->tagList(3)),
-            logger:      new Log(),
         );
         $collage = $this->collageList[0];
 
@@ -231,7 +227,6 @@ class CollageTest extends TestCase {
 
     public function testCollageArtist(): void {
         $manager = new Manager\Collage();
-        $logger = new Log();
         $this->collageList = [
             $manager->create(
                 user:        $this->userList['u1'],
@@ -239,7 +234,6 @@ class CollageTest extends TestCase {
                 name:        'phpunit collage artist ' . randomString(20),
                 description: 'phpunit collage artist description',
                 tagList:     implode(' ', $this->tagList(3)),
-                logger:      $logger,
             ),
             $manager->create(
                 user:        $this->userList['u1'],
@@ -247,7 +241,6 @@ class CollageTest extends TestCase {
                 name:        'phpunit collage artist ' . randomString(20),
                 description: 'phpunit collage artist description',
                 tagList:     implode(' ', $this->tagList(3)),
-                logger:      $logger,
             ),
             $manager->create(
                 user:        $this->userList['u1'],
@@ -255,7 +248,6 @@ class CollageTest extends TestCase {
                 name:        'phpunit collage artist ' . randomString(20),
                 description: 'phpunit collage artist description',
                 tagList:     implode(' ', $this->tagList(4)),
-                logger:      $logger,
             ),
         ];
 
@@ -314,7 +306,6 @@ class CollageTest extends TestCase {
             name:        'phpunit collage contrib ' . randomString(20),
             description: 'phpunit collage contrib description',
             tagList:     implode(' ', $this->tagList(3)),
-            logger:      new Log(),
         );
         $collage = $this->collageList[0];
         $this->assertEquals(0, $collage->numContributors(), 'collage-no-contributors');
@@ -395,7 +386,6 @@ class CollageTest extends TestCase {
                 name:        'phpunit collage feat 001 ' . randomString(20),
                 description: 'phpunit collage feature description',
                 tagList:     implode(' ', $this->tagList(3)),
-                logger:      new Log(),
             ),
             $manager->create(
                 user:        $user,
@@ -403,7 +393,6 @@ class CollageTest extends TestCase {
                 name:        'phpunit collage feat 002 ' . randomString(20),
                 description: 'phpunit collage feature description',
                 tagList:     implode(' ', $this->tagList(3)),
-                logger:      new Log(),
             ),
             $manager->create(
                 user:        $user,
@@ -411,7 +400,6 @@ class CollageTest extends TestCase {
                 name:        'phpunit collage feat 003 ' . randomString(20),
                 description: 'phpunit collage feature description',
                 tagList:     implode(' ', $this->tagList(3)),
-                logger:      new Log(),
             ),
             $manager->create(
                 user:        $user,
@@ -419,7 +407,6 @@ class CollageTest extends TestCase {
                 name:        'phpunit collage feat 004 ' . randomString(20),
                 description: 'phpunit collage feature description',
                 tagList:     implode(' ', $this->tagList(3)),
-                logger:      new Log(),
             ),
         ];
         $personal = $manager->findPersonalByUser($user);
@@ -452,7 +439,6 @@ class CollageTest extends TestCase {
             name:        'phpunit collage json ' . randomString(20),
             description: 'phpunit collage json description',
             tagList:     implode(' ', $this->tagList(3)),
-            logger:      new Log(),
         );
         $collage = $this->collageList[0];
         foreach (range(0, 3) as $n) {
@@ -480,7 +466,6 @@ class CollageTest extends TestCase {
             name:        'phpunit collage lock ' . randomString(20),
             description: 'phpunit collage lock description',
             tagList:     implode(' ', $this->tagList(3)),
-            logger:      new Log(),
         );
         $collage = $this->collageList[0];
 
@@ -508,7 +493,6 @@ class CollageTest extends TestCase {
                 name:        $stem . randomString(20),
                 description: 'phpunit collage man description',
                 tagList:     implode(' ', $this->tagList(3)),
-                logger:      new Log(),
             ),
             $manager->create(
                 user:        $this->userList['u1'],
@@ -516,7 +500,6 @@ class CollageTest extends TestCase {
                 name:        $stem . randomString(20),
                 description: 'phpunit collage man description',
                 tagList:     implode(' ', $this->tagList(3)),
-                logger:      new Log(),
             ),
             $manager->create(
                 user:        $this->userList['u1'],
@@ -524,7 +507,6 @@ class CollageTest extends TestCase {
                 name:        $stem . randomString(20),
                 description: 'phpunit collage man description',
                 tagList:     implode(' ', $this->tagList(3)),
-                logger:      new Log(),
             ),
             $manager->create(
                 user:        $this->userList['u2'],
@@ -532,7 +514,6 @@ class CollageTest extends TestCase {
                 name:        $stem . randomString(20),
                 description: 'phpunit collage man description',
                 tagList:     implode(' ', $this->tagList(3)),
-                logger:      new Log(),
             ),
             $manager->create(
                 user:        $this->userList['u2'],
@@ -540,7 +521,6 @@ class CollageTest extends TestCase {
                 name:        $stem . randomString(20),
                 description: 'phpunit collage man description',
                 tagList:     implode(' ', $this->tagList(3)),
-                logger:      new Log(),
             ),
         ];
         $this->assertCount(
@@ -569,7 +549,6 @@ class CollageTest extends TestCase {
             name:        'phpunit collage personal ' . randomString(20),
             description: 'phpunit collage personal description',
             tagList:     implode(' ', $this->tagList(3)),
-            logger:      new Log(),
         );
         $collage = $this->collageList[0];
         // $this->userList['u1']->addCustomPrivilege('site_collages_manage');
@@ -639,7 +618,6 @@ class CollageTest extends TestCase {
             name:        $name,
             description: 'phpunit collage remove description',
             tagList:     implode(' ', $this->tagList(3)),
-            logger:      new Log(),
         );
         $collage = $this->collageList[0];
 
@@ -662,7 +640,6 @@ class CollageTest extends TestCase {
             name:        $name,
             description: 'phpunit collage ajax description',
             tagList:     implode(' ', $this->tagList(3)),
-            logger:      new Log(),
         );
         $artMan    = new Manager\Artist();
         $tgMan     = new Manager\TGroup();

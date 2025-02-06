@@ -17,7 +17,7 @@ class CommentTest extends TestCase {
 
     public function tearDown(): void {
         if (isset($this->artist)) {
-            $this->artist->remove($this->user, new Log());
+            $this->artist->remove($this->user);
         }
         if (isset($this->collage)) {
             $this->collage->hardRemove();
@@ -70,7 +70,6 @@ class CommentTest extends TestCase {
             name:        'phpunit collage comment ' . randomString(20),
             description: 'phpunit collage comment description',
             tagList:     'acoustic electronic',
-            logger:      new Log(),
         );
 
         $manager = new Manager\Comment();
@@ -166,6 +165,6 @@ class CommentTest extends TestCase {
         $manager->merge('artist', $artistExtra->id(), $this->artist->id());
         $this->assertInstanceOf(Comment\Artist::class, $comment->load(), 'comment-merge-load');
         $this->assertCount(2, $comment->thread(), 'comment-artist-merged-thread');
-        $artistExtra->remove($this->user, new Log());
+        $artistExtra->remove($this->user);
     }
 }
