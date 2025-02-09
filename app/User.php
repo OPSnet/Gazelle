@@ -1475,9 +1475,11 @@ class User extends BaseObject {
     }
 
     public function collageUnreadCount(): int {
-        if (($new = self::$cache->get_value(sprintf(Collage::SUBS_NEW_KEY, $this->id))) === false) {
+        $new = self::$cache->get_value(sprintf(Collage::SUBS_NEW_KEY, $this->id));
+        if ($new === false) {
             $new = self::$db->scalar("
-                 SELECT count(*) FROM (
+                 SELECT count(*)
+                 FROM (
                     SELECT s.LastVisit
                     FROM users_collage_subs s
                     INNER JOIN collages c ON (c.ID = s.CollageID)

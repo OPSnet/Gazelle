@@ -106,12 +106,13 @@ class Artist extends AbstractCollage {
             SELECT ArtistID FROM collages_artists WHERE CollageID = ?
             ", $this->id
         );
-        $keys = array_merge(...array_map(
-            fn ($id) => ["artists_collages_$id", "artists_collages_personal_$id"],
-            self::$db->collect(0, false)
-        ));
-        $rows = parent::remove();
-        $this->flushAll($keys);
+        $this->flushAll(
+            array_merge(...array_map(
+                fn ($id) => ["artists_collages_$id", "artists_collages_personal_$id"],
+                self::$db->collect(0, false)
+            ))
+        );
+        $rows = parent::remove(); // soft remove
         return $rows;
     }
 }

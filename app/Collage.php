@@ -447,7 +447,10 @@ class Collage extends BaseObject {
     }
 
     public function remove(): int {
-        return $this->collage->remove();
+        self::$db->begin_transaction();
+        $rows = $this->collage->remove();
+        self::$db->commit();
+        return $rows;
     }
 
     public function toggleLocked(): static {

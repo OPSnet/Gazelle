@@ -145,7 +145,20 @@ class TGroup extends AbstractCollage {
         if (!$this->holder->isPersonal()) {
             $rows = parent::remove();
         } else {
+            // personal collages are nuked hard, no undo
             (new \Gazelle\Manager\Comment())->remove('collages', $this->id);
+            self::$db->prepared_query("
+                DELETE FROM bookmarks_collages WHERE CollageID = ?
+                ", $this->id
+            );
+            self::$db->prepared_query("
+                DELETE FROM collage_has_attr WHERE CollageID = ?
+                ", $this->id
+            );
+            self::$db->prepared_query("
+                DELETE FROM users_collage_subs WHERE CollageID = ?
+                ", $this->id
+            );
             self::$db->prepared_query("
                 DELETE FROM collages_torrents WHERE CollageID = ?
                 ", $this->id
