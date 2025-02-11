@@ -3,43 +3,43 @@
 namespace Gazelle\Manager;
 
 class DNU extends \Gazelle\Base {
+    use \Gazelle\Pg;
+
     public function create(
         string        $name,
-        string        $comment,
+        string        $description,
         \Gazelle\User $user,
     ): int {
-        self::$db->prepared_query("
-            INSERT INTO do_not_upload
-                   (Name, Comment, UserID, Sequence)
-            VALUES (?,    ?,       ?,      9999)
-            ", $name, $comment, $user->id()
+        return $this->pg()->insert("
+            insert into do_not_upload
+                   (name, description, id_user, sequence)
+            VALUES (?,    ?,           ?,       9999)
+            ", $name, $description, $user->id()
         );
-        return self::$db->inserted_id();
     }
 
     public function modify(
         int           $id,
         string        $name,
-        string        $comment,
+        string        $description,
         \Gazelle\User $user,
     ): int {
-        self::$db->prepared_query("
-            UPDATE do_not_upload SET
-                Name    = ?,
-                Comment = ?,
-                UserID  = ?
-            WHERE ID = ?
-            ", $name, $comment, $user->id(), $id
+        return $this->pg()->prepared_query("
+            update do_not_upload set
+                name        = ?,
+                description = ?,
+                id_user     = ?
+            where id_do_not_upload = ?
+            returning id_do_not_upload
+            ", $name, $description, $user->id(), $id
         );
-        return self::$db->affected_rows();
     }
 
     public function remove(int $id): int {
-        self::$db->prepared_query("
-            DELETE FROM do_not_upload WHERE ID = ?
+        return $this->pg()->prepared_query("
+            delete from do_not_upload where id_do_not_upload = ?
             ", $id
         );
-        return self::$db->affected_rows();
     }
 
     public function reorder(array $list): int {
@@ -47,42 +47,40 @@ class DNU extends \Gazelle\Base {
         $case = [];
         $args = [];
         foreach ($list as $id) {
-            $case[] = "WHEN ID = ? THEN ?";
+            $case[] = "when id_do_not_upload = ? then ?::int";
             array_push($args, $id, ++$sequence);
         }
-        $sql = "UPDATE do_not_upload SET Sequence = CASE "
+        $sql = "update do_not_upload set sequence = case "
             . implode(' ', $case)
-            . ' END';
-        self::$db->prepared_query($sql, ...$args);
-        return self::$db->affected_rows();
+            . ' end';
+        return $this->pg()->prepared_query($sql, ...$args);
     }
 
     public function dnuList(): array {
-        self::$db->prepared_query("
-            SELECT d.ID   AS id,
-                d.Name    AS name,
-                d.Comment AS comment,
-                d.UserID  AS user_id,
-                d.Time    AS time,
-                if(d.Time > now() - INTERVAL 1 MONTH, 1, 0)
-                          AS is_new
-            FROM do_not_upload AS d
-            ORDER BY d.Sequence
+        return $this->pg()->all("
+            SELECT d.id_do_not_upload,
+                d.name,
+                d.description,
+                d.id_user,
+                d.created,
+                case when d.created > now() - '1 month'::interval
+                    then 1 else 0 end as is_new
+            from do_not_upload d
+            order by d.sequence
         ");
-        return self::$db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     public function latest(): string {
-        return (string)self::$db->scalar("
-            SELECT max(Time) FROM do_not_upload
+        return (string)$this->pg()->scalar("
+            select greatest('-infinity', max(created)) from do_not_upload
         ");
     }
 
     public function hasNewForUser(\Gazelle\User $user): bool {
-        return (bool)self::$db->scalar("
-            SELECT if(max(created) IS NULL OR max(created) < ?, 1, 0)
-            FROM torrents
-            WHERE UserID = ?
+        return (bool)$this->pg()->scalar("
+            select coalesce(max(t.created), '-infinity') < ?
+            from relay.torrents t
+            where t.\"UserID\" = ?
             ", $this->latest(), $user->id()
         );
     }

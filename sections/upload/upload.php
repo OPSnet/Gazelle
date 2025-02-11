@@ -89,7 +89,7 @@ View::show_header('Upload', ['js' => 'upload,validate_upload,musicbrainz,bbcode'
 <div class="<?= $Viewer->permitted('torrents_hide_dnu') ? 'box pad' : '' ?> dnu_list" style="margin: 0px auto; width: 700px;">
     <h3 id="dnu_header">Do Not Upload List</h3>
     <p><?= $dnuNew ? '<strong class="important_text">' : '' ?>Last updated: <?= time_diff($dnu->latest()) ?><?= $dnuNew ? '</strong>' : '' ?></p>
-    <p>The following releases are currently forbidden from being uploaded to the site. Do not upload them unless your torrent meets a condition specified in the comment.
+    <p>The following releases are currently forbidden from being uploaded to the site. Do not upload them unless your torrent meets a condition specified in the given reason.
 <?php if ($dnuHide) { ?>
     <span id="showdnu"><a href="#" onclick="$('#dnulist').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets">Show</a></span>
 <?php } ?>
@@ -107,7 +107,7 @@ View::show_header('Upload', ['js' => 'upload,validate_upload,musicbrainz,bbcode'
                 <strong class="important_text">(New!)</strong>
 <?php   } ?>
             </td>
-            <td><?= Text::full_format($bad['comment']) ?></td>
+            <td><?= Text::full_format($bad['description']) ?></td>
         </tr>
 <?php } ?>
     </table>

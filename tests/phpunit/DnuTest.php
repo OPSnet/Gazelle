@@ -25,10 +25,10 @@ class DnuTest extends TestCase {
         $this->assertEquals(
             1,
             $manager->modify(
-                id:      $dnu,
-                name:    'phpunit new ' . randomString(10),
-                comment: 'phpunit modified description',
-                user:    $this->user,
+                id:          $dnu,
+                name:        'phpunit new ' . randomString(10),
+                description: 'phpunit modified description',
+                user:        $this->user,
             ),
             'dnu-modify'
         );
@@ -38,10 +38,10 @@ class DnuTest extends TestCase {
         $this->assertEquals(
             0,
             $manager->modify(
-                id:      $dnu + 1,
-                name:    'fail',
-                comment: 'fail',
-                user:    $this->user,
+                id:          $dnu + 1,
+                name:        'fail',
+                description: 'fail',
+                user:        $this->user,
             ),
             'dnu-fail-modify'
         );
@@ -51,7 +51,7 @@ class DnuTest extends TestCase {
 
     public function testReorder(): void {
         $manager = new Manager\DNU();
-        $idList = array_map(fn ($x) => $x['id'], $manager->dnuList());
+        $idList = array_map(fn ($x) => $x['id_do_not_upload'], $manager->dnuList());
 
         $first  = $manager->create('phpunit first ' . randomString(10), 'phpunit description', $this->user);
         $second = $manager->create('phpunit second ' . randomString(10), 'phpunit description', $this->user);
