@@ -12,6 +12,6 @@ if (is_null($request)) {
 }
 
 echo $Twig->render('request/edit-bounty.twig', [
-    'auth'    => $Viewer->auth(),
     'request' => $request,
+    'viewer'  => $Viewer,
 ]);

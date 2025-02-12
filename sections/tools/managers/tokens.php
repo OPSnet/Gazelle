@@ -26,9 +26,9 @@ if (isset($_POST['addtokens'])) {
 
 echo $Twig->render('admin/freeleech-tokens.twig', [
     'amount'         => $amount,
-    'auth'           => $Viewer->auth(),
     'fl_added'       => $flAdded,
     'fl_cleared'     => $flCleared,
     'leech_disabled' => $_POST['allowleechdisabled'] ?? true,
     'only_drop'      => $_POST['onlydrop'] ?? false,
+    'viewer'         => $Viewer,
 ]);

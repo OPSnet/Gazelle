@@ -7,6 +7,6 @@ if (!$Viewer->permitted('admin_dnu')) {
 }
 
 echo $Twig->render('admin/dnu.twig', [
-    'auth' => $Viewer->auth(),
-    'list' => (new Gazelle\Manager\DNU())->dnuList(),
+    'list'   => (new Gazelle\Manager\DNU())->dnuList(),
+    'viewer' => $Viewer,
 ]);

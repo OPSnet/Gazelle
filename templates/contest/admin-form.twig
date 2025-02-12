@@ -131,7 +131,7 @@
     </table>
     </div>
     <input type="hidden" name="userid" value="{{ user_id }}"/>
-    <input type="hidden" name="auth" value="{{ auth }}"/>
+    <input type="hidden" name="auth" value="{{ viewer.auth }}"/>
 {% if create %}
     <input type="hidden" name="new" value="1"/>
     <input type="submit" id="submit" value="Create contest"/>

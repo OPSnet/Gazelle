@@ -20,6 +20,6 @@ if ($remove) {
 }
 
 echo $Twig->render('admin/invite-source-config.twig', [
-    'auth' => $Viewer->auth(),
-    'list' => $manager->usageList(),
+    'list'   => $manager->usageList(),
+    'viewer' => $Viewer,
 ]);

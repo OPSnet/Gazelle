@@ -45,10 +45,10 @@ if (isset($_POST['curr']) && isset($_POST['prev'])) {
 }
 
 echo $Twig->render('recovery/pair.twig', [
-    'auth'    => $Viewer->auth(),
     'confirm' => $confirm,
     'curr_id' => $currId,
     'prev_id' => $prevId,
     'prev'    => $prev,
     'message' => $message,
+    'viewer'  => $Viewer,
 ]);

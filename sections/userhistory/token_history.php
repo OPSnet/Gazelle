@@ -33,10 +33,8 @@ $paginator = new Gazelle\Util\Paginator(25, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($user->stats()->flTokenTotal());
 
 echo $Twig->render('user/history-freeleech.twig', [
-    'admin'       => $Viewer->permitted('admin_fl_history'),
-    'auth'        => $Viewer->auth(),
-    'list'        => $user->tokenList($torMan, $paginator->limit(), $paginator->offset()),
-    'own_profile' => $Viewer->id() == $user->id(),
-    'paginator'   => $paginator,
-    'user'        => $user,
+    'list'      => $user->tokenList($torMan, $paginator->limit(), $paginator->offset()),
+    'paginator' => $paginator,
+    'user'      => $user,
+    'viewer'    => $Viewer,
 ]);

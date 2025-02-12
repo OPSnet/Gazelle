@@ -9,7 +9,7 @@
     <form class="{{ action }}_form" name="blog_post" action="staffblog.php" method="post">
         <div id="postform" class="pad{{ show_form ? ' hidden' : '' }}">
             <input type="hidden" name="action" value="{{ action == 'create' ? 'takenewblog' : 'takeeditblog' }}" />
-            <input type="hidden" name="auth" value="{{ auth }}" />
+            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
 {% if action == 'edit' %}
             <input type="hidden" name="id" value="{{ blog.id }}" />
 {% endif %}

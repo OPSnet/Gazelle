@@ -30,8 +30,8 @@ if ($_POST['newtag'] ?? null) {
 }
 
 echo $Twig->render('tag/official.twig', [
-    'auth'       => $Viewer->auth(),
     'list'       => $tagMan->officialList($_GET['order'] ?? 'name'),
     'new'        => $new,
     'unofficial' => $unofficialName,
+    'viewer'     => $Viewer,
 ]);

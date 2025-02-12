@@ -4,9 +4,8 @@
 {% macro active_class(t) %}
 {%-  if t %} active{% endif -%}
 {% endmacro -%}
-{% set auth = user.auth -%}
 </head>
-<body data-id="{{ user.id }}" data-auth="{{ auth }}" id="{% if document == 'collages' %}collage{% else %}{{ document }}{% endif %}">
+<body data-id="{{ viewer.id }}" data-auth="{{ viewer.auth }}" id="{% if document == 'collages' %}collage{% else %}{{ document }}{% endif %}">
 <form id="extra-hidden">
 <input id="extracb1" class="hidden" type="checkbox">
 <input id="extracb2" class="hidden" type="checkbox">
@@ -20,17 +19,17 @@
 <div id="logo"><a href="index.php"></a></div>
 <div id="userinfo">
 <ul id="userinfo_username">
-    <li id="nav_userinfo" {{ _self.active(document == 'user' and request.id == user.id) }}>
-        <a href="user.php?id={{ user.id }}" class="username">{{ user.username }}</a>
+    <li id="nav_userinfo" {{ _self.active(document == 'user' and request.id == viewer.id) }}>
+        <a href="user.php?id={{ viewer.id }}" class="username">{{ viewer.username }}</a>
     </li>
     <li id="nav_userclass">
-        <span class="hidden userclass">{{ user.userclassName }}</span>
+        <span class="hidden userclass">{{ viewer.userclassName }}</span>
     </li>
     <li id="nav_useredit" class="brackets{{ _self.active_class(document == 'user' and action =='edit') }}">
-        <a href="user.php?action=edit&amp;id={{ user.id }}">Settings</a>
+        <a href="user.php?action=edit&amp;id={{ viewer.id }}">Settings</a>
     </li>
     <li id="nav_logout" class="brackets">
-        <a href="logout.php?auth={{ auth }}">Logout</a>
+        <a href="logout.php?auth={{ viewer.auth }}">Logout</a>
     </li>
 </ul>
 <ul id="userinfo_major">
@@ -39,11 +38,11 @@
     </li>
     <li id="nav_bonus" class="brackets{{ _self.active_class(document == 'user' and action == 'bonus') }}">
         <a href="bonus.php" class='tooltip' title="BP/hour: {{
-            bonus.hourlyRate|number_format(3) }}">Bonus ({{ user.bonusPointsTotal|number_format }})</a>
+            bonus.hourlyRate|number_format(3) }}">Bonus ({{ viewer.bonusPointsTotal|number_format }})</a>
     </li>
     <li id="nav_invite" class="brackets{{ _self.active_class(document == 'user' and action == 'invite') }}">
         <a href="user.php?action=invite" class='tooltip' title="Invite a friend!">Invite
-        {% if user.permitted('site_send_unlimited_invites') %} (∞){% elseif user.unusedInviteTotal %} ({{ user.unusedInviteTotal }}){% endif %}</a>
+        {% if viewer.permitted('site_send_unlimited_invites') %} (∞){% elseif viewer.unusedInviteTotal %} ({{ viewer.unusedInviteTotal }}){% endif %}</a>
     </li>
     <li id="nav_donate" class="brackets{{ _self.active_class(document == 'donate') }}">
         <a href="donate.php" class='tooltip' title="Donate">Donate ({{ dono_target }}%)</a>
@@ -51,15 +50,15 @@
 </ul>
 <ul id="userinfo_stats">
     <li id="stats_seeding">
-        <a href="torrents.php?type=seeding&amp;userid={{ user.id }}">Up</a>:
-        <span class="stat tooltip" title="{{ user.uploadedSize|octet_size(5) }}">{{ user.uploadedSize|octet_size }}</span>
+        <a href="torrents.php?type=seeding&amp;userid={{ viewer.id }}">Up</a>:
+        <span class="stat tooltip" title="{{ viewer.uploadedSize|octet_size(5) }}">{{ viewer.uploadedSize|octet_size }}</span>
     </li>
     <li id="stats_leeching">
-        <a href="torrents.php?type=leeching&amp;userid={{ user.id }}">Down</a>:
-        <span class="stat tooltip" title="{{ user.downloadedSize|octet_size(5) }}">{{ user.downloadedSize|octet_size }}</span>
+        <a href="torrents.php?type=leeching&amp;userid={{ viewer.id }}">Down</a>:
+        <span class="stat tooltip" title="{{ viewer.downloadedSize|octet_size(5) }}">{{ viewer.downloadedSize|octet_size }}</span>
     </li>
     <li id="stats_ratio">
-        Ratio: <span class="stat">{{ ratio(user.uploadedSize, user.downloadedSize) }}</span>
+        Ratio: <span class="stat">{{ ratio(viewer.uploadedSize, viewer.downloadedSize) }}</span>
     </li>
 {% set required_ratio = viewer.requiredRatio %}
 {% if required_ratio > 0 %}
@@ -68,11 +67,11 @@
         <span class="stat tooltip" title="{{ required_ratio|number_format(5) }}">{{ required_ratio|number_format(2) }}</span>
     </li>
 {% endif %}
-{% if user.tokenCount %}
+{% if viewer.tokenCount %}
     <li id="fl_tokens">
         <a href="wiki.php?action=article&amp;id=57">Tokens</a>:
         <span class="stat">
-            <a href="userhistory.php?action=token_history&amp;userid={{ user.id }}">{{ user.tokenCount|number_format }}</a>
+            <a href="userhistory.php?action=token_history&amp;userid={{ viewer.id }}">{{ viewer.tokenCount|number_format }}</a>
         </span>
     </li>
 {% endif %}
@@ -117,7 +116,7 @@
     <span class="hidden">Artist: </span>
     <form class="search_form" name="artists" action="artist.php" method="get">
         <input id="artistsearch"
-            {%- if user.hasAutocomplete('search') %} data-gazelle-autocomplete="true" {% endif -%}
+            {%- if viewer.hasAutocomplete('search') %} data-gazelle-autocomplete="true" {% endif -%}
             value="Artists" placeholder="Artists" type="text" name="artistname" size="17" spellcheck="false" accesskey="a" />
     </form>
 </li>
@@ -125,7 +124,7 @@
     <span class="hidden">Collage: </span>
     <form class="search_form" name="collages" action="collages.php" method="get">
         <input id="collagesearch"
-            {%- if user.hasAutocomplete('search') %} data-gazelle-autocomplete="true" {% endif -%}
+            {%- if viewer.hasAutocomplete('search') %} data-gazelle-autocomplete="true" {% endif -%}
             value="Collages" placeholder="Collages" type="text" name="search" size="17" spellcheck="false" accesskey="c" />
     </form>
 </li>

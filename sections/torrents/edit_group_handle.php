@@ -14,24 +14,23 @@ $tgroup = (new Gazelle\Manager\TGroup())->findById((int)$_REQUEST['groupid']);
 if (is_null($tgroup)) {
     error(404);
 }
-$GroupID = $tgroup->id();
 
 $logInfo = [];
 if (($_GET['action'] ?? '') == 'revert') {
     // we're reverting to a previous revision
-    $RevisionID = (int)$_GET['revisionid'];
-    if (!$RevisionID) {
+    $revisionId = (int)$_GET['revisionid'];
+    if (!$revisionId) {
         error('No revision specified to revert');
     }
     if (empty($_GET['confirm'])) {
-        echo $Twig->render('tgroup/revert-confirm.twig', [
-            'auth'        => $Viewer->auth(),
-            'group_id'    => $GroupID,
-            'revision_id' => $RevisionID,
+        echo $Twig->render('tgroup/confirm-revert.twig', [
+            'group_id'    => $tgroup->id(),
+            'revision_id' => $revisionId,
+            'viewer'      => $Viewer,
         ]);
         exit;
     }
-    $revert = $tgroup->revertRevision($Viewer->id(), $RevisionID);
+    $revert = $tgroup->revertRevision($Viewer->id(), $revisionId);
     if (is_null($revert)) {
         error(404);
     }
@@ -78,7 +77,7 @@ if (($_GET['action'] ?? '') == 'revert') {
     if ($_POST['summary']) {
         $logInfo[] = "summary: " . trim($_POST['summary']);
     }
-    $RevisionID = $tgroup->createRevision($Body, $Image, $_POST['summary'], $Viewer);
+    $revisionId = $tgroup->createRevision($Body, $Image, $_POST['summary'], $Viewer);
 }
 
 $imageFlush = ($Image != $tgroup->showFallbackImage(false)->image());

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eo pipefail
+set -euo pipefail
 
 STAGED=$(git diff --name-only --cached --diff-filter=d)
 JS="$(echo $(grep ".*\.js$" <<< "$STAGED" || true))"
@@ -9,7 +9,6 @@ CSS="$(echo $(grep ".*\.scss$" <<< "$STAGED" || true))"
 TWIG="$(echo $(grep ".*\.twig$" <<< "$STAGED" || true))"
 
 if [ -z "$JS" ] && [ -z "$PHP" ] && [ -z "$CSS" ] && [ -z "$TWIG" ]; then
-    echo "Nothing to lint."
     exit 0
 fi
 
@@ -21,6 +20,13 @@ fi
 
 if [ -n "$TWIG" ]; then
     echo "Linting Twig"
+    for t in $TWIG
+    do
+        if ! git grep -qc "${t/templates\//}"; then
+            echo "$t not referenced in codebase"
+            exit 1
+        fi
+    done
     docker compose exec -T web bin/twig-parse $TWIG
 fi
 

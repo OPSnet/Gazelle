@@ -21,14 +21,13 @@ if ($search) {
 $pending = $inviteMan->totalPending();
 
 $paginator = new Gazelle\Util\Paginator(INVITES_PER_PAGE, (int)($_GET['page'] ?? 1));
-$paginator->setTotal($inviteMan->totalPending());
+$paginator->setTotal($pending);
 
 echo $Twig->render('invite/pool.twig', [
-    'auth'      => $Viewer->auth(),
     'paginator' => $paginator,
     'list'      => $inviteMan->pendingInvites($paginator->limit(), $paginator->offset()),
     'pending'   => $pending,
     'removed'   => $removed,
     'search'    => $search,
-    'can_edit'  => $Viewer->permitted('users_edit_invites'),
+    'viewer'    => $Viewer,
 ]);

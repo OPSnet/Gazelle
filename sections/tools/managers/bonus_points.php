@@ -37,7 +37,7 @@ if (isset($_REQUEST['add_points'])) {
 }
 
 echo $Twig->render('admin/bonus-points.twig', [
-    'auth'    => $Viewer->auth(),
     'message' => $message,
     'since'   =>  date("Y-m-d", strtotime("-120 day", time())),
+    'viewer'  => $Viewer,
 ]);

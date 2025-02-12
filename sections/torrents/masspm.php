@@ -11,7 +11,7 @@ if (is_null($torrent)) {
 }
 
 echo $Twig->render('torrent/masspm.twig', [
-    'auth'     => $Viewer->auth(),
     'textarea' => new Gazelle\Util\Textarea('message', '[pl]' . $torrent->id() . '[/pl]', 60, 8),
     'torrent'  => $torrent,
+    'viewer'   => $Viewer,
 ]);

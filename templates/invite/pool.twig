@@ -28,7 +28,7 @@
 </div>
 
 {% for invite in list %}
-    {% if loop.first %}
+{%  if loop.first %}
     {{ paginator.linkbox|raw }}
 <table width="100%">
     <tr class="colhead">
@@ -37,11 +37,11 @@
         <td>IP address</td>
         <td>Invite link</td>
         <td>Expires</td>
-    {% if can_edit %}
+{%      if viewer.permitted('users_edit_invites') %}
         <td>Controls</td>
-    {% endif %}
+{%      endif %}
     </tr>
-    {% endif %}
+{%  endif %}
 
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
         <td>{{ invite.user_id|user_full }}</td>
@@ -49,21 +49,21 @@
         <td>{{ ipaddr(invite.ipaddr) }}</td>
         <td><a href="register.php?invite={{ invite.key }}">{{ invite.key }}</a></td>
         <td>{{ invite.expires|time_diff }}</td>
-    {% if can_edit %}
+{%  if viewer.permitted('users_edit_invites') %}
         <td>
             <form class="delete_form" name="invite" action="" method="post">
                 <input type="hidden" name="action" value="invite_pool" />
-                <input type="hidden" name="auth" value="{{ auth }}" />
+                <input type="hidden" name="auth" value="{{ viewer.auth }}" />
                 <input type="hidden" name="invitekey" value="{{ invite.key }}" />
                 <input type="submit" value="Delete" />
             </form>
         </td>
-    {% endif %}
+{%  endif %}
     </tr>
 
-    {% if loop.last %}
+{%  if loop.last %}
 </table>
-    {{ paginator.linkbox|raw }}
-    {% endif %}
+{{ paginator.linkbox|raw }}
+{%  endif %}
 {% endfor %}
 {{ footer() }}

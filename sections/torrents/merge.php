@@ -25,9 +25,9 @@ if ($old->categoryName() !== 'Music') {
 // Everything is legit, ask for confirmation
 if (empty($_POST['confirm'])) {
     echo $Twig->render('torrent/confirm-merge.twig', [
-        'auth' => $Viewer->auth(),
-        'new'  => $new,
-        'old'  => $old,
+        'new'    => $new,
+        'old'    => $old,
+        'viewer' => $Viewer,
     ]);
     exit;
 }

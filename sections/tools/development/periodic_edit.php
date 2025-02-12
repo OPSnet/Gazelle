@@ -7,7 +7,7 @@ if (!$Viewer->permitted('admin_periodic_task_manage')) {
 }
 
 echo $Twig->render('admin/scheduler/edit.twig', [
-    'auth'      => $Viewer->auth(),
     'err'       => $err ?? null,
     'task_list' => (new Gazelle\TaskScheduler())->getTasks(),
+    'viewer'    => $Viewer,
 ]);

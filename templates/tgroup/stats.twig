@@ -1,28 +1,28 @@
 {% from 'macro/rank.twig' import css_rank %}
 {% if tgroup.categoryName == 'Music' %}
-    {% if viewer.permitted('site_collages_manage') or viewer.activePersonalCollages %}
+{%  if viewer.permitted('site_collages_manage') or viewer.activePersonalCollages %}
         {% include 'torrent/collage-add.twig' with {
-            'collage_list': collage_list,
-            'tgroup_id': tgroup.id,
-            'viewer': viewer
+            'collage_list' : collage_list,
+            'tgroup_id'    : tgroup.id,
+            'viewer'       : viewer,
             } only
         %}
-    {% endif %}
+{%  endif %}
 
-    {% for key, r in vote.ranking(tgroup, viewer.permitted('site_advanced_top10')) %}
-        {% if loop.first %}
+{%  for key, r in vote.ranking(tgroup, viewer.permitted('site_advanced_top10')) %}
+{%      if loop.first %}
 <div class="box" id="votes_ranks">
     <div class="head"><strong>{{ constant('SITE_NAME') }} Favorites</strong></div>
     <div class="vote_charts body">
         <ul class="stats nobullet" id="vote_rankings">
-        {% endif %}
+{%      endif %}
             <li id="vote_rank_{{ key }}" class="{{ css_rank(r.rank) }}">No. {{ r.rank }} {{ r.title|raw }}</li>
-        {% if loop.last %}
+{%      if loop.last %}
         </ul>
     </div>
 </div>
-        {% endif %}
-    {% endfor %}
+{%      endif %}
+{%  endfor %}
 {% endif %}
 
 <div class="box">

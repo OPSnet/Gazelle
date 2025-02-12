@@ -7,7 +7,7 @@
     <form class="{% if create %}create_form{% else %}edit_form{% endif %}" name="news_post" action="tools.php" method="post">
         <div class="box pad">
             <input type="hidden" name="action" value="{% if create %}takenewnews{% else %}takeeditnews{% endif %}" />
-            <input type="hidden" name="auth" value="{{ auth }}" />
+            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
 {% if id %}
             <input type="hidden" name="id" value="{{ id }}" />
 {% endif %}
@@ -32,7 +32,7 @@
         <div class="head">
             <strong>{{ article.title }}</strong> - posted {{ article.created|time_diff }}
             - <a href="tools.php?action=editnews&amp;id={{ article.id }}" class="brackets">Edit</a>
-            <a href="tools.php?action=deletenews&amp;id={{ article.id }}&amp;auth={{ auth }}" class="brackets">Delete</a>
+            <a href="tools.php?action=deletenews&amp;id={{ article.id }}&amp;auth={{ viewer.auth }}" class="brackets">Delete</a>
         </div>
         <div class="pad">{{ article.body|bb_format }}</div>
     </div>

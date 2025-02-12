@@ -10,7 +10,7 @@
     <tr class="rowa">
         <form class="add_form" name="dnu" action="tools.php" method="post">
             <input type="hidden" name="action" value="dnu_alter" />
-            <input type="hidden" name="auth" value="{{ auth }}" />
+            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
             <td>
                 <input type="text" name="name" size="40" />
             </td>
@@ -34,7 +34,7 @@
         <form class="manage_form dnu" action="tools.php" method="post">
         <td>
             <input type="hidden" name="action" value="dnu_alter" />
-            <input type="hidden" name="auth" value="{{ auth }}" />
+            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
             <input type="hidden" name="id" value="{{ item.id_do_not_upload }}" />
             <input type="text" name="name" value="{{ item.name }}" size="40" />
         </td>

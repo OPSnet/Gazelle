@@ -24,16 +24,13 @@
 </div>
 
 <div class="box pad">
-{% if host is empty %}
-    No seed locations are reporting. Are your clients seeding and connected?
-{% else %}
+{% for h in seedbox.hostList %}
+{%  if loop.first %}
     <h3>Seeding locations</h3>
-{%  for h in host %}
-{%      if loop.first %}
     <form class="manage_form" name="seedbox" action="user.php?action=seedbox&amp;userid={{ user.id }}" method="post">
         <input type="hidden" name="action" value="seedbox" />
         <input type="hidden" name="mode" value="update" />
-        <input type="hidden" name="auth" value="{{ auth }}" />
+        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
         <input type="hidden" name="userid" value="{{ user.id }}" />
         <table>
         <tr>
@@ -42,7 +39,7 @@
             <th>Useragent</th>
             <th>Total seeding</th>
         </tr>
-{%      endif %}
+{%  endif %}
         <tr>
             <td>
                 <input type="text" name="name-{{ loop.index }}" size="40" maxlen="40" value="{{ h.name }}" />
@@ -59,16 +56,17 @@
             </td>
             <td>{{ h.total|number_format }}</td>
         </tr>
-{%      if loop.last %}
+{%  if loop.last %}
         </table>
         <input type="submit" value="Update names" />
     </form>
-{%      endif %}
-{%  endfor %}
-{% endif %}
+{%  endif %}
+{% else %}
+    No seed locations are reporting. Are your clients seeding and connected?
+{% endfor %}
 </div>
 
-{% for f in free %}
+{% for f in seedbox.freeList %}
 {%  if loop.first %}
 <div class="box pad">
     <h3>Unused names</h3>
@@ -79,7 +77,7 @@
     <form class="manage_form" name="seedbox" action="user.php?action=seedbox&amp;userid={{ user.id }}" method="post">
         <input type="hidden" name="action" value="seedbox" />
         <input type="hidden" name="mode" value="remove" />
-        <input type="hidden" name="auth" value="{{ auth }}" />
+        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
         <input type="hidden" name="userid" value="{{ user.id }}" />
     <ul class="stats nobullet">
 {%  endif %}

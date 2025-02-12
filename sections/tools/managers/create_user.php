@@ -40,5 +40,5 @@ if (isset($_POST['Username'])) {
 }
 
 echo $Twig->render('admin/user-create.twig', [
-    'auth' => $Viewer->auth(),
+    'viewer' => $Viewer,
 ]);

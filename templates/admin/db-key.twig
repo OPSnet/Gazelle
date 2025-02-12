@@ -7,7 +7,7 @@
     <form class="create_form" name="db_key" method="post" action="">
         <div class="pad">
             <input type="hidden" name="action" value="dbkey" />
-            <input type="hidden" name="auth" value="{{ auth }}" />
+            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
             <input type="text" name="dbkey" class="inputtext" /> <br />
             <div class="center">
                 <input type="submit" name="submit" value="Update Key" class="submit" />

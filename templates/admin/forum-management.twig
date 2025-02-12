@@ -27,7 +27,7 @@
         <form class="manage_form" name="forums" action="" method="post">
             <input type="hidden" name="id" value="{{ forum.id }}>" />
             <input type="hidden" name="action" value="forum_alter" />
-            <input type="hidden" name="auth" value="{{ auth }}" />
+            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
             <td>
                 <select name="categoryid">
         {% for id, name in category %}
@@ -69,7 +69,7 @@
     <tr class="rowa">
         <form class="create_form" name="forum" action="" method="post">
             <input type="hidden" name="action" value="forum_alter" />
-            <input type="hidden" name="auth" value="{{ auth }}" />
+            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
             <td>
                 <select name="categoryid">
 {% for id, name in category %}

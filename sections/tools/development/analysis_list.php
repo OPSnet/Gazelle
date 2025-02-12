@@ -38,10 +38,15 @@ $heading = new Gazelle\Util\SortableTableHeader('updated', [
 ]);
 
 echo $Twig->render('debug/analysis-list.twig', [
-    'auth'      => $Viewer->auth(),
     'heading'   => $heading,
-    'list'      => $errMan->list($heading->getOrderBy(), $heading->getOrderDir(), $paginator->limit(), $paginator->offset()),
+    'list'      => $errMan->list(
+        $heading->getOrderBy(),
+        $heading->getOrderDir(),
+        $paginator->limit(),
+        $paginator->offset()
+    ),
     'paginator' => $paginator,
     'removed'   => $removed,
     'search'    => $_REQUEST['search'] ?? '',
+    'viewer'    => $Viewer,
 ]);

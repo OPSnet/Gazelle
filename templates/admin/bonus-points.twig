@@ -18,7 +18,7 @@
         <label for="seed_points"> Add points for people who have been seeding now.</label><br /><br />
 
         <input type="hidden" name="action" value="bonus_points" />
-        <input type="hidden" name="auth" value="{{ auth }}" />
+        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
         <input type="submit" name="add_points" value="Add bonus points" />
     </form>
 </div>

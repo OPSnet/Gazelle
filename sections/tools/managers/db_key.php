@@ -12,7 +12,7 @@ if (isset($_POST['dbkey'])) {
 }
 
 echo $Twig->render('admin/db-key.twig', [
-    'auth'        => $Viewer->auth(),
+    'viewer'      => $Viewer,
     'fingerprint' => (apcu_exists('DB_KEY') && apcu_fetch('DB_KEY'))
         ? '0x' . substr(apcu_fetch('DB_KEY'), 0, 4)
         : false,

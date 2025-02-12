@@ -43,9 +43,9 @@ if (isset($_POST['confirm'])) {
 }
 
 echo $Twig->render('bonus/title.twig', [
-    'auth'   => $Viewer->auth(),
     'bbcode' => $BBCode,
     'label'  => $Label,
     'price'  => $Price,
     'title'  => $Item['Title'],
+    'viewer' => $Viewer,
 ]);

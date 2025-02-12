@@ -29,7 +29,7 @@ to {{ fl_added|number_format }} enabled users
         Tokens to add: <input type="text" name="numtokens" size="{{ amount }}" /><br /><br />
 
         <input type="hidden" name="action" value="tokens" />
-        <input type="hidden" name="auth" value="{{ auth }}" />
+        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
         <input type="submit" name="addtokens" value="Add tokens" />
     </form>
 </div>
@@ -50,7 +50,7 @@ to {{ fl_added|number_format }} enabled users
         Members with more tokens will have their total reduced to this limit.<br /><br />
 
         <input type="hidden" name="action" value="tokens" />
-        <input type="hidden" name="auth" value="{{ auth }}" />
+        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
         <input type="submit" name="cleartokens" value="Set maximum token limit" />
     </form>
 </div>

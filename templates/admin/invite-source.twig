@@ -30,7 +30,7 @@
     <h3>No inviters have been configured</h3>
 {% endfor %}
     <br />
-    <input type="hidden" name="auth" value="{{ auth }}" />
+    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
     <input type="hidden" name="action" value="invite_source" />
     Go to user page to edit sources (user id or @name): <input type="text" length="40" name="user" /> <input type="submit" value="Go!" />
     </form>

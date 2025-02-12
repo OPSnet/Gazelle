@@ -56,13 +56,13 @@
         <textarea cols="80" rows="8" name="key" id="key" class="inputtext">{{ key }}</textarea><br />
         <span style="padding: 0 0"><input type="submit" name="view" value="View" /></span>
         <span style="padding: 0 20px"><input type="submit" name="json" value="View as JSON" /></span>
-{% if can_flush %}
+{% if viewer.permitted('admin_clear_cache') %}
         <label><input type="checkbox" name="check" /> Confirm</label>
         <input type="submit" name="flush" value="Flush keys" />
 {% endif %}
     </form>
     </div>
-{% if can_flush %}
+{% if viewer.permitted('admin_clear_cache') %}
     <div class="box pad">
     <h2>Bulk Eraser</h2>
         <p>Flush collections. Warning: may be so slow as to cause a gateway timeout, but the process will complete.</p>
@@ -104,7 +104,7 @@
                 <td colspan="{{ constant('CACHE_NAMESPACE')|length }}">
                     <form class="delete_form" name="cache" action="" method="post">
                         <input type="hidden" name="action" value="clear_cache" />
-                        <input type="hidden" name="auth" value="{{ auth }}" />
+                        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
                         <input type="hidden" name="global_flush" value="1" />
 
                         <p>Full restart (all keys will be flushed!)</p>

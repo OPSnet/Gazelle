@@ -19,7 +19,7 @@
     <form class="manage_form" name="forums" action="" method="post">
         <input type="hidden" name="id" value="{{ cat.id }}" />
         <input type="hidden" name="action" value="categories_alter" />
-        <input type="hidden" name="auth" value="{{ auth }}" />
+        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
         <td>
             <input type="text" size="3" name="sort" value="{{ cat.sequence }}" />
         </td>
@@ -45,7 +45,7 @@
     <tr class="rowa">
         <form class="create_form" name="forum" action="" method="post">
             <input type="hidden" name="action" value="categories_alter" />
-            <input type="hidden" name="auth" value="{{ auth }}" />
+            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
             <td>
                 <input type="text" size="3" name="sort" />
             </td>

@@ -24,7 +24,7 @@
             <input type="hidden" name="id" value="{{ t.periodic_task_id }}" />
             <input type="hidden" name="action" value="periodic" />
             <input type="hidden" name="mode" value="alter" />
-            <input type="hidden" name="auth" value="{{ auth }}" />
+            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
             <td>
                 <input type="text" size="15" name="name" value="{{ t.name }}" />
             </td>
@@ -60,7 +60,7 @@
         <form class="create_form" name="accounts" action="" method="post">
             <input type="hidden" name="action" value="periodic" />
             <input type="hidden" name="mode" value="alter" />
-            <input type="hidden" name="auth" value="{{ auth }}" />
+            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
             <td>
                 <input type="text" size="10" name="name" />
             </td>

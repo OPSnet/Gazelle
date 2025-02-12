@@ -7,7 +7,7 @@ if (!$Viewer->permitted("admin_global_notification")) {
 }
 
 echo $Twig->render('admin/mass-pm.twig', [
-    'auth'  => $Viewer->auth(),
-    'body'  => new Gazelle\Util\Textarea('body', '', 95, 10),
-    'class' => (new Gazelle\Manager\User())->classList(),
+    'body'   => new Gazelle\Util\Textarea('body', '', 95, 10),
+    'class'  => (new Gazelle\Manager\User())->classList(),
+    'viewer' => $Viewer,
 ]);

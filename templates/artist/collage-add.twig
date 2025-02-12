@@ -3,15 +3,15 @@
         <div class="pad">
             <form id="add-to-collage" action="collages.php" method="post">
 {% for collage in collage_list %}
-    {% if loop.first %}
+{%  if loop.first %}
             <select style="max-width: 100%" name="collage_combo" id="collage-select">
                 <option value="0">Choose recent...</option>
-    {% endif %}
+{%  endif %}
                 <option value="{{ collage.id }}">{{ collage.name }}</option>
-    {% if loop.last %}
+{%  if loop.last %}
             </select>
             <div>or search for collage name or URL:</div>
-    {% endif %}
+{%  endif %}
 {% else %}
             <div>Search for a collage name or URL:</div>
 {% endfor %}

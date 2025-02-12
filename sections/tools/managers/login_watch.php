@@ -54,12 +54,11 @@ $list = $watch->activeList($headerInfo->getOrderBy(), $headerInfo->getOrderDir()
 $resolve = isset($_REQUEST['resolve']);
 
 echo $Twig->render('admin/login-watch.twig', [
-    'auth'      => $Viewer->auth(),
     'header'    => $header,
     'list'      => $list,
-    'can_ban'   => $Viewer->permitted('admin_manage_ipbans'),
     'nr_ban'    => $nrBan ?? null,
     'nr_clear'  => $nrClear ?? null,
     'paginator' => $paginator,
     'resolve'   => $resolve,
+    'viewer'    => $Viewer,
 ]);

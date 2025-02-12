@@ -11,8 +11,8 @@ $siteOption = new Gazelle\Manager\SiteOption();
 if ($Viewer->permitted('admin_manage_permissions') && isset($_POST['submit'])) {
     authorize();
 
-    $name = trim($_POST['name']);
-    $value = trim($_POST['value']);
+    $name    = trim($_POST['name']);
+    $value   = trim($_POST['value']);
     $comment = trim($_POST['comment']);
 
     if ($_POST['submit'] == 'Delete') {
@@ -37,7 +37,6 @@ if ($Viewer->permitted('admin_manage_permissions') && isset($_POST['submit'])) {
 }
 
 echo $Twig->render('admin/site-option.twig', [
-    'auth'     => $Viewer->auth(),
-    'is_admin' => $Viewer->permitted('admin_manage_permissions'),
-    'list'     => $siteOption->list(),
+    'list'   => $siteOption->list(),
+    'viewer' => $Viewer,
 ]);

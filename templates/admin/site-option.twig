@@ -7,12 +7,12 @@
         <td>Name</td>
         <td>Value</td>
         <td>Comment</td>
-{% if is_admin %}
+{% if viewer.permitted('admin_manage_permissions') %}
         <td>Manage</td>
 {% endif %}
     </tr>
 
-{% if is_admin %}
+{% if viewer.permitted('admin_manage_permissions') %}
     <tr class="rowa">
         <form class="create_form" name="site_option" action="" method="post">
             <td title="Words must be separated by dashes or underscores">
@@ -26,7 +26,7 @@
             </td>
             <td>
                 <input type="hidden" name="action" value="site_options" />
-                <input type="hidden" name="auth" value="{{ auth }}" />
+                <input type="hidden" name="auth" value="{{ viewer.auth }}" />
                 <input type="submit" name="submit" value="Create" />
             </td>
         </form>
@@ -35,14 +35,14 @@
 
 {% for opt in list %}
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
-    {% if is_admin %}
+    {% if viewer.permitted('admin_manage_permissions') %}
     <form class="manage_form" name="site_option" action="" method="post">
         <td><input type="text" size="25" name="name" value="{{ opt.name }}" /></td>
         <td><input type="text" size="6" name="value" value="{{ opt.value }}" /></td>
         <td><input type="text" size="60" name="comment" value="{{ opt.comment }}" /></td>
         <td>
             <input type="hidden" name="action" value="site_options" />
-            <input type="hidden" name="auth" value="{{ auth }}" />
+            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
             <input type="hidden" name="id" value="{{ opt.id }}" />
             <input type="submit" name="submit" value="Edit" />
             <input type="submit" name="submit" value="Delete" />

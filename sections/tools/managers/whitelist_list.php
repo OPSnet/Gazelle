@@ -7,6 +7,6 @@ if (!$Viewer->permitted('admin_whitelist')) {
 }
 
 echo $Twig->render('admin/client-whitelist.twig', [
-    'auth' => $Viewer->auth(),
-    'list' => (new Gazelle\Manager\ClientWhitelist())->list(),
+    'list'   => (new Gazelle\Manager\ClientWhitelist())->list(),
+    'viewer' => $Viewer,
 ]);

@@ -31,5 +31,5 @@ if (!empty($_POST['id']) || $_POST['name'] !== '') {
 }
 
 echo $Twig->render('collage/recover.twig', [
-    'auth' => $Viewer->auth(),
+    'viewer' => $Viewer,
 ]);

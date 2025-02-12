@@ -7,7 +7,7 @@
         <div class="pad">
             <form class="undelete_form" name="collage" action="collages.php" method="post">
                 <input type="hidden" name="action" value="recover" />
-                <input type="hidden" name="auth" value="{{ auth }}" />
+                <input type="hidden" name="auth" value="{{ viewer.auth }}" />
                 <div class="field_div">
                     <strong>Collage ID: </strong>
                     <input type="text" name="id" size="8" />

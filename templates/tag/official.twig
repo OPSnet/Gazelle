@@ -26,7 +26,7 @@
     <div class="thin box">
         <form class="manage_form" name="tags" method="post">
             <input type="hidden" name="action" value="tags_official" />
-            <input type="hidden" name="auth" value="{{ auth }}" />
+            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
             <table class="tags_table layout">
                 <tr class="colhead_dark">
 {% for col in range(1, constant('TAG_OFFICIAL_COLUMNS')) %}

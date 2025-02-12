@@ -65,21 +65,21 @@ if ($source && $target) {
             $paginator->limit(),
             $paginator->offset()
         ),
-        'auth'      => $Viewer->auth(),
         'mode'      => $union ? 'union' : 'exclude',
         'paginator' => $paginator,
         'seedbox'   => $seedbox,
         'source_id' => $source,
         'target_id' => $target,
         'user_id'   => $userId,
+        'viewer'    => $Viewer,
     ]);
 }
 
 echo $Twig->render('seedbox/view.twig', [
-    'auth'    => $Viewer->auth(),
     'mode'    => $union ? 'union' : 'exclude',
     'seedbox' => $seedbox,
     'source'  => $source,
     'target'  => $target,
     'user_id' => $userId,
+    'viewer'  => $Viewer,
 ]);

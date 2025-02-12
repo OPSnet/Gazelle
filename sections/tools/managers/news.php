@@ -65,10 +65,10 @@ switch ($_REQUEST['action']) {
         error('Unknown news action');
 }
 echo $Twig->render('admin/news.twig', [
-    'auth'    => $Viewer->auth(),
     'body'    => new Gazelle\Util\Textarea('body', $body),
     'create'  => $create,
     'id'      => $id,
     'title'   => $title,
     'list'    => $newsMan->headlines(),
+    'viewer'  => $Viewer,
 ]);

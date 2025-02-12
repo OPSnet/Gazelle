@@ -29,9 +29,9 @@ if ($torrent->groupId() === $new->id()) {
 
 if (empty($_POST['confirm'])) {
     echo $Twig->render('torrent/confirm-move.twig', [
-        'auth'    => $Viewer->auth(),
         'new'     => $new,
-        'torrent' => $torrent
+        'torrent' => $torrent,
+        'viewer'  => $Viewer,
     ]);
     exit;
 }

@@ -72,10 +72,10 @@ if (isset($_REQUEST['json'])) {
 }
 
 echo $Twig->render('admin/cache-management.twig', [
-    'can_flush'     => $Viewer->permitted('admin_clear_cache'),
-    'delta'         => $delta,
-    'flushed'       => $flushed,
-    'key'           => $_REQUEST['key'] ?? '',
-    'multi'         => $multi,
-    'result'        => $result,
+    'delta'   => $delta,
+    'flushed' => $flushed,
+    'key'     => $_REQUEST['key'] ?? '',
+    'multi'   => $multi,
+    'result'  => $result,
+    'viewer'  => $Viewer,
 ]);

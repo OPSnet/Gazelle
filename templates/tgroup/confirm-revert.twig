@@ -6,7 +6,7 @@
 <div class="box pad">
     <form class="confirm_form" name="torrent_group" action="torrents.php" method="get">
         <input type="hidden" name="action" value="revert" />
-        <input type="hidden" name="auth" value="{{ auth }}" />
+        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
         <input type="hidden" name="confirm" value="true" />
         <input type="hidden" name="groupid" value="{{ group_id }}" />
         <input type="hidden" name="revisionid" value="{{ revision_id }}" />

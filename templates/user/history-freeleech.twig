@@ -1,4 +1,5 @@
 {{ header(user.username ~ ' › Freeleech token history') }}
+{% set own_profile = user.id == viewer.id %}
 <div class="header">
     <h2><a href="{{ user.location }}">{{ user.username }}</a> › Freeleech token history</h2>
 </div>
@@ -10,7 +11,7 @@
         <td>Torrent</td>
         <td>Time</td>
         <td>Expired</td>
-{% if own_profile or admin %}
+{% if own_profile or viewer.permitted('admin_fl_history') %}
         <td>Downloaded</td>
         <td>Size</td>
         <td>Tokens used</td>
@@ -21,15 +22,15 @@
         <td>{{ t.name|raw }}</td>
         <td class="nowrap">{{ t.created|time_diff }}</td>
         <td>{{ t.expired ? 'Yes' : 'No' }}
-    {%- if admin and not t.expired %}
-            &nbsp;<a href="userhistory.php?action=token_history&amp;expire=1&amp;auth={{ auth }}&amp;userid={{ user.id }}&amp;torrentid={{ t.torrent_id }}">(expire)</a>
-    {%- endif -%}
+{%  if viewer.permitted('admin_fl_history') and not t.expired -%}
+            &nbsp;<a href="userhistory.php?action=token_history&amp;expire=1&amp;auth={{ viewer.auth }}&amp;userid={{ user.id }}&amp;torrentid={{ t.torrent_id }}">(expire)</a>
+{%  endif -%}
         </td>
-    {% if own_profile or admin %}
+{%  if own_profile or viewer.permitted('admin_fl_history') %}
         <td class="nowrap">{{ t.downloaded|octet_size }}</td>
         <td class="nowrap">{{ t.size|octet_size }}</td>
         <td>{{ t.uses }}</td>
-     {% endif %}
+{%  endif %}
     </tr>
 {% endfor %}
 </table>

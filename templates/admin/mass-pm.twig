@@ -6,7 +6,7 @@
 <form class="send_form" name="message" action="tools.php" method="post" id="messageform">
     <div class="box pad">
         <input type="hidden" name="action" value="take_mass_pm" />
-        <input type="hidden" name="auth" value="{{ auth }}" />
+        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
         <div id="quickpost">
             <h3>Class</h3>
             <select id="class_id" name="class_id">

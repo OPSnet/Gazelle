@@ -1,5 +1,4 @@
 {{ header('contest admin') }}
-
 <div class="thin">
     <div class="header">
         <h2>Contest admin</h2>
@@ -19,20 +18,21 @@
 {% endif %}
 
 {% if not create %}
-    {% include 'contest/list.twig' with {
-        'viewer':  viewer,
-        'current': contest,
-        'list':    list,
-        'type':    type,
-        } only
-    %}
+{%  include 'contest/list.twig'
+    with {
+        'current' : contest,
+        'list'    : list,
+        'type'    : type,
+        'viewer'  : viewer,
+    } only
+%}
 {% endif %}
 
 {% if contest is request_fill %}
     <div class="box pad">
         <h2>Request pairs</h2>
-    {% for pair in contest.requestPairs %}
-        {% if loop.first %}
+{%  for pair in contest.requestPairs %}
+{%      if loop.first %}
         <p>The following members have filled out more than one request for the same member.</p>
         <table>
             <tr class="colhead">
@@ -40,33 +40,35 @@
                 <td>Request creator</td>
                 <td>Filled</td>
             </tr>
-        {% endif %}
+{%      endif %}
             <tr>
                 <td>{{ pair.FillerID|user_url }}</td>
                 <td>{{ pair.UserID|user_url }}</td>
                 <td>{{ pair.nr|number_format }}</td>
             </tr>
-        {% if loop.last %}
+{%      if loop.last %}
         </table>
-        {% endif %}
-    {% else %}
+{%      endif %}
+{%  else %}
         <p>No members have filled out more than one request for the same member.</p>
-    {% endfor %}
+{%  endfor %}
     </div>
 {% endif %}
 
 {% if create or contest %}
-    {% include 'contest/admin-form.twig' with {
-        'action':     create ? 'contest.php?action=create' : 'contest.php?action=admin&id=' ~ contest.id,
-        'auth':       viewer.auth,
-        'contest':    contest,
-        'create':     create,
-        'type':       type,
-        'intro':      intro,
-        'user_count': user_count,
+{%   include 'contest/admin-form.twig'
+     with {
+        'action'     : create
+            ? 'contest.php?action=create'
+            : 'contest.php?action=admin&id=' ~ contest.id,
+        'contest'    : contest,
+        'create'     : create,
+        'type'       : type,
+        'intro'      : intro,
+        'user_count' : user_count,
+        'viewer'     : viewer,
     } only
-    %}
+%}
 {% endif %}
-
 </div>
 {{ footer() }}

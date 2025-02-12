@@ -13,6 +13,6 @@ if ($user) {
 }
 
 echo $Twig->render('admin/invite-source.twig', [
-    'auth' => $Viewer->auth(),
-    'list' => (new Gazelle\Manager\InviteSource())->summaryByInviter(),
+    'list'   => (new Gazelle\Manager\InviteSource())->summaryByInviter(),
+    'viewer' => $Viewer,
 ]);

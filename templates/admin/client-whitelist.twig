@@ -5,7 +5,7 @@
 <div class="box2 pad thin">
 <form class="add_form" name="clients" action="" method="post">
     <input type="hidden" name="action" value="whitelist_alter" />
-    <input type="hidden" name="auth" value="{{ auth }}" />
+    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
     <table>
         <tr class="colhead">
             <td colspan="4">Add client</td>
@@ -33,7 +33,7 @@
 {% for c in list %}
 <form class="manage_form" name="clients" action="" method="post">
     <input type="hidden" name="action" value="whitelist_alter" />
-    <input type="hidden" name="auth" value="{{ auth }}" />
+    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
     <table>
         <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
             <td>

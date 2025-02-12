@@ -29,7 +29,7 @@
 {% for b in list %}
     {% if loop.first %}
 <form class="manage_form" name="bans" action="" method="post">
-<input type="hidden" name="auth" value="{{ auth }}" />
+<input type="hidden" name="auth" value="{{ viewer.auth }}" />
 <input type="hidden" name="action" value="login_watch" />
 <table width="100%">
     <tr class="colhead">
@@ -41,7 +41,7 @@
         <td>{{ header.last_attempt|raw }}</td>
         <td>{{ header.banned_until|raw }}</td>
         <td>Clear</td>
-        {% if can_ban %}
+        {% if viewer.permitted('admin_manage_ipbans') %}
         <td>Ban</td>
         {% endif %}
         <td>Do nothing</td>
@@ -79,7 +79,7 @@
         <td style="text-align: center">
             <input type="radio" title="clear" name="admin-{{ b.id }}" value="clear" />
         </td>
-    {% if can_ban %}
+    {% if viewer.permitted('admin_manage_ipbans') %}
         <td style="text-align: center">
             <input type="radio" title="ban" name="admin-{{ b.id }}" value="ban" />
         </td>
@@ -88,7 +88,7 @@
             <input type="radio" title="no change" id="noop-{{ b.id }}" name="admin-{{ b.id }}" value="noop" checked="checked" />
         </td>
     {% if loop.last %}
-        {% if can_ban %}
+        {% if viewer.permitted('admin_manage_ipbans') %}
     <tr>
         <td><br />Ban Reason</td>
         <td colspan="9">

@@ -6,7 +6,7 @@
     </div>
     <form class="send_form" name="mass_message" action="torrents.php" method="post">
         <input type="hidden" name="action" value="takemasspm" />
-        <input type="hidden" name="auth" value="{{ auth }}" />
+        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
         <input type="hidden" name="torrentid" value="{{ torrent.id }}" />
         <table class="layout">
             <tr>

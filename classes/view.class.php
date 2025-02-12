@@ -142,7 +142,7 @@ class View {
             'document'    => $module,
             'dono_target' => $payMan->monthlyPercent(new Gazelle\Manager\Donation()),
             'nav_links'   => $navLinks,
-            'user'        => $Viewer,
+            'viewer'      => $Viewer,
         ]);
     }
 
