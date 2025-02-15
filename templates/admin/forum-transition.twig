@@ -1,0 +1,132 @@
+{% from 'macro/form.twig' import selected %}
+{% macro class_selector(class_list, level) %}
+<select name="permission_class">
+{%  for userclass in class_list %}
+{%  if not userclass.Secondary %}
+    <option value="{{ userclass.Level }}"{{ selected(userclass.Level == level)
+        }}>{{ userclass.Name }}</option>
+{%      endif %}
+{%  endfor %}
+</select>
+{% endmacro %}
+{% macro forum_selector(list, name, is_selected) %}
+<select name="{{ name }}">
+{%  set prev = '' %}
+{%  for forum in list %}
+{%      if loop.first or prev != forum.categoryName %}
+{%          if prev %}
+    </optgroup>
+{%          endif %}
+    <optgroup label="{{ forum.categoryName }}">
+{%      endif %}
+        <option value="{{ forum.id }}"{{ selected(forum.id == is_selected) }}>{{ forum.name }}</option>
+{%      if loop.last %}
+    </optgroup>
+{%      endif %}
+{%      set prev = forum.categoryName %}
+{%  endfor %}
+</select>
+{% endmacro %}
+{{ header('Forum Transitions') }}
+<div class="header">
+    <h2>Forum transition manager</h2>
+</div>
+<div class="linkbox">
+    <a class="brackets" href="tools.php?action=categories">Forum Categories</a>
+    <a class="brackets" href="tools.php?action=forum">Forum Control Panel</a>
+</div>
+<div class="thin box">
+    <h4>Preview transitions</h4>
+    <form class="manage_form" name="preview" action="" method="get">
+        <input type="hidden" name="action" value="forum_transitions" />
+        <table class="layout">
+            <tr>
+                <td class="label"><label for="userid">User ID (or @username)</label></td>
+                <td><input type="text" name="userid" value="{{ user.id }}" /> {{ user.username }}</td>
+                <td><input type="submit" name="submit" value="Preview" class="submit" /></td>
+            <tr>
+        </table>
+    </form>
+</div>
+<h4 class="center">All permission columns are ORed to check for access, any value with a minus (-) in front will invalidate the transition for the user regardless of other permissions</h4>
+<table>
+    <tr class="colhead">
+        <td>Source</td>
+        <td>Destination</td>
+        <td>Label</td>
+        <td>Secondary Classes</td>
+        <td>User Class</td>
+        <td>Permissions</td>
+        <td>User IDs</td>
+        <td>Submit</td>
+    </tr>
+{% for item in user_list %}
+    <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+        <form class="manage_form" name="navitems" action="" method="post">
+            <input type="hidden" name="id" value="{{ item.id }}" />
+            <input type="hidden" name="action" value="forum_transitions_alter" />
+            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+            <td>
+{{  _self.forum_selector(forum_list, "source", item.sourceId) }}
+            </td>
+            <td>
+{{  _self.forum_selector(forum_list, "destination", item.destinationId) }}
+            </td>
+            <td>
+                <input type="text" size="10" name="label" value="{{ item.label }}" />
+            </td>
+            <td>
+                <input type="text" size="10" name="secondary_classes" value="{{ item.secondaryClassIdList|join(', ') }}" />
+            </td>
+            <td>
+{{  _self.class_selector(class_list, item.classLevel) }}
+            </td>
+            <td>
+                <input type="text" size="10" name="permissions" value="" />
+            </td>
+            <td>
+                <input type="text" size="10" name="user_ids" value="{{ item.userIdList|join(', ') }}" />
+            </td>
+            <td>
+                <input type="submit" name="submit" value="Edit" />
+                <input type="submit" name="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this transition? This is an irreversible action!')" />
+            </td>
+        </form>
+    </tr>
+{% endfor %}
+    <tr>
+        <td colspan="5">Create Transition</td>
+    </tr>
+    <tr class="rowa">
+        <form class="manage_form" name="navitems" action="" method="post">
+            <input type="hidden" name="action" value="forum_transitions_alter" />
+            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+            <td>
+{{  _self.forum_selector(forum_list, "source", 0) }}
+            </td>
+            <td>
+{{  _self.forum_selector(forum_list, "destination", 0) }}
+            </td>
+            <td>
+                <input size="10" type="text" name="label" />
+            </td>
+            <td>
+                <input size="10" type="text" name="secondary_classes" />
+            </td>
+            <td>
+{{  _self.class_selector(class_list, viewer.classLevel) }}
+            </td>
+            <td>
+                <input size="10" type="text" name="permissions" />
+            </td>
+            <td>
+                <input size="10" type="text" name="user_ids" />
+            </td>
+            <td>
+                <input type="submit" name="submit" value="Create" />
+            </td>
+        </form>
+    </tr>
+</table>
+{{ footer() }}
+
