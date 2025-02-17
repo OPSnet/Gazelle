@@ -46,9 +46,9 @@
         <br />Last action: {{ torrent.lastActiveDate|default('Never') }}
         <br /><span class="report_torrent_file_ext">Audio files present:
 {% for ext, total in torrent.fileListPrimaryMap -%}
-    {%- if loop.first %}<span class="file_ext_map">{% else %}, {% endif -%}
+{%- if loop.first %}<span class="file_ext_map">{% else %}, {% endif -%}
         {{ ext }}: {{ total|number_format }}
-    {%- if loop.last %}</span>{% endif -%}
+{%- if loop.last %}</span>{% endif -%}
 {% else %}
             <span class="file_ext_none">none</span>
 {% endfor %}
@@ -58,38 +58,38 @@
         <br /><div class="report_torrent_info" title="Release description of reported torrent">Release info: {{ torrent.description|bb_format }}</div>
 {% endif %}
 {% if report.status != 'resolved' %}
-    {% if total_group > 1 %}
-        {% set total_group = total_group - 1 %}
+{%  if total_group > 1 %}
+{%      set total_group = total_group - 1 %}
         <div style="text-align: right;">
             <a href="reportsv2.php?view=group&amp;id={{ torrent.groupId }}">There
-        {%- if total_group > 1 %} are {{ total_group }} other reports {% else %} is 1 other report {% endif -%}
+{%-     if total_group > 1 %} are {{ total_group }} other reports {% else %} is 1 other report {% endif -%}
                 for torrents in this group</a>
         </div>
-    {% endif %}
-    {% if total_uploader > 1 %}
-        {% set total_uploader = total_uploader - 1 %}
+{%  endif %}
+{%  if total_uploader > 1 %}
+{%      set total_uploader = total_uploader - 1 %}
         <div style="text-align: right;">
             <a href="reportsv2.php?view=uploader&amp;id={{ torrent.uploaderId }}">There
-        {%- if total_uploader > 1 %} are {{ total_uploader }} other reports {% else %} is 1 other report {% endif -%}
+{%-     if total_uploader > 1 %} are {{ total_uploader }} other reports {% else %} is 1 other report {% endif -%}
                 for torrents uploaded by this user</a>
         </div>
-    {% endif %}
-    {% if total_torrent > 1 %}
-        {% set total_torrent = total_torrent - 1 %}
+{%  endif %}
+{%  if total_torrent > 1 %}
+{%      set total_torrent = total_torrent - 1 %}
         <div style="text-align: right;">
             <strong class="important_text">
                 <a href="reportsv2.php?view=torrent&amp;id={{ torrent.id }}">There
-                {%- if total_torrent > 1 %} are {{ total_torrent }} other reports {% else %} is 1 other report {% endif -%}
+{%-     if total_torrent > 1 %} are {{ total_torrent }} other reports {% else %} is 1 other report {% endif -%}
                 for this torrent</a>
             </strong>
         </div>
-    {% endif %}
-    {% for request in request_list %}
+{%  endif %}
+{%  for request in request_list %}
         <div style="text-align: right;">
             <strong class="important_text">{{ request.fillerId|user_url }} used this torrent to fill <a href="{{
                 request.location }}">this request</a> {{ request.fillDate|time_diff }}</strong>
         </div>
-    {% endfor %}
+{%  endfor %}
 {% endif %}
     </td>
 </tr>
@@ -100,14 +100,14 @@
 </tr>
 {% endif %}
 {% for link in report.externalLink %}
-    {% if loop.first %}
+{%  if loop.first %}
 <tr>
     <td class="label">Relevant links:</td>
     <td>
-    {% endif %}
+{%  endif %}
         {{ link|linkify }}
-    {% if loop.last %}
+{%  if loop.last %}
     </td>
 </tr>
-    {% endif %}
+{%  endif %}
 {% endfor %}

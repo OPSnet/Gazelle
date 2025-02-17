@@ -2,7 +2,7 @@
 {{ header('Reports V2', {'js': 'reportsv2'}) }}
 <div class="header">
     <h2>Search Reports</h2>
-    {%- include 'reportsv2/linkbox.twig' with {'viewer': viewer} only %}
+{%- include 'reportsv2/linkbox.twig' with {'viewer': viewer} only %}
 </div>
 {% if list %}
 {{ paginator.linkbox|raw }}
@@ -27,14 +27,14 @@
             <td>{{ r.reporter.username ?? '<i>unknown</i>'|raw }}</td>
             <td>{{ r.resolver.username ?? '<i>unclaimed</i>'|raw }}</td>
             <td>
-                {% if r.torrent.isDeleted %}<i>Deleted {% endif %}
-                {% if r.torrent.hasTGroup %}
-                    {{ r.torrent.groupLink|raw }} {{ r.torrent.edition}}
-                {% else %}
+{%  if r.torrent.isDeleted %}<i>Deleted {% endif %}
+{%  if r.torrent.hasTGroup %}
+{{      r.torrent.groupLink|raw }} {{ r.torrent.edition}}
+{%  else %}
                     <i>Deleted/Merged Group #{{ r.torrent.groupId }}</i>
-                {% endif %}
+{%  endif %}
                 <br />{{ r.torrent.label|raw }}
-                {% if r.torrent.isDeleted %}</i>{% endif %}
+{%  if r.torrent.isDeleted %}</i>{% endif %}
             </td>
             <td class="nowrap">{{ name_cache[r.Type] }}</td>
             <td>{{ r.ReportedTime|time_diff }}</td>

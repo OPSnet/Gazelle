@@ -2,37 +2,37 @@
 
 <div class="header">
     <h2>Torrent Report Information</h2>
-    {%- include 'reportsv2/linkbox.twig' with {'viewer': viewer} only %}
+{%- include 'reportsv2/linkbox.twig' with {'viewer': viewer} only %}
 </div>
 
 <div class="thin float_clear">
 <div class="two_columns pad">
 {% for interval, summary in resolved %}
     <h3>
-    {%- if interval == 'total' -%}
+{%-  if interval == 'total' -%}
         Total reports resolved
-    {%- else -%}
+{%-  else -%}
         Reports resolved in the last {{ interval }}
-    {%- endif -%}
+{%-  endif -%}
     </h3>
-    {% for entry in summary %}
-        {% if loop.first %}
+{%  for entry in summary %}
+{%      if loop.first %}
     <table class="box border">
     <tr class="colhead">
         <td class="colhead_dark">Username</td>
         <td class="colhead_dark number_column">Reports</td>
     </tr>
-        {% endif %}
+{%      endif %}
     <tr{% if entry.user_id == viewr.user_id %} class="rowa"{% endif %}>
         <td><a href="reportsv2.php?view=resolver&amp;id={{ entry.user_id }}">{{ entry.user.username }}</a></td>
         <td class="number_column">{{ entry.total|number_format }}</td>
     </tr>
-        {% if loop.last %}
+{%      if loop.last %}
     </table>
-        {% endif %}
-    {% else %}
+{%      endif %}
+{%  else %}
     <div>No activity<br /><br /></div>
-    {% endfor %}
+{%  endfor %}
 {% endfor %}
 
 <h3>Different view modes by person</h3>
@@ -98,46 +98,45 @@
 <div class="two_columns pad">
 <h3>Currently assigned reports by staff member</h3>
 {% for entry in in_progress %}
-    {% if loop.first %}
+{%  if loop.first %}
     <table class="box border">
         <tr class="colhead">
             <td class="colhead_dark">Staff Member</td>
             <td class="colhead_dark number_column">Open</td>
         </tr>
-    {% endif %}
+{%  endif %}
         <tr class="{% if entry.user_id == viewer.id %}rowa{% else %}rowb{% endif %}">
             <td>
                 <a href="reportsv2.php?view=staff&amp;id={{ entry.user_id }}">{{ entry.user.username }}</a>
             </td>
             <td class="number_column">{{ entry.total|number_format }}</td>
         </tr>
-    {% if loop.last %}
+{%  if loop.last %}
     </table>
-    {% endif %}
+{%  endif %}
 {% else %}
     <p>There are no claimed reports</p>
 {% endfor %}
 
 <h3>Different view modes by report type</h3>
 {% for entry in new %}
-    {% if loop.first %}
+{%  if loop.first %}
     <table class="box border">
         <tr class="colhead">
             <td class="colhead_dark">Type</td>
             <td class="colhead_dark number_column">Current Count</td>
         </tr>
-    {% endif %}
+{%  endif %}
         <tr{% if entry.type == 'urgent' %} class="rowa" style="font-weight: bold;"{% endif %}>
             <td><a href="reportsv2.php?view=type&amp;id={{ entry.type }}">{{ entry.name }}</a></td>
             <td class="number_column">{{ entry.total|number_format }} </td>
         </tr>
-    {% if loop.last %}
+{%  if loop.last %}
     </table>
-    {% endif %}
+{%  endif %}
 {% else %}
     <p>No open reports</p>
 {% endfor %}
     </div>
 </div>
 {{ footer() }}
-
