@@ -502,78 +502,75 @@ class Users extends \Gazelle\Base {
         ");
 
         self::$db->prepared_query("
-            INSERT INTO user_summary_new (user_id, request_bounty_size, request_bounty_total)
-                SELECT r.FillerID,
-                    coalesce(sum(rv.Bounty), 0) AS size,
-                    count(DISTINCT r.ID) AS total
-                FROM requests AS r
-                INNER JOIN users_main um ON (um.ID = r.FillerID)
-                LEFT JOIN requests_votes AS rv ON (r.ID = rv.RequestID)
-                WHERE r.FillerID != 0
-                GROUP BY r.FillerID
+            INSERT INTO user_summary_new (user_id, request_created_size, request_created_total, request_bounty_size, request_bounty_total, request_vote_size, request_vote_total)
+                WITH crea AS (
+                    SELECT r.UserID,
+                        count(*)       AS total,
+                        sum(rv.Bounty) AS bounty
+                    FROM requests r
+                    INNER JOIN requests_votes rv ON (rv.RequestID = r.ID AND rv.UserID = r.UserID)
+                    GROUP BY UserID
+                ),
+                filler AS (
+                    SELECT r.FillerID,
+                        count(DISTINCT r.id) AS total,
+                        /**
+                         * Note: exclude the bounty voted by a user on a request they filled themselves,
+                         * as that increase has already been accounted for in users_leech_stats.Uploaded
+                         */
+                        sum(CASE WHEN rv.UserID = r.FillerID THEN 0 ELSE rv.bounty END) AS bounty
+                    FROM requests r
+                    INNER JOIN requests_votes rv ON (rv.RequestID = r.ID)
+                    WHERE r.FillerID > 0
+                    GROUP BY r.FillerID
+                ),
+                voter AS (
+                    SELECT rv.UserID,
+                        count(DISTINCT rv.RequestID) AS total,
+                        sum(bounty) AS bounty
+                    FROM requests_votes rv
+                    GROUP BY rv.UserID
+                )
+                SELECT um.ID,
+                    coalesce(crea.bounty,    0),
+                    coalesce(crea.total,     0),
+                    coalesce(filler.bounty,  0),
+                    coalesce(filler.total,   0),
+                    coalesce(voter.bounty,   0),
+                    coalesce(voter.total,    0)
+                FROM users_main um
+                LEFT JOIN crea   ON (crea.UserID     = um.ID)
+                LEFT JOIN filler ON (filler.FillerID = um.ID)
+                LEFT JOIN voter  ON (voter.UserID    = um.ID)
+                WHERE (
+                    crea.total IS NOT NULL
+                    OR filler.total IS NOT NULL
+                    OR voter.total IS NOT NULL
+                )
             ON DUPLICATE KEY UPDATE
-                request_bounty_size = VALUES(request_bounty_size),
-                request_bounty_total = VALUES(request_bounty_total)
+                request_created_size  = VALUES(request_created_size),
+                request_created_total = VALUES(request_created_total),
+                request_bounty_size   = VALUES(request_bounty_size),
+                request_bounty_total  = VALUES(request_bounty_total),
+                request_vote_size     = VALUES(request_vote_size),
+                request_vote_total    = VALUES(request_vote_total)
         ");
 
         self::$db->prepared_query("
-            INSERT INTO user_summary_new (user_id, request_created_size, request_created_total)
-                SELECT r.UserID,
-                    coalesce(sum(rv.Bounty), 0) AS size,
-                    count(*) AS total
-                FROM requests AS r
-                INNER JOIN users_main um ON (um.ID = r.UserID)
-                LEFT JOIN requests_votes AS rv ON (rv.RequestID = r.ID AND rv.UserID = r.UserID)
-                GROUP BY r.UserID
-            ON DUPLICATE KEY UPDATE
-                request_created_size = VALUES(request_created_size),
-                request_created_total = VALUES(request_created_total)
-        ");
-
-        /**
-         * Note: exclude the bounty voted by a user on a request they filled themselves,
-         * as that increase has already been accounted for in users_leech_stats.Uploaded
-         */
-        self::$db->prepared_query("
-            INSERT INTO user_summary_new (user_id, request_vote_size, request_vote_total)
-                SELECT rv.UserID,
-                    coalesce(sum(rv.Bounty), 0) AS size,
-                    count(*) AS total
-                FROM requests_votes rv
-                INNER JOIN requests r ON (r.ID = rv.RequestID)
-                INNER JOIN users_main um ON (um.ID = rv.UserID)
-                WHERE r.UserID != r.FillerID
-                GROUP BY rv.UserID
-            ON DUPLICATE KEY UPDATE
-                request_vote_size = VALUES(request_vote_size),
-                request_vote_total = VALUES(request_vote_total)
-        ");
-
-        self::$db->prepared_query("
-            INSERT INTO user_summary_new (user_id, leech_total)
+            INSERT INTO user_summary_new (user_id, leech_total, seeding_total)
                 SELECT xfu.uid,
-                    count(DISTINCT xfu.fid)
+                    sum(case when xfu.remaining > 0 then 1 else 0 end) as leeching,
+                    sum(case when xfu.remaining = 0 then 1 else 0 end) as seeding
                 FROM xbt_files_users AS xfu
                 INNER JOIN torrents AS t ON (t.ID = xfu.fid)
                 INNER JOIN users_main um ON (um.ID = xfu.uid)
-                WHERE xfu.remaining > 0
+                WHERE um.Enabled = ?
                 GROUP BY xfu.uid
             ON DUPLICATE KEY UPDATE
-                leech_total = VALUES(leech_total)
-        ");
-
-        self::$db->prepared_query("
-            INSERT INTO user_summary_new (user_id, seeding_total)
-                SELECT xfu.uid,
-                    count(DISTINCT xfu.fid)
-                FROM xbt_files_users AS xfu
-                INNER JOIN torrents AS t ON (t.ID = xfu.fid)
-                INNER JOIN users_main um ON (um.ID = xfu.uid)
-                WHERE xfu.remaining = 0
-                GROUP BY xfu.uid
-            ON DUPLICATE KEY UPDATE
+                leech_total = VALUES(leech_total),
                 seeding_total = VALUES(seeding_total)
-        ");
+            ", UserStatus::enabled->value
+        );
 
         self::$db->prepared_query("
             INSERT INTO user_summary_new (user_id, snatch_total, snatch_unique)
