@@ -168,7 +168,7 @@ class DB extends Base {
     public function longRunning(): int {
         return (int)self::$db->scalar("
             SELECT count(*)
-            FROM information_schema.processlist
+            FROM performance_schema.processlist
             WHERE COMMAND NOT IN ('Sleep')
                 AND TIME > 1200;
         ");
