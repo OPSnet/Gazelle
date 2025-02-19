@@ -137,13 +137,26 @@ final class AttrTables extends AbstractMigration {
             )
         ");
         $this->query("create unique index dnu_n_uidx on do_not_upload (name)");
-        $this->query("
-            insert into do_not_upload
-                (id_do_not_upload, id_user, sequence, name, description, created)
-            select \"ID\", \"UserID\", \"Sequence\", \"Name\", \"Comment\", \"Time\"
-            from relay.do_not_upload
-            order by \"ID\"
+
+        $exists = $this->fetchRow("
+            select 1
+            from pg_foreign_table
+            where ftoptions @> ARRAY['table_name=do_not_upload']
         ");
+        if ($exists) {
+            // This will return nothing on a fresh installation and this is
+            // normal, because the Mysql migrations have already run and the
+            // table is no more. On an existing installation we want to copy
+            // over the existing rows before the table is dropped later on
+            // in time.
+            $this->query("
+                insert into do_not_upload
+                    (id_do_not_upload, id_user, sequence, name, description, created)
+                select \"ID\", \"UserID\", \"Sequence\", \"Name\", \"Comment\", \"Time\"
+                from relay.do_not_upload
+                order by \"ID\"
+            ");
+        }
 
         $this->query("
             create table torrent_group_attr (
