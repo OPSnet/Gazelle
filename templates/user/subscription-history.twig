@@ -3,7 +3,7 @@
 {{ header('Subscriptions', {'js': 'subscriptions,comments,bbcode'}) }}
 <div class="thin">
     <div class="header">
-        <h2>{{ viewer.link|raw }}</a> › Subscriptions
+        <h2>{{ viewer.link|raw }} › Subscriptions
 {%- if show_unread %} with unread posts{% endif -%}
 {%- if paginator.total %} {{ paginator.total }} new{% endif %}</h2>
         <div class="linkbox">
@@ -16,7 +16,7 @@
 
 {% if paginator.total %}
             <a href="#" onclick="Collapse(); return false;" id="collapselink" class="brackets">
-    {%- if show_collapsed %}Show{% else %}Hide{% endif %} post bodies</a>
+{%- if show_collapsed %}Show{% else %}Hide{% endif %} post bodies</a>
 {% endif %}
             <a href="userhistory.php?action=posts&amp;userid={{ viewer.id }}" class="brackets">Go to post history</a>
             <a href="userhistory.php?action=quote_notifications" class="brackets">Quote notifications</a>
@@ -25,56 +25,56 @@
     </div>
 
 {% for result in page %}
-    {% if loop.first %}
+{%  if loop.first %}
     {{ paginator.linkbox|raw }}
-    {% endif -%}
+{%  endif -%}
     <table class="forum_post box vertical_margin{% if not show_avatar %}noavatar{% endif %}">
         <colgroup>
-    {% if show_avatar %}
+{%  if show_avatar %}
             <col class="col_avatar" />
-    {% endif %}
+{%  endif %}
             <col class="col_post_body" />
         </colgroup>
         <tr class="colhead_dark notify_{{ result.page }}">
             <td colspan="{% if show_avatar %}2{% else %}1{% endif %}">
                 <span style="float: left;">{{ result.link|raw }}</span>
-    {% if result.PostID < result.LastPost %} <span class="new">(New!)</span>{% endif %}
-    {% if result.PostID %}
+{%  if result.PostID < result.LastPost %} <span class="new">(New!)</span>{% endif %}
+{%  if result.PostID %}
                 <span style="float: left;" class="tooltip last_read" title="Jump to last read">
                     <a href="{{ result.jump|raw }}"></a>
                 </span>
-    {% endif %}
-    {% if result.Page == 'forums' %}
+{%  endif %}
+{%  if result.Page == 'forums' %}
                 <span id="bar{{ result.PostID }}" style="float: right;">
                     <a href="#" onclick="Subscribe({{ result.PageID }}); return false;" id="subscribelink{{ result.PageID }}" class="brackets">Unsubscribe</a>
-    {% else %}
+{%  else %}
                 <span id="bar_{{ result.Page }}{{ result.PageID }}" style="float: right;">
                     <a href="#" onclick="SubscribeComments('{{ result.Page }}', {{ result.PageID }}); return false;" id="subscribelink_{{ result.Page }}{{ result.PageID }}" class="brackets">Unsubscribe</a>
-    {% endif -%}
+{%  endif -%}
                     &nbsp;<a href="#">↑</a>
                 </span>
             </td>
         </tr>
-    {% if result.LastReadBody %}
+{%  if result.LastReadBody %}
         <tr class="row{% if show_collapsed %} hidden{% endif %}">
-        {% if show_avatar %}
+{%      if show_avatar %}
             <td class="avatar" valign="top">{{ result.avatar|raw }}</td>
-        {% endif %}
+{%      endif %}
             <td class="body" valign="top">
                 <div class="content3">
                     {{ result.LastReadBody|bb_format }}
-        {% if result.editor_link %}
+{%      if result.editor_link %}
                     <br /><br />
                     <span class="last_edited">Last edited by {{ result.editor_link }} {{ result.LastReadEditedTime|time_diff }}</span>
-        {% endif %}
+{%      endif %}
                 </div>
             </td>
         </tr>
-    {% endif %}
+{%  endif %}
     </table>
-    {% if loop.last %}
+{%  if loop.last %}
     {{ paginator.linkbox|raw }}
-    {% endif %}
+{%  endif %}
 {% else %}
     <div class="center">
         No subscriptions{% if show_unread %} with unread posts{% endif %}
