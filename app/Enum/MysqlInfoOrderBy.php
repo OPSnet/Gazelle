@@ -6,6 +6,7 @@ enum MysqlInfoOrderBy: string {
     // Note: these names must correspond to the columns defined in Gazelle\DB\MysqlInfo::info()
     case tableName    = 'table_name';
     case tableRows    = 'table_rows';
+    case rowsRead     = 'rows_read';
     case dataLength   = 'data_length';
     case indexLength  = 'index_length';
     case totalLength  = 'total_length';

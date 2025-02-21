@@ -28,14 +28,14 @@
         </tr>
 {% for r in table_read %}
         <tr>
-            <td>{{ stats.table_rows|number_format }}</td>
-            <td>{{ stats.avg_row_length|number_format }}</td>
-            <td>{{ stats.data_length|octet_size }}</td>
-            <td>{{ stats.index_length|octet_size }}</td>
-            <td>{{ stats.data_free|octet_size }}</td>
-            <td>{{ r.ROWS_READ|number_format }}</td>
-            <td>{{ r.ROWS_CHANGED|number_format }}</td>
-            <td>{{ r.ROWS_CHANGED_X_INDEXES|number_format }}</td>
+            <td>{{ stats.TABLE_ROWS|number_format }}</td>
+            <td>{{ stats.AVG_ROW_LENGTH|number_format }}</td>
+            <td>{{ stats.DATA_LENGTH|octet_size }}</td>
+            <td>{{ stats.INDEX_LENGTH|octet_size }}</td>
+            <td>{{ stats.DATA_FREE|octet_size }}</td>
+            <td>{{ stats.ROWS_READ|number_format }}</td>
+            <td>{{ stats.ROWS_CHANGED|number_format }}</td>
+            <td>{{ stats.ROWS_CHANGED_X_INDEXES|number_format }}</td>
         </tr>
 {% endfor %}
     </table>

@@ -57,8 +57,10 @@ Highcharts.chart('statistics', {
 <table>
 <tr class="colhead" style="text-align:right">
     <td style="text-align:left" class="nobr">{{ header|column('table_name') }}</td>
-    <td style="text-align:right" class="nobr">{{ header|column('table_rows') }}</td>
+    <td style="text-align:left" class="nobr">Row format</td>
     <td style="text-align:right" class="nobr">{{ header|column('avg_row_length') }}</td>
+    <td style="text-align:right" class="nobr">{{ header|column('table_rows') }}</td>
+    <td style="text-align:right" class="nobr">{{ header|column('rows_read') }}</td>
     <td style="text-align:right" class="nobr">{{ header|column('data_length') }}</td>
     <td style="text-align:right" class="nobr">{{ header|column('index_length') }}</td>
     <td style="text-align:right" class="nobr">{{ header|column('data_free') }}</td>
@@ -67,11 +69,13 @@ Highcharts.chart('statistics', {
 </tr>
 
 {% set total_rows       = 0 %}
+{% set total_rows_read  = 0 %}
 {% set total_data_size  = 0 %}
 {% set total_index_size = 0 %}
 {% set total_free_size  = 0 %}
 {% for t in list -%}
     {%- set total_rows       = total_rows       + t.table_rows -%}
+    {%- set total_rows_read  = total_rows_read  + t.rows_read -%}
     {%- set total_data_size  = total_data_size  + t.data_length -%}
     {%- set total_index_size = total_index_size + t.index_length -%}
     {%- set total_free_size  = total_free_size  + t.data_free -%}
@@ -81,8 +85,10 @@ Highcharts.chart('statistics', {
             {{- t.table_name -}}
             {%- if t.engine != 'InnoDB' %}</span>{% endif -%}
     </a></td>
-    <td class="number_column">{{ t.table_rows|number_format }}</td>
+    <td>{{ t.row_format }}</td>
     <td class="number_column">{{ t.avg_row_length|octet_size }}</td>
+    <td class="number_column">{{ t.table_rows|number_format }}</td>
+    <td class="number_column">{{ t.rows_read|number_format }}</td>
     <td class="number_column">{{ t.data_length|octet_size }}</td>
     <td class="number_column">{{ t.index_length|octet_size }}</td>
     <td class="number_column">{{ t.data_free|octet_size }}</td>
@@ -91,9 +97,9 @@ Highcharts.chart('statistics', {
 </tr>
 {% endfor %}
 <tr>
-    <td><b>Grand totals</b></td>
+    <td style="text-align: right" colspan="3"><b>Grand totals</b></td>
     <td class="number_column"><b>{{ total_rows|number_format }}</b></td>
-    <td></td>
+    <td class="number_column"><b>{{ total_rows_read|number_format }}</b></td>
     <td class="number_column"><b>{{ total_data_size|octet_size }}</b></td>
     <td class="number_column"><b>{{ total_index_size|octet_size }}</b></td>
     <td class="number_column"><b>{{ total_free_size|octet_size }}</b></td>

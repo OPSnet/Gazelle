@@ -191,14 +191,18 @@ class SiteInfo extends Base {
 
     public function tableStats(string $tableName): array {
         return self::$db->rowAssoc("
-            SELECT t.table_rows,
-                t.avg_row_length,
-                t.data_length,
-                t.index_length,
-                t.data_free
+            SELECT t.TABLE_ROWS,
+                t.AVG_ROW_LENGTH,
+                t.DATA_LENGTH,
+                t.INDEX_LENGTH,
+                t.DATA_FREE,
+                ts.ROWS_READ,
+                ts.ROWS_CHANGED,
+                ts.ROWS_CHANGED_X_INDEXES
             FROM information_schema.tables t
-            WHERE t.table_schema = ?
-                AND t.table_name = ?
+            INNER JOIN information_schema.table_statistics ts USING (TABLE_SCHEMA, TABLE_NAME)
+            WHERE t.TABLE_SCHEMA = ?
+                AND t.TABLE_NAME = ?
             ", SQLDB, $tableName
         );
     }

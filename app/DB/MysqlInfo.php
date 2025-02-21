@@ -35,17 +35,20 @@ class MysqlInfo extends \Gazelle\Base {
 
         self::$db->prepared_query("
             SELECT $tableColumn AS table_name,
-                ENGINE AS engine,
-                sum(TABLE_ROWS) AS table_rows,
-                avg(AVG_ROW_LENGTH) AS avg_row_length,
-                sum(DATA_LENGTH) AS data_length,
-                sum(INDEX_LENGTH) AS index_length,
-                sum(INDEX_LENGTH + DATA_LENGTH) AS total_length,
-                sum(DATA_FREE) AS data_free,
-                CASE WHEN sum(DATA_LENGTH) = 0 THEN 0 ELSE sum(DATA_FREE) / sum(DATA_LENGTH) END as free_ratio
-            FROM information_schema.tables
+                t.ENGINE AS engine,
+                t.ROW_FORMAT AS row_format,
+                sum(t.TABLE_ROWS) AS table_rows,
+                coalesce(sum(ts.ROWS_READ), 0) AS rows_read,
+                avg(t.AVG_ROW_LENGTH) AS avg_row_length,
+                sum(t.DATA_LENGTH) AS data_length,
+                sum(t.INDEX_LENGTH) AS index_length,
+                sum(t.INDEX_LENGTH + t.DATA_LENGTH) AS total_length,
+                sum(t.DATA_FREE) AS data_free,
+                CASE WHEN sum(t.DATA_LENGTH) = 0 THEN 0 ELSE sum(t.DATA_FREE) / sum(t.DATA_LENGTH) END as free_ratio
+            FROM information_schema.tables t
+            LEFT JOIN information_schema.table_statistics ts USING (table_schema, table_name)
             WHERE table_schema = ? $where
-            GROUP BY $tableColumn, engine
+            GROUP BY $tableColumn, engine, row_format
             ORDER BY {$this->orderBy->value} {$this->direction->value}
             ", SQLDB
         );
@@ -58,6 +61,8 @@ class MysqlInfo extends \Gazelle\Base {
                 => ['dbColumn' => MysqlInfoOrderBy::tableName->value,    'defaultSort' => 'asc',  'text' => 'Free Size',  'alt' => 'table name'],
             MysqlInfoOrderBy::tableRows->value
                 => ['dbColumn' => MysqlInfoOrderBy::tableRows->value,    'defaultSort' => 'desc', 'text' => 'Rows',       'alt' => 'total rows'],
+            MysqlInfoOrderBy::rowsRead->value
+                => ['dbColumn' => MysqlInfoOrderBy::rowsRead->value,     'defaultSort' => 'desc', 'text' => 'Rows read',   'alt' => 'rows read'],
             MysqlInfoOrderBy::dataLength->value
                 => ['dbColumn' => MysqlInfoOrderBy::dataLength->value,   'defaultSort' => 'desc', 'text' => 'Data Size',  'alt' => 'table size'],
             MysqlInfoOrderBy::indexLength->value
@@ -81,6 +86,7 @@ class MysqlInfo extends \Gazelle\Base {
         return match ($columnName) {
             default                               => MysqlInfoOrderBy::tableName,
             MysqlInfoOrderBy::tableRows->value    => MysqlInfoOrderBy::tableRows,
+            MysqlInfoOrderBy::rowsRead->value     => MysqlInfoOrderBy::rowsRead,
             MysqlInfoOrderBy::dataLength->value   => MysqlInfoOrderBy::dataLength,
             MysqlInfoOrderBy::indexLength->value  => MysqlInfoOrderBy::indexLength,
             MysqlInfoOrderBy::totalLength->value  => MysqlInfoOrderBy::totalLength,
