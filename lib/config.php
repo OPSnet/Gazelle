@@ -400,6 +400,17 @@ defined('COUNTRY_STEP') or define('COUNTRY_STEP', 10);
 // to require a change will be listed in the example override files.
 // When in doubt, read the source.
 
+// Lowest visible userclass (there banished users below this of which we
+// shall not speak). These userclass levels must match the values in the
+// permissions table.
+defined('CLASSLEVEL_USER') or define('CLASSLEVEL_USER', 100);
+
+// The userclass level of the Member class (one up from User).
+defined('CLASSLEVEL_MEMBER') or define('CLASSLEVEL_MEMBER', 150);
+
+// The lowest userclass level of all staff classes.
+defined('CLASSLEVEL_STAFF') or define('CLASSLEVEL_STAFF', 800);
+
 // Display the site logo on the public pages.
 defined('SHOW_LOGO') or define('SHOW_LOGO', true);
 
@@ -507,7 +518,7 @@ defined('DONOR_INVITES') or define('DONOR_INVITES', 2);
 defined('DONOR_RANK_PRICE') or define('DONOR_RANK_PRICE', 10);
 
 // Minimum permission.Level allowed to purchase invites.
-defined('MIN_INVITE_CLASS') or define('MIN_INVITE_CLASS', 150);
+defined('MIN_INVITE_CLASS') or define('MIN_INVITE_CLASS', CLASSLEVEL_MEMBER);
 
 // Lowest permissions.Level of staff user classes
 defined('STAFF_LEVEL') or define('STAFF_LEVEL', 820);

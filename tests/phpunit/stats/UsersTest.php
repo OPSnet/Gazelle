@@ -26,12 +26,12 @@ class UsersTest extends TestCase {
         $stats = new Stats\Users();
 
         /* not easy to test precise results, but at least the SQL can be exercised */
-        $this->assertIsArray($stats->browserDistribution(), 'users-stats-browser');
-        $this->assertIsArray($stats->browserDistributionList(), 'users-stats-browser-list');
-        $this->assertIsArray($stats->userclassDistribution(), 'users-stats-userclass');
-        $this->assertIsArray($stats->userclassDistributionList(), 'users-stats-userclass-list');
-        $this->assertIsArray($stats->platformDistribution(), 'users-stats-platform');
-        $this->assertIsArray($stats->platformDistributionList(), 'users-stats-platform-list');
+        $this->assertIsArray($stats->browserDistribution(true), 'users-stats-browser');
+        $this->assertIsArray($stats->browserDistributionList(true), 'users-stats-browser-list');
+        $this->assertIsArray($stats->userclassDistribution(true), 'users-stats-userclass');
+        $this->assertIsArray($stats->userclassDistributionList(true), 'users-stats-userclass-list');
+        $this->assertIsArray($stats->platformDistribution(true), 'users-stats-platform');
+        $this->assertIsArray($stats->platformDistributionList(true), 'users-stats-platform-list');
         $this->assertIsArray($stats->browserList(), 'user-stats-browser');
         $this->assertIsArray($stats->operatingSystemList(), 'user-stats-os');
 

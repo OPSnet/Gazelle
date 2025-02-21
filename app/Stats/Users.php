@@ -5,10 +5,10 @@ namespace Gazelle\Stats;
 use Gazelle\Enum\UserStatus;
 
 class Users extends \Gazelle\Base {
-    protected const USER_BROWSER  = 'stat_u_browser';
-    protected const USER_CLASS    = 'stat_u_class';
+    protected const USER_BROWSER  = 'stat_u2_browser';
+    protected const USER_CLASS    = 'stat_u2_class';
     protected const USER_GEODIST  = 'stat_u_geodist';
-    protected const USER_PLATFORM = 'stat_u_platform';
+    protected const USER_PLATFORM = 'stat_u2_platform';
     protected const FLOW          = 'stat_u_flow';
 
     protected array $info;
@@ -95,11 +95,11 @@ class Users extends \Gazelle\Base {
     /**
      * Users aggregated by browser
      */
-    public function browserDistributionList(): array {
+    public function browserDistributionList(bool $viewAll): array {
         $dist = self::$cache->get_value(self::USER_BROWSER);
         if ($dist === false) {
             self::$db->prepared_query("
-                SELECT Browser AS label,
+                SELECT coalesce(Browser, 'unreported') AS label,
                     count(*) AS total
                 FROM users_sessions
                 GROUP BY label
@@ -108,59 +108,99 @@ class Users extends \Gazelle\Base {
             $dist = self::$db->to_pair('label', 'total', false);
             self::$cache->cache_value(self::USER_BROWSER, $dist, 86400);
         }
-        return $dist;
+        $result = [];
+        // Users see up to the 10 most popular browsers with totals rounded up
+        // to the nearest 10. Staff see everything.
+        foreach ($dist as $label => $total) {
+            if ($viewAll) {
+                $result[$label] = $total;
+            } elseif ($label === 'staff-browser') {
+                continue;
+            } elseif ($total > 10) {
+                $result[$label] = (int)(ceil($total / 10) * 10);
+                if (count($result) >= 10) {
+                    break;
+                }
+            }
+        }
+        return $result;
     }
 
-    public function browserDistribution(): array {
-        return $this->reformatDist($this->browserDistributionList());
+    public function browserDistribution($viewAll): array {
+        return $this->reformatDist($this->browserDistributionList($viewAll));
     }
 
     /**
      * Users aggregated by primary class
      */
-    public function userclassDistributionList(): array {
+    public function userclassDistributionList(bool $viewAll): array {
         $dist = self::$cache->get_value(self::USER_CLASS);
         if ($dist === false) {
             self::$db->prepared_query("
                 SELECT p.Name AS label,
-                    count(*)  AS total
-                FROM users_main AS um
-                INNER JOIN permissions AS p ON (um.PermissionID = p.ID)
-                WHERE um.Enabled = '1'
-                GROUP BY label
+                    p.Level AS level,
+                    count(um.ID) AS total
+                FROM permissions p
+                LEFT JOIN users_main um ON (um.PermissionID = p.ID)
+                WHERE p.Secondary = 0
+                    AND (um.ID IS NULL OR um.Enabled = ?)
+                GROUP BY p.Name, p.Level
                 ORDER BY p.Level
-            ");
-            $dist = self::$db->to_pair('label', 'total', false);
+                ", UserStatus::enabled->value
+            );
+            $dist = self::$db->to_array(false, MYSQLI_ASSOC, false);
             self::$cache->cache_value(self::USER_CLASS, $dist, 86400);
         }
-        return $dist;
+        $result = [];
+        // Users only see non-staff userclasses (the staff classes can be
+        // worked out by consulting the Staff roster page in any event).
+        // Staff see all userclasses.
+        foreach ($dist as $d) {
+            if (
+                $viewAll
+                || ($d['level'] >= CLASSLEVEL_USER && $d['level'] < CLASSLEVEL_STAFF)
+            ) {
+                $result[$d['label']] = $d['total'];
+            }
+        }
+        return $result;
     }
 
-    public function userclassDistribution(): array {
-        return $this->reformatDist($this->userclassDistributionList());
+    public function userclassDistribution(bool $viewAll): array {
+        return $this->reformatDist($this->userclassDistributionList($viewAll));
     }
 
     /**
      * Users aggregated by OS platform
      */
-    public function platformDistributionList(): array {
+    public function platformDistributionList(bool $viewAll): array {
         $dist = self::$cache->get_value(self::USER_PLATFORM);
         if ($dist === false) {
             self::$db->prepared_query("
-                SELECT OperatingSystem AS label,
+                SELECT coalesce(OperatingSystem, 'unreported') AS label,
                     count(*) AS total
                 FROM users_sessions
                 GROUP BY label
                 ORDER BY total DESC
             ");
-            $dist = self::$db->to_pair('label', 'total', false);
+            $dist = self::$db->to_array(false, MYSQLI_ASSOC, false);
             self::$cache->cache_value(self::USER_PLATFORM, $dist, 86400);
         }
-        return $dist;
+        $result = [];
+        // Users see up to the 10 most popular platforms with totals rounded up
+        // to the nearest 10. Staff see everything.
+        foreach ($dist as $d) {
+            if ($viewAll) {
+                $result[$d['label']] = $d['total'];
+            } elseif ($d['total'] > 10) {
+                $result[$d['label']] = (int)(ceil($d['total'] / 10) * 10);
+            }
+        }
+        return $result;
     }
 
-    public function platformDistribution(): array {
-        return $this->reformatDist($this->platformDistributionList());
+    public function platformDistribution(bool $viewAll): array {
+        return $this->reformatDist($this->platformDistributionList($viewAll));
     }
 
     /**
@@ -278,8 +318,9 @@ class Users extends \Gazelle\Base {
             $total = self::$cache->get_value('stats_user_count');
             if ($total === false) {
                 $total = (int)self::$db->scalar("
-                    SELECT count(*) FROM users_main WHERE Enabled = '1'
-                ");
+                    SELECT count(*) FROM users_main WHERE Enabled = ?
+                    ", UserStatus::enabled->value
+                );
                 self::$cache->cache_value('stats_user_count', $total, 7200);
             }
             $this->info['enabled'] = $total;
@@ -313,9 +354,11 @@ class Users extends \Gazelle\Base {
                             sum(ula.last_access > now() - INTERVAL 1 MONTH) AS active_month
                         FROM users_main um
                         INNER JOIN user_last_access AS ula ON (ula.user_id = um.ID)
-                        WHERE um.Enabled = '1'
+                        WHERE um.Enabled = ?
                             AND ula.last_access > now() - INTERVAL 1 MONTH
-                    ") ?? ['active_day' => 0, 'active_week' => 0, 'active_month' => 0]
+                        ", UserStatus::enabled->value
+                    )
+                    ?? ['active_day' => 0, 'active_week' => 0, 'active_month' => 0]
                 );
                 self::$cache->cache_value('stats_user_active', $active, 7200 + random_int(0, 300));
             }

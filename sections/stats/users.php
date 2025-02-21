@@ -6,9 +6,9 @@ $flow      = $statsUser->flow();
 
 echo $Twig->render('stats/user.twig', [
     'distribution' => [
-        'browser'  => $statsUser->browserDistribution(),
-        'class'    => $statsUser->userclassDistribution(),
-        'platform' => $statsUser->platformDistribution(),
+        'browser'  => $statsUser->browserDistribution($Viewer->permitted('users_mod')),
+        'class'    => $statsUser->userclassDistribution($Viewer->permitted('users_mod')),
+        'platform' => $statsUser->platformDistribution($Viewer->permitted('users_mod')),
     ],
     'flow' => [
         'month' => array_keys($flow),

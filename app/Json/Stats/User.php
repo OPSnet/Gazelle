@@ -4,15 +4,16 @@ namespace Gazelle\Json\Stats;
 
 class User extends \Gazelle\Json {
     public function __construct(
-        protected \Gazelle\Stats\Users $stat
+        protected \Gazelle\Stats\Users $stat,
+        protected \Gazelle\User $viewer,
     ) {}
 
     public function payload(): array {
         return [
             'flow'      => $this->stat->flow(),
-            'classes'   => $this->stat->userclassDistributionList(),
-            'platforms' => $this->stat->platformDistributionList(),
-            'browsers'  => $this->stat->browserDistributionList(),
+            'browsers'  => $this->stat->browserDistributionList($this->viewer->permitted('users_mod')),
+            'classes'   => $this->stat->userclassDistributionList($this->viewer->permitted('users_mod')),
+            'platforms' => $this->stat->platformDistributionList($this->viewer->permitted('users_mod')),
         ];
     }
 }
