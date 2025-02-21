@@ -27,9 +27,10 @@ class View {
             ]);
         }
 
+        $staffPmManager = new Gazelle\Manager\StaffPM();
         $activity = new Gazelle\User\Activity($Viewer);
         $activity->configure()
-            ->setStaffPM(new Gazelle\Manager\StaffPM());
+            ->setStaffPM($staffPmManager);
 
         $notifier  = new Gazelle\User\Notification($Viewer);
         $module    = $Viewer->requestContext()->module();
@@ -89,21 +90,34 @@ class View {
             $extraClass = [];
             if ($Key === 'inbox') {
                 $Target = 'inbox.php';
+                if ((new \Gazelle\User\Inbox($Viewer))->unreadTotal()) {
+                    $extraClass[] = 'new-subscriptions';
+                }
             } elseif ($Key === 'subscriptions') {
-                if (isset($alertList['Subscription'])) {
+                if (
+                    isset($alertList['Subscription'])
+                    && (new \Gazelle\User\Subscription($Viewer))->unread()
+                ) {
                     $extraClass[] = 'new-subscriptions';
                 }
                 if (self::add_active($PageID, ['userhistory', 'subscriptions'])) {
                     $extraClass[] = 'active';
                 }
             } elseif ($Key === 'staffinbox') {
-                if ($activity->showStaffInbox()) {
+                if (
+                    $activity->showStaffInbox()
+                    && $staffPmManager->countByStatus($Viewer, ['Unanswered'])
+                ) {
                     $extraClass[] = 'new-subscriptions';
                 }
                 if (self::add_active($PageID, $testList)) {
                     $extraClass[] = 'active';
                 }
-            } elseif ($TestUser && $Viewer->id() != ($_REQUEST['userid'] ?? 0) && self::add_active($PageID, $testList)) {
+            } elseif (
+                $TestUser
+                && $Viewer->id() != ($_REQUEST['userid'] ?? 0)
+                && self::add_active($PageID, $testList)
+            ) {
                 $extraClass[] = 'active';
             }
             $navLinks[] = "<li id=\"nav_{$Key}\""
