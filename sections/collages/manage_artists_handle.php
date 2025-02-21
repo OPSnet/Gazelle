@@ -19,10 +19,10 @@ if (!$collage->isArtist()) {
     error(403);
 }
 
-if ($_POST['submit'] === 'Remove') {
-    $collage->removeEntry($artist);
-} elseif (isset($_POST['drag_drop_collage_sort_order'])) {
+if (isset($_POST['drag_drop_collage_sort_order'])) {
     $collage->updateSequence($_POST['drag_drop_collage_sort_order']);
+} elseif ($_POST['submit'] === 'Remove') {
+    $collage->removeEntry($artist);
 } else {
     $sequence = (int)$_POST['sort'];
     if (!$sequence) {

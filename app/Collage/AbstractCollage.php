@@ -172,8 +172,8 @@ abstract class AbstractCollage extends \Gazelle\Base {
     }
 
     public function updateSequence(string $series): int {
-        $series = $this->parseUrlArgs($series, 'li[]');
-        if (empty($series)) {
+        $list = $this->parseUrlArgs($series, 'li[]');
+        if (empty($list)) {
             return 0;
         }
         self::$db->prepared_query("
@@ -185,10 +185,16 @@ abstract class AbstractCollage extends \Gazelle\Base {
         );
         $userMap = self::$db->to_pair('cID', 'UserID');
         $id = $this->id;
-        $args = array_merge(...array_map(fn($sort, $entryId) => [(int)$entryId, ($sort + 1) * 10, $id, $userMap[$entryId]], array_keys($series), $series));
+        $args = array_merge(
+            ...array_map(
+                fn($sort, $entryId) => [(int)$entryId, ($sort + 1) * 10, $id, $userMap[$entryId]],
+                array_keys($list),
+                $list
+            )
+        );
         self::$db->prepared_query("
             INSERT INTO {$this->entryTable()} ({$this->entryColumn()}, Sort, CollageID, UserID)
-            VALUES " . implode(', ', array_fill(0, count($series), '(?, ?, ?, ?)')) . "
+            VALUES " . implode(', ', array_fill(0, count($list), '(?, ?, ?, ?)')) . "
             ON DUPLICATE KEY UPDATE Sort = VALUES(Sort)
             ", ...$args
         );
