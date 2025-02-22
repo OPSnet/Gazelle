@@ -10,43 +10,46 @@
 </div>
 <div class="thin pad">
 
-{% if result %}
+{% for name, value in result %}
+{%  if loop.first %}
     <div class="box pad">
         <h2>{% if flushed %}Cache flushed{% else %}Cache contents{% endif %}</h2>
         <table>
         <tr><th>Name</th><th>Value</th><tr>
-    {% for name, value in result %}
+{%  endif %}
         <tr><td style="vertical-align: top">{{ name }}</td>
-        {% if flushed %}
-            {% if multi %}
+{%  if flushed %}
+{%      if multi %}
         <td>Flushed {{ value|number_format }} key{{ value|plural }} in this namespace</td>
-            {% else %}
+{%      else %}
         <td>{{ value }}</td>
-            {% endif %}
-        {% else %}
+{%      endif %}
+{%  else %}
         <td style="overflow: scroll; max-width: 400px;">
-            {%- if value is null -%}
+{%      if value is null %}
             <tt>null</tt>
-            {%- elseif value is iterable -%}
-            {{- dump(value) -}}
-            {%- elseif value == false -%}
+{%      elseif value is iterable %}
+            <pre>{{ value|json_encode }}</pre>
+{%      elseif value == false %}
             <tt>false</tt>
-            {%- else -%}
-            {{- value -}}
-            {%- endif -%}
+{%      else %}
+            {{ value }}
+{%      endif %}
         </td>
-        {% endif %}
+{%  endif %}
         </tr>
-    {% endfor %}
-    {% if flushed %}
+{%  if loop.last %}
+{%      if flushed %}
         <tr><td colspan="2">Flush performed in
-        {%- if delta > 1 %} {{ delta|number_format(3) }} sec</td></tr>
-        {%- else %} {{ (delta*1000)|number_format(3) }} msec
-        {%- endif %}</td></tr>
-    {% endif %}
+{%-         if delta > 1 %} {{ delta|number_format(3) }} sec
+{%-         else %} {{ (delta*1000)|number_format(3) }} msec
+{%-         endif %}
+            </td></tr>
+{%      endif %}
         </table>
     </div>
-{% endif %}
+{%  endif %}
+{% endfor %}
 
     <div class="box pad">
     <h2>Inspection</h2>
@@ -70,52 +73,55 @@
         <input type="hidden" name="action" value="clear_cache" />
         <table>
             <tr>
-{% for name in constant('CACHE_NAMESPACE')|keys %}
+{%  for name in constant('CACHE_NAMESPACE')|keys %}
                 <th width="{{ 100/(constant('CACHE_NAMESPACE')|length) }}%">{{ name }}</th>
-{% endfor %}
+{%  endfor %}
             </tr>
-{% for list in constant('CACHE_NAMESPACE') %}
+            <tr>
+{%  for list in constant('CACHE_NAMESPACE') %}
                 <td style="vertical-align: top">
-    {% for field, shape in list %}
+{%      for field, shape in list %}
                     <label><input type="checkbox" name="{{ field }}" id="flush-{{ field }}" /> {{ shape|replace({'%d': '*'}) }}</label>
                     <br />
-    {% endfor %}
+{%      endfor %}
                 </td>
-{% endfor %}
+{%  endfor %}
+            </tr>
             <tr>
                 <td colspan="{{ constant('CACHE_NAMESPACE')|length }}">If you also want to flush a specfic collection (or more) that is not listed,
                 you may write it in below (e.g. <tt>artist_foo_*</tt>, space separated, in the appropriate column).</td>
             </tr>
             <tr>
-{% for name in constant('CACHE_NAMESPACE')|keys %}
+{%  for name in constant('CACHE_NAMESPACE')|keys %}
                 <td>write-in<br />
                     <textarea cols="{{ 90/(constant('CACHE_NAMESPACE')|length) }}" rows="3" name="{{ name }}-free" id="{{ name }}-free" class="inputtext"></textarea><br />
                 </td>
-{% endfor %}
+{%  endfor %}
             </tr>
             <tr>
-{% for name in constant('CACHE_NAMESPACE')|keys %}
+{%  for name in constant('CACHE_NAMESPACE')|keys %}
                 <td align="center">
-                    <input type="submit" name="flush-{{ name }}" value="Flush checked" /></span>
+                    <input type="submit" name="flush-{{ name }}" value="Flush checked" />
                 </td>
-{% endfor %}
-            </tr>
-            <tr>
-                <td colspan="{{ constant('CACHE_NAMESPACE')|length }}">
-                    <form class="delete_form" name="cache" action="" method="post">
-                        <input type="hidden" name="action" value="clear_cache" />
-                        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-                        <input type="hidden" name="global_flush" value="1" />
-
-                        <p>Full restart (all keys will be flushed!)</p>
-                        <label><input type="checkbox" field }}" id="confirm-global" /> Confirm</label>
-                        <input type="submit" value="Flush memcached" />
-                    </form>
-                </td>
+{%  endfor %}
             </tr>
         </table>
-    <form class="manage_form" name="eraser" action="">
     </form>
+    <br />
+    <table>
+        <tr>
+            <td>
+                <form class="delete_form" name="cache" action="" method="post">
+                    <input type="hidden" name="action" value="clear_cache" />
+                    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+                    <input type="hidden" name="flush-global" value="1" />
+                    <p>Full restart (all keys will be flushed!)</p>
+                    <label><input type="checkbox" name="confirm-global" value="1" /> Confirm</label>
+                    <input type="submit" value="Flush memcached" />
+                </form>
+            </td>
+        </tr>
+    </table>
     </div>
 {% endif %}
 </div>

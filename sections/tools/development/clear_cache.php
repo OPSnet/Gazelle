@@ -7,17 +7,16 @@ if (!$Viewer->permitted('admin_clear_cache')) {
     error(403);
 }
 
-$flusher = new Gazelle\Util\CacheMultiFlush();
-
-if (isset($_POST['confirm-flush']) && isset($_POST['global_flush'])) {
+$result = [];
+if (isset($_POST['confirm-global']) && isset($_POST['flush-global'])) {
     authorize();
     $Cache->flush();
+    $result['global flush'] = $Cache->getResultMessage();
 }
 
 $flushed = false;
 $multi   = false;
-$result = [];
-$begin = microtime(true);
+$begin   = microtime(true);
 if (!empty($_REQUEST['key'])) {
     $Keys = preg_split('/\s+/', trim($_REQUEST['key']));
     if ($Keys && isset($_REQUEST['flush']) && isset($_REQUEST['check'])) {
@@ -37,6 +36,7 @@ if (!empty($_REQUEST['key'])) {
         }
     }
 } else {
+    $flusher = new Gazelle\Util\CacheMultiFlush();
     foreach (array_keys(CACHE_DB) as $namespace) {
         if (empty($_REQUEST["flush-$namespace"])) {
             continue;
@@ -54,7 +54,9 @@ if (!empty($_REQUEST['key'])) {
                 $shape = array_merge($shape, $freeform);
             }
         }
-        $result = [$namespace => $flusher->multiFlush($namespace, $shape)];
+        $result = [
+            $namespace => $flusher->multiFlush($namespace, $shape)
+        ];
         $flushed = true;
         $multi   = true;
     }
