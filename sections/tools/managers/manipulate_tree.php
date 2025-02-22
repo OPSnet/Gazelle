@@ -24,9 +24,13 @@ if (isset($_POST['id'])) {
         error('Please enter a comment to add to the users affected.');
     }
     $userMan = new Gazelle\Manager\User();
-    $user = $userMan->find(trim($_POST['id']));
+    $id      = trim($_POST['id']);
+    $user    = $userMan->find($id);
     if (is_null($user)) {
-        error(404);
+        error((int)$id
+            ? "No such user '{$_POST['id']}'"
+            : "No such user '{$_POST['id']}', did you mean '@{$_POST['id']}'?"
+        );
     }
 
     $message = (new Gazelle\User\InviteTree($user))
