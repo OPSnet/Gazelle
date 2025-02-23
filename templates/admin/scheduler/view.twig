@@ -1,6 +1,6 @@
-{{ header('Periodic Task Status') }}
+{{ header('Scheduler Status') }}
 <div class="header">
-    <h2>Periodic Task Status</h2>
+    <h2>Scheduler › Status</h2>
 </div>
 {% include 'admin/scheduler/links.twig' with {'can_edit': viewer.permitted('admin_periodic_task_manage')} only %}
 <table width="100%" id="tasks">

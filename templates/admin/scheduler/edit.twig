@@ -1,7 +1,7 @@
 {% from 'macro/form.twig' import checked -%}
-{{ header('Periodic Task Manager') }}
+{{ header('Scheduler Editor') }}
 <div class="header">
-    <h2>Periodic Task Manager</h2>
+<h2><a href="?action=periodic&mode=view">Scheduler</a> › Editor</h2>
 </div>
 {% include 'admin/scheduler/links.twig' with {'can_edit': true} only %}
 {% if err %}

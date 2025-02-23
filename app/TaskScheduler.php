@@ -205,7 +205,7 @@ class TaskScheduler extends Base {
         return $result;
     }
 
-    public function getRuntimeStats(int $days = 28): array {
+    public function getRuntimeStats(int $days = 90): array {
         self::$db->prepared_query("
             SELECT date_format(pth.launch_time, '%Y-%m-%d %H:00:00') AS date,
                 sum(pth.duration_ms) AS duration,
@@ -269,7 +269,7 @@ class TaskScheduler extends Base {
         ];
     }
 
-    public function getTaskRuntimeStats(int $taskId, int $days = 28): array {
+    public function getTaskRuntimeStats(int $taskId, int $days = 90): array {
         self::$db->prepared_query("
             SELECT date(pth.launch_time) AS date,
                 sum(pth.duration_ms) AS duration,
