@@ -5,7 +5,7 @@
  * If masterElem is false, toggle each box, otherwise use masterElem's status on all boxes
  * If elemSelector is false, act on all checkboxes in formElem
  */
-function toggleChecks(formElem, masterElem, elemSelector) {
+export function toggleChecks(formElem, masterElem, elemSelector) {
     elemSelector = elemSelector || 'input:checkbox';
     if (masterElem) {
         $('#' + formElem + ' ' + elemSelector).prop('checked', masterElem.checked);
@@ -63,7 +63,7 @@ var lightbox = {
     }
 };
 
-function resize(id) {
+export function resize(id) {
     var textarea = document.getElementById(id);
     if (textarea.scrollHeight > textarea.clientHeight) {
         textarea.style.height = Math.min(1000, textarea.scrollHeight + textarea.style.fontSize) + 'px';
@@ -71,7 +71,7 @@ function resize(id) {
 }
 
 //ZIP downloader stuff
-function add_selection() {
+export function add_selection() {
     var selected = $('#formats').raw().options[$('#formats').raw().selectedIndex];
     if (selected.disabled === false) {
         var listitem = document.createElement("li");
@@ -85,12 +85,12 @@ function add_selection() {
     }
 }
 
-function remove_selection(index) {
+export function remove_selection(index) {
     $('#list' + index).remove();
     $('#opt' + index).raw().disabled = '';
 }
 
-function toggle_display(selector) {
+export function toggle_display(selector) {
     let element = document.getElementById(selector);
     if (!element) {
         element = document.getElementsByClassName(selector);
@@ -238,7 +238,7 @@ function Unbookmark(type, id, newName) {
 
 /* Site wide functions */
 
-function byte_format(size, precision) {
+export function byte_format(size, precision) {
     if (precision === undefined) {
         precision = 2;
     }
@@ -287,7 +287,7 @@ function ratio_css(ratio) {
     return 'r50';
 }
 
-function ratio(dividend, divisor, color) {
+export function ratio(dividend, divisor, color) {
     if (!color) {
         color = true;
     }
@@ -308,14 +308,14 @@ function ratio(dividend, divisor, color) {
     return rat;
 }
 
-function save_message(message) {
+export function save_message(message) {
     var messageDiv = document.createElement("div");
     messageDiv.className = "save_message";
     messageDiv.innerHTML = message;
     $("#content").raw().insertBefore(messageDiv,$("#content").raw().firstChild);
 }
 
-function error_message(message) {
+export function error_message(message) {
     var messageDiv = document.createElement("div");
     messageDiv.className = "error_message";
     messageDiv.innerHTML = message;
@@ -348,7 +348,7 @@ function array_search(needle, haystack, strict) {
     return false;
 }
 
-var util = function (selector, context) {
+export var util = function (selector, context) {
     return new util.fn.init(selector, context);
 };
 
