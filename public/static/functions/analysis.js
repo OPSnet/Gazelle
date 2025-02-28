@@ -1,4 +1,6 @@
-/* allow error log rows to be bulk-toggled for faster clearing */
+/* global toggleChecks */
+
+import { toggleChecks } from "global.js";
 
 document.addEventListener('DOMContentLoaded', function () {
     $('#clear-all').click(function () {
