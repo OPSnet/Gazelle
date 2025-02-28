@@ -21,21 +21,22 @@
   },
   "license": "Unlicense",
   "devDependencies": {
-    "@eslint/js": "^9.8.0",
+    "@eslint/js": "^9.21.0",
     "@stylistic/eslint-plugin-js": "^2.4.0",
     "browser-sync": "^2.27.5",
     "browser-sync-webpack-plugin": "^2.2.2",
     "cypress": "^12.0.2",
     "cypress-terminal-report": "^5.0.2",
-    "eslint": "^9.6.0",
-    "globals": "^15.8.0",
+    "eslint": "^9.21.0",
+    "globals": "^15.15.0",
     "husky": "^8.0.1",
     "lint-staged": "^10.5.0",
     "stylelint": "^13.3.2",
     "stylelint-checkstyle-formatter": "^0.1.2",
     "stylelint-config-recommended": "^3.0.0",
     "stylelint-config-standard": "^20.0.0",
-    "stylelint-scss": "^3.16.1"
+    "stylelint-scss": "^3.16.1",
+    "vue-template-compiler": "^2.7.16"
   },
   "dependencies": {
     "cross-env": "^7.0.2",
