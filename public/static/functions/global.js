@@ -5,7 +5,7 @@
  * If masterElem is false, toggle each box, otherwise use masterElem's status on all boxes
  * If elemSelector is false, act on all checkboxes in formElem
  */
-function toggleChecks(formElem, masterElem, elemSelector) {
+export function toggleChecks(formElem, masterElem, elemSelector) {
     elemSelector = elemSelector || 'input:checkbox';
     if (masterElem) {
         $('#' + formElem + ' ' + elemSelector).prop('checked', masterElem.checked);
@@ -63,7 +63,7 @@ var lightbox = {
     }
 };
 
-function resize(id) {
+export function resize(id) {
     var textarea = document.getElementById(id);
     if (textarea.scrollHeight > textarea.clientHeight) {
         textarea.style.height = Math.min(1000, textarea.scrollHeight + textarea.style.fontSize) + 'px';
@@ -71,7 +71,7 @@ function resize(id) {
 }
 
 //ZIP downloader stuff
-function add_selection() {
+export function add_selection() {
     var selected = $('#formats').raw().options[$('#formats').raw().selectedIndex];
     if (selected.disabled === false) {
         var listitem = document.createElement("li");
@@ -85,12 +85,12 @@ function add_selection() {
     }
 }
 
-function remove_selection(index) {
+export function remove_selection(index) {
     $('#list' + index).remove();
     $('#opt' + index).raw().disabled = '';
 }
 
-function toggle_display(selector) {
+export function toggle_display(selector) {
     let element = document.getElementById(selector);
     if (!element) {
         element = document.getElementsByClassName(selector);
@@ -207,7 +207,7 @@ var ajax = {
 function Bookmark(type, id, newName) {
     var bmLinks = $('#bookmarklink_' + type + '_' + id + ', .bookmarklink_' + type + '_' + id);
     var oldName = bmLinks.html();
-    ajax.get("bookmarks.php?action=add&type=" + type + "&auth=" + document.body.dataset.auth + "&id=" + id, function() {
+    ajax.get("bookmarks.php?action=add&type=" + type + "&auth=" + authkey + "&id=" + id, function() {
         bmLinks.parent('.remove_bookmark, .add_bookmark').toggleClass('add_bookmark remove_bookmark');
         bmLinks.html(newName).attr('title', 'Remove bookmark').removeAttr('onclick').off('click').click(function() {
             Unbookmark(type, id, oldName);
@@ -218,7 +218,7 @@ function Bookmark(type, id, newName) {
 
 function Unbookmark(type, id, newName) {
     if (window.location.pathname.indexOf('bookmarks.php') != -1) {
-        ajax.get("bookmarks.php?action=remove&type=" + type + "&auth=" + document.body.dataset.auth + "&id=" + id, function() {
+        ajax.get("bookmarks.php?action=remove&type=" + type + "&auth=" + authkey + "&id=" + id, function() {
             $('#group_' + id).remove();
             $('.groupid_' + id).remove();
             $('.bookmark_' + id).remove();
@@ -226,7 +226,7 @@ function Unbookmark(type, id, newName) {
     } else {
         var bmLinks = $('#bookmarklink_' + type + '_' + id + ', .bookmarklink_' + type + '_' + id);
         var oldName = bmLinks.html();
-        ajax.get("bookmarks.php?action=remove&type=" + type + "&auth=" + document.body.dataset.auth + "&id=" + id, function() {
+        ajax.get("bookmarks.php?action=remove&type=" + type + "&auth=" + authkey + "&id=" + id, function() {
             bmLinks.parent('.remove_bookmark, .add_bookmark').toggleClass('add_bookmark remove_bookmark');
             bmLinks.html(newName).attr('title', 'Add bookmark').removeAttr('onclick').off('click').click(function() {
                 Bookmark(type, id, oldName);
@@ -238,17 +238,19 @@ function Unbookmark(type, id, newName) {
 
 /* Site wide functions */
 
-function byte_format(size, precision) {
+export function byte_format(size, precision) {
     if (precision === undefined) {
         precision = 2;
     }
-    let steps = 0;
+    var steps = 0;
     while (steps < 8 && size >= 1024) {
         steps++;
         size = size / 1024;
     }
-    let ext;
+    var ext;
     switch (steps) {
+        case 0: ext = ' B';
+                break;
         case 1: ext = ' KiB';
                 break;
         case 2: ext = ' MiB';
@@ -264,8 +266,6 @@ function byte_format(size, precision) {
         case 7: ext = ' ZiB';
                 break;
         case 8: ext = ' YiB';
-                break;
-        default: ext = ' B';
                 break;
     }
     return (size.toFixed(precision) + ext);
@@ -287,7 +287,7 @@ function ratio_css(ratio) {
     return 'r50';
 }
 
-function ratio(dividend, divisor, color) {
+export function ratio(dividend, divisor, color) {
     if (!color) {
         color = true;
     }
@@ -308,14 +308,14 @@ function ratio(dividend, divisor, color) {
     return rat;
 }
 
-function save_message(message) {
+export function save_message(message) {
     var messageDiv = document.createElement("div");
     messageDiv.className = "save_message";
     messageDiv.innerHTML = message;
     $("#content").raw().insertBefore(messageDiv,$("#content").raw().firstChild);
 }
 
-function error_message(message) {
+export function error_message(message) {
     var messageDiv = document.createElement("div");
     messageDiv.className = "error_message";
     messageDiv.innerHTML = message;
@@ -348,7 +348,7 @@ function array_search(needle, haystack, strict) {
     return false;
 }
 
-var util = function (selector, context) {
+export var util = function (selector, context) {
     return new util.fn.init(selector, context);
 };
 
@@ -370,33 +370,6 @@ function gazURL() {
     response['path'] = path;
     response['query'] = query;
     return response;
-}
-
-function showWarningMessage(content, button_cb=null) {
-    let el = document.querySelector('.warning-message');
-    if (!el) {
-        el = document.createElement('div');
-        el.classList.add('warning-message');
-
-        const button = document.createElement('button');
-        button.classList.add('warning-message-confirm');
-        button.type = 'button';
-        button.innerText = 'Ok';
-        button.addEventListener('click', () => {
-            if (button_cb) {
-                button_cb();
-            }
-            el.remove();
-        });
-
-        el.appendChild(button);
-        document.body.append(el);
-    }
-    el.prepend(content);
-}
-
-function clearWarningMessage() {
-    document.querySelector('.warning-message')?.remove();
 }
 
 $.fn.extend({
@@ -548,7 +521,7 @@ $.fn.extend({
     }
 });
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
     // autocomplete
     var url = new gazURL();
     var ARTIST_AUTOCOMPLETE_URL  = 'artist.php?action=autocomplete';
