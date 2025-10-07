@@ -86,4 +86,74 @@ class ForumSearchTest extends TestCase {
         $search->setAuthor('nobody-by-this-name!');
         $this->assertEquals(0, $search->totalHits(), 'forum-search-user-miss');
     }
+
+    public function testForumSearchJson(): void {
+        $this->category = new Manager\ForumCategory()->create('phpunit category', 10001);
+        $this->forum  = Helper::makeForum(
+            user:        $this->user,
+            sequence:    250,
+            category:    $this->category,
+            name:        'Search forum',
+            description: 'This is where it is found',
+        );
+        $title        = 'search thread ' . randomString(10);
+        $body         = 'search body ' . randomString(10);
+        $threadMan    = new Manager\ForumThread();
+        $this->thread = $threadMan->create($this->forum, $this->user, $title, $body);
+        $pm = $this->thread->addPost($this->user, randomString());
+
+        $payload = new Json\PostHistory(
+            new Search\Forum($this->user),
+            new Util\Paginator(1, 1),
+            )->payload();
+        $this->assertEqualsCanonicalizing(
+            [
+                'currentPage',
+                'pages',
+                'messages',
+            ],
+            array_keys($payload),
+            'json-posthistory-payload',
+        );
+        $this->assertCount(1, $payload['messages'], 'json-posthistory-total');
+        $this->assertEqualsCanonicalizing(
+            [
+                'currentPage',
+                'pages',
+                'messages',
+            ],
+            array_keys($payload),
+            'json-posthistory-payload',
+        );
+        $this->assertCount(1, $payload['messages'], 'json-posthistory-total');
+        $this->assertEqualsCanonicalizing(
+            [
+                "postId",
+                "topicId",
+                "threadTitle",
+                "lastPostId",
+                "lastRead",
+                "locked",
+                "sticky",
+                "addedTime",
+                "body",
+                "bbbody",
+                "editedUserId",
+                "editedUsername",
+                "editedTime",
+            ],
+            array_keys($payload['messages'][0]),
+            'json-posthistory-payload-pm-keys',
+        );
+        $this->assertEquals(
+            $this->thread->id,
+            $payload['messages'][0]['topicId'],
+            'json-posthistory-payload-pm-thread-id',
+        );
+        $this->assertEquals(
+            $pm->id,
+            $payload['messages'][0]['postId'],
+            'json-posthistory-payload-pm-post-id',
+        );
+    }
 }

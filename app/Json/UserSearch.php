@@ -6,8 +6,8 @@ class UserSearch extends \Gazelle\Json {
     public function __construct(
         protected string                  $search,
         protected \Gazelle\User           $viewer,
-        protected \Gazelle\Manager\User   $manager,
         protected \Gazelle\Util\Paginator $paginator,
+        protected \Gazelle\Manager\User   $manager = new \Gazelle\Manager\User(),
     ) {}
 
     public function payload(): array {

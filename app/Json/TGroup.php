@@ -6,7 +6,7 @@ class TGroup extends \Gazelle\Json {
     public function __construct(
         protected \Gazelle\TGroup $tgroup,
         protected \Gazelle\User $user,
-        protected \Gazelle\Manager\Torrent $torMan,
+        protected \Gazelle\Manager\Torrent $torMan = new \Gazelle\Manager\Torrent(),
     ) {}
 
     public function tgroupPayload(): array {

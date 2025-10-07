@@ -14,7 +14,7 @@ class Inbox extends \Gazelle\Json {
         protected string $folder,
         protected int $page,
         protected bool $unreadFirst,
-        protected \Gazelle\Manager\User $userMan,
+        protected \Gazelle\Manager\User $userMan = new \Gazelle\Manager\User(),
     ) {}
 
     public function setSearch(string $searchType, string $search): static {

@@ -76,6 +76,26 @@ class NewsTest extends TestCase {
         $this->assertEquals('phpunit new title', $manager->latest()['title'], 'news-thread-title');
     }
 
+    public function testJsonNews(): void {
+        $manager    = new Manager\News();
+        $title      = 'phpunit news json ' . randomString(6);
+        $this->news = $manager->create(
+            $title,
+            'phpunit news json body',
+            'phpunit news json',
+            $this->userList[0],
+            $this->forum,
+        );
+
+        $payload = new Json\News(1, 0)->payload();
+        $this->assertCount(1, $payload['items'], 'json-news-total');
+        $this->assertEquals(
+            $title,
+            $payload['items'][0][1],
+            'json-news-title',
+        );
+    }
+
     public function testNewsWitness(): void {
         $manager    = new Manager\News();
         $this->news = $manager->create(

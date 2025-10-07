@@ -109,7 +109,6 @@ class UserJsonTest extends TestCase {
         $json = new Json\UserSearch(
             substr($this->userList['admin']->username(), 0, -1),
             $this->userList['admin'],
-            new Manager\User(),
             new Util\Paginator(10, 1),
         );
         $payload = $json->payload();
@@ -135,7 +134,6 @@ class UserJsonTest extends TestCase {
         $json = new Json\UserSearch(
             substr($this->userList['admin']->username(), 0, -1),
             $this->userList['user'],
-            new Manager\User(),
             new Util\Paginator(10, 1),
         );
         $payload = $json->payload();

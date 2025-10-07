@@ -8,8 +8,8 @@ class AddLog extends \Gazelle\Json {
     public function __construct(
         protected \Gazelle\Torrent            $torrent,
         protected \Gazelle\User               $user,
-        protected \Gazelle\Manager\TorrentLog $torrentLogManager,
         protected \Gazelle\LogfileSummary     $logfileSummary,
+        protected \Gazelle\Manager\TorrentLog $torrentLogManager = new \Gazelle\Manager\TorrentLog(),
     ) {}
 
     public function payload(): array {
@@ -35,7 +35,7 @@ class AddLog extends \Gazelle\Json {
         $this->torrent->flush();
 
         return [
-            'torrentId'         => $this->torrent->id(),
+            'torrentId'         => $this->torrent->id,
             'score'             => $this->torrent->logScore(),
             'checksum'          => $this->torrent->logChecksum(),
             'logcheckerVersion' => $checkerVersion,

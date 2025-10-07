@@ -138,28 +138,13 @@ class UsersTest extends TestCase {
     }
 
     public function testAjaxTop10(): void {
-        $bogus = new Json\Top10\User(
-            'bogus',
-            10,
-            new Stats\Users(),
-            new Manager\User(),
-        );
+        $bogus = new Json\Top10\User('bogus', 10);
         $this->assertCount(0, $bogus->payload(), 'user-ajax-top10-bogus');
 
-        $all = new Json\Top10\User(
-            'all',
-            10,
-            new Stats\Users(),
-            new Manager\User(),
-        );
+        $all = new Json\Top10\User('all', 10);
         $this->assertCount(5, $all->payload(), 'user-ajax-top10-all');
 
-        $ul = new Json\Top10\User(
-            'ul',
-            10,
-            new Stats\Users(),
-            new Manager\User(),
-        );
+        $ul = new Json\Top10\User('ul', 10);
         $this->assertCount(1, $ul->payload(), 'user-ajax-top10-ul');
     }
 
@@ -183,5 +168,19 @@ class UsersTest extends TestCase {
 
         $this->assertEquals(23 + $stranded, $eco->tokenStrandedTotal(), 'utest-stats-total-disabled-stranded-tokens');
         $this->assertEquals(1 + $disabled, $eco->userDisabledTotal(), 'utest-stats-user-disabled-total');
+    }
+
+    public function testJsonUserStats(): void {
+        $this->userList[] = Helper::makeUser('stats.' . randomString(10), 'json', enable: true);
+        $this->assertEqualsCanonicalizing(
+            [
+                'flow',
+                'browsers',
+                'classes',
+                'platforms',
+            ],
+            array_keys(new Json\Stats\User($this->userList[0])->payload()),
+            'json-stats-users',
+        );
     }
 }

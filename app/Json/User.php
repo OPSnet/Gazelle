@@ -67,7 +67,7 @@ class User extends \Gazelle\Json {
             'stats' => [
                 'joinedDate'    => $user->created(),
                 'lastAccess'    => match (true) {
-                    $viewer->id() == $user->id                => $user->lastAccessRealtime(),
+                    $viewer->id == $user->id                    => $user->lastAccessRealtime(),
                     $viewer->isStaff()                          => $user->lastAccessRealtime(),
                     $user->propertyVisible($viewer, 'lastseen') => $user->lastAccess(),
                     default                                     => null,
@@ -105,7 +105,7 @@ class User extends \Gazelle\Json {
                 'donor'        => new \Gazelle\User\Donor($user)->isDonor(),
                 'warned'       => $user->isWarned(),
                 'enabled'      => $user->isEnabled(),
-                'passkey'      => ($user->id === $viewer->id() || $viewer->isStaff()) ? $user->announceKey() : null,
+                'passkey'      => ($user->id === $viewer->id || $viewer->isStaff()) ? $user->announceKey() : null,
             ],
             'community' => [
                 'posts'           => $forumPosts,

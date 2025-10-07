@@ -18,12 +18,12 @@ class Transcode extends \Gazelle\Json {
             $torrent = $result['torrent'];
             $tgroup  = $torrent->group();
             $payload[] = [
-                'torrentId'   => $torrent->id(),
-                'groupId'     => $tgroup->id(),
+                'torrentId'   => $torrent->id,
+                'groupId'     => $tgroup->id,
                 'artistInfo'  => static::artistPayload($torrent->group()),
                 'groupName'   => $tgroup->name(),
                 'groupYear'   => $tgroup->year(),
-                'downloadUrl' => "torrents.php?action=download&id={$torrent->id()}&torrent_pass={$this->announceKey}",
+                'downloadUrl' => "torrents.php?action=download&id={$torrent->id}&torrent_pass={$this->announceKey}",
                 'source'      => $torrent->location(),
                 'missingV0'   => $result['want_v0'] === 1,
                 'missing320'  => $result['want_320'] === 1,

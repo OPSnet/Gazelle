@@ -149,7 +149,9 @@ class TGroupTest extends TestCase {
             array_keys($timeline[0]),
             'tgroupe-user-timeline-section'
         );
+    }
 
+    public function testTGroupBookmark(): void {
         $bookmarker = new User\Bookmark($this->userList['user']);
         $bookmarker->create($this->tgroup);
         $page = $bookmarker->tgroupList(2, 0);
@@ -165,6 +167,18 @@ class TGroupTest extends TestCase {
             $bookmarker->tgroupTagLeaderboard(),
             'bookmark-tag-leaderboard',
         );
+        $payload = new Json\Bookmark\TGroup($bookmarker)->payload();
+        $this->assertEquals(
+            $this->tgroup->id,
+            $payload['bookmarks'][0]['id'],
+            'tgroup-json-bookmark-id',
+        );
+        $this->assertEqualsCanonicalizing(
+            $this->tgroup->torrentIdList(),
+            array_map(fn ($b) => $b['id'], $payload['bookmarks'][0]['torrents']),
+            'tgroup-json-bookmark-torrent-list',
+        );
+
         $this->assertEquals(
             1,
             $bookmarker->removeObject($this->tgroup),
@@ -353,7 +367,6 @@ class TGroupTest extends TestCase {
         $json = new Json\TGroup(
             $this->tgroup,
             $this->userList['user'],
-            new Manager\Torrent(),
         );
         ['group' => $group, 'torrents' => $torrentList] = $json->payload();
         $this->assertEquals(
@@ -368,12 +381,12 @@ class TGroupTest extends TestCase {
         $this->assertCount(3, $torrentList, 'tgroup-json-torrent-total');
         $this->assertEquals(
             ["infoHash", "id", "media", "format", "encoding", "remastered",
-             "remasterYear", "remasterTitle", "remasterRecordLabel",
-             "remasterCatalogueNumber", "scene", "hasLog", "hasCue", "logScore",
-             "logChecksum", "logCount", "ripLogIds", "fileCount", "size",
-             "seeders", "leechers", "snatched", "freeTorrent", "reported",
-             "time", "description", "fileList", "filePath", "userId",
-             "username"
+            "remasterYear", "remasterTitle", "remasterRecordLabel",
+            "remasterCatalogueNumber", "scene", "hasLog", "hasCue", "logScore",
+            "logChecksum", "logCount", "ripLogIds", "fileCount", "size",
+            "seeders", "leechers", "snatched", "freeTorrent", "freeReason",
+            "reported", "trumpable", "trumpable_reasons", "time", "description",
+            "fileList", "filePath", "userId", "username",
             ],
             array_keys($torrentList[0]),
             'tgroup-json-torrent'
@@ -382,17 +395,16 @@ class TGroupTest extends TestCase {
         $nope = new Json\TGroup(
             $this->tgroup,
             $this->userList['nope'],
-            new Manager\Torrent(),
         );
         // no infohash if not uploader
         $this->assertEquals(
-            ["id", "media", "format", "encoding", "remastered",
-             "remasterYear", "remasterTitle", "remasterRecordLabel",
-             "remasterCatalogueNumber", "scene", "hasLog", "hasCue", "logScore",
-             "logChecksum", "logCount", "ripLogIds", "fileCount", "size",
-             "seeders", "leechers", "snatched", "freeTorrent", "reported",
-             "time", "description", "fileList", "filePath", "userId",
-             "username"
+            ["id", "media", "format", "encoding", "remastered", "remasterYear",
+            "remasterTitle", "remasterRecordLabel", "remasterCatalogueNumber",
+            "scene", "hasLog", "hasCue", "logScore", "logChecksum", "logCount",
+            "ripLogIds", "fileCount", "size", "seeders", "leechers", "snatched",
+            "freeTorrent", "freeReason", "reported", "trumpable",
+            "trumpable_reasons", "time", "description", "fileList", "filePath",
+            "userId", "username"
             ],
             array_keys($nope->payload()['torrents'][0]),
             'tgroup-json-nope-torrent'

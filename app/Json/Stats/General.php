@@ -4,9 +4,9 @@ namespace Gazelle\Json\Stats;
 
 class General extends \Gazelle\Json {
     public function __construct(
-        protected \Gazelle\Stats\Request $reqStat,
-        protected \Gazelle\Stats\Torrent $torStat,
-        protected \Gazelle\Stats\Users   $userStat,
+        protected \Gazelle\Stats\Request $reqStat  = new \Gazelle\Stats\Request(),
+        protected \Gazelle\Stats\Torrent $torStat  = new \Gazelle\Stats\Torrent(),
+        protected \Gazelle\Stats\Users   $userStat = new \Gazelle\Stats\Users(),
     ) {}
 
     public function payload(): array {

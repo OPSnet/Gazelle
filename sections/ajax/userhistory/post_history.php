@@ -22,6 +22,5 @@ $forumSearch = new Search\Forum($user)
 
 echo new Json\PostHistory(
     $forumSearch,
-    new Manager\User(),
     new Util\Paginator($Viewer->postsPerPage(), (int)($_GET['page'] ?? 1))
 )->response();

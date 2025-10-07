@@ -19,10 +19,6 @@ if (empty($_GET['userid'])) {
     }
 }
 
-echo new Json\Bookmark\TGroup(
-    new User\Bookmark($user),
-    new Manager\TGroup(),
-    new Manager\Torrent()
-)
+echo new Json\Bookmark\TGroup(new User\Bookmark($user))
     ->setVersion(2)
     ->response();

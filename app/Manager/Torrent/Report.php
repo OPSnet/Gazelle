@@ -19,7 +19,7 @@ class Report extends \Gazelle\BaseManager {
     protected array $filter;
 
     public function __construct(
-        protected \Gazelle\Manager\Torrent $torMan,
+        protected \Gazelle\Manager\Torrent $torMan = new \Gazelle\Manager\Torrent(),
     ) {}
 
     public function create(

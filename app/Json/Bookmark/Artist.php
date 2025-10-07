@@ -15,7 +15,7 @@ class Artist extends \Gazelle\Json {
             INNER JOIN artists_group AS ag USING (ArtistID)
             INNER JOIN artists_alias aa ON (ag.PrimaryAlias = aa.AliasID)
             WHERE ba.UserID = ?
-            ", $this->bookmark->id()
+            ", $this->bookmark->id
         );
         return self::$db->to_array(false, MYSQLI_ASSOC);
     }

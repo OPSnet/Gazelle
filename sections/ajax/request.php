@@ -15,7 +15,6 @@ echo new Json\Request(
     $Viewer,
     new User\Bookmark($Viewer),
     new Comment\Request($request->id(), (int)($_GET['page'] ?? 1), (int)($_GET['post'] ?? 0)),
-    new Manager\User(),
 )
     ->setVersion(2)
     ->response();

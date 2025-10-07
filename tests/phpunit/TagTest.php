@@ -413,18 +413,13 @@ class TagTest extends TestCase {
         $this->assertGreaterThanOrEqual(0, count($manager->topRequestList(1)), 'tag-top10-request');
         $this->assertGreaterThanOrEqual(0, count($manager->topVotedList(1)), 'tag-top10-voted');
 
-        $ajax = new Json\Top10\Tag(
-            details: 'all',
-            limit: 10,
-            manager: $manager,
-        );
-        $payload = $ajax->payload();
+        $payload = new Json\Top10\Tag('all', 10)->payload();
         $this->assertCount(3, $payload, 'tag-top10-all-payload');
         $this->assertEquals('ut', $payload[0]['tag'], 'tag-top10-payload-ut');
         $this->assertEquals('ur', $payload[1]['tag'], 'tag-top10-payload-ur');
         $this->assertEquals('v', $payload[2]['tag'], 'tag-top10-payload-v');
 
-        $this->assertCount(0, new Json\Top10\Tag('bogus', 1, $manager)->payload(), 'tag-top10-bogus-payload');
+        $this->assertCount(0, new Json\Top10\Tag('bogus', 1)->payload(), 'tag-top10-bogus-payload');
     }
 
     public function testTagRejection(): void {

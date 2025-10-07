@@ -6,13 +6,13 @@ class TGroupList extends \Gazelle\Json {
     public function __construct(
         protected \Gazelle\User\Bookmark   $bookmark,
         protected \Gazelle\User\Snatch     $snatcher,
-        protected \Gazelle\Manager\Artist  $artistMan,
-        protected \Gazelle\Manager\TGroup  $tgMan,
-        protected \Gazelle\Manager\Torrent $torMan,
-        protected array $result,
-        protected bool  $groupResults,
-        protected int   $total,
-        protected int   $page
+        protected array                    $result,
+        protected bool                     $groupResults,
+        protected int                      $total,
+        protected int                      $page,
+        protected \Gazelle\Manager\Artist  $artistMan = new \Gazelle\Manager\Artist(),
+        protected \Gazelle\Manager\TGroup  $tgMan     = new \Gazelle\Manager\TGroup(),
+        protected \Gazelle\Manager\Torrent $torMan    = new \Gazelle\Manager\Torrent(),
     ) {}
 
     public function payload(): array {

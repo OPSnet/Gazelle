@@ -14,10 +14,6 @@ if (!in_array($limit, [10, 100, 250])) {
     json_die(['status' => 'bad limit parameter']);
 }
 
-echo new Json\Top10\Tag(
-    details: $details,
-    limit: $limit,
-    manager: new Manager\Tag(),
-)
+echo new Json\Top10\Tag($details, $limit)
     ->setVersion(2)
     ->response();

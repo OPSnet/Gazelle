@@ -4,8 +4,8 @@ namespace Gazelle\Json\Stats;
 
 class User extends \Gazelle\Json {
     public function __construct(
-        protected \Gazelle\Stats\Users $stat,
         protected \Gazelle\User $viewer,
+        protected \Gazelle\Stats\Users $stat = new \Gazelle\Stats\Users(),
     ) {}
 
     public function payload(): array {

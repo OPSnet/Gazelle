@@ -6,8 +6,8 @@ class User extends \Gazelle\Json {
     public function __construct(
         protected string                $details,
         protected int                   $limit,
-        protected \Gazelle\Stats\Users  $stats,
-        protected \Gazelle\Manager\User $userMan,
+        protected \Gazelle\Stats\Users  $stats   = new \Gazelle\Stats\Users(),
+        protected \Gazelle\Manager\User $userMan = new \Gazelle\Manager\User(),
     ) {}
 
     protected function userMetrics(array $idList): array {

@@ -16,6 +16,6 @@ if (is_null($torrent)) {
     json_error('bad parameters');
 }
 
-echo new Json\Torrent($torrent, $Viewer, new Manager\Torrent())
+echo new Json\Torrent($torrent, $Viewer)
     ->setVersion(5)
     ->response();

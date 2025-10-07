@@ -4,9 +4,9 @@ namespace Gazelle\Json;
 
 class PostHistory extends \Gazelle\Json {
     public function __construct(
-        protected \Gazelle\Search\Forum $search,
-        protected \Gazelle\Manager\User $userMan,
+        protected \Gazelle\Search\Forum   $search,
         protected \Gazelle\Util\Paginator $paginator,
+        protected \Gazelle\Manager\User   $userMan = new \Gazelle\Manager\User(),
     ) {}
 
     public function payload(): array {

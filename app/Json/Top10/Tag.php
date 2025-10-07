@@ -6,7 +6,7 @@ class Tag extends \Gazelle\Json {
     public function __construct(
         protected string               $details,
         protected int                  $limit,
-        protected \Gazelle\Manager\Tag $manager,
+        protected \Gazelle\Manager\Tag $manager = new \Gazelle\Manager\Tag(),
     ) {}
 
     public function payload(): array {

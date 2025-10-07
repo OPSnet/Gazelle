@@ -5,8 +5,8 @@ namespace Gazelle\Json\Bookmark;
 class TGroup extends \Gazelle\Json {
     public function __construct(
         protected \Gazelle\User\Bookmark   $userBookmark,
-        protected \Gazelle\Manager\TGroup  $tgMan,
-        protected \Gazelle\Manager\Torrent $torMan,
+        protected \Gazelle\Manager\TGroup  $tgMan  = new \Gazelle\Manager\TGroup(),
+        protected \Gazelle\Manager\Torrent $torMan = new \Gazelle\Manager\Torrent(),
     ) {}
 
     public function payload(): array {
@@ -24,7 +24,7 @@ class TGroup extends \Gazelle\Json {
                 }
                 $torrentList[] = [
                     'id'                      => $torrentId,
-                    'groupId'                 => $tgroup->id(),
+                    'groupId'                 => $tgroup->id,
                     'media'                   => $torrent->media(),
                     'format'                  => $torrent->format(),
                     'encoding'                => $torrent->encoding(),
@@ -48,14 +48,14 @@ class TGroup extends \Gazelle\Json {
                 ];
             }
             $list[] = [
-                'id'              => $tgroup->id(),
+                'id'              => $tgroup->id,
                 'name'            => $tgroup->name(),
                 'year'            => $tgroup->year(),
                 'recordLabel'     => $tgroup->recordLabel(),
                 'catalogueNumber' => $tgroup->catalogueNumber(),
                 'tagList'         => $tgroup->tagList(),
                 'releaseType'     => $tgroup->releaseType(),
-                'vanityHouse'     => $tgroup->isShowcase() == 1,
+                'vanityHouse'     => $tgroup->isShowcase(),
                 'image'           => $tgroup->image(),
                 'torrents'        => $torrentList,
             ];

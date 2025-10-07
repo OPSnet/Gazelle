@@ -2,21 +2,35 @@
 
 namespace Gazelle\Json;
 
+use Gazelle\Enum\TorrentFlag;
+
 class Torrent extends \Gazelle\Json {
     public function __construct(
-        protected \Gazelle\Torrent         $torrent,
-        protected \Gazelle\User            $user,
-        protected \Gazelle\Manager\Torrent $torMan,
+        protected \Gazelle\Torrent                $torrent,
+        protected \Gazelle\User                   $user,
+        protected \Gazelle\Manager\Torrent        $torMan    = new \Gazelle\Manager\Torrent(),
+        protected \Gazelle\Manager\Torrent\Report $reportMan = new \Gazelle\Manager\Torrent\Report(),
     ) {}
 
     public function torrentPayload(): array {
-        $torrent = $this->torrent;
+        $torrent   = $this->torrent;
+        $trumpList = [];
+        foreach ($torrent->reportIdList($this->user) as $reportId) {
+            $report = $this->reportMan->findById($reportId);
+            if ($report) {
+                $trumpList[] = $report->name();
+            }
+        }
+        if ($torrent->hasFlag(TorrentFlag::noLineage)) {
+            $trumpList[] = 'Missing lineage';
+        }
+
         return array_merge(
             $this->user->snatch()->isSnatched($torrent) || $torrent->uploaderId() == $this->user->id
                 ? [ 'infoHash' => $torrent->infohash() ]
                 : [],
             [
-                'id'            => $torrent->id(),
+                'id'            => $torrent->id,
                 'media'         => $torrent->media(),
                 'format'        => $torrent->format(),
                 'encoding'      => $torrent->encoding(),
@@ -39,8 +53,12 @@ class Torrent extends \Gazelle\Json {
                 'seeders'       => $torrent->seederTotal(),
                 'leechers'      => $torrent->leecherTotal(),
                 'snatched'      => $torrent->snatchTotal(),
-                'freeTorrent'   => $torrent->leechType()->value,
+                'freeTorrent'   => $torrent->isFreeleechPersonal() ? 'personal' : $torrent->leechType()->label(),
+                'freeReason'    => $torrent->leechReason()->label(),
                 'reported'      => (bool)$torrent->reportTotal($this->user),
+                'trumpable'     => $trumpList !== [],
+                'trumpable_reasons'
+                                => array_unique($trumpList),
                 'time'          => $torrent->created(),
                 'description'   => $torrent->description(),
                 'fileList'      => $torrent->fileListLegacyAPI(),

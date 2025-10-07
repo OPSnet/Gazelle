@@ -45,5 +45,4 @@ echo new Json\ForumThread(
     $Viewer,
     $paginator,
     isset($_GET['updatelastread']),
-    new Manager\User(),
 )->response();

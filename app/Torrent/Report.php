@@ -31,22 +31,24 @@ class Report extends \Gazelle\BaseObject {
 
     public function info(): array {
         return $this->info ??= self::$db->rowAssoc("
-            SELECT ReporterID  AS reporter_id,
-                ResolverID     AS resolver_id,
-                TorrentID      AS torrent_id,
-                Type           AS type,
-                ModComment     AS comment,
-                UserComment    AS reason,
-                Status         AS status,
-                ReportedTime   AS created,
-                LastChangeTime AS modified,
-                Track          AS track_list,
-                Image          AS image,
-                ExtraID        AS other_id,
-                Link           AS external_link,
-                LogMessage     AS message
-            FROM reportsv2
-            WHERE ID = ?
+            SELECT r.ReporterID  AS reporter_id,
+                r.ResolverID     AS resolver_id,
+                r.TorrentID      AS torrent_id,
+                r.Type           AS type,
+                r.ModComment     AS comment,
+                r.UserComment    AS reason,
+                r.Status         AS status,
+                r.ReportedTime   AS created,
+                r.LastChangeTime AS modified,
+                r.Track          AS track_list,
+                r.Image          AS image,
+                r.ExtraID        AS other_id,
+                r.Link           AS external_link,
+                r.LogMessage     AS message,
+                trc.name
+            FROM reportsv2 r
+            INNER JOIN torrent_report_configuration trc ON (trc.type = r.Type)
+            WHERE r.ID = ?
             ", $this->id
         );
     }
@@ -81,6 +83,10 @@ class Report extends \Gazelle\BaseObject {
 
     public function modified(): string {
         return $this->info()['modified'];
+    }
+
+    public function name(): string {
+        return $this->info()['name'];
     }
 
     public function otherIdList(): array {

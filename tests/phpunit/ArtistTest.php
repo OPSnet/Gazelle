@@ -562,15 +562,29 @@ class ArtistTest extends TestCase {
         $artist = $manager->create('phpunit.' . randomString(12));
         $this->artistIdList[] = $artist->id;
 
-        $json = (new Json\Artist(
+        $other = $manager->create('phpunit.other1.' . randomString(12));
+        $this->artistIdList[] = $other->id;
+        $artist->similar()->addSimilar($other, $this->user);
+
+        $this->tgroupList = [
+            Helper::makeTGroupMusic(
+                $this->user,
+                'phpunit json ' . randomString(10),
+                [[ARTIST_MAIN], [$artist->name()]],
+                ['metal'],
+            ),
+        ];
+        Helper::makeTorrentMusic(
+            tgroup:          $this->tgroupList[0],
+            user:            $this->user,
+            catalogueNumber: 'UA-JSON-1',
+        );
+
+        $json = new Json\Artist(
             $artist,
             $this->user,
             new User\Bookmark($this->user),
-            new Manager\Request(),
-            new Manager\TGroup(),
-            new Manager\Torrent(),
-        ));
-        $this->assertInstanceOf(Json\Artist::class, $json->setReleasesOnly(true), 'artist-json-set-releases');
+        );
         $payload = $json->payload();
         $this->assertEquals(
             ["id", "name", "notificationsEnabled", "hasBookmarked", "image",
@@ -581,11 +595,15 @@ class ArtistTest extends TestCase {
         );
         $this->assertEquals($artist->id, $payload['id'], 'artist-payload-id');
         $this->assertEquals($artist->name(), $payload['name'], 'artist-payload-name');
-        $this->assertCount(0, $payload['tags'], 'artist-payload-tags');
-        $this->assertCount(0, $payload['similarArtists'], 'artist-payload-similar-artists');
-        $this->assertCount(0, $payload['torrentgroup'], 'artist-payload-torrentgroup');
+        $this->assertCount(1, $payload['tags'], 'artist-payload-tags');
+        $this->assertCount(1, $payload['similarArtists'], 'artist-payload-similar-artists');
+        $this->assertCount(1, $payload['torrentgroup'], 'artist-payload-torrentgroup');
         $this->assertCount(0, $payload['requests'], 'artist-payload-requests');
         $this->assertIsArray($payload['statistics'], 'artist-payload-statistics');
+
+        $similar = new Json\ArtistSimilar($artist, 1)->payload();
+        $this->assertCount(1, $similar, 'artist-similar-payload-total');
+        $this->assertEquals($other->id, $similar[0]['artist_id'], 'artist-similar-payload-id');
     }
 
     public function testArtistAutocomplete(): void {

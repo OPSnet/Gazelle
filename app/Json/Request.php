@@ -8,7 +8,7 @@ class Request extends \Gazelle\Json {
         protected \Gazelle\User            $viewer,
         protected \Gazelle\User\Bookmark   $bookmark,
         protected \Gazelle\Comment\Request $commentPage,
-        protected \Gazelle\Manager\User    $userMan,
+        protected \Gazelle\Manager\User    $userMan = new \Gazelle\Manager\User(),
     ) {}
 
     public function payload(): array {

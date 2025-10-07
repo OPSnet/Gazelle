@@ -65,19 +65,20 @@ class UserTorrents extends \Gazelle\Json {
                 function ($acc, $id) {
                     $torrent = $this->torMan->findById($id);
                     if ($torrent) {
+                        $tgroup = $torrent->group();
                         $item = [
-                            'groupId' => $torrent->groupId(),
-                            'torrentId' => $torrent->id(),
-                            'name' => $torrent->group()->name(),
+                            'groupId'     => $torrent->groupId(),
+                            'torrentId'   => $torrent->id,
+                            'name'        => $tgroup->name(),
                             'torrentSize' => $torrent->size(),
                         ];
 
                         if ($torrent->group()->hasArtistRole()) {
                             // artistId and artistName are returned mostly for compatibility with RED
                             // as people should probably just use `artists` array principally.
-                            $item['artistId'] = $torrent->group()->artistRole()?->primaryId();
-                            $item['artistName'] = $torrent->group()->artistName();
-                            $item['artists'] = static::artistPayload($torrent->group());
+                            $item['artistId']   = $tgroup->artistRole()?->primaryId();
+                            $item['artistName'] = $tgroup->artistName();
+                            $item['artists']    = static::artistPayload($tgroup);
                         }
                         $acc[] = $item;
                     }

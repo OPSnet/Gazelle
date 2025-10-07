@@ -5,7 +5,7 @@ namespace Gazelle\Json;
 class PM extends \Gazelle\Json {
     public function __construct(
         protected \Gazelle\PM $pm,
-        protected \Gazelle\Manager\User $userMan,
+        protected \Gazelle\Manager\User $userMan = new \Gazelle\Manager\User(),
     ) {}
 
     public function payload(): array {
@@ -18,9 +18,9 @@ class PM extends \Gazelle\Json {
             $conversation[] = [
                 'messageId'  => $post['id'],
                 'senderId'   => $post['sender_id'],
-                'senderName' => $user[$post['sender_id']]->username(),
+                'senderName' => $user[$post['sender_id']]?->username() ?? 'System',
                 'sentDate'   => $post['sent_date'],
-                'avatar'     => $user[$post['sender_id']]->avatar(),
+                'avatar'     => $user[$post['sender_id']]?->avatar(),
                 'bbBody'     => $post['body'],
                 'body'       => \Text::full_format($post['body']),
             ];

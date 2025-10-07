@@ -10,8 +10,8 @@ class Collage extends \Gazelle\Json {
         protected \Gazelle\Collage         $collage,
         protected int                      $page,
         protected \Gazelle\User            $user,
-        protected \Gazelle\Manager\TGroup  $tgMan,
-        protected \Gazelle\Manager\Torrent $torMan,
+        protected \Gazelle\Manager\TGroup  $tgMan  = new \Gazelle\Manager\TGroup(),
+        protected \Gazelle\Manager\Torrent $torMan = new \Gazelle\Manager\Torrent(),
     ) {}
 
     public function collageArtistPayload(): array {

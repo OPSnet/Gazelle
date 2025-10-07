@@ -6,15 +6,15 @@ class Torrent extends \Gazelle\Json {
     public function __construct(
         protected \Gazelle\User\Notification\Torrent $notifier,
         protected \Gazelle\Util\Paginator            $paginator,
-        protected \Gazelle\Manager\Torrent           $torMan,
+        protected \Gazelle\Manager\Torrent           $torMan = new \Gazelle\Manager\Torrent(),
     ) {}
 
     public function torrentPayload(array $info): array {
         $torrent = $info['torrent'];
         $tgroup = $torrent->group();
         return [
-            'torrentId'       => $torrent->id(),
-            'groupId'         => $tgroup->id(),
+            'torrentId'       => $torrent->id,
+            'groupId'         => $tgroup->id,
             'groupName'       => $tgroup->name(),
             'groupCategoryId' => $tgroup->categoryId(),
             'wikiImage'       => $tgroup->image(),

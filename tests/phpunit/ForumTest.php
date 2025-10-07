@@ -368,12 +368,12 @@ class ForumTest extends TestCase {
             description: 'This is where it json',
         );
 
-        $json = (new Json\Forum(
+        $json = new Json\Forum(
             $this->forum,
             $this->userList['user'],
             1,
             1,
-        ));
+        );
         $this->assertInstanceOf(Json::class, $json, 'forum-json-class');
         $response = json_decode($json->response(), true);
         $info = $response['response'];
@@ -408,13 +408,12 @@ class ForumTest extends TestCase {
             'this is a new json thread'
         );
 
-        $json = (new Json\ForumThread(
+        $json = new Json\ForumThread(
             $thread,
             $this->userList['user'],
             new Util\Paginator(25, 1),
             true,
-            new Manager\User(),
-        ));
+        );
         $this->assertInstanceOf(Json::class, $json, 'forum-json-class');
         $response = json_decode($json->response(), true);
         $result = $response['response'];

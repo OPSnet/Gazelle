@@ -14,7 +14,5 @@ echo new Json\Collage(
     $collage,
     (int)($_GET['page'] ?? 1),
     $Viewer,
-    new Manager\TGroup(),
-    new Manager\Torrent()
 )
     ->response();

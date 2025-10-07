@@ -42,9 +42,6 @@ if ($resultTotal == 0) {
 echo new Json\TGroupList(
     new User\Bookmark($Viewer),
     $Viewer->snatch(),
-    new Manager\Artist(),
-    new Manager\TGroup(),
-    new Manager\Torrent(),
     $Results,
     $GroupResults,
     $resultTotal,

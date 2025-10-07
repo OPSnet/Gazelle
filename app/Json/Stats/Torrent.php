@@ -4,7 +4,7 @@ namespace Gazelle\Json\Stats;
 
 class Torrent extends \Gazelle\Json {
     public function __construct(
-        protected \Gazelle\Stats\Torrent $stat,
+        protected \Gazelle\Stats\Torrent $stat = new \Gazelle\Stats\Torrent(),
     ) {}
 
     public function payload(): array {

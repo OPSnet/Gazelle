@@ -11,4 +11,4 @@ if (is_null($pm)) {
 }
 $pm->markRead();
 
-echo new Json\PM($pm, new Manager\User())->response();
+echo new Json\PM($pm)->response();

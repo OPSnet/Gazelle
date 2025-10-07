@@ -531,8 +531,6 @@ class CollageTest extends TestCase {
                 $collage,
                 1,
                 $this->userList['u1'],
-                new Manager\TGroup(),
-                new Manager\Torrent(),
             )->payload();
         $this->assertEquals($collage->id, $payload['id'], 'collage-json-id');
         $this->assertEquals('Staff picks', $payload['collageCategoryName'], 'collage-json-cat-name');

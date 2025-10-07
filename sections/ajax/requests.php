@@ -5,11 +5,10 @@ declare(strict_types=1);
 
 namespace Gazelle;
 
-$userMan = new Manager\User();
 if (!isset($_GET['userid'])) {
     $user = null;
 } else {
-    $user = $userMan->findById((int)($_GET['userid'] ?? 0));
+    $user = new Manager\User()->findById((int)($_GET['userid'] ?? 0));
     if (is_null($user)) {
         json_die("failure");
     }
@@ -93,6 +92,6 @@ if (isset($_GET['year'])) {
 $paginator = new Util\Paginator(REQUESTS_PER_PAGE, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($search->total());
 
-echo new Json\Requests($search, $paginator->page(), $userMan)
+echo new Json\Requests($search, $paginator->page())
     ->setVersion(2)
     ->response();

@@ -62,4 +62,64 @@ class TGroupManagerTest extends TestCase {
         // There is at least something from our own tgroup
         $this->assertGreaterThanOrEqual(1, $manager->refreshBetterTranscode(), 'tgman-refresh-better-transcode');
     }
+
+    public function testJsonTGroupList(): void {
+        $tgroup = $this->tgroupList[0];
+        $ungrouped = new Json\TGroupList(
+                new User\Bookmark($this->user),
+                $this->user->snatch(),
+                [$tgroup->torrentIdList()[0] => $tgroup->id],
+                false,
+                2,
+                1,
+            )->payload();
+        $this->assertEqualsCanonicalizing(
+            [
+                'currentPage',
+                'pages',
+                'results',
+            ],
+            array_keys($ungrouped),
+            'json-tgroup-ungrouped-list',
+        );
+        $result = $ungrouped['results'][0];
+        $this->assertEquals(
+            $tgroup->id,
+            $result['groupId'],
+            'json-tgroup-ungrouped-id',
+        );
+        $this->assertEquals(
+            $tgroup->torrentIdList()[0],
+            $result['torrentId'],
+            'json-tgroup-ungrouped-torrentid',
+        );
+        $grouped = new Json\TGroupList(
+                new User\Bookmark($this->user),
+                $this->user->snatch(),
+                [$tgroup->torrentIdList()[0] => $tgroup->id],
+                true,
+                2,
+                1,
+            )->payload();
+        $this->assertEqualsCanonicalizing(
+            [
+                'currentPage',
+                'pages',
+                'results',
+            ],
+            array_keys($grouped),
+            'json-tgroup-grouped-list',
+        );
+        $result = $grouped['results'][0];
+        $this->assertEquals(
+            $tgroup->id,
+            $result['groupId'],
+            'json-tgroup-grouped-id'
+        );
+        $this->assertEquals(
+            $tgroup->torrentIdList()[0],
+            $result['torrents'][0]['torrentId'],
+            'json-tgroup-grouped-torrentid',
+        );
+    }
 }

@@ -20,9 +20,6 @@ if (is_null($tgroup)) {
     json_error('bad parameters');
 }
 
-echo new Json\TGroup(
-        $tgroup,
-        $Viewer,
-        new Manager\Torrent(),
-    )->setVersion(2)
+echo new Json\TGroup($tgroup, $Viewer)
+    ->setVersion(2)
     ->response();

@@ -6,7 +6,7 @@ class Requests extends \Gazelle\Json {
     public function __construct(
         protected \Gazelle\Search\Request $search,
         protected int                     $page,
-        protected \Gazelle\Manager\User   $userMan,
+        protected \Gazelle\Manager\User   $userMan = new \Gazelle\Manager\User(),
     ) {}
 
     public function payload(): array {

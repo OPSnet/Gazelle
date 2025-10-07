@@ -8,7 +8,7 @@ class ForumThread extends \Gazelle\Json {
         protected \Gazelle\User           $user,
         protected \Gazelle\Util\Paginator $paginator,
         protected bool                    $updateLastRead,
-        protected \Gazelle\Manager\User   $userMan,
+        protected \Gazelle\Manager\User   $userMan = new \Gazelle\Manager\User(),
     ) {}
 
     public function payload(): array {
@@ -34,7 +34,7 @@ class ForumThread extends \Gazelle\Json {
                     FROM forums_last_read_topics
                     WHERE UserID = ?
                         AND TopicID = ?
-                    ", $this->user->id, $thread->id()
+                    ", $this->user->id, $thread->id
                 );
                 if ($lastRead < $lastPost) {
                     self::$db->prepared_query("
@@ -42,7 +42,7 @@ class ForumThread extends \Gazelle\Json {
                                (UserID, TopicID, PostID)
                         VALUES (?,      ?,       ?)
                         ON DUPLICATE KEY UPDATE PostID = ?
-                        ", $this->user->id, $thread->id(), $lastPostId, $lastPostId
+                        ", $this->user->id, $thread->id, $lastPostId, $lastPostId
                     );
                 }
             }
@@ -120,9 +120,9 @@ class ForumThread extends \Gazelle\Json {
         }
 
         return [
-            'forumId'     => $thread->forum()->id(),
+            'forumId'     => $thread->forum()->id,
             'forumName'   => $thread->forum()->name(),
-            'threadId'    => $thread->id(),
+            'threadId'    => $thread->id,
             'threadTitle' => $thread->title(),
             'subscribed'  => $subscribed,
             'locked'      => $thread->isLocked(),

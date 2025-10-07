@@ -16,12 +16,9 @@ if (empty($_FILES) || empty($_FILES['logfiles'])) {
     json_error('no log files uploaded');
 }
 
-$manager = new Manager\TorrentLog();
-
 echo new Json\AddLog(
     $torrent,
     $Viewer,
-    $manager,
     new LogfileSummary($_FILES['logfiles'], $torrent->logfileHashList()),
 )
     ->setVersion(1)

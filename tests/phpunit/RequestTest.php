@@ -626,7 +626,6 @@ class RequestTest extends TestCase {
             $this->userList['user'],
             new User\Bookmark($this->userList['user']),
             new Comment\Request($this->request->id, 1, 0),
-            new Manager\User(),
         );
         $payload = $json->payload();
         $this->assertCount(43, $payload, 'req-json-payload');
@@ -817,6 +816,36 @@ class RequestTest extends TestCase {
                 ", "\"{$title}\""
             ),
             'request-fts-search-title'
+        );
+    }
+
+    public function testRequestJson(): void {
+        $this->request = Helper::makeRequestMusic(
+            $this->userList['admin'],
+            'phpunit json ' . randomString()
+        );
+        $payload = new Json\Requests(
+                new Search\Request(),
+                1,
+            )->payload();
+        $this->assertEqualsCanonicalizing(
+            [
+                'currentPage',
+                'pages',
+                'results',
+            ],
+            array_keys($payload),
+            'request-json-payload',
+        );
+        $this->assertGreaterThan(
+            0,
+            count($payload['results']),
+            'request-json-total',
+        );
+        $this->assertEquals(
+            $this->request->id,
+            $payload['results'][0]['requestId'],
+            'request-json-id',
         );
     }
 }

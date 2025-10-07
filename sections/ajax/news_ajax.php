@@ -12,4 +12,6 @@ if ($limit <= 0 || $offset < 0 || $limit > 10) {
     json_die('failure');
 }
 
-echo new Json\News($limit, $offset)->setVersion(2)->response();
+echo new Json\News($limit, $offset)
+    ->setVersion(2)
+    ->response();

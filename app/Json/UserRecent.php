@@ -22,7 +22,7 @@ class UserRecent extends \Gazelle\Json {
             $tgroup = $this->tgMan->findById($tgroupId);
             if ($tgroup) {
                 $detail[] = [
-                    'ID'        => $tgroup->id(),
+                    'ID'        => $tgroup->id,
                     'Name'      => $tgroup->name(),
                     'WikiImage' => $tgroup->image(),
                     'artists'   => $tgroup->artistRole()->idList(),

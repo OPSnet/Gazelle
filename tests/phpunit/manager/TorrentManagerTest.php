@@ -213,4 +213,15 @@ class TorrentManagerTest extends TestCase {
 
         $this->assertCount(24, $stats->flush()->flow(), 'torrent-stats-flow');
     }
+
+    public function testJsonTorrentStats(): void {
+        $this->assertEqualsCanonicalizing(
+            [
+                'uploads_by_month',
+                'torrents_by_category',
+            ],
+            array_keys(new Json\Stats\Torrent()->payload()),
+            'json-stats-torrent'
+        );
+    }
 }

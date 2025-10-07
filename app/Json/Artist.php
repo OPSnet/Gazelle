@@ -9,9 +9,9 @@ class Artist extends \Gazelle\Json {
         protected \Gazelle\Artist          $artist,
         protected \Gazelle\User            $user,
         protected \Gazelle\User\Bookmark   $bookmark,
-        protected \Gazelle\Manager\Request $requestMan,
-        protected \Gazelle\Manager\TGroup  $tgMan,
-        protected \Gazelle\Manager\Torrent $torMan
+        protected \Gazelle\Manager\Request $requestMan = new \Gazelle\Manager\Request(),
+        protected \Gazelle\Manager\TGroup  $tgMan      = new \Gazelle\Manager\TGroup(),
+        protected \Gazelle\Manager\Torrent $torMan     = new \Gazelle\Manager\Torrent(),
     ) {}
 
     public function setReleasesOnly(bool $releasesOnly): static {
@@ -23,12 +23,11 @@ class Artist extends \Gazelle\Json {
         $artist   = $this->artist;
         $artistId = $artist->id;
         $artist->loadArtistRole();
-        $tgroupIds = $artist->groupIds();
 
         $JsonTorrents = [];
         $Tags = [];
 
-        foreach ($tgroupIds as $tgroupId) {
+        foreach ($artist->groupIds() as $tgroupId) {
             $tgroup = $this->tgMan->findById($tgroupId);
             if (is_null($tgroup)) {
                 continue;

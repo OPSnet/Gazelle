@@ -145,6 +145,91 @@ class TorrentTest extends TestCase {
         );
     }
 
+    public function testJsonUserTorrents(): void {
+        $torrent = Helper::makeTorrentMusic(
+            tgroup: $this->torrent->group(),
+            user:   $this->user,
+            title:  randomString(10),
+        );
+
+        // downloader
+        $this->assertEquals(
+            new Download($torrent, new User\UserclassRateLimit($this->user), false)->status(),
+            Enum\DownloadStatus::ok,
+            'torrent-user-json-download-ok'
+        );
+
+        $download = new Json\UserTorrents($this->user, $this->user)
+            ->setType('downloaded')
+            ->setLimit(2)
+            ->setOffset(0)
+            ->payload();
+        $this->assertEquals(1, $download['total'], 'torrent-user-json-download-total');
+        $this->assertEquals(
+            $torrent->groupId(),
+            $download['downloaded'][0]['groupId'],
+            'torrent-user-json-download-id',
+        );
+
+        // uploader
+        $upload = new Json\UserTorrents($this->user, $this->user)
+            ->setType('uploaded')
+            ->setLimit(2)
+            ->setOffset(0)
+            ->payload();
+        $this->assertEquals(2, $upload['total'], 'torrent-user-json-upload-total');
+        $this->assertEquals(
+            $torrent->groupId(),
+            $upload['uploaded'][0]['groupId'],
+            'torrent-user-json-upload-id',
+        );
+
+        // uploader-unseeded
+        $upUnseed = new Json\UserTorrents($this->user, $this->user)
+            ->setType('uploaded-unseeded')
+            ->setLimit(2)
+            ->setOffset(0)
+            ->payload();
+        $this->assertEquals(2, $upUnseed['total'], 'torrent-user-json-up-unseed-total');
+        $this->assertEquals(
+            $torrent->groupId(),
+            $upUnseed['uploaded-unseeded'][0]['groupId'],
+            'torrent-user-json-up-uneed-id',
+        );
+
+        // leecher
+        $leech = new Json\UserTorrents($this->user, $this->user)
+            ->setType('leeching')
+            ->setLimit(2)
+            ->setOffset(0)
+            ->payload();
+        $this->assertEquals(0, $leech['total'], 'torrent-user-json-leech-total');
+
+        // snatcher
+        $snatch = new Json\UserTorrents($this->user, $this->user)
+            ->setType('snatched')
+            ->setLimit(2)
+            ->setOffset(0)
+            ->payload();
+        $this->assertEquals(0, $snatch['total'], 'torrent-user-json-snatch-total');
+
+        // snatched-unseeded
+        $snatchUnseed = new Json\UserTorrents($this->user, $this->user)
+            ->setType('snatched-unseeded')
+            ->setLimit(2)
+            ->setOffset(0)
+            ->payload();
+        $this->assertEquals(0, $snatchUnseed['total'], 'torrent-user-json-snatch-unseed-total');
+
+        // seeder
+        $seed = new Json\UserTorrents($this->user, $this->user)
+            ->setType('seeding')
+            ->setLimit(2)
+            ->setOffset(0)
+            ->payload();
+        $this->assertEquals(0, $seed['total'], 'torrent-user-json-seed-total');
+    }
+
     public function testRemovalPm(): void {
         $torrent = Helper::makeTorrentMusic(
             tgroup: $this->torrent->group(),

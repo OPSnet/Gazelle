@@ -180,14 +180,132 @@ class InboxTest extends TestCase {
             'inbox-mass-remove'
         );
         $this->assertEquals(3, $receiverInbox->messageTotal(), 'inbox-after-remove');
+    }
 
-        $json = new Json\Inbox($receiverInbox->user(), 'inbox', 1, true, $userMan);
-        $payload = $json->payload();
-        $this->assertCount(3, $payload, 'inbox-json-payload');
-        $this->assertEquals(1, $payload['currentPage'], 'inbox-json-current-page');
-        $this->assertEquals(1, $payload['pages'], 'inbox-json-pages');
-        $this->assertCount(3, $payload['messages'], 'inbox-json-message-list');
-        $this->assertEquals($convList[2], $payload['messages'][0]['convId'], 'inbox-json-first-message-id');
+    public function testJsonInbox(): void {
+        $this->userList = [
+            Helper::makeUser('inbox.json.' . randomString(6), 'inbox'),
+            Helper::makeUser('inbox.json.' . randomString(6), 'inbox'),
+        ];
+        $body = 'body ' . randomString();
+        $pm = $this->userList[0]->inbox()->create(
+            $this->userList[1],
+            'testJsonInbox',
+            $body,
+        );
+
+        $inbox = new Json\Inbox(
+                $this->userList[0],
+                'inbox',
+                1,
+                true,
+            )->payload();
+        $this->assertEqualsCanonicalizing(
+            [
+                "currentPage",
+                "pages",
+                "messages",
+            ],
+            array_keys($inbox),
+            'json-inbox-receiver-payload'
+        );
+        $this->assertEqualsCanonicalizing(
+            [
+                "convId",
+                "subject",
+                "unread",
+                "sticky",
+                "forwardedId",
+                "forwardedName",
+                "senderId",
+                "username",
+                "avatar",
+                "warned",
+                "enabled",
+                "donor",
+                "date",
+            ],
+            array_keys($inbox['messages'][0]),
+            'json-inbox-receiver-list',
+        );
+        $this->assertEquals(
+            $pm->id,
+            $inbox['messages'][0]['convId'],
+            'json-inbox-receiver-pm'
+        );
+
+        $sentbox = new Json\Inbox(
+                $this->userList[1],
+                'sentbox',
+                1,
+                true,
+            )->payload();
+        $this->assertEquals(
+            $pm->id,
+            $sentbox['messages'][0]['convId'],
+            'json-inbox-receiver-pm'
+        );
+
+        $byMessage = new Json\Inbox(
+                $this->userList[0],
+                'inbox',
+                1,
+                true,
+            )
+            ->setSearch('message', $body)
+            ->payload();
+        $this->assertCount(1, $byMessage['messages'], 'json-inbox-search-message');
+
+        $bySubject = new Json\Inbox(
+                $this->userList[0],
+                'inbox',
+                1,
+                true,
+            )
+            ->setSearch('subject', 'not found ' . randomString(10))
+            ->payload();
+        $this->assertCount(0, $bySubject['messages'], 'json-inbox-search-subject');
+
+        $byUser = new Json\Inbox(
+                $this->userList[0],
+                'inbox',
+                1,
+                true,
+            )
+            ->setSearch('user', 'not found ' . randomString(10))
+            ->payload();
+        $this->assertCount(0, $byUser['messages'], 'json-inbox-search-user');
+    }
+
+    public function testJsonPM(): void {
+        $this->userList = [
+            Helper::makeUser('inbox.json.' . randomString(6), 'inbox'),
+        ];
+        $pm = $this->userList[0]->inbox()->createSystem('system', 'body');
+        $payload = new Json\PM($pm)->payload();
+        $this->assertEqualsCanonicalizing(
+            [
+                'convId',
+                'subject',
+                'sticky',
+                'messages',
+            ],
+            array_keys($payload),
+            'pm-json-payload-keys',
+        );
+        $this->assertEqualsCanonicalizing(
+            [
+                'messageId',
+                'senderId',
+                'senderName',
+                'sentDate',
+                'avatar',
+                'bbBody',
+                'body',
+            ],
+            array_keys($payload['messages'][0]),
+            'pm-json-payload-conversation',
+        );
     }
 
     public function testSystem(): void {
