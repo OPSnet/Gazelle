@@ -105,7 +105,7 @@
         artistName = document.querySelectorAll('h2')[0].textContent;
         artistId   = window.location.search.split("?id=")[1];
         load_canvas();
-        document.getElementById('flip_to').addEventListener('click', (e) => {
+        document.getElementById('flip_to')?.addEventListener('click', (e) => {
             flipView(e);
         });
     });
