@@ -68,7 +68,7 @@ while (true) { // break early on error
             )
             : new Request\LogCue();
 
-        if (empty($_POST['artists'])) {
+        if ($_POST['artists'] === []) {
             $error = 'You did not enter any artists.';
             break;
         }
@@ -203,7 +203,7 @@ $request = new Manager\Request()->create(
     media:           $media,
     logCue:          $logCue,
     oclc:            trim($_POST['oclc'] ?? ''),
-    groupId:         $tgroup?->id(),
+    groupId:         $tgroup?->id,
 );
 if ($categoryName == 'Music') {
     $request->artistRole()->set($artistRole, $Viewer);
@@ -216,7 +216,7 @@ new Manager\Tag()->replaceTagList(
 $tgroup?->flush();
 
 if ($Viewer->option('AutoSubscribe')) {
-    new User\Subscription($Viewer)->subscribeComments('requests', $request->id());
+    new User\Subscription($Viewer)->subscribeComments('requests', $request->id);
 }
 
 Util\Irc::sendMessage(

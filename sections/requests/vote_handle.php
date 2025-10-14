@@ -21,7 +21,7 @@ if (is_null($request)) {
 } else {
     $result = [
         'bounty' => $request->bountyTotal(),
-        'id'     => $request->id(),
+        'id'     => $request->id,
         'status' => 'success',
         'total'  => $request->userVotedTotal(),
     ];

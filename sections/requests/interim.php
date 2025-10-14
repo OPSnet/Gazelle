@@ -14,13 +14,13 @@ if (is_null($request)) {
 $action = $_GET['action'] ?? '';
 switch ($action) {
     case 'delete':
-        if ($Viewer->id() != $request->userId() && !$Viewer->permitted('site_moderate_requests')) {
-            Error403::error();
+        if ($Viewer->id !== $request->userId() && !$Viewer->permitted('site_moderate_requests')) {
+            Error403::error("You are not authorized to remove requests");
         }
         break;
     case 'unfill':
-        if (!in_array($Viewer->id(), [$request->userId(), $request->fillerId()]) && !$Viewer->permitted('site_moderate_requests')) {
-            Error403::error();
+        if (!in_array($Viewer->id, [$request->userId(), $request->fillerId()]) && !$Viewer->permitted('site_moderate_requests')) {
+            Error403::error("You are not authorized to unfill a request on behalf of someone else");
         }
         break;
     default:

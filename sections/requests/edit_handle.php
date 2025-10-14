@@ -27,7 +27,7 @@ if (!isset($_POST['type'])) {
         Error400::error('The upload category is corrupt');
     }
     $categoryId++; // array offset to id
-    if ($categoryId != $request->categoryId()) {
+    if ($categoryId !== $request->categoryId()) {
         $request->setField('CategoryID', $categoryId);
     }
 }
@@ -172,8 +172,9 @@ while (true) {
         break;
     }
 
-    if (!empty($_POST['groupid'])) {
-        $tgroupId = preg_match(TGROUP_REGEXP, trim($_POST['groupid']), $match)
+    $tgroupValue = trim($_POST['groupid'] ?? '');
+    if ($tgroupValue !== '') {
+        $tgroupId = preg_match(TGROUP_REGEXP, $tgroupValue, $match)
             ? (int)$match['id']
             : (int)$_POST['groupid'];
         if ($tgroupId > 0) {
@@ -182,15 +183,15 @@ while (true) {
                 $error = 'The torrent group, if entered, must correspond to a music torrent group on the site.';
                 break;
             }
-            if ($request->tgroupId() != $tgroup->id()) {
-                $request->setField('GroupID', $tgroup->id());
+            if ($request->tgroupId() != $tgroup->id) {
+                $request->setField('GroupID', $tgroup->id);
             }
         }
     }
 
     // final thing to check
     if ($categoryName === 'Music' && $Viewer->permittedAny('site_edit_requests', 'site_moderate_requests')) {
-        if (empty($_POST['artists'])) {
+        if ($_POST['artists'] === []) {
             $error = 'You did not enter any artists.';
             break;
         }
@@ -200,7 +201,6 @@ while (true) {
         $roleList   = array_map('intval', $_POST['importance']);
         $seen       = [];
         $main       = 0;
-        show($artistList, $_POST['importance'], $roleList);
         for ($i = 0, $il = count($artistList); $i < $il; $i++) {
             $name = trim($artistList[$i]);
             if ($name == '' || in_array($name, $seen)) {
@@ -229,7 +229,7 @@ while (true) {
     break; // all good!
 }
 
-if (!empty($error)) {
+if (isset($error)) {
     include_once 'edit.php';
     exit;
 }

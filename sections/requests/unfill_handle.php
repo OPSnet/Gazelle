@@ -14,7 +14,7 @@ if (is_null($request)) {
 if (
     $request->fillerId() === 0
     || (
-        !in_array($Viewer->id(), [$request->userId(), $request->fillerId()])
+        !in_array($Viewer->id, [$request->userId(), $request->fillerId()])
         && !$Viewer->permitted('site_moderate_requests')
     )
 ) {
