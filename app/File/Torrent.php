@@ -24,7 +24,7 @@ class Torrent extends \Gazelle\File {
      */
     public function path(): string {
         $key = strrev(sprintf('%04d', $this->id));
-        return sprintf('%s/%02d/%02d/%d.torrent',
+        return sprintf('%s/%02s/%02s/%d.torrent',
             STORAGE_PATH_TORRENT, substr($key, 0, 2), substr($key, 2, 2), $this->id
         );
     }

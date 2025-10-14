@@ -87,11 +87,10 @@ function html_unescape(string $str): string {
 /**
  * Returns ratio
  */
-function ratio(int $uploaded, int $downloaded, int $digits = 2): string|false {
+function ratio(int $uploaded, int $downloaded, int $digits = 2): string {
     return match (true) {
-        $downloaded == 0 && $uploaded == 0 => false,
         $downloaded == 0 => '∞',
-        $uploaded <= 0  => number_format(0.0, $digits),
+        $uploaded   <= 0 => number_format(0.0, $digits),
         default => number_format(
             (floor(($uploaded / $downloaded) * 10 ** $digits) / 10 ** $digits),
             $digits
@@ -147,9 +146,6 @@ function ratio_css(float $ratio): string {
  */
 function ratio_html(int $uploaded, int $downloaded, bool $wantColor = true): string {
     $ratio = ratio($uploaded, $downloaded);
-    if ($ratio === false) {
-        return '--';
-    }
     if ($ratio === '∞') {
         return $wantColor ? '<span class="tooltip r99" title="Infinite">∞</span>' : '∞';
     }

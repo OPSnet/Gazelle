@@ -115,7 +115,7 @@ class Bonus extends \Gazelle\BaseUser {
     }
 
     public function history(int $limit, int $offset): array {
-        $page = $offset / $limit;
+        $page = (int)($offset / $limit);
         $key = sprintf(self::CACHE_HISTORY, $this->user->id, $page);
         $history = self::$cache->get_value($key);
         if ($history === false) {

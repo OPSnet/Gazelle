@@ -147,8 +147,8 @@ class UtilTest extends TestCase {
     }
 
     public function testFormat(): void {
-        $this->assertFalse(ratio(0, 0),                  'format-ratio-0-0-x');
-        $this->assertFalse(ratio(0, 0, 4),               'format-ratio-0-0-4');
+        $this->assertEquals("∞",       ratio(0, 0),      'format-ratio-0-0-x');
+        $this->assertEquals("∞",       ratio(0, 0, 4),   'format-ratio-0-0-4');
         $this->assertEquals('∞',       ratio(1, 0),      'format-ratio-1-0-4');
         $this->assertEquals('∞',       ratio(1, 0, 4),   'format-ratio-1-0-x');
         $this->assertEquals('0.50',    ratio(2, 4),      'format-ratio-2-4-x');
@@ -195,11 +195,11 @@ class UtilTest extends TestCase {
         $this->assertEquals('<span class="tooltip r10" title="100%">100%</span>', ratio_percent(1), 'ratio-percent-100');
         $this->assertEquals('<span class="tooltip r20" title="200%">100%</span>', ratio_percent(2), 'ratio-percent-200');
 
-        $this->assertEquals('--', ratio_html(0, 0), 'format-html-0-0-t');
-        $this->assertEquals('--', ratio_html(0, 0, false), 'format-html-0-0-f');
+        $this->assertEquals('<span class="tooltip r99" title="Infinite">∞</span>', ratio_html(0, 0), 'format-html-0-0-t');
         $this->assertEquals('<span class="tooltip r99" title="Infinite">∞</span>', ratio_html(100, 0), 'format-html-100-0-t');
-        $this->assertEquals('∞', ratio_html(100, 0, false), 'format-html-0-0-f');
         $this->assertEquals('<span class="tooltip r07" title="0.70000">0.70</span>', ratio_html(70, 100), 'format-html-70-100-t');
+        $this->assertEquals('∞', ratio_html(0, 0, false), 'format-html-0-0-f');
+        $this->assertEquals('∞', ratio_html(100, 0, false), 'format-html-100-0-f');
         $this->assertEquals('0.70', ratio_html(70, 100, false), 'format-html-70-100-f');
 
         $this->assertEquals(0,  get_bytes('5.05a'), 'format-bytes-0');

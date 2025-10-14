@@ -314,8 +314,8 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
         ]);
 
         // We need to clear all subsequential catalogues as they've all been bumped with the absence of this post
-        $current = floor((TORRENT_COMMENTS_PER_PAGE * $commentPage - TORRENT_COMMENTS_PER_PAGE) / THREAD_CATALOGUE);
-        $last = floor((TORRENT_COMMENTS_PER_PAGE * $commentPages - TORRENT_COMMENTS_PER_PAGE) / THREAD_CATALOGUE);
+        $current = (int)floor((TORRENT_COMMENTS_PER_PAGE * $commentPage - TORRENT_COMMENTS_PER_PAGE) / THREAD_CATALOGUE);
+        $last = (int)floor((TORRENT_COMMENTS_PER_PAGE * $commentPages - TORRENT_COMMENTS_PER_PAGE) / THREAD_CATALOGUE);
         for ($i = $current; $i <= $last; ++$i) {
             self::$cache->delete_value(sprintf(\Gazelle\Manager\Comment::CATALOG, $page, $this->pageId, $i));
         }

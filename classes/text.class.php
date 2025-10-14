@@ -995,7 +995,7 @@ class Text {
                                 self::$Headlines[] = [$Block['Attr'], $raw, $id];
                             }
 
-                            $Str .= sprintf('<h%1$d id="%3$s">%2$s</h%1$d>', ($Block['Attr'] + 2), $text, $id);
+                            $Str .= sprintf('<h%1$d id="%3$s">%2$s</h%1$d>', ((int)$Block['Attr'] + 2), $text, $id);
                             self::$HeadlineID++;
                         }
                         break;
