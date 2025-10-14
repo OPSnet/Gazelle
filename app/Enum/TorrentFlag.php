@@ -21,7 +21,7 @@ enum TorrentFlag: string {
             self::trumpable   => 'Trumpable',
             self::cassette    => 'Cassette Approved',
             self::lossyMaster => 'Lossy Master Approved',
-            self::lossyWeb    => 'Lossy WEB Approved', /* @phpstan-ignore-line */
+            self::lossyWeb    => 'Lossy WEB Approved',
         };
     }
 
@@ -41,7 +41,7 @@ enum TorrentFlag: string {
             self::trumpable   => 'The torrent is trumpable for miscellaneous reasons.',
             self::cassette    => 'This is an approved cassette rip.',
             self::lossyMaster => 'This is an approved lossy master.',
-            self::lossyWeb    => 'This is an approved Lossy WEB.',  /* @phpstan-ignore-line */
+            self::lossyWeb    => 'This is an approved Lossy WEB.',
         };
     }
 
@@ -54,7 +54,7 @@ enum TorrentFlag: string {
             self::trumpable => 'reported',
             self::cassette,
             self::lossyMaster,
-            self::lossyWeb  => 'approved',  /* @phpstan-ignore-line */
+            self::lossyWeb  => 'approved',
         };
     }
 }

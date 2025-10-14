@@ -626,11 +626,13 @@ class Tag extends \Gazelle\BaseManager {
         foreach ($Tags['include'] as &$Tag) {
             $Tag = \Sphinxql::sph_escape_string($Tag);
         }
+        unset($Tag);
 
         if (!empty($Tags['exclude'])) {
             foreach ($Tags['exclude'] as &$Tag) {
                 $Tag = '!' . \Sphinxql::sph_escape_string(substr($Tag, 1));
             }
+            unset($Tag);
         }
 
         if ($allTags) {

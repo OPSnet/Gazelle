@@ -19,7 +19,7 @@ enum AvatarSynthetic: int {
             AvatarSynthetic::retro     => 'Retro',
             AvatarSynthetic::robot1    => 'Robots 1',
             AvatarSynthetic::robot2    => 'Robots 2',
-            AvatarSynthetic::robot3    => 'Robots 3', /** @phpstan-ignore-line */
+            AvatarSynthetic::robot3    => 'Robots 3',
         };
     }
 }

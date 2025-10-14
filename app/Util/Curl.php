@@ -54,6 +54,7 @@ class Curl {
     }
 
     public function fetch(string $url): bool {
+        // @phpstan-ignore-next-line argument.type
         curl_setopt_array($this->curl, [
             CURLOPT_HEADER         => false,
             CURLOPT_HTTPHEADER     => $this->headers,
@@ -66,7 +67,7 @@ class Curl {
                 CurlMethod::GET  => CURLOPT_HTTPGET,
                 CurlMethod::HEAD => CURLOPT_NOBODY,
                 CurlMethod::POST => CURLOPT_POST,
-                CurlMethod::PUT  => CURLOPT_PUT, /** @phpstan-ignore-line */
+                CurlMethod::PUT  => CURLOPT_PUT,
             } => true,
         ]);
         $proxy = httpProxy();

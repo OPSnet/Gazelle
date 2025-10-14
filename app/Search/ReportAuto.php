@@ -33,7 +33,7 @@ class ReportAuto {
         $this->cond[] = match ($state) {
             \Gazelle\Enum\ReportAutoState::open        => 'resolved is NULL',
             \Gazelle\Enum\ReportAutoState::closed      => 'resolved is not NULL',
-            \Gazelle\Enum\ReportAutoState::in_progress => 'resolved is NULL and id_owner is not NULL', /* @phpstan-ignore-line */
+            \Gazelle\Enum\ReportAutoState::in_progress => 'resolved is NULL and id_owner is not NULL',
         };
         return $this;
     }

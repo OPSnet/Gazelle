@@ -292,7 +292,7 @@ class User extends BaseAttrObject {
                         => $viewed->avatar() ?: new User\SyntheticAvatar($this)->avatar($viewed->username()),
                     AvatarDisplay::forceSynthetic
                         => new User\SyntheticAvatar($this)->avatar($viewed->username()),
-                    AvatarDisplay::none /** @phpstan-ignore-line */
+                    AvatarDisplay::none
                         => USER_DEFAULT_AVATAR,
                 },
                 'hover' => $donor->avatarHover(),

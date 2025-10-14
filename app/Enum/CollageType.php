@@ -25,7 +25,7 @@ enum CollageType: int {
             self::personal    => 'Personal',
             self::series      => 'Series',
             self::staffPick   => 'Staff picks',
-            self::theme       => 'Theme', /** @phpstan-ignore-line */
+            self::theme       => 'Theme',
         };
     }
 }

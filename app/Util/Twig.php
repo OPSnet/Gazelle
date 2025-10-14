@@ -248,19 +248,19 @@ class Twig {
         )));
 
         $twig->addFunction(new \Twig\TwigFunction('mtime', fn ($filename) => new \Twig\Markup(
-            base_convert(filemtime(SERVER_ROOT . '/public/static/' . $filename), 10, 36),
+            base_convert((string)(filemtime(SERVER_ROOT . '/public/static/' . $filename) ?: '0'), 10, 36),
             'UTF-8'
         )));
 
         $twig->addFunction(new \Twig\TwigFunction('mtime_scss', fn ($filename) => new \Twig\Markup(
-            base_convert(filemtime(
-                SERVER_ROOT . '/sass/' . preg_replace('/\.css$/', '.scss', $filename) /** @phpstan-ignore-line */
+            base_convert((string)(filemtime(
+                SERVER_ROOT . '/sass/' . preg_replace('/\.css$/', '.scss', $filename)) ?: '0' /** @phpstan-ignore-line */
             ), 10, 36),
             'UTF-8'
         )));
 
         $twig->addFunction(new \Twig\TwigFunction('mtime_css', fn ($filename) => new \Twig\Markup(
-            base_convert(filemtime(SERVER_ROOT . '/public/static/styles/' . $filename), 10, 36),
+            base_convert((string)(filemtime(SERVER_ROOT . '/public/static/styles/' . $filename)) ?: '0', 10, 36),
             'UTF-8'
         )));
 

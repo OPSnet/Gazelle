@@ -11,21 +11,21 @@ enum FeaturedAlbumType: int {
     public function label(): string {
         return match ($this) {
             FeaturedAlbumType::AlbumOfTheMonth => 'Album of the Month',
-            FeaturedAlbumType::Showcase        => 'Showcase', /** @phpstan-ignore-line */
+            FeaturedAlbumType::Showcase        => 'Showcase',
         };
     }
 
     public function forumId(): int {
         return match ($this) {
             FeaturedAlbumType::AlbumOfTheMonth => AOTM_FORUM_ID,
-            FeaturedAlbumType::Showcase        => SHOWCASE_FORUM_ID, /** @phpstan-ignore-line */
+            FeaturedAlbumType::Showcase        => SHOWCASE_FORUM_ID,
         };
     }
 
     public function leechReason(): LeechReason {
         return match ($this) {
             FeaturedAlbumType::AlbumOfTheMonth => LeechReason::AlbumOfTheMonth,
-            FeaturedAlbumType::Showcase        => LeechReason::Showcase, /** @phpstan-ignore-line */
+            FeaturedAlbumType::Showcase        => LeechReason::Showcase,
         };
     }
 }

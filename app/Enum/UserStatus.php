@@ -13,7 +13,7 @@ enum UserStatus: string {
             UserStatus::unconfirmed => 'Unconfirmed',
             UserStatus::enabled     => 'Enabled',
             UserStatus::disabled    => 'Disabled',
-            UserStatus::banned      => 'Banned', /** @phpstan-ignore-line */
+            UserStatus::banned      => 'Banned',
         };
     }
 }

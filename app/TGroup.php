@@ -171,7 +171,7 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
                 $refresh = false;
                 if (!isset($cached['Image'])) {
                     $cached['Image'] = $this->showFallbackImage
-                        ? (STATIC_SERVER . '/common/noartwork/' . CATEGORY_ICON[$cached['CategoryID'] - 1])
+                        ? (STATIC_SERVER . '/common/noartwork/' . CATEGORY_ICON[$cached['CategoryID'] - 1])  // @phpstan-ignore offsetAccess.invalidOffset
                         : null;
                     $refresh = true;
                 }
@@ -279,7 +279,7 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
         }
         if (!$info['Image']) {
             $info['Image'] = $this->showFallbackImage
-                ? (STATIC_SERVER . '/common/noartwork/' . CATEGORY_ICON[$info['CategoryID'] - 1])
+                ? (STATIC_SERVER . '/common/noartwork/' . CATEGORY_ICON[$info['CategoryID'] - 1])  // @phpstan-ignore offsetAccess.invalidOffset
                 : null;
         }
         $info['Flags'] = [

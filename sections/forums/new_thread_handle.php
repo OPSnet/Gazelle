@@ -53,7 +53,7 @@ if (empty($_POST['question']) || empty($_POST['answers']) || !$Viewer->permitted
         if ($Answer == '') {
             continue;
         }
-        $answerList[$i + 1] = $Answer;
+        $answerList[(int)$i + 1] = $Answer;
     }
 
     if (count($answerList) < 2) {

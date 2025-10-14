@@ -15,7 +15,7 @@ enum LeechReason: string {
             LeechReason::StaffPick       => 'Staff Pick',
             LeechReason::Permanent       => 'Permanent FL',
             LeechReason::Showcase        => 'Showcase',
-            LeechReason::AlbumOfTheMonth => 'Album of the Month', /** @phpstan-ignore-line */
+            LeechReason::AlbumOfTheMonth => 'Album of the Month',
         };
     }
 }

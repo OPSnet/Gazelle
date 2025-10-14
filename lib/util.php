@@ -883,7 +883,7 @@ function image_cache_encode(
     } else {
         $spec = match ($height || $width) {
             true  => ($height ?: '') . 'x' . ($width ?: ''),
-            false => 'full', /** @phpstan-ignore-line */
+            false => 'full',
         };
     }
     return IMAGE_CACHE_HOST . "/{$bucket->value}/$spec/$sig/$encode";

@@ -11,7 +11,7 @@ enum LeechType: string {
         return match ($this) {
             LeechType::Normal  => 'Normal',
             LeechType::Neutral => 'Neutral Leech',
-            LeechType::Free    => 'Freeleech', /** @phpstan-ignore-line */
+            LeechType::Free    => 'Freeleech',
         };
     }
 }

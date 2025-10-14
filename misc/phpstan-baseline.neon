@@ -43,12 +43,6 @@ parameters:
 			path: ../app/Util/Text.php
 
 		-
-			message: '#^Parameter \#1 \$num of function base_convert expects string, int\|false given\.$#'
-			identifier: argument.type
-			count: 3
-			path: ../app/Util/Twig.php
-
-		-
 			message: '#^Parameter \#2 \$timestamp of function date expects int\|null, string\|null given\.$#'
 			identifier: argument.type
 			count: 1

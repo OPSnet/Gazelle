@@ -13,7 +13,7 @@ enum AvatarDisplay: int {
             AvatarDisplay::show              => 'show',
             AvatarDisplay::none              => 'none',
             AvatarDisplay::fallbackSynthetic => 'fallbackSynthetic',
-            AvatarDisplay::forceSynthetic    => 'forceSynthetic', /** @phpstan-ignore-line */
+            AvatarDisplay::forceSynthetic    => 'forceSynthetic',
         };
     }
 }

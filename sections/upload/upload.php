@@ -123,7 +123,7 @@ if (!isset($categoryId)) {
 }
 $uploadForm = new Upload($Viewer, $Properties, $Err);
 echo $uploadForm->head($categoryId);
-echo match (CATEGORY[$categoryId - 1]) {
+echo match (CATEGORY[(int)$categoryId - 1]) {
     'Audiobooks',       => $uploadForm->audiobook(),
     'Applications'      => $uploadForm->application(),
     'Comics'            => $uploadForm->comic(),

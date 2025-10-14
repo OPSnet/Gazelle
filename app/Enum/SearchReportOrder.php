@@ -13,7 +13,7 @@ enum SearchReportOrder: int {
             self::createdAsc   => 'created-asc',
             self::createdDesc  => 'created-desc',
             self::resolvedAsc  => 'resolved-asc',
-            self::resolvedDesc => 'resolved-desc', /** @phpstan-ignore-line */
+            self::resolvedDesc => 'resolved-desc',
         };
     }
 
@@ -22,7 +22,7 @@ enum SearchReportOrder: int {
             self::createdAsc,
             self::createdDesc => 'created',
             self::resolvedAsc,
-            self::resolvedDesc => 'resolved', /** @phpstan-ignore-line */
+            self::resolvedDesc => 'resolved',
         };
     }
 
@@ -31,7 +31,7 @@ enum SearchReportOrder: int {
             self::createdAsc,
             self::resolvedAsc => 'ASC',
             self::createdDesc,
-            self::resolvedDesc => 'DESC', /** @phpstan-ignore-line */
+            self::resolvedDesc => 'DESC',
         };
     }
 }
