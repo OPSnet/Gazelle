@@ -89,10 +89,11 @@
     <form class="fl_form" name="user" id="fl_form" action="user.php?id={{ user_id }}" method="post">
         <ul class="stats nobullet">
 {%      for item in freeleech.offer %}
+{%          set price = item.priceForTokenOther(viewer, user) %}
             <li>
-                <label class="tooltip" title="This costs {{ item.price|number_format
+                <label class="tooltip" title="This costs {{ price|number_format
                     }} BP, which will leave you with {{
-                    (viewer.bonusPointsTotal - item.price)|number_format }} afterwards">
+                    (viewer.bonusPointsTotal - price)|number_format }} afterwards">
                     <input type="radio" name="fltype" value="{{ item.label }}" />
                     {{ item.title }}
                 </label>

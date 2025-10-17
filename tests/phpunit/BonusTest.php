@@ -314,12 +314,12 @@ class BonusTest extends TestCase {
             'bonus-purchase-token-other-no-money',
         );
         $this->assertCount(0,
-            $manager->offerTokenOther($user),
+            $manager->offerTokenOther($user, $receiver),
             'bonus-offer-other-none',
         );
 
         $giver->addPoints((float)$other1->price());
-        $offer = $manager->offerTokenOther($user);
+        $offer = $manager->offerTokenOther($user, $receiver);
         $this->assertEquals('other-1', $offer[0]->label(), 'bonus-item-all-I-can-give');
 
         $this->assertEquals(
@@ -371,7 +371,7 @@ class BonusTest extends TestCase {
         $giver->addPoints((float)$other50->price() * 2);
         $this->assertCount(
             3,
-            $manager->offerTokenOther($user),
+            $manager->offerTokenOther($user, $receiver),
             'bonus-offer-other-all',
         );
 

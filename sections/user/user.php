@@ -101,7 +101,7 @@ echo $Twig->render('user/header.twig', [
     'bonus'      => $userBonus,
     'donor'      => $donor,
     'freeleech'  => [
-        'offer'  => $OwnProfile ? [] : $bonusMan->offerTokenOther($Viewer),
+        'offer'  => $OwnProfile ? [] : $bonusMan->offerTokenOther($Viewer, $user),
         'latest' => $viewerBonus->otherLatest($user),
     ],
     'friend'       => new User\Friend($Viewer),

@@ -42,7 +42,8 @@ async function validateBonusUsername() {
     if (data.status !== 'success') {
         message = status;
     } else {
-        const info = data.response;
+        const info  = data.response;
+        const price = new Intl.NumberFormat('en').format(info.price);
         if (!info.found) {
             message = '⛔️ ' + 'user not found';
         } else if (info.id == document.body.dataset.id) {
@@ -51,8 +52,10 @@ async function validateBonusUsername() {
             message = '⛔️ ' + info.username + ' is currently not enabled';
         } else if (!info.accept) {
             message = '🚫 ' + info.username + ' does not wish to receive tokens';
+        } else if (info.percent5 >= 100) {
+            message = '⛔️ you do not have enough bonus points (' + price + ' needed)';
         } else {
-            message = '✅ This will cost ' + info.price + ' bonus points';
+            message = '✅ This will cost ' + price + ' bonus points';
             if (info.percent5 > 0) {
                 message = message + ' (which is more than ' + info.percent5 + '% of your balance)';
             }

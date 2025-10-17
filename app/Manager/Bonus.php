@@ -232,11 +232,14 @@ class Bonus extends \Gazelle\Base {
     /**
      * return array<BonusItem>
      */
-    public function offerTokenOther(User $user): array {
-        $balance = $user->bonusPointsTotal();
+    public function offerTokenOther(User $giver, User $receiver): array {
+        $balance = $giver->bonusPointsTotal();
         $offer   = [];
         foreach ($this->itemList() as $item) {
-            if (str_starts_with($item->label(), 'other-') && $balance >= $item->price()) {
+            if (
+                str_starts_with($item->label(), 'other-')
+                && $balance >= $item->priceForTokenOther($giver, $receiver)
+            ) {
                 $offer[] = $item;
             }
         }
@@ -253,9 +256,13 @@ class Bonus extends \Gazelle\Base {
         if (is_null($item)) {
             return BonusItemPurchaseStatus::incomplete;
         }
+        $price = $item->priceForTokenOther($giver, $receiver);
+        if ($price === false) {
+            return BonusItemPurchaseStatus::insufficientFunds;
+        }
         return $item->purchase(
             $giver,
-            $item->price(),
+            $price,
             [
                 'message'  => $message,
                 'receiver' => $receiver,
