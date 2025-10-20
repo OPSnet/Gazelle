@@ -97,7 +97,7 @@
         </tr>
 {%  for h in history %}
         <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
-            <td>{{ h.Title }}</td>
+            <td>{{ h.title }}</td>
             <td style="text-align: right;">{{ h.Price|number_format }}</td>
             <td>{{ h.PurchaseDate|time_diff }}</td>
             <td>{% if h.OtherUserID > 0 %}{{ h.OtherUserID|user_url }}{% else %}&nbsp;{% endif %}</td>

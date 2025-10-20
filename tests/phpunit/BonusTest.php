@@ -91,7 +91,7 @@ class BonusTest extends TestCase {
         $history = $giver->history(10, 0);
         $this->assertEquals(
             '1 Freeleech Token',
-            $history[0]['Title'],
+            $history[0]['title'],
             'bonus-history-title',
         );
 
@@ -363,7 +363,7 @@ class BonusTest extends TestCase {
         );
         $latest = $giver->otherLatest($receiver);
         $this->assertEquals(
-            '50 Freeleech Tokens to Other',
+            '1 Freeleech Token to Other',
             $latest['title'],
             'bonus-item-given'
         );

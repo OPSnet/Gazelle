@@ -9,16 +9,16 @@ class Bonus extends \Gazelle\Base {
      * @return array of [title, total]
      */
     public function itemPurchase(): array {
-        self::$db->prepared_query("
-            SELECT bi.ID as id,
-                bi.Title AS title,
-                count(bh.ID) AS total
-            FROM bonus_item bi
-            LEFT JOIN bonus_history bh ON (bh.ItemID = bi.ID)
-            GROUP BY bi.Title
-            ORDER BY bi.sequence
-        ");
-        return self::$db->to_array('id', MYSQLI_ASSOC);
+        return $this->pg()->all(<<<END_SQL
+            select bi.id_bonus_item as id,
+                count(bh."ItemID")  as total,
+                bi.title
+            from bonus_item bi
+            left join relay.bonus_history bh ON (bh."ItemID" = bi.id_bonus_item)
+            group by bi.id_bonus_item
+            order by bi.sequence
+            END_SQL
+        );
     }
 
     /**
@@ -32,22 +32,23 @@ class Bonus extends \Gazelle\Base {
      * @return array of array of [title, total] aggregated over interval range
      */
     public function expenditureRange(string $interval, int $offset, int $length): array {
-        self::$db->prepared_query("
-            SELECT bi.ID AS id,
-                bi.Title AS title,
-                count(bh.ItemID) AS total
-            FROM bonus_item bi
-            LEFT JOIN bonus_history bh ON (bh.ItemID = bi.ID)
-            WHERE (
-                bh.ItemID IS NULL
-                OR
-                bh.PurchaseDate BETWEEN (now() - INTERVAL ? {$interval}) AND (now() - INTERVAL ? {$interval})
+        return $this->pg()->all(<<<END_SQL
+            select bi.id_bonus_item as id,
+                count(bh."ItemID") as total,
+                bi.title
+            from bonus_item bi
+            left join relay.bonus_history bh on (bh."ItemID" = bi.id_bonus_item)
+            where (
+                bh."ItemID" is null
+                or
+                bh."PurchaseDate" between (now() - '1 {$interval}'::interval * ?)
+                    and (now() - '1 {$interval}'::interval * ?)
             )
-            GROUP BY bi.ID
-            ORDER BY bi.sequence
-            ", ($offset + $length), $offset
+            group by bi.id_bonus_item
+            order by bi.sequence
+            END_SQL
+            , $offset + $length, $offset
         );
-        return self::$db->to_array('id', MYSQLI_ASSOC);
     }
 
     /**
