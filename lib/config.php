@@ -537,6 +537,10 @@ defined('DELETE_USER_STATS_MONTHLY_DAY') or define('DELETE_USER_STATS_MONTHLY_DA
 defined('SECURE_COOKIE') or define('SECURE_COOKIE', true);
 
 // Can freeleech (FL) tokens be stacked?
+// Note: token size is set via a site option. When the site is brought up
+// for the first time, navigate to tools.php?action=site_options and adjust
+// fl-token-size as appropriate. This may be changed at any point afterwards
+// to change the value from that point on.
 defined('STACKABLE_FREELEECH_TOKENS') or define('STACKABLE_FREELEECH_TOKENS', true);
 
 // How much upload buffer to members start out with? (3 GiB)
