@@ -69,7 +69,7 @@ class UserTorrentTest extends TestCase {
     public function testUploaded(): void {
         $search = new Search\UserTorrent($this->user, UserTorrentSearch::uploaded);
         $this->assertEquals('uploaded', $search->label(), 'search-utor-label-uploaded');
-        $this->assertEquals(
+        $this->assertEqualsCanonicalizing(
             array_map(fn ($t) => $t->id, $this->torrentList),
             $search->idList(),
             'search-utor-list-uploaded'

@@ -95,6 +95,11 @@ class Upload extends \Gazelle\Base {
                 $this->cond[] = "(" . implode(' OR ', [...["unf.Artists = ''"], ...array_fill(0, count($all), "unf.Artists LIKE concat('%|', ?, '|%')")]) . ")";
                 $this->args = array_merge($this->args, $all);
             }
+        } else {
+            // Most users are not fans of boolean logic and expect notifications for artists to only match torrents that
+            // can actually have an artist. Do them a favour, unless they have explicitly selected the category.
+            $this->cond[] = "(unf.Artists = '' OR unf.Categories LIKE concat('%|', ?, '|%'))";
+            $this->args[] = $tgroup->categoryName();
         }
 
         // exclude VA (compilations)
