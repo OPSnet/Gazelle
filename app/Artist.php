@@ -932,7 +932,6 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
         $db->relaxConstraints(true);
         self::$db->prepared_query("DELETE FROM artists_alias WHERE ArtistID = ?", $id);
         self::$db->prepared_query("DELETE FROM artists_group WHERE ArtistID = ?", $id);
-        self::$db->prepared_query("DELETE FROM artists_tags WHERE ArtistID = ?", $id);
         self::$db->prepared_query("DELETE FROM wiki_artists WHERE PageID = ?", $id);
         $db->relaxConstraints(false);
 

@@ -285,17 +285,6 @@ class Tag extends \Gazelle\BaseManager {
         );
         $changed = self::$db->affected_rows();
 
-        // same for artists,
-        self::$db->prepared_query('
-            INSERT INTO artists_tags (TagID, UserID, ArtistID, PositiveVotes, NegativeVotes)
-                SELECT ?, ?, curr.ArtistID, curr.PositiveVotes, curr.NegativeVotes
-                FROM artists_tags curr
-                LEFT JOIN artists_tags merge ON (merge.ArtistID = curr.ArtistID AND merge.TagID = ?)
-                WHERE curr.TagID = ? AND merge.TagID IS NULL
-            ', $new->id, $user->id, $new->id, $old->id
-        );
-        $changed += self::$db->affected_rows();
-
         // and requests.
         self::$db->prepared_query("
             INSERT INTO requests_tags (TagID, RequestID)
@@ -312,12 +301,11 @@ class Tag extends \Gazelle\BaseManager {
         self::$db->prepared_query("
             UPDATE tags SET
                 Uses = (
-                    (SELECT count(*) FROM artists_tags WHERE TagID = ?)
-                    + (SELECT count(*) FROM requests_tags WHERE TagID = ?)
+                    (SELECT count(*) FROM requests_tags WHERE TagID = ?)
                     + (SELECT count(*) FROM torrents_tags WHERE TagID = ?)
                 )
             WHERE ID = ?
-            ", $new->id, $new->id, $new->id, $new->id
+            ", $new->id, $new->id, $new->id
         );
 
         // update cache
@@ -367,9 +355,8 @@ class Tag extends \Gazelle\BaseManager {
         );
         $reqList = self::$db->collect(0);
         self::$db->prepared_query("
-            DELETE t, at, rt, tt
+            DELETE t, rt, tt
             FROM tags t
-            LEFT JOIN artists_tags  at ON (at.TagID = t.ID)
             LEFT JOIN requests_tags rt ON (rt.TagID = t.ID)
             LEFT JOIN torrents_tags tt ON (tt.TagID = t.ID)
             WHERE t.ID = ?
@@ -402,9 +389,8 @@ class Tag extends \Gazelle\BaseManager {
         );
         $reqList = self::$db->collect(0);
         self::$db->prepared_query("
-            DELETE t, at, rt, tt
+            DELETE t, rt, tt
             FROM tags t
-            LEFT JOIN artists_tags  at ON (at.TagID = t.ID)
             LEFT JOIN requests_tags rt ON (rt.TagID = t.ID)
             LEFT JOIN torrents_tags tt ON (tt.TagID = t.ID)
             WHERE t.ID = ?
