@@ -98,7 +98,7 @@ class UserLinkTest extends TestCase {
 
         $this->assertCount(2, $linker->info()['list'], 'user-link-two');
         $this->assertEquals(1, $linker->removeUser($this->userList[1], $this->userList[0]), 'user-link-remove-group');
-        $this->assertEquals(1, $linker->removeUser($this->userList[2], $this->userList[0]), 'user-link-remove-last');
+        $this->assertEquals(3, $linker->removeUser($this->userList[2], $this->userList[0]), 'user-link-remove-last');
     }
 
     public function testUserLinkMergeGroup(): void {
