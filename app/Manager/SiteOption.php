@@ -43,7 +43,7 @@ class SiteOption extends \Gazelle\Base {
     }
 
     public function freeTokenSize(): int {
-        return 1024 * 1014 * (int)$this->findValueByName('fl-token-size');
+        return 1024 * 1024 * (int)$this->findValueByName('fl-token-size');
     }
 
     /**
