@@ -41,7 +41,7 @@ if (!empty($_POST['username']) && !empty($_POST['password'])) {
         if ($user->isEnabled()) {
             if (!Util\PasswordCheck::checkPasswordStrength($_POST['password'], $user)) {
                 $user->addStaffNote("login prevented because of weak/compromised password")->modify();
-                $user->logoutEverywhere();
+                $user->session()->logoutEverywhere();
                 echo $Twig->render('login/weak-password.twig');
                 exit;
             }

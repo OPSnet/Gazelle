@@ -130,13 +130,13 @@ class User extends \Gazelle\BaseManager {
         if ($user->permitted('site_disable_ip_history')) {
             $user->requestContext()->anonymize();
         }
+        $session = $user->session();
         if ($user->isDisabled() && !in_array($user->requestContext()->module(), ['index', 'login'])) {
-            $user->logoutEverywhere();
+            $session->logoutEverywhere();
             return null;
         }
-        $session = new Session($user);
         if (!$session->valid($cookie->sessionKey())) {
-            $user->logout();
+            $session->logout();
             return null;
         }
         global $SessionID;

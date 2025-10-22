@@ -39,6 +39,18 @@ class Session extends \Gazelle\BaseUser {
         return $this->info;
     }
 
+    public function lastActive(?string $sessionKey): ?array {
+        $info = $this->info();
+        if (count($info) > 1) {
+            foreach ($info as $id => $session) {
+                if ($id != $sessionKey) {
+                    return $session;
+                }
+            }
+        }
+        return null;
+    }
+
     public function valid(string $sessionKey): bool {
         return isset($this->info()[$sessionKey]);
     }
@@ -139,15 +151,28 @@ class Session extends \Gazelle\BaseUser {
         return self::$db->affected_rows();
     }
 
-    public function lastActive(?string $sessionKey): ?array {
-        $info = $this->info();
-        if (count($info) > 1) {
-            foreach ($info as $id => $session) {
-                if ($id != $sessionKey) {
-                    return $session;
-                }
-            }
+    /**
+     * Log out the current session
+     */
+    public function logout(): void {
+        setcookie('session', '', [
+            'expires'  => time() - 60 * 60 * 24 * 90,
+            'path'     => '/',
+            'secure'   => SECURE_COOKIE,
+            'httponly' => true,
+            'samesite' => 'Strict',
+        ]);
+        if ($this->requestContext()->hasSessionId()) {
+            $this->drop($this->requestContext()->sessionId());
         }
-        return null;
+        $this->flush();
+    }
+
+    /**
+     * Logout all sessions
+     */
+    public function logoutEverywhere(): void {
+        $this->dropAll();
+        $this->logout();
     }
 }

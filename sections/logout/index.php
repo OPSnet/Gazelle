@@ -6,5 +6,5 @@ declare(strict_types=1);
 namespace Gazelle;
 
 authorize();
-$Viewer->logout();
+$Viewer->session()->logout();
 header("Location: /index.php");

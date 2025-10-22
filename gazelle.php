@@ -113,7 +113,7 @@ if ($Viewer) {
 
     // these endpoints do not exist
     if (in_array($module, OBSOLETE_ENDPOINTS)) {
-        $Viewer->logoutEverywhere();
+        $Viewer->session()->logoutEverywhere();
         $cookie?->expire();
         header('Location: login.php');
         exit;

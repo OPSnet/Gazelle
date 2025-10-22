@@ -34,6 +34,7 @@ class User extends BaseAttrObject {
     protected User\Invite     $invite;
     protected User\Ordinal    $ordinal;
     protected User\Privilege  $privilege;
+    protected User\Session    $session;
     protected User\Snatch     $snatch;
 
     public function flush(): static {
@@ -49,7 +50,7 @@ class User extends BaseAttrObject {
         $this->stats()->flush();
         $this->ordinal()->flush();
         $this->privilege()->flush();
-        unset($this->info, $this->invite, $this->ordinal, $this->privilege, $this->stats, $this->tokenCache);
+        unset($this->info, $this->invite, $this->ordinal, $this->privilege, $this->session, $this->stats, $this->tokenCache);
         return parent::flush();
     }
 
@@ -94,38 +95,16 @@ class User extends BaseAttrObject {
         return $this->privilege ??= new User\Privilege($this);
     }
 
+    public function session(): User\Session {
+        return $this->session ??= new User\Session($this);
+    }
+
     public function snatch(): User\Snatch {
         return $this->snatch ??= new User\Snatch($this);
     }
 
     public function stats(): Stats\User {
         return $this->stats ??= new Stats\User($this->id);
-    }
-
-    /**
-     * Log out the current session
-     */
-    public function logout(): void {
-        setcookie('session', '', [
-            'expires'  => time() - 60 * 60 * 24 * 90,
-            'path'     => '/',
-            'secure'   => SECURE_COOKIE,
-            'httponly' => true,
-            'samesite' => 'Strict',
-        ]);
-        if ($this->requestContext()->hasSessionId()) {
-            new User\Session($this)->drop($this->requestContext()->sessionId());
-        }
-        $this->flush();
-    }
-
-    /**
-     * Logout all sessions
-     */
-    public function logoutEverywhere(): void {
-        $session = new User\Session($this);
-        $session->dropAll();
-        $this->logout();
     }
 
     public function info(): array {
