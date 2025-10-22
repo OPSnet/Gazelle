@@ -14,7 +14,7 @@ require_once(__DIR__ . '/../lib/bootstrap.php');
 $bitcoin = new Gazelle\Donate\Bitcoin;
 $userMan = new Gazelle\Manager\User;
 
-$xbtRate = (new Gazelle\Manager\XBT)->latestRate('EUR');
+$xbtRate = new Gazelle\Manager\XBT()->latestRate('EUR');
 if (!$xbtRate) {
     echo "No exchange rate for BTC\n";
     exit(1);

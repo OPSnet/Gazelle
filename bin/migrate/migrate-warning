@@ -147,8 +147,8 @@ function insert (int $id, array $data): void {
     if (count($data) < 3) {
         return;
     }
-    $user = (new Gazelle\Manager\User)->findByUsername($data['who']);
-    (new Gazelle\DB\Pg(PG_RW_DSN))->prepared_query("
+    $user = new Gazelle\Manager\User()->findByUsername($data['who']);
+    new Gazelle\DB\Pg(PG_RW_DSN)->prepared_query("
         insert into user_warning
                (id_user, reason, id_user_warner, warning)
         values (?,       ?,      ?,              tstzrange(?, ?))

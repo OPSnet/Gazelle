@@ -17,10 +17,10 @@ if ($id || $name !== '') {
     authorize();
     $collage = null;
     if ($id) {
-        $collage = (new Manager\Collage())->recoverById($id);
+        $collage = new Manager\Collage()->recoverById($id);
     }
     if (!$collage && $name !== '') {
-        $collage = (new Manager\Collage())->recoverByName($name);
+        $collage = new Manager\Collage()->recoverByName($name);
     }
     if (!$collage) {
         Error404::error('Collage is completely deleted');

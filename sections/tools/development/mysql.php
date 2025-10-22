@@ -23,10 +23,10 @@ if (preg_match('/([\w-]+)/', $_GET['table'] ?? '', $match)) {
     exit;
 }
 
-$info = (new DB\MysqlInfo(
+$info = new DB\MysqlInfo(
     DB\MysqlInfo::lookupTableMode($_GET['mode'] ?? Enum\MysqlTableMode::all->value),
     DB\MysqlInfo::lookupOrderby($_GET['order'] ?? Enum\MysqlInfoOrderBy::tableName->value),
-    DB::lookupDirection($_GET['sort'] ?? Enum\Direction::ascending->value))
+    DB::lookupDirection($_GET['sort'] ?? Enum\Direction::ascending->value)
 );
 $list = $info->info();
 $column = $info->orderBy() == Enum\MysqlInfoOrderBy::tableName

@@ -7,12 +7,11 @@ if (isset($_GET['clearcache'])) {
 
 require_once __DIR__ . '/../lib/bootstrap.php';
 
-$user = (new Gazelle\Manager\User())->findByAnnounceKey($_GET['passkey'] ?? '');
+$user = new Gazelle\Manager\User()->findByAnnounceKey($_GET['passkey'] ?? '');
 $feed = new Gazelle\Feed();
 if (
     !$user?->isEnabled()
-    || empty($_GET['feed'])
-    || empty($_GET['auth'])
+    || !isset($_GET['feed'], $_GET['auth'])
     || $user->rssAuth($_GET['feed']) !== $_GET['auth']
 ) {
     // phpcs:disable Generic.PHP.ForbiddenFunctions.Found

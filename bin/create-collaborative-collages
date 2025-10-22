@@ -5,7 +5,7 @@ require_once(__DIR__ . '/../lib/bootstrap.php');
 
 $logger     = new Gazelle\Log;
 $collageMan = new Gazelle\Manager\Collage;
-$creator    = (new Gazelle\Manager\User)->findById($argv[1]);
+$creator    = new Gazelle\Manager\User->findById($argv[1]);
 $min        = (int)($argv[2] ?? 1000);
 $wikiId     = (int)($argv[3] ?? 706);
 
