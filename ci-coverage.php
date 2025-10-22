@@ -4,14 +4,13 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-use SebastianBergmann\CodeCoverage\Filter;
-use SebastianBergmann\CodeCoverage\Driver\Selector;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
+use SebastianBergmann\CodeCoverage\Driver\Selector;
+use SebastianBergmann\CodeCoverage\Filter;
 use SebastianBergmann\CodeCoverage\Report\PHP as PhpReport;
-use SebastianBergmann\CodeCoverage\Util\Filesystem;
 
 /**
- * @return array<string>
+ * @return list<string>
  */
 function filenameList(string $path): array {
     $list = [];
@@ -33,6 +32,11 @@ class CoverageHelper {
     private CodeCoverage $coverage;
 
     public function __construct() {
+        if (!is_dir($this::TARGET_DIR) && mkdir($this::TARGET_DIR, 0o755, true) === false) {
+            throw new \Exception(
+                "Directory " . $this::TARGET_DIR . " could not be created"
+            );
+        }
         $filter = new Filter();
         $filter->includeFiles(filenameList(__DIR__ . '/app'));
         $filter->includeFiles(filenameList(__DIR__ . '/classes'));
@@ -40,7 +44,7 @@ class CoverageHelper {
         $filter->includeFiles(filenameList(__DIR__ . '/public'));
         $filter->includeFiles(filenameList(__DIR__ . '/sections'));
         $this->coverage = new CodeCoverage(
-            (new Selector())->forLineCoverage($filter),
+            new Selector()->forLineCoverage($filter),
             $filter
         );
         $this->coverage->cacheStaticAnalysis('/tmp/coverage-cache');
@@ -49,10 +53,9 @@ class CoverageHelper {
 
     public function __destruct() {
         $this->coverage->stop();
-        Filesystem::createDirectory($this::TARGET_DIR);
         $outfile = tempnam($this::TARGET_DIR, 'phpcov');
         if ($outfile !== false) {
-            (new PhpReport())->process($this->coverage, $outfile);
+            new PhpReport()->process($this->coverage, $outfile);
             rename($outfile, $outfile . ".cov");
         }
     }

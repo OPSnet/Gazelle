@@ -54,6 +54,9 @@ parameters:
         - ../lib/bootstrap.php
 
     paths:
+        - ../ci-coverage.php
+        - ../gazelle.php
+        - ../phinx.php
         - ../lib/util.php
         - ../app
         - ../bin
