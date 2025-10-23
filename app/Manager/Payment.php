@@ -21,13 +21,12 @@ class Payment extends \Gazelle\Base {
         string $cc,
         bool   $active,
     ): int {
-        self::$db->prepared_query('
-            INSERT INTO payment_reminders
-                   (Text, Expiry, AnnualRent, cc, Active)
+        $id = $this->pg()->insert("
+            insert into payment
+                   (name, expiry, annual_rent, currency, active)
             VALUES (?,    ?,      ?,          ?,  ?)
-            ', $text, $expiry, $rent, $cc, $active ? 1 : 0
+            ", $text, $expiry, $rent, $cc, $active ? 't' : 'f'
         );
-        $id = self::$db->inserted_id();
         $this->flush();
         return $id;
     }
@@ -40,24 +39,24 @@ class Payment extends \Gazelle\Base {
         string $cc,
         bool   $active,
     ): int {
-        self::$db->prepared_query("
-            UPDATE payment_reminders SET
-                Text = ?, Expiry = ?, AnnualRent = ?, cc = ?, Active = ?
-            WHERE ID = ?
-            ", $text, $expiry, $rent, $cc, $active ? 1 : 0,
+        $result = $this->pg()->executeParams("
+            update payment set
+                name = $1, expiry = $2, annual_rent = $3, currency = $4, active = $5
+            where id_payment = $6
+            ", $text, $expiry, $rent, $cc, $active ? 't' : 'f',
             $id
         );
-        $affected = self::$db->affected_rows();
+        $affected = $result->getAffectedRows();
         $this->flush();
         return $affected;
     }
 
     public function remove(int $id): int {
-        self::$db->prepared_query('
-            DELETE FROM payment_reminders WHERE ID = ?
+        $result = $this->pg()->executeParams('
+            delete from payment where id_payment = $1
             ', $id
         );
-        $affected = self::$db->affected_rows();
+        $affected = $result->getAffectedRows();
         $this->flush();
         return $affected;
     }
@@ -65,45 +64,45 @@ class Payment extends \Gazelle\Base {
     public function list(): array {
         $list = self::$cache->get_value(self::LIST_KEY);
         if ($list === false) {
-            self::$db->prepared_query("
-                SELECT ID,
-                    Text,
-                    Expiry,
-                    AnnualRent,
-                    cc,
-                    Active
-                FROM payment_reminders
-                ORDER BY Expiry
-            ");
-            $list = self::$db->to_array('ID', MYSQLI_ASSOC);
+            $list = $this->pg()->all('
+                select id_payment as id,
+                    name,
+                    expiry,
+                    annual_rent,
+                    currency,
+                    active
+                from payment
+                order by expiry
+            ');
             self::$cache->cache_value(self::LIST_KEY, $list, 86400);
         }
 
         $rates = [];
         foreach ($list as &$l) {
-            $l['Active'] = (bool)$l['Active'];
-            if ($l['cc'] == 'XBT') {
+            if ($l['currency'] === 'XBT') {
                 $l['fiatRate'] = 1.0;
-                $l['Rent'] = $l['btcRent'] = sprintf('%0.6f', $l['AnnualRent']);
+                $l['rent'] = $l['btcRent'] = (float)sprintf('%0.6f', $l['annual_rent']);
             } else {
-                if (!isset($rates[$l['cc']])) {
+                if (!isset($rates[$l['currency']])) {
                     $l['fiatRate'] = (float)self::$db->scalar("
                         SELECT rate
                         FROM xbt_forex
                         WHERE cc = ?
                         ORDER BY forex_date DESC
                         LIMIT 1
-                        ", $l['cc']
+                        ", $l['currency']
                     );
                     if (!$l['fiatRate']) {
-                        throw new PaymentFetchForexException(sprintf('XBT id=%d cc=%s', $l['ID'], $l['cc']));
+                        throw new PaymentFetchForexException(
+                            sprintf('XBT id=%d cc=%s', $l['id'], $l['currency'])
+                        );
                     }
-                    $rates[$l['cc']] = $l['fiatRate'];
+                    $rates[$l['currency']] = $l['fiatRate'];
                 } else {
-                    $l['fiatRate'] = $rates[$l['cc']];
+                    $l['fiatRate'] = $rates[$l['currency']];
                 }
-                $l['Rent'] = sprintf('%0.2f', $l['AnnualRent']);
-                $l['btcRent'] = sprintf('%0.6f', $l['AnnualRent'] / $l['fiatRate']);
+                $l['rent'] = sprintf('%0.2f', $l['annual_rent']);
+                $l['btcRent'] = sprintf('%0.6f', $l['annual_rent'] / $l['fiatRate']);
             }
         }
         return $list;
@@ -112,21 +111,21 @@ class Payment extends \Gazelle\Base {
     public function monthlyRental(): float {
         $rental = self::$cache->get_value(self::RENT_KEY);
         if ($rental === false) {
-            $rental = (float)self::$db->scalar("
-                SELECT sum(p.AnnualRent/coalesce(CUR.rate, 1.0)) / 12
-                FROM payment_reminders p
-                LEFT JOIN (
-                    SELECT f.cc,
+            $rental = (float)$this->pg()->scalar("
+                select sum(p.annual_rent/coalesce(CUR.rate, 1.0)) / 12
+                from payment p
+                left join (
+                    select f.cc,
                         f.rate
-                    FROM xbt_forex f
-                    INNER JOIN (
-                        SELECT cc,
+                    from relay.xbt_forex f
+                    inner join (
+                        select cc,
                             max(forex_date) AS forex_date
-                        FROM xbt_forex
-                        GROUP BY cc
+                        from relay.xbt_forex
+                        group by cc
                     ) LATEST using (cc, forex_date)
-                ) CUR USING (cc)
-                WHERE p.active = 1;
+                ) CUR on (CUR.cc::text::currency_t = p.currency)
+                where p.active is true
             ");
             self::$cache->cache_value(self::RENT_KEY, $rental, 86400);
         }
@@ -147,24 +146,25 @@ class Payment extends \Gazelle\Base {
     public function due(): array {
         $due = self::$cache->get_value(self::DUE_KEY);
         if ($due === false) {
-            self::$db->prepared_query('
-                SELECT Text, Expiry
-                FROM payment_reminders
-                WHERE Active = 1 AND Expiry < now() + INTERVAL 1 WEEK
-                ORDER BY Expiry
-            ');
-            $due = self::$db->to_array(false, MYSQLI_ASSOC);
+            $due = $this->pg()->all("
+                select name, expiry
+                from payment
+                where expiry < now() + '1 week'::interval
+                    and active is true
+                order by expiry
+            ");
             self::$cache->cache_value(self::DUE_KEY, $due, 3600);
         }
         return $due;
     }
 
     public function soon(): array {
-        return self::$db->rowAssoc("
-            SELECT count(*) as total,
-                min(Expiry) as next
-            FROM payment_reminders
-            WHERE Active = 1 AND Expiry < now() + INTERVAL 1 WEEK
+        return $this->pg()->rowAssoc("
+            select count(*) as total,
+                min(expiry) as next
+            from payment
+            where expiry < now() + '1 week'::interval
+                and active is true
         ");
     }
 }

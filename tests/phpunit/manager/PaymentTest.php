@@ -19,13 +19,13 @@ class PaymentTest extends TestCase {
         );
 
         $this->assertGreaterThan(0, $id, 'payment-create');
-        $payment = current(array_filter($manager->list(), fn ($p) => $p['ID'] === $id));
-        $this->assertTrue($payment['Active'], 'payment-active');
-        $this->assertEquals($name, $payment['Text'], 'payment-text');
-        $this->assertEquals($expiry, $payment['Expiry'], 'payment-expiry');
-        $this->assertEquals('XBT', $payment['cc'], 'payment-cc');
-        $this->assertEquals(0.03125, $payment['Rent'], 'payment-rent');
-        $this->assertEquals(0.03125, $payment['AnnualRent'], 'payment-btc-annual');
+        $payment = current(array_filter($manager->list(), fn ($p) => $p['id'] === $id));
+        $this->assertTrue($payment['active'], 'payment-active');
+        $this->assertEquals($name, $payment['name'], 'payment-text');
+        $this->assertEquals($expiry, $payment['expiry'], 'payment-expiry');
+        $this->assertEquals('XBT', $payment['currency'], 'payment-cc');
+        $this->assertEquals(0.03125, $payment['rent'], 'payment-rent');
+        $this->assertEquals(0.03125, $payment['annual_rent'], 'payment-btc-annual');
         $this->assertEquals(0.03125, $payment['btcRent'], 'payment-btc-rent');
         $this->assertEquals(1, $payment['fiatRate'], 'payment-fiat');
 

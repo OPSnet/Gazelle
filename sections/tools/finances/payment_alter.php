@@ -11,11 +11,10 @@ if (!$Viewer->permitted('admin_manage_payments')) {
 
 $Payment = new Manager\Payment();
 
-if ($_POST['submit'] == 'Delete') {
-    if (!is_number($_POST['id']) || $_POST['id'] == '') {
-        Error400::error('Unknown payment id for delete');
+if ($_POST['submit'] === 'Delete') {
+    if ($Payment->remove((int)$_POST['id']) < 1) {
+        Error404::error('Unknown payment id');
     }
-    $Payment->remove($_POST['id']);
 } else {
     $Validator = new Util\Validator();
     $Validator->setFields([
@@ -30,7 +29,7 @@ if ($_POST['submit'] == 'Delete') {
         exit;
     }
 
-    if ($_POST['submit'] == 'Create') {
+    if ($_POST['submit'] === 'Create') {
         $Payment->create(
             trim($_POST['text']),
             $_POST['expiry'],
