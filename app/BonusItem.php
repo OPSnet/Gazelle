@@ -2,7 +2,7 @@
 
 namespace Gazelle;
 
-class BonusItem extends \Gazelle\BaseObject {
+class BonusItem extends \Gazelle\BasePgObject {
     final public const tableName = 'bonus_item';
     final public const CACHE_KEY = 'bonus_%d';
 
