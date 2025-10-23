@@ -7,6 +7,7 @@ namespace Gazelle\Manager;
 class Registration extends \Gazelle\Base {
     protected string $beforeDate;
     protected string $afterDate;
+    protected int $source;
 
     public function __construct(
         protected User $manager = new User(),
@@ -22,9 +23,15 @@ class Registration extends \Gazelle\Base {
         return $this;
     }
 
+    public function setSource(int $sourceId): static {
+        $this->source = $sourceId;
+        return $this;
+    }
+
     public function configure(): array {
         $cond = [];
         $args = [];
+        $join = '';
         if (isset($this->beforeDate)) {
             if (isset($this->afterDate)) {
                 $cond[] = 'um.created BETWEEN ? AND ?';
@@ -40,22 +47,28 @@ class Registration extends \Gazelle\Base {
         } else {
             $cond[] = 'um.created > now() - INTERVAL 3 DAY';
         }
-        return [implode(' AND ', $cond), $args];
+        if (isset($this->source)) {
+            $cond[] = 'uhis.invite_source_id = ?';
+            $args[] = $this->source;
+            $join = 'INNER JOIN user_has_invite_source uhis ON (uhis.user_id = um.ID)';
+        }
+        return [$join, implode(' AND ', $cond), $args];
     }
 
     public function total(): int {
-        [$where, $args] = $this->configure();
+        [$join, $where, $args] = $this->configure();
         return (int)self::$db->scalar("
-            SELECT count(*) FROM users_main um WHERE $where
+            SELECT count(*) FROM users_main um $join WHERE $where
             ", ...$args
         );
     }
 
     public function page(int $limit, int $offset): array {
-        [$where, $args] = $this->configure();
+        [$join, $where, $args] = $this->configure();
         self::$db->prepared_query("
             SELECT um.ID
             FROM users_main um
+            $join
             WHERE $where
             ORDER BY um.created DESC
             LIMIT ? OFFSET ?

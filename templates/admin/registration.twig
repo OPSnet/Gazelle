@@ -1,4 +1,5 @@
 {% from 'macro/ipv4.twig' import ip_search %}
+{% from 'macro/form.twig' import checked, selected -%}
 {{ header('Registration log', {'js': 'resolve-ip'}) }}
 <div class="thin">
 <div class="header">
@@ -15,133 +16,186 @@
 {%- else %} in the last 72 hours
 {%- endif -%}
     </h2>
-</div>
+</div>{# header #}
 <div class="linkbox">
     <a href="?action=invite_pool" class="brackets">Invite Pool</a>
     <a href="?action=recruitment-history" class="brackets">Recruitment History</a>
 </div>
 <div class="box pad">
-    <form action="" method="post">
-        <input type="hidden" name="action" value="registration_log" />
-        <span style="display: inline-block; width: 90px">Joined after:</span><input type="date" name="after_date" value="{{ after }}" /><br />
-        <span style="display: inline-block; width: 90px">Joined before:</span><input type="date" name="before_date" value="{{ before }}" />
-        <br />
-        <br />
-        <input type="submit" value="Search" />
+    <form action="" method="get">
+        <input type="hidden" name="action" value="registration_log">
+        <div>
+            <label for="after_date_input" style="display: inline-block; padding: 0 1em 1em; text-align: right; width: 10em;">Joined after:</label>
+            <input id="after_date_input" type="date" name="after_date" value="{{ after }}">
+        </div>
+        <div>
+            <label for="before_date_input" style="display: inline-block; padding: 0 1em 1em; text-align: right; width: 10em;">Joined before:</label>
+            <input id="before_date_input" type="date" name="before_date" value="{{ before }}">
+        </div>
+        <div>
+            <label for="view_input" style="display: inline-block; padding: 0 1em 1em; text-align: right; width: 10em;">Recruitment view:</label>
+            <input id="view_input" type="checkbox" name="view" value="recruit"{{ checked(is_recruit_view) }}>
+        </div>
+        <div>
+            <label for="source_input" style="display: inline-block; padding: 0 1em 1em; text-align: right; width: 10em;">Source:</label>
+            <select id="source_input" name="source">
+                <option value="" {{ selected(not invite_source) }}>---</option>
+{% for source in invite_source_list %}
+                <option value="{{ source.invite_source_id }}"
+                    {{- selected(invite_source == source.invite_source_id) -}}>{{ source.name -}}
+                </option>
+{% endfor %}
+            </select>
+        </div>
+        <br>
+        <input type="submit" value="Search">
     </form>
-</div>
-</div>
+</div>{# box #}
+</div>{# thin #}
 
-{% for user in list %}
-{%  if loop.first %}
-{{  paginator.linkbox|raw }}
-    <table width="100%">
-        <tr class="colhead">
-            <td>User</td>
-            <td>Uploaded</td>
-            <td>Downloaded</td>
-            <td>Ratio</td>
-            <td colspan="2">Email</td>
-            <td colspan="2">IP address</td>
-            <td colspan="2">Host</td>
-            <td>Country</td>
-            <td>Registered</td>
-            <td>Source</td>
+{% if is_recruit_view %}
+<div class="box2">
+    {{ paginator.linkbox|raw }}
+    <table>
+{%  for user in list %}
+{%      set first_email = user.history.email|first %}
+        <tr class="head">
+                <td colspan="1">{{ loop.index }} | {{ user.link|raw }}{% if user.isDisabled %}<span title="disabled"> ⛔️</span>{% endif %}</td>
+                <td colspan="4">{{ user.externalProfile.profile|default('no external profile') }}</td>
         </tr>
-{%  endif %}
-        <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
-            <td>
-                {{ user.id|user_full }}
-                <br />
-                {{ user.inviter.id|user_full }}
-            </td>
-            <td style="vertical-align: top">
-                {{- user.uploadedSize|octet_size -}}
-{%  if user.inviter -%}
-                <br />
-                {{- user.inviter.uploadedSize|octet_size -}}
-{%   endif -%}
-            </td>
-            <td style="vertical-align: top">
-                {{- user.downloadedSize|octet_size -}}
-{%  if user.inviter -%}
-                <br />
-                {{- user.inviter.downloadedSize|octet_size -}}
-{%  endif -%}
-            </td>
-            <td style="vertical-align: top">
-                {{- ratio(user.uploadedSize, user.downloadedSize) -}}
-{%  if user.inviter -%}
-                <br />
-                {{- ratio(user.inviter.uploadedSize, user.inviter.downloadedSize) -}}
-{%  endif -%}
-            </td>
-            <td style="vertical-align: top">
-                {{- user.email -}}
-                <br />
-                {{- user.inviter.email -}}
-            </td>
-            <td style="vertical-align: top">
-                <a href="userhistory.php?action=email&amp;userid={{ user.id }}" title="Email History" class="brackets tooltip">H</a>
-                <a href="/user.php?action=search&amp;email_history=on&amp;email={{ user.email }}" title="Email Search" class="brackets tooltip">S</a>
-{%  if user.inviter -%}
-                <br />
-                <a href="userhistory.php?action=email&amp;userid={{ user.inviter.id }}" title="Email History" class="brackets tooltip">H</a>
-                <a href="/user.php?action=search&amp;email_history=on&amp;email={{ user.inviter.email }}" title="Email Search" class="brackets tooltip">S</a>
-{%  endif -%}
-            </td>
-            <td style="vertical-align: top">
-                <span style="float: left">
-                {{- user.ipaddr -}}
-{%  if user.inviter.id -%}
-                <br />
-                {{- user.inviter.ipaddr -}}
-{%  endif -%}
-                </span>
-{%  if user.inviter and user.ipaddr == user.inviter.ipaddr -%}
-                <span title="IP addresses match" style="float: left; padding: 0px 5px;  color: #ffff00; font-size: large">&#x26A0;</span>
-{%  endif -%}
-            </td>
-            <td style="vertical-align: top">
-                <span style="float: left; padding-left: 2px;" title="Duplicate usage by other users">
-                {{- ipv4.duplicateTotal(user) -}}
-{%  if user.inviter and user.ipaddr != user.inviter.ipaddr -%}
-                <br />
-                {{- ipv4.duplicateTotal(user.inviter) -}}
-{%  endif %}
-                </span>
-            </td>
-            <td style="vertical-align: top">
-                <span class="resolve-ipv4" data-ip="{{ user.ipaddr }}">Resolving...</span>
-{%  if user.inviter.id and user.inviter.ipaddr != user.ipaddr %}
-                <br />
-                <span class="resolve-ipv4" data-ip="{{ user.inviter.ipaddr }}">Resolving...</span>
-{%  endif %}
-            </td>
-            <td style="vertical-align: top">
-                <a href="userhistory.php?action=ips&amp;userid{{ user.id }}" title="IP History" class="brackets tooltip">H</a>
-                <a href="/user.php?action=search&amp;ip_history=on&amp;ip={{ user.ipaddr }}" title="IP Search" class="brackets tooltip">S</a>
-                {{ ip_search(user.ipaddr) }}
-{%  if user.inviter.id and user.inviter.ipaddr != user.ipaddr %}
-                <br />
-                <a href="userhistory.php?action=ips&amp;userid={{ user.inviter.id }}" title="IP History" class="brackets tooltip">H</a>
-                <a href="/user.php?action=search&amp;ip_history=on&amp;ip={{ user.inviter.ipaddr }}" title="IP Search" class="brackets tooltip">S</a>
-                {{ ip_search(user.inviter.ipaddr) }}
-{%  endif %}
-            </td>
-            <td>{{ user.ipCountryIso }}</td>
-            <td>
-                <span style="white-space: nowrap">{{- user.created|time_diff -}}</span>
-                <br />
-                <span style="white-space: nowrap">{{- user.inviter.created|time_diff -}}</span>
-            </td>
-            <td>
-                {{ user.inviteSource }}
+        <tr>
+            <td>{{ first_email.ipv4 }}</td>
+            <td>{{ user.created }}</td>
+            <td>{{ first_email.cc }}</td>
+            <td>ASN {{ first_email.n }} / {{ first_email.name }}</td>
+            <td><span class="resolve-ipv4" data-ip="{{ first_email.ipv4 }}">Resolving...</span></td>
+        </tr>
+        <tr>
+            <td colspan="5">
+{%-     for email_row in user.history.email -%}
+                    <span>{{ email_row.email }}</span>
+{%      endfor %}
             </td>
         </tr>
-{%  if loop.last %}
+{%      if not loop.last %}
+        <tr><td colspan="5">&nbsp;</td></tr>
+{%      endif %}
+{%  endfor %}
     </table>
     {{ paginator.linkbox|raw }}
-{%  endif %}
-{% endfor %}
+</div>
+{% else %}
+{%  for user in list %}
+{%      if loop.first %}
+{{  paginator.linkbox|raw }}
+<table width="100%">
+    <tr class="colhead">
+        <td>User</td>
+        <td>Uploaded</td>
+        <td>Downloaded</td>
+        <td>Ratio</td>
+        <td colspan="2">Email</td>
+        <td colspan="2">IP address</td>
+        <td colspan="2">Host</td>
+        <td>Country</td>
+        <td>Registered</td>
+        <td>Source</td>
+    </tr>
+{%      endif %}
+    <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+        <td>
+            {{ user.id|user_full }}
+            <br>
+            {{ user.inviter.id|user_full }}
+        </td>
+        <td style="vertical-align: top">
+            {{- user.uploadedSize|octet_size -}}
+{%      if user.inviter -%}
+            <br>
+            {{- user.inviter.uploadedSize|octet_size -}}
+{%      endif -%}
+        </td>
+        <td style="vertical-align: top">
+            {{- user.downloadedSize|octet_size -}}
+{%      if user.inviter -%}
+            <br>
+            {{- user.inviter.downloadedSize|octet_size -}}
+{%      endif -%}
+        </td>
+        <td style="vertical-align: top">
+            {{- ratio(user.uploadedSize, user.downloadedSize) -}}
+{%      if user.inviter -%}
+            <br>
+            {{- ratio(user.inviter.uploadedSize, user.inviter.downloadedSize) -}}
+{%      endif -%}
+        </td>
+        <td style="vertical-align: top">
+            {{- user.email -}}
+            <br>
+            {{- user.inviter.email -}}
+        </td>
+        <td style="vertical-align: top">
+            <a href="userhistory.php?action=email&amp;userid={{ user.id }}" title="Email History" class="brackets tooltip">H</a>
+            <a href="user.php?action=search&amp;email_history=on&amp;email={{ user.email }}" title="Email Search" class="brackets tooltip">S</a>
+{%      if user.inviter -%}
+            <br>
+            <a href="userhistory.php?action=email&amp;userid={{ user.inviter.id }}" title="Email History" class="brackets tooltip">H</a>
+            <a href="user.php?action=search&amp;email_history=on&amp;email={{ user.inviter.email }}" title="Email Search" class="brackets tooltip">S</a>
+{%      endif -%}
+        </td>
+        <td style="vertical-align: top">
+            <span style="float: left">
+            {{- user.ipaddr -}}
+{%      if user.inviter.id -%}
+            <br>
+            {{- user.inviter.ipaddr -}}
+{%      endif -%}
+            </span>
+{%      if user.inviter and user.ipaddr == user.inviter.ipaddr -%}
+            <span title="IP addresses match" style="float: left; padding: 0 5px;  color: #ffff00; font-size: large">&#x26A0;</span>
+{%      endif -%}
+        </td>
+        <td style="vertical-align: top">
+            <span style="float: left; padding-left: 2px;" title="Duplicate usage by other users">
+            {{- ipv4.duplicateTotal(user) -}}
+{%      if user.inviter and user.ipaddr != user.inviter.ipaddr -%}
+            <br>
+            {{- ipv4.duplicateTotal(user.inviter) -}}
+{%      endif %}
+            </span>
+        </td>
+        <td style="vertical-align: top">
+            <span class="resolve-ipv4" data-ip="{{ user.ipaddr }}">Resolving...</span>
+{%      if user.inviter.id and user.inviter.ipaddr != user.ipaddr %}
+            <br>
+            <span class="resolve-ipv4" data-ip="{{ user.inviter.ipaddr }}">Resolving...</span>
+{%      endif %}
+        </td>
+        <td style="vertical-align: top">
+            <a href="userhistory.php?action=ips&amp;userid{{ user.id }}" title="IP History" class="brackets tooltip">H</a>
+            <a href="user.php?action=search&amp;ip_history=on&amp;ip={{ user.ipaddr }}" title="IP Search" class="brackets tooltip">S</a>
+            {{ ip_search(user.ipaddr) }}
+{%      if user.inviter.id and user.inviter.ipaddr != user.ipaddr %}
+            <br>
+            <a href="userhistory.php?action=ips&amp;userid={{ user.inviter.id }}" title="IP History" class="brackets tooltip">H</a>
+            <a href="user.php?action=search&amp;ip_history=on&amp;ip={{ user.inviter.ipaddr }}" title="IP Search" class="brackets tooltip">S</a>
+            {{ ip_search(user.inviter.ipaddr) }}
+{%      endif %}
+        </td>
+        <td>{{ user.ipCountryIso }}</td>
+        <td>
+            <span style="white-space: nowrap">{{- user.created|time_diff -}}</span>
+            <br>
+            <span style="white-space: nowrap">{{- user.inviter.created|time_diff -}}</span>
+        </td>
+        <td>
+            {{ user.inviteSource }}
+        </td>
+    </tr>
+{%      if loop.last %}
+</table>
+{{ paginator.linkbox|raw }}
+{%      endif %}
+{%  endfor %}
+{% endif %}
 {{ footer() }}
