@@ -37,7 +37,7 @@ class ListMatcher extends \Gazelle\Base {
         return $this;
     }
 
-    public function extract(string $text): array {
+    public static function extract(string $text): array {
         $ips = [];
         foreach (explode("\n", $text) as $line) {
             // do not match IPs followed by a dot to filter out common rDNS hostnames

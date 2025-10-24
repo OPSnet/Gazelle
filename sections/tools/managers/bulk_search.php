@@ -40,7 +40,7 @@ if ($token) {
         $emails = $emailSearch->extract($text);
     }
     if ($Viewer->permitted('users_view_ips')) {
-        $ips = $ipSearch->extract($text);
+        $ips = $ipSearch::extract($text);
     }
 
     $cntIps = count($ips);

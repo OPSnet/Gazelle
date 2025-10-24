@@ -1,0 +1,44 @@
+{{ header('GeoIP Lookup', {'js': 'vendor/table-sort.min,resolve-ip'}) }}
+<div class="thin">
+    <div class="header">
+        <h2 align="center">GeoIP Lookup</h2>
+    </div>
+{% if ip_matches %}
+    <div class="box2">
+        <table class="ips table-sort table-arrows">
+            <thead>
+                <tr>
+                    <th>IP</th>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>CC</th>
+                    <th>ASN</th>
+                    <th>rDNS</th>
+                </tr>
+            </thead>
+            <tbody>
+{%  for data in ip_matches %}
+{%      set asn_info = geoip_data[data[0]] %}
+                <tr>
+                    <td>{{ data[0] }}</td>
+                    <td>{{ data[1].format('c') }}</td>
+                    <td>{{ data[2].format('c') }}</td>
+                    <td>{{ asn_info.country_iso }}</td>
+                    <td>ASN {{  asn_info.asn }} / {{ asn_info.asn_org }}</td>
+                    <td><span class="resolve-ipv4" data-ip="{{ data[0] }}">Resolving...</span></td>
+                </tr>
+{%  endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endif %}
+    <div class="box pad">
+        <form method="post">
+            <input type="hidden" name="action" value="geoip_lookup">
+            <textarea id="data" name="data" cols="90" rows="10"></textarea>
+            <br>
+            <input type="submit" value="Lookup">
+        </form>
+    </div>
+</div>{# thin #}
+{{ footer() }}

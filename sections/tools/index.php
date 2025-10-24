@@ -11,6 +11,9 @@ switch ($_REQUEST['action'] ?? '') {
     case 'asn_search':
         include_once 'managers/asn_search.php';
         break;
+    case 'geoip_lookup':
+        include_once 'managers/geoip_lookup.php';
+        break;
 
     case 'bonus_points':
         include_once 'managers/bonus_points.php';
