@@ -146,8 +146,7 @@ class MultiFactorAuth extends \Gazelle\BaseUser {
     }
 
     public function verify(string $token): bool {
-        $tfa = new \RobThree\Auth\TwoFactorAuth();
-        if (!$tfa->verifyCode($this->secret() ?: '', $token, 2)) {
+        if (!new TwoFactorAuth()->verifyCode($this->secret() ?: '', $token, 2)) {
             // They have MFA but the device key did not match
             // Fallback to considering it as a recovery key.
             if (strlen($token) === self::RECOVERY_KEY_LEN) {
@@ -156,6 +155,15 @@ class MultiFactorAuth extends \Gazelle\BaseUser {
             return false;
         }
         return true;
+    }
+
+    public function verifyToken(string $token): bool {
+        if ($token === '') {
+            // empty token only works if they have not set up MFA
+            return !$this->enabled();
+        }
+        // otherwise they must have set up MFA and the token must be verified
+        return $this->enabled() && $this->verify($token);
     }
 
     public function remove(): int {

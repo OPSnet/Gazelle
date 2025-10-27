@@ -12,7 +12,7 @@ class Login extends Base {
     protected bool $persistent = false;
     protected int $userId = 0;
     protected string $password;
-    protected string $mfa;
+    protected string $mfaToken;
     protected string $username;
     protected LoginWatch $watch;
 
@@ -38,16 +38,16 @@ class Login extends Base {
      */
     public function login(
         string $username,
-        string $password,
+        #[\SensitiveParameter] string $password,
         LoginWatch $watch,
         bool $persistent = false,
-        string $mfa      = '',
+        #[\SensitiveParameter] string $mfaToken = '',
     ): ?User {
         $this->username   = trim($username);
         $this->password   = $password;
         $this->watch      = $watch;
         $this->persistent = $persistent;
-        $this->mfa        = trim($mfa);
+        $this->mfaToken   = trim($mfaToken);
 
         $begin  = microtime(true);
         $user   = $this->attemptLogin();
@@ -114,19 +114,10 @@ class Login extends Base {
             $this->error = self::ERR_CREDENTIALS;
             return null;
         }
-
-        // password checks out, if they have MFA, does that check out?
-        $userMfa = $user->MFA();
-        if (
-            $userMfa->enabled() && !(
-                $this->mfa && $userMfa->verify($this->mfa)
-            )
-            ||  $this->mfa && !$userMfa->enabled()
-        ) {
+        if (!$user->MFA()->verifyToken($this->mfaToken)) {
             $this->error = self::ERR_CREDENTIALS;
             return null;
         }
-
         if ($user->isUnconfirmed()) {
             $this->error = self::ERR_UNCONFIRMED;
             return null;
