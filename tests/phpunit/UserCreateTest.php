@@ -72,7 +72,7 @@ class UserCreateTest extends TestCase {
             'user-create-login-bad-pw-null'
         );
         $this->assertEquals(
-            Login::ERR_CREDENTIALS,
+            Enum\LoginStatus::badCredentials,
             $login->error(),
             'user-create-login-bad-pw-error'
         );
@@ -82,7 +82,7 @@ class UserCreateTest extends TestCase {
             'user-create-login-unconfirmed-null'
         );
         $this->assertEquals(
-            Login::ERR_UNCONFIRMED,
+            Enum\LoginStatus::unconfirmed,
             $login->error(),
             'user-create-login-unconfirmed-error',
         );

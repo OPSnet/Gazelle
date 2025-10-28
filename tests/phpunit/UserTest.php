@@ -405,7 +405,7 @@ class UserTest extends TestCase {
             watch:    $watch,
         );
         $this->assertNull($result, 'login-bad-username');
-        $this->assertEquals($login->error(), Login::ERR_CREDENTIALS, 'login-error-username');
+        $this->assertEquals($login->error(), Enum\LoginStatus::badCredentials, 'login-error-username');
         $this->assertEquals('email@example.com', $login->username(), 'login-username');
         $this->assertEquals($ipaddr, $login->requestContext()->remoteAddr(), 'login-ipaddr');
         $this->assertFalse($login->persistent(), 'login-persistent');
@@ -417,7 +417,7 @@ class UserTest extends TestCase {
             watch:    $watch,
         );
         $this->assertNull($result, 'login-bad-password');
-        $this->assertEquals($login->error(), Login::ERR_CREDENTIALS, 'login-error-password');
+        $this->assertEquals($login->error(), Enum\LoginStatus::badCredentials, 'login-error-password');
         $this->assertEquals(2, $watch->nrAttempts(), 'loginwatch-more-attempt');
 
         $this->assertGreaterThan(0, count($watch->activeList(10, 0)), 'loginwatch-active-list');

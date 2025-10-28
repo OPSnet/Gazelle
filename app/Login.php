@@ -3,12 +3,9 @@
 namespace Gazelle;
 
 class Login extends Base {
-    final public const NO_ERROR = 0;
-    final public const ERR_CREDENTIALS = 1;
-    final public const ERR_UNCONFIRMED = 2;
     final public const FLOOD_COUNT = 'login_flood_total_%d';
 
-    protected int $error = self::NO_ERROR;
+    protected Enum\LoginStatus $error = Enum\LoginStatus::ok;
     protected bool $persistent = false;
     protected int $userId = 0;
     protected string $password;
@@ -16,7 +13,7 @@ class Login extends Base {
     protected string $username;
     protected LoginWatch $watch;
 
-    public function error(): int {
+    public function error(): Enum\LoginStatus {
         return $this->error;
     }
 
@@ -101,25 +98,25 @@ class Login extends Base {
         // we have all we need to go forward
         $userMan = new Manager\User();
         if (!preg_match(USERNAME_REGEXP, $this->username)) {
-            $this->error = self::ERR_CREDENTIALS;
+            $this->error = Enum\LoginStatus::badCredentials;
             return null;
         }
         $user = $userMan->findByUsername($this->username);
         if (is_null($user)) {
-            $this->error = self::ERR_CREDENTIALS;
+            $this->error = Enum\LoginStatus::badCredentials;
             return null;
         }
         $this->userId = $user->id;
         if (!$user->validatePassword($this->password)) {
-            $this->error = self::ERR_CREDENTIALS;
+            $this->error = Enum\LoginStatus::badCredentials;
             return null;
         }
         if (!$user->MFA()->verifyToken($this->mfaToken)) {
-            $this->error = self::ERR_CREDENTIALS;
+            $this->error = Enum\LoginStatus::badCredentials;
             return null;
         }
         if ($user->isUnconfirmed()) {
-            $this->error = self::ERR_UNCONFIRMED;
+            $this->error = Enum\LoginStatus::unconfirmed;
             return null;
         }
 
