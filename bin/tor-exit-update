@@ -1,0 +1,17 @@
+#!/usr/bin/env php
+<?php
+
+namespace Gazelle;
+require_once __DIR__ . '/../lib/bootstrap.php';
+
+if (stream_isatty(STDIN)) {
+    echo "usage: tor-exit-update < torbulkexitlist\n";
+    echo "list can be downloaded at https://check.torproject.org/torbulkexitlist\n";
+    exit(1);
+}
+
+$tor = new Manager\Tor();
+$data = stream_get_contents(STDIN);
+$cnt = $tor->add($data);
+
+echo "updated $cnt entries\n";
