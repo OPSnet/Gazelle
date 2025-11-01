@@ -144,7 +144,7 @@ class Notification extends \Gazelle\Base {
            inner join user_has_attr ha using (id_user)
            inner join user_attr ua using (id_user_attr)
            where ua.name = ?
-        ", strtolower($type->toString()) . '_push');
+        ", strtolower($type->toString()) . '-push');
     }
 
     public function pushableTokensById(array $userIds, NotificationType $type): array {
@@ -155,7 +155,7 @@ class Notification extends \Gazelle\Base {
         inner join user_attr ua using (id_user_attr)
         where ua.name = ?
         and ha.id_user = ANY(?::INT[])
-   ", strtolower($type->toString()) . '_push', "{" . implode(',', $userIds) . "}");
+   ", strtolower($type->toString()) . '-push', "{" . implode(',', $userIds) . "}");
         return $token ? [$token] : [];
     }
 }
