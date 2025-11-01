@@ -14,8 +14,8 @@ if (is_null($torrent)) {
 $paginator = new Util\Paginator(PEERS_PER_PAGE, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($torrent->seederTotal());
 
+header('Content-type: application/json');
 echo $Twig->render('torrent/seederlist.twig', [
-    'is_admin'  => $Viewer->permitted('users_mod'),
     'list'      => $torrent->seederList($Viewer, $paginator->limit(), $paginator->offset()),
     'paginator' => $paginator,
     'torrent'   => $torrent,

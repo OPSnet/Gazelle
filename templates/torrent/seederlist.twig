@@ -1,4 +1,5 @@
 {% from 'macro/paginator.twig' import pager %}
+{% set is_admin = viewer.permitted('users_mod') %}
 {% set result %}
 {%  for peer in list %}
 {%      if loop.first %}
@@ -59,4 +60,8 @@
 <div style="text-align: center">No current peers</div>
 {%  endfor %}
 {% endset %}
-{{ {'page': paginator.page, 'pages': paginator.pages, 'debug': list, 'html': result}|json_encode|raw }}
+{% set response_data = {'page': paginator.page, 'pages': paginator.pages, 'html': result} %}
+{% if viewer.permitted('site_debug') %}
+{%  set response_data = response_data|merge({'debug': list}) %}
+{% endif %}
+{{ response_data|json_encode|raw }}
