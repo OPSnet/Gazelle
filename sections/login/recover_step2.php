@@ -35,10 +35,9 @@ if (!empty($_REQUEST['password'])) {
             header('Location: login.php?action=recover&expired=1');
             exit;
         } else {
-            // set new secret and password.
-            $userToken->user()
-                ->history()->modifyPassword($_REQUEST['password'], true)
-                ->modify();
+            // set new password.
+            $userToken->user()->history()->modifyPassword($_REQUEST['password'], true);
+            $userToken->user()->modify();
             $userToken->user()->session()->logoutEverywhere();
             $success = true;
         }
