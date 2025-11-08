@@ -244,6 +244,10 @@ switch ($_REQUEST['action'] ?? '') {
         break;
 
     //Data
+    case 'recruitment-history':
+        include_once 'data/recruitment-history.php';
+        break;
+
     case 'registration_log':
         include_once 'data/registration_log.php';
         break;

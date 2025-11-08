@@ -183,4 +183,10 @@ class UsersTest extends TestCase {
             'json-stats-users',
         );
     }
+
+    public function testRecruitmentHistory(): void {
+        $manager = new Stats\Users();
+        $this->assertCount(0, $manager->recruitmentHistory(), 'recruitment-history-stats');
+        $this->assertCount(13, $manager->recruitmentHistoryRange(), 'recruitment-history-range');
+    }
 }

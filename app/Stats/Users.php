@@ -878,4 +878,64 @@ class Users extends \Gazelle\Base {
         );
         return self::$db->to_array(false, MYSQLI_ASSOC);
     }
+
+    public function recruitmentHistory(): array {
+        return $this->pg()->all(<<<END_SQL
+            select * from crosstab($$
+            with r as (
+                select isrc.name,
+                to_char(um.created, 'YYYY-MM') as yyyymm,
+                concat(
+                    sum(case when um."Enabled" = '1' then 1 else 0 end)
+                    || '/' ||
+                    count(um.*)
+                ) as total
+                from relay.users_main um
+                inner join relay.user_has_invite_source uhis on (uhis.user_id = um."ID")
+                inner join relay.invite_source isrc using (invite_source_id)
+                where um.created > now() - interval '1 year'
+                group by grouping sets ((isrc.name, yyyymm), (isrc.name))
+                order by 1, 2
+            )
+            select name,
+                coalesce(yyyymm, 'total'),
+                nullif(total, '')
+            from r
+            $$,$$
+            select to_char(
+                 now() - interval '11 month' + (interval '1 month' * generate_series(0, 11)), 'YYYY-MM'
+            )
+            union select 'total'
+            order by 1
+            $$)
+            as (
+               name text,
+               m11 text,
+               m10 text,
+               m09 text,
+               m08 text,
+               m07 text,
+               m06 text,
+               m05 text,
+               m04 text,
+               m03 text,
+               m02 text,
+               m01 text,
+               m00 text,
+               total text
+            )
+            END_SQL
+        );
+    }
+
+    public function recruitmentHistoryRange(): array {
+        return $this->pg()->column(<<<END_SQL
+            select to_char(
+                 now() - interval '11 month' + (interval '1 month' * generate_series(0, 11)), 'YYYY-MM'
+            )
+            union select 'total'
+            order by 1
+            END_SQL
+        );
+    }
 }

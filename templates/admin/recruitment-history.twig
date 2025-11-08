@@ -1,0 +1,52 @@
+{{ header('Recruitment History') }}
+<div class="thin">
+<div class="header">
+    <h2>Recruitment History</h2>
+</div>
+<div class="linkbox">
+    <a href="?action=invite_pool" class="brackets">Invite Pool</a>
+    <a href="?action=registration_log" class="brackets">Registration Log</a>
+</div>
+<pre>
+
+{% for site in list %}
+{%  if loop.first %}
+<table width="100%">
+    <tr class="colhead">
+        <td>Site</td>
+        <td>{{ range[0] }}</td>
+        <td>{{ range[1] }}</td>
+        <td>{{ range[2] }}</td>
+        <td>{{ range[3] }}</td>
+        <td>{{ range[4] }}</td>
+        <td>{{ range[5] }}</td>
+        <td>{{ range[6] }}</td>
+        <td>{{ range[7] }}</td>
+        <td>{{ range[8] }}</td>
+        <td>{{ range[9] }}</td>
+        <td>{{ range[10] }}</td>
+        <td>{{ range[11] }}</td>
+        <td>Total</td>
+    </tr>
+{%  endif %}
+    <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+        <td>{{ site.name }}</td>
+        <td>{{ site.m11 }}</td>
+        <td>{{ site.m10 }}</td>
+        <td>{{ site.m09 }}</td>
+        <td>{{ site.m08 }}</td>
+        <td>{{ site.m07 }}</td>
+        <td>{{ site.m06 }}</td>
+        <td>{{ site.m05 }}</td>
+        <td>{{ site.m04 }}</td>
+        <td>{{ site.m03 }}</td>
+        <td>{{ site.m02 }}</td>
+        <td>{{ site.m01 }}</td>
+        <td>{{ site.m00 }}</td>
+        <td>{{ site.total }}</td>
+    </tr>
+{%  if loop.last %}
+</table>
+{%  endif %}
+{% endfor %}
+{{ footer() }}
