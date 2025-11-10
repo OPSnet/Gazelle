@@ -139,27 +139,27 @@ if ($user->lockType() != $lockType) {
 }
 
 if (isset($_POST['ResetRatioWatch']) && $Viewer->permitted('users_edit_reset_keys')) {
-    new User\History($user)->resetRatioWatch();
+    $user->history()->resetRatioWatch();
     $editSummary[] = 'RatioWatch history reset';
 }
 
 if ($resetIPHistory && $Viewer->permitted('users_edit_reset_keys')) {
-    new User\History($user)->resetIp();
+    $user->history()->resetIp();
     $editSummary[] = 'IP history cleared';
 }
 
 if (isset($_POST['ResetEmailHistory']) && $Viewer->permitted('users_edit_reset_keys')) {
-    new User\History($user)->resetEmail($user->username() . '@' . SITE_HOST, $resetIPHistory ? '127.0.0.1' : $user->ipaddr());
+    $user->history()->resetEmail($user->username() . '@' . SITE_HOST, $resetIPHistory ? '127.0.0.1' : $user->ipaddr());
     $editSummary[] = 'email history cleared';
 }
 
 if (isset($_POST['ResetSnatchList']) && $Viewer->permitted('users_edit_reset_keys')) {
-    new User\History($user)->resetSnatched();
+    $user->history()->resetSnatched();
     $editSummary[] = 'snatch list cleared';
 }
 
 if (isset($_POST['ResetDownloadList']) && $Viewer->permitted('users_edit_reset_keys')) {
-    new User\History($user)->resetDownloaded();
+    $user->history()->resetDownloaded();
     $editSummary[] = 'download list cleared';
 }
 

@@ -143,7 +143,7 @@ class Login extends Base {
         }
 
         if (!$user->permitted('site_disable_ip_history')) {
-            new User\History($user)->registerSiteIp($ipaddr);
+            $user->history()->registerSiteIp($ipaddr);
         }
 
         // We have a user!

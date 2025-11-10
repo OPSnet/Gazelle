@@ -27,7 +27,6 @@ $Class       = $user->primaryClass();
 $donor       = new User\Donor($user);
 $userBonus   = new User\Bonus($user);
 $viewerBonus = new User\Bonus($Viewer);
-$history     = new User\History($user);
 $limiter     = new User\UserclassRateLimit($user);
 $bonusMan    = new Manager\Bonus();
 $donorMan    = new Manager\Donation();
@@ -197,7 +196,7 @@ if ($user->propertyVisibleMulti($previewer, ['artistsadded', 'collagecontribs+',
             <div class="head colhead_dark">History</div>
             <ul class="stats nobullet">
 <?php if ($Viewer->permitted('users_view_email')) { ?>
-                <li>Emails: <?=number_format($history->emailTotal())?> <a href="userhistory.php?action=email&amp;userid=<?=$userId?>" class="brackets">View</a></li>
+                <li>Emails: <?=number_format($user->history()->emailTotal())?> <a href="userhistory.php?action=email&amp;userid=<?=$userId?>" class="brackets">View</a></li>
 <?php
     }
     if ($Viewer->permitted('users_view_ips')) {
@@ -384,7 +383,6 @@ echo $Twig->render('user/main-column.twig', [
     'class_list'    => $userMan->classLevelList(),
     'donor'         => $donor,
     'forum_man'     => new Manager\Forum(),
-    'history'       => $history,
     'invite_source' => new Manager\InviteSource()->inviterConfiguration($user),
     'is_traced'     => $Viewer->permitted('admin_tracker') && new Tracker()->isTraced($user),
     'over_usercap'  => new Stats\Users()->overUsercap(),

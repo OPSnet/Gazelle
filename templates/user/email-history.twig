@@ -16,7 +16,7 @@
         <th>ASN</th>
         <th>Useragent</th>
     </tr>
-{% for r in history.email(asn)  %}
+{% for r in user.history.email %}
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
         <td>{{ r.email }}</td>
         <td>{{ r.created }}</td>
@@ -28,8 +28,8 @@
 {% endfor %}
 </table>
 
-{% for r in history.emailDuplicate(asn) %}
-{% if loop.first %}
+{% for r in user.history.emailDuplicate %}
+{%  if loop.first %}
 <br />
 <div class="header">
 <h3>Duplicate email addresses used</h3>
@@ -47,7 +47,7 @@
         <th>Donor</th>
         <th>Warned until</th>
     </tr>
-{% endif %}
+{%  endif %}
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
         <td><a href="userhistory.php?action=email&userid={{ r.user_id }}">{{ r.user.username }}</a></td>
         <td>{{ r.user.email }}</td>
@@ -60,10 +60,10 @@
         <td>{{ r.user is donor ? 'yes' : 'no' }}</td>
         <td>{{ r.user.warningExpiry ?? 'no' }}</td>
     </tr>
-{% if loop.last %}
+{%  if loop.last %}
 </table>
 <br />
-{% endif %}
+{%  endif %}
 {% endfor %}
 <br />
 </div>

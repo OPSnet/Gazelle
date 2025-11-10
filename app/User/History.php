@@ -211,9 +211,9 @@ class History extends \Gazelle\BaseUser {
     public function registerNewEmail(
         string $newEmail,
         bool $notify,
-        \Gazelle\Manager\IPv4 $ipv4,
-        \Gazelle\Util\Irc $irc,
-        \Gazelle\Util\Mail $mailer
+        \Gazelle\Manager\IPv4 $ipv4   = new \Gazelle\Manager\IPv4(),
+        \Gazelle\Util\Irc     $irc    = new \Gazelle\Util\Irc(),
+        \Gazelle\Util\Mail    $mailer = new \Gazelle\Util\Mail(),
     ): int {
         $ipaddr = $this->requestContext()->remoteAddr();
         $useragent = $this->requestContext()->useragent();

@@ -257,9 +257,8 @@ foreach (
     $user->toggleAttr($attr, $state);
 }
 
-$history = new User\History($user);
 if ($newEmail) {
-    $history->registerNewEmail($newEmail, $ownProfile, new Manager\IPv4(), $irc, new Util\Mail());
+    $user->history()->registerNewEmail($newEmail, $ownProfile);
 }
 
 if (isset($_POST['resetpasskey'])) {

@@ -76,7 +76,7 @@
         <td>
             <input type="checkbox" name="SendHackedMail" id="SendHackedMail" /> <label for="SendHackedMail">Send hacked account email</label> to
             <select name="HackedEmail">
-{%  for e in history.email(asn) %}
+{%  for e in user.history.email %}
                 <option value="{{ e.email }}">{{ e.email }} - {{ e.created }}</option>
 {%  endfor %}
             </select>

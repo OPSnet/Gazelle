@@ -9,14 +9,11 @@ namespace Gazelle;
 if (!$Viewer->permitted('users_view_email')) {
     Error403::error();
 }
-
 $user = new Manager\User()->findById((int)$_GET['userid']);
 if (is_null($user)) {
     Error404::error();
 }
 
 echo $Twig->render('user/email-history.twig', [
-    'asn'     => new Search\ASN(),
-    'history' => new User\History($user),
-    'user'    => $user,
+    'user' => $user,
 ]);
