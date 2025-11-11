@@ -53,18 +53,13 @@ function option(string $field, string $value, string $label): string {
 }
 
 $orderBy = [
-    'Bounty'     => 'Bounty',
-    'Downloaded' => 'uls1.Downloaded',
-    'Downloads'  => 'Downloads',
-    'Email'      => 'um1.Email',
-    'Invites'    => 'um1.Invites',
     'Joined'     => 'um1.created',
     'Last Seen'  => 'ula.last_access',
-    'Ratio'      => '(uls1.Uploaded / uls1.Downloaded)',
     'Seeding'    => 'Seeding',
     'Snatches'   => 'Snatches',
-    'Uploaded'   => 'uls1.Uploaded',
-    'Username'   => 'um1.Username',
+    'Email'      => 'um1."Email"',
+    'Invites'    => 'um1."Invites"',
+    'Username'   => 'um1."Username"',
 ];
 $dir = ['Ascending' => 'ASC', 'Descending' => 'DESC'];
 
@@ -73,7 +68,6 @@ $orderByValue = ['inarray' => array_keys($orderBy)];
 $dirValue = ['inarray' => array_keys($dir)];
 
 $dateChoice = ['inarray' => ['on', 'before', 'after', 'between']];
-$singledateChoice = ['inarray' => ['on', 'before', 'after']];
 $numberChoice = ['inarray' => ['equal', 'above', 'below', 'between', 'buffer']];
 $offNumberChoice = ['inarray' => ['equal', 'above', 'below', 'between', 'buffer', 'off']];
 $yesNo = ['inarray' => ['any', 'yes', 'no']];
@@ -85,7 +79,7 @@ $disabledIpChecked = false;
 $trackerLiveSource = true;
 
 $paginator = new Util\Paginator(USERS_PER_PAGE, (int)($_GET['page'] ?? 1));
-$stylesheet = new \Gazelle\Manager\Stylesheet()->list();
+$stylesheet = new Manager\Stylesheet()->list();
 
 $matchMode = ($_GET['matchtype'] ?? 'fuzzy');
 $searchDisabledInvites = (isset($_GET['disabled_invites']) && $_GET['disabled_invites'] != '');
@@ -427,7 +421,7 @@ if (empty($_GET)) {
     $order = 'ORDER BY ' . $orderBy[$_GET['order'] ?? 'Joined'] . ' ' . $dir[$_GET['way'] ?? 'Descending'];
 
     //---------- Build the query
-    $query = "SELECT count(*) $from " . implode("\n", $join);
+    $query = "SELECT count(*) over () $from " . implode("\n", $join);
     if (count($where)) {
         $query .= " WHERE " . implode("\nAND ", $where);
     }
@@ -435,7 +429,7 @@ if (empty($_GET)) {
         $query .= ' GROUP BY um1."ID"';
     }
 
-    $pg = new DB\Pg(PG_RW_DSN);
+    $pg = new DB\Pg(PG_RO_DSN);
     $paginator->setTotal((int)$pg->scalar($query, ...$args));
 
     $query = "SELECT $columns $from " . implode("\n", $join);
@@ -443,7 +437,7 @@ if (empty($_GET)) {
         $query .= ' WHERE ' . implode("\nAND ", $where);
     }
     if ($distinct) {
-        $query .= 'GROUP BY um1."ID", um1.created';
+        $query .= 'GROUP BY um1."ID", ' . implode(',', array_values($orderBy));
     }
     $query .= " $order LIMIT ? OFFSET ?";
 
