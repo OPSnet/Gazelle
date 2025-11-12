@@ -114,6 +114,7 @@ e2e-tests:
     - /bin/bash "${CI_PROJECT_DIR}/misc/docker/web/bootstrap-base.sh"
     - su gazelle -c "bin/twig-parse \$(find templates -type f)"
     - /bin/bash "${CI_PROJECT_DIR}/misc/docker/web/start-services.sh"
+    - su gazelle -s /usr/bin/php ${CI_PROJECT_DIR}/bin/setup-check
     - su gazelle -c "${CI_PROJECT_DIR}/vendor/bin/phpunit -c misc/phpunit.xml --coverage-php /tmp/coverage/phpunit.cov --exclude-group no-ci"
     - /bin/bash "${CI_PROJECT_DIR}/misc/docker/web/bootstrap-npm.sh"
     - su gazelle -c "make lint-js"

@@ -1,0 +1,31 @@
+#!/usr/bin/env php
+<?php
+
+namespace Gazelle;
+
+require_once __DIR__ . '/../lib/bootstrap.php';
+
+$quiet = in_array('--quiet', $argv) || in_array('-q', $argv);
+$exitCode = 0;
+
+foreach (Util\SetupStatus::check() as [$action, $error]) {
+    if ($error) {
+        $exitCode = 1;
+        echo "[❌ ERROR]️ $action->value: $error" . PHP_EOL;
+    } elseif (!$quiet) {
+        echo "[✅ OK] $action->value" . PHP_EOL;
+    }
+}
+
+if ($quiet) {
+    exit($exitCode);
+}
+echo PHP_EOL;
+
+if ($exitCode === 0) {
+    echo "No errors detected." . PHP_EOL;
+} else {
+    echo "There were errors." . PHP_EOL;
+}
+
+exit($exitCode);
