@@ -28,6 +28,9 @@ final class ReadRelay extends AbstractMigration {
         $this->query("
             grant select on all tables in schema relay to $pgUser
         ");
+        $this->query("
+            alter default privileges for role " . PG_RW_USER . " in schema relay grant select on tables to $pgUser;        
+        ");
     }
 
     public function down(): void {

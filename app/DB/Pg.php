@@ -59,9 +59,7 @@ class Pg {
 
     public function __construct(#[\SensitiveParameter] string $dsn) {
         $this->cnxrw = new Connection(
-            sprintf('host=%s port=%s dbname=%s user=%s password=%s',
-                PG_HOST, PG_PORT, PG_DB, PG_RW_USER, PG_RW_PASS,
-            ),
+            str_replace(';', ' ', explode(':', $dsn, 2)[1])
         );
         // The DSN of the connection
         $this->pdo   = new \PDO($dsn);

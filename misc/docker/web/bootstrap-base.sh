@@ -7,10 +7,7 @@ set -euo pipefail
 DUMP_MYSQL_SCHEMA=0
 
 cd "${CI_PROJECT_DIR}"
-COMPOSER_HOME="${CI_PROJECT_DIR}/.composer"
-POSTGRES_USER_PASSWORD="$(dd if=/dev/urandom count=1 bs=12 status=none | base64)"
-export COMPOSER_HOME
-export POSTGRES_USER_PASSWORD
+export COMPOSER_HOME="${CI_PROJECT_DIR}/.composer"
 
 [ -f "${CI_PROJECT_DIR}/lib/override.config.php" ] || bash "${CI_PROJECT_DIR}/misc/docker/web/generate-config-testing.sh"
 sed -i 's|gazelle\.php|ci-coverage.php|' "${CI_PROJECT_DIR}/public/index.php"
@@ -33,24 +30,13 @@ do
     sleep 1
 done
 
-echo "Create postgres database..."
-cat > ~/.pgpass << EOF
+echo "Configure postgres database..."
+cat > ~/.pgpass <<EOF
 #hostname:port:database:username:password
 ${PGHOST}:5432:*:${POSTGRES_USER}:${POSTGRES_PASSWORD}
 ${PGHOST}:5432:*:${POSTGRES_DB_USER}:${POSTGRES_USER_PASSWORD}
 EOF
 chmod 600 ~/.pgpass
-
-cat << EOF | psql -d postgres -U ${POSTGRES_USER} 
-create role ${POSTGRES_DB_USER} with password '${POSTGRES_USER_PASSWORD}' login;
-create role ${PG_RO_USER} with password '${PG_RO_PASS}' login;
-create database ${POSTGRES_DATABASE} with owner ${POSTGRES_DB_USER};
-EOF
-
-cat << EOF | psql "${POSTGRES_DATABASE}" "${POSTGRES_USER}"
-create extension mysql_fdw;
-grant all on foreign data wrapper mysql_fdw to ${POSTGRES_DB_USER};
-EOF
 
 if [ -z "${MYSQL_INIT_DB-}" ]; then
     echo "Restore mysql dump..."
@@ -58,6 +44,7 @@ if [ -z "${MYSQL_INIT_DB-}" ]; then
         cat /opt/gazelle/mysql_schema.sql /opt/gazelle/mysql_data.sql
         cat <<EOF
 CREATE USER IF NOT EXISTS 'ro_$MYSQL_USER'@'%' IDENTIFIED BY 'ro_$MYSQL_PASSWORD';
+GRANT SELECT ON $MYSQL_DATABASE.* TO 'ro_$MYSQL_USER'@'%';
 GRANT SELECT ON performance_schema.table_io_waits_summary_by_index_usage TO '$MYSQL_USER'@'%';
 GRANT SELECT ON performance_schema.table_io_waits_summary_by_table TO '$MYSQL_USER'@'%';
 GRANT SELECT ON sys.schema_redundant_indexes TO '$MYSQL_USER'@'%';

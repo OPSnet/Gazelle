@@ -32,7 +32,9 @@ services:
     environment:
       - POSTGRES_USER=nyala
       - POSTGRES_PASSWORD=nyalapw
-      - POSTGRES_DB=gz
+      - POSTGRES_DATABASE=gz
+      - POSTGRES_DB_USER=gazelle
+      - POSTGRES_USER_PASSWORD=gazellepw
       - POSTGRES_RO_USER=nyro
       - POSTGRES_RO_PASS=nyropw
 

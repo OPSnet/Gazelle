@@ -7,9 +7,11 @@ stages:
 #   MYSQL_PASSWORD - mysql user password
 #   MYSQL_USER - mysql username
 #   MYSQL_ROOT_PASSWORD - mysql root password
-#   PG_DATABASE - postgres database
-#   PG_USER - postgres R/W username
-#   PG_PASSWORD - postgres R/W password
+#   PG_DATABASE - postgres database stub name for gazelle
+#   PG_USER - postgres admin user
+#   PG_PASSWORD - postgres admin password
+#   POSTGRES_DB_USER - postgres R/W user
+#   POSTGRES_USER_PASSWORD - postgres R/W password
 #   PG_RO_USER - postgres R/O user
 #   PG_RO_PASS - postgres R/O password
 #
@@ -30,7 +32,9 @@ variables:
   POSTGRES_DATABASE: ${PG_DATABASE}_${CI_COMMIT_SHORT_SHA}
   POSTGRES_USER: $PG_USER
   POSTGRES_PASSWORD: $PG_PASSWORD
-  POSTGRES_USER_PASS: $PG_PASSWORD
+  # passthru
+  POSTGRES_DB_USER: $POSTGRES_DB_USER
+  POSTGRES_USER_PASSWORD: $POSTGRES_USER_PASSWORD
   PG_RO_USER: $PG_RO_USER
   PG_RO_PASS: $PG_RO_PASS
 
@@ -79,11 +83,6 @@ e2e-tests:
     ENV: dev
     MYSQL_HOST: mysql
     PGHOST: postgres
-    POSTGRES_DB_USER: gazelle
-    PGUSER: $POSTGRES_DB_USER
-    PGDATABASE: $POSTGRES_DATABASE
-    PG_RO_USER: $PG_RO_USER
-    PG_RO_PASS: $PG_RO_PASS
     PGDATA: /dev/shm/pg
     TEST_SSL_HOST: $TEST_SSL_HOST
     #ELECTRON_RUN_AS_NODE: 1
