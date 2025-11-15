@@ -33,10 +33,10 @@ class LoginWatch extends Base {
      */
     public function increment(int $userId, string $username): int {
         $this->userId = $userId;
-        $this->pg()->prepared_query("
+        $this->pg()->executeParams("
             insert into ip_history
                    (id_user, ip, data_origin)
-            values (?,       ?,  'login-fail')
+            values ($1,      $2, 'login-fail')
             on conflict (id_user, ip, data_origin) do update set
                 total = ip_history.total + 1,
                 seen = tstzrange(lower(ip_history.seen), now())
@@ -44,14 +44,21 @@ class LoginWatch extends Base {
         );
         $seen = match ($this->userId) {
             0       => false,
-            default => (bool)self::$db->scalar("
-                    SELECT 1
-                    FROM users_history_ips
-                    WHERE (EndTime IS NULL OR EndTime > now() - INTERVAL 1 WEEK)
-                        AND UserID = ?
-                        AND IP = ?
-                    ", $this->userId, $this->ipaddr
-                )
+            default => $this->pg()->executeParams("
+                select 1
+                from ip_site_history
+                where upper(seen) > now() - '1 week'::interval
+                    and id_user = $1
+                    and ip = $2
+                union
+                select 1
+                from ip_history
+                where upper(seen) > now() - '1 week'::interval
+                    and data_origin not in ('login-fail', 'tracker')
+                    and id_user = $1
+                    and ip = $2
+                ", $userId, $this->ipaddr
+            )->count() > 0
         };
         self::$db->prepared_query('
             UPDATE login_attempts SET

@@ -44,9 +44,6 @@ switch ($_REQUEST['action'] ?? '') {
     case 'dnu_alter':
         include_once 'managers/dnu_alter.php';
         break;
-    case 'dupe_ips':
-        include_once 'managers/dupe_ip.php';
-        break;
 
     case 'email_blacklist':
         include_once 'managers/email_blacklist.php';

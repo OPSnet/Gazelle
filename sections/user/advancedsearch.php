@@ -75,7 +75,6 @@ $nullable = ['inarray' => ['any', 'isnull', 'isnotnull']];
 
 $emailHistoryChecked = false;
 $ipHistoryChecked = false;
-$disabledIpChecked = false;
 $trackerLiveSource = true;
 
 $paginator = new Util\Paginator(USERS_PER_PAGE, (int)($_GET['page'] ?? 1));
@@ -91,7 +90,6 @@ if (empty($_GET)) {
     $result = [];
 } else {
     $emailHistoryChecked = !empty($_GET['email_history']);
-    $disabledIpChecked   = !empty($_GET['disabled_ip']);
     $ipHistoryChecked    = !empty($_GET['ip_history']);
     $trackerLiveSource   = ($_GET['tracker-src'] ?? 'live') == 'live';
     $dateRegexp          = ['regexp' => '/\d{4}-\d{2}-\d{2}/'];
@@ -201,8 +199,8 @@ if (empty($_GET)) {
     if (!empty($_GET['ip'])) {
         if ($ipHistoryChecked) {
             $distinct = true;
-            $join['hi'] = 'INNER JOIN relay.users_history_ips AS hi ON (hi."UserID" = um1."ID")';
-            $where[] = $m->leftMatch('hi."IP"');
+            $join['ish'] = 'INNER JOIN ip_site_history AS ish ON (ish.id_user = um1."ID")';
+            $where[] = $m->op('ish.ip', 'subnet');
         } else {
             $where[] = $m->leftMatch('um1."IP"');
         }
@@ -391,18 +389,6 @@ if (empty($_GET)) {
         $where[] = $m->op('ui1."Warned"', $_GET['warned']);
     }
 
-    if ($disabledIpChecked) {
-        $distinct = true;
-        if ($ipHistoryChecked) {
-            if (!isset($join['hi'])) {
-                $join['hi'] = 'LEFT JOIN relay.users_history_ips AS hi ON (hi."UserID" = um1."ID")';
-            }
-            $join['um2'] = 'LEFT JOIN relay.users_main AS um2 ON (um2."ID" != um1."ID" AND um2."Enabled" = \'2\' AND um2."ID" = hi."UserID")';
-        } else {
-            $join['um2'] = 'LEFT JOIN relay.users_main AS um2 ON (um2."ID" != um1."ID" AND um2."Enabled" = \'2\' AND um2."IP" = um1."IP")';
-        }
-    }
-
     if (isset($_GET['passkey']) && !empty($_GET['passkey'])) {
         $where[] = $m->matchField('um1.torrent_pass');
         $args[] = $_GET['passkey'];
@@ -437,7 +423,7 @@ if (empty($_GET)) {
         $query .= ' WHERE ' . implode("\nAND ", $where);
     }
     if ($distinct) {
-        $query .= 'GROUP BY um1."ID", ' . implode(',', array_values($orderBy));
+        $query .= ' GROUP BY um1."ID", ' . implode(',', array_values($orderBy));
     }
     $query .= " $order LIMIT ? OFFSET ?";
 
@@ -462,7 +448,6 @@ echo $Twig->render('admin/advanced-user-search.twig', [
     'input'         => $_GET,
 
     'tracker_live_source' => $trackerLiveSource,
-    'check_disabled_ip'   => $disabledIpChecked,
     'check_ip_history'    => $ipHistoryChecked,
     'check_email_history' => $emailHistoryChecked,
 

@@ -125,7 +125,9 @@ if ($Viewer) {
         if ($banMan->isBanned($Viewer->requestContext()->remoteAddr())) {
             Error403::error('Your IP address has been banned.');
         }
-        new Manager\IPv4()->register($Viewer, $Viewer->requestContext()->remoteAddr());
+        if (!$cookie) {  // api key or passkey (torrent dl)
+            new Manager\IPv4()->register($Viewer, $Viewer->requestContext()->remoteAddr());
+        }
     }
     if ($Viewer->isLocked() && !in_array($module, ['chat', 'staffpm', 'ajax', 'locked', 'logout', 'login'])) {
         $Viewer->requestContext()->setModule('locked');

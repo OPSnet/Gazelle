@@ -122,10 +122,6 @@ class IPv4Test extends TestCase {
         $this->assertEquals(1, $ipv4->userTotal($user), 'ipv4-user-filter-ip');
         $ipv4->setFilterIpaddr('10.1.0.1');
         $this->assertEquals(0, $ipv4->userTotal($user), 'ipv4-user-fail-ip');
-
-        global $Cache;
-        $Cache->delete_value("ipv4_dup_" . str_replace('.', '_', (string)$user->ipaddr()));
-        $this->assertEquals(0, $ipv4->duplicateTotal($user), 'ipv4-user-duplicate');
     }
 
     public function testUserOther(): void {

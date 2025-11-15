@@ -27,15 +27,15 @@ class IPv4 extends \Gazelle\Base {
     }
 
     public function register(User $user, string $ipv4): int {
-        $this->pg()->prepared_query("
+        $affected = $this->pg()->executeParams("
             insert into ip_history
                    (id_user, ip, data_origin)
-            values (?,       ?,  'site')
+            values ($1,      $2, 'token')
             on conflict (id_user, ip, data_origin) do update set
                 total = ip_history.total + 1,
                 seen = tstzrange(lower(ip_history.seen), now())
             ", $user->id, $ipv4
-        );
+        )->getAffectedRows();
         self::$db->prepared_query('
             INSERT INTO users_history_ips
                    (UserID, IP)
@@ -43,11 +43,9 @@ class IPv4 extends \Gazelle\Base {
             ON DUPLICATE KEY UPDATE EndTime = now()
             ', $user->id, $ipv4
         );
-        $affected = self::$db->affected_rows();
         $user->setField('IP', $ipv4)
             ->setField('ipcc', new GeoIP()->countryISO($ipv4))
             ->modify();
-        self::$cache->delete_value(sprintf('ipv4_dup_' . str_replace('-', '_', $ipv4)));
         $this->flush();
         return $affected;
     }
@@ -76,19 +74,6 @@ class IPv4 extends \Gazelle\Base {
     public function setFilterIpaddrRegexp(string $filterIpaddrRegexp): static {
         $this->filterIpaddrRegexp = $filterIpaddrRegexp;
         return $this;
-    }
-
-    public function duplicateTotal(User $user): int {
-        $cacheKey = "ipv4_dup_" . str_replace('.', '_', $user->ipaddr());
-        $value = self::$cache->get_value($cacheKey);
-        if ($value === false) {
-            $value = (int)self::$db->scalar("
-                SELECT count(*) FROM users_history_ips WHERE IP = ?
-                ", $user->ipaddr()
-            );
-            self::$cache->cache_value($cacheKey, $value, 3600);
-        }
-        return max(0, (int)$value - 1);
     }
 
     public function userTotalConfig(User $user): array {

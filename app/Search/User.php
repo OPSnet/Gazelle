@@ -33,6 +33,7 @@ class User {
             'isnotnull'       => "$field IS NOT NULL",
             'isnull'          => "$field IS NULL",
             'no', 'not_equal' => "$field != ?",
+            'subnet'          => "$field <<= ?",
             default           => "$field = ?",
         };
     }
