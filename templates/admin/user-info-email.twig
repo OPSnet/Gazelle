@@ -13,11 +13,11 @@
 </tr>
     {% endif %}
 <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
-    <td>{{ ip_search(r.ipv4) }}</td>
+    <td>{{ ip_search(r.ip) }}</td>
     <td>{{ r.cc }}</td>
     <td>{{ r.created }}</td>
     <td>{{ asn(r.name, r.n) }}</td>
-    <td><span class="resolve-ipv4" data-ip="{{ r.ipv4 }}">Resolving...</span></td>
+    <td><span class="resolve-ipv4" data-ip="{{ r.ip }}">Resolving...</span></td>
     <td>{{ r.email }}</td>
     <td>{{ r.useragent }}</td>
 </tr>

@@ -144,28 +144,22 @@ class History extends \Gazelle\BaseUser {
         self::$db->prepared_query("
             select h.Email  AS email,
                 h.created   AS created,
-                h.IP        AS ipv4,
+                h.IP        AS ip,
                 h.useragent AS useragent
             FROM users_history_emails AS h
             WHERE h.UserID = ?
             ORDER BY h.created DESC
             ", $this->user->id
         );
-        $asnList = $asn->findByIpList(self::$db->collect('ipv4'));
         $list = self::$db->to_array(false, MYSQLI_ASSOC);
-        foreach ($list as &$row) {
-            $row['cc']   = $asnList[$row['ipv4']]['cc'];
-            $row['n']    = $asnList[$row['ipv4']]['n'];
-            $row['name'] = $asnList[$row['ipv4']]['name'];
-        }
-        unset($row);
+        static::addAsnInfo($asn, $list);
         return $list;
     }
 
     /**
      * Email duplicates
      *
-     * @return array of array of [id, email, user_id, created, ipv4, \User user]
+     * @return array of array of [id, email, user_id, created, ip, \User user]
      */
     public function emailDuplicate(ASN $asn = new ASN()): array {
         // Get history of matches
@@ -173,7 +167,7 @@ class History extends \Gazelle\BaseUser {
             SELECT users_history_emails_id AS id,
                 Email  AS email,
                 UserID AS user_id,
-                IP     AS ipv4,
+                IP     AS ip,
                 created,
                 useragent
             FROM users_history_emails AS uhe
@@ -182,14 +176,8 @@ class History extends \Gazelle\BaseUser {
             ORDER BY uhe.Email, uhe.created DESC
             ", $this->user->id, $this->user->id
         );
-        $asnList = $asn->findByIpList(self::$db->collect('ipv4'));
         $list = self::$db->to_array(false, MYSQLI_ASSOC);
-        foreach ($list as &$row) {
-            $row['cc']   = $asnList[$row['ipv4']]['cc'];
-            $row['n']    = $asnList[$row['ipv4']]['n'];
-            $row['name'] = $asnList[$row['ipv4']]['name'];
-        }
-        unset($row);
+        static::addAsnInfo($asn, $list);
         return $list;
     }
 
@@ -315,32 +303,48 @@ class History extends \Gazelle\BaseUser {
         );
     }
 
-    public function siteIPv4(ASN $asn = new ASN()): array {
+    public function apiIP(ASN $asn = new ASN()): array {
         $dir = $this->direction === 'down' ? 'desc' : 'asc';
         $orderBy = match ($this->column) {
             'first' => "first_seen $dir, ip $dir, last_seen $dir",
             'last'  => "last_seen $dir, ip $dir, first_seen $dir",
             default => "ip $dir, first_seen $dir, last_seen $dir",
         };
-        $result = $this->pg()->all("
-            select ip               ipv4,
-                lower(unnest(seen)) first_seen,
-                upper(unnest(seen)) last_seen
-            from ip_site_history
-            where id_user = ?
+        $result = $this->pg()->executeParams("
+            select ip       ip,
+                lower(seen) first_seen,
+                upper(seen) last_seen
+            from ip_history
+            where id_user = $1
+                and data_origin = 'token'
             order by $orderBy
             ", $this->user->id
-        );
-        $asnList = $asn->findByIpList(array_unique(array_map(fn ($r) => $r['ipv4'], $result)));
-        foreach ($result as &$row) {
-            $row['cc']   = $asnList[$row['ipv4']]['cc'];
-            $row['n']    = $asnList[$row['ipv4']]['n'];
-            $row['name'] = $asnList[$row['ipv4']]['name'];
-        }
+        )->fetchAll();
+        static::addAsnInfo($asn, $result);
         return $result;
     }
 
-    public function trackerIPv4(ASN $asn = new ASN()): array {
+    public function siteIP(ASN $asn = new ASN()): array {
+        $dir = $this->direction === 'down' ? 'desc' : 'asc';
+        $orderBy = match ($this->column) {
+            'first' => "first_seen $dir, ip $dir, last_seen $dir",
+            'last'  => "last_seen $dir, ip $dir, first_seen $dir",
+            default => "ip $dir, first_seen $dir, last_seen $dir",
+        };
+        $result = $this->pg()->executeParams("
+            select ip               ip,
+                lower(unnest(seen)) first_seen,
+                upper(unnest(seen)) last_seen
+            from ip_site_history
+            where id_user = $1
+            order by $orderBy
+            ", $this->user->id
+        )->fetchAll();
+        static::addAsnInfo($asn, $result);
+        return $result;
+    }
+
+    public function trackerIP(ASN $asn = new ASN()): array {
         $dir = $this->direction === 'down' ? 'DESC' : 'ASC';
         $orderBy = match ($this->column) {
             'first' => "from_unixtime(min(tstamp)) $dir, inet_aton(IP) $dir, from_unixtime(max(tstamp)) $dir",
@@ -348,7 +352,7 @@ class History extends \Gazelle\BaseUser {
             default => "inet_aton(IP) $dir, from_unixtime(min(tstamp)) $dir, from_unixtime(max(tstamp)) $dir",
         };
         self::$db->prepared_query("
-            SELECT IP                      AS ipv4,
+            SELECT IP                      AS ip,
                 from_unixtime(min(tstamp)) AS first_seen,
                 from_unixtime(max(tstamp)) AS last_seen
             FROM xbt_snatched
@@ -357,14 +361,12 @@ class History extends \Gazelle\BaseUser {
             ORDER BY $orderBy
             ", $this->user->id
         );
-        $asnList = $asn->findByIpList(self::$db->collect('ipv4'));
         $list = self::$db->to_array(false, MYSQLI_ASSOC);
         foreach ($list as &$row) {
-            $row['cc']   = $asnList[$row['ipv4']]['cc'];
-            $row['n']    = $asnList[$row['ipv4']]['n'];
-            $row['name'] = $asnList[$row['ipv4']]['name'];
+            $row['first_seen'] = new \DateTimeImmutable($row['first_seen']);
+            $row['last_seen']  = new \DateTimeImmutable($row['last_seen']);
         }
-        unset($row);
+        static::addAsnInfo($asn, $list);
         return $list;
     }
 
@@ -443,5 +445,14 @@ class History extends \Gazelle\BaseUser {
         );
         $this->user->snatch()->flush();
         return self::$db->affected_rows();
+    }
+
+    protected static function addAsnInfo(ASN $asn, array &$ipList): void {
+        $asnList = $asn->findByIpList(array_unique(array_map(fn ($r) => $r['ip'], $ipList)));
+        foreach ($ipList as &$row) {
+            $row['cc']   = $asnList[$row['ip']]['cc'];
+            $row['n']    = $asnList[$row['ip']]['n'];
+            $row['name'] = $asnList[$row['ip']]['name'];
+        }
     }
 }

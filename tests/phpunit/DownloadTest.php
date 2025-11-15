@@ -122,9 +122,9 @@ class DownloadTest extends TestCase {
         $this->assertEquals(1, $this->torrent->expireToken($user), 'redown-expire-token');
         $this->assertFalse($user->flush()->hasToken($this->torrent), 'redown-user-no-more-token');
         $this->assertFalse($this->torrent->isFreeleechPersonal(), 'redown-torrent-is-not-pfl');
-        $tracker = $user->history()->trackerIPv4();
+        $tracker = $user->history()->trackerIP();
         $this->assertCount(1, $tracker, 'tracker-history-total');
-        $this->assertEquals('127.0.0.1', $tracker[0]['ipv4'], 'tracker-history-ipv4');
+        $this->assertEquals('127.0.0.1', $tracker[0]['ip'], 'tracker-history-ipv4');
 
         $list = $this->torrent->snatchList($user, 2, 0);
         $this->assertCount(1, $list, 'snatch-torrent-list');
