@@ -894,6 +894,7 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
             );
         self::$db->commit();
 
+        $this->artistRole()?->flush();
         $this->flush()->refresh();
         $torrent->uploader()->flushRecentUpload();
         $torrent->flush();
@@ -966,7 +967,7 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
                 if ($artist->usageTotal() === 0) {
                     $artist->remove();
                 } else {
-                    $this->flush();
+                    $artist->flush();
                 }
             }
         }
@@ -1045,21 +1046,18 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
         if (!$ok) {
             return 0;
         }
+        $this->flush();
         parent::remove();
+        self::$cache->delete_multi([
+            sprintf(Manager\TGroup::ID_KEY, $this->id),
+            sprintf(Manager\Torrent::CACHE_KEY_LATEST_UPLOADS, 5),
+        ]);
 
         if ($isMusic) {
             self::$cache->decrement('stats_album_count');
         }
         self::$cache->decrement('stats_group_count');
 
-        self::$cache->delete_multi([
-            "groups_artists_{$this->id}",
-            "torrent_group_{$this->id}",
-            sprintf(self::CACHE_KEY, $this->id),
-            sprintf(self::CACHE_TLIST_KEY, $this->id),
-            sprintf(Manager\TGroup::ID_KEY, $this->id),
-            sprintf(Manager\Torrent::CACHE_KEY_LATEST_UPLOADS, 5),
-        ]);
         return (int)$ok;
     }
 }

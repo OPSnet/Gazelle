@@ -206,15 +206,10 @@ class TGroup extends \Gazelle\BaseManager {
         ));
 
         // Requests
-        self::$db->prepared_query("
-            SELECT concat('request_', ID) FROM requests WHERE GroupID = ?
-            ", $old->id
-        );
-        self::$cache->delete_multi(self::$db->collect(0));
-        self::$db->prepared_query("
-            UPDATE requests SET
-                GroupID = ?
-            WHERE GroupID = ?
+        $this->pg()->query("
+            update request set
+                id_tgroup = $1
+            where id_tgroup = $2
             ", $new->id, $old->id
         );
 
