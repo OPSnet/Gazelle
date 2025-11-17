@@ -290,7 +290,7 @@ class SphinxqlQuery {
      * @return SphinxqlResult|false object
      */
     public function sphinxquery($GetMeta = true) {
-        $QueryStartTime = microtime(true);
+        $QueryStartTime = hrtime(true);
         $this->build_query();
         if (count($this->Errors) > 0) {
             $ErrorMsg = implode("\n", $this->Errors);
@@ -299,7 +299,7 @@ class SphinxqlQuery {
         }
         $QueryString = $this->QueryString;
         $Result = $this->send_query($GetMeta);
-        $QueryProcessTime = (microtime(true) - $QueryStartTime) * 1000;
+        $QueryProcessTime = (hrtime(true) - $QueryStartTime) * 1e-9;
         Sphinxql::register_query($QueryString, $QueryProcessTime);
         return $Result;
     }

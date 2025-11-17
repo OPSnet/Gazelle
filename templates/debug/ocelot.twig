@@ -18,7 +18,7 @@
             {{ request.status }}
         </td>
         <td class="debug_info debug_timing" style="width: 100px;">
-            {{ request.time|number_format(5) }} ms
+            {{ (request.time * 1000)|number_format(5) }} ms
         </td>
     </tr>
     {% if loop.last %}

@@ -5,7 +5,7 @@
     <tr>
         <td><strong><a href="#" id="debug-view-query-my" class="brackets">View</a>
         {{ list|length|number_format }} Mysql {% if list|length == 1 %}query{% else %}queries{% endif %}
-        ({{ elapsed|number_format(2) }} ms)</strong> (mean: {{ (elapsed/nr)|number_format(5) }} ms)</td>
+        ({{ (elapsed * 1000)|number_format(2) }} ms)</strong> (mean: {{ ((elapsed * 1000)/nr)|number_format(5) }} ms)</td>
     </tr>
 </table>
 <table id="debug-query-my" class="debug_table hidden">
@@ -16,7 +16,7 @@
             {"query": q.query}|json_encode|b64 }}">Inspect</a>
         </td>
         <td class="rowa debug_info debug_query_time" style="width: 130px;">{{
-            q.elapsed|number_format(5) }} ms</td>
+            (q.elapsed * 1000)|number_format(5) }} ms</td>
 {%    if q.warning is defined %}
 {%      for w in q.warning %}
 {%          if loop.first %}

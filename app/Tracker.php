@@ -271,7 +271,7 @@ class Tracker extends Base {
         $uri = "http://" . TRACKER_HOST . ":" . TRACKER_PORT . "/{$secret}{$path}";
         $attempts = 0;
         $success = false;
-        $startTime = microtime(true);
+        $startTime = hrtime(true);
         $data = null;
         $responseCode = 0;
         $sleep = 1200000; // 1200ms
@@ -306,7 +306,7 @@ class Tracker extends Base {
             'response' => $data,
             'code'     => $responseCode,
             'status'   => ($success ? 'ok' : 'failed'),
-            'time'     => 1000 * (microtime(true) - $startTime),
+            'time'     => (hrtime(true) - $startTime) * 1e-9,
         ];
         if ($success) {
             return $data;

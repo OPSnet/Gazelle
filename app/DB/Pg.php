@@ -85,7 +85,7 @@ class Pg {
     }
 
     public function execute(string $query): Result {
-        $begin = microtime(true);
+        $begin = hrtime(true);
         try {
             $result = $this->cnxrw->execute($query);
         } catch (ProgrammingException $e) {
@@ -99,7 +99,7 @@ class Pg {
      * @param $args array<int, mixed>
      */
     public function executeParams(string $query, mixed ...$args): Result {
-        $begin = microtime(true);
+        $begin = hrtime(true);
         try {
             $result = $this->cnxrw->executeParams($query, [...$args]); /** @phpstan-ignore-line mixed mess */
         } catch (ProgrammingException $e) {
@@ -120,7 +120,7 @@ class Pg {
 
     // phpcs:disable PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function prepared_query(string $query, ...$args): int {
-        $begin = microtime(true);
+        $begin = hrtime(true);
         $st = $this->prepare($query);
         try {
             if ($st->execute([...$args])) {
@@ -139,7 +139,7 @@ class Pg {
     // phpcs:enable
 
     public function insert(string $query, ...$args): int {
-        $begin = microtime(true);
+        $begin = hrtime(true);
         $st = $this->prepare($query);
         try {
             if ($st->execute([...$args])) {
@@ -163,7 +163,7 @@ class Pg {
             return false;
         }
         static $delimiter = "\t", $nullAs = '\\N';
-        $begin = microtime(true);
+        $begin = hrtime(true);
         $processedRows = [];
         foreach ($rows as $row) {
             $vals = [];
@@ -202,7 +202,7 @@ class Pg {
      * Returns `false` if the execute() failed
      */
     public function writeReturning(string $query, ...$args): int|string|float|false {
-        $begin = microtime(true);
+        $begin = hrtime(true);
         $st = $this->prepare($query);
         if ($st->execute([...$args])) {
             $result = $st->fetch(\PDO::FETCH_NUM)[0];
@@ -218,7 +218,7 @@ class Pg {
      * when there is more than one item returned
      */
     public function writeReturningRow(string $query, ...$args): array {
-        $begin = microtime(true);
+        $begin = hrtime(true);
         $st = $this->prepare($query);
         if ($st->execute([...$args])) {
             $row = $st->fetch(\PDO::FETCH_NUM);
@@ -230,7 +230,7 @@ class Pg {
     }
 
     protected function fetchRow(string $query, int $mode, ...$args): array {
-        $begin = microtime(true);
+        $begin = hrtime(true);
         $st = $this->pdo->prepare($query);
         if ($st !== false && $st->execute([...$args])) {
             $row = $st->fetch($mode);
@@ -244,7 +244,7 @@ class Pg {
     }
 
     public function scalar(string $query, ...$args): mixed {
-        $begin = microtime(true);
+        $begin = hrtime(true);
         $st = $this->pdo->prepare($query);
         if ($st !== false && $st->execute([...$args])) {
             $result = $st->fetch(\PDO::FETCH_NUM);
@@ -268,7 +268,7 @@ class Pg {
     }
 
     public function all(string $query, ...$args): array {
-        $begin = microtime(true);
+        $begin = hrtime(true);
         $st = $this->pdo->prepare($query);
         if ($st === false || !$st->execute([...$args])) {
             $this->stats->error($query);
@@ -310,7 +310,7 @@ class Pg {
     }
 
     public function column(string $query, ...$args): array {
-        $begin = microtime(true);
+        $begin = hrtime(true);
         $st = $this->pdo->prepare($query);
         if ($st === false || !$st->execute([...$args])) {
             $this->stats->error($query);

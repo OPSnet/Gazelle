@@ -48,7 +48,7 @@ class Cache extends \Memcached {
      * @see Memcached::getServerList()
      */
     public function __construct() {
-        $begin = microtime(true);
+        $begin = hrtime(true);
         parent::__construct(CACHE_ID);
         $Servers = MEMCACHE_HOST_LIST;
         $ServerList = [];
@@ -65,14 +65,14 @@ class Cache extends \Memcached {
                 $this->addServer($Server['host'], $Server['port'], $Weight);
             }
         }
-        $this->elapsed = (microtime(true) - $begin) * 1000;
+        $this->elapsed = (hrtime(true) - $begin) * 1e-9;
     }
 
     //---------- Caching functions ----------//
 
     // Wrapper for Memcache::set, with the zlib option removed and default duration of 30 days
     public function cache_value($key, $value, $Duration = 2_592_000): bool {
-        $begin = microtime(true);
+        $begin = hrtime(true);
         if (empty($key)) {
             trigger_error("Cache insert failed for empty key");
         }
@@ -80,12 +80,12 @@ class Cache extends \Memcached {
         if ($result === false) {
             trigger_error("Cache insert failed for key $key:" . $this->getResultMessage());
         }
-        $this->elapsed += (microtime(true) - $begin) * 1000;
+        $this->elapsed += (hrtime(true) - $begin) * 1e-9;
         return $result;
     }
 
     public function get_value(string $key): mixed {
-        $begin = microtime(true);
+        $begin = hrtime(true);
         if (empty($key)) {
             $value = false;
         } else {
@@ -95,13 +95,13 @@ class Cache extends \Memcached {
             }
             ++$this->hit[$key];
         }
-        $this->elapsed += (microtime(true) - $begin) * 1000;
+        $this->elapsed += (hrtime(true) - $begin) * 1e-9;
         return $value;
     }
 
     // Wrapper for Memcache::delete. For a reason, see above.
     public function delete_value(string $key): bool {
-        $begin = microtime(true);
+        $begin = hrtime(true);
         if (empty($key)) {
             $ret = false;
         } else {
@@ -111,12 +111,12 @@ class Cache extends \Memcached {
             }
             $this->delete[] = $key;
         }
-        $this->elapsed += (microtime(true) - $begin) * 1000;
+        $this->elapsed += (hrtime(true) - $begin) * 1e-9;
         return $ret;
     }
 
     public function delete_multi(array $list): array {
-        $begin = microtime(true);
+        $begin = hrtime(true);
         if (empty($list)) {
             $ret = [];
         } else {
@@ -127,29 +127,29 @@ class Cache extends \Memcached {
                 array_push($this->delete, ...$list);
             }
         }
-        $this->elapsed += (microtime(true) - $begin) * 1000;
+        $this->elapsed += (hrtime(true) - $begin) * 1e-9;
         return $ret;
     }
 
     public function increment_value(string $key, int $delta = 1): int|false {
-        $begin = microtime(true);
+        $begin = hrtime(true);
         $new = $this->increment($key, $delta);
         if (!isset($this->hit[$key])) {
             $this->hit[$key] = 0;
         }
         ++$this->hit[$key];
-        $this->elapsed += (microtime(true) - $begin) * 1000;
+        $this->elapsed += (hrtime(true) - $begin) * 1e-9;
         return $new;
     }
 
     public function decrement_value($key, $delta = 1): int|false {
-        $begin = microtime(true);
+        $begin = hrtime(true);
         $new = $this->decrement($key, $delta);
         if (!isset($this->hit[$key])) {
             $this->hit[$key] = 0;
         }
         ++$this->hit[$key];
-        $this->elapsed += (microtime(true) - $begin) * 1000;
+        $this->elapsed += (hrtime(true) - $begin) * 1e-9;
         return $new;
     }
 

@@ -26,11 +26,11 @@ class Notification extends \Gazelle\Base {
         \Gazelle\Manager\Torrent            $torMan,
     ): int {
         $processed = 0;
-        $begin     = microtime(true);
         $seen      = [];
 
-        // How many new uploads can we process in almost a minute
-        while (microtime(true) < $begin + 50) {
+        // How many new uploads can we process in roughly 50s
+        $eta = hrtime(true) + 50e9;
+        while (hrtime(true) < $eta) {
             $ticket = $ticketMan->findByExclusion(NotificationTicketState::Pending, $seen);
             if (is_null($ticket)) {
                 $ticket = $ticketMan->findByExclusion(NotificationTicketState::Stale, $seen);

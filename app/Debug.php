@@ -10,13 +10,15 @@ class Debug {
     protected static array $markList = [];
     protected float $cpuStart;
     protected float $epochStart;
+    protected float $timerStart;
 
     public function __construct(
         protected Cache    $cache,
         protected DB\Mysql $db,
     ) {
+        $this->timerStart = hrtime(true);
         $this->epochStart = microtime(true);
-        $this->cpuStart = $this->cpuElapsed();
+        $this->cpuStart   = $this->cpuElapsed();
         set_error_handler($this->errorHandler(...));
     }
 
@@ -31,7 +33,7 @@ class Debug {
     }
 
     public function duration(): float {
-        return microtime(true) - $this->epochStart();
+        return (hrtime(true) - $this->timerStart) * 1e-9;
     }
 
     public function profile(User $user, bool $profile): ErrorLog|null {
@@ -269,7 +271,7 @@ class Debug {
                 : "{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}",
             'Memory usage'      => byte_format(memory_get_usage(true)),
             'Page process time' => number_format($this->duration(), 3) . ' s',
-            'Script start'      => Time::sqlTime($this->epochStart()),
+            'Script start'      => Time::sqlTime($this->epochStart),
             'Script end'        => Time::sqlTime(microtime(true)),
         ];
     }

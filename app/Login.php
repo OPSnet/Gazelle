@@ -46,7 +46,7 @@ class Login extends Base {
         $this->persistent = $persistent;
         $this->mfaToken   = trim($mfaToken);
 
-        $begin  = microtime(true);
+        $begin  = hrtime(true);
         $user   = $this->attemptLogin();
         $ipaddr = $this->requestContext()->remoteAddr();
         if ($user) {
@@ -84,7 +84,7 @@ class Login extends Base {
                 );
             }
         }
-        usleep((int)(LOGIN_SLEEP_USEC - (microtime(true) - $begin)));
+        usleep(max(0, (int)(LOGIN_SLEEP_USEC - (hrtime(true) - $begin) * 1e-3)));
         return $user;
     }
 

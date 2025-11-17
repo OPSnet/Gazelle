@@ -20,7 +20,7 @@ if (isset($_POST['confirm-flush']) && isset($_POST['global_flush'])) {
 
 $flushed = false;
 $multi   = false;
-$begin   = microtime(true);
+$begin   = hrtime(true);
 if (!empty($_REQUEST['key'])) {
     $Keys = preg_split('/\s+/', trim($_REQUEST['key']));
     if ($Keys && isset($_REQUEST['flush']) && isset($_REQUEST['check'])) {
@@ -65,7 +65,6 @@ if (!empty($_REQUEST['key'])) {
         $multi   = true;
     }
 }
-$delta = microtime(true) - $begin;
 
 if (isset($_REQUEST['json'])) {
     header('Content-Type: application/json; charset=utf-8');
@@ -78,7 +77,7 @@ if (isset($_REQUEST['json'])) {
 }
 
 echo $Twig->render('admin/cache-management.twig', [
-    'delta'   => $delta,
+    'delta'   => (hrtime(true) - $begin)  * 1e-9,
     'flushed' => $flushed,
     'key'     => $_REQUEST['key'] ?? '',
     'multi'   => $multi,

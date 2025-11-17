@@ -55,7 +55,7 @@ if ($find === false) {
 }
 
 $db        = Gazelle\DB::DB();
-$begin     = microtime(true);
+$begin     = hrtime(true);
 $processed = 0;
 $orphan    = 0;
 $alien     = 0;
@@ -88,7 +88,7 @@ while (($file = fgets($find)) !== false) {
     }
 }
 
-$delta = microtime(true) - $begin;
+$delta = (hrtime(true) - $begin) * 1e-9;
 printf("## Processed %d files in %0.1f seconds (%0.2f file/sec), %d orphan, %d alien, %d mismatch.\n",
     $processed, $delta, $delta > 0 ? $processed / $delta : 0, $orphan, $alien, $mismatch
 );

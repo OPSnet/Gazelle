@@ -66,7 +66,7 @@ abstract class Collector extends Base  {
         protected readonly string          $title,
         protected int                      $orderBy,
     ) {
-        $this->startTime = microtime(true);
+        $this->startTime = hrtime(true);
     }
 
     /**
@@ -264,7 +264,7 @@ abstract class Collector extends Base  {
             'skipped' => $this->skipped,
             'title'   => $this->title,
             'date'    => date("Y-m-d H:i"),
-            'time'    => 1000 * (microtime(true) - $this->startTime),
+            'time'    => (hrtime(true) - $this->startTime) * 1e-9,
             'used'    => memory_get_usage(true),
             'user'    => $this->user,
         ]);

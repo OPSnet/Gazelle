@@ -265,7 +265,7 @@ class Mysql {
      * @param callable(): (\mysqli_result|false) $Closure
      */
     private function attempt_query(string $Query, callable $Closure): \mysqli_result|false {
-        $startTime = microtime(true);
+        $startTime = hrtime(true);
         if ($this->LinkID === false) {
             return false;
         }
@@ -292,7 +292,7 @@ class Mysql {
             usleep((int)($sleep * 1e6));
             $sleep *= 1.75;
         }
-        $elapsed = (microtime(true) - $startTime) * 1000;
+        $elapsed = (hrtime(true) - $startTime) * 1e-9;
         // Kills admin pages, and prevents Debug->analysis when the whole set exceeds 1 MB
         if (($Len = strlen($Query)) > 16384) {
             $Query = substr($Query, 0, 16384) . '... ' . ($Len - 16384) . ' bytes trimmed';

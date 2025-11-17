@@ -20,7 +20,7 @@
 <div class="thin">
 <table>
     <tr><td class="colhead">Case</td><td>{{ case.id }}</td></tr>
-    <tr><td class="colhead">Duration</td><td>{{ case.duration }}</td></tr>
+    <tr><td class="colhead">Duration</td><td>{{ case.duration }} s</td></tr>
     <tr><td class="colhead">Memory usage</td><td>{{ case.memory|octet_size }}</td></tr>
     <tr><td class="colhead">Queries</td><td>{{ case.nr_query|number_format }}</td></tr>
     <tr><td class="colhead">Cache hits</td><td>{{ case.nr_cache|number_format }}</td></tr>

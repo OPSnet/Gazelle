@@ -28,7 +28,6 @@ class Stats {
     }
 
     public function totalDuration(): float {
-        $sum = 0.0;
         return (float)array_reduce(
             $this->queryList(),
             fn ($sum, $query) => $sum + $query['duration']
@@ -36,11 +35,10 @@ class Stats {
     }
 
     public function register(string $query, int $metric, float $begin, array $args): int {
-        $now = microtime(true);
         self::$query[] = [
             'args'     => $args,
-            'duration' => $now - $begin,
-            'epoch'    => $now,
+            'duration' => (hrtime(true) - $begin) * 1e-9,
+            'epoch'    => microtime(true),
             'metric'   => $metric,
             'query'    => $query,
         ];

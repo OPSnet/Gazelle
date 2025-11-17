@@ -17,7 +17,7 @@ abstract class Task extends Base {
         public readonly string $name,
         public readonly bool $isDebug,
     ) {
-        $this->startTime = microtime(true);
+        $this->startTime = hrtime(true);
     }
 
     public function begin(): void {
@@ -31,7 +31,7 @@ abstract class Task extends Base {
     }
 
     public function end(bool $sane): int {
-        $elapsed = (microtime(true) - $this->startTime) * 1000;
+        $elapsed = (hrtime(true) - $this->startTime) / 1e6;
         $errorCount = count(array_filter($this->events, fn($event) => $event->severity === 'error'));
         self::$db->prepared_query('
             UPDATE periodic_task_history SET
@@ -43,7 +43,7 @@ abstract class Task extends Base {
             ', 'completed', $errorCount, $this->processed, $elapsed, $this->historyId
         );
 
-        echo("DONE! (" . number_format(microtime(true) - $this->startTime, 3) . ")\n");
+        echo("DONE! (" . number_format((hrtime(true) - $this->startTime) * 1e-9, 3) . ")\n");
 
         foreach ($this->events as $event) {
             printf("%s [%s] (%d) %s\n", $event->timestamp, $event->severity, $event->reference, $event->event);

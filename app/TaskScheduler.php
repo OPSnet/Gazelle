@@ -347,8 +347,8 @@ class TaskScheduler extends Base {
         $fail = [0];
         $run  = 0;
 
-        $TTL = microtime(true) + 58;
-        while (microtime(true) < $TTL) {
+        $TTL = hrtime(true) + 58e9;
+        while (hrtime(true) < $TTL) {
             $taskId = (int)self::$db->scalar("
                 SELECT pt.periodic_task_id
                 FROM periodic_task pt
