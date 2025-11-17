@@ -401,16 +401,6 @@ class Forum extends BaseObject {
         );
     }
 
-    public function autoSubscribeForUserList(User $user): array {
-        if (!$user->permitted('site_forum_autosub')) {
-            return [];
-        }
-        return $this->pg()->column("
-            select id_forum from forum_autosub where id_user = ?
-            ", $user->id
-        );
-    }
-
     /**
      * Toggle the state of auto subscriptions on this forum
      *

@@ -124,6 +124,7 @@ class Forum extends \Gazelle\BaseManager {
     public function tableOfContents(\Gazelle\User $user): array {
         $toc = $this->tableOfContentsMain();
         $userToc = [];
+        $autosubList = $this->forumAutosubscribeList($user);
         foreach ($toc as $category => $forumList) {
             $seen = 0;
             foreach ($forumList as $f) {
@@ -131,7 +132,6 @@ class Forum extends \Gazelle\BaseManager {
                 if (!$user->readAccess($forum)) {
                     continue;
                 }
-                $autosubList  = $forum->autoSubscribeForUserList($user);
                 $userLastRead = $forum->userLastRead($user);
                 if (isset($userLastRead[$f['LastPostTopicID']])) {
                     $isRead       = true;
@@ -286,5 +286,15 @@ class Forum extends \Gazelle\BaseManager {
             ", $user->id, ...$args
         );
         return self::$db->to_array(false, MYSQLI_ASSOC);
+    }
+
+    public function forumAutosubscribeList(\Gazelle\User $user): array {
+        if (!$user->permitted('site_forum_autosub')) {
+            return [];
+        }
+        return $this->pg()->column("
+            select id_forum from forum_autosub where id_user = ?
+            ", $user->id
+        );
     }
 }

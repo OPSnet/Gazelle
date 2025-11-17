@@ -303,6 +303,7 @@ class ForumTest extends TestCase {
 
     public function testForumAutoSub(): void {
         $this->category = new Manager\ForumCategory()->create('phpunit category', 10010);
+        $forumMan       = new Manager\Forum();
         $this->forum    = Helper::makeForum(
             user:        $this->userList['admin'],
             sequence:    151,
@@ -318,9 +319,9 @@ class ForumTest extends TestCase {
         $this->assertEquals(0, $this->forum->toggleAutoSubscribe($user, true), 'forum-autosub-toggle-none');
 
         $this->assertEquals([$user->id], $this->forum->autoSubscribeUserIdList(), 'forum-autosub-userlist');
-        $this->assertEquals([], $this->forum->autoSubscribeForUserList($user), 'forum-autosub-forum-list');
+        $this->assertEquals([], $forumMan->forumAutosubscribeList($user), 'forum-autosub-forum-list');
         $user->addCustomPrivilege('site_forum_autosub');
-        $this->assertEquals([$this->forum->id], $this->forum->autoSubscribeForUserList($user), 'forum-autosub-forum-list');
+        $this->assertEquals([$this->forum->id], $forumMan->forumAutosubscribeList($user), 'forum-autosub-forum-list');
 
         $threadMan = new Manager\ForumThread();
         $this->threadList[] = $threadMan->create($this->forum, $this->userList['admin'], 'phpunit thread title', 'this is a new thread');

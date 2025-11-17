@@ -81,7 +81,7 @@ if (isset($_POST['subscribe'])) {
 $userMan = new Manager\User();
 foreach ($forum->autoSubscribeUserIdList() as $userId) {
     $user = $userMan->findById($userId);
-    if ($user) {
+    if ($user?->permitted('site_forum_autosub')) {
         new User\Subscription($user)->subscribe($thread);
     }
 }
