@@ -30,16 +30,13 @@ $notes  = '';
 $reason = '';
 $source = '';
 
-if ($Viewer->isInterviewer() || $Viewer->isStaff()) {
+if ($Viewer->isInterviewer() || $Viewer->permitted('users_invite_notes')) {
     $notes = trim($_POST['notes'] ?? '');
 }
 
 $inviteSourceMan = null;
 if ($Viewer->isRecruiter() || $Viewer->isStaff()) {
     $inviteSourceMan = new Manager\InviteSource();
-}
-
-if ($inviteSourceMan || $Viewer->permitted('users_invite_notes')) {
     $reason = trim($_POST['profile_info'] ?? '');
 }
 

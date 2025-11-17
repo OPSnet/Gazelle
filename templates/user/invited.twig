@@ -61,21 +61,13 @@
 </div>
 <div class="box box2">
     <form class="send_form pad" name="invite" action="user.php" method="post">
-{%  if is_site_inviter %}
+{%  if user.isRecruiter or user.isStaff %}
         <div class="field_div">
             <div class="label">Invite source:</div>
             <div class="input">
-            {{ _self.select_invite_source(0, config, user_source) }}
+                {{ _self.select_invite_source(0, config, user_source) }}
             </div>
         </div>
-{%  endif %}
-        <div class="field_div">
-            <div class="label">Email address:</div>
-            <div class="input">
-                <input type="email" name="email" size="40" />
-            </div>
-        </div>
-{%  if is_site_inviter or user.permitted('users_invite_notes') %}
         <div class="field_div">
             <div class="label">&nbsp;</div>
             <div class="input">
@@ -83,22 +75,26 @@
                 (E.g. <tt>{{ constant('SITE_URL') }}/user.php?id={{ user.id }}</tt>).
             </div>
         </div>
-{%      if user.isRecruiter or user.isStaff %}
         <div class="field_div">
             <div class="label">Profile information:</div>
             <div class="input">
                 <input type="text" name="profile_info" size="40" maxlength="255" />
             </div>
         </div>
-{%      endif %}
-{%      if user.isInterviewer or user.isStaff %}
+{%  endif %}
+        <div class="field_div">
+            <div class="label">Email address:</div>
+            <div class="input">
+                <input type="email" name="email" size="40">
+            </div>
+        </div>
+{%  if user.isInterviewer or user.permitted('users_invite_notes') %}
         <div class="field_div">
             <div class="label">Additional notes:</div>
             <div class="input">
                 {{ notes.emit|raw }}
             </div>
         </div>
-{%      endif %}
 {%  endif %}
         <div class="field_div">
             <div class="label">&nbsp;</div>
@@ -213,12 +209,12 @@
 {% endif %}
     </table>
     {{ paginator.linkbox|raw }}
+</div>
 {% if is_site_inviter %}
     <input type="hidden" name="action" value="invite" />
     <input type="hidden" name="auth" value="{{ viewer.auth }}" />
     <input type="hidden" name="user_id" value="{{ user.id }}" />
 </form>
 {% endif %}
-</div>
-</div>
+</div>{# thin #}
 {{ footer() }}
