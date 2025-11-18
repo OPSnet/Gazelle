@@ -26,7 +26,7 @@ if (isset($_GET['page']) && (int)$_GET['page'] < 1) {
     json_error('invalid page parameter, must be 1 or greater');
 }
 
-$limit = (int)($_GET['limit'] ?? 500);
+$limit = min((int)($_GET['limit'] ?? 500), 500);
 $offset = isset($_GET['page']) ? (int)($_GET['page'] - 1) * $limit : (int)($_GET['offset'] ?? 0);
 if ($limit < 1) {
     json_error('invalid limit parameter, must be 1 or greater');

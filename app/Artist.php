@@ -395,6 +395,7 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
         $affected = self::$db->affected_rows();
         if ($affected) {
             $this->flush();
+            self::$cache->delete_value(sprintf(Manager\Artist::ALIAS_KEY, $aliasId));
             $this->logger()->general(
                 "The alias $aliasId ({$alias['name']}) for the artist {$this->label()}  was removed by user {$this->viewer()->label()}"
             );
@@ -693,6 +694,7 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
             ", $old->id
         );
 
+        $oldAliasIds = array_keys($old->aliasList());
         // Merge all of this artist's aliases with the new artist
         self::$db->prepared_query("
             UPDATE artists_alias SET
@@ -762,6 +764,9 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
             . "redirecting alias of artist $newId ({$this->name()}) by user {$user->label()}"
         );
         self::$cache->delete_value("zz_a_{$old->id}");
+        self::$cache->delete_multi(
+            array_map(fn (int $id) => sprintf(Manager\Artist::ALIAS_KEY, $id), $oldAliasIds)
+        );
         $this->flush();
         $old->flush();
         return $affected;
@@ -898,6 +903,7 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
 
         self::$db->commit();
 
+        self::$cache->delete_value(sprintf(Manager\Artist::ALIAS_KEY, $aliasId));
         foreach ($requestList as $requestId) {
             $request = $reqMan->findById($requestId);
             if ($request) {
@@ -917,6 +923,8 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
         $id   = $this->id;
         $name = $this->name();
         $db   = new DB();
+
+        $aliasIds = array_keys($this->aliasList());
 
         self::$db->begin_transaction();
 
@@ -943,6 +951,9 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
         );
         self::$db->commit();
 
+        self::$cache->delete_multi(
+            array_map(fn (int $id) => sprintf(Manager\Artist::ALIAS_KEY, $id), $aliasIds)
+        );
         self::$cache->delete_value('zz_a_' . $id);
         self::$cache->decrement('stats_artist_count');
 

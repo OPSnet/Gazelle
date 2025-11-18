@@ -5,6 +5,7 @@ namespace Gazelle\Manager;
 class Artist extends \Gazelle\BaseManager {
     protected const ID_KEY = 'zz_a_%d';
     protected const ROLE_KEY = 'artist_role';
+    public const ALIAS_KEY = 'alias_artist_%d';
 
     protected array $role;
     protected int $groupId; // torrent or request context
@@ -103,6 +104,10 @@ class Artist extends \Gazelle\BaseManager {
     }
 
     public function findByAliasId(int $aliasId): ?\Gazelle\Artist {
+        $key = sprintf(self::ALIAS_KEY, $aliasId);
+        if ($artistId = self::$cache->get_value($key)) {
+            return new \Gazelle\Artist($artistId, $aliasId);
+        }
         [$artistId, $aliasId] = self::$db->row("
             SELECT ArtistID,
                    CASE WHEN Redirect > 0
@@ -111,7 +116,11 @@ class Artist extends \Gazelle\BaseManager {
             FROM artists_alias WHERE AliasID = ?
             ", $aliasId
         );
-        return $artistId ? new \Gazelle\Artist($artistId, $aliasId) : null;
+        if ($artistId) {
+            self::$cache->cache_value($key, $artistId);
+            return new \Gazelle\Artist($artistId, $aliasId);
+        }
+        return null;
     }
 
     public function findRandom(): ?\Gazelle\Artist {
