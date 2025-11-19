@@ -1822,8 +1822,7 @@ class User extends BaseAttrObject {
         return (bool)self::$db->scalar("
             SELECT 1
             FROM api_tokens
-            WHERE revoked = 0
-                AND user_id = ?
+            WHERE user_id = ?
                 AND name = ?
             ", $this->id, $name
         );
