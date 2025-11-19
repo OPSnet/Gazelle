@@ -33,7 +33,7 @@ $validator->setFields([
     ['stylesheet', true, "number", "You forgot to select a stylesheet."],
     ['styleurl', false, "regex", "You did not enter a valid stylesheet URL.", ['regex' => CSS_REGEXP]],
     ['postsperpage', true, "number", "You forgot to select your posts per page option.", ['inarray' => [25, 50, 100]]],
-    ['collagecovers', true, "number", "You forgot to select your collage option."],
+    ['collageentries', true, "number", "You forgot to select your collage option.", ['inarray' => [10, 25, 50, 100]]],
     ['avatar', false, "regex", "You did not enter a valid avatar URL.", ['regex' => IMAGE_REGEXP]],
     ['email', true, "email", "You did not enter a valid email address."],
     ['irckey', false, "string", "You did not enter a valid IRC key. An IRC key must be between 6 and 32 characters long.", ['range' => [6, 32]]],
@@ -183,7 +183,7 @@ if (!empty($_POST['password']) && !empty($_POST['new_pass_1']) && !empty($_POST[
 $option['DisableGrouping2']    = (!empty($_POST['disablegrouping']) ? 0 : 1);
 $option['TorrentGrouping']     = (!empty($_POST['torrentgrouping']) ? 1 : 0);
 $option['PostsPerPage']        = (int)$_POST['postsperpage'];
-$option['CollageCovers']       = (int)$_POST['collagecovers'];
+$option['CollageEntries']      = (int)$_POST['collageentries'];
 $option['ShowTorFilter']       = (empty($_POST['showtfilter']) ? 0 : 1);
 $option['AutoSubscribe']       = (!empty($_POST['autosubscribe']) ? 1 : 0);
 $option['DisableSmileys']      = (int)isset($_POST['disablesmileys']);
@@ -191,7 +191,6 @@ $option['EnableMatureContent'] = (!empty($_POST['enablematurecontent']) ? 1 : 0)
 $option['UseOpenDyslexic']     = (!empty($_POST['useopendyslexic']) ? 1 : 0);
 $option['DisableAvatars']      = (int)($_POST['disableavatars'] ?? 0);
 $option['Identicons']          = (int)($_POST['identicons'] ?? 0);
-$option['DisablePMAvatars']    = (!empty($_POST['disablepmavatars']) ? 1 : 0);
 $option['ListUnreadPMsFirst']  = (!empty($_POST['list_unread_pms_first']) ? 1 : 0);
 $option['ShowSnatched']        = (!empty($_POST['showsnatched']) ? 1 : 0);
 $option['DisableAutoSave']     = (!empty($_POST['disableautosave']) ? 1 : 0);

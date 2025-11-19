@@ -97,18 +97,16 @@
         </td>
     </tr>
     <tr id="tor_cover_coll_tr">
-        <td class="label tooltip" title="This option allows you to change the number of album covers to display within a single collage page.">
-            <strong>Cover art (collages)</strong>
+        <td class="label tooltip" title="This option allows you to change the number of albums to display within a single collage page.">
+            <strong>Albums per page (collages)</strong>
         </td>
         <td>
-            <select name="collagecovers" id="collagecovers">
-                {%- set n = user.option('CollageCovers') -%}
+            <select name="collageentries" id="collageentries">
+                {%- set n = user.option('CollageEntries') -%}
                 <option value="10"{{ selected(n == 10) }}>10</option>
                 <option value="25"{{ selected(n is null or n == 25) }}>25 (default)</option>
                 <option value="50"{{ selected(n == 50) }}>50</option>
                 <option value="100"{{ selected(n == 100) }}>100</option>
-                <option value="1000000"{{ selected(n == 1000000) }}>All</option>
-                <option value="0"{{ selected(n == 0 or (n is null and user.option('HideCollage'))) }}>None</option>
             </select>
             covers per page
         </td>

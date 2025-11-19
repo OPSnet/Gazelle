@@ -43,7 +43,7 @@ $bookmarkList      = $bookmark->tgroupList($paginator->limit(), $paginator->offs
 $NumGroups         = count($bookmarkList);
 $artistLeaderboard = $bookmark->tgroupArtistLeaderboard();
 $tagLeaderboard    = $bookmark->tgroupTagLeaderboard();
-$CollageCovers     = (int)($Viewer->option('CollageCovers') ?? 25);
+$CollageCovers     = (int)($Viewer->option('CollageEntries') ?? 25);
 
 View::show_header($user->username() . " › Bookmarked Torrent Groups", ['js' => 'browse,collage']);
 ?>

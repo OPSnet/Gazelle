@@ -18,12 +18,11 @@ $vote          = new User\Vote($Viewer);
 /** @var Collage $collage required from collage.php */
 
 $collage->setViewer($Viewer);
-$collageCovers = (int)($Viewer->option('CollageCovers') ?? 25) * (1 - (int)$Viewer->option('HideCollage'));
-$collagePages  = [];
-$tgroupTotal     = $collage->total();
-$snatcher      = $Viewer->snatch();
-$entryList     = $collage->entryList();
-$groupsClosed  = (bool)$Viewer->option('TorrentGrouping');
+$paginator    = new Util\Paginator((int)($Viewer->option('CollageEntries') ?? 25),
+                                   (int)($_GET['page'] ?? 1))->setTotal($collage->total());
+$snatcher     = $Viewer->snatch();
+$entryList    = array_slice($collage->entryList(), $paginator->offset(), $paginator->limit());
+$groupsClosed = (bool)$Viewer->option('TorrentGrouping');
 
 echo $Twig->render('collage/header.twig', [
     'bookmarked' => $bookmark->isBookmarked($collage),
@@ -56,16 +55,18 @@ if ($Viewer->permitted('zip_downloader')) {
             <div class="head colhead_dark"><strong>Collector</strong></div>
             <div class="pad">
                 <form class="download_form" name="zip" action="collages.php" method="post">
-                <input type="hidden" name="action" value="download" />
-                <input type="hidden" name="auth" value="<?=$Viewer->auth()?>" />
-                <input type="hidden" name="collageid" value="<?= $collage->id ?>" />
+                <input type="hidden" name="action" value="download">
+                <input type="hidden" name="auth" value="<?=$Viewer->auth()?>">
+                <input type="hidden" name="collageid" value="<?= $collage->id ?>">
                 <ul id="list" class="nobullet">
 <?php foreach ($ZIPList as $ListItem) { ?>
                     <li id="list<?=$ListItem?>">
-                        <input type="hidden" name="list[]" value="<?=$ListItem?>" />
+                        <input type="hidden" name="list[]" value="<?=$ListItem?>">
                         <span class="float_left"><?=ZIP_OPTION[$ListItem]['2']?></span>
-                        <span class="remove remove_collector"><a href="#" onclick="remove_selection('<?=$ListItem?>'); return false;" class="float_right brackets">X</a></span>
-                        <br style="clear: both;" />
+                        <span class="remove remove_collector">
+                            <a href="#" onclick="remove_selection('<?=$ListItem?>'); return false;"
+                               class="float_right brackets">X</a></span>
+                        <br style="clear: both;">
                     </li>
 <?php } ?>
                 </ul>
@@ -78,17 +79,17 @@ if ($Viewer->permitted('zip_downloader')) {
         [$GroupID, $OptionID, $OptName] = $Option;
         if ($GroupID != $LastGroupID) {
             $LastGroupID = $GroupID;
-            if ($OpenGroup) {
-?>
+            if ($OpenGroup) { ?>
                     </optgroup>
-<?php        } ?>
+<?php       } ?>
                     <optgroup label="<?=ZIP_GROUP[$GroupID]?>">
 <?php
             $OpenGroup = true;
-        }
-?>
-                        <option id="opt<?=$GroupID . $OptionID?>" value="<?=$GroupID . $OptionID?>"<?php if (in_array($GroupID . $OptionID, $ZIPList)) {
-echo ' disabled="disabled"'; }?>><?=$OptName?></option>
+        } ?>
+                        <option id="opt<?=$GroupID . $OptionID?>" value="<?=$GroupID . $OptionID?>"<?php
+        if (in_array($GroupID . $OptionID, $ZIPList)) {
+            echo ' disabled="disabled"';
+        }?>><?=$OptName?></option>
 <?php } /* foreach */ ?>
                     </optgroup>
                 </select>
@@ -108,65 +109,20 @@ echo ' selected="selected"'; } ?>>Prefer Bonus Tracks</option>
 <?php } /* zip collector */ ?>
     </div>
     <div class="main_column">
-<?php if ($collageCovers != 0) { ?>
         <div id="coverart" class="box">
             <div class="head" id="coverhead"><strong>Cover Art</strong></div>
             <ul class="collage_images" id="collage_page0">
 <?php
-    $Idx = 0;
-    $limit = min($tgroupTotal, $collageCovers);
-    foreach ($entryList as $tgroupId) {
-        $tgroup = $tgMan->findById($tgroupId);
-        if ($tgroup) {
-            echo $collMan->tgroupCover($tgroup);
-            ++$Idx;
-        }
-        if ($Idx >= $limit) {
-            break;
-        }
-    }
-?>
-            </ul>
-        </div>
-<?php if ($tgroupTotal > $collageCovers) { ?>
-        <div class="linkbox pager" style="clear: left;" id="pageslinksdiv">
-            <span id="firstpage" class="invisible"><a href="#" class="pageslink" onclick="collageShow.page(0); return false;"><strong>&laquo; First</strong></a> | </span>
-            <span id="prevpage" class="invisible"><a href="#" class="pageslink" onclick="collageShow.prevPage(); return false;"><strong>&lsaquo; Prev</strong></a> | </span>
-<?php   for ($i = 0; $i < $tgroupTotal / $collageCovers; $i++) { ?>
-            <span id="pagelink<?=$i?>" class="<?=(($i > 4) ? 'hidden' : '')?><?=(($i == 0) ? 'selected' : '')?>"><a href="#" class="pageslink" onclick="collageShow.page(<?=$i?>, this); return false;"><strong><?=$collageCovers * $i + 1?>-<?=min($tgroupTotal, $collageCovers * ($i + 1))?></strong></a><?=(($i != ceil($tgroupTotal / $collageCovers) - 1) ? ' | ' : '')?></span>
-<?php   } ?>
-            <span id="nextbar" class="<?=($tgroupTotal / $collageCovers > 5) ? 'hidden' : ''?>"> | </span>
-            <span id="nextpage"><a href="#" class="pageslink" onclick="collageShow.nextPage(); return false;"><strong>Next</strong></a> ›</span>
-            <span id="lastpage" class="<?=(ceil($tgroupTotal / $collageCovers) == 2 ? 'invisible' : '')?>"> | <a href="#" class="pageslink" onclick="collageShow.page(<?=ceil($tgroupTotal / $collageCovers) - 1?>); return false;"><strong>Last &raquo;</strong></a></span>
-        </div>
-<?php
-        for ($i = 0; $i < $tgroupTotal / $collageCovers; $i++) {
-            $chunk = array_slice($entryList, $i * $collageCovers, $collageCovers);
-            if (!empty($chunk)) {
-                $collagePages[] = implode('',
-                    array_map(
-                        function ($id) use ($collMan, $tgMan) {
-                            $tgroup = $tgMan->findById($id);
-                            return $tgroup ? $collMan->tgroupCover($tgroup) : '';
-                        }, $chunk
-                    )
-                );
-            }
-        }
-        if ($tgroupTotal > $collageCovers) {
-            for ($i = $tgroupTotal + 1; $i <= ceil($tgroupTotal / $collageCovers) * $collageCovers; $i++) {
-                $collagePages[count($collagePages) - 1] .= '<li></li>';
-            }
-        }
-?>
-        <script type="text/javascript">//<![CDATA[
-            collageShow.init(<?=json_encode($collagePages)?>);
-        //]]></script>
-<?php
-        unset($collagePages);
+foreach ($entryList as $tgroupId) {
+    $tgroup = $tgMan->findById($tgroupId);
+    if ($tgroup) {
+        echo $collMan->tgroupCover($tgroup);
     }
 }
 ?>
+            </ul>
+        </div>
+        <?= $paginator->linkbox() ?>
         <table class="torrent_table grouping cats m_table" id="discog_table">
             <tr class="colhead_dark">
                 <td><!-- expand/collapse --></td>
@@ -176,26 +132,53 @@ echo ' selected="selected"'; } ?>>Prefer Bonus Tracks</option>
                 <td class="number_column nobr">Files</td>
 <?php } ?>
                 <td class="number_column nobr">Size</td>
-                <td class="sign snatches"><img src="<?= $urlStem ?>snatched.png" class="tooltip" alt="Snatches" title="Snatches" /></td>
-                <td class="sign seeders"><img src="<?= $urlStem ?>seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>
-                <td class="sign leechers"><img src="<?= $urlStem ?>leechers.png" class="tooltip" alt="Leechers" title="Leechers" /></td>
+                <td class="sign snatches"><img src="<?= $urlStem ?>snatched.png" class="tooltip" alt="Snatches" title="Snatches"></td>
+                <td class="sign seeders"><img src="<?= $urlStem ?>seeders.png" class="tooltip" alt="Seeders" title="Seeders"></td>
+                <td class="sign leechers"><img src="<?= $urlStem ?>leechers.png" class="tooltip" alt="Leechers" title="Leechers"></td>
             </tr>
 <?php
-$Number = 0;
+$tgroupIndex = $paginator->offset();
 foreach ($entryList as $tgroupId) {
     $tgroup = $tgMan->findById($tgroupId);
     if (is_null($tgroup)) {
         continue;
     }
     $torrentIdList = $tgroup->torrentIdList();
-    if (count($torrentIdList) === 0) {
-        continue;
-    }
     $SnatchedGroupClass = $tgroup->isSnatched() ? ' snatched_group' : '';
     $prev = '';
     $EditionID = 0;
     unset($FirstUnknown);
-    $Number++;
+    $tgroupIndex++;
+
+    if (count($torrentIdList) > 1 || $tgroup->categoryGrouped()) {
+        // Tgroup header
+?>
+            <tr class="group groupid_<?=$tgroupId?>_header discog<?= $SnatchedGroupClass ?>" id="group_<?= $tgroupId ?>">
+                <?= $Twig->render('tgroup/collapse-tgroup.twig', [ 'closed' => $groupsClosed, 'id' => $tgroupId ]) ?>
+                <td class="center">
+                    <div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>"></div>
+                </td>
+                <td colspan="<?= $Viewer->ordinal()->value('file-count-display') ? 6 : 5 ?>">
+                    <strong><?= $tgroupIndex ?> – <?= $tgroup->link() ?></strong>
+                    <span class="float_right">
+<?php
+echo $Twig->render('bookmark/action.twig', [
+    'class'         => 'torrent',
+    'id'            => $tgroupId,
+    'is_bookmarked' => $bookmark->isBookmarked($tgroup),
+]);
+if (!$Viewer->option('NoVoteLinks') && $Viewer->permitted('site_album_votes')) { ?>
+                            <br><?= $vote->links($tgroup) ?>
+<?php } ?>
+                        </span>
+                    <div class="tags"><?= implode(', ', array_map(
+                                fn ($name) => "<a href=\"collages.php?action=search&tags=$name\">$name</a>", $tgroup->tagNameList()
+                        )) ?></div>
+                </td>
+            </tr>
+<?php
+    }
+
     foreach ($torrentIdList as $torrentId) {
         $torrent = $torMan->findById($torrentId);
         if (is_null($torrent)) {
@@ -203,36 +186,6 @@ foreach ($entryList as $tgroupId) {
         }
 
         if (count($torrentIdList) > 1 || $tgroup->categoryGrouped()) {
-            if ($prev === '') {
-            // Grouped torrents
-?>
-            <tr class="group groupid_<?=$tgroupId?>_header discog<?= $SnatchedGroupClass ?>" id="group_<?= $tgroupId ?>">
-<?= $Twig->render('tgroup/collapse-tgroup.twig', [ 'closed' => $groupsClosed, 'id' => $tgroupId ]) ?>
-                <td class="center">
-                    <div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>"></div>
-                </td>
-                <td colspan="<?= $Viewer->ordinal()->value('file-count-display') ? 6 : 5 ?>">
-                    <strong><?= $Number ?> – <?= $tgroup->link() ?></strong>
-                        <span class="float_right">
-<?php
-                echo $Twig->render('bookmark/action.twig', [
-                    'class'         => 'torrent',
-                    'id'            => $tgroupId,
-                    'is_bookmarked' => $bookmark->isBookmarked($tgroup),
-                ]);
-                if (!$Viewer->option('NoVoteLinks') && $Viewer->permitted('site_album_votes')) {
-?>
-                        <br /><?= $vote->links($tgroup) ?>
-<?php           } ?>
-                        </span>
-                    <div class="tags"><?= implode(', ', array_map(
-                        fn ($name) => "<a href=\"collages.php?action=search&tags=$name\">$name</a>", $tgroup->tagNameList()
-                        )) ?></div>
-                </td>
-            </tr>
-<?php
-            }
-
             if ($torrent->isRemasteredUnknown()) {
                 $FirstUnknown = !isset($FirstUnknown);
             }
@@ -253,21 +206,23 @@ foreach ($entryList as $tgroupId) {
             }
             $prev = $current;
 ?>
-            <tr class="group_torrent torrent_row groupid_<?= $tgroupId ?> edition_<?= $EditionID ?><?= ($snatcher->showSnatch($torrent) ? ' snatched_torrent' : '')
-                . $SnatchedGroupClass . ($groupsClosed ? ' hidden' : '') ?>">
+            <tr class="group_torrent torrent_row groupid_<?= $tgroupId ?> edition_<?= $EditionID ?><?=
+                    ($snatcher->showSnatch($torrent) ? ' snatched_torrent' : '') . $SnatchedGroupClass
+                    . ($groupsClosed ? ' hidden' : '') ?>">
                 <td class="td_info" colspan="3">
                     <?= $Twig->render('torrent/action-v2.twig', [
                         'pl'      => true,
                         'torrent' => $torrent,
                         'viewer'  => $Viewer,
                     ]) ?>
-                    &nbsp;&nbsp;&raquo;&nbsp;<?= $torrent->shortLabelLink() ?>
+                    &nbsp;&nbsp;»&nbsp;<?= $torrent->shortLabelLink() ?>
 <?php   } else { ?>
             <tr class="torrent torrent_row<?= ($snatcher->showSnatch($torrent) ? ' snatched_torrent' : '')
                 . $SnatchedGroupClass ?>" id="group_<?= $tgroupId ?>">
                 <td></td>
                 <td class="td_collage_category center">
-                    <div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>"></div>
+                    <div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?=
+                        $tgroup->primaryTagCss() ?>"></div>
                 </td>
                 <td class="td_info">
                     <?= $Twig->render('torrent/action-v2.twig', [
@@ -275,14 +230,15 @@ foreach ($entryList as $tgroupId) {
                         'torrent' => $torrent,
                         'viewer'  => $Viewer,
                     ]) ?>
-                    <?= $Number ?> – <strong><?= $tgroup->link() ?></strong>
+                    <?= $tgroupIndex ?> – <strong><?= $tgroup->link() ?></strong>
 <?php       if (!$Viewer->option('NoVoteLinks') && $Viewer->permitted('site_album_votes')) { ?>
                     <?= $vote->links($tgroup) ?>
 <?php       } ?>
                     <div class="tags">
-                        <?= implode(', ', array_map(fn ($name) => "<a href=\"collages.php?action=search&tags=$name\">$name</a>", $tgroup->tagNameList())) ?>
+                        <?= implode(', ', array_map(fn ($name) =>
+                            "<a href=\"collages.php?action=search&amp;tags=$name\">$name</a>", $tgroup->tagNameList())) ?>
                     </div>
-    <?php } ?>
+<?php   } ?>
                 </td>
                 <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent, 'viewer' => $Viewer]) ?>
             </tr>
@@ -291,6 +247,7 @@ foreach ($entryList as $tgroupId) {
 }
 ?>
         </table>
+        <?= $paginator->linkbox() ?>
     </div>
 </div>
 <?php
