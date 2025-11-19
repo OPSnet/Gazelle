@@ -39,7 +39,7 @@ if (!empty($_GET['search'])) {
     }
 }
 
-foreach (['ip', 'email', 'username', 'comment'] as $field) {
+foreach (['ip', 'email', 'username', 'comment', 'ext_profile'] as $field) {
     if (isset($_GET[$field])) {
         $_GET[$field] = trim($_GET[$field]);
     }
@@ -113,6 +113,7 @@ if (empty($_GET)) {
         ['disabled_uploads', false, 'inarray', 'Invalid disabled_uploads field', $yesNo],
         ['downloaded', false, 'inarray', 'Invalid downloaded field', $numberChoice],
         ['enabled', false, 'inarray', 'Invalid enabled field', ['inarray' => ['', 0, 1, 2]]],
+        ['ext_profile', false, 'string', 'External profile is too long.', ['maxlength' => 512]],
         ['join1', false, 'regexp', 'Invalid join1 field', $dateRegexp],
         ['join2', false, 'regexp', 'Invalid join2 field', $dateRegexp],
         ['joined', false, 'inarray', 'Invalid joined field', $dateChoice],
@@ -184,6 +185,12 @@ if (empty($_GET)) {
             $where[] = $m->matchField('um1."Email"');
         }
         $args[] = $_GET['email'];
+    }
+
+    if (!empty($_GET['ext_profile'])) {
+        $join['ep'] = 'INNER JOIN user_external_profile ep ON (ep.id_user = um1."ID")';
+        $where[] = $m->matchField('ep.profile');
+        $args[] = $_GET['ext_profile'];
     }
 
     if (isset($_GET['email_opt']) && isset($_GET['email_cnt']) && strlen($_GET['email_cnt'])) {
