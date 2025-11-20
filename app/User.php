@@ -1073,8 +1073,8 @@ class User extends BaseAttrObject {
      */
     public function validatePassword(#[\SensitiveParameter] string $plaintext): bool {
         $hash = $this->info()['PassHash'];
-        $success = password_verify(hash(PASSWORD_ALGO, $plaintext), $hash);
-        if (password_needs_rehash($hash, PASSWORD_DEFAULT)) {
+        $success = password_verify(hash(PASSWORD_ALGO, $plaintext) . PASSWORD_PEPPER, $hash);
+        if (password_needs_rehash($hash, PASSWORD_HASH_ALGO, PASSWORD_HASH_OPTS)) {
             self::$db->prepared_query("
                 UPDATE users_main SET
                     PassHash = ?

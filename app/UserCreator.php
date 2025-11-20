@@ -327,6 +327,9 @@ class UserCreator extends Base {
      * Create a password hash of a plaintext password.
      */
     public static function hashPassword(#[\SensitiveParameter] string $plaintext): string {
-        return password_hash(hash(PASSWORD_ALGO, $plaintext), PASSWORD_DEFAULT);
+        return password_hash(
+            hash(PASSWORD_ALGO, $plaintext) . PASSWORD_PEPPER,
+            PASSWORD_HASH_ALGO, PASSWORD_HASH_OPTS
+        );
     }
 }

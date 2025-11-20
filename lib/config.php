@@ -494,11 +494,25 @@ defined('DEBUG_CONTEST_PAYOUT') or define('DEBUG_CONTEST_PAYOUT', false);
 // or sha512 when machines become more powerful.
 defined('DIGEST_ALGO') or define('DIGEST_ALGO', 'sha256');
 
-// The cryptographic algorithm used to hash passwords. Switch to sha384
-// or sha512 when machines become more powerful. Changing after site
+// The cryptographic algorithm used to pre-hash passwords. This is done for
+// legacy purposes and not needed to increase security. Changing after site
 // launch will break all user passwords. You must plan for a password
 // migration strategy.
 defined('PASSWORD_ALGO') or define('PASSWORD_ALGO', 'sha256');
+
+// Actual password hashing algorithm. See https://www.php.net/manual/en/function.password-hash.php
+// for possible values.
+defined('PASSWORD_HASH_ALGO') or define('PASSWORD_HASH_ALGO', PASSWORD_DEFAULT);
+
+// Password hashing options. Depends on the value above. Leave unchanged
+// for php's default settings, which are generally sane.
+defined('PASSWORD_HASH_OPTS') or define('PASSWORD_HASH_OPTS', []);
+
+// Increase password hashing security by adding a random string,
+// commonly called a pepper. Changing after site launch will break
+// all user passwords. You must plan for a password migration strategy.
+// Existing installations must set this to '' for compatibility.
+defined('PASSWORD_PEPPER') or define('PASSWORD_PEPPER', 'changeme');
 
 // if false, no attempt will be made to contact the last.fm website.
 defined('LASTFM_API_KEY') or define('LASTFM_API_KEY', false);
@@ -717,7 +731,7 @@ defined('REAPER_RESEED_REWARD_FACTOR') or define('REAPER_RESEED_REWARD_FACTOR', 
 
 // Source flag for torrent files. Should be unique across the wider tracker
 // space to enable easy cross-seeding.
-defined('SOURCE_FLAG') or define('SOURCE_FLAG', 'OPS');
+defined('SOURCE_FLAG') or define('SOURCE_FLAG', SITE_NAME);
 
 // Acceptable source flag from a prior site.
 defined('SOURCE_PREV_FLAG') or define('SOURCE_PREV_FLAG', '');

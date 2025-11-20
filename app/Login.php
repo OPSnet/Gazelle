@@ -107,11 +107,11 @@ class Login extends Base {
             return null;
         }
         $this->userId = $user->id;
-        if (!$user->validatePassword($this->password)) {
+        if (!$user->MFA()->verifyToken($this->mfaToken)) {
             $this->error = Enum\LoginStatus::badCredentials;
             return null;
         }
-        if (!$user->MFA()->verifyToken($this->mfaToken)) {
+        if (!$user->validatePassword($this->password)) {
             $this->error = Enum\LoginStatus::badCredentials;
             return null;
         }

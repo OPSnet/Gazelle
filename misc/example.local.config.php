@@ -29,3 +29,11 @@ define('MYSQL_PHINX_PASS', 'sc5tlc9JSCC6');
 
 // Docker setup runs the scheduler only once every 15 minutes
 define('SCHEDULER_DELAY', 1200);
+
+define('PASSWORD_HASH_ALGO', PASSWORD_ARGON2ID);
+// fast, insecure hashing for development, do not use this in production!
+define('PASSWORD_HASH_OPTS', ["memory_cost" => 8, "time_cost" => 1]);
+define('PASSWORD_PEPPER', '');
+define('LOGIN_SLEEP_USEC', 0);
+
+define('SOURCE_FLAG', 'OPS');

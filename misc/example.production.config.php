@@ -32,6 +32,13 @@ define('MYSQL_RW_PASS', 'changeme');
 define('MYSQL_PHINX_USER', 'thisis.phinx');
 define('MYSQL_PHINX_PASS', 'thisis.phinx');
 
+define('PG_HOST',    'localhost');
+define('PG_DB',      'changeme');
+define('PG_RW_USER', 'changeme');
+define('PG_RW_PASS', 'changeme');
+define('PG_RO_USER', 'changeme');
+define('PG_RO_PASS', 'changeme');
+
 define('SPHINX_HOST', 'sphinx.example.com');
 define('SPHINXQL_HOST', SPHINX_HOST);
 
@@ -41,11 +48,12 @@ define('SPHINXQL_SOCK', '/var/run/sphinx.sock');
 define('TRACKER_SECRET',    '0123456789abcdef0123456789abcdef01');
 define('TRACKER_REPORTKEY', '0123456789abcdef0123456789abcdef01');
 
-define('ENCKEY',       'changeme');
-define('AUTHKEY',      'changeme');
-define('RSS_HASH',     'changeme');
-define('SEEDBOX_SALT', 'changeme');
-define('AVATAR_SALT',  'changeme');
+define('PASSWORD_PEPPER', 'changeme');
+define('ENCKEY',          'changeme');
+define('AUTHKEY',         'changeme');
+define('RSS_HASH',        'changeme');
+define('SEEDBOX_SALT',    'changeme');
+define('AVATAR_SALT',     'changeme');
 
 define('PARANOIA_PREVIEW_USER', 1);
 
