@@ -1,6 +1,9 @@
 /* global beforeEach, cy, describe, it */
 
 describe('page loads as admin', () => {
+    beforeEach(() => {
+        cy.loginAdmin();
+    });
     [
         "/",
         "/artist.php",
@@ -40,11 +43,10 @@ describe('page loads as admin', () => {
         "/userhistory.php?action=posts",
         "/wiki.php",
     ].forEach((url) => {
-        beforeEach(() => {
-            cy.loginAdmin();
-        })
         it(`should have a footer: ${url}`, () => {
-            cy.visit(url);
+            cy.intercept(url).as('pageLoad' + url)
+            cy.visit(url, {failOnStatusCode: false});
+            cy.wait('@pageLoad' + url).its('response.statusCode').should('below', 400)
             cy.ensureFooter();
         })
     })
