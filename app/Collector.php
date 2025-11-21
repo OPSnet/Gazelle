@@ -242,12 +242,12 @@ abstract class Collector extends Base  {
      */
     public function emitZip(\ZipStream\ZipStream $zip): void {
         self::$db->disableQueryLog();
+        header('X-Accel-Buffering: no');
         $this->fillZip($zip);
         $zip->addFile("README.txt", $this->summary());
         if ($this->error) {
             $zip->addFile("ERRORS.txt", $this->errors());
         }
-        header('X-Accel-Buffering: no');
         $zip->finish();
     }
 
