@@ -1,6 +1,9 @@
 {% from 'macro/form.twig' import disabled, selected %}
 <div class="thin">
 {% if is_upload %}
+{%  if dnu %}
+{%      include 'upload/dnu.twig' with {'dnu': dnu, 'user': user} only %}
+{%  endif %}
 <h2>Upload</h2>
     <div style="text-align: center;">
         Your personal announce url is:<br />

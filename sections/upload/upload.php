@@ -1,7 +1,6 @@
 <?php
 /** @phpstan-var \Gazelle\User $Viewer */
-// phpcs:disable Generic.WhiteSpace.ScopeIndent.IncorrectExact
-// phpcs:disable Generic.WhiteSpace.ScopeIndent.Incorrect
+/** @phpstan-var \Twig\Environment $Twig */
 
 declare(strict_types=1);
 
@@ -83,46 +82,13 @@ if (!isset($Properties)) {
 if (!isset($Err)) {
     $Err = false;
 }
-
-$dnu     = new Manager\DNU();
-$dnuNew  = $dnu->hasNewForUser($Viewer);
-$dnuHide = !$dnuNew && $Viewer->permitted('torrents_hide_dnu');
-
-View::show_header('Upload', ['js' => 'upload,validate_upload,musicbrainz,bbcode']);
-?>
-<div class="<?= $Viewer->permitted('torrents_hide_dnu') ? 'box pad' : '' ?> dnu_list" style="margin: 0px auto; width: 700px;">
-    <h3 id="dnu_header">Do Not Upload List</h3>
-    <p><?= $dnuNew ? '<strong class="important_text">' : '' ?>Last updated: <?= time_diff($dnu->latest()) ?><?= $dnuNew ? '</strong>' : '' ?></p>
-    <p>The following releases are currently forbidden from being uploaded to the site. Do not upload them unless your torrent meets a condition specified in the given reason.
-<?php if ($dnuHide) { ?>
-    <span id="showdnu"><a href="#" onclick="$('#dnulist').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets">Show</a></span>
-<?php } ?>
-    </p>
-    <table id="dnulist" class="<?= $dnuHide ? 'hidden' : '' ?>">
-        <tr class="colhead">
-            <th width="30%"><strong>Name</strong></th>
-            <th><strong>Reason</strong></th>
-        </tr>
-<?php foreach ($dnu->dnuList() as $index => $bad) { ?>
-        <tr class="row<?= (int)$index % 2 ? 'b' : 'a'?>">
-            <td>
-                <?= \Text::full_format($bad['name']) ?>
-<?php   if ($bad['is_new']) { ?>
-                <strong class="important_text">(New!)</strong>
-<?php   } ?>
-            </td>
-            <td><?= \Text::full_format($bad['description']) ?></td>
-        </tr>
-<?php } ?>
-    </table>
-</div>
-<br />
-<?php
 if (!isset($categoryId)) {
     $categoryId = CATEGORY_MUSIC;
 }
 $uploadForm = new Upload($Viewer, $Properties, $Err);
-echo $uploadForm->head($categoryId);
+
+View::show_header('Upload', ['js' => 'upload,validate_upload,musicbrainz,bbcode']);
+echo $uploadForm->head($categoryId, true);
 echo match (CATEGORY[(int)$categoryId - 1]) {
     'Audiobooks',       => $uploadForm->audiobook(),
     'Applications'      => $uploadForm->application(),

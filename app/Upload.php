@@ -36,9 +36,10 @@ class Upload extends Base {
         return Textarea::factory();
     }
 
-    public function head(int $categoryId): string {
+    public function head(int $categoryId, bool $showDnu = false): string {
         return self::$twig->render('upload/header.twig', [
             'category_id' => $categoryId,
+            'dnu'         => $showDnu ? new Manager\DNU() : null,
             'error'       => $this->Error,
             'is_uploaded' => $this->isUploaded,
             'is_upload'   => !$this->isUploaded || isset($this->Torrent['add-format']),

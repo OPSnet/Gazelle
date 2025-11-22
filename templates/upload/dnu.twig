@@ -1,0 +1,29 @@
+{% set dnu_new = dnu.hasNewForUser(user) %}
+{% set dnu_hide = not(dnu_new) and user.permitted('torrents_hide_dnu') %}
+<div class="dnu_list box pad">
+    <h3 id="dnu_header">Do Not Upload List</h3>
+    <p>{% if dnu_new %}<strong class="important_text">{% endif -%}
+        Last updated: {{ dnu.latest|time_diff }}
+        {% if dnu_new %}</strong>{% endif %}
+    </p>
+    <p>The following releases are currently forbidden from being uploaded to the site. Do not upload them unless your torrent meets a condition specified in the given reason.
+        <span id="showdnu">
+            <a class="brackets" href="#"
+               onclick="$('#dnulist').gtoggle(); this.innerHTML = (this.innerHTML === 'Hide' ? 'Show' : 'Hide'); return false;">
+                {%- if dnu_hide %}Show{% else %}Hide{% endif -%}
+            </a>
+        </span>
+    </p>
+    <table id="dnulist" {% if dnu_hide %}class="hidden"{% endif %}>
+        <tr class="colhead">
+            <th width="30%"><strong>Name</strong></th>
+            <th><strong>Reason</strong></th>
+        </tr>
+{% for bad in dnu.dnuList %}
+        <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+            <td>{{ bad.name }}{% if bad.is_new %} <strong class="important_text">(New!)</strong>{% endif %}</td>
+            <td>{{ bad.description|bb_format }}</td>
+        </tr>
+{% endfor %}
+    </table>
+</div>
