@@ -112,6 +112,10 @@ class UtilTest extends TestCase {
         $this->assertEquals('?,?,?', placeholders(['a', 'b', 'c']), 'placeholders-3');
         $this->assertEquals('(?),(?)', placeholders(['d', 'e'], '(?)'), 'placeholders-custom');
 
+        $this->assertEquals('$1,$2,$3', placeholders_pg(['a', 'b', 'c']), 'placeholders-pg-3');
+        $this->assertEquals('($1),($2)', placeholders_pg(['d', 'e'], '(%s)'), 'placeholders-pg-custom');
+        $this->assertEquals('($5, $6),($7, $8)', placeholders_pg([['d', 1], ['e', 1]], '(%s, %s)', 2, 4), 'placeholders-pg-custom-multi');
+
         $this->assertEquals(32, strlen(randomString()), 'random-string');
 
         $this->assertEquals('--------.txt', safeFilename('"-*-/-:-<->-?-\\-|.txt'), 'safe-filename');

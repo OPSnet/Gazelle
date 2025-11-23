@@ -7,6 +7,7 @@ use sad_spirit\pg_wrapper\Result;
 use sad_spirit\pg_wrapper\converters\containers\ArrayConverter;
 use sad_spirit\pg_wrapper\converters\StringConverter;
 use sad_spirit\pg_wrapper\exceptions\server\ProgrammingException;
+use sad_spirit\pg_wrapper\PreparedStatement;
 
 /* There are (at least) two ways to interact with Postgresql databases
  * in PHP: PDO and pg_wrapper. (There are others but they are less
@@ -56,6 +57,7 @@ class Pg {
     protected Connection $cnxrw;
     protected \PDO       $pdo;
     protected Pg\Stats   $stats;
+    protected ?string    $tx = null;
 
     public function __construct(#[\SensitiveParameter] string $dsn) {
         $this->cnxrw = new Connection(
@@ -64,10 +66,6 @@ class Pg {
         // The DSN of the connection
         $this->pdo   = new \PDO($dsn);
         $this->stats = new Pg\Stats();
-    }
-
-    public function pdo(): \PDO {
-        return $this->pdo;
     }
 
     public function stats(): Pg\Stats {
@@ -84,25 +82,54 @@ class Pg {
         return new ArrayConverter(new StringConverter());
     }
 
+    public function beginex(): void {
+        if ($this->tx === 'pdo') {
+            throw new \Exception('ongoing PDO transaction');
+        }
+        $this->tx = 'pgw';
+        $this->cnxrw->beginTransaction();
+    }
+
+    public function commitex(): void {
+        if ($this->tx !== 'pgw') {
+            throw new \Exception('no ongoing transaction');
+        }
+        $this->cnxrw->commit();
+        $this->tx = null;
+    }
+
+    public function rollbackex(): void {
+        if ($this->tx !== 'pgw') {
+            throw new \Exception('no ongoing transaction');
+        }
+        $this->cnxrw->rollback();
+        $this->tx = null;
+    }
+
     public function execute(string $query): Result {
+        if ($this->tx === 'pdo') {
+            throw new \Exception('ongoing PDO transaction');
+        }
         $begin = hrtime(true);
         try {
             $result = $this->cnxrw->execute($query);
         } catch (ProgrammingException $e) {
+            $this->stats->error($query, []);
             throw new ProgrammingException("{$e->getMessage()} $query");
         }
         $this->stats->register($query, $result->getAffectedRows(), $begin, []);
         return $result;
     }
 
-    /**
-     * @param $args array<int, mixed>
-     */
     public function executeParams(string $query, mixed ...$args): Result {
+        if ($this->tx === 'pdo') {
+            throw new \Exception('ongoing PDO transaction');
+        }
         $begin = hrtime(true);
         try {
-            $result = $this->cnxrw->executeParams($query, [...$args]); /** @phpstan-ignore-line mixed mess */
+            $result = $this->cnxrw->executeParams($query, $args); /** @phpstan-ignore-line mixed mess */
         } catch (ProgrammingException $e) {
+            $this->stats->error($query, $args);
             throw new ProgrammingException(
                 "{$e->getMessage()} $query argc=" . count($args) . ' '
                     . json_encode($args, JSON_UNESCAPED_SLASHES)
@@ -112,14 +139,103 @@ class Pg {
         return $result;
     }
 
+    public function prepareex(string $query): PreparedStatement {
+        if ($this->tx === 'pdo') {
+            throw new \Exception('ongoing PDO transaction');
+        }
+        return $this->cnxrw->prepare($query);
+    }
+
+    public function query(string $query, ...$args): int {
+        return $this->executeParams($query, ...$args)->getAffectedRows();
+    }
+
+    // postponed
+    /**
+     * DO NOT USE FOR UNTRUSTED DATA. There can likely be weird cases with specifically crafted data, especially BYTEA.
+     */
+    //public function insertCopyex(string $table, array $colList, array $rows): bool {
+    //}
+
+    /**
+     * Perform an insert or update and return the RETURNING clause
+     * Returns `false` if the execute() failed
+     */
+    public function writeReturningex(string $query, ...$args): int|string|float|false {
+        return $this->scalarex($query, ...$args);
+    }
+
+    /**
+     * Perform an insert or update and return the RETURNING clause,
+     * when there is more than one item returned
+     */
+    public function writeReturningRowex(string $query, ...$args): array {
+        return $this->rowex($query, ...$args);
+    }
+
+    public function scalarex(string $query, ...$args): mixed {
+        return $this->rowex($query, ...$args)[0];
+    }
+
+    public function rowex(string $query, ...$args): array {
+        return $this->executeParams($query, ...$args)->setMode(\PGSQL_NUM)->current();
+    }
+
+    public function rowAssocex(string $query, ...$args): array {
+        return $this->executeParams($query, ...$args)->current();
+    }
+
+    public function allex(string $query, ...$args): array {
+        return $this->executeParams($query, ...$args)->fetchAll();
+    }
+
+    public function allByKeyex(string $key, string $query, ...$args): array {
+        $list = [];
+        foreach ($this->allex($query, ...$args) as $row) {
+            $list[$row[$key]] = $row;
+        }
+        return $list;
+    }
+
+    public function columnex(string $query, ...$args): array {
+        return $this->executeParams($query, ...$args)->fetchColumn(0);
+    }
+
     // **************************** PDO methods **********************************
 
     public function prepare(string $query): \PDOStatement {
         return $this->pdo->prepare($query); /** @phpstan-ignore-line let it blow up downstream */
     }
 
+    public function begin(): void {
+        if ($this->tx === 'pgw') {
+            throw new \Exception('ongoing pg_wrapper transaction');
+        }
+        $this->tx = 'pdo';
+        $this->pdo->beginTransaction();
+    }
+
+    public function commit(): void {
+        if ($this->tx !== 'pdo') {
+            throw new \Exception('no ongoing transaction');
+        }
+        $this->pdo->commit();
+        $this->tx = null;
+    }
+
+    public function rollback(): void {
+        if ($this->tx !== 'pdo') {
+            throw new \Exception('no ongoing transaction');
+        }
+        $this->pdo->rollBack();
+        $this->tx = null;
+    }
+
     // phpcs:disable PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function prepared_query(string $query, ...$args): int {
+        if ($this->tx === 'pgw') {
+            throw new \Exception('ongoing pg_wrapper transaction');
+        }
         $begin = hrtime(true);
         $st = $this->prepare($query);
         try {
@@ -132,13 +248,16 @@ class Pg {
             throw new \PDOException($e->getMessage()
                 . " $query " . json_encode($args, JSON_UNESCAPED_SLASHES));
         }
-        $this->stats->error($query);
+        $this->stats->error($query, $args);
         return 0;
     }
 
     // phpcs:enable
 
     public function insert(string $query, ...$args): int {
+        if ($this->tx === 'pgw') {
+            throw new \Exception('ongoing pg_wrapper transaction');
+        }
         $begin = hrtime(true);
         $st = $this->prepare($query);
         try {
@@ -151,7 +270,7 @@ class Pg {
             throw new \PDOException($e->getMessage()
                 . " $query " . json_encode($args, JSON_UNESCAPED_SLASHES));
         }
-        $this->stats->error($query);
+        $this->stats->error($query, $args);
         return 0;
     }
 
@@ -202,6 +321,9 @@ class Pg {
      * Returns `false` if the execute() failed
      */
     public function writeReturning(string $query, ...$args): int|string|float|false {
+        if ($this->tx === 'pgw') {
+            throw new \Exception('ongoing pg_wrapper transaction');
+        }
         $begin = hrtime(true);
         $st = $this->prepare($query);
         if ($st->execute([...$args])) {
@@ -209,7 +331,7 @@ class Pg {
             $this->stats->register($query, (int)$result, $begin, [...$args]);
             return $result;
         }
-        $this->stats->error($query);
+        $this->stats->error($query, $args);
         return false;
     }
 
@@ -218,6 +340,9 @@ class Pg {
      * when there is more than one item returned
      */
     public function writeReturningRow(string $query, ...$args): array {
+        if ($this->tx === 'pgw') {
+            throw new \Exception('ongoing pg_wrapper transaction');
+        }
         $begin = hrtime(true);
         $st = $this->prepare($query);
         if ($st->execute([...$args])) {
@@ -225,11 +350,14 @@ class Pg {
             $this->stats->register($query, count($row), $begin, [...$args]);
             return $row;
         }
-        $this->stats->error($query);
+        $this->stats->error($query, $args);
         return [];
     }
 
     protected function fetchRow(string $query, int $mode, ...$args): array {
+        if ($this->tx === 'pgw') {
+            throw new \Exception('ongoing pg_wrapper transaction');
+        }
         $begin = hrtime(true);
         $st = $this->pdo->prepare($query);
         if ($st !== false && $st->execute([...$args])) {
@@ -239,11 +367,14 @@ class Pg {
                 return $row;
             }
         }
-        $this->stats->error($query);
+        $this->stats->error($query, $args);
         return [];
     }
 
     public function scalar(string $query, ...$args): mixed {
+        if ($this->tx === 'pgw') {
+            throw new \Exception('ongoing pg_wrapper transaction');
+        }
         $begin = hrtime(true);
         $st = $this->pdo->prepare($query);
         if ($st !== false && $st->execute([...$args])) {
@@ -255,7 +386,7 @@ class Pg {
                     : $result[0];
             }
         }
-        $this->stats->error($query);
+        $this->stats->error($query, $args);
         return null;
     }
 
@@ -268,10 +399,13 @@ class Pg {
     }
 
     public function all(string $query, ...$args): array {
+        if ($this->tx === 'pgw') {
+            throw new \Exception('ongoing pg_wrapper transaction');
+        }
         $begin = hrtime(true);
         $st = $this->pdo->prepare($query);
         if ($st === false || !$st->execute([...$args])) {
-            $this->stats->error($query);
+            $this->stats->error($query, $args);
             return [];
         }
         // If any columns are of datatype bytea then we get the contents
@@ -310,10 +444,13 @@ class Pg {
     }
 
     public function column(string $query, ...$args): array {
+        if ($this->tx === 'pgw') {
+            throw new \Exception('ongoing pg_wrapper transaction');
+        }
         $begin = hrtime(true);
         $st = $this->pdo->prepare($query);
         if ($st === false || !$st->execute([...$args])) {
-            $this->stats->error($query);
+            $this->stats->error($query, $args);
             return [];
         }
         $result = $st->fetchAll(\PDO::FETCH_COLUMN);
@@ -322,7 +459,7 @@ class Pg {
     }
 
     public function checkpointInfo(): array {
-        $version = (int)$this->scalar("
+        $version = (int)$this->scalarex("
             select current_setting('server_version_num')
         ");
         $query = $version < 170000
@@ -350,12 +487,12 @@ class Pg {
                 end as percent
             from pg_stat_checkpointer
             ';
-        $info = $this->rowAssoc($query);
+        $info = $this->rowAssocex($query);
         $info['percent'] = (float)$info['percent'];
         return $info;
     }
 
     public function version(): string {
-        return $this->scalar('select version()');
+        return $this->scalarex('select version()');
     }
 }

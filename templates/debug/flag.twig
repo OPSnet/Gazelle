@@ -7,7 +7,7 @@
     </tr>
 </table>
 <table id="debug_flag" class="debug_table hidden">
-    <tr valign="top">
+    <tr>
         <td class="debug_flags_event"><strong>Event</strong></td>
         <td style="text-align: right" class="debug_flags_time"><strong>Page time</strong></td>
         {% if row.3 is not empty %}
@@ -16,7 +16,7 @@
         <td style="text-align: right" class="debug_flags_memory"><strong>Memory</strong></td>
     </tr>
     {% endif %}
-    <tr valign="top">
+    <tr>
         <td>{{ row.0 }}</td>
         <td style="text-align: right">{{ row.1|number_format(3) }} ms</td>
     {% if row.3 is not empty %}

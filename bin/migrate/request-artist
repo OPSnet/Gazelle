@@ -8,7 +8,7 @@ namespace Gazelle;
 require_once __DIR__ . '/../../lib/bootstrap.php';
 
 $pg = new \Gazelle\DB\Pg(PG_RW_DSN);
-$pg->pdo()->beginTransaction();
+$pg->begin();
 
 $pg->prepared_query("
     truncate table request_artist
@@ -25,6 +25,6 @@ $inserted = $pg->prepared_query(
 END_SQL
 );
 
-$pg->pdo()->commit();
+$pg->commit();
 
 echo "request_artist: $inserted inserted\n";

@@ -195,7 +195,6 @@ class DbTest extends TestCase {
     }
 
     public function testPgBasic(): void {
-        $this->assertInstanceOf(\PDO::class, $this->pg()->pdo(), 'db-pg-pdo');
         $num = random_int(100, 999);
         $this->assertEquals($num, $this->pg()->scalar("select ?", $num), 'db-pg-scalar-int');
         $this->assertEquals(true, $this->pg()->scalar("select ?", true), 'db-pg-scalar-true');
@@ -253,13 +252,74 @@ class DbTest extends TestCase {
         );
     }
 
+    public function testPgBasicex(): void {
+        $num = random_int(100, 999);
+        $this->assertEquals($num, $this->pg()->scalarex("select $1", $num), 'db-pg-scalar-int');
+        $this->assertEquals(true, $this->pg()->scalarex("select $1", true), 'db-pg-scalar-true');
+        $this->assertEquals("test", $this->pg()->scalarex("select $1", "test"), 'db-pg-scalar-string');
+        $this->assertEquals("test", $this->pg()->scalarex("select '\\x74657374'::bytea"), 'db-pg-scalar-bytea');
+
+        $st = $this->pg()->prepareex("
+            create temporary table t (
+                id_t integer not null primary key generated always as identity,
+                label text not null,
+                created timestamptz not null default current_date
+            )
+        ");
+        $st->execute();
+
+        $id = $this->pg()->scalarex("
+            insert into t (label) values ($1) returning id_t
+            ", 'phpunit'
+        );
+        $this->assertEquals(1, $id, 'db-pg-last-id');
+        $this->assertEquals([2, 3, 4], $this->pg()->columnex("
+            insert into t (label) values ($1), ($2), ($3) returning id_t
+            ", 'abc', 'def', 'ghi'),
+            'db-pg-triple-insert'
+        );
+        $this->assertEquals([2], $this->pg()->rowex("
+            select id_t from t where label = $1
+            ", 'abc'),
+            'db-pg-row'
+        );
+        $this->assertEquals(
+            ['i' => 3, 'j' => 'def'],
+            $this->pg()->rowAssocex("select id_t as i, label as j from t where id_t = $1", 3),
+            'db-pg-assoc-row'
+        );
+        $this->assertEquals(
+            ['phpunit', 'abc', 'def', 'ghi'],
+            $this->pg()->columnex("select label from t order by id_t"),
+            'db-pg-column'
+        );
+        $all = $this->pg()->allex("
+            select id_t, label, created from t order by id_t desc
+        ");
+        $this->assertCount(4, $all, 'pg-all-total');
+        $this->assertEquals(['id_t', 'label', 'created'], array_keys($all[0]), 'pg-all-column-names');
+        $this->assertEquals('ghi', $all[0]['label'], 'pg-all-row-value');
+        $this->assertEquals(
+            3,
+            $this->pg()->query("
+                update t set label = upper(label) where char_length(label) = $1
+                ", 3
+            ),
+            'db-pg-prepared-update'
+        );
+        $all = $this->pg()->allByKeyex('label', "
+            select id_t, label from t where label = 'ABC'
+        ");
+        $this->assertEquals(['id_t' => 2, 'label' => 'ABC'], $all['ABC'], 'pg-all-column-names-by-key');
+    }
+
     public function testPgStats(): void {
         $this->pg()->stats()->flush();
-        $this->pg()->prepared_query('select now()');
+        $this->pg()->query('select now()');
         usleep(1000);
-        $this->pg()->prepared_query('select now()');
-        $this->pg()->prepared_query("
-            select now() + ? * '1 day'::interval
+        $this->pg()->query('select now()');
+        $this->pg()->query("
+            select now() + $1 * '1 day'::interval
             ", 3
         );
 
@@ -272,18 +332,19 @@ class DbTest extends TestCase {
         );
         $last = end($queryList);
         $this->assertEquals(
-            "select now() + ? * '1 day'::interval",
+            "select now() + $1 * '1 day'::interval",
             trim($last['query']),
             'pg-stats-query',
         );
         $this->assertEquals([3], $last['args'], 'pg-stats-args');
         $this->assertEquals(1, $last['metric'], 'pg-stats-metric');
 
-        $this->pg()->stats()->error('computer says no');
+        $this->pg()->stats()->error('computer says no', [123]);
         $errorList = $this->pg()->stats()->errorList();
         $this->assertCount(1, $errorList, 'db-pg-error-count');
         $this->assertEquals('computer says no', $errorList[0]['query'], 'db-pg-error-query');
         $this->assertArrayHasKey('epoch', $errorList[0], 'db-pg-error-epoch');
+        $this->assertEquals([123], $errorList[0]['args'], 'db-pg-error-args');
     }
 
     public function testMysqlDuplicateException(): void {
@@ -452,6 +513,31 @@ class DbTest extends TestCase {
         ");
     }
 
+    public function testPgByteaScalarex(): void {
+        $this->pg()->query("
+            create temporary table test_bytea (
+                payload bytea not null primary key
+            )
+        ");
+        $payload = pack('C*', array_map(fn ($n) => chr($n), range(0, 255)));
+        $this->assertEquals(
+            1,
+            $this->pg()->query("
+                insert into test_bytea (payload) values ($1)
+                ", $payload
+            ),
+            'db-pg-insert-bytea'
+        );
+        $this->assertEquals(
+            $payload,
+            $this->pg()->scalarex("select payload from test_bytea"),
+            'db-pg-scalar-bytea'
+        );
+        $this->pg()->query("
+            drop table test_bytea
+        ");
+    }
+
     public function testPgWriteReturn(): void {
         $this->pg()->prepared_query("
             create temporary table test1 (
@@ -480,6 +566,34 @@ class DbTest extends TestCase {
         $this->assertEquals([$n, $label], $row, 'db-pg-write-row');
     }
 
+    public function testPgWriteReturnex(): void {
+        $this->pg()->query("
+            create temporary table test1 (
+                t_id int not null primary key
+            )
+        ");
+        $n = random_int(1000, 9999);
+        $value = $this->pg()->writeReturningex("
+            insert into test1 (t_id) values ($1) returning t_id
+            ", $n
+        );
+        $this->assertEquals($n, $value, 'db-pg-write-scalar');
+
+        $this->pg()->query("
+            create temporary table test2 (
+                t_id int not null primary key,
+                label text not null
+            )
+        ");
+        $n = random_int(1000, 9999);
+        $label = randomString();
+        $row = $this->pg()->writeReturningRowex("
+            insert into test2 (t_id, label) values ($1, $2) returning t_id, label
+            ", $n, $label
+        );
+        $this->assertEquals([$n, $label], $row, 'db-pg-write-row');
+    }
+
     public function testPgByteaAll(): void {
         $this->pg()->prepared_query("
             create temporary table test_bytea (
@@ -501,6 +615,31 @@ class DbTest extends TestCase {
             'db-pg-all-bytea'
         );
         $this->pg()->prepared_query("
+            drop table test_bytea
+        ");
+    }
+
+    public function testPgByteaAllex(): void {
+        $this->pg()->query("
+            create temporary table test_bytea (
+                id int generated always as identity,
+                payload bytea not null
+            )
+        ");
+        $payload = pack('C*', array_map(fn ($n) => chr($n), range(0, 255)));
+        $this->pg()->query("
+            insert into test_bytea (payload) values ($1), ($2)
+            ", $payload, $payload
+        );
+        $this->assertEquals(
+            [
+                ['id' => 1, 'payload' => $payload],
+                ['id' => 2, 'payload' => $payload],
+            ],
+            $this->pg()->allex("select id, payload from test_bytea order by id"),
+            'db-pg-all-bytea'
+        );
+        $this->pg()->query("
             drop table test_bytea
         ");
     }

@@ -19,7 +19,7 @@ $db->prepared_query("
 ");
 
 $n = 0;
-$pg->pdo()->beginTransaction();
+$pg->begin();
 foreach ($db->to_array(false, MYSQLI_ASSOC) as $row) {
     [$id, $action] = $pg->row("
         with add as (select network(inet_merge(?::inet, ?::inet)) as ip)
@@ -42,5 +42,5 @@ foreach ($db->to_array(false, MYSQLI_ASSOC) as $row) {
     );
     $n++;
 }
-$pg->pdo()->commit();
+$pg->commit();
 echo "$n rows migrated\n";

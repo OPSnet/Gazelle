@@ -17,9 +17,9 @@
         <td>Duration</td>
     </tr>
 {%  endif %}
-    <tr valign="top" class="row{{ cycle(['a', 'b'], loop.index0) }}">
+    <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
         <td class="debug_data debug_query_data"><pre>{{ q.query|nl2br }}
-{%  if q.args|length %}
+{%  if q.args %}
         -- {{ q.args|join(', ') }}
 {%  endif %}
         </pre>
@@ -46,8 +46,13 @@
         <td>Error</td>
     </tr>
 {%  endif %}
-    <tr valign="top" class="row{{ cycle(['a', 'b'], loop.index0) }}">
-        <td class="debug_data debug_query_data"><pre>{{ e.query|nl2br }}</td>
+    <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+        <td class="debug_data debug_query_data"><pre>{{ e.query|nl2br }}
+{%  if e.args %}
+    -- {{ e.args|join(', ') }}
+{%  endif %}
+            </pre>
+        </td>
     </tr>
 {%  if loop.last %}
 </table>

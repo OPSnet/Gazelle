@@ -18,7 +18,7 @@ class Request extends \Gazelle\ArtistRole {
         \Gazelle\Manager\Artist $manager = new \Gazelle\Manager\Artist(),
     ): int {
         self::$db->begin_transaction();
-        $this->pg()->pdo()->beginTransaction();
+        $this->pg()->begin();
         foreach ($roleList as $role => $artistList) {
             foreach ($artistList as $n => $name) {
                 $artist = $manager->findByName($name) ?? $manager->create($name);
@@ -87,7 +87,7 @@ class Request extends \Gazelle\ArtistRole {
             where request.id_request = upd.id_request
             ", $this->object->id()
         );
-        $this->pg()->pdo()->commit();
+        $this->pg()->commit();
         self::$db->commit();
         $this->flush();
         return $affected;

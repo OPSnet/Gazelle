@@ -8,7 +8,7 @@ namespace Gazelle;
 require_once(__DIR__ . '/../lib/bootstrap.php');
 
 $pg = new DB\Pg(PG_RW_DSN);
-$pg->pdo()->beginTransaction();
+$pg->begin();
 
 $n = $pg->prepared_query("
     delete from request
@@ -92,4 +92,4 @@ $n = $pg->prepared_query('
 ');
 echo "$n summaries inserted\n";
 
-$pg->pdo()->commit();
+$pg->commit();

@@ -45,8 +45,9 @@ class Stats {
         return count(self::$query);
     }
 
-    public function error(string $query): int {
+    public function error(string $query, array $args): int {
         self::$error[] = [
+            'args'  => $args,
             'epoch' => microtime(true),
             'query' => $query,
         ];

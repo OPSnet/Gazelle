@@ -35,7 +35,7 @@ class Ban extends \Gazelle\Base {
      * to a password brute-forcing attempt.
      */
     public function create(string $ipaddr, string $note, \Gazelle\User|null $user = null): \Gazelle\Ban {
-        $this->pg()->pdo()->beginTransaction();
+        $this->pg()->begin();
         $cidrList = $this->pg()->column("
             select ip from ip_ban where ip && ?::inet
             ", $ipaddr
@@ -96,7 +96,7 @@ class Ban extends \Gazelle\Base {
                     (int)$user?->id
             );
         }
-        $this->pg()->pdo()->commit();
+        $this->pg()->commit();
         $this->flush();
         return new \Gazelle\Ban($id);
     }

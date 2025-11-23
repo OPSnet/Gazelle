@@ -577,7 +577,7 @@ function unserialize_array($array) {
 }
 
 /**
- * Helper function to return an string of N elements from an array.
+ * Helper function to return a string of N elements from an array.
  *
  * (e.g. [2, 4, 6] into a list of query placeholders (e.g. '?,?,?')
  * By default '?' is used, but a custom placeholder may be specified,
@@ -588,6 +588,30 @@ function unserialize_array($array) {
  */
 function placeholders(array $list, string $placeholder = '?'): string {
     return implode(',', array_fill(0, count($list), $placeholder));
+}
+
+/**
+ * Helper function to return a string of N elements from an array.
+ *
+ * (e.g. [2, 4, 6] into a list of query placeholders (e.g. '$1,$2,$3')
+ * By default '%s' is used, but a custom placeholder may be specified,
+ * such as '(%s)' or '(%s, now(), 100)', for use in a bulk insert.
+ *
+ * @param array $list The list of elements
+ * @param string $placeholder ('%s' by default). printf-format string
+ *   with %s in place of placeholders
+ * @param int $num number of %s in $placeholder
+ * @param int $start offset to start counting with, first placeholder num will be $start + 1
+ */
+function placeholders_pg(array $list, string $placeholder = '%s', int $num = 1, int $start = 0): string {
+    return implode(',', array_map(function ($ph) use ($num, &$start) {
+        $oldStart = $start;
+        $start += $num;
+        return sprintf($ph, ...array_map(
+            fn ($n) => '$' . $n,
+            range($oldStart + 1, $oldStart + $num)
+        ));
+    }, array_fill(0, count($list), $placeholder)));
 }
 
 /**

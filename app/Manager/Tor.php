@@ -9,44 +9,37 @@ class Tor extends \Gazelle\Base {
         }
         $quad = array_unique($match[0]);
 
-        $this->pg()->pdo()->beginTransaction();
-        $this->pg()->pdo()->query("
+        $this->pg()->beginex();
+        $this->pg()->query("
             CREATE TEMPORARY TABLE tor_node_new (ipv4 inet)
         ");
-        $this->pg()->prepared_query(
+        $this->pg()->query(
             sprintf("
                 INSERT INTO tor_node_new (ipv4) VALUES %s
-                ", placeholders($quad, '(?)')
+                ", placeholders_pg($quad, '(%s)')
             ), ...$quad
         );
 
-        $st = $this->pg()->pdo()->query("
+        $changed = -$this->pg()->query("
             DELETE FROM tor_node
             WHERE ipv4 NOT IN (
                 SELECT ipv4 FROM tor_node_new
             )
         ");
-        $changed = 0;
-        if ($st) {
-            $changed = -$st->rowCount();
-        }
-        $this->pg()->pdo()->query("
+        $this->pg()->query("
             DELETE FROM tor_node_new
             WHERE ipv4 IN (
                 SELECT ipv4 FROM tor_node
             )
         ");
-        $st = $this->pg()->pdo()->query("
+        $changed += $this->pg()->query("
             INSERT INTO tor_node (ipv4)
                 SELECT ipv4 FROM tor_node_new
         ");
-        if ($st) {
-            $changed += $st->rowCount();
-        }
-        $this->pg()->pdo()->query("
+        $this->pg()->query("
             DROP TABLE tor_node_new
         ");
-        $this->pg()->pdo()->commit();
+        $this->pg()->commitex();
 
         return $changed;
     }

@@ -2,6 +2,9 @@
 .debug_table {
   text-align: left;
   width: 100%;
+  td {
+    vertical-align: top;
+  }
 }
 
 .pg-checkpoint {

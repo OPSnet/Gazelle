@@ -914,19 +914,18 @@ END_SQL
     }
 
     public function relayTag(): int {
-        $this->pg()->cnxrw()->beginTransaction();
+        $this->pg()->beginex();
         $this->pg()->executeParams('
             delete from request_tag where id_request = $1
             ', $this->id
         );
-        $result = $this->pg()->executeParams('
+        $affected = $this->pg()->query('
             insert into request_tag (id_request, id_tag)
             select "RequestID", "TagID"
             from relay.requests_tags
             where "RequestID" = $1
             ', $this->id
         );
-        $affected = $result->getAffectedRows();
         $this->pg()->executeParams('
             update request set
                 tag = (
@@ -937,7 +936,7 @@ END_SQL
             where id_request = $2
             ', $this->id, $this->id
         );
-        $this->pg()->cnxrw()->commit();
+        $this->pg()->commitex();
         return $affected;
     }
 

@@ -42,7 +42,7 @@ class BonusUploadReward extends Base {
     }
 
     public function modifyCategory(int $categoryId, array $reward): int {
-        $this->pg()->pdo()->beginTransaction();
+        $this->pg()->begin();
         $this->pg()->prepared_query("
             update bonus_upload_reward set
                 valid = tstzrange(lower(valid), now())
@@ -56,7 +56,7 @@ class BonusUploadReward extends Base {
              values (?,           ?,    ?,        ?,   tstzrange(now(), 'infinity'))
             ", $categoryId, $reward['high'], $reward['standard'], $reward['low']
         );
-        $this->pg()->pdo()->commit();
+        $this->pg()->commit();
         return $id;
     }
 }
