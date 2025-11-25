@@ -130,7 +130,7 @@ if ($user->email() != $emailClean) {
     if ($ownProfile && !Util\PasswordCheck::checkPasswordStrength($_POST['password'], $user)) {
         // same corner case as with changing passwords, see comment there
         $user->addStaffNote("forced logout because of weak/compromised password")->modify();
-        $user->logoutEverywhere();
+        $user->session()->logoutEverywhere();
         echo $Twig->render('login/weak-password.twig');
         exit;
     }
@@ -163,7 +163,7 @@ if (!empty($_POST['password']) && !empty($_POST['new_pass_1']) && !empty($_POST[
         // an attacker that happens to have the compromised password, and an old login session, but no access to
         // the email account. Force password reset by email.
         $user->addStaffNote("forced logout because of weak/compromised password")->modify();
-        $user->logoutEverywhere();
+        $user->session()->logoutEverywhere();
         echo $Twig->render('login/weak-password.twig');
         exit;
     } else {
@@ -325,7 +325,7 @@ $user->flush();
 new User\Stylesheet($user)->modifyInfo((int)$_POST['stylesheet'], $_POST['styleurl']);
 
 if ($ResetPassword) {
-    $user->logoutEverywhere();
+    $user->session()->logoutEverywhere();
 }
 
 header('Location: ' . $user->location() . '&action=edit');
