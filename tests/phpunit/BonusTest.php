@@ -396,6 +396,12 @@ class BonusTest extends TestCase {
             $other50->priceForTokenOther($user, $receiver),
             'bonus-price-other-increase',
         );
+        $user->toggleAttr('bypass-bonus-scale', true);
+        $this->assertEquals(
+            $basePrice,
+            $other50->priceForTokenOther($user, $receiver),
+            'bonus-price-other-bypass-increase',
+        );
         $receiver->setField('inviter_user_id', $user->id)->modify();
         $this->assertEquals(
             $basePrice,

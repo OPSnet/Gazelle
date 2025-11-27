@@ -1,4 +1,4 @@
-{% from 'macro/form.twig' import hidden, selected %}
+{% from 'macro/form.twig' import checked, disabled, hidden, selected %}
 {% set own_profile = user.id == viewer.id %}
 {% if viewer.isStaff %}
 {%  set initial_hide = viewer.hasAttr('audit-trail-hidden') %}
@@ -24,6 +24,35 @@
 <table class="layout" id="user_info_box">
     <tr class="colhead">
         <td colspan="2">
+            User Flags
+        </td>
+    </tr>
+    <tr>
+        <td class="label"></td>
+        <td>
+            <details>
+            <summary>View and edit user attributes</summary>
+            <p>To avoid confusion, be careful when toggling attributes that users
+            can change themselves. The greyed out checkboxes indicate the current state.</p>
+            <ul class="nobullet">
+{%  for attr in user.attrList %}
+{%      if not (attr.name matches '/^(?:disable|hide|no-pm)-/' or attr.name matches '/-(?:pop|push|trad)$/') %}
+{#      these matched attribute names are handled perfectly well elsewhere #}
+                <li>
+                    <input type="checkbox" name="current-{{ attr.name }}"{{checked(attr.active) }}{{ disabled(true) }} />
+                    <label>
+                        <input type="checkbox" name="attr-{{ attr.name }}"{{ checked(attr.active) }} />
+                        <span title="{{ attr.name }}">{{ attr.description }}</span>
+                    </label>
+                </li>
+{%      endif %}
+{%  endfor %}
+            </ul>
+            </details>
+        </td>
+    </tr>
+    <tr class="colhead">
+        <td colspan="2">
             User Information
         </td>
     </tr>
@@ -37,10 +66,10 @@
 {%  endif %}
 
 {%  if viewer.permittedAny('users_promote_below', 'users_promote_to') %}
-            <tr>
-                <td class="label">Primary class:</td>
-                <td>
-                    <select name="Class">
+    <tr>
+        <td class="label">Primary class:</td>
+        <td>
+            <select name="Class">
 {%      for level, userclass in class_list %}
 {%          if userclass.Secondary == '0'
                 and not own_profile
@@ -54,9 +83,9 @@
                             }}>{{ userclass.Name }} ({{ userclass.Level }})</option>
 {%          endif %}
 {%      endfor %}
-                    </select>
-                </td>
-            </tr>
+            </select>
+        </td>
+    </tr>
 {%      include 'user/edit-secondary-class.twig' with {
             'permission' : user.privilege.secondaryClassesList,
             'max_level'  : viewer.privilege.effectiveClassLevel - (viewer.permitted('users_promote_up') ? 0 : 1),

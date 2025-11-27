@@ -1,9 +1,6 @@
 {% from 'macro/form.twig' import checked %}
 <tr id="comm_unlimited_download">
-    <td class="label tooltip" title="">Unlimited Torrent Downloads</td>
-    <td><input type="checkbox" name="unlimitedDownload" id="unlimitedDownload"{{ checked(user.hasAttr('unlimited-download')) }} />
-    If checked, user is not subject to rate limiting of torrent files (i.e. [DL] links).
-    <p>
+    <td class="label tooltip" title="">Torrent Downloading</td>
 {% if prl.userclassFactor is null and prl.userclassOvershoot is null %}
     Download/Snatch rate limits do not apply to {{ user.userclassName }}.
 {% else %}
@@ -25,6 +22,5 @@
     <li><strong class="important_text">Downloads are blocked for up to 24 hours or until more torrents are snatched or seeded.</strong></li>
     {% endif %}
 {% endif %}
-    </p>
     </td>
 </tr>

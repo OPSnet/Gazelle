@@ -50,7 +50,6 @@ $class             = (int)($_POST['Class'] ?? 0);
 $title             = trim($_POST['Title']);
 $adminComment      = trim($_POST['admincomment'] ?? '');
 $visible           = isset($_POST['Visible']) ? '1' : '0';
-$unlimitedDownload = isset($_POST['unlimitedDownload']);
 $invites           = (int)$_POST['Invites'];
 $slogan            = trim($_POST['slogan']);
 $changePassword    = !empty($_POST['ChangePassword']);
@@ -81,7 +80,6 @@ $disableRequests      = isset($_POST['DisableRequests']);
 $disableTagging       = isset($_POST['DisableTagging']);
 $disableUpload        = isset($_POST['DisableUpload']);
 $disableWiki          = isset($_POST['DisableWiki']);
-$editWikiEditReadable = isset($_POST['wiki-edit-readable']);
 $resetRatioWatch      = $_POST['ResetRatioWatch'] ?? 0 ? 1 : 0;
 $resetIPHistory       = $_POST['ResetIPHistory'] ?? 0;
 $resetPasskey         = isset($_POST['ResetPasskey']) ? 1 : 0;
@@ -192,9 +190,23 @@ if (
     $editSummary[] = "bonus points changed from {$user->bonusPointsTotal()} to {$bonusPoints}";
 }
 
-if ($unlimitedDownload !== $user->hasAttr('unlimited-download') && $Viewer->permitted('admin_rate_limit_manage')) {
-    if ($user->toggleAttr('unlimited-download', $unlimitedDownload)) {
-        $editSummary[] = "unlimited download " . strtolower(enabledStatus($unlimitedDownload ? '1' : '0'));
+foreach (
+    [
+        'admin-error-reporting' => isset($_POST['attr-admin-error-reporting']),
+        'audit-trail-hidden'    => isset($_POST['attr-audit-trail-hidden']),
+        'bypass-bonus-scale'    => isset($_POST['attr-bypass-bonus-scale']),
+        'download-as-text'      => isset($_POST['attr-download-as-text']),
+        'feature-file-count'    => isset($_POST['attr-feature-file-count']),
+        'feature-seedbox'       => isset($_POST['attr-feature-seedbox']),
+        'inactive-warning-sent' => isset($_POST['attr-inactive-warning-sent']),
+        'no-fl-gifts'           => isset($_POST['attr-no-fl-gifts']),
+        'unlimited-download'    => isset($_POST['attr-unlimited-download']),
+        'wiki-edit-readable'    => isset($_POST['attr-wiki-edit-readable']),
+    ] as $attr => $state
+) {
+    if ($state !== $user->hasAttr($attr) && $user->toggleAttr($attr, $state)) {
+        $editSummary[] = str_replace('-', ' ', $attr) . " "
+            . ($state ? 'set' : 'reset');
     }
 }
 
@@ -442,10 +454,6 @@ if ($Viewer->permitted('users_disable_any')) {
         $privChange[] = 'Your request privileges have been ' . revoked($disableRequests);
         $editSummary[] = 'request privileges ' . revoked($disableRequests);
         $user->toggleAttr('disable-requests', $disableRequests);
-    }
-    if ($editWikiEditReadable !== $user->hasAttr('wiki-edit-readable')) {
-        $editSummary[] = 'edit any wiki article ' . revoked($editWikiEditReadable);
-        $user->toggleAttr('wiki-edit-readable', $editWikiEditReadable);
     }
 }
 

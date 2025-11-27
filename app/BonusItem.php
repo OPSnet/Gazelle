@@ -81,8 +81,8 @@ class BonusItem extends \Gazelle\BasePgObject {
         if (!str_starts_with($this->label(), 'other-')) {
             return false;
         }
-        // Inviters send tokens at a flat rate.
-        if ($receiver->inviterId() === $giver->id) {
+        // Inviters and special people send tokens at a flat rate.
+        if ($receiver->inviterId() === $giver->id || $giver->hasAttr('bypass-bonus-scale')) {
             return $this->price();
         }
         $exchange = new User\Bonus($receiver)->tokenExchange();

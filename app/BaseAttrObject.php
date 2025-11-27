@@ -53,6 +53,10 @@ abstract class BaseAttrObject extends BaseObject {
         $key  = $this->attrCacheKey();
         $attr = self::$cache->get_value($key);
         if ($attr === false) {
+            // SELECT a.ID AS id, a.name AS name
+            // FROM user_attr a
+            // INNER JOIN user_has_attr ha ON (ha.UserAttrID = a.ID)
+            // WHERE ha.UserID = ?
             self::$db->prepared_query("
                 SELECT a." . static::PkColumn . " AS id, a.name AS name FROM "
                 . static::ObjectName . "_attr a INNER JOIN "
@@ -66,6 +70,28 @@ abstract class BaseAttrObject extends BaseObject {
         }
         $this->attr = $attr;
         return $attr;
+    }
+
+    public function attrList(): array {
+        // I apologize in advance for this. It is doing this:
+        // WITH ha as (select UserAttrID from user_has_attr where UserID = 1)
+        // SELECT a.ID, a.name, if(u.UserAttrID is null, 0, 1) as active
+        // FROM user_attr a
+        // LEFT JOIN u on (u.UserAttrID = a.ID)
+        // ORDER BY a.description;
+        self::$db->prepared_query("
+            WITH ha AS (SELECT "
+            . static::JoinColumn . " FROM "
+            . static::ObjectName . "_has_attr WHERE "
+            . static::ObjectColumn . " = ?) SELECT a."
+            . static::PkColumn . " AS id, a.name AS name, a.description, if(ha."
+            . static::JoinColumn . " IS NULL, 0, 1) AS active FROM "
+            . static::ObjectName . "_attr a LEFT JOIN ha ON (ha."
+            . static::JoinColumn . ' = a.'
+            . static::PkColumn . ") ORDER BY a.description
+            ", $this->id
+        );
+        return self::$db->to_array(false, MYSQLI_ASSOC);
     }
 
     public function hasAttr(string $name): bool {
