@@ -82,6 +82,9 @@ switch ($_REQUEST['action'] ?? '') {
         include_once 'managers/forum_transitions_alter.php';
         break;
 
+    case 'gift-event':
+        include_once 'managers/gift-event.php';
+        break;
     case 'global_notification':
         include_once 'managers/global_notification.php';
         break;

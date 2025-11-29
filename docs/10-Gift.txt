@@ -1,0 +1,98 @@
+From: Spine To: Developers Date: 2025-11-16 Subject: Orpheus Development
+Papers #10 - Gift Implementation
+Version: 1
+
+Private trackers run yearly advent calendars to hand out gifts to users in
+order to encourage engagement. Some implementations have an annoying bug
+whereby you can only claim the next gift after more than 24 hours have
+elapsed. Unless you keep a close watch on the clock, the hour in which you
+claim a gift creeps forward and eventually comes the day when you go to bed
+before you are eligible once more to collect a gift.
+
+The gift implementation here avoids that trap by simplifying the condition
+to "once per day". This means that if you collect a first gift at 23:55,
+you will be able to collect a second gift ten minutes later because a new
+day has rolled over.
+
+Four classes are used to implement the feature.
+
+The first is the Manager\Gift class. This looks after the instantiation of
+gift instances, by id or label, and choosing a random gift. Each gift has a
+different weight. The higher the weight, the more likely it is to be
+chosen. The manager has no facility to create new gifts. This must be done
+through a database migration, because at the same time, code will need to
+be added to implement the gift functionality. It also looks after a couple
+of statistics that are used in the admin console.
+
+The second class is the Gift class itself. It is backed by the gift table.
+A gift is given to a user by calling the giveTo(User) method. It returns
+the id of the row that was inserted into user_has_gift.
+
+A gift can have a duration to provide a transient effect. It is expected
+that a Task will be used to cancel the effect after the duration expires
+(or else it is taken into consideration directly by whatever query makes
+use of it). A gift can also report how many times it has ever been granted.
+
+There is a method to alter the weight of a gift for the duration of the
+page request. This can be used to play with the different gifts to favor or
+reduce the possibility of choosing a specific gift. It does not affect the
+cached value.
+
+Conceptually, an admin has the possiblity of granting a gift through the
+following call:
+
+    new Manager\Gift()->choose()->giveTo($user);
+
+This in itself is not particularly useful, which is why there are gift
+events, to organize the automatic allocation of gifts to members.
+
+An event is created in the Gift Reward console. It needs a beginning and
+ending date, and a name. Events CANNOT overlap. Only one may be active at a
+time. The console does not attempt to check: if a new event overlaps, an
+error will be thrown.
+
+The Manager\GiftEvent class looks after the creation and management of gift
+events. You can find an event by id, or you can call findOpenEvent() and if
+one is open, it will be returned. There is also an eventList() method that
+returns all defined events. Events can be set up for well into the future.
+As a convenience, if an event is open, it will always be at the top of the
+list in the Gift Reward console.
+
+The final class needed to tie everything together is the GiftEvent class.
+The two methods that govern the granting of gifts are isGiftAvailable() and
+allocateGift().  These much be called in a transaction to have a unified
+view of the database in order to prevent race conditions and fraud.
+
+The isGiftAvailable() method is given a User object. It checks that the
+event is still open and that the most recent gift received was not in the
+current day. If both checks pass, the user is informed that a gift is
+available for them.
+
+The website uses javascript to make an ajax callback to determine the
+random gift. It passes the current day in Y-M-D format, the id of the user
+and signature which is a hash digest d(event, day, user). The
+allocateGift() takes those parameters and performs a number of checks and
+then awards a gift (and returns a success/fail status).
+
+The assocation of an event and the giving of a gift is stored in the
+gift_event_user_has_gift table. If a gift event is removed after gifts
+have been allocated, the delete cascades to the gift_event_user_has_gift
+table, but not the user_has_gift table. In other words, removing a
+gift_event row cascades to gift_event_user_has_gift but the user will
+still have the fact that a gift was given in user_has_gift, it is only
+no longer related to an event.
+
+The managers can be used to flush and events and gifts if ever they are
+reconfigured in the database. Note that there is a trick to make it work:
+the items have to be loaded into order call their individual flush()
+methods, so the following needs to be done:
+
+  $manager = new Manager\Gift();
+  (void)$manager->giftList();
+  $manager->flush();
+
+Similarly:
+
+  $manager = new Manager\GiftEvent();
+  (void)$manager->eventList();
+  $manager->flush();

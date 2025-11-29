@@ -27,7 +27,7 @@ class BonusItem extends \Gazelle\BasePgObject {
         $key = sprintf(self::CACHE_KEY, $this->id);
         $info = self::$cache->get_value($key);
         if ($info === false) {
-            $info = $this->pg()->rowAssoc('
+            $info = $this->pg()->rowAssocex('
                 select price,
                     amount,
                     userclass_min,
@@ -37,7 +37,7 @@ class BonusItem extends \Gazelle\BasePgObject {
                     label,
                     title
                 from bonus_item
-                where id_bonus_item = ?
+                where id_bonus_item = $1
                 ', $this->id
             );
             self::$cache->cache_value($key, $info, 0);
@@ -120,12 +120,12 @@ class BonusItem extends \Gazelle\BasePgObject {
     }
 
     public function isPurchased(User $user): bool {
-        return (bool)$this->pg()->scalar('
+        return (bool)$this->pg()->scalarex('
             select exists (
                 select 1
                 from relay.bonus_history bh
-                where bh."ItemID" = ?
-                    and bh."UserID" = ?
+                where bh."ItemID" = $1
+                    and bh."UserID" = $2
             )
             ', $this->id, $user->id
         );

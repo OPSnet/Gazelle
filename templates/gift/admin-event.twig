@@ -1,0 +1,74 @@
+{{ header('Gift Events') }}
+<div class="header">
+    <h2>Gift Events</h2>
+</div>
+<div class="box pad thin">
+{% for event in manager.eventList %}
+{%  if loop.first %}
+<table id="gift-event" width="100%">
+    <tr class="colhead">
+        <td>Name</td>
+        <td>Open</td>
+        <td>Begins</td>
+        <td>Ends</td>
+        <td class="number_column">Total users</td>
+        <td class="number_column">Total gifts</td>
+        <td class="number_column">Average gifts</td>
+        <td class="number_column">Average weight</td>
+    </tr>
+{%  endif %}
+    <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+        <td>{{ event.link|raw }}</td>
+        <td class="center">{% if event.isOpen %}✅{% endif %}</td>
+        <td>{{ event.openBegin|date('Y-m-d H:i:s') }}</td>
+        <td>{{ event.openEnd|date('Y-m-d H:i:s') }}</td>
+        <td class="number_column">{{ event.totalUser|number_format }}</td>
+        <td class="number_column">{{ event.totalGift|number_format }}</td>
+        <td class="number_column">{% if event.totalUser %}{{
+            (event.totalGift / event.totalUser)|number_format(1) }}{% else %}0.0{% endif %}</td>
+        <td class="number_column">{{ event.averageWeight|number_format(1) }}</td>
+    </tr>
+{%  if loop.last %}
+</table>
+{%  endif %}
+{% else %}
+    <h4>There are no programmed gift events</h4>
+{% endfor %}
+    <br />
+{% if viewer.permitted('admin_schedule') %}
+    <h4>Create a new event</h4>
+    <br />
+    <form action="?action=gift-event" method="post">
+    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+    <label><input type="datetime-local" name="begin" /> Begin event</label><br />
+    <label><input type="datetime-local" name="end" /> End event</label><br />
+    <label><input type="text" name="name" length="20" /> Name</label><br />
+    <input type="submit" value="Create" />
+    </form>
+{% endif %}
+</div>
+<div class="box pad thin">
+<table id="gift-event">
+    <tr class="colhead">
+        <td>Label</td>
+        <td>Description</td>
+        <td class="number_column">Total given</td>
+        <td class="number_column">Weight</td>
+        <td class="number_column">Probability %</td>
+        <td class="number_column">Observed %</td>
+    </tr>
+{% set gift_total = gift_man.giftTotal %}
+{% for gift in gift_man.giftList %}
+    <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+        <td>{{ gift.name }}</td>
+        <td>{{ gift.description }}</td>
+        <td class="number_column">{{ gift.givenTotal }}</td>
+        <td class="number_column">{{ gift.weight }}</td>
+        <td class="number_column">{{ (gift.weight / gift_man.weightTotal * 100)|number_format(1) }}</td>
+        <td class="number_column">{% if gift_total == 0 %}0.0{% else %}{{
+            ((gift.givenTotal / gift_total) * 100)|number_format(1) }}{% endif %}</td>
+    </tr>
+{% endfor %}
+</table>
+</div>
+{{ footer() }}

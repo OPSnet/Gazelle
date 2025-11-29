@@ -36,6 +36,7 @@ class User extends BaseAttrObject {
     protected User\Privilege  $privilege;
     protected User\Session    $session;
     protected User\Snatch     $snatch;
+    protected User\Stylesheet $stylesheet;
 
     public function flush(): static {
         self::$cache->delete_multi([
@@ -50,7 +51,16 @@ class User extends BaseAttrObject {
         $this->stats()->flush();
         $this->ordinal()->flush();
         $this->privilege()->flush();
-        unset($this->info, $this->invite, $this->ordinal, $this->privilege, $this->session, $this->stats, $this->tokenCache);
+        unset(
+            $this->info,
+            $this->invite,
+            $this->ordinal,
+            $this->privilege,
+            $this->session,
+            $this->stats,
+            $this->stylesheet,
+            $this->tokenCache,
+         );
         return parent::flush();
     }
 
@@ -101,6 +111,10 @@ class User extends BaseAttrObject {
 
     public function snatch(): User\Snatch {
         return $this->snatch ??= new User\Snatch($this);
+    }
+
+    public function stylesheet(): User\Stylesheet {
+        return $this->stylesheet ??= new User\Stylesheet($this);
     }
 
     public function stats(): Stats\User {

@@ -365,6 +365,52 @@ class UtilTest extends TestCase {
         show(1.25);
     }
 
+    public function testWeightedChoice(): void {
+        $list = [[1, 100], [2, 60], [3, 75], [4, 240]];
+        $sum  = array_sum(array_column($list, 1));
+
+        for ($i = 0; $i < 100; $i++) {
+            $this->assertContains(
+                weightedChoice($list),
+                [1, 2, 3, 4],
+                'util-weighted-choice-see-all',
+            );
+        }
+
+        $total = [1 => 0, 2 => 0, 3 => 0, 4 => 0];
+        $n     = 20000;
+        for ($i = 0; $i < $n; $i++) {
+            $total[weightedChoice($list)]++;
+        }
+
+        // check distribution (1% error max: if this fails, increase $n)
+        $this->assertEqualsWithDelta(
+            $list[0][1] / $sum, $total[1] / $n,
+            0.01,
+            'util-weighted-choice-1'
+        );
+        $this->assertEqualsWithDelta(
+            $list[1][1] / $sum, $total[2] / $n,
+            0.01,
+            'util-weighted-choice-2'
+        );
+        $this->assertEqualsWithDelta(
+            $list[2][1] / $sum, $total[3] / $n,
+            0.01,
+            'util-weighted-choice-3'
+        );
+        $this->assertEqualsWithDelta(
+            $list[3][1] / $sum, $total[4] / $n,
+            0.01,
+            'util-weighted-choice-4'
+        );
+    }
+
+    public function testWeightedFail(): void {
+        $this->expectException(\ValueError::class);
+        $fail = weightedChoice([]);
+    }
+
     public function testZip(): void {
         $this->assertInstanceOf(\ZipStream\ZipStream::class, Util\Zip::make("phpunit"), 'zip-object');
     }

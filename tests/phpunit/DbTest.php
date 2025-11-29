@@ -216,20 +216,38 @@ class DbTest extends TestCase {
             ", 'phpunit'
         );
         $this->assertEquals(1, $id, 'db-pg-last-id');
+        $this->assertEquals(
+            ['phpunit'],
+            $this->pg()->row(
+                'select label from t where id_t = ?', $id
+            ),
+            'db-pg-row-assoc-one'
+        );
+        $this->assertEquals(
+            ['label' => 'phpunit'],
+            $this->pg()->rowAssoc(
+                'select label from t where id_t = ?', $id
+            ),
+            'db-pg-row-assoc-one'
+        );
+        $this->assertEquals(
+            [],
+            $this->pg()->row(
+                'select label from t where id_t = ?', $id + 1
+            ),
+            'db-pg-row-assoc-none'
+        );
+        $this->assertEquals(
+            [],
+            $this->pg()->rowAssoc(
+                'select label from t where id_t = ?', $id + 1
+            ),
+            'db-pg-row-assoc-none'
+        );
         $this->assertEquals(4, $this->pg()->insert("
             insert into t (label) values (?), (?), (?)
             ", 'abc', 'def', 'ghi'),
             'db-pg-triple-insert'
-        );
-        $this->assertEquals([2], $this->pg()->row("
-            select id_t from t where label = ?
-            ", 'abc'),
-            'db-pg-row'
-        );
-        $this->assertEquals(
-            ['i' => 3, 'j' => 'def'],
-            $this->pg()->rowAssoc("select id_t as i, label as j from t where id_t = ?", 3),
-            'db-pg-assoc-row'
         );
         $this->assertEquals(
             ['phpunit', 'abc', 'def', 'ghi'],
@@ -273,25 +291,48 @@ class DbTest extends TestCase {
             ", 'phpunit'
         );
         $this->assertEquals(1, $id, 'db-pg-last-id');
+        $this->assertEquals(
+            ['phpunit'],
+            $this->pg()->rowex(
+                'select label from t where id_t = $1', $id
+            ),
+            'db-pg-row-assocex-one'
+        );
+        $this->assertEquals(
+            ['label' => 'phpunit'],
+            $this->pg()->rowAssocex(
+                'select label from t where id_t = $1', $id
+            ),
+            'db-pg-row-assocex-one'
+        );
+        $this->assertNull(
+            $this->pg()->rowex(
+                'select label from t where id_t = $1', $id + 1
+            ),
+            'db-pg-row-assocex-none'
+        );
+        $this->assertNull(
+            $this->pg()->rowAssocex(
+                'select label from t where id_t = $1', $id + 1
+            ),
+            'db-pg-row-assocex-none'
+        );
         $this->assertEquals([2, 3, 4], $this->pg()->columnex("
             insert into t (label) values ($1), ($2), ($3) returning id_t
             ", 'abc', 'def', 'ghi'),
             'db-pg-triple-insert'
         );
-        $this->assertEquals([2], $this->pg()->rowex("
-            select id_t from t where label = $1
-            ", 'abc'),
-            'db-pg-row'
-        );
-        $this->assertEquals(
-            ['i' => 3, 'j' => 'def'],
-            $this->pg()->rowAssocex("select id_t as i, label as j from t where id_t = $1", 3),
-            'db-pg-assoc-row'
-        );
         $this->assertEquals(
             ['phpunit', 'abc', 'def', 'ghi'],
             $this->pg()->columnex("select label from t order by id_t"),
             'db-pg-column'
+        );
+        $this->assertEquals(
+            [],
+            $this->pg()->allex("
+                select id_t, label, created from t where id_t < 0 order by id_t desc
+            "),
+            'pg-all-none'
         );
         $all = $this->pg()->allex("
             select id_t, label, created from t order by id_t desc

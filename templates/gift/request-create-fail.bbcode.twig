@@ -1,0 +1,18 @@
+Hello,
+
+There is some good news... and some bad news.
+
+The good news is that you received a gift to add {{ gift.factor|number_format
+    }} GiB of bounty to one the requests you created!
+
+{% if user.stats.requestCreatedTotal == 0 %}
+The bad news is... you have not created any requests, so the gift was left unwrapped :-(
+{% else %}
+The bad news is... all of the requests you have created have already been filled :-(
+{% endif %}
+{% set tomorrow  = date('tomorrow')|date('Y-m-d H:i:s') %}
+{% set event_end = gift_event.openEnd|date('Y-m-d H:i:s') %}
+{% if tomorrow < event_end %}
+
+But there is still some good news, tomorrow there might be a different gift waiting for you :-)
+{% endif %}

@@ -352,7 +352,7 @@ class UserTest extends TestCase {
 
         $sheet = end($list);
         $url   = STATIC_SERVER . '/bogus.css';
-        $stylesheet = new User\Stylesheet($this->user);
+        $stylesheet = $this->user->stylesheet();
         $this->assertNull($stylesheet->styleUrl(), 'stylesheet-no-external-url');
         $this->assertEquals(1, $stylesheet->modifyInfo($sheet['id'], null), 'stylesheet-modify');
         $this->assertEquals($sheet['css_name'], $stylesheet->cssName(), 'stylesheet-css-name');

@@ -49,7 +49,7 @@
 {% if viewer.option('UseOpenDyslexic') %}
 {{  scss('opendyslexic/style.css') }}
 {% endif %}
-<link rel="stylesheet" type="text/css" media="screen" href="{{ stylesheet.cssUrl }}" title="{{ stylesheet.name }}" />
+<link rel="stylesheet" type="text/css" media="screen" href="{{ viewer.stylesheet.cssUrl }}" title="{{ viewer.stylesheet.name }}" />
 <script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/vendor/jquery.js?v={{ mtime('vendor/jquery.js') }}"></script>
 <script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/vendor/jquery.autocomplete.js?v={{ mtime('vendor/jquery.autocomplete.js') }}"></script>
 <script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/vendor/katex-0.16.10.min.js?v={{ mtime('vendor/katex-0.16.10.min.js') }}"></script>

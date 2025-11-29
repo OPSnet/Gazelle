@@ -38,14 +38,14 @@ class Warning extends \Gazelle\BaseUser {
 
     public function info(): array {
         if (!isset($this->info)) {
-            $expiry = $this->pg()->scalar("
+            $expiry = $this->pg()->scalarex("
                 select max(upper(warning))
                 from user_warning
                 where now() < upper(warning)
-                    and id_user = ?
+                    and id_user = $1
                 ", $this->user->id
             );
-            $this->info = ['expiry' => is_null($expiry) ? null : (string)$expiry];
+            $this->info = ['expiry' => is_null($expiry) ? null : $expiry->format('Y-m-d H:i:s')];
         }
         return $this->info;
     }

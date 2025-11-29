@@ -2428,12 +2428,11 @@ tr.snatched_torrent div.tags::before {
   color: variables.$color-text-base !important;  /* varies by stylesheet */
   font-size: 13px;
   font-weight: 500;
-  padding: 10px 10px 10px 48px;
+  padding: 10px;
   text-align: center;
 }
 
 .alertbar:first-of-type {
-  background-image: url(config('STATIC_SERVER') + "/svg/site/ops-icon-harp-ccc.svg");
   background-position: 8px center;
   background-repeat: no-repeat;
   background-size: 32px;

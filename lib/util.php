@@ -552,6 +552,23 @@ function array_key_filter_and_map(string $prefix, array $list, bool $cast = true
 }
 
 /**
+ * Return an element from a weighted array.
+ * Each array entry is a pair [<thing>, weight]
+ * Return the thing of the chosen row
+ * @throw ValueError if list is empty
+ */
+function weightedChoice(array $list): mixed {
+    $random = random_int(1, (int)array_sum(array_column($list, 1)));
+    foreach ($list as $item) {
+        $random -= $item[1];
+        if ($random <= 0) {
+            return $item[0];
+        }
+    }
+    throw new \ValueError('list is empty');
+}
+
+/**
  * Extract torrent ids from a string
  * "http://localhost:7001/torrents.php?id=2316&torrentid=4575#torrent4575 9317,173"
  * returns [4575, 9317, 173]

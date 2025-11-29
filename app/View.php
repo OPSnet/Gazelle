@@ -146,7 +146,6 @@ class View extends Base {
             'script'     => $js,
             'scss_style' => isset($option['css'])
                 ? array_map(fn($s) => "$s/style.css", explode(',', $option['css'])) : [],
-            'stylesheet' => new User\Stylesheet($user),
             'use_noty'   => $notifier->useNoty(),
             'viewer'     => $user,
         ])
@@ -157,6 +156,7 @@ class View extends Base {
             'bonus'       => new User\Bonus($user),
             'document'    => $module,
             'dono_target' => $payMan->monthlyPercent(new Manager\Donation()),
+            'gift_event'  => new Manager\GiftEvent()->findOpenEvent(),
             'nav_links'   => $navLinks,
             'viewer'      => $user,
         ]);

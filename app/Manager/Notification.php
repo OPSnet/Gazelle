@@ -147,15 +147,17 @@ class Notification extends \Gazelle\Base {
         ", strtolower($type->toString()) . '-push');
     }
 
-    public function pushableTokensById(array $userIds, NotificationType $type): array {
-        $token = $this->pg()->scalar("
-        select po.push_token
-        from user_push_options po
-        inner join user_has_attr ha using (id_user)
-        inner join user_attr ua using (id_user_attr)
-        where ua.name = ?
-        and ha.id_user = ANY(?::INT[])
-   ", strtolower($type->toString()) . '-push', "{" . implode(',', $userIds) . "}");
-        return $token ? [$token] : [];
+    public function pushableTokensById(array $idList, NotificationType $type): array {
+        return $this->pg()->column('
+            select po.push_token
+            from user_push_options po
+            inner join user_has_attr ha using (id_user)
+            inner join user_attr ua using (id_user_attr)
+            where ua.name = $1
+                and ha.id_user = any($2::integer[])
+            ',
+                strtolower($type->toString()) . '-push',
+                $idList,
+        );
     }
 }

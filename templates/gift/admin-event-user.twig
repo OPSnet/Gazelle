@@ -1,0 +1,34 @@
+{{ header(event.name ~ ' › ' ~ user.username) }}
+<div class="header">
+{% if viewer.isStaff %}
+    <h2><a href="?action=gift-event">Gift Event</a> › {{ event.link|raw }} › {{ user.id|user_url }}</h2>
+{% else %}
+    <h2>{{ event.name }} › Your rewards</h2>
+{% endif %}
+</div>
+<div class="box pad thin">
+{% for g in event.userGiftList(user) %}
+{%  if loop.first %}
+    <table id="gift-event-detail">
+        <tr class="colhead">
+            <td>#</td>
+            <td>Given</td>
+            <td>Name</td>
+            <td>Weight</td>
+        </tr>
+{%  endif %}
+        <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+            <td class="number_column">{{ g.id_user_has_gift }}</td>
+            <td>{{ g.created|date('Y-m-d H:i:s') }}</td>
+            <td>{{ g.gift.description }}</td>
+            <td class="number_column">{{ g.gift.weight|number_format }}</td>
+        </tr>
+{%  if loop.last %}
+    </table>
+{%  endif %}
+{% else %}
+    <h4>No gifts received in this event. Have you been naughty?</h4>
+{% endfor %}
+    </div>
+</div>
+{{ footer() }}

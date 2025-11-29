@@ -146,6 +146,10 @@ defined('FILE_SALT') or define('FILE_SALT', 'changeme');
 // invalidate cache keys that will be regenerated on next call.
 defined('FOLDER_CLASH_SALT') or define('FOLDER_CLASH_SALT', 'changeme');
 
+// Salt used in signing gift activation urls. This can be changed at
+// any time with harm (although a page reload would be necessary).
+defined('GIFT_SALT') or define('GIFT_SALT', 'changeme');
+
 // Seedbox ids are hashified with this salt.
 defined('SEEDBOX_SALT') or define('SEEDBOX_SALT', 'changeme');
 
@@ -766,6 +770,14 @@ defined('BONUS_UPLOAD_BOOST') or define('BONUS_UPLOAD_BOOST', [5000, 4000, 3000,
 
 // What is the highest userclass level that benefits from boosts? (200 == Power User)
 defined('BONUS_UPLOAD_BOOST_MAX_LEVEL') or define('BONUS_UPLOAD_BOOST_MAX_LEVEL', 200);
+
+// ------------------------------------------------------------------------
+// Gift event assets
+
+defined('GIFT_EVENT_SMALL_READY') or define('GIFT_EVENT_SMALL_READY', STATIC_SERVER . '/local/gift-small-ready.webp');
+defined('GIFT_EVENT_SMALL_OPEN')  or define('GIFT_EVENT_SMALL_OPEN',  STATIC_SERVER . '/local/gift-small-open.webp');
+defined('GIFT_EVENT_LARGE_READY') or define('GIFT_EVENT_LARGE_READY', STATIC_SERVER . '/local/gift-large-ready.webp');
+defined('GIFT_EVENT_LARGE_OPEN')  or define('GIFT_EVENT_LARGE_OPEN',  STATIC_SERVER . '/local/gift-large-open.webp');
 
 // ------------------------------------------------------------------------
 // Pagination

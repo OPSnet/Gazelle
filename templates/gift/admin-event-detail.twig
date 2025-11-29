@@ -1,0 +1,148 @@
+{{ header('Gift Event' ~ event.name, {'js': 'vendor/highcharts,vendor/highcharts_custom'}) }}
+<div class="header">
+    <h2><a href="?action=gift-event">Gift Event</a> › {{ event.name }}</h2>
+</div>
+<div class="box pad thin">
+    <h3>{{ event.name }} ({{ event.openBegin|date('Y-m-d H:i:s') }}–{{ event.openEnd|date('Y-m-d H:i:s') }})</h3>
+    <div class="box">
+        Total users: {{ event.totalUser|number_format }}<br />
+        Total gifts: {{ event.totalGift|number_format }}<br />
+        Average gifts received: {% if event.totalUser %}{{
+            (event.totalGift / event.totalUser)|number_format(1) }}{% else %}0.0{% endif %}<br />
+        Average gift weight: {{ event.averageWeight|number_format(1) }}<br />
+        <br />
+        <form action="?action=gift-event&id={{ event.id }}" method="post">
+        <label>Search for: <input name="search" value="" length="10" /></label> (id or @username)
+        <input type="submit" value="🔎" />
+        </form>
+    </div>
+    <div class="box">
+        <figure class="highcharts-figure"><div id="day-stats"></div></figure>
+        <figure class="highcharts-figure"><div id="assiduity-stats"></div></figure>
+    </div>
+    <div class="box">
+{% for gift in event.giftStats %}
+{%  if loop.first %}
+    <table id="gift-event-detail">
+        <tr class="colhead">
+            <td>Total</td>
+            <td>Description</td>
+        <tr>
+{%  endif %}
+        <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+            <td class="number_column">{{ gift.total|number_format }}</td>
+            <td>{{ gift.description }}</td>
+        <tr>
+{%  if loop.last %}
+    </table>
+{%  endif %}
+{% else %}
+        <h4>No items have been gifted yet.</h4>
+{% endfor %}
+    </div>
+    <div class="box">
+{{ paginator.linkbox|raw }}
+{% for user in list %}
+{%  if loop.first %}
+    <table id="gift-event-detail">
+        <tr class="colhead">
+            <td>Username</td>
+            <td>Total</td>
+            <td>First gift</td>
+            <td>Last gift</td>
+        </tr>
+{%  endif %}
+        <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+            <td><a href="?action=gift-event&amp;id={{ event.id}}&amp;userid={{ user.id_user }}">{{ user.username }}</a></td>
+            <td class="number_column">{{ user.total|number_format }}</td>
+            <td>{{ user.first|date('Y-m-d H:i:s') }}</td>
+            <td>{{ user.last|date('Y-m-d H:i:s') }}</td>
+        </tr>
+{%  if loop.last %}
+    </table>
+{%  endif %}
+{% endfor %}
+{{ paginator.linkbox|raw }}
+    </div>
+</div>
+{% set day_stats = event.dayStats %}
+{% set assiduity_stats = event.assiduityStats %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    Highcharts.chart('day-stats', {
+    chart: {
+        type: 'column',
+        plotBackgroundColor: '#051401',
+        backgroundColor: '#000000',
+    },
+    title: {
+        text: 'Gifts per day',
+        style: { color: '#c0c0c0', },
+    },
+    credits: { enabled: false },
+    xAxis: {
+        categories: {{ day_stats|map(v => v.day|date('Y-m-d'))|json_encode|raw }},
+    },
+    yAxis: [
+        {
+        allowDecimals: false,
+            labels: { format: '{value}', style: { color: Highcharts.getOptions().colors[0] }},
+            title: { text: 'Total', style: { color: Highcharts.getOptions().colors[0] }},
+        },
+    ],
+    tooltip: {
+        headerFormat: '<b>{point.x}</b><br/>',
+        pointFormat: '{series.name}: {point.y}'
+    },
+    plotOptions: {
+        column: {
+            groupPadding: 0.05,
+            pointPadding: 0,
+            stacking: 'normal',
+            color: '#006600',
+        },
+    },
+    series: [
+        { type: 'column', name: 'Handed out',  data: {{ day_stats|map(v => v.total)|json_encode }} },
+    ]
+    });
+    Highcharts.chart('assiduity-stats', {
+        chart: {
+            type: 'column',
+            plotBackgroundColor: '#051401',
+            backgroundColor: '#000000',
+        },
+        title: {
+            text: 'Assiduity (total users who opened N gifts)',
+            style: { color: '#c0c0c0', },
+        },
+        credits: { enabled: false },
+        xAxis: {
+            categories: {{ assiduity_stats|map(v => v.activity)|json_encode }},
+        },
+        yAxis: [
+            {
+            allowDecimals: false,
+                labels: { format: '{value}', style: { color: Highcharts.getOptions().colors[0] }},
+                title: { text: 'Total', style: { color: Highcharts.getOptions().colors[0] }},
+            },
+        ],
+        tooltip: {
+            headerFormat: '<b>{point.x}</b><br/>',
+            pointFormat: '{series.name}: {point.y}'
+        },
+        plotOptions: {
+            column: {
+                groupPadding: 0.05,
+                pointPadding: 0,
+                stacking: 'normal',
+                color: '#006600',
+            },
+        },
+        series: [
+            { type: 'column', name: 'Users opening this many',  data: {{ assiduity_stats|map(v => v.total)|json_encode }} },
+        ]
+    });
+});
+</script>
+{{ footer() }}

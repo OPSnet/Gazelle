@@ -39,10 +39,10 @@ class EmailBlacklist extends \Gazelle\Base {
     }
 
     public function exists(string $target): bool {
-        return (bool)$this->pg()->scalar("
+        return (bool)$this->pg()->scalarex("
             select 1
             from email_blacklist
-            where ? ~* email
+            where $1 ~* email
             ", $target
         );
     }

@@ -1,0 +1,53 @@
+{% if gift_event %}
+{{  header(gift_event.name, {'js': 'gift'}) }}
+{% else %}
+{{  header('No gifts today') }}
+{% endif %}
+<div class="box pad thin">
+<div class="center">
+{% if gift_event %}
+<h1>{{ gift_event.name }}</h1>
+{%- if gift_event.isGiftAvailable(viewer) %}
+<h4>Click on the present to find out what is inside!</h4>
+<img width="300" height="300" id="gift-box" title="Time to unwrap your present!" src="{{
+    constant('GIFT_EVENT_LARGE_READY') }}" data-d="{{ 'now'|date('Y-m-d') }}" data-i="{{
+    gift_event.id }}" data-s="{{ gift_event.signature(viewer) }}" />
+<div id="result"></div>
+{%  else %}
+{%      set tomorrow  = date('tomorrow')|date('Y-m-d H:i:s') %}
+{%      set event_end = gift_event.openEnd|date('Y-m-d H:i:s') %}
+{%      if tomorrow < event_end %}
+<img class="center" src="{{ constant('GIFT_EVENT_LARGE_OPEN') }}" title="Patience! Come back tomorrow!" />
+<h4>Come back in {{ tomorrow|time_diff }}!</h4>
+{%      else %}
+<h4>That's all folks!</h4>
+{%      endif %}
+{%  endif %}
+</div>
+</div>
+<div class="box pad thin">
+{%  for g in gift_event.userGiftList(viewer) %}
+{%      if loop.first %}
+<h3>Received so far in this event</h3>
+<table id="gift-event-detail">
+        <tr class="colhead">
+            <td style="width: 140px">Date</td>
+            <td>Name</td>
+        </tr>
+{%      endif %}
+        <tr>
+            <td>{{ g.created|date('Y-m-d H:i') }}</td>
+            <td>{{ g.gift.description }}</td>
+        </tr>
+{%      if loop.last %}
+    </table>
+{%      endif %}
+{%  else %}
+    <h4>No gifts received so far. Have you been naughty?</h4>
+{%  endfor %}
+{% else %}
+<h1>The event has finished</h1>
+<div class="box pad thin"><h4>Come back some other time!<h4></div>
+{% endif %}
+</div>
+{{ footer() }}

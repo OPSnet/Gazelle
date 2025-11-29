@@ -159,9 +159,9 @@ class Pg {
 
     /**
      * Perform an insert or update and return the RETURNING clause
-     * Returns `false` if the execute() failed
+     * Returns `null` if executeParams() failed
      */
-    public function writeReturningex(string $query, ...$args): int|string|float|false {
+    public function writeReturningex(string $query, ...$args): mixed {
         return $this->scalarex($query, ...$args);
     }
 
@@ -174,14 +174,15 @@ class Pg {
     }
 
     public function scalarex(string $query, ...$args): mixed {
-        return $this->rowex($query, ...$args)[0];
+        $result = $this->rowex($query, ...$args);
+        return $result === null ? null : $result[0];
     }
 
-    public function rowex(string $query, ...$args): array {
+    public function rowex(string $query, ...$args): ?array {
         return $this->executeParams($query, ...$args)->setMode(\PGSQL_NUM)->current();
     }
 
-    public function rowAssocex(string $query, ...$args): array {
+    public function rowAssocex(string $query, ...$args): ?array {
         return $this->executeParams($query, ...$args)->current();
     }
 

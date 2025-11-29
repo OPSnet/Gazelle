@@ -82,7 +82,7 @@
     {{ link|raw }}
 {%- endfor %}
 </ul>
-</div>
+</div>{# id="userinfo" #}
 
 <div id="menu">
 <h4 class="hidden">Site Menu</h4>
@@ -98,7 +98,7 @@
 <li id="nav_wiki"{{     _self.active(document == 'wiki')     }}><a href="wiki.php">Wiki</a> </li>
 <li id="nav_staff"{{    _self.active(document == 'staff')    }}><a href="staff.php" title="Staff">Staff</a> </li>
 </ul>
-</div>
+</div>{# id="menu" #}
 
 <div id="searchbars">
 <ul>
@@ -154,8 +154,10 @@
     </form>
 </li>
 </ul>
-</div>
-</div>
+</div>{# id="searchbars" #}
+
+</div>{# id="header" #}
+
 <div id="content">
 {% if alert_list or action_list or viewer.permitted('site_analysis') %}
 <div id="alerts">
@@ -168,10 +170,45 @@
         <input value="case" type="submit" name="go" />
     </form>
 {%      endif %}
-</div>
+</div>{# id="alertbar" #}
 {%  endif %}
 {%  if action_list %}
 <div class="alertbar blend">{{ action_list|join(' ⋅ ')|raw }}</div>
 {%  endif %}
-</div>
+</div>{# id="alerts", id="content" open #}
+{% endif %}
+{% if gift_event and viewer.requestContext.module != 'gift' %}
+<div class="alertbar">
+<div class="center">
+<h1>{{ gift_event.name }}</h1>
+{%- if gift_event.isGiftAvailable(viewer) %}
+<h3>Click on the present to find out what is inside!</h3>
+<a href="gift.php">
+<img src="{{ constant('GIFT_EVENT_SMALL_READY') }}" alt="a gift waiting to be opened" title="Oooh! What's in here?"></a>
+<h5>Event ends in {{ gift_event.openEnd|date('Y-m-d H:i:s')|time_diff }}.</h5>
+{%  else %}
+{%      set tomorrow  = date('tomorrow')|date('Y-m-d H:i:s') %}
+{%      set event_end = gift_event.openEnd|date('Y-m-d H:i:s') %}
+<details>
+{%      if tomorrow < event_end %}
+<summary>Come back in {{ tomorrow|time_diff }}!</summary>
+{%      else %}
+<summary>That's all folks!</summary>
+{%      endif %}
+{%      if tomorrow < event_end %}
+<h3>Click on the present to find out what is inside!</h3>
+<a href="gift.php">
+<img src="{{ constant('GIFT_EVENT_SMALL_OPEN') }}" alt="an opened gift" title="Patience! Come back tomorrow!"></a>
+{%      else -%}
+<a href="gift.php">
+<img src="{{ constant('GIFT_EVENT_SMALL_OPEN') }}" alt="an opened gift" title="So much presents!">
+{%      endif %}</a>
+</details>
+<br />
+{%  endif %}
+{%  if viewer.stylesheet.name == 'Proton' %}
+<br />{# I drowned a kitten for this #}
+{%  endif -%}
+</div>{# class="center" #}
+</div>{# class="alertbar blend" #}
 {% endif %}
