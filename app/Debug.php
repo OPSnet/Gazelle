@@ -191,6 +191,11 @@ class Debug {
         $Args = '';
         $Tracer = debug_backtrace();
 
+        // probably something run via cli
+        if (!array_key_exists($Steps, $Tracer)) {
+            return true;
+        }
+
         // This is in case something in this function goes wrong and we get stuck with an infinite loop
         if (($Tracer[$Steps]['class'] ?? '') === \Gazelle\Debug::class && $Tracer[$Steps]['function'] === 'errorHandler') {
             return true;

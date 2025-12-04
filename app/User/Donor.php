@@ -484,7 +484,7 @@ class Donor extends \Gazelle\BaseUser {
         // The entire number of multiple ranks purchased at donation time are credited to Total ranks.
         // Total ranks acquired (all time) unlock Special ranks.
         $priorRank = $this->rank();
-        $rankDelta = (int)floor($fiatAmount / DONOR_RANK_PRICE);
+        $rankDelta = min(127 - $priorRank, (int)floor($fiatAmount / DONOR_RANK_PRICE));
 
         self::$db->begin_transaction();
         self::$db->prepared_query('
@@ -499,7 +499,7 @@ class Donor extends \Gazelle\BaseUser {
             ', $this->user->id,
                 $rankDelta, $rankDelta, $rankDelta, $rankDelta
         );
-        if (!(bool)self::$db->scalar("SELECT 1 FROM donor_rewards WHERE UserID = ?", $this->user->id)) {
+        if (!self::$db->scalar("SELECT 1 FROM donor_rewards WHERE UserID = ?", $this->user->id)) {
             self::$db->prepared_query("
                 INSERT INTO donor_rewards (
                     UserID, IconMouseOverText, AvatarMouseOverText, CustomIcon, CustomIconLink, SecondAvatar,
