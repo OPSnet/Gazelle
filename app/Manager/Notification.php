@@ -148,7 +148,7 @@ class Notification extends \Gazelle\Base {
     }
 
     public function pushableTokensById(array $idList, NotificationType $type): array {
-        return $this->pg()->column('
+        return $this->pg()->columnex('
             select po.push_token
             from user_push_options po
             inner join user_has_attr ha using (id_user)
@@ -157,7 +157,7 @@ class Notification extends \Gazelle\Base {
                 and ha.id_user = any($2::integer[])
             ',
                 strtolower($type->toString()) . '-push',
-                $idList,
+                $this->pg()->arrayConverter()->output($idList),
         );
     }
 }

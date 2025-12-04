@@ -25,8 +25,8 @@ class Bonus extends \Gazelle\Base {
     }
 
     public function findBonusItemByLabel(string $label): ?BonusItem {
-        $idBonusItem = $this->pg()->scalar('
-            select id_bonus_item from bonus_item where label = ?
+        $idBonusItem = $this->pg()->scalarex('
+            select id_bonus_item from bonus_item where label = $1
             ', $label
         );
         return is_null($idBonusItem) ? null : new BonusItem($idBonusItem);

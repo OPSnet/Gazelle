@@ -72,6 +72,24 @@ class Pg {
         return $this->stats;
     }
 
+    /**
+     * abort whatever transaction is going on and move on
+     */
+    public function abort(): void {
+        try {
+            if ($this->tx === 'pdo') {
+                $this->rollback();
+            } elseif ($this->tx === 'pgw') {
+                $this->rollbackex();
+            }
+        } catch (\Exception) {
+            // When this is called things already went south. possibly
+            // the connection was aborted or other now-meaningless problems
+        } finally {
+            $this->tx = null;
+        }
+    }
+
     // ************************* pg_wrapper methods ******************************
 
     public function cnxrw(): Connection {

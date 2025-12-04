@@ -169,6 +169,7 @@ try {
     if ($e::class === DB\MysqlException::class) {
         DB::DB()->rollback();
     }
+    new Manager\ErrorLog()->pg()->abort();
     $errorLog = $Debug->saveError($e);
     Error500::error(
         $Viewer?->permitted('site_debug')
