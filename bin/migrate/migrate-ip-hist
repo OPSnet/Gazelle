@@ -1,6 +1,9 @@
 #! /usr/bin/env php
 <?php
 
+use \sad_spirit\pg_wrapper\converters\containers\MultiRangeConverter;
+use \sad_spirit\pg_wrapper\converters\datetime\TimeStampTzConverter;
+
 require_once __DIR__ . "/../../lib/bootstrap.php";
 
 // length of interval between two records to extend the date range
@@ -62,38 +65,43 @@ foreach ($list as $userId) {
 }
 
 function persist(\Gazelle\DB\Pg $pg, int $userId, string $ip, int $total, array $range): void {
-    $pg->begin();
-    $seen = 'tstzmultirange('
-        . implode(',', array_map(
-            fn ($r) => "tstzrange('{$r['begin']}','{$r['end']}', '[]')",
-            $range
-        ))
-        . ')';
+    $pgRange = array_map(fn ($dates) => [
+            'lower' => new \DateTimeImmutable($dates['begin']),
+            'upper' => new \DateTimeImmutable($dates['end']),
+            'lower_inc' => true,
+            'upper_inc' => true,
+        ],
+        $range
+    );
+    $converter = new MultiRangeConverter(new TimeStampTzConverter());
+    $seen = $converter->output($pgRange);
+    unset($range, $pgRange);
 
-    $exists = $pg->scalar("
+    $pg->begin();
+    $exists = $pg->scalarex("
         select 1
         from ip_site_history
-        where id_user = ?
-            and ip = ?
+        where id_user = $1
+            and ip = $2
         ", $userId, $ip
     );
     if ($exists) {
         echo "$userId $ip append\n";
-        $pg->prepared_query("
+        $pg->query("
             update ip_site_history set
-                seen = seen + $seen,
-                total = total + ?
-            where id_user = ?
-            and ip = ?
-            ", $total, $userId, $ip
+                seen = seen + $1::tstzmultirange,
+                total = total + $2
+            where id_user = $3
+            and ip = $4
+            ", $seen, $total, $userId, $ip
         );
     } else {
         echo "$userId $ip create\n";
-        $pg->prepared_query("
+        $pg->query("
             insert into ip_site_history
                    (id_user, ip, total, seen)
-            values (?,       ?,  ?,    $seen)
-            ", $userId, $ip, $total
+            values ($1,      $2, $3,    $4::tstzmultirange)
+            ", $userId, $ip, $total, $seen
         );
     }
     $pg->commit();

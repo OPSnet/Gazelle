@@ -152,14 +152,14 @@ class GiftEvent extends \Gazelle\BasePgObject {
             return [GiftStatus::tooEarly, null];
         }
         $gift = $giftMan->choose();
-        $this->pg()->beginex();
+        $this->pg()->begin();
         $this->pg()->query('
             insert into gift_event_user_has_gift
                    (id_gift_event, id_user_has_gift)
             values ($1,            $2)
             ', $this->id, $gift->giveTo($user)
         );
-        $this->pg()->commitex();
+        $this->pg()->commit();
         $this->flush();
         return [GiftStatus::success, $gift];
     }

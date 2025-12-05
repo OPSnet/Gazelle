@@ -4,13 +4,9 @@ namespace Gazelle\Manager;
 
 use Gazelle\Enum\NotificationTicketState;
 use Gazelle\Enum\NotificationType;
+use sad_spirit\pg_wrapper\converters\IntegerConverter;
 
 class Notification extends \Gazelle\Base {
-    // Option types
-    final public const OPT_PUSH             = 3;
-    final public const OPT_POPUP_PUSH       = 4;
-    final public const OPT_TRADITIONAL_PUSH = 5;
-
     /**
      * This method is called from a scheduled task. Its job is to look
      * for new uploads that have begun to seed, in which case a notification
@@ -78,7 +74,7 @@ class Notification extends \Gazelle\Base {
     }
 
     public function ticketStats(): array {
-        return $this->pg()->allByKey("state", "
+        return $this->pg()->allByKeyex("state", "
             with s as (
                 select e.enumlabel as state
                 from pg_enum e
@@ -94,7 +90,7 @@ class Notification extends \Gazelle\Base {
     }
 
     public function ticketPendingStats(): array {
-        return $this->pg()->all("
+        return $this->pg()->allex("
             with d as (
                 select date_trunc('hour', x::timestamptz(0)) as h
                 from generate_series(now() - '71 hour'::interval, now(), interval '1 hour') t(x)
@@ -132,18 +128,18 @@ class Notification extends \Gazelle\Base {
     }
 
     public function allTokens(): array {
-        return $this->pg()->column("
+        return $this->pg()->columnex("
             select push_token from user_push_options
         ");
     }
 
     public function pushableTokens(NotificationType $type): array {
-        return $this->pg()->column("
+        return $this->pg()->columnex("
            select po.push_token
            from user_push_options po
            inner join user_has_attr ha using (id_user)
            inner join user_attr ua using (id_user_attr)
-           where ua.name = ?
+           where ua.name = $1
         ", strtolower($type->toString()) . '-push');
     }
 
@@ -157,7 +153,7 @@ class Notification extends \Gazelle\Base {
                 and ha.id_user = any($2::integer[])
             ',
                 strtolower($type->toString()) . '-push',
-                $this->pg()->arrayConverter()->output($idList),
+                $this->pg()->arrayConverter(new IntegerConverter())->output($idList),
         );
     }
 }

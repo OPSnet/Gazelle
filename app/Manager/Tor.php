@@ -9,7 +9,7 @@ class Tor extends \Gazelle\Base {
         }
         $quad = array_unique($match[0]);
 
-        $this->pg()->beginex();
+        $this->pg()->begin();
         $this->pg()->query("
             CREATE TEMPORARY TABLE tor_node_new (ipv4 inet)
         ");
@@ -39,7 +39,7 @@ class Tor extends \Gazelle\Base {
         $this->pg()->query("
             DROP TABLE tor_node_new
         ");
-        $this->pg()->commitex();
+        $this->pg()->commit();
 
         return $changed;
     }

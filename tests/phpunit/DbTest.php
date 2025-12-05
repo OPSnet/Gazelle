@@ -2,6 +2,7 @@
 
 namespace Gazelle;
 
+use sad_spirit\pg_wrapper\exceptions\server\ProgrammingException;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\Group;
 use GazelleUnitTest\Helper;
@@ -386,6 +387,45 @@ class DbTest extends TestCase {
         $this->assertEquals('computer says no', $errorList[0]['query'], 'db-pg-error-query');
         $this->assertArrayHasKey('epoch', $errorList[0], 'db-pg-error-epoch');
         $this->assertEquals([123], $errorList[0]['args'], 'db-pg-error-args');
+    }
+
+    public function testPgBadQuery(): void {
+        $stats = $this->pg()->stats();
+        $queryCnt = count($stats->queryList());
+        $errorCnt = count($stats->errorList());
+
+        try {
+            $this->pg()->executeParams("select 1 from nonexistent_table");
+            $this->fail('pg-bad-exception-not-thrown');
+        } catch (ProgrammingException $e) {
+            $this->assertEquals(ProgrammingException::class, get_class($e), 'pg-bad-exception-class');
+        }
+
+        $this->assertEquals($queryCnt, count($stats->queryList()), 'pg-bad-query-count');
+        $this->assertEquals($errorCnt + 1, count($stats->errorList()), 'pg-bad-error-count');
+    }
+
+    public function testPgAbort(): void {
+        // make sure we are not in a tx
+        $this->pg()->prepared_query('select 1');
+        // abort non-existent tx, should be noop
+        $this->pg()->abort();
+
+        $this->pg()->begin();
+        $this->assertEquals(1, $this->pg()->scalarex('select 1'), 'pg-abort-qry1');
+
+        try {
+            $this->pg()->prepared_query('select 1');
+            $this->fail('pg-abort-exception-not-thrown');
+        } catch (\Exception $e) {
+            $this->assertEquals(\Exception::class, get_class($e), 'pg-abort-exception-class');
+            $this->assertEquals('ongoing pg_wrapper transaction', $e->getMessage(), 'pg-abort-exception-msg');
+        }
+
+        $this->assertEquals(1, $this->pg()->scalarex('select 1'), 'pg-abort-qry2');
+
+        $this->pg()->abort();
+        $this->assertEquals(1, $this->pg()->scalar('select 1'), 'pg-abort-qry3');
     }
 
     public function testMysqlDuplicateException(): void {

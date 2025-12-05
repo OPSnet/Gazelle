@@ -10,12 +10,12 @@ require_once(__DIR__ . '/../lib/bootstrap.php');
 $pg = new DB\Pg(PG_RW_DSN);
 $pg->begin();
 
-$n = $pg->prepared_query("
-    delete from request
+$n = $pg->query("
+    truncate table request
 ");
 echo "$n requests removed\n";
 
-$n = $pg->prepared_query(<<<END_SQL
+$n = $pg->query(<<<END_SQL
     with a_t as (
         select rr."ID" as id_request,
             to_tsvector(
@@ -72,7 +72,7 @@ $n = $pg->prepared_query(<<<END_SQL
 );
 echo "$n requests inserted\n";
 
-$n = $pg->prepared_query('
+$n = $pg->query('
     insert into request_vote (id_request_vote, id_request, id_user, bounty, created)
     select rv.requests_votes_id, rv."RequestID", rv."UserID", rv."Bounty", rv.created
     from relay.requests_votes rv
@@ -80,7 +80,7 @@ $n = $pg->prepared_query('
 ');
 echo "$n votes inserted\n";
 
-$n = $pg->prepared_query('
+$n = $pg->query('
     insert into request_vote_summary (id_request, bounty_total, user_total, last_vote)
     select r.id_request,
         coalesce(sum(rv.bounty)::bigint, 0::bigint),

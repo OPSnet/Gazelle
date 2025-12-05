@@ -36,49 +36,50 @@ class Ban extends \Gazelle\Base {
      */
     public function create(string $ipaddr, string $note, \Gazelle\User|null $user = null): \Gazelle\Ban {
         $this->pg()->begin();
-        $cidrList = $this->pg()->column("
-            select ip from ip_ban where ip && ?::inet
+        $cidrList = $this->pg()->columnex("
+            select ip from ip_ban where ip && $1::inet
             ", $ipaddr
         );
         if (count($cidrList) > 1) {
             // the new  CIDR overlaps with more than one previous range
             $inet = $ipaddr;
             foreach ($cidrList as $cidr) {
-                $inet = $this->pg()->scalar("
-                    select inet_merge(?::inet, ?::inet)
+                $inet = $this->pg()->scalarex("
+                    select inet_merge($1::inet, $2::inet)
                     ", $inet, $cidr
                 );
             }
             // grab the notes from the existing ranges
-            $noteList = $this->pg()->column("
+            $noteList = $this->pg()->columnex("
                 select ib.ip || ':' || ibh.note
                 from ip_ban_hist ibh
                 inner join ip_ban ib using (id_ip_ban)
-                where ip && ?::inet
+                where ip && $1::inet
                 ", $ipaddr
             );
             // before we delete them
-            $this->pg()->prepared_query("
-                delete from ip_ban where ip && ?::inet
+            $this->pg()->query("
+                delete from ip_ban where ip && $1::inet
                 ", $ipaddr
             );
             // and create a new range than encompasses them all
-            $id = $this->pg()->insert("
-                insert into ip_ban (ip) values (inet_merge(?::inet, ?::inet))
+            $id = $this->pg()->scalarex("
+                insert into ip_ban (ip) values (inet_merge($1::inet, $2::inet))
+                returning id_ip_ban
                 ", $ipaddr, $inet
             );
-            $this->pg()->insert("
+            $this->pg()->query("
                 insert into ip_ban_hist
                        (id_ip_ban, note, id_user)
-                values (?,         ?,    ?)
+                values ($1,        $2,   $3)
                 ", $id,
-                    trim("$note (extended " . implode(', ', $noteList) . ")"),
-                    (int)$user?->id
+                   trim("$note (extended " . implode(', ', $noteList) . ")"),
+                   (int)$user?->id
             );
         } else {
             // 0 or 1 other ranges, insert or merge
-            [$id, $action] = $this->pg()->row("
-                with add as (select network(?::inet) as ip)
+            [$id, $action] = $this->pg()->rowex("
+                with add as (select network($1::inet) as ip)
                 merge into ip_ban ib using add on (ib.ip && add.ip)
                     when not matched then insert (ip) values (ip)
                     when matched then update set
@@ -87,13 +88,13 @@ class Ban extends \Gazelle\Base {
                 returning id_ip_ban, merge_action()
                 ", $ipaddr
             );
-            $this->pg()->insert("
+            $this->pg()->query("
                 insert into ip_ban_hist
                        (id_ip_ban, note, id_user)
-                values (?,         ?,    ?)
+                values ($1,        $2,   $3)
                 ", $id,
-                    $action === 'INSERT' ? $note : "$note (merged $ipaddr)",
-                    (int)$user?->id
+                   $action === 'INSERT' ? $note : "$note (merged $ipaddr)",
+                   (int)$user?->id
             );
         }
         $this->pg()->commit();

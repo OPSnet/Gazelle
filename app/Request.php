@@ -884,7 +884,7 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
      * Rebuild the fulltext artist/title text vector when either changes
      */
     public function reindex(): int {
-        $this->pg()->beginex();
+        $this->pg()->begin();
         $this->pg()->query('
             delete from request_artist where id_request = $1
             ', $this->id
@@ -923,12 +923,12 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
 END_SQL
             , $this->id
         );
-        $this->pg()->commitex();
+        $this->pg()->commit();
         return $affected;
     }
 
     public function relayTag(): int {
-        $this->pg()->beginex();
+        $this->pg()->begin();
         $this->pg()->executeParams('
             delete from request_tag where id_request = $1
             ', $this->id
@@ -950,7 +950,7 @@ END_SQL
             where id_request = $2
             ', $this->id, $this->id
         );
-        $this->pg()->commitex();
+        $this->pg()->commit();
         return $affected;
     }
 

@@ -8,6 +8,7 @@ use sad_spirit\pg_wrapper\converters\containers\ArrayConverter;
 use sad_spirit\pg_wrapper\converters\StringConverter;
 use sad_spirit\pg_wrapper\exceptions\server\ProgrammingException;
 use sad_spirit\pg_wrapper\PreparedStatement;
+use sad_spirit\pg_wrapper\TypeConverter;
 
 /* There are (at least) two ways to interact with Postgresql databases
  * in PHP: PDO and pg_wrapper. (There are others but they are less
@@ -76,58 +77,40 @@ class Pg {
      * abort whatever transaction is going on and move on
      */
     public function abort(): void {
-        try {
-            if ($this->tx === 'pdo') {
+        if ($this->tx === 'pgw') {
+            try {
                 $this->rollback();
-            } elseif ($this->tx === 'pgw') {
-                $this->rollbackex();
+            } catch (\Exception) {
+                // When this is called things already went south. possibly
+                // the connection was aborted or other now-meaningless problems
+            } finally {
+                $this->tx = null;
             }
-        } catch (\Exception) {
-            // When this is called things already went south. possibly
-            // the connection was aborted or other now-meaningless problems
-        } finally {
-            $this->tx = null;
         }
     }
 
     // ************************* pg_wrapper methods ******************************
 
-    public function cnxrw(): Connection {
-        return $this->cnxrw;
+    public function arrayConverter(TypeConverter $subtype = new StringConverter()): ArrayConverter {
+        return new ArrayConverter($subtype);
     }
 
-    public function arrayConverter(): ArrayConverter {
-        return new ArrayConverter(new StringConverter());
-    }
-
-    public function beginex(): void {
-        if ($this->tx === 'pdo') {
-            throw new \Exception('ongoing PDO transaction');
-        }
+    public function begin(): void {
         $this->tx = 'pgw';
         $this->cnxrw->beginTransaction();
     }
 
-    public function commitex(): void {
-        if ($this->tx !== 'pgw') {
-            throw new \Exception('no ongoing transaction');
-        }
+    public function commit(): void {
         $this->cnxrw->commit();
         $this->tx = null;
     }
 
-    public function rollbackex(): void {
-        if ($this->tx !== 'pgw') {
-            throw new \Exception('no ongoing transaction');
-        }
+    public function rollback(): void {
         $this->cnxrw->rollback();
         $this->tx = null;
     }
 
     public function execute(string $query): Result {
-        if ($this->tx === 'pdo') {
-            throw new \Exception('ongoing PDO transaction');
-        }
         $begin = hrtime(true);
         try {
             $result = $this->cnxrw->execute($query);
@@ -140,9 +123,6 @@ class Pg {
     }
 
     public function executeParams(string $query, mixed ...$args): Result {
-        if ($this->tx === 'pdo') {
-            throw new \Exception('ongoing PDO transaction');
-        }
         $begin = hrtime(true);
         try {
             $result = $this->cnxrw->executeParams($query, $args); /** @phpstan-ignore-line mixed mess */
@@ -158,9 +138,6 @@ class Pg {
     }
 
     public function prepareex(string $query): PreparedStatement {
-        if ($this->tx === 'pdo') {
-            throw new \Exception('ongoing PDO transaction');
-        }
         return $this->cnxrw->prepare($query);
     }
 
@@ -224,30 +201,6 @@ class Pg {
 
     public function prepare(string $query): \PDOStatement {
         return $this->pdo->prepare($query); /** @phpstan-ignore-line let it blow up downstream */
-    }
-
-    public function begin(): void {
-        if ($this->tx === 'pgw') {
-            throw new \Exception('ongoing pg_wrapper transaction');
-        }
-        $this->tx = 'pdo';
-        $this->pdo->beginTransaction();
-    }
-
-    public function commit(): void {
-        if ($this->tx !== 'pdo') {
-            throw new \Exception('no ongoing transaction');
-        }
-        $this->pdo->commit();
-        $this->tx = null;
-    }
-
-    public function rollback(): void {
-        if ($this->tx !== 'pdo') {
-            throw new \Exception('no ongoing transaction');
-        }
-        $this->pdo->rollBack();
-        $this->tx = null;
     }
 
     // phpcs:disable PSR1.Methods.CamelCapsMethodName.NotCamelCaps

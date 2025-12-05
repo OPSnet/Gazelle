@@ -10,10 +10,10 @@ require_once __DIR__ . '/../../lib/bootstrap.php';
 $pg = new \Gazelle\DB\Pg(PG_RW_DSN);
 $pg->begin();
 
-$pg->prepared_query("
+$pg->query("
     truncate table request_artist
 ");
-$inserted = $pg->prepared_query(
+$inserted = $pg->query(
 <<<END_SQL
     insert into request_artist
     select "RequestID",

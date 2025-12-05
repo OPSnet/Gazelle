@@ -43,8 +43,8 @@ class Request extends \Gazelle\ArtistRole {
             DELETE FROM requests_artists WHERE RequestID = ?
             ", $this->object->id()
         );
-        $this->pg()->prepared_query("
-            delete from request_artist where id_request = ?
+        $this->pg()->query("
+            delete from request_artist where id_request = $1
             ", $this->object->id()
         );
 
@@ -59,16 +59,16 @@ class Request extends \Gazelle\ArtistRole {
                     ", $this->object->id(), $user->id, $artist->aliasId(), $role
                 );
                 $affected += self::$db->affected_rows();
-                $this->pg()->prepared_query("
+                $this->pg()->query("
                     insert into request_artist
                            (id_request, id_alias, id_artist_role, id_user)
-                    VALUES (?,         ?,      ?,       ?)
+                    VALUES ($1,         $2,       $3,             $4)
                     ", $this->object->id(), $artist->aliasId(), $role, $user->id
                 );
                 self::$cache->delete_value("artists_requests_{$artist->id}");
             }
         }
-        $this->pg()->prepared_query("
+        $this->pg()->query("
             update request set
                 artist_title_ts = upd.artist_title_ts
             from (
@@ -81,7 +81,7 @@ class Request extends \Gazelle\ArtistRole {
                 left join relay.artists_alias aa using (\"AliasID\")
                 left join relay.artist_role ar on (ar.artist_role_id = ra.artist_role_id)
                 where (ar.slug is null or ar.slug != 'guest')
-                    and r.id_request = ?
+                    and r.id_request = $1
                 group by r.id_request
             ) upd
             where request.id_request = upd.id_request

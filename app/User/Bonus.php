@@ -46,26 +46,26 @@ class Bonus extends \Gazelle\BaseUser {
     public function tokenExchange(): array {
         return array_map(
             'intval',
-            $this->pg()->rowAssoc(<<<END_SQL
+            $this->pg()->rowAssocex(<<<END_SQL
                 with sent(n) AS (
                     select sum(bi.amount)
                     from relay.bonus_history bh
                     inner join bonus_item bi on (bi.id_bonus_item = bh."ItemID")
-                    where bh."OtherUserID" is not null
-                        and bh."UserID" = ?
+                    where coalesce(bh."OtherUserID", 0) != 0
+                        and bh."UserID" = $1
                 ),
                 recv(n) AS (
                     select sum(bi.amount)
                     from relay.bonus_history bh
                     inner join bonus_item bi on (bi.id_bonus_item = bh."ItemID")
-                    where bh."OtherUserID" = ?
+                    where bh."OtherUserID" = $1
                 )
                 select coalesce(recv.n, 0) as received,
                     coalesce(sent.n, 0)    as sent
                 from sent
                 cross join recv
                 END_SQL
-                , $this->user->id, $this->user->id
+                , $this->user->id
             )
         );
     }

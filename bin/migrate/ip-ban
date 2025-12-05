@@ -21,24 +21,24 @@ $db->prepared_query("
 $n = 0;
 $pg->begin();
 foreach ($db->to_array(false, MYSQLI_ASSOC) as $row) {
-    [$id, $action] = $pg->row("
-        with add as (select network(inet_merge(?::inet, ?::inet)) as ip)
+    [$id, $action] = $pg->rowex("
+        with add as (select network(inet_merge($1::inet, $2::inet)) as ip)
         merge into ip_ban ib using add on (ib.ip && add.ip)
             when not matched then insert (ip) values (inet_merge(add.ip, ip))
             when matched then update set is_active = true
         returning id_ip_ban, merge_action()
         ", $row['from_ip'], $row['to_ip'],
     );
-    $pg->insert("
+    $pg->query("
         insert into ip_ban_hist
                (id_ip_ban, id_user, created, note)
-        values (?,         ?,       ?,       ?)
+        values ($1,        $2,      $3,      $4)
         ", $id,
             $row['user_id'],
             $row['created'],
             $action === 'INSERT'
                 ? "historical:{$row['Reason']}"
-                : "${row['Reason']} (merged {$row['from_ip']}–{$row['to_ip']})",
+                : "{$row['Reason']} (merged {$row['from_ip']}–{$row['to_ip']})",
     );
     $n++;
 }

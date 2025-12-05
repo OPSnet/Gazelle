@@ -32,28 +32,29 @@ class BonusUploadReward extends Base {
             // Music MP3
             $column = 'low';
         }
-        return (int)$this->pg()->scalar("
+        return (int)$this->pg()->scalarex("
             select $column
             from bonus_upload_reward
-            where id_category = ?
-                and valid @> ?::timestamptz
+            where id_category = $1
+                and valid @> $2::timestamptz
             ", $categoryId, $torrent->created()
         );
     }
 
     public function modifyCategory(int $categoryId, array $reward): int {
         $this->pg()->begin();
-        $this->pg()->prepared_query("
+        $this->pg()->query("
             update bonus_upload_reward set
                 valid = tstzrange(lower(valid), now())
             where now() <@ valid
-                and id_category = ?
+                and id_category = $1
             ", $categoryId
         );
-        $id = $this->pg()->insert("
+        $id = $this->pg()->scalarex("
             insert into bonus_upload_reward
                     (id_category, high, standard, low, valid)
-             values (?,           ?,    ?,        ?,   tstzrange(now(), 'infinity'))
+             values ($1,          $2,   $3,       $4,  tstzrange(now(), 'infinity'))
+            returning id_bonus_upload_reward
             ", $categoryId, $reward['high'], $reward['standard'], $reward['low']
         );
         $this->pg()->commit();
