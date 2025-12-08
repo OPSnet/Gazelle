@@ -10,6 +10,7 @@ use Gazelle\Util\Time;
 
 require_once __DIR__ . '/lib/bootstrap.php';
 global $Cache, $Debug, $Twig;
+$Debug->mark('bootstrap complete');
 
 register_shutdown_function(
     function () {
@@ -132,7 +133,6 @@ if ($Viewer) {
     }
 }
 
-$Debug->mark('load page');
 if (DEBUG_TWIG) {
     $Twig->addExtension(new \Twig\Extension\DebugExtension());
 }
@@ -160,6 +160,7 @@ if ($file === false) {
 }
 
 try {
+    $Debug->mark('call ' . str_replace(SERVER_ROOT . '/', '', $file));
     include_once $file;
 } catch (\Error | \Exception $e) {
     // if there was an ongoing transaction, abort it
@@ -174,7 +175,6 @@ try {
             : "That is not supposed to happen. Check to see whether someone has created a thread in the the Bugs forum, or create a new thread to explain what you were doing and reference the Error ID {$errorLog->id}."
     );
 } finally {
-    $Debug->mark('send to user');
     if (!is_null($Viewer)) {
         $Debug->profile($Viewer, isset($_REQUEST['profile']));
     }

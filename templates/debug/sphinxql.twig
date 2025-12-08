@@ -1,20 +1,17 @@
 {% for query in list %}
-    {% if loop.first %}
-        {% set nr = list|length %}
-<table class="layout" width="100%">
-    <tr>
-        <td><strong><a href="#" id="debug-view-sphinxql" class="brackets">View</a>
-        {{ nr }} Sphinx search{% if n > 1 %}s{% endif %}
-        ({{ (time * 1000)|number_format(2) }} ms)</strong></td>
-    </tr>
-</table>
-<table id="debug_sphinxql" class="debug_table hidden">
-    {% endif %}
-    <tr>
+{%  if loop.first %}
+{%      set nr = list|length %}
+<details>
+<summary>{{ nr }} Sphinx search{{ nr|plural('es') }} ({{
+    (time * 1000)|number_format(2) }} ms)</summary>
+<table class="debug-table">
+{%   endif %}
+    <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
         <td class="debug_data debug_sphinxql"><pre>{{ query.0 }}</pre></td>
         <td class="rowa debug_info debug_sphinx_time" style="width: 130px;">{{ (query.1 * 1000)|number_format(5) }} ms</td>
     </tr>
-    {% if loop.last %}
+{%  if loop.last %}
 </table>
-    {% endif %}
+</details>
+{%  endif %}
 {% endfor %}

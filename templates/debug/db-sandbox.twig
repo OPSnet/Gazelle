@@ -23,33 +23,33 @@
 </div>
 
 {% if error or result %}
-    {% if error %}
+{%  if error %}
     <div class="thin box pad">
         <h3 style="display:inline">Query error</h3>
         <div>{{ source == 'pg' ? 'PostgreSQL' : 'MySQL' }} error: <code>{{ error }}</code></div>
     </div>
-    {% else %}
+{%  else %}
 <div class="thin" style="overflow-x: scroll">
     <div>
         <h3 style="display:inline">Query results ({{ result|length }} row{{ result|length|plural }})</h3>
     </div>
     <table>
-        {% for row in result %}
-            {% if loop.first %}
+{%      for row in result %}
+{%          if loop.first %}
         <tr class="colhead">
-                {% for heading in row|keys %}
+{%              for heading in row|keys %}
             <td>{{ heading }}</td>
-                {% endfor %}
+{%              endfor %}
         </tr>
-            {% endif %}
+{%          endif %}
         <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
-            {% for value in row %}
+{%          for value in row %}
             <td>{{ value }}</td>
-            {% endfor %}
+{%         endfor %}
         </tr>
-        {% endfor %}
+{%      endfor %}
     </table>
 </div>
-    {% endif %}
+{%  endif %}
 {% endif %}
 {{ footer() }}

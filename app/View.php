@@ -221,6 +221,7 @@ class View extends Base {
         }
 
         global $Debug, $SessionID;
+        $Debug->mark('render footer');
         return self::$twig->render('index/private-footer.twig', [
             'cache'        => self::$cache,
             'db'           => self::$db,

@@ -62,7 +62,6 @@
 {% endif %}
 {% if viewer.permitted('site_debug') %}
 <script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/vendor/jquery-migrate.js?v={{ mtime('vendor/jquery-migrate.js') }}"></script>
-<script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/functions/debug.js?v={{ mtime('functions/debug.js') }}"></script>
 {% endif %}
 <script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/functions/global.js?v={{ mtime('functions/global.js') }}"></script>
 {% for js in script %}

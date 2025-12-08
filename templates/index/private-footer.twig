@@ -1,9 +1,8 @@
 </div>
 <div id="footer">
 {% if viewer.permitted('site_debug') %}
-    <div id="site_debug">
-{%  include 'debug/performance.twig' with {'list': debug.perfInfo} only %}
-{%  include 'debug/flag.twig' with {'list': debug.markList} only %}
+    <div class="debug-container box pad thin">
+{%  include 'debug/profile.twig' with {'perf': debug.perfInfo, 'mark': debug.markList} only %}
 {%  include 'debug/error.twig' with {'list': debug.errorList} only %}
 {%  if pg %}
 {%      include 'debug/pg.twig' with {'pg': pg} only %}

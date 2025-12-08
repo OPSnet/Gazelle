@@ -1,0 +1,43 @@
+{% set wall_prev = false %}
+{% set cpu_prev = false %}
+<details>
+<summary>Profile ({{ perf['Page process time'] }})</summary>
+<table class="debug-table">
+{% for stat, value in perf %}
+    <tr>
+        <td class="debug_perf_stat">{{ stat }}</td>
+        <td class="debug_perf_data">{{ value }}</td>
+    </tr>
+{% endfor %}
+</table>
+{% for row in mark %}
+{%  if loop.first %}
+<table class="debug-table">
+    <tr>
+        <td class="debug_flags_event"><strong>Event</strong></td>
+        <td class="number_column debug_flags_time"><strong>Wall time</strong></td>
+        <td class="number_column debug_flags_time"><strong>Wall delta</strong></td>
+{%      if row.3 is not empty %}
+        <td class="number_column debug_flags_time"><strong>CPU time</strong></td>
+        <td class="number_column debug_flags_time"><strong>CPU Delta</strong></td>
+{%      endif %}
+        <td class="number_column debug_flags_memory"><strong>Memory</strong></td>
+    </tr>
+{%  endif %}
+    <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+        <td>{{ row.0 }}</td>
+        <td class="number_column">{{ row.1|number_format(3) }} ms</td>
+        <td class="number_column">{% if wall_prev is same as(false) %}—{% else %}{{ ((row.1 - wall_prev))|number_format(3) }} ms{% endif %}</td>
+{%  set wall_prev = row.1 %}
+{%  if row.3 is not empty %}
+        <td class="number_column">{{ (row.3 / 1000)|number_format(3) }} ms</td>
+        <td class="number_column">{% if cpu_prev is same as(false) %}—{% else %}{{ ((row.3 - cpu_prev) / 1000)|number_format(3) }} ms{% endif %}</td>
+{%      set cpu_prev = row.3 %}
+{%  endif %}
+        <td class="number_column">{{ row.2|octet_size }}</td>
+    </tr>
+{%  if loop.last %}
+</table>
+</details>
+{%  endif %}
+{% endfor %}

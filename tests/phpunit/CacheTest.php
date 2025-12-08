@@ -50,8 +50,11 @@ class CacheTest extends TestCase {
 
         $this->assertIsArray($cache->server_status(), 'cache-server-status'); /** @phpstan-ignore-line */
 
-        $html = Util\Twig::factory(new Manager\User())->render('debug/cache.twig', ['cache' => $cache]);
-        $this->assertStringContainsString('<table id="debug_cache" class="debug_table hidden">', $html, 'cache-debug-render');
-        $this->assertStringContainsString('<table id="debug_cache_del" class="debug_table hidden">', $html, 'cache-del-debug-render');
+        $this->assertStringContainsString(
+            "<details>\n<summary>5 Cache keys",
+            Util\Twig::factory(new Manager\User())
+                ->render('debug/cache.twig', ['cache' => $cache]),
+            'cache-debug-render'
+        );
     }
 }

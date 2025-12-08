@@ -1,36 +1,30 @@
 {% set nr = cache.hitList|length %}
 {% for key, hit in cache.hitList %}
-    {% if loop.first %}
-<table class="layout" width="100%">
-    <tr>
-        <td><strong><a href="#" id="debug-view-cache" class="brackets">View</a>
-        {{ nr|number_format }} Cache key{{ nr|plural }}
-        ({{ (cache.elapsed * 1000)|number_format(2) }} ms)</strong> (mean: {{ ((cache.elapsed  * 1000)/nr)|number_format(5) }} ms)</td>
-    </tr>
-</table>
-<table id="debug_cache" class="debug_table hidden">
-    {% endif %}
+{%  if loop.first %}
+<details>
+<summary>{{ nr|number_format }} Cache key{{ nr|plural }} ({{
+    (cache.elapsed * 1000)|number_format(2) }} ms)</strong> (mean: {{
+    ((cache.elapsed  * 1000)/nr)|number_format(5) }} ms)</summary>
+<table class="debug-table">
+{%  endif %}
     <tr>
         <td class="nobr debug_info debug_cache_key">
             <a href="tools.php?action=clear_cache&amp;key={{ key }}&amp;type=clear" target="_blank" class="tooltip" title="View this cache key">{{ key }}</a>
             ({{ hit|number_format }} hit{{ hit|plural}})
         </td>
     </tr>
-    {% if loop.last %}
+{%  if loop.last %}
 </table>
-    {% endif %}
+</details>
+{%  endif %}
 {% endfor %}
 {% set nr = cache.deleteList|length %}
 {% for key in cache.deleteList %}
-    {% if loop.first %}
-<table class="layout" width="100%">
-    <tr>
-        <td><strong><a href="#" id="debug-view-del-cache" class="brackets">View</a>
-        {{ nr|number_format }} Cache key{{ nr|plural }} deleted</strong></td>
-    </tr>
-</table>
-<table id="debug_cache_del" class="debug_table hidden">
-    {% endif %}
+{%  if loop.first %}
+<details>
+<summary>{{ nr|number_format }} Cache key{{ nr|plural }} deleted</summary>
+<table class="debug-table">
+{%  endif %}
     <tr>
         <td class="nobr debug_info debug_cache_key">
             <a href="tools.php?action=clear_cache&amp;key={{ key }}&amp;view=View" target="_blank" class="tooltip" title="View this cache key">{{ key }}</a>
@@ -38,7 +32,8 @@
         <td class="rowa debug_info debug_query_time" style="width: 130px;">
             {{- (q.elapsed * 1000)|number_format(5) }} ms</td>
     </tr>
-    {% if loop.last %}
+{%  if loop.last %}
 </table>
-    {% endif %}
+</details>
+{%  endif %}
 {% endfor %}

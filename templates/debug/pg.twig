@@ -1,16 +1,11 @@
 {% set nr = pg.queryList|length %}
 {% for q in pg.queryList %}
 {%  if loop.first %}
-<table class="layout" width="100%">
-    <tr>
-        <td colspan="3"><strong><a href="#" id="debug-view-query-pg" class="brackets">View</a>
-        {{ pg.queryList|length|number_format }} Postgresql {% if pg.queryList|length == 1 %}query{% else %}queries{% endif %}
-        ({{ (pg.totalDuration * 1000)|number_format(2) }} ms)</strong> (mean: {{ ((pg.totalDuration * 1000)/nr)|number_format(5) }} ms)</td>
-    </tr>
-</table>
-<table id="debug-query-pg" class="debug_table hidden">
-{%  endif %}
-{%  if loop.first %}
+<details>
+<summary>{{ pg.queryList|length|number_format }} Postgresql {% if nr == 1 %}query{% else %}queries{% endif %} ({{
+    (pg.totalDuration * 1000)|number_format(2) }} ms)</strong> (mean: {{
+    ((pg.totalDuration * 1000)/nr)|number_format(5) }} ms)</summary>
+<table class="debug-table">
     <tr class="colhead">
         <td>Query</td>
         <td>Metric</td>
@@ -31,17 +26,14 @@
     </tr>
 {%  if loop.last %}
 </table>
+</details>
 {%  endif %}
 {% endfor %}
 {% for e in pg.errorList %}
 {%  if loop.first %}
-<table class="layout" width="100%">
-    <tr>
-        <td colspan="3"><strong><a href="#" id="debug-view-error-pg" class="brackets">View</a>
-        {{ pg.errorList|length|number_format }} Postgresql error{{ pg.errorList|length|plural }}</strong></td>
-    </tr>
-</table>
-<table id="debug-error-pg" class="debug_table hidden">
+<details>
+<summary>{{ pg.errorList|length|number_format }} Postgresql error{{ pg.errorList|length|plural }}</summary>
+<table class="debug-table">
     <tr class="colhead">
         <td>Error</td>
     </tr>
@@ -56,5 +48,6 @@
     </tr>
 {%  if loop.last %}
 </table>
+</details>
 {%  endif %}
 {% endfor %}

@@ -1,15 +1,10 @@
 {% for n, request in list %}
-    {% if loop.first %}
-        {% set nr = list|length %}
-<table class="layout" width="100%">
-    <tr>
-        <td><strong><a href="#" id="debug-view-ocelot" class="brackets">View</a>
-        {{ nr|number_format }} Ocelot request{% if nr > 1 %}s{% endif %}s</strong></td>
-    </tr>
-</table>
-<table id="debug_ocelot" class="debug_table hidden">
-    {% endif %}
-    <tr>
+{%  if loop.first %}
+<details>
+<summary>{{ list|length|number_format }} Ocelot request{{ list|length|plural }}</summary>
+<table class="debug-table">
+{%  endif %}
+    <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
         <td class="debug_data debug_ocelot_data">
             <a href="#" onclick="$('#debug_ocelot_{{ n }}').gtoggle(); return false">{{ request.path }}</a>
             <pre id="debug_ocelot_{{ n }}" class="hidden">{{ request.response }}</pre>
@@ -21,7 +16,8 @@
             {{ (request.time * 1000)|number_format(5) }} ms
         </td>
     </tr>
-    {% if loop.last %}
+{%  if loop.last %}
 </table>
-    {% endif %}
+</details>
+{%  endif %}
 {% endfor %}
