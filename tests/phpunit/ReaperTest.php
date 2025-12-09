@@ -27,7 +27,6 @@ use Gazelle\Enum\ReaperNotify;
 use Gazelle\Enum\ReaperState;
 
 class ReaperTest extends TestCase {
-    protected string $tgroupName;
     protected array $torrentList = [];
     protected array $userList    = [];
 
@@ -40,9 +39,8 @@ class ReaperTest extends TestCase {
         $this->userList[0]->requestContext()->setViewer($this->userList[0]);
 
         // create a torrent group
-        $this->tgroupName = 'phpunit reaper ' . randomString(6);
         $tgroup = Helper::makeTGroupMusic(
-            name:       $this->tgroupName,
+            name:       'phpunit reaper ' . randomString(6),
             artistName: [[ARTIST_MAIN], ['Reaper Girl ' . randomString(12)]],
             tagName:    ['electronic'],
             user:       $this->userList[0],
@@ -63,9 +61,8 @@ class ReaperTest extends TestCase {
 
     public function tearDown(): void {
         $this->removeUnseededAlert($this->torrentList);
-        Helper::removeTGroup($this->torrentList[0]->group(), $this->userList[0]);
         foreach ($this->userList as $user) {
-            $user->remove();
+            Helper::removeUser($user);
         }
     }
 

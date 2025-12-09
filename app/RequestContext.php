@@ -83,6 +83,11 @@ class RequestContext {
         return isset($this->sessionId);
     }
 
+    public function setSessionId(string $sessionId): static {
+        $this->sessionId = $sessionId;
+        return $this;
+    }
+
     /**
      * Because we <3 our staff
      */
@@ -113,8 +118,15 @@ class RequestContext {
         return $this;
     }
 
-    public function setSessionId(string $sessionId): static {
-        $this->sessionId = $sessionId;
+    /**
+     * In normal circumstances, this method never needs to be called. It
+     * is required only when running phpunit tests, to prevent contexts
+     * bleeding into one another.
+     */
+    public function unsetViewer(): static {
+        if ($this->hasViewer()) {
+            unset($this->viewer);
+        }
         return $this;
     }
 }

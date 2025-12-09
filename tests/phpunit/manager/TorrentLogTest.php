@@ -41,17 +41,14 @@ class TorrentLogTest extends TestCase {
             $this->assertEquals($torrentLog->id, $torrentLog2->id);
             $this->assertEquals($torrentLog->link(), $torrentLog2->link());
         } finally {
-            if (isset($tgroup)) {
-                Helper::removeTGroup($tgroup, $user);
-            }
             if (isset($user)) {
-                $user->remove();
+                Helper::removeUser($user);
             }
         }
     }
 
     public function testFindByIdNull(): void {
         $manager = new Manager\TorrentLog();
-        $this->assertNull($manager->findById(new Torrent(1), 1));
+        $this->assertNull($manager->findById(new Torrent(-1), 1));
     }
 }

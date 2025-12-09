@@ -15,7 +15,7 @@ class TorrentTest extends TestCase {
     protected array   $userList;
 
     public function setUp(): void {
-        $this->user    = Helper::makeUser('torrent.' . randomString(10), 'rent', clearInbox: true);
+        $this->user = Helper::makeUser('torrent.' . randomString(10), 'rent', clearInbox: true);
         $this->user->requestContext()->setViewer($this->user);
         $this->torrent = Helper::makeTorrentMusic(
             tgroup: Helper::makeTGroupMusic(
@@ -30,13 +30,12 @@ class TorrentTest extends TestCase {
     }
 
     public function tearDown(): void {
-        Helper::removeTGroup($this->torrent->group(), $this->user);
-        $this->user->remove();
         if (isset($this->userList)) {
             foreach ($this->userList as $user) {
                 $user->remove();
             }
         }
+        Helper::removeUser($this->user);
     }
 
     public function testFlag(): void {

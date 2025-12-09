@@ -7,7 +7,6 @@ use GazelleUnitTest\Helper;
 
 class UserSeedboxTest extends TestCase {
     protected User $user;
-    protected string $tgroupName;
     protected array $torrentList = [];
 
     public function setUp(): void {
@@ -15,9 +14,8 @@ class UserSeedboxTest extends TestCase {
         $this->user->requestContext()->setViewer($this->user);
         $this->user->toggleAttr('feature-seedbox', true);
 
-        $this->tgroupName = 'phpunit seedbox ' . randomString(6);
         $tgroup = Helper::makeTGroupMusic(
-            name:       $this->tgroupName,
+            name:       'phpunit seedbox ' . randomString(6),
             artistName: [[ARTIST_MAIN], ['Seed Box ' . randomString(12)]],
             tagName:    ['metal'],
             user:       $this->user,
@@ -38,7 +36,6 @@ class UserSeedboxTest extends TestCase {
     }
 
     public function tearDown(): void {
-        Helper::removeTGroup($this->torrentList[0]->group(), $this->user);
         DB::DB()->prepared_query("
             DELETE us, xfu
             FROM user_seedbox us
@@ -46,7 +43,7 @@ class UserSeedboxTest extends TestCase {
             WHERE us.user_id = ?
             ", $this->user->id
         );
-        $this->user->remove();
+        Helper::removeUser($this->user);
     }
 
     protected function generateSeed(Torrent $torrent, string $ua, string $peerId, string $ip): void {

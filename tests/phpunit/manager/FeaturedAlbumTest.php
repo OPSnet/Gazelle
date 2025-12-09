@@ -11,8 +11,8 @@ use Gazelle\Enum\LeechReason;
 class FeaturedAlbumTest extends TestCase {
     use Pg;
 
-    protected TGroup      $tgroup;
-    protected User        $user;
+    protected TGroup $tgroup;
+    protected User   $user;
 
     public function setUp(): void {
         $this->user = Helper::makeUser('feat.' . randomString(10), 'featured');
@@ -33,8 +33,7 @@ class FeaturedAlbumTest extends TestCase {
             )
         );
         new Manager\FeaturedAlbum()->findById($this->tgroup->id)?->remove();
-        $this->tgroup->remove();
-        $this->user->remove();
+        Helper::removeUser($this->user);
     }
 
     public function testFeaturedAotm(): void {

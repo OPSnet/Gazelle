@@ -33,11 +33,13 @@ class TGroupVoteTest extends TestCase {
     }
 
     public function tearDown(): void {
-        foreach ($this->tgroupList as $tgroup) {
-            Helper::removeTGroup($tgroup, $this->userList[0]);
-        }
+        $db = DB::DB();
         foreach ($this->userList as $user) {
-            $user->remove();
+            $db->prepared_query("
+                DELETE FROM users_votes WHERE UserID = ?
+                ", $user->id
+            );
+            Helper::removeUser($user);
         }
     }
 

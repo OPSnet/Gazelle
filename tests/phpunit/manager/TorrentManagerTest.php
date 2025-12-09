@@ -8,9 +8,9 @@ use Gazelle\Enum\LeechType;
 use Gazelle\Enum\LeechReason;
 
 class TorrentManagerTest extends TestCase {
-    protected array         $torrentList = [];
-    protected array         $topTenList = [];
-    protected User $user;
+    protected array $torrentList = [];
+    protected array $topTenList = [];
+    protected User  $user;
 
     public function setUp(): void {
         $this->user = Helper::makeUser('torman.' . randomString(10), 'torman');
@@ -62,10 +62,7 @@ class TorrentManagerTest extends TestCase {
                 ", $id
             );
         }
-        foreach ($this->torrentList as $torrent) {
-            Helper::removeTGroup($torrent->group(), $this->user);
-        }
-        $this->user->remove();
+        Helper::removeUser($this->user);
     }
 
     public function testLatestUploads(): void {

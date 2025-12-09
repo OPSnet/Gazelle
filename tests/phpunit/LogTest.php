@@ -23,14 +23,8 @@ class LogTest extends TestCase {
             DELETE FROM group_log WHERE Info REGEXP ?
             ", '^' . self::PREFIX
         );
-        if (isset($this->tgroup)) {
-            $this->tgroup->remove();
-        }
-        if (isset($this->tgroupNew)) {
-            $this->tgroupNew->remove();
-        }
         if (isset($this->user)) {
-            $this->user->remove();
+            Helper::removeUser($this->user);
         }
     }
 

@@ -35,6 +35,7 @@ class ArtistTest extends TestCase {
                 Helper::removeTGroup($tgroup, $this->user);
             }
         }
+        $this->user->requestContext()->unsetViewer();
         $this->user->remove();
     }
 

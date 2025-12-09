@@ -40,6 +40,7 @@ class ContestTest extends TestCase {
                 $request->remove();
             }
         }
+        $this->userList[0]->requestContext()->unsetViewer();
         foreach ($this->userList as $user) {
             $user->remove();
         }

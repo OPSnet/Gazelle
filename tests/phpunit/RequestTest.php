@@ -34,6 +34,7 @@ class RequestTest extends TestCase {
             Helper::removeTGroup($this->tgroup, $this->userList['admin']);
         }
         foreach ($this->userList as $user) {
+            $user->requestContext()->unsetViewer();
             $user->remove();
         }
     }

@@ -38,10 +38,7 @@ class UserTorrentTest extends TestCase {
     }
 
     public function tearDown(): void {
-        foreach ($this->torrentList as $t) {
-            Helper::removeTGroup($t->group(), $this->user);
-        }
-        $this->user->remove();
+        Helper::removeUser($this->user);
     }
 
     public function testSeeding(): void {

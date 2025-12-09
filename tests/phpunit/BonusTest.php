@@ -20,6 +20,7 @@ class BonusTest extends TestCase {
         }
         if (isset($this->userList)) {
             foreach ($this->userList as $user) {
+                $user->requestContext()->unsetViewer();
                 $user->remove();
             }
         }

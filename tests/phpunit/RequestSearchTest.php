@@ -34,6 +34,7 @@ class RequestSearchTest extends TestCase {
             Helper::removeTGroup($this->tgroup, $this->userList[0]);
         }
         foreach ($this->userList as $user) {
+            $user->requestContext()->unsetViewer();
             $user->remove();
         }
     }

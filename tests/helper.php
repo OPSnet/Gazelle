@@ -9,6 +9,7 @@ use Gazelle\Request\Encoding;
 use Gazelle\Request\Format;
 use Gazelle\Request\Media;
 use Gazelle\Request\LogCue;
+use Gazelle\TGroup;
 use Gazelle\User;
 
 class Helper {
@@ -85,10 +86,10 @@ class Helper {
      * @param array<int> $tagList
      */
     public static function makeRequestComics(
-        User     $user,
-        string   $title,
-        string   $description = 'This is a unit test description',
-        array    $tagList     = [],
+        User   $user,
+        string $title,
+        string $description = 'This is a unit test description',
+        array  $tagList     = [],
     ): \Gazelle\Request {
         return new \Gazelle\Manager\Request()->create(
             user:            $user,
@@ -112,7 +113,7 @@ class Helper {
 
     public static function makeTGroupEBook(
         string $name,
-    ): \Gazelle\TGroup {
+    ): TGroup {
         return new \Gazelle\Manager\TGroup()->create(
             categoryId:      (int)new Category()->findIdByName('E-Books'),
             name:            $name,
@@ -126,12 +127,12 @@ class Helper {
     }
 
     public static function makeTGroupMusic(
-        \Gazelle\User $user,
+        User   $user,
         string $name,
-        array $artistName,
-        array $tagName,
-        int $releaseType = 1
-    ): \Gazelle\TGroup {
+        array  $artistName,
+        array  $tagName,
+        int    $releaseType = 1
+    ): TGroup {
         $user->requestContext()->setViewer($user);
         $tgroup = new \Gazelle\Manager\TGroup()->create(
             categoryId:      (int)new Category()->findIdByName('Music'),
@@ -156,9 +157,9 @@ class Helper {
     }
 
     public static function makeTorrentEBook(
-        \Gazelle\TGroup $tgroup,
-        \Gazelle\User   $user,
-        string          $description,
+        TGroup $tgroup,
+        User   $user,
+        string $description,
     ): \Gazelle\Torrent {
         return new \Gazelle\Manager\Torrent()->create(
             tgroup:                  $tgroup,
@@ -181,16 +182,16 @@ class Helper {
     }
 
     public static function makeTorrentMusic(
-        \Gazelle\TGroup $tgroup,
-        \Gazelle\User   $user,
-        string          $media           = 'WEB',
-        string          $format          = 'FLAC',
-        string          $encoding        = 'Lossless',
-        string          $catalogueNumber = '',
-        string          $recordLabel     = 'Unitest Artists',
-        string          $title           = 'phpunit remaster title',
-        int             $size            = 10_000_000,
-        bool            $seed            = false,
+        TGroup $tgroup,
+        User   $user,
+        string $media           = 'WEB',
+        string $format          = 'FLAC',
+        string $encoding        = 'Lossless',
+        string $catalogueNumber = '',
+        string $recordLabel     = 'Unitest Artists',
+        string $title           = 'phpunit remaster title',
+        int    $size            = 10_000_000,
+        bool   $seed            = false,
     ): \Gazelle\Torrent {
         if (empty($catalogueNumber)) {
             $catalogueNumber = 'UA-REM-' . random_int(10000, 99999);
@@ -234,10 +235,10 @@ class Helper {
 
     public static function generateTorrentSeed(
         \Gazelle\Torrent $torrent,
-        \Gazelle\User    $user,
-        string           $ipAddr = '127.0.0.1',
-        int              $interval = 5,
-        string|null      $useragent = null,
+        User        $user,
+        string      $ipAddr = '127.0.0.1',
+        int         $interval = 5,
+        string|null $useragent = null,
     ): int {
         if (is_null($useragent)) {
             $useragent = 'ua-' . randomString(12);
@@ -252,7 +253,7 @@ class Helper {
         return $db->affected_rows();
     }
 
-    public static function generateTorrentSnatch(\Gazelle\Torrent $torrent, \Gazelle\User $user): int {
+    public static function generateTorrentSnatch(\Gazelle\Torrent $torrent, User $user): int {
         $db = \Gazelle\DB::DB();
         $db->prepared_query("
             INSERT INTO xbt_snatched
@@ -263,7 +264,7 @@ class Helper {
         return $db->affected_rows();
     }
 
-    public static function removeTGroup(\Gazelle\TGroup $tgroup, \Gazelle\User $user): void {
+    public static function removeTGroup(TGroup $tgroup, User $user): void {
         $torMan = new \Gazelle\Manager\Torrent();
         if (!new \Gazelle\Manager\TGroup()->findById($tgroup->id)) {
             // Already deleted. This can occur when removing two
@@ -277,7 +278,7 @@ class Helper {
         $tgroup->removeTGroup();
     }
 
-    public static function makeUser(string $username, string $tag, bool $enable = false, bool $clearInbox = false): \Gazelle\User {
+    public static function makeUser(string $username, string $tag, bool $enable = false, bool $clearInbox = false): User {
         $user = new \Gazelle\UserCreator()
             ->setUsername($username)
             ->setEmail(randomString(6) . "@{$tag}.example.com")
@@ -293,7 +294,7 @@ class Helper {
         return $user;
     }
 
-    public static function makeUserByInvite(string $username, string $key): \Gazelle\User {
+    public static function makeUserByInvite(string $username, string $key): User {
         return new \Gazelle\UserCreator()
             ->setUsername($username)
             ->setEmail(randomString(6) . "@key.invite.example.com")
@@ -303,7 +304,7 @@ class Helper {
             ->create();
     }
 
-    public static function clearInbox(\Gazelle\User $user): \Gazelle\User {
+    public static function clearInbox(User $user): User {
         $pmMan = new \Gazelle\Manager\PM($user);
         foreach ($user->inbox()->messageList($pmMan, 1, 0) as $pm) {
             $pm->remove();
@@ -311,7 +312,7 @@ class Helper {
         return $user;
     }
 
-    public static function removeUser(\Gazelle\User $user): void {
+    public static function removeUser(User $user): void {
         $tgMan = new \Gazelle\Manager\TGroup();
         foreach ($user->recentUploadList(100, true) as $tgroupId) {
             $tgroup = $tgMan->findById($tgroupId);
@@ -319,6 +320,7 @@ class Helper {
                 static::removeTGroup($tgroup, $user);
             }
         }
+        $user->requestContext()->unsetViewer();
         $user->remove();
     }
 

@@ -56,17 +56,8 @@ class CollageFreeleechTest extends TestCase {
     }
 
     public function tearDown(): void {
-        $torMan = new Manager\Torrent();
-        foreach ($this->tgroupList as $tgroup) {
-            $this->collage->removeEntry($tgroup);
-            foreach ($tgroup->torrentIdList() as $torrentId) {
-                $torMan->findById($torrentId)
-                    ?->removeTorrent($this->user, 'collfree unit test');
-            }
-            $tgroup->remove($this->user);
-        }
         $this->collage->hardRemove();
-        $this->user->remove();
+        Helper::removeUser($this->user);
     }
 
     public function testCollageFreeleech(): void {

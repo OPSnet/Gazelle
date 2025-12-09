@@ -27,10 +27,7 @@ class CommentTest extends TestCase {
         if (isset($this->request)) {
             $this->request->remove();
         }
-        if (isset($this->torrent)) {
-            Helper::removeTGroup($this->torrent->group(), $this->user);
-        }
-        $this->user->remove();
+        Helper::removeUser($this->user);
     }
 
     public function testCommentArtist(): void {

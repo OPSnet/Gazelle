@@ -33,13 +33,12 @@ class TorrentReportManagerTest extends TestCase {
     }
 
     public function tearDown(): void {
-        Helper::removeTGroup($this->tgroup, $this->userList[0]);
         foreach ($this->userList as $user) {
             DB::DB()->prepared_query("
                 DELETE FROM torrent_report_configuration_log WHERE user_id = ?
                 ", $user->id
             );
-            $user->remove();
+            Helper::removeUser($user);
         }
         DB::DB()->prepared_query("
             DELETE FROM reportsv2 WHERE UserComment REGEXP '^phpunit (?:other|search|urgent) report$'

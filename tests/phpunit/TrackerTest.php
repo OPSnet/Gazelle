@@ -9,15 +9,11 @@ use Gazelle\Enum\DownloadStatus;
 use Gazelle\Enum\LeechType;
 
 class TrackerTest extends TestCase {
-    protected Torrent $torrent;
-    protected User    $user;
+    protected User $user;
 
     public function tearDown(): void {
-        if (isset($this->torrent)) {
-            Helper::removeTGroup($this->torrent->group(), $this->user);
-        }
         if (isset($this->user)) {
-            $this->user->remove();
+            Helper::removeUser($this->user);
         }
     }
 
@@ -37,7 +33,7 @@ class TrackerTest extends TestCase {
     #[Group('no-ci')]
     public function testTrackerToken(): void {
         $this->user = Helper::makeUser('trkfl.' . randomString(10), 'tracker');
-        $this->torrent = Helper::makeTorrentMusic(
+        $torrent = Helper::makeTorrentMusic(
             Helper::makeTGroupMusic(
                 name:       'tracker ' . randomString(10),
                 artistName: [[ARTIST_MAIN], ['Tracker Girl ' . randomString(12)]],
@@ -48,21 +44,21 @@ class TrackerTest extends TestCase {
             title: 'tracker ' . randomString(10),
         );
         $tracker = new Tracker();
-        $this->assertTrue($tracker->addTorrent($this->torrent), 'tracker-add-torrent');
-        $this->assertTrue($tracker->addToken($this->torrent, $this->user), 'tracker-add-token');
-        $report = $tracker->torrentReport($this->torrent);
+        $this->assertTrue($tracker->addTorrent($torrent), 'tracker-add-torrent');
+        $this->assertTrue($tracker->addToken($torrent, $this->user), 'tracker-add-token');
+        $report = $tracker->torrentReport($torrent);
         $this->assertCount(9, array_keys($report), 'tracker-tinfo-count');
-        $this->assertEquals($this->torrent->id, $report['id'], 'tracker-tinfo-id');
+        $this->assertEquals($torrent->id, $report['id'], 'tracker-tinfo-id');
         $this->assertCount(0, $report['leecher_list'], 'tracker-tinfo-leecher');
         $this->assertCount(0, $report['seeder_list'], 'tracker-tinfo-seeder');
         $this->assertEquals([$this->user->id], $report['fltoken_list'], 'tracker-tinfo-fltoken');
-        $this->assertTrue($tracker->removeToken($this->torrent, $this->user), 'tracker-remove-token');
+        $this->assertTrue($tracker->removeToken($torrent, $this->user), 'tracker-remove-token');
     }
 
     #[Group('no-ci')]
     public function testTrackerTorrent(): void {
         $this->user = Helper::makeUser('trk.' . randomString(10), 'tracker');
-        $this->torrent = Helper::makeTorrentMusic(
+        $torrent = Helper::makeTorrentMusic(
             Helper::makeTGroupMusic(
                 name:       'tracker ' . randomString(10),
                 artistName: [[ARTIST_MAIN], ['Tracker Girl ' . randomString(12)]],
@@ -73,8 +69,8 @@ class TrackerTest extends TestCase {
             title: 'tracker ' . randomString(10),
         );
         $tracker = new Tracker();
-        $this->assertTrue($tracker->addTorrent($this->torrent), 'tracker-add-torrent');
-        $this->assertTrue($tracker->modifyTorrent($this->torrent, LeechType::Free), 'tracker-modify-torrent');
+        $this->assertTrue($tracker->addTorrent($torrent), 'tracker-add-torrent');
+        $this->assertTrue($tracker->modifyTorrent($torrent, LeechType::Free), 'tracker-modify-torrent');
     }
 
     #[Group('no-ci')]
@@ -158,7 +154,7 @@ class TrackerTest extends TestCase {
         $tracker = new Tracker();
         $this->user = Helper::makeUser('trkfree.' . randomString(10), 'tracker');
         $this->user->requestContext()->setViewer($this->user);
-        $this->torrent = Helper::makeTorrentMusic(
+        $torrent = Helper::makeTorrentMusic(
             Helper::makeTGroupMusic(
                 name:       'tracker ' . randomString(10),
                 artistName: [[ARTIST_MAIN], ['Tracker Girl ' . randomString(12)]],
@@ -168,15 +164,15 @@ class TrackerTest extends TestCase {
             user:  $this->user,
             title: 'tracker ' . randomString(10),
         );
-        $tracker->addTorrent($this->torrent);
+        $tracker->addTorrent($torrent);
 
         $downloader = Helper::makeUser('trkdown.' . randomString(10), 'tracker');
         $downloader->updateTokens(10);
-        $download = new Download($this->torrent, new User\UserclassRateLimit($downloader), true);
+        $download = new Download($torrent, new User\UserclassRateLimit($downloader), true);
         $this->assertEquals(DownloadStatus::ok, $download->status(), 'tracker-downloader-enough-tokens');
 
         $userId    = $downloader->id;
-        $torrentId = $this->torrent->id;
+        $torrentId = $torrent->id;
         $fakeId    = $torrentId + 1;
 
         $this->assertEquals(1, $tracker->expireFreeleechTokens("$userId:$torrentId,$userId:$fakeId"), 'tracker-expire-tokens');
@@ -186,7 +182,7 @@ class TrackerTest extends TestCase {
     public function testTrackerUpdate(): void {
         $this->user = Helper::makeUser('trkfree.' . randomString(10), 'tracker');
         $this->user->requestContext()->setViewer($this->user);
-        $this->torrent = Helper::makeTorrentMusic(
+        $torrent = Helper::makeTorrentMusic(
             Helper::makeTGroupMusic(
                 name:       'tracker ' . randomString(10),
                 artistName: [[ARTIST_MAIN], ['Tracker Girl ' . randomString(12)]],
@@ -196,7 +192,7 @@ class TrackerTest extends TestCase {
             user:  $this->user,
             title: 'tracker ' . randomString(10),
         );
-        Helper::generateTorrentSeed($this->torrent, $this->user);
+        Helper::generateTorrentSeed($torrent, $this->user);
         $this->assertTrue(new Tracker()->recentUpdate(60), 'tracker-recent-update');
     }
 }

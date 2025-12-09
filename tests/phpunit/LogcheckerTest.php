@@ -8,22 +8,18 @@ use OrpheusNET\Logchecker\Logchecker;
 use OrpheusNET\Logchecker\Check\Checksum;
 
 class LogcheckerTest extends TestCase {
-    protected TGroup $tgroup;
-    protected User   $user;
+    protected User $user;
 
     public function tearDown(): void {
-        if (isset($this->tgroup)) {
-            Helper::removeTGroup($this->tgroup, $this->user);
-        }
         if (isset($this->user)) {
-            $this->user->remove();
+            Helper::removeUser($this->user);
         }
     }
 
     public function testLogchecker(): void {
         $this->user = Helper::makeUser('logchecker.' . randomString(6), 'logcheck');
         $this->user->requestContext()->setViewer($this->user);
-        $this->tgroup = Helper::makeTGroupMusic(
+        $tgroup = Helper::makeTGroupMusic(
             $this->user,
             'phpunit logchecker ' . randomString(6),
             [[ARTIST_MAIN], ['phpunit logchecker artist ' . randomString(6)]],
@@ -68,16 +64,16 @@ class LogcheckerTest extends TestCase {
     public function testLogcheckerSummary(): void {
         $this->user   = Helper::makeUser('logchecker.' . randomString(6), 'logcheck-summary');
         $this->user->requestContext()->setViewer($this->user);
-        $this->tgroup = Helper::makeTGroupMusic(
+        $tgroup = Helper::makeTGroupMusic(
             $this->user,
             'phpunit logchecker ' . randomString(6),
             [[ARTIST_MAIN], ['phpunit logchecker artist ' . randomString(6)]],
             ['czech']
         );
         $torrent = Helper::makeTorrentMusic(
-            tgroup: $this->tgroup,
-            user:  $this->user,
-            title: randomString(10),
+            tgroup: $tgroup,
+            user:   $this->user,
+            title:  randomString(10),
         );
         $logfileSummary = new LogfileSummary([
             'error'    => [UPLOAD_ERR_OK],

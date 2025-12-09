@@ -86,6 +86,7 @@ class CollageTest extends TestCase {
             $tgroup->remove($this->userList['u1']);
         }
         foreach ($this->userList as $user) {
+            $user->requestContext()->unsetViewer();
             $user->remove();
         }
     }

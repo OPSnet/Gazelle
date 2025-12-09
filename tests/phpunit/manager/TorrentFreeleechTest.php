@@ -37,9 +37,7 @@ class TorrentFreeleechTest extends TestCase {
     }
 
     public function tearDown(): void {
-        $user = $this->torrentList[0]->uploader();
-        Helper::removeTGroup($this->torrentList[0]->group(), $user);
-        $user->remove();
+        Helper::removeUser($this->torrentList[0]->uploader());
     }
 
     public function testTorrentFreeleechThreshold(): void {

@@ -33,6 +33,7 @@ class DownloadTest extends TestCase {
         $db = DB::DB();
         foreach ($this->userList as $user) {
             $db->scalar("DELETE FROM ratelimit_torrent WHERE user_id = ?", $user->id);
+            $user->requestContext()->unsetViewer();
             $user->remove();
         }
     }

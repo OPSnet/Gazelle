@@ -6,9 +6,9 @@ use PHPUnit\Framework\TestCase;
 use GazelleUnitTest\Helper;
 
 class TGroupManagerTest extends TestCase {
-    protected array         $tgroupList = [];
-    protected array         $torrentList = [];
-    protected User $user;
+    protected array $tgroupList;
+    protected array $torrentList;
+    protected User  $user;
 
     public function setUp(): void {
         $this->user = Helper::makeUser('tgman.' . randomString(10), 'tgman');
@@ -31,10 +31,7 @@ class TGroupManagerTest extends TestCase {
     }
 
     public function tearDown(): void {
-        foreach ($this->torrentList as $torrent) {
-            Helper::removeTGroup($torrent->group(), $this->user);
-        }
-        $this->user->remove();
+        Helper::removeUser($this->user);
     }
 
     public function testFindByTorrentId(): void {
