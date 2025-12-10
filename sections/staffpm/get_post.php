@@ -14,7 +14,7 @@ if (!$pm->visible($Viewer)) {
     Error403::error();
 }
 
-header('Content-Type: application/json; charset=utf-8');
+header('Content-Type: application/json');
 echo json_encode([
     'username' => new Manager\User()->findById((int)$pm->postUserId($postId))?->username(),
     'body'     => $pm->postBody($postId),

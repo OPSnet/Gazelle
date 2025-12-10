@@ -67,7 +67,7 @@ if (!empty($_REQUEST['key'])) {
 }
 
 if (isset($_REQUEST['json'])) {
-    header('Content-Type: application/json; charset=utf-8');
+    header('Content-Type: application/json');
     if (count($result) == 1) {
         print(json_encode(current($result)));
     } else {

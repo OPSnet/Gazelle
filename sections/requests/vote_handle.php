@@ -27,5 +27,5 @@ if (is_null($request)) {
     ];
 }
 
-header('Content-Type: application/json; charset=utf-8');
+header('Content-Type: application/json');
 echo json_encode($result);

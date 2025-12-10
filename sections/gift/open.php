@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Gazelle;
 
-header('Content-Type: application/json; charset=utf-8');
+header('Content-Type: application/json');
 
 authorize(ajax: true);
 

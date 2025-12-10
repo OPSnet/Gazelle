@@ -5,7 +5,7 @@ declare(strict_types=1);
 
 namespace Gazelle;
 
-header('Content-Type: application/json; charset=utf-8');
+header('Content-Type: application/json');
 
 $lastfm   = new Util\LastFM();
 $username = $_GET['username'] ?? null;

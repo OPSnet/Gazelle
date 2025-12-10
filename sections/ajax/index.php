@@ -75,7 +75,7 @@ if (str_starts_with($_SERVER['CONTENT_TYPE'] ?? '', 'application/json')) {
     $_POST = json_decode($input, true);
 }
 
-header('Content-Type: application/json; charset=utf-8');
+header('Content-Type: application/json');
 // Enforce rate limiting everywhere except info.php
 if (!$Viewer->permitted('site_unlimit_ajax') && isset($LimitedPages[$Action])) {
     [$rate, $interval] = $LimitedPages[$Action];

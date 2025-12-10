@@ -14,7 +14,7 @@ if (!$Viewer->permitted('site_collages_create')) {
 
 $fullName = rawurldecode($_GET['query']);
 
-header('Content-Type: application/json; charset=utf-8');
+header('Content-Type: application/json');
 echo json_encode([
     'query'       => $fullName,
     'suggestions' => new Manager\Collage()->autocomplete($fullName, isset($_GET['artist'])),

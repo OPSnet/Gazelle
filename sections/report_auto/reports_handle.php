@@ -5,7 +5,7 @@ declare(strict_types=1);
 
 namespace Gazelle;
 
-header('Content-Type: application/json; charset=utf-8');
+header('Content-Type: application/json');
 
 if (!$Viewer->permitted('users_auto_reports')) {
     json_error('permission denied');

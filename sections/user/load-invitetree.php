@@ -8,7 +8,7 @@ namespace Gazelle;
 
 authorize();
 
-header('Content-Type: application/json; charset=utf-8');
+header('Content-Type: application/json');
 
 if (!$Viewer->permitted('users_view_invites')) {
     json_die("Forbidden");

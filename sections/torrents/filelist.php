@@ -7,7 +7,7 @@ declare(strict_types=1);
 namespace Gazelle;
 
 /* lazy-load the torrent file list */
-header('Content-Type: application/json; charset=utf-8');
+header('Content-Type: application/json');
 
 echo json_encode(
     $Twig->render('torrent/detail-filelist.twig', [
