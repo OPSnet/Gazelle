@@ -101,8 +101,12 @@ class TaskScheduler extends Base {
         ));
     }
 
-    public static function isClassValid(string $class): bool {
-        return class_exists('Gazelle\\Task\\' . $class);
+    public static function className(string $class): string {
+        return "Gazelle\\Task\\$class";
+    }
+
+    public function isClassValid(string $class): bool {
+        return class_exists(self::className($class));
     }
 
     public function enqueue(int $taskId): int {
@@ -136,7 +140,7 @@ class TaskScheduler extends Base {
         bool $isSane,
         bool $isDebug
     ): int {
-        if (!self::isClassValid($class)) {
+        if (!$this->isClassValid($class)) {
             return 0;
         }
         self::$db->prepared_query("
@@ -388,6 +392,14 @@ class TaskScheduler extends Base {
         return $run;
     }
 
+    private function createRunner(int $taskId, string $name, string $class, bool $isDebug): mixed {
+        if (!$this->isClassValid($class)) {
+            return null;
+        }
+        $taskClass = self::className($class);
+        return new $taskClass($taskId, $name, $isDebug);
+    }
+
     public function runClass(string $className, bool $debug = false): int {
         $task = $this->findByName($className);
         if ($task === null) {
@@ -404,14 +416,14 @@ class TaskScheduler extends Base {
         echo "Running task {$task['name']}...";
 
         $taskRunner = $this->createRunner($taskId, $task['name'], $task['classname'], $task['is_debug'] || $debug);
-        if ($taskRunner === null) {
+        if (is_null($taskRunner)) {
             echo "DONE! (0.000)\n";
             Util\Irc::sendMessage(IRC_CHAN_DEV, "Failed to construct task {$task['name']}");
             return -1;
         }
 
         // some tasks require a viewer context (and probably should not...)
-        $sysop = new \Gazelle\Manager\User()->findById(
+        $sysop = new Manager\User()->findById(
             (int)self::$db->scalar('
                 SELECT um.id
                 FROM users_main um
@@ -428,6 +440,8 @@ class TaskScheduler extends Base {
             $taskRunner->run();
         } catch (\Throwable $e) {
             $taskRunner->log('Caught exception: ' . str_replace(SERVER_ROOT, '', $e->getMessage()), 'error');
+            global $Debug;
+            $Debug->saveCase($e->getMessage());
         } finally {
             $processed = $taskRunner->end($task['is_sane']);
         }
@@ -436,13 +450,5 @@ class TaskScheduler extends Base {
             $this->clear($taskId);
         }
         return $processed;
-    }
-
-    private function createRunner(int $taskId, string $name, string $class, bool $isDebug): mixed {
-        $class = 'Gazelle\\Task\\' . $class;
-        if (!class_exists($class)) {
-            return null;
-        }
-        return new $class($taskId, $name, $isDebug);
     }
 }

@@ -64,19 +64,17 @@ class Debug {
         Manager\ErrorLog $manager = new Manager\ErrorLog(),
     ): ErrorLog {
         if (!isset($_SERVER['REQUEST_URI'])) {
-            $uri    = 'cli';
-            $userId = null;
+            $uri = $_SERVER['SCRIPT_NAME'];
         } else {
             $uri = $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-            $uri = preg_replace('/(?<=[?&]auth=)\w+/', 'AUTH', $uri);
+            $uri = preg_replace('/(?<=[?&]auth=)\w+/',         'AUTH', $uri);
             $uri = preg_replace('/(?<=[?&]torrent_pass=)\w+/', 'HASH', $uri);
-            $uri = preg_replace('/([?&]\w*id=)\d+/', '\1IDnnn', $uri);
-            global $Viewer;
-            $userId = $Viewer?->id;
+            $uri = preg_replace('/([?&]\w*id=)\d+/',           '\1IDnnn', $uri);
         }
+        $context  = $manager->requestContext();
         $errorLog = $manager->create(
            uri:       $uri,
-           userId:    $userId,
+           userId:    $context->hasViewer() ? $context->viewer()->id : null,
            duration:  $this->duration(),
            memory:    memory_get_usage(true),
            nrQuery:   count(DB::DB()->queryList()),
