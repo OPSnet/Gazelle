@@ -65,14 +65,14 @@ class Debug {
     ): ErrorLog {
         if (!isset($_SERVER['REQUEST_URI'])) {
             $uri    = 'cli';
-            $userId = 0;
+            $userId = null;
         } else {
             $uri = $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
             $uri = preg_replace('/(?<=[?&]auth=)\w+/', 'AUTH', $uri);
             $uri = preg_replace('/(?<=[?&]torrent_pass=)\w+/', 'HASH', $uri);
             $uri = preg_replace('/([?&]\w*id=)\d+/', '\1IDnnn', $uri);
             global $Viewer;
-            $userId = (int)$Viewer?->id;
+            $userId = $Viewer?->id;
         }
         $errorLog = $manager->create(
            uri:       $uri,

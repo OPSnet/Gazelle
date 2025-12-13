@@ -86,7 +86,7 @@ class DebugTest extends TestCase {
         $uri      = '/phpunit.php';
         $errorLog = $manager->create(
             uri:       $uri,
-            userId:    0,
+            userId:    null,
             duration:  0.0,
             memory:    0,
             nrQuery:   0,

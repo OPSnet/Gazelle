@@ -13,7 +13,7 @@ class ErrorLog extends BaseManager {
 
     public function create(
         string $uri,
-        int $userId,
+        ?int $userId,
         float $duration,
         int $memory,
         int $nrQuery,

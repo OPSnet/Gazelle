@@ -97,7 +97,7 @@ class ErrorLog extends BasePgObject {
         return $this->info()['uri'];
     }
 
-    public function userId(): float {
+    public function userId(): ?int {
         return $this->info()['id_user'];
     }
 
