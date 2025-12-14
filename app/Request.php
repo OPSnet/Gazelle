@@ -884,7 +884,19 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
      * Rebuild the fulltext artist/title text vector when either changes
      */
     public function reindex(): int {
-        return $this->pg()->prepared_query(
+        $this->pg()->beginex();
+        $this->pg()->query('
+            delete from request_artist where id_request = $1
+            ', $this->id
+        );
+        $this->pg()->query('
+            insert into request_artist (id_request, id_alias, id_artist_role, id_user, created)
+            select "RequestID", "AliasID", artist_role_id, "UserID", created
+            from relay.requests_artists ra
+            where ra."RequestID" = $1
+            ', $this->id
+        );
+        $affected = $this->pg()->query(
         <<<END_SQL
             with r(id_request, artist_title_ts) as (
                 select
@@ -901,7 +913,7 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
                 left join relay.artists_alias    aa using ("AliasID")
                 left join relay.artist_role      ar on    (ar.artist_role_id = ra.artist_role_id)
                 where (ar.slug is null or ar.slug != 'guest')
-                    and rr."ID" = ?
+                    and rr."ID" = $1
                 group by rr."ID", rr."Title"
             )
             update request set
@@ -911,6 +923,8 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
 END_SQL
             , $this->id
         );
+        $this->pg()->commitex();
+        return $affected;
     }
 
     public function relayTag(): int {
