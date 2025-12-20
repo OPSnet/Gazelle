@@ -3,13 +3,13 @@
 <div class="thin">
 <div class="box">
 <figure class="user-error">
-<img src="{{ constant('STATIC_SERVER') }}/local/http{{ code }}.jpg" width="700" height="500" />
 <figcaption>
 <div class="pad">{{ description }}
 {% if message %}
 <br />Additional details: {{ message|raw }}
 {% endif %}</div>
 </figcaption>
+<img src="{{ constant('STATIC_SERVER') }}/local/http{{ code }}.jpg" width="700" height="500" />
 </figure>
 </div>
 </div>
