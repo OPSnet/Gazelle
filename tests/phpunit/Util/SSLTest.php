@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 class SSLTest extends TestCase {
     public function testAll(): void {
         $host = getenv('TEST_SSL_HOST');
-        if ($host !== false) {
+        if ($host) {
             $manager = new Manager\SSLHost();
 
             $result = $manager->lookup($host, 443);
