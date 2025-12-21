@@ -196,9 +196,9 @@ class Text {
     // This will be configured correctly for the website, but it can be set up
     // manually in boris is you need to render something that requires knowledge
     // of a user context. But most of the time you can forget about this.
-    private static \Gazelle\User $viewer;
+    private static ?\Gazelle\User $viewer = null;
 
-    public static function setViewer(\Gazelle\User $viewer): void {
+    public static function setViewer(?\Gazelle\User $viewer): void {
         self::$viewer = $viewer;
     }
 
@@ -1060,7 +1060,7 @@ class Text {
                         $Str .= '<blockquote class="hidden spoiler">' . self::to_html($Block['Val'], $Rules, $cache, $bucket) . '</blockquote>';
                         break;
                     case 'mature':
-                        if (self::$viewer->option('EnableMatureContent')) {
+                        if (self::$viewer?->option('EnableMatureContent')) {
                             if (!empty($Block['Attr'])) {
                                 $Str .= '<strong class="mature" style="font-size: 1.2em;">Mature content:</strong><strong> ' . $Block['Attr'] . '</strong><br /> <a href="javascript:void(0);" onclick="BBCode.spoiler(this);">Show</a>';
                                 $Str .= '<blockquote class="hidden spoiler">' . self::to_html($Block['Val'], $Rules, $cache, $bucket) . '</blockquote>';
@@ -1258,7 +1258,7 @@ class Text {
     }
 
     private static function smileys(string $Str): string {
-        if (!isset(self::$viewer) || self::$viewer->option('DisableSmileys')) {
+        if (self::$viewer?->option('DisableSmileys')) {
             return $Str;
         }
         if (count(self::$ProcessedSmileys) == 0 && count(self::$Smileys) > 0) {

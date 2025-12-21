@@ -27,6 +27,7 @@ class WikiTest extends TestCase {
         foreach ($this->userList as $user) {
             $user->remove();
         }
+        \Text::setViewer(null);
     }
 
     public static function providerAlias(): array {

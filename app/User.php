@@ -127,8 +127,7 @@ class User extends BaseAttrObject {
         }
         $key = sprintf(self::CACHE_KEY, $this->id);
         $info = self::$cache->get_value($key);
-        if ($info !== false && isset($info['updated'])) {
-            // TODO: remove check on 'updated' key after site has been flushed
+        if ($info !== false) {
             return $this->info = $info;
         }
         $qid = self::$db->get_query_id();
@@ -181,14 +180,11 @@ class User extends BaseAttrObject {
             WHERE um.ID = ?
             ", FORUM_MOD, $this->id
         );
-        $this->info = self::$db->next_record(MYSQLI_ASSOC) ?? [];
+        $this->info = self::$db->next_record(MYSQLI_ASSOC);
         self::$db->set_query_id($qid);
-        if (empty($this->info)) {
-            return $this->info;
-        }
 
         $this->info['nav_list']    = json_decode($this->info['nav_list'] ?? '[]', true);
-        $this->info['NavItems']    = empty($this->info['NavItems']) ? [] : explode(',', $this->info['NavItems']);
+        $this->info['NavItems']    = $this->info['NavItems'] ? explode(',', $this->info['NavItems']) : [];
         $this->info['ParanoiaRaw'] = $this->info['Paranoia'];
         $this->info['Paranoia']    = $this->info['Paranoia'] ? unserialize($this->info['Paranoia']) : [];
         $this->info['SiteOptions'] = $this->info['SiteOptions'] ? unserialize($this->info['SiteOptions']) : [];

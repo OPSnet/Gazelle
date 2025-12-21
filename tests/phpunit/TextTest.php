@@ -14,6 +14,7 @@ class TextTest extends TestCase {
             foreach ($this->userList as $user) {
                 $user->remove();
             }
+            \Text::setViewer(null);
         }
     }
 
