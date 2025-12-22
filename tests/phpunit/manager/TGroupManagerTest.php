@@ -54,6 +54,13 @@ class TGroupManagerTest extends TestCase {
         );
     }
 
+    public function testFindByGroupName(): void {
+        $manager = new Manager\TGroup();
+        $gid = $this->torrentList[0]->groupId();
+        $idList = $manager->findByGroupName($this->torrentList[0]->group()->name());
+        $this->assertEquals([$gid], $idList, 'tgman-find-by-group-name');
+    }
+
     public function testRefreshBetterTranscode(): void {
         $manager = new Manager\TGroup();
         // There is at least something from our own tgroup

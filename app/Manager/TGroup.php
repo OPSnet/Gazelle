@@ -121,6 +121,17 @@ class TGroup extends \Gazelle\BaseManager {
         return $this->findById($id);
     }
 
+    /**
+     * returns a list of group ids with matching name
+     */
+    public function findByGroupName(string $name, int $limit = 2): array {
+        self::$db->prepared_query("
+            SELECT ID FROM torrents_group WHERE Name = ? LIMIT ?
+            ", $name, $limit
+        );
+        return self::$db->collect(0);
+    }
+
     public function findByArtistReleaseYear(string $artistName, string $name, int $releaseType, int $year): ?\Gazelle\TGroup {
         $id = (int)self::$db->scalar("
             SELECT tg.id
