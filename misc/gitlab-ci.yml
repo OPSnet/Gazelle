@@ -117,6 +117,7 @@ e2e-tests:
     - su gazelle -c "${CI_PROJECT_DIR}/vendor/bin/phpunit -c misc/phpunit.xml --coverage-php /tmp/coverage/phpunit.cov --exclude-group no-ci"
     - /bin/bash "${CI_PROJECT_DIR}/misc/docker/web/bootstrap-npm.sh"
     - su gazelle -c "make lint-js"
+    - su gazelle -c "npm exec stylelint -- --config misc/stylelint.json sass"
     - npx cypress run || test "$WAIT_ON_FINISH"
     # note: phpcov has problems if .cov files are somewhere in the src tree
     - su gazelle -c 'vendor/bin/phpcov merge "/tmp/coverage" --text "/tmp/coverage/coverage.txt" && cat "/tmp/coverage/coverage.txt"'

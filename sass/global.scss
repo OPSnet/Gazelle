@@ -106,12 +106,11 @@ ul.collage_images li a {
   display: grid;
   gap: 2px 0;
   grid-auto-flow: row;
-  grid-template-columns: 154px 1fr 48px 40px 55px 40px;
-  grid-template-rows: 20px 25px 1fr;
-  grid-template-areas:
-    "cae-img cae-name cae-l-grp cae-v-grp cae-l-sna cae-v-sna"
-    "cae-img cae-tag cae-l-dcg cae-v-dcg cae-l-see cae-v-see"
-    "cae-img cae-bio cae-bio cae-bio cae-bio cae-bio";
+  grid-template:
+    "cae-img cae-name cae-l-grp cae-v-grp cae-l-sna cae-v-sna" 20px
+    "cae-img cae-tag cae-l-dcg cae-v-dcg cae-l-see cae-v-see" 25px
+    "cae-img cae-bio cae-bio cae-bio cae-bio cae-bio" 1fr
+    / 154px 1fr 48px 40px 55px 40px;
 }
 
 .cae-img {
