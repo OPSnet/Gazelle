@@ -62,7 +62,6 @@ echo $Twig->render('request/request.twig', [
     'format'           => $format          ?? new Request\Format(),
     'log_cue'          => $logCue          ?? new Request\LogCue(),
     'media'            => $media           ?? new Request\Media(),
-    'oclc'             => $oclc            ?? '',
     'image'            => $image           ?? '',
     'record_label'     => $recordLabel     ?? '',
     'release_type'     => $releaseType     ?? null,

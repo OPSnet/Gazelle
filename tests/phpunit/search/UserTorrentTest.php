@@ -59,7 +59,7 @@ class UserTorrentTest extends TestCase {
         $this->assertEquals(
             [$this->torrentList[0]->id],
             $search->idList(),
-            'search-utor-list-snatched'
+            'search-utor-list-snatched',
         );
     }
 
@@ -69,7 +69,7 @@ class UserTorrentTest extends TestCase {
         $this->assertEqualsCanonicalizing(
             array_map(fn ($t) => $t->id, $this->torrentList),
             $search->idList(),
-            'search-utor-list-uploaded'
+            'search-utor-list-uploaded',
         );
     }
 }

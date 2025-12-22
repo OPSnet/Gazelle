@@ -50,7 +50,6 @@ $tags            = trim($_POST['tags'] ?? '');
 $image           = trim($_POST['image'] ?? '');
 $catalogueNumber = trim($_POST['cataloguenumber'] ?? '');
 $recordLabel     = trim($_POST['recordlabel'] ?? '');
-$oclc            = trim($_POST['oclc'] ?? '');
 $year            = (int)$_POST['year'];
 $amount          = (int)$_POST['amount'];
 
@@ -202,7 +201,6 @@ $request = new Manager\Request()->create(
     format:          $format,
     media:           $media,
     logCue:          $logCue,
-    oclc:            trim($_POST['oclc'] ?? ''),
     groupId:         $tgroup?->id,
 );
 if ($categoryName == 'Music') {

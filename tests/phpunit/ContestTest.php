@@ -308,6 +308,8 @@ class ContestTest extends TestCase {
             hasPool     : true,
             type        : $reqFill['id'],
         );
+        $this->userList[0]->addBounty(200 * 1024 ** 3);
+        $this->userList[1]->addBounty(100 * 1024 ** 3);
         $this->requestList = [
             Helper::makeRequestMusic($this->userList[0], 'phpunit contest request fill 0-1'),
             Helper::makeRequestMusic($this->userList[0], 'phpunit contest request fill 0-2'),

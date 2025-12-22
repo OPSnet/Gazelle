@@ -27,7 +27,6 @@ class Request extends \Gazelle\BaseManager {
         Format   $format,
         Media    $media,
         LogCue   $logCue,
-        string   $oclc,
         array    $tagList = [],
         int|null $groupId = null,
     ): \Gazelle\Request {
@@ -40,41 +39,70 @@ class Request extends \Gazelle\BaseManager {
             $user->id, $categoryId, $title, $year, $image, $description, $recordLabel,
             $catalogueNumber, $releaseType,
             $encoding->dbValue(), $format->dbValue(), $media->dbValue(),
-            $logCue->dbValue(), $logCue->needLogChecksum ? 1 : 0, $oclc, $groupId
+            $logCue->dbValue(), $logCue->needLogChecksum ? 1 : 0, '', $groupId
         );
-        $request   = new \Gazelle\Request(self::$db->inserted_id());
+        $requestId = self::$db->inserted_id();
+        $created   = (string)self::$db->scalar("
+            SELECT created FROM requests WHERE ID = ?
+            ", $requestId
+        );
         $converter = $this->pg()->arrayConverter();
         $this->pg()->executeParams('
             insert into request (
                 id_request, id_user, id_tgroup, id_category, id_release_type,
-                year, created, modified,
+                year, created, last_vote, modified,
                 description, title, image, catalogue_number, record_label,
                 log_score, need_log, need_cue, need_checksum,
                 artist_title_ts, tag, encoding_str, format_str, media_str
             ) values (
                 $1, $2, $3, $4, $5,
-                $6, $7, $8,
-                $9, $10, $11, $12, $13,
-                $14, $15, $16, $17,
-                to_tsvector(\'simple\', unaccent($18)), $19::int[],
-                $20::text[], $21::text[], $22::text[]
+                $6, $7, $8, $9,
+                $10, $11, $12, $13, $14,
+                $15, $16, $17, $18,
+                to_tsvector(\'simple\', unaccent($19)), $20::int[],
+                $21::text[], $22::text[], $23::text[]
             )',
-            $request->id, $user->id, $groupId, $categoryId, $releaseType === 0 ? null : $releaseType, // 5
-            $year === 0 ? null : $year, $request->created(), $request->modified(), // 8
+            $requestId, $user->id, $groupId, $categoryId, $releaseType === 0 ? null : $releaseType, // 5
+            $year === 0 ? null : $year, $created, $created, $created, // 9
             $description, $title,
             $image           === '' ? null : $image,
             $catalogueNumber === '' ? null : $catalogueNumber,
-            $recordLabel     === '' ? null : $recordLabel, // 13
+            $recordLabel     === '' ? null : $recordLabel, // 14
             $logCue->minScore,
             $logCue->needLog         ? 't' : 'f',
             $logCue->needCue         ? 't' : 'f',
-            $logCue->needLogChecksum ? 't' : 'f', // 17
-            $title, $converter->output($tagList), // 19
+            $logCue->needLogChecksum ? 't' : 'f', // 18
+            $title, $converter->output($tagList), // 20
             $converter->output($encoding->dbList()),
             $converter->output($format->dbList()),
-            $converter->output($media->dbList()), // 22
+            $converter->output($media->dbList()), // 23
         );
-        $request->vote($user, $bounty);
+        $requestVoteId = \Gazelle\Request::voteById($requestId, $user, $bounty);
+        if (!$requestVoteId) {
+            throw new \Exception("request($requestId) vote of $bounty by {$user->username()} failed");
+        }
+        $this->pg()->executeParams('
+            merge into request_vote_summary rvs using (
+                select id_request,
+                    sum(bounty)             as bounty_total,
+                    count(distinct id_user) as user_total,
+                    max(created)            as last_vote
+                from request_vote
+                where id_request = $1
+                group by id_request
+            ) as i on rvs.id_request = i.id_request
+                when not matched then
+                    insert (  id_request,   bounty_total,   user_total,   last_vote)
+                    values (i.id_request, i.bounty_total, i.user_total, i.last_vote)
+                when matched then
+                    update set
+                        id_request   = i.id_request,
+                        bounty_total = i.bounty_total,
+                        user_total   = i.user_total,
+                        last_vote    = i.last_vote
+            ', $requestId
+        );
+        $request = new \Gazelle\Request($requestId);
         $request->artistFlush();
         return $request;
     }
@@ -83,8 +111,8 @@ class Request extends \Gazelle\BaseManager {
         $key = sprintf(self::ID_KEY, $id);
         $requestId = self::$cache->get_value($key);
         if ($requestId === false) {
-            $requestId = (int)self::$db->scalar("
-                SELECT ID FROM requests WHERE ID = ?
+            $requestId = (int)$this->pg()->scalarex("
+                select id_request from request where id_request = $1
                 ", $id
             );
             if ($requestId) {
@@ -101,20 +129,18 @@ class Request extends \Gazelle\BaseManager {
      * @return array of \Gazelle\Request objects
      */
     public function findUnfilledByUser(User $user, int $limit): array {
-        self::$db->prepared_query("
-            SELECT DISTINCT r.ID
-            FROM requests r
-            INNER JOIN requests_votes v ON (v.RequestID = r.ID)
-            WHERE r.TorrentID = 0
-                AND r.UserID = ?
-            GROUP BY r.ID
-            ORDER BY count(v.UserID) DESC, sum(v.Bounty) DESC
-            LIMIT 0, ?
-            ", $user->id, $limit
-        );
         return array_map(
             fn ($id) => $this->findById($id),
-            self::$db->collect(0)
+            $this->pg()->columnex("
+                select r.id_request
+                from request r
+                inner join request_vote_summary rvs using (id_request)
+                where r.id_torrent is null
+                    and r.id_user = $1
+                order by rvs.user_total desc, rvs.bounty_total desc, rvs.last_vote desc
+                limit $2 offset 0
+                ", $user->id, $limit
+            )
         );
     }
 
@@ -122,105 +148,112 @@ class Request extends \Gazelle\BaseManager {
         $key = sprintf(\Gazelle\Artist::CACHE_REQUEST_ARTIST, $artist->id);
         $requestList = self::$cache->get_value($key);
         if ($requestList === false) {
-            self::$db->prepared_query("
-                SELECT DISTINCT r.ID
-                FROM requests AS r
-                INNER JOIN requests_votes v ON (v.RequestID = r.ID)
-                INNER JOIN requests_artists AS ra ON (ra.RequestID = r.ID)
-                INNER JOIN artists_alias aa ON (ra.AliasID = aa.AliasID)
-                WHERE r.TorrentID = 0
-                    AND aa.ArtistID = ?
-                GROUP BY r.ID
-                ORDER BY count(v.UserID) DESC, sum(v.Bounty) DESC
-                ", $artist->id
+            $requestList = $this->pg()->columnex(<<<END_SQL
+                with r(id_request) as (
+                    select r.id_request
+                    from request                       r
+                    inner join request_artist          ra  using (id_request)
+                    inner join relay.artists_alias     aa  on    (ra.id_alias = aa."AliasID")
+                    where r.id_torrent is null
+                        and aa."ArtistID" = $1
+                    group by r.id_request
+                )
+                select r.id_request
+                from r
+                inner join request_vote_summary rvs using (id_request)
+                order by rvs.user_total desc, rvs.bounty_total desc, rvs.last_vote desc
+                END_SQL
+                , $artist->id
             );
-            $requestList = self::$db->collect(0);
             self::$cache->cache_value($key, $requestList, 3600);
         }
-        return array_map(fn($id) => $this->findById($id), $requestList);
+        return array_map(fn ($id) => $this->findById($id), $requestList);
     }
 
     public function findByTGroup(\Gazelle\TGroup $tgroup): array {
         $key = sprintf(\Gazelle\TGroup::CACHE_REQUEST_TGROUP, $tgroup->id);
         $requestList = self::$cache->get_value($key);
         if ($requestList === false) {
-            self::$db->prepared_query("
-                SELECT r.ID
-                FROM requests AS r
-                INNER JOIN torrents_group tg ON (tg.ID = r.GroupID)
-                WHERE r.TorrentID = 0
-                    AND tg.ID = ?
-                ORDER BY r.TimeAdded ASC
-                ", $tgroup->id
+            $requestList = $this->pg()->columnex(<<<END_SQL
+                select r.id_request
+                from request as r
+                inner join relay.torrents_group tg ON (tg."ID" = r.id_tgroup)
+                where r.id_torrent is null
+                    and tg."ID" = $1
+                order by r.created
+                END_SQL
+                , $tgroup->id
             );
-            $requestList = self::$db->collect(0);
             self::$cache->cache_value($key, $requestList, 3600);
         }
-        return array_map(fn($id) => $this->findById($id), $requestList);
+        return array_map(fn ($id) => $this->findById($id), $requestList);
     }
 
     public function findByTorrentReported(\Gazelle\TorrentAbstract $torrent): array {
-        self::$db->prepared_query("
-            SELECT DISTINCT req.ID
-            FROM requests AS req
-            INNER JOIN reportsv2 AS rep ON (rep.TorrentID = req.TorrentID)
-            WHERE rep.Status != 'Resolved'
-                AND req.TorrentID = ?
-            ",  $torrent->id
+        return array_map(
+            fn ($id) => $this->findById($id),
+            $this->pg()->columnex(<<<END_SQL
+                select distinct req.id_request
+                from request               req
+                inner join relay.reportsv2 rep on (rep."TorrentID" = req.id_torrent)
+                where rep."Status" != 'Resolved'
+                    and req.id_torrent = $1
+                END_SQL
+                , $torrent->id
+            )
         );
-        return array_map(fn($id) => $this->findById($id), self::$db->collect(0));
     }
 
     public function relay(): int {
-        return $this->pg()->prepared_query("
+        return $this->pg()->query(<<<END_SQL
             merge into request r using (
                 with a_t as (
-                    select rr.\"ID\" as id_request,
+                    select rr."ID" as id_request,
                         to_tsvector(
                             'simple',
                             unaccent(
-                                coalesce(string_agg(aa.\"Name\", ' '), '')
-                                    || ' ' || rr.\"Title\"
+                                coalesce(string_agg(aa."Name", ' '), '')
+                                    || ' ' || rr."Title"
                             )
                         ) as artist_title_ts
                     from relay.requests rr
-                    left join relay.requests_artists ra on    (ra.\"RequestID\" = rr.\"ID\")
-                    left join relay.artists_alias    aa using (\"AliasID\")
+                    left join relay.requests_artists ra on    (ra."RequestID" = rr."ID")
+                    left join relay.artists_alias    aa using ("AliasID")
                     left join relay.artist_role      ar on    (ar.artist_role_id = ra.artist_role_id)
                     where (ar.slug is null or ar.slug != 'guest')
                         and rr.updated >= (select coalesce(max(modified), '2000-01-01'::timestamptz) from request)
-                    group by rr.\"ID\", rr.\"Title\"
+                    group by rr."ID", rr."Title"
                 ),
                 tl as (
-                    select rt.id_request,
-                        array_agg(rt.id_tag) as tag
-                    from request_tag rt
-                    inner join relay.requests rr on (rr.\"ID\" = rt.id_request)
+                    select rt."RequestID" as id_request,
+                        array_agg(rt."TagID") as tag
+                    from relay.requests_tags rt
+                    inner join relay.requests rr on (rr."ID" = rt."RequestID")
                     where rr.updated >= (select coalesce(max(modified), '2000-01-01'::timestamptz) from request)
-                    group by rt.id_request
+                    group by rt."RequestID"
                 )
                 select
-                    rr.\"ID\" as id_request, rr.\"UserID\" as id_user, nullif(rr.\"FillerID\", 0) as id_filler,
-                    nullif(rr.\"TorrentID\", 0) as id_torrent, nullif(rr.\"GroupID\", 0) as id_tgroup,
-                    rr.\"CategoryID\" as id_category, nullif(rr.\"ReleaseType\", 0) as id_release_type,
-                    nullif(rr.\"Year\", 0) as year, rr.\"TimeFilled\" as filled,
+                    rr."ID" as id_request, rr."UserID" as id_user, nullif(rr."FillerID", 0) as id_filler,
+                    nullif(rr."TorrentID", 0) as id_torrent, nullif(rr."GroupID", 0) as id_tgroup,
+                    rr."CategoryID" as id_category, nullif(rr."ReleaseType", 0) as id_release_type,
+                    nullif(rr."Year", 0) as year, rr."TimeFilled" as filled,
                     rr.created, rr.updated + '1 microsecond'::interval as updated,
-                    rr.\"Description\" as description, rr.\"Title\" as title, nullif(rr.\"Image\", '') as image,
-                    nullif(rr.\"CatalogueNumber\", '') as catalogue_number, nullif(rr.\"RecordLabel\", '') as record_label,
-                    (case when regexp_replace(coalesce(rr.\"LogCue\", ''), '\D+', '', 'g') = ''
+                    rr."Description" as description, rr."Title" as title, nullif(rr."Image", '') as image,
+                    nullif(rr."CatalogueNumber", '') as catalogue_number, nullif(rr."RecordLabel", '') as record_label,
+                    (case when regexp_replace(coalesce(rr."LogCue", ''), '\D+', '', 'g') = ''
                         then '0'
-                        else regexp_replace(coalesce(rr.\"LogCue\", ''), '\D+', '', 'g')
+                        else regexp_replace(coalesce(rr."LogCue", ''), '\D+', '', 'g')
                         end)::int as log_score,
-                    coalesce(position('Log' in rr.\"LogCue\") > 0, false) as need_log,
-                    coalesce(position('Cue' in rr.\"LogCue\") > 0, false) as need_cue,
-                    case when rr.\"Checksum\" = 0 then false else true end as need_checksum,
+                    coalesce(position('Log' in rr."LogCue") > 0, false) as need_log,
+                    coalesce(position('Cue' in rr."LogCue") > 0, false) as need_cue,
+                    case when rr."Checksum" = 0 then false else true end as need_checksum,
                     a_t.artist_title_ts, coalesce(tl.tag, ARRAY[]::int[]) as tag,
-                    string_to_array(nullif(rr.\"BitrateList\", ''), '|') as encoding_str,
-                    string_to_array(nullif(rr.\"FormatList\", ''), '|') as format_str,
-                    string_to_array(nullif(rr.\"MediaList\", ''), '|') as media_str
+                    string_to_array(nullif(rr."BitrateList", ''), '|') as encoding_str,
+                    string_to_array(nullif(rr."FormatList", ''), '|') as format_str,
+                    string_to_array(nullif(rr."MediaList", ''), '|') as media_str
                 from relay.requests rr
-                inner join a_t on (a_t.id_request = rr.\"ID\")
-                left join tl on (tl.id_request = rr.\"ID\")
+                inner join a_t on (a_t.id_request = rr."ID")
+                left join tl on (tl.id_request = rr."ID")
             ) as i on r.id_request = i.id_request
                 when not matched then
                     insert (
@@ -254,6 +287,7 @@ class Request extends \Gazelle\BaseManager {
                         encoding_str = i.encoding_str,
                         format_str = i.format_str,
                         media_str = i.media_str
-        ");
+            END_SQL
+        );
     }
 }

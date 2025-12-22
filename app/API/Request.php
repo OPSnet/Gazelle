@@ -31,7 +31,6 @@ class Request extends AbstractAPI {
             'TorrentID'       => $request->torrentId(),
             'TimeFilled'      => (string)$request->fillDate(),
             'GroupID'         => (string)$request->tgroupId(),
-            'OCLC'            => $request->oclc(),
             'Tags'            => $request->tagNameList(),
             'Artists'         => $request->artistRole()->idList(),
             'DisplayArtists'  => $request->artistRole()->text(),

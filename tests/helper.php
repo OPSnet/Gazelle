@@ -64,7 +64,7 @@ class Helper {
     ): \Gazelle\Request {
         return new \Gazelle\Manager\Request()->create(
             user:            $user,
-            bounty:          100 * 1024 ** 3,
+            bounty:          100 * 1024 * 1024,
             categoryId:      (int)new Category()->findIdByName('Music'),
             year:            $year,
             title:           $title,
@@ -77,7 +77,6 @@ class Helper {
             format:          $format,
             media:           $media,
             logCue:          $logCue,
-            oclc:            '123,456',
             tagList:         $tagList,
         );
     }
@@ -93,7 +92,7 @@ class Helper {
     ): \Gazelle\Request {
         return new \Gazelle\Manager\Request()->create(
             user:            $user,
-            bounty:          100 * 1024 ** 3,
+            bounty:          100 * 1024 * 1024,
             categoryId:      (int)new Category()->findIdByName('Comics'),
             year:            (int)date('Y'),
             title:           $title,
@@ -106,7 +105,6 @@ class Helper {
             format:          new Format(list: ['Any']),
             media:           new Media(list: ['Any']),
             logCue:          new LogCue(false, false, false, 0),
-            oclc:            '123,456',
             tagList:         $tagList,
         );
     }

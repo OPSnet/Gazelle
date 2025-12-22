@@ -34,7 +34,7 @@ echo $Twig->render('request/detail.twig', [
     'amount_box'    => $amount,
     'unit_GiB'      => isset($unitGiB),
     'comment_page'  => $commentPage,
-    'filler'        => $userMan->findById($request->fillerId()),
+    'filler'        => $userMan->findById((int)$request->fillerId()),
     'is_bookmarked' => new User\Bookmark($Viewer)->isBookmarked($request),
     'is_subscribed' => new User\Subscription($Viewer)->isSubscribedComments('requests', $request->id),
     'paginator'     => $paginator,

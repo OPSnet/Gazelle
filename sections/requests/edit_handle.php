@@ -246,12 +246,6 @@ if (isset($_POST['recordlabel'])) {
         $request->setField('RecordLabel', $recordLabel);
     }
 }
-if (isset($_POST['oclc'])) {
-    $oclc = trim($_POST['oclc']);
-    if ($oclc != $request->oclc()) {
-        $request->setField('OCLC', $oclc);
-    }
-}
 
 $request->modify();
 if ($categoryName === 'Music' && $Viewer->permittedAny('site_edit_requests', 'site_moderate_requests')) {

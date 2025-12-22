@@ -11,9 +11,16 @@ $pg = new DB\Pg(PG_RW_DSN);
 $pg->begin();
 
 $n = $pg->query("
-    truncate table request
+    delete from request
 ");
 echo "$n requests removed\n";
+
+$pg->query(<<<END_SQL
+    insert into request_tag (id_request, id_tag)
+    select "RequestID", "TagID"
+    from relay.requests_tags
+    END_SQL
+);
 
 $n = $pg->query(<<<END_SQL
     with a_t as (
@@ -34,17 +41,17 @@ $n = $pg->query(<<<END_SQL
         group by rr."ID", rr."Title"
     ),
     tl as (
-        select rt."RequestID" as id_request,
-            array_agg(rt."TagID") as tag
-        from relay.requests_tags rt
-        inner join relay.requests rr on (rr."ID" = rt."RequestID")
+        select rt.id_request,
+            array_agg(rt.id_tag) as tag
+        from request_tag rt
+        inner join relay.requests rr on (rr."ID" = rt.id_request)
         where rr.updated >= (select coalesce(max(modified), '2000-01-01'::timestamptz) from request)
-        group by rt."RequestID"
+        group by rt.id_request
     )
     insert into request (
         id_request, id_user, id_filler, id_tgroup,
         id_torrent, id_category, id_release_type, year,
-        created, modified, filled,
+        created, modified, filled, last_vote,
         description, title, image, catalogue_number, record_label,
         log_score, need_log, need_cue, need_checksum,
         artist_title_ts, tag, encoding_str, format_str, media_str
@@ -52,7 +59,7 @@ $n = $pg->query(<<<END_SQL
     select
         rr."ID", rr."UserID", nullif(rr."FillerID", 0), nullif(rr."GroupID", 0),
         nullif(rr."TorrentID", 0), rr."CategoryID", nullif(rr."ReleaseType", 0), nullif(rr."Year", 0),
-        rr.created, rr.updated + '1 microsecond'::interval, rr."TimeFilled",
+        rr.created, rr.updated + '1 microsecond'::interval, rr."TimeFilled", rr."LastVote",
         rr."Description", rr."Title", nullif(rr."Image", ''), nullif(rr."CatalogueNumber",''),  nullif(rr."RecordLabel", ''),
         (case when regexp_replace(coalesce(rr."LogCue", ''), '\D+', '', 'g') = ''
             then '0'
@@ -71,6 +78,14 @@ $n = $pg->query(<<<END_SQL
     END_SQL
 );
 echo "$n requests inserted\n";
+
+$n = $pg->query('
+    insert into request_artist (id_request, id_alias, id_user, id_artist_role, created)
+    select ra."RequestID", ra."AliasID", ra."UserID", ra.artist_role_id, ra.created
+    from relay.requests_artists ra
+    inner join request r on (r.id_request = ra."RequestID")
+');
+echo "$n artists inserted\n";
 
 $n = $pg->query('
     insert into request_vote (id_request_vote, id_request, id_user, bounty, created)

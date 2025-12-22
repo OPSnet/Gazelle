@@ -36,7 +36,6 @@ if (isset($returnEdit)) {
     $tags            = implode(', ', $request->tagNameList());
     $releaseType     = $request->releaseType();
     $catalogueNumber = $request->catalogueNumber();
-    $oclc            = $request->oclc();
 
     $encoding        = $request->encoding();
     $format          = $request->format();
@@ -61,7 +60,6 @@ echo $Twig->render('request/request.twig', [
     'format'           => $format,
     'log_cue'          => $logCue,
     'media'            => $media,
-    'oclc'             => $oclc            ?? $request->oclc(),
     'image'            => $image           ?? $request->image(),
     'record_label'     => $recordLabel     ?? $request->recordLabel(),
     'release_type'     => $releaseType     ?? $request->releaseType(),

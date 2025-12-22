@@ -76,13 +76,12 @@ class Tag extends \Gazelle\BaseManager {
      */
     public function createRejected(string $name, \Gazelle\User $user): int {
         try {
-            $id = $this->pg()->insert("
+            return $this->pg()->insert("
                 insert into tag_reject
                        (name, id_user)
                 values (?,    ?)
                 ", $this->sanitize($name), $user->id
             );
-            return $id;
         } catch (\PDOException) {
             // most likely a duplicate key due to a name that already exists
             return 0;
@@ -310,6 +309,10 @@ class Tag extends \Gazelle\BaseManager {
 
         // update cache
         // (some of these may not have changed, skipping them would be a false optimization)
+        foreach ($affectedRequests as $id) {
+            new \Gazelle\Request($id)->flush();
+        }
+
         foreach ($affectedTGroups as $id) {
             new \Gazelle\TGroup($id)->refresh();
         }

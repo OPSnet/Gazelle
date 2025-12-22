@@ -20,7 +20,7 @@ class Requests extends \Gazelle\Json {
         $list = [];
         foreach ($this->search->page(REQUESTS_PER_PAGE, ($this->page - 1) * REQUESTS_PER_PAGE) as $request) {
             $user   = $this->userMan->findById($request->userId());
-            $filler = $this->userMan->findById($request->fillerId());
+            $filler = $this->userMan->findById((int)$request->fillerId());
             $list[] = [
                 ...$request->ajaxInfo(),
                 'requestorName' => $user->username(),

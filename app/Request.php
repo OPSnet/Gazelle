@@ -10,7 +10,7 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
     final public const tableName  = 'requests';
 
     public function flush(): static {
-        if ($this->tgroupId()) {
+        if (isset($this->info) && $this->tgroupId()) {
             self::$cache->delete_value("requests_group_" . $this->tgroupId());
         }
         unset($this->info);
@@ -83,18 +83,20 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
 
     public function artistFlush(): int {
         $this->flush();
-        self::$db->prepared_query("
-            SELECT aa.ArtistID
-            FROM requests_artists ra
-            INNER JOIN artists_alias aa USING (AliasID)
-            WHERE RequestID = ?
-            ", $this->id
+        $artistList = $this->pg()->columnex(<<<END_SQL
+            select aa."ArtistID"
+            from request_artist ra
+            inner join relay.artists_alias aa on (aa."AliasID" = ra.id_alias)
+            where ra.id_request = $1
+            END_SQL
+            , $this->id
         );
-        $affected = (int)self::$db->record_count();
-        self::$cache->delete_multi([
-            ...array_map(fn ($id) => "artists_requests_$id", self::$db->collect(0)),
-        ]);
-        return $affected;
+        if ($artistList !== []) {
+            self::$cache->delete_multi([
+                ...array_map(fn ($id) => "artists_requests_$id", $artistList),
+            ]);
+        }
+        return count($artistList);
     }
 
     public function artistRole(): ?ArtistRole\Request {
@@ -112,82 +114,82 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
         if (isset($this->info)) {
             return $this->info;
         }
-        $info = self::$db->rowAssoc("
-            SELECT r.UserID       AS user_id,
-                r.FillerID        AS filler_id,
-                r.created         AS created,
-                r.TimeFilled      AS fill_date,
-                r.LastVote        AS last_vote_date,
-                r.CategoryID      AS category_id,
-                c.name            AS category_name,
-                r.Title           AS title,
-                r.Description     AS description,
-                r.Year            AS year,
-                r.Image           AS image,
-                r.CatalogueNumber AS catalogue_number,
-                r.ReleaseType     AS release_type,
-                coalesce(rel.Name, 'Unknown')
-                                  AS release_type_name,
-                r.RecordLabel     AS record_label,
-                r.GroupID         AS tgroup_id,
-                r.TorrentID       AS torrent_id,
-                r.LogCue          AS log_cue,
-                r.Checksum        AS checksum,
-                coalesce(r.BitrateList, '') AS encoding_list,
-                coalesce(r.FormatList, '')  AS format_list,
-                coalesce(r.MediaList, '')   AS media_list,
-                r.OCLC            AS oclc,
-                r.updated         AS modified
-            FROM requests            r
-            INNER JOIN category      c ON (c.category_id = r.CategoryID)
-            LEFT JOIN release_type rel ON (rel.ID = r.ReleaseType)
-            WHERE r.ID = ?
-            GROUP BY r.ID
+        $result = $this->pg()->executeParams("
+            select r.id_user  as user_id,
+                r.id_filler   as filler_id,
+                r.id_tgroup   as tgroup_id,
+                r.id_torrent  as torrent_id,
+                r.created,
+                r.modified,
+                r.filled      as fill_date,
+                rvs.last_vote as last_vote_date,
+                r.id_category as category_id,
+                c.name        as category_name,
+                r.title,
+                r.description,
+                r.year,
+                r.image,
+                r.catalogue_number,
+                r.record_label,
+                r.id_release_type as release_type,
+                coalesce(rel.name, 'Unknown')
+                                  as release_type_name,
+                r.encoding_str    as need_encoding,
+                r.format_str      as need_format,
+                r.media_str       as need_media,
+                r.need_cue,
+                r.need_log,
+                r.need_checksum,
+                r.log_score,
+                r.url
+            from request                    r
+            inner join request_vote_summary rvs using (id_request)
+            inner join category             c   using (id_category)
+            left join release_type          rel using (id_release_type)
+            where r.id_request = $1
             ", $this->id
         );
-
-        self::$db->prepared_query("
-            SELECT rv.UserID   AS user_id,
-                sum(rv.Bounty) AS bounty
-            FROM requests_votes AS rv
-            WHERE rv.RequestID = ?
-            GROUP BY rv.UserID
-            ORDER BY rv.Bounty DESC
+        $info = $result->fetchAll()[0];
+        $info['user_vote_list'] = $this->pg()->allex("
+            select rv.id_user as user_id,
+                sum(rv.bounty) as bounty
+            from request_vote rv
+            where rv.id_request = $1
+            group by id_user
+            order by 2 desc
             ", $this->id
         );
-        $info['user_vote_list'] = self::$db->to_array(false, MYSQLI_ASSOC);
-
-        self::$db->prepared_query("
-            SELECT t.Name
-            FROM requests_tags AS rt
-            INNER JOIN tags AS t ON (t.ID = rt.TagID)
-            WHERE rt.RequestID = ?
-            ORDER BY rt.TagID ASC
-            ", $this->id
+        $info['tag'] = $this->pg()->columnex(<<<END_SQL
+            with rt(id_tag) as (
+                select unnest(tag)
+                from request
+                where id_request = $1
+            )
+            select t."Name" as name
+            from rt
+            inner join relay.tags t on (t."ID" = rt.id_tag)
+            END_SQL
+            , $this->id
         );
-        $info['tag'] = self::$db->collect('Name');
-
-        $info['need_encoding'] = explode('|', $info['encoding_list']);
-        $info['need_format']   = explode('|', $info['format_list']);
-        $info['need_media']    = explode('|', $info['media_list']);
 
         $info['encoding'] = new Request\Encoding(
-            $info['encoding_list'] === 'All',
-            explode('|', $info['encoding_list']),
+            is_null($info['need_encoding']),
+            $info['need_encoding'] ?? [],
         );
         $info['format'] = new Request\Format(
-            $info['format_list'] === 'All',
-            explode('|', $info['format_list']),
+            is_null($info['need_format']),
+            $info['need_format'] ?? [],
         );
         $info['media'] = new Request\Media(
-            $info['media_list'] === 'All',
-            explode('|', $info['media_list']),
+            is_null($info['need_media']),
+            $info['need_media'] ?? [],
         );
+
         $info['logCue'] = new Request\LogCue(
-            needLogChecksum: (bool)$info['checksum'],
-            needCue:         str_contains($info['log_cue'], 'Cue'),
-            needLog:         str_contains($info['log_cue'], 'Log'),
-            minScore:        (int)preg_replace('/\D+/', '', $info['log_cue']),
+            needLogChecksum: (bool)$info['need_checksum'],
+            needCue:         (bool)$info['need_cue'],
+            needLog:         (bool)$info['need_log'],
+            minScore:        (int)$info['log_score'],
         );
 
         $this->info = $info;
@@ -202,9 +204,9 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
         return [
             'requestId'       => $this->id,
             'requestorId'     => $info['user_id'],
-            'timeAdded'       => $info['created'],
+            'timeAdded'       => $this->created(),
             'voteCount'       => $this->userVotedTotal(),
-            'lastVote'        => $info['last_vote_date'],
+            'lastVote'        => $this->lastVoteDate(),
             'totalBounty'     => $this->bountyTotal(),
             'categoryId'      => $info['category_id'],
             'categoryName'    => $info['category_name'],
@@ -215,21 +217,19 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
             'description'     => \Text::full_format($info['description']),
             'catalogueNumber' => $info['catalogue_number'],
             'recordLabel'     => $info['record_label'],
-            'oclc'            => $info['oclc'],
             'releaseType'     => $info['release_type'],
             'releaseTypeName' => $info['release_type_name'],
             'bitrateList'     => array_values($this->currentEncoding()),
             'formatList'      => array_values($this->currentFormat()),
             'mediaList'       => array_values($this->currentMedia()),
-            'logCue'          => $info['log_cue'],  // deprecated, remove some time
             'needCue'         => $this->needCue(),
             'needLog'         => $this->needLog(),
             'needLogChecksum' => $this->needLogChecksum(),
             'minLogScore'     => $this->needLogScore(),
             'isFilled'        => $info['torrent_id'] > 0,
             'fillerId'        => (int)$info['filler_id'],
-            'torrentId'       => $info['torrent_id'],
-            'timeFilled'      => (string)$info['fill_date'],
+            'torrentId'       => (int)$info['torrent_id'],
+            'timeFilled'      => $this->fillDate(),
             'tags'            => $this->tagNameList(),
         ];
     }
@@ -250,7 +250,7 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
         return !$this->isFilled() && $user->permitted('site_vote');
     }
 
-    public function catalogueNumber(): string {
+    public function catalogueNumber(): string|null {
         return $this->info()['catalogue_number'];
     }
 
@@ -267,7 +267,8 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
     }
 
     public function created(): string {
-        return $this->info()['created'];
+        // pg_wrapper returns DateTimeImmutable objects
+        return $this->info()['created']->format('Y-m-d H:i:s');
     }
 
     public function currentEncoding(): array {
@@ -317,7 +318,7 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
     }
 
     public function descriptionLogCue(): ?string {
-        return $this->info()['log_cue'];
+        return $this->logCue()->dbValue();
     }
 
     public function descriptionMedia(): ?string {
@@ -326,12 +327,14 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
             : $this->media()->display();
     }
 
-    public function fillerId(): int {
+    public function fillerId(): int|null {
         return $this->info()['filler_id'];
     }
 
-    public function fillDate(): ?string {
-        return $this->info()['fill_date'];
+    public function fillDate(): string|null {
+        return is_null($this->info()['fill_date'])
+            ? null
+            : $this->info()['fill_date']->format('Y-m-d H:i:s');
     }
 
     public function hasNewVote(): bool {
@@ -347,23 +350,23 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
     }
 
     public function lastVoteDate(): string {
-        return $this->info()['last_vote_date'];
+        return $this->info()['last_vote_date']->format('Y-m-d H:i:s');
     }
 
     public function legacyFormatList(): string {
-        return $this->info()['format_list'];
+        return $this->format()->dbValue();
     }
 
     public function legacyEncodingList(): string {
-        return $this->info()['encoding_list'];
+        return $this->encoding()->dbValue();
     }
 
     public function legacyLogChecksum(): string {
-        return $this->info()['checksum'];
+        return $this->logCue()->needLogChecksum ? '1' : '0';
     }
 
     public function legacyMediaList(): string {
-        return $this->info()['media_list'];
+        return $this->media()->dbValue();
     }
 
     public function modified(): string {
@@ -386,7 +389,7 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
     }
 
     public function needEncodingList(): array {
-        return $this->info()['need_encoding'];
+        return $this->info()['need_encoding'] ?? [''];
     }
 
     public function needFormat(string $format): bool {
@@ -397,7 +400,7 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
     }
 
     public function needFormatList(): array {
-        return $this->info()['need_format'];
+        return $this->info()['need_format'] ?? [''];
     }
 
     public function needLog(): bool {
@@ -420,23 +423,7 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
     }
 
     public function needMediaList(): array {
-        return $this->info()['need_media'];
-    }
-
-    public function oclc(): ?string {
-        return $this->info()['oclc'];
-    }
-
-    public function oclcLink(): ?string {
-        $oclc = $this->oclc();
-        if (is_null($oclc) || $oclc === '') {
-            return null;
-        }
-        return implode(', ',
-            array_map(fn($id) => "<a href=\"https://www.worldcat.org/oclc/{$id}\">{$id}</a>",
-                explode(',', $oclc)
-            )
-        );
+        return $this->info()['need_media'] ?? [''];
     }
 
     public function recordLabel(): ?string {
@@ -472,7 +459,7 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
         return $this->info()['title'];
     }
 
-    public function torrentId(): int {
+    public function torrentId(): int|null {
         return $this->info()['torrent_id'];
     }
 
@@ -579,6 +566,11 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
      * return @bool vote was successful (user had sufficient buffer)
      */
     public function vote(User $user, int $amount): bool {
+        return (bool)static::voteById($this->id, $user, $amount);
+    }
+
+    /* temporary scaffolding while the move to Pg is underway */
+    public static function voteById(int $requestId, User $user, int $amount): int {
         self::$db->begin_transaction();
 
         self::$db->prepared_query("
@@ -591,7 +583,7 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
         if (self::$db->affected_rows() == 0) {
             // Uploaded would turn negative
             self::$db->rollback();
-            return false;
+            return 0;
         }
 
         $bounty = $amount * (1 - REQUEST_TAX);
@@ -599,15 +591,16 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
             INSERT INTO requests_votes
                    (RequestID, UserID, Bounty)
             VALUES (?,         ?,      ?)
-            ", $this->id, $user->id, $bounty
+            ", $requestId, $user->id, $bounty
         );
-        $this->pg()->executeParams('
+        $requestVoteId = self::$db->inserted_id();
+        self::pgStatic()->executeParams('
             insert into request_vote
                    (id_request_vote, id_request, id_user, bounty)
             values ($1,              $2,         $3,      $4)
-            ', self::$db->inserted_id(), $this->id, $user->id, $bounty
+            ', $requestVoteId, $requestId, $user->id, $bounty
         );
-        $this->pg()->executeParams('
+        self::pgStatic()->executeParams('
             merge into request_vote_summary rvs using (
                 select id_request,
                     sum(bounty)             as bounty_total,
@@ -626,13 +619,13 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
                         bounty_total = i.bounty_total,
                         user_total   = i.user_total,
                         last_vote    = i.last_vote
-            ', $this->id
+            ', $requestId
         );
         self::$db->prepared_query("
             UPDATE requests SET
                 LastVote = now()
             WHERE ID = ?
-            ", $this->id
+            ", $requestId
         );
         self::$db->prepared_query("
             INSERT INTO user_summary (user_id, request_vote_size, request_vote_total)
@@ -653,7 +646,7 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
 
         $user->flush();
 
-        return true;
+        return $requestVoteId;
     }
 
     /**
@@ -673,19 +666,33 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
     }
 
     public function fill(User $user, Torrent $torrent): int {
-        $bounty = $this->bountyTotal();
-        self::$db->begin_transaction();
         self::$db->prepared_query("
             UPDATE requests SET
                 TimeFilled = now(),
                 FillerID = ?,
                 TorrentID = ?
             WHERE ID = ?
+                AND FillerID = 0
             ", $user->id, $torrent->id, $this->id
         );
         $updated = self::$db->affected_rows();
-        self::$db->commit();
+        if (!$updated) {
+            return 0;
+        }
+        $now = (string)self::$db->scalar('
+            SELECT updated FROM requests WHERE ID = ?
+            ', $this->id
+        );
+        $this->pg()->query("
+            update request set
+                filled     = $1,
+                id_filler  = $2,
+                id_torrent = $3
+            where id_request = $4
+            ", $now, $user->id, $torrent->id, $this->id
+        );
 
+        $bounty = $this->bountyTotal();
         $user->addBounty($bounty);
         $name = $this->title();
         $message = "One of your requests — [url={$this->location()}]{$name}[/url] — has been filled. You can view it here: [pl]{$torrent->id}[/pl]";
@@ -702,6 +709,7 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
             . byte_format($bounty) . ' bounty.'
         );
 
+        $this->flush();
         $this->artistFlush();
         return $updated;
     }
@@ -725,6 +733,18 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
             ", $this->id
         );
         $updated = self::$db->affected_rows();
+        if (!$updated) {
+            self::$db->rollback();
+            return 0;
+        }
+        $this->pg()->query("
+            update request set
+                filled     = null,
+                id_filler  = null,
+                id_torrent = null
+            where id_request = $1
+            ", $this->id
+        );
         $filler->addBounty(-$bounty);
         $filler->flush();
         self::$db->commit();
@@ -785,7 +805,8 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
         $affected = self::$db->affected_rows();
         $this->pg()->executeParams('
             delete from request vote
-            where id_request = $1 and id_user = $2
+            where id_request = $1
+                and id_user  = $2
             ', $this->id, $user->id
         );
         if ($affected) {
@@ -822,7 +843,8 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
         $affected = self::$db->affected_rows();
         $this->pg()->executeParams('
             delete from request vote
-            where id_request = $1 and id_user = $2
+            where id_request = $1
+                and id_user  = $2
             ', $this->id, $user->id
         );
         if ($affected) {

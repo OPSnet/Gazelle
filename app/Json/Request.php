@@ -14,7 +14,7 @@ class Request extends \Gazelle\Json {
     public function payload(): array {
         $commentPage = $this->commentPage;
         $request     = $this->request;
-        $filler      = $this->userMan->findById($request->fillerId());
+        $filler      = $this->userMan->findById((int)$request->fillerId());
         $user        = $this->userMan->findById($request->userId());
 
         return [

@@ -166,7 +166,7 @@
     function init_category_form() {
         const cat = document.getElementById('categories').selectedOptions[0].value;
         if (cat == "Music") {
-            ['artist', 'bitrates', 'cataloguenumber', 'formats', 'media', 'oclc',
+            ['artist', 'bitrates', 'cataloguenumber', 'formats', 'media',
                 'recordlabel', 'releasetypes', 'year'
             ].forEach((input) => {
                 document.getElementById(input + '_tr').classList.remove('hidden');
@@ -174,14 +174,14 @@
             toggle_log_cue();
         } else if (["Audiobooks", "Comedy"].includes(cat)) {
             ['artist', 'bitrates', 'cataloguenumber', 'formats', 'logcue', 'media',
-                'oclc', 'recordlabel', 'releasetypes'
+                'recordlabel', 'releasetypes'
             ].forEach((input) => {
                 document.getElementById(input + '_tr').classList.add('hidden');
             });
             document.getElementById('year_tr').classList.remove('hidden');
         } else {
             ['artist', 'bitrates', 'cataloguenumber', 'formats', 'logcue', 'media',
-                'oclc', 'recordlabel', 'releasetypes', 'year'
+                'recordlabel', 'releasetypes', 'year'
             ].forEach((input) => {
                 document.getElementById(input + '_tr').classList.add('hidden');
             });

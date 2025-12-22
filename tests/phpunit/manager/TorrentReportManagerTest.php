@@ -48,7 +48,6 @@ class TorrentReportManagerTest extends TestCase {
     public function testWorkflowReport(): void {
         $torMan = new Manager\Torrent();
         $torrent = $torMan->findById($this->tgroup->torrentIdList()[0]);
-        $this->assertInstanceOf(Torrent::class, $torrent, 'trep-workflow-found');
         $title = [
             'torrent extra 1 ' . randomString(10),
             'torrent extra 2 ' . randomString(10),

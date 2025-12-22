@@ -22,6 +22,7 @@ class RequestTest extends TestCase {
         ];
         $this->userList['admin']->requestContext()->setViewer($this->userList['admin']);
         $this->userList['admin']->setField('Enabled', '1')->setField('PermissionID', SYSOP)->modify();
+        $this->userList['admin']->addBounty(BUFFER_FOR_BOUNTY);
         $this->userList['user']->setField('Enabled', '1')->modify();
     }
 
@@ -43,7 +44,6 @@ class RequestTest extends TestCase {
         $admin = $this->userList['admin'];
         $user  = $this->userList['user'];
 
-        $admin->addBounty(BUFFER_FOR_BOUNTY);
         $manager       = new Manager\Request();
         $title         = 'phpunit ' . randomString(6) . ' Test Sessions (bonus VIP)';
         $image         = 'https://example.com/req.jpg';
@@ -146,12 +146,6 @@ class RequestTest extends TestCase {
             'request-set-tag'
         );
 
-        $this->assertEquals('123,456', $this->request->oclc(), 'request-oclc');
-        $this->assertEquals(
-            '<a href="https://www.worldcat.org/oclc/123">123</a>, <a href="https://www.worldcat.org/oclc/456">456</a>',
-            $this->request->oclcLink(),
-            'request-oclc-link'
-        );
         $this->assertEquals('This is a unit test description', $this->request->description(), 'request-description');
         $this->assertTrue($this->request->needCue(), 'request-need-cue');
         $this->assertTrue($this->request->needLog(), 'request-need-log');
@@ -229,7 +223,6 @@ class RequestTest extends TestCase {
             format:          new Request\Format(list: ['MP3', 'FLAC']),
             media:           new Request\Media(list: ['CD', 'WEB']),
             logCue:          new Request\LogCue(),
-            oclc:            '',
         );
 
         $statsReq->flush();
@@ -248,8 +241,8 @@ class RequestTest extends TestCase {
             'uploaded'      => $admin->uploadedSize(),
         ];
 
-        $this->assertEquals(0, $this->request->fillerId(), 'request-unfilled-filler-id');
-        $this->assertEquals(0, $this->request->torrentId(), 'request-unfilled-torrent-id');
+        $this->assertNull($this->request->fillerId(), 'request-unfilled-filler-id');
+        $this->assertNull($this->request->torrentId(), 'request-unfilled-torrent-id');
         $this->assertNull($this->request->fillDate(), 'request-unfilled-date');
 
         $taxedBounty = (int)($bounty * (1 - REQUEST_TAX));
@@ -272,7 +265,7 @@ class RequestTest extends TestCase {
         $this->assertEquals(2 * $taxedBounty, $this->request->bountyTotal(), 'request-total-bounty-added');
         $this->assertTrue(Helper::recentDate($this->request->lastVoteDate()), 'request-last-vote-date');
         $this->assertEquals(2, $this->request->userVotedTotal(), 'request-user-voted-total');
-        $this->assertEquals(
+        $this->assertEqualsCanonicalizing(
             [$admin->id, $user->id],
             array_column($this->request->userIdVoteList(), 'user_id'),
             'request-user-id-vote-list'
@@ -301,7 +294,8 @@ class RequestTest extends TestCase {
             title:  'Deluxe Edition',
         );
         $torrentId = current($this->tgroup->torrentIdList());
-        $torrent = new Manager\Torrent()->findById($torrentId);
+        $torMan    = new Manager\Torrent();
+        $torrent   = $torMan->findById($torrentId);
         $this->assertInstanceOf(Torrent::class, $torrent, 'request-torrent-filler');
 
         $this->assertEquals(1, $this->request->fill($user, $torrent), 'request-fill');
@@ -315,6 +309,22 @@ class RequestTest extends TestCase {
         $this->assertEquals($before['total-filled'] + 1, $statsReq->filledTotal(), 'request-stats-now-filled');
         $this->assertGreaterThan(0.0, $statsReq->filledPercent(), 'request-stats-filled-percent');
         $this->assertTrue($this->request->isFilled(), 'request-now-filled');
+
+        $reportManager = new Manager\Torrent\Report($torMan);
+        $report = $reportManager->create(
+            torrent:     $torrent,
+            user:        $user,
+            reportType:  new Manager\Torrent\ReportType()->findByName('other'),
+            reason:      'phpunit requst other report',
+            otherIdList: '',
+            irc:         new Util\Irc(),
+        );
+        $reportList = $requestMan->findByTorrentReported($torrent);
+        $this->assertEquals(
+            [$this->request->id],
+            [$reportList[0]->id],
+            'req-find-by-torrent-reported'
+        );
 
         // and now unfill it
         $this->assertEquals(1, $this->request->unfill($this->userList['admin'], 'unfill unittest', new Manager\Torrent()), 'request-unfill');
@@ -508,7 +518,6 @@ class RequestTest extends TestCase {
             format:          new Request\Format(list: ['MP3', 'FLAC']),
             media:           new Request\Media(list: ['CD', 'WEB']),
             logCue:          new Request\LogCue(),
-            oclc:            '',
         );
 
         $this->request->vote($user2, $bounty + 1);
@@ -544,7 +553,6 @@ class RequestTest extends TestCase {
             format:          new Request\Format(list: ['FLAC']),
             media:           new Request\Media(list: ['WEB']),
             logCue:          new Request\LogCue(),
-            oclc:            '',
         );
         $this->request->artistRole()->set(
             [ARTIST_MAIN => ['phpunit req ' . randomString(6)]],
@@ -562,7 +570,6 @@ class RequestTest extends TestCase {
 
     public function testReport(): void {
         // FIXME: this duplicates tests in tests/phpunit/manager/ReportManagerTest.php
-        $this->userList['admin']->addBounty(BUFFER_FOR_BOUNTY);
         $this->request = Helper::makeRequestMusic($this->userList['admin'], 'phpunit request report');
         $this->request->artistRole()->set(
             [ARTIST_MAIN => ['phpunit req ' . randomString(6)]],
@@ -608,7 +615,6 @@ class RequestTest extends TestCase {
     }
 
     public function testJson(): void {
-        $this->userList['admin']->addBounty(BUFFER_FOR_BOUNTY);
         $this->request = Helper::makeRequestMusic(
             $this->userList['admin'],
             'phpunit request json',
@@ -629,7 +635,7 @@ class RequestTest extends TestCase {
             new Comment\Request($this->request->id, 1, 0),
         );
         $payload = $json->payload();
-        $this->assertCount(43, $payload, 'req-json-payload');
+        $this->assertCount(41, $payload, 'req-json-payload');
         $this->assertTrue($payload['canVote'], 'req-json-can-vote');
         $this->assertFalse($payload['canEdit'], 'req-json-can-edit');
 
