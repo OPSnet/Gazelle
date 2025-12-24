@@ -6,7 +6,7 @@
 // SLUG/SETUP
 
 // import basic colors as a backup:
-@use '../apollostage/_variables';
+@use '../apollostage/_variables' as variables;
 
 // debug slugs: must be after import.
 variables.$build-slug: variables.$build-slug + " " + "sunset";
@@ -39,9 +39,7 @@ variables.$fore-800: #DBC8D5;
 variables.$fore-900: #DADDEA;
 variables.$fore-1000: #F9ECEC;
 
-// midtones ~ reduced brightness
-// <400 for background accents
-// >500 used on black backgrounds
+// midtones ~ reduced brightness; <400 for background accents; >500 used on black backgrounds
 variables.$midtone-100: #674242;
 variables.$midtone-200: #7B4848;
 variables.$midtone-300: #84464A;
@@ -74,8 +72,8 @@ variables.$ds-black: #000;
 $ds-menu-white: #fff8f8;
 
 // // Standard except where marked:
-// DEFINE FROM LOGICAL LAYOUT TO TOKENS
 
+// DEFINE FROM LOGICAL LAYOUT TO TOKENS
 variables.$color-background-base: variables.$back-100;
 variables.$color-background-blockquote: variables.$back-500-low;
 variables.$color-background-box: variables.$back-500-low;
@@ -134,7 +132,7 @@ variables.$color-text-input-active: variables.$fore-900;
 variables.$color-text-linkbox: variables.$midtone-800; // links in linkbox
 variables.$color-text-menu: $ds-menu-white; // changed
 variables.$color-text-menu-hover: variables.$fore-700; // during pulldown // changed
-variables.$color-text-mono: variables.$fore-500;
+variables.$color-text-mono: variables.$midtone-500;
 variables.$color-text-popup-anchor-hover: variables.$midtone-1000;
 variables.$color-text-popup-anchor: variables.$fore-900;
 variables.$color-text-popup: variables.$fore-700;
@@ -153,10 +151,19 @@ variables.$color-obj-button-base-1: variables.$ds-gray-62;
 variables.$color-obj-button-base-2: variables.$ds-gray-92;
 variables.$color-obj-poll: variables.$midtone-900; // poll active part of bargraph
 
-variables.$color-obj-tag_bubble-background: variables.$midtone-200; // menu-2 suggested
-variables.$color-obj-tag_bubble-foreground: variables.$midtone-900; // menu-9 suggested
-variables.$color-obj-tag_bubble_snatched-background: variables.$back-600;
-variables.$color-obj-tag_bubble_snatched-foreground: variables.$midtone-1000; // Changed for sunset
+// bubbles
+variables.$color-obj-tag-bubble-bg: variables.$midtone-800;
+variables.$color-obj-tag-bubble-fg: $ds-menu-white;
+variables.$color-obj-info-bubble-bg: variables.$ds-neutral-500; 
+variables.$color-obj-info-bubble-fg: $ds-menu-white;
+variables.$color-obj-reported-bubble-bg: variables.$midtone-900;
+variables.$color-obj-reported_bubble-fg: $ds-menu-white;
+variables.$color-obj-warning-bubble-bg: variables.$midtone-700;
+variables.$color-obj-warning-bubble-fg: $ds-menu-white;
+variables.$color-obj-approved-bubble-bg: variables.$midtone-500;
+variables.$color-obj-approved-bubble-fg: $ds-menu-white;
+variables.$color-obj-gratis-bubble-bg: variables.$menutheme-100;
+variables.$color-obj-gratis-bubble-fg: variables.$back-100;
 
 // Autocompletes
 variables.$color-background-autocompletes: variables.$color-background-searchbars;

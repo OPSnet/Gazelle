@@ -6,7 +6,7 @@
 // SLUG/SETUP
 
 // import basic colors as a backup:
-@use '../apollostage/_variables';
+@use '../apollostage/_variables' as variables;
 
 // debug slugs: must be after import.
 variables.$build-slug: variables.$build-slug + " " + "coffee";
@@ -43,7 +43,7 @@ variables.$midtone-800: #785746;
 variables.$midtone-900: #805D49;
 variables.$midtone-1000: #89644C;
 
-// coffee theme runs runs from lighter to darker, for style reasons
+// Menus; coffee theme runs runs from lighter to darker, for style reasons
 variables.$menutheme-100: #89644C;
 variables.$menutheme-200: #805D49;
 variables.$menutheme-300: #785746;
@@ -83,8 +83,6 @@ variables.$color-background-table: variables.$back-200; // tables/forms without 
 variables.$color-background-table-row-th: variables.$back-700;
 variables.$color-background-table-row-odd: variables.$back-500;
 variables.$color-background-table-row-even: variables.$back-300;
-
-$color-background-table-secondary: orangered; // no longer used
 variables.$color-background-table-torrenttable: variables.$back-300; // also form field in focus
 variables.$color-background-table-details: variables.$back-400; // equal to blockquote
 variables.$color-background-table-torrents-group: variables.$back-600;
@@ -129,7 +127,7 @@ variables.$color-text-input-active: variables.$fore-900;
 variables.$color-text-linkbox: variables.$midtone-800; // links in linkbox
 variables.$color-text-menu: variables.$fore-1000;
 variables.$color-text-menu-hover: variables.$fore-700; // during pulldown // changed
-variables.$color-text-mono: variables.$fore-500;
+variables.$color-text-mono: variables.$fore-800;
 variables.$color-text-popup-anchor-hover: variables.$midtone-1000;
 variables.$color-text-popup-anchor: variables.$fore-900;
 variables.$color-text-popup: variables.$fore-700;
@@ -147,10 +145,19 @@ variables.$color-obj-button-base-1: variables.$ds-gray-62;
 variables.$color-obj-button-base-2: variables.$ds-gray-92;
 variables.$color-obj-poll: variables.$midtone-900; // poll active part of bargraph
 
-variables.$color-obj-tag_bubble-background: variables.$midtone-700; // changed
-variables.$color-obj-tag_bubble-foreground: variables.$fore-600; // changed
-variables.$color-obj-tag_bubble_snatched-background: variables.$back-600;
-variables.$color-obj-tag_bubble_snatched-foreground: variables.$fore-800;
+// Bubbles
+variables.$color-obj-tag-bubble-bg: variables.$midtone-800;
+variables.$color-obj-tag-bubble-fg: variables.$fore-700;
+variables.$color-obj-info-bubble-bg: variables.$ds-neutral-500; 
+variables.$color-obj-info-bubble-fg: variables.$ds-neutral-000;
+variables.$color-obj-reported-bubble-bg: variables.$midtone-900;
+variables.$color-obj-reported_bubble-fg: variables.$fore-900;
+variables.$color-obj-warning-bubble-bg: variables.$midtone-700;
+variables.$color-obj-warning-bubble-fg: variables.$fore-700;
+variables.$color-obj-approved-bubble-bg: variables.$midtone-500;
+variables.$color-obj-approved-bubble-fg: variables.$fore-500;
+variables.$color-obj-gratis-bubble-bg: variables.$fore-800;
+variables.$color-obj-gratis-bubble-fg: variables.$midtone-100;
 
 // Autocompletes
 variables.$color-background-autocompletes: variables.$color-background-searchbars;

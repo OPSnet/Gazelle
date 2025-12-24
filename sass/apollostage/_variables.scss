@@ -4,7 +4,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // SLUG
 
-$build-slug: "Apollostage build 240906"; // must include quotes
+$build-slug: "Apollostage build 20251215"; // must include quotes
 
 // ////////////////////////////////////////////////////////////////////////////////
 // COLORS
@@ -38,9 +38,7 @@ $midtone-800: #1daf8b;
 $midtone-900: #20c098;
 $midtone-1000: #23d1a5;
 
-// Menu theme
-// can be same as "midtone" above.
-
+// Menu theme; can be same as "midtone" above.
 $menutheme-100: #003d2d;
 $menutheme-200: #004b38;
 $menutheme-300: #005943;
@@ -72,6 +70,7 @@ $ds-neutral-000: #000;
 $ds-red: #b71010;
 $ds-green: #099909;
 $ds-yellow: #f9e340;
+$ds-yellow-high: hsl(50deg 90% 50% / 77.7%);
 $ds-goldenrod: #daa520;
 $ds-fx-low: rgb(255 255 255 / 8%);
 $ds-fx-mid: rgb(255 255 255 / 25%);
@@ -168,10 +167,19 @@ $color-obj-button-base-1: $ds-gray-62;
 $color-obj-button-base-2: $ds-gray-92;
 $color-obj-poll: $midtone-900; // poll active part of bargraph
 
-$color-obj-tag_bubble-background: $midtone-200; // menu-2 suggested
-$color-obj-tag_bubble-foreground: $midtone-900; // menu-9 suggested
-$color-obj-tag_bubble_snatched-background: $back-600;
-$color-obj-tag_bubble_snatched-foreground: $fore-800;
+// bubbles
+$color-obj-tag-bubble-bg: $midtone-200;
+$color-obj-tag-bubble-fg: $midtone-900;
+$color-obj-info-bubble-bg: $ds-neutral-500; 
+$color-obj-info-bubble-fg: $ds-neutral-000;
+$color-obj-reported-bubble-bg: $midtone-100;
+$color-obj-reported-bubble-fg: $fore-900;
+$color-obj-warning-bubble-bg: $midtone-300;
+$color-obj-warning-bubble-fg: $fore-700;
+$color-obj-approved-bubble-bg: $midtone-500;
+$color-obj-approved-bubble-fg: $fore-800;
+$color-obj-gratis-bubble-bg: $midtone-1000;
+$color-obj-gratis-bubble-fg: $back-200;
 
 // Autocompletes
 $color-background-autocompletes: $color-background-searchbars;

@@ -3,12 +3,11 @@
 // _base.scss for Apollostage
 //
 // SASS/SCSS NOTE
-// This is one of four files for the main ApolloStage theme:
-//  - style.scss, _base.scss, _variables.scss, _fonts_base.scss.
+// This is one of three files for the main ApolloStage theme:
+//  - style.scss, _base.scss, _variables.scss
 //  - This file is imported by the parent style.scss.
 // For the main ApolloStage theme:
 //  - Colors & icons are all defined in _variables.scss.
-//  - Fonts are called in _fonts_base.scss.
 // For derivative themes:
 //  - The approach is similar, colors & icons are defined in the parent SCSS file.
 
@@ -17,6 +16,10 @@
    CHANGELOG
    ########################################################################
 */
+
+/*  # 2025-12-15 - Bug fixes per community feedback, including
+    # pulldown menu will appear over notifications, and color highlighting
+    # for the active page breadcrumb. */
 
 /*  # 2024-08-08 - Updated with community feedback.
     # Fix: mobile menu, category stripes;
@@ -28,6 +31,29 @@
 // ########################################################################
 // FULL CHANGELOG
 // ########################################################################
+//
+//  Updated 2025-12-15:
+//
+//  Fix: (032) Pulldown memo will appear over notifications;
+//       Tooltipster over pulldown menu. Adjust Z-index precendence.
+//
+//  Fix: (036) Front page recent uploads: don't allow aspect ratio stretch.
+//
+//  Fix: (038) Sticky headers: stop header from drooping (multiple pages). 
+// 
+//  Fix: (039) Restore color highlight for Active page (1-50) breadcrumb.
+// 
+//  Feature: (041) Background highlighting for code.
+//
+//  Feature: (042) Styling (2.2.6) for `Reported` torrents, like Snatched indicator
+//
+//  Fix: (044) Correctly pull warning/notification icons for all themes.
+//
+//  Fix: (045) SVG logo: Reticulated splines.
+//
+//  Style: (046) Fix Button colors on Orpheus_Paper are unsightly.
+//
+//  Fix: (048) Center notifications message.
 //
 //  Updated 2024-08-22:
 //
@@ -144,7 +170,7 @@
    ### 2.2.2  Hover effect
    ### 2.2.3  Non-clickable appearance
    ### 2.2.4  Other special cases
-   ### 2.2.5  Snatched torrent indicators
+   ### 2.2.5  Snatched & other Torrent Indicators
    ## 2.3 Alertbar and error handling
    ## 2.3.1 Base styling
    ## 2.3.2 additional treatment for messages that pop
@@ -223,13 +249,14 @@ $phone-screen-size: 575px;
 $z-lightbox: 1000;
 $z-upload-error-popups: 900;
 $z-mobilemenu-closed: 1000;
-$z-mobilemenu_closed-tab: 400;
-$z-mobilemenu_closed-tab-icons: 500;
-$z-desktop-menu-open: 800;
-$z-desktop-menu-closed: 900;
+$z-mobilemenu-closed-tab: 400;
+$z-mobilemenu-closed-tab-icons: 500;
+$z-desktop-menu-open: 10000010;
+$z-desktop-menu-closed: 10000020;
+$z-notifications: 750; 
 $z-sticky-table-headers: 1;
 $z-avatar-mobile: 1;
-$height-mobilemenu_closed-tab: 32px;
+$height-mobilemenu-closed-tab: 32px;
 $wrapper-max-width: 1020px;
 
 /* ## 0.3 Fonts */
@@ -250,14 +277,20 @@ $wrapper-max-width: 1020px;
     "Apple Color Emoji",
     "Segoe UI Emoji",
     "Segoe UI Symbol";
-  --monospace-ui:
-    "Cascadia Code",
-    "Consolas",
-    "Ubuntu Mono",
-    "Fira Code",
-    "Menlo",
-    "Liberation Mono",
-    "Monaco",
+  --monospace-ui: 
+    ui-monospace, 
+    menlo,
+    monaco, 
+    "Cascadia Mono",
+    "Segoe UI Mono", 
+    "Roboto Mono", 
+    "Oxygen Mono", 
+    "Ubuntu Mono", 
+    "Source Code Pro",
+    "Fira Mono", 
+    "Droid Sans Mono", 
+    consolas,
+    "Courier New",
     monospace;
 }
 
@@ -306,6 +339,13 @@ body {
 pre,
 code {
   color: variables.$color-text-mono;
+}
+
+code {
+  background-color: variables.$color-background-blockquote;
+  border-radius: 0.2rem;
+  border: transparent;
+  padding: 0.05rem 0.2rem;
 }
 
 h1,
@@ -784,7 +824,7 @@ table.box2 {
 // override *both* have overflow set not to scroll
 .box.pad:has(.session_table.border),
 .box.pad .session_table.border {
-  overflow: scroll !important;
+  overflow: auto visible !important;
 }
 
 .forum_post.forum_unread {
@@ -894,6 +934,11 @@ table.box2 {
 #noty_bottomRight_layout_container .brackets::after,
 #noty_bottomRight_layout_container .brackets::before {
   display: none;
+}
+
+#noty_bottomRight_layout_container {
+  position: relative;
+  z-index: $z-notifications !important;
 }
 
 .thin > .header h1,
@@ -1211,6 +1256,7 @@ ul.collage_images li a img {
   height: 100%;
   position: absolute;
   width: 100%;
+  object-fit: cover;  // disallow aspect ratio stretch
 }
 
 ul.collage_images li::before {
@@ -1566,6 +1612,24 @@ blockquote {
   word-break: break-word !important;
 }
 
+/* 'sessions' page forms */
+form.manage_form[name="sessions"],
+form.delete_form[name="session"] {
+  background-color: inherit;
+}
+
+/* Quote notifications page */
+body#userhistory .thin .header .center {
+text-align: center;
+background: variables.$color-background-form;
+width: 100%;
+min-height: 4rem;
+font-size: 140%;
+display: flex; /* turn on flexbox */
+justify-content: center; /* horizontal centering */
+align-items: center; /* vertical centering */
+}
+
 /* END desktop view, handling of classes */
 
 /* ************************************************ */
@@ -1664,6 +1728,7 @@ div#discog_table td.td_info:not(span.torrent_links_block) > a {
 .tooltipster-base {
   box-shadow: 0 0 8px rgb(0 0 0 / 25%);
   width: auto !important;
+  z-index: 825;
 }
 
 .tooltipster-default {
@@ -1987,12 +2052,12 @@ body#collage .cats_music {
   #userinfo_minor,
   #userinfo_username {
     position: absolute;
-    z-index: $z-desktop-menu-closed;
+    z-index: $z-desktop-menu-closed !important;
   }
 
   #userinfo_minor:hover,
   #userinfo_username:hover {
-    z-index: $z-desktop-menu-open;
+    z-index: $z-desktop-menu-open !important;
   }
 
   #userinfo_username:hover {
@@ -2115,6 +2180,17 @@ body#collage .cats_music {
   text-align: right;
 }
 
+/* Quote notifications page ~ center the empty-state message */
+body#userhistory .header + .center {
+  width: 100%;
+  min-height: 4rem;
+  font-size: 140%;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .linkbox br {
   display: block;
   line-height: 4px;
@@ -2127,6 +2203,18 @@ body#collage .cats_music {
 .linkbox .brackets::after,
 .linkbox .brackets::before {
   display: none;
+}
+
+/* Active pagination breadcrumb (current page) */
+.linkbox b {
+  color: variables.$color-text-anchor-hover;
+  font-weight: 800;
+}
+
+/* Inactive pagination breadcrumbs (clickable links) */
+.linkbox a b {
+  color: variables.$color-text-anchor;
+  font-weight: 400;
 }
 
 /* ************************************************ */
@@ -2186,7 +2274,7 @@ body#collage .cats_music {
 /* buttons */
 #noty_bottomRight_layout_container .noty_buttons a {
   background-color: none;
-  color: variables.$color-obj-tag_bubble-foreground !important;
+  color: variables.$color-obj-tag-bubble-fg !important;
   border: thin solid transparent; /* prevents button movement */
   border-radius: 14px;
   padding: 0 6px;
@@ -2199,9 +2287,9 @@ body#collage .cats_music {
 }
 
 #noty_bottomRight_layout_container .noty_buttons a:hover {
-  background-color: variables.$color-obj-tag_bubble-foreground;
-  color: variables.$color-obj-tag_bubble-background !important;
-  border: thin solid variables.$color-obj-tag_bubble-background;
+  background-color: variables.$color-obj-tag-bubble-fg;
+  color: variables.$color-obj-tag-bubble-bg !important;
+  border: thin solid variables.$color-obj-tag-bubble-bg;
   border-radius: 14px;
 }
 
@@ -2306,8 +2394,8 @@ body#torrents div.box.box_tags li > a:first-child {
   font-weight: 700;
   font-size: 0.6rem;
   vertical-align: baseline;
-  color: variables.$color-obj-tag_bubble-foreground;
-  background: variables.$color-obj-tag_bubble-background;
+  color: variables.$color-obj-tag-bubble-fg;
+  background: variables.$color-obj-tag-bubble-bg;
   padding: 0 0.5rem;
   border-radius: 1rem;
   margin-bottom: 0.1rem;
@@ -2329,8 +2417,8 @@ body#torrents div.box.box_tags li > a:first-child {
   table.torrent_table.cats.checkboxes.border.m_table td.td_info.big_info div.group_info.clear div.tags a:hover,
   table.torrent_table.cats.m_table td.td_info.big_info div.group_info.clear div.tags a:hover,
   body#torrents div.box.box_tags li > a:first-child:hover {
-    color: variables.$color-obj-tag_bubble-background !important;
-    background: variables.$color-obj-tag_bubble-foreground !important;
+    color: variables.$color-obj-tag-bubble-bg !important;
+    background: variables.$color-obj-tag-bubble-fg !important;
     transition: all 0.15s cubic-bezier(0.25, 0.8, 0.25, 1);
     box-shadow:
       rgb(0 0 0 / 25%) 0 14px 28px,
@@ -2361,48 +2449,124 @@ table.torrent_table.cats.m_table td.td_info.big_info div.group_info.clear div.ta
   /* use alpha, not invisibility, to preserve copy & paste ability */
   color: rgb(0 0 0 / 10%);
 }
+/* ============================================
+   2.2.5  Snatched & other Torrent Indicators
+   Must be after 2.2.4 invisibility
+   ============================================ */
 
-/* ### 2.2.5 Snatched torrent indicators
-   the following must be after 2.2.4 invisibility */
+/* ============================================
+   TOKEN: Base bubble style for ALL tag labels
+   (applies to elements and pseudo-elements)
+   ============================================ */
+
+%token-badge {
+  visibility: visible;
+  border-radius: 1rem;
+  box-sizing: border-box;
+  display: inline-block;
+  font-size: 0.6rem;
+  margin-bottom: 0.1rem;
+  padding: 0 0.5rem;
+  vertical-align: baseline;
+}
+
+/* ============================================
+   TOKEN: SEMANTIC BADGE ROLES
+   VISUAL THEME COLORS ONLY (defined as variables)
+   ============================================ */
+
+%token-badge-info {
+  background: variables.$color-obj-info-bubble-bg;
+  color: variables.$color-obj-info-bubble-fg;
+  font-style: italic;
+  font-weight: 300;
+}
+
+%token-badge-error {
+  background: variables.$color-obj-reported-bubble-bg;
+  color: variables.$color-obj-reported-bubble-fg;
+}
+
+%token-badge-warning {
+  background: variables.$color-obj-warning-bubble-bg;
+  color: variables.$color-obj-warning-bubble-fg;
+}
+
+%token-badge-approved {
+  background: variables.$color-obj-approved-bubble-bg;
+  color: variables.$color-obj-approved-bubble-fg;
+}
+
+%token-badge-gratis {
+  background: variables.$color-obj-gratis-bubble-bg;
+  color: variables.$color-obj-gratis-bubble-fg;
+}
+
+/* ============================================
+   STATUS ASSIGNMENTS (extend tokens + roles)
+   ============================================ */
+
+/* INFO (snatched / informational) */
+.tl_snatched,
+.tl_snatched_group,
+.tl_snatched_torrent {
+  @extend %token-badge;
+  @extend %token-badge-info;
+}
+
+/* ERROR (bad metadata / corrupted / reported) */
+.tl_reported,
+.tl_notice,
+.tl_bad_tags,
+.tl_bad_folders,
+.tl_bad_files {
+  @extend %token-badge;
+  @extend %token-badge-error;
+}
+
+/* WARNING (fixable / trumpable / missing lineage) */
+.tl_checksum,
+.tl_trumpable,
+.tl_missing_lineage {
+  @extend %token-badge;
+  @extend %token-badge-warning;
+}
+
+/* APPROVED (masters / provenance approved) */
+.tl_cassette_approved,
+.tl_lossymaster_approved {
+  @extend %token-badge;
+  @extend %token-badge-approved;
+}
+
+/* GRATIS (freeleech / personal / neutral economy) */
+.tl_freeload,
+.tl_freeleech,
+.tl_free,
+.tl_personal,
+.tl_neutral {
+  @extend %token-badge;
+  @extend %token-badge-gratis;
+}
+
+/* ============================================
+   PSEUDO-LABELS: Snatched indicators on GROUPS
+   (content separate from styling)
+   ============================================ */
 
 tr.snatched_group div.tags::before {
-  content: "snatched group";
-  /* plus formatting below */
-}
-tr.snatched_torrent div.tags::before {
-  content: "snatched torrent";
-  /* plus formatting below */
+  content: "✔︎ Snatched group";
 }
 
+tr.snatched_torrent div.tags::before {
+  content: "✔︎ Snatched torrent";
+}
+
+/* Pseudo-elements inherit badge + semantic styling */
 tr.snatched_group div.tags::before,
 tr.snatched_torrent div.tags::before {
-  visibility: visible;
-  background: variables.$color-obj-tag_bubble_snatched-background;
-  color: variables.$color-obj-tag_bubble_snatched-foreground;
-  border-radius: 1rem;
-  box-sizing: border-box;
-  display: inline-block;
-  font-size: 0.6rem;
-  font-style: italic;
-  font-weight: 200;
-  margin-bottom: 0.1rem;
-  padding: 0 0.5rem;
-  vertical-align: baseline;
-}
-
-/* album pages */
-#torrent_details.snatched .group_torrent.snatched_torrent .torrent_label.tooltip.tl_snatched {
-  background: variables.$back-600;
-  border-radius: 1rem;
-  box-sizing: border-box;
-  display: inline-block;
-  font-size: 0.6rem;
-  font-style: italic;
-  font-weight: 400;
-  margin-bottom: 0.1rem;
-  margin-inline: 0.5rem;
-  padding: 0 0.5rem;
-  vertical-align: baseline;
+  @extend %token-badge;
+  @extend %token-badge-info;
 }
 
 /* ************************************************ */
@@ -2428,11 +2592,12 @@ tr.snatched_torrent div.tags::before {
   color: variables.$color-text-base !important;  /* varies by stylesheet */
   font-size: 13px;
   font-weight: 500;
-  padding: 10px;
+  padding: 10px 10px 10px 48px;
   text-align: center;
 }
 
 .alertbar:first-of-type {
+  background-image: variables.$icon-notification;
   background-position: 8px center;
   background-repeat: no-repeat;
   background-size: 32px;
@@ -2445,7 +2610,7 @@ tr.snatched_torrent div.tags::before {
 /* occurs on failure, for example failed request votes */
 .error_message {
   background-color: variables.$color-background-warning;
-  background-image: url(config('STATIC_SERVER') + "/svg/site/ops-icon-triangle-ccc.svg");
+  background-image: variables.$icon-warning;
   background-position: 8px;
   background-repeat: no-repeat;
   background-size: 32px;
@@ -2569,9 +2734,9 @@ ul#check::after {
 
 // body#upload div#wrapper div#content p a
 // {
-//   color: $color-obj-tag_bubble-foreground;
-//   background-color:  $color-obj-tag_bubble-background;
-//   border: thick solid $color-obj-tag_bubble-foreground;
+//   color: $color-obj-tag-bubble-fg;
+//   background-color:  $color-obj-tag-bubble-bg;
+//   border: thick solid $color-obj-tag-bubble-fg;
 //   padding: .25rem 2rem .25rem 2rem;
 //   margin: 1rem;
 //   border-radius: 2.5rem;
@@ -2630,7 +2795,7 @@ ul#check::after {
   #dnulist tr.colhead,
   .toolbox_container tr.colhead {
     position: sticky;
-    top: $height-mobilemenu_closed-tab;
+    top: $height-mobilemenu-closed-tab;
     font-size: 120%;
     font-weight: bold;
   }
@@ -2758,7 +2923,7 @@ Documentation of mobile classes:
 
   /* intra-page links shouldn't hide behind the sticky top tab */
   * {
-    scroll-margin-top: $height-mobilemenu_closed-tab;
+    scroll-margin-top: $height-mobilemenu-closed-tab;
   }
 
   /* override from earlier, avoids weird */
@@ -3259,8 +3424,8 @@ Documentation of mobile classes:
     font-weight: 400;
     font-size: 0.55rem;
     vertical-align: baseline;
-    color: variables.$color-obj-tag_bubble-foreground;
-    background: variables.$color-obj-tag_bubble-background !important;
+    color: variables.$color-obj-tag-bubble-fg;
+    background: variables.$color-obj-tag-bubble-bg !important;
     padding: 0.05rem 0.5rem;
     border: none !important;
     border-radius: 1rem;
@@ -3442,12 +3607,71 @@ Documentation of mobile classes:
 
   /* ## 4.16 Handling for sticky table headers on Mobile */
 
+  /* For data tables and forum posts, */
+  /* Apply sticky with offset to avoid mobile menubar */
   .colhead,
   .colhead_dark {
     position: sticky;
-    top: $height-mobilemenu_closed-tab;
+    top: $height-mobilemenu-closed-tab; 
     font-size: 120%;
     font-weight: bold;
+  }
+  
+  /* Disable sticky for layout tables (Settings page) */
+  .layout .colhead,
+  .layout .colhead_dark {
+    position: static;
+  }
+
+  /* Settings page: allow sticky headers by letting content overflow */
+  body#user .main_column {
+    overflow: visible;
+  }
+
+  /* Re-enable sticky for settings tables (layout class) with menu-tab offset */
+  body#user .user_options .colhead,
+  body#user .user_options .colhead_dark,
+  body#user .user_options .colhead td,
+  body#user .user_options .colhead_dark td {
+    position: sticky;
+    top: $height-mobilemenu-closed-tab;
+    z-index: $z-sticky-table-headers;
+    background: variables.$color-background-table-row-th;
+  }
+
+  /* Sessions page: keep sticky with same offset as menu tab to avoid droop */
+  body#user .session_table .colhead,
+  body#user .session_table .colhead_dark,
+  body#user .session_table .colhead td,
+  body#user .session_table .colhead_dark td {
+    position: sticky;
+    top: $height-mobilemenu-closed-tab;
+    z-index: $z-sticky-table-headers;
+    background: variables.$color-background-table-row-th;
+  }
+
+  /* Sessions page: open container + horizontal scroll without relying on :has */
+  body#user .box.pad {
+    overflow: visible !important;
+  }
+  body#user .session_table.border {
+    overflow-x: auto !important;
+  }
+
+  /* Staff Inbox container: allow overflow for sticky header to work */
+  body#staffpm #inbox {
+    overflow: visible;
+  }
+
+  /* Staff Inbox: keep sticky with same offset as menu tab to avoid droop */
+  body#staffpm .message_table .colhead,
+  body#staffpm .message_table .colhead_dark,
+  body#staffpm .message_table .colhead td,
+  body#staffpm .message_table .colhead_dark td {
+    position: sticky;
+    top: $height-mobilemenu-closed-tab;
+    z-index: $z-sticky-table-headers;
+    background: variables.$color-background-table-row-th;
   }
 
   /* ************************************************ */
@@ -3457,7 +3681,7 @@ Documentation of mobile classes:
 
   #header {
     // base height for building blocks of the open menu.
-    // for the closed menu tab, see also $height-mobilemenu_closed-tab
+    // for the closed menu tab, see also $height-mobilemenu-closed-tab
     --row-height: 40px;
   }
 
@@ -3525,7 +3749,7 @@ Documentation of mobile classes:
     height: 25px;
     background-image: variables.$icon-menu-pulldown-mobile;
     background-size: contain;
-    z-index: $z-mobilemenu_closed-tab-icons;
+    z-index: $z-mobilemenu-closed-tab-icons;
     pointer-events: none;
   }
 
@@ -3536,7 +3760,7 @@ Documentation of mobile classes:
     display: block;
     right: 0;
     width: 100%;
-    z-index: $z-mobilemenu_closed-tab;
+    z-index: $z-mobilemenu-closed-tab;
   }
 
   /* topbar for mobile ~ site logo, upper left */
@@ -3548,12 +3772,12 @@ Documentation of mobile classes:
     pointer-events: none;
     transform: translateZ(0);
     width: 15%;
-    z-index: $z-mobilemenu_closed-tab-icons;
+    z-index: $z-mobilemenu-closed-tab-icons;
   }
 
   #extra4,
   #extra5 {
-    height: $height-mobilemenu_closed-tab;
+    height: $height-mobilemenu-closed-tab;
     position: fixed;
     top: 0;
   }
@@ -3798,15 +4022,15 @@ Documentation of mobile classes:
 
   #taglist tr.label {
     height: auto;
-    border: thick solid variables.$color-obj-tag_bubble-foreground;
+    border: thick solid variables.$color-obj-tag-bubble-fg;
   }
 
   #taglist tr.label td {
-    background: variables.$color-obj-tag_bubble-background;
-    color: variables.$color-obj-tag_bubble-foreground;
+    background: variables.$color-obj-tag-bubble-bg;
+    color: variables.$color-obj-tag-bubble-fg;
     align-content: center;
     text-align: center;
-    border: variables.$color-obj-tag_bubble-foreground;
+    border: variables.$color-obj-tag-bubble-fg;
     width: 100%;
   }
 
@@ -3827,8 +4051,8 @@ Documentation of mobile classes:
     text-overflow: ellipsis;
     font-style: italic;
     vertical-align: baseline;
-    color: variables.$color-obj-tag_bubble-foreground !important;
-    background: variables.$color-obj-tag_bubble-background;
+    color: variables.$color-obj-tag-bubble-fg !important;
+    background: variables.$color-obj-tag-bubble-bg;
     padding: 0.25rem;
     border-radius: 1rem;
     margin-bottom: 0.1rem;
