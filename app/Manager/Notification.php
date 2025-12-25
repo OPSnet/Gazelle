@@ -95,7 +95,7 @@ class Notification extends \Gazelle\Base {
                 select date_trunc('hour', x::timestamptz(0)) as h
                 from generate_series(now() - '71 hour'::interval, now(), interval '1 hour') t(x)
             )
-            select d.h as hour,
+            select to_char(d.h, 'YYYY-MM-DD HH24') as hour,
                 count(nt.id_torrent) as total
             from d
             left join notification_ticket nt on (nt.created between d.h and d.h + '1 hour'::interval)
