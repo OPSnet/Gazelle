@@ -3,7 +3,8 @@
 /* require this file to have a fully-initialized Gazelle runtime */
 
 if (PHP_VERSION_ID < 80406) {
-    die("Gazelle (Orpheus fork) requires at least PHP version 8.4.6");
+    $version = phpversion();
+    die("Gazelle (Orpheus fork) requires at least PHP version 8.4.6, you have $version\n");
 }
 foreach (['memcached', 'mysqli'] as $e) {
     if (!extension_loaded($e)) {
