@@ -90,21 +90,20 @@ class Tag extends BaseObject {
      * (artist elements may be null)
      */
     public function requestList(): array {
-        self::$db->prepared_query("
-            SELECT
-                aa.ArtistID  AS artistId,
-                aa.Name      AS artistName,
-                ra.RequestID AS requestId,
-                r.Title      AS requestName
-            FROM requests              r
-            INNER JOIN requests_tags   t  ON (t.RequestID = r.ID)
-            LEFT JOIN requests_artists ra ON (r.ID = ra.RequestID)
-            LEFT JOIN artists_group    ag ON (ag.PrimaryAlias = ra.AliasID)
-            LEFT JOIN artists_alias    aa ON (ag.PrimaryAlias = aa.AliasID)
-            WHERE t.TagID = ?
-            ", $this->id
+        return $this->pg()->allex(<<<END_SQL
+            select
+                aa."ArtistID" as artistId,
+                aa."Name"     as artistName,
+                ra.id_request as requestId,
+                r.title       as requestName
+            from request                  r
+            left join request_artist      ra using (id_request)
+            left join relay.artists_group ag on (ag."PrimaryAlias" = ra.id_alias)
+            left join relay.artists_alias aa on (ag."PrimaryAlias" = aa."AliasID")
+            where r.tag @> array[$1::int]
+            END_SQL
+            , $this->id
         );
-        return self::$db->to_array(false, MYSQLI_ASSOC);
     }
 
     public function addTGroup(TGroup $tgroup, User $user, int $weight): int {
@@ -219,19 +218,17 @@ class Tag extends BaseObject {
         );
         $affected = self::$db->affected_rows();
         if (!$affected) {
+            self::$db->rollback();
             return false;
         }
 
         // Was this the last occurrence?
-        $inUse = (int)self::$db->scalar("
-            SELECT count(*) FROM torrents_tags WHERE TagID = ?
+        $inUse = self::$db->scalar("
+            SELECT 1 FROM torrents_tags WHERE TagID = ? LIMIT 1
             ", $this->id
-        ) + (int)self::$db->scalar("
-            SELECT count(*)
-            FROM requests_tags rt
-            INNER JOIN requests r ON (r.ID = rt.RequestID)
-            WHERE r.FillerID = 0
-                AND rt.TagID = ?
+        )
+        || $this->pg()->scalarex("
+            select 1 from request where tag @> array[$1::int] limit 1
             ", $this->id
         );
         $affected += $inUse ? 0 : $this->remove();

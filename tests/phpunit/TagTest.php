@@ -299,7 +299,7 @@ class TagTest extends TestCase {
 
         // split tag into two new (indie.rock.alt.rock => indie.rock, alt.rock)
         $this->assertEquals(
-            4, // 2 for each tgroup and request
+            3, // 2 for tgroup and 1 for request
             $manager->rename(
                 $tag,
                 [
@@ -350,7 +350,7 @@ class TagTest extends TestCase {
         $nameList = ["$name.3", "$name.4"];
         array_map(fn($n) => $manager->create($n, $this->user), $nameList);
         $this->assertEquals(
-            4,
+            3,
             $manager->rename(
                 $tag,
                 [

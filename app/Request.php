@@ -114,7 +114,7 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
         if (isset($this->info)) {
             return $this->info;
         }
-        $result = $this->pg()->executeParams("
+        $info = $this->pg()->rowAssocex("
             select r.id_user  as user_id,
                 r.id_filler   as filler_id,
                 r.id_tgroup   as tgroup_id,
@@ -149,7 +149,6 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
             where r.id_request = $1
             ", $this->id
         );
-        $info = $result->fetchAll()[0];
         $info['user_vote_list'] = $this->pg()->allex("
             select rv.id_user as user_id,
                 sum(rv.bounty) as bounty
@@ -969,8 +968,8 @@ END_SQL
                     from request_tag
                     where id_request = $1
                 )
-            where id_request = $2
-            ', $this->id, $this->id
+            where id_request = $1
+            ', $this->id
         );
         $this->pg()->commit();
         return $affected;
