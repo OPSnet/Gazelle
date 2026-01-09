@@ -394,289 +394,325 @@ class Users extends \Gazelle\Base {
     }
 
     public function refresh(): int {
-        self::$db->dropTemporaryTable("user_summary_new");
-        self::$db->prepared_query("
-            CREATE TEMPORARY TABLE user_summary_new LIKE user_summary
+        /* Postgres cannot see Mysql temporary tables, so the temp table is
+         * created in Postgres and the results copied over.
+         */
+        $this->pg()->query("
+            create temporary table user_summary_new (like relay.user_summary)
         ");
-
-        /* Need to perform dirty reads to avoid wedging users, especially inserts to users_downloads */
-        self::$db->prepared_query("
-            SET SESSION TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
-        ");
-
-        self::$db->prepared_query("
-            INSERT INTO user_summary_new (user_id, artist_added_total)
-                SELECT ta.UserID, count(*)
-                FROM torrents_artists ta
-                INNER JOIN users_main um ON (um.ID = ta.UserID)
-                GROUP BY ta.UserID
-            ON DUPLICATE KEY UPDATE
-                artist_added_total = VALUES(artist_added_total)
-        ");
-
-        self::$db->prepared_query("
-            INSERT INTO user_summary_new (user_id, collage_total, collage_contrib)
-                WITH c AS (
-                    SELECT c.UserID AS user_id,
-                        count(c.ID) AS total
-                    FROM collages c
-                    WHERE c.Deleted = '0'
-                    GROUP BY c.UserID
-                ),
-                ca AS (
-                    SELECT ca.UserID                AS user_id,
-                        count(DISTINCT ca.ArtistID) AS total
-                    FROM collages_artists ca
-                    INNER JOIN collages c ON (c.ID = ca.CollageID AND c.Deleted = '0')
-                    GROUP BY ca.UserID
-                ),
-                ct AS (
-                    SELECT ct.UserID                AS user_id,
-                        count(DISTINCT ct.GroupID) AS total
-                    FROM collages_torrents ct
-                    INNER JOIN collages c ON (c.ID = ct.CollageID AND c.Deleted = '0')
-                    GROUP BY ct.UserID
+        /* Default values are not copied over from a foreign table, so we have
+         * to add them manually.
+         */
+        $sql = $this->pg()->scalarex("
+            with c as (
+                select column_name
+                from information_schema.columns
+                where table_name = 'user_summary_new'
+                    and column_name != 'user_id'
+            )
+            select 'alter table user_summary_new '
+                || string_agg(
+                    'alter column ' || column_name || ' set default 0',
+                    ', '
                 )
-                SELECT um.ID, coalesce(c.total, 0), coalesce(ca.total, 0) + coalesce(ct.total, 0)
-                FROM users_main um
-                LEFT JOIN c ON (c.user_id = um.ID)
-                LEFT JOIN ca ON (ca.user_id = um.ID)
-                LEFT JOIN ct ON (ct.user_id = um.ID)
-            ON DUPLICATE KEY UPDATE
-                collage_total   = VALUES(collage_total),
-                collage_contrib = VALUES(collage_contrib)
+            from c
         ");
+        $this->pg()->query($sql);
+        $this->pg()->query("alter table user_summary_new add primary key (user_id)");
 
-        self::$db->prepared_query("
-            INSERT INTO user_summary_new (user_id, download_total, download_unique)
-                SELECT ud.UserID,
-                   count(*) AS total,
-                   count(DISTINCT ud.TorrentID) AS 'unique'
-               FROM users_downloads AS ud
-               INNER JOIN torrents AS t ON (t.ID = ud.TorrentID)
-               INNER JOIN users_main um ON (um.ID = ud.UserID)
-               GROUP BY ud.UserID
-            ON DUPLICATE KEY UPDATE
-                download_total = VALUES(download_total),
-                download_unique = VALUES(download_unique)
-        ");
+        $this->pg()->query(<<<END_SQL
+            insert into user_summary_new (user_id, artist_added_total)
+                select ta."UserID",
+                    count(*)
+                from relay.torrents_artists ta
+                inner join relay.users_main um on (um."ID" = ta."UserID")
+                group by ta."UserID"
+        END_SQL
+        );
 
-        self::$db->prepared_query("
-            INSERT INTO user_summary_new (user_id, fl_token_total)
-                SELECT uf.UserID, count(*) AS fl_token_total
-                FROM users_freeleeches uf
-                INNER JOIN users_main um ON (um.ID = uf.UserID)
-                GROUP BY uf.UserID
-            ON DUPLICATE KEY UPDATE
-                fl_token_total = VALUES(fl_token_total)
-        ");
-
-        self::$db->prepared_query("
-            INSERT INTO user_summary_new (user_id, forum_post_total)
-                SELECT fp.AuthorID, count(*) AS forum_post_total
-                FROM forums_posts fp
-                INNER JOIN users_main um ON (um.ID = fp.AuthorID)
-                GROUP BY fp.AuthorID
-            ON DUPLICATE KEY UPDATE
-                forum_post_total = VALUES(forum_post_total)
-        ");
-
-        self::$db->prepared_query("
-            INSERT INTO user_summary_new (user_id, forum_thread_total)
-                SELECT ft.AuthorID, count(*) AS forum_thread_total
-                FROM forums_topics ft
-                INNER JOIN users_main um ON (um.ID = ft.AuthorID)
-                GROUP BY ft.AuthorID
-            ON DUPLICATE KEY UPDATE
-                forum_thread_total = VALUES(forum_thread_total)
-        ");
-
-        self::$db->prepared_query("
-            INSERT INTO user_summary_new (user_id, invited_total)
-                SELECT um.inviter_user_id, count(*) AS invited_total
-                FROM users_main um
-                WHERE um.inviter_user_id > 0
-                GROUP BY um.inviter_user_id
-            ON DUPLICATE KEY UPDATE
-                invited_total = VALUES(invited_total)
-        ");
-
-        self::$db->prepared_query("
-            INSERT INTO user_summary_new (user_id, unique_group_total, upload_total)
-                SELECT t.UserID,
-                    count(DISTINCT GroupID) AS unique_group_total,
-                    count(*) AS upload_total
-                FROM torrents t
-                INNER JOIN users_main um ON (um.ID = t.UserID)
-                GROUP BY t.UserID
-            ON DUPLICATE KEY UPDATE
-                unique_group_total = VALUES(unique_group_total),
-                upload_total = VALUES(upload_total)
-        ");
-
-        self::$db->prepared_query("
-            INSERT INTO user_summary_new (user_id, perfect_flac_total)
-                SELECT t.UserID, count(DISTINCT t.GroupID) AS perfect_flac_total
-                FROM torrents t
-                INNER JOIN users_main um ON (um.ID = t.UserID)
-                WHERE t.Format = 'FLAC'
-                    AND (
-                        (t.Media = 'CD' AND t.LogScore = 100)
-                        OR (t.Media IN ('Vinyl', 'WEB', 'DVD', 'Soundboard', 'Cassette', 'SACD', 'Blu-ray', 'DAT'))
-                    )
-                GROUP BY t.UserID
-            ON DUPLICATE KEY UPDATE
-                perfect_flac_total = VALUES(perfect_flac_total)
-        ");
-
-        self::$db->prepared_query("
-            INSERT INTO user_summary_new (user_id, perfecter_flac_total)
-                SELECT t.UserID, count(DISTINCT t.GroupID) AS perfecter_flac_total
-                FROM torrents t
-                INNER JOIN users_main um ON (um.ID = t.UserID)
-                WHERE t.Format = 'FLAC'
-                    AND (
-                        (t.Media = 'CD' AND t.LogScore = 100)
-                        OR (t.Media IN ('Vinyl', 'DVD', 'Soundboard', 'Cassette', 'SACD', 'Blu-ray', 'DAT'))
-                    )
-                GROUP BY t.UserID
-            ON DUPLICATE KEY UPDATE
-                perfecter_flac_total = VALUES(perfecter_flac_total)
-        ");
-
-        self::$db->prepared_query("
-            INSERT INTO user_summary_new (user_id, request_created_size, request_created_total, request_bounty_size, request_bounty_total, request_vote_size, request_vote_total)
-                WITH crea AS (
-                    SELECT r.UserID,
-                        count(*)       AS total,
-                        sum(rv.Bounty) AS bounty
-                    FROM requests r
-                    INNER JOIN requests_votes rv ON (rv.RequestID = r.ID AND rv.UserID = r.UserID)
-                    GROUP BY UserID
+        $this->pg()->query(<<<END_SQL
+            insert into user_summary_new (user_id, collage_total, collage_contrib)
+                with c as (
+                    select c."UserID" as user_id,
+                        count(c."ID") as total
+                    from relay.collages c
+                    where c."Deleted" = '0'
+                    group by c."UserID"
                 ),
-                filler AS (
-                    SELECT r.FillerID,
-                        count(DISTINCT r.id) AS total,
+                ca as (
+                    select ca."UserID"                as user_id,
+                        count(distinct ca."ArtistID") as total
+                    from relay.collages_artists ca
+                    inner join relay.collages c on (c."ID" = ca."CollageID" and c."Deleted" = '0')
+                    group by ca."UserID"
+                ),
+                ct as (
+                    select ct."UserID"               as user_id,
+                        count(distinct ct."GroupID") as total
+                    from relay.collages_torrents ct
+                    inner join relay.collages c on (c."ID" = ct."CollageID" and c."Deleted" = '0')
+                    group by ct."UserID"
+                )
+                select um."ID",
+                    coalesce(c.total, 0)                          as collage_total,
+                    coalesce(ca.total, 0) + coalesce(ct.total, 0) as collage_contrib
+                from relay.users_main um
+                left join c  on (c.user_id  = um."ID")
+                left join ca on (ca.user_id = um."ID")
+                left join ct on (ct.user_id = um."ID")
+            on conflict (user_id) do update set
+                collage_total   = EXCLUDED.collage_total,
+                collage_contrib = EXCLUDED.collage_contrib
+        END_SQL
+        );
+
+        $this->pg()->query(<<<END_SQL
+            insert into user_summary_new (user_id, download_total, download_unique)
+                select ud."UserID",
+                   count(*)                       as download_total,
+                   count(distinct ud."TorrentID") as download_unique
+               from relay.users_downloads  ud
+               inner join relay.torrents   t  on (t."ID" = ud."TorrentID")
+               inner join relay.users_main um on (um."ID" = ud."UserID")
+               group by ud."UserID"
+            on conflict (user_id) do update set
+                download_total  = EXCLUDED.download_total,
+                download_unique = EXCLUDED.download_unique
+        END_SQL
+        );
+
+        $this->pg()->query(<<<END_SQL
+            insert into user_summary_new (user_id, fl_token_total)
+                select uf."UserID",
+                    count(*) as fl_token_total
+                from relay.users_freeleeches uf
+                inner join relay.users_main  um on (um."ID" = uf."UserID")
+                group by uf."UserID"
+            on conflict (user_id) do update set
+                fl_token_total = EXCLUDED.fl_token_total
+        END_SQL
+        );
+
+        $this->pg()->query(<<<END_SQL
+            insert into user_summary_new (user_id, forum_post_total)
+                select fp."AuthorID",
+                    count(*) as forum_post_total
+                from relay.forums_posts     fp
+                inner join relay.users_main um on (um."ID" = fp."AuthorID")
+                group by fp."AuthorID"
+            on conflict (user_id) do update set
+                forum_post_total = EXCLUDED.forum_post_total
+        END_SQL
+        );
+
+        $this->pg()->query(<<<END_SQL
+            insert into user_summary_new (user_id, forum_thread_total)
+                select ft."AuthorID",
+                    count(*) as forum_thread_total
+                from relay.forums_topics    ft
+                inner join relay.users_main um on (um."ID" = ft."AuthorID")
+                group by ft."AuthorID"
+            on conflict (user_id) do update set
+                forum_thread_total = EXCLUDED.forum_thread_total
+        END_SQL
+        );
+
+        $this->pg()->query(<<<END_SQL
+            insert into user_summary_new (user_id, invited_total)
+                select um.inviter_user_id,
+                    count(*) as invited_total
+                from relay.users_main um
+                where um.inviter_user_id > 0
+                group by um.inviter_user_id
+            on conflict (user_id) do update set
+                invited_total = EXCLUDED.invited_total
+        END_SQL
+        );
+
+        $this->pg()->query(<<<END_SQL
+            insert into user_summary_new (user_id, unique_group_total, upload_total)
+                select t."UserID",
+                    count(distinct t."GroupID") as unique_group_total,
+                    count(*)                    as upload_total
+                from relay.torrents         t
+                inner join relay.users_main um on (um."ID" = t."UserID")
+                group by t."UserID"
+            on conflict (user_id) do update set
+                unique_group_total = EXCLUDED.unique_group_total,
+                upload_total       = EXCLUDED.upload_total
+        END_SQL
+        );
+
+        $this->pg()->query(<<<END_SQL
+            insert into user_summary_new (user_id, perfect_flac_total)
+                select t."UserID",
+                    count(distinct t."GroupID") as perfect_flac_total
+                from relay.torrents         t
+                inner join relay.users_main um on (um."ID" = t."UserID")
+                where t."Format" = 'FLAC'
+                    and (
+                        (t."Media" = 'CD' and t."LogScore" = 100)
+                        or (t."Media" in ('Vinyl', 'WEB', 'DVD', 'Soundboard', 'Cassette', 'SACD', 'Blu-ray', 'DAT'))
+                    )
+                group by t."UserID"
+            on conflict (user_id) do update set
+                perfect_flac_total = EXCLUDED.perfect_flac_total
+        END_SQL
+        );
+
+        $this->pg()->query(<<<END_SQL
+            insert into user_summary_new (user_id, perfecter_flac_total)
+                select t."UserID", count(distinct t."GroupID") as perfecter_flac_total
+                from relay.torrents         t
+                inner join relay.users_main um on (um."ID" = t."UserID")
+                where t."Format" = 'FLAC'
+                    and (
+                        (t."Media" = 'CD' and t."LogScore" = 100)
+                        or (t."Media" in ('Vinyl', 'DVD', 'Soundboard', 'Cassette', 'SACD', 'Blu-ray', 'DAT'))
+                    )
+                group by t."UserID"
+            on conflict (user_id) do update set
+                perfecter_flac_total = EXCLUDED.perfecter_flac_total
+        END_SQL
+        );
+
+        $this->pg()->query(<<<END_SQL
+            insert into user_summary_new (user_id, request_created_size, request_created_total, request_bounty_size, request_bounty_total, request_vote_size, request_vote_total)
+                with crea as (
+                    select r.id_user,
+                        count(*)       as crea_total,
+                        sum(rv.bounty) as crea_bounty
+                    from request r
+                    inner join request_vote rv using (id_request, id_user)
+                    group by r.id_user
+                ),
+                filler as (
+                    select r.id_filler as id_user,
+                        count(distinct r.id_request) as fill_total,
                         /**
                          * Note: exclude the bounty voted by a user on a request they filled themselves,
                          * as that increase has already been accounted for in users_leech_stats.Uploaded
                          */
-                        sum(CASE WHEN rv.UserID = r.FillerID THEN 0 ELSE rv.bounty END) AS bounty
-                    FROM requests r
-                    INNER JOIN requests_votes rv ON (rv.RequestID = r.ID)
-                    WHERE r.FillerID > 0
-                    GROUP BY r.FillerID
+                        sum(case when rv.id_user = r.id_filler then 0 else rv.bounty end) as fill_bounty
+                    from request            r
+                    inner join request_vote rv using (id_request)
+                    where r.filled is not null
+                    group by r.id_filler
                 ),
-                voter AS (
-                    SELECT rv.UserID,
-                        count(DISTINCT rv.RequestID) AS total,
-                        sum(bounty) AS bounty
-                    FROM requests_votes rv
-                    GROUP BY rv.UserID
+                voter as (
+                    select rv.id_user,
+                        count(distinct rv.id_request) as vote_total,
+                        sum(rv.bounty) as vote_bounty
+                    from request_vote rv
+                    group by rv.id_user
                 )
-                SELECT um.ID,
-                    coalesce(crea.bounty,    0),
-                    coalesce(crea.total,     0),
-                    coalesce(filler.bounty,  0),
-                    coalesce(filler.total,   0),
-                    coalesce(voter.bounty,   0),
-                    coalesce(voter.total,    0)
-                FROM users_main um
-                LEFT JOIN crea   ON (crea.UserID     = um.ID)
-                LEFT JOIN filler ON (filler.FillerID = um.ID)
-                LEFT JOIN voter  ON (voter.UserID    = um.ID)
-                WHERE (
-                    crea.total IS NOT NULL
-                    OR filler.total IS NOT NULL
-                    OR voter.total IS NOT NULL
+                select um."ID",
+                    coalesce(crea_bounty,  0),
+                    coalesce(crea_total,   0),
+                    coalesce(fill_bounty,  0),
+                    coalesce(fill_total,   0),
+                    coalesce(vote_bounty,  0),
+                    coalesce(vote_total,   0)
+                from relay.users_main um
+                left join crea   on (crea.id_user   = um."ID")
+                left join filler on (filler.id_user = um."ID")
+                left join voter  on (voter.id_user  = um."ID")
+                where (
+                       crea_total is not null
+                    or fill_total is not null
+                    or vote_total is not null
                 )
-            ON DUPLICATE KEY UPDATE
-                request_created_size  = VALUES(request_created_size),
-                request_created_total = VALUES(request_created_total),
-                request_bounty_size   = VALUES(request_bounty_size),
-                request_bounty_total  = VALUES(request_bounty_total),
-                request_vote_size     = VALUES(request_vote_size),
-                request_vote_total    = VALUES(request_vote_total)
-        ");
+            on conflict (user_id) do update set
+                request_created_size  = EXCLUDED.request_created_size,
+                request_created_total = EXCLUDED.request_created_total,
+                request_bounty_size   = EXCLUDED.request_bounty_size,
+                request_bounty_total  = EXCLUDED.request_bounty_total,
+                request_vote_size     = EXCLUDED.request_vote_size,
+                request_vote_total    = EXCLUDED.request_vote_total
+        END_SQL
+        );
 
-        self::$db->prepared_query("
-            INSERT INTO user_summary_new (user_id, leech_total, seeding_total)
-                SELECT xfu.uid,
+        $this->pg()->query(<<<END_SQL
+            insert into user_summary_new (user_id, leech_total, seeding_total)
+                select xfu.uid,
                     sum(case when xfu.remaining > 0 then 1 else 0 end) as leeching,
                     sum(case when xfu.remaining = 0 then 1 else 0 end) as seeding
-                FROM xbt_files_users AS xfu
-                INNER JOIN torrents AS t ON (t.ID = xfu.fid)
-                INNER JOIN users_main um ON (um.ID = xfu.uid)
-                WHERE um.Enabled = ?
-                GROUP BY xfu.uid
-            ON DUPLICATE KEY UPDATE
-                leech_total = VALUES(leech_total),
-                seeding_total = VALUES(seeding_total)
-            ", UserStatus::enabled->value
+                from relay.xbt_files_users  xfu
+                inner join relay.torrents   t  on (t."ID" = xfu.fid)
+                inner join relay.users_main um on (um."ID" = xfu.uid)
+                where um."Enabled" = $1
+                group by xfu.uid
+            on conflict (user_id) do update set
+                leech_total   = EXCLUDED.leech_total,
+                seeding_total = EXCLUDED.seeding_total
+            END_SQL
+            , UserStatus::enabled->value
         );
 
-        self::$db->prepared_query("
-            INSERT INTO user_summary_new (user_id, bp_hourly_accrual)
-                SELECT xfu.uid,
-                    sum(category_bonus_accrual(t.Size, xfh.seedtime, tls.Seeders, c.bonus_scale))
-                FROM (
-                    SELECT DISTINCT uid, fid
-                    FROM xbt_files_users
-                    WHERE active = 1
-                        AND remaining = 0
-                        AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR)
-                ) AS xfu
-                INNER JOIN xbt_files_history xfh USING (uid, fid)
-                INNER JOIN torrents t ON (t.ID = xfu.fid)
-                INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
-                INNER JOIN torrents_group tg ON (tg.ID = t.GroupID)
-                INNER JOIN category c ON (c.category_id = tg.CategoryID)
-                INNER JOIN users_main um ON (um.ID = xfu.uid)
-                WHERE um.Enabled = ?
-                GROUP BY xfu.uid
-            ON DUPLICATE KEY UPDATE
-                bp_hourly_accrual = VALUES(bp_hourly_accrual)
-            ", UserStatus::enabled->value
+        $this->pg()->query(<<<END_SQL
+            insert into user_summary_new (user_id, bp_hourly_accrual)
+                select xfu.uid,
+                    sum(category_bonus_accrual(t."Size", xfh.seedtime, tls."Seeders", c.bonus_scale))
+                from (
+                    select distinct uid, fid
+                    from relay.xbt_files_users
+                    where active = 1
+                        and remaining = 0
+                        and mtime > extract(epoch from now() - interval '1 hour')
+                ) as xfu
+                inner join relay.xbt_files_history    xfh using (uid, fid)
+                inner join relay.torrents             t   on (t."ID"          = xfu.fid)
+                inner join relay.torrents_leech_stats tls on (tls."TorrentID" = t."ID")
+                inner join relay.torrents_group       tg  on (tg."ID"         = t."GroupID")
+                inner join relay.category             c   on (c.category_id   = tg."CategoryID")
+                inner join relay.users_main           um  on (um."ID"         = xfu.uid)
+                where um."Enabled" = $1
+                group by xfu.uid
+            on conflict (user_id) do update set
+                bp_hourly_accrual = EXCLUDED.bp_hourly_accrual
+            END_SQL
+            , UserStatus::enabled->value
         );
 
-        self::$db->prepared_query("
-            INSERT INTO user_summary_new (user_id, snatch_total, snatch_unique)
-                SELECT xs.uid,
-                   count(*) AS total,
-                   count(DISTINCT xs.fid) AS 'unique'
-               FROM xbt_snatched AS xs
-               INNER JOIN torrents AS t ON (t.ID = xs.fid)
-               INNER JOIN users_main um ON (um.ID = xs.uid)
-               GROUP BY xs.uid
-            ON DUPLICATE KEY UPDATE
-                snatch_total = VALUES(snatch_total),
-                snatch_unique = VALUES(snatch_unique)
-        ");
+        $this->pg()->query(<<<END_SQL
+            insert into user_summary_new (user_id, snatch_total, snatch_unique)
+                select xs.uid,
+                   count(*)               as snatch_total,
+                   count(distinct xs.fid) as snatch_unique
+               from relay.xbt_snatched     xs
+               inner join relay.torrents   t  on (t."ID"  = xs.fid)
+               inner join relay.users_main um on (um."ID" = xs.uid)
+               group by xs.uid
+            on conflict (user_id) do update set
+                snatch_total  = EXCLUDED.snatch_total,
+                snatch_unique = EXCLUDED.snatch_unique
+        END_SQL
+        );
 
-        self::$db->prepared_query("
-            INSERT INTO user_summary_new (user_id, seedtime_hour)
-                SELECT xfh.uid,
+        $this->pg()->query(<<<END_SQL
+            insert into user_summary_new (user_id, seedtime_hour)
+                select xfh.uid,
                    sum(seedtime)
-                FROM xbt_files_history xfh
-                INNER JOIN users_main um ON (um.ID = xfh.uid)
-                INNER JOIN torrents t ON (t.ID = xfh.fid)
-                GROUP BY xfh.uid
-            ON DUPLICATE KEY UPDATE
-                seedtime_hour = VALUES(seedtime_hour)
-        ");
+                from relay.xbt_files_history xfh
+                inner join relay.torrents    t  on (t."ID"  = xfh.fid)
+                inner join relay.users_main  um on (um."ID" = xfh.uid)
+                group by xfh.uid
+            on conflict (user_id) do update set
+                seedtime_hour = EXCLUDED.seedtime_hour
+        END_SQL
+        );
 
-        self::$db->begin_transaction();
-        self::$db->prepared_query("
-            DELETE FROM user_summary
+        // Transactions don't work across foreign tables, so we just have to wing it.
+        $this->pg()->query("
+            delete from relay.user_summary
         ");
-
-        self::$db->prepared_query("
-            INSERT INTO user_summary
-            SELECT * FROM user_summary_new
+        $processed = $this->pg()->query("
+            insert into relay.user_summary
+            select * from user_summary_new
         ");
-        $processed = self::$db->affected_rows();
-        self::$db->commit();
-        self::$db->dropTemporaryTable("user_summary_new");
+        $this->pg()->query("
+            drop table user_summary_new
+        ");
         return $processed;
     }
 

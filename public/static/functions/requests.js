@@ -37,7 +37,7 @@
             return;
         }
 
-        let vote_id = false;
+        let vote_id;
         if (source === DETAIL_PAGE) {
             document.getElementById('button').disabled = true;
             document.getElementById('formatted_bounty').innerHTML = byte_format(data.bounty);
@@ -60,13 +60,13 @@
             vote_link.classList.remove('brackets');
             vote_id = 'vote_count_' + data.id;
         }
-        document.getElementById(vote_id).textContent = data.total.toLocaleString('en-US');
+        document.getElementById(vote_id).textContent = data.total.toLocaleString();
     }
 
     function recalculate_bounty() {
         const box_val = document.getElementById('amount_box').value;
         const unit    = document.getElementById("unit");
-        const mul     = unit.options[unit.selectedIndex].value == 'mb' ? 1024 ** 2 : 1024 ** 3;
+        const mul     = unit.options[unit.selectedIndex].value === 'mb' ? 1024 ** 2 : 1024 ** 3;
         const amt     = Math.floor(box_val * mul);
 
         const current_upload_val = document.getElementById('current_uploaded').value;
@@ -150,22 +150,19 @@
     }
 
     function check_various_artists() {
-        let shown = false;
-        Array.from(document.getElementsByName('artists[]')).forEach((input) => {
-            if (input.value.toLowerCase().trim().match(/^va(rious(\s?a(rtists?)))?$/)) {
-                document.getElementById('vawarning').classList.remove('hidden');
-                shown = true;
-                return;
-            }
-        });
-        if (!shown) {
+        const is_va = Array.from(document.getElementsByName('artists[]')).some(
+            (input) => input.value.trim().toLowerCase().match(/^va(rious(\s?a(rtists?)))?$/)
+        );
+        if (is_va) {
+            document.getElementById('vawarning').classList.remove('hidden');
+        } else {
             document.getElementById('vawarning').classList.add('hidden');
         }
     }
 
     function init_category_form() {
         const cat = document.getElementById('categories').selectedOptions[0].value;
-        if (cat == "Music") {
+        if (cat === "Music") {
             ['artist', 'bitrates', 'cataloguenumber', 'formats', 'media',
                 'recordlabel', 'releasetypes', 'year'
             ].forEach((input) => {
@@ -192,9 +189,9 @@
         let tags     = document.getElementById('tags');
         const name   = tags.value;
         const chosen = document.getElementById('genre_tags').selectedOptions[0].value;
-        if (name == '') {
+        if (name === '') {
             tags.value = chosen;
-        } else if (chosen != '---') {
+        } else if (chosen !== '---') {
             tags.value = tags.value + ', ' + chosen;
         }
     }
@@ -236,14 +233,9 @@
     }
 
     function recheck_all(group) {
-        let all_checked = true;
         const name = (group === 'cat') ? 'filter_cat[]' : (group + '[]');
-        Array.from(document.getElementsByName(name)).forEach((e) => {
-            if (!e.checked) {
-                all_checked = false;
-            }
-        });
-        document.getElementById('toggle_' + group).checked = all_checked;
+        document.getElementById('toggle_' + group).checked =
+            !Array.from(document.getElementsByName(name)).some((e) => !e.checked);
     }
 
     function init_input() {
@@ -318,10 +310,12 @@
         document.getElementById('unit').addEventListener('input', () => {
             recalculate_bounty();
         });
-        document.getElementById('button').addEventListener('click', (e) => {
+        document.getElementById('button').addEventListener('click', async (e) => {
             const requestId = document.getElementById('requestid');
-            if (requestId != null) {
-                add_bounty(
+            if (requestId !== null) {
+                // disable to require a reload before voting again
+                e.target.classList.add("hidden");
+                await add_bounty(
                     DETAIL_PAGE,
                     parseInt(requestId.value),
                     parseFloat(document.getElementById('amount').value),
@@ -330,11 +324,8 @@
                     parseInt(document.getElementById('current_downloaded').value),
                     parseFloat(document.getElementById('current_rr').value),
                 );
-                // disable to require a reload before voting again
-                e.target.classList.add("hidden");
-                document.getElementById('vote-help').innerHTML =
-                    "Reload the page if you wish to vote again";
-                recalculate_bounty();
+                document.getElementById('request_form').parentElement.innerHTML =
+                    '<div class="vote_again">Reload the page if you wish to vote again</div>';
             }
         });
 
@@ -376,12 +367,12 @@
         const page = window.location.href.match(/\brequests\.php.*?action=(edit|new|view)/);
         if (page) {
             init_request_page(page[1]);
-        } else if (window.location.pathname == '/requests.php') {
+        } else if (window.location.pathname === '/requests.php') {
             init_index_page();
         }
         Array.from(document.querySelectorAll('.request-vote')).forEach((span) => {
-            span.addEventListener('click', (e) => {
-                add_bounty(
+            span.addEventListener('click', async (e) => {
+                await add_bounty(
                     VOTE_PAGE,
                     parseInt(e.target.dataset.id),
                     parseFloat(e.target.dataset.bounty),

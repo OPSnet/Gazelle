@@ -29,14 +29,11 @@ class Economic extends \Gazelle\Base {
                 ", UserStatus::enabled->value
             );
 
-            $info['bounty_total'] = (int)self::$db->scalar("
-                SELECT SUM(Bounty) FROM requests_votes
-            ");
-            $info['bounty_available'] = (int)self::$db->scalar("
-                SELECT SUM(rv.Bounty)
-                FROM requests_votes AS rv
-                INNER JOIN requests AS r ON (r.ID = rv.RequestID)
-                WHERE r.FillerID = 0
+            [$info['bounty_total'], $info['bounty_available']] = $this->pg()->rowex("
+                select sum(rvs.bounty_total),
+                    sum(case when r.filled is null then rvs.bounty_total else 0 end)
+                from request_vote_summary rvs
+                inner join request r using (id_request)
             ");
 
             [$info['download_total'], $info['upload_total']] = self::$db->row("
