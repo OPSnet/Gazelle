@@ -1451,9 +1451,22 @@ __NOTE__: If using `groupid`, may leave group details (e.g. `title`, `year`, etc
     "status": "success",
     "response": {
         "groupId": 384,
+        "newgroup": true,
         "torrentId": 526,
         "private": true,
         "source": true,
+        "extraTorrents": [
+          {
+            "torrentId": 527,
+            "private": true,
+            "source": true,
+          },
+          {
+            "torrentId": 528,
+            "private": true,
+            "source": true,
+          },
+        ]
         "fillRequest": {
             "requestId": 1,
             "torrentId": 526,
@@ -1470,7 +1483,7 @@ __NOTE__: If using `groupid`, may leave group details (e.g. `title`, `year`, etc
 
 __NOTE__: If `private` or `source` is `false`, then you will need to [download](#download) the torrent file.
 
-__NOTE__: If the provided `requestid` is invalid, then `fillRequest` in the response will have a key `error` that will designate what went wrong.
+__NOTE__: If the provided `requestid` is invalid, then `fillRequest` in the response will have a key `error` that will indicate what went wrong.
 
 ## Download
 
@@ -1484,8 +1497,6 @@ __NOTE__: Requires using the API token
 `id` - torrent id
 
 `usetoken` - use FL token to download torrent (default: false)
-
-`ssl` - force https (optional, defaults to user setting)
 
 **Response format:**
 

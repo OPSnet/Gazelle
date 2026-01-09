@@ -390,11 +390,13 @@ if ($isMusicUpload) {
                     json_error("Thank you for fixing this torrent {$torrent->link()}");
                 }
             }
-            if (!$xbencoder->isPrivate()) {
+            $isPrivate = $xbencoder->isPrivate();
+            if (!$isPrivate) {
                 $xbencoder->makePrivate(); // The torrent is now private.
                 $PublicTorrent = true;
             }
-            if ($torMan->setSourceFlag($xbencoder)) {
+            $unsourced = $torMan->setSourceFlag($xbencoder);
+            if ($unsourced) {
                 $UnsourcedTorrent = true;
             }
 
@@ -426,6 +428,8 @@ if ($isMusicUpload) {
                 'Name'        => $fileTmpName,
                 'TorEnc'      => $xbencoder->getEncode(),
                 'TotalSize'   => $totalSize,
+                'Private'     => $isPrivate,
+                'HasSource'   => !$unsourced,
             ];
         }
     }
@@ -563,7 +567,7 @@ $upload['new'][] = $torrent;
 //******************************************************************************//
 //--------------- Upload Extra torrents ----------------------------------------//
 
-foreach ($upload['extra'] as $info) {
+foreach ($upload['extra'] as &$info) {
     $extra = $torMan->create(
         tgroup:                  $tgroup,
         user:                    $Viewer,
@@ -582,13 +586,14 @@ foreach ($upload['extra'] as $info) {
         fileList:                $info['FileList'],
         size:                    $info['TotalSize'],
     );
-
-    $size            = number_format($extra->size() / (1024 * 1024), 2);
-    $upload['new'][] = $extra;
+    $info['TorrentID'] = $extra->id;
+    $size              = number_format($extra->size() / (1024 * 1024), 2);
+    $upload['new'][]   = $extra;
     new File\Torrent($extra->id)->put($info['TorEnc']);
     $extra->logger()->torrent($extra, $Viewer, "uploaded ($size MiB)")
         ->general("Torrent {$extra->id} ($logName) ($size MiB) was uploaded by " . $Viewer->username());
 }
+unset($info);
 
 //******************************************************************************//
 //--------------- Write Files To Disk ------------------------------------------//
@@ -662,12 +667,21 @@ if ($isMusicUpload) {
 
 if (defined('AJAX')) {
     $Response = [
-        'groupId' => $GroupID,
-        'torrentId' => $TorrentID,
-        'private' => !$PublicTorrent,
-        'source' => !$UnsourcedTorrent,
-        'warnings' => [],
+        'groupId'       => $GroupID,
+        'newgroup'      => $IsNewGroup,
+        'torrentId'     => $TorrentID,
+        'private'       => !$PublicTorrent,
+        'source'        => !$UnsourcedTorrent,
+        'extraTorrents' => [],
+        'warnings'      => [],
     ];
+    foreach ($upload['extra'] as $xInfo) {
+        $Response['extraTorrents'][] = [
+            'torrentId' => $xInfo['TorrentID'],
+            'private'   => $xInfo['Private'],
+            'source'    => $xInfo['HasSource'],
+        ];
+    }
 
     if (isset($RequestID)) {
         define('NO_AJAX_ERROR', true);
