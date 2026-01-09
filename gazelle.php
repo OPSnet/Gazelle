@@ -46,10 +46,7 @@ if (!$context->isValid()) {
 $module = $context->module();
 if (
     in_array($module, ['announce', 'scrape'])
-    || (
-        isset($_REQUEST['info_hash'])
-        && isset($_REQUEST['peer_id'])
-    )
+    || isset($_REQUEST['info_hash'], $_REQUEST['peer_id'])
 ) {
     die("d14:failure reason40:Invalid .torrent, try downloading again.e");
 }
