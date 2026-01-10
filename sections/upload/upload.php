@@ -49,16 +49,23 @@ if (!isset($Properties)) {
             $Properties = [
                 'add-format'       => true,
                 'RequestID'        => $requestId,
-                'ReleaseType'      => $request->releaseType(),
                 'Title'            => $request->title(),
                 'Year'             => $request->year(),
                 'Image'            => $request->image(),
                 'GroupDescription' => $request->description(),
-                'RecordLabel'      => $request->recordLabel(),
-                'CatalogueNumber'  => $request->catalogueNumber(),
                 'Artists'          => $request->artistRole()?->idList() ?? [],
                 'TagList'          => implode(', ', $request->tagNameList()),
             ];
+            if ($request->categoryName() === 'Music') {
+                $Properties = array_merge(
+                    $Properties,
+                    [
+                        'CatalogueNumber' => $request->catalogueNumber(),
+                        'RecordLabel'     => $request->recordLabel(),
+                        'ReleaseType'     => $request->releaseType(),
+                    ],
+                );
+            }
         }
     } elseif (isset($_GET['artistid'])) {
         $artist = new Manager\Artist()->findById((int)$_GET['artistid']);
