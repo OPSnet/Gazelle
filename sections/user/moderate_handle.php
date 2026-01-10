@@ -64,8 +64,8 @@ if (isset($_POST['Uploaded']) && isset($_POST['Downloaded'])) {
 if (isset($_POST['BonusPoints'])) {
     $bonusPoints = (float)$_POST['BonusPoints'];
 }
-$Collages = (int)($_POST['Collages'] ?? 0);
-$flTokens = (int)($_POST['FLTokens'] ?? 0);
+$collageTotal = (int)($_POST['Collages'] ?? 0);
+$flTokens     = (int)($_POST['FLTokens'] ?? 0);
 
 $userReason           = trim($_POST['UserReason']);
 $disableAvatar        = isset($_POST['DisableAvatar']);
@@ -211,12 +211,12 @@ foreach (
 }
 
 if (
-    $Collages != $user->paidPersonalCollages() && $Collages != (int)$_POST['OldCollages']
+    $collageTotal != $user->paidPersonalCollages() && $collageTotal != (int)$_POST['OldCollages']
     && ($Viewer->permitted('users_edit_ratio') || ($Viewer->permitted('users_edit_own_ratio') && $ownProfile))
 ) {
-    $user->setField('collage_total', $Collages);
-    $user->ordinal()->set('personal-collage', $Collages);
-    $EditSummary[] = "personal collages changed from {$user->paidPersonalCollages()} to {$Collages}";
+    $user->setField('collage_total', $collageTotal);
+    $user->ordinal()->set('personal-collage', $collageTotal);
+    $EditSummary[] = "personal collages changed from {$user->paidPersonalCollages()} to {$collageTotal}";
 }
 
 if ($invites != $user->unusedInviteTotal() && $Viewer->permitted('users_edit_invites')) {

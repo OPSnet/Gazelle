@@ -10,7 +10,7 @@ use Gazelle\Util\Time;
 
 class User extends BaseAttrObject {
     final public const tableName             = 'users_main';
-    final protected const CACHE_KEY          = 'u_%d';
+    final protected const CACHE_KEY          = 'u2_%d';
     final protected const CACHE_NOTIFY       = 'u_notify_%d';
     final protected const CACHE_REFERRAL     = 'u_refer_%d';
     final protected const USER_RECENT_UPLOAD = 'u_recent_up_%d';
@@ -136,7 +136,6 @@ class User extends BaseAttrObject {
                 um.auth_key,
                 um.avatar,
                 um.can_leech,
-                um.collage_total,
                 um.created,
                 um.inviter_user_id,
                 um.IP,
@@ -1327,7 +1326,7 @@ class User extends BaseAttrObject {
      * @return int number of collages
      */
     public function paidPersonalCollages(): int {
-        return $this->info()['collage_total'];
+        return $this->ordinal()->value('personal-collage');
     }
 
     /**

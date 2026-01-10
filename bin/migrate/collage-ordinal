@@ -1,0 +1,35 @@
+#! /usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+namespace Gazelle;
+
+require __DIR__ . '/../../lib/bootstrap.php';
+
+$execute = isset($argv[1]) && $argv[1] === '--execute';
+
+$db = DB::DB();
+$db->prepared_query("
+    SELECT um.ID         AS id_user,
+        um.collage_total AS main_total,
+        uho.value        AS ordinal_total
+    FROM users_main            um
+    LEFT JOIN user_has_ordinal uho ON (uho.user_id = um.ID)
+    LEFT JOIN user_ordinal     uo USING (user_ordinal_id)
+    WHERE uo.name = 'personal-collage'
+        AND um.collage_total != uho.value;
+");
+
+$userMan = new Manager\User();
+foreach ($db->to_array(false, MYSQLI_ASSOC) as $row) {
+    echo implode("\t", $row), "\n";
+    $user = $userMan->findById($row['id_user']);
+    if ($execute) {
+        $user->ordinal()->set('personal-collage', $row['main_total']);
+    }
+}
+
+if (!$execute) {
+    echo "dry run mode, use --execute to apply changes\n";
+}
