@@ -24,7 +24,7 @@ $UserID = $user->id;
 $ownProfile = $UserID === $Viewer->id;
 
 $imgTag = '<img loading="lazy" src="' . new User\Stylesheet($Viewer)->imagePath()
-    . '%s.png" class="tooltip" alt="%s" title="%s"/>';
+    . '%s.svg" class="tooltip" alt="%s" title="%s"/>';
 $headerMap = [
     'year'     => ['dbColumn' => 'tg.Year',       'defaultSort' => 'desc', 'text' => 'Year'],
     'time'     => ['dbColumn' => 'unt.TorrentID', 'defaultSort' => 'desc', 'text' => 'Created'],

@@ -14,9 +14,9 @@
                 <td class="number_column nobr"><strong>Files</strong></td>
 {% endif %}
                 <td class="number_column nobr"><strong>Size</strong></td>
-                <td class="sign snatches"><img src="{{ url_stem }}snatched.png" class="tooltip" alt="Snatches" title="Snatches" /></td>
-                <td class="sign seeders"><img src="{{ url_stem }}seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>
-                <td class="sign leechers"><img src="{{ url_stem }}leechers.png" class="tooltip" alt="Leechers" title="Leechers" /></td>
+                <td class="sign snatches"><img src="{{ url_stem }}snatched.svg" class="tooltip" alt="Snatches" title="Snatches" /></td>
+                <td class="sign seeders"><img src="{{ url_stem }}seeders.svg" class="tooltip" alt="Seeders" title="Seeders" /></td>
+                <td class="sign leechers"><img src="{{ url_stem }}leechers.svg" class="tooltip" alt="Leechers" title="Leechers" /></td>
             </tr>
 {% include 'torrent/detail-torrentgroup.twig' with {
     'report_man'    : report_man,

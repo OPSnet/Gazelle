@@ -123,9 +123,9 @@ echo display_str($_GET['year2']);} ?>" />
         <td class="number_column nobr">Files</td>
 <?php } ?>
         <td class="number_column nobr">Size</td>
-        <td class="sign snatches"><img src="<?= $urlStem ?>snatched.png" alt="Snatches" title="Snatches" class="tooltip" /></td>
-        <td class="sign seeders"><img src="<?= $urlStem ?>seeders.png" alt="Seeders" title="Seeders" class="tooltip" /></td>
-        <td class="sign leechers"><img src="<?= $urlStem ?>leechers.png" alt="Leechers" title="Leechers" class="tooltip" /></td>
+        <td class="sign snatches"><img src="<?= $urlStem ?>snatched.svg" alt="Snatches" title="Snatches" class="tooltip" /></td>
+        <td class="sign seeders"><img src="<?= $urlStem ?>seeders.svg" alt="Seeders" title="Seeders" class="tooltip" /></td>
+        <td class="sign leechers"><img src="<?= $urlStem ?>leechers.svg" alt="Leechers" title="Leechers" class="tooltip" /></td>
     </tr>
 <?php
 if (count($topVotes) === 0) { ?>

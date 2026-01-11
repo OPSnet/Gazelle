@@ -22,7 +22,7 @@ if (is_null($user)) {
 $userId = $user->id;
 
 $imgTag = '<img loading="lazy" src="' . new User\Stylesheet($Viewer)->imagePath()
-    . '%s.png" class="tooltip" alt="%s" title="%s"/>';
+    . '%s.svg" class="tooltip" alt="%s" title="%s"/>';
 $headerMap = [
     'name'     => ['dbColumn' => 'tg.Name', 'defaultSort' => 'asc',  'text' => 'Torrent'],
     'time'     => ['dbColumn' => 'Time',    'defaultSort' => 'desc', 'text' => 'Created'],
