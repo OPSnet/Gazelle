@@ -161,7 +161,6 @@ $mapPrivilege = [
     'users_make_invisible'         => 'make-peer-invisible',
     'users_mod'                    => 'toolbox-view',
     'users_override_paranoia'      => 'paranoia-override',
-    'users_promote_below'          => 'user-roadkill',
     'users_view_email'             => 'view-email',
     'users_view_friends'           => 'view-friend',
     'users_view_invites'           => 'invite-view',
@@ -206,7 +205,6 @@ $obsolete = [
     'users_edit_own_ratio',
     'users_edit_ratio',
     'users_edit_watch_hours',
-    'users_promote_to',
     'users_reset_own_keys',
 ];
 

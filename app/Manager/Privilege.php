@@ -220,8 +220,6 @@ class Privilege extends \Gazelle\BaseManager {
             'users_linked_users' => 'View and edit linked users',
             'users_view_friends' => 'View user friends',
             'users_edit_password' => 'Edit passwords',
-            'users_promote_below' => 'Promote users to below own level',
-            'users_promote_to' => 'Promote users up to own level',
             'users_give_donor' => 'Grant donor status',
             'users_warn' => 'Warn users',
             'users_disable_users' => 'Disable users',

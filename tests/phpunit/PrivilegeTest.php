@@ -32,7 +32,7 @@ class PrivilegeTest extends TestCase {
 
     public function testPrivilegeCreate(): void {
         $privilegeList = Manager\Privilege::privilegeList();
-        $this->assertCount(125, $privilegeList, 'privilege-total');
+        $this->assertCount(123, $privilegeList, 'privilege-total');
 
         $manager = new Manager\Privilege();
         $this->assertNull($manager->findByLevel(FAKE_LEVEL), 'privilege-find-none'); // if this fails, check the `permissions` table

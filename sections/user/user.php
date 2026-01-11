@@ -380,11 +380,18 @@ echo $Twig->render('user/information.twig', [
 
 echo $Twig->render('user/main-column.twig', [
     'asn'           => new Search\ASN(),
-    'class_list'    => $userMan->classLevelList(),
+    'class_list'    => array_merge(
+        array_filter(
+            $userMan->classList(),
+            fn ($c) => in_array($c['Name'], USERCLASS_PROMOTE),
+        ),
+        $userMan->staffClassList(),
+    ),
     'donor'         => $donor,
     'forum_man'     => new Manager\Forum(),
     'invite_source' => new Manager\InviteSource()->inviterConfiguration($user),
     'is_traced'     => $Viewer->permitted('admin_tracker') && new Tracker()->isTraced($user),
+    'max_level'     => max(array_map(fn ($c) => $c['Level'], $userMan->staffClassList())), /** @phpstan-ignore-line never empty */
     'over_usercap'  => new Stats\Users()->overUsercap(),
     'prl'           => $limiter,
     'user'          => $user,

@@ -65,30 +65,30 @@
 {%      include 'user/edit-title.twig' with {'title': user.title } only %}
 {%  endif %}
 
-{%  if viewer.permittedAny('users_promote_below', 'users_promote_to') %}
-    <tr>
-        <td class="label">Primary class:</td>
-        <td>
-            <select name="Class">
+{%  if viewer.isStaff %}
+{%      set seen = 0 %}
 {%      for level, userclass in class_list %}
-{%          if userclass.Secondary == '0'
-                and not own_profile
-                and (
-                    (viewer.permitted('users_promote_to') and level <= viewer.privilege.effectiveClassLevel)
-                    or
-                    (viewer.permitted('users_promote_below') and level < viewer.privilege.effectiveClassLevel)
-                )
-%}
+{%          if viewer.classLevel > userclass.Level or viewer.classLevel == max_level %}
+{%              if seen == 0 %}
+            <tr>
+                <td class="label">Userclass:</td>
+                <td>Currently {{ user.userclassName }}<br />
+                    Change to:
+                    <select name="Class">
+                        <option value="">Unchanged</option>
+{%              endif %}
+{%              set seen = seen + 1 %}
                         <option value="{{ userclass.ID }}"{{ selected(user.classLevel == level)
                             }}>{{ userclass.Name }} ({{ userclass.Level }})</option>
 {%          endif %}
+{%          if loop.last and seen > 0 %}
+                    </select>
+                </td>
+            </tr>
+{%          endif %}
 {%      endfor %}
-            </select>
-        </td>
-    </tr>
 {%      include 'user/edit-secondary-class.twig' with {
-            'permission' : user.privilege.secondaryClassesList,
-            'max_level'  : viewer.privilege.effectiveClassLevel - (viewer.permitted('users_promote_up') ? 0 : 1),
+            'permission' : user.privilege.secondaryClassesList
         } only %}
 {%  endif %}
 

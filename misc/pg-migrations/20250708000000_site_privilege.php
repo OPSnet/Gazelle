@@ -230,8 +230,6 @@ final class SitePrivilege extends AbstractMigration {
             (1240, 'ip-ban-manage', 'Can manage blacklisted IP addresses'), -- admin_manage_ipbans
             (1300, 'tracker-view', 'Can view tracker statistics'), -- admin_tracker
             (1310, 'tracker-edit', 'Can edit tracker configuration'), -- admin_tracker
-            (9000, 'promote-to-legend', 'Can can promote users to legend'), -- users_promote_to
-            (9010, 'promote-to-staff', 'Can can promote users to staff'), -- users_promote_to
             (9999, 'privilege-manage', 'Can manage global site privileges (dangerous!)') -- admin_manage_permissions
         ");
 
@@ -280,7 +278,6 @@ final class SitePrivilege extends AbstractMigration {
             (3010, 'user-action-disable', 'Can remove user actions (bp, invites, posting, ...)'), -- users_disable_any
             (3020, 'user-logout', 'Can logout users'), -- users_logout
             (3030, 'user-site-disable', 'Can ban users'), -- users_disable_users
-            (3040, 'user-roadkill', 'Can set users to roadkill'), -- users_promote_below
             (4000, 'user-create', 'Can create users'), -- admin_create_users
             (4010, 'user-menu-edit', 'Can define user menu items'), -- admin_manage_navigation
             (4020, 'make-peer-invisible', 'Can make users invisible in swarms'), -- users_make_invisible

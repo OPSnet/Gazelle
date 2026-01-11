@@ -46,13 +46,13 @@ if ($_POST['checkpoint'] != $user->checkpoint()) {
 $ownProfile = $user->id === $Viewer->id;
 
 // Variables for database input
-$class             = (int)($_POST['Class'] ?? 0);
+$userclass         = (int)($_POST['Class'] ?? 0);
 $title             = trim($_POST['Title']);
 $adminComment      = trim($_POST['admincomment'] ?? '');
 $visible           = isset($_POST['Visible']) ? '1' : '0';
 $invites           = (int)$_POST['Invites'];
 $slogan            = trim($_POST['slogan']);
-$changePassword    = !empty($_POST['ChangePassword']);
+$changePassword    = $_POST['ChangePassword'] !== '';
 $uploaded          = 0;
 $downloaded        = 0;
 $bonusPoints       = null;
@@ -86,7 +86,7 @@ $resetPasskey         = isset($_POST['ResetPasskey']) ? 1 : 0;
 $resetAuthkey         = isset($_POST['ResetAuthkey']) ? 1 : 0;
 $logoutSession        = isset($_POST['Logout']) ? 1 : 0;
 $sendHackedMail       = isset($_POST['SendHackedMail']) ? 1 : 0;
-if ($sendHackedMail && !empty(trim($_POST['HackedEmail']))) {
+if ($sendHackedMail && trim($_POST['HackedEmail']) !== '') {
     $hackedEmail = trim($_POST['HackedEmail']);
 } else {
     $sendHackedMail = false;
@@ -239,21 +239,13 @@ if ($editRatio) {
     }
 }
 
-if ($class) {
-    $Classes = $userMan->classList();
-    $newClass = $Classes[$class]['Level'];
-    if (
-        $newClass != $user->classLevel()
-        && (
-            ($newClass < $Viewer->classLevel() && $Viewer->permitted('users_promote_below'))
-            || ($newClass <= $Viewer->classLevel() && $Viewer->permitted('users_promote_to'))
-        )
-    ) {
-        $user->setField('PermissionID', $class);
-        $editSummary[] = 'class changed to ' . $userMan->userclassName($class);
-
-        if ($user->supportCount($class, $user->primaryClass()) === 2) {
-            if ($newClass < $user->primaryClass()) {
+if ($userclass) {
+    $classLevel = $userMan->classList()[$userclass]['Level'];
+    if ($classLevel !== $user->classLevel() && $classLevel <= $Viewer->classLevel()) {
+        $user->setField('PermissionID', $userclass);
+        $editSummary[] = "class changed to {$userMan->userclassName($userclass)}";
+        if ($user->supportCount($userclass, $user->primaryClass()) === 2) {
+            if ($classLevel < $user->primaryClass()) {
                 $slogan = null;
             }
             $Cache->delete_value('staff_ids');
@@ -358,21 +350,19 @@ if ($Viewer->permitted('users_give_donor')) {
 
 $removedClasses = [];
 $addedClasses   = [];
-if ($Viewer->permittedAny('users_promote_below', 'users_promote_to')) {
-    $currentClasses = array_keys($user->privilege()->secondaryClassList());
-    sort($currentClasses);
-    sort($secondaryClasses);
-    if ($currentClasses != $secondaryClasses) {
-        $removedClasses = array_diff($currentClasses, $secondaryClasses);
-        $addedClasses   = array_diff($secondaryClasses, $currentClasses);
-        if (!empty($removedClasses)) {
-            $names = array_map(fn (int $c): string => $userMan->userclassName($c), $removedClasses);
-            $editSummary[] = 'secondary classes dropped: ' . implode(', ', $names);
-        }
-        if (!empty($addedClasses)) {
-            $names = array_map(fn (int $c): string => $userMan->userclassName($c), $addedClasses);
-            $editSummary[] = "secondary classes added: " . implode(', ', $names);
-        }
+$currentClasses = array_keys($user->privilege()->secondaryClassList());
+sort($currentClasses);
+sort($secondaryClasses);
+if ($currentClasses !== $secondaryClasses) {
+    $removedClasses = array_diff($currentClasses, $secondaryClasses);
+    $addedClasses   = array_diff($secondaryClasses, $currentClasses);
+    if ($removedClasses !== []) {
+        $names = array_map(fn (int $c): string => $userMan->userclassName($c), $removedClasses);
+        $editSummary[] = 'secondary classes dropped: ' . implode(', ', $names);
+    }
+    if ($addedClasses !== []) {
+        $names = array_map(fn (int $c): string => $userMan->userclassName($c), $addedClasses);
+        $editSummary[] = "secondary classes added: " . implode(', ', $names);
     }
 }
 

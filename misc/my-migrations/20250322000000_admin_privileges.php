@@ -126,8 +126,6 @@ final class AdminPrivileges extends AbstractMigration {
                     'users_make_invisible' => 1,
                     'users_mod' => 1,
                     'users_override_paranoia' => 1,
-                    'users_promote_below' => 1,
-                    'users_promote_to' => 1,
                     'users_reset_own_keys' => 1,
                     'users_view_email' => 1,
                     'users_view_friends' => 1,

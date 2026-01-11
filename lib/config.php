@@ -626,6 +626,18 @@ defined('SCHEDULER_DELAY') or define('SCHEDULER_DELAY', 450);
 // to be seeding a torrent
 defined('UNSEEDED_DRAIN_INTERVAL') or define('UNSEEDED_DRAIN_INTERVAL', 3600 * 6);
 
+// Userclass promotions (Member, Elite, TM...) are handled automatically by a
+// scheduled task and are not set manually. If you are trying to force the
+// promotion to the next userclass, you are doing something wrong. On the other
+// hand, only staff can promote user accounts to staff. Staff userclasses are
+// fetched from the database. There is an additional case to consider: when
+// people retire from staff positions. The normal path is to promote them to
+// Legend. If you want to revert them to a mere mortal, change them to User and
+// the next time the promotion task runs they will be promoted to the
+// appropriate userclass. If you never intend to demote a staff member back to
+// a regular user, override this define and remove the 'User' entry.
+defined('USERCLASS_PROMOTE') or define('USERCLASS_PROMOTE', ['User', 'Legend']);
+
 // Which image hosts are acceptable and which aren't?
 defined('IMAGE_HOST_BANNED') or define('IMAGE_HOST_BANNED', []);
 defined('IMAGE_HOST_RECOMMENDED') or define('IMAGE_HOST_RECOMMENDED', []);
