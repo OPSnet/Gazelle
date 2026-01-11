@@ -1,0 +1,37 @@
+#! /usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+namespace Gazelle;
+
+require_once __DIR__ . '/../../lib/bootstrap.php';
+
+$db = DB::DB();
+$db->prepared_query("
+    WITH r AS (
+        SELECT rv.requests_votes_id AS rvid,
+            r.created    AS rcreate,
+            r.updated    AS rupdate,
+            rv.created   AS vcreate,
+            row_number() OVER (
+                PARTITION BY rv.RequestID
+                ORDER BY rv.created, rv.requests_votes_id
+            ) AS f
+        FROM requests_votes rv
+        INNER JOIN requests r ON (r.ID = rv.RequestID)
+        ORDER BY rv.RequestID, rv.created
+    ),
+    upd AS (
+        SELECT rvid,
+        CASE WHEN f = 1 THen rcreate ELSE rupdate END AS vset
+        FROM r
+        WHERE vcreate = '1970-01-01 00:00:00'
+    )
+    UPDATE requests_votes rv
+    INNER JOIN upd ON (upd.rvid = rv.requests_votes_id)
+    SET
+        rv.created = upd.vset;
+");
+
+echo "request-last-vote: {$db->affected_rows()} updated\n";
