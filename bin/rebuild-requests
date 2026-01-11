@@ -15,13 +15,6 @@ $n = $pg->query("
 ");
 echo "$n requests removed\n";
 
-$pg->query(<<<END_SQL
-    insert into request_tag (id_request, id_tag)
-    select "RequestID", "TagID"
-    from relay.requests_tags
-    END_SQL
-);
-
 $n = $pg->query(<<<END_SQL
     with a_t as (
         select rr."ID" as id_request,
@@ -41,12 +34,12 @@ $n = $pg->query(<<<END_SQL
         group by rr."ID", rr."Title"
     ),
     tl as (
-        select rt.id_request,
-            array_agg(rt.id_tag) as tag
-        from request_tag rt
-        inner join relay.requests rr on (rr."ID" = rt.id_request)
+        select rt."RequestID" as id_request,
+            array_agg(rt."TagID") as tag
+        from relay.requests_tags rt
+        inner join relay.requests rr on (rr."ID" = rt."RequestID")
         where rr.updated >= (select coalesce(max(modified), '2000-01-01'::timestamptz) from request)
-        group by rt.id_request
+        group by rt."RequestID"
     )
     insert into request (
         id_request, id_user, id_filler, id_tgroup,

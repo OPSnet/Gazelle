@@ -949,30 +949,16 @@ END_SQL
     }
 
     public function relayTag(): int {
-        $this->pg()->begin();
-        $this->pg()->executeParams('
-            delete from request_tag where id_request = $1
-            ', $this->id
-        );
-        $affected = $this->pg()->query('
-            insert into request_tag (id_request, id_tag)
-            select "RequestID", "TagID"
-            from relay.requests_tags
-            where "RequestID" = $1
-            ', $this->id
-        );
-        $this->pg()->executeParams('
+        return $this->pg()->query('
             update request set
                 tag = (
-                    select array_agg(id_tag)
-                    from request_tag
-                    where id_request = $1
+                    select array_agg(rt."TagID")
+                    from relay.requests_tags rt
+                    where rt."RequestID" = $1
                 )
             where id_request = $1
             ', $this->id
         );
-        $this->pg()->commit();
-        return $affected;
     }
 
     public function modify(): bool {
@@ -1008,10 +994,6 @@ END_SQL
         }
         self::$cache->delete_value(sprintf(Manager\Request::ID_KEY, $this->id));
         $this->flush();
-        $this->pg()->executeParams('
-            delete from request_tag where id_request = $1
-            ', $this->id
-        );
         $this->pg()->executeParams('
             delete from request where id_request = $1
             ', $this->id
