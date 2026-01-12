@@ -62,7 +62,7 @@ class DnuTest extends TestCase {
         // If that happens, run again.  We really only want to check that the
         // SQL is correct.
         $reorder = $manager->reorder([...$idList, $second, $first]);
-        $this->assertEquals(2, $reorder, 'dnu-reorder');
+        $this->assertEquals(2 + count($idList), $reorder, 'dnu-reorder');
 
         $manager->remove($first);
         $manager->remove($second);

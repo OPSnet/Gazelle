@@ -7,8 +7,8 @@ use Gazelle\Enum\ReaperState;
 
 class Reaper extends \Gazelle\Base {
     public function __construct(
-        protected \Gazelle\Manager\Torrent $torMan,
-        protected \Gazelle\Manager\User    $userMan,
+        protected \Gazelle\Manager\Torrent $torMan  = new \Gazelle\Manager\Torrent(),
+        protected \Gazelle\Manager\User    $userMan = new \Gazelle\Manager\User(),
     ) {}
 
     /**

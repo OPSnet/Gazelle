@@ -101,7 +101,7 @@ class IPv4Test extends TestCase {
         $user = $this->userList[0];
         $this->assertEquals(1, $ipv4->register($user, '127.1.0.1'), 'ipv4-create');
         $this->assertEquals(2, $ipv4->userTotal($user), 'ipv4-user-total');
-        $this->assertEquals(
+        $this->assertEqualsCanonicalizing(
             ['127.0.0.1', '127.1.0.1'],
             array_map(
                 fn ($h) => $h['ip_addr'],

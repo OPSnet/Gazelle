@@ -33,7 +33,7 @@ class NewsTest extends TestCase {
         $threadMan  = new Manager\ForumThread();
         $body       = 'phpunit news body';
         $title      = 'phpunit news ' . randomString(10);
-        $initial    = $manager->headlines();
+        $initial    = count($manager->headlines());
         $this->news = $manager->create(
             $title,
             $body,
@@ -47,7 +47,7 @@ class NewsTest extends TestCase {
         $this->assertEquals($body, $thread->body(), 'news-thread-body');
         $this->assertEquals($title, $thread->title(), 'news-thread-title');
 
-        $this->assertEquals(1 + count($initial), count($manager->headlines()), 'news-headlines');
+        $this->assertEquals(1 + $initial, count($manager->headlines()), 'news-headlines');
         $this->assertEquals($this->news, $manager->latestId(), 'news-id-latest');
         $this->assertLessThan(2, time() - $manager->latestEpoch(), 'news-created-epoch');
 

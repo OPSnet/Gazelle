@@ -7,8 +7,10 @@ use GazelleUnitTest\Helper;
 
 class UserRegistrationTest extends TestCase {
     protected array $userList;
+    protected int $initialUnconfirmed; // local dev may already have some unconfirmed users
 
     public function setUp(): void {
+        $this->initialUnconfirmed = new Manager\User()->disableUnconfirmedUsers();
         $this->userList = [
             Helper::makeUser('reg1.' . randomString(10), 'registration')->setField('created', '1600-01-15 13:01:05'),
             Helper::makeUser('reg2.' . randomString(10), 'registration')->setField('created', '1600-02-15 14:02:10'),
@@ -61,6 +63,10 @@ class UserRegistrationTest extends TestCase {
     }
 
     public function testUserRegistrationUnconfirmed(): void {
-        $this->assertEquals(3, new Manager\User()->disableUnconfirmedUsers(), 'user-reg-unconfirmed');
+        $this->assertEquals(
+            3,
+            new Manager\User()->disableUnconfirmedUsers() - $this->initialUnconfirmed,
+            'user-reg-unconfirmed',
+        );
     }
 }

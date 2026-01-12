@@ -11,6 +11,11 @@ namespace Gazelle;
 
 require_once(__DIR__ . '/../lib/bootstrap.php');
 
+
+$pgrw = new DB\Pg(PG_RW_DSN);
+$pgrw->query("
+    delete from news where title ~ 'phpunit'
+");
 $db = DB::DB();
 
 $db->prepared_query("SHOW TABLES LIKE 'phpunit_%'");

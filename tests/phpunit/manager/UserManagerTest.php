@@ -31,12 +31,11 @@ class UserManagerTest extends TestCase {
     }
 
     public function testCycleAuthKeys(): void {
-        $userMan = new Manager\User();
         $this->assertEquals(
             (int)DB::DB()->scalar("
                 SELECT count(*) FROM users_main
             "),
-            $userMan->cycleAuthKeys(),
+            new Manager\User()->cycleAuthKeys(),
             'uman-auth-keys'
         );
     }

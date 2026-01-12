@@ -166,13 +166,12 @@ class TextTest extends TestCase {
         );
 
         $postId = (int)DB::DB()->scalar("
-            SELECT min(fp.ID)
-            FROM forums_posts fp
-            INNER JOIN forums_topics ft ON (ft.ID = fp.TopicID)
-        ");
-        $post = new Manager\ForumPost()->findById($postId);
-        $threadId = $post?->thread()->id;
-        $title    = $post?->thread()->title();
+            SELECT fp.ID FROM forums_posts fp WHERE fp.TopicID = ?
+            ", $thread->id
+        );
+        $post     = new Manager\ForumPost()->findById($postId);
+        $threadId = $post->thread()->id;
+        $title    = $post->thread()->title();
 
         $this->assertMatchesRegularExpression(
             "@^<a href=\"forums\.php\?action=viewthread&amp;threadid={$threadId}\">\Q{$title}\E</a>$@",
