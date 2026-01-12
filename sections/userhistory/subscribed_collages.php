@@ -20,7 +20,6 @@ $groupSubs = $collMan->subscribedTGroupCollageList(
 );
 
 $torMan    = new Manager\Torrent();
-$imgProxy  = new Util\ImageProxy($Viewer);
 $reportMan = new Manager\Report(new Manager\User());
 $snatcher  = $Viewer->snatch();
 $urlStem   = new User\Stylesheet($Viewer)->imagePath();
@@ -111,7 +110,7 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
         <td colspan="<?= $Viewer->ordinal()->value('file-count-display') ? 6 : 5 ?>" class="big_info">
 <?php if ($Viewer->option('CoverArt')) { ?>
             <div class="group_image float_left clear">
-                <?= $imgProxy->tgroupThumbnail($tgroup) ?>
+                <?= Util\ImageProxy::tgroupThumbnail($tgroup) ?>
             </div>
 <?php } ?>
             <div class="group_info clear">
@@ -146,7 +145,7 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
         <td class="td_info big_info">
 <?php           if ($Viewer->option('CoverArt')) { ?>
             <div class="group_image float_left clear">
-                <?= $imgProxy->tgroupThumbnail($tgroup) ?>
+                <?= Util\ImageProxy::tgroupThumbnail($tgroup) ?>
             </div>
 <?php           } ?>
             <div class="group_info clear">

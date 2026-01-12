@@ -322,13 +322,11 @@ $db->prepared_query("
     ", ...$args
 );
 
-$groupIDs     = $db->collect('GroupID');
 $torrentsInfo = $db->to_array('TorrentID', MYSQLI_ASSOC);
 $action       = display_str($_GET['type']);
 $urlStem      = "torrents.php?userid={$userId}&amp;type=";
 
 $torMan   = new Manager\Torrent();
-$imgProxy = new Util\ImageProxy($Viewer);
 $snatcher = $Viewer->snatch();
 
 View::show_header($user->username() . "'s $action torrents", ['js' => 'voting']);
@@ -513,7 +511,7 @@ foreach (CATEGORY as $catKey => $catName) {
             <td class="td_info big_info">
 <?php    if ($Viewer->option('CoverArt')) { ?>
                 <div class="group_image float_left clear">
-                    <?= $imgProxy->tgroupThumbnail($tgroup) ?>
+                    <?= Util\ImageProxy::tgroupThumbnail($tgroup) ?>
                 </div>
 <?php    } ?>
                 <div class="group_info clear">

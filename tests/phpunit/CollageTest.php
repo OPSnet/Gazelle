@@ -437,11 +437,6 @@ class CollageTest extends TestCase {
         $entry = 2;
         $this->assertEquals($entry * 10, $collage->sequence($newOrder[$entry - 1]), 'collage-entry-sequence');
 
-        $this->assertInstanceOf(
-            Manager\Collage::class,
-            $manager->setImageProxy(new Util\ImageProxy($u1)),
-            'collage-manager-image-proxy'
-        );
         $cover = $manager->tgroupCover($this->tgroupList[0]);
         $this->assertStringContainsString("image_group_{$this->tgroupList[0]->id}", $cover, 'collage-tgroup-cover-id');
         $this->assertStringContainsString($this->tgroupList[0]->name(), $cover, 'collage-tgroup-cover-name');

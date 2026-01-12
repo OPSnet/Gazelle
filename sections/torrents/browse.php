@@ -120,9 +120,7 @@ if ($NumResults == 0) {
     exit;
 }
 
-$releaseTypes = new ReleaseType()->list();
 $bookmark = new \Gazelle\User\Bookmark($Viewer);
-$imgProxy = new Util\ImageProxy($Viewer);
 
 echo $paginator->linkbox();
 ?>
@@ -173,7 +171,7 @@ foreach ($Results as $Key => $GroupID) {
         <td class="td_info big_info">
 <?php    if ($Viewer->option('CoverArt')) { ?>
             <div class="group_image float_left clear">
-                <?= $imgProxy->tgroupThumbnail($tgroup) ?>
+                <?= Util\ImageProxy::tgroupThumbnail($tgroup) ?>
             </div>
 <?php    } ?>
             <div class="group_info clear">
@@ -277,7 +275,7 @@ foreach ($Results as $Key => $GroupID) {
         <td class="td_info big_info">
 <?php       if ($Viewer->option('CoverArt')) { ?>
             <div class="group_image float_left clear">
-                <?= $imgProxy->tgroupThumbnail($tgroup) ?>
+                <?= Util\ImageProxy::tgroupThumbnail($tgroup) ?>
             </div>
 <?php       } ?>
             <div class="group_info clear">

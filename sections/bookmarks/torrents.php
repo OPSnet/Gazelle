@@ -33,7 +33,7 @@ $snatcher  = $Viewer->snatch();
 $reportMan = new Manager\Report($userMan);
 $tgMan     = new Manager\TGroup();
 $torMan    = new Manager\Torrent();
-$collMan   = new Manager\Collage()->setImageProxy(new Util\ImageProxy($Viewer));
+$collMan   = new Manager\Collage();
 $totalGroups = $bookmark->tgroupTotal();
 
 $paginator = new Util\Paginator(200, (int)($_GET['page'] ?? 1));

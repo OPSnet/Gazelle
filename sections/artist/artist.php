@@ -27,7 +27,6 @@ $stats      = new Stats\Artist($artistId);
 $userMan    = new Manager\User();
 $reportMan  = new Manager\Report($userMan);
 $vote       = new User\Vote($Viewer);
-$imgProxy   = new Util\ImageProxy($Viewer);
 
 $isSubscribed = new User\Subscription($Viewer)->isSubscribedComments('artist', $artistId);
 $requestList  = $Viewer->disableRequests() ? [] : new Manager\Request()->findByArtist($artist);
@@ -237,7 +236,7 @@ if ($sections = $artist->sections()) {
                 <td colspan="<?= $Viewer->ordinal()->value('file-count-display') ? 7 : 6 ?>" class="td_info big_info">
 <?php   if ($Viewer->option('CoverArt')) { ?>
                     <div class="group_image float_left clear">
-                        <?= $imgProxy->tgroupThumbnail($tgroup) ?>
+                        <?= Util\ImageProxy::tgroupThumbnail($tgroup) ?>
                     </div>
 <?php   } ?>
                     <div class="group_info clear">

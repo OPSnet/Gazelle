@@ -28,7 +28,6 @@ $reportTypeMan = new Manager\Torrent\ReportType();
 $requestMan    = new Manager\Request();
 $userMan       = new Manager\User();
 $search        = new Search\Torrent\Report($_GET['view'] ?? '', $_GET['id'] ?? '', $reportTypeMan, $userMan);
-$imgProxy      = new Util\ImageProxy($Viewer);
 
 $paginator = new Util\Paginator(REPORTS_PER_PAGE, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($search->total());

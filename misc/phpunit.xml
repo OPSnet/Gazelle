@@ -6,9 +6,8 @@
     cacheDirectory="../cache/phpunit"
 >
   <php>
-    <const name="IMAGE_CACHE_HOST" value="http://image.host" />
+    <const name="IMAGE_CACHE_HOST" value="https://image.host" />
     <const name="IMAGE_CACHE_SECRET" value="phpunit" />
-    <const name="LOGIN_SLEEP_USEC" value="100" />
   </php>
   <testsuites>
     <testsuite name="unit">

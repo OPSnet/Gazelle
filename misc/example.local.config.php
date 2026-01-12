@@ -37,3 +37,5 @@ define('PASSWORD_PEPPER', '');
 define('LOGIN_SLEEP_USEC', 0);
 
 define('SOURCE_FLAG', 'OPS');
+
+define('IMAGE_HOST_BANNED', ['phpunit.bad']);

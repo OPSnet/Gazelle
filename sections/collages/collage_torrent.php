@@ -11,7 +11,7 @@ namespace Gazelle;
 $tgMan         = new Manager\TGroup();
 $torMan        = new Manager\Torrent();
 $bookmark      = new User\Bookmark($Viewer);
-$collMan       = new Manager\Collage()->setImageProxy(new \Gazelle\Util\ImageProxy($Viewer));
+$collMan       = new Manager\Collage();
 $urlStem       = new User\Stylesheet($Viewer)->imagePath();
 $vote          = new User\Vote($Viewer);
 

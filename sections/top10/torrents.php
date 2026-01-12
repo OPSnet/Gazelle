@@ -9,9 +9,7 @@ declare(strict_types=1);
 namespace Gazelle;
 
 $torMan    = new Manager\Torrent();
-$reportMan = new Manager\Torrent\Report($torMan);
 $bookmark  = new User\Bookmark($Viewer);
-$imgProxy  = new Util\ImageProxy($Viewer);
 $top10     = new Top10\Torrent(FORMAT, $Viewer);
 $urlStem   = new User\Stylesheet($Viewer)->imagePath();
 $snatcher  = $Viewer->snatch();
@@ -226,7 +224,7 @@ foreach ($context as $c) {
         <td class="td_info big_info">
 <?php   if ($Viewer->option('CoverArt')) { ?>
             <div class="group_image float_left clear">
-                <?= $imgProxy->tgroupThumbnail($tgroup) ?>
+                <?= Util\ImageProxy::tgroupThumbnail($tgroup) ?>
             </div>
 <?php   } ?>
             <div class="group_info clear">

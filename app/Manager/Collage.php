@@ -13,8 +13,6 @@ class Collage extends \Gazelle\BaseManager {
     final protected const TGROUP_PERSONAL_KEY  = 'torrent_collages_personal_%d';
     final protected const ARTIST_KEY           = 'artists_collages_%d';
 
-    protected \Gazelle\Util\ImageProxy $imageProxy;
-
     public static function findType(int $type): ?\Gazelle\Enum\CollageType {
         return match ($type) {
             0 => CollageType::personal,
@@ -126,11 +124,6 @@ class Collage extends \Gazelle\BaseManager {
             );
         }
         return $this->findById($id);
-    }
-
-    public function setImageProxy(\Gazelle\Util\ImageProxy $imageProxy): \Gazelle\Manager\Collage {
-        $this->imageProxy = $imageProxy;
-        return $this;
     }
 
     public function tgroupCover(\Gazelle\TGroup $tgroup): string {

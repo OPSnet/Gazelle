@@ -266,7 +266,7 @@ if ($Properties['Image']) {
     if (!preg_match(IMAGE_REGEXP, $Properties['Image'])) {
         json_error(display_str($Properties['Image']) . " does not look like a valid image url");
     }
-    $banned = new Util\ImageProxy($Viewer)->badHost($Properties['Image']);
+    $banned = Util\ImageProxy::badHost($Properties['Image']);
     if ($banned) {
         json_error("Please rehost images from $banned elsewhere.");
     }

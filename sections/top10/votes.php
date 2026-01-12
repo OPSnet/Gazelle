@@ -38,7 +38,6 @@ if (empty($_GET['advanced']) || !$Viewer->permitted('site_advanced_top10')) {
 $vote->setTopLimit($limit);
 
 $bookmark     = new User\Bookmark($Viewer);
-$imgProxy     = new Util\ImageProxy($Viewer);
 $reportMan    = new Manager\Report(new Manager\User());
 $tgMan        = new Manager\TGroup();
 $torMan       = new Manager\Torrent();
@@ -169,7 +168,7 @@ if (count($topVotes) === 0) { ?>
         <td class="big_info">
 <?php       if ($Viewer->option('CoverArt')) { ?>
             <div class="group_image float_left clear">
-                <?= $imgProxy->tgroupThumbnail($tgroup) ?>
+                <?= Util\ImageProxy::tgroupThumbnail($tgroup) ?>
             </div>
 <?php       } ?>
             <div class="group_info clear">

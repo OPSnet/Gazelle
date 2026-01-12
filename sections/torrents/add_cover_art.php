@@ -21,14 +21,12 @@ if (is_null($tgroup)) {
     Error404::error();
 }
 
-$imgProxy = new Util\ImageProxy($Viewer);
-
 foreach ($imageList as $n => $image) {
     $image = trim($image);
     if (!preg_match(IMAGE_REGEXP, $image)) {
         Error400::error(html_escape($image) . " does not look like a valid image url");
     }
-    $banned = $imgProxy->badHost($image);
+    $banned = Util\ImageProxy::badHost($image);
     if ($banned) {
         Error400::error("Please rehost images from $banned elsewhere.");
     }

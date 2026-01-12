@@ -51,7 +51,6 @@ $paginator->setTotal($notifier->total());
 $page = $notifier->page($paginator->limit(), $paginator->offset());
 
 $bookmark = new User\Bookmark($Viewer);
-$imgProxy = new Util\ImageProxy($Viewer);
 $snatcher = $Viewer->snatch();
 
 View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notifications', ['js' => 'notifications']);
@@ -130,7 +129,7 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
         <td class="td_info big_info">
 <?php       if ($Viewer->option('CoverArt')) { ?>
             <div class="group_image float_left clear">
-                <?= $imgProxy->tgroupThumbnail($tgroup) ?>
+                <?= Util\ImageProxy::tgroupThumbnail($tgroup) ?>
             </div>
 <?php       } ?>
             <div class="group_info clear">
