@@ -45,5 +45,3 @@ echo $Twig->render('user/report-history.twig', [
     'user'      => $user,
     'viewer'    => $Viewer,
 ]);
-
-

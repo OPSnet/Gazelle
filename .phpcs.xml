@@ -94,8 +94,6 @@
         </properties>
     </rule>
 
-    <rule ref="PEAR.Files.IncludingFile" />
-
     <rule ref="Squiz.ControlStructures.ForEachLoopDeclaration" />
     <rule ref="Squiz.ControlStructures.ForLoopDeclaration" />
     <rule ref="Squiz.PHP.NonExecutableCode" />

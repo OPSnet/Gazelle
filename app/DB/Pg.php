@@ -80,9 +80,12 @@ class Pg {
         if ($this->tx === 'pgw') {
             try {
                 $this->rollback();
-            } catch (\Exception) {
+            } catch (\Exception $e) {
                 // When this is called things already went south. possibly
                 // the connection was aborted or other now-meaningless problems
+                global $Debug;
+                $class = $e::class;
+                $Debug->saveCase("pg abort: {$class}({$e->getMessage()})");
             } finally {
                 $this->tx = null;
             }

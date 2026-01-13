@@ -94,7 +94,7 @@ lint-php:
         -o -type f -name '*.php' \
         -print0 \
         | xargs -0 php -l -n | grep -v '^No syntax errors detected in' || true
-	vendor/bin/phpcs -p --report-width=256
+	vendor/bin/phpcs -p --parallel=4
 	vendor/bin/phpstan analyse --memory-limit=1024M --configuration=misc/phpstan.neon
 
 .PHONY: lint-twig

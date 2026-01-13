@@ -257,7 +257,6 @@ class Bookmark extends \Gazelle\BaseUser {
         );
     }
 
-
     public function artistList(): array {
         self::$db->prepared_query("
             SELECT ag.ArtistID AS artist_id,
