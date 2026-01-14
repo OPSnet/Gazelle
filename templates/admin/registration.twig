@@ -64,11 +64,11 @@
                 <td colspan="4">{{ user.externalProfile.profile|default('no external profile') }}</td>
         </tr>
         <tr>
-            <td>{{ first_email.ipv4 }}</td>
+            <td>{{ first_email.ip }}</td>
             <td>{{ user.created }}</td>
             <td>{{ first_email.cc }}</td>
             <td>ASN {{ first_email.n }} / {{ first_email.name }}</td>
-            <td><span class="resolve-ipv4" data-ip="{{ first_email.ipv4 }}">Resolving...</span></td>
+            <td><span class="resolve-ipv4" data-ip="{{ first_email.ip }}">Resolving...</span></td>
         </tr>
         <tr>
             <td colspan="5">
