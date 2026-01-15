@@ -1,0 +1,38 @@
+{% from 'macro/success.twig' import success %}
+Hello {{ user.username }},
+
+You have been demoted from {{ from }} to {{ to }} as you no longer meet all the requirements.
+
+{% if level['from-class'] == constant('MEMBER') %}
+[b]Warning![/b] Your account is now being watched by the inactivity reaper. If you do not log in every {{
+    constant('INACTIVE_USER_DEACTIVATE_DAYS') }} days, your account will be disabled for inactivity.
+
+{% endif %}
+{{ success(user.uploadedSize >= level['upload-size']) }} {{ level['upload-size']|octet_size
+    }} uploaded, you have {{ user.uploadedSize|octet_size }}
+{% set ratio = user.downloadedSize == 0 ? 0 : (user.uploadedSize + user.stats.requestBountySize) / user.downloadedSize %}
+{{ success(user.downloadedSize == 0 or ratio >= level['ratio-down']) }} {{ level['ratio-down']
+    }} ratio required, you have {% if user.downloadedSize == 0 %}∞{% else %}{{ ratio|number_format(4) }}{% endif %}
+
+{% if level['upload-total'] > 0 %}
+{{ success(user.stats.uploadTotal >= level['upload-total']) }} {{ level['upload-total']|number_format
+    }} uploads required, you have {{ user.stats.uploadTotal|number_format }}
+{% endif %}
+{% for label, condition in level['extra'] %}
+{%  if condition['Query'] == 'us.unique_group_total' %}
+{{      success(user.stats.uniqueGroupTotal >= condition['Count']) }} {{ condition['Count']|number_format
+    }} {{ label|raw }} required, you have {{ user.stats.uniqueGroupTotal|number_format }}
+{%  endif %}
+{%  if condition['Query'] == 'us.perfect_flac_total' %}
+{{      success(user.stats.perfectFlacTotal >= condition['Count']) }} {{ condition['Count']|number_format
+    }} {{ label|raw }} required, you have {{ user.stats.perfectFlacTotal|number_format }}
+{%  endif %}
+{%  if condition['Query'] == 'us.perfecter_flac_total' %}
+{{      success(user.stats.perfecterFlacTotal >= condition['Count']) }} {{ condition['Count']|number_format
+    }} {{ label|raw }} required, you have {{ user.stats.perfecterFlacTotal|number_format }}
+{%  endif %}
+{% endfor %}
+
+To read more about {{ constant('SITE_NAME') }}'s user classes, read [url=wiki.php?action=article&name=userclasses]this wiki article[/url].
+
+We hope to see you as {{ from }} again as soon as possible!

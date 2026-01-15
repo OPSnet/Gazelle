@@ -303,45 +303,6 @@ class UserTest extends TestCase {
         $this->assertFalse($this->user->isLocked(), 'utest-is-unlocked');
     }
 
-    public function testNextClass(): void {
-        $this->assertEquals(Enum\UserStatus::unconfirmed, $this->user->userStatus(), 'utest-user-status-unconfirmed');
-        $this->user->setField('Enabled', UserStatus::enabled->value)->modify();
-        $this->assertEquals(Enum\UserStatus::enabled, $this->user->userStatus(), 'utest-user-status-enabled');
-
-        $manager = new Manager\User();
-        $next = $this->user->nextClass($manager);
-        $this->assertIsArray($next, 'user-next-array');
-        $this->assertEquals('Member', $next['class'], 'user-next-class-is-member');
-
-        $goal = $next['goal'];
-        $this->assertIsArray($goal, 'user-next-requirements-array');
-        $this->assertCount(3, $goal, 'user-next-requirements-count');
-        $this->assertStringContainsString('100%', $goal['Ratio']['percent'],  'user-next-ratio');
-        $this->assertStringContainsString('0%',   $goal['Time']['percent'],   'user-next-time');
-        $this->assertStringContainsString('30%',  $goal['Upload']['percent'], 'user-next-upload');
-
-        $this->user->setField('created', date('Y-m-d H:i:s', strtotime('-2 day')))->modify();
-        $next = $this->user->nextClass($manager);
-        $this->assertIsArray($next, 'user-next-requirements-next-array');
-        $this->assertStringContainsString('29%', $next['goal']['Time']['percent'], 'user-next-closer-time');
-        $this->user->setField('created', date('Y-m-d H:i:s', strtotime('-7 day')))->modify();
-        $next = $this->user->nextClass($manager);
-        $this->assertIsArray($next, 'user-next-requirements-next-2-array');
-        $this->assertStringContainsString('100%', $next['goal']['Time']['percent'], 'user-next-has-time');
-
-        $this->user->addBounty(7 * 1024 * 1024 * 1024);
-        $this->user->stats()->flush();
-        $next = $this->user->nextClass($manager);
-        $this->assertIsArray($next, 'user-next-requirements-next-3-array');
-        $this->assertStringContainsString('100%',  $next['goal']['Upload']['percent'], 'user-next-has-upload');
-
-        $manager->promote();
-        $this->assertEquals('Member', $this->user->flush()->userclassName(), 'user-promoted-to-member');
-
-        $this->user->setField('PermissionId', SYSOP)->modify();
-        $this->assertNull($this->user->nextClass($manager), 'user-next-class-is-null');
-    }
-
     public function testStylesheet(): void {
         global $Cache;
         $Cache->delete_value(Manager\Stylesheet::CACHE_KEY);

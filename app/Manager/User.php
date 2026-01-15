@@ -988,114 +988,103 @@ class User extends \Gazelle\BaseManager {
         return $n;
     }
 
-    public function demotionCriteria(): array {
-        return [
-            USER => [
-                'From' => [MEMBER, POWER, ELITE, TORRENT_MASTER, POWER_TM, ELITE_TM, ULTIMATE_TM],
-                'To' => USER,
-                'Ratio' => 0.65,
-                'Upload' => 0
-            ],
-            MEMBER => [
-                'From' => [POWER, ELITE, TORRENT_MASTER, POWER_TM, ELITE_TM, ULTIMATE_TM],
-                'To' => MEMBER,
-                'Ratio' => 0.95,
-                'Upload' => 25 * 1024 * 1024 * 1024
-            ],
-        ];
-    }
-
     public function promotionCriteria(): array {
-        $GiB = 1024 * 1024 * 1024;
         $criteria = [
             USER => [
-                'From' => USER,
-                'To' => MEMBER,
-                'MinUpload' => 10 * $GiB,
-                'MinRatio' => 0.7,
-                'MinUploads' => 0,
-                'Weeks' => 1
+                'from-class'   => USER,
+                'to-class'     => MEMBER,
+                'upload-size'  => 10 * 1024 ** 3,
+                'ratio-up'     => 0.7,
+                'ratio-down'   => 0.6,
+                'upload-total' => 0,
+                'week-total'   => 1,
             ],
             MEMBER => [
-                'From' => MEMBER,
-                'To' => POWER,
-                'MinUpload' => 25 * $GiB,
-                'MinRatio' => 1.05,
-                'MinUploads' => 5,
-                'Weeks' => 2
+                'from-class'   => MEMBER,
+                'to-class'     => POWER,
+                'upload-size'  => 25 * 1024 ** 3,
+                'ratio-up'     => 1.05,
+                'ratio-down'   => 0.95,
+                'upload-total' => 5,
+                'week-total'   => 2,
             ],
             POWER => [
-                'From' => POWER,
-                'To' => ELITE,
-                'MinUpload' => 100 * $GiB,
-                'MinRatio' => 1.05,
-                'MinUploads' => 50,
-                'Weeks' => 4
+                'from-class'   => POWER,
+                'to-class'     => ELITE,
+                'upload-size'  => 100 * 1024 ** 3,
+                'ratio-up'     => 1.05,
+                'ratio-down'   => 0.95,
+                'upload-total' => 50,
+                'week-total'   => 4,
             ],
             ELITE => [
-                'From' => ELITE,
-                'To' => TORRENT_MASTER,
-                'MinUpload' => 500 * $GiB,
-                'MinRatio' => 1.05,
-                'MinUploads' => 500,
-                'Weeks' => 8
+                'from-class'   => ELITE,
+                'to-class'     => TORRENT_MASTER,
+                'upload-size'  => 500 * 1024 ** 3,
+                'ratio-up'     => 1.05,
+                'ratio-down'   => 0.95,
+                'upload-total' => 500,
+                'week-total'   => 8,
             ],
             TORRENT_MASTER => [
-                'From' => TORRENT_MASTER,
-                'To' => POWER_TM,
-                'MinUpload' => 500 * $GiB,
-                'MinRatio' => 1.05,
-                'MinUploads' => 500,
-                'Weeks' => 8,
-                'Extra' => [
+                'from-class'   => TORRENT_MASTER,
+                'to-class'     => POWER_TM,
+                'upload-size'  => 500 * 1024 ** 3,
+                'ratio-up'     => 1.05,
+                'ratio-down'   => 0.95,
+                'upload-total' => 500,
+                'week-total'   => 8,
+                'extra'        => [
                     'Unique groups' => [
                         'Query' => 'us.unique_group_total',
                         'Count' => 500,
-                        'Type' => 'int'
+                        'Type'  => 'int'
                     ]
                 ]
             ],
             POWER_TM => [
-                'From' => POWER_TM,
-                'To' => ELITE_TM,
-                'MinUpload' => 500 * $GiB,
-                'MinRatio' => 1.05,
-                'MinUploads' => 500,
-                'Weeks' => 8,
-                'Extra' => [
+                'from-class'   => POWER_TM,
+                'to-class'     => ELITE_TM,
+                'upload-size'  => 500 * 1024 ** 3,
+                'ratio-up'     => 1.05,
+                'ratio-down'   => 0.95,
+                'upload-total' => 500,
+                'week-total'   => 8,
+                'extra'        => [
                     '"Perfect" FLACs' => [
                         'Query' => 'us.perfect_flac_total',
                         'Count' => 500,
-                        'Type' => 'int'
+                        'Type'  => 'int'
                     ]
                 ]
             ],
             ELITE_TM => [
-                'From' => ELITE_TM,
-                'To' => ULTIMATE_TM,
-                'MinUpload' => 2048 * $GiB,
-                'MinRatio' => 1.05,
-                'MinUploads' => 2000,
-                'Weeks' => 12,
-                'Extra' => [
+                'from-class'   => ELITE_TM,
+                'to-class'     => ULTIMATE_TM,
+                'upload-size'  => 2048 * 1024 ** 3,
+                'ratio-up'     => 1.05,
+                'ratio-down'   => 0.95,
+                'upload-total' => 2000,
+                'week-total'   => 12,
+                'extra'        => [
                     '"Perfecter" FLACs' => [
                         'Query' => 'us.perfecter_flac_total',
                         'Count' => 2000,
-                        'Type' => 'int'
+                        'Type'  => 'int'
                     ]
                 ]
             ]
         ];
         if (RECOVERY_DB) {
-            $criteria[ELITE_TM]['Extra'][SITE_NAME . ' Upload'] = [
+            $criteria[ELITE_TM]['extra'][SITE_NAME . ' Upload'] = [
                'Query' => "
                     (SELECT uls.Uploaded + us.request_bounty_size - coalesce(rb.final, 0)
                     FROM users_leech_stats uls
                     INNER JOIN user_summary us ON (us.user_id = uls.UserID)
                     LEFT JOIN recovery_buffer rb ON (rb.user_id = uls.UserID)
                     WHERE uls.UserID = um.ID)",
-               'Count' => 2048 * $GiB,
-               'Type' => 'bytes'
+               'Count' => 2048 * 1024 ** 3,
+               'Type'  => 'bytes'
             ];
         }
         return $criteria;
@@ -1107,28 +1096,35 @@ class User extends \Gazelle\BaseManager {
     ): int {
         $processed = 0;
         foreach ($this->promotionCriteria() as $level) {
-            $fromClass = $this->userclassName($level['From']);
-            $toClass   = $this->userclassName($level['To']);
+            $fromClass = $this->userclassName($level['from-class']);
+            $toClass   = $this->userclassName($level['to-class']);
             $query = "
                 SELECT um.ID
                 FROM users_main um
                 INNER JOIN users_leech_stats uls ON (uls.UserID = um.ID)
-                LEFT JOIN user_summary       us  ON (us.user_id = um.ID)
+                INNER JOIN user_summary      us  ON (us.user_id = um.ID)
                 WHERE um.Enabled = ?
                     AND um.PermissionID = ?
                     AND uls.Uploaded + us.request_vote_size >= ?
+                    AND us.upload_total >= ?
                     AND (uls.Downloaded = 0 OR uls.Uploaded / uls.Downloaded >= ?)
                     AND um.created <= now() - INTERVAL ? WEEK
-                    AND coalesce(us.upload_total, 0) >= ?
             ";
-            $args = [UserStatus::enabled->value, $level['From'], $level['MinUpload'], $level['MinRatio'], $level['Weeks'], $level['MinUploads']];
+            $args = [
+                UserStatus::enabled->value,
+                $level['from-class'],
+                $level['upload-size'],
+                $level['upload-total'],
+                $level['ratio-up'],
+                $level['week-total'],
+            ];
 
-            if (!empty($level['Extra'])) {
+            if (isset($level['extra'])) {
                 $query .= ' AND ' . implode(' AND ',
                     array_map(function ($v) use (&$args) {
                         $args[] = $v['Count'];
                         return "{$v['Query']} >= ?";
-                    }, $level['Extra'])
+                    }, $level['extra'])
                 );
             }
 
@@ -1144,7 +1140,7 @@ class User extends \Gazelle\BaseManager {
                     continue;
                 }
 
-                $user->setField('PermissionID', $level['To'])
+                $user->setField('PermissionID', $level['to-class'])
                     ->addStaffNote("Class changed to $toClass by System")
                     ->modify();
                 $user->auditTrail()->addEvent(UserAuditEvent::userclass, "Promoted to $toClass");
@@ -1165,41 +1161,45 @@ class User extends \Gazelle\BaseManager {
     ): int {
         $processed = 0;
         foreach (array_reverse($this->promotionCriteria()) as $level) {
-            $fromClass = $this->userclassName($level['To']);  // note: To/From are reversed
-            $toClass   = $this->userclassName($level['From']);
+            $fromClass = $this->userclassName($level['to-class']);  // note: To/From are reversed
+            $toClass   = $this->userclassName($level['from-class']);
             $task?->debug("Begin demoting users from $fromClass to $toClass");
 
             $query = "
                 SELECT ID
                 FROM users_main um
                 INNER JOIN users_leech_stats uls ON (uls.UserID = um.ID)
-                LEFT JOIN user_summary       us  ON (us.user_id = um.ID)
+                INNER JOIN user_summary      us  ON (us.user_id = um.ID)
                 WHERE um.Enabled = ?
                     AND um.PermissionID = ?
                     AND (
-                        uls.Uploaded + coalesce(us.request_vote_size, 0) < ?
-                        OR (? > 0 AND coalesce(us.upload_total, 0) < ?)
+                        uls.Uploaded + us.request_vote_size < ?
+                        OR us.upload_total < ?
+                        OR (
+                            uls.Downloaded > 0
+                            AND (uls.Uploaded + us.request_vote_size) / uls.Downloaded < ?
+                        )
             ";
             $args = [
                 UserStatus::enabled->value,
-                $level['To'],
-                $level['MinUpload'],
-                $level['MinUploads'],
-                $level['MinUploads']
+                $level['to-class'],
+                $level['upload-size'],
+                $level['upload-total'],
+                $level['ratio-down'],
             ];
 
-            if (!empty($level['Extra'])) {
+            if (isset($level['extra'])) {
                 $query .= ' OR NOT ' . implode(' AND ',
                     array_map(function ($v) use (&$args) {
                         $args[] = $v['Count'];
                         return "{$v['Query']} >= ?";
-                    }, $level['Extra'])
+                    }, $level['extra'])
                 );
             }
             $query .= ')';
 
             self::$db->prepared_query($query, ...$args);
-            foreach (self::$db->collect('ID') as $userId) {
+            foreach (self::$db->collect(0) as $userId) {
                 $user = $this->findById($userId);
                 if (is_null($user)) {
                     continue;
@@ -1210,19 +1210,96 @@ class User extends \Gazelle\BaseManager {
                     continue;
                 }
 
-                $user->setField('PermissionID', $level['From'])
+                $user->setField('PermissionID', $level['from-class'])
                     ->addStaffNote("Class changed to $toClass by System")
                     ->modify();
                 $user->auditTrail()->addEvent(UserAuditEvent::userclass, "Demoted to $toClass");
                 $user->inbox()->createSystem(
                     "You have been demoted to $toClass",
-                    "You now only qualify for the \"$toClass\" user class.\n\nTo read more about "
-                        . SITE_NAME
-                        . "'s user classes, read [url=wiki.php?action=article&name=userclasses]this wiki article[/url]."
+                    self::$twig->render('notification/demotion.bbcode.twig', [
+                        'level' => $level,
+                        'from'  => $fromClass,
+                        'to'    => $toClass,
+                        'user'  => $user,
+                    ]),
                 );
             }
         }
         return $processed;
+    }
+
+    public function userBuffer(\Gazelle\User $user): array {
+        $criteria = $this->promotionCriteria()[$user->primaryClass()] ?? [];
+        $ratio    = $criteria !== [] ? $criteria['ratio-down'] : $user->requiredRatio();
+        $upload   = $user->uploadedSize() + $user->stats()->requestBountySize();
+        return [
+            $ratio,
+            $ratio == 0 ? $upload : $upload / $ratio - $user->downloadedSize()
+        ];
+    }
+
+    public function userNextClass(\Gazelle\User $user): ?array {
+        $criteria = $this->promotionCriteria()[$user->primaryClass()] ?? null;
+        if (!$criteria) {
+            return null;
+        }
+        $upload   = $user->uploadedSize();
+        $download = $user->downloadedSize();
+        $bounty   = $user->stats()->requestVoteSize();
+        $week     = $criteria['week-total'];
+        $goal = [
+            'Upload' => [
+                'current' => byte_format($upload + $bounty),
+                'target'  => byte_format($criteria['upload-size']),
+                'percent' => ratio_percent(($upload + $bounty) / $criteria['upload-size']),
+            ],
+            'Ratio' => [
+                'current' => $download == 0 ? '∞' : number_format($upload / $download, 2),
+                'target'  => number_format($criteria['ratio-up'], 2),
+                'percent' => ratio_percent($download == 0 ? 1 : ($upload / $download) / $criteria['ratio-up']),
+            ],
+            'Time' => [
+                'current' => $user->created(),
+                'target'  => "$week week" . plural($week),
+                'percent' => ratio_percent((time() - (int)strtotime($user->created())) / ($criteria['week-total'] * 7 * 86_400)),
+            ],
+        ];
+
+        if ($criteria['upload-total']) {
+            $uploadTotal = $user->stats()->uploadTotal();
+            $goal['Torrents'] = [
+                'current' => number_format($uploadTotal),
+                'target'  => $criteria['upload-total'],
+                'percent' => ratio_percent($uploadTotal / $criteria['upload-total']),
+            ];
+        }
+        if (isset($criteria['extra'])) {
+            foreach ($criteria['extra'] as $req => $info) {
+                $query = (string)$info['Query'];
+                $query = (str_starts_with($query, 'us.'))
+                    ? "SELECT $query FROM user_summary us WHERE user_id = ?"
+                    : str_replace('um.ID', '?', $query);
+                $current = (int)self::$db->scalar($query, ...array_fill(0, substr_count($query, '?'), $user->id));
+                if ($req == SITE_NAME . ' Upload') {
+                    $goal[$req] = [
+                        'current' => byte_format($current),
+                        'target'  => byte_format($info['Count']),
+                        'percent' => ratio_percent($current / $info['Count']),
+                    ];
+                } else {
+                    $goal[$req] = [
+                        'current' => number_format($current),
+                        'target'  => $info['Count'],
+                        'percent' => ratio_percent($current / $info['Count']),
+                    ];
+                }
+            }
+        }
+
+        return [
+            'class' => $this->userclassName($criteria['to-class']),
+            'goal'  => $goal,
+        ];
     }
 
     /**
@@ -1407,7 +1484,7 @@ class User extends \Gazelle\BaseManager {
                 [ 5 * 1024 * 1024 * 1024, 0.15, 0.0]
             ];
 
-            $downloadBarrier = 100 * 1024 * 1024 * 1024;
+            $downloadBarrier = 100 * 1024 ** 3;
             $begin = self::$db->elapsed();
             self::$db->prepared_query("
                 UPDATE users_main AS um

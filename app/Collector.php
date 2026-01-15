@@ -254,19 +254,19 @@ abstract class Collector extends Base  {
     /**
      * Produce a summary text over the collector results
      */
-    public function summary(): string {
+    public function summary(Manager\User $manager = new Manager\User()): string {
         return self::$twig->render('collector.twig', [
-            'added'   => $this->totalAdded,
-            'total'   => $this->totalFound,
-            'size'    => $this->totalSize,
-            'tokens'  => $this->totalTokens,
-            'error'   => count($this->error),
-            'skipped' => $this->skipped,
-            'title'   => $this->title,
-            'date'    => date("Y-m-d H:i"),
-            'time'    => (hrtime(true) - $this->startTime) * 1e-9,
-            'used'    => memory_get_usage(true),
-            'user'    => $this->user,
+            'added'       => $this->totalAdded,
+            'date'        => date("Y-m-d H:i"),
+            'error'       => count($this->error),
+            'size'        => $this->totalSize,
+            'skipped'     => $this->skipped,
+            'time'        => (hrtime(true) - $this->startTime) * 1e-9,
+            'title'       => $this->title,
+            'tokens'      => $this->totalTokens,
+            'total'       => $this->totalFound,
+            'used'        => memory_get_usage(true),
+            'user_buffer' => $manager->userBuffer($this->user),
         ]);
     }
 

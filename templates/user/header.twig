@@ -169,7 +169,7 @@ None
 
 {%- set visible = min(user.propertyVisible(preview_user, 'downloaded'), user.propertyVisible(preview_user, 'uploaded')) %}
 {% if visible %}
-{%  set buffer = user.buffer[1] %}
+{%  set buffer = user_buffer[1] %}
         <li class="tooltip{{ override(visible) }}" title="{{ buffer|octet_size(5) }}">Buffer: {{ buffer|octet_size }}</li>
 {% endif %}
 
@@ -189,7 +189,7 @@ None
 
 {%- set visible = user.propertyVisible(preview_user, 'requiredratio') %}
 {% if visible %}
-{%  set required = user.buffer[0] %}
+{%  set required = user_buffer[0] %}
         <li{{ class_override(visible) }}>Required Ratio: <span class="tooltip" title="{{ user.requiredRatio|number_format(5) }}">{{ user.requiredRatio|number_format(2) }}</span></li>
         <li{{ class_override(visible) }}>Required Class Ratio: <span class="tooltip" title="{{ required|number_format(5) }}">{{ required|number_format(2) }}</span></li>
 {% endif %}

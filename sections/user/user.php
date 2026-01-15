@@ -106,6 +106,7 @@ echo $Twig->render('user/header.twig', [
     'friend'       => new User\Friend($Viewer),
     'preview_user' => $previewer,
     'user'         => $user,
+    'user_buffer'  => $userMan->userBuffer($user),
     'viewer'       => $Viewer,
 ]);
 
@@ -114,7 +115,7 @@ echo $Twig->render('user/sidebar.twig', [
     'applicant'     => new Manager\Applicant(),
     'invite_source' => $Viewer->permitted('admin_manage_invite_source')
         ? new Manager\InviteSource()->findSourceNameByUser($user) : null,
-    'next_class'    => $user->nextClass($userMan),
+    'next_class'    => $userMan->userNextClass($user),
     'user'          => $user,
     'viewer'        => $Viewer,
 ]);

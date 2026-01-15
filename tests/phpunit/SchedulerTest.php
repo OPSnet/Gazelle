@@ -111,7 +111,6 @@ class SchedulerTest extends TestCase {
             ['CommunityStats'],
             ['CycleAuthKeys'],
             ['DeleteTags'],
-            ['DemoteUsersRatio'],
             ['DisableDownloadingRatioWatch'],
             ['DisableLeechingRatioWatch'],
             ['DisableStuckTasks'],
@@ -149,7 +148,7 @@ class SchedulerTest extends TestCase {
 
     public function testTaskDetailList(): void {
         $list = new TaskScheduler()->taskDetailList();
-        $this->assertCount(43, $list, 'task-detail-list');
+        $this->assertCount(42, $list, 'task-detail-list');
         $detail = current($list);
         $this->assertEquals(
             [
