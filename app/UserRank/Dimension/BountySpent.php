@@ -8,13 +8,12 @@ class BountySpent extends \Gazelle\UserRank\AbstractUserRank {
     }
 
     public function selector(): string {
-        return "
-            SELECT sum(rv.Bounty) AS n
-            FROM users_main AS um
-            INNER JOIN requests_votes AS rv ON (rv.UserID = um.ID)
-            WHERE um.Enabled = '1'
-            GROUP BY um.ID
-            ORDER BY 1
-        ";
+        return <<<END_SQL
+            select sum(rv.bounty)
+            from relay.users_main um
+            inner join request_vote rv on (rv.id_user = um."ID")
+            where um."Enabled" = '1'
+            group by rv.id_user
+        END_SQL;
     }
 }

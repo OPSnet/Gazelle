@@ -8,13 +8,12 @@ class ForumPosts extends \Gazelle\UserRank\AbstractUserRank {
     }
 
     public function selector(): string {
-        return "
-            SELECT count(*) AS n
-            FROM users_main AS um
-            INNER JOIN forums_posts AS p ON (p.AuthorID = um.ID)
-            WHERE um.Enabled = '1'
-            GROUP BY um.ID
-            ORDER BY 1
-        ";
+        return <<<END_SQL
+            select count(*)
+            from relay.users_main         um
+            inner join relay.forums_posts p on (p."AuthorID" = um."ID")
+            where um."Enabled" = '1'
+            group by um."ID"
+        END_SQL;
     }
 }

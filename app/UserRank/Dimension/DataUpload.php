@@ -8,13 +8,13 @@ class DataUpload extends \Gazelle\UserRank\AbstractUserRank {
     }
 
     public function selector(): string {
-        return "
-            SELECT greatest(uls.Uploaded - " . STARTING_UPLOAD . ", 0) AS n
-            FROM users_main um
-            INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
-            WHERE um.Enabled = '1'
-                AND uls.Uploaded > " . STARTING_UPLOAD . "
-            ORDER BY 1
-        ";
+        $starting = STARTING_UPLOAD;
+        return <<<END_SQL
+            select uls."Uploaded" - $starting
+            from relay.users_main              um
+            inner join relay.users_leech_stats uls on (uls."UserID" = um."ID")
+            where um."Enabled" = '1'
+                and uls."Uploaded" > $starting
+        END_SQL;
     }
 }

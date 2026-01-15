@@ -26,20 +26,18 @@ abstract class AbstractUserRank extends \Gazelle\Base {
      * slow.
      */
     public function bucketList(): array {
-        self::$db->prepared_query("
-            WITH r(n) AS ({$this->selector()}),
-            p(n, percent) AS (
-              SELECT n,
-                ntile(100) OVER (ORDER BY n)
-              FROM r
+        return $this->pg()->columnex("
+            with r(n) as ({$this->selector()}),
+            p(n, percent) as (
+              select n,
+                ntile(100) over (order by n)
+              from r
             )
-            SELECT min(n)
-            FROM p
-            GROUP BY percent
-            ORDER BY percent
-
+            select min(n)
+            from p
+            group by percent
+            order by percent
         ");
-        return self::$db->collect(0);
     }
 
     public function build(): array {

@@ -8,13 +8,12 @@ class Uploads extends \Gazelle\UserRank\AbstractUserRank {
     }
 
     public function selector(): string {
-        return "
-            SELECT count(*) AS n
-            FROM users_main AS um
-            INNER JOIN torrents AS t ON (t.UserID = um.ID)
-            WHERE um.Enabled = '1'
-            GROUP BY um.ID
-            ORDER BY 1
-        ";
+        return <<<END_SQL
+            select count(*)
+            from relay.users_main     um
+            inner join relay.torrents t on (t."UserID" = um."ID")
+            where um."Enabled" = '1'
+            group by um."ID"
+        END_SQL;
     }
 }
