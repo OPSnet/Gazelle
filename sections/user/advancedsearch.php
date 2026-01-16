@@ -324,7 +324,7 @@ if (empty($_GET)) {
 
     if (isset($_GET['bounty']) && !empty($_GET['bounty']) && $_GET['bounty'] !== 'off' && isset($_GET['bounty1']) && strlen($_GET['bounty1'])) {
         $op = $_GET['bounty'];
-        $where[] = $m->op('(SELECT sum("Bounty") FROM relay.requests_votes rv WHERE rv."UserID" = um1."ID")', $op);
+        $where[] = $m->op('(SELECT us.request_created_size FROM relay.user_summary us WHERE us.user_id = um1."ID")', $op);
         $args = array_merge($args, [$_GET['bounty1'] * 1024 ** 3], ($op === 'between' ? [$_GET['bounty2'] * 1024 ** 3] : []));
     }
 
