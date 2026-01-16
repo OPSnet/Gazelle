@@ -33,30 +33,18 @@ class User extends \Gazelle\Base {
             $orderBy = $this->sortMap[$type];
             self::$db->prepared_query("
                 SELECT
-                    um.ID                  AS id,
-                    um.created             AS created,
-                    uls.Uploaded           AS uploaded,
-                    uls.Downloaded         AS downloaded,
-                    coalesce(bs.Bounty, 0) AS request_votes,
-                    coalesce(bf.Fills, 0)  AS request_fills,
+                    um.ID          AS id,
+                    um.created     AS created,
+                    uls.Uploaded   AS uploaded,
+                    uls.Downloaded AS downloaded,
+                    coalesce(us.request_vote_size, 0)    AS request_votes,
+                    coalesce(us.request_bounty_total, 0) AS request_fills,
+                    coalesce(us.upload_total, 0)         AS num_uploads,
                     abs(uls.Uploaded - ?) / (unix_timestamp() - unix_timestamp(um.created)) AS up_speed,
-                    uls.Downloaded / (unix_timestamp() - unix_timestamp(um.created))        AS down_speed,
-                    count(t.ID) AS num_uploads
-                FROM users_main AS um
-                INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
-                LEFT JOIN torrents AS t ON (t.UserID = um.ID)
-                LEFT JOIN
-                (
-                    SELECT UserID, sum(Bounty) AS Bounty
-                    FROM requests_votes
-                    GROUP BY UserID
-                ) AS bs ON (bs.UserID = um.ID)
-                LEFT JOIN
-                (
-                    SELECT FillerID, count(*) AS Fills
-                    FROM requests
-                    GROUP BY FillerID
-                ) AS bf ON (bf.FillerID = um.ID)
+                    uls.Downloaded / (unix_timestamp() - unix_timestamp(um.created))        AS down_speed
+                FROM users_main              um
+                INNER JOIN users_leech_stats uls ON (uls.UserID = um.ID)
+                LEFT JOIN user_summary       us  ON (us.user_id = um.ID)
                 WHERE um.Enabled = '1'
                     AND (um.Paranoia IS NULL OR (um.Paranoia NOT LIKE '%\"uploaded\"%' AND um.Paranoia NOT LIKE '%\"downloaded\"%'))
                 GROUP BY um.ID
