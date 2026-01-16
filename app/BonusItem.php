@@ -228,26 +228,17 @@ class BonusItem extends \Gazelle\BasePgObject {
                     $price = (int)($price * 2 ** $user->paidPersonalCollages());
                     self::$db->begin_transaction();
                     self::$db->prepared_query('
-                        UPDATE user_bonus ub
-                        INNER JOIN users_main um ON (um.ID = ub.user_id) SET
-                            ub.points = ub.points - ?,
-                            um.collage_total = um.collage_total + 1
+                        UPDATE user_bonus ub SET
+                            ub.points = ub.points - ?
                         WHERE ub.points >= ?
                             AND ub.user_id = ?
                         ', $price, $price, $user->id
                     );
-                    if (self::$db->affected_rows() != 1 + ($price === 0 ? 0 : 1)) {
+                    if (self::$db->affected_rows() != ($price === 0 ? 0 : 1)) {
                         self::$db->rollback();
                         return Enum\BonusItemPurchaseStatus::insufficientFunds;
                     }
-                    $user->ordinal()
-                        ->set(
-                            'personal-collage',
-                            (int)self::$db->scalar("
-                                SELECT collage_total FROM  users_main WHERE ID = ?
-                                ", $user->id
-                            )
-                        );
+                    $user->ordinal()->increment('personal-collage', 1);
                     self::$db->commit();
                     break;
 
@@ -358,6 +349,16 @@ class BonusItem extends \Gazelle\BasePgObject {
                 $user->id,
                 $price,
                 isset($extra['receiver']) ? $extra['receiver']->id : 0,
+        );
+        $this->pg()->query('
+            insert into history_bonus
+                   (id_bonus_item, id_user, price, id_user_other, id_history_bonus)
+            values ($1,            $2,      $3,    $4,            $5)
+            ', $this->id,
+                $user->id,
+                $price,
+                isset($extra['receiver']) ? $extra['receiver']->id : null,
+                self::$db->inserted_id(),
         );
         new User\Bonus($user)->flush();
         $user->flush();
