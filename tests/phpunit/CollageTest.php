@@ -38,8 +38,7 @@ class CollageTest extends TestCase {
         ];
 
         $this->tgroupList = [];
-        $artistMan = new Manager\Artist();
-        $user      = $this->userList['u1'];
+        $user = $this->userList['u1'];
 
         $this->tgroupList = [
             Helper::makeTGroupMusic(

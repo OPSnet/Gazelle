@@ -19,12 +19,6 @@ class LogcheckerTest extends TestCase {
     public function testLogchecker(): void {
         $this->user = Helper::makeUser('logchecker.' . randomString(6), 'logcheck');
         $this->user->requestContext()->setViewer($this->user);
-        $tgroup = Helper::makeTGroupMusic(
-            $this->user,
-            'phpunit logchecker ' . randomString(6),
-            [[ARTIST_MAIN], ['phpunit logchecker artist ' . randomString(6)]],
-            ['czech']
-        );
 
         $this->assertMatchesRegularExpression(
             '/^\d+\.\d+\.\d+$/',

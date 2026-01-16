@@ -5,7 +5,7 @@ declare(strict_types=1);
 
 namespace Gazelle;
 
-require_once dirname(__FILE__) . '/../../lib/bootstrap.php';
+require_once __DIR__ . '/../../lib/bootstrap.php';
 
 /* The phinx migration will set up the default privileges
  * according to the initial installation. For a site in

@@ -162,9 +162,8 @@ class ReaperTest extends TestCase {
         $pmMan = new Manager\PM($user);
         $this->assertEquals(0, $user->inbox()->messageTotal(), 'never-inbox-initial');
 
-        $torMan  = new Manager\Torrent();
-        $userMan = new Manager\User();
-        $reaper  = new Torrent\Reaper();
+        $torMan = new Manager\Torrent();
+        $reaper = new Torrent\Reaper();
         $initialUnseededStats = $reaper->stats();
 
         // reset the time of the never seeded alert back in time to hit the initial timeout
@@ -294,9 +293,8 @@ class ReaperTest extends TestCase {
     }
 
     public function testUnseeded(): void {
-        $torMan  = new Manager\Torrent();
-        $userMan = new Manager\User();
-        $reaper  = new Torrent\Reaper();
+        $torMan = new Manager\Torrent();
+        $reaper = new Torrent\Reaper();
 
         $initialUnseededStats = $reaper->stats();
         $unseededInitial = $reaper->initialUnseededList();

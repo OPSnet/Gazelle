@@ -398,7 +398,7 @@ class DbTest extends TestCase {
             $this->pg()->executeParams("select 1 from nonexistent_table");
             $this->fail('pg-bad-exception-not-thrown');
         } catch (ProgrammingException $e) {
-            $this->assertEquals(ProgrammingException::class, get_class($e), 'pg-bad-exception-class');
+            $this->assertEquals(ProgrammingException::class, $e::class, 'pg-bad-exception-class');
         }
 
         $this->assertEquals($queryCnt, count($stats->queryList()), 'pg-bad-query-count');
@@ -418,7 +418,7 @@ class DbTest extends TestCase {
             $this->pg()->prepared_query('select 1');
             $this->fail('pg-abort-exception-not-thrown');
         } catch (\Exception $e) {
-            $this->assertEquals(\Exception::class, get_class($e), 'pg-abort-exception-class');
+            $this->assertEquals(\Exception::class, $e::class, 'pg-abort-exception-class');
             $this->assertEquals('ongoing pg_wrapper transaction', $e->getMessage(), 'pg-abort-exception-msg');
         }
 

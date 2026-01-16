@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
 use Rector\DeadCode\Rector\If_\RemoveAlwaysTrueIfConditionRector;
+use Rector\Php73\Rector\FuncCall\RegexDashEscapeRector;
 use Rector\Php73\Rector\FuncCall\StringifyStrNeedlesRector;
 use Rector\Php81\Rector\FuncCall\NullToStrictStringFuncCallArgRector;
 use Rector\Php83\Rector\ClassConst\AddTypeToConstRector;
 use Rector\Php83\Rector\ClassMethod\AddOverrideAttributeToOverriddenMethodsRector;
 
 // phpcs:disable PSR1.Files.SideEffects.FoundWithSymbols
+define('BONUS_UPLOAD_BOOST_ACTIVE', true);
 define('DEBUG_TWIG', true);
 define('DISABLE_IRC', false);
 define('FEATURE_EMAIL_REENABLE', true);
@@ -40,6 +42,7 @@ return RectorConfig::configure()
     ->withPhpSets()
     ->withSkip([
         NullToStrictStringFuncCallArgRector::class,
+        RegexDashEscapeRector::class,
         StringifyStrNeedlesRector::class,
         // From the one-thing-at-a-time department
         AddTypeToConstRector::class,

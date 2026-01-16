@@ -311,7 +311,7 @@ class RequestTest extends TestCase {
         $this->assertTrue($this->request->isFilled(), 'request-now-filled');
 
         $reportManager = new Manager\Torrent\Report($torMan);
-        $report = $reportManager->create(
+        $reportManager->create(
             torrent:     $torrent,
             user:        $user,
             reportType:  new Manager\Torrent\ReportType()->findByName('other'),

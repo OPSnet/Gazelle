@@ -365,7 +365,6 @@ class ArtistTest extends TestCase {
         $commentMan = new Manager\Comment();
         $post = $commentMan->create($this->user, 'artist', $artist->id, 'phpunit smart rename ' . randomString(6));
 
-        $requestMan = new Manager\Request();
         $request = Helper::makeRequestMusic(
             user:            $this->user,
             title:           'phpunit smart rename ' . randomString(6),
@@ -421,8 +420,6 @@ class ArtistTest extends TestCase {
 
     public function testRenameAliasCapchange(): void {
         $artistMan = new Manager\Artist();
-        $reqMan = new Manager\Request();
-        $tgMan = new Manager\TGroup();
         $mainName = 'phpunit.' . randomString(12);
         $artist = $artistMan->create($mainName);
         $mainAliasId = $artist->aliasId();
@@ -451,8 +448,6 @@ class ArtistTest extends TestCase {
 
     public function testRenameAliasNraMerge(): void {
         $artistMan = new Manager\Artist();
-        $reqMan = new Manager\Request();
-        $tgMan = new Manager\TGroup();
         $mainName = 'phpunit.' . randomString(12);
         $artist = $artistMan->create($mainName);
         $mainAliasId = $artist->aliasId();

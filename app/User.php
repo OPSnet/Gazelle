@@ -229,12 +229,10 @@ class User extends BaseAttrObject {
      * Does the user have any of the specified privileges?
      */
     public function permittedAny(string ...$privilege): bool {
-        foreach ($privilege as $p) {
-            if ($this->privilege()->permitted($p)) {
-                return true;
-            }
-        }
-        return false;
+        return array_any(
+            $privilege,
+            fn ($p) => $this->privilege()->permitted($p),
+        );
     }
 
     public function announceKey(): string {

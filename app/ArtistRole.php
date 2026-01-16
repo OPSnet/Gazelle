@@ -95,8 +95,6 @@ abstract class ArtistRole extends Base {
      * Returns the id of the first artist that would be shown in the renderRole
      * display. If it would be shown as "various ...", then it's the first
      * artist of that role type.
-     *
-     * @return int|null
      */
     public function primaryId(): int|null {
         $roleList       = $this->roleList();
