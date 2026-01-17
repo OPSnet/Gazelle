@@ -1,9 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
     $(".forum_category").click(function(e) {
-        var id = this.id;
-        var isChecked = $(this).text() != "Check all";
-        isChecked ? $(this).text("Check all") : $(this).text("Uncheck all");
-        $("input[data-category='" + id + "']").attr("checked", !isChecked);
+        const id = this.id;
+        const is_checked = $(this).text() != "Check all";
+        $(this).text(is_checked ? "Check all" : "Uncheck all");
+        $("input[data-category='" + id + "']").prop("checked", !is_checked);
         e.preventDefault();
     });
 

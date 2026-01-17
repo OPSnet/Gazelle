@@ -1,0 +1,102 @@
+{% from 'macro/form.twig' import checked, class_hidden -%}
+<div class="thin">
+    <div class="header">
+        <h2><a href="forums.php">Forums</a> › Search
+{%- if thread_id %} › <a href="forums.php?action=viewthread&amp;threadid={{
+        thread_id }}">{{ search.threadTitle(thread_id) }}</a>
+{%- elseif search.searchText %} › “{{ search.searchText }}”{% endif -%}
+        </h2>
+    </div>
+    <form class="search_form" name="forums" action="" method="get">
+        <input type="hidden" name="action" value="search" />
+        <table cellpadding="6" cellspacing="1" border="0" class="layout border" width="100%">
+            <tr>
+                <td><strong>Search for:</strong></td>
+                <td>
+                    <input type="search" name="search" size="70" value="{{ search.searchText }}" />
+                </td>
+            </tr>
+            <tr>
+                <td><strong>Posted by:</strong></td>
+                <td>
+                    <input type="search" name="user" placeholder="Username" size="70" value="{{ search.authorName }}" />
+                </td>
+            </tr>
+            <tr>
+                <td><strong>Topic created:</strong></td>
+                <td>
+                    After:
+                    <input type="date" class="date_picker" name="thread_created_after" id="thread_created_after" value="{{ thread_after }}" />
+                    Before:
+                    <input type="date" class="date_picker" name="thread_created_before" id="thread_created_before" value="{{ thread_before }}" />
+                </td>
+            </tr>
+{% if thread_id %}
+            <tr>
+                <td>
+                    <input type="hidden" name="threadid" value="{{ thread_id }}" />
+                </td>
+            </tr>
+{% else %}
+            <tr>
+                <td><strong>Search in:</strong></td>
+                <td>
+                    <input type="radio" name="type" id="type_title" value="title"{{ checked(not search.isBodySearch) }} />
+                    <label for="type_title">Titles</label>
+                    <input type="radio" name="type" id="type_body" value="body"{{ checked(search.isBodySearch) }} />
+                    <label for="type_body">Post bodies</label>
+                </td>
+            </tr>
+            <tr id="post_created_row"{{ class_hidden(not search.isBodySearch) }}>
+                <td><strong>Post created:</strong></td>
+                <td>
+                    After:
+                    <input type="date" class="date_picker" name="post_created_after" id="post_created_after" value="{{ post_after }}" />
+                    Before:
+                    <input type="date" class="date_picker" name="post_created_before" id="post_created_before" value="{{ post_before }}" />
+                </td>
+            </tr>
+            <tr>
+                <td><strong>Forums:</strong></td>
+                <td>
+{%  for forum in forum_list %}
+{%      if loop.first %}
+      <div id="forum-dept">
+{%          set prev_cat = 0 %}
+{%      endif %}
+{%      if viewer.readAccess(forum) %}
+{%          if prev_cat != forum.categoryId %}
+{%              if prev_cat %}
+            </div>
+        </div>
+{%              endif %}
+{%              set prev_cat = forum.categoryId %}
+        <div class="forum-item">
+            <div class="forum-name">
+                <b>{{ forum.categoryName }}</b>
+                <a href="#" class="brackets forum_category" id="forum_category_{{ forum.categoryId }}">Check all</a>
+            </div>
+            <div class="forum-search-cat">
+{%          endif %}
+                <div>
+                    <label>
+                    <input type="checkbox" name="forums[]" value="{{ forum.id }}" data-category="forum_category_{{ forum.categoryId }}"{{ checked(forum.id in id_list) }} />
+                    {{ forum.name }}</label>
+                </div>
+{%      endif %}
+{%      if loop.last %}
+        </div>
+      </div>
+{%      endif %}
+{%  endfor %}
+{% endif %}
+                </div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" class="center">
+                    <input type="submit" value="Search" />
+                </td>
+            </tr>
+        </table>
+    </form>

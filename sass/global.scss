@@ -282,10 +282,6 @@ div#flip_view_1 .similar-artist-graph {
   font-weight: bold;
 }
 
-#forums #quickpost {
-  width: 95%;
-}
-
 td.label {
   vertical-align: top;
 }
@@ -732,8 +728,30 @@ tr.torrent .bookmark > a::after {
   display: none;
 }
 
+#forums #quickpost {
+  width: 95%;
+}
+
+#forum-dept {
+  display: grid;
+  gap: 4px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  overflow: visible;
+}
+
+.forum-name {
+  padding-bottom: 2px;
+}
 .forum_post td img {
   max-width: 675px;
+}
+
+.forum_post td img {
+  max-width: 675px;
+}
+
+td.forum-post-head a.username {
+  font-weight: bold;
 }
 
 #collage #reply_box img,
@@ -886,10 +904,6 @@ input[type="search"] {
 }
 hr.tbx {
   margin: 15px 6px 10px 6px;
-}
-
-td.forum-post-head a.username {
-  font-weight: bold;
 }
 
 .upload-error {
