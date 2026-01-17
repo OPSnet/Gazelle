@@ -9,11 +9,11 @@ class BonusPoints extends \Gazelle\UserRank\AbstractUserRank {
 
     public function selector(): string {
         return <<<END_SQL
-            select sum(bh."Price")
-            from relay.users_main          um
-            inner join relay.bonus_history bh on (bh."UserID" = um."ID")
+            select sum(hb.price)
+            from relay.users_main    um
+            inner join history_bonus hb on (hb.id_user = um."ID")
             where um."Enabled" = '1'
-            group by bh."UserID"
+            group by hb.id_user
         END_SQL;
     }
 }

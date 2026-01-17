@@ -77,7 +77,7 @@ class Bonus extends \Gazelle\Base {
     }
 
     public function addMultiPoints(int $points, array $ids = []): int {
-        if (empty($ids)) {
+        if ($ids === []) {
             return 0;
         }
         self::$db->prepared_query("

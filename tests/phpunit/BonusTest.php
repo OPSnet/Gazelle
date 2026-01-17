@@ -266,6 +266,11 @@ class BonusTest extends TestCase {
         $receiver = $this->userList['receiver'];
         $giver    = new User\Bonus($user);
 
+        $this->assertEquals(
+            [],
+            $giver->otherLatest($receiver),
+            'bonus-other-none',
+        );
         $this->assertTrue($other1->needsPreparation(), 'bonus-token-other-prepare');
         $this->assertEquals(
             BonusItemPurchaseStatus::incomplete,

@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 use Phinx\Migration\AbstractMigration;
 
-/* After this has landed in production, run the following update */
+/* After this has landed in production, run the following queries */
 /*
 insert into history_bonus
 select "ID", "ItemID", "UserID", "Price", "OtherUserID", "PurchaseDate"
 from relay.bonus_history
-on conflict (id_history_bonus) do nothing
+on conflict (id_history_bonus) do nothing;
+
+update history_bonus set id_user_other = null where id_user_other = 0;
 */
 
 final class BonusHistory extends AbstractMigration {

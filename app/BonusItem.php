@@ -75,8 +75,8 @@ class BonusItem extends \Gazelle\BasePgObject {
         };
     }
 
-    public function price(): int {
-        return $this->info()['price'];
+    public function price($manager = new \Gazelle\Manager\Bonus()): int {
+        return (int)ceil(($this->info()['price'] * (100 - $manager->discount()) / 100));
     }
 
     public function priceForTokenOther(User $giver, User $receiver): int|false {
@@ -125,9 +125,9 @@ class BonusItem extends \Gazelle\BasePgObject {
         return (bool)$this->pg()->scalarex('
             select exists (
                 select 1
-                from relay.bonus_history bh
-                where bh."ItemID" = $1
-                    and bh."UserID" = $2
+                from history_bonus
+                where id_bonus_item = $1
+                    and id_user     = $2
             )
             ', $this->id, $user->id
         );
@@ -358,24 +358,14 @@ class BonusItem extends \Gazelle\BasePgObject {
                     break;
             }
         }
-        self::$db->prepared_query("
-            INSERT INTO bonus_history
-                   (ItemID, UserID, Price, OtherUserID)
-            VALUES (?,      ?,      ?,     ?)
-            ", $this->id,
-                $user->id,
-                $price,
-                isset($extra['receiver']) ? $extra['receiver']->id : 0,
-        );
         $this->pg()->query('
             insert into history_bonus
-                   (id_bonus_item, id_user, price, id_user_other, id_history_bonus)
-            values ($1,            $2,      $3,    $4,            $5)
+                   (id_bonus_item, id_user, price, id_user_other)
+            values ($1,            $2,      $3,    $4)
             ', $this->id,
                 $user->id,
                 $price,
                 isset($extra['receiver']) ? $extra['receiver']->id : null,
-                self::$db->inserted_id(),
         );
         new User\Bonus($user)->flush();
         $user->flush();

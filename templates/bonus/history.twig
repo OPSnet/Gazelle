@@ -98,9 +98,9 @@
 {%  for h in history %}
         <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
             <td>{{ h.title }}</td>
-            <td style="text-align: right;">{{ h.Price|number_format }}</td>
-            <td>{{ h.PurchaseDate|time_diff }}</td>
-            <td>{% if h.OtherUserID > 0 %}{{ h.OtherUserID|user_url }}{% else %}&nbsp;{% endif %}</td>
+            <td style="text-align: right;">{{ h.price|number_format }}</td>
+            <td>{{ h.created.format('U')|time_diff }}</td>
+            <td>{% if h.id_user_other > 0 %}{{ h.id_user_other|user_url }}{% else %}&nbsp;{% endif %}</td>
         </tr>
 {%  endfor %}
     </table>

@@ -16,7 +16,7 @@ use Gazelle\Util\SortableTableHeader;
  */
 
 class Bonus extends \Gazelle\BaseUser {
-    final public const tableName          = 'bonus_history';
+    final public const tableName             = 'history_bonus';
     final protected const CACHE_PURCHASE     = 'bonus_purchase_%d';
     final protected const CACHE_SUMMARY      = 'bonus_summary_%d';
     final protected const CACHE_HISTORY      = 'bonus_hist_%d_%d';
@@ -34,9 +34,9 @@ class Bonus extends \Gazelle\BaseUser {
     }
 
     public function pointsSpent(): int {
-        return (int)self::$db->scalar("
-            SELECT sum(Price) FROM bonus_history WHERE UserID = ?
-            ", $this->user->id
+        return (int)$this->pg()->scalarex('
+            select sum(price) from history_bonus where id_user = $1
+            ', $this->user->id
         );
     }
 
@@ -49,16 +49,16 @@ class Bonus extends \Gazelle\BaseUser {
             $this->pg()->rowAssocex(<<<END_SQL
                 with sent(n) AS (
                     select sum(bi.amount)
-                    from relay.bonus_history bh
-                    inner join bonus_item bi on (bi.id_bonus_item = bh."ItemID")
-                    where coalesce(bh."OtherUserID", 0) != 0
-                        and bh."UserID" = $1
+                    from history_bonus hb
+                    inner join bonus_item bi using (id_bonus_item)
+                    where hb.id_user_other is not null
+                        and hb.id_user = $1
                 ),
                 recv(n) AS (
                     select sum(bi.amount)
-                    from relay.bonus_history bh
-                    inner join bonus_item bi on (bi.id_bonus_item = bh."ItemID")
-                    where bh."OtherUserID" = $1
+                    from history_bonus hb
+                    inner join bonus_item bi using (id_bonus_item)
+                    where hb.id_user_other = $1
                 )
                 select coalesce(recv.n, 0) as received,
                     coalesce(sent.n, 0)    as sent
@@ -71,29 +71,29 @@ class Bonus extends \Gazelle\BaseUser {
     }
 
     public function otherLatest(\Gazelle\User $other): array {
-        return $this->pg()->rowAssoc(<<<END_SQL
+        return $this->pg()->rowAssocex(<<<END_SQL
             select bi.title,
-                bh."PurchaseDate" AS purchase_date
-            from relay.bonus_history bh
-            inner join bonus_item bi ON (bi.id_bonus_item = bh."ItemID")
-            where bh."UserID" = ?
-                and bh."OtherUserID" = ?
-            order by bh."PurchaseDate" desc, bh."ID" desc
+                hb.created AS purchase_date
+            from history_bonus hb
+            inner join bonus_item bi using (id_bonus_item)
+            where hb.id_user = $1
+                and hb.id_user_other = $2
+            order by hb.created desc, hb.id_history_bonus desc
             limit 1
             END_SQL
             , $this->user->id, $other->id
-        );
+        ) ?? [];
     }
 
     public function summary(): array {
         $key = sprintf(self::CACHE_SUMMARY, $this->user->id);
         $summary = self::$cache->get_value($key);
         if ($summary === false) {
-            $summary = self::$db->rowAssoc('
-                SELECT count(*) AS nr,
-                    coalesce(sum(price), 0) AS total
-                FROM bonus_history
-                WHERE UserID = ?
+            $summary = $this->pg()->rowAssocex('
+                select count(*)             as nr,
+                    coalesce(sum(price), 0) as total
+                from history_bonus
+                where id_user = $1
                 ', $this->user->id
             );
             self::$cache->cache_value($key, $summary, 86400 * 7);
@@ -121,13 +121,13 @@ class Bonus extends \Gazelle\BaseUser {
         $key = sprintf(self::CACHE_HISTORY, $this->user->id, $page);
         $history = self::$cache->get_value($key);
         if ($history === false) {
-            $history = $this->pg()->all(<<<END_SQL
-                select bi.title, bh."Price", bh."PurchaseDate", bh."OtherUserID"
-                from relay.bonus_history bh
-                inner join bonus_item bi on (bi.id_bonus_item = bh."ItemID")
-                where bh."UserID" = ?
-                order by bh."PurchaseDate" desc
-                limit ? offset ?
+            $history = $this->pg()->allex(<<<END_SQL
+                select bi.title, hb.price, hb.created, hb.id_user_other
+                from bonus_item          bi
+                inner join history_bonus hb using (id_bonus_item)
+                where hb.id_user = $1
+                order by hb.created desc
+                limit $2 offset $3
                 END_SQL
                 , $this->user->id, $limit, $offset
             );
@@ -186,14 +186,14 @@ class Bonus extends \Gazelle\BaseUser {
         $key = sprintf(self::CACHE_PURCHASE, $this->user->id);
         $history = self::$cache->get_value($key);
         if ($history === false) {
-            $history = $this->pg()->all(<<<END_SQL
-                SELECT bi.id_bonus_item as id,
+            $history = $this->pg()->allex(<<<END_SQL
+                select bi.id_bonus_item as id,
                     bi.title,
-                    count(bh."ID") as total,
-                    sum(bh."Price") as cost
+                    count(hb.id_history_bonus) as total,
+                    sum(hb.price) as cost
                 from bonus_item bi
-                left join relay.bonus_history bh on (bh."ItemID" = bi.id_bonus_item)
-                where bh."UserID" = ?
+                left join history_bonus hb using (id_bonus_item)
+                where hb.id_user = $1
                 group by bi.id_bonus_item
                 order by bi.sequence
                 END_SQL

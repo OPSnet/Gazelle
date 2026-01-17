@@ -102,7 +102,7 @@
             <li><input type="text" id="message" name="message" placeholder="Message"/> <br /></li>
             <li><input type="submit" name="flsubmit" value="Send" /></li>
 {%      if freeleech.latest %}
-{%          set when = freeleech.latest.purchase_date|time_diff %}
+{%          set when = freeleech.latest.purchase_date.format('U')|time_diff %}
             <li>You gave them {{ freeleech.latest.title|trim(' to Other') }} {{
                 when|raw }}{% if 'Just now' in when %}. Your generosity is most appreciated!{% endif -%}
             </li>

@@ -11,10 +11,10 @@ class Bonus extends \Gazelle\Base {
     public function itemPurchase(): array {
         return $this->pg()->all(<<<END_SQL
             select bi.id_bonus_item as id,
-                count(bh."ItemID")  as total,
+                count(hb.id_bonus_item)  as total,
                 bi.title
             from bonus_item bi
-            left join relay.bonus_history bh ON (bh."ItemID" = bi.id_bonus_item)
+            left join history_bonus hb using (id_bonus_item)
             group by bi.id_bonus_item
             order by bi.sequence
             END_SQL
@@ -34,14 +34,14 @@ class Bonus extends \Gazelle\Base {
     public function expenditureRange(string $interval, int $offset, int $length): array {
         return $this->pg()->all(<<<END_SQL
             select bi.id_bonus_item as id,
-                count(bh."ItemID") as total,
+                count(hb.id_bonus_item) as total,
                 bi.title
             from bonus_item bi
-            left join relay.bonus_history bh on (bh."ItemID" = bi.id_bonus_item)
+            left join history_bonus hb using (id_bonus_item)
             where (
-                bh."ItemID" is null
+                bh.id_bonus_item is null
                 or
-                bh."PurchaseDate" between (now() - '1 {$interval}'::interval * ?)
+                bh.created between (now() - '1 {$interval}'::interval * ?)
                     and (now() - '1 {$interval}'::interval * ?)
             )
             group by bi.id_bonus_item
@@ -108,16 +108,15 @@ class Bonus extends \Gazelle\Base {
      * @return array of array of [user_id, total]
      */
     public function topSpenders(int $n): array {
-        self::$db->prepared_query("
-            SELECT UserID AS user_id,
-                sum(Price) AS total
-            FROM bonus_history
-            GROUP BY user_id
-            ORDER BY total DESC
-            LIMIT ?
-            ", $n
+        return $this->pg()->allex('
+            SELECT id_user as user_id,
+                sum(orice) AS total
+            from history_bonus
+            group by id_user
+            order by total desc
+            limit $1
+            ', $n
         );
-        return self::$db->to_array(false, MYSQLI_ASSOC);
     }
 
     /**
@@ -144,25 +143,24 @@ class Bonus extends \Gazelle\Base {
      * @return array of array of [user_id, total]
      */
     public function topAggregateSpenders(int $n): array {
-        self::$db->prepared_query("
-            select user_id,
+        return $this->pg()->allex('
+            select id_user,
                 sum(total) as total
-            FROM (
-                SELECT user_id,
-                    sum(amount_sent) AS total
-                FROM bonus_pool_contrib
-                GROUP BY user_id
-            UNION ALL
-                SELECT UserID AS user_id,
-                    sum(Price) AS total
-                FROM bonus_history
-                GROUP BY user_id
+            from (
+                select user_id,
+                    sum(amount_sent) as total
+                from relay.bonus_pool_contrib
+                group by user_id
+            union all
+                select id_user as user_id,
+                    sum(price) as total
+                from history_bonus
+                group by id_user
             ) SPEND
-            GROUP BY user_id
-            ORDER BY total DESC
-            LIMIT ?
-            ", $n
+            group by user_id
+            order by total desc
+            limit $1
+            ', $n
         );
-        return self::$db->to_array(false, MYSQLI_ASSOC);
     }
 }
