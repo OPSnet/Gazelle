@@ -713,6 +713,10 @@ function insertParsedJson(data, source) {
     }
     categories.val(categories_mapping[group['categoryName']]).triggerHandler('change');
 
+    if (torrent['media'] == 'Blu-Ray') {
+        torrent['media'] = 'BD';
+    }
+
     function completeFill() {
         // delay for the form to change before filling it
         WaitForCategory(function() {
@@ -765,7 +769,7 @@ function ParseUploadJson() {
 
     const file = $('#torrent-json-file')[0].files[0];
     if (file) {
-        if (file.name.endsWith('[redacted.ch].json')) {
+        if (file.name.endsWith('[redacted.sh].json')) {
             source = 'red';
         }
         reader.readAsText(file);
