@@ -50,56 +50,63 @@ $Type     = $_REQUEST['type'] ?? 'default';
 $BaseLink = "comments.php?action=$Action$linkId";
 
 // SQL components
-$condArgs  = [];
+$idField = match ($Action) {
+    'artist'   => 'ag."ArtistID"',
+    'collages' => 'cl."ID"',
+    'requests' => 'r.id_request',
+    'torrents' => 'tg."ID"',
+    default    => Error400::error('bad comment type: ' . html_escape($Action)),
+};
+$Join      = ["inner join relay.comments C ON (C.\"Page\" = $1 AND C.\"PageID\" = $idField)"];
+$args      = [$Action];
 $condition = [];
-$Join      = [];
-$joinArgs  = [];
-
 $TypeLinks = [];
 
 switch ($Action) {
     case 'artist':
         $Title       = '%s › Artist comments';
-        $table       = 'artists_group ag INNER JOIN artists_alias aa ON (ag.PrimaryAlias = aa.AliasID)';
-        $idField     = 'ag.ArtistID';
-        $nameField   = 'aa.Name';
-        $condition[] = "C.AuthorID = ?";
-        $condArgs[]  = $UserID;
+        $table       = 'relay.artists_group ag inner join relay.artists_alias aa on (ag."PrimaryAlias" = aa."AliasID")';
+        $nameField   = 'aa."Name"';
+        $condition[] = 'C."AuthorID" = $' . (1 + count($args));
+        $args[]      = $UserID;
         break;
 
     case 'collages':
-        $table       = 'collages AS cl';
-        $idField     = 'cl.ID';
-        $nameField   = 'cl.Name';
-        $condition[] = "cl.Deleted = '0'";
+        $table       = 'relay.collages cl';
+        $nameField   = 'cl."Name"';
+        $condition[] = "cl.\"Deleted\" = '0'";
 
         switch ($Type) {
             case 'created':
-                $Title = "%s › Comments on their collages";
-                array_push($condition, "cl.UserID = ?", "C.AuthorID != ?");
-                array_push($condArgs, $UserID, $UserID);
-                $TypeLinks = [
+                $Title       = "%s › Comments on their collages";
+                $placeholder = '$' . (1 + count($args));
+                $condition[] = "cl.\"UserID\" = $placeholder and C.\"AuthorID\" != $placeholder";
+                $args[]      = $UserID;
+                $TypeLinks   = [
                     [$BaseLink, "$Username › Collage comments"],
                     ["$BaseLink&amp;type=contributed", "$Username › Contributed collage comments"],
                 ];
                 break;
             case 'contributed':
-                $Title = '%s › Contributed collage comments';
-                $condition[] = "C.AuthorID != ? AND cl.ID IN (
-                    SELECT DISTINCT CollageID FROM collages_torrents ct WHERE ct.UserID = ?
-                    UNION ALL
-                    SELECT DISTINCT CollageID FROM collages_artists ca WHERE ca.UserID = ?)";
-                $condArgs = array_merge($condArgs, [$UserID, $UserID, $UserID]);
-                $TypeLinks = [
+                $Title       = '%s › Contributed collage comments';
+                $placeholder = '$' . (1 + count($args));
+                $condition[] = <<<END_SQL
+                    C."AuthorID" != $placeholder and cl."ID" in (
+                    select distinct "CollageID" from relay.collages_torrents ct where ct."UserID" = $placeholder
+                    union all
+                    select distinct "CollageID" from relay.collages_artists ca where ca."UserID" = $placeholder)
+                    END_SQL;
+                $args[]     = $UserID;
+                $TypeLinks  = [
                     [$BaseLink, "$Username › Collage comments"],
                     ["$BaseLink&amp;type=created", "$Username › Comments on their collages"],
                 ];
                 break;
             default:
-                $Title = "%s › Collage comments";
-                $condition[] = "C.AuthorID = ?";
-                $condArgs[]  = $UserID;
-                $TypeLinks = [
+                $Title       = "%s › Collage comments";
+                $condition[] = 'C."AuthorID" = $' . (1 + count($args));
+                $args[]      = $UserID;
+                $TypeLinks   = [
                     ["$BaseLink&amp;type=contributed", "$Username › Contributed collage comments"],
                     ["$BaseLink&amp;type=created", "$Username › Comments on their collages"],
                 ];
@@ -108,35 +115,36 @@ switch ($Action) {
         break;
 
     case 'requests':
-        $table      = 'requests AS r';
-        $idField    = 'r.ID';
-        $nameField  = 'r.Title';
+        $table      = 'request AS r';
+        $nameField  = 'r.title';
 
         switch ($Type) {
             case 'created':
-                $Title = "%s › Comments on their requests";
-                array_push($condition, "r.UserID = ?", "C.AuthorID != ?");
-                array_push($condArgs, $UserID, $UserID);
-                $TypeLinks = [
+                $Title       = "%s › Comments on their requests";
+                $placeholder = '$' . (1 + count($args));
+                $condition[] = "r.id_user = $placeholder and C.\"AuthorID\" != $placeholder";
+                $args[]      = $UserID;
+                $TypeLinks   = [
                     [$BaseLink, "$Username › Request comments"],
                     ["$BaseLink&amp;type=contributed", "$Username › Voted-on request comments"],
                 ];
                 break;
             case 'voted':
-                $Title = "%s › Comments on voted-on requests";
-                $Join[] = 'INNER JOIN requests_votes rv ON (rv.RequestID = r.ID)';
-                array_push($condition, "rv.UserID = ?", "C.AuthorID != ?");
-                array_push($condArgs, $UserID, $UserID);
-                $TypeLinks = [
+                $Title       = "%s › Comments on voted-on requests";
+                $Join[]      = 'inner join request_vote rv using (id_request)';
+                $placeholder = '$' . (1 + count($args));
+                $condition[] = "rv.id_user = $placeholder and C.\"AuthorID\" != $placeholder";
+                $args[]      = $UserID;
+                $TypeLinks   = [
                     [$BaseLink, "$Username › Request comments"],
                     ["$BaseLink&amp;type=created", "$Username › Created request comments"],
                 ];
                 break;
             default:
-                $Title = "%s › Request comments";
-                $condition[] = "C.AuthorID = ?";
-                $condArgs[] = $UserID;
-                $TypeLinks = $ownProfile
+                $Title       = "%s › Request comments";
+                $condition[] = 'C."AuthorID" = $' . (1 + count($args));
+                $args[]      = $UserID;
+                $TypeLinks   = $ownProfile
                     ? [
                         ["$BaseLink&amp;type=created", "Comments on your created requests"],
                         ["$BaseLink&amp;type=contributed", "Your comments on requests"],
@@ -150,25 +158,26 @@ switch ($Action) {
         break;
 
     case 'torrents':
-        $table     = 'torrents_group AS tg';
-        $idField   = 'tg.ID';
-        $nameField = 'tg.Name';
+        $table     = 'relay.torrents_group tg';
+        $nameField = 'tg."Name"';
 
         switch ($Type) {
             case 'uploaded':
-                $Title = "%s › Comments on their uploads";
-                $Join[] = 'INNER JOIN torrents t ON (t.GroupID = tg.ID)';
-                array_push($condition, "C.AuthorID != ?",  "t.UserID = ?", 'C.AddedTime > t.created');
-                array_push($condArgs, $UserID, $UserID);
+                $Title       = "%s › Comments on their uploads";
+                $Join[]      = 'inner join relay.torrents t on (t."GroupID" = tg."ID")';
+                $placeholder = '$' . (1 + count($args));
+                $condition[] = "t.\"UserID\" = $placeholder and C.\"AuthorID\" != $placeholder";
+                $condition[] = 'C."AddedTime" > t.created';
+                $args[]      = $UserID;
                 $TypeLinks[] = [
                     $BaseLink,
                     $ownProfile ? "Your torrent comments" : "$Username › Torrent comments"
                 ];
                 break;
             default:
-                $Title = "%s › Torrent comments";
-                $condition[] = "C.AuthorID = ?";
-                $condArgs[] = $UserID;
+                $Title       = "%s › Torrent comments";
+                $condition[] = 'C."AuthorID" = $' . (1 + count($args));
+                $args[]      = $UserID;
                 $TypeLinks[] = [
                     "$BaseLink&amp;type=uploaded",
                     $ownProfile ? "Comments on your uploads" : "$Username › Comments on their uploads"
@@ -180,53 +189,59 @@ switch ($Action) {
         Error400::error('What are you trying to comment on?');
 }
 
-$Join[] = "INNER JOIN comments C ON (C.Page = ? AND C.PageID = $idField)";
-$joinArgs[] = $Action;
 $Join = implode("\n", $Join);
-$cond = 'WHERE ' . implode(" AND ", $condition);
+$cond = 'WHERE ' . implode(" and ", $condition);
 
-$db = DB::DB();
+$pg = new DB\Pg(PG_RO_DSN);
 
 // Posts per page limit stuff
 $paginator = new Util\Paginator($Viewer->postsPerPage(), (int)($_GET['page'] ?? 1));
 $paginator->setTotal(
-    (int)$db->scalar("
-        SELECT count(DISTINCT C.ID) FROM $table $Join $cond", ...array_merge($joinArgs, $condArgs)
+    (int)$pg->scalarex(<<<END_SQL
+        select count(distinct C."ID") from
+        $table
+        $Join
+        $cond
+        END_SQL,
+            ...$args
     )
 );
 
-$Comments = $db->prepared_query("
-    SELECT C.AuthorID,
-        C.Page,
-        C.PageID,
-        $nameField,
-        C.ID,
-        C.Body,
-        C.AddedTime,
-        C.EditedTime,
-        C.EditedUserID
-    FROM $table
+$limit  = '$' . (1 + count($args));
+$args[] = $paginator->limit();
+$offset = '$' . (1 + count($args));
+$args[] = $paginator->offset();
+
+$commentList = $pg->allex(<<<END_SQL
+    select C."AuthorID",
+        C."Page",
+        C."PageID",
+        $nameField AS name,
+        C."ID",
+        C."Body",
+        C."AddedTime",
+        C."EditedTime",
+        C."EditedUserID"
+    from $table
     $Join
     $cond
-    GROUP BY C.ID
-    ORDER BY C.ID DESC
-    LIMIT ? OFFSET ?
-    ", ...[...$joinArgs, ...$condArgs, $paginator->limit(), $paginator->offset()]
+    order by C."ID" desc
+    limit $limit offset $offset
+    END_SQL,
+        ...$args
 );
 
 $requestList = [];
 $tgroupList = [];
 if ($Action == 'requests') {
     $requestMan = new Manager\Request();
-    foreach (array_flip(array_flip($db->collect('PageID'))) as $id) {
-        $id = (int)$id;
-        $requestList[$id] = $requestMan->findById($id);
+    foreach (array_unique(array_map(fn ($c) => $c['PageID'], $commentList)) as $id) {
+        $requestList[$id] = $requestMan->findById((int)$id);
     }
 } elseif ($Action == 'torrents') {
     $tgMan = new Manager\TGroup();
-    foreach (array_flip(array_flip($db->collect('PageID'))) as $id) {
-        $id = (int)$id;
-        $tgroupList[$id] = $tgMan->findById($id);
+    foreach (array_unique(array_map(fn ($c) => $c['PageID'], $commentList)) as $id) {
+        $tgroupList[$id] = $tgMan->findById((int)$id);
     }
 }
 
@@ -260,27 +275,25 @@ View::show_header(sprintf($Title, $Username), ['js' => 'bbcode,comments']);
 } else {
     echo $paginator->linkbox();
     $commentMan = new Manager\Comment();
-    $db->set_query_id($Comments);
-    while ([$AuthorID, $Page, $PageID, $Name, $PostID, $Body, $AddedTime, $EditedTime, $EditedUserID] = $db->next_record(MYSQLI_NUM)) {
-        $author = new User($AuthorID);
+    foreach ($commentList as $c) {
+        $author = new User($c['AuthorID']);
         echo $Twig->render('comment/comment.twig', [
-            'added_time'  => $AddedTime,
+            'created'     => $c['AddedTime'],
             'author'      => $author,
-            'body'        => $Body,
-            'editor'      => $userMan->findById((int)$EditedUserID),
-            'edit_time'   => $EditedTime,
-            'id'          => $PostID,
-            'heading'     => match ($Page) {
-                'artist'   => "<a href=\"artist.php?id=$PageID\">" . html_escape($Name) . "</a>",
-                'collages' => "<a href=\"collages.php?id=$PageID\">" . html_escape($Name) . "</a>",
-                'requests' => $requestList[$PageID]->smartLink(),
-                default    => $tgroupList[$PageID]->link(),
+            'body'        => $c['Body'],
+            'editor'      => $userMan->findById((int)$c['EditedUserID']),
+            'edit_time'   => $c['EditedTime'],
+            'id'          => $c['ID'],
+            'heading'     => match ($Action) {
+                'artist'   => "<a href=\"artist.php?id={$c['ID']}\">" . html_escape($c['name']) . "</a>",
+                'collages' => "<a href=\"collages.php?id={$c['ID']}\">" . html_escape($c['name']) . "</a>",
+                'requests' => $requestList[$c['PageID']]->smartLink(),
+                default    => $tgroupList[$c['PageID']]->link(),
             },
             'page'        => $Action,
-            'url'         => $commentMan->findById($PostID)->url(),
+            'url'         => $commentMan->findById($c['ID'])->url(),
             'viewer'      => $Viewer,
         ]);
-        $db->set_query_id($Comments);
     }
     echo $paginator->linkbox();
 }
