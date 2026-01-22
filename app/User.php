@@ -157,7 +157,6 @@ class User extends BaseAttrObject {
                 um.Visible,
                 um.ipcc,
                 ui.BanDate,
-                ui.NavItems,
                 ui.RatioWatchEnds,
                 ui.RatioWatchDownload,
                 ui.SiteOptions,
@@ -183,7 +182,6 @@ class User extends BaseAttrObject {
         self::$db->set_query_id($qid);
 
         $this->info['nav_list']    = json_decode($this->info['nav_list'] ?? '[]', true);
-        $this->info['NavItems']    = $this->info['NavItems'] ? explode(',', $this->info['NavItems']) : [];
         $this->info['ParanoiaRaw'] = $this->info['Paranoia'];
         $this->info['Paranoia']    = $this->info['Paranoia'] ? unserialize($this->info['Paranoia']) : [];
         $this->info['SiteOptions'] = $this->info['SiteOptions'] ? unserialize($this->info['SiteOptions']) : [];
@@ -200,7 +198,7 @@ class User extends BaseAttrObject {
      * Get the custom user link navigation configuration.
      */
     public function navigationList(): array {
-        return $this->info()['NavItems'];
+        return $this->info()['nav_list'];
     }
 
     public function addCustomPrivilege(string $name): bool {
@@ -948,7 +946,6 @@ class User extends BaseAttrObject {
 
         $userInfo = [];
         if ($this->field('nav_list') !== null) {
-            $userInfo['NavItems = ?'] = implode(',', $this->field('nav_list'));
             $this->setField('nav_list', json_encode($this->clearField('nav_list')));
         }
         if ($this->field('option_list') !== null) {
