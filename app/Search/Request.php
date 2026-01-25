@@ -197,75 +197,93 @@ class Request extends \Gazelle\Base {
         $join = [];
         $cond = [];
         $args = [];
+        if (!isset($this->info['show_filled'])) {
+            $cond[] = 'r.id_torrent is null';
+        }
         if (isset($this->info['bookmarker'])) {
             $join[] = 'inner join relay.bookmarks_requests rb on (rb."RequestID" = r.id_request)';
-            $cond[] = 'rb."UserID" = ?';
+            $cond[] = 'rb."UserID" = $' . (1 + count($args));
             $args[] = $this->info['bookmarker']->id;
         }
         if (isset($this->info['creator'])) {
-            $cond[] = 'r.id_user = ?';
+            $cond[] = 'r.id_user = $' . (1 + count($args));
             $args[] = $this->info['creator']->id;
         }
         if (isset($this->info['filler'])) {
-            $cond[] = 'r.id_filler = ?';
+            $cond[] = 'r.id_filler = $' . (1 + count($args));
             $args[] = $this->info['filler']->id;
         }
+        if (isset($this->info['year'])) {
+            $cond[] = 'r.year = $' . (1 + count($args));
+            $args[] = $this->info['year'];
+        }
         if (isset($this->info['voter'])) {
-            $cond[] = 'exists (select 1 from request_vote rv where rv.id_request = r.id_request and rv.id_user = ?)';
+            $cond[] = 'exists (select 1 from request_vote rv where rv.id_request = r.id_request and rv.id_user = $'
+                . (1 + count($args))
+                . ')';
             $args[] = $this->info['voter']->id;
         }
         if (isset($this->info['category'])) {
-            $cond[] = 'r.id_category in (' . placeholders($this->info['category']) . ')';
-            array_push($args, ...$this->info['category']);
+            $cond[] = 'r.id_category = any($' . (1 + count($args)) . '::int[])';
+            $args[] = $this->pg()->integerConverter()->output($this->info['category']);
         }
         if (isset($this->info['release_type'])) {
-            $cond[] = 'r.id_release_type in (' . placeholders($this->info['release_type']) . ')';
-            array_push($args, ...$this->info['release_type']);
+            $cond[] = 'r.id_release_type = any($' . (1 + count($args)) . '::int[])';
+            $args[] = $this->pg()->integerConverter()->output($this->info['release_type']);
         }
         if (isset($this->info['encoding'])) {
-            ['list' => $list, 'strict' => $strict] = $this->info['encoding'];
-            $cond[] = $strict
-                ? "encoding_str is not null and encoding_str && ARRAY[" . placeholders($list) . ']'
-                : "(encoding_str is null or encoding_str && ARRAY[" . placeholders($list) . '])';
-            array_push($args, ...array_map(fn ($key) => ENCODING[$key] ?? $key, $list));
+            $placeholder = '$' . (1 + count($args));
+            $cond[] = $this->info['encoding']['strict']
+                ? "encoding_str && $placeholder::text[]"
+                : "(encoding_str is null or encoding_str && $placeholder::text[])";
+            $args[] = $this->pg()->arrayConverter()->output(
+                array_map(fn ($key) => ENCODING[$key] ?? $key, $this->info['encoding']['list'])
+            );
         }
         if (isset($this->info['format'])) {
-            ['list' => $list, 'strict' => $strict] = $this->info['format'];
-            $cond[] = $strict
-                ? "format_str is not null and format_str && ARRAY[" . placeholders($list) . ']'
-                : "(format_str is null or format_str && ARRAY[" . placeholders($list) . '])';
-            array_push($args, ...array_map(fn ($key) => FORMAT[$key] ?? $key, $list));
+            $placeholder = '$' . (1 + count($args));
+            $cond[] = $this->info['format']['strict']
+                ? "format_str && $placeholder::text[]"
+                : "(format_str is null or format_str && $placeholder::text[])";
+            $args[] = $this->pg()->arrayConverter()->output(
+                array_map(fn ($key) => FORMAT[$key] ?? $key, $this->info['format']['list'])
+            );
         }
         if (isset($this->info['media'])) {
-            ['list' => $list, 'strict' => $strict] = $this->info['media'];
-            $cond[] = $strict
-                ? "media_str is not null and media_str && ARRAY[" . placeholders($list) . ']'
-                : "(media_str is null or media_str && ARRAY[" . placeholders($list) . '])';
-            array_push($args, ...array_map(fn ($key) => MEDIA[$key] ?? $key, $list));
+            $placeholder = '$' . (1 + count($args));
+            $cond[] = $this->info['media']['strict']
+                ? "media_str && $placeholder"
+                : "(media_str is null or media_str && $placeholder)";
+            $args[] = $this->pg()->arrayConverter()->output(
+                array_map(fn ($key) => MEDIA[$key] ?? $key, $this->info['media']['list'])
+            );
         }
         if (isset($this->info['search'])) {
-            $cond[] = "r.artist_title_ts @@ websearch_to_tsquery('simple', unaccent(?))";
+            $cond[] = "r.artist_title_ts @@ websearch_to_tsquery('simple', unaccent($"
+                . (1 + count($args))
+                . '))';
             $args[] = $this->info['search'];
         }
         if (isset($this->info['tag'])) {
             $op = $this->info['tag']['mode'] == SearchTag::all ? '@>' : '&&';
             if (count($this->info['tag']['include']) > 0) {
-                $list = array_map(fn ($t) => $t->id, $this->info['tag']['include']);
-                $cond[] = "r.tag $op ARRAY[" . placeholders($list, '?::int') . "]";
-                array_push($args, ...$list);
+                $cond[] = "r.tag $op $" . (1 + count($args)) . "::int[]";
+                $args[] = $this->pg()->integerConverter()->output(
+                    array_map(
+                        fn ($t) => $t->id,
+                        $this->info['tag']['include']
+                    )
+                );
             }
             if (count($this->info['tag']['exclude']) > 0) {
-                $list = array_map(fn ($t) => $t->id, $this->info['tag']['exclude']);
-                $cond[] = "not r.tag $op ARRAY[" . placeholders($list, '?::int') . "]";
-                array_push($args, ...$list);
+                $cond[] = "not r.tag $op $" . (1 + count($args)) . "::int[]";
+                $args[] = $this->pg()->integerConverter()->output(
+                    array_map(
+                        fn ($t) => $t->id,
+                        $this->info['tag']['exclude']
+                    )
+                );
             }
-        }
-        if (isset($this->info['year'])) {
-            $cond[] = 'r.year = ?';
-            $args[] = $this->info['year'];
-        }
-        if (!isset($this->info['show_filled'])) {
-            $cond[] = 'r.id_torrent is null';
         }
         if (in_array($this->heading()->orderBy(), ['rvs.bounty_total', 'rvs.last_vote', 'rvs.user_total'])) {
             $join[] = 'inner join request_vote_summary rvs using (id_request)';
@@ -286,20 +304,23 @@ class Request extends \Gazelle\Base {
     }
 
     public function total(): int {
-        return (int)$this->pg()->scalar(
+        return (int)$this->pg()->scalarex(
             $this->totalSql(),
             ...$this->args,
         );
     }
 
     public function pageSql(): string {
-        return "select r.id_request from request r{$this->filter()} order by {$this->heading()->orderBy()} {$this->heading()->dir()}, r.id_request {$this->heading()->dir()} limit ? offset ?";
+        return "select r.id_request from request r{$this->filter()} order by {$this->heading()->orderBy()} {$this->heading()->dir()}, r.id_request {$this->heading()->dir()} limit $"
+            . (count($this->args) + 1)
+            . ' offset $'
+            . (count($this->args) + 2);
     }
 
     public function page(int $limit, int $offset): array {
         return array_map(
             fn ($id) => $this->manager->findById($id),
-            $this->pg()->column(
+            $this->pg()->columnex(
                 $this->pageSql(),
                 ...[...$this->args, $limit, $offset],
             )

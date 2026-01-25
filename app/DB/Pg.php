@@ -5,6 +5,7 @@ namespace Gazelle\DB;
 use sad_spirit\pg_wrapper\Connection;
 use sad_spirit\pg_wrapper\Result;
 use sad_spirit\pg_wrapper\converters\containers\ArrayConverter;
+use sad_spirit\pg_wrapper\converters\IntegerConverter;
 use sad_spirit\pg_wrapper\converters\StringConverter;
 use sad_spirit\pg_wrapper\exceptions\server\ProgrammingException;
 use sad_spirit\pg_wrapper\PreparedStatement;
@@ -96,6 +97,10 @@ class Pg {
 
     public function arrayConverter(TypeConverter $subtype = new StringConverter()): ArrayConverter {
         return new ArrayConverter($subtype);
+    }
+
+    public function integerConverter(): ArrayConverter {
+        return new ArrayConverter(new IntegerConverter());
     }
 
     public function begin(): void {
