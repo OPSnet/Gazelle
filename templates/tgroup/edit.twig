@@ -29,10 +29,10 @@
         <div class="tbx-field">
             {{ body.emit|raw }}
         </div>
-        <div class="tbx-label">Year</div>
+        <div class="tbx-label">Initial Year</div>
         <div class="tbx-field">
 {% if tgroup.categoryName == 'Music' %}
-            This relates to the <strong>Original Release</strong> only. (The year the album was first issued. Remastered versions may have a more recent year).
+            This relates to the year the album was first issued. Remastered versions may have a more recent year which is specified in the edition information.
 {% else  %}
             Year of release/publication
 {% endif %}
@@ -49,16 +49,6 @@
 {%  endfor %}
             </select>
         </div>
-{%  if tgroup.isOwner(viewer) or viewer.permitted('torrents_edit') %}
-        <div class="tbx-label">Record label</div>
-        <div class="tbx-field">
-            <input type="text" name="record_label" size="40" value="{{ tgroup.recordLabel }}" />
-        </div>
-        <div class="tbx-label">Catalogue number</div>
-        <div class="tbx-field">
-            <input type="text" name="catalogue_number" size="40" value="{{ tgroup.catalogueNumber }}" />
-        </div>
-{%  endif %}
 {%  if viewer.permitted('torrents_freeleech') %}
         <div class="tbx-label">Download status</div>
         <div class="tbx-field">

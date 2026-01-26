@@ -6,7 +6,7 @@ use Gazelle\Enum\TorrentFlag;
 
 class TorrentDeleted extends TorrentAbstract {
     final public const tableName = 'deleted_torrents';
-    final public const CACHE_KEY = 'tdel_%d';
+    final public const CACHE_KEY = 'tdel_2_%d';
 
     public function location(): string {
         return "log.php?search=Torrent+" . $this->id;
@@ -19,7 +19,6 @@ class TorrentDeleted extends TorrentAbstract {
                 t.Media,
                 t.Format,
                 t.Encoding,
-                t.Remastered,
                 t.RemasterYear,
                 t.RemasterTitle,
                 t.RemasterCatalogueNumber,

@@ -10,31 +10,23 @@
 
 (function() {
     // global variables
-    var $catalog_number;
-    var $record_label;
     var $release_group_id;
     var $release_type;
     var $tags;
     var $year_original;
-    var $year_release;
-
-    var $popup_state = 0;
-    var $searched    = false;
 
     document.addEventListener('DOMContentLoaded', function() {
-        loadCSS();
         enableMusicBrainzButton();
         controlPopup();
 
         $("#musicbrainz_button").click(function() {
-            let $album = $("#title").val();
-            let $artist = $("#artist_0").val();
+            const $album = document.getElementById('title').value;
+            const $artist = document.getElementById('artist_0').value;
             if ($artist.length > 0 || $album.length > 0) {
                 jQuery('#results1').empty();
                 jQuery('#results2').empty();
                 jQuery('#results1').show();
                 jQuery('#results2').show();
-                $searched = true;
                 $.ajax({
                     type: "GET",
                     url : "https://musicbrainz.org/ws/2/release-group/?query=artist:%22"
@@ -88,15 +80,6 @@
                 jQuery('#popup_back').empty();
                 jQuery('#popup_title').text("Choose Release Group");
             }
-        });
-
-        $("#remaster").click(function() {
-            if ($("#remaster").attr("checked") && $searched == true) {
-                populateEditionsForm();
-            } else if ($searched == true) {
-                depopulateEditionsForm();
-            }
-
         });
     });
 
@@ -243,10 +226,10 @@
      * @param xml
      */
     function populateForm(xml) {
-        let $date       = $(xml).find("release").find("date").text();
-        $year_release   = $date.substring(0,4);
-        $catalog_number = $(xml).find("catalog-number").text();
-        $record_label   = $(xml).find("label").find("sort-name").text();
+        const date = $(xml).find("release").find("date").text();
+        const year_release = date.substring(0,4);
+        const catalog_number = $(xml).find("catalog-number").text();
+        const record_label = $(xml).find("label").find("sort-name").text();
 
         let $track_count  = $(xml).find("track-list").attr("count");
         let $track_titles = new Array();
@@ -273,46 +256,20 @@
             + "Tracks: " + $track_count + "\n\n" + "Track list:" + "\n";
         for (let i = 0; i < $track_titles.length; i++) {
             $description = $description + "[#]" + $track_titles[i] + "\n";
-        };
+        }
 
         closePopup();
         clear();
 
-        $("#artist_0").val($(xml).find("artist-credit:first").find("name:first").text());
-        $("#title").val($(xml).find("release").find("title:first").text());
-        $("#year").val($year_original);
-        $("#record_label").val($record_label);
-        $("#catalogue_number").val($(xml).find("catalog-number").text());
-        $("#tags").val($tags);
-        $("#releasetype").val(getReleaseType());
-        $("#album_desc").val($description);
-    }
-
-    function populateEditionsForm() {
-        $('#remaster_true').show();
-        $("#record_label").val("");
-        $("#catalogue_number").val("");
-        $("#remaster_year").val($year_release);
-        $("#remaster_record_label").val($record_label);
-        $("#remaster_catalogue_number").val($catalog_number);
-    }
-
-    function depopulateEditionsForm() {
-        $("#record_label").val($record_label);
-        $("#catalogue_number").val($catalog_number);
-        $("#remaster_year").val("");
-        $("#remaster_record_label").val("");
-        $("#remaster_catalogue_number").val("");
-    }
-
-    function closeEditionsForm() {
-        if ($("#remaster").attr("checked")) {
-            $('#remaster_true').hide();
-        }
-        $("#remaster").attr("checked", false);
-        $("#remaster_year").val("");
-        $("#remaster_record_label").val("");
-        $("#remaster_catalogue_number").val("");
+        document.getElementById('artist_0').value = $(xml).find("artist-credit:first").find("name:first").text();
+        document.getElementById('title').value = $(xml).find("release").find("title:first").text();
+        document.getElementById('year').value = $year_original;
+        document.getElementById('remaster_year').value = year_release;
+        document.getElementById('remaster_record_label').value = record_label;
+        document.getElementById('remaster_catalogue_number').value = catalog_number;
+        document.getElementById('tags').value = $tags;
+        document.getElementById('releasetype').value = getReleaseType();
+        document.getElementById('album_desc').value = $description;
     }
 
     /**
@@ -375,19 +332,15 @@
      * Clears fields in the upload form
      */
     function clear() {
-        closeEditionsForm();
-
-        $("#artist_0").val("");
-        $("#title").val("");
-        $("#year").val("");
-        $("#record_label").val("");
-        $("#catalogue_number").val("");
-        $("#tags").val("");
-        $("#releasetype").val("");
-        $("#album_desc").val("");
-        $("#remaster_year").val("");
-        $("#remaster_record_label").val("");
-        $("#remaster_catalogue_number").val("");
+        document.getElementById('artist_0').value = "";
+        document.getElementById('title').value = "";
+        document.getElementById('year').value = "";
+        document.getElementById('tags').value = "";
+        document.getElementById('releasetype').value = "";
+        document.getElementById('album_desc').value = "";
+        document.getElementById('remaster_year').value = "";
+        document.getElementById('remaster_record_label').value = "";
+        document.getElementById('remaster_catalogue_number').value = "";
     }
 
     /**
@@ -396,14 +349,8 @@
      */
     function openPopup() {
         centerPopup();
-        if ($popup_state == 0) {
-            $("#popup_background").css({
-                "opacity": "0.7"
-            });
-            $("#popup_background").fadeIn("fast");
-            $("#musicbrainz_popup").fadeIn("fast");
-            $popup_state = 1;
-        }
+        document.getElementById("musicbrainz_popup").style.display = "block";
+        document.getElementById("popup_background").style.display = "block";
     }
 
     /**
@@ -411,12 +358,8 @@
      * @returns
      */
     function closePopup() {
-        if ($popup_state == 1) {
-            $("#popup_background").fadeOut("fast");
-            $("#musicbrainz_popup").fadeOut("fast");
-            jQuery('#popup_back').html("");
-            $popup_state = 0;
-        }
+        document.getElementById("musicbrainz_popup").style.display = "none";
+        document.getElementById("popup_background").style.display = "none";
     }
 
     /**
@@ -448,19 +391,9 @@
             closePopup();
         });
         $(document).keypress(function(e) {
-            if (e.keyCode == 27 && $popup_state == 1) {
+            if (e.keyCode == 27) {
                 closePopup();
             }
         });
     }
-
-    function loadCSS() {
-        let link = document.createElement('link');
-        // TODO: FIX_STATIC_SERVER
-        link.href = 'static/styles/musicbrainz.css';
-        link.rel = 'stylesheet';
-        link.type = 'text/css';
-        document.body.appendChild(link);
-    }
-
-    })();
+})();

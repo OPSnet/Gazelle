@@ -117,8 +117,6 @@ class Helper {
             name:            $name,
             description:     'phpunit ebook description',
             image:           '',
-            recordLabel:     '',
-            catalogueNumber: '',
             releaseType:     null,
             year:            null,
         );
@@ -139,8 +137,6 @@ class Helper {
             description:     'phpunit music description',
             image:           'https://example.com/phpunit-tgroup/' . randomString(10) . '.jpg',
             year:            (int)date('Y') - 1,
-            recordLabel:     'Unitest Artists Corporation',
-            catalogueNumber: 'UA-' . random_int(10000, 99999),
         );
         $tgroup->addArtists($artistName[0], $artistName[1]);
         $tagMan = new \Gazelle\Manager\Tag();
@@ -171,7 +167,6 @@ class Helper {
             fileList:                [],
             size:                    random_int(10_000_000, 99_999_999),
             isScene:                 false,
-            isRemaster:              false,
             remasterYear:            null,
             remasterTitle:           '',
             remasterRecordLabel:     '',
@@ -206,7 +201,6 @@ class Helper {
             fileList:                [],
             size:                    $size,
             isScene:                 false,
-            isRemaster:              true,
             remasterYear:            (int)date('Y'),
             remasterTitle:           $title,
             remasterRecordLabel:     $recordLabel,

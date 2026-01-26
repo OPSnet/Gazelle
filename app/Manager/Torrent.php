@@ -24,7 +24,6 @@ class Torrent extends \Gazelle\BaseManager {
         array           $fileList,
         int             $size,
         bool            $isScene,
-        bool            $isRemaster,
         ?int            $remasterYear,
         string          $remasterTitle,
         string          $remasterRecordLabel,
@@ -37,15 +36,15 @@ class Torrent extends \Gazelle\BaseManager {
     ): \Gazelle\Torrent {
         self::$db->prepared_query("
             INSERT INTO torrents (
-                GroupID, UserID, Media, Format, Encoding, Remastered, RemasterYear, RemasterTitle, RemasterRecordLabel, RemasterCatalogueNumber,
+                GroupID, UserID, Media, Format, Encoding, RemasterYear, RemasterTitle, RemasterRecordLabel, RemasterCatalogueNumber,
                 info_hash, Scene, LogScore, LogChecksum, HasLog, HasCue, HasLogDB, FilePath, FileCount, FileList,
                 Size, Description
             ) VALUES (
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                ?, ?, ?, ?, ?, ?, ?, ?, ?,
                 ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
                 ?, ?
             )", $tgroup->id, $user->id, $media, $format, $encoding,
-                $isRemaster ? '1' : '0', $remasterYear, $remasterTitle, $remasterRecordLabel, $remasterCatalogueNumber,
+                $remasterYear, $remasterTitle, $remasterRecordLabel, $remasterCatalogueNumber,
                 $infohash, $isScene ? '1' : '0', $logScore, $hasChecksum ? '1' : '0', $hasLog ? '1' : '0',
                 $hasCue ? '1' : '0', $hasLogInDB ? '1' : '0', $filePath, count($fileList), implode("\n", $fileList),
                 $size, $description,

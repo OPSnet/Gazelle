@@ -38,14 +38,13 @@ if ($Viewer->permitted('torrents_edit') && ($Viewer->permitted('users_mod') || $
     }
 }
 
-if (!($torrent->isRemastered() && !$torrent->remasterYear()) || $Viewer->permitted('edit_unknowns')) {
+if ($torrent->remasterYear() !== null || $Viewer->permitted('edit_unknowns')) {
     $torrentInfo = [
         'ID'                      => $torrent->id,
         'Media'                   => $torrent->media(),
         'Format'                  => $torrent->format(),
         'Bitrate'                 => $torrent->encoding(),
         'RemasterYear'            => $torrent->remasterYear(),
-        'Remastered'              => $torrent->isRemastered(),
         'RemasterTitle'           => $torrent->remasterTitle(),
         'RemasterCatalogueNumber' => $torrent->remasterCatalogueNumber(),
         'RemasterRecordLabel'     => $torrent->remasterRecordLabel(),
@@ -82,7 +81,7 @@ if (!($torrent->isRemastered() && !$torrent->remasterYear()) || $Viewer->permitt
         default => $uploadForm->music([], new Manager\TGroup()),
     };
     echo $uploadForm->foot(false);
-};
+}
 
 echo $Twig->render('torrent/edit-torrent.twig', [
     'artist'            => $artist,

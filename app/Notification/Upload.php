@@ -328,7 +328,7 @@ class Upload extends \Gazelle\Base {
                 ' – ',
                 IrcText::DarkOrange,
                 '[',
-                $torrent->isRemasteredUnknown() || !$torrent->isRemastered() ? $tgroup->year() : $torrent->remasterYear(),
+                $torrent->isRemasteredUnknown() ? $tgroup->year() : $torrent->remasterYear(),
                 "] [{$tgroup->releaseTypeName()}] ",
                 implode('/', $metadata),
                 IrcText::ColorOff,

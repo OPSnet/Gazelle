@@ -32,8 +32,6 @@ if (!isset($Properties)) {
                 'Year'             => $tgroup->year(),
                 'Image'            => $tgroup->image(),
                 'GroupDescription' => $tgroup->description(),
-                'RecordLabel'      => $tgroup->recordLabel(),
-                'CatalogueNumber'  => $tgroup->catalogueNumber(),
                 'VanityHouse'      => $tgroup->isShowcase(),
                 'Artists'          => $tgroup->artistRole()?->idList() ?? [],
                 'TagList'          => implode(', ', $tgroup->tagNameList()),
@@ -60,9 +58,9 @@ if (!isset($Properties)) {
                 $Properties = array_merge(
                     $Properties,
                     [
-                        'CatalogueNumber' => $request->catalogueNumber(),
-                        'RecordLabel'     => $request->recordLabel(),
-                        'ReleaseType'     => $request->releaseType(),
+                        'RemasterCatalogueNumber' => $request->catalogueNumber(),
+                        'RemasterRecordLabel'     => $request->recordLabel(),
+                        'ReleaseType'             => $request->releaseType(),
                     ],
                 );
             }
@@ -94,7 +92,7 @@ if (!isset($categoryId)) {
 }
 $uploadForm = new Upload($Viewer, $Properties, $Err);
 
-View::show_header('Upload', ['js' => 'upload,validate_upload,musicbrainz,bbcode']);
+View::show_header('Upload', ['js' => 'upload,validate_upload,musicbrainz,bbcode', 'css' => 'musicbrainz']);
 echo $uploadForm->head($categoryId, true);
 echo match (CATEGORY[(int)$categoryId - 1]) {
     'Audiobooks',       => $uploadForm->audiobook(),

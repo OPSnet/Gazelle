@@ -34,7 +34,6 @@ class Torrent extends \Gazelle\Json {
                 'media'         => $torrent->media(),
                 'format'        => $torrent->format(),
                 'encoding'      => $torrent->encoding(),
-                'remastered'    => $torrent->isRemastered(),
                 'remasterYear'  => $torrent->remasterYear(),
                 'remasterTitle' => $torrent->remasterTitle() ?? '',
                 'remasterRecordLabel'

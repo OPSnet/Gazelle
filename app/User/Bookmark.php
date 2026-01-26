@@ -282,7 +282,7 @@ class Bookmark extends \Gazelle\BaseUser {
                 b.Sort             AS seq,
                 b.Time             AS added,
                 group_concat(t.ID ORDER BY
-                    t.GroupID, t.Remastered, (t.RemasterYear != 0) DESC, t.RemasterYear, t.RemasterTitle,
+                    t.GroupID, (t.RemasterYear != 0) DESC, t.RemasterYear, t.RemasterTitle,
                     t.RemasterRecordLabel, t.RemasterCatalogueNumber, t.Media, t.Format, t.Encoding, t.ID
                 ) AS torrent_list
             FROM bookmarks_torrents b

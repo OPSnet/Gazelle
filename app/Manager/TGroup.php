@@ -13,16 +13,14 @@ class TGroup extends \Gazelle\BaseManager {
         string  $description,
         ?int    $year,
         ?int    $releaseType,
-        ?string $recordLabel,
-        ?string $catalogueNumber,
         ?string $image,
         bool    $showcase = false,
     ): \Gazelle\TGroup {
         self::$db->prepared_query("
             INSERT INTO torrents_group
-                   (CategoryID, Name, WikiBody, Year, RecordLabel, CatalogueNumber, WikiImage, ReleaseType, VanityHouse)
-            VALUES (?,          ?,    ?,        ?,    ?,           ?,               ?,         ?,           ?)
-            ", $categoryId, $name, $description, $year, $recordLabel, $catalogueNumber, $image, $releaseType, (int)$showcase
+                   (CategoryID, Name, WikiBody, Year, WikiImage, ReleaseType, VanityHouse)
+            VALUES (?,          ?,    ?,        ?,    ?,         ?,           ?)
+            ", $categoryId, $name, $description, $year, $image, $releaseType, (int)$showcase
         );
         $id = self::$db->inserted_id();
         $tgroup = $this->findById($id);
@@ -277,7 +275,7 @@ class TGroup extends \Gazelle\BaseManager {
             FROM torrents_group g
             INNER JOIN (
                 SELECT DISTINCT GroupID,
-                    concat_ws(char(31), Remastered, RemasterYear, RemasterTitle, RemasterRecordLabel, RemasterCatalogueNumber) AS edition
+                    concat_ws(char(31), RemasterYear, RemasterTitle, RemasterRecordLabel, RemasterCatalogueNumber) AS edition
                 FROM torrents
                 WHERE format = 'FLAC'
             ) F ON (F.GroupID = g.ID)
@@ -378,8 +376,6 @@ class TGroup extends \Gazelle\BaseManager {
             name:            $name,
             year:            $year,
             releaseType:     $releaseType,
-            recordLabel:     null,
-            catalogueNumber: null,
         );
         if ($new->hasArtistRole()) {
             $new->addArtists([ARTIST_MAIN], [$artistName], $artistMan);

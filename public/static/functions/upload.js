@@ -38,20 +38,11 @@ let ExtraFormatCount = 0;
 // the form starts with one logfile field
 let LogCount         = 1;
 
-function MBhide() {
-    document.getElementById("musicbrainz_popup").style.display = "none";
-    document.getElementById("popup_background").style.display = "none";
-}
-function MBshow() {
-    document.getElementById("musicbrainz_popup").style.display = "block";
-    document.getElementById("popup_background").style.display = "block";
-}
-
 function Categories() {
     let dynamic_form = $('#dynamic_form');
     $.when(
-        $.ajax({url: 'ajax.php?action=upload_section&categoryid=' + $('#categories').raw().value, dataType: 'text'}),
-        $.ajax({url: 'ajax.php?action=upload_section&js=1&categoryid=' + $('#categories').raw().value, dataType: 'text'})
+        $.ajax({url: 'ajax.php?action=upload_section&categoryid=' + document.getElementById('categories').value, dataType: 'text'}),
+        $.ajax({url: 'ajax.php?action=upload_section&js=1&categoryid=' + document.getElementById('categories').value, dataType: 'text'})
     ).then(
         function (resp1, resp2) {
             if (resp1[1] !== 'success' || resp2[1] !== 'success') {
@@ -71,14 +62,6 @@ function Categories() {
     );
 }
 
-function Remaster() {
-    if ($('#remaster').raw().checked) {
-        $('#remaster_true').gshow();
-    } else {
-        $('#remaster_true').ghide();
-    }
-}
-
 function changeMedia() {
     CheckYear();
     setAllowedFormat('#format', '#bitrate');
@@ -93,7 +76,7 @@ function setAllowedFormat(formatField, bitrateField) {
             $(bitrateField).empty().append(new Option('---', ''));
             $('#upload_logs').ghide();
             $('#other_bitrate_span').ghide();
-            $('#format_warning').raw().innerHTML = '';
+            document.getElementById('format_warning').innerHTML = '';
             return;
         }
         $.each(AllowedMediaFormat[media], function(k) {
@@ -119,7 +102,7 @@ function setAllowedFormat(formatField, bitrateField) {
         else {
             $('#upload_logs').ghide();
         }
-        $('#format_warning').raw().innerHTML = ($(formatField).val() === 'AAC')
+        document.getElementById('format_warning').innerHTML = ($(formatField).val() === 'AAC')
             ? 'AAC torrents may only be uploaded if they represent editions unavailable on Orpheus in any other format sourced from the same medium and edition <a href="rules.php?p=upload#r2.1.21" target="_blank">(2.1.21)</a>'
             : '';
     }
@@ -153,11 +136,11 @@ function setAllowedBitrate(formatField, bitrateField) {
 }
 
 function AltBitrate() {
-    if ($('#other_bitrate').raw().value >= 320) {
-        $('#vbr').raw().disabled = true;
-        $('#vbr').raw().checked = false;
+    if (document.getElementById('other_bitrate').value >= 320) {
+        document.getElementById('vbr').disabled = true;
+        document.getElementById('vbr').checked = false;
     } else {
-        $('#vbr').raw().disabled = false;
+        document.getElementById('vbr').disabled = false;
     }
 }
 
@@ -302,10 +285,12 @@ function getUsedPairs() {
 }
 
 function add_tag() {
-    if ($('#tags').raw().value == "") {
-        $('#tags').raw().value = $('#genre_tags').raw().options[$('#genre_tags').raw().selectedIndex].value;
-    } else if (!($('#genre_tags').raw().options[$('#genre_tags').raw().selectedIndex].value === '---')) {
-        $('#tags').raw().value = $('#tags').raw().value + ', ' + $('#genre_tags').raw().options[$('#genre_tags').raw().selectedIndex].value;
+    const tagEl = document.getElementById('tags');
+    const genreTagEl = document.getElementById('genre_tags');
+    if (tagEl.value === "") {
+        tagEl.value = genreTagEl.options[genreTagEl.selectedIndex].value;
+    } else if (!(genreTagEl.options[genreTagEl.selectedIndex].value === '---')) {
+        tagEl.value = tagEl.value + ', ' + genreTagEl.options[genreTagEl.selectedIndex].value;
     }
 }
 
@@ -321,31 +306,16 @@ function AddLogField(acceptTypes) {
     LogField.accept = acceptTypes;
     LogField.multiple = true;
     LogField.size = 50;
-    let x = $('#logfields').raw();
+    let x = document.getElementById('logfields');
     x.appendChild(document.createElement("br"));
     x.appendChild(LogField);
-}
-
-function AddExtraLogField(id) {
-    if (LogCount > MAX_RIPLOGS) {
-        return;
-    }
-    let LogField = document.createElement("input");
-    LogField.type = "file";
-    LogField.id = "file_" + id;
-    LogField.name = "logfile_" + id + "[]";
-    LogField.size = 50;
-    let x = $('#logfields_' + id).raw();
-    x.appendChild(document.createElement("br"));
-    x.appendChild(LogField);
-    LogCount++;
 }
 
 function RemoveLogField() {
     if (LogCount === 1) {
         return;
     }
-    let x = $('#logfields').raw();
+    let x = document.getElementById('logfields');
     for (let i = 0; i < 2; i++) {
         x.removeChild(x.lastChild);
     }
@@ -415,11 +385,10 @@ function RemoveArtistField() {
 }
 
 
-function CheckVA () {
+function CheckVA() {
     let shown = false;
     for (let i = 0; i < ArtistCount; i++) {
-        let artistId = "#artist_" + i;
-        if ($(artistId).raw().value.toLowerCase().trim().match(/^(va|various(\sa|a)rtis(t|ts)|various)$/)) {
+        if (document.getElementById('artist_' + i).value.toLowerCase().trim().match(/^(va|various(\sa|a)rtis(t|ts)|various)$/)) {
             $('#vawarning').gshow();
             shown = true;
             break;
@@ -431,68 +400,53 @@ function CheckVA () {
 }
 
 function CheckYear() {
-    let media = $('#media').raw().options[$('#media').raw().selectedIndex].text;
-    let mediaOld = (media == "---" || media == "Vinyl" || media == "Soundboard" || media == "Cassette");
-    let year = $('#year').val();
-    let unknown = $('#unknown').prop('checked');
-    if (year < 1982 && year != '' && !mediaOld && !unknown) {
+    const isUnknownEdition = document.getElementById('unknown')?.checked;
+    const media = document.getElementById('media').value;
+    const isOldMedia = ["---", "Vinyl", "Soundboard", "Cassette"].includes(media);
+    const year = document.getElementById('remaster_year').value;
+    if (year !== '' && year < 1982 && !isOldMedia && !isUnknownEdition) {
         $('#yearwarning').gshow();
-        $('#remaster').raw().checked = true;
-        $('#remaster_true').gshow();
-    } else if (unknown) {
-        $('#remaster').raw().checked = true;
-        $('#yearwarning').ghide();
-        $('#remaster_true').gshow();
     } else {
         $('#yearwarning').ghide();
     }
 }
 
 function ToggleUnknown() {
-    if ($('#unknown').raw().checked) {
-        $('#remaster_year').raw().value = "";
-        $('#remaster_title').raw().value = "";
-        $('#remaster_record_label').raw().value = "";
-        $('#remaster_catalogue_number').raw().value = "";
+    if (document.getElementById('unknown').checked) {
+        document.getElementById('remaster_year').value = "";
+        document.getElementById('remaster_title').value = "";
+        document.getElementById('remaster_record_label').value = "";
+        document.getElementById('remaster_catalogue_number').value = "";
 
-        if ($('#groupremasters').raw()) {
-            $('#groupremasters').raw().selectedIndex = 0;
-            $('#groupremasters').raw().disabled = true;
+        if (document.getElementById('groupremasters')) {
+            document.getElementById('groupremasters').selectedIndex = 0;
+            document.getElementById('groupremasters').disabled = true;
         }
 
-        $('#remaster_year').raw().disabled = true;
-        $('#remaster_title').raw().disabled = true;
-        $('#remaster_record_label').raw().disabled = true;
-        $('#remaster_catalogue_number').raw().disabled = true;
+        document.getElementById('remaster_year').disabled = true;
+        document.getElementById('remaster_title').disabled = true;
+        document.getElementById('remaster_record_label').disabled = true;
+        document.getElementById('remaster_catalogue_number').disabled = true;
     } else {
-        $('#remaster_year').raw().disabled = false;
-        $('#remaster_title').raw().disabled = false;
-        $('#remaster_record_label').raw().disabled = false;
-        $('#remaster_catalogue_number').raw().disabled = false;
+        document.getElementById('remaster_year').disabled = false;
+        document.getElementById('remaster_title').disabled = false;
+        document.getElementById('remaster_record_label').disabled = false;
+        document.getElementById('remaster_catalogue_number').disabled = false;
 
-        if ($('#groupremasters').raw()) {
-            $('#groupremasters').raw().disabled = false;
+        if (document.getElementById('groupremasters')) {
+            document.getElementById('groupremasters').disabled = false;
         }
     }
 }
 
 function GroupRemaster() {
-    let remasters = JSON.parse($('#json_remasters').raw().value);
-    let index = $('#groupremasters').raw().options[$('#groupremasters').raw().selectedIndex].value;
-    if (index != "") {
-        $('#remaster_year').raw().value = remasters[index][1];
-        $('#remaster_title').raw().value = remasters[index][2];
-        $('#remaster_record_label').raw().value = remasters[index][3];
-        $('#remaster_catalogue_number').raw().value = remasters[index][4];
-    }
-}
-
-function loadThumbnail() {
-    let url = $('#image').val();
-    if (url === '') {
-        $('#thumbnail').attr('src', '').hide();
-    } else {
-        $('#thumbnail').attr('src', url).show();
+    const remasters = JSON.parse(document.getElementById('json_remasters').value);
+    const index = document.getElementById('groupremasters').options[document.getElementById('groupremasters').selectedIndex].value;
+    if (index !== "") {
+        document.getElementById('remaster_year').value = remasters[index][1];
+        document.getElementById('remaster_title').value = remasters[index][2];
+        document.getElementById('remaster_record_label').value = remasters[index][3];
+        document.getElementById('remaster_catalogue_number').value = remasters[index][4];
     }
 }
 
@@ -767,7 +721,7 @@ function ParseUploadJson() {
         }
     }, false);
 
-    const file = $('#torrent-json-file')[0].files[0];
+    const file = document.getElementById('torrent-json-file').files[0];
     if (file) {
         if (file.name.endsWith('[redacted.sh].json')) {
             source = 'red';
@@ -829,87 +783,92 @@ function htmlDecode(string) {
 function checkFields() {
     let error = 0;
     // When your DOM is historically fucked up...
-    let is_new = $("#torrent-new").val() == "1";
-    let is_music = (typeof($('#categories').val()) != "undefined" && $('#categories').val() == "0");
-    let is_edit = (typeof($('#edittype').val()) != "undefined" && $('#edittype').val() == "1");
-    $("#check").empty();
-    if (!is_edit && (is_new && !$('#file').val())) {
-        ++error;
-        $("#check").append('<li>No torrent file specified, no-one will be able to download from you.</li>');
+    const is_new_grp = document.getElementById('torrent-new')?.value === "1";
+    const is_music = document.getElementById('categories')?.value  === "0";
+    const is_upload = document.querySelector('input[type="hidden"][value="takeedit"]') === null;
+
+    const checkEl = document.getElementById('check');
+    checkEl.replaceChildren();
+
+    if (is_upload) {
+        if (!document.getElementById('file').value) {
+            ++error;
+            checkEl.innerHTML += '<li>No torrent file specified, no-one will be able to download from you.</li>';
+        }
+        if (is_new_grp) {
+            if (!document.getElementById('title').value) {
+                ++error;
+                checkEl.innerHTML += '<li>No title specified.</li>';
+            }
+            if (document.getElementById('tags').value === '') {
+                ++error;
+                checkEl.innerHTML += '<li>You must add at least one tag that describes this release.</li>';
+            }
+        }
     }
-    if (!is_edit && (is_new && !$('#title').val())) {
-        ++error;
-        $("#check").append('<li>No title specified.</li>');
-    }
-    if ($('#tags').val() == '') {
-        ++error;
-        $("#check").append('<li>You must add at least one tag that describes this release.</li>');
-    }
+
     if (is_music) {
-        if (is_new && !$('#artist_0').val()) {
-            ++error;
-            $("#check").append('<li>No artist specified. There must be at least Main artist.</li>');
+        if (is_new_grp) {  // implies is_upload
+            if (!document.getElementById('artist_0').value) {
+                ++error;
+                checkEl.innerHTML += '<li>No artist specified. There must be at least one Main artist.</li>';
+            }
+            if (document.getElementById('releasetype').value === '---') {
+                ++error;
+                checkEl.innerHTML += '<li>Release type (Album, EP, ...) not specified.</li>';
+            }
+            if (document.getElementById('year').value === '') {
+                ++error;
+                checkEl.innerHTML += '<li>No year specified. When was this released?</li>';
+            }
+            if (document.getElementById('album_desc').value === '') {
+                ++error;
+                checkEl.innerHTML += '<li>You need to add a description to this release (which also improves its chance of being snatched).</li>';
+            }
         }
-        if ($('#year').val() == '') {
+        if (document.getElementById('media').value === '---') {
             ++error;
-            $("#check").append('<li>No year specified. When was this released?</li>');
+            checkEl.innerHTML += '<li>Media type (CD, WEB, ...) not specified.</li>';
         }
-        if (is_new && $('#releasetype').val() == '---') {
+        if (document.getElementById('format').value === '---') {
             ++error;
-            $("#check").append('<li>Release type (Album, EP, ...) not specified.</li>');
+            checkEl.innerHTML += '<li>Format (FLAC, MP3, ...) not specified.</li>';
         }
-        if (is_new && $('#media').val() == '---') {
+        if (document.getElementById('bitrate').value === '---') {
             ++error;
-            $("#check").append('<li>Media type (CD, WEB, ...) not specified.</li>');
+            checkEl.innerHTML += '<li>Bitrate (Lossless, 320, V0 (VBR), ...) not specified.</li>';
         }
-        if (is_new && $('#format').val() == '---') {
-            ++error;
-            $("#check").append('<li>Format (FLAC, MP3, ...) not specified.</li>');
-        }
-        if ($('#bitrate').val() == '---') {
-            ++error;
-            $("#check").append('<li>Bitrate (Lossless, 320, V0 (VBR), ...) not specified.</li>');
-        }
-        if (LogCount > 1 && !$('#upload_logs')[0].classList.contains('hidden')) {
+        if (LogCount > 1 && !document.getElementById('upload_logs').classList.contains('hidden')) {
             let missing = 0;
             for (let i = 1; i <= LogCount; i++) {
-                if (!$('#logfile_' + i).val()) {
+                if (!document.getElementById('logfile_' + i)?.value) {
                     ++missing;
                 }
             }
             if (missing) {
                 ++error;
-                $("#check").append('<li>You specified that there was a logfile for this rip but did not add it (Expected: '
-                    + LogCount + ', missing: ' + missing + ').</li>');
+                checkEl.innerHTML += '<li>You specified that there was a logfile for this rip but did not add it '
+                    + `(Expected: ${LogCount}, missing: ${missing}).</li>`;
             }
         }
-        if ($('#album_desc').val() == '') {
-            ++error;
-            $("#check").append('<li>You need to add a description to this release (which also improves its chance of being snatched).</li>');
-        }
-    }
-    if (error) {
-        if (is_music) {
-            $("#check").append('<li>Using <b>YADG</b> solves many such problems automatically, check it out in the forums.</li>');
-        }
-        $("#check").append('<li><strong class="important_text">You must correct the above problems.</strong></li>');
-        $("#check").show();
-    } else {
-        $("#check").hide();
     }
 
-    return error == 0;
+    if (error) {
+        if (is_music) {
+            checkEl.innerHTML += '<li>Using <b>YADG</b> solves many such problems automatically, check it out in the forums.</li>';
+        }
+        checkEl.innerHTML += '<li><strong class="important_text">You must correct the above problems.</strong></li>';
+        checkEl.style.display = '';
+    } else {
+        checkEl.style.display = 'none';
+    }
+
+    return error === 0;
 }
 
 function musicFormInit() {
     $('#torrent-json-file').change(function () {
         ParseUploadJson();
-    });
-    $('#musicbrainz_button').click(function () {
-        MBshow();
-    });
-    $('#popup_close').click(function () {
-        MBhide();
     });
     $('#media').change(function () {
         changeMedia();
@@ -928,9 +887,6 @@ function musicFormInit() {
     });
     $('#other_bitrate_span').click(function () {
         AltBitrate();
-    });
-    $('#image').change(function () {
-        loadThumbnail();
     });
     ArtistCount      = 0;
     ArtistJsonCount  = 0;

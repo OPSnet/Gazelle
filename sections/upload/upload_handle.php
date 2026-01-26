@@ -41,26 +41,21 @@ $isMusicUpload  = ($categoryName === 'Music');
 $Properties = [];
 $Properties['Artists'] = $ArtistForm;
 $Properties['Title'] = isset($_POST['title']) ? trim($_POST['title']) : null;
-$Properties['Remastered'] = isset($_POST['remaster']);
-if ($Properties['Remastered'] || !empty($_POST['unknown'])) {
-    $Properties['UnknownRelease']          = !empty($_POST['unknown']) ? 1 : 0;
-    $Properties['RemasterYear']            = isset($_POST['remaster_year']) ? (int)$_POST['remaster_year'] : null;
-    $_POST['remaster_year']                = $Properties['RemasterYear'];
-    $Properties['RemasterTitle']           = trim($_POST['remaster_title'] ?? '');
-    $Properties['RemasterRecordLabel']     = trim($_POST['remaster_record_label'] ?? '');
-    $Properties['RemasterCatalogueNumber'] = trim($_POST['remaster_catalogue_number'] ?? '');
-}
-if (!$Properties['Remastered'] || $Properties['UnknownRelease']) {
-    $Properties['UnknownRelease']          = 1;
+if (isset($_POST['unknown'])) {
+    $Properties['UnknownRelease']          = true;
     $Properties['RemasterYear']            = null;
     $Properties['RemasterTitle']           = '';
     $Properties['RemasterRecordLabel']     = '';
     $Properties['RemasterCatalogueNumber'] = '';
+} else {
+    $Properties['UnknownRelease']          = false;
+    $Properties['RemasterYear']            = (int)($_POST['remaster_year'] ?? 0);
+    $Properties['RemasterTitle']           = trim($_POST['remaster_title'] ?? '');
+    $Properties['RemasterRecordLabel']     = trim($_POST['remaster_record_label'] ?? '');
+    $Properties['RemasterCatalogueNumber'] = trim($_POST['remaster_catalogue_number'] ?? '');
 }
 $Properties['Year'] = isset($_POST['year']) ? (int)$_POST['year'] : null;
 $_POST['year'] = $Properties['Year'];
-$Properties['RecordLabel'] = trim($_POST['record_label'] ?? '');
-$Properties['CatalogueNumber'] = trim($_POST['catalogue_number'] ?? '');
 $Properties['ReleaseType'] = (int)($_POST['releasetype'] ?? 0);
 $Properties['Scene'] = isset($_POST['scene']);
 $Properties['Format'] = isset($_POST['format']) ? trim($_POST['format']) : null;
@@ -100,7 +95,7 @@ if (!isset($_POST['workaround_broken_html_entities']) || $_POST['workaround_brok
     // html entities that need to be unmangled
     $brokenProperties = [ // pretty much everything that is not int/bool
         'Title', 'RemasterTitle', 'RemasterRecordLabel', 'RemasterCatalogueNumber',
-        'RecordLabel', 'CatalogueNumber', 'GroupDescription', 'Description'
+        'GroupDescription', 'Description'
     ];
     foreach ($brokenProperties as $prop) {
         if (!empty($Properties[$prop])) {
@@ -152,57 +147,40 @@ if (in_array($categoryName, ['Music', 'Audiobooks', 'Comedy'])) {
     }
 }
 
-$releaseTypes = new ReleaseType()->list();
-switch ($categoryName) {
-    case 'Audiobooks':
-        $Validate->setField('year', true, 'number', 'The year of the release must be entered.');
-        break;
-
-    case 'Music':
+$nextYear = (int)date('Y') + 1;
+if ($categoryName === 'Music') {
+    $Validate->setFields([
+        ['groupid', false, 'number', 'Group ID was not numeric'],
+        ['media', true, 'inarray','Please select a valid media.', ['inarray' => MEDIA]],
+        ['remaster_title', false, 'string','Remaster title must be between 1 and 80 characters.', ['range' => [1, 80]]],
+        ['remaster_record_label', false, 'string','Remaster record label must be between 1 and 80 characters.', ['range' => [1, 80]]],
+        ['remaster_catalogue_number', false, 'string','Remaster catalogue number must be between 1 and 80 characters.', ['range' => [1, 80]]],
+    ]);
+    if (!$Properties['GroupID']) {
         $Validate->setFields([
-            ['groupid', false, 'number', 'Group ID was not numeric'],
-            ['media', true, 'inarray','Please select a valid media.', ['inarray' => MEDIA]],
-            ['remaster_title', false, 'string','Remaster title must be between 1 and 80 characters.', ['range' => [1, 80]]],
-            ['remaster_record_label', false, 'string','Remaster record label must be between 1 and 80 characters.', ['range' => [1, 80]]],
-            ['remaster_catalogue_number', false, 'string','Remaster catalogue number must be between 1 and 80 characters.', ['range' => [1, 80]]],
+            ['year', true, 'number','The year of the original release must be entered.', ['maxlength' => $nextYear]],
+            ['releasetype', true, 'inarray','Please select a valid release type.', ['inarray' => array_keys(new ReleaseType()->list())]],
+            ['record_label', false, 'string','Record label must be between 1 and 80 characters.', ['range' => [1, 80]]],
+            ['catalogue_number', false, 'string','Catalogue Number must be between 1 and 80 characters.', ['range' => [1, 80]]],
         ]);
-        if (!$Properties['GroupID']) {
-            $Validate->setFields([
-                ['year', true, 'number','The year of the original release must be entered.', ['length' => 40]],
-                ['releasetype', true, 'inarray','Please select a valid release type.', ['inarray' => array_keys($releaseTypes)]],
-                ['record_label', false, 'string','Record label must be between 1 and 80 characters.', ['range' => [1, 80]]],
-                ['catalogue_number', false, 'string','Catalogue Number must be between 1 and 80 characters.', ['range' => [1, 80]]],
-            ]);
-            if ($Properties['Media'] == 'CD' && !$Properties['Remastered']) {
-                $Validate->setField('year', true, 'number', 'You have selected a year for an album that predates the media you say it was created on.', ['minlength' => 1982]);
-            }
-        }
-
-        if ($Properties['RemasterTitle'] === 'Original Release') {
-            $Validate->setField('remaster_title', false, 'string', '"Orginal Release" is not a valid remaster title.');
-        }
-        if (!$Properties['Remastered']) {
-            $Validate->setField('remaster_year', false, 'number', 'Invalid remaster year.');
+    }
+    if ($Properties['RemasterTitle'] === 'Original Release') {
+        $Validate->setField('remaster_title', false, 'string', '"Orginal Release" is not a valid remaster title.');
+    }
+    if (!$Properties['UnknownRelease']) {
+        if ($Properties['Media'] === 'CD') {
+            $Validate->setField('remaster_year', true, 'number',
+                'You have selected a year for an album that predates the media you say it was created on.',
+                ['minlength' => 1982, 'maxlength' => $nextYear]
+            );
         } else {
-            if (!$Properties['UnknownRelease']) {
-                $Validate->setField('remaster_year', true, 'number', 'Year of remaster/re-issue must be entered.');
-            }
-            if ($Properties['Media'] == 'CD') {
-                $Validate->setField('remaster_year', true, 'number', 'You have selected a year for an album that predates the media you say it was created on.',
-                    ['minlength' => 1982]
-                );
-            }
+            $Validate->setField('remaster_year', true, 'number',
+                'The year of the edition must be entered.', ['maxlength' => $nextYear]);
         }
-
-        if (!is_null($Properties['RemasterYear'])) {
-            $future = (int)date('Y') + 1;
-            if ($Properties['RemasterYear'] > $future) {
-                json_error(
-                    "You may not specify a remaster year that far in the future. Instead, set it to $future and report the upload afterwards to have the year set as appropriate by staff."
-                );
-            }
-        }
-        break;
+    }
+} elseif (in_array($categoryName, ['Audiobooks', 'Comedy'], true)) {
+    $Validate->setField('year', true, 'number',
+        'The year of the release must be entered.', ['maxlength' => $nextYear]);
 }
 
 if ($isMusicUpload && !$Properties['GroupID']) {
@@ -269,15 +247,6 @@ if ($Properties['Image']) {
     $banned = Util\ImageProxy::badHost($Properties['Image']);
     if ($banned) {
         json_error("Please rehost images from $banned elsewhere.");
-    }
-}
-
-if (!is_null($Properties['Year'])) {
-    $future = (int)date('Y') + 1;
-    if ($Properties['Year'] > $future) {
-        json_error(
-            "You may not specify a year that far in the future. Instead, set it to $future and report the upload afterwards to have the year set as appropriate by staff."
-        );
     }
 }
 
@@ -514,8 +483,6 @@ if ($tgroup) {
         categoryId:      $categoryId,
         name:            $Properties['Title'],
         year:            $Properties['Year'],
-        recordLabel:     $Properties['RecordLabel'],
-        catalogueNumber: $Properties['CatalogueNumber'],
         description:     $Properties['GroupDescription'],
         image:           $Properties['Image'],
         releaseType:     $Properties['ReleaseType'],
@@ -551,7 +518,6 @@ $torrent = $torMan->create(
     fileList:                $TmpFileList,
     size:                    $TotalSize,
     isScene:                 $Properties['Scene'],
-    isRemaster:              $Properties['Remastered'],
     remasterYear:            $Properties['RemasterYear'],
     remasterTitle:           $Properties['RemasterTitle'],
     remasterRecordLabel:     $Properties['RemasterRecordLabel'],
@@ -573,7 +539,6 @@ foreach ($upload['extra'] as &$info) {
         user:                    $Viewer,
         media:                   $Properties['Media'],
         isScene:                 $Properties['Scene'],
-        isRemaster:              $Properties['Remastered'],
         remasterYear:            $Properties['RemasterYear'],
         remasterTitle:           $Properties['RemasterTitle'],
         remasterRecordLabel:     $Properties['RemasterRecordLabel'],

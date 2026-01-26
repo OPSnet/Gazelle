@@ -22,7 +22,7 @@
                 <option value="{{ key }}"{{ selected(key == torrent.ReleaseType) }}>{{ name }}</option>
 {%  endfor %}
             </select>
-            <br />Please take the time to fill this out correctly (especially when adding Compilations and Anthologies). Need help? Try reading <a href="wiki.php?action=article&amp;id=58" target="_blank">this wiki article</a> or searching <a href="https://musicbrainz.org/search" target="_blank">MusicBrainz</a>.
+            <br>Please take the time to fill this out correctly (especially when adding Compilations and Anthologies). Need help? Try reading <a href="wiki.php?action=article&amp;id=58" target="_blank">this wiki article</a> or searching <a href="https://musicbrainz.org/search" target="_blank">MusicBrainz</a>.
         </td>
     </tr>
 {%  include 'upload/cover.twig' with {'is_uploaded': is_uploaded, 'image': torrent.Image} only %}
@@ -33,7 +33,7 @@
 {%  if torrent.Artists %}
 {%      for role, artist_list in torrent.Artists %}
 {%          for artist in artist_list %}
-            <input type="text" id="artist_{{ loop.index0 }}" name="artists[]" size="45" value="{{ artist.name }}"{{ autocomplete(user, 'other') }}{{ disabled(is_uploaded) }} onblur="CheckVA();" />
+            <input type="text" id="artist_{{ loop.index0 }}" name="artists[]" size="45" value="{{ artist.name }}"{{ autocomplete(user, 'other') }}{{ disabled(is_uploaded) }} onblur="CheckVA();">
             <select id="importance_{{ loop.index0 }}" name="importance[]"{{ disabled(is_uploaded) }}>
                 <option value="{{ constant('ARTIST_MAIN') }}"{{ selected(role == constant('ARTIST_MAIN')) }}>Main</option>
                 <option value="{{ constant('ARTIST_GUEST') }}"{{ selected(role == constant('ARTIST_GUEST')) }}>Guest</option>
@@ -47,11 +47,11 @@
 {%              if loop.parent.loop.first and loop.first and not is_uploaded %}
             <a href="javascript:AddArtistField()" class="brackets">+</a> <a href="javascript:RemoveArtistField()" class="brackets">&minus;</a>
 {%              endif %}
-            <br />
+            <br>
 {%          endfor %}
 {%      endfor %}
 {%  else %}
-            <input type="text" id="artist_0" name="artists[]" size="45" value="{{ artist.name }}"{{ autocomplete(user, 'other') }}{{ disabled(is_uploaded) }} onblur="CheckVA();" />
+            <input type="text" id="artist_0" name="artists[]" size="45" value="{{ artist.name }}"{{ autocomplete(user, 'other') }}{{ disabled(is_uploaded) }} onblur="CheckVA();">
             <select id="importance_0" name="importance[]"{{ disabled(is_uploaded) }}>
                 <option value="{{ constant('ARTIST_MAIN') }}">Main</option>
                 <option value="{{ constant('ARTIST_GUEST') }}">Guest</option>
@@ -70,58 +70,44 @@
     <tr id="title_tr">
         <td class="label">Album title:</td>
         <td>
-            <input type="text" id="title" name="title" size="60" value="{{ torrent.Title }}"{{ disabled(is_uploaded) }} />
+            <input type="text" id="title" name="title" size="60" value="{{ torrent.Title }}"{{ disabled(is_uploaded) }}>
             <p class="min_padding">Do not include the words remaster, re-issue, MFSL Gold, limited edition, bonus tracks, bonus disc or country-specific information in this field. That belongs in the edition information fields below; see <a href="wiki.php?action=article&amp;id=18" target="_blank">this</a> for further information. Also remember to use the correct capitalization for your upload. See the <a href="wiki.php?action=article&id=42" target="_blank">Capitalization Guidelines</a> for more information.</p>
         </td>
     </tr>
     <tr id="musicbrainz_tr">
         <td class="label tooltip" title="Click the &quot;Find Info&quot; button to automatically fill out parts of the upload form by selecting an entry in MusicBrainz">MusicBrainz:</td>
-        <td><input type="button" value="Find Info" id="musicbrainz_button" /></td>
+        <td><input type="button" value="Find Info" id="musicbrainz_button"></td>
     </tr>
     <tr id="year_tr">
         <td class="label">
-            <span id="year_label_not_remaster"{{ class_hidden(torrent.Remastered) }}>Year:</span>
-            <span id="year_label_remaster"{{ class_hidden(not torrent.Remastered) }}>Year of first release:</span>
+            <span id="year_label_not_remaster">Initial Year:</span>
         </td>
         <td>
-            <p id="yearwarning" class="hidden">You have entered a year for a release which predates the medium's availability. You will need to change the year and enter additional edition information. If this information cannot be provided, check the &quot;Unknown Release&quot; check box below.</p>
-            <input type="text" id="year" name="year" size="5" value="{{ torrent.Year }}"{{ disabled(is_uploaded) }} onblur="CheckYear();" />
-            <br />This is the year of the original release. You may be uploading a remaster or re-edition that was published more recently.
-            <br />If so, there is a place to add that date below (check Edition information).
-        </td>
-    </tr>
-    <tr id="label_tr">
-        <td class="label">Record label (optional):</td>
-        <td><input type="text" id="record_label" name="record_label" size="40" value="{{ torrent.RecordLabel }}"{{ disabled(is_uploaded) }} /></td>
-    </tr>
-    <tr id="catalogue_tr">
-        <td class="label">Catalogue number (optional):</td>
-        <td>
-            <input type="text" id="catalogue_number" name="catalogue_number" size="40" value="{{ torrent.CatalogueNumber }}"{{ disabled(is_uploaded) }} />
-            <br />
-            Please double-check the record label and catalogue number when using MusicBrainz. See <a href="wiki.php?action=article&amp;id=18" target="_blank">this guide</a> for more details.
+            <input type="number" id="year" name="year" size="5" max="{{ 'now'|date('Y') + 1 }}" value="{{ torrent.Year }}"{{ disabled(is_uploaded) }} onblur="CheckYear();">
+            <p id="album_year_notice">This relates to the year the album was first issued. You may be uploading a remaster or re-release that was published more recently. That year goes to the edition year below.</p>
         </td>
     </tr>
 {% endif %}{# new upload #}
-
     <tr>
         <td class="label">Edition information:</td>
         <td>
-            <input type="checkbox" id="remaster" name="remaster"{{ checked(torrent.Remastered) }} onclick="Remaster();{% if not torrent %}CheckYear();{% endif %}" />
-            <label for="remaster">Check this if this torrent is a different edition to the original, for example a remaster, country specific edition, or a release that includes additional bonus tracks or bonus discs.</label>
-            <div id="remaster_true"{{ class_hidden(not (torrent.Remastered)) }}>
-{% set unknown_release = torrent.Remastered and not torrent.RemasterYear %}
+            <p id="yearwarning" class="hidden">You have entered a year for a release which predates the medium's availability. You will need to change the year and enter additional edition information. If this information cannot be provided, check the &quot;Unknown Release&quot; check box below.</p>
+            Please double-check the record label and catalogue number when using MusicBrainz. See
+            <a href="wiki.php?action=article&amp;id=18" target="_blank">this guide</a> for more details.
+            <br>
+            <div id="remaster_true">
+{% set unknown_release = torrent.UploaderID is defined and not torrent.RemasterYear %}
 {% if user.permitted('edit_unknowns') or torrent.UploaderID is same as(user.id) %}
-                <br />
-                <label><input type="checkbox" id="unknown" name="unknown"{{ checked(unknown_release) }} onclick="{% if not torrent %}>CheckYear();{% endif %}ToggleUnknown();" />
+                <br>
+                <label><input type="checkbox" id="unknown" name="unknown"{{ checked(unknown_release) }} onchange="{% if not torrent %}CheckYear();{% endif %}ToggleUnknown();">
                 Unknown Release</label>
 {% endif %}
-                <br /><br />
+                <br><br>
 {% for index, remaster in tgroup.remasterList %}
 {%  if loop.first %}
-                <input type="hidden" id="json_remasters" value="{{ tgroup.remasterList|json_encode }}" />
+                <input type="hidden" id="json_remasters" value="{{ tgroup.remasterList|json_encode }}">
                 <select id="groupremasters" name="groupremasters" onchange="GroupRemaster()"{{ disabled(unknown_release) }}>
-                    <option value="">-------</option>
+                    <option value="">---</option>
 {%      set prev = '' %}
 {%  endif %}
 {%  set line = [remaster.year, remaster.title, remaster.record_label, remaster.catalogue_number]|join(' / ') %}
@@ -131,36 +117,34 @@
 {%  endif %}
 {%  if loop.last %}
                 </select>
-                <br />
+                <br>
 {%  endif %}
 {% endfor %}
                 <table id="edition_information" class="layout border" border="0" width="100%">
                     <tbody>
                         <tr id="edition_year">
-                            <td class="label">Year (required):</td>
+                            <td class="label">Edition Year:</td>
                             <td>
-                                <input type="text" id="remaster_year" name="remaster_year" size="5" value="{{ torrent.RemasterYear }}"{{ disabled(unknown_release) }} />
+                                <input type="number" id="remaster_year" name="remaster_year" max="{{ 'now'|date('Y') + 1 }}" size="5" value="{{ torrent.RemasterYear }}"{{ disabled(unknown_release) }}>
                             </td>
                         </tr>
                         <tr id="edition_title">
                             <td class="label">Title:</td>
                             <td>
-                                <input type="text" id="remaster_title" name="remaster_title" size="50" value="{{ torrent.RemasterTitle }}"{{ disabled(unknown_release) }} />
-                                <p class="min_padding">Title of the edition (e.g. <span style="font-style: italic;">"Deluxe Edition" or "Remastered"</span>).</p>
+                                <input type="text" id="remaster_title" name="remaster_title" size="50" value="{{ torrent.RemasterTitle }}"{{ disabled(unknown_release) }}>
+                                <p class="min_padding">Title of the edition, if any (e.g. <span style="font-style: italic;">"Deluxe Edition" or "Remastered"</span>).</p>
                             </td>
                         </tr>
                         <tr id="edition_record_label">
                             <td class="label">Record label:</td>
                             <td>
-                                <input type="text" id="remaster_record_label" name="remaster_record_label" size="50" value="{{ torrent.RemasterRecordLabel }}"{{ disabled(unknown_release) }} />
-                                <p class="min_padding">This is for the record label of the <strong>edition</strong>. It may differ from the original.</p>
+                                <input type="text" id="remaster_record_label" name="remaster_record_label" size="50" value="{{ torrent.RemasterRecordLabel }}"{{ disabled(unknown_release) }}>
                             </td>
                         </tr>
                         <tr id="edition_catalogue_number">
                             <td class="label">Catalogue number:</td>
                             <td>
-                                <input type="text" id="remaster_catalogue_number" name="remaster_catalogue_number" size="50" value="{{ torrent.RemasterCatalogueNumber }}"{{ disabled(unknown_release) }} />
-                                <p class="min_padding">This is for the catalogue number of the <strong>edition</strong>.</p>
+                                <input type="text" id="remaster_catalogue_number" name="remaster_catalogue_number" size="50" value="{{ torrent.RemasterCatalogueNumber }}"{{ disabled(unknown_release) }}>
                             </td>
                         </tr>
                     </tbody>
@@ -171,8 +155,8 @@
     <tr>
         <td class="label">Scene:</td>
         <td>
-            <label><input type="checkbox" id="scene" name="scene"{{ checked(torrent.Scene) }} />
-            Select this only if this is a "scene release".<br />
+            <label><input type="checkbox" id="scene" name="scene"{{ checked(torrent.Scene) }}>
+            Select this only if this is a "scene release".<br>
             If you ripped it yourself, it is <strong>not</strong> a scene release. If you are not sure, <strong class="important_text">do not</strong> select it; you will be penalized. For information on the scene, visit <a href="https://en.wikipedia.org/wiki/Warez_scene" target="_blank">Wikipedia</a>.</label>
         </td>
     </tr>
@@ -180,7 +164,7 @@
     <tr>
         <td class="label">Showcase:</td>
         <td>
-            <label><input type="checkbox" id="vanity_house" name="vanity_house"{{ checked(torrent.VanityHouse) }} />
+            <label><input type="checkbox" id="vanity_house" name="vanity_house"{{ checked(torrent.VanityHouse) }}>
             Check this only if you are submitting your own work or submitting on behalf of the artist, and this is intended to be a Showcase release.</label>
         </td>
     </tr>
@@ -200,18 +184,18 @@
 {% include 'upload/bitrate.twig' with {'bitrate': torrent.Bitrate} %}
     <tr id="upload_logs"{{ class_hidden(not torrent or torrent.Media != 'CD') }}>
         <td class="label">
-            Log files:<br /><a href="javascript:;" onclick="AddLogField('{{ logchecker_accept }}');" class="brackets">+</a> <a href="javascript:;" onclick="RemoveLogField();" class="brackets">&minus;</a>
+            Log files:<br><a href="javascript:;" onclick="AddLogField('{{ logchecker_accept }}');" class="brackets">+</a> <a href="javascript:;" onclick="RemoveLogField();" class="brackets">&minus;</a>
         </td>
         <td id="logfields">
             <a class="brackets" href="logchecker.php" target="_blank">Logchecker</a>
-            You may analyze your log files prior uploading to verify that they are perfect.<br />For multi-disc releases, click the "<span class="brackets">+</span>" button to add multiple log files.<br />
-            <input id="logfile_1" type="file" accept="{{ logchecker_accept }}" multiple name="logfiles[]" size="50" />
+            You may analyze your log files prior uploading to verify that they are perfect.<br>For multi-disc releases, click the "<span class="brackets">+</span>" button to add multiple log files.<br>
+            <input id="logfile_1" type="file" accept="{{ logchecker_accept }}" multiple name="logfiles[]" size="50">
         </td>
     </tr>
 {% if not tgroup or add_format %}
     <tr>
         <td class="label">Multi-format uploader:</td>
-        <td><input type="button" value="+" id="add_format" />&nbsp;<input type="button" style="display: none;" value="-" id="remove_format" /></td>
+        <td><input type="button" value="+" id="add_format">&nbsp;<input type="button" style="display: none;" value="-" id="remove_format"></td>
     </tr>
     <tr id="placeholder_row_top"></tr>
     <tr id="extra_format_placeholder"></tr>
@@ -220,10 +204,10 @@
     <tr>
         <td class="label">Log/cue:</td>
         <td>
-            <label><input type="checkbox" id="flac_log" name="flac_log"{{ checked(torrent.HasLog) }} />
-            Check this box if the torrent has, or should have, a log file.</label><br />
-            <label><input type="checkbox" id="flac_cue" name="flac_cue"{{ checked(torrent.HasCue) }} />
-            Check this box if the torrent has, or should have, a cue file.</label><br />
+            <label><input type="checkbox" id="flac_log" name="flac_log"{{ checked(torrent.HasLog) }}>
+            Check this box if the torrent has, or should have, a log file.</label><br>
+            <label><input type="checkbox" id="flac_cue" name="flac_cue"{{ checked(torrent.HasCue) }}>
+            Check this box if the torrent has, or should have, a cue file.</label><br>
         </td>
     </tr>
 {%  endif %}
@@ -232,7 +216,7 @@
     <tr>
         <td class="label">{{ flag.label }}:</td>
         <td>
-            <label><input type="checkbox" id="{{ flag.value }}" name="{{ flag.value }}"{{ checked(torrent[flag.value]) }} />
+            <label><input type="checkbox" id="{{ flag.value }}" name="{{ flag.value }}"{{ checked(torrent[flag.value]) }}>
             {{ flag.description }}</label>
         </td>
     </tr>

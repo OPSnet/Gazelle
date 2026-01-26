@@ -12,7 +12,7 @@ class Transcode extends \Gazelle\Base {
      * based on what a user is seeding or has snatched.
      */
 
-    protected const CACHE_KEY          = 'u_better_%s_%s_%d';
+    protected const CACHE_KEY          = 'u_better_2_%s_%s_%d';
     protected BetterFilter $mode       = BetterFilter::any;
     protected BetterEncoding $encoding = BetterEncoding::any;
     protected string $search;
@@ -90,7 +90,7 @@ class Transcode extends \Gazelle\Base {
                 b.tgroup_id = t.GroupID
                 AND b.edition = concat_ws(
                     char(31),
-                    t.Remastered, t.RemasterYear, t.RemasterTitle, t.RemasterRecordLabel, t.RemasterCatalogueNumber
+                    t.RemasterYear, t.RemasterTitle, t.RemasterRecordLabel, t.RemasterCatalogueNumber
                 )
             )
             $join";

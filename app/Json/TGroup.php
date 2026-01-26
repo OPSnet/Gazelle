@@ -21,8 +21,6 @@ class TGroup extends \Gazelle\Json {
             'id'              => $tgroup->id,
             'name'            => $tgroup->name(),
             'year'            => $tgroup->year(),
-            'recordLabel'     => $tgroup->recordLabel() ?? '',
-            'catalogueNumber' => $tgroup->catalogueNumber() ?? '',
             'releaseType'     => $tgroup->releaseType() ?? '',
             'releaseTypeName' => $tgroup->releaseTypeName(),
             'categoryId'      => $tgroup->categoryId(),

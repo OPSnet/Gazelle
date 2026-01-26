@@ -19,7 +19,6 @@ describe('uploading torrent', () => {
         cy.get('#importance_1').select('Guest');
         cy.get('#title').type('Some Album');
         cy.get('#year').type('2022');
-        cy.get('#remaster').click();
         cy.get('#remaster_year').type('2023');
         cy.get('#remaster_title').type('test edition');
         cy.get('#remaster_record_label').type('Cool Test Label!');
@@ -55,7 +54,6 @@ describe('uploading torrent', () => {
         cy.get('#importance_0').select('Main');
         cy.get('#title').type('Some Album');
         cy.get('#year').type('2022');
-        cy.get('#remaster').click();
         cy.get('#remaster_year').type('2023');
         cy.get('#remaster_title').type('test edition');
         cy.get('#remaster_record_label').type('Cool Test Label!');

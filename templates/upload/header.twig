@@ -22,7 +22,6 @@
 {% if not is_upload %}
         <input type="hidden" name="action" value="takeedit" />
         <input type="hidden" name="torrentid" value="{{ info.ID }}" />
-        <input type="hidden" name="type" id="edittype" value="{{ info.CategoryID }}" />
 {% else %}
         <input type="hidden" id="torrent-new" name="torrent-new" value="{{ (info is not iterable)|number_format }}" />
     {%  if info.GroupID %}

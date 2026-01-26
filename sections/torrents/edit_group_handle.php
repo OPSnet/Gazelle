@@ -106,18 +106,6 @@ if ($tgroup->categoryName() === 'Music') {
         $logInfo[] = "Release type {$rt->findNameById($tgroup->releaseType())} → $newReleaseTypeName";
     }
 
-    $recordLabel = trim($_POST['record_label'] ?? '');
-    if ($tgroup->recordLabel() !== $recordLabel) {
-        $tgroup->setField('RecordLabel', $recordLabel);
-        $log[] = "record label \"{$tgroup->recordLabel()}\" → \"$recordLabel\"";
-    }
-
-    $catNumber = trim($_POST['catalogue_number'] ?? '');
-    if ($tgroup->catalogueNumber() !== $catNumber) {
-        $tgroup->setField('CatalogueNumber', $catNumber);
-        $log[] = "cat number \"{$tgroup->catalogueNumber()}\" → \"$catNumber\"";
-    }
-
     $showcase = isset($_POST['vanity_house']);
     if ($tgroup->isShowcase() != $showcase) {
         if (!$Viewer->permitted('torrents_edit_vanityhouse')) {

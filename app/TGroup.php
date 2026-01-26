@@ -10,7 +10,7 @@ use Gazelle\Intf\CollageEntry;
 
 class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, CollageEntry {
     final public const tableName            = 'torrents_group';
-    final public const CACHE_KEY            = 'tg_%d';
+    final public const CACHE_KEY            = 'tg_2_%d';
     final public const CACHE_TLIST_KEY      = 'tlist_%d';
     final public const CACHE_COVERART_KEY   = 'tg_cover_%d';
     final public const USER_RECENT_UPLOAD   = 'u_recent_up_%d';
@@ -183,7 +183,7 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
                         SELECT t.ID
                         FROM torrents t
                         WHERE t.GroupID = ?
-                        ORDER BY t.Remastered, (t.RemasterYear != 0) DESC, t.RemasterYear, t.RemasterTitle,
+                        ORDER BY (t.RemasterYear IS NOT NULL) DESC, t.RemasterYear, t.RemasterTitle,
                             t.RemasterRecordLabel, t.RemasterCatalogueNumber, t.Media, t.Format, t.Encoding, t.ID
                         ", $this->id
                     );
@@ -203,8 +203,6 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
             . " tg.ID,
                 tg.Name,
                 tg.Year,
-                tg.RecordLabel,
-                tg.CatalogueNumber,
                 tg.ReleaseType,
                 tg.CategoryID,
                 tg.Time,
@@ -240,9 +238,6 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
 
         // make the values sane (null, boolean as appropriate)
         // TODO: once all get_*_info calls have been ported over, do this prior to caching
-        foreach (['CatalogueNumber', 'RecordLabel'] as $nullable) {
-            $info[$nullable] = $info[$nullable] == '' ? null : $info[$nullable];
-        }
         $info['VanityHouse'] = ($info['VanityHouse'] == 1);
         $info['ReleaseType'] = (int)$info['ReleaseType'];
 
@@ -268,7 +263,7 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
             SELECT t.ID
             FROM torrents t
             WHERE t.GroupID = ?
-            ORDER BY t.Remastered, (t.RemasterYear != 0) DESC, t.RemasterYear, t.RemasterTitle,
+            ORDER BY (t.RemasterYear IS NOT NULL) DESC, t.RemasterYear, t.RemasterTitle,
                 t.RemasterRecordLabel, t.RemasterCatalogueNumber, t.Media, t.Format, t.Encoding, t.ID
             ", $this->id
         );
@@ -323,10 +318,6 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
 
     public function hasArtistRole(): bool {
         return $this->artistRole() instanceof ArtistRole\TGroup;
-    }
-
-    public function catalogueNumber(): ?string {
-        return $this->info()['CatalogueNumber'];
     }
 
     public function categoryId(): int {
@@ -397,10 +388,6 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
         return $this->info()['Name'];
     }
 
-    public function recordLabel(): ?string {
-        return $this->info()['RecordLabel'];
-    }
-
     /**
      * @return int Release type (will be null for non-Music categories)
      */
@@ -424,8 +411,7 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
                 RemasterRecordLabel     AS record_label,
                 RemasterCatalogueNumber AS catalogue_number
             FROM torrents
-            WHERE Remastered = '1'
-                AND RemasterYear != 0
+            WHERE RemasterYear IS NOT NULL
                 AND GroupID = ?
             GROUP BY RemasterYear,
                 cast(RemasterTitle AS binary),
@@ -501,6 +487,10 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
 
     public function torrentIdList(): array {
         return $this->info()['torrent_list'];
+    }
+
+    public function yieldTorrents(Manager\Torrent $torMan = new Manager\Torrent()): \Generator {
+        return object_generator($torMan, $this->torrentIdList());
     }
 
     /**
@@ -753,16 +743,16 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
 
         self::$db->prepared_query("
             REPLACE INTO sphinx_delta
-                (ID, GroupID, GroupName, Year, CategoryID, Time, ReleaseType, RecordLabel,
-                CatalogueNumber, VanityHouse, Size, Snatched, Seeders, Leechers, LogScore, Scene, HasLog,
+                (ID, GroupID, GroupName, Year, CategoryID, Time, ReleaseType,
+                VanityHouse, Size, Snatched, Seeders, Leechers, LogScore, Scene, HasLog,
                 HasCue, FreeTorrent, Media, Format, Encoding, Description, RemasterYear, RemasterTitle,
                 RemasterRecordLabel, RemasterCatalogueNumber, FileList, TagList, VoteScore, ArtistName)
             SELECT
                 t.ID, g.ID, g.Name, g.Year, g.CategoryID, t.created, g.ReleaseType,
-                g.RecordLabel, g.CatalogueNumber, g.VanityHouse, t.Size, tls.Snatched, tls.Seeders,
-                tls.Leechers, t.LogScore, cast(t.Scene AS CHAR), cast(t.HasLog AS CHAR), cast(t.HasCue AS CHAR),
+                g.VanityHouse, t.Size, tls.Snatched, tls.Seeders, tls.Leechers, t.LogScore,
+                cast(t.Scene AS CHAR), cast(t.HasLog AS CHAR), cast(t.HasCue AS CHAR),
                 cast(t.FreeTorrent AS CHAR), t.Media, t.Format, t.Encoding, t.Description,
-                coalesce(t.RemasterYear, 0), t.RemasterTitle, t.RemasterRecordLabel, t.RemasterCatalogueNumber,
+                t.RemasterYear, t.RemasterTitle, t.RemasterRecordLabel, t.RemasterCatalogueNumber,
                 replace(replace(t.FileList, '_', ' '), '/', ' ') AS FileList,
                 replace(group_concat(coalesce(t2.Name, '') SEPARATOR ' '), '.', '_'), ?, ?
             FROM torrents t
@@ -922,21 +912,19 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
      * Return info about the deleted masterings of a torrent group.
      *
      * @return array of strings imploded by '!!'
-     *  [torrent_id, remastered, title, year, record_label, catalogue_number]
+     *  [torrent_id, title, year, record_label, catalogue_number]
      */
     public function deletedMasteringList(): array {
         self::$db->prepared_query("
-            SELECT d.Media                                                            AS media,
-                d.Remastered = '1'                                                    AS remastered,
-                d.RemasterTitle                                                       AS title,
-                if(d.Remastered = '1', d.RemasterYear, tg.Year)                       AS year,
-                if(d.Remastered = '1', d.RemasterRecordLabel, tg.RecordLabel)         AS record_label,
-                if(d.Remastered = '1', d.RemasterCatalogueNumber, tg.CatalogueNumber) AS catalogue_number
+            SELECT d.Media                AS media,
+                d.RemasterTitle           AS title,
+                d.RemasterYear            AS year,
+                d.RemasterRecordLabel     AS record_label,
+                d.RemasterCatalogueNumber AS catalogue_number
             FROM deleted_torrents d
-            LEFT JOIN torrents_group tg ON (tg.ID = d.GroupID)
             WHERE d.GroupID = ?
-            GROUP BY remastered, year, title, record_label, catalogue_number, media
-            ORDER BY remastered, year, title, record_label, catalogue_number, media
+            GROUP BY year, title, record_label, catalogue_number, media
+            ORDER BY year, title, record_label, catalogue_number, media
             ", $this->id
         );
         return self::$db->to_array(false, MYSQLI_ASSOC);

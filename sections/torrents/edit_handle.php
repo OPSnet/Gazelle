@@ -38,25 +38,16 @@ $Properties = [
     'Media'       => $_POST['media'] ?? '',
     'HasLog'      => isset($_POST['flac_log']),
     'HasCue'      => isset($_POST['flac_cue']),
-    'Remastered'  => isset($_POST['remaster']),
     'Scene'       => isset($_POST['scene']),
 ];
 if (isset($_POST['album_desc'])) {
     $Properties['GroupDescription'] = trim($_POST['album_desc']);
 }
-if ($Properties['Remastered']) {
-    $Properties['UnknownRelease']          = isset($_POST['unknown']);
-    $Properties['RemasterYear']            = isset($_POST['remaster_year']) ? (int)$_POST['remaster_year'] : null;
-    $Properties['RemasterTitle']           = trim($_POST['remaster_title'] ?? '');
-    $Properties['RemasterRecordLabel']     = trim($_POST['remaster_record_label'] ?? '');
-    $Properties['RemasterCatalogueNumber'] = trim($_POST['remaster_catalogue_number'] ?? '');
-} else {
-    $Properties['UnknownRelease']          = false;
-    $Properties['RemasterYear']            = null;
-    $Properties['RemasterTitle']           = '';
-    $Properties['RemasterRecordLabel']     = '';
-    $Properties['RemasterCatalogueNumber'] = '';
-}
+$Properties['UnknownRelease']          = isset($_POST['unknown']);
+$Properties['RemasterYear']            = (int)($_POST['remaster_year'] ?? 0);
+$Properties['RemasterTitle']           = trim($_POST['remaster_title'] ?? '');
+$Properties['RemasterRecordLabel']     = trim($_POST['remaster_record_label'] ?? '');
+$Properties['RemasterCatalogueNumber'] = trim($_POST['remaster_catalogue_number'] ?? '');
 foreach (TorrentFlag::cases() as $flag) {
     $Properties[$flag->value] = isset($_POST[$flag->value]);
 }
@@ -65,24 +56,17 @@ foreach (TorrentFlag::cases() as $flag) {
 //--------------- Validate data in edit form -----------------------------------//
 
 if (!$Viewer->permitted('edit_unknowns')) {
-    $remastered   = $torrent->isRemastered();
-    $remasterYear = $torrent->remasterYear();
-    if ($remastered && !$remasterYear) {
-        Error400::error("You must supply a remaster year for a remastered release");
-    }
-    if ($Properties['UnknownRelease'] && !($remastered && !$remasterYear)) { /** @phpstan-ignore-line *//* wtf is this logic */
-        if ($Viewer->id != $uploaderId) {
-            Error400::error("You cannot set a release to be Unknown");
-        }
-    }
-    if ($Viewer->id !== $uploaderId && $Properties['Remastered'] && !$Properties['RemasterYear']) {
-        $Err = "You may not set someone else's upload to unknown release.";
+    if (
+        $Viewer->id !== $uploaderId
+        && $Properties['UnknownRelease']
+        && $torrent->remasterYear() !== null
+    ) {
+        Error400::error("You may not set someone else's upload to unknown release.");
     }
 }
 
 $Validate = new Util\Validator();
-$Validate->setField('type', true, 'number', 'Not a valid category.', ['range' => [1, count(CATEGORY)]]);
-switch (CATEGORY[(int)($_POST['type'] ?? 0) - 1]) {
+switch ($torrent->group()->categoryName()) {
     case 'Music':
         if (!is_null($Properties['RemasterYear'])) {
             $future = (int)date('Y') + 1;
@@ -92,7 +76,7 @@ switch (CATEGORY[(int)($_POST['type'] ?? 0) - 1]) {
                 );
             }
         }
-        if ($Properties['Remastered'] && !$Properties['UnknownRelease'] && $Properties['RemasterYear'] < 1982 && $Properties['Media'] == 'CD') {
+        if (!$Properties['UnknownRelease'] && $Properties['RemasterYear'] < 1982 && $Properties['Media'] == 'CD') {
             Error400::error(
                 'You have selected a year for an album that predates the medium you say it was created on.'
             );
@@ -111,10 +95,13 @@ switch (CATEGORY[(int)($_POST['type'] ?? 0) - 1]) {
             ['remaster_catalogue_number', false, 'string', 'Remaster catalogue number must be between 1 and 80 characters.', ['range' => [1, 80]]],
         ]);
 
-        if ($Properties['Remastered'] && !$Properties['UnknownRelease']) {
-            $Validate->setField('remaster_year', true, 'number', 'Year of remaster/re-issue must be entered.');
+        if ($Properties['UnknownRelease']) {
+            $Properties['RemasterYear']            = null;
+            $Properties['RemasterTitle']           = '';
+            $Properties['RemasterRecordLabel']     = '';
+            $Properties['RemasterCatalogueNumber'] = '';
         } else {
-            $Validate->setField('remaster_year', false, 'number', 'Invalid remaster year.');
+            $Validate->setField('remaster_year', true, 'number', 'Year of remaster/re-issue must be entered.');
         }
 
         if ($Properties['Encoding'] !== 'Other') {
@@ -175,7 +162,6 @@ $propertyMap = [
     'Scene'                   => 'isScene',
     'Description'             => 'description',
     'RemasterYear'            => 'remasterYear',
-    'Remastered'              => 'isRemastered',
     'RemasterTitle'           => 'remasterTitle',
     'RemasterRecordLabel'     => 'remasterRecordLabel',
     'RemasterCatalogueNumber' => 'remasterCatalogueNumber',
@@ -198,7 +184,7 @@ foreach ($propertyMap as $field => $method) {
             } else {
                 $change[] = "$field $value → {$Properties[$field]}";
             }
-            if (in_array($field, ['Remastered', 'Scene'])) {
+            if ($field === 'Scene') {
                 $torrent->setField($field, $Properties[$field] ? '1' : '0');
             } else {
                 $torrent->setField($field, $Properties[$field]);

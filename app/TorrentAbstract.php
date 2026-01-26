@@ -75,7 +75,7 @@ abstract class TorrentAbstract extends BaseAttrObject {
         if (isset($this->info)) {
             return $this->info;
         }
-        $key = sprintf($this->isDeleted() ? TorrentDeleted::CACHE_KEY : Torrent::CACHE_KEY, $this->id);
+        $key = sprintf(static::CACHE_KEY, $this->id);  // @phpstan-ignore-line late static binding
         $info = self::$cache->get_value($key);
         if ($info === false) {
             $info = $this->infoRow();
@@ -85,7 +85,7 @@ abstract class TorrentAbstract extends BaseAttrObject {
             foreach (['last_action', 'LastReseedRequest', 'RemasterCatalogueNumber', 'RemasterRecordLabel', 'RemasterTitle', 'RemasterYear'] as $nullable) {
                 $info[$nullable] = $info[$nullable] == '' ? null : $info[$nullable];
             }
-            foreach (['LogChecksum', 'HasCue', 'HasLog', 'HasLogDB', 'Remastered', 'Scene'] as $zerotruth) {
+            foreach (['LogChecksum', 'HasCue', 'HasLog', 'HasLogDB', 'Scene'] as $zerotruth) {
                 $info[$zerotruth] = !($info[$zerotruth] == '0');
             }
 
@@ -137,24 +137,14 @@ abstract class TorrentAbstract extends BaseAttrObject {
         if ($tgroup->categoryName() !== 'Music') {
             return '';
         }
-        if ($this->isRemastered()) {
-            $edition = [
-                $this->remasterRecordLabel(),
-                $this->remasterCatalogueNumber(),
-                $this->remasterTitle(),
-            ];
-        } elseif ($tgroup->recordLabel() || $tgroup->catalogueNumber()) {
-            $edition = [
-                $tgroup->recordLabel(),
-                $tgroup->catalogueNumber(),
-            ];
-        } else {
-            $edition = [
-                'Original Release',
-            ];
+        if ($this->remasterYear() === null) {
+            return 'Unknown edition';
         }
-        $edition = implode(' / ', array_filter($edition, fn($e) => !is_null($e)));
-        return $this->isRemastered() ? ($this->remasterYear() . " – " . $edition) : $edition;
+        return $this->remasterYear() . " – " . implode(' / ', array_filter([
+            $this->remasterRecordLabel(),
+            $this->remasterCatalogueNumber(),
+            $this->remasterTitle(),
+        ], fn($e) => (bool)$e));
     }
 
     /**
@@ -425,15 +415,8 @@ abstract class TorrentAbstract extends BaseAttrObject {
         );
     }
 
-    /**
-     * Is this a remastered release?
-     */
-    public function isRemastered(): bool {
-        return $this->info()['Remastered'] ?? false;
-    }
-
     public function isRemasteredUnknown(): bool {
-        return $this->isRemastered() && !$this->remasterYear();
+        return $this->remasterYear() === null;
     }
 
     public function isScene(): bool {
@@ -542,7 +525,6 @@ abstract class TorrentAbstract extends BaseAttrObject {
     public function remasterTuple(): string {
         return implode('!!', [
             $this->media(),
-            $this->isRemastered(),
             $this->remasterTitle(),
             $this->remasterYear(),
             $this->remasterRecordLabel(),

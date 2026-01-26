@@ -4,7 +4,7 @@ namespace Gazelle;
 
 class Torrent extends TorrentAbstract {
     final public const tableName               = 'torrents';
-    final public const CACHE_KEY               = 't2_%d';
+    final public const CACHE_KEY               = 't_%d';
     final public const CACHE_FOLDERNAME        = 'foldername_%s';
     final public const CACHE_KEY_PEERLIST_PAGE = 'peerlist_page_%d_%d';
     final public const USER_RECENT_UPLOAD      = 'u_recent_up_%d';
@@ -25,7 +25,6 @@ class Torrent extends TorrentAbstract {
                 t.Media,
                 t.Format,
                 t.Encoding,
-                t.Remastered,
                 t.RemasterYear,
                 t.RemasterTitle,
                 t.RemasterCatalogueNumber,

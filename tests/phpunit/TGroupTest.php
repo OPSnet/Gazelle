@@ -33,8 +33,6 @@ class TGroupTest extends TestCase {
             categoryId:      CATEGORY_MUSIC,
             name:            $this->name,
             year:            $this->year,
-            recordLabel:     $this->recordLabel,
-            catalogueNumber: $this->catalogueNumber,
             description:     "Description of {$this->name}",
             image:           'https://example.com/' . randomString(10) . '.jpg',
             releaseType:     new ReleaseType()->findIdByName('Live album'),
@@ -91,8 +89,6 @@ class TGroupTest extends TestCase {
         $this->assertEquals('Live album', $this->tgroup->releaseTypeName(), 'tgroup-create-release-type-name');
         $this->assertEquals($this->name, $this->tgroup->name(), 'tgroup-create-name');
         $this->assertEquals($this->year, $this->tgroup->year(), 'tgroup-create-year');
-        $this->assertEquals($this->recordLabel, $this->tgroup->recordLabel(), 'tgroup-create-record-label');
-        $this->assertEquals($this->catalogueNumber, $this->tgroup->catalogueNumber(), 'tgroup-create-catalogue-number');
         $this->assertEquals(0, $this->tgroup->unresolvedReportsTotal(), 'tgroup-create-unresolved-reports');
         $this->assertEquals($this->tgroup->name(), $this->tgroup->flush()->name(), 'tgroup-create-flush');
         $this->assertStringStartsWith('https://example.com/', $this->tgroup->image(), 'tgroup-create-image');
@@ -371,16 +367,15 @@ class TGroupTest extends TestCase {
         ['group' => $group, 'torrents' => $torrentList] = $json->payload();
         $this->assertEquals(
             ["wikiBody", "wikiBBcode", "wikiImage", "proxyImage", "id", "name",
-             "year", "recordLabel", "catalogueNumber", "releaseType",
-             "releaseTypeName", "categoryId", "categoryName", "time",
-             "vanityHouse", "isBookmarked", "tags", "musicInfo"
+             "year", "releaseType", "releaseTypeName", "categoryId", "categoryName",
+             "time", "vanityHouse", "isBookmarked", "tags", "musicInfo"
             ],
             array_keys($group),
             'tgroup-json-group'
         );
         $this->assertCount(3, $torrentList, 'tgroup-json-torrent-total');
         $this->assertEquals(
-            ["infoHash", "id", "media", "format", "encoding", "remastered",
+            ["infoHash", "id", "media", "format", "encoding",
             "remasterYear", "remasterTitle", "remasterRecordLabel",
             "remasterCatalogueNumber", "scene", "hasLog", "hasCue", "logScore",
             "logChecksum", "logCount", "ripLogIds", "fileCount", "size",
@@ -398,7 +393,7 @@ class TGroupTest extends TestCase {
         );
         // no infohash if not uploader
         $this->assertEquals(
-            ["id", "media", "format", "encoding", "remastered", "remasterYear",
+            ["id", "media", "format", "encoding", "remasterYear",
             "remasterTitle", "remasterRecordLabel", "remasterCatalogueNumber",
             "scene", "hasLog", "hasCue", "logScore", "logChecksum", "logCount",
             "ripLogIds", "fileCount", "size", "seeders", "leechers", "snatched",
@@ -467,8 +462,6 @@ class TGroupTest extends TestCase {
             categoryId:      1,
             name:            $this->name . ' merge ' . randomString(10),
             year:            $this->year,
-            recordLabel:     $this->recordLabel,
-            catalogueNumber: $this->catalogueNumber,
             description:     "Description of {$this->name} merge",
             image:           '',
             releaseType:     new ReleaseType()->findIdByName('Live album'),

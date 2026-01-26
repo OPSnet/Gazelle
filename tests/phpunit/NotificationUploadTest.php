@@ -23,8 +23,6 @@ class NotificationUploadTest extends TestCase {
             description:     'phpunit notify description',
             image:           '',
             year:            2022,
-            recordLabel:     'Unitest Artists Corporation',
-            catalogueNumber: 'UA-246',
             showcase:        false,
         );
         $tgroup->addArtists([ARTIST_MAIN], ['phpunit notify ' . randomString(6)]);
@@ -51,7 +49,6 @@ class NotificationUploadTest extends TestCase {
             fileList:                [],
             size:                    123_456_789,
             isScene:                 false,
-            isRemaster:              true,
             remasterYear:            2023,
             remasterTitle:           '',
             remasterRecordLabel:     'Unitest Artists',
@@ -418,7 +415,6 @@ class NotificationUploadTest extends TestCase {
             fileList:                [],
             size:                    123_456_789,
             isScene:                 false,
-            isRemaster:              true,
             remasterYear:            2023,
             remasterTitle:           '',
             remasterRecordLabel:     'Unitest Artists',
@@ -465,7 +461,6 @@ class NotificationUploadTest extends TestCase {
             fileList:                [],
             size:                    123_456_789,
             isScene:                 false,
-            isRemaster:              true,
             remasterYear:            2023,
             remasterTitle:           '',
             remasterRecordLabel:     'Unitest Artists',

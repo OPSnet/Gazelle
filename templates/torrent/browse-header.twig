@@ -45,13 +45,13 @@
         <tr id="record_label" class="ftr_advanced{{ hidden(show_basic)  }}">
             <td class="label">Record label:</td>
             <td colspan="3" class="ft_recordlabel">
-                <input type="search" spellcheck="false" size="40" name="recordlabel" class="inputtext smaller fti_advanced" value="{{ input.recordlabel }}" />
+                <input type="search" spellcheck="false" size="40" name="remasterrecordlabel" class="inputtext smaller fti_advanced" value="{{ input.remasterrecordlabel }}" />
             </td>
         </tr>
         <tr id="catalogue_number_year" class="ftr_advanced{{ hidden(show_basic)  }}">
             <td class="label">Catalogue number:</td>
             <td class="ft_cataloguenumber">
-                <input type="search" size="40" name="cataloguenumber" class="inputtext smallest fti_advanced" value="{{ input.cataloguenumber }}" />
+                <input type="search" size="40" name="remastercataloguenumber" class="inputtext smallest fti_advanced" value="{{ input.remastercataloguenumber }}" />
             </td>
             <td class="label">Year:</td>
             <td class="ft_year">
@@ -71,18 +71,6 @@
             <td class="label">Edition year:</td>
             <td class="ft_remasteryear">
                 <input type="search" name="remasteryear" class="inputtext smallest fti_advanced" value="{{ input.remasteryear }}" size="4" />
-            </td>
-        </tr>
-        <tr id="edition_label" class="ftr_advanced{{ hidden(show_basic or (not show_remaster)) }}">
-            <td class="label">Edition record label:</td>
-            <td colspan="3" class="ft_remasterrecordlabel">
-                <input type="search" spellcheck="false" size="40" name="remasterrecordlabel" class="inputtext smaller fti_advanced" value="{{ input.remasterrecordlabel }}" />
-            </td>
-        </tr>
-        <tr id="edition_catalogue" class="ftr_advanced{{ hidden(show_basic or (not show_remaster)) }}">
-            <td class="label">Edition catalogue number:</td>
-            <td colspan="3" class="ft_remastercataloguenumber">
-                <input type="search" size="40" name="remastercataloguenumber" class="inputtext smallest fti_advanced" value="{{ input.remastercataloguenumber }}" />
             </td>
         </tr>
         <tr id="file_list" class="ftr_advanced{{ hidden(show_basic) }}">

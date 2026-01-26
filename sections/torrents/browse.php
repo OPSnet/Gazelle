@@ -102,11 +102,7 @@ echo $Twig->render('torrent/browse-header.twig', [
     'results_total' => $RealNumResults,
     'results_shown' => $NumResults,
     'show_basic'    => !$advancedSearch,
-    'show_remaster' =>
-           isset($_GET['remastercataloguenumber'])
-        || isset($_GET['remasterrecordlabel'])
-        || isset($_GET['remastertitle'])
-        || isset($_GET['remasteryear']),
+    'show_remaster' => isset($_GET['remastertitle']) || isset($_GET['remasteryear']),
     'show_search'   => (bool)$Viewer->option('ShowTorFilter'),
     'tag_default'   => $tagMan->genreList(),
     'tag_list'      => $Search->get_terms('taglist'),
