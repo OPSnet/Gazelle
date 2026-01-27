@@ -1046,15 +1046,10 @@ tr.torrent td {
   white-space: nowrap;
 }
 
-.sign.snatches img {
-  width: 15px;
-  height: 15px;
-}
-
 .sign.seeders img,
-.sign.leechers img {
-  width: 11px;
-  height: 15px;
+.sign.leechers img,
+.sign.snatches img {
+  height: 0.825rem;
 }
 
 #torrents #content .box.pad,

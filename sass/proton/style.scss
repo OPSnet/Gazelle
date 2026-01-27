@@ -952,8 +952,10 @@ strong.quoteheader {
   width: 100%;
 }
 
-#torrent_table a img {
-  border: 0;
+.sign.seeders img,
+.sign.leechers img,
+.sign.snatches img {
+  height: 0.825rem;
 }
 
 .torrent_table tr.group:not(.discog) {
