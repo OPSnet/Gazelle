@@ -12,14 +12,15 @@
         <tr>
             <td>
                 <form name="custom-title-preview" action="bonus.php" method="post">
-                    <input type="hidden" name="action" value="purchase" />
-                    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-                    <input type="hidden" name="label" value="{{ item.label }}" />
-                    <input type="text" style="width: 98%" id="title" name="title" placeholder="Custom Title"/> <br />
-                    <br />
-                    <input type="button" id="preview-title" value="Preview" />
-                    <input type="submit" value="Purchase" />
-                    <br /><br />
+                    <input type="hidden" name="action" value="purchase">
+                    <input type="hidden" name="auth" value="{{ viewer.auth }}">
+                    <input type="hidden" name="label" value="{{ item.label }}">
+                    <input type="text" style="width: 98%" id="title" name="title" placeholder="Custom Title"
+                           maxlength="{{ constant('USER_TITLE_LENGTH') }}">
+                    <br><br>
+                    <input type="button" id="preview-title" value="Preview">
+                    <input type="submit" value="Purchase">
+                    <br><br>
                     <div id="preview"></div>
                 </form>
             </td>

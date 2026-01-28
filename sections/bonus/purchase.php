@@ -24,8 +24,9 @@ if (is_null($item)) {
     Error404::error("We don't stock that item");
 }
 
+$isTitlePurchase = str_starts_with($item->label(), 'title-bb-');
 $extra = [];
-if (str_starts_with($item->label(), 'title-bb-')) {
+if ($isTitlePurchase) {
     $extra['title']  = $_POST['title'] ?? '';
 } elseif (str_starts_with($item->label(), 'other-')) {
     $user = new Manager\User()->findByUsername($_POST['user'] ?? '');
@@ -56,5 +57,9 @@ switch ($item->purchase($Viewer, $item->price(), $extra)) {
         Error400::error("You already own {$item->title()}.");
 
     case Enum\BonusItemPurchaseStatus::incomplete:
-        Error400::error("Information lacking to complete purchase of {$item->title()}.");
+        if ($isTitlePurchase) {
+            Error400::error("The specified title is too long.");
+        } else {
+            Error400::error("No recipient specified to gift tokens to.");
+        }
 }

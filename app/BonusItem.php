@@ -2,6 +2,8 @@
 
 namespace Gazelle;
 
+use Gazelle\Exception\BonusPurchaseException;
+
 class BonusItem extends \Gazelle\BasePgObject {
     final public const tableName = 'bonus_item';
     final public const CACHE_KEY = 'bonus_%d';
@@ -131,6 +133,21 @@ class BonusItem extends \Gazelle\BasePgObject {
         );
     }
 
+    public function purchase(User $user, int $price, array $extra = []): Enum\BonusItemPurchaseStatus {
+        self::$db->begin_transaction();
+        $this->pg()->begin();
+        try {
+            $this->processPurchase($user, $price, $extra);
+        } catch (BonusPurchaseException $e) {
+            $this->pg()->rollback();
+            self::$db->rollback();
+            return $e->reason;
+        }
+        $this->pg()->commit();
+        self::$db->commit();
+        return Enum\BonusItemPurchaseStatus::success;
+    }
+
     /* Object-orient orthodoxy would suggest creating classes for each type
      * of item that can be purchased, and calling the purchase() method
      * through polymorphism. That would be a lot of boilerplate code simply
@@ -145,12 +162,12 @@ class BonusItem extends \Gazelle\BasePgObject {
      * ... but it allows the gifting of something to a user for free:
      *   $item->purchase($user, 0);
      */
-    public function purchase(User $user, int $price, array $extra = []): Enum\BonusItemPurchaseStatus {
+    protected function processPurchase(User $user, int $price, array $extra = []): void {
         if ($user->classLevel() < $this->userclassMin()) {
-            return Enum\BonusItemPurchaseStatus::forbidden;
+            throw new BonusPurchaseException(Enum\BonusItemPurchaseStatus::forbidden);
         }
         if ($this->isPurchased($user) && !$this->isRecurring()) {
-            return Enum\BonusItemPurchaseStatus::alreadyPurchased;
+            throw new BonusPurchaseException(Enum\BonusItemPurchaseStatus::alreadyPurchased);
         }
         if ($user->classLevel() >= $this->userclassFree()) {
             $price = 0;
@@ -167,18 +184,18 @@ class BonusItem extends \Gazelle\BasePgObject {
                 ', $this->amount(), $price, $price, $user->id
             );
             if (self::$db->affected_rows() != 1 + ($price === 0 ? 0 : 1)) {
-                return Enum\BonusItemPurchaseStatus::insufficientFunds;
+                throw new BonusPurchaseException(Enum\BonusItemPurchaseStatus::insufficientFunds);
             }
         } elseif (str_starts_with($this->label(), 'other-')) {
             if (!isset($extra['receiver'])) {
-                return Enum\BonusItemPurchaseStatus::incomplete;
+                throw new BonusPurchaseException(Enum\BonusItemPurchaseStatus::incomplete);
             }
             $receiver = $extra['receiver'];
             if ($user->id === $receiver->id || !$receiver->isEnabled()) {
-                return Enum\BonusItemPurchaseStatus::forbidden;
+                throw new BonusPurchaseException(Enum\BonusItemPurchaseStatus::forbidden);
             }
             if ($receiver->hasAttr('no-fl-gifts')) {
-                return Enum\BonusItemPurchaseStatus::declined;
+                throw new BonusPurchaseException(Enum\BonusItemPurchaseStatus::declined);
             }
             /* Take the bonus points from the giver and give tokens to the
              * receiver, unless the latter have asked to refuse receiving
@@ -208,7 +225,7 @@ class BonusItem extends \Gazelle\BasePgObject {
                     Enum\UserStatus::enabled->value, $receiver->id, $user->id, $price
             );
             if (self::$db->affected_rows() != 1 + ($price === 0 ? 0 : 1)) {
-                return Enum\BonusItemPurchaseStatus::insufficientFunds;
+                throw new BonusPurchaseException(Enum\BonusItemPurchaseStatus::insufficientFunds);
             }
             $amount = $this->amount();
             $receiver->inbox()->createSystem(
@@ -236,7 +253,7 @@ class BonusItem extends \Gazelle\BasePgObject {
                     );
                     if (self::$db->affected_rows() != ($price === 0 ? 0 : 1)) {
                         self::$db->rollback();
-                        return Enum\BonusItemPurchaseStatus::insufficientFunds;
+                        throw new BonusPurchaseException(Enum\BonusItemPurchaseStatus::insufficientFunds);
                     }
                     $user->ordinal()->increment('personal-collage', 1);
                     self::$db->commit();
@@ -253,7 +270,7 @@ class BonusItem extends \Gazelle\BasePgObject {
                     );
                     if ($price > 0 && self::$db->affected_rows() != 1) {
                         self::$db->rollback();
-                        return Enum\BonusItemPurchaseStatus::insufficientFunds;
+                        throw new BonusPurchaseException(Enum\BonusItemPurchaseStatus::insufficientFunds);
                     }
                     try {
                         self::$db->prepared_query("
@@ -265,14 +282,14 @@ class BonusItem extends \Gazelle\BasePgObject {
                     } catch (\Gazelle\DB\MysqlDuplicateKeyException) {
                         // no point in buying a second time
                         self::$db->rollback();
-                        return Enum\BonusItemPurchaseStatus::alreadyPurchased;
+                        throw new BonusPurchaseException(Enum\BonusItemPurchaseStatus::alreadyPurchased);
                     }
                     self::$db->commit();
                     break;
 
                 case 'invite':
                     if (!$user->canPurchaseInvite()) {
-                        return Enum\BonusItemPurchaseStatus::forbidden;
+                        throw new BonusPurchaseException(Enum\BonusItemPurchaseStatus::forbidden);
                     }
                     self::$db->prepared_query('
                         UPDATE user_bonus ub
@@ -284,7 +301,7 @@ class BonusItem extends \Gazelle\BasePgObject {
                         ', $price, $price, $user->id
                     );
                     if (self::$db->affected_rows() != 1 + ($price === 0 ? 0 : 1)) {
-                        return Enum\BonusItemPurchaseStatus::insufficientFunds;
+                        throw new BonusPurchaseException(Enum\BonusItemPurchaseStatus::insufficientFunds);
                     }
                     break;
 
@@ -299,7 +316,7 @@ class BonusItem extends \Gazelle\BasePgObject {
                     );
                     if ($price > 0 && self::$db->affected_rows() != 1) {
                         self::$db->rollback();
-                        return Enum\BonusItemPurchaseStatus::insufficientFunds;
+                        throw new BonusPurchaseException(Enum\BonusItemPurchaseStatus::insufficientFunds);
                     }
                     try {
                         self::$db->prepared_query("
@@ -311,7 +328,7 @@ class BonusItem extends \Gazelle\BasePgObject {
                     } catch (DB\MysqlDuplicateKeyException) {
                         // no point in buying a second time
                         self::$db->rollback();
-                        return Enum\BonusItemPurchaseStatus::alreadyPurchased;
+                        throw new BonusPurchaseException(Enum\BonusItemPurchaseStatus::alreadyPurchased);
                     }
                     self::$db->commit();
                     break;
@@ -319,10 +336,7 @@ class BonusItem extends \Gazelle\BasePgObject {
                 case 'title-bb-n':
                 case 'title-bb-y':
                     if (!isset($extra['title'])) {
-                        return Enum\BonusItemPurchaseStatus::incomplete;
-                    }
-                    if ($price > 0 && !new User\Bonus($user)->removePoints($price)) {
-                        return Enum\BonusItemPurchaseStatus::insufficientFunds;
+                        throw new BonusPurchaseException(Enum\BonusItemPurchaseStatus::incomplete);
                     }
                     if (
                         !$user->setTitle(
@@ -331,7 +345,10 @@ class BonusItem extends \Gazelle\BasePgObject {
                                 : \Text::strip_bbcode($extra['title'])
                         )
                     ) {
-                        return Enum\BonusItemPurchaseStatus::incomplete;
+                        throw new BonusPurchaseException(Enum\BonusItemPurchaseStatus::incomplete);
+                    }
+                    if ($price > 0 && !new User\Bonus($user)->removePoints($price)) {
+                        throw new BonusPurchaseException(Enum\BonusItemPurchaseStatus::insufficientFunds);
                     }
                     $user->modify();
                     break;
@@ -362,7 +379,5 @@ class BonusItem extends \Gazelle\BasePgObject {
         );
         new User\Bonus($user)->flush();
         $user->flush();
-
-        return Enum\BonusItemPurchaseStatus::success;
     }
 }
