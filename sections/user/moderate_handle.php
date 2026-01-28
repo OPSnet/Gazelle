@@ -214,7 +214,6 @@ if (
     $collageTotal != $user->paidPersonalCollages() && $collageTotal != (int)$_POST['OldCollages']
     && ($Viewer->permitted('users_edit_ratio') || ($Viewer->permitted('users_edit_own_ratio') && $ownProfile))
 ) {
-    $user->setField('collage_total', $collageTotal);
     $user->ordinal()->set('personal-collage', $collageTotal);
     $EditSummary[] = "personal collages changed from {$user->paidPersonalCollages()} to {$collageTotal}";
 }

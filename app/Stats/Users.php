@@ -924,7 +924,7 @@ class Users extends \Gazelle\Base {
                 concat(
                     sum(case when um."Enabled" = '1' then 1 else 0 end)
                     || '/' ||
-                    count(um.*)
+                    count(um."ID")
                 ) as total
                 from relay.users_main um
                 inner join relay.user_has_invite_source uhis on (uhis.user_id = um."ID")
