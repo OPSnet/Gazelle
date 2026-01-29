@@ -366,8 +366,10 @@ class Forum extends BaseObject {
                 CEIL((
                     SELECT count(*)
                     FROM forums_posts AS p
+                    INNER JOIN forums_topics AS t ON (p.TopicID = t.ID)
                     WHERE p.TopicID = l.TopicID
                         AND p.ID <= l.PostID
+                        AND p.ID != t.StickyPostID
                     ) / ?
                 ) AS Page
             FROM forums_last_read_topics AS l

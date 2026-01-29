@@ -81,7 +81,8 @@ class ForumThread extends BaseObject {
             );
             if ($info) {
                 if ($info['pinned_post_id']) {
-                    $info['post_total']--;
+                    // without this max() a thread that consists only of a pinned post will have 0 posts
+                    $info['post_total'] = max($info['post_total'] - 1, 1);
                 }
                 $info['pinned_post'] = self::$db->rowAssoc("
                     SELECT p.ID,
@@ -164,6 +165,7 @@ class ForumThread extends BaseObject {
     }
 
     public function pinnedPostId(): ?int {
+        // FIXME: this returns 0 when no pinned post, not null
         return $this->info()['pinned_post_id'];
     }
 

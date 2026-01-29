@@ -539,10 +539,19 @@ class ForumTest extends TestCase {
 
         $this->threadList[] = $thread
             = new Manager\ForumThread()->create($this->forum, $user, 'unittest post pin', 'this is a new thread for post pins');
+
+        // it doesn't make sense to pin the first post if it's the only post in the thread,
+        // but make sure we are at least a bit sane
+        $postId = $thread->lastPostId();
+        $post = new Manager\ForumPost()->findById($postId);
+        $this->assertEquals(1, $post->pin($admin, true), 'forum-post-pin-op');
+        $this->assertEquals(1, $thread->postTotal(), 'forum-post-pin-op-count');
+
         $post = $thread->addPost($user, 'pinnable content');
 
         $this->assertFalse($post->isPinned(), 'forum-post-is-not-pinned');
         $this->assertEquals(1, $post->pin($admin, true), 'forum-post-pin');
+        $this->assertEquals($post->id, $thread->pinnedPostId(), 'froum-post-pin-id');
         $this->assertTrue($post->isPinned(), 'forum-post-is-now-pinned');
         $this->assertEquals(1, $post->pin($admin, false), 'forum-post-unpin');
         $this->assertFalse($post->isPinned(), 'forum-post-is-no-longer-pinned');

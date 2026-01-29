@@ -37,8 +37,6 @@ if (!$Viewer->readAccess($forum)) {
     Error403::error();
 }
 
-//Escape strings for later display
-$ForumName    = display_str($forum->name());
 $IsDonorForum = ($forum->id == DONOR_FORUM);
 $PerPage      = $Viewer->postsPerPage();
 
@@ -50,7 +48,7 @@ $PostNum = match (true) {
 };
 
 $Page = max(1, (int)($_GET['page'] ?? (int)ceil(min($thread->postTotal(), $PostNum) / $PerPage)));
-if (($Page - 1) * $PerPage > $thread->postTotal()) {
+if (($Page - 1) * $PerPage >= $thread->postTotal()) {
     $Page = (int)ceil($thread->postTotal() / $PerPage);
 }
 $slice = $thread->slice(perPage: $PerPage, page: $Page);
@@ -82,10 +80,9 @@ $userMan = new Manager\User();
 $avatarFilter = Util\Twig::factory($userMan)->createTemplate('{{ user|avatar(viewer)|raw }}');
 
 $transitions = new Manager\ForumTransition()->threadTransitionList($Viewer, $thread);
-$department = $forum->departmentList($Viewer);
 $auth = $Viewer->auth();
 
-View::show_header("Forums › $ForumName › {$thread->title()}",
+View::show_header("Forums › {$forum->name()} › {$thread->title()}",
      ['js' => 'comments,subscriptions,bbcode' . ($IsDonorForum ? ',donor_titles' : '')]
 );
 echo $Twig->render('forum/thread-header.twig', [
