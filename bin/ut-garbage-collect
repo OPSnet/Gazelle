@@ -24,9 +24,9 @@ foreach($tableList as $t) {
     $db->prepared_query("DROP TABLE $t");
 }
 
-// clean artists
-
 $db->prepared_query("SET foreign_key_checks = 0");
+
+// artists
 $db->prepared_query("
     DELETE aa, ag
     FROM artists_alias aa
@@ -34,20 +34,16 @@ $db->prepared_query("
         ag.ArtistID = aa.ArtistID
         AND ag.PrimaryAlias = aa.AliasID
     )
-    WHERE aa.name REGEXP '^(phpunit (?:req|artist merge) |(?:qqqq|qqqb|qqbb|qbbb|bbbb)\.phpunit\.)[a-z]{6}$'
+    WHERE aa.name REGEXP '^phpunit '
 ");
+
+// contests
 $db->prepared_query("
-    DELETE aa, ag
-    FROM artists_alias aa
-    INNER JOIN artists_group ag on (
-        ag.ArtistID = aa.ArtistID
-        AND ag.PrimaryAlias = aa.AliasID
-    )
-    WHERE aa.name REGEXP '^(phpunit\.|Tag Girl |Notify Man )'
-");
-$db->prepared_query("
-    DELETE FROM artists_alias
-    WHERE Name REGEXP '^(?:phpunit\.|new artist |Tracker Girl )';
+    DELETE c, chbp, bp
+    FROM contest c
+    LEFT JOIN contest_has_bonus_pool chbp USING (contest_id)
+    LEFT JOIN bonus_pool bp USING (bonus_pool_id)
+    WHERE c.name LIKE 'phpunit contest %';
 ");
 
 $db->prepared_query("SET foreign_key_checks = 1");
@@ -121,7 +117,7 @@ $collageMan->requestContext()->setViewer(
 $db->prepared_query("
     SELECT ID
     FROM collages
-    WHERE Name regexp '^(?:phpunit (?:collage (?:ajax|artist|comment|contrib|personal|report)|merge artist|search report) )'
+    WHERE Name LIKE 'phpunit %'
 ");
 foreach ($db->collect(0) as $collageId) {
     $collage = $collageMan->findById($collageId);
@@ -133,7 +129,7 @@ foreach ($db->collect(0) as $collageId) {
 $db->prepared_query("
     SELECT ID
     FROM requests
-    WHERE Title regexp '^(?:The [a-z]{6} Test Sessions|phpunit request(?: report)?)$'
+    WHERE Title LIKE 'phpunit %'
 ");
 
 $reqMan = new Manager\Request();
@@ -147,7 +143,7 @@ foreach ($db->collect(0) as $requestId) {
 $db->prepared_query("
     SELECT ID
     FROM forums
-    WHERE Name regexp '^(phpunit |forum .{6}$)'
+    WHERE Name LIKE 'phpunit %'
 ");
 
 $forMan = new Manager\Forum();
@@ -170,7 +166,7 @@ $db->prepared_query("
     SELECT tg.ID as gid, t.ID as tid
     FROM torrents_group tg
     LEFT JOIN torrents t on (t.GroupID = tg.ID)
-    WHERE tg.Name regexp '^(?:phpunit (?:category new|collfree|live in|notify|reaper|request|seedbox|tgvote|torman|torrent) [a-z]{6}|(?:php(?: split title|unit artist (?:autocomp|merge[12]))|tracker) [a-z]{10}|Some (?:(?:boppy|live|more) )?[a-z]{8} (?:contest )?songs)$'
+    WHERE tg.Name regexp '^(?:phpunit (?:category (?:change|new)|collfree|feat|live in|log(?:checker)?|notify|reaper|request|seedbox|tag|tgvote|torman|torrent) [a-z]{6}|(?:php(?: split title|unit artist (?:autocomp|merge[12]))|tracker) [a-z]{10}|Some (?:(?:boppy|live|more) )?[a-z]{8} (?:contest )?songs)$'
 ");
 $groupList   = $db->collect('gid');
 $torrentList = $db->collect('tid');

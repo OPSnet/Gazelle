@@ -147,7 +147,7 @@ class ForumTest extends TestCase {
 
         // Forum Threads
         $threadMan = new Manager\ForumThread();
-        $thread    = $threadMan->create($this->forum, $admin, 'thread title', 'this is a new thread');
+        $thread    = $threadMan->create($this->forum, $admin, 'phpunit thread title', 'this is a new thread');
         $this->assertEquals('this is a new thread', $thread->body(), 'fthread-body');
         $this->assertEquals(1, $thread->postTotal(), 'fthread-post-total');
         $this->assertEquals(0, $thread->lastPage(), 'fthread-last-page');
@@ -159,7 +159,7 @@ class ForumTest extends TestCase {
         $this->assertEquals($this->forum->id, $thread->forumId(), 'fthread-forum-id');
         $this->assertEquals($this->forum->name(), $thread->forum()->name(), 'fthread-forum-title');
         $this->assertEquals($admin->id, $thread->lastAuthorId(), 'fthread-forum-title');
-        $this->assertEquals('thread title', $thread->title(), 'thread-title');
+        $this->assertEquals('phpunit thread title', $thread->title(), 'thread-title');
         $this->assertEquals(0, $thread->pinnedPostId(), 'fthread-pinned-post-id');
 
         $this->assertFalse($thread->hasPoll(), 'fthread-has-poll-no');

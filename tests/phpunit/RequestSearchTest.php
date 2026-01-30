@@ -138,7 +138,7 @@ class RequestSearchTest extends TestCase {
         $this->userList[] = $user;
         $this->tgroup = Helper::makeTGroupMusic(
             $user,
-            'phpunit ' . randomString(10),
+            'phpunit reqfill ' . randomString(10),
             [[ARTIST_MAIN], ['phpunit reqfill ' . randomString(6)]],
             [
                 new Manager\Tag()->create('ut-' . randomString(8), $this->userList[0])->id,

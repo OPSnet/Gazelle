@@ -45,7 +45,7 @@ class RequestTest extends TestCase {
         $user  = $this->userList['user'];
 
         $manager       = new Manager\Request();
-        $title         = 'phpunit ' . randomString(6) . ' Test Sessions (bonus VIP)';
+        $title         = 'phpunit create ' . randomString(6);
         $image         = 'https://example.com/req.jpg';
         $year          = 2002;
         $this->request = Helper::makeRequestMusic($admin, $title, image: $image, year: $year);
@@ -789,9 +789,9 @@ class RequestTest extends TestCase {
 
     public function testRequestFTS(): void {
         $user  = $this->userList['admin'];
-        $title = 'phpunit reqfts ' . randomString();
+        $title = 'phpunit reqfts ' . randomString(6);
         $this->request = Helper::makeRequestMusic($user, $title);
-        $artistName    = 'artist ftsreq ' . randomString();
+        $artistName    = 'phpunit ftsreq ' . randomString(6);
         $this->request->artistRole()->set([ARTIST_MAIN => [$artistName]], $user);
 
         $this->assertEquals(

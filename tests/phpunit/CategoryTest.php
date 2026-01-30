@@ -44,7 +44,7 @@ class CategoryTest extends TestCase {
         $idList = array_map(fn($t) => $t->id, $torrentList);
 
         // move one torrent to new category
-        $artistName = 'new artist ' . randomString(6);
+        $artistName = 'phpunit chgcat ' . randomString(6);
         $new = $tgMan->changeCategory(
             old:         $tgroup,
             torrent:     $torrentList[1],
@@ -90,7 +90,7 @@ class CategoryTest extends TestCase {
             categoryId:  $tgroup->categoryId(), // same category as the original, null expected
             name:        'phpunit category new ' . randomString(6),
             year:        (int)date('Y'),
-            artistName:  'new artist ' . randomString(6),
+            artistName:  'phpunit chgcat ' . randomString(6),
             releaseType: new ReleaseType()->findIdByName('EP'),
             artistMan:   new Manager\Artist(),
             user:        $user,

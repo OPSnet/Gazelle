@@ -226,7 +226,7 @@ class TagTest extends TestCase {
         $this->user->requestContext()->setViewer($this->user);
         $tgroup = Helper::makeTGroupMusic(
             name:       'phpunit tag ' . randomString(6),
-            artistName: [[ARTIST_MAIN], ['Tag Girl ' . randomString(12)]],
+            artistName: [[ARTIST_MAIN], ['phpunit tag ' . randomString(6)]],
             tagName:    ['phpunit.electronic', 'phpunit.folk', 'phpunit.disco'],
             user:       $this->user,
         );
@@ -271,7 +271,7 @@ class TagTest extends TestCase {
         $tag          = $manager->create($name, $this->user);
         $tgroup = Helper::makeTGroupMusic(
             name:       'phpunit tag ' . randomString(6),
-            artistName: [[ARTIST_MAIN], ['Tag Girl ' . randomString(12)]],
+            artistName: [[ARTIST_MAIN], ['phpunit tag ' . randomString(6)]],
             tagName:    [$name],
             user:       $this->user,
         );
@@ -291,7 +291,7 @@ class TagTest extends TestCase {
         $this->assertEquals(1, $tag->flush()->uses(), 'tag-instance-use-1');
         $tgroup = Helper::makeTGroupMusic(
             name:       'phpunit tag ' . randomString(6),
-            artistName: [[ARTIST_MAIN], ['Tag Girl ' . randomString(12)]],
+            artistName: [[ARTIST_MAIN], ['phpunit tag ' . randomString(6)]],
             tagName:    [$name],
             user:       $this->user,
         );
@@ -341,7 +341,7 @@ class TagTest extends TestCase {
         $tag->addRequest($this->request);
         $tgroup = Helper::makeTGroupMusic(
             name:       'phpunit tag ' . randomString(6),
-            artistName: [[ARTIST_MAIN], ['Tag Girl ' . randomString(12)]],
+            artistName: [[ARTIST_MAIN], ['phpunit tag ' . randomString(6)]],
             tagName:    [$name],
             user:       $this->user,
         );

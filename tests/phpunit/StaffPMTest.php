@@ -35,6 +35,9 @@ class StaffPMTest extends TestCase {
             WHERE spm.UserID IN (?, ?, ?, ?)
             ", $this->fls->id, $this->mod->id, $this->sysop->id, $this->user->id
         );
+        $db->prepared_query("
+            DELETE FROM staff_pm_responses WHERE Name LIKE '^phpunit '
+        ");
         $this->fls->remove();
         $this->mod->remove();
         $this->sysop->remove();
@@ -213,14 +216,14 @@ class StaffPMTest extends TestCase {
     public function testCommonAnswer(): void {
         $initial = count($this->spMan->commonAnswerList());
         $answer = 'because we can';
-        $first = $this->spMan->createCommonAnswer('why', $answer);
+        $first = $this->spMan->createCommonAnswer('phpunit common ' . randomString(6), $answer);
         $this->assertGreaterThan(0, $first, 'spm-common-add-1');
         $this->assertEquals($answer, $this->spMan->commonAnswer($first), 'spm-common-get');
 
-        $second = $this->spMan->createCommonAnswer('why not', 'because we cannot');
+        $second = $this->spMan->createCommonAnswer('phpunit why not', 'because we cannot');
         $this->assertEquals($first + 1, $second, 'spm-common-add-2');
 
-        $third = $this->spMan->createCommonAnswer('third', 'third common answer');
+        $third = $this->spMan->createCommonAnswer('phpunit third', 'third common answer');
         $this->assertEquals($first + 2, $third, 'spm-common-add-3');
         $this->assertEquals(1, $this->spMan->modifyCommonAnswer($third, 'third', 'because we might'), 'spm-common-modify');
         $this->assertCount($initial + 3, $this->spMan->commonAnswerList(), 'spm-common-list');
@@ -229,7 +232,6 @@ class StaffPMTest extends TestCase {
         $this->assertCount($initial + 2, $this->spMan->commonAnswerList(), 'spm-common-list');
 
         $this->assertEquals(1, $this->spMan->removeCommonAnswer($third), 'spm-common-tidy');
-        // flush the context to play nicely with the CI
         $this->assertStringStartsWith(
             "TextareaPreview.factory([[0, 'answer-",
             Textarea::factory(),

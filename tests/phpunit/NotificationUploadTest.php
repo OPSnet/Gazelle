@@ -11,7 +11,7 @@ class NotificationUploadTest extends TestCase {
 
     protected Manager\Torrent $torMan;
     protected Torrent         $torrent;
-    protected array                   $userList;
+    protected array           $userList;
 
     public function setUp(): void {
         $user = Helper::makeUser('uploader.' . randomString(10), 'notification-ticket');
@@ -27,7 +27,7 @@ class NotificationUploadTest extends TestCase {
             catalogueNumber: 'UA-246',
             showcase:        false,
         );
-        $tgroup->addArtists([ARTIST_MAIN], ['Notify Man ' . randomString(12)]);
+        $tgroup->addArtists([ARTIST_MAIN], ['phpunit notify ' . randomString(6)]);
 
         $tagMan = new Manager\Tag();
         foreach (['electronic', 'funk', 'jazz'] as $name) {

@@ -36,7 +36,7 @@ class TrackerTest extends TestCase {
         $torrent = Helper::makeTorrentMusic(
             Helper::makeTGroupMusic(
                 name:       'tracker ' . randomString(10),
-                artistName: [[ARTIST_MAIN], ['Tracker Girl ' . randomString(12)]],
+                artistName: [[ARTIST_MAIN], ['phpunit trk ' . randomString(6)]],
                 tagName:    ['trap'],
                 user:       $this->user,
             ),
@@ -61,7 +61,7 @@ class TrackerTest extends TestCase {
         $torrent = Helper::makeTorrentMusic(
             Helper::makeTGroupMusic(
                 name:       'tracker ' . randomString(10),
-                artistName: [[ARTIST_MAIN], ['Tracker Girl ' . randomString(12)]],
+                artistName: [[ARTIST_MAIN], ['phpunit trk ' . randomString(6)]],
                 tagName:    ['trap'],
                 user:       $this->user,
             ),
@@ -157,7 +157,7 @@ class TrackerTest extends TestCase {
         $torrent = Helper::makeTorrentMusic(
             Helper::makeTGroupMusic(
                 name:       'tracker ' . randomString(10),
-                artistName: [[ARTIST_MAIN], ['Tracker Girl ' . randomString(12)]],
+                artistName: [[ARTIST_MAIN], ['phpunit trk ' . randomString(6)]],
                 tagName:    ['trap'],
                 user:       $this->user,
             ),
@@ -185,7 +185,7 @@ class TrackerTest extends TestCase {
         $torrent = Helper::makeTorrentMusic(
             Helper::makeTGroupMusic(
                 name:       'tracker ' . randomString(10),
-                artistName: [[ARTIST_MAIN], ['Tracker Girl ' . randomString(12)]],
+                artistName: [[ARTIST_MAIN], ['phpunit trk ' . randomString(6)]],
                 tagName:    ['trap'],
                 user:       $this->user,
             ),

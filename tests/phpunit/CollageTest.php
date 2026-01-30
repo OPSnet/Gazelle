@@ -30,11 +30,11 @@ class CollageTest extends TestCase {
         ];
         $this->userList['u1']->requestContext()->setViewer($this->userList['u1']);
         $this->artistName = [
-            'The phpunit ' . randomString(8) . ' Band',
-            'The phpunit ' . randomString(8) . ' Sisters',
-            'The phpunit ' . randomString(8) . ' Brothers',
-            'The phpunit ' . randomString(8) . ' Mothers',
-            'The phpunit ' . randomString(8) . ' Fathers',
+            'phpunit collage ' . randomString(6),
+            'phpunit collage ' . randomString(6),
+            'phpunit collage ' . randomString(6),
+            'phpunit collage ' . randomString(6),
+            'phpunit collage ' . randomString(6),
         ];
 
         $this->tgroupList = [];

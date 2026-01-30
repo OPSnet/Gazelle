@@ -31,7 +31,7 @@ class ForumSearchTest extends TestCase {
             name:        'Search forum',
             description: 'This is where it is found',
         );
-        $title        = 'search thread ' . randomString(10);
+        $title        = 'phpunit search thread ' . randomString(10);
         $body         = 'search body ' . randomString(10);
         $threadMan    = new Manager\ForumThread();
         $this->thread = $threadMan->create($this->forum, $this->user, $title, $body);
@@ -74,7 +74,7 @@ class ForumSearchTest extends TestCase {
             name:        'Search forum',
             description: 'This is where it is found',
         );
-        $title        = 'search thread ' . randomString(10);
+        $title        = 'phpunit search thread ' . randomString(10);
         $body         = 'search body ' . randomString(10);
         $threadMan    = new Manager\ForumThread();
         $this->thread = $threadMan->create($this->forum, $this->user, $title, $body);
@@ -96,7 +96,7 @@ class ForumSearchTest extends TestCase {
             name:        'Search forum',
             description: 'This is where it is found',
         );
-        $title        = 'search thread ' . randomString(10);
+        $title        = 'phpunit search thread ' . randomString(10);
         $body         = 'search body ' . randomString(10);
         $threadMan    = new Manager\ForumThread();
         $this->thread = $threadMan->create($this->forum, $this->user, $title, $body);

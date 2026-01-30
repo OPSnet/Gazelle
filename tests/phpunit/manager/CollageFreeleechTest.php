@@ -18,13 +18,13 @@ class CollageFreeleechTest extends TestCase {
         $this->tgroupList = [
             Helper::makeTGroupMusic(
                 name:       'phpunit collfree ' . randomString(6),
-                artistName: [[ARTIST_MAIN], ['Dr Collfree ' . randomString(12)]],
+                artistName: [[ARTIST_MAIN], ['phpunit collfree ' . randomString(6)]],
                 tagName:    ['hip.hop'],
                 user:       $this->user,
             ),
             Helper::makeTGroupMusic(
                 name:       'phpunit collfree ' . randomString(6),
-                artistName: [[ARTIST_MAIN], ['Dr Collfree ' . randomString(12)]],
+                artistName: [[ARTIST_MAIN], ['phpunit collfree ' . randomString(6)]],
                 tagName:    ['hip.hop'],
                 user:       $this->user,
             ),

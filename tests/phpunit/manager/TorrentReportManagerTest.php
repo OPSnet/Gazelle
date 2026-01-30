@@ -20,7 +20,7 @@ class TorrentReportManagerTest extends TestCase {
         // create a torrent group
         $this->tgroup = Helper::makeTGroupMusic(
             name:       'phpunit torrent report ' . randomString(6),
-            artistName: [[ARTIST_MAIN], ['Report Dog ' . randomString(12)]],
+            artistName: [[ARTIST_MAIN], ['phpunit torrent report ' . randomString(6)]],
             tagName:    ['electronic'],
             user:       $this->userList[0],
         );
