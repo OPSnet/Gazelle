@@ -6,42 +6,42 @@
     <div class="box pad">
     {{ paginator.linkbox|raw }}
 {% for friend in list %}
-    {% set allspan = viewer.showAvatars ? 3 : 2 %}
-    {% set uploaded = friend.user.uploadedSize %}
-    {% set downloaded = friend.user.downloadedSize %}
+{%  set allspan = viewer.showAvatars ? 3 : 2 %}
+{%  set uploaded = friend.user.uploadedSize %}
+{%  set downloaded = friend.user.downloadedSize %}
 <form class="manage_form" name="friends" action="friends.php" method="post">
     <input type="hidden" name="auth" value="{{ viewer.auth }}" />
     <table class="friends_table vertical_margin">
         <tr class="colhead">
             <td colspan="{{ allspan }}">
-                <span style="float: left;">{{ friend.id|user_full }}
-        {% if friend.mutual %} <span title="The feeling is mutual (awwww!)">💕</span>{% endif %}
-        {% if friend.user.propertyVisible(viewer, 'ratio') %}
+                <span style="float: left;">{{ friend.user.id|user_full }}
+{%  if friend.mutual %} <span title="The feeling is mutual (awwww!)">💕</span>{% endif %}
+{%  if friend.user.propertyVisible(viewer, 'ratio') %}
                 &nbsp;Ratio: <strong>{{ ratio(uploaded, downloaded)|raw }}</strong>
-        {% endif %}
-        {% if friend.user.propertyVisible(viewer, 'uploaded') %}
+{%  endif %}
+{%  if friend.user.propertyVisible(viewer, 'uploaded') %}
                 &nbsp;Up: <strong>{{ uploaded|octet_size }}</strong>
-        {% endif %}
-        {% if friend.user.propertyVisible(viewer, 'downloaded') %}
+{%  endif %}
+{%  if friend.user.propertyVisible(viewer, 'downloaded') %}
                 &nbsp;Down: <strong>{{ downloaded|octet_size }}</strong>
-        {% endif %}
+{%  endif %}
                 </span>
-        {% if friend.user.propertyVisible(viewer, 'lastseen') %}
+{%  if friend.user.propertyVisible(viewer, 'lastseen') %}
                 <span style="float: right;">Last seen: {{ friend.user.lastAccess|time_diff }}</span>
-        {% endif %}
+{%  endif %}
             </td>
         </tr>
         <tr>
-        {% if viewer.showAvatars %}
+{%  if viewer.showAvatars %}
             <td valign="top">{{ friend.user|avatar(viewer)|raw }}</td>
-        {% endif %}
+{%  endif %}
             <td valign="top">
-                <input type="hidden" name="friendid" value="{{ friend.id }}" />
+                <input type="hidden" name="friendid" value="{{ friend.user.id }}" />
                 <textarea name="comment" rows="4" cols="70">{{ friend.comment }}</textarea>
                 <br /> <input type="submit" name="action" value="Save notes" />
             </td>
             <td class="left" valign="top">
-                <a href="inbox.php?action=compose&amp;toid={{ friend.id }}" class="brackets">Send PM</a>
+                <a href="inbox.php?action=compose&amp;toid={{ friend.user.id }}" class="brackets">Send PM</a>
                 <br /><br /><br /><br /><input type="submit" name="action" value="Unfriend" />
             </td>
         </tr>

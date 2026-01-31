@@ -2,8 +2,8 @@
 
 namespace Gazelle\User;
 
-class Friend extends \Gazelle\BaseUser {
-    final public const tableName = 'friends';
+class Friend extends \Gazelle\BasePgUser {
+    final public const tableName = 'user_has_friend';
 
     public function flush(): static {
         $this->user()->flush();
@@ -11,97 +11,106 @@ class Friend extends \Gazelle\BaseUser {
     }
 
     public function isFriend(\Gazelle\User $friend): bool {
-        return (bool)self::$db->scalar("
-            SELECT 1
-            FROM friends
-            WHERE UserID = ?
-                AND FriendID = ?
-            ", $this->user->id, $friend->id
+        return (bool)$this->pg()->scalarex('
+            select 1
+            from user_has_friend
+            where id_user = $1
+                and id_user_friend = $2
+            ', $this->user->id, $friend->id
         );
     }
 
     public function isMutual(\Gazelle\User $friend): bool {
-        return (bool)self::$db->scalar("
-            SELECT 1
-            FROM friends a
-            INNER JOIN friends b ON (b.UserID = a.FriendID AND b.FriendID = ?)
-            WHERE a.UserID = ?
-                AND a.FriendID = ?
-            ", $this->user->id, $this->user->id, $friend->id
+        return (bool)$this->pg()->scalarex('
+            select 1
+            from user_has_friend a
+            inner join user_has_friend b ON (b.id_user = a.id_user_friend AND b.id_user_friend = $1)
+            where a.id_user = $1
+                and a.id_user_friend = $2
+            ', $this->user->id, $friend->id
         );
     }
 
     public function add(\Gazelle\User $friend): int {
-        if ($this->user->id === $friend->id()) {
+        if ($this->user->id === $friend->id) {
             return -1;
         }
-        self::$db->prepared_query("
-            INSERT IGNORE INTO friends
-                   (UserID, FriendID)
-            VALUES (?,      ?)
-            ", $this->user->id, $friend->id()
+        return $this->pg()->query("
+            insert into user_has_friend
+                   (id_user, id_user_friend)
+            values ($1,      $2)
+            on conflict (id_user, id_user_friend)
+                do nothing
+            ", $this->user->id, $friend->id
         );
-        return self::$db->affected_rows();
     }
 
-    public function addComment(\Gazelle\User $friend, string $comment): int {
-        self::$db->prepared_query("
-            UPDATE friends SET
-                Comment = ?
-            WHERE UserID = ?
-                AND FriendID = ?
-            ", $comment, $this->user->id, $friend->id()
+    public function setComment(\Gazelle\User $friend, string $comment): int {
+        return $this->pg()->query('
+            update user_has_friend set
+                comment = $1
+            where id_user = $2
+                and id_user_friend = $3
+            ', $comment, $this->user->id, $friend->id
         );
-        return self::$db->affected_rows();
     }
 
     public function removeFriend(\Gazelle\User $friend): int {
-        self::$db->prepared_query("
-            DELETE FROM friends
-            WHERE UserID = ?
-                AND FriendID = ?
-            ", $this->user->id, $friend->id()
+        return $this->pg()->query('
+            delete from user_has_friend
+            where id_user = $1
+                and id_user_friend = $2
+            ', $this->user->id, $friend->id
         );
-        return self::$db->affected_rows();
     }
 
     public function total(): int {
-        return (int)self::$db->scalar("
-            SELECT count(*) FROM friends WHERE UserID = ?
-            ", $this->user->id
+        return (int)$this->pg()->scalarex('
+            select count(*) from user_has_friend where id_user = $1
+            ', $this->user->id
         );
     }
 
-    public function page(\Gazelle\Manager\User $userMan, int $limit, int $offset): array {
-        self::$db->prepared_query("
-            SELECT a.FriendID AS id,
-                a.Comment     AS comment,
-                CASE WHEN b.UserID IS NULL THEN 0 ELSE 1 END AS mutual
-            FROM friends a
-            INNER JOIN users_main AS um ON (um.ID = a.FriendID)
-            LEFT JOIN friends b ON (b.UserID = a.FriendID AND b.FriendID = ?)
-            WHERE a.UserID = ?
-            ORDER BY um.Username
-            LIMIT ? OFFSET ?
-            ", $this->user->id, $this->user->id, $limit, $offset
+    public function page(
+        int $limit,
+        int $offset,
+        \Gazelle\Manager\User $manager = new \Gazelle\Manager\User(),
+    ): array {
+        $result = $this->pg()->allex(<<<END_SQL
+            select a.id_user_friend,
+                a.comment,
+                case when b.id_user is null then 0 else 1 end as mutual
+            from user_has_friend        a
+            inner join relay.users_main um on (um."ID" = a.id_user_friend)
+            left join user_has_friend   b  on (b.id_user = a.id_user_friend AND b.id_user_friend = $1)
+            WHERE a.id_user = $1
+            ORDER BY um."Username"
+            LIMIT $2 OFFSET $3
+            END_SQL,
+                $this->user->id, $limit, $offset
         );
-        $list = self::$db->to_array('id', MYSQLI_ASSOC);
-        foreach (array_map('intval', array_keys($list)) as $id) {
-            $list[$id]['user'] = $userMan->findById($id);
+        $list = [];
+        foreach ($result as $row) {
+            $row['user'] = $manager->findById($row['id_user_friend']);
+            $list[$row['id_user_friend']] = $row;
         }
         return $list;
     }
 
-    public function userList(): array {
-        self::$db->prepared_query("
-            SELECT f.FriendID,
-                u.Username
-            FROM friends AS f
-            INNER JOIN users_main AS u ON (u.ID = f.FriendID)
-            WHERE f.UserID = ?
-            ORDER BY u.Username ASC
-            ", $this->user->id
+    public function userList(
+        \Gazelle\Manager\User $manager = new \Gazelle\Manager\User(),
+    ): array {
+        return array_map(
+            fn ($id) => $manager->findById($id),
+            $this->pg()->columnex(<<<END_SQL
+                select f.id_user_friend
+                from user_has_friend        f
+                inner join relay.users_main u on (u."ID" = f.id_user_friend)
+                where f.id_user = $1
+                order by u."Username"
+                END_SQL,
+                    $this->user->id
+            ),
         );
-        return self::$db->to_array(false, MYSQLI_ASSOC);
     }
 }
