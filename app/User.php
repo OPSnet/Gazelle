@@ -1810,18 +1810,6 @@ class User extends BaseAttrObject {
             DELETE FROM user_read_forum WHERE user_id = ?
             ", $this->id
         );
-        self::$db->prepared_query("
-            DELETE FROM users_stats_daily WHERE UserID = ?
-            ", $this->id
-        );
-        self::$db->prepared_query("
-            DELETE FROM users_stats_monthly WHERE UserID = ?
-            ", $this->id
-        );
-        self::$db->prepared_query("
-            DELETE FROM users_stats_yearly WHERE UserID = ?
-            ", $this->id
-        );
         $affected = parent::remove();
         $this->flush();
         self::$cache->delete_multi([

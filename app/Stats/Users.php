@@ -709,6 +709,7 @@ class Users extends \Gazelle\Base {
         $processed = $this->pg()->query("
             insert into relay.user_summary
             select * from user_summary_new
+            on conflict do nothing
         ");
         $this->pg()->query("
             drop table user_summary_new

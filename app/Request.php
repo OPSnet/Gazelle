@@ -627,7 +627,8 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
             ", $requestId
         );
         self::$db->prepared_query("
-            INSERT INTO user_summary (user_id, request_vote_size, request_vote_total)
+            UPDATE user_summary us
+            INNER JOIN (
                 SELECT rv.UserID,
                     sum(rv.Bounty) AS size,
                     count(*) AS total
@@ -636,9 +637,9 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
                 WHERE rv.UserID != r.FillerID
                     AND rv.UserID = ?
                 GROUP BY rv.UserID
-            ON DUPLICATE KEY UPDATE
-                request_vote_size = VALUES(request_vote_size),
-                request_vote_total = VALUES(request_vote_total)
+            ) AS w ON us.user_id = w.UserID
+            SET us.request_vote_size  = w.size,
+                us.request_vote_total = w.total
             ", $user->id
         );
         self::$db->commit();

@@ -212,9 +212,6 @@ foreach ($db->collect(0) as $userId) {
     $user = $userMan->findById($userId);
     $db->prepared_query("DELETE FROM forums_topics WHERE LastPostAuthorID = ?", $userId);
     $db->prepared_query("DELETE FROM locked_accounts WHERE UserID = ?", $userId);
-    $db->prepared_query("DELETE FROM users_stats_daily WHERE UserID = ?", $userId);
-    $db->prepared_query("DELETE FROM users_stats_monthly WHERE UserID = ?", $userId);
-    $db->prepared_query("DELETE FROM users_stats_yearly WHERE UserID = ?", $userId);
     if ($user) {
         try {
             echo "user {$user->label()}\n";
@@ -270,24 +267,6 @@ $db->prepared_query("
 $db->prepared_query("
     DELETE u
     FROM users_leech_stats u
-    LEFT JOIN users_main um ON (um.ID = u.UserID)
-    WHERE um.ID IS NULL
-");
-$db->prepared_query("
-    DELETE u
-    FROM users_stats_daily u
-    LEFT JOIN users_main um ON (um.ID = u.UserID)
-    WHERE um.ID IS NULL
-");
-$db->prepared_query("
-    DELETE u
-    FROM users_stats_monthly u
-    LEFT JOIN users_main um ON (um.ID = u.UserID)
-    WHERE um.ID IS NULL
-");
-$db->prepared_query("
-    DELETE u
-    FROM users_stats_yearly u
     LEFT JOIN users_main um ON (um.ID = u.UserID)
     WHERE um.ID IS NULL
 ");
