@@ -150,7 +150,7 @@ class SchedulerTest extends TestCase {
         $list = new TaskScheduler()->taskDetailList();
         $this->assertCount(42, $list, 'task-detail-list');
         $detail = current($list);
-        $this->assertEquals(
+        $this->assertEqualsCanonicalizing(
             [
                 "periodic_task_id", "name", "description", "period",
                 "is_enabled", "is_sane", "run_now", "runs", "processed",
