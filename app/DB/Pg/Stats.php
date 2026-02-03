@@ -28,9 +28,9 @@ class Stats {
     }
 
     public function totalDuration(): float {
-        return (float)array_reduce(
+        return array_reduce(
             $this->queryList(),
-            fn ($sum, $query) => $sum + $query['duration']
+            fn ($sum, $query): float => $sum + $query['duration']
         );
     }
 

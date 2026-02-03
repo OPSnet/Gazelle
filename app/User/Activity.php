@@ -180,7 +180,7 @@ class Activity extends \Gazelle\BaseUser {
                     fn ($h) => $h['total'],
                     $stats->recentDownloadTotal()
                 ),
-                fn ($total, $hour) => $total += $hour
+                fn ($total, $hour): int => $total += $hour
             );
             if ($total > $threshold) {
                 $this->setAction(

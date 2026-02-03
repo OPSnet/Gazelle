@@ -305,8 +305,10 @@ END_SQL
         return $total;
     }
 
-    /* Recent download statistics */
-
+    /**
+     * Recent download statistics
+     * @return array<int, array<string, int>>
+     */
     public function recentDownloadTotal(): array {
         self::$db->prepared_query("
             SELECT count(*) as total,

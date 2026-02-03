@@ -85,6 +85,9 @@ class Bonus extends \Gazelle\BaseUser {
         ) ?? [];
     }
 
+    /**
+     * @return array<int, array{0: int, 1: int}>
+     */
     public function summary(): array {
         $key = sprintf(self::CACHE_SUMMARY, $this->user->id);
         $summary = self::$cache->get_value($key);
@@ -158,6 +161,9 @@ class Bonus extends \Gazelle\BaseUser {
         return true;
     }
 
+    /**
+     * @return array<int, array{0: int, 1: string, 2: string}>
+     */
     public function poolHistory(): array {
         $key = sprintf(self::CACHE_POOL_HISTORY, $this->user->id);
         $history = self::$cache->get_value($key);

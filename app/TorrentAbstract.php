@@ -252,7 +252,7 @@ abstract class TorrentAbstract extends BaseAttrObject {
     /**
      * Aggregate the primary media file types per extension
      *
-     * @return array of array of [ac3, flac, m4a, mp3, ...] => count
+     * @return array<string, int> [ac3, flac, m4a, mp3, ...] => count
      */
     public function fileListPrimaryMap(): array {
         $map = [];
@@ -272,10 +272,7 @@ abstract class TorrentAbstract extends BaseAttrObject {
     }
 
     public function fileListPrimaryTotal(): int {
-        return (int)array_reduce(
-            array_values($this->fileListPrimaryMap()),
-            fn ($total, $n) => $total += $n
-        );
+        return array_sum($this->fileListPrimaryMap());
     }
 
     public function fileListNonPrimarySize(): int {
