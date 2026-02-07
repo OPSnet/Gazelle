@@ -124,26 +124,20 @@ class Seedbox extends \Gazelle\BaseUser {
         $from = $this->buildFrom();
         $orderBy = ['tg.Name', 't.FilePath'][$this->viewBy];
         self::$db->prepared_query("
-            SELECT xfu.fid, tg.Name, tg.Year, tg.RecordLabel,
-                t.GroupID, tg.Name, t.FilePath, t.RemasterTitle, t.RemasterRecordLabel,
-                t.Format, t.Encoding, t.Media, t.HasLog, t.HasLogDB, t.LogScore, t.HasCue, t.Scene
+            SELECT xfu.fid
             $from
             ORDER BY $orderBy
             LIMIT ? OFFSET ?
             ", $this->user->id, $this->source, $this->user->id, $this->target,
                 $limit, $offset
         );
-        $info = self::$db->to_array('fid', MYSQLI_ASSOC);
+        $torrentIds = self::$db->collect(0);
 
         $list = [];
-        foreach (array_map('intval', array_keys($info)) as $tid) {
-            $torrent = $torMan->findById($tid);
-            if (is_null($torrent)) {
-                continue;
-            }
+        foreach (object_generator($torMan, $torrentIds) as $torrent) { /** @phpstan-var \Gazelle\Torrent $torrent */
             $tgroup = $torrent->group();
             $list[] = [
-                'id'       => $tid,
+                'id'       => $torrent->id,
                 'folder'   => $torrent->path(),
                 'sortname' => $tgroup->name(),
                 'artist'   => $tgroup->hasArtistRole()
