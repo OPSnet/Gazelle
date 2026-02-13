@@ -104,6 +104,7 @@ variables.$color-background-tooltipster: variables.$back-100;
 variables.$color-background-torrent: variables.$midtone-200; // edition in group-list
 variables.$color-background-table-discog: variables.$midtone-300; // navigation row ~ "jump down to.."
 variables.$color-background-table-keyrows: variables.$midtone-300; // navigation row ~ "jump up to.."
+variables.$color-background-popup: variables.$fore-400; // upload musicbrainz info
 
 variables.$color-menu-1: variables.$menutheme-1000; // unused (could be home)
 variables.$color-menu-2: variables.$menutheme-100; // torrents
@@ -144,8 +145,8 @@ variables.$color-text-linkbox: variables.$midtone-800; // links in linkbox
 variables.$color-text-menu: variables.$fore-1000;
 variables.$color-text-menu-hover: variables.$fore-700; // during pulldown // changed
 variables.$color-text-mono: variables.$fore-700;
-variables.$color-text-popup-anchor-hover: variables.$midtone-1000;
-variables.$color-text-popup-anchor: variables.$fore-500;
+variables.$color-text-popup-anchor-hover: variables.$fore-900;
+variables.$color-text-popup-anchor: variables.$fore-800;
 variables.$color-text-popup: variables.$fore-400; // white background
 $color-text-ratio-greenzone: variables.$ds-green;
 $color-text-ratio-redzone: variables.$ds-red;

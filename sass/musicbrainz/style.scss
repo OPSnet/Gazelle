@@ -44,5 +44,8 @@
   position: absolute;
   color: #6fa5fd;
   font-weight: 700;
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
