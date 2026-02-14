@@ -96,7 +96,6 @@ variables.$color-background-table: variables.$back-200; // tables/forms without 
 variables.$color-background-table-row-th: variables.$back-700;
 variables.$color-background-table-row-odd: variables.$back-500;
 variables.$color-background-table-row-even: variables.$back-300;
-
 variables.$color-background-table-torrenttable: variables.$back-300; // also form field in focus
 variables.$color-background-table-details: variables.$back-400; // equal to blockquote
 variables.$color-background-table-torrents-group: variables.$back-600;
@@ -105,6 +104,7 @@ variables.$color-background-torrent: variables.$midtone-200; // edition in group
 variables.$color-background-table-discog: variables.$midtone-300; // navigation row ~ "jump down to.."
 variables.$color-background-table-keyrows: variables.$midtone-300; // navigation row ~ "jump up to.."
 variables.$color-background-popup: variables.$fore-400; // upload musicbrainz info
+variables.$color-background-highlight-non-primary: variables.$fore-800;
 
 variables.$color-menu-1: variables.$menutheme-1000; // unused (could be home)
 variables.$color-menu-2: variables.$menutheme-100; // torrents
@@ -131,6 +131,7 @@ variables.$color-text-anchor-hover: variables.$midtone-1000;
 variables.$color-text-anchor: variables.$fore-1000;
 variables.$color-text-base: variables.$fore-800;
 variables.$color-text-bold: variables.$fore-800;
+variables.$color-text-highlight-non-primary: variables.$ds-black;
 
 $color-text-button: variables.$ds-gray-05;
 $color-text-footer: variables.$ds-neutral-300;

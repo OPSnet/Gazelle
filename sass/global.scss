@@ -670,6 +670,11 @@ tr.torrent .bookmark > a::after {
   text-align: right;
 }
 
+td.number_column.td_size.highlight_non_primary {
+  background-color: #f5b041;
+  color: #000;
+}
+
 .wide_input_text {
   width: 95%;
 }

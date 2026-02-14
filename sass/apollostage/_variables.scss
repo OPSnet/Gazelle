@@ -4,7 +4,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // SLUG
 
-$build-slug: "Apollostage build 20251215"; // must include quotes
+$build-slug: "Apollostage build 20260219"; // must include quotes
 
 // ////////////////////////////////////////////////////////////////////////////////
 // COLORS
@@ -72,6 +72,7 @@ $ds-green: #099909;
 $ds-yellow: #f9e340;
 $ds-yellow-high: hsl(50deg 90% 50% / 77.7%);
 $ds-goldenrod: #daa520;
+$ds-lightorange: #f5b041;
 $ds-fx-low: rgb(255 255 255 / 8%);
 $ds-fx-mid: rgb(255 255 255 / 25%);
 $ds-fx-menutheme: rgb(255 255 255 / 25%);
@@ -104,7 +105,7 @@ $color-background-fx-unread: $ds-fx-mid;
 $color-background-torrent: $midtone-200; // edition in group-list
 $color-background-table-discog: $midtone-300; // navigation row ~ "jump down to.."
 $color-background-table-keyrows: $midtone-300; // navigation row ~ "jump up to.."
-
+$color-background-highlight-non-primary: $midtone-900;
 $color-menu-1: orangered; // UNUSED (could be home)
 $color-menu-2: $menutheme-100; // torrents
 $color-menu-3: $menutheme-200; // collages
@@ -152,6 +153,7 @@ $color-text-table-discog-titles: $midtone-900;
 $color-text-tooltipster: $fore-700;
 $color-text-tooltipster-anchor: $fore-900;
 $color-text-tooltipster-anchor-hover: $fore-800;
+$color-text-highlight-non-primary: $ds-black;
 
 // popup notifications
 $color-background-notification-gradient-1: $midtone-1000; // menu low/high suggested

@@ -158,6 +158,7 @@ variables.$color-background-table-torrents-group: variables.$back-600;
 variables.$color-background-tooltipster: variables.$back-100;
 variables.$color-background-torrent: variables.$midtone-200; // edition in group-list
 variables.$color-background-fx-unread: $ds-fx-blue;
+variables.$color-background-highlight-non-primary: variables.$ds-yellow-high;
 
 variables.$color-text-anchor-hover: $blue-800;
 variables.$color-text-anchor: $blue-700;
@@ -188,6 +189,7 @@ variables.$color-text-table-discog-titles: variables.$fore-300;
 variables.$color-text-tooltipster: variables.$fore-700;
 variables.$color-text-tooltipster-anchor: variables.$fore-900;
 variables.$color-text-tooltipster-anchor-hover: variables.$fore-800;
+variables.$color-text-highlight-non-primary: variables.$ds-black;
 
 variables.$color-menu-1: orangered; // unused (could be home)
 variables.$color-menu-2: variables.$menutheme-100; // torrents
