@@ -96,16 +96,24 @@ class TextTest extends TestCase {
     }
 
     public function testImage(): void {
-        $bad = "[img=https://www.example.com/a.pdf]";
-        $this->assertEquals($bad, $bad, "text-image-bad");
+        $bad = "[img]https://www.example.com/a.pdf[/img]";
+        $this->assertEquals($bad, \Text::full_format($bad), "text-image-bad");
 
         foreach (['avif', 'bmp', 'gif', 'jpg', 'jpeg', 'png', 'svg', 'tiff', 'webp'] as $ext) {
-            $image     = "https://www.example.com/a.jpg";
-            $withCache = '@^<img loading="lazy" class="scale_image" onclick=".*?" alt=".*?/i/full/[\w-]+/[\w-]+" src=".*?/i/full/[\w-]+/[\w-]+" data-origin-src="\Q' . $image . '\E" />$@';
-            $noCache   = "<img loading=\"lazy\" class=\"scale_image\" onclick=\"lightbox.init(this, \$(this).width());\" alt=\"$image\" src=\"$image\" />";
+            $image     = "https://www.example.com/a.$ext";
+            $withCache = '@^<img loading="lazy" class="scale_image" onclick=".*?" alt="\Q' . $image . '\E" src=".*?/i/full/[\w-]+/[\w-]+" data-origin-src="\Q' . $image . '\E">$@';
+            $noCache   = "<img loading=\"lazy\" class=\"scale_image\" onclick=\"lightbox.init(this, \$(this).width());\" alt=\"$image\" src=\"$image\">";
 
-            $this->assertEquals($noCache, \Text::full_format("[img=$image]"), "text-image1-cache-implicit-$ext");
-            $this->assertEquals($noCache, \Text::full_format("[img]{$image}[/img]"), "text-image2-cache-implicit-$ext");
+            $this->assertEquals($noCache, \Text::full_format("[img=$image]"), "text-image1-nocache-implicit-$ext");
+            $this->assertEquals($noCache, \Text::full_format("[img]{$image}[/img]"), "text-image2-nocache-implicit-$ext");
+            $this->assertMatchesRegularExpression(
+                $withCache, \Text::full_format("[img=$image]", cache: Enum\ImageCacheMode::cache),
+                "text-image1-cache-implicit-$ext"
+            );
+            $this->assertMatchesRegularExpression(
+                $withCache, \Text::full_format("[img]{$image}[/img]", cache: Enum\ImageCacheMode::cache),
+                "text-image2-cache-implicit-$ext"
+            );
         }
     }
 

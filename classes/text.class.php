@@ -2,6 +2,7 @@
 // phpcs:disable PSR1.Methods.CamelCapsMethodName.NotCamelCaps
 
 use Gazelle\Enum\CacheBucket;
+use Gazelle\Enum\ImageCacheMode;
 
 class Text {
     /**
@@ -228,14 +229,14 @@ class Text {
      * Output BBCode as XHTML
      */
     public static function full_format(
-        ?string     $Str,
-        bool        $OutputTOC = true,
-        int         $Min = 3,
-        bool        $Rules = false,
-        bool        $cache = false,
-        CacheBucket $bucket = CacheBucket::standard,
+        ?string        $Str,
+        bool           $OutputTOC = true,
+        int            $Min = 3,
+        bool           $Rules = false,
+        ImageCacheMode $cache = ImageCacheMode::off,
+        CacheBucket    $bucket = CacheBucket::standard,
     ): string {
-        if (is_null($Str)) {
+        if ($Str === null || $Str === '') {
             return '';
         }
         $Str = html_escape($Str);
@@ -818,7 +819,7 @@ class Text {
         }
     }
 
-    private static function to_html(array $Array, bool $Rules, bool $cache, CacheBucket $bucket): string {
+    private static function to_html(array $Array, bool $Rules, ImageCacheMode $cache, CacheBucket $bucket): string {
         self::$Levels++;
         /*
          * Hax prevention
@@ -1081,16 +1082,17 @@ class Text {
                         } else {
                             $LocalURL = self::local_url($Block['Val']);
                             if ($LocalURL) {
-                                $Str .= '<img loading="lazy" class="scale_image" onclick="lightbox.init(this, $(this).width());" alt="' . $Block['Val'] . '" src="' . $LocalURL . '" />';
+                                $Str .= '<img loading="lazy" class="scale_image" onclick="lightbox.init(this, $(this).width());" alt="' . $Block['Val'] . '" src="' . $LocalURL . '">';
                             } else {
-                                if ($cache) {
-                                    $image    = image_cache_encode($Block['Val'], bucket: $bucket);
+                                if ($cache !== ImageCacheMode::off) {
+                                    $passthru = $cache === ImageCacheMode::passthru;
+                                    $image    = html_escape(image_cache_encode(html_unescape($Block['Val']), passthru: $passthru, bucket: $bucket));
                                     $original = " data-origin-src=\"{$Block['Val']}\"";
                                 } else {
                                     $image    = $Block['Val'];
                                     $original = "";
                                 }
-                                $Str .= "<img loading=\"lazy\" class=\"scale_image\" onclick=\"lightbox.init(this, $(this).width());\" alt=\"$image\" src=\"$image\"$original />";
+                                $Str .= "<img loading=\"lazy\" class=\"scale_image\" onclick=\"lightbox.init(this, $(this).width());\" alt=\"{$Block['Val']}\" src=\"$image\"$original>";
                             }
                         }
                         break;

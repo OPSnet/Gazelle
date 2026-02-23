@@ -213,7 +213,7 @@ if (!empty($userTitle)) {
         <td class="body" valign="top"<?php if (!$Viewer->showAvatars()) {
 echo ' colspan="2"'; } ?>>
             <div id="content<?=$PostID?>">
-                <?= \Text::full_format($Body, cache: IMAGE_CACHE_ENABLED, bucket: CacheBucket::forum) ?>
+                <?= \Text::full_format($Body, cache: Enum\ImageCacheMode::cache, bucket: CacheBucket::forum) ?>
 <?php   if ($EditedUserID) { ?>
                 <br />
                 <br />

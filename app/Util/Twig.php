@@ -3,6 +3,7 @@
 namespace Gazelle\Util;
 
 use Gazelle\Enum\CacheBucket;
+use Gazelle\Enum\ImageCacheMode;
 use Gazelle\Manager\SiteOption;
 use Gazelle\View;
 
@@ -76,12 +77,17 @@ class Twig {
 
         $twig->addFilter(new \Twig\TwigFilter(
             'bb_format',
-            fn ($text, $outputToc = true) => new \Twig\Markup(\Text::full_format($text, $outputToc, cache: IMAGE_CACHE_ENABLED, bucket: CacheBucket::forum), 'UTF-8')
+            fn ($text, $outputToc = true) => new \Twig\Markup(\Text::full_format($text, $outputToc, cache: ImageCacheMode::cache, bucket: CacheBucket::forum), 'UTF-8')
+        ));
+
+        $twig->addFilter(new \Twig\TwigFilter(
+            'bb_passthru',
+            fn ($text) => new \Twig\Markup(\Text::full_format($text, cache: ImageCacheMode::passthru, bucket: CacheBucket::forum), 'UTF-8')
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
             'bb_forum',
-            fn ($text) => new \Twig\Markup(\Text::full_format($text, OutputTOC: false, cache: IMAGE_CACHE_ENABLED, bucket: CacheBucket::forum), 'UTF-8')
+            fn ($text) => new \Twig\Markup(\Text::full_format($text, OutputTOC: false, cache: ImageCacheMode::cache, bucket: CacheBucket::forum), 'UTF-8')
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
@@ -95,13 +101,13 @@ class Twig {
 
         $twig->addFilter(new \Twig\TwigFilter(
             'image_cache',
-            fn (?string $image, mixed $height = 0, mixed $width = 0)
-                => $image ? image_cache_encode(url: $image, height: (int)$height, width: (int)$width) : $image
+            fn (?string $image, mixed $height = 0, mixed $width = 0, bool $passthru = false)
+                => $image ? image_cache_encode(url: $image, height: (int)$height, width: (int)$width, passthru: $passthru) : $image
         ));
         $twig->addFilter(new \Twig\TwigFilter(
             'image_proxy',
             fn (?string $image, mixed $proxy = true)
-                => ((bool)$proxy && $image) ? image_cache_encode(url: $image, proxy: true) : $image
+                => ((bool)$proxy && $image) ? image_cache_encode(url: $image, passthru: true) : $image
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
@@ -240,7 +246,7 @@ class Twig {
             return $base;
         }));
 
-        $twig->addFunction(new \Twig\TwigFunction('donor_icon', fn ($icon) => new \Twig\Markup(image_cache_encode($icon), 'UTF-8')));
+        $twig->addFunction(new \Twig\TwigFunction('donor_icon', fn ($icon) => image_cache_encode($icon)));
 
         $twig->addFunction(new \Twig\TwigFunction('ipaddr', fn (string $ipaddr) => new \Twig\Markup(
             "$ipaddr <a href=\"user.php?action=search&amp;ip_history=on&amp;matchtype=strict&amp;ip=$ipaddr\" title=\"Search\" class=\"brackets tooltip\">S</a>",
@@ -309,10 +315,7 @@ class Twig {
             'UTF-8'
         )));
 
-        $twig->addFunction(new \Twig\TwigFunction('shorten', fn ($text, $length) => new \Twig\Markup(
-            shortenString($text, $length),
-            'UTF-8'
-        )));
+        $twig->addFunction(new \Twig\TwigFunction('shorten', fn ($text, $length) => shortenString($text, $length)));
 
         // round up number to next closest power of 10 of n/10
         // 120 => 120, but 121 => 130, 129 => 130

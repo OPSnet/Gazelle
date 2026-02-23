@@ -710,7 +710,7 @@ function shortenString(string $text, int $maxLength, bool $force = false, bool $
         }
     }
     if ($ellipsis) {
-        $short .= "\xE2\x80\xA6"; // U+2026 HORIZONTAL ELLIPSIS
+        $short .= "…";
     }
     return $short;
 }
@@ -902,27 +902,23 @@ function image_cache_signature(string $url, int|null $epoch = null, string $secr
  */
 function image_cache_encode(
     string      $url,
-    int         $height = 0,
-    int         $width  = 0,
-    bool        $proxy  = false,
-    int|null    $epoch  = null,
-    CacheBucket $bucket = CacheBucket::standard,
-    string      $secret = IMAGE_CACHE_SECRET,
-    bool        $cache  = IMAGE_CACHE_ENABLED,
+    int         $height   = 0,
+    int         $width    = 0,
+    bool        $passthru = false,
+    int|null    $epoch    = null,
+    CacheBucket $bucket   = CacheBucket::standard,
+    string      $secret   = IMAGE_CACHE_SECRET,
+    bool        $cache    = IMAGE_CACHE_ENABLED,
 ): string {
     if (!$cache || str_starts_with($url, STATIC_SERVER) || !str_starts_with($url, 'http')) {
         return $url;
     }
-    $encode = urlencode_safe($url) . ($proxy ? '/proxy' : '');
+    $encode = urlencode_safe($url) . ($passthru ? '/proxy' : '');
     $sig    = image_cache_signature("{$bucket->value}/$encode", $epoch, $secret);
-    if ($proxy) {
-        $spec = 'full';
-    } else {
-        $spec = match ($height || $width) {
-            true  => ($height ?: '') . 'x' . ($width ?: ''),
-            false => 'full',
-        };
-    }
+    $spec   = match ($height || $width) {
+        true  => ($height ?: '') . 'x' . ($width ?: ''),
+        false => 'full',
+    };
     return IMAGE_CACHE_HOST . "/{$bucket->value}/$spec/$sig/$encode";
 }
 

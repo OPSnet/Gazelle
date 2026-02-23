@@ -145,7 +145,7 @@ echo $Twig->render('tgroup/similar.twig', [
             <div class="head"><a href="#">↑</a>&nbsp;<strong><?= $tgroup->releaseTypeName() ? $tgroup->releaseTypeName() . ' info' : 'Info' ?></strong></div>
             <div class="body">
 <?php if (!empty($tgroup->description())) { ?>
-                <?= \Text::full_format($tgroup->description(), cache: IMAGE_CACHE_ENABLED, bucket: CacheBucket::tgroup) ?>
+                <?= \Text::full_format($tgroup->description(), cache: Enum\ImageCacheMode::cache, bucket: CacheBucket::tgroup) ?>
 <?php } else { ?>
                 There is no information on this torrent.
 <?php } ?>

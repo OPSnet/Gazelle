@@ -20,7 +20,7 @@ if (is_null($reportType)) {
 }
 ?>
 <ul>
-    <li><?= \Text::full_format($reportType->explanation()) ?></li>
+    <li><?= \Text::full_format($reportType->explanation(), cache: Enum\ImageCacheMode::passthru, bucket: Enum\CacheBucket::forum) ?></li>
 </ul>
 <br />
 <table class="layout border" cellpadding="3" cellspacing="1" border="0" width="100%">
@@ -54,7 +54,7 @@ if ($needTrack !== 'none') {
         </td>
         <td>
             <input id="track" type="text" name="track" size="8" value="<?= display_str($_POST['track'] ?? '') ?>" />
-            <?= $needTrack === 'all' ? '<input id="all_tracks" type="checkbox" onclick="AllTracks()" /> All' : ''?>
+            <?= $needTrack === 'all' ? '<input id="all_tracks" type="checkbox"> All' : ''?>
         </td>
     </tr>
 <?php

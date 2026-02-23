@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Gazelle;
 
-require_once match ($_REQUEST['action'] ?? '') {
+require __DIR__ . '/' . match ($_REQUEST['action'] ?? null) {
     'compose'     => 'compose.php',
     'forward'     => 'forward.php',
     'get_post'    => 'get_post.php',

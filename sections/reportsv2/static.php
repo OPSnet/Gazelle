@@ -74,9 +74,8 @@ if ($search->canUnclaim($Viewer)) {
     </div>
 <?php
         } else {
-            $torrentId    = $report->torrentId();
-            $torrent      = $report->torrent();
-            $tgroupId     = (int)$torrent?->groupId();
+            $torrentId = $report->torrentId();
+            $torrent   = $report->torrent();
 ?>
     <div id="report<?= $reportId ?>">
         <form class="manage_form" style="80%" name="report" id="reportform_<?= $reportId ?>" action="reports.php" method="post">
@@ -84,9 +83,6 @@ if ($search->canUnclaim($Viewer)) {
 /*
 * Some of these are for takeresolve, namely the ones that aren't inputs, some for the JavaScript.
 */
-?>
-
-<?php
             echo $Twig->render('reportsv2/detail.twig', [
                 'report'         => $report,
                 'request_list'   => $requestMan->findByTorrentReported($torrent),
@@ -150,7 +146,7 @@ if ($search->canUnclaim($Viewer)) {
 <?php                   } ?>
                         </span>
 <?php                   if ($extra->description()) { ?>
-                        <br /><span class="report_other_torrent_info" title="Release description of other torrent">Release info: <?= \Text::full_format($extra->description()) ?></span>
+                        <br><span class="report_other_torrent_info" title="Release description of other torrent">Release info: <?= \Text::full_format($extra->description(), cache: Enum\ImageCacheMode::passthru, bucket: Enum\CacheBucket::forum) ?></span>
 <?php                   } ?>
                     </td>
                 </tr>
@@ -270,14 +266,14 @@ if ($search->canUnclaim($Viewer)) {
 <?php
     foreach ($report->image() as $image) {
 ?>
-                        <img style="max-width: 200px;" onclick="lightbox.init(this, 200);" src="<?= html_escape(image_cache_encode($image)) ?>" alt="Relevant image" />
+                        <img style="max-width: 200px;" onclick="lightbox.init(this, 200);" src="<?= html_escape(image_cache_encode($image, passthru: true)) ?>" alt="Relevant image">
 <?php           } ?>
                     </td>
                 </tr>
 <?php       } ?>
                 <tr>
                     <td class="label">User comment:</td>
-                    <td class="wrap_overflow"><?= \Text::full_format($report->reason()) ?></td>
+                    <td class="wrap_overflow"><?= \Text::full_format($report->reason(), cache: Enum\ImageCacheMode::passthru, bucket: Enum\CacheBucket::forum) ?></td>
                 </tr>
 <?php       if ($report->status() == 'InProgress') { /* BEGIN MOD STUFF */ ?>
                 <tr>

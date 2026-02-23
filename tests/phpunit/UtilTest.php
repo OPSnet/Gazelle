@@ -302,8 +302,8 @@ class UtilTest extends TestCase {
             image_cache_encode($url, height: 45, width: 67),
             'image-resize-height-and-width'
         );
-        $this->assertStringStartsWith(IMAGE_CACHE_HOST . '/i/full/',
-            image_cache_encode($url, height: 89, proxy: true),
+        $this->assertStringStartsWith(IMAGE_CACHE_HOST . '/i/89x/',
+            image_cache_encode($url, height: 89, passthru: true),
             'image-proxy-resize-height-and-width'
         );
         $this->assertStringStartsWith(IMAGE_CACHE_HOST . '/f/89x/',
@@ -318,13 +318,13 @@ class UtilTest extends TestCase {
         );
         $this->assertEquals(
             IMAGE_CACHE_HOST . '/i/full/u21SyNepGvwmqYgs/aHR0cHM6Ly9leGFtcGxlX3VybC9pbWcuanBn/proxy',
-            image_cache_encode("https://example_url/img.jpg", epoch: 1640730000, secret: "1234", proxy: true),
+            image_cache_encode("https://example_url/img.jpg", epoch: 1640730000, secret: "1234", passthru: true),
             'image-cache-proxied-reference-vector'
         );
         $this->assertEquals(
-            IMAGE_CACHE_HOST . '/i/full/u21SyNepGvwmqYgs/aHR0cHM6Ly9leGFtcGxlX3VybC9pbWcuanBn/proxy',
-            image_cache_encode("https://example_url/img.jpg", epoch: 1640730000, secret: "1234", proxy: true, width: 512),
-            'image-cache-proxied-ignore-resize-reference-vector'
+            IMAGE_CACHE_HOST . '/i/x512/u21SyNepGvwmqYgs/aHR0cHM6Ly9leGFtcGxlX3VybC9pbWcuanBn/proxy',
+            image_cache_encode("https://example_url/img.jpg", epoch: 1640730000, secret: "1234", passthru: true, width: 512),
+            'image-cache-proxied-resize-reference-vector'
         );
     }
 

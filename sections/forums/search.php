@@ -130,7 +130,7 @@ echo "&amp;postid=$PostID#post$PostID"; } ?>"></a></span>
         </tr>
 <?php    if ($search->isBodySearch()) { ?>
         <tr class="row<?=$Row?> hidden" id="post_<?=$PostID?>_text">
-            <td colspan="4"><?=\Text::full_format($Body)?></td>
+            <td colspan="4"><?=\Text::full_format($Body, cache: Enum\ImageCacheMode::cache, bucket: Enum\CacheBucket::forum)?></td>
         </tr>
 <?php    }
 }

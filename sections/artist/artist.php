@@ -303,7 +303,7 @@ echo $Twig->render('artist/similar-graph.twig', [
             <strong>Artist Information</strong>
             <a href="#" class="brackets" onclick="$('#body').gtoggle(); return false;">Toggle</a>
         </div>
-        <div id="body" class="body"><?=\Text::full_format($artist->body())?></div>
+        <div id="body" class="body"><?=\Text::full_format($artist->body(), cache: Enum\ImageCacheMode::cache, bucket: Enum\CacheBucket::tgroup)?></div>
     </div>
     <div id="artistcomments">
 <?php

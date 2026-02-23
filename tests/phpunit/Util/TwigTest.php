@@ -52,7 +52,7 @@ END;
 
         if (IMAGE_CACHE_ENABLED) {
             $this->assertStringStartsWith(
-                '<img loading="lazy" class="scale_image" onclick="lightbox.init(this, $(this).width());" alt="' . IMAGE_CACHE_HOST . '/f/full/',
+                '<img loading="lazy" class="scale_image" onclick="lightbox.init(this, $(this).width());" alt="https://example.com/image.jpg" src="' . IMAGE_CACHE_HOST . '/f/full/',
                 self::twig('{{ text|bb_forum }}')->render(['text' => '[img=https://example.com/image.jpg]']),
                 'twig-bb-forum'
             );
@@ -218,7 +218,7 @@ END;
         );
 
         $this->assertStringStartsWith(
-            '<img loading="lazy" class="scale_image" onclick="lightbox.init(this, $(this).width());" alt="' . IMAGE_CACHE_HOST . '/f/full/',
+            '<img loading="lazy" class="scale_image" onclick="lightbox.init(this, $(this).width());" alt="https://example.com/image.jpg" src="' . IMAGE_CACHE_HOST . '/f/full/',
             self::twig('{{ text|bb_forum }}')->render(['text' => '[img=https://example.com/image.jpg]']),
             'twig-bb-forum'
         );
