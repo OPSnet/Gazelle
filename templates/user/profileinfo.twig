@@ -1,0 +1,25 @@
+<div class="box">
+    <div class="head">
+        {{ user.profileTitle }}
+        <span style="float: right;">
+            <a href="#" onclick="$('#profilediv').gtoggle(); this.innerHTML = (this.innerHTML === 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets">Hide</a>
+        </span>&nbsp;
+    </div>
+    <div class="pad profileinfo" id="profilediv">
+        {{ user.profileInfo|bb_format|default("This profile is currently empty.") }}
+    </div>
+</div>
+{% for level in 1..4 %}
+{%  set profileinfo = donor.profileInfo(level) %}
+{%  if profileinfo %}
+<div class="box">
+    <div class="head">
+        {{ donor.profileTitle(level)|default("Extra Info " ~ level) }}
+        <span style="float: right;">
+            <a href="#" onclick="$('#profilediv_{{ level }}').gtoggle(); this.innerHTML = (this.innerHTML === 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets">Hide</a>
+        </span>
+    </div>
+    <div class="pad profileinfo" id="profilediv_{{ level }}">{{ profileinfo|bb_format }}</div>
+</div>
+{%  endif %}
+{% endfor %}

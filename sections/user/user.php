@@ -29,7 +29,6 @@ $userBonus   = new User\Bonus($user);
 $viewerBonus = new User\Bonus($Viewer);
 $limiter     = new User\UserclassRateLimit($user);
 $bonusMan    = new Manager\Bonus();
-$donorMan    = new Manager\Donation();
 $ipv4        = new Manager\IPv4();
 $tgMan       = new Manager\TGroup();
 
@@ -275,7 +274,7 @@ if ($Viewer->permitted("users_mod") || $OwnProfile || $donor->isVisible()) {
     ]);
 }
 ?>
-    </div>
+    </div><?php /* class="sidebar" */?>
     <div class="main_column">
 <?php
 if ($Viewer->permitted('users_mod') && $user->onRatioWatch()) {
@@ -283,31 +282,11 @@ if ($Viewer->permitted('users_mod') && $user->onRatioWatch()) {
         'user' => $user,
     ]);
 }
-?>
-        <div class="box">
-            <div class="head">
-                <?= html_escape($user->profileTitle()) ?>
-                <span style="float: right;"><a href="#" onclick="$('#profilediv').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets">Hide</a></span>&nbsp;
-            </div>
-            <div class="pad profileinfo" id="profilediv">
-                <?= $user->profileInfo() ? \Text::full_format($user->profileInfo()) : 'This profile is currently empty.' ?>
-            </div>
-        </div>
-<?php
-foreach (range(1, 4) as $level) {
-    $profileInfo = $donor->profileInfo($level);
-    if (!empty($profileInfo)) {
-?>
-    <div class="box">
-        <div class="head">
-            <?= html_escape($donor->profileTitle($level) ?? "Extra Info $level") ?>
-            <span style="float: right;"><a href="#" onclick="$('#profilediv_<?= $level ?>').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets">Hide</a></span>
-        </div>
-        <div class="pad profileinfo" id="profilediv_<?= $level ?>"><?= \Text::full_format($profileInfo) ?></div>
-    </div>
-<?php
-    }
-}
+
+echo $Twig->render('user/profileinfo.twig', [
+    'donor' => $donor,
+    'user'  => $user,
+]);
 
 if (check_paranoia_here('snatched')) {
     echo $Twig->render('user/recent.twig', [
