@@ -54,20 +54,22 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
     });
 
-    document.getElementById('gen-password').addEventListener('click', () => {
+    document.getElementById('gen-password')?.addEventListener('click', () => {
         document.getElementById('change_password').value = Array(32)
             .fill('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz')
             .map((str) => { return str[Math.floor(Math.random() * str.length)]; })
             .join('');
     });
 
-    function download_warning() {
-        return confirm('If you no longer have the content, your ratio WILL be affected; be sure to check the cumulative size of all torrents before redownloading!');
+    function download_warning(e) {
+        if (!confirm('If you no longer have the content, your ratio WILL be affected; be sure to check the cumulative size of all torrents before redownloading!')) {
+            e.preventDefault();
+        }
     }
 
-    document.getElementById('collect-upload')?.addEventListener('click', () => { return download_warning(); });
-    document.getElementById('collect-snatch')?.addEventListener('click', () => { return download_warning(); });
-    document.getElementById('collect-seeding')?.addEventListener('click', () => { return download_warning(); });
+    document.getElementById('collect-upload')?.addEventListener('click', download_warning);
+    document.getElementById('collect-snatch')?.addEventListener('click', download_warning);
+    document.getElementById('collect-seeding')?.addEventListener('click', download_warning);
 
     let adjuster = document.getElementById('warning-adjust');
     if (adjuster) {

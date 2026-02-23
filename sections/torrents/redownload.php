@@ -7,41 +7,27 @@ namespace Gazelle;
 
 use Gazelle\Enum\UserTorrentSearch;
 
-if (!$Viewer->permitted('zip_downloader')) {
-    Error403::error();
-}
-$user = new Manager\User()->findById((int)($_GET['userid'] ?? 0));
-if (is_null($user)) {
-    Error404::error();
-}
-if ($user->id != $Viewer->id && !$Viewer->isStaff()) {
-    Error403::error();
+if ($Viewer->isStaff() && isset($_GET['userid'])) {
+    $user = new Manager\User()->findById((int)$_GET['userid']);
+    if (is_null($user)) {
+        Error404::error();
+    }
+} else {
+    $user = $Viewer;
 }
 
-switch ($_GET['type']) {
-    case 'seeding':
-        if (!$user->propertyVisible($Viewer, 'seeding')) {
-            Error403::error();
-        }
-        $userTorrent = new Search\UserTorrent($user, UserTorrentSearch::seeding);
-        break;
-    case 'snatches':
-        if (!$user->propertyVisible($Viewer, 'snatched')) {
-            Error403::error();
-        }
-        $userTorrent = new Search\UserTorrent($user, UserTorrentSearch::snatched);
-        break;
-    default:
-        if (!$user->propertyVisible($Viewer, 'uploads')) {
-            Error403::error();
-        }
-        $userTorrent = new Search\UserTorrent($user, UserTorrentSearch::uploaded);
-        break;
-}
+$userTorrent = new Search\UserTorrent(
+    $user,
+    match ($_GET['type']) {
+        'seeding'  => UserTorrentSearch::seeding,
+        'snatches' => UserTorrentSearch::snatched,
+        default    => UserTorrentSearch::uploaded,
+    }
+);
 
-$title = "{$user->username()}-{$userTorrent->label()}";
+$title     = "{$user->username()}-{$userTorrent->label()}";
 $collector = new Collector\TList($Viewer, new Manager\Torrent(), $title, 0);
-$idList = $userTorrent->idList();
+$idList    = $userTorrent->idList();
 $collector->setList($idList);
 $collector->prepare([]);
 set_time_limit((int)max(30, count($idList) * 0.1));
