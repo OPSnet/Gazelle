@@ -168,6 +168,9 @@ if ($categoryName === 'Music') {
         $Validate->setField('remaster_title', false, 'string', '"Orginal Release" is not a valid remaster title.');
     }
     if (!$Properties['UnknownRelease']) {
+        if (($_POST['remaster_year'] ?? '') === '') {
+            json_error('You must specify at minimum the edition year. Label and catalogue number are highly encouraged.');
+        }
         if ($Properties['Media'] === 'CD') {
             $Validate->setField('remaster_year', true, 'number',
                 'You have selected a year for an album that predates the media you say it was created on.',

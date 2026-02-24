@@ -826,6 +826,13 @@ function checkFields() {
                 checkEl.innerHTML += '<li>You need to add a description to this release (which also improves its chance of being snatched).</li>';
             }
         }
+        if (is_upload) {
+            const remYearEl = document.getElementById('remaster_year');
+            if (!remYearEl.disabled && remYearEl.value === '') {
+                ++error;
+                checkEl.innerHTML += '<li>You must specify at minimum the edition year. Label and catalogue number are highly encouraged.</li>';
+            }
+        }
         if (document.getElementById('media').value === '---') {
             ++error;
             checkEl.innerHTML += '<li>Media type (CD, WEB, ...) not specified.</li>';
