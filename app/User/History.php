@@ -148,7 +148,7 @@ class History extends \Gazelle\BaseUser {
                 h.useragent AS useragent
             FROM users_history_emails AS h
             WHERE h.UserID = ?
-            ORDER BY h.created DESC
+            ORDER BY users_history_emails_id DESC
             ", $this->user->id
         );
         $list = self::$db->to_array(false, MYSQLI_ASSOC);

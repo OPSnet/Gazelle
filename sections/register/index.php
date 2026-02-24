@@ -5,6 +5,7 @@ declare(strict_types=1);
 
 namespace Gazelle;
 
+use Gazelle\Enum\UserCreatorError;
 use Gazelle\Enum\UserStatus;
 use Gazelle\Enum\UserTokenType;
 
@@ -77,36 +78,22 @@ if (isset($_REQUEST['confirm'])) {
                 }
                 new Util\Mail()->send($user->email(), 'New account confirmation at ' . SITE_NAME,
                     $Twig->render('email/registration.twig', [
-                        'ipaddr' => $user->requestContext()->remoteAddr(),
                         'user'   => $user,
                         'token'  => new Manager\UserToken()->create(UserTokenType::confirm, $user),
                     ])
                 );
                 $emailSent = true;
             } catch (Exception\UserCreatorException $e) {
-                switch ($e->getMessage()) {
-                    case 'duplicate':
-                        $error = 'Someone already took that username :-(';
-                        break;
-                    case 'email':
-                        $error = 'No email address given';
-                        break;
-                    case 'ipaddr':
-                        $error = 'No IP address given';
-                        break;
-                    case 'invitation':
-                        echo $Twig->render('register/no-invite.twig');
-                        exit;
-                    case 'password':
-                        $error = 'No password given';
-                        break;
-                    case 'username':
-                        $error = 'No username given';
-                        break;
-                    case 'username-invalid':
-                        $error = 'Specified username is forbidden';
-                        break;
+                if ($e->error === UserCreatorError::invitation) {
+                    echo $Twig->render('register/no-invite.twig');
+                    exit;
                 }
+                $error = match ($e->error) {
+                    UserCreatorError::duplicate => 'Someone already took that username :-(',
+                    UserCreatorError::email     => 'The specified email is forbidden.',
+                    UserCreatorError::password  => 'The specified password is forbidden.',
+                    UserCreatorError::username  => 'The specified username contains illegal characters.',
+                };
             }
             if (!$error) {
                 $newInstall = $creator->newInstall();

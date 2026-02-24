@@ -4,9 +4,9 @@ namespace Gazelle;
 
 use Gazelle\Enum\NotificationType;
 use Gazelle\Enum\UserAuditEvent;
+use Gazelle\Enum\UserCreatorError;
 use Gazelle\Enum\UserStatus;
 use Gazelle\Exception\UserCreatorException;
-use Gazelle\Util\Time;
 
 class UserCreator extends Base {
     protected bool   $newInstall;
@@ -37,16 +37,13 @@ class UserCreator extends Base {
 
     public function create(): User {
         if (!isset($this->passHash)) {
-            throw new UserCreatorException('password');
+            throw new UserCreatorException(UserCreatorError::password);
         }
         if (!isset($this->username)) {
-            throw new UserCreatorException('username');
+            throw new UserCreatorException(UserCreatorError::username);
         }
         if (self::$db->scalar("SELECT 1 FROM users_main WHERE Username = ?", $this->username)) {
-            throw new UserCreatorException('duplicate');
-        }
-        if (!preg_match(USERNAME_REGEXP, $this->username)) {
-            throw new UserCreatorException('username-invalid');
+            throw new UserCreatorException(UserCreatorError::duplicate);
         }
 
         if ($this->newInstall()) {
@@ -67,7 +64,7 @@ class UserCreator extends Base {
             );
             $inviter = $manager->findById((int)$inviterId);
             if (is_null($inviter)) {
-                throw new UserCreatorException('invitation');
+                throw new UserCreatorException(UserCreatorError::invitation);
             }
             if ($this->email && strtolower($email) != strtolower($this->email[0])) {
                 // The invitation was sent to one email address, and the user
@@ -75,19 +72,18 @@ class UserCreator extends Base {
                 // as belonging to them.
                 $this->email[] = $email;
             }
-            if (!empty($inviterReason)) {
+            if ($inviterReason) {
                 $this->note[] = $inviterReason;
             }
             $this->note[] = "invite key = " . $this->inviteKey;
-            if (!empty($inviterNotes)) {
+            if ($inviterNotes) {
                 $this->note[] = $inviterNotes;
             }
         }
 
-        $emailBlacklist = new \Gazelle\Manager\EmailBlacklist();
-        if (!$this->email || $emailBlacklist->exists(current($this->email))) {
+        if (!$this->email || new Manager\EmailBlacklist()->exists(current($this->email))) {
             // neither setEmail() nor setInviteKey() produced anything useful or email blacklisted
-            throw new UserCreatorException('email');
+            throw new UserCreatorException(UserCreatorError::email);
         }
 
         // create users_main row
@@ -151,7 +147,7 @@ class UserCreator extends Base {
 
         // Log the one or two email addresses known to be associated with the user.
         // Each additional previous email address is staggered one second back in the past.
-        $past      = count($this->email);
+        $past      = 0;
         $useragent = $this->requestContext()->useragent();
         foreach ($this->email as $e) {
             self::$db->prepared_query('
@@ -163,9 +159,10 @@ class UserCreator extends Base {
             $this->pg()->query("
                 insert into history_email
                        (id_user, email, useragent, ip,      created)
-                values ($1,      $2,    $3,        $4::inet, now() - '1 second'::interval * $5)
-                ", $this->id, $e, $useragent, $ipaddr, $past--
+                values ($1,      $2,    $3,        $4::inet, now() - make_interval(secs => $5))
+                ", $this->id, $e, $useragent, $ipaddr, $past
             );
+            ++$past;
         }
 
         // Create the remaining rows in auxilliary tables
@@ -316,7 +313,7 @@ class UserCreator extends Base {
      */
     public function setUsername(string $username): static {
         if (preg_match('/^' . str_replace('/', '', USERNAME_REGEXP) . '$/', trim($username), $match)) {
-            if (!empty($match['username'])) {
+            if (isset($match['username'])) {
                 $this->username = $match['username'];
             }
         }
