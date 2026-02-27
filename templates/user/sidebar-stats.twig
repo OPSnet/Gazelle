@@ -19,33 +19,46 @@ Seeding: {{ stats.seedingTotal|number_format }}
     <ul class="stats nobullet">
         <li id="comm_posts">Forum threads: {{ stats.forumThreadTotal|number_format }}
 {% if stats.forumThreadTotal %}
-            <a href="userhistory.php?action=topics&amp;userid={{ user.id }}" class="brackets">View</a>
+            <a href="userhistory.php?action=topics&amp;userid={{
+                user.id }}" class="brackets">View</a>
 {% endif %}
         </li>
         <li id="comm_posts">Forum posts: {{ stats.forumPostTotal|number_format }}
 {% if stats.forumPostTotal %}
-            <a href="userhistory.php?action=posts&amp;userid={{ user.id }}" class="brackets">View</a>
+            <a href="userhistory.php?action=posts&amp;userid={{
+                user.id }}" class="brackets">View</a>
 {% endif %}
         </li>
 {% if visible['torrentcomments+'] %}
-        <li id="comm_torrcomm"{{ _self.class_override(visible['torrentcomments+']) }}>Torrent comments: {{ stats.commentTotal('torrents')|number_format }}
+        <li id="comm_torrcomm"{{ _self.class_override(visible['torrentcomments+'])
+            }}>Torrent comments: {{ stats.commentTotal('torrents')|number_format }}
 {%  if stats.commentTotal('torrents') and visible['torrentcomments'] %}
-            <a href="comments.php?id={{ user.id }}" class="brackets{{ _self.override(visible['torrentcomments']) }}">View</a>
+            <a href="comments.php?id={{ user.id }}" class="brackets{{
+                _self.override(visible['torrentcomments']) }}">View</a>
 {%  endif %}
         </li>
-        <li id="comm_artcomm"{{ _self.class_override(visible['torrentcomments']) }}>Artist comments: {{ stats.commentTotal('artist')|number_format }}
+        <li id="comm_artcomm"{{ _self.class_override(visible['torrentcomments'])
+            }}>Artist comments: {{ stats.commentTotal('artist')|number_format }}
 {%  if stats.commentTotal('artist') and visible['torrentcomments'] %}
-            <a href="comments.php?id={{ user.id }}&amp;action=artist" class="brackets{{ _self.override(visible['torrentcomments']) }}">View</a>
+            <a href="comments.php?id={{ user.id }}&amp;action={{
+                enum('Gazelle\\Enum\\CommentType').artist.value }}" class="brackets{{
+                _self.override(visible['torrentcomments']) }}">View</a>
 {%  endif %}
         </li>
-        <li id="comm_collcomm"{{ _self.class_override(visible['torrentcomments']) }}>Collage comments: {{ stats.commentTotal('collages')|number_format }}
+        <li id="comm_collcomm"{{ _self.class_override(visible['torrentcomments'])
+            }}>Collage comments: {{ stats.commentTotal('collages')|number_format }}
 {%  if stats.commentTotal('collages') and visible['torrentcomments'] %}
-            <a href="comments.php?id={{ user.id }}&amp;action=collages" class="brackets{{ _self.override(visible['torrentcomments']) }}">View</a>
+            <a href="comments.php?id={{ user.id }}&amp;action={{
+                enum('Gazelle\\Enum\\CommentType').collage.value }}" class="brackets{{
+                _self.override(visible['torrentcomments']) }}">View</a>
 {%  endif %}
         </li>
-        <li id="comm_reqcomm"{{ _self.class_override(visible['torrentcomments']) }}>Request comments: {{ stats.commentTotal('requests')|number_format }}
+        <li id="comm_reqcomm"{{ _self.class_override(visible['torrentcomments'])
+            }}>Request comments: {{ stats.commentTotal('requests')|number_format }}
 {%  if stats.commentTotal('requests') and visible['torrentcomments'] %}
-            <a href="comments.php?id={{ user.id }}&amp;action=requests" class="brackets{{ _self.override(visible['torrentcomments']) }}">View</a>
+            <a href="comments.php?id={{ user.id }}&amp;action={{
+                enum('Gazelle\\Enum\\CommentType').request.value }}" class="brackets{{
+                _self.override(visible['torrentcomments']) }}">View</a>
 {%  endif %}
         </li>
 {% endif %}

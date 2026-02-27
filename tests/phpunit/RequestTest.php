@@ -4,6 +4,7 @@ namespace Gazelle;
 
 use PHPUnit\Framework\TestCase;
 use GazelleUnitTest\Helper;
+use Gazelle\Enum\CommentType;
 
 define('BUFFER_FOR_BOUNTY', 1024 ** 4); // some upload credit to allow request creation
 
@@ -853,6 +854,145 @@ class RequestTest extends TestCase {
             $this->request->id,
             $payload['results'][0]['requestId'],
             'request-json-id',
+        );
+    }
+
+    public function testRequestSearchComment(): void {
+        /**
+         * Strategy:
+         *  - u1 creates a request
+         *  - u2 votes on it
+         */
+        $manager = new Manager\Collage();
+        $creator = $this->userList['admin'];
+        $voter   = $this->userList['user'];
+        $this->request = Helper::makeRequestMusic(
+            $creator,
+            'phpunit comment ' . randomString()
+        );
+        $body    = "phpunit u{$creator->id} r{$this->request->id}";
+        $comment = new Manager\Comment()->create(
+            $creator,
+            CommentType::request->value,
+            $this->request->id,
+            $body,
+        );
+
+        $searchCreator = new Search\Comment(
+            CommentType::request,
+            'default',
+            $creator->id === $creator->id,
+            $creator,
+        );
+        $this->assertEquals(
+            1,
+            $searchCreator->total(),
+            'comment-request-creator-total',
+        );
+        $this->assertEquals(
+            'Request comments',
+            $searchCreator->title(),
+            'comment-request-creator-title',
+        );
+
+        $this->assertEqualsCanonicalizing(
+            [
+                "Comments on requests you created",
+                "Comments on requests you voted on",
+            ],
+            array_map(
+                fn ($t) => $t['title'],
+                $searchCreator->linkList(),
+            ),
+            'comment-request-creator-linklist',
+        );
+        $page = $searchCreator->page(2, 0);
+        $this->assertCount(1, $page['list'], 'comment-request-creator-created-list-total');
+        $this->assertCount(1, $page['user'], 'comment-request-creator-created-user-total');
+        $this->assertCount(1, $page['request'], 'comment-request-creator-created-request-total');
+        $this->assertTrue(
+            isset($page['request'][$this->request->id]),
+            'comment-request-creator-request-id',
+        );
+        $this->assertTrue(
+            isset($page['user'][$creator->id]),
+            'comment-request-creator-created-id',
+        );
+        $comment = $page['list'][0];
+        $this->assertEquals($body, $comment['body'], 'comment-request-writer-body');
+        $this->assertEquals(
+            $this->request->id,
+            $comment['id_type'],
+            'comment-request-writer-request-id',
+        );
+        $this->assertEquals(
+            $creator->id,
+            $comment['id_user'],
+            'comment-request-writer-user-id',
+        );
+
+        $searchCreated = new Search\Comment(
+            CommentType::request,
+            'created',
+            $creator->id !== $creator->id,
+            $creator,
+        );
+        $this->assertEquals(
+            0,
+            $searchCreated->total(),
+            'comment-request-created-total',
+        );
+        $this->assertEquals(
+            'Comments on requests they created',
+            $searchCreated->title(),
+            'comment-request-created-title',
+        );
+        $this->assertEqualsCanonicalizing(
+            [
+                "Request comments",
+                "Comments on requests they voted on",
+            ],
+            array_map(
+                fn ($t) => $t['title'],
+                $searchCreated->linkList(),
+            ),
+            'comment-request-created-linklist',
+        );
+
+        $this->request->vote($voter, 1024 * 1024);
+        $body    = "phpunit v{$voter->id} r{$this->request->id}";
+        $comment = new Manager\Comment()->create(
+            $voter,
+            CommentType::request->value,
+            $this->request->id,
+            $body,
+        );
+        $searchVoter = new Search\Comment(
+            CommentType::request,
+            'voted',
+            $voter->id === $voter->id,
+            $voter,
+        );
+        $this->assertEquals(
+            1,
+            $searchVoter->total(),
+            'comment-request-vote-total',
+        );
+        $this->assertEquals(
+            'Comments on requests you voted on',
+            $searchVoter->title(),
+            'comment-request-vote-title',
+        );
+        $this->assertEqualsCanonicalizing(
+            [
+                "Request comments",
+                "Comments on requests you created",
+            ],
+            array_map(
+                fn ($t) => $t['title'],
+                $searchVoter->linkList(),
+            ),
+            'comment-request-vote-linklist',
         );
     }
 }

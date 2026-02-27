@@ -5,6 +5,7 @@ namespace Gazelle;
 use PHPUnit\Framework\TestCase;
 use GazelleUnitTest\Helper;
 use Gazelle\Enum\CollageType;
+use Gazelle\Enum\CommentType;
 
 /**
  * Note: these tests are not interested in how a collage was acquired.
@@ -858,6 +859,215 @@ class CollageTest extends TestCase {
             1,
             $notifier->clear(),
             'collage-user-sub-clear-all'
+        );
+    }
+
+    public function testCollageSearchComment(): void {
+        /**
+         * Strategy:
+         *  - u1 creates a collage
+         *  - u2 adds a collage to it
+         *  - u3 comments on the collage.
+         * This way all of the use cases can be covered
+         */
+        $manager = new Manager\Collage();
+        $creator = $this->userList['u1'];
+        $adder   = $this->userList['u2'];
+        $writer  = $this->userList['u3'];
+        $this->collageList[] = $manager->create(
+            user:        $creator,
+            categoryId:  CollageType::theme->value,
+            name:        'phpunit collage comment ' . randomString(20),
+            description: 'phpunit collage comment description',
+            tagList:     implode(' ', $this->tagList(3)),
+        );
+        $collage = $this->collageList[0];
+        $body    = "phpunit u{$writer->id} c{$collage->id}";
+        $this->tgroupList = [
+            Helper::makeTGroupMusic(
+                $adder,
+                'phpunit collage comment ' . randomString(8),
+                [[ARTIST_MAIN], ['phpunit collage comment ' . randomString(6)]],
+                $this->tagList(1),
+            ),
+        ];
+        $collage->addEntry($this->tgroupList[0], $adder, 'collage-add-dupe-entry');
+        $comment = new Manager\Comment()->create(
+            $writer,
+            CommentType::collage->value,
+            $collage->id,
+            $body,
+        );
+
+        $searchCreator = new Search\Comment(
+            CommentType::collage,
+            'default',
+            $creator->id !== $creator->id,
+            $creator,
+        );
+        $this->assertEquals(
+            0,
+            $searchCreator->total(),
+            'collage-comment-creator-total',
+        );
+        $this->assertEquals(
+            'Collage comments',
+            $searchCreator->title(),
+            'collage-comment-creator-title',
+        );
+
+        $searchCreatorCreated = new Search\Comment(
+            CommentType::collage,
+            'created',
+            $creator->id === $creator->id,
+            $creator,
+        );
+        $this->assertEquals(
+            1,
+            $searchCreatorCreated->total(),
+            'collage-comment-creator-created-total',
+        );
+        $this->assertEqualsCanonicalizing(
+            [
+                "Collage comments",
+                "Contributed collage comments",
+            ],
+            array_map(
+                fn ($t) => $t['title'],
+                $searchCreatorCreated->linkList(),
+            ),
+            'collage-comment-creator-created-linklist',
+        );
+        $page = $searchCreatorCreated->page(2, 0);
+        $this->assertCount(1, $page['list'], 'collage-comment-creator-created-list-total');
+        $this->assertCount(1, $page['user'], 'collage-comment-creator-created-user-total');
+        $this->assertTrue(
+            isset($page['user'][$writer->id]),
+            'collage-comment-creator-created-id',
+        );
+        $comment = $page['list'][0];
+        $this->assertEquals($body, $comment['body'], 'collage-comment-writer-body');
+
+        $searchCreatorContributed = new Search\Comment(
+            CommentType::collage,
+            'contributed',
+            $creator->id === $creator->id,
+            $creator,
+        );
+        $this->assertEquals(
+            0,
+            $searchCreatorContributed->total(),
+            'collage-comment-creator-contributed-total',
+        );
+        $this->assertEqualsCanonicalizing(
+            [
+                "Collage comments",
+                "Comments on your collages",
+            ],
+            array_map(
+                fn ($t) => $t['title'],
+                $searchCreatorContributed->linkList(),
+            ),
+            'collage-comment-creator-contributed-linklist',
+        );
+
+        $searchContributor = new Search\Comment(
+            CommentType::collage,
+            'contributed',
+            $adder->id === $adder->id,
+            $adder,
+        );
+        $this->assertEquals(
+            'Contributed collage comments',
+            $searchContributor->title(),
+            'collage-comment-contributor-linklist',
+        );
+        $this->assertEquals(
+            1,
+            $searchContributor->total(),
+            'collage-comment-contributor-total',
+        );
+        $page = $searchContributor->page(2, 0);
+        $this->assertCount(1, $page['list'], 'collage-comment-contributor-list-total');
+        $this->assertCount(1, $page['user'], 'collage-comment-contributor-user-total');
+        $this->assertTrue(
+            isset($page['user'][$writer->id]),
+            'collage-comment-contributor-id',
+        );
+        $comment = $page['list'][0];
+        $this->assertEquals($body, $comment['body'], 'collage-comment-contributor-writer-body');
+
+        $searchWriter = new Search\Comment(
+            CommentType::collage,
+            'default',
+            $writer->id === $writer->id,
+            $writer,
+        );
+        $this->assertEquals(
+            'Collage comments',
+            $searchWriter->title(),
+            'collage-comment-writer-linklist',
+        );
+        $this->assertEquals(
+            1,
+            $searchWriter->total(),
+            'collage-comment-writer-total',
+        );
+        $page = $searchWriter->page(2, 0);
+        $this->assertCount(1, $page['list'], 'collage-comment-writer-list-total');
+        $this->assertCount(1, $page['user'], 'collage-comment-writer-user-total');
+        $this->assertTrue(
+            isset($page['user'][$writer->id]),
+            'collage-comment-writer-writer-id',
+        );
+        $comment = $page['list'][0];
+        $this->assertEquals($body, $comment['body'], 'collage-comment-writer-writer-body');
+
+        $searchWriterOther = new Search\Comment(
+            CommentType::collage,
+            'default',
+            $writer->id !== $writer->id,
+            $writer,
+        );
+        $this->assertEqualsCanonicalizing(
+            [
+                "Contributed collage comments",
+                "Comments on their collages",
+            ],
+            array_map(
+                fn ($t) => $t['title'],
+                $searchWriterOther->linkList()
+            ),
+            'collage-comment-writer-other-linklist',
+        );
+
+        $searchWriterCreated = new Search\Comment(
+            CommentType::collage,
+            'created',
+            $writer->id === $writer->id,
+            $writer,
+        );
+        $this->assertEquals(
+            0,
+            $searchWriterCreated->total(),
+            'collage-comment-writer-created-total',
+        );
+        $this->assertEquals(
+            'Comments on your collages',
+            $searchWriterCreated->title(),
+            'collage-comment-writer-created-title',
+        );
+
+        $searchWriterContributed = new Search\Comment(
+            CommentType::collage,
+            'contributed',
+            $writer->id === $writer->id,
+            $writer,
+        );
+        $this->assertEquals(
+            0,
+            $searchWriterContributed->total(),
+            'collage-comment-writer-contributed-total',
         );
     }
 }

@@ -20,10 +20,8 @@ if (!$pageId) {
     Error404::error();
 }
 
-$commentMan = new Manager\Comment();
-$comment = $commentMan->create($Viewer, $page, $pageId, $_POST['quickpost']);
-
-$subscription = new \Gazelle\User\Subscription($Viewer);
+$comment = new Manager\Comment()->create($Viewer, $page, $pageId, $_POST['quickpost']);
+$subscription = new User\Subscription($Viewer);
 if (isset($_POST['subscribe']) && !$subscription->isSubscribedComments($page, $pageId)) {
     $subscription->subscribeComments($page, $pageId);
 }

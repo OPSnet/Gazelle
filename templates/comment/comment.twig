@@ -1,58 +1,68 @@
+{% set heading %}
+{% if page == enum('Gazelle\\Enum\\CommentType').artist.value
+    %}<a href="artist.php?id={{ comment.id }}">{{ comment.name }}</a>
+{%- elseif page == enum('Gazelle\\Enum\\CommentType').collage.value
+    %}<a href="collages.php?id={{ comment.id }}">{{ comment.name }}</a>
+{%- elseif page == enum('Gazelle\\Enum\\CommentType').request.value
+    %}{{ request_list[comment.id_type].smartLink|raw }}
+{%- else %}{{ tgroup_list[comment.id_type].link|raw }}
+{%- endif %}
+{%- endset %}
 {% set show_avatar = viewer.showAvatars %}
-{% set own_comment = author.id == viewer.id %}
-<table class="forum_post box vertical_margin{{ show_avatar ? '' : ' noavatar' }}{{ unread ? ' forum_unread' : ''}}" id="post{{ id }}">
+{% set own_comment = comment.id_user == viewer.id %}
+<table class="forum_post box vertical_margin{{ show_avatar ? '' : ' noavatar' }}{{ unread ? ' forum_unread' : ''}}" id="post{{ comment.id }}">
     <colgroup>
 {% if show_avatar %}
-        <col class="col_avatar" />
+        <col class="col_avatar">
 {% endif %}
-        <col class="col_post_body" />
+        <col class="col_post_body">
     </colgroup>
     <tr class="colhead_dark">
         <td colspan="{{ show_avatar ? 2 : 1 }}">
-            <div style="float: left;"><a class="post_id" href="{{ url }}">#{{ id }}</a>
-                <strong>{{ author.id|user_full }}</strong> {{ created|date('Y-m-d H:i:s')|time_diff }} on {{ heading|raw }}
-                <span id="postcontrol-{{ id }}">
+            <div style="float: left;"><a class="post_id" href="{{ url }}">#{{ comment.id }}</a>
+                <strong>{{ comment.id_user|user_full }}</strong> {{ comment.created|date('Y-m-d H:i:s')|time_diff }} on {{ heading }}
+                <span id="postcontrol-{{ comment.id }}">
 {%    if own_comment or viewer.permitted('site_moderate_forums') %}
-                - <a href="#post{{ id }}" id="edit-{{ id }}" data-author="{{ author.id }}" data-key="{{ key }}" class="edit-post brackets">Edit</a>
+                - <a href="#post{{ comment.id }}" id="edit-{{ comment.id }}" data-author="{{ comment.id_user }}" data-key="{{ key }}" class="edit-post brackets">Edit</a>
 {%    endif %}
                 </span>
             </div>
-            <div id="bar{{ id }}" style="float: right;">
-                <a href="reports.php?action=report&amp;type=comment&amp;id={{ id }}" class="brackets">Report</a>
+            <div id="bar{{ comment.id }}" style="float: right;">
+                <a href="reports.php?action=report&amp;type=comment&amp;id={{ comment.id }}" class="brackets">Report</a>
 {% if viewer.permitted('site_admin_forums') %}
 {%    if viewer.permitted('site_forum_post_delete') %}
-                - <a href="#" data-id="{{ id }}" class="brackets delete-post">Delete</a>
+                - <a href="#" data-id="{{ comment.id }}" class="brackets delete-post">Delete</a>
 {%    endif %}
 {%    if not own_comment and viewer.permitted('users_warn') and viewer.classLevel >= author.classLevel %}
-                <form class="manage_form hidden" name="user" id="warn{{ id }}" action="comments.php" method="post">
-                    <input type="hidden" name="action" value="warn" />
-                    <input type="hidden" name="postid" value="{{ id }}" />
+                <form class="manage_form hidden" name="user" id="warn{{ comment.id }}" action="comments.php" method="post">
+                    <input type="hidden" name="action" value="warn">
+                    <input type="hidden" name="postid" value="{{ comment.id }}">
                 </form>
-                {{- dom.click('#warn-' ~ id, "$('#warn" ~ id ~ "').raw().submit(); return false;") -}}
-                - <a href="#" id="warn-{{ id }}" class="brackets">Warn</a>
+                {{- dom.click('#warn-' ~ comment.id, "$('#warn" ~ comment.id ~ "').raw().submit(); return false;") -}}
+                - <a href="#" id="warn-{{ comment.id }}" class="brackets">Warn</a>
 {%     endif %}
                 &nbsp;
-                <a href="#">↑</a>
+                <a href="#"> ↑ </a>
 {% endif %}
             </div>
         </td>
     </tr>
     <tr>
 {% if show_avatar %}
-        <td class="avatar" valign="top">{{ author|avatar(viewer)|raw }}</td>
+        <td class="avatar" valign="top">{{ user_list[comment.id_user]|avatar(viewer)|raw }}</td>
 {% endif %}
         <td class="body" valign="top">
-            <div id="content{{ id }}">
-                {{ body|bb_format }}
-{% if editor %}
-                <br />
-                <br />
+            <div id="content{{ comment.id }}">
+                {{ comment.body|bb_format }}
+{% if comment.edited %}
+                <br>
+                <br>
                 <span class="last_edited">
 {%    if viewer.permitted('site_admin_forums') %}
-                {{- dom.click('#load-edit-' ~ id, "LoadEdit('" ~ page ~ "', " ~ id ~ ", 1); return false;") -}}
-                <a href="#content{{ id }}" id="load-edit-{{ id }}">&laquo;</a>
+                {{- dom.click('#load-edit-' ~ comment.id, "LoadEdit('" ~ page ~ "', " ~ comment.id ~ ", 1); return false;") -}}
+                <a href="#content{{ comment.id }}" id="load-edit-{{ comment.id }}">&laquo;</a>
 {%    endif %}
-                Last edited by {{ editor.id|user_url }} {{ edit_time|date('Y-m-d H:i:s')|time_diff }}</span>
+                Last edited by {{ comment.id_editor|user_url }} {{ comment.edited|date('Y-m-d H:i:s')|time_diff }}</span>
 {% endif %}
             </div>
         </td>

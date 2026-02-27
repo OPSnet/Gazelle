@@ -4,6 +4,7 @@ namespace Gazelle\Manager;
 
 use Gazelle\Collage;
 use Gazelle\Error400;
+use Gazelle\User\Notification\Quote;
 
 class Comment extends \Gazelle\BaseManager {
     final public const CATALOG = '%s_comments_%d_cat_%d';
@@ -44,11 +45,11 @@ class Comment extends \Gazelle\BaseManager {
             sprintf(self::CATALOG, $page, $pageId, $catalogueId),
             "{$page}_comments_{$pageId}"
         ]);
+        $user->stats()->incrementCommentTotal($page);
         if ($page == 'collages') {
             self::$cache->delete_value("{$page}_comments_recent_{$pageId}");
         }
-        new \Gazelle\User\Notification\Quote($user)
-            ->create($page, $pageId, $postId, $body);
+        new Quote($user)->create($page, $pageId, $postId, $body);
         new Subscription()->flushPage($page, $pageId);
 
         $className = $this->className($page);

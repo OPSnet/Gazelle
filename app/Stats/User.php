@@ -62,6 +62,18 @@ class User extends \Gazelle\BaseObject {
         return $this->commentTotal[$page] ?? 0;
     }
 
+    public function incrementCommentTotal(string $page): int {
+        // need to call the commentTotal() method to set first
+        // comment of a page type to 0, then we can increment it.
+        $this->commentTotal[$page] = 1 + $this->commentTotal($page);
+        self::$cache->cache_value(
+            sprintf(self::CACHE_COMMENT_TOTAL, $this->id),
+            $this->commentTotal,
+            3600,
+        );
+        return $this->commentTotal[$page];
+    }
+
     public function historyUseragentTracker(): array {
         $result = $this->pg()->executeParams('
             select useragent, total

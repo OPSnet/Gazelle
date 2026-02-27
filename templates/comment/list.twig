@@ -1,0 +1,40 @@
+{{ header(user.username ~ ' › ' ~ search.title, {'js': 'bbcode,comments'}) }}
+<div class="thin">
+    <div class="header">
+        <h2>{{ user.id|user_url }} › {{ search.title }}</h2>
+        <div class="linkbox">
+{% for other in other_type %}
+            <a href="?action={{ other.value }}" class="brackets">{{
+                other.value|trim('s')|ucfirst }} comments</a>
+{% endfor %}
+{% for a in search.linkList %}
+{%  if loop.first %}
+            <br>
+{%  endif %}
+            <a class="brackets" href="?action={{ search.commentType.value }}{{
+                a.link|raw }}{% if not search.ownProfile %}&amp;id={{ user.id }}{%
+                endif %}">{{ a.title }}</a>
+{% endfor %}
+        </div>
+    </div>
+{% set result = search.page(paginator.limit, paginator.offset) %}
+{% for comment in result.list %}
+{%  if loop.first %}
+{{      paginator.linkbox|raw }}
+{%  endif %}
+{%  include 'comment/comment.twig' with {
+        'comment'      : comment,
+        'page'         : search.commentType.value,
+        'request_list' : result.request,
+        'tgroup_list'  : result.tgroup,
+        'user_list'    : result.user,
+        'viewer'       : viewer,
+    }
+%}
+{%  if loop.last %}
+{{      paginator.linkbox|raw }}
+{%  endif %}
+{% else %}
+    <div class="center"><h3>No comment<h3></div>
+{% endfor %}
+{{ footer() }}

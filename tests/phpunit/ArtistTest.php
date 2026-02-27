@@ -5,6 +5,7 @@ namespace Gazelle;
 use PHPUnit\Framework\TestCase;
 use GazelleUnitTest\Helper;
 use Gazelle\Enum\CollageType;
+use Gazelle\Enum\CommentType;
 
 class ArtistTest extends TestCase {
     protected Artist  $artist;
@@ -683,5 +684,51 @@ class ArtistTest extends TestCase {
         $manager = new Manager\Artist();
         $this->assertTrue($manager->roleExists(0, ARTIST_MAIN), 'artist-role-main');
         $this->assertFalse($manager->roleExists(0, 99), 'artist-role-inexistent');
+    }
+
+    public function testArtistComment(): void {
+        $manager = new Manager\Artist();
+        $artist = $manager->create('phpunit.' . randomString(12));
+        $this->artistIdList[] = $artist->id;
+        $body = "phpunit u{$this->user->id} a{$artist->id}";
+        $comment = new Manager\Comment()->create(
+            $this->user,
+            CommentType::artist->value,
+            $artist->id,
+            $body
+        );
+
+        $search = new Search\Comment(
+            CommentType::artist,
+            'default',
+            $this->user->id === $this->user->id,
+            $this->user,
+        );
+
+        $this->assertCount(0, $search->linkList(), 'artist-comment-linklist');
+        $this->assertEquals(
+            'Artist comments',
+            $search->title(),
+            'artist-comment-linklist'
+        );
+        $this->assertEquals(
+            1,
+            $search->total(),
+            'artist-comment-total'
+        );
+        $page = $search->page(2, 0);
+        $this->assertCount(1, $page['list'], 'artist-comment-list-total');
+        $this->assertCount(1, $page['user'], 'artist-comment-user-total');
+        $this->assertTrue(
+            isset($page['user'][$this->user->id]),
+            'artist-comment-user-id'
+        );
+        $comment = $page['list'][0];
+        $this->assertEqualsCanonicalizing(
+            ["id_user", "type", "id_type", "name", "id", "body", "created", "edited", "id_editor"],
+            array_keys($comment),
+            'artist-comment-keys',
+        );
+        $this->assertEquals($body, $comment['body'], 'artist-comment-body');
     }
 }

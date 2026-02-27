@@ -4,6 +4,7 @@ namespace Gazelle;
 
 use PHPUnit\Framework\TestCase;
 use GazelleUnitTest\Helper;
+use Gazelle\Enum\CommentType;
 
 class TGroupTest extends TestCase {
     protected TGroup $tgroup;
@@ -827,5 +828,103 @@ class TGroupTest extends TestCase {
         $this->assertEquals(1, $artistRole[ARTIST_CONDUCTOR], 'tgroup-artistrole-conductor');
         $this->assertEquals(1, $artistRole[ARTIST_MAIN], 'tgroup-artistrole-main');
         $this->assertEquals(1, $artistRole[ARTIST_PRODUCER], 'tgroup-artistrole-producer');
+    }
+
+    public function testTGroupSearchComment(): void {
+        /**
+         * Strategy:
+         *  - user creates a torrent
+         *  - admin comments on it
+         */
+        $creator = $this->userList['user'];
+        $writer  = $this->userList['admin'];
+        $body    = "phpunit u{$writer->id} t{$this->tgroup->id}";
+        $comment = new Manager\Comment()->create(
+            $writer,
+            CommentType::tgroup->value,
+            $this->tgroup->id,
+            $body,
+        );
+
+        $searchWriter = new Search\Comment(
+            CommentType::tgroup,
+            'default',
+            $writer->id !== $writer->id,
+            $writer,
+        );
+        $this->assertEquals(
+            1,
+            $searchWriter->total(),
+            'tgroup-comment-writer-total',
+        );
+        $this->assertEquals(
+            'Torrent comments',
+            $searchWriter->title(),
+            'tgroup-comment-writer-title',
+        );
+        $page = $searchWriter->page(2, 0);
+        $this->assertCount(1, $page['list'], 'tgroup-comment-writer-list-total');
+        $this->assertCount(1, $page['user'], 'tgroup-comment-writer-user-total');
+        $this->assertCount(1, $page['tgroup'], 'tgroup-comment-writer-user-total');
+        $this->assertTrue(
+            isset($page['user'][$writer->id]),
+            'tgroup-comment-writer-writer-id',
+        );
+        $comment = $page['list'][0];
+        $this->assertEquals($body, $comment['body'], 'tgroup-comment-writer-writer-body');
+        $this->assertEqualsCanonicalizing(
+            [
+                "Comments on their uploads",
+            ],
+            array_map(
+                fn ($t) => $t['title'],
+                $searchWriter->linkList(),
+            ),
+            'tgroup-comment-creator-linklist',
+        );
+
+        $searchCreator = new Search\Comment(
+            CommentType::tgroup,
+            'uploaded',
+            $creator->id === $creator->id,
+            $creator,
+        );
+        $this->assertEquals(
+            1,
+            $searchCreator->total(),
+            'tgroup-comment-uploaded-total',
+        );
+        $this->assertEquals(
+            'Comments on your uploads',
+            $searchCreator->title(),
+            'tgroup-comment-uploaded-title',
+        );
+
+        $searchUploader = new Search\Comment(
+            CommentType::tgroup,
+            'uploaded',
+            $creator->id !== $creator->id,
+            $creator,
+        );
+        $this->assertEquals(
+            1,
+            $searchUploader->total(),
+            'tgroup-comment-uploader-total',
+        );
+        $this->assertEquals(
+            'Comments on their uploads',
+            $searchUploader->title(),
+            'tgroup-comment-uploader-title',
+        );
+        $this->assertEqualsCanonicalizing(
+            [
+                "Torrent comments",
+            ],
+            array_map(
+                fn ($t) => $t['title'],
+                $searchUploader->linkList(),
+            ),
+            'tgroup-comment-creator-linklist',
+        );
     }
 }
