@@ -13,7 +13,7 @@ if (!isset($_GET['userid'])) {
     if (is_null($user)) {
         Error404::error();
     }
-    if ($user->id !== $Viewer->id() && !$Viewer->permitted('admin_fl_history')) {
+    if ($user->id !== $Viewer->id() && !($Viewer->isFLS() || $Viewer->permitted('admin_fl_history'))) {
         Error403::error();
     }
 }
