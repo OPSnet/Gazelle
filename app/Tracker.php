@@ -208,10 +208,10 @@ class Tracker extends Base {
 
     public function torrentReport(Torrent $torrent): array {
         $result = $this->report("get=torrent&info_hash={$torrent->flush()->infohashEncoded()}");
-        if (empty($result)) {
+        if ($result === []) {
             return $result;
         }
-        $result['last_flushed'] = date('Y-m-d H:i:s', $result['last_flushed']);
+        $result['last_flushed_date'] = date('Y-m-d H:i:s', $result['last_flushed']);
         sort($result['fltoken_list']);
         sort($result['leecher_list']);
         sort($result['seeder_list']);

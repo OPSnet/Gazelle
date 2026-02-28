@@ -1,0 +1,283 @@
+#! /usr/bin/env php
+<?php
+
+/* ocelotctl -- control an ocelot instance
+ *
+ * By default, this program connects to host 'ocelot' on port 34000.
+ * This can be overidden by exporting the environment variables TRACKER_HOST
+ * and TRACKER_PORT respectively.
+ * e.g.: export TRACKER_HOST=10.0.0.2
+ *
+ * Usage:
+ *  ocelotctl scrape <user> <torrent-id> [...<torrent-id>]
+ *  ocelotctl announce <user> <torrent-id> [u<n>] [d<n>] [l<n>] [c<n>] [port=<n>] [peer=<peer>] [event=<event>]
+ *  ocelotctl report-torrent <torrent-id>
+ *  ocelotctl report-user <user>
+ *  ocelotctl stats
+ *
+ *  <event> one of started, completed, stopped
+ *  <peer>  a unique identifier (will be extended to 20 bytes if shorter)
+ *  <port>  a number, usually between 1025 and 65535
+ *  <user>  username (@abc) or a userid (123)
+ *  <n>     a number between 0 and 100
+ *
+ * Announces report upload/download/left/corrupt bytes. To simplify things,
+ * values are specified as a percentage of the torrent size.
+ * d33  means 33% of the torrent has been downloaded
+ * l100 means 100% of the torrent is left to be downloaded (hence, a leecher)
+ * u10  means 10% of the torrent has been uploaded. u4000 means 40x has been been uploaded.
+ *
+ * NB: when setting up the interaction between multiple users
+ *     give them separate peerids and ports
+ *       port=1234 peer=seeder
+ *       port=5678 peer=leecher
+ *
+ * All peers pretend to be some sort of QBitTorrent 4.3 client
+ * to get past whitelist checks.
+ *
+ * Get information about a torrent. leecher_list and seeder_list are user ids.
+ * ocelotctl report-torrent 12345 | jq
+ * {
+ *   "id": 12345,
+ *   "completed": 0,
+ *   "balance": 0,
+ *   "last_flushed": 1772305134,
+ *   "last_selected_seeder": "y12426-qB51zzzzzzzzzzzzzzz",
+ *   "leech_type": 0,
+ *   "leecher_list": [
+ *     22
+ *   ],
+ *   "seeder_list": [
+ *     10,
+ *     45
+ *   ],
+ *   "fltoken_list": []
+ * }
+ *
+ * Get information about a user.
+ * ocelotctl report-user @someone | jq
+ * {
+ *   "id": 4567,
+ *   "leeching": 3,
+ *   "seeding": 501,
+ *   "deleted": 0,
+ *   "protected": 0,
+ *   "can_leech": 1
+ * }
+ *
+ * Scrape a torrent
+ * ocelotctl scrape @user 23456
+ * torrent(23456) ArtistName – Album [2026 EP] [2026 – Deluxe]
+ *   complete:1 downloaded:0 incomplete:3
+ *
+ * (that is: 1 seeder and 3 leechers)
+ *
+ * Declare a seeder
+ * ocelot announce @seeder 34567
+ *
+ * Declare a leecher
+ * ocelot announce @leecher 34567 l100 event=started
+ *
+ * Declare some leeching activity
+ * ocelot announce @leecher 34567 l80 d20
+ *
+ * Declare some seeding activity
+ * ocelot announce @seeder 34567 u20
+ *
+ * Declare leeching complete
+ * ocelot announce @leecher 34567 d100 event=completed
+ *
+ * Report a performance statistic
+ * ocelotctl stats | jq '."maximum resident set size" | .value'
+ * ➔
+ *   25350144
+ */
+
+declare(strict_types=1);
+
+namespace Gazelle;
+
+define('FAKE_USERAGENT', 'ocelotctl');
+require_once __DIR__ . '/../lib/bootstrap.php';
+
+array_shift($argv);
+switch (array_shift($argv) ?? '') {
+    case 'announce':
+        announce($argv);
+        break;
+    case 'scrape':
+        scrape($argv);
+        break;
+    case 'report-torrent':
+        reportTorrent($argv);
+        break;
+    case 'report-user':
+        reportUser($argv);
+        break;
+    case 'stats':
+        stats();
+        break;
+    default:
+        die("unknown action, must be one of announce scrape report-torrent report-user");
+}
+
+/**
+ * @param array<string> $arglist
+ */
+function announce(array $arglist): void {
+    $arg = array_shift($arglist) ?? '';
+    $user = new Manager\User()->find($arg);
+    if (is_null($user)) {
+        die("announce: no such user: $arg");
+    }
+
+    $arg = array_shift($arglist) ?? 0;
+    $torrent = new Manager\Torrent()->findById((int)$arg);
+    if (is_null($torrent)) {
+        die("announce: no such torrent id $arg");
+    }
+
+    $client  = "-qB43";
+    $size    = $torrent->size();
+    $peer    = sprintf("%'z-20s", $client);
+    $corrupt = 0;
+    $down    = 0;
+    $left    = 0;
+    $up      = 0;
+    $port    = 54321;
+    $event   = '';
+
+    foreach ($arglist as $arg) {
+        if (preg_match('/c(\d+)/', $arg, $match)) {
+            $corrupt = (int)($size * ($match[1] / 100));
+        } elseif (preg_match('/d(\d+)/', $arg, $match)) {
+            $down = (int)($size * ($match[1] / 100));
+        } elseif (preg_match('/l(\d+)/', $arg, $match)) {
+            $left = (int)($size * ($match[1] / 100));
+        } elseif (preg_match('/u(\d+)/', $arg, $match)) {
+            $up = (int)($size * ($match[1] / 100));
+        } elseif (preg_match('/port=(\d+)/', $arg, $match)) {
+            $port = (int)$match[1];
+        } elseif (preg_match('/event=(?:completed|started|stopped)/', $arg)) {
+            $event = '&' . $arg;
+        } elseif (preg_match('/peer=(.{1,20})/', $arg, $match)) {
+            // pad will trailing z to 20 bytes
+            $peer = sprintf("%'z-20s", substr("$client{$match[1]}", 0, 20));
+        } else {
+            echo "WARN: '$arg' ignored\n";
+        }
+    }
+
+    $url = trackerHost() . "{$user->announceKey()}/announce?compact=1"
+        . "&port=$port&peer_id=$peer&info_hash={$torrent->infohashEncoded()}"
+        . "&left=$left&uploaded=$up&downloaded=$down&corrupt=$corrupt$event";
+    $curl = curl();
+    if ($curl->fetch($url) === false) {
+        die("err:{$curl->error()}\n");
+    }
+    $decoder = new \OrpheusNET\BencodeTorrent\Bencode();
+    $decoder->decodeString($curl->result());
+    show($decoder->getData());
+}
+
+/**
+ * @param array<string> $arglist
+ */
+function scrape(array $arglist): void {
+    $arg  = array_shift($arglist) ?? '';
+    $user = new Manager\User()->find($arg);
+    if (is_null($user)) {
+        die("scrape: no such user: $arg\n");
+    }
+
+    $torMan   = new Manager\Torrent();
+    $infohash = [];
+    foreach ($arglist as $id) {
+        $torrent = $torMan->findById((int)$id);
+        if (is_null($torrent)) {
+            die("scrape: no such torrent id $id\n");
+        }
+        $infohash[] = "info_hash={$torrent->infohashEncoded()}";
+    }
+
+    $url  = trackerHost() . "{$user->announceKey()}/scrape?" . implode('&', $infohash);
+    $curl = curl();
+    if ($curl->fetch($url) === false) {
+        die("err:{$curl->error()}\n");
+    }
+
+    $user->requestContext()->setViewer($user);
+    $decoder = new \OrpheusNET\BencodeTorrent\Bencode();
+    $decoder->decodeString($curl->result());
+    foreach($decoder->getData()['files'] as $key => $stats) {
+        $torrent = $torMan->findByInfohash(bin2hex($key));
+        echo "torrent({$torrent->id}) {$torrent->fullName()}\n"
+            . "  complete:{$stats['complete']} downloaded:{$stats['downloaded']}"
+            . " incomplete:{$stats['incomplete']}\n";
+    }
+}
+
+/**
+ * @param array<string> $arglist
+ */
+function reportTorrent(array $arglist): void {
+    $arg     = (int)(array_shift($arglist) ?? 0);
+    $torrent = new Manager\Torrent()->findById($arg);
+    if (is_null($torrent)) {
+        die("scrape: no such torrent: $arg\n");
+    }
+
+    $url  = reportUrl() . "get=torrent&info_hash={$torrent->infohashEncoded()}";
+    $curl = curl();
+    if ($curl->fetch($url) === false) {
+        die("err:{$curl->error()}\n");
+    }
+    echo $curl->result();
+}
+
+/**
+ * @param array<string> $arglist
+ */
+function reportUser(array $arglist): void {
+    $arg  = array_shift($arglist) ?? '';
+    $user = new Manager\User()->find($arg);
+    if (is_null($user)) {
+        die("scrape: no such torrent: $arg\n");
+    }
+
+    $url  = reportUrl() . "get=user&key={$user->announceKey()}";
+    $curl = curl();
+    if ($curl->fetch($url) === false) {
+        die("err:{$curl->error()}\n");
+    }
+    echo $curl->result();
+}
+
+function stats(): void {
+    $url  = reportUrl() . "get=stats";
+    $curl = curl();
+    if ($curl->fetch($url) === false) {
+        die("err:{$curl->error()}\n");
+    }
+    echo $curl->result();
+}
+
+function curl(): Util\Curl {
+    return new Util\Curl()->setUseProxy(false)->addHeader('Host: ocelot');
+}
+
+function trackerHost(): string {
+    return 'http://'
+        . (getenv("TRACKER_HOST") ?: 'ocelot')
+        . ':'
+        . (getenv("TRACKER_PORT") ?: 34000)
+        . '/';
+}
+
+function reportUrl(): string {
+    return trackerHost() . (getenv("TRACKER_REPORTKEY") ?: TRACKER_REPORTKEY) . "/report?";
+}
+
+function trackerUrl(): string {
+    return trackerHost() . (getenv("TRACKER_SECRET") ?: TRACKER_SECRET) . "/";
+}

@@ -88,6 +88,10 @@ class Curl {
         return $this->result !== false || $this->responseCode() === 200;
     }
 
+    public function error(): string {
+        return curl_error($this->curl);
+    }
+
     public function result(): string|null {
         return $this->result === false ? null : (string)$this->result;
     }
