@@ -4,19 +4,21 @@ declare(strict_types=1);
 
 namespace Gazelle;
 
-switch ($_REQUEST['type'] ?? '') {
+switch ($_REQUEST['type'] ?? null) {
     case 'artists':
-        include_once __DIR__ . '/artists.php';
+        require_once __DIR__ . '/artists.php';
         break;
     case 'collages':
-        $_GET['bookmarks'] = 1;
-        include_once __DIR__ . '/browse.php';
-        break;
+        // FIXME: not implemented
+        json_die('not implemented');
+        //$_GET['bookmarks'] = 1;
+        //require_once __DIR__ . '/browse.php';
+        //break;
     case 'requests':
         $_GET['type'] = 'bookmarks';
-        include_once __DIR__ . '/requests.php';
+        require_once __DIR__ . '/../requests.php';
         break;
     default:
-        include_once __DIR__ . '/torrents.php';
+        require_once __DIR__ . '/torrents.php';
         break;
 }

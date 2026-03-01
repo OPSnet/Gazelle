@@ -15,54 +15,39 @@ if (!isset($_GET['userid'])) {
 }
 
 $search = new Search\Request();
-$type   = $_GET['type'] ?? '';
-switch ($type) {
+switch ($_GET['type'] ?? null) {
     case 'created':
         if ($user) {
             if (!$user->propertyVisible($Viewer, 'requestsvoted_list')) {
-                json_die("failure");
+                json_die("hidden by paranoia");
             }
-            $Title = "Requests created by " . $user->username();
             $search->setCreator($user);
         } else {
-            $Title = 'My requests';
             $search->setCreator($Viewer);
         }
         break;
     case 'voted':
         if ($user) {
             if (!$user->propertyVisible($Viewer, 'requestsvoted_list')) {
-                json_die("failure");
+                json_die("hidden by paranoia");
             }
-            $Title = "Requests voted for by " . $user->username();
             $search->setVoter($user);
         } else {
-            $Title = 'Requests you have voted on';
             $search->setVoter($Viewer);
         }
         break;
     case 'filled':
         if ($user) {
             if (!$user->propertyVisible($Viewer, 'requestsfilled_list')) {
-                json_die("failure");
+                json_die("hidden by paranoia");
             }
-            $Title = "Requests filled by " . $user->username();
             $search->setFiller($user);
         } else {
-            $Title = 'Requests you have filled';
             $search->setFiller($Viewer);
         }
         break;
     case 'bookmarks':
-        if (is_null($user)) {
-            json_die("No user id given");
-        }
-        $search->setBookmarker($user);
-        $Title = 'Your bookmarked requests';
-        $BookmarkView = true;
-        break;
-    default:
-        $Title = 'Requests';
+        $search->setBookmarker($Viewer);
         break;
 }
 

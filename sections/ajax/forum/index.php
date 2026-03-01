@@ -6,12 +6,12 @@ declare(strict_types=1);
 namespace Gazelle;
 
 if ($Viewer->disableForums()) {
-    print json_die('failure');
+    json_die('not allowed');
 }
 
-match ($_GET['type'] ?? 'main') {
-    'main'       => include_once 'main.php',
-    'viewforum'  => include_once 'forum.php',
-    'viewthread' => include_once 'thread.php',
+require_once __DIR__ . '/' . match ($_GET['type'] ?? 'main') {
+    'main'       => 'main.php',
+    'viewforum'  => 'forum.php',
+    'viewthread' => 'thread.php',
     default      => json_error('type'),
 };

@@ -6,12 +6,12 @@ declare(strict_types=1);
 namespace Gazelle;
 
 if (!$Viewer->permitted('site_top10')) {
-    json_die('failure');
+    json_die('not allowed');
 }
 
-match ($_GET['type'] ?? 'torrents') {
-    'tags'     => include_once 'tags.php',
-    'torrents' => include_once 'torrents.php',
-    'users'    => include_once 'users.php',
+require_once __DIR__ . '/' . match ($_GET['type'] ?? 'torrents') {
+    'tags'     => 'tags.php',
+    'torrents' => 'torrents.php',
+    'users'    => 'users.php',
     default    => json_error('bad type'),
 };

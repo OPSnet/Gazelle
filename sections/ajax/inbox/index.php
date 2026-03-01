@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Gazelle;
 
-require_once match ($_GET['type'] ?? 'inbox') {
+require_once __DIR__ . '/' . match ($_GET['type'] ?? 'inbox') {
     'viewconv' => 'viewconv.php',
     default    => 'inbox.php',
 };
