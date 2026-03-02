@@ -11,7 +11,6 @@ namespace Gazelle;
 $tagMan    = new Manager\Tag();
 $tgMan     = new Manager\TGroup();
 $torMan    = new Manager\Torrent();
-$reportMan = new Manager\Torrent\Report($torMan);
 $snatcher  = $Viewer->snatch();
 
 if (!empty($_GET['searchstr']) || !empty($_GET['groupname'])) {
@@ -30,6 +29,7 @@ $headerMap = [
     'snatched' => ['defaultSort' => 'desc', 'text' => sprintf($imgTag, 'snatched', 'Snatches', 'Snatches')],
     'seeders'  => ['defaultSort' => 'desc', 'text' => sprintf($imgTag, 'seeders', 'Seeders', 'Seeders')],
     'leechers' => ['defaultSort' => 'desc', 'text' => sprintf($imgTag, 'leechers', 'Leechers', 'Leechers')],
+    'random'   => ['defaultSort' => 'desc'],
 ];
 $header = new Util\SortableTableHeader('time', $headerMap);
 $headerIcons = new Util\SortableTableHeader('time', $headerMap, ['asc' => '', 'desc' => '']);
@@ -71,7 +71,7 @@ $Search = new Search\Torrent(
     $Viewer->permitted('site_search_many'),
 );
 $Results = $Search->query($_GET);
-if ($Results == false) {
+if ($Results === false) {
     $Results = [];
 } else {
     // bleah
@@ -116,7 +116,7 @@ if ($NumResults == 0) {
     exit;
 }
 
-$bookmark = new \Gazelle\User\Bookmark($Viewer);
+$bookmark = new User\Bookmark($Viewer);
 
 echo $paginator->linkbox();
 ?>
@@ -147,7 +147,7 @@ foreach ($Results as $Key => $GroupID) {
     }
     if ($GroupResults) {
         $torrentList = $tgroup->torrentIdList();
-        if (empty($torrentList)) {
+        if (!$torrentList) {
             continue;
         }
     } else {

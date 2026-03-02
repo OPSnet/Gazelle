@@ -10,7 +10,6 @@ use Gazelle\Manager\Torrent as TorrentManager;
 
 class Torrent {
     final protected const TAGS_ANY = 0;
-    final protected const TAGS_ALL = 1;
     final protected const SPH_BOOL_AND = ' ';
     final protected const SPH_BOOL_OR = ' | ';
 
@@ -254,12 +253,8 @@ class Torrent {
      * Internal function that runs the queries needed to get the desired results
      */
     private function run_query(): void {
-        $SphQLResult = $this->SphQL->sphinxquery();
-        if ($SphQLResult === false) {
-            return;
-        }
-        $result = $SphQLResult; /* to keep phpstan happy */
-        if ($result->Errno > 0) {
+        $result = $this->SphQL->sphinxquery();
+        if ($result === false || $result->Errno > 0) {
             return;
         }
         if ($this->Random && $this->GroupResults) {
@@ -270,8 +265,8 @@ class Torrent {
             while ($result->get_meta('total') < $TotalCount && $GroupCount < $this->PageSize) {
                 // Make sure we get $PageSize results, or all of them if there are less than $PageSize hits
                 $this->SphQL->where('groupid', $GroupIDs, true);
-                $SphQLResult = $this->SphQL->sphinxquery();
-                if (!$result->has_results()) {
+                $result = $this->SphQL->sphinxquery();
+                if (!($result && $result->has_results())) {
                     break;
                 }
                 $this->SphResults += $result->collect('groupid');
