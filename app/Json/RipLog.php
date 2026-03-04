@@ -11,25 +11,8 @@ class RipLog extends \Gazelle\Json {
     public function payload(): array {
         $ripLog = new \Gazelle\File\RipLog($this->torrentId, $this->logId);
         if (!$ripLog->exists()) {
-            return [
-                'id'                => $this->torrentId,
-                'logid'             => $this->logId,
-                'log'               => false,
-                'log_sha256'        => false,
-                'score'             => false,
-                'score_adjusted'    => false,
-                'checksum'          => false,
-                'checksum_adjusted' => false,
-                'checksum_state'    => false,
-                'adjusted'          => false,
-                'adjusted_by'       => false,
-                'adjusted_reason'   => false,
-                'ripper'            => false,
-                'ripper_lang'       => false,
-                'ripper_version'    => false,
-                'checker_version'   => false,
-                'success'           => false,
-            ];
+            $this->failure = 'no such log';
+            return [];
         }
 
         $logFile = $ripLog->get();

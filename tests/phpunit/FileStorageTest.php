@@ -123,10 +123,8 @@ class FileStorageTest extends TestCase {
         $this->assertFalse($file->get(),    'file-r-get-nok');
 
         $json = new Json\RipLog(0, 0);
-        $this->assertInstanceOf(Json\RipLog::class, $json, 'json-riplog-class');
-        $payload = $json->payload();
-        $this->assertCount(17, $payload, 'json-riplog-payload');
-        $this->assertFalse($payload['success'], 'json-riplog-success-404');
+        $response = json_decode($json->response(), true);
+        $this->assertEquals('failure', $response['status'], 'json-riplog-failure');
 
         $this->assertFalse($file->flush()->get(),  'file-riplog-get-after-remove');
         $this->assertEquals('', $file->link(),     'file-riplog-link');
