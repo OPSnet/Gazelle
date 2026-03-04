@@ -29,7 +29,7 @@
         </tr>
         <tr id="report_details_{{ item.id }}" class="hidden">
             <td colspan="4">
-                <blockquote>{{ item.reason }}</blockquote>
+                <blockquote>{{ item.reason|bb_passthru }}</blockquote>
                 {% if item.message %}
                     <blockquote>{{ item.message }}</blockquote>
                 {% endif %}
