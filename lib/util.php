@@ -525,7 +525,7 @@ function array_trim_prefix(string $prefix, array $list): array {
  */
 function array_key_extract_suffix(string $prefix, array $list, bool $cast = true): array {
     return array_map(
-        fn(string $v): int|string => $cast ? (int)explode('-', $v)[1] : explode('-', $v)[1],
+        fn(string $v): int|string => $cast ? (int)explode('-', $v)[1] : substr($v, (int)strpos($v, '-') + 1),
         array_values(array_filter(
             array_keys($list),
             fn(string $v) => str_starts_with($v, $prefix)

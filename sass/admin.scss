@@ -99,6 +99,45 @@ form.analysis-case {
   justify-self: end;
 }
 
+/* search audit trail */
+
+.search-audit-trail {
+  display: grid;
+  gap: 0;
+  grid-template-columns: 135px 135px 145px 70px 1fr;
+}
+
+.search-audit-trail .row-header,
+.search-audit-trail .row {
+  display: contents;
+}
+
+.search-audit-trail .user {
+  grid-column: 1;
+  padding: 6px;
+}
+.search-audit-trail .author {
+  grid-column: 2;
+  padding: 6px;
+}
+.search-audit-trail .created {
+  grid-column: 3;
+  padding: 6px;
+}
+.search-audit-trail .event {
+  grid-column: 4;
+  padding: 6px;
+}
+.search-audit-trail .note {
+  grid-column: 5;
+  padding: 6px;
+}
+
+.row:nth-child(odd) > div {
+  background-color: rgb(255 255 255 / 5%);
+  mix-blend-mode: screen;
+}
+
 /* privilege-audit.twig */
 
 .compare-grid {

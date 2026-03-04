@@ -1,0 +1,101 @@
+{% from 'macro/form.twig' import checked -%}
+{{ header('Search audit trail') }}
+<div class="header">
+    <h2>Search audit trail</h2>
+</div>
+<div class="box pad thin">
+<form action="tools.php">
+<input type="hidden" name="action" value="audit_trail" />
+<table>
+<tr>
+    <td>Username</td>
+    <td><input name="user" type="text" size="40" placeholder="Username" value="{{ form.user }}">
+      <br>May be @username or id (e.g. @{{ viewer.username }} or {{ viewer.id }})
+    </td>
+    <td>Created after</td>
+    <td><input name="after" type="datetime-local" value="{{ form.after }}">
+    </td>
+</tr>
+<tr>
+    <td>Staff username</td>
+    <td><input name="author" type="text" size="40" placeholder="Staff username" value="{{ form.author }}">
+      <br>May be @username or id
+    </td>
+    <td>Created before</td>
+    <td><input name="before" type="datetime-local" value="{{ form.before }}">
+    </td>
+</tr>
+<tr>
+    <td>Event</td>
+    <td>
+{% set no_event = form.event|length == 0 %}
+        <label>
+            <input name="event-{{ enum('Gazelle\\Enum\\UserAuditEvent').activity.value }}" type="checkbox"{{ checked(no_event or 'activity' in form.event) }} >&nbsp;{{ enum('Gazelle\\Enum\\UserAuditEvent').activity.value }}
+        </label>
+        <label>
+            <input name="event-{{ enum('Gazelle\\Enum\\UserAuditEvent').historical.value }}" type="checkbox"{{ checked(no_event or 'historical' in form.event) }} >&nbsp;{{ enum('Gazelle\\Enum\\UserAuditEvent').historical.value }}
+        </label>
+        <label>
+            <input name="event-{{ enum('Gazelle\\Enum\\UserAuditEvent').invite.value }}" type="checkbox"{{ checked(no_event or 'invite' in form.event) }} >&nbsp;{{ enum('Gazelle\\Enum\\UserAuditEvent').invite.value }}
+        </label>
+        <label>
+            <input name="event-{{ enum('Gazelle\\Enum\\UserAuditEvent').link.value }}" type="checkbox"{{ checked(no_event or 'link' in form.event) }} >&nbsp;{{ enum('Gazelle\\Enum\\UserAuditEvent').link.value }}
+        </label>
+        <label>
+            <input name="event-{{ enum('Gazelle\\Enum\\UserAuditEvent').staffNote.value }}" type="checkbox"{{ checked(no_event or 'staff-note' in form.event) }} >&nbsp;{{ enum('Gazelle\\Enum\\UserAuditEvent').staffNote.value }}
+        </label>
+        <br>
+        <label>
+            <input name="event-{{ enum('Gazelle\\Enum\\UserAuditEvent').mfa.value }}" type="checkbox"{{ checked(no_event or 'mfa' in form.event) }} >&nbsp;{{ enum('Gazelle\\Enum\\UserAuditEvent').mfa.value }}
+        </label>
+        <label>
+            <input name="event-{{ enum('Gazelle\\Enum\\UserAuditEvent').ratio.value }}" type="checkbox"{{ checked(no_event or 'ratio' in form.event) }} >&nbsp;{{ enum('Gazelle\\Enum\\UserAuditEvent').ratio.value }}
+        </label>
+        <label>
+            <input name="event-{{ enum('Gazelle\\Enum\\UserAuditEvent').request.value }}" type="checkbox"{{ checked(no_event or 'request' in form.event) }} >&nbsp;{{ enum('Gazelle\\Enum\\UserAuditEvent').request.value }}
+        </label>
+        <label>
+            <input name="event-{{ enum('Gazelle\\Enum\\UserAuditEvent').userclass.value }}" type="checkbox"{{ checked(no_event or 'userclass' in form.event) }} >&nbsp;{{ enum('Gazelle\\Enum\\UserAuditEvent').userclass.value }}
+        </label>
+        <label>
+            <input name="event-{{ enum('Gazelle\\Enum\\UserAuditEvent').warning.value }}" type="checkbox"{{ checked(no_event or 'warning' in form.event) }} >&nbsp;{{ enum('Gazelle\\Enum\\UserAuditEvent').warning.value }}
+        </label>
+    </td>
+    <td>Note</td>
+    <td><input name="note" type="text" size="40" placeholder="Full text search" value="{{ form.note }}">
+        <br>Tips on searching: {{ "[[searchfulltext]]" | bb_format }}
+    </td>
+</tr>
+<tr>
+    <td></td>
+    <td colspan="3"><input type="submit" value="search">
+    </td>
+</tr>
+</table>
+</form>
+{{ paginator.linkbox|raw }}
+{% for item in page %}
+{%  if loop.first %}
+<h4>{{ paginator.total }} result{{ paginator.total|plural }}</h4>
+<div class="search-audit-trail">
+  <div class="row-header">
+    <div class="user"><b>{{    heading.emit('user')|raw }}</b></div>
+    <div class="author"><b>{{  heading.emit('author')|raw }}</b></div>
+    <div class="created"><b>{{ heading.emit('created')|raw }}</b></div>
+    <div class="event"><b>{{   heading.emit('event')|raw }}</b></div>
+    <div class="note"><b>{{    heading.emit('note')|raw }}</b></div>
+  </div>
+{%  endif %}
+  <div class="row">
+    <div class="user">{{ item.id_user|user_url }}</div>
+    <div class="author">{{ item.id_user_creator|user_url }}</div>
+    <div class="created">{{ item.created|date('Y-m-d H:i:s') }}</div>
+    <div class="event">{{ item.event }}</div>
+    <div class="note">{{ item.note }}</div>
+  </div>
+{%  if loop.last %}
+</div>
+{%  endif %}
+{% endfor %}
+</div>
+{{ footer() }}

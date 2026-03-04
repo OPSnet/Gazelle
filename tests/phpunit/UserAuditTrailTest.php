@@ -107,4 +107,78 @@ class UserAuditTrailTest extends TestCase {
         $this->user->auditTrail()->addEvent(UserAuditEvent::staffNote, 'update');
         $this->assertNotEquals($checkpoint, $this->user->checkpoint(), 'user-newer-checkpoint');
     }
+
+    public function testAuditTrailSearch(): void {
+        $this->admin = Helper::makeUser('uat.' . randomString(10), 'uata');
+        $adminTrail  = $this->admin->auditTrail();
+        $adminTrail->addEvent(UserAuditEvent::activity, 'phpunit activity');
+        $adminTrail->addEvent(UserAuditEvent::userclass, 'phpunit userclass');
+
+        $this->user = Helper::makeUser('uat.' . randomString(10), 'uatas');
+        $random    = randomString(6);
+        $staffNote = "phpunit staff note $random";
+        $userTrail = $this->user->auditTrail();
+        $userTrail->addEvent(UserAuditEvent::activity, 'phpunit activity');
+        $userTrail->addEvent(UserAuditEvent::userclass, 'phpunit userclass');
+        $userTrail->addEvent(UserAuditEvent::staffNote, $staffNote, $this->admin);
+
+        // This is a bit of an awful hack. There are users that are created
+        // before the unit test suite is run, and they will be noticed in the
+        // unit tests for contests. Tidy up that side effect here:
+        new DB\Pg(PG_RW_DSN)->query("
+            delete from user_audit_trail where note ~ 'phpunit contest request fill'
+        ");
+        $after = new Search\AuditTrail();
+        $after->setCreatedAfter(date('Y-m-d H:i:s', time() - 3600));
+        $this->assertEquals(
+            7, // 2 activity, 2 userclass + staff note + 2 invite
+            $after->total(),
+            'ats-after-total',
+        );
+        $page = $after->page(10, 0);
+        $this->assertCount(7, $page, 'ats-page-count');
+        $this->assertEqualsCanonicalizing(
+            ["id_user", "id_user_creator", "created", "event", "note"],
+            array_keys($page[0]),
+            'ats-page-keys',
+        );
+        $item = current(array_filter(
+            $page,
+            fn ($a) => $a['event'] === UserAuditEvent::staffNote->value,
+        ));
+        $this->assertEquals($staffNote, $item['note'], 'ats-user-note');
+
+        $before = new Search\AuditTrail();
+        $before->setCreatedBefore('2000-01-01 00:00:00');
+        $this->assertEquals(0, $before->total(), 'ats-before-total');
+
+        $author = new Search\AuditTrail();
+        $author->setAuthorList([$this->admin]);
+        $this->assertEquals(1, $author->total(), 'ats-author-total');
+        $item = current(array_filter(
+            $author->page(2, 0),
+            fn ($a) => $a['event'] === UserAuditEvent::staffNote->value,
+        ));
+        $this->assertEquals($staffNote, $item['note'], 'ats-author-note');
+
+        $note = new Search\AuditTrail();
+        $note->setNote($random);
+        $this->assertEquals(1, $note->total(), 'ats-note-total');
+        $item = current(array_filter(
+            $note->page(2, 0),
+            fn ($a) => $a['event'] === UserAuditEvent::staffNote->value,
+        ));
+        $this->assertEquals($staffNote, $item['note'], 'ats-note-note');
+
+        $user = new Search\AuditTrail();
+        $user->setUserList([$this->user]);
+        $this->assertEquals(4, $user->total(), 'ats-user-total');
+        $this->assertCount(4, $user->page(5, 0), 'ats-user-page');
+
+        $event = new Search\AuditTrail();
+        $event->setEventList(['activity', 'userclass']);
+        $event->setCreatedAfter(date('Y-m-d H:i:s', time() - 3600));
+        $this->assertEquals(4, $event->total(), 'ats-event-total');
+        $this->assertCount(4, $event->page(5, 0), 'ats-event-page');
+    }
 }

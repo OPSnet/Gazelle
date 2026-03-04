@@ -281,6 +281,7 @@ class Privilege extends \Gazelle\BaseManager {
             'admin_periodic_task_view' => 'View scheduler logs',
             'admin_rate_limit_manage' => 'Manage rate limiting',
             'admin_rate_limit_view' => 'View rate limiting',
+            'admin_search_audit_trail' => 'Search user audit trail',
             'site_collages_recover' => 'Recover \'deleted\' collages',
             'torrents_add_artist' => 'Add artists to any group',
             'edit_unknowns' => 'Edit unknown release information',

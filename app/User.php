@@ -1810,6 +1810,10 @@ class User extends BaseAttrObject {
             DELETE FROM user_read_forum WHERE user_id = ?
             ", $this->id
         );
+        $this->pg()->query('
+            delete from user_audit_trail where id_user = $1
+            ', $this->id
+        );
         $affected = parent::remove();
         $this->flush();
         self::$cache->delete_multi([

@@ -14,6 +14,9 @@ switch ($_REQUEST['action'] ?? '') {
     case 'geoip_lookup':
         include_once 'managers/geoip_lookup.php';
         break;
+    case 'audit_trail':
+        include_once 'managers/audit_trail.php';
+        break;
 
     case 'bonus_points':
         include_once 'managers/bonus_points.php';

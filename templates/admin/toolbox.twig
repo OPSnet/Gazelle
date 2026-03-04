@@ -31,6 +31,7 @@
     ['Reports V1',                   'reports.php',                 viewer.permittedAny('admin_reports', 'site_moderate_forums')],
     ['Staff page group manager',     '?action=staff_groups',        viewer.permitted('admin_manage_permissions')],
     ['Torrent report configuration', '?action=torrent_report_view', viewer.permitted('users_mod')],
+    ['Userclass manager',            '?action=userclass',           viewer.permitted('admin_manage_permissions')],
 ]) }}
 
 {{ _self.category('Announcements', [
@@ -70,9 +71,9 @@
     ['Referral accounts',    '?action=referral_accounts', viewer.permitted('admin_manage_referrals') and constant('OPEN_EXTERNAL_REFERRALS')],
     ['Referred users',       '?action=referral_users',    viewer.permitted('admin_view_referrals')],
     ['Registration log',     '?action=registration_log',  viewer.permitted('users_view_email')],
+    ['Search audit trail',   '?action=audit_trail',       viewer.permitted('admin_search_audit_trail')],
     ['Send custom PM',       '?action=custom_pm',         viewer.permitted('admin_site_debug')],
     ['User flow',            '?action=user_flow',         viewer.permitted('site_view_flow')],
-    ['Userclass manager',    '?action=userclass',         viewer.permitted('admin_manage_permissions')],
 ]) }}
 
 {{ _self.category('Community', [
