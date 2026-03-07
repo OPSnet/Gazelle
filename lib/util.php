@@ -954,6 +954,7 @@ function worldTopology(): array {
     return $data === false ? [] : json_decode($data, true);
 }
 
+// @phpstan-ignore-next-line missingType.generics
 function object_generator(\Gazelle\BaseManager $manager, array $idList): \Generator {
     foreach ($idList as $id) {
         $object = $manager->findById($id);

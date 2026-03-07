@@ -489,6 +489,7 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
         return $this->info()['torrent_list'];
     }
 
+    // @phpstan-ignore-next-line missingType.generics
     public function yieldTorrents(Manager\Torrent $torMan = new Manager\Torrent()): \Generator {
         return object_generator($torMan, $this->torrentIdList());
     }

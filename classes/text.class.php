@@ -523,7 +523,7 @@ class Text {
             // phpcs:disable Generic.CodeAnalysis.EmptyStatement.DetectedElseif
             if ($i >= strlen($Str)) {
                 // document end, tag unclosed
-            } elseif ($TagName == 'img' && !empty($Tag[3][0])) { //[img=...]
+            } elseif ($TagName == 'img' && isset($Tag[3][0])) { //[img=...] /** @phpstan-ignore-line need more magic */
                 $Block = ''; // Nothing inside this tag
                 // Don't need to touch $i
             } elseif ($TagName == 'hr') {

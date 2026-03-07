@@ -6,8 +6,8 @@ use Phinx\Migration\AbstractMigration;
 
 final class AdminPrivileges extends AbstractMigration {
     public function up(): void {
-        $this->getQueryBuilder('update') /** @phpstan-ignore-line need more magic */
-            ->update('permissions')
+        $this->getQueryBuilder('update')
+            ->update('permissions') /** @phpstan-ignore-line need more magic */
             ->set('`Values`',
                 serialize([
                     'admin_add_log' => 1,

@@ -129,7 +129,10 @@ class TGroup extends \Gazelle\ArtistRole {
         }
         $legacy = [];
         foreach ($this->roleList as $id => $list) {
-            $legacy[array_search($id, self::MAP)] = empty($list) ? null : $list;
+            $offset = array_search($id, self::MAP);
+            if ($offset !== false) {
+                $legacy[$offset] = $list === [] ? null : $list;
+            }
         }
         return $legacy;
     }

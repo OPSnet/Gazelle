@@ -71,8 +71,7 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
             </span>
             <span style="float: right;">
 <?php if ($new) { ?>
-                <a href="#" onclick="$('#discog_table_<?= $s['collageId'] ?>').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets"><?=
-                $viewAll ? 'Show' : 'Hide' ?></a>
+                <a href="#" onclick="$('#discog_table_<?= $s['collageId'] ?>').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets">Hide</a>
                 &nbsp;&nbsp;&nbsp;
                 <a href="userhistory.php?action=catchup_collages&amp;auth=<?= $Viewer->auth() ?>&amp;collageid=<?= $s['collageId'] ?>" class="brackets">Catch up</a>
                 &nbsp;&nbsp;&nbsp;

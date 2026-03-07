@@ -6,8 +6,8 @@ use Phinx\Migration\AbstractMigration;
 
 final class DefaultUserPrivileges extends AbstractMigration {
     public function up(): void {
-        $this->getQueryBuilder('update') /** @phpstan-ignore-line need more magic */
-            ->update('permissions')
+        $this->getQueryBuilder('update')
+            ->update('permissions') /** @phpstan-ignore-line need more magic */
             ->set('`Values`',
                 serialize([
                     'site_advanced_search' => 1,
@@ -28,8 +28,8 @@ final class DefaultUserPrivileges extends AbstractMigration {
             ->where(['Level' => 150]) // Member
             ->execute();
 
-        $this->getQueryBuilder('update') /** @phpstan-ignore-line need more magic */
-            ->update('permissions')
+        $this->getQueryBuilder('update')
+            ->update('permissions') /** @phpstan-ignore-line need more magic */
             ->set('`Values`',
                 serialize([
                     'admin_add_log' => 1,
@@ -170,8 +170,8 @@ final class DefaultUserPrivileges extends AbstractMigration {
     }
 
     public function down(): void {
-        $this->getQueryBuilder('update') /** @phpstan-ignore-line need more magic */
-            ->update('permissions')
+        $this->getQueryBuilder('update')
+            ->update('permissions') /** @phpstan-ignore-line need more magic */
             ->set('`Values`',
                 serialize([
                     'edit_unknowns' => 1,
@@ -194,8 +194,8 @@ final class DefaultUserPrivileges extends AbstractMigration {
             ->where(['Level' => 150]) // Member
             ->execute();
 
-        $this->getQueryBuilder('update') /** @phpstan-ignore-line need more magic */
-            ->update('permissions')
+        $this->getQueryBuilder('update')
+            ->update('permissions') /** @phpstan-ignore-line need more magic */
             ->set('`Values`',
                 serialize([
                     'admin_add_log' => 1,
