@@ -4,7 +4,7 @@
     {% if loop.first %}
 <h4 class="tooltip" title="List of users that have reported a snatch to the tracker">List of Snatchers</h4>
 {% set linkbox %}
-<div class="linkbox">{{ pager('show_snatches', torrent, paginator)|raw }}</div>
+<div class="linkbox">{{ pager(torrent, paginator)|raw }}</div>
 {% endset %}
 {{ linkbox|raw }}
 <table>

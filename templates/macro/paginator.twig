@@ -1,4 +1,4 @@
-{% macro pager(action, torrent, paginator) %}
+{% macro pager(torrent, paginator) %}
 {%- if paginator.pages > 1 %}
 {%-     for p in 1 .. paginator.pages %}
 {%-         if not loop.first %}·{% endif -%}

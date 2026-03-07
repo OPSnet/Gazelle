@@ -42,13 +42,13 @@ View::show_header('Torrent Reports', ['js' => 'reportsv2,bbcode,browse,torrent']
 </div>
 <div class="buttonbox pad center">
 <?php if ($search->mode() !== 'resolved') { ?>
-    <span class="tooltip" title="Resolves *all* checked reports with their respective resolutions"><input type="button" onclick="MultiResolve();" value="Multi-resolve" /></span>
-    <span class="tooltip" title="Assigns all of the reports on the page to you!"><input type="button" onclick="Grab();" value="Claim all" /></span>
+    <span class="tooltip" title="Resolves *all* checked reports with their respective resolutions"><input type="button" onclick="MultiResolve();" value="Multi-resolve"></span>
+    <span class="tooltip" title="Assigns all of the reports on the page to you!"><input type="button" onclick="Grab();" value="Claim all"></span>
 <?php
 }
 if ($search->canUnclaim($Viewer)) {
 ?>
-    | <span class="tooltip" title="Unclaim all of the reports currently displayed"><input type="button" onclick="GiveBack();" value="Unclaim all" /></span>
+    | <span class="tooltip" title="Unclaim all of the reports currently displayed"><input type="button" onclick="GiveBack();" value="Unclaim all"></span>
 <?php } ?>
 </div>
 <?= $paginator->linkbox() ?>
@@ -70,7 +70,7 @@ if ($search->canUnclaim($Viewer)) {
 ?>
     <div id="report<?= $reportId ?>" class="report box pad center">
         <a href="reportsv2.php?view=report&amp;id=<?= $reportId ?>">Report <?= $reportId ?></a> for torrent <?= $report->torrentId()
-        ?> (deleted) has been automatically resolved. <input type="button" value="Hide" onclick="ClearReport(<?= $reportId ?>);" />
+        ?> (deleted) has been automatically resolved. <input type="button" value="Hide" onclick="ClearReport(<?= $reportId ?>);">
     </div>
 <?php
         } else {
@@ -103,14 +103,15 @@ if ($search->canUnclaim($Viewer)) {
     foreach ($otherTorrentList as $extra) {
         if ($extra) {
 ?>
-            <?= $n++ == 0 ? '' : '<br />' ?>
+                    <span data-id="<?= $extra->id ?>">
+            <?= $n++ == 0 ? '' : '<br>' ?>
             <?= $extra->group()->link() ?> <?= $extra->shortLabelLink() ?> (<?= byte_format($extra->size()) ?>)
-                        <br /><?= $extra->edition() ?>
-                        <br /><a href="torrents.php?action=download&amp;id=<?= $extra->id ?>&amp;torrent_pass=<?= $Viewer->announceKey() ?>" title="Download" class="brackets tooltip">DL</a>
-                        <a href="#" class="brackets tooltip" onclick="show_downloads('<?= $extra->id ?>', 0); return false;" title="View the list of users that have clicked the &quot;DL&quot; button.">Downloaders</a>
-                        <a href="#" class="brackets tooltip" onclick="show_snatches('<?= $extra->id ?>', 0); return false;" title="View the list of users that have reported a snatch to the tracker.">Snatchers</a>
-                        <a href="#" class="brackets" onclick="show_seeders('<?= $extra->id ?>', 0); return false;">Seeders</a>
-                        <a href="#" class="brackets" onclick="show_files('<?= $extra->id ?>'); return false;">Contents</a>
+                        <br><?= $extra->edition() ?>
+                        <br><a href="torrents.php?action=download&amp;id=<?= $extra->id ?>&amp;torrent_pass=<?= $Viewer->announceKey() ?>" title="Download" class="brackets tooltip">DL</a>
+                        <a href="#" class="brackets tooltip view-download" title="View the list of users that have clicked the &quot;DL&quot; button.">Downloaders</a>
+                        <a href="#" class="brackets tooltip view-snatch" title="View the list of users that have reported a snatch to the tracker.">Snatchers</a>
+                        <a href="#" class="brackets tooltip view-peer" title="View the list of peers in this torrent's swarm.">Peers</a>
+                        <a href="#" class="brackets tooltip view-filelist" title="View the list of files in this torrent">Contents</a>
                         <div id="viewlog_<?= $extra->id ?>" class="hidden"></div>
                         <div id="peers_<?= $extra->id ?>" class="hidden"></div>
                         <div id="downloads_<?= $extra->id ?>" class="hidden"></div>
@@ -131,11 +132,11 @@ if ($search->canUnclaim($Viewer)) {
 <?php                   } ?>
                         </table>
                         </div>
-                        <br />uploaded by <?= $extra->uploader()->link() ?> on <span title="<?=
+                        <br>uploaded by <?= $extra->uploader()->link() ?> on <span title="<?=
                 time_diff($extra->created(), 3, false) ?>"><?= $extra->created() ?> (<?=
                 strtotime($extra->created()) < strtotime($torrent?->created() ?? '2000-01-01 00:00:00') ? 'older upload' : 'more recent upload' ?>)</span>
-                        <br />Last action: <?= $extra->lastActiveDate() ?: 'Never' ?>
-                        <br /><span>Audio files present:
+                        <br>Last action: <?= $extra->lastActiveDate() ?: 'Never' ?>
+                        <br><span>Audio files present:
 <?php
             $extMap = $extra->fileListPrimaryMap();
             if (count($extMap) == 0) {
@@ -148,6 +149,7 @@ if ($search->canUnclaim($Viewer)) {
 <?php                   if ($extra->description()) { ?>
                         <br><span class="report_other_torrent_info" title="Release description of other torrent">Release info: <?= \Text::full_format($extra->description(), cache: Enum\ImageCacheMode::passthru, bucket: Enum\CacheBucket::forum) ?></span>
 <?php                   } ?>
+                    </span>
                     </td>
                 </tr>
 <?php                   if ($torrent?->hasLog() || $extra->hasLog()) { ?>
@@ -294,8 +296,8 @@ if ($search->canUnclaim($Viewer)) {
                 <tr>
                     <td class="label">Report comment:</td>
                     <td>
-                        <input type="text" name="comment" id="comment<?= $reportId ?>" size="70" value="<?= html_escape($report->comment() ?? '') ?>" />
-                        <input type="button" value="Update now" onclick="UpdateComment(<?= $reportId ?>);" />
+                        <input type="text" name="comment" id="comment<?= $reportId ?>" size="70" value="<?= html_escape($report->comment() ?? '') ?>">
+                        <input type="button" value="Update now" onclick="UpdateComment(<?= $reportId ?>);">
                     </td>
                 </tr>
                 <tr>
@@ -320,14 +322,14 @@ if ($search->canUnclaim($Viewer)) {
                             </span> |
 <?php           if ($Viewer->permitted('users_mod')) { ?>
                             <span class="tooltip" title="Delete torrent?">
-                                <input type="checkbox" name="delete" id="delete<?= $reportId ?>"<?= $reportType->doDeleteUpload() ? ' checked' : '' ?> />&nbsp;<label for="delete<?= $reportId ?>"><strong>Delete</strong></label>
+                                <input type="checkbox" name="delete" id="delete<?= $reportId ?>"<?= $reportType->doDeleteUpload() ? ' checked' : '' ?>>&nbsp;<label for="delete<?= $reportId ?>"><strong>Delete</strong></label>
                             </span> |
                                 <?php           } ?>
                             <span class="tooltip" title="Remove upload privileges?">
-                                <input type="checkbox" name="upload" id="upload<?= $reportId ?>"<?= $reportType->doRevokeUploadPrivs() ? ' checked' : '' ?> />&nbsp;<label for="upload<?= $reportId ?>"><strong>Remove upload privileges</strong></label>
+                                <input type="checkbox" name="upload" id="upload<?= $reportId ?>"<?= $reportType->doRevokeUploadPrivs() ? ' checked' : '' ?>>&nbsp;<label for="upload<?= $reportId ?>"><strong>Remove upload privileges</strong></label>
                             </span> |
                             <span class="tooltip" title="Update resolve type">
-                                <input type="button" name="update_resolve" id="update_resolve<?= $reportId ?>" value="Update now" onclick="UpdateResolve(<?= $reportId ?>);" />
+                                <input type="button" name="update_resolve" id="update_resolve<?= $reportId ?>" value="Update now" onclick="UpdateResolve(<?= $reportId ?>);">
                             </span>
                         </span>
                     </td>
@@ -342,35 +344,35 @@ if ($search->canUnclaim($Viewer)) {
                     </td>
                     <td>
                         <textarea name="uploader_pm" id="uploader_pm<?= $reportId ?>" cols="50" rows="2"></textarea>
-                        <input type="button" value="Send now" onclick="SendPM(<?= $reportId ?>);" />
+                        <input type="button" value="Send now" onclick="SendPM(<?= $reportId ?>);">
                     </td>
                 </tr>
                 <tr>
                     <td class="label"><strong>Extra</strong> log message:</td>
                     <td>
-                        <input type="text" name="log_message" id="log_message<?= $reportId ?>" size="40" value="<?= html_escape($logMessage) ?>" />
+                        <input type="text" name="log_message" id="log_message<?= $reportId ?>" size="40" value="<?= html_escape($logMessage) ?>">
                     </td>
                 <tr>
                     <td class="label"><strong>Extra</strong> staff notes:</td>
                     <td>
-                        <input type="text" name="admin_message" id="admin_message<?= $reportId ?>" size="40" />
+                        <input type="text" name="admin_message" id="admin_message<?= $reportId ?>" size="40">
                         (These notes will be added to the user profile)
                     </td>
                 </tr>
                 <tr>
                     <td>&nbsp;</td>
                     <td>
-                        <input type="button" value="Invalidate report" onclick="Dismiss(<?= $reportId ?>);" />
-                        | <input type="button" value="Resolve report manually" onclick="ManualResolve(<?= $reportId ?>);" />
+                        <input type="button" value="Invalidate report" onclick="Dismiss(<?= $reportId ?>);">
+                        | <input type="button" value="Resolve report manually" onclick="ManualResolve(<?= $reportId ?>);">
 <?php           if ($report->status() == 'InProgress' && $Viewer->id == $resolverId) { ?>
-                        | <input type="button" value="Unclaim" onclick="GiveBack(<?= $reportId ?>);" />
+                        | <input type="button" value="Unclaim" onclick="GiveBack(<?= $reportId ?>);">
                                 <?php           } else { ?>
-                        | <input id="grab<?= $reportId ?>" type="button" value="Claim" onclick="Grab(<?= $reportId ?>);" />
+                        | <input id="grab<?= $reportId ?>" type="button" value="Claim" onclick="Grab(<?= $reportId ?>);">
                 <?php           } ?>
                         | <span class="tooltip" title="All checked reports will be resolved via the Multi-resolve button">
-                            <input type="checkbox" name="multi" id="multi<?= $reportId ?>" />&nbsp;<label for="multi">Multi-resolve</label>
+                            <input type="checkbox" name="multi" id="multi<?= $reportId ?>">&nbsp;<label for="multi<?= $reportId ?>">Multi-resolve</label>
                           </span>
-                        | <input type="button" id="submit_<?= $reportId ?>" value="Submit" onclick="TakeResolve(<?= $reportId ?>);" />
+                        | <input type="button" id="submit_<?= $reportId ?>" value="Submit" onclick="TakeResolve(<?= $reportId ?>);">
                     </td>
                 </tr>
 <?php

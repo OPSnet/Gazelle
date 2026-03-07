@@ -5,7 +5,7 @@
 {%      if loop.first %}
 <h4>List of Peers</h4>
 {%          set linkbox %}
-<div class="linkbox">{{ pager('show_seeders', torrent, paginator)|raw }}</div>
+<div class="linkbox">{{ pager(torrent, paginator)|raw }}</div>
 {%          endset %}
 {{ linkbox|raw }}
 <table>

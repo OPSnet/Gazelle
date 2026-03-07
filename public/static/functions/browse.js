@@ -1,26 +1,5 @@
 "use strict";
 
-async function show_downloads_load(tid, page) {
-    let e = document.getElementById('downloads_' + tid);
-    e.innerHTML = '<h4>Loading...</h4>';
-    e.classList.remove('hidden');
-    const response = await fetch(
-        'torrents.php?action=downloadlist&page=' + page + '&torrentid=' + tid,
-    );
-    const data = await response.json();
-    e.innerHTML = data.html;
-    if (data.pages > 1) {
-        Array.from(document.getElementsByClassName('pager-link')).forEach((p) => {
-            const page = p.innerHTML;
-            if (page != data.page) {
-                p.addEventListener('click', () => {
-                    show_downloads(tid, page);
-                });
-            }
-        });
-    }
-}
-
 async function show_filelist_load(div) {
     div.innerHTML = '<h4>Loading...</h4>';
     div.classList.remove('hidden');
@@ -30,171 +9,89 @@ async function show_filelist_load(div) {
     div.innerHTML = await response.json();
 }
 
-async function show_snatches_load(tid, page) {
-    let e = document.getElementById('snatches_' + tid);
+async function show_and_load_page(thing, tid, page_num) {
+    const thing_action_map = new Map([
+        ['peers', 'peerlist'], ['downloads', 'downloadlist'], ['snatches', 'snatchlist']
+    ]);
+    const action = thing_action_map.get(thing);
+    const e = document.getElementById(thing + '_' + tid);
     e.innerHTML = '<h4>Loading...</h4>';
     e.classList.remove('hidden');
     const response = await fetch(
-        'torrents.php?action=snatchlist&page=' + page + '&torrentid=' + tid,
+        `torrents.php?action=${action}&page=${page_num}&torrentid=${tid}`,
     );
     const data = await response.json();
     e.innerHTML = data.html;
     if (data.pages > 1) {
-        Array.from(document.getElementsByClassName('pager-link')).forEach((p) => {
-            const page = p.innerHTML;
-            if (page != data.page) {
-                p.addEventListener('click', () => {
-                    show_snatches(tid, page);
-                });
+        for (const p of e.getElementsByClassName('pager-link')) {
+            const page = p.innerText;
+            if (page !== data.page) {
+                p.addEventListener('click', async () => await show_thing(thing, tid, page));
             }
-        });
-    }
-}
-
-async function show_seeders_load(tid, page) {
-    let e = document.getElementById('peers_' + tid);
-    e.innerHTML = '<h4>Loading...</h4>';
-    e.classList.remove('hidden');
-    let response = await fetch(
-        'torrents.php?action=peerlist&page=' + page + '&torrentid=' + tid,
-    );
-    const data = await response.json();
-    e.innerHTML = data.html;
-    if (data.pages > 1) {
-        Array.from(document.getElementsByClassName('pager-link')).forEach((p) => {
-            const page = p.innerHTML;
-            if (page != data.page) {
-                p.addEventListener('click', () => {
-                    show_seeders(tid, page);
-                });
-            }
-        });
-    }
-}
-
-function show_downloads(tid, Page) {
-    if (Page > 0) {
-        show_downloads_load(tid, Page);
-    } else {
-        let e = document.getElementById('downloads_' + tid);
-        if (!e.classList.contains('hidden')) {
-            e.classList.add('hidden');
-        } else if (e.innerHTML === '') {
-            show_downloads_load(tid, 1);
-        } else {
-            e.classList.remove('hidden');
         }
     }
-    document.getElementById('viewlog_' + tid).classList.add('hidden');
-    document.getElementById('peers_' + tid).classList.add('hidden');
-    document.getElementById('snatches_' + tid).classList.add('hidden');
-    document.getElementById('files_' + tid).classList.add('hidden');
-    let r = document.getElementById('reported_' + tid);
-    if (r) {
-        r.classList.add('hidden');
+}
+
+function hide_dynamic_content(tid, exclude = []) {
+    const prefixes = ['downloads', 'files', 'peers', 'reported', 'snatches', 'viewlog'];
+    for (const prefix of prefixes) {
+        if (!exclude.includes(prefix)) {
+            document.getElementById(prefix + '_' + tid)?.classList.add('hidden');
+        }
     }
 }
 
-function show_snatches(tid, Page) {
-    if (Page > 0) {
-        show_snatches_load(tid, Page);
+async function show_thing(thing, tid, page) {
+    if (page > 0) {
+        await show_and_load_page(thing, tid, page);
     } else {
-        let e = document.getElementById('snatches_' + tid);
-        if (!e.classList.contains('hidden')) {
-            e.classList.add('hidden');
-        } else if (e.innerHTML === '') {
-            show_snatches_load(tid, 1);
+        const e = document.getElementById(thing + '_' + tid);
+        if (e.innerHTML === '') {
+            await show_and_load_page(thing, tid, 1);
         } else {
-            e.classList.remove('hidden');
+            e.classList.toggle('hidden');
         }
     }
-    document.getElementById('viewlog_' + tid).classList.add('hidden');
-    document.getElementById('peers_' + tid).classList.add('hidden');
-    document.getElementById('downloads_' + tid).classList.add('hidden');
-    document.getElementById('files_' + tid).classList.add('hidden');
-    let r = document.getElementById('reported_' + tid);
-    if (r) {
-        r.classList.add('hidden');
-    }
+    hide_dynamic_content(tid, [thing]);
 }
 
-function show_seeders(tid, Page) {
-    if (Page > 0) {
-        show_seeders_load(tid, Page);
-    } else {
-        let e = document.getElementById('peers_' + tid);
-        if (!e.classList.contains('hidden')) {
-            e.classList.add('hidden');
-        } else if (e.innerHTML === '') {
-            show_seeders_load(tid, 1);
-        } else {
-            e.classList.remove('hidden');
-        }
-    }
-    document.getElementById('viewlog_' + tid).classList.add('hidden');
-    document.getElementById('snatches_' + tid).classList.add('hidden');
-    document.getElementById('downloads_' + tid).classList.add('hidden');
-    document.getElementById('files_' + tid).classList.add('hidden');
-    let r = document.getElementById('reported_' + tid);
-    if (r) {
-        r.classList.add('hidden');
-    }
+async function show_downloads(tid, page) {
+    await show_thing('downloads', tid, page);
+}
+
+async function show_snatches(tid, page) {
+    await show_thing('snatches', tid, page);
+}
+
+async function show_peers(tid, page) {
+    await show_thing('peers', tid, page);
 }
 
 async function show_logs(tid) {
-    let e = document.getElementById('viewlog_' + tid);
+    const e = document.getElementById('viewlog_' + tid);
     if (e.innerHTML === '') {
         const response = await fetch(
             'torrents.php?action=viewlog&torrentid=' + tid
         );
         e.innerHTML = await response.text();
     }
-    if (e.classList.contains('hidden')) {
-        e.classList.remove('hidden');
-    } else {
-        e.classList.add('hidden');
-    }
-    document.getElementById('peers_' + tid).classList.add('hidden');
-    document.getElementById('snatches_' + tid).classList.add('hidden');
-    document.getElementById('downloads_' + tid).classList.add('hidden');
-    document.getElementById('files_' + tid).classList.add('hidden');
-    let r = document.getElementById('reported_' + tid);
-    if (r) {
-        r.classList.add('hidden');
-    }
+    e.classList.toggle('hidden');
+    hide_dynamic_content(tid, ['viewlog']);
 }
 
-function show_filelist(tid) {
-    let div = document.getElementById('files_' + tid);
+async function show_filelist(tid) {
+    const div = document.getElementById('files_' + tid);
     if (div.innerHTML === '') {
-        show_filelist_load(div);
-    } else if (div.classList.contains('hidden')) {
-        div.classList.remove('hidden');
+        await show_filelist_load(div);
     } else {
-        div.classList.add('hidden');
+        div.classList.toggle('hidden');
     }
-    document.getElementById('viewlog_' + tid).classList.add('hidden');
-    document.getElementById('peers_' + tid).classList.add('hidden');
-    document.getElementById('snatches_' + tid).classList.add('hidden');
-    document.getElementById('downloads_' + tid).classList.add('hidden');
-    let r = document.getElementById('reported_' + tid);
-    if (r) {
-        r.classList.add('hidden');
-    }
+    hide_dynamic_content(tid, ['files']);
 }
 
 function show_reported(tid) {
-    document.getElementById('files_' + tid).classList.add('hidden');
-    document.getElementById('viewlog_' + tid).classList.add('hidden');
-    document.getElementById('peers_' + tid).classList.add('hidden');
-    document.getElementById('snatches_' + tid).classList.add('hidden');
-    document.getElementById('downloads_' + tid).classList.add('hidden');
-    let r = document.getElementById('reported_' + tid);
-    if (r.classList.contains('hidden')) {
-        r.classList.remove('hidden');
-    } else {
-        r.classList.add('hidden');
-    }
+    hide_dynamic_content(tid, ['reported']);
+    document.getElementById('reported_' + tid)?.classList.toggle('hidden');
 }
 
 function add_tag(tag) {
@@ -458,14 +355,9 @@ async function add_to_collage() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    let button = document.getElementById('collage-add');
-    if (button) {
-        button.addEventListener('click', () => {
-            add_to_collage();
-        })
-    }
+    document.getElementById('collage-add')?.addEventListener('click', add_to_collage);
 
-    Array.from(document.querySelectorAll('.request-reseed')).forEach((reseed) => {
+    for (const reseed of document.querySelectorAll('.request-reseed')) {
         reseed.addEventListener('click', (e) => {
             if (!confirm(
                 'Are you sure you want to request a re-seed of this torrent?'
@@ -473,42 +365,42 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.preventDefault();
             }
         });
-    });
+    }
 
-    Array.from(document.querySelectorAll('.view-filelist')).forEach((view) => {
-        view.addEventListener('click', (e) => {
-            show_filelist(view.parentNode.dataset.id);
+    for (const view of document.querySelectorAll('.view-filelist')) {
+        view.addEventListener('click', async (e) => {
             e.preventDefault();
+            await show_filelist(view.parentNode.dataset.id);
         });
-    });
-    Array.from(document.querySelectorAll('.view-riplog')).forEach((view) => {
-        view.addEventListener('click', (e) => {
-            show_logs(view.parentNode.dataset.id);
+    }
+    for (const view of document.querySelectorAll('.view-riplog')) {
+        view.addEventListener('click', async (e) => {
             e.preventDefault();
+            await show_logs(view.parentNode.dataset.id);
         });
-    });
-    Array.from(document.querySelectorAll('.view-download')).forEach((view) => {
-        view.addEventListener('click', (e) => {
-            show_downloads(view.parentNode.dataset.id);
+    }
+    for (const view of document.querySelectorAll('.view-download')) {
+        view.addEventListener('click', async (e) => {
             e.preventDefault();
+            await show_downloads(view.parentNode.dataset.id);
         });
-    });
-    Array.from(document.querySelectorAll('.view-report')).forEach((view) => {
+    }
+    for (const view of document.querySelectorAll('.view-report')) {
         view.addEventListener('click', (e) => {
+            e.preventDefault();
             show_reported(view.parentNode.dataset.id);
-            e.preventDefault();
         });
-    });
-    Array.from(document.querySelectorAll('.view-seeder')).forEach((view) => {
-        view.addEventListener('click', (e) => {
-            show_seeders(view.parentNode.dataset.id);
+    }
+    for (const view of document.querySelectorAll('.view-peer')) {
+        view.addEventListener('click', async (e) => {
             e.preventDefault();
+            await show_peers(view.parentNode.dataset.id);
         });
-    });
-    Array.from(document.querySelectorAll('.view-snatch')).forEach((view) => {
-        view.addEventListener('click', (e) => {
-            show_snatches(view.parentNode.dataset.id);
+    }
+    for (const view of document.querySelectorAll('.view-snatch')) {
+        view.addEventListener('click', async (e) => {
             e.preventDefault();
+            await show_snatches(view.parentNode.dataset.id);
         });
-    });
+    }
 });

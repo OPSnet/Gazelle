@@ -4,7 +4,7 @@
 {%  if loop.first %}
 <h4 class="tooltip" title="List of users that have clicked the [DL] button">List of Downloaders</h4>
 {%  set linkbox %}
-<div class="linkbox">{{ pager('show_downloads', torrent, paginator)|raw }}</div>
+<div class="linkbox">{{ pager(torrent, paginator)|raw }}</div>
 {% endset %}
 {{  linkbox|raw }}
 <table>

@@ -1,26 +1,26 @@
 <div>
-    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-    <input type="hidden" id="categoryid{{ report.id }}" name="categoryid" value="{{ report.reportType.categoryId }}" />
-    <input type="hidden" id="raw_name{{ report.id }}" name="raw_name" value="{{ (torrent.fullName|default('deleted torrent')) ~ ' (' ~ ((torrent.size|default(0)) / (1024 * 1024))|number_format(2) ~ ' MiB)' }}" />
-    <input type="hidden" id="report_reason{{ report.id }}" name="report_reason" value="{{ report.reason }}" />
-    <input type="hidden" id="reporterid{{ report.id }}" name="reporterid" value="{{ report.reporterId }}" />
-    <input type="hidden" id="reportid{{ report.id }}" name="reportid" value="{{ report.id }}" />
-    <input type="hidden" id="torrentid{{ report.id }}" name="torrentid" value="{{ torrent.id }}" />
-    <input type="hidden" id="type{{ report.id }}" name="type" value="{{ report.reportType.type }}" />
-    <input type="hidden" id="uploader{{ report.id }}" name="uploader" value="{{ torrent.uploader.username }}" />
-    <input type="hidden" id="uploaderid{{ report.id }}" name="uploaderid" value="{{ torrent.uploaderId }}" />
+    <input type="hidden" name="auth" value="{{ viewer.auth }}">
+    <input type="hidden" id="categoryid{{ report.id }}" name="categoryid" value="{{ report.reportType.categoryId }}">
+    <input type="hidden" id="raw_name{{ report.id }}" name="raw_name" value="{{ (torrent.fullName|default('deleted torrent')) ~ ' (' ~ ((torrent.size|default(0)) / (1024 * 1024))|number_format(2) ~ ' MiB)' }}">
+    <input type="hidden" id="report_reason{{ report.id }}" name="report_reason" value="{{ report.reason }}">
+    <input type="hidden" id="reporterid{{ report.id }}" name="reporterid" value="{{ report.reporterId }}">
+    <input type="hidden" id="reportid{{ report.id }}" name="reportid" value="{{ report.id }}">
+    <input type="hidden" id="torrentid{{ report.id }}" name="torrentid" value="{{ torrent.id }}">
+    <input type="hidden" id="type{{ report.id }}" name="type" value="{{ report.reportType.type }}">
+    <input type="hidden" id="uploader{{ report.id }}" name="uploader" value="{{ torrent.uploader.username }}">
+    <input type="hidden" id="uploaderid{{ report.id }}" name="uploaderid" value="{{ torrent.uploaderId }}">
 </div>
 <table class="box layout" cellpadding="5">
 <tr>
     <td class="label"><a href="reportsv2.php?view=report&amp;id={{ report.id }}">Reported</a> torrent:</td>
-    <td>
+    <td data-id="{{ torrent.id }}">
         {{ torrent.group.link|raw }} {{ torrent.shortLabelLink|raw }} ({{ torrent.size|octet_size }})
-        <br />{{ torrent.edition }}
-        <br /><a href="torrents.php?action=download&amp;id={{ torrent.id }}&amp;torrent_pass={{ viewer.announceKey }}" title="Download" class="brackets tooltip">DL</a>
-        <a href="#" class="brackets tooltip" onclick="show_downloads('{{ torrent.id }}', 0); return false;" title="View the list of users that have clicked the &quot;DL&quot; button.">Downloaders</a>
-        <a href="#" class="brackets tooltip" onclick="show_snatches('{{ torrent.id }}', 0); return false;" title="View the list of users that have reported a snatch to the tracker.">Snatchers</a>
-        <a href="#" class="brackets" onclick="show_seeders('{{ torrent.id }}', 0); return false;">Seeders</a>
-        <a href="#" class="brackets" onclick="show_files('{{ torrent.id }}'); return false;">Contents</a>
+        <br>{{ torrent.edition }}
+        <br><a href="torrents.php?action=download&amp;id={{ torrent.id }}&amp;torrent_pass={{ viewer.announceKey }}" title="Download" class="brackets tooltip">DL</a>
+        <a href="#" class="brackets tooltip view-download" title="View the list of users that have clicked the &quot;DL&quot; button.">Downloaders</a>
+        <a href="#" class="brackets tooltip view-snatch" title="View the list of users that have reported a snatch to the tracker.">Snatchers</a>
+        <a href="#" class="brackets tooltip view-peer" title="View the list of peers in this torrent's swarm.">Peers</a>
+        <a href="#" class="brackets tooltip view-filelist" title="View the list of files in this torrent">Contents</a>
         <div id="viewlog_{{ torrent.id }}" class="hidden"></div>
         <div id="peers_{{ torrent.id }}" class="hidden"></div>
         <div id="downloads_{{ torrent.id }}" class="hidden"></div>
@@ -41,10 +41,10 @@
 {% endfor %}
             </table>
         </div>
-        <br /><span class="report_reporter">reported by {{ report.reporterId|user_url }} {{ report.created|time_diff }} for the reason: <strong>{{ report.reportType.name }}</strong></span>
-        <br />uploaded by {{ torrent.uploaderId|user_url }} on <span title="{{ torrent.created|time_diff(3, false) }}">{{ torrent.created }}</span>
-        <br />Last action: {{ torrent.lastActiveDate|default('Never') }}
-        <br /><span class="report_torrent_file_ext">Audio files present:
+        <br><span class="report_reporter">reported by {{ report.reporterId|user_url }} {{ report.created|time_diff }} for the reason: <strong>{{ report.reportType.name }}</strong></span>
+        <br>uploaded by {{ torrent.uploaderId|user_url }} on <span title="{{ torrent.created|time_diff(3, false) }}">{{ torrent.created }}</span>
+        <br>Last action: {{ torrent.lastActiveDate|default('Never') }}
+        <br><span class="report_torrent_file_ext">Audio files present:
 {% for ext, total in torrent.fileListPrimaryMap -%}
 {%- if loop.first %}<span class="file_ext_map">{% else %}, {% endif -%}
         {{ ext }}: {{ total|number_format }}
@@ -55,7 +55,7 @@
         </span>
 {% set torrent = report.torrent %}
 {% if torrent.description %}
-        <br /><div class="report_torrent_info" title="Release description of reported torrent">Release info: {{ torrent.description|bb_format }}</div>
+        <br><div class="report_torrent_info" title="Release description of reported torrent">Release info: {{ torrent.description|bb_format }}</div>
 {% endif %}
 {% if report.status != 'resolved' %}
 {%  if total_group > 1 %}
