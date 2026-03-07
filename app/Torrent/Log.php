@@ -2,7 +2,8 @@
 
 namespace Gazelle\Torrent;
 
-use Gazelle\File\RipLogHTML as RipLogHTML;
+use Gazelle\File\RipLogHTML;
+use Gazelle\Manager\User;
 
 class Log extends \Gazelle\Base {
     public function __construct(
@@ -20,7 +21,7 @@ class Log extends \Gazelle\Base {
      *      - reason (reason given by the adjuster for adjusting the log)
      *    The 'status' key points to an unserialized array of AdjustmentDetails
      */
-    public function logDetails(): array {
+    public function logDetails(User $userMan = new User()): array {
         self::$db->prepared_query("
             SELECT LogID,
                 Adjusted,
@@ -40,21 +41,22 @@ class Log extends \Gazelle\Base {
         $logs = self::$db->to_array('LogID', MYSQLI_ASSOC);
         $details = [];
         foreach ($logs as $log) {
-            $details[$log['LogID']] = [
+            $logDetails = [
                 'adjustment' => !$log['is_adjusted']
                     ? []
                     : [
-                        'userId'   => $log['AdjustedBy'],
+                        'user'     => $userMan->findById($log['AdjustedBy']),
                         'score'    => $log['Score'],
                         'adjusted' => $log['AdjustedScore'],
                         'reason'   => empty($log['AdjustmentReason']) ? 'none supplied' : $log['AdjustmentReason'],
                     ],
-                'log'    => new RipLogHTML($this->id, $log['LogID'])->get(),
-                'status' => array_merge(explode("\n", $log['Details']), unserialize($log['AdjustmentDetails'])),
+                'html_log' => new RipLogHTML($this->id, $log['LogID'])->get(),
+                'status'   => array_merge(explode("\n", $log['Details']), unserialize($log['AdjustmentDetails'])),
             ];
             if (($log['Adjusted'] === '0' && $log['Checksum'] === '0') || ($log['Adjusted'] === '1' && $log['AdjustedChecksum'] === '0')) {
-                $details[$log['LogID']]['status'][] = 'Bad/No Checksum(s)';
+                $logDetails['status'][] = 'Bad/No Checksum(s)';
             }
+            $details[$log['LogID']] = $logDetails;
         }
         return $details;
     }

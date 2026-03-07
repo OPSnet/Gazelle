@@ -1,0 +1,41 @@
+{{ header('Torrent Reports', {'js': 'reportsv2,browse,torrent,bbcode'}) }}
+<div class="thin">
+    <div class="header">
+        <h2>{{ search.title|raw }}</h2>
+{% include 'reportsv2/linkbox.twig' with {'viewer': viewer} only %}
+    </div>
+    <div class="buttonbox pad center">
+{% if search.mode != 'resolved' %}
+        <span class="tooltip" title="Resolves *all* checked reports with their respective resolutions"><input type="button" onclick="MultiResolve();" value="Multi-resolve"></span>
+        <span class="tooltip" title="Assigns all of the reports on the page to you!"><input type="button" onclick="Grab();" value="Claim all"></span>
+{% endif %}
+{% if search.canUnclaim(viewer) %}
+        <span class="tooltip" title="Unclaim all of the reports currently displayed"><input type="button" onclick="GiveBack();" value="Unclaim all"></span>
+{% endif %}
+    </div>
+{{ linkbox|raw }}
+    <div id="all_reports">
+{% for report in reports %}
+{%  set torrent = report.torrent %}
+{%  include 'reportsv2/report.twig' with {
+        'category_list' : torrent.isDeleted ? [] : report_type_man.categoryList(torrent.group.categoryId),
+        'report'        : report,
+        'request_list'  : request_man.findByTorrentReported(torrent),
+        'torrent'       : torrent,
+        'other'         : {
+            'group'    : report_man.totalReportsTGroup(torrent.group) - 1,
+            'uploader' : report_man.totalReportsUploader(torrent.uploader) - 1,
+            'torrent'  : report_man.totalReportsTorrent(torrent) - 1,
+        },
+        'viewer'        : viewer,
+    }
+%}
+{% else %}
+        <div class="box pad center">
+            <strong>No reports here! \o/</strong>
+        </div>
+{% endfor %}
+    </div>
+{{ linkbox|raw }}
+</div>
+{{ footer() }}

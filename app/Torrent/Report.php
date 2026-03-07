@@ -7,7 +7,7 @@ use Gazelle\Enum\TorrentFlag;
 class Report extends \Gazelle\BaseObject {
     final public const tableName = 'reportsv2';
 
-    protected \Gazelle\TorrentAbstract|null|false $torrent = false;
+    protected \Gazelle\Torrent|\Gazelle\TorrentDeleted|null $torrent;
 
     public function __construct(
         int $id,
@@ -133,8 +133,8 @@ class Report extends \Gazelle\BaseObject {
      * the torrent (even if the report knows the torrent id). This is why the
      * code must start from false and transition to either NULL or a Torrent.
      */
-    public function torrent(): ?\Gazelle\TorrentAbstract {
-        if ($this->torrent === false) {
+    public function torrent(): \Gazelle\Torrent|\Gazelle\TorrentDeleted|null {
+        if (!isset($this->torrent)) {
             $this->torrent = $this->torMan->findById($this->torrentId());
             if (is_null($this->torrent)) {
                 $this->torrent = $this->torMan->findDeletedById($this->torrentId());
@@ -161,11 +161,11 @@ class Report extends \Gazelle\BaseObject {
     }
 
     public function addTorrentFlag(TorrentFlag $flag, \Gazelle\User $user): int {
-        if ($this->torrent === false) {
+        if ($this->torrent() === null || $this->torrent()->isDeleted()) {
             return 0;
         }
-        $affected = $this->torrent->addFlag($flag, $user);
-        $this->torrent->flush();
+        $affected = $this->torrent()->addFlag($flag, $user);
+        $this->torrent()->flush();
         return $affected;
     }
 
@@ -230,9 +230,7 @@ class Report extends \Gazelle\BaseObject {
             ", $user->id, $message, $this->id
         );
         $affected = self::$db->affected_rows();
-        if ($this->torrent) {
-            $this->torrent->flush();
-        }
+        $this->torrent()?->flush();
         self::$cache->delete_value(sprintf(\Gazelle\TorrentAbstract::CACHE_REPORTLIST, $this->torrentId()));
         $this->flush();
         return $affected;
@@ -251,9 +249,7 @@ class Report extends \Gazelle\BaseObject {
             ", $log, $message, $this->id
         );
         $affected = self::$db->affected_rows();
-        if ($this->torrent) {
-            $this->torrent->flush();
-        }
+        $this->torrent()?->flush();
         self::$cache->delete_value(sprintf(\Gazelle\TorrentAbstract::CACHE_REPORTLIST, $this->torrentId()));
         self::$cache->decrement('num_torrent_reportsv2');
         $this->flush();
@@ -285,5 +281,12 @@ class Report extends \Gazelle\BaseObject {
         $affected = self::$db->affected_rows();
         $this->flush();
         return $affected;
+    }
+
+    /*
+     * utility function for twig
+     */
+    public static function logDetails(\Gazelle\Torrent|\Gazelle\TorrentDeleted $torrent): array {
+        return new \Gazelle\Torrent\Log($torrent->id)->logDetails();
     }
 }

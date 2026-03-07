@@ -31,7 +31,6 @@ class TorrentDeleted extends TorrentAbstract {
                 t.LogChecksum,
                 t.info_hash,
                 t.FileCount,
-                t.FileList,
                 t.FilePath,
                 t.Size,
                 t.FreeTorrent,
@@ -65,5 +64,29 @@ class TorrentDeleted extends TorrentAbstract {
 
     public function isDeleted(): bool {
         return true;
+    }
+
+    public function fullName(): string {
+        try {
+            return parent::fullName();
+        } catch (\TypeError) {
+            return "Torrent {$this->id} of deleted group {$this->groupId()}";
+        }
+    }
+
+    public function groupLink(): string {
+        try {
+            return parent::groupLink();
+        } catch (\TypeError) {
+            return "Deleted group " . $this->groupId();
+        }
+    }
+
+    public function edition(): string {
+        try {
+            return parent::edition();
+        } catch (\TypeError) {
+            return "";
+        }
     }
 }

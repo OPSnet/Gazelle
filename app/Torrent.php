@@ -18,6 +18,10 @@ class Torrent extends TorrentAbstract {
         return "torrents.php?id={$this->groupId()}&torrentid={$this->id}#torrent{$this->id}";
     }
 
+    public function downloadLocation(User $user): string {
+        return "torrents.php?action=download&id={$this->id}&torrent_pass={$user->announceKey()}";
+    }
+
     public function infoRow(): ?array {
         $info = self::$db->rowAssoc("
             SELECT t.GroupID,

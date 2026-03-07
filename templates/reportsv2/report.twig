@@ -1,0 +1,239 @@
+{% from 'macro/form.twig' import checked, selected %}
+{% set reportType = report.reportType %}
+<div id="report{{ report.id }}" class="report" data-reportid="{{ report.id }}">
+<form class="edit_form" name="report" id="reportform_{{ report.id }}" action="reports.php" method="post">
+<div>
+    <input type="hidden" name="auth" value="{{ viewer.auth }}">
+    <input type="hidden" id="reportid{{ report.id }}" name="reportid" value="{{ report.id }}">
+    <input type="hidden" id="torrentid{{ report.id }}" name="torrentid" value="{{ report.torrentId }}">
+    <input type="hidden" id="uploader{{ report.id }}" name="uploader" value="{{ torrent.uploader.username }}">
+    <input type="hidden" id="uploaderid{{ report.id }}" name="uploaderid" value="{{ torrent.uploaderId }}">
+    <input type="hidden" id="reporterid{{ report.id }}" name="reporterid" value="{{ report.reporterId }}">
+    <input type="hidden" id="raw_name{{ report.id }}" name="raw_name" value="{{
+        torrent.fullName ~ ' ('  ~ ((torrent.size|default(0)) / (1024 * 1024))|number_format(2) ~ ' MiB)' }}">
+    <input type="hidden" id="type{{ report.id }}" name="type" value="{{ reportType.type }}">
+    <input type="hidden" id="categoryid{{ report.id }}" name="categoryid" value="{{ reportType.categoryId }}">
+</div>
+<table class="box layout">
+<tr>
+    <td class="label"><a href="{{ report.location }}">Reported</a> torrent:</td>
+    <td>
+{% include 'reportsv2/torrentinfo.twig' with {
+        'report'          : report,
+        'reported_torrent': torrent,
+        'torrent'         : torrent,
+        'viewer'          : viewer,
+    } only
+%}
+{% if other.group > 0 %}
+        <div style="text-align: right;">
+            <a href="reportsv2.php?view=group&amp;id={{ torrent.groupId }}">There
+{%-  if other.group == 1 %} is 1 other report {% else %} are {{ other.group }} other reports {% endif -%}
+                for torrents in this group</a>
+            </div>
+{% endif %}
+
+{% if other.uploader > 0 %}
+        <div style="text-align: right;">
+            <a href="reportsv2.php?view=uploader&amp;id={{ torrent.uploaderId }}">There
+{%- if other.uploader == 1 %} is 1 other report {% else %} are {{ other.uploader }} other reports {% endif -%}
+                for torrents uploaded by this user</a>
+            </div>
+{% endif %}
+{% if other.torrent > 0 %}
+            <div style="text-align: right;">
+                <strong class="important_text">
+                    <a href="reportsv2.php?view=torrent&amp;id={{ torrent.id }}">There
+{%- if other.torrent > 1 %} are {{ other.torrent }} other reports {% else %} is 1 other report {% endif -%}
+                for this torrent</a>
+                </strong>
+            </div>
+{% endif %}
+{% for request in request_list %}
+            <div style="text-align: right;">
+                <strong class="important_text">{{ request.fillerId|user_url }} used
+                this torrent to fill {{ request.link|raw }} {{ request.fillDate|time_diff }}</strong>
+            </div>
+{% endfor %}
+    </td>
+</tr>
+{% if report.trackList %}
+<tr>
+    <td class="label">Relevant tracks:</td>
+    <td>{{ report.trackList|join(' ') }}</td>
+</tr>
+{% endif %}
+{% for link in report.externalLink %}
+{%  if loop.first %}
+<tr>
+    <td class="label">Relevant links:</td>
+    <td>
+{%-  endif %}
+        {{- link|linkify -}}
+{%  if loop.last -%}
+    </td>
+</tr>
+{%  endif %}
+{% endfor %}
+
+{% for extra in report.otherTorrentList %}
+<tr>
+    <td class="label">Relevant other torrent:</td>
+    <td>
+{%  include 'reportsv2/torrentinfo.twig' with {
+        'report'           : report,
+        'reported_torrent' : torrent,
+        'torrent'          : extra,
+        'viewer'           : viewer,
+    } only
+%}
+    </td>
+</tr>
+
+<tr>
+    <td class="label">Switch:</td>
+    <td>
+        <a onclick="Switch({{ report.id }}, {{ extra.id }}); return false;" class="brackets">Switch</a>
+        the source and target torrents (you become the report owner).
+    </td>
+</tr>
+{%  if torrent.hasLogDB or extra.hasLogDB %}
+<tr>
+    <td class="label">Logfiles:</td>
+    <td>
+{%      include 'reportsv2/logfiles.twig' with {
+        'log_details'   : report.logDetails(torrent),
+        'other_details' : report.logDetails(extra),
+    } only
+%}
+    </td>
+</tr>
+{%  endif %}
+{% endfor %}
+{% for image in report.image %}
+{%  if loop.first %}
+<tr>
+    <td class="label">Relevant images:</td>
+    <td>
+{%  endif %}
+        <img style="max-height: 250px;max-width: 250px;" onclick="lightbox.init('{{
+            image|image_cache(passthru=true) }}', 250);" src="{{
+            image|image_cache(250, 250, true) }}" alt="{{ image }}" data-origin-src="{{ image }}">
+{%  if loop.last %}
+    </td>
+</tr>
+{%  endif %}
+{% endfor%}
+<tr>
+    <td class="label">User comment:</td>
+    <td class="wrap_overflow">{{ report.reason|bb_passthru }}</td>
+</tr>
+{# MOD STUFF #}
+{% if report.status == 'InProgress' %}
+<tr>
+    <td class="label">In progress by:</td>
+    <td>{{ report.resolverId|user_url }}</td>
+</tr>
+{% endif %}
+{% if report.status == 'Resolved' %}
+{%  include 'reportsv2/resolved.twig' with {
+        'report'  : report,
+        'torrent' : torrent,
+    } only
+%}
+{% else %}
+<tr>
+    <td class="label">Report comment:</td>
+    <td>
+        <input type="text" name="comment" id="comment{{ report.id }}" size="70" value="{{ report.comment }}">
+        <input type="button" value="Update now" onclick="UpdateComment({{ report.id }});">
+    </td>
+</tr>
+<tr>
+    <td class="label">
+        <a href="javascript:Load('{{ report.id }}')" class="tooltip"
+           title="Click here to reset the resolution options to their default values.">Resolve</a>:
+    </td>
+    <td>
+        <select name="resolve_type" id="resolve_type{{ report.id }}" onchange="ChangeResolve({{ report.id }});">
+{% for category in category_list %}
+            <option value="{{ category.type }}"{{ selected(category.type == report.type) }}>{{ category.name }}</option>
+{% endfor %}
+        </select> |
+        <span id="options{{ report.id }}">
+            <span class="tooltip" title="Warning length in weeks">
+                <label for="warning{{ report.id }}"><strong>Warning</strong></label>
+                <select name="warning" id="warning{{ report.id }}">
+{% set not_uploader = report.reporterId != torrent.uploaderId %}
+{% for week in range(0, 8) %}
+                    <option value="{{ week }}"{{ selected(not_uploader and reportType.warnWeeks == week)
+                        }}>{{ week }}</option>
+{% endfor %}
+                </select>
+            </span> |
+            <span class="tooltip" title="Delete torrent?">
+                <input type="checkbox" name="delete" id="delete{{ report.id }}"{{ checked(reportType.doDeleteUpload) }}>
+                <label for="delete{{ report.id }}"><strong>Delete</strong></label>
+            </span> |
+            <span class="tooltip" title="Remove upload privileges?">
+                <input type="checkbox" name="upload" id="upload{{ report.id }}"{{
+                    checked(not_uploader and reportType.doRevokeUploadPrivs) }}>
+                <label for="upload{{ report.id }}"><strong>Remove upload privileges</strong></label>
+            </span> |
+            <span class="tooltip" title="Update resolve type">
+                <input type="button" name="update_resolve" id="update_resolve{{ report.id
+                    }}" value="Update now" onclick="UpdateResolve({{ report.id }});">
+            </span>
+        </span>
+    </td>
+</tr>
+<tr>
+    <td class="label tooltip" title="Uploader: Appended to the regular message unless using &quot;Send now&quot;. Reporter: Must be used with &quot;Send now&quot;.">
+        PM
+        <select name="pm_type" id="pm_type{{ report.id }}">
+            <option value="Uploader">Uploader</option>
+            <option value="Reporter" selected>Reporter</option>
+        </select>:
+    </td>
+    <td>
+        <textarea name="uploader_pm" id="uploader_pm{{ report.id }}" cols="50" rows="2"></textarea>
+        <input type="button" value="Send now" onclick="SendPM({{ report.id }});">
+    </td>
+</tr>
+<tr>
+    <td class="label"><strong>Extra</strong> log message:</td>
+    <td>
+        <input type="text" name="log_message" id="log_message{{ report.id
+            }}" size="40" value="{{
+            report.message|default(report.otherTorrentList|map(t => t.publicLocation)|join(' '))
+        }}">
+    </td>
+</tr>
+<tr>
+    <td class="label"><strong>Extra</strong> staff notes:</td>
+    <td>
+        <input type="text" name="admin_message" id="admin_message{{ report.id }}" size="40">
+        (These notes will be added to the user profile)
+    </td>
+</tr>
+<tr>
+    <td></td>
+    <td>
+        <input type="button" value="Invalidate report" onclick="Dismiss({{ report.id }});">
+        | <input type="button" value="Resolve report manually" onclick="ManualResolve({{ report.id }});">
+{%  if report.status == 'InProgress' and viewer.id == report.resolverId %}
+        | <input type="button" value="Unclaim" onclick="GiveBack({{ report.id }});">
+{%  else %}
+        | <input id="grab{{ report.id }}" type="button" value="Claim" onclick="Grab({{ report.id }});">
+{%  endif %}
+        | <span class="tooltip" title="All checked reports will be resolved via the Multi-resolve button">
+            <input type="checkbox" name="multi" id="multi{{ report.id }}">&nbsp;
+            <label for="multi{{ report.id }}">Multi-resolve</label>
+        </span>
+        | <input type="button" id="submit_{{ report.id }}" value="Submit" onclick="TakeResolve({{ report.id }});">
+    </td>
+</tr>
+{% endif %}
+</table>
+</form>
+</div>

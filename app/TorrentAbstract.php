@@ -215,7 +215,7 @@ abstract class TorrentAbstract extends BaseAttrObject {
         }
         if ($rebuild) {
             $fileList = (string)self::$db->scalar("
-                SELECT FileList FROM torrents WHERE ID = ?
+                SELECT FileList FROM " . static::tableName . " WHERE ID = ?
                 ", $this->id
             );
             $chunkSize  = 1024 ** 2;
