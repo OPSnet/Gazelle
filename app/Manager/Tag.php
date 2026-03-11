@@ -253,7 +253,7 @@ class Tag extends \Gazelle\BaseManager {
         return $list;
     }
 
-    /**
+        /**
      * Rename a tag.
      *
      * This is not as simple as it appears at first glance. The simplest case a
@@ -284,12 +284,6 @@ class Tag extends \Gazelle\BaseManager {
 
         self::$db->begin_transaction();
         $changed = $this->replace($tag, $replacement[0], $user);
-        $this->pg()->query("
-            update request set
-                tag = array_remove(tag, $1)
-            where tag @> array[$1::int]
-            ", $tag->id
-        );
         self::$db->prepared_query("
             DELETE t, tt
             FROM tags t
@@ -306,7 +300,7 @@ class Tag extends \Gazelle\BaseManager {
         \Gazelle\Tag  $new,
         \Gazelle\User $user,
         Request       $requestMan = new Request(),
-        TGroup        $tgMan      = new TGroup(),
+        TGroup        $tgMan = new TGroup(),
     ): int {
         // When replacing a tag that exists, there is a chance that a tgroup or
         // request might already have the tag. We therefore only add the tag if
@@ -375,18 +369,14 @@ class Tag extends \Gazelle\BaseManager {
         array         $replacement,
         \Gazelle\User $user,
     ): int {
-        $totalChanged = $this->pg()->query($sql = "
+        $totalChanged = $this->pg()->query("
             update request set
-                tag = array_remove(tag, $1) || array["
-                    . placeholders_pg(
-                        array_map(fn ($t) => $t->id, $replacement),
-                        placeholder: '%s::int',
-                        start: 1
-                    )
-                    . "]
+                tag = array_remove(tag, $1) || $2
             where tag @> array[$1::int]
             ", $tag->id,
-                ...array_map(fn ($t) => $t->id, $replacement)
+            $this->pg()->integerConverter()->output(
+                array_map(fn ($t) => $t->id, $replacement)
+            )
         );
         foreach ($replacement as $r) {
             $totalChanged += $this->replace($tag, $r, $user);

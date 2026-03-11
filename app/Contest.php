@@ -2,6 +2,8 @@
 
 namespace Gazelle;
 
+use Gazelle\Enum\SourceDB;
+
 class Contest extends BaseObject {
     final public const pkName        = 'contest_id';
     final public const tableName     = 'contest';
@@ -232,27 +234,59 @@ class Contest extends BaseObject {
     public function calculateLeaderboard(): int {
         /* only called from scheduler, don't need to worry how long this takes */
         [$subquery, $args] = $this->type()->ranker();
-        self::$db->begin_transaction();
-        self::$db->prepared_query('DELETE FROM contest_leaderboard WHERE contest_id = ?', $this->id);
-        self::$db->prepared_query($sql = "
-            INSERT INTO contest_leaderboard
-                (contest_id, user_id, entry_count, last_entry_id)
-            SELECT ?, LADDER.user_id, LADDER.nr, T.ID
-            FROM torrents_group TG
-            LEFT JOIN torrents_artists TA ON (TA.GroupID = TG.ID)
-            INNER JOIN torrents T ON (T.GroupID = TG.ID)
-            INNER JOIN (
-                $subquery
-            ) LADDER on (LADDER.last_torrent = T.ID)
-            GROUP BY
-                LADDER.nr,
-                T.ID,
-                TG.Name,
-                T.created
-            ", $this->id, ...$args
-        );
-        $n = self::$db->affected_rows();
-        self::$db->commit();
+        if ($this->type()->rankerSource() === SourceDB::mysql) {
+            self::$db->begin_transaction();
+            self::$db->prepared_query(
+                'DELETE FROM contest_leaderboard WHERE contest_id = ?',
+                $this->id,
+            );
+            self::$db->prepared_query("
+                INSERT INTO contest_leaderboard
+                    (contest_id, user_id, entry_count, last_entry_id)
+                SELECT ?, LADDER.user_id, LADDER.nr, t.ID
+                FROM torrents_group tg
+                LEFT JOIN torrents_artists ta ON (ta.GroupID = tg.ID)
+                INNER JOIN torrents t ON (t.GroupID = tg.ID)
+                INNER JOIN (
+                    $subquery
+                ) LADDER on (LADDER.last_torrent = t.ID)
+                GROUP BY
+                    LADDER.user_id,
+                    LADDER.nr,
+                    t.ID,
+                    tg.Name,
+                    t.created
+                ", $this->id, ...$args
+            );
+            $n = self::$db->affected_rows();
+            self::$db->commit();
+        } else {
+            // a transaction is not possible across databases, just wing it
+            self::$db->prepared_query(
+                'DELETE FROM contest_leaderboard WHERE contest_id = ?',
+                $this->id,
+            );
+            $n = $this->pg()->query(<<<END_SQL
+                insert into relay.contest_leaderboard
+                    (contest_id, user_id, entry_count, last_entry_id)
+                select $1, LADDER.user_id, LADDER.nr, t."ID"
+                from relay.torrents_group tg
+                left join relay.torrents_artists ta ON (ta."GroupID" = tg."ID")
+                inner join relay.torrents t ON (t."GroupID" = tg."ID")
+                inner join (
+                    $subquery
+                ) LADDER on (LADDER.last_torrent = t."ID")
+                group by
+                    LADDER.user_id,
+                    LADDER.nr,
+                    t."ID",
+                    tg."Name",
+                    t.created
+                END_SQL,
+                    $this->id,
+                    ...$args
+            );
+        }
         /* recache the pages */
         $pages = range(0, (int)(ceil($n) / CONTEST_ENTRIES_PER_PAGE) - 1);
         foreach ($pages as $p) {

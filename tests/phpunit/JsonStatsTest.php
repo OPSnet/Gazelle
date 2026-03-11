@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 
 class JsonStatsTest extends TestCase {
     public function testGeneral(): void {
+        new Stats\Request()->flush();
         $this->assertEqualsCanonicalizing(
             [
                 'maxUsers',

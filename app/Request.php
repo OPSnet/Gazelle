@@ -6,8 +6,9 @@ use Gazelle\Enum\UserAuditEvent;
 use Gazelle\Intf\Bookmarked;
 use Gazelle\Intf\CategoryHasArtist;
 
-class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
-    final public const tableName  = 'requests';
+class Request extends BasePgObject implements Bookmarked, CategoryHasArtist {
+    final public const tableName = 'request';
+    final public const pkName    = 'id_request';
 
     public function flush(): static {
         if (isset($this->info) && $this->tgroupId()) {
@@ -114,7 +115,7 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
         if (isset($this->info)) {
             return $this->info;
         }
-        $info = $this->pg()->rowAssocex("
+        $info = $this->pg()->rowAssocex(<<<END_SQL
             select r.id_user  as user_id,
                 r.id_filler   as filler_id,
                 r.id_tgroup   as tgroup_id,
@@ -141,14 +142,22 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
                 r.need_log,
                 r.need_checksum,
                 r.log_score,
-                r.url
+                r.url,
+                array_agg(t."Name" order by t."Name") as tag
             from request                    r
-            inner join request_vote_summary rvs using (id_request)
+            inner join request_vote_summary rvs on (rvs.id_request = r.id_request)
             inner join category             c   using (id_category)
             left join release_type          rel using (id_release_type)
+            left join lateral unnest(r.tag) id_tag on true
+            left join relay.tags            t on (t."ID" = id_tag)
             where r.id_request = $1
-            ", $this->id
+            group by r.id_request, rvs.last_vote, c.name, rel.name
+            END_SQL
+            , $this->id
         );
+        if ($info['tag'] === [null]) {
+            $info['tag'] = [];
+        }
         $info['user_vote_list'] = $this->pg()->allex("
             select rv.id_user as user_id,
                 sum(rv.bounty) as bounty
@@ -158,19 +167,6 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
             order by 2 desc
             ", $this->id
         );
-        $info['tag'] = $this->pg()->columnex(<<<END_SQL
-            with rt(id_tag) as (
-                select unnest(tag)
-                from request
-                where id_request = $1
-            )
-            select t."Name" as name
-            from rt
-            inner join relay.tags t on (t."ID" = rt.id_tag)
-            END_SQL
-            , $this->id
-        );
-
         $info['encoding'] = new Request\Encoding(
             is_null($info['need_encoding']),
             $info['need_encoding'] ?? [],
@@ -353,11 +349,11 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
     }
 
     public function legacyFormatList(): string {
-        return $this->format()->dbValue();
+        return $this->format()->legacyDisplay();
     }
 
     public function legacyEncodingList(): string {
-        return $this->encoding()->dbValue();
+        return $this->encoding()->legacyDisplay();
     }
 
     public function legacyLogChecksum(): string {
@@ -365,11 +361,11 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
     }
 
     public function legacyMediaList(): string {
-        return $this->media()->dbValue();
+        return $this->media()->legacyDisplay();
     }
 
     public function modified(): string {
-        return $this->info()['modified'];
+        return $this->info()['modified']->format('Y-m-d H:i:s');
     }
 
     public function logCue(): Request\LogCue {
@@ -440,7 +436,7 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
     public function tagLinkList(): string {
         return implode(' ',
             array_map(
-                fn($tag) => "<a href=\"requests.php?tags=$tag\">$tag</a>",
+                fn ($tag) => "<a href=\"requests.php?tags=$tag\">$tag</a>",
                 $this->tagNameList()
             )
         );
@@ -565,13 +561,7 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
      * return @bool vote was successful (user had sufficient buffer)
      */
     public function vote(User $user, int $amount): bool {
-        return (bool)static::voteById($this->id, $user, $amount);
-    }
-
-    /* temporary scaffolding while the move to Pg is underway */
-    public static function voteById(int $requestId, User $user, int $amount): int {
         self::$db->begin_transaction();
-
         self::$db->prepared_query("
             UPDATE users_leech_stats SET
                 Uploaded = Uploaded - ?
@@ -582,24 +572,18 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
         if (self::$db->affected_rows() == 0) {
             // Uploaded would turn negative
             self::$db->rollback();
-            return 0;
+            return false;
         }
 
         $bounty = $amount * (1 - REQUEST_TAX);
-        self::$db->prepared_query("
-            INSERT INTO requests_votes
-                   (RequestID, UserID, Bounty)
-            VALUES (?,         ?,      ?)
-            ", $requestId, $user->id, $bounty
-        );
-        $requestVoteId = self::$db->inserted_id();
-        self::pgStatic()->executeParams('
+        $this->pg()->begin();
+        $this->pg()->query('
             insert into request_vote
-                   (id_request_vote, id_request, id_user, bounty)
-            values ($1,              $2,         $3,      $4)
-            ', $requestVoteId, $requestId, $user->id, $bounty
+                   (id_request, id_user, bounty)
+            values ($1,         $2,      $3)
+            ', $this->id, $user->id, $bounty
         );
-        self::pgStatic()->executeParams('
+        $this->pg()->query('
             merge into request_vote_summary rvs using (
                 select id_request,
                     sum(bounty)             as bounty_total,
@@ -618,89 +602,66 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
                         bounty_total = i.bounty_total,
                         user_total   = i.user_total,
                         last_vote    = i.last_vote
-            ', $requestId
+            ', $this->id
         );
-        self::$db->prepared_query("
-            UPDATE requests SET
-                LastVote = now()
-            WHERE ID = ?
-            ", $requestId
-        );
-        self::$db->prepared_query("
-            UPDATE user_summary us
-            INNER JOIN (
-                SELECT rv.UserID,
-                    sum(rv.Bounty) AS size,
-                    count(*) AS total
-                FROM requests_votes rv
-                INNER JOIN requests r ON (r.ID = rv.RequestID)
-                WHERE rv.UserID != r.FillerID
-                    AND rv.UserID = ?
-                GROUP BY rv.UserID
-            ) AS w ON us.user_id = w.UserID
-            SET us.request_vote_size  = w.size,
-                us.request_vote_total = w.total
+        [$bountySize, $requestTotal] = $this->pg()->rowex("
+            select
+                sum(rv.bounty) as size,
+                count(*)       as total
+            from request_vote rv
+            inner join request r using (id_request)
+            where rv.id_user != r.id_filler
+              and rv.id_user = $1
+            group by rv.id_user
             ", $user->id
         );
+        $this->pg()->query("
+            update relay.user_summary set
+                request_vote_size  = $1,
+                request_vote_total = $2
+            where user_id = $3
+            ", $bountySize, $requestTotal, $user->id
+        );
+        $this->pg()->commit();
         self::$db->commit();
-
         $user->flush();
-
-        return $requestVoteId;
+        return true;
     }
 
     /**
      * get all individual votes on this request
      */
     public function voteList(): array {
-        self::$db->prepared_query("
-            SELECT UserID AS user_id,
-                Bounty    AS bounty,
+        return $this->pg()->allex("
+            select id_user,
+                bounty,
                 created
-            FROM requests_votes
-            WHERE RequestID = ?
-            ORDER BY created DESC, requests_votes_id DESC
+            from request_vote
+            where id_request = $1
+            order by created desc, id_request_vote desc
             ", $this->id
         );
-        return self::$db->to_array(false, MYSQLI_ASSOC);
     }
 
     public function fill(User $user, Torrent $torrent): int {
-        self::$db->prepared_query("
-            UPDATE requests SET
-                TimeFilled = now(),
-                FillerID = ?,
-                TorrentID = ?
-            WHERE ID = ?
-                AND FillerID = 0
-            ", $user->id, $torrent->id, $this->id
-        );
-        $updated = self::$db->affected_rows();
-        if (!$updated) {
-            return 0;
-        }
-        $now = (string)self::$db->scalar('
-            SELECT updated FROM requests WHERE ID = ?
-            ', $this->id
-        );
-        $this->pg()->query("
+        $updated = $this->pg()->query("
             update request set
-                filled     = $1,
-                id_filler  = $2,
-                id_torrent = $3
-            where id_request = $4
-            ", $now, $user->id, $torrent->id, $this->id
+                filled     = now(),
+                id_filler  = $1,
+                id_torrent = $2
+            where id_request = $3
+            ", $user->id, $torrent->id, $this->id
         );
 
         $bounty = $this->bountyTotal();
         $user->addBounty($bounty);
         $name = $this->title();
         $message = "One of your requests — [url={$this->location()}]{$name}[/url] — has been filled. You can view it here: [pl]{$torrent->id}[/pl]";
-        self::$db->prepared_query("
-            SELECT DISTINCT UserID FROM requests_votes WHERE RequestID = ?
+        $userIdList = $this->pg()->columnex("
+            select distinct id_user from request_vote where id_request = $1
             ", $this->id
         );
-        foreach (self::$db->collect(0) as $userId) {
+        foreach ($userIdList as $userId) {
             new User($userId)->inbox()->createSystem("The request \"$name\" has been filled", $message);
         }
 
@@ -714,30 +675,20 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
         return $updated;
     }
 
-    public function unfill(User $admin, string $reason, Manager\Torrent $torMan): int {
-        $bounty = $this->bountyTotal();
-        $filler = new User($this->fillerId());
+    public function unfill(
+        User            $admin,
+        string          $reason,
+        Manager\Torrent $torMan  = new Manager\Torrent(),
+        Manager\User    $userMan = new Manager\User(),
+    ): int {
+        $bounty  = $this->bountyTotal();
         $torrent = $torMan->findById($this->torrentId());
+        $filler  = $userMan->findById($this->fillerId());
         if (is_null($torrent)) {
             $torrent = $torMan->findDeletedById($this->torrentId());
         }
 
-        self::$db->begin_transaction();
-        self::$db->prepared_query("
-            UPDATE requests SET
-                TorrentID = 0,
-                FillerID = 0,
-                TimeFilled = null,
-                Visible = 1
-            WHERE ID = ?
-            ", $this->id
-        );
-        $updated = self::$db->affected_rows();
-        if (!$updated) {
-            self::$db->rollback();
-            return 0;
-        }
-        $this->pg()->query("
+        $updated = $this->pg()->query("
             update request set
                 filled     = null,
                 id_filler  = null,
@@ -747,7 +698,6 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
         );
         $filler->addBounty(-$bounty);
         $filler->flush();
-        self::$db->commit();
 
         if ($filler->id !== $admin->id) {
             $filler->inbox()->createSystem(
@@ -796,15 +746,8 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
      */
     public function refundBounty(User $user, User $admin): int {
         $bounty = $this->userBounty($user);
-        self::$db->begin_transaction();
-        self::$db->prepared_query("
-            DELETE FROM requests_votes
-            WHERE RequestID = ? AND UserID = ?
-            ", $this->id, $user->id
-        );
-        $affected = self::$db->affected_rows();
-        $this->pg()->executeParams('
-            delete from request vote
+        $affected = $this->pg()->query('
+            delete from request_vote
             where id_request = $1
                 and id_user  = $2
             ', $this->id, $user->id
@@ -825,7 +768,6 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
             );
             $user->flush();
         }
-        self::$db->commit();
         return $affected;
     }
 
@@ -834,14 +776,7 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
      */
     public function removeBounty(User $user, User $admin): int {
         $bounty = $this->userBounty($user);
-        self::$db->begin_transaction();
-        self::$db->prepared_query("
-            DELETE FROM requests_votes
-            WHERE RequestID = ? AND UserID = ?
-            ", $this->id, $user->id
-        );
-        $affected = self::$db->affected_rows();
-        $this->pg()->executeParams('
+        $affected = $this->pg()->query('
             delete from request vote
             where id_request = $1
                 and id_user  = $2
@@ -865,10 +800,10 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
      * Inform the filler of a request that their bounty was reduced
      */
     public function informRequestFillerReduction(int $bounty, User $admin): int {
-        [$fillerId, $fillDate] = self::$db->row("
-            SELECT FillerID, date(TimeFilled)
-            FROM requests
-            WHERE TimeFilled IS NOT NULL AND ID = ?
+        [$fillerId, $fillDate] = $this->pg()->rowex("
+            select id_filler, date(filled)
+            from request
+            where filled is not null and id_request = $1
             ", $this->id
         );
         if (!$fillerId) {
@@ -893,7 +828,7 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
                 "Bounty was reduced on a request you filled",
                 self::$twig->render('request/bounty-reduction.bbcode.twig', [
                     'bounty'      => $bounty,
-                    'fill_date'   => $fillDate,
+                    'fill_date'   => $fillDate->format('Y-m-d H:i:s'),
                     'request_url' => $this->url(),
                     'staff_name'  => $admin->username(),
                 ])
@@ -906,99 +841,54 @@ class Request extends BaseObject implements Bookmarked, CategoryHasArtist {
      * Rebuild the fulltext artist/title text vector when either changes
      */
     public function reindex(): int {
-        $this->pg()->begin();
-        $this->pg()->query('
-            delete from request_artist where id_request = $1
-            ', $this->id
-        );
-        $this->pg()->query('
-            insert into request_artist (id_request, id_alias, id_artist_role, id_user, created)
-            select "RequestID", "AliasID", artist_role_id, "UserID", created
-            from relay.requests_artists ra
-            where ra."RequestID" = $1
-            ', $this->id
-        );
-        $affected = $this->pg()->query(
-        <<<END_SQL
+        return $this->pg()->query(<<<END_SQL
             with r(id_request, artist_title_ts) as (
                 select
-                    rr."ID",
+                    r.id_request,
                     to_tsvector(
                         'simple',
                         unaccent(
                             coalesce(string_agg(aa."Name", ' '), '')
-                                || ' ' || rr."Title"
+                                || ' ' || r.title
                         )
                     )
-                from relay.requests rr
-                left join relay.requests_artists ra on    (ra."RequestID" = rr."ID")
-                left join relay.artists_alias    aa using ("AliasID")
-                left join relay.artist_role      ar on    (ar.artist_role_id = ra.artist_role_id)
+                from request                  r
+                left join request_artist      ra using (id_request)
+                left join artist_role         ar using (id_artist_role)
+                left join relay.artists_alias aa on (aa."AliasID" = ra.id_alias)
                 where (ar.slug is null or ar.slug != 'guest')
-                    and rr."ID" = $1
-                group by rr."ID", rr."Title"
+                    and r.id_request = $1
+                group by r.id_request, r.title
             )
             update request set
                 artist_title_ts = r.artist_title_ts
             from r
             where request.id_request = r.id_request
-END_SQL
+            END_SQL
             , $this->id
         );
-        $this->pg()->commit();
-        return $affected;
-    }
-
-    public function relayTag(): int {
-        return $this->pg()->query('
-            update request set
-                tag = (
-                    select array_agg(rt."TagID")
-                    from relay.requests_tags rt
-                    where rt."RequestID" = $1
-                )
-            where id_request = $1
-            ', $this->id
-        );
-    }
-
-    public function modify(): bool {
-        $affected = parent::modify();
-        if ($affected) {
-            new Manager\Request()->relay();
-        }
-        return $affected;
     }
 
     public function remove(): int {
-        self::$db->begin_transaction();
-        self::$db->prepared_query("DELETE FROM requests_votes WHERE RequestID = ?", $this->id);
-        self::$db->prepared_query("DELETE FROM requests_tags WHERE RequestID = ?", $this->id);
-        self::$db->prepared_query("DELETE FROM requests WHERE ID = ?", $this->id);
-        $affected = self::$db->affected_rows();
-        self::$db->prepared_query("
-            SELECT DISTINCT aa.ArtistID
-            FROM requests_artists ra
-            INNER JOIN artists_alias aa USING (AliasID)
-            WHERE ra.RequestID = ?
-            ", $this->id
+        $artistIdList = $this->pg()->columnex(<<<END_SQL
+            select distinct aa."ArtistID"
+            from request_artist ra
+            inner join relay.artists_alias aa on (aa."AliasID" = ra.id_alias)
+            where ra.id_request = $1
+            END_SQL
+            , $this->id
         );
-        $artisIds = self::$db->collect(0);
-        self::$db->prepared_query('
-            DELETE FROM requests_artists WHERE RequestID = ?', $this->id
+        $affected = $this->pg()->query('
+            delete from request where id_request = $1
+            ', $this->id
         );
-        new Manager\Comment()->remove('requests', $this->id);
-        self::$db->commit();
 
-        foreach ($artisIds as $artistId) {
+        new Manager\Comment()->remove('requests', $this->id);
+        foreach ($artistIdList as $artistId) {
             self::$cache->delete_value("artists_requests_$artistId");
         }
         self::$cache->delete_value(sprintf(Manager\Request::ID_KEY, $this->id));
         $this->flush();
-        $this->pg()->executeParams('
-            delete from request where id_request = $1
-            ', $this->id
-        );
         return $affected;
     }
 }

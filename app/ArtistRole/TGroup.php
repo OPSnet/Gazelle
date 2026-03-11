@@ -6,7 +6,7 @@ namespace Gazelle\ArtistRole;
 
 class TGroup extends \Gazelle\ArtistRole {
     protected function cacheKey(): string {
-        return sprintf('ar_tgroup_%d', $this->object->id());
+        return sprintf('ar_tgroup_2_%d', $this->object->id());
     }
 
     protected const MAP = [
@@ -22,7 +22,7 @@ class TGroup extends \Gazelle\ArtistRole {
 
     protected function artistListRaw(): array {
         self::$db->prepared_query("
-            SELECT ta.artist_role_id,
+            SELECT ta.artist_role_id as id_artist_role,
                 aa.ArtistID AS artist_id,
                 aa.Name     AS name,
                 ta.AliasID  AS alias_id
@@ -40,7 +40,7 @@ class TGroup extends \Gazelle\ArtistRole {
         $this->roleList = array_fill_keys(array_values(self::MAP), []);
         $this->idList = [];
         foreach ($this->artistList as $artist) {
-            $roleId = $artist['artist_role_id'];
+            $roleId = $artist['id_artist_role'];
             $this->idList[$roleId][] = [
                 'id'      => $artist['artist_id'],
                 'aliasid' => $artist['alias_id'],

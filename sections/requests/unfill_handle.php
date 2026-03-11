@@ -21,6 +21,6 @@ if (
     Error403::error();
 }
 
-$request->unfill($Viewer, trim($_POST['reason']), new Manager\Torrent());
+$request->unfill($Viewer, trim($_POST['reason']));
 
 header('Location: ' . $request->location());

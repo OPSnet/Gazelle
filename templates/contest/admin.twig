@@ -42,8 +42,8 @@
             </tr>
 {%      endif %}
             <tr>
-                <td>{{ pair.FillerID|user_url }}</td>
-                <td>{{ pair.UserID|user_url }}</td>
+                <td>{{ pair.id_filler|user_url }}</td>
+                <td>{{ pair.id_user|user_url }}</td>
                 <td>{{ pair.nr|number_format }}</td>
             </tr>
 {%      if loop.last %}

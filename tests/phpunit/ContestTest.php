@@ -378,7 +378,7 @@ class ContestTest extends TestCase {
         $this->assertEquals(2, $this->contest->totalEntries(), 'ct-reqfill-entry-3');
 
         // unfill first request, and fill with other user
-        $this->requestList[0]->unfill($this->userList[0], 'phpunit contest', new Manager\Torrent());
+        $this->requestList[0]->unfill($this->userList[0], 'phpunit contest');
         $this->requestList[0]->fill($this->userList[1], $this->torrentList[2]);
         $this->contest->flush();
         $this->assertEquals(2, $this->contest->calculateLeaderboard(), 'ct-reqfill-leaderboard-4');
@@ -387,9 +387,9 @@ class ContestTest extends TestCase {
 
         $this->assertEquals(
             [[
-                'FillerID' => $this->userList[1]->id,
-                'UserID'   => $this->userList[0]->id,
-                'nr'       => 2,
+                'id_filler' => $this->userList[1]->id,
+                'id_user'   => $this->userList[0]->id,
+                'nr'        => 2,
             ]],
             $this->contest->type()->requestPairs(), /* @phpstan-ignore-line it does exist in this particular case */
             'ct-reqfill-pairs',

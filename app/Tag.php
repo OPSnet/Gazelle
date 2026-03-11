@@ -66,20 +66,19 @@ class Tag extends BaseObject {
     }
 
     public function addRequest(Request $request): int {
-        self::$db->prepared_query("
-            INSERT IGNORE INTO requests_tags
-                   (TagID, RequestID)
-            VALUES (?,     ?)
-            ", $this->id, $request->id()
+        $affected = $this->pg()->query("
+            update request set
+                tag = array_append(tag, $2)
+            where id_request = $1
+                and not tag @> array[$2::int]
+            ", $request->id, $this->id
         );
-        $affected = self::$db->affected_rows();
         self::$db->prepared_query("
             UPDATE tags SET
-                Uses = Uses + 1
+                Uses = Uses + ?
             WHERE ID = ?
-            ", $this->id
+            ", $affected, $this->id
         );
-        $request->relayTag();
         return $affected;
     }
 
@@ -94,12 +93,12 @@ class Tag extends BaseObject {
             select
                 aa."ArtistID" as artistId,
                 aa."Name"     as artistName,
-                ra.id_request as requestId,
+                r.id_request  as requestId,
                 r.title       as requestName
             from request                  r
             left join request_artist      ra using (id_request)
             left join relay.artists_group ag on (ag."PrimaryAlias" = ra.id_alias)
-            left join relay.artists_alias aa on (ag."PrimaryAlias" = aa."AliasID")
+            left join relay.artists_alias aa on (aa."AliasID" = ag."PrimaryAlias")
             where r.tag @> array[$1::int]
             END_SQL
             , $this->id

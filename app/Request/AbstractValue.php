@@ -2,7 +2,11 @@
 
 namespace Gazelle\Request;
 
+use Gazelle\Pg;
+
 abstract class AbstractValue {
+    use Pg;
+
     protected array $label;
 
     public function __construct(
@@ -40,13 +44,19 @@ abstract class AbstractValue {
 
     public function dbValue(): string {
         return $this->all() || count($this->label) == count($this->legal())
-            ? 'Any'
-            : implode('|', array_values($this->label));
+            ? '{}'
+            : $this->pg()->arrayConverter()->output(array_values($this->label));
     }
 
     public function display(): string {
         return $this->all || count($this->label) == count($this->legal())
             ? 'Any'
             : implode(', ', array_values($this->label));
+    }
+
+    public function legacyDisplay(): string {
+        return $this->all || count($this->label) == count($this->legal())
+            ? 'Any'
+            : implode('|', $this->label);
     }
 }

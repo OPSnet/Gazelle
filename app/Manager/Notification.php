@@ -4,7 +4,6 @@ namespace Gazelle\Manager;
 
 use Gazelle\Enum\NotificationTicketState;
 use Gazelle\Enum\NotificationType;
-use sad_spirit\pg_wrapper\converters\IntegerConverter;
 
 class Notification extends \Gazelle\Base {
     /**
@@ -153,7 +152,7 @@ class Notification extends \Gazelle\Base {
                 and ha.id_user = any($2::integer[])
             ',
                 strtolower($type->toString()) . '-push',
-                $this->pg()->arrayConverter(new IntegerConverter())->output($idList),
+                $this->pg()->integerConverter()->output($idList),
         );
     }
 }

@@ -148,7 +148,6 @@ class RequestSearchTest extends TestCase {
             $this->tgroup, $user, 'Cassette', 'FLAC', 'Lossless',
         );
         $this->assertEquals(1, $this->requestList[0]->fill($user, $torrent), 'request-search-fill');
-        new Manager\Request()->relay(); // FIXME: remove when Pg migration is complete
 
         $filler->flush();
         $filler->setFiller($user)->showFilled();

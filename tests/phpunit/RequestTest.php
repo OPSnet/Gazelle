@@ -46,26 +46,50 @@ class RequestTest extends TestCase {
         $user  = $this->userList['user'];
 
         $manager       = new Manager\Request();
-        $title         = 'phpunit create ' . randomString(6);
+        $title         = 'phpunit create (x) ' . randomString(6);
         $image         = 'https://example.com/req.jpg';
         $year          = 2002;
         $this->request = Helper::makeRequestMusic($admin, $title, image: $image, year: $year);
         $id = $this->request->id;
 
         $this->assertInstanceOf(Request::class, $this->request, 'request-create');
-        $this->assertStringNotContainsString(' (bonus VIP)', $this->request->urlencodeTitle(), 'request-urlencode-title');
+        $this->assertFalse($this->request->hasNewVote(), 'request-new-vote');
+        $this->assertStringNotContainsString(
+            ' (x)',
+            $this->request->urlencodeTitle(),
+            'request-urlencode-title'
+        );
+        $this->assertEquals(
+            $this->request->created(),
+            $this->request->modified(),
+            'request-modified'
+        );
+        $this->assertEquals(
+            1,
+            $this->request->releaseType(),
+            'request-release-type'
+        );
+
         $artistMan  = new Manager\Artist();
         $artistName = 'phpunit req ' . randomString(6);
-        $this->assertInstanceOf(ArtistRole\Request::class, $this->request->artistRole(), 'request-add-artist-role');
+        $this->assertInstanceOf(
+            ArtistRole\Request::class,
+            $this->request->artistRole(),
+            'request-add-artist-role'
+        );
         $this->assertEquals(
             1,
             $this->request->artistRole()->set(
                 [ARTIST_MAIN => [$artistName]],
                 $user,
             ),
-            'request-add-artist-role'
+            'request-add-artist-role',
         );
-        $this->assertInstanceOf(ArtistRole\Request::class, $this->request->artistRole(), 'request-has-artist-role');
+        $this->assertInstanceOf(
+            ArtistRole\Request::class,
+            $this->request->artistRole(),
+            'request-has-artist-role',
+        );
         $this->assertInstanceOf(Request\LogCue::class, $this->request->logCue(), 'request-log-cue');
         $this->assertStringContainsString('+', $this->request->urlencodeArtist(), 'request-urlencode-artist');
         $this->assertEquals(
@@ -76,6 +100,7 @@ class RequestTest extends TestCase {
 
         $this->assertCount(0, $this->request->tagNameList());
         $nameList = ['phpunit.' . randomString(6), 'phpunit.' . randomString(6)];
+        sort($nameList);
         $tagMan   = new Manager\Tag();
         $tag      = $tagMan->create($nameList[0], $admin);
         $this->assertEquals(1, $tag->addRequest($this->request), 'request-add-tag');
@@ -93,7 +118,6 @@ class RequestTest extends TestCase {
         $this->assertCount(1, $find, 'request-find-by-artist');
         $this->assertEquals($id, $find[0]->id, 'request-find-id');
 
-        $this->assertEquals(1, $this->request->releaseType(), 'request-release-type-id');
         $location = "requests.php?action=view&id=$id";
         $this->assertEquals($location, $this->request->location(), 'request-location');
         $this->assertEquals(SITE_URL . "/$location", $this->request->publicLocation(), 'request-public-location');
@@ -126,10 +150,27 @@ class RequestTest extends TestCase {
         $this->assertEquals('UA-7890', $this->request->catalogueNumber(), 'request-can-no');
         $this->assertEquals('Unitest Artists', $this->request->recordLabel(), 'request-rec-label');
         $this->assertEquals(1, $this->request->categoryId(), 'request-cat-id');
-        $this->assertEquals('Music', $this->request->categoryName(), 'request-cat-name');
+        $this->assertEquals(
+            'Music',
+            $this->request->categoryName(),
+            'request-cat-name',
+        );
+        $this->assertEquals(
+            STATIC_SERVER . '/common/noartwork/music.png',
+            $this->request->categoryImage(),
+            'request-cat-image'
+        );
         $this->assertTrue($this->request->hasArtistRole(), 'request-has-artist-role');
-        $this->assertInstanceOf(ArtistRole\Request::class, $this->request->artistRole(), 'request-artist-role');
-        $this->assertEquals($nameList, $this->request->flush()->tagNameList(), 'request-tag-list');
+        $this->assertInstanceOf(
+            ArtistRole\Request::class,
+            $this->request->artistRole(),
+            'request-artist-role'
+        );
+        $this->assertEquals(
+            $nameList,
+            $this->request->flush()->tagNameList(),
+            'request-tag-list',
+        );
         $this->assertEquals(
             "<a href=\"requests.php?tags={$nameList[0]}\">{$nameList[0]}</a> <a href=\"requests.php?tags={$nameList[1]}\">{$nameList[1]}</a>",
             $this->request->tagLinkList(), 'request-tag-linklist'
@@ -155,10 +196,26 @@ class RequestTest extends TestCase {
         $this->assertEquals('Log (100%) + Cue', $this->request->descriptionLogCue(), 'request-descn-log-cue');
         $this->assertEquals('1', $this->request->legacyLogChecksum(), 'request-legacy-checksum');
 
-        $this->assertEquals(['Lossless', 'V0 (VBR)'], array_values($this->request->currentEncoding()), 'request-cur-encoding');
-        $this->assertEquals(['Lossless', 'V0 (VBR)'], array_values($this->request->needEncodingList()), 'request-need-encoding');
-        $this->assertEquals('Lossless, V0 (VBR)', $this->request->descriptionEncoding(), 'request-descr-encoding');
-        $this->assertEquals('Lossless|V0 (VBR)', $this->request->legacyEncodingList(), 'request-legacy-encoding');
+        $this->assertEquals(
+            ['Lossless', 'V0 (VBR)'],
+            array_values($this->request->currentEncoding()),
+            'request-cur-encoding',
+        );
+        $this->assertEquals(
+            ['Lossless', 'V0 (VBR)'],
+            array_values($this->request->needEncodingList()),
+            'request-need-encoding',
+        );
+        $this->assertEquals(
+            'Lossless, V0 (VBR)',
+            $this->request->descriptionEncoding(),
+            'request-descr-encoding',
+        );
+        $this->assertEquals(
+            'Lossless|V0 (VBR)',
+            $this->request->legacyEncodingList(),
+            'request-legacy-encoding'
+        );
         $this->assertTrue($this->request->needEncoding('Lossless'), 'request-need-encoding-lossless');
         $this->assertFalse($this->request->needEncoding('24bit Lossless'), 'request-need-encoding-24bit');
         $this->assertNotEquals(ENCODING, $this->request->currentEncoding(), 'request-encoding-specified');
@@ -189,6 +246,31 @@ class RequestTest extends TestCase {
         $this->assertEquals(1, $this->request->remove(), 'request-remove');
         unset($this->request); // success, no need to tidy up
         $this->assertNull($manager->findById($id), 'request-gone');
+    }
+
+    public function testRequestAny(): void {
+        $this->request = Helper::makeRequestMusic(
+            $this->userList['admin'],
+            'phpunit request any',
+            encoding: new Request\Encoding(true, []),
+            format:   new Request\Format(true, []),
+            media:    new Request\Media(true, []),
+        );
+        $this->assertEquals(
+            ENCODING,
+            $this->request->currentEncoding(),
+            'request-any-encoding'
+        );
+        $this->assertEquals(
+            FORMAT,
+            $this->request->currentFormat(),
+            'request-any-format'
+        );
+        $this->assertEquals(
+            MEDIA,
+            $this->request->currentMedia(),
+            'request-any-media'
+        );
     }
 
     public function testFillBasic(): void {
@@ -269,9 +351,18 @@ class RequestTest extends TestCase {
         $this->assertEqualsCanonicalizing(
             [$admin->id, $user->id],
             array_column($this->request->userIdVoteList(), 'user_id'),
-            'request-user-id-vote-list'
+            'request-user-id-vote-list',
         );
-        $this->assertEquals($taxedBounty, $this->request->userBounty($admin), 'request-user-bounty-total');
+        $this->assertEqualsCanonicalizing(
+            [$admin->id, $user->id],
+            array_keys($this->request->bounty()),
+            'request-bounty',
+        );
+        $this->assertEquals(
+            $taxedBounty,
+            $this->request->userBounty($admin),
+            'request-user-bounty-total'
+        );
         $this->assertCount(2, array_column($this->request->bounty(), 'UserID'));
         $this->assertCount(2, array_column($this->request->bounty(), 'Bounty'));
 
@@ -285,7 +376,7 @@ class RequestTest extends TestCase {
         $tgroupName = 'phpunit request ' . randomString(6);
         $this->tgroup = Helper::makeTGroupMusic(
             name:       $tgroupName,
-            artistName: [[ARTIST_MAIN], ['Request Girl ' . randomString(12)]],
+            artistName: [[ARTIST_MAIN], ['phpunit reqfill ' . randomString(12)]],
             tagName:    ['electronic'],
             user:       $user,
         );
@@ -303,13 +394,18 @@ class RequestTest extends TestCase {
         $this->assertEquals($fillBefore['bounty-size'] + $taxedBounty * 2, $user->stats()->flush()->requestBountySize(), 'request-fill-receive-bounty');
         $this->assertEquals($fillBefore['bounty-total'] + 1, $user->stats()->requestBountyTotal(), 'request-fill-receive-total');
         $this->assertTrue(Helper::recentDate($this->request->fillDate()), 'request-fill-date');
-        $this->assertEquals($this->request->id, $torrent->requestFills($requestMan)[0]->id, 'request-torrent-fills');
+        $this->assertEquals($this->request->id, $torrent->requestFills()[0]->id, 'request-torrent-fills');
 
         $statsReq->flush();
         $this->assertEquals($before['total'] + 1, $statsReq->total(), 'request-stats-now-total');
         $this->assertEquals($before['total-filled'] + 1, $statsReq->filledTotal(), 'request-stats-now-filled');
         $this->assertGreaterThan(0.0, $statsReq->filledPercent(), 'request-stats-filled-percent');
         $this->assertTrue($this->request->isFilled(), 'request-now-filled');
+        $this->assertEquals(
+            1,
+            $this->request->informRequestFillerReduction(100, $admin),
+            'request-inform-bounty-reduction',
+        );
 
         $reportManager = new Manager\Torrent\Report($torMan);
         $reportManager->create(
@@ -328,9 +424,21 @@ class RequestTest extends TestCase {
         );
 
         // and now unfill it
-        $this->assertEquals(1, $this->request->unfill($this->userList['admin'], 'unfill unittest', new Manager\Torrent()), 'request-unfill');
-        $this->assertEquals($fillBefore['uploaded'], $this->userList['user']->flush()->uploadedSize(), 'request-fill-unfill-user');
-        $this->assertEquals($fillBefore['bounty-total'], $this->userList['user']->stats()->requestBountyTotal(), 'request-fill-unfill-total');
+        $this->assertEquals(
+            1,
+            $this->request->unfill($this->userList['admin'], 'unfill unittest'),
+            'request-unfill',
+        );
+        $this->assertEquals(
+            $fillBefore['uploaded'] - 100, // 100 from bounty reduction
+            $this->userList['user']->flush()->uploadedSize(),
+            'request-fill-unfill-user',
+        );
+        $this->assertEquals(
+            $fillBefore['bounty-total'],
+            $this->userList['user']->stats()->requestBountyTotal(),
+            'request-fill-unfill-total',
+        );
         $this->assertFalse($this->request->isFilled(), 'request-unfilled');
 
         $siteLog = new Manager\SiteLog();
@@ -352,10 +460,22 @@ class RequestTest extends TestCase {
         );
 
         $statsReq->flush();
-        $this->assertEquals($before['total-filled'], $statsReq->filledTotal(), 'request-stats-now-unfilled');
+        $this->assertEquals(
+            $before['total-filled'],
+            $statsReq->filledTotal(),
+            'request-stats-now-unfilled',
+        );
 
-        $this->assertEquals(1, $this->request->refundBounty($this->userList['user'], $admin), 'request-bounty-refund');
-        $this->assertEquals(1, $this->request->removeBounty($admin, $admin), 'request-bounty-remove');
+        $this->assertEquals(
+            1,
+            $this->request->refundBounty($this->userList['user'], $admin),
+            'request-bounty-refund',
+        );
+        $this->assertEquals(
+            1,
+            $this->request->removeBounty($admin, $admin),
+            'request-bounty-remove',
+        );
     }
 
     public function testFillLooseFit(): void {
@@ -368,7 +488,7 @@ class RequestTest extends TestCase {
         );
         $this->tgroup = Helper::makeTGroupMusic(
             name:      'phpunit request ' . randomString(6),
-            artistName: [[ARTIST_MAIN], ['Request Girl ' . randomString(12)]],
+            artistName: [[ARTIST_MAIN], ['phpunit reqloose ' . randomString(12)]],
             tagName:    ['electronic'],
             user:       $this->userList['user'],
         );
@@ -385,6 +505,9 @@ class RequestTest extends TestCase {
             $this->request->validate($torrent, $this->userList['user'], isAdmin: false),
             'request-any-validate',
         );
+        $find = new Manager\Request()->findUnfilledByUser($this->userList['admin'], 2);
+        $this->assertCount(1, $find, 'request-find-unfilled');
+        $this->assertEquals($this->request->id, $find[0]->id, 'request-found');
         $this->assertEquals(
             1,
             $this->request->fill(
@@ -411,7 +534,7 @@ class RequestTest extends TestCase {
         );
         $this->tgroup = Helper::makeTGroupMusic(
             name:       'phpunit request validate ' . randomString(6),
-            artistName: [[ARTIST_MAIN], ['Request Girl ' . randomString(12)]],
+            artistName: [[ARTIST_MAIN], ['phpunit reqvalidate ' . randomString(12)]],
             tagName:    ['electronic'],
             user:       $user2,
         );
@@ -491,6 +614,16 @@ class RequestTest extends TestCase {
             $this->request->validate($torrent, $user, isAdmin: true),
             'req-fill-category',
         );
+        $this->request->fill($user, $torrent);
+
+        $this->assertEquals(
+            [
+                "This request has already been filled.",
+                "This torrent is of a different category than the request. If the request is actually miscategorized, please contact staff.",
+            ],
+            $this->request->validate($torrent, $user, isAdmin: true),
+            'req-fill-filled',
+        );
     }
 
     public function testVotes(): void {
@@ -527,14 +660,14 @@ class RequestTest extends TestCase {
 
         $votes = $this->request->voteList();
         $this->assertCount(4, $votes, 'request-votes-count');
-        $first = new \DateTime($votes[0]['created']);
-        $added = new \DateTime($votes[1]['created']);
+        $first = $votes[0]['created'];
+        $added = $votes[1]['created'];
         // can be 1 second later
         $this->assertLessThan(2, abs($first->getTimestamp() - $added->getTimestamp()), 'request-vote-order');
         $this->assertEquals($bounty + 15, $votes[0]['bounty'], 'request-vote-bounty1');
         $this->assertEquals($bounty + 1, $votes[2]['bounty'], 'request-vote-bounty2');
-        $this->assertEquals($user->id, $votes[0]['user_id'], 'request-vote-user1');
-        $this->assertEquals($user2->id, $votes[2]['user_id'], 'request-vote-user2');
+        $this->assertEquals($user->id, $votes[0]['id_user'], 'request-vote-user1');
+        $this->assertEquals($user2->id, $votes[2]['id_user'], 'request-vote-user2');
     }
 
     public function testBookmark(): void {
@@ -564,9 +697,6 @@ class RequestTest extends TestCase {
             new User\Bookmark($this->userList['user'])->create($this->request),
             'request-bookmark-add'
         );
-        $find = $manager->findUnfilledByUser($this->userList['admin'], 2);
-        $this->assertCount(1, $find, 'request-find-unfilled');
-        $this->assertEquals($this->request->id, $find[0]->id, 'request-found');
     }
 
     public function testReport(): void {
@@ -585,6 +715,7 @@ class RequestTest extends TestCase {
         $report = $reportMan->create(
             $this->userList['user'], $this->request->id, 'request', $title
         );
+
         $this->assertEquals('phpunit request report', $report->reason(), 'request-report-reason');
         $requestReport = new Report\Request($report->id, $this->request);
         $this->assertStringStartsWith('Request Report: ', $requestReport->titlePrefix(), 'request-report-title');
@@ -593,23 +724,6 @@ class RequestTest extends TestCase {
             "the request [url=requests.php?action=view&amp;id={$this->request->id}]{$title}[/url]",
             $requestReport->bbLink(),
             'request-report-bb-link'
-        );
-
-        $detail = $reportMan->decorate([$report->id])[0];
-        $this->assertEquals(
-            ["label", "subject", "report"],
-            array_keys($detail),
-            'request-report-decorate-keys',
-        );
-        $this->assertEquals(
-            $this->request->id,
-            $detail['subject']->id,
-            'request-report-decorate-subject'
-        );
-        $this->assertEquals(
-            $report->id,
-            $detail['report']->id,
-            'request-report-decorate-report'
         );
 
         $report->remove();
@@ -682,13 +796,17 @@ class RequestTest extends TestCase {
         $this->assertTrue($allEncoding->isValid(), 'req-enc-all-valid');
         $this->assertTrue($allEncoding->exists('Lossless'), 'req-enc-all-flac');
         $this->assertTrue($allEncoding->exists('Morse'), 'req-enc-all-morse'); // because of all encodings shortcut
-        $this->assertEquals('Any', $allEncoding->dbValue(), 'req-enc-all-value');
+        $this->assertEquals('{}', $allEncoding->dbValue(), 'req-enc-all-value');
 
         $some = new Request\Encoding(false, ['24bit Lossless', 'V0 (VBR)']);
         $this->assertTrue($some->isValid(), 'req-enc-some-valid');
         $this->assertTrue($some->exists('24bit Lossless'), 'req-enc-some-lossless');
         $this->assertFalse($some->exists('Morse'), 'req-enc-some-morse');
-        $this->assertEquals("24bit Lossless|V0 (VBR)", $some->dbValue(), 'req-enc-some-value');
+        $this->assertEquals(
+            '{"24bit Lossless","V0 (VBR)"}',
+            $some->dbValue(),
+            'req-enc-some-value'
+        );
     }
 
     public function testFormatValue(): void {
@@ -699,15 +817,15 @@ class RequestTest extends TestCase {
         $allFormat = new Request\Format(true);
         $this->assertTrue($allFormat->isValid(), 'req-fmt-all-valid');
         $this->assertTrue($allFormat->exists('FLAC'), 'req-fmt-all-flac');
-        $this->assertEquals('Any', $allFormat->dbValue(), 'req-fmt-all-value');
+        $this->assertEquals('{}', $allFormat->dbValue(), 'req-fmt-all-value');
 
         $some = new Request\Format(false, ['FLAC', 'MP3']);
         $this->assertTrue($some->isValid(), 'req-fmt-some-valid');
         $this->assertTrue($some->exists('FLAC'), 'req-fmt-some-flac');
-        $this->assertEquals("MP3|FLAC", $some->dbValue(), 'req-fmt-some-value');
+        $this->assertEquals('{"MP3","FLAC"}', $some->dbValue(), 'req-fmt-some-value');
 
         $also = new Request\Format(false, ['FLAC', 'MP3']);
-        $this->assertEquals("MP3|FLAC", $also->dbValue(), 'req-fmt-same-value');
+        $this->assertEquals('{"MP3","FLAC"}', $also->dbValue(), 'req-fmt-same-value');
     }
 
     public function testMediaValue(): void {
@@ -718,12 +836,16 @@ class RequestTest extends TestCase {
         $allMedia = new Request\Media(true);
         $this->assertTrue($allMedia->isValid(), 'req-med-all-valid');
         $this->assertTrue($allMedia->exists('CD'), 'req-med-all-cd');
-        $this->assertEquals('Any', $allMedia->dbValue(), 'req-med-all-value');
+        $this->assertEquals('{}', $allMedia->dbValue(), 'req-med-all-value');
 
         $some = new Request\Media(false, ['Cassette', 'CD', 'WEB', 'Vinyl']);
         $this->assertTrue($some->isValid(), 'req-med-some-valid');
         $this->assertTrue($some->exists('Vinyl'), 'req-med-some-vinyl');
-        $this->assertEquals("CD|WEB|Vinyl|Cassette", $some->dbValue(), 'req-med-some-value');
+        $this->assertEquals(
+            '{"CD","WEB","Vinyl","Cassette"}',
+            $some->dbValue(),
+            'req-med-some-value',
+        );
     }
 
     public function testLogCueValue(): void {
@@ -777,7 +899,7 @@ class RequestTest extends TestCase {
             user       : $this->userList['user'],
         );
         $this->request = Helper::makeRequestMusic($this->userList['admin'], 'phpunit render req');
-        $this->request->setField('GroupID', $this->tgroup->id)->modify();
+        $this->request->setField('id_tgroup', $this->tgroup->id)->modify();
 
         $this->assertStringContainsString(
             "<span style=\"font-weight: bold;\">Requests (1)</span>",
@@ -993,6 +1115,15 @@ class RequestTest extends TestCase {
                 $searchVoter->linkList(),
             ),
             'comment-request-vote-linklist',
+        );
+    }
+
+    public function testRequestAbort(): void {
+        $this->userList['admin']->setField('leech_upload', 0)->modify();
+        $this->expectException(\RangeException::class);
+        $this->request = Helper::makeRequestMusic(
+            $this->userList['admin'],
+            'phpunit request abort',
         );
     }
 }

@@ -269,19 +269,13 @@ class Request extends \Gazelle\Base {
             if (count($this->info['tag']['include']) > 0) {
                 $cond[] = "r.tag $op $" . (1 + count($args)) . "::int[]";
                 $args[] = $this->pg()->integerConverter()->output(
-                    array_map(
-                        fn ($t) => $t->id,
-                        $this->info['tag']['include']
-                    )
+                    array_map(fn ($t) => $t->id, $this->info['tag']['include'])
                 );
             }
             if (count($this->info['tag']['exclude']) > 0) {
                 $cond[] = "not r.tag $op $" . (1 + count($args)) . "::int[]";
                 $args[] = $this->pg()->integerConverter()->output(
-                    array_map(
-                        fn ($t) => $t->id,
-                        $this->info['tag']['exclude']
-                    )
+                    array_map(fn ($t) => $t->id, $this->info['tag']['exclude'])
                 );
             }
         }

@@ -64,7 +64,7 @@
 {% for vote in request.voteList %}
             <tr>
                 <td>{{ vote.created|date("Y-m-d H:i:s") }}</td>
-                <td>{{ vote.user_id|user_url }}</td>
+                <td>{{ vote.id_user|user_url }}</td>
                 <td>{{ vote.bounty|octet_size }}</td>
             </tr>
 {% endfor %}

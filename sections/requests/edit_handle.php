@@ -28,7 +28,7 @@ if (!isset($_POST['type'])) {
     }
     $categoryId++; // array offset to id
     if ($categoryId !== $request->categoryId()) {
-        $request->setField('CategoryID', $categoryId);
+        $request->setField('id_category', $categoryId);
     }
 }
 
@@ -64,21 +64,21 @@ while (true) {
     if (isset($_POST['description'])) {
         $description = trim($_POST['description']);
         if ($description != $request->description()) {
-            $request->setField('Description', $description);
+            $request->setField('description', $description);
         }
     }
 
     if (isset($_POST['image'])) {
         $image = trim($_POST['image']);
         if ($image != $request->image()) {
-            $request->setField('Image', $image);
+            $request->setField('image', $image);
         }
     }
 
     if (isset($_POST['title'])) {
         $title = trim($_POST['title']);
         if ($title != $request->title()) {
-            $request->setField('Title', $title);
+            $request->setField('title', $title);
         }
     }
 
@@ -88,7 +88,7 @@ while (true) {
             $year = null;
         }
         if ($year != $request->year()) {
-            $request->setField('Year', $year);
+            $request->setField('year', $year);
         }
     }
 
@@ -99,7 +99,7 @@ while (true) {
             break;
         }
         if ($releaseType != $request->releaseType()) {
-            $request->setField('ReleaseType', $releaseType);
+            $request->setField('id_release_type', $releaseType);
         }
     }
 
@@ -113,7 +113,7 @@ while (true) {
             break;
         }
         if ($format->dbValue() != $request->legacyFormatList()) {
-            $request->setField('FormatList', $format->dbValue());
+            $request->setField('format_str', $format->dbValue());
         }
     }
 
@@ -129,7 +129,7 @@ while (true) {
             break;
         }
         if ($encoding->dbValue() != $request->legacyEncodingList()) {
-            $request->setField('BitrateList', $encoding->dbValue());
+            $request->setField('encoding_str', $encoding->dbValue());
         }
     }
 
@@ -143,14 +143,15 @@ while (true) {
             break;
         }
         if ($media->dbValue() != $request->legacyMediaList()) {
-            $request->setField('MediaList', $media->dbValue());
+            $request->setField('media_str', $media->dbValue());
         }
     }
 
     if ($Viewer->permitted('site_moderate_requests')) {
         if (!($format?->exists('FLAC') && $media?->exists('CD'))) {
-            $request->setField('Checksum', 0);
-            $request->setField('LogCue', '');
+            $request->setField('need_checksum', 'f');
+            $request->setField('need_cue', 'f');
+            $request->setField('need_log', 'f');
         } else {
             $logCue = new Request\LogCue(
                 needCue:         isset($_POST['needcue']),
@@ -158,11 +159,17 @@ while (true) {
                 needLogChecksum: isset($_POST['needcksum']),
                 minScore:        (int)($_POST['minlogscore'] ?? $request->needLogScore()),
             );
-            if ($logCue->needLogChecksum != $request->needLogChecksum()) {
-                $request->setField('Checksum', (int)$logCue->needLogChecksum);
+            if ($logCue->needLogChecksum !== $request->needLogChecksum()) {
+                $request->setField('need_checksum', $logCue->needLogChecksum ? 't' : 'f');
             }
-            if ($logCue->dbValue() != $request->descriptionLogCue()) {
-                $request->setField('LogCue', $logCue->dbValue());
+            if ($logCue->needCue !== $request->needCue()) {
+                $request->setField('need_cue', $logCue->needCue ? 't' : 'f');
+            }
+            if ($logCue->needLog !== $request->needLog()) {
+                $request->setField('need_log', $logCue->needLog ? 't' : 'f');
+            }
+            if ($logCue->minScore !== $request->needLogScore()) {
+                $request->setField('log_score', $logCue->minScore);
             }
         }
     }
@@ -184,7 +191,7 @@ while (true) {
                 break;
             }
             if ($request->tgroupId() != $tgroup->id) {
-                $request->setField('GroupID', $tgroup->id);
+                $request->setField('id_tgroup', $tgroup->id);
             }
         }
     }
@@ -237,13 +244,13 @@ if (isset($error)) {
 if (isset($_POST['cataloguenumber'])) {
     $catalogueNumber = trim($_POST['cataloguenumber']);
     if ($catalogueNumber != $request->catalogueNumber()) {
-        $request->setField('CatalogueNumber', $catalogueNumber);
+        $request->setField('catalogue_number', $catalogueNumber);
     }
 }
 if (isset($_POST['recordlabel'])) {
     $recordLabel = trim($_POST['recordlabel']);
     if ($recordLabel != $request->recordLabel()) {
-        $request->setField('RecordLabel', $recordLabel);
+        $request->setField('record_label', $recordLabel);
     }
 }
 

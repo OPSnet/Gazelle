@@ -997,19 +997,18 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
         new Manager\Comment()->remove('torrents', $this->id);
 
         // Requests
-        self::$db->prepared_query("
-            SELECT ID FROM requests WHERE GroupID = ?
-            ", $this->id
+        $idList = $this->pg()->columnex('
+            select id_request from request where id_tgroup = $1
+            ', $this->id
         );
-        $Requests = self::$db->collect(0);
-        self::$db->prepared_query("
-            UPDATE requests SET
-                GroupID = NULL
-            WHERE GroupID = ?
-            ", $this->id
+        $this->pg()->query('
+            update request set
+                id_tgroup = null
+            where id_tgroup = $1
+            ', $this->id
         );
-        foreach ($Requests as $RequestID) {
-            self::$cache->delete_value("request_$RequestID");
+        foreach ($idList as $id) {
+            self::$cache->delete_value("request_$id");
         }
 
         self::$db->prepared_query("

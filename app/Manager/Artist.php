@@ -9,7 +9,7 @@ class Artist extends \Gazelle\BaseManager {
 
     protected array $role;
     protected int $groupId; // torrent or request context
-    protected int $userId; // who is manipulating the torrents_artists or requests_artists tables
+    protected int $userId; // who is manipulating the torrents_artists or request_artist tables
 
     public function __construct() {
         $role = self::$cache->get_value(self::ROLE_KEY);

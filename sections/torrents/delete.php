@@ -57,7 +57,7 @@ if ($torrent->snatchTotal() >= 5 && !$Viewer->permitted('torrents_delete')) {
 echo $Twig->render('torrent/remove.twig', [
     'report_category_list' => $reportTypeMan->categoryList($torrent->group()->categoryId()),
     'report_type'          => $reportTypeMan->findByType('dupe'),
-    'request_list'         => $torrent->requestFills(new Manager\Request()),
+    'request_list'         => $torrent->requestFills(),
     'torrent'              => $torrent,
     'viewer'               => $Viewer,
 ]);

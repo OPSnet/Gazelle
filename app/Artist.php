@@ -476,15 +476,15 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
     }
 
     public function requestIdUsage(): array {
-        self::$db->prepared_query("
-            SELECT DISTINCT r.ID
-            FROM requests AS r
-            INNER JOIN requests_artists AS ra ON (ra.RequestID = r.ID)
-            INNER JOIN artists_alias       aa ON (ra.AliasID = aa.AliasID)
-            WHERE aa.ArtistID = ?
-            ", $this->id
+        return $this->pg()->columnex(<<<END_SQL
+            select distinct r.id_request
+            from request                   r
+            inner join request_artist      ra using (id_request)
+            inner join relay.artists_alias aa on (aa."AliasID" = ra.id_alias)
+            where aa."ArtistID" = $1
+            END_SQL
+            , $this->id
         );
-        return self::$db->collect(0);
     }
 
     public function tgroupIdUsage(): array {
@@ -627,14 +627,8 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
             ", $old->id
         );
         $groupList = self::$db->collect(0);
-        self::$db->prepared_query("
-            SELECT DISTINCT RequestID
-            FROM requests_artists ra
-            INNER JOIN artists_alias aa ON (ra.AliasID = aa.AliasID)
-            WHERE aa.ArtistID = ?
-            ", $old->id
-        );
-        $requestList = self::$db->collect(0);
+
+        $requestList = $this->requestIdUsage();
 
         // only need to flush torrent collages, no db update is required
         self::$db->prepared_query("
@@ -715,16 +709,24 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
                 UPDATE IGNORE torrents_artists SET AliasID = ?  WHERE AliasID = ?
             ", $this->primaryAliasId(), $old->primaryAliasId()
             );
-            self::$db->prepared_query("
-                UPDATE IGNORE requests_artists SET AliasID = ? WHERE AliasID = ?
-            ", $this->primaryAliasId(), $old->primaryAliasId()
+            $this->pg()->query('
+                update request_artist a set
+                    id_alias = $1
+                where id_alias = $2
+                    and not exists (
+                        select 1
+                        from request_artist b
+                        where b.id_request = a.id_request
+                            and b.id_alias = $1
+                    )
+                ', $this->primaryAliasId(), $old->primaryAliasId()
+            );
+            $this->pg()->query('
+                delete from request_artist where id_alias = $1
+            ', $old->primaryAliasId()
             );
             self::$db->prepared_query("
                 DELETE FROM torrents_artists WHERE AliasID = ?
-            ", $old->primaryAliasId()
-            );
-            self::$db->prepared_query("
-                DELETE FROM requests_artists WHERE AliasID = ?
             ", $old->primaryAliasId()
             );
         }
@@ -879,14 +881,9 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
         }
 
         // process artists in requests
-        self::$db->prepared_query("
-            SELECT RequestID FROM requests_artists WHERE AliasID = ?
-            ", $aliasId
-        );
-        $requestList = self::$db->collect(0);
-        self::$db->prepared_query("
-            UPDATE IGNORE requests_artists SET AliasID = ? WHERE AliasID = ?
-            ", $newId, $aliasId
+        $requestList = $this->pg()->columnex('
+            select id_request from request_artist where id_alias = $1
+            ', $aliasId
         );
 
         if ($aliasId !== $newId) {
@@ -895,8 +892,20 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
                 DELETE FROM torrents_artists WHERE AliasID = ?
                 ", $aliasId
             );
-            self::$db->prepared_query("
-                DELETE FROM requests_artists WHERE AliasID = ?
+            $this->pg()->query('
+                update request_artist a set
+                    id_alias = $1
+                where id_alias = $2
+                    and not exists (
+                        select 1
+                        from request_artist b
+                        where b.id_request = a.id_request
+                            and b.id_alias = $1
+                    )
+                ', $newId, $aliasId
+            );
+            $this->pg()->query("
+                delete from request_artist where id_alias = $1
                 ", $aliasId
             );
         }

@@ -3,6 +3,7 @@
 namespace Gazelle\Contest;
 
 use Gazelle\Enum\UserStatus;
+use Gazelle\Enum\SourceDB;
 
 /* Contest based on how many requests filled
  *
@@ -12,35 +13,40 @@ use Gazelle\Enum\UserStatus;
  */
 
 class RequestFill extends AbstractContest {
-    public function leaderboard(int $limit, int $offset): array {
+    public function leaderboard(
+        int $limit,
+        int $offset,
+        \Gazelle\Manager\Torrent $torMan = new \Gazelle\Manager\Torrent(),
+    ): array {
         $key = sprintf(\Gazelle\Contest::CONTEST_LEADERBOARD_CACHE_KEY,
             $this->id, (int)($offset / CONTEST_ENTRIES_PER_PAGE)
         );
         $leaderboard = self::$cache->get_value($key);
         if ($leaderboard === false) {
-            self::$db->prepared_query("
-                SELECT
-                    l.user_id,
+            $leaderboard = $this->pg()->allex(<<<END_SQL
+                select l.user_id,
                     l.entry_count,
                     l.last_entry_id,
                     t.created as last_upload,
-                    t.GroupID as group_id
-                FROM contest_leaderboard l
-                INNER JOIN torrents t ON (t.ID = l.last_entry_id)
-                INNER JOIN requests r ON (r.FillerID = t.UserID AND t.ID = r.TorrentID)
-                INNER JOIN users_main um ON (um.ID = l.user_id)
-                INNER JOIN xbt_files_users xfu ON (xfu.fid = t.ID AND xfu.uid = t.UserID)
-                WHERE xfu.remaining   = 0
-                    AND r.FillerID   != r.UserID
-                    AND um.Enabled    = ?
-                    AND  l.contest_id = ?
-                ORDER BY l.entry_count DESC, t.created ASC, l.user_id ASC
-                LIMIT ? OFFSET ?
-                ", UserStatus::enabled->value, $this->id, $limit, $offset
+                    t."GroupID" as group_id
+                from relay.contest_leaderboard   l
+                inner join relay.torrents        t   on (t."ID" = l.last_entry_id)
+                inner join request               r   on (r.id_filler = t."UserID" and t."ID" = r.id_torrent)
+                inner join relay.users_main      um  on (um."ID" = l.user_id)
+                inner join relay.xbt_files_users xfu on (xfu.fid = t."ID" and xfu.uid = t."UserID")
+                where xfu.remaining   = 0
+                    and r.id_filler  != r.id_user
+                    and um."Enabled"  = $1
+                    and l.contest_id  = $2
+                order by l.entry_count desc, t.created asc, l.user_id asc
+                limit $3 offset $4
+                END_SQL,
+                    UserStatus::enabled->value,
+                    $this->id,
+                    $limit,
+                    $offset,
             );
-            $leaderboard = self::$db->to_array(false, MYSQLI_ASSOC);
 
-            $torMan = new \Gazelle\Manager\Torrent();
             for ($i = 0, $leaderboardCount = count($leaderboard); $i < $leaderboardCount; $i++) {
                 $torrent = $torMan->findById($leaderboard[$i]['last_entry_id']);
                 $leaderboard[$i]['last_entry_link']
@@ -51,89 +57,102 @@ class RequestFill extends AbstractContest {
         return $leaderboard;
     }
 
+    public function rankerSource(): SourceDB {
+        return SourceDB::postgres;
+    }
+
     public function ranker(): array {
-        return ["
-            SELECT r.FillerID    AS user_id,
-                count(*)         AS nr,
-                max(r.TorrentID) AS last_torrent
-            FROM requests r
-            INNER JOIN torrents t ON (t.ID = r.TorrentID)
-            INNER JOIN users_main um ON (um.ID = r.FillerID)
-            WHERE r.FillerId != r.UserID
-                AND um.Enabled = ?
-                AND r.created < ?
-                AND r.TimeFilled BETWEEN ? AND ?
-            GROUP BY r.FillerID
-            ",
+        // note: this subquery is incorporated in a larger query
+        // that will already contain a $1 placeholder prior to it,
+        // hence the offset here must start from $2.
+        return [<<<END_SQL
+            select r.id_filler    as user_id,
+                count(*)          as nr,
+                max(r.id_torrent) as last_torrent
+            from request                r
+            inner join relay.torrents   t  on (t."ID" = r.id_torrent)
+            inner join relay.users_main um on (um."ID" = r.id_filler)
+            where r.id_filler != r.id_user
+                and um."Enabled" = $2
+                and r.created < $3
+                and r.filled between $3 and $4
+            group by r.id_filler
+            END_SQL,
             [
                 UserStatus::enabled->value,
-                $this->begin,
                 $this->begin, $this->end,
             ]
         ];
     }
 
     public function participationStats(): array {
-        return self::$db->rowAssoc("
-            SELECT count(DISTINCT r.ID) AS total_entries,
-                count(DISTINCT um.ID) AS total_users
-            FROM contest c,
-                users_main um
-            INNER JOIN requests r ON (r.FillerID = um.ID)
-            INNER JOIN torrents t ON (t.ID = r.TorrentID)
-            WHERE r.FillerId != r.UserID
-                AND r.TimeFilled BETWEEN c.date_begin AND c.date_end
-                AND r.created < c.date_begin
-                AND um.Enabled   = ?
-                AND c.contest_id = ?
-            ", UserStatus::enabled->value, $this->id
+        return $this->pg()->rowAssocex(<<<END_SQL
+            select count(distinct r.id_request) as total_entries,
+                count(distinct um."ID")         as total_users
+            from relay.contest        c,
+                relay.users_main      um
+            inner join request        r on (r.id_filler = um."ID")
+            inner join relay.torrents t on (t."ID" = r.id_torrent)
+            where r.id_filler != r.id_user
+                and r.created < c.date_begin
+                and r.filled between c.date_begin and c.date_end
+                and um."Enabled" = $1
+                and c.contest_id = $2
+            END_SQL,
+                UserStatus::enabled->value,
+                $this->id,
         );
     }
 
     public function userPayout(): array {
-        self::$db->prepared_query("
-            WITH c AS (
-                SELECT um.ID    AS user_id,
-                    count(r.ID) AS total_entries
-                FROM contest c,
-                    users_main um
-                INNER JOIN requests r ON (r.FillerID = um.ID)
-                INNER JOIN torrents t ON (t.ID = r.TorrentID)
-                WHERE r.FillerId != r.UserID
-                    AND r.TimeFilled BETWEEN c.date_begin AND c.date_end
-                    AND r.created < c.date_begin
-                    AND um.Enabled   = ?
-                    AND c.contest_id = ?
-                GROUP BY um.ID
+        return $this->pg()->allex(<<<END_SQL
+            with c as (
+                select um."ID"          as user_id,
+                    count(r.id_request) as total_entries
+                from relay.contest c,
+                    relay.users_main      um
+                inner join request        r on (r.id_filler = um."ID")
+                inner join relay.torrents t on (t."ID" = r.id_torrent)
+                where r.id_filler != r.id_user
+                    and r.created < c.date_begin
+                    and r.filled between c.date_begin and c.date_end
+                    and um."Enabled" = $1
+                    and c.contest_id = $2
+                group by um."ID"
             )
-            SELECT um.ID                     AS user_id,
-                coalesce(c.total_entries, 0) AS total_entries
-            FROM users_main um
-            LEFT JOIN c ON (c.user_id = um.ID)
-            WHERE um.Enabled = ?
-                AND um.created <= (SELECT date_end FROM contest WHERE contest_id = ?)
-            ", UserStatus::enabled->value, $this->id,
-               UserStatus::enabled->value, $this->id,
+            select um."ID"                   as user_id,
+                coalesce(c.total_entries, 0) as total_entries
+            from relay.users_main um
+            left join c on (c.user_id = um."ID")
+            where um."Enabled" = $1
+                and um.created <= (
+                    select date_end from relay.contest where contest_id = $2
+                )
+            END_SQL,
+                UserStatus::enabled->value,
+                $this->id,
         );
-        return self::$db->to_array(false, MYSQLI_ASSOC);
     }
 
     public function requestPairs(): array {
         $key = "contest_pairs_" . $this->id;
         $pairs = self::$cache->get_value($key);
         if ($pairs === false) {
-            self::$db->prepared_query("
-                SELECT r.FillerID, r.UserID, count(*) AS nr
-                FROM requests r
-                INNER JOIN torrents t ON (t.ID = r.TorrentID)
-                WHERE r.TimeFilled BETWEEN ? AND ?
-                GROUP BY r.FillerID, r.UserId
-                HAVING count(*) > 1
-                ORDER BY count(*) DESC, r.FillerID ASC
-                LIMIT 100
-                ", $this->begin, $this->end
+            $pairs = $this->pg()->allex(<<<END_SQL
+                select r.id_filler,
+                    r.id_user,
+                    count(*) as nr
+                from request r
+                inner join relay.torrents t on (t."ID" = r.id_torrent)
+                where r.filled between $1 and $2
+                group by r.id_filler, r.id_user
+                having count(*) > 1
+                order by count(*) desc, r.id_filler asc
+                limit 100
+                END_SQL,
+                    $this->begin,
+                    $this->end,
             );
-            $pairs = self::$db->to_array(false, MYSQLI_ASSOC);
             self::$cache->cache_value('contest_pairs_' . $this->id, $pairs, 3600);
         }
         return $pairs;

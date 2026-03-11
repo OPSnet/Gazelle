@@ -6,7 +6,7 @@ namespace Gazelle\ArtistRole;
 
 class Request extends \Gazelle\ArtistRole {
     protected function cacheKey(): string {
-        return sprintf('ar_request_%d', $this->object->id());
+        return sprintf('ar_request_2_%d', $this->object->id());
     }
 
     /**
@@ -27,22 +27,18 @@ class Request extends \Gazelle\ArtistRole {
         }
 
         // remove any trace of the previous artistRole if we are updating
-        self::$db->prepared_query("
-            SELECT concat('artists_requests_', aa.ArtistID)
-            FROM requests_artists ra
-            INNER JOIN artists_alias aa USING (AliasID)
-            WHERE ra.RequestID = ?
-            GROUP BY aa.ArtistID
-            ", $this->object->id()
-        );
         self::$cache->delete_multi([
             "request_artists_{$this->object->id()}",
-            ...self::$db->collect(0)
+            ...$this->pg()->columnex(<<<END_SQL
+                select 'artists_requests_' || aa."ArtistID"
+                from request_artist            ra
+                inner join relay.artists_alias aa on (aa."AliasID" = ra.id_alias)
+                where ra.id_request = $1
+                group by aa."ArtistID"
+                END_SQL
+                , $this->object->id()
+            ),
         ]);
-        self::$db->prepared_query("
-            DELETE FROM requests_artists WHERE RequestID = ?
-            ", $this->object->id()
-        );
         $this->pg()->query("
             delete from request_artist where id_request = $1
             ", $this->object->id()
@@ -52,14 +48,7 @@ class Request extends \Gazelle\ArtistRole {
         $affected = 0;
         foreach ($roleList as $role => $artistList) {
             foreach ($artistList as $artist) {
-                self::$db->prepared_query("
-                    INSERT INTO requests_artists
-                           (RequestID, UserID, AliasID, artist_role_id)
-                    VALUES (?,         ?,      ?,       ?)
-                    ", $this->object->id(), $user->id, $artist->aliasId(), $role
-                );
-                $affected += self::$db->affected_rows();
-                $this->pg()->query("
+                $affected += $this->pg()->query("
                     insert into request_artist
                            (id_request, id_alias, id_artist_role, id_user)
                     VALUES ($1,         $2,       $3,             $4)
@@ -68,24 +57,25 @@ class Request extends \Gazelle\ArtistRole {
                 self::$cache->delete_value("artists_requests_{$artist->id}");
             }
         }
-        $this->pg()->query("
+        $this->pg()->query(<<<END_SQL
             update request set
                 artist_title_ts = upd.artist_title_ts
             from (
                 select r.id_request,
-                    to_tsvector('simple', coalesce(string_agg(aa.\"Name\", ' '), '')
+                    to_tsvector('simple', coalesce(string_agg(aa."Name", ' '), '')
                         || ' ' || r.title
                     ) as artist_title_ts
-                from request r
-                left join relay.requests_artists ra on (ra.\"RequestID\" = r.id_request)
-                left join relay.artists_alias aa using (\"AliasID\")
-                left join relay.artist_role ar on (ar.artist_role_id = ra.artist_role_id)
+                from request                  r
+                left join request_artist      ra using (id_request)
+                left join artist_role         ar using (id_artist_role)
+                left join relay.artists_alias aa on (aa."AliasID" = ra.id_alias)
                 where (ar.slug is null or ar.slug != 'guest')
                     and r.id_request = $1
                 group by r.id_request
             ) upd
             where request.id_request = upd.id_request
-            ", $this->object->id()
+            END_SQL
+            , $this->object->id()
         );
         $this->pg()->commit();
         self::$db->commit();
@@ -94,20 +84,21 @@ class Request extends \Gazelle\ArtistRole {
     }
 
     protected function artistListRaw(): array {
-        self::$db->prepared_query("
-            SELECT r.artist_role_id,
-                r.slug      AS slug,
-                aa.ArtistID AS artist_id,
-                aa.AliasID  AS alias_id,
-                aa.Name     AS name
-            FROM requests_artists    ra
-            INNER JOIN artist_role   r  USING (artist_role_id)
-            INNER JOIN artists_alias aa USING (AliasID)
-            WHERE ra.RequestID = ?
-            ORDER BY r.artist_role_id ASC, aa.Name ASC
-            ", $this->object->id()
+        return $this->pg()->allex(<<<END_SQL
+            select ra.id_artist_role,
+                ar.slug,
+                aa."ArtistID" as artist_id,
+                aa."AliasID"  as alias_id,
+                aa."Name"     as name
+            from request                   r
+            inner join request_artist      ra using (id_request)
+            inner join artist_role         ar using (id_artist_role)
+            inner join relay.artists_alias aa on (aa."AliasID" = ra.id_alias)
+            where r.id_request = $1
+            order by ar.id_artist_role ASC, aa."Name" ASC
+            END_SQL
+            , $this->object->id()
         );
-        return self::$db->to_array(false, MYSQLI_ASSOC);
     }
 
     /**
@@ -122,7 +113,7 @@ class Request extends \Gazelle\ArtistRole {
         }
         $list = [];
         foreach ($this->artistList as $artist) {
-            $roleId = $artist['artist_role_id'];
+            $roleId = $artist['id_artist_role'];
             if (!isset($list[$roleId])) {
                 $list[$roleId] = [];
             }
@@ -141,7 +132,7 @@ class Request extends \Gazelle\ArtistRole {
         }
         $list = [];
         foreach ($this->artistList as $artist) {
-            $roleId = $artist['artist_role_id'];
+            $roleId = $artist['id_artist_role'];
             if (!isset($list[$roleId])) {
                 $list[$roleId] = [];
             }

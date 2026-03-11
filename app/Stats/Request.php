@@ -19,12 +19,11 @@ class Request extends \Gazelle\Base {
         }
         $info = self::$cache->get_value(self::CACHE_KEY);
         if ($info === false) {
-            $info = self::$db->rowAssoc("
-                SELECT count(*)                 AS total,
-                    sum(if(FillerID > 0, 1, 0)) AS filled
-                FROM requests
+            $info = $this->pg()->rowAssocex("
+                select count(*) AS total,
+                    coalesce(sum(case when filled is null then 0 else 1 end), 0)::int as filled
+                from request
             ");
-            $info['filled'] = (int)$info['filled'];
             self::$cache->cache_value(self::CACHE_KEY, $info, 3600 + random_int(0, 300)); // a bit over an hour
         }
         $this->info = $info;

@@ -323,13 +323,15 @@ class Torrent extends TorrentAbstract {
     /**
      * Get the requests filled by this torrent.
      */
-    public function requestFills(Manager\Request $manager): array {
-        self::$db->prepared_query("
-            SELECT ID FROM requests WHERE TorrentID = ?
+    public function requestFills(
+        Manager\Request $manager = new Manager\Request()
+    ): array {
+        $idList = $this->pg()->columnex("
+            select id_request from request where id_torrent = $1
             ", $this->id
         );
         $result = [];
-        foreach (self::$db->collect(0) as $id) {
+        foreach ($idList as $id) {
             $request = $manager->findById($id);
             if ($request) {
                 $result[] = $request;
