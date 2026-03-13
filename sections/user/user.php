@@ -1,5 +1,4 @@
 <?php
-// phpcs:disable PSR1.Files.SideEffects.FoundWithSymbols
 // phpcs:disable Generic.WhiteSpace.ScopeIndent.IncorrectExact
 // phpcs:disable Generic.WhiteSpace.ScopeIndent.Incorrect
 /** @phpstan-var \Gazelle\User $Viewer */
@@ -9,10 +8,6 @@
 declare(strict_types=1);
 
 namespace Gazelle;
-
-use Gazelle\Enum\BonusItemPurchaseStatus;
-use Gazelle\Enum\UserTokenType;
-use Gazelle\User\Vote;
 
 $userMan = new Manager\User();
 $user = $userMan->findById((int)$_GET['id']);
@@ -33,7 +28,7 @@ $ipv4        = new Manager\IPv4();
 $tgMan       = new Manager\TGroup();
 
 $resetToken  = $Viewer->permitted('users_mod')
-    ? new Manager\UserToken()->findByUser($user, UserTokenType::password)
+    ? new Manager\UserToken()->findByUser($user, Enum\UserTokenType::password)
     : null;
 
 if (isset($_POST['flsubmit'], $_POST['fltype']) && ($_POST['action'] ?? '') === 'fltoken') {
@@ -45,19 +40,19 @@ if (isset($_POST['flsubmit'], $_POST['fltype']) && ($_POST['action'] ?? '') === 
     $status = $bonusMan->purchaseTokenOther(
         $Viewer, $user, $_POST['fltype'], $_POST['message'] ?? ''
     );
-    if ($status === BonusItemPurchaseStatus::success) {
+    if ($status === Enum\BonusItemPurchaseStatus::success) {
         header("Location: {$user->location()}");
         exit;
     } else {
         Error400::error(
             match ($status) { /* @phpstan-ignore match.unhandled (alreadyPurchased) */
-                BonusItemPurchaseStatus::declined
+                Enum\BonusItemPurchaseStatus::declined
                     => "{$user->username()} does not wish to receive tokens",
-                BonusItemPurchaseStatus::insufficientFunds
+                Enum\BonusItemPurchaseStatus::insufficientFunds
                     => "You do not have enough bonus points to buy that",
-                BonusItemPurchaseStatus::forbidden
+                Enum\BonusItemPurchaseStatus::forbidden
                     => "{$user->username()} cannot receive tokens from you",
-                BonusItemPurchaseStatus::incomplete
+                Enum\BonusItemPurchaseStatus::incomplete
                     => "Something was wrong with the parameters provided",
             }
         );
@@ -75,18 +70,6 @@ if ($userId == $Viewer->id) {
 }
 $previewer = $Preview ? $userMan->findById(PARANOIA_PREVIEW_USER) : $Viewer;
 $Paranoia  = $Preview ? explode(',', $_GET['paranoia']) : $user->paranoia();
-
-function check_paranoia_here(?string $Setting): int|false {
-    global $Paranoia, $Class, $userId, $Preview;
-    if (!$Setting) {
-        return PARANOIA_ALLOWED;
-    }
-    if ($Preview) {
-        return check_paranoia($Setting, $Paranoia ?? [], $Class);
-    } else {
-        return check_paranoia($Setting, $Paranoia ?? [], $Class, $userId);
-    }
-}
 
 View::show_header($username, [
     'js' => 'vendor/jquery.imagesloaded,vendor/jquery.wookmark,bbcode,comments,lastfm,requests,user'
@@ -129,9 +112,9 @@ if ($lastfmInfo) {
     ]);
 }
 
-$vote    = new Vote($user);
+$vote    = new User\Vote($user);
 $stats   = $user->stats();
-$Uploads = check_paranoia_here('uploads+') ? $stats->uploadTotal() : 0;
+$Uploads = $user->propertyVisible($Viewer, 'uploads+') ? $stats->uploadTotal() : 0;
 $rank    = new UserRank(
     new UserRank\Configuration(RANKING_WEIGHT),
     [
@@ -141,12 +124,12 @@ $rank    = new UserRank(
         'requests'       => $stats->requestBountyTotal(),
         'posts'          => $stats->forumPostTotal(),
         'bounty'         => $stats->requestVoteSize(),
-        'artists'        => check_paranoia_here('artistsadded') ? $stats->artistAddedTotal() : 0,
-        'collage-add'    => check_paranoia_here('collagecontribs+') ? $stats->collageContrib() : 0,
-        'collage-create' => check_paranoia_here('collagecontribs+') ? $stats->collageTotal() : 0,
-        'votes'          => $vote->userTotal(Vote::UPVOTE | Vote::DOWNVOTE),
+        'artists'        => $user->propertyVisible($Viewer, 'artistsadded') ? $stats->artistAddedTotal() : 0,
+        'collage-add'    => $user->propertyVisible($Viewer, 'collagecontribs+') ? $stats->collageContrib() : 0,
+        'collage-create' => $user->propertyVisible($Viewer, 'collagecontribs+') ? $stats->collageTotal() : 0,
+        'votes'          => $vote->userTotal(User\Vote::UPVOTE | User\Vote::DOWNVOTE),
         'bonus'          => $userBonus->pointsSpent(),
-        'comment-t'      => check_paranoia_here('torrentcomments++') ? $stats->commentTotal('torrents') : 0,
+        'comment-t'      => $user->propertyVisible($Viewer, 'torrentcomments++') ? $stats->commentTotal('torrents') : 0,
     ],
 );
 
@@ -166,16 +149,17 @@ $statList = [
     ['collage-create', 'collagecontribs+', 'Collages created', $numberFormatter, 'created'],
     ['artists', 'artistsadded', 'Artists added', $numberFormatter, 'added'],
     ['votes', null, 'Release votes cast', $numberFormatter, 'votes'],
-]
+];
 ?>
         <div class="box box_info box_userinfo_percentile">
             <div class="head colhead_dark">Percentile Rankings (hover for values)</div>
             <ul class="stats nobullet">
 <?php
 foreach ($statList as $item) {
-    if (($Override = check_paranoia_here($item[1]))) {
+    $Override = is_null($item[1]) ? PARANOIA_ALLOWED : $user->propertyVisible($Viewer, $item[1]);
+    if ($Override) {
 ?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?= $item[3]($rank->raw($item[0])) ?> <?= $item[4] ?>"><?= $item[2] ?>: <?= $rank->rank($item[0]) ?></li>
+                <li class="tooltip<?=($Override === PARANOIA_OVERRIDDEN ? ' paranoia_override' : '')?>" title="<?= $item[3]($rank->raw($item[0])) ?> <?= $item[4] ?>"><?= $item[2] ?>: <?= $rank->rank($item[0]) ?></li>
 <?php
     }
 }
@@ -226,7 +210,7 @@ if ($user->propertyVisibleMulti($previewer, ['artistsadded', 'collagecontribs+',
 
 <?php
 
-if (check_paranoia_here('snatched')) {
+if ($user->propertyVisible($Viewer, 'snatched')) {
     echo $Twig->render('user/tag-snatch.twig', [
         'user' => $user,
     ]);
@@ -238,32 +222,32 @@ echo $Twig->render('user/sidebar-stats.twig', [
     'user'         => $user,
     'viewer'       => $Viewer,
     'visible'      => [
-        'collages+'             => check_paranoia_here('collages+'),
-        'collages'              => check_paranoia_here('collages'),
-        'collagescontrib+'      => check_paranoia_here('collagecontribs+'),
-        'collagecontribs'       => check_paranoia_here('collagecontribs'),
+        'collages+'             => $user->propertyVisible($Viewer, 'collages+'),
+        'collages'              => $user->propertyVisible($Viewer, 'collages'),
+        'collagescontrib+'      => $user->propertyVisible($Viewer, 'collagecontribs+'),
+        'collagecontribs'       => $user->propertyVisible($Viewer, 'collagecontribs'),
         'downloaded'            => $OwnProfile || $Viewer->permitted('site_view_torrent_snatchlist'),
-        'invitedcount'          => check_paranoia_here('invitedcount'),
-        'leeching+'             => check_paranoia_here('leeching+'),
-        'leeching'              => check_paranoia_here('leeching'),
-        'perfectflacs+'         => check_paranoia_here('perfectflacs+'),
-        'perfectflacs'          => check_paranoia_here('perfectflacs'),
-        'seeding+'              => check_paranoia_here('seeding+'),
-        'seeding'               => check_paranoia_here('seeding'),
-        'snatched+'             => check_paranoia_here('snatched+'),
-        'snatched'              => check_paranoia_here('snatched'),
-        'torrentcomments+'      => check_paranoia_here('torrentcomments+'),
-        'torrentcomments'       => check_paranoia_here('torrentcomments'),
-        'requestsfilled_list'   => check_paranoia_here('requestsfilled_list'),
-        'requestsfilled_count'  => check_paranoia_here('requestsfilled_count'),
-        'requestsfilled_bounty' => check_paranoia_here('requestsfilled_bounty'),
-        'requestsvoted_list'    => check_paranoia_here('requestsvoted_list'),
-        'requestsvoted_count'   => check_paranoia_here('requestsvoted_count'),
-        'requestsvoted_bounty'  => check_paranoia_here('requestsvoted_bounty'),
-        'uniquegroups+'         => check_paranoia_here('uniquegroups+'),
-        'uniquegroups'          => check_paranoia_here('uniquegroups'),
-        'uploads+'              => check_paranoia_here('uploads+'),
-        'uploads'               => check_paranoia_here('uploads'),
+        'invitedcount'          => $user->propertyVisible($Viewer, 'invitedcount'),
+        'leeching+'             => $user->propertyVisible($Viewer, 'leeching+'),
+        'leeching'              => $user->propertyVisible($Viewer, 'leeching'),
+        'perfectflacs+'         => $user->propertyVisible($Viewer, 'perfectflacs+'),
+        'perfectflacs'          => $user->propertyVisible($Viewer, 'perfectflacs'),
+        'seeding+'              => $user->propertyVisible($Viewer, 'seeding+'),
+        'seeding'               => $user->propertyVisible($Viewer, 'seeding'),
+        'snatched+'             => $user->propertyVisible($Viewer, 'snatched+'),
+        'snatched'              => $user->propertyVisible($Viewer, 'snatched'),
+        'torrentcomments+'      => $user->propertyVisible($Viewer, 'torrentcomments+'),
+        'torrentcomments'       => $user->propertyVisible($Viewer, 'torrentcomments'),
+        'requestsfilled_list'   => $user->propertyVisible($Viewer, 'requestsfilled_list'),
+        'requestsfilled_count'  => $user->propertyVisible($Viewer, 'requestsfilled_count'),
+        'requestsfilled_bounty' => $user->propertyVisible($Viewer, 'requestsfilled_bounty'),
+        'requestsvoted_list'    => $user->propertyVisible($Viewer, 'requestsvoted_list'),
+        'requestsvoted_count'   => $user->propertyVisible($Viewer, 'requestsvoted_count'),
+        'requestsvoted_bounty'  => $user->propertyVisible($Viewer, 'requestsvoted_bounty'),
+        'uniquegroups+'         => $user->propertyVisible($Viewer, 'uniquegroups+'),
+        'uniquegroups'          => $user->propertyVisible($Viewer, 'uniquegroups'),
+        'uploads+'              => $user->propertyVisible($Viewer, 'uploads+'),
+        'uploads'               => $user->propertyVisible($Viewer, 'uploads'),
     ],
 ]);
 
@@ -288,7 +272,7 @@ echo $Twig->render('user/profileinfo.twig', [
     'user'  => $user,
 ]);
 
-if (check_paranoia_here('snatched')) {
+if ($user->propertyVisible($Viewer, 'snatched')) {
     echo $Twig->render('user/recent.twig', [
         'id'     => $userId,
         'recent' => array_map(fn ($id) => $tgMan->findById($id), $user->snatch()->recentSnatchList()),
@@ -298,7 +282,7 @@ if (check_paranoia_here('snatched')) {
     ]);
 }
 
-if (check_paranoia_here('uploads')) {
+if ($user->propertyVisible($Viewer, 'uploads')) {
     echo $Twig->render('user/recent.twig', [
         'id'     => $userId,
         'recent' => array_map(fn ($id) => $tgMan->findById($id), $user->recentUploadList()),
@@ -351,8 +335,8 @@ echo $Twig->render('user/information.twig', [
 
     'auto_list' => $Viewer->permitted('users_auto_reports')
         ? (function ($u) {
-            $raTypeMan = new \Gazelle\Manager\ReportAutoType();
-            $raSearch  = new Search\ReportAuto(new \Gazelle\Manager\ReportAuto($raTypeMan), $raTypeMan);
+            $raTypeMan = new Manager\ReportAutoType();
+            $raSearch  = new Search\ReportAuto(new Manager\ReportAuto($raTypeMan), $raTypeMan);
             return $raSearch->setUser($u)->setState(Enum\ReportAutoState::open)->userTotalList(0);
         })($user)
         : [],
