@@ -12,6 +12,29 @@ class Transcode extends \Gazelle\Base {
      * based on what a user is seeding or has snatched.
      */
 
+    /*
+    with u as (
+        select distinct t."ID" as id_torrent,
+            t."GroupID" as id_tgroup,
+             concat_ws(
+                 chr(31),
+                 t."RemasterYear", t."RemasterTitle", t."RemasterRecordLabel", t."RemasterCatalogueNumber"
+             ) as edition
+        from relay.xbt_files_users xfu
+        inner join relay.torrents t on (xfu.fid = t."ID")
+        where t."Format" = 'FLAC'
+            and xfu.active = 1
+            and xfu.remaining = 0
+            and xfu.mtime > extract(epoch from (now() - interval '1 hour'))::integer
+            and xfu.uid = $1
+    )
+    select u.id_torrent AS source, b.want_320, b.want_v0
+    from u
+    inner join better_tgroup b using (id_tgroup, edition)
+    where (b.want_320 is true and b.want_v0 is true)
+    limit 10 offset 0;
+    */
+
     protected const CACHE_KEY          = 'u_better_2_%s_%s_%d';
     protected BetterFilter $mode       = BetterFilter::any;
     protected BetterEncoding $encoding = BetterEncoding::any;
@@ -19,8 +42,13 @@ class Transcode extends \Gazelle\Base {
 
     public function __construct(
         protected \Gazelle\User $user,
-        protected \Gazelle\Manager\Torrent $torMan
+        protected \Gazelle\Manager\Torrent $torMan = new \Gazelle\Manager\Torrent(),
     ) {}
+
+    public function setEncoding(BetterEncoding $encoding): static {
+        $this->encoding = $encoding;
+        return $this;
+    }
 
     public function setMode(BetterFilter $mode): static {
         $this->mode = $mode;
@@ -32,77 +60,105 @@ class Transcode extends \Gazelle\Base {
         return $this;
     }
 
-    public function setEncoding(BetterEncoding $encoding): static {
-        $this->encoding = $encoding;
-        return $this;
+    public function placeholder(int $n): string {
+        return '$' . (1 + $n);
     }
 
     public function queryInit(): array {
-        $cond = ["tg.CategoryID = 1 AND t.Format = 'FLAC'"];
-        $args = [];
-
         // need to join additional tables to restrict the search?
-        $distinct = '';
+        $join = isset($this->search)
+            ? 'inner join relay.torrents_group tg ON (tg."ID" = t."GroupID")'
+            : '/* no join */';
+        $cond = [];
+        $args = [];
         switch ($this->mode) {
             case BetterFilter::seeding:
-                $distinct = 'DISTINCT'; // may be seeding from more than one location
-                $join = 'INNER JOIN xbt_files_users xfu ON (xfu.fid = t.ID)';
-                $cond[] = 'active = 1 AND remaining = 0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = ?';
+                $distinct = ' distinct'; // may be seeding more than once
+                $body = <<<END_SQL
+                    from relay.torrents t
+                    $join
+                    inner join relay.xbt_files_users xfu on (xfu.fid = t."ID")
+                END_SQL;
+                $cond[] = <<<END_SQL
+                    t."Format" = 'FLAC'
+                        and xfu.active = 1
+                        and xfu.remaining = 0
+                        and xfu.mtime > extract(epoch from (now() - interval '1 hour'))::integer
+                        and xfu.uid = {$this->placeholder(count($args))}
+                END_SQL;
                 $args[] = $this->user->id;
                 break;
             case BetterFilter::snatched:
-                $distinct = 'DISTINCT'; // may have snatched more than once
-                $join = 'INNER JOIN xbt_snatched xs ON (xs.fid = t.ID)';
-                $cond[] = 'xs.uid = ?';
+                $distinct = ' distinct'; // may have snatched more than once
+                $body = <<<END_SQL
+                    from relay.torrents t
+                    $join
+                    inner join relay.xbt_snatched xs on (xs.fid = t."ID")
+                END_SQL;
+                $cond[] = "xs.uid = {$this->placeholder(count($args))}";
                 $args[] = $this->user->id;
                 break;
             case BetterFilter::uploaded:
-                $join = '/* uploaded */';
-                $cond[] = 't.UserID = ?';
-                $args[] = $this->user->id;
+                $distinct = '';
+                $body     = "from relay.torrents t $join";
+                $cond[]   = "t.\"UserID\" = {$this->placeholder(count($args))}";
+                $args[]   = $this->user->id;
                 break;
             default:
-                $join = '/* any */';
+                $distinct = '';
+                $body     = "from relay.torrents t $join";
                 break;
         }
 
         if (isset($this->search)) {
-            $cond[] = "tg.Name LIKE concat('%', ?, '%')";
+            $cond[] = "tg.\"Name\" ~~* ('%' || {$this->placeholder(count($args))} || '%')";
             $args[] = $this->search;
         }
 
-        // what opportunities are there?
-        switch ($this->encoding) {
-            case BetterEncoding::all:
-                $cond[] = '(b.want_320 = 1 AND b.want_v0 = 1)';
-                break;
-            case BetterEncoding::cbr320:
-                $cond[] = 'b.want_320 = 1';
-                break;
-            case BetterEncoding::v0:
-                $cond[] = 'b.want_v0 = 1';
-                break;
-        }
+        $where = $cond === []
+            ? ''
+            : "where " . implode(' and ', $cond);
 
-        $sql = "FROM torrents t
-            INNER JOIN torrents_group tg ON (tg.ID = t.GroupID)
-            INNER JOIN better_transcode_music b ON (
-                b.tgroup_id = t.GroupID
-                AND b.edition = concat_ws(
-                    char(31),
-                    t.RemasterYear, t.RemasterTitle, t.RemasterRecordLabel, t.RemasterCatalogueNumber
-                )
+        return [
+            <<<END_SQL
+            with u as (
+                select $distinct t."ID" as id_torrent,
+                    t."GroupID" as id_tgroup,
+                     concat_ws(
+                         chr(31),
+                         t."RemasterYear", t."RemasterTitle", t."RemasterRecordLabel", t."RemasterCatalogueNumber"
+                     ) as edition
+                $body
+                $where
             )
-            $join";
-        return [$sql, $distinct, $cond, $args];
+            END_SQL,
+            match ($this->encoding) {
+                BetterEncoding::all    => '(b.want_320 is true and b.want_v0 is true)',
+                BetterEncoding::any    => '(b.want_320 is true or b.want_v0 is true)',
+                BetterEncoding::cbr320 => 'b.want_320 is true',
+                BetterEncoding::v0     => 'b.want_v0 is true',
+            },
+            $args,
+        ];
     }
 
     public function queryList(int $limit, int $offset): array {
-        [$sqlBody, $distinct, $cond, $args] = $this->queryInit();
-        $sql = "SELECT $distinct t.ID AS source, b.want_320, b.want_v0
-            $sqlBody
-            WHERE " . implode(' AND ', $cond) . " LIMIT ? OFFSET ?";
-        return [$sql, array_merge($args, [$limit, $offset])];
+        [$cte, $cond, $args] = $this->queryInit();
+        return [
+            <<<END_SQL
+                $cte
+                select u.id_torrent as source, b.want_320, b.want_v0
+                from u
+                inner join better_tgroup b using (id_tgroup, edition)
+                where $cond
+                limit {$this->placeholder(count($args))} offset {$this->placeholder(count($args) + 1)}
+            END_SQL,
+            [
+                ...$args,
+                $limit,
+                $offset
+            ],
+        ];
     }
 
     public function list(int $limit, int $offset): array {
@@ -118,8 +174,7 @@ class Transcode extends \Gazelle\Base {
         }
         if ($list === false) {
             [$sql, $args] = $this->queryList($limit, $offset);
-            self::$db->prepared_query($sql, ...$args);
-            $list = self::$db->to_array(false, MYSQLI_ASSOC);
+            $list = $this->pg()->allex($sql, ...$args);
             if ($key) {
                 self::$cache->cache_value($key, $list, 3600);
             }
@@ -132,13 +187,19 @@ class Transcode extends \Gazelle\Base {
     }
 
     public function queryTotal(): array {
-        [$sqlBody, $distinct, $cond, $args] = $this->queryInit();
-        $sql = "SELECT count($distinct t.ID) AS `all`,
-                sum(b.want_320) AS total_320,
-                sum(b.want_v0) AS total_v0
-            $sqlBody
-            WHERE " . implode(' AND ', $cond);
-        return [$sql, $args];
+        [$cte, $cond, $args] = $this->queryInit();
+        return [
+            <<<END_SQL
+                $cte
+                select count(u.id_torrent) as "all",
+                    sum(b.want_320::integer) as total_320,
+                    sum(b.want_v0::integer) as total_v0
+                from u
+                inner join better_tgroup b using (id_tgroup, edition)
+                where $cond
+            END_SQL,
+            $args
+        ];
     }
 
     public function total(): array {
@@ -154,7 +215,7 @@ class Transcode extends \Gazelle\Base {
         }
         if ($total === false) {
             [$sql, $args] = $this->queryTotal();
-            $total = self::$db->rowAssoc($sql, ...$args);
+            $total = $this->pg()->rowAssocex($sql, ...$args);
             if ($key) {
                 self::$cache->cache_value($key, $total, 3600);
             }

@@ -255,40 +255,6 @@ class TGroup extends \Gazelle\BaseManager {
         return true;
     }
 
-    /**
-     * Find all the music releases that have a FLAC upload which could be used to
-     * produce V0 and 320 transcodes. If there is more than one FLAC in an
-     * edition it does not really matter which one is chosen. Any will be of
-     * sufficient quality to generate a lossy transcode.
-     */
-    public function refreshBetterTranscode(): int {
-        self::$db->begin_transaction();
-        self::$db->prepared_query("
-            DELETE FROM better_transcode_music;
-        ");
-        self::$db->prepared_query("
-            INSERT IGNORE INTO better_transcode_music (tgroup_id, want_v0, want_320, edition)
-            SELECT g.ID,
-                if(mp3__v0.ID is null, 1, 0),
-                if(mp3_320.ID is null, 1, 0),
-                F.edition
-            FROM torrents_group g
-            INNER JOIN (
-                SELECT DISTINCT GroupID,
-                    concat_ws(char(31), RemasterYear, RemasterTitle, RemasterRecordLabel, RemasterCatalogueNumber) AS edition
-                FROM torrents
-                WHERE format = 'FLAC'
-            ) F ON (F.GroupID = g.ID)
-            LEFT JOIN torrents mp3__v0 ON (mp3__v0.GroupID = F.GroupID and mp3__v0.Format = 'MP3' AND mp3__v0.Encoding = 'V0 (VBR)')
-            LEFT JOIN torrents mp3_320 ON (mp3_320.GroupID = F.GroupID and mp3_320.Format = 'MP3' AND mp3_320.Encoding = '320')
-            WHERE g.CategoryID = 1
-                AND (mp3__v0.ID IS NULL OR mp3_320.ID IS NULL)
-        ");
-        $affected = self::$db->affected_rows();
-        self::$db->commit();
-        return $affected;
-    }
-
     public function similarVote(\Gazelle\TGroup $tgroup): array {
         $key = sprintf(self::VOTE_SIMILAR, $tgroup->id);
         $similar = self::$cache->get_value($key);
@@ -404,5 +370,41 @@ class TGroup extends \Gazelle\BaseManager {
                 "Torrent {$torrent->id} was changed to category {$new->categoryId()} by {$user->label()}"
             );
         return $new;
+    }
+
+    /**
+     * Find all the music releases that have a FLAC upload which could be used to
+     * produce V0 and 320 transcodes. If there is more than one FLAC in an
+     * edition it does not really matter which one is chosen. Any will be of
+     * sufficient quality to generate a lossy transcode.
+     */
+    public function refreshBetter(): int {
+        $this->pg()->begin();
+        $this->pg()->query("
+            delete from better_tgroup;
+        ");
+        $affected = $this->pg()->query(<<<END_SQL
+            insert into better_tgroup (id_tgroup, want_v0, want_320, edition)
+            select tg."ID",
+                case when mp3__v0."ID" is null then true else false end,
+                case when mp3_320."ID" is null then true else false end,
+                f.edition
+            from relay.torrents_group tg
+            inner join (
+                select distinct t."GroupID" as id_tgroup,
+                    concat_ws(chr(31), t."RemasterYear", t."RemasterTitle", t."RemasterRecordLabel", t."RemasterCatalogueNumber") as edition
+                from relay.torrents t
+                where t."Format" = 'FLAC'
+            ) f on (f.id_tgroup = tg."ID")
+            left join relay.torrents mp3__v0 on (mp3__v0."GroupID" = f.id_tgroup and mp3__v0."Format" = 'MP3' and mp3__v0."Encoding" = 'V0 (VBR)')
+            left join relay.torrents mp3_320 on (mp3_320."GroupID" = f.id_tgroup and mp3_320."Format" = 'MP3' and mp3_320."Encoding" = '320')
+            where tg."CategoryID" = 1
+                and (mp3__v0."ID" is null or mp3_320."ID" is null)
+            on conflict (id_tgroup, edition)
+                do nothing
+            END_SQL
+        );
+        $this->pg()->commit();
+        return $affected;
     }
 }

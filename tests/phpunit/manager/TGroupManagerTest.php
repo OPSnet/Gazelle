@@ -64,7 +64,7 @@ class TGroupManagerTest extends TestCase {
     public function testRefreshBetterTranscode(): void {
         $manager = new Manager\TGroup();
         // There is at least something from our own tgroup
-        $this->assertGreaterThanOrEqual(1, $manager->refreshBetterTranscode(), 'tgman-refresh-better-transcode');
+        $this->assertGreaterThanOrEqual(1, $manager->refreshBetter(), 'tgman-refresh-better-transcode');
     }
 
     public function testJsonTGroupList(): void {
