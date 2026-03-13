@@ -7,12 +7,14 @@
  * Usage: process-monero-donation <payment_id>,<eur_value> [<payment_id>,<eur_value> ...]
  */
 
-require_once(__DIR__ . '/../lib/bootstrap.php');
+namespace Gazelle;
 
-$monero = new Gazelle\Donate\Monero;
-$userMan = new Gazelle\Manager\User;
+require __DIR__ . '/../lib/bootstrap.php';
 
-$xbtRate = new Gazelle\Manager\XBT()->latestRate('EUR');
+$monero = new Donate\Monero();
+$userMan = new Manager\User();
+
+$xbtRate = new Manager\XBT()->latestRate('EUR');
 
 array_shift($argv);
 foreach ($argv as $paymentData) {
@@ -33,7 +35,7 @@ foreach ($argv as $paymentData) {
         continue;
     }
 
-    $donor = new Gazelle\User\Donor($user);
+    $donor = new User\Donor($user);
     $donor->donate(
         amount:   $eurValue,
         xbtRate:  $xbtRate,

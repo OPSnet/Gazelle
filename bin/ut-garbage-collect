@@ -9,7 +9,7 @@ namespace Gazelle;
  * either unknown to the unit tests, or the queries here do not identify them.
  */
 
-require_once(__DIR__ . '/../lib/bootstrap.php');
+require __DIR__ . '/../lib/bootstrap.php';
 
 
 $pgrw = new DB\Pg(PG_RW_DSN);
@@ -126,14 +126,14 @@ foreach ($db->collect(0) as $collageId) {
 }
 
 // clean requests
-$db->prepared_query("
-    SELECT ID
-    FROM requests
-    WHERE Title LIKE 'phpunit %'
+$requestList = $pgrw->columnex("
+    select id_request
+    from request
+    where title ~ '^phpunit '
 ");
 
 $reqMan = new Manager\Request();
-foreach ($db->collect(0) as $requestId) {
+foreach ($requestList as $requestId) {
     $request = $reqMan->findById($requestId);
     echo "request {$request->id()} ({$request->title()})\n";
     $request->remove();

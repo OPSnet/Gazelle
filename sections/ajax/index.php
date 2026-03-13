@@ -99,166 +99,166 @@ switch ($Action) {
     // things (that may be) used on the site
     case 'upload_section':
         // Gets one of the upload forms
-        include_once 'upload.php';
+        require __DIR__ . '/upload.php';
         break;
     case 'preview':
-        include_once 'preview.php';
+        require __DIR__ . '/preview.php';
         break;
     case 'add_tag':
-        include_once 'torrent_tag_add.php';
+        require __DIR__ . '/torrent_tag_add.php';
         break;
     case 'delete_tag':
-        include_once 'torrent_tag_remove.php';
+        require __DIR__ . '/torrent_tag_remove.php';
         break;
     case 'stats':
-        include_once 'stats.php';
+        require __DIR__ . '/stats.php';
         break;
 
     // things not yet used on the site
     case 'torrent':
-        include_once 'torrent.php';
+        require __DIR__ . '/torrent.php';
         break;
     case 'torrentgroup':
-        include_once 'torrentgroup.php';
+        require __DIR__ . '/torrentgroup.php';
         break;
     case 'torrentgroupalbumart':        // so the album art script can function without breaking the ratelimit
-        include_once 'torrentgroupalbumart.php';
+        require __DIR__ . '/torrentgroupalbumart.php';
         break;
     case 'torrent_remove_cover_art':
-        include_once 'torrent_remove_cover_art.php';
+        require __DIR__ . '/torrent_remove_cover_art.php';
         break;
     case 'tcomments':
-        include_once 'tcomments.php';
+        require __DIR__ . '/tcomments.php';
         break;
     case 'user':
-        include_once 'user.php';
+        require __DIR__ . '/user.php';
         break;
     case 'forum':
-        include_once 'forum/index.php';
+        require __DIR__ . '/forum/index.php';
         break;
     case 'post_edit':
-        include_once 'post_edit.php';
+        require __DIR__ . '/post_edit.php';
         break;
     case 'top10':
-        include_once 'top10/index.php';
+        require __DIR__ . '/top10/index.php';
         break;
     case 'browse':
-        include_once 'browse.php';
+        require __DIR__ . '/browse.php';
         break;
     case 'usersearch':
-        include_once 'usersearch.php';
+        require __DIR__ . '/usersearch.php';
         break;
     case 'requests':
-        include_once 'requests.php';
+        require __DIR__ . '/requests.php';
         break;
     case 'artist':
-        include_once 'artist.php';
+        require __DIR__ . '/artist.php';
         break;
     case 'add_similar':
-        include_once __DIR__ . '/../artist/add_similar.php';
+        require __DIR__ . '/../artist/add_similar.php';
         break;
     case 'inbox':
-        include_once 'inbox/index.php';
+        require __DIR__ . '/inbox/index.php';
         break;
     case 'subscriptions':
-        include_once 'subscriptions.php';
+        require __DIR__ . '/subscriptions.php';
         break;
     case 'index':
-        include_once 'info.php';
+        require __DIR__ . '/info.php';
         break;
     case 'bookmarks':
-        include_once 'bookmarks/index.php';
+        require __DIR__ . '/bookmarks/index.php';
         break;
     case 'announcements':
-        include_once 'announcements.php';
+        require __DIR__ . '/announcements.php';
         break;
     case 'request':
-        include_once 'request.php';
+        require __DIR__ . '/request.php';
         break;
     case 'loadavg':
-        include_once 'loadavg.php';
+        require __DIR__ . '/loadavg.php';
         break;
     case 'better':
-        include_once 'better/index.php';
+        require __DIR__ . '/better/index.php';
         break;
     case 'password_validate':
-        include_once 'password_validate.php';
+        require __DIR__ . '/password_validate.php';
         break;
     case 'similar_artists':
-        include_once 'similar_artists.php';
+        require __DIR__ . '/similar_artists.php';
         break;
     case 'userhistory':
         match ($_GET['type'] ?? '') {
-            'posts' => include_once 'userhistory/post_history.php',
+            'posts' => require __DIR__ . '/userhistory/post_history.php',
             default => json_error('bad type'),
         };
         break;
     case 'votefavorite':
-        include_once 'vote_handle.php';
+        require __DIR__ . '/vote_handle.php';
         break;
     case 'wiki':
-        include_once 'wiki.php';
+        require __DIR__ . '/wiki.php';
         break;
     case 'get_friends':
         echo json_encode(new User\Friend($Viewer)->userList());
         break;
     case 'news_ajax':
-        include_once 'news_ajax.php';
+        require __DIR__ . '/news_ajax.php';
         break;
     case 'user_recents':
-        include_once 'user_recents.php';
+        require __DIR__ . '/user_recents.php';
         break;
     case 'collage':
-        include_once 'collage.php';
+        require __DIR__ . '/collage.php';
         break;
     case 'raw_bbcode':
-        include_once 'raw_bbcode.php';
+        require __DIR__ . '/raw_bbcode.php';
         break;
     case 'notifications':
-        include_once 'notifications.php';
+        require __DIR__ . '/notifications.php';
         break;
     case 'get_user_notifications':
-        include_once 'get_user_notifications.php';
+        require __DIR__ . '/get_user_notifications.php';
         break;
     case 'clear_user_notification':
-        include_once 'clear_user_notification.php';
+        require __DIR__ . '/clear_user_notification.php';
         break;
     case 'push_cycle_topic':
-        include_once 'push_cycle_topic.php';
+        require __DIR__ . '/push_cycle_topic.php';
         break;
     case 'push_test':
-        include_once 'push_test.php';
+        require __DIR__ . '/push_test.php';
         break;
     case 'loggy':
-        include_once 'loggy.php';
+        require __DIR__ . '/loggy.php';
         break;
     case 'user_stats':
-        include_once 'stats/users.php';
+        require __DIR__ . '/stats/users.php';
         break;
     case 'torrent_stats':
-        include_once 'stats/torrents.php';
+        require __DIR__ . '/stats/torrents.php';
         break;
     case 'logchecker':
-        include_once 'logchecker.php';
+        require __DIR__ . '/logchecker.php';
         break;
     case 'riplog':
-        include_once 'riplog.php';
+        require __DIR__ . '/riplog.php';
         break;
 
     case 'upload':
-        include_once __DIR__ . '/../upload/upload_handle.php';
+        require __DIR__ . '/../upload/upload_handle.php';
         break;
     case 'download':
-        include_once __DIR__ . '/../torrents/download.php';
+        require __DIR__ . '/../torrents/download.php';
         break;
     case 'request_fill':
-        json_print('success', include_once __DIR__ . '/../requests/fill_handle.php');
+        json_print('success', require __DIR__ . '/../requests/fill_handle.php');
         break;
     case 'add_log':
-        include_once __DIR__ . '/add_log.php';
+        require __DIR__ . '/add_log.php';
         break;
     case 'user_torrents':
-        include_once __DIR__ . '/user_torrents.php';
+        require __DIR__ . '/user_torrents.php';
         break;
     default:
         // If they're screwing around with the query string

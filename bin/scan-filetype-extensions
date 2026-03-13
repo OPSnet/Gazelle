@@ -4,13 +4,15 @@
 // Scan each torrent and make a note of what file extensions are present.
 // 1.6M torrents takes about 12 minutes, running in tmux is advised.
 
-require_once __DIR__ . '/../lib/bootstrap.php';
+namespace Gazelle;
 
-$db  = Gazelle\DB::DB();
+require __DIR__ . '/../lib/bootstrap.php';
+
+$db  = DB::DB();
 $max = (int)$db->scalar("
     select max(id) from torrents
 ");
-$torMan = new Gazelle\Manager\Torrent();
+$torMan = new Manager\Torrent();
 $seen   = [];
 $chunk  = 10000;
 $id     = 0;

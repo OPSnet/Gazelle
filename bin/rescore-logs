@@ -11,7 +11,7 @@ namespace Gazelle;
 
 use OrpheusNET\Logchecker\Logchecker;
 
-require_once(__DIR__ . '/../lib/bootstrap.php');
+require __DIR__ . '/../lib/bootstrap.php';
 
 $dryRun = in_array('--dry-run', $argv);
 $includeAdjusted = in_array('--include-adjusted', $argv);

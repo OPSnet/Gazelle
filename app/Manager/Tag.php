@@ -679,8 +679,8 @@ class Tag extends \Gazelle\BaseManager {
                 )
                 select t."Name" as name,
                     count(*)    as uses,
-                    0           as posVotes,
-                    0           as negVotes
+                    0           as "posVotes",
+                    0           as "negVotes"
                 from relay.tags t
                 inner join rt on (rt.id_tag = t."ID")
                 group by t."Name"

@@ -14,4 +14,4 @@ if ($collage->isDeleted()) {
     exit;
 }
 
-require_once $collage->isArtist() ? 'collage_artists.php' : 'collage_torrent.php';
+require __DIR__ . ($collage->isArtist() ? '/collage_artists.php' : '/collage_torrent.php');

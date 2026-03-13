@@ -5,37 +5,37 @@ declare(strict_types=1);
 
 namespace Gazelle;
 
-if (!empty($_POST['action'])) {
-    match ($_POST['action']) {
-        'add_similar'     => include_once 'add_similar.php',
-        'add_alias'       => include_once 'add_alias.php',
-        'change_artistid' => include_once 'change_artistid.php',
-        'download'        => include_once 'download.php',
-        'rename'          => include_once 'rename.php',
-        'edit'            => include_once 'edit_handle.php',
-        'takeeditrequest' => include_once 'edit_request_handle.php',
+if (isset($_POST['action'])) {
+    require __DIR__ . match ($_POST['action']) {
+        'add_similar'     => '/add_similar.php',
+        'add_alias'       => '/add_alias.php',
+        'change_artistid' => '/change_artistid.php',
+        'download'        => '/download.php',
+        'rename'          => '/rename.php',
+        'edit'            => '/edit_handle.php',
+        'takeeditrequest' => '/edit_request_handle.php',
         default           => Error400::error('Missing artist POST action'),
     };
-} elseif (!empty($_GET['action'])) {
-    match ($_GET['action']) {
-        'autocomplete'    => include_once 'autocomplete.php',
-        'change_artistid' => include_once 'change_artistid.php',
-        'delete'          => include_once 'delete.php',
-        'delete_alias'    => include_once 'delete_alias.php',
-        'delete_similar'  => include_once 'delete_similar.php',
-        'edit'            => include_once 'edit.php',
-        'editrequest'     => include_once 'edit_request.php',
-        'history'         => include_once 'history.php',
-        'notify'          => include_once 'notify.php',
-        'notifyremove'    => include_once 'notify_remove.php',
-        'revert'          => include_once 'edit_handle.php',
-        'vote_similar'    => include_once 'vote_similar.php',
+} elseif (isset($_GET['action'])) {
+    require __DIR__ . match ($_GET['action']) {
+        'autocomplete'    => '/autocomplete.php',
+        'change_artistid' => '/change_artistid.php',
+        'delete'          => '/delete.php',
+        'delete_alias'    => '/delete_alias.php',
+        'delete_similar'  => '/delete_similar.php',
+        'edit'            => '/edit.php',
+        'editrequest'     => '/edit_request.php',
+        'history'         => '/history.php',
+        'notify'          => '/notify.php',
+        'notifyremove'    => '/notify_remove.php',
+        'revert'          => '/edit_handle.php',
+        'vote_similar'    => '/vote_similar.php',
         default           => Error400::error('Missing artist action'),
     };
 } else {
-    if (!empty($_GET['id'])) {
-        include_once 'artist.php';
-    } elseif (empty($_GET['artistname'])) {
+    if (isset($_GET['id'])) {
+        require __DIR__ . '/artist.php';
+    } elseif (!isset($_GET['artistname'])) {
         header('Location: torrents.php');
     } else {
         $db = DB::DB();

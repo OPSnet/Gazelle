@@ -9,9 +9,8 @@ if (!$Viewer->permitted('site_top10')) {
     json_die('not allowed');
 }
 
-require_once __DIR__ . '/' . match ($_GET['type'] ?? 'torrents') {
-    'tags'     => 'tags.php',
-    'torrents' => 'torrents.php',
-    'users'    => 'users.php',
-    default    => json_error('bad type'),
+require __DIR__ . match ($_GET['type'] ?? '') {
+    'tags'     => '/tags.php',
+    'users'    => '/users.php',
+    default    => '/torrents.php',
 };

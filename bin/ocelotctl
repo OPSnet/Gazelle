@@ -98,7 +98,7 @@ declare(strict_types=1);
 namespace Gazelle;
 
 define('FAKE_USERAGENT', 'ocelotctl');
-require_once __DIR__ . '/../lib/bootstrap.php';
+require __DIR__ . '/../lib/bootstrap.php';
 
 array_shift($argv);
 switch (array_shift($argv) ?? '') {

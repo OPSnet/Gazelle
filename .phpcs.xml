@@ -52,17 +52,16 @@
                 <element key="each" value="null"/>
                 <element key="eval" value="null"/>
                 <element key="extract" value="null"/>
-                <!-- use is_int() instead -->
-                <element key="is_integer" value="null"/>
-                <!-- use implode(...) instead -->
-                <element key="join" value="null"/>
-                <element key="md5" value="null"/>
-                <element key="sha1" value="null"/>
-                <element key="uniqid" value="null"/>
-                <!-- use hash_file('sha256', ...) instead -->
-                <element key="sha1file" value="null"/>
-                <!-- use string equality instead: $x == $y -->
-                <element key="strcmp" value="null"/>
+                <element key="include" value="require"/>
+                <element key="include_once" value="require"/>
+                <element key="is_integer" value="is_int"/>
+                <element key="join" value="implode"/>
+                <element key="md5" value="hash_file"/>
+                <element key="require_once" value="require"/>
+                <element key="sha1" value="hash_file"/>
+                <element key="uniqid" value="hash_file"/>
+                <element key="sha1file" value="hash_file"/>
+                <element key="strcmp" value="==="/>
             </property>
         </properties>
         <type>warning</type>
@@ -81,6 +80,7 @@
     <rule ref="Generic.PHP.NoSilencedErrors" />
     <rule ref="Generic.PHP.Syntax" />
     <rule ref="Generic.Strings.UnnecessaryStringConcat" />
+    <rule ref="Generic.WhiteSpace.DisallowTabIndent" />
     <rule ref="Generic.WhiteSpace.SpreadOperatorSpacingAfter" />
 
     <rule ref="Generic.WhiteSpace.ArbitraryParenthesesSpacing">

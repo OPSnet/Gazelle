@@ -2,8 +2,13 @@
 
 /* A script to import the old WhatCD wiki articles from the 10th birthday release */
 
-require_once __DIR__ . '/../lib/bootstrap.php';
+namespace Gazelle;
 
+require __DIR__ . '/../lib/bootstrap.php';
+
+if (count($argv) < 2) {
+    die("no filename given\n");
+}
 $in = fopen($argv[1], 'r');
 if ($in === false) {
     exit(1);
@@ -26,7 +31,7 @@ while (($row = fgets($in))) {
     $body .= $row;
 }
 
-Gazelle\DB::DB()->prepared_query('
+DB::DB()->prepared_query('
     INSERT INTO wiki_articles (Title, Body, MinClassRead, MinClassEdit, Date, Author)
     VALUES (?, ?, 800, 800, now(), 2)
     ', $title, $body

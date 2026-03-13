@@ -10,9 +10,12 @@
  * but the resulting select query is too clever to be easily understood.
  */
 
-require_once(__DIR__ . '/../lib/bootstrap.php');
-$db = Gazelle\DB::DB();
-$manager = new Gazelle\Manager\ForumThread();
+namespace Gazelle;
+
+require __DIR__ . '/../lib/bootstrap.php';
+
+$db = DB::DB();
+$manager = new Manager\ForumThread();
 
 $db->prepared_query("
     SELECT ft.ID AS id,
@@ -57,7 +60,7 @@ foreach ($db->to_array(false, MYSQLI_ASSOC) as $row) {
         ->modify();
 }
 
-$forumMan = new Gazelle\Manager\Forum();
+$forumMan = new Manager\Forum();
 $db->prepared_query("
     SELECT f.ID AS forum_id FROM forums f
 ");

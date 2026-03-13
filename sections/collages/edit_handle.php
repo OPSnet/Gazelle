@@ -38,7 +38,7 @@ if (isset($_POST['name'])) {
             $Err = "A collage with that name already exists: {$check->link()}.";
         }
         $ErrNoEscape = true;
-        include 'edit.php';
+        require __DIR__ . '/edit.php';
         exit;
     }
     if ($collage->isOwner($Viewer)) {

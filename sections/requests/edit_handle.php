@@ -237,7 +237,7 @@ while (true) {
 }
 
 if (isset($error)) {
-    include_once 'edit.php';
+    require __DIR__ . '/edit.php';
     exit;
 }
 

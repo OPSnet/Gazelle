@@ -16,7 +16,9 @@
  * migrate existing Gazelle installations.
  */
 
-require_once __DIR__ . '/../lib/bootstrap.php';
+namespace Gazelle;
+
+require __DIR__ . '/../lib/bootstrap.php';
 
 $allConfig = [
     '-html' => [
@@ -42,8 +44,11 @@ $allConfig = [
     ],
 ];
 
-if ($argc < 2 || !isset($allConfig[$argv[1]])) {
-    die('usage: ' . basename($argv[0]) . " <-html|-log|-torrent>\n");
+if (count($argv) < 2 || !isset($allConfig[$argv[1]])) {
+    die('usage: '
+        . basename($argv[0])
+        . " <-html|-log|-torrent>\n"
+    );
 }
 $config = $allConfig[$argv[1]];
 
@@ -54,7 +59,7 @@ if ($find === false) {
     die("Could not popen(" . $config['PIPE'] . ")\n");
 }
 
-$db        = Gazelle\DB::DB();
+$db        = DB::DB();
 $begin     = hrtime(true);
 $processed = 0;
 $orphan    = 0;

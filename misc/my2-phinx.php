@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../lib/config.php';
+require __DIR__ . '/../lib/config.php';
 
 /* This second batch of Mysql migrations are run after the Postgresql migrations
  * have been run. This is needed for the CI, to drop tables in the Mysql schema

@@ -1,15 +1,17 @@
 #!/usr/bin/env php
 <?php
 
-require_once __DIR__ . '/../../lib/bootstrap.php';
+namespace Gazelle;
 
-$db = Gazelle\DB::DB();
+require __DIR__ . '/../../lib/bootstrap.php';
+
+$db = DB::DB();
 
 $db->prepared_query("
     SELECT UserID, NavItems FROM users_info WHERE NavItems != '';
 ");
 
-$manager = new Gazelle\Manager\User;
+$manager = new Manager\User();
 
 $n = 0;
 foreach ($db->to_array(false, MYSQLI_NUM) as [$id, $items]) {

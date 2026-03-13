@@ -7,10 +7,10 @@ namespace Gazelle;
 
 switch ($_REQUEST['action'] ?? null) {
     case 'users':
-        include_once 'users.php';
+        require __DIR__ . '/users.php';
         break;
     case 'torrents':
-        include_once 'torrents.php';
+        require __DIR__ . '/torrents.php';
         break;
     default:
         echo $Twig->render('stats.twig');

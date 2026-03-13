@@ -9,12 +9,14 @@
  * bitcoin-cli -rpcwallet=test listtransactions \* 20 | jq '[.[]|select(.confirmations > 1)]|map([.address, .amount]|join(","))|join("|")' | tr -d \" | tr '|' '\0' | xargs -0 php process-bitcoin-donation
  */
 
-require_once(__DIR__ . '/../lib/bootstrap.php');
+namespace Gazelle;
 
-$bitcoin = new Gazelle\Donate\Bitcoin;
-$userMan = new Gazelle\Manager\User;
+require __DIR__ . '/../lib/bootstrap.php';
 
-$xbtRate = new Gazelle\Manager\XBT()->latestRate('EUR');
+$bitcoin = new Donate\Bitcoin;
+$userMan = new Manager\User;
+
+$xbtRate = new Manager\XBT()->latestRate('EUR');
 if (!$xbtRate) {
     echo "No exchange rate for BTC\n";
     exit(1);
@@ -39,7 +41,7 @@ foreach ($argv as $paymentData) {
         continue;
     }
 
-    $donor = new Gazelle\User\Donor($user);
+    $donor = new User\Donor($user);
     $donor->donate(
         amount:   $value,
         xbtRate:  $xbtRate,

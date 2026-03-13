@@ -3,17 +3,14 @@
 
 namespace Gazelle;
 
-use Gazelle\Enum\FeaturedAlbumType;
-use Gazelle\Enum\LeechType;
-use Gazelle\Enum\LeechReason;
 use sad_spirit\pg_wrapper\converters\containers\ArrayConverter;
 use sad_spirit\pg_wrapper\converters\IntegerConverter;
 use sad_spirit\pg_wrapper\converters\StringConverter;
 
 error_reporting(E_ALL);
 
-require_once(__DIR__ . '/../lib/bootstrap.php');
-require_once(__DIR__ . '/../tests/helper.php');
+require __DIR__ . '/../lib/bootstrap.php';
+require __DIR__ . '/../tests/helper.php';
 
 $remove = [];
 foreach (['pcntl_fork', 'pcntl_signal', 'pcntl_signal_dispatch', 'pcntl_waitpid'] as $function) {

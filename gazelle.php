@@ -8,14 +8,14 @@ use Gazelle\Util\Time;
 
 // 1. Initialization
 
-require_once __DIR__ . '/lib/bootstrap.php';
+require __DIR__ . '/lib/bootstrap.php';
 global $Cache, $Debug, $Twig;
 $Debug->mark('bootstrap complete');
 
 register_shutdown_function(
     function () {
         if (preg_match(DEBUG_URI, $_SERVER['REQUEST_URI'])) {
-            include DEBUG_TRACE; /** @phpstan-ignore-line */
+            require DEBUG_TRACE; /** @phpstan-ignore-line */
         }
         $error = error_get_last();
         global $Debug;
@@ -161,7 +161,7 @@ if ($file === false) {
 
 try {
     $Debug->mark('call ' . str_replace(SERVER_ROOT . '/', '', $file));
-    include_once $file;
+    require $file;
 } catch (\Error | \Exception $e) {
     // if there was an ongoing transaction, abort it
     if ($e::class === DB\MysqlException::class) {

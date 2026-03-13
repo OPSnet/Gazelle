@@ -11,7 +11,7 @@ if (!$Viewer->permitted('admin_manage_permissions')) {
 }
 
 if (isset($_REQUEST['id']) && $_REQUEST['id'] === 'new') {
-    include_once 'userclass_edit.php';
+    require __DIR__ . '/userclass_edit.php';
     exit;
 }
 

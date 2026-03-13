@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 use Phinx\Migration\AbstractMigration;
 
-// phpcs:disable PSR1.Files.SideEffects.FoundWithSymbols
-require_once __DIR__ . '/../../lib/config.php';
-// phpcs:enable PSR1.Files.SideEffects.FoundWithSymbols
-
 final class DropUsersInfoNavItems extends AbstractMigration {
     public function change(): void {
         $this->query("

@@ -25,7 +25,7 @@ if ($_POST['submit'] === 'Delete') {
     ]);
     if (!$Validator->validate($_POST)) {
         $Err = $Validator->errorMessage();
-        include_once 'payment_list.php';
+        require __DIR__ . '/payment_list.php';
         exit;
     }
 

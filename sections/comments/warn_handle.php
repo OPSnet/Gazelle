@@ -5,7 +5,7 @@ declare(strict_types=1);
 
 namespace Gazelle;
 
-require_once __DIR__ . '/../forums/do_warn.php';
+require __DIR__ . '/../forums/do_warn.php';
 
 [$post, $body] = handleWarningRequest(new Manager\Comment());
 $post->setField('Body', $body)

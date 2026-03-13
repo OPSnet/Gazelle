@@ -58,7 +58,7 @@ if ($Err) {
     $Category = $categoryId;
     $Tags = $_POST['tags'];
     $Description = $_POST['description'];
-    include 'new.php';
+    require __DIR__ . '/new.php';
     exit;
 }
 

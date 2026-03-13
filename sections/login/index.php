@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Gazelle;
 
-require_once match ($_REQUEST['action'] ?? '') {
-    'disabled'    => 'disabled.php',
-    'recover'     => isset($_REQUEST['key']) ? 'recover_step2.php' : 'recover_step1.php',
-    default       => 'login.php',
+require __DIR__ . match ($_REQUEST['action'] ?? '') {
+    'disabled'    => '/disabled.php',
+    'recover'     => isset($_REQUEST['key']) ? '/recover_step2.php' : '/recover_step1.php',
+    default       => '/login.php',
 };

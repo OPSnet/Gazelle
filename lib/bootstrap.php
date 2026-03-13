@@ -16,9 +16,9 @@ date_default_timezone_set('UTC');
 
 if (!defined('SITE_NAME')) {
     ob_start();
-    include_once __DIR__ . '/config.php';
-    include_once __DIR__ . '/../lib/util.php';
-    include_once __DIR__ . '/../vendor/autoload.php';
+    require __DIR__ . '/config.php';
+    require __DIR__ . '/../lib/util.php';
+    require __DIR__ . '/../vendor/autoload.php';
     ob_end_clean();
 }
 

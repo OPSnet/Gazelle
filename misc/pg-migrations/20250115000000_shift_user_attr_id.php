@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 // phpcs:disable PSR1.Files.SideEffects.FoundWithSymbols
-require_once __DIR__ . '/../../lib/util.php';
-require_once __DIR__ . '/../../lib/bootstrap.php';
+require __DIR__ . '/../../lib/util.php';
+require __DIR__ . '/../../lib/bootstrap.php';
 // phpcs:enable PSR1.Files.SideEffects.FoundWithSymbols
 
 /**

@@ -182,7 +182,7 @@ if (isset($error)) {
     if ($year == 0) {
         $year = null;
     }
-    include_once 'new.php';
+    require __DIR__ . '/new.php';
     exit;
 }
 

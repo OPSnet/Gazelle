@@ -1,9 +1,11 @@
 #! /usr/bin/env php
 <?php
 
-require_once(__DIR__ . '/../lib/bootstrap.php');
+require __DIR__ . '/../lib/bootstrap.php';
 
-$db = Gazelle\DB::DB();
+namespace Gazelle;
+
+$db = DB::DB();
 $db->dropTemporaryTable("torrents_votes_new");
 $db->prepared_query("
     CREATE TEMPORARY TABLE torrents_votes_new LIKE torrents_votes

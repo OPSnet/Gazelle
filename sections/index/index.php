@@ -6,13 +6,13 @@ declare(strict_types=1);
 namespace Gazelle;
 
 if (!isset($Viewer)) {
-    include 'public.php';
+    require __DIR__ . '/public.php';
 } else {
     if (!isset($_REQUEST['action'])) {
-        include 'private.php';
+        require __DIR__ . '/private.php';
     } else {
         match ($_REQUEST['action']) {
-            'poll'  => include __DIR__ . '/../forums/poll_vote.php',
+            'poll'  => require __DIR__ . '/../forums/poll_vote.php',
             default => Error400::error('Unknown action requested'),
         };
     }

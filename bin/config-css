@@ -3,7 +3,7 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../lib/bootstrap.php';
+require __DIR__ . '/../lib/bootstrap.php';
 
 $out = fopen($argv[1], 'w');
 if ($out === false) {

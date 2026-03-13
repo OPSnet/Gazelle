@@ -17,7 +17,7 @@ if (!$reportId || !$id || is_null($type)) {
     Error400::error();
 }
 
-require_once 'array.php';
+require __DIR__ . '/array.php';
 /** @var array $Types */
 $reportType = $Types[$type];
 

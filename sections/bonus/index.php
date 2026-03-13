@@ -11,23 +11,23 @@ if ($Viewer->disableBonusPoints()) {
 
 switch ($_REQUEST['action'] ?? '') {
     case 'bprates':
-        include_once 'bprates.php';
+        require __DIR__ . '/bprates.php';
         break;
     case 'cacheflush':
         new Manager\Bonus()->flush();
         header("Location: bonus.php");
         exit;
     case 'history':
-        include_once 'history.php';
+        require __DIR__ . '/history.php';
         break;
     case 'prepare':
-        include_once 'prepare.php';
+        require __DIR__ . '/prepare.php';
         break;
     case 'purchase':
-        include_once 'purchase.php';
+        require __DIR__ . '/purchase.php';
         break;
     case 'donate':
     default:
-        include_once 'shop.php';
+        require __DIR__ . '/shop.php';
         break;
 }

@@ -1,7 +1,9 @@
 #! /usr/bin/env php
 <?php
 
-require_once __DIR__ . "/../../lib/bootstrap.php";
+namespace Gazelle;
+
+require __DIR__ . "/../../lib/bootstrap.php";
 
 function genPlaceholders(int $num, string $val) {
     for ($i = 1; $i <= $num; $i++) {
@@ -9,8 +11,8 @@ function genPlaceholders(int $num, string $val) {
     }
 }
 
-$db = Gazelle\DB::DB();
-$pg = new \Gazelle\DB\Pg(PG_RW_DSN);
+$db = DB::DB();
+$pg = new DB\Pg(PG_RW_DSN);
 
 $values = [];
 

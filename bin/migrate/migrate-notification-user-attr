@@ -1,10 +1,12 @@
 #! /usr/bin/env php
 <?php
 
-require_once __DIR__ . '/../../lib/bootstrap.php';
+namespace Gazelle;
 
-$db = Gazelle\DB::DB();
-$pg = new \Gazelle\DB\Pg(PG_RW_DSN);
+require __DIR__ . '/../../lib/bootstrap.php';
+
+$db = DB::DB();
+$pg = new DB\Pg(PG_RW_DSN);
 $userCount = 0;
 $db->prepared_query("
     SELECT ID FROM users_main ORDER BY ID

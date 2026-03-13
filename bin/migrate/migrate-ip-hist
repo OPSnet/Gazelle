@@ -1,16 +1,18 @@
 #! /usr/bin/env php
 <?php
 
+namespace Gazelle;
+
 use \sad_spirit\pg_wrapper\converters\containers\MultiRangeConverter;
 use \sad_spirit\pg_wrapper\converters\datetime\TimeStampTzConverter;
 
-require_once __DIR__ . "/../../lib/bootstrap.php";
+require __DIR__ . "/../../lib/bootstrap.php";
 
 // length of interval between two records to extend the date range
 define('INTERVAL_DAYS', 8);
 
-$db = Gazelle\DB::DB();
-$pg = new \Gazelle\DB\Pg(PG_RW_DSN);
+$db = DB::DB();
+$pg = new DB\Pg(PG_RW_DSN);
 
 $db->prepared_query("
     SELECT ID FROM users_main ORDER BY 1
@@ -64,7 +66,7 @@ foreach ($list as $userId) {
     }
 }
 
-function persist(\Gazelle\DB\Pg $pg, int $userId, string $ip, int $total, array $range): void {
+function persist(DB\Pg $pg, int $userId, string $ip, int $total, array $range): void {
     $pgRange = array_map(fn ($dates) => [
             'lower' => new \DateTimeImmutable($dates['begin']),
             'upper' => new \DateTimeImmutable($dates['end']),

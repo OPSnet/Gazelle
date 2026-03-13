@@ -6,11 +6,11 @@ declare(strict_types=1);
 namespace Gazelle;
 
 if (!$Viewer || $Viewer->isLocked()) {
-    include_once 'webirc_disabled.php';
+    require __DIR__ . '/webirc_disabled.php';
     exit;
 }
 
-require_once match ($_REQUEST['action'] ?? '') {
-    'webirc' => 'webirc.php',
-    default  => 'join.php',
+require match ($_REQUEST['action'] ?? '') {
+    'webirc' => __DIR__ . '/webirc.php',
+    default  => __DIR__ . '/join.php',
 };

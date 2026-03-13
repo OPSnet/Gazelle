@@ -5,9 +5,9 @@ declare(strict_types=1);
 
 namespace Gazelle;
 
-require_once __DIR__ . '/../../lib/bootstrap.php';
+require __DIR__ . '/../../lib/bootstrap.php';
 
-$pg = new \Gazelle\DB\Pg(PG_RW_DSN);
+$pg = new DB\Pg(PG_RW_DSN);
 $pg->begin();
 
 $pg->query("

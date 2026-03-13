@@ -1,9 +1,11 @@
 #! /usr/bin/env php
 <?php
 
-require_once(__DIR__ . '/../lib/bootstrap.php');
+namespace Gazelle;
 
-$twig = Gazelle\Util\Twig::factory(new \Gazelle\Manager\User());
+require __DIR__ . '/../lib/bootstrap.php';
+
+$twig = Util\Twig::factory(new Manager\User());
 
 // there is no dump() in production
 $twig->addFunction(new \Twig\TwigFunction('dump', function ($value) { return ''; }));

@@ -38,7 +38,7 @@ View::show_header('Torrent Reports', ['js' => 'reportsv2,bbcode,browse,torrent']
 ?>
 <div class="header">
     <h2><?= $search->title() ?></h2>
-<?php require_once 'header.php'; ?>
+<?php require __DIR__ . '/header.php'; ?>
 </div>
 <div class="buttonbox pad center">
 <?php if ($search->mode() !== 'resolved') { ?>

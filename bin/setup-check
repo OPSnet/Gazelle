@@ -3,7 +3,7 @@
 
 namespace Gazelle;
 
-require_once __DIR__ . '/../lib/bootstrap.php';
+require __DIR__ . '/../lib/bootstrap.php';
 
 $quiet = in_array('--quiet', $argv) || in_array('-q', $argv);
 $exitCode = 0;

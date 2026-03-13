@@ -5,7 +5,7 @@ declare(strict_types=1);
 
 namespace Gazelle;
 
-require_once 'do_warn.php';
+require __DIR__ . '/do_warn.php';
 [$post, $body] = handleWarningRequest(new Manager\ForumPost());
 $post->edit($Viewer, $body);
 if ($post->isPinned()) {

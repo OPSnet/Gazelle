@@ -2,10 +2,6 @@
 
 declare(strict_types=1);
 
-// phpcs:disable PSR1.Files.SideEffects.FoundWithSymbols
-require_once __DIR__ . '/../../lib/config.php';
-// phpcs:enable PSR1.Files.SideEffects.FoundWithSymbols
-
 use Phinx\Migration\AbstractMigration;
 
 final class BonusPointAccrualStats extends AbstractMigration {

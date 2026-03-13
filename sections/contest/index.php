@@ -10,11 +10,11 @@ $contestMan = new Manager\Contest();
 
 switch ($_GET['action'] ?? '') {
     case 'leaderboard':
-        include 'leaderboard.php';
+        require __DIR__ . '/leaderboard.php';
         break;
     case 'admin':
     case 'create':
-        include 'admin.php';
+        require __DIR__ . '/admin.php';
         break;
     default:
         echo $Twig->render('contest/intro.twig', [

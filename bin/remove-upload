@@ -9,7 +9,7 @@
 
 namespace Gazelle;
 
-require_once(__DIR__ . '/../lib/bootstrap.php');
+require __DIR__ . '/../lib/bootstrap.php';
 
 $torMan  = new Manager\Torrent();
 $userMan = new Manager\User();

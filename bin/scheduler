@@ -3,7 +3,7 @@
 
 namespace Gazelle;
 
-require_once(__DIR__ . '/../lib/bootstrap.php');
+require __DIR__ . '/../lib/bootstrap.php';
 
 Base::setRequestContext(new RequestContext('cli', '127.0.0.1', 'scheduler'));
 new TaskScheduler()->run();

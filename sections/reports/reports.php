@@ -10,7 +10,7 @@ if (!$Viewer->permittedAny('admin_reports', 'site_moderate_forums')) {
     Error403::error();
 }
 
-require_once 'array.php';
+require __DIR__ . '/array.php';
 
 $search    = new Search\Report();
 $paginator = new Util\Paginator(REPORTS_PER_PAGE, (int)($_REQUEST['page'] ?? 1));

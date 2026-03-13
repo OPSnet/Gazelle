@@ -9,60 +9,60 @@ namespace Gazelle;
 switch ($_REQUEST['action'] ?? '') {
     //Managers
     case 'asn_search':
-        include_once 'managers/asn_search.php';
+        require __DIR__ . '/managers/asn_search.php';
         break;
     case 'geoip_lookup':
-        include_once 'managers/geoip_lookup.php';
+        require __DIR__ . '/managers/geoip_lookup.php';
         break;
     case 'audit_trail':
-        include_once 'managers/audit_trail.php';
+        require __DIR__ . '/managers/audit_trail.php';
         break;
 
     case 'bonus_points':
-        include_once 'managers/bonus_points.php';
+        require __DIR__ . '/managers/bonus_points.php';
         break;
 
     case 'categories':
-        include_once 'managers/categories_list.php';
+        require __DIR__ . '/managers/categories_list.php';
         break;
     case 'categories_alter':
-        include_once 'managers/categories_alter.php';
+        require __DIR__ . '/managers/categories_alter.php';
         break;
     case 'change_log':
-        include_once 'managers/change_log.php';
+        require __DIR__ . '/managers/change_log.php';
         break;
     case 'create_user':
-        include_once 'managers/create_user.php';
+        require __DIR__ . '/managers/create_user.php';
         break;
     case 'custom_pm':
-        include_once 'managers/custom_pm.php';
+        require __DIR__ . '/managers/custom_pm.php';
         break;
 
     case 'dbkey':
-        include_once 'managers/db_key.php';
+        require __DIR__ . '/managers/db_key.php';
         break;
     case 'dnu':
-        include_once 'managers/dnu_list.php';
+        require __DIR__ . '/managers/dnu_list.php';
         break;
     case 'dnu_alter':
-        include_once 'managers/dnu_alter.php';
+        require __DIR__ . '/managers/dnu_alter.php';
         break;
 
     case 'email_blacklist':
-        include_once 'managers/email_blacklist.php';
+        require __DIR__ . '/managers/email_blacklist.php';
         break;
     case 'email_blacklist_alter':
-        include_once 'managers/email_blacklist_alter.php';
+        require __DIR__ . '/managers/email_blacklist_alter.php';
         break;
     case 'email_search':
-        include_once 'managers/email_search.php';
+        require __DIR__ . '/managers/email_search.php';
         break;
     case 'enable_requests':
-        include_once 'managers/enable_requests.php';
+        require __DIR__ . '/managers/enable_requests.php';
         break;
     case 'ajax_take_enable_request':
         if (FEATURE_EMAIL_REENABLE) {
-            include_once 'managers/ajax_take_enable_request.php';
+            require __DIR__ . '/managers/ajax_take_enable_request.php';
         } else {
             // Prevent post requests to the ajax page
             header("Location: tools.php");
@@ -70,66 +70,66 @@ switch ($_REQUEST['action'] ?? '') {
         break;
 
     case 'featured_album':
-        include_once 'managers/featured_album.php';
+        require __DIR__ . '/managers/featured_album.php';
         break;
     case 'forum':
-        include_once 'managers/forum_list.php';
+        require __DIR__ . '/managers/forum_list.php';
         break;
     case 'forum_alter':
-        include_once 'managers/forum_alter.php';
+        require __DIR__ . '/managers/forum_alter.php';
         break;
     case 'forum_transitions':
-        include_once 'managers/forum_transitions_list.php';
+        require __DIR__ . '/managers/forum_transitions_list.php';
         break;
     case 'forum_transitions_alter':
-        include_once 'managers/forum_transitions_alter.php';
+        require __DIR__ . '/managers/forum_transitions_alter.php';
         break;
 
     case 'gift-event':
-        include_once 'managers/gift-event.php';
+        require __DIR__ . '/managers/gift-event.php';
         break;
     case 'global_notification':
-        include_once 'managers/global_notification.php';
+        require __DIR__ . '/managers/global_notification.php';
         break;
 
     case 'invite_source':
-        include_once 'managers/invite_source.php';
+        require __DIR__ . '/managers/invite_source.php';
         break;
     case 'invite_source_config':
-        include_once 'managers/invite_source_config.php';
+        require __DIR__ . '/managers/invite_source_config.php';
         break;
     case 'ip_ban':
-        include_once 'managers/bans.php';
+        require __DIR__ . '/managers/bans.php';
         break;
     case 'ip-ban-edit':
-        include_once 'managers/ban-edit.php';
+        require __DIR__ . '/managers/ban-edit.php';
         break;
     case 'ip_search':
-        include_once 'managers/ip_search.php';
+        require __DIR__ . '/managers/ip_search.php';
         break;
     case 'bulk_search':
-        include_once 'managers/bulk_search.php';
+        require __DIR__ . '/managers/bulk_search.php';
         break;
 
     case 'login_watch':
-        include_once 'managers/login_watch.php';
+        require __DIR__ . '/managers/login_watch.php';
         break;
 
     case 'manipulate_tree':
-        include_once 'managers/manipulate_tree.php';
+        require __DIR__ . '/managers/manipulate_tree.php';
         break;
     case 'mass_pm':
-        include_once 'managers/mass_pm.php';
+        require __DIR__ . '/managers/mass_pm.php';
         break;
     case 'take_mass_pm':
-        include_once 'managers/take_mass_pm.php';
+        require __DIR__ . '/managers/take_mass_pm.php';
         break;
 
     case 'navigation_alter':
-        include_once 'managers/navigation_alter.php';
+        require __DIR__ . '/managers/navigation_alter.php';
         break;
     case 'navigation':
-        include_once 'managers/navigation_list.php';
+        require __DIR__ . '/managers/navigation_list.php';
         break;
 
     case 'news':
@@ -137,173 +137,173 @@ switch ($_REQUEST['action'] ?? '') {
     case 'editnews':
     case 'takeeditnews':
     case 'takenewnews':
-        include_once 'managers/news.php';
+        require __DIR__ . '/managers/news.php';
         break;
 
     case 'ocelot':
         // this is the callback for ocelot
-        include_once 'managers/ocelot.php';
+        require __DIR__ . '/managers/ocelot.php';
         break;
     case 'ocelot_info':
-        include_once 'managers/ocelot_info.php';
+        require __DIR__ . '/managers/ocelot_info.php';
         break;
 
 
     case 'userclass':
-        include_once 'managers/userclass_list.php';
+        require __DIR__ . '/managers/userclass_list.php';
         break;
     case 'privilege-edit':
-        include_once 'managers/userclass_edit.php';
+        require __DIR__ . '/managers/userclass_edit.php';
         break;
     case 'privilege-alter':
-        include_once 'managers/userclass_alter.php';
+        require __DIR__ . '/managers/userclass_alter.php';
         break;
     case 'privilege-audit':
-        include_once 'managers/privilege_audit.php';
+        require __DIR__ . '/managers/privilege_audit.php';
         break;
     case 'privilege_matrix':
-        include_once 'managers/privilege_matrix.php';
+        require __DIR__ . '/managers/privilege_matrix.php';
         break;
 
     case 'quick_ban':
-        include_once 'managers/quick_ban.php';
+        require __DIR__ . '/managers/quick_ban.php';
         break;
 
     case 'rate_limit':
-        include_once 'managers/rate_limit.php';
+        require __DIR__ . '/managers/rate_limit.php';
         break;
     case 'reaper':
-        include_once 'managers/reaper.php';
+        require __DIR__ . '/managers/reaper.php';
         break;
     case 'referral_accounts':
-        include_once 'managers/referral_accounts.php';
+        require __DIR__ . '/managers/referral_accounts.php';
         break;
     case 'referral_alter':
-        include_once 'managers/referral_alter.php';
+        require __DIR__ . '/managers/referral_alter.php';
         break;
     case 'referral_users':
-        include_once 'managers/referral_users.php';
+        require __DIR__ . '/managers/referral_users.php';
         break;
 
     case 'ssl_host':
-        include_once 'managers/ssl_host.php';
+        require __DIR__ . '/managers/ssl_host.php';
         break;
     case 'staff_groups_alter':
-        include_once 'managers/staff_groups_alter.php';
+        require __DIR__ . '/managers/staff_groups_alter.php';
         break;
     case 'staff_groups':
-        include_once 'managers/staff_groups_list.php';
+        require __DIR__ . '/managers/staff_groups_list.php';
         break;
     case 'stylesheets':
-        include_once 'managers/stylesheets_list.php';
+        require __DIR__ . '/managers/stylesheets_list.php';
         break;
 
     case 'tags':
-        include_once 'managers/tags.php';
+        require __DIR__ . '/managers/tags.php';
         break;
     case 'tags_aliases':
-        include_once 'managers/tags_aliases.php';
+        require __DIR__ . '/managers/tags_aliases.php';
         break;
     case 'tags_official':
-        include_once 'managers/tags_official.php';
+        require __DIR__ . '/managers/tags_official.php';
         break;
     case 'tag-reject':
-        include_once 'managers/tag-reject.php';
+        require __DIR__ . '/managers/tag-reject.php';
         break;
     case 'tokens':
-        include_once 'managers/tokens.php';
+        require __DIR__ . '/managers/tokens.php';
         break;
     case 'tor_node':
-        include_once 'managers/tor_node.php';
+        require __DIR__ . '/managers/tor_node.php';
         break;
     case 'torrent_report_edit':
-        include_once 'managers/torrent_report_edit.php';
+        require __DIR__ . '/managers/torrent_report_edit.php';
         break;
     case 'torrent_report_view':
-        include_once 'managers/torrent_report_view.php';
+        require __DIR__ . '/managers/torrent_report_view.php';
         break;
 
     case 'whitelist':
-        include_once 'managers/whitelist_list.php';
+        require __DIR__ . '/managers/whitelist_list.php';
         break;
     case 'whitelist_alter':
-        include_once 'managers/whitelist_alter.php';
+        require __DIR__ . '/managers/whitelist_alter.php';
         break;
 
     // Finances
     case 'donation_log':
-        include_once 'finances/donation_log.php';
+        require __DIR__ . '/finances/donation_log.php';
         break;
     case 'donor_rewards':
-        include_once 'finances/donor_rewards.php';
+        require __DIR__ . '/finances/donor_rewards.php';
         break;
 
     case 'payment_alter':
-        include_once 'finances/payment_alter.php';
+        require __DIR__ . '/finances/payment_alter.php';
         break;
 
     case 'payment_list':
-        include_once 'finances/payment_list.php';
+        require __DIR__ . '/finances/payment_list.php';
         break;
 
     //Data
     case 'recruitment-history':
-        include_once 'data/recruitment-history.php';
+        require __DIR__ . '/data/recruitment-history.php';
         break;
 
     case 'registration_log':
-        include_once 'data/registration_log.php';
+        require __DIR__ . '/data/registration_log.php';
         break;
 
     case 'ratio_watch':
-        include_once 'data/ratio_watch.php';
+        require __DIR__ . '/data/ratio_watch.php';
         break;
 
     case 'recently_disabled':
-        include_once 'data/recently_disabled.php';
+        require __DIR__ . '/data/recently_disabled.php';
         break;
 
     case 'invite_pool':
-        include_once 'data/invite_pool.php';
+        require __DIR__ . '/data/invite_pool.php';
         break;
     case 'site_info':
-        include_once 'data/site_info.php';
+        require __DIR__ . '/data/site_info.php';
         break;
 
     case 'torrent_stats':
-        include_once 'data/torrent_stats.php';
+        require __DIR__ . '/data/torrent_stats.php';
         break;
 
     case 'user_flow':
-        include_once 'data/user_flow.php';
+        require __DIR__ . '/data/user_flow.php';
         break;
 
     case 'user_info':
-        include_once 'data/user_info.php';
+        require __DIR__ . '/data/user_info.php';
         break;
 
     case 'bonus_stats':
-        include_once 'data/bonus_stats.php';
+        require __DIR__ . '/data/bonus_stats.php';
         break;
 
     case 'economic_stats':
-        include_once 'data/economic_stats.php';
+        require __DIR__ . '/data/economic_stats.php';
         break;
 
     case 'special_users':
-        include_once 'data/special_users.php';
+        require __DIR__ . '/data/special_users.php';
         break;
 
     case 'platform_usage':
-        include_once 'data/platform_usage.php';
+        require __DIR__ . '/data/platform_usage.php';
         break;
 
     // Development
     case 'analysis':
-        include_once 'development/analysis.php';
+        require __DIR__ . '/development/analysis.php';
         break;
     case 'analysis_list':
-        include_once 'development/analysis_list.php';
+        require __DIR__ . '/development/analysis_list.php';
         break;
     case 'bbcode_sandbox':
         if (!$Viewer->permitted('users_mod')) {
@@ -312,31 +312,31 @@ switch ($_REQUEST['action'] ?? '') {
         echo $Twig->render('admin/sandbox/bbcode.twig');
         break;
     case 'clear_cache':
-        include_once 'development/clear_cache.php';
+        require __DIR__ . '/development/clear_cache.php';
         break;
     case 'db-mysql':
-        include_once 'development/mysql.php';
+        require __DIR__ . '/development/mysql.php';
         break;
     case 'db-pg':
-        include_once 'development/pg.php';
+        require __DIR__ . '/development/pg.php';
         break;
     case 'db_sandbox':
-        include_once 'development/db_sandbox.php';
+        require __DIR__ . '/development/db_sandbox.php';
         break;
     case 'notification_sandbox':
-        include_once 'development/notification.php';
+        require __DIR__ . '/development/notification.php';
         break;
     case 'process_info':
-        include_once 'development/process_info.php';
+        require __DIR__ . '/development/process_info.php';
         break;
     case 'referral_sandbox':
-        include_once 'development/referral_sandbox.php';
+        require __DIR__ . '/development/referral_sandbox.php';
         break;
     case 'service_stats':
-        include_once 'development/service_stats.php';
+        require __DIR__ . '/development/service_stats.php';
         break;
     case 'site_options':
-        include_once 'development/site_options.php';
+        require __DIR__ . '/development/site_options.php';
         break;
 
     case 'periodic':
@@ -344,34 +344,34 @@ switch ($_REQUEST['action'] ?? '') {
         switch ($mode) {
             case 'enqueue':
             case 'view':
-                include_once 'development/periodic_view.php';
+                require __DIR__ . '/development/periodic_view.php';
                 break;
             case 'detail':
-                include_once 'development/periodic_detail.php';
+                require __DIR__ . '/development/periodic_detail.php';
                 break;
             case 'stats':
-                include_once 'development/periodic_stats.php';
+                require __DIR__ . '/development/periodic_stats.php';
                 break;
             case 'edit':
-                include_once 'development/periodic_edit.php';
+                require __DIR__ . '/development/periodic_edit.php';
                 break;
             case 'alter':
-                include_once 'development/periodic_alter.php';
+                require __DIR__ . '/development/periodic_alter.php';
                 break;
             case 'run':
-                include_once 'development/periodic_run.php';
+                require __DIR__ . '/development/periodic_run.php';
                 break;
         }
         break;
 
     //Services
     case 'get_host':
-        include_once 'services/get_host.php';
+        require __DIR__ . '/services/get_host.php';
         break;
     case 'get_cc':
-        include_once 'services/get_cc.php';
+        require __DIR__ . '/services/get_cc.php';
         break;
 
     default:
-        include_once 'tools.php';
+        require __DIR__ . '/tools.php';
 }

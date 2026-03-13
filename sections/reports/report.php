@@ -11,7 +11,7 @@ if (!$id) {
     Error404::error();
 }
 
-require_once 'array.php';
+require __DIR__ . '/array.php';
 if (!isset($Types[$_GET['type'] ?? ''])) {
     Error403::error();
 }

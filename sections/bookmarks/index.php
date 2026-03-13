@@ -6,24 +6,24 @@ namespace Gazelle;
 
 switch ($_REQUEST['action'] ?? 'view') {
     case 'add':
-        include_once 'add.php';
+        require __DIR__ . '/add.php';
         break;
 
     case 'remove':
-        include_once 'remove.php';
+        require __DIR__ . '/remove.php';
         break;
 
     case 'mass_edit':
-        include_once 'mass_edit.php';
+        require __DIR__ . '/mass_edit.php';
         break;
 
     case 'remove_snatched':
-        include_once 'remove_snatched.php';
+        require __DIR__ . '/remove_snatched.php';
         break;
 
     case 'edit':
         match ($_REQUEST['type'] ?? '') {
-            'torrents' => include_once 'edit_torrents.php',
+            'torrents' => require __DIR__ . '/edit_torrents.php',
             default    => Error404::error(),
         };
         break;
@@ -31,18 +31,18 @@ switch ($_REQUEST['action'] ?? 'view') {
     case 'view':
         switch ($_REQUEST['type'] ?? 'torrents') {
             case 'torrents':
-                include_once 'torrents.php';
+                require __DIR__ . '/torrents.php';
                 break;
             case 'artists':
-                include_once 'artists.php';
+                require __DIR__ . '/artists.php';
                 break;
             case 'collages':
                 $_GET['bookmarks'] = '1';
-                include_once __DIR__ . '/../collages/browse.php';
+                require __DIR__ . '/../collages/browse.php';
                 break;
             case 'requests':
                 $_GET['type'] = 'bookmarks';
-                include_once __DIR__ . '/../requests/requests.php';
+                require __DIR__ . '/../requests/requests.php';
                 break;
             default:
                 Error404::error();

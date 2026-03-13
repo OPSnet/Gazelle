@@ -2,7 +2,7 @@
 // phpcs:disable PSR1.Classes.ClassDeclaration.MissingNamespace
 // phpcs:disable PSR1.Files.SideEffects.FoundWithSymbols
 
-require_once __DIR__ . '/vendor/autoload.php';
+require __DIR__ . '/vendor/autoload.php';
 
 use SebastianBergmann\CodeCoverage\CodeCoverage;
 use SebastianBergmann\CodeCoverage\Driver\Selector;
@@ -62,4 +62,4 @@ class CoverageHelper {
 }
 
 $coverage_helper = new CoverageHelper();
-require_once __DIR__ . '/gazelle.php';
+require __DIR__ . '/gazelle.php';

@@ -13,9 +13,9 @@ if ($Viewer->disableUpload()) {
 }
 
 if (isset($_GET['action']) && $_GET['action'] == 'parse_html') {
-    include_once 'parse_html.php';
+    require __DIR__ . '/parse_html.php';
 } elseif (!empty($_POST['submit'])) {
-    include_once 'upload_handle.php';
+    require __DIR__ . '/upload_handle.php';
 } else {
-    include_once 'upload.php';
+    require __DIR__ . '/upload.php';
 }

@@ -13,8 +13,8 @@ if ($user->id != $Viewer->id && !$Viewer->permitted('users_mod')) {
     Error403::error();
 }
 
-require_once __DIR__ . '/' . match ($_GET['do'] ?? '') {
-    'configure' => 'configure.php',
-    'remove'    => 'remove.php',
+require __DIR__ . match ($_GET['do'] ?? '') {
+    'configure' => '/configure.php',
+    'remove'    => '/remove.php',
     default     => Error404::error(),
 };

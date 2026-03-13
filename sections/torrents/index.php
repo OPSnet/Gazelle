@@ -57,9 +57,9 @@ $includeFile = match ($_REQUEST['action'] ?? '') {
 };
 
 if ($includeFile) {
-    require_once __DIR__ . '/' . $includeFile;
+    require __DIR__ . '/' . $includeFile;
 } elseif (isset($_GET['id'])) {
-    require_once __DIR__ . '/details.php';
+    require __DIR__ . '/details.php';
 } elseif (isset($_GET['torrentid'])) {
     $torrent = new Manager\Torrent()->findById((int)$_GET['torrentid']);
     if ($torrent) {
@@ -68,14 +68,14 @@ if ($includeFile) {
         header("Location: log.php?search=Torrent+" . (int)$_GET['torrentid']);
     }
 } elseif (isset($_GET['type'])) {
-    require_once __DIR__ . '/user.php';
+    require __DIR__ . '/user.php';
 } elseif (isset($_GET['groupname'])) {
     $idList = new Manager\TGroup()->findByGroupName(trim($_GET['groupname']));
     if (count($idList) === 1) {
         header("Location: torrents.php?id=$idList[0]");
     } else {
-        require_once __DIR__ . '/browse.php';
+        require __DIR__ . '/browse.php';
     }
 } else {
-    require_once __DIR__ . '/browse.php';
+    require __DIR__ . '/browse.php';
 }

@@ -5,7 +5,7 @@ if (isset($_GET['clearcache'])) {
     unset($_GET['clearcache']);
 }
 
-require_once __DIR__ . '/../lib/bootstrap.php';
+require __DIR__ . '/../lib/bootstrap.php';
 
 $user = new Gazelle\Manager\User()->findByAnnounceKey($_GET['passkey'] ?? '');
 $feed = new Gazelle\Feed();

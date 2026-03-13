@@ -1,9 +1,11 @@
 #! /usr/bin/env php
 <?php
 
-require_once(__DIR__ . '/../lib/bootstrap.php');
+namespace Gazelle;
 
-$db = Gazelle\DB::DB();
+require __DIR__ . '/../lib/bootstrap.php';
+
+$db = DB::DB();
 
 $db->prepared_query("
     select v.ID
@@ -19,7 +21,7 @@ $db->prepared_query("
     where v.Encoding = 'V2 (VBR)'
 ");
 
-$torMan = new Gazelle\Manager\Torrent;
+$torMan = new Manager\Torrent();
 
 foreach ($db->collect(0) as $id) {
     $torrent = $torMan->findById($id);

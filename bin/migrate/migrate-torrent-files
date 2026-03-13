@@ -1,18 +1,20 @@
 <?php
 // phpcs:disable PSR1.Files.SideEffects.FoundWithSymbols
 
-require_once __DIR__ . '/../../lib/bootstrap.php';
+namespace Gazelle;
+
+require __DIR__ . '/../../lib/bootstrap.php';
 
 ini_set('max_execution_time', -1);
 
 define('CHUNK', 100);
 
-$db        = Gazelle\DB::DB();
+$db        = DB::DB();
 $offset    = 0;
 $processed = 0;
 $new       = 0;
 
-$filer = new Gazelle\File\Torrent();
+$filer = new File\Torrent();
 
 while (true) {
     $db->prepared_query('

@@ -96,4 +96,4 @@ if (isset($_REQUEST['submit'])) {
     $usersAffected = new Manager\User()->flushUserclass($privilege->id());
 }
 
-require_once 'userclass_edit.php';
+require __DIR__ . '/userclass_edit.php';

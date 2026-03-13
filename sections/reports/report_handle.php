@@ -14,7 +14,7 @@ if (!$subjectId || empty($_POST['type'])) {
     Error400::error();
 }
 
-require_once 'array.php';
+require __DIR__ . '/array.php';
 /** @var array $Types */
 if (!array_key_exists($_POST['type'], $Types)) {
     Error400::error();
