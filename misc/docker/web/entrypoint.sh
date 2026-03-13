@@ -14,7 +14,7 @@ if [ ! -e .docker-init-done ] ; then
     bin/local-patch
     echo "Installing node, go grab a coffee"
     bin/config-css /tmp/config-css.js
-    npm install -g npm@11.4.1
+    npm install -g npm@11.11.1
     npm install cypress
     npx update-browserslist-db@latest
     npx puppeteer browsers install chrome

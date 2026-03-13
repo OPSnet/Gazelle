@@ -2,10 +2,11 @@ FROM debian:bookworm-slim
 
 ENV DEB_RELEASE=bookworm
 ENV DEBIAN_FRONTEND=noninteractive
-ENV PHP_VER=8.4
+ENV PHP_VER=8.5
 ENV NODE_VERSION=20
-# commit of composer 2.8.10
-ENV COMPOSER_COMMIT=509d1a234aa92d0315c2d2c01889ddb759404e8a
+# https://github.com/composer/getcomposer.org/commits/main/
+# commit of composer 2.9.3
+ENV COMPOSER_COMMIT=681b090a0890b986ee0ae5862ca98db7c9170144
 
 # Uncomment to skip the chromium download when installing puppeteer. If you do,
 # you'll need to launch puppeteer with:

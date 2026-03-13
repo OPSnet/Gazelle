@@ -21,12 +21,12 @@
     "stylelint": "^16.18",
     "stylelint-checkstyle-formatter": "^0.1.2",
     "stylelint-config-standard-scss": "^15.0.1",
-    "update-browserslist-db": "1.1"
+    "update-browserslist-db": "1.2.3"
   },
   "dependencies": {
-    "cross-env": "^7.0",
-    "puppeteer": "^24.6",
-    "sass": "^1.86",
+    "cross-env": "^10.1",
+    "puppeteer": "^24.39",
+    "sass": "^1.98",
     "sharp": "^0.34"
   },
   "browserslist": [

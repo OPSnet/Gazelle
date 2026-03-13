@@ -8,7 +8,6 @@ ENV NODE_VERSION=20
 # commit of composer 2.9.3
 ENV COMPOSER_COMMIT=681b090a0890b986ee0ae5862ca98db7c9170144
 
-
 # Uncomment to skip the chromium download when installing puppeteer. If you do,
 # you'll need to launch puppeteer with:
 #     browser.launch({executablePath: 'google-chrome-unstable'})
