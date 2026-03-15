@@ -102,7 +102,7 @@ abstract class BaseAttrObject extends BaseObject {
         $hasAttr = $this->hasAttr($attr);
         $toggled = false;
         if (!$enable && $hasAttr) {
-            self::$db->prepared_query($sql = "
+            self::$db->prepared_query("
                 DELETE FROM " . static::ObjectName . "_has_attr WHERE "
                 . static::ObjectColumn . " = ? AND " . static::JoinColumn
                 . " = (SELECT " . static::PkColumn . " FROM "
@@ -110,8 +110,25 @@ abstract class BaseAttrObject extends BaseObject {
                 ", $this->id, $attr
             );
             $toggled = self::$db->affected_rows() === 1;
+            // shim during migration
+            if (static::ObjectName === 'torrent_group') {
+                self::$db->prepared_query("
+                    DELETE FROM tgroup_has_attr
+                    WHERE TGroupID = ? AND TGroupAttrID = (
+                        SELECT TGroupAttrID FROM torrent_group_attr WHERE Name = ?
+                    )
+                    ", $this->id, $attr
+                );
+                $this->pg()->query("
+                    delete from tgroup_has_attr
+                    where id_tgroup = $1 and id_tgroup_attr = (
+                        select id_tgroup_attr from tgroup_attr where name = $2
+                    )
+                    ", $this->id, $attr
+                );
+            }
         } elseif ($enable && !$hasAttr) {
-            self::$db->prepared_query($sql = "
+            self::$db->prepared_query("
                 INSERT INTO " . static::ObjectName . "_has_attr ("
                 . static::ObjectColumn . ", " . static::JoinColumn
                 . ") SELECT ?, " . static::PkColumn . " FROM "
@@ -119,6 +136,19 @@ abstract class BaseAttrObject extends BaseObject {
                 ", $this->id, $attr
             );
             $toggled = self::$db->affected_rows() === 1;
+            // shim during migration
+            if (static::ObjectName === 'torrent_group') {
+                self::$db->prepared_query("
+                    INSERT INTO tgroup_has_attr (TGroupID, TGroupAttrID)
+                    SELECT ?, ID FROM tgroup_attr WHERE Name = ?
+                    ", $this->id, $attr
+                );
+                $this->pg()->query("
+                    insert into tgroup_has_attr (id_tgroup, id_tgroup_attr)
+                    select $1, id_tgroup_attr from tgroup_attr where name = $2
+                    ", $this->id, $attr
+                );
+            }
         }
         if ($toggled) {
             $this->flush();

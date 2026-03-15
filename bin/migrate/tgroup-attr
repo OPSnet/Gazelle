@@ -1,0 +1,29 @@
+#! /usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+namespace Gazelle;
+
+require __DIR__ . '/../../lib/bootstrap.php';
+
+$pg = new DB\Pg(PG_RW_DSN);
+$pg->begin();
+
+$pg->query('delete from tgroup_attr');
+$ta = $pg->query(<<<END_SQL
+    insert into tgroup_attr (name, description)
+    select "Name", "Description"
+    from relay.torrent_group_attr
+END_SQL
+);
+$tha = $pg->query(<<<END_SQL
+    insert into tgroup_has_attr (id_tgroup_attr, id_tgroup)
+    select tgha."TorrentGroupAttrID", tgha."TorrentGroupID"
+    from relay.torrent_group_has_attr tgha
+END_SQL
+);
+
+$pg->commit();
+
+echo "$ta attributes, $tha references inserted\n";
