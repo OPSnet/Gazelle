@@ -32,6 +32,9 @@ class UserMultiFactorAuthTest extends TestCase {
     }
 
     public function testMFA(): void {
+        $this->user->toggleAttr('enforce-mfa', true);
+        $this->assertTrue($this->user->enforceMFA(), 'user-needs-mfa');
+
         $mfa     = $this->user->MFA();
         $secret  = $mfa->generateSessionSecret();
         $manager = new Manager\UserToken();
@@ -51,6 +54,7 @@ class UserMultiFactorAuthTest extends TestCase {
             $this->user->auditTrail()->hasEvent(Enum\UserAuditEvent::mfa),
             'utest-mfa-audit'
         );
+        $this->assertFalse($this->user->enforceMFA(), 'user-has-mfa');
 
         $burn = array_pop($recovery);
         $this->assertFalse($mfa->burnRecovery('no such key'), 'utest-no-burn-mfa');

@@ -546,6 +546,10 @@ class User extends BaseAttrObject {
         return new MultiFactorAuth($this);
     }
 
+    public function enforceMFA(): bool {
+        return $this->hasAttr('enforce-mfa') && !$this->MFA()->enabled();
+    }
+
     public function userStatus(): UserStatus {
         return match ($this->info()['Enabled']) {
             '1'     => UserStatus::enabled,

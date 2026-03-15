@@ -45,6 +45,16 @@
         </div>
     </div>
     <div class="main_column">
+{% if user.hasAttr('enforce-mfa') and not user.MFA.enabled %}
+    <div style="width: 80%; margin: 0 auto;">
+      <div style="padding: 12px; text-align: left; border: 2px solid orangered">
+        Staff has made MFA mandatory for your account. <a href="#access">You must
+        activate it</a> before full access to the site is granted. If you
+        encounter any difficulties doing so, <a href="chat.php">join IRC
+        #help</a> or send a <a href="staff.php">Staff PM</a>.
+      </div>
+    </div>
+{% endif %}
 {% include 'user/setting/appearance.twig' %}
 {% include 'user/setting/navigation.twig' with {'nav_items': nav_items, 'nav_items_user': nav_items_user} only %}
 {% include 'user/setting/display.twig' %}

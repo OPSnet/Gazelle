@@ -76,6 +76,7 @@ if (str_starts_with($_SERVER['CONTENT_TYPE'] ?? '', 'application/json')) {
 }
 
 header('Content-Type: application/json');
+
 // Enforce rate limiting everywhere except info.php
 if (!$Viewer->permitted('site_unlimit_ajax') && isset($LimitedPages[$Action])) {
     [$rate, $interval] = $LimitedPages[$Action];
@@ -91,10 +92,17 @@ if (!$Viewer->permitted('site_unlimit_ajax') && isset($LimitedPages[$Action])) {
     }
 }
 
+if ($Viewer->isLocked() || $Viewer->enforceMFA()) {
+    if ($Action !== 'preview') {
+        json_error("Insufficient privileges");
+    }
+    require __DIR__ . '/preview.php';
+    exit;
+}
+
 if (AJAX && !defined('AUTHED_BY_TOKEN') && in_array($Action, $RequireTokenPages)) {
     json_error("This page requires an api token");
 }
-
 switch ($Action) {
     // things (that may be) used on the site
     case 'upload_section':

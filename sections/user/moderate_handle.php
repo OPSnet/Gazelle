@@ -202,6 +202,7 @@ foreach (
         'no-fl-gifts'           => isset($_POST['attr-no-fl-gifts']),
         'unlimited-download'    => isset($_POST['attr-unlimited-download']),
         'wiki-edit-readable'    => isset($_POST['attr-wiki-edit-readable']),
+        'enforce-mfa'           => isset($_POST['attr-enforce-mfa']),
     ] as $attr => $state
 ) {
     if ($state !== $user->hasAttr($attr) && $user->toggleAttr($attr, $state)) {
@@ -586,7 +587,7 @@ if (!(count($editSummary)) && $reason) {
 // that change, but until we never decode stuff coming out of the DB, not much can be done.
 
 if ($editSummary) {
-    $summary = implode(', ', $editSummary) . " by {$Viewer->username()}";
+    $summary = implode(', ', $editSummary);
     if ($reason) {
         $summary .= "\nReason: $reason";
     }

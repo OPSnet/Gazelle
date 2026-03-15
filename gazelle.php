@@ -127,9 +127,13 @@ if ($Viewer) {
             new Manager\IPv4()->register($Viewer, $Viewer->requestContext()->remoteAddr());
         }
     }
-    if ($Viewer->isLocked() && !in_array($module, ['chat', 'staffpm', 'ajax', 'locked', 'logout', 'login'])) {
+    $authorized = ['ajax', 'chat', 'locked', 'login', 'logout', 'staffpm'];
+    if ($Viewer->isLocked() && !in_array($module, $authorized)) {
         $Viewer->requestContext()->setModule('locked');
         $module = 'locked';
+    } elseif ($Viewer->enforceMFA() && !in_array($module, [...$authorized, 'user'])) {
+        header("Location: user.php?action=mfa&do=configure&auth=" . $Viewer->auth());
+        exit;
     }
 }
 

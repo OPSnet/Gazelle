@@ -82,10 +82,23 @@
     <tr id="acc_mfa_tr">
         <td class="label"><strong>Multi Factor Authentication</strong></td>
         <td>
-{% set has_mfa = user.MFA.enabled %}
-            Multi Factor authentication is currently <strong class="{{ has_mfa ? 'r99' : 'warning' }}">{{ has_mfa ? 'enabled' : 'disabled' }}</strong> for your account.
-            <br><br>
-            <a href="user.php?action=mfa&amp;do={{ has_mfa ? 'remove' : 'configure' }}&amp;userid={{ user.id }}&amp;auth={{ viewer.auth }}">Click here to {{ has_mfa ? 'remove' : 'configure' }}</a>
+{% if user.MFA.enabled %}
+{%  if user.hasAttr('enforce-mfa') %}
+{%      if viewer.isStaff %}
+            ✅ Multi Factor authentication (MFA) is mandatory and enabled. Remove the user attribute enforcing mandatory MFA if this is not longer necessary.
+{%      else %}
+            ✅ Multi Factor authentication (MFA) is mandatory on your account and enabled.
+{%      endif %}
+{%  else %}
+            ✅ Multi Factor authentication (MFA) is enabled on your account.
+            <br>
+            <a href="user.php?action=mfa&amp;do=remove&amp;userid={{ user.id }}&amp;auth={{ viewer.auth }}">Click here to remove</a>
+{%  endif %}
+{% else %}
+            ❌ Multi Factor authentication (MFA) is not enabled on your account.
+            <br>
+            <a href="user.php?action=mfa&amp;do=configure&amp;userid={{ user.id }}&amp;auth={{ viewer.auth }}">Click here to configure</a>
+{% endif %}
         </td>
     </tr>
 

@@ -5,7 +5,13 @@ declare(strict_types=1);
 
 namespace Gazelle;
 
-switch ($_REQUEST['action'] ?? '') {
+$action = $_REQUEST['action'] ?? '';
+if ($Viewer->enforceMFA()) {
+    require __DIR__ . '/mfa/index.php';
+    exit;
+}
+
+switch ($action) {
     case 'audit':
         require __DIR__ . '/audit.php';
         break;

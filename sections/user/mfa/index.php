@@ -5,12 +5,13 @@ declare(strict_types=1);
 
 namespace Gazelle;
 
-$user = new Manager\User()->findById((int)($_REQUEST['userid'] ?? 0));
-if (is_null($user)) {
-    Error404::error('No such user');
-}
-if ($user->id != $Viewer->id && !$Viewer->permitted('users_mod')) {
-    Error403::error();
+if (!$Viewer->isStaff()) {
+    $user = $Viewer;
+} else {
+    $user = new Manager\User()->findById((int)($_REQUEST['userid'] ?? 0));
+    if (is_null($user)) {
+        Error404::error('No such user');
+    }
 }
 
 require __DIR__ . match ($_GET['do'] ?? '') {
