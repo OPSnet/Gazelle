@@ -5,7 +5,7 @@ namespace Gazelle;
 class Blog extends BasePgObject {
     final public const tableName = 'blog';
     final public const pkName    = 'id_blog';
-    final public const CACHE_KEY = 'blogv2_%d';
+    final public const CACHE_KEY = 'blogv2_2_%d';
 
     public function location(): string {
         return "blog.php?id={$this->id}#blog{$this->id}";
@@ -31,16 +31,15 @@ class Blog extends BasePgObject {
         $key = sprintf(self::CACHE_KEY, $this->id);
         $info = self::$cache->get_value($key);
         if ($info === false) {
-            $info = $this->pg()->rowAssoc("
+            $info = $this->pg()->rowAssocex('
                 select title,
                     body,
                     id_thread,
                     created,
-                    notify,
                     id_user
                 from blog
-                where id_blog = ?
-                ", $this->id
+                where id_blog = $1
+                ', $this->id
             );
             self::$cache->cache_value($key, $info, 7200);
         }
@@ -58,7 +57,7 @@ class Blog extends BasePgObject {
     /**
      * The creation date of the blog
      */
-    public function created(): string {
+    public function created(): \DateTimeImmutable {
         return $this->info()['created'];
     }
 
@@ -66,14 +65,7 @@ class Blog extends BasePgObject {
      * The creation epoch of the blog
      */
     public function createdEpoch(): int {
-        return (int)strtotime($this->created());
-    }
-
-    /**
-     * The notification status of the blog
-     */
-    public function notify(): bool {
-        return $this->info()['notify'];
+        return $this->created()->getTimestamp();
     }
 
     /**
@@ -102,20 +94,6 @@ class Blog extends BasePgObject {
      */
     public function userId(): int {
         return $this->info()['id_user'];
-    }
-
-    /**
-     * Remove an the link to the forum topic of the blog article
-     */
-    public function removeThread(): int {
-        $affected = $this->pg()->prepared_query("
-            update blog set
-                id_thread = null
-            where id_blog = ?
-            ", $this->id
-        );
-        $this->flush();
-        return $affected;
     }
 
     /**

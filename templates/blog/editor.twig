@@ -5,42 +5,49 @@
     <div class="head">{{ action }} blog post</div>
     <form class="{% if create %}create_form{% else %}edit_form{% endif %}" name="blog_post" action="blog.php" method="post">
         <div class="pad">
-            <input type="hidden" name="action" value="{% if create %}takenewblog{% else %}takeeditblog{% endif %}" />
-            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+            <input type="hidden" name="action" value="{% if create %}takenewblog{% else %}takeeditblog{% endif %}">
+            <input type="hidden" name="auth" value="{{ viewer.auth }}">
 {%  if blog %}
-            <input type="hidden" name="blogid" value="{{ blog.id }}"/>
+            <input type="hidden" name="blogid" value="{{ blog.id }}">
 {%  endif %}
             <h3>Title</h3>
-            <input type="text" name="title" size="95" value="{{ blog.title }}" /><br/>
+            <input type="text" name="title" size="95" value="{{ blog.title }}"><br>
 
             <h3>Body</h3>
                 {{ body.preview|raw }}
                 {{ body.field|raw }}
-            <br/>
+            <br>
+{% if create %}
             <label>
-            <input type="checkbox" value="1" name="notify" checked />
-            Post an announcement to IRC {{ constant('IRC_CHAN') }} and send user notifications
+                <input type="checkbox" value="1" name="notify" checked>
+                Post an announcement to IRC {{ constant('IRC_CHAN') }} and send user notifications
             </label>
-            <br />
+            <br>
             <label>
-            <input type="checkbox" name="subscribe"{{ checked(viewer.option('AutoSubscribe')) }} tabindex="2" />
-            Subscribe to thread
+                <input type="checkbox" name="subscribe"{{ checked(viewer.option('AutoSubscribe')) }} tabindex="2">
+                Subscribe to thread
             </label>
+{% else %}
+            <label>
+                <input type="text" name="thread" value="{{ blog.threadId }}">
+                Forum Thread ID (insert 0 to create a new one)
+            </label>
+{% endif %}
             <div class="center">
                 {{ body.button|raw }}
-                <input type="submit" value="{{ action }} blog post" />
+                <input type="submit" value="{{ action }} blog post">
             </div>
         </div>
     </form>
 </div>
-<br/>
+<br>
 {% endif %}
 {% if create %}
 <div class="thin">
 {%  for item in headlines %}
     <div id="blog{{ item.id }}" class="box blog_post">
         <div class="head">
-            <a name="blog{{ item.id }}"><strong>{{ item.title }}</strong></a> - posted {{ item.created|time_diff }} by {{ item.userId|user_url }}
+            <a name="blog{{ item.id }}"><strong>{{ item.title }}</strong></a> - posted {{ item.createdEpoch|time_diff }} by {{ item.userId|user_url }}
 {%      if viewer.permitted('admin_manage_blog') %}
                 - <a href="blog.php?action=editblog&amp;id={{ item.id }}" class="brackets">Edit</a>
                 <a href="blog.php?action=deleteblog&amp;id={{ item.id }}&amp;auth={{ viewer.auth }}" class="brackets">Delete</a>
@@ -49,7 +56,7 @@
         <div class="pad">
 {{      item.body|bb_format }}
 {%      if item.threadId %}
-                <br /><br />
+                <br><br>
                 <em><a href="forums.php?action=viewthread&amp;threadid={{ item.threadId }}">Discuss this post here</a></em>
 {%          if viewer.permitted('admin_manage_blog') %}
                     <span style="float: right"><a href="blog.php?action=deadthread&amp;id={{ item.id }}&amp;auth={{ viewer.auth }}"
@@ -58,7 +65,7 @@
 {%      endif %}
         </div>
     </div>
-    <br />
+    <br>
 {%  endfor %}
 {% endif %}
 </div>

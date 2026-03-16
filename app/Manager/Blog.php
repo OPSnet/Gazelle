@@ -17,15 +17,15 @@ class Blog extends \Gazelle\BaseManager {
     public function create(
         string                    $title,
         string                    $body,
-        bool                      $notify,
         \Gazelle\ForumThread|null $thread,
         \Gazelle\User             $user,
     ): \Gazelle\Blog {
-        $id = $this->pg()->insert("
+        $id = $this->pg()->scalarex('
             insert into blog
-                   (id_user, title, body, id_thread, notify)
-            values (?,       ?,     ?,    ?,         ?)
-            ", $user->id, $title, $body, $thread?->id, $notify ? 't' : 'f',
+                   (id_user, title, body, id_thread)
+            values ($1,      $2,    $3,   $4)
+            returning id_blog
+            ', $user->id, $title, $body, $thread?->id,
         );
         $this->flush();
         return new \Gazelle\Blog($id);
@@ -35,9 +35,9 @@ class Blog extends \Gazelle\BaseManager {
         $key = sprintf(self::ID_KEY, $id);
         $blogId = self::$cache->get_value($key);
         if ($blogId === false) {
-            $blogId = (int)$this->pg()->scalar("
-                select id_blog from blog where id_blog = ?
-                ", $id
+            $blogId = (int)$this->pg()->scalarex('
+                select id_blog from blog where id_blog = $1
+                ', $id
             );
             if ($blogId) {
                 self::$cache->cache_value($key, $blogId, 7200);
@@ -55,7 +55,7 @@ class Blog extends \Gazelle\BaseManager {
     public function headlines(): array {
         $idList = self::$cache->get_value(self::CACHE_KEY);
         if ($idList === false) {
-            $idList = $this->pg()->column("
+            $idList = $this->pg()->columnex("
                 select b.id_blog
                 from blog b
                 order by b.created desc
@@ -79,21 +79,19 @@ class Blog extends \Gazelle\BaseManager {
 
     /**
      * Get the latest blog article id
-     * ID will be 0 if no article yet exists.
+     * ID will be null if no article yet exists.
      *
      * @return int $id blog article id
      */
-    public function latestId(): int {
-        $latest = $this->latest();
-        return $latest ? $latest->id : 0;
+    public function latestId(): ?int {
+        return $this->latest()?->id;
     }
 
     /**
      * Get the epoch of the most recent entry
-     * epoch will be 0 if no article yet exists.
+     * epoch will be null if no article yet exists.
      */
-    public function latestEpoch(): int {
-        $latest = $this->latest();
-        return $latest ? (int)strtotime($latest->created()) : 0;
+    public function latestEpoch(): ?int {
+        return $this->latest()?->createdEpoch();
     }
 }

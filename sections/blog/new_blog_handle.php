@@ -29,11 +29,10 @@ $thread = new Manager\ForumThread()->create(
     user  : $Viewer,
 );
 $blog = new Manager\Blog()->create(
-    title  : $title,
-    body   : $body,
-    thread : $thread,
-    user   : $Viewer,
-    notify : $notify,
+    title: $title,
+    body: $body,
+    thread: $thread,
+    user: $Viewer,
 );
 
 if (isset($_POST['subscribe'])) {

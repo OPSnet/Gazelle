@@ -40,7 +40,6 @@ if ($thread) {
 }
 $blog->setField('body', $body)
     ->setField('title', $title)
-    ->setField('notify', isset($_POST['notify']))
     ->modify();
 
 if ($thread && isset($_POST['subscribe'])) {

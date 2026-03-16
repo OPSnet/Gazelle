@@ -321,7 +321,14 @@ class Helper {
      * The default tolerance is 20 seconds.
      */
     public static function recentDate(string $date, int $tolerance = 20): bool {
-        $epoch = strtotime($date);
+        return self::recentEpoch(strtotime($date), $tolerance);
+    }
+
+    /**
+     * Test whether a unix timestamp is close enough to now.
+     * The default tolerance is 20 seconds.
+     */
+    public static function recentEpoch(int|false $epoch, int $tolerance = 20): bool {
         if ($epoch === false) {
             return false;
         }

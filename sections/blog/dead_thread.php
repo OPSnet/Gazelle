@@ -16,6 +16,6 @@ if (is_null($blog)) {
         'Please provide the ID of a blog post from which to remove the thread link.'
     );
 }
-$blog->removeThread();
+$blog->setField('id_thread', null)->modify();
 
 header('Location: blog.php');
