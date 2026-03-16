@@ -7,15 +7,19 @@ abstract class BasePgObject extends BaseObject {
         if (!$this->dirty()) {
             return false;
         }
+        $counter = 1;
         $set = implode(
             ', ',
-            [...array_map(fn($f) => "$f = ?", array_keys($this->updateField))]
+            array_map(
+                function ($f) use (&$counter) { return "$f = $" . $counter++; },
+                array_keys($this->updateField)
+            )
         );
         $args = [...array_values($this->updateField)];
         $args[] = $this->id();
-        $rowCount = $this->pg()->prepared_query(
+        $rowCount = $this->pg()->query(
             "update /* BasePgObject */ " . static::tableName
-                . " set $set where " . static::pkName . " = ?",
+                . " set $set where " . static::pkName . ' = $' . $counter,
             ...$args
         );
         $success = ($rowCount === 1);
@@ -32,12 +36,12 @@ abstract class BasePgObject extends BaseObject {
      * before calling this.
      */
     public function remove(): int {
-        $affected = $this->pg()->prepared_query(
+        $affected = $this->pg()->query(
             "DELETE /* BasePgObject */ FROM "
                 . static::tableName
                 . " WHERE "
                 . static::pkName
-                . " = ?",
+                . ' = $1',
             $this->id
         );
         $this->flush();
