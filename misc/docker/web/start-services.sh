@@ -15,7 +15,7 @@ sed -i "s|\(sql_db = \).*|\1${MYSQL_DATABASE}|g" /etc/sphinxsearch/sphinx.conf
 sed -i "s|/var/lib/sphinxsearch/data/|${CI_PROJECT_DIR}/.sphinxsearch/|g" /etc/sphinxsearch/sphinx.conf
 sed -i "s|listen = |\0127.0.0.1:|g" /etc/sphinxsearch/sphinx.conf
 mkdir -p "${CI_PROJECT_DIR}/.sphinxsearch"
-chown sphinxsearch:sphinxsearch "${CI_PROJECT_DIR}/.sphinxsearch"
+chown -R sphinxsearch:sphinxsearch "${CI_PROJECT_DIR}/.sphinxsearch"
 setpriv --reuid sphinxsearch -- /usr/bin/indexer --all
 
 echo "Start services..."

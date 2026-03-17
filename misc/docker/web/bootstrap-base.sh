@@ -17,6 +17,7 @@ bin/local-patch
 
 cat > ~/.my.cnf <<EOF
 [client]
+skip-ssl = true
 user = $MYSQL_USER
 password = $MYSQL_PASSWORD
 host = $MYSQL_HOST

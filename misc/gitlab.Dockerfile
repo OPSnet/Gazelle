@@ -1,9 +1,8 @@
-FROM debian:bookworm-slim
+FROM debian:trixie-slim
 
-ENV DEB_RELEASE=bookworm
+ENV DEB_RELEASE=trixie
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PHP_VER=8.5
-ENV NODE_VERSION=20
 # https://github.com/composer/getcomposer.org/commits/main/
 # commit of composer 2.9.3
 ENV COMPOSER_COMMIT=681b090a0890b986ee0ae5862ca98db7c9170144
@@ -25,8 +24,6 @@ RUN apt-get update \
     && mkdir -p /etc/apt/keyrings \
     && curl -fsSL https://packages.sury.org/php/apt.gpg > /usr/share/keyrings/debsuryorg-archive-keyring.gpg \
     && echo "deb [signed-by=/usr/share/keyrings/debsuryorg-archive-keyring.gpg] https://packages.sury.org/php/ $DEB_RELEASE main" > /etc/apt/sources.list.d/php.list \
-    && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
-    && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_${NODE_VERSION}.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
         make \
@@ -34,6 +31,7 @@ RUN apt-get update \
         nginx \
         netcat-openbsd \
         nodejs \
+        npm \
         php${PHP_VER}-cli \
         php${PHP_VER}-curl \
         php${PHP_VER}-fpm \
@@ -54,12 +52,10 @@ RUN apt-get update \
         python3-pip \
         python3-setuptools \
         python3-wheel \
-        software-properties-common \
         unzip \
         zlib1g-dev \
         # This installs the necessary packages to run the bundled version of chromium for puppeteer
         fonts-liberation \
-        gconf-service \
         libasound2 \
         libatk1.0-0 \
         libc6 \
@@ -69,8 +65,7 @@ RUN apt-get update \
         libexpat1 \
         libfontconfig1 \
         libgcc1 \
-        libgconf-2-4 \
-        libgdk-pixbuf2.0-0 \
+        libgdk-pixbuf-xlib-2.0-0 \
         libglib2.0-0 \
         libgtk-3-0 \
         libnspr4 \
