@@ -18,7 +18,7 @@ class SingleSeeded extends \Gazelle\Json {
                 'groupYear'   => $torrent->group()->year(),
                 'downloadUrl' => "torrents.php?action=download&id={$torrent->id}&torrent_pass={$this->user->announceKey()}",
                 'source'      => $torrent->location(),
-            ], $this->better->list(50, 0)
+            ], $this->better->page(50, 0)
         );
     }
 }

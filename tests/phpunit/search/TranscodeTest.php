@@ -10,7 +10,7 @@ use GazelleUnitTest\Helper;
 class TranscodeTest extends TestCase {
     protected array $torrentList;
     protected User $user;
-    protected Search\Transcode $tcSearch;
+    protected Search\Transcode $search;
 
     public function setUp(): void {
         $this->user = Helper::makeUser('torrent.' . randomString(10), 'bettertranscode');
@@ -37,7 +37,7 @@ class TranscodeTest extends TestCase {
                 title: $remaster
             )
         ];
-        $this->tcSearch = new Search\Transcode($this->user)->setSearch($tgroup->name());
+        $this->search = new Search\Transcode($this->user)->setSearch($tgroup->name());
         new Manager\TGroup()->refreshBetter();
     }
 
@@ -46,33 +46,38 @@ class TranscodeTest extends TestCase {
     }
 
     public function testSearchTranscode(): void {
-        $this->assertCount(1, $this->tcSearch->list(10, 0), 'searchtranscode-basic');
+        $this->assertCount(1, $this->search->page(10, 0), 'searchtranscode-basic');
 
-        $this->tcSearch->setMode(BetterFilter::seeding);
-        $this->assertCount(1, $this->tcSearch->list(10, 0), 'searchtranscode-seeding');
+        $this->search->setMode(BetterFilter::seeding);
+        $this->assertCount(1, $this->search->page(10, 0), 'searchtranscode-seeding');
 
-        $this->tcSearch->setMode(BetterFilter::uploaded);
-        $this->assertCount(1, $this->tcSearch->list(10, 0), 'searchtranscode-uploaded');
+        $this->search->setMode(BetterFilter::uploaded);
+        $this->assertCount(1, $this->search->page(10, 0), 'searchtranscode-uploaded');
 
-        $this->tcSearch->setMode(BetterFilter::snatched);
-        $this->assertCount(0, $this->tcSearch->list(10, 0), 'searchtranscode-snatched');
+        $this->search->setMode(BetterFilter::snatched);
+        $this->assertCount(0, $this->search->page(10, 0), 'searchtranscode-snatched');
 
-        $this->tcSearch->setMode(BetterFilter::any)->setEncoding(BetterEncoding::cbr320);
-        $this->assertCount(0, $this->tcSearch->list(10, 0), 'searchtranscode-320');
+        $this->search->setMode(BetterFilter::any)->setEncoding(BetterEncoding::cbr320);
+        $this->assertCount(0, $this->search->page(10, 0), 'searchtranscode-320');
 
-        $this->tcSearch->setEncoding(BetterEncoding::v0);
-        $this->assertCount(1, $this->tcSearch->list(10, 0), 'searchtranscode-v0');
+        $this->search->setEncoding(BetterEncoding::v0);
+        $this->assertCount(1, $this->search->page(10, 0), 'searchtranscode-v0');
 
-        $this->tcSearch->setEncoding(BetterEncoding::all);
-        $this->assertCount(0, $this->tcSearch->list(10, 0), 'searchtranscode-allenc');
+        $this->search->setEncoding(BetterEncoding::all);
+        $this->assertCount(0, $this->search->page(10, 0), 'searchtranscode-allenc');
 
-        $this->tcSearch->setEncoding(BetterEncoding::any);
-        $this->assertCount(1, $this->tcSearch->list(10, 0), 'searchtranscode-anyenc');
-        $this->assertEquals(['all' => 1, 'total_320' => 0, 'total_v0' => 1], $this->tcSearch->total(), 'searchtranscode-total');
+        $this->search->setEncoding(BetterEncoding::any);
+        $this->assertCount(1, $this->search->page(10, 0), 'searchtranscode-anyenc');
+        $this->assertEquals(['all' => 1, 'total_320' => 0, 'total_v0' => 1], $this->search->total(), 'searchtranscode-total');
     }
 
-    public function testSearchSearchTranscode(): void {
-        $this->tcSearch->setSearch('xcode');
-        $this->assertCount(1, $this->tcSearch->list(10, 0), 'searchtranscode-search');
+    public function testSearchTranscodeSearch(): void {
+        $this->search->setSearch('xcode');
+        $this->assertEqualsCanonicalizing(
+            ['all' => 1, 'want_320' =>  0, 'want_v0' => 1],
+            $this->search->total(),
+            'searchtranscode-search-total',
+        );
+        $this->assertCount(1, $this->search->page(10, 0), 'searchtranscode-search-page');
     }
 }

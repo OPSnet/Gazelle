@@ -7,7 +7,7 @@ namespace Gazelle;
 
 echo new Json\Better\SingleSeeded(
     $Viewer,
-    new Better\SingleSeeded($Viewer, 'all', new Manager\Torrent())
+    new Better\SingleSeeded($Viewer, Enum\BetterFilter::any, new Manager\Torrent())
 )
     ->setVersion(2)
     ->response();

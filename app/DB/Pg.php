@@ -70,6 +70,10 @@ class Pg {
         $this->stats = new Pg\Stats();
     }
 
+    public function placeholder(int $n): string {
+        return '$' . (1 + $n);
+    }
+
     public function stats(): Pg\Stats {
         return $this->stats;
     }

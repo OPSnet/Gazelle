@@ -3,6 +3,8 @@
 namespace Gazelle\Better;
 
 class SingleSeeded extends AbstractBetter {
+    protected int $uploaderId;
+
     public function mode(): string {
         return 'torrent';
     }
@@ -12,20 +14,22 @@ class SingleSeeded extends AbstractBetter {
     }
 
     public function setUploader(\Gazelle\User $user): static {
-        $this->where[] = "t.UserID = ?";
-        $this->args[] = $user->id;
+        $this->uploaderId = $user->id;
         return $this;
     }
 
     public function configure(): void {
-        $this->field = 't.ID';
-        $this->baseQuery = "
-            FROM torrents t
-            INNER JOIN torrents_group tg ON (tg.ID = t.GroupID)
-            INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
-        ";
-
-        $this->where[] = "t.Format = 'FLAC' AND tls.Seeders = 1";
-        $this->orderBy = "ORDER BY t.LogScore DESC, rand()";
+        $this->field = 't."ID"';
+        $this->baseQuery = <<<END_SQL
+            from relay.torrents                   t
+            inner join relay.torrents_group       tg  on (tg."ID" = t."GroupID")
+            inner join relay.torrents_leech_stats tls on (tls."TorrentID" = t."ID")
+        END_SQL;
+        $this->where[] = "t.\"Format\" = 'FLAC' and tls.\"Seeders\" = 1";
+        if (isset($this->uploaderId)) {
+            $this->where[] = "t.\"UserID\" = {$this->pg()->placeholder(count($this->args))}";
+            $this->args[] = $this->uploaderId;
+        }
+        $this->orderBy = "order by t.\"LogScore\" desc, random()";
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Gazelle\Better;
 
+use Gazelle\Enum\BetterFilter;
 use Gazelle\Enum\TorrentFlag;
 
 class Bad extends AbstractBetter {
@@ -11,14 +12,8 @@ class Bad extends AbstractBetter {
         return 'torrent';
     }
 
-    public function setBadType(string $bad): static {
-        $this->torrentFlag = match ($bad) { /** @phpstan-ignore-line */
-            'files'     => TorrentFlag::badFile,
-            'folders'   => TorrentFlag::badFolder,
-            'lineage'   => TorrentFlag::noLineage,
-            'tags'      => TorrentFlag::badTag,
-            'trumpable' => TorrentFlag::trumpable,
-        };
+    public function setBadType(TorrentFlag $flag): static {
+        $this->torrentFlag = $flag;
         return $this;
     }
 
@@ -37,27 +32,30 @@ class Bad extends AbstractBetter {
     }
 
     public function configure(): void {
-        $this->field     = 't.ID';
-        $this->baseQuery = "
-            FROM torrents t
-            INNER JOIN torrents_group    tg ON (tg.ID = t.GroupID)
-            INNER JOIN torrent_has_attr bad ON (bad.TorrentID = t.ID)
-            INNER JOIN torrent_attr    attr ON (attr.ID = bad.TorrentAttrID)
-            ";
-        $this->orderBy = "ORDER BY bad.created ASC";
-        $this->where[] = "attr.Name = ?";
+        $this->field     = 't."ID"';
+        $this->baseQuery = <<<END_SQL
+            from relay.torrents               t
+            inner join relay.torrents_group   tg   on (tg."ID" = t."GroupID")
+            inner join relay.torrent_has_attr bad  on (bad."TorrentID" = t."ID")
+            inner join relay.torrent_attr     attr on (attr."ID" = bad."TorrentAttrID")
+        END_SQL;
+        $this->orderBy = 'order by bad.created';
+        $this->where[] = "attr.\"Name\" = {$this->pg()->placeholder(count($this->args))}";
         $this->args[] = $this->torrentFlag->value;
 
-        if ($this->filter === 'snatched') {
-            $this->where[] = "EXISTS (
-                SELECT 1
-                FROM xbt_snatched xs
-                WHERE xs.fid = t.ID
-                    AND xs.uid = ?)";
-            $this->args[]     = $this->user->id;
-        } elseif ($this->filter === 'uploaded') {
-            $this->where[]    = 't.UserID = ?';
-            $this->args[]     = $this->user->id;
+        if ($this->filter === BetterFilter::snatched) {
+            $this->where[] = <<<END_SQL
+                exists (
+                    select 1
+                    from relay.xbt_snatched xs
+                    where xs.fid = t."ID"
+                        and xs.uid = {$this->pg()->placeholder(count($this->args))}
+                )
+            END_SQL;
+            $this->args[] = $this->user->id;
+        } elseif ($this->filter === BetterFilter::uploaded) {
+            $this->where[] = "t.\"UserID\" = {$this->pg()->placeholder(count($this->args))}";
+            $this->args[]  = $this->user->id;
         }
     }
 }

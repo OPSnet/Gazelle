@@ -28,34 +28,33 @@ if (!isset($_GET['userid'])) {
     }
 }
 
+$better = new Search\Transcode($user);
 $filter = $_GET['filter'] ?? 'uploaded';
-$search = $_GET['search'] ?? null;
-$target = $_GET['target'] ?? 'all';
-$better = new Search\Transcode($user, new Manager\Torrent());
-
 try {
     $better->setMode(Enum\BetterFilter::{$filter});
 } catch (\Error) {
     Error400::error('Unknown filter.');
 }
+$target = $_GET['target'] ?? 'all';
 try {
     $better->setEncoding(Enum\BetterEncoding::from($target));
 } catch (\ValueError) {
     Error400::error('Unknown target.');
 }
+$search = $_GET['search'] ?? null;
 if ($search) {
     $better->setSearch($search);
 }
 
-$list = $better->list(200, 0);
-shuffle($list);
-$list = array_slice($list, 0, TORRENTS_PER_PAGE);
+$page = $better->page(200, 0);
+shuffle($page);
+$page = array_slice($page, 0, TORRENTS_PER_PAGE);
 
 echo $Twig->render('better/search.twig', [
     'filter' => $filter,
-    'list'   => $list,
+    'list'   => $page,
     'search' => $search,
-    'source' => array_map(fn ($b) => $b['source'], $list),
+    'source' => array_map(fn ($b) => $b['source'], $page),
     'target' => $target,
     'total'  => $better->total(),
     'viewer' => $Viewer,

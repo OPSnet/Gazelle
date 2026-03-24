@@ -2,19 +2,21 @@
 
 namespace Gazelle\Json\Better;
 
+use Gazelle\Search\Transcode as SearchTranscode;
+
 class Transcode extends \Gazelle\Json {
     public function __construct(
-        protected string                    $announceKey,
-        protected \Gazelle\Search\Transcode $search,
+        protected string          $announceKey,
+        protected SearchTranscode $search,
     ) {}
 
     public function payload(): array {
-        $list = $this->search->list(200, 0);
-        shuffle($list);
-        $list = array_slice($list, 0, TORRENTS_PER_PAGE);
+        $page = $this->search->page(200, 0);
+        shuffle($page);
+        $page = array_slice($page, 0, TORRENTS_PER_PAGE);
 
         $payload = [];
-        foreach ($list as $result) {
+        foreach ($page as $result) {
             $torrent = $result['torrent'];
             $tgroup  = $torrent->group();
             $payload[] = [

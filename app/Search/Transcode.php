@@ -41,7 +41,7 @@ class Transcode extends \Gazelle\Base {
     protected string $search;
 
     public function __construct(
-        protected \Gazelle\User $user,
+        protected \Gazelle\User            $user,
         protected \Gazelle\Manager\Torrent $torMan = new \Gazelle\Manager\Torrent(),
     ) {}
 
@@ -58,10 +58,6 @@ class Transcode extends \Gazelle\Base {
     public function setSearch(string $search): static {
         $this->search = $search;
         return $this;
-    }
-
-    public function placeholder(int $n): string {
-        return '$' . (1 + $n);
     }
 
     public function queryInit(): array {
@@ -84,7 +80,7 @@ class Transcode extends \Gazelle\Base {
                         and xfu.active = 1
                         and xfu.remaining = 0
                         and xfu.mtime > extract(epoch from (now() - interval '1 hour'))::integer
-                        and xfu.uid = {$this->placeholder(count($args))}
+                        and xfu.uid = {$this->pg()->placeholder(count($args))}
                 END_SQL;
                 $args[] = $this->user->id;
                 break;
@@ -95,13 +91,13 @@ class Transcode extends \Gazelle\Base {
                     $join
                     inner join relay.xbt_snatched xs on (xs.fid = t."ID")
                 END_SQL;
-                $cond[] = "xs.uid = {$this->placeholder(count($args))}";
+                $cond[] = "xs.uid = {$this->pg()->placeholder(count($args))}";
                 $args[] = $this->user->id;
                 break;
             case BetterFilter::uploaded:
                 $distinct = '';
                 $body     = "from relay.torrents t $join";
-                $cond[]   = "t.\"UserID\" = {$this->placeholder(count($args))}";
+                $cond[]   = "t.\"UserID\" = {$this->pg()->placeholder(count($args))}";
                 $args[]   = $this->user->id;
                 break;
             default:
@@ -111,7 +107,7 @@ class Transcode extends \Gazelle\Base {
         }
 
         if (isset($this->search)) {
-            $cond[] = "tg.\"Name\" ~~* ('%' || {$this->placeholder(count($args))} || '%')";
+            $cond[] = "tg.\"Name\" ~~* ('%' || {$this->pg()->placeholder(count($args))} || '%')";
             $args[] = $this->search;
         }
 
@@ -151,7 +147,7 @@ class Transcode extends \Gazelle\Base {
                 from u
                 inner join better_tgroup b using (id_tgroup, edition)
                 where $cond
-                limit {$this->placeholder(count($args))} offset {$this->placeholder(count($args) + 1)}
+                limit {$this->pg()->placeholder(count($args))} offset {$this->pg()->placeholder(count($args) + 1)}
             END_SQL,
             [
                 ...$args,
@@ -161,29 +157,29 @@ class Transcode extends \Gazelle\Base {
         ];
     }
 
-    public function list(int $limit, int $offset): array {
-        $key = null;
-        $list = false;
+    public function page(int $limit, int $offset): array {
+        $key  = null;
+        $page = false;
         if (!isset($this->search)) {
             $key = sprintf(self::CACHE_KEY,
                 $this->mode->name,
                 $this->encoding->value,
                 $this->user->id
             );
-            $list = self::$cache->get_value($key);
+            $page = self::$cache->get_value($key);
         }
-        if ($list === false) {
+        if ($page === false) {
             [$sql, $args] = $this->queryList($limit, $offset);
-            $list = $this->pg()->allex($sql, ...$args);
+            $page = $this->pg()->allex($sql, ...$args);
             if ($key) {
-                self::$cache->cache_value($key, $list, 3600);
+                self::$cache->cache_value($key, $page, 3600);
             }
         }
 
-        foreach ($list as &$row) {
+        foreach ($page as &$row) {
             $row['torrent'] = $this->torMan->findById($row['source']);
         }
-        return $list;
+        return $page;
     }
 
     public function queryTotal(): array {

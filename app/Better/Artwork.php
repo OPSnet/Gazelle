@@ -2,6 +2,8 @@
 
 namespace Gazelle\Better;
 
+use Gazelle\Enum\BetterFilter;
+
 class Artwork extends AbstractBetter {
     public function mode(): string {
         return 'group';
@@ -12,32 +14,39 @@ class Artwork extends AbstractBetter {
     }
 
     public function configure(): void {
-        $this->field = 'tg.ID';
-        $this->baseQuery = "
-            FROM torrents_group tg
-            LEFT JOIN wiki_torrents wt USING (RevisionID)
-            LEFT JOIN torrent_group_has_attr tgha ON (tgha.TorrentGroupID = tg.ID
-                AND tgha.TorrentGroupAttrID = (
-                    SELECT tga.ID FROM torrent_group_attr tga WHERE tga.Name = 'no-cover-art'
+        $this->field = 'tg."ID"';
+        $this->baseQuery = <<<END_SQL
+            from relay.torrents_group     tg
+            left join relay.wiki_torrents wt using ("RevisionID")
+            left join tgroup_has_attr     tgha on (
+                tgha.id_tgroup = {$this->field}
+                and tgha.id_tgroup_attr = (
+                    select tga.id_tgroup_attr from tgroup_attr tga where tga.name = 'no-cover-art'
                 )
-            )";
+            )
+            END_SQL;
+        $this->where[] = 'tg."CategoryID" = 1 and coalesce(wt."Image", tg."WikiImage") = \'\' and tgha.id_tgroup is null';
+        $this->orderBy = 'order by tg."Name"';
 
-        $this->where[] = "tg.CategoryID = 1 AND coalesce(wt.Image, tg.WikiImage) = '' AND tgha.TorrentGroupID IS NULL";
-        $this->orderBy = "ORDER BY tg.Name";
-
-        if ($this->filter === 'snatched') {
-            $this->where[] = "EXISTS (
-                SELECT 1
-                FROM xbt_snatched xs
-                INNER JOIN torrents t ON (t.ID = xs.fid AND xs.uid = ?)
-                WHERE t.GroupID = tg.ID)";
-            $this->args[]     = $this->user->id;
-        } elseif ($this->filter === 'uploaded') {
-            $this->where[] = "EXISTS (
-                SELECT 1
-                FROM torrents t
-                WHERE t.GroupID = tg.ID
-                    AND t.UserID = ?)";
+        if ($this->filter === BetterFilter::snatched) {
+            $this->where[] = <<<END_SQL
+                exists (
+                    select 1
+                    from relay.xbt_snatched xs
+                    inner join relay.torrents t on (t."ID" = xs.fid and xs.uid = $1)
+                    where t."GroupID" = tg."ID"
+                )
+            END_SQL;
+            $this->args[] = $this->user->id;
+        } elseif ($this->filter === BetterFilter::uploaded) {
+            $this->where[] = <<<END_SQL
+                exists (
+                    select 1
+                    from relay.torrents t
+                    where t."GroupID" = tg."ID"
+                        and t."UserID" = $1
+                )
+            END_SQL;
             $this->args[] = $this->user->id;
         }
     }

@@ -123,11 +123,12 @@ class Helper {
     }
 
     public static function makeTGroupMusic(
-        User   $user,
-        string $name,
-        array  $artistName,
-        array  $tagName,
-        int    $releaseType = 1
+        User    $user,
+        string  $name,
+        array   $artistName,
+        array   $tagName,
+        int     $releaseType = 1,
+        ?string $image       = 'https://example.com/phpunit-tgroup/image.jpg',
     ): TGroup {
         $user->requestContext()->setViewer($user);
         $tgroup = new \Gazelle\Manager\TGroup()->create(
@@ -135,7 +136,7 @@ class Helper {
             releaseType:     $releaseType,
             name:            $name,
             description:     'phpunit music description',
-            image:           'https://example.com/phpunit-tgroup/' . randomString(10) . '.jpg',
+            image:           $image,
             year:            (int)date('Y') - 1,
         );
         $tgroup->addArtists($artistName[0], $artistName[1]);
@@ -212,7 +213,12 @@ class Helper {
         return $torrent;
     }
 
-    public static function addTorrentTraffic(\Gazelle\Torrent $torrent, int $leechTotal, int $seedTotal, int $snatchTotal): int {
+    public static function addTorrentTraffic(
+        \Gazelle\Torrent $torrent,
+        int $leechTotal  = 0,
+        int $seedTotal   = 0,
+        int $snatchTotal = 0,
+    ): int {
         $db = \Gazelle\DB::DB();
         $db->prepared_query("
             UPDATE torrents_leech_stats SET
@@ -312,7 +318,6 @@ class Helper {
                 static::removeTGroup($tgroup, $user);
             }
         }
-        $user->requestContext()->unsetViewer();
         $user->remove();
     }
 

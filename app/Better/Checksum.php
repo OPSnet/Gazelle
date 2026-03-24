@@ -2,6 +2,8 @@
 
 namespace Gazelle\Better;
 
+use Gazelle\Enum\BetterFilter;
+
 class Checksum extends AbstractBetter {
     public function mode(): string {
         return 'torrent';
@@ -12,24 +14,27 @@ class Checksum extends AbstractBetter {
     }
 
     public function configure(): void {
-        $this->field = 't.ID';
-        $this->baseQuery = "
-            FROM torrents t
-            INNER JOIN torrents_group tg ON (tg.ID = t.GroupID)
-            INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)";
+        $this->field = 't."ID"';
+        $this->baseQuery = <<<END_SQL
+            from relay.torrents                   t
+            inner join relay.torrents_group       tg  on (tg."ID" = t."GroupID")
+            inner join relay.torrents_leech_stats tls on (tls."TorrentID" = t."ID")
+        END_SQL;
+        $this->where[] = "t.\"HasLogDB\" = '1' AND t.\"LogChecksum\" = '0'";
+        $this->orderBy = 'order by tls."Snatched" DESC, t.created';
 
-        $this->where[] = "t.HasLogDB = '1' AND t.LogChecksum = '0'";
-        $this->orderBy = "ORDER BY tls.Snatched DESC, t.created ASC";
-
-        if ($this->filter === 'snatched') {
-            $this->where[] = "EXISTS (
-                SELECT 1
-                FROM xbt_snatched xs
-                WHERE xs.fid = t.ID
-                    AND xs.uid = ?)";
+        if ($this->filter === BetterFilter::snatched) {
+            $this->where[] = <<<END_SQL
+                exists (
+                    select 1
+                    from relay.xbt_snatched xs
+                    where xs.fid = t."ID"
+                        and xs.uid = {$this->pg()->placeholder(count($this->args))}
+                    )
+            END_SQL;
             $this->args[] = $this->user->id;
-        } elseif ($this->filter === 'uploaded') {
-            $this->where[] = 't.UserID = ?';
+        } elseif ($this->filter === BetterFilter::uploaded) {
+            $this->where[] = "t.\"UserID\" = {$this->pg()->placeholder(count($this->args))}";
             $this->args[]  = $this->user->id;
         }
     }

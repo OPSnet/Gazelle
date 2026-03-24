@@ -2,24 +2,26 @@
 
 namespace Gazelle\Better;
 
+use Gazelle\Enum\BetterFilter;
+
 abstract class AbstractBetter extends \Gazelle\Base {
-    final public const CACHE_TOTAL = 'better_%s_total';
+    final public const CACHE_TOTAL = 'better_%s_%s_total';
 
     protected string $baseQuery;
     protected string $countBy;
     protected string $orderBy;
     protected string $field;
     protected string $search;
-    protected bool $distinct = false;
+    protected string $distinct;
     protected bool $dirty    = true;
     protected array $where = [];
     protected array $args  = [];
 
     public function __construct(
         protected \Gazelle\User $user,
-        protected string $filter,
+        protected BetterFilter $filter,
         protected \Gazelle\BaseManager $manager,
-    ) { }
+    ) {}
 
     /**
      * This defines the SQL queries needed to perform the
@@ -51,26 +53,30 @@ abstract class AbstractBetter extends \Gazelle\Base {
     }
 
     public function addArtistUserSnatchJoin(): static {
-        $this->baseQuery .= " INNER JOIN (
-            SELECT DISTINCT aa.ArtistID
-            FROM torrents_artists ta
-            INNER JOIN torrents t ON (t.GroupID = ta.GroupID)
-            INNER JOIN artists_alias aa ON (ta.AliasID = aa.AliasID)
-            INNER JOIN xbt_snatched x ON (x.fid = t.ID AND x.uid = ?)
-        ) s ON (s.ArtistID = a.ArtistID)";
+        $this->baseQuery .= <<<END_SQL
+            inner join (
+                select distinct aa."ArtistID"
+                from relay.torrents_artists    ta
+                inner join relay.torrents      t  on (t."GroupID" = ta."GroupID")
+                inner join relay.artists_alias aa on (ta."AliasID" = aa."AliasID")
+                inner join relay.xbt_snatched  x  on (x.fid = t."ID" and x.uid = {$this->pg()->placeholder(count($this->args))})
+            ) s on (s."ArtistID" = a."ArtistID")
+        END_SQL;
         $this->args[] = $this->user->id;
         return $this;
     }
 
     public function addArtistUserUploadJoin(): static {
-        $this->baseQuery .= "INNER JOIN (
-            SELECT DISTINCT aa.ArtistID
-            FROM torrents t
-            INNER JOIN torrents_group tg ON (tg.ID = t.GroupID)
-            INNER JOIN torrents_artists ta ON (ta.GroupID = tg.ID)
-            INNER JOIN artists_alias aa ON (ta.AliasID = aa.AliasID)
-            WHERE t.UserID = ?
-            ) s ON (s.ArtistID = a.ArtistID)";
+        $this->baseQuery .= <<<END_SQL
+            inner join (
+                select distinct aa."ArtistID"
+                from relay.torrents               t
+                inner join relay.torrents_group   tg on (tg."ID" = t."GroupID")
+                inner join relay.torrents_artists ta on (ta."GroupID" = tg."ID")
+                inner join relay.artists_alias    aa on (ta."AliasID" = aa."AliasID")
+                where t."UserID" = {$this->pg()->placeholder(count($this->args))}
+            ) s ON (s."ArtistID" = a."ArtistID")
+        END_SQL;
         $this->args[] = $this->user->id;
         return $this;
     }
@@ -78,69 +84,77 @@ abstract class AbstractBetter extends \Gazelle\Base {
     public function buildQuery(): string {
         $query = $this->baseQuery;
         if ($this->where) {
-            $query .= " WHERE " . implode(' AND ', $this->where);
+            $query .= " where " . implode(' and ', $this->where);
         }
         return $query;
     }
 
     protected function build(): void {
-        if ($this->dirty) {
-            $this->dirty = false;
-            $this->configure();
+        $this->args = [];
+        $this->configure();
 
-            if ($this->mode() === 'artist') {
-                if ($this->filter === 'snatched') {
-                    $this->addArtistUserSnatchJoin();
-                } elseif ($this->filter === 'uploaded') {
-                    $this->addArtistUserUploadJoin();
-                }
+        if ($this->mode() === 'artist') {
+            if ($this->filter === BetterFilter::snatched) {
+                $this->addArtistUserSnatchJoin();
+            } elseif ($this->filter === BetterFilter::uploaded) {
+                $this->addArtistUserUploadJoin();
             }
-            if (isset($this->search)) {
-                switch ($this->mode()) {
-                    case 'artist':
-                        $this->where[] = 'aa.Name LIKE ?';
-                        $this->args[] = "%{$this->search}%";
-                        break;
-                    case 'group':
-                    case 'torrent':
-                        $this->where[] = "tg.Name LIKE ?";
-                        $this->args[] = "%{$this->search}%";
-                        break;
-                }
+        }
+        if (isset($this->search)) {
+            switch ($this->mode()) {
+                case 'artist':
+                    $this->where[] = "aa.\"Name\" ~~* ('%' || {$this->pg()->placeholder(count($this->args))} || '%')";
+                    $this->args[] = $this->search;
+                    break;
+                case 'group':
+                case 'torrent':
+                    $this->where[] = "tg.\"Name\" ~~* ('%' || {$this->pg()->placeholder(count($this->args))} || '%')";
+                    $this->args[] = $this->search;
+                    break;
             }
         }
     }
 
-    public function listSql(): string {
-        $this->build();
-        return "SELECT " . ($this->distinct ? 'DISTINCT ' : '') . $this->field
-            . " " . $this->buildQuery()
-            . " " . $this->orderBy
-            . " LIMIT ? OFFSET ?";
-    }
-
-    public function list(int $limit, int $offset): array {
-        self::$db->prepared_query($this->listSql(), ...[...$this->args, $limit, $offset]);
-        return array_map(fn ($id) => $this->manager->findById($id), self::$db->collect(0));
-    }
-
-    protected function totalCacheKey(): string {
+    public function totalCacheKey(): string {
         $class = explode('\\', static::class);
-        return sprintf(self::CACHE_TOTAL, strtolower(array_pop($class)));
+        return sprintf(self::CACHE_TOTAL, strtolower(array_pop($class)), $this->filter->name);
     }
 
     public function totalSql(): string {
         $this->build();
-        return "SELECT count(" . ($this->distinct ? "DISTINCT {$this->field}" : '*') . ") " . $this->buildQuery();
+        return "select count("
+            . (isset($this->distinct) ? 'distinct ' : '')
+            . "{$this->field}) {$this->buildQuery()}";
     }
 
     public function total(): int {
         $key = $this->totalCacheKey();
         $total = self::$cache->get_value($key);
         if ($total === false) {
-            $total =  self::$db->scalar($this->totalSql(), ...$this->args);
+            $total =  $this->pg()->scalarex($this->totalSql(), ...$this->args);
             self::$cache->cache_value($key, $total, 1200);
         }
         return $total;
+    }
+
+    public function pageSql(int $limit, int $offset): string {
+        $this->build();
+        $p1 = $this->pg()->placeholder(count($this->args));
+        $this->args[] = $limit;
+        $p2 = $this->pg()->placeholder(count($this->args));
+        $this->args[] = $offset;
+        return "select " . (
+            isset($this->distinct)
+                ? "distinct {$this->field}, {$this->distinct}"
+                : $this->field
+            )
+            . " {$this->buildQuery()} {$this->orderBy} limit $p1 offset $p2";
+    }
+
+    public function page(int $limit, int $offset): array {
+        return array_map(
+            fn ($id) => $this->manager->findById($id),
+            $this->pg()->columnex($this->pageSql($limit, $offset), ...$this->args),
+        );
     }
 }

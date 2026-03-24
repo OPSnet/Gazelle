@@ -96,10 +96,6 @@ class AuditTrail extends \Gazelle\Base {
         return $this;
     }
 
-    protected function placeholder(int $n): string {
-        return '$' . (1 + $n);
-    }
-
     public function configure(): void {
         if (isset($this->args)) {
             return;
@@ -108,29 +104,29 @@ class AuditTrail extends \Gazelle\Base {
         $this->cond = [];
         $this->join = [];
         if (isset($this->info['after'])) {
-            $this->cond[] = 'uat.created >= ' . $this->placeholder(count($this->args));
+            $this->cond[] = 'uat.created >= ' . $this->pg()->placeholder(count($this->args));
             $this->args[] = $this->info['after'];
         }
         if (isset($this->info['before'])) {
-            $this->cond[] = 'uat.created <= ' . $this->placeholder(count($this->args));
+            $this->cond[] = 'uat.created <= ' . $this->pg()->placeholder(count($this->args));
             $this->args[] = $this->info['before'];
         }
         if (isset($this->info['event'])) {
-            $this->cond[] = "uat.event = any({$this->placeholder(count($this->args))}::text[])";
+            $this->cond[] = "uat.event = any({$this->pg()->placeholder(count($this->args))}::text[])";
             $this->args[] = $this->pg()->arrayConverter()->output($this->info['event']);
         }
         if (isset($this->info['note'])) {
-            $this->cond[] = "uat.note_ts @@ websearch_to_tsquery('simple', {$this->placeholder(count($this->args))})";
+            $this->cond[] = "uat.note_ts @@ websearch_to_tsquery('simple', {$this->pg()->placeholder(count($this->args))})";
             $this->args[] = $this->info['note'];
         }
         if (isset($this->info['author'])) {
             $this->join[] = 'inner join relay.users_main ua on (ua."ID" = uat.id_user_creator)';
-            $this->cond[] = "uat.id_user_creator = any({$this->placeholder(count($this->args))}::int[])";
+            $this->cond[] = "uat.id_user_creator = any({$this->pg()->placeholder(count($this->args))}::int[])";
             $this->args[] = $this->pg()->integerConverter()->output($this->info['author']);
         }
         if (isset($this->info['user'])) {
             $this->join[] = 'inner join relay.users_main um on (um."ID" = uat.id_user)';
-            $this->cond[] = "uat.id_user = any({$this->placeholder(count($this->args))}::int[])";
+            $this->cond[] = "uat.id_user = any({$this->pg()->placeholder(count($this->args))}::int[])";
             $this->args[] = $this->pg()->integerConverter()->output($this->info['user']);
         }
 
@@ -167,8 +163,8 @@ class AuditTrail extends \Gazelle\Base {
 
     public function pageSql(): string {
         $this->configure();
-        $limitPlaceholder  = $this->placeholder(count($this->args));
-        $offsetPlaceholder = $this->placeholder(count($this->args) + 1);
+        $limitPlaceholder  = $this->pg()->placeholder(count($this->args));
+        $offsetPlaceholder = $this->pg()->placeholder(count($this->args) + 1);
         $join = isset($this->join) ? implode(' ', $this->join) : '';
         return <<<END_SQL
             select uat.id_user, uat.id_user_creator, uat.created, uat.event, uat.note

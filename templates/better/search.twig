@@ -11,7 +11,7 @@
     <h2>Transcodes</h2>
 {% include 'better/links.twig' only %}
     <form class="search_form" name="transcodes" action="" method="get">
-        <input type="hidden" name="method" value="transcode" />
+        <input type="hidden" name="method" value="transcode">
         <table cellpadding="6" cellspacing="1" border="0" class="border" width="100%">
             <tr>
                 <td class="label"><strong>Filter</strong></td>
@@ -31,24 +31,24 @@
             <tr>
                 <td class="label"><strong>Search</strong></td>
                 <td>
-                    <input type="search" name="search" size="60" value="{{ search }}" />
+                    <input type="search" name="search" size="60" value="{{ search }}">
                 </td>
             </tr>
-            <tr><td>&nbsp;</td><td><input type="submit" value="Search" /></td></tr>
+            <tr><td>&nbsp;</td><td><input type="submit" value="Search"></td></tr>
         </table>
     </form>
     <h3>About</h3>
     <div class="box pad" style="padding: 10px 10px 10px 20px;">
         <p>
-            This page lists {{ list|length }} random transcodable perfect FLACs matching the options you selected above. The following numbers tell you something about the torrents currently listed below and can change if you reload.<br /><br />
+            This page lists {{ page|length }} random transcodable perfect FLACs matching the options you selected above. The following numbers tell you something about the torrents currently listed below and can change if you reload.<br><br>
 
-            Number of perfect FLACs you can transcode: {{ total.all|number_format }}<br />
-            Number of missing V0 transcodes: {{ total.total_v0|number_format }}<br />
-            Number of missing 320 transcodes: {{ total.total_320|number_format }}<br />
-            Total missing transcodes: {{ (total.total_v0 + total.total_320)|number_format }}<br />
+            Number of perfect FLACs you can transcode: {{ total.all|number_format }}<br>
+            Number of missing V0 transcodes: {{ total.total_v0|number_format }}<br>
+            Number of missing 320 transcodes: {{ total.total_320|number_format }}<br>
+            Total missing transcodes: {{ (total.total_v0 + total.total_320)|number_format }}<br>
 {% if viewer.permitted('zip_downloader') and source|length > 0 %}
-            <br />
-            <br />
+            <br>
+            <br>
 {%  set id_list = source|join(',') %}
             <a class="brackets" href="torrents.php?action=collector&amp;title=better&amp;ids={{ id_list }}&amp;sig={{ viewer.hashHmac('collector', id_list) }}" onclick="return confirm('If you do not have the content, your ratio WILL be affected; be sure to check the size of all torrents before downloading.');">Download All</a>
 {% endif %}

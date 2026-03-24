@@ -17,11 +17,16 @@ if (isset($_GET['userid']) && $Viewer->permitted('users_override_paranoia')) {
 }
 
 if (($_GET['method'] ?? '') === 'single') {
-    $filter = 'all';
+    $filter = Enum\BetterFilter::any;
     $type   = 'single';
 } else {
-    $filter = $_GET['filter'] ?? 'all';
-    $type   = $_GET['type'] ?? 'artwork';
+    $filter = match ($_GET['filter'] ?? '') {
+        'seeding'  => Enum\BetterFilter::seeding,
+        'snatched' => Enum\BetterFilter::snatched,
+        'uploaded' => Enum\BetterFilter::uploaded,
+        default    => Enum\BetterFilter::any,
+    };
+    $type = $_GET['type'] ?? 'artwork';
 }
 
 $better = match ($type) {
@@ -32,9 +37,17 @@ $better = match ($type) {
     'artwork'       => new Better\Artwork($user, $filter, new Manager\TGroup()),
     'checksum'      => new Better\Checksum($user, $filter, new Manager\Torrent()),
     'single'        => new Better\SingleSeeded($user, $filter, new Manager\Torrent()),
-    'files', 'folders', 'lineage', 'tags', 'trumpable'
-                    => new Better\Bad($user, $filter, new Manager\Torrent())->setBadType($type),
-    default         => Error404::error(),
+    'files', 'folders', 'lineage', 'tags', 'trumpable' =>
+        new Better\Bad($user, $filter, new Manager\Torrent())->setBadType(
+            match ($type) {
+               'files'     => Enum\TorrentFlag::badFile,
+               'folders'   => Enum\TorrentFlag::badFolder,
+               'lineage'   => Enum\TorrentFlag::noLineage,
+               'tags'      => Enum\TorrentFlag::badTag,
+               'trumpable' => Enum\TorrentFlag::trumpable,
+            }
+        ),
+    default => Error404::error(),
 };
 
 if (isset($_GET['remove']) && $better instanceof Better\Bad && $Viewer->permitted('admin_reports')) {

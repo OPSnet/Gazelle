@@ -103,7 +103,7 @@ class Collage extends \Gazelle\BaseManager {
             ORDER BY Featured DESC, Name ASC
             ", $user->id
         );
-        return array_map(fn($id) => $this->findById($id), self::$db->collect(0));
+        return array_map(fn ($id) => $this->findById($id), self::$db->collect(0));
     }
 
     public function recoverById(int $id): ?\Gazelle\Collage {

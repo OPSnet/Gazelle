@@ -4,15 +4,15 @@
 <h2>{% if type == 'single' %}Single seeded{% else %}Attaining perfection{% endif %}</h2>
 {% include 'better/links.twig' only %}
 <form class="search_form" name="missing" action="" method="get">
-<input type="hidden" name="method" value="{% if type == "single" %}single{% else %}missing{% endif %}" />
+<input type="hidden" name="method" value="{% if type == "single" %}single{% else %}missing{% endif %}">
 <table cellpadding="6" cellspacing="1" border="0" class="border" width="100%">
 {% if type == 'single' %}
     <tr>
         <td class="label"><strong>Uploader</strong></td>
         <td>
-            <input type="search" name="uploader" size="20" value="{{ uploader.id }}" />
+            <input type="search" name="uploader" size="20" value="{{ uploader.id }}">
             {% if uploader %} ({{ uploader.id|user_url }}){% endif %}
-            <br />Search by userid or @username (e.g. {{ viewer.id }} or @{{ viewer.username }})
+            <br>Search by userid or @username (e.g. {{ viewer.id }} or @{{ viewer.username }})
         </td>
 {% else %}
     <tr>
@@ -20,7 +20,7 @@
         <td>
             <select name="filter">
 {%  for filterCase in enum('Gazelle\\Enum\\BetterFilter').cases %}
-                <option value="{{ filterCase.name }}"{{ selected(filter == filterCase.name) }}>{{ filterCase.name|ucfirst }}</option>
+                <option value="{{ filterCase.name }}"{{ selected(filter == filterCase) }}>{{ filterCase.name|ucfirst }}</option>
 {%  endfor %}
             </select>
             <select name="type">
@@ -42,35 +42,35 @@
     <tr>
         <td class="label"><strong>Filter in title/name</strong></td>
         <td>
-            <input type="search" name="search" size="20" value="{{ better.search }}" />
+            <input type="search" name="search" size="20" value="{{ better.search }}">
         </td>
     </tr>
-    <tr><td>&nbsp;</td><td><input type="submit" value="Search" /></td></tr>
+    <tr><td>&nbsp;</td><td><input type="submit" value="Search"></td></tr>
 </table>
 </form>
-{% set list = better.list(paginator.limit, paginator.offset) %}
-{% set list_total = list|length %}
-{% set size = list|map(t => "#{t.size}")|reduce((sum, s) => sum + s, 0) %}
+{% set page = better.page(paginator.limit, paginator.offset) %}
+{% set page_total = page|length %}
+{% set size = page|map(t => "#{t.size}")|reduce((sum, s) => sum + s, 0) %}
 <div class="box pad">
     <div class="torrent">
         <h3>{{ better.heading }}</h3>
 {%  if better.mode != 'torrent' %}
         <h4>There {% if better.total == 1 %}is{% else %}are{% endif %} {{ better.total }} {{ better.mode }}{{ better.total|plural }} remaining</h4>
 {%  elseif better.total > 1 and viewer.permitted('zip_downloader') %}
-        <h4>Here are {{ list_total }}{% if type == 'single' and better.total > 50 %} random{% endif %} torrent{{ list_total|plural }}
+        <h4>Here are {{ page_total }}{% if type == 'single' and better.total > 50 %} random{% endif %} torrent{{ page_total|plural }}
 {%      if better.total > 50 %} of {{ better.total }} remaining{% endif %}
-{%          set id_list = list|map(t => "#{t.id}")|join(',') %}
+{%          set id_list = page|map(t => "#{t.id}")|join(',') %}
             <span class="torrents_links_block">
                 <a id="collector-list" class="brackets" href="torrents.php?action=collector&amp;title=better&amp;ids={{
                     id_list }}&amp;sig={{ viewer.hashHmac('collector', id_list) }}">Download All</a>
-                <br />(size: {{ size|octet_size }})
+                <br>(size: {{ size|octet_size }})
             </span>
         </h4>
 {%  endif %}
     </div>
 {{ paginator.linkbox|raw }}
 <table width"=100%" class="torrent_table">
-{% for item in list %}
+{% for item in page %}
 {%  if better.mode == 'torrent' %}
     <tr class="torrent row{{ cycle(['a', 'b'], loop.index0) }}">
         <td>
@@ -84,7 +84,7 @@
             </span>
 {{      item.fullLink|raw }}
 {%      if type != 'single' and viewer.permitted('admin_reports') %}
-            <a href="better.php?method=missing&amp;type={{ type }}&amp;remove={{ item.id }}&amp;filter={{ filter }}&amp;search={{ item.search }}" title="Remove the {{ type }} flag" class="brackets">X</a>
+            <a href="better.php?method=missing&amp;type={{ type }}&amp;remove={{ item.id }}&amp;filter={{ filter.name }}&amp;search={{ item.search }}" title="Remove the {{ type }} flag" class="brackets">X</a>
 {%      endif %}
             <div class="tags">{{ item.group.tagList|map(tag => "#{tag.name}")|join(', ') }}</div>{{ item.size|octet_size }}
         </td>
