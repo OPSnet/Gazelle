@@ -416,6 +416,7 @@ class Vote extends \Gazelle\BaseUser {
 
         // update db
         self::$db->begin_transaction();
+        $this->pg()->begin();
         self::$db->prepared_query("
             INSERT IGNORE INTO users_votes
                    (UserID, GroupID, upvote, Type)
@@ -433,6 +434,29 @@ class Vote extends \Gazelle\BaseUser {
                 Score = ?
             ", $tgroup->id, $ups, $score, $total, $ups, $score
         );
+        $this->pg()->query("
+            insert into tgroup_vote
+                   (id_tgroup, id_user, upvote)
+            values ($1,        $2,      $3)
+            on conflict (id_tgroup, id_user)
+                do nothing
+            ", $tgroup->id, $this->user->id, $up
+        );
+        $this->pg()->query("
+            delete from tgroup_vote_summary where id_tgroup = $1
+            ", $tgroup->id
+        );
+        $this->pg()->query("
+            insert into tgroup_vote_summary (id_tgroup, total, upvote)
+            select id_tgroup,
+                count(*),
+                sum(case when upvote is true then 1 else 0 end)
+            from tgroup_vote
+            where id_tgroup = $1
+            group by id_tgroup
+            ", $tgroup->id
+        );
+        $this->pg()->commit();
         self::$db->commit();
 
         // update cache
