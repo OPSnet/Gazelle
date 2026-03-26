@@ -2393,7 +2393,7 @@ body#userhistory .header + .center {
 #discog_table .group .tags :not(:empty),
 #taglist td a,
 #request_table .tags,
-#top10 .tags,
+#top10 .tags a,
 #better .tags,
 #user #requests .tags a,
 /* Artist page, sidebar, tags box */
@@ -2429,6 +2429,7 @@ body#torrents div.box.box_tags li > a:first-child {
   .collage_table .td_info .tags :not(:empty):hover,
   #torrent_table .group .tags :not(:empty):hover,
   #discog_table .tags :hover,
+  #top10 .tags a:hover,
   #taglist td a:hover,
   #user #requests .tags a:hover,
   #artist .sidebar div.box.box_tags ul.stats.nobullet li a:hover,
@@ -2449,7 +2450,6 @@ body#torrents div.box.box_tags li > a:first-child {
 /* ### 2.2.3 Non-clickable appearance
    Applies to top10 and request_table pages, where tags are not clickable links. */
 #request_table .tags,
-#top10 .tags,
 #better .tags {
   font-style: italic;
   font-weight: normal;
@@ -2461,6 +2461,7 @@ body#torrents div.box.box_tags li > a:first-child {
    only needed on torrent and collage-discog pages. */
 #torrent_table .tags,
 #discog_table .tags,
+#top10 .tags,
 #userhistory div.group_info.clear div.tags,
 /* This monstrosity is for torrents.php?action=notify */
 table.torrent_table.cats.checkboxes.border.m_table td.td_info.big_info div.group_info.clear div.tags,

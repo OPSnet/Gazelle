@@ -111,21 +111,21 @@ View::show_header(TOP_TEN_HEADING . " – Torrents");
 if ($Viewer->permitted('site_advanced_top10')) {
 ?>
     <form class="search_form" name="torrents" action="" method="get">
-        <input type="hidden" name="advanced" value="1" />
+        <input type="hidden" name="advanced" value="1">
         <table cellpadding="6" cellspacing="1" border="0" class="layout border" width="100%">
             <tr id="tagfilter">
                 <td class="label">Tags (comma-separated):</td>
                 <td class="ft_taglist">
-                    <input type="text" name="tags" id="tags" size="75" value="<?= display_str($tags) ?>"<?=
-                        $Viewer->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> />&nbsp;
-                    <input type="radio" id="rdoAll" name="anyall" value="all"<?= $anyAll == 'all' ? ' checked="checked"' : '' ?> /><label for="rdoAll"> All</label>&nbsp;&nbsp;
-                    <input type="radio" id="rdoAny" name="anyall" value="any"<?= $anyAll != 'all' ? ' checked="checked"' : '' ?> /><label for="rdoAny"> Any</label>
+                    <input type="text" name="tags" id="tags" size="75" value="<?= html_escape($tags) ?>"<?=
+                        $Viewer->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?>>&nbsp;
+                    <input type="radio" id="rdoAll" name="anyall" value="all"<?= $anyAll == 'all' ? ' checked="checked"' : '' ?>><label for="rdoAll"> All</label>&nbsp;&nbsp;
+                    <input type="radio" id="rdoAny" name="anyall" value="any"<?= $anyAll != 'all' ? ' checked="checked"' : '' ?>><label for="rdoAny"> Any</label>
                 </td>
             </tr>
             <tr id="artistfilter">
                 <td class="label">Exclude Artists (one on each line):</td>
                 <td>
-                    <textarea name="excluded_artists" rows="3" cols="25" style="width: 95%"><?= display_str($excludedArtists) ?></textarea>&nbsp;
+                    <textarea name="excluded_artists" rows="3" cols="25" style="width: 95%"><?= html_escape($excludedArtists) ?></textarea>&nbsp;
                 </td>
             </tr>
             <tr>
@@ -134,15 +134,15 @@ if ($Viewer->permitted('site_advanced_top10')) {
                     <select name="format" style="width: auto;" class="ft_format">
                         <option value="">Any</option>
 <?php foreach (FORMAT as $formatName) { ?>
-                        <option value="<?=display_str($formatName)?>"<?php if ($format) {
-?> selected="selected"<?php } ?>><?=display_str($formatName)?></option>
+                        <option value="<?= html_escape($formatName) ?>"<?php if ($format) {
+?> selected="selected"<?php } ?>><?= html_escape($formatName) ?></option>
 <?php } ?>
                     </select>
                 </td>
             </tr>
             <tr>
                 <td colspan="2" class="center">
-                    <input type="submit" value="Filter torrents" />
+                    <input type="submit" value="Filter torrents">
                 </td>
             </tr>
         </table>
@@ -191,9 +191,9 @@ foreach ($context as $c) {
         <td class="number_column nobr">Files</td>
 <?php } ?>
         <td class="number_column nobr">Size</td>
-        <td class="sign snatches"><img src="<?= $urlStem ?>snatched.svg" alt="Snatches" title="Snatches" class="tooltip" /></td>
-        <td class="sign seeders"><img src="<?= $urlStem ?>seeders.svg" alt="Seeders" title="Seeders" class="tooltip" /></td>
-        <td class="sign leechers"><img src="<?= $urlStem ?>leechers.svg" alt="Leechers" title="Leechers" class="tooltip" /></td>
+        <td class="sign snatches"><img src="<?= $urlStem ?>snatched.svg" alt="Snatches" title="Snatches" class="tooltip"></td>
+        <td class="sign seeders"><img src="<?= $urlStem ?>seeders.svg" alt="Seeders" title="Seeders" class="tooltip"></td>
+        <td class="sign leechers"><img src="<?= $urlStem ?>leechers.svg" alt="Leechers" title="Leechers" class="tooltip"></td>
         <td class="number_column nobr">Transferred</td>
     </tr>
 <?php if (!$details) { ?>
@@ -202,7 +202,7 @@ foreach ($context as $c) {
                 Found no torrents matching the criteria.
             </td>
         </tr>
-        </table><br />
+        </table><br>
 <?php
         continue;
     }
@@ -234,7 +234,7 @@ foreach ($context as $c) {
                     'viewer'  => $Viewer,
                 ]) ?>
                 <strong><?= $tgroup->link() ?></strong> <?= $torrent->shortLabelLink() ?>
-                <br />[<?= $torrent->edition() ?>]
+                <br>[<?= $torrent->edition() ?>]
 <?php   if ($torrent->reportTotal($Viewer)) { ?>
                 - <strong class="torrent_label tl_reported">Reported</strong>
 <?php   } ?>
@@ -243,14 +243,19 @@ foreach ($context as $c) {
                     'id'            => $tgroup->id(),
                     'is_bookmarked' => $isBookmarked,
                 ]); ?>
-                <div class="tags"><?= implode(', ', $tgroup->tagNameList()) ?></div>
+                <div class="tags"><?= implode(', ',
+                    array_map(
+                        fn ($name) => "<a href=\"torrents.php?taglist=$name\">$name</a>",
+                        $tgroup->tagNameList()
+                    )
+                ) ?></div>
             </div>
         </td>
         <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent, 'viewer' => $Viewer]) ?>
         <td class="td_data number_column nobr"><?= byte_format($detail['score']) ?></td>
     </tr>
 <?php } ?>
-    </table><br />
+    </table><br>
 <?php } ?>
 </div>
 <?php
