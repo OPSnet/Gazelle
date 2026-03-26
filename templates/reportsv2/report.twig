@@ -9,8 +9,6 @@
     <input type="hidden" id="uploader{{ report.id }}" name="uploader" value="{{ torrent.uploader.username }}">
     <input type="hidden" id="uploaderid{{ report.id }}" name="uploaderid" value="{{ torrent.uploaderId }}">
     <input type="hidden" id="reporterid{{ report.id }}" name="reporterid" value="{{ report.reporterId }}">
-    <input type="hidden" id="raw_name{{ report.id }}" name="raw_name" value="{{
-        torrent.fullName ~ ' ('  ~ ((torrent.size|default(0)) / (1024 * 1024))|number_format(2) ~ ' MiB)' }}">
     <input type="hidden" id="type{{ report.id }}" name="type" value="{{ reportType.type }}">
     <input type="hidden" id="categoryid{{ report.id }}" name="categoryid" value="{{ reportType.categoryId }}">
 </div>
@@ -197,7 +195,7 @@
     </td>
     <td>
         <textarea name="uploader_pm" id="uploader_pm{{ report.id }}" cols="50" rows="2"></textarea>
-        <input type="button" value="Send now" onclick="SendPM({{ report.id }});">
+        <input type="button" value="Send now" class="send_pm">
     </td>
 </tr>
 <tr>

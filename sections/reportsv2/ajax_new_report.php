@@ -19,6 +19,9 @@ $torMan    = new Manager\Torrent();
 $reportMan = new Manager\Torrent\Report($torMan);
 
 $report = $reportMan->findNewest();
+if (!$report) {
+    exit;
+}
 $torrent = $report->torrent();
 if (is_null($torrent)) {
     if ($report->status() !== 'Resolved') {

@@ -30,7 +30,7 @@
 </div>
 {% if viewer.permitted('admin_reports') %}
 <div id="all_reports" style="width: 80%; margin-left: auto; margin-right: auto;">
-<div id="report0" class="report">
+<div id="report0" class="report" data-reportid="0">
     <form class="create_form" name="report" id="reportform_0" action="reports.php" method="post">
 {# Some of these are for takeresolve, some for the JavaScript. #}
         <div>
@@ -40,7 +40,6 @@
             <input type="hidden" id="uploader0" name="uploader" value="{{ torrent.uploader.username }}" />
             <input type="hidden" id="uploaderid0" name="uploaderid" value="{{ torrent.uploader.id }}" />
             <input type="hidden" id="reporterid0" name="reporterid" value="{{ viewer.id }}" />
-            <input type="hidden" id="raw_name0" name="raw_name" value="{{ torrent.fullName ~ " " ~ size }}" />
             <input type="hidden" id="type0" name="type" value="{{ report_type.type }}" />
             <input type="hidden" id="categoryid0" name="categoryid" value="{{ torrent.group.categoryId }}" />
             <input type="hidden" id="pm_type0" name="pm_type" value="Uploader" />
@@ -113,7 +112,7 @@
                         <span class="tooltip" title="Appended to the regular message unless using &quot;Send now&quot;.">
                             <textarea name="uploader_pm" id="uploader_pm0" cols="50" rows="1"></textarea>
                         </span>
-                        <input type="button" value="Send now" onclick="SendPM(0);" />
+                        <input type="button" value="Send now" class="send_pm">
                     </td>
                 </tr>
                 <tr>

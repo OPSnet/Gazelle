@@ -11,7 +11,8 @@ namespace Gazelle;
  * random user cannot access another PM object by accident.
  */
 
-class PM extends Base {
+class PM extends BaseObject {
+    public const tableName = 'pm_conversations';
     public final const CACHE_KEY = 'pm2_%d_%d';
 
     protected array $info;
@@ -21,8 +22,12 @@ class PM extends Base {
         protected User $user
     ) {}
 
-    public function id(): int {
-        return $this->id;
+    public function link(): string {
+        return sprintf('<a href="%s">Private Message #%s</a>', $this->url(), $this->id);
+    }
+
+    public function location(): string {
+        return "inbox.php?action=viewconv&id={$this->id}";
     }
 
     public function flush(): static {

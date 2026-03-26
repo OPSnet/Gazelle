@@ -62,20 +62,25 @@ function NewReport(q, view, id) {
         url += '&id=' + id;
     }
     $.get(url, function (response) {
+        const allReportsEl = document.getElementById('all_reports');
+        const noReportsEl = document.getElementById('no_reports');
         if (response) {
-            const div = $(response);
-            const id = div.data("reportid");
-            if (!$('#report'+id).length) {
-                $('#all_reports').append(div);
-                $('#no_reports').remove();
-                if ($('#type', div).length) {
+            const template = document.createElement('template');
+            template.innerHTML = response;
+            const div = template.content.children[0];
+            const id = div.dataset.reportid;
+            if (!document.getElementById('report' + id)) {
+                allReportsEl.append(div);
+                attachEventListeners(div);
+                noReportsEl?.remove();
+                if (document.getElementById('type')) {
                     Load(id);
                 }
             }
         } else {
             // No new reports at this time
-            if (!$('.report').length && !$('#no_reports') == 0) {
-                $('#all_reports').append($('<div id="no_reports" class="box pad center"><strong>No new reports! \\o/</strong></div>'));
+            if (!document.getElementsByClassName('report') && !noReportsEl) {
+                allReportsEl.innerHTML += '<div id="no_reports" class="box pad center"><strong>No new reports! \\o/</strong></div>';
                 return;
             }
         }
@@ -95,10 +100,27 @@ function AddMore(view, id) {
     }
 }
 
-function SendPM(reportid) {
-    $.post('reportsv2.php?action=ajax_take_pm', $('#reportform_' + reportid).serialize(), function(response) {
-        $('#uploader_pm' + reportid).val(response);
-    });
+async function SendPM(e) {
+    const reportId = e.target.form.parentElement.dataset.reportid;
+    const form = new FormData(e.target.form);
+    try {
+        const response = await fetch(
+            'reportsv2.php?action=ajax_take_pm', {
+                method: 'POST',
+                body: form,
+            });
+        const json = await response.json();
+        let message;
+        if (json['status'] === 'success') {
+            message = json['message'];
+        } else {
+            message = json;
+        }
+        document.getElementById(`uploader_pm${reportId}`).value = message;
+    } catch (exception) {
+        console.log(exception);
+        alert("network error when sending PM");
+    }
 }
 
 function UpdateComment(reportid) {
@@ -200,6 +222,18 @@ function Switch(reportid, otherid) {
     });
 }
 
+function attachEventListeners(dom) {
+    for (const clear of dom.getElementsByClassName('report-clear')) {
+        clear.addEventListener("click", (e) => {
+            e.target.parentNode.remove();
+        });
+    }
+
+    for (const pmBtn of dom.querySelectorAll('.report .send_pm')) {
+        pmBtn.addEventListener('click', SendPM);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     let reportType = document.getElementById('type');
     if (reportType) {
@@ -208,10 +242,5 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         ChangeReportType();
     }
-
-    Array.from(document.getElementsByClassName('report-clear')).forEach((clear) => {
-        clear.addEventListener("click", () => {
-            document.getElementById('report' + clear.parentNode.dataset.reportid).remove();
-        });
-    });
+    attachEventListeners(document);
 });
