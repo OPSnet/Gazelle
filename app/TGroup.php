@@ -12,7 +12,6 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
     final public const tableName            = 'torrents_group';
     final public const CACHE_KEY            = 'tg_2_%d';
     final public const CACHE_TLIST_KEY      = 'tlist_%d';
-    final public const CACHE_COVERART_KEY   = 'tg_cover_%d';
     final public const USER_RECENT_UPLOAD   = 'u_recent_up_%d';
     final public const CACHE_REQUEST_TGROUP = 'req_tg_%d';
 
@@ -27,17 +26,21 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
     protected bool $showFallbackImage = true;
     protected ArtistRole\TGroup $artistRole;
     protected Stats\TGroup      $stats;
+    protected TGroup\Artwork    $artwork;
 
     public function flush(): static {
         self::$cache->delete_multi([
             sprintf(self::CACHE_KEY, $this->id),
             sprintf(self::CACHE_TLIST_KEY, $this->id),
-            sprintf(self::CACHE_COVERART_KEY, $this->id),
             sprintf(self::CACHE_REQUEST_TGROUP, $this->id),
             "torrent_group_{$this->id}",
             "groups_artists_{$this->id}",
         ]);
-        unset($this->artistRole, $this->info);
+        $this->artwork()->flush(); // only cache, there is no state
+        unset(
+            $this->artistRole,
+            $this->info,
+        );
         return parent::flush();
     }
 
@@ -54,6 +57,10 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
 
     public function location(): string {
         return "torrents.php?id={$this->id}";
+    }
+
+    public function artwork(): TGroup\Artwork {
+        return $this->artwork ??= new TGroup\Artwork($this);
     }
 
     public function bookmarkTable(): string {
@@ -212,16 +219,12 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
                 group_concat(tag.UserID ORDER BY tt.PositiveVotes - tt.NegativeVotes DESC, tag.Name)       AS tagVoteUserIds,
                 group_concat(tt.PositiveVotes ORDER BY tt.PositiveVotes - tt.NegativeVotes DESC, tag.Name) AS tagUpvotes,
                 group_concat(tt.NegativeVotes ORDER BY tt.PositiveVotes - tt.NegativeVotes DESC, tag.Name) AS tagDownvotes,
-                (tgha.TorrentGroupID IS NOT NULL) AS noCoverArt,
                 max(coalesce(t.Size, 0)) AS max_torrent_size,
                 max(coalesce(t.created, '2000-01-01 00:00:00')) AS most_recent_upload
             FROM torrents_group AS tg
             LEFT JOIN torrents AS t ON (t.GroupID = tg.ID)
             LEFT JOIN torrents_tags AS tt ON (tt.GroupID = tg.ID)
             LEFT JOIN tags as tag ON (tag.ID = tt.TagID)
-            LEFT JOIN torrent_group_has_attr AS tgha ON (tgha.TorrentGroupID = tg.ID
-                AND tgha.TorrentGroupAttrID = (SELECT tga.ID FROM torrent_group_attr tga WHERE tga.Name = 'no-cover-art')
-            )
         ";
 
         $args = [];
@@ -344,10 +347,6 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
 
     public function description(): string {
         return $this->info()['Body'] ?? '';
-    }
-
-    public function hasNoCoverArt(): bool {
-        return $this->info()['noCoverArt'] ?? false;
     }
 
     public function image(): string {
@@ -505,89 +504,6 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
                     SELECT 1 FROM torrents WHERE GroupID = ? AND UserID = ? LIMIT 1
                     ", $this->id, $user->id
                 );
-    }
-
-    public function addCoverArt(string $image, string $summary): int {
-        self::$db->prepared_query("
-            INSERT IGNORE INTO cover_art
-                   (GroupID, Image, Summary, UserID)
-            VALUES (?,       ?,     ?,       ?)
-            ", $this->id, $image, $summary, $this->requestContext()->viewer()->id
-        );
-        $id = self::$db->inserted_id();
-        if ($id) {
-            $this->logger()->group(
-                $this,
-                $this->requestContext()->viewer(),
-                "Additional cover \"$summary - $image\" added to group"
-            );
-            self::$cache->delete_value(sprintf(self::CACHE_COVERART_KEY, $this->id));
-        }
-        return $id;
-    }
-
-    public function removeCoverArt(int $coverId): int {
-        [$image, $summary] = self::$db->row("
-            SELECT Image, Summary FROM cover_art WHERE ID = ?
-            ", $coverId
-        );
-        if (is_null($image)) {
-            return 0;
-        }
-        self::$db->prepared_query("
-            DELETE FROM cover_art WHERE ID = ?
-            ", $coverId
-        );
-        $affected = self::$db->affected_rows();
-        if ($affected) {
-            $this->logger()->group(
-                $this,
-                $this->requestContext()->viewer(),
-                "Additional cover \"$summary - $image\" removed from group"
-            );
-            self::$cache->delete_value(sprintf(self::CACHE_COVERART_KEY, $this->id));
-        }
-        return $affected;
-    }
-
-    public function coverArt(): array {
-        $key = sprintf(self::CACHE_COVERART_KEY, $this->id);
-        $list = self::$cache->get_value($key);
-        if ($list === false) {
-            self::$db->prepared_query("
-                SELECT ID   AS id,
-                    Image   AS image,
-                    Summary AS summary,
-                    UserID  AS user_id,
-                    Time    AS created
-                FROM cover_art
-                WHERE GroupID = ?
-                ORDER BY Time ASC
-                ", $this->id
-            );
-            $list = self::$db->to_array(false, MYSQLI_ASSOC);
-            self::$cache->cache_value($key, $list, 0);
-        }
-        return $list;
-    }
-
-    public function toggleNoCoverArt(bool $noCoverArt): int {
-        if ($noCoverArt) {
-            self::$db->prepared_query("
-                INSERT INTO torrent_group_has_attr
-                   (TorrentGroupID, TorrentGroupAttrID)
-                VALUES (?, (SELECT ID FROM torrent_group_attr WHERE Name = 'no-cover-art'))
-                ", $this->id
-            );
-        } else {
-            self::$db->prepared_query("
-                DELETE FROM torrent_group_has_attr
-                WHERE TorrentGroupAttrID = (SELECT ID FROM torrent_group_attr WHERE Name = 'no-cover-art')
-                    AND TorrentGroupID = ?
-                ", $this->id
-            );
-        }
-        return self::$db->affected_rows();
     }
 
     public function primaryArtist(): ?Artist {

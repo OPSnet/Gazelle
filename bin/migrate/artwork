@@ -1,0 +1,41 @@
+#! /usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+namespace Gazelle;
+
+require __DIR__ . '/../../lib/bootstrap.php';
+
+$pg = new DB\Pg(PG_RW_DSN);
+$pg->begin();
+
+$pg->query("
+    truncate table tgroup_artwork
+");
+$inserted = $pg->query(
+<<<END_SQL
+    insert into tgroup_artwork
+        (id_tgroup_artwork, id_tgroup, id_user, created, url, description)
+    select "ID",
+        "GroupID",
+        "UserID",
+        "Time",
+        "Image",
+        "Summary"
+    from relay.cover_art
+END_SQL
+);
+
+$pg->query("
+    with m as (
+        select 1 + max(id_tgroup_artwork) as id
+        from tgroup_artwork
+    )
+    select setval('tgroup_artwork_id_tgroup_artwork_seq', m.id)
+    from m
+");
+
+$pg->commit();
+
+echo "tgroup_artwork: $inserted inserted\n";

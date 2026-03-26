@@ -13,17 +13,17 @@
         <div class="tbx-label">Name</div>
         <div class="tbx-field">
             <input type="text" name="name" size="50" value="{{ tgroup.name }}"{{
-                disabled(not viewer.permitted('torrents_edit')) }} />
+                disabled(not viewer.permitted('torrents_edit')) }}>
         </div>
         <div class="tbx-label">Image</div>
         <div class="tbx-field">
-            <input type="text" name="image" size="50" value="{{ tgroup.image }}" />
+            <input type="text" name="image" size="50" value="{{ tgroup.image }}">
 {% if constant('IMAGE_HOST_BANNED') %}
-            <br /><b>Images hosted on <strong class="important_text">{{ constant('IMAGE_HOST_BANNED')|join(', ') }}
+            <br><b>Images hosted on <strong class="important_text">{{ constant('IMAGE_HOST_BANNED')|join(', ') }}
                 are not allowed</strong>, please rehost first on one of {{ constant('IMAGE_HOST_RECOMMENDED')|join(', ') }}.</b>
 {% endif %}
-            <br />If the release has no known official artwork (e.g. jam band live recording), check the following:<br />
-            <label><input type="checkbox" name="no_cover_art" value="1"{{ checked(tgroup.noCoverArt) }} /> No release cover art</label><br /><br />
+            <br>If the release has no known official artwork (e.g. jam band live recording), check the following:<br>
+            <label><input type="checkbox" name="no_cover_art"{{ checked(tgroup.hasAttr('no-cover-art')) }}> No release cover art</label><br><br>
         </div>
         <div class="tbx-label">Group description</div>
         <div class="tbx-field">
@@ -36,8 +36,8 @@
 {% else  %}
             Year of release/publication
 {% endif %}
-            <br />
-            <input type="text" name="year" size="5" value="{{ tgroup.year }}" />
+            <br>
+            <input type="text" name="year" size="5" value="{{ tgroup.year }}">
         </div>
 
 {% if tgroup.categoryName == 'Music' %}
@@ -53,8 +53,8 @@
         <div class="tbx-label">Download status</div>
         <div class="tbx-field">
             <b>Note:</b> this affects all present uploads in the group but subsequent uploads will not inherit the value.
-            <br />
-            <br />
+            <br>
+            <br>
             {{ freeleech(size, unit, leech_type, leech_reason) }}
         </div>
 {%  endif %}
@@ -68,28 +68,28 @@
         <div class="tbx-label">Summary of changes</div>
         <div class="tbx-field">
             A brief explanation of what was changed, for the site log
-            <br />
-            <input type="text" name="summary" size="70" maxlength="100" />
+            <br>
+            <input type="text" name="summary" size="70" maxlength="100">
         </div>
         <div class="tbx-label"></div>
         <div class="tbx-field">
-            <input type="hidden" name="action" value="tgroup-edit" />
-            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-            <input type="hidden" name="groupid" value="{{ tgroup.id }}" />
-            <input type="submit" value="Update" />
+            <input type="hidden" name="action" value="tgroup-edit">
+            <input type="hidden" name="auth" value="{{ viewer.auth }}">
+            <input type="hidden" name="groupid" value="{{ tgroup.id }}">
+            <input type="submit" value="Update">
         </div>
     </div>
     </form>
 
 {% if tgroup.categoryName == 'Music' and viewer.permitted('torrents_edit') %}
-    <hr class="tbx" />
+    <hr class="tbx">
 
     <h4>Merge with another group</h4>
     <form class="merge_form" name="torrent_group" action="torrents.php" method="post">
     <div class="tbx tgroup-merge">
         <div class="tbx-label">Target ID</div>
         <div class="tbx-field">
-            <input type="text" name="targetgroupid" size="6" /> example, the <b>nnn</b> in <tt>{{
+            <input type="text" name="targetgroupid" size="6"> example, the <b>nnn</b> in <tt>{{
                 constant('SITE_URL') }}/torrents.php?id=<b>nnn</b></tt>
             <p>If this torrent group was created by mistake and a prior group
             exists, this group may be merged into that one. Note: there may be
@@ -98,10 +98,10 @@
 
         <div class="tbx-label"></div>
         <div class="tbx-field">
-            <input type="hidden" name="action" value="tgroup-merge" />
-            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-            <input type="hidden" name="groupid" value="{{ tgroup.id }}" />
-            <input type="submit" value="Merge" />
+            <input type="hidden" name="action" value="tgroup-merge">
+            <input type="hidden" name="auth" value="{{ viewer.auth }}">
+            <input type="hidden" name="groupid" value="{{ tgroup.id }}">
+            <input type="submit" value="Merge">
         </div>
     </div>
     </form>

@@ -35,17 +35,17 @@
             <div class="body">
                 <form class="add_form" name="artists" action="torrents.php" method="post">
                     <div id="AddArtists">
-                        <input type="hidden" name="action" value="add_alias" />
-                        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-                        <input type="hidden" name="groupid" value="{{ tgroup.id }}" />
-                        <input type="text" id="artist" name="aliasname[]" size="17"{{ autocomplete(viewer, 'other') }} />
+                        <input type="hidden" name="action" value="add_alias">
+                        <input type="hidden" name="auth" value="{{ viewer.auth }}">
+                        <input type="hidden" name="groupid" value="{{ tgroup.id }}">
+                        <input type="text" id="artist" name="aliasname[]" size="17"{{ autocomplete(viewer, 'other') }}>
                         <select name="importance[]">
 {%  for s in section|sort((a, b) => a.id <=> b.id) %}
                             <option value="{{ s.id }}">{% if s.role == 'Artist' %}Main{% else %}{{ s.role }}{% endif %}</option>
 {%  endfor %}
                         </select>
                     </div>
-                    <input type="submit" value="Add" />
+                    <input type="submit" value="Add">
                 </form>
             </div>
         </div>

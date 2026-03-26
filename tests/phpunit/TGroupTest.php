@@ -83,7 +83,6 @@ class TGroupTest extends TestCase {
 
         $this->assertTrue($this->tgroup->categoryGrouped(), 'tgroup-create-category-grouped');
         $this->assertFalse($this->tgroup->isShowcase(), 'tgroup-create-showcase');
-        $this->assertFalse($this->tgroup->hasNoCoverArt(), 'tgroup-create-has-no-cover-art');
         $this->assertCount(0, $this->tgroup->revisionList(), 'tgroup-create-revision-list');
         $this->assertEquals('Music', $this->tgroup->categoryName(), 'tgroup-create-category-name');
         $this->assertEquals('cats_music', $this->tgroup->categoryCss(), 'tgroup-create-category-ss');
@@ -333,21 +332,33 @@ class TGroupTest extends TestCase {
         );
     }
 
-    public function testTGroupCoverArt(): void {
-        $coverId = $this->tgroup->addCoverArt(
+    public function testTGroupArtwork(): void {
+        $user = $this->userList['user'];
+        $artworkId = $this->tgroup->artwork()->addArtwork(
             'https://www.example.com/cover.jpg',
-            'cover art summary',
+            'cover art description',
+            $user,
         );
-        $this->assertGreaterThan(0, $coverId, 'tgroup-cover-art-add');
+        $this->assertGreaterThan(0, $artworkId, 'tgroup-artwork-add');
+        $this->assertCount(
+            1,
+            $this->tgroup->artwork()->artworkList(),
+            'tgroup-artwork-list',
+        );
         $this->assertEquals(
             1,
-            $this->tgroup->removeCoverArt($coverId),
-            'tgroup-cover-art-del-ok'
+            $this->tgroup->artwork()->removeArtwork($artworkId, $user),
+            'tgroup-artwork-del-ok'
         );
         $this->assertEquals(
             0,
-            $this->tgroup->removeCoverArt(9999999),
-            'tgroup-cover-art-del-nok'
+            $this->tgroup->artwork()->removeArtwork($artworkId + 1, $user),
+            'tgroup-artwork-del-nok'
+        );
+        $this->assertCount(
+            0,
+            $this->tgroup->artwork()->artworkList(),
+            'tgroup-artwork-nolist',
         );
     }
 

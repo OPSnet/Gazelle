@@ -29,13 +29,13 @@
     </div>
 
     <div class="sidebar">
-{% if tgroup.cover or (tgroup.coverArt and viewer.option('CoverArt')) %}
-{%  set extra_cover = tgroup.coverArt|length %}
+{% if tgroup.cover or (tgroup.artwork.artworkList and viewer.option('CoverArt')) %}
+{%  set artwork = tgroup.artwork.artworkList %}
         <div class="box box_image box_image_albumart box_albumart">
             <div class="head">
-                <strong>{% if extra_cover > 0 %}Covers ({{ 1 + extra_cover }}){% else %}Cover {% endif %}</strong>
+                <strong>{% if artwork|length > 0 %}Covers ({{ 1 + artwork|length }}){% else %}Cover {% endif %}</strong>
 {%  if not viewer.option('ShowExtraCovers') %}
-{%      for cover in tgroup.coverArt %}
+{%      for cover in artwork %}
 {%          if loop.first %}
         <span id="cover_controls_0">
             <span class="brackets">Prev</span>
@@ -57,18 +57,18 @@
             </div>
 <div id="covers">
 <div id="cover_div_0" class="pad">
-            <p align="center"><img width="100%" src="{{ tgroup.cover|image_cache }}" alt="cover image" onclick="lightbox.init('{{ tgroup.cover|image_cache }}', 220);" data-origin-src="{{ tgroup.cover }}" /></p>
+            <p align="center"><img width="100%" src="{{ tgroup.cover|image_cache }}" alt="cover image" onclick="lightbox.init('{{ tgroup.cover|image_cache }}', 220);" data-origin-src="{{ tgroup.cover }}"></p>
 </div>
-{%  for cover in tgroup.coverArt %}
-{%      if viewer.option('ShowExtraCovers') %}<hr />{% endif %}
+{%  for cover in artwork %}
+{%      if viewer.option('ShowExtraCovers') %}<hr>{% endif %}
             <div id="cover_div_{{ loop.index }}" class="pad"{% if not viewer.option('ShowExtraCovers') %} style="display: none;"{% endif %}>
                 <p align="center">
                     <img id="cover_{{ loop.index }}" width="100%"
-            {% if viewer.option('ShowExtraCovers') %}src="{{ cover.image|image_cache }}"{% else %}src="" data-gazelle-temp-src="{{ cover.image|image_cache }}"{% endif %}
-                    alt="{{ cover.summary }}" onclick="lightbox.init('{{ cover.image|image_cache }}', 220);" data-origin-src="{{ cover.image }}" />
+            {% if viewer.option('ShowExtraCovers') %}src="{{ cover.url|image_cache }}"{% else %}src="" data-gazelle-temp-src="{{ cover.url|image_cache }}"{% endif %}
+                    alt="{{ cover.summary }}" onclick="lightbox.init('{{ cover.url|image_cache }}', 220);" data-origin-src="{{ cover.url }}">
                 </p>
                 <ul class="stats nobullet">
-                    <li>{{ cover.summary }}{% if viewer.permitted('users_mod') %} added by {{ cover.user_id|user_url }}{% endif %}
+                    <li>{{ cover.description }}{% if viewer.permitted('users_mod') %} added by {{ cover.id_user|user_url }}{% endif %}
                         <span class="remove remove_cover_art"><a href="#" onclick="if (confirm('Do not delete valid alternative cover art. Are you sure you want to delete this cover art?') == true) { ajax.get('ajax.php?action=torrent_remove_cover_art&amp;auth={{
                             viewer.auth }}&amp;id={{ cover.id }}&amp;groupid={{ tgroup.id }}'); this.parentNode.parentNode.parentNode.style.display = 'none'; this.parentNode.parentNode.parentNode.previousElementSibling.style.display = 'none'; } else { return false; }" class="brackets tooltip" title="Remove image">X</a></span>
                     </li>
@@ -78,7 +78,7 @@
 </div>
 
 {%  if viewer.permitted('torrents_edit') and tgroup.image != '' %}
-    <hr />
+    <hr>
     <div id="add_cover_div">
         <div style="padding: 10px;">
             <span style="float: right;" class="additional_add_artists">
@@ -88,9 +88,9 @@
         <div class="body">
             <form class="add_form" name="covers" id="add_covers_form" action="torrents.php" method="post">
                 <div id="add_cover">
-                    <input type="hidden" name="action" value="add_cover_art" />
-                    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-                    <input type="hidden" name="groupid" value="{{ tgroup.id }}" />
+                    <input type="hidden" name="action" value="add_cover_art">
+                    <input type="hidden" name="auth" value="{{ viewer.auth }}">
+                    <input type="hidden" name="groupid" value="{{ tgroup.id }}">
                 </div>
             </form>
         </div>

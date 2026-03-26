@@ -5,11 +5,11 @@
 {% set tgroup_id = tgroup.id %}
 {% if tag_undo %}
             <form style="display: none;" id="undo_tag_delete_form" name="tags" action="ajax.php" method="post">
-                <input type="hidden" name="action" value="add_tag" />
-                <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-                <input type="hidden" name="groupid" value="{{ tgroup_id }}" />
-                <input type="hidden" name="tagname" value="{{ tag_undo }}" />
-                <input type="hidden" name="undo" value="true" />
+                <input type="hidden" name="action" value="add_tag">
+                <input type="hidden" name="auth" value="{{ viewer.auth }}">
+                <input type="hidden" name="groupid" value="{{ tgroup_id }}">
+                <input type="hidden" name="tagname" value="{{ tag_undo }}">
+                <input type="hidden" name="undo" value="true">
             </form>
             <a class="brackets" href="#" onclick="$('#undo_tag_delete_form').raw().submit(); return false;">Undo delete</a>
 {% endif %}
@@ -33,7 +33,7 @@
         </span>
 {%  endif %}
             </div>
-            <br style="clear: both;" />
+            <br style="clear: both;">
         </li>
 {%  if loop.last %}
     </ul>
@@ -48,13 +48,13 @@
     <div class="head"><strong>Add tag</strong></div>
     <div class="body">
         <form class="add_form" name="tags" action="torrents.php" method="post">
-            <input type="hidden" name="action" value="add_tag" />
-            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-            <input type="hidden" name="groupid" value="{{ tgroup_id }}>" />
-            <input type="text" name="tagname" id="tagname" size="20"{{ autocomplete(viewer, 'other') }} />
-            <input type="submit" value="+" />
+            <input type="hidden" name="action" value="add_tag">
+            <input type="hidden" name="auth" value="{{ viewer.auth }}">
+            <input type="hidden" name="groupid" value="{{ tgroup_id }}>">
+            <input type="text" name="tagname" id="tagname" size="20"{{ autocomplete(viewer, 'other') }}>
+            <input type="submit" value="+">
         </form>
-        <br /><br />
+        <br><br>
         <strong><a href="rules.php?p=tag" class="brackets">View tagging rules</a></strong>
     </div>
 </div>

@@ -5,14 +5,14 @@
 </div>
 <div class="box pad">
     <form class="confirm_form" name="torrent_group" action="torrents.php" method="get">
-        <input type="hidden" name="action" value="revert" />
-        <input type="hidden" name="confirm" value="true" />
-        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-        <input type="hidden" name="groupid" value="{{ tgroup.id }}" />
-        <input type="hidden" name="revisionid" value="{{ revision_id }}" />
+        <input type="hidden" name="action" value="revert">
+        <input type="hidden" name="confirm" value="true">
+        <input type="hidden" name="auth" value="{{ viewer.auth }}">
+        <input type="hidden" name="groupid" value="{{ tgroup.id }}">
+        <input type="hidden" name="revisionid" value="{{ revision_id }}">
         <h3>You intend to revert {{ tgroup.link|raw }} to revision <a href="torrents.php?id={{
             tgroup.id }}&amp;revisionid={{ revision_id }}">{{ revision_id }}</a>.</h3>
-        <input type="submit" value="Confirm" />
+        <input type="submit" value="Confirm">
     </form>
 </div>
 </div>

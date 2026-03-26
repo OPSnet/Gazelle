@@ -12,7 +12,7 @@ authorize();
 
 $summaryList = $_POST['summary'] ?? [];
 $imageList   = $_POST['image'] ?? [];
-if (count($imageList) != count($summaryList)) {
+if (count($imageList) !== count($summaryList)) {
     Error400::error('Missing an image or a summary');
 }
 
@@ -30,7 +30,7 @@ foreach ($imageList as $n => $image) {
     if ($banned) {
         Error400::error("Please rehost images from $banned elsewhere.");
     }
-    $tgroup->addCoverArt($image, trim($summaryList[$n]));
+    $tgroup->artwork()->addArtwork($image, trim($summaryList[$n]), $Viewer);
 }
 
 header('Location: ' . redirectUrl($tgroup->location()));

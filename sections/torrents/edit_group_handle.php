@@ -70,10 +70,10 @@ if ($image !== $tgroup->image()) {
     $newRevision = true;
 }
 
-$noCoverArt = isset($_POST['no_cover_art']);
-if ($noCoverArt != $tgroup->hasNoCoverArt()) {
-    $tgroup->toggleNoCoverArt($noCoverArt);
-    $logInfo[] = "No cover art exception " . ($noCoverArt ? 'added' : 'removed');
+$noArtwork = isset($_POST['no_cover_art']);
+if ($noArtwork !== $tgroup->hasAttr('no-cover-art')) {
+    $tgroup->toggleAttr('no-cover-art', $noArtwork);
+    $logInfo[] = "No cover art exception " . ($noArtwork ? 'added' : 'removed');
 }
 
 $body = trim($_POST['body']);
