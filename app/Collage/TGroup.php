@@ -42,7 +42,7 @@ class TGroup extends AbstractCollage {
             WHERE ct.collageid = ?
             GROUP BY tag.name
             ORDER BY 1 DESC, ct.AddedOn
-            ", $this->holder->id()
+            ", $this->holder->id
         );
         $this->torrentTags = self::$db->to_array('tag', MYSQLI_ASSOC);
 
@@ -55,7 +55,7 @@ class TGroup extends AbstractCollage {
             INNER JOIN torrents_group AS tg ON (tg.ID = ct.GroupID)
             WHERE ct.CollageID = ?
             ORDER BY ct.Sort
-            ", $this->holder->id()
+            ", $this->holder->id
         );
         $groupContribIds = self::$db->to_array('GroupID', MYSQLI_ASSOC);
         $groupIds        = array_map('intval', array_keys($groupContribIds));

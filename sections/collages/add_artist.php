@@ -35,7 +35,7 @@ if (is_null($collage)) {
 }
 
 if (!$Viewer->permitted('site_collages_delete')) {
-    if ($collage->isLocked()) {
+    if ($collage->isLockedForUser($Viewer)) {
         Error400::error('This collage is locked');
     }
     if ($collage->isPersonal() && !$collage->isOwner($Viewer)) {

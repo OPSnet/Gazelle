@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace Gazelle;
 
 /** @var Collage $collage required from collage.php */
-$collage->setViewer($Viewer);
 
 echo $Twig->render('collage/header.twig', [
     'bookmarked' => new User\Bookmark($Viewer)->isBookmarked($collage),

@@ -8,13 +8,13 @@
 {% if viewer.permitted('site_collages_create') %}
         <a href="collages.php?action=new" class="brackets">New collage</a>
 {% endif %}
-        <br /><br />
+        <br><br>
 {% if viewer.permitted('site_collages_subscribe') %}
         {{- dom.click('#subscribelink' ~ collage.id, "CollageSubscribe(" ~ collage.id ~ "); return false;") -}}
         <a href="#" id="subscribelink{{ collage.id }}" class="brackets">
     {%- if collage.isSubscribed(viewer) %}Unsubscribe{% else %}Subscribe{% endif %}</a>
 {% endif %}
-{% if viewer.permitted('site_collages_delete') or (viewer.permitted('site_edit_wiki') and not collage.isLocked) %}
+{% if viewer.permitted('site_collages_delete') or (viewer.permitted('site_edit_wiki') and not collage.isLockedForUser(viewer)) %}
         <a href="collages.php?action=edit&amp;collageid={{ collage.id }}" class="brackets">Edit description</a>
 {% endif %}
 {% if bookmarked %}

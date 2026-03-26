@@ -87,8 +87,8 @@ if (isset($_POST['category']) && isset(COLLAGE[$_POST['category']]) && (int)$_PO
 }
 
 if ($Viewer->permitted('site_collages_delete')) {
-    if (isset($_POST['locked']) != $collage->isLocked()) {
-        $collage->toggleLocked();
+    if (isset($_POST['locked']) !== $collage->isLockedForUser($Viewer)) {
+        $collage->toggleLocked($_POST['locked']);
     }
     if (isset($_POST['maxgroups']) && ($_POST['maxgroups'] == 0 || is_number($_POST['maxgroups'])) && $_POST['maxgroups'] != $collage->maxGroups()) {
         $collage->setField('MaxGroups', (int)$_POST['maxgroups']);

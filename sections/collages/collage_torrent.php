@@ -8,21 +8,21 @@ declare(strict_types=1);
 
 namespace Gazelle;
 
-$tgMan         = new Manager\TGroup();
-$torMan        = new Manager\Torrent();
-$bookmark      = new User\Bookmark($Viewer);
-$collMan       = new Manager\Collage();
-$urlStem       = new User\Stylesheet($Viewer)->imagePath();
-$vote          = new User\Vote($Viewer);
+$tgMan        = new Manager\TGroup();
+$torMan       = new Manager\Torrent();
+$bookmark     = new User\Bookmark($Viewer);
+$collMan      = new Manager\Collage();
+$urlStem      = new User\Stylesheet($Viewer)->imagePath();
+$vote         = new User\Vote($Viewer);
+$groupsClosed = (bool)$Viewer->option('TorrentGrouping');
+$snatcher     = $Viewer->snatch();
 
 /** @var Collage $collage required from collage.php */
-
-$collage->setViewer($Viewer);
-$paginator    = new Util\Paginator((int)($Viewer->option('CollageEntries') ?? 25),
-                                   (int)($_GET['page'] ?? 1))->setTotal($collage->total());
-$snatcher     = $Viewer->snatch();
-$entryList    = array_slice($collage->entryList(), $paginator->offset(), $paginator->limit());
-$groupsClosed = (bool)$Viewer->option('TorrentGrouping');
+$paginator = new Util\Paginator(
+    (int)($Viewer->option('CollageEntries') ?? 25),
+    (int)($_GET['page'] ?? 1))->setTotal($collage->total()
+);
+$entryList = array_slice($collage->entryList(), $paginator->offset(), $paginator->limit());
 
 echo $Twig->render('collage/header.twig', [
     'bookmarked' => $bookmark->isBookmarked($collage),

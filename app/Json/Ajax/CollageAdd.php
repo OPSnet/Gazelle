@@ -19,11 +19,11 @@ class CollageAdd extends \Gazelle\Json {
 
     public function payload(): array {
         if (!$this->user->permitted('site_collages_delete')) {
-            if ($this->collage->isLocked()) {
-                return $this->setFailure('locked');
-            }
             if ($this->collage->isPersonal() && !$this->collage->isOwner($this->user)) {
                 return $this->setFailure('personal');
+            }
+            if ($this->collage->isLockedForUser($this->user)) {
+                return $this->setFailure('locked');
             }
             if ($this->collage->maxGroups() > 0 && $this->collage->total() >= $this->collage->maxGroups()) {
                 return $this->setFailure('max entries reached');

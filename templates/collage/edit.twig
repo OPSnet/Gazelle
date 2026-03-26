@@ -10,14 +10,14 @@
         <h2>{{ collage.link|raw }} › Edit</h2>
     </div>
     <form class="edit_form" name="collage" action="collages.php" method="post">
-        <input type="hidden" name="action" value="edit_handle" />
-        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-        <input type="hidden" name="collageid" value="{{ collage.id }}" />
+        <input type="hidden" name="action" value="edit_handle">
+        <input type="hidden" name="auth" value="{{ viewer.auth }}">
+        <input type="hidden" name="collageid" value="{{ collage.id }}">
         <table id="edit_collage" class="layout">
 {% if can_rename %}
             <tr>
                 <td class="label">Name</td>
-                <td><input type="text" name="name" size="60" value="{{ collage.name }}" /></td>
+                <td><input type="text" name="name" size="60" value="{{ collage.name }}"></td>
             </tr>
 {% endif %}
 {% if not collage.isPersonal or viewer.permitted('site_collages_delete') %}
@@ -42,9 +42,9 @@
             </tr>
             <tr>
                 <td class="label">Tags</td>
-                <td><input type="text" name="tags" size="60" value="{{ collage.tags|join(', ') }}" />
+                <td><input type="text" name="tags" size="60" value="{{ collage.tags|join(', ') }}">
                 <label class="tooltip" title="Regenerate the tag list based on the tags most frequently used by the current collage entries. If there are less than three candidate tags, the list will remain unchanged.">
-                    <input type="checkbox" name="regen-tags" /> Regenerate?
+                    <input type="checkbox" name="regen-tags"> Regenerate?
                 </label></td>
             </tr>
 {% if collage.isPersonal %}
@@ -52,14 +52,14 @@
                 <td class="label"><span class="tooltip" title="">Featured</span></td>
                 <td>
                 <label>
-                    <input type="checkbox" name="featured"{{ checked(collage.isFeatured) }} />
+                    <input type="checkbox" name="featured"{{ checked(collage.isFeatured) }}>
                     A "featured" personal collage will be listed first on your profile, along with a preview of the included torrents.
                 </label></td>
             </tr>
             <tr>
                 <td class="label">Additions</td>
                 <td><label>
-                    <input type="checkbox" name="addition"{{ checked(collage.sortNewest) }} />
+                    <input type="checkbox" name="addition"{{ checked(collage.sortNewest) }}>
                     Append new entries to the end of the list (new entries in Personal collages are inserted at the top by default).
                 </label></td>
             </tr>
@@ -67,7 +67,7 @@
             <tr>
                 <td class="label">Additions</td>
                 <td><label>
-                    <input type="checkbox" name="addition"{{ checked(collage.sortNewest) }} />
+                    <input type="checkbox" name="addition"{{ checked(collage.sortNewest) }}>
                     Insert new entries at the top of the list (new entries in collages other than Personal are appended to the end by default).
                 </label></td>
             </tr>
@@ -75,15 +75,15 @@
 {% if viewer.permitted('site_collages_delete') %}
             <tr>
                 <td class="label">Locked</td>
-                <td><input type="checkbox" name="locked"{{ checked(collage.isLocked) }} /> No new entries are permitted.</td>
+                <td><input type="checkbox" name="locked"{{ checked(collage.isLockedForUser(viewer)) }}> No new entries are permitted.</td>
             </tr>
             <tr>
                 <td class="label">Max groups</td>
-                <td><input type="text" name="maxgroups" size="2" value="{{ collage.maxGroups }}" /> (0 indicates unlimited)</td>
+                <td><input type="text" name="maxgroups" size="2" value="{{ collage.maxGroups }}"> (0 indicates unlimited)</td>
             </tr>
             <tr>
                 <td class="label">Max groups per user</td>
-                <td><input type="text" name="maxgroupsperuser" size="2" value="{{ collage.maxGroupsPerUser }}" /> (0 indicates unlimited)</td>
+                <td><input type="text" name="maxgroupsperuser" size="2" value="{{ collage.maxGroupsPerUser }}"> (0 indicates unlimited)</td>
             </tr>
 {% endif %}
 {% if viewer.permitted('admin_freeleech') %}
@@ -94,7 +94,7 @@
             </tr>
 {% endif %}
             <tr>
-                <td></td><td><input type="submit" value="Edit collage" /></td>
+                <td></td><td><input type="submit" value="Edit collage"></td>
             </tr>
         </table>
     </form>

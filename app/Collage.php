@@ -25,9 +25,7 @@ class Collage extends BaseAttrObject implements Bookmarked {
     final protected const JoinColumn   = 'CollageAttrID';
     final protected const ObjectColumn = 'CollageID';
 
-    protected bool  $lockedForUser = false;
     protected array $userSubscriptions;
-    protected User  $viewer;
 
     protected Collage\AbstractCollage $collage;
 
@@ -150,7 +148,32 @@ class Collage extends BaseAttrObject implements Bookmarked {
     }
 
     public function isLocked(): bool {
-        return $this->info()['is_locked'] == '1' || $this->lockedForUser;
+        return $this->info()['is_locked'] === '1';
+    }
+
+    public function isLockedForUser(User $user): bool {
+        if ($user->permitted('site_collages_manage')) {
+            return false;
+        }
+        if (
+            $this->categoryId() === CollageType::personal->value
+            && !$this->isOwner($user)
+        ) {
+            return true;
+        }
+        if (
+            (
+                $this->maxGroups() > 0
+                && count($this->groupIds()) >= $this->maxGroups()
+            )
+            || (
+                $this->maxGroupsPerUser() > 0
+                && ($this->contributors()[$user->id] ?? 0) >= $this->maxGroupsPerUser()
+            )
+        ) {
+            return true;
+        }
+        return $this->isLocked();
     }
 
     public function isOwner(User $user): bool {
@@ -181,38 +204,20 @@ class Collage extends BaseAttrObject implements Bookmarked {
         return $this->hasAttr('sort-newest');
     }
 
-    public function setViewer(User $viewer): static {
-        $this->viewer = $viewer;
-        $this->lockedForUser = false;
-        if (!$this->viewer->permitted('site_collages_delete')) {
-            if ($this->categoryId() === 0) {
-                if (!$this->viewer->permitted('site_collages_personal') || !$this->isOwner($this->viewer)) {
-                    $this->lockedForUser = true;
-                }
-            }
-            $groupsByUser = $this->contributors()[$this->viewer->id()] ?? 0;
-            if (
-                $this->isLocked()
-                || ($this->maxGroups() > 0 && count($this->groupIds()) >= $this->maxGroups())
-                || ($this->maxGroupsPerUser() > 0 && $groupsByUser >= $this->maxGroupsPerUser())
-            ) {
-                $this->lockedForUser = true;
-            }
-        }
-        return $this;
-    }
-
     public function userHasContributed(User $user): bool {
         return isset($this->contributors()[$user->id]);
     }
 
     public function userCanContribute(User $user): bool {
-        return !$this->isLocked()
+        if ($user->permitted('site_collages_manage')) {
+            return true;
+        }
+        return !$this->isLockedForUser($user)
             && (
-                (!$this->isPersonal() && ($user->permitted('site_collages_manage') || $user->activePersonalCollages()))
-                ||
                 ($this->isPersonal() && $this->isOwner($user))
-            );
+                ||
+                (!$this->isPersonal() && $user->activePersonalCollages())
+        );
     }
 
     /**
@@ -393,9 +398,9 @@ class Collage extends BaseAttrObject implements Bookmarked {
         foreach ($idList as $torrentId) {
             $torrent = $torMan->findById($torrentId);
             if ($threshold > 0 and $torrent->size() > $threshold) {
-                $large[] = $torrent->id();
+                $large[] = $torrent->id;
             } else {
-                $regular[] = $torrent->id();
+                $regular[] = $torrent->id;
             }
         }
         if ($regular) {
@@ -445,8 +450,8 @@ class Collage extends BaseAttrObject implements Bookmarked {
         return $this->collage->updateSequenceEntry($entry, $sequence);
     }
 
-    public function toggleLocked(): static {
-        return $this->setField('Locked', $this->isLocked() ? '0' : '1');
+    public function toggleLocked(bool $state): static {
+        return $this->setField('Locked', $state ? '1' : '0');
     }
 
     public function setFeatured(): static {

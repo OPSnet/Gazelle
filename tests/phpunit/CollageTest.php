@@ -544,12 +544,35 @@ class CollageTest extends TestCase {
         );
         $collage = $this->collageList[0];
 
-        $this->assertFalse($collage->isLocked(), 'collage-is-not-locked');
-        $this->assertTrue($collage->toggleLocked()->modify(), 'collage-lock');
-        $this->assertTrue($collage->isLocked(), 'collage-is-now-locked');
-        $this->assertFalse($collage->userCanContribute($this->userList['u1']), 'collage-locked-contribute');
-        $this->assertTrue($collage->toggleLocked()->modify(), 'collage-unlock');
-        $this->assertFalse($collage->isLocked(), 'collage-is-unlocked');
+        $this->assertFalse(
+            $collage->isLockedForUser($this->userList['u1']),
+            'collage-is-not-locked'
+        );
+        $this->assertTrue(
+            $collage->toggleLocked(true)->modify(),
+            'collage-lock'
+        );
+        $this->assertTrue(
+            $collage->isLockedForUser($this->userList['u1']),
+            'collage-is-now-locked'
+        );
+        $this->userList['u2']->addCustomPrivilege('site_collages_manage');
+        $this->assertFalse(
+            $collage->isLockedForUser($this->userList['u2']),
+            'collage-is-manager-unlocked'
+        );
+        $this->assertFalse(
+            $collage->userCanContribute($this->userList['u1']),
+            'collage-locked-contribute'
+        );
+        $this->assertTrue(
+            $collage->toggleLocked(false)->modify(),
+            'collage-unlock'
+        );
+        $this->assertFalse(
+            $collage->isLockedForUser($this->userList['u1']),
+            'collage-is-unlocked'
+        );
     }
 
     public function testCollageManager(): void {
@@ -771,7 +794,7 @@ class CollageTest extends TestCase {
         $response = json_decode($fail->response(), true);
         $this->assertEquals('personal', $response['error'], 'collage-ajax-error-personal');
 
-        $collage->toggleLocked()->modify();
+        $collage->toggleLocked(true)->modify();
         $fail = new Json\Ajax\CollageAdd(
             collage: $collage,
             entry:   $this->tgroupList[1],

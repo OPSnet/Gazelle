@@ -48,7 +48,7 @@ class Collage extends \Gazelle\Json {
                 'deleted'             => $this->collage->isDeleted(),
                 'collageCategoryID'   => $this->collage->categoryId(),
                 'collageCategoryName' => COLLAGE[$this->collage->categoryId()],
-                'locked'              => $this->collage->isLocked(),
+                'locked'              => $this->collage->isLockedForUser($this->user),
                 'maxGroups'           => $this->collage->maxGroups(),
                 'maxGroupsPerUser'    => $this->collage->maxGroupsPerUser(),
                 'hasBookmarked'       => new \Gazelle\User\Bookmark($this->user)->isBookmarked($this->collage),
