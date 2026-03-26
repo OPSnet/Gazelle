@@ -676,7 +676,7 @@ class User extends \Gazelle\BaseManager {
      * Cannot use a torrent object here as it has already be deleted, which
      * is why the ID and name needs to be passed in.
      */
-    public function sendRemovalPm(\Gazelle\User $user, int $torrentId, string $name, string $path, string $log, int $replacementId, bool $pmUploader): int {
+    public function sendRemovalPm(\Gazelle\User $user, int $torrentId, string $name, string $path, string $log, ?int $replacementId, bool $pmUploader): int {
         if ($pmUploader) {
             $user->inbox()->createSystem(
                 "Uploaded torrent deleted: $name",

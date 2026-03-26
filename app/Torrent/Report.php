@@ -231,7 +231,10 @@ class Report extends \Gazelle\BaseObject {
         );
         $affected = self::$db->affected_rows();
         $this->torrent()?->flush();
-        self::$cache->delete_value(sprintf(\Gazelle\TorrentAbstract::CACHE_REPORTLIST, $this->torrentId()));
+        self::$cache->delete_multi([
+            sprintf(\Gazelle\TorrentAbstract::CACHE_REPORTLIST, $this->torrentId()),
+            'num_torrent_reportsv2',
+        ]);
         $this->flush();
         return $affected;
     }

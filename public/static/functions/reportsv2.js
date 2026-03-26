@@ -38,7 +38,7 @@ function HideErrors() {
 function TakeResolve(reportid) {
     $('#submit_' + reportid).disable();
     $.post("reportsv2.php?action=takeresolve", $('#reportform_' + reportid).serialize(), function(response) {
-        if (response) {
+        if (response && response.status !== 'success') {
             ErrorBox(reportid, response);
         } else {
             if ($('#from_delete' + reportid).length) {
