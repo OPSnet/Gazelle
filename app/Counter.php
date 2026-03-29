@@ -36,10 +36,10 @@ class Counter {
     }
 
     public function increment(): int {
-        $new = $this->pg()->scalar("
+        $new = $this->pg()->scalarex("
             update counter set
                 value = value + 1
-            where name = ? 
+            where name = $1
             returning value
             ", $this->name
         );

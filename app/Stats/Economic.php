@@ -84,7 +84,7 @@ class Economic extends \Gazelle\Base {
                 WHERE remaining = 0
                     AND active = 1
             ");
-            $info['user_mfa_total'] = (int)$this->pg()->scalar("
+            $info['user_mfa_total'] = (int)$this->pg()->scalarex("
                 select count(*) from multi_factor_auth
             ");
 

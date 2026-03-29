@@ -73,11 +73,11 @@ class UserToken extends \Gazelle\BaseManager {
      */
     public function findByToken(string $token): ?\Gazelle\User\Token {
         return $this->findById(
-            (int)$this->pg()->scalar("
+            (int)$this->pg()->scalarex("
                 select id_user_token
                 from user_token
                 where now() < expiry
-                    and token = ?
+                    and token = $1
                 ", $token
             )
         );
@@ -88,11 +88,11 @@ class UserToken extends \Gazelle\BaseManager {
      */
     public function findByUser(\Gazelle\User $user, UserTokenType $type): ?\Gazelle\User\Token {
         return $this->findById(
-            (int)$this->pg()->scalar("
+            (int)$this->pg()->scalarex("
                 select id_user_token
                 from user_token
-                where id_user = ?
-                    and type = ?
+                where id_user = $1
+                    and type = $2
                 ", $user->id, $type->value
             )
         );

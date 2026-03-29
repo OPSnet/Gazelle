@@ -27,8 +27,8 @@ class FeaturedAlbumTest extends TestCase {
 
     public function tearDown(): void {
         new Manager\News()->remove(
-            (int)$this->pg()->scalar("
-                select id_news from news where id_user = ?
+            (int)$this->pg()->scalarex("
+                select id_news from news where id_user = $1
                 ", $this->user->id
             )
         );

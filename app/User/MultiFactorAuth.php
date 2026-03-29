@@ -95,8 +95,8 @@ class MultiFactorAuth extends \Gazelle\BaseUser {
 
     protected function secret(): string|false {
         if (!isset($this->secret)) {
-            $this->secret = $this->pg()->scalar('
-                select secret from multi_factor_auth where id_user = ?
+            $this->secret = $this->pg()->scalarex('
+                select secret from multi_factor_auth where id_user = $1
                 ', $this->user->id
             ) ?? false;
         }

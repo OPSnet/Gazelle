@@ -75,10 +75,10 @@ class Notification extends \Gazelle\BaseUser {
     }
 
     public function pushToken(): string {
-        return $this->pushToken ??= (string)$this->pg()->scalar("
+        return $this->pushToken ??= (string)$this->pg()->scalarex("
             SELECT push_token
             FROM user_push_options AS pn
-            WHERE pn.id_user = ?
+            WHERE pn.id_user = $1
             ", $this->user->id
         );
     }

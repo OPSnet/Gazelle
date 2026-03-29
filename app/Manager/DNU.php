@@ -75,11 +75,12 @@ class DNU extends \Gazelle\Base {
     }
 
     public function hasNewForUser(\Gazelle\User $user): bool {
-        return (bool)$this->pg()->scalar("
-            select coalesce(max(t.created), '-infinity') < ?
+        return (bool)$this->pg()->scalarex(<<<END_SQL
+            select coalesce(max(t.created), '-infinity') < $1
             from relay.torrents t
-            where t.\"UserID\" = ?
-            ", $this->latest(), $user->id
+            where t."UserID" = $2
+            END_SQL,
+                $this->latest(), $user->id
         );
     }
 }

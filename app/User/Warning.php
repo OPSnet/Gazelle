@@ -13,20 +13,20 @@ class Warning extends \Gazelle\BaseUser {
     }
 
     public function add(string $reason, string $interval, \Gazelle\User $warner): string {
-        $end = (string)$this->pg()->scalar("
+        $end = (string)$this->pg()->scalarex("
             with cte as (
                 select max(upper(warning)) as warning_end
                 from user_warning
-                where id_user = ? and now() < upper(warning)
+                where id_user = $1 and now() < upper(warning)
             )
             insert into user_warning
                    (id_user, id_user_warner, reason, warning)
-            values (?,       ?,              ?,      tstzrange(
+            values ($1,      $2,             $3,     tstzrange(
                 coalesce((select warning_end from cte), now()),
-                coalesce((select warning_end from cte), now()) + ?::interval
+                coalesce((select warning_end from cte), now()) + $4::interval
             ))
             returning to_char(upper(warning), 'YYYY-MM-DD HH24:MI')
-            ", $this->user->id, $this->user->id, $warner->id, $reason, $interval
+            ", $this->user->id, $warner->id, $reason, $interval
         );
         $this->user()->auditTrail()->addEvent(
             \Gazelle\Enum\UserAuditEvent::warning,

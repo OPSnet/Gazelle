@@ -17,8 +17,8 @@ class ExternalProfile extends \Gazelle\BaseUser {
         if (isset($this->info)) {
             return $this->info;
         }
-        $this->info['profile'] = (string)$this->pg()->scalar("
-            select profile from user_external_profile where id_user = ?
+        $this->info['profile'] = (string)$this->pg()->scalarex("
+            select profile from user_external_profile where id_user = $1
             ", $this->user->id
         );
         return $this->info;

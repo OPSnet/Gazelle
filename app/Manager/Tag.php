@@ -66,8 +66,8 @@ class Tag extends \Gazelle\BaseManager {
      * Check whether this name is allowed. Some tags we never want to see again.
      */
     public function validName(string $name): bool {
-        return !$this->pg()->scalar("
-            select 1 from tag_reject where name = ?
+        return !$this->pg()->scalarex("
+            select 1 from tag_reject where name = $1
             ", $name
         );
     }

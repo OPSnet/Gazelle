@@ -46,21 +46,21 @@ class Tor extends \Gazelle\Base {
 
     public function exitNodeList(): array {
         return $this->pg()->all("
-            SELECT t.ipv4,
+            select t.ipv4,
                 t.created,
                 coalesce(a.cc, 'XX') as cc,
                 coalesce(a.name, 'unknown') as name,
                 a.id_asn
-            FROM tor_node t
-            LEFT JOIN geo.asn_network an ON (an.network >> t.ipv4)
-            LEFT JOIN geo.asn a USING (id_asn)
-            ORDER BY 1
+            from tor_node t
+            left join geo.asn_network an on (an.network >> t.ipv4)
+            left join geo.asn a using (id_asn)
+            order by 1
         ");
     }
 
     public function isExitNode(string $ip): bool {
-        return BLOCK_TOR && (bool)$this->pg()->scalar("
-            SELECT 1 FROM tor_node WHERE ipv4 = ?
+        return BLOCK_TOR && (bool)$this->pg()->scalarex("
+            select 1 from tor_node where ipv4 = $1
             ", $ip
         );
     }

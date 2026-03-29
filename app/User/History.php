@@ -29,8 +29,8 @@ class History extends \Gazelle\BaseUser {
     /***** ANNOUNCE KEYS *****/
 
     public function announceKeyTotal(): int {
-        return (int)$this->pg()->scalar("
-            select count(*) from history_announce where id_user = ?
+        return (int)$this->pg()->scalarex("
+            select count(*) from history_announce where id_user = $1
             ", $this->user->id
         );
     }
@@ -79,20 +79,20 @@ class History extends \Gazelle\BaseUser {
     }
 
     public function passwordList(): array {
-        return $this->pg()->all("
+        return $this->pg()->allex("
             select created,
                 ip,
                 useragent
             from history_password
-            where id_user = ?
+            where id_user = $1
             order by created desc
             ", $this->user->id
         );
     }
 
     public function passwordTotal(): int {
-        return (int)$this->pg()->scalar("
-            select count(*) from history_password where id_user = ?
+        return (int)$this->pg()->scalarex("
+            select count(*) from history_password where id_user = $1
             ", $this->user->id
         );
     }

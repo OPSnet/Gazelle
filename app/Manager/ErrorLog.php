@@ -27,18 +27,18 @@ class ErrorLog extends BaseManager {
             $clipped = $len - 4000;
             $trace = substr($trace, 0, 4000) . "[...$clipped chars clipped]";
         }
-        $id = $this->pg()->scalar("
+        $id = $this->pg()->scalarex("
             merge into error_log using (
-                select ? as uri,
-                    ?::int as id_user,
-                    ?::double precision as duration,
-                    ?::bigint as memory,
-                    ?::int as nr_query,
-                    ?::int as nr_cache,
-                    ? as trace,
-                    ?::jsonb as request,
-                    ?::jsonb as error_list,
-                    ?::bytea as digest
+                select $1 as uri,
+                    $2::int as id_user,
+                    $3::double precision as duration,
+                    $4::bigint as memory,
+                    $5::int as nr_query,
+                    $6::int as nr_cache,
+                    $7 as trace,
+                    $8::jsonb as request,
+                    $9::jsonb as error_list,
+                    $10::bytea as digest
                 ) as i on i.digest = error_log.digest
             when not matched then
                 insert (  uri,   id_user,   duration,   memory,   nr_query,   nr_cache,   trace,   request,   error_list,   digest)
@@ -48,9 +48,9 @@ class ErrorLog extends BaseManager {
                     seen = error_log.seen + 1,
                     updated = now()
             returning id_error_log;
-            ", substr($uri, 0, 255), $userId, $duration, $memory, $nrQuery, $nrCache,
-                $trace, json_encode($request), json_encode($errorList),
-                $this->digest($trace, $errorList),
+            ", substr($uri, 0, 255), $userId, $duration, $memory, $nrQuery, $nrCache, // 6
+                $trace, json_encode($request), json_encode($errorList), // 9
+                $this->digest($trace, $errorList), // 10
         );
         return new \Gazelle\ErrorLog($id);
     }
@@ -59,8 +59,8 @@ class ErrorLog extends BaseManager {
      * Get an error log based on its ID
      */
     public function findById(int $id): ?\Gazelle\ErrorLog {
-        $errorId = (int)$this->pg()->scalar("
-            select id_error_log FROM error_log where id_error_log = ?
+        $errorId = (int)$this->pg()->scalarex("
+            select id_error_log from error_log where id_error_log = $1
             ", $id
         );
         return $errorId ? new \Gazelle\ErrorLog($errorId) : null;
@@ -70,18 +70,18 @@ class ErrorLog extends BaseManager {
      * Get an error log based on its digest
      */
     public function findByDigest(string $trace, array $errorList): ?\Gazelle\ErrorLog {
-        $id = (int)$this->pg()->scalar("
-            select id_error_log FROM error_log where digest = ?
+        $id = (int)$this->pg()->scalarex("
+            select id_error_log from error_log where digest = $1
             ", $this->digest($trace, $errorList),
         );
         return $id ? new \Gazelle\ErrorLog($id) : null;
     }
 
     public function findByPrev(int $errorId): ?\Gazelle\ErrorLog {
-        $id = (int)$this->pg()->scalar("
+        $id = (int)$this->pg()->scalarex("
             select id_error_log
             from error_log
-            where updated > (select updated from error_log where id_error_log = ?)
+            where updated > (select updated from error_log where id_error_log = $1)
             order by updated asc
             limit 1
             ", $errorId
@@ -90,10 +90,10 @@ class ErrorLog extends BaseManager {
     }
 
     public function findByNext(int $errorId): ?\Gazelle\ErrorLog {
-        $id = (int)$this->pg()->scalar("
+        $id = (int)$this->pg()->scalarex("
             select id_error_log
             from error_log
-            where updated < (select updated from error_log where id_error_log = ?)
+            where updated < (select updated from error_log where id_error_log = $1)
             order by updated desc
             limit 1
             ", $errorId
@@ -111,10 +111,10 @@ class ErrorLog extends BaseManager {
         if (!isset($this->filter)) {
             $where = '';
         } else {
-            $where = "where uri ~ ?";
+            $where = "where uri ~* $1";
             $args[] = $this->filter;
         }
-        return (int)$this->pg()->scalar("
+        return (int)$this->pg()->scalarex("
             select count(*) from error_log $where
             ", ...$args
         );

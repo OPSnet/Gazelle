@@ -72,19 +72,19 @@ class Bitcoin {
      * @return string bitcoin address
      */
     public function address(int $userId): string {
-        $addr = $this->pg()->scalar("
-            SELECT address
-            FROM donate_bitcoin
-            WHERE id_user = ?
+        $addr = $this->pg()->scalarex("
+            select address
+            from donate_bitcoin
+            where id_user = $1
             ", $userId
         );
         if (is_null($addr)) {
             $addr = $this->createAddress();
-            return $this->pg()->scalar("
-                INSERT INTO donate_bitcoin
+            return $this->pg()->scalarex("
+                insert into donate_bitcoin
                        (id_user, address)
-                VALUES (?,       ?)
-                RETURNING address
+                values ($1,      $2)
+                returning address
                 ", $userId, $addr
             );
         }
@@ -98,18 +98,18 @@ class Bitcoin {
      * @return int user id or null if no user found
      */
     public function findUserIdbyAddress(string $addr): ?int {
-        return $this->pg()->scalar("
-            SELECT id_user
-            FROM donate_bitcoin
-            WHERE address = ?
+        return $this->pg()->scalarex("
+            select id_user
+            from donate_bitcoin
+            where address = $1
             ", $addr
         );
     }
 
     public function invalidate(int $userId): bool {
-        return $this->pg()->prepared_query("
-            DELETE FROM donate_bitcoin
-            WHERE id_user = ?
+        return $this->pg()->query("
+            delete from donate_bitcoin
+            where id_user = $1
             ", $userId
         ) === 1;
     }

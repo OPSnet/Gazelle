@@ -919,30 +919,30 @@ class RequestTest extends TestCase {
 
         $this->assertEquals(
             $this->request->id,
-            $this->pg()->scalar("
+            $this->pg()->scalarex("
                 select id_request
                 from request
-                where id_request = ?
+                where id_request = $1
                 ", $this->request->id
             ),
             'request-fts-id', // ensure the request has been relayed
         );
         $this->assertEquals(
             $this->request->id,
-            $this->pg()->scalar("
+            $this->pg()->scalarex("
                 select id_request
                 from request
-                where artist_title_ts @@ websearch_to_tsquery('simple', ?)
+                where artist_title_ts @@ websearch_to_tsquery('simple', $1)
                 ", "\"{$artistName}\""
             ),
             'request-fts-search-artist'
         );
         $this->assertEquals(
             $this->request->id,
-            $this->pg()->scalar("
+            $this->pg()->scalarex("
                 select id_request
                 from request
-                where artist_title_ts @@ websearch_to_tsquery('simple', ?)
+                where artist_title_ts @@ websearch_to_tsquery('simple', $1)
                 ", "\"{$title}\""
             ),
             'request-fts-search-title'

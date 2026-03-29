@@ -49,7 +49,7 @@ class SSLHost extends \Gazelle\Base {
         $info = $this->curl->curlInfo(CURLINFO_CERTINFO);
 
         if (!isset($info[0]['Start date'], $info[0]['Expire date'])) {
-	    // some network error
+            // some network error
             return [];
         }
 
@@ -92,14 +92,14 @@ class SSLHost extends \Gazelle\Base {
 
     public function list(): array {
         return $this->pg()->allex("
-            SELECT id_ssl_host AS id,
+            select id_ssl_host as id,
                 hostname,
                 port,
                 not_before,
                 not_after,
                 created
-            FROM ssl_host
-            ORDER BY not_after, hostname
+            from ssl_host
+            order by not_after, hostname
         ");
     }
 
@@ -111,7 +111,9 @@ class SSLHost extends \Gazelle\Base {
     public function expiryDays(): ?int {
         return $this->pg()->scalarex("
             select extract(day from not_after - now())
-            from ssl_host order by not_after asc limit 1
+            from ssl_host
+            order by not_after asc
+            limit 1
         ");
     }
 

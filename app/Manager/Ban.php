@@ -103,16 +103,16 @@ class Ban extends \Gazelle\Base {
     }
 
     public function findById(int $id): ?\Gazelle\Ban {
-        $banId = (int)$this->pg()->scalar("
-            select id_ip_ban from ip_ban where id_ip_ban = ?
+        $banId = (int)$this->pg()->scalarex("
+            select id_ip_ban from ip_ban where id_ip_ban = $1
             ", $id
         );
         return $banId ? new \Gazelle\Ban($banId) : null;
     }
 
     public function findByIp(string $ip): ?\Gazelle\Ban {
-        $banId = (int)$this->pg()->scalar("
-            select id_ip_ban from ip_ban where ip && ?::inet
+        $banId = (int)$this->pg()->scalarex("
+            select id_ip_ban from ip_ban where ip && $1::inet
             ", $ip
         );
         return $this->findById($banId);
@@ -133,11 +133,11 @@ class Ban extends \Gazelle\Base {
      * Is an IP address banned?
      */
     public function isBanned(string $ipaddr): bool {
-        return (bool)$this->pg()->scalar("
+        return (bool)$this->pg()->scalarex("
             select 1
             from ip_ban
             where is_active is true
-                and ip && ?::inet
+                and ip && $1::inet
             ", $ipaddr
         );
     }

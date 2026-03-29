@@ -28,7 +28,7 @@ class SiteLog extends \Gazelle\Base {
 
     public function total(string $searchTerm): int {
         if ($searchTerm === '') {
-            return (int)$this->pg()->scalar("
+            return (int)$this->pg()->scalarex("
                 select total from table_row_count where table_name = 'site_log'
             ");
         }

@@ -387,18 +387,18 @@ class Forum extends BaseObject {
     }
 
     public function isAutoSubscribe(User $user): bool {
-        return (bool)$this->pg()->scalar("
-            SELECT 1
-            FROM forum_autosub
-            WHERE id_forum = ?
-                AND id_user = ?
+        return (bool)$this->pg()->scalarex("
+            select 1
+            from forum_autosub
+            where id_forum = $1
+                and id_user = $2
             ", $this->id, $user->id
         );
     }
 
     public function autoSubscribeUserIdList(): array {
-        return $this->pg()->column("
-            SELECT id_user FROM forum_autosub WHERE id_forum = ?
+        return $this->pg()->columnex("
+            select id_user from forum_autosub where id_forum = $1
             ", $this->id
         );
     }

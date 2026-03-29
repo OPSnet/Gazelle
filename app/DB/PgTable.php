@@ -23,11 +23,11 @@ class PgTable extends AbstractTable {
 
     public function exists(): bool {
         [$schema, $table] = $this->schemaTable();
-        return (bool)$this->pg()->scalar("
+        return (bool)$this->pg()->scalarex("
             SELECT 1
             FROM information_schema.tables t
-            WHERE t.table_schema = ?
-                AND t.table_name = ?
+            WHERE t.table_schema = $1
+                AND t.table_name = $2
             ", $schema, $table
         );
     }

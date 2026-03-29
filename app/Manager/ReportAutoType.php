@@ -20,8 +20,8 @@ class ReportAutoType extends \Gazelle\BaseManager {
     }
 
     public function findByName(string $name): ?\Gazelle\ReportAuto\Type {
-        $id = $this->pg()->scalar("
-            SELECT id_report_auto_type FROM report_auto_type WHERE name = ?
+        $id = $this->pg()->scalarex("
+            select id_report_auto_type from report_auto_type where name = $1
             ", $name
         );
         return $id ? $this->findById($id) : null;
@@ -33,9 +33,9 @@ class ReportAutoType extends \Gazelle\BaseManager {
      * returns > 0 on success
      */
     public function createCategory(string $name): int {
-        return $this->pg()->scalar("
-            INSERT INTO report_auto_category (name) VALUES (?)
-            RETURNING id_report_auto_category
+        return $this->pg()->scalarex("
+            insert into report_auto_category (name) values ($1)
+            returning id_report_auto_category
         ", $name);
     }
 
@@ -48,18 +48,20 @@ class ReportAutoType extends \Gazelle\BaseManager {
         } else {
             $catId = null;
         }
-        return $this->findById($this->pg()->scalar("
-            INSERT INTO report_auto_type
+        return $this->findById($this->pg()->scalarex("
+            insert into report_auto_type
                 (name, id_report_auto_category, description)
-            VALUES
-                (?,    ?,                       ?)
-            RETURNING id_report_auto_type
-        ", $name, $catId, $description));
+            values
+                ($1,   $2,                      $3)
+            returning id_report_auto_type
+            ", $name, $catId, $description
+        ));
     }
 
     protected function findCategory(string $name): ?int {
-        return $this->pg()->scalar("
-            SELECT id_report_auto_category FROM report_auto_category WHERE name = ?
-        ", $name);
+        return $this->pg()->scalarex("
+            select id_report_auto_category from report_auto_category where name = $1
+            ", $name
+        );
     }
 }

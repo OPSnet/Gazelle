@@ -16,8 +16,8 @@ class Counter {
     }
 
     public function find(string $name): ?\Gazelle\Counter {
-        $counter = $this->pg()->scalar("
-            select name from counter where name = ?
+        $counter = $this->pg()->scalarex("
+            select name from counter where name = $1
             ", $name
         );
         return $counter ? new \Gazelle\Counter($counter) : null;

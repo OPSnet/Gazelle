@@ -21,12 +21,12 @@ class UserMultiFactorAuthTest extends TestCase {
     }
 
     protected function countTokens(): int {
-        return $this->pg()->scalar('
+        return $this->pg()->scalarex('
             select count(*)
             from user_token
             where expiry > now()
-                and id_user = ?
-                and type = ?
+                and id_user = $1
+                and type = $2
             ', $this->user->id, Enum\UserTokenType::mfa->value
         );
     }

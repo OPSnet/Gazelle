@@ -49,11 +49,11 @@ class AuditTrail extends \Gazelle\BaseUser {
     }
 
     public function hasEvent(UserAuditEvent $event): bool {
-        return (bool)$this->pg()->scalar("
+        return (bool)$this->pg()->scalarex("
             select 1
             from user_audit_trail
-            where id_user = ?
-                and event = ?
+            where id_user = $1
+                and event = $2
             ", $this->user->id, $event->value
         );
     }
@@ -91,10 +91,10 @@ class AuditTrail extends \Gazelle\BaseUser {
      * Return the id of the most recent audit event. (0 if no events)
      */
     public function lastEventId(): int {
-        return (int)$this->pg()->scalar("
+        return (int)$this->pg()->scalarex("
             select id_user_audit_trail
             from user_audit_trail
-            where id_user = ?
+            where id_user = $1
             order by id_user_audit_trail desc
             limit 1
             ", $this->user->id
@@ -102,10 +102,10 @@ class AuditTrail extends \Gazelle\BaseUser {
     }
 
     public function removeEvent(int $eventId): int {
-        return $this->pg()->prepared_query("
+        return $this->pg()->query("
             delete from user_audit_trail
-            where id_user_audit_trail = ?
-                and id_user = ?
+            where id_user_audit_trail = $1
+                and id_user = $2
             ", $eventId, $this->user->id
         );
     }

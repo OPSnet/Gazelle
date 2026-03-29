@@ -43,11 +43,11 @@ class Token extends \Gazelle\BaseUser {
     }
 
     public function isValid(): bool {
-        return (bool)$this->pg()->scalar("
+        return (bool)$this->pg()->scalarex("
             select 1
             from user_token
             where expiry > now()
-                and id_user_token = ?
+                and id_user_token = $1
             ", $this->tokenId
         );
     }

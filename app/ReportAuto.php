@@ -142,11 +142,11 @@ class ReportAuto extends BasePgObject {
      * returns comment id on success, null otherwise
      */
     public function addComment(User $user, string $comment): ?int {
-        $commentId = $this->pg()->scalar("
-            INSERT INTO report_auto_comment
+        $commentId = $this->pg()->scalarex("
+            insert into report_auto_comment
                    (id_report_auto, id_user, comment)
-            VALUES (?,              ?,       ?)
-            RETURNING id_report_auto_comment
+            values ($1,             $2,      $3)
+            returning id_report_auto_comment
             ", $this->id, $user->id, $comment
         );
         unset($this->comments);

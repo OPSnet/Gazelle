@@ -37,10 +37,10 @@ class Monero {
      * @return string payment id in hex or null if no payment id exists
      */
     protected function findPaymentIdByUserId(int $userId): ?string {
-        $token = $this->pg()->scalar("
-            SELECT token
-            FROM donate_monero
-            WHERE id_user = ?
+        $token = $this->pg()->scalarex("
+            select token
+            from donate_monero
+            where id_user = $1
             ", $userId
         );
         if ($token) {
@@ -59,11 +59,11 @@ class Monero {
         if ($token) {
             return $token;
         }
-        $token = $this->pg()->scalar("
-            INSERT INTO donate_monero
+        $token = $this->pg()->scalarex("
+            insert into donate_monero
                    (id_user, token)
-            VALUES (?,       gen_random_bytes(?))
-            RETURNING token
+            values ($1,      gen_random_bytes($2))
+            returning token
             ", $userId, self::paymentIdLength
         );
         return bin2hex($token);
@@ -88,18 +88,18 @@ class Monero {
         if (strlen($paymentId) !== self::paymentIdLength * 2 || !ctype_xdigit($paymentId)) {
             throw new MoneroException("invalid payment id: $paymentId");
         }
-        return $this->pg()->scalar("
-            SELECT id_user
-            FROM donate_monero
-            WHERE token = ?
+        return $this->pg()->scalarex("
+            select id_user
+            from donate_monero
+            where token = $1
             ", '\\x' . $paymentId
         );
     }
 
     public function invalidate(int $userId): bool {
-        return $this->pg()->prepared_query("
-                DELETE FROM donate_monero
-                WHERE id_user = ?
+        return $this->pg()->query("
+                delete from donate_monero
+                where id_user = $1
                 ", $userId
         ) === 1;
     }

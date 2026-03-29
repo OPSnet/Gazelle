@@ -87,7 +87,7 @@ class Payment extends \Gazelle\Base {
                     $l['fiatRate'] = (float)self::$db->scalar("
                         SELECT rate
                         FROM xbt_forex
-                        WHERE cc = ?
+                        WHERE cc = $1
                         ORDER BY forex_date DESC
                         LIMIT 1
                         ", $l['currency']
@@ -111,7 +111,7 @@ class Payment extends \Gazelle\Base {
     public function monthlyRental(): float {
         $rental = self::$cache->get_value(self::RENT_KEY);
         if ($rental === false) {
-            $rental = (float)$this->pg()->scalar("
+            $rental = (float)$this->pg()->scalarex("
                 select sum(p.annual_rent/coalesce(CUR.rate, 1.0)) / 12
                 from payment p
                 left join (
