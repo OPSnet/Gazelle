@@ -17,10 +17,6 @@ class Curl {
         $this->curl = curl_init();  /** @phpstan-ignore-line if this is false there are bigger problems */
     }
 
-    public function __destruct() {
-        curl_close($this->curl);
-    }
-
     public function setMethod(CurlMethod $method): static {
         $this->method = $method;
         return $this;
@@ -54,6 +50,7 @@ class Curl {
     }
 
     public function fetch(string $url): bool {
+        curl_reset($this->curl);
         // @phpstan-ignore-next-line argument.type
         curl_setopt_array($this->curl, [
             CURLOPT_HEADER         => false,

@@ -140,7 +140,10 @@ RUN useradd -ms /bin/bash gazelle \
     && cp /var/www/misc/docker/web/nginx.conf /etc/nginx/sites-available/gazelle.conf \
     && ln -s /etc/nginx/sites-available/gazelle.conf /etc/nginx/sites-enabled/gazelle.conf \
     && rm -f /etc/nginx/sites-enabled/default \
-    && mkdir /opt/gazelle
+    && mkdir /opt/gazelle \
+    # self-signed cert for our unittests
+    && openssl req -x509 -newkey ed25519 -not_before 20000101000000Z -not_after 20010202010100Z \
+        -noenc -keyout /etc/nginx/selfsigned.key -out /etc/nginx/selfsigned.crt -subj "/CN=gazelle.local"
 
 COPY mysql_schema.sql mysql_data.sql /opt/gazelle/
 

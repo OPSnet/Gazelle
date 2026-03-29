@@ -136,12 +136,13 @@ class Activity extends \Gazelle\BaseUser {
     public function setSSLHost(\Gazelle\Manager\SSLHost $ssl): static {
         if ($this->user->permitted('site_debug')) {
             $soon = $ssl->expiryDays();
-            if ($soon > 0 && $soon < 8) {
+            if ($soon !== null && $soon < 8) {
+                ++$soon;
                 $this->setAlert(
                     "<a title=\"SSL Certificate will expire within $soon day"
                         . plural($soon)
                         . "\" href=\"tools.php?action=ssl_host\"><span class=\""
-                        . ($soon === 1 ? 'sys-error' : 'sys-warning')
+                        . ($soon <= 1 ? 'sys-error' : 'sys-warning')
                         . "\">SSL</span></a>"
                 );
             }

@@ -763,7 +763,7 @@ function sanitize_irc_nick(string $nick): string {
  * difference in text (e.g. "16 hours and 28 minutes", "1 day, 18 hours").
  */
 function time_diff(
-    string|null     $TimeStamp,
+    int|string|null $TimeStamp,
     int             $Levels    = 2,
     bool            $span      = true,
     string|false    $StartTime = false,

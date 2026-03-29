@@ -143,6 +143,18 @@ class Twig {
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
+            'date_fmt',
+            fn (?\DateTimeInterface $date) => new \Twig\Markup(
+                $date?->format('Y-m-d H:i:sP') ?? 'Never', 'UTF-8')
+        ));
+
+        $twig->addFilter(new \Twig\TwigFilter(
+            'date_diff',
+            fn (?\DateTimeInterface $date, $levels = 2, $span = true) => new \Twig\Markup(
+                time_diff($date?->getTimestamp(), $levels, $span), 'UTF-8')
+        ));
+
+        $twig->addFilter(new \Twig\TwigFilter(
             'time_compact',
             fn (int $seconds) => new \Twig\Markup(Time::convertSeconds($seconds), 'UTF-8')
         ));
