@@ -621,9 +621,9 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
     public function refresh(): static {
         $qid = self::$db->get_query_id();
 
-        $voteScore = (int)self::$db->scalar("
-            SELECT Score FROM torrents_votes WHERE GroupID = ?
-            ", $this->id
+        $voteScore = (int)$this->pg()->scalarex('
+            select score from tgroup_vote_summary where id_tgroup = $1
+            ', $this->id
         );
 
         $artistName = (string)self::$db->scalar("

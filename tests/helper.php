@@ -128,16 +128,17 @@ class Helper {
         array   $artistName,
         array   $tagName,
         int     $releaseType = 1,
+        ?int    $year        = null,
         ?string $image       = 'https://example.com/phpunit-tgroup/image.jpg',
     ): TGroup {
         $user->requestContext()->setViewer($user);
         $tgroup = new \Gazelle\Manager\TGroup()->create(
-            categoryId:      (int)new Category()->findIdByName('Music'),
-            releaseType:     $releaseType,
-            name:            $name,
-            description:     'phpunit music description',
-            image:           $image,
-            year:            (int)date('Y') - 1,
+            categoryId:  (int)new Category()->findIdByName('Music'),
+            releaseType: $releaseType,
+            name:        $name,
+            description: 'phpunit music description',
+            image:       $image,
+            year:        $year ?? (int)date('Y') - 1,
         );
         $tgroup->addArtists($artistName[0], $artistName[1]);
         $tagMan = new \Gazelle\Manager\Tag();

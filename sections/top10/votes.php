@@ -144,10 +144,10 @@ if (count($topVotes) === 0) { ?>
             continue;
         }
         ++$number;
-        $sequence   = $result['sequence'];
-        $upVotes    = $result['Ups'];
-        $totalVotes = $result['Total'];
-        $score      = $result['Score'];
+        $sequence   = $result['tier'];
+        $upVotes    = $result['upvote'];
+        $totalVotes = $result['total'];
+        $score      = $result['score'];
         $downVotes  = $totalVotes - $upVotes;
         $isSnatched = $tgroup->isSnatched();
         $snatchedGroupClass = $isSnatched ? ' snatched_group' : '';

@@ -4,29 +4,31 @@ namespace Gazelle\User;
 
 class Vote extends \Gazelle\BaseUser {
     final public const tableName = 'users_votes';
-    final protected const Z_VAL     = 1.281728756502709;  // original
-    final protected const Z_VAL_90  = 1.6448536251336989; // p-value .90
-    final protected const Z_VAL_95  = 1.959963986120195;  //         .95
 
     final public const UPVOTE   = 1;
     final public const DOWNVOTE = 2;
 
-    protected const VOTE_USER_KEY = 'vote_user_%d';
-    protected const VOTE_PAIR_KEY = 'vote_pair_%d';
-    protected const VOTE_RECENT   = 'u_vote_%d';
-    protected const VOTE_TOTAL    = 'u_vote_T_%d';
-    protected const VOTED_USER    = 'user_voted_%d';
-    protected const VOTED_GROUP   = 'group_voted_%d';
+    final protected const VOTE_USER_KEY = 'tgv_u_%d';
+    final protected const VOTE_PAIR_KEY = 'tgv_pair_%d';
+    final protected const VOTE_RECENT   = 'tgv_uvote_2_%d';
+    final protected const VOTE_TOTAL    = 'tgv_utotal_%d';
+    final protected const VOTED_USER    = 'tgv_u_voted_%d';
+    final protected const VOTED_TGROUP  = 'tgv_t_voted_%d';
+
+    final public const VOTE_RANK_OVERALL = 'tgv_rank_overall';
+    final public const VOTE_RANK_DECADE  = 'tgv_rank_year_%d';
+    final public const VOTE_RANK_YEAR    = 'tgv_rank_decade_%d';
 
     protected int   $limit;
-    protected array $topConfig = [];
-    protected array $topJoin   = [];
-    protected array $topWhere  = [];
-    protected array $topArgs   = [];
+    protected array $config = [];
+    protected array $join   = [];
+    protected array $where  = [];
+    protected array $args   = [];
     protected array $voteSummary;
 
     public function flush(): static {
         self::$cache->delete_multi([
+            self::VOTE_RANK_OVERALL,
             sprintf(self::VOTE_RECENT, $this->user->id),
             sprintf(self::VOTE_TOTAL, $this->user->id),
             sprintf(self::VOTE_USER_KEY, $this->user->id),
@@ -38,7 +40,7 @@ class Vote extends \Gazelle\BaseUser {
 
     protected function tgroupFlush(\Gazelle\TGroup $tgroup): static {
         self::$cache->delete_multi([
-            sprintf(self::VOTED_GROUP, $tgroup->id),
+            sprintf(self::VOTED_TGROUP, $tgroup->id),
             sprintf(self::VOTE_PAIR_KEY, $tgroup->id),
         ]);
         return $this->flush();
@@ -48,20 +50,20 @@ class Vote extends \Gazelle\BaseUser {
         if (isset($this->info)) {
             return $this->info;
         }
-        $key = sprintf(self::VOTE_USER_KEY, $this->user->id);
+        $key  = sprintf(self::VOTE_USER_KEY, $this->user->id);
         $info = self::$cache->get_value($key);
         if ($info === false) {
-            self::$db->prepared_query("
-                SELECT GroupID,
-                    CASE WHEN Type = 'Up' THEN 1
-                        WHEN Type = 'Down' THEN -1
-                        ELSE 0
-                     END as Vote
-                FROM users_votes
-                WHERE UserID = ?
-                ", $this->user->id
+            $info = $this->pg()->pair(
+                'id_tgroup',
+                'vote',
+                <<<END_SQL
+                select id_tgroup,
+                    case when upvote then 1 else -1 end as vote
+                from tgroup_vote
+                where id_user = $1
+                END_SQL,
+                    $this->user->id
             );
-            $info = self::$db->to_pair('GroupID', 'Vote');
             self::$cache->cache_value($key, $info, 0);
         }
         $this->info = $info;
@@ -69,54 +71,34 @@ class Vote extends \Gazelle\BaseUser {
     }
 
     public function setTopLimit(int $limit): static {
-        $this->topConfig['limit'] = $limit;
+        $this->config['limit'] = $limit;
         return $this;
     }
 
     public function setTopTagList(array $tagList, bool $all): static {
-        $this->topConfig['tagList'] = $tagList;
-        $this->topConfig['tagAll']  = $all;
+        $this->config['tagList'] = $tagList;
+        $this->config['tagAll']  = $all;
         return $this;
     }
 
     public function setTopYearInterval(int $lower, int $higher): static {
         if ($lower > 0) {
             if ($higher > 0) {
-                $this->topJoin['torrents_group'] = 'INNER JOIN torrents_group tg ON (tg.ID = v.GroupID)';
-                $this->topWhere[] = 'tg.Year BETWEEN ? AND ?';
-                $this->topArgs[] = min($lower, $higher);
-                $this->topArgs[] = max($lower, $higher);
+                $this->join[] = 'inner join relay.torrents_group tg on (tg."ID" = tvs.id_tgroup)';
+                $this->where[] = "tg.\"Year\" between {$this->pg()->placeholder(count($this->args))} and {$this->pg()->placeholder(1 + count($this->args))}";
+                $this->args[] = min($lower, $higher);
+                $this->args[] = max($lower, $higher);
             } else {
-                $this->topJoin['torrents_group'] = 'INNER JOIN torrents_group tg ON (tg.ID = v.GroupID)';
-                $this->topWhere[] = 'tg.Year >= ?';
-                $this->topArgs[] = $lower;
+                $this->join[] = 'inner join relay.torrents_group tg on (tg."ID" = tvs.id_tgroup)';
+                $this->where[] = "tg.\"Year\" >= 1 + {$this->pg()->placeholder(count($this->args))}";
+                $this->args[] = $lower;
             }
         } elseif ($higher > 0) {
-            $this->topJoin['torrents_group'] = 'INNER JOIN torrents_group tg ON (tg.ID = v.GroupID)';
-            $this->topWhere[] = 'tg.Year <= ?';
-            $this->topArgs[] = $higher;
+            $this->join[] = 'inner join relay.torrents_group tg on (tg."ID" = tvs.id_tgroup)';
+            $this->where[] = "tg.\"Year\" <= {$this->pg()->placeholder(count($this->args))}";
+            $this->args[] = $higher;
         }
          return $this;
-    }
-
-    /**
-     * Calculate a leaderboard with ties, based on scores.
-     * E.g. [10, 13, 17, 17, 20, 34, 34, 34, 50] returns [1, 2, 3, 3, 5, 6, 6, 6, 9]
-     */
-    public function voteRanks(array $list): array {
-        $ranks = [];
-        $rank = 0;
-        $prevRank = 1;
-        $prevScore = false;
-        foreach ($list as $id => $score) {
-            ++$rank;
-            if ($prevScore && $prevScore !== $score) {
-                $prevRank = $rank;
-            }
-            $ranks[$id] = $prevRank;
-            $prevScore  = $score;
-        }
-        return $ranks;
     }
 
     public function ranking(\Gazelle\TGroup $tgroup, bool $viewAdvancedTop10): array {
@@ -159,17 +141,47 @@ class Vote extends \Gazelle\BaseUser {
      * Gets where this album ranks overall.
      */
     public function rankOverall(\Gazelle\TGroup $tgroup): int|false {
-        $key = "voting_ranks_overall";
+        $key = self::VOTE_RANK_OVERALL;
         $ranks = self::$cache->get_value($key);
         if ($ranks === false) {
-            self::$db->prepared_query("
-                SELECT GroupID,
-                    Score
-                FROM torrents_votes
-                ORDER BY Score DESC
-                LIMIT 1000
-            ");
-            $ranks = $this->voteRanks(self::$db->to_pair('GroupID', 'Score'));
+            $ranks = $this->pg()->pair(
+                'id_tgroup',
+                'tier',
+                <<<END_SQL
+                select tvs.id_tgroup,
+                    rank() over (order by tvs.score desc) as tier
+                from tgroup_vote_summary tvs
+                limit 1000
+                END_SQL
+            );
+            self::$cache->cache_value($key, $ranks, 259200); // 3 days
+        }
+        return $ranks[$tgroup->id] ?? false;
+    }
+
+    /**
+     * Gets where this album ranks in its decade.
+     */
+    public function rankDecade(\Gazelle\TGroup $tgroup): int|false {
+        $decade  = $tgroup->year();
+        $decade -= $decade % 10; // First year of the decade
+        $key     = sprintf(self::VOTE_RANK_DECADE, $decade);
+        $ranks   = self::$cache->get_value($key);
+        if ($ranks === false) {
+            $ranks = $this->pg()->pair(
+                'id_tgroup',
+                'tier',
+                <<<END_SQL
+                select tvs.id_tgroup,
+                    rank() over (order by tvs.score desc) as tier
+                from tgroup_vote_summary tvs
+                inner join relay.torrents_group tg on (tg."ID" = tvs.id_tgroup)
+                where tg."CategoryID" = 1
+                  and tg."Year" between $1 and $1 + 9
+                limit 1000
+                END_SQL,
+                    $decade
+            );
             self::$cache->cache_value($key, $ranks, 259200); // 3 days
         }
         return $ranks[$tgroup->id] ?? false;
@@ -179,131 +191,110 @@ class Vote extends \Gazelle\BaseUser {
      * Gets where this album ranks in its year.
      */
     public function rankYear(\Gazelle\TGroup $tgroup): int|false {
-        $year = $tgroup->year();
-        $key = "voting_ranks_year_$year";
-        $ranks = self::$cache->get_value($key);
-        if ($ranks == false) {
-            self::$db->prepared_query("
-                SELECT v.GroupID,
-                    v.Score
-                FROM torrents_votes AS v
-                INNER JOIN torrents_group AS g ON (g.ID = v.GroupID)
-                WHERE g.Year = ?
-                ORDER BY v.Score DESC
-                LIMIT 1000
-                ", $year
-            );
-            $ranks = $this->voteRanks(self::$db->to_pair('GroupID', 'Score'));
-            self::$cache->cache_value($key, $ranks, 259200);
-        }
-        return $ranks[$tgroup->id] ?? false;
-    }
-
-    /**
-     * Gets where this album ranks in its decade.
-     */
-    public function rankDecade(\Gazelle\TGroup $tgroup): int|false {
-        $year = $tgroup->year();
-        $year -= $year % 10; // First year of the decade
-        $key = "voting_ranks_decade_$year";
+        $year  = $tgroup->year();
+        $key   = sprintf(self::VOTE_RANK_YEAR, $year);
         $ranks = self::$cache->get_value($key);
         if ($ranks === false) {
-            self::$db->prepared_query("
-                SELECT GroupID,
-                    Score
-                FROM torrents_votes  AS v
-                INNER JOIN torrents_group AS g ON (g.ID = v.GroupID)
-                WHERE g.Year BETWEEN ? AND ? + 9
-                      AND g.CategoryID = 1
-                ORDER BY Score DESC
-                LIMIT 1000
-                ", $year, $year
+            $ranks = $this->pg()->pair(
+                'id_tgroup',
+                'tier',
+                <<<END_SQL
+                select tvs.id_tgroup,
+                    rank() over (order by tvs.score desc) as tier
+                from tgroup_vote_summary tvs
+                inner join relay.torrents_group tg on (tg."ID" = tvs.id_tgroup)
+                where tg."CategoryID" = 1
+                  and tg."Year" = $1
+                limit 1000
+                END_SQL,
+                    $year
             );
-            $ranks = $this->voteRanks(self::$db->to_pair('GroupID', 'Score'));
             self::$cache->cache_value($key, $ranks, 259200); // 3 days
         }
         return $ranks[$tgroup->id] ?? false;
     }
 
-    public function topVotes(): array {
-        $key = "top10_votes_{$this->topConfig['limit']}"
-            . ($this->topWhere
+    public function topVotes(bool $bypassCache = false): array {
+        $key = "top10_votes_{$this->config['limit']}"
+            . ($this->where !== []
                 ? signature(
-                    implode('|', array_merge($this->topWhere, $this->topArgs, [(int)isset($this->topConfig['tagAll'])])),
+                    implode('|', array_merge($this->where, $this->args, [(int)isset($this->config['tagAll'])])),
                     TOP10_SALT
                 )
                 : ''
             );
-        $topVotes = self::$cache->get_value($key);
-        if ($topVotes === false) {
-            if (isset($this->topConfig['tagList'])) {
-                if ($this->topConfig['tagAll']) {
-                    foreach ($this->topConfig['tagList'] as $tag) {
-                        $this->topWhere[] = "EXISTS (
-                            SELECT 1
-                            FROM torrents_tags tt
-                            INNER JOIN tags t ON (t.ID = tt.TagID)
-                            WHERE tt.GroupID = tg.ID
-                                AND t.Name = ?
-                        )";
+        $voteList = self::$cache->get_value($key);
+        if ($voteList === false || $bypassCache) {
+            if (isset($this->config['tagList'])) {
+                if ($this->config['tagAll']) {
+                    foreach ($this->config['tagList'] as $tag) {
+                        $this->where[] = <<<END_SQL
+                        exists (
+                            select 1
+                            from relay.torrents_tags tt
+                            inner join relay.tags t on (t."ID" = tt."TagID")
+                            where tt."GroupID" = tg."ID"
+                                and t."Name" = {$this->pg()->placeholder(count($this->args))}
+                        )
+                        END_SQL;
+                        $this->args[] = $tag;
                     }
                 } else {
-                    $this->topWhere[] = "EXISTS (
-                        SELECT 1
-                        FROM torrents_tags tt
-                        INNER JOIN tags t ON (t.ID = tt.TagID)
-                        WHERE tt.GroupID = tg.ID
-                            AND t.Name IN (" . placeholders($this->topConfig['tagList']) . ")
-                    )";
+                    $placeholder = placeholders_pg($this->config['tagList'], '%s', 1, count($this->args));
+                    $this->where[] = <<<END_SQL
+                    exists (
+                        select 1
+                        from relay.torrents_tags tt
+                        inner join relay.tags t ON (t."ID" = tt."TagID")
+                        where tt."GroupID" = tg."ID"
+                            and t."Name" in ($placeholder)
+                    )
+                    END_SQL;
+                    $this->args = array_merge($this->args, $this->config['tagList']);
                 }
-                $this->topArgs = array_merge($this->topArgs, $this->topConfig['tagList']);
-                $this->topJoin['torrents_group'] = 'INNER JOIN torrents_group tg ON (tg.ID = v.GroupID)';
+                $this->join[] = 'inner join relay.torrents_group tg on (tg."ID" = tvs.id_tgroup)';
             }
-            $this->topWhere[] = 'Score > 0';
-            $this->topArgs[] = $this->topConfig['limit'] ?? 25;
-
-            self::$db->prepared_query("
-                SELECT v.GroupID, v.Ups, v.Total, v.Score
-                FROM torrents_votes AS v
-                " . implode("\n", array_values($this->topJoin)) . "
-                WHERE
-                " . implode(' AND ', $this->topWhere) . "
-                ORDER BY Score DESC
-                LIMIT ?
-                ", ...$this->topArgs
+            $join = implode(' ', $this->join);
+            $this->where[] = 'score > 0';
+            $where = implode(' and ', $this->where);
+            $limit = "limit {$this->pg()->placeholder(count($this->args))}";
+            $this->args[] = $this->config['limit'] ?? 25;
+            $voteList = $this->pg()->allByKeyex(
+                'id_tgroup',
+                $sql = <<<END_SQL
+                    select tvs.id_tgroup,
+                        tvs.upvote,
+                        tvs.total,
+                        tvs.score,
+                        rank() over (order by tvs.score desc) as tier
+                    from tgroup_vote_summary tvs
+                    $join
+                    where $where
+                    order by tvs.score desc
+                    $limit
+                END_SQL,
+                ...$this->args
             );
-            $results = self::$db->to_array('GroupID', MYSQLI_ASSOC);
-            $ranks = $this->voteRanks(self::$db->to_pair('GroupID', 'Score'));
-
-            $topVotes = [];
-            foreach ($results as $tgroupId => $votes) {
-                $topVotes[$tgroupId] = [
-                    'Ups'      => $votes['Ups'],
-                    'Total'    => $votes['Total'],
-                    'Score'    => $votes['Score'],
-                    'sequence' => $ranks[$tgroupId],
-                ];
-            }
-            self::$cache->cache_value($key, $topVotes, 3600);
+            self::$cache->cache_value($key, $voteList, 3600);
         }
-        return $topVotes;
+        return $voteList;
     }
 
     public function links(\Gazelle\TGroup $tgroup): string {
         return self::$twig->render('vote/links.twig', [
             'group_id' => $tgroup->id,
-            'score'    => $this->score($tgroup),
+            'score'    => $this->tgroupInfo($tgroup)['score'],
             'vote'     => $this->info()[$tgroup->id] ?? 0,
             'viewer'   => $this->user,
         ]);
     }
 
     public function total(\Gazelle\TGroup $tgroup): int {
-        return $this->tgroupInfo($tgroup)['Total'];
+        return $this->tgroupInfo($tgroup)['total'];
     }
 
     public function totalUp(\Gazelle\TGroup $tgroup): int {
-        return $this->tgroupInfo($tgroup)['Ups'];
+        return $this->tgroupInfo($tgroup)['upvote'];
     }
 
     public function totalDown(\Gazelle\TGroup $tgroup): int {
@@ -319,13 +310,17 @@ class Vote extends \Gazelle\BaseUser {
      * @return array (Ups, Total, Score)
      */
     public function tgroupInfo(\Gazelle\TGroup $tgroup): array {
-        $key = sprintf(self::VOTED_GROUP, $tgroup->id);
+        $key = sprintf(self::VOTED_TGROUP, $tgroup->id);
         $tgroupInfo = self::$cache->get_value($key);
         if ($tgroupInfo === false) {
-            $tgroupInfo = self::$db->rowAssoc("
-                SELECT Ups, `Total`, Score FROM torrents_votes WHERE GroupID = ?
+            $tgroupInfo = $this->pg()->rowAssocex("
+                select tvs.upvote,
+                    tvs.total,
+                    tvs.score
+                from tgroup_vote_summary tvs
+                where id_tgroup = $1
                 ", $tgroup->id
-            ) ?? ['Ups' => 0, 'Total' => 0, 'Score' => 0];
+            ) ?? ['upvote' => 0, 'total' => 0, 'score' => 0];
             self::$cache->cache_value($key, $tgroupInfo, 259200); // 3 days
         }
         return $tgroupInfo;
@@ -339,39 +334,35 @@ class Vote extends \Gazelle\BaseUser {
         $key = sprintf(self::VOTED_USER, $this->user->id);
         $votes = self::$cache->get_value($key);
         if ($votes === false) {
-            self::$db->prepared_query("
-                SELECT GroupID,
-                    CASE WHEN Type = 'Up' THEN 1 ELSE 0 END AS vote
-                FROM users_votes
-                WHERE UserID = ?
-                ", $this->user->id
+            $votes = $this->pg()->pair(
+                'id_tgroup',
+                'vote',
+                <<<END_SQL
+                    select id_tgroup,
+                        upvote
+                    from tgroup_vote
+                    where id_user = $1
+                END_SQL,
+                    $this->user->id
             );
-            $votes = self::$db->to_pair('GroupID', 'vote');
             self::$cache->cache_value($key, $votes, 86400);
         }
         return $votes;
     }
 
-    /**
-     * Calculate the binomial score given the total and upvotes.
-     * Implementation of the algorithm described at
-     *    http://www.evanmiller.org/how-not-to-sort-by-average-rating.html
-     *
-     * @return float score [0 <= x <= 1]
-     */
     public function score(\Gazelle\TGroup $tgroup): float {
-        return $this->calcScore($this->total($tgroup), $this->totalUp($tgroup));
+        return $this->summary($tgroup)[2];
     }
 
-    public function calcScore(int $total, int $ups): float {
-        if ($total <= 0 || $ups <= 0) {
-            return 0.0;
-        }
-        $phat = $ups / $total;
-        $numerator = $phat + self::Z_VAL * self::Z_VAL / (2 * $total)
-            - self::Z_VAL * sqrt(($phat * (1 - $phat) + self::Z_VAL * self::Z_VAL / (4 * $total)) / $total);
-        $denominator = 1 + self::Z_VAL * self::Z_VAL / $total;
-        return $numerator / $denominator;
+    protected function summary(\Gazelle\TGroup $tgroup): array {
+        return $this->pg()->rowex('
+            select total,
+                upvote,
+                score
+            from tgroup_vote_summary
+            where id_tgroup = $1
+            ', $tgroup->id
+        ) ?? [0, 0, 0.0];
     }
 
     /**
@@ -380,7 +371,7 @@ class Vote extends \Gazelle\BaseUser {
      * @return array [bool success, string reason]
      */
     public function upvote(\Gazelle\TGroup $tgroup): array {
-        return $this->castVote($tgroup, 1);
+        return $this->castVote($tgroup, true);
     }
 
     /**
@@ -389,18 +380,7 @@ class Vote extends \Gazelle\BaseUser {
      * @return array [bool success, string reason]
      */
     public function downvote(\Gazelle\TGroup $tgroup): array {
-        return $this->castVote($tgroup, -1);
-    }
-
-    protected function summary(\Gazelle\TGroup $tgroup): array {
-        [$total, $ups] = self::$db->row("
-            SELECT count(*) AS Total,
-                coalesce(sum(if(v.Type = 'Up', 1, 0)), 0) AS Ups
-            FROM users_votes AS v
-            WHERE v.GroupID = ?
-            ", $tgroup->id
-        );
-        return [$total, (int)$ups, $this->calcScore($total, (int)$ups)];
+        return $this->castVote($tgroup, false);
     }
 
     /**
@@ -408,15 +388,38 @@ class Vote extends \Gazelle\BaseUser {
      *
      * @return array [bool success, string reason]
      */
-    protected function castVote(\Gazelle\TGroup $tgroup, int $direction): array {
+    protected function castVote(\Gazelle\TGroup $tgroup, bool $upvote): array {
         if (isset($this->info()[$tgroup->id])) {
             return [false, 'already-voted'];
         }
-        $up = $direction === 1 ? 1 : 0;
+        $up = $upvote === true ? 1 : 0;
 
         // update db
-        self::$db->begin_transaction();
         $this->pg()->begin();
+        $this->pg()->query("
+            insert into tgroup_vote
+                   (id_tgroup, id_user, upvote)
+            values ($1,        $2,      $3)
+            on conflict (id_tgroup, id_user)
+                do nothing
+            ", $tgroup->id, $this->user->id, $upvote
+        );
+        $this->pg()->query("
+            delete from tgroup_vote_summary where id_tgroup = $1
+            ", $tgroup->id
+        );
+        $this->pg()->query("
+            insert into tgroup_vote_summary (id_tgroup, total, upvote)
+            select id_tgroup,
+                count(*),
+                sum(upvote::int)
+            from tgroup_vote
+            where id_tgroup = $1
+            group by id_tgroup
+            ", $tgroup->id
+        );
+        $this->pg()->commit();
+        self::$db->begin_transaction();
         self::$db->prepared_query("
             INSERT IGNORE INTO users_votes
                    (UserID, GroupID, upvote, Type)
@@ -434,33 +437,10 @@ class Vote extends \Gazelle\BaseUser {
                 Score = ?
             ", $tgroup->id, $ups, $score, $total, $ups, $score
         );
-        $this->pg()->query("
-            insert into tgroup_vote
-                   (id_tgroup, id_user, upvote)
-            values ($1,        $2,      $3)
-            on conflict (id_tgroup, id_user)
-                do nothing
-            ", $tgroup->id, $this->user->id, $up
-        );
-        $this->pg()->query("
-            delete from tgroup_vote_summary where id_tgroup = $1
-            ", $tgroup->id
-        );
-        $this->pg()->query("
-            insert into tgroup_vote_summary (id_tgroup, total, upvote)
-            select id_tgroup,
-                count(*),
-                sum(case when upvote is true then 1 else 0 end)
-            from tgroup_vote
-            where id_tgroup = $1
-            group by id_tgroup
-            ", $tgroup->id
-        );
-        $this->pg()->commit();
         self::$db->commit();
 
         // update cache
-        $this->info[$tgroup->id] = $direction;
+        $this->info[$tgroup->id] = $upvote;
         self::$cache->cache_value(sprintf(self::VOTE_USER_KEY, $this->user->id), $this->info, 259200); // 3 days
         $this->tgroupFlush($tgroup);
 
@@ -475,6 +455,29 @@ class Vote extends \Gazelle\BaseUser {
             return [false, 'not-voted'];
         }
 
+        $this->pg()->begin();
+        $this->pg()->query('
+            delete from tgroup_vote
+            where id_tgroup = $1
+                and id_user = $2
+            ', $tgroup->id, $this->user->id
+        );
+        $this->pg()->query('
+            delete from tgroup_vote_summary
+            where id_tgroup = $1
+            ', $tgroup->id
+        );
+        $this->pg()->query("
+            insert into tgroup_vote_summary (id_tgroup, total, upvote)
+            select id_tgroup,
+                count(*),
+                sum(upvote::int)
+            from tgroup_vote
+            where id_tgroup = $1
+            group by id_tgroup
+            ", $tgroup->id
+        );
+        $this->pg()->commit();
         self::$db->begin_transaction();
         self::$db->prepared_query("
             DELETE FROM users_votes
@@ -500,22 +503,24 @@ class Vote extends \Gazelle\BaseUser {
         return [true, 'cleared'];
     }
 
-    public function recent(\Gazelle\Manager\TGroup $tgMan): array {
+    public function recent(
+        \Gazelle\Manager\TGroup $tgMan = new \Gazelle\Manager\TGroup()
+    ): array {
         $key = sprintf(self::VOTE_RECENT, $this->user->id);
         $recent = self::$cache->get_value($key);
         if ($recent === false) {
-            self::$db->prepared_query("
-                SELECT tg.ID AS group_id,
-                    if(uv.Type = 'Up', 1, 0) AS upvote
-                FROM users_votes uv
-                INNER JOIN torrents_group tg ON (tg.ID = uv.GroupID)
-                WHERE tg.WikiImage != ''
-                    AND uv.UserID = ?
-                ORDER BY uv.Time DESC
-                LIMIT 5
-                ", $this->user->id
+            $recent = $this->pg()->allex(<<<END_SQL
+                select tv.id_tgroup as group_id,
+                    tv.upvote
+                from tgroup_vote tv
+                inner join relay.torrents_group tg ON (tg."ID" = tv.id_tgroup)
+                where tg."WikiImage" != ''
+                    and tv.id_user = $1
+                order by tv.created desc
+                limit 5
+                END_SQL,
+                    $this->user->id
             );
-            $recent = self::$db->to_array(false, MYSQLI_ASSOC);
             self::$cache->cache_value($key, $recent, 0);
         }
         foreach ($recent as &$r) {
@@ -529,10 +534,14 @@ class Vote extends \Gazelle\BaseUser {
             $key = sprintf(self::VOTE_TOTAL, $this->user->id);
             $voteSummary = self::$cache->get_value($key);
             if ($voteSummary === false) {
-                $voteSummary = self::$db->rowAssoc("
-                    SELECT count(*) AS total, coalesce(sum(Type='Up'), 0) AS up FROM users_votes WHERE UserID = ?
-                    ", $this->user->id
-                );
+                $voteSummary = $this->pg()->rowAssocex(<<<END_SQL
+                    select count(*) AS total,
+                        sum(upvote::int) as up
+                    from tgroup_vote
+                    where id_user = $1
+                    END_SQL,
+                        $this->user->id
+                ) ?? ['total' => 0, 'upvote' => 0];
                 self::$cache->cache_value($key, $voteSummary, 0);
             }
             $this->voteSummary = $voteSummary;
@@ -545,26 +554,29 @@ class Vote extends \Gazelle\BaseUser {
     }
 
     public function userPage(\Gazelle\Manager\TGroup $tgMan, int $mask, int $limit, int $offset): array {
-        $cond = ['UserID = ?'];
-        $args = [$this->user->id];
+        $args   = [];
+        $cond   = ["id_user = {$this->pg()->placeholder(count($args))}"];
+        $args[] = $this->user->id;
         if ($mask === self::UPVOTE) {
-            $cond[] = 'Type = ?';
-            $args[] = 'Up';
+            $cond[] = 'upvote is true';
         } elseif ($mask === self::DOWNVOTE) {
-            $cond[] = 'Type = ?';
-            $args[] = 'Down';
+            $cond[] = 'upvote is false';
         }
-        array_push($args, $limit, $offset);
-        self::$db->prepared_query("
-            SELECT GroupID AS group_id,
-                if(Type = 'Up', 1, 0) AS upvote
-            FROM users_votes
-            WHERE " . implode(' AND ', $cond) . "
-            ORDER BY Time DESC
-            LIMIT ? OFFSET ?
-            ", ...$args
+        $limitClause = "limit {$this->pg()->placeholder(count($args))}";
+        $args[] = $limit;
+        $offsetClause = "offset {$this->pg()->placeholder(count($args))}";
+        $args[] = $offset;
+        $where  = "where " . implode(' and ', $cond);
+        $page   = $this->pg()->allex(<<<END_SQL
+            select id_tgroup as group_id,
+                upvote::int as upvote
+            from tgroup_vote
+            $where
+            order by created desc
+            $limitClause $offsetClause
+            END_SQL,
+                ...$args
         );
-        $page =  self::$db->to_array(false, MYSQLI_ASSOC);
         foreach ($page as &$p) {
             $p['tgroup'] = $tgMan->findById($p['group_id']);
         }

@@ -12,11 +12,10 @@ class Vote extends \Gazelle\Base {
         User   $userManager = new User(),
     ): int {
         // Get a list of everybody who voted on either group to clear their cache keys
-        self::$db->prepared_query("
-            SELECT UserID FROM users_votes WHERE GroupID IN (?, ?)
-            ", $old->id, $new->id
+        $userIdList = $this->pg()->columnex('
+            select id_user from tgroup_vote where id_tgroup in ($1, $2)
+            ', $old->id, $new->id
         );
-        $userIdList = self::$db->collect(0);
 
         self::$db->begin_transaction();
         $this->pg()->begin();

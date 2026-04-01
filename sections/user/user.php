@@ -294,7 +294,7 @@ if ($user->propertyVisible($Viewer, 'uploads')) {
 
 if ($OwnProfile || !$user->hasAttr('hide-vote-recent') || $Viewer->permitted('view-release-votes')) {
     echo $Twig->render('user/recent-vote.twig', [
-        'recent'    => $vote->recent($tgMan),
+        'recent'    => $vote->recent(),
         'show_link' => $OwnProfile || !$user->hasAttr('hide-vote-history') || $Viewer->permitted('view-release-votes'),
         'user_id'   => $userId,
     ]);

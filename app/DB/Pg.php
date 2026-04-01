@@ -209,6 +209,14 @@ class Pg {
         return $this->executeParams($query, ...$args)->fetchColumn(0);
     }
 
+    public function pair(string $key, string $value, string $query, ...$args): array {
+        $list = [];
+        foreach ($this->allex($query, ...$args) as $row) {
+            $list[$row[$key]] = $row[$value];
+        }
+        return $list;
+    }
+
     // **************************** PDO methods **********************************
 
     public function prepare(string $query): \PDOStatement {

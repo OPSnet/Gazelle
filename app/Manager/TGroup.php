@@ -5,7 +5,7 @@ namespace Gazelle\Manager;
 class TGroup extends \Gazelle\BaseManager {
     final public const ID_KEY = 'zz_tg_%d';
 
-    protected const VOTE_SIMILAR = 'vote_similar_albums_%d';
+    protected const VOTE_SIMILAR = 'tg_sim_%d';
 
     public function create(
         int     $categoryId,
@@ -259,24 +259,22 @@ class TGroup extends \Gazelle\BaseManager {
         $key = sprintf(self::VOTE_SIMILAR, $tgroup->id);
         $similar = self::$cache->get_value($key);
         if ($similar === false || !isset($similar[$tgroup->id])) {
-            self::$db->prepared_query("
-                SELECT v.GroupID
-                FROM (
-                    SELECT UserID
-                    FROM users_votes
-                    WHERE Type = 'Up' AND GroupID = ?
-                ) AS a
-                INNER JOIN users_votes AS v USING (UserID)
-                WHERE v.GroupID != ?
-                GROUP BY v.GroupID
-                HAVING sum(if(v.Type = 'Up', 1, 0)) > 0
-                    AND binomial_ci(sum(if(v.Type = 'Up', 1, 0)), count(*)) > 0.3
-                ORDER BY binomial_ci(sum(if(v.Type = 'Up', 1, 0)), count(*)),
-                    count(*) DESC
-                LIMIT 10
-                ", $tgroup->id, $tgroup->id
+            $similar = $this->pg()->columnex('
+                select tvs.id_tgroup
+                from tgroup_vote_summary tvs
+                inner join tgroup_vote tv using (id_tgroup)
+                where tv.id_tgroup != $1
+                    and tvs.score > 0.3125
+                    and tv.id_user in (
+                        select tv.id_user
+                        from tgroup_vote tv
+                        where tv.id_tgroup = $1
+                    )
+                group by tvs.id_tgroup
+                order by tvs.score desc
+                limit 10
+                ', $tgroup->id
             );
-            $similar = self::$db->collect(0);
             self::$cache->cache_value($key, $similar, 3600);
         }
         $list = [];
