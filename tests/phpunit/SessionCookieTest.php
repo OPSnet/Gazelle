@@ -30,6 +30,31 @@ class SessionCookieTest extends TestCase {
         $this->assertEquals($this->user->id, $new->userId(), 'cookie-regenerate');
     }
 
+    public function testLoginCookie(): void {
+        $session = $this->user->session()->create([
+            'keep-logged' => '0',
+            'browser'     => [
+               'Browser'                => 'phpunit-browser',
+               'BrowserVersion'         => '1.1',
+               'OperatingSystem'        => 'phpunit-os',
+               'OperatingSystemVersion' => '2.2',
+            ],
+            'ipaddr'    => '127.0.0.1',
+            'useragent' => 'phpunit-browser',
+        ]);
+        $cookie = new SessionCookie(
+            SessionCookie::encode(
+                $this->user,
+                $session['SessionID'],
+            )
+        );
+        $this->assertEquals(
+            $this->user->id,
+            new Manager\User()->findByCookie($cookie)->id,
+            'cookie-find-user'
+        );
+    }
+
     public function testGarbageSessionCookie(): void {
         $cookie = new SessionCookie('');
         $this->assertFalse($cookie->isValid(), 'cookie-session-invalid');

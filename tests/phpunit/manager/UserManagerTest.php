@@ -30,6 +30,53 @@ class UserManagerTest extends TestCase {
         }
     }
 
+    public function testUserMagicFind(): void {
+        $manager = new Manager\User();
+        $user    = $this->userList[2];
+        $this->assertEquals(
+            $user->id,
+            $manager->find($user->id)->id,
+            'uman-find-id'
+        );
+        $this->assertEquals(
+            $user->id,
+            $manager->find('@' . $user->username())->id,
+            'uman-find-username'
+        );
+        $this->assertNull(
+            $manager->find($user->id + 1),
+            'uman-find-no-id'
+        );
+        $this->assertNull(
+            $manager->find('@' . $user->username() . $user->username()),
+            'uman-find-no-username'
+        );
+        $this->assertNull(
+            $manager->find($user->username()),
+            'uman-find-no-at'
+        );
+    }
+
+    public function testUserFindCustomPriv(): void {
+        $user      = $this->userList[1];
+        $privilege = 'site_view_torrent_snatchlist';
+        $user->privilege()->modifyCustomList([$privilege => true]);
+        $this->assertContains(
+            $user->id,
+            array_keys(new Manager\User()->findAllByCustomPermission()),
+            'uman-find-all-custom'
+        );
+    }
+
+    public function testUserEmailFind(): void {
+        $manager = new Manager\User();
+        $this->assertEquals(
+            $this->userList[0]->id,
+            $manager->findByEmail($this->userList[0]->email())->id,
+            'uman-find-by-email'
+        );
+    }
+
     public function testCycleAuthKeys(): void {
         $this->assertEquals(
             (int)DB::DB()->scalar("
@@ -41,12 +88,12 @@ class UserManagerTest extends TestCase {
     }
 
     public function testDisableUserList(): void {
-        $userMan = new Manager\User();
+        $manager = new Manager\User();
         $idList  = array_map(fn ($u) => $u->id, $this->userList);
 
         $this->assertEquals(
             3,
-            $userMan->disableUserList(
+            $manager->disableUserList(
                 $idList,
                 UserAuditEvent::activity,
                 'phpunit mass disable',
@@ -61,44 +108,61 @@ class UserManagerTest extends TestCase {
     }
 
     public function testDisplayUsername(): void {
-        $userMan = new Manager\User();
+        $manager = new Manager\User();
         $this->userList[1]->privilege()->addSecondaryClass(FLS_TEAM);
         $this->userList[2]->setField('Enabled', UserStatus::disabled->value)->modify();
 
         $this->assertEquals(
             "<a href=\"user.php?id={$this->userList[1]->id}\">{$this->userList[1]->username()}</a>",
-            $userMan->displayUsername($this->userList[1]->id, $this->userList[0]),
+            $manager->displayUsername($this->userList[1]->id, $this->userList[0]),
             'uman-display-user-short'
         );
         $this->assertEquals(
             "<a class=\"username\" href=\"user.php?id={$this->userList[1]->id}\">{$this->userList[1]->username()}</a>&nbsp;<span class=\"tooltip secondary_class\" title=\"First Line Support\">FLS</span> (User)",
-            $userMan->displayUsername($this->userList[1]->id, $this->userList[0], true),
+            $manager->displayUsername($this->userList[1]->id, $this->userList[0], true),
             'uman-display-user-secondary'
         );
         $this->assertEquals(
             "<a class=\"username\" href=\"user.php?id={$this->userList[2]->id}\">{$this->userList[2]->username()}</a><a href=\"rules.php\"><img loading=\"lazy\" class=\"tooltip\" src=\""
                 . STATIC_SERVER
                 . "/common/symbols/disabled.png\" alt=\"Banned\" title=\"Disabled\" /></a> (User)",
-            $userMan->displayUsername($this->userList[2]->id, $this->userList[0], true),
+            $manager->displayUsername($this->userList[2]->id, $this->userList[0], true),
             'uman-display-user-disabled'
+        );
+        $this->assertEquals(
+            "System",
+            $manager->displayUsername(0, $this->userList[0]),
+            'uman-display-system'
+        );
+        $this->assertEquals(
+            "[Unknown]",
+            $manager->displayUsername((int)$this->userList[2]->id + 100, $this->userList[0]),
+            'uman-display-404'
+        );
+        $this->userList[2]->setField('PermissionID', SYSOP)->modify();
+        $id404 = (int)$this->userList[2]->id + 100;
+        $this->assertEquals(
+            "[Unknown $id404]",
+            $manager->displayUsername($id404, $this->userList[2]),
+            'uman-display-staff-404'
         );
     }
 
     public function testModifyUserAttr(): void {
-        $userMan = new Manager\User();
+        $manager = new Manager\User();
         $idList  = array_map(fn ($u) => $u->id, $this->userList);
         $this->assertFalse($this->userList[0]->hasAttr('hide-tags'), 'uman-attr-no-attr');
 
-        $this->assertEquals(3, $userMan->modifyAttr($idList, 'hide-tags', true), 'uman-attr-modify');
+        $this->assertEquals(3, $manager->modifyAttr($idList, 'hide-tags', true), 'uman-attr-modify');
         $this->assertTrue($this->userList[0]->flush()->hasAttr('hide-tags'), 'uman-attr-has-attr');
     }
 
     public function testModifyUserMassToken(): void {
-        $userMan = new Manager\User();
+        $manager = new Manager\User();
         array_map(fn ($u) => $u->id, $this->userList);
         $this->assertEquals(0, $this->userList[0]->tokenCount(), 'uman-masstoken-initial');
 
-        $userMan->addMassTokens(10, allowLeechDisabled: false);
+        $manager->addMassTokens(10, allowLeechDisabled: false);
         foreach ($this->userList as $user) {
             $user->flush();
         }
@@ -107,7 +171,7 @@ class UserManagerTest extends TestCase {
         $this->assertEquals(10, $this->userList[2]->tokenCount(), 'uman-masstoken-add-all-2');
 
         $this->userList[0]->setField('can_leech', 0)->modify();
-        $userMan->addMassTokens(15, allowLeechDisabled: false);
+        $manager->addMassTokens(15, allowLeechDisabled: false);
         foreach ($this->userList as $user) {
             $user->flush();
         }
@@ -116,7 +180,7 @@ class UserManagerTest extends TestCase {
         $this->assertEquals(25, $this->userList[2]->tokenCount(), 'uman-masstoken-add-more-2');
 
         $this->userList[1]->toggleAttr('no-fl-gifts', true);
-        $userMan->addMassTokens(12, allowLeechDisabled: false);
+        $manager->addMassTokens(12, allowLeechDisabled: false);
         foreach ($this->userList as $user) {
             $user->flush();
         }
@@ -124,7 +188,7 @@ class UserManagerTest extends TestCase {
         $this->assertEquals(25, $this->userList[1]->tokenCount(), 'uman-masstoken-add-fl-1');
         $this->assertEquals(37, $this->userList[2]->tokenCount(), 'uman-masstoken-add-fl-2');
 
-        $userMan->addMassTokens(11, allowLeechDisabled: true);
+        $manager->addMassTokens(11, allowLeechDisabled: true);
         foreach ($this->userList as $user) {
             $user->flush();
         }
@@ -134,7 +198,7 @@ class UserManagerTest extends TestCase {
 
         $this->assertEquals(
             1,
-            $userMan->disableUserList(
+            $manager->disableUserList(
                 [$this->userList[2]->id],
                 UserAuditEvent::activity,
                 'phpunit fltoken',
@@ -142,7 +206,7 @@ class UserManagerTest extends TestCase {
             ),
             'uman-masstoken-disable'
         );
-        $userMan->clearMassTokens(18, allowLeechDisabled: false, excludeDisabled: true);
+        $manager->clearMassTokens(18, allowLeechDisabled: false, excludeDisabled: true);
         foreach ($this->userList as $user) {
             $user->flush();
         }
@@ -150,7 +214,7 @@ class UserManagerTest extends TestCase {
         $this->assertEquals(18, $this->userList[1]->tokenCount(), 'uman-masstoken-clear-1');
         $this->assertEquals(48, $this->userList[2]->tokenCount(), 'uman-masstoken-clear-2');
 
-        $userMan->clearMassTokens(17, allowLeechDisabled: true, excludeDisabled: false);
+        $manager->clearMassTokens(17, allowLeechDisabled: true, excludeDisabled: false);
         foreach ($this->userList as $user) {
             $user->flush();
         }
@@ -158,7 +222,7 @@ class UserManagerTest extends TestCase {
         $this->assertEquals(17, $this->userList[1]->tokenCount(), 'uman-masstoken-clear2-1');
         $this->assertEquals(48, $this->userList[2]->tokenCount(), 'uman-masstoken-clear2-2');
 
-        $userMan->clearMassTokens(16, allowLeechDisabled: false, excludeDisabled: false);
+        $manager->clearMassTokens(16, allowLeechDisabled: false, excludeDisabled: false);
         foreach ($this->userList as $user) {
             $user->flush();
         }
@@ -166,7 +230,7 @@ class UserManagerTest extends TestCase {
         $this->assertEquals(16, $this->userList[1]->tokenCount(), 'uman-masstoken-clear3-1');
         $this->assertEquals(48, $this->userList[2]->tokenCount(), 'uman-masstoken-clear3-2');
 
-        $userMan->clearMassTokens(15, allowLeechDisabled: true, excludeDisabled: true);
+        $manager->clearMassTokens(15, allowLeechDisabled: true, excludeDisabled: true);
         foreach ($this->userList as $user) {
             $user->flush();
         }
@@ -176,7 +240,7 @@ class UserManagerTest extends TestCase {
     }
 
     public function testUserRatioWatch(): void {
-        $userMan = new Manager\User();
+        $manager = new Manager\User();
         $this->userList[] = Helper::makeUser('um4.' . randomString(10), 'userman', enable: true, clearInbox: true);
         $user = $this->userList[0];
         $this->assertFalse($user->onRatioWatch(), 'utest-personal-on-ratio-watch');
@@ -199,7 +263,7 @@ class UserManagerTest extends TestCase {
             VALUES " . placeholders($idList, '(?, 1, unix_timestamp(now()), 259200)') . "
             ", ...$idList
         );
-        $result = $userMan->updateRatioRequirements();
+        $result = $manager->updateRatioRequirements();
         $this->assertCount(29, $result, 'uman-ratiowatch-update');
         $this->assertGreaterThanOrEqual(
             count($idList),
@@ -208,12 +272,12 @@ class UserManagerTest extends TestCase {
         );
         $this->assertEquals(
             $idList,
-            $userMan->ratioWatchSetList(),
+            $manager->ratioWatchSetList(),
             'uman-ratiowatch-set-list',
         );
         $this->assertEquals(
             count($idList),
-            $userMan->ratioWatchSet(),
+            $manager->ratioWatchSet(),
             'uman-ratiowatch-set-action',
         );
         foreach ($this->userList as $user) {
@@ -250,8 +314,8 @@ class UserManagerTest extends TestCase {
             ", $GiB50, $GiB50, $this->userList[0]->id
         );
         $this->userList[0]->flush();
-        $this->assertEquals([$this->userList[0]->id], $userMan->ratioWatchBlockList(), 'uman-ratiowatch-block-list');
-        $this->assertEquals(1, $userMan->ratioWatchBlock(), 'uman-ratiowatch-do-block');
+        $this->assertEquals([$this->userList[0]->id], $manager->ratioWatchBlockList(), 'uman-ratiowatch-block-list');
+        $this->assertEquals(1, $manager->ratioWatchBlock(), 'uman-ratiowatch-do-block');
         $this->userList[0]->flush();
 
         $receiver = $this->userList[0]->inbox();
@@ -281,9 +345,9 @@ class UserManagerTest extends TestCase {
         }
 
         // user[1] is cleared
-        $this->assertEquals([$this->userList[1]->id], $userMan->ratioWatchClearList(), 'uman-ratiowatch-clear-list');
-        $this->assertEquals(1, $userMan->ratioWatchClear(), 'uman-ratiowatch-do-clear');
-        $this->assertEquals(0, $userMan->ratioWatchClear(), 'uman-ratiowatch-reprocess-clear');
+        $this->assertEquals([$this->userList[1]->id], $manager->ratioWatchClearList(), 'uman-ratiowatch-clear-list');
+        $this->assertEquals(1, $manager->ratioWatchClear(), 'uman-ratiowatch-do-clear');
+        $this->assertEquals(0, $manager->ratioWatchClear(), 'uman-ratiowatch-reprocess-clear');
         $this->userList[1]->flush();
 
         $receiver = $this->userList[1]->inbox();
@@ -301,9 +365,9 @@ class UserManagerTest extends TestCase {
         );
 
         // user[2] did nothing, loses download privileges
-        $this->assertEquals([$this->userList[2]->id], $userMan->ratioWatchEngageList(), 'uman-ratiowatch-engage-list');
-        $this->assertEquals(1, $userMan->ratioWatchEngage(), 'uman-ratiowatch-do-engage');
-        $this->assertEquals(0, $userMan->ratioWatchEngage(), 'uman-ratiowatch-reprocess-engage');
+        $this->assertEquals([$this->userList[2]->id], $manager->ratioWatchEngageList(), 'uman-ratiowatch-engage-list');
+        $this->assertEquals(1, $manager->ratioWatchEngage(), 'uman-ratiowatch-do-engage');
+        $this->assertEquals(0, $manager->ratioWatchEngage(), 'uman-ratiowatch-reprocess-engage');
         $this->userList[2]->flush();
 
         $receiver = $this->userList[2]->inbox();
@@ -319,10 +383,10 @@ class UserManagerTest extends TestCase {
     }
 
     public function testSendCustomPM(): void {
-        $userMan = new Manager\User();
+        $manager = new Manager\User();
         $this->assertEquals(
             2,
-            $userMan->sendCustomPM(
+            $manager->sendCustomPM(
                 $this->userList[0],
                 'phpunit sendCustomPMTest',
                 'phpunit sendCustomPMTest %USERNAME% message',
@@ -352,36 +416,74 @@ class UserManagerTest extends TestCase {
     }
 
     public function testUserclassFlush(): void {
-        $userMan = new Manager\User();
+        $manager = new Manager\User();
         $administratorId = (int)current(array_filter(
-            $userMan->classList(),
+            $manager->classList(),
             fn ($class) => $class['Name'] == 'Administrator'
         ))['ID'];
         $alphaTeamId = (int)current(
-            array_filter($userMan->classList(),
+            array_filter($manager->classList(),
             fn ($class) => $class['Name'] == 'Alpha Team'
         ))['ID'];
 
         $this->userList[0]->addClasses([$administratorId]);
         $this->userList[1]->addClasses([$alphaTeamId]);
-        $this->assertEquals(1, $userMan->flushUserclass($administratorId), 'uman-flush-userclass-administrator');
-        $this->assertEquals(1, $userMan->flushUserclass($alphaTeamId), 'uman-flush-userclass-alphateam');
+        $this->assertEquals(1, $manager->flushUserclass($administratorId), 'uman-flush-userclass-administrator');
+        $this->assertEquals(1, $manager->flushUserclass($alphaTeamId), 'uman-flush-userclass-alphateam');
+
+        $classLevelList = $manager->classLevelList();
+        $this->assertCount(27, $classLevelList, 'uman-classlevel-total');
+        $this->assertEqualsCanonicalizing(
+            ['ID', 'Name', 'Level', 'Secondary', 'badge'],
+            array_keys($classLevelList[100]),
+            'uman-classlevel-total',
+        );
     }
 
     public function testUserflow(): void {
-        $userflow = new Manager\User()->userflow();
+        global $Cache;
+        $Cache->delete_value(Manager\User::USERFLOW_KEY);
+        $manager  = new Manager\User();
+        $userflow = $manager->userflow();
         $this->assertGreaterThanOrEqual(0, count($userflow), 'uman-userflow-is-array');
         $recent = end($userflow);
         $this->assertGreaterThanOrEqual(0, count($recent), 'uman-userflow-recent-is-array');
         $this->assertEquals(['Week', 'created', 'disabled'], array_keys($recent), 'userman-recent-keys');
+        $this->assertGreaterThan(
+            0,
+            $manager->userflowTotal(),
+            'uman-userflow-total'
+        );
+        $details = $manager->userflowDetails(1, 0);
+        $this->assertCount(1, $details, 'uman-userflow-details-count');
+        $this->assertEqualsCanonicalizing(
+            ["date", "month", "created", "manual", "ratio", "inactivity"],
+            array_keys($details[0]),
+            'uman-userflow-details-keys'
+        );
     }
 
-    public function testUserFind(): void {
+    public function testUserStaffList(): void {
         $manager = new Manager\User();
-        $this->assertInstanceOf(
-            User::class,
-            $manager->findByEmail($this->userList[0]->email()),
-            'userman-find-by-email'
+        $this->userList[1]->privilege()->addSecondaryClass(FLS_TEAM);
+        $this->userList[2]->setField('PermissionID', SYSOP)->modify();
+        global $Cache;
+        $Cache->delete_multi(['idfls', 'staff_class']);
+
+        $this->assertContains(
+            $this->userList[1]->id,
+            array_map(fn ($u) => $u->id, $manager->flsList()),
+            'uman-fls-list'
+        );
+        $this->assertContains(
+            $this->userList[2]->id,
+            array_map(fn ($u) => $u->id, $manager->staffList()),
+            'uman-staff-list'
+        );
+        $this->assertEqualsCanonicalizing(
+            ['Forum Moderator', 'Moderator', 'Administrator', 'Sysop'],
+            array_column($manager->staffClassList(), 'Name'),
+            'uman-staff-class-list',
         );
     }
 }

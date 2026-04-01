@@ -19,9 +19,8 @@ class User extends \Gazelle\BaseManager {
     final public const DISABLE_TOR        = 2;
     final public const DISABLE_INACTIVITY = 3;
     final public const DISABLE_TREEBAN    = 4;
-
-    final protected const CACHE_STAFF  = 'pm_staff_list';
-    final protected const USERFLOW_KEY = 'uflow';
+    final public const USERFLOW_KEY       = 'uflow';
+    final public const CACHE_STAFF        = 'pm_staff_list';
 
     /**
      * Get a User object based on a magic field (id or @name)
@@ -339,7 +338,8 @@ class User extends \Gazelle\BaseManager {
      * @return array id => \Gazelle\User
      */
     public function flsList() {
-        if (($list = self::$cache->get_value('idfls')) === false) {
+        $list = self::$cache->get_value('idfls');
+        if ($list === false) {
             self::$db->prepared_query("
                 SELECT um.ID
                 FROM users_main AS um
@@ -351,11 +351,7 @@ class User extends \Gazelle\BaseManager {
             $list = self::$db->collect(0);
             self::$cache->cache_value('idfls', $list, 3600);
         }
-        $fls = [];
-        foreach ($list as $id) {
-            $fls[$id] = $this->findById($id);
-        }
-        return $fls;
+        return array_map(fn ($id) => $this->findById($id), $list);
     }
 
     /**
@@ -372,11 +368,7 @@ class User extends \Gazelle\BaseManager {
             ", FORUM_MOD
         );
         $list = self::$db->collect(0);
-        $staff = [];
-        foreach ($list as $id) {
-            $staff[$id] = $this->findById($id);
-        }
-        return $staff;
+        return array_map(fn ($id) => $this->findById($id), $list);
     }
 
     /**
