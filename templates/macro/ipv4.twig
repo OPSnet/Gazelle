@@ -2,7 +2,9 @@
     {% if n %}{{n}} / {{ name }}{% else %}{{ name }}{% endif %}
 {%- endmacro -%}
 
-{%- macro ip_search(ip) -%}
+{%- macro ip_search(ip, withTracker = false) -%}
     <a href="https://whatismyipaddress.com/ip/{{ ip }}" title="whatismyipaddress.com" class="brackets tooltip"><span class="wimia">WI</span></a>
-    <a href="tools.php?action=ip_search&amp;ip={{ ip }}">{{ ip }}</a>
+    <a href="tools.php?action=bulk_search&amp;column=2
+        {%- if withTracker %}&amp;use_tracker_ips=1{% endif %}&amp;text={{ ip -}}
+        &amp;auth={{ get_viewer().auth }}">{{ ip }}</a>
 {%- endmacro -%}

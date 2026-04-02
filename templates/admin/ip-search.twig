@@ -115,7 +115,7 @@
 <tbody>
     {% endif %}
     <tr>
-    <td{% if r.is_tor %} class="tor"{% endif %}>{{ ip_search(r.ipv4) }}</td>
+    <td{% if r.is_tor %} class="tor"{% endif %}>{{ ip_search(r.ipv4, true) }}</td>
     <td>{{ r.cc }}</td>
     <td>{{ r.first_seen }}</td>
     <td>{{ r.last_seen }}</td>

@@ -96,7 +96,7 @@ class IPv4 extends \Gazelle\Base {
     }
 
     public function siteTotal(): int {
-        return (int)$this->pg()->scalarex("
+        return (int)$this->pg()->scalar("
             select count(distinct id_user)
             from ip_site_history ih
             inner join {$this->name} s on (s.addr = ih.ip)

@@ -61,7 +61,7 @@
             <td>
 {%-  if user %}
 {{  r.ip }} <span class="resolve-ipv4" data-ip="{{ r.ip }}">Resolving...</span> ({{
-                resolveCountryIpv4(r.ip) }}) {{ ip_search(r.ip) }}
+                resolveCountryIpv4(r.ip) }}) {{ ip_search(r.ip, true) }}
 {%  else %}
             <a href="{{ urlstem }}userid={{ r.uid }}">{{ r.username }}</a>
 {%  endif -%}

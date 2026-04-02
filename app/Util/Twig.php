@@ -258,6 +258,8 @@ class Twig {
             return $base;
         }));
 
+        $twig->addFunction(new \Twig\TwigFunction('get_viewer', fn () => self::$viewer));
+
         $twig->addFunction(new \Twig\TwigFunction('donor_icon', fn ($icon) => image_cache_encode($icon)));
 
         $twig->addFunction(new \Twig\TwigFunction('ipaddr', fn (string $ipaddr) => new \Twig\Markup(

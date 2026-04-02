@@ -172,13 +172,11 @@
 {%      endif %}
         </td>
         <td style="vertical-align: top">
-            <a href="userhistory.php?action=ips&amp;userid{{ user.id }}" title="IP History" class="brackets tooltip">H</a>
-            <a href="user.php?action=search&amp;ip_history=on&amp;ip={{ user.ipaddr }}" title="IP Search" class="brackets tooltip">S</a>
+            <a href="userhistory.php?action=ips&amp;userid={{ user.id }}" title="IP History" class="brackets tooltip">H</a>
             {{ ip_search(user.ipaddr) }}
 {%      if user.inviter.id and user.inviter.ipaddr != user.ipaddr %}
             <br>
             <a href="userhistory.php?action=ips&amp;userid={{ user.inviter.id }}" title="IP History" class="brackets tooltip">H</a>
-            <a href="user.php?action=search&amp;ip_history=on&amp;ip={{ user.inviter.ipaddr }}" title="IP Search" class="brackets tooltip">S</a>
             {{ ip_search(user.inviter.ipaddr) }}
 {%      endif %}
         </td>

@@ -44,7 +44,7 @@
 {% include 'admin/user-info-email.twig' with {'info': hist.email(asn),     'title': 'Email History' } only %}
 {% include 'admin/user-info-ip.twig'    with {'info': hist.siteIP(asn),    'title': 'Site IP History' } only %}
 {% include 'admin/user-info-ip.twig'    with {'info': hist.apiIP(asn),     'title': 'API IP History' } only %}
-{% include 'admin/user-info-ip.twig'    with {'info': hist.trackerIP(asn), 'title': 'Tracker IP History' } only %}
+{% include 'admin/user-info-ip.twig'    with {'info': hist.trackerIP(asn), 'title': 'Tracker IP History', 'withTracker': true } only %}
 
 </table>
 </div>
