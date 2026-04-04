@@ -99,7 +99,7 @@
 {{      report.reporterId|user_url }} <a href="{{ report.url|raw }}">reported it</a>
 {%  else -%}
         Someone reported it
-{%  endif %} {{ report.created|time_diff(1) }} for the reason <b>{{ report.reportType.name }}</b>
+{%  endif %} {{ report.created|date('Y-m-d H:i:s')|time_diff(1) }} for the reason <b>{{ report.reportType.name }}</b>
                 <blockquote>{{ report.reason|bb_format }}</blockquote>
             </td>
         </tr>

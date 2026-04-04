@@ -8,7 +8,7 @@
         <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
             <td width="15%">
                 <div id="report-{{ report.id }}-metadata">
-                    <a href='{{ report.location }}'>{{ report.created|time_diff(1) }}</a><br>
+                    <a href='{{ report.location }}'>{{ report.created|date('Y-m-d H:i:s')|time_diff(1) }}</a><br>
 {%  if report.status == "New" %}<b>{% endif %}
                     {{- report.status -}}
 {%  if report.status == "New" -%}</b>{% endif %}

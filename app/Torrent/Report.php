@@ -30,26 +30,27 @@ class Report extends \Gazelle\BaseObject {
     }
 
     public function info(): array {
-        return $this->info ??= self::$db->rowAssoc("
-            SELECT r.ReporterID  AS reporter_id,
-                r.ResolverID     AS resolver_id,
-                r.TorrentID      AS torrent_id,
-                r.Type           AS type,
-                r.ModComment     AS comment,
-                r.UserComment    AS reason,
-                r.Status         AS status,
-                r.ReportedTime   AS created,
-                r.LastChangeTime AS modified,
-                r.Track          AS track_list,
-                r.Image          AS image,
-                r.ExtraID        AS other_id,
-                r.Link           AS external_link,
-                r.LogMessage     AS message,
+        return $this->info ??= $this->pg()->rowAssocex(<<<END_SQL
+            select r."ReporterID"  as reporter_id,
+                r."ResolverID"     as resolver_id,
+                r."TorrentID"      as torrent_id,
+                r."Type"           as type,
+                r."ModComment"     as comment,
+                r."UserComment"    as reason,
+                r."Status"         as status,
+                r."ReportedTime"   as created,
+                r."LastChangeTime" as modified,
+                r."Track"          as track_list,
+                r."Image"          as image,
+                r."ExtraID"        as other_id,
+                r."Link"           as external_link,
+                r."LogMessage"     as message,
                 trc.name
-            FROM reportsv2 r
-            INNER JOIN torrent_report_configuration trc ON (trc.type = r.Type)
-            WHERE r.ID = ?
-            ", $this->id
+            from relay.reportsv2 r
+            inner join torrent_report_configuration trc ON (trc.type = r."Type")
+            where r."ID" = $1
+            END_SQL,
+                $this->id
         );
     }
 
@@ -57,7 +58,7 @@ class Report extends \Gazelle\BaseObject {
         return $this->info()['comment'];
     }
 
-    public function created(): string {
+    public function created(): \DateTimeImmutable {
         return $this->info()['created'];
     }
 
@@ -81,7 +82,7 @@ class Report extends \Gazelle\BaseObject {
         return $this->info()['message'];
     }
 
-    public function modified(): string {
+    public function modified(): \DateTimeImmutable {
         return $this->info()['modified'];
     }
 

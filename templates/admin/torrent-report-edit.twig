@@ -157,7 +157,7 @@
     <tr>
         <td>{{ total - loop.index0 }}</td>
         <td>{{ r.user_id|user_url }}</td>
-        <td>{{ r.created|time_diff }}</td>
+        <td>{{ r.created.format('Y-m-d H:m:s')|time_diff }}</td>
         <td><a name="revision-{{ total - loop.index0 }}"></a>{{ r.change_set|map(c => "#{c.field}: #{c.old} → #{c.new}")|join(', ') }}</td>
     </tr>
     {% if loop.last %}

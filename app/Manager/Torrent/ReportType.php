@@ -11,70 +11,74 @@ class ReportType extends \Gazelle\Base {
         $key = sprintf(self::ID_KEY, $id);
         $reportTypeId = self::$cache->get_value($key);
         if ($reportTypeId === false) {
-            $reportTypeId = (int)self::$db->scalar("
-                SELECT torrent_report_configuration_id
-                FROM torrent_report_configuration
-                WHERE torrent_report_configuration_id = ?
+            $reportTypeId = $this->pg()->scalarex("
+                select id_torrent_report_configuration
+                from torrent_report_configuration
+                where id_torrent_report_configuration = $1
                 ", $id
             );
-            if ($reportTypeId) {
+            if (!is_null($reportTypeId)) {
                 self::$cache->cache_value($key, $reportTypeId, 0);
             }
         }
-        return $reportTypeId ? new \Gazelle\Torrent\ReportType($reportTypeId) : null;
+        return is_null($reportTypeId) ? null : new \Gazelle\Torrent\ReportType((int)$reportTypeId);
     }
 
     public function findByName(string $name): ?\Gazelle\Torrent\ReportType {
         $key = sprintf(self::NAME_KEY, $name);
-        $id = self::$cache->get_value($key);
-        if ($id === false) {
-            $id = self::$db->scalar("
-                SELECT torrent_report_configuration_id
-                FROM torrent_report_configuration
-                WHERE name = ?
+        $reportTypeId = self::$cache->get_value($key);
+        if ($reportTypeId === false) {
+            $reportTypeId = $this->pg()->scalarex("
+                select id_torrent_report_configuration
+                from torrent_report_configuration
+                where name = $1
                 ", $name
             );
-            if (!is_null($id)) {
-                self::$cache->cache_value($key, $id, 0);
+            if (!is_null($reportTypeId)) {
+                self::$cache->cache_value($key, $reportTypeId, 0);
             }
         }
-        return $id ? $this->findById($id) : null;
+        return is_null($reportTypeId) ? null : $this->findById((int)$reportTypeId);
     }
 
     public function findByType(string $type): ?\Gazelle\Torrent\ReportType {
         $key = sprintf(self::TYPE_KEY, $type);
-        $id = self::$cache->get_value($key);
-        if ($id === false) {
-            $id = self::$db->scalar("
-                SELECT torrent_report_configuration_id
-                FROM torrent_report_configuration
-                WHERE type = ?
+        $reportTypeId = self::$cache->get_value($key);
+        if ($reportTypeId === false) {
+            $reportTypeId = $this->pg()->scalarex("
+                select id_torrent_report_configuration
+                from torrent_report_configuration
+                where type = $1
                 ", $type
             );
-            if (!is_null($id)) {
-                self::$cache->cache_value($key, $id, 0);
+            if (!is_null($reportTypeId)) {
+                self::$cache->cache_value($key, $reportTypeId, 0);
             }
         }
-        return $id ? $this->findById($id) : null;
+        return is_null($reportTypeId) ? null : $this->findById((int)$reportTypeId);
     }
 
     public function list(): array {
-        self::$db->prepared_query("
-            SELECT torrent_report_configuration_id
-            FROM torrent_report_configuration
-            ORDER BY sequence, category_id
-        ");
-        return array_map(fn ($id) => $this->findById($id), self::$db->collect(0));
+        return array_map(
+            fn ($id) => $this->findById($id),
+            $this->pg()->columnex("
+                select id_torrent_report_configuration
+                from torrent_report_configuration
+                order by sequence, id_category
+            ")
+        );
     }
 
     public function categoryList(int $categoryId): array {
-        self::$db->prepared_query("
-            SELECT torrent_report_configuration_id
-            FROM torrent_report_configuration
-            WHERE category_id IN (0, ?)
-            ORDER BY sequence
-            ", $categoryId
+        return array_map(
+            fn ($id) => $this->findById($id),
+            $this->pg()->columnex("
+                select id_torrent_report_configuration
+                from torrent_report_configuration
+                where id_category IN (0, $1)
+                order by sequence
+                ", $categoryId
+            )
         );
-        return array_map(fn ($id) => $this->findById($id), self::$db->collect(0));
     }
 }

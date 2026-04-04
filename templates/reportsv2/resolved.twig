@@ -4,7 +4,7 @@
     </tr>
     <tr>
         <td class="label">Resolved:</td>
-        <td>{{ report.modified|time_diff }}</td>
+        <td>{{ report.modified|date('Y-m-d H:i:s')|time_diff }}</td>
     </tr>
     <tr>
         <td class="label">Report comments:</td>

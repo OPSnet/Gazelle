@@ -544,19 +544,17 @@ abstract class TorrentAbstract extends BaseAttrObject {
         $key = sprintf(self::CACHE_REPORTLIST, $this->id);
         $list = self::$cache->get_value($key);
         if ($list === false) {
-            $qid = self::$db->get_query_id();
-            self::$db->prepared_query("
-                SELECT r.ID      AS id,
-                    r.ReporterID AS reporter_id,
+            $list = $this->pg()->allex(<<<END_SQL
+                select r."ID"      AS id,
+                    r."ReporterID" AS reporter_id,
                     trc.is_invisible
-                FROM reportsv2 r
-                INNER JOIN torrent_report_configuration trc ON (trc.type = r.Type)
-                WHERE r.Status != 'Resolved'
-                    AND r.TorrentID = ?
-                ", $this->id
+                from relay.reportsv2 r
+                inner join torrent_report_configuration trc ON (trc.type = r."Type")
+                where r."Status" != 'Resolved'
+                    and r."TorrentID" = $1
+                END_SQL,
+                    $this->id
             );
-            $list = self::$db->to_array(false, MYSQLI_ASSOC);
-            self::$db->set_query_id($qid);
             self::$cache->cache_value($key, $list, 7200);
         }
         if (!$viewer->isStaff()) {

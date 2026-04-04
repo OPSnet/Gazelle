@@ -411,7 +411,7 @@ class RequestTest extends TestCase {
         $reportManager->create(
             torrent:     $torrent,
             user:        $user,
-            reportType:  new Manager\Torrent\ReportType()->findByName('other'),
+            reportType:  new Manager\Torrent\ReportType()->findByName('Other'),
             reason:      'phpunit requst other report',
             otherIdList: '',
             irc:         new Util\Irc(),

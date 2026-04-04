@@ -341,6 +341,10 @@ class Helper {
         return time() - $epoch < $tolerance;
     }
 
+    public static function recentDateTimeImmutable(\DateTimeImmutable $date, int $tolerance = 20): bool {
+        return new \DateTimeImmutable('now')->getTimestamp() - $date->getTimestamp() < $tolerance;
+    }
+
     /**
      * Test whether a timestamp (YYYY-MM-DD HH:MM:SS) in the future is close enough to now.
      * The default tolerance is 20 seconds.

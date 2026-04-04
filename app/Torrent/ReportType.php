@@ -2,10 +2,10 @@
 
 namespace Gazelle\Torrent;
 
-class ReportType extends \Gazelle\BaseObject {
+class ReportType extends \Gazelle\BasePgObject {
     final public const tableName = 'torrent_report_configuration';
-    final public const pkName    = 'torrent_report_configuration_id';
-    final public const CACHE_KEY = 'trepcfg_v2_%d';
+    final public const pkName    = 'id_torrent_report_configuration';
+    final public const CACHE_KEY = 'trepcfg_3_%d';
 
     protected array $changeset;
 
@@ -36,12 +36,12 @@ class ReportType extends \Gazelle\BaseObject {
         $key = sprintf(self::CACHE_KEY, $this->id);
         $info = self::$cache->get_value($key);
         if ($info === false) {
-            $info = self::$db->rowAssoc("
-                SELECT r.name,
+            $info = $this->pg()->rowAssocex(<<<END_SQL
+                select r.name,
                     r.type,
                     r.name,
-                    r.category_id,
-                    c.name AS category_name,
+                    r.id_category,
+                    c.name as category_name,
                     r.sequence,
                     r.tracker_reason,
                     r.is_active,
@@ -57,15 +57,12 @@ class ReportType extends \Gazelle\BaseObject {
                     r.resolve_warn,
                     r.explanation,
                     r.pm_body
-                FROM torrent_report_configuration r
-                INNER JOIN category c USING (category_id)
-                WHERE r.torrent_report_configuration_id = ?
-                ", $this->id
+                from torrent_report_configuration r
+                inner join category c using (id_category)
+                where r.id_torrent_report_configuration = $1
+                END_SQL,
+                    $this->id
             );
-            $info['is_active']      = (bool)$info['is_active'];
-            $info['is_admin']       = (bool)$info['is_admin'];
-            $info['resolve_delete'] = (bool)$info['resolve_delete'];
-            $info['resolve_upload'] = (bool)$info['resolve_upload'];
             self::$cache->cache_value($key, $info, 0);
             $this->info = $info;
         }
@@ -77,21 +74,15 @@ class ReportType extends \Gazelle\BaseObject {
     }
 
     public function history(): array {
-        self::$db->prepared_query("
-            SELECT change_set AS change_set_json,
-                user_id,
+        return $this->pg()->allex("
+            select change_set
+                id_user,
                 created
-            FROM torrent_report_configuration_log
-            WHERE torrent_report_configuration_id = ?
-            ORDER BY created DESC
-            ", $this->id()
+            from torrent_report_configuration_log
+            where id_torrent_report_configuration = $1
+            order by created desc
+            ", $this->id
         );
-        $history = [];
-        foreach (self::$db->to_array(false, MYSQLI_ASSOC) as $row) {
-            $row['change_set'] = json_decode($row['change_set_json'], true);
-            $history[] = $row;
-        }
-        return $history;
     }
 
     public function categoryName(): string {
@@ -99,7 +90,7 @@ class ReportType extends \Gazelle\BaseObject {
     }
 
     public function categoryId(): int {
-        return $this->info()['category_id'];
+        return $this->info()['id_category'];
     }
 
     public function doDeleteUpload(): bool {
@@ -223,23 +214,20 @@ class ReportType extends \Gazelle\BaseObject {
         unset($this->changeset);
         $affected = parent::modify();
         if ($affected) {
-            self::$db->prepared_query("
-                INSERT INTO torrent_report_configuration_log
-                       (user_id, change_set, torrent_report_configuration_id)
-                VALUES (?,       ?,          ?)
+            $this->pg()->query("
+                insert into torrent_report_configuration_log
+                       (id_user, change_set, id_torrent_report_configuration)
+                values ($1,      $2,         $3)
                 ", $userId, json_encode($changeset), $this->id
             );
         }
-        return $affected != 0;
+        return $affected;
     }
 
     public function remove(): int {
         self::$db->prepared_query("
-            DELETE trc, trcl
-            FROM torrent_report_configuration trc
-            LEFT JOIN torrent_report_configuration_log trcl
-                USING (torrent_report_configuration_id)
-            WHERE trc.torrent_report_configuration_id = ?
+            delete from torrent_report_configuration
+            where id_torrent_report_configuration = $1
             ", $this->id
         );
         $affected = self::$db->affected_rows();

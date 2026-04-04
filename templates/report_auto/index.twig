@@ -58,7 +58,7 @@
                         {% if report.isResolved %}(done){% endif %}
                         <a class="report_link" href="{{ report.location }}">#{{ report.id }}</a>
                         <span class="report_type">{{ report.text }}</span>
-                        <span class="report_time">{{ report.created|time_diff }}</span>
+                        <span class="report_time">{{ report.created|date('Y-m-d H:i:s')|time_diff }}</span>
                         {% if report.isClaimed %}
                             <span class="report_claimed">{% if report.isResolved %}resolved{% else %}claimed{% endif %}
                             by {{ report.ownerId|user_url }}</span>
