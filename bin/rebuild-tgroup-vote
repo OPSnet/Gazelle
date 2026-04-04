@@ -1,0 +1,27 @@
+#! /usr/bin/env php
+<?php
+
+require __DIR__ . '/../lib/bootstrap.php';
+
+namespace Gazelle;
+
+$pg = new DB\Pg(PG_RW_DSN);
+$pg->begin();
+
+$n = $pg->query("
+    delete from tgroup_vote_summary
+");
+echo "$n tgroup summaries removed\n";
+
+$n = $pg->query(<<<END_SQL
+    insert into tgroup_vote_summary (id_tgroup, total, upvote)
+    select id_tgroup,
+        count(*),
+        sum(case when upvote is true then 1 else 0 end)
+    from tgroup_vote
+    group by id_tgroup
+END_SQL
+);
+echo "$n tgroup summaries inserted\n";
+
+$pg->commit();

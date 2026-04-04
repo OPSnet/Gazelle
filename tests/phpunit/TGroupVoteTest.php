@@ -38,7 +38,6 @@ class TGroupVoteTest extends TestCase {
         foreach ($this->tgroupList as $tgroup) {
             Helper::removeTGroup($tgroup, $this->userList[0]);
         }
-        $db = DB::DB();
         $pg = new DB\Pg(PG_RW_DSN);
         foreach ($this->userList as $user) {
             $pg->query('
@@ -52,10 +51,6 @@ class TGroupVoteTest extends TestCase {
                     select distinct id_tgroup from t
                 )
                 ', $user->id
-            );
-            $db->prepared_query("
-                DELETE FROM users_votes WHERE UserID = ?
-                ", $user->id
             );
             Helper::removeUser($user);
         }

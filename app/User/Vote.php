@@ -2,8 +2,8 @@
 
 namespace Gazelle\User;
 
-class Vote extends \Gazelle\BaseUser {
-    final public const tableName = 'users_votes';
+class Vote extends \Gazelle\BasePgUser {
+    final public const tableName = 'tgroup_vote';
 
     final public const UPVOTE   = 1;
     final public const DOWNVOTE = 2;
@@ -392,7 +392,6 @@ class Vote extends \Gazelle\BaseUser {
         if (isset($this->info()[$tgroup->id])) {
             return [false, 'already-voted'];
         }
-        $up = $upvote === true ? 1 : 0;
 
         // update db
         $this->pg()->begin();
@@ -419,25 +418,6 @@ class Vote extends \Gazelle\BaseUser {
             ", $tgroup->id
         );
         $this->pg()->commit();
-        self::$db->begin_transaction();
-        self::$db->prepared_query("
-            INSERT IGNORE INTO users_votes
-                   (UserID, GroupID, upvote, Type)
-            VALUES (?,      ?,       ?,      ?)
-            ", $this->user->id, $tgroup->id, $up, $up ? 'Up' : 'Down'
-        );
-        [$total, $ups, $score] = $this->summary($tgroup);
-        self::$db->prepared_query("
-            INSERT INTO torrents_votes
-                   (GroupID, Ups, Score, Total)
-            VALUES (?,       ?,   ?,     1)
-            ON DUPLICATE KEY UPDATE
-                Total = ?,
-                Ups   = ?,
-                Score = ?
-            ", $tgroup->id, $ups, $score, $total, $ups, $score
-        );
-        self::$db->commit();
 
         // update cache
         $this->info[$tgroup->id] = $upvote;
@@ -478,22 +458,6 @@ class Vote extends \Gazelle\BaseUser {
             ", $tgroup->id
         );
         $this->pg()->commit();
-        self::$db->begin_transaction();
-        self::$db->prepared_query("
-            DELETE FROM users_votes
-            WHERE UserID = ? AND GroupID = ?
-            ", $this->user->id, $tgroup->id
-        );
-        [$total, $ups, $score] = $this->summary($tgroup);
-        self::$db->prepared_query("
-            UPDATE torrents_votes SET
-                Total = ?,
-                Ups   = ?,
-                Score = ?
-            WHERE GroupID = ?
-            ", $total, $ups, $score, $tgroup->id
-        );
-        self::$db->commit();
 
         // Update cache
         unset($this->info[$tgroup->id]);
