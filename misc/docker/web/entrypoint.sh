@@ -48,6 +48,15 @@ if ! $PHINXBIN migrate -c ./misc/my2-phinx.php; then
     exit 1
 fi
 
+# restart the web container if it is left running for more than a year!
+openssl req -x509 -newkey ed25519 \
+    -noenc -keyout /etc/nginx/selfsigned.key -out /etc/nginx/selfsigned.crt \
+    -subj "/CN=gazelle.local" \
+    -days 365
+nginx -t
+
+chown -R gazelle:gazelle /var/log/xdebug.log /var/www/cache/twig
+
 echo "Start services..."
 
 run_service cron
