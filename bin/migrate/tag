@@ -1,0 +1,51 @@
+#! /usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+namespace Gazelle;
+
+require __DIR__ . '/../../lib/bootstrap.php';
+
+$pg = new DB\Pg(PG_RW_DSN);
+$pg->begin();
+
+$n = $pg->query("
+    delete from tag_alias
+");
+echo "$n tag aliases removed\n";
+$n = $pg->query("
+    delete from tag
+");
+echo "$n tag removed\n";
+
+$n = $pg->query(<<<END_SQL
+    insert into tag (id_tag, id_user, kind, usage, name)
+    select "ID",
+        "UserID",
+        case when "TagType" = 'genre' then 'genre'::tag_kind_t else 'other'::tag_kind_t end,
+        "Uses",
+        "Name"
+    from relay.tags
+END_SQL
+);
+echo "$n tags inserted\n";
+
+$n = $pg->query(<<<END_SQL
+    insert into tag_alias (alias_deny, alias_allow)
+    select "BadTag", "AliasTag" 
+    from relay.tag_aliases;
+END_SQL
+);
+echo "$n tag aliases inserted\n";
+
+$pg->query("
+    with m as (
+        select 1 + max(id_tag) as id
+        from tag
+    )
+    select setval('tag_id_tag_seq', m.id)
+    from m
+");
+
+$pg->commit();

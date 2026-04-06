@@ -19,7 +19,18 @@ class Tag extends \Gazelle\BaseManager {
                 $type,
                 $uses,
         );
-        return new \Gazelle\Tag(self::$db->inserted_id());
+        $tagId = self::$db->inserted_id();
+        $this->pg()->query('
+            insert into tag
+                   (id_tag, id_user, usage, name, kind)
+            values ($1,     $2,      $3,    $4,   $5)
+            ', $tagId, $user->id, $uses, $this->resolve($this->sanitize($name)), $type
+        );
+        $this->pg()->query("
+            select setval('tag_id_tag_seq', $1)
+            ", $tagId + 1
+        );
+        return new \Gazelle\Tag($tagId);
     }
 
     /**
@@ -190,6 +201,12 @@ class Tag extends \Gazelle\BaseManager {
                 WHERE ID = ?
                 ", $tag->id
             );
+            $this->pg()->query("
+                update tag set
+                    kind = 'genre'
+                where id_tag = $1
+                ", $tag->id
+            );
         } else {
             // Tag doesn't exist yet: create it
             $tag = $this->create($name, $user, 'genre', 0);
@@ -212,6 +229,12 @@ class Tag extends \Gazelle\BaseManager {
             ", ...$tagIdList
         );
         $affected = self::$db->affected_rows();
+        $this->pg()->query("
+            update tag set
+                kind = 'other'
+            where id_tag = any($1)
+            ", $this->pg()->integerConverter()->output($tagIdList)
+        );
         self::$cache->delete_value(self::GENRE_KEY);
         return $affected;
     }
@@ -230,7 +253,10 @@ class Tag extends \Gazelle\BaseManager {
             ORDER BY $orderBy
             ", 'genre'
         );
-        return array_map(fn($id) => $this->findById($id), self::$db->collect(0));
+        return array_map(
+            fn ($id) => $this->findById($id),
+            self::$db->collect(0)
+        );
     }
 
     /**
@@ -253,7 +279,7 @@ class Tag extends \Gazelle\BaseManager {
         return $list;
     }
 
-        /**
+    /**
      * Rename a tag.
      *
      * This is not as simple as it appears at first glance. The simplest case a
@@ -292,6 +318,10 @@ class Tag extends \Gazelle\BaseManager {
             ", $tag->id
         );
         self::$db->commit();
+        $this->pg()->query('
+            delete from tag where id_tag = $1
+            ', $tag->id
+        );
         return $changed;
     }
 
@@ -344,9 +374,17 @@ class Tag extends \Gazelle\BaseManager {
                     + (select count(*) from relay.torrents_tags where "TagID" = $1)
                 )
             where "ID" = $1
-            END_SQL
-            , $new->id
+            END_SQL,
+                $new->id
         );
+        $this->pg()->query(<<<END_SQL
+            update tag set
+                usage = (
+                    select "Uses" from relay.tags where "ID" = $1
+                )
+            END_SQL,
+                $new->id
+            );
 
         // update cache
         // (some of these may not have changed but skipping them would be a false optimization)
@@ -389,6 +427,10 @@ class Tag extends \Gazelle\BaseManager {
             ", $tag->id
         );
         self::$db->commit();
+        $this->pg()->query('
+            delete from tag where id_tag = $1
+            ', $tag->id
+        );
         return $totalChanged;
     }
 
@@ -404,6 +446,12 @@ class Tag extends \Gazelle\BaseManager {
             ", $this->sanitize($bad), $this->sanitize($good)
         );
         $id = self::$db->inserted_id();
+        $this->pg()->query('
+            insert into tag_alias
+                   (alias_deny, alias_allow)
+            values ($1,     $2)
+            ', $this->sanitize($bad), $this->sanitize($good)
+        );
         self::$cache->delete_value(self::ALIAS_KEY);
         return $id;
     }
@@ -420,6 +468,13 @@ class Tag extends \Gazelle\BaseManager {
             ", $this->sanitize($bad), $this->sanitize($good), $aliasId
         );
         $affected = self::$db->affected_rows();
+        $this->pg()->query('
+            update tag_alias set
+                alias_deny  = $1,
+                alias_allow = $2
+            where id_tag_alias = $3
+            ', $this->sanitize($bad), $this->sanitize($good), $aliasId
+        );
         self::$cache->delete_value(self::ALIAS_KEY);
         return $affected;
     }
@@ -450,6 +505,10 @@ class Tag extends \Gazelle\BaseManager {
             ", $aliasId
         );
         $affected = self::$db->affected_rows();
+        $this->pg()->query('
+            delete from tag_alias where id_tag_alias = $1
+            ', $aliasId
+        );
         self::$cache->delete_value(self::ALIAS_KEY);
         return $affected;
     }

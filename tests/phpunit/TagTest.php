@@ -29,6 +29,13 @@ class TagTest extends TestCase {
             LEFT JOIN torrents_tags_votes ttv ON (ttv.TagID = t.ID)
             WHERE t.Name like 'phpunit.%'
         ");
+        $pg = new DB\Pg(PG_RW_DSN);
+        $pg->query("
+            delete from tag_alias where alias_allow ~ '^phpunit'
+        ");
+        $pg->query("
+            delete from tag where name ~ '^phpunit'
+        ");
     }
 
     public function testSanitize(): void {
