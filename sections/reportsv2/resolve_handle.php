@@ -136,6 +136,7 @@ if (!$isDelete) {
 } elseif ($torrent->isDeleted()) {
     $Log = $logMessage ?? "No log message (torrent was already deleted).";
 } else {
+    $tgroup = $torrent->group();
     [$ok, $message] = $torrent->removeTorrent( /** @phpstan-ignore-line TorrentDeleted vs Torrent confusion */
         $Viewer,
         sprintf('%s (%s)', $reportTypeName, $logMessage ?? 'none'),
@@ -147,6 +148,11 @@ if (!$isDelete) {
     }
 
     $torrent = new TorrentDeleted($torrent->id);
+    if (isset($_POST['remove-empty']) && $tgroup->flush()->torrentIdList() === []) {
+        $tgroup->removeTGroup();
+        $Viewer->logger("Empty torrent group {$torrent->groupId()} removed following report {$report->id}");
+    }
+
     $logList = ["Torrent {$torrent->id} ($name) uploaded by {$uploader->username()} was deleted by {$Viewer->username()}"];
     if ($_POST['resolve_type'] != 'custom') {
         $logList[] = "for the reason: {$reportTypeName}.";

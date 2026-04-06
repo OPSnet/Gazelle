@@ -471,7 +471,6 @@ class Torrent extends TorrentAbstract {
         self::$db->commit();
 
         self::$cache->delete_multi([
-            "torrent_group_{$tgroup->id}",
             sprintf(Manager\Torrent::ID_KEY, $this->id),
             sprintf(self::CACHE_KEY, $this->id),
             ...$deleteKeys

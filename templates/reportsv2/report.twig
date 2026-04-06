@@ -172,6 +172,13 @@
                 <input type="checkbox" name="delete" id="delete{{ report.id }}"{{ checked(reportType.doDeleteUpload) }}>
                 <label for="delete{{ report.id }}"><strong>Delete</strong></label>
             </span> |
+{% set this_torrent = [torrent.id] %}
+{% if torrent.group.torrentIdList == this_torrent %}
+        <span class="tooltip" title="Remove the torrent group if there are no other torrents">
+            <input type="checkbox" name="remove-empty" id="empty{{ report.id }}">&nbsp;
+            <label for="empty{{ report.id }}">Remove empty group</label>
+        </span> |
+{% endif %}
             <span class="tooltip" title="Remove upload privileges?">
                 <input type="checkbox" name="upload" id="upload{{ report.id }}"{{
                     checked(not_uploader and reportType.doRevokeUploadPrivs) }}>

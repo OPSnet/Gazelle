@@ -47,6 +47,21 @@ if (($_GET['action'] ?? '') == 'revert') {
     exit;
 }
 
+if (isset($_POST['remove'])) {
+    $tgroupId = $tgroup->id;
+    $name     = $tgroup->text();
+    if ($tgroup->torrentIdList() !== []) {
+        Error400::error('Attempted to remove the group but it is no longer empty!');
+    }
+    if (!$tgroup->removeTGroup()) {
+        Error400::error('An attempt was made to remove the group but failed due to an internal constraint!');
+    }
+    $summary = trim($_POST['summary'] ?? 'none given');
+    $Viewer->logger()->general("Group $tgroupId ($name) was removed by user {$Viewer->username()}, reason: $summary");
+    header('Location: torrents.php');
+    exit;
+}
+
 $logInfo = [];
 if ($_POST['name'] !== $tgroup->name()) {
     $name = trim($_POST['name']);

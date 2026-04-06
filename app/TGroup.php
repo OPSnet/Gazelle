@@ -854,6 +854,7 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
     public function removeTGroup(): int {
         $isMusic = ($this->categoryName() === 'Music');
 
+        self::$db->begin_transaction();
         // Artists
         // Collect the artist IDs and then wipe the torrents_artist entry
         self::$db->prepared_query("
@@ -952,6 +953,8 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
         }
         $this->flush();
         parent::remove();
+        self::$db->commit();
+
         self::$cache->delete_multi([
             sprintf(Manager\TGroup::ID_KEY, $this->id),
             sprintf(Manager\Torrent::CACHE_KEY_LATEST_UPLOADS, 5),

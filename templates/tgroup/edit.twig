@@ -65,6 +65,13 @@
         </div>
 {%  endif %}
 {% endif %}
+{% if empty and viewer.permitted('torrents_edit') %}
+        <div class="tbx-label">Empty group</div>
+        <div class="tbx-field">
+            <label><input type="checkbox" name="remove"> Remove?</label><br>
+            There are no torrents associated with this group.
+        </div>
+{% endif %}
         <div class="tbx-label">Summary of changes</div>
         <div class="tbx-field">
             A brief explanation of what was changed, for the site log
