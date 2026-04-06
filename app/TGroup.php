@@ -15,10 +15,10 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
     final public const USER_RECENT_UPLOAD   = 'u_recent_up_%d';
     final public const CACHE_REQUEST_TGROUP = 'req_tg_%d';
 
-    final protected const ObjectName   = 'torrent_group';
+    final protected const ObjectName   = 'tgroup';
     final protected const PkColumn     = 'ID';
-    final protected const JoinColumn   = 'TorrentGroupAttrID';
-    final protected const ObjectColumn = 'TorrentGroupID';
+    final protected const JoinColumn   = 'TGroupAttrID';
+    final protected const ObjectColumn = 'TGroupID';
 
     final protected const USER_RECENT_SNATCH = 'u_recent_snatch_%d';
 

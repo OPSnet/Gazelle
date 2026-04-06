@@ -115,7 +115,7 @@ abstract class BaseAttrObject extends BaseObject {
                 self::$db->prepared_query("
                     DELETE FROM tgroup_has_attr
                     WHERE TGroupID = ? AND TGroupAttrID = (
-                        SELECT TGroupAttrID FROM torrent_group_attr WHERE Name = ?
+                        SELECT TGroupAttrID FROM tgroup_attr WHERE Name = ?
                     )
                     ", $this->id, $attr
                 );

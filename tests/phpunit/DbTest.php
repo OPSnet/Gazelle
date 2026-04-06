@@ -55,13 +55,13 @@ class DbTest extends TestCase {
         );
 
         // Do we have the right number of tables?
-        $this->assertCount(6, $mysqlAttrTableList, 'db-mysql-attr-table-total');
+        $this->assertCount(5, $mysqlAttrTableList, 'db-mysql-attr-table-total');
         $this->assertCount(5, $pgAttrTableList, 'db-pg-attr-table-total');
 
         // Are the tables the same?
         $this->assertEquals(
             // during migration
-            [4 => 'torrent_group_attr'],
+            [],
             array_diff($mysqlAttrTableList, $pgAttrTableList),
             'db-mysql-has-pg-attr-tables'
         );
