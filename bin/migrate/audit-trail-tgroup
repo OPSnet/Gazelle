@@ -1,0 +1,58 @@
+#! /usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+namespace Gazelle;
+
+require __DIR__ . '/../../lib/bootstrap.php';
+
+$pg = new DB\Pg(PG_RW_DSN);
+$pg->begin();
+
+$n = $pg->query("
+    delete from audit_trail_tgroup
+");
+echo "$n tgroup trails removed\n";
+
+$n      = 0;
+$offset = 0;
+$chunk  = 20000;
+while (true) {
+    $inserted = $pg->query('
+        insert into audit_trail_tgroup (id_audit_trail_tgroup, id_tgroup, id_torrent, id_user, created, note, is_visible)
+        select "ID",
+            "GroupID",
+            case when "TorrentID" = 0 then null else "TorrentID" end,
+            "UserID",
+            "Time",
+            "Info",
+            case when "Hidden" = 0 then true else false end
+        from relay.group_log
+        where group_log."ID" > $1
+        order by "ID"
+        limit $2
+        ', $offset, $chunk
+    );
+    if (!$inserted) {
+        break;
+    }
+    $n += $inserted;
+    $offset = $pg->scalarex('
+        select max(id_audit_trail_tgroup) from audit_trail_tgroup
+    ');
+    echo ".";
+}
+
+echo "\n$n tgroup trails inserted\n";
+
+$pg->query("
+    with m as (
+        select 1 + max(id_audit_trail_tgroup) as id
+        from audit_trail_tgroup
+    )
+    select setval('audit_trail_tgroup_id_audit_trail_tgroup_seq', m.id)
+    from m
+");
+
+$pg->commit();

@@ -2,6 +2,8 @@
 
 namespace Gazelle\Manager;
 
+use Gazelle\TGroup;
+
 class SiteLog extends \Gazelle\Base {
     final protected const CACHE_TERM  = 'site_log_';
 
@@ -61,23 +63,31 @@ class SiteLog extends \Gazelle\Base {
         );
     }
 
-    public function tgroupLogList($tgroupId): array {
-        self::$db->prepared_query("
-            SELECT gl.TorrentID        AS torrent_id,
-                gl.UserID              AS user_id,
-                gl.Info                AS info,
-                gl.Time                AS created,
-                t.Media                AS media,
-                t.Format               AS format,
-                t.Encoding             AS encoding,
-                if(t.ID IS NULL, 1, 0) AS deleted
-            FROM group_log gl
-            LEFT JOIN torrents t ON (t.ID = gl.TorrentID)
-            WHERE gl.GroupID = ?
-            ORDER BY gl.ID DESC
-            ", $tgroupId
+    public function tgroupLogList(TGroup $tgroup): array {
+        return $this->pg()->allex(<<<END_SQL
+            with t as (
+                select "ID"    as id_torrent,
+                    "Media"    as media,
+                    "Format"   as format,
+                    "Encoding" as encoding
+                from relay.torrents
+                where "GroupID" = $1
+            )
+            select att.id_torrent,
+                att.id_user,
+                att.note,
+                att.created,
+                t.media,
+                t.format,
+                t.encoding,
+                case when t.id_torrent is null then true else false end as deleted
+            from audit_trail_tgroup att
+            left join t using (id_torrent)
+            where att.id_tgroup = $1
+            order by att.id_audit_trail_tgroup desc
+            END_SQL,
+                $tgroup->id
         );
-        return self::$db->to_array(false, MYSQLI_ASSOC);
     }
 
     /**

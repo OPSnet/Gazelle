@@ -14,8 +14,12 @@ class LogTest extends TestCase {
 
     public function tearDown(): void {
         $pg = new DB\Pg(PG_RW_DSN);
-        $pg->prepared_query("
-            delete from site_log where note ~ ?
+        $pg->query("
+            delete from site_log where note ~ $1
+            ", '^' . self::PREFIX
+        );
+        $pg->query("
+            delete from audit_trail_tgroup where note ~ $1
             ", '^' . self::PREFIX
         );
         $db = DB::DB();
@@ -58,16 +62,16 @@ class LogTest extends TestCase {
         $logger->group($this->tgroup, $this->user, self::PREFIX . "group first " . randomString());
 
         $siteLog = new Manager\SiteLog();
-        $this->assertCount(2, $siteLog->tgroupLogList($tgroupId), 'grouplog-intial');
-        $result = $siteLog->tgroupLogList($tgroupId);
+        $this->assertCount(2, $siteLog->tgroupLogList($this->tgroup), 'grouplog-intial');
+        $result = $siteLog->tgroupLogList($this->tgroup);
         $latest = current($result);
-        $this->assertEquals(
-            ["torrent_id", "user_id", "info", "created", "media", "format", "encoding", "deleted"],
+        $this->assertEqualsCanonicalizing(
+            ["id_torrent", "id_user", "note", "created", "media", "format", "encoding", "deleted"],
             array_keys($latest),
             'grouplog-latest-keys'
         );
-        $this->assertEquals(1, $latest['deleted'], 'grouplog-latest-is-deleted');
-        $this->assertEquals(0, $latest['torrent_id'], 'grouplog-latest-no-torrent-id');
+        $this->assertEquals(true, $latest['deleted'], 'grouplog-latest-is-deleted');
+        $this->assertEquals(0, $latest['id_torrent'], 'grouplog-latest-no-torrent-id');
 
         $this->tgroupNew = Helper::makeTGroupMusic(
             $this->user,
@@ -80,8 +84,8 @@ class LogTest extends TestCase {
         $this->assertEquals(3, $logger->merge($this->tgroup, $this->tgroupNew), 'grouplog-merge-result');
 
         $messageList = array_map(
-            fn($m) => $m['info'],
-            $siteLog->tgroupLogList($this->tgroupNew->id),
+            fn ($m) => $m['note'],
+            $siteLog->tgroupLogList($this->tgroupNew),
         );
 
         $this->assertStringStartsWith(self::PREFIX . 'group merge ', $messageList[0], 'grouplog-merge-line-0');
@@ -109,14 +113,14 @@ class LogTest extends TestCase {
         $logger->torrent($torrent, $this->user, self::PREFIX . "torrent " . randomString());
 
         $siteLog = new Manager\SiteLog();
-        $this->assertCount(2, $siteLog->tgroupLogList($this->tgroup->id), 'torrentlog-has-log');
+        $this->assertCount(2, $siteLog->tgroupLogList($this->tgroup), 'torrentlog-has-log');
 
         $torrent->removeTorrent($this->user, 'phpunit log delete');
-        $result = $siteLog->tgroupLogList($this->tgroup->id);
+        $result = $siteLog->tgroupLogList($this->tgroup);
         $latest = current($result);
-        $this->assertEquals(1, $latest['deleted'], 'torrentlog-latest-is-deleted');
-        $this->assertEquals($torrent->id, $latest['torrent_id'], 'torrentlog-latest-torrent-id');
-        $this->assertEquals($this->user->id, $latest['user_id'], 'torrentlog-latest-user-id');
+        $this->assertEquals(true, $latest['deleted'], 'torrentlog-latest-is-deleted');
+        $this->assertEquals($torrent->id, $latest['id_torrent'], 'torrentlog-latest-torrent-id');
+        $this->assertEquals($this->user->id, $latest['id_user'], 'torrentlog-latest-user-id');
     }
 
     public function testRenderLog(): void {

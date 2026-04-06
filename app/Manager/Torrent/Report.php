@@ -216,77 +216,58 @@ class Report extends \Gazelle\BaseManager {
 
     protected function searchConfigure(): array {
         if (!isset($this->filter)) {
-            return [[], [], [], []];
+            return [[], [], []];
         }
         $cond = [];
         $args = [];
-        $delcond = [];
-        $delargs = [];
         if (isset($this->filter['reporter'])) {
-            $cond[] = 'r.ReporterID = ?';
+            $cond[] = "r.\"ReporterID\" = {$this->pg()->placeholder(count($args))}";
             $args[] = $this->filter['reporter']->id;
         }
         if (isset($this->filter['handler'])) {
-            $cond[] = 'r.ResolverID = ?';
+            $cond[] = "r.\"ResolverID\" = {$this->pg()->placeholder(count($args))}";
             $args[] = $this->filter['handler']->id;
         }
         if (isset($this->filter['uploader'])) {
-            $userId = $this->filter['uploader']->id;
-            $cond[] = 't.UserID = ?';
-            $args[] = $userId;
-            $delcond[] = '(dt.UserID IS NULL OR dt.UserID = ?)';
-            $delargs[] = $userId;
+            $cond[] = "coalesce(t.\"UserID\", dt.\"UserID\") = {$this->pg()->placeholder(count($args))}";
+            $args[] = $this->filter['uploader']->id;
         }
         if (array_key_exists('report-type', $this->filter)) {
-            $cond[] = 'r.Type in (' . placeholders($this->filter['report-type']) . ')';
-            $args = array_merge($args, $this->filter['report-type']);
+            $cond[] = "r.\"Type\" = any({$this->pg()->placeholder(count($args))})";
+            $args[] = $this->pg()->arrayConverter()->output($this->filter['report-type']);
         }
         if (array_key_exists('dt-from', $this->filter)) {
-            $cond[] = 'r.ReportedTime >= ?';
+            $cond[] = "r.\"ReportedTime\" >= {$this->pg()->placeholder(count($args))}";
             $args[] = $this->filter['dt-from'];
         }
         if (array_key_exists('dt-until', $this->filter)) {
-            $delcond[] = 'r.ReportedTime <= ? + INTERVAL 1 DAY';
-            $delargs[] = $this->filter['dt-until'];
+            $cond[] = "r.\"ReportedTime\"::timestamptz <= {$this->pg()->placeholder(count($args))}::timestamptz + interval '1 day'";
+            $args[] = $this->filter['dt-until'];
         }
         if (array_key_exists('torrent', $this->filter)) {
-            $delcond[] = 'r.TorrentID = ?';
-            $delargs[] = $this->filter['torrent'];
+            $cond[] = "r.\"TorrentID\" = {$this->pg()->placeholder(count($args))}";
+            $args[] = $this->filter['torrent'];
         }
         if (array_key_exists('group', $this->filter)) {
-            $cond[] = 't.GroupID = ?';
+            $cond[] = "coalesce(t.\"GroupID\", t.\"GroupID\") = {$this->pg()->placeholder(count($args))}";
             $args[] = $this->filter['group'];
-            $delcond[] = '(dt.GroupID IS NULL OR dt.GroupID = ?)';
-            $delargs[] = $this->filter['group'];
         }
-        return [$cond, $args, $delcond, $delargs];
+        return [
+            $cond ? ('where ' .  implode(' and ', $cond)) : '',
+            $args,
+        ];
     }
 
     public function searchTotal(): int {
-        [$cond, $args, $delcond, $delargs] = $this->searchConfigure();
-        $where = (count($cond) == 0 && count($delcond) == 0)
-            ? ''
-            : ('WHERE ' . implode(" AND ", array_merge($cond, $delcond)));
-        /* The construct below is pretty sick: we alias the group_log table to t
-         * which means that t.GroupID in a condition refers to the same thing in
-         * the `torrents` table as well. I am not certain this is entirely sane.
-         */
-        return (int)self::$db->scalar("
-            SELECT count(*)
-            FROM reportsv2 r
-            LEFT JOIN torrents t ON (t.ID = r.TorrentID)
-            LEFT JOIN deleted_torrents dt ON (dt.ID = r.TorrentID)
-            LEFT JOIN torrents_group g on (g.ID = t.GroupID)
-            LEFT JOIN (
-                SELECT max(t.ID) AS ID, t.TorrentID
-                FROM group_log t
-                INNER JOIN reportsv2 r using (TorrentID)
-                WHERE " . implode(' AND ', array_merge(["t.Info NOT LIKE 'uploaded%'"], $cond)) . "
-                GROUP BY t.TorrentID
-            ) LASTLOG USING (TorrentID)
-            LEFT JOIN group_log gl ON (gl.ID = LASTLOG.ID)
+        [$where, $args] = $this->searchConfigure();
+        return $this->pg()->scalarex(<<<END_SQL
+            select count(*)
+            from relay.reportsv2             r
+            left join relay.torrents         t on (t."ID" = r."TorrentID")
+            left join relay.deleted_torrents dt on (dt."ID" = r."TorrentID")
+            left join relay.torrents_group   tg on (tg."ID" = coalesce(t."GroupID", dt."GroupID"))
             $where
-            ", ...array_merge($args, $args, $delargs)
+            END_SQL, ...$args
         );
     }
 
@@ -295,41 +276,33 @@ class Report extends \Gazelle\BaseManager {
         int $offset,
         \Gazelle\Manager\User $userMan = new \Gazelle\Manager\User(),
     ): array {
-        [$cond, $args, $delcond, $delargs] = $this->searchConfigure();
-        $where = (count($cond) == 0 && count($delcond) == 0)
-            ? ''
-            : ('WHERE ' . implode(" AND ", array_merge($cond, $delcond)));
-
-        self::$db->prepared_query("
-            SELECT r.ID                       AS report_id,
-                r.ReporterID                  AS reporter_id,
-                r.ResolverID                  AS resolver_id,
-                r.TorrentID                   AS torrent_id,
-                coalesce(t.UserID, dt.UserID) AS uploader_id,
-                dt.ID IS NOT NULL             AS is_deleted,
-                r.Type,
-                r.ReportedTime
-            FROM reportsv2 r
-            LEFT JOIN torrents t          ON (t.ID = r.TorrentID)
-            LEFT JOIN deleted_torrents dt ON (dt.ID = r.TorrentID)
-            LEFT JOIN torrents_group g    ON (g.ID = t.GroupID)
-            LEFT JOIN (
-                SELECT max(t.ID) AS ID, t.TorrentID
-                FROM group_log t
-                INNER JOIN reportsv2 r using (TorrentID)
-                WHERE " . implode(' AND ', array_merge(["t.Info NOT LIKE 'uploaded%'"], $cond)) . "
-                GROUP BY t.TorrentID
-            ) LASTLOG ON (LASTLOG.TorrentID = r.TorrentID)
-            LEFT JOIN group_log gl ON (gl.ID = LASTLOG.ID)
+        [$where, $args] = $this->searchConfigure();
+        $limitPH  = $this->pg()->placeholder(count($args));
+        $args[]   = $limit;
+        $offsetPH = $this->pg()->placeholder(count($args));
+        $args[]   = $offset;
+        $result   = $this->pg()->allex(<<<END_SQL
+            select r."ID"           as report_id,
+                r."ReporterID"      as reporter_id,
+                r."ResolverID"      as resolver_id,
+                r."TorrentID"       as torrent_id,
+                coalesce(t."UserID", dt."UserID")
+                                    as uploader_id,
+                dt."ID" is not null as is_deleted,
+                r."Type",
+                r."ReportedTime"
+            from relay.reportsv2             r
+            left join relay.torrents         t on (t."ID" = r."TorrentID")
+            left join relay.deleted_torrents dt on (dt."ID" = r."TorrentID")
+            left join relay.torrents_group   tg on (tg."ID" = coalesce(t."GroupID", dt."GroupID"))
             $where
-            ORDER BY r.ReportedTime DESC
-            LIMIT ? OFFSET ?
-            ", ...array_merge($args, $args, $delargs, [$limit, $offset])
+            order by r."ReportedTime" desc
+            limit $limitPH offset $offsetPH
+            END_SQL, ...$args
         );
 
         $list = [];
         $cache = []; // Avoid looking up a user more than once
-        $result = self::$db->to_array(false, MYSQLI_ASSOC);
         foreach ($result as $r) {
             foreach (['reporter_id', 'resolver_id', 'uploader_id'] as $id) {
                 if ($r[$id] && !isset($cache[$r[$id]])) {

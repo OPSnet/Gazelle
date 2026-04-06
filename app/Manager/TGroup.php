@@ -222,13 +222,6 @@ class TGroup extends \Gazelle\BaseManager {
             ", $new->id, $old->id
         );
 
-        self::$db->prepared_query("
-            UPDATE group_log SET
-                GroupID = ?
-            WHERE GroupID = ?
-            ", $new->id, $old->id
-        );
-
         $oldId    = $old->id;
         $oldLabel = $old->label();
         $old->removeTGroup();

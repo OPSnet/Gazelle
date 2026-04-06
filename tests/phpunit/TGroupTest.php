@@ -506,10 +506,10 @@ class TGroupTest extends TestCase {
         );
 
         $siteLog = new Manager\SiteLog();
-        $list = $siteLog->tgroupLogList($this->tgroup->id);
+        $list = $siteLog->tgroupLogList($this->tgroup);
         $event = end($list);
-        $this->assertStringContainsString("($oldName)", $event['info'], 'tgroup-merge-old-name');
-        $this->assertStringContainsString("({$this->tgroup->name()})", $event['info'], 'tgroup-merge-new-name');
+        $this->assertStringContainsString("($oldName)", $event['note'], 'tgroup-merge-old-name');
+        $this->assertStringContainsString("({$this->tgroup->name()})", $event['note'], 'tgroup-merge-new-name');
 
         $general = current($siteLog->page(1, 0, ''));
         $this->assertEquals(
