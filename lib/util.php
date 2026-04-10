@@ -338,17 +338,26 @@ function authKey(): string {
 /**
  * Make sure $_GET['auth'] is the same as the user's authorization key
  * Should be used for any user action that relies solely on GET.
+ * Hash secret value and client-supplied value to guarantee they are
+ * the same length before using hash_equals().
  */
 function authorize(bool $ajax = false): void {
     global $Viewer;
     foreach (['auth', 'authkey'] as $auth) {
-        if (isset($_REQUEST[$auth]) && $Viewer->auth() === $_REQUEST[$auth]) {
+        if (
+            isset($_REQUEST[$auth])
+            &&
+            hash_equals(
+                hash_hmac(DIGEST_ALGO, $Viewer->auth(), USER_HASH_SALT),
+                hash_hmac(DIGEST_ALGO, $_REQUEST[$auth], USER_HASH_SALT),
+            )
+        ) {
             return;
         }
     }
     Irc::sendMessage(IRC_CHAN_STATUS,
         "{$Viewer->username()} authorize failed on {$_SERVER['REQUEST_URI']}"
-        . (!empty($_SERVER['HTTP_REFERER']) ? " coming from " . $_SERVER['HTTP_REFERER'] : "")
+        . (isset($_SERVER['HTTP_REFERER']) ? " coming from " . $_SERVER['HTTP_REFERER'] : "")
     );
     if ($ajax) {
         json_die('Invalid authorization key. Go back, refresh, and try again.');
