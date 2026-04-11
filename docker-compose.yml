@@ -45,14 +45,14 @@ services:
       - 127.0.0.1:36000:3306
     volumes:
       - mysql-data:/var/lib/mysql
-      - ./misc/docker/mysql/home:/home/mysql
+      - ./misc/docker/mysql/cnf/client.cnf:/opt/mysql/client.cnf:ro
       - ./misc/docker/mysql/init:/docker-entrypoint-initdb.d
     environment:
       - MYSQL_DATABASE=gazelle
       - MYSQL_USER=gazelle
       - MYSQL_PASSWORD=password
       - MYSQL_ROOT_PASSWORD=sc5tlc9JSCC6
-      - PERCONA_TELEMETRY_DISABLE=1 
+      - PERCONA_TELEMETRY_DISABLE=1
     command:
       - mysqld
       - --group-concat-max-len=1048576

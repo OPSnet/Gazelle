@@ -26,6 +26,7 @@ help:
 	echo '  lint-twig            - lint (style check) the Twig templates'
 	echo '  lint-staged          - lint (style check) all staged changes'
 	echo '  reformat-staged      - reformat all staged changes'
+	echo '  mysql                - access the database via mysql'
 	echo '  mysqldump            - dump mysql database from docker to misc/mysql-dump.sql'
 	echo '  ocelot-reload-conf   - signal Ocelot to reload its configuration'
 	echo '  ocelot-reload-db     - signal Ocelot to reload from database'
@@ -108,6 +109,10 @@ lint-staged:
 .PHONY: reformat-staged
 reformat-staged:
 	bin/reformat-staged
+
+.PHONY: mysql
+mysql:
+	docker compose exec mysql mysql --defaults-extra-file=/opt/mysql/client.cnf
 
 # defaults file must be chmod 0400 and look something like:
 #
