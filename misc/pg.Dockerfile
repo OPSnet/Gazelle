@@ -7,5 +7,3 @@ RUN apt-get update \
   && apt-get autoremove \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
-
-ADD ./misc/docker/pg/* /docker-entrypoint-initdb.d/

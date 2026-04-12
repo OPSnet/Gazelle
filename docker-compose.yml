@@ -29,14 +29,15 @@ services:
       - 127.0.0.1:54321:5432
     volumes:
       - pg-data:/var/lib/postgresql/data
+      - ./misc/docker/pg/init:/docker-entrypoint-initdb.d:ro
     environment:
       - POSTGRES_USER=nyala
       - POSTGRES_PASSWORD=nyalapw
       - POSTGRES_DATABASE=gz
       - POSTGRES_DB_USER=gazelle
       - POSTGRES_USER_PASSWORD=gazellepw
-      - POSTGRES_RO_USER=nyro
-      - POSTGRES_RO_PASS=nyropw
+      - PG_RO_USER=nyro
+      - PG_RO_PASS=nyropw
 
   mysql:
     # remember to update misc/gitlab-ci.yml
@@ -46,7 +47,7 @@ services:
     volumes:
       - mysql-data:/var/lib/mysql
       - ./misc/docker/mysql/cnf/client.cnf:/opt/mysql/client.cnf:ro
-      - ./misc/docker/mysql/init:/docker-entrypoint-initdb.d
+      - ./misc/docker/mysql/init:/docker-entrypoint-initdb.d:ro
     environment:
       - MYSQL_DATABASE=gazelle
       - MYSQL_USER=gazelle
