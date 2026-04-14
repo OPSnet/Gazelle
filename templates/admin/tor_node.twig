@@ -23,21 +23,21 @@
     </tr>
 {% endfor %}
 </table>
-<br />
+<br>
 
 {% if viewer.permitted('site_disable_ip_history') %}
 <div class="box pad">
-<div class="pad">The list may be updated by pasting the results of https://check.torproject.org/torbulkexitlist below<br />
+<div class="pad">The list may be updated by pasting the results of https://check.torproject.org/torbulkexitlist below<br>
 Note: the posted addresses become the new list. Existing addresses not listed in the paste will be removed. In other words,
 pasting an empty string will remove all addresses, which has the effect of allowing all Tor exit nodes.
 </div>
 <form method="post" action="">
-<input type="hidden" name="action" value="tor_node" />
-<input type="hidden" name="auth" value="{{ viewer.auth }}" />
+<input type="hidden" name="action" value="tor_node">
+<input type="hidden" name="auth" value="{{ viewer.auth }}">
 <textarea name="exitlist" cols="90" rows="10"></textarea>
-<br />
-<br />
-<input type="submit" value="Update" />
+<br>
+<br>
+<input type="submit" value="Update">
 </form>
 </div>
 {% endif %}

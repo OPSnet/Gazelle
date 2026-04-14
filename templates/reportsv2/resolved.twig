@@ -4,7 +4,7 @@
     </tr>
     <tr>
         <td class="label">Resolved:</td>
-        <td>{{ report.modified|date('Y-m-d H:i:s')|time_diff }}</td>
+        <td>{{ report.modified|time_diff }}</td>
     </tr>
     <tr>
         <td class="label">Report comments:</td>
@@ -18,7 +18,7 @@
     <tr>
         <td>&nbsp;</td>
         <td>
-            <input id="grab{{ report.id }}" type="button" value="Claim" onclick="Grab({{ report.id }});" />
+            <input id="grab{{ report.id }}" type="button" value="Claim" onclick="Grab({{ report.id }});">
         </td>
     </tr>
 {% endif %}

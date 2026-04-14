@@ -45,7 +45,7 @@
         <td>{{ rank|number_format }}</td>
         <td class="nowrap">{{ entry.user_id|user_url }}{% if entry.user_id == viewer.id %} (that's you!){% endif %}</td>
         <td>{{ entry.last_entry_link|raw }}</td>
-        <td class="nowrap">{{ entry.last_upload|time_diff }} </td>
+        <td class="nowrap">{{ entry.last_upload|time_diff }}</td>
         <td>{{ entry.entry_count|number_format }}</td>
     </tr>
     {% endfor %}

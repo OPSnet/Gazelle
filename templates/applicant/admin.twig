@@ -14,30 +14,31 @@
     <div class="pad">
 
 {% if not role %}
-    {% for r in list %}
-        {% if loop.first %}
+{%  for r in list %}
+{%      if loop.first %}
         <table>
-        {% endif %}
+{%      endif %}
             <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
                 <td>
                     <div class="head">
-                        <span style="font-size: medium"><a href="apply.php?action=edit&amp;id={{ r.id }}">{{ r.title }}</a></span> ({% if r.isPublished %}published{% else %}archived{% endif %})
-                        <br />Role created {{ r.created|time_diff }} by {{ r.userId|user_url }}
-                        {% if r.modified != r.created %}
+                        <span style="font-size: medium"><a href="apply.php?action=edit&amp;id={{ r.id }}">{{ r.title
+                            }}</a></span> ({% if r.isPublished %}published{% else %}archived{% endif %})
+                        <br>Role created {{ r.created|time_diff }} by {{ r.userId|user_url }}
+{%      if r.modified != r.created %}
                             last modified {{ r.modified|time_diff }}
-                        {% endif %}
+{%      endif %}
                     </div>
                 </td>
             </tr>
             <tr>
                 <td><div class="pad">{{ r.description|bb_format }}</div></td>
             </tr>
-        {% if loop.last %}
+{%      if loop.last %}
         </table>
-        {% endif %}
-    {% else %}
+{%      endif %}
+{%  else %}
         <p>There are no current roles. Create one using the form below.</p>
-    {% endfor %}
+{%  endfor %}
 {% endif %}
     </div>
 </div>

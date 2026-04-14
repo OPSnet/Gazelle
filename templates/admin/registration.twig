@@ -182,9 +182,9 @@
         </td>
         <td>{{ user.ipCountryIso }}</td>
         <td>
-            <span style="white-space: nowrap">{{- user.created|time_diff -}}</span>
+            <span style="white-space: nowrap">{{ user.created|time_diff }}</span>
             <br>
-            <span style="white-space: nowrap">{{- user.inviter.created|time_diff -}}</span>
+            <span style="white-space: nowrap">{{ user.inviter.created|time_diff }}</span>
         </td>
         <td>
             {{ user.inviteSource }}

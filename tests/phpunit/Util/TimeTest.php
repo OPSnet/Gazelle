@@ -108,4 +108,53 @@ class TimeTest extends TestCase {
             "time-seconds-$seconds"
         );
     }
+
+    public static function providerDiff(): array {
+        return [
+            [ null, 'null', 'Never'],
+            [ false, 'false', 'Never'],
+            [ strtotime('garbage'), 'garbage', 'Never'],
+        ];
+    }
+
+    #[DataProvider('providerDiff')]
+    public function testDiff(int|false|null|\DateTimeImmutable $time, string $label, string $expected, int $levels = 2): void {
+        $this->assertEquals(
+            $expected,
+            Time::diff($time, $levels, false),
+            "time-seconds-$label"
+        );
+    }
+
+    public function testImmutableDiff(): void {
+        $this->assertEquals(
+            '3 days ago',
+            Time::diff(new \DateTimeImmutable('3 days ago'), 2, false),
+            "time-immutable-3d"
+        );
+    }
+
+    public static function providerRealtimeDiff(): array {
+        $hour = 3600;
+        $day  = $hour * 24;
+        $week = $day  *  7;
+        $year = $week * 52;
+        return [
+            [ 90, 'm1', '1 minute ago'],
+            [ 120, 'm2', '2 minutes ago'],
+            [ $hour + 90, 'h1m1', '1 hour and 1 minute ago'],
+            [ 2 * $hour, 'h2', '2 hours ago'],
+            [ $day + $hour + 90, 'd1h1m1', '1 day, 1 hour and 1 minute ago', 3],
+            [ $year * 2 + $week * 10, 'y2w10', '2 years, 2 months ago'],
+        ];
+    }
+
+    #[DataProvider('providerRealtimeDiff')]
+    public function testRealtimeDiff(int $diff, string $label, string $expected, int $levels = 2): void {
+        $this->assertEquals(
+            $expected,
+            Time::diff(time() - $diff, $levels, false),
+            "time-seconds-$label"
+        );
+    }
 }

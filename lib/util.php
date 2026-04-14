@@ -772,13 +772,13 @@ function sanitize_irc_nick(string $nick): string {
  * difference in text (e.g. "16 hours and 28 minutes", "1 day, 18 hours").
  */
 function time_diff(
-    int|string|null $TimeStamp,
-    int             $Levels    = 2,
-    bool            $span      = true,
-    string|false    $StartTime = false,
-    bool            $hideAgo   = false,
+    int|string|\DateTimeImmutable|null $time,
+    int                                $levels    = 2,
+    bool                               $span      = true,
+    string|false                       $startTime = false,
+    bool                               $hideAgo   = false,
 ): string {
-    return Time::diff($TimeStamp, $Levels, $span, $StartTime, $hideAgo);
+    return Time::diff($time, $levels, $span, $startTime, $hideAgo);
 }
 
 /*** Paranoia functions ***/

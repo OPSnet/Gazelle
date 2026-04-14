@@ -1,5 +1,5 @@
 {% for pm in list %}
-    {% if loop.first %}
+{%  if loop.first %}
 <div class="box" id="staffpms_box">
     <div class="head">
         Staff PMs <a href="#" onclick="$('#staffpms').gtoggle(); return false;" class="brackets">View</a>
@@ -12,16 +12,16 @@
             <td>Replies</td>
             <td>Resolved by</td>
         </tr>
-    {% endif %}
+{%  endif %}
         <tr>
             <td><a href="staffpm.php?action=viewconv&amp;id={{ pm.pm_id }}">{{ pm.subject }}</a></td>
-            <td>{{ pm.date|time_diff(2) }}</td>
+            <td>{{ pm.date|time_diff }}</td>
             <td>{% if assigned_to_user %}{{ pm.user_id|user_url }}{% else %}{{ pm.reader }}{% endif %}</td>
             <td>{{ pm.replies }}</td>
             <td>{% if pm.resolver_id %}{{ pm.resolver_id|user_url }}{% else %}(unresolved){% endif %}</td>
         </tr>
-    {% if loop.last %}
+{%  if loop.last %}
     </table>
 </div>
-    {% endif %}
+{%  endif %}
 {% endfor %}

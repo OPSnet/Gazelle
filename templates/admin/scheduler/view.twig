@@ -6,12 +6,12 @@
 <div class="thin">
 Note: tasks are created and removed via Phinx migrations. When removing a task, remember to
 remove the code as well as the database entry.</div>
-<br />
+<br>
 <div class="thin">
 <a href="#" onclick="$('#tasks .reltime').gtoggle(); $('#tasks .abstime').gtoggle(); return false;" class="brackets">Toggle</a>
 date display between relative and absolute.
 </div>
-<br />
+<br>
 <table width="100%" id="tasks">
     <tr class="colhead">
         <td>{{ heading.emit('name')|raw }}</td>
@@ -49,9 +49,8 @@ date display between relative and absolute.
         </td>
         <td>{{ t.period|time_compact }}</td>
         <td>
-            <span class="reltime">{% if t.last_run %}{{ t.last_run|time_diff
-                }}{% else %}Never{% endif %}</span>
-            <span class="abstime hidden">{{ t.last_run|default('Never') }}</span>
+            <span class="reltime">{{ t.last_run|time_diff }}</span>
+            <span class="abstime hidden">{{ t.last_run }}</span>
         </td>
         <td>{{ t.duration }}ms</td>
         <td>

@@ -47,7 +47,8 @@
 {%  for item in headlines %}
     <div id="blog{{ item.id }}" class="box blog_post">
         <div class="head">
-            <a name="blog{{ item.id }}"><strong>{{ item.title }}</strong></a> - posted {{ item.createdEpoch|time_diff }} by {{ item.userId|user_url }}
+            <a name="blog{{ item.id }}"><strong>{{ item.title }}</strong></a> - posted {{
+                item.createdEpoch|time_diff }} by {{ item.userId|user_url }}
 {%      if viewer.permitted('admin_manage_blog') %}
                 - <a href="blog.php?action=editblog&amp;id={{ item.id }}" class="brackets">Edit</a>
                 <a href="blog.php?action=deleteblog&amp;id={{ item.id }}&amp;auth={{ viewer.auth }}" class="brackets">Delete</a>

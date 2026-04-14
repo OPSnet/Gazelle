@@ -118,15 +118,21 @@ END;
         $this->assertEquals('abc &quot;def&quot;…', self::twig('{{ value|shorten(10) }}')->render(['value' => 'abc "def" ghi']), 'twig-shorten-10');
 
         $this->assertEquals(
-            '2 hours and 7 mins',
+            '2 hours and 7 minutes',
             self::twig('{{ value|time_interval }}')->render(['value' => 3600 * 2 + 7 * 60]),
             'twig-time-ago'
         );
 
         $this->assertEquals(
-            '30 mins',
+            '30 minutes',
             self::twig('{{ value|time_interval }}')->render(['value' => 1800.125]),
             'twig-time-float-ago'
+        );
+
+        $this->assertEquals(
+            '1 week',
+            self::twig('{{ value|time_interval }}')->render(['value' => new \DateTimeImmutable('1 week ago')]),
+            'twig-time-dti-ago'
         );
 
         $this->assertMatchesRegularExpression(

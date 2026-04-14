@@ -9,73 +9,63 @@ class Time {
      * it's a string of a timestamp that we convert to a UNIX timestamp and then do a subtraction.
      * If the passed in $timestamp does not convert properly or is null, return false (error).
      */
-    public static function timeAgo(string|int|float $timestamp): false|int {
-        if (is_numeric($timestamp)) {
-            $timestamp = (int)$timestamp;
-        } else {
-            if ($timestamp == '') {
-                return false;
-            }
-            $timestamp = strtotime($timestamp);
-            if ($timestamp === false) {
-                return false;
-            }
-        }
-        return time() - $timestamp;
+    public static function timeAgo(string|int|float|\DateTimeImmutable $time): false|int {
+        $epoch = match (true) {
+            is_numeric($time)                   => (int)$time,
+            $time instanceof \DateTimeImmutable => (int)(time() - $time->format('U')),
+            default                             => strtotime($time),
+        };
+        return $epoch === false ? false : time() - $epoch;
     }
 
     public static function diff(
-        int|string|null $timestamp,
-        int             $levels    = 2,
-        bool            $span      = true,
-        string|false    $starttime = false,
-        bool            $hideAgo   = false,
+        int|false|string|\DateTimeImmutable|null $time,
+        int                                      $levels    = 2,
+        bool                                     $span      = true,
+        string|false                             $starttime = false,
+        bool                                     $hideAgo   = false,
     ): string {
         $starttime = ($starttime === false) ? time() : strtotime($starttime);
-        if ($starttime === false || $timestamp === 0 || $timestamp === '' || is_null($timestamp)) {
+        if ($starttime === false || $time === 0 || $time === false || $time === '' || $time === null) {
             return 'Never';
         }
-        if (is_numeric($timestamp)) {
-            $timestamp = (int)$timestamp;
-        } else {
-            $timestamp = strtotime($timestamp);
-            if ($timestamp === false) {
-                return 'Never';
-            }
+        $epoch = match (true) {
+            is_numeric($time)                   => (int)$time,
+            $time instanceof \DateTimeImmutable => (int)$time->format('U'),
+            default                             => strtotime($time),
+        };
+        if ($epoch === false) {
+            return 'Never';
         }
-        $time = $starttime - $timestamp;
+        $seconds = $starttime - $epoch;
 
         // If the time is negative, then it expires in the future.
-        if ($time < 0) {
-            $time = -$time;
+        if ($seconds < 0) {
+            $seconds = -$seconds;
             $hideAgo = true;
         }
 
-        $years = floor($time / 31_556_926); // seconds in one year
-        $remain = $time - $years * 31_556_926;
+        $years  = (int)floor($seconds / 31_556_926); // seconds in one year
+        $remain = $seconds - $years * 31_556_926;
 
-        $months = floor($remain / 2_629_744); // seconds in one month
+        $months = (int)floor($remain / 2_629_744); // seconds in one month
         $remain = $remain - $months * 2_629_744;
 
-        $weeks = floor($remain / 604800); // seconds in one week
+        $weeks  = (int)floor($remain / 604800); // seconds in one week
         $remain = $remain - $weeks * 604800;
 
-        $days = floor($remain / 86400); // seconds in one day
+        $days   = (int)floor($remain / 86400); // seconds in one day
         $remain = $remain - $days * 86400;
 
-        $hours = floor($remain / 3600); // seconds in one hour
+        $hours  = (int)floor($remain / 3600); // seconds in one hour
         $remain = $remain - $hours * 3600;
 
-        $minutes = floor($remain / 60);
+        $minutes = (int)floor($remain / 60);
 
         $timespec = '';
 
         if ($years > 0 && $levels > 0) {
-            if ($years > 1) {
-                $timespec .= "$years years";
-            } else {
-                $timespec .= "$years year";
-            }
+            $timespec .= "$years year" . plural($years);
             $levels--;
         }
 
@@ -83,11 +73,7 @@ class Time {
             if ($timespec != '') {
                 $timespec .= ', ';
             }
-            if ($months > 1) {
-                $timespec .= "$months months";
-            } else {
-                $timespec .= "$months month";
-            }
+            $timespec .= "$months month" . plural($months);
             $levels--;
         }
 
@@ -95,11 +81,7 @@ class Time {
             if ($timespec != '') {
                 $timespec .= ', ';
             }
-            if ($weeks > 1) {
-                $timespec .= "$weeks weeks";
-            } else {
-                $timespec .= "$weeks week";
-            }
+            $timespec .= "$weeks week" . plural($weeks);
             $levels--;
         }
 
@@ -107,11 +89,7 @@ class Time {
             if ($timespec != '') {
                 $timespec .= ', ';
             }
-            if ($days > 1) {
-                $timespec .= "$days days";
-            } else {
-                $timespec .= "$days day";
-            }
+            $timespec .= "$days day" . plural($days);
             $levels--;
         }
 
@@ -119,11 +97,7 @@ class Time {
             if ($timespec != '') {
                 $timespec .= ', ';
             }
-            if ($hours > 1) {
-                $timespec .= "$hours hours";
-            } else {
-                $timespec .= "$hours hour";
-            }
+            $timespec .= "$hours hour" . plural($hours);
             $levels--;
         }
 
@@ -131,11 +105,7 @@ class Time {
             if ($timespec != '') {
                 $timespec .= ' and ';
             }
-            if ($minutes > 1) {
-                $timespec .= "$minutes mins";
-            } else {
-                $timespec .= "$minutes min";
-            }
+            $timespec .= "$minutes minute" . plural($minutes);
         }
 
         if ($timespec == '') {
@@ -144,11 +114,9 @@ class Time {
             $timespec .= ' ago';
         }
 
-        if ($span) {
-            return '<span class="time tooltip" title="' . date('M d Y, H:i', $timestamp) . '">' . $timespec . '</span>';
-        } else {
-            return $timespec;
-        }
+        return $span
+            ? ('<span class="time tooltip" title="' . date('Y-m-d H:i', $epoch) . "\">$timespec</span>")
+            : $timespec;
     }
 
     /**

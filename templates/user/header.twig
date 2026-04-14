@@ -11,10 +11,10 @@
 {% if user.isWarned -%}
         &nbsp;<a href="wiki.php?action=article&amp;name=warnings"><img src="{{
             constant('STATIC_SERVER') }}/common/symbols/warned.png" alt="Warned" title="Warned
-{%- if own_profile or viewer.permitted('users_mod') %} – Expires {{ user.warningExpiry }}{% endif %}" class="tooltip" /></a>
+{%- if own_profile or viewer.permitted('users_mod') %} – Expires {{ user.warningExpiry }}{% endif %}" class="tooltip"></a>
 {% endif %}
 {% if user.isDisabled -%}
-        &nbsp;<a href="rules.php"><img src="{{ constant('STATIC_SERVER') }}/common/symbols/disabled.png" alt="Banished" title="Naughty person" class="tooltip" /></a>
+        &nbsp;<a href="rules.php"><img src="{{ constant('STATIC_SERVER') }}/common/symbols/disabled.png" alt="Banished" title="Naughty person" class="tooltip"></a>
 {% endif %}
 {% for badge, name in user.privilege.badgeList %}
             <span class="tooltip secondary_class" title="{{ name }}">{{ badge }}</span>
@@ -94,15 +94,15 @@
                 <label class="tooltip" title="This costs {{ price|number_format
                     }} BP, which will leave you with {{
                     (viewer.bonusPointsTotal - price)|number_format }} afterwards">
-                    <input type="radio" name="fltype" value="{{ item.label }}" />
+                    <input type="radio" name="fltype" value="{{ item.label }}">
                     {{ item.title }}
                 </label>
             </li>
 {%      endfor %}
-            <li><input type="text" id="message" name="message" placeholder="Message"/> <br /></li>
-            <li><input type="submit" name="flsubmit" value="Send" /></li>
+            <li><input type="text" id="message" name="message" placeholder="Message"/> <br></li>
+            <li><input type="submit" name="flsubmit" value="Send"></li>
 {%      if freeleech.latest %}
-{%          set when = freeleech.latest.purchase_date.format('U')|time_diff %}
+{%          set when = freeleech.latest.purchase_date|time_diff %}
             <li>You gave them {{ freeleech.latest.title|trim(' to Other') }} {{
                 when|raw }}{% if 'Just now' in when %}. Your generosity is most appreciated!{% endif -%}
             </li>
@@ -115,8 +115,8 @@
                 net | number_format }} token{{ net|plural }}</li>
 {%      endif %}
         </ul>
-        <input type="hidden" name="action" value="fltoken" />
-        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+        <input type="hidden" name="action" value="fltoken">
+        <input type="hidden" name="auth" value="{{ viewer.auth }}">
     </form>
 </div>
 {% endif %}

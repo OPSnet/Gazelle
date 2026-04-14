@@ -20,7 +20,7 @@
     <tr class="colhead_dark">
         <td colspan="{{ show_avatar ? 2 : 1 }}">
             <div style="float: left;"><a class="post_id" href="{{ url }}">#{{ comment.id }}</a>
-                <strong>{{ comment.id_user|user_full }}</strong> {{ comment.created|date('Y-m-d H:i:s')|time_diff }} on {{ heading }}
+                <strong>{{ comment.id_user|user_full }}</strong> {{ comment.created|time_diff }} on {{ heading }}
                 <span id="postcontrol-{{ comment.id }}">
 {%    if own_comment or viewer.permitted('site_moderate_forums') %}
                 - <a href="#post{{ comment.id }}" id="edit-{{ comment.id }}" data-author="{{ comment.id_user }}" data-key="{{ key }}" class="edit-post brackets">Edit</a>
@@ -62,7 +62,7 @@
                 {{- dom.click('#load-edit-' ~ comment.id, "LoadEdit('" ~ page ~ "', " ~ comment.id ~ ", 1); return false;") -}}
                 <a href="#content{{ comment.id }}" id="load-edit-{{ comment.id }}">&laquo;</a>
 {%    endif %}
-                Last edited by {{ comment.id_editor|user_url }} {{ comment.edited|date('Y-m-d H:i:s')|time_diff }}</span>
+                Last edited by {{ comment.id_editor|user_url }} {{ comment.edited|time_diff }}</span>
 {% endif %}
             </div>
         </td>

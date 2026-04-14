@@ -6,79 +6,79 @@
             <a href="report_auto.php">New</a> |
             <a href="report_auto.php?view=old">Old</a>
         </div>
-        {% if type_count|length > 1 %}
+{% if type_count|length > 1 %}
         <table class="auto_reports_type_box auto_reports_top_box"><tr><td>
             <p>Reports by type</p>
             <ul>
-            {% for item in type_count %}
+{%  for item in type_count %}
                 <li><a href="{{ build_url(base_uri, {'type': item[0].id}) }}">{{ item[1] }} {{ item[0].name }}</a></li>
-            {% endfor %}
+{%  endfor %}
             </ul>
         </td></tr></table>
-        {% endif %}
-        {% if user_count|length > 1 %}
+{% endif %}
+{% if user_count|length > 1 %}
         <table class="auto_reports_user_box auto_reports_top_box"><tr><td>
             <p>Reports by user</p>
             <ul>
-            {% for item in user_count %}
+{%  for item in user_count %}
                 <li><a href="{{ build_url(base_uri, {'userid': item[0].id}) }}">{{ item[1] }} {{ item[0].username }}</a></li>
-            {% endfor %}
+{%  endfor %}
             </ul>
         </td></tr></table>
-        {% endif %}
+{% endif %}
     </div>
     {{ paginator.linkbox|raw }}
     <div class="auto_reports_container">
-    {% for user_id, reports in auto_reports %}
+{% for user_id, reports in auto_reports %}
         <table id="auto_reports_{{ user_id }}" class="auto_reports">
             <tr><td>{# wrapping in stupid table because stylesheets #}
             <label class="auto_reports_expand" for="auto_reports_{{ user_id }}_cb">
                 <span class="auto_reports_header">
                     <span class="report_auto">{{ user_id|user_full }}</span>
                     <span class="report_num">{{ reports|length }} report{{ reports|length|plural }}</span>
-                    {% if (reports|last).isClaimed %}{# test if oldest report is claimed #}
+{%  if (reports|last).isClaimed %}{# test if oldest report is claimed #}
                         <span class="report_claimed">{% if is_old %}resolved{% else %}claimed{% endif %}
                             by {{ (reports|last).ownerId|user_url }}</span>
-                    {% endif %}
+{%  endif %}
                 </span>
             </label>
-            {% if not is_old %}
+{%  if not is_old %}
             <span class="all_buttons">
                 <button class="all_button" data-action="resolve_all" data-id="{{ user_id }}"{%
                     if type_id %} data-typeid="{{ type_id }}"{% endif %}>Resolve all</button>
                 <button class="all_button" data-action="claim_all" data-id="{{ user_id }}"{%
                     if type_id %} data-typeid="{{ type_id }}"{% endif %}>Claim all</button>
             </span>
-            {% endif %}
-            <input type="checkbox" class="expand_checkbox" id="auto_reports_{{ user_id }}_cb" autocomplete="off" checked />
+{%  endif %}
+            <input type="checkbox" class="expand_checkbox" id="auto_reports_{{ user_id }}_cb" autocomplete="off" checked>
             <div class="auto_reports_list expand_block">
-            {% for report in reports %}
+{%  for report in reports %}
                 <div id="user_report_{{ report.id }}">
                     <div class="report_title">
-                        {% if report.isResolved %}(done){% endif %}
+{%      if report.isResolved %}(done){% endif %}
                         <a class="report_link" href="{{ report.location }}">#{{ report.id }}</a>
                         <span class="report_type">{{ report.text }}</span>
-                        <span class="report_time">{{ report.created|date('Y-m-d H:i:s')|time_diff }}</span>
-                        {% if report.isClaimed %}
+                        <span class="report_time">{{ report.created|time_diff }}</span>
+{%      if report.isClaimed %}
                             <span class="report_claimed">{% if report.isResolved %}resolved{% else %}claimed{% endif %}
                             by {{ report.ownerId|user_url }}</span>
-                        {% endif %}
+{%      endif %}
                     </div>
                     <div class="details">{{ report.details|raw }}</div>
                     <div class="buttons">
-                        {% if report.isResolved %}
+{%      if report.isResolved %}
                             <button class="action_button" data-action="unresolve" data-id="{{ report.id }}">Unresolve</button>
-                        {% else %}
+{%      else %}
                             <button class="action_button" data-action="resolve" data-id="{{ report.id }}">Resolve</button>
-                        {% endif %}
-                        {% if report.ownerId != viewer.id %}
+{%      endif %}
+{%      if report.ownerId != viewer.id %}
                             <button class="action_button" data-action="claim" data-id="{{ report.id }}">Claim</button>
-                        {% else %}
+{%      else %}
                             <button class="action_button" data-action="unclaim" data-id="{{ report.id }}">Unclaim</button>
-                        {% endif %}
+{%      endif %}
                         <button><label class="link" for="auto_reports_comments_{{ report.id }}_cb">Add Comment</label></button>
                     </div>
-                    <input type="checkbox" class="expand_checkbox" id="auto_reports_comments_{{ report.id }}_cb" autocomplete="off" />
+                    <input type="checkbox" class="expand_checkbox" id="auto_reports_comments_{{ report.id }}_cb" autocomplete="off">
                     <form class="add_comment expand_block">
                         <textarea class="comment_box" name="comment" required="required" placeholder="Comment"></textarea>
                         <input type="submit" value="Send">
@@ -86,26 +86,26 @@
                         <input type="hidden" name="auth" value="{{ viewer.auth }}">
                     </form>
                     <div class="comments">
-                    {% if report.hasComments %}
-                        {% for comment in report.comments %}
+{%      if report.hasComments %}
+{%          for comment in report.comments %}
                         <div class="comment">
                             <span class="comment_time">{{ comment.created|time_diff }}</span>
                             <span class="comment_user">{{ comment.id_user }}</span>
                             <span class="comment_text">{{ comment.comment|bb_format }}</span>
                         </div>
-                        {% endfor %}
-                    {% endif %}
+{%          endfor %}
+{%      endif %}
                     </div>
                 </div>
-            {% endfor %}
+{%  endfor %}
             </div>
             </td></tr>
         </table>
-    {% else %}
+{% else %}
         <div class="box pad thin">
             <h4 style="text-align: center">No reports today, hooray!</h4>
         </div>
-    {% endfor %}
+{% endfor %}
     </div>
     {{ paginator.linkbox|raw }}
 </div>

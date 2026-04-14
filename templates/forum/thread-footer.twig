@@ -2,47 +2,47 @@
 {% include 'forum/thread-transition.twig' with {'thread': thread, 'transition_list': transition_list, 'viewer': viewer } only %}
 
 {% if viewer.permitted('site_moderate_forums') %}
-<br />
+<br>
 <h3 id="thread_notes">Thread notes</h3> <a href="#" onclick="$('#thread_notes_table').gtoggle(); return false;" class="brackets">Toggle</a>
 <form action="forums.php" method="post">
-    <input type="hidden" name="action" value="take_topic_notes" />
-    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-    <input type="hidden" name="threadid" value="{{ thread.id }}" />
+    <input type="hidden" name="action" value="take_topic_notes">
+    <input type="hidden" name="auth" value="{{ viewer.auth }}">
+    <input type="hidden" name="threadid" value="{{ thread.id }}">
     <table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border hidden" id="thread_notes_table">
 {%  for note in thread.threadNotes %}
         <tr>
-            <td>{{ note.AuthorID|user_url }} ({{ note.AddedTime|time_diff(2) }})</td>
+            <td>{{ note.AuthorID|user_url }} ({{ note.AddedTime|time_diff }})</td>
             <td>{{ note.Body|bb_format }}</td>
         </tr>
 {%  endfor %}
         <tr>
             <td colspan="2" class="center">
                 <div class="field_div textarea_wrap"><textarea id="topic_notes" name="body" cols="90" rows="3" onkeyup="resize('threadnotes');" style=" margin: 0px; width: 735px;"></textarea></div>
-                <input type="submit" value="Save" />
+                <input type="submit" value="Save">
             </td>
         </tr>
     </table>
 </form>
-<br />
+<br>
 <h3>Edit thread</h3>
 <form class="edit_form" name="forum_thread" action="forums.php" method="post">
     <div>
-    <input type="hidden" name="action" value="mod_thread" />
-    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-    <input type="hidden" name="threadid" value="{{ thread.id }}" />
-    <input type="hidden" name="page" value="{{ page }}" />
+    <input type="hidden" name="action" value="mod_thread">
+    <input type="hidden" name="auth" value="{{ viewer.auth }}">
+    <input type="hidden" name="threadid" value="{{ thread.id }}">
+    <input type="hidden" name="page" value="{{ page }}">
     </div>
     <table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border">
         <tr>
             <td class="label"><label for="sticky_thread_checkbox" title="Pin this thread at the top of the list of threads">Pin</label></td>
             <td>
-                <input type="checkbox" id="sticky_thread_checkbox" onclick="$('#ranking_row').gtoggle();" name="sticky"{{ checked(thread.isPinned) }} tabindex="4" />
+                <input type="checkbox" id="sticky_thread_checkbox" onclick="$('#ranking_row').gtoggle();" name="sticky"{{ checked(thread.isPinned) }} tabindex="4">
             </td>
         </tr>
         <tr id="ranking_row"{{ class_hidden(not thread.isPinned) }}>
             <td class="label"><label for="thread_ranking_textbox">Ranking</label></td>
             <td>
-                <input type="text" id="thread_ranking_textbox" name="ranking" size="6" value="{{ thread.pinnedRanking }}" tabindex="5" />
+                <input type="text" id="thread_ranking_textbox" name="ranking" size="6" value="{{ thread.pinnedRanking }}" tabindex="5">
 {% for t in thread.forum.pinnedThreadList %}
 {%  if loop.first %}
                 <details>
@@ -55,20 +55,20 @@
                 </details>
 {%  endif %}
 {% else %}
-                <br />No other threads are pinned in {{ thread.forum.link|raw }}
+                <br>No other threads are pinned in {{ thread.forum.link|raw }}
 {% endfor %}
             </td>
         </tr>
         <tr>
             <td class="label"><label for="locked_thread_checkbox">Locked</label></td>
             <td>
-                <input type="checkbox" id="locked_thread_checkbox" name="locked"{{ checked(thread.isLocked) }} tabindex="6" />
+                <input type="checkbox" id="locked_thread_checkbox" name="locked"{{ checked(thread.isLocked) }} tabindex="6">
             </td>
         </tr>
         <tr>
             <td class="label"><label for="thread_title_textbox">Title</label></td>
             <td>
-                <input type="text" id="thread_title_textbox" name="title" style="width: 75%;" value="{{ thread.title }}" tabindex="7" />
+                <input type="text" id="thread_title_textbox" name="title" style="width: 75%;" value="{{ thread.title }}" tabindex="7">
             </td>
         </tr>
         <tr>
@@ -98,13 +98,13 @@
         <tr>
             <td class="label"><label for="delete_thread_checkbox">Delete thread</label></td>
             <td>
-                <input type="checkbox" id="delete_thread_checkbox" name="delete" tabindex="2" />
+                <input type="checkbox" id="delete_thread_checkbox" name="delete" tabindex="2">
             </td>
         </tr>
 {%  endif %}
         <tr>
             <td colspan="2" class="center">
-                <input type="submit" value="Edit thread" tabindex="3" />
+                <input type="submit" value="Edit thread" tabindex="3">
             </td>
         </tr>
     </table>

@@ -25,12 +25,12 @@
     {%- if is_staff %}
         <div style="float: right;">
             <form name="role_resolve" method="POST" action="/apply.php?action=view&amp;id={{ app.id }}">
-                <input type="submit" name="resolve" value="{% if app.isResolved %}Reopen{% else %}Resolve{% endif %}" />
+                <input type="submit" name="resolve" value="{% if app.isResolved %}Reopen{% else %}Resolve{% endif %}">
                 <input type="hidden" name="id" value="{{ app.id }}"/>
                 <input type="hidden" name="auth" value="{{ viewer.auth }}"/>
             </form>
         </div>
-        <br />Application received from {{ app.userId|user_full }} received {{ app.created|time_diff }}.
+        <br>Application received from {{ app.userId|user_full }} received {{ app.created|time_diff }}.
     {%- endif %}
     </div>
 
@@ -75,8 +75,8 @@
                 <td class="label">Visibility</td>
                 <td>
                     <div>
-                        <label><input type="radio" name="visibility" value="public" /> public <span style="color: #347235">(member will see this reply)</span></label><br />
-                        <label><input type="radio" name="visibility" value="staff" checked /> staff <span style="color: #FF8017">(only staff will see this reply)</span></label><br />
+                        <label><input type="radio" name="visibility" value="public"> public <span style="color: #347235">(member will see this reply)</span></label><br>
+                        <label><input type="radio" name="visibility" value="staff" checked> staff <span style="color: #FF8017">(only staff will see this reply)</span></label><br>
                     </div>
                 <td>
             </tr>
@@ -94,7 +94,7 @@
                         <input type="hidden" name="id" value="{{ app.id }}"/>
                         <input type="hidden" name="auth" value="{{ viewer.auth }}"/>
                         {{ note.button|raw }}
-                        <input type="submit" id="submit" value="Save" />
+                        <input type="submit" id="submit" value="Save">
                     </div>
                 </td>
             </tr>
