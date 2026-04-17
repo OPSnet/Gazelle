@@ -9,7 +9,7 @@ class Debug {
     protected static array $Errors = [];
     protected static array $markList = [];
     protected float $cpuStart;
-    protected float $epochStart;
+    protected int $epochStart;
     protected float $timerStart;
 
     public function __construct(
@@ -17,7 +17,7 @@ class Debug {
         protected DB\Mysql $db,
     ) {
         $this->timerStart = hrtime(true);
-        $this->epochStart = microtime(true);
+        $this->epochStart = time();
         $this->cpuStart   = $this->cpuElapsed();
         set_error_handler($this->errorHandler(...));
     }
@@ -274,8 +274,8 @@ class Debug {
                 : "{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}",
             'Memory usage'      => byte_format(memory_get_usage(true)),
             'Page process time' => number_format($this->duration(), 3) . ' s',
-            'Script start'      => Time::sqlTime($this->epochStart),
-            'Script end'        => Time::sqlTime(microtime(true)),
+            'Script start'      => date('Y-m-d H:i:s', $this->epochStart),
+            'Script end'        => date('Y-m-d H:i:s'),
         ];
     }
 

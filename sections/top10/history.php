@@ -18,7 +18,7 @@ if (empty($_GET['date'])) {
     $list = [];
 } else {
     $date = trim($_GET['date']);
-    if (!Util\Time::validDate($date . ' 00:00:00')) {
+    if (!Util\Time::isValidDateTime($date, 'Y-m-d')) {
         Error400::error('That does not look like a date');
     }
     $list = new Manager\Torrent()->topTenHistoryList($date, $isByDay);

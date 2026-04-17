@@ -247,47 +247,8 @@ class Time {
         return date('Y-m-d H:i:s', time() + $offset);
     }
 
-    public static function sqlTime($timestamp = false): string {
-        if ($timestamp === false) {
-            $timestamp = time();
-        }
-        return date('Y-m-d H:i:s', (int)$timestamp);
-    }
-
-    public static function validDate($date_string): bool {
-        $date_time = explode(' ', $date_string);
-        if (count($date_time) != 2) {
-            return false;
-        }
-        [$date, $time] = $date_time;
-        $split_time = array_map('intval', explode(':', $time));
-        if (count($split_time) != 3) {
-            return false;
-        }
-        [$hour, $minute, $second] = $split_time;
-        if ($hour != 0 && !(is_number($hour) && $hour < 24 && $hour >= 0)) {
-            return false;
-        }
-        if ($minute != 0 && !(is_number($minute) && $minute < 60 && $minute >= 0)) {
-            return false;
-        }
-        if ($second != 0 && !(is_number($second) && $second < 60 && $second >= 0)) {
-            return false;
-        }
-        $split_date = array_map('intval', explode('-', $date));
-        if (count($split_date) != 3) {
-            return false;
-        }
-        [$year, $month, $day] = $split_date;
-        return checkdate($month, $day, $year);
-    }
-
-    public static function isValidDate($date): bool {
-        return static::isValidDateTime($date, 'Y-m-d');
-    }
-
-    public static function isValidDateTime($date_time, $format = 'Y-m-d H:i'): bool {
-        $formatted_date_time = \DateTime::createFromFormat($format, $date_time);
-        return $formatted_date_time && $formatted_date_time->format($format) == $date_time;
+    public static function isValidDateTime($dateTime, $format = 'Y-m-d H:i'): bool {
+        $formatted = \DateTime::createFromFormat($format, $dateTime);
+        return $formatted && $formatted->format($format) === $dateTime;
     }
 }

@@ -33,14 +33,14 @@ if (!empty($userSearch)) {
 
 $threadCreatedBefore = $_GET['thread_created_before'] ?? '';
 if (!empty($threadCreatedBefore)) {
-    if (!Time::isValidDate($threadCreatedBefore)) {
+    if (!Time::isValidDateTime($threadCreatedBefore, 'Y-m-d')) {
         Error400::error("Incorrect topic created before date");
     }
     $search->setThreadCreatedBefore($threadCreatedBefore);
 }
 $threadCreatedAfter = $_GET['thread_created_after'] ?? '';
 if (!empty($threadCreatedAfter)) {
-    if (!Time::isValidDate($threadCreatedAfter)) {
+    if (!Time::isValidDateTime($threadCreatedAfter, 'Y-m-d')) {
         Error400::error("Incorrect topic created after date");
     }
     $search->setThreadCreatedAfter($threadCreatedAfter);
@@ -49,14 +49,14 @@ if (!empty($threadCreatedAfter)) {
 if ($search->isBodySearch()) {
     $postCreatedBefore = $_GET['post_created_before'] ?? '';
     if (!empty($postCreatedBefore)) {
-        if (!Time::isValidDate($postCreatedBefore)) {
+        if (!Time::isValidDateTime($postCreatedBefore, 'Y-m-d')) {
             Error400::error("Incorrect post created before date");
         }
         $search->setPostCreatedBefore($postCreatedBefore);
     }
     $postCreatedAfter = $_GET['post_created_after'] ?? '';
     if (!empty($postCreatedAfter)) {
-        if (!Time::isValidDate($postCreatedAfter)) {
+        if (!Time::isValidDateTime($postCreatedAfter, 'Y-m-d')) {
             Error400::error("Incorrect post created after date");
         }
         $search->setPostCreatedAfter($postCreatedAfter);

@@ -143,7 +143,7 @@ if (DEBUG_TWIG) {
 
 // for sections/tools/development/process_info.php
 $Cache->cache_value('php_' . getmypid(), [
-    'start'    => Time::sqlTime(),
+    'start'    => date('Y-m-d H:i:s'),
     'document' => $module,
     'query'    => $_SERVER['QUERY_STRING'],
     'get'      => $_GET,

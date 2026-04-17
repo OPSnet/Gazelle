@@ -83,7 +83,7 @@ abstract class Task extends Base {
         if (!$this->isDebug && $severity === 'debug') {
             return;
         }
-        $this->events[] = new TaskScheduler\Event($severity, $message, $reference, Util\Time::sqlTime());
+        $this->events[] = new TaskScheduler\Event($severity, $message, $reference);
     }
 
     public function debug(string $message, int $reference = 0): void {
