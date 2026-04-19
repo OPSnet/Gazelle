@@ -28,12 +28,12 @@
     <h3>Reason</h3>
     <div class="box pad center">
         <form class="create_form" name="report" id="report_form" action="" method="post">
-            <input type="hidden" name="action" value="takereport" />
-            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-            <input type="hidden" name="id" value="{{ id }}" />
-            <input type="hidden" name="type" value="{{ type }}" />
-            <textarea class="required" rows="10" cols="95" name="reason"></textarea><br /><br />
-            <input type="submit" value="Create report" />
+            <input type="hidden" name="action" value="takereport">
+            <input type="hidden" name="auth" value="{{ viewer.auth }}">
+            <input type="hidden" name="id" value="{{ id }}">
+            <input type="hidden" name="type" value="{{ type }}">
+            <textarea class="required" rows="10" cols="95" name="reason"></textarea><br><br>
+            <input type="submit" value="Create report">
         </form>
     </div>
 {% endif %}

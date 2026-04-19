@@ -58,7 +58,7 @@ if (isset($_REQUEST['user']) && $isAdmin) {
 
 array_push($error, ...$request->validate($torrent, $filler, $isAdmin));
 if (count($error)) {
-    echo print_or_return(implode('<br />', $error));
+    echo print_or_return(implode('<br>', $error));
 } else {
     $request->fill($filler, $torrent);
 }

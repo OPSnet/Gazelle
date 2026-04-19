@@ -169,7 +169,7 @@ class Text {
         $Str = preg_replace("/\<pad pad=\"(.*?)\"\>/", "[pad=\\1]", $Str);
         $Str = str_replace("</pad>", "[/pad]", $Str);
         $Str = str_replace(['<number>', '<bullet>'], ['[#]', '[*]'], $Str);
-        $Str = str_replace(['</number>', '</bullet>'], '<br />', $Str);
+        $Str = str_replace(['</number>', '</bullet>'], '<br>', $Str);
         $Str = str_replace(['<ul class="postlist">', '<ol class="postlist">', '</ul>', '</ol>'], '', $Str);
         $Str = preg_replace("/\<align align=\"([a-z]+);\">/", "[align=\\1]", $Str);
         $Str = str_replace("</align>", "[/align]", $Str);
@@ -183,7 +183,6 @@ class Text {
         $Str = preg_replace("/\<(\/*)a\>/", "[\\1url]", $Str);
         $Str = preg_replace("/\<img(.*?)src=\"(.*?)\"(.*?)\>/", '[img]\\2[/img]', $Str);
         $Str = str_replace('<p>', '', $Str);
-        $Str = str_replace('</p>', '<br />', $Str);
-        return str_replace(["<br />", "<br>"], "\n", $Str);
+        return str_replace(["<br>","<br />", "</p>"], "\n", $Str);
     }
 }

@@ -4,11 +4,11 @@
     {{ paginator.linkbox|raw }}
 </div>
 <form action="" method="get">
-    <input type="hidden" name="action" value="donor_rewards" />
+    <input type="hidden" name="action" value="donor_rewards">
     <strong>Username (regexps allowed): </strong>
     <input name="search" value="{{ search }}"/>
 </form>
-<br />
+<br>
 
 {% for u in user %}
 {%  if loop.first %}
@@ -35,8 +35,8 @@
         <td style="vertical-align: top; word-wrap: anywhere">
             {{ u.custom_icon }}
 {%  if u.custom_icon %}
-            <br />
-            <img src="{{ donor_icon(u.custom_icon) }}" width="15" height="13" alt="" />
+            <br>
+            <img src="{{ donor_icon(u.custom_icon) }}" width="15" height="13" alt="">
 {%  endif %}
         </td>
         <td style="vertical-align: top; word-wrap: anywhere">
@@ -44,8 +44,8 @@
         </td>
         <td style="vertical-align: top">
             {{ u.second_avatar }}
-            <br />
-            <img width="150" src="{{ u.second_avatar }}" />
+            <br>
+            <img width="150" src="{{ u.second_avatar }}">
         </td>
     </tr>
 {%  if loop.last %}

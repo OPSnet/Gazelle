@@ -17,8 +17,8 @@
 {% set total = list|length %}
 <h3>{{ total }} user{{ total|plural }} currently under observation by the reaper</h3>
 <form action="tools.php?action=reaper" method="post">
-<label><input type="checkbox" name="unseeded"{{ checked(unseeded) }}/> Show unseeded</label><br />
-<label><input type="checkbox" name="never"{{ checked(never) }}/> Show never seeded</label><br /><br />
+<label><input type="checkbox" name="unseeded"{{ checked(unseeded) }}/> Show unseeded</label><br>
+<label><input type="checkbox" name="never"{{ checked(never) }}/> Show never seeded</label><br><br>
 <table>
     <tr class="colhead">
         <td>User</td>
@@ -33,17 +33,17 @@
         <td>{{ user.total|number_format }}</td>
         <td{% if user.in_future %} style="color: lime"{% endif %}>{{ user.min_date|time_diff }}</td>
         <td{% if user.in_future %} style="color: lime"{% endif %}>{{ user.max_date|time_diff }}</td>
-        <td><input type="checkbox" name="extend-{{ user.user_id }}" /></td>
+        <td><input type="checkbox" name="extend-{{ user.user_id }}"></td>
     </tr>
 {% endfor %}
 </table>
 <div class="thin pad box">
     Extend the reaper grace period of all checked users by the following amount:
-    <br />
-    <br />
-    <input type="number" name="extension" value="30" max="365" size="5" /> days <input type="submit" value="Extend" />
+    <br>
+    <br>
+    <input type="number" name="extension" value="30" max="365" size="5"> days <input type="submit" value="Extend">
 </div>
-<input type="hidden" name="auth" value="{{ viewer.auth }}" />
+<input type="hidden" name="auth" value="{{ viewer.auth }}">
 </form>
 </div>
 {{ footer() }}

@@ -140,9 +140,9 @@ foreach ($slice as $Key => $Post) {
 <table class="<?= implode(' ', $tableClass) ?>" id="post<?= $PostID ?>">
     <colgroup>
 <?php if ($Viewer->showAvatars()) { ?>
-        <col class="col_avatar" />
+        <col class="col_avatar">
 <?php } ?>
-        <col class="col_post_body" />
+        <col class="col_post_body">
     </colgroup>
     <tr class="colhead_dark">
         <td class="forum-post-head" colspan="<?= $Viewer->showAvatars() ? 2 : 1 ?>">
@@ -191,11 +191,11 @@ if (!empty($userTitle)) {
     if ($Viewer->permitted('users_warn') && $Viewer->id != $AuthorID && $Viewer->classLevel() >= $author->classLevel()) {
 ?>
                 <form class="manage_form hidden" name="user" id="warn<?=$PostID?>" action="" method="post">
-                    <input type="hidden" name="action" value="warn" />
-                    <input type="hidden" name="auth" value="<?= $auth ?>" />
-                    <input type="hidden" name="postid" value="<?=$PostID?>" />
-                    <input type="hidden" name="userid" value="<?=$AuthorID?>" />
-                    <input type="hidden" name="key" value="<?=$Key?>" />
+                    <input type="hidden" name="action" value="warn">
+                    <input type="hidden" name="auth" value="<?= $auth ?>">
+                    <input type="hidden" name="postid" value="<?=$PostID?>">
+                    <input type="hidden" name="userid" value="<?=$AuthorID?>">
+                    <input type="hidden" name="key" value="<?=$Key?>">
                 </form>
                 - <a href="#" onclick="$('#warn<?=$PostID?>').raw().submit(); return false;" class="brackets">Warn</a>
 <?php } ?>
@@ -215,8 +215,8 @@ echo ' colspan="2"'; } ?>>
             <div id="content<?=$PostID?>">
                 <?= \Text::full_format($Body, cache: Enum\ImageCacheMode::cache, bucket: CacheBucket::forum) ?>
 <?php   if ($EditedUserID) { ?>
-                <br />
-                <br />
+                <br>
+                <br>
                 <span class="last_edited">
 <?php       if ($Viewer->permitted('site_admin_forums')) { ?>
                 <a href="#content<?=$PostID?>" onclick="LoadEdit('forums', <?=$PostID?>, 1); return false;">&laquo;</a>

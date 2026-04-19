@@ -15,7 +15,7 @@
                     s.artist_id }}&amp;auth={{ viewer.auth }}" class="tooltip brackets" title="Remove this similar artist">✕</a></span>
 {%  endif -%}
             </div>
-            <br />
+            <br>
         </li>
 {% else %}
         <li><i>None found</i></li>
@@ -27,11 +27,11 @@
     <ul class="nobullet">
         <li>
             <form class="add_form" name="similar_artists" action="artist.php" method="post">
-                <input type="hidden" name="action" value="add_similar" />
-                <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-                <input type="hidden" name="artistid" value="{{ artist.id }}" />
-                <input type="text" autocomplete="off" id="artistsimilar" name="artistname" size="20"{{ autocomplete(viewer, 'other') }} />
-                <input type="submit" value="+" />
+                <input type="hidden" name="action" value="add_similar">
+                <input type="hidden" name="auth" value="{{ viewer.auth }}">
+                <input type="hidden" name="artistid" value="{{ artist.id }}">
+                <input type="text" autocomplete="off" id="artistsimilar" name="artistname" size="20"{{ autocomplete(viewer, 'other') }}>
+                <input type="submit" value="+">
             </form>
         </li>
     </ul>

@@ -3,17 +3,17 @@
 <div class="thin">
 {% if error %}
     <div class="save_message error">{{ error|raw }}</div>
-    <br />
+    <br>
 {% endif %}
     <form class="create_form" name="collage" action="collages.php" method="post">
 
-        <input type="hidden" name="action" value="new_handle" />
-        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+        <input type="hidden" name="action" value="new_handle">
+        <input type="hidden" name="auth" value="{{ viewer.auth }}">
         <table class="layout">
             <tr id="collagename">
                 <td class="label"><strong>Name</strong></td>
                 <td>
-                    <input type="text"{% if no_name %} class="hidden"{% endif %} name="name" size="60" id="namebox" value="{{ name }}" />
+                    <input type="text"{% if no_name %} class="hidden"{% endif %} name="name" size="60" id="namebox" value="{{ name }}">
                     <span id="personal"{% if not no_name %} class="hidden"{% endif %} style="font-style: oblique;"><strong>{{ viewer.username }}'s personal collage</strong></span>
                 </td>
             </tr>
@@ -33,8 +33,8 @@
     {% endif %}
 {% endfor %}
                     </select>
-                    <br />
-{% if viewer.permitted('site_collages_create') %}<br />{% endif %}
+                    <br>
+{% if viewer.permitted('site_collages_create') %}<br>{% endif %}
 {% include 'collage/description.twig' with {
         'general_allowed': viewer.permitted('site_collages_create'),
         'personal_allowed': viewer.canCreatePersonalCollage,
@@ -51,7 +51,7 @@
             <tr>
                 <td class="label"><strong>Tags (comma-separated)</strong></td>
                 <td>
-                    <input type="text" id="tags" name="tags" size="60" value="{{ tags }}" />
+                    <input type="text" id="tags" name="tags" size="60" value="{{ tags }}">
                 </td>
             </tr>
             <tr>
@@ -60,7 +60,7 @@
                 </td>
             </tr>
             <tr>
-                <td colspan="2" class="center"><input type="submit" value="Create collage" /></td>
+                <td colspan="2" class="center"><input type="submit" value="Create collage"></td>
             </tr>
         </table>
     </form>

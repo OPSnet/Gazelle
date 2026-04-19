@@ -33,7 +33,7 @@
 {%  else %}
                     <i>Deleted/Merged Group #{{ r.torrent.groupId }}</i>
 {%  endif %}
-                <br />{{ r.torrent.label|raw }}
+                <br>{{ r.torrent.label|raw }}
 {%  if r.torrent.isDeleted %}</i>{% endif %}
             </td>
             <td class="nowrap">{{ name_cache[r.Type] }}</td>
@@ -44,7 +44,7 @@
     </table>
 </div>
 {{ paginator.linkbox|raw }}
-<br />
+<br>
 {% endif %}
 
 <div class="thin box pad">
@@ -52,23 +52,23 @@
         <table>
             <tr>
                 <td style="width:150px">Uploaded by</td>
-                <td><input type="text" name="uploader" size="20" value="{{ uploader }}" /> User id or @username</td>
+                <td><input type="text" name="uploader" size="20" value="{{ uploader }}"> User id or @username</td>
             </tr>
             <tr>
                 <td style="width:150px">Reported by</td>
-                <td><input type="text" name="reporter" size="20" value="{{ reporter }}" /> User id or @username</td>
+                <td><input type="text" name="reporter" size="20" value="{{ reporter }}"> User id or @username</td>
             </tr>
             <tr>
                 <td style="width:150px">Handled by</td>
-                <td><input type="text" name="handler" size="20" value="{{ handler }}" /> User id or @username</td>
+                <td><input type="text" name="handler" size="20" value="{{ handler }}"> User id or @username</td>
             </tr>
             <tr>
                 <td style="width:150px">Single Torrent ID</td>
-                <td><input type="text" name="torrent" size="80" value="{{ torrent_id }}" /></td>
+                <td><input type="text" name="torrent" size="80" value="{{ torrent_id }}"></td>
             </tr>
             <tr>
                 <td style="width:150px">Torrent Group ID</td>
-                <td><input type="text" name="group" size="80" value="{{ group_id }}" /></td>
+                <td><input type="text" name="group" size="80" value="{{ group_id }}"></td>
             </tr>
             <tr>
                 <td style="width:150px">Report Type</td>
@@ -84,14 +84,14 @@
             <tr>
                 <td style="width:150px">Created</td>
                 <td>
-                    From <input type="text" name="dt-from" size="10" value="{{ dt_from }}" />
-                    and until <input type="text" name="dt-until" size="10" value="{{ dt_until }}" />
+                    From <input type="text" name="dt-from" size="10" value="{{ dt_from }}">
+                    and until <input type="text" name="dt-until" size="10" value="{{ dt_until }}">
                 </td>
             </tr>
             <tr>
                 <td colspan="2">
-                    <input type="hidden" name="action" value="search" />
-                    <input type="submit" value="Search reports" />
+                    <input type="hidden" name="action" value="search">
+                    <input type="submit" value="Search reports">
                 </td>
             </tr>
         </table>

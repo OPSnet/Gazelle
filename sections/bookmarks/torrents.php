@@ -58,7 +58,7 @@ if ($ownProfile) {
             ?>&amp;passkey=<?= $Viewer->announceKey()
             ?>&amp;auth=<?= $Viewer->rssAuth($feed)
             ?>&amp;name=<?= urlencode(SITE_NAME . ': Bookmarked Torrent Groups')
-            ?>"><img src="<?=STATIC_SERVER?>/common/symbols/rss.png" alt="RSS feed" /></a>&nbsp;
+            ?>"><img src="<?=STATIC_SERVER?>/common/symbols/rss.png" alt="RSS feed"></a>&nbsp;
 <?php } ?>
             <?= $user->link() ?> › Bookmarked Torrent Groups
         </h2>
@@ -69,7 +69,7 @@ if ($ownProfile) {
             <a href="bookmarks.php?type=requests" class="brackets">Requests</a>
 <?php
 if (count($bookmarkList) > 0) { ?>
-            <br /><br />
+            <br><br>
             <a href="bookmarks.php?action=remove_snatched&amp;auth=<?= $Viewer->auth() ?>" class="brackets" onclick="return confirm('Are you sure you want to remove the bookmarks for all items you\'ve snatched?');">Remove snatched</a>
             <a href="bookmarks.php?action=edit&amp;type=torrents" class="brackets">Manage torrents</a>
 <?php
@@ -171,7 +171,7 @@ if ($CollageCovers !== 0) { ?>
             <span id="nextpage"><a href="#" class="pageslink" onclick="collageShow.nextPage(); return false;">Next</a> ›</span>
             <span id="lastpage" class="<?=((int)ceil($NumGroups / $CollageCovers) === 2 ? 'invisible' : '')?>"> | <a href="#" id="lastpage" class="pageslink" onclick="collageShow.page(<?=(ceil($NumGroups / $CollageCovers) - 1)?>); return false;">Last &raquo;</a></span>
         </div>
-        <script type="text/javascript">
+        <script>
 <?php
         $CollagePages = [];
         for ($i = 0; $i < $NumGroups / $CollageCovers; $i++) {
@@ -205,9 +205,9 @@ $urlStem = new User\Stylesheet($Viewer)->imagePath();
                 <td class="number_column nobr">Files</td>
 <?php } ?>
                 <td class="number_column nobr">Size</td>
-                <td class="sign snatches"><img src="<?= $urlStem ?>snatched.svg" class="tooltip" alt="Snatches" title="Snatches" /></td>
-                <td class="sign seeders"><img src="<?= $urlStem ?>seeders.svg" class="tooltip" alt="Seeders" title="Seeders" /></td>
-                <td class="sign leechers"><img src="<?= $urlStem ?>leechers.svg" class="tooltip" alt="Leechers" title="Leechers" /></td>
+                <td class="sign snatches"><img src="<?= $urlStem ?>snatched.svg" class="tooltip" alt="Snatches" title="Snatches"></td>
+                <td class="sign seeders"><img src="<?= $urlStem ?>seeders.svg" class="tooltip" alt="Seeders" title="Seeders"></td>
+                <td class="sign leechers"><img src="<?= $urlStem ?>leechers.svg" class="tooltip" alt="Leechers" title="Leechers"></td>
             </tr>
 <?php
 

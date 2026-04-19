@@ -9,27 +9,27 @@
 <div class="pad">
 <h3>Add / Lookup</h3>
 <form class="create_form" name="ban" action="" method="post">
-<input type="hidden" name="action" value="ip_ban" />
-<input type="hidden" name="auth" value="{{ viewer.auth }}" />
+<input type="hidden" name="action" value="ip_ban">
+<input type="hidden" name="auth" value="{{ viewer.auth }}">
 <table cellpadding="6" cellspacing="1" border="0" class="layout border" width="100%">
     <tr>
         <th><label for="ip">IP address</label></th>
         <td>
             <textarea id="ip" name="ip" rows="2" cols="90" placeholder="An IP address {{ viewer.requestContext.remoteAddr }} or a range (e.g. {{ viewer.requestContext.remoteAddr }}/24) can be given to specify a range of addresses."></textarea>
-        <br />Be careful with ranges below /24, you can quite easily block half the internet.
+        <br>Be careful with ranges below /24, you can quite easily block half the internet.
         </td>
     </tr>
     <tr>
         <th><label for="note">Note</label></th>
         <td>
-            <input type="text" size="72" id="note" name="note" />
+            <input type="text" size="72" id="note" name="note">
         </td>
     </tr>
     <tr>
         <th>&nbsp;</th>
         <td>
-            <input type="submit" name="add" value="Add" />&nbsp;
-            <input type="submit" name="search" value="Search" />
+            <input type="submit" name="add" value="Add">&nbsp;
+            <input type="submit" name="search" value="Search">
         </td>
     </tr>
 </table>

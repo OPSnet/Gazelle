@@ -28,10 +28,10 @@
 {%  if loop.first %}
     <h3>Seeding locations</h3>
     <form class="manage_form" name="seedbox" action="user.php?action=seedbox&amp;userid={{ user.id }}" method="post">
-        <input type="hidden" name="action" value="seedbox" />
-        <input type="hidden" name="mode" value="update" />
-        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-        <input type="hidden" name="userid" value="{{ user.id }}" />
+        <input type="hidden" name="action" value="seedbox">
+        <input type="hidden" name="mode" value="update">
+        <input type="hidden" name="auth" value="{{ viewer.auth }}">
+        <input type="hidden" name="userid" value="{{ user.id }}">
         <table>
         <tr>
             <th>Name</th>
@@ -42,11 +42,11 @@
 {%  endif %}
         <tr>
             <td>
-                <input type="text" name="name-{{ loop.index }}" size="40" maxlen="40" value="{{ h.name }}" />
-                <input type="hidden" name="id-{{ loop.index }}" value="{{ h.id }}" />
-                <input type="hidden" name="ip-{{ loop.index }}" value="{{ h.ipv4addr }}" />
-                <input type="hidden" name="ua-{{ loop.index }}" value="{{ h.useragent }}" />
-                <input type="hidden" name="sig-{{ loop.index }}" value="{{ h.sig }}" />
+                <input type="text" name="name-{{ loop.index }}" size="40" maxlen="40" value="{{ h.name }}">
+                <input type="hidden" name="id-{{ loop.index }}" value="{{ h.id }}">
+                <input type="hidden" name="ip-{{ loop.index }}" value="{{ h.ipv4addr }}">
+                <input type="hidden" name="ua-{{ loop.index }}" value="{{ h.useragent }}">
+                <input type="hidden" name="sig-{{ loop.index }}" value="{{ h.sig }}">
             </td>
             <td>
                 {{ h.ipv4addr }}
@@ -58,7 +58,7 @@
         </tr>
 {%  if loop.last %}
         </table>
-        <input type="submit" value="Update names" />
+        <input type="submit" value="Update names">
     </form>
 {%  endif %}
 {% else %}
@@ -75,19 +75,19 @@
     expect to see a name here because it is in use, check your client to make sure
     it is not frozen or has crashed.</p>
     <form class="manage_form" name="seedbox" action="user.php?action=seedbox&amp;userid={{ user.id }}" method="post">
-        <input type="hidden" name="action" value="seedbox" />
-        <input type="hidden" name="mode" value="remove" />
-        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-        <input type="hidden" name="userid" value="{{ user.id }}" />
+        <input type="hidden" name="action" value="seedbox">
+        <input type="hidden" name="mode" value="remove">
+        <input type="hidden" name="auth" value="{{ viewer.auth }}">
+        <input type="hidden" name="userid" value="{{ user.id }}">
     <ul class="stats nobullet">
 {%  endif %}
         <li>
-            <input type="checkbox" id="seedbox-rm-{{ loop.index }}" name="rm-{{ f.id }}" />
+            <input type="checkbox" id="seedbox-rm-{{ loop.index }}" name="rm-{{ f.id }}">
             <label for="seedbox-rm-{{ loop.index }}">{{ f.name }}</label>
         </li>
 {%  if loop.last %}
     </ul>
-    <input type="submit" value="Remove unused names" />
+    <input type="submit" value="Remove unused names">
     </form>
 </div>
 {%  endif %}

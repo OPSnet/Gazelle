@@ -7,31 +7,31 @@
     </div>
     <div class="pad box">
         <form class="search_form" name="top10" method="get" action="">
-            <input type="hidden" name="type" value="history" />
+            <input type="hidden" name="type" value="history">
             <h3>Search for a date (from {{ constant('TOP_TEN_HISTORY_BEGIN') }} onwards)</h3>
             <table class="layout">
                 <tr>
                     <td class="label">Date:</td>
-                    <td><input type="text" id="date" name="date" value="{{ date }}" /></td>
+                    <td><input type="text" id="date" name="date" value="{{ date }}"></td>
                 </tr>
                 <tr>
                     <td class="label">Type:</td>
                     <td>
                         <label><input type="radio" name="datetype" value="day"{{ checked(by_day) }}> Day</label>
-                        <br />
+                        <br>
                         <label><input type="radio" name="datetype" value="week"{{ checked(not by_day) }}> Week</label>
                     </td>
                 </tr>
                 <tr>
                     <td colspan="2">
-                        <input type="submit" value="Submit" />
+                        <input type="submit" value="Submit">
                     </td>
                 </tr>
             </table>
         </form>
     </div>
 
-    <br />
+    <br>
     <div class="pad box">
         <h3>Top 10 for {% if by_day %}{{ date }}{% else %}the week following {{ date }}{% endif %}</h3>
     <table class="torrent_table cats numbering border">
@@ -59,7 +59,7 @@
         </td>
     </tr>
 {% endfor %}
-    </table><br />
+    </table><br>
 </div>
 </div>
 {{ footer() }}

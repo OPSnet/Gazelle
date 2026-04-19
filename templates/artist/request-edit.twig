@@ -10,8 +10,8 @@
     </div>
     <div style="margin-bottom: 10px">
         <p>
-        Please detail all information that needs to be edited for the artist. Include all relevant links (discogs, musicbrainz, etc.).<br /><br />
-        This will not generate a report, but will create a thread in the Editing forum.<br /><br />
+        Please detail all information that needs to be edited for the artist. Include all relevant links (discogs, musicbrainz, etc.).<br><br>
+        This will not generate a report, but will create a thread in the Editing forum.<br><br>
         What this form can be used for:
         </p>
         <ul>
@@ -29,11 +29,11 @@
 
         <div class="center">
             <form action="artist.php" method="POST">
-                <input type="hidden" name="action" value="takeeditrequest" />
-                <input type="hidden" name="artistid" value="{{ artist.id }}" />
-                <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+                <input type="hidden" name="action" value="takeeditrequest">
+                <input type="hidden" name="artistid" value="{{ artist.id }}">
+                <input type="hidden" name="auth" value="{{ viewer.auth }}">
                 {{ details.emit|raw }}
-                <input type="submit" value="Send Request" />
+                <input type="submit" value="Send Request">
             </form>
         </div>
     </div>

@@ -6,7 +6,7 @@
             {% if paginator.total and not show_all %} ({{ paginator.total }} new){% endif %}
         </h2>
         <div class="linkbox pager">
-            <br />
+            <br>
 {% if show_all %}
             <a href="userhistory.php?action=quote_notifications" class="brackets">Show unread quotes</a>&nbsp;
 {% else %}
@@ -14,13 +14,13 @@
 {% endif %}
             <a href="userhistory.php?action=subscriptions" class="brackets">Show subscriptions</a>&nbsp;
             <a href="userhistory.php?action=quote_notifications&amp;catchup=1" class="brackets">Catch up</a>&nbsp;
-            <br /><br />
+            <br><br>
         </div>
 {{ paginator.linkbox|raw }}
 {% if not paginator.total %}
     <div class="center">No{% if not show_all %} new{% endif %} quotes.</div>
 {% endif %}
-    <br />
+    <br>
 {% for quote in page %}
     <table class="forum_post box vertical_margin noavatar">
         <tr class="colhead_dark notify_{{ quote.page }}">

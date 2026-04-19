@@ -80,6 +80,6 @@ class FileChecker {
     }
 
     protected function characterError(string $character, string $allBlockedChars): string {
-        return "One or more of the files or folders in the torrent has a name that contains the forbidden character '$character'. Please rename the files as necessary and recreate the torrent.<br /><br />\nNote: The complete list of characters that are disallowed are shown below:<br />\n\t\t$allBlockedChars";
+        return "One or more of the files or folders in the torrent has a name that contains the forbidden character '$character'. Please rename the files as necessary and recreate the torrent.<br><br>\nNote: The complete list of characters that are disallowed are shown below:<br>\n\t\t$allBlockedChars";
     }
 }

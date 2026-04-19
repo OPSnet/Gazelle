@@ -62,14 +62,14 @@
         </tr>
 
         <tr>
-            <td colspan="3"><input type="submit" value="Confirm" /></td>
+            <td colspan="3"><input type="submit" value="Confirm"></td>
         </tr>
 
     </table>
 
-    <input type="hidden" name="curr" value="{{ curr_id }}" />
-    <input type="hidden" name="prev" value="{{ prev_id }}" />
-    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+    <input type="hidden" name="curr" value="{{ curr_id }}">
+    <input type="hidden" name="prev" value="{{ prev_id }}">
+    <input type="hidden" name="auth" value="{{ viewer.auth }}">
     </form>
 </div>
 {% endif %}
@@ -86,15 +86,15 @@
         <table>
             <tr>
                 <th>{{ constant('SITE_NAME') }} ID</th>
-                <td><input type="text" name="curr" width="10" value="{{ curr_id }}" /></td>
+                <td><input type="text" name="curr" width="10" value="{{ curr_id }}"></td>
             </tr>
             <tr>
                 <th>Previous ID</th>
-                <td><input type="text" name="prev" width="10" value="{{ prev_id }}" /></td>
+                <td><input type="text" name="prev" width="10" value="{{ prev_id }}"></td>
             </tr>
         </table>
-        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-        <input type="submit" value="Pair" />
+        <input type="hidden" name="auth" value="{{ viewer.auth }}">
+        <input type="submit" value="Pair">
         </form>
     </div>
 </div>

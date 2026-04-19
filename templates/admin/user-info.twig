@@ -29,7 +29,7 @@
     <tt> {{ user.externalProfile.profile }}</tt>
 {%      endif %}
 {%      set current = parent %}
-    <br />
+    <br>
 {%  endfor %}
 {% endif %}
 </td></tr>
@@ -50,8 +50,8 @@
 </div>
 
 <form method="get" action="">
-    <input type="hidden" name="action" value="user_info" />
-    <input type="hidden" name="userid" value="{{ user.id }}" />
+    <input type="hidden" name="action" value="user_info">
+    <input type="hidden" name="userid" value="{{ user.id }}">
 Order by <select name="col">
     <option value="first"{{ selected(column == "first") }}>First seen</option>
     <option value="last"{{ selected(column == "last") }}>Last seen</option>
@@ -61,7 +61,7 @@ Order by <select name="col">
     <option value="up"{{ selected(direction == "up") }}>Ascending</option>
     <option value="down"{{ selected(direction == "down") }}>Descending</option>
 </select>
-<input type="submit" value="Sort" />
+<input type="submit" value="Sort">
 </form>
 
 {{ footer() }}

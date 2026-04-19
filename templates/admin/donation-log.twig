@@ -39,35 +39,35 @@ Highcharts.chart('donation-timeline', {
 <div class="box pad">
     <figure class="highcharts-figure"><div id="donation-timeline"></div></figure>
 </div>
-<br />
+<br>
 
 <div>
     <form class="search_form" name="donation_log" action="" method="get">
-        <input type="hidden" name="action" value="donation_log" />
+        <input type="hidden" name="action" value="donation_log">
         <table cellpadding="6" cellspacing="1" border="0" class="layout border" width="100%">
             <tr>
                 <td class="label"><strong>Username:</strong></td>
                 <td>
-                    <input type="search" name="username" size="60" value="{{ username }}" />
+                    <input type="search" name="username" size="60" value="{{ username }}">
                 </td>
             </tr>
             <tr>
                 <td class="label"><strong>Date Range:</strong></td>
                 <td>
-                    <input type="date" name="after_date" value="{{ after }}" />
-                    <input type="date" name="before_date" value="{{ before }}" />
+                    <input type="date" name="after_date" value="{{ after }}">
+                    <input type="date" name="before_date" value="{{ before }}">
                 </td>
             </tr>
             <tr>
                 <td class="label">&nbsp;</td>
                 <td>
-                    <input type="submit" value="Search donation log" />
+                    <input type="submit" value="Search donation log">
                 </td>
             </tr>
         </table>
     </form>
 </div>
-<br />
+<br>
 {{ paginator.linkbox|raw }}
 <table width="100%">
     <tr class="colhead">

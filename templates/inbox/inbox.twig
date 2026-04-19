@@ -15,22 +15,22 @@
 {% else %}
     <form class="search_form" name="{{ inbox.folder }}" action="inbox.php" method="get" id="searchbox">
         <div>
-            <input type="hidden" name="section" value="{{ inbox.folder }}" />
-            <label><input type="radio" name="searchtype" value="user"{{ checked(inbox.searchField == 'user') }} /> User</label>
-            <label><input type="radio" name="searchtype" value="subject"{{ checked(inbox.searchField == 'subject') }} /> Subject</label>
-            <label><input type="radio" name="searchtype" value="message"{{ checked(inbox.searchField == 'message') }} /> Message</label>
-            <input type="search" name="search" placeholder="{{ inbox.searchField|default('Search in ' ~ inbox.folder) }}" style="width: 98%;" />
+            <input type="hidden" name="section" value="{{ inbox.folder }}">
+            <label><input type="radio" name="searchtype" value="user"{{ checked(inbox.searchField == 'user') }}> User</label>
+            <label><input type="radio" name="searchtype" value="subject"{{ checked(inbox.searchField == 'subject') }}> Subject</label>
+            <label><input type="radio" name="searchtype" value="message"{{ checked(inbox.searchField == 'message') }}> Message</label>
+            <input type="search" name="search" placeholder="{{ inbox.searchField|default('Search in ' ~ inbox.folder) }}" style="width: 98%;">
         </div>
-    </form><br />
+    </form><br>
     <form class="manage_form" name="messages" action="inbox.php" method="post" id="messageform">
-        <input type="hidden" name="action" value="masschange" />
-        <input type="hidden" name="section" value="{{ inbox.folder }}" />
-        <input type="hidden" name="sort" value="{{ inbox.showUnreadFirst }}" />
-        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-        <input type="submit" name="read" value="Mark as read" />&nbsp;
-        <input type="submit" name="unread" value="Mark as unread" />&nbsp;
-        <input type="submit" name="pin" value="Pin/Unpin message(s)" title="Unpin message are pinned, pin messages are unpinned" />&nbsp;
-        <input type="submit" name="delete" value="Delete message(s)" />
+        <input type="hidden" name="action" value="masschange">
+        <input type="hidden" name="section" value="{{ inbox.folder }}">
+        <input type="hidden" name="sort" value="{{ inbox.showUnreadFirst }}">
+        <input type="hidden" name="auth" value="{{ viewer.auth }}">
+        <input type="submit" name="read" value="Mark as read">&nbsp;
+        <input type="submit" name="unread" value="Mark as unread">&nbsp;
+        <input type="submit" name="pin" value="Pin/Unpin message(s)" title="Unpin message are pinned, pin messages are unpinned">&nbsp;
+        <input type="submit" name="delete" value="Delete message(s)">
         <span style="float: right;">
     {% if filter in ['user', 'system'] %}
             {# FIXME: using setFilter is not idempotent, need a better technique #}
@@ -53,7 +53,7 @@
 
         <table class="message_table checkboxes">
             <tr class="colhead">
-                <td style="width:10px"><input type="checkbox" onclick="toggleChecks('messageform', this);" /></td>
+                <td style="width:10px"><input type="checkbox" onclick="toggleChecks('messageform', this);"></td>
                 <td style="width:50%">Subject</td>
                 <td>{% if inbox.folder == 'sentbox' %}Receiver{% else  %}Sender{% endif %}</td>
                 <td>Date</td>
@@ -63,7 +63,7 @@
             </tr>
     {% for pm in messageList %}
             <tr class="{% if pm.isUnread %}unreadpm{% else %}row{{ cycle(['a', 'b'], loop.index0) }}{% endif %}">
-                <td class="center"><input type="checkbox" name="messages[]" value="{{ pm.id }}" /></td>
+                <td class="center"><input type="checkbox" name="messages[]" value="{{ pm.id }}"></td>
                 <td>
         {% if pm.isRead %}<strong>{% endif %}
         {% if pm.isPinned %}<span title="Pinned">&#x1f4cc; </span>{% endif %}
@@ -87,10 +87,10 @@
             </tr>
     {% endfor %}
         </table>
-        <input type="submit" name="read" value="Mark as read" />&nbsp;
-        <input type="submit" name="unread" value="Mark as unread" />&nbsp;
-        <input type="submit" name="pin" value="Pin/Unpin message(s)" title="Unpin message are pinned, pin messages are unpinned" />&nbsp;
-        <input type="submit" name="delete" value="Delete message(s)" />
+        <input type="submit" name="read" value="Mark as read">&nbsp;
+        <input type="submit" name="unread" value="Mark as unread">&nbsp;
+        <input type="submit" name="pin" value="Pin/Unpin message(s)" title="Unpin message are pinned, pin messages are unpinned">&nbsp;
+        <input type="submit" name="delete" value="Delete message(s)">
     </form>
 {% endif %}
 </div>

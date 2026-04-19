@@ -14,19 +14,19 @@
     <div style="float: right">
     {% if not (reveal_voters or poll.isClosed) %}
     <form class="manage_form" name="poll" action="forums.php" method="post">
-        <input type="hidden" name="action" value="poll_mod" />
-        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-        <input type="hidden" name="threadid" value="{{ thread.id }}" />
-        <input type="checkbox" name="ck-feat" />
-        <input type="submit" name="feature" value="{% if poll.isFeatured %}Unfeature{% else %}Feature{% endif %}" />
+        <input type="hidden" name="action" value="poll_mod">
+        <input type="hidden" name="auth" value="{{ viewer.auth }}">
+        <input type="hidden" name="threadid" value="{{ thread.id }}">
+        <input type="checkbox" name="ck-feat">
+        <input type="submit" name="feature" value="{% if poll.isFeatured %}Unfeature{% else %}Feature{% endif %}">
     </form>
     {% endif %}
     <form class="manage_form" name="poll" action="forums.php" method="post">
-        <input type="hidden" name="action" value="poll_mod" />
-        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-        <input type="hidden" name="threadid" value="{{ thread.id }}" />
-        <input type="checkbox" name="ck-close" />
-        <input type="submit" name="close" value="{% if poll.isClosed %}Reopen{% else %}Close{% endif %}" />
+        <input type="hidden" name="action" value="poll_mod">
+        <input type="hidden" name="auth" value="{{ viewer.auth }}">
+        <input type="hidden" name="threadid" value="{{ thread.id }}">
+        <input type="checkbox" name="ck-close">
+        <input type="submit" name="close" value="{% if poll.isClosed %}Reopen{% else %}Close{% endif %}">
     </form>
     </div>
 {% endif %}
@@ -46,13 +46,13 @@
             </li>
         {% endfor %}
         {% if response == 0 %}
-        <br />
+        <br>
         <li>&raquo; (Abstain)</li>
         {% endif %}
 
     </ul>
-    <br />
-    <strong>Votes:</strong> {{ poll.total|number_format }}<br />
+    <br>
+    <strong>Votes:</strong> {{ poll.total|number_format }}<br>
     {% else %}
     <ul class="nobullet" id="poll_options">
     {# Staff forum, output voters, not percentages #}
@@ -72,14 +72,14 @@
         </li>
         {% endfor %}
         {% if staff_vote.missing.who|length %}
-        <br />
+        <br>
             {% set total_staff = total_staff + staff_vote.missing.who|length %}
         <li>Missing: {{ staff_vote.missing.who|map(who => who.username)|join(', ') }}</li>
         {% endif %}
     </ul>
-    <br />
+    <br>
     <strong>Voted:</strong> {{ total_voted|number_format }} of {{ total_staff|number_format }} total. (You may click on a choice to change your vote).
-    <br />
+    <br>
     <a href="#" onclick="AddPollOption({{ thread.id }}); return false;" class="brackets">+</a>
 
     {% endif %}
@@ -87,22 +87,22 @@
 {# user has not voted #}
         <div id="poll_container">
             <form class="vote_form" name="poll" id="poll" action="">
-                <input type="hidden" name="action" value="poll" />
-                <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-                <input type="hidden" name="threadid" value="{{ thread.id }}" />
+                <input type="hidden" name="action" value="poll">
+                <input type="hidden" name="auth" value="{{ viewer.auth }}">
+                <input type="hidden" name="threadid" value="{{ thread.id }}">
                 <ul class="nobullet" id="poll_options">
     {% for key, answer in answer_list %}
                     <li>
-                        <input type="radio" name="vote" id="answer_{{ key }}" value="{{ key }}" />
+                        <input type="radio" name="vote" id="answer_{{ key }}" value="{{ key }}">
                         <label for="answer_{{ key }}">{{ answer }}</label>
                     </li>
     {% endfor %}
                     <li>
-                        <br />
-                        <input type="radio" name="vote" id="answer_0" value="0" /> <label for="answer_0">Abstain</label><br />
+                        <br>
+                        <input type="radio" name="vote" id="answer_0" value="0"> <label for="answer_0">Abstain</label><br>
                     </li>
                 </ul>
-                <input type="button" onclick="ajax.post('index.php','poll',function(response) { $('#poll_container').raw().innerHTML = response});" value="Vote" />
+                <input type="button" onclick="ajax.post('index.php','poll',function(response) { $('#poll_container').raw().innerHTML = response});" value="Vote">
             </form>
         </div>
 {% endif %}

@@ -2,19 +2,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width" />
-<meta name="referrer" content="same-origin" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="referrer" content="same-origin">
 <title>{{ page_title }} ⠶ {{ constant('SITE_NAME') }}</title>
-<link rel="shortcut icon" href="/favicon.ico" />
-<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-<link rel="search" type="application/opensearchdescription+xml" title="{{ constant('SITE_NAME') }} Torrents" href="opensearch.php?type=torrents" />
-<link rel="search" type="application/opensearchdescription+xml" title="{{ constant('SITE_NAME') }} Artists" href="opensearch.php?type=artists" />
-<link rel="search" type="application/opensearchdescription+xml" title="{{ constant('SITE_NAME') }} Requests" href="opensearch.php?type=requests" />
-<link rel="search" type="application/opensearchdescription+xml" title="{{ constant('SITE_NAME') }} Forums" href="opensearch.php?type=forums" />
-<link rel="search" type="application/opensearchdescription+xml" title="{{ constant('SITE_NAME') }} Log" href="opensearch.php?type=log" />
-<link rel="search" type="application/opensearchdescription+xml" title="{{ constant('SITE_NAME') }} Users" href="opensearch.php?type=users" />
-<link rel="search" type="application/opensearchdescription+xml" title="{{ constant('SITE_NAME') }} Wiki" href="opensearch.php?type=wiki" />
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="search" type="application/opensearchdescription+xml" title="{{ constant('SITE_NAME') }} Torrents" href="opensearch.php?type=torrents">
+<link rel="search" type="application/opensearchdescription+xml" title="{{ constant('SITE_NAME') }} Artists" href="opensearch.php?type=artists">
+<link rel="search" type="application/opensearchdescription+xml" title="{{ constant('SITE_NAME') }} Requests" href="opensearch.php?type=requests">
+<link rel="search" type="application/opensearchdescription+xml" title="{{ constant('SITE_NAME') }} Forums" href="opensearch.php?type=forums">
+<link rel="search" type="application/opensearchdescription+xml" title="{{ constant('SITE_NAME') }} Log" href="opensearch.php?type=log">
+<link rel="search" type="application/opensearchdescription+xml" title="{{ constant('SITE_NAME') }} Users" href="opensearch.php?type=users">
+<link rel="search" type="application/opensearchdescription+xml" title="{{ constant('SITE_NAME') }} Wiki" href="opensearch.php?type=wiki">
 {{ rss_link(viewer, "feed_news", "News") }}
 {{ rss_link(viewer, "feed_blog", "Blog") }}
 {{ rss_link(viewer, "feed_changelog", "Change Log") }}
@@ -49,27 +49,27 @@
 {% if viewer.option('UseOpenDyslexic') %}
 {{  scss('opendyslexic/style.css') }}
 {% endif %}
-<link rel="stylesheet" type="text/css" media="screen" href="{{ viewer.stylesheet.cssUrl }}" title="{{ viewer.stylesheet.name }}" />
-<script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/vendor/jquery.js?v={{ mtime('vendor/jquery.js') }}"></script>
-<script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/vendor/jquery.autocomplete.js?v={{ mtime('vendor/jquery.autocomplete.js') }}"></script>
-<script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/vendor/katex-0.16.10.min.js?v={{ mtime('vendor/katex-0.16.10.min.js') }}"></script>
-<script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/vendor/tooltipster.js?v={{ mtime('vendor/tooltipster.js') }}"></script>
-<script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/vendor/tooltipster_settings.js?v={{ mtime('vendor/tooltipster_settings.js') }}"></script>
+<link rel="stylesheet" type="text/css" media="screen" href="{{ viewer.stylesheet.cssUrl }}" title="{{ viewer.stylesheet.name }}">
+<script src="{{ constant('STATIC_SERVER') }}/vendor/jquery.js?v={{ mtime('vendor/jquery.js') }}"></script>
+<script src="{{ constant('STATIC_SERVER') }}/vendor/jquery.autocomplete.js?v={{ mtime('vendor/jquery.autocomplete.js') }}"></script>
+<script src="{{ constant('STATIC_SERVER') }}/vendor/katex-0.16.10.min.js?v={{ mtime('vendor/katex-0.16.10.min.js') }}"></script>
+<script src="{{ constant('STATIC_SERVER') }}/vendor/tooltipster.js?v={{ mtime('vendor/tooltipster.js') }}"></script>
+<script src="{{ constant('STATIC_SERVER') }}/vendor/tooltipster_settings.js?v={{ mtime('vendor/tooltipster_settings.js') }}"></script>
 {% if use_noty %}
-<script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/vendor/noty/noty.js?v={{ mtime('vendor/noty/noty.js') }}"></script>
-<script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/vendor/noty/noty.layout.bottomRight.js?v={{ mtime('vendor/noty/noty.layout.bottomRight.js') }}"></script>
-<script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/vendor/noty/noty.theme.default.js?v={{ mtime('vendor/noty/noty.theme.default.js') }}"></script>
+<script src="{{ constant('STATIC_SERVER') }}/vendor/noty/noty.js?v={{ mtime('vendor/noty/noty.js') }}"></script>
+<script src="{{ constant('STATIC_SERVER') }}/vendor/noty/noty.layout.bottomRight.js?v={{ mtime('vendor/noty/noty.layout.bottomRight.js') }}"></script>
+<script src="{{ constant('STATIC_SERVER') }}/vendor/noty/noty.theme.default.js?v={{ mtime('vendor/noty/noty.theme.default.js') }}"></script>
 {% endif %}
 {% if viewer.permitted('site_debug') %}
-<script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/vendor/jquery-migrate.js?v={{ mtime('vendor/jquery-migrate.js') }}"></script>
+<script src="{{ constant('STATIC_SERVER') }}/vendor/jquery-migrate.js?v={{ mtime('vendor/jquery-migrate.js') }}"></script>
 {% endif %}
-<script type="text/javascript" src="{{ constant('STATIC_SERVER') }}/functions/global.js?v={{ mtime('functions/global.js') }}"></script>
+<script src="{{ constant('STATIC_SERVER') }}/functions/global.js?v={{ mtime('functions/global.js') }}"></script>
 {% for js in script %}
 {{  script(js) }}
 {% endfor %}
 {% if use_noty %}
 {{  script('user_notifications.js') }}
 {% endif %}
-<script type="text/javascript">
+<script>
 var authkey="{{ viewer.auth }}";var userid={{ viewer.id }};
 </script>

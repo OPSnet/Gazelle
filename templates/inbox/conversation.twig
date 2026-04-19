@@ -36,15 +36,15 @@
     <h3>Reply</h3>
     <form class="send_form" name="reply" action="inbox.php" method="post" id="messageform">
         <div class="box pad">
-            <input type="hidden" name="action" value="takecompose" />
-            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-            <input type="hidden" name="toid" value="{{ pm.recipientList|filter(v => v != viewer.id)|join(',') }}" />
-            <input type="hidden" name="convid" value="{{ pm.id }}" />
+            <input type="hidden" name="action" value="takecompose">
+            <input type="hidden" name="auth" value="{{ viewer.auth }}">
+            <input type="hidden" name="toid" value="{{ pm.recipientList|filter(v => v != viewer.id)|join(',') }}">
+            <input type="hidden" name="convid" value="{{ pm.id }}">
             {{ body.preview|raw }}
             <a name="quickpost">{{ body.field|raw }}</a>
             <div id="buttons" class="center">
                 {{ body.button|raw }}
-                <input type="submit" value="Send message" />
+                <input type="submit" value="Send message">
             </div>
         </div>
     </form>
@@ -52,26 +52,26 @@
     <h3>Manage conversation</h3>
     <form class="manage_form" name="messages" action="inbox.php" method="post">
         <div class="box pad">
-            <input type="hidden" name="action" value="takeedit" />
-            <input type="hidden" name="convid" value="{{ pm.id }}" />
-            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+            <input type="hidden" name="action" value="takeedit">
+            <input type="hidden" name="convid" value="{{ pm.id }}">
+            <input type="hidden" name="auth" value="{{ viewer.auth }}">
             <table class="layout" width="100%">
                 <tr>
                     <td class="label"><label for="pin">Pinned</label></td>
                     <td>
-                        <input type="checkbox" id="pin" name="pin"{{ checked(pm.isPinned) }} />
+                        <input type="checkbox" id="pin" name="pin"{{ checked(pm.isPinned) }}>
                     </td>
                     <td class="label"><label for="mark_unread">Mark as unread</label></td>
                     <td>
-                        <input type="checkbox" id="mark_unread" name="mark_unread" />
+                        <input type="checkbox" id="mark_unread" name="mark_unread">
                     </td>
                     <td class="label"><label for="delete">Delete conversation</label></td>
                     <td>
-                        <input type="checkbox" id="delete" name="delete" />
+                        <input type="checkbox" id="delete" name="delete">
                     </td>
                 </tr>
                 <tr>
-                    <td class="center" colspan="6"><input type="submit" value="Manage conversation" /></td>
+                    <td class="center" colspan="6"><input type="submit" value="Manage conversation"></td>
                 </tr>
             </table>
         </div>
@@ -80,9 +80,9 @@
     <h3>Forward conversation</h3>
     <form class="send_form" name="forward" action="inbox.php" method="post">
         <div class="box pad">
-            <input type="hidden" name="action" value="forward" />
-            <input type="hidden" name="convid" value="{{ pm.id }}" />
-            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+            <input type="hidden" name="action" value="forward">
+            <input type="hidden" name="convid" value="{{ pm.id }}">
+            <input type="hidden" name="auth" value="{{ viewer.auth }}">
             <label for="receiverid">Forward to</label>
             <select id="receiverid" name="receiverid">
 {%  for staff_id, staff_name in staff_list %}
@@ -91,7 +91,7 @@
 {%      endif %}
 {%  endfor %}
             </select>
-            <input type="submit" value="Forward" />
+            <input type="submit" value="Forward">
         </div>
     </form>
 {% endif %}

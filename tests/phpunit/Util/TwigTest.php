@@ -28,7 +28,7 @@ class TwigTest extends TestCase {
         $twig = Util\Twig::factory(new Manager\User());
         $twig->createTemplate("{{ dom.click('#id', \"$('#id').frob(); return false;\") }}")->render();
         $expected = <<<END
-<script type="text/javascript">document.addEventListener('DOMContentLoaded', () => {
+<script>document.addEventListener('DOMContentLoaded', () => {
 \$('#id').click(() => {\$('#id').frob(); return false;});
 })</script>
 END;
@@ -64,14 +64,14 @@ END;
             );
         }
 
-        $checked = self::twig('{%- from "macro/form.twig" import checked -%}<input type="checkbox" name="test"{{ checked(truth) }} />');
+        $checked = self::twig('{%- from "macro/form.twig" import checked -%}<input type="checkbox" name="test"{{ checked(truth) }}>');
         $this->assertEquals(
-            '<input type="checkbox" name="test" checked />',
+            '<input type="checkbox" name="test" checked>',
             $checked->render(['truth' => true]),
             'twig-checked-true'
         );
         $this->assertEquals(
-            '<input type="checkbox" name="test" />',
+            '<input type="checkbox" name="test">',
             $checked->render(['truth' => false]),
             'twig-checked-false'
         );
@@ -183,14 +183,14 @@ END;
             reason: 'phpunit twig reason',
         );
         $this->assertMatchesRegularExpression(
-            "@^<a class=\"username\" href=\"user.php\?id={$this->user->id}\">{$this->user->username()}</a><a target=\"_blank\" href=\"[^\"]+\"><img class=\"donor_icon tooltip\" src=\"[^\"]+\" (?:alt=\"[^\"]+\" )?(?:title=\"[^\"]+\" )?/></a> \(Sysop\)$@",
+            "@^<a class=\"username\" href=\"user.php\?id={$this->user->id}\">{$this->user->username()}</a><a target=\"_blank\" href=\"[^\"]+\"><img class=\"donor_icon tooltip\" src=\"[^\"]+\"(?: alt=\"[^\"]+\")?(?: title=\"[^\"]+\")?></a> \(Sysop\)$@",
             self::twig('{{ user_id|user_full }}')->render(['user_id' => $this->user->id]),
             'twig-user-full'
         );
 
         $status = self::twig('{{ user_id|user_status(viewer) }}');
         $this->assertEquals(
-            "<a target=\"_blank\" href=\"donate.php\"><img class=\"donor_icon tooltip\" src=\"/static/common/symbols/donor_6.png\" title=\"Donor\" /></a>",
+            "<a target=\"_blank\" href=\"donate.php\"><img class=\"donor_icon tooltip\" src=\"/static/common/symbols/donor_6.png\" title=\"Donor\"></a>",
             $status->render(['user_id' => $this->user->id, 'viewer' => $this->user]),
             'twig-user-status'
         );

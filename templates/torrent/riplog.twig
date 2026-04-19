@@ -6,7 +6,7 @@
     <td>This torrent has {{ total }} log{{ total|plural }} with a total score of {{ log_score }}/100
 {%      if total > 1 and viewer.permitted('torrents_delete') %}
         <span style="float: right; font-weight: normal"><a class="brackets" onclick="return confirm('This is permanent and irreversible. Missing logs can still be uploaded.');"
-            href="torrents.php?action=removelogs&amp;torrentid={{ id }}&amp;auth={{ viewer.auth }}">Remove all logs</a></span><br />
+            href="torrents.php?action=removelogs&amp;torrentid={{ id }}&amp;auth={{ viewer.auth }}">Remove all logs</a></span><br>
 {%      endif %}
     </td>
 </tr>
@@ -23,13 +23,13 @@
 {%  if log.has_riplog %}
         <div style="padding: 10px; float: left"><a class="brackets" href="view.php?type=riplog&amp;id={{ id }}.{{ log.id }}" target="_blank">View Raw Log</a></div>
 {%  endif %}
-    <br />
-    <br clear="both" />
+    <br>
+    <br clear="both">
 
 {%  if (not log.adjusted and not log.checksum) or (log.adjusted and not log.adjusted_checksum) %}
     <div style="margin-left: 40px">
         <strong>Trumpable For:</strong>
-        <br /><br />
+        <br><br>
         Bad/No Checksum(s)
     </div>
 {%  endif %}

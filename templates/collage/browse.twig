@@ -27,38 +27,38 @@
 {% else %}
     <div>
         <form class="search_form" name="collages" action="" method="get">
-            <div><input type="hidden" name="action" value="search" /></div>
+            <div><input type="hidden" name="action" value="search"></div>
             <table cellpadding="6" cellspacing="1" border="0" class="layout border" width="100%">
                 <tr id="search_terms">
                     <td class="label">Search for:</td>
                     <td>
-                        <input type="search" name="search" size="70" value="{{ input.search }}" />
+                        <input type="search" name="search" size="70" value="{{ input.search }}">
                     </td>
                 </tr>
                 <tr id="search_name_description">
                     <td class="label">Search in:</td>
                     <td>
-                        <label><input type="radio" name="type" value="name"{{ checked(search.lookup == 'name') }} /> Names</label>&nbsp;&nbsp;
-                        <label><input type="radio" name="type" value="description"{{ checked(search.lookup == 'description') }} /> Descriptions</label>
+                        <label><input type="radio" name="type" value="name"{{ checked(search.lookup == 'name') }}> Names</label>&nbsp;&nbsp;
+                        <label><input type="radio" name="type" value="description"{{ checked(search.lookup == 'description') }}> Descriptions</label>
                     </td>
                 </tr>
                 <tr id="tagfilter">
                     <td class="label">Tags (comma-separated):</td>
                     <td>
-                        <input type="text" id="tags" name="tags" size="70" value="{{ input.tags }}"{{ autocomplete(viewer, 'other') }} />
-                        <br /><br />
-                        <label><input type="radio" name="tags_type" value="1"{{ checked(search.isTagAll) }} /> All</label>
-                        <label><input type="radio" name="tags_type" value="0"{{ checked(not search.isTagAll) }} /> Any</label>&nbsp;&nbsp;
+                        <input type="text" id="tags" name="tags" size="70" value="{{ input.tags }}"{{ autocomplete(viewer, 'other') }}>
+                        <br><br>
+                        <label><input type="radio" name="tags_type" value="1"{{ checked(search.isTagAll) }}> All</label>
+                        <label><input type="radio" name="tags_type" value="0"{{ checked(not search.isTagAll) }}> Any</label>&nbsp;&nbsp;
                     </td>
                 </tr>
                 <tr id="categories">
                     <td class="label">Categories:</td>
                     <td>
 {%  for id, name in constant('COLLAGE')|sort %}
-                        <label class="cat-choice"><input type="checkbox" class="collagecat" value="1" name="cats[{{ id }}]"{{ checked(search.isSelectedCategory(id)) }} /> {{ name }}</label>
-{%      if loop.index % 5 %}&nbsp;&nbsp;&nbsp;{% else %}<br />{% endif %}
+                        <label class="cat-choice"><input type="checkbox" class="collagecat" value="1" name="cats[{{ id }}]"{{ checked(search.isSelectedCategory(id)) }}> {{ name }}</label>
+{%      if loop.index % 5 %}&nbsp;&nbsp;&nbsp;{% else %}<br>{% endif %}
 {%  endfor %}
-                        <br />
+                        <br>
                         <a href="#" id="cat-all" title="Select all collage categories">✅</a>
                         <a href="#" id="cat-none" title="Clear all collage categories (but at least one will have to be checked)">🚫</a>
                         <a href="#" id="cat-invert" title="Toggle the select categories">🔁</a>
@@ -82,7 +82,7 @@
                 </tr>
                 <tr>
                     <td colspan="2" class="center">
-                        <input type="submit" value="Search" />
+                        <input type="submit" value="Search">
                     </td>
                 </tr>
             </table>
@@ -108,7 +108,7 @@
 {%  if viewer.permitted('site_collages_recover') %}
         <a href="collages.php?action=recover" class="brackets">Recover collage</a>
 {%  endif %}
-        <br />
+        <br>
 {%  if viewer.permittedAny('site_collages_create') %}
         <a href="collages.php?userid={{ viewer.id }}" class="brackets">Collages you started</a>
         <a href="collages.php?userid={{ viewer.id }}&amp;contrib=1" class="brackets">Collages you contributed to</a>

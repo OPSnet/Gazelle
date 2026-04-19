@@ -21,7 +21,7 @@
     </table>
 
     <div class="drag_drop_save hidden">
-        <input type="button" name="submit" value="Save All Changes" class="save_sortable_collage" />
+        <input type="button" name="submit" value="Save All Changes" class="save_sortable_collage">
     </div>
     <table id="manage_collage_table">
         <thead>
@@ -41,15 +41,15 @@
                 <td>{{ entry.artist.name }}</td>
                 <td class="nobr">{{ entry.user_id|user_url }}</td>
                 <td>
-                    <input class="sort_numbers" type="text" name="sort" value="{{ entry.sequence }}" id="sort_{{ id }}" size="4" />
+                    <input class="sort_numbers" type="text" name="sort" value="{{ entry.sequence }}" id="sort_{{ id }}" size="4">
                 </td>
                 <td class="nobr">
-                    <input type="hidden" name="action" value="manage_artists_handle" />
-                    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-                    <input type="hidden" name="collageid" value="{{ collage.id }}" />
-                    <input type="hidden" name="artistid" value="{{ id }}" />
-                    <input title="Use Save to register the change in a sequence value" type="submit" name="submit" value="Save" />
-                    <input type="submit" name="submit" value="Remove" />
+                    <input type="hidden" name="action" value="manage_artists_handle">
+                    <input type="hidden" name="auth" value="{{ viewer.auth }}">
+                    <input type="hidden" name="collageid" value="{{ collage.id }}">
+                    <input type="hidden" name="artistid" value="{{ id }}">
+                    <input title="Use Save to register the change in a sequence value" type="submit" name="submit" value="Save">
+                    <input type="submit" name="submit" value="Remove">
                 </td>
             </form>
         </tr>
@@ -57,14 +57,14 @@
         </tbody>
     </table>
     <div class="drag_drop_save hidden">
-        <input type="button" name="submit" value="Save All Changes" class="save_sortable_collage" />
+        <input type="button" name="submit" value="Save All Changes" class="save_sortable_collage">
     </div>
     <form class="dragdrop_form hidden" name="collage" action="collages.php" method="post" id="drag_drop_collage_form">
         <div>
-            <input type="hidden" name="action" value="manage_artists_handle" />
-            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-            <input type="hidden" name="collageid" value="{{ collage.id }}" />
-            <input type="hidden" name="drag_drop_collage_sort_order" id="drag_drop_collage_sort_order" value="" />
+            <input type="hidden" name="action" value="manage_artists_handle">
+            <input type="hidden" name="auth" value="{{ viewer.auth }}">
+            <input type="hidden" name="collageid" value="{{ collage.id }}">
+            <input type="hidden" name="drag_drop_collage_sort_order" id="drag_drop_collage_sort_order" value="">
         </div>
     </form>
 </div>

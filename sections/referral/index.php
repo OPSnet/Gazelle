@@ -17,7 +17,7 @@ if (session_status() === PHP_SESSION_NONE) {
 ?>
 
 <div id="logo">
-<a href="/" style="margin-left: 0;"><img src="<?= STATIC_SERVER ?>/styles/public/images/loginlogo.png" alt="Orpheus Network" title="Orpheus Network" /></a>
+<a href="/" style="margin-left: 0;"><img src="<?= STATIC_SERVER ?>/styles/public/images/loginlogo.png" alt="Orpheus Network" title="Orpheus Network"></a>
 </div>
 
 <?php
@@ -39,7 +39,7 @@ if (!OPEN_EXTERNAL_REFERRALS || !count($Accounts) || $ReferralManager->readOnly)
 View::show_header('External Tracker Referrals');
 ?>
 
-<br />
+<br>
 <div class="referral">
     <h1>External Tracker Referrals</h1>
     <p>Here you may create an account on <?= SITE_NAME ?> by verifying that you are a member of another private tracker that we trust.</p>
@@ -68,7 +68,7 @@ View::show_header('External Tracker Referrals');
 <?php } ?>
             <br/>
             <input type="hidden" name="action" value="account">
-            <input type="submit" name="submit" value="Submit" class="submit" />
+            <input type="submit" name="submit" value="Submit" class="submit">
         </form>
     </div>
 <?php
@@ -92,14 +92,14 @@ View::show_header('External Tracker Referrals');
     <br/>
     <div class="center">
         <form name="referral_service" method="post" action="">
-        <label for="username"><?=$Account["UserIsId"] ? "User Id" : "Username"?></label><input type="text" name="username" /><br />
-            <label for="Email">Email Address</label><input type="text" name="email" />
-            <input type="hidden" name="token" value="<?=$Token?>" />
-            <input type="hidden" name="service" value="<?=$Account["ID"]?>" />
-            <input type="hidden" name="action" value="verify" />
+        <label for="username"><?=$Account["UserIsId"] ? "User Id" : "Username"?></label><input type="text" name="username"><br>
+            <label for="Email">Email Address</label><input type="text" name="email">
+            <input type="hidden" name="token" value="<?=$Token?>">
+            <input type="hidden" name="service" value="<?=$Account["ID"]?>">
+            <input type="hidden" name="action" value="verify">
             <br/>
             <br/>
-            <input type="submit" name="submit" value="Verify" class="submit" />
+            <input type="submit" name="submit" value="Verify" class="submit">
             <br/>
             <br/>
         </form>
@@ -136,15 +136,15 @@ View::show_header('External Tracker Referrals');
         }
     }
 ?>
-    <br />
+    <br>
     <h2>Step 2: Join</h2>
-    <br />
+    <br>
 <?php
     if (isset($Account)) {
         if ($Error) {
 ?>
     <h3>There was an error verifying your account at <?=$Account["Site"]?>. Please refresh the page and try again.</h3>
-    <br />
+    <br>
     <p><?=$Error?></p>
 <?php
     } elseif (REFERRAL_SEND_EMAIL) {

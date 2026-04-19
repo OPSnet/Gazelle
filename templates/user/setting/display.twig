@@ -14,17 +14,17 @@
         <td>
             <ul class="options_list nobullet">
                 <li>
-                    <input type="checkbox" name="showtfilter" id="showtfilter"{{ checked(user.option('ShowTorFilter')) }} />
+                    <input type="checkbox" name="showtfilter" id="showtfilter"{{ checked(user.option('ShowTorFilter')) }}>
                     <label for="showtfilter">Show search form at top page (otherwise it is just a click away)</label>
                 </li>
 {% if user.permitted('site_advanced_search') %}
                 <li>
-                    <input type="checkbox" name="search_type_advanced" id="search_type"{{ checked(user.option('SearchType')) }} />
+                    <input type="checkbox" name="search_type_advanced" id="search_type"{{ checked(user.option('SearchType')) }}>
                     <label for="search_type">Show advanced search form (more filtering options)</label>
                 </li>
 {% endif %}
                 <li>
-                    <input type="checkbox" name="hidetags" id="hidetags"{{ checked(user.hasAttr('hide-tags')) }} />
+                    <input type="checkbox" name="hidetags" id="hidetags"{{ checked(user.hasAttr('hide-tags')) }}>
                     <label for="hidetags">Do not show most popular official tags at bottom of search form by default</label>
                 </li>
             </ul>
@@ -37,7 +37,7 @@
             <p class="min_padding">Enabling torrent grouping on the search page will place multiple
             formats of the same torrent group together beneath a common header.</p>
             <div class="option_group">
-                <input type="checkbox" name="disablegrouping" id="disablegrouping"{{ checked(not user.option('DisableGrouping2')) }} />
+                <input type="checkbox" name="disablegrouping" id="disablegrouping"{{ checked(not user.option('DisableGrouping2')) }}>
                 <label for="disablegrouping">Enable torrent grouping</label>
             </div>
         </td>
@@ -50,11 +50,11 @@
                     <p class="min_padding">In torrent search results and on artist pages, &quot;open&quot;
                     will expand torrent groups by default, and &quot;closed&quot; will collapse torrent groups by default.</p>
                     <li>
-                        <input type="radio" name="torrentgrouping" id="torrent_grouping_open" value="0"{{ checked(user.option('TorrentGrouping') == 0) }} />
+                        <input type="radio" name="torrentgrouping" id="torrent_grouping_open" value="0"{{ checked(user.option('TorrentGrouping') == 0) }}>
                         <label for="torrent_grouping_open">Open</label>
                     </li>
                     <li>
-                        <input type="radio" name="torrentgrouping" id="torrent_grouping_closed" value="1"{{ checked(user.option('TorrentGrouping') == 1) }} />
+                        <input type="radio" name="torrentgrouping" id="torrent_grouping_closed" value="1"{{ checked(user.option('TorrentGrouping') == 1) }}>
                         <label for="torrent_grouping_closed">Closed</label>
                     </li>
                 </ul>
@@ -62,20 +62,20 @@
         </td>
     </tr>
     <tr id="tor_reltype_tr">
-        <td style="vertical-align: top;" class="label"><strong>Order of release types<br />(artist pages)</strong></td>
+        <td style="vertical-align: top;" class="label"><strong>Order of release types<br>(artist pages)</strong></td>
         <td>
-            <p class="min_padding">Drag and drop release types to change the order of display on artist pages.<br />
+            <p class="min_padding">Drag and drop release types to change the order of display on artist pages.<br>
             Check the box of a release type if it should be collapsed when an artist page is viewed.</p>
             <a href="#" id="reset_sortable" class="brackets">Reset to default</a>
             <ul class="sortable_list" id="sortable">
 {% set release -%}
     {%- for r in release_order -%}
-                <li class="sortable_item"><input type="checkbox" id="{{ r.id }}"{{ checked(r.checked) }} /> <label for="{{ r.id }}">{{ r.label }}</label></li>
+                <li class="sortable_item"><input type="checkbox" id="{{ r.id }}"{{ checked(r.checked) }}> <label for="{{ r.id }}">{{ r.label }}</label></li>
     {%- endfor -%}
 {% endset -%}
                 {{- release }}
             </ul>
-            <input type="hidden" id="sorthide" name="sorthide" value="" />
+            <input type="hidden" id="sorthide" name="sorthide" value="">
         </td>
     </tr>
     <tr id="tor_cover_tor_tr">
@@ -85,12 +85,12 @@
         <td>
             <ul class="options_list nobullet">
                 <li>
-                    <input type="hidden" name="coverart" value="" />
-                    <input type="checkbox" name="coverart" id="coverart"{{ checked(user.option('CoverArt')) }} />
+                    <input type="hidden" name="coverart" value="">
+                    <input type="checkbox" name="coverart" id="coverart"{{ checked(user.option('CoverArt')) }}>
                     <label for="coverart">Enable cover artwork</label>
                 </li>
                 <li>
-                    <input type="checkbox" name="show_extra_covers" id="show_extra_covers"{{ checked(user.option('ShowExtraCovers')) }} />
+                    <input type="checkbox" name="show_extra_covers" id="show_extra_covers"{{ checked(user.option('ShowExtraCovers')) }}>
                     <label for="show_extra_covers">Enable additional cover artwork</label>
                 </li>
             </ul>
@@ -129,7 +129,7 @@
             <strong>Voting links</strong>
         </td>
         <td>
-            <input type="checkbox" name="novotelinks" id="novotelinks"{{ checked(user.option('NoVoteLinks')) }} />
+            <input type="checkbox" name="novotelinks" id="novotelinks"{{ checked(user.option('NoVoteLinks')) }}>
             <label for="novotelinks">Disable voting links</label>
         </td>
     </tr>
@@ -139,7 +139,7 @@
             <strong>Snatched torrents indicator</strong>
         </td>
         <td>
-            <input type="checkbox" name="showsnatched" id="showsnatched"{{ checked(user.option('ShowSnatched')) }} />
+            <input type="checkbox" name="showsnatched" id="showsnatched"{{ checked(user.option('ShowSnatched')) }}>
             <label for="showsnatched">Enable snatched torrents indicator</label>
         </td>
     </tr>
@@ -148,7 +148,7 @@
             <strong>Text file downloads</strong>
         </td>
         <td>
-            <input type="checkbox" name="downloadtext" id="downloadtext"{{ checked(user.downloadAsText) }} />
+            <input type="checkbox" name="downloadtext" id="downloadtext"{{ checked(user.downloadAsText) }}>
             <label for="downloadtext">Enable downloading torrent files as text files</label>
         </td>
     </tr>
@@ -159,21 +159,21 @@
         </td>
         <td>
             <label><input type="radio" name="file-count-display" value="0"{{
-                checked(user.ordinal.value('file-count-display') == 0) }} />
-            None</label><br />
+                checked(user.ordinal.value('file-count-display') == 0) }}>
+            None</label><br>
             <label><input type="radio" name="file-count-display" value="1"{{
-                checked(user.ordinal.value('file-count-display') == 1) }} />
-            Total files</label><br />
+                checked(user.ordinal.value('file-count-display') == 1) }}>
+            Total files</label><br>
             <label><input type="radio" name="file-count-display" value="2"{{
-                checked(user.ordinal.value('file-count-display') == 2) }} />
-            {{ constant('PRIMARY_MEDIA')|ucfirst }} files / Total files</label><br />
+                checked(user.ordinal.value('file-count-display') == 2) }}>
+            {{ constant('PRIMARY_MEDIA')|ucfirst }} files / Total files</label><br>
             <label><input type="radio" name="file-count-display" value="3"{{
-                checked(user.ordinal.value('file-count-display') == 3) }} />
+                checked(user.ordinal.value('file-count-display') == 3) }}>
             {{ constant('PRIMARY_MEDIA')|ucfirst }} files + Non-{{
-                constant('PRIMARY_MEDIA') }} files</label><br />
+                constant('PRIMARY_MEDIA') }} files</label><br>
             <label><input type="radio" name="file-count-display" value="4"{{
-                checked(user.ordinal.value('file-count-display') == 4) }} />
-            {{ constant('PRIMARY_MEDIA')|ucfirst }} files only</label><br />
+                checked(user.ordinal.value('file-count-display') == 4) }}>
+            {{ constant('PRIMARY_MEDIA')|ucfirst }} files only</label><br>
         </td>
     </tr>
     <tr id="nonprimary_size_tr">
@@ -181,7 +181,7 @@
             <strong>Non-{{ constant('PRIMARY_MEDIA') }} threshold</strong>
         </td>
         <td>
-            <label><input type="input" size="4" name="non-primary-threshold" value="{{ user.ordinal.value('non-primary-threshold') }}" />
+            <label><input type="input" size="4" name="non-primary-threshold" value="{{ user.ordinal.value('non-primary-threshold') }}">
             Highlight torrents with excessive non-{{ constant('PRIMARY_MEDIA') }} content (in MiB)</label>
         </td>
     </tr>
@@ -191,11 +191,11 @@
             <strong>Request creation</strong>
         </td>
         <td>
-            <input type="input" size="4" name="req-create" id="req-create" value="{{ user.requestCreationInfo.value|replace({',': ' '}) }}" />
-            <label><input type="radio" name="req-c-unit" value="MiB"{{ checked(user.requestCreationInfo.unit == "MiB") }} /> MiB</label>
-            <label><input type="radio" name="req-c-unit" value="GiB"{{ checked(user.requestCreationInfo.unit == "GiB") }} /> GiB</label>
-            <label><input type="radio" name="req-c-unit" value="TiB"{{ checked(user.requestCreationInfo.unit == "TiB") }} /> TiB</label>
-            <br />
+            <input type="input" size="4" name="req-create" id="req-create" value="{{ user.requestCreationInfo.value|replace({',': ' '}) }}">
+            <label><input type="radio" name="req-c-unit" value="MiB"{{ checked(user.requestCreationInfo.unit == "MiB") }}> MiB</label>
+            <label><input type="radio" name="req-c-unit" value="GiB"{{ checked(user.requestCreationInfo.unit == "GiB") }}> GiB</label>
+            <label><input type="radio" name="req-c-unit" value="TiB"{{ checked(user.requestCreationInfo.unit == "TiB") }}> TiB</label>
+            <br>
             <label for="req-create">Amount of bounty to offer when creating a request. Value between 100 MiB and 2 TiB.</label>
         </td>
     </tr>
@@ -204,11 +204,11 @@
             <strong>Request vote</strong>
         </td>
         <td>
-            <label><input type="input" size="4" name="req-vote" id="req-vote" value="{{ user.requestVoteInfo.value|replace({',': ' '}) }}" />
-            <label><input type="radio" name="req-v-unit" value="MiB"{{ checked(user.requestVoteInfo.unit == "MiB") }} /> MiB</label>
-            <label><input type="radio" name="req-v-unit" value="GiB"{{ checked(user.requestVoteInfo.unit == "GiB") }} /> GiB</label>
-            <label><input type="radio" name="req-v-unit" value="TiB"{{ checked(user.requestVoteInfo.unit == "TiB") }} /> TiB</label>
-            <br />
+            <label><input type="input" size="4" name="req-vote" id="req-vote" value="{{ user.requestVoteInfo.value|replace({',': ' '}) }}">
+            <label><input type="radio" name="req-v-unit" value="MiB"{{ checked(user.requestVoteInfo.unit == "MiB") }}> MiB</label>
+            <label><input type="radio" name="req-v-unit" value="GiB"{{ checked(user.requestVoteInfo.unit == "GiB") }}> GiB</label>
+            <label><input type="radio" name="req-v-unit" value="TiB"{{ checked(user.requestVoteInfo.unit == "TiB") }}> TiB</label>
+            <br>
             <label for="req-vote">Amount of bounty to offer when voting in a request. Value between 100 MiB and 1 TiB.</label>
         </td>
     </tr>
@@ -219,7 +219,7 @@
         <td>
             <ul class="options_list nobullet">
                 <li>
-                    <input type="checkbox" name="show-all-tags" id="show-all-tags"{{ checked(not user.hasAttr('show-all-tags')) }} />
+                    <input type="checkbox" name="show-all-tags" id="show-all-tags"{{ checked(not user.hasAttr('show-all-tags')) }}>
                     <label for="show-all-tags">Show recommended tags</label>
                 </li>
             </ul>
@@ -227,7 +227,7 @@
     </tr>
 </table>
 </div>
-<script type="text/javascript" id="sortable_default">
+<script id="sortable_default">
     //<![CDATA[
     var sortable_list_default = '{{ release }}';
     //]]>

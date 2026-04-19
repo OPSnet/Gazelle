@@ -14,7 +14,7 @@
             <strong>Reset passkey</strong></td>
         <td>
             <div class="field_div">
-                <label><input type="checkbox" name="resetpasskey" id="resetpasskey" />
+                <label><input type="checkbox" name="resetpasskey" id="resetpasskey">
                 Reset your passkey?</label>
             </div>
             <p class="min_padding">Any active torrents must be downloaded again to continue leeching/seeding.</p>
@@ -25,8 +25,8 @@
         <td class="label"><strong>IRC key</strong></td>
         <td>
             <div class="field_div">
-                <input type="text" size="50" name="irckey" id="irckey" value="{{ user.IRCKey }}" />
-                <input type="button" id="gen-irc-key" value="Generate IRC key" />
+                <input type="text" size="50" name="irckey" id="irckey" value="{{ user.IRCKey }}">
+                <input type="button" id="gen-irc-key" value="Generate IRC key">
             </div>
                 <p class="min_padding">If set, this key will be used instead of your site password when authenticating with
                 {{ constant('IRC_BOT') }} on the <a href="wiki.php?action=article&amp;id=5">site's IRC network</a>. <span
@@ -45,7 +45,7 @@
         </td>
         <td>
             <div class="field_div">
-                <input type="email" size="50" name="email" id="email" value="{{ user.email }}" />
+                <input type="email" size="50" name="email" id="email" value="{{ user.email }}">
             </div>
             <p class="min_padding">When changing your email address, you must enter your current password in the
             "Current password" field before saving your changes.</p>
@@ -56,17 +56,17 @@
         <td class="label"><strong>Change password</strong></td>
         <td>
             <div class="field_div">
-                <label>Current password:<br />
-                <input type="password" size="40" name="password" id="password" value="" /></label>
+                <label>Current password:<br>
+                <input type="password" size="40" name="password" id="password" value=""></label>
                 <span id="password-toggle">🫣</span>
             </div>
             <div class="field_div">
-                <label>New password:<br />
-                <input type="password" size="40" name="new_pass_1" id="new_pass_1" value="" /> <strong id="pass_strength"></strong></label>
+                <label>New password:<br>
+                <input type="password" size="40" name="new_pass_1" id="new_pass_1" value=""> <strong id="pass_strength"></strong></label>
             </div>
             <div class="field_div">
-                <label>Confirm new password:<br />
-                <input type="password" size="40" name="new_pass_2" id="new_pass_2" value="" /> <strong id="pass_match"></strong></label>
+                <label>Confirm new password:<br>
+                <input type="password" size="40" name="new_pass_2" id="new_pass_2" value=""> <strong id="pass_match"></strong></label>
             </div>
             <div class="setting_description">
                 A strong password:
@@ -105,10 +105,10 @@
     <tr id="acc_api_keys_tr">
         <td class="label"><strong>API Keys</strong></td>
         <td>API keys can be generated to access our
-            <b><a href="https://github.com/OPSnet/Gazelle/wiki/JSON-API-Documentation" target='_blank'>API</a></b>.<br />
-            Remember to revoke tokens you no longer use.<br />
+            <b><a href="https://github.com/OPSnet/Gazelle/wiki/JSON-API-Documentation" target='_blank'>API</a></b>.<br>
+            Remember to revoke tokens you no longer use.<br>
             <strong class="important_text">Treat your tokens like passwords and keep them secret.</strong>
-            <br /><br />
+            <br><br>
 {%- for token in user.apiTokenList %}
     {%- if loop.first %}
             <table class="layout border">
@@ -154,7 +154,7 @@
         <td class="label"><strong>Error reporting</strong></td>
         <td>
             <div class="field_div">
-                <label><input type="checkbox" name="error_reporting" id="error_reporting"{{ checked(user.hasAttr('admin-error-reporting')) }} />
+                <label><input type="checkbox" name="error_reporting" id="error_reporting"{{ checked(user.hasAttr('admin-error-reporting')) }}>
                 Show PHP errors when rendering pages</label> 
             </div>
             <p class="min_padding">Any uncaught exceptions will be emitted in the page output. <strong class="important_text">Note:</strong>

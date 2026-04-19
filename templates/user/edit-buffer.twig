@@ -1,15 +1,15 @@
 <tr>
     <td class="label tooltip" title="Upload amount in bytes.">Uploaded:</td>
     <td>
-        <input type="hidden" name="OldUploaded" value="{{ user.uploadedSize }}" />
-        <input type="text" size="20" name="Uploaded" value="{{ user.uploadedSize }}" />
+        <input type="hidden" name="OldUploaded" value="{{ user.uploadedSize }}">
+        <input type="text" size="20" name="Uploaded" value="{{ user.uploadedSize }}">
     </td>
 </tr>
 <tr>
     <td class="label tooltip" title="Download amount in bytes.">Downloaded:</td>
     <td>
-        <input type="hidden" name="OldDownloaded" value="{{ user.downloadedSize }}" />
-        <input type="text" size="20" name="Downloaded" value="{{ user.downloadedSize }}" />
+        <input type="hidden" name="OldDownloaded" value="{{ user.downloadedSize }}">
+        <input type="text" size="20" name="Downloaded" value="{{ user.downloadedSize }}">
         <div>Upload and download values can be set to a fixed value using SI units.
         For example: 10k, 200MiB, 3Gb. Hint: only the first letter is examined.
         The current value can remain as is, and a delta value applied, e.g. <code>{{
@@ -20,15 +20,15 @@
 <tr>
     <td class="label tooltip" title="Bonus Points.">Bonus Points:</td>
     <td>
-        <input type="hidden" name="OldBonusPoints" value="{{ user.bonusPointsTotal }}" />
-        <input type="text" size="20" name="BonusPoints" value="{{ user.bonusPointsTotal }}" />
+        <input type="hidden" name="OldBonusPoints" value="{{ user.bonusPointsTotal }}">
+        <input type="text" size="20" name="BonusPoints" value="{{ user.bonusPointsTotal }}">
     </td>
 </tr>
 <tr>
     <td class="label tooltip" title="Personal Collages.">Personal Collages:</td>
     <td>
-        <input type="hidden" name="OldCollages" value="{{ user.paidPersonalCollages }}" />
-        <input type="text" size="20" name="Collages" value="{{ user.paidPersonalCollages }}" />
+        <input type="hidden" name="OldCollages" value="{{ user.paidPersonalCollages }}">
+        <input type="text" size="20" name="Collages" value="{{ user.paidPersonalCollages }}">
 {% if donor.collageTotal %}
             <p>Donor perks provide an extra {{ donor.collageTotal }} collage{{ donor.collageTotal|plural }} <em>in addition</em> to this amount.</p>
 {% endif %}
@@ -37,7 +37,7 @@
 <tr>
     <td class="label tooltip" title="Enter a username.">Transfer buffer from user:</td>
     <td>
-        <input type="text" size="16" name="MergeStatsFrom" /> Upload and download from the specified user will be drained into this user.
+        <input type="text" size="16" name="MergeStatsFrom"> Upload and download from the specified user will be drained into this user.
         Do <b>not</b> edit user upload/down and transfer buffer at the same time.
     </td>
 </tr>

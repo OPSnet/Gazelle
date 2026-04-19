@@ -350,9 +350,9 @@ View::show_header($user->username() . "'s $action torrents", ['js' => 'voting'])
                 <tr>
                     <td class="label"><strong>Search for:</strong></td>
                     <td>
-                        <input type="hidden" name="type" value="<?=$_GET['type']?>" />
-                        <input type="hidden" name="userid" value="<?=$userId?>" />
-                        <input type="search" name="search" size="60" value="<?= display_str($_GET['search'] ?? '') ?>" />
+                        <input type="hidden" name="type" value="<?=$_GET['type']?>">
+                        <input type="hidden" name="userid" value="<?=$userId?>">
+                        <input type="search" name="search" size="60" value="<?= display_str($_GET['search'] ?? '') ?>">
                     </td>
                 </tr>
                 <tr>
@@ -418,9 +418,9 @@ View::show_header($user->username() . "'s $action torrents", ['js' => 'voting'])
                 <tr>
                     <td class="label"><strong>Tags:</strong></td>
                     <td>
-                        <input type="search" name="tags" size="60" class="tooltip" title="Use !tag to exclude tag" value="<?= display_str($_GET['tags'] ?? '') ?>" />&nbsp;
-                        <input type="radio" name="tags_type" id="tags_type0" value="0"<?= ($_GET['tags_type'] ?? '') == '0' ? ' checked' : '' ?> /><label for="tags_type0"> Any</label>&nbsp;&nbsp;
-                        <input type="radio" name="tags_type" id="tags_type1" value="1"<?= ($_GET['tags_type'] ?? '') == '1' ? ' checked' : '' ?> /><label for="tags_type1"> All</label>
+                        <input type="search" name="tags" size="60" class="tooltip" title="Use !tag to exclude tag" value="<?= display_str($_GET['tags'] ?? '') ?>">&nbsp;
+                        <input type="radio" name="tags_type" id="tags_type0" value="0"<?= ($_GET['tags_type'] ?? '') == '0' ? ' checked' : '' ?>><label for="tags_type0"> Any</label>&nbsp;&nbsp;
+                        <input type="radio" name="tags_type" id="tags_type1" value="1"<?= ($_GET['tags_type'] ?? '') == '1' ? ' checked' : '' ?>><label for="tags_type1"> All</label>
                     </td>
                 </tr>
 
@@ -459,14 +459,14 @@ foreach (CATEGORY as $catKey => $catName) {
 ?>
                     <td>
                         <input type="checkbox" name="categories[<?=($catKey + 1)?>]" id="cat_<?=($catKey + 1)?>" value="1"<?php if (isset($_GET['categories'][$catKey + 1])) {
-?> checked="checked"<?php } ?> />
+?> checked<?php } ?>>
                         <label for="cat_<?=($catKey + 1)?>"><?=$catName?></label>
                     </td>
 <?php } ?>
                 </tr>
             </table>
             <div class="submit">
-                <input type="submit" value="Search torrents" />
+                <input type="submit" value="Search torrents">
             </div>
         </form>
     </div>
@@ -521,7 +521,7 @@ foreach (CATEGORY as $catKey => $catName) {
                     ]) ?>
                     <?= $torrent->fullLink() ?>
 <?php   if (!$Viewer->option('NoVoteLinks')) { ?>
-                    <br />
+                    <br>
                     <span class="float_right"><?= $vote->links($tgroup) ?></span>
 <?php   } ?>
                     <div class="tags"><?= implode(', ', array_map(

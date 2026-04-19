@@ -18,7 +18,7 @@
         -- {{ q.args|join(', ') }}
 {%  endif %}
         </pre>
-        <br /><a class="brackets" href="tools.php?action=db_sandbox&amp;src=pg&amp;debug={{
+        <br><a class="brackets" href="tools.php?action=db_sandbox&amp;src=pg&amp;debug={{
             {"query": q.query, "args": q.args}|json_encode|b64 }}">Inspect</a>
         </td>
         <td class="debug_info" style="width: 130px;">{{ q.metric }}</td>

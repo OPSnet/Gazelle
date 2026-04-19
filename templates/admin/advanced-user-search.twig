@@ -3,21 +3,21 @@
 {{ header('User search') }}
 <div class="thin">
 <form class="search_form" name="users" action="user.php" method="get">
-<input type="hidden" name="action" value="search" />
+<input type="hidden" name="action" value="search">
 
 <table class="layout"><tr>
     <td style="vertical-align:top;"><table class="layout">
         <tr>
         <td class="label nobr">Username:</td>
         <td>
-            <input type="text" name="username" size="20" value="{{ input.username }}" />
+            <input type="text" name="username" size="20" value="{{ input.username }}">
         </td>
         </tr>
 
         <tr>
         <td class="label nobr">Email address:</td>
         <td>
-            <input type="text" name="email" size="20" value="{{ input.email }}" />
+            <input type="text" name="email" size="20" value="{{ input.email }}">
         </td>
         </tr>
 
@@ -25,42 +25,42 @@
         <td class="label tooltip nobr" title="To fuzzy search (default) for a block of addresses
             (e.g. 55.66.77.*), enter &quot;55.66.77.&quot; without the quotes">Site IP:</td>
         <td>
-            <input type="text" name="ip" size="20" value="{{ input.ip }}" />
+            <input type="text" name="ip" size="20" value="{{ input.ip }}">
         </td>
         </tr>
 
         <tr>
-        <td class="label nobr">Tracker IP:<br />
+        <td class="label nobr">Tracker IP:<br>
           <div style="padding-left: 20px; text-align: left;">
-            <input type="radio" name="tracker-src" id="tracker-src-live" value="live"{{ checked(tracker_live_source) }} />
-            <label class="tooltip" for="tracker-src-live" title="Search for client ip addresses currently connecting to the tracker">Live</label><br />
-            <input type="radio" name="tracker-src" id="tracker-src-hist" value="hist"{{ checked(not tracker_live_source) }} />
+            <input type="radio" name="tracker-src" id="tracker-src-live" value="live"{{ checked(tracker_live_source) }}>
+            <label class="tooltip" for="tracker-src-live" title="Search for client ip addresses currently connecting to the tracker">Live</label><br>
+            <input type="radio" name="tracker-src" id="tracker-src-hist" value="hist"{{ checked(not tracker_live_source) }}>
             <label class="tooltip" for="tracker-src-hist" title="Search for ip addresses that have been seen by the tracker (but may be not connected at this time)">Historical</label>
           </div>
         </td>
         <td>
-            <input type="text" name="tracker_ip" size="20" value="{{ input.tracker_ip }}" />
+            <input type="text" name="tracker_ip" size="20" value="{{ input.tracker_ip }}">
         </td>
         </tr>
 
         <tr>
         <td class="label nobr">Staff notes:</td>
         <td>
-            <input type="text" name="comment" size="20" value="{{ input.comment }}" />
+            <input type="text" name="comment" size="20" value="{{ input.comment }}">
         </td>
         </tr>
 
         <tr>
         <td class="label nobr">External profile:</td>
         <td>
-            <input type="text" name="ext_profile" size="20" value="{{ input.ext_profile }}" />
+            <input type="text" name="ext_profile" size="20" value="{{ input.ext_profile }}">
         </td>
         </tr>
 
         <tr>
         <td class="label nobr">Passkey:</td>
         <td>
-            <input type="text" name="passkey" size="20" value="{{ input.passkey }}" />
+            <input type="text" name="passkey" size="20" value="{{ input.passkey }}">
         </td>
         </tr>
 
@@ -68,14 +68,14 @@
         <td class="label tooltip nobr" title="Supports partial URL matching, e.g. entering
             &quot;&#124;https://ptpimg.me&quot; will search for avatars hosted on https://phpimg.me">Avatar URL:</td>
         <td>
-            <input type="text" name="avatar" size="20" value="{{ input.avatar }}" />
+            <input type="text" name="avatar" size="20" value="{{ input.avatar }}">
         </td>
         </tr>
 
         <tr>
         <td class="label nobr">Last.fm username:</td>
         <td>
-            <input type="text" name="lastfm" size="20" value="{{ input.lastfm }}" />
+            <input type="text" name="lastfm" size="20" value="{{ input.lastfm }}">
         </td>
         </tr>
 
@@ -84,11 +84,11 @@
         <h4>Extra</h4>
         <ul class="options_list nobullet">
             <li>
-                <input type="checkbox" name="ip_history" id="ip_history"{{ checked(check_ip_history) }} />
+                <input type="checkbox" name="ip_history" id="ip_history"{{ checked(check_ip_history) }}>
                 <label title="Disabled accounts linked by IP must also be checked" for="ip_history">IP history</label>
             </li>
             <li>
-                <input type="checkbox" name="email_history" id="email_history"{{ checked(check_email_history) }} />
+                <input type="checkbox" name="email_history" id="email_history"{{ checked(check_email_history) }}>
                 <label title="Also search the email addresses the member used in the past" for="email_history">Email history</label>
             </li>
         </ul>
@@ -107,8 +107,8 @@
                 <option value="after"{{ selected(input.joined == 'after') }}>After</option>
                 <option value="between"{{ selected(input.joined == 'between') }}>Between</option>
             </select>
-            <input type="text" name="join1" size="10" value="{{ input.join1 }}" placeholder="YYYY-MM-DD" />
-            <input type="text" name="join2" size="10" value="{{ input.join2 }}" placeholder="YYYY-MM-DD" />
+            <input type="text" name="join1" size="10" value="{{ input.join1 }}" placeholder="YYYY-MM-DD">
+            <input type="text" name="join2" size="10" value="{{ input.join2 }}" placeholder="YYYY-MM-DD">
         </td>
         </tr>
 
@@ -121,8 +121,8 @@
                 <option value="after"{{ selected(input.lastactive == 'after') }}>After</option>
                 <option value="between"{{ selected(input.lastactive == 'between') }}>Between</option>
             </select>
-            <input type="text" name="lastactive1" size="10" value="{{ input.lastactive1 }}" placeholder="YYYY-MM-DD" />
-            <input type="text" name="lastactive2" size="10" value="{{ input.lastactive2 }}" placeholder="YYYY-MM-DD" />
+            <input type="text" name="lastactive1" size="10" value="{{ input.lastactive1 }}" placeholder="YYYY-MM-DD">
+            <input type="text" name="lastactive2" size="10" value="{{ input.lastactive2 }}" placeholder="YYYY-MM-DD">
         </td>
         </tr>
 
@@ -136,8 +136,8 @@
                 <option value="below"{{ selected(input.downloads == 'below') }}>Below</option>
                 <option value="between"{{ selected(input.downloads == 'between') }}>Between</option>
             </select>
-            <input type="text" name="downloads1" size="6" value="{{ input.downloads1 }}" />
-            <input type="text" name="downloads2" size="6" value="{{ input.downloads2 }}" />
+            <input type="text" name="downloads1" size="6" value="{{ input.downloads1 }}">
+            <input type="text" name="downloads2" size="6" value="{{ input.downloads2 }}">
         </td>
         </tr>
 
@@ -151,8 +151,8 @@
                 <option value="below"{{ selected(input.snatched == 'below') }}>Below</option>
                 <option value="between"{{ selected(input.snatched == 'between') }}>Between</option>
             </select>
-            <input type="text" name="snatched1" size="6" value="{{ input.snatched1 }}" />
-            <input type="text" name="snatched2" size="6" value="{{ input.snatched2 }}" />
+            <input type="text" name="snatched1" size="6" value="{{ input.snatched1 }}">
+            <input type="text" name="snatched2" size="6" value="{{ input.snatched2 }}">
         </td>
         </tr>
 
@@ -166,8 +166,8 @@
                 <option value="below"{{ selected(input.seeding == 'below') }}>Below</option>
                 <option value="between"{{ selected(input.seeding == 'between') }}>Between</option>
             </select>
-            <input type="text" name="seeding1" size="6" value="{{ input.seeding1 }}" />
-            <input type="text" name="seeding2" size="6" value="{{ input.seeding2 }}" />
+            <input type="text" name="seeding1" size="6" value="{{ input.seeding1 }}">
+            <input type="text" name="seeding2" size="6" value="{{ input.seeding2 }}">
         </td>
         </tr>
 
@@ -181,8 +181,8 @@
                 <option value="between"{{ selected(input.uploaded == 'between') }}>Between</option>
                 <option value="buffer"{{ selected(input.uploaded == 'buffer') }}>buffer</option>
             </select>
-            <input type="text" name="uploaded1" size="6" value="{{ input.uploaded1 }}" />
-            <input type="text" name="uploaded2" size="6" value="{{ input.uploaded2 }}" />
+            <input type="text" name="uploaded1" size="6" value="{{ input.uploaded1 }}">
+            <input type="text" name="uploaded2" size="6" value="{{ input.uploaded2 }}">
         </td>
         </tr>
 
@@ -195,8 +195,8 @@
                 <option value="below"{{ selected(input.downloaded == 'below') }}>Below</option>
                 <option value="between"{{ selected(input.downloaded == 'between') }}>Between</option>
             </select>
-            <input type="text" name="downloaded1" size="6" value="{{ input.downloaded1 }}" />
-            <input type="text" name="downloaded2" size="6" value="{{ input.downloaded2 }}" />
+            <input type="text" name="downloaded1" size="6" value="{{ input.downloaded1 }}">
+            <input type="text" name="downloaded2" size="6" value="{{ input.downloaded2 }}">
         </td>
         </tr>
 
@@ -209,8 +209,8 @@
                 <option value="below"{{ selected(input.bounty == 'below') }}>Below</option>
                 <option value="between"{{ selected(input.bounty == 'between') }}>Between</option>
             </select>
-            <input type="text" name="bounty1" size="6" value="{{ input.bounty1 }}" />
-            <input type="text" name="bounty2" size="6" value="{{ input.bounty2 }}" />
+            <input type="text" name="bounty1" size="6" value="{{ input.bounty1 }}">
+            <input type="text" name="bounty2" size="6" value="{{ input.bounty2 }}">
         </td>
         </tr>
 
@@ -223,8 +223,8 @@
                 <option value="below"{{ selected(input.ratio == 'below') }}>Below</option>
                 <option value="between"{{ selected(input.ratio == 'between') }}>Between</option>
             </select>
-            <input type="text" name="ratio1" size="6" value="{{ input.ratio1 }}" />
-            <input type="text" name="ratio2" size="6" value="{{ input.ratio2 }}" />
+            <input type="text" name="ratio1" size="6" value="{{ input.ratio1 }}">
+            <input type="text" name="ratio2" size="6" value="{{ input.ratio2 }}">
         </td>
         </tr>
 
@@ -237,8 +237,8 @@
                 <option value="below"{{ selected(input.invites == 'below') }}>Below</option>
                 <option value="between"{{ selected(input.invites == 'between') }}>Between</option>
             </select>
-            <input type="text" name="invites1" size="6" value="{{ input.invites1 }}" />
-            <input type="text" name="invites2" size="6" value="{{ input.invites2 }}" />
+            <input type="text" name="invites1" size="6" value="{{ input.invites1 }}">
+            <input type="text" name="invites2" size="6" value="{{ input.invites2 }}">
         </td>
         </tr>
 
@@ -252,8 +252,8 @@
                 <option value="below"{{ selected(input.invited == 'below') }}>Below</option>
                 <option value="between"{{ selected(input.invited == 'between') }}>Between</option>
             </select>
-            <input type="text" name="invited1" size="6" value="{{ input.invited1 }}" />
-            <input type="text" name="invited2" size="6" value="{{ input.invited2 }}" />
+            <input type="text" name="invited1" size="6" value="{{ input.invited1 }}">
+            <input type="text" name="invited2" size="6" value="{{ input.invited2 }}">
         </td>
         </tr>
 
@@ -265,7 +265,7 @@
                 <option value="above"{{ selected(input.emails_opt == 'locked') }}>Above</option>
                 <option value="below"{{ selected(input.emails_opt == 'unlocked') }}>Below</option>
             </select>
-            <input type="text" name="email_cnt" size="6" value="{{ input.email_cnt }}" />
+            <input type="text" name="email_cnt" size="6" value="{{ input.email_cnt }}">
         </td>
         </tr>
     </table></td>
@@ -371,7 +371,7 @@
                 <option value="equal"{{ selected(input.cc_op == 'equal') }}>Equals</option>
                 <option value="not_equal"{{ selected(input.cc_op == 'not_equal') }}>Not equal</option>
             </select>
-            <input type="text" name="cc" size="2" value="{{ input.cc }}" />
+            <input type="text" name="cc" size="2" value="{{ input.cc }}">
         </td>
         </tr>
 
@@ -380,18 +380,18 @@
         <td>
             <ul class="options_list nobullet">
                 <li>
-                    <input type="radio" name="matchtype" id="strict_match_type" value="strict"{{ checked(match_mode == 'strict') }} />
+                    <input type="radio" name="matchtype" id="strict_match_type" value="strict"{{ checked(match_mode == 'strict') }}>
                     <label class="tooltip" title="A &quot;strict&quot; search uses no wildcards in search fields,
                         and it is analogous to &#96;grep -E &quot;&circ;SEARCHTERM&#36;&quot;&#96;" for="strict_match_type">Strict</label>
                 </li>
                 <li>
-                    <input type="radio" name="matchtype" id="fuzzy_match_type" value="fuzzy"{{ checked(match_mode == 'fuzzy') }} />
+                    <input type="radio" name="matchtype" id="fuzzy_match_type" value="fuzzy"{{ checked(match_mode == 'fuzzy') }}>
                     <label class="tooltip" title="A &quot;fuzzy&quot; search automatically prepends and appends wildcards to
                         search strings, except for IP address searches, unless the search string begins or ends with a
                         &quot;&#124;&quot; (pipe). It is analogous to a vanilla grep search (except for the pipe stuff)." for="fuzzy_match_type">Fuzzy</label>
                 </li>
                 <li>
-                    <input type="radio" name="matchtype" id="regexp_match_type" value="regexp"{{ checked(match_mode == 'regexp') }} />
+                    <input type="radio" name="matchtype" id="regexp_match_type" value="regexp"{{ checked(match_mode == 'regexp') }}>
                     <label class="tooltip" title="A &quot;regexp&quot; search uses MySQL's regular expression syntax." for="regexp_match_type">Regexp</label>
                 </li>
             </ul>
@@ -414,7 +414,7 @@ Results ordered <select name="order">
     <option value="{{ dir }}"{{ selected(dir == input.way|default('Descending')) }}>{{ dir }}</option>
 {% endfor %}
 </select>
-<input type="submit" value=" Search " />
+<input type="submit" value=" Search ">
 
 </form>
 </div>
@@ -433,8 +433,8 @@ Results ordered <select name="order">
             <td>Ratio</td>
             <td>Bounty</td>
             <td title="Downloads">DLs</td>
-            <td><img src="{{ url_stem }}snatched.svg" class="tooltip" title="Snatched" /></td>
-            <td><img src="{{ url_stem }}seeders.svg" class="tooltip" title="Seeding" /></td>
+            <td><img src="{{ url_stem }}snatched.svg" class="tooltip" title="Snatched"></td>
+            <td><img src="{{ url_stem }}seeders.svg" class="tooltip" title="Seeding"></td>
             <td>Invited by</td>
 {% if show_invited %}
             <td>Invited</td>
@@ -450,13 +450,13 @@ Results ordered <select name="order">
             <td>{{ u.user.userclassName }}
     {% for badge, title in u.user|badge_list %}
         {% if loop.first %}
-            <br />
+            <br>
         {% endif %}
             <span class="tooltip secondary_class" title="{{ title }}">{{ badge }}</span>
     {% endfor %}
             </td>
             <td>{{ u.user.email }}</td>
-            <td>{{ u.user.created|time_diff(1) }}<br />{{ u.user.lastAccess|time_diff(1) }}</td>
+            <td>{{ u.user.created|time_diff(1) }}<br>{{ u.user.lastAccess|time_diff(1) }}</td>
             <td>{{ u.user.uploadedSize|octet_size }}</td>
             <td>{{ u.user.downloadedSize|octet_size }}</td>
             <td>{{ ratio(u.user.uploadedSize, u.user.downloadedSize) }}</td>

@@ -14,10 +14,10 @@
     <form action="tools.php?action=db_sandbox" method='POST'>
         <textarea style="width: 98%;" name="query" cols="90" rows="{{ rows }}">{{ query }}</textarea>
         Source
-        <label><input type="radio" name="src" value="mysql"{{ checked(source == 'mysql') }} /> Mysql</label>
-        <label><input type="radio" name="src" value="pg"{{ checked(source == 'pg') }} /> Postgres</label>
-        <input type="submit" value="Query" />
-        <br />
+        <label><input type="radio" name="src" value="mysql"{{ checked(source == 'mysql') }}> Mysql</label>
+        <label><input type="radio" name="src" value="pg"{{ checked(source == 'pg') }}> Postgres</label>
+        <input type="submit" value="Query">
+        <br>
         <div class="box pad"><pre>{{ table.definition }}</pre></div>
     </form>
 </div>

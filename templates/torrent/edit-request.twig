@@ -11,8 +11,8 @@
         </div>
         <div style="margin-bottom: 10px">
             <p>
-            Please detail all information that needs to be edited for the torrent group. Include all relevant links (Bandcamp, Discogs, Musicbrainz, etc.).<br /><br />
-            This will not generate a report, but will create a thread in the Editing forum.<br /><br />
+            Please detail all information that needs to be edited for the torrent group. Include all relevant links (Bandcamp, Discogs, Musicbrainz, etc.).<br><br>
+            This will not generate a report, but will create a thread in the Editing forum.<br><br>
 
             What this form can be used for:
             </p>
@@ -31,11 +31,11 @@
 
             <div class="center">
                 <form action="torrents.php" method="POST">
-                    <input type="hidden" name="action" value="takeeditrequest" />
-                    <input type="hidden" name="id" value="{{ tgroup.id }}" />
-                    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+                    <input type="hidden" name="action" value="takeeditrequest">
+                    <input type="hidden" name="id" value="{{ tgroup.id }}">
+                    <input type="hidden" name="auth" value="{{ viewer.auth }}">
                     {{ textarea.emit|raw }}
-                    <input type="submit" value="Send Edit Request" />
+                    <input type="submit" value="Send Edit Request">
                 </form>
             </div>
         </div>

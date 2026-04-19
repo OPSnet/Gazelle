@@ -31,10 +31,10 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
         <h2><?= $Viewer->link() ?> › Collage subscriptions<?= $viewAll ? '' : ' with new additions' ?></h2>
         <div class="linkbox">
 <?php if ($viewAll) { ?>
-            <br /><br />
+            <br><br>
             <a href="userhistory.php?action=subscribed_collages&amp;showall=0" class="brackets">Only display collages with new additions</a>&nbsp;&nbsp;&nbsp;
 <?php } else { ?>
-            <br /><br />
+            <br><br>
             <a href="userhistory.php?action=subscribed_collages&amp;showall=1" class="brackets">Show all subscribed collages</a>&nbsp;&nbsp;&nbsp;
 <?php } ?>
             <a href="userhistory.php?action=catchup_collages&amp;auth=<?= $Viewer->auth() ?>" class="brackets">Catch up</a>&nbsp;&nbsp;&nbsp;
@@ -89,9 +89,9 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
         <td>Files</td>
 <?php } ?>
         <td>Size</td>
-        <td class="sign snatches"><img src="<?= $urlStem ?>snatched.svg" class="tooltip" alt="Snatches" title="Snatches" /></td>
-        <td class="sign seeders"><img src="<?= $urlStem ?>seeders.svg" class="tooltip" alt="Seeders" title="Seeders" /></td>
-        <td class="sign leechers"><img src="<?= $urlStem ?>leechers.svg" class="tooltip" alt="Leechers" title="Leechers" /></td>
+        <td class="sign snatches"><img src="<?= $urlStem ?>snatched.svg" class="tooltip" alt="Snatches" title="Snatches"></td>
+        <td class="sign seeders"><img src="<?= $urlStem ?>seeders.svg" class="tooltip" alt="Seeders" title="Seeders"></td>
+        <td class="sign leechers"><img src="<?= $urlStem ?>leechers.svg" class="tooltip" alt="Leechers" title="Leechers"></td>
     </tr>
 <?php
             }

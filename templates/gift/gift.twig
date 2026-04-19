@@ -11,13 +11,13 @@
 <h4>Click on the present to find out what is inside!</h4>
 <img width="300" height="300" id="gift-box" title="Time to unwrap your present!" src="{{
     constant('GIFT_EVENT_LARGE_READY') }}" data-d="{{ 'now'|date('Y-m-d') }}" data-i="{{
-    gift_event.id }}" data-s="{{ gift_event.signature(viewer) }}" />
+    gift_event.id }}" data-s="{{ gift_event.signature(viewer) }}">
 <div id="result"></div>
 {%  else %}
 {%      set tomorrow  = date('tomorrow')|date('Y-m-d H:i:s') %}
 {%      set event_end = gift_event.openEnd|date('Y-m-d H:i:s') %}
 {%      if tomorrow < event_end %}
-<img class="center" src="{{ constant('GIFT_EVENT_LARGE_OPEN') }}" title="Patience! Come back tomorrow!" />
+<img class="center" src="{{ constant('GIFT_EVENT_LARGE_OPEN') }}" title="Patience! Come back tomorrow!">
 <h4>Come back in {{ tomorrow|time_diff }}!</h4>
 {%      else %}
 <h4>That's all folks!</h4>

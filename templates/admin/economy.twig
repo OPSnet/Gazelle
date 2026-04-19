@@ -52,7 +52,7 @@ Tools necessary for economic management
                 <li><strong>Total upload: </strong>{{ upload|octet_size }}</li>
                 <li><strong>Total download: </strong>{{ download|octet_size }}</li>
                 <li><strong>Total buffer: </strong>{{ (upload - download)|octet_size }}</li>
-                <br />
+                <br>
                 <li><strong>Mean ratio: </strong>{{ ratio(upload, download) }}</li>
                 <li><strong>Mean upload: </strong>{{ (upload / userbase)|octet_size }} ({{
                     (upload / userbase)|octet_size }} enabled)</li>
@@ -61,7 +61,7 @@ Tools necessary for economic management
                 <li><strong>Mean buffer: </strong>{{ ((upload - download) / userbase)|octet_size }} ({{
                     ((upload / enabled) / enabled)|octet_size }} enabled)</li>
                 </li>
-                <br />
+                <br>
                 <li><strong>Total request bounty: </strong>{{ eco.bountyTotal|octet_size }}</li>
                 <li><strong>Available request bounty: </strong>{{ eco.bountyAvailable|octet_size }}</li>
             </ul>
@@ -83,21 +83,21 @@ Tools necessary for economic management
 ({{ ((eco.userMfaTotal / eco.userTotal) * 100)|number_format(1) }}%)
 {%- endif -%}
                 </li>
-                <br />
+                <br>
                 <li><strong>BP in circulation: </strong>{{ eco.bonusTotal|number_format }}</li>
                 <li><strong>BP stranded: </strong>{{ eco.bonusStrandedTotal|number_format }}</li>
-                <br />
+                <br>
                 <li><strong>Tokens in circulation: </strong>{{ eco.tokenTotal|number_format }}</li>
                 <li><strong>Tokens stranded: </strong>{{ eco.tokenStrandedTotal|number_format }}</li>
             </ul>
-            <br />
+            <br>
             <div>("Stranded" refers to disabled users)</div>
             </td>
             </tr>
             </table>
         </div>
     </div>
-    <br />
+    <br>
 
     <div class="box">
         <div class="head">Swarms and snatches</div>
@@ -147,7 +147,7 @@ Tools necessary for economic management
                 <li><strong>Seeder/Leecher ratio: </strong>{{ ratio(seeders, leechers) }}</li>
                 <li><strong>Seeder/Snatch ratio: </strong>{{ ratio(seeders, snatches_overall) }}</li>
                 <li><strong>Seeder/Torrent ratio: </strong>{{ ratio(seeders, torrent.torrentTotal) }}</li>
-                <br />
+                <br>
                 <li><strong>Total users in at least one swarm: </strong>{{ peers|number_format }}</li>
                 <li><strong>Mean leeching per user in at least one swarm: </strong>{{ (peers ? leechers / peers : 0)|number_format(2) }}</li>
                 <li><strong>Mean snatches per user in at least one swarm: </strong>{{ (peers ? snatches / peers : 0)|number_format(2) }}</li>
@@ -158,12 +158,12 @@ Tools necessary for economic management
                 <li><strong>Mean seeders per torrent: </strong>{{ (torrents ? seeders / torrents : 0)|number_format(2) }}</li>
                 <li><strong>Mean leechers per torrent: </strong>{{ (torrents ? leechers / torrents : 0)|number_format(4) }}</li>
                 <li><strong>Mean snatches per torrent: </strong>{{ (torrents ? snatches / torrents : 0)|number_format(2) }}</li>
-                <br />
+                <br>
                 <li><strong>Mean seeding per user: </strong>{{ (seeders / enabled)|number_format(2) }}</li>
                 <li><strong>Mean leeching per user: </strong>{{ (leechers / enabled)|number_format(2) }}</li>
                 <li><strong>Mean snatches per user: </strong>{{ (snatches_overall / enabled)|number_format(2) }}</li>
             </ul>
-            <br />
+            <br>
 {% for user in eco.biggestSeederList %}
 {%  if loop.first %}
             Users contributing the most seeds

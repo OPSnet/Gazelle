@@ -112,9 +112,9 @@
 {{ text.preview|raw }}
 {{ text.field|raw }}
         <br>
-        <input type="checkbox" name="use_tracker_ips" id="use_tracker_ips"{{ checked(use_tracker_ips) }} />
+        <input type="checkbox" name="use_tracker_ips" id="use_tracker_ips"{{ checked(use_tracker_ips) }}>
         <label for="use_tracker_ips">check tracker IPs</label>
-        <input type="checkbox" name="loose_match" id="loose_match"{{ checked(loose_match) }} />
+        <input type="checkbox" name="loose_match" id="loose_match"{{ checked(loose_match) }}>
         <label for="loose_match">loose matches</label>
         <span>Order by</span>
         <select name="column">
@@ -128,8 +128,8 @@
 {% endfor %}
         </select>
 {{ text.button|raw }}
-        <input type="submit" value="Search" />
-        <input type="hidden" name="auth" value="{{ auth }}" />
+        <input type="submit" value="Search">
+        <input type="hidden" name="auth" value="{{ auth }}">
     </form>
 </div>
 {{ footer() }}

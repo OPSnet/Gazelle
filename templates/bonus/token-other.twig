@@ -7,14 +7,14 @@
         <div class="pad">
             <table cellpadding="6" cellspacing="1" border="0" class="layout border" width="100%">
                 <tbody>
-                    <input type="hidden" name="action" value="purchase" />
-                    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-                    <input type="hidden" name="label" value="{{ item.label }}" />
-                    <input type="hidden" name="user" value="" />
+                    <input type="hidden" name="action" value="purchase">
+                    <input type="hidden" name="auth" value="{{ viewer.auth }}">
+                    <input type="hidden" name="label" value="{{ item.label }}">
+                    <input type="hidden" name="user" value="">
                     <tr>
                         <td class="label">Username:</td>
                         <td>
-                            <input type="text" id="bonus-user-other" name="bonus-user-other" length="20" />
+                            <input type="text" id="bonus-user-other" name="bonus-user-other" length="20">
                             <span id="bonus-other-status"></span>
                         </td>
                     </tr>
@@ -31,7 +31,7 @@
             </table>
             <div id="buttons" class="center">
                 {{ message.button|raw }}
-                <input type="submit" id="bonus-other-purchase" disabled="disabled" value="Purchase" />
+                <input type="submit" id="bonus-other-purchase" disabled="disabled" value="Purchase">
             </div>
         </div>
     </form>

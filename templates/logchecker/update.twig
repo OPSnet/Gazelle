@@ -11,10 +11,10 @@
         all logs that you wish to upload. This will overwrite any previously uploaded logs for
         this torrent. If you wish to just have a torrent manually rescored, please report it
         to staff.</p>
-        <br />
+        <br>
         <form action="" method="post" enctype="multipart/form-data">
-          <input type="hidden" name="action" value="take_upload" />
-          <input type="hidden" name="from_action" value="update" />
+          <input type="hidden" name="action" value="take_upload">
+          <input type="hidden" name="from_action" value="update">
           <table class="form_post vertical_margin">
 {% for t in list %}
     {% if loop.first %}
@@ -31,13 +31,13 @@
             </tr>
             <tr>
                 <td colspan="2" id="logfields">
-                    Check your log files before uploading <a href="logchecker.php" target="_blank">here</a>. For multi-disc releases, click the "<span class="brackets">+</span>" button to add multiple log files.<br />
-                    <input id="file" type="file" accept="{{ accepted }}" name="logfiles[]" size="50" required /> <a href="javascript:;" onclick="AddLogField();" class="brackets">+</a> <a href="javascript:;" onclick="RemoveLogField();" class="brackets">&minus;</a>
+                    Check your log files before uploading <a href="logchecker.php" target="_blank">here</a>. For multi-disc releases, click the "<span class="brackets">+</span>" button to add multiple log files.<br>
+                    <input id="file" type="file" accept="{{ accepted }}" name="logfiles[]" size="50" required> <a href="javascript:;" onclick="AddLogField();" class="brackets">+</a> <a href="javascript:;" onclick="RemoveLogField();" class="brackets">&minus;</a>
                 </td>
-            <tr />
+            <tr>
             <tr>
                 <td colspan="2">
-                    <input type="submit" value="Upload Logs!" name="logsubmit" />
+                    <input type="submit" value="Upload Logs!" name="logsubmit">
                 </td>
             </tr>
     {% endif %}

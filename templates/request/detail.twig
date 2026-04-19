@@ -38,9 +38,9 @@
                 <div class="pad"><p align="center">
 {% if request.image %}
 {%  set image = request.image|image -%}
-                    <img style="width: 100%;" src="{{ image }}" alt="album art" onclick="lightbox.init('{{ image }}', 220);" data-origin-src="{{ request.image }}" />
+                    <img style="width: 100%;" src="{{ image }}" alt="album art" onclick="lightbox.init('{{ image }}', 220);" data-origin-src="{{ request.image }}">
 {%  else %}
-                    <img style="width: 100%;" src="{{ request.categoryImage }}" alt="{{ request.categoryName }}" class="tooltip" title="{{ request.categoryName }}" height="220" border="0" />
+                    <img style="width: 100%;" src="{{ request.categoryImage }}" alt="{{ request.categoryName }}" class="tooltip" title="{{ request.categoryName }}" height="220" border="0">
 {%  endif %}
                 </p></div>
             </div>
@@ -107,7 +107,7 @@
 {% for name in request.tagNameList %}
                 <li>
                     <a href="torrents.php?taglist={{ name }}">{{ name }}</a>
-                    <br style="clear: both;" />
+                    <br style="clear: both;">
                 </li>
 {% endfor %}
             </ul>
@@ -154,9 +154,9 @@
     </div>
     <div class="main_column">
         <form>
-        <input type="hidden" id="current_uploaded" value="{{ viewer.uploadedSize }}" />
-        <input type="hidden" id="current_downloaded" value="{{ viewer.downloadedSize }}" />
-        <input type="hidden" id="current_rr" value="{{ viewer.requiredRatio }}" />
+        <input type="hidden" id="current_uploaded" value="{{ viewer.uploadedSize }}">
+        <input type="hidden" id="current_downloaded" value="{{ viewer.downloadedSize }}">
+        <input type="hidden" id="current_rr" value="{{ viewer.requiredRatio }}">
         </form>
         <table class="layout">
             <tr>
@@ -228,17 +228,17 @@
                 <td class="label tooltip" title="These units are in base 2, not base 10. For example, there are 1,024 MiB in 1 GiB.">Vote for this request</td>
                 <td>
                     <form class="add_form" name="request" action="requests.php" method="get" id="request_form">
-                        <input type="hidden" name="action" value="vote" />
-                        <input type="hidden" id="request_tax" value="{{ constant('REQUEST_TAX') }}" />
-                        <input type="hidden" id="requestid" name="id" value="{{ request.id }}" />
-                        <input type="hidden" id="auth" name="auth" value="{{ viewer.auth }}" />
-                        <input type="hidden" id="amount" name="amount" value="0" />
-                        <input type="hidden" id="current_uploaded" value="{{ viewer.uploadedSize }}" />
-                        <input type="hidden" id="current_downloaded" value="{{ viewer.downloadedSize }}" />
-                        <input type="hidden" id="current_rr" value="{{ viewer.requiredRatio }}" />
-                        <input id="total_bounty" type="hidden" value="{{ request.bountyTotal }}" />
+                        <input type="hidden" name="action" value="vote">
+                        <input type="hidden" id="request_tax" value="{{ constant('REQUEST_TAX') }}">
+                        <input type="hidden" id="requestid" name="id" value="{{ request.id }}">
+                        <input type="hidden" id="auth" name="auth" value="{{ viewer.auth }}">
+                        <input type="hidden" id="amount" name="amount" value="0">
+                        <input type="hidden" id="current_uploaded" value="{{ viewer.uploadedSize }}">
+                        <input type="hidden" id="current_downloaded" value="{{ viewer.downloadedSize }}">
+                        <input type="hidden" id="current_rr" value="{{ viewer.requiredRatio }}">
+                        <input id="total_bounty" type="hidden" value="{{ request.bountyTotal }}">
 {%  if constant('REQUEST_TAX') > 0 %}
-                            Bounty after tax: <strong><span id="bounty_after_tax">{{ tax_rate }} MiB</span></strong><br />
+                            Bounty after tax: <strong><span id="bounty_after_tax">{{ tax_rate }} MiB</span></strong><br>
 {%  else %}
                             <span id="bounty_after_tax" style="display: none;">{{ tax_rate }} MiB</span>
 {%  endif %}
@@ -247,11 +247,11 @@
                         <option value="mb"{{ selected(not unit_GiB) }}>MiB</option>
                         <option value="gb"{{ selected(unit_GiB) }}>GiB</option>
                     </select>
-                    <input type="button" id="button" value="Vote!" disabled />
+                    <input type="button" id="button" value="Vote!" disabled>
                     </form>
                     <div id="vote-help">If you add the entered <strong><span id="new_bounty">0 MiB</span></strong> of bounty, your new stats will be:</div>
-                    <div>Uploaded: <span id="new_uploaded">{{ viewer.uploadedSize|octet_size }}</span><br />
-                    Ratio: <span id="new_ratio">{{ ratio(viewer.uploadedSize, viewer.downloadedSize) }}</span><br />
+                    <div>Uploaded: <span id="new_uploaded">{{ viewer.uploadedSize|octet_size }}</span><br>
+                    Ratio: <span id="new_ratio">{{ ratio(viewer.uploadedSize, viewer.downloadedSize) }}</span><br>
                     Bounty must be greater than or equal to {{ constant('REQUEST_MIN') }} MiB.</div>
 {%  if constant('REQUEST_TAX') > 0 -%}
     <strong>{{ constant('REQUEST_TAX') * 100 }}% of this is deducted as tax by the system.</strong>
@@ -279,20 +279,20 @@
                 <td>
                     <form class="edit_form" name="request" action="" method="post">
                         <div class="field_div">
-                            <input type="hidden" name="action" value="takefill" />
-                            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-                            <input type="hidden" name="requestid" value="{{ request.id }}" />
-                            <input type="text" size="50" name="link"{% if link %}  value="{{ link }}"{% endif %} />
-                            <br />
-                            <strong>Must be the permalink [PL] of the torrent<br />(e.g. {{ constant('SITE_URL') }}/torrents.php?torrentid=nnn).</strong>
+                            <input type="hidden" name="action" value="takefill">
+                            <input type="hidden" name="auth" value="{{ viewer.auth }}">
+                            <input type="hidden" name="requestid" value="{{ request.id }}">
+                            <input type="text" size="50" name="link"{% if link %}  value="{{ link }}"{% endif %}>
+                            <br>
+                            <strong>Must be the permalink [PL] of the torrent<br>(e.g. {{ constant('SITE_URL') }}/torrents.php?torrentid=nnn).</strong>
                         </div>
 {%  if viewer.permitted('site_moderate_requests') %}
                         <div class="field_div">
-                            For user: <input type="text" size="25" name="user"{% if filler %} value="{{ filler.username}}"{% endif %} />
+                            For user: <input type="text" size="25" name="user"{% if filler %} value="{{ filler.username}}"{% endif %}>
                         </div>
 {%  endif %}
                         <div class="submit_div">
-                            <input type="submit" value="Fill request" />
+                            <input type="submit" value="Fill request">
                         </div>
                     </form>
                 </td>

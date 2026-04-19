@@ -63,7 +63,7 @@
             {% if info.email == info.email_clean %}
                 {{ info.email }}
             {% else %}
-                {{ info.email_clean }}<br />(cleaned from {{ info.email }})
+                {{ info.email_clean }}<br>(cleaned from {{ info.email }})
             {% endif %}
             <td>{{ candidate.email }}</td>
             <th>Created</th>
@@ -79,7 +79,7 @@
         <tr>
             <th>Remote IP</th>
             <td>{{ info.ipaddr }}</td>
-            <td>{{ candidate.ips|default('')|replace({',': '<br />'}) }}</td>
+            <td>{{ candidate.ips|default('')|replace({',': '<br>'}) }}</td>
             <th>Token</th>
             <td><tt>{{ info.token }}</tt></td>
         </tr>

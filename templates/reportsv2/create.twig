@@ -14,9 +14,9 @@
                 <td class="number_column nobr"><strong>Files</strong></td>
 {% endif %}
                 <td class="number_column nobr"><strong>Size</strong></td>
-                <td class="sign snatches"><img src="{{ url_stem }}snatched.svg" class="tooltip" alt="Snatches" title="Snatches" /></td>
-                <td class="sign seeders"><img src="{{ url_stem }}seeders.svg" class="tooltip" alt="Seeders" title="Seeders" /></td>
-                <td class="sign leechers"><img src="{{ url_stem }}leechers.svg" class="tooltip" alt="Leechers" title="Leechers" /></td>
+                <td class="sign snatches"><img src="{{ url_stem }}snatched.svg" class="tooltip" alt="Snatches" title="Snatches"></td>
+                <td class="sign seeders"><img src="{{ url_stem }}seeders.svg" class="tooltip" alt="Seeders" title="Seeders"></td>
+                <td class="sign leechers"><img src="{{ url_stem }}leechers.svg" class="tooltip" alt="Leechers" title="Leechers"></td>
             </tr>
 {% include 'torrent/detail-torrentgroup.twig' with {
     'report_man'    : report_man,
@@ -33,10 +33,10 @@
 
     <form class="create_form" name="report" action="reportsv2.php?action=takereport" enctype="multipart/form-data" method="post" id="reportform">
         <div>
-            <input type="hidden" name="submit" value="true" />
-            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-            <input type="hidden" name="torrentid" value="{{ torrent.id }}" />
-            <input type="hidden" name="categoryid" value="{{ torrent.group.categoryId }}" />
+            <input type="hidden" name="submit" value="true">
+            <input type="hidden" name="auth" value="{{ viewer.auth }}">
+            <input type="hidden" name="torrentid" value="{{ torrent.id }}">
+            <input type="hidden" name="categoryid" value="{{ torrent.group.categoryId }}">
         </div>
 
         <h3>Report Information</h3>
@@ -55,21 +55,21 @@
             </table>
             <p>Fields that contain lists of values (for example, listing more
             than one track number) should be separated by a space.</p>
-            <br />
+            <br>
             <p><strong>Following the below report type specific guidelines will
             help the moderators deal with your report in a timely
             fashion.</strong></p>
-            <br />
+            <br>
 
             <div id="dynamic_form">
-                <input id="sitelink" type="hidden" name="sitelink" size="50" value="{{ post.sitelink }}" />
-                <input id="image" type="hidden" name="image" size="50" value="{{ post.image }}" />
-                <input id="track" type="hidden" name="track" size="8" value="{{ post.track }}" />
-                <input id="link" type="hidden" name="link" size="50" value="{{ post.link }}" />
-                <input id="extra" type="hidden" name="extra" value="{{ post.extra }}" />
+                <input id="sitelink" type="hidden" name="sitelink" size="50" value="{{ post.sitelink }}">
+                <input id="image" type="hidden" name="image" size="50" value="{{ post.image }}">
+                <input id="track" type="hidden" name="track" size="8" value="{{ post.track }}">
+                <input id="link" type="hidden" name="link" size="50" value="{{ post.link }}">
+                <input id="extra" type="hidden" name="extra" value="{{ post.extra }}">
             </div>
         </div>
-    <input type="submit" value="Create report" />
+    <input type="submit" value="Create report">
     </form>
 </div>
 {{ footer() }}

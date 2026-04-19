@@ -10,7 +10,7 @@
     </div>
     <div class="center pad">
         <a href="{{ aotm.tgroup.location }}" class="tooltip" title="{{ aotm.tgroup.text }}">
-            <img src="{{ aotm.tgroup.image|image }}" loading="eager" alt="{{ aotm.tgroup.text }}" width="100%" />
+            <img src="{{ aotm.tgroup.image|image }}" loading="eager" alt="{{ aotm.tgroup.text }}" width="100%">
         </a>
     </div>
 </div>
@@ -24,7 +24,7 @@
     </div>
     <div class="center pad">
         <a href="{{ aotm.tgroup.link }}" class="tooltip" title="{{ aotm.tgroup.text }}">
-            <img src="{{ showcase.tgroup.image|image }}" loading="eager" alt="{{ showcase.tgroup.text }}" width="100%" />
+            <img src="{{ showcase.tgroup.image|image }}" loading="eager" alt="{{ showcase.tgroup.text }}" width="100%">
         </a>
     </div>
 </div>
@@ -72,7 +72,7 @@
 {%  if loop.last and contest_rank %}
 {%      if contest_rank.position > 4 %}
         <tr>
-            <td colspan="3"><hr /></td>
+            <td colspan="3"><hr></td>
         </tr>
 {%      endif %}
 {%      if contest_rank.position > 3 %}
@@ -111,23 +111,23 @@
             </li>
 {%      endfor %}
 {%      if poll.response(viewer) == 0 %}
-            <br />
+            <br>
             <li title="You abstained">➔ (Abstain)</li>
 {%      endif %}
         </ul>
-        <br /><strong>Votes:</strong> {{ poll.total|number_format }}<br />
+        <br><strong>Votes:</strong> {{ poll.total|number_format }}<br>
 {%  else %}
         <div id="poll_container">
         <form class="vote_form" name="poll" id="poll" action="">
-            <input type="hidden" name="action" value="poll" />
-            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-            <input type="hidden" name="threadid" value="{{ poll.id }}" />
+            <input type="hidden" name="action" value="poll">
+            <input type="hidden" name="auth" value="{{ viewer.auth }}">
+            <input type="hidden" name="threadid" value="{{ poll.id }}">
 {%      for id, answer in poll.answerList %}
-            <input type="radio" name="vote" id="answer_{{ id }}" value="{{ id }}" />
-            <label for="answer_{{ id }}">{{ answer }}</label><br />
+            <input type="radio" name="vote" id="answer_{{ id }}" value="{{ id }}">
+            <label for="answer_{{ id }}">{{ answer }}</label><br>
 {%      endfor %}
-            <br /><input type="radio" name="vote" id="answer_0" value="0" /> <label for="answer_0">Blank&nbsp;&mdash;&nbsp;Show the results!</label><br /><br />
-            <input type="button" onclick="ajax.post('index.php', 'poll', function(response) { $('#poll_container').raw().innerHTML = response } );" value="Vote" />
+            <br><input type="radio" name="vote" id="answer_0" value="0"> <label for="answer_0">Blank&nbsp;&mdash;&nbsp;Show the results!</label><br><br>
+            <input type="button" onclick="ajax.post('index.php', 'poll', function(response) { $('#poll_container').raw().innerHTML = response } );" value="Vote">
         </form>
         </div>
 {%  endif %}

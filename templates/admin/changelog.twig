@@ -9,20 +9,20 @@
         </div>
         <div class="pad">
             <form method="post" action="">
-                <input type="hidden" name="perform" value="add" />
-                <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+                <input type="hidden" name="perform" value="add">
+                <input type="hidden" name="auth" value="{{ viewer.auth }}">
                 <div class="field_div" id="cl_message">
                     <span class="label">Commit message:</span>
-                    <br />
+                    <br>
                     <textarea name="message" rows="2"></textarea>
                 </div>
                 <div class="field_div" id="cl_author">
                     <span class="label">Author:</span>
-                    <br />
-                    <input type="text" name="author" value="{{ viewer.username }}" />
+                    <br>
+                    <input type="text" name="author" value="{{ viewer.username }}">
                 </div>
                 <div class="submit_div" id="cl_submit">
-                    <input type="submit" value="Submit" />
+                    <input type="submit" value="Submit">
                 </div>
             </form>
         </div>
@@ -35,9 +35,9 @@
     {% if viewer.permitted('users_mod') %}
             <span style="float: right;">
                 <form id="delete_{{ change.id }}" method="post" action="">
-                    <input type="hidden" name="perform" value="remove" />
-                    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-                    <input type="hidden" name="change_id" value="{{ change.id }}" />
+                    <input type="hidden" name="perform" value="remove">
+                    <input type="hidden" name="auth" value="{{ viewer.auth }}">
+                    <input type="hidden" name="change_id" value="{{ change.id }}">
                 </form>
                 {{- dom.click('#changelog-rm-' ~ change.id, "$('#delete_" ~ change.id ~ "').raw().submit(); return false;") -}}
                 <a href="#" id="changelog-rm-{{ change.id }}" class="brackets">Delete</a>

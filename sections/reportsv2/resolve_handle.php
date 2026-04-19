@@ -142,7 +142,7 @@ if (!$isDelete) {
         $report->reportType()->trackerReason()
     );
     if (!$ok) {
-        echo "Failure: $message<br />";
+        echo "Failure: $message<br>";
         exit;
     }
 

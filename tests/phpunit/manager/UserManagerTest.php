@@ -125,7 +125,7 @@ class UserManagerTest extends TestCase {
         $this->assertEquals(
             "<a class=\"username\" href=\"user.php?id={$this->userList[2]->id}\">{$this->userList[2]->username()}</a><a href=\"rules.php\"><img loading=\"lazy\" class=\"tooltip\" src=\""
                 . STATIC_SERVER
-                . "/common/symbols/disabled.png\" alt=\"Banned\" title=\"Disabled\" /></a> (User)",
+                . "/common/symbols/disabled.png\" alt=\"Banned\" title=\"Disabled\"></a> (User)",
             $manager->displayUsername($this->userList[2]->id, $this->userList[0], true),
             'uman-display-user-disabled'
         );

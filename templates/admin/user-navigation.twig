@@ -17,33 +17,33 @@
 {% for item in list %}
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
     <form class="manage_form" name="navitems" action="" method="post">
-        <input type="hidden" name="id" value="{{ item.id }}" />
-        <input type="hidden" name="action" value="navigation_alter" />
-        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+        <input type="hidden" name="id" value="{{ item.id }}">
+        <input type="hidden" name="action" value="navigation_alter">
+        <input type="hidden" name="auth" value="{{ viewer.auth }}">
         <td>
-            <input type="text" name="tag" value="{{ item.tag }}" />
+            <input type="text" name="tag" value="{{ item.tag }}">
         </td>
         <td>
-            <input type="text" name="title" value="{{ item.title }}" />
+            <input type="text" name="title" value="{{ item.title }}">
         </td>
         <td>
-            <input type="text" name="target" value="{{ item.target }}" />
+            <input type="text" name="target" value="{{ item.target }}">
         </td>
         <td>
-            <input type="text" name="tests" value="{{ item.tests }}" />
+            <input type="text" name="tests" value="{{ item.tests }}">
         </td>
         <td>
-            <input type="checkbox" name="testuser"{{ checked(item.test_user) }} />
+            <input type="checkbox" name="testuser"{{ checked(item.test_user) }}>
         </td>
         <td>
-            <input type="checkbox" name="mandatory"{{ checked(item.mandatory) }} />
+            <input type="checkbox" name="mandatory"{{ checked(item.mandatory) }}>
         </td>
         <td>
-            <input type="checkbox" name="default"{{ checked(item.initial) }} />
+            <input type="checkbox" name="default"{{ checked(item.initial) }}>
         </td>
         <td>
-            <input type="submit" name="submit" value="Edit" />
-            <input type="submit" name="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this link? This is an irreversible action!')" />
+            <input type="submit" name="submit" value="Edit">
+            <input type="submit" name="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this link? This is an irreversible action!')">
         </td>
     </form>
     </tr>
@@ -53,31 +53,31 @@
     </tr>
     <tr class="rowa">
     <form class="manage_form" name="navitems" action="" method="post">
-        <input type="hidden" name="action" value="navigation_alter" />
-        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+        <input type="hidden" name="action" value="navigation_alter">
+        <input type="hidden" name="auth" value="{{ viewer.auth }}">
         <td>
-            <input type="text" name="tag" />
+            <input type="text" name="tag">
         </td>
         <td>
-            <input type="text" name="title" />
+            <input type="text" name="title">
         </td>
         <td>
-            <input type="text" name="target" />
+            <input type="text" name="target">
         </td>
         <td>
-            <input type="text" name="tests" />
+            <input type="text" name="tests">
         </td>
         <td>
-            <input type="checkbox" name="testuser" />
+            <input type="checkbox" name="testuser">
         </td>
         <td>
-            <input type="checkbox" name="mandatory" />
+            <input type="checkbox" name="mandatory">
         </td>
         <td>
-            <input type="checkbox" name="default" />
+            <input type="checkbox" name="default">
         </td>
         <td>
-            <input type="submit" name="submit" value="Create" />
+            <input type="submit" name="submit" value="Create">
         </td>
     </form>
     </tr>

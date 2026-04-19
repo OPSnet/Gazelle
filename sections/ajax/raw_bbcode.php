@@ -12,4 +12,4 @@ if (is_null($post)) {
     json_die("failure", "assholes");
 }
 
-json_print("success", ["body" => nl2br($post->body())]);
+json_print("success", ["body" => nl2br($post->body(), false)]);

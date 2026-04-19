@@ -10,7 +10,7 @@
         {% if r is not null %}
             <a href="torrents.php?id={{ r.id }}">
             <img src="{{ r.image|image_cache(width = 150) }}" loading="eager" class="tooltip" title="{{ r.text }}" alt="{{ r.text }}"
-                data-origin-src="{{ r.image }}" width="107" />
+                data-origin-src="{{ r.image }}" width="107">
             </a>
         {% endif %}
     </td>

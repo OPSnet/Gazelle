@@ -102,7 +102,7 @@ echo ' selected="selected"'; } ?>>Prefer Best Seeded</option>
                     <option value="2"<?php if ($ZIPPrefs == 2) {
 echo ' selected="selected"'; } ?>>Prefer Bonus Tracks</option>
                 </select>
-                <input type="submit" style="width: 210px;" value="Download" />
+                <input type="submit" style="width: 210px;" value="Download">
                 </form>
             </div>
         </div>

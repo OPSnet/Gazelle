@@ -4,7 +4,7 @@
         <input class="notification-popup" type="checkbox" name="notifications_{{ name }}_popup" id="notifications_{{ name }}_popup"{{ checked(value in [
             constant('\\Gazelle\\User\\Notification::DISPLAY_POPUP'),
             constant('\\Gazelle\\User\\Notification::DISPLAY_POPUP_PUSH'),
-        ]) }} /> Pop-up
+        ]) }}> Pop-up
     </label>
 {% endmacro %}
 {% macro check_push(name, value) %}
@@ -13,7 +13,7 @@
             constant('\\Gazelle\\User\\Notification::DISPLAY_PUSH'),
             constant('\\Gazelle\\User\\Notification::DISPLAY_POPUP_PUSH'),
             constant('\\Gazelle\\User\\Notification::DISPLAY_TRADITIONAL_PUSH'),
-        ]) }} /> Push
+        ]) }}> Push
     </label>
 {% endmacro %}
 {% macro check_trad(name, value) %}
@@ -21,7 +21,7 @@
         <input class="notification-trad" type="checkbox" name="notifications_{{ name }}_traditional" id="notifications_{{ name }}_traditional"{{ checked(value in [
             constant('\\Gazelle\\User\\Notification::DISPLAY_TRADITIONAL'),
             constant('\\Gazelle\\User\\Notification::DISPLAY_TRADITIONAL_PUSH'),
-        ]) }} /> Traditional
+        ]) }}> Traditional
     </label>
 {% endmacro %}
 <div id="notification">
@@ -36,7 +36,7 @@
             <strong>Automatic thread subscriptions</strong>
         </td>
         <td>
-            <input type="checkbox" name="autosubscribe" id="autosubscribe"{{ checked(user.option('AutoSubscribe')) }} />
+            <input type="checkbox" name="autosubscribe" id="autosubscribe"{{ checked(user.option('AutoSubscribe')) }}>
             <label for="autosubscribe">Enable automatic thread subscriptions</label>
         </td>
     </tr>
@@ -45,7 +45,7 @@
             <strong>Unseeded snatches alerts</strong>
         </td>
         <td>
-            <input type="checkbox" name="notifyonunseededsnatch" id="notifyonunseededsnatch"{{ checked(not user.hasAttr('no-pm-unseeded-snatch')) }} />
+            <input type="checkbox" name="notifyonunseededsnatch" id="notifyonunseededsnatch"{{ checked(not user.hasAttr('no-pm-unseeded-snatch')) }}>
             <label for="notifyonunseededsnatch">Receive PM alerts when a snatched upload is not being seeded and faces imminent removal</label>
         </td>
     </tr>
@@ -54,7 +54,7 @@
             <strong>Unseeded uploads alerts</strong>
         </td>
         <td>
-            <input type="checkbox" name="notifyonunseededupload" id="notifyonunseededupload"{{ checked(not user.hasAttr('no-pm-unseeded-upload')) }} />
+            <input type="checkbox" name="notifyonunseededupload" id="notifyonunseededupload"{{ checked(not user.hasAttr('no-pm-unseeded-upload')) }}>
             <label for="notifyonunseededupload">Receive PM alerts when one of your uploads is not being seeded and faces imminent removal</label>
         </td>
     </tr>
@@ -63,7 +63,7 @@
             <strong>Deleted seeding torrent alerts</strong>
         </td>
         <td>
-            <input type="checkbox" name="notifyondeleteseeding" id="notifyondeleteseeding"{{ checked(user.notifyDeleteSeeding) }} />
+            <input type="checkbox" name="notifyondeleteseeding" id="notifyondeleteseeding"{{ checked(user.notifyDeleteSeeding) }}>
             <label for="notifyondeleteseeding">Enable PM notifications when seeding torrents are deleted</label>
         </td>
     </tr>
@@ -72,7 +72,7 @@
             <strong>Deleted snatched torrent alerts</strong>
         </td>
         <td>
-            <input type="checkbox" name="notifyondeletesnatched" id="notifyondeletesnatched"{{ checked(user.notifyDeleteSnatch) }} />
+            <input type="checkbox" name="notifyondeletesnatched" id="notifyondeletesnatched"{{ checked(user.notifyDeleteSnatch) }}>
             <label for="notifyondeletesnatched">Enable PM notification when snatched torrents are deleted</label>
         </td>
     </tr>
@@ -81,7 +81,7 @@
             <strong>Deleted downloaded torrent alerts</strong>
         </td>
         <td>
-            <input type="checkbox" name="notifyondeletedownloaded" id="notifyondeletedownloaded"{{ checked(user.notifyDeleteDownload) }} />
+            <input type="checkbox" name="notifyondeletedownloaded" id="notifyondeletedownloaded"{{ checked(user.notifyDeleteDownload) }}>
             <label for="notifyondeletedownloaded">Enable PM notification when downloaded torrents are deleted</label>
         </td>
     </tr>

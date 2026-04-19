@@ -4,13 +4,13 @@
     <tr id="title_tr">
         <td class="label">Author - Title:</td>
         <td>
-            <input type="text" id="title" name="title" size="60" value="" />
+            <input type="text" id="title" name="title" size="60" value="">
             <p class="min_padding">Should only include the author if applicable.</p>
         </td>
     </tr>
     <tr id="year_tr">
         <td class="label">Year:</td>
-        <td><input type="text" id="year" name="year" size="5" value="" /></td>
+        <td><input type="text" id="year" name="year" size="5" value=""></td>
     </tr>
 {% endif %}
 {% include 'upload/format.twig' with {'format': torrent.Format} %}

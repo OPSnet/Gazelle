@@ -36,8 +36,8 @@
     </div>
 {%      endif %}
     <form action="" method="post">
-    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-    <input type="hidden" name="action" value="purchase" />
+    <input type="hidden" name="auth" value="{{ viewer.auth }}">
+    <input type="hidden" name="action" value="purchase">
     <table>
         <thead>
             <tr class="colhead">
@@ -67,7 +67,7 @@
 {%  elseif item.needsPreparation %}
                     <a href="bonus.php?action=prepare&amp;item={{ item.label }}">Prepare</a>
 {%  else %}
-                    <input style="font-size:10px;margin:0px;" type="submit" name="{{ item.label }}" value="Purchase!" />
+                    <input style="font-size:10px;margin:0px;" type="submit" name="{{ item.label }}" value="Purchase!">
 {%  endif %}
                 </td>
             </tr>
@@ -75,7 +75,7 @@
         </tbody>
     </table>
     </form>
-    <br />
+    <br>
 </div>
 {%  endif %}
 {% endfor %}

@@ -39,9 +39,9 @@ through the staff tools on their profile page.</p>
         <td>{{ info.overshoot }}</td>
     {% if is_admin %}
         <td>
-            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+            <input type="hidden" name="auth" value="{{ viewer.auth }}">
             <input type="submit" name="remove-{{ info.ID }}" value="Remove"
-                onclick="return confirm('Are you sure you want to remove this rate limit? This is an irreversible action!')" />
+                onclick="return confirm('Are you sure you want to remove this rate limit? This is an irreversible action!')">
         </td>
     {% endif %}
     </tr>
@@ -67,12 +67,12 @@ through the staff tools on their profile page.</p>
     {% endfor %}
             </select>
         </td>
-        <td><input type="text" size="6" name="factor" value="" placeholder="1.0" /></td>
-        <td><input type="text" size="6" name="overshoot" /></td>
+        <td><input type="text" size="6" name="factor" value="" placeholder="1.0"></td>
+        <td><input type="text" size="6" name="overshoot"></td>
         <td>
-            <input type="hidden" name="task" value="add" />
-            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-            <input type="submit" name="submit" value="Create" />
+            <input type="hidden" name="task" value="add">
+            <input type="hidden" name="auth" value="{{ viewer.auth }}">
+            <input type="submit" name="submit" value="Create">
         </td>
     </tr>
 </table>

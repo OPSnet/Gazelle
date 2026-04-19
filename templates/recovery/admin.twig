@@ -13,11 +13,11 @@
 
 <form method="post" action="/recovery.php?action=admin">
 <table>
-<tr><th>Token</th><td><input type="text" width="30" name="token" /></td>
-<th>Username</th><td><input type="text" width="30" name="username" /></td></tr>
-<tr><th>Announce</th><td><input type="text" width="30" name="announce" /></td>
-<th>Email</th><td><input type="text" width="30" name="email" /></td></tr>
-<tr><td></td><td colspan="3"><input type="submit" value="Search" /></td></tr>
+<tr><th>Token</th><td><input type="text" width="30" name="token"></td>
+<th>Username</th><td><input type="text" width="30" name="username"></td></tr>
+<tr><th>Announce</th><td><input type="text" width="30" name="announce"></td>
+<th>Email</th><td><input type="text" width="30" name="email"></td></tr>
+<tr><td></td><td colspan="3"><input type="submit" value="Search"></td></tr>
 </table>
 
 <h3>{{ paginator.total }} {{ state }} recovery request{{ paginator.total|plural }}</h3>

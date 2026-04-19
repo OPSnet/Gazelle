@@ -22,11 +22,11 @@
                 <div class="preview_wrapper">
                     <div class="preview_image" name="{{ sheet.css_name }}">
                         <a href="{{ constant('STATIC_SERVER') }}/stylespreview/full_{{ sheet.css_name }}.png" target="_blank">
-                            <img src="{{ constant('STATIC_SERVER') }}/stylespreview/thumb_{{ sheet.css_name }}.png" alt="{{ sheet.css_name }}" />
+                            <img src="{{ constant('STATIC_SERVER') }}/stylespreview/thumb_{{ sheet.css_name }}.png" alt="{{ sheet.css_name }}">
                         </a>
                     </div>
                     <p class="preview_name">
-                        <label><input type="radio" name="stylesheet_gallery" value="{{ sheet.id }}" /> {{ sheet.name }}</label>
+                        <label><input type="radio" name="stylesheet_gallery" value="{{ sheet.id }}"> {{ sheet.name }}</label>
                     </p>
                 </div>
 {% endfor %}
@@ -38,7 +38,7 @@
             <strong>External stylesheet URL</strong>
         </td>
         <td>
-            <input type="text" size="40" name="styleurl" id="styleurl" value="{{ stylesheet.styleUrl }}" />
+            <input type="text" size="40" name="styleurl" id="styleurl" value="{{ stylesheet.styleUrl }}">
         </td>
     </tr>
     <tr id="site_opendyslexic_tr">
@@ -48,7 +48,7 @@
             <strong>OpenDyslexic</strong></td>
         <td>
             <div class="field_div">
-                <input type="checkbox" name="useopendyslexic" id="useopendyslexic"{{ checked(user.option('UseOpenDyslexic')) }} />
+                <input type="checkbox" name="useopendyslexic" id="useopendyslexic"{{ checked(user.option('UseOpenDyslexic')) }}>
                 <label for="useopendyslexic">Enable the OpenDyslexic font</label>
             </div>
             <p class="min_padding">Note: some stylesheets may have display issues.</p>
@@ -60,7 +60,7 @@
             <strong>User audit trail</strong></td>
         <td>
             <div class="field_div">
-                <label><input type="checkbox" name="audit-trail-hidden" {{ checked(user.hasAttr('audit-trail-hidden')) }} />
+                <label><input type="checkbox" name="audit-trail-hidden" {{ checked(user.hasAttr('audit-trail-hidden')) }}>
                 History (staff notes) on user profiles is collapsed by default</label>
             </div>
         </td>

@@ -97,7 +97,7 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
 <form class="manage_form" name="torrents" id="notificationform_<?=$filterId?>" action="">
 <table class="torrent_table cats checkboxes border m_table">
     <tr class="colhead">
-        <td style="text-align: center;"><input type="checkbox" name="toggle" onclick="toggleChecks('notificationform_<?=$filterId?>', this, '.notify_box')" /></td>
+        <td style="text-align: center;"><input type="checkbox" name="toggle" onclick="toggleChecks('notificationform_<?=$filterId?>', this, '.notify_box')"></td>
         <td class="small cats_col"></td>
         <td style="width: 100%;" class="nobr">Name<?= ' / ' . $header->emit('year') ?></td>
         <td class="nobr"><?= $header->emit('time') ?></td>
@@ -121,7 +121,7 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
         . ($tgroup->isSnatched() ? ' snatched_group' : '')
         ?>">
         <td class="m_td_left td_checkbox" style="text-align: center;">
-            <input type="checkbox" class="notify_box notify_box_<?=$filterId?>" value="<?=$torrentId?>" id="clear_<?=$torrentId?>" tabindex="1" />
+            <input type="checkbox" class="notify_box notify_box_<?=$filterId?>" value="<?=$torrentId?>" id="clear_<?=$torrentId?>" tabindex="1">
         </td>
         <td class="center cats_col">
             <div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>"></div>

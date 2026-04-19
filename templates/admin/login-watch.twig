@@ -25,8 +25,8 @@
 {%  if loop.first %}
 {{  paginator.linkbox|raw }}
 <form class="manage_form" name="bans" action="" method="post">
-<input type="hidden" name="auth" value="{{ viewer.auth }}" />
-<input type="hidden" name="action" value="login_watch" />
+<input type="hidden" name="auth" value="{{ viewer.auth }}">
+<input type="hidden" name="action" value="login_watch">
 <table width="100%">
     <tr class="colhead">
         <td>{{ header.emit('ipaddr')|raw }}</td>
@@ -62,31 +62,31 @@
         <td>{{ b.last_attempt|time_diff }}</td>
         <td>{{ b.banned_until|time_diff }}</td>
         <td style="text-align: center">
-            <input type="radio" title="clear" name="admin-{{ b.id }}" value="clear" />
+            <input type="radio" title="clear" name="admin-{{ b.id }}" value="clear">
         </td>
 {%  if viewer.permitted('admin_manage_ipbans') %}
         <td style="text-align: center">
-            <input type="radio" title="ban" name="admin-{{ b.id }}" value="ban" />
+            <input type="radio" title="ban" name="admin-{{ b.id }}" value="ban">
         </td>
 {%  endif %}
         <td style="text-align: center">
             <input type="radio" title="no change" id="noop-{{ b.id
-                }}" name="admin-{{ b.id }}" value="noop" checked="checked" />
+                }}" name="admin-{{ b.id }}" value="noop" checked>
         </td>
 {%  if loop.last %}
 {%      if viewer.permitted('admin_manage_ipbans') %}
     <tr>
-        <td><br />Ban Reason</td>
+        <td><br>Ban Reason</td>
         <td colspan="9">
-            <br />
-            <input type="text" name="reason" size="40" />
-            <br />When banning, this reason will be recorded for each checked IP address.
+            <br>
+            <input type="text" name="reason" size="40">
+            <br>When banning, this reason will be recorded for each checked IP address.
         </td>
     </tr>
 {%      endif %}
     <tr>
         <td colspan="{{ 9 + (viewer.permitted('admin_manage_ipbans') ? 1 : 0) }}">
-            <input type="submit" name="submit" value="Update" />
+            <input type="submit" name="submit" value="Update">
         </td>
     </tr>
 

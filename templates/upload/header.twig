@@ -6,9 +6,9 @@
 {%  endif %}
 <h2>Upload</h2>
     <div style="text-align: center;">
-        Your personal announce url is:<br />
+        Your personal announce url is:<br>
         <div style="margin: 0 auto;">
-            <input type="text" value="{{ user.announceUrl }}" size="71" onclick="this.select();" readonly="readonly" />
+            <input type="text" value="{{ user.announceUrl }}" size="71" onclick="this.select();" readonly="readonly">
         </div>
     </div>
 {% else %}
@@ -18,18 +18,18 @@
     <p class="upload-error">{{ error|raw }}</p>
 {% endif %}
     <form class="{% if is_upload %}create_form{% else %}edit_form{% endif %}" name="torrent" action="" enctype="multipart/form-data" method="post" id="upload_table">
-        <input type="hidden" name="auth" value="{{ user.auth }}" />
+        <input type="hidden" name="auth" value="{{ user.auth }}">
 {% if not is_upload %}
-        <input type="hidden" name="action" value="takeedit" />
-        <input type="hidden" name="torrentid" value="{{ info.ID }}" />
+        <input type="hidden" name="action" value="takeedit">
+        <input type="hidden" name="torrentid" value="{{ info.ID }}">
 {% else %}
-        <input type="hidden" id="torrent-new" name="torrent-new" value="{{ (info is not iterable)|number_format }}" />
+        <input type="hidden" id="torrent-new" name="torrent-new" value="{{ (info is not iterable)|number_format }}">
     {%  if info.GroupID %}
-        <input type="hidden" name="groupid" value="{{ info.GroupID }}" />
-        <input type="hidden" name="type" value="{{ category_id - 1 }}" />
+        <input type="hidden" name="groupid" value="{{ info.GroupID }}">
+        <input type="hidden" name="type" value="{{ category_id - 1 }}">
 {%  endif %}
 {%  if info.RequestID %}
-        <input type="hidden" name="requestid" value="{{ info.RequestID }}" />
+        <input type="hidden" name="requestid" value="{{ info.RequestID }}">
 {%  endif %}
 {% endif %}
 {% if is_upload %}
@@ -37,14 +37,14 @@
             <tr>
                 <td class="label">Torrent file:</td>
                 <td>
-                    <input id="file" type="file" name="file_input" size="50" accept="application/x-bittorrent, .torrent" />
+                    <input id="file" type="file" name="file_input" size="50" accept="application/x-bittorrent, .torrent">
                 </td>
             </tr>
             <tr>
                 <td class="label">JSON file:</td>
                 <td>
-                    <input type="file" id="torrent-json-file" accept="application/json, .json" />
-                    <br />(If you are not cross-seeding from another site, you can safely leave this field empty).
+                    <input type="file" id="torrent-json-file" accept="application/json, .json">
+                    <br>(If you are not cross-seeding from another site, you can safely leave this field empty).
                 </td>
             </tr>
             <tr>

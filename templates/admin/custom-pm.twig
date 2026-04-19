@@ -18,14 +18,14 @@
 
 <div class="thin box pad">
 <form class="create_form" name="user" method="post" action="">
-    <input type="hidden" name="action" value="custom_pm" />
-    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+    <input type="hidden" name="action" value="custom_pm">
+    <input type="hidden" name="auth" value="{{ viewer.auth }}">
     <table class="layout" cellpadding="2" cellspacing="1" border="0">
         <tr valign="top">
             <td align="right" class="label">Source:</td>
             <td>
-                <label><input type="radio" name="source" value="my"{{ checked(source == 'my') }} /> Mysql</label>
-                <br /><label><input type="radio" name="source" value="pg"{{ checked(source == 'pg') }} /> Postgres</label>
+                <label><input type="radio" name="source" value="my"{{ checked(source == 'my') }}> Mysql</label>
+                <br><label><input type="radio" name="source" value="pg"{{ checked(source == 'pg') }}> Postgres</label>
             </td>
         </tr>
         <tr valign="top">
@@ -33,7 +33,7 @@
             <td>
                 {%- if error %}<strong class="important_text">{{ error }}</strong>{% endif %}
                 <textarea name="query" cols="100" rows="6">{{ query|raw }}</textarea>
-            <br />
+            <br>
 
         </tr>
 {% if id_list %}
@@ -44,21 +44,21 @@
         <tr>
             <td align="right" class="label">Subject:</td>
             <td>
-                <input type="text" size="50" name="subject" value="{{ subject }}" />
+                <input type="text" size="50" name="subject" value="{{ subject }}">
             </td>
         </tr>
         <tr>
             <td align="right" class="label">Message:</td>
-            <td>NB: You may use <code>%USERNAME%</code> which will be replaced by their username<br />
+            <td>NB: You may use <code>%USERNAME%</code> which will be replaced by their username<br>
                 {{ message.emit|raw }}
             </td>
         </tr>
         <tr>
             <td align="right" class="label">Anonymous:</td>
             <td>
-                <label><input type="checkbox" name="anonymous" /> Check to send as a System message</label>
+                <label><input type="checkbox" name="anonymous"> Check to send as a System message</label>
                 {% if not id_list %}
-                <br />Note that if you send this message anonymously, you will not receive a copy in your Sendbox and
+                <br>Note that if you send this message anonymously, you will not receive a copy in your Sendbox and
                 people will not be able to answer (in this case, recommend a Staff PM or IRC).
                 {% endif %}
             </td>
@@ -66,7 +66,7 @@
         <tr>
             <td align="right" class="label">Send:</td>
             <td>
-                <label><input type="checkbox" name="send" /> Check to send (you really mean it!)</label>
+                <label><input type="checkbox" name="send"> Check to send (you really mean it!)</label>
             </td>
         </tr>
 {% else %}
@@ -81,7 +81,7 @@
         AND Enabled = '1'
         AND Email LIKE '%@hotmail.com'
                 </pre>
-                <br />
+                <br>
                 <pre>
     -- users who have exactly 42 snatches
     SELECT uid
@@ -98,7 +98,7 @@
         <tr>
             <td>&nbsp;</td>
             <td>
-                <input type="submit" name="submit" value="{% if id_list %}Send{% else %}Review{% endif %}" />
+                <input type="submit" name="submit" value="{% if id_list %}Send{% else %}Review{% endif %}">
             </td>
         </tr>
     </table>

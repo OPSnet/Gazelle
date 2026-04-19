@@ -14,12 +14,12 @@ event and the more recent events will be removed from the timeline.</div>
 <div class="pad">You can click on [Edit] or [View] to abandon any changes.</div>
 <form action="" method="post">
 {{ note.emit|raw }}
-<input type="hidden" name="action" value="audit-edit-handle" />
-<input type="hidden" name="auth" value="{{ viewer.auth }}" />
-<input type="hidden" name="id" value="{{ user.id }}" />
-<input type="hidden" name="id_list" value="{{ id_list }}" />
-<input type="hidden" name="sig" value="{{ viewer.hashHmac('audit', id_list) }}" />
-<input type="submit" value="Save" />
+<input type="hidden" name="action" value="audit-edit-handle">
+<input type="hidden" name="auth" value="{{ viewer.auth }}">
+<input type="hidden" name="id" value="{{ user.id }}">
+<input type="hidden" name="id_list" value="{{ id_list }}">
+<input type="hidden" name="sig" value="{{ viewer.hashHmac('audit', id_list) }}">
+<input type="submit" value="Save">
 </form>
 </div>
 

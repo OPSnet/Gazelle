@@ -27,16 +27,16 @@ if (isset($_REQUEST['add_points'])) {
     $uploadCount = $bonusMan->addUploadPoints($upload, $since);
     $seedCount   = $bonusMan->addSeedPoints($seed);
     if ($activeCount) {
-        $message .= '<strong>' . number_format($active) . ' bonus points added to ' . number_format($activeCount) . ' active users.</strong><br />';
+        $message .= '<strong>' . number_format($active) . ' bonus points added to ' . number_format($activeCount) . ' active users.</strong><br>';
     }
     if ($uploadCount) {
-        $message .= '<strong>' . number_format($upload) . ' bonus points added to ' . number_format($uploadCount) . ' active uploaders.</strong><br />';
+        $message .= '<strong>' . number_format($upload) . ' bonus points added to ' . number_format($uploadCount) . ' active uploaders.</strong><br>';
     }
     if ($seedCount) {
-        $message .= '<strong>' . number_format($seed) . ' bonus points added to ' . number_format($seedCount) . ' active seeders.</strong><br />';
+        $message .= '<strong>' . number_format($seed) . ' bonus points added to ' . number_format($seedCount) . ' active seeders.</strong><br>';
     }
     if ($message) {
-        $message .= '<br />';
+        $message .= '<br>';
     }
 }
 

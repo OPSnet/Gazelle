@@ -22,20 +22,20 @@
     <table>
         <tr>
             <td class="label">Title</td>
-            <td><input type="text" size="30" name="title" value="{{ role.title }}" /></td>
+            <td><input type="text" size="30" name="title" value="{{ role.title }}"></td>
         </tr>
         <tr>
             <td class="label">Viewers</td>
             <td><input type="text" size="60" name="viewer_list" value="
-                {%- for user in viewer_list -%}@{{ user.username }} {% endfor %}" />
-                <br />You can enter a @username or user id
+                {%- for user in viewer_list -%}@{{ user.username }} {% endfor %}">
+                <br>You can enter a @username or user id
             </td>
         </tr>
         <tr>
             <td class="label">Visibility</td>
             <td>
-                <input type="radio" name="status" value="1" id="status-pub"{{ checked(not role.isArchived) }} /><label for="status-pub">published</label><br />
-                <input type="radio" name="status" value="0" id="status-arch"{{ checked(role.isArchived) }} /><label for="status-arch">archived</label>
+                <input type="radio" name="status" value="1" id="status-pub"{{ checked(not role.isArchived) }}><label for="status-pub">published</label><br>
+                <input type="radio" name="status" value="0" id="status-arch"{{ checked(role.isArchived) }}><label for="status-arch">archived</label>
             </td>
         </tr>
         <tr>

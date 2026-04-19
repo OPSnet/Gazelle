@@ -10,7 +10,7 @@
 {%  endif %}
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
         <td class="debug_data debug_query_data">{{ q.query|nl2br }}
-        <br /><a class="brackets" href="tools.php?action=db_sandbox&amp;debug={{
+        <br><a class="brackets" href="tools.php?action=db_sandbox&amp;debug={{
             {"query": q.query}|json_encode|b64 }}">Inspect</a>
         </td>
         <td class="rowa debug_info debug_query_time" style="width: 130px;">{{

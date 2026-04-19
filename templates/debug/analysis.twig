@@ -7,14 +7,14 @@
 </div>
 <div style="text-align: center">
 <form method="post">
-    <input type="hidden" name="action" value="analysis" />
-    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-    <input type="hidden" name="id" value="{{ case.id }}" />
-    <input type="submit" name="prev" value="Prev" />
-    <input type="submit" name="remove-prev" value="Remove and Prev" />
-    <input type="submit" name="remove" value="Remove" />
-    <input type="submit" name="remove-next" value="Remove and Next" />
-    <input type="submit" name="next" value="Next" />
+    <input type="hidden" name="action" value="analysis">
+    <input type="hidden" name="auth" value="{{ viewer.auth }}">
+    <input type="hidden" name="id" value="{{ case.id }}">
+    <input type="submit" name="prev" value="Prev">
+    <input type="submit" name="remove-prev" value="Remove and Prev">
+    <input type="submit" name="remove" value="Remove">
+    <input type="submit" name="remove-next" value="Remove and Next">
+    <input type="submit" name="next" value="Next">
 </form>
 </div>
 <div class="thin">
@@ -34,39 +34,39 @@
 {% endif %}
     <tr><td class="colhead" style="vertical-align: top">Stacktrace</td><td>
 {% for line in case.trace %}
-        <code>{{ line }}</code><br />
+        <code>{{ line }}</code><br>
 {% endfor %}
     </td></tr>
 {% if case.request is not empty %}
     <tr><td class="colhead" style="vertical-align: top">Request</td><td>
 {%  for key, value in case.request %}
         {{ key }}: <code>{% if value is iterable %}{{ value|json_encode }}{%
-            else %}{{ value }}{% endif %}</code><br />
+            else %}{{ value }}{% endif %}</code><br>
 {%  endfor %}
     </td></tr>
 {% endif %}
 {% if case.errorList is not empty %}
     <tr><td class="colhead" style="vertical-align: top">Errors</td><td>
 {%  for line in case.errorList %}
-        <code>{{ line.1 }} - {{ line.2 }}({{ line.0 }}) </code><br />
+        <code>{{ line.1 }} - {{ line.2 }}({{ line.0 }}) </code><br>
 {%  endfor %}
     </td></tr>
 {% endif %}
 </td></tr>
 </table>
 </div>
-<br />
+<br>
 <div style="text-align: center">
 <form method="post">
-    <input type="hidden" name="action" value="analysis" />
-    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-    <input type="hidden" name="id" value="{{ case.id }}" />
-    <input type="submit" name="prev" value="Prev" />
-    <input type="submit" name="remove-prev" value="Remove and Prev" />
-    <input type="submit" name="remove" value="Remove" />
-    <input type="submit" name="remove-next" value="Remove and Next" />
-    <input type="submit" name="next" value="Next" />
+    <input type="hidden" name="action" value="analysis">
+    <input type="hidden" name="auth" value="{{ viewer.auth }}">
+    <input type="hidden" name="id" value="{{ case.id }}">
+    <input type="submit" name="prev" value="Prev">
+    <input type="submit" name="remove-prev" value="Remove and Prev">
+    <input type="submit" name="remove" value="Remove">
+    <input type="submit" name="remove-next" value="Remove and Next">
+    <input type="submit" name="next" value="Next">
 </form>
 </div>
-<br />
+<br>
 {{ footer() }}

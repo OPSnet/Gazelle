@@ -5,15 +5,15 @@
 <div class="box pad thin">
     <h3>{{ event.name }} ({{ event.openBegin|date('Y-m-d H:i:s') }}–{{ event.openEnd|date('Y-m-d H:i:s') }})</h3>
     <div class="box">
-        Total users: {{ event.totalUser|number_format }}<br />
-        Total gifts: {{ event.totalGift|number_format }}<br />
+        Total users: {{ event.totalUser|number_format }}<br>
+        Total gifts: {{ event.totalGift|number_format }}<br>
         Average gifts received: {% if event.totalUser %}{{
-            (event.totalGift / event.totalUser)|number_format(1) }}{% else %}0.0{% endif %}<br />
-        Average gift weight: {{ event.averageWeight|number_format(1) }}<br />
-        <br />
+            (event.totalGift / event.totalUser)|number_format(1) }}{% else %}0.0{% endif %}<br>
+        Average gift weight: {{ event.averageWeight|number_format(1) }}<br>
+        <br>
         <form action="?action=gift-event&id={{ event.id }}" method="post">
-        <label>Search for: <input name="search" value="" length="10" /></label> (id or @username)
-        <input type="submit" value="🔎" />
+        <label>Search for: <input name="search" value="" length="10"></label> (id or @username)
+        <input type="submit" value="🔎">
         </form>
     </div>
     <div class="box">

@@ -12,10 +12,10 @@
 
         <tr><td>
             <form class="search_form" name="ip_log" method="get" action="">
-                <input type="hidden" name="action" value="ips" />
-                <input type="hidden" name="userid" value="{{ user.id }}" />
-                <input type="text" name="ip" value="{{ ip }}" />
-                <input type="submit" value="Search" />
+                <input type="hidden" name="action" value="ips">
+                <input type="hidden" name="userid" value="{{ user.id }}">
+                <input type="text" name="ip" value="{{ ip }}">
+                <input type="submit" value="Search">
                 Regexps may be used
             </form>
         </td></tr>
@@ -41,7 +41,7 @@
                  {{ ip_search(row.ip_addr) }} (<span class="resolve-ipv4" data-ip="{{ row.ip_addr }}">Resolving...</span>)
             {% else %}
             <a href="tools.php?action=ip_ban&ip={{ row.ip_addr }}">{{ ip_search(row.ip_addr) }} (<span class="resolve-ipv4" data-ip="{{ row.ip_addr }}">Resolving {{ row.ip_addr }}...</span>)
-                <img src="{{ constant('STATIC_SERVER') }}/common/symbols/disabled.png" alt="IP ranned" title="IP banned" class="tooltip" />
+                <img src="{{ constant('STATIC_SERVER') }}/common/symbols/disabled.png" alt="IP ranned" title="IP banned" class="tooltip">
             </a>
             {% endif %}
             </td>

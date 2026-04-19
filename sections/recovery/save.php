@@ -10,7 +10,7 @@ $key        = "apl-recovery.$ipaddr";
 $rate_limit = 0;
 
 if ($Cache->get_value($key)) {
-    $msg = "Rate limiting in force.<br />You tried to save this page too rapidly following the previous save.";
+    $msg = "Rate limiting in force.<br>You tried to save this page too rapidly following the previous save.";
 } else {
     $info = $recovery->validate($_POST);
     if (count($info)) {
@@ -49,11 +49,11 @@ $Cache->cache_value($key, 1, 300);
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <title><?= SITE_NAME ?> :: Membership recovery</title>
-<meta http-equiv="X-UA-Compatible" content="chrome=1; IE=edge" />
-<meta http-equiv="Content-Type" content="text/html" />
-<link rel="shortcut icon" href="/favicon.ico" />
-<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-<link rel="stylesheet" href="<?= STATIC_SERVER ?>/styles/apollostage/style.css" />
+<meta http-equiv="X-UA-Compatible" content="chrome=1; IE=edge">
+<meta http-equiv="Content-Type" content="text/html">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="<?= STATIC_SERVER ?>/styles/apollostage/style.css">
 
 <style type="text/css" media="screen">
 body{background-color:#212328;margin:0;font-size:0.9em;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif}
@@ -85,7 +85,7 @@ recheck your spam folder), join the <tt>#recovery</tt> channel on IRC.</p>
 
 <blockquote>
 <h4>IRC details</h4>
-<p>Server: <tt><?= IRC_HOSTNAME ?></tt><br />
+<p>Server: <tt><?= IRC_HOSTNAME ?></tt><br>
 Port: 6667 or +7000 for SSL</p>
 </blockquote>
 

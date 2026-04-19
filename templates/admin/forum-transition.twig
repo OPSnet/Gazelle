@@ -38,12 +38,12 @@
 <div class="thin box">
     <h4>Preview transitions</h4>
     <form class="manage_form" name="preview" action="" method="get">
-        <input type="hidden" name="action" value="forum_transitions" />
+        <input type="hidden" name="action" value="forum_transitions">
         <table class="layout">
             <tr>
                 <td class="label"><label for="userid">User ID (or @username)</label></td>
-                <td><input type="text" name="userid" value="{{ user.id }}" /> {{ user.username }}</td>
-                <td><input type="submit" name="submit" value="Preview" class="submit" /></td>
+                <td><input type="text" name="userid" value="{{ user.id }}"> {{ user.username }}</td>
+                <td><input type="submit" name="submit" value="Preview" class="submit"></td>
             <tr>
         </table>
     </form>
@@ -63,9 +63,9 @@
 {% for item in user_list %}
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
         <form class="manage_form" name="navitems" action="" method="post">
-            <input type="hidden" name="id" value="{{ item.id }}" />
-            <input type="hidden" name="action" value="forum_transitions_alter" />
-            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+            <input type="hidden" name="id" value="{{ item.id }}">
+            <input type="hidden" name="action" value="forum_transitions_alter">
+            <input type="hidden" name="auth" value="{{ viewer.auth }}">
             <td>
 {{  _self.forum_selector(forum_list, "source", item.sourceId) }}
             </td>
@@ -73,23 +73,23 @@
 {{  _self.forum_selector(forum_list, "destination", item.destinationId) }}
             </td>
             <td>
-                <input type="text" size="10" name="label" value="{{ item.label }}" />
+                <input type="text" size="10" name="label" value="{{ item.label }}">
             </td>
             <td>
-                <input type="text" size="10" name="secondary_classes" value="{{ item.secondaryClassIdList|join(', ') }}" />
+                <input type="text" size="10" name="secondary_classes" value="{{ item.secondaryClassIdList|join(', ') }}">
             </td>
             <td>
 {{  _self.class_selector(class_list, item.classLevel) }}
             </td>
             <td>
-                <input type="text" size="10" name="permissions" value="" />
+                <input type="text" size="10" name="permissions" value="">
             </td>
             <td>
-                <input type="text" size="10" name="user_ids" value="{{ item.userIdList|join(', ') }}" />
+                <input type="text" size="10" name="user_ids" value="{{ item.userIdList|join(', ') }}">
             </td>
             <td>
-                <input type="submit" name="submit" value="Edit" />
-                <input type="submit" name="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this transition? This is an irreversible action!')" />
+                <input type="submit" name="submit" value="Edit">
+                <input type="submit" name="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this transition? This is an irreversible action!')">
             </td>
         </form>
     </tr>
@@ -99,8 +99,8 @@
     </tr>
     <tr class="rowa">
         <form class="manage_form" name="navitems" action="" method="post">
-            <input type="hidden" name="action" value="forum_transitions_alter" />
-            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+            <input type="hidden" name="action" value="forum_transitions_alter">
+            <input type="hidden" name="auth" value="{{ viewer.auth }}">
             <td>
 {{  _self.forum_selector(forum_list, "source", 0) }}
             </td>
@@ -108,22 +108,22 @@
 {{  _self.forum_selector(forum_list, "destination", 0) }}
             </td>
             <td>
-                <input size="10" type="text" name="label" />
+                <input size="10" type="text" name="label">
             </td>
             <td>
-                <input size="10" type="text" name="secondary_classes" />
+                <input size="10" type="text" name="secondary_classes">
             </td>
             <td>
 {{  _self.class_selector(class_list, viewer.classLevel) }}
             </td>
             <td>
-                <input size="10" type="text" name="permissions" />
+                <input size="10" type="text" name="permissions">
             </td>
             <td>
-                <input size="10" type="text" name="user_ids" />
+                <input size="10" type="text" name="user_ids">
             </td>
             <td>
-                <input type="submit" name="submit" value="Create" />
+                <input type="submit" name="submit" value="Create">
             </td>
         </form>
     </tr>

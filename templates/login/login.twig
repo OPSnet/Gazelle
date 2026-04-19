@@ -1,9 +1,9 @@
 {% from 'macro/form.twig' import checked %}
 {{ header('Login', {'js': 'cookie,password'}) }}
 
-<span id="no-cookies" class="hidden warning-login">You appear to have cookies disabled.<br /><br /></span>
+<span id="no-cookies" class="hidden warning-login">You appear to have cookies disabled.<br><br></span>
 <noscript><span class="warning-login">{{ constant('SITE_NAME') }} requires JavaScript to function properly.
-Please enable JavaScript in your browser.</span><br /><br /></noscript>
+Please enable JavaScript in your browser.</span><br><br></noscript>
 
 {% include 'logo.twig' %}
 
@@ -18,9 +18,9 @@ Please enable JavaScript in your browser.</span><br /><br /></noscript>
     <div class="warning-login">
 {%  if error != enum('Gazelle\\Enum\\LoginStatus').ok %}
 {%      if error == enum('Gazelle\\Enum\\LoginStatus').badCredentials %}
-        Your login credentials were not recognized.<br />
-        Please double check your username and password.<br />
-        If previously enabled, you must supply a valid Multi Factor Authentication code.<br />
+        Your login credentials were not recognized.<br>
+        Please double check your username and password.<br>
+        If previously enabled, you must supply a valid Multi Factor Authentication code.<br>
 {%      elseif error == enum('Gazelle\\Enum\\LoginStatus').unconfirmed %}
         Your account has not been confirmed. Please check your email account for a message with a validation link.
 {%      else %}
@@ -28,16 +28,16 @@ Please enable JavaScript in your browser.</span><br /><br /></noscript>
 {%      endif %}
 {%  endif %}
 {%  if delta > 0 %}
-    <br />As a security measure, you are temporarily prevented<br />from logging in for
+    <br>As a security measure, you are temporarily prevented<br>from logging in for
 {%      if delta < 60 %}
     <span title="{{ delta }} seconds">a few moments.</span>
 {%      else %}
     another {{ watch.bannedUntil|time_diff }}.
 {%  endif %}
-    <br />
+    <br>
 {%  endif %}
 {%  if watch.nrAttempts > 0 %}
-        <br /><strong>WARNING:</strong> Incorrect login credentials will increase<br />
+        <br><strong>WARNING:</strong> Incorrect login credentials will increase<br>
         the duration you are prevented from logging in.
 {%  endif %}
     </div>
@@ -47,29 +47,29 @@ Please enable JavaScript in your browser.</span><br /><br /></noscript>
 <form class="auth-form" name="login" id="loginform" method="post" action="login.php" autocomplete="off">
     <div>
         <label for="username">Username</label>
-        <input type="text" name="username" id="username" class="inputtext" required maxlength="20" pattern="[\w.]{1,20}" autofocus="autofocus" placeholder="Username" />
+        <input type="text" name="username" id="username" class="inputtext" required maxlength="20" pattern="[\w.]{1,20}" autofocus="autofocus" placeholder="Username">
     </div>
     <div>
         <label for="password">Password</label>
-        <input type="password" name="password" id="password" class="inputtext" required minlength="8" placeholder="Password" />
+        <input type="password" name="password" id="password" class="inputtext" required minlength="8" placeholder="Password">
         <span id="password-toggle">🫣</span>
     </div>
     <div>
         <label title="MFA key (or recovery key), if configured" for="keeplogged">MFA Key</label>
-        <input type="text" name="mfa" id="mfa" class="inputtext" placeholder="MFA key (or recovery code) if required" />
+        <input type="text" name="mfa" id="mfa" class="inputtext" placeholder="MFA key (or recovery code) if required">
     </div>
     <div>
         <label title="Keep me logged in for 90 days" for="keeplogged">Remember me</label>
-        <input title="Keep me logged in for 90 days" type="checkbox" id="keeplogged" name="keeplogged" value="1"{{ checked(keep_logged) }} />
+        <input title="Keep me logged in for 90 days" type="checkbox" id="keeplogged" name="keeplogged" value="1"{{ checked(keep_logged) }}>
     </div>
     <div id="login-buttons">
         <div>
-            <input style="margin: auto" type="submit" name="login" value="Log in" class="submit" />
+            <input style="margin: auto" type="submit" name="login" value="Log in" class="submit">
         </div>
         <a href="login.php?action=recover" class="tooltip" title="I forgot my password :-(">Password recovery</a>
     </div>
 </form>
-<script type="text/javascript">
+<script>
 cookie.set('cookie_test', 1, 1);
 if (cookie.get('cookie_test') != null) {
     cookie.del('cookie_test');

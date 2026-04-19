@@ -48,7 +48,7 @@
 and {{ summary.paranoid == 1 ? 'was' : 'were' }} not factored into the upload and download totals.
 </p>
 {%      endif %}
-<hr />
+<hr>
 {%  endif %}
 {%  if invitee.depth > prev_depth %}
 {{      '<ul class="invitetree"><li>'|repeat(invitee.depth - prev_depth)|raw }}
@@ -62,7 +62,7 @@ and {{ summary.paranoid == 1 ? 'was' : 'were' }} not factored into the upload an
 {%  endif %}
     <strong><a href="user.php?id={{ invitee.user_id }}">{{ invitee.username }}</a></strong>
 {%  if invitee.disabled %} <a href="rules.php"><img src="{{ constant('STATIC_SERVER')
-    }}/common/symbols/disabled.png" alt="Banned" title="Disabled" class="tooltip" /></a>{% endif %}
+    }}/common/symbols/disabled.png" alt="Banned" title="Disabled" class="tooltip"></a>{% endif %}
 {%  if max_depth < invitee.depth %}
 {%      set max_depth = invitee.depth %}
 {%  endif %}

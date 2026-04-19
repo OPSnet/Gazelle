@@ -70,28 +70,28 @@ collage by {{ collage.ownerId|user_url }}
     <div class="head"><strong>Add {{ object_name }}</strong><span class="float_right"><a href="#" onclick="$('.add_{{ object }}_container').toggle_class('hidden'); this.innerHTML = (this.innerHTML == 'Batch add' ? 'Individual add' : 'Batch add'); return false;" class="brackets">Batch add</a></span></div>
     <div class="pad add_{{ object }}_container">
         <form class="add_form" name="{{ object }}" action="collages.php" method="post">
-            <input type="hidden" name="action" value="add_{{ object }}" />
-            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-            <input type="hidden" name="collageid" value="{{ collage.id }}" />
+            <input type="hidden" name="action" value="add_{{ object }}">
+            <input type="hidden" name="auth" value="{{ viewer.auth }}">
+            <input type="hidden" name="collageid" value="{{ collage.id }}">
             <div class="field_div">
-                <input type="text" size="20" name="url" />
+                <input type="text" size="20" name="url">
             </div>
             <div class="submit_div">
-                <input type="submit" value="Add" />
+                <input type="submit" value="Add">
             </div>
             <span style="font-style: italic;">Enter the URL of {{ object|article }} {{ object }} on the site.</span>
         </form>
     </div>
     <div class="pad hidden add_{{ object }}_container">
         <form class="add_form" name="{{ object }}s" action="collages.php" method="post">
-            <input type="hidden" name="action" value="add_{{ object }}_batch" />
-            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-            <input type="hidden" name="collageid" value="{{ collage.id }}" />
+            <input type="hidden" name="action" value="add_{{ object }}_batch">
+            <input type="hidden" name="auth" value="{{ viewer.auth }}">
+            <input type="hidden" name="collageid" value="{{ collage.id }}">
             <div class="field_div">
                 <textarea name="urls" rows="5" cols="25" style="white-space: pre; word-wrap: normal; overflow: auto;"></textarea>
             </div>
             <div class="submit_div">
-                <input type="submit" value="Add" />
+                <input type="submit" value="Add">
             </div>
             <span style="font-style: italic;">Enter the URLs of {{ object}}s on the site, one per line.</span>
         </form>
@@ -123,16 +123,16 @@ collage by {{ collage.ownerId|user_url }}
 <div class="box box_addcomment">
     <div class="head"><strong>Add comment</strong></div>
     <form class="send_form" name="comment" id="quickpostform" onsubmit="quickpostform.submit_button.disabled = true;" action="comments.php" method="post">
-        <input type="hidden" name="action" value="take_post" />
-        <input type="hidden" name="page" value="collages" />
-        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-        <input type="hidden" name="pageid" value="{{ collage.id }}" />
+        <input type="hidden" name="action" value="take_post">
+        <input type="hidden" name="page" value="collages">
+        <input type="hidden" name="auth" value="{{ viewer.auth }}">
+        <input type="hidden" name="pageid" value="{{ collage.id }}">
         <div class="pad">
             <div class="field_div">
                 <textarea name="quickpost" cols="24" rows="5"></textarea>
             </div>
             <div class="submit_div">
-                <input type="submit" id="submit_button" value="Add comment" />
+                <input type="submit" id="submit_button" value="Add comment">
             </div>
         </div>
     </form>

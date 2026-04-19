@@ -92,9 +92,9 @@ echo $Twig->render('collage/summary.twig', [
                 <td class="number_column"><strong>Files</strong></td>
 <?php } ?>
                 <td class="number_column"><strong>Size</strong></td>
-                <td class="m_th_right sign snatches"><img src="<?= $urlStem ?>snatched.svg" class="tooltip" alt="Snatches" title="Snatches" /></td>
-                <td class="m_th_right sign seeders"><img src="<?= $urlStem ?>seeders.svg" class="tooltip" alt="Seeders" title="Seeders" /></td>
-                <td class="m_th_right sign leechers"><img src="<?= $urlStem ?>leechers.svg" class="tooltip" alt="Leechers" title="Leechers" /></td>
+                <td class="m_th_right sign snatches"><img src="<?= $urlStem ?>snatched.svg" class="tooltip" alt="Snatches" title="Snatches"></td>
+                <td class="m_th_right sign seeders"><img src="<?= $urlStem ?>seeders.svg" class="tooltip" alt="Seeders" title="Seeders"></td>
+                <td class="m_th_right sign leechers"><img src="<?= $urlStem ?>leechers.svg" class="tooltip" alt="Leechers" title="Leechers"></td>
             </tr>
 <?php
 if (!$torrentList) {

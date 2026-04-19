@@ -33,29 +33,29 @@
         <tr id="artist_name" class="ftr_advanced{{ hidden(show_basic)  }}">
             <td class="label">Artist name:</td>
             <td colspan="3" class="ft_artistname">
-                <input type="search" spellcheck="false" size="40" name="artistname" class="inputtext smaller fti_advanced" value="{{ input.artistname }}" />
+                <input type="search" spellcheck="false" size="40" name="artistname" class="inputtext smaller fti_advanced" value="{{ input.artistname }}">
             </td>
         </tr>
         <tr id="album_torrent_name" class="ftr_advanced{{ hidden(show_basic)  }}">
             <td class="label">Album/Torrent name:</td>
             <td colspan="3" class="ft_groupname">
-                <input type="search" spellcheck="false" size="40" name="groupname" class="inputtext smaller fti_advanced" value="{{ input.groupname }}" />
+                <input type="search" spellcheck="false" size="40" name="groupname" class="inputtext smaller fti_advanced" value="{{ input.groupname }}">
             </td>
         </tr>
         <tr id="record_label" class="ftr_advanced{{ hidden(show_basic)  }}">
             <td class="label">Record label:</td>
             <td colspan="3" class="ft_recordlabel">
-                <input type="search" spellcheck="false" size="40" name="remasterrecordlabel" class="inputtext smaller fti_advanced" value="{{ input.remasterrecordlabel }}" />
+                <input type="search" spellcheck="false" size="40" name="remasterrecordlabel" class="inputtext smaller fti_advanced" value="{{ input.remasterrecordlabel }}">
             </td>
         </tr>
         <tr id="catalogue_number_year" class="ftr_advanced{{ hidden(show_basic)  }}">
             <td class="label">Catalogue number:</td>
             <td class="ft_cataloguenumber">
-                <input type="search" size="40" name="remastercataloguenumber" class="inputtext smallest fti_advanced" value="{{ input.remastercataloguenumber }}" />
+                <input type="search" size="40" name="remastercataloguenumber" class="inputtext smallest fti_advanced" value="{{ input.remastercataloguenumber }}">
             </td>
             <td class="label">Year:</td>
             <td class="ft_year">
-                <input type="search" name="year" class="inputtext smallest fti_advanced" value="{{ input.year }}" size="4" />
+                <input type="search" name="year" class="inputtext smallest fti_advanced" value="{{ input.year }}" size="4">
             </td>
         </tr>
         <tr id="edition_expand" class="ftr_advanced{{ hidden(show_basic and (not show_remaster))  }}">
@@ -66,23 +66,23 @@
         <tr id="edition_title" class="ftr_advanced{{ hidden(show_basic or (not show_remaster)) }}">
             <td class="label">Edition title:</td>
             <td class="ft_remastertitle">
-                <input type="search" spellcheck="false" size="40" name="remastertitle" class="inputtext smaller fti_advanced" value="{{ input.remastertitle }}" />
+                <input type="search" spellcheck="false" size="40" name="remastertitle" class="inputtext smaller fti_advanced" value="{{ input.remastertitle }}">
             </td>
             <td class="label">Edition year:</td>
             <td class="ft_remasteryear">
-                <input type="search" name="remasteryear" class="inputtext smallest fti_advanced" value="{{ input.remasteryear }}" size="4" />
+                <input type="search" name="remasteryear" class="inputtext smallest fti_advanced" value="{{ input.remasteryear }}" size="4">
             </td>
         </tr>
         <tr id="file_list" class="ftr_advanced{{ hidden(show_basic) }}">
             <td class="label">File list:</td>
             <td colspan="3" class="ft_filelist">
-                <input type="search" spellcheck="false" size="40" name="filelist" class="inputtext fti_advanced" value="{{ input.filelist }}" />
+                <input type="search" spellcheck="false" size="40" name="filelist" class="inputtext fti_advanced" value="{{ input.filelist }}">
             </td>
         </tr>
         <tr id="torrent_description" class="ftr_advanced{{ hidden(show_basic) }}">
             <td class="label"><span title="Search torrent descriptions (not group information)" class="tooltip">Torrent description:</span></td>
             <td colspan="3" class="ft_description">
-                <input type="search" spellcheck="false" size="40" name="description" class="inputtext fti_advanced" value="{{ input.description }}" />
+                <input type="search" spellcheck="false" size="40" name="description" class="inputtext fti_advanced" value="{{ input.description }}">
             </td>
         </tr>
         <tr id="rip_specifics" class="ftr_advanced{{ hidden(show_basic) }}">
@@ -152,16 +152,16 @@
         <tr id="search_terms" class="ftr_basic{{ hidden(not show_basic) }}">
             <td class="label">Search terms:</td>
             <td colspan="3" class="ftb_searchstr">
-                <input type="search" spellcheck="false" size="40" name="searchstr" class="inputtext fti_basic" value="{{ input.searchstr }}" />
+                <input type="search" spellcheck="false" size="40" name="searchstr" class="inputtext fti_basic" value="{{ input.searchstr }}">
             </td>
         </tr>
         <tr id="tagfilter">
             <td class="label"><span title="Use !tag to exclude tag" class="tooltip">Tags (comma-separated):</span></td>
             <td colspan="3" class="ft_taglist">
                 <input type="search" size="40" id="tags" name="taglist" class="inputtext smaller" value="{{
-                    tag_list }}"{{ autocomplete(viewer, 'other') }} />&nbsp;
-                <input type="radio" name="tags_type" id="tags_type0" value="0"{{ checked(input.tags_type == 0) }} /><label for="tags_type0"> Any</label>&nbsp;&nbsp;
-                <input type="radio" name="tags_type" id="tags_type1" value="1"{{ checked(input.tags_type == 1) }} /><label for="tags_type1"> All</label>
+                    tag_list }}"{{ autocomplete(viewer, 'other') }}>&nbsp;
+                <input type="radio" name="tags_type" id="tags_type0" value="0"{{ checked(input.tags_type == 0) }}><label for="tags_type0"> Any</label>&nbsp;&nbsp;
+                <input type="radio" name="tags_type" id="tags_type1" value="1"{{ checked(input.tags_type == 1) }}><label for="tags_type1"> All</label>
             </td>
         </tr>
         <tr id="order">
@@ -187,7 +187,7 @@
                 <label for="group_results">Group by release:</label>
             </td>
             <td colspan="3" class="ft_group_results">
-                <input type="checkbox" value="1" name="group_results" id="group_results"{{ checked(grouped) }} />
+                <input type="checkbox" value="1" name="group_results" id="group_results"{{ checked(grouped) }}>
             </td>
         </tr>
     </table>
@@ -196,7 +196,7 @@
         <tr>
 {% for key, name in constant('CATEGORY') %}
             <td style="width:{{ (100 / constant('CATEGORY')|length)|round(1) }}%; padding-left: 1.6em; text-indent:-1.6em">
-                <label><input type="checkbox" name="filter_cat[{{ key + 1 }}]" id="cat_{{ key + 1 }}" value="1"{{ checked(input.filter_cat[key + 1]) }} />
+                <label><input type="checkbox" name="filter_cat[{{ key + 1 }}]" id="cat_{{ key + 1 }}" value="1"{{ checked(input.filter_cat[key + 1]) }}>
                 {{ name }}</label>
             </td>
 {% endfor %}
@@ -242,21 +242,21 @@
             </td>
         </tr>
     </table>
-    <br />
+    <br>
     <div class="submit ft_submit">
         <span style="float: left;">{{ results_total|number_format }} Result{{ results_total|plural }}
 {% if results_total > results_shown and not viewer.permitted('site_search_many') %} (Showing first {{ results_shown|number_format }}  matches){% endif %}
         </span>
-        <input type="submit" class="search_button" value="Search" />
+        <input type="submit" class="search_button" value="Search">
 {% if filtered %}
-        <input type="submit" class="setdefault_button" name="setdefault" value="Make default" />
+        <input type="submit" class="setdefault_button" name="setdefault" value="Make default">
 {% endif %}
 {% if viewer.option('DefaultSearch') %}
-        <input type="submit" class="cleardefault_button" name="cleardefault" value="Clear default" />
+        <input type="submit" class="cleardefault_button" name="cleardefault" value="Clear default">
 {% endif %}
-        <input type="hidden" name="action" id="ft_action" value="{{ search_mode }}" />
-        <input type="hidden" name="searchsubmit" value="1" />
-        <input type="button" class="reset_button" value="Reset" onclick="location.href = 'torrents.php{% if input.action == 'action' %}?action=advanced{% endif %}'" />
+        <input type="hidden" name="action" id="ft_action" value="{{ search_mode }}">
+        <input type="hidden" name="searchsubmit" value="1">
+        <input type="button" class="reset_button" value="Reset" onclick="location.href = 'torrents.php{% if input.action == 'action' %}?action=advanced{% endif %}'">
     </div>
 </div>
 </div>

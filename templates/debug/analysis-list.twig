@@ -5,9 +5,9 @@
 <div class="thin">
 <form class="manage_form" id="error-log" action="" method="post">
 <span style="float: right">
-    <input type="text" name="search" value="{{ search }}" />
-    <input type="submit" name="filter" value="Filter" />
-    <input type="submit" name="refresh" value="Refresh" />
+    <input type="text" name="search" value="{{ search }}">
+    <input type="submit" name="filter" value="Filter">
+    <input type="submit" name="refresh" value="Refresh">
 </span>
 {{ paginator.linkbox|raw }}
 {% if removed >= 0 %}
@@ -15,8 +15,8 @@
 {{ removed }} case{{ removed|plural }} removed.
 </div>
 {% endif %}
-<input type="hidden" name="auth" value="{{ viewer.auth }}" />
-<input type="hidden" name="action" value="analysis_list" />
+<input type="hidden" name="auth" value="{{ viewer.auth }}">
+<input type="hidden" name="action" value="analysis_list">
 <table width="100%">
     <tr class="colhead">
         <td class="nobr">{{ heading|column('id') }}</td>
@@ -29,7 +29,7 @@
         <td class="nobr">{{ heading|column('created') }}</td>
         <td class="nobr">{{ heading|column('updated') }}</td>
         <td class="nobr">{{ heading|column('uri') }}</td>
-        <td style="text-align: center">Toggle<br /><input type="checkbox" id="clear-all" name="clear-all" /></td>
+        <td style="text-align: center">Toggle<br><input type="checkbox" id="clear-all" name="clear-all"></td>
     </tr>
 {% for item in list %}
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
@@ -43,21 +43,21 @@
         <td>{{ item.created }}</td>
         <td>{% if item.seen == 1 %}&mdash;{% else %}{{ item.updated }}{% endif %}</td>
         <td style="word-break: break-all">{{ item.uri }}</td>
-        <td style="text-align: center"><input class="clear-row" type="checkbox" name="clear-{{ item.id }}" /></td>
+        <td style="text-align: center"><input class="clear-row" type="checkbox" name="clear-{{ item.id }}"></td>
     </tr>
 {% endfor %}
     <tr>
         <td colspan="11">
             Remove cases with a duration that meets or exceeds
-            <input type="text" name="slow" size="2" value="5" />
+            <input type="text" name="slow" size="2" value="5">
             seconds.
-            <input type="submit" name="slow-clear" value="Slow clear" />
-            <span style="float: right"><input type="submit" name="clear" value="Clear" /></span>
+            <input type="submit" name="slow-clear" value="Slow clear">
+            <span style="float: right"><input type="submit" name="clear" value="Clear"></span>
         </td>
     </tr>
 </table>
 </form>
 {{ paginator.linkbox|raw }}
 </div>
-<br />
+<br>
 {{ footer() }}

@@ -26,7 +26,7 @@ class UploadTest extends TestCase {
         $SessionID = '';
         Util\Twig::setViewer($this->user);
         $this->assertStringContainsString(
-            '<input id="post" type="submit" value="Upload torrent" />',
+            '<input id="post" type="submit" value="Upload torrent">',
             $upload->foot(true),
             'upload-foot'
         );

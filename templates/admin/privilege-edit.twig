@@ -13,30 +13,30 @@
     <div class="box thin"><div class="pad"><b>{{ edit_total }} user{{ edit_total|plural }} affected.</b></div></div>
 {% endif %}
 <form class="manage_form" name="permissions" id="permissionsform" method="post" action="">
-    <input type="hidden" name="action" value="privilege-alter" />
-    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+    <input type="hidden" name="action" value="privilege-alter">
+    <input type="hidden" name="auth" value="{{ viewer.auth }}">
 {% if privilege.id %}
-    <input type="hidden" name="id" value="{{ privilege.id }}" />
+    <input type="hidden" name="id" value="{{ privilege.id }}">
 {% endif %}
     <table class="permission_head layout">
         <tr>
             <td class="label">Userclass name</td>
-            <td><input type="text" name="name" id="name" value="{{ privilege.name }}" /></td>
+            <td><input type="text" name="name" id="name" value="{{ privilege.name }}"></td>
         </tr>
         <tr>
             <td class="label">Class level</td>
-            <td><input type="text" name="level" id="level" value="{{ privilege.level }}" /></td>
+            <td><input type="text" name="level" id="level" value="{{ privilege.level }}"></td>
         </tr>
         <tr>
             <td class="label">Secondary class</td>
-            <td><input type="checkbox" name="secondary" value="1"{{ checked(privilege.isSecondary) }} /></td>
+            <td><input type="checkbox" name="secondary" value="1"{{ checked(privilege.isSecondary) }}></td>
         </tr>
         <tr>
             <td class="label">Show on staff page</td>
             <td>
 {% for id, group in group_list %}
 {%  if loop.first %}
-                <input type="checkbox" name="displaystaff" value="1"{{ checked(privilege.displayStaff) }} />
+                <input type="checkbox" name="displaystaff" value="1"{{ checked(privilege.displayStaff) }}>
                 in <select name="staffgroup" id="staffgroup">
 {%  endif %}
                     <option value="{{ id }}"{{ selected(id == privilege.staffGroupId) }}>{{ group.name }}</option>
@@ -46,17 +46,17 @@
 {% else %}
                 There are no staff groups defined.
 {% endfor %}
-                <br /><a class="brackets" href="/tools.php?action=staff_groups">Manage staff groups</a>
+                <br><a class="brackets" href="/tools.php?action=staff_groups">Manage staff groups</a>
             </td>
         </tr>
         <tr>
             <td class="label">Additional forums</td>
-            <td><input type="text" size="30" name="forums" value="{{ privilege.permittedForums|join(', ') }}" /></td>
+            <td><input type="text" size="30" name="forums" value="{{ privilege.permittedForums|join(', ') }}"></td>
         </tr>
 {% if privilege.isSecondary %}
         <tr>
             <td class="label">Badge</td>
-            <td><input type="text" size="30" name="badge" value="{{ privilege.badge }}" /></td>
+            <td><input type="text" size="30" name="badge" value="{{ privilege.badge }}"></td>
         </tr>
 {% endif %}
 {% if privilege.id %}

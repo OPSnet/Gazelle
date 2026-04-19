@@ -60,20 +60,20 @@ foreach ($ReferralAccounts as $a) {
 ?>
     <tr class="row<?=$Row?>">
         <form class="manage_form" name="accounts" action="" method="post">
-            <input type="hidden" name="id" value="<?=$ID?>" />
-            <input type="hidden" name="action" value="referral_alter" />
-            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
+            <input type="hidden" name="id" value="<?=$ID?>">
+            <input type="hidden" name="action" value="referral_alter">
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>">
             <td>
-                <input type="text" size="10" name="site" value="<?=$Site?>" />
+                <input type="text" size="10" name="site" value="<?=$Site?>">
             </td>
             <td>
-                <input type="text" size="15" name="url" value="<?=$URL?>" />
+                <input type="text" size="15" name="url" value="<?=$URL?>">
             </td>
             <td>
-                <input type="text" size="10" name="user" value="<?=$User?>" />
+                <input type="text" size="10" name="user" value="<?=$User?>">
             </td>
             <td>
-                <input type="password" size="10" name="password" />
+                <input type="password" size="10" name="password">
             </td>
             <td>
                 <select name="type">
@@ -81,16 +81,16 @@ foreach ($ReferralAccounts as $a) {
                 </select>
             </td>
             <td>
-                <input type="checkbox" name="active"<?=($Active == '1') ? ' checked="checked"' : ''?> />
+                <input type="checkbox" name="active"<?=($Active == '1') ? ' checked' : ''?>>
             </td>
             <td>
-                <input type="text" size="10" name="cookie" />
+                <input type="text" size="10" name="cookie">
             </td>
             <td>
                 <?php if (!$ReferralManager->readOnly) { ?>
-                <input type="submit" name="submit" value="Edit" />
+                <input type="submit" name="submit" value="Edit">
                 <?php } ?>
-                <input type="submit" name="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this account? This is an irreversible action!')" />
+                <input type="submit" name="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this account? This is an irreversible action!')">
             </td>
         </form>
     </tr>
@@ -103,19 +103,19 @@ if (!$ReferralManager->readOnly) {
     </tr>
     <tr class="rowa">
         <form class="create_form" name="accounts" action="" method="post">
-            <input type="hidden" name="action" value="referral_alter" />
-            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
+            <input type="hidden" name="action" value="referral_alter">
+            <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>">
             <td>
-                <input type="text" size="10" name="site" />
+                <input type="text" size="10" name="site">
             </td>
             <td>
-                <input type="text" size="15" name="url" />
+                <input type="text" size="15" name="url">
             </td>
             <td>
-                <input type="text" size="10" name="user" />
+                <input type="text" size="10" name="user">
             </td>
             <td>
-                <input type="password" size="10" name="password" />
+                <input type="password" size="10" name="password">
             </td>
             <td>
                 <select name="type">
@@ -123,13 +123,13 @@ if (!$ReferralManager->readOnly) {
                 </select>
             </td>
             <td>
-                <input type="checkbox" name="active" checked="checked" />
+                <input type="checkbox" name="active" checked>
             </td>
             <td>
-                <input type="text" size="10" name="cookie" />
+                <input type="text" size="10" name="cookie">
             </td>
             <td>
-                <input type="submit" name="submit" value="Create" />
+                <input type="submit" name="submit" value="Create">
             </td>
         </form>
     </tr>

@@ -5,15 +5,15 @@
     </div>
     <form class="send_form" name="message" action="inbox.php" method="post" id="messageform">
         <div class="box pad">
-            <input type="hidden" name="action" value="takecompose" />
-            <input type="hidden" name="toid" value="{{ recipient.id }}" />
-            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+            <input type="hidden" name="action" value="takecompose">
+            <input type="hidden" name="toid" value="{{ recipient.id }}">
+            <input type="hidden" name="auth" value="{{ viewer.auth }}">
             <div id="quickpost">
                 <h3>Subject</h3>
-                <input type="text" class="required" name="subject" size="95" /><br />
+                <input type="text" class="required" name="subject" size="95"><br>
                 <h3>Body</h3>
                 {{ body.emit|raw }}
-                <input type="submit" value="Send message" />
+                <input type="submit" value="Send message">
             </div>
         </div>
     </form>

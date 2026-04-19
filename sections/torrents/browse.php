@@ -179,7 +179,7 @@ foreach ($Results as $Key => $GroupID) {
                     'is_bookmarked' => $bookmark->isBookmarked($tgroup),
                 ]) ?>
                 </span>
-                <br />
+                <br>
                 <div class="tags"><?= implode(', ',
                     array_map(fn ($name) => "<a href=\"torrents.php?action="
                         . ($advancedSearch ? 'advanced' : 'basic')

@@ -5,7 +5,7 @@
 {% for p in permission %}
         <label style="width: 130px; display: inline-block"><input type="checkbox" id="perm_{{
             p.permId }}" name="secondary_classes[]" value="{{ p.permId }}"{{
-            checked(p.isSet) }} />&nbsp;{{ p.permName }}</label>
+            checked(p.isSet) }}>&nbsp;{{ p.permName }}</label>
 {% endfor %}
     </td>
 </tr>

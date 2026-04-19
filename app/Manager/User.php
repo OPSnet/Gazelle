@@ -197,11 +197,11 @@ class User extends \Gazelle\BaseManager {
                 . ($viewer->id == $userId
                     ? ' - Expires ' . date('Y-m-d H:i', (int)strtotime($user->warningExpiry()))
                     : '')
-                . '" /></a>';
+                . '"></a>';
         }
         if ($user->isDisabled()) {
             $display .= '<a href="rules.php"><img loading="lazy" class="tooltip" src="'
-                . STATIC_SERVER . '/common/symbols/disabled.png" alt="Banned" title="Disabled" /></a>';
+                . STATIC_SERVER . '/common/symbols/disabled.png" alt="Banned" title="Disabled"></a>';
         }
 
         $privilege = new \Gazelle\User\Privilege($user);

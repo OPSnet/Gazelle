@@ -34,16 +34,16 @@
 {% else %}
     <h4>There are no programmed gift events</h4>
 {% endfor %}
-    <br />
+    <br>
 {% if viewer.permitted('admin_schedule') %}
     <h4>Create a new event</h4>
-    <br />
+    <br>
     <form action="?action=gift-event" method="post">
-    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-    <label><input type="datetime-local" name="begin" /> Begin event</label><br />
-    <label><input type="datetime-local" name="end" /> End event</label><br />
-    <label><input type="text" name="name" length="20" /> Name</label><br />
-    <input type="submit" value="Create" />
+    <input type="hidden" name="auth" value="{{ viewer.auth }}">
+    <label><input type="datetime-local" name="begin"> Begin event</label><br>
+    <label><input type="datetime-local" name="end"> End event</label><br>
+    <label><input type="text" name="name" length="20"> Name</label><br>
+    <input type="submit" value="Create">
     </form>
 {% endif %}
 </div>

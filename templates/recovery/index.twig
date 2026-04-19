@@ -22,21 +22,21 @@ sufficient.</p>
 <p>Should be obvious – your username on the previous site. When you receive your invite link, you have the
 chance to change it to something else if that is your wish.</p>
 
-<input type="text" name="username" />
+<input type="text" name="username">
 
 <h5>Your email</h5>
 
 <p>The email address used for registration. If you changed your address at some point, any address
 is valid, assuming it is the the backup.</p>
 
-<input type="text" name="email" />
+<input type="text" name="email">
 
 <h5>Your Password</h5>
 
 <p>This will be hashed upon reception and compared with the existing hash of your password.
 When you receive an invite to {{ constant('SITE_NAME') }}, you should not reuse this password.</p>
 
-<input type="password" name="password" />
+<input type="password" name="password">
 
 <h5>Your announce key</h5>
 
@@ -44,7 +44,7 @@ When you receive an invite to {{ constant('SITE_NAME') }}, you should not reuse 
 hexadecimal (digits 0 to and 9 and letters A to F) characters. This is optional, but provides
 additional proof that you are who you say you are and can be used in lieu of a password.</p>
 
-<input type="text" name="announce" />
+<input type="text" name="announce">
 
 <h5>Your original APL/XNX invitation</h5>
 
@@ -69,7 +69,7 @@ standard archive format, compressed as you see fit. We should be able to figure 
 Size is limited to 10MiB. Only HTML and PNG and JPEG image formats are accepted. All other
 filetypes will be discarded.</p>
 
-<input type="file" name="screen" />
+<input type="file" name="screen">
 
 <h5>Additional information</h5>
 
@@ -87,7 +87,7 @@ heard back by then, you never will).</p>
 can be used as an identifier on the IRC #recovery channel if you need to get in touch with us.
 Never paste it in any channel, a Staff member will ask you to send it via a private message.</p>
 
-<input type="submit" value="Send" />
+<input type="submit" value="Send">
 
 <p>Rate limiting applies. You cannot submit this form more than once every five minutes from the
 same IP address.</p>

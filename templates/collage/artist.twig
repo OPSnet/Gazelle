@@ -10,7 +10,7 @@
         <img loading="lazy" class="tooltip" src="{{ artist.image|image_cache(width = 150)
             }}" alt="{{ artist.name }}" title="{{ artist.name
             }}" width="150"  data-origin-src="{{ artist.image
-            }}" />
+            }}">
 {%- endif -%}
         </div>
         <div class="cae-name">{{ artist.link|raw }}</div>

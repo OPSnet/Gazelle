@@ -14,57 +14,57 @@
 {% endif %}
         </div>
     </div>
-    <br />
+    <br>
     <div class="box pad">You can add a new answer here (or edit existing
     answers). Updates will be made in place without a page reload. When you are
     satified with the result, you may click on the "Back to conversation" link
     above to resume your reply.</div>
-    <br />
+    <br>
     <div id="commonresponses">
-        <br />
+        <br>
         <div id="ajax_message_0" class="hidden alertbar"></div>
-        <br />
+        <br>
         <div class="pad">
             <h3>Create new response:</h3>
         </div>
         <div id="response_new" class="box">
             <form class="send_form" name="response" id="response_form_0" action="">
                 <div class="pad thin">
-                    <strong>Name:</strong><br />
-                    <input type="text" id="name-0" size="87" value="" />
+                    <strong>Name:</strong><br>
+                    <input type="text" id="name-0" size="87" value="">
                 </div>
                 <div class="pad thin">
-                    <strong>Answer:</strong><br />
+                    <strong>Answer:</strong><br>
                     {{ new.emit|raw }}
-                    <input type="button" class="common-ans-save" value="Save" data-id="0" />
+                    <input type="button" class="common-ans-save" value="Save" data-id="0">
                 </div>
             </form>
         </div>
-        <br />
-        <br />
+        <br>
+        <br>
         <div class="pad">
             <h3>Edit old responses:</h3>
         </div>
 {% for answer in list %}
-        <br />
+        <br>
         <div id="ajax_message_{{ answer.id }}" class="hidden alertbar"></div>
-        <br />
+        <br>
         <div id="response_{{ answer.id }}" class="box">
             <form class="send_form" name="response" id="response_form_{{ answer.id }}" action="">
                 <div class="pad thin">
-                    <strong>Name:</strong><br />
-                    <input type="text" name="name" id="name-{{ answer.id }}" size="87" value="{{ answer.name }}" />
-                    <input type="hidden" name="id" value="{{ answer.id }}" />
+                    <strong>Name:</strong><br>
+                    <input type="text" name="name" id="name-{{ answer.id }}" size="87" value="{{ answer.name }}">
+                    <input type="hidden" name="id" value="{{ answer.id }}">
                 </div>
                 <div class="pad thin">
-                    <strong>Answer:</strong><br />
+                    <strong>Answer:</strong><br>
                     <div class="box pad hidden" style="text-align: left;" id="response_div_{{ answer.id }}">
                         {{ answer.message|bb_format }}
                     </div>
                     {{ answer.editor.emit|raw }}
-                    <input type="button" value="Save" class="common-ans-save" data-id="{{ answer.id }}" />
+                    <input type="button" value="Save" class="common-ans-save" data-id="{{ answer.id }}">
 
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="button" value="Delete Common Answer" class="common-ans-del" data-auth="{{ viewer.auth }}" data-id="{{ answer.id }}" />
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="button" value="Delete Common Answer" class="common-ans-del" data-auth="{{ viewer.auth }}" data-id="{{ answer.id }}">
                 </div>
             </form>
         </div>

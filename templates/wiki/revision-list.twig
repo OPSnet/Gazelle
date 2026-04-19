@@ -6,8 +6,8 @@
         article.id }}">{{ article.title }}</a> › Revision history</h2>
 </div>
 <form action="wiki.php" method="get">
-    <input type="hidden" name="action" id="action" value="compare" />
-    <input type="hidden" name="id" id="id" value="{{ article.id }}" />
+    <input type="hidden" name="action" id="action" value="compare">
+    <input type="hidden" name="id" id="id" value="{{ article.id }}">
 {% for link in article.revisionList %}
     {% if loop.first %}
     <table>
@@ -24,8 +24,8 @@
             <td>{{ article.title }}</td>
             <td>{{ article.authorId|user_url }}</td>
             <td>{{ article.date|time_diff }}</td>
-            <td><input type="radio" name="old" value="{{ article.revision }}" disabled="disabled" /></td>
-            <td><input type="radio" name="new" value="{{ article.revision }}" checked="checked" /></td>
+            <td><input type="radio" name="old" value="{{ article.revision }}" disabled="disabled"></td>
+            <td><input type="radio" name="new" value="{{ article.revision }}" checked></td>
         </tr>
     {% endif %}
         <tr>
@@ -33,13 +33,13 @@
             <td>{{ link.title }}</td>
             <td>{{ link.author_id|user_url }}</td>
             <td>{{ link.date|time_diff }}</td>
-            <td><input type="radio" name="old" value="{{ link.revision }}"{{ checked(loop.first) }} /></td>
-            <td><input type="radio" name="new" value="{{ link.revision }}"{{ disabled(loop.last) }} /></td>
+            <td><input type="radio" name="old" value="{{ link.revision }}"{{ checked(loop.first) }}></td>
+            <td><input type="radio" name="new" value="{{ link.revision }}"{{ disabled(loop.last) }}></td>
         </tr>
     {% if loop.last %}
         <tr>
             <td class="center" colspan="6">
-                <input type="submit" value="Compare" />
+                <input type="submit" value="Compare">
             </td>
         </tr>
     </table>

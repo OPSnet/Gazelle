@@ -7,9 +7,9 @@
         <table class="forum_post box vertical_margin" style="text-align: left;">
             <colgroup>
 {% if viewer.showAvatars %}
-                <col class="col_avatar" />
+                <col class="col_avatar">
 {% endif %}
-                <col class="col_post_body" />
+                <col class="col_post_body">
             </colgroup>
             <tr class="colhead_dark">
                 <td colspan="{{ viewer.showAvatars ? 2 : 1 }}">
@@ -32,13 +32,13 @@
     </div>
     <div class="box pad">
         <form class="create_form" name="forum_thread" action="" id="newthreadform" method="post">
-            <input type="hidden" name="action" value="take-new" />
-            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-            <input type="hidden" name="forum" value="{{ forum.id }}" />
+            <input type="hidden" name="action" value="take-new">
+            <input type="hidden" name="auth" value="{{ viewer.auth }}">
+            <input type="hidden" name="forum" value="{{ forum.id }}">
             <table id="newthreadtext" class="layout">
                 <tr>
                     <td class="label">Title:</td>
-                    <td><input id="title" class="required" type="text" name="title" style="width: 98%;" /></td>
+                    <td><input id="title" class="required" type="text" name="title" style="width: 98%;"></td>
                 </tr>
                 <tr>
                     <td class="label">Body:</td>
@@ -50,7 +50,7 @@
                 <tr>
                     <td></td>
                     <td>
-                        <input id="subscribebox" type="checkbox" name="subscribe"{{ checked(viewer.option('AutoSubscribe')) }} />
+                        <input id="subscribebox" type="checkbox" name="subscribe"{{ checked(viewer.option('AutoSubscribe')) }}>
                         <label for="subscribebox">Subscribe to thread</label>
                     </td>
                 </tr>
@@ -64,12 +64,12 @@
                 </tr>
                 <tr id="poll_question" class="hidden">
                     <td class="label">Question:</td>
-                    <td><input type="text" name="question" id="pollquestionfield" class="required" style="width: 98%;" /></td>
+                    <td><input type="text" name="question" id="pollquestionfield" class="required" style="width: 98%;"></td>
                 </tr>
                 <tr id="poll_answers" class="hidden">
                     <td class="label">Answers:</td>
                     <td id="answer_block">
-                        <input type="text" name="answers[]" class="required" style="width: 90%;" />
+                        <input type="text" name="answers[]" class="required" style="width: 90%;">
                         <a href="#" id="poll-add" class="brackets">+</a>
                         <a href="#" id="poll-remove" class="brackets">&minus;</a>
                     </td>
@@ -77,12 +77,12 @@
 {% endif %}
             </table>
             <div id="subscribediv" class="hidden">
-                <input id="subscribeboxpreview" type="checkbox" name="subscribe"{{ checked(viewer.option('AutoSubscribe')) }} />
+                <input id="subscribeboxpreview" type="checkbox" name="subscribe"{{ checked(viewer.option('AutoSubscribe')) }}>
                 <label for="subscribebox">Subscribe to thread</label>
             </div>
             <div id="buttons" class="center">
                 {{ textarea.button|raw }}
-                <input type="submit" class="submit" id="submit_button" value="Create thread" />
+                <input type="submit" class="submit" id="submit_button" value="Create thread">
             </div>
         </form>
     </div>

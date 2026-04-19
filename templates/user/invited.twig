@@ -78,7 +78,7 @@
         <div class="field_div">
             <div class="label">Profile information:</div>
             <div class="input">
-                <input type="text" name="profile_info" size="40" maxlength="255" />
+                <input type="text" name="profile_info" size="40" maxlength="255">
             </div>
         </div>
 {%  endif %}
@@ -99,15 +99,15 @@
         <div class="field_div">
             <div class="label">&nbsp;</div>
             <div class="input">
-                <label><input type="checkbox" name="agreement"{{ checked(is_site_inviter) }} /> I have read and agree to the information written above.</label>
+                <label><input type="checkbox" name="agreement"{{ checked(is_site_inviter) }}> I have read and agree to the information written above.</label>
             </div>
         </div>
         <div class="field_div">
             <div class="label">&nbsp;</div>
             <div class="input">
-                <input type="hidden" name="action" value="take_invite" />
-                <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-                <input type="submit" value="Invite" />
+                <input type="hidden" name="action" value="take_invite">
+                <input type="hidden" name="auth" value="{{ viewer.auth }}">
+                <input type="submit" value="Invite">
             </div>
         </div>
     </form>
@@ -194,7 +194,7 @@
         <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
 {%  if edit_source %}
             <td colspan="8">
-                External profile (URL): <input type="text" name="reason-{{ u.id }}" size="40" maxlength="255" value="{{ profile }}" />
+                External profile (URL): <input type="text" name="reason-{{ u.id }}" size="40" maxlength="255" value="{{ profile }}">
             </td>
 {%  else %}
             <td colspan="8">{% if profile %}{{ profile }}{% else %}<i>External profile not specified</i>{% endif %}</td>
@@ -204,16 +204,16 @@
 {% if is_site_inviter and edit_source %}
         <tr>
             <td colspan="7">&nbsp;</td>
-            <td><input type="submit" value="Update" /></td>
+            <td><input type="submit" value="Update"></td>
         </tr>
 {% endif %}
     </table>
     {{ paginator.linkbox|raw }}
 </div>
 {% if is_site_inviter %}
-    <input type="hidden" name="action" value="invite" />
-    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-    <input type="hidden" name="user_id" value="{{ user.id }}" />
+    <input type="hidden" name="action" value="invite">
+    <input type="hidden" name="auth" value="{{ viewer.auth }}">
+    <input type="hidden" name="user_id" value="{{ user.id }}">
 </form>
 {% endif %}
 </div>{# thin #}

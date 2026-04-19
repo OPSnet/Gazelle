@@ -92,7 +92,7 @@ class ReportManagerTest extends TestCase {
         $this->assertTrue($reqReport->needReason(), 'request-report-not-an-update');
 
         // note
-        $note = "abc<br />def<br />ghi";
+        $note = "abc<br>def<br>ghi";
         $report->addNote($note);
         $this->assertEquals("abc\ndef\nghi", $report->notes(), 'request-report-notes');
 

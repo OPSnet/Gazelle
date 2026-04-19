@@ -35,45 +35,45 @@ possible to create double-dotted tags (e.g. space..rock). When cleaning out
 broken legacy tags, you may need to check "Do not sanitize".</p>
 
 </div>
-<br />
+<br>
 
 <form action="tools.php" method="get" name="tagform" id="tagform">
-    <input type="hidden" name="action" value="tags" />
+    <input type="hidden" name="action" value="tags">
     <table>
         <tr>
             <td style="vertical-align: top;">
                 Tag to change:
             </td>
             <td style="vertical-align: top;">
-                <input type="text" name="tag" id="tag" minlength="2" maxlength="100" />
-                <br /><input type="checkbox" name="dirty" id="dirty" /> <label for="dirty">Do not sanitize (e.g. legacy double-dotted tags)</label>
+                <input type="text" name="tag" id="tag" minlength="2" maxlength="100">
+                <br><input type="checkbox" name="dirty" id="dirty"> <label for="dirty">Do not sanitize (e.g. legacy double-dotted tags)</label>
             </td>
             <td style="vertical-align: top;">
                 Merge with tag:
             </td>
             <td>
-                <input type="text" name="replace" id="replace" minlength="2" maxlength="100" />
-                <br />If this tag does not exist, the tag to change will be renamed to this.
-                <br />Use commas to separate multiple replacements.
+                <input type="text" name="replace" id="replace" minlength="2" maxlength="100">
+                <br>If this tag does not exist, the tag to change will be renamed to this.
+                <br>Use commas to separate multiple replacements.
             </td>
         </tr>
         <tr>
             <td>
-                <input type="checkbox" name="list" id="list" checked="checked" /> <label for="list">List affected items</label>
+                <input type="checkbox" name="list" id="list" checked> <label for="list">List affected items</label>
             </td>
             <td>
-                <input type="checkbox" name="alias" id="alias" /> <label for="alias">Create a permanent alias for this correction</label>
+                <input type="checkbox" name="alias" id="alias"> <label for="alias">Create a permanent alias for this correction</label>
             </td>
             <td>
-                <input type="checkbox" name="official" id="official" /> <label for="official">Mark this tag as official</label>
+                <input type="checkbox" name="official" id="official"> <label for="official">Mark this tag as official</label>
             </td>
             <td>
-                <input type="submit" value="Merge" />
+                <input type="submit" value="Merge">
             </td>
         </tr>
     </table>
 </form>
-    <br />
+    <br>
 {% if changed or failure or success %}
 <div class="box pad center">
     {% if failure %}
@@ -95,7 +95,7 @@ broken legacy tags, you may need to check "Do not sanitize".</p>
     {% endif %}
 {% endif %}
 
-<br />
+<br>
 <table>
 {% if torrent_list or request_list %}
 <tr class="colhead">

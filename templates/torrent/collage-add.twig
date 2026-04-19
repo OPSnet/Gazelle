@@ -16,13 +16,13 @@
 {% else %}
             <div>Search for a collage name or URL:</div>
 {% endfor %}
-            <input type="text" name="collage_ref" id="collage_ref" size="25"{{ autocomplete(viewer, 'other') }} />
-            <input type="hidden" name="action" value="add_torrent" />
-            <input type="hidden" name="entryid" value="{{ tgroup_id }}" />
-            <input type="hidden" name="userid" value="{{ viewer.id }}" />
-            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-            <br />
-            <input type="submit" value="Add &amp; Go" />&nbsp;<input type="button" id="collage-add" value="Add" />
+            <input type="text" name="collage_ref" id="collage_ref" size="25"{{ autocomplete(viewer, 'other') }}>
+            <input type="hidden" name="action" value="add_torrent">
+            <input type="hidden" name="entryid" value="{{ tgroup_id }}">
+            <input type="hidden" name="userid" value="{{ viewer.id }}">
+            <input type="hidden" name="auth" value="{{ viewer.auth }}">
+            <br>
+            <input type="submit" value="Add &amp; Go">&nbsp;<input type="button" id="collage-add" value="Add">
             <div id="add-result"></div>
             </form>
     </div>

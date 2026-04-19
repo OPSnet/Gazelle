@@ -102,7 +102,7 @@ class Report extends BaseObject {
     }
 
     public function addNote(string $note): static {
-        $this->setField('Notes', str_replace("<br />", "\n", trim($note)))->modify();
+        $this->setField('Notes', str_replace("<br>", "\n", trim($note)))->modify();
         return $this;
     }
 

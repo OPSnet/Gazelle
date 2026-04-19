@@ -19,13 +19,13 @@
     {% endif %}
     <tr>
         <td>&nbsp;</td>
-        <td><label><input type="checkbox" name="source-{{ site.invite_source_id }}"{{ checked(site.active == 1) }} /> {{ site.name }}</label></td>
+        <td><label><input type="checkbox" name="source-{{ site.invite_source_id }}"{{ checked(site.active == 1) }}> {{ site.name }}</label></td>
     </tr>
     {% if loop.last %}
     <tr>
         <td class="label">&nbsp;</td>
         <td>
-            <input type="submit" name="invite_source_update" value="Update" />
+            <input type="submit" name="invite_source_update" value="Update">
         </td>
     </tr>
     {% endif %}

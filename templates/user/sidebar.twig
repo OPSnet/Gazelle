@@ -51,7 +51,7 @@
 {%          if not source and (inviter.isInterviewer or inviter.isRecruiter) %} (unconfirmed){% endif %}
 {%          if source %} from {{ source }}{% endif %}
 {%          set current = parent %}
-    <br />
+    <br>
 {%      endfor %}
 {%  endif %}
     </li>

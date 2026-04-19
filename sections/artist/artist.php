@@ -105,16 +105,16 @@ if ($Viewer->permitted('zip_downloader')) {
             <div class="head colhead_dark"><strong>Collector</strong></div>
             <div class="pad">
                 <form class="download_form" name="zip" action="artist.php" method="post">
-                    <input type="hidden" name="action" value="download" />
-                    <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
-                    <input type="hidden" name="artistid" value="<?=$artistId?>" />
+                    <input type="hidden" name="action" value="download">
+                    <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>">
+                    <input type="hidden" name="artistid" value="<?=$artistId?>">
                     <ul id="list" class="nobullet">
 <?php foreach ($ZIPList as $ListItem) { ?>
                         <li id="list<?=$ListItem?>">
-                            <input type="hidden" name="list[]" value="<?=$ListItem?>" />
+                            <input type="hidden" name="list[]" value="<?=$ListItem?>">
                             <span style="float: left;"><?=ZIP_OPTION[$ListItem]['2']?></span>
                             <span class="remove remove_collector"><a href="#" onclick="remove_selection('<?=$ListItem?>'); return false;" style="float: right;" class="brackets tooltip" title="Remove format from the Collector">X</a></span>
-                            <br style="clear: all;" />
+                            <br style="clear: all;">
                         </li>
 <?php } /* foreach */ ?>
                     </ul>
@@ -150,7 +150,7 @@ echo ' selected="selected"'; } ?>>Prefer Best Seeded</option>
                         <option value="2"<?php if ($ZIPPrefs == 2) {
 echo ' selected="selected"'; } ?>>Prefer Bonus Tracks</option>
                     </select>
-                    <input type="submit" style="width: 210px;" value="Download" />
+                    <input type="submit" style="width: 210px;" value="Download">
                 </form>
             </div>
         </div>
@@ -217,9 +217,9 @@ if ($sections = $artist->sections()) {
                     <td class="number_column">Files</td>
 <?php } ?>
                     <td class="number_column">Size</td>
-                    <td class="sign snatches"><img src="<?= $urlStem ?>snatched.svg" class="tooltip" alt="Snatches" title="Snatches" /></td>
-                    <td class="sign seeders"><img src="<?= $urlStem ?>seeders.svg" class="tooltip" alt="Seeders" title="Seeders" /></td>
-                    <td class="sign leechers"><img src="<?= $urlStem ?>leechers.svg" class="tooltip" alt="Leechers" title="Leechers" /></td>
+                    <td class="sign snatches"><img src="<?= $urlStem ?>snatched.svg" class="tooltip" alt="Snatches" title="Snatches"></td>
+                    <td class="sign seeders"><img src="<?= $urlStem ?>seeders.svg" class="tooltip" alt="Seeders" title="Seeders"></td>
+                    <td class="sign leechers"><img src="<?= $urlStem ?>leechers.svg" class="tooltip" alt="Leechers" title="Leechers"></td>
                 </tr>
 <?php
     foreach (array_keys($groupList) as $groupId) {
@@ -251,7 +251,7 @@ if ($sections = $artist->sections()) {
 
         if (!$Viewer->option('NoVoteLinks')) {
 ?>
-                        <br /><?= $vote->links($tgroup) ?>
+                        <br><?= $vote->links($tgroup) ?>
 <?php   } ?>
                         </span>
                         <div class="tags"><?= implode(', ', $tgroup->torrentTagList()) ?></div>
@@ -294,7 +294,7 @@ echo $Twig->render('artist/similar-graph.twig', [
     <div id="flip_view_2" style="display: none; position: relative; width: <?= SIMILAR_WIDTH ?>px; height: <?= SIMILAR_HEIGHT ?>px;">
       <canvas id="similarArtistsCanvas" style="position: absolute;" width="<?= SIMILAR_WIDTH - 20 ?>px" height="<?= SIMILAR_HEIGHT - 20 ?>px"></canvas>
       <div id="artistTags" style="display: none;"><ul><li></li></ul></div>
-      <strong><br /><a id="currentArtist" style="position: relative; margin-left: 15px" href="#null">Loading...</a></strong>
+      <strong><br><a id="currentArtist" style="position: relative; margin-left: 15px" href="#null">Loading...</a></strong>
     </div>
 <!--  </div> ?? -->
     <div id="artist_information" class="box">

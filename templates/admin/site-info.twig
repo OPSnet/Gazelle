@@ -26,13 +26,13 @@ div#phpinfo hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}
 <div class="thin">
     <h3>OS</h3>
     <div class="box pad">
-        <span style="width: 70px; display: inline-block">Uptime:</span> {{ site_info.uptime.uptime|raw }} <br />
-        <span style="width: 70px; display: inline-block">Idle time:</span> {{ site_info.uptime.idletime|raw }} <br /><br />
-        <span style="width: 100px; display: inline-block">User:</span> {{ uid }} <br />
-        <span style="width: 100px; display: inline-block">Group:</span> {{ euid }} <br />
-        <span style="width: 100px; display: inline-block">Effective User:</span> {{ euid }} <br />
-        <span style="width: 100px; display: inline-block">Effective Group:</span> {{ euid }} <br />
-        <br /><tt>openssl_random_pseudo_bytes()</tt>:&nbsp;
+        <span style="width: 70px; display: inline-block">Uptime:</span> {{ site_info.uptime.uptime|raw }} <br>
+        <span style="width: 70px; display: inline-block">Idle time:</span> {{ site_info.uptime.idletime|raw }} <br><br>
+        <span style="width: 100px; display: inline-block">User:</span> {{ uid }} <br>
+        <span style="width: 100px; display: inline-block">Group:</span> {{ euid }} <br>
+        <span style="width: 100px; display: inline-block">Effective User:</span> {{ euid }} <br>
+        <span style="width: 100px; display: inline-block">Effective Group:</span> {{ euid }} <br>
+        <br><tt>openssl_random_pseudo_bytes()</tt>:&nbsp;
 {%- if openssl_strong -%}
             <span style="color:lime;">Strong</span>
 {%- else -%}
@@ -41,14 +41,14 @@ div#phpinfo hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}
     </div>
     <h3>Timestamps</h3>
     <div class="box pad">
-        <span style="width: 50px; display: inline-block">PHP:</span> {{ timestamp_php }}<br />
+        <span style="width: 50px; display: inline-block">PHP:</span> {{ timestamp_php }}<br>
         <span style="width: 50px; display: inline-block">DB:</span> {{ timestamp_db }}
     </div>
 
     <h3>PHP</h3>
     <div class="box pad">
-        Version: {{ php_version }} <br />
-        <a onclick="toggle_display('phpinfo')" href='javascript:void(0)'>Toggle PHP Info</a><br />
+        Version: {{ php_version }} <br>
+        <a onclick="toggle_display('phpinfo')" href='javascript:void(0)'>Toggle PHP Info</a><br>
         <div id="phpinfo">{{ site_info.phpinfo|raw }}</div>
     </div>
 
@@ -59,7 +59,7 @@ div#phpinfo hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}
 
     <h3>Postgresql</h3>
     <div class="box pad">
-        Version: {{ pg_version }}<br /><br />
+        Version: {{ pg_version }}<br><br>
         <h4>Checkpointing</h4>
         <div class="pg-checkpoint">
             <div>Ratio</div>
@@ -88,8 +88,8 @@ div#phpinfo hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}
 
     <h3>Git</h3>
     <div class="box pad">
-        <span style="width: 150px; display: inline-block;">Branch:</span> {{ site_info.gitBranch }}<br />
-        <span style="width: 150px; display: inline-block;">Local Hash:</span> {{ site_info.gitHash }}<br />
+        <span style="width: 150px; display: inline-block;">Branch:</span> {{ site_info.gitBranch }}<br>
+        <span style="width: 150px; display: inline-block;">Local Hash:</span> {{ site_info.gitHash }}<br>
         <span style="width: 150px; display: inline-block;">Remote Hash:</span> {{ site_info.gitHashRemote }}
     </div>
 
@@ -173,7 +173,7 @@ div#phpinfo hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}
 {% for table in site_info.tablesWithDuplicateForeignKeys %}
 {%  if loop.first %}
     <div class="thin">The following tables have redundant foreign key definitions.
-    All but one of the definitions per table/column may safely be removed.</div><br />
+    All but one of the definitions per table/column may safely be removed.</div><br>
     <table>
         <tr class="colhead">
             <td>Table</td>
@@ -203,7 +203,7 @@ div#phpinfo hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}
 
     <h3>Composer</h3>
     <div class="box pad">
-        Composer Version: {{ site_info.composerVersion }}<br />
+        Composer Version: {{ site_info.composerVersion }}<br>
         <table>
             <tr class="colhead">
                 <td>Package</td>
@@ -222,7 +222,7 @@ div#phpinfo hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}
 
     <h3>Phinx</h3>
     <div class="box pad">
-        {{ site_info.phinx.version }}<br />
+        {{ site_info.phinx.version }}<br>
         <table>
             <tr class='colhead'>
                 <td>Status</td>

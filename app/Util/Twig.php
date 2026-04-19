@@ -59,8 +59,8 @@ class Twig {
                     $hoverAttr[] = 'src="' . html_escape(image_cache_encode($rollover, width: AVATAR_WIDTH))
                         . '" loading="eager" data-origin-src="' . html_escape($rollover) . '"';
                 }
-                return '<div class="avatar_container"><div><img ' . implode(' ', $basicAttr) . " /></div>"
-                    . ($rollover ? ('<div><img ' . implode(' ', $hoverAttr) . ' /></div>') : '')
+                return '<div class="avatar_container"><div><img ' . implode(' ', $basicAttr) . "></div>"
+                    . ($rollover ? ('<div><img ' . implode(' ', $hoverAttr) . '></div>') : '')
                     . "</div>";
             },
         ));
@@ -224,11 +224,11 @@ class Twig {
                     $icon[] = '<a href="wiki.php?action=article&amp;name=warnings"><img src="'
                         . STATIC_SERVER . '/common/symbols/warned.png" alt="Warned" title="Warned'
                         . ($viewer->id == $user->id ? ' - Expires ' . date('Y-m-d H:i', $user->warningExpiry()) : '')
-                        . '" class="tooltip" /></a>';
+                        . '" class="tooltip"></a>';
                 }
                 if ($user->isDisabled()) {
                     $icon[] = '<a href="rules.php"><img src="'
-                        . STATIC_SERVER . '/common/symbols/disabled.png" alt="Banned" title="Disabled" class="tooltip" /></a>';
+                        . STATIC_SERVER . '/common/symbols/disabled.png" alt="Banned" title="Disabled" class="tooltip"></a>';
                 }
                 return new \Twig\Markup(implode(' ', $icon), 'UTF-8');
             }
@@ -290,16 +290,16 @@ class Twig {
                 return new \Twig\Markup(
                     "<input type=\"checkbox\" name=\"perm_$name\" id=\"$name\" title=\"$name\""
                     . (isset($config[$name]) ? ' checked' : '')
-                    . " />&nbsp;<label title=\"$name\" for=\"$name\" class=\"single\">$label</label>",
+                    . ">&nbsp;<label title=\"$name\" for=\"$name\" class=\"single\">$label</label>",
                     'UTF-8'
                 );
             }
             return new \Twig\Markup(
                 "<input type=\"checkbox\" name=\"default_$name\" disabled"
                 . (isset($default[$name]) ? ' checked' : '')
-                . " /> <input type=\"checkbox\" class=\"double\" name=\"perm_$name\" id=\"$name\" title=\"$name\""
+                . "> <input type=\"checkbox\" class=\"double\" name=\"perm_$name\" id=\"$name\" title=\"$name\""
                 . ($config[$name] ?? $default[$name] ?? false ? ' checked' : '')
-                . " />&nbsp;<label title=\"$name\" for=\"$name\" class=\"double\">$label</label>",
+                . ">&nbsp;<label title=\"$name\" for=\"$name\" class=\"double\">$label</label>",
                 'UTF-8'
             );
         }));
@@ -315,7 +315,7 @@ class Twig {
                     $Class = strtr($ip, '.', '-');
                     // phpcs:disable Generic.Strings.UnnecessaryStringConcat.Found
                     $cache[$ip] = "<span class=\"cc_{$Class}\">Resolving CC..."
-                        . '<script type="text/javascript">'
+                        . '<script>'
                             . "document.addEventListener('DOMContentLoaded', function() {"
                                 . "$.get('tools.php?action=get_cc&ip={$ip}', function(cc) {"
                                     . "$('.cc_{$Class}').html(cc);"

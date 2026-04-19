@@ -3,7 +3,7 @@
     <i>none</i>
 {%- else -%}
     {%- for a in list -%}
-        {{ a.name }}{% if not loop.last %}<br />{% endif %}
+        {{ a.name }}{% if not loop.last %}<br>{% endif %}
     {%- endfor -%}
 {% endif -%}
 {% endmacro -%}
@@ -117,7 +117,7 @@
 <tr>
     <td colspan="2">
     {% for arg in notification.args %}
-        {{ arg }}{% if not loop.last %}<br />{% endif %}
+        {{ arg }}{% if not loop.last %}<br>{% endif %}
     {% endfor %}
     </td>
 <tr>
@@ -160,32 +160,32 @@
         </td>
         <td class="vertical-align: top;">
         {% for tag in r.filter.info.tag|sort %}
-            {{ tag }}{% if not loop.last %}<br />{% endif %}
+            {{ tag }}{% if not loop.last %}<br>{% endif %}
         {% endfor %}
         </td>
         <td class="vertical-align: top;">
         {% for notTag in r.filter.info.notTag|sort %}
-            {{ notTag }}{% if not loop.last %}<br />{% endif %}
+            {{ notTag }}{% if not loop.last %}<br>{% endif %}
         {% endfor %}
         </td>
         <td class="vertical-align: top;">
         {% for format in r.filter.info.format|sort %}
-            {{ format }}{% if not loop.last %}<br />{% endif %}
+            {{ format }}{% if not loop.last %}<br>{% endif %}
         {% endfor %}
         </td>
         <td class="vertical-align: top;">
         {% for encoding in r.filter.info.encoding|sort %}
-            <span style="white-space: nowrap">{{ encoding }}</span>{% if not loop.last %}<br />{% endif %}
+            <span style="white-space: nowrap">{{ encoding }}</span>{% if not loop.last %}<br>{% endif %}
         {% endfor %}
         </td>
         <td class="vertical-align: top;">
         {% for media in r.filter.info.media|sort %}
-            {{ media }}{% if not loop.last %}<br />{% endif %}
+            {{ media }}{% if not loop.last %}<br>{% endif %}
         {% endfor %}
         </td>
         <td class="vertical-align: top;">
         {% for user in r.filter.info.user|sort %}
-            {{ user|user_url }}{% if not loop.last %}<br />{% endif %}
+            {{ user|user_url }}{% if not loop.last %}<br>{% endif %}
         {% endfor %}
         </td>
         <td class="vertical-align: top;">{{ r.filter.info.exclude_va }}</td>
@@ -199,7 +199,7 @@
 {% endif %}
 <div class="box pad">
     <form class="send_form" action="" method="post">
-        <input type="hidden" name="action" value="notification_sandbox" />
+        <input type="hidden" name="action" value="notification_sandbox">
         <table class="layout">
             <tbody>
                 <tr>
@@ -207,7 +207,7 @@
                         <label for="torrentid">Torrent ID</label>
                     </td>
                     <td>
-                        <input type="text" name="torrentid" value="{{ torrent.ID }}" /> (<b>not</b> group ID!)
+                        <input type="text" name="torrentid" value="{{ torrent.ID }}"> (<b>not</b> group ID!)
                     </td>
                 <tr>
                 </tr>
@@ -215,14 +215,14 @@
                         <label for="torrentid">optional notified User ID</label>
                     </td>
                     <td>
-                        <input type="text" name="notifiedid" value="{{ notified_id }}" />&nbsp;(To limit results to one person)
-                        <br />Use <tt>@name</tt> for a username, otherwise (numeric) user ID.
+                        <input type="text" name="notifiedid" value="{{ notified_id }}">&nbsp;(To limit results to one person)
+                        <br>Use <tt>@name</tt> for a username, otherwise (numeric) user ID.
                     </td>
                     </td>
                 </tr>
             </tbody>
         </table>
-        <input type="submit" value="Submit" />
+        <input type="submit" value="Submit">
     </form>
 </div>
 </div>

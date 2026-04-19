@@ -24,7 +24,7 @@
             <strong>Recent activity</strong>
         </td>
         <td>
-            <label><input type="checkbox" name="p_lastseen"{{ checked(not user.isParanoid('lastseen')) }} /> Last seen</label>
+            <label><input type="checkbox" name="p_lastseen"{{ checked(not user.isParanoid('lastseen')) }}> Last seen</label>
         </td>
     </tr>
     <tr id="para_vote_recent_tr">
@@ -32,7 +32,7 @@
             <strong>Recent release votes</strong>
         </td>
         <td>
-            <label><input type="checkbox" name="pattr_hide_vote_recent"{{ checked(not user.hasAttr('hide-vote-recent')) }} /> Show recent release votes</label>
+            <label><input type="checkbox" name="pattr_hide_vote_recent"{{ checked(not user.hasAttr('hide-vote-recent')) }}> Show recent release votes</label>
         </td>
     </tr>
     <tr id="para_vote_hist_tr">
@@ -40,23 +40,23 @@
             <strong>Release votes history</strong>
         </td>
         <td>
-            <label><input type="checkbox" name="pattr_hide_vote_history"{{ checked(not user.hasAttr('hide-vote-history')) }} /> Show release votes history</label>
+            <label><input type="checkbox" name="pattr_hide_vote_history"{{ checked(not user.hasAttr('hide-vote-history')) }}> Show release votes history</label>
         </td>
     </tr>
     <tr id="para_presets_tr">
         <td class="label"><strong>Presets</strong></td>
         <td>
-            <input type="button" id="paranoid-none" value="Show everything" />
-            <input type="button" id="paranoid-stats" value="Show stats only" />
-            <input type="button" id="paranoid-all" value="Show nothing" />
+            <input type="button" id="paranoid-none" value="Show everything">
+            <input type="button" id="paranoid-stats" value="Show stats only">
+            <input type="button" id="paranoid-all" value="Show nothing">
         </td>
     </tr>
     <tr id="para_donations_tr">
         <td class="label"><strong>Donations</strong></td>
         <td>
-            <input type="checkbox" id="p_donor_stats" name="p_donor_stats" class="paranoia-setting"{{ checked(donor.isVisible) }} />
+            <input type="checkbox" id="p_donor_stats" name="p_donor_stats" class="paranoia-setting"{{ checked(donor.isVisible) }}>
             <label for="p_donor_stats">Show donor stats</label>&nbsp;&nbsp;
-            <input type="checkbox" id="p_donor_heart" name="p_donor_heart" class="paranoia-setting"{{ checked(not user.isParanoid('hide_donor_heart')) }} />
+            <input type="checkbox" id="p_donor_heart" name="p_donor_heart" class="paranoia-setting"{{ checked(not user.isParanoid('hide_donor_heart')) }}>
             <label for="p_donor_heart">Show donor heart</label>
         </td>
     </tr>
@@ -65,17 +65,17 @@
             <strong>Statistics</strong>
         </td>
         <td>
-            <label><input type="checkbox" name="p_uploaded" class="paranoia-setting"{{ checked(not user.isParanoid('uploaded')) }} /> Uploaded</label>&nbsp;&nbsp;
-            <label><input type="checkbox" name="p_downloaded" class="paranoia-setting"{{ checked(not user.isParanoid('downloaded')) }} /> Downloaded</label>&nbsp;&nbsp;
-            <label><input type="checkbox" name="p_bonuspoints"{{ checked(not user.isParanoid('bonuspoints')) }} /> Bonus Points</label>
-            <label><input type="checkbox" name="p_invitedcount"{{ checked(not user.isParanoid('invitedcount')) }} /> Invitees</label>
+            <label><input type="checkbox" name="p_uploaded" class="paranoia-setting"{{ checked(not user.isParanoid('uploaded')) }}> Uploaded</label>&nbsp;&nbsp;
+            <label><input type="checkbox" name="p_downloaded" class="paranoia-setting"{{ checked(not user.isParanoid('downloaded')) }}> Downloaded</label>&nbsp;&nbsp;
+            <label><input type="checkbox" name="p_bonuspoints"{{ checked(not user.isParanoid('bonuspoints')) }}> Bonus Points</label>
+            <label><input type="checkbox" name="p_invitedcount"{{ checked(not user.isParanoid('invitedcount')) }}> Invitees</label>
         </td>
     </tr>
     <tr id="para_reqratio_tr">
         <td class="label"><strong>Ratio</strong></td>
         <td>
-            <label><input type="checkbox" name="p_ratio" class="paranoia-setting"{{ checked(not user.isParanoid('ratio')) }} /> Current Ratio</label>&nbsp;&nbsp;
-            <label><input type="checkbox" name="p_requiredratio"{{ checked(not user.isParanoid('requiredratio')) }} /> Required Ratio</label>
+            <label><input type="checkbox" name="p_ratio" class="paranoia-setting"{{ checked(not user.isParanoid('ratio')) }}> Current Ratio</label>&nbsp;&nbsp;
+            <label><input type="checkbox" name="p_requiredratio"{{ checked(not user.isParanoid('requiredratio')) }}> Required Ratio</label>
         </td>
     </tr>
     <tr id="para_upltor_tr">
@@ -95,7 +95,7 @@
             <strong>Artists added via uploads</strong>
         </td>
         <td>
-            <label><input type="checkbox" name="p_artistsadded"{{ checked(not user.isParanoid('artistsadded')) }} /> Show count</label>
+            <label><input type="checkbox" name="p_artistsadded"{{ checked(not user.isParanoid('artistsadded')) }}> Show count</label>
         </td>
     </tr>
     <tr id="para_torsubscr_tr">
@@ -103,7 +103,7 @@
             <strong>Notifications</strong>
         </td>
         <td>
-            <label><input type="checkbox" name="p_notifications"{{ checked(not user.isParanoid('notifications')) }} /> Allow notifications on your uploads</label>
+            <label><input type="checkbox" name="p_notifications"{{ checked(not user.isParanoid('notifications')) }}> Allow notifications on your uploads</label>
         </td>
     </tr>
     <tr id="para_torleech_tr">
@@ -133,17 +133,17 @@
     <tr id="para_reqfill_tr">
         <td class="label"><strong>Requests (filled)</strong></td>
         <td>
-            <label><input type="checkbox" name="p_count_requestsfilled" class="paranoia-setting"{{ checked(not user.isParanoid('requestsfilled_count')) }} /> Show count</label>&nbsp;&nbsp;
-            <label><input type="checkbox" name="p_list_requestsfilled" class="paranoia-setting"{{ checked(not user.isParanoid('requestsfilled_list')) }} /> Show list</label>&nbsp;&nbsp;
-            <label><input type="checkbox" name="p_bounty_requestsfilled" class="paranoia-setting"{{ checked(not user.isParanoid('requestsfilled_bounty')) }} /> Show bounty received</label>
+            <label><input type="checkbox" name="p_count_requestsfilled" class="paranoia-setting"{{ checked(not user.isParanoid('requestsfilled_count')) }}> Show count</label>&nbsp;&nbsp;
+            <label><input type="checkbox" name="p_list_requestsfilled" class="paranoia-setting"{{ checked(not user.isParanoid('requestsfilled_list')) }}> Show list</label>&nbsp;&nbsp;
+            <label><input type="checkbox" name="p_bounty_requestsfilled" class="paranoia-setting"{{ checked(not user.isParanoid('requestsfilled_bounty')) }}> Show bounty received</label>
         </td>
     </tr>
     <tr id="para_reqvote_tr">
         <td class="label"><strong>Requests (voted for)</strong></td>
         <td>
-            <label><input type="checkbox" name="p_count_requestsvoted" class="paranoia-setting"{{ checked(not user.isParanoid('requestsvoted_count')) }} /> Show count</label>&nbsp;&nbsp;
-            <label><input type="checkbox" name="p_list_requestsvoted" class="paranoia-setting"{{ checked(not user.isParanoid('requestsvoted_list')) }} /> Show list</label>&nbsp;&nbsp;
-            <label><input type="checkbox" name="p_bounty_requestsvoted" class="paranoia-setting"{{ checked(not user.isParanoid('requestsvoted_bounty')) }} /> Show bounty offered</label>
+            <label><input type="checkbox" name="p_count_requestsvoted" class="paranoia-setting"{{ checked(not user.isParanoid('requestsvoted_count')) }}> Show count</label>&nbsp;&nbsp;
+            <label><input type="checkbox" name="p_list_requestsvoted" class="paranoia-setting"{{ checked(not user.isParanoid('requestsvoted_list')) }}> Show list</label>&nbsp;&nbsp;
+            <label><input type="checkbox" name="p_bounty_requestsvoted" class="paranoia-setting"{{ checked(not user.isParanoid('requestsvoted_bounty')) }}> Show bounty offered</label>
         </td>
     </tr>
     <tr id="para_preview_tr">

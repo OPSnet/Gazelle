@@ -20,13 +20,13 @@
         <td style="width: 50%; vertical-align: top;">
 {% for interval in left %}
     {% include 'staffpm/history-list.twig' with {'column_title': column_title, 'history': interval} only %}
-            <br /><br />
+            <br><br>
 {% endfor %}
         </td>
         <td style="vertical-align: top;">
 {% for interval in right %}
     {% include 'staffpm/history-list.twig' with {'column_title': column_title, 'history': interval} only %}
-            <br /><br />
+            <br><br>
 {% endfor %}
         </td>
     </tr>

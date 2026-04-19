@@ -5,14 +5,14 @@
         <a href="tools.php?action=privilege-audit" class="brackets">Privileges audit</a>
         <a href="tools.php?action=userclass" class="brackets">Userclass list</a>
         <a href="tools.php?action=staff_groups" class="brackets">Staff Groups</a>
-        <br />
+        <br>
         <a href="tools.php?action=userclass&amp;id=new" class="brackets">Create a new userclass</a>
     </div>
 </div>
 <h2>Privileges Matrix</h2>
 <table width="100%">
     <tr class="colhead">
-        <td rowspan="2" style="vertical-align: bottom">Primary Class ★<br /><br />Privilege</td>
+        <td rowspan="2" style="vertical-align: bottom">Primary Class ★<br><br>Privilege</td>
 {% for c in class_list %}
         <td style="padding: 0;"><div class="rot90-container"><div class="rot90">
             <a href="tools.php?action=privilege-edit&amp;id={{ c.ID }}">{{ c.Name }}</a>
@@ -34,7 +34,7 @@
     </tr>
 {% endfor %}
 </table>
-<br />
+<br>
 
 <div class="box pad">Any privileges marked <span style="color: orangered">in
 red</span> are orphaned privileges that were found in the database

@@ -12,7 +12,7 @@
     <p>The invite was {{ removed ? '' : ' not' }} removed.</p>
 {% endif %}
 </div>
-<br />
+<br>
 
 <div>
     <form class="search_form" name="invites" action="" method="get">
@@ -20,10 +20,10 @@
             <tr>
                 <td class="label"><strong>Email address (regexps allowed):</strong></td>
                 <td>
-                    <input type="hidden" name="action" value="invite_pool" />
-                    <input type="text" name="search" size="60" value="{{ search }}" />
+                    <input type="hidden" name="action" value="invite_pool">
+                    <input type="text" name="search" size="60" value="{{ search }}">
                     &nbsp;
-                    <input type="submit" value="Search pool" />
+                    <input type="submit" value="Search pool">
                 </td>
             </tr>
         </table>
@@ -57,10 +57,10 @@
 {%  if viewer.permitted('users_edit_invites') %}
         <td>
             <form class="delete_form" name="invite" action="" method="post">
-                <input type="hidden" name="action" value="invite_pool" />
-                <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-                <input type="hidden" name="invitekey" value="{{ invite.key }}" />
-                <input type="submit" value="Delete" />
+                <input type="hidden" name="action" value="invite_pool">
+                <input type="hidden" name="auth" value="{{ viewer.auth }}">
+                <input type="hidden" name="invitekey" value="{{ invite.key }}">
+                <input type="submit" value="Delete">
             </form>
         </td>
 {%  endif %}

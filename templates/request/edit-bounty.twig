@@ -2,7 +2,7 @@
 <div class="thin">
     <div class="header">
         <h2><a href="requests.php">Request</a> › {{ request.categoryName }} › {{ request.link|raw }} › edit bounty</h2>
-        <br />
+        <br>
     </div>
 
     <div class="box pad">
@@ -23,9 +23,9 @@
 
         <form action="" method="post" id="request_form">
             <div>
-                <input type="hidden" name="id" value="{{ request.id }}" />
-                <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-                <input type="hidden" name="action" value="takebounty" />
+                <input type="hidden" name="id" value="{{ request.id }}">
+                <input type="hidden" name="auth" value="{{ viewer.auth }}">
+                <input type="hidden" name="action" value="takebounty">
             </div>
 
             <table class="layout">
@@ -40,14 +40,14 @@
                 <tr>
                     <td>{{ b.UserID|user_full }}</td>
                     <td title="{{ b.Bounty|number_format }}">{{ b.Bounty|octet_size }}</td>
-                    <td><input type="radio" title="No change" name="action-{{ b.UserID }}" value="keep" checked="checked" /></td>
-                    <td><input type="radio" title="Refund" name="action-{{ b.UserID }}" value="refund" /></td>
-                    <td><input type="radio" title="Remove (Danger!)" name="action-{{ b.UserID }}" value="remove" />&nbsp;<input type="checkbox" name="check-{{ b.UserID }}" /></td>
+                    <td><input type="radio" title="No change" name="action-{{ b.UserID }}" value="keep" checked></td>
+                    <td><input type="radio" title="Refund" name="action-{{ b.UserID }}" value="refund"></td>
+                    <td><input type="radio" title="Remove (Danger!)" name="action-{{ b.UserID }}" value="remove">&nbsp;<input type="checkbox" name="check-{{ b.UserID }}"></td>
                 </tr>
 {% endfor %}
                 <tr>
                     <td colspan="5">
-                        <input type="submit" id="button" value="Edit bounty" />
+                        <input type="submit" id="button" value="Edit bounty">
                     </td>
                 </tr>
             </table>

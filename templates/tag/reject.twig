@@ -15,7 +15,7 @@
 <li>{{ m }}</li>
 {%  if loop.last %}
 </ul>
-<br />
+<br>
 {%  endif %}
 {% endfor %}
 <form name="tag-reject" method="post">
@@ -28,7 +28,7 @@
             tag.created|date('Y-m-d H:i:s') }}">{{ tag.name }}</span>
         <div style="float: right">
             <label><small>❌</small>
-            <input type="checkbox" name="remove[]" value="{{ tag.id }}" />
+            <input type="checkbox" name="remove[]" value="{{ tag.id }}">
             </label>
         </div>
     </div>
@@ -43,13 +43,13 @@
 <div class="tbx tbx-tag-reject-edit">
     <div class="tbx-label">Create new entry</div>
     <div class="tbx-field">
-        <input type="text" name="create" size="20" value="" placeholder="tag name" />
+        <input type="text" name="create" size="20" value="" placeholder="tag name">
     </div>
     <div class="tbx-label"></div>
     <div class="tbx-field">
-        <input type="hidden" name="action" value="tag-reject" />
-        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-        <input type="submit" value="Update" />
+        <input type="hidden" name="action" value="tag-reject">
+        <input type="hidden" name="auth" value="{{ viewer.auth }}">
+        <input type="submit" value="Update">
     </div>
 </div>
 </form>

@@ -20,17 +20,17 @@ $answerList = $poll->answerList();
 $vote = $poll->vote();
 if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
 ?>
-<span class="error">Please select an option.</span><br />
+<span class="error">Please select an option.</span><br>
 <form class="vote_form" name="poll" id="poll" action="">
-    <input type="hidden" name="action" value="poll" />
-    <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
-    <input type="hidden" name="threadid" value="<?= $poll->id ?>" />
+    <input type="hidden" name="action" value="poll">
+    <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>">
+    <input type="hidden" name="threadid" value="<?= $poll->id ?>">
 <?php foreach ($answerList as $i => $answer) { ?>
-    <input type="radio" name="vote" id="answer_<?=$i?>" value="<?=$i?>" />
-    <label for="answer_<?=$i?>"><?=display_str($answer)?></label><br />
+    <input type="radio" name="vote" id="answer_<?=$i?>" value="<?=$i?>">
+    <label for="answer_<?=$i?>"><?=display_str($answer)?></label><br>
 <?php } ?>
-    <br /><input type="radio" name="vote" id="answer_0" value="0" /> <label for="answer_0">Blank&nbsp;&mdash;&nbsp;Show the results!</label><br /><br />
-    <input type="button" onclick="ajax.post('index.php', 'poll', function(response) { $('#poll_container').raw().innerHTML = response });" value="Vote" />
+    <br><input type="radio" name="vote" id="answer_0" value="0"> <label for="answer_0">Blank&nbsp;&mdash;&nbsp;Show the results!</label><br><br>
+    <input type="button" onclick="ajax.post('index.php', 'poll', function(response) { $('#poll_container').raw().innerHTML = response });" value="Vote">
 </form>
 <?php
 } else {
@@ -64,12 +64,12 @@ if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
         if (count($staffVote['missing']['who'])) {
             $totalStaff += count($staffVote['missing']['who']);
 ?>
-            <li><br />Missing: <?= implode(', ', array_map(fn ($u) => $u->link(), $staffVote['missing']['who'])) ?></li>
+            <li><br>Missing: <?= implode(', ', array_map(fn ($u) => $u->link(), $staffVote['missing']['who'])) ?></li>
 <?php } ?>
         </ul>
-        <br />
+        <br>
         <strong>Voted:</strong> <?= number_format($totalVoted) ?> of <?= number_format($totalStaff) ?> total. (You may click on a choice to change your vote).
-        <br />
+        <br>
         <a href="#" onclick="AddPollOption(<?= $threadId ?>); return false;" class="brackets">+</a>
 <?php
     } else {
@@ -86,10 +86,10 @@ if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
        }
        if ($response === 0) {
 ?>
-            <li><br />➔ (Abstain)</li>
+            <li><br>➔ (Abstain)</li>
 <?php   } ?>
         </ul>
-        <br /><strong>Votes:</strong> <?= number_format($poll->total()) ?>
+        <br><strong>Votes:</strong> <?= number_format($poll->total()) ?>
 <?php
     }
 }

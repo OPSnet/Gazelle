@@ -44,21 +44,21 @@ class TextTest extends TestCase {
             ["text-align-l",    "[align=left]o[/align]",         "<div style=\"text-align: left;\">o</div>"],
             ["text-artist",     "[artist]Frank Zappa[/artist]",  "<a href=\"artist.php?artistname=Frank+Zappa\">Frank Zappa</a>"],
             ["text-b",          "[b]o[/b]",                      "<strong>o</strong>"],
-            ["text-br",         "a\nb",                          "a<br />\nb"],
+            ["text-br",         "a\nb",                          "a<br>\nb"],
             ["text-box",        "[box]jellyfish[/box]",          "<div class=\"box pad\" style=\"padding: 10px 10px 10px 20px\">jellyfish</div>"],
-            ["text-code",       "[code]ab\ncd[/code]",           "<code>ab<br />\ncd</code>"],
+            ["text-code",       "[code]ab\ncd[/code]",           "<code>ab<br>\ncd</code>"],
             ["text-color-name", "[color=cornsilk]pink[/color]",  "<span style=\"color: cornsilk;\">pink</span>"],
             ["text-color-hash", "[color=#c0ffee]black[/color]",  "<span style=\"color: #c0ffee;\">black</span>"],
             ["text-colour",     "[colour=gold]pink[/colour]",    "<span style=\"color: gold;\">pink</span>"],
             ["text-headline",   "[headline]abc[/headline]",      "=abc="],
-            ["text-hr",         "[hr]",                          "<hr />"],
+            ["text-hr",         "[hr]",                          "<hr>"],
             ["text-i",          "[i]am[/i]",                     "<span style=\"font-style: italic;\">am</span>"],
             ["text-important",  "[important]x[/important]",      "<strong class=\"important_text\">x</strong>"],
             ["text-inlinesize", "[inlinesize=7]b[/inlinesize]",  "<span class=\"size7\">b</span>"],
             ["text-n",          "[[n]i]am[[n]/i]",               "[i]am[/i]"],
             ["text-pad",        "[pad=2|4|6|8]text[/pad]",       "<span style=\"display: inline-block; padding: 2px 4px 6px 8px\">text</span>"],
             ["text-plain",      "[plain]a[b]c[/plain]",          "a[b]c"],
-            ["text-pre",        "[pre]a\nb[/pre]",               "<pre>a<br />\nb</pre>"],
+            ["text-pre",        "[pre]a\nb[/pre]",               "<pre>a<br>\nb</pre>"],
             ["text-quote-n",    "[quote]a[/quote]",              "<blockquote>a</blockquote>"],
             ["text-quote-y",    "[quote=phpunit]a[/quote]",      "<strong class=\"quoteheader\">phpunit</strong> wrote: <blockquote>a</blockquote>"],
             ["text-quote-tid",  "[quote=phpunit|t123]a[/quote]", "<a href=\"#\" onclick=\"QuoteJump(event, 't123'); return false;\"><strong class=\"quoteheader\">phpunit</strong> wrote: </a><blockquote>a</blockquote>"],
@@ -78,7 +78,7 @@ class TextTest extends TestCase {
                 "<strong>Hidden text</strong>: <a href=\"javascript:void(0);\" onclick=\"BBCode.spoiler(this);\">Show</a><blockquote class=\"hidden spoiler\">surprise</blockquote>"
             ],
 
-            ["text-emoji",      ":nod:",             "<img border=\"0\" src=\"" . STATIC_SERVER . "/common/smileys/nod.gif\" />"],
+            ["text-emoji",      ":nod:",             "<img border=\"0\" src=\"" . STATIC_SERVER . "/common/smileys/nod.gif\">"],
 
             ["text-nest-1",     "[size=3][i]z[/i][/size]", "<span class=\"size3\"><span style=\"font-style: italic;\">z</span></span>"],
             ["text-nest-2",
@@ -224,8 +224,8 @@ intro
 [*] two
 outro
 END_BB, <<<END_HTML
-intro<br />
-<ul class="postlist"><li>one</li><li>two</li></ul><br />
+intro<br>
+<ul class="postlist"><li>one</li><li>two</li></ul><br>
 outro
 END_HTML],
             ['text-list-c', <<<END_BB
@@ -250,7 +250,7 @@ END_HTML],
 [*] two [*]
 outro
 END_BB, <<<END_HTML
-<ul class="postlist"><li>two [*]</li></ul><br />
+<ul class="postlist"><li>two [*]</li></ul><br>
 outro
 END_HTML],
             ['text-list-g', <<<END_BB

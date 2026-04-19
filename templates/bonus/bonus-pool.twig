@@ -3,7 +3,7 @@
         <h3>The <b>{{ pool.name }}</b> pool is open for business!</h3>
         <div>Donate points for greater good! The points you give here will be distributed out to everyone
         who participates in the contest. You can give as many times as you want until the end.</div>
-        <br />
+        <br>
         <h3>The grand total currently stands at {{ pool.total|number_format }} points</h3>
         <form class="pool_form" name="pool" id="poolform" action="bonus.php?action=donate" method="post">
             <table>
@@ -13,7 +13,7 @@
                 <tbody>
                     <tr>
                         <td>{{ viewer.bonusPointsTotal|number_format(0) }}</td>
-                        <td><input type="text" width="10" name="donate" />
+                        <td><input type="text" width="10" name="donate">
                             <input type="hidden" name="poolid" value="{{ pool.bonus_pool_id }}"/>
                             <input type="hidden" name="userid" value="{{ viewer.id }}"/>
                             <input type="hidden" name="auth" value="{{ viewer.auth }}"/>
@@ -21,7 +21,7 @@
                     </tr>
                     <tr>
                         <td></td>
-                        <td><input type="submit" value="Donate" /></td>
+                        <td><input type="submit" value="Donate"></td>
                     </tr>
                 </tbody>
             </table>

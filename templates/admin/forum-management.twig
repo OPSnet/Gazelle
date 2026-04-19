@@ -15,9 +15,9 @@
         <td>Sort</td>
         <td>Name</td>
         <td>Description</td>
-        <td colspan="2">Min class<br />Read/Write/Create</td>
+        <td colspan="2">Min class<br>Read/Write/Create</td>
         <td>Auto-lock</td>
-        <td>Auto-lock<br />weeks</td>
+        <td>Auto-lock<br>weeks</td>
         <td>Submit</td>
     </tr>
 {% for forum_list in toc %}
@@ -25,9 +25,9 @@
     {% set forum = f.forum %}
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
         <form class="manage_form" name="forums" action="" method="post">
-            <input type="hidden" name="id" value="{{ forum.id }}>" />
-            <input type="hidden" name="action" value="forum_alter" />
-            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+            <input type="hidden" name="id" value="{{ forum.id }}>">
+            <input type="hidden" name="action" value="forum_alter">
+            <input type="hidden" name="auth" value="{{ viewer.auth }}">
             <td>
                 <select name="categoryid">
         {% for id, name in category %}
@@ -35,28 +35,28 @@
         {% endfor %}
             </td>
             <td>
-                <input type="text" size="2" name="sort" value="{{ forum.sequence }}" />
+                <input type="text" size="2" name="sort" value="{{ forum.sequence }}">
             </td>
             <td>
-                <input type="text" size="10" name="name" value="{{ forum.name }}" />
+                <input type="text" size="10" name="name" value="{{ forum.name }}">
             </td>
             <td>
-                <input type="text" size="16" name="description" value="{{ forum.description }}" />
+                <input type="text" size="16" name="description" value="{{ forum.description }}">
             </td>
-            <td>R<br />W<br />C</td>
+            <td>R<br>W<br>C</td>
             <td>
-                <select name="minclassread">{{ class_option(1000, class_list, forum.minClassRead) }}</select><br />
-                <select name="minclasswrite">{{ class_option(1000, class_list, forum.minClassWrite) }}</select><br />
-                <select name="minclasscreate">{{ class_option(1000, class_list, forum.minClassCreate) }}</select><br />
-            </td>
-            <td>
-                <input type="checkbox" name="autolock"{{ checked(forum.autoLock) }} />
+                <select name="minclassread">{{ class_option(1000, class_list, forum.minClassRead) }}</select><br>
+                <select name="minclasswrite">{{ class_option(1000, class_list, forum.minClassWrite) }}</select><br>
+                <select name="minclasscreate">{{ class_option(1000, class_list, forum.minClassCreate) }}</select><br>
             </td>
             <td>
-                <input type="text" size="4" name="autolockweeks" value="{{ forum.autoLockWeeks }}" />
+                <input type="checkbox" name="autolock"{{ checked(forum.autoLock) }}>
             </td>
             <td>
-                <input type="submit" name="submit" value="Edit" />
+                <input type="text" size="4" name="autolockweeks" value="{{ forum.autoLockWeeks }}">
+            </td>
+            <td>
+                <input type="submit" name="submit" value="Edit">
                 <input type="submit" name="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this forum? This is an irreversible action!')"/>
             </td>
         </form>
@@ -68,8 +68,8 @@
     </tr>
     <tr class="rowa">
         <form class="create_form" name="forum" action="" method="post">
-            <input type="hidden" name="action" value="forum_alter" />
-            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+            <input type="hidden" name="action" value="forum_alter">
+            <input type="hidden" name="auth" value="{{ viewer.auth }}">
             <td>
                 <select name="categoryid">
 {% for id, name in category %}
@@ -78,28 +78,28 @@
                 </select>
             </td>
             <td>
-                <input type="text" size="3" name="sort" />
+                <input type="text" size="3" name="sort">
             </td>
             <td>
-                <input type="text" size="10" name="name" />
+                <input type="text" size="10" name="name">
             </td>
             <td>
-                <input type="text" size="20" name="description" />
+                <input type="text" size="20" name="description">
             </td>
-            <td>R<br />W<br />C</td>
+            <td>R<br>W<br>C</td>
             <td>
-                <select name="minclassread">{{ class_option(1000, class_list, 0) }}</select><br />
-                <select name="minclasswrite">{{ class_option(1000, class_list, 0) }}</select><br />
-                <select name="minclasscreate">{{ class_option(1000, class_list, 0) }}</select><br />
-            </td>
-            <td>
-                <input type="checkbox" name="autolock" />
+                <select name="minclassread">{{ class_option(1000, class_list, 0) }}</select><br>
+                <select name="minclasswrite">{{ class_option(1000, class_list, 0) }}</select><br>
+                <select name="minclasscreate">{{ class_option(1000, class_list, 0) }}</select><br>
             </td>
             <td>
-                <input type="text" size="4" name="autolockweeks" value="52" />
+                <input type="checkbox" name="autolock">
             </td>
             <td>
-                <input type="submit" name="submit" value="Create" />
+                <input type="text" size="4" name="autolockweeks" value="52">
+            </td>
+            <td>
+                <input type="submit" name="submit" value="Create">
             </td>
         </form>
     </tr>

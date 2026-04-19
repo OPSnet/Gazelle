@@ -22,7 +22,7 @@ if (is_null($reportType)) {
 <ul>
     <li><?= \Text::full_format($reportType->explanation(), cache: Enum\ImageCacheMode::passthru, bucket: Enum\CacheBucket::forum) ?></li>
 </ul>
-<br />
+<br>
 <table class="layout border" cellpadding="3" cellspacing="1" border="0" width="100%">
 <?php
 $needImage = $reportType->needImage();
@@ -53,7 +53,7 @@ if ($needTrack !== 'none') {
             Track Number(s)<?= in_array($needTrack, ['all', 'required']) ? ' <strong class="important_text">(Required)</strong>:' : '' ?>
         </td>
         <td>
-            <input id="track" type="text" name="track" size="8" value="<?= display_str($_POST['track'] ?? '') ?>" />
+            <input id="track" type="text" name="track" size="8" value="<?= display_str($_POST['track'] ?? '') ?>">
             <?= $needTrack === 'all' ? '<input id="all_tracks" type="checkbox"> All' : ''?>
         </td>
     </tr>
@@ -73,7 +73,7 @@ if ($needLink !== 'none') {
     } ?>:
         </td>
         <td>
-            <input id="link" type="text" name="link" size="50" value="<?= display_str($_POST['link'] ?? '') ?>" />
+            <input id="link" type="text" name="link" size="50" value="<?= display_str($_POST['link'] ?? '') ?>">
         </td>
     </tr>
 <?php
@@ -92,7 +92,7 @@ if ($needSitelink !== 'none') {
     } ?>:
         </td>
         <td>
-            <input id="sitelink" type="text" name="sitelink" size="50" value="<?= display_str($_POST['sitelink'] ?? '') ?>" />
+            <input id="sitelink" type="text" name="sitelink" size="50" value="<?= display_str($_POST['sitelink'] ?? '') ?>">
         </td>
     </tr>
 <?php } ?>

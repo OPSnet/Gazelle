@@ -24,7 +24,7 @@
         <td>{{ source.user_total|number_format }}</td>
         <td>
     {% if source.inviter_total == 0 and source.user_total == 0 %}
-            <input type="checkbox" name="remove-{{ source.invite_source_id }}" />
+            <input type="checkbox" name="remove-{{ source.invite_source_id }}">
     {% else %}
             <i>in use</i>
     {% endif %}
@@ -32,13 +32,13 @@
     <tr>
 {% endfor %}
     </table>
-    <br />
-    New name: <input type="text" length="40" name="name" />
-    <br />
-    <br />
-    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-    <input type="hidden" name="action" value="invite_source_config" />
-    <input type="submit" value="Update" />
+    <br>
+    New name: <input type="text" length="40" name="name">
+    <br>
+    <br>
+    <input type="hidden" name="auth" value="{{ viewer.auth }}">
+    <input type="hidden" name="action" value="invite_source_config">
+    <input type="submit" value="Update">
     </form>
     </div>
 </div>

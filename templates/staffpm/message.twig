@@ -21,7 +21,7 @@
 {% endif %}
     </div>
 </div>
-<br />
+<br>
 <div id="inbox">
 {% for message in pm.thread %}
     <div class="box vertical_space" id="post{{ message.id }}">
@@ -44,13 +44,13 @@
 {%  if pm.inProgress %}
                 {{ textarea.preview|raw }}
                 {{ textarea.field|raw }}
-                <br />
+                <br>
 {%  endif %}
 {% if viewer.isFLS %}
                 {{- dom.click('#to-staff', "location.href='staffpm.php?action=assign&to=staff&convid=" ~ pm.id ~ "';") -}}
                 {{- dom.click('#to-fmod', "location.href='staffpm.php?action=assign&to=forum&convid=" ~ pm.id ~ "';") -}}
-                <input type="button" id="to-staff" value="Assign to staff" />
-                <input type="button" id="to-fmod" value="Assign to forum staff" />
+                <input type="button" id="to-staff" value="Assign to staff">
+                <input type="button" id="to-fmod" value="Assign to forum staff">
 {% elseif viewer.isStaff %}
                 <select id="assign_to" name="assign">
                     <optgroup label="User classes">
@@ -70,27 +70,27 @@
 {%  endfor %}
                     </optgroup>
                 </select>
-                <input type="button" id="assign" value="Assign" />
+                <input type="button" id="assign" value="Assign">
 {% endif %}
 
 {% if not pm.inProgress %}
                 {{- dom.click('#unresolve', "location.href='staffpm.php?action=unresolve&id=" ~ pm.id ~ "';") -}}
-                <input type="button" id="unresolve" value="Unresolve" />
+                <input type="button" id="unresolve" value="Unresolve">
 {% else %}
 {%  if viewer.isStaffPMReader %}
-                <input type="button" id="common" title="Create, edit and use canned replies" value="Common answers" />
+                <input type="button" id="common" title="Create, edit and use canned replies" value="Common answers">
 {%  endif %}
                 {{ textarea.button|raw }}
-                <input type="submit" value="Reply" />
-                <label><input type="checkbox" name="resolve" /> Resolve?</label>
+                <input type="submit" value="Reply">
+                <label><input type="checkbox" name="resolve"> Resolve?</label>
 {% endif %}
-                <input type="hidden" name="action" value="takepost" />
-                <input type="hidden" name="convid" value="{{ pm.id }}" id="convid" />
+                <input type="hidden" name="action" value="takepost">
+                <input type="hidden" name="convid" value="{{ pm.id }}" id="convid">
             </form>
 
 {% if viewer.isStaffPMReader %}
 {%  if pm.inProgress %}
-    <br />
+    <br>
     <div id="common_answers" class="hidden">
         <h3>Retrieve a common answer for the reply</h3>
         <div class="pad">
@@ -100,9 +100,9 @@
                 <option value="{{ answer.id }}">{{ answer.name }}</option>
 {%      endfor %}
             </select>
-            <input type="button" id="common-ans-set" title="Use this message as the basis for your reply" value="Use this draft" />
+            <input type="button" id="common-ans-set" title="Use this message as the basis for your reply" value="Use this draft">
         </div>
-        <br />
+        <br>
         <div class="box vertical_space">
             <h3>Answer preview</h3>
             <div id="common_answers_body" class="body">Select an answer from the drop-down to view it.</div>

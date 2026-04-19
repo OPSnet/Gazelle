@@ -8,7 +8,7 @@
     <tr>
         <td class="label">Warned:</td>
         <td>
-            <label><input type="checkbox" name="Warned"{{ checked(user.isWarned) }} />
+            <label><input type="checkbox" name="Warned"{{ checked(user.isWarned) }}>
             {%- if user.isWarned %} until {{ user.warningExpiry }}{% endif %}</label>
         </td>
     </tr>
@@ -54,7 +54,7 @@
     <tr>
         <td class="label tooltip" title="This message *will* be sent to the user in the warning PM!">Warning reason:</td>
         <td>
-            <input type="text" class="wide_input_text" name="WarnReason" />
+            <input type="text" class="wide_input_text" name="WarnReason">
         </td>
     </tr>
 </table>

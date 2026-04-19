@@ -76,10 +76,10 @@ div#preview {display: none;}
     <div class="thin">
         <h3>Response</h3>
         <div class="box pad">
-            <a onclick="toggle_display('preview')" href="javascript:void(0)">Toggle Preview</a><br />
+            <a onclick="toggle_display('preview')" href="javascript:void(0)">Toggle Preview</a><br>
             <div id="preview">
                 <iframe style="width: 100%; height: 600px;" srcdoc="<?= html_escape($response['response']) ?>"></iframe>
-            </div><br />
+            </div><br>
             <div>
 <?php
 if (str_contains($response['response'], '<html')) {
@@ -95,8 +95,8 @@ var_dump($response)
 <div class="thin box pad">
     <h3>Manual</h3>
     <form class="send_form" action="" method="post">
-        <input type="hidden" name="action" value="referral_sandbox" />
-        <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
+        <input type="hidden" name="action" value="referral_sandbox">
+        <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>">
         <table class="layout">
             <tbody>
                 <tr>
@@ -104,7 +104,7 @@ var_dump($response)
                         <label for="url">URL</label>
                     </td>
                     <td>
-                        <input style="width: 98%;" type="text" name="url" value="<?=$url?>" />
+                        <input style="width: 98%;" type="text" name="url" value="<?=$url?>">
                     </td>
                 </tr>
                 <tr>
@@ -128,12 +128,12 @@ var_dump($response)
                         <label for="post">POST</label>
                     </td>
                     <td>
-                        <input type="checkbox" name="post"<?=$post ? ' checked="checked"' : ""?> />
+                        <input type="checkbox" name="post"<?=$post ? ' checked' : ""?>>
                     </td>
                 </tr>
             </tbody>
         </table>
-        <input type="submit" value="Submit" />
+        <input type="submit" value="Submit">
     </form>
 </div>
 <div class="thin box pad">
@@ -147,8 +147,8 @@ var_dump($response)
 <?php } else { ?>
     <h3>Auto</h3>
     <form class="send_form" action="" method="post">
-        <input type="hidden" name="action" value="referral_sandbox" />
-        <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>" />
+        <input type="hidden" name="action" value="referral_sandbox">
+        <input type="hidden" name="auth" value="<?= $Viewer->auth() ?>">
         <table class="layout">
             <tbody>
                 <tr>
@@ -156,7 +156,7 @@ var_dump($response)
                         <label for="url">URL</label>
                     </td>
                     <td>
-                        <input style="width: 98%;" type="text" name="url" value="<?=$url?>" />
+                        <input style="width: 98%;" type="text" name="url" value="<?=$url?>">
                     </td>
                 </tr>
                 <tr>
@@ -169,7 +169,7 @@ var_dump($response)
         $id = $account["ID"];
 ?>
                         <label for="<?=$id?>"><?=$account["Site"]?></label>
-                        <input id="<?=$id?>" type="radio" name="account" value="<?=$id?>" />
+                        <input id="<?=$id?>" type="radio" name="account" value="<?=$id?>">
 <?php } ?>
                     </td>
                 </tr>
@@ -186,12 +186,12 @@ var_dump($response)
                         <label for="post">POST</label>
                     </td>
                     <td>
-                        <input type="checkbox" name="post"<?=$post ? ' checked="checked"' : ""?> />
+                        <input type="checkbox" name="post"<?=$post ? ' checked' : ""?>>
                     </td>
                 </tr>
             </tbody>
         </table>
-        <input type="submit" value="Submit" />
+        <input type="submit" value="Submit">
     </form>
 <?php } ?>
 </div>

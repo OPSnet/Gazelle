@@ -12,15 +12,15 @@
         <h3><a href="wiki.php">Wiki</a> › Edit › <a href="{{ article.location }}">{{ article.title }}</a></h3>
 {% endif %}
         <form class="create_form" name="wiki_article" action="wiki.php" method="post">
-            <input type="hidden" name="action" value="{{ action }}" />
-            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+            <input type="hidden" name="action" value="{{ action }}">
+            <input type="hidden" name="auth" value="{{ viewer.auth }}">
 {% if article %}
-            <input type="hidden" name="id" value="{{ article.id }}" />
-            <input type="hidden" name="revision" value="{{ article.revision }}" />
+            <input type="hidden" name="id" value="{{ article.id }}">
+            <input type="hidden" name="revision" value="{{ article.revision }}">
 {% endif %}
             <div class="pad">
                 <h3>Title</h3>
-                <input type="text" name="title" size="92" maxlength="100" value="{{ article.title }}" /><br /><br />
+                <input type="text" name="title" size="92" maxlength="100" value="{{ article.title }}"><br><br>
                 <h3>Contents</h3>
                 {{ body.field|raw }}
                 {{ body.preview|raw }}
@@ -33,7 +33,7 @@
                 </p>
 {% endif %}
                 <p>{{ body.button|raw }}
-                    <input type="submit" value="Submit" />
+                    <input type="submit" value="Submit">
                 </p>
             </div>
         </form>

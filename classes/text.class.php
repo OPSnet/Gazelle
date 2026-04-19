@@ -265,7 +265,10 @@ class Text {
             $Str = preg_replace('/(\={2})([^=].*)\1/i', '[inlinesize=7]$2[/inlinesize]', $Str);
         }
 
-        $HTML = nl2br(self::to_html(self::parse($Str), $Rules, $cache, $bucket));
+        $HTML = nl2br(
+            string: self::to_html(self::parse($Str), $Rules, $cache, $bucket),
+            use_xhtml: false,
+        );
 
         if (self::$TOC && $OutputTOC) {
             $HTML = self::parse_toc($Min) . $HTML;
@@ -279,7 +282,10 @@ class Text {
         //Inline links
         $Str = preg_replace('/(?<!(\[url\]|\[url\=|\[img\=|\[img\]))http(s)?:\/\//i', '$1[inlineurl]http$2://', $Str);
 
-        return nl2br(self::raw_text(self::parse($Str)));
+        return nl2br(
+            string: self::raw_text(self::parse($Str)),
+            use_xhtml: false,
+        );
     }
 
     private static function valid_url(string $Str, string $Extension = '', bool $Inline = false): int|false {
@@ -883,7 +889,7 @@ class Text {
                         $Str .= '<span style="text-decoration: line-through;">' . self::to_html($Block['Val'], $Rules, $cache, $bucket) . '</span>';
                         break;
                     case 'hr':
-                        $Str .= '<hr />';
+                        $Str .= '<hr>';
                         break;
                     case 'important':
                         $Str .= '<strong class="important_text">' . self::to_html($Block['Val'], $Rules, $cache, $bucket) . '</strong>';
@@ -1038,7 +1044,7 @@ class Text {
                         }
                         $Str .= '<blockquote>' . self::to_html($Block['Val'], $Rules, $cache, $bucket) . '</blockquote>';
                         if (self::$InQuotes == self::$NestsBeforeHide) { //Close quote the deeply nested quote [hide].
-                            $Str .= '</blockquote><br />'; // Ensure new line after quote train hiding
+                            $Str .= '</blockquote><br>'; // Ensure new line after quote train hiding
                         }
                         self::$NoImg--;
                         self::$InQuotes--;
@@ -1063,7 +1069,7 @@ class Text {
                     case 'mature':
                         if (self::$viewer?->option('EnableMatureContent')) {
                             if (!empty($Block['Attr'])) {
-                                $Str .= '<strong class="mature" style="font-size: 1.2em;">Mature content:</strong><strong> ' . $Block['Attr'] . '</strong><br /> <a href="javascript:void(0);" onclick="BBCode.spoiler(this);">Show</a>';
+                                $Str .= '<strong class="mature" style="font-size: 1.2em;">Mature content:</strong><strong> ' . $Block['Attr'] . '</strong><br> <a href="javascript:void(0);" onclick="BBCode.spoiler(this);">Show</a>';
                                 $Str .= '<blockquote class="hidden spoiler">' . self::to_html($Block['Val'], $Rules, $cache, $bucket) . '</blockquote>';
                             } else {
                                 $Str .= '<strong>Use of the [mature] tag requires a description.</strong> The correct format is as follows: <strong>[mature=description] ...content... [/mature]</strong>, where "description" is a mandatory description of the post. Misleading descriptions will be penalized. For further information on our mature content policies, please refer to this <a href="wiki.php?action=article&amp;id=1063">wiki</a>.';
@@ -1266,7 +1272,7 @@ class Text {
         if (count(self::$ProcessedSmileys) == 0 && count(self::$Smileys) > 0) {
             foreach (self::$Smileys as $Key => $Val) {
                 self::$ProcessedSmileys[$Key] = '<img border="0" src="'
-                    . STATIC_SERVER . "/common/smileys/{$Val}\" />";
+                    . STATIC_SERVER . "/common/smileys/{$Val}\">";
             }
             reset(self::$ProcessedSmileys);
         }

@@ -10,7 +10,7 @@
 {%  set uploaded = friend.user.uploadedSize %}
 {%  set downloaded = friend.user.downloadedSize %}
 <form class="manage_form" name="friends" action="friends.php" method="post">
-    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+    <input type="hidden" name="auth" value="{{ viewer.auth }}">
     <table class="friends_table vertical_margin">
         <tr class="colhead">
             <td colspan="{{ allspan }}">
@@ -36,13 +36,13 @@
             <td valign="top">{{ friend.user|avatar(viewer)|raw }}</td>
 {%  endif %}
             <td valign="top">
-                <input type="hidden" name="friendid" value="{{ friend.user.id }}" />
+                <input type="hidden" name="friendid" value="{{ friend.user.id }}">
                 <textarea name="comment" rows="4" cols="70">{{ friend.comment }}</textarea>
-                <br /> <input type="submit" name="action" value="Save notes" />
+                <br> <input type="submit" name="action" value="Save notes">
             </td>
             <td class="left" valign="top">
                 <a href="inbox.php?action=compose&amp;toid={{ friend.user.id }}" class="brackets">Send PM</a>
-                <br /><br /><br /><br /><input type="submit" name="action" value="Unfriend" />
+                <br><br><br><br><input type="submit" name="action" value="Unfriend">
             </td>
         </tr>
     </table>

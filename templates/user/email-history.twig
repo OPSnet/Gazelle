@@ -30,7 +30,7 @@
 
 {% for r in user.history.emailDuplicate %}
 {%  if loop.first %}
-<br />
+<br>
 <div class="header">
 <h3>Duplicate email addresses used</h3>
 </div>
@@ -62,9 +62,9 @@
     </tr>
 {%  if loop.last %}
 </table>
-<br />
+<br>
 {%  endif %}
 {% endfor %}
-<br />
+<br>
 </div>
 {{ footer() }}

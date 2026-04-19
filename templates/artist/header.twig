@@ -53,7 +53,7 @@
             <div style="text-align: center; padding: 10px 0px;">
                 <img loading="eager" style="max-width: 220px;" src="{{ artist.image|image_cache }}" alt="artist image"
                      onclick="lightbox.init('{{ artist.image|image_cache }}', 220);"
-                     data-origin-src="{{ artist.image }}" />
+                     data-origin-src="{{ artist.image }}">
             </div>
         </div>
 {% endif %}
@@ -62,10 +62,10 @@
             <ul class="nobullet" style="padding-bottom: 2px">
                 <li>
                     <form class="search_form" name="filelists" action="torrents.php">
-                        <input type="hidden" name="artistname" value="{{ artist.name }}" />
-                        <input type="hidden" name="action" value="advanced" />
-                        <input type="text" autocomplete="off" id="filelist" name="filelist" size="24" placeholder="Find a specific song or track..." spellcheck="false" />
-                        <input type="submit" value="🔎" />
+                        <input type="hidden" name="artistname" value="{{ artist.name }}">
+                        <input type="hidden" name="action" value="advanced">
+                        <input type="text" autocomplete="off" id="filelist" name="filelist" size="24" placeholder="Find a specific song or track..." spellcheck="false">
+                        <input type="submit" value="🔎">
                     </form>
                 </li>
             </ul>

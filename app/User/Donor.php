@@ -317,7 +317,7 @@ class Donor extends \Gazelle\BaseUser {
         if (!$override && !$this->user->propertyVisible($viewer, 'hide_donor_heart')) {
             return '';
         }
-        return "<a target=\"_blank\" href=\"{$this->iconLink()}\"><img class=\"donor_icon tooltip\" src=\"{$this->heartIcon()}\" title=\"{$this->iconHoverText()}\" /></a>";
+        return "<a target=\"_blank\" href=\"{$this->iconLink()}\"><img class=\"donor_icon tooltip\" src=\"{$this->heartIcon()}\" title=\"{$this->iconHoverText()}\"></a>";
     }
 
     /**

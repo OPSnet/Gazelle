@@ -14,7 +14,7 @@
         {% if artist.name != '[unknown]' and category in ['hyped', 'weekly'] and image %}
         <li>
             <a href="artist.php?artistname={{ artist.name }}">
-                <img class="tooltip large_tile" alt="{{ artist.name }}" title="{{ artist.name }}" src="{{ image|image_cache }}" />
+                <img class="tooltip large_tile" alt="{{ artist.name }}" title="{{ artist.name }}" src="{{ image|image_cache }}">
             </a>
         </li>
         {% endif %}

@@ -12,9 +12,9 @@
     No seed locations are reporting. Are your clients seeding and connected?
 {% else %}
     <form class="manage_form" name="seedbox" action="user.php?action=seedbox-view&amp;userid={{ user_id }}" method="post">
-        <input type="hidden" name="action" value="seedbox-view" />
-        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-        <input type="hidden" name="userid" value="{{ user_id }}" />
+        <input type="hidden" name="action" value="seedbox-view">
+        <input type="hidden" name="auth" value="{{ viewer.auth }}">
+        <input type="hidden" name="userid" value="{{ user_id }}">
 
 <div>View seeds on&nbsp;
 {%- for h in seedbox.hostList -%}
@@ -41,7 +41,7 @@
 </select>
     {% endif %}
 {% endfor %}
-<br /><br />
+<br><br>
 Sort by <select name="viewby">
     <option value="{{ constant('\\Gazelle\\User\\Seedbox::VIEW_BY_NAME') }}"{{
         selected(seedbox.viewBy == constant('\\Gazelle\\User\\Seedbox::VIEW_BY_NAME')) }}>release name</option>
@@ -49,8 +49,8 @@ Sort by <select name="viewby">
         selected(seedbox.viewBy == constant('\\Gazelle\\User\\Seedbox::VIEW_BY_PATH')) }}>folder name</option>
 </select>
 </div>
-<br />
-<input type="submit" value="View seeds" />
+<br>
+<input type="submit" value="View seeds">
 </form>
 {% endif %}
 </div>

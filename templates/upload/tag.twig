@@ -12,8 +12,8 @@
             </select>
 {%  endif %}
 {% endfor %}
-            <input type="text" id="tags" name="tags" size="40" value="{{ active_tags }}"{{ autocomplete(user, 'other') }}{{ disabled(is_uploaded) }} />
-            <br />
+            <input type="text" id="tags" name="tags" size="40" value="{{ active_tags }}"{{ autocomplete(user, 'other') }}{{ disabled(is_uploaded) }}>
+            <br>
 {% include 'rules/tag.twig' with {'on_upload': true} %}
         </td>
     </tr>

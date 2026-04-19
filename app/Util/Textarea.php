@@ -16,11 +16,11 @@ class Textarea extends \Gazelle\Base {
         if (!self::$list) {
             return '';
         }
-        return '<script type="text/javascript" src="' . STATIC_SERVER . '/functions/bbcode.js?v='
+        return '<script src="' . STATIC_SERVER . '/functions/bbcode.js?v='
             . filemtime(SERVER_ROOT . '/public/static/functions/bbcode.js')
-            . '"></script><script type="text/javascript" src="' . STATIC_SERVER . '/functions/textareapreview.class.js?v='
+            . '"></script><script src="' . STATIC_SERVER . '/functions/textareapreview.class.js?v='
             . filemtime(SERVER_ROOT . '/public/static/functions/textareapreview.class.js')
-            . "\"></script><script type=\"text/javascript\">document.addEventListener('DOMContentLoaded', () => {"
+            . "\"></script><script>document.addEventListener('DOMContentLoaded', () => {"
             . self::factory()
             . "});</script>";
     }
@@ -106,7 +106,7 @@ class Textarea extends \Gazelle\Base {
      */
     public function button(): string {
         return '<input type="button" class="hidden button_preview_'
-            . $this->id . '" value="Preview" title="Preview text" />';
+            . $this->id . '" value="Preview" title="Preview text">';
     }
 
     /**

@@ -19,11 +19,11 @@
     change. <strong>DO NOT DESELECT EVERYTHING.</strong> If you need further
     clarification, ask a developer before using this tool.</p>
 </div>
-<br />
+<br>
 <form class="manage_form" name="permissions" id="permissionsform" method="post" action="">
-    <input type="hidden" name="action" value="permissions" />
-    <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-    <input type="hidden" name="id" value="{{ user.id }}" />
+    <input type="hidden" name="action" value="permissions">
+    <input type="hidden" name="auth" value="{{ viewer.auth }}">
+    <input type="hidden" name="id" value="{{ user.id }}">
 {% include 'admin/privilege-list.twig'
     with {
         'default': user.privilege.defaultList,

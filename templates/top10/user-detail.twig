@@ -35,7 +35,7 @@
             No users matched the criteria
         </td>
     </tr>
-</table><br />
+</table><br>
 {% else %}
     {% for row in results %}
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
@@ -52,6 +52,6 @@
         <td class="number_column">{{ row.created|time_diff }}</td>
     </tr>
     {% endfor %}
-</table><br />
+</table><br>
 {% endif %}
 

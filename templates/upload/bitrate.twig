@@ -20,8 +20,8 @@
 {% endfor %}
             </select>
             <span id="other_bitrate_span"{{ class_hidden(not other_bitrate) }}>
-                <input type="text" name="other_bitrate" size="5" id="other_bitrate"{% if other_bitrate and bitrate %} value="{{ current }}"{% endif %} onchange="AltBitrate()" />
-                <label><input type="checkbox" id="vbr" name="vbr"{{ checked(vbr) }} /> (VBR)</label>
+                <input type="text" name="other_bitrate" size="5" id="other_bitrate"{% if other_bitrate and bitrate %} value="{{ current }}"{% endif %} onchange="AltBitrate()">
+                <label><input type="checkbox" id="vbr" name="vbr"{{ checked(vbr) }}> (VBR)</label>
             </span>
         </td>
     </tr>

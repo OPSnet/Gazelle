@@ -55,31 +55,31 @@ View::show_header(TOP_TEN_HEADING . " – Voted Groups", ['js' => 'browse,voting
     </div>
 <?php if ($Viewer->permitted('site_advanced_top10')) { ?>
     <form class="search_form" name="votes" action="" method="get">
-        <input type="hidden" name="advanced" value="1" />
-        <input type="hidden" name="type" value="votes" />
+        <input type="hidden" name="advanced" value="1">
+        <input type="hidden" name="type" value="votes">
         <table cellpadding="6" cellspacing="1" border="0" class="layout border" width="100%">
             <tr id="tagfilter">
                 <td class="label">Tags (comma-separated):</td>
                 <td class="ft_taglist">
                     <input type="text" name="tags" size="75" value="<?php if (!empty($_GET['tags'])) {
-echo display_str($_GET['tags']);} ?>" />&nbsp;
-                    <input type="radio" id="rdoAll" name="anyall" value="all"<?=($all ? ' checked="checked"' : '')?> /><label for="rdoAll"> All</label>&nbsp;&nbsp;
-                    <input type="radio" id="rdoAny" name="anyall" value="any"<?=(!$all ? ' checked="checked"' : '')?> /><label for="rdoAny"> Any</label>
+echo display_str($_GET['tags']);} ?>">&nbsp;
+                    <input type="radio" id="rdoAll" name="anyall" value="all"<?=($all ? ' checked' : '')?>><label for="rdoAll"> All</label>&nbsp;&nbsp;
+                    <input type="radio" id="rdoAny" name="anyall" value="any"<?=(!$all ? ' checked' : '')?>><label for="rdoAny"> Any</label>
                 </td>
             </tr>
             <tr id="yearfilter">
                 <td class="label">Year:</td>
                 <td class="ft_year">
                     <input type="text" name="year1" size="4" value="<?php if (!empty($_GET['year1'])) {
-echo display_str($_GET['year1']);} ?>" />
+echo display_str($_GET['year1']);} ?>">
                     to
                     <input type="text" name="year2" size="4" value="<?php if (!empty($_GET['year2'])) {
-echo display_str($_GET['year2']);} ?>" />
+echo display_str($_GET['year2']);} ?>">
                 </td>
             </tr>
             <tr>
                 <td colspan="2" class="center">
-                    <input type="submit" value="Filter torrents" />
+                    <input type="submit" value="Filter torrents">
                 </td>
             </tr>
         </table>
@@ -122,9 +122,9 @@ echo display_str($_GET['year2']);} ?>" />
         <td class="number_column nobr">Files</td>
 <?php } ?>
         <td class="number_column nobr">Size</td>
-        <td class="sign snatches"><img src="<?= $urlStem ?>snatched.svg" alt="Snatches" title="Snatches" class="tooltip" /></td>
-        <td class="sign seeders"><img src="<?= $urlStem ?>seeders.svg" alt="Seeders" title="Seeders" class="tooltip" /></td>
-        <td class="sign leechers"><img src="<?= $urlStem ?>leechers.svg" alt="Leechers" title="Leechers" class="tooltip" /></td>
+        <td class="sign snatches"><img src="<?= $urlStem ?>snatched.svg" alt="Snatches" title="Snatches" class="tooltip"></td>
+        <td class="sign seeders"><img src="<?= $urlStem ?>seeders.svg" alt="Seeders" title="Seeders" class="tooltip"></td>
+        <td class="sign leechers"><img src="<?= $urlStem ?>leechers.svg" alt="Leechers" title="Leechers" class="tooltip"></td>
     </tr>
 <?php
 if (count($topVotes) === 0) { ?>
@@ -184,7 +184,7 @@ echo ' [' . $tgroup->year() . ']'; } ?></strong>
                 'class'         => 'torrent',
                 'id'            => $tgroupId,
                 'is_bookmarked' => $bookmark->isBookmarked($tgroup),
-            ]) ?><br />
+            ]) ?><br>
             <span style="white-space: nowrap;">
                 <span class="favoritecount_small tooltip" title="<?=$upVotes . ($upVotes == 1 ? ' upvote' : ' upvotes')?>"><span id="upvotes"><?=number_format($upVotes)?></span> <span class="vote_album_up">&#x25b2;</span></span>
                 &nbsp; &nbsp;
@@ -192,7 +192,7 @@ echo ' [' . $tgroup->year() . ']'; } ?></strong>
                 &nbsp;
                 <span class="favoritecount_small" id="totalvotes"><?=number_format($totalVotes)?></span> Total
             </span>
-            <br />
+            <br>
             <span style="white-space: nowrap;">
                 <span class="tooltip_interactive" title="&lt;span style=&quot;font-weight: bold;&quot;&gt;Score: <?=number_format($score * 100, 4)?>&lt;/span&gt;&lt;br /&gt;&lt;br /&gt;This is the lower bound of the binomial confidence interval &lt;a href=&quot;wiki.php?action=article&amp;id=108&quot;&gt;described here&lt;/a&gt;, multiplied by 100." data-title-plain="Score: <?=number_format($score * 100, 4)?>. This is the lower bound of the binomial confidence interval described in the Favorite Album Votes wiki article, multiplied by 100.">Score: <span class="favoritecount_small"><?=number_format($score * 100, 1)?></span></span>
                 &nbsp; | &nbsp;

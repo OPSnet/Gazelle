@@ -6,7 +6,7 @@
 </div>
 
 <div class="thin">
-<br />
+<br>
 <div class="box pad">
 {% if not current.aotm %}
 There is no current Album of the Month.
@@ -16,7 +16,7 @@ The current Album of the Month is {{ current.aotm.tgroup.link|raw }}
 <b><a class="brackets" href="tools.php?action=featured_album&unfeature=aotm&auth={{ viewer.auth }}">Unfeature</a></b>
 {% endif %}
 </div>
-<br />
+<br>
 
 <div class="thin box pad">
 {% if not current.showcase %}
@@ -27,28 +27,28 @@ The current Showcase is {{ current.showcase.tgroup.link|raw }}
 <b><a class="brackets" href="tools.php?action=featured_album&unfeature=showcase&auth={{ viewer.auth }}">Unfeature</a></b>
 {% endif %}
 </div>
-<br />
+<br>
 
 <div class="box pad">
 <form class="create_form" name="album" method="post" action="">
     <div class="pad">
-        <input type="hidden" name="action" value="featured_album" />
-        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+        <input type="hidden" name="action" value="featured_album">
+        <input type="hidden" name="auth" value="{{ viewer.auth }}">
         <h3>Torrent Group to feature</h3>
-        (enter a torrent group ID or URL)<br />
-        <input type="text" name="groupid" />
-        <br /><br />
+        (enter a torrent group ID or URL)<br>
+        <input type="text" name="groupid">
+        <br><br>
         <h3>Front page title</h3>
-        This is the title that will appear front page annoucement (the title of the forum thread will be the name of the torrent group)<br />
-        <input type="text" name="title" size="60" />
-        <br /><br />
+        This is the title that will appear front page annoucement (the title of the forum thread will be the name of the torrent group)<br>
+        <input type="text" name="title" size="60">
+        <br><br>
         <h3>Body</h3>
         {{ body.emit|raw }}
-        <br /><br />
+        <br><br>
         {{ freeleech(size, unit, leech_type, leech_reason) }}
         {{ news_pitch() }}
-        <br />
-        <input type="submit" name="submit" value="Feature" class="submit" />
+        <br>
+        <input type="submit" name="submit" value="Feature" class="submit">
     </div>
 </form>
 </div>

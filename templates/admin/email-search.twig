@@ -16,7 +16,7 @@
     <li>Email addresses identified: {{ email_list|length|number_format }}</li>
     <li>Matched on site: {{ paginator.total|number_format }}</li>
 </ul>
-<br />
+<br>
 
 {{ paginator.linkbox|raw }}
 
@@ -52,7 +52,7 @@
 <div>no records</div>
 {% endfor %}
 
-<br />
+<br>
 <h3>Historical addresses</h3>
 {% for r in history_page %}
     {% if loop.first %}
@@ -94,7 +94,7 @@
 <div class="box pad">
     <div class="thin">Paste a block of text here containing mail addresses (anything that look
     like xxx@yyy). The code will take of sorting and deduplicating.</div>
-    <br />
+    <br>
     <form action="tools.php?action=email_search&amp;column={{ column }}&amp;direction={{ direction }}{% if email_list %}&amp;emaillist={{ email_list|join(',') }}{% endif %}" method="post">
     {{ text.preview|raw }}
     {{ text.field|raw }}
@@ -110,7 +110,7 @@
         <option value="{{ constant('\\Gazelle\\Search\\Email::DESC') }}"{{ selected(direction == constant('\\Gazelle\\Search\\Email::DESC')) }}>Descending</option>
     </select>
     {{ text.button|raw }}
-    <input type="submit" value="Search" />
+    <input type="submit" value="Search">
     </form>
 </div>
 {{ footer() }}

@@ -21,33 +21,33 @@
 {% for t in task_list %}
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
         <form class="manage_form" name="accounts" action="" method="post">
-            <input type="hidden" name="id" value="{{ t.periodic_task_id }}" />
-            <input type="hidden" name="action" value="periodic" />
-            <input type="hidden" name="mode" value="alter" />
-            <input type="hidden" name="auth" value="{{ viewer.auth }}" />
+            <input type="hidden" name="id" value="{{ t.periodic_task_id }}">
+            <input type="hidden" name="action" value="periodic">
+            <input type="hidden" name="mode" value="alter">
+            <input type="hidden" name="auth" value="{{ viewer.auth }}">
             <td>
-                <input type="text" size="15" name="name" value="{{ t.name }}" />
+                <input type="text" size="15" name="name" value="{{ t.name }}">
             </td>
             <td>
-                <input type="text" size="15" name="classname" value="{{ t.classname }}" />
+                <input type="text" size="15" name="classname" value="{{ t.classname }}">
             </td>
             <td>
-                <input type="text" size="40" name="description" value="{{ t.description }}" />
+                <input type="text" size="40" name="description" value="{{ t.description }}">
             </td>
             <td>
-            <input type="text" size="7" name="interval" value="{{ t.period }}" />
+            <input type="text" size="7" name="interval" value="{{ t.period }}">
             </td>
             <td>
-                <input type="checkbox" name="enabled"{{ checked(t.is_enabled) }} />
+                <input type="checkbox" name="enabled"{{ checked(t.is_enabled) }}>
             </td>
             <td>
-                <input type="checkbox" name="sane"{{ checked(t.is_sane) }} />
+                <input type="checkbox" name="sane"{{ checked(t.is_sane) }}>
             </td>
             <td>
-                <input type="checkbox" name="debug"{{ checked(t.is_debug) }} />
+                <input type="checkbox" name="debug"{{ checked(t.is_debug) }}>
             </td>
             <td>
-                <input type="submit" name="submit" value="Edit" />
+                <input type="submit" name="submit" value="Edit">
             </td>
         </form>
     </tr>

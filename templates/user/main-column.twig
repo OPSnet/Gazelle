@@ -3,10 +3,10 @@
 {% if viewer.isStaff %}
 {%  set initial_hide = viewer.hasAttr('audit-trail-hidden') %}
         <form class="manage_form" name="user" id="form" action="user.php" method="post">
-        <input type="hidden" name="action" value="moderate" />
-        <input type="hidden" name="userid" value="{{ user.id }}" />
-        <input type="hidden" name="auth" value="{{ viewer.auth }}" />
-        <input type="hidden" name="checkpoint" value="{{ user.checkpoint }}" />
+        <input type="hidden" name="action" value="moderate">
+        <input type="hidden" name="userid" value="{{ user.id }}">
+        <input type="hidden" name="auth" value="{{ viewer.auth }}">
+        <input type="hidden" name="checkpoint" value="{{ user.checkpoint }}">
         <div class="box box2" id="staff_notes_box">
             <div class="head">
                 Staff Notes
@@ -39,9 +39,9 @@
 {%      if not (attr.name matches '/^(?:disable|hide|no-pm)-/' or attr.name matches '/-(?:pop|push|trad)$/') %}
 {#      these matched attribute names are handled perfectly well elsewhere #}
                 <li>
-                    <input type="checkbox" name="current-{{ attr.name }}"{{checked(attr.active) }}{{ disabled(true) }} />
+                    <input type="checkbox" name="current-{{ attr.name }}"{{checked(attr.active) }}{{ disabled(true) }}>
                     <label>
-                        <input type="checkbox" name="attr-{{ attr.name }}"{{ checked(attr.active) }} />
+                        <input type="checkbox" name="attr-{{ attr.name }}"{{ checked(attr.active) }}>
                         <span title="{{ attr.name }}">{{ attr.description }}</span>
                     </label>
                 </li>
@@ -72,7 +72,7 @@
 {%              if seen == 0 %}
             <tr>
                 <td class="label">Userclass:</td>
-                <td>Currently {{ user.userclassName }}<br />
+                <td>Currently {{ user.userclassName }}<br>
                     Change to:
                     <select name="Class">
                         <option value="">Unchanged</option>
@@ -130,19 +130,19 @@
 <tr>
     <td class="label">Reset:</td>
     <td>
-        <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="ResetRatioWatch" id="ResetRatioWatch" />
+        <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="ResetRatioWatch" id="ResetRatioWatch">
         <label for="ResetRatioWatch">Ratio watch</label></span>
-        <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="ResetPasskey" id="ResetPasskey" />
+        <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="ResetPasskey" id="ResetPasskey">
         <label for="ResetPasskey">Passkey</label></span>
-        <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="ResetAuthkey" id="ResetAuthkey" />
+        <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="ResetAuthkey" id="ResetAuthkey">
         <label for="ResetAuthkey">Authkey</label></span>
-        <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="ResetIPHistory" id="ResetIPHistory" />
+        <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="ResetIPHistory" id="ResetIPHistory">
         <label for="ResetIPHistory">IP history</label></span>
-        <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="ResetEmailHistory" id="ResetEmailHistory" />
+        <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="ResetEmailHistory" id="ResetEmailHistory">
         <label for="ResetEmailHistory">Email history</label></span>
-        <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="ResetSnatchList" id="ResetSnatchList" />
+        <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="ResetSnatchList" id="ResetSnatchList">
         <label for="ResetSnatchList">Snatch list</label></span>
-        <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="ResetDownloadList" id="ResetDownloadList" />
+        <span style="white-space: nowrap; padding-right: 15px"><input type="checkbox" name="ResetDownloadList" id="ResetDownloadList">
         <label for="ResetDownloadList">Download list</label></span>
     </td>
 </tr>
@@ -207,7 +207,7 @@
     <tr>
         <td>&nbsp;</td>
         <td>
-            <input type="submit" value="Save changes" />
+            <input type="submit" value="Save changes">
         </td>
     </tr>
 </table>

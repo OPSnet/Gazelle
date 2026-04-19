@@ -1,9 +1,9 @@
 <form class="manage_form" name="user" method="post" id="linkedform" action="">
-    <input type="hidden" name="action" value="dupes" />
-    <input type="hidden" name="dupeaction" value="update" />
-    <input type="hidden" name="userid" value="{{ user.id }}" />
-    <input type="hidden" id="auth" name="auth" value="{{ viewer.auth }}" />
-    <input type="hidden" id="form_comment_hash" name="form_comment_hash" value="{{ hash }}" />
+    <input type="hidden" name="action" value="dupes">
+    <input type="hidden" name="dupeaction" value="update">
+    <input type="hidden" name="userid" value="{{ user.id }}">
+    <input type="hidden" id="auth" name="auth" value="{{ viewer.auth }}">
+    <input type="hidden" id="form_comment_hash" name="form_comment_hash" value="{{ hash }}">
     <div class="box box2" id="l_a_box">
         <div class="head">
             {{- dom.click('#view-linked', "$('.linkedaccounts').gtoggle(); return false;") -}}
@@ -51,11 +51,11 @@
         </table>
         <div class="pad hidden linkedaccounts">
             <label>Link this user with:
-            <input type="text" name="target" id="target" />
-            </label> @username or numeric id are recognized.<br />
+            <input type="text" name="target" id="target">
+            </label> @username or numeric id are recognized.<br>
             <label for="update_note">Update staff notes</label>
-            <input type="checkbox" name="update_note" id="update_note" checked /><br />
-            <input type="submit" value="Update" />
+            <input type="checkbox" name="update_note" id="update_note" checked><br>
+            <input type="submit" value="Update">
         </div>
     </div>
 </form>

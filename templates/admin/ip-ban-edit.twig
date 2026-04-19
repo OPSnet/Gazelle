@@ -4,10 +4,10 @@
 </div>
 <div class="pad">
 <form method="post">
-<input type="submit" name="toggle" value="{% if ban.isActive %}Disable{% else %}Enable{% endif %} Ban" />
-<input type="hidden" name="action" value="ip_ban" />
-<input type="hidden" name="id" value="{{ ban.id }}" />
-<input type="hidden" name="toggle" value="{{ ban.isActive ? 1 : 0 }}" />
+<input type="submit" name="toggle" value="{% if ban.isActive %}Disable{% else %}Enable{% endif %} Ban">
+<input type="hidden" name="action" value="ip_ban">
+<input type="hidden" name="id" value="{{ ban.id }}">
+<input type="hidden" name="toggle" value="{{ ban.isActive ? 1 : 0 }}">
 <div class="pad">Disabling a ban allows connections from this IP address once more,
 however, subsequent user activity may cause it to be reactivated in the
 future.</div>

@@ -6,7 +6,7 @@
 <div align="center">
     <a class="brackets tooltip" href="" title="Show/Hide Search" onclick="$('#search_form').gtoggle(); return false;">Search</a>
     <a class="brackets tooltip" href="" title="Show/Hide Search" onclick="$('#scores').gtoggle(); return false;">Scores</a>
-</div><br />
+</div><br>
 <div class="thin">
 {% for r in total %}
     {% if loop.first %}
@@ -25,17 +25,17 @@
     {% endif %}
 {% endfor %}
     <form action="" method="GET" id="search_form"{% if not search %} class="hidden"{% endif %}>
-        <input type="hidden" name="action" value="enable_requests" />
-        <input type="hidden" name="view" value="{{ view }}" />
-        <input type="hidden" name="search" value="1" />
+        <input type="hidden" name="action" value="enable_requests">
+        <input type="hidden" name="view" value="{{ view }}">
+        <input type="hidden" name="search" value="1">
         <table>
             <tr>
                 <td class="label">Username</td>
-                <td><input type="text" name="username" value="{{ username }}" /></td>
+                <td><input type="text" name="username" value="{{ username }}"></td>
             </tr>
             <tr>
                 <td class="label">Handled By</td>
-                <td><input type="text" name="handled_username" value="{{ admin }}" /></td>
+                <td><input type="text" name="handled_username" value="{{ admin }}"></td>
             </tr>
             <tr>
                 <td class="label">Outcome</td>
@@ -50,7 +50,7 @@
             </tr>
             <tr>
                 <td class="label">Include Checked</td>
-                <td><input type="checkbox" name="show_checked"{{ checked(show_checked) }} /></td>
+                <td><input type="checkbox" name="show_checked"{{ checked(show_checked) }}></td>
             </tr>
             <tr>
                 <td class="label">Order By</td>
@@ -67,7 +67,7 @@
                 </td>
             </tr>
             <tr>
-                <td colspan=2><input type="submit" value="Search" /></td>
+                <td colspan=2><input type="submit" value="Search"></td>
             </tr>
         </table>
     </form>
@@ -80,18 +80,18 @@
     Before proceeding with an enable, you should perform searches on the IP address
     used and the given email address to verify that someone is not trying to take
     over an inactive account.
-    <br /><br />Denying a request will send an email to the address they specified,
+    <br><br>Denying a request will send an email to the address they specified,
     inviting them to come to IRC. Discarding a request does not send anything and
     also halts the workflow.
-    <br /><br />Approbing a request sends them an email which contains a special link to
+    <br><br>Approbing a request sends them an email which contains a special link to
     allow them to log back in and reenable their account with no further
     intervention required on your part. In other words, they are not automatically
     reenabled, they still need to follow up on the email
     </div>
-    <br />
+    <br>
     <table width="100%">
         <tr class="colhead">
-            <td class="center"><input type="checkbox" id="check_all" /></td>
+            <td class="center"><input type="checkbox" id="check_all"></td>
             <td>Username</td>
             <td class="nobr">Email Address</td>
             <td class="nobr">IP Address</td>
@@ -107,7 +107,7 @@
         <tr class="row{{ cycle(['a', 'b'], loop.index0) }}" id="row_{{ r.id }}">
             <td class="center">
     {% if r.isPending %}
-                <input type="checkbox" id="multi" data-id="{{ r.id }}" />
+                <input type="checkbox" id="multi" data-id="{{ r.id }}">
     {% endif %}
             </td>
             <td>{{ r.user.id|user_url }}</td>
@@ -119,11 +119,11 @@
             <td>{{ r.admin_user_id|user_url }}</td>
             <td>{{ r.handled }}</td>
     {% endif %}
-            <td><input class="inputtext" type="text" id="comment{{ r.id }}" placeholder="Comment" /></td>
+            <td><input class="inputtext" type="text" id="comment{{ r.id }}" placeholder="Comment"></td>
             <td>
-                <input type="submit" id="outcome" value="Approve" data-id="{{ r.id }}" />
-                <input type="submit" id="outcome" value="Reject" data-id="{{ r.id }}" />
-                <input type="submit" id="outcome" value="Discard" data-id="{{ r.id }}" />
+                <input type="submit" id="outcome" value="Approve" data-id="{{ r.id }}">
+                <input type="submit" id="outcome" value="Reject" data-id="{{ r.id }}">
+                <input type="submit" id="outcome" value="Discard" data-id="{{ r.id }}">
             </td>
     {% if show_checked %}
             <td>{{ r.outcomeLabel }}
@@ -142,9 +142,9 @@
     </table>
     {{ paginator.linkbox|raw }}
 <div style="padding-bottom: 11px;">
-    <input type="submit" id="outcome" value="Approve Selected" />
-    <input type="submit" id="outcome" value="Reject Selected" />
-    <input type="submit" id="outcome" value="Discard Selected" />
+    <input type="submit" id="outcome" value="Approve Selected">
+    <input type="submit" id="outcome" value="Reject Selected">
+    <input type="submit" id="outcome" value="Discard Selected">
 </div>
     {% endif %}
 {% else %}

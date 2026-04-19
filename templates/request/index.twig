@@ -50,37 +50,37 @@ Requests
     </div>
     <form class="search_form" name="requests" action="" method="get">
 {%  if search.isBookmarkView %}
-        <input type="hidden" name="action" value="view" />
-        <input type="hidden" name="type" value="requests" />
+        <input type="hidden" name="action" value="view">
+        <input type="hidden" name="type" value="requests">
 {%  elseif type %}
-        <input type="hidden" name="type" value="{{ type }}" />
+        <input type="hidden" name="type" value="{{ type }}">
 {%  endif %}
-        <input type="hidden" name="submit" value="true" />
+        <input type="hidden" name="submit" value="true">
 {%  if user.id != viewer.id %}
-        <input type="hidden" name="userid" value="{{ user.id }}" />
+        <input type="hidden" name="userid" value="{{ user.id }}">
 {%  endif %}
         <table cellpadding="6" cellspacing="1" border="0" class="layout border" width="100%">
             <tr id="search_terms">
                 <td class="label">Search terms:</td>
                 <td>
-                    <input type="search" name="search" size="75" value="{{ search_text }}" />
-                    <br />
-                    <br />
+                    <input type="search" name="search" size="75" value="{{ search_text }}">
+                    <br>
+                    <br>
                     Tips on searching: {{ "[[searchfulltext]]" | bb_format }}
                 </td>
             </tr>
             <tr id="tagfilter">
                 <td class="label">Tags (comma-separated):</td>
                 <td>
-                    <input type="search" name="tags" id="tags" size="60" value="{{ search.tagList.list }}"{{ autocomplete(user, 'other') }} />&nbsp;
-                    <label><input type="radio" name="tag_mode" value="any"{{ checked(search.tagList.mode.value == 'any') }} /> Any</label>&nbsp;&nbsp;
-                    <label><input type="radio" name="tag_mode" value="all"{{ checked(search.tagList.mode.value == 'all') }} /> All</label>
+                    <input type="search" name="tags" id="tags" size="60" value="{{ search.tagList.list }}"{{ autocomplete(user, 'other') }}>&nbsp;
+                    <label><input type="radio" name="tag_mode" value="any"{{ checked(search.tagList.mode.value == 'any') }}> Any</label>&nbsp;&nbsp;
+                    <label><input type="radio" name="tag_mode" value="all"{{ checked(search.tagList.mode.value == 'all') }}> All</label>
                 </td>
             </tr>
             <tr id="include_filled">
                 <td class="label"><label for="include_filled_box">Include filled:</label></td>
                 <td>
-                    <input type="checkbox" id="include_filled_box" name="show_filled"{{ checked(search.isShowFilled) }} />
+                    <input type="checkbox" id="include_filled_box" name="show_filled"{{ checked(search.isShowFilled) }}>
                 </td>
             </tr>
         </table>
@@ -90,12 +90,12 @@ Requests
                 <td>
                     <label><input type="checkbox" id="toggle_cat" {{
                         checked(filter_cat|length in [0, constant('CATEGORY')|length])
-                       }} /> All</label>
-                    <br />
+                       }}> All</label>
+                    <br>
 {%  for key, name in constant('CATEGORY') %}
                     <label class="req-choice">
                     <input type="checkbox" name="filter_cat[]" id="cat_{{ key }}" value="{{ key }}"{{
-                        checked(not filter_cat or key in filter_cat or initial) }} /> {{ name }}</label>
+                        checked(not filter_cat or key in filter_cat or initial) }}> {{ name }}</label>
 {%  endfor %}
                 </td>
             </tr>
@@ -105,13 +105,13 @@ Requests
                 <td>
                     <label><input type="checkbox" id="toggle_releases" {{
                         checked(search.releaseTypeList|length in [0, release_types|length])
-                       }} /> All</label>
-                    <br />
+                       }}> All</label>
+                    <br>
 {%  for key, name in release_types %}
                     <label class="req-choice">
                     <input type="checkbox" name="releases[]" value="{{ key }}" id="release_{{ key }}"{{
                         checked(not search.releaseTypeList or key in search.releaseTypeList or initial)
-                        }} /> {{ name }}</label>
+                        }}> {{ name }}</label>
 {%  endfor %}
                 </td>
             </tr>
@@ -121,18 +121,18 @@ Requests
                 <td>
                     <label><input type="checkbox" id="toggle_media" {{
                         checked(not search.mediaList or search.mediaList.list|length in [0, constant('MEDIA')|length])
-                    }} />
+                    }}>
                     All</label>
                     <label class="tooltip" title="Requests that also specify other media will be excluded from the results">
                     <input type="checkbox" id="media_strict" name="media_strict"{{
-                        checked(media_strict) }} />
+                        checked(media_strict) }}>
                     Only specified</label>
-                    <br />
+                    <br>
 {%  for key, name in constant('MEDIA') %}
                     <label class="req-choice">
                     <input type="checkbox" name="media[]" value="{{ key }}" id="media_{{ key }}"{{
                         checked(not search.mediaList or key in search.mediaList.list or initial)
-                        }} /> {{ name }}</label>
+                        }}> {{ name }}</label>
 {%  endfor %}
                 </td>
             </tr>
@@ -142,18 +142,18 @@ Requests
                 <td>
                     <label><input type="checkbox" id="toggle_formats" {{
                         checked(not search.formatList or search.formatList.list|length in [0, constant('FORMAT')|length])
-                    }} />
+                    }}>
                     All</label>
                     <label class="tooltip" title="Requests that also specify other formats will be excluded from the results">
                     <input type="checkbox" id="formats_strict" name="formats_strict"{{
-                        checked(format_strict) }} />
+                        checked(format_strict) }}>
                     Only specified</label>
-                    <br />
+                    <br>
 {%  for key, name in constant('FORMAT') %}
                     <label class="req-choice">
                     <input type="checkbox" name="formats[]" value="{{ key }}" id="format_{{ key }}" {{
                         checked(not search.formatList or key in search.formatList.list or initial)
-                        }} /> {{ name }}</label>
+                        }}> {{ name }}</label>
 {%  endfor %}
                 </td>
             </tr>
@@ -163,25 +163,25 @@ Requests
                 <td>
                     <label><input type="checkbox" id="toggle_bitrates" {{
                         checked(not search.encodingList or search.encodingList.list|length in [0, constant('ENCODING')|length])
-                    }} />
+                    }}>
                     All</label>
                     <label class="tooltip" title="Requests that also specify other encodings will be excluded from the results">
                     <input type="checkbox" id="bitrates_strict" name="bitrates_strict"{{
-                        checked(encoding_strict) }} />
+                        checked(encoding_strict) }}>
                     Only specified</label>
-                    <br />
+                    <br>
 {%  for key, name in constant('ENCODING') %}
                     <label class="req-choice">
                     <input type="checkbox" name="bitrates[]" value="{{ key }}" id="bitrate_{{ key }}"{{
                         checked(not search.encodingList or key in search.encodingList.list or initial)
-                        }} /> {{ name }}</label>
+                        }}> {{ name }}</label>
 {%  endfor %}
                 </td>
             </tr>
 
             <tr>
                 <td colspan="2" class="center">
-                    <input type="submit" value="Search requests" />
+                    <input type="submit" value="Search requests">
 {%  set total = search.total %}
                     <h5>{{ total }} request{{ total|plural }} matched</h5>
                 </td>
