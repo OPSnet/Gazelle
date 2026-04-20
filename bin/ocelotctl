@@ -177,7 +177,29 @@ function announce(array $arglist): void {
     }
     $decoder = new \OrpheusNET\BencodeTorrent\Bencode();
     $decoder->decodeString($curl->result());
-    show($decoder->getData());
+    $result = $decoder->getData();
+
+    $peerlen = 6;
+    $offset  = 0;
+    $peer    = [];
+    while ($offset < strlen($result['peers'])) {
+        $chunk = substr($result['peers'], $offset, $peerlen);
+        $unpacked = unpack('N1ip/n1port', $chunk);
+        $peer[] = long2ip($unpacked['ip']) . ':' . $unpacked['port'];
+        $offset += $peerlen;
+    }
+    $swarm = implode(', ', $peer);
+    $total = count($peer);
+    print <<<EOS
+complete     : {$result['complete']}
+downloaded   : {$result['downloaded']}
+incomplete   : {$result['incomplete']}
+interval     : {$result['interval']}
+min interval : {$result['min interval']}
+peer total   : {$total}
+peers        : {$swarm}
+
+EOS;
 }
 
 /**
