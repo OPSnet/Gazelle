@@ -22,11 +22,6 @@ class LogTest extends TestCase {
             delete from audit_trail_tgroup where note ~ $1
             ", '^' . self::PREFIX
         );
-        $db = DB::DB();
-        $db->prepared_query("
-            DELETE FROM group_log WHERE Info REGEXP ?
-            ", '^' . self::PREFIX
-        );
         if (isset($this->user)) {
             Helper::removeUser($this->user);
         }
