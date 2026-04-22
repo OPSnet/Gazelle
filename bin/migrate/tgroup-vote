@@ -19,16 +19,33 @@ $n = $pg->query("
 ");
 echo "$n user votes removed\n";
 
-$n = $pg->query(<<<END_SQL
-    insert into tgroup_vote (id_tgroup, id_user, created, upvote)
-    select "GroupID",
-        "UserID",
-        "Time",
-        case when upvote = 1 then true else false end
-    from relay.users_votes
-END_SQL
-);
-echo "$n user votes inserted\n";
+$n      = 0;
+$offset = 0;
+$chunk  = 10000;
+while (true) {
+    $inserted = $pg->query('
+        insert into tgroup_vote (id_tgroup, id_user, created, upvote)
+        select "GroupID",
+            "UserID",
+            "Time",
+            case when upvote = 1 then true else false end
+        from relay.users_votes
+        where "GroupID" > $1
+        order by "GroupID"
+        limit $2
+        ', $offset, $chunk
+    );
+    if (!$inserted) {
+        break;
+    }
+    $n += $inserted;
+    $offset = $pg->scalarex('
+        select max(id_tgroup) from tgroup_vote
+    ');
+    echo ".";
+}
+
+echo "\n$n user votes inserted\n";
 
 $n = $pg->query(<<<END_SQL
     insert into tgroup_vote_summary (id_tgroup, total, upvote)

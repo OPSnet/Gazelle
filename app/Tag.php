@@ -20,11 +20,11 @@ class Tag extends BaseObject {
     }
 
     public function link(): string {
-        return sprintf('<a href="%s">%s</a>', $this->url(), display_str($this->name()));
+        return sprintf('<a href="%s">%s</a>', $this->url(), html_escape($this->name()));
     }
 
     public function location(): string {
-        return 'torrents.php?taglist=' . $this->name();
+        return "torrents.php?taglist={$this->name()}";
     }
 
     public function info(): array {
@@ -79,6 +79,12 @@ class Tag extends BaseObject {
             WHERE ID = ?
             ", $affected, $this->id
         );
+        $this->pg()->query("
+            update tag set
+                usage = usage + $1
+            where id_tag = $2
+            ", $affected, $this->id
+        );
         $request->flush();
         return $affected;
     }
@@ -113,8 +119,8 @@ class Tag extends BaseObject {
                    (TagID, GroupID, UserID, PositiveVotes)
             VALUES (?,     ?,       ?,      ?)
             ON DUPLICATE KEY UPDATE
-                PositiveVotes = PositiveVotes + 2
-            ", $this->id, $tgroup->id(), $user->id, $weight
+                PositiveVotes = PositiveVotes + ?
+            ", $this->id, $tgroup->id, $user->id, $weight, TGROUP_TAG_UPVOTE
         );
         $affected = self::$db->affected_rows();
         self::$db->prepared_query("
@@ -125,6 +131,14 @@ class Tag extends BaseObject {
 
         );
         self::$db->commit();
+        $this->pg()->scalarex("
+            insert into tgroup_tag
+                   (id_tgroup, id_tag, id_user)
+            values ($1,        $2,     $3)
+            on conflict (id_tgroup, id_tag)
+                do nothing
+            ", $tgroup->id, $this->id, $user->id
+        );
         $tgroup->refresh();
         return $affected;
     }
@@ -169,11 +183,11 @@ class Tag extends BaseObject {
             return 0;
         }
         if ($way == 'down') {
-            $neg = 1;
+            $neg = TGROUP_TAG_DOWNVOTE;
             $pos = 0;
         } else {
             $neg = 0;
-            $pos = 2;
+            $pos = TGROUP_TAG_UPVOTE;
         }
         self::$db->prepared_query("
             UPDATE torrents_tags SET
@@ -187,10 +201,45 @@ class Tag extends BaseObject {
             INSERT INTO torrents_tags_votes
                    (TagID, GroupID, UserID, Way)
             VALUES (?,     ?,       ?,      ?)
-            ", $this->id, $tgroup->id(), $user->id, $way
+            ", $this->id, $tgroup->id, $user->id, $way
         );
         $affected = self::$db->affected_rows();
         self::$db->commit();
+        $prior = $this->pg()->scalarex('
+            select ttv.upvote
+            from tgroup_tag_vote ttv
+            inner join tgroup_tag tt using (id_tgroup_tag)
+            where tt.id_tgroup = $1
+                and tt.id_tag  = $2
+                and tt.id_user = $3
+            ', $tgroup->id, $this->id, $user->id
+        );
+        $vote = $way === "up";
+        if (is_null($prior)) {
+            // they have not yet voted either way
+            $this->pg()->query(<<<END_SQL
+                insert into tgroup_tag_vote
+                    (id_user, upvote, id_tgroup_tag)
+                select $3, $4, id_tgroup_tag
+                from tgroup_tag
+                    where id_tgroup = $1 and id_tag = $2
+                END_SQL,
+                    $tgroup->id, $this->id, $user->id, $vote
+            );
+        } else {
+            // they have recorded an vote already and this is in the
+            // opposite direction, then they are withdrawing their vote.
+            // otherwide do nothing
+            if ($prior !== $vote) {
+                $this->pg()->query('
+                    delete from tgroup_tag_vote
+                    where id_tgroup = $1
+                        and it_tag  = $2
+                        and id_user = $3
+                    ', $tgroup->id, $this->id, $user->id
+                );
+            }
+        }
         $tgroup->flush();
         return $affected;
     }
@@ -221,6 +270,12 @@ class Tag extends BaseObject {
             self::$db->rollback();
             return false;
         }
+        $this->pg()->query("
+            delete from tgroup_tag
+            where id_tgroup = $1
+                and id_tag  = $2
+            ", $tgroup->id, $this->id
+        );
 
         // Was this the last occurrence?
         $inUse = self::$db->scalar("
@@ -236,5 +291,13 @@ class Tag extends BaseObject {
         self::$db->commit();
         $tgroup->refresh();
         return $affected != 0;
+    }
+
+    public function remove(): int {
+        $this->pg()->query("
+            delete from tag where id_tag = $1
+            ", $this->id
+        );
+        return parent::remove();
     }
 }

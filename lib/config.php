@@ -681,6 +681,15 @@ defined('LOGIN_SLEEP_USEC') or define('LOGIN_SLEEP_USEC', 600000);
 // Releases and collages with these tags are hidden by default
 defined('HIDDEN_TAGS') or define('HIDDEN_TAGS', [0]);
 
+// A newly added tgroup tag is created with this score
+defined('TGROUP_TAG_SCORE') or define('TGROUP_TAG_SCORE', 8);
+
+// A user upvote of a tgroup tag adds this to the score
+defined('TGROUP_TAG_UPVOTE') or define('TGROUP_TAG_UPVOTE', 2);
+
+// A user downvote of a tgroup tag removes this from the score
+defined('TGROUP_TAG_DOWNVOTE') or define('TGROUP_TAG_DOWNVOTE', 1);
+
 // Do not report these pages for excessive memory consumption
 defined('IGNORE_PAGE_MAX_MEMORY') or define('IGNORE_PAGE_MAX_MEMORY', ['artist', 'bookmark']);
 

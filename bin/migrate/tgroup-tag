@@ -1,0 +1,61 @@
+#! /usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+namespace Gazelle;
+
+require __DIR__ . '/../../lib/bootstrap.php';
+
+$pg = new DB\Pg(PG_RW_DSN);
+$pg->begin();
+
+$n = $pg->query("
+    delete from tgroup_tag
+");
+echo "$n tgroup tags removed\n";
+
+// first add the tgroup-tag associations
+$n = $pg->query(<<<END_SQL
+    insert into tgroup_tag (id_tgroup, id_tag, id_user)
+    select "GroupID", "TagID", "UserID"
+    from relay.torrents_tags
+END_SQL
+);
+echo "$n tgroup tags inserted\n";
+
+// attribute to the creator synthetic votes for each tag of the tgroup
+$n = $pg->query(<<<END_SQL
+    insert into tgroup_tag_vote (id_tgroup_tag, id_user)
+    select id_tgroup_tag, id_user
+    from tgroup_tag
+END_SQL
+);
+echo "$n tgroup synthetic votes inserted\n";
+
+// then add tag votes by others, ignoring subsequent votes by the creator
+// of the tgroup
+$n = $pg->query(<<<END_SQL
+    with tt as (
+        select id_tgroup_tag, id_tgroup, id_tag
+        from tgroup_tag
+    ),
+    ttv as (
+        select "GroupID" as id_tgroup,
+            "TagID"      as id_tag,
+            "UserID"     as id_user,
+            case when "Way" = 'up' then true else false end
+                         as upvote
+        from relay.torrents_tags_votes
+    )
+    insert into tgroup_tag_vote (id_tgroup_tag, id_user, upvote)
+    select tt.id_tgroup_tag, ttv.id_user, ttv.upvote
+    from tt
+    inner join ttv using (id_tgroup, id_tag)
+    on conflict (id_tgroup_tag, id_user)
+        do nothing
+END_SQL
+);
+echo "$n tgroup tag votes inserted\n";
+
+$pg->commit();

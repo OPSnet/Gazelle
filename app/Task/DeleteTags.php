@@ -10,5 +10,10 @@ class DeleteTags extends \Gazelle\Task {
                 AND NegativeVotes > PositiveVotes
         ");
         $this->processed = self::$db->affected_rows();
+        $this->pg()->query("
+            delete from tgroup_tag
+            where downvote_total > 1
+                and downvote_total > upvote_total
+        ");
     }
 }
