@@ -6,29 +6,26 @@ declare(strict_types=1);
 namespace Gazelle;
 
 if (isset($_FILES['log']) && is_uploaded_file($_FILES['log']['tmp_name'])) {
-    $file    = $_FILES['log'];
-    $isPaste = false;
+    $isPaste  = false;
+    $filename = $_FILES['log']['tmp_name'];
 } elseif (!empty($_POST["pastelog"])) {
-    $fileTmp = tempnam(TMPDIR, 'log_');
-    if ($fileTmp === false) {
+    $isPaste  = true;
+    $filename = tempnam(TMPDIR, 'log_');
+    if ($filename === false) {
         // This will only happen if the directory that TMPDIR points to disappears
         Error404::error('Failed to persist the log file.');
     }
-    file_put_contents($fileTmp, $_POST["pastelog"]);
-    $file = [
-        'tmp_name' => $fileTmp,
-        'name'     => $fileTmp
-    ];
-    $isPaste = true;
+    file_put_contents($filename, $_POST["pastelog"]);
 } else {
     Error400::error('No log file uploaded or file is empty.');
 }
-$logfile = new \Gazelle\Logfile($file['tmp_name'], $file['name']);
-if (isset($fileTmp)) {
-    unlink($fileTmp);
+
+$checker = new Manager\Riplog()->parse($filename);
+if ($isPaste) {
+    unlink($filename);
 }
 
-echo $Twig->render('logchecker/test-report.twig', [
+echo $Twig->render('riplog/test-report.twig', [
     'pasted'  => $isPaste,
-    'logfile' => $logfile,
+    'checker' => $checker,
 ]);

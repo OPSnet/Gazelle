@@ -10,16 +10,15 @@ if (is_null($torrent)) {
     json_error('bad parameters');
 }
 if ($torrent->uploaderId() != $Viewer->id && !$Viewer->permitted('admin_add_log')) {
-    json_error('Not your upload.');
+    json_error('not your upload');
 }
-if (empty($_FILES) || empty($_FILES['logfiles'])) {
+if (!isset($_FILES['logfiles'])) {
     json_error('no log files uploaded');
 }
 
 echo new Json\AddLog(
     $torrent,
-    $Viewer,
-    new LogfileSummary($_FILES['logfiles'], $torrent->logfileHashList()),
+    $_FILES['logfiles'],
 )
     ->setVersion(1)
     ->response();

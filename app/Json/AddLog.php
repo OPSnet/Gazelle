@@ -2,44 +2,34 @@
 
 namespace Gazelle\Json;
 
-use OrpheusNET\Logchecker\Logchecker;
+use Gazelle\Manager\Riplog as RiplogManager;
 
 class AddLog extends \Gazelle\Json {
     public function __construct(
-        protected \Gazelle\Torrent            $torrent,
-        protected \Gazelle\User               $user,
-        protected \Gazelle\LogfileSummary     $logfileSummary,
-        protected \Gazelle\Manager\TorrentLog $torrentLogManager = new \Gazelle\Manager\TorrentLog(),
+        protected \Gazelle\Torrent $torrent,
+        protected array            $uploadList,
+        protected RiplogManager    $riplogManager = new RiplogManager(),
     ) {}
 
     public function payload(): array {
-        if ($this->user->id !== $this->torrent->uploaderId() && !$this->user->permitted('admin_add_log')) {
-            $this->failure('Not the torrent owner or moderator');
-            return [];
-        }
-
-        $logSummaries = [];
-        $checkerVersion = Logchecker::getLogcheckerVersion();
-        foreach ($this->logfileSummary->all() as $logfile) {
-            $this->torrentLogManager->create($this->torrent, $logfile, $checkerVersion);
-            $logSummaries[] = [
-                'score'         => $logfile->score(),
-                'checksum'      => $logfile->checksumState(),
-                'ripper'        => $logfile->ripper(),
-                'ripperVersion' => $logfile->ripperVersion(),
-                'language'      => $logfile->language(),
-                'details'       => $logfile->detailsAsString(),
+        $this->torrent->flush();
+        $summaryList = [];
+        foreach ($this->riplogManager->bulkCreate($this->torrent, $this->uploadList) as $riplog) {
+            $summaryList[] = [
+                'score'         => $riplog->score(),
+                'checksum'      => $riplog->checksumState(),
+                'ripper'        => $riplog->ripper(),
+                'ripperVersion' => $riplog->ripperVersion(),
+                'language'      => $riplog->ripperLanguage(),
+                'details'       => $riplog->report(),
             ];
         }
-        $this->torrent->modifyLogscore();
-        $this->torrent->flush();
-
         return [
             'torrentId'         => $this->torrent->id,
             'score'             => $this->torrent->logScore(),
             'checksum'          => $this->torrent->logChecksum(),
-            'logcheckerVersion' => $checkerVersion,
-            'logSummaries'      => $logSummaries,
+            'logcheckerVersion' => $this->riplogManager->logcheckerVersion(),
+            'logSummaries'      => $summaryList,
         ];
     }
 }

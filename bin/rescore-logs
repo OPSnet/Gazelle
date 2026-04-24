@@ -13,7 +13,6 @@ use OrpheusNET\Logchecker\Logchecker;
 
 require __DIR__ . '/../lib/bootstrap.php';
 
-$dryRun = in_array('--dry-run', $argv);
 $includeAdjusted = in_array('--include-adjusted', $argv);
 
 $limitKey = array_find_key($argv, fn ($val) => $val === '--limit');
@@ -75,47 +74,45 @@ $db->prepared_query("
     LIMIT ? OFFSET ?
 ", ...$args);
 
-$i = 0;
+$riplogMan = new Manager\Riplog();
+$torMan    = new Manager\Torrent();
+
 /** @var Torrent|null */
 $torrent = null;
-
+$i       = 0;
 while (true) {
     $db->set_query_id($queryId);
     $row = $db->next_row(MYSQLI_NUM);
     if (!$row) {
-        if (!$dryRun) {
-            $torrent?->modifyLogscore();
-        }
         break;
     }
 
     [$torrentId, $logId, $score] = $row;
 
-    if (!$torrent || $torrent->id() !== $torrentId) {
-        if (!$dryRun) {
-            $torrent?->modifyLogscore();
+    if ($torrent->id !== $torrentId) {
+        if ($torrent) {
+            $riplogMan->refreshTorrent($torrent);
         }
-        $torrent = new Torrent($torrentId);
-        $rescore = false;
+        $torrent = $torMan->findById($torrentId);
+        if (!$torrent) {
+            continue;
+        }
     }
 
     $logpath = new File\RipLog($torrent->id, $logId)->path();
-    $logfile = new Logfile($logpath, basename($logpath));
+    $riplog = $riplogMan->create($torrent, $logpath, basename($logpath));
 
-    echo sprintf(
+    printf(
         "%d: torrent %d - log %d (%s): %d -> %d\n",
-        $i,
-        $torrent->id(),
+        $i++,
+        $torrent->id,
         $logId,
         $logpath,
         $score,
-        $logfile->score()
+        $riplog->score()
     );
+}
 
-    if (!$dryRun) {
-        new File\RipLogHTML($torrent->id, $logId)->put($logfile->text());
-        $torrent->rescoreLog($logId, $logfile, Logchecker::getLogcheckerVersion(), false);
-    }
-
-    $i++;
+if ($torrent) {
+    $riplogMan->refreshTorrent($torrent);
 }

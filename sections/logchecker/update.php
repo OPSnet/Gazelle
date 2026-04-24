@@ -6,7 +6,7 @@ declare(strict_types=1);
 
 namespace Gazelle;
 
-echo $Twig->render('logchecker/update.twig', [
+echo $Twig->render('riplog/update.twig', [
     'accepted' => \OrpheusNET\Logchecker\Logchecker::getAcceptValues(),
     'list'     => new Manager\Torrent()->logFileList($Viewer->id()),
 ]);

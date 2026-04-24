@@ -5,8 +5,6 @@ namespace Gazelle;
 use Gazelle\Enum\LeechReason;
 use Gazelle\Enum\LeechType;
 use Gazelle\Enum\TorrentFlag;
-use Gazelle\File\RipLog as RipLog;
-use Gazelle\File\RipLogHTML as RipLogHTML;
 
 abstract class TorrentAbstract extends BaseAttrObject {
     final public const CACHE_LOCK           = 'torrent_lock_%d';
@@ -481,8 +479,8 @@ abstract class TorrentAbstract extends BaseAttrObject {
         );
         $list = self::$db->to_array(false, MYSQLI_ASSOC);
         foreach ($list as &$log) {
-            $log['has_riplog']         = new RipLog($this->id, $log['id'])->exists();
-            $log['html_log']           = new RipLogHTML($this->id, $log['id'])->get();
+            $log['has_riplog']         = new File\RipLog($this->id, $log['id'])->exists();
+            $log['html_log']           = new File\RipLogHTML($this->id, $log['id'])->get();
             $log['adjustment_details'] = unserialize($log['AdjustmentDetails']);
             $log['adjusted']           = ($log['Adjusted'] === '1');
             $log['adjusted_checksum']  = ($log['AdjustedChecksum'] === '1');
@@ -800,14 +798,17 @@ abstract class TorrentAbstract extends BaseAttrObject {
      * Get array of the hashes of all logfiles for a torrent
      * @return array<string>
      */
-    public function logfileHashList(): array {
+    public function riplogHashList(): array {
         self::$db->prepared_query("
             SELECT LogID FROM torrents_logs WHERE TorrentID = ?
             ", $this->id
         );
         $hashes = [];
         foreach (self::$db->collect(0) as $logId) {
-            $hashes[] = new RipLog($this->id, $logId)->hash();
+            $file = new File\RipLog($this->id, $logId);
+            if ($file->exists()) {
+                $hashes[] = $file->hash();
+            }
         }
         return $hashes;
     }

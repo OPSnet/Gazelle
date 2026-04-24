@@ -269,15 +269,7 @@ $db = DB::DB();
 $db->begin_transaction(); // It's all or nothing
 
 if (isset($_FILES['logfiles'])) {
-    $logfileSummary = new LogfileSummary($_FILES['logfiles'], $torrent->logfileHashList());
-    if ($logfileSummary->total()) {
-        $torrentLogManager = new Manager\TorrentLog();
-        $checkerVersion = Logchecker::getLogcheckerVersion();
-        foreach ($logfileSummary->all() as $logfile) {
-            $torrentLogManager->create($torrent, $logfile, $checkerVersion);
-        }
-        $torrent->modifyLogscore();
-    }
+    new Manager\Riplog()->bulkCreate($torrent, $_FILES['logfiles']);
 }
 
 foreach (TorrentFlag::cases() as $flag) {

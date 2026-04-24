@@ -21,25 +21,17 @@ if ($torrent->uploaderId() != $Viewer->id && !$Viewer->permitted('admin_add_log'
     Error403::error('Not your upload.');
 }
 
-$action = in_array($_POST['from_action'], ['upload', 'update']) ? $_POST['from_action'] : 'upload';
-$logfileSummary = new LogfileSummary($_FILES['logfiles'], $torrent->logfileHashList());
-
-if (!$logfileSummary->total()) {
+$manager = new Manager\Riplog();
+$riplogList = $manager->bulkCreate($torrent, $_FILES['logfiles']);
+if ($riplogList === []) {
     Error400::error("No (new) logfiles uploaded.");
-} else {
-    $torrent->removeLogDb();
-    new File\RipLog($torrent->id, '*')->remove();
-    new File\RipLogHTML($torrent->id, '*')->remove();
-
-    $torrentLogManager = new Manager\TorrentLog();
-    $checkerVersion = Logchecker::getLogcheckerVersion();
-    foreach ($logfileSummary->all() as $logfile) {
-        $torrentLogManager->create($torrent, $logfile, $checkerVersion);
-    }
-    $torrent->modifyLogscore();
 }
+$manager->refreshTorrent($torrent);
 
-echo $Twig->render('logchecker/result.twig', [
-    'summary' => $logfileSummary->all(),
-    'action'  => $action,
+echo $Twig->render('riplog/logchecker-result.twig', [
+    'action' => in_array($_POST['from_action'], ['upload', 'update'])
+        ? $_POST['from_action']
+        : 'upload',
+    'list'   => $riplogList,
+    'viewer' => $Viewer,
 ]);

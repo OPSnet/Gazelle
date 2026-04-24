@@ -13,6 +13,6 @@ if (is_null($torrent)) {
     json_error('torrent not found');
 }
 
-echo new Json\RipLog($torrent->id(), $logId)
+echo new Json\Riplog($torrent, $logId)
     ->setVersion(2)
     ->response();

@@ -43,11 +43,13 @@ class RipLog extends \Gazelle\File {
 
     /**
      * Move an existing rip log to the file storage location.
-     * NOTE: This is a change in behaviour from the parent class,
-     *      which is expecting the file contents.
      */
     public function put(string $source): bool {
-        return move_uploaded_file($source, $this->path()) !== false;
+        // From a $_FILES post?
+        if (is_uploaded_file($source)) {
+            return move_uploaded_file($source, $this->path()) !== false;
+        }
+        return parent::put((string)file_get_contents($source));
     }
 
     /**

@@ -15,9 +15,8 @@ if (is_null($torrent)) {
     Error404::error();
 }
 
-echo $Twig->render('torrent/riplog.twig', [
-    'id'        => $torrent->id,
-    'list'      => $torrent->logfileList(),
-    'log_score' => $torrent->logScore(),
-    'viewer'    => $Viewer,
+echo $Twig->render('riplog/list.twig', [
+    'collection' => new Manager\Riplog()->collection($torrent),
+    'torrent'    => $torrent,
+    'viewer'     => $Viewer,
 ]);

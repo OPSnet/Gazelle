@@ -14,15 +14,11 @@ $torrent = new Manager\Torrent()->findById((int)($_GET['torrentid'] ?? 0));
 if (is_null($torrent)) {
     Error404::error();
 }
-$tlog = new Manager\TorrentLog()->findById($torrent, (int)($_GET['logid'] ?? 0));
-if (is_null($tlog)) {
+$riplog = new Manager\Riplog()->findById($torrent, (int)($_GET['logid'] ?? 0));
+if (is_null($riplog)) {
     Error404::error();
 }
 
-echo $Twig->render('torrent/edit-log.twig', [
-    'adjuster' => new Manager\User()
-        ->findById($tlog->adjustedByUserId())?->link() ?? 'System',
-    'tlog'     => $tlog,
-    'torrent'  => $torrent,
-
+echo $Twig->render('riplog/edit.twig', [
+    'riplog'  => $riplog,
 ]);

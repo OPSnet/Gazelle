@@ -99,10 +99,9 @@
 <tr>
     <td class="label">Logfiles:</td>
     <td>
-{%      include 'reportsv2/logfiles.twig' with {
-        'log_details'   : report.logDetails(torrent),
-        'other_details' : report.logDetails(extra),
-    } only
+{%      include 'reportsv2/riplog.twig' with {
+            'report': report,
+        } only
 %}
     </td>
 </tr>

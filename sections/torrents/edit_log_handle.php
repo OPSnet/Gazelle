@@ -9,24 +9,35 @@ if (!$Viewer->permitted('users_mod')) {
     Error403::error();
 }
 
-$logId = (int)($_POST['logid'] ?? 0);
-if (!$logId) {
-    Error404::error();
-}
 $torrent = new Manager\Torrent()->findById((int)($_POST['torrentid'] ?? 0));
 if (is_null($torrent)) {
-    Error404::error();
+    Error404::error("Cannot find torrent to edit riplog");
+}
+$manager = new Manager\Riplog();
+$riplog  = $manager->findById($torrent, (int)($_POST['logid'] ?? 0));
+if (is_null($riplog)) {
+    Error404::error("Cannot find riplog belonging to torrent #{$torrent->id}");
 }
 
 $adjusted          = false;
 $adjustedChecksum  = isset($_POST['adjusted_checksum']);
 $adjustmentReason  = $_POST['adjustment_reason'];
 $adjustedScore     = 100;
+
+/**
+ * @var array{
+ *  crc_mismatches?: string,
+ *  suspicious_positions?: string,
+ *  timing_problems?: string,
+ *  tracks?: array<string, int>
+ * } $adjustmentDetails
+ */
 $adjustmentDetails = [];
 
 if ($adjustedChecksum != $torrent->logChecksum()) {
     $adjusted = true;
     $adjustmentDetails['checksum'] = 'Checksum manually ' . ($adjustedChecksum ? 'validated' : 'invalidated');
+    $riplog->setField('AdjustedChecksum', $torrent->logChecksum() == '0' ? '1' : '0');
 }
 
 $Deductions = [
@@ -68,12 +79,19 @@ foreach ($TrackDeductions as [$tag, $deduction, $label]) {
     if ($n > 0) {
         $score = $n * $deduction;
         $adjustmentDetails[$tag] = "$n $label (-{$score} points)";
-        $adjustmentDetails['tracks'][$tag] = $n; /** @phpstan-ignore-line */
+        $adjustmentDetails['tracks'][$tag] = $n; /** @phpstan-ignore-line offsetAssign.dimType recognized in 2.1.55 */
         $adjustedScore -= $score;
         $adjusted = true;
     }
 }
 
-$torrent->adjustLogscore($logId, $adjusted, max(0, $adjustedScore), $adjustedChecksum, $adjustmentReason, $adjustmentDetails, $Viewer);
+$riplog->setField('Adjusted', $adjusted ? '1' : '0')
+    ->setField('AdjustedChecksum', $adjustedChecksum ? '1' : '0')
+    ->setField('AdjustedScore', max(0, $adjustedScore))
+    ->setField('AdjustmentDetails', $adjustmentDetails)
+    ->setField('AdjustmentReason', $adjustmentReason)
+    ->setField('AdjustedBy', $Viewer->id)
+    ->modify();
+$manager->refreshTorrent($torrent);
 
-header('Location: ' . $torrent->location());
+header("Location: {$torrent->location()}");

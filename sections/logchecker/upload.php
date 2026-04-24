@@ -8,7 +8,7 @@ namespace Gazelle;
 
 use OrpheusNET\Logchecker\Logchecker;
 
-echo $Twig->render('logchecker/upload.twig', [
+echo $Twig->render('riplog/upload.twig', [
     'accepted' => Logchecker::getAcceptValues(),
     'list'     => new Manager\Torrent()->missingLogfiles($Viewer->id),
 ]);

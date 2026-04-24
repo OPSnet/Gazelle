@@ -418,12 +418,12 @@ $TmpFileList  = [];
 $TooLongPaths = [];
 
 foreach ($FileList as ['path' => $filename, 'size' => $size]) {
-    if ($Properties['Encoding'] == "Lossless" && preg_match('/\.cue$/i', $filename)) {
+    if ($Properties['Encoding'] === "Lossless" && preg_match('/\.cue$/i', $filename)) {
         $hasCue = true;
     }
     if (
-        $Properties['Media'] == 'CD'
-        && $Properties['Encoding'] == "Lossless"
+        $Properties['Media'] === 'CD'
+        && $Properties['Encoding'] === "Lossless"
         && !in_array(strtolower($filename), IGNORE_AUDIO_LOGFILE)
         && preg_match('/\.log$/i', $filename)
     ) {
@@ -438,9 +438,9 @@ foreach ($FileList as ['path' => $filename, 'size' => $size]) {
     }
     $TmpFileList[] = $torMan->metaFilename($filename, $size);
 }
-if (count($TooLongPaths) > 0) {
+if ($TooLongPaths !== []) {
     json_error('The torrent contained one or more files with too long a name: <ul>'
-            . implode('', array_map(fn($p) => "<li>" . html_escape($p) . "</li>", $TooLongPaths))
+            . implode('', array_map(fn ($p) => "<li>" . html_escape($p) . "</li>", $TooLongPaths))
             . '</ul><br>'
     );
 }
@@ -466,11 +466,6 @@ if ($isMusicUpload) {
 
 //For notifications--take note now whether it's a new group
 $IsNewGroup = is_null($tgroup);
-
-$logfileSummary = ($hasLog && isset($_FILES['logfiles']))
-    ? new LogfileSummary($_FILES['logfiles'])
-    : null;
-$hasLogInDB = $logfileSummary?->total() > 0;
 
 //******************************************************************************//
 //--------------- Start database stuff -----------------------------------------//
@@ -507,7 +502,7 @@ if ($tgroup) {
 $GroupID = $tgroup->id;
 $logName = $tgroup->text();
 
-// Torrent
+// torrent
 $torrent = $torMan->create(
     tgroup:                  $tgroup,
     user:                    $Viewer,
@@ -515,7 +510,6 @@ $torrent = $torMan->create(
     media:                   $Properties['Media'],
     format:                  $Properties['Format'],
     encoding:                $Properties['Encoding'],
-    logScore:                $logfileSummary?->overallScore() ?? 0,
     infohash:                $infohash,
     filePath:                $folderName,
     fileList:                $TmpFileList,
@@ -525,10 +519,11 @@ $torrent = $torMan->create(
     remasterTitle:           $Properties['RemasterTitle'],
     remasterRecordLabel:     $Properties['RemasterRecordLabel'],
     remasterCatalogueNumber: $Properties['RemasterCatalogueNumber'],
-    hasChecksum:             $logfileSummary?->checksum() ?? false,
     hasCue:                  $hasCue,
     hasLog:                  $hasLog,
-    hasLogInDB:              $hasLogInDB,
+    hasChecksum:             false, // this, and the remaining fields, will be updated for CD/FLAC
+    hasLogInDB:              false,
+    logScore:                0,
 );
 $TorrentID       = $torrent->id;
 $upload['new'][] = $torrent;
@@ -564,14 +559,10 @@ foreach ($upload['extra'] as &$info) {
 unset($info);
 
 //******************************************************************************//
-//--------------- Write Files To Disk ------------------------------------------//
+//--------------- Write Riplog Files To Disk -----------------------------------//
 
-if ($logfileSummary?->total()) {
-    $torrentLogManager = new Manager\TorrentLog();
-    $checkerVersion = Logchecker::getLogcheckerVersion();
-    foreach ($logfileSummary->all() as $logfile) {
-        $torrentLogManager->create($torrent, $logfile, $checkerVersion);
-    }
+if ($hasLog && isset($_FILES['logfiles'])) {
+    new Manager\Riplog()->bulkCreate($torrent, $_FILES['logfiles']);
 }
 
 $size = number_format($TotalSize / (1024 * 1024), 2);

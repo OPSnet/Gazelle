@@ -7,6 +7,6 @@ namespace Gazelle;
 
 use OrpheusNET\Logchecker\Logchecker;
 
-echo $Twig->render('logchecker/test.twig', [
+echo $Twig->render('riplog/test.twig', [
     'accepted' => Logchecker::getAcceptValues(),
 ]);

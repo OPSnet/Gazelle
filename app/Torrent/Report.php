@@ -3,6 +3,9 @@
 namespace Gazelle\Torrent;
 
 use Gazelle\Enum\TorrentFlag;
+use Gazelle\Manager\Torrent as TorrentManager;
+use Gazelle\Manager\Riplog  as RiplogManager;
+use Gazelle\RiplogCollection;
 
 class Report extends \Gazelle\BaseObject {
     final public const tableName = 'reportsv2';
@@ -11,7 +14,8 @@ class Report extends \Gazelle\BaseObject {
 
     public function __construct(
         int $id,
-        protected \Gazelle\Manager\Torrent $torMan,
+        protected TorrentManager $torManager    = new TorrentManager(),
+        protected RiplogManager  $riplogManager = new RiplogManager(),
     ) {
         parent::__construct($id);
     }
@@ -102,10 +106,17 @@ class Report extends \Gazelle\BaseObject {
     public function otherTorrentList(): array {
         return array_filter(
             array_map(
-                fn($id) => $this->torMan->findById($id),
-                $this->otherIdList()
+                fn ($id) => $this->torManager->findById($id),
+                $this->otherIdList(),
             ),
-            fn($t) => $t instanceof \Gazelle\Torrent
+            fn ($t) => $t instanceof \Gazelle\Torrent
+        );
+    }
+
+    public function otherRiplogCollection(): array {
+        return array_map(
+            fn ($other) => $this->riplogManager->collection($other),
+            $this->otherTorrentList(),
         );
     }
 
@@ -136,9 +147,9 @@ class Report extends \Gazelle\BaseObject {
      */
     public function torrent(): \Gazelle\Torrent|\Gazelle\TorrentDeleted|null {
         if (!isset($this->torrent)) {
-            $this->torrent = $this->torMan->findById($this->torrentId());
+            $this->torrent = $this->torManager->findById($this->torrentId());
             if (is_null($this->torrent)) {
-                $this->torrent = $this->torMan->findDeletedById($this->torrentId());
+                $this->torrent = $this->torManager->findDeletedById($this->torrentId());
             }
         }
         return $this->torrent;
@@ -146,6 +157,10 @@ class Report extends \Gazelle\BaseObject {
 
     public function torrentId(): int {
         return $this->info()['torrent_id'];
+    }
+
+    public function torrentRiplogCollection(): RiplogCollection {
+        return $this->riplogManager->collection($this->torrent());
     }
 
     public function trackList(): array {
@@ -285,12 +300,5 @@ class Report extends \Gazelle\BaseObject {
         $affected = self::$db->affected_rows();
         $this->flush();
         return $affected;
-    }
-
-    /*
-     * utility function for twig
-     */
-    public static function logDetails(\Gazelle\Torrent|\Gazelle\TorrentDeleted $torrent): array {
-        return new \Gazelle\Torrent\Log($torrent->id)->logDetails();
     }
 }

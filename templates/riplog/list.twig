@@ -1,0 +1,28 @@
+{% for riplog in collection.riplogList %}
+{%  if loop.first %}
+<table>
+<tr class="colhead_dark" style="font-weight: bold">
+    <td>This torrent has {{ collection.total }} log{{ collection.total|plural }} with a total score of {{ collection.overallScore }}/100
+{%      if collection.total > 1 and viewer.permitted('torrents_delete') %}
+        <span style="float: right; font-weight: normal"><a class="brackets" onclick="return confirm('This is permanent and irreversible. Missing logs can still be uploaded.');"
+            href="torrents.php?action=removelogs&amp;torrentid={{ torrent.id }}&amp;auth={{ viewer.auth }}">Remove all logs</a></span><br>
+{%      endif %}
+    </td>
+</tr>
+{%  endif %}
+{%  include 'riplog/detail.twig' with {
+        'n': loop.index,
+        'total':  collection.total,
+        'riplog': riplog,
+        'viewer': viewer,
+    } only
+%}
+{%  if loop.last %}
+</table>
+{%  endif %}
+{% else %}
+    No logs found!
+{%  if viewer.permitted('torrents_delete') %}
+&nbsp;<a class="brackets" href="torrents.php?action=removelogs&amp;torrentid={{ torrent.id }}&amp;auth={{ viewer.auth }}">Repair DB</a>
+{%  endif %}
+{% endfor %}

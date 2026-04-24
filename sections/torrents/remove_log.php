@@ -11,17 +11,21 @@ if (!$Viewer->permitted('users_mod')) {
 }
 
 $torrent = new Manager\Torrent()->findById((int)$_GET['torrentid']);
-$logId = (int)$_GET['logid'];
-if (is_null($torrent) || !$logId) {
-    Error404::error();
+if (is_null($torrent)) {
+    Error404::error("Was not able to find torrent #" . (int)$_GET['torrentid']);
+}
+$riplog = new Manager\Riplog()->findById($torrent, (int)$_GET['logid']);
+if (is_null($riplog)) {
+    Error404::error("Was not able to find log #" . (int)$_GET['logid']);
 }
 
-new File\RipLog($torrent->id, $logId)->remove();
+$logId = $riplog->id;
+$riplog->remove();
+new Manager\Riplog()->refreshTorrent($torrent);
 $torrent->logger()->torrent(
     $torrent,
     $Viewer,
     "Riplog ID $logId removed from torrent {$torrent->id}",
 );
-$torrent->clearLog($logId);
 
-header('Location: ' . $torrent->location());
+header("Location: {$torrent->location()}");

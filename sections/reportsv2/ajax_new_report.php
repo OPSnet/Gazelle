@@ -44,5 +44,5 @@ echo $Twig->render('reportsv2/report.twig', [
         'uploader' => $reportMan->totalReportsUploader($torrent->uploader()) - 1,
         'torrent'  => $reportMan->totalReportsTorrent($torrent) - 1,
     ],
-    'viewer'        => $Viewer,
+    'viewer' => $Viewer,
 ]);

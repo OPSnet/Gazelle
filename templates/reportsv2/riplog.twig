@@ -1,14 +1,13 @@
-{% macro renderDetails(details) %}
+{% macro renderDetails(collection) %}
 <ul class="nobullet logdetails">
-{% for log_id, info in details %}
-{%  if info.adjustment %}
-{%      set adj = info.adjustment %}
-    <li>Log adjusted by {{ adj.user.link|default('System')
-        }} from score {{ adj.score }} to {{ adj.adjusted }}
-        {%- if adj.reason %} (reason: {{ adj.reason }}){% endif %}
+{% for riplog in collection.riplogList %}
+{%  if riplog.isAdjusted %}
+    <li>Log adjusted by {{ riplog.adjusterUserId|user_url
+        }} from score {{ riplog.score }} to {{ riplog.scoreAdjusted }}
+{%  if riplog.adjustmentReason %} (reason: {{ riplog.adjustmentReason }}){% endif %}
     </li>
 {%  endif %}
-{%  for key, status in info.status %}
+{%  for key, status in riplog.adjustmentList %}
 {%      if status %}
 {%          if key == 'tracks' %}
 {%              set status = status|join(', ') %}
@@ -17,9 +16,9 @@
 {%      endif %}
 {%  endfor %}
     <li>
-        <span class="nobr"><strong>Logfile #{{ log_id }}</strong>: </span>
+        <span class="nobr"><strong>Logfile #{{ riplog.id }}</strong>: </span>
         <a onclick="BBCode.spoiler(this);" class="brackets">Show</a><blockquote class="hidden">
-            <pre class="logfile_html">{{ info.html_log|raw }}</pre>
+            <pre class="logfile_html">{{ riplog.html.get|raw }}</pre>
         </blockquote>
     </li>
 {% else %}
@@ -34,10 +33,12 @@
     </tr>
     <tr>
         <td style="vertical-align: top; max-width: 500px; width: 50%">
-{{ _self.renderDetails(log_details) }}
+{{ _self.renderDetails(report.torrentRiplogCollection) }}
         </td>
         <td style="vertical-align: top; max-width: 500px; width: 50%">
-{{ _self.renderDetails(other_details) }}
+{% for o in report.otherRiplogCollection %}
+{{  _self.renderDetails(o) }}
+{% endfor %}
         </td>
     </tr>
 </table>

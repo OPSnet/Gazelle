@@ -122,7 +122,7 @@ class FileStorageTest extends TestCase {
         $this->assertFalse($file->exists(), 'file-r-exists-nok');
         $this->assertFalse($file->get(),    'file-r-get-nok');
 
-        $json = new Json\RipLog(0, 0);
+        $json = new Json\Riplog(new Torrent(0), 0);
         $response = json_decode($json->response(), true);
         $this->assertEquals('failure', $response['status'], 'json-riplog-failure');
 

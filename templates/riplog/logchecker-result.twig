@@ -1,0 +1,16 @@
+{{ header('Logchecker results', {'css': 'logchecker'}) }}
+<div class="thin center">
+    <br><a href="logchecker.php?action={{ action }}">Upload another log file</a>
+</div>
+{% for riplog in list %}
+<table>
+{%  include 'riplog/detail.twig' with {
+        'n': loop.index,
+        'total':  list|length,
+        'riplog': riplog,
+        'viewer': viewer,
+    } only
+%}
+</table>
+{% endfor %}
+{{ footer() }}

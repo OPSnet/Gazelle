@@ -1,41 +1,41 @@
-{% if not logfile.checksum %}
+{% if checker.getChecksumState != constant('OrpheusNET\\Logchecker\\Check\\Checksum::CHECKSUM_OK') %}
     <blockquote>
 {%  if pasted %}
         Checksums of pasted log files cannot be verified, as the character encoding can change during copy-pasting.
 {%  else %}
         <strong>Trumpable For:</strong>
         <br><br>
-{%      if logfile.checksumState == 'checksum_missing' %}
+{%      if checker.getChecksumState == constant('OrpheusNET\\Logchecker\\Check\\Checksum::CHECKSUM_MISSING') %}
                 No Checksum(s)
-{%      elseif logfile.checksumState == 'checksum_invalid' %}
+{%      elseif checker.getChecksumState == constant('OrpheusNET\\Logchecker\\Check\\Checksum::CHECKSUM_INVALID') %}
                 Invalid Checksum(s)
 {%      endif %}
 {%  endif %}
     </blockquote>
 {% endif %}
 
-{% if logfile.score == 100 %}
+{% if checker.getScore == 100 %}
 {%  set color = '#418B00' %}
-{% elseif logfile.score  >  90 %}
+{% elseif checker.getScore  > 90 %}
 {%  set color = '#74C42E' %}
-{% elseif logfile.score  >  75 %}
+{% elseif checker.getScore  > 75 %}
 {%  set color = '#FFAA00' %}
-{% elseif logfile.score  >  50 %}
+{% elseif checker.getScore  > 50 %}
 {%  set color = '#FF5E00' %}
 {% else %}
 {%  set color = '#FF0000' %}
 {% endif %}
     <blockquote>
-        <strong>Score:</strong> <span style="color:{{ color }}">{{ logfile.score }}</span> (out of 100)
+        <strong>Score:</strong> <span style="color:{{ color }}">{{ checker.getScore }}</span> (out of 100)
     </blockquote>
     <blockquote>
         <h3>Log validation report:</h3>
         <ul>
-{% for detail in logfile.details %}
+{% for detail in checker.getDetails %}
             <li>{{ detail }}</li>
 {% endfor %}
         </ul>
     </blockquote>
     <blockquote>
-        <pre>{{ logfile.text|raw }}</pre>
+        <pre>{{ checker.getLog|raw }}</pre>
     </blockquote>
