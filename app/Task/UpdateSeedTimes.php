@@ -4,6 +4,11 @@ namespace Gazelle\Task;
 
 class UpdateSeedTimes extends \Gazelle\Task {
     public function run(): void {
+        self::$db->prepared_query("
+            DELETE FROM xbt_files_users
+            WHERE mtime < unix_timestamp(now() - INTERVAL ? SECOND)
+            ", UNSEEDED_DRAIN_INTERVAL
+        );
         self::$db->prepared_query('
             INSERT INTO xbt_files_history (uid, fid, seedtime)
                 SELECT DISTINCT uid, fid, 1
