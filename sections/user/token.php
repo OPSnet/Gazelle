@@ -30,6 +30,8 @@ if ($_GET['do'] === 'revoke') {
         $error = 'You must supply a name for the token.';
     } elseif ($user->hasApiTokenByName($tokenName)) {
         $error = 'You have already generated a token with that name.';
+    } elseif (strlen($tokenName) > 40) {
+        $error = 'Token names must be 40 characters or fewer.';
     } else {
         $token = $user->createApiToken($tokenName);
     }
