@@ -9,8 +9,10 @@ use Gazelle\Intf\CategoryHasArtist;
 class Request extends BasePgObject implements Bookmarked, CategoryHasArtist {
     final public const tableName = 'request';
     final public const pkName    = 'id_request';
+    protected const CACHE_KEY    = 'rq_%d';
 
     public function flush(): static {
+        self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
         if (isset($this->info) && $this->tgroupId()) {
             self::$cache->delete_value("requests_group_" . $this->tgroupId());
         }
@@ -115,58 +117,63 @@ class Request extends BasePgObject implements Bookmarked, CategoryHasArtist {
         if (isset($this->info)) {
             return $this->info;
         }
-        $info = $this->pg()->rowAssocex(<<<END_SQL
-            select r.id_user  as user_id,
-                r.id_filler   as filler_id,
-                r.id_tgroup   as tgroup_id,
-                r.id_torrent  as torrent_id,
-                r.created,
-                r.modified,
-                r.filled      as fill_date,
-                rvs.last_vote as last_vote_date,
-                r.id_category as category_id,
-                c.name        as category_name,
-                r.title,
-                r.description,
-                r.year,
-                r.image,
-                r.catalogue_number,
-                r.record_label,
-                r.id_release_type as release_type,
-                coalesce(rel.name, 'Unknown')
-                                  as release_type_name,
-                r.encoding_str    as need_encoding,
-                r.format_str      as need_format,
-                r.media_str       as need_media,
-                r.need_cue,
-                r.need_log,
-                r.need_checksum,
-                r.log_score,
-                r.url,
-                array_agg(t."Name" order by t."Name") as tag
-            from request                    r
-            inner join request_vote_summary rvs on (rvs.id_request = r.id_request)
-            inner join category             c   using (id_category)
-            left join release_type          rel using (id_release_type)
-            left join lateral unnest(r.tag) id_tag on true
-            left join relay.tags            t on (t."ID" = id_tag)
-            where r.id_request = $1
-            group by r.id_request, rvs.last_vote, c.name, rel.name
-            END_SQL
-            , $this->id
-        );
-        if ($info['tag'] === [null]) {
-            $info['tag'] = [];
+        $key = sprintf(self::CACHE_KEY, $this->id);
+        $info = self::$cache->get_value($key);
+        if ($info === false) {
+            $info = $this->pg()->rowAssocex(<<<END_SQL
+                select r.id_user  as user_id,
+                    r.id_filler   as filler_id,
+                    r.id_tgroup   as tgroup_id,
+                    r.id_torrent  as torrent_id,
+                    r.created,
+                    r.modified,
+                    r.filled      as fill_date,
+                    rvs.last_vote as last_vote_date,
+                    r.id_category as category_id,
+                    c.name        as category_name,
+                    r.title,
+                    r.description,
+                    r.year,
+                    r.image,
+                    r.catalogue_number,
+                    r.record_label,
+                    r.id_release_type as release_type,
+                    coalesce(rel.name, 'Unknown')
+                                      as release_type_name,
+                    r.encoding_str    as need_encoding,
+                    r.format_str      as need_format,
+                    r.media_str       as need_media,
+                    r.need_cue,
+                    r.need_log,
+                    r.need_checksum,
+                    r.log_score,
+                    r.url,
+                    array_agg(t."Name" order by t."Name") as tag
+                from request                    r
+                inner join request_vote_summary rvs on (rvs.id_request = r.id_request)
+                inner join category             c   using (id_category)
+                left join release_type          rel using (id_release_type)
+                left join lateral unnest(r.tag) id_tag on true
+                left join relay.tags            t on (t."ID" = id_tag)
+                where r.id_request = $1
+                group by r.id_request, rvs.last_vote, c.name, rel.name
+                END_SQL
+                , $this->id
+            );
+            if ($info['tag'] === [null]) {
+                $info['tag'] = [];
+            }
+            $info['user_vote_list'] = $this->pg()->allex("
+                select rv.id_user as user_id,
+                    sum(rv.bounty) as bounty
+                from request_vote rv
+                where rv.id_request = $1
+                group by id_user
+                order by 2 desc
+                ", $this->id
+            );
+            self::$cache->cache_value($key, $info, 86400);
         }
-        $info['user_vote_list'] = $this->pg()->allex("
-            select rv.id_user as user_id,
-                sum(rv.bounty) as bounty
-            from request_vote rv
-            where rv.id_request = $1
-            group by id_user
-            order by 2 desc
-            ", $this->id
-        );
         $info['encoding'] = new Request\Encoding(
             is_null($info['need_encoding']),
             $info['need_encoding'] ?? [],
@@ -179,7 +186,6 @@ class Request extends BasePgObject implements Bookmarked, CategoryHasArtist {
             is_null($info['need_media']),
             $info['need_media'] ?? [],
         );
-
         $info['logCue'] = new Request\LogCue(
             needLogChecksum: (bool)$info['need_checksum'],
             needCue:         (bool)$info['need_cue'],
@@ -624,6 +630,7 @@ class Request extends BasePgObject implements Bookmarked, CategoryHasArtist {
         );
         $this->pg()->commit();
         self::$db->commit();
+        $this->flush();
         $user->flush();
         return true;
     }
@@ -670,7 +677,6 @@ class Request extends BasePgObject implements Bookmarked, CategoryHasArtist {
             . byte_format($bounty) . ' bounty.'
         );
 
-        $this->flush();
         $this->artistFlush();
         return $updated;
     }
@@ -766,6 +772,7 @@ class Request extends BasePgObject implements Bookmarked, CategoryHasArtist {
                 WHERE UserId = ?
                 ", $bounty, $user->id
             );
+            $this->flush();
             $user->flush();
         }
         return $affected;
@@ -790,6 +797,7 @@ class Request extends BasePgObject implements Bookmarked, CategoryHasArtist {
                     . " bounty ({$bounty}b) on {$this->url()}",
                 $admin,
             );
+            $this->flush();
             $user->flush();
         }
         self::$db->commit();
@@ -799,7 +807,11 @@ class Request extends BasePgObject implements Bookmarked, CategoryHasArtist {
     /**
      * Inform the filler of a request that their bounty was reduced
      */
-    public function informRequestFillerReduction(int $bounty, User $admin): int {
+    public function informRequestFillerReduction(
+        int          $bounty,
+        User         $admin,
+        Manager\User $manager = new Manager\User(),
+    ): int {
         [$fillerId, $fillDate] = $this->pg()->rowex("
             select id_filler, date(filled)
             from request
@@ -809,7 +821,7 @@ class Request extends BasePgObject implements Bookmarked, CategoryHasArtist {
         if (!$fillerId) {
             return 0;
         }
-        $user = new User($fillerId);
+        $user = $manager->findById($fillerId);
         $user->auditTrail()->addEvent(
             UserAuditEvent::request,
             "Reduction of " . byte_format($bounty)

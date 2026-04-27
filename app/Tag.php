@@ -79,6 +79,7 @@ class Tag extends BaseObject {
             WHERE ID = ?
             ", $affected, $this->id
         );
+        $request->flush();
         return $affected;
     }
 
