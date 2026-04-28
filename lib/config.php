@@ -342,8 +342,10 @@ defined('CACHE_ID') or define('CACHE_ID', 'ops');
 
 defined('BIN_COMPOSER') or define('BIN_COMPOSER', '/usr/local/bin/composer');
 defined('BIN_GIT')      or define('BIN_GIT', '/usr/bin/git');
-defined('BIN_PHINX')    or define('BIN_PHINX', realpath(__DIR__ . '/../vendor/bin/phinx'));
-defined('PHINX_MYSQL')  or define('PHINX_MYSQL', realpath(__DIR__ . '/../phinx.php'));
+defined('BIN_PHINX')    or define('BIN_PHINX',    realpath(__DIR__ . '/../vendor/bin/phinx'));
+defined('PHINX_MYSQL')  or define('PHINX_MYSQL',  realpath(__DIR__ . '/../phinx.php'));
+defined('PHINX_MYSQL2') or define('PHINX_MYSQL2', realpath(__DIR__ . '/../misc/my2-phinx.php'));
+defined('PHINX_PG')     or define('PHINX_PG',     realpath(__DIR__ . '/../misc/phinx-pg.php'));
 
 // ------------------------------------------------------------------------
 // Local image caching settings

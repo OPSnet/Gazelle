@@ -12,6 +12,7 @@ class SiteInfoTest extends TestCase {
         $this->assertGreaterThanOrEqual(0, strlen($info->phpinfo()), 'siteinfo-phpinfo');
         $this->assertCount(2, $info->uptime(), 'siteinfo-uptime');
         $this->assertGreaterThan(0, count($info->phinx()), 'siteinfo-phinx');
+        $this->assertEquals(0, $info->phinxMigrationsPending(), 'siteinfo-pending-phinx');
         $this->assertStringStartsWith(
             'Composer version 2.',
             $info->composerVersion(),

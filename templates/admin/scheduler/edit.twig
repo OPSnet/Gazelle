@@ -9,8 +9,8 @@
 {% endif %}
 <table width="100%" id="tasks">
     <tr class="colhead">
-        <td>Name</td>
         <td>Class Name</td>
+        <td>Name</td>
         <td>Description</td>
         <td>Interval</td>
         <td>Enabled</td>
@@ -21,15 +21,15 @@
 {% for t in task_list %}
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
         <form class="manage_form" name="accounts" action="" method="post">
-            <input type="hidden" name="id" value="{{ t.periodic_task_id }}">
+            <input type="hidden" name="id" value="{{ t.id_task }}">
             <input type="hidden" name="action" value="periodic">
             <input type="hidden" name="mode" value="alter">
             <input type="hidden" name="auth" value="{{ viewer.auth }}">
             <td>
-                <input type="text" size="15" name="name" value="{{ t.name }}">
+                {{ t.class_name }}
             </td>
             <td>
-                <input type="text" size="15" name="classname" value="{{ t.classname }}">
+                <input type="text" size="15" name="name" value="{{ t.name }}">
             </td>
             <td>
                 <input type="text" size="40" name="description" value="{{ t.description }}">

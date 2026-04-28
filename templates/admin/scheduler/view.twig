@@ -45,12 +45,12 @@ date display between relative and absolute.
         <td title="{% if not t.is_sane %}Insane! {% endif %}{% if not t.is_enabled
             %}Disabled! {% endif %}{{ t.description }}">
             <a style="{{ color }}" href="tools.php?action=periodic&amp;mode=detail&amp;id={{
-                t.periodic_task_id }}">{{ prefix }}{{ t.name }}</a>
+                t.id_task }}">{{ prefix }}{{ t.name }}</a>
         </td>
         <td>{{ t.period|time_compact }}</td>
         <td>
             <span class="reltime">{{ t.last_run|time_diff }}</span>
-            <span class="abstime hidden">{{ t.last_run }}</span>
+            <span class="abstime hidden">{{ t.last_run|date('Y-m-d H:i:s') }}</span>
         </td>
         <td>{{ t.duration }}ms</td>
         <td>
@@ -58,20 +58,20 @@ date display between relative and absolute.
             Never
 {%  else %}
             <span class="reltime">{{ t.next_run|time_diff }}</span>
-            <span class="abstime hidden">{{ t.next_run }}</span>
+            <span class="abstime hidden">{{ t.next_run|date('Y-m-d H:i:s') }}</span>
 {%  endif %}
         </td>
         <td>{{ t.status|default('-') }}</td>
-        <td class="number_column">{{ t.runs|number_format }}</td>
-        <td class="number_column">{{ t.processed|number_format }}</td>
-        <td class="number_column">{{ t.errors|number_format }}</td>
-        <td class="number_column">{{ t.events|number_format }}</td>
+        <td class="number_column">{{ t.run_total|number_format }}</td>
+        <td class="number_column">{{ t.item_total|number_format }}</td>
+        <td class="number_column">{{ t.error_total|number_format }}</td>
+        <td class="number_column">{{ t.event_total|number_format }}</td>
         <td>
 {%  if viewer.permitted('admin_schedule') %}
             <a class="brackets" href="tools.php?action=periodic&amp;auth={{
-                viewer.auth }}&amp;id={{ t.periodic_task_id }}&amp;mode=enqueue">Enqueue</a>
+                viewer.auth }}&amp;id={{ t.id_task }}&amp;mode=enqueue">Enqueue</a>
             <a class="brackets" href="tools.php?action=periodic&amp;auth={{
-                viewer.auth }}&amp;id={{ t.periodic_task_id }}&amp;mode=run">Run</a>
+                viewer.auth }}&amp;id={{ t.id_task }}&amp;mode=run">Run</a>
 {%  endif %}
         </td>
     </tr>

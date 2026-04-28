@@ -18,10 +18,10 @@ if ($task) {
             Error403::error();
         }
         authorize();
-        $scheduler->runNow($task['periodic_task_id']);
+        $scheduler->runNow($task['id_task']);
     } elseif ($_REQUEST['mode'] === 'enqueue') {
-        $scheduler->enqueue($task['periodic_task_id']);
-        header("Location: tools.php?action=periodic&mode=view");
+        $scheduler->enqueue($task['id_task']);
+        header("Location: ?action=periodic&mode=view");
         exit;
     }
 }

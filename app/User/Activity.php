@@ -116,13 +116,10 @@ class Activity extends \Gazelle\BaseUser {
 
     public function setScheduler(\Gazelle\TaskScheduler $scheduler): static {
         if ($this->user->permitted('admin_periodic_task_view')) {
-            $lastSchedulerRun = self::$db->scalar("
-                SELECT now() - max(launch_time) FROM periodic_task_history
-            ");
-            if ($lastSchedulerRun > SCHEDULER_DELAY) {
+            if (!$scheduler->isLastRunIntervalOk(SCHEDULER_DELAY)) {
                 $this->setAlert("<span class=\"sys-error\" title=\"Cron scheduler not running\">CRON</span>");
             }
-            $insane = $scheduler->insaneTaskList();
+            $insane = $scheduler->insaneTaskTotal();
             if ($insane) {
                 $this->setAlert("<a title=\"$insane insane task"
                     . plural($insane)

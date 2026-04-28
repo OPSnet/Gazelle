@@ -20,24 +20,24 @@ class SchedulerTest extends TestCase {
     public function testRunWithMissingImplementation(): void {
         $scheduler = new TaskScheduler();
         $name = "RunUnimplemented";
-        $db = DB::DB();
-        $db->prepared_query("
-            DELETE FROM periodic_task WHERE classname = ?
-            ", $name
+        $pg = new DB\Pg(PG_RW_DSN);
+        $pg->query('
+            delete from task where class_name = $1
+            ', $name
         );
-        $db->prepared_query("
-            INSERT INTO periodic_task
-                   (classname, name, description, period)
-            VALUES (?,         ?,    ?,           86400)
-            ",
+        $pg->query('
+            insert into task
+                   (class_name, name, description, period)
+            VALUES ($1,         $2,   $3,          86400)
+            ',
             $name, "phpunit run task", "A run with no PHP implementation"
         );
 
-        $this->expectOutputRegex('/^(?:\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} \[(?:debug|info)\] (.*?)\n|Running task (?:.*?)\.\.\.DONE! \(\d+\.\d+\)\n)*$/');
+        $this->expectOutputRegex('/^(?:\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} \[(?:debug|info)\] (.*?)\n|Running task (?:.*?)\.\.\.Failed\.\n$)/');
         $scheduler->run();
-        $db->prepared_query("
-            DELETE FROM periodic_task WHERE classname = ?
-            ", $name
+        $pg->query('
+            delete from task where class_name = $1
+            ', $name
         );
     }
 
@@ -62,15 +62,15 @@ class SchedulerTest extends TestCase {
     public function testMissingImplementation(): void {
         $scheduler = new TaskScheduler();
         $name = "Unimplemented";
-        $db = DB::DB();
-        $db->prepared_query("
-            DELETE FROM periodic_task WHERE classname = ?
+        $pg = new DB\Pg(PG_RW_DSN);
+        $pg->query("
+            delete from task where class_name = $1
             ", $name
         );
-        $db->prepared_query("
-            INSERT INTO periodic_task
-                   (classname, name, description, period)
-            VALUES (?,         ?,    ?,           86400)
+        $pg->query("
+            insert into task
+                   (class_name, name, description, period)
+            VALUES ($1,         $2,   $3,           86400)
             ",
             $name, "phpunit task", "A task with no PHP implementation"
         );
@@ -81,8 +81,8 @@ class SchedulerTest extends TestCase {
             "sched-task-unimplemented"
         );
         ob_end_clean();
-        $db->prepared_query("
-            DELETE FROM periodic_task WHERE classname = ?
+        $pg->query("
+            delete from task where class_name = $1
             ", $name
         );
     }
@@ -151,9 +151,9 @@ class SchedulerTest extends TestCase {
         $detail = current($list);
         $this->assertEqualsCanonicalizing(
             [
-                "periodic_task_id", "name", "description", "period",
-                "is_enabled", "is_sane", "run_now", "runs", "processed",
-                "errors", "events", "duration", "status", "last_run",
+                "id_task", "name", "description", "period",
+                "is_enabled", "is_sane", "run_now", "run_total", "item_total",
+                "error_total", "event_total", "duration", "status", "last_run",
                 "next_run",
             ],
             array_keys($detail),
@@ -164,7 +164,7 @@ class SchedulerTest extends TestCase {
     public function testTaskHistory(): void {
         $scheduler = new TaskScheduler();
         $task      = $scheduler->findByName('Test');
-        $taskId    = $task['periodic_task_id'];
+        $taskId    = $task['id_task'];
         $initial   = $scheduler->taskHistory($taskId, 10, 0);
         $total     = $scheduler->taskRunTotal($taskId);
         ob_start();
@@ -175,6 +175,7 @@ class SchedulerTest extends TestCase {
             $scheduler->taskRunTotal($taskId),
             'task-run-total'
         );
+        $this->assertTrue($scheduler->isLastRunIntervalOk(10), 'task-run-interval-ok');
 
         $history = $scheduler->taskHistory($taskId, 10, 0);
         $this->assertEquals(
@@ -183,7 +184,7 @@ class SchedulerTest extends TestCase {
             'task-history-total'
         );
         $item = current($history->items);
-        $this->assertTrue(Helper::recentDate($item->launchTime), 'task-launch-time');
+        $this->assertTrue(Helper::recentDate($item->created->format('Y-m-d H:i:s')), 'task-created');
         $this->assertEquals('completed', $item->status, 'task-status');
         $this->assertEquals(0, $item->nrErrors, 'task-nr-error');
         $this->assertEquals(0, $item->nrItems, 'task-nr-item');
@@ -192,7 +193,7 @@ class SchedulerTest extends TestCase {
     public function testTaskEnqueue(): void {
         $scheduler = new TaskScheduler();
         $task      = $scheduler->findByName('Test');
-        $taskId    = $task['periodic_task_id'];
+        $taskId    = $task['id_task'];
         $this->assertEquals(
             1,
             $scheduler->enqueue($taskId),
@@ -215,14 +216,11 @@ class SchedulerTest extends TestCase {
     public function testTaskStats(): void {
         $scheduler = new TaskScheduler();
         $task      = $scheduler->findByName('Test');
-        $taskId    = $task['periodic_task_id'];
-        $stats     = $scheduler->taskRuntimeStats($taskId, 1);
-        $this->assertCount(2, $stats, 'task-runtime-stats-count');
-        $this->assertEquals(
-            'duration', $stats[0]['name'], 'task-stats-duration',
-        );
-        $this->assertEquals(
-            'processed', $stats[1]['name'], 'task-stats-processed',
+        $taskId    = $task['id_task'];
+        $this->assertEqualsCanonicalizing(
+            ['category', 'duration', 'item_total'],
+            array_keys($scheduler->taskRuntimeStats($taskId, 1)),
+            'task-stats-duration',
         );
     }
 
@@ -237,25 +235,10 @@ class SchedulerTest extends TestCase {
 
     public function testTaskUpdate(): void {
         $this->assertEquals(
-            0,
-            new TaskScheduler()->updateTask(
-                taskId:      1,
-                name:        'Test',
-                class:       'Bonkers',
-                description: 'Scheduler functionality test ' . randomString(),
-                period:      60,
-                isEnabled:   false,
-                isSane:      true,
-                isDebug:     false,
-            ),
-            'task-update-bad-class',
-        );
-        $this->assertEquals(
             1,
             new TaskScheduler()->updateTask(
                 taskId:      1,
                 name:        'Test',
-                class:       'Test',
                 description: 'Scheduler functionality test ' . randomString(),
                 period:      60,
                 isEnabled:   false,
@@ -267,7 +250,6 @@ class SchedulerTest extends TestCase {
         new TaskScheduler()->updateTask(
             taskId:      1,
             name:        'Test',
-            class:       'Test',
             description: 'Scheduler functionality test',
             period:      60,
             isEnabled:   false,

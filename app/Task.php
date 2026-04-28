@@ -20,60 +20,64 @@ abstract class Task extends Base {
         $this->startTime = hrtime(true);
     }
 
-    public function begin(): void {
-        self::$db->prepared_query('
-            INSERT INTO periodic_task_history
-                   (periodic_task_id)
-            VALUES (?)
+    public function begin(): int {
+        $this->historyId = $this->pg()->scalarex('
+            insert into task_history
+                   (id_task)
+            values ($1)
+            returning id_task_history
             ', $this->taskId
         );
-        $this->historyId = self::$db->inserted_id();
+        return $this->historyId;
     }
 
     public function end(bool $sane): int {
         $elapsed = (hrtime(true) - $this->startTime) / 1e6;
         $errorCount = count(array_filter($this->events, fn($event) => $event->severity === 'error'));
-        self::$db->prepared_query('
-            UPDATE periodic_task_history SET
-                status = ?,
-                num_errors = ?,
-                num_items = ?,
-                duration_ms = ?
-            WHERE periodic_task_history_id = ?
-            ', 'completed', $errorCount, $this->processed, $elapsed, $this->historyId
+        $this->pg()->query('
+            update task_history set
+                status      = $1::task_status_t,
+                error_total = $2,
+                item_total  = $3,
+                duration_ms = $4
+            where id_task_history = $5
+            ', 'completed', $errorCount, $this->processed, (int)$elapsed, $this->historyId
         );
 
         echo("DONE! (" . number_format((hrtime(true) - $this->startTime) * 1e-9, 3) . ")\n");
 
         foreach ($this->events as $event) {
-            printf("%s [%s] (%d) %s\n", $event->timestamp, $event->severity, $event->reference, $event->event);
-            self::$db->prepared_query('
-                INSERT INTO periodic_task_history_event
-                       (periodic_task_history_id, severity, event_time, event,             reference)
-                VALUES (?,                        ?,        ?,          substr(?, 1, 255), ?)
-            ', $this->historyId, $event->severity, $event->timestamp, $event->event, $event->reference);
+            $timestamp = $event->timestamp()->format('Y-m-d H:i:s');
+            printf("%s [%s] (%d) %s\n", $timestamp, $event->severity, $event->reference, $event->event);
+            $this->pg()->query('
+                insert into task_history_event
+                       (id_task_history, created, reference, severity,                  note)
+                VALUES ($1,              $2,      $3,        $4::task_event_severity_t, substr($5, 1, 1000))
+            ', $this->historyId, $timestamp, $event->reference, $event->severity, $event->event);
         }
 
         if ($errorCount > 0 && $sane) {
-            self::$db->prepared_query('
-                UPDATE periodic_task SET
-                    is_sane = FALSE
-                WHERE periodic_task_id = ?
-            ', $this->taskId);
+            $this->pg()->query('
+                update task set
+                    is_sane = false
+                where id_task = $1
+                ', $this->taskId
+            );
             self::$cache->delete_value(TaskScheduler::CACHE_TASKS);
-
             Irc::sendMessage(
                 IRC_CHAN_DEV,
-                "Task {$this->name} is no longer sane " . SITE_URL . "/tools.php?action=periodic&mode=detail&id={$this->taskId}"
+                "Task {$this->name} is no longer sane "
+                    . SITE_URL
+                    . "/tools.php?action=periodic&mode=detail&id={$this->taskId}"
             );
-        } elseif ($errorCount == 0 && !$sane) {
-            self::$db->prepared_query('
-                UPDATE periodic_task SET
-                    is_sane = TRUE
-                WHERE periodic_task_id = ?
-            ', $this->taskId);
+        } elseif ($errorCount === 0 && !$sane) {
+            $this->pg()->query('
+                update task set
+                    is_sane = true
+                where id_task = $1
+                ', $this->taskId
+            );
             self::$cache->delete_value(TaskScheduler::CACHE_TASKS);
-
             Irc::sendMessage(IRC_CHAN_DEV, "Task {$this->name} is now sane");
         }
         return $this->processed;

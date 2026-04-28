@@ -18,14 +18,11 @@ if (!$scheduler->findById($taskId)) {
 
 $paginator = new Util\Paginator(ITEMS_PER_PAGE, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($scheduler->taskRunTotal($taskId));
-$stats = $scheduler->taskRuntimeStats($taskId);
 
 echo $Twig->render('admin/scheduler/task.twig', [
-    'header'    => $scheduler->heading(),
-    'stats'     => $stats,
-    'duration'  => json_encode($stats[0]['data']),
-    'processed' => json_encode($stats[1]['data']),
-    'task'      => $scheduler->taskHistory(
+    'header' => $scheduler->heading(),
+    'stats'  => $scheduler->taskRuntimeStats($taskId),
+    'task'   => $scheduler->taskHistory(
         $taskId, $paginator->limit(), $paginator->offset()
     ),
     'paginator' => $paginator,

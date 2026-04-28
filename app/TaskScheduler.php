@@ -8,7 +8,7 @@ namespace Gazelle;
  */
 
 class TaskScheduler extends Base {
-    final public const CACHE_TASKS = 'scheduled_tasks';
+    final public const CACHE_TASKS = 'tasks';
 
     protected Util\SortableTableHeader $heading;
 
@@ -19,23 +19,102 @@ class TaskScheduler extends Base {
 
     public function findByName(string $className): ?array {
         return $this->findById(
-            (int)self::$db->scalar("
-                SELECT pt.periodic_task_id FROM periodic_task pt WHERE pt.classname = ?
+            (int)$this->pg()->scalarex("
+                select id_task from task where class_name = $1
                 ", $className
             )
         );
     }
 
-    public function taskList(): array {
-        self::$db->prepared_query("
-            SELECT periodic_task_id, name, classname, description, period, is_enabled, is_sane, is_debug, run_now
-            FROM periodic_task
-        ");
-        return self::$db->to_array('periodic_task_id', MYSQLI_ASSOC);
+    public function heading(): Util\SortableTableHeader {
+        return $this->heading ??= new Util\SortableTableHeader(
+            'next', [
+                'name'        => ['dbColumn' => 'name',        'defaultSort' => 'asc',  'text' => 'Name'],
+                'period'      => ['dbColumn' => 'period',      'defaultSort' => 'asc',  'text' => 'Interval'],
+                'run_total'   => ['dbColumn' => 'run_total',   'defaultSort' => 'desc', 'text' => 'Runs'],
+                'duration'    => ['dbColumn' => 'duration',    'defaultSort' => 'desc', 'text' => 'Duration'],
+                'item_total'  => ['dbColumn' => 'item_total',  'defaultSort' => 'desc', 'text' => 'Processed'],
+                'status'      => ['dbColumn' => 'status',      'defaultSort' => 'desc', 'text' => 'Status'],
+                'error_total' => ['dbColumn' => 'error_total', 'defaultSort' => 'desc', 'text' => 'Errors'],
+                'event_total' => ['dbColumn' => 'event_total', 'defaultSort' => 'desc', 'text' => 'Events'],
+                'last'        => [
+                    'dbColumn'    => 'last_run is null asc, is_enabled desc, last_run',
+                    'defaultSort' => 'desc',
+                    'text'        => 'Last Run'
+                ],
+                'next'        => [
+                    'dbColumn'    => 'next_run is null asc, is_enabled desc, run_now desc, next_run',
+                    'defaultSort' => 'asc',
+                    'text'        => 'Next Run'
+                ],
+            ]
+        );
     }
 
-    public function insaneTaskList(): int {
-        return count(array_filter($this->taskList(),
+    public function taskDetailList(int $days = 7): array {
+        return $this->pg()->allex(<<<END_SQL
+            with events(id_task, total) as (
+                select th.id_task,
+                    count(*)
+                from task_history_event the
+                inner join task_history th using (id_task_history)
+                where th.created > now() - interval '1 day' * $1
+                group by th.id_task
+            ),
+            stats(id_task, id_task_history, run_total, error_total, item_total) as (
+                select id_task,
+                    max(id_task_history),
+                    count(*),
+                    sum(error_total),
+                    sum(item_total)
+                from task_history
+                where created > now() - interval '1 day' * $1
+                group by id_task
+            )
+            select * from (
+                select t.id_task, t.name, t.description, t.period, t.is_enabled, t.is_sane, t.run_now,
+                    coalesce(s.run_total, 0)    as run_total,
+                    coalesce(s.item_total, 0)   as item_total,
+                    coalesce(s.error_total, 0)  as error_total,
+                    coalesce(e.total, 0)        as event_total,
+                    coalesce(th.duration_ms, 0) as duration,
+                    th.status,
+                    th.created                  as last_run,
+                    th.created + interval '1 second' * t.period
+                                                as next_run
+                from task              t
+                left join events       e  on (e.id_task = t.id_task)
+                left join stats        s  on (s.id_task = t.id_task)
+                left join task_history th using (id_task_history)
+            ) q
+            order by {$this->heading()->orderBy()} {$this->heading()->dir()}, name asc
+            END_SQL, $days
+        );
+        // need to wrap the select so that pg can resolve next_run
+    }
+
+    public function taskList(): array {
+        return $this->pg()->allByKeyex(
+            'id_task',
+            <<<END_SQL
+            select id_task,
+                name,
+                class_name,
+                description,
+                period,
+                is_enabled,
+                is_sane,
+                is_debug,
+                run_now
+            from task
+            order by class_name
+            END_SQL
+        );
+    }
+
+    public function insaneTaskTotal(): int {
+        return count(array_filter(
+            $this->taskList(),
             fn ($v) => !$v['is_sane']
         ));
     }
@@ -49,54 +128,47 @@ class TaskScheduler extends Base {
     }
 
     public function enqueue(int $taskId): int {
-        self::$db->prepared_query("
-            UPDATE periodic_task SET
+        return $this->pg()->query('
+            update task set
                 is_sane = true,
                 run_now = true
-            WHERE periodic_task_id = ?
-            ", $taskId
+            where id_task = $1
+            ', $taskId
         );
-        return self::$db->affected_rows();
     }
 
     public function clear(int $taskId): int {
-        self::$db->prepared_query('
-            UPDATE periodic_task SET
+        return $this->pg()->query('
+            update task set
                 run_now = false
-            WHERE periodic_task_id = ?
+            where id_task = $1
             ', $taskId
         );
-        return self::$db->affected_rows();
     }
 
     public function updateTask(
         int $taskId,
         string $name,
-        string $class,
         string $description,
         int $period,
         bool $isEnabled,
         bool $isSane,
         bool $isDebug
     ): int {
-        if (!$this->isClassValid($class)) {
-            return 0;
-        }
-        self::$db->prepared_query("
-            UPDATE periodic_task SET
-                name        = ?,
-                classname   = ?,
-                description = ?,
-                period      = ?,
-                is_enabled  = ?,
-                is_sane     = ?,
-                is_debug    = ?
-            WHERE periodic_task_id = ?
-            ", $name, $class, $description, $period,
-                (int)$isEnabled, (int)$isSane, (int)$isDebug,
+        $affected = $this->pg()->query('
+            update task set
+                name        = $1,
+                description = $2,
+                period      = $3,
+                is_enabled  = $4,
+                is_sane     = $5,
+                is_debug    = $6
+            where id_task = $7
+            ', $name, $description, $period, $isEnabled, $isSane, $isDebug,
                 $taskId,
         );
-        return self::$db->affected_rows();
+        self::$cache->delete_value(self::CACHE_TASKS);
+        return $affected;
     }
 
     public function runClass(string $className, bool $debug = false): int {
@@ -104,29 +176,20 @@ class TaskScheduler extends Base {
         if ($task === null) {
             return -1;
         }
-        return $this->runTask($task['periodic_task_id'], $debug);
+        return $this->runTask($task['id_task'], $debug);
     }
 
     public function runNow(int $taskId): int {
-        self::$db->prepared_query("
-            UPDATE periodic_task SET
-                run_now = 1 - run_now
-            WHERE periodic_task_id = ?
+        return $this->pg()->query("
+            update task set
+                run_now = true
+            where id_task = $1
             ", $taskId
         );
-        return self::$db->affected_rows();
     }
 
     public function run(): int {
-        $pendingMigrations = array_filter(
-            json_decode(
-                (string)shell_exec(BIN_PHINX . ' status -c ' . PHINX_MYSQL . ' --format=json | tail -n 1'),
-                true
-            )['migrations'],
-            fn ($value) => count($value) > 0 && $value['migration_status'] === 'down'
-        );
-
-        if ($pendingMigrations) {
+        if (new SiteInfo()->phinxMigrationsPending()) {
             Util\Irc::sendMessage(IRC_CHAN_DEV, 'Pending migrations found, scheduler cannot continue');
             echo "Pending migrations found, aborting\n";
             return 0;
@@ -145,31 +208,31 @@ class TaskScheduler extends Base {
 
         $TTL = hrtime(true) + 58e9;
         while (hrtime(true) < $TTL) {
-            $taskId = (int)self::$db->scalar("
-                SELECT pt.periodic_task_id
-                FROM periodic_task pt
-                LEFT JOIN (
-                    SELECT pth.periodic_task_id,
-                    max(pth.launch_time) AS launch_time
-                    FROM periodic_task_history pth
-                    WHERE pth.status = 'completed'
-                    GROUP BY pth.periodic_task_id
-                ) last USING (periodic_task_id)
-                WHERE pt.is_enabled IS TRUE
-                    AND pt.is_sane IS TRUE
-                    AND (
-                        last.periodic_task_id is null
-                        OR last.launch_time + INTERVAL pt.period SECOND < now()
-                        OR pt.run_now IS TRUE
+            $taskId = (int)$this->pg()->scalarex("
+                select t.id_task
+                from task t
+                left join (
+                    select th.id_task,
+                    max(th.created) AS created
+                    from task_history th
+                    where th.status = 'completed'
+                    group by th.id_task
+                ) last using (id_task)
+                where t.is_enabled is true
+                    and t.is_sane is true
+                    and (
+                        last.id_task is null
+                        or last.created + interval '1 second' * t.period < now()
+                        or t.run_now is true
                     )
-                    AND NOT EXISTS (
-                        SELECT 1 FROM periodic_task_history r
-                        WHERE r.status = 'running'
-                            AND r.periodic_task_id = pt.periodic_task_id
+                    and not exists (
+                        select 1 from task_history r
+                        where r.status = 'running'
+                            anD r.id_task = t.id_task
                     )
-                    AND pt.periodic_task_id NOT IN (" . placeholders($fail) . ")
-                LIMIT 1
-                ", ...$fail
+                    and not t.id_task = any($1::integer[])
+                limit 1
+                ", $this->pg()->integerConverter()->output($fail)
             );
             if (!$taskId) {
                 // no tasks remaining to be run
@@ -191,10 +254,19 @@ class TaskScheduler extends Base {
         }
         echo "Running task {$task['name']}...";
 
-        $taskRunner = $this->createRunner($taskId, $task['name'], $task['classname'], $task['is_debug'] || $debug);
+        $taskRunner = $this->createRunner($taskId, $task['name'], $task['class_name'], $task['is_debug'] || $debug);
         if (is_null($taskRunner)) {
-            echo "DONE! (0.000)\n";
-            Util\Irc::sendMessage(IRC_CHAN_DEV, "Failed to construct task {$task['name']}");
+            echo "Failed.\n";
+            Util\Irc::sendMessage(
+                IRC_CHAN_DEV,
+                sprintf("No implementation for task $taskId (%s), disabling.", self::className($task['class_name']))
+            );
+            $this->pg()->query('
+                update task set
+                    is_enabled = false
+                where id_task = $1
+                ', $taskId
+            );
             return -1;
         }
 
@@ -237,75 +309,10 @@ class TaskScheduler extends Base {
     }
 
     public function taskRunTotal(int $taskId): int {
-        return (int)self::$db->scalar("
-            SELECT count(*) FROM periodic_task_history WHERE periodic_task_id = ?
+        return (int)$this->pg()->scalarex("
+            select count(*) from task_history where id_task = $1
             ", $taskId
         );
-    }
-
-    public function heading(): Util\SortableTableHeader {
-        return $this->heading ??= new Util\SortableTableHeader(
-            'next', [
-                'name'        => ['dbColumn' => 'name',      'defaultSort' => 'asc',  'text' => 'Name'],
-                'period'      => ['dbColumn' => 'period',    'defaultSort' => 'asc',  'text' => 'Interval'],
-                'runs'        => ['dbColumn' => 'runs',      'defaultSort' => 'desc', 'text' => 'Runs'],
-                'duration'    => ['dbColumn' => 'duration',  'defaultSort' => 'desc', 'text' => 'Duration'],
-                'processed'   => ['dbColumn' => 'processed', 'defaultSort' => 'desc', 'text' => 'Processed'],
-                'status'      => ['dbColumn' => 'status',    'defaultSort' => 'desc', 'text' => 'Status'],
-                'errors'      => ['dbColumn' => 'errors',    'defaultSort' => 'desc', 'text' => 'Errors'],
-                'events'      => ['dbColumn' => 'events',    'defaultSort' => 'desc', 'text' => 'Events'],
-                'last'        => [
-                    'dbColumn'    => 'last_run IS NULL ASC, is_enabled DESC, last_run',
-                    'defaultSort' => 'desc',
-                    'text'        => 'Last Run'
-                ],
-                'next'        => [
-                    'dbColumn'    => 'next_run IS NULL ASC, is_enabled DESC, run_now DESC, next_run',
-                    'defaultSort' => 'asc',
-                    'text'        => 'Next Run'
-                ],
-            ]
-        );
-    }
-
-    public function taskDetailList(int $days = 7): array {
-        self::$db->prepared_query("
-            SELECT pt.periodic_task_id,
-                pt.period,
-                pt.name,
-                pt.description,
-                pt.period,
-                pt.is_enabled,
-                pt.is_sane,
-                pt.run_now,
-                last_value(pth.status) OVER (PARTITION BY pt.periodic_task_id, pt.period)
-                                                              AS status,
-                count(DISTINCT pth.periodic_task_history_id)  AS runs,
-                sum(DISTINCT pth.num_items)                   AS processed,
-                sum(DISTINCT pth.num_errors)                  AS errors,
-                sum(DISTINCT pth.duration_ms)                 AS duration,
-                count(pthe.periodic_task_history_event_id)    AS events,
-                max(pth.launch_time)                          AS last_run,
-                max(pth.launch_time) + INTERVAL period SECOND AS next_run
-            FROM periodic_task                    pt
-            LEFT JOIN periodic_task_history       pth  USING (periodic_task_id)
-            LEFT JOIN periodic_task_history_event pthe USING (periodic_task_history_id)
-            WHERE (
-                    pth.launch_time IS NULL
-                    OR pth.launch_time > now() - INTERVAL ? DAY
-                )
-            GROUP BY pt.periodic_task_id,
-                pt.period,
-                pt.name,
-                pt.description,
-                pt.period,
-                pt.is_enabled,
-                pt.is_sane,
-                pt.run_now
-            ORDER BY {$this->heading()->orderBy()} {$this->heading()->dir()}, name ASC
-            ", $days
-        );
-        return self::$db->to_array(false, MYSQLI_ASSOC);
     }
 
     public function taskHistory(
@@ -313,26 +320,26 @@ class TaskScheduler extends Base {
         int $limit,
         int $offset,
     ): ?TaskScheduler\TaskHistory {
-        self::$db->prepared_query("
-            SELECT periodic_task_history_id, launch_time, status, num_errors, num_items, duration_ms
-            FROM periodic_task_history
-            WHERE periodic_task_id = ?
-            ORDER BY launch_time DESC
-            LIMIT ? OFFSET ?
-            ", $taskId, $limit, $offset
+        $items = $this->pg()->allex('
+            select id_task_history, created, status, error_total, item_total, duration_ms
+            from task_history
+            where id_task = $1
+            order by created desc
+            limit $2 offset $3
+            ', $taskId, $limit, $offset
         );
-        $items = self::$db->to_array('periodic_task_history_id', MYSQLI_ASSOC);
 
         $historyEvents = [];
-        if (count($items)) {
-            self::$db->prepared_query("
-                SELECT periodic_task_history_id, event_time, severity, event, reference
-                FROM periodic_task_history_event
-                WHERE periodic_task_history_id IN (" . placeholders($items) . ")
-                ORDER BY event_time, periodic_task_history_event_id
-            ", ...array_keys($items));
-            $events = self::$db->to_array(false, MYSQLI_ASSOC);
-
+        if ($items !== []) {
+            $events = $this->pg()->allex('
+                select id_task_history, created, severity, note, reference
+                from task_history_event
+                where id_task_history = any($1::integer[])
+                order by created, id_task_history_event
+                ', $this->pg()->integerConverter()->output(
+                    array_column($items, 'id_task_history')
+                )
+            );
             foreach ($events as $event) {
                 [$historyId, $eventTime, $severity, $message, $reference] = array_values($event);
                 $historyEvents[$historyId][] = new TaskScheduler\Event($severity, $message, $reference, $eventTime);
@@ -344,115 +351,120 @@ class TaskScheduler extends Base {
             $this->taskRunTotal($taskId)
         );
         foreach ($items as $item) {
-            [$historyId, $launchTime, $status, $numErrors, $numItems, $duration] = array_values($item);
+            [$historyId, $created, $status, $errorTotal, $itemTotal, $duration] = array_values($item);
             $taskEvents = $historyEvents[$historyId] ?? [];
-            $history->items[] = new TaskScheduler\HistoryItem($launchTime, $status, $numErrors, $numItems, $duration, $taskEvents);
+            $history->items[] = new TaskScheduler\HistoryItem($created, $status, $errorTotal, $itemTotal, $duration, $taskEvents);
         }
 
         return $history;
     }
 
-    private function constructAxes(array $data, string $key, array $axes, bool $time): array {
-        $result = [];
-
-        foreach ($axes as $axis) {
-            if (is_array($axis)) {
-                $taskId = $axis[0];
-                $name = $axis[1];
-            } else {
-                $taskId = $axis;
-                $name = $axis;
-            }
-
-            $result[] = [
-                'name' => $name,
-                'data' => array_map(
-                    fn ($v) => [$time ? (int)strtotime($v[$key]) * 1000 : $v[$key], (int)$v[$taskId]],
-                    $data
-                )
-            ];
-        }
-        return $result;
-    }
-
     public function runtimeStats(int $days = 90): array {
-        self::$db->prepared_query("
-            SELECT date_format(pth.launch_time, '%Y-%m-%d %H:00:00') AS date,
-                sum(pth.duration_ms) AS duration,
-                sum(pth.num_items) AS processed
-            FROM periodic_task pt
-            INNER JOIN periodic_task_history pth USING (periodic_task_id)
-            WHERE pt.is_enabled IS TRUE
-              AND pth.launch_time >= now() - INTERVAL 1 DAY
-            GROUP BY 1
-            ORDER BY 1
-        ");
-        $hourly = $this->constructAxes(self::$db->to_array(false, MYSQLI_ASSOC), 'date', ['duration', 'processed'], true);
-
-        self::$db->prepared_query("
-            SELECT date(pth.launch_time) AS date,
-                sum(pth.duration_ms) AS duration,
-                sum(pth.num_items) AS processed
-            FROM periodic_task pt
-            INNER JOIN periodic_task_history pth USING (periodic_task_id)
-            WHERE pt.is_enabled IS TRUE
-                AND pth.launch_time BETWEEN curdate() - INTERVAL ? DAY AND curdate()
-            GROUP BY 1
-            ORDER BY 1
-            ", $days
-        );
-        $daily = $this->constructAxes(self::$db->to_array(false, MYSQLI_ASSOC), 'date', ['duration', 'processed'], true);
-
-        self::$db->prepared_query("
-            SELECT pt.name,
-                avg(pth.duration_ms) AS duration_avg,
-                avg(pth.num_items)   AS processed_avg
-            FROM periodic_task pt
-            INNER JOIN periodic_task_history pth USING (periodic_task_id)
-            WHERE pt.is_enabled IS TRUE
-                AND pth.launch_time BETWEEN curdate() - INTERVAL ? DAY AND curdate()
-            GROUP BY 1
-            ORDER BY 1
-            ", $days
-        );
-        $tasks = $this->constructAxes(self::$db->to_array(false, MYSQLI_ASSOC), 'name', ['duration_avg', 'processed_avg'], false);
-
-        $totals = self::$db->rowAssoc("
-            SELECT count(pth.periodic_task_history_id) AS runs,
-                sum(pth.duration_ms) AS duration,
-                sum(pth.num_items) AS processed,
-                count(pthe.periodic_task_history_event_id) AS events,
-                sum(pth.num_errors) AS errors
-            FROM periodic_task pt
-            INNER JOIN periodic_task_history pth USING (periodic_task_id)
-            LEFT JOIN periodic_task_history_event pthe USING (periodic_task_history_id)
-            WHERE pt.is_enabled IS TRUE
-                AND pth.launch_time BETWEEN curdate() - INTERVAL ? DAY AND curdate()
-            ", $days
+        $daily = $this->pg()->rowAssocex(<<<END_SQL
+            with daily(ymd, name, duration, item_total) as (
+                select to_char(th.created, 'YYYY-MM-DD') as ymd,
+                    t.name,
+                    sum(th.duration_ms),
+                    sum(th.item_total)
+                from task               t
+                inner join task_history th using (id_task)
+                where t.is_enabled is true
+                    and th.created between now()::date - interval '1 day' * $1 and now()::date
+                group by ymd, t.name
+                order by ymd, t.name
+            ),
+            by_day(duration, item_total) as (
+                select sum(duration), sum(item_total) from daily group by ymd order by ymd
+            ),
+            by_task(duration, item_total) as (
+                select sum(duration), sum(item_total) from daily group by name order by name
+            )
+            select
+                (select jsonb_agg(distinct ymd)  from daily)   as daily_category,
+                (select jsonb_agg(duration)      from by_day)  as daily_duration,
+                (select jsonb_agg(item_total)    from by_day)  as daily_total,
+                (select jsonb_agg(distinct name) from daily)   as task_category,
+                (select jsonb_agg(duration)      from by_task) as task_duration,
+                (select jsonb_agg(item_total)    from by_task) as task_total
+            END_SQL, $days
         );
 
         return [
-            'hourly' => $hourly,
-            'daily'  => $daily,
-            'tasks'  => $tasks,
-            'totals' => $totals,
+            'hourly' => $this->pg()->rowAssocex(<<<END_SQL
+                with hourly(h, duration, item_total) as (
+                    select to_char(th.created, 'HH24:00') as h,
+                        sum(th.duration_ms),
+                        sum(th.item_total)
+                    from task               t
+                    inner join task_history th using (id_task)
+                    where th.created > now() - interval '1 day'
+                    group by h
+                    order by h
+                )
+                select
+                    jsonb_agg(h)          as category,
+                    jsonb_agg(duration)   as duration,
+                    jsonb_agg(item_total) as item_total
+                from hourly
+                END_SQL
+            ),
+            'daily' => [
+                'category'   => $daily['daily_category'],
+                'duration'   => $daily['daily_duration'],
+                'item_total' => $daily['daily_total'],
+            ],
+            'tasks' => [
+                'category'   => $daily['task_category'],
+                'duration'   => $daily['task_duration'],
+                'item_total' => $daily['task_total'],
+            ],
+            'totals' => $this->pg()->rowAssocex(<<<END_SQL
+                select count(*)                      as run_total,
+                    sum(th.duration_ms)              as duration,
+                    sum(th.item_total)               as item_total,
+                    count(the.id_task_history_event) as event_total,
+                    sum(th.error_total)              as error_total
+                from task                    t
+                inner join task_history      th using (id_task)
+                left join task_history_event the using (id_task_history)
+                where t.is_enabled is true
+                    and th.created between now()::date - interval '1 day' * $1 and now()::date
+                END_SQL, $days
+            ),
         ];
     }
 
     public function taskRuntimeStats(int $taskId, int $days = 90): array {
-        self::$db->prepared_query("
-            SELECT date(pth.launch_time) AS date,
-                sum(pth.duration_ms) AS duration,
-                sum(pth.num_items) AS processed
-            FROM periodic_task pt
-            INNER JOIN periodic_task_history pth USING (periodic_task_id)
-            WHERE pt.periodic_task_id = ?
-                AND pth.launch_time BETWEEN curdate() - INTERVAL ? DAY AND curdate()
-            GROUP BY 1
-            ORDER BY 1
-            ", $taskId, $days
+        return $this->pg()->rowAssocex(<<<END_SQL
+            with daily(ymd, name, duration, item_total) as (
+                select to_char(th.created, 'YYYY-MM-DD') as ymd,
+                    t.name,
+                    sum(th.duration_ms),
+                    sum(th.item_total)
+                from task               t
+                inner join task_history th using (id_task)
+                where t.id_task = $1
+                    and th.created between now()::date - interval '1 day' * $2 and now()::date
+                group by ymd, t.name
+                order by ymd, t.name
+            ),
+            by_day(duration, item_total) as (
+                select sum(duration), sum(item_total) from daily group by ymd order by ymd
+            ),
+            by_task(duration, item_total) as (
+                select sum(duration), sum(item_total) from daily group by name order by name
+            )
+            select
+                (select jsonb_agg(distinct ymd) from daily)  as category,
+                (select jsonb_agg(duration)     from by_day) as duration,
+                (select jsonb_agg(item_total)   from by_day) as item_total
+            END_SQL, $taskId, $days
         );
+    }
 
-        return $this->constructAxes(self::$db->to_array(false, MYSQLI_ASSOC), 'date', ['duration', 'processed'], true);
+    public function isLastRunIntervalOk(int $delay): bool {
+        return $delay >= (int)$this->pg()->scalarex("
+            select extract(epoch from now() - max(created)) from task_history
+        ");
     }
 }

@@ -5,7 +5,7 @@
 {% include 'admin/scheduler/links.twig' with {'can_edit': viewer.permitted('admin_periodic_task_manage')} only %}
 {{ paginator.linkbox|raw }}
 {% for item in task.items %}
-    {% if loop.first %}
+{%  if loop.first %}
 <br>
 <div class="box pad">
     <div id="daily-totals" style="width: 100%; height: 350px;"></div>
@@ -13,25 +13,25 @@
 
 <table width="100%" id="tasks">
     <tr class="colhead">
-        <td>{{ header|column('launchtime') }} <a id="dtoggle" class="brackets" href="#">Toggle</a></td>
+        <td>{{ header|column('created') }} <a id="dtoggle" class="brackets" href="#">Toggle</a></td>
         <td>{{ header|column('duration') }}</td>
         <td style="width:10%">{{ header|column('status') }}</td>
-        <td style="width:10%">{{ header|column('items') }}</td>
-        <td style="width:10%">{{ header|column('errors') }}</td>
+        <td style="width:10%">{{ header|column('item_total') }}</td>
+        <td style="width:10%">{{ header|column('error_total') }}</td>
     </tr>
-    {% endif %}
+{%  endif %}
     <tr class="rowa">
         <td>
-            <span class="reltime">{{ item.launchTime|time_diff }}</span>
-            <span class="abstime hidden">{{ item.launchTime }}</span>
+            <span class="reltime">{{ item.created|time_diff }}</span>
+            <span class="abstime hidden">{{ item.created|date('Y-m-d H:i:s') }}</span>
         </td>
         <td>{{ item.duration }}ms</td>
         <td>{{ item.status }}</td>
-        <td>{{ item.numItems|number_format }}</td>
-        <td>{{ item.numErrors|number_format }}</td>
+        <td>{{ item.itemTotal|number_format }}</td>
+        <td>{{ item.errorTotal|number_format }}</td>
     </tr>
-    {% for event in item.events %}
-        {% if loop.first %}
+{%  for event in item.events %}
+{%      if loop.first %}
     <tr class="rowb">
         <td colspan="5">
             <table>
@@ -41,39 +41,34 @@
                     <td>Event</td>
                     <td>Reference</td>
                 </tr>
-        {% endif %}
+{%      endif %}
                 <tr>
                     <td>
-                        <span class="reltime">{{ event.timestamp|time_diff }}</span>
-                        <span class="abstime hidden">{{ event.timestamp }}</span>
+                        <span class="reltime">{{ event.created|time_diff }}</span>
+                        <span class="abstime hidden">{{ event.created|date('Y-m-d H:i:s') }}</span>
                     </td>
                     <td>{{ event.severity }}</td>
                     <td>{{ event.event }}</td>
                     <td>{{ event.reference }}</td>
                 </tr>
-        {% if loop.last %}
+{%      if loop.last %}
             </table>
         </td>
     </tr>
-        {% endif %}
-    {% endfor %}
-    {% if loop.last %}
+{%      endif %}
+{%  endfor %}
+{%  if loop.last %}
 </table>
 {{ paginator.linkbox|raw }}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    initialiseChart('daily-totals', 'Daily', [
-        {
-            name: 'Duration',
-            yAxis: 0,
-            data: {{ duration|raw }}
+    Highcharts.chart('daily-totals', {
+        chart: { type: 'column' },
+        title: { text: 'Daily' },
+        credits: { enabled: false },
+        xAxis: {
+            categories: {{ stats.category|json_encode|raw }},
         },
-        {
-            name: 'Processed',
-            yAxis: 1,
-            data: {{ processed|raw }}
-        }
-    ], {
         yAxis: [
             {
                 title: { text: 'Duration' }
@@ -81,6 +76,20 @@ document.addEventListener('DOMContentLoaded', function() {
             {
                 title: { text: 'Items' },
                 opposite: true
+            }
+        ],
+        series: [
+            {
+                data: {{ stats.duration|json_encode }},
+                name: 'Duration',
+                type: 'column',
+                yAxis: 0
+            },
+            {
+                data: {{ stats.item_total|json_encode }},
+                name: 'Processed',
+                type: 'column',
+                yAxis: 1
             }
         ]
     });
@@ -91,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 });
 </script>
-    {% endif %}
+{%  endif %}
 {% else %}
 <div class="center">
     <h2>No history found</h2>

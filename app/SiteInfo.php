@@ -58,9 +58,27 @@ class SiteInfo extends Base {
                     (string)shell_exec(BIN_PHINX . ' status -c ' . PHINX_MYSQL . ' --format=json|tail -n 1'),
                     true
                 )['migrations'],
-                fn($v) => count($v) > 0
+                fn ($v) => count($v) > 0
             )
         ];
+    }
+
+    public function phinxMigrationsPending(): bool {
+        $pendingMigrations = false;
+        foreach ([PHINX_MYSQL, PHINX_MYSQL2, PHINX_PG] as $configuration) {
+            $output = shell_exec(
+                escapeshellarg(BIN_PHINX) . " status -c " . escapeshellarg($configuration)
+                    . " --format=json | tail -n 1"
+            );
+            if ($output !== false) {
+                $status = json_decode($output, true);
+                if (is_array($status) && $status['pending_count'] !== 0) {
+                    $pendingMigrations = true;
+                    break;
+                }
+            }
+        }
+        return $pendingMigrations;
     }
 
     public function composerVersion(): string {

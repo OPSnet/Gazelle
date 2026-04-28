@@ -13,11 +13,11 @@
             <td>Errors</td>
         </tr>
         <tr>
-            <td>{{ totals.runs|number_format }}</td>
-            <td>{{ totals.duration|number_format }} ms</td>
-            <td>{{ totals.processed|number_format }}</td>
-            <td>{{ totals.events|number_format }}</td>
-            <td>{{ totals.errors|number_format }}</td>
+            <td>{{ stats.totals.run_total|number_format }}</td>
+            <td>{{ stats.totals.duration|number_format }} ms</td>
+            <td>{{ stats.totals.item_total|number_format }}</td>
+            <td>{{ stats.totals.event_total|number_format }}</td>
+            <td>{{ stats.totals.error_total|number_format }}</td>
         </tr>
     </table>
     <br>
@@ -30,85 +30,104 @@
 </div>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    initialiseBarChart('task-averages', 'Task Averages', [
-        {
-            name: 'Duration',
-            yAxis: 0,
-            data: {{ tasks.duration|raw }}
+    Highcharts.chart('task-averages', {
+        chart: { type: 'column' },
+        title: { text: 'Task Averages' },
+        credits: { enabled: false },
+        xAxis: {
+            categories: {{ stats.tasks.category|json_encode|raw }},
         },
-        {
-            name: 'Processed',
-            yAxis: 1,
-            data: {{ tasks.processed|raw }}
-        }
-    ], {
         yAxis: [
             {
-                title: {
-                    text: 'Duration'
-                },
+                title: { text: 'Duration' },
                 type: 'logarithmic',
-            }, {
-                title: {
-                    text: 'Items'
-                },
+            },
+            {
+                title: { text: 'Items' },
                 type: 'logarithmic',
                 opposite: true,
             }
-        ]
-    });
-
-    initialiseChart('hourly-totals', 'Hourly', [
-        {
-            name: 'Duration',
-            yAxis: 0,
-            data: {{ hourly.duration|raw }}
-        },
-        {
-            name: 'Processed',
-            yAxis: 1,
-            data: {{ hourly.processed|raw }}
-        }
-    ], {
-        yAxis: [
+        ],
+        series: [
             {
-                title: {
-                    text: 'Duration'
-                }
-            }, {
-                title: {
-                    text: 'Items'
-                },
-                opposite: true
+                data: {{ stats.tasks.duration|json_encode }},
+                name: 'Duration',
+                type: 'column',
+                yAxis: 0
+            },
+            {
+                data: {{ stats.tasks.item_total|json_encode }},
+                name: 'Processed',
+                type: 'column',
+                yAxis: 1
             }
         ]
     });
 
-    initialiseChart('daily-totals', 'Daily', [
-        {
-            name: 'Duration',
-            yAxis: 0,
-            data: {{ daily.duration|raw }}
+    Highcharts.chart('hourly-totals', {
+        chart: { type: 'column' },
+        title: { text: 'Hourly' },
+        credits: { enabled: false },
+        xAxis: {
+            categories: {{ stats.hourly.category|json_encode|raw }},
         },
-        {
-            name: 'Processed',
-            yAxis: 1,
-            data: {{ daily.processed|raw }}
-        }
-    ], {
         yAxis: [
             {
-                title: {
-                    text: 'Duration'
-                }
-            }, {
-                title: {
-                    text: 'Items'
-                },
+                title: { text: 'Duration' }
+            },
+            {
+                title: { text: 'Items' },
                 opposite: true
+            }
+        ],
+        series: [
+            {
+                data: {{ stats.hourly.duration|json_encode }},
+                name: 'Duration',
+                type: 'column',
+                yAxis: 0
+            },
+            {
+                data: {{ stats.hourly.item_total|json_encode }},
+                name: 'Processed',
+                type: 'column',
+                yAxis: 1
             }
         ]
     });
+
+    Highcharts.chart('daily-totals', {
+        chart: { type: 'column' },
+        title: { text: 'Daily' },
+        credits: { enabled: false },
+        xAxis: {
+            categories: {{ stats.daily.category|json_encode|raw }},
+        },
+        yAxis: [
+            {
+                title: { text: 'Duration' }
+            },
+            {
+                title: { text: 'Items' },
+                opposite: true
+            }
+        ],
+        series: [
+            {
+                data: {{ stats.daily.duration|json_encode }},
+                name: 'Duration',
+                type: 'column',
+                yAxis: 0
+            },
+            {
+                data: {{ stats.daily.item_total|json_encode }},
+                name: 'Processed',
+                type: 'column',
+                yAxis: 1
+            }
+        ]
+    });
+
 });
 </script>
 {{ footer() }}

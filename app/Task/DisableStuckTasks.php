@@ -8,37 +8,40 @@ use Gazelle\Util\Time;
 class DisableStuckTasks extends \Gazelle\Task {
     public function run(): void {
         // If a task fails with a fatal error it will be stuck in a `running` state forever
-        self::$db->prepared_query("
-            SELECT pth.periodic_task_id, pth.periodic_task_history_id, pth.launch_time, pt.name
-            FROM periodic_task_history pth
-            INNER JOIN periodic_task pt USING (periodic_task_id)
-            WHERE pth.status = 'running'
-                AND pth.launch_time < now() - INTERVAL 15 MINUTE
-                AND pt.is_enabled IS TRUE
+        $taskList = $this->pg()->allex("
+            select th.id_task, th.id_task_history, th.created, t.name
+            from task_history th
+            inner join task t using (id_task)
+            where th.status = 'running'
+                and th.created < now() - interval '15 minute'
+                and t.is_enabled is true
         ");
-        $tasks = self::$db->to_array(false, MYSQLI_ASSOC);
 
-        foreach ($tasks as $task) {
-            [$id, $historyId, $launchTime, $name] = array_values($task);
-            $duration = Time::diff(time() - (int)strtotime($launchTime) + time(), 2, false);
+        $now = new \DateTimeImmutable();
+        foreach ($taskList as $task) {
+            $duration = sprintf(
+                '%0.2fs',
+                $now->format('U.u') - $task['created']->format('U.u')
+            );
 
-            Irc::sendMessage(IRC_CHAN_DEV, "Marking stuck task $name ($duration) as insane");
+            Irc::sendMessage(IRC_CHAN_DEV, "Marking stuck task {$task['name']} ($duration) as insane");
             $this->processed++;
-            $this->info("Marking stuck task $name ($duration) as insane", $id);
+            $this->info("Marking stuck task {$task['name']} ($duration) as insane", $task['id_task']);
 
-            self::$db->prepared_query('
-                UPDATE periodic_task SET
-                    is_sane = FALSE
-                WHERE periodic_task_id = ?
-                ', $id
+            $this->pg()->begin();
+            $this->pg()->query('
+                update task set
+                    is_sane = false
+                where id_task = $1
+                ', $task['id_task']
             );
-
-            self::$db->prepared_query("
-                UPDATE periodic_task_history SET
+            $this->pg()->query("
+                update task_history set
                     status = 'failed'
-                WHERE periodic_task_history_id = ?
-                ", $historyId
+                where id_task_history = $1
+                ", $task['id_task_history']
             );
+            $this->pg()->commit();
         }
 
         if ($this->processed > 0) {
