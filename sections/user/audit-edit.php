@@ -25,7 +25,7 @@ $eventList = $user->auditTrail()->eventList($idList);
 echo $Twig->render('user/audit-edit.twig', [
     'id_list' => implode(
         ',',
-        array_map(fn ($e) => $e['id_user_audit_trail'], $eventList),
+        array_map(fn ($e) => $e['id_audit_trail_user'], $eventList),
     ),
     'note' => new Util\Textarea(
         'note',

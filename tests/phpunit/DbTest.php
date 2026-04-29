@@ -515,7 +515,8 @@ class DbTest extends TestCase {
         $bad = new DB\PgTable('nosuchtable');
         $this->assertFalse($bad->exists(), 'pg-table-does-not-exist');
 
-        $table = new DB\PgTable('user_audit_trail');
+        $name  = 'counter';
+        $table = new DB\PgTable($name);
         $this->assertTrue($table->exists(), 'pg-table-exists');
         $this->assertEquals(
             "tools.php?action=db-pg&table={$table->name}",
@@ -523,7 +524,7 @@ class DbTest extends TestCase {
             'pg-table-location',
         );
         $this->assertEquals(
-            "<a href=\"tools.php?action=db-pg&amp;table=user_audit_trail\">user_audit_trail</a>",
+            "<a href=\"tools.php?action=db-pg&amp;table=$name\">$name</a>",
             $table->link(),
             'pg-table-link',
         );
@@ -548,7 +549,7 @@ class DbTest extends TestCase {
         );
 
         $indexRead = $table->indexRead();
-        $this->assertCount(4, $indexRead, 'pg-table-index-read-total');
+        $this->assertCount(1, $indexRead, 'pg-table-index-read-total');
         $index = $indexRead[0];
         $this->assertEquals(
             [

@@ -39,7 +39,7 @@ class SiteLog extends \Gazelle\Base {
         if ($total === false) {
             $conf  = $this->configure($searchTerm);
             $total = (int)$this->pg()->scalar("
-                select count(*) from site_log {$conf['where']}
+                select count(*) from audit_trail_site {$conf['where']}
                 ", ...$conf['args']
             );
             self::$cache->cache_value($key, $total, 3600);
@@ -52,11 +52,11 @@ class SiteLog extends \Gazelle\Base {
         array_push($conf['args'], $limit, $offset);
         return $this->decorate(
             $this->pg()->all("
-                select id_site_log,
+                select id_audit_trail_site,
                     note,
                     created
-                from site_log {$conf['where']}
-                order by id_site_log desc
+                from audit_trail_site {$conf['where']}
+                order by id_audit_trail_site desc
                 limit ? offset ?
                 ", ...$conf['args']
             )
@@ -98,7 +98,7 @@ class SiteLog extends \Gazelle\Base {
         foreach ($in as $entry) {
             [$class, $message] = $this->colorize($entry['note']);
             $out[] = [
-                'id'      => $entry['id_site_log'],
+                'id'      => $entry['id_audit_trail_site'],
                 'class'   => $class,
                 'message' => $message,
                 'created' => $entry['created'],

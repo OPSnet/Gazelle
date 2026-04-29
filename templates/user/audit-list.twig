@@ -8,9 +8,9 @@
 <div class="auhead note">Note</div>
 {%  endif %}
 {%  if edit %}
-{%      set label = '<label for="a-' ~ e.id_user_audit_trail ~ '">' %}
+{%      set label = '<label for="a-' ~ e.id_audit_trail_user ~ '">' %}
 {%      set label_end = '</label>' %}
-<div class="aubody id"><input type="checkbox" name="idlist[]" id="a-{{ e.id_user_audit_trail }}" value="{{ e.id_user_audit_trail }}"></div>
+<div class="aubody id"><input type="checkbox" name="idlist[]" id="a-{{ e.id_audit_trail_user }}" value="{{ e.id_audit_trail_user }}"></div>
 {%  endif %}
 <div class="aubody date">{{ label|raw }}{{ e.created|date('Y-m-d H:i') }}{{ label_end|raw }}</div>
 <div class="aubody note">

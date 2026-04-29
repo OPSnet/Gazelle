@@ -10,7 +10,7 @@ class Log extends Base {
      */
     public function general(string $message): static {
         $this->pg()->insert("
-            insert into site_log (note) values (?)
+            insert into audit_trail_site (note) values (?)
             ", trim($message)
         );
         return $this;

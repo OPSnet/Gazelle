@@ -194,7 +194,7 @@ class Torrent extends \Gazelle\Base {
                     select date_trunc('month', created) as created_month,
                         sum(case when note ~ '^Torrent \d+.* was uploaded by ' then 1 else 0 end),
                         sum(case when note ~ '^Torrent \d+.* was deleted by ' then -1 else 0 end)
-                    from site_log
+                    from audit_trail_site
                     where created between
                         now() - interval '24 month'
                         and now() - interval '1 month'

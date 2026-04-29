@@ -60,8 +60,8 @@ class UserAuditTrailTest extends TestCase {
         $this->assertCount(
             2,
             $auditTrail->eventList([
-                $eventList[0]['id_user_audit_trail'],
-                $eventList[1]['id_user_audit_trail'],
+                $eventList[0]['id_audit_trail_user'],
+                $eventList[1]['id_audit_trail_user'],
             ]),
             'uat-partial-event-list'
         );
@@ -126,7 +126,7 @@ class UserAuditTrailTest extends TestCase {
         // before the unit test suite is run, and they will be noticed in the
         // unit tests for contests. Tidy up that side effect here:
         new DB\Pg(PG_RW_DSN)->query("
-            delete from user_audit_trail where note ~ 'phpunit contest request fill'
+            delete from audit_trail_user where note ~ 'phpunit contest request fill'
         ");
         $after = new Search\AuditTrail();
         $after->setCreatedAfter(date('Y-m-d H:i:s', time() - 3600));

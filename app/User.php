@@ -1815,7 +1815,7 @@ class User extends BaseAttrObject {
             ", $this->id
         );
         $this->pg()->query('
-            delete from user_audit_trail where id_user = $1
+            delete from audit_trail_user where id_user = $1
             ', $this->id
         );
         $affected = parent::remove();

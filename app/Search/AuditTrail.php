@@ -20,9 +20,9 @@ class AuditTrail extends \Gazelle\Base {
             [
                 'user'    => ['dbColumn' => 'um."Username"', 'defaultSort' => 'asc',  'text' => 'User'],
                 'author'  => ['dbColumn' => 'ua."Username"', 'defaultSort' => 'asc',  'text' => 'Author'],
-                'event'   => ['dbColumn' => 'uat.event',     'defaultSort' => 'asc',  'text' => 'Event'],
-                'created' => ['dbColumn' => 'uat.created',   'defaultSort' => 'desc', 'text' => 'Created'],
-                'note'    => ['dbColumn' => 'uat.note',      'defaultSort' => 'asc',  'text' => 'Note'],
+                'event'   => ['dbColumn' => 'atu.event',     'defaultSort' => 'asc',  'text' => 'Event'],
+                'created' => ['dbColumn' => 'atu.created',   'defaultSort' => 'desc', 'text' => 'Created'],
+                'note'    => ['dbColumn' => 'atu.note',      'defaultSort' => 'asc',  'text' => 'Note'],
             ]
         );
     }
@@ -104,38 +104,38 @@ class AuditTrail extends \Gazelle\Base {
         $this->cond = [];
         $this->join = [];
         if (isset($this->info['after'])) {
-            $this->cond[] = 'uat.created >= ' . $this->pg()->placeholder(count($this->args));
+            $this->cond[] = 'atu.created >= ' . $this->pg()->placeholder(count($this->args));
             $this->args[] = $this->info['after'];
         }
         if (isset($this->info['before'])) {
-            $this->cond[] = 'uat.created <= ' . $this->pg()->placeholder(count($this->args));
+            $this->cond[] = 'atu.created <= ' . $this->pg()->placeholder(count($this->args));
             $this->args[] = $this->info['before'];
         }
         if (isset($this->info['event'])) {
-            $this->cond[] = "uat.event = any({$this->pg()->placeholder(count($this->args))}::text[])";
+            $this->cond[] = "atu.event = any({$this->pg()->placeholder(count($this->args))}::text[])";
             $this->args[] = $this->pg()->arrayConverter()->output($this->info['event']);
         }
         if (isset($this->info['note'])) {
-            $this->cond[] = "uat.note_ts @@ websearch_to_tsquery('simple', {$this->pg()->placeholder(count($this->args))})";
+            $this->cond[] = "atu.note_ts @@ websearch_to_tsquery('simple', {$this->pg()->placeholder(count($this->args))})";
             $this->args[] = $this->info['note'];
         }
         if (isset($this->info['author'])) {
-            $this->join[] = 'inner join relay.users_main ua on (ua."ID" = uat.id_user_creator)';
-            $this->cond[] = "uat.id_user_creator = any({$this->pg()->placeholder(count($this->args))}::int[])";
+            $this->join[] = 'inner join relay.users_main ua on (ua."ID" = atu.id_user_creator)';
+            $this->cond[] = "atu.id_user_creator = any({$this->pg()->placeholder(count($this->args))}::int[])";
             $this->args[] = $this->pg()->integerConverter()->output($this->info['author']);
         }
         if (isset($this->info['user'])) {
-            $this->join[] = 'inner join relay.users_main um on (um."ID" = uat.id_user)';
-            $this->cond[] = "uat.id_user = any({$this->pg()->placeholder(count($this->args))}::int[])";
+            $this->join[] = 'inner join relay.users_main um on (um."ID" = atu.id_user)';
+            $this->cond[] = "atu.id_user = any({$this->pg()->placeholder(count($this->args))}::int[])";
             $this->args[] = $this->pg()->integerConverter()->output($this->info['user']);
         }
 
         // check if we need to join users_main for order by
         if ($this->heading()->orderKey() === 'author' && !isset($this->info['author'])) {
-            $this->join[] = 'inner join relay.users_main ua on (ua."ID" = uat.id_user_creator)';
+            $this->join[] = 'inner join relay.users_main ua on (ua."ID" = atu.id_user_creator)';
         }
         if ($this->heading()->orderKey() === 'user' && !isset($this->info['user'])) {
-            $this->join[] = 'inner join relay.users_main um on (um."ID" = uat.id_user)';
+            $this->join[] = 'inner join relay.users_main um on (um."ID" = atu.id_user)';
         }
     }
 
@@ -148,7 +148,7 @@ class AuditTrail extends \Gazelle\Base {
         $join = isset($this->join) ? implode(' ', $this->join) : '';
         return <<<END_SQL
             select count(*)
-            from user_audit_trail uat
+            from audit_trail_user atu
             $join
             {$this->where()}
         END_SQL;
@@ -167,8 +167,8 @@ class AuditTrail extends \Gazelle\Base {
         $offsetPlaceholder = $this->pg()->placeholder(count($this->args) + 1);
         $join = isset($this->join) ? implode(' ', $this->join) : '';
         return <<<END_SQL
-            select uat.id_user, uat.id_user_creator, uat.created, uat.event, uat.note
-            from user_audit_trail uat
+            select atu.id_user, atu.id_user_creator, atu.created, atu.event, atu.note
+            from audit_trail_user atu
             $join
             {$this->where()}
             order by {$this->heading()->orderBy()} {$this->heading()->dir()}

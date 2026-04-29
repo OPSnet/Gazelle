@@ -3,7 +3,7 @@
 namespace Gazelle\Enum;
 
 /**
- * These are the allowed columns to order user_audit_trail rows
+ * These are the allowed columns to order audit_trail_user rows
  */
 
 enum UserAuditOrder: string {

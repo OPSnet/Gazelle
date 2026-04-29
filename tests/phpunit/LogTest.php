@@ -15,7 +15,7 @@ class LogTest extends TestCase {
     public function tearDown(): void {
         $pg = new DB\Pg(PG_RW_DSN);
         $pg->query("
-            delete from site_log where note ~ $1
+            delete from audit_trail_site where note ~ $1
             ", '^' . self::PREFIX
         );
         $pg->query("

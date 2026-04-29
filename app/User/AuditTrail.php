@@ -12,10 +12,10 @@ class AuditTrail extends \Gazelle\BaseUser {
 
     public function addEvent(UserAuditEvent $event, string $note, \Gazelle\User|null $creator = null): int {
         return $this->pg()->insert("
-            insert into user_audit_trail
+            insert into audit_trail_user
                    (id_user, event, note, id_user_creator)
             values (?,       ?,     ?,    ?)
-            returning id_user_audit_trail
+            returning id_audit_trail_user
             ", $this->user->id, $event->value, $note, $creator?->id
         );
     }
@@ -40,10 +40,10 @@ class AuditTrail extends \Gazelle\BaseUser {
             $event = UserAuditEvent::historical;
         }
         return $this->pg()->insert("
-            insert into user_audit_trail
+            insert into audit_trail_user
                    (id_user, event, note, created, id_user_creator)
             values (?,       ?,     ?,    ?,       ?)
-            returning id_user_audit_trail
+            returning id_audit_trail_user
             ", $this->user->id, $event->value, $note, $date, (int)$creator?->id
         );
     }
@@ -51,7 +51,7 @@ class AuditTrail extends \Gazelle\BaseUser {
     public function hasEvent(UserAuditEvent $event): bool {
         return (bool)$this->pg()->scalarex("
             select 1
-            from user_audit_trail
+            from audit_trail_user
             where id_user = $1
                 and event = $2
             ", $this->user->id, $event->value
@@ -60,14 +60,14 @@ class AuditTrail extends \Gazelle\BaseUser {
 
     public function eventList(array $idList, UserAuditOrder $order = UserAuditOrder::created): array {
         return $this->pg()->all("
-            select id_user_audit_trail,
+            select id_audit_trail_user,
                 id_user_creator,
                 event,
                 note,
                 created
-            from user_audit_trail
+            from audit_trail_user
             where id_user = ?
-                and id_user_audit_trail in (" . placeholders($idList) . ")
+                and id_audit_trail_user in (" . placeholders($idList) . ")
             order by {$order->value}
             ", $this->user->id, ...$idList
         );
@@ -75,12 +75,12 @@ class AuditTrail extends \Gazelle\BaseUser {
 
     public function fullEventList(UserAuditOrder $order = UserAuditOrder::created): array {
         return $this->pg()->all("
-            select id_user_audit_trail,
+            select id_audit_trail_user,
                 id_user_creator,
                 event,
                 note,
                 created
-            from user_audit_trail
+            from audit_trail_user
             where id_user = ?
             order by {$order->value}
             ", $this->user->id
@@ -92,10 +92,10 @@ class AuditTrail extends \Gazelle\BaseUser {
      */
     public function lastEventId(): int {
         return (int)$this->pg()->scalarex("
-            select id_user_audit_trail
-            from user_audit_trail
+            select id_audit_trail_user
+            from audit_trail_user
             where id_user = $1
-            order by id_user_audit_trail desc
+            order by id_audit_trail_user desc
             limit 1
             ", $this->user->id
         );
@@ -103,8 +103,8 @@ class AuditTrail extends \Gazelle\BaseUser {
 
     public function removeEvent(int $eventId): int {
         return $this->pg()->query("
-            delete from user_audit_trail
-            where id_user_audit_trail = $1
+            delete from audit_trail_user
+            where id_audit_trail_user = $1
                 and id_user = $2
             ", $eventId, $this->user->id
         );
@@ -112,7 +112,7 @@ class AuditTrail extends \Gazelle\BaseUser {
 
     public function resetAuditTrail(): int {
         return $this->pg()->prepared_query("
-            delete from user_audit_trail where id_user = ?
+            delete from audit_trail_user where id_user = ?
             ", $this->user->id
         );
     }
@@ -124,42 +124,47 @@ class AuditTrail extends \Gazelle\BaseUser {
      */
     public function modifyEventList(array $idList, string $note, \Gazelle\User $user): int {
         $affected = $this->pg()->prepared_query("
-            insert into user_audit_trail_revision
-            (id_user_audit_trail, id_user, id_user_creator, created, event, note, revision)
-            select uat.id_user_audit_trail, 
-                uat.id_user,
-                uat.id_user_creator,
-                uat.created,
-                uat.event,
-                uat.note,
-                1 + count(uatr.id_user_audit_trail) as revision
-            from user_audit_trail uat
-            left join user_audit_trail_revision uatr using (id_user_audit_trail)
-            where id_user_audit_trail in (" . placeholders($idList) . ")
-            group by uat.id_user_audit_trail
+            insert into audit_trail_user_revision
+            (id_audit_trail_user, id_user, id_user_creator, created, event, note, revision)
+            select atu.id_audit_trail_user, 
+                atu.id_user,
+                atu.id_user_creator,
+                atu.created,
+                atu.event,
+                atu.note,
+                1 + count(atur.id_audit_trail_user) as revision
+            from audit_trail_user atu
+            left join audit_trail_user_revision atur using (id_audit_trail_user)
+            where id_audit_trail_user in (" . placeholders($idList) . ")
+            group by atu.id_audit_trail_user,
+                atu.id_user,
+                atu.id_user_creator,
+                atu.created,
+                atu.event,
+                atu.note
             ", ...$idList
         );
         if (!$note) {
             // delete
             $this->pg()->prepared_query("
-                delete from user_audit_trail
-                where id_user_audit_trail in (" . placeholders($idList) . ")
+                delete from audit_trail_user
+                where id_audit_trail_user in (" . placeholders($idList) . ")
                 ", ...$idList
             );
         } elseif (count($idList)) {
             // edit
             $eventId = min($idList);
             $this->pg()->prepared_query("
-                delete from user_audit_trail
-                where id_user_audit_trail != ?
-                    and id_user_audit_trail in (" . placeholders($idList) . ")
+                delete from audit_trail_user
+                where id_audit_trail_user != ?
+                    and id_audit_trail_user in (" . placeholders($idList) . ")
                 ", $eventId, ...$idList
             );
             $this->pg()->prepared_query("
-                update user_audit_trail set
+                update audit_trail_user set
                     note = ?,
                     id_user_creator = ?
-                where id_user_audit_trail = ?
+                where id_audit_trail_user = ?
                 ", $note, $user->id, $eventId
             );
         }
