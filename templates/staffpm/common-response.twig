@@ -1,20 +1,19 @@
 {{ header('Staff PMs', {'js': 'staffpm'}) }}
-<div class="thin">
-    <div class="header">
-        <h2><a href="/staffpm.php">Staff PMs</a> › Common Answers</h2>
-        <div class="linkbox">
+<div class="header">
+    <h2><a href="/staffpm.php">Staff PMs</a> › Common Answers</h2>
+    <div class="linkbox">
 {% if viewer.isStaff %}
-            <a href="staffpm.php" class="brackets">View your unanswered</a>
+        <a href="staffpm.php" class="brackets">View your unanswered</a>
 {% endif %}
-            <a href="staffpm.php?view=unanswered" class="brackets">View all unanswered</a>
-            <a href="staffpm.php?view=open" class="brackets">View unresolved</a>
-            <a href="staffpm.php?view=resolved" class="brackets">View resolved</a>
+        <a href="staffpm.php?view=unanswered" class="brackets">View all unanswered</a>
+        <a href="staffpm.php?view=open" class="brackets">View unresolved</a>
+        <a href="staffpm.php?view=resolved" class="brackets">View resolved</a>
 {% if conv_id %}
-            <a href="staffpm.php?action=viewconv&amp;id={{ conv_id }}" class="brackets">Back to conversation</a>
+        <a href="staffpm.php?action=viewconv&amp;id={{ conv_id }}" class="brackets">Back to conversation</a>
 {% endif %}
-        </div>
     </div>
-    <br>
+</div>
+<div class="thin">
     <div class="box pad">You can add a new answer here (or edit existing
     answers). Updates will be made in place without a page reload. When you are
     satified with the result, you may click on the "Back to conversation" link

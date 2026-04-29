@@ -1,8 +1,6 @@
 {% if checker.getChecksumState != constant('OrpheusNET\\Logchecker\\Check\\Checksum::CHECKSUM_OK') %}
     <blockquote>
-{%  if pasted %}
-        Checksums of pasted log files cannot be verified, as the character encoding can change during copy-pasting.
-{%  else %}
+{%  if pasted is not defined or pasted == false %}
         <strong>Trumpable For:</strong>
         <br><br>
 {%      if checker.getChecksumState == constant('OrpheusNET\\Logchecker\\Check\\Checksum::CHECKSUM_MISSING') %}
@@ -10,6 +8,8 @@
 {%      elseif checker.getChecksumState == constant('OrpheusNET\\Logchecker\\Check\\Checksum::CHECKSUM_INVALID') %}
                 Invalid Checksum(s)
 {%      endif %}
+{%  else %}
+            Checksums of pasted log files cannot be verified, as the character encoding can change during copy-pasting.
 {%  endif %}
     </blockquote>
 {% endif %}

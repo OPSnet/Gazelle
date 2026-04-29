@@ -1,9 +1,12 @@
 {{ header("Bonus Points - Gift Tokens ", {'js': 'bonus'}) }}
+<div class="header">
+    <h2>Gift Tokens - {{price | number_format}} Points</a></h2>
+</div>
 <div class="thin">
     <div class="header">
         <h2><a href="bonus.php">Shop</a> › Gift Tokens</a></h2>
     </div>
-    <form name="bonus-other" action="bonus.php" method="post">
+    <form action="bonus.php?action=purchase&amp;label={{ label }}" method="post">
         <div class="pad">
             <table cellpadding="6" cellspacing="1" border="0" class="layout border" width="100%">
                 <tbody>

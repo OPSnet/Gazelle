@@ -1,5 +1,5 @@
 {{ header('Staff Inbox') }}
-<div class="thin">
+<div class="header">
     <div class="linkbox">
 {% if viewer.isStaff %}
         <a href="staffpm.php" class="brackets">View your unanswered</a>
@@ -13,6 +13,8 @@
         <span class="tooltip" title="The Staff PMs that you created are here."><a href="staffpm.php?action=userinbox" class="brackets">Personal Staff Inbox</a></span>
 {% endif %}
     </div>
+</div>
+<div class="thin">
     <div class="head">Statistics</div>
     <div class="box pad">
     <table>

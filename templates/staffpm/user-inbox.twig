@@ -1,19 +1,16 @@
 {{ header('Staff PMs', {'js': 'staffpm'}) }}
-<div class="thin">
-    <div class="header">
-        <h2>Staff PMs › Your Inbox</h2>
-        <div class="linkbox">
+<div class="header">
+    <h2>Staff PMs › Your Inbox</h2>
+    <div class="linkbox">
 {% if viewer.isFLS %}
-            <a href="staffpm.php" class="brackets">Main Staff Inbox</a>
+        <a href="staffpm.php" class="brackets">Main Staff Inbox</a>
 {% endif %}
-            <a href="#" onclick="$('#compose').gtoggle();" class="brackets">Compose new</a>
-        </div>
+        <a href="#" onclick="$('#compose').gtoggle();" class="brackets">Compose new</a>
     </div>
-    <br>
-    <br>
+</div>
+<div class="thin">
 {% include 'staffpm/reply.twig' with {'hidden': true, 'reply': reply, 'user': viewer, 'level': level} only %}
     <div class="box pad" id="inbox">
-
 {% set resolved = 0 %}
 {% for spm in list %}
 {%  if loop.first %}

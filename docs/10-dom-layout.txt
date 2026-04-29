@@ -1,0 +1,22 @@
+From: Spine
+To: Designers/Developers
+Date: 2024-12-02
+Subject: Orpheus Development Papers #10 - preferred DOM layout
+Version: 1
+
+The best page layout for the moment is as follows:
+
+Body
+└──Wrapper
+   ├───Header  (menus)
+   ├───Content
+   │   └───Thin
+   │       ├───Header  (preamble of the content)
+   │       │   ├───H2 
+   │       │   ├───linkbox
+   │       │   └───linkbox
+   │       └───tables (etc — the actual content)
+   └───Footer
+       └───P (etc)
+
+Note that H2 is to be replaced by H1

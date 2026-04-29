@@ -1,10 +1,9 @@
 {{ header('Staff Inbox') }}
 {% set view_resolved = view_map[view].title == 'Resolved' %}
 {% set view_staff_open = not view_resolved and viewer.isStaffPMReader %}
-<div class="thin">
-    <div class="header">
-        <h2>Staff PMs › {{ view_map[view].title }}</h2>
-        <div class="linkbox">
+<div class="header">
+    <h2>Staff PMs › {{ view_map[view].title }}</h2>
+    <div class="linkbox">
 {% for section, info in view_map %}
 {%  if view_map[section].count %}
 {%      set title %}{{ info.title }} ({{view_map[section].count }}){% endset %}
@@ -13,21 +12,20 @@
 {%  else %}
 {%      set title = info.title %}
 {%  endif %}
-        <a href="staffpm.php{% if section %}?view={{ section }}{% endif %}" class="brackets">
+    <a href="staffpm.php{% if section %}?view={{ section }}{% endif %}" class="brackets">
 {%- if section == view %}<strong>{% endif %}{{ title }}</a>{% if section == view %}</strong>{% endif -%}
-        </a>
+    </a>
 {% endfor %}
-
 {% if viewer.permitted('admin_staffpm_stats') %}
-            <a href="staffpm.php?action=scoreboard&amp;view=user" class="brackets">View user scoreboard</a>
-            <a href="staffpm.php?action=scoreboard&amp;view=staff" class="brackets">View staff scoreboard</a>
+        <a href="staffpm.php?action=scoreboard&amp;view=user" class="brackets">View user scoreboard</a>
+        <a href="staffpm.php?action=scoreboard&amp;view=staff" class="brackets">View staff scoreboard</a>
 {% endif %}
 {% if viewer.isFLS %}
-            <span class="tooltip" title="This is the inbox where replies to Staff PMs you have sent are."><a href="staffpm.php?action=userinbox" class="brackets">Personal Staff Inbox</a></span>
+        <span class="tooltip" title="This is the inbox where replies to Staff PMs you have sent are."><a href="staffpm.php?action=userinbox" class="brackets">Personal Staff Inbox</a></span>
 {% endif %}
-        </div>
     </div>
-    <br>
+</div>
+<div class="thin">
 {{ paginator.linkbox|raw }}
     <div class="box pad" id="inbox">
 {% for spm in page %}
@@ -83,4 +81,3 @@
         <h2>No messages</h2>
 {% endfor %}
 {{ footer() }}
-

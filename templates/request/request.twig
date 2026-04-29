@@ -1,10 +1,10 @@
 {%- from 'macro/form.twig' import autocomplete, checked, disabled, selected -%}
 {%- set new = action == 'new' -%}
 {{ header('Request › ' ~ (new ? 'Create' : 'Edit › ' ~ request.text), {'js': 'requests,form_validate'}) }}
-<div class="thin">
-  <div class="header">
+<div class="header">
     <h2><a href="requests.php">Requests</a> › {% if new %}Create{% else %}Edit › {{ request.smartLink|raw }}{% endif %}</h2>
-  </div>
+</div>
+<div class="thin">
 {% if not new and request.userId != viewer.id and viewer.permittedAny('site_edit_requests', 'site_moderate_requests') %}
     <div class="box pad">
         <strong class="important_text">Warning! You are editing {{ request.userId|user_url }}'s request.

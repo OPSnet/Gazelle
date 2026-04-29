@@ -1,17 +1,16 @@
 {% from 'macro/form.twig' import selected %}
 {{ header("View request: " ~ request.text, {'js': 'bbcode,comments,requests,subscriptions'}) }}
-<div class="thin">
-    <div class="header">
-        <h2><a href="requests.php">Requests</a> › {{ request.categoryName }} › {{ request.selfLink|raw }}</h2>
-        <div class="linkbox">
+<div class="header">
+    <h2><a href="requests.php">Requests</a> › {{ request.categoryName }} › {{ request.selfLink|raw }}</h2>
+    <div class="linkbox">
 {% if request.canEdit(viewer) %}
-            <a href="requests.php?action=edit&amp;id={{ request.id }}" class="brackets">Edit</a>
+        <a href="requests.php?action=edit&amp;id={{ request.id }}" class="brackets">Edit</a>
 {% endif %}
 {% if viewer.permitted('site_admin_requests') %}
-            <a href="requests.php?action=edit-bounty&amp;id={{ request.id }}" class="brackets">Edit bounty</a>
+        <a href="requests.php?action=edit-bounty&amp;id={{ request.id }}" class="brackets">Edit bounty</a>
 {% endif %}
 {% if request.canEdit(viewer) %}
-            <a href="requests.php?action=delete&amp;id={{ request.id }}" class="brackets">Delete</a>
+        <a href="requests.php?action=delete&amp;id={{ request.id }}" class="brackets">Delete</a>
 {% endif %}
 {% include 'bookmark/action.twig' with {
     'class':         'request',
@@ -20,17 +19,21 @@
     'is_bookmarked': is_bookmarked
     } only
 %}
-            <a href="#" id="subscribelink_requests{{ request.id }}" class="brackets" onclick="SubscribeComments('requests',{{ request.id }});return false;">{% if is_subscribed %}Unsubscribe{% else %}Subscribe{% endif %}</a>
-           <a href="reports.php?action=report&amp;type=request&amp;id={{ request.id }}" class="brackets">Report request</a>
+        <a href="#" id="subscribelink_requests{{ request.id }}" class="brackets" onclick="SubscribeComments('requests',{{ request.id }});return false;">{% if is_subscribed %}Unsubscribe{% else %}Subscribe{% endif %}</a>
+       <a href="reports.php?action=report&amp;type=request&amp;id={{ request.id }}" class="brackets">Report request</a>
 {% if not request.isFilled %}
-            <a href="upload.php?requestid={{ request.id }}{% if request.tgroupId %}&amp;groupid={{ request.tgroupId }}{% endif %}" class="brackets">Upload request</a>
+        <a href="upload.php?requestid={{ request.id }}{% if request.tgroupId %}&amp;groupid={{ request.tgroupId }}{% endif %}" class="brackets">Upload request</a>
+{%  if request.categoryName == 'Music' and request.year == 0 %}
+        <a href="reports.php?action=report&amp;type=request_update&amp;id={{ request.id }}" class="brackets">Request update</a>
+{%  endif %}
 {% endif %}
 {% if request.categoryName == 'Music' %}
-            <a href="https://www.worldcat.org/search?qt=worldcat_org_all&amp;q={{ request.urlencodeArtist }}%20{{ request.urlencodeTitle }}" class="brackets">Find in library</a>
-            <a href="https://www.discogs.com/search/?q={{ request.urlencodeArtist }}+{{ request.urlencodeTitle }}&amp;type=release" class="brackets">Find on Discogs</a>
+        <a href="https://www.worldcat.org/search?qt=worldcat_org_all&amp;q={{ request.urlencodeArtist }}%20{{ request.urlencodeTitle }}" class="brackets">Find in library</a>
+        <a href="https://www.discogs.com/search/?q={{ request.urlencodeArtist }}+{{ request.urlencodeTitle }}&amp;type=release" class="brackets">Find on Discogs</a>
 {% endif %}
-        </div>
     </div>
+</div>
+<div class="thin">
     <div class="sidebar">
         <div class="box box_image box_image_albumart box_albumart">
             <div class="head"><strong>Cover</strong></div>

@@ -1,27 +1,23 @@
 {% from 'macro/form.twig' import selected %}
 {{ header('Staff PM', {'js': 'bbcode,comments,staffpm'}) }}
-<div class="thin">
-    <div class="header">
-        <h2>Staff PM › {{ pm.subject }}{% if pm.isResolved %} (Resolved){% endif %}</h2>
-        <div class="linkbox">
+<div class="header">
+    <h2>Staff PM › {{ pm.subject }}{% if pm.isResolved %} (Resolved){% endif %}</h2>
+    <div class="linkbox">
 {% for view in heading %}
-        <a href="staffpm.php{{ view.link }}" class="brackets">{{ view.title }}{% if view.count %} ({{ view.count }}){% endif %}</a>&nbsp;
+    <a href="staffpm.php{{ view.link }}" class="brackets">{{ view.title }}{% if view.count %} ({{ view.count }}){% endif %}</a>&nbsp;
 {% endfor %}
-
 {% if viewer.permitted('admin_staffpm_stats') %}
-        <a href="staffpm.php?action=scoreboard&amp;view=user" class="brackets">View user scoreboard</a>
-        <a href="staffpm.php?action=scoreboard&amp;view=staff" class="brackets">View staff scoreboard</a>
+    <a href="staffpm.php?action=scoreboard&amp;view=user" class="brackets">View user scoreboard</a>
+    <a href="staffpm.php?action=scoreboard&amp;view=staff" class="brackets">View staff scoreboard</a>
 {% endif %}
 {% if viewer.isFLS %}
-        <a href="staffpm.php" class="brackets">Main Staff Inbox</a>
-        <a title="Replies to your own Staff PMs are here" href="staffpm.php?action=userinbox" class="brackets">Personal Staff Inbox</a>
+    <a href="staffpm.php" class="brackets">Main Staff Inbox</a>
+    <a title="Replies to your own Staff PMs are here" href="staffpm.php?action=userinbox" class="brackets">Personal Staff Inbox</a>
 {% endif %}
 {% if not viewer.isStaffPMReader %}
-        <a href="staffpm.php" class="brackets">Back to inbox</a>
+    <a href="staffpm.php" class="brackets">Back to inbox</a>
 {% endif %}
-    </div>
 </div>
-<br>
 <div id="inbox">
 {% for message in pm.thread %}
     <div class="box vertical_space" id="post{{ message.id }}">

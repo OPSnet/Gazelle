@@ -40,11 +40,11 @@ Requests
 {% if not search.isBookmarkView %}
     <div class="linkbox">
 {%  if viewer.permitted('site_submit_requests') %}
-        <a href="requests.php?action=new" class="brackets">New request</a>
-        <a href="requests.php?type=created" class="brackets">My requests</a>
+    <a href="requests.php?action=new" class="brackets">New request</a>
+    <a href="requests.php?type=created" class="brackets">My requests</a>
 {%  endif %}
 {%  if viewer.permitted('site_vote') %}
-        <a href="requests.php?type=voted" class="brackets">Requests I've voted on</a>
+    <a href="requests.php?type=voted" class="brackets">Requests I've voted on</a>
 {%  endif %}
         <a href="bookmarks.php?type=requests" class="brackets">Bookmarked Requests</a>
     </div>
