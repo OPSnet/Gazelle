@@ -7,7 +7,9 @@ uses Mysql and Sphinx, but work is under way to replace those with
 Postgresql.
 
 ## Gazelle Runtime Dependencies
-* [PHP 8.4.6+](https://www.php.net/) (required)
+* [PHP 8.4.13+](https://www.php.net/) (required)
+* [PostgreSQL 17](https://www.postgresql.org/) (required)
+* [MySQL 8.4](https://www.mysql.com/) (required)
 * [nginx](http://wiki.nginx.org/Main) (required)
 * [nodeJS 20+](https://nodejs.org/en/) (required)
 * [memcached](http://memcached.org/) (required)
@@ -25,6 +27,8 @@ depedencies through `pip`:
 
 We provide installation notes [here](docs/INSTALL.txt). These notes are provided
 as a best effort, and are not guaranteed to be fully up-to-date or accurate.
+Looking at the Dockerfile and docker-compose.yml files and following the order
+should clear up most questions.
 
 Due to the nature of torrenting, we HIGHLY recommend not trying to run this in
 production if you are not prepared or knowledgeable in setting up servers,

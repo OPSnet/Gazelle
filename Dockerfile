@@ -1,12 +1,11 @@
-FROM debian:bookworm-slim
+FROM debian:trixie-slim
 
-ENV DEB_RELEASE=bookworm
+ENV DEB_RELEASE=trixie
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PHP_VER=8.5
-ENV NODE_VERSION=20
 # https://github.com/composer/getcomposer.org/commits/main/
-# commit of composer 2.9.3
-ENV COMPOSER_COMMIT=681b090a0890b986ee0ae5862ca98db7c9170144
+# commit of composer 2.9.5
+ENV COMPOSER_COMMIT=09a1f131c28d6c496f6bddcbf6cebf34502ad9bc
 
 # Uncomment to skip the chromium download when installing puppeteer. If you do,
 # you'll need to launch puppeteer with:
@@ -23,10 +22,8 @@ RUN apt-get update \
         curl \
         gnupg2 \
     && mkdir -p /etc/apt/keyrings \
-    && curl -fsSL https://packages.sury.org/php/apt.gpg | gpg --dearmor -o /etc/apt/keyrings/debsuryorg-archive-keyring.gpg \
-    && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
-    && echo "deb [signed-by=/etc/apt/keyrings/debsuryorg-archive-keyring.gpg] https://packages.sury.org/php/ bookworm main" | tee /etc/apt/sources.list.d/php.list \
-    && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_${NODE_VERSION}.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list \
+    && curl -fsSL https://packages.sury.org/php/apt.gpg > /usr/share/keyrings/debsuryorg-archive-keyring.gpg \
+    && echo "deb [signed-by=/usr/share/keyrings/debsuryorg-archive-keyring.gpg] https://packages.sury.org/php/ $DEB_RELEASE main" > /etc/apt/sources.list.d/php.list \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
         cron \
@@ -35,8 +32,8 @@ RUN apt-get update \
         nginx \
         netcat-openbsd \
         nodejs \
+        npm \
         php${PHP_VER}-cli \
-        php${PHP_VER}-common \
         php${PHP_VER}-curl \
         php${PHP_VER}-fpm \
         php${PHP_VER}-gd \
@@ -57,28 +54,24 @@ RUN apt-get update \
         python3-setuptools \
         python3-wheel \
         shellcheck \
-        software-properties-common \
         unzip \
         zlib1g-dev \
-        # Puppeteer layer
         # This installs the necessary packages to run the bundled version of chromium for puppeteer
-        gconf-service \
+        fonts-liberation \
         libasound2 \
         libatk1.0-0 \
         libc6 \
         libcairo2 \
         libcups2 \
         libdbus-1-3 \
-        libdrm2 \
         libexpat1 \
         libfontconfig1 \
-        libgbm1 \
         libgcc1 \
-        libgconf-2-4 \
-        libgdk-pixbuf2.0-0 \
+        libgdk-pixbuf-xlib-2.0-0 \
         libglib2.0-0 \
         libgtk-3-0 \
         libnspr4 \
+        libnss3 \
         libpango-1.0-0 \
         libpangocairo-1.0-0 \
         libstdc++6 \
@@ -95,8 +88,6 @@ RUN apt-get update \
         libxrender1 \
         libxss1 \
         libxtst6 \
-        fonts-liberation \
-        libnss3 \
         lsb-release \
         xdg-utils \
         # cypress

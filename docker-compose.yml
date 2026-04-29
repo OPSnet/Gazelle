@@ -41,7 +41,7 @@ services:
 
   mysql:
     # remember to update misc/gitlab-ci.yml
-    image: percona:ps-8.0.41-32
+    image: percona/percona-server:8.4.6
     ports:
       - 127.0.0.1:36000:3306
     volumes:
@@ -63,7 +63,7 @@ services:
       - --userstat=on
       - --sql-mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
       # neither sphinxsearch or ocelot are compatible with the mysql8 caching_sha2_password plugin
-      - --default-authentication-plugin=mysql_native_password
+      - --mysql_native_password=ON
 
   sphinxsearch:
     build: misc/docker/sphinxsearch

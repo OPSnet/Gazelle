@@ -55,6 +55,7 @@ openssl req -x509 -newkey ed25519 \
     -days 365
 nginx -t
 
+mkdir -p /var/www/cache/twig
 chown -R gazelle:gazelle /var/log/xdebug.log /var/www/cache/twig
 
 echo "Start services..."
