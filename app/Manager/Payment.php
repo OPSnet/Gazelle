@@ -87,7 +87,7 @@ class Payment extends \Gazelle\Base {
                     $l['fiatRate'] = (float)self::$db->scalar("
                         SELECT rate
                         FROM xbt_forex
-                        WHERE cc = $1
+                        WHERE cc = ?
                         ORDER BY forex_date DESC
                         LIMIT 1
                         ", $l['currency']
