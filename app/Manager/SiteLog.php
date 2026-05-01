@@ -3,9 +3,10 @@
 namespace Gazelle\Manager;
 
 use Gazelle\TGroup;
+use Gazelle\Util\Text;
 
 class SiteLog extends \Gazelle\Base {
-    final protected const CACHE_TERM  = 'site_log_';
+    final protected const CACHE_TERM  = 'audit_trail_site_';
 
     protected array $usernames  = [];
 
@@ -23,7 +24,7 @@ class SiteLog extends \Gazelle\Base {
                 'args'   => [],
             ]
             : [
-                'where'  => "where note_ts @@ websearch_to_tsquery('simple', ?)",
+                'where'  => "where note_ts @@ websearch_to_tsquery('simple', $1)",
                 'args'   => [$searchTerm],
             ];
     }
@@ -31,14 +32,14 @@ class SiteLog extends \Gazelle\Base {
     public function total(string $searchTerm): int {
         if ($searchTerm === '') {
             return (int)$this->pg()->scalarex("
-                select total from table_row_count where table_name = 'site_log'
+                select total from table_row_count where table_name = 'audit_trail_site'
             ");
         }
-        $key   = self::CACHE_TERM . \Gazelle\Util\Text::base64UrlEncode($searchTerm);
+        $key   = self::CACHE_TERM . Text::base64UrlEncode($searchTerm);
         $total = self::$cache->get_value($key);
         if ($total === false) {
             $conf  = $this->configure($searchTerm);
-            $total = (int)$this->pg()->scalar("
+            $total = (int)$this->pg()->scalarex("
                 select count(*) from audit_trail_site {$conf['where']}
                 ", ...$conf['args']
             );
@@ -51,13 +52,13 @@ class SiteLog extends \Gazelle\Base {
         $conf = $this->configure($searchTerm);
         array_push($conf['args'], $limit, $offset);
         return $this->decorate(
-            $this->pg()->all("
+            $this->pg()->allex("
                 select id_audit_trail_site,
                     note,
                     created
                 from audit_trail_site {$conf['where']}
                 order by id_audit_trail_site desc
-                limit ? offset ?
+                limit {$this->pg()->placeholder(count($conf['args']) - 2)} offset {$this->pg()->placeholder(count($conf['args']) - 1)}
                 ", ...$conf['args']
             )
         );
