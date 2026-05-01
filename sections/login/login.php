@@ -78,4 +78,5 @@ echo $Twig->render('login/login.twig', [
         $login->requestContext()->remoteAddr()
     ),
     'watch'    => $watch,
+    'keep_logged' => isset($_POST['keeplogged']),
 ]);

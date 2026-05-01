@@ -33,7 +33,7 @@ Please enable JavaScript in your browser.</span><br><br></noscript>
     <span title="{{ delta }} seconds">a few moments.</span>
 {%      else %}
     another {{ watch.bannedUntil|time_diff }}.
-{%  endif %}
+{%      endif %}
     <br>
 {%  endif %}
 {%  if watch.nrAttempts > 0 %}
