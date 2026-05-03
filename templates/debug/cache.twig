@@ -29,8 +29,6 @@
         <td class="nobr debug_info debug_cache_key">
             <a href="tools.php?action=clear_cache&amp;key={{ key }}&amp;view=View" target="_blank" class="tooltip" title="View this cache key">{{ key }}</a>
         </td>
-        <td class="rowa debug_info debug_query_time" style="width: 130px;">
-            {{- (q.elapsed * 1000)|number_format(5) }} ms</td>
     </tr>
 {%  if loop.last %}
 </table>
