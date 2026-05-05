@@ -26,26 +26,16 @@ class IPv4 extends \Gazelle\Base {
         return $this;
     }
 
-    public function register(User $user, string $ipv4): int {
-        $affected = $this->pg()->executeParams("
+    public function registerApi(User $user, string $ip): int {
+        $affected = $this->pg()->query("
             insert into ip_history
                    (id_user, ip, data_origin)
             values ($1,      $2, 'token')
             on conflict (id_user, ip, data_origin) do update set
                 total = ip_history.total + 1,
                 seen = tstzrange(lower(ip_history.seen), now())
-            ", $user->id, $ipv4
-        )->getAffectedRows();
-        self::$db->prepared_query('
-            INSERT INTO users_history_ips
-                   (UserID, IP)
-            VALUES (?,      ?)
-            ON DUPLICATE KEY UPDATE EndTime = now()
-            ', $user->id, $ipv4
+            ", $user->id, $ip
         );
-        $user->setField('IP', $ipv4)
-            ->setField('ipcc', new GeoIP()->countryISO($ipv4))
-            ->modify();
         $this->flush();
         return $affected;
     }
@@ -76,108 +66,88 @@ class IPv4 extends \Gazelle\Base {
         return $this;
     }
 
-    public function userTotalConfig(User $user): array {
-        $cond = ['uhi.UserID = ?'];
-        $args = [$user->id];
-        if (isset($this->filterIpaddrRegexp)) {
-            $cond[] = "uhi.IP REGEXP ?";
-            $args[] = $this->filterIpaddrRegexp;
-        }
-        if (isset($this->filterIpaddr)) {
-            $cond[] = "uhi.IP = ?";
-            $args[] = $this->filterIpaddr;
-        }
-        if (isset($this->filterBefore)) {
-            $cond[] = "uhi.StartTime <= now() - INTERVAL ? SECOND";
-            $args[] = $this->filterBefore;
-        }
-        if (isset($this->filterAfter)) {
-            $cond[] = "uhi.StartTime >= now() - INTERVAL ? SECOND";
-            $args[] = $this->filterAfter;
-        }
-        return [
-            "SELECT count(DISTINCT IP) FROM users_history_ips uhi WHERE "
-                . implode(' AND ', $cond),
-            $args
-        ];
-    }
-
     public function userTotal(User $user): int {
-        [$sql, $args] = $this->userTotalConfig($user);
-        return (int)self::$db->scalar($sql, ...$args);
-    }
-
-    public function userOtherConfig(User $user): array {
-        $cond = ['uhi.UserID != ?'];
+        $cond = ['id_user = $1'];
         $args = [$user->id];
         if (isset($this->filterIpaddrRegexp)) {
-            $cond[] = "uhi.IP REGEXP ?";
+            $cond[] = 'ip::text ~* ' . $this->pg()->placeholder(count($args));
             $args[] = $this->filterIpaddrRegexp;
         }
         if (isset($this->filterIpaddr)) {
-            $cond[] = "uhi.IP = ?";
+            $cond[] = 'ip <<= ' . $this->pg()->placeholder(count($args));
             $args[] = $this->filterIpaddr;
         }
         if (isset($this->filterBefore)) {
-            $cond[] = "uhi.StartTime <= now() - INTERVAL ? SECOND";
+            $cond[] = 'lower(seen) <= now() - '  . $this->pg()->placeholder(count($args)) . '::interval';
             $args[] = $this->filterBefore;
         }
         if (isset($this->filterAfter)) {
-            $cond[] = "uhi.StartTime >= now() - INTERVAL ? SECOND";
+            $cond[] = 'lower(seen) >= now() - '  . $this->pg()->placeholder(count($args)) . '::interval';
             $args[] = $this->filterAfter;
         }
-        return [
-            "SELECT DISTINCT UserID FROM users_history_ips uhi WHERE "
-                . implode(' AND ', $cond),
-            $args,
-        ];
-    }
-
-    /**
-     * returns array of userids that match filters, excluding specified user
-     */
-    public function userOther(User $user): array {
-        [$sql, $args] = $this->userOtherConfig($user);
-        self::$db->prepared_query($sql, ...$args);
-        return self::$db->collect(0);
+        $where  = implode(' and ', $cond);
+        return $this->pg()->scalarex(<<<END_SQL
+            with history as (
+                select distinct ip from ip_site_history
+                where $where
+                union
+                select distinct ip from ip_history
+                where $where
+                  and data_origin != 'login-fail'
+            )
+            select count(ip) from history
+            END_SQL, ...$args
+        );
     }
 
     public function userPage(User $user, int $limit, int $offset): array {
-        self::$db->prepared_query("SET SESSION group_concat_max_len = 50000");
-        $cond = ['i.UserID = ?'];
+        $cond = ['ish.id_user = $1'];
         $args = [$user->id];
         if (isset($this->filterIpaddrRegexp)) {
-            $cond[] = "i.IP REGEXP ?";
+            $cond[] = 'ish.ip::text ~* ' . $this->pg()->placeholder(count($args));
             $args[] = $this->filterIpaddrRegexp;
         }
         if (isset($this->filterIpaddr)) {
-            $cond[] = "i.IP = ?";
+            $cond[] = 'ish.ip <<= ' . $this->pg()->placeholder(count($args));
             $args[] = $this->filterIpaddr;
         }
-        $where  = implode(' AND ', $cond);
+        $where  = implode(' and ', $cond);
+        $where2 = str_replace('ish.', 'ih.', $where);
         $args[] = $limit;
         $args[] = $offset;
-        self::$db->prepared_query("
-            SELECT uhi.IP as ip_addr,
-                count(DISTINCT UserID) as nr_users,
-                group_concat(
-                    concat(UserID, '/', StartTime, '/', coalesce(EndTime, now()))
-                    ORDER BY if(UserID = ?, 0, 1), StartTime DESC
+        return $this->pg()->allex(<<<END_SQL
+            with seen_ranges as (
+                select ip, id_user, unnest(seen) seen_time from ip_site_history
+                union all
+                select ip, id_user, seen seen_time from ip_history
+                where data_origin != 'login-fail'
+            )
+            select ip as ip_addr,
+                count(distinct id_user) as nr_users,
+                string_agg(
+                    concat(id_user, '/', lower(seen_time), '/', upper(seen_time)), ','
+                    order by id_user != \$1, lower(seen_time) desc
                 ) AS ranges,
-                min(uhi.StartTime) AS min_start,
-                coalesce(max(uhi.EndTime), now()) AS max_end,
-                exists (SELECT ib.ID FROM ip_bans ib WHERE inet_aton(uhi.IP) BETWEEN ib.FromIP AND ib.ToIP) AS is_banned
-            FROM users_history_ips uhi
-            WHERE IP IN (
-                    SELECT DISTINCT i.IP
-                    FROM users_history_ips i
-                    WHERE $where
-                )
-            GROUP BY uhi.IP
-            ORDER BY max_end DESC, ip_addr
-            LIMIT ? OFFSET ?
-            ", $user->id, ...$args
+                min(lower(seen_time)) as min_start,
+                max(upper(seen_time)) as max_end,
+                exists(select 1 from ip_ban ib where ib.ip = ih.ip and ib.is_active) as is_banned
+            from seen_ranges ih
+            where ip in (
+                select distinct ish.ip
+                from ip_site_history ish
+                where $where
+                union
+                select distinct ih.ip
+                from ip_history ih
+                where $where2
+                  and data_origin != 'login-fail'
+            )
+            group by ip
+            order by max_end desc, ip
+            END_SQL
+            . ' limit ' . $this->pg()->placeholder(count($args) - 2)
+            . ' offset ' . $this->pg()->placeholder(count($args) - 1),
+            ...$args
         );
-        return self::$db->to_array(false, MYSQLI_ASSOC);
     }
 }

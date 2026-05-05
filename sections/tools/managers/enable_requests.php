@@ -32,9 +32,9 @@ if (isset($_GET['search'])) {
 }
 
 $heading = new Util\SortableTableHeader('submitted_timestamp', [
-    'submitted_timestamp' => ['dbColumn' => 'uer.Timestamp', 'defaultSort' => 'desc', 'text' => 'Age'],
-    'handled_timestamp'   => ['dbColumn' => 'uer.Outcome',   'defaultSort' => 'desc', 'text' => 'Checked Date'],
-    'outcome'             => ['dbColumn' => 'uer.HandledTimestamp', 'defaultSort' => 'desc', 'text' => 'Outcome'],
+    'submitted_timestamp' => ['dbColumn' => 'uer."Timestamp"', 'defaultSort' => 'desc', 'text' => 'Age'],
+    'handled_timestamp'   => ['dbColumn' => 'uer."Outcome"',   'defaultSort' => 'desc', 'text' => 'Checked Date'],
+    'outcome'             => ['dbColumn' => 'uer."HandledTimestamp"', 'defaultSort' => 'desc', 'text' => 'Outcome'],
 ]);
 $orderBy = $heading->orderBy();
 $dir = $heading->dir();

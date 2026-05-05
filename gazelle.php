@@ -124,7 +124,7 @@ if ($Viewer) {
             Error403::error('Your IP address has been banned.');
         }
         if (!$cookie) {  // api key or passkey (torrent dl)
-            new Manager\IPv4()->register($Viewer, $Viewer->requestContext()->remoteAddr());
+            new Manager\IPv4()->registerApi($Viewer, $Viewer->requestContext()->remoteAddr());
         }
     }
     $authorized = ['ajax', 'chat', 'locked', 'login', 'logout', 'staffpm'];

@@ -16,16 +16,13 @@ class IPv4Test extends TestCase {
 
     public function tearDown(): void {
         $idList = array_map(fn ($u) => $u->id, $this->userList);
-        $placeholders = placeholders($idList);
-        $this->pg()->prepared_query("
+        $placeholders = placeholders_pg($idList);
+        $this->pg()->query("
             delete from ip_ban where id_ip_ban in (
                 select id_ip_ban from ip_ban_hist where id_user in ($placeholders))
             ", ...$idList
         );
-        DB::DB()->prepared_query("
-            DELETE FROM users_history_ips WHERE UserID IN ($placeholders)
-            ", ...$idList
-        );
+        $this->pg()->query("delete from ip_site_history where id_user in ($placeholders)", ...$idList);
         foreach ($this->userList as $user) {
             $user->remove();
         }
@@ -99,7 +96,7 @@ class IPv4Test extends TestCase {
     public function testUserPage(): void {
         $ipv4 = new Manager\IPv4();
         $user = $this->userList[0];
-        $this->assertEquals(1, $ipv4->register($user, '127.1.0.1'), 'ipv4-create');
+        $this->assertEquals(1, $ipv4->registerApi($user, '127.1.0.1'), 'ipv4-create');
         $this->assertEquals(2, $ipv4->userTotal($user), 'ipv4-user-total');
         $this->assertEqualsCanonicalizing(
             ['127.0.0.1', '127.1.0.1'],
@@ -122,42 +119,5 @@ class IPv4Test extends TestCase {
         $this->assertEquals(1, $ipv4->userTotal($user), 'ipv4-user-filter-ip');
         $ipv4->setFilterIpaddr('10.1.0.1');
         $this->assertEquals(0, $ipv4->userTotal($user), 'ipv4-user-fail-ip');
-    }
-
-    public function testUserOther(): void {
-        $this->userList[] = Helper::makeUser('ipv4.' . randomString(10), 'ipv4man');
-        $ipv4 = new Manager\IPv4();
-        $ip   = '0.1.2.3';
-        $ipv4->register($this->userList[0], $ip);
-        $ipv4->register($this->userList[1], $ip);
-        $ipv4->setFilterIpaddr($ip);
-
-        $db = DB::DB();
-        $db->prepared_query("
-            UPDATE users_history_ips SET
-                StartTime = StartTime - INTERVAL 1 MINUTE
-            WHERE UserID = ?
-            ", $this->userList[1]->id
-        );
-
-        $this->assertEquals(
-            [$this->userList[1]->id],
-            $ipv4->userOther($this->userList[0]),
-            'ipv4-other-success'
-        );
-
-        $ipv4->setFilterBefore(90); // before 1m30 ago
-        $this->assertEquals(
-            [],
-            $ipv4->userOther($this->userList[0]),
-            'ipv4-other-too-late'
-        );
-
-        $ipv4->setFilterBefore(0)->setFilterAfter(30); // after 30s ago
-        $this->assertEquals(
-            [],
-            $ipv4->userOther($this->userList[0]),
-            'ipv4-other-too-early'
-        );
     }
 }

@@ -106,10 +106,10 @@ class ListMatcherTest extends TestCase {
         $this->assertEmpty($this->matcher->findCandidates($candidate, false), 'listmatcher-findcandidates-strict-nomatch');
         $this->assertEquals([$user->id], $this->matcher->findCandidates($candidate), 'listmatcher-findcandidates-loose');
 
-        $ipMan->register($user, $ips[0][0]);
+        $ipMan->registerApi($user, $ips[0][0]);
         $this->assertEquals([$user->id], $this->matcher->findCandidates($candidate, false), 'listmatcher-findcandidates-strict-ip');
 
-        $ipMan->register($user2, $ips[0][0]);
+        $ipMan->registerApi($user2, $ips[0][0]);
         $this->assertEqualsCanonicalizing([$user2->id, $user->id], $this->matcher->findCandidates($candidate), 'listmatcher-findcandidates-loose-ip');
 
         $this->assertEqualsCanonicalizing([$user2->id, $user->id, $user3->id], $this->matcher->findCandidates($candidate, false, true), 'listmatcher-findcandidates-tracker');
@@ -130,8 +130,8 @@ class ListMatcherTest extends TestCase {
         $candidate = new UserMatch\MatchCandidate([], ['listmatcher@phpunit.test'], $ips);
 
         $this->matcher->create();
-        $ipMan->register($user3, $ips[0][0]);
-        $ipMan->register($user, $ips[0][0]);
+        $ipMan->registerApi($user3, $ips[0][0]);
+        $ipMan->registerApi($user, $ips[0][0]);
 
         $matches = $this->matcher->findUsers($candidate, true, true);
         $this->assertCount(2, $matches, 'listmatcher-findusers-count');

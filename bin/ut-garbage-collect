@@ -254,12 +254,6 @@ $db->prepared_query("
 ");
 $db->prepared_query("
     DELETE u
-    FROM users_history_ips u
-    LEFT JOIN users_main um ON (um.ID = u.UserID)
-    WHERE um.ID IS NULL
-");
-$db->prepared_query("
-    DELETE u
     FROM user_last_access_delta u
     LEFT JOIN users_main um ON (um.ID = u.user_id)
     WHERE um.ID IS NULL

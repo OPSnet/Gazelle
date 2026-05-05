@@ -185,10 +185,6 @@ class UserCreator extends Base {
             ", $this->id, $ipaddr
         );
         self::$db->prepared_query("
-            INSERT INTO users_history_ips (UserID, IP) VALUES (?, ?)
-            ", $this->id, $ipaddr
-        );
-        self::$db->prepared_query("
             INSERT INTO users_leech_stats (UserID, Uploaded) VALUES (?, ?)
             ", $this->id, STARTING_UPLOAD
         );

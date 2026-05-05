@@ -380,11 +380,6 @@ class History extends \Gazelle\BaseUser {
             ", $this->user->id
         );
         self::$db->prepared_query("
-            DELETE FROM users_history_ips WHERE UserID = ?
-            ", $this->user->id
-        );
-        $n += self::$db->affected_rows();
-        self::$db->prepared_query("
             UPDATE users_main SET IP = '127.0.0.1' WHERE ID = ?
             ", $this->user->id
         );

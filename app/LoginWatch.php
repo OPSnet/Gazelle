@@ -33,7 +33,7 @@ class LoginWatch extends Base {
      */
     public function increment(int $userId, string $username): int {
         $this->userId = $userId;
-        $this->pg()->executeParams("
+        $this->pg()->query("
             insert into ip_history
                    (id_user, ip, data_origin)
             values ($1,      $2, 'login-fail')
@@ -44,7 +44,7 @@ class LoginWatch extends Base {
         );
         $seen = match ($this->userId) {
             0       => false,
-            default => $this->pg()->executeParams("
+            default => $this->pg()->query("
                 select 1
                 from ip_site_history
                 where upper(seen) > now() - '1 week'::interval
@@ -58,7 +58,7 @@ class LoginWatch extends Base {
                     and id_user = $1
                     and ip = $2
                 ", $userId, $this->ipaddr
-            )->count() > 0
+            ) > 0
         };
         self::$db->prepared_query('
             UPDATE login_attempts SET
@@ -184,12 +184,12 @@ class LoginWatch extends Base {
         return new Util\SortableTableHeader(
             'last_attempt',
             [
-                'ipaddr'       => ['dbColumn' => 'inet_aton(w.IP)', 'defaultSort' => 'asc',  'text' => 'IP'],
-                'user'         => ['dbColumn' => 'coalesce(um.username, w.capture)', 'defaultSort' => 'asc', 'text' => 'User'],
-                'attempts'     => ['dbColumn' => 'w.Attempts',      'defaultSort' => 'desc', 'text' => 'Attempts'],
-                'bans'         => ['dbColumn' => 'w.Bans',          'defaultSort' => 'desc', 'text' => 'Bans'],
-                'last_attempt' => ['dbColumn' => 'w.LastAttempt',   'defaultSort' => 'desc', 'text' => 'Last Attempt'],
-                'banned_until' => ['dbColumn' => 'w.BannedUntil',   'defaultSort' => 'desc', 'text' => 'Login Forbidden'],
+                'ipaddr'       => ['dbColumn' => 'inet_aton(w."IP")', 'defaultSort' => 'asc',  'text' => 'IP'],
+                'user'         => ['dbColumn' => 'coalesce(um."username", w."capture")', 'defaultSort' => 'asc', 'text' => 'User'],
+                'attempts'     => ['dbColumn' => 'w."Attempts"',      'defaultSort' => 'desc', 'text' => 'Attempts'],
+                'bans'         => ['dbColumn' => 'w."Bans"',          'defaultSort' => 'desc', 'text' => 'Bans'],
+                'last_attempt' => ['dbColumn' => 'w."LastAttempt"',   'defaultSort' => 'desc', 'text' => 'Last Attempt'],
+                'banned_until' => ['dbColumn' => 'w."BannedUntil"',   'defaultSort' => 'desc', 'text' => 'Login Forbidden'],
             ]
         );
     }
@@ -200,27 +200,26 @@ class LoginWatch extends Base {
      * @return array list [ID, ipaddr, userid, LastAttempt (datetime), Attempts, BannedUntil (datetime), Bans]
      */
     public function activeList(int $limit, int $offset): array {
-        self::$db->prepared_query("
-            SELECT w.ID       AS id,
-                w.IP          AS ipaddr,
-                w.UserID      AS user_id,
-                w.LastAttempt AS last_attempt,
-                w.Attempts    AS attempts,
-                w.BannedUntil AS banned_until,
-                w.Bans        AS bans,
-                w.capture,
-                um.Username   AS username,
-                (ip.FromIP IS NOT NULL) AS banned
-            FROM login_attempts w
-            LEFT JOIN users_main um ON (um.ID = w.UserID)
-            LEFT JOIN ip_bans ip ON (ip.FromIP = inet_aton(w.IP))
-            WHERE (w.BannedUntil > now() - INTERVAL 24 HOUR AND Bans > 0)
-                OR (w.LastAttempt > now() - INTERVAL 6 HOUR AND attempts > 0)
-            ORDER BY {$this->header()->orderBy()} {$this->header()->dir()}
-            LIMIT ? OFFSET ?
-            ", $limit, $offset
+        return $this->pg()->allByKeyex('id', <<<END_SQL
+            SELECT w."ID"       AS id,
+                w."IP"          AS ipaddr,
+                w."UserID"      AS user_id,
+                w."LastAttempt" AS last_attempt,
+                w."Attempts"    AS attempts,
+                w."BannedUntil" AS banned_until,
+                w."Bans"        AS bans,
+                w."capture",
+                um."Username"   AS username,
+                (ib.ip is not null) AS banned
+            FROM relay.login_attempts w
+            LEFT JOIN relay.users_main um ON (um."ID" = w."UserID")
+            LEFT JOIN ip_ban ib on (ib.ip::text = w."IP" and ib.is_active = true)
+            WHERE (w."BannedUntil" > now() - interval '24 hour' AND w."Bans" > 0)
+                OR (w."LastAttempt" > now() - interval '6 hour' AND w."Attempts" > 0)
+            order by {$this->header()->orderBy()} {$this->header()->dir()}
+            limit $1 offset $2
+            END_SQL, $limit, $offset
         );
-        return self::$db->to_array('id', MYSQLI_ASSOC);
     }
 
     /**
