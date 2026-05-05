@@ -149,8 +149,14 @@ if (!$isDelete) {
 
     $torrent = new TorrentDeleted($torrent->id);
     if (isset($_POST['remove-empty']) && $tgroup->flush()->torrentIdList() === []) {
-        $tgroup->removeTGroup();
-        $Viewer->logger("Empty torrent group {$torrent->groupId()} removed following report {$report->id}");
+        $requestList = array_filter(
+            new Manager\Request()->findByTGroup($tgroup),
+            fn ($r) => !$r->isFilled()
+        );
+        if ($requestList === []) {
+            $tgroup->removeTGroup();
+            $Viewer->logger("Empty torrent group {$torrent->groupId()} removed following report {$report->id}");
+        }
     }
 
     $logList = ["Torrent {$torrent->id} ($name) uploaded by {$uploader->username()} was deleted by {$Viewer->username()}"];

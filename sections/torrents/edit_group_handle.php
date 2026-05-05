@@ -51,7 +51,13 @@ if (isset($_POST['remove'])) {
     $tgroupId = $tgroup->id;
     $name     = $tgroup->text();
     if ($tgroup->torrentIdList() !== []) {
-        Error400::error('Attempted to remove the group but it is no longer empty!');
+        $requestList = array_filter(
+            new Manager\Request()->findByTGroup($tgroup),
+            fn ($r) => !$r->isFilled()
+        );
+        if ($requestList !== []) {
+            Error400::error('Attempted to remove the group but it is no longer empty!');
+        }
     }
     if (!$tgroup->removeTGroup()) {
         Error400::error('An attempt was made to remove the group but failed due to an internal constraint!');

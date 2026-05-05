@@ -17,7 +17,11 @@ $torMan = new Manager\Torrent();
 
 echo $Twig->render('tgroup/edit.twig', [
     'body'         => new Util\Textarea('body', $tgroup->description(), 80, 20),
-    'empty'        => $tgroup->torrentIdList() === [],
+    'empty'        => $tgroup->torrentIdList() === []
+        && array_filter(
+            new Manager\Request()->findByTGroup($tgroup),
+            fn ($r) => !$r->isFilled()
+        ) === [],
     'leech_reason' => $torMan->leechReasonList(),
     'leech_type'   => $torMan->leechTypeList(),
     'release_type' => new ReleaseType()->list(),

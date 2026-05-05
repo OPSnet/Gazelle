@@ -69,7 +69,7 @@
         <div class="tbx-label">Empty group</div>
         <div class="tbx-field">
             <label><input type="checkbox" name="remove"> Remove?</label><br>
-            There are no torrents associated with this group.
+            There are no torrents or unfilled requests associated with this group.
         </div>
 {% endif %}
         <div class="tbx-label">Summary of changes</div>
@@ -87,9 +87,10 @@
         </div>
     </div>
     </form>
+    </div>
 
 {% if tgroup.categoryName == 'Music' and viewer.permitted('torrents_edit') %}
-    <hr class="tbx">
+    <div class="box pad">
 
     <h4>Merge with another group</h4>
     <form class="merge_form" name="torrent_group" action="torrents.php" method="post">
