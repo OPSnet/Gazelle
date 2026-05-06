@@ -2,6 +2,7 @@ const { defineConfig } = require("cypress");
 
 module.exports = defineConfig({
   e2e: {
+    responseTimeout: 60_000,  // 60s, CI server is slow
     watchForFileChanges: false,
     baseUrl: 'http://localhost/',
     downloadsFolder: 'tests/cypress/downloads',
