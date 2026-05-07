@@ -477,7 +477,7 @@ class User extends \Gazelle\BaseManager {
             SELECT j.Date                    AS date,
                 DATE_FORMAT(j.Date, '%Y-%m') AS month,
                 coalesce(j.Flow, 0)          AS created,
-                coalesce(m.Flow, 0)          AS manual,
+                coalesce(m.Flow, 0)          AS `manual`,
                 coalesce(r.Flow, 0)          AS ratio,
                 coalesce(i.Flow, 0)          AS inactivity
             FROM (

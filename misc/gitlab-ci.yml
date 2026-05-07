@@ -64,11 +64,11 @@ e2e-tests:
     name: gazelle-e2e-testing
     entrypoint: [""]
   services:
-    - name: memcached:1.6.34-alpine
+    - name: memcached:1.6.41-alpine
       alias: memcached
     - name: postgres-orpheus
       alias: postgres
-    - name: percona:ps-8.0.40-31
+    - name: percona/percona-server:8.4.8
       alias: mysql
       command:
         - --datadir=/dev/shm/mysql
@@ -78,7 +78,7 @@ e2e-tests:
         - --collation-server=utf8mb4_0900_ai_ci
         - --userstat=on
         - --sql-mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
-        - --authentication-policy=mysql_native_password
+        - --mysql_native_password=ON
   variables:
     ENV: dev
     MYSQL_HOST: mysql

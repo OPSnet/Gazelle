@@ -18,7 +18,7 @@ services:
 
   memcached:
     # remember to update misc/gitlab-ci.yml
-    image: memcached:1.6.38-alpine
+    image: memcached:1.6.41-alpine
 
   pg:
     image: postgres:orpheus
@@ -41,7 +41,7 @@ services:
 
   mysql:
     # remember to update misc/gitlab-ci.yml
-    image: percona/percona-server:8.4.6
+    image: percona/percona-server:8.4.8
     ports:
       - 127.0.0.1:36000:3306
     volumes:
