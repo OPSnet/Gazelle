@@ -66,8 +66,10 @@ class Upload extends Base {
         );
     }
 
-    public function foot(bool $showFooter): string {
-        $torMan = new Manager\Torrent();
+    public function foot(
+        bool $showFooter,
+        Manager\Torrent $torMan = new Manager\Torrent(),
+    ): string {
         return self::$twig->render('upload/footer.twig', [
             'is_upload'    => !$this->isUploaded || isset($this->Torrent['add-format']),
             'info'         => $this->Torrent,
