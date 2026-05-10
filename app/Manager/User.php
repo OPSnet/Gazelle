@@ -108,7 +108,7 @@ class User extends \Gazelle\BaseManager {
             $watch = new \Gazelle\LoginWatch($ipaddr);
             $watch->increment($userId, "[usertoken:$userId]");
             if ($watch->nrAttempts() >= 5) {
-                $watch->ban("[id:$userId]");
+                $watch->ban("[id:{$user->id}]");
                 if ($watch->nrBans() >= 10) {
                     $manager->create($ipaddr, 'Automated ban per failed token usage', $user);
                 }

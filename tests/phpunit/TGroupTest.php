@@ -140,10 +140,10 @@ class TGroupTest extends TestCase {
                 "bp",
                 "uploads",
                 "perfect",
-                "start",
+                "timeline",
             ],
             array_keys($timeline[0]),
-            'tgroupe-user-timeline-section'
+            'tgroup-user-timeline-section'
         );
     }
 

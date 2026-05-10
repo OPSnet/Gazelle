@@ -3,34 +3,64 @@
 document.addEventListener('DOMContentLoaded', function() {
 
 {% for c in charts %}
-    {% if c.count %}
-    initialiseChart('{{ c.name }}-stats', '{{ c.name|ucfirst }} Stats', [
-    {
-        name: 'Downloaded',
-        data: {{ c.data_down|json_encode }},
-    },{
-        name: 'Uploaded',
-        data: {{ c.data_up|json_encode }},
-    },{
-        name: 'Buffer',
-        data: {{ c.buffer|json_encode }},
-    }], {bytes: true});
+{%  if c.count %}
+    Highcharts.chart('{{ c.name }}-stats', {
+        chart: { type: 'line' },
+        credits: { enabled: false },
+        title: { text: '{{ c.name|ucfirst }} Stats' },
+        xAxis: {
+            categories: {{ c.timeline|json_encode|raw }},
+        },
+        series: [
+            {
+                name: 'Downloaded',
+                data: {{ c.data_down|json_encode }},
+            },
+            {
+                name: 'Uploaded',
+                data: {{ c.data_up|json_encode }},
+            },
+            {
+                name: 'Buffer',
+                data: {{ c.buffer|json_encode }},
+            },
+        ],
+    });
 
-    initialiseChart('{{ c.name }}-bp', '{{ c.name|ucfirst }} Bonus Points', [
-    {
-        name: 'Bonus Points',
-        data: {{ c.bp|json_encode }},
-    }]);
+    Highcharts.chart('{{ c.name }}-bp', {
+        chart: { type: 'line' },
+        credits: { enabled: false },
+        title: { text: '{{ c.name|ucfirst }} Bonus Points' },
+        xAxis: {
+            categories: {{ c.timeline|json_encode|raw }},
+        },
+        series: [
+            {
+                name: 'Bonus Points',
+                data: {{ c.bp|json_encode|raw }},
+            }
+        ]
+    });
 
-    initialiseChart('{{ c.name }}-upload', '{{ c.name|ucfirst }} Uploads', [
-    {
-        name: 'Torrents',
-        data: {{ c.uploads|json_encode }},
-    },{
-        name: 'Perfect FLACs',
-        data: {{ c.perfect|json_encode }},
-    }]);
-    {% endif %}
+    Highcharts.chart('{{ c.name }}-upload', {
+        chart: { type: 'line' },
+        credits: { enabled: false },
+        title: { text: '{{ c.name|ucfirst }} Uploads' },
+        xAxis: {
+            categories: {{ c.timeline|json_encode|raw }},
+        },
+        series: [
+            {
+                name: 'Torrents',
+                data: {{ c.uploads|json_encode|raw }},
+            },
+            {
+                name: 'Perfect FLACs',
+                data: {{ c.perfect|json_encode|raw }},
+            },
+        ]
+    });
+{%  endif %}
 {% endfor %}
 });
 </script>
@@ -60,15 +90,15 @@ document.addEventListener('DOMContentLoaded', function() {
 {% for c in charts %}
 <div class="box">
     <div class="pad">
-    {% if user.id %}
+{%  if user.id %}
         <div id="{{ c.name }}-stats" style="width: 100%; height: 400px"></div>
         <br>
         <div id="{{ c.name }}-bp" style="width: 100%; height: 400px"></div>
         <br>
         <div id="{{ c.name }}-upload" style="width: 100%; height: 400px"></div>
-    {% else %}
+{%  else %}
         No stats available.
-    {% endif %}
+{%  endif %}
     </div>
 </div>
 {% endfor %}

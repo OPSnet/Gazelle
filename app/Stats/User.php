@@ -279,7 +279,7 @@ class User extends \Gazelle\BaseObject {
     }
 
     public function timeline(): array {
-        $key = "u_statgraphs_" . $this->id;
+        $key = "u_statgfx_{$this->id}";
         $charts = self::$cache->get_value($key);
         if ($charts === false) {
             $charts = [
@@ -289,7 +289,8 @@ class User extends \Gazelle\BaseObject {
             ];
             foreach ($charts as &$chart) {
                 self::$db->prepared_query("
-                    SELECT unix_timestamp(Time) * 1000 AS epoch,
+                    SELECT date_format(Time, '%Y-%m-%d')
+                                              AS date,
                         Uploaded              AS data_up,
                         Downloaded            AS data_down,
                         Uploaded - Downloaded AS buffer,
@@ -303,12 +304,10 @@ class User extends \Gazelle\BaseObject {
                     ", $this->id, $chart['count']
                 );
                 $stats = array_reverse(self::$db->to_array(false, MYSQLI_ASSOC));
-                $timeline = array_column($stats, 'epoch');
                 foreach (['data_up', 'data_down', 'buffer', 'bp', 'uploads', 'perfect'] as $dimension) {
-                    $series = array_column($stats, $dimension);
-                    $chart[$dimension] = array_map(fn($n) => [$timeline[$n], $series[$n]], range(0, count($series) - 1));
+                    $chart[$dimension] = array_column($stats, $dimension);
                 }
-                $chart['start'] = $timeline[0] ?? null;
+                $chart['timeline'] = array_column($stats, 'date');
                 unset($chart);
             }
             self::$cache->cache_value($key, $charts, 3600);
