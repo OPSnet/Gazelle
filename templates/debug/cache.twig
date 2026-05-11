@@ -3,7 +3,7 @@
 {%  if loop.first %}
 <details>
 <summary>{{ nr|number_format }} Cache key{{ nr|plural }} ({{
-    (cache.elapsed * 1000)|number_format(2) }} ms)</strong> (mean: {{
+    (cache.elapsed * 1000)|number_format(2) }} ms) (mean: {{
     ((cache.elapsed  * 1000)/nr)|number_format(5) }} ms)</summary>
 <table class="debug-table">
 {%  endif %}

@@ -3,7 +3,7 @@
 {%  if loop.first %}
 <details>
 <summary>{{ pg.queryList|length|number_format }} Postgresql {% if nr == 1 %}query{% else %}queries{% endif %} ({{
-    (pg.totalDuration * 1000)|number_format(2) }} ms)</strong> (mean: {{
+    (pg.totalDuration * 1000)|number_format(2) }} ms) (mean: {{
     ((pg.totalDuration * 1000)/nr)|number_format(5) }} ms)</summary>
 <table class="debug-table">
     <tr class="colhead">

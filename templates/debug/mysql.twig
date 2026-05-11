@@ -4,7 +4,7 @@
 <details>
 <summary>{{ list|length|number_format }} Mysql {% if list|length == 1 %}query{%
     else %}queries{% endif %} ({{ (elapsed * 1000)|number_format(2)
-    }} ms)</strong> (mean: {{ ((elapsed * 1000)/nr)|number_format(5) }} ms)
+    }} ms) (mean: {{ ((elapsed * 1000)/nr)|number_format(5) }} ms)
 </summary>
 <table class="debug-table">
 {%  endif %}
