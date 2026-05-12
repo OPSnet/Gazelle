@@ -29,7 +29,7 @@ class TwigTest extends TestCase {
         $twig->createTemplate("{{ dom.click('#id', \"$('#id').frob(); return false;\") }}")->render();
         $expected = <<<END
 <script>document.addEventListener('DOMContentLoaded', () => {
-\$('#id').click(() => {\$('#id').frob(); return false;});
+\$('#id').click(function () {\$('#id').frob(); return false;});
 })</script>
 END;
         $this->assertEquals($expected, $twig->createTemplate('{{ dom.emit|raw }}')->render(), 'twig-dominator');

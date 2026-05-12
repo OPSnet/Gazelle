@@ -25,7 +25,7 @@ class Dominator extends \Gazelle\Base {
         }
         $js = "<script>document.addEventListener('DOMContentLoaded', () => {\n";
         foreach (self::$click as $id => $code) {
-            $js .= "\$('$id').click(() => {{$code}});\n";
+            $js .= "\$('$id').click(function () {{$code}});\n";
         }
         return $js . '})</script>';
     }
