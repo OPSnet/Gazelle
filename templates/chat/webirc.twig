@@ -54,7 +54,8 @@
     ],
     "startupOptions" : {
         "server": "{{ constant('IRC_HOSTNAME') }}",
-        "port": 8000,
+        "port": 443,
+        "direct_path": "/websocket",
         "tls": true,
         "direct": true,
         "nick": "{{ irc_nick }}",
