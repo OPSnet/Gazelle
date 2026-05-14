@@ -11,7 +11,7 @@
             (event.totalGift / event.totalUser)|number_format(1) }}{% else %}0.0{% endif %}<br>
         Average gift weight: {{ event.averageWeight|number_format(1) }}<br>
         <br>
-        <form action="?action=gift-event&id={{ event.id }}" method="post">
+        <form action="?action=gift-event&amp;id={{ event.id }}" method="post">
         <label>Search for: <input name="search" value="" length="10"></label> (id or @username)
         <input type="submit" value="🔎">
         </form>

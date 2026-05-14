@@ -22,7 +22,7 @@
 <h3>Site history</h3>
 {% set prev_user = -1 %}
 {% for r in site %}
-    {% if loop.first %}
+{%  if loop.first %}
 <table>
 <thead>
     <tr>
@@ -35,12 +35,12 @@
     </tr>
 </thead>
 <tbody>
-    {% endif %}
-    {% if prev_user != r.id_user %}
+{%  endif %}
+{%  if prev_user != r.id_user %}
     <tr>
         <td colspan="6">{% if r.id_user %}{{ r.id_user|user_url }}{% else %}User #{{ r.id_user }} (deleted){% endif %}</td>
     </tr>
-    {% endif %}
+{%  endif %}
     <tr>
     <td{% if r.is_tor %} class="tor"{% endif %}>{{ ip_search(r.ip) }}</td>
     <td>{{ r.cc }}</td>
@@ -49,11 +49,11 @@
     <td>{{ asn(r.name, r.n) }}</td>
     <td><span class="resolve-ipv4" data-ip="{{ r.ip }}">Resolving...</span></td>
     </tr>
-    {% if loop.last %}
+{%  if loop.last %}
 </tbody>
 </table>
-    {% endif %}
-    {%- set prev_user = r.id_user %}
+{%  endif %}
+{% set prev_user = r.id_user %}
 {% else %}
 <div>no records</div>
 {% endfor %}
@@ -61,7 +61,7 @@
 <br>
 <h3>Snatch history</h3>
 {% for r in snatch %}
-    {% if loop.first %}
+{%  if loop.first %}
 <table>
 <thead>
     <tr>
@@ -76,7 +76,7 @@
     </tr>
 </thead>
 <tbody>
-    {% endif %}
+{%  endif %}
     <tr>
     <td{% if r.is_tor %} class="tor"{% endif %}>{{ ip_search(r.ipv4) }}</td>
     <td>{{ r.cc }}</td>
@@ -84,13 +84,13 @@
     <td>{{ r.last_seen }}</td>
     <td>{{ asn(r.name, r.n) }}</td>
     <td><span class="resolve-ipv4" data-ip="{{ r.ipv4 }}">Resolving...</span></td>
-    <td><a href="torrents.php?type=snatched&userid={{ r.user_id }}">{{ r.total|number_format }}</a></td>
+    <td><a href="torrents.php?type=snatched&amp;userid={{ r.user_id }}">{{ r.total|number_format }}</a></td>
     <td>{% if r.user_id %}{{ r.user_id|user_url }}{% else %}User #{{ r.user_id }}{% endif %}</td>
     </tr>
-    {% if loop.last %}
+{%  if loop.last %}
 </tbody>
 </table>
-    {% endif %}
+{%  endif %}
 {% else %}
 <div>no records</div>
 {% endfor %}
@@ -98,7 +98,7 @@
 <br>
 <h3>Tracker history</h3>
 {% for r in tracker %}
-    {% if loop.first %}
+{%  if loop.first %}
 <table>
 <thead>
     <tr>
@@ -113,7 +113,7 @@
     </tr>
 </thead>
 <tbody>
-    {% endif %}
+{%  endif %}
     <tr>
     <td{% if r.is_tor %} class="tor"{% endif %}>{{ ip_search(r.ipv4, true) }}</td>
     <td>{{ r.cc }}</td>
@@ -121,13 +121,13 @@
     <td>{{ r.last_seen }}</td>
     <td>{{ asn(r.name, r.n) }}</td>
     <td><span class="resolve-ipv4" data-ip="{{ r.ipv4 }}">Resolving...</span></td>
-    <td><a href="torrents.php?type=snatched&userid={{ r.user_id }}">{{ r.total|number_format }}</a></td>
+    <td><a href="torrents.php?type=snatched&amp;userid={{ r.user_id }}">{{ r.total|number_format }}</a></td>
     <td>{% if r.user_id %}{{ r.user_id|user_url }}{% else %}User #{{ r.user_id }}{% endif %}</td>
     </tr>
-    {% if loop.last %}
+{%  if loop.last %}
 </tbody>
 </table>
-    {% endif %}
+{%  endif %}
 {% else %}
 <div>no records</div>
 {% endfor %}

@@ -853,7 +853,7 @@ class User extends \Gazelle\BaseManager {
             $user = $this->findById($userId);
             if ($user) {
                 $mailer->send($user->email(), 'Your ' . SITE_NAME . ' account is about to be deactivated',
-                    self::$twig->render('email/disable-warning.twig', [
+                    self::$twig->render('email/disable-warning.text.twig', [
                         'username'  => $user->username(),
                         'days_left' => INACTIVE_USER_DEACTIVATE_DAYS - INACTIVE_USER_WARN_DAYS,
                     ])

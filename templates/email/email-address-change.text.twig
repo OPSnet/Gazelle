@@ -1,6 +1,6 @@
 Dear {{ username }},
 
-At {{ now }} UTC, your email address was changed for {{ constant('SITE_NAME') }}.
+At {{ now|date('Y-m-d H:i:s') }} UTC, your email address was changed for {{ constant('SITE_NAME') }}.
 
 The new address is {{ new_email }} . Please take a moment to
 verify that you did not made a mistake when entering it.

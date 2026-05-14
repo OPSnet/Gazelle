@@ -544,7 +544,7 @@ if ($Viewer->permitted('users_edit_reset_keys')) {
 
 if ($sendHackedMail && $Viewer->permitted('users_disable_any')) {
     new Mail()->send($hackedEmail, SITE_NAME . ' account - suspicious activity',
-        $Twig->render('email/hacked.twig', [
+        $Twig->render('email/hacked.text.twig', [
             'user' => $user
         ])
     );

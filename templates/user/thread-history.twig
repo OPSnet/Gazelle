@@ -18,8 +18,8 @@
             </tr>
     {% for t in page %}
             <tr>
-                <td><a href="forums.php?action=viewforum&forumid={{ t.forum_id }}">{{ t.forum_title }}</a></td>
-                <td><a href="forums.php?action=viewthread&threadid={{ t.thread_id }}">{{ t.thread_title }}</td>
+                <td><a href="forums.php?action=viewforum&amp;forumid={{ t.forum_id }}">{{ t.forum_title }}</a></td>
+                <td><a href="forums.php?action=viewthread&amp;threadid={{ t.thread_id }}">{{ t.thread_title }}</td>
                 <td class="nowrap">{{ t.created_time|time_diff }}</td>
                 <td class="nowrap">{{ t.last_post_time|time_diff }}</td>
             </tr>

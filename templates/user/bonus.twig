@@ -10,7 +10,7 @@ Your Bonus Points Rates
     <h2>{{ title }}</h2>
 </div>
 <div class="linkbox">
-    <a href="wiki.php?action=article&name=bonuspoints" class="brackets">About Bonus Points</a>
+    <a href="wiki.php?action=article&amp;name=bonuspoints" class="brackets">About Bonus Points</a>
     <a href="bonus.php" class="brackets">Bonus Point Shop</a>
     <a href="bonus.php?action=history{% if viewer.permitted('admin_bp_history') and viewer.id != user.id
         %}&amp;userid={{ user.id }}{% endif %}" class="brackets">History</a>

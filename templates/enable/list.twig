@@ -111,8 +111,8 @@
     {% endif %}
             </td>
             <td>{{ r.user.id|user_url }}</td>
-            <td><a href="/tools.php?action=email_search&emaillist={{ r.email }}">{{ r.email }}</td>
-            <td><a href="/tools.php?action=ip_search&ip={{ r.ipv4 }}">{{ r.ipv4 }}</a></td>
+            <td><a href="/tools.php?action=email_search&amp;emaillist={{ r.email }}">{{ r.email }}</td>
+            <td><a href="/tools.php?action=ip_search&amp;ip={{ r.ipv4 }}">{{ r.ipv4 }}</a></td>
             <td>{{ r.created|time_diff }}</td>
             <td>{% if r.banReason == 3 %}<b>Inactivity</b>{% else %}Other ({{ r.banReason }}){% endif %}</td>
     {% if not r.isPending %}

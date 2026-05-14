@@ -74,7 +74,7 @@
         </tr>
 {% endif %}
         <tr>
-            <td><a href="tools.php?action=db-mysql&table={{ r.TABLE_NAME }}">{{ r.TABLE_NAME }}</a></td>
+            <td><a href="tools.php?action=db-mysql&amp;table={{ r.TABLE_NAME }}">{{ r.TABLE_NAME }}</a></td>
             <td>{{ r.COLUMN_NAME }}</td>
             <td>{{ r.CONSTRAINT_NAME }}</td>
             <td class="center">{{ r.UPDATE_RULE == 'CASCADE' ? '✅' : '·' }}</td>

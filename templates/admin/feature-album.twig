@@ -13,7 +13,7 @@ There is no current Album of the Month.
 {% else %}
 The current Album of the Month is {{ current.aotm.tgroup.link|raw }}
 <a class="brackets" href="{{ current.aotm.thread.location }}">Thread</a>
-<b><a class="brackets" href="tools.php?action=featured_album&unfeature=aotm&auth={{ viewer.auth }}">Unfeature</a></b>
+<b><a class="brackets" href="tools.php?action=featured_album&amp;unfeature=aotm&amp;auth={{ viewer.auth }}">Unfeature</a></b>
 {% endif %}
 </div>
 <br>
@@ -24,7 +24,7 @@ There is no current Showcase.
 {% else %}
 The current Showcase is {{ current.showcase.tgroup.link|raw }}
 <a class="brackets" href="{{ current.showcase.thread.url|raw }}">Thread</a>
-<b><a class="brackets" href="tools.php?action=featured_album&unfeature=showcase&auth={{ viewer.auth }}">Unfeature</a></b>
+<b><a class="brackets" href="tools.php?action=featured_album&amp;unfeature=showcase&amp;auth={{ viewer.auth }}">Unfeature</a></b>
 {% endif %}
 </div>
 <br>

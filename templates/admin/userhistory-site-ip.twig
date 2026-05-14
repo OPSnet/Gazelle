@@ -40,7 +40,7 @@
             {% if not row.is_banned %}
                  {{ ip_search(row.ip_addr) }} (<span class="resolve-ipv4" data-ip="{{ row.ip_addr }}">Resolving...</span>)
             {% else %}
-            <a href="tools.php?action=ip_ban&ip={{ row.ip_addr }}">{{ ip_search(row.ip_addr) }} (<span class="resolve-ipv4" data-ip="{{ row.ip_addr }}">Resolving {{ row.ip_addr }}...</span>)
+            <a href="tools.php?action=ip_ban&amp;ip={{ row.ip_addr }}">{{ ip_search(row.ip_addr) }} (<span class="resolve-ipv4" data-ip="{{ row.ip_addr }}">Resolving {{ row.ip_addr }}...</span>)
                 <img src="{{ constant('STATIC_SERVER') }}/common/symbols/disabled.png" alt="IP ranned" title="IP banned" class="tooltip">
             </a>
             {% endif %}
@@ -54,7 +54,7 @@
             <td colspan="3">&nbsp;</td>
         {% endif %}
         {% if not loop.first %}
-            <td>{{ u.0|user_full }} <a class="brackets" href="/userhistory.php?action=ips&userid={{ u.0 }}">View</a></td>
+            <td>{{ u.0|user_full }} <a class="brackets" href="/userhistory.php?action=ips&amp;userid={{ u.0 }}">View</a></td>
             <td><span class="date-rel">{{ u.1|time_diff }}</span><span class="date-abs hidden">{{ u.1 }}</span></td>
             <td><span class="date-rel">{{ u.2|time_diff }}</span><span class="date-abs hidden">{{ u.2 }}</span></td>
             {% set open = 0 %}

@@ -38,7 +38,7 @@ class UserToken extends \Gazelle\BaseManager {
         );
         $userToken = $this->create(UserTokenType::password, $user);
         new \Gazelle\Util\Mail()->send($user->email(), 'Password reset information for ' . SITE_NAME,
-            self::$twig->render('email/password-reset.twig', [
+            self::$twig->render('email/password-reset.text.twig', [
                 'ipaddr'    => $this->requestContext()->remoteAddr(),
                 'reset_key' => $userToken->value(),
                 'user'      => $user,

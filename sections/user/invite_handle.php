@@ -63,7 +63,7 @@ if (!$invite) {
 }
 
 new \Gazelle\Util\Mail()->send($email, 'You have been invited to ' . SITE_NAME,
-    $Twig->render('email/invite-member.twig', [
+    $Twig->render('email/invite-member.text.twig', [
         'email'    => $email,
         'key'      => $invite->key(),
         'username' => $Viewer->username(),

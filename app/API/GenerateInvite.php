@@ -40,7 +40,7 @@ class GenerateInvite extends AbstractAPI {
         );
         if (!empty($_GET['email'])) {
             new Mail()->send($email, 'New account confirmation at ' . SITE_NAME,
-                self::$twig->render('email/invite-interviewer.twig', [
+                self::$twig->render('email/invite-interviewer.text.twig', [
                     'inviter_name' => $interviewer->username(),
                     'inviter_key' => $key,
                     'email' => $email,

@@ -12,7 +12,7 @@
         </div>
     </div>
 {% else %}
-<h2>Edit <a href="torrents.php?id={{ info.GroupID }}&torrentid={{ info.ID }}#torrent{{ info.ID }}">{{ info.Title }}</a></h2>
+<h2>Edit <a href="torrents.php?id={{ info.GroupID }}&amp;torrentid={{ info.ID }}#torrent{{ info.ID }}">{{ info.Title }}</a></h2>
 {% endif %}
 {% if error %}
     <p class="upload-error">{{ error|raw }}</p>

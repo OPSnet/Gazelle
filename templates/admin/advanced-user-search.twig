@@ -472,7 +472,7 @@ Results ordered <select name="order">
     {% if show_invited %}
             <td>
         {%- if u.user.stats.invitedTotal > 0 -%}
-            <a href="user.php?action=invitetree&userid={{ u.user_id }}">
+            <a href="user.php?action=invitetree&amp;userid={{ u.user_id }}">
         {%- endif -%}
             {{ u.user.stats.invitedTotal|number_format }}
         {%- if u.user.stats.invitedTotal > 0 -%}

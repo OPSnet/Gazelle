@@ -37,7 +37,7 @@ ASN name: <input type="text" name="name" size="50" value="{{ name }}">
     <tr>
         <td>{{ s.id_asn }}</td>
         <td>{{ s.cc }}</td>
-        <td><a href="tools.php?action=asn_search&asn={{ s.id_asn }}">{{ s.name }}</a></td>
+        <td><a href="tools.php?action=asn_search&amp;asn={{ s.id_asn }}">{{ s.name }}</a></td>
         <td>{{ s.total|number_format }}</td>
     </tr>
     {% endfor %}
@@ -51,7 +51,7 @@ ASN name: <input type="text" name="name" size="50" value="{{ name }}">
 <p>
 <ul class="nobullet">
     {% for s in similar %}
-    <a href="tools.php?action=asn_search&name={{ s.word }}">{{ s.word }}</a>
+    <a href="tools.php?action=asn_search&amp;name={{ s.word }}">{{ s.word }}</a>
     {% endfor %}
 </p>
 </div>

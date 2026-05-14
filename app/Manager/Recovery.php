@@ -276,7 +276,7 @@ class Recovery extends \Gazelle\Base {
              ",                   $admin_id, $key,      $email, "Account recovery id={$id} key={$key}"
         );
         new Mail()->send($email, 'Account recovery confirmation at ' . SITE_NAME,
-            self::$twig->render('email/recovery.twig', [
+            self::$twig->render('email/recovery.text.twig', [
                 'invite_key' => $key,
             ])
         );

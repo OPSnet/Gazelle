@@ -77,7 +77,7 @@ if (isset($_REQUEST['confirm'])) {
                     exit;
                 }
                 new Util\Mail()->send($user->email(), 'New account confirmation at ' . SITE_NAME,
-                    $Twig->render('email/registration.twig', [
+                    $Twig->render('email/registration.text.twig', [
                         'user'   => $user,
                         'token'  => new Manager\UserToken()->create(UserTokenType::confirm, $user),
                     ])
@@ -114,8 +114,7 @@ if (isset($_REQUEST['confirm'])) {
         'vpn'       => isset($_REQUEST['vpn']),
     ]);
 } else {
-    echo $Twig->render(isset($_GET['welcome'])
-        ? 'register/code.twig'
-        : 'register/closed.twig'
+    echo $Twig->render(
+        isset($_GET['welcome']) ? 'register/code.twig' : 'register/closed.twig'
     );
 }

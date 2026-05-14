@@ -234,7 +234,7 @@ echo ' [' . $tgroup->year() . ']'; } ?></strong>
                 <?= $vote->links($tgroup) ?>
 <?php       } ?>
             <div class="tags"><?= implode(', ', array_map(
-                fn($name) => "<a href=\"collages.php?action=search&tags=$name\">$name</a>", $tgroup->tagNameList()
+                fn($name) => "<a href=\"collages.php?action=search&amp;tags=$name\">$name</a>", $tgroup->tagNameList()
                 )) ?></div>
         </td>
         <?= $Twig->render('torrent/stats.twig', ['torrent' => $torrent, 'viewer' => $Viewer]) ?>

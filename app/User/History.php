@@ -123,7 +123,7 @@ class History extends \Gazelle\BaseUser {
             $mail->send(
                 $this->user->email(),
                 'Password changed information for ' . SITE_NAME,
-                self::$twig->render('email/password-change.twig', [
+                self::$twig->render('email/password-change.text.twig', [
                     'ipaddr'    => $ipaddr,
                     'useragent' => $useragent,
                     'username'  => $this->user->username(),
@@ -230,7 +230,7 @@ class History extends \Gazelle\BaseUser {
                 );
             }
             $mailer->send($this->user->email(), 'Email address changed information for ' . SITE_NAME,
-                self::$twig->render('email/email-address-change.twig', [
+                self::$twig->render('email/email-address-change.text.twig', [
                     'ipaddr'     => $ipaddr,
                     'new_email'  => $newEmail,
                     'now'        => date('Y-m-d H:i:s'),

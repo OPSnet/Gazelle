@@ -22,7 +22,7 @@
         <tbody>
 {% for r in list %}
         <tr>
-            <td align="right"><a href="/reportsv2.php?view=report&id={{ r.report_id }}">{{ r.report_id }}</a></td>
+            <td align="right"><a href="/reportsv2.php?view=report&amp;id={{ r.report_id }}">{{ r.report_id }}</a></td>
             <td>{{ r.uploader.username ?? '<i>unknown</i>'|raw }}</td>
             <td>{{ r.reporter.username ?? '<i>unknown</i>'|raw }}</td>
             <td>{{ r.resolver.username ?? '<i>unclaimed</i>'|raw }}</td>

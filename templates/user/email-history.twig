@@ -49,7 +49,7 @@
     </tr>
 {%  endif %}
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
-        <td><a href="userhistory.php?action=email&userid={{ r.user_id }}">{{ r.user.username }}</a></td>
+        <td><a href="userhistory.php?action=email&amp;userid={{ r.user_id }}">{{ r.user.username }}</a></td>
         <td>{{ r.user.email }}</td>
         <td>{{ r.created }}</td>
         <td>{{ ip_search(r.ip) }} (<span class="resolve-ipv4" data-ip="{{ r.ip }}">Resolving...</span>)</td>
