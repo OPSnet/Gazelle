@@ -9,12 +9,13 @@ class Session extends \Gazelle\BaseUser {
     protected const CACHE_KEY    = 'u_sess_%d';
 
     public function flush(): static {
-        $this->user()->flush();
+        self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->user->id));
+        unset($this->info);
         return $this;
     }
 
     public function info(): array {
-        if (isset($this->info) && !empty($this->info)) {
+        if (isset($this->info)) {
             return $this->info;
         }
         $key = sprintf(self::CACHE_KEY, $this->user->id);
@@ -59,7 +60,7 @@ class Session extends \Gazelle\BaseUser {
         if (!isset($this->info()[$sessionKey])) {
             return false;
         }
-        if (strtotime($this->info()[$sessionKey]['LastUpdate']) > time() - 600) {
+        if (time() - (int)strtotime($this->info()[$sessionKey]['LastUpdate']) < 600) {
             // Update every 10 minutes
             return false;
         }
@@ -78,7 +79,8 @@ class Session extends \Gazelle\BaseUser {
                 BrowserVersion = ?,
                 OperatingSystem = ?,
                 OperatingSystemVersion = ?
-            WHERE UserID = ? AND SessionID = ?
+            WHERE UserID = ?
+                AND SessionID = ?
             ", $this->requestContext()->remoteAddr(),
                 $ua['Browser'], $ua['BrowserVersion'],
                 $ua['OperatingSystem'], $ua['OperatingSystemVersion'],
@@ -87,8 +89,7 @@ class Session extends \Gazelle\BaseUser {
         new History($this->user)
             ->registerSiteIp($this->requestContext()->remoteAddr());
 
-        self::$cache->delete_value('users_sessions_' . $this->user->id);
-        $this->info = [];
+        $this->flush();
         return true;
     }
 
@@ -111,7 +112,7 @@ class Session extends \Gazelle\BaseUser {
             ON DUPLICATE KEY UPDATE last_access = now()
             ', $this->user->id
         );
-        self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->user->id));
+        $this->flush();
         return $this->info()[$sessionKey];
     }
 

@@ -1810,7 +1810,11 @@ class User extends BaseAttrObject {
         // Many, but not all, of the associated user tables will drop their entries via foreign key cascades.
         // But some won't. If this call fails, you will need to decide what to do about the tables in question.
         // Calling BaseObject::remove() removes the attribute rows and the row in users_main.
-        DB::DB()->prepared_query("
+        self::$db->prepared_query("
+            DELETE FROM user_last_access_delta WHERE user_id = ?
+            ", $this->id
+        );
+        self::$db->prepared_query("
             DELETE FROM user_read_forum WHERE user_id = ?
             ", $this->id
         );
