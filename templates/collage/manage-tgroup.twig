@@ -24,15 +24,16 @@
     <table id="manage_collage_table">
         <thead>
             <tr class="colhead">
-                <th style="width: 7%;" data-sorter="false">Order</th>
-                <th style="width: 1%;"><span><abbr class="tooltip" title="Current rank">#</abbr></span></th>
-                <th style="width: 7%;"><span>Cat.&nbsp;#</span></th>
-                <th style="width: 1%;"><span>Year</span></th>
-                <th style="width: 15%;" data-sorter="ignoreArticles"><span>Artist</span></th>
+                <th data-sorter="false">Order</th>
+                <th><span><abbr class="tooltip" title="Current rank">#</abbr></span></th>
+                <th><span>Year</span></th>
+                <th data-sorter="ignoreArticles"><span>Artist</span></th>
                 <th data-sorter="ignoreArticles"><span>Torrent</span></th>
-                <th style="width: 10%;"><span>Added</span></th>
-                <th style="width: 1%;"><span>User</span></th>
-                <th style="width: 1%; text-align: right;" class="nobr" data-sorter="false"><span><abbr class="tooltip" title="Modify an individual row">Tweak</abbr></span></th>
+                <th><span>Added</span></th>
+{%  if not collage.isPersonal %}
+                <th><span>User</span></th>
+{%  endif %}
+                <th class="nobr" data-sorter="false"><span><abbr class="tooltip" title="Modify an individual row">Tweak</abbr></span></th>
             </tr>
         </thead>
         <tbody>
@@ -43,12 +44,13 @@
                     <input class="sort_numbers" type="text" name="sort" value="{{ collage.sequence(tgroup.id) }}" id="sort_{{ tgroup.id }}" size="4">
                 </td>
                 <td>{{ loop.index }}</td>
-                <td>{{ tgroup.yieldTorrents.current.remasterCatalogueNumber|escape('html')|default('&nbsp;')|raw }}</td>
                 <td>{{ tgroup.year|escape('html')|default('&nbsp;'|raw) }}</td>
                 <td>{{ tgroup.artistRole.link|default('&mdash;')|raw }}</td>
                 <td><a href="{{ tgroup.location }}" class="tooltip" title="View torrent group">{{ tgroup.name }}</a></td>
                 <td class="nobr">{{ collage.entryCreated(tgroup) }}</td>
+{%  if not collage.isPersonal %}
                 <td class="nobr">{{ collage.entryUserId(tgroup)|user_url }}</td>
+{%  endif %}
                 <td class="nobr">
                     <input type="hidden" name="action" value="manage_handle">
                     <input type="hidden" name="auth" value="{{ viewer.auth }}">
