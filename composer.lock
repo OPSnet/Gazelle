@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "bbad407fe683c3096bae5daa5317cdb2",
+    "content-hash": "6b56b8cc358e3945719c4974dad7dbc3",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -1205,16 +1205,16 @@
         },
         {
             "name": "orpheusnet/logchecker",
-            "version": "0.14.3",
+            "version": "0.14.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/OPSnet/Logchecker.git",
-                "reference": "661fb57f4ee9c6d86161e42077ea9f0931a4fc8d"
+                "reference": "d7d80571cbf21d62c938fbe24e5b5a477c47113c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/OPSnet/Logchecker/zipball/661fb57f4ee9c6d86161e42077ea9f0931a4fc8d",
-                "reference": "661fb57f4ee9c6d86161e42077ea9f0931a4fc8d",
+                "url": "https://api.github.com/repos/OPSnet/Logchecker/zipball/d7d80571cbf21d62c938fbe24e5b5a477c47113c",
+                "reference": "d7d80571cbf21d62c938fbe24e5b5a477c47113c",
                 "shasum": ""
             },
             "require": {
@@ -1260,9 +1260,9 @@
             "description": "Logchecker for validating logs generated from supported ripping programs (like EAC and XLD)",
             "support": {
                 "issues": "https://github.com/OPSnet/Logchecker/issues",
-                "source": "https://github.com/OPSnet/Logchecker/tree/0.14.3"
+                "source": "https://github.com/OPSnet/Logchecker/tree/0.14.4"
             },
-            "time": "2025-10-13T23:19:32+00:00"
+            "time": "2026-05-17T20:27:47+00:00"
         },
         {
             "name": "pleonasm/merkle-tree",
