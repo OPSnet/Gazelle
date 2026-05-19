@@ -34,13 +34,10 @@ class LoginWatch extends Base {
     public function increment(int $userId, string $username): int {
         $this->userId = $userId;
         $this->pg()->query("
-            insert into ip_history
-                   (id_user, ip, data_origin)
-            values ($1,      $2, 'login-fail')
-            on conflict (id_user, ip, data_origin) do update set
-                total = ip_history.total + 1,
-                seen = tstzrange(lower(ip_history.seen), now())
-            ", $userId, $this->ipaddr
+            insert into history_login_fail
+                   (ip, username)
+            values ($1, $2)
+            ", $this->ipaddr, $username
         );
         $seen = match ($this->userId) {
             0       => false,

@@ -123,6 +123,7 @@ class SchedulerTest extends TestCase {
             ['InactiveUserWarn'],
             ['InactiveUserDeactivate'],
             ['LockOldThreads'],
+            ['LoginFailPurge'],
             ['LowerLoginAttempts'],
             ['Peerupdate'],
             ['PromoteUsers'],
@@ -147,7 +148,7 @@ class SchedulerTest extends TestCase {
 
     public function testTaskDetailList(): void {
         $list = new TaskScheduler()->taskDetailList();
-        $this->assertCount(41, $list, 'task-detail-list');
+        $this->assertCount(42, $list, 'task-detail-list');
         $detail = current($list);
         $this->assertEqualsCanonicalizing(
             [

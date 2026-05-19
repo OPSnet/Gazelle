@@ -402,7 +402,7 @@ class UserTest extends TestCase {
         $this->assertEquals($ban->id, $page[0]['id'], 'loginwatch-ip-id-page');
         $this->assertEquals(1, $ban->remove(), 'loginwatch-ip-ban-clear');
 
-        $this->assertEquals(2, $this->user->history()->resetIp(), 'user-reset-ip');
+        $this->assertEquals(1, $this->user->history()->resetIp(), 'user-reset-ip');
     }
 
     public function testParanoia(): void {

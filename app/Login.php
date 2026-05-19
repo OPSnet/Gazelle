@@ -130,15 +130,6 @@ class Login extends Base {
                 Manager\User::DISABLE_TOR
             );
             // return a newly disabled instance
-            $this->pg()->prepared_query("
-                insert into ip_history
-                       (id_user, ip, data_origin)
-                values (?,       ?,  'login-fail')
-                on conflict (id_user, ip, data_origin) do update set
-                    total = ip_history.total + 1,
-                    seen = tstzrange(lower(ip_history.seen), now(), '[]')
-                ", $user->id, $ipaddr
-            );
             return $userMan->findById($user->id);
         }
 
