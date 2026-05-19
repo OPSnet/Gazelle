@@ -93,7 +93,6 @@ class IPv4 extends \Gazelle\Base {
                 union
                 select distinct ip from ip_history
                 where $where
-                  and data_origin != 'login-fail'
             )
             select count(ip) from history
             END_SQL, ...$args
@@ -120,7 +119,6 @@ class IPv4 extends \Gazelle\Base {
                 select ip, id_user, unnest(seen) seen_time from ip_site_history
                 union all
                 select ip, id_user, seen seen_time from ip_history
-                where data_origin != 'login-fail'
             )
             select ip as ip_addr,
                 count(distinct id_user) as nr_users,
@@ -140,7 +138,6 @@ class IPv4 extends \Gazelle\Base {
                 select distinct ih.ip
                 from ip_history ih
                 where $where2
-                  and data_origin != 'login-fail'
             )
             group by ip
             order by max_end desc, ip

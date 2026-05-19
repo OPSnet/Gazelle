@@ -119,7 +119,7 @@ class ListMatcher extends \Gazelle\Base {
             select ip, lower(seen) as first_seen, upper(seen) as last_seen
             from ip_history ih
             inner join {$this->ipTable} s on (s.addr = ih.ip)
-            where id_user = ? and data_origin != 'login-fail'
+            where id_user = ?
             ", $user->id
         );
         array_push($siteIps, ...$eventIps);
@@ -187,7 +187,6 @@ class ListMatcher extends \Gazelle\Base {
             union select id_user
             from ip_history ih
             inner join {$this->ipTable} t on (t.addr = ih.ip)
-            where ih.data_origin != 'login-fail'
             group by id_user
         "));
     }

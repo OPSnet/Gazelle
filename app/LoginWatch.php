@@ -51,7 +51,7 @@ class LoginWatch extends Base {
                 select 1
                 from ip_history
                 where upper(seen) > now() - '1 week'::interval
-                    and data_origin not in ('login-fail', 'tracker')
+                    and data_origin != 'tracker'
                     and id_user = $1
                     and ip = $2
                 ", $userId, $this->ipaddr
