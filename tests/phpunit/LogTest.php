@@ -130,8 +130,7 @@ class LogTest extends TestCase {
         $paginator->setTotal($siteLog->total(''));
 
         Base::setRequestContext(new RequestContext('/index.php', '127.0.0.1', ''));
-        global $SessionID;
-        $SessionID = 'phpunit';
+        Base::staticRequestContext()->setSessionId('phpunit');
         Util\Twig::setViewer($this->user);
         $html = Util\Twig::factory(new Manager\User())->render('sitelog.twig', [
             'search'    => '',

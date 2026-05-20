@@ -76,7 +76,7 @@ class RequestContext {
     }
 
     public function sessionId(): string {
-        return $this->sessionId;
+        return $this->hasSessionId() ? $this->sessionId : '';
     }
 
     public function hasSessionId(): bool {

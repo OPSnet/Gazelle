@@ -429,8 +429,7 @@ class DonorTest extends TestCase {
         $paginator = new Util\Paginator(USERS_PER_PAGE, 1)->setTotal($manager->rewardTotal());
         Base::staticRequestContext()->setViewer($this->donor->user());
         Util\Twig::setViewer($this->donor->user());
-        global $SessionID;
-        $SessionID = 'phpunit';
+        Base::staticRequestContext()->setSessionId('phpunit');
         $render = (Util\Twig::factory($userMan))->render('donation/reward-list.twig', [
             'paginator' => $paginator,
             'user'      => $manager->rewardPage(null, $paginator->limit(), $paginator->offset()),

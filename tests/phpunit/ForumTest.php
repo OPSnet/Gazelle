@@ -570,8 +570,7 @@ class ForumTest extends TestCase {
         );
         $paginator = new Util\Paginator(TOPICS_PER_PAGE, 1)->setTotal(1);
         Base::setRequestContext(new RequestContext('/forum.php', '127.0.0.1', ''));
-        global $SessionID; // to render header()
-        $SessionID = 'phpunit';
+        Base::staticRequestContext()->setSessionId('phpunit');
         Util\Twig::setViewer($admin);
         $this->assertStringContainsString(
             "<a href=\"forums.php#$name\">$name</a>",

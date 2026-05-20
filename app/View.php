@@ -220,14 +220,14 @@ class View extends Base {
             }
         }
 
-        global $Debug, $SessionID;
+        global $Debug;
         $Debug->mark('render footer');
         return self::$twig->render('index/private-footer.twig', [
             'cache'        => self::$cache,
             'db'           => self::$db,
             'debug'        => $Debug,
             'disclaimer'   => $showDisclaimer,
-            'last_active'  => new User\Session($user)->lastActive($SessionID),
+            'last_active'  => new User\Session($user)->lastActive(self::$requestContext->sessionId()),
             'launch'       => $launch,
             'load'         => sys_getloadavg(),
             'notification' => $notification,

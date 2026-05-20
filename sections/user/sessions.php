@@ -32,7 +32,7 @@ if (isset($_POST['session'])) {
 }
 
 echo $Twig->render('user/session.twig', [
-    'current' => $SessionID,
+    'current' => $session->requestContext()->sessionId(),
     'session' => $session->info(),
     'user'    => $user,
     'viewer'  => $Viewer,

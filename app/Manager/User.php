@@ -138,8 +138,6 @@ class User extends \Gazelle\BaseManager {
             $session->logout();
             return null;
         }
-        global $SessionID;
-        $SessionID = $cookie->sessionKey();
         $user->requestContext()->setSessionId($cookie->sessionKey());
         $session->refresh($cookie->sessionKey());
         return $user;

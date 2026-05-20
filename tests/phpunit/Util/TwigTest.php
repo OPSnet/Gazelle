@@ -256,8 +256,7 @@ END;
             'ipaddr'      => '127.0.0.1',
             'useragent'   => 'phpunit',
         ]);
-        global $SessionID;
-        $SessionID = $current['SessionID'];
+        Base::staticRequestContext()->setSessionId($current['SessionID']);
         $this->assertStringEndsWith("</body>\n</html>\n", self::twig('{{ footer() }}')->render(), 'twig-function-footer');
 
         $this->assertEquals(

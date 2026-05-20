@@ -11,8 +11,7 @@ class ErrorTest extends TestCase {
     public function setUp(): void {
         $this->user = Helper::makeUser('error.' . randomString(6), 'error');
         Base::staticRequestContext()->setViewer($this->user);
-        global $SessionID;
-        $SessionID = 'phpunit';
+        Base::staticRequestContext()->setSessionId('phpunit');
     }
 
     public function tearDown(): void {

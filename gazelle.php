@@ -57,7 +57,6 @@ if (
 Base::setRequestContext($context);
 $Viewer    = null;
 $cookie    = null;
-$SessionID = null;
 $banMan    = new Manager\Ban();
 $userMan   = new Manager\User();
 
