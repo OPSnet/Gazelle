@@ -90,7 +90,6 @@ class WikiTest extends TestCase {
         $manager = new Manager\Wiki();
         $title   = 'phpunit bbwiki ' . randomString(6);
         $alias   = Wiki::normalizeAlias($title);
-        $this->userList['user'] = Helper::makeUser('wiki.' . randomString(6), 'text');
         $article = $manager->create(
             $title,
             'wiki bbcode body',
