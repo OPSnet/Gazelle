@@ -255,14 +255,14 @@
 /* CSS compiler will leave this section blank. */
 
 $phone-screen-size: 575px;
-$z-lightbox: 1000;
-$z-upload-error-popups: 900;
-$z-mobilemenu-closed: 1000;
-$z-mobilemenu-closed-tab: 400;
-$z-mobilemenu-closed-tab-icons: 500;
-$z-desktop-menu-open: 10000010;
-$z-desktop-menu-closed: 10000020;
-$z-notifications: 750; 
+$z-lightbox: 4000;
+$z-upload-error-popups: 1100;
+$z-mobilemenu-closed: 2300;
+$z-mobilemenu-closed-tab: 2100;
+$z-mobilemenu-closed-tab-icons: 2200;
+$z-desktop-menu-open: 2510;
+$z-desktop-menu-closed: 2520;
+$z-notifications: 1000;
 $z-sticky-table-headers: 1;
 $z-avatar-mobile: 1;
 $height-mobilemenu-closed-tab: 32px;
@@ -1748,7 +1748,7 @@ div#discog_table td.td_info:not(span.torrent_links_block) > a {
 .tooltipster-base {
   box-shadow: 0 0 8px rgb(0 0 0 / 25%);
   width: auto !important;
-  z-index: 825;
+  z-index: 5000;
 }
 
 .tooltipster-default {
@@ -2162,13 +2162,19 @@ body#collage .cats_music {
   padding: 0 9px;
 }
 
-#searchbars > ul li {
+#searchbars > ul > li {
   flex: 1 1 auto;
-  margin-right: 9px;
-}
+  position: relative;
 
-#searchbars > ul li:last-child {
-  margin-right: 0;
+  & + li {
+    margin-left: 9px;
+  }
+  > ul {
+    position: absolute;
+    z-index: $z-desktop-menu-open;
+    top: 3em;
+    background-color: variables.$color-background-searchbars-surround;
+  }
 }
 
 #searchbars > ul input {
@@ -2387,10 +2393,10 @@ body#userhistory .header + .center {
 
 /* ### 2.2.1 Full clickable appearance
    Applies to Torrent Pages, collage-listing pages, collage-discog pages. */
-.collage_table .td_info .tags :not(:empty),
-.collage-artist-entry .tags :not(:empty),
-#torrent_table .group .tags :not(:empty),
-#discog_table .group .tags :not(:empty),
+.collage_table .td_info .tags a:not(:empty),
+.collage-artist-entry .tags a:not(:empty),
+#torrent_table .group .tags a:not(:empty),
+#discog_table .group .tags a:not(:empty),
 #taglist td a,
 #request_table .tags,
 #top10 .tags a,
@@ -2426,8 +2432,8 @@ body#torrents div.box.box_tags li > a:first-child {
    The people have spoken. Applies only to pages with clickable tags. */
 
 @media screen and (prefers-reduced-motion: no-preference) {
-  .collage_table .td_info .tags :not(:empty):hover,
-  #torrent_table .group .tags :not(:empty):hover,
+  .collage_table .td_info .tags a:not(:empty):hover,
+  #torrent_table .group .tags a:not(:empty):hover,
   #discog_table .tags :hover,
   #top10 .tags a:hover,
   #taglist td a:hover,
@@ -2454,6 +2460,15 @@ body#torrents div.box.box_tags li > a:first-child {
   font-style: italic;
   font-weight: normal;
   margin-inline: 1rem;
+}
+
+/* Non-clickable tag entries rendered as plain spans */
+.collage_table .td_info .tags > span:not(:empty),
+.collage-artist-entry .tags > span:not(:empty),
+#torrent_table .group .tags > span:not(:empty),
+#discog_table .group .tags > span:not(:empty) {
+  font-style: italic;
+  font-weight: normal;
 }
 
 /* ### 2.2.4 Other special cases
@@ -2871,6 +2886,31 @@ ul#check::after {
 /* When one match is highlighted by mouse */
 .autocomplete-suggestions .autocomplete-suggestion.autocomplete-selected {
   background-color: variables.$color-menu-fx-selection !important;
+}
+
+.autocomplete-menu.ac-rich {
+  --ac-menu-bg: #{variables.$ac-rich-menu-bg};
+  --ac-menu-border: #{variables.$ac-rich-menu-border};
+  --ac-menu-fg: #{variables.$ac-rich-menu-fg};
+  --ac-row-bg: #{variables.$ac-rich-row-bg};
+  --ac-row-border: #{variables.$ac-rich-row-border};
+  --ac-row-fg: #{variables.$ac-rich-row-fg};
+  --ac-row-muted-fg: #{variables.$ac-rich-row-muted-fg};
+  --ac-row-bio-fg: #{variables.$ac-rich-row-bio-fg};
+  --ac-row-advanced-fg: #{variables.$ac-rich-row-advanced-fg};
+  --ac-row-link-fg: #{variables.$ac-rich-row-link-fg};
+  --ac-row-selected-bg: #{variables.$ac-rich-row-selected-bg};
+  --ac-row-selected-border: #{variables.$ac-rich-row-selected-border};
+  --ac-row-selected-fg: #{variables.$ac-rich-row-selected-fg};
+  --ac-row-selected-muted-fg: #{variables.$ac-rich-row-selected-muted-fg};
+  --ac-row-selected-bio-fg: #{variables.$ac-rich-row-selected-bio-fg};
+  --ac-row-selected-advanced-fg: #{variables.$ac-rich-row-selected-advanced-fg};
+  --ac-row-selected-link-fg: #{variables.$ac-rich-row-selected-link-fg};
+  --ac-tag-bg: #{variables.$ac-rich-tag-bg};
+  --ac-tag-fg: #{variables.$ac-rich-tag-fg};
+  --ac-tag-border: #{variables.$ac-rich-tag-border};
+  --ac-tag-hover-bg: #{variables.$ac-rich-tag-hover-bg};
+  --ac-tag-hover-fg: #{variables.$ac-rich-tag-hover-fg};
 }
 
 /* ########################################################################
@@ -3440,7 +3480,7 @@ Documentation of mobile classes:
   }
 
   /* ## 4.11.2 collage ~ tag bubble appearance on mobile */
-  .collage_table .td_info .tags :not(:empty) {
+  .collage_table .td_info .tags a:not(:empty) {
     box-sizing: border-box;
     display: inline-block;
     font-weight: 400;
@@ -3833,16 +3873,16 @@ Documentation of mobile classes:
     text-align: center;
   }
 
-  #header ul:not(#userinfo_major, #userinfo_stats) {
+  #header ul:not(#userinfo_major, #userinfo_stats, .autocomplete-menu) {
     display: flex;
     flex-wrap: wrap;
     width: 100%;
   }
-  #header ul:not(#userinfo_major, #userinfo_stats) li {
+  #header ul:not(#userinfo_major, #userinfo_stats, .autocomplete-menu) > li {
     margin: 0;
     width: 33.3%;
   }
-  #header ul:not(#userinfo_major, #userinfo_stats) a {
+  #header ul:not(#userinfo_major, #userinfo_stats, .autocomplete-menu) > li > a {
     line-height: var(--row-height);
   }
   /* end setup
@@ -3983,23 +4023,76 @@ Documentation of mobile classes:
 
   /* ## 4.17.9   Menu when open, Row Five ~ searchboxes */
 
-  #searchbars ul {
+  #searchbars > ul {
     bottom: 0;
     height: unset;
     padding: 0 0 0 6px;
     position: absolute;
   }
-  #searchbars li {
+  #searchbars > ul > li {
     height: var(--row-height);
   }
-  #searchbars li:nth-child(-n + 3) .search_form {
+  #searchbars > ul > li:nth-child(-n + 3) .search_form {
     margin: 6px 6px 3px 0;
   }
-  #searchbars li:nth-child(n + 4) .search_form {
+  #searchbars > ul > li:nth-child(n + 4) .search_form {
     margin: 3px 6px 6px 0;
   }
   #header #searchbars input {
     height: calc(var(--row-height) - 9px);
+    font-size: 16px;
+    line-height: 1.25;
+  }
+
+  /* Let rich autocomplete mobile takeover own the artist field geometry. */
+  body.ac-mobile-rich-open #header #searchbars > ul {
+    bottom: auto;
+    padding: 0;
+    position: static;
+  }
+
+  body.ac-mobile-rich-open #header #searchbars > ul > li#searchbar_artists {
+    height: auto;
+    width: auto;
+  }
+
+  body.ac-mobile-rich-open #header #searchbars > ul > li#searchbar_artists .search_form {
+    margin: 0;
+  }
+
+  body.ac-mobile-rich-open #header #searchbars > ul > li#searchbar_artists input {
+    height: auto;
+  }
+
+  /* Keep only the artist takeover control above the drape. */
+  body.ac-mobile-rich-open #header,
+  body.ac-mobile-rich-open #header:hover {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    pointer-events: none !important;
+    z-index: 3502 !important;
+  }
+
+  body.ac-mobile-rich-open #header #searchbars {
+    pointer-events: auto !important;
+  }
+
+  body.ac-mobile-rich-open #header > :not(#searchbars) {
+    pointer-events: none !important;
+    visibility: hidden !important;
+  }
+
+  /* Mobile takeover should not inherit the menu-rollout input delay. */
+  body.ac-mobile-rich-open #header #searchbars input,
+  body.ac-mobile-rich-open #header:hover #searchbars input {
+    animation: none !important;
+    transition: none !important;
+    visibility: visible !important;
+  }
+
+  body.ac-mobile-rich-open:has(ul.autocomplete-menu.show) {
+    --ac-dim-overlay: #{variables.$color-background-autocomplete-drape-mobile};
   }
   /* END searchboxes */
 
@@ -4014,7 +4107,7 @@ Documentation of mobile classes:
     right: 0;
     top: 0;
     width: 50vw;
-    z-index: 999;
+    z-index: $z-mobilemenu-closed - 10;
   }
   #extracb1:checked ~ #wrapper #header {
     transform: translateY(120%);

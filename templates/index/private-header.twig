@@ -49,6 +49,7 @@
 {% if viewer.option('UseOpenDyslexic') %}
 {{  scss('opendyslexic/style.css') }}
 {% endif %}
+<link rel="stylesheet" type="text/css" media="screen" href="{{ constant('STATIC_SERVER') }}/styles/autocomplete/style.css?v={{ mtime('styles/autocomplete/style.css') }}">
 <link rel="stylesheet" type="text/css" media="screen" href="{{ viewer.stylesheet.cssUrl }}" title="{{ viewer.stylesheet.name }}">
 <script src="{{ constant('STATIC_SERVER') }}/vendor/jquery.js?v={{ mtime('vendor/jquery.js') }}"></script>
 <script src="{{ constant('STATIC_SERVER') }}/vendor/jquery.autocomplete.js?v={{ mtime('vendor/jquery.autocomplete.js') }}"></script>
@@ -64,6 +65,7 @@
 <script src="{{ constant('STATIC_SERVER') }}/vendor/jquery-migrate.js?v={{ mtime('vendor/jquery-migrate.js') }}"></script>
 {% endif %}
 <script src="{{ constant('STATIC_SERVER') }}/functions/global.js?v={{ mtime('functions/global.js') }}"></script>
+<script src="{{ constant('STATIC_SERVER') }}/functions/autocomplete.mjs?v={{ mtime('functions/autocomplete.mjs') }}" type="module"></script>
 {% for js in script %}
 {{  script(js) }}
 {% endfor %}

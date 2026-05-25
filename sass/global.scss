@@ -1,3 +1,14 @@
+/* Z-index contract for theme writers:
+ * 0-99: normal content
+ * 100-499: minor elevated UI
+ * 500-999: reserved
+ * 1000-1999: notifications/alerts
+ * 2000-2999: theme menus
+ * 3000-3999: search autocompletes
+ * 4000-4999: modal overlays (lightbox/curtain)
+ * 5000+: tooltip/helper frontmost
+ */
+
 .box h3 {
   font-size: 140%;
 }
@@ -111,6 +122,8 @@ ul.collage_images li a {
     "cae-img cae-tag cae-l-dcg cae-v-dcg cae-l-see cae-v-see" 25px
     "cae-img cae-bio cae-bio cae-bio cae-bio cae-bio" 1fr
     / 154px 1fr 48px 40px 55px 40px;
+  text-wrap: wrap;
+  word-wrap: anywhere;
 }
 
 .cae-img {
@@ -121,6 +134,11 @@ ul.collage_images li a {
   font-size: 1.4em;
   font-weight: 600;
   grid-area: cae-name;
+  padding-right: 0.5em;
+}
+
+.cae-artist-text {
+  font-size: x-small;
 }
 
 .cae-bio {
@@ -141,7 +159,11 @@ ul.collage_images li a {
   position: absolute;
 }
 
-.cae-tag   { grid-area: cae-tag; }
+.cae-tag   {
+  grid-area: cae-tag;
+  padding-right: 0.5em;
+}
+
 .cae-l-grp { grid-area: cae-l-grp; }
 .cae-v-grp { grid-area: cae-v-grp; }
 .cae-l-sna { grid-area: cae-l-sna; }
@@ -590,11 +612,16 @@ tr.torrent .bookmark > a::after {
   border: 1px solid #999;
   background: #FFF;
   width: auto !important;
+  overflow: scroll;
 }
 .autocomplete-suggestion {
   padding: 2px 5px;
   white-space: nowrap;
   cursor: pointer;
+
+  > .collage-artist-entry {
+    max-width: 80em;
+  }
 }
 .autocomplete-selected {
   background: #F0F0F0;
@@ -602,6 +629,28 @@ tr.torrent .bookmark > a::after {
 .autocomplete-suggestions strong {
   font-weight: normal;
   color: #3399FF;
+}
+
+ul.autocomplete-menu {
+  display: none;
+  &.show {
+    display: block;
+  }
+}
+
+#artistsearch + ul.autocomplete-menu {
+  overflow-y: scroll;
+  overflow-x: unset;
+  width: 70em;
+  max-height: 50em !important;
+  max-width: initial !important;
+
+  > li {
+    text-align: initial;
+    > .dropdown-item {
+      text-decoration: none;
+    }
+  }
 }
 
 .setting_description > * {
@@ -916,12 +965,16 @@ hr.tbx {
   text-align: center;
 }
 
+#noty_bottomRight_layout_container {
+  z-index: 1000 !important;
+}
+
 .warning-message {
   position: fixed;
   top: 64px;
   left: 50vw;
   transform: translateX(-50%);
-  z-index: 900;
+  z-index: 1100;
   border: thick solid #daa520;
   border-radius: 0.25rem;
   padding: 1rem 1rem 1rem 48px;

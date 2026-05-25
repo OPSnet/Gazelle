@@ -123,6 +123,7 @@ variables.$color-menu-userinfo-hover: variables.$menutheme-900; // VV pulldown m
 $color-menu-fx-selection: variables.$ds-fx-menutheme;
 variables.$color-mobilemenu-userinfo-1: variables.$menutheme-400; // mobile pulldown menu gradient 1
 variables.$color-mobilemenu-userinfo-2: variables.$menutheme-900; // mobile pulldown menu gradient 2
+variables.$color-background-autocomplete-drape-mobile: variables.$color-mobilemenu-userinfo-1;
 variables.$color-mobilemenu-closed: variables.$menutheme-700; // rules, also mobile menu header
 variables.$color-mobilemenu-shadow: variables.$menutheme-500; // mobile menu
 variables.$color-mobilemenu-closed-overlays: variables.$menutheme-100; // bg for icons on the hedaer
@@ -187,6 +188,28 @@ variables.$color-background-autocompletes: variables.$color-background-searchbar
 variables.$color-accent-border-autocompletes: variables.$midtone-300;
 variables.$color-text-autocomplete: variables.$color-text-input;
 variables.$color-text-autocomplete-highlight-match: variables.$fore-1000;
+variables.$ac-rich-menu-bg: variables.$color-background-searchbars-surround;
+variables.$ac-rich-menu-border: variables.$color-accent-border-autocompletes;
+variables.$ac-rich-menu-fg: variables.$color-text-base;
+variables.$ac-rich-row-bg: variables.$color-background-searchbars;
+variables.$ac-rich-row-border: variables.$color-accent-border-autocompletes;
+variables.$ac-rich-row-fg: variables.$color-text-base;
+variables.$ac-rich-row-muted-fg: variables.$color-text-input;
+variables.$ac-rich-row-bio-fg: variables.$ac-rich-row-muted-fg;
+variables.$ac-rich-row-advanced-fg: variables.$ac-rich-row-fg;
+variables.$ac-rich-row-link-fg: variables.$ac-rich-row-fg;
+variables.$ac-rich-row-selected-bg: variables.$midtone-500;
+variables.$ac-rich-row-selected-border: variables.$midtone-700;
+variables.$ac-rich-row-selected-fg: hsl(45deg 14% 94%);
+variables.$ac-rich-row-selected-muted-fg: hsl(42deg 14% 83%);
+variables.$ac-rich-row-selected-bio-fg: hsl(42deg 14% 83%);
+variables.$ac-rich-row-selected-advanced-fg: hsl(45deg 14% 94%);
+variables.$ac-rich-row-selected-link-fg: hsl(45deg 14% 94%);
+variables.$ac-rich-tag-bg: variables.$color-obj-tag-bubble-bg;
+variables.$ac-rich-tag-fg: variables.$color-obj-tag-bubble-fg;
+variables.$ac-rich-tag-border: variables.$color-obj-tag-bubble-bg;
+variables.$ac-rich-tag-hover-bg: variables.$ac-rich-row-bg;
+variables.$ac-rich-tag-hover-fg: variables.$ac-rich-row-fg;
 
 variables.$color-accent-border-blockquote: variables.$back-900; // Dotted
 variables.$color-accent-border-box: variables.$back-900;

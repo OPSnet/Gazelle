@@ -465,49 +465,55 @@ ul#userinfo_username {
   margin-left: 20px;
 }
 
-#searchbars ul {
+#searchbars > ul {
   padding: 0;
   margin: 0;
   list-style: none;
 }
 
-#searchbars ul li {
+#searchbars > ul > li {
   display: inline;
   padding-right: 15px;
   position: relative;
 }
 
-#searchbars ul li ul {
-  display: block;
+#searchbars > ul > li > ul {
   position: absolute;
   top: 1em;
   left: 0;
-  z-index: 1000;
+  z-index: 2000;
   border: 1px solid #181818;
   background: #252525 url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAATCAIAAADeafBOAAAAGklEQVR4AWOQk5NjYmBgAGNGRkZUNmEamQ0AInIAlM7IAp8AAAAASUVORK5CYII=") top left repeat-x;
   width: 12em;
   margin-top: 12px;
 }
 
-#searchbars ul li ul li {
-  margin: 1px 0 1px 4px;
+#searchbars > ul > li > ul li {
   padding: 0;
   display: block;
-  width: 100%;
   color: #878787;
   cursor: pointer;
+
+  > a {
+    color: inherit;
+    width: 100%;
+  }
 }
 
-#searchbars ul li ul li.highlight {
+#searchbars > ul > li > ul li.highlight {
   color: #007DC6;
 }
 
-*:first-child + html #searchbars ul li {
+*:first-child + html #searchbars > ul > li {
   padding-right: 10px !important;
 }
 
 #searchbars form {
   display: inline;
+}
+
+#artistsearch + ul.autocomplete-menu {
+  padding-left: 0;
 }
 
 /* CONTENT */
@@ -1274,7 +1280,7 @@ td.r00 {
   width: 100%;
   height: 100%;
   background-color: black;
-  z-index: 1001;
+  z-index: 4000;
   opacity: 0.8;
   filter: alpha(opacity=80);
 }
@@ -1287,7 +1293,7 @@ td.r00 {
   width: 90%;
   height: 90%;
   padding: 0;
-  z-index: 1002;
+  z-index: 4100;
   overflow: auto;
 }
 
@@ -2207,4 +2213,25 @@ TODO: Make these rules apply globally and add exceptions where needed
 
 #reportsv2 .manage_form img {
   max-width: 602px;
+}
+
+/* Rich autocomplete palette */
+.autocomplete-menu.ac-rich {
+  --ac-menu-bg: rgb(47 47 47);
+  --ac-menu-border: rgb(194 194 209);
+  --ac-menu-fg: rgb(246 247 248);
+  --ac-row-bg: rgb(33 33 33);
+  --ac-row-border: rgb(133 133 142);
+  --ac-row-fg: rgb(246 247 248);
+  --ac-row-muted-fg: rgb(186 187 188);
+  --ac-row-bio-fg: rgb(186 187 188);
+  --ac-row-advanced-fg: rgb(246 247 248);
+  --ac-row-link-fg: rgb(246 247 248);
+  --ac-row-selected-bg: rgb(64 64 64);
+  --ac-row-selected-border: rgb(131 131 140);
+  --ac-row-selected-fg: rgb(255 255 255);
+  --ac-row-selected-muted-fg: rgb(186 187 188);
+  --ac-row-selected-bio-fg: rgb(186 187 188);
+  --ac-row-selected-advanced-fg: rgb(255 255 255);
+  --ac-row-selected-link-fg: rgb(255 255 255);
 }

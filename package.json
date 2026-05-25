@@ -13,10 +13,10 @@
   "license": "Unlicense",
   "devDependencies": {
     "@eslint/js": "^9.24",
-    "@stylistic/eslint-plugin-js": "^4.2",
+    "@stylistic/eslint-plugin": "^5.6",
     "cypress": "^13.17.0",
     "cypress-terminal-report": "^7.1.0",
-    "eslint": "^9.24",
+    "eslint": "^9.39",
     "globals": "^15.12",
     "stylelint": "^16.18",
     "stylelint-checkstyle-formatter": "^0.1.2",

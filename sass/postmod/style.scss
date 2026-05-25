@@ -284,7 +284,7 @@ ul.thin li {
   margin: 0 auto;
   border: 1px solid #222;
   color: #DFDFDF;
-  background: transparent url('images/content.png');
+  background: rgb(30 30 30 / 80%);
   padding: 40px 22px;
   overflow: hidden;
 }
@@ -463,68 +463,70 @@ ul.thin li {
   padding: 0 2px 0 10px;
   font-family: Helvetica, Arial, sans-serif;
   height: 22px;
-  background: url('images/content_light.png') transparent;
+  background: rgb(0 0 0 / 23.5%);
   color: #FFF;
   border-radius: 4px;
   box-shadow: 0 2px rgb(0 0 0 / 50%);
 }
 
 #autocomplete {
-  background: url('images/content.png');
+  background: rgb(30 30 30 / 80%);
   border: 1px solid #EEE;
   list-style: none;
 }
 
 #searchbars input:active,
 #searchbars input:focus {
-  background: url('images/content.png');
+  background: rgb(30 30 30 / 80%);
   border: 1px solid #EEE;
 }
 
-#searchbars ul {
+#searchbars > ul {
   padding: 0;
   list-style: none;
   display: block;
 }
 
-#searchbars ul li {
+#searchbars > ul > li {
   float: left;
   position: relative;
   list-style: none;
   margin: 0;
 }
 
-#searchbars ul li ul {
-  display: block;
+#searchbars > ul > li > ul {
   position: absolute;
   top: 1em;
   left: 0;
-  z-index: 1000;
+  z-index: 2000;
   border: 1px solid #EEE;
-  background: url('images/content.png');
+  background: rgb(30 30 30 / 80%);
   width: 12em;
   margin-top: 12px;
 }
 
-#searchbars ul li ul li {
-  margin: 1px 0 1px 4px;
+#searchbars > ul > li > ul li {
   padding: 0;
   display: block;
   width: 100%;
   cursor: pointer;
+
+  a {
+    color: #444;
+  }
 }
 
-#searchbars ul li ul li.highlight {
+#searchbars > ul > li > ul li.highlight {
   color: #4FD1FF;
 }
 
-#searchbars ul li form {
+#searchbars > ul > li form {
   display: inline;
   margin: 0;
 }
 
 #alerts {
-  background: transparent url('images/content.png');
+  background: rgb(30 30 30 / 80%);
   box-shadow: 1px 3px rgb(0 0 0 / 50%);
   color: #FFF;
   margin: -151px 0 0 327px;
@@ -1118,7 +1120,7 @@ ul .invitetree {
   width: 100%;
   height: 100%;
   background: #111 50% 0 no-repeat fixed;
-  z-index: 1001;
+  z-index: 4000;
   opacity: 0.9;
   filter: alpha(opacity = 90);
 }
@@ -1131,7 +1133,7 @@ ul .invitetree {
   width: 90%;
   height: 90%;
   padding: 0;
-  z-index: 1002;
+  z-index: 4100;
   overflow: auto;
 }
 
@@ -1393,4 +1395,25 @@ input[type="search"] {
 
 table tr.colhead a img {
   height: 0.825rem
+}
+
+/* Rich autocomplete palette */
+.autocomplete-menu.ac-rich {
+  --ac-menu-bg: rgb(10 10 10);
+  --ac-menu-border: rgb(193 194 209);
+  --ac-menu-fg: rgb(246 246 247);
+  --ac-row-bg: rgb(18 18 18);
+  --ac-row-border: rgb(90 90 90);
+  --ac-row-fg: rgb(246 247 248);
+  --ac-row-muted-fg: rgb(176 182 186);
+  --ac-row-bio-fg: rgb(176 182 186);
+  --ac-row-advanced-fg: rgb(246 247 248);
+  --ac-row-link-fg: rgb(246 247 248);
+  --ac-row-selected-bg: rgb(58 58 58);
+  --ac-row-selected-border: rgb(110 110 110);
+  --ac-row-selected-fg: rgb(255 255 255);
+  --ac-row-selected-muted-fg: rgb(210 214 218);
+  --ac-row-selected-bio-fg: rgb(210 214 218);
+  --ac-row-selected-advanced-fg: rgb(255 255 255);
+  --ac-row-selected-link-fg: rgb(255 255 255);
 }

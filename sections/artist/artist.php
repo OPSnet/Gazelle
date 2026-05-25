@@ -78,10 +78,11 @@ if ($Viewer->permitted('site_collages_manage') || $Viewer->activePersonalCollage
 <?php if (!$artist->discogs()->id) { ?>
                 <li>Discogs ID: <i>not set</i></li>
 <?php } else { ?>
-                <li>Discogs ID: <?= $artist->discogs()->id ?></li>
+                <li>Discogs ID: <a target="_blank" rel="noreferrer" href="https://www.discogs.com/artist/<?= $artist->discogs()->id
+                    ?>"><?= $artist->discogs()->id ?></a></li>
                 <li>Name: <?= html_escape($artist->discogs()->name()) ?><?= $artist->discogsIsPreferred()
-                    ? '<span title="This artist does not need to display a sequence number for disambiguation">' . " \xE2\x98\x85</span>" : '' ?></li>
-                <li><span title="Artists having the same name">Synonyms: <?= $artist->homonymCount() - 1 ?></span></li>
+                    ? '<span title="This artist does not need to display a sequence number for disambiguation">' . " ★</span>" : '' ?></li>
+                <li><span title="Artists having the same name">Homonyms: <?= $artist->homonymCount() - 1 ?></span></li>
 <?php } ?>
             </ul>
         </div>
@@ -212,7 +213,7 @@ if ($sections = $artist->sections()) {
                     <td class="small"><!-- expand/collapse --></td>
                     <td class="m_th_left m_th_left_collapsable" width="70%"><a href="#">↑</a>&nbsp;<strong><?=
                         $artistMan->sectionTitle($sectionId) ?></strong> <a href="#" class="tooltip brackets" onclick="$('.releases_<?=
-                        $sectionId ?>').gtoggle(true); return false;" title="Show/hide this section">Toggle</a></td>
+                        $sectionId ?>').gtoggle(); return false;" title="Show/hide this section">Toggle</a></td>
 <?php if ($Viewer->ordinal()->value('file-count-display')) { ?>
                     <td class="number_column">Files</td>
 <?php } ?>

@@ -4,7 +4,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // SLUG
 
-$build-slug: "Apollostage build 20260328"; // must include quotes
+$build-slug: "Apollostage build 20260511a"; // must include quotes
 
 // ////////////////////////////////////////////////////////////////////////////////
 // COLORS
@@ -123,6 +123,7 @@ $color-menu-userinfo-hover: $menutheme-900; // VV pulldown menu ~ open
 $color-menu-fx-selection: $ds-fx-menutheme;
 $color-mobilemenu-userinfo-1: $menutheme-400; // mobile pulldown menu gradient 1
 $color-mobilemenu-userinfo-2: $menutheme-900; // mobile pulldown menu gradient 2
+$color-background-autocomplete-drape-mobile: $color-mobilemenu-userinfo-2;
 $color-mobilemenu-closed: $menutheme-700; // rules, also mobile menu header
 $color-mobilemenu-shadow: $menutheme-500; // mobile menu
 $color-mobilemenu-closed-overlays: $menutheme-100; // bg for icons on the hedaer
@@ -188,6 +189,28 @@ $color-background-autocompletes: $color-background-searchbars;
 $color-accent-border-autocompletes: $midtone-300;
 $color-text-autocomplete: $color-text-input;
 $color-text-autocomplete-highlight-match: $fore-1000;
+$ac-rich-menu-bg: $color-background-searchbars-surround;
+$ac-rich-menu-border: $color-accent-border-autocompletes;
+$ac-rich-menu-fg: $color-text-base;
+$ac-rich-row-bg: $color-background-searchbars;
+$ac-rich-row-border: $color-accent-border-autocompletes;
+$ac-rich-row-fg: $color-text-base;
+$ac-rich-row-muted-fg: $color-text-input;
+$ac-rich-row-bio-fg: $ac-rich-row-muted-fg;
+$ac-rich-row-advanced-fg: $ac-rich-row-fg;
+$ac-rich-row-link-fg: $ac-rich-row-fg;
+$ac-rich-row-selected-bg: $menutheme-300;
+$ac-rich-row-selected-border: $menutheme-500;
+$ac-rich-row-selected-fg: hsl(130deg 12% 80%);
+$ac-rich-row-selected-muted-fg: hsl(138deg 5% 64%);
+$ac-rich-row-selected-bio-fg: hsl(138deg 5% 64%);
+$ac-rich-row-selected-advanced-fg: hsl(130deg 12% 80%);
+$ac-rich-row-selected-link-fg: hsl(130deg 12% 80%);
+$ac-rich-tag-bg: $color-obj-tag-bubble-bg;
+$ac-rich-tag-fg: $color-obj-tag-bubble-fg;
+$ac-rich-tag-border: $color-obj-tag-bubble-bg;
+$ac-rich-tag-hover-bg: $ac-rich-row-bg;
+$ac-rich-tag-hover-fg: $ac-rich-row-fg;
 $color-accent-border-blockquote: $back-900; // Dotted
 $color-accent-border-box: $back-900;
 $color-accent-border-input: $ds-fx-low;

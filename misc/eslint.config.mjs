@@ -1,6 +1,6 @@
 import js from "@eslint/js";
 import globals from 'globals';
-import stylisticJs from '@stylistic/eslint-plugin-js'
+import stylistic from '@stylistic/eslint-plugin'
 
 export default [
     {
@@ -13,7 +13,6 @@ export default [
     {
         languageOptions: {
             ecmaVersion: 2022,
-            sourceType: "script",
             globals: {
                 ...globals.browser,
                 "$":       "readonly",
@@ -24,11 +23,28 @@ export default [
             }
         },
         plugins: {
-            '@stylistic/js': stylisticJs,  // provides checks for whitespace
+            '@stylistic': stylistic,  // provides checks for whitespace
         },
         rules: {  // degrade these errors to warnings as a rudimentary baseline
             "no-unused-vars": "warn",
             "no-prototype-builtins": "warn",
+        },
+    },
+    {
+        files: ["**/*.js"],
+        languageOptions: {
+            sourceType: "script",
+        },
+    },
+    {
+        files: ["**/*.mjs"],
+        languageOptions: {
+            sourceType: "module",
+            globals: {
+                ...globals.browser,
+                "$":       "readonly",
+                "gazURL":  "readonly",
+            }
         },
     }
 ];

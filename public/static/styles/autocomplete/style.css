@@ -1,0 +1,758 @@
+/* Artist autocomplete staging stylesheet.
+ *
+ * Rich autocomplete layout telemetry:
+ * - `window.GAZELLE_AC_DEBUG = true` enables console telemetry for the current page
+ * - `localStorage.gazelle_ac_debug = "1"` persists console telemetry across reloads
+ *
+ * Theme author guidance:
+ * - Override `--ac-*` tokens on `.autocomplete-menu.ac-rich` after this
+ *   stylesheet loads.
+ * - Override `--ac-mobile-*` tokens on `body` for mobile takeover tuning.
+ * - Primary styling hooks are `.autocomplete-menu.ac-rich` and
+ *   `.ac-row-chosen`; optional hooks are `.ac-row-hover`,
+ *   `.ac-mode-keyboard`, and `.ac-mode-pointer`.
+ * - Optional rich-row flags on the menu root:
+ *   - `.ac-flag-reserve-no-image-slot`
+ * - Z-index contract:
+ *   - 0-99 for local row layering
+ *   - 3000 for the page drape
+ *   - 3100 for the menu/header
+ */
+
+#menu ul.autocomplete-menu > li {
+  float: none;
+  margin: 0.25em 0;
+}
+
+.autocomplete-menu.ac-rich {
+  /* Color tokens */
+  --ac-menu-bg: rgb(26, 26, 26);
+  --ac-menu-border: rgb(177, 177, 193);
+  --ac-menu-fg: rgb(246, 247, 248);
+  --ac-row-bg: rgb(33, 33, 33);
+  --ac-row-border: rgb(120, 120, 129);
+  --ac-row-fg: rgb(246, 247, 248);
+  --ac-row-muted-fg: rgb(193, 194, 195);
+  --ac-row-bio-fg: var(--ac-row-muted-fg);
+  --ac-row-advanced-fg: var(--ac-row-fg);
+  --ac-row-link-fg: var(--ac-row-fg);
+  --ac-row-selected-bg: rgb(58, 58, 58);
+  --ac-row-selected-border: rgb(120, 120, 128);
+  --ac-row-selected-fg: rgb(255, 255, 255);
+  --ac-row-selected-muted-fg: rgb(210, 214, 218);
+  --ac-row-selected-bio-fg: var(--ac-row-selected-muted-fg);
+  --ac-row-selected-advanced-fg: var(--ac-row-selected-fg);
+  --ac-row-selected-link-fg: var(--ac-row-selected-fg);
+  --ac-tag-bg: transparent;
+  --ac-tag-fg: var(--ac-row-fg);
+  --ac-tag-border: transparent;
+  --ac-tag-hover-bg: transparent;
+  --ac-tag-hover-fg: var(--ac-row-selected-fg);
+  --ac-tag-selected-fg: var(--ac-row-selected-fg);
+
+  /* Geometry tokens */
+  --ac-menu-width: 46rem;
+  --ac-menu-fit-width: clamp(28rem, calc(100vw - 9rem), var(--ac-menu-width));
+  --ac-menu-side-gutter: clamp(1.25rem, 5vw, 4.5rem);
+  --ac-menu-max-width: min(var(--ac-menu-fit-width), calc(100vw - var(--ac-menu-side-gutter)));
+  --ac-menu-max-height: min(70vh, 44rem);
+  --ac-menu-bottom-gutter: 1.25rem;
+  --ac-anchor-offset-y: 0.2rem;
+  --ac-img-size-step-wide: 6.5rem;
+  --ac-img-size-step-med: 5.5em;
+  --ac-img-size-step-phone: 5.0rem;
+  --ac-img-size: var(--ac-img-size-step-wide);
+  --ac-entry-pad-x: 1rem;
+  --ac-entry-pad-y: 3px;
+  --ac-entry-gap-x: 0.95rem;
+  --ac-copy-gap-y: 2px;
+  --ac-copy-gap-y-aka-after-name: 0px;
+  --ac-copy-gap-y-aka: 2px;
+  --ac-meta-gap-x: 0.7rem;
+  --ac-tag-gap-x: 0.4rem;
+  --ac-discogs-gap-x: 0.8rem;
+  --ac-advanced-gap-x: 0.75rem;
+  --ac-advanced-item-gap-x: 0.2rem;
+  --ac-discogs-glyph-size: 1.05rem;
+  --ac-name-line-height: 1.1;
+  --ac-name-descender-pad-bottom: 1.5px;
+  --ac-bio-lines: 3;
+  --ac-bio-line-height: 1.21;
+  --ac-bio-pad-right: 0;
+  --ac-bio-pad-left: 0;
+  --ac-menu-border-width: 0.15rem;
+  --ac-menu-border-radius: 0.15rem;
+  --ac-entry-border-width: 0.02rem;
+  --ac-hover-outline-width: 0.20rem;
+  --ac-hover-outline-radius: 0.10rem;
+  --ac-row-link-z: 1;
+  --ac-row-content-z: 2;
+  --ac-row-nested-link-z: 3;
+}
+
+body {
+  --ac-mobile-viewport-top: 0px;
+  --ac-mobile-viewport-left: 0px;
+  --ac-mobile-viewport-width: 100vw;
+  --ac-mobile-viewport-height: 100vh;
+  --ac-mobile-gutter-top: min(5vh, 0.6rem);
+  --ac-mobile-gutter-right: min(5vw, 0.6rem);
+  --ac-mobile-gutter-bottom: min(5vh, 0.6rem);
+  --ac-mobile-gutter-left: min(5vw, 0.6rem);
+  --ac-mobile-close-hit-size: 42px;
+  --ac-mobile-close-icon-size: 1.4rem;
+  --ac-mobile-top-row-gap: 0.35rem;
+  --ac-mobile-top-row-top: calc(
+    var(--ac-mobile-viewport-top) + var(--ac-mobile-gutter-top)
+  );
+  --ac-mobile-panel-left: calc(var(--ac-mobile-viewport-left) + var(--ac-mobile-gutter-left));
+  --ac-mobile-panel-width: calc(
+    var(--ac-mobile-viewport-width) - var(--ac-mobile-gutter-left) - var(--ac-mobile-gutter-right)
+  );
+  --ac-mobile-panel-top: calc(
+    var(--ac-mobile-top-row-top)
+    + var(--ac-mobile-close-hit-size)
+    + var(--ac-mobile-top-row-gap)
+  );
+  --ac-mobile-panel-height: calc(
+    var(--ac-mobile-viewport-top)
+    + var(--ac-mobile-viewport-height)
+    - var(--ac-mobile-panel-top)
+    - max(var(--ac-mobile-gutter-bottom), 0.75rem)
+  );
+  --ac-mobile-input-width: calc(
+    var(--ac-mobile-panel-width)
+    - var(--ac-mobile-close-hit-size)
+    - var(--ac-mobile-top-row-gap)
+  );
+  --ac-mobile-input-z: 3503;
+  --ac-mobile-close-z: 3504;
+  --ac-mobile-input-font-size: 16px;
+  --ac-mobile-input-bg: rgb(245 245 245);
+  --ac-mobile-input-fg: rgb(20 20 20);
+  --ac-mobile-input-border: rgb(26 26 26 / 80%);
+  --ac-mobile-input-shadow: 0 2px 10px rgb(0 0 0 / 45%);
+  --ac-mobile-close-bg: #000;
+  --ac-mobile-close-fg: #fff;
+  --ac-mobile-close-radius: 999px;
+  --ac-mobile-close-glyph: "✕";
+  --ac-mobile-row-img-size: 2.65rem;
+  --ac-mobile-entry-pad-x: 0.35rem;
+  --ac-mobile-entry-pad-y: 0.28rem;
+  --ac-mobile-entry-gap-x: 0.32rem;
+  --ac-mobile-copy-gap-y: 0.16rem;
+}
+
+#artistsearch + .autocomplete-menu.ac-rich {
+  width: var(--ac-menu-max-width);
+  max-width: var(--ac-menu-max-width);
+  max-height: var(--ac-menu-max-height) !important;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.autocomplete-menu.ac-rich {
+  background-color: var(--ac-menu-bg);
+  color: var(--ac-menu-fg);
+  list-style: none !important;
+  list-style-type: none !important;
+}
+
+.autocomplete-menu.ac-rich > li {
+  list-style: none !important;
+  list-style-type: none !important;
+}
+
+@media (max-width: 900px) {
+  #artistsearch + .autocomplete-menu.ac-rich,
+  #artistsearch + .autocomplete-menu.ac-rich.show {
+    --ac-img-size: var(--ac-img-size-step-med);
+    --ac-entry-pad-x: 0.95rem;
+    --ac-entry-gap-x: 0.85rem;
+  }
+}
+
+@media (max-width: 700px) {
+  #artistsearch + .autocomplete-menu.ac-rich,
+  #artistsearch + .autocomplete-menu.ac-rich.show {
+    --ac-img-size: var(--ac-img-size-step-phone);
+    --ac-entry-pad-x: 0.85rem;
+    --ac-entry-pad-y: 0.72rem;
+    --ac-entry-gap-x: 0.75rem;
+  }
+}
+
+#searchbar_artists {
+  position: relative;
+}
+
+#artistsearch + ul.autocomplete-menu.show:not(.ac-rich) {
+  position: absolute !important;
+  top: calc(100% + var(--ac-anchor-offset-y)) !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: 0 !important;
+  transform: none !important;
+}
+
+@media (max-width: 575px) {
+  body.ac-mobile-rich-open {
+    --ac-dim-overlay: rgba(0, 0, 0, 0.9);
+    overflow: hidden;
+  }
+
+  body.ac-mobile-rich-open #header {
+    opacity: 1 !important;
+    transition: none !important;
+  }
+
+  body.ac-mobile-rich-open:has(ul.autocomplete-menu.show)::before {
+    background: var(--ac-dim-overlay);
+    z-index: 3490;
+  }
+
+  body.ac-mobile-rich-open #wrapper #header #searchbars,
+  body.ac-mobile-rich-open #wrapper #header #searchbars #searchbar_artists,
+  body.ac-mobile-rich-open #wrapper #header #searchbars ul li#searchbar_artists,
+  body.ac-mobile-rich-open #wrapper #header #searchbars #searchbar_artists input[data-gazelle-autocomplete="true"] {
+    z-index: 3502 !important;
+  }
+
+  body.ac-mobile-rich-open #wrapper #header #searchbars {
+    background: transparent !important;
+    padding: 0 !important;
+  }
+
+  body.ac-mobile-rich-open #wrapper #header #searchbars > ul,
+  body.ac-mobile-rich-open #wrapper #header #searchbars #searchbar_artists,
+  body.ac-mobile-rich-open #wrapper #header #searchbars #searchbar_artists .search_form {
+    background: transparent !important;
+    display: block !important;
+    margin: 0 !important;
+    opacity: 1 !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    position: static !important;
+    visibility: visible !important;
+    width: auto !important;
+  }
+
+  body.ac-mobile-rich-open #wrapper #header #searchbars > ul > li:not(#searchbar_artists) {
+    display: none !important;
+  }
+
+  body.ac-mobile-rich-open #artistsearch.ac-mobile-rich-input[data-gazelle-autocomplete="true"],
+  body.ac-mobile-rich-open input.ac-mobile-rich-input[data-gazelle-autocomplete="true"] {
+    position: fixed !important;
+    top: var(--ac-mobile-top-row-top) !important;
+    left: var(--ac-mobile-panel-left) !important;
+    width: var(--ac-mobile-input-width) !important;
+    max-width: var(--ac-mobile-input-width) !important;
+    z-index: var(--ac-mobile-input-z) !important;
+    box-sizing: border-box;
+    font-size: var(--ac-mobile-input-font-size) !important;
+    line-height: 1.25 !important;
+    min-height: 2.5rem !important;
+    padding: 0.45rem 0.65rem !important;
+    color: var(--ac-mobile-input-fg) !important;
+    background-color: var(--ac-mobile-input-bg) !important;
+    border: 2px solid var(--ac-mobile-input-border) !important;
+    border-radius: 0.35rem !important;
+    box-shadow: var(--ac-mobile-input-shadow) !important;
+    caret-color: var(--ac-mobile-input-fg) !important;
+    opacity: 1 !important;
+    transform: none !important;
+    display: block !important;
+    transition: none !important;
+    margin: 0 !important;
+  }
+
+  body.ac-mobile-rich-open #artistsearch.ac-mobile-rich-input[data-gazelle-autocomplete="true"]::placeholder,
+  body.ac-mobile-rich-open input.ac-mobile-rich-input[data-gazelle-autocomplete="true"]::placeholder {
+    color: color-mix(in srgb, var(--ac-mobile-input-fg) 55%, transparent) !important;
+    opacity: 1 !important;
+  }
+
+  body.ac-mobile-rich-open #artistsearch + ul.autocomplete-menu.ac-rich.ac-mobile-rich-menu.show,
+  body.ac-mobile-rich-open .autocomplete-menu.ac-rich.ac-mobile-rich-menu.show {
+    --ac-img-size: var(--ac-mobile-row-img-size);
+    --ac-entry-pad-x: var(--ac-mobile-entry-pad-x);
+    --ac-entry-pad-y: var(--ac-mobile-entry-pad-y);
+    --ac-entry-gap-x: var(--ac-mobile-entry-gap-x);
+    --ac-copy-gap-y: var(--ac-mobile-copy-gap-y);
+    position: fixed !important;
+    top: var(--ac-mobile-panel-top) !important;
+    left: var(--ac-mobile-panel-left) !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: var(--ac-mobile-panel-width) !important;
+    height: var(--ac-mobile-panel-height) !important;
+    max-width: none !important;
+    max-height: none !important;
+    transform: none !important;
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 3500 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0;
+    border-radius: 0;
+    box-sizing: border-box;
+    background-color: transparent !important;
+    box-shadow: none;
+    opacity: 1 !important;
+    filter: none !important;
+    mix-blend-mode: normal;
+    isolation: isolate;
+    list-style: none !important;
+  }
+
+  body.ac-mobile-rich-open .autocomplete-menu.ac-rich.ac-mobile-rich-menu.show > li > .dropdown-item {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  body.ac-mobile-rich-open .autocomplete-menu.ac-rich.ac-mobile-rich-menu.show > li {
+    list-style: none !important;
+    min-width: 0;
+  }
+
+  body.ac-mobile-rich-open .autocomplete-menu.ac-rich.ac-mobile-rich-menu.show .collage-artist-entry.box2 {
+    border: 0;
+    border-radius: 0;
+    width: 100%;
+    min-width: 0;
+  }
+
+  body.ac-mobile-rich-open .autocomplete-menu.ac-rich.ac-mobile-rich-menu.show > li + li .collage-artist-entry.box2 {
+    border-top: 1px solid var(--ac-row-border);
+  }
+
+  body.ac-mobile-rich-open .autocomplete-menu.ac-rich.ac-mobile-rich-menu.show .cae-copy {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "name"
+      "aka";
+    column-gap: 0;
+    row-gap: var(--ac-copy-gap-y);
+    align-self: center;
+    align-content: center;
+  }
+
+  body.ac-mobile-rich-open .autocomplete-menu.ac-rich.ac-mobile-rich-menu.show .cae-copy:not(:has(.cae-aka)) {
+    grid-template-areas: "name";
+    row-gap: 0;
+  }
+
+  body.ac-mobile-rich-open .autocomplete-menu.ac-rich.ac-mobile-rich-menu.show .cae-name,
+  body.ac-mobile-rich-open .autocomplete-menu.ac-rich.ac-mobile-rich-menu.show .cae-aka {
+    max-width: 100%;
+  }
+
+  body.ac-mobile-rich-open .autocomplete-menu.ac-rich.ac-mobile-rich-menu.show .cae-name {
+    font-size: 1rem;
+    line-height: 1.15;
+  }
+
+  body.ac-mobile-rich-open .autocomplete-menu.ac-rich.ac-mobile-rich-menu.show .cae-aka {
+    font-size: 0.84rem;
+    line-height: 1.15;
+  }
+
+  body.ac-mobile-rich-open .autocomplete-menu.ac-rich.ac-mobile-rich-menu.show .cae-meta,
+  body.ac-mobile-rich-open .autocomplete-menu.ac-rich.ac-mobile-rich-menu.show .cae-bio,
+  body.ac-mobile-rich-open .autocomplete-menu.ac-rich.ac-mobile-rich-menu.show .cae-advanced-meta {
+    display: none !important;
+  }
+
+  .ac-mobile-rich-close {
+    position: fixed;
+    top: var(--ac-mobile-top-row-top);
+    left: calc(
+      var(--ac-mobile-panel-left)
+      + var(--ac-mobile-panel-width)
+      - var(--ac-mobile-close-hit-size)
+    );
+    right: auto;
+    width: var(--ac-mobile-close-hit-size);
+    height: var(--ac-mobile-close-hit-size);
+    border-radius: var(--ac-mobile-close-radius);
+    border: solid;
+    border-width: var(--ac-menu-border-width);
+    border-color: var(--ac-mobile-close-fg);
+    background: var(--ac-mobile-close-bg) !important;
+    color: var(--ac-mobile-close-fg) !important;
+    z-index: var(--ac-mobile-close-z);
+    padding: 0;
+    cursor: pointer;
+    font-size: 0;
+    line-height: 0;
+  }
+
+  .ac-mobile-rich-close::before {
+    content: var(--ac-mobile-close-glyph);
+    font-size: var(--ac-mobile-close-icon-size);
+    width: var(--ac-mobile-close-icon-size);
+    height: var(--ac-mobile-close-icon-size);
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -56%);
+    display: block;
+    text-align: center;
+    line-height: 1;
+    color: var(--ac-mobile-close-fg) !important;
+  }
+
+  .ac-mobile-rich-close:focus-visible {
+    outline: 2px solid color-mix(in srgb, currentColor 80%, transparent);
+    outline-offset: 2px;
+  }
+}
+
+#artistsearch + .autocomplete-menu.ac-rich > li > .dropdown-item {
+  text-decoration: none;
+  display: block;
+  cursor: pointer;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.autocomplete-menu.ac-rich.ac-rich-simple .collage-artist-entry {
+  --ac-row-image-column: var(--ac-img-size);
+  --ac-row-column-gap: var(--ac-entry-gap-x);
+  --ac-row-min-height: calc(var(--ac-img-size) + (2 * var(--ac-entry-pad-y)));
+  color: var(--ac-row-fg);
+  background-color: var(--ac-row-bg);
+  display: grid;
+  grid-template-columns: var(--ac-row-image-column) minmax(0, 1fr);
+  grid-template-rows: auto;
+  grid-template-areas: "cae-image cae-copy";
+  grid-auto-flow: row;
+  align-items: center;
+  align-content: center;
+  gap: 0 var(--ac-row-column-gap);
+  padding: var(--ac-entry-pad-y) var(--ac-entry-pad-x);
+  min-height: var(--ac-row-min-height);
+  margin: 0;
+  position: relative;
+}
+
+.autocomplete-menu.ac-rich.ac-rich-simple .cae-row-link {
+  position: absolute;
+  inset: 0;
+  z-index: var(--ac-row-link-z);
+  display: block;
+  border-radius: inherit;
+}
+
+.autocomplete-menu.ac-rich.ac-rich-simple:not(.ac-flag-reserve-no-image-slot) .collage-artist-entry.cae-no-image {
+  --ac-row-image-column: 0px;
+  --ac-row-column-gap: 0px;
+  --ac-row-min-height: 0px;
+}
+
+.autocomplete-menu.ac-rich.ac-rich-simple .cae-img {
+  grid-area: cae-image;
+  width: var(--ac-img-size);
+  height: var(--ac-img-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  justify-self: start;
+  overflow: hidden;
+  position: relative;
+  z-index: var(--ac-row-content-z);
+  pointer-events: none;
+}
+
+.autocomplete-menu.ac-rich.ac-rich-simple .cae-img img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.autocomplete-menu.ac-rich.ac-rich-simple .cae-copy {
+  grid-area: cae-copy;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "name"
+    "aka"
+    "discogs"
+    "meta"
+    "bio";
+  align-self: center;
+  gap: var(--ac-copy-gap-y);
+  position: relative;
+  z-index: var(--ac-row-content-z);
+  pointer-events: none;
+}
+
+.autocomplete-menu.ac-rich.ac-rich-simple .cae-copy > * {
+  min-width: 0;
+}
+
+.autocomplete-menu.ac-rich.ac-rich-simple .cae-name {
+  grid-area: name;
+  color: var(--ac-row-fg);
+  line-height: var(--ac-name-line-height);
+  overflow: hidden;
+  padding-bottom: var(--ac-name-descender-pad-bottom);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.autocomplete-menu.ac-rich.ac-rich-simple .cae-name a,
+.autocomplete-menu.ac-rich.ac-rich-simple .cae-name a:visited,
+.autocomplete-menu.ac-rich.ac-rich-simple .cae-name a:hover,
+.autocomplete-menu.ac-rich.ac-rich-simple .cae-name a:focus,
+.autocomplete-menu.ac-rich.ac-rich-simple .cae-name a:active {
+  color: inherit;
+  text-decoration: none;
+}
+
+.autocomplete-menu.ac-rich.ac-rich-simple .cae-aka {
+  grid-area: aka;
+  color: var(--ac-row-muted-fg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.autocomplete-menu.ac-rich.ac-rich-simple .cae-meta {
+  grid-area: meta;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem var(--ac-meta-gap-x);
+}
+
+.autocomplete-menu.ac-rich.ac-rich-simple .cae-tag {
+  grid-area: auto;
+  float: none !important;
+  clear: both;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem var(--ac-tag-gap-x);
+  margin: 0;
+  padding-right: 0;
+}
+
+.autocomplete-menu.ac-rich.ac-rich-simple .cae-tag-entry {
+  float: none !important;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.05rem 0.35rem;
+  border: 1px solid var(--ac-tag-border);
+  border-radius: 999px;
+  background-color: var(--ac-tag-bg);
+  color: var(--ac-tag-fg);
+  line-height: 1.2;
+}
+
+.autocomplete-menu.ac-rich.ac-rich-simple .cae-tag-entry:hover {
+  background-color: var(--ac-tag-hover-bg);
+  color: var(--ac-tag-hover-fg);
+}
+
+.autocomplete-menu.ac-rich.ac-rich-simple .cae-advanced-meta {
+  grid-area: discogs;
+  display: none;
+  align-self: start;
+  justify-self: end;
+  align-items: baseline;
+  gap: 0.1rem var(--ac-advanced-gap-x);
+  min-width: 0;
+  max-width: 100%;
+  position: relative;
+  z-index: var(--ac-row-content-z);
+  white-space: nowrap;
+  color: var(--ac-row-advanced-fg);
+  pointer-events: none;
+}
+
+.autocomplete-menu.ac-rich.ac-rich-simple .cae-advanced-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0 var(--ac-advanced-item-gap-x);
+  min-width: 0;
+  max-width: 100%;
+}
+
+.autocomplete-menu.ac-rich.ac-rich-simple .cae-advanced-item-discogs {
+  color: var(--ac-row-link-fg);
+  pointer-events: auto;
+  position: relative;
+  z-index: var(--ac-row-nested-link-z);
+}
+
+.autocomplete-menu.ac-rich.ac-rich-simple .cae-advanced-label,
+.autocomplete-menu.ac-rich.ac-rich-simple .cae-advanced-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.autocomplete-menu.ac-rich.ac-rich-simple .cae-advanced-value::before {
+  content: ": ";
+}
+
+.autocomplete-menu.ac-rich.ac-rich-simple .cae-advanced-item-discogs:visited,
+.autocomplete-menu.ac-rich.ac-rich-simple .cae-advanced-item-discogs:hover,
+.autocomplete-menu.ac-rich.ac-rich-simple .cae-advanced-item-discogs:focus,
+.autocomplete-menu.ac-rich.ac-rich-simple .cae-advanced-item-discogs:active {
+  color: var(--ac-row-link-fg);
+}
+
+.autocomplete-menu.ac-rich.ac-rich-simple .cae-bio-content {
+  display: -webkit-box;
+  -webkit-line-clamp: var(--ac-bio-lines);
+  -webkit-box-orient: vertical;
+  overflow: hidden !important;
+  line-height: var(--ac-bio-line-height);
+  max-height: calc(var(--ac-bio-line-height) * 1em * var(--ac-bio-lines));
+  padding-right: var(--ac-bio-pad-right);
+  padding-left: var(--ac-bio-pad-left);
+  color: var(--ac-row-bio-fg);
+  font-stretch: condensed;
+}
+
+.autocomplete-menu.ac-rich.ac-rich-simple .cae-bio {
+  grid-area: bio;
+  margin: 0;
+}
+
+.autocomplete-menu.ac-rich.ac-rich-simple .cae-copy {
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "name discogs"
+    "aka aka"
+    "meta meta"
+    "bio bio";
+  column-gap: var(--ac-discogs-gap-x);
+}
+
+.autocomplete-menu.ac-rich.ac-rich-simple .cae-copy:not(:has(.cae-aka)) {
+  grid-template-areas:
+    "name discogs"
+    "meta meta"
+    "bio bio";
+}
+
+.autocomplete-menu.ac-rich.ac-rich-simple .cae-copy:has(.cae-aka) {
+  row-gap: var(--ac-copy-gap-y-aka-after-name);
+}
+
+.autocomplete-menu.ac-rich.ac-rich-simple .cae-copy:has(.cae-aka) .cae-meta,
+.autocomplete-menu.ac-rich.ac-rich-simple .cae-copy:has(.cae-aka) .cae-bio {
+  margin-top: var(--ac-copy-gap-y-aka);
+}
+
+.autocomplete-menu.ac-rich.ac-rich-simple .cae-advanced-item-discogs.cae-advanced-mode-glyph .cae-advanced-label {
+  font-size: var(--ac-discogs-glyph-size);
+  line-height: 1;
+}
+
+.autocomplete-menu.ac-rich.ac-rich-simple .postlist {
+  position: static !important;
+  float: none !important;
+  display: block;
+  margin: 0.5rem 0 0 !important;
+  padding-left: 1.2rem;
+  background: none;
+  box-shadow: none;
+}
+
+.autocomplete-menu.ac-rich.ac-rich-simple .postlist li {
+  display: list-item;
+  float: none;
+  margin: 0.1rem 0;
+}
+
+body:has(ul.autocomplete-menu.show) {
+  --ac-dim-overlay: rgba(30, 32, 32, 0.85);
+}
+
+body.ac-mobile-rich-open:has(ul.autocomplete-menu.show) {
+  --ac-dim-overlay: rgba(148, 150, 150, 1);
+}
+
+body:has(ul.autocomplete-menu.show)::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: var(--ac-dim-overlay);
+  z-index: 3000;
+  pointer-events: none;
+}
+
+body:has(ul.autocomplete-menu.show) .autocomplete-menu {
+  z-index: 3100;
+}
+
+body:has(ul.autocomplete-menu.show):not(.ac-mobile-rich-open) #wrapper #header #searchbars,
+body:has(ul.autocomplete-menu.show):not(.ac-mobile-rich-open) #wrapper #header #searchbars #searchbar_artists,
+body:has(ul.autocomplete-menu.show):not(.ac-mobile-rich-open) #wrapper #header #searchbars ul li#searchbar_artists,
+body:has(ul.autocomplete-menu.show):not(.ac-mobile-rich-open) #wrapper #header #searchbars #searchbar_artists input[data-gazelle-autocomplete="true"] {
+  z-index: 3100;
+}
+
+body:has(ul.autocomplete-menu.show) #artistsearch + .autocomplete-menu.ac-rich.show {
+  border: var(--ac-menu-border-width) solid var(--ac-menu-border);
+  border-radius: var(--ac-menu-border-radius);
+  box-sizing: border-box;
+}
+
+#artistsearch + .autocomplete-menu.ac-rich .collage-artist-entry.box2 {
+  margin: 0;
+  border: var(--ac-entry-border-width) solid var(--ac-row-border);
+}
+
+.autocomplete-menu.ac-rich > li.ac-row.ac-row-chosen .collage-artist-entry {
+  outline: var(--ac-hover-outline-width) solid var(--ac-row-selected-border);
+  outline-offset: -1px;
+  border-color: var(--ac-row-selected-border);
+  border-radius: var(--ac-hover-outline-radius);
+  background-color: var(--ac-row-selected-bg);
+}
+
+.autocomplete-menu.ac-rich > li.ac-row.ac-row-chosen .cae-aka {
+  color: var(--ac-row-selected-muted-fg);
+}
+
+.autocomplete-menu.ac-rich > li.ac-row.ac-row-chosen .cae-name,
+.autocomplete-menu.ac-rich > li.ac-row.ac-row-chosen .cae-name a,
+.autocomplete-menu.ac-rich > li.ac-row.ac-row-chosen .cae-name a:visited,
+.autocomplete-menu.ac-rich > li.ac-row.ac-row-chosen .cae-name a:hover,
+.autocomplete-menu.ac-rich > li.ac-row.ac-row-chosen .cae-name a:focus,
+.autocomplete-menu.ac-rich > li.ac-row.ac-row-chosen .cae-name a:active {
+  color: var(--ac-row-selected-fg);
+  text-decoration: underline;
+}
+
+.autocomplete-menu.ac-rich > li.ac-row.ac-row-chosen .cae-advanced-meta {
+  color: var(--ac-row-selected-advanced-fg);
+}
+
+.autocomplete-menu.ac-rich > li.ac-row.ac-row-chosen .cae-advanced-item-discogs,
+.autocomplete-menu.ac-rich > li.ac-row.ac-row-chosen .cae-advanced-item-discogs:hover,
+.autocomplete-menu.ac-rich > li.ac-row.ac-row-chosen .cae-advanced-item-discogs:focus,
+.autocomplete-menu.ac-rich > li.ac-row.ac-row-chosen .cae-advanced-item-discogs:visited {
+  color: var(--ac-row-selected-link-fg);
+  text-decoration: underline;
+}
+
+.autocomplete-menu.ac-rich > li.ac-row.ac-row-chosen .cae-bio-content {
+  color: var(--ac-row-selected-bio-fg);
+}
+
+.autocomplete-menu.ac-rich > li.ac-row.ac-row-chosen .cae-tag-entry {
+  color: var(--ac-tag-selected-fg);
+}

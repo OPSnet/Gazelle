@@ -443,38 +443,42 @@ ul#userinfo_username {
   clear: both;
 }
 
-#searchbars ul {
+#searchbars > ul {
   display: block;
   list-style: none;
   padding: 20px 0 0 0;
   margin: 0;
 }
 
-#searchbars ul li {
+#searchbars > ul > li {
   display: inline;
   position: relative;
 }
 
-#searchbars ul li ul {
+#searchbars > ul > li > ul {
   background-color: #F0F0F0;
   border: 1px solid #CCC !important;
-  display: block;
   left: 0;
   margin-top: 12px;
   padding: 0;
   position: absolute;
   top: 1em;
-  z-index: 1000;
+  z-index: 2000;
 }
 
-#searchbars ul li ul li {
+#searchbars > ul > li > ul li {
   margin: 0;
-  padding: 3px;
   display: block;
   cursor: pointer;
+
+  a {
+    color: inherit;
+    width: 100%;
+    padding: 0;
+  }
 }
 
-#searchbars ul li ul li.highlight {
+#searchbars > ul > li > ul li.highlight {
   background-color: #007DC6;
   color: #fff;
 }
@@ -1422,7 +1426,7 @@ td.r00 {
   width: 100%;
   height: 100%;
   background: #111 50% 0 no-repeat fixed;
-  z-index: 1001;
+  z-index: 4000;
   opacity: 0.9;
   filter: alpha(opacity = 90);
 }
@@ -1435,7 +1439,7 @@ td.r00 {
   width: 90%;
   height: 90%;
   padding: 0;
-  z-index: 1002;
+  z-index: 4100;
   overflow: auto;
 }
 
@@ -2105,4 +2109,26 @@ TODO: Make these rules apply globally and add exceptions where needed
 
 #reportsv2 .manage_form img {
   max-width: 600px;
+}
+
+/* Rich autocomplete palette */
+.autocomplete-menu.ac-rich {
+  --ac-menu-bg: rgb(228 228 228);
+  --ac-menu-border: rgb(160 160 177);
+  --ac-menu-fg: rgb(0 0 0);
+  --ac-row-bg: rgb(245 245 245);
+  --ac-row-border: rgb(187 187 199);
+  --ac-row-fg: rgb(0 0 0);
+  --ac-row-muted-fg: rgb(69 69 69);
+  --ac-row-bio-fg: rgb(69 69 69);
+  --ac-row-advanced-fg: rgb(0 0 0);
+  --ac-row-link-fg: rgb(0 0 0);
+  --ac-row-selected-bg: #007dc6;
+  --ac-row-selected-border: #00639e;
+  --ac-row-selected-fg: #ffffff;
+  --ac-row-selected-muted-fg: #e8f4ff;
+  --ac-row-selected-bio-fg: #e8f4ff;
+  --ac-row-selected-advanced-fg: #ffffff;
+  --ac-row-selected-link-fg: #ffffff;
+  --ac-tag-selected-fg: #eef6ff;
 }

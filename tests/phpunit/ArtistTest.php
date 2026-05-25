@@ -15,6 +15,13 @@ class ArtistTest extends TestCase {
     protected User    $extra;
     protected array   $artistIdList = [];
 
+    protected function renderAutocompleteWidget(array $autocomplete): string {
+        return \Gazelle\Util\Twig::factory(new Manager\User())->render(
+            'artist/widget.twig',
+            $autocomplete['widget']
+        );
+    }
+
     public function setUp(): void {
         $this->user = Helper::makeUser('arty.' . randomString(10), 'artist');
         $this->user->requestContext()->setViewer($this->user);
@@ -606,8 +613,14 @@ class ArtistTest extends TestCase {
     public function testArtistAutocomplete(): void {
         $manager = new Manager\Artist();
         $composer = null;
-        foreach (['qqqq', 'qqqb', 'qqbb', 'qbbb', 'bbbb'] as $auto) {
-            $name = "$auto.phpunit." . randomString(6);
+        $prefix2 = 'qac' . randomString(5) . '.';
+        $prefix4 = $prefix2 . 'aa';
+        foreach ([
+            $prefix4,
+            $prefix2 . 'ab',
+            $prefix2 . 'ba',
+            'zac' . randomString(5) . '.off',
+        ] as $name) {
             if (is_null($composer)) {
                 $composer = $name;
             }
@@ -627,12 +640,151 @@ class ArtistTest extends TestCase {
         global $Cache;
         $Cache->delete_multi([
             $manager->autocompleteKey("%"),
-            $manager->autocompleteKey("qq"),
-            $manager->autocompleteKey("qqqq"),
+            $manager->autocompleteKey($prefix2),
+            $manager->autocompleteKey($prefix4),
         ]);
         $this->assertCount(0, $manager->autocompleteList("%"), 'artist-autocomp-wildcard');
-        $this->assertCount(3, $manager->autocompleteList("qq"), 'artist-autocomp-2');
-        $this->assertCount(1, $manager->autocompleteList("qqqq"), 'artist-autocomp-4');
+        $this->assertCount(3, $manager->autocompleteList($prefix2), 'artist-autocomp-2');
+        $this->assertCount(1, $manager->autocompleteList($prefix4), 'artist-autocomp-4');
+
+        $artist = $manager->create('qredir.phpunit.' . randomString(6));
+        $this->artistIdList[] = $artist->id;
+        $redirectName = $artist->name() . '-typo';
+        $artist->addAlias($redirectName, $artist->aliasId(), $this->user);
+        $tgroup = Helper::makeTGroupMusic(
+            $this->user,
+            'phpunit artist autocomp redirect ' . randomString(10),
+            [[ARTIST_MAIN], [$artist->primaryName()]],
+            ['punk'],
+        );
+        Helper::makeTorrentMusic($tgroup, $this->user);
+        $this->tgroupList[] = $tgroup;
+        $Cache->delete_multi([
+            $manager->autocompleteKey($redirectName),
+        ]);
+        $autocomplete = $manager->autocompleteList($redirectName);
+        $this->assertCount(1, $autocomplete, 'artist-autocomp-redir-count');
+        $this->assertEquals([$artist->id], array_column($autocomplete, 'data'), 'artist-autocomp-redir-id');
+        $this->assertEquals([$redirectName], array_column($autocomplete, 'value'), 'artist-autocomp-redir-value');
+        $widget = $this->renderAutocompleteWidget($autocomplete[0]);
+        $this->assertStringContainsString(
+            "<a class=\"cae-row-link\" href=\"artist.php?id={$artist->id}\"",
+            $widget,
+            'artist-autocomp-redir-html-link'
+        );
+        $this->assertStringContainsString(
+            "<div class=\"cae-name\">$redirectName</div>",
+            $widget,
+            'artist-autocomp-redir-html-name'
+        );
+        $this->assertStringNotContainsString(
+            "<div class=\"cae-name\">{$artist->primaryName()}</div>",
+            $widget,
+            'artist-autocomp-redir-html-name-not-primary'
+        );
+        $this->assertStringContainsString(
+            "<div class=\"cae-aka\">aka {$artist->primaryName()}</div>",
+            $widget,
+            'artist-autocomp-redir-html-aka'
+        );
+        $cached = $manager->autocompleteList($redirectName);
+        $this->assertCount(1, $cached, 'artist-autocomp-redir-cache-count');
+        $this->assertSame($autocomplete[0]['data'], $cached[0]['data'], 'artist-autocomp-redir-cache-data');
+        $this->assertSame($autocomplete[0]['value'], $cached[0]['value'], 'artist-autocomp-redir-cache-value');
+        $this->assertInstanceOf(Artist::class, $cached[0]['widget']['artist'], 'artist-autocomp-redir-cache-artist-object');
+        $this->assertSame(
+            $widget,
+            $this->renderAutocompleteWidget($cached[0]),
+            'artist-autocomp-redir-cache-html'
+        );
+    }
+
+    public function testArtistAutocompleteSortBySnatchTotal(): void {
+        $manager = new Manager\Artist();
+        $rankPrefix = 'qrank.phpunit.' . randomString(6) . '.';
+        $rankedList = [];
+        foreach ([
+            ['Alpha', 20],
+            ['Beta', 50],
+            ['Gamma', 20],
+        ] as [$suffix, $snatches]) {
+            $name = $rankPrefix . $suffix;
+            $artist = $manager->create($name);
+            $this->artistIdList[] = $artist->id;
+            $tgroup = Helper::makeTGroupMusic(
+                $this->user,
+                'phpunit artist autocomp rank ' . randomString(10),
+                [[ARTIST_MAIN], [$name]],
+                ['punk'],
+            );
+            $torrent = Helper::makeTorrentMusic($tgroup, $this->user);
+            Helper::addTorrentTraffic($torrent, 0, 0, $snatches);
+            $this->tgroupList[] = $tgroup;
+            $rankedList[$suffix] = $artist;
+        }
+        global $Cache;
+        $Cache->delete_value($manager->autocompleteKey($rankPrefix));
+        $autocomplete = $manager->autocompleteList($rankPrefix);
+        $this->assertSame(
+            [
+                $rankedList['Beta']->id,
+                $rankedList['Alpha']->id,
+                $rankedList['Gamma']->id,
+            ],
+            array_column($autocomplete, 'data'),
+            'artist-autocomp-order-snatched'
+        );
+        $this->assertSame(
+            [
+                $rankPrefix . 'Beta',
+                $rankPrefix . 'Alpha',
+                $rankPrefix . 'Gamma',
+            ],
+            array_column($autocomplete, 'value'),
+            'artist-autocomp-order-snatched-value'
+        );
+    }
+
+    public function testArtistAutocompleteFlushesCachedHtmlOnRevisionChange(): void {
+        $manager = new Manager\Artist();
+        $name = 'qcache.phpunit.' . randomString(6);
+        $prefix = substr($name, 0, 6);
+        $artist = $manager->create($name);
+        $this->artistIdList[] = $artist->id;
+        $artist->createRevision(
+            body:    'before cache body',
+            image:   null,
+            summary: ['before cache body'],
+            user:    $this->user,
+        );
+        $tgroup = Helper::makeTGroupMusic(
+            $this->user,
+            'phpunit artist autocomp cache ' . randomString(10),
+            [[ARTIST_MAIN], [$name]],
+            ['punk'],
+        );
+        Helper::makeTorrentMusic($tgroup, $this->user);
+        $this->tgroupList[] = $tgroup;
+
+        global $Cache;
+        $Cache->delete_value($manager->autocompleteKey($prefix));
+        $autocomplete = $manager->autocompleteList($prefix);
+        $this->assertStringContainsString(
+            'before cache body',
+            $this->renderAutocompleteWidget($autocomplete[0]),
+            'artist-autocomp-cache-before'
+        );
+
+        $artist->createRevision(
+            body:    'after cache body',
+            image:   null,
+            summary: ['after cache body'],
+            user:    $this->user,
+        );
+        $autocomplete = $manager->autocompleteList($prefix);
+        $widget = $this->renderAutocompleteWidget($autocomplete[0]);
+        $this->assertStringContainsString('after cache body', $widget, 'artist-autocomp-cache-after');
+        $this->assertStringNotContainsString('before cache body', $widget, 'artist-autocomp-cache-stale');
     }
 
     public function testArtistBookmark(): void {
@@ -677,6 +829,16 @@ class ArtistTest extends TestCase {
             'artist-add-discogs'
         );
         $this->assertEquals($name, $artist->discogs()->name(), 'artist-self-discogs-name');
+        $context = $artist->widgetContext();
+        $this->assertSame($artist, $context['artist'], 'artist-widget-context-object');
+        $widget = \Gazelle\Util\Twig::factory(new Manager\User())->render(
+            'artist/widget.twig',
+            $context
+        );
+        $this->assertStringContainsString('cae-advanced-meta', $widget, 'artist-discogs-advanced-meta');
+        $this->assertStringContainsString('cae-advanced-item-discogs', $widget, 'artist-discogs-advanced-discogs');
+        $this->assertStringContainsString((string)$id, $widget, 'artist-discogs-advanced-discogs-id');
+        $this->assertStringContainsString('cae-advanced-item-snatches', $widget, 'artist-discogs-advanced-snatches');
         $this->assertEquals(1, $artist->removeDiscogsRelation(), 'artist-discogs-remove');
     }
 

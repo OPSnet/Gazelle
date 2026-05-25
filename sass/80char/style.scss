@@ -603,7 +603,7 @@ input[type="search"]::-webkit-search-cancel-button {
   -webkit-appearance: none;
 }
 #autocomplete {
-  background: url('https://what.cd/static/styles/postmod/images/content.png');
+  background: rgb(30 30 30 / 80%);
   border: 1px solid #000;
   list-style: none;
 }
@@ -614,7 +614,7 @@ input[type="search"]::-webkit-search-cancel-button {
   color: #000000;
 }
 
-#searchbars ul {
+#searchbars > ul {
   margin: 0;
   padding: 0;
   list-style: none;
@@ -625,7 +625,7 @@ input[type="search"]::-webkit-search-cancel-button {
   text-align: center !important;
 }
 
-#searchbars ul li {
+#searchbars > ul > li {
   display: inline;
   float: left;
   width: 148px;
@@ -635,19 +635,18 @@ input[type="search"]::-webkit-search-cancel-button {
   list-style: none;
 }
 
-#searchbars ul li ul {
-  display: block;
+#searchbars > ul > li > ul {
   position: absolute;
   top: 1em;
   left: 0;
-  z-index: 1000;
+  z-index: 2000;
   border: 1px solid #FFF;
-  background: url('https://what.cd/static/styles/postmod/images/content.png');
+  background: rgb(30 30 30 / 80%);
   width: 12em;
   margin-top: 12px;
 }
 
-#searchbars ul li ul li {
+#searchbars > ul > li > ul li {
   margin: 1px 0 1px 4px;
   padding: 0;
   display: block;
@@ -655,11 +654,11 @@ input[type="search"]::-webkit-search-cancel-button {
   cursor: pointer;
 }
 
-#searchbars ul li ul li.highlight {
+#searchbars > ul > li > ul li.highlight {
   color: #FF0000;
 }
 
-#searchbars ul li form {
+#searchbars > ul > li form {
   display: inline;
   margin: 0;
 }
@@ -1257,7 +1256,7 @@ ul .invitetree {
   width: 100%;
   height: 100%;
   background: #111 50% 0 no-repeat fixed;
-  z-index: 1001;
+  z-index: 4000;
   opacity: 0.9;
   filter: alpha(opacity = 90);
 }
@@ -1270,7 +1269,7 @@ ul .invitetree {
   width: 90%;
   height: 90%;
   padding: 0;
-  z-index: 1002;
+  z-index: 4100;
   overflow: auto;
 }
 

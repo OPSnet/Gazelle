@@ -11,7 +11,6 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
     final public const pkName               = 'ArtistID';
     final public const tableName            = 'artists_group';
     final public const CACHE_REQUEST_ARTIST = 'artists_requests_%d';
-
     protected const CACHE_PREFIX = 'artist_%d';
     protected const CACHE_TAG    = 'artist_tag_%d_%d';
 
@@ -46,6 +45,11 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
     }
 
     public function flush(): static {
+        $autocompleteNameList = array_map(
+            fn ($alias) => $alias['name'],
+            $this->info()['alias']
+        );
+        $autocompleteKeyList = (new Manager\Artist())->autocompleteKeyList($autocompleteNameList);
         self::$db->prepared_query("
             SELECT DISTINCT concat('groups_artists_', GroupID)
             FROM torrents_artists ta
@@ -58,6 +62,7 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
             sprintf(self::CACHE_REQUEST_ARTIST, $this->id),
             sprintf(self::CACHE_TAG, $this->id, 5),
             sprintf(self::CACHE_TAG, $this->id, 10),
+            ...$autocompleteKeyList,
             ...self::$db->collect(0)
         ]);
         unset($this->info);
@@ -248,8 +253,43 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
         return $this->aliasList()[$this->aliasId()]['name'];
     }
 
+    public function primaryName(): string {
+        return $this->aliasList()[$this->primaryAliasId()]['name'];
+    }
+
     public function primaryAliasId(): int {
         return $this->info()['primary_alias_id'];
+    }
+
+    public function isPrimaryAlias(): bool {
+        return $this->aliasId() === $this->primaryAliasId();
+    }
+
+    public function isRedirectAlias(): bool {
+        return (int)($this->aliasList()[$this->aliasId()]['redirect_id'] ?? 0) !== 0;
+    }
+
+    public function widgetContext(array $display = []): array {
+        $discogsMode = 'id';
+        $hasAdvancedDiscogs = $this->discogs()->id > 0;
+        $discogsLabel = 'Discogs';
+        $discogsValue = $hasAdvancedDiscogs
+            ? (string)$this->discogs()->id
+            : '';
+
+        return [
+            'artist'    => $this,
+            'advanced'  => [
+                'discogs_mode'  => $discogsMode,
+                'discogs_label' => $discogsLabel,
+                'discogs_value' => $discogsValue,
+                'snatch_total'  => $this->stats()->snatchTotal(),
+            ],
+            'display'   => [
+                'name'     => $display['display_name'] ?? $this->name(),
+                'show_aka' => $display['show_aka'] ?? ($this->isRedirectAlias() && $this->primaryName() !== $this->name()),
+            ],
+        ];
     }
 
     public function sections(): array {

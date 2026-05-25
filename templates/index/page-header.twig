@@ -108,7 +108,7 @@
 {% if viewer.option('SearchType') %}
         <input type="hidden" name="action" value="advanced">
 {% endif %}
-        <input id="torrentssearch" value="Torrents" placeholder="Torrents" type="text" name="
+        <input id="torrentssearch" placeholder="Torrents" type="text" name="
             {%- if viewer.option('SearchType') %}groupname{% else %}searchstr{% endif -%}
             " size="17" spellcheck="false" accesskey="t">
     </form>
@@ -117,40 +117,40 @@
     <span class="hidden">Artist: </span>
     <form class="search_form" name="artists" action="artist.php" method="get">
         <input id="artistsearch"{{ autocomplete(viewer, 'search')
-            }} value="Artists" placeholder="Artists" type="text" name="artistname" size="17" spellcheck="false" accesskey="a">
+            }} placeholder="Artists" type="text" name="artistname" size="17" spellcheck="false" accesskey="a">
     </form>
 </li>
 <li id="searchbar_collages">
     <span class="hidden">Collage: </span>
     <form class="search_form" name="collages" action="collages.php" method="get">
         <input id="collagesearch"{{ autocomplete(viewer, 'search')
-            }} value="Collages" placeholder="Collages" type="text" name="search" size="17" spellcheck="false" accesskey="c">
+            }} placeholder="Collages" type="text" name="search" size="17" spellcheck="false" accesskey="c">
     </form>
 </li>
 <li id="searchbar_requests">
     <span class="hidden">Requests: </span>
     <form class="search_form" name="requests" action="requests.php" method="get">
-        <input id="requestssearch" value="Requests" placeholder="Requests" type="text" name="search" size="17" spellcheck="false" accesskey="r">
+        <input id="requestssearch" placeholder="Requests" type="text" name="search" size="17" spellcheck="false" accesskey="r">
     </form>
 </li>
 <li id="searchbar_forums">
     <span class="hidden">Forums: </span>
     <form class="search_form" name="forums" action="forums.php" method="get">
         <input value="search" type="hidden" name="action">
-        <input id="forumssearch" value="Forums" placeholder="Forums" type="text" name="search" size="17" accesskey="f">
+        <input id="forumssearch" placeholder="Forums" type="text" name="search" size="17" accesskey="f">
     </form>
 </li>
 <li id="searchbar_log">
     <span class="hidden">Log: </span>
     <form class="search_form" name="log" action="log.php" method="get">
-        <input id="logsearch" value="Log" placeholder="Log" type="text" name="search" size="17" accesskey="l">
+        <input id="logsearch" placeholder="Log" type="text" name="search" size="17" accesskey="l">
     </form>
 </li>
 <li id="searchbar_users">
     <span class="hidden">Users: </span>
     <form class="search_form" name="users" action="user.php" method="get">
         <input type="hidden" name="action" value="search">
-        <input id="userssearch" value="Users" placeholder="Users" type="text" name="search" size="20" spellcheck="false" accesskey="u">
+        <input id="userssearch" placeholder="Users" type="text" name="search" size="20" spellcheck="false" accesskey="u">
     </form>
 </li>
 </ul>

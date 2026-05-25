@@ -155,7 +155,6 @@ $Cache->cache_value('php_' . getmypid(), [
 // 4. Display the page
 
 header('Cache-Control: no-cache, must-revalidate, post-check=0, pre-check=0');
-header('Pragma: no-cache');
 
 $file = realpath(__DIR__ . "/sections/{$module}/index.php");
 if ($file === false) {

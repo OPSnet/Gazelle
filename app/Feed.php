@@ -5,7 +5,6 @@ namespace Gazelle;
 class Feed extends Base {
     public function header(): string {
         header('Cache-Control: no-cache, must-revalidate, post-check=0, pre-check=0');
-        header('Pragma:');
         header('Expires: ' . date('D, d M Y H:i:s', time() + (2 * 60 * 60)) . ' GMT');
         header('Last-Modified: ' . date('D, d M Y H:i:s') . ' GMT');
         header("Content-type: application/xml; charset=UTF-8");

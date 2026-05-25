@@ -167,14 +167,17 @@ ul.thin li {
 /* Layout (Every page) */
 
 #header {
+  /* Keep the header stack in flow so wrapped userinfo lines push content down. */
   background: #F2E9E1;
-  padding: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0 0 0.3rem;
   width: 100%;
 }
 
 #content {
   margin: auto;
-  margin-top: 100px;
+  margin-top: 0;
   overflow: hidden;
   width: 90%;
 }
@@ -207,10 +210,10 @@ ul.thin li {
 #menu {
   background-color: #CBE86B;
   font-size: 10pt;
+  order: 3;
   padding: 0.6em 0;
-  position: absolute;
+  position: relative;
   text-align: center;
-  top: 114px;
   width: 100%;
 }
 
@@ -237,10 +240,10 @@ ul.thin li {
   background: #1C140D;
   color: #FFF;
   font-size: 8pt;
+  order: 4;
   padding: 4px 0;
-  position: absolute;
+  position: relative;
   text-align: center;
-  top: 146px;
   width: 100%;
 }
 
@@ -276,10 +279,10 @@ ul.thin li {
 #searchbars {
   background-color: #FFF;
   margin-top: 2px;
+  order: 2;
   padding: 4px 0;
-  position: absolute;
+  position: relative;
   text-align: center;
-  top: 88px;
   width: 100%;
 }
 
@@ -292,42 +295,41 @@ ul.thin li {
   position: relative;
 }
 
-#searchbars ul {
+#searchbars > ul {
   display: block;
   margin: 0 auto;
   text-align: center;
 }
 
-#searchbars ul li {
+#searchbars > ul > li {
   display: inline;
   list-style: none;
   margin: 0 1px;
   position: relative;
 }
 
-#searchbars ul li ul {
+#searchbars > ul > li > ul {
   background-color: #999;
-  display: block;
   left: 0;
   margin-top: 12px;
   position: absolute;
   top: 1em;
   width: 12em;
-  z-index: 1000;
+  z-index: 2000;
 }
 
-#searchbars ul li ul li {
+#searchbars > ul > li > ul li {
   display: block;
   margin: 0;
   padding: 0;
   width: 100%;
 }
 
-#searchbars ul li ul li.highlight {
+#searchbars > ul > li > ul li.highlight {
   background: #D7D7D7;
 }
 
-#searchbars ul li form {
+#searchbars > ul > li form {
   display: inline;
 }
 
@@ -867,7 +869,7 @@ ul .invitetree {
   position: fixed;
   top: 0;
   width: 100%;
-  z-index: 1001;
+  z-index: 4000;
 }
 
 .lightbox {
@@ -879,7 +881,7 @@ ul .invitetree {
   text-align: center;
   top: 5%;
   width: 90%;
-  z-index: 1002;
+  z-index: 4100;
 }
 
 .center {
@@ -986,4 +988,25 @@ ol {
 .sign.leechers img,
 .sign.snatches img {
   height: 0.825rem;
+}
+
+/* Rich autocomplete palette */
+.autocomplete-menu.ac-rich {
+  --ac-menu-bg: rgb(250 247 245);
+  --ac-menu-border: rgb(160 160 177);
+  --ac-menu-fg: rgb(0 0 0);
+  --ac-row-bg: rgb(255 255 255);
+  --ac-row-border: rgb(191 191 202);
+  --ac-row-fg: rgb(0 0 0);
+  --ac-row-muted-fg: rgb(71 71 71);
+  --ac-row-bio-fg: rgb(71 71 71);
+  --ac-row-advanced-fg: rgb(0 0 0);
+  --ac-row-link-fg: rgb(0 0 0);
+  --ac-row-selected-bg: rgb(226 240 181);
+  --ac-row-selected-border: rgb(83 170 0);
+  --ac-row-selected-fg: rgb(17 17 17);
+  --ac-row-selected-muted-fg: rgb(41 41 41);
+  --ac-row-selected-bio-fg: rgb(41 41 41);
+  --ac-row-selected-advanced-fg: rgb(17 17 17);
+  --ac-row-selected-link-fg: rgb(17 17 17);
 }

@@ -1,0 +1,60 @@
+{% set tags = artist.tagLeaderboard(5) %}
+{% set has_tags = tags|length > 0 %}
+{% set has_discogs = artist.discogs.id %}
+{% set has_meta = has_tags or has_discogs %}
+{% set display_name = display.name %}
+{% set has_aka = display.show_aka %}
+{% set has_advanced_discogs = has_discogs and advanced.discogs_mode in ['text', 'glyph', 'id'] %}
+{% set has_advanced_snatches = true %}
+{% set has_advanced_meta = has_advanced_discogs or has_advanced_snatches %}
+<div class="collage-artist-entry box2 {{ artist.image ? 'cae-has-image' : 'cae-no-image' }} {{ has_meta ? 'cae-has-meta' : 'cae-no-meta' }} {{ artist.body ? 'cae-has-bio' : 'cae-no-bio' }}">
+    <a class="cae-row-link" href="artist.php?id={{ artist.id }}" aria-label="{{ display_name }}"></a>
+{%- if artist.image -%}
+    <div class="cae-img">
+            <img loading="lazy" class="tooltip" src="{{ artist.image|image_cache(width = 150)
+            }}" alt="{{ artist.name }}" title="{{ artist.name
+            }}" width="150" data-origin-src="{{ artist.image
+            }}">
+    </div>
+{%- endif -%}
+    <div class="cae-copy">
+        <div class="cae-name">{{ display_name }}</div>
+{% if has_aka %}
+        <div class="cae-aka">aka {{ artist.primaryName }}</div>
+{% endif %}
+{% if has_advanced_meta %}
+        <span class="cae-advanced-meta">
+{%  if has_advanced_discogs %}
+            <a class="cae-advanced-item cae-advanced-item-discogs cae-advanced-mode-{{ advanced.discogs_mode }} ac-discogs-link external" aria-label="Discogs" title="Discogs" target="_blank" rel="noreferrer noopener" href="https://www.discogs.com/artist/{{ artist.discogs.id }}">
+                <span class="cae-advanced-label">{{ advanced.discogs_label }}</span>
+{%      if advanced.discogs_value %}
+                <span class="cae-advanced-value">{{ advanced.discogs_value }}</span>
+{%      endif %}
+            </a>
+{%  endif %}
+{%  if has_advanced_snatches %}
+            <span class="cae-advanced-item cae-advanced-item-snatches">
+                <span class="cae-advanced-label">Snatches</span>
+                <span class="cae-advanced-value">{{ advanced.snatch_total|number_format }}</span>
+            </span>
+{%  endif %}
+        </span>
+{% endif %}
+{% if has_tags %}
+        <div class="cae-meta cae-has-tags {{ has_discogs ? 'cae-has-discogs' : 'cae-no-discogs' }}">
+            <div class="cae-tag tags">
+{%      for entry in tags %}
+                <span class="cae-tag-entry">{{ entry.name }}</span>
+{%      endfor %}
+            </div>
+        </div>
+{% endif %}
+{% if artist.body %}
+        <div class="cae-bio">
+            <div class="cae-bio-content">
+                {{- artist.body|bb_format -}}
+            </div>
+        </div>
+{% endif %}
+    </div>
+</div>

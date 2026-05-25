@@ -236,7 +236,7 @@ function toggleTorrentSearch(mode) {
     if (mode == 'basic') {
         $('.fti_advanced').disable();
         $('.fti_basic').enable();
-        $('.ftr_advanced').ghide(true);
+        $('.ftr_advanced').ghide();
         $('.ftr_basic').gshow();
         $('#ft_type').attr('onclick', "return toggleTorrentSearch('advanced')");
         $('#ft_type').raw().innerHTML = 'Switch to advanced';

@@ -1,5 +1,20 @@
 "use strict";
 
+// Normalize Z-index
+
+/*
+ * Gazelle z-index rules are set in global.css.
+ * Vendor scripts load before this file;
+ *  change their defaults to fit Gazelle's z-index rule.
+ */
+
+if (window.jQuery && $.Autocomplete && $.Autocomplete.defaults) {
+    $.Autocomplete.defaults.zIndex = 3100;
+}
+if (window.jQuery && $.noty && $.noty.themes && $.noty.themes.defaultTheme) {
+    $.noty.themes.defaultTheme.modal.css.zIndex = 1200;
+}
+
 /**
  * Check or uncheck checkboxes in formElem
  * If masterElem is false, toggle each box, otherwise use masterElem's status on all boxes
@@ -406,57 +421,35 @@ $.fn.extend({
     gshow: function () {
         return this.remove_class('hidden');
     },
-    ghide: function (force) {
-        return this.add_class('hidden', force);
+    ghide: function () {
+        return this.add_class('hidden');
     },
-    gtoggle: function (force) {
+    gtoggle: function () {
         //Should we interate and invert all entries, or just go by the first?
-        if (!in_array('hidden', this[0].className.split(' '))) {
-            this.add_class('hidden', force);
-        } else {
-            this.remove_class('hidden');
-        }
+        this.toggle_class('hidden');
         return this;
     },
     listen: function (event, callback) {
         for (var i = 0, il = this.length; i < il; i++) {
-            var object = this[i];
-            if (document.addEventListener) {
-                object.addEventListener(event, callback, false);
-            } else {
-                object.attachEvent('on' + event, callback);
-            }
+            this[i].addEventListener(event, callback, false);
         }
         return this;
     },
-    add_class: function (class_name, force) {
+    add_class: function (class_name) {
         for (var i = 0, il = this.length; i < il; i++) {
-            var object = this[i];
-            if (object.className === '') {
-                object.className = class_name;
-            } else if (force || !in_array(class_name, object.className.split(' '))) {
-                object.className = object.className + ' ' + class_name;
-            }
+            this[i].classList.add(class_name);
         }
         return this;
     },
     remove_class: function (class_name) {
         for (var i = 0, il = this.length; i < il; i++) {
-            var object = this[i];
-            var classes = object.className.split(' ');
-            var result = array_search(class_name, classes);
-            if (result !== false) {
-                classes.splice(result, 1);
-                object.className = classes.join(' ');
-            }
+            this[i].classList.remove(class_name);
         }
         return this;
     },
     has_class: function(class_name) {
         for (var i = 0, il = this.length; i < il; i++) {
-            var object = this[i];
-            var classes = object.className.split(' ');
-            if (array_search(class_name, classes)) {
+            if (this[i].classList.contains(class_name)) {
                 return true;
             }
         }
@@ -464,19 +457,7 @@ $.fn.extend({
     },
     toggle_class: function(class_name) {
         for (var i = 0, il = this.length; i < il; i++) {
-            var object = this[i];
-            var classes = object.className.split(' ');
-            var result = array_search(class_name, classes);
-            if (result !== false) {
-                classes.splice(result, 1);
-                object.className = classes.join(' ');
-            } else {
-                if (object.className === '') {
-                    object.className = class_name;
-                } else {
-                    object.className = object.className + ' ' + class_name;
-                }
-            }
+            this[i].classList.toggle(class_name);
         }
         return this;
     },
@@ -546,81 +527,4 @@ $.fn.extend({
         // Keep chainability
         return this;
     }
-});
-
-document.addEventListener('DOMContentLoaded', () => {
-    // autocomplete
-    var url = new gazURL();
-    var ARTIST_AUTOCOMPLETE_URL  = 'artist.php?action=autocomplete';
-    var COLLAGE_AUTOCOMPLETE_URL = 'collages.php?action=autocomplete';
-    var TAGS_AUTOCOMPLETE_URL    = 'torrents.php?action=autocomplete_tags';
-    var SELECTOR = '[data-gazelle-autocomplete="true"]';
-
-    $('#artistsearch' + SELECTOR).autocomplete({
-        deferRequestBy: 300,
-        onSelect : function(suggestion) {
-            window.location = 'artist.php?id=' + suggestion['data'];
-        },
-        serviceUrl: ARTIST_AUTOCOMPLETE_URL,
-    });
-
-    $('#collagesearch' + SELECTOR).autocomplete({
-        deferRequestBy: 300,
-        onSelect : function(suggestion) {
-            window.location = 'collages.php?id=' + suggestion['data'];
-        },
-        serviceUrl: COLLAGE_AUTOCOMPLETE_URL,
-    });
-
-    if (url.path == 'torrents' || url.path == 'upload' || url.path == 'artist' || (url.path == 'requests' && url.query['action'] == 'new') || url.path == 'collages') {
-        $("#artist_0" + SELECTOR).autocomplete({
-            deferRequestBy: 300,
-            serviceUrl: ARTIST_AUTOCOMPLETE_URL
-        });
-        $("#artist" + SELECTOR).autocomplete({
-            deferRequestBy: 300,
-            serviceUrl: ARTIST_AUTOCOMPLETE_URL
-        });
-        $("#artistsimilar" + SELECTOR).autocomplete({
-            deferRequestBy: 300,
-            serviceUrl: ARTIST_AUTOCOMPLETE_URL
-        });
-        $("#collage_ref" + SELECTOR).autocomplete({
-            deferRequestBy: 300,
-            serviceUrl: COLLAGE_AUTOCOMPLETE_URL + (url.path == 'artist' ? '&artist=1' : '')
-        });
-    }
-    if (url.path == 'torrents' || url.path == 'upload' || url.path == 'collages' || url.path == 'requests' || url.path == 'top10' || (url.path == 'requests' && url.query['action'] == 'new')) {
-        $("#tags" + SELECTOR).autocomplete({
-            deferRequestBy: 300,
-            delimiter: ',',
-            serviceUrl: TAGS_AUTOCOMPLETE_URL
-        });
-        $("#tagname" + SELECTOR).autocomplete({
-            deferRequestBy: 300,
-            serviceUrl: TAGS_AUTOCOMPLETE_URL,
-        });
-    }
-
-    // header search bar
-    $('#torrentssearch').focus(function () { if (this.value == 'Torrents') { this.value = ''; }});
-    $('#torrentssearch').blur(function () { if (this.value == '') { this.value = 'Torrents'; }});
-
-    $('#artistsearch').focus(function () { if (this.value == 'Artists') { this.value = ''; }});
-    $('#artistsearch').blur(function () { if (this.value == '') { this.value = 'Artists'; }});
-
-    $('#collagesearch').focus(function () { if (this.value == 'Collages') { this.value = ''; }});
-    $('#collagesearch').blur(function () { if (this.value == '') { this.value = 'Collages'; }});
-
-    $('#requestssearch').focus(function () { if (this.value == 'Requests') { this.value = ''; }});
-    $('#requestssearch').blur(function () { if (this.value == '') { this.value = 'Requests'; }});
-
-    $('#forumssearch').focus(function () { if (this.value == 'Forums') { this.value = ''; }});
-    $('#forumssearch').blur(function () { if (this.value == '') { this.value = 'Forums'; }});
-
-    $('#logsearch').focus(function () { if (this.value == 'Log') { this.value = ''; }});
-    $('#logsearch').blur(function () { if (this.value == '') { this.value = 'Log'; }});
-
-    $('#userssearch').focus(function () { if (this.value == 'Users') { this.value = ''; }});
-    $('#userssearch').blur(function () { if (this.value == '') { this.value = 'Users'; }});
 });

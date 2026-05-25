@@ -385,29 +385,28 @@ ul.thin li {
   border: 1px solid #303030;
 }
 
-#searchbars ul {
+#searchbars > ul {
   margin: 0 auto;
   display: block;
 }
 
-#searchbars ul li {
+#searchbars > ul > li {
   display: inline;
   margin: 0 1px;
   list-style: none;
   position: relative;
 }
 
-#searchbars ul li ul {
-  display: block;
+#searchbars > ul > li > ul {
   position: absolute;
   top: 1em;
   left: 0;
-  z-index: 1000;
+  z-index: 2000;
   width: 12em;
   margin-top: 12px;
 }
 
-#searchbars ul li ul li {
+#searchbars > ul > li > ul li {
   margin: 0;
   padding: 0;
   display: block;
@@ -415,11 +414,11 @@ ul.thin li {
   background: #303030;
 }
 
-#searchbars ul li ul li.highlight {
+#searchbars > ul > li > ul li.highlight {
   background: #454545;
 }
 
-#searchbars ul li form {
+#searchbars > ul > li form {
   display: inline;
 }
 
@@ -959,7 +958,7 @@ ul .invitetree {
   width: 100%;
   height: 100%;
   background-color: black;
-  z-index: 1001;
+  z-index: 4000;
   opacity: 0.8;
   filter: alpha(opacity = 80);
 }
@@ -972,7 +971,7 @@ ul .invitetree {
   width: 90%;
   height: 90%;
   padding: 0;
-  z-index: 1002;
+  z-index: 4100;
   overflow: auto;
 }
 
@@ -1061,4 +1060,25 @@ ol {
 #forum_search_cat_list,
 #forum_search_cat_list tr {
   border: none;
+}
+
+/* Rich autocomplete palette */
+.autocomplete-menu.ac-rich {
+  --ac-menu-bg: rgb(37 37 37);
+  --ac-menu-border: rgb(182 182 198);
+  --ac-menu-fg: rgb(184 184 184);
+  --ac-row-bg: rgb(40 40 40);
+  --ac-row-border: rgb(128 128 138);
+  --ac-row-fg: rgb(184 184 184);
+  --ac-row-muted-fg: rgb(143 143 143);
+  --ac-row-bio-fg: rgb(143 143 143);
+  --ac-row-advanced-fg: rgb(184 184 184);
+  --ac-row-link-fg: rgb(184 184 184);
+  --ac-row-selected-bg: rgb(70 70 70);
+  --ac-row-selected-border: rgb(128 128 137);
+  --ac-row-selected-fg: rgb(184 184 184);
+  --ac-row-selected-muted-fg: rgb(184 184 184);
+  --ac-row-selected-bio-fg: rgb(184 184 184);
+  --ac-row-selected-advanced-fg: rgb(184 184 184);
+  --ac-row-selected-link-fg: rgb(184 184 184);
 }
