@@ -4,6 +4,7 @@ namespace Gazelle\Manager;
 
 use Gazelle\Util\Crypto;
 use Gazelle\Util\Mail;
+use Gazelle\Util\Paginator;
 use Gazelle\Util\Proxy;
 
 class Referral extends \Gazelle\Base {
@@ -200,7 +201,15 @@ class Referral extends \Gazelle\Base {
         self::$cache->delete_value(self::CACHE_ACCOUNTS);
     }
 
-    public function getReferredUsers(string $startDate, string $endDate, ?string $site, ?string $username, ?string $invite, \Gazelle\Util\Paginator $paginator, string $view): array {
+    public function getReferredUsers(
+        string|null $startDate,
+        string|null $endDate,
+        string|null $site,
+        string|null $username,
+        string|null $invite,
+        Paginator $paginator,
+        string $view
+    ): array {
         if (empty($startDate)) {
             $startDate = \Gazelle\Util\Time::offset(-3600 * 24 * 30);
         }

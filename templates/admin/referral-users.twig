@@ -16,11 +16,11 @@
             <table class="layout">
                 <tr>
                     <td class="label"><label for="start_date">Start Date</label></td>
-                    <td><input type="text" name="start_date" size="10" value="{{ start_date }}" placeholder="YYYY-MM-DD"></td>
+                    <td><input type="date" name="start_date" size="10" value="{{ start_date }}"></td>
                 </tr>
                 <tr>
                     <td class="label"><label for="end_date">End Date</label></td>
-                    <td><input type="text" name="end_date" size="10" value="{{ end_date }}" placeholder="YYYY-MM-DD"></td>
+                    <td><input type="date" name="end_date" size="10" value="{{ end_date }}"></td>
                 </tr>
                 <tr>
                     <td class="label"><label for="site">Site</label></td>
@@ -41,11 +41,8 @@
         </div>
     </form>
 </div>
-{% if not paginator.total %}
-<div class="center">
-    <h2>No users found</h2>
-</div>
-{% else %}
+{% for u in list %}
+{%  if loop.first %}
 {{ paginator.linkbox|raw }}
 <table width="100%">
     <tr class="colhead">
@@ -55,51 +52,46 @@
         <td>Referred</td>
         <td>Joined</td>
         <td>Active</td>
-    {% if viewer.permitted('users_view_invites') %}
+{%      if viewer.permitted('users_view_invites') %}
         <td>Invite</td>
-    {% endif %}
-    {% if viewer.permitted('admin_manage_referrals') %}
+{%      endif %}
+{%      if viewer.permitted('admin_manage_referrals') %}
         <td></td>
-    {% endif %}
+{%      endif %}
     </tr>
-    {% for u in list %}
+{%  endif %}
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
         <form class="manage_form" name="accounts" action="" method="post">
             <input type="hidden" name="id" value="{{ u.id }}">
             <input type="hidden" name="action" value="referral_users">
             <input type="hidden" name="auth" value="{{ viewer.auth }}">
             <td>{{ u.user_id|user_full }}</td>
+            <td>{{ u.site }}</td>
+            <td>{{ u.username }}</td>
+            <td>{{ u.created|time_diff }}</td>
+            <td>{{ u.joined|time_diff }}</td>
+            <td><input type="checkbox" name="active" disabled="disabled"{{ checked(u.active) }}></td>
+{%  if viewer.permitted('users_view_invites') %}
             <td>
-                {{ u.site }}
-            </td>
-            <td>
-                {{ u.username }}
-            </td>
-            <td>
-                {{ u.created|time_diff }}
-            </td>
-            <td>
-                {{ u.joined|time_diff }}
-            </td>
-            <td>
-                <input type="checkbox" name="active" disabled="disabled"{{ checked(u.active) }}>
-            </td>
-        {% if viewer.permitted('users_view_invites') %}
-            <td>
-            {% if not u.active %}
+{%      if not u.active %}
                 <a href="register.php?invite={{ u.invite }}">{{ u.invite }}</a>
-            {% endif %}
+{%      endif %}
             </td>
-        {% endif %}
-        {% if viewer.permitted('admin_manage_referrals') %}
+{%  endif %}
+{%  if viewer.permitted('admin_manage_referrals') %}
             <td>
                 <input type="submit" name="submit" value="Unlink" onclick="return confirm('Are you sure you want to unlink this account? This is an irreversible action!')">
             </td>
-        {% endif %}
+{%  endif %}
         </form>
     </tr>
-    {% endfor %}
+{%  if loop.last %}
 </table>
-{{ paginator.linkbox|raw }}
-{% endif %}
+{{  paginator.linkbox|raw }}
+{%  endif %}
+{% else %}
+<div class="center">
+    <h2>No users found</h2>
+</div>
+{% endfor %}
 {{ footer() }}

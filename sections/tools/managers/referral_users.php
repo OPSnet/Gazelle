@@ -10,47 +10,32 @@ if (!$Viewer->permitted('admin_view_referrals')) {
     Error403::error();
 }
 
-$ReferralManager = new Manager\Referral();
+$manager = new Manager\Referral();
 
 if (isset($_POST['id'])) {
     authorize();
     if (!$Viewer->permitted('admin_manage_referrals')) {
         Error403::error();
     }
-    $ReferralManager->deleteUserReferral($_POST['id']);
+    $manager->deleteUserReferral($_POST['id']);
 }
 
-$StartDate = $_GET['start_date'];
-$EndDate   = $_GET['end_date'];
-$Site      = $_GET['site'];
-$Username  = $_GET['username'];
-$Invite    = $_GET['invite'];
-
-if (!empty($StartDate)) {
-    [$Y, $M, $D] = array_map('intval', explode('-', $StartDate));
-    if (!checkdate($M, $D, $Y)) {
-        $StartDate = null;
-    }
-}
-
-if (!empty($EndDate)) {
-    [$Y, $M, $D] = array_map('intval', explode('-', $EndDate));
-    if (!checkdate($M, $D, $Y)) {
-        $EndDate = null;
-    }
-}
-
-$View = $_GET['view'] ?? 'all';
+$endDate   = $_GET['end_date'];
+$startDate = $_GET['start_date'];
+$site      = $_GET['site'];
+$username  = $_GET['username'];
+$invite    = $_GET['invite'];
+$view      = $_GET['view'] ?? 'all';
 $paginator = new Util\Paginator(USERS_PER_PAGE, (int)($_GET['page'] ?? 1));
 
 echo $Twig->render('admin/referral-users.twig', [
-    'invite'     => $Invite,
-    'list'       => $ReferralManager->getReferredUsers($StartDate, $EndDate, $Site, $Username, $Invite, $paginator, $View),
+    'invite'     => $invite,
+    'list'       => $manager->getReferredUsers($startDate, $endDate, $site, $username, $invite, $paginator, $view),
     'paginator'  => $paginator,
-    'site'       => $Site,
-    'start_date' => $StartDate,
-    'end_date'   => $EndDate,
-    'username'   => $Username,
-    'view'       => $View,
+    'site'       => $site,
+    'start_date' => $startDate,
+    'end_date'   => $endDate,
+    'username'   => $username,
+    'view'       => $view,
     'viewer'     => $Viewer,
 ]);
