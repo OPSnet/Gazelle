@@ -20,7 +20,7 @@ class SiteInfoTest extends TestCase {
         );
         $package = current($info->composerPackages());
         $this->assertEquals(
-            ['name', 'installed', 'require'],
+            ['name', 'require', 'locked', 'installed'],
             array_keys($package),
             'siteinfo-composer-packages',
         );

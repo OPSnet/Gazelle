@@ -89,36 +89,38 @@ class SiteInfo extends Base {
         $packages = [];
         $root = realpath(__DIR__ . '/../');
 
+        $info = json_decode((string)shell_exec(BIN_COMPOSER . " info -d $root --format=json --no-dev 2>/dev/null"), true);
+        foreach ($info['installed'] as $p) {
+            $packages[$p['name']] = [
+                'name'      => $p['name'],
+                'require'   => '-',
+                'locked'    => '-',
+                'installed' => str_replace(' ', '#', $p['version']),
+            ];
+        }
+
         $composer = json_decode((string)file_get_contents((string)realpath("$root/composer.json")), true);
         foreach ($composer['require'] as $name => $version) {
-            if ($name != 'php') {
-                $packages[$name] = [
-                    'name'    => $name,
-                    'require' => $version,
-                    'installed' => null,
-                ];
+            if (isset($packages[$name])) {
+                if (str_starts_with($version, 'dev-')) {
+                    $parts = explode("#", $version);
+                    $version = $parts[0] . '#' . substr($parts[1], 0, 7);
+                }
+                $packages[$name]['require'] = $version;
             }
         }
 
         $lock = json_decode((string)file_get_contents((string)realpath("$root/composer.lock")), true);
         foreach ($lock['packages'] as $p) {
             if (isset($packages[$p['name']])) {
-                if ($p['name'] == $packages[$p['name']]['name']) {
-                    $packages[$p['name']]['installed'] = $p['version'];
+                $version = $p['version'];
+                if (str_starts_with($version, 'dev-')) {
+                    $version .= '#' . substr($p['source']['reference'], 0, 7);
                 }
+                $packages[$p['name']]['locked'] = $version;
             }
         }
 
-        $info = json_decode((string)shell_exec(BIN_COMPOSER . " info -d $root --format=json 2>/dev/null"), true);
-        foreach ($info['installed'] as $p) {
-            if (!isset($packages[$p['name']])) {
-                $packages[$p['name']] = [
-                    'name'      => $p['name'],
-                    'installed' => $p['version'],
-                    'require'   => '-',
-                ];
-            }
-        }
         ksort($packages);
         return $packages;
     }

@@ -208,12 +208,14 @@ div#phpinfo hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}
             <tr class="colhead">
                 <td>Package</td>
                 <td>Requirement</td>
+                <td>Locked</td>
                 <td>Installed</td>
             </tr>
 {% for p in site_info.composerPackages %}
             <tr>
-                <td>{{ p.name }}</td>
+                <td><span style={{ not(p.locked starts with p.installed) ? "color:tomato" : "" }}>{{ p.name }}</span></td>
                 <td>{{ p.require }}</td>
+                <td>{{ p.locked }}</td>
                 <td>{{ p.installed }}</td>
             </tr>
 {% endfor %}
