@@ -46,7 +46,7 @@ class TextTest extends TestCase {
             ["text-b",          "[b]o[/b]",                      "<strong>o</strong>"],
             ["text-br",         "a\nb",                          "a<br>\nb"],
             ["text-box",        "[box]jellyfish[/box]",          "<div class=\"box pad\" style=\"padding: 10px 10px 10px 20px\">jellyfish</div>"],
-            ["text-code",       "[code]ab\ncd[/code]",           "<code>ab<br>\ncd</code>"],
+            ["text-code",       "[code]ab\ncd[/code]",           "<code><pre>ab<br>\ncd</pre></code>"],
             ["text-color-name", "[color=cornsilk]pink[/color]",  "<span style=\"color: cornsilk;\">pink</span>"],
             ["text-color-hash", "[color=#c0ffee]black[/color]",  "<span style=\"color: #c0ffee;\">black</span>"],
             ["text-colour",     "[colour=gold]pink[/colour]",    "<span style=\"color: gold;\">pink</span>"],
