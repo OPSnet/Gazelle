@@ -965,7 +965,7 @@ class Text {
                         $Str .= '<pre>' . $Block['Val'] . '</pre>';
                         break;
                     case 'code':
-                        $Str .= '<code>' . $Block['Val'] . '</code>';
+                        $Str .= '<code><pre>' . $Block['Val'] . '</pre></code>';
                         break;
                     case 'list':
                         $Str .= "<{$Block['ListType']} class=\"postlist\">";
