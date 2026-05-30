@@ -84,14 +84,13 @@ class ForumThread extends \Gazelle\Json {
         $postList = [];
         foreach ($slice as $post) {
             [$postId, $authorId, $addedTime, $body, $editedUserId, $editedTime] = array_values($post);
-            if (!isset($userCache[$authorId])) {
-                $userCache[$authorId] = $this->userMan->findById((int)$authorId);
-            }
+            $userCache[$authorId] ??= $this->userMan->findById((int)$authorId);
             $author = $userCache[$authorId];
-            if (!isset($userCache[$editedUserId])) {
-                $userCache[$editedUserId] = $this->userMan->findById((int)$editedUserId);
+            $editor = null;
+            if (isset($editedUserId)) {
+                $userCache[$editedUserId] ??= $this->userMan->findById((int)$editedUserId);
+                $editor = $userCache[$editedUserId];
             }
-            $editor = $userCache[$editedUserId];
 
             $postList[] = [
                 'postId'         => $postId,
