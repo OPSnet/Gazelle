@@ -88,7 +88,7 @@ if ($reportType->needImage() !== 'none') {
             Error400::error("You must supply one or more images in your report");
         }
     } else {
-        if (!preg_match_all(IMAGE_REGEXP, $image, $match)) {
+        if (!preg_match_all(IMAGETEXT_REGEXP, $image, $match)) {
             Error400::error("The extra image links you provided weren't links to images...");
         }
         $Images = implode(' ', $match[1]);

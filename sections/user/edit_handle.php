@@ -34,7 +34,7 @@ $validator->setFields([
     ['styleurl', false, "regex", "You did not enter a valid stylesheet URL.", ['regex' => CSS_REGEXP]],
     ['postsperpage', true, "number", "You forgot to select your posts per page option.", ['inarray' => [25, 50, 100]]],
     ['collageentries', true, "number", "You forgot to select your collage option.", ['inarray' => [10, 25, 50, 100]]],
-    ['avatar', false, "regex", "You did not enter a valid avatar URL.", ['regex' => IMAGE_REGEXP]],
+    ['avatar', false, "image", "You did not enter a valid avatar URL."],
     ['email', true, "email", "You did not enter a valid email address."],
     ['irckey', false, "string", "You did not enter a valid IRC key. An IRC key must be between 6 and 32 characters long.", ['range' => [6, 32]]],
     ['new_pass_1', false, "regex",
