@@ -45,7 +45,6 @@
         <th>Useragent</th>
         <th>Enabled</th>
         <th>Donor</th>
-        <th>Warned until</th>
     </tr>
 {%  endif %}
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
@@ -58,7 +57,6 @@
         <td>{{ r.useragent }}</td>
         <td>{{ r.user.isEnabled ? 'yes' : 'no' }}</td>
         <td>{{ r.user is donor ? 'yes' : 'no' }}</td>
-        <td>{{ r.user.warningExpiry ?? 'no' }}</td>
     </tr>
 {%  if loop.last %}
 </table>

@@ -226,7 +226,7 @@ if ($weeksWarned > 0) {
         $staffNote .= ' (Upload privileges removed).';
         $message   .= ' (Upload privileges removed).';
     }
-    $uploader->warn($weeksWarned, $staffNote, $Viewer, $message);
+    $uploader->warning()->warn($weeksWarned, $staffNote, $Viewer, $message);
 } else {
     $staffNote = [];
     if ($revokeUpload) {

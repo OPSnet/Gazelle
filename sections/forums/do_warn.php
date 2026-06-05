@@ -47,7 +47,7 @@ function handleWarningRequest(\Gazelle\Manager\ForumPost|\Gazelle\Manager\Commen
     $reason = trim($_POST['reason']);
     $userMessage = trim($_POST['privatemessage']);
 
-    $user->warnPost($post, $weeks, $Viewer, $reason, $userMessage);
+    $user->warning()->warnPost($post, $weeks, $Viewer, $reason, $userMessage);
 
     header("Location: {$post->location()}");
 

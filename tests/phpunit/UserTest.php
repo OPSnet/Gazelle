@@ -174,11 +174,11 @@ class UserTest extends TestCase {
         $this->assertFalse($this->user->isRecruiter(), 'utest-is-recruiter');
         $this->assertFalse($this->user->isStaff(), 'utest-is-staff');
         $this->assertFalse($this->user->isStaffPMReader(), 'utest-is-staff-pm-reader');
-        $this->assertFalse($this->user->isWarned(), 'utest-is-not-warned');
+        $this->assertFalse($this->user->warning()->isWarned(), 'utest-is-not-warned');
         $this->assertFalse($this->user->canCreatePersonalCollage(), 'utest-personal-collage-create');
         $this->assertFalse($this->user->permitted('site_debug'), 'utest-permitted-site-debug');
 
-        $this->assertNull($this->user->warningExpiry(), 'utest-warning-expiry');
+        $this->assertNull($this->user->warning()->expiry(), 'utest-warning-expiry');
 
         $this->assertEquals([], $this->user->recentUploadList(), 'utest-recent-upload');
         $this->assertTrue($this->user->flushRecentUpload(), 'utest-flush-recent-upload');
@@ -329,15 +329,15 @@ class UserTest extends TestCase {
     }
 
     public function testWarning(): void {
-        $warned = new User\Warning($this->user);
+        $warned = $this->user->warning();
         $this->assertFalse($warned->isWarned(), 'utest-warn-initial');
-        $end = $warned->add(reason: 'phpunit 1', interval: '1 hour', warner: $this->user);
-        $this->assertTrue(Helper::recentDate($end, -60 * 60 + 60), 'utest-warn-1-hour'); // one hour - 60 seconds
+        $end = $warned->add(staffReason: 'phpunit 1', interval: '1 hour', warner: $this->user);
+        $this->assertTrue(Helper::recentDate($end->upper->format('Y-m-d H:i:s'), -60 * 60 + 60), 'utest-warn-1-hour'); // one hour - 60 seconds
         $this->assertTrue($warned->isWarned(), 'utest-is-warned');
         $this->assertEquals(1, $warned->total(), 'utest-warn-total');
 
-        $end = $this->user->warn(2, "phpunit warning", $this->user, "phpunit");
-        $this->assertTrue(Helper::recentDate($end, strtotime('+2 weeks') - 60), 'utest-warn-in-future'); // two weeks - 60 seconds
+        $end = $warned->warn(2, "phpunit warning", $this->user, "phpunit");
+        $this->assertTrue(Helper::recentDate($end->upper->format('Y-m-d H:i:s'), strtotime('+2 weeks') - 60), 'utest-warn-in-future'); // two weeks - 60 seconds
         $this->assertEquals(2, $warned->total(), 'utest-warn-total');
         $warningList = $warned->warningList();
         $this->assertCount(2, $warningList, 'utest-warn-list');

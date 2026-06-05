@@ -284,18 +284,17 @@ if ($Viewer->permitted('users_warn')) {
     $weeks   = (int)($_POST['WarnLength'] ?? 0);
     $extend  = (int)($_POST['ExtendWarning'] ?? 0);
     $reduce  = (int)($_POST['ReduceWarning'] ?? 0);
-    $warning = new User\Warning($user);
     if (!isset($_POST['Warned'])) {
-        if ($user->isWarned()) {
-            $warning->clear();
+        if ($user->warning()->isWarned()) {
+            $user->warning()->clear();
             $editSummary[] = 'warning removed';
         }
     } elseif ($reduce) {
-        $warning->clear(); // replace the current warning with the new duration
+        $user->warning()->clear(); // replace the current warning with the new duration
         $duration = 'week' . plural($reduce);
-        $expiry = $warning->add($reason, "$reduce $duration", $Viewer);
+        $expiry = $user->warning()->add($reason, "$reduce $duration", $Viewer);
         $userMessage = trim($_POST['WarnReason'] ?? '');
-        $body = "Your warning has been reduced to $reduce $duration, set to expire at $expiry, by [user]{$Viewer->username()}[/user].";
+        $body = "Your warning has been reduced to $reduce $duration, set to expire at {$expiry->upper->format('Y-m-d H:i')}, by [user]{$Viewer->username()}[/user].";
         if ($userMessage) {
             $body .= " Reason:\n[quote]{$userMessage}[/quote].";
         }
@@ -303,13 +302,11 @@ if ($Viewer->permitted('users_warn')) {
             "Your warning has been reduced to $reduce $duration",
             $body,
         );
-        $editSummary[] = "warning reduced by $reduce $duration";
     } elseif ($weeks || $extend) {
         $staffReason = $reason ?: ($extend ? 'warning extension' : 'no reason');
         $weeks = $extend ?: $weeks;
-        $user->warn($weeks, $staffReason, $Viewer, $_POST['WarnReason'] ?? 'none given');
+        $user->warning()->warn($weeks, $staffReason, $Viewer, $_POST['WarnReason'] ?? 'none given');
         $duration = 'week' . plural($weeks);
-        $editSummary[] = "warned for $weeks $duration";
     }
 }
 

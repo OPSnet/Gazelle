@@ -105,7 +105,7 @@ class ForumThread extends \Gazelle\Json {
                     'authorName' => $author->username(),
                     'paranoia'   => $author->paranoia(),
                     'donor'      => new \Gazelle\User\Donor($author)->isDonor(),
-                    'warned'     => $author->isWarned(),
+                    'warned'     => $author->warning()->isWarned(),
                     'avatar'     => $author->avatar(),
                     'enabled'    => $author->isEnabled(),
                     'userTitle'  => $author->title(),

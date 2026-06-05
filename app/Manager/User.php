@@ -189,11 +189,11 @@ class User extends \Gazelle\BaseManager {
         }
 
         $display = "<a class=\"username\" href=\"user.php?id=$userId\">$username</a>{$donor->heart($viewer)}";
-        if ($user->warningExpiry()) {
+        if ($user->warning()->isWarned()) {
             $display .= '<a href="wiki.php?action=article&amp;name=warnings"><img loading="lazy" class="tooltip" src="'
                 . STATIC_SERVER . '/common/symbols/warned.png" alt="Warned" title="Warned'
                 . ($viewer->id == $userId
-                    ? ' - Expires ' . date('Y-m-d H:i', (int)strtotime($user->warningExpiry()))
+                    ? " – Expires {$user->warning()->expiry()->format('Y-m-d H:i')}"
                     : '')
                 . '"></a>';
         }
@@ -1121,7 +1121,7 @@ class User extends \Gazelle\BaseManager {
             self::$db->prepared_query($query, ...$args);
             foreach (self::$db->collect(0) as $userId) {
                 $user = $this->findById($userId);
-                if (is_null($user) || new \Gazelle\User\Warning($user)->isWarned()) {
+                if ($user?->warning()->isWarned()) {
                     continue;
                 }
                 ++$processed;

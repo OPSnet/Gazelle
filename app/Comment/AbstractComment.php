@@ -71,7 +71,7 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
                 'authorId'       => $userId,
                 'name'           => $author->username(),
                 'donor'          => new \Gazelle\User\Donor($author)->isDonor(),
-                'warned'         => $author->isWarned(),
+                'warned'         => $author->warning()->isWarned(),
                 'enabled'        => $author->isEnabled(),
                 'class'          => $manager->userclassName($author->primaryClass()),
                 'addedTime'      => $created,

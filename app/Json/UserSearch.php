@@ -31,7 +31,7 @@ class UserSearch extends \Gazelle\Json {
                 'userId'   => $user->id,
                 'username' => $user->username(),
                 'donor'    => new \Gazelle\User\Donor($user)->isDonor(),
-                'warned'   => $user->isWarned(),
+                'warned'   => $user->warning()->isWarned(),
                 'enabled'  => $user->isEnabled(),
                 'class'    => $user->userclassName(),
                 'avatar'   => $user->avatar(),

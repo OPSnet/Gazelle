@@ -43,12 +43,6 @@ parameters:
 			path: ../app/Util/Text.php
 
 		-
-			message: '#^Parameter \#2 \$timestamp of function date expects int\|null, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: ../app/Util/Twig.php
-
-		-
 			message: '#^Method Sphinxql\:\:error\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1

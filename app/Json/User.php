@@ -103,7 +103,7 @@ class User extends \Gazelle\Json {
                 'paranoia'     => $user->paranoiaLevel(),
                 'paranoiaText' => $user->paranoiaLabel(),
                 'donor'        => new \Gazelle\User\Donor($user)->isDonor(),
-                'warned'       => $user->isWarned(),
+                'warned'       => $user->warning()->isWarned(),
                 'enabled'      => $user->isEnabled(),
                 'passkey'      => ($user->id === $viewer->id || $viewer->isStaff()) ? $user->announceKey() : null,
             ],

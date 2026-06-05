@@ -220,11 +220,11 @@ class Twig {
                     return new \Twig\Markup('', 'UTF-8');
                 }
                 $icon = [new \Gazelle\User\Donor($user)->heart($viewer)];
-                if ($user->isWarned()) {
+                if ($user->warning()->isWarned()) {
                     $icon[] = '<a href="wiki.php?action=article&amp;name=warnings"><img src="'
-                        . STATIC_SERVER . '/common/symbols/warned.png" alt="Warned" title="Warned'
-                        . ($viewer->id == $user->id ? ' - Expires ' . date('Y-m-d H:i', $user->warningExpiry()) : '')
-                        . '" class="tooltip"></a>';
+                        . STATIC_SERVER . '/common/symbols/warned.png" class="tooltip alt="Warned" title="Warned'
+                        . ($viewer->id == $user->id ? " – Expires {$user->warning()->expiry()->format('Y-m-d H:i')}" : '')
+                        . '></a>';
                 }
                 if ($user->isDisabled()) {
                     $icon[] = '<a href="rules.php"><img src="'

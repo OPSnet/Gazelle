@@ -109,7 +109,7 @@ class Inbox extends \Gazelle\Json {
                 'senderId'      => $senderId,
                 'username'      => $senderId ? $user[$senderId]->username() : 'System',
                 'avatar'        => $senderId ? $user[$senderId]->avatar() : null,
-                'warned'        => $senderId && $user[$senderId]->isWarned(),
+                'warned'        => $senderId && $user[$senderId]->warning()->isWarned(),
                 'enabled'       => $senderId && $user[$senderId]->isEnabled(),
                 'donor'         => $senderId && new \Gazelle\User\Donor($user[$senderId])->isDonor(),
                 'date'          => $actionDate,

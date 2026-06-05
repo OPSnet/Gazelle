@@ -8,10 +8,10 @@
 {% if donor.isDonor and (own_profile or donor.isVisible or viewer.permitted('users_override_paranoia')) -%}
         &nbsp;{{ donor.heart(viewer)|raw -}}
 {% endif %}
-{% if user.isWarned -%}
+{% if user.warning.isWarned -%}
         &nbsp;<a href="wiki.php?action=article&amp;name=warnings"><img src="{{
             constant('STATIC_SERVER') }}/common/symbols/warned.png" alt="Warned" title="Warned
-{%- if own_profile or viewer.permitted('users_mod') %} – Expires {{ user.warningExpiry }}{% endif %}" class="tooltip"></a>
+{%- if own_profile or viewer.permitted('users_mod') %} – Expires {{ user.warning.expiry.format('Y-m-d H:i') }}{% endif %}" class="tooltip"></a>
 {% endif %}
 {% if user.isDisabled -%}
         &nbsp;<a href="rules.php"><img src="{{ constant('STATIC_SERVER') }}/common/symbols/disabled.png" alt="Banished" title="Naughty person" class="tooltip"></a>
@@ -231,9 +231,9 @@ None
             }}><a href="userhistory.php?action=token_history&amp;userid={{ user_id }}">Tokens</a>: {{ user.tokenCount|number_format }}</li>
 {% endif %}
 
-{%- if user.isWarned and (own_profile or viewer.permitted('users_mod')) %}
+{%- if user.warning.sWarned and (own_profile or viewer.permitted('users_mod')) %}
         <li{{ class_override(viewer.permitted('users_mod') ? constant('PARANOIA_OVERRIDDEN') : constant('PARANOIA_ALLOWED'))
-            }}>Warning expires in: {{ user.warningExpiry|time_diff }}</li>
+            }}>Warning expires in: {{ user.warning.expiry.upper|time_diff }}</li>
 {% endif %}
     </ul>
 </div>

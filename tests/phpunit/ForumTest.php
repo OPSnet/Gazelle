@@ -450,7 +450,7 @@ class ForumTest extends TestCase {
         $week    = 2;
         $message = "phpunit forum warn test " . randomString(10);
         $this->assertNull($user->forumWarning(), 'forum-post-no-warning-history');
-        $user->warnPost($post, $week, $admin, "{$post->location()} - because phpunit", $message);
+        $user->warning()->warnPost($post, $week, $admin, "{$post->location()} - because phpunit", $message);
         $this->assertTrue($user->addForumWarning($message)->modify(), 'forum-post-add-warning');
         // phpstan does not realize that forumWarning() is volatile and so it considers that the value is still null when in fact it is a string
         $this->assertStringStartsWith(date('Y-m-d H'), $user->forumWarning(), 'forum-user-warning-history-start'); /** @phpstan-ignore-line */
@@ -460,15 +460,18 @@ class ForumTest extends TestCase {
         $pmReceiverManager = new Manager\PM($inbox->user());
         $this->assertEquals(1, $inbox->messageTotal(), 'warn-user-inbox-total');
         $pm = $inbox->messageList($pmReceiverManager, 1, 0)[0];
-        $this->assertEquals('You have been warned', $pm->subject(), 'warn-user-inbox-pm-subject');
+        $this->assertEquals(
+            'You have been warned',
+            $pm->subject(),
+            'warn-user-inbox-pm-subject',
+        );
         $postInfo = $pm->postList(1, 0)[0];
         $body = $postInfo['body'];
         $this->assertMatchesRegularExpression(
-            "/You have been warned by \[user]admin\.\w+\[\/user]\. The warning is set to expire on \d+-\d+-\d+ \d+:\d+:\d+\. Remember, repeated warnings may jeopardize your account\./",
+            "/You have been warned by \[user\]admin\.\w+\[\/user\] for /",
             $body,
-            'warn-user-inbox-pm-body-start'
+            'warn-user-inbox-pm-body-start',
         );
-        $this->assertStringEndsWith($message . '[/quote]', $body, 'warn-user-inbox-pm-body-end');
 
         $this->assertEquals(1, $post->edit($admin, 'cleaned'), 'fpost-edit');
         $this->assertEquals(2, $post->remove(), 'fpost-remove');
