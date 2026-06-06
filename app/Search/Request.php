@@ -202,55 +202,53 @@ class Request extends \Gazelle\Base {
         }
         if (isset($this->info['bookmarker'])) {
             $join[] = 'inner join relay.bookmarks_requests rb on (rb."RequestID" = r.id_request)';
-            $cond[] = 'rb."UserID" = $' . (1 + count($args));
+            $cond[] = "rb.\"UserID\" = {$this->pg()->placeholder(count($args))}";
             $args[] = $this->info['bookmarker']->id;
         }
         if (isset($this->info['creator'])) {
-            $cond[] = 'r.id_user = $' . (1 + count($args));
+            $cond[] = "r.id_user = {$this->pg()->placeholder(count($args))}";
             $args[] = $this->info['creator']->id;
         }
         if (isset($this->info['filler'])) {
-            $cond[] = 'r.id_filler = $' . (1 + count($args));
+            $cond[] = "r.id_filler = {$this->pg()->placeholder(count($args))}";
             $args[] = $this->info['filler']->id;
         }
         if (isset($this->info['year'])) {
-            $cond[] = 'r.year = $' . (1 + count($args));
+            $cond[] = "r.year = {$this->pg()->placeholder(count($args))}";
             $args[] = $this->info['year'];
         }
         if (isset($this->info['voter'])) {
-            $cond[] = 'exists (select 1 from request_vote rv where rv.id_request = r.id_request and rv.id_user = $'
-                . (1 + count($args))
-                . ')';
+            $cond[] = "exists (select 1 from request_vote rv where rv.id_request = r.id_request and rv.id_user = {$this->pg()->placeholder(count($args))})";
             $args[] = $this->info['voter']->id;
         }
         if (isset($this->info['category'])) {
-            $cond[] = 'r.id_category = any($' . (1 + count($args)) . '::int[])';
+            $cond[] = "r.id_category = any({$this->pg()->placeholder(count($args))}::int[])";
             $args[] = $this->pg()->integerConverter()->output($this->info['category']);
         }
         if (isset($this->info['release_type'])) {
-            $cond[] = 'r.id_release_type = any($' . (1 + count($args)) . '::int[])';
+            $cond[] = "r.id_release_type = any({$this->pg()->placeholder(count($args))}::int[])";
             $args[] = $this->pg()->integerConverter()->output($this->info['release_type']);
         }
         if (isset($this->info['encoding'])) {
-            $placeholder = '$' . (1 + count($args));
+            $placeholder = $this->pg()->placeholder(count($args)) . '::text[]';
             $cond[] = $this->info['encoding']['strict']
-                ? "encoding_str && $placeholder::text[]"
-                : "(encoding_str is null or encoding_str && $placeholder::text[])";
+                ? "encoding_str && $placeholder"
+                : "(encoding_str is null or encoding_str && $placeholder)";
             $args[] = $this->pg()->arrayConverter()->output(
                 array_map(fn ($key) => ENCODING[$key] ?? $key, $this->info['encoding']['list'])
             );
         }
         if (isset($this->info['format'])) {
-            $placeholder = '$' . (1 + count($args));
+            $placeholder = $this->pg()->placeholder(count($args)) . '::text[]';
             $cond[] = $this->info['format']['strict']
-                ? "format_str && $placeholder::text[]"
-                : "(format_str is null or format_str && $placeholder::text[])";
+                ? "format_str && $placeholder"
+                : "(format_str is null or format_str && $placeholder)";
             $args[] = $this->pg()->arrayConverter()->output(
                 array_map(fn ($key) => FORMAT[$key] ?? $key, $this->info['format']['list'])
             );
         }
         if (isset($this->info['media'])) {
-            $placeholder = '$' . (1 + count($args));
+            $placeholder = $this->pg()->placeholder(count($args));
             $cond[] = $this->info['media']['strict']
                 ? "media_str && $placeholder"
                 : "(media_str is null or media_str && $placeholder)";
@@ -259,21 +257,19 @@ class Request extends \Gazelle\Base {
             );
         }
         if (isset($this->info['search'])) {
-            $cond[] = "r.artist_title_ts @@ websearch_to_tsquery('simple', unaccent($"
-                . (1 + count($args))
-                . '))';
+            $cond[] = "r.artist_title_ts @@ websearch_to_tsquery('simple', unaccent({$this->pg()->placeholder(count($args))}))";
             $args[] = $this->info['search'];
         }
         if (isset($this->info['tag'])) {
             $op = $this->info['tag']['mode'] == SearchTag::all ? '@>' : '&&';
             if (count($this->info['tag']['include']) > 0) {
-                $cond[] = "r.tag $op $" . (1 + count($args)) . "::int[]";
+                $cond[] = "r.tag $op {$this->pg()->placeholder(count($args))}::int[]";
                 $args[] = $this->pg()->integerConverter()->output(
                     array_map(fn ($t) => $t->id, $this->info['tag']['include'])
                 );
             }
             if (count($this->info['tag']['exclude']) > 0) {
-                $cond[] = "not r.tag $op $" . (1 + count($args)) . "::int[]";
+                $cond[] = "not r.tag $op {$this->pg()->placeholder(count($args))}::int[]";
                 $args[] = $this->pg()->integerConverter()->output(
                     array_map(fn ($t) => $t->id, $this->info['tag']['exclude'])
                 );
