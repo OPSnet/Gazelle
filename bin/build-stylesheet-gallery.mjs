@@ -30,16 +30,20 @@ if (!existsSync(previewPath)) {
 const styles = [];
 const styleCandidates = readdirSync(stylesPath, {withFileTypes: true});
 styleCandidates.forEach((entry) => {
-    if (!entry.isDirectory) {
-        return;
+    if (
+        entry.isDirectory
+        &&
+        existsSync(path.join(stylesPath, entry.name, 'style.css'))
+        &&
+        // skip these non-stylesheets
+        !Array(
+            'autocomplete', 'bulk_search', 'logchecker', 'musicbrainz',
+            'opendyslexic', 'public', 'recently_disabled', 'reportauto',
+            'tiles', 'tooltipster',
+        ).includes(entry.name)
+    ) {
+        styles.push(entry.name);
     }
-    if (!existsSync(path.join(stylesPath, entry.name, 'style.css'))) {
-        return;
-    }
-    if (entry.name === 'public') {
-        return;
-    }
-    styles.push(entry.name);
 });
 
 process.setMaxListeners(styles.length);
