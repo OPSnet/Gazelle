@@ -23,7 +23,7 @@ if ($before !== '') {
 }
 $note = trim($_GET['note'] ?? '');
 if ($note !== '') {
-    $search->setNote($note);
+    $search->setNote($note, $_GET['note-op'] ?? 'webquery');
 }
 $userList = [];
 if (isset($_GET['user'])) {
@@ -57,12 +57,13 @@ $paginator->setTotal($search->total());
 
 echo $Twig->render('admin/search-audit-trail.twig', [
     'form' => [
-        'after'  => $after,
-        'before' => $before,
-        'note'   => $note,
-        'author' => implode(' ', array_map(fn ($u) => "@{$u->username()}", $authorList)),
-        'user'   => implode(' ', array_map(fn ($u) => "@{$u->username()}", $userList)),
-        'event'  => $search->eventList(),
+        'after'   => $after,
+        'before'  => $before,
+        'note'    => $note,
+        'note-op' => $_GET['note-op'] ?? 'webquery',
+        'author'  => implode(' ', array_map(fn ($u) => "@{$u->username()}", $authorList)),
+        'user'    => implode(' ', array_map(fn ($u) => "@{$u->username()}", $userList)),
+        'event'   => $search->eventList(),
     ],
     'heading'   => $search->heading(),
     'page'      => $search->page($paginator->limit(), $paginator->offset()),

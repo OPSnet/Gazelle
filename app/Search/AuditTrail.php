@@ -75,8 +75,9 @@ class AuditTrail extends \Gazelle\Base {
         return $this->info['event'] ?? [];
     }
 
-    public function setNote(string $note): static {
-        $this->info['note'] = $note;
+    public function setNote(string $note, string $op): static {
+        $this->info['note']    = $note;
+        $this->info['note-op'] = $op;
         return $this;
     }
 
@@ -116,7 +117,10 @@ class AuditTrail extends \Gazelle\Base {
             $this->args[] = $this->pg()->arrayConverter()->output($this->info['event']);
         }
         if (isset($this->info['note'])) {
-            $this->cond[] = "atu.note_ts @@ websearch_to_tsquery('simple', {$this->pg()->placeholder(count($this->args))})";
+            $placeholder = $this->pg()->placeholder(count($this->args));
+            $this->cond[] = $this->info['note-op'] === 'regexp'
+                ? "atu.note ~* $placeholder"
+                : "atu.note_ts @@ websearch_to_tsquery('simple', $placeholder)";
             $this->args[] = $this->info['note'];
         }
         if (isset($this->info['author'])) {

@@ -63,7 +63,10 @@
     </td>
     <td>Note</td>
     <td><input name="note" type="text" size="40" placeholder="Full text search" value="{{ form.note }}">
-        <br>Tips on searching: {{ "[[searchfulltext]]" | bb_format }}
+        <br>
+        <label><input type="radio" name="note-op" value="webquery"{{ checked(form['note-op']|default('webquery') == 'webquery') }}> webquery</label>
+        <label><input type="radio" name="note-op" value="regexp"{{ checked(form['note-op'] == 'regexp') }}> regexp</label>
+        <br>Tips on webquery searching: {{ "[[searchfulltext]]" | bb_format }}
     </td>
 </tr>
 <tr>

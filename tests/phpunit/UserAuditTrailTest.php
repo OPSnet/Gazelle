@@ -162,7 +162,7 @@ class UserAuditTrailTest extends TestCase {
         $this->assertEquals($staffNote, $item['note'], 'ats-author-note');
 
         $note = new Search\AuditTrail();
-        $note->setNote($random);
+        $note->setNote($random, 'webquery');
         $this->assertEquals(1, $note->total(), 'ats-note-total');
         $item = current(array_filter(
             $note->page(2, 0),
