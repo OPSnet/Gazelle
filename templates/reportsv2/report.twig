@@ -1,7 +1,7 @@
 {% from 'macro/form.twig' import checked, selected %}
 {% set reportType = report.reportType %}
 <div id="report{{ report.id }}" class="report" data-reportid="{{ report.id }}">
-<form class="edit_form" name="report" id="reportform_{{ report.id }}" action="reports.php" method="post">
+<form class="edit_form" name="report" id="reportform_{{ report.id }}" action="reports.php" method="post" autocomplete="off">
 <div>
     <input type="hidden" name="auth" value="{{ viewer.auth }}">
     <input type="hidden" id="reportid{{ report.id }}" name="reportid" value="{{ report.id }}">

@@ -79,7 +79,7 @@
                         <button><label class="link" for="auto_reports_comments_{{ report.id }}_cb">Add Comment</label></button>
                     </div>
                     <input type="checkbox" class="expand_checkbox" id="auto_reports_comments_{{ report.id }}_cb" autocomplete="off">
-                    <form class="add_comment expand_block">
+                    <form class="add_comment expand_block" autocomplete="off">
                         <textarea class="comment_box" name="comment" required="required" placeholder="Comment"></textarea>
                         <input type="submit" value="Send">
                         <input type="hidden" name="id" value="{{ report.id }}">

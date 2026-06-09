@@ -3,7 +3,7 @@
     <div class="header">
         <h2>Send a message to {{ user.id|user_url }}</h2>
     </div>
-    <form class="send_form" name="message" action="reports.php" method="post" id="messageform">
+    <form class="send_form" name="message" action="reports.php" method="post" id="messageform" autocomplete="off">
         <div class="box pad">
             <input type="hidden" name="action" value="takecompose">
             <input type="hidden" name="toid" value="{{ user.id }}">

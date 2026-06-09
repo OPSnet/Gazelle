@@ -85,7 +85,7 @@
 {%  if report.status != 'Resolved' %}
                 <tr>
                     <td class="center" colspan="2">
-                        <form id="report_form_{{ report.id }}" action="">
+                        <form id="report_form_{{ report.id }}" action="" autocomplete="off">
                             <input type="hidden" name="reportid" value="{{ report.id }}">
                             <input type="hidden" name="auth" value="{{ viewer.auth }}">
                             <input type="submit" onclick="return resolve({{ report.id }},
