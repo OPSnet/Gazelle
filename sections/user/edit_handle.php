@@ -21,7 +21,7 @@ if (!isset($_REQUEST['id'])) {
     if (is_null($user)) {
         Error404::error();
     }
-    $ownProfile = ($user->id === $Viewer->id());
+    $ownProfile = ($user->id === $Viewer->id);
     if (!$ownProfile && !$Viewer->permitted('users_edit_profiles')) {
         $irc::sendMessage(IRC_CHAN_MOD, "User {$Viewer->label()} tried to edit {$user->publicLocation()}");
         Error403::error();

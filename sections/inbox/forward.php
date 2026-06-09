@@ -19,11 +19,11 @@ if (!$Viewer->permitted('users_mod') && !$recipient->isStaffPMReader()) {
     Error403::error();
 }
 
-if (in_array($recipient->id(), $pm->recipientList())) {
+if (in_array($recipient->id, $pm->recipientList())) {
     Error400::error(
         "{$recipient->username()} already has this conversation in their inbox."
     );
 }
 
-$pm->setForwardedTo($recipient->id());
+$pm->setForwardedTo($recipient->id);
 header('Location: inbox.php');

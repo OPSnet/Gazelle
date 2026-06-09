@@ -16,7 +16,7 @@ if (isset($_GET['task'])) {
     if ($id) {
         switch ($_GET['task']) {
             case 'accept':
-                $ok = $recovery->accept($id, $Viewer->id(), $Viewer->username());
+                $ok = $recovery->accept($id, $Viewer->id, $Viewer->username());
                 $message = $ok ? '<font color="#008000">Invite sent</font>' : '<font color="#800000">Invite not sent, check log</font>';
                 break;
             case 'deny':
@@ -45,10 +45,10 @@ if (isset($_GET['task'])) {
 
 $state = $_GET['state'] ?? 'pending';
 $paginator = new Util\Paginator(ITEMS_PER_PAGE, (int)($_GET['page'] ?? 1));
-$paginator->setTotal($recovery->total($state, $Viewer->id()));
+$paginator->setTotal($recovery->total($state, $Viewer->id));
 
 echo $Twig->render('recovery/admin.twig', [
-    'list'        => $recovery->page($paginator->limit(), $paginator->offset(), $state, $Viewer->id()),
+    'list'        => $recovery->page($paginator->limit(), $paginator->offset(), $state, $Viewer->id),
     'message'     => $message ?? null,
     'paginator'   => $paginator,
     'state'       => $state,

@@ -33,14 +33,14 @@ if (isset($_GET['convid'])) {
     exit;
 }
 
-if ($Viewer->privilege()->effectiveClassLevel() < $staffPm->classLevel() && $Viewer->id() != $staffPm->assignedUserId()) {
+if ($Viewer->privilege()->effectiveClassLevel() < $staffPm->classLevel() && $Viewer->id !== $staffPm->assignedUserId()) {
     // Staff member is not allowed to assign conversation
     echo '-1';
 } else {
     // Staff member is allowed to assign conversation
     [$assignTo, $NewLevel] = explode('_', $_POST['assign']);
     $NewLevel = (int)$NewLevel;
-    if ($assignTo == 'class') {
+    if ($assignTo === 'class') {
         $staffPm->assignClass($NewLevel, $Viewer);
     } else {
         $assignee = new Manager\User()->findById($NewLevel);

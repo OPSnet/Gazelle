@@ -13,7 +13,7 @@ if (is_null($recipient)) {
 if ($Viewer->disablePm() && !$recipient->isStaff()) {
     Error403::error();
 }
-if ($recipient->id() == $Viewer->id()) {
+if ($recipient->id === $Viewer->id) {
     Error400::error('You cannot start a conversation with yourself!');
 }
 

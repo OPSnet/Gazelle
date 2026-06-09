@@ -8,14 +8,14 @@ namespace Gazelle;
 
 if (MONERO_DONATION_ADDRESS) {
     $moneroDonation = new Donate\Monero();
-    $moneroAddr = $moneroDonation->address($Viewer->id());
+    $moneroAddr = $moneroDonation->address($Viewer->id);
 } else {
     $moneroAddr = null;
 }
 
 if (BITCOIN_DONATION_XYZPUB) {
     $btcDonation = new Donate\Bitcoin();
-    $btcAddr = $btcDonation->address($Viewer->id());
+    $btcAddr = $btcDonation->address($Viewer->id);
 } else {
     $btcAddr = null;
 }

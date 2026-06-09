@@ -65,7 +65,6 @@ if (isset($Aliases[$Action])) {
 if (!$Action || !isset($Viewer)) {
     json_error("failure");
 }
-$UserID = $Viewer->id();
 
 if (str_starts_with($_SERVER['CONTENT_TYPE'] ?? '', 'application/json')) {
     $input = file_get_contents('php://input');
@@ -80,11 +79,11 @@ header('Content-Type: application/json');
 // Enforce rate limiting everywhere except info.php
 if (!$Viewer->permitted('site_unlimit_ajax') && isset($LimitedPages[$Action])) {
     [$rate, $interval] = $LimitedPages[$Action];
-    if (($UserRequests = $Cache->get_value('ajax_requests_' . $UserID)) === false) {
+    if (($UserRequests = $Cache->get_value("ajax_requests_{$Viewer->id}")) === false) {
         $UserRequests = 0;
-        $Cache->cache_value('ajax_requests_' . $UserID, '0', $interval);
+        $Cache->cache_value("ajax_requests_{$Viewer->id}", '0', $interval);
     } else {
-        $Cache->increment_value('ajax_requests_' . $UserID);
+        $Cache->increment_value("ajax_requests_{$Viewer->id}");
         if ($UserRequests > $rate) {
             Util\Irc::sendMessage(IRC_CHAN_STATUS, "ajax rate limit hit by {$Viewer->username()} on $Action");
             json_error("Rate limit exceeded");
@@ -101,7 +100,7 @@ if ($Viewer->isLocked() || $Viewer->enforceMFA()) {
 }
 
 if (AJAX && !defined('AUTHED_BY_TOKEN') && in_array($Action, $RequireTokenPages)) {
-    json_error("This page requires an api token");
+    json_error("This page requires an API token");
 }
 switch ($Action) {
     // things (that may be) used on the site

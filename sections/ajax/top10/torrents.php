@@ -107,7 +107,7 @@ function payload(Manager\Torrent $torMan, array $details): array {
         }
         $tgroup = $torrent->group();
         $results[] = [
-            'torrentId'     => $torrent->id(),
+            'torrentId'     => $torrent->id,
             'groupID'       => $torrent->groupId(),
             'artist'        => $tgroup->artistName(),
             'groupName'     => $tgroup->name(),

@@ -62,7 +62,7 @@ echo $Twig->render('report_auto/index.twig', [
     'paginator'    => $paginator,
     'viewer'       => $Viewer,
     'is_old'       => $isOld,
-    'type_id'      => $type?->id(),
+    'type_id'      => $type?->id,
     'base_uri'     => $baseUri,
     'type_count'   => $search->typeTotalList(),
     'user_count'   => $search->userTotalList(20),

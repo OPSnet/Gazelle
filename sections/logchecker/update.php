@@ -8,5 +8,5 @@ namespace Gazelle;
 
 echo $Twig->render('riplog/update.twig', [
     'accepted' => \OrpheusNET\Logchecker\Logchecker::getAcceptValues(),
-    'list'     => new Manager\Torrent()->logFileList($Viewer->id()),
+    'list'     => new Manager\Torrent()->logFileList($Viewer->id),
 ]);

@@ -12,7 +12,7 @@ $user = new Manager\Invite()->findUserByKey($inviteKey, new Manager\User());
 if (is_null($user)) {
     Error404::error();
 }
-if ($user->id != $Viewer->id()) {
+if ($user->id !== $Viewer->id) {
     Error403::error();
 }
 

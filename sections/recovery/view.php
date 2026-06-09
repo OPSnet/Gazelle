@@ -14,7 +14,7 @@ $recovery = new Manager\Recovery();
 if (isset($_GET['id']) && (int)$_GET['id'] > 0) {
     $id = (int)$_GET['id'];
     $search = false;
-} elseif (isset($_GET['action']) && $_GET['action'] == 'search') {
+} elseif (isset($_GET['action']) && $_GET['action'] === 'search') {
     $search = true;
 } else {
     Error404::error();
@@ -30,9 +30,9 @@ if ($search) {
     $info = $recovery->search($terms);
     $id = $info['recovery_id'];
 } else {
-    if (isset($_GET['claim']) and (int)$_GET['claim'] > 0) {
+    if (isset($_GET['claim']) && (int)$_GET['claim'] > 0) {
         $claimId = (int)$_GET['claim'];
-        if ($claimId == $Viewer->id()) {
+        if ($claimId === $Viewer->id) {
             $recovery->claim($id, $claimId, $Viewer->username());
         }
     }

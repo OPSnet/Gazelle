@@ -25,7 +25,7 @@ if (empty($_GET['userid'])) {
     if (is_null($user)) {
         Error404::error();
     }
-    $ownProfile = ($user->id === $Viewer->id());
+    $ownProfile = ($user->id === $Viewer->id);
 }
 
 $bookmark  = new User\Bookmark($user);

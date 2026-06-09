@@ -39,7 +39,7 @@ if ($_REQUEST['action'] === 'claim_all') {
             $report->claim($Viewer);
             break;
         case 'unclaim':
-            if ($report->ownerId() !== $Viewer->id()) {
+            if ($report->ownerId() !== $Viewer->id) {
                 json_error('can only unclaim own reports');
             }
             $report->claim(null);

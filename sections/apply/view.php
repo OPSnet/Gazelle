@@ -18,7 +18,7 @@ if (isset($_REQUEST['id'])) {
 
     if (!empty($_POST['note_reply'])) {
         authorize();
-        $visibility = $app->userId() == $Viewer->id() ? 'public' : $_POST['visibility'] ?? 'staff';
+        $visibility = $app->userId() === $Viewer->id ? 'public' : $_POST['visibility'] ?? 'staff';
         $app->saveNote($Viewer, $_POST['note_reply'], $visibility);
     } elseif ($app->role()->isStaffViewer($Viewer)) {
         if (isset($_POST['resolve'])) {
@@ -34,7 +34,7 @@ if (isset($_REQUEST['id'])) {
             }
         } else {
             $remove = array_key_extract_suffix('note-delete-', $_POST);
-            if (count($remove) == 1) {
+            if (count($remove) === 1) {
                 authorize();
                 $app->removeNote($remove[0]);
             }
@@ -45,7 +45,7 @@ if (isset($_REQUEST['id'])) {
 echo $Twig->render('applicant/view.twig', [
     'app'      => $app ?? null,
     'list'     => match (true) {
-        $Viewer->permitted('admin_manage_applicants') && ($_GET['status'] ?? '') == 'resolved'
+        $Viewer->permitted('admin_manage_applicants') && ($_GET['status'] ?? '') === 'resolved'
             => $appMan->resolvedList(),
         $Viewer->permitted('users_mod') => $appMan->openList($Viewer),
         default                         => $appMan->userList($Viewer),

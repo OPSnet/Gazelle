@@ -21,11 +21,11 @@ if (is_null($tgroup) || is_null($tag)) {
 $tagName = $tag->name();
 
 if ($tag->removeTGroup($tgroup)) {
-    $Cache->cache_value('deleted_tags_' . $tgroup->id() . '_' . $Viewer->id(), $tagName, 300);
+    $Cache->cache_value("deleted_tags_{$tgroup->id}_{$Viewer->id}", $tagName, 300);
 
     // Log the removal and if it was the last occurrence.
     $tag->logger()->group($tgroup, $Viewer, "Tag \"$tagName\" removed");
-    if (!$tagMan->findById($tag->id())) {
+    if (!$tagMan->findById($tag->id)) {
         $tag->logger()->general("Unused tag \"$tagName\" removed by user {$Viewer->label()}");
     }
 }

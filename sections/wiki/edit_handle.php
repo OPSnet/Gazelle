@@ -38,7 +38,7 @@ if ($error) {
 
 $article->setField('Body',     trim($_POST['body']))
     ->setField('Title',        trim($_POST['title']))
-    ->setField('Author',       $Viewer->id())
+    ->setField('Author',       $Viewer->id)
     ->setField('MinClassEdit', $minEdit)
     ->setField('MinClassRead', $minRead)
     ->modify();

@@ -15,7 +15,7 @@ if (is_null($user)) {
     Error404::error();
 }
 $forumSearch = new Search\Forum($user);
-if ($Viewer->id() != $user->id) {
+if ($Viewer->id !== $user->id) {
     $forumSearch->setViewer($Viewer);
 }
 

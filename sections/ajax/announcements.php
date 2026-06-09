@@ -31,7 +31,7 @@ $headlines = new Manager\Blog()->headlines();
 $blog = [];
 foreach ($headlines as $item) {
     $blog[] = [
-        'blogId'   => $item->id(),
+        'blogId'   => $item->id,
         'author'   => $item->userId(),
         'title'    => $item->title(),
         'bbBody'   => $item->body(),

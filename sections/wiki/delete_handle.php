@@ -17,7 +17,7 @@ if (is_null($article)) {
     Error404::error();
 }
 
-$id    = $article->id();
+$id    = $article->id;
 $title = $article->title();
 $article->remove();
 $article->logger()->general(

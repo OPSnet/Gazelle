@@ -12,7 +12,7 @@ $user = new Manager\User()->findById((int)$_GET['id']);
 if (is_null($user)) {
     Error404::error();
 }
-$ownProfile = $user->id === $Viewer->id();
+$ownProfile = $user->id === $Viewer->id;
 if (!$Viewer->permitted('view-release-votes') && !$ownProfile) {
     Error403::error();
 }

@@ -57,8 +57,8 @@ if ($_POST['submit'] === 'Delete') {
             Error404::error();
         }
         $transition
-            ->setField('source',            $source->id())
-            ->setField('destination',       $target->id())
+            ->setField('source',            $source->id)
+            ->setField('destination',       $target->id)
             ->setField('label',             $_POST['label'])
             ->setField('permission_levels', $_POST['secondary_classes'])
             ->setField('permission_class',  $_POST['permission_class'])

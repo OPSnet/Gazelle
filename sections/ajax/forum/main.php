@@ -6,7 +6,7 @@ declare(strict_types=1);
 namespace Gazelle;
 
 $userMan = new Manager\User();
-$user = [$Viewer->id() => $Viewer];
+$user = [$Viewer->id => $Viewer];
 
 $category = [];
 foreach (new Manager\Forum()->forumList() as $forum) {
@@ -27,7 +27,7 @@ foreach (new Manager\Forum()->forumList() as $forum) {
     }
 
     $category[count($category) - 1]['forums'][] = [
-        'forumId'            => $forum->id(),
+        'forumId'            => $forum->id,
         'forumName'          => $forum->name(),
         'forumDescription'   => $forum->description(),
         'numTopics'          => $forum->numThreads(),

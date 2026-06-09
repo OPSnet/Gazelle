@@ -13,8 +13,8 @@ if (is_null($request)) {
 if (!$request->canEdit($Viewer)) {
     Error403::error("You do not have the necessary privileges to edit requests.");
 }
-$requestId  = $request->id();
-$ownRequest = $request->userId() == $Viewer->id();
+$requestId  = $request->id;
+$ownRequest = $request->userId() === $Viewer->id;
 // phpcs:disable Generic.CodeAnalysis.EmptyStatement.DetectedIf
 if (isset($returnEdit)) {
 // phpcs:enable Generic.CodeAnalysis.EmptyStatement.DetectedIf
@@ -41,7 +41,7 @@ if (isset($returnEdit)) {
     $format          = $request->format();
     $media           = $request->media();
     $logCue          = $request->logCue();
-    $artistRole      = $categoryName == 'Music' ? $request->artistRole()->roleNameList() : [];
+    $artistRole      = $categoryName === 'Music' ? $request->artistRole()->roleNameList() : [];
 }
 
 echo $Twig->render('request/request.twig', [

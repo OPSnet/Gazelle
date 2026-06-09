@@ -12,7 +12,7 @@ if (!$friend) {
     Error404::error("no such user found");
 }
 
-if ($friend->id() === $Viewer->id()) {
+if ($friend->id === $Viewer->id) {
     Error400::error("you cannot add yourself as a friend");
 }
 

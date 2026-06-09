@@ -8,12 +8,12 @@ namespace Gazelle;
 
 $userMan = new Manager\User();
 
-$user = $userMan->findById(($_REQUEST['id'] ?? '') === 'me' ? $Viewer->id() : (int)($_REQUEST['id'] ?? 0));
+$user = $userMan->findById(($_REQUEST['id'] ?? '') === 'me' ? $Viewer->id : (int)($_REQUEST['id'] ?? 0));
 if (is_null($user)) {
     Error404::error();
 }
 $UserID = $user->id;
-if ($UserID != $Viewer->id() && !$Viewer->permitted('users_edit_profiles')) {
+if ($UserID != $Viewer->id && !$Viewer->permitted('users_edit_profiles')) {
     Error403::error();
 }
 

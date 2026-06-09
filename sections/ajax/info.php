@@ -22,7 +22,7 @@ $latestBlog = new \Gazelle\Manager\Blog()->latest();
 
 json_print("success", [
     'username' => $Viewer->username(),
-    'id'       => $Viewer->id(),
+    'id'       => $Viewer->id,
     'authkey'  => $Viewer->auth(),
     'passkey'  => $Viewer->announceKey(),
     'notifications' => [

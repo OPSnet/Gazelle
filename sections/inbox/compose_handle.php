@@ -24,7 +24,7 @@ $userMan = new Manager\User();
 $pmMan = new Manager\PM($Viewer);
 $pm = $pmMan->findById((int)($_POST['convid'] ?? 0));
 if ($pm) {
-    $userMan->replyPM($recipient->id(), $Viewer->id(), $pm->subject(), $body, $pm->id());
+    $userMan->replyPM($recipient->id, $Viewer->id, $pm->subject(), $body, $pm->id);
 } else {
     $subject = trim($_POST['subject']);
     if (empty($subject)) {

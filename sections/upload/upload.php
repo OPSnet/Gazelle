@@ -26,7 +26,7 @@ if (!isset($Properties)) {
             $categoryId = $tgroup->categoryId();
             $Properties = [
                 'add-format'       => true,
-                'GroupID'          => $tgroup->id(),
+                'GroupID'          => $tgroup->id,
                 'ReleaseType'      => $tgroup->releaseType(),
                 'Title'            => $tgroup->name(),
                 'Year'             => $tgroup->year(),
@@ -72,7 +72,7 @@ if (!isset($Properties)) {
                 'add-format' => true,
                 'Artists'    => [
                     ARTIST_MAIN => [[
-                        'id'   => $artist->id(),
+                        'id'   => $artist->id,
                         'name' => $artist->name(),
                     ]],
                 ],

@@ -240,7 +240,7 @@ foreach ($context as $c) {
 <?php   } ?>
                 <?= $Twig->render('bookmark/action.twig', [
                     'class'         => 'torrent',
-                    'id'            => $tgroup->id(),
+                    'id'            => $tgroup->id,
                     'is_bookmarked' => $isBookmarked,
                 ]); ?>
                 <div class="tags"><?= implode(', ',

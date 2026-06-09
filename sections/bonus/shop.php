@@ -15,7 +15,7 @@ if (($_GET['action'] ?? '') !== 'donate') {
 } else {
     authorize();
     $value = (int)$_POST['donate'];
-    if ($Viewer->id() != $_POST['userid']) {
+    if ($Viewer->id !== $_POST['userid']) {
         $donate = 'User error, no bonus points donated.';
     } elseif ($value <= 0) {
         $donate = 'Warning! You cannot donate negative or no points!';

@@ -23,7 +23,7 @@ $db->prepared_query("
     (SELECT ID AS UserID FROM users_main WHERE PermissionID = ? AND ID != ?)
     UNION DISTINCT
     (SELECT UserID FROM users_levels WHERE PermissionID = ? AND UserID != ?)
-    ", $permissionId, $Viewer->id(), $permissionId, $Viewer->id()
+    ", $permissionId, $Viewer->id, $permissionId, $Viewer->id
 );
 
 $userMan = new Manager\User();

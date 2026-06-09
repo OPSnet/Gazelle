@@ -11,7 +11,7 @@ if (!$Viewer->hasAttr('feature-seedbox') && !$Viewer->permitted('users_view_ips'
 }
 
 if (!isset($_POST['action'])) {
-    $userId = (int)($_GET['userid'] ?? $Viewer->id());
+    $userId = (int)($_GET['userid'] ?? $Viewer->id);
 } else {
     authorize();
     $userId = (int)$_POST['userid'];
@@ -20,7 +20,7 @@ $user = new Manager\User()->findById($userId);
 if (!$user) {
     Error404::error();
 }
-if ($Viewer->id() != $userId && !$Viewer->permitted('users_view_ips')) {
+if ($Viewer->id != $userId && !$Viewer->permitted('users_view_ips')) {
     Error403::error();
 }
 

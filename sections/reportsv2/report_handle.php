@@ -58,7 +58,7 @@ if ($reportType->needSitelink() !== 'none') {
             );
         }
         $all = $match['id'];
-        if (in_array($torrent->id(), $all)) {
+        if (in_array($torrent->id, $all)) {
             Error400::error(
                 "The extra permalinks you gave included the link to the torrent you're reporting!"
             );
@@ -72,7 +72,7 @@ if ($reportType->needLink() !== 'none') {
     $link = trim($_POST['link'] ?? '');
     if ($link === '' && $reportType->needLink() === 'required') {
         Error400::error("You must supply one or more links in your report");
-    } elseif ($link != '') {
+    } elseif ($link !== '') {
         if (!preg_match_all(URL_REGEXP, $link, $match)) {
             Error400::error("The extra links you provided weren't links...");
         }
@@ -128,11 +128,11 @@ $report = $reportMan->create(
     irc:         new Util\Irc(),
 );
 
-if (!$reportType->isInvisible() && $torrent->uploaderId() != $Viewer->id()) {
+if (!$reportType->isInvisible() && $torrent->uploaderId() !== $Viewer->id) {
     $torrent->uploader()->inbox()->createSystem(
         "One of your torrents has been reported",
         $Twig->render('reportsv2/new.bbcode.twig', [
-            'id'     => $torrent->id(),
+            'id'     => $torrent->id,
             'title'  => $reportType->name(),
             'reason' => $report->reason(),
         ])

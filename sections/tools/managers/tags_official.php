@@ -21,7 +21,7 @@ if ($_POST['oldtags'] ?? null) {
         if (is_null($tag)) {
             Error403::error();
         }
-        $unofficialId[]   = $tag->id();
+        $unofficialId[]   = $tag->id;
         $unofficialName[] = $tag->name();
     }
     $tagMan->unofficialize($unofficialId);

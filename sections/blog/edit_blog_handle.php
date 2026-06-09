@@ -36,7 +36,7 @@ $thread = match ((int)($_POST['thread'] ?? -1)) {
 };
 
 if ($thread) {
-    $blog->setField('id_thread', $thread->id());
+    $blog->setField('id_thread', $thread->id);
 }
 $blog->setField('body', $body)
     ->setField('title', $title)

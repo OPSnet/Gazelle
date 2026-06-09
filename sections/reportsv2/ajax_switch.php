@@ -46,15 +46,15 @@ $new = $reportMan->create(
     irc:         new Util\Irc(),
 );
 
-if ($other->uploaderId() != $Viewer->id()) {
+if ($other->uploaderId() !== $Viewer->id) {
     $other->uploader()->inbox()->createSystem(
         "One of your torrents has been reported",
         $Twig->render('reportsv2/new.bbcode.twig', [
-            'id'     => $other->id(),
+            'id'     => $other->id,
             'title'  => $new->reportType()->name(),
             'reason' => $new->reason(),
         ])
     );
 }
 
-echo $new->id();
+echo $new->id;

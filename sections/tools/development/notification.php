@@ -22,7 +22,7 @@ if ($torrent) {
     if (isset($_POST['notifiedid'])) {
         $notified = new Manager\User()->find(trim($_POST['notifiedid']));
         if ($notified) {
-            $notifiedId = $notified->id();
+            $notifiedId = $notified->id;
             $result = array_filter($result, fn($r) => $r['user_id'] === $notifiedId);
         }
     }

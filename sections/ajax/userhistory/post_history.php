@@ -13,7 +13,7 @@ $user = empty($_GET['userid']) ? $Viewer : new Manager\User()->findById((int)$_G
 if (is_null($user)) {
     json_error('User does not exist!');
 }
-$ownProfile = ($user->id === $Viewer->id());
+$ownProfile = ($user->id === $Viewer->id);
 
 $forumSearch = new Search\Forum($user)
     ->setViewer($Viewer)

@@ -38,7 +38,7 @@ if (!$ok) {
 }
 json_print('success', [
     'action' => $message,
-    'id'     => $tgroup->id(),
+    'id'     => $tgroup->id,
     'total'  => $vote->total($tgroup),
     'up'     => $vote->totalUp($tgroup),
     'down'   => $vote->totalDown($tgroup),

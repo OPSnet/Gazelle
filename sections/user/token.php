@@ -6,7 +6,7 @@ declare(strict_types=1);
 
 namespace Gazelle;
 
-$userId = (int)($_GET['user_id'] ?? $Viewer->id());
+$userId = (int)($_GET['user_id'] ?? $Viewer->id);
 $user = new User($userId);
 
 $tokenId = (int)($_GET['token_id'] ?? 0);
@@ -16,7 +16,7 @@ $tokenName = '';
 
 $_GET['do'] ??= '';
 
-if (!empty($_GET['do']) && $userId !== $Viewer->id() && !$Viewer->permitted('users_mod')) {
+if (!empty($_GET['do']) && $userId !== $Viewer->id && !$Viewer->permitted('users_mod')) {
     Error403::error();
 }
 

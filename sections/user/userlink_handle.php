@@ -30,7 +30,7 @@ switch ($_REQUEST['dupeaction'] ?? '') {
             $target = $userMan->find($username);
             if (is_null($target)) {
                 Error400::error("User '" . display_str($username) . "' not found.");
-            } elseif ($source->id() === $target->id()) {
+            } elseif ($source->id === $target->id) {
                 Error400::error("Cannot link a user to themselves");
             }
             $userLink->dupe($target, $Viewer, $updateNote);

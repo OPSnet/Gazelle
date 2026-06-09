@@ -14,7 +14,7 @@ if (is_null($staffPM)) {
 if (!$staffPM->visible($Viewer)) {
     Error403::error();
 }
-if ($staffPM->userId() === $Viewer->id() && $staffPM->isUnread()) {
+if ($staffPM->userId() === $Viewer->id && $staffPM->isUnread()) {
     // User is viewing their own unread conversation, set it to read
     $staffPM->markAsRead($Viewer);
 }

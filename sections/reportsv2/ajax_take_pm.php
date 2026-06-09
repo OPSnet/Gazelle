@@ -63,7 +63,7 @@ switch ($_POST['pm_type']) {
 $recipient = new Manager\User()->findById($ToID);
 if (is_null($recipient)) {
     json_error("bad recipient id");
-} elseif ($ToID === $Viewer->id()) {
+} elseif ($ToID === $Viewer->id) {
     json_error("message to self");
 }
 
