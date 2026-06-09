@@ -88,11 +88,11 @@ class DownloadTest extends TestCase {
         $this->assertEquals(DownloadStatus::too_big, $some->status(), 'download-downloader-some-tokens');
         $this->assertFalse($this->torrent->isFreeleechPersonal(), 'download-downloader-not-yet-free');
 
-        $this->userList['down']->updateTokens(4);
+        $this->userList['down']->updateTokens(5);
         $enough = new Download($this->torrent, new User\UserclassRateLimit($this->userList['down']), true);
         $this->assertEquals(DownloadStatus::ok, $enough->status(), 'download-downloader-enough-tokens');
 
-        $this->assertEquals(1, $this->userList['down']->tokenCount(), 'download-downloader-spent-tokens');
+        $this->assertEquals(2, $this->userList['down']->tokenCount(), 'download-downloader-spent-tokens');
         $this->assertTrue($this->userList['down']->hasToken($this->torrent), 'download-downloader-is-free');
         $this->torrent->requestContext()->setViewer($this->userList['down']);
         $this->assertTrue(
@@ -102,9 +102,14 @@ class DownloadTest extends TestCase {
 
         new Stats\Users()->refresh();
         $this->assertEquals(
-            1,
+            3,
             $this->userList['down']->flush()->stats()->flTokenTotal(),
             'download-user-fl-tokens-used',
+        );
+        $this->assertEquals(
+            2,
+            $this->userList['down']->tokenCount(),
+            'download-user-fl-tokens-remain'
         );
     }
 

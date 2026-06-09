@@ -484,7 +484,7 @@ class Users extends \Gazelle\Base {
         $this->pg()->query(<<<END_SQL
             insert into user_summary_new (user_id, fl_token_total)
                 select uf."UserID",
-                    count(*) as fl_token_total
+                    sum(uf."Uses") as fl_token_total
                 from relay.users_freeleeches uf
                 inner join relay.users_main  um on (um."ID" = uf."UserID")
                 group by uf."UserID"
@@ -711,6 +711,68 @@ class Users extends \Gazelle\Base {
             select * from user_summary_new
             on conflict do nothing
         ");
+
+        // until the migration is complete...
+        $this->pg()->begin();
+        $this->pg()->query('delete from user_summary_fltoken');
+        $this->pg()->query('
+            insert into user_summary_fltoken (id_user, gifted, received, used)
+            select us.user_id, coalesce(fltx.total, 0), coalesce(flrx.total, 0), us.fl_token_total
+            from user_summary_new us
+            left join (
+                select hb.id_user_other as id_user,
+                    sum(bi.amount) as total
+                from history_bonus hb
+                inner join bonus_item bi using (id_bonus_item)
+                group by hb.id_user_other
+            ) flrx on (flrx.id_user = us.user_id)
+            left join (
+                select hb.id_user,
+                    sum(bi.amount) as total
+                from history_bonus hb
+                inner join bonus_item bi using (id_bonus_item)
+                where hb.id_user_other is not null
+                group by hb.id_user
+            ) fltx on (fltx.id_user = us.user_id)
+        ');
+        $this->pg()->commit();
+
+        $this->pg()->begin();
+        $this->pg()->query('delete from user_summary_misc');
+        $this->pg()->query('
+            insert into user_summary_misc (id_user, collage_created, collage_contrib, forum_post, forum_thread, invited)
+            select user_id, collage_total, collage_contrib, forum_post_total, forum_thread_total, invited_total
+            from user_summary_new us
+        ');
+        $this->pg()->commit();
+
+        $this->pg()->begin();
+        $this->pg()->query('delete from user_summary_request');
+        $this->pg()->query('
+            insert into user_summary_request (id_user, bounty_total, created_total, vote_total, bounty_size, created_size, vote_size)
+            select user_id, request_bounty_total, request_created_total, request_vote_total, request_bounty_size, request_created_size, request_vote_size 
+            from user_summary_new us
+        ');
+        $this->pg()->commit();
+
+        $this->pg()->begin();
+        $this->pg()->query('delete from user_summary_seed');
+        $this->pg()->query('
+            insert into user_summary_seed (id_user, leeching, seeding, snatch_total, snatch_unique, bp_accrual_hour, seedtime_hour)
+            select user_id, leech_total, seeding_total, snatch_total, snatch_unique, bp_hourly_accrual, seedtime_hour
+            from user_summary_new us
+        ');
+        $this->pg()->commit();
+
+        $this->pg()->begin();
+        $this->pg()->query('delete from user_summary_tgroup');
+        $this->pg()->query('
+            insert into user_summary_tgroup (id_user, artist_added, download_total, download_unique, perfect_flac, perfecter_flac, upload, unique_group)
+            select user_id, artist_added_total, download_total, download_unique, perfect_flac_total, perfecter_flac_total, upload_total, unique_group_total
+            from user_summary_new us
+        ');
+        $this->pg()->commit();
+
         $this->pg()->query("
             drop table user_summary_new
         ");

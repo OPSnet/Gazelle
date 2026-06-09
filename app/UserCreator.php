@@ -188,6 +188,20 @@ class UserCreator extends Base {
             INSERT INTO users_leech_stats (UserID, Uploaded) VALUES (?, ?)
             ", $this->id, STARTING_UPLOAD
         );
+        foreach (
+            [
+                'user_summary_fltoken',
+                'user_summary_misc',
+                'user_summary_request',
+                'user_summary_seed',
+                'user_summary_tgroup'
+            ] as $table
+        ) {
+            $this->pg()->query("
+                insert into $table (id_user) values ($1)
+                ", $this->id
+            );
+        }
         foreach (NotificationType::cases() as $attr) {
             $attr = strtolower($attr->toString());
             $this->pg()->prepared_query("
