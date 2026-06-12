@@ -7,7 +7,7 @@ class Login extends Base {
 
     protected Enum\LoginStatus $error = Enum\LoginStatus::ok;
     protected bool $persistent = false;
-    protected int $userId = 0;
+    protected int|null $userId = null;
     protected string $password;
     protected string $mfaToken;
     protected string $username;
@@ -34,10 +34,10 @@ class Login extends Base {
      * @return \Gazelle\User|null on failure, reason will be available from error()
      */
     public function login(
-        string $username,
+        string                        $username,
         #[\SensitiveParameter] string $password,
-        LoginWatch $watch,
-        bool $persistent = false,
+        LoginWatch                    $watch,
+        bool                          $persistent = false,
         #[\SensitiveParameter] string $mfaToken = '',
     ): ?User {
         $this->username   = trim($username);
@@ -46,28 +46,26 @@ class Login extends Base {
         $this->persistent = $persistent;
         $this->mfaToken   = trim($mfaToken);
 
-        $begin  = hrtime(true);
-        $user   = $this->attemptLogin();
-        $ipaddr = $this->requestContext()->remoteAddr();
+        $begin = hrtime(true);
+        $user  = $this->attemptLogin();
         if ($user) {
-            $this->watch->clearAttempts();
+            $this->watch->clearAttempt();
             $user->toggleAttr('inactive-warning-sent', false);
             self::$cache->delete_value(sprintf(self::FLOOD_COUNT, $user->id));
         } else {
-            // we might not have an authenticated user, but still have the id of the username
+            // we might not have an authenticated user, but have a username and perhaps the id as well
             $this->watch->increment($this->userId, $this->username);
-            if ($this->watch->nrAttempts() > 10) {
-                $this->watch->ban($this->username);
-
+            if ($this->watch->attemptTotal() > 10) {
+                $this->watch->block($this->userId, $this->username);
                 if ($this->userId) {
-                    $key = 'login_flood_' . $this->userId;
+                    $key = "login_flood_{$this->userId}";
                     if (self::$cache->get_value($key) === false) {
                         self::$cache->cache_value($key, true, 86400);
                         // fake a user object temporarily to send them some email
                         new User($this->userId)->inbox()->createSystem(
                             "Too many login attempts on your account",
                             self::$twig->render('login/too-many-failures.bbcode.twig', [
-                                'ipaddr'   => $ipaddr,
+                                'ipaddr'   => $this->watch->ipaddr,
                                 'username' => $this->username,
                             ])
                         );
@@ -78,9 +76,10 @@ class Login extends Base {
                     }
                     self::$cache->increment($key);
                 }
-            } elseif ($this->watch->nrBans() > 3) {
+            } elseif ($this->watch->blockTotal() > 3) {
                 new Manager\Ban()->create(
-                    $ipaddr, 'Automated ban, too many failed login attempts'
+                    $this->watch->ipaddr,
+                    'Automated ban, too many failed login attempts',
                 );
             }
         }
@@ -121,8 +120,12 @@ class Login extends Base {
         }
 
         // Did they come in over Tor?
-        $ipaddr = $this->requestContext()->remoteAddr();
-        if (BLOCK_TOR && !$user->permitted('can_use_tor') && new Manager\Tor()->isExitNode($ipaddr)) {
+        $ipaddr = $this->watch->ipaddr;
+        if (
+            BLOCK_TOR
+            && !$user->permitted('can_use_tor')
+            && new Manager\Tor()->isExitNode($ipaddr)
+        ) {
             $userMan->disableUserList(
                 [$user->id],
                 Enum\UserAuditEvent::activity,

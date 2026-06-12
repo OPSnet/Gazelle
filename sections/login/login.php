@@ -14,9 +14,9 @@ if (isset($Viewer)) {
 $login = new Login();
 $watch = new LoginWatch($login->requestContext()->remoteAddr());
 
-if (!empty($_POST['username']) && !empty($_POST['password'])) {
+if (isset($_POST['username'], $_POST['password'])) {
     $user = $login->login(
-        username:   $_POST['username'],
+        username:   trim($_POST['username']),
         password:   $_POST['password'],
         watch:      $watch,
         mfaToken:   $_POST['mfa'] ?? '',
@@ -74,7 +74,6 @@ if (!empty($_POST['username']) && !empty($_POST['password'])) {
 }
 
 echo $Twig->render('login/login.twig', [
-    'delta'    => (int)$watch->bannedEpoch() - time(),
     'error'    => $login->error(),
     'ip_addr'  => $login->requestContext()->remoteAddr(),
     'tor_node' => new Manager\Tor()->isExitNode(

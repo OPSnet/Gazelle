@@ -9,6 +9,8 @@ use Gazelle\Enum\AvatarSynthetic;
 use Gazelle\Enum\UserStatus;
 
 class UserTest extends TestCase {
+    use Pg;
+
     protected User $user;
 
     public function setUp(): void {
@@ -19,6 +21,10 @@ class UserTest extends TestCase {
         if (isset($this->user)) {
             $this->user->remove();
         }
+        $this->pg()->query('
+            delete from login_watch where ip = $1
+            ', Helper::IP_ADDR
+        );
     }
 
     public function modifyAvatarRender(AvatarDisplay $display, AvatarSynthetic $synthetic): bool {
@@ -350,15 +356,15 @@ class UserTest extends TestCase {
     }
 
     public function testLogin(): void {
-        $_SERVER['REMOTE_ADDR'] = '127.0.0.255';
+        $_SERVER['REMOTE_ADDR'] = Helper::IP_ADDR;
         Base::setRequestContext(new RequestContext(
             'phpunit', $_SERVER['REMOTE_ADDR'], 'whatever'
         ));
         $login  = new Login();
         $ipaddr = $_SERVER['REMOTE_ADDR'];
         $watch  = new LoginWatch($ipaddr);
-        $this->assertEquals(0, $watch->nrAttempts(), 'loginwatch-init-attempt');
-        $this->assertEquals(0, $watch->nrBans(), 'loginwatch-init-ban');
+        $this->assertEquals(0, $watch->attemptTotal(), 'loginwatch-init-attempt');
+        $this->assertEquals(0, $watch->blockTotal(), 'loginwatch-init-block');
 
         $result = $login->login(
             username: 'email@example.com',
@@ -370,7 +376,7 @@ class UserTest extends TestCase {
         $this->assertEquals('email@example.com', $login->username(), 'login-username');
         $this->assertEquals($ipaddr, $login->requestContext()->remoteAddr(), 'login-ipaddr');
         $this->assertFalse($login->persistent(), 'login-persistent');
-        $this->assertEquals(1, $watch->nrAttempts(), 'loginwatch-attempt');
+        $this->assertEquals(1, $watch->attemptTotal(), 'loginwatch-attempt');
 
         $result = $login->login(
             username: $this->user->username(),
@@ -379,16 +385,23 @@ class UserTest extends TestCase {
         );
         $this->assertNull($result, 'login-bad-password');
         $this->assertEquals($login->error(), Enum\LoginStatus::badCredentials, 'login-error-password');
-        $this->assertEquals(2, $watch->nrAttempts(), 'loginwatch-more-attempt');
+        $this->assertEquals(2, $watch->attemptTotal(), 'loginwatch-more-attempt');
 
-        $this->assertGreaterThan(0, count($watch->activeList(10, 0)), 'loginwatch-active-list');
-        $this->assertGreaterThan(0, $watch->clearAttempts(), 'loginwatch-clear');
-        $this->assertEquals(0, $watch->nrAttempts(), 'loginwatch-no-attempts');
-
-        $banned = $watch->setBan('phpunit ban', [$watch->id()], $this->user);
-        $this->assertEquals(1, $banned, 'loginwatch-ip-ban');
+        $watchMan = new Manager\LoginWatch();
+        $total = $watchMan->activeTotal();
+        $this->assertGreaterThanOrEqual(0, $total, 'user-login-watch-total');
+        $this->assertEquals(
+            $total,
+            count($watchMan->activeList(10, 0)),
+            'loginwatch-active-list'
+        );
+        $this->assertEquals(1, $watch->clearAttempt(), 'loginwatch-clear');
+        $this->assertEquals(0, $watch->attemptTotal(), 'loginwatch-no-attempts');
 
         $banMan = new Manager\Ban();
+        $banned = $banMan->create($watch->ipaddr, 'phpunit ban', $this->user);
+        $this->assertEquals($watch->ipaddr, $banned->ip(), 'loginwatch-ip-ban');
+
         $ban = $banMan->findByIp($login->requestContext()->remoteAddr());
         $this->assertInstanceOf(Ban::class, $ban, 'loginwatch-find-ban');
         $this->assertTrue(

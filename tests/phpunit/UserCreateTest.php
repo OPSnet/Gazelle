@@ -6,12 +6,18 @@ use PHPUnit\Framework\TestCase;
 use GazelleUnitTest\Helper;
 
 class UserCreateTest extends TestCase {
+    use Pg;
+
     protected User $user;
 
     public function tearDown(): void {
         if (isset($this->user)) {
             $this->user->remove();
         }
+        $this->pg()->query('
+            delete from login_watch where ip = $1
+            ', Helper::IP_ADDR,
+        );
     }
 
     public function testCreate(): void {
@@ -59,11 +65,11 @@ class UserCreateTest extends TestCase {
             ->addNote('phpunit test login')
             ->create();
         $login = new Login();
-        $watch = new LoginWatch($login->requestContext()->remoteAddr());
-        $watch->clearAttempts();
+        $watch = new LoginWatch(Helper::IP_ADDR);
+        $watch->clearAttempt();
         $this->assertEquals(
-            $login->requestContext()->remoteAddr(),
-            $watch->ipaddr(),
+            Helper::IP_ADDR,
+            $watch->ipaddr,
             'user-login-watch-ipaddr'
         );
 
@@ -87,22 +93,22 @@ class UserCreateTest extends TestCase {
             'user-create-login-unconfirmed-error',
         );
 
-        $this->assertEquals(2, $watch->nrAttempts(), 'user-create-two-login-attempts');
-        $this->assertEquals(60, (int)$watch->bannedEpoch() - time(), 'user-login-ban-epoch');
-        $this->assertTrue(Helper::futureDate($watch->bannedUntil(), 70), 'user-login-temporary-ban');
-        $this->assertEquals(0, $watch->clearPriorBan(), 'user-login-clear-ban');
+        $this->assertEquals(2, $watch->attemptTotal(), 'user-create-two-login-attempts');
+        $this->assertTrue(Helper::futureDate(
+            $watch->blockedUntil()->format('Y-m-d H:i:s'), 70),
+            'user-login-temporary-ban'
+        );
+        $this->assertEquals(1, $watch->unblock(), 'user-login-clear-ban');
         $this->user->setField('Enabled', Enum\UserStatus::enabled->value)->modify();
 
         $enabledUser = $login->login($this->user->username(), 'password', $watch);
         $this->assertInstanceOf(User::class, $enabledUser, 'user-create-login-success');
-        $this->assertEquals(0, $watch->nrAttempts(), 'user-create-two-login-cleared');
+        $this->assertEquals(0, $watch->attemptTotal(), 'user-create-two-login-cleared');
         // check the table if this fails
-        $this->assertEquals(0, $watch->nrBans(), 'user-create-two-login-banned');
+        $this->assertEquals(0, $watch->blockTotal(), 'user-create-two-login-banned');
         $this->assertEquals($this->user->username(), $watch->capture(), 'user-login-capture');
-        $this->assertGreaterThanOrEqual(0, $watch->activeTotal(), 'user-login-watch-total-sql');
 
         $relogin = new Login();
-        $watch->clearAttempts();
         foreach (range(1, 11) as $nr) {
             $relogin->login($this->user->username(), "multi-fail-$nr", $watch);
         }
@@ -114,16 +120,6 @@ class UserCreateTest extends TestCase {
             'Too many login attempts on your account',
             $warning->subject(),
             'user-login-pm-subject'
-        );
-        $this->assertEquals(
-            0,
-            $watch->setClear([], $this->user),
-            'user-login-watch-no-clear',
-        );
-        $this->assertEquals(
-            1,
-            $watch->setClear([$watch->id()], $this->user),
-            'user-login-watch-clear',
         );
     }
 

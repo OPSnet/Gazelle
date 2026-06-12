@@ -5,6 +5,7 @@ namespace Gazelle\Manager;
 use Gazelle\Enum\NotificationType;
 use Gazelle\Enum\UserAuditEvent;
 use Gazelle\Enum\UserStatus;
+use Gazelle\LoginWatch;
 use Gazelle\SessionCookie;
 use Gazelle\Task;
 use Gazelle\Tracker;
@@ -105,11 +106,11 @@ class User extends \Gazelle\BaseManager {
             return [false, 'invalid token'];
         } elseif ($user->isDisabled() || $user->isLocked() || !$user->hasApiToken($token)) {
             $ipaddr = $this->requestContext()->remoteAddr();
-            $watch = new \Gazelle\LoginWatch($ipaddr);
-            $watch->increment($userId, "[usertoken:$userId]");
-            if ($watch->nrAttempts() >= 5) {
-                $watch->ban("[id:{$user->id}]");
-                if ($watch->nrBans() >= 10) {
+            $watch  = new LoginWatch($ipaddr);
+            $watch->increment($user->id, "[usertoken:{$user->id}]");
+            if ($watch->attemptTotal() >= 5) {
+                $watch->block($user->id, $user->username());
+                if ($watch->blockTotal() >= 10) {
                     $manager->create($ipaddr, 'Automated ban per failed token usage', $user);
                 }
             }

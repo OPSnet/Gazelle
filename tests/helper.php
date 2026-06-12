@@ -13,6 +13,8 @@ use Gazelle\TGroup;
 use Gazelle\User;
 
 class Helper {
+    public const string IP_ADDR = '127.0.0.255';
+
     public static function makeForum(
         string                 $name,
         string                 $description,
@@ -235,7 +237,7 @@ class Helper {
     public static function generateTorrentSeed(
         \Gazelle\Torrent $torrent,
         User        $user,
-        string      $ipAddr = '127.0.0.1',
+        string      $ipAddr = self::IP_ADDR,
         int         $interval = 5,
         string|null $useragent = null,
     ): int {
@@ -256,9 +258,9 @@ class Helper {
         $db = \Gazelle\DB::DB();
         $db->prepared_query("
             INSERT INTO xbt_snatched
-                   (fid, uid, tstamp, IP, seedtime)
-            VALUES (?,   ?,   unix_timestamp(now()), '127.0.0.1', 1)
-            ", $torrent->id, $user->id
+                   (fid, uid, IP, tstamp, seedtime)
+            VALUES (?,   ?,   ?, unix_timestamp(now()), 1)
+            ", $torrent->id, $user->id, self::IP_ADDR
         );
         return $db->affected_rows();
     }
