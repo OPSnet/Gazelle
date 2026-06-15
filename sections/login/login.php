@@ -62,8 +62,11 @@ if (!empty($_POST['username']) && !empty($_POST['password'])) {
                 'useragent'   => $context->useragent(),
             ]);
 
-            new SessionCookie(SessionCookie::encode($user, $current['SessionID']))
-                ->emit((int)$login->persistent() * (time() + 60 * 60 * 24 * 90));
+            SessionCookie::emit(
+                $user,
+                $current['SessionID'],
+                (int)$login->persistent() * (time() + 60 * 60 * 24 * 90)
+            );
             header("Location: index.php");
             exit;
         }

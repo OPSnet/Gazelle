@@ -62,10 +62,10 @@ class SessionCookie {
         return $this->userId;
     }
 
-    public function emit(int $expiryEpoch): void {
+    public static function emit(User $user, string $sessionKey, int $expiryEpoch): void {
         setcookie(
             'session',
-            $this->payload(),
+            self::encode($user, $sessionKey),
             [
                 'expires'  => $expiryEpoch,
                 'path'     => '/',
@@ -76,7 +76,7 @@ class SessionCookie {
         );
     }
 
-    public function expire(): void {
+    public static function expire(): void {
         setcookie(
             'session',
             '',

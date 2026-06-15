@@ -2,7 +2,7 @@
 
 namespace Gazelle\User;
 
-use Gazelle\Util\Crypto;
+use Gazelle\SessionCookie;
 
 class Session extends \Gazelle\BaseUser {
     final public const tableName = 'users_sessions';
@@ -116,10 +116,6 @@ class Session extends \Gazelle\BaseUser {
         return $this->info()[$sessionKey];
     }
 
-    public function cookie(string $sessionKey): string {
-        return Crypto::encrypt($sessionKey . '|~|' . $this->user->id, ENCKEY);
-    }
-
     public function drop(string $sessionKey): int {
         self::$db->prepared_query('
             DELETE FROM users_sessions
@@ -156,13 +152,7 @@ class Session extends \Gazelle\BaseUser {
      * Log out the current session
      */
     public function logout(): void {
-        setcookie('session', '', [
-            'expires'  => time() - 60 * 60 * 24 * 90,
-            'path'     => '/',
-            'secure'   => SECURE_COOKIE,
-            'httponly' => true,
-            'samesite' => 'Strict',
-        ]);
+        SessionCookie::expire();
         if ($this->requestContext()->hasSessionId()) {
             $this->drop($this->requestContext()->sessionId());
         }

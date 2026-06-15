@@ -78,7 +78,7 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $module === 'ajax') {
     $cookie = new SessionCookie($_COOKIE['session']);
     $Viewer = $userMan->findByCookie($cookie);
     if (!$Viewer) {
-        $cookie->expire();
+        SessionCookie::expire();
         header('Location: login.php');
         exit;
     }
@@ -111,7 +111,6 @@ if ($Viewer) {
     // these endpoints do not exist
     if (in_array($module, OBSOLETE_ENDPOINTS)) {
         $Viewer->session()->logoutEverywhere();
-        $cookie?->expire();
         header('Location: login.php');
         exit;
     }

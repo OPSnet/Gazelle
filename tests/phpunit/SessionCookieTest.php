@@ -63,8 +63,7 @@ class SessionCookieTest extends TestCase {
     public function testCookieEmit(): void {
         header_remove(null);
         $sessionKey = 'phpunit';
-        $cookie = new SessionCookie(SessionCookie::encode($this->user, $sessionKey));
-        $cookie->emit(time() + 3600);
+        SessionCookie::emit($this->user, $sessionKey, time() + 3600);
 
         $headerList = xdebug_get_headers();
         $this->assertCount(1, $headerList, 'session-cookie-header');
