@@ -39,11 +39,11 @@ class News extends \Gazelle\Base {
      * Modify an existing news article (the author remains unchanged)
      */
     public function modify(int $id, string $title, string $body): int {
-        $affected = $this->pg()->prepared_query("
+        $affected = $this->pg()->query("
             update news set
-                title = ?,
-                body = ?
-            where id_news = ?
+                title = $1,
+                body  = $2
+            where id_news = $3
             ", trim($title), trim($body), $id
         );
         self::$cache->delete_multi(['feed_news', self::CACHE_KEY]);
@@ -131,8 +131,8 @@ class News extends \Gazelle\Base {
             ", $id
         );
         $affected = self::$db->affected_rows();
-        $affected += $this->pg()->prepared_query("
-            delete from news where id_news = ?
+        $affected += $this->pg()->query("
+            delete from news where id_news = $1
             ", $id
         );
         self::$cache->delete_multi(['feed_news', self::CACHE_KEY]);

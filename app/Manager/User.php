@@ -1739,7 +1739,7 @@ class User extends \Gazelle\BaseManager {
             WHERE um.ID IN (" . placeholders($idList) . ")
             ", ...$idList
         );
-        $this->pg()->prepared_query('
+        $this->pg()->query(<<<END_SQL
             update history_ratio_watch set
                 upload_end   = uls.upload,
                 download_end = uls.download,
@@ -1749,10 +1749,11 @@ class User extends \Gazelle\BaseManager {
                     "Uploaded"   as upload,
                     "Downloaded" as download
                 from relay.users_leech_stats
-                where "UserID" in (' . placeholders($idList) . ')
+                where "UserID" = any($1)
             ) uls
             where uls.id_user = history_ratio_watch.id_user
-            ', ...$idList
+            END_SQL,
+                $this->pg()->integerConverter()->output($idList),
         );
 
         $processed = 0;
@@ -1839,12 +1840,13 @@ class User extends \Gazelle\BaseManager {
             ", ...$idList
         );
 
-        $this->pg()->prepared_query('
+        $this->pg()->query(<<<END_SQL
             insert into history_ratio_watch (id_user, upload_begin, download_begin)
             select "UserID", "Uploaded", "Downloaded"
             from relay.users_leech_stats uls
-            where uls."UserID" in (' . placeholders($idList) . ")
-            ", ...$idList
+            where uls."UserID" = any($1)
+            END_SQL,
+                $this->pg()->integerConverter()->output($idList),
         );
 
         $processed = 0;

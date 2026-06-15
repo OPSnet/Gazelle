@@ -81,7 +81,7 @@ class DebugTest extends TestCase {
         $this->assertEquals($rounded, $Debug->memoryRound($input), $name);
     }
 
-    public function testCreate(): void {
+    public function testCreateErrorLog(): void {
         $manager  = new Manager\ErrorLog();
         $uri      = '/phpunit.php';
         $errorLog = $manager->create(
@@ -92,24 +92,62 @@ class DebugTest extends TestCase {
             nrQuery:   0,
             nrCache:   0,
             trace:     "a\nb",
-            request:   [],
-            errorList: [],
+            request:   ['abc'],
+            errorList: [2, 4, 6],
+        );
+        $next = $manager->create(
+            uri:       '/phpunit-next.php',
+            userId:    null,
+            duration:  1.0,
+            memory:    1,
+            nrQuery:   1,
+            nrCache:   1,
+            trace:     str_repeat('phpunit x ', 410), // to ensure clipping
+            request:   ['def'],
+            errorList: [3, 6, 9],
         );
 
         $this->assertGreaterThan(0, $errorLog->id, 'errorlog-create');
         $case = $manager->findById($errorLog->id);
         $this->assertInstanceOf(ErrorLog::class, $case, 'errorlog-find');
         $this->assertEquals($uri, $case->uri(), 'errorlog-uri');
-        $this->assertEquals([], $case->request(), 'errorlog-request');
-        $this->assertEquals([], $case->errorList(), 'errorlog-errrolist');
+        $this->assertEquals(['abc'], $case->request(), 'errorlog-request');
+        $this->assertEquals([2, 4, 6], $case->errorList(), 'errorlog-errrolist');
         $this->assertEquals(["a", "b"], $case->trace(), 'errorlog-trace');
         $this->assertEquals(
             $case->id,
-            $manager->findByDigest("a\nb", [])?->id,
+            $manager->findByDigest("a\nb", [2, 4, 6])?->id,
             'errorlog-find-by-digest',
         );
 
-        $this->assertEquals(1, $case->remove(), 'errorlog-remove');
+        $this->assertEquals(1, $next->id - $errorLog->id, 'errorlog-next-id');
+        $this->assertEquals(
+            $next->id,
+            $manager->findByPrev($errorLog->id)->id,
+            'errorlog-find-prev',
+        );
+        $this->assertEquals(
+            $errorLog->id,
+            $manager->findByNext($next->id)->id,
+            'errorlog-find-next',
+        );
+        $manager->setFilter($case->uri());
+        $this->assertEquals(1, $manager->total(), 'errorlog-uri-filter');
+        $page = $manager->list('id_error_log', 'desc', 2, 0);
+        $this->assertCount(1, $page, 'errorlog-page-items');
+        $this->assertEquals([2, 4, 6], $page[0]['error_list'], 'errorlog-page-items');
+
+        $this->assertEquals(1, $case->remove(), 'errorlog-remove-case');
+        $this->assertEquals(
+            1,
+            $manager->removeList([$next->id]),
+            'errorlog-remove-list',
+        );
+        $this->assertEquals(
+            0,
+            $manager->removeSlow(100.0),
+            'errorlog-remove',
+        );
     }
 
     public function testDebugCase(): void {

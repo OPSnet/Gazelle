@@ -8,8 +8,8 @@ class NotificationTicket {
     use \Gazelle\Pg;
 
     public function create(\Gazelle\Torrent $torrent): \Gazelle\NotificationTicket {
-        $this->pg()->prepared_query("
-            INSERT INTO notification_ticket (id_torrent) VALUES (?)
+        $this->pg()->query("
+            insert into notification_ticket (id_torrent) values ($1)
             ", $torrent->id
         );
         return $this->findById($torrent->id);

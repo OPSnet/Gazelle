@@ -2,6 +2,8 @@
 
 namespace Gazelle\Manager;
 
+use Gazelle\User;
+
 /**
  * The name of this class (and the underlying table name) are ambiguous.
  * Individual email addresses as well as email domains can be blacklisted.
@@ -11,7 +13,7 @@ class EmailBlacklist extends \Gazelle\Base {
     protected string $filterComment;
     protected string $filterEmail;
 
-    public function create(string $email, string $comment, \Gazelle\User $user): int {
+    public function create(string $email, string $comment, User $user): int {
         return $this->pg()->insert("
             insert into email_blacklist
                    (email, comment, id_user)
@@ -20,20 +22,20 @@ class EmailBlacklist extends \Gazelle\Base {
         );
     }
 
-    public function modify(int $id, string $email, string $comment, \Gazelle\User $user): int {
-        return $this->pg()->prepared_query("
+    public function modify(int $id, string $email, string $comment, User $user): int {
+        return $this->pg()->query("
             update email_blacklist set
-                email   = ?,
-                comment = ?,
-                id_user = ?
-            where id_email_blacklist = ?
+                email   = $1,
+                comment = $2,
+                id_user = $3
+            where id_email_blacklist = $4
             ", $email, $comment, $user->id, $id
         );
     }
 
     public function remove(int $id): int {
-        return $this->pg()->prepared_query("
-            delete from email_blacklist where id_email_blacklist = ?
+        return $this->pg()->query("
+            delete from email_blacklist where id_email_blacklist = $1
             ", $id
         );
     }

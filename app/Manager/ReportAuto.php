@@ -2,6 +2,8 @@
 
 namespace Gazelle\Manager;
 
+use Gazelle\User;
+
 class ReportAuto extends \Gazelle\BaseManager {
     protected array $reportCategories;
 
@@ -28,7 +30,7 @@ class ReportAuto extends \Gazelle\BaseManager {
         return $this->reportCategories;
     }
 
-    public function create(\Gazelle\User $user, \Gazelle\ReportAuto\Type $type, array $data, string|null $time = null): \Gazelle\ReportAuto {
+    public function create(User $user, \Gazelle\ReportAuto\Type $type, array $data, string|null $time = null): \Gazelle\ReportAuto {
         $args = [$user->id, $type->id, json_encode($data)];
         if ($time) {
             // time is an iso timestring
@@ -68,41 +70,41 @@ class ReportAuto extends \Gazelle\BaseManager {
     /**
      * claim all unclaimed reports for $userId by $claimer
      */
-    public function claimAll(\Gazelle\User $claimer, int $userId, ?int $typeId): int {
+    public function claimAll(User $claimer, int $userId, ?int $typeId): int {
         $typeWhere = "";
-        $args = [];
+        $args = [$claimer->id, $userId];
         if (!is_null($typeId)) {
-            $typeWhere = "AND id_report_auto_type = ?";
+            $typeWhere = "and id_report_auto_type = {$this->pg()->placeholder(count($args))}";
             $args[] = $typeId;
         }
-        return $this->pg()->prepared_query("
-            UPDATE report_auto SET
-              id_owner = ?
-            WHERE id_owner IS NULL
-                AND id_user = ?
+        return $this->pg()->query("
+            update report_auto set
+                id_owner = $1
+            where id_owner is null
+                and id_user = $2
             $typeWhere
-            ", $claimer->id, $userId, ...$args
+            ", ...$args
         );
     }
 
     /**
      * resolve all open reports for $userId by $resolver
      */
-    public function resolveAll(\Gazelle\User $resolver, int $userId, ?int $typeId): int {
+    public function resolveAll(User $resolver, int $userId, ?int $typeId): int {
         $typeWhere = "";
-        $args = [];
+        $args = [$resolver->id, $userId];
         if (!is_null($typeId)) {
-            $typeWhere = "AND id_report_auto_type = ?";
+            $typeWhere = "and id_report_auto_type = {$this->pg()->placeholder(count($args))}";
             $args[] = $typeId;
         }
-        return $this->pg()->prepared_query("
-            UPDATE report_auto SET
+        return $this->pg()->query("
+            update report_auto set
                 resolved = now(),
-                id_owner = ?
-            WHERE resolved IS NULL
-                AND id_user = ?
+                id_owner = $1
+            where resolved is null
+                and id_user = $2
             $typeWhere
-            ", $resolver->id, $userId, ...$args
+            ", ...$args
         );
     }
 
@@ -111,11 +113,11 @@ class ReportAuto extends \Gazelle\BaseManager {
      *
      * return >0 on success
      */
-    public function deleteComment(int $commentId, \Gazelle\User $user): int {
-        return $this->pg()->prepared_query("
-            DELETE FROM report_auto_comment
-            WHERE id_report_auto_comment = ?
-                AND id_user = ?
+    public function deleteComment(int $commentId, User $user): int {
+        return $this->pg()->query("
+            delete from report_auto_comment
+            where id_report_auto_comment = $1
+                and id_user = $2
             ", $commentId, $user->id
         );
     }
@@ -125,12 +127,12 @@ class ReportAuto extends \Gazelle\BaseManager {
      *
      * return >0 on success
      */
-    public function editComment(int $commentId, \Gazelle\User $user, string $message): int {
-        return $this->pg()->prepared_query("
-            UPDATE report_auto_comment SET
-                comment = ?
-            WHERE id_report_auto_comment = ?
-                AND id_user = ?
+    public function editComment(int $commentId, User $user, string $message): int {
+        return $this->pg()->query("
+            update report_auto_comment set
+                comment = $1
+            where id_report_auto_comment = $2
+                and id_user = $3
             ", $message, $commentId, $user->id
         );
     }

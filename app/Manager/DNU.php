@@ -22,20 +22,20 @@ class DNU extends \Gazelle\Base {
         string        $description,
         \Gazelle\User $user,
     ): int {
-        return $this->pg()->prepared_query("
+        return $this->pg()->query("
             update do_not_upload set
-                name        = ?,
-                description = ?,
-                id_user     = ?
-            where id_do_not_upload = ?
+                name        = $1,
+                description = $2,
+                id_user     = $3
+            where id_do_not_upload = $4
             returning id_do_not_upload
             ", $name, $description, $user->id, $id
         );
     }
 
     public function remove(int $id): int {
-        return $this->pg()->prepared_query("
-            delete from do_not_upload where id_do_not_upload = ?
+        return $this->pg()->query("
+            delete from do_not_upload where id_do_not_upload = $1
             ", $id
         );
     }
@@ -45,13 +45,13 @@ class DNU extends \Gazelle\Base {
         $case = [];
         $args = [];
         foreach ($list as $id) {
-            $case[] = "when id_do_not_upload = ? then ?::int";
+            $case[] = "when id_do_not_upload = {$this->pg()->placeholder(count($args))} then {$this->pg()->placeholder(count($args) + 1)}::int";
             array_push($args, $id, ++$sequence);
         }
         $sql = "update do_not_upload set sequence = case "
             . implode(' ', $case)
             . ' end';
-        return $this->pg()->prepared_query($sql, ...$args);
+        return $this->pg()->query($sql, ...$args);
     }
 
     public function dnuList(): array {

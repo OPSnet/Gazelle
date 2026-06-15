@@ -40,8 +40,8 @@
         <td style="text-align: right">{{ item.nr_query|number_format }}</td>
         <td style="text-align: right">{{ item.nr_cache|number_format }}</td>
         <td style="text-align: right">{{ item.seen|number_format }}</td>
-        <td>{{ item.created }}</td>
-        <td>{% if item.seen == 1 %}&mdash;{% else %}{{ item.updated }}{% endif %}</td>
+        <td>{{ item.created|date('Y-m-d H-i-s') }}</td>
+        <td>{% if item.seen == 1 %}&mdash;{% else %}{{ item.updated|date('Y-m-d H-i-s') }}{% endif %}</td>
         <td style="word-break: break-all">{{ item.uri }}</td>
         <td style="text-align: center"><input class="clear-row" type="checkbox" name="clear-{{ item.id }}"></td>
     </tr>

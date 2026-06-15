@@ -6,10 +6,10 @@ class Counter {
     use \Gazelle\Pg;
 
     public function create(string $name, string $description, int $value = 0): \Gazelle\Counter {
-        $this->pg()->prepared_query("
+        $this->pg()->query("
             insert into counter
                    (name, description, value)
-            values (?,    ?,           ?)
+            values ($1,   $2,          $3)
             ", $name, $description, $value
         );
         return $this->find($name);

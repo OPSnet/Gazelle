@@ -116,10 +116,10 @@ class Tag extends \Gazelle\BaseManager {
     }
 
     public function removeRejectedList(array $idList): int {
-        return $this->pg()->prepared_query("
+        return $this->pg()->query("
             delete from tag_reject
-            where id_tag_reject in (" . placeholders($idList) . ")",
-            ...$idList
+            where id_tag_reject = any($1)
+            ", $this->pg()->integerConverter()->output($idList),
         );
     }
 

@@ -229,18 +229,18 @@ class InviteSource extends \Gazelle\Base {
             }
             if (isset($source['profile'])) {
                 if ($source['profile'] == '') {
-                    $affected += $this->pg()->prepared_query("
-                        DELETE FROM user_external_profile WHERE id_user = ?
+                    $affected += $this->pg()->query("
+                        delete from user_external_profile where id_user = $1
                         ", $inviteeId
                     );
                 } else {
-                    $affected += $this->pg()->prepared_query("
-                        INSERT INTO user_external_profile
+                    $affected += $this->pg()->query("
+                        insert into user_external_profile
                                (id_user, profile)
-                        VALUES (?,       ?)
-                        ON CONFLICT (id_user) DO UPDATE SET
-                            profile = ?
-                        ", $inviteeId, $source['profile'], $source['profile']
+                        values ($1,      $2)
+                        on conflict (id_user) do update set
+                            profile = $2
+                        ", $inviteeId, $source['profile']
                     );
                 }
             }

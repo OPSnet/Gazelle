@@ -125,15 +125,18 @@ class ErrorLog extends BaseManager {
         if (!isset($this->filter)) {
             $where = '';
         } else {
-            $where = "where uri ~ ?";
+            $where = "where uri ~ {$this->pg()->placeholder(count($args))}";
             $args[] = $this->filter;
         }
-        array_push($args, $limit, $offset);
+        $limitPh = "limit {$this->pg()->placeholder(count($args))}";
+        $args[] = $limit;
+        $offsetPh = "offset {$this->pg()->placeholder(count($args))}";
+        $args[] = $offset;
         /* In theory this could simply fetch the ids and then hydrate the
          * individual ErrorLog objects, but as they are uncached, it would
          * require n+1 queries overall.
          */
-        $result = $this->pg()->all("
+        $result = $this->pg()->allex("
             select id_error_log as id,
                 duration,
                 memory,
@@ -149,30 +152,27 @@ class ErrorLog extends BaseManager {
                 logged_var
             from error_log $where
             order by {$orderBy} {$dir}
-            limit ? offset ?
+            $limitPh $offsetPh
             ", ...$args
         );
         $list = [];
         foreach ($result as $item) {
             $item['trace']      = explode("\n", $item['trace']);
-            $item['request']    = json_decode($item['request'], true);
-            $item['error_list'] = json_decode($item['error_list'], true);
-            $item['logged_var'] = json_decode($item['logged_var'], true);
             $list[] = $item;
         }
         return $list;
     }
 
     public function removeList(array $list): int {
-        return $this->pg()->prepared_query("
-            delete from error_log where id_error_log in (
-            " . placeholders($list) . ")", ...$list
+        return $this->pg()->query("
+            delete from error_log where id_error_log = any($1)
+            ", $this->pg()->integerConverter()->output($list)
         );
     }
 
     public function removeSlow(float $duration): int {
-        return $this->pg()->prepared_query("
-            delete from error_log where duration >= ?
+        return $this->pg()->query("
+            delete from error_log where duration >= $1
             ", $duration
         );
     }

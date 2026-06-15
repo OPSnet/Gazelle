@@ -3,9 +3,10 @@
 namespace Gazelle\Manager;
 
 use Gazelle\Enum\UserTokenType;
+use Gazelle\User;
 
 class UserToken extends \Gazelle\BaseManager {
-    public function create(UserTokenType $type, \Gazelle\User $user, string|null $value = null): \Gazelle\User\Token {
+    public function create(UserTokenType $type, User $user, string|null $value = null): \Gazelle\User\Token {
         $field = ['type',       'id_user'];
         $args  = [$type->value, $user->id];
         if (!empty($value)) {
@@ -27,13 +28,13 @@ class UserToken extends \Gazelle\BaseManager {
         );
     }
 
-    public function createPasswordResetToken(\Gazelle\User $user): \Gazelle\User\Token {
+    public function createPasswordResetToken(User $user): \Gazelle\User\Token {
         // expire any existing requests
-        $this->pg()->prepared_query("
+        $this->pg()->query("
             update user_token set
                 expiry = now()
-            where id_user = ?
-                and type = ?
+            where id_user = $1
+                and type = $2
             ", $user->id, UserTokenType::password->value
         );
         $userToken = $this->create(UserTokenType::password, $user);
@@ -64,7 +65,7 @@ class UserToken extends \Gazelle\BaseManager {
         }
         return new \Gazelle\User\Token(
             $token['id_user_token'],
-            new \Gazelle\User($token['id_user'])
+            new User($token['id_user'])
         );
     }
 
@@ -86,7 +87,7 @@ class UserToken extends \Gazelle\BaseManager {
     /**
      * Find a user token record based on its token value
      */
-    public function findByUser(\Gazelle\User $user, UserTokenType $type): ?\Gazelle\User\Token {
+    public function findByUser(User $user, UserTokenType $type): ?\Gazelle\User\Token {
         return $this->findById(
             (int)$this->pg()->scalarex("
                 select id_user_token
@@ -99,26 +100,26 @@ class UserToken extends \Gazelle\BaseManager {
     }
 
     public function expireTokens(UserTokenType $type): int {
-        return $this->pg()->prepared_query("
+        return $this->pg()->query("
             delete from user_token
             where expiry < now()
-                and type = ?
+                and type = $1
             ", $type->value
         );
     }
 
-    public function removeTokens(\Gazelle\User $user, UserTokenType $type): int {
-        return $this->pg()->prepared_query("
+    public function removeTokens(User $user, UserTokenType $type): int {
+        return $this->pg()->query("
             delete from user_token
-            where id_user = ?
-                and type = ?
+            where id_user = $1
+                and type = $2
             ", $user->id, $type->value
         );
     }
 
-    public function removeUser(\Gazelle\User $user): int {
-        return $this->pg()->prepared_query("
-            delete from user_token where id_user = ?
+    public function removeUser(User $user): int {
+        return $this->pg()->query("
+            delete from user_token where id_user = $1
             ", $user->id
         );
     }
