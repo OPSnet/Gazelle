@@ -56,7 +56,7 @@ class GiftTest extends TestCase {
         $initial = $manager->giftTotal();
         $gift->giveTo($this->user);
         $this->assertEquals(
-            STARTING_UPLOAD + $gift->factor() * 1024 ** 3,
+            STARTING_UPLOAD + $gift->factor() * 1024 * 1024,
             $this->user->uploadedSize(),
             'gift-up-1',
         );

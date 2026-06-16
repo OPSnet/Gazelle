@@ -108,12 +108,12 @@ class Gift extends \Gazelle\BasePgObject {
         if (str_starts_with($this->label(), 'up-')) {
             $user->setField(
                 'leech_upload',
-                $user->uploadedSize() + $this->factor() * 1024 ** 3
+                $user->uploadedSize() + $this->factor() * 1024 * 1024,
             )->modify();
         } elseif (str_starts_with($this->label(), 'down-')) {
             // if reducing download would put their metric into negative
             // territory, add the surplus to their upload metric.
-            $reduction = $this->factor() * 1024 ** 3;
+            $reduction = $this->factor() * 1024 * 1024;
             $currentDown = $user->downloadedSize();
             if ($currentDown > $reduction) {
                 $user->setField('leech_download', $currentDown - $reduction);
