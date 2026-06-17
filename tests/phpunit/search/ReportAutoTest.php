@@ -120,7 +120,18 @@ class SearchReportAutoTest extends TestCase {
         $search->setState(Enum\ReportAutoState::closed);
         $search->setOwner(self::$user1);
 
-        $this->matchThingList($search->userTotalList(), self::$user2, 2, 'closed-1');
+        $this->matchThingList(
+            $search->userTotalList(),
+            self::$user2,
+            2,
+            'closed-1-all'
+        );
+        $this->matchThingList(
+            $search->userTotalList(limit: 1),
+            self::$user2,
+            2,
+            'closed-1-limit'
+        );
     }
 
     public function testClosed2(): void {

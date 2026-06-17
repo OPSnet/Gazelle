@@ -2,6 +2,8 @@
 
 namespace Gazelle\Search;
 
+use Gazelle\Enum\ReportAutoState;
+
 class ReportAuto {
     use \Gazelle\Pg;
 
@@ -14,38 +16,38 @@ class ReportAuto {
     ) {}
 
     public function setId(int $id): ReportAuto {
-        $this->cond[] = 'id_report_auto = ?';
+        $this->cond[] = "id_report_auto = {$this->pg()->placeholder(count($this->args))}";
         $this->args[] = $id;
         return $this;
     }
 
     public function setOwner(?\Gazelle\User $user): ReportAuto {
         if (!$user) {
-            $this->cond[] = 'id_owner is NULL';
+            $this->cond[] = 'id_owner is null';
         } else {
-            $this->cond[] = 'id_owner = ?';
+            $this->cond[] = "id_owner = {$this->pg()->placeholder(count($this->args))}";
             $this->args[] = $user->id;
         }
         return $this;
     }
 
-    public function setState(\Gazelle\Enum\ReportAutoState $state): ReportAuto {
+    public function setState(ReportAutoState $state): ReportAuto {
         $this->cond[] = match ($state) {
-            \Gazelle\Enum\ReportAutoState::open        => 'resolved is NULL',
-            \Gazelle\Enum\ReportAutoState::closed      => 'resolved is not NULL',
-            \Gazelle\Enum\ReportAutoState::in_progress => 'resolved is NULL and id_owner is not NULL',
+            ReportAutoState::open        => 'resolved is null',
+            ReportAutoState::closed      => 'resolved is not null',
+            ReportAutoState::in_progress => 'resolved is null and id_owner is not null',
         };
         return $this;
     }
 
     public function setType(\Gazelle\ReportAuto\Type $type): ReportAuto {
-        $this->cond[] = 'id_report_auto_type = ?';
-        $this->args[] = $type->id();
+        $this->cond[] = "id_report_auto_type = {$this->pg()->placeholder(count($this->args))}";
+        $this->args[] = $type->id;
         return $this;
     }
 
     public function setUser(\Gazelle\User $user): ReportAuto {
-        $this->cond[] = 'id_user = ?';
+        $this->cond[] = "id_user = {$this->pg()->placeholder(count($this->args))}";
         $this->args[] = $user->id;
         return $this;
     }
@@ -54,29 +56,36 @@ class ReportAuto {
      * number of users with matching reports
      */
     public function total(): int {
-        $cond = implode(' AND ', $this->cond);
-        $where = $cond ? "WHERE $cond" : '';
+        $cond = implode(' and ', $this->cond);
+        $where = $cond ? "where $cond" : '';
 
-        return (int)$this->pg()->scalar("
-            SELECT count(distinct id_user) FROM report_auto $where
+        return (int)$this->pg()->scalarex("
+            select count(distinct id_user) from Report_auto $where
             ", ...$this->args
         );
     }
 
-    protected function totalList($key, int $limit = 0): array {
-        $cond = implode(' AND ', $this->cond);
-        $where = $cond ? "WHERE $cond" : '';
-        $limit = $limit ? "LIMIT $limit" : '';
-        return $this->pg()->all("
-            SELECT
-                $key AS key,
-                count(*) AS total
-            FROM report_auto
+    protected function totalList(string $key, int $limit = 0): array {
+        $cond  = implode(' and ', $this->cond);
+        $where = $cond ? "where $cond" : '';
+        $args  = $this->args; // take a copy to avoid piling up limit/offset arguments
+        if ($limit) {
+            $limitPh = "limit {$this->pg()->placeholder(count($args))}";
+            $args[] = $limit;
+        } else {
+            $limitPh = '';
+        }
+        return $this->pg()->allex("
+            select
+                $key as key,
+                count(*) as total
+            from report_auto
             $where
-            GROUP BY $key
-            ORDER BY count(*) DESC
-            $limit
-        ", ...$this->args);
+            group by $key
+            order by count(*) desc
+            $limitPh
+            ", ...$args
+        );
     }
 
     /**
@@ -84,7 +93,7 @@ class ReportAuto {
      */
     public function typeTotalList(): array {
         return array_map(
-            fn($row) => [$this->typeMan->findById($row['key']), $row['total']],
+            fn ($row) => [$this->typeMan->findById($row['key']), $row['total']],
             $this->totalList('id_report_auto_type')
         );
     }
@@ -106,25 +115,31 @@ class ReportAuto {
      * returns array of userId => [ReportAuto obj,...]
      */
     public function page(int $limit, int $offset): array {
-        $cond = implode(' AND ', $this->cond);
-        $where = $cond ? "WHERE $cond" : '';
-
-        $userReportsList = $this->pg()->all("
-            SELECT id_user,  array_to_string(array_agg(id_report_auto ORDER BY id_report_auto DESC), ',') as id_reports
-            FROM report_auto
+        $cond     = implode(' and ', $this->cond);
+        $where    = $cond ? "where $cond" : '';
+        $args     = $this->args;
+        $limitPh  = "limit {$this->pg()->placeholder(count($args))}";
+        $args[]   = $limit;
+        $offsetPh = "offset {$this->pg()->placeholder(count($args))}";
+        $args[]   = $offset;
+        $list     = $this->pg()->allByKeyex(
+            'id_user', <<<END_SQL
+            select id_user,
+                array_agg(id_report_auto order by id_report_auto desc) as id_reports
+            from report_auto
             $where
-            GROUP BY id_user
-            ORDER BY max(created) DESC, id_user
-            LIMIT ? OFFSET ?
-            ", ...[...$this->args, $limit, $offset]
+            group by id_user
+            order by max(created) desc, id_user
+            $limitPh $offsetPh
+            END_SQL,
+                ...$args
         );
 
         $reports = [];
-        foreach ($userReportsList as $row) {
-            $userId = $row['id_user'];
-            $reportIds = $row['id_reports'];
+        foreach ($list as $userId => $row) {
             $reports[$userId] = array_map(
-                fn($r) => $this->reportMan->findById((int)$r), explode(',', $reportIds)
+                fn ($r) => $this->reportMan->findById((int)$r),
+                $row['id_reports'],
             );
         }
         return $reports;

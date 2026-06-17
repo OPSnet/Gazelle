@@ -14,10 +14,11 @@ class EmailBlacklist extends \Gazelle\Base {
     protected string $filterEmail;
 
     public function create(string $email, string $comment, User $user): int {
-        return $this->pg()->insert("
+        return $this->pg()->scalarex("
             insert into email_blacklist
                    (email, comment, id_user)
-            VALUES (?,     ?,       ?)
+            values ($1,    $2,      $3)
+            returning id_email_blacklist
             ", $email, $comment, $user->id
         );
     }
@@ -62,29 +63,32 @@ class EmailBlacklist extends \Gazelle\Base {
     public function queryBase(): array {
         $args = [];
         $cond = [];
-        if (!empty($this->filterComment)) {
+        if (isset($this->filterComment)) {
+            $cond[] = "comment ~ {$this->pg()->placeholder(count($args))}";
             $args[] = $this->filterComment;
-            $cond[] = "comment ~ ?";
         }
-        if (!empty($this->filterEmail)) {
+        if (isset($this->filterEmail)) {
+            $cond[] = "email ~ {$this->pg()->placeholder(count($args))}";
             $args[] = $this->filterEmail;
-            $cond[] = "email ~ ?";
         }
         return [
-            "from email_blacklist" . (empty($cond) ? '' : (' where ' . implode(' and ', $cond))),
+            "from email_blacklist" . ($cond === [] ? '' : (' where ' . implode(' and ', $cond))),
             $args
         ];
     }
 
     public function total(): int {
         [$from, $args] = $this->queryBase();
-        return (int)$this->pg()->scalar("select count(*) $from", ...$args);
+        return (int)$this->pg()->scalarex("select count(*) $from", ...$args);
     }
 
     public function page(int $limit, int $offset): array {
         [$from, $args] = $this->queryBase();
-        $args = array_merge($args, [$limit, $offset]);
-        return $this->pg()->all("
+        $limitPh = "limit {$this->pg()->placeholder(count($args))}";
+        $args[] = $limit;
+        $offsetPh = "offset {$this->pg()->placeholder(count($args))}";
+        $args[] = $offset;
+        return $this->pg()->allex("
             select id_email_blacklist as id,
                 id_user,
                 created,
@@ -92,7 +96,7 @@ class EmailBlacklist extends \Gazelle\Base {
                 comment
             $from
             order by created desc
-            limit ? offset ?
+            $limitPh $offsetPh
             ", ...$args
         );
     }

@@ -38,7 +38,11 @@ class EmailBlacklistTest extends TestCase {
             $newEmail = randomString(10) . "@$domain";
         } while ($newEmail === $email);
 
-        $blacklist[] = $manager->create('^' . str_replace('.', '\.', $newEmail) . '$', $comment, $this->user);
+        $blacklist[] = $manager->create(
+            '^' . str_replace('.', '\.', $newEmail) . '$',
+            $comment,
+            $this->user,
+        );
         $this->assertEquals(2, $manager->total(), 'email-blacklist-filter-domain-new-filter');
         $this->assertCount(2, $manager->page(3, 0), 'email-blacklist-domain-page');
         // caught by rule for $domain
@@ -47,7 +51,11 @@ class EmailBlacklistTest extends TestCase {
         $newComment = "new $comment";
         $manager->setFilterEmail('')->setFilterComment($newComment);
         $this->assertEquals(0, $manager->total(), 'email-blacklist-filter-comment-fail');
-        $this->assertEquals(1, $manager->modify($blacklist[0], $domain, $newComment, $this->user), 'email-blacklist-modify');
+        $this->assertEquals(
+            1,
+            $manager->modify($blacklist[0], $domain, $newComment, $this->user),
+            'email-blacklist-modify',
+        );
 
         $this->assertEquals(1, $manager->total(), 'email-blacklist-filter-comment-true');
         $this->assertCount(1, $manager->page(2, 0), 'email-blacklist-comment-page');

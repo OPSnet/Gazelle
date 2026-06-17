@@ -167,33 +167,33 @@ class Ban extends \Gazelle\Base {
         $cond = [];
         $args = [];
         if (isset($this->filterActive)) {
-            $cond[] = "ib.is_active = ?";
+            $cond[] = "ib.is_active = {$this->pg()->placeholder(count($args))}";
             $args[] = $this->filterActive;
         }
         if (isset($this->filterBegin)) {
-            $cond[] = "ibh.created between ? and ?";
+            $cond[] = "ibh.created between {$this->pg()->placeholder(count($args))} and {$this->pg()->placeholder(count($args) + 1)}";
             array_push($args, $this->filterBegin, $this->filterEnd);
         }
         if (isset($this->filterIpaddr)) {
-            $cond[] = "ib.ip && ?";
+            $cond[] = "ib.ip && {$this->pg()->placeholder(count($args))}";
             $args[] = $this->filterIpaddr;
         }
         if (isset($this->filterNotes)) {
-            $cond[] = "ibh.note ~ ?";
+            $cond[] = "ibh.note ~ {$this->pg()->placeholder(count($args))}";
             $args[] = $this->filterNotes;
         }
         return [
             "from ip_ban ib
             inner join ip_ban_hist ibh using (id_ip_ban)
             inner join h using (id_ip_ban, id_ip_ban_hist)"
-                . (empty($cond) ? '' : (' where ' . implode(' and ', $cond))),
+                . ($cond === [] ? '' : (' where ' . implode(' and ', $cond))),
             $args
         ];
     }
 
     public function total(): int {
         [$from, $args] = $this->queryBase();
-        return (int)$this->pg()->scalar("
+        return (int)$this->pg()->scalarex("
             with h as (
                 select id_ip_ban,
                     max(id_ip_ban_hist) as id_ip_ban_hist
@@ -208,8 +208,12 @@ class Ban extends \Gazelle\Base {
 
     public function page(int $limit, int $offset): array {
         [$from, $args] = $this->queryBase();
+        $limitPh = "limit {$this->pg()->placeholder(count($args))}";
+        $args[] = $limit;
+        $offsetPh = "offset {$this->pg()->placeholder(count($args))}";
+        $args[] = $offset;
         $header = $this->header();
-        return $this->pg()->all("
+        return $this->pg()->allex("
             with h as (
                 select id_ip_ban,
                     max(id_ip_ban_hist) as id_ip_ban_hist,
@@ -229,8 +233,8 @@ class Ban extends \Gazelle\Base {
                 h.total
             $from
             order by {$header->orderBy()} {$header->dir()}
-            limit ? offset ?
-            ", ...array_merge($args, [$limit, $offset])
+            $limitPh $offsetPh
+            ", ...$args,
         );
     }
 }

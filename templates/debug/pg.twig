@@ -15,7 +15,15 @@
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
         <td class="debug_data debug_query_data"><pre>{{ q.query|nl2br }}
 {%  if q.args %}
-        -- {{ q.args|join(', ') }}
+        -- {%
+        for arg in q.args -%}
+{%          if not loop.first %}, {% endif -%}
+{%          if arg is instanceof('\\DateTimeImmutable') -%}
+'{{              arg|date('Y-m-d H:i:s.u') -}}'
+{%-          else -%}
+{{              arg -}}
+{%          endif -%}
+{%      endfor -%}
 {%  endif %}
         </pre>
         <br><a class="brackets" href="tools.php?action=db_sandbox&amp;src=pg&amp;debug={{

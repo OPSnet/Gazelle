@@ -22,7 +22,7 @@ abstract class AbstractWitnessTable extends \Gazelle\Base {
     protected function latestValue(): ?int {
         $id = $this->sourceDb() === SourceDB::mysql
             ? self::$db->scalar("SELECT max({$this->refIdColumn()}) FROM {$this->reference()}")
-            : $this->pg()->scalar("select max({$this->refIdColumn()}) from {$this->reference()}");
+            : $this->pg()->scalarex("select max({$this->refIdColumn()}) from {$this->reference()}");
         return $id ? (int)$id : null;
     }
 

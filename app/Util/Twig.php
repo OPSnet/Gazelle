@@ -344,6 +344,7 @@ class Twig {
 
         $twig->addTest(new \Twig\TwigTest('donor', fn ($user) => !is_null($user) && $user::class === \Gazelle\User::class && new \Gazelle\User\Donor($user)->isDonor()));
         $twig->addTest(new \Twig\TwigTest('forum_thread', fn ($thread) => $thread instanceof \Gazelle\ForumThread));
+        $twig->addTest(new \Twig\TwigTest('instanceof', fn ($obj, $class) => $obj instanceof $class));
 
         $twig->addTest(new \Twig\TwigTest('nan', fn ($value) => is_nan($value)));
 

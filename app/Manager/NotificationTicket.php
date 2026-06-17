@@ -40,15 +40,15 @@ class NotificationTicket {
      * and see if any can be processed. The earliest modified ticket is returned.
      */
     public function findByExclusion(NotificationTicketState $state, array $exclude): ?\Gazelle\NotificationTicket {
-        $cond = ["state = ?"];
+        $cond = ["state = $1"];
         $args = [$state->value];
         if ($exclude) {
-            $cond[] = "id_torrent not in (" . placeholders($exclude) . ")";
-            $args = array_merge($args, $exclude);
+            $cond[] = "id_torrent != any({$this->pg()->placeholder(count($args))})";
+            $args[] = $this->pg()->integerConverter()->output($exclude);
         }
         $condition = implode(' and ', $cond);
         return $this->findById(
-            (int)$this->pg()->scalar("
+            (int)$this->pg()->scalarex("
                 select id_torrent
                 from notification_ticket
                 where $condition

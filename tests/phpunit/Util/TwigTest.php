@@ -327,12 +327,23 @@ END;
         $this->assertEquals(48000, self::twig('{{ upscale(value) }}')->render(['value' => 47133]), 'twig-upscale-47133');
     }
 
-    public function testTest(): void {
-        $this->assertEquals('yes', self::twig('{% if value is nan %}yes{% endif %}')->render(['value' => sqrt(-1)]), 'twig-test-nan');
-
+    public function testTwigTestTest(): void {
         $this->assertEquals(
             'yes',
-            self::twig('{% if value is request_fill %}yes{% endif %}')->render(['value' => new Contest\RequestFill(0, '', '')]),
+            self::twig("{% if value is instanceof('\\DateTimeImmutable') %}yes{% endif %}")
+                ->render(['value' => new \DateTimeImmutable()]),
+            'twig-test-instanceof'
+        );
+        $this->assertEquals(
+            'yes',
+            self::twig('{% if value is nan %}yes{% endif %}')
+                ->render(['value' => sqrt(-1)]),
+            'twig-test-nan'
+        );
+        $this->assertEquals(
+            'yes',
+            self::twig('{% if value is request_fill %}yes{% endif %}')
+                ->render(['value' => new Contest\RequestFill(0, '', '')]),
             'twig-test-contest-request-fill'
         );
     }

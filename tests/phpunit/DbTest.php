@@ -198,11 +198,6 @@ class DbTest extends TestCase {
 
     public function testPgBasic(): void {
         $num = random_int(100, 999);
-        $this->assertEquals($num, $this->pg()->scalar("select ?", $num), 'db-pg-scalar-int');
-        $this->assertEquals(true, $this->pg()->scalar("select ?", true), 'db-pg-scalar-true');
-        $this->assertEquals("test", $this->pg()->scalar("select ?", "test"), 'db-pg-scalar-string');
-        $this->assertEquals("test", $this->pg()->scalar("select '\\x74657374'::bytea"), 'db-pg-scalar-bytea');
-
         $st = $this->pg()->prepare("
             create temporary table t (
                 id_t integer not null primary key generated always as identity,
@@ -426,7 +421,7 @@ class DbTest extends TestCase {
         $this->assertEquals(1, $this->pg()->scalarex('select 1'), 'pg-abort-qry2');
 
         $this->pg()->abort();
-        $this->assertEquals(1, $this->pg()->scalar('select 1'), 'pg-abort-qry3');
+        $this->assertEquals(2, $this->pg()->scalarex('select 2'), 'pg-abort-qry3');
     }
 
     public function testMysqlDuplicateException(): void {
@@ -569,31 +564,6 @@ class DbTest extends TestCase {
             array_keys($table->stats()),
             'pg-table-stats',
         );
-    }
-
-    public function testPgByteaScalar(): void {
-        $this->pg()->prepared_query("
-            create temporary table test_bytea (
-                payload bytea not null primary key
-            )
-        ");
-        $payload = pack('C*', array_map(fn ($n) => chr($n), range(0, 255)));
-        $this->assertEquals(
-            1,
-            $this->pg()->prepared_query("
-                insert into test_bytea (payload) values (?)
-                ", $payload
-            ),
-            'db-pg-insert-bytea'
-        );
-        $this->assertEquals(
-            $payload,
-            $this->pg()->scalar("select payload from test_bytea"),
-            'db-pg-scalar-bytea'
-        );
-        $this->pg()->prepared_query("
-            drop table test_bytea
-        ");
     }
 
     public function testPgByteaScalarex(): void {
