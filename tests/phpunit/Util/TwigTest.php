@@ -36,7 +36,7 @@ END;
         $this->assertSame($expected, $twig->createTemplate('{{ dom.emit|raw }}')->render(), 'twig-dominator');
     }
 
-    public function testFilter(): void {
+    public function testFilterBasic(): void {
         $article = self::twig('{{ word|article }}');
         $this->assertSame('a', $article->render(['word' => 'consonant']), 'twig-article-a');
         $this->assertSame('an', $article->render(['word' => 'anticonsonant']), 'twig-article-an');
@@ -87,18 +87,6 @@ END;
             '<a href="?order=alpha&amp;sort=asc">First</a> ↑',
             $heading->render(['heading' => $sth]),
             'twig-heading'
-        );
-
-        $linkify = self::twig('{{ url|linkify }}');
-        $this->assertSame(
-            '<a href="/index.php">/index.php</a>',
-            $linkify->render(['url' => '/index.php']),
-            'twig-linkify-index'
-        );
-        $this->assertSame(
-            '<a href="' . SITE_URL . '/index.php">' . SITE_URL . '/index.php</a>',
-            $linkify->render(['url' => SITE_URL . '/index.php']),
-            'twig-linkify-site-index'
         );
 
         $this->assertSame('3.00 MiB', self::twig('{{ size|octet_size }}')->render(['size' => 1024 * 1024 * 3]), 'twig-octet-3.00MiB');
@@ -159,6 +147,28 @@ END;
             self::twig('{{ user_id|user_url }}')->render(['user_id' => $this->user->id]),
             'twig-user-url'
         );
+    }
+
+    public function testFilterLinkify(): void {
+        $linkify = self::twig('{{ url|linkify }}');
+        $this->assertSame(
+            '<a href="/index.php">/index.php</a>',
+            $linkify->render(['url' => '/index.php']),
+            'twig-linkify-index'
+        );
+        $this->assertSame(
+            '<a href="' . SITE_URL . '/index.php">' . SITE_URL . '/index.php</a>',
+            $linkify->render(['url' => SITE_URL . '/index.php']),
+            'twig-linkify-site-index',
+        );
+        $this->assertSame(
+            '<a href="&quot;&gt;&lt;script&gt;console.log(&quot;XSS&quot;);&lt;/script&gt;">&quot;&gt;&lt;script&gt;console.log(&quot;XSS&quot;);&lt;/script&gt;</a>',
+            $linkify->render(['url' => '"><script>console.log("XSS");</script>']),
+            'twig-linkify-xss'
+        );
+    }
+
+    public function testTwigDonor(): void {
         $donor = new User\Donor($this->user);
         $donor->donate(
             amount:  20,

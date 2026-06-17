@@ -357,16 +357,14 @@ class Text {
         $info = parse_url($rawurl);
         if (
             !$info
-            || empty($info['host'])
-            || !in_array($info['host'], [SITE_HOST, ALT_SITE_HOST])
+            || !in_array($info['host'] ?? '', [SITE_HOST, ALT_SITE_HOST])
         ) {
             return null;
         }
-        parse_str($info['query'] ?? '', $args);
 
+        parse_str($info['query'] ?? '', $args);
         if (
-            isset($args['postid'])
-            && isset($info['path'])
+            isset($args['postid'], $info['path'])
             && in_array(
                 $info['path'],
                 ['/artist.php', '/collages.php', '/requests.php', '/torrents.php']

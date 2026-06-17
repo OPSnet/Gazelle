@@ -44,7 +44,7 @@ class Twig {
                 $basicAttr = ['class="avatar_0" width="' . AVATAR_WIDTH . '"'];
                 $hoverAttr = ['class="avatar_1" width="' . AVATAR_WIDTH . '"'];
                 $text      = $data['text'];
-                if ($text !== false && $text != '') {
+                if ($text !== false && $text !== '') {
                     $basicAttr[] = 'title="' . html_escape($text) . '" alt="' . html_escape($text) . '"';
                     $hoverAttr[] = 'title="' . html_escape($text) . '" alt="' . html_escape($text) . '"';
                 }
@@ -134,11 +134,17 @@ class Twig {
         $twig->addFilter(new \Twig\TwigFilter(
             'linkify',
             function ($link) {
-                $local = \Text::local_url($link);
-                if ($local !== false) {
-                    $link = \Text::resolve_url($link);
+                if (\Text::local_url($link) !== false) {
+                    return new \Twig\Markup(
+                        \Text::resolve_url(html_escape($link)),
+                        'UTF-8',
+                    );
                 }
-                return new \Twig\Markup("<a href=\"$link\">$link</a>", 'UTF-8');
+                $link = html_escape($link);
+                return new \Twig\Markup(
+                    "<a href=\"$link\">$link</a>",
+                    'UTF-8',
+                );
             }
         ));
 
@@ -237,12 +243,13 @@ class Twig {
                 if ($user->warning()->isWarned()) {
                     $icon[] = '<a href="wiki.php?action=article&amp;name=warnings"><img src="'
                         . STATIC_SERVER . '/common/symbols/warned.png" class="tooltip alt="Warned" title="Warned'
-                        . ($viewer->id == $user->id ? " – Expires {$user->warning()->expiry()->format('Y-m-d H:i')}" : '')
+                        . ($viewer->id === $user->id ? " – Expires {$user->warning()->expiry()->format('Y-m-d H:i')}" : '')
                         . '></a>';
                 }
                 if ($user->isDisabled()) {
                     $icon[] = '<a href="rules.php"><img src="'
-                        . STATIC_SERVER . '/common/symbols/disabled.png" alt="Banned" title="Disabled" class="tooltip"></a>';
+                        . STATIC_SERVER
+                        . '/common/symbols/disabled.png" alt="Banned" title="Disabled" class="tooltip"></a>';
                 }
                 return new \Twig\Markup(implode(' ', $icon), 'UTF-8');
             }
@@ -276,10 +283,15 @@ class Twig {
 
         $twig->addFunction(new \Twig\TwigFunction('donor_icon', fn ($icon) => image_cache_encode($icon)));
 
-        $twig->addFunction(new \Twig\TwigFunction('ipaddr', fn (string $ipaddr) => new \Twig\Markup(
-            "$ipaddr <a href=\"user.php?action=search&amp;ip_history=on&amp;matchtype=strict&amp;ip=$ipaddr\" title=\"Search\" class=\"brackets tooltip\">S</a>",
-            'UTF-8'
-        )));
+        $twig->addFunction(new \Twig\TwigFunction('ipaddr',
+            fn (string $ipaddr) => new \Twig\Markup(
+                html_escape($ipaddr)
+                . ' <a href="user.php?action=search&amp;ip_history=on&amp;matchtype=strict&amp;ip='
+                . html_escape($ipaddr)
+                . '" title="Search" class="brackets tooltip">S</a>',
+                'UTF-8',
+            )
+        ));
 
         $twig->addFunction(new \Twig\TwigFunction('mtime', fn ($filename) => new \Twig\Markup(
             base_convert((string)(filemtime(SERVER_ROOT . '/public/static/' . $filename) ?: '0'), 10, 36),
