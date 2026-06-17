@@ -512,7 +512,7 @@ class Donor extends \Gazelle\BaseUser {
         $this->flush(); // so that rank() etc are updated
 
         // Assign them to the Donor secondary class if it hasn't already been done
-        if ($priorRank == 0 && $xbtAmount > 0) {
+        if ($priorRank == 0 && $fiatAmount >= DONOR_RANK_PRICE) {
             $this->addDonorStatus();
         }
 

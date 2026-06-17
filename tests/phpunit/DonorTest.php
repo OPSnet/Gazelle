@@ -49,14 +49,14 @@ class DonorTest extends TestCase {
         $this->assertEquals(
             1,
             $donor->donate(
-                amount: 9.75,
+                amount: DONOR_RANK_PRICE / 2,
                 xbtRate: 0.06125,
                 source: 'phpunit source',
                 reason: 'phpunit reason',
             ),
             'donor-small'
         );
-        $this->assertTrue($donor->isDonor(), 'donor-is-now-new');
+        $this->assertFalse($donor->isDonor(), 'donor-is-now-new');
         $this->assertEquals(0, $donor->invitesReceived(), 'donor-no-invites');
 
         $inbox = $donor->user()->inbox();
@@ -112,7 +112,7 @@ class DonorTest extends TestCase {
             ),
             'donor-donate-rank-2'
         );
-        $this->assertTrue($donor->isDonor(), 'donor-adj-is-donor');
+        $this->assertFalse($donor->isDonor(), 'donor-adj-is-donor');
         $this->assertEquals(0, $donor->rank(), 'donor-adj-no-rank');
         $this->assertEquals(0, $donor->totalRank(), 'donor-adj-no-total-rank');
         $this->assertEquals(1, $donor->adjust(7, 12, 'phpunit adjust 1', $donor->user()), 'donor-adj-rank-plus');
