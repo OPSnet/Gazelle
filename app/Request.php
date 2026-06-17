@@ -709,7 +709,7 @@ class Request extends BasePgObject implements Bookmarked, CategoryHasArtist {
             $filler->inbox()->createSystem(
                 'A request you filled has been unfilled',
                 self::$twig->render('request/unfill-pm.bbcode.twig', [
-                    'name'    => $torrent->group()->text(),
+                    'name'    => $torrent->fullName(),
                     'reason'  => $reason,
                     'request' => $this,
                     'viewer'  => $admin,
