@@ -144,8 +144,8 @@
 <br>
 <h4>Revision history</h4>
 {% for r in config.history %}
-    {% if loop.first %}
-        {% set total = config.history|length %}
+{%  if loop.first %}
+{%      set total = config.history|length %}
 <table>
     <tr>
         <td class="colhead">Revision</td>
@@ -153,16 +153,16 @@
         <td class="colhead">Date</td>
         <td class="colhead">Change set</td>
     </tr>
-    {% endif %}
+{%  endif %}
     <tr>
         <td>{{ total - loop.index0 }}</td>
         <td>{{ r.user_id|user_url }}</td>
-        <td>{{ r.created.format('Y-m-d H:m:s')|time_diff }}</td>
+        <td>{{ r.created.format('Y-m-d H:i:s')|time_diff }}</td>
         <td><a name="revision-{{ total - loop.index0 }}"></a>{{ r.change_set|map(c => "#{c.field}: #{c.old} → #{c.new}")|join(', ') }}</td>
     </tr>
-    {% if loop.last %}
+{%  if loop.last %}
 </table>
-    {% endif %}
+{%  endif %}
 {% else %}
 <div>None</div>
 {% endfor %}
