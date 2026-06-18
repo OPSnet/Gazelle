@@ -11,9 +11,9 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
     final public const pkName               = 'ArtistID';
     final public const tableName            = 'artists_group';
     final public const CACHE_REQUEST_ARTIST = 'artists_requests_%d';
-    protected const CACHE_PREFIX = 'artist_%d';
-    protected const CACHE_TAG    = 'artist_tag_%d_%d';
 
+    final protected const CACHE_PREFIX = 'artist_%d';
+    final protected const CACHE_TAG    = 'artist_tag_%d_%d';
     final protected const ObjectName   = 'artist';
     final protected const PkColumn     = 'artist_attr_id';
     final protected const JoinColumn   = 'artist_attr_id';
@@ -216,14 +216,14 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
     }
 
     public function groupIds(): array {
-        if (!isset($this->groupRole)) {
+        if ($this->groupRole === []) {
             $this->loadArtistRole();
         }
         return array_keys($this->groupRole);
     }
 
     public function group(int $groupId): array {
-        if (!isset($this->group)) {
+        if ($this->group === []) {
             $this->loadArtistRole();
         }
         return $this->group[$groupId] ?? []; // FIXME
@@ -293,7 +293,7 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
     }
 
     public function sections(): array {
-        if (!isset($this->section)) {
+        if ($this->section === []) {
             $this->loadArtistRole();
         }
         return $this->section;

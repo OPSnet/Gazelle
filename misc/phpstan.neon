@@ -154,9 +154,12 @@ parameters:
         -  ../classes/text.class.php
         -  ../tests/phpunit/*
     -
-      message: '/^Variable \$(?:Cache|DB|Debug|SessionID|Twig|Viewer) might not be defined\.$/'
+      message: '/^Variable \$(?:argv|Cache|Debug|Twig|Viewer) might not be defined\.$/'
       paths:
         - ../bin/*
+    -
+      message: '/^Variable \$(?:Cache|DB|Debug|Twig|Viewer) might not be defined\.$/'
+      paths:
         - ../sections/*
     -
       message: '/^Variable \$Types might not be defined\.$/'

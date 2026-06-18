@@ -132,7 +132,7 @@ class Inbox extends \Gazelle\BaseUser {
         if (isset($this->filter)) {
             $param['filter'] = $this->filter;
         }
-        if (isset($this->searchTerm) && isset($this->searchField)) {
+        if (isset($this->searchTerm)) {
             $param['search'] = $this->searchTerm;
             $param['searchtype'] = $this->searchField;
         }
@@ -159,7 +159,7 @@ class Inbox extends \Gazelle\BaseUser {
         } else {
             $cond[] = "cu.InInbox = '1'";
         }
-        if (isset($this->searchField) && isset($this->searchTerm) && !empty($this->searchTerm)) {
+        if (isset($this->searchTerm) && $this->searchTerm !== '') {
             $cond[] = match ($this->searchField) {
                 'subject' => "c.Subject LIKE concat('%', ?, '%')",
                 'user'    => 'um.Username = ?',

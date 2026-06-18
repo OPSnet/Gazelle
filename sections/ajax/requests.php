@@ -8,7 +8,7 @@ namespace Gazelle;
 if (!isset($_GET['userid'])) {
     $user = null;
 } else {
-    $user = new Manager\User()->findById((int)($_GET['userid'] ?? 0));
+    $user = new Manager\User()->findById((int)$_GET['userid']);
     if (is_null($user)) {
         json_die("failure");
     }

@@ -79,7 +79,7 @@ foreach ($TrackDeductions as [$tag, $deduction, $label]) {
     if ($n > 0) {
         $score = $n * $deduction;
         $adjustmentDetails[$tag] = "$n $label (-{$score} points)";
-        $adjustmentDetails['tracks'][$tag] = $n; /** @phpstan-ignore-line offsetAssign.dimType recognized in 2.1.55 */
+        $adjustmentDetails['tracks'][$tag] = $n;
         $adjustedScore -= $score;
         $adjusted = true;
     }

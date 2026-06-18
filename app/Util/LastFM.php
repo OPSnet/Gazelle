@@ -50,7 +50,7 @@ class LastFM extends \Gazelle\Base {
                 WHERE ID = ?
                 ", $username, $user->id
             );
-        } elseif ($previous && $username === "") {
+        } elseif ($previous) {
             self::$db->prepared_query("
                 DELETE FROM lastfm_users WHERE ID = ?
                 ", $user->id

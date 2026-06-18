@@ -1,439 +1,1135 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Match expression does not handle remaining value\: string$#'
+			rawMessage: 'Match expression does not handle remaining value: string'
 			identifier: match.unhandled
 			count: 2
 			path: ../app/Feed.php
 
 		-
-			message: '#^Parameter \#2 \$timestamp of function date expects int\|null, int\|false given\.$#'
+			rawMessage: 'Parameter #2 $array of function implode expects array<string>, array<(array<string>|string)> given.'
 			identifier: argument.type
 			count: 1
 			path: ../app/Feed.php
 
 		-
-			message: '#^Method Gazelle\\Util\\Proxy\:\:fetch\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: ../app/Util/Proxy.php
-
-		-
-			message: '#^Method Gazelle\\Util\\Proxy\:\:urlDecode\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: ../app/Util/Proxy.php
-
-		-
-			message: '#^Method Gazelle\\Util\\Proxy\:\:urlEncode\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: ../app/Util/Proxy.php
-
-		-
-			message: '#^Cannot call method setAttribute\(\) on DOMElement\|false\.$#'
-			identifier: method.nonObject
-			count: 4
-			path: ../app/Util/Text.php
-
-		-
-			message: '#^Parameter \#1 \$node of method DOMNode\:\:replaceChild\(\) expects DOMNode, \(DOMElement\|false\) given\.$#'
+			rawMessage: 'Parameter #2 $timestamp of function date expects int|null, int|false given.'
 			identifier: argument.type
-			count: 12
-			path: ../app/Util/Text.php
+			count: 1
+			path: ../app/Feed.php
 
 		-
-			message: '#^Method Sphinxql\:\:error\(\) has no return type specified\.$#'
+			rawMessage: 'Method Gazelle\Util\Proxy::fetch() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: ../app/Util/Proxy.php
+
+		-
+			rawMessage: 'Method Gazelle\Util\Proxy::urlDecode() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: ../app/Util/Proxy.php
+
+		-
+			rawMessage: 'Method Gazelle\Util\Proxy::urlEncode() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: ../app/Util/Proxy.php
+
+		-
+			rawMessage: 'Method Sphinxql::error() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: ../classes/sphinxql.class.php
 
 		-
-			message: '#^Method Sphinxql\:\:register_query\(\) has no return type specified\.$#'
+			rawMessage: 'Method Sphinxql::register_query() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: ../classes/sphinxql.class.php
 
 		-
-			message: '#^Method Sphinxql\:\:sph_connect\(\) has no return type specified\.$#'
+			rawMessage: 'Method Sphinxql::sph_connect() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: ../classes/sphinxql.class.php
 
 		-
-			message: '#^Property Sphinxql\:\:\$Connected has no type specified\.$#'
+			rawMessage: Property Sphinxql::$Connected has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: ../classes/sphinxql.class.php
 
 		-
-			message: '#^Property Sphinxql\:\:\$Connections has no type specified\.$#'
+			rawMessage: Property Sphinxql::$Connections has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: ../classes/sphinxql.class.php
 
 		-
-			message: '#^Property Sphinxql\:\:\$Ident has no type specified\.$#'
+			rawMessage: Property Sphinxql::$Ident has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: ../classes/sphinxql.class.php
 
 		-
-			message: '#^Property Sphinxql\:\:\$Queries has no type specified\.$#'
+			rawMessage: Property Sphinxql::$Queries has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: ../classes/sphinxql.class.php
 
 		-
-			message: '#^Property Sphinxql\:\:\$Time has no type specified\.$#'
+			rawMessage: Property Sphinxql::$Time has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: ../classes/sphinxql.class.php
 
 		-
-			message: '#^Cannot call method to_pair\(\) on SphinxqlResult\|false\.$#'
+			rawMessage: 'Cannot call method to_pair() on SphinxqlResult|false.'
 			identifier: method.nonObject
 			count: 1
 			path: ../classes/sphinxqlquery.class.php
 
 		-
-			message: '#^Method SphinxqlQuery\:\:build_query\(\) has no return type specified\.$#'
+			rawMessage: 'Method SphinxqlQuery::build_query() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: ../classes/sphinxqlquery.class.php
 
 		-
-			message: '#^Method SphinxqlQuery\:\:error\(\) has no return type specified\.$#'
+			rawMessage: 'Method SphinxqlQuery::error() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: ../classes/sphinxqlquery.class.php
 
 		-
-			message: '#^Method SphinxqlQuery\:\:error\(\) has parameter \$Msg with no type specified\.$#'
+			rawMessage: 'Method SphinxqlQuery::error() has parameter $Msg with no type specified.'
 			identifier: missingType.parameter
 			count: 1
 			path: ../classes/sphinxqlquery.class.php
 
 		-
-			message: '#^Method SphinxqlQuery\:\:get_meta\(\) return type has no value type specified in iterable type array\.$#'
+			rawMessage: 'Method SphinxqlQuery::get_meta() return type has no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
 			count: 1
 			path: ../classes/sphinxqlquery.class.php
 
 		-
-			message: '#^Method SphinxqlQuery\:\:reset\(\) has no return type specified\.$#'
+			rawMessage: 'Method SphinxqlQuery::reset() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: ../classes/sphinxqlquery.class.php
 
 		-
-			message: '#^Method SphinxqlQuery\:\:where_between\(\) has parameter \$Values with no value type specified in iterable type array\.$#'
+			rawMessage: 'Method SphinxqlQuery::where_between() has parameter $Values with no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
 			count: 1
 			path: ../classes/sphinxqlquery.class.php
 
 		-
-			message: '#^Parameter \#1 \$Result of class SphinxqlResult constructor expects mysqli_result, null given\.$#'
+			rawMessage: 'Parameter #1 $Result of class SphinxqlResult constructor expects mysqli_result, null given.'
 			identifier: argument.type
 			count: 1
 			path: ../classes/sphinxqlquery.class.php
 
 		-
-			message: '#^Parameter \#2 \$Meta of class SphinxqlResult constructor expects array, null given\.$#'
+			rawMessage: 'Parameter #2 $Meta of class SphinxqlResult constructor expects array, null given.'
 			identifier: argument.type
 			count: 1
 			path: ../classes/sphinxqlquery.class.php
 
 		-
-			message: '#^Parameter \#3 \$Socket of static method Sphinxql\:\:init_connection\(\) expects string, string\|false given\.$#'
+			rawMessage: 'Parameter #3 $Socket of static method Sphinxql::init_connection() expects string, string|false given.'
 			identifier: argument.type
 			count: 1
 			path: ../classes/sphinxqlquery.class.php
 
 		-
-			message: '#^Property SphinxqlQuery\:\:\$Errors has no type specified\.$#'
+			rawMessage: Property SphinxqlQuery::$Errors has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: ../classes/sphinxqlquery.class.php
 
 		-
-			message: '#^Property SphinxqlQuery\:\:\$Expressions has no type specified\.$#'
+			rawMessage: Property SphinxqlQuery::$Expressions has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: ../classes/sphinxqlquery.class.php
 
 		-
-			message: '#^Property SphinxqlQuery\:\:\$Filters has no type specified\.$#'
+			rawMessage: Property SphinxqlQuery::$Filters has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: ../classes/sphinxqlquery.class.php
 
 		-
-			message: '#^Property SphinxqlQuery\:\:\$GroupBy has no type specified\.$#'
+			rawMessage: Property SphinxqlQuery::$GroupBy has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: ../classes/sphinxqlquery.class.php
 
 		-
-			message: '#^Property SphinxqlQuery\:\:\$Indexes has no type specified\.$#'
+			rawMessage: Property SphinxqlQuery::$Indexes has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: ../classes/sphinxqlquery.class.php
 
 		-
-			message: '#^Property SphinxqlQuery\:\:\$Limits has no type specified\.$#'
+			rawMessage: Property SphinxqlQuery::$Limits has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: ../classes/sphinxqlquery.class.php
 
 		-
-			message: '#^Property SphinxqlQuery\:\:\$Options has no type specified\.$#'
+			rawMessage: Property SphinxqlQuery::$Options has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: ../classes/sphinxqlquery.class.php
 
 		-
-			message: '#^Property SphinxqlQuery\:\:\$QueryString has no type specified\.$#'
+			rawMessage: Property SphinxqlQuery::$QueryString has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: ../classes/sphinxqlquery.class.php
 
 		-
-			message: '#^Property SphinxqlQuery\:\:\$Select has no type specified\.$#'
+			rawMessage: Property SphinxqlQuery::$Select has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: ../classes/sphinxqlquery.class.php
 
 		-
-			message: '#^Property SphinxqlQuery\:\:\$SortBy has no type specified\.$#'
+			rawMessage: Property SphinxqlQuery::$SortBy has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: ../classes/sphinxqlquery.class.php
 
 		-
-			message: '#^Property SphinxqlQuery\:\:\$SortGroupBy has no type specified\.$#'
+			rawMessage: Property SphinxqlQuery::$SortGroupBy has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: ../classes/sphinxqlquery.class.php
 
 		-
-			message: '#^Property SphinxqlQuery\:\:\$Sphinxql has no type specified\.$#'
+			rawMessage: Property SphinxqlQuery::$Sphinxql has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: ../classes/sphinxqlquery.class.php
 
 		-
-			message: '#^Method SphinxqlResult\:\:__construct\(\) has parameter \$Meta with no value type specified in iterable type array\.$#'
+			rawMessage: 'Method SphinxqlResult::__construct() has parameter $Meta with no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
 			count: 1
 			path: ../classes/sphinxqlresult.class.php
 
 		-
-			message: '#^Method SphinxqlResult\:\:collect\(\) return type has no value type specified in iterable type array\.$#'
+			rawMessage: 'Method SphinxqlResult::collect() return type has no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
 			count: 1
 			path: ../classes/sphinxqlresult.class.php
 
 		-
-			message: '#^Method SphinxqlResult\:\:to_array\(\) return type has no value type specified in iterable type array\.$#'
+			rawMessage: 'Method SphinxqlResult::to_array() return type has no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
 			count: 1
 			path: ../classes/sphinxqlresult.class.php
 
 		-
-			message: '#^Method SphinxqlResult\:\:to_pair\(\) return type has no value type specified in iterable type array\.$#'
+			rawMessage: 'Method SphinxqlResult::to_pair() return type has no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
 			count: 1
 			path: ../classes/sphinxqlresult.class.php
 
 		-
-			message: '#^Call to method getName\(\) of internal class WhichBrowser\\Model\\Primitive\\NameVersion from outside its root namespace WhichBrowser\.$#'
+			rawMessage: 'Offset ''collageid'' on *NEVER* in isset() always exists and is not nullable.'
+			identifier: isset.offset
+			count: 1
+			path: ../classes/text.class.php
+
+		-
+			rawMessage: 'Offset ''id'' on *NEVER* in isset() always exists and is not nullable.'
+			identifier: isset.offset
+			count: 2
+			path: ../classes/text.class.php
+
+		-
+			rawMessage: Offset 'id' on *NEVER* on left side of ?? always exists and is not nullable.
+			identifier: nullCoalesce.offset
+			count: 2
+			path: ../classes/text.class.php
+
+		-
+			rawMessage: 'Offset ''torrentid'' on *NEVER* in isset() always exists and is not nullable.'
+			identifier: isset.offset
+			count: 1
+			path: ../classes/text.class.php
+
+		-
+			rawMessage: Result of && is always false.
+			identifier: booleanAnd.alwaysFalse
+			count: 1
+			path: ../classes/text.class.php
+
+		-
+			rawMessage: Unreachable statement - code above always terminates.
+			identifier: deadCode.unreachable
+			count: 1
+			path: ../classes/text.class.php
+
+		-
+			rawMessage: 'Call to method getName() of internal class WhichBrowser\Model\Primitive\NameVersion from outside its root namespace WhichBrowser.'
 			identifier: method.internalClass
 			count: 1
 			path: ../lib/util.php
 
 		-
-			message: '#^Call to method getVersion\(\) of internal class WhichBrowser\\Model\\Primitive\\NameVersion from outside its root namespace WhichBrowser\.$#'
+			rawMessage: 'Call to method getVersion() of internal class WhichBrowser\Model\Primitive\NameVersion from outside its root namespace WhichBrowser.'
 			identifier: method.internalClass
 			count: 2
 			path: ../lib/util.php
 
 		-
-			message: '#^Offset ''userid'' on non\-empty\-array on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: ../sections/ajax/bookmarks/torrents.php
-
-		-
-			message: '#^Offset ''userid'' on non\-empty\-array on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: ../sections/ajax/requests.php
-
-		-
-			message: '#^Function Gazelle\\payload\(\) has parameter \$details with no value type specified in iterable type array\.$#'
+			rawMessage: 'Function Gazelle\payload() has parameter $details with no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
 			count: 1
 			path: ../sections/ajax/top10/torrents.php
 
 		-
-			message: '#^Offset ''hash'' on non\-empty\-array on left side of \?\? always exists and is not nullable\.$#'
+			rawMessage: Offset 'hash' on non-empty-array<mixed> on left side of ?? always exists and is not nullable.
 			identifier: nullCoalesce.offset
 			count: 1
 			path: ../sections/ajax/torrent.php
 
 		-
-			message: '#^Call to an undefined method object\:\:run\(\)\.$#'
+			rawMessage: 'Call to an undefined method object::run().'
 			identifier: method.notFound
 			count: 1
 			path: ../sections/api/index.php
 
 		-
-			message: '#^Offset ''aid'' on non\-empty\-array on left side of \?\? always exists and is not nullable\.$#'
+			rawMessage: Offset 'aid' on non-empty-array<mixed> on left side of ?? always exists and is not nullable.
 			identifier: nullCoalesce.offset
 			count: 1
 			path: ../sections/api/index.php
 
 		-
-			message: '#^Offset ''token'' on non\-empty\-array on left side of \?\? always exists and is not nullable\.$#'
+			rawMessage: Offset 'token' on non-empty-array<mixed> on left side of ?? always exists and is not nullable.
 			identifier: nullCoalesce.offset
 			count: 1
 			path: ../sections/api/index.php
 
 		-
-			message: '#^Call to an undefined method Gazelle\\Better\\ArtistCollage\|Gazelle\\Better\\ArtistDescription\|Gazelle\\Better\\ArtistDiscogs\|Gazelle\\Better\\ArtistImage\|Gazelle\\Better\\Artwork\|Gazelle\\Better\\Bad\|Gazelle\\Better\\Checksum\|Gazelle\\Better\\SingleSeeded\:\:setUploader\(\)\.$#'
+			rawMessage: 'Call to an undefined method Gazelle\Better\ArtistCollage|Gazelle\Better\ArtistDescription|Gazelle\Better\ArtistDiscogs|Gazelle\Better\ArtistImage|Gazelle\Better\Artwork|Gazelle\Better\Bad|Gazelle\Better\Checksum|Gazelle\Better\SingleSeeded::setUploader().'
 			identifier: method.notFound
 			count: 1
 			path: ../sections/better/better.php
 
 		-
-			message: '#^Offset ''userid'' on non\-empty\-array on left side of \?\? always exists and is not nullable\.$#'
+			rawMessage: Offset 'userid' on non-empty-array<mixed> on left side of ?? always exists and is not nullable.
 			identifier: nullCoalesce.offset
 			count: 1
 			path: ../sections/bonus/bprates.php
 
 		-
-			message: '#^Offset ''userid'' on non\-empty\-array on left side of \?\? always exists and is not nullable\.$#'
+			rawMessage: Offset 'userid' on non-empty-array<mixed> on left side of ?? always exists and is not nullable.
 			identifier: nullCoalesce.offset
 			count: 1
 			path: ../sections/bonus/history.php
 
 		-
-			message: '#^Offset ''userid'' on non\-empty\-array on left side of \?\? always exists and is not nullable\.$#'
+			rawMessage: Offset 'userid' on non-empty-array<mixed> on left side of ?? always exists and is not nullable.
 			identifier: nullCoalesce.offset
 			count: 1
 			path: ../sections/bookmarks/edit_torrents.php
 
 		-
-			message: '#^Offset ''userid'' on non\-empty\-array on left side of \?\? always exists and is not nullable\.$#'
+			rawMessage: Offset 'userid' on non-empty-array<mixed> on left side of ?? always exists and is not nullable.
 			identifier: nullCoalesce.offset
 			count: 1
 			path: ../sections/bookmarks/torrents.php
 
 		-
-			message: '#^Offset ''groupid'' on non\-empty\-array on left side of \?\? always exists and is not nullable\.$#'
+			rawMessage: Offset 'groupid' on non-empty-array<mixed> on left side of ?? always exists and is not nullable.
 			identifier: nullCoalesce.offset
 			count: 1
 			path: ../sections/collages/manage_handle.php
 
 		-
-			message: '#^Offset ''id'' on non\-empty\-array on left side of \?\? always exists and is not nullable\.$#'
+			rawMessage: Offset 'id' on non-empty-array<mixed> on left side of ?? always exists and is not nullable.
 			identifier: nullCoalesce.offset
 			count: 1
 			path: ../sections/comments/comments.php
 
 		-
-			message: '#^Variable \$info might not be defined\.$#'
+			rawMessage: Variable $info might not be defined.
 			identifier: variable.undefined
 			count: 1
 			path: ../sections/recovery/save.php
 
 		-
-			message: '#^Variable \$recovery might not be defined\.$#'
+			rawMessage: Variable $recovery might not be defined.
 			identifier: variable.undefined
 			count: 4
 			path: ../sections/recovery/save.php
 
 		-
-			message: '#^Offset ''bitrates'' on non\-empty\-array on left side of \?\? always exists and is not nullable\.$#'
+			rawMessage: If condition is always false.
+			identifier: if.alwaysFalse
+			count: 1
+			path: ../sections/reportsv2/resolve_handle.php
+
+		-
+			rawMessage: Offset 'bitrates' on non-empty-array<mixed> on left side of ?? always exists and is not nullable.
 			identifier: nullCoalesce.offset
 			count: 1
 			path: ../sections/requests/edit_handle.php
 
 		-
-			message: '#^Offset ''formats'' on non\-empty\-array on left side of \?\? always exists and is not nullable\.$#'
+			rawMessage: Offset 'formats' on non-empty-array<mixed> on left side of ?? always exists and is not nullable.
 			identifier: nullCoalesce.offset
 			count: 1
 			path: ../sections/requests/edit_handle.php
 
 		-
-			message: '#^Offset ''media'' on non\-empty\-array on left side of \?\? always exists and is not nullable\.$#'
+			rawMessage: Offset 'media' on non-empty-array<mixed> on left side of ?? always exists and is not nullable.
 			identifier: nullCoalesce.offset
 			count: 1
 			path: ../sections/requests/edit_handle.php
 
 		-
-			message: '#^Function Gazelle\\print_or_return\(\) has no return type specified\.$#'
+			rawMessage: 'Function Gazelle\print_or_return() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: ../sections/requests/fill_handle.php
 
 		-
-			message: '#^Offset ''convid'' on non\-empty\-array on left side of \?\? always exists and is not nullable\.$#'
+			rawMessage: Offset 'convid' on non-empty-array<mixed> on left side of ?? always exists and is not nullable.
 			identifier: nullCoalesce.offset
 			count: 1
 			path: ../sections/staffpm/viewconv_handle.php
 
 		-
-			message: '#^Variable \$post might not be defined\.$#'
+			rawMessage: Variable $post might not be defined.
 			identifier: variable.undefined
 			count: 1
 			path: ../sections/tools/development/referral_sandbox.php
 
 		-
-			message: '#^Variable \$url might not be defined\.$#'
+			rawMessage: Variable $url might not be defined.
 			identifier: variable.undefined
 			count: 2
 			path: ../sections/tools/development/referral_sandbox.php
 
 		-
-			message: '#^Expression on left side of \?\? is not nullable\.$#'
+			rawMessage: Expression on left side of ?? is not nullable.
 			identifier: nullCoalesce.expr
 			count: 1
 			path: ../sections/tools/managers/ajax_take_enable_request.php
 
 		-
-			message: '#^Offset ''tags_type'' on non\-empty\-array on left side of \?\? always exists and is not nullable\.$#'
+			rawMessage: 'Call to function is_null() with int will always evaluate to false.'
+			identifier: function.impossibleType
+			count: 1
+			path: ../sections/torrents/edit_handle.php
+
+		-
+			rawMessage: 'Offset ''Description''|''Encoding''|''Format''|''Media''|''RemasterCatalogueNu…''|''RemasterRecordLabel''|''RemasterTitle''|''RemasterYear''|''Scene'' on *NEVER* in isset() always exists and is not nullable.'
+			identifier: isset.offset
+			count: 1
+			path: ../sections/torrents/edit_handle.php
+
+		-
+			rawMessage: Offset 'Description'|'Encoding'|'Format'|'Media'|'RemasterCatalogueNu…'|'RemasterRecordLabel'|'RemasterTitle'|'RemasterYear'|'Scene' on *NEVER* on left side of ?? always exists and is not nullable.
+			identifier: nullCoalesce.offset
+			count: 1
+			path: ../sections/torrents/edit_handle.php
+
+		-
+			rawMessage: Offset 'tags_type' on non-empty-array on left side of ?? always exists and is not nullable.
 			identifier: nullCoalesce.offset
 			count: 2
 			path: ../sections/torrents/user.php
 
 		-
-			message: '#^Offset ''html'' on non\-empty\-array in empty\(\) always exists and is not falsy\.$#'
+			rawMessage: 'Offset ''html'' on non-empty-array<mixed> in empty() always exists and is not falsy.'
 			identifier: empty.offset
 			count: 1
 			path: ../sections/upload/parse_html.php
 
 		-
-			message: '#^Offset ''album_desc'' on non\-empty\-array on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: ../sections/upload/upload_handle.php
-
-		-
-			message: '#^Offset ''desc'' on non\-empty\-array on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: ../sections/upload/upload_handle.php
-
-		-
-			message: '#^Method GazelleUnitTest\\Helper\:\:makeTGroupMusic\(\) has parameter \$artistName with no value type specified in iterable type array\.$#'
+			rawMessage: 'Method GazelleUnitTest\Helper::makeTGroupMusic() has parameter $artistName with no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
 			count: 1
 			path: ../tests/helper.php
 
 		-
-			message: '#^Method GazelleUnitTest\\Helper\:\:makeTGroupMusic\(\) has parameter \$tagName with no value type specified in iterable type array\.$#'
+			rawMessage: 'Method GazelleUnitTest\Helper::makeTGroupMusic() has parameter $tagName with no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
 			count: 1
 			path: ../tests/helper.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, default: '''', limit: 100, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 2
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, default: '''', limit: 128, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 2
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, default: '''', limit: 15, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, default: '''', limit: 150, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 4
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, default: '''', limit: 16, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, default: '''', limit: 2, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, default: '''', limit: 200, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 5
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, default: '''', limit: 255, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 7
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, default: '''', limit: 30, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 3
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, default: '''', limit: 35, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 2
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, default: '''', limit: 40, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 2
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, default: '''', limit: 50, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, default: '''', limit: 500, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 8
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, default: '''', limit: 51, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, default: '''', limit: 55, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, default: '''', limit: 728, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, default: '''', limit: 80, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 5
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, default: ''0.0.0.0'', limit: 15, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 3
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, default: ''USD'', limit: 5, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 10, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 2
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 100, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 2
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 15, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 5
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 150, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 16777215, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 8
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 2, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 2
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 20, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 2
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 200, collation: ''utf8_swedish_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 25, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 255, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 22
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 3, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 30, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 2
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 32, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 9
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 32, collation: ''utf8_swedish_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 34, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 400, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 50, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 5
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 500, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 60, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 64, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 65535, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 26
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 80, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 3
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 80, collation: ''utf8_swedish_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 3
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: '''', limit: 20, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: '''', limit: 200, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: '''', limit: 255, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: null, limit: 10, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: null, limit: 100, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 6
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: null, limit: 13, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: null, limit: 15, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 4
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: null, limit: 16, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: null, limit: 16777215, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 16
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: null, limit: 20, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 5
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: null, limit: 200, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 2
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: null, limit: 2048, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 4
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: null, limit: 255, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 30
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: null, limit: 30, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 3
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: null, limit: 300, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 2
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: null, limit: 32, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 4
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: null, limit: 34, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: null, limit: 40, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: null, limit: 50, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 9
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: null, limit: 500, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: null, limit: 512, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 2
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: null, limit: 65535, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 26
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: null, limit: 728, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 2
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: null, limit: 80, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 5
+			path: my-migrations/20180104060449_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 32, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20200219075508_drop_secret.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::changeColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 255, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 3
+			path: my-migrations/20200219075508_drop_secret.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::changeColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 32, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20200219075508_drop_secret.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::changeColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 500, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20200219075508_drop_secret.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::changeColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 65535, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 3
+			path: my-migrations/20200219075508_drop_secret.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::changeColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: null, limit: 255, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20200219075508_drop_secret.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 10, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20200421032552_remove_drives.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 50, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20200421032552_remove_drives.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 3, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20200430134648_drop_dead_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: null, limit: 16777215, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 2
+			path: my-migrations/20200430134648_drop_dead_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: null, limit: 2048, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20200430134648_drop_dead_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: null, limit: 255, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 5
+			path: my-migrations/20200430134648_drop_dead_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: null, limit: 50, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 4
+			path: my-migrations/20200430134648_drop_dead_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: null, limit: 512, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20200430134648_drop_dead_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: null, limit: 728, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20200430134648_drop_dead_tables.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{limit: 100, encoding: ''utf8mb4''} given.'
+			identifier: argument.type
+			count: 2
+			path: my-migrations/20200512195120_discogs_artist.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{limit: 20, encoding: ''utf8mb4''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20200912155104_user_seedbox.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20201013211254_api_token.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 32, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20201013211254_api_token.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::changeColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{collation: ''utf8mb4_unicode_ci''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20201031182917_forum_thread_title.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::changeColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 16777215, collation: ''utf8mb4_unicode_ci'', encoding: ''utf8mb4''} given.'
+			identifier: argument.type
+			count: 2
+			path: my-migrations/20201226210341_comment_edits_not_null.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::changeColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, limit: 16777215, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 2
+			path: my-migrations/20201226210341_comment_edits_not_null.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 2, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20210201180413_nuke_geoip.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::changeColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, collation: ''utf8mb4_unicode_ci'', encoding: ''utf8mb4''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20210203173519_sane_wiki_revisions.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::changeColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 16777215, collation: ''utf8mb4_unicode_ci'', encoding: ''utf8mb4''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20210203173519_sane_wiki_revisions.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::changeColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: null, limit: 100, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20210203173519_sane_wiki_revisions.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::changeColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: null, limit: 16777215, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20210203173519_sane_wiki_revisions.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::changeColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, default: null, limit: 16777215, collation: ''utf8mb4_unicode_ci'', encoding: ''utf8mb4''} given.'
+			identifier: argument.type
+			count: 2
+			path: my-migrations/20210514174014_unicode_inbox.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::changeColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 16777215, collation: ''utf8mb4_unicode_ci'', encoding: ''utf8mb4''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20210514174014_unicode_inbox.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::changeColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 255, collation: ''utf8mb4_unicode_ci'', encoding: ''utf8mb4''} given.'
+			identifier: argument.type
+			count: 3
+			path: my-migrations/20210514174014_unicode_inbox.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::changeColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: null, limit: 16777215, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 3
+			path: my-migrations/20210514174014_unicode_inbox.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::changeColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, limit: 255, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 3
+			path: my-migrations/20210514174014_unicode_inbox.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::changeColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, default: null, collation: ''utf8mb4_unicode_ci'', encoding: ''utf8mb4'', limit: 16777215} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20210609175044_wiki_utf_8mb_4.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::changeColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 100, collation: ''utf8mb4_unicode_ci'', encoding: ''utf8mb4''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20210609175044_wiki_utf_8mb_4.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::changeColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: null, collation: ''utf8_general_ci'', encoding: ''utf8'', limit: 16777215} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20210609175044_wiki_utf_8mb_4.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::changeColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, limit: 100, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20210609175044_wiki_utf_8mb_4.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{limit: 20, encoding: ''ascii''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20210616100351_invite_source.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{limit: 768, encoding: ''ascii'', null: true} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20210720085440_users_history_passwords_now.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::changeColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{limit: 768, encoding: ''ascii'', null: false} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20210720085440_users_history_passwords_now.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{limit: 768, encoding: ''ascii'', null: true} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20210720093846_users_history_email_useragent.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::changeColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{limit: 768, encoding: ''ascii'', null: false} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20210720093846_users_history_email_useragent.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: null, limit: 16777215, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20211106221613_drop_calendar.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: null, limit: 255, collation: ''utf8_general_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20211106221613_drop_calendar.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: true, default: null, limit: 200, collation: ''utf8mb4_0900_ai_ci'', encoding: ''utf8mb4''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20240327000000_artists_alias_foreign_key.php
+
+		-
+			rawMessage: 'Parameter #3 $options of method Phinx\Db\Table::addColumn() expects array{limit?: int, length?: int, default?: mixed, null?: bool, after?: string, comment?: string, precision?: int, scale?: int, ...}, array{null: false, limit: 32, collation: ''utf8mb4_0900_ai_ci'', encoding: ''utf8''} given.'
+			identifier: argument.type
+			count: 1
+			path: my-migrations/20240614000000_remove_bad_passwords.php

@@ -74,7 +74,7 @@ class TranscodeTest extends TestCase {
     public function testSearchTranscodeSearch(): void {
         $this->search->setSearch('xcode');
         $this->assertEqualsCanonicalizing(
-            ['all' => 1, 'want_320' =>  0, 'want_v0' => 1],
+            ['all' => 1, 'total_320' =>  0, 'total_v0' => 1],
             $this->search->total(),
             'searchtranscode-search-total',
         );

@@ -116,12 +116,12 @@ class Upload extends \Gazelle\Base {
         $originalYear = $tgroup->year();
         $remasterYear = $torrent->remasterYear();
         $default = "unf.FromYear = 0 AND unf.ToYear = 0";
-        if ($originalYear && $remasterYear && ($originalYear !== $remasterYear)) {
+        if ($originalYear && $remasterYear && $originalYear !== $remasterYear) {
             $this->cond[] = "((? BETWEEN unf.FromYear AND unf.ToYear) OR (? BETWEEN unf.FromYear AND unf.ToYear) OR ($default))";
             $this->args = array_merge($this->args, [$originalYear, $remasterYear]);
-        } elseif ($originalYear || $remasterYear) {
+        } elseif ($originalYear) {
             $this->cond[] = "((? BETWEEN unf.FromYear AND unf.ToYear) OR ($default))";
-            $this->args[] = max($originalYear, $remasterYear);
+            $this->args[] = $originalYear;
         } else {
             $this->cond[] = $default;
         }

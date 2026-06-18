@@ -83,7 +83,7 @@ class CacheVector extends \Gazelle\Base {
         }
         $source = ord(substr($this->bitvec, $offset, 1));
         $mask   = 1 << ($value % 8);
-        $this->bitvec = substr_replace($this->bitvec, chr($source | $mask), $offset, 1);
+        $this->bitvec = substr_replace($this->bitvec, chr($source | $mask), $offset, 1); /** @phpstan-ignore-line argument.type (too zealous) */
         return true;
     }
 

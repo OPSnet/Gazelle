@@ -64,20 +64,15 @@ $Properties['Encoding'] = trim($_POST['bitrate'] ?? '');
 if ($Properties['Encoding'] === 'Other') {
     $_POST['other_bitrate'] = trim($_POST['other_bitrate'] ?? '');
 }
-$Properties['TagList'] = !empty($_POST['tags'])
+$Properties['TagList'] = isset($_POST['tags'])
     ? array_unique(array_map('trim', explode(',', $_POST['tags']))) // Musicbranes loves to send duplicates
     : [];
 $Properties['Image'] = trim($_POST['image'] ?? '');
-$Properties['GroupDescription'] = trim($_POST['album_desc'] ?? '');
+$Properties['GroupDescription'] = trim($_POST['album_desc'] ?? $_POST['desc'] ?? '');
 $Properties['Description'] = trim($_POST['release_desc'] ?? '');
-if (isset($_POST['album_desc'])) {
-    $Properties['GroupDescription'] = trim($_POST['album_desc'] ?? '');
-} elseif (isset($_POST['desc'])) {
-    $Properties['GroupDescription'] = trim($_POST['desc'] ?? '');
-}
 $Properties['GroupID'] = (int)($_POST['groupid'] ?? 0);
 
-if (empty($_POST['artists'])) {
+if (!isset($_POST['artists'])) {
     $Artists = [];
     $artistRole = [];
 } else {
@@ -85,7 +80,7 @@ if (empty($_POST['artists'])) {
     $artistRole = array_map('intval', $_POST['importance']);
 }
 
-if (!empty($_POST['requestid'])) {
+if (isset($_POST['requestid'])) {
     $RequestID = (int)$_POST['requestid'];
     $Properties['RequestID'] = $RequestID;
 }
@@ -98,7 +93,7 @@ if (!isset($_POST['workaround_broken_html_entities']) || $_POST['workaround_brok
         'GroupDescription', 'Description'
     ];
     foreach ($brokenProperties as $prop) {
-        if (!empty($Properties[$prop])) {
+        if (isset($Properties[$prop])) {
             $Properties[$prop] = html_unescape($Properties[$prop]);
         }
     }
@@ -142,7 +137,7 @@ if (in_array($categoryName, ['Music', 'Audiobooks', 'Comedy'])) {
             $Validate->setField('bitrate', true, 'string', 'FLAC bitrate must be lossless.', ['regex' => '/Lossless/']);
         } else {
             $Validate->setField('other_bitrate', true, 'string', 'You must enter the other bitrate (max length: 9 characters).', ['maxlength' => 9]);
-            $Properties['Encoding'] = trim($_POST['other_bitrate']) . (!empty($_POST['vbr']) ? ' (VBR)' : '');
+            $Properties['Encoding'] = trim($_POST['other_bitrate']) . (isset($_POST['vbr']) ? ' (VBR)' : '');
         }
     }
 }
@@ -230,7 +225,7 @@ if ($isMusicUpload && !$Properties['GroupID']) {
         }
     }
     $Properties['Artists'] = $ArtistForm;
-    if (empty($ArtistNameByRole[ARTIST_MAIN])) {
+    if (!isset($ArtistNameByRole[ARTIST_MAIN])) {
         json_error('Please enter at least one main artist');
     }
 }
@@ -313,9 +308,9 @@ if ($torrent) {
 if ($isMusicUpload) {
     // additional torrent files
     $dupeName = [$_FILES['file_input']['name'] => true];
-    if (!empty($_POST['extra_format']) && !empty($_POST['extra_bitrate'])) {
+    if (isset($_POST['extra_format']) && isset($_POST['extra_bitrate'])) {
         for ($i = 1; $i <= 5; $i++) {
-            if (empty($_FILES["extra_file_$i"])) {
+            if (!isset($_FILES["extra_file_$i"])) {
                 continue;
             }
             $filename    = $_FILES["extra_file_$i"];
@@ -329,14 +324,14 @@ if ($isMusicUpload) {
             }
             $dupeName[$filename['name']] = true;
 
-            $format = trim($_POST['extra_format'][$i - 1]);
-            if (empty($format)) {
+            if (!isset($_POST['extra_format'][$i - 1])) {
                 json_error('Missing format for extra torrent.');
             }
-            $encoding = trim($_POST['extra_bitrate'][$i - 1]);
-            if (empty($encoding)) {
+            $format = trim($_POST['extra_format'][$i - 1]);
+            if (!isset($_POST['extra_bitrate'][$i - 1])) {
                 json_error('Missing encoding/bitrate for extra torrent.');
             }
+            $encoding = trim($_POST['extra_bitrate'][$i - 1]);
 
             $xbencoder = new \OrpheusNET\BencodeTorrent\BencodeTorrent();
             try {
