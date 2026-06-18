@@ -11,7 +11,7 @@ if (!$Viewer->permitted('users_view_ips')) {
 }
 
 $ipMatches = null;
-$geoipData = null;
+$asnData = null;
 if (isset($_POST['data'])) {
     $ipMatches = UserMatch\ListMatcher::extract($_POST['data']);
     if (!$ipMatches) {
@@ -22,11 +22,11 @@ if (isset($_POST['data'])) {
         $uniqueIps[$match[0]] = true;
     }
     $uniqueIps = array_keys($uniqueIps);
-    $GeoIP = new Util\GeoIP();
-    $geoipData = $GeoIP->lookupList($uniqueIps);
+    $asn = new Search\ASN();
+    $asnData = $asn->findByIpList($uniqueIps);
 }
 
 echo $Twig->render('admin/geoip-lookup.twig', [
-    'geoip_data' => $geoipData,
+    'asn_data' => $asnData,
     'ip_matches' => $ipMatches,
 ]);

@@ -15,7 +15,6 @@ define('BONUS_UPLOAD_BOOST_ACTIVE', true);
 define('DEBUG_TWIG', true);
 define('DISABLE_IRC', false);
 define('FEATURE_EMAIL_REENABLE', true);
-define('GEOIP_SERVER', true);
 define('HTTP_PROXY', '127.0.0.1');
 define('LASTFM_API_KEY', true);
 define('OPEN_EXTERNAL_REFERRALS', true);

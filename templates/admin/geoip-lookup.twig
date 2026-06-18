@@ -1,7 +1,7 @@
 {{ header('GeoIP Lookup', {'js': 'vendor/table-sort.min,resolve-ip'}) }}
 <div class="thin">
     <div class="header">
-        <h2 align="center">GeoIP Lookup</h2>
+        <h2>GeoIP Lookup</h2>
     </div>
 {% if ip_matches %}
     <div class="box2">
@@ -18,13 +18,13 @@
             </thead>
             <tbody>
 {%  for data in ip_matches %}
-{%      set asn_info = geoip_data[data[0]] %}
+{%      set asn_info = asn_data[data[0]] %}
                 <tr>
                     <td>{{ data[0] }}</td>
                     <td>{{ data[1].format('c') }}</td>
                     <td>{{ data[2].format('c') }}</td>
-                    <td>{{ asn_info.country_iso }}</td>
-                    <td>ASN {{  asn_info.asn }} / {{ asn_info.asn_org }}</td>
+                    <td>{{ asn_info.cc }}</td>
+                    <td>ASN {{ asn_info.n }} / {{ asn_info.name }}</td>
                     <td><span class="resolve-ipv4" data-ip="{{ data[0] }}">Resolving...</span></td>
                 </tr>
 {%  endfor %}

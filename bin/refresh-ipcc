@@ -6,7 +6,7 @@ namespace Gazelle;
 require __DIR__ . '/../lib/bootstrap.php';
 
 $db      = DB::DB();
-$geoip   = new Util\GeoIP();
+$asn     = new Search\ASN();
 $userMan = new Manager\User();
 
 $db->prepared_query("
@@ -19,7 +19,7 @@ foreach ($db->collect(0) as $id) {
     if (is_null($user)) {
         continue;
     }
-    $user->setField('ipcc', $geoip->countryISO($user->ipaddr()))->modify();
+    $user->setField('ipcc', $asn->countryISO($user->ipaddr()))->modify();
     ++$n;
 }
 

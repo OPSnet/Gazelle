@@ -114,7 +114,7 @@ class UserCreator extends Base {
                 ? UserStatus::enabled->value
                 : UserStatus::unconfirmed->value,
             STARTING_INVITES,
-            new Util\GeoIP()->countryISO($ipaddr),
+            new Search\ASN()->countryISO($ipaddr),
             authKey()
         ];
 

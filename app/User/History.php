@@ -445,9 +445,9 @@ class History extends \Gazelle\BaseUser {
     protected static function addAsnInfo(ASN $asn, array &$ipList): void {
         $asnList = $asn->findByIpList(array_unique(array_map(fn ($r) => $r['ip'], $ipList)));
         foreach ($ipList as &$row) {
-            $row['cc']   = $asnList[$row['ip']]['cc'];
-            $row['n']    = $asnList[$row['ip']]['n'];
-            $row['name'] = $asnList[$row['ip']]['name'];
+            foreach ($asnList[$row['ip']] as $k => $v) {
+                $row[$k] = $v;
+            }
         }
     }
 }

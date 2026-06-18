@@ -420,10 +420,7 @@ defined('PUSH_SERVER_SECRET') or define('PUSH_SERVER_SECRET', 'changeme');
 defined('PUSH_SETTINGS_WIKI_PAGE_ID') or define('PUSH_SETTINGS_WIKI_PAGE_ID', 0);
 
 // ------------------------------------------------------------------------
-// GeoIP server settings
-
-// The HTTP endpoint of the geoip service
-defined('GEOIP_SERVER') or define('GEOIP_SERVER', false);
+// Country stats settings
 
 // Countries with less than this number of users is rounded up this value
 // for privacy, to avoid having countries with one user.

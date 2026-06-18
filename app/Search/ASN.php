@@ -28,8 +28,8 @@ class ASN extends \Gazelle\Base {
         if (!$ipList) {
             return [];
         }
-        $ipList = array_map(fn ($ip) => $ip === '' ? '0.0.0.0' : $ip, array_unique($ipList));
-        $ipList = array_map(fn ($ip) => str_contains($ip, '%3A') ? '0.0.0.0' : $ip, $ipList); // filter truncated IPv6 addresses from ocelot
+        // filter truncated IPv6 addresses from ocelot
+        $ipList = array_filter(array_unique($ipList), fn ($ip) => $ip && !str_contains($ip, '%3A'));
         $result = $this->pg()->all("
             SELECT lu.ip,
                 an.network,
@@ -70,6 +70,10 @@ class ASN extends \Gazelle\Base {
         );
         $this->ipCache[$ip] = $result;
         return $result;
+    }
+
+    public function countryISO(string $ip): string {
+        return $this->findByIp($ip)['cc'] ?? 'XX';
     }
 
     public function searchName(string $text): array {
