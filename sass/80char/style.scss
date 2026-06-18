@@ -279,6 +279,22 @@ ul.thin li {
   margin: -5px auto 0 auto;
 }
 
+#alerts .alertbar-user,
+#alerts .alertbar-staff {
+  color: inherit;
+  text-align: inherit;
+}
+
+#alert-events .alertbar-gift-event {
+  background: #FF0808;
+  border: 1px solid #000;
+  color: #000;
+  margin: 10px auto;
+  max-width: 640px;
+  padding: 10px 18px;
+  text-align: center;
+}
+
 #footer {
   background: transparent url('https://what.cd/static/styles/postmod/images/bg_footer.png');
   margin-top: 40px;
@@ -564,7 +580,10 @@ ul.thin li {
 #userinfo a {
   color: #fff;
 }
-#alerts a {
+#alerts a,
+#alerts .alertbar-user a,
+#alerts .alertbar-staff a,
+#alert-events .alertbar-gift-event a {
   color: #000000;
 }
 

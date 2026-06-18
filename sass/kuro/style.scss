@@ -450,7 +450,10 @@ ul.thin li {
   // float: left;
 }
 
-.alertbar {
+.alertbar,
+.alertbar-user,
+.alertbar-staff,
+.alertbar-gift-event {
   background-color: #222;
   text-align: center;
   color: #ccc;
@@ -461,14 +464,25 @@ ul.thin li {
   padding: 10px;
 }
 
-.alertbar a {
-  color: #555;
-  text-decoration: underline;
+#alert-events .alertbar-gift-event {
+  border: 1px solid #303030;
+  margin: 10px auto;
+  max-width: 640px;
+  width: auto;
 }
 
-.alertbar a:hover {
-  color: #777;
-  text-decoration: none;
+.alertbar a,
+.alertbar-user a,
+.alertbar-staff a,
+.alertbar-gift-event a {
+  color: #555;
+  text-decoration: underline;
+
+  &:hover,
+  &:focus {
+    color: #777;
+    text-decoration: none;
+  }
 }
 
 /* Layout (Any page) */

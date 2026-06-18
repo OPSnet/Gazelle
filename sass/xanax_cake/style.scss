@@ -350,7 +350,10 @@ ul.thin li {
   // width: 12em;
 }
 
-.alertbar {
+.alertbar,
+.alertbar-user,
+.alertbar-staff,
+.alertbar-gift-event {
   background-color: #E5F3B5;
   border: 1px solid #999;
   color: #444;
@@ -362,14 +365,22 @@ ul.thin li {
   width: 350px;
 }
 
-.alertbar a {
-  color: #555;
-  text-decoration: underline;
+#alert-events .alertbar-gift-event {
+  margin: 10px auto;
 }
 
-.alertbar a:hover {
-  color: #777;
-  text-decoration: none;
+.alertbar a,
+.alertbar-user a,
+.alertbar-staff a,
+.alertbar-gift-event a {
+  color: #555;
+  text-decoration: underline;
+
+  &:hover,
+  &:focus {
+    color: #777;
+    text-decoration: none;
+  }
 }
 
 /* Layout (Artist page) */

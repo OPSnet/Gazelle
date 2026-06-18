@@ -314,15 +314,39 @@ ul#userinfo_stats li a {
 .blend,
 .blend a,
 .alertbar,
-.alertbar a {
+.alertbar-user,
+.alertbar-staff,
+.alertbar-gift-event,
+.alertbar a,
+.alertbar-user a,
+.alertbar-staff a,
+.alertbar-gift-event a {
   font-weight: bold;
   padding: 2px;
   color: #d5efff;
 }
 
-.blend a:hover,
-.alertbar a:hover {
+.blend a:hover {
   color: #fff;
+}
+
+.alertbar a,
+.alertbar-user a,
+.alertbar-staff a,
+.alertbar-gift-event a {
+  &:hover,
+  &:focus {
+  color: #fff;
+  }
+}
+
+#alert-events .alertbar-gift-event {
+  background: #252525;
+  border: 1px solid #666;
+  margin: 10px auto;
+  max-width: 640px;
+  padding: 10px 18px;
+  text-align: center;
 }
 
 ul#userinfo_stats li span.stat {

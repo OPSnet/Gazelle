@@ -354,7 +354,10 @@ ul.thin li {
   background: #383c4a;
   margin-top: 7px;
 }
-.alertbar {
+.alertbar,
+.alertbar-user,
+.alertbar-staff,
+.alertbar-gift-event {
   background-color: #4b5162;
   border-bottom: 1px solid #5294e2;
   border-left: 1px solid #5294e2;
@@ -367,16 +370,29 @@ ul.thin li {
   padding: 10px;
   width: 350px;
 }
-.alertbar:first-of-type {
+.alertbar:first-of-type,
+.alertbar-user:first-of-type,
+.alertbar-staff:first-of-type,
+.alertbar-gift-event:first-of-type {
   border-top: 1px solid #5294e2;
 }
-.alertbar a {
+
+#alert-events .alertbar-gift-event {
+  margin: 10px auto;
+}
+
+.alertbar a,
+.alertbar-user a,
+.alertbar-staff a,
+.alertbar-gift-event a {
   color: #a7adb9;
   text-decoration: underline;
-}
-.alertbar a:hover {
-  color: #a7adb9;
-  text-decoration: none;
+
+  &:hover,
+  &:focus {
+    color: #a7adb9;
+    text-decoration: none;
+  }
 }
 
 /* Layout (Any page) */

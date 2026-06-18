@@ -1,4 +1,5 @@
 @use "variables";
+@use "sass:color";
 
 // _base.scss for Apollostage
 //
@@ -17,6 +18,8 @@
    ########################################################################
 */
 
+/*  # 2026-05-27 - Alertbar cleanups */
+
 /*  # 2026-02-11 - Updates for new site features */
 
 /*  # 2025-12-15 - Bug fixes per community feedback, including
@@ -34,12 +37,17 @@
 // FULL CHANGELOG
 // ########################################################################
 //
+//  Updated 2026-05-27:
+//
+//  Chore: (059) Split DOM for user/staff header bars.
+//       Keep .alertbar as shared base behavior; use class-only hooks
+//       (.alertbar-user and .alertbar-staff).
+//  Fix: Add a dedicated event-alert region for large gift event boxes.
+//
 //  Updated 2026-02-11:
 //
 //  Feat: Add handling for new Input[type=number]
-//  
 //
-// 
 //  Updated 2025-12-15:
 //
 //  Fix: (032) Pulldown memo will appear over notifications;
@@ -2612,34 +2620,52 @@ tr.snatched_torrent div.tags::before {
 /* ## 2.3.1 Base styling */
 
 #alerts {
-  border: 2px solid variables.$color-accent-border-alert;  /* varies by stylesheet */
-  border-radius: 5px;
-  margin: 10px auto 0 auto;
+  margin: 8px auto 8px auto;
   max-width: fit-content;
   min-width: 40%;
+}
+
+#alert-events {
+  margin: 8px auto;
+  text-align: center;
 }
 
 /* Alertbar occurs when User Settings: Notifications: "Traditional" is selected. */
 /* Save_message can occur on request votes. */
 .alertbar,
+.alertbar-user,
+.alertbar-staff,
+.alertbar-gift-event,
 .sys_error,
 .save_message {
+  border: 0;
+  border-radius: 4px;
+  box-shadow: 0 0 0 2px variables.$color-accent-border-alert;
   background-color: variables.$color-background-alert;  /* varies by stylesheet */
   color: variables.$color-text-base !important;  /* varies by stylesheet */
   font-size: 13px;
   font-weight: 500;
-  padding: 10px 10px 10px 48px;
+  padding: .4rem 1.6rem;
   text-align: center;
+  margin: 10px;
 }
 
-.alertbar:first-of-type {
-  background-image: variables.$icon-notification;
-  background-position: 8px center;
-  background-repeat: no-repeat;
-  background-size: 32px;
+/* Staff alertbars keep a distinct, muted ring. */
+.alertbar-staff {
+  box-shadow: 0 0 0 2px color.mix(variables.$menutheme-1000, variables.$color-background-alert, 30%);
 }
 
-.alertbar a {
+.alertbar-gift-event {
+  display: inline-block;
+  margin: 6px auto;
+  max-width: min(100%, 760px);
+  padding: .35rem 2rem;
+}
+
+.alertbar a,
+.alertbar-user a,
+.alertbar-staff a,
+.alertbar-gift-event a {
   color: variables.$color-anchor-alert !important;
 }
 

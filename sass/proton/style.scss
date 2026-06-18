@@ -325,12 +325,26 @@ ul#userinfo_stats li a {
   background-color: #cccccc;
 }
 
-.alertbar {
+.alertbar,
+.alertbar-user,
+.alertbar-staff,
+.alertbar-gift-event {
   font-weight: normal;
   padding: 0 5px;
 }
 
-.alertbar a {
+#alert-events .alertbar-gift-event {
+  border: 1px solid #cccccc;
+  margin: 10px auto;
+  max-width: 640px;
+  padding: 10px 18px;
+  text-align: center;
+}
+
+.alertbar a,
+.alertbar-user a,
+.alertbar-staff a,
+.alertbar-gift-event a {
   font-weight: bold;
   padding: 2px;
 }

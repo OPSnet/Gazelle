@@ -446,11 +446,29 @@ textarea.wbbarea {
   opacity: 0.95;
 }
 
-.alertbar {
+.alertbar,
+.alertbar-user,
+.alertbar-staff {
   float: left;
 }
 
-.alertbar a {
+.alertbar-gift-event {
+  float: none;
+}
+
+#alert-events .alertbar-gift-event {
+  background: #262626;
+  border: 1px solid #757575;
+  margin: 10px auto;
+  max-width: 640px;
+  padding: 10px 18px;
+  text-align: center;
+}
+
+.alertbar a,
+.alertbar-user a,
+.alertbar-staff a,
+.alertbar-gift-event a {
   color: #f60021;
   padding-right: 10px;
 }

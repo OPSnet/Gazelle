@@ -441,7 +441,10 @@ ul.thin li {
 }
 
 #userinfo a,
-#alerts a {
+#alerts a,
+#alerts .alertbar-user a,
+#alerts .alertbar-staff a,
+#alert-events .alertbar-gift-event a {
   color: #fff;
 }
 
@@ -534,6 +537,23 @@ ul.thin li {
   position: absolute;
   text-align: center;
   width: 320px;
+}
+
+#alerts .alertbar-user,
+#alerts .alertbar-staff {
+  color: inherit;
+  text-align: inherit;
+}
+
+#alert-events .alertbar-gift-event {
+  background: rgb(30 30 30 / 80%);
+  border: 1px solid #EEE;
+  box-shadow: 1px 3px rgb(0 0 0 / 50%);
+  color: #FFF;
+  margin: 10px auto;
+  max-width: 640px;
+  padding: 10px 18px;
+  text-align: center;
 }
 
 #cat-selector ul {

@@ -162,7 +162,7 @@
 {% if alert_list or action_list or viewer.permitted('site_analysis') %}
 <div id="alerts">
 {%  if alert_list or viewer.permitted('site_analysis') %}
-<div class="alertbar">{{ alert_list|join(' ⋅ ')|raw }}
+<div class="alertbar alertbar-user">{{ alert_list|join(' ⋅ ')|raw }}
 {%      if viewer.permitted('site_analysis') %}
     <form class="analysis-case" action="tools.php" method="POST">
         <input type="hidden" name="action" value="analysis">
@@ -170,15 +170,16 @@
         <input value="case" type="submit" name="go">
     </form>
 {%      endif %}
-</div>{# id="alertbar" #}
+</div>{# class="alertbar alertbar-user" #}
 {%  endif %}
 {%  if action_list %}
-<div class="alertbar blend">{{ action_list|join(' ⋅ ')|raw }}</div>
+<div class="alertbar alertbar-staff blend">{{ action_list|join(' ⋅ ')|raw }}</div>
 {%  endif %}
 </div>{# id="alerts", id="content" open #}
 {% endif %}
 {% if gift_event and viewer.requestContext.module != 'gift' %}
-<div class="alertbar">
+<div id="alert-events">
+<div class="alertbar alertbar-gift-event">
 <div class="center">
 <h1>{{ gift_event.name }}</h1>
 {%- if gift_event.isGiftAvailable(viewer) %}
@@ -210,5 +211,6 @@
 <br>{# I drowned a kitten for this #}
 {%  endif -%}
 </div>{# class="center" #}
-</div>{# class="alertbar blend" #}
+</div>{# class="alertbar alertbar-gift-event" #}
+</div>{# id="alert-events" #}
 {% endif %}

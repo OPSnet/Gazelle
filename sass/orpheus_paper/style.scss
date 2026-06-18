@@ -323,12 +323,10 @@ variables.$icon-number-leechers: url(config('STATIC_SERVER') + "/svg/std/arrow-d
 
 // // standard:
 // changing to #000 black version
-// variables.$icon-notification: url(config('STATIC_SERVER') + "/svg/std/notification-bell-000.svg");
 // variables.$icon-warning: url(config('STATIC_SERVER') + "/svg/std/x-000.svg")
 
 // // Orpheus specific; other deployments, use the above.
 // changing to #000 black version
-variables.$icon-notification: url(config('STATIC_SERVER') + "/svg/site/ops-icon-harp-000.svg");
 variables.$icon-warning: url(config('STATIC_SERVER') + "/svg/site/ops-icon-triangle-000.svg");
 
 @use '../apollostage/_base';
