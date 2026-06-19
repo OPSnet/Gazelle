@@ -744,7 +744,7 @@ class Request extends BasePgObject implements Bookmarked, CategoryHasArtist {
      */
     public function userBounty(User $user): int {
         $vote = array_filter($this->userIdVoteList(), fn($r) => $r['user_id'] == $user->id);
-        return count($vote) ? current($vote)['bounty'] : 0;
+        return count($vote) ? array_first($vote)['bounty'] : 0;
     }
 
     /**

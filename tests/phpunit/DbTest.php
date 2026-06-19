@@ -130,7 +130,7 @@ class DbTest extends TestCase {
 
         $queryList = $db->queryList();
         $this->assertEquals($initial + 2, count($queryList), 'db-querylist');
-        $last = end($queryList);
+        $last = array_last($queryList);
         $this->assertIsArray($last['warning'], 'db-has-warning');
         $warning = $last['warning'];
         $this->assertCount(1, $warning, 'db-warning');
@@ -178,7 +178,7 @@ class DbTest extends TestCase {
 
         $list = array_filter($db->redundantIndexList(), fn ($t) => $t['table_name'] === $tableName);
         $this->assertCount(1, $list, 'db-index-redundant');
-        $redundant = current($list);
+        $redundant = array_first($list);
         $this->assertEquals($tableName, $redundant['table_name'], 'redundant-table-name');
         $this->assertEquals('t1 (t1,t2)', $redundant['covering_index'], 'covering-index-name');
         $this->assertEquals('t1_2 (t1)', $redundant['redundant_index'], 'redundant-index-name');
@@ -187,7 +187,7 @@ class DbTest extends TestCase {
 
         $list = array_filter($db->unusedIndexList(), fn ($t) => $t['table_name'] === $tableName);
         $this->assertCount(2, $list, 'db-index-unused');
-        $unused = current($list);
+        $unused = array_first($list);
         $this->assertEquals($tableName, $unused['table_name'], 'unused-table-name');
         $this->assertEquals('t1', $unused['index_name'], 'unused-index-name');
         $this->assertEquals('t1 {0}, t2 {0}', $unused['column_list'], 'unused-column-list');
@@ -373,7 +373,7 @@ class DbTest extends TestCase {
             $queryList[1]['epoch'],
             'db-pg-stats-epoch'
         );
-        $last = end($queryList);
+        $last = array_last($queryList);
         $this->assertEquals(
             "select now() + $1 * '1 day'::interval",
             trim($last['query']),

@@ -417,11 +417,11 @@ class UserManagerTest extends TestCase {
 
     public function testUserclassFlush(): void {
         $manager = new Manager\User();
-        $administratorId = (int)current(array_filter(
+        $administratorId = (int)array_first(array_filter(
             $manager->classList(),
             fn ($class) => $class['Name'] == 'Administrator'
         ))['ID'];
-        $alphaTeamId = (int)current(
+        $alphaTeamId = (int)array_first(
             array_filter($manager->classList(),
             fn ($class) => $class['Name'] == 'Alpha Team'
         ))['ID'];
@@ -446,7 +446,7 @@ class UserManagerTest extends TestCase {
         $manager  = new Manager\User();
         $userflow = $manager->userflow();
         $this->assertGreaterThanOrEqual(0, count($userflow), 'uman-userflow-is-array');
-        $recent = end($userflow);
+        $recent = array_last($userflow);
         $this->assertGreaterThanOrEqual(0, count($recent), 'uman-userflow-recent-is-array');
         $this->assertEquals(['Week', 'created', 'disabled'], array_keys($recent), 'userman-recent-keys');
         $this->assertGreaterThan(

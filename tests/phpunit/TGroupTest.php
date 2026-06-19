@@ -256,7 +256,7 @@ class TGroupTest extends TestCase {
             $artistRole->nameList(),
             'tgroup-artistrole-namelist',
         );
-        $first = current($main);
+        $first = array_first($main);
         $this->assertEquals($artistName, $first['name'], 'tgroup-artist-first-name');
 
         $foundByArtist = $this->manager->findByArtistReleaseYear(
@@ -507,11 +507,11 @@ class TGroupTest extends TestCase {
 
         $siteLog = new Manager\SiteLog();
         $list = $siteLog->tgroupLogList($this->tgroup);
-        $event = end($list);
+        $event = array_last($list);
         $this->assertStringContainsString("($oldName)", $event['note'], 'tgroup-merge-old-name');
         $this->assertStringContainsString("({$this->tgroup->name()})", $event['note'], 'tgroup-merge-new-name');
 
-        $general = current($siteLog->page(1, 0, ''));
+        $general = array_first($siteLog->page(1, 0, ''));
         $this->assertEquals(
             "Group <a href=\"torrents.php?id=$oldId\">$oldId</a> deleted following merge to {$this->tgroup->id}.",
             $general['message'],

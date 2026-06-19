@@ -55,8 +55,8 @@ $slice = $thread->slice(perPage: $PerPage, page: $Page);
 $paginator = new Util\Paginator($PerPage, $Page);
 $paginator->setTotal($thread->postTotal());
 
-$firstOnPage = current($slice)['ID'] ?? 0;
-$lastOnPage = count($slice) ? end($slice)['ID'] : 0;
+$firstOnPage = array_first($slice)['ID'] ?? 0;
+$lastOnPage = count($slice) ? array_last($slice)['ID'] : 0;
 if ($lastOnPage <= $thread->pinnedPostId() && $thread->postTotal() <= $PerPage * $Page) {
     $lastOnPage = $thread->pinnedPostId();
 }
@@ -104,7 +104,7 @@ if ($thread->pinnedPostId()) {
     if (!$slice) {
         $slice = [$thread->pinnedPostInfo()];
     } else {
-        if ($thread->pinnedPostId() != current($slice)['ID']) {
+        if ($thread->pinnedPostId() != array_first($slice)['ID']) {
             array_unshift($slice, $thread->pinnedPostInfo());
         }
         if ($thread->pinnedPostId() != $slice[count($slice) - 1]['ID']) {
@@ -237,7 +237,7 @@ echo ' colspan="2"'; } ?>>
 echo $paginator->linkbox();
 
 if ($Viewer->permitted('site_moderate_forums') || ($Viewer->writeAccess($forum) && !$thread->isLocked())) {
-    $lastPost = end($slice);
+    $lastPost = array_last($slice);
     echo $Twig->render('reply.twig', [
         'object'   => $thread,
         'merge'    => strtotime($lastPost['AddedTime']) > time() - 3600 && $lastPost['AuthorID'] == $Viewer->id,

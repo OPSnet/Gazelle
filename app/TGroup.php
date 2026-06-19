@@ -446,7 +446,7 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
 
     public function primaryTag(): string {
         $tagList = $this->tagList();
-        return $tagList ? ucfirst(current($tagList)['name']) : '';
+        return $tagList ? ucfirst(array_first($tagList)['name']) : '';
     }
 
     public function primaryTagCss(): string {

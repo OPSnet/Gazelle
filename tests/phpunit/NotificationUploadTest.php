@@ -332,7 +332,7 @@ class NotificationUploadTest extends TestCase {
         // look at the pending stats
         $manager = new Manager\Notification();
         $pending = $manager->ticketPendingStats();
-        $lastHour = end($pending);
+        $lastHour = array_last($pending);
         $this->assertEquals(1, $lastHour['total'], 'notif-stats-pending');
 
         // process the backlog
@@ -483,7 +483,7 @@ class NotificationUploadTest extends TestCase {
         $page = $search->page(2, 0);
         $this->assertCount(1, $page, 'notif-search-page');
 
-        $item = current($page);
+        $item = array_first($page);
         $this->assertEquals($filter, $item['id'], 'notif-search-filter-id');
         $this->assertEquals($filter, $item['filter']->id, 'notif-search-filter-id');
 

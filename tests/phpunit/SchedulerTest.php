@@ -149,7 +149,7 @@ class SchedulerTest extends TestCase {
     public function testTaskDetailList(): void {
         $list = new TaskScheduler()->taskDetailList();
         $this->assertCount(42, $list, 'task-detail-list');
-        $detail = current($list);
+        $detail = array_first($list);
         $this->assertEqualsCanonicalizing(
             [
                 "id_task", "name", "description", "period",
@@ -184,7 +184,7 @@ class SchedulerTest extends TestCase {
             $history->count - $initial->count,
             'task-history-total'
         );
-        $item = current($history->items);
+        $item = array_first($history->items);
         $this->assertTrue(Helper::recentDate($item->created->format('Y-m-d H:i:s')), 'task-created');
         $this->assertEquals('completed', $item->status, 'task-status');
         $this->assertEquals(0, $item->nrErrors, 'task-nr-error');

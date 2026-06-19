@@ -18,7 +18,7 @@ class SiteInfoTest extends TestCase {
             $info->composerVersion(),
             'siteinfo-composer-version'
         );
-        $package = current($info->composerPackages());
+        $package = array_first($info->composerPackages());
         $this->assertEquals(
             ['name', 'require', 'locked', 'installed'],
             array_keys($package),

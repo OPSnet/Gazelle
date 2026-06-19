@@ -96,7 +96,7 @@ class TGroupList extends \Gazelle\Json {
             } else {
                 // Viewing a type that does not require grouping
                 if ($this->groupResults) {
-                    $torrent = $this->torMan->findById(current($torrentIdList));
+                    $torrent = $this->torMan->findById(array_first($torrentIdList));
                 } else {
                     // $Key is the torrentID in this case
                     $torrent = $this->torMan->findById((int)$Key);

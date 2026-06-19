@@ -15,7 +15,7 @@ class BonusTest extends TestCase {
     public function tearDown(): void {
         if (isset($this->tgroupList)) {
             foreach ($this->tgroupList as $tgroup) {
-                Helper::removeTGroup($tgroup, current($this->userList));
+                Helper::removeTGroup($tgroup, array_first($this->userList));
             }
         }
         if (isset($this->userList)) {
@@ -228,7 +228,7 @@ class BonusTest extends TestCase {
         $this->assertCount(7, $history, 'bonus-history-count');
         $this->assertEquals(
             ['id', 'title', 'total', 'cost'],
-            array_keys(current($history)),
+            array_keys(array_first($history)),
             'bonus-history-shape',
         );
 

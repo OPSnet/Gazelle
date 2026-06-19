@@ -115,7 +115,7 @@ class UserCreateTest extends TestCase {
         $inbox = $this->user->inbox();
         $this->assertEquals(1, $inbox->messageTotal(), 'user-login-fail-inbox');
         $list    = $inbox->messageList(new Manager\PM($this->user), 3, 0);
-        $warning = end($list);
+        $warning = array_last($list);
         $this->assertEquals(
             'Too many login attempts on your account',
             $warning->subject(),

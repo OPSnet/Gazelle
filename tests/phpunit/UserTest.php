@@ -317,7 +317,7 @@ class UserTest extends TestCase {
         $this->assertGreaterThan(5, $list, 'we-can-haz-stylesheets');
         $this->assertEquals(count($list), count($manager->usageList()), 'stylesheet-list-usage');
 
-        $sheet = end($list);
+        $sheet = array_last($list);
         $url   = STATIC_SERVER . '/bogus.css';
         $stylesheet = $this->user->stylesheet();
         $this->assertNull($stylesheet->styleUrl(), 'stylesheet-no-external-url');
@@ -441,7 +441,7 @@ class UserTest extends TestCase {
         $this->user->modify();
         $this->assertEquals($new, $this->user->announceKey(), 'utest-new-announce-key');
         $this->assertEquals(1, $this->user->history()->announceKeyTotal(), 'utest-announce-key-new-count');
-        $history = current($this->user->history()->announceKeyList());
+        $history = array_first($this->user->history()->announceKeyList());
         $this->assertCount(4, $history, 'utest-announce-key-new-history');
         $this->assertEquals($key, $history['previous'], 'utest-announce-key-history-old');
         $this->assertEquals(

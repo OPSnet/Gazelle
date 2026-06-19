@@ -37,6 +37,6 @@ class MysqlInfoTest extends TestCase {
             Direction::descending,
         );
         $list = $mysqlInfo->info();
-        $this->assertEquals('xbt_snatched', current($list)['table_name'], 'mysqlinfo-list');
+        $this->assertEquals('xbt_snatched', array_first($list)['table_name'], 'mysqlinfo-list');
     }
 }

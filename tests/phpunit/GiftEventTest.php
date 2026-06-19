@@ -203,7 +203,7 @@ class GiftEventTest extends TestCase {
 
         $list = $giftEvent->userPage(10, 0, 'total', 'desc');
         $this->assertCount(1, $list, 'gift-event-user-page-total');
-        $row = current($list);
+        $row = array_first($list);
         $this->assertEquals($this->user->id, $row['id_user'], 'gift-event-user-page-id');
         $this->assertEquals(1, $row['total'], 'gift-event-user-page-total');
         $this->assertEquals(
@@ -232,7 +232,7 @@ class GiftEventTest extends TestCase {
         );
         $this->assertEquals(
             1,
-            current($stats)['total'],
+            array_first($stats)['total'],
             'gift-event-gift-stats-item-total',
         );
         $giftEvent->remove();

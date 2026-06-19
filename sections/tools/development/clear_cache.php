@@ -69,7 +69,7 @@ if (!empty($_REQUEST['key'])) {
 if (isset($_REQUEST['json'])) {
     header('Content-Type: application/json');
     if (count($result) == 1) {
-        print(json_encode(current($result)));
+        print(json_encode(array_first($result)));
     } else {
         print(json_encode($result));
     }

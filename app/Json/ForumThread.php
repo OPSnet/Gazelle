@@ -18,7 +18,7 @@ class ForumThread extends \Gazelle\Json {
         $slice = $thread->slice($paginator->page(), $paginator->perPage());
 
         if ($this->updateLastRead) {
-            $lastPost = end($slice);
+            $lastPost = array_last($slice);
             $lastPostId = $lastPost['ID'];
             reset($slice);
             if (

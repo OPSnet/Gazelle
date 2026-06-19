@@ -29,7 +29,7 @@ class Gift extends \Gazelle\BaseManager {
             $this->giftList(),
             fn ($g) => $g->id() === $id
         );
-        return $gift === [] ? null : current($gift);
+        return $gift === [] ? null : array_first($gift);
     }
 
     public function findByLabel(string $label): ?\Gazelle\Gift {
@@ -37,7 +37,7 @@ class Gift extends \Gazelle\BaseManager {
             $this->giftList(),
             fn ($g) => $g->label() === $label
         );
-        return $gift === [] ? null : current($gift);
+        return $gift === [] ? null : array_first($gift);
     }
 
     public function giftList(): array {

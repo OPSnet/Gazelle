@@ -421,7 +421,7 @@ class DonorTest extends TestCase {
         $this->assertEquals($username, $entry['Username'], 'donor-manager-reward-search');
 
         $timeline = $manager->timeline();
-        $last = end($timeline);
+        $last = array_last($timeline);
 
         Helper::flushDonationMonth(1);
         $this->assertLessThanOrEqual($manager->totalMonth(1), $last['Amount'], 'donor-manager-timeline');

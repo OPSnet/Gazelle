@@ -33,7 +33,7 @@ class LogTest extends TestCase {
         $siteLog->logger()->general($message);
 
         $result = $siteLog->page(1, 0, '');
-        $latest = current($result);
+        $latest = array_first($result);
         $this->assertEquals(['id', 'class', 'message', 'created'], array_keys($latest), 'sitelog-latest-keys');
         $this->assertStringContainsString(
             '<a href="torrents.php?torrentid=123457890">123457890</a>',
@@ -59,7 +59,7 @@ class LogTest extends TestCase {
         $siteLog = new Manager\SiteLog();
         $this->assertCount(2, $siteLog->tgroupLogList($this->tgroup), 'grouplog-intial');
         $result = $siteLog->tgroupLogList($this->tgroup);
-        $latest = current($result);
+        $latest = array_first($result);
         $this->assertEqualsCanonicalizing(
             ["id_torrent", "id_user", "note", "created", "media", "format", "encoding", "deleted"],
             array_keys($latest),
@@ -111,8 +111,7 @@ class LogTest extends TestCase {
         $this->assertCount(2, $siteLog->tgroupLogList($this->tgroup), 'torrentlog-has-log');
 
         $torrent->removeTorrent($this->user, 'phpunit log delete');
-        $result = $siteLog->tgroupLogList($this->tgroup);
-        $latest = current($result);
+        $latest = array_first($siteLog->tgroupLogList($this->tgroup));
         $this->assertEquals(true, $latest['deleted'], 'torrentlog-latest-is-deleted');
         $this->assertEquals($torrent->id, $latest['id_torrent'], 'torrentlog-latest-torrent-id');
         $this->assertEquals($this->user->id, $latest['id_user'], 'torrentlog-latest-user-id');

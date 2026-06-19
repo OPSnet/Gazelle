@@ -150,10 +150,10 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
             SELECT ta.GroupID AS group_id,
                 ta.artist_role_id as artist_role,
                 rt.ID as release_type_id
-            FROM torrents_artists AS ta
-            INNER JOIN torrents_group AS tg ON (tg.ID = ta.GroupID)
-            INNER JOIN release_type AS rt ON (rt.ID = tg.ReleaseType)
-            INNER JOIN artists_alias aa ON (ta.AliasID = aa.AliasID)
+            FROM torrents_artists     ta
+            INNER JOIN artists_alias  aa ON (aa.AliasID = ta.AliasID)
+            INNER JOIN torrents_group tg ON (tg.ID      = ta.GroupID)
+            INNER JOIN release_type   rt ON (rt.ID      = tg.ReleaseType)
             WHERE aa.ArtistID = ?
             ORDER BY tg.Year DESC, tg.Name, rt.ID
             ", $this->id
@@ -420,7 +420,7 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
                 fn($a) => (strcasecmp($a['name'], $name) == 0)
             )
         );
-        return empty($alias) ? null : current($alias);  // @phpstan-ignore-line ?phpstan bug should return int|null but returns int|string|null.
+        return $alias === [] ? null : array_first($alias); /** @phpstan-ignore-line return.type (the design needs to be clarified) */
     }
 
     public function removeAlias(int $aliasId): int {

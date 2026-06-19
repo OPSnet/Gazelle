@@ -252,7 +252,7 @@ class TagTest extends TestCase {
         $tag    = $manager->findByName('phpunit.electronic');
         $this->assertInstanceOf(Tag::class, $tag, 'tag-tag-found');
         $result = $tag->tgroupList();
-        $item   = current($result);
+        $item   = array_first($result);
         $this->assertCount(1, $result, 'tag-torrent-lookup');
         $this->assertEquals($tgroup->id, $item['torrentGroupId'], 'tag-found-tgroup');
         $this->assertEquals(

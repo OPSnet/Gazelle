@@ -52,7 +52,7 @@ class GiftEvent extends \Gazelle\BaseManager {
 
     public function findOpenEvent(): ?\Gazelle\GiftEvent {
         $open = array_filter($this->eventList(), fn ($e) => $e->isOpen());
-        return $open !== [] ? current($open) : null;
+        return $open !== [] ? array_first($open) : null;
     }
 
     public function eventList(): array {

@@ -89,7 +89,7 @@ class StaffPMTest extends TestCase {
         $this->assertEquals($this->fls->id, $thread[1]['user_id'], 'spm-thread-1');
         $this->assertEquals($this->mod->id, $thread[2]['user_id'], 'spm-thread-2');
 
-        $last = end($thread);
+        $last = array_last($thread);
         $pm = $this->spMan->findByPostId($last['id']);
         $this->assertInstanceOf(StaffPM::class, $pm, 'spm-find-by-post-id');
         $this->assertEquals('mod reply', $pm->postBody($last['id']), 'spm-post-body');

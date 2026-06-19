@@ -74,7 +74,7 @@ class Thread extends BaseObject {
         if (!$story) {
             return null;
         }
-        $last = end($story);
+        $last = array_last($story);
         return $last['user_id'];
     }
 
@@ -87,7 +87,7 @@ class Thread extends BaseObject {
         if (!$story) {
             return $this->created();
         }
-        $last = end($story);
+        $last = array_last($story);
         return $last['created'];
     }
 

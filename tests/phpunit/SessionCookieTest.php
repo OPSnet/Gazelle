@@ -67,7 +67,7 @@ class SessionCookieTest extends TestCase {
 
         $headerList = xdebug_get_headers();
         $this->assertCount(1, $headerList, 'session-cookie-header');
-        $header = current($headerList);
+        $header = array_first($headerList);
         $this->assertEquals(
             1,
             // Set-Cookie: session=e%2F8GAPo...;

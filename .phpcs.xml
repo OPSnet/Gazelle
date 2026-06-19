@@ -49,7 +49,9 @@
     <rule ref="Generic.PHP.ForbiddenFunctions">
         <properties>
             <property name="forbiddenFunctions" type="array" extend="true">
+                <element key="current" value="array_first"/>
                 <element key="each" value="null"/>
+                <element key="end" value="array_last"/>
                 <element key="eval" value="null"/>
                 <element key="extract" value="null"/>
                 <element key="include" value="require"/>

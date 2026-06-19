@@ -259,7 +259,7 @@ foreach ($bookmarkList as $bm) {
         ]);
     } else {
         // Viewing a type that does not require grouping
-        $torrent = $torMan->findById(current($torrentIdList));
+        $torrent = $torMan->findById(array_first($torrentIdList));
         if (is_null($torrent)) {
             continue;
         }

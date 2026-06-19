@@ -221,7 +221,7 @@ class ContestTest extends TestCase {
             'bonus',
             enable: true
         );
-        $donor = end($this->userList);
+        $donor = array_last($this->userList);
         $donor->refreshLastAccess();
         $userMan->refreshLastAccess();
         $donorBonus = new User\Bonus($donor);
@@ -244,7 +244,7 @@ class ContestTest extends TestCase {
 
         // add an upload that does not count
         $this->torrentList[] = Helper::makeTorrentMusic(
-            current($this->torrentList)->group(),
+            array_first($this->torrentList)->group(),
             $this->userList[2],
             format   : 'MP3',
             encoding : '320',

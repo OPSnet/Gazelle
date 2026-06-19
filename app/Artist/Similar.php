@@ -356,7 +356,7 @@ class Similar extends \Gazelle\Base {
                 // placed artists, and if this artist is related to them, then choose first
                 // or last angle in the layout list to place this artist close to them.
                 $nextAngle = reset($layout);
-                $prevAngle = end($layout);
+                $prevAngle = array_last($layout);
                 $bestNextAngle = 2 * M_PI;
                 $bestPrevAngle = 2 * M_PI;
                 foreach ($s['related'] as $r) {
@@ -364,7 +364,7 @@ class Similar extends \Gazelle\Base {
                         continue;
                     }
                     $nextAngleDistance = fmod($nextAngle + $placed[$r], 2 * M_PI); /** @phpstan-ignore-line */
-                    $prevAngleDistance = fmod($prevAngle + $placed[$r], 2 * M_PI); /** @phpstan-ignore-line */
+                    $prevAngleDistance = fmod($prevAngle + $placed[$r], 2 * M_PI);
                     if ($nextAngleDistance <= $prevAngleDistance) {
                         $bestNextAngle = min($bestNextAngle, $nextAngleDistance);
                     } else {

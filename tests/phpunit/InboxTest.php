@@ -95,7 +95,7 @@ class InboxTest extends TestCase {
         $this->assertCount(1, $msgList, 'inbox-sentbox-still-1-list');
         $pmList = $msgList[0]->postList(4, 0);
         $this->assertCount(3, $pmList, 'inbox-sender-replies');
-        $this->assertEquals($replyBody, end($pmList)['body'], 'inbox-sender-recent-reply');
+        $this->assertEquals($replyBody, array_last($pmList)['body'], 'inbox-sender-recent-reply');
 
         // several
         $subject  = "phpunit multi " . randomString(12);
@@ -125,7 +125,7 @@ class InboxTest extends TestCase {
         $receiverInbox->setUnreadFirst(true);
         $rlist = $receiverInbox->messageList($pmReceiverManager, 6, 0);
         $this->assertTrue($rlist[0]->isUnread(), 'inbox-unread-first-is-unread');
-        $this->assertFalse(end($rlist)->isUnread(), 'inbox-unread-last-is-read');
+        $this->assertFalse(array_last($rlist)->isUnread(), 'inbox-unread-last-is-read');
 
         // search body
         $receiverInbox->setSearchField('message')->setSearchTerm($bodyList[1]);

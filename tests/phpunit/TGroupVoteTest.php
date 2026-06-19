@@ -146,7 +146,7 @@ class TGroupVoteTest extends TestCase {
         );
 
         $page = $vote[0]->userPage(new Manager\TGroup(), User\Vote::UPVOTE, 10, 0);
-        $first = current($page);
+        $first = array_first($page);
         $this->assertEquals(
             ['group_id', 'upvote', 'tgroup'],
             array_keys($first),

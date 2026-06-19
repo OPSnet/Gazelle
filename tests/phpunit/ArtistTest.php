@@ -213,7 +213,7 @@ class ArtistTest extends TestCase {
         );
         $artistInfo = $aliasInfo[$artist->id];
         $this->assertArrayHasKey('alias', $artistInfo, 'artist-alias-has-key');
-        $alias = current($artistInfo['alias']);
+        $alias = array_first($artistInfo['alias']);
         $this->assertEquals($newId, $alias['alias_id'], 'artist-alias-artist-id');
         $this->assertEquals($aliasName, $alias['name'], 'artist-alias-name');
         $this->assertEquals($this->user->id, $alias['user']->id, 'artist-alias-user');
@@ -615,12 +615,14 @@ class ArtistTest extends TestCase {
         $composer = null;
         $prefix2 = 'qac' . randomString(5) . '.';
         $prefix4 = $prefix2 . 'aa';
-        foreach ([
-            $prefix4,
-            $prefix2 . 'ab',
-            $prefix2 . 'ba',
-            'zac' . randomString(5) . '.off',
-        ] as $name) {
+        foreach (
+            [
+                $prefix4,
+                $prefix2 . 'ab',
+                $prefix2 . 'ba',
+                'zac' . randomString(5) . '.off',
+            ] as $name
+        ) {
             if (is_null($composer)) {
                 $composer = $name;
             }
@@ -703,11 +705,13 @@ class ArtistTest extends TestCase {
         $manager = new Manager\Artist();
         $rankPrefix = 'qrank.phpunit.' . randomString(6) . '.';
         $rankedList = [];
-        foreach ([
-            ['Alpha', 20],
-            ['Beta', 50],
-            ['Gamma', 20],
-        ] as [$suffix, $snatches]) {
+        foreach (
+            [
+                ['Alpha', 20],
+                ['Beta', 50],
+                ['Gamma', 20],
+            ] as [$suffix, $snatches]
+        ) {
             $name = $rankPrefix . $suffix;
             $artist = $manager->create($name);
             $this->artistIdList[] = $artist->id;

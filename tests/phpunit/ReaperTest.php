@@ -496,8 +496,8 @@ class ReaperTest extends TestCase {
         $this->assertEquals(0, $this->userList[1]->inbox()->messageTotal(), 'unseeded-snatcher-no-notify');
 
         $timeline = $reaper->timeline();
-        $this->assertEquals(2, current($timeline), 'reaper-two-today');
-        $today = current(array_keys($timeline));
+        $this->assertEquals(2, array_first($timeline), 'reaper-two-today');
+        $today = array_first(array_keys($timeline));
         // take into account the chance of running a few seconds before midnight
         $this->assertContains($today, [date('Y-m-d'), date('Y-m-d', strtotime('1 hour ago'))], 'reaper-timeline');
     }

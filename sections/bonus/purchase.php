@@ -8,7 +8,7 @@ namespace Gazelle;
 authorize();
 
 $label = $_POST['label'] // from a prepare page
-    ?? current(
+    ?? array_first(
         array_keys(
             array_filter(
                 $_POST,

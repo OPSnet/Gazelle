@@ -728,7 +728,7 @@ class CollageTest extends TestCase {
         );
         $summary = $commentMan->collageSummary($collage);
         $this->assertCount(1, $summary, 'collage-comment-summary-count');
-        $first = current($summary);
+        $first = array_first($summary);
         $this->assertEquals(
             ['id', 'body', 'author_id', 'added'],
             array_keys($first),
@@ -841,7 +841,7 @@ class CollageTest extends TestCase {
 
         $list = $manager->subscribedTGroupCollageList($subscriber, true);
         $this->assertCount(1, $list, 'collage-user-sub-list-total');
-        $entry = current($list);
+        $entry = array_first($list);
         $this->assertEquals(
             $collage->id,
             $entry['collageId'],

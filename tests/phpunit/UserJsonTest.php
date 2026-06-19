@@ -116,7 +116,7 @@ class UserJsonTest extends TestCase {
         $this->assertEquals(1, $payload['pages'], 'json-user-search-page-total');
         $this->assertEquals(1, $payload['currentPage'], 'json-user-search-page-current');
         $this->assertCount(1, $payload['results'], 'json-user-search-results');
-        $result = current($payload['results']);
+        $result = array_first($payload['results']);
         $this->assertEquals(
             $this->userList['admin']->id,
             $result['userId'],

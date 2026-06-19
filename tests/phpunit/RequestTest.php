@@ -385,7 +385,7 @@ class RequestTest extends TestCase {
             user:   $user,
             title:  'Deluxe Edition',
         );
-        $torrentId = current($this->tgroup->torrentIdList());
+        $torrentId = array_first($this->tgroup->torrentIdList());
         $torMan    = new Manager\Torrent();
         $torrent   = $torMan->findById($torrentId);
         $this->assertInstanceOf(Torrent::class, $torrent, 'request-torrent-filler');
@@ -498,7 +498,7 @@ class RequestTest extends TestCase {
             title:  'Deluxe Edition',
         );
         $torrent = new Manager\Torrent()->findById(
-            current($this->tgroup->torrentIdList())
+            array_first($this->tgroup->torrentIdList())
         );
         $this->assertEquals(
             [],

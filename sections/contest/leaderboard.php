@@ -16,7 +16,7 @@ if (!empty($_POST['leaderboard'])) {
 } else {
     $contest = $contestMan->currentContest();
     if (is_null($contest)) {
-        $contest = end($prior);
+        $contest = array_last($prior);
     }
 }
 

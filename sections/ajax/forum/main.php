@@ -18,7 +18,7 @@ foreach (new Manager\Forum()->forumList() as $forum) {
         $user[$lastAuthorId] = $userMan->findById($lastAuthorId);
     }
 
-    if (empty($category) || end($category)['categoryID'] != $forum->categoryId()) {
+    if ($category === [] || array_last($category)['categoryID'] != $forum->categoryId()) {
         $category[] = [
             'categoryID'   => $forum->categoryId(),
             'categoryName' => $forum->categoryName(),

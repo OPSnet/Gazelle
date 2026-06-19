@@ -175,7 +175,7 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
         if (empty($this->thread)) {
             return 0;
         }
-        $lastPost = end($this->thread)['ID'];
+        $lastPost = array_last($this->thread)['ID'];
         $page = $this->page();
         $pageId = $this->pageId;
         $userId = $user->id;
@@ -189,7 +189,7 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
                 AND PageID = ?
                 AND PostID BETWEEN ? AND ?
                 AND UserID = ?
-            ", $page, $pageId, current($this->thread)['ID'], $lastPost, $userId
+            ", $page, $pageId, array_first($this->thread)['ID'], $lastPost, $userId
         );
         $affected = self::$db->affected_rows();
         if ($affected) {

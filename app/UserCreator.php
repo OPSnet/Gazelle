@@ -81,7 +81,7 @@ class UserCreator extends Base {
             }
         }
 
-        if (!$this->email || new Manager\EmailBlacklist()->exists(current($this->email))) {
+        if (!$this->email || new Manager\EmailBlacklist()->exists(array_first($this->email))) {
             // neither setEmail() nor setInviteKey() produced anything useful or email blacklisted
             throw new UserCreatorException(UserCreatorError::email);
         }
@@ -105,7 +105,7 @@ class UserCreator extends Base {
         $mainArgs = [
             (int)$inviter?->id,
             $this->username,
-            current($this->email),
+            array_first($this->email),
             $this->passHash,
             $this->announceKey,
             $ipaddr,
@@ -265,7 +265,7 @@ class UserCreator extends Base {
      * @return string The email address to use.
      */
     public function email(): string {
-        return end($this->email);
+        return array_last($this->email);
     }
 
     /**

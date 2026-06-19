@@ -32,7 +32,7 @@ class CacheMultiFlush extends \Gazelle\Base {
             }
             self::$cache->delete_multi($flush);
             $flushed += count($flush);
-            $current = end($list);
+            $current = array_last($list);
         }
         return $flushed;
     }
