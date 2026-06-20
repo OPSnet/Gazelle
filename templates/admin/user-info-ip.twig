@@ -13,7 +13,20 @@
 </tr>
     {% endif %}
 <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
-    <td>{{ ip_search(r.ip, withTracker) }}</td>
+    <td>{{ ip_search(r.ip, withTracker) }}
+{%  if r.ips %}
+        <span class="history_expanded_ipv6">
+{%      set id = 'ipv6_' ~ r.ip ~ '_' ~ r.first_seen.format('U') %}
+            <label for="{{ id }}" title="expand" class="tooltip"></label>
+            <input type="checkbox" id="{{ id }}" autocomplete="off">
+            <ul>
+{%      for ip in r.ips %}
+                <li>{{ ip }}</li>
+{%      endfor %}
+            </ul>
+        </span>
+{%  endif %}
+    </td>
     <td>{{ r.cc }}</td>
     <td>{{ r.first_seen.format('Y-m-d H:i:s.vP') }}</td>
     <td>{{ r.last_seen.format('Y-m-d H:i:s.vP') }}</td>

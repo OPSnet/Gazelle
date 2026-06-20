@@ -53,10 +53,11 @@ class History extends \Gazelle\BaseUser {
      */
     public function modifyAnnounceKey(string $old, string $new): int {
         $this->user->setField('torrent_pass', $new);
-        $id = $this->pg()->insert("
+        $id = $this->pg()->scalarex("
             insert into history_announce
                    (id_user, previous, ip, useragent)
-            values (?,      ?,          ?,          ?)
+            values ($1,      $2,       $3, $4)
+            returning id_history_announce
             ", $this->user->id, $old,
                 $this->requestContext()->remoteAddr(),
                 $this->requestContext()->useragent(),
@@ -108,10 +109,10 @@ class History extends \Gazelle\BaseUser {
         $this->user->setField('PassHash', UserCreator::hashPassword($new));
         $ipaddr    = $this->requestContext()->remoteAddr();
         $useragent = $this->requestContext()->useragent();
-        $this->pg()->insert("
+        $this->pg()->query("
             insert into history_password
-                   (id_user, ip,      useragent)
-            VALUES (?,       ?::inet, ?)
+                   (id_user, ip,       useragent)
+            VALUES ($1,      $2::inet, $3)
             ", $this->user->id, $ipaddr, $useragent
         );
         self::$cache->delete_value("user_pw_count_{$this->user->id}");
@@ -266,24 +267,24 @@ class History extends \Gazelle\BaseUser {
     }
 
     public function registerSiteIp(string $ipaddr, int $delay = IP_HISTORY_NEW_INTERVAL): int {
-        return (int)$this->pg()->writeReturning("
+        return (int)$this->pg()->scalarex("
             with cur as (
-                select ?::int id_user,
-                    ?::inet as ip,
+                select $1::int id_user,
+                    $2::inet as ip,
                     total,
                     upper(seen) as recent
                 from ip_site_history
-                where id_user = ?
-                    and ip = ?::inet
+                where id_user = $1
+                    and ip = $2::inet
             ),
             ins as (
                 select
-                    coalesce((select id_user from cur), ?)   as id_user,
-                    coalesce((select ip from cur), ?::inet)  as ip,
+                    coalesce((select id_user from cur), $1)   as id_user,
+                    coalesce((select ip from cur), $2::inet)  as ip,
                     coalesce((select total + 1 from cur), 1) as total,
                     tstzmultirange(
                         tstzrange(
-                            case when (select recent from cur) > now() - '1 second'::interval * ?
+                            case when (select recent from cur) > now() - '1 second'::interval * $3
                                 then (select recent from cur)
                                 else now()
                             end,
@@ -299,7 +300,7 @@ class History extends \Gazelle\BaseUser {
                 total = EXCLUDED.total,
                 seen  = s.seen + EXCLUDED.seen
             returning total
-            ", $this->user->id, $ipaddr, $this->user->id, $ipaddr, $this->user->id, $ipaddr, $delay
+            ", $this->user->id, $ipaddr, $delay
         );
     }
 
@@ -310,7 +311,7 @@ class History extends \Gazelle\BaseUser {
             'last'  => "last_seen $dir, ip $dir, first_seen $dir",
             default => "ip $dir, first_seen $dir, last_seen $dir",
         };
-        $result = $this->pg()->executeParams("
+        $result = $this->pg()->allex("
             select ip       ip,
                 lower(seen) first_seen,
                 upper(seen) last_seen
@@ -319,7 +320,7 @@ class History extends \Gazelle\BaseUser {
                 and data_origin = 'token'
             order by $orderBy
             ", $this->user->id
-        )->fetchAll();
+        );
         static::addAsnInfo($asn, $result);
         return $result;
     }
@@ -331,15 +332,21 @@ class History extends \Gazelle\BaseUser {
             'last'  => "last_seen $dir, ip $dir, first_seen $dir",
             default => "ip $dir, first_seen $dir, last_seen $dir",
         };
-        $result = $this->pg()->executeParams("
-            select ip               ip,
-                lower(unnest(seen)) first_seen,
-                upper(unnest(seen)) last_seen
+        // merge ipv6 of the same /64 into a single row if gaps are small
+        $result = $this->pg()->allex("
+            select host(case when count(ip) > 1
+                             then network(set_masklen(max(ip), 64))
+                             else max(ip)
+                        end) ip,
+                lower(unnest(merge_ranges_by_gap(range_agg(seen), '14 days'::interval))) first_seen,
+                upper(unnest(merge_ranges_by_gap(range_agg(seen), '14 days'::interval))) last_seen,
+                (case when count(ip) > 1 then array_agg(ip) else null end) ips
             from ip_site_history
             where id_user = $1
+            group by network(set_masklen(ip, case when inet_same_family(ip, '::') then 64 else 32 end))
             order by $orderBy
             ", $this->user->id
-        )->fetchAll();
+        );
         static::addAsnInfo($asn, $result);
         return $result;
     }
@@ -371,12 +378,12 @@ class History extends \Gazelle\BaseUser {
     }
 
     public function resetIp(): int {
-        $n = $this->pg()->prepared_query("
-            delete from ip_history where id_user = ?
+        $n = $this->pg()->query("
+            delete from ip_history where id_user = $1
             ", $this->user->id
         );
-        $n += $this->pg()->prepared_query("
-            delete from ip_site_history where id_user = ?
+        $n += $this->pg()->query("
+            delete from ip_site_history where id_user = $1
             ", $this->user->id
         );
         self::$db->prepared_query("

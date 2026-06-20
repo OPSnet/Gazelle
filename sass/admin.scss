@@ -43,6 +43,27 @@ table.debug-table {
   user-select: none;
 }
 
+.history_expanded_ipv6 {
+  > label {
+    margin-left: 0.2em;
+
+    // user-select:none will cause a newline on copy, and we don't want the + in the copy either
+    &::before {
+      content: "[+]";
+    }
+  }
+  > input {
+    display: none;
+    &:checked + ul {
+      display: block !important;
+    }
+  }
+  > ul {
+    display: none;
+    margin-left: 0.5em;
+  }
+}
+
 form.analysis-case {
   display: inline;
   input {
