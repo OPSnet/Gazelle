@@ -32,7 +32,7 @@ if ($_POST['submit'] === 'Delete') {
     if ($_POST['submit'] === 'Create') {
         $Payment->create(
             trim($_POST['text']),
-            $_POST['expiry'],
+            new \DateTimeImmutable($_POST['expiry']),
             (float)$_POST['rent'],
             $_POST['cc'],
             isset($_POST['active']),
@@ -41,7 +41,7 @@ if ($_POST['submit'] === 'Delete') {
         $Payment->modify(
             (int)$_POST['id'],
             trim($_POST['text']),
-            $_POST['expiry'],
+            new \DateTimeImmutable($_POST['expiry']),
             (float)$_POST['rent'],
             $_POST['cc'],
             isset($_POST['active']),

@@ -17,24 +17,24 @@
     </tr>
 {% set total = 0.0 %}
 {% for p in list %}
-    {% if p.active %}
+{%  if p.active %}
         {% set total = total + p.btcRent %}
-    {% endif %}
+{%  endif %}
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
-    {% if not viewer.permitted('admin_manage_payments') %}
+{%  if not viewer.permitted('admin_manage_payments') %}
             <td>{{ p.name }}</td>
-            <td>{{ p.expiry }}</td>
+            <td>{{ p.expiry|date('Y-m-d') }}</td>
             <td>{{ p.rent }}</td>
             <td>{{ p.currency }}</td>
             <td title="Based on a rate of {{ p.fiatRate|number_format(4) }}">{{ p.btcRent }}</td>
             <td>{% if p.active %}Active{% else %}Inactive{% endif %}</td>
-    {% else %}
+{%  else %}
         <form class="manage_form" name="accounts" action="" method="post">
             <input type="hidden" name="action" value="payment_alter">
             <input type="hidden" name="auth" value="{{ viewer.auth }}">
             <input type="hidden" name="id" value="{{ p.id }}">
             <td><input type="text" name="text" value="{{ p.name }}"></td>
-            <td><input type="text" name="expiry" value="{{ p.expiry }}" placeholder="YYYY-MM-DD"></td>
+            <td><input type="text" name="expiry" value="{{ p.expiry|date('Y-m-d') }}" placeholder="YYYY-MM-DD"></td>
             <td><input type="text" name="rent" value="{{ p.rent }}"></td>
             <td>
                 <select name="cc">
@@ -53,7 +53,7 @@
             </td>
         </form>
     </tr>
-    {% endif %}
+{%  endif %}
 {% endfor %}
 
 {% if viewer.permitted('admin_manage_payments') %}

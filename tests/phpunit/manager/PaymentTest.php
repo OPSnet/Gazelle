@@ -6,10 +6,13 @@ use GazelleUnitTest\Helper;
 use PHPUnit\Framework\TestCase;
 
 class PaymentTest extends TestCase {
+    public function tearDown(): void {
+    }
+
     public function testPayment(): void {
         $manager = new Payment();
         $name    = 'phpunit-' . randomString(6);
-        $expiry  = date('Y-m-d', strtotime("50 days"));
+        $expiry  = new \DateTimeImmutable("50 days")->modify('midnight');
         $id      = $manager->create(
             text:   $name,
             expiry: $expiry,
@@ -19,7 +22,7 @@ class PaymentTest extends TestCase {
         );
 
         $this->assertGreaterThan(0, $id, 'payment-create');
-        $payment = current(array_filter($manager->list(), fn ($p) => $p['id'] === $id));
+        $payment = array_first(array_filter($manager->list(), fn ($p) => $p['id'] === $id));
         $this->assertTrue($payment['active'], 'payment-active');
         $this->assertEquals($name, $payment['name'], 'payment-text');
         $this->assertEquals($expiry, $payment['expiry'], 'payment-expiry');
@@ -36,7 +39,7 @@ class PaymentTest extends TestCase {
         $manager = new Payment();
         $id      = $manager->create(
             text:   'phpunit-' . randomString(6),
-            expiry: date('Y-m-d', strtotime("120 days")),
+            expiry: new \DateTimeImmutable("120 days")->modify('midnight'),
             rent:   0.03125 * 12,
             cc:     'XBT',
             active: true,
@@ -61,7 +64,7 @@ class PaymentTest extends TestCase {
 
     public function testSoon(): void {
         $manager = new Payment();
-        $next    = date('Y-m-d', strtotime("3 days"));
+        $next    = new \DateTimeImmutable("3 days")->modify('midnight');
         $idList  =  [
             $manager->create(
                 text:   'phpunit-' . randomString(6),
@@ -72,7 +75,7 @@ class PaymentTest extends TestCase {
             ),
             $manager->create(
                 text:   'phpunit-' . randomString(6),
-                expiry: date('Y-m-d', strtotime("4 days")),
+                expiry: new \DateTimeImmutable("4 days")->modify('midnight'),
                 rent:   0.03125,
                 cc:     'XBT',
                 active: true,
@@ -83,14 +86,13 @@ class PaymentTest extends TestCase {
         $this->assertCount(2, $soon, 'payment-soon-element');
         $this->assertEquals(2, $soon['total'], 'payment-soon-total');
         $this->assertEquals($next, $soon['next'], 'payment-soon-next');
-        $this->assertCount(2, $manager->due(), 'payment-due');
 
         $this->assertEquals(
             1,
             $manager->modify(
                 id:     $idList[1],
                 text:   'phpunit-' . randomString(6),
-                expiry: date('Y-m-d', strtotime("4 days")),
+                expiry: new \DateTimeImmutable("4 days")->modify('midnight'),
                 rent:   0.03125,
                 cc:     'XBT',
                 active: false,

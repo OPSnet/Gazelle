@@ -4,59 +4,65 @@ namespace Gazelle\Manager;
 
 use Gazelle\Exception\PaymentFetchForexException;
 
+/* pg_wrapper returns the `date` datatype as \DateTimeImmutable
+ * so ensure that all uses are truncated to midnight.
+ */
+
 class Payment extends \Gazelle\Base {
     final protected const LIST_KEY = 'payment_list';
     final protected const RENT_KEY = 'payment_monthly_rental';
-    final protected const DUE_KEY  = 'payment_due';
 
     public function flush(): static {
-        self::$cache->delete_multi([self::LIST_KEY, self::DUE_KEY, self::RENT_KEY]);
+        self::$cache->delete_multi([self::LIST_KEY, self::RENT_KEY]);
         return $this;
     }
 
     public function create(
-        string $text,
-        string $expiry,
-        float  $rent,
-        string $cc,
-        bool   $active,
+        string             $text,
+        \DateTimeImmutable $expiry,
+        float              $rent,
+        string             $cc,
+        bool               $active,
     ): int {
-        $id = $this->pg()->insert("
+        $id = $this->pg()->scalarex("
             insert into payment
                    (name, expiry, annual_rent, currency, active)
-            VALUES (?,    ?,      ?,          ?,  ?)
-            ", $text, $expiry, $rent, $cc, $active ? 't' : 'f'
+            values ($1,   $2,     $3,          $4,       $5)
+            returning id_payment
+            ", $text, $expiry->modify('midnight'), $rent, $cc, $active
         );
         $this->flush();
         return $id;
     }
 
     public function modify(
-        int    $id,
-        string $text,
-        string $expiry,
-        float  $rent,
-        string $cc,
-        bool   $active,
+        int                $id,
+        string             $text,
+        \DateTimeImmutable $expiry,
+        float              $rent,
+        string             $cc,
+        bool               $active,
     ): int {
-        $result = $this->pg()->executeParams("
+        $affected = $this->pg()->query("
             update payment set
-                name = $1, expiry = $2, annual_rent = $3, currency = $4, active = $5
+                name        = $1,
+                expiry      = $2,
+                annual_rent = $3,
+                currency    = $4,
+                active      = $5
             where id_payment = $6
-            ", $text, $expiry, $rent, $cc, $active ? 't' : 'f',
+            ", $text, $expiry->modify('midnight'), $rent, $cc, $active,
             $id
         );
-        $affected = $result->getAffectedRows();
         $this->flush();
         return $affected;
     }
 
     public function remove(int $id): int {
-        $result = $this->pg()->executeParams('
+        $affected = $this->pg()->query('
             delete from payment where id_payment = $1
             ', $id
         );
-        $affected = $result->getAffectedRows();
         $this->flush();
         return $affected;
     }
@@ -64,7 +70,7 @@ class Payment extends \Gazelle\Base {
     public function list(): array {
         $list = self::$cache->get_value(self::LIST_KEY);
         if ($list === false) {
-            $list = $this->pg()->all('
+            $list = $this->pg()->allex('
                 select id_payment as id,
                     name,
                     expiry,
@@ -143,27 +149,12 @@ class Payment extends \Gazelle\Base {
             : min(100, (int)(($donorMan->totalMonth(1) / $monthlyRental) * 100));
     }
 
-    public function due(): array {
-        $due = self::$cache->get_value(self::DUE_KEY);
-        if ($due === false) {
-            $due = $this->pg()->all("
-                select name, expiry
-                from payment
-                where expiry < now() + '1 week'::interval
-                    and active is true
-                order by expiry
-            ");
-            self::$cache->cache_value(self::DUE_KEY, $due, 3600);
-        }
-        return $due;
-    }
-
     public function soon(): array {
-        return $this->pg()->rowAssoc("
+        return $this->pg()->rowAssocex("
             select count(*) as total,
                 min(expiry) as next
             from payment
-            where expiry < now() + '1 week'::interval
+            where expiry < now() + interval '1 week'
                 and active is true
         ");
     }
