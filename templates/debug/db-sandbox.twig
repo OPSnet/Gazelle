@@ -16,9 +16,12 @@
         Source
         <label><input type="radio" name="src" value="mysql"{{ checked(source == 'mysql') }}> Mysql</label>
         <label><input type="radio" name="src" value="pg"{{ checked(source == 'pg') }}> Postgres</label>
-        <input type="submit" value="Query">
+        <label><input type="checkbox" name="plain" {{ checked(plain) }}> Render in monospace?</label>
+        <br><input type="submit" value="Run">
+{% if table %}
         <br>
         <div class="box pad"><pre>{{ table.definition }}</pre></div>
+{% endif %}
     </form>
 </div>
 
@@ -44,7 +47,7 @@
 {%          endif %}
         <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
 {%          for value in row %}
-            <td>{{ value }}</td>
+            <td>{% if plain %}<pre>{% endif %}{{ value }}{% if plain %}</pre>{% endif %}</td>
 {%         endfor %}
         </tr>
 {%      endfor %}

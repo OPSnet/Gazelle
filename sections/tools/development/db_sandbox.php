@@ -57,10 +57,11 @@ if ($execute) {
 }
 
 echo $Twig->render('debug/db-sandbox.twig', [
+    'error'  => $error,
+    'plain'  => isset($_REQUEST['plain']),
     'query'  => $query,
     'rows'   => $textAreaRows,
     'result' => $result,
     'source' => $src->value,
     'table'  => $table,
-    'error'  => $error,
 ]);
