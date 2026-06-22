@@ -355,7 +355,7 @@ class UserTest extends TestCase {
         $this->assertFalse($warned->isWarned(), 'utest-warn-final');
     }
 
-    public function testLogin(): void {
+    public function testLoginBasic(): void {
         $_SERVER['REMOTE_ADDR'] = Helper::IP_ADDR;
         Base::setRequestContext(new RequestContext(
             'phpunit', $_SERVER['REMOTE_ADDR'], 'whatever'
@@ -416,6 +416,22 @@ class UserTest extends TestCase {
         $this->assertEquals(1, $ban->remove(), 'loginwatch-ip-ban-clear');
 
         $this->assertEquals(1, $this->user->history()->resetIp(), 'user-reset-ip');
+    }
+
+    public function testLoginTrim(): void {
+        /* There is no point capturing usernames that are too long for the site schema */
+        $username = '12345678901234567890'; // 20 chars max
+        $watch    = new LoginWatch(Helper::IP_ADDR);
+        $result   = new Login()->login(
+            username: $username . 'z',
+            password: 'password',
+            watch:    $watch,
+        );
+        $this->assertEquals(
+            $username,
+            $watch->capture(),
+            'login-username-trim'
+        );
     }
 
     public function testParanoia(): void {

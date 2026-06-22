@@ -40,7 +40,7 @@ class Login extends Base {
         bool                          $persistent = false,
         #[\SensitiveParameter] string $mfaToken = '',
     ): ?User {
-        $this->username   = trim($username);
+        $this->username   = substr(trim($username), 0, 20); // usernames are 20 char max
         $this->password   = $password;
         $this->watch      = $watch;
         $this->persistent = $persistent;
