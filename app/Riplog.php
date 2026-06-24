@@ -129,8 +129,8 @@ class Riplog extends BaseObject {
         return $this->info()['score'];
     }
 
-    public function scoreAdjusted(): int {
-        return (int)$this->info()['score_adjusted'];
+    public function scoreAdjusted(): int|null {
+        return $this->info()['score_adjusted'];
     }
 
     /*** ripper methods ***/

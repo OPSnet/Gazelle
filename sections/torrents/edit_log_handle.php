@@ -88,7 +88,7 @@ foreach ($TrackDeductions as [$tag, $deduction, $label]) {
 $riplog->setField('Adjusted', $adjusted ? '1' : '0')
     ->setField('AdjustedChecksum', $adjustedChecksum ? '1' : '0')
     ->setField('AdjustedScore', max(0, $adjustedScore))
-    ->setField('AdjustmentDetails', $adjustmentDetails)
+    ->setField('AdjustmentDetails', serialize($adjustmentDetails))
     ->setField('AdjustmentReason', $adjustmentReason)
     ->setField('AdjustedBy', $Viewer->id)
     ->modify();

@@ -115,6 +115,10 @@ class RiplogTest extends TestCase {
             'valid_log_eac.log',
         );
 
+        $this->assertNull(
+            $riplog->scoreAdjusted(),
+            'riplog-score-not-adjusted',
+        );
         $this->assertTrue(
             $riplog->setField('Adjusted', '1')
                 ->setField('AdjustedChecksum', '0')

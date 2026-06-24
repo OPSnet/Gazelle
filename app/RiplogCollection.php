@@ -10,7 +10,10 @@ class RiplogCollection {
     ) {
         foreach ($this->riplogList as $r) {
             $this->allChecksum = $this->allChecksum && $r->isChecksumOk();
-            $this->lowestScore = min($this->lowestScore, $r->score());
+            $this->lowestScore = min(
+                $this->lowestScore,
+                $r->scoreAdjusted() ?? $r->score(),
+            );
         }
     }
 

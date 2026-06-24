@@ -36,7 +36,7 @@
 {%  if riplog.adjustmentList %}
     <div style="margin-left: 40px">
         <div style="margin-top: 10px">Log adjusted by {{ riplog.adjusterUserId|user_url }}.</div>
-{%      if riplog.scoreAdjuested != riplog.score %}
+{%      if riplog.scoreAdjusted != riplog.score %}
         Score changed from {{ riplog.score }} to {{ riplog.scoreAdjusted }}
 {%      endif %}
 {%      if riplog.adjustmentReason %}
