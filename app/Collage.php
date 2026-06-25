@@ -36,6 +36,10 @@ class Collage extends BaseAttrObject implements Bookmarked {
             : new Collage\TGroup($this);
     }
 
+    public function bookmarkType(): Enum\BookmarkType {
+        return Enum\BookmarkType::collage;
+    }
+
     public function flush(): static {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
         unset($this->userSubscriptions);
@@ -81,14 +85,6 @@ class Collage extends BaseAttrObject implements Bookmarked {
         }
         $this->info = $info;
         return $this->info;
-    }
-
-    public function bookmarkTable(): string {
-        return 'bookmark_collage';
-    }
-
-    public function bookmarkColumnName(): string {
-        return 'id_collage';
     }
 
     public function categoryId(): int {

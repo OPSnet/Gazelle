@@ -8,14 +8,21 @@ class Artist extends \Gazelle\Json {
     ) {}
 
     public function payload(): array {
+        $idList = $this->pg()->columnex("
+            select id_artist from bookmark_artist where id_user = $1
+            ", $this->bookmark->id
+        );
+        if ($idList === []) {
+            return [];
+        }
+        $placeholder = placeholders($idList);
         self::$db->prepared_query("
             SELECT ag.ArtistID AS artistId,
                 aa.Name        AS artistName
-            FROM bookmarks_artists AS ba
-            INNER JOIN artists_group AS ag USING (ArtistID)
-            INNER JOIN artists_alias aa ON (ag.PrimaryAlias = aa.AliasID)
-            WHERE ba.UserID = ?
-            ", $this->bookmark->id
+            FROM artists_group       ag
+            INNER JOIN artists_alias aa ON (aa.AliasID = ag.PrimaryAlias)
+            WHERE ag.ArtistID IN ($placeholder)
+            ", ...$idList
         );
         return self::$db->to_array(false, MYSQLI_ASSOC);
     }

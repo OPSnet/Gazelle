@@ -1,10 +1,10 @@
 {{ header(user.username ~ ' › Organize torrent bookmarks', {'js': 'browse,vendor/jquery-ui,vendor/jquery.tablesorter,sort'}) }}
 {% for b in list %}
-    {% if loop.first %}
+{%  if loop.first %}
 <div class="thin">
 <div class="header">
     <h2>{{ user.id|user_url }} › <a href="bookmarks.php?type=torrents
-        {%- if user.id != viewer.id %}&amp;user_id={{ user.id }}{% endif -%}
+{%      if user.id != viewer.id %}&amp;user_id={{ user.id }}{% endif -%}
         ">Torrent Bookmarks</a> › Manage</h2>
 </div>
 <table width="100%" class="layout">
@@ -38,7 +38,7 @@
         </tr>
     </thead>
     <tbody>
-    {% endif %}
+{%  endif %}
     <tr class="drag row{{ cycle(['a', 'b'], loop.index0) }}" id="li_{{ b.tgroup_id }}">
         <td>
             <input class="sort_numbers" type="text" name="sort[{{ b.tgroup_id }}]" value="{{ b.sequence }}" id="sort_{{ b.tgroup_id }}" size="4">
@@ -50,7 +50,7 @@
         <td class="nobr tooltip" title="{{ b.created }}">{{ b.created|time_diff }}</td>
         <td class="center"><input type="checkbox" name="remove[{{ b.tgroup_id }}]" value=""></td>
     </tr>
-    {% if loop.last %}
+{%  if loop.last %}
 </tbody>
 </table>
 <div class="drag_drop_save">
@@ -64,7 +64,7 @@
 </div>
 </form>
 </div>
-    {% endif %}
+{%  endif %}
 {% else %}
 <div class="header">
     <h2>No torrents found.</h2>

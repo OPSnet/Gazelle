@@ -2,11 +2,10 @@
 
 namespace Gazelle\Intf;
 
+use Gazelle\Enum\BookmarkType;
+
 interface Bookmarked {
-    // objects that implement this can be bookmarked
     public function id(): int;
 
-    public function bookmarkTable(): string;
-
-    public function bookmarkColumnName(): string;
+    public function bookmarkType(): BookmarkType;
 }

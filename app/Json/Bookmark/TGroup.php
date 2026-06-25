@@ -2,6 +2,8 @@
 
 namespace Gazelle\Json\Bookmark;
 
+use Gazelle\Enum\BookmarkType;
+
 class TGroup extends \Gazelle\Json {
     public function __construct(
         protected \Gazelle\User\Bookmark   $userBookmark,
@@ -11,7 +13,7 @@ class TGroup extends \Gazelle\Json {
 
     public function payload(): array {
         $list = [];
-        foreach ($this->userBookmark->tgroupBookmarkList() as $bookmark) {
+        foreach ($this->userBookmark->bookmarkList(BookmarkType::tgroup) as $bookmark) {
             $tgroup = $this->tgMan->findById($bookmark['tgroup_id']);
             if (is_null($tgroup)) {
                 continue;

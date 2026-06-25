@@ -28,13 +28,13 @@ if (empty($_GET['userid'])) {
     $ownProfile = ($user->id === $Viewer->id);
 }
 
-$bookmark  = new User\Bookmark($user);
-$snatcher  = $Viewer->snatch();
-$reportMan = new Manager\Report($userMan);
-$tgMan     = new Manager\TGroup();
-$torMan    = new Manager\Torrent();
-$collMan   = new Manager\Collage();
+$bookmark    = new User\Bookmark($user);
+$reportMan   = new Manager\Report($userMan);
+$tgMan       = new Manager\TGroup();
+$torMan      = new Manager\Torrent();
+$collMan     = new Manager\Collage();
 $totalGroups = $bookmark->tgroupTotal();
+$snatcher    = $Viewer->snatch();
 
 $paginator = new Util\Paginator(200, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($totalGroups);
@@ -67,13 +67,11 @@ if ($ownProfile) {
             <a href="bookmarks.php?type=artists" class="brackets">Artists</a>
             <a href="bookmarks.php?type=collages" class="brackets">Collages</a>
             <a href="bookmarks.php?type=requests" class="brackets">Requests</a>
-<?php
-if (count($bookmarkList) > 0) { ?>
+<?php if ($bookmarkList !== []) { ?>
             <br><br>
             <a href="bookmarks.php?action=remove_snatched&amp;auth=<?= $Viewer->auth() ?>" class="brackets" onclick="return confirm('Are you sure you want to remove the bookmarks for all items you\'ve snatched?');">Remove snatched</a>
             <a href="bookmarks.php?action=edit&amp;type=torrents" class="brackets">Manage torrents</a>
-<?php
-} ?>
+<?php } ?>
         </div>
     </div>
 <?php
@@ -219,9 +217,8 @@ foreach ($bookmarkList as $bm) {
         continue;
     }
     $isSnatched = $tgroup->isSnatched();
-    $torrentIdList = array_map('intval', explode(',', $bm['torrent_list']));
 
-    if (count($torrentIdList) > 1 || $tgroup->categoryId() == 1) {
+    if (count($bm['torrent_list']) > 1 || $tgroup->categoryId() == 1) {
         $tagList = $tgroup->tagList();
         // Grouped torrents
 ?>
@@ -234,12 +231,12 @@ foreach ($bookmarkList as $bm) {
                 <strong><?= $tgroup->link() ?></strong>
                 <span style="text-align: right;" class="float_right">
 <?php if ($ownProfile) { ?>
-        <a href="#group_<?= $tgroupId ?>" class="brackets remove_bookmark"
-           onclick="Unbookmark('torrent', <?= $tgroupId ?>, ''); return false;">Remove bookmark</a>
-        <br/>
+                    <a href="#group_<?= $tgroupId ?>" class="brackets remove_bookmark" onclick="Unbookmark('torrent', <?=
+                        $tgroupId ?>, ''); return false;">Remove bookmark</a>
+                    <br>
 <?php } ?>
                     <?= time_diff($bm['added']); ?>
-                        </span>
+                </span>
                 <div class="tags"><?= implode(', ',
                     array_map(fn ($name) => "<a href=\"torrents.php?taglist=$name\">$name</a>", $tgroup->tagNameList())
                     ) ?></div>
@@ -253,13 +250,13 @@ foreach ($bookmarkList as $bm) {
             'report_man'      => $reportMan,
             'snatcher'        => $snatcher,
             'tgroup'          => $tgroup,
-            'torrent_list'    => object_generator($torMan, $torrentIdList),
+            'torrent_list'    => object_generator($torMan, $bm['torrent_list']),
             'tor_man'         => $torMan,
             'viewer'          => $Viewer,
         ]);
     } else {
         // Viewing a type that does not require grouping
-        $torrent = $torMan->findById(array_first($torrentIdList));
+        $torrent = $torMan->findById(array_first($bm['torrent_list']));
         if (is_null($torrent)) {
             continue;
         }

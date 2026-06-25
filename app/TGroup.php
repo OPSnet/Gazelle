@@ -28,6 +28,10 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
     protected Stats\TGroup      $stats;
     protected TGroup\Artwork    $artwork;
 
+    public function bookmarkType(): Enum\BookmarkType {
+        return Enum\BookmarkType::tgroup;
+    }
+
     public function flush(): static {
         self::$cache->delete_multi([
             sprintf(self::CACHE_KEY, $this->id),
@@ -61,14 +65,6 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
 
     public function artwork(): TGroup\Artwork {
         return $this->artwork ??= new TGroup\Artwork($this);
-    }
-
-    public function bookmarkTable(): string {
-        return 'bookmark_tgroup';
-    }
-
-    public function bookmarkColumnName(): string {
-        return 'id_tgroup';
     }
 
     public function torrentLink(int $torrentId): string {
@@ -883,8 +879,8 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
             DELETE FROM bookmarks_torrents WHERE GroupID = ?
             ", $this->id
         );
-        $this->pg()->prepared_query("
-            delete from bookmark_tgroup where id_tgroup = ?
+        $this->pg()->query("
+            delete from bookmark_tgroup where id_tgroup = $1
             ", $this->id
         );
 

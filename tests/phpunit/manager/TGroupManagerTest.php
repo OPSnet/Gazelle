@@ -126,4 +126,34 @@ class TGroupManagerTest extends TestCase {
             'json-tgroup-grouped-torrentid',
         );
     }
+
+    public function testTGroupBookmarkEditor(): void {
+        $this->tgroupList[] = Helper::makeTGroupMusic(
+            name:       'phpunit tgman ' . randomString(6),
+            artistName: [[ARTIST_MAIN], ['phpunit tgman ' . randomString(12)]],
+            tagName:    ['neo.folk'],
+            user:       $this->user,
+        );
+        $editor = new Editor\UserBookmark($this->user->id);
+        $this->assertEquals(
+            0,
+            $editor->modify([]),
+            'tgroup-bookmark-editor-no-modify',
+        );
+        $this->assertEquals(
+            2,
+            $editor->modify([
+                $this->tgroupList[0]->id => 10,
+                $this->tgroupList[1]->id => 20,
+            ]),
+            'tgroup-bookmark-editor-modify',
+        );
+        $this->assertEquals(
+            1,
+            $editor->remove([
+                $this->tgroupList[1]->id,
+            ]),
+            'tgroup-bookmark-editor-remove',
+        );
+    }
 }

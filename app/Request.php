@@ -11,6 +11,10 @@ class Request extends BasePgObject implements Bookmarked, CategoryHasArtist {
     final public const pkName    = 'id_request';
     protected const CACHE_KEY    = 'rq_%d';
 
+    public function bookmarkType(): Enum\BookmarkType {
+        return Enum\BookmarkType::request;
+    }
+
     public function flush(): static {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
         if (isset($this->info) && $this->tgroupId()) {
@@ -26,14 +30,6 @@ class Request extends BasePgObject implements Bookmarked, CategoryHasArtist {
 
     public function location(): string {
         return 'requests.php?action=view&id=' . $this->id;
-    }
-
-    public function bookmarkTable(): string {
-        return 'bookmark_request';
-    }
-
-    public function bookmarkColumnName(): string {
-        return 'id_request';
     }
 
     /**

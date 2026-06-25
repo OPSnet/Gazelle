@@ -201,8 +201,8 @@ class Request extends \Gazelle\Base {
             $cond[] = 'r.id_torrent is null';
         }
         if (isset($this->info['bookmarker'])) {
-            $join[] = 'inner join relay.bookmarks_requests rb on (rb."RequestID" = r.id_request)';
-            $cond[] = "rb.\"UserID\" = {$this->pg()->placeholder(count($args))}";
+            $join[] = 'inner join bookmark_request br using (id_request)';
+            $cond[] = "br.id_user = {$this->pg()->placeholder(count($args))}";
             $args[] = $this->info['bookmarker']->id;
         }
         if (isset($this->info['creator'])) {

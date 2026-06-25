@@ -11,20 +11,22 @@ class UserBookmark extends \Gazelle\Base {
 
     /**
      * Uses (checkboxes) $_POST['remove'] to delete entries.
+     * @param $list array<int, int>
      */
-    public function remove(array $groupIds): int {
+    public function remove(array $list): int {
         self::$db->prepared_query("
             DELETE FROM bookmarks_torrents
             WHERE UserID = ?
-                AND GroupID IN (" . placeholders($groupIds) . ")
-            ", $this->userId, ...$groupIds
+                AND GroupID IN (" . placeholders($list) . ")
+            ", $this->userId, ...$list
         );
         $affected = self::$db->affected_rows();
-        $this->pg()->prepared_query("
+        $this->pg()->query("
             delete from bookmark_tgroup
-            where id_user = ?
-                and id_tgroup in (" . placeholders($groupIds) . ")
-            ", $this->userId, ...$groupIds
+            where id_user = $1
+                and id_tgroup = any($2)
+            ", $this->userId,
+            $this->pg()->integerConverter()->output($list)
         );
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->userId));
         return $affected;
@@ -32,20 +34,18 @@ class UserBookmark extends \Gazelle\Base {
 
     /**
      * Uses $_POST['sort'] values to update entries.
+     * @param $list array<int, int>
      */
     public function modify(array $list): int {
         $placeholders = [];
         $args = [];
-        foreach ($list as $groupId => $sequence) {
-            if (is_number($sequence) && is_number($groupId)) {
-                $placeholders[] = '(?, ?, ?)';
-                $args = array_merge($args,  [$groupId, $sequence, $this->userId]);
-            }
+        foreach ($list as $tgroupId => $sequence) {
+            $placeholders[] = '(?, ?, ?)';
+            $args = array_merge($args,  [(int)$tgroupId, (int)$sequence, $this->userId]);
         }
-        if (empty($placeholders)) {
+        if ($placeholders === []) {
             return 0;
         }
-        $affected = self::$db->affected_rows();
         self::$db->prepared_query("
             INSERT INTO bookmarks_torrents
                 (GroupID, Sort, UserID)
@@ -54,6 +54,7 @@ class UserBookmark extends \Gazelle\Base {
                 Sort = VALUES (Sort)
             ", ...$args
         );
+        $affected = self::$db->affected_rows();
         $this->pg()->prepared_query("
             insert into bookmark_tgroup
                 (id_tgroup, seq, id_user)

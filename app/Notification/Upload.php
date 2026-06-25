@@ -50,8 +50,8 @@ class Upload extends \Gazelle\Base {
         // add uploader
         $uploader = $this->torrent->uploader();
         $this->cond[] = "((coalesce(Users, '') = '' AND UserId != ?) OR (Users LIKE concat('%|', ?, '|%')))";
-        $this->args[] = $uploader->id();
-        $this->args[] = $uploader->id();
+        $this->args[] = $uploader->id;
+        $this->args[] = $uploader->id;
 
         // add tags
         $tagList = $tgroup->tagNameList();
@@ -198,10 +198,10 @@ class Upload extends \Gazelle\Base {
         $debug    = false;
         $tgroupId = $this->torrent->groupId();
         if (DEBUG_UPLOAD_NOTIFICATION) {
-            $debug = fopen(TMPDIR . "/notification.{$this->torrent->id()}", "a");
+            $debug = fopen(TMPDIR . "/notification.{$this->torrent->id}", "a");
             if ($debug !== false) {
                 fprintf($debug, "g=%d t=%d results=%d\n%s\n%s\n",
-                    $tgroupId, $this->torrent->id(), $nr, $this->sql(), implode("\n", $this->args())
+                    $tgroupId, $this->torrent->id, $nr, $this->sql(), implode("\n", $this->args())
                 );
             }
         }
@@ -222,7 +222,7 @@ class Upload extends \Gazelle\Base {
                 INSERT IGNORE INTO users_notify_torrents
                        (GroupID, TorrentID, UserID, FilterID)
                 VALUES (?,       ?,         ?,      ?)
-                ", $tgroupId, $this->torrent->id(), $notify['user_id'], $notify['filter_id']
+                ", $tgroupId, $this->torrent->id, $notify['user_id'], $notify['filter_id']
             );
             $n += self::$db->affected_rows();
             $this->rss[] = "torrents_notify_{$notify['passkey']}";
@@ -284,17 +284,24 @@ class Upload extends \Gazelle\Base {
         }
 
         // RSS for bookmarks
-        self::$db->prepared_query("
-            SELECT concat('torrents_bookmarks_t_', um.torrent_pass)
-            FROM users_main AS um
-            INNER JOIN bookmarks_torrents AS b ON (b.UserID = um.ID)
-            WHERE b.GroupID = ?
-            ", $tgroup->id()
+        $idList = $this->pg()->columnex("
+            select id_user from bookmark_tgroup where id_tgroup = $1
+            ", $tgroup->id
         );
-        foreach (self::$db->collect(0) as $subFeed) {
+        if ($idList === []) {
+            return $n;
+        }
+        $placeholder = placeholders($idList);
+        self::$db->prepared_query("
+            SELECT concat('torrents_bookmarks_t_' || torrent_pass)
+            FROM users_main
+            WHERE ID IN ($placeholder)
+            ", ...$idList
+        );
+        foreach (self::$db->collect(0) as $f) {
             foreach ($this->rss as $rss) {
                 $n++;
-                $feed->populate($rss, $subFeed);
+                $feed->populate($rss, $f);
             }
         }
         return $n;

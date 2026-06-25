@@ -39,6 +39,10 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
         protected int $revisionId = 0
     ) {}
 
+    public function bookmarkType(): Enum\BookmarkType {
+        return Enum\BookmarkType::artist;
+    }
+
     protected function cacheKey(): string {
         return sprintf(self::CACHE_PREFIX, $this->id)
             . ($this->revisionId ? '_r' . $this->revisionId : '');
@@ -75,14 +79,6 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
 
     public function location(): string {
         return 'artist.php?id=' . $this->id;
-    }
-
-    public function bookmarkTable(): string {
-        return 'bookmark_artist';
-    }
-
-    public function bookmarkColumnName(): string {
-        return 'id_artist';
     }
 
     public function info(): array {
@@ -647,11 +643,10 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
 
         // Get the ids of the objects that need to be flushed
         $oldName = $old->name();
-        self::$db->prepared_query("
-            SELECT UserID FROM bookmarks_artists WHERE ArtistID = ?
-            ", $old->id
+        $bookmarkList = $this->pg()->columnex('
+            select id_user from bookmark_artist where id_artist = $1
+            ', $old->id
         );
-        $bookmarkList = self::$db->collect(0);
         self::$db->prepared_query("
             SELECT ca.CollageID
             FROM collages_artists AS ca
@@ -712,8 +707,8 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
             ) and id_artist = $1
             ', $old->id, $newId
         );
-        $this->pg()->prepared_query("
-            delete from bookmark_artist where id_artist = ?
+        $this->pg()->query("
+            delete from bookmark_artist where id_artist = $1
             ", $old->id
         );
         self::$db->prepared_query("
@@ -774,8 +769,24 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
         $commMan->merge('artist', $old->id, $newId);
 
         // Cache clearing
-        self::$cache->delete_multi(array_map(fn ($id) => "notify_artists_$id", $bookmarkList));
-        self::$cache->delete_multi(array_map(fn ($id) => sprintf(Collage::CACHE_KEY, $id), $collageList));
+        self::$cache->delete_multi(
+            array_map(
+                fn ($id) => "notify_artists_$id",
+                $bookmarkList
+            )
+        );
+        self::$cache->delete_multi(
+            array_map(
+                fn ($id) => sprintf(User\Bookmark::CACHE_KEY, 'artist', $id),
+                $bookmarkList
+            )
+        );
+        self::$cache->delete_multi(
+            array_map(
+                fn ($id) => sprintf(Collage::CACHE_KEY, $id),
+                $collageList
+            )
+        );
         foreach ($artistCollageList as $collageId) {
             $collMan->findById($collageId)?->flush();
         }

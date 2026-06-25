@@ -21,7 +21,7 @@ if (empty($_GET['userid'])) {
 $tgMan = new Manager\TGroup();
 
 $list = [];
-foreach (new User\Bookmark($user)->tgroupBookmarkList() as $info) {
+foreach (new User\Bookmark($user)->bookmarkList(Enum\BookmarkType::tgroup) as $info) {
     $tgroup = $tgMan->findById($info['tgroup_id']);
     if (is_null($tgroup)) {
         continue;

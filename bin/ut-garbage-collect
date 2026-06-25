@@ -193,6 +193,10 @@ foreach ($groupList as $tgroupId) {
                 DELETE FROM bookmarks_torrents bt WHERE GroupID = ?
                 ", $tgroupId
             );
+            $pgrw->query('
+                delete from bookmark_tgroup bt WHERE id_tgroup = $1
+                ', $tgroupId
+            );
             $tgroup->remove(new User(1));
         } catch (\Error|\Exception) {
         }
@@ -222,30 +226,23 @@ foreach ($db->collect(0) as $userId) {
     }
 }
 
-$db->prepared_query("
-    DELETE u
-    FROM bookmarks_artists u
-    LEFT JOIN users_main um ON (um.ID = u.UserID)
-    WHERE um.ID IS NULL
-");
-$db->prepared_query("
-    DELETE u
-    FROM bookmarks_collages u
-    LEFT JOIN users_main um ON (um.ID = u.UserID)
-    WHERE um.ID IS NULL
-");
-$db->prepared_query("
-    DELETE u
-    FROM bookmarks_requests u
-    LEFT JOIN users_main um ON (um.ID = u.UserID)
-    WHERE um.ID IS NULL
-");
-$db->prepared_query("
-    DELETE u
-    FROM bookmarks_torrents u
-    LEFT JOIN users_main um ON (um.ID = u.UserID)
-    WHERE um.ID IS NULL
-");
+foreach (['artists', 'collages', 'requests', 'torrents'] as $type) {
+    $db->prepared_query("
+        DELETE u
+        FROM bookmarks_$type u
+        LEFT JOIN users_main um ON (um.ID = u.UserID)
+        WHERE um.ID IS NULL
+    ");
+}
+foreach (['artist', 'collage', 'request', 'tgroup'] as $type) {
+    $pgrw->query(<<<END_SQL
+        delete from bookmark_$type u
+        where not exists (
+            select 1 from relay.users_main um where um."ID" = u.id_user
+        )
+    END_SQL
+    );
+}
 $db->prepared_query("
     DELETE u
     FROM users_freeleeches u

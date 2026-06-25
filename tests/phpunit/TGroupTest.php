@@ -4,7 +4,6 @@ namespace Gazelle;
 
 use PHPUnit\Framework\TestCase;
 use GazelleUnitTest\Helper;
-use Gazelle\Enum\CommentType;
 
 class TGroupTest extends TestCase {
     protected TGroup $tgroup;
@@ -30,14 +29,14 @@ class TGroupTest extends TestCase {
         $this->recordLabel     = randomString(6) . ' Records';
         $this->catalogueNumber = randomString(3) . '-' . random_int(1000, 2000);
         $this->manager         = new Manager\TGroup();
-        $this->tgroup      = $this->manager->create(
-            categoryId:      CATEGORY_MUSIC,
-            name:            $this->name,
-            year:            $this->year,
-            description:     "Description of {$this->name}",
-            image:           'https://example.com/' . randomString(10) . '.jpg',
-            releaseType:     new ReleaseType()->findIdByName('Live album'),
-            showcase:        false,
+        $this->tgroup          = $this->manager->create(
+            categoryId:  CATEGORY_MUSIC,
+            name:        $this->name,
+            year:        $this->year,
+            description: "Description of {$this->name}",
+            image:       'https://example.com/' . randomString(10) . '.jpg',
+            releaseType: new ReleaseType()->findIdByName('Live album'),
+            showcase:    false,
         );
 
         // and add some torrents to the group
@@ -149,7 +148,32 @@ class TGroupTest extends TestCase {
 
     public function testTGroupBookmark(): void {
         $bookmarker = new User\Bookmark($this->userList['user']);
+        $this->assertEquals(
+            0,
+            $bookmarker->tgroupTotal(),
+            'bookmark-tgroup-not-bookmarked',
+        );
+        $this->assertEquals(
+            [],
+            $bookmarker->tgroupArtistLeaderboard(),
+            'bookmark-tgroup-no-leaderboard',
+        );
+        $this->assertEquals(
+            0,
+            $bookmarker->tgroupArtistTotal(),
+            'bookmark-tgroup-no-artist-total',
+        );
+        $this->assertEquals(
+            [],
+            $bookmarker->tgroupList(1, 0),
+            'bookmark-tgroup-no-list',
+        );
         $bookmarker->create($this->tgroup);
+        $this->assertEquals(
+            1,
+            $bookmarker->tgroupTotal(),
+            'bookmark-tgroup-bookmarked'
+        );
         $page = $bookmarker->tgroupList(2, 0);
         $this->assertCount(1, $page, 'bookmark-tgroup-page-total');
         $this->assertEquals(
@@ -157,9 +181,14 @@ class TGroupTest extends TestCase {
             $page[0]['tgroup_id'],
             'bookmark-tgroup-page-item'
         );
-        // no tags, but verify the SQL works
-        $this->assertCount(
-            0,
+        $this->assertFalse($bookmarker->create($this->tgroup), 'bookmark-tgroup-overbooked');
+        $tag = new Manager\Tag()->softCreate('pop', $this->userList['admin']);
+        $tag->addTGroup($this->tgroup, $this->userList['admin'], 10);
+        $this->assertEquals(
+            [[
+                'name'  => $tag->name(),
+                'total' => 1,
+            ]],
             $bookmarker->tgroupTagLeaderboard(),
             'bookmark-tag-leaderboard',
         );
@@ -605,6 +634,11 @@ class TGroupTest extends TestCase {
         $this->assertGreaterThanOrEqual(0, $stats->seedingTotal(), 'tgroup-stats-seeding');
         $this->assertGreaterThanOrEqual(0, $stats->snatchTotal(), 'tgroup-stats-snatch');
 
+        $artMan = new Manager\Artist();
+        $artistName = 'phpunit ' . randomString(6) . ' band';
+        $this->tgroup->addArtists([ARTIST_MAIN], [$artistName]);
+        $artistName = array_first($this->tgroup->artistRole()->roleListByType()['artists'])['name'];
+
         // test increment
         $total = $stats->bookmarkTotal();
         $bookmarker = new User\Bookmark($this->userList['user']);
@@ -612,33 +646,35 @@ class TGroupTest extends TestCase {
 
         new Stats\TGroups()->refresh();
         $stats->flush();
-        $this->assertEquals($total + 1, $stats->bookmarkTotal(), 'tgroup-stats-update-bookmark');
+        $this->assertEquals(
+            $total + 1,
+            $stats->bookmarkTotal(),
+            'tgroup-stats-update-bookmark',
+        );
 
         $this->assertTrue(
             $bookmarker->isBookmarked($this->tgroup),
-            'tgroup-merge-bookmark',
+            'tgroup-is-bookmarked',
         );
         $this->assertEquals(1, $bookmarker->tgroupTotal(), 'tgroup-bookmark-tgroupTotal');
-        $list = $bookmarker->tgroupBookmarkList();
+        $list = $bookmarker->bookmarkList(Enum\BookmarkType::tgroup);
         $this->assertCount(1, $list, 'tgroup-bookmark-user-total');
         $this->assertEquals(
             $this->tgroup->id,
-            $list[0]['tgroup_id'],
+            array_first($list)['tgroup_id'],
             'tgroup-bookmark-user-id',
         );
         $this->assertEquals(
-            3,
-            $bookmarker->torrentTotal(),
-            'tgroup-bookmark-tgroup-total',
-        );
-        // artists have not been assigned, but this tests the SQL
-        $this->assertEquals(
-            [],
+            [[
+                "id"    => array_first(array_first($this->tgroup->artistRole()->idList()))['id'],
+                "total" => 1,
+                "name"  => $artistName,
+            ]],
             $bookmarker->tgroupArtistLeaderboard(),
             'tgroup-bookmark-leaderboard',
         );
         $this->assertEquals(
-            0,
+            1,
             $bookmarker->tgroupArtistTotal(),
             'tgroup-bookmark-artist-total',
         );
@@ -852,13 +888,13 @@ class TGroupTest extends TestCase {
         $body    = "phpunit u{$writer->id} t{$this->tgroup->id}";
         $comment = new Manager\Comment()->create(
             $writer,
-            CommentType::tgroup->value,
+            Enum\CommentType::tgroup->value,
             $this->tgroup->id,
             $body,
         );
 
         $searchWriter = new Search\Comment(
-            CommentType::tgroup,
+            Enum\CommentType::tgroup,
             'default',
             $writer->id !== $writer->id,
             $writer,
@@ -895,7 +931,7 @@ class TGroupTest extends TestCase {
         );
 
         $searchCreator = new Search\Comment(
-            CommentType::tgroup,
+            Enum\CommentType::tgroup,
             'uploaded',
             $creator->id === $creator->id,
             $creator,
@@ -912,7 +948,7 @@ class TGroupTest extends TestCase {
         );
 
         $searchUploader = new Search\Comment(
-            CommentType::tgroup,
+            Enum\CommentType::tgroup,
             'uploaded',
             $creator->id !== $creator->id,
             $creator,
