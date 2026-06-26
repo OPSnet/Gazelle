@@ -181,7 +181,7 @@ class Torrent extends \Gazelle\Base {
     public function flow(): array {
         $flow = self::$cache->get_value(self::TORRENT_FLOW);
         if ($flow === false) {
-            $flow = $this->pg()->all(<<<END_SQL
+            $flow = $this->pg()->allex(<<<END_SQL
                 with dates(m) as (
                     select date_trunc('month', t)
                     from generate_series(
@@ -209,17 +209,13 @@ class Torrent extends \Gazelle\Base {
                 left join delta using (m)
                 group by Month, delta.t_add, delta.t_del
                 order by Month
-END_SQL
+                END_SQL
             );
-            foreach ($flow as &$f) {
-                $f['t_add'] = (int)$f['t_add'];
-                $f['t_del'] = (int)$f['t_del'];
-            }
-            unset($f);
             self::$cache->cache_value(
                 self::TORRENT_FLOW,
                 $flow,
-                mktime(0, 0, 0, date('n') + 1, 2)
+                new \DateTimeImmutable('first day of next month')->format('U')
+                    - new \DateTimeImmutable()->format('U'),
             );
         }
         return $flow;

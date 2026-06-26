@@ -21,15 +21,22 @@ class BonusTest extends TestCase {
         if (isset($this->userList)) {
             foreach ($this->userList as $user) {
                 $user->requestContext()->unsetViewer();
-                $user->remove();
+                Helper::removeUser($user);
             }
         }
     }
 
     public function testBonusBasic(): void {
+        $stats                      = new Stats\Bonus();
         $this->userList['giver']    = Helper::makeUser('bonusg.' . randomString(6), 'bonus', true);
         $this->userList['receiver'] = Helper::makeUser('bonusr.' . randomString(6), 'bonus', true);
-        $startingPoints = 10000;
+        $startingPoints             = 10000;
+
+        $initial = [
+            'purchase' => $stats->itemPurchase(),
+            'expend'   => $stats->expenditureRange('month', 0, 1),
+            'accrue'   => $stats->accrualRange('month', 0, 1),
+        ];
 
         $user  = $this->userList['giver'];
         $giver = new User\Bonus($user);
@@ -61,9 +68,6 @@ class BonusTest extends TestCase {
         );
 
         $manager = new Manager\Bonus();
-        // Here is as good a place as any
-        $this->assertEquals(0, $manager->discount(), 'bonus-discount');
-
         $manager->flush();
         $this->assertCount(13, $manager->itemList(), 'bonus-item-list');
         $this->assertNull($manager->findBonusItemByLabel('nope'), 'bonus-item-null');
@@ -253,6 +257,27 @@ class BonusTest extends TestCase {
 
         $this->assertCount(0, $giver->seedList(5, 0), 'bonus-history-seedlist');
         $this->assertCount(0, $giver->poolHistory(), 'bonus-history-pool');
+
+        $final = [
+            'purchase' => $stats->itemPurchase(),
+            'expend'   => $stats->expenditureRange('month', 0, 1),
+            'accrue'   => $stats->accrualRange('month', 0, 1),
+        ];
+        $this->assertEquals(
+            1,
+            array_first($final['purchase'])['total'] - array_first($initial['purchase'])['total'],
+            'bonus-stats-item-purchase',
+        );
+        $this->assertEquals(
+            1,
+            array_first($final['expend'])['total'] - array_first($initial['expend'])['total'],
+            'bonus-stats-item-expend',
+        );
+        $this->assertEquals(
+            $initial['accrue'],
+            $final['accrue'],
+            'bonus-stats-accrual',
+        );
     }
 
     public function testBonusPurchaseOther(): void {
@@ -453,16 +478,6 @@ class BonusTest extends TestCase {
                 "bonus-item-broke-$label",
             );
         }
-    }
-
-    public function testBonusPool(): void {
-        global $Cache;
-        $Cache->delete_value("bonus_pool");
-        $this->assertEquals(
-            [],
-            new Manager\Bonus()->openPoolList(),
-            'bonus-open-pool',
-        );
     }
 
     public function testBonusInvite(): void {
@@ -743,6 +758,89 @@ class BonusTest extends TestCase {
 
         $this->userList['bonus']->setField('Enabled', UserStatus::disabled->value)->modify();
         $eco->flush();
-        $this->assertEquals(98765 + $stranded, $eco->bonusStrandedTotal(), 'bonus-total-disabled-stranded-points');
+        $this->assertEquals(
+            98765 + $stranded,
+            $eco->bonusStrandedTotal(),
+            'bonus-total-disabled-stranded-points',
+        );
+    }
+
+    public function testBonusDiscount(): void {
+        $siteOption = new Manager\SiteOption();
+        $manager    = new Manager\Bonus();
+        $initial    = $manager->discount();
+        $this->assertEquals(
+            1,
+            $siteOption->modifyOption('bonus-discount', '25'),
+            'bonus-discount-set',
+        );
+        $this->assertEquals(25, $manager->discount(), 'bonus-discount-read');
+        $siteOption->modifyOption('bonus-discount', (string)$initial);
+    }
+
+    public function testBonusPool(): void {
+
+        $this->userList[] = Helper::makeUser('bonus.' . randomString(6), 'bonus');
+        $stats = new Stats\Bonus();
+        $bonus = new User\Bonus(array_first($this->userList));
+        $bonus->addPoints(10_000_000);
+        $db = DB::DB();
+        $db->prepared_query("
+            INSERT INTO bonus_pool
+                   (name, since_date, until_date)
+            VALUES (?,    now(),      now() + interval 10 minute)
+            ", 'phpunit-' . randomString(10)
+        );
+        $pool = new BonusPool($db->inserted_id());
+        $this->assertEquals(
+            2,
+            $pool->contribute($bonus->user(), 8_000_000, 9_000_000),
+            'bonus-pool-contribute',
+        );
+        $this->assertEquals(
+            [[
+                'user_id' => $bonus->user()->id,
+                'total'   => 9_000_000,
+            ]],
+            $stats->topPoolContributors(1),
+            'bonus-top-pool-contributor',
+        );
+        $open = new Manager\Bonus()->openPoolList();
+        $this->assertEquals(
+            $pool->id,
+            $open['bonus_pool_id'],
+            'bonus-pool-list',
+        );
+        $this->assertEquals(
+            2,
+            $pool->remove(),
+            'bonus-pool-remove'
+        );
+    }
+
+    public function testBonusHoarder(): void {
+        $this->userList[] = Helper::makeUser('bonus.' . randomString(6), 'bonus');
+        $stats = new Stats\Bonus();
+        $bonus = new User\Bonus(array_first($this->userList));
+        $bonus->addPoints(1_000_000_000); // if you have more than that, buy some tokens
+        $this->assertEquals(
+            [[
+                'user_id' => $bonus->user()->id,
+                'total'   => 1_000_000_000,
+            ]],
+            $stats->topHoarders(1),
+            'bonus-top-hoarder',
+        );
+
+        $this->assertEqualsCanonicalizing(
+            ['user_id', 'total'],
+            array_keys(array_first($stats->topSpenders(1))),
+            'bonus-top-spender',
+        );
+        $this->assertEqualsCanonicalizing(
+            ['user_id', 'total'],
+            array_keys(array_first($stats->topAggregateSpenders(1))),
+            'bonus-aggregate-top-spender',
+        );
     }
 }

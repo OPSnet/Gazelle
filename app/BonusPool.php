@@ -62,13 +62,15 @@ class BonusPool extends BaseObject {
 
     public function remove(): int {
         self::$db->prepared_query("
-            DELETE bp, bpc
-            FROM bonus_pool bp
-            LEFT JOIN bonus_pool_contrib bpc USING (bonus_pool_id)
-            WHERE bp.bonus_pool_id = ?
+            DELETE FROM bonus_pool_contrib WHERE bonus_pool_id = ?
             ", $this->id
         );
         $affected = self::$db->affected_rows();
+        self::$db->prepared_query("
+            DELETE FROM bonus_pool WHERE bonus_pool_id = ?
+            ", $this->id
+        );
+        $affected += self::$db->affected_rows();
         $this->flush();
         return $affected;
     }

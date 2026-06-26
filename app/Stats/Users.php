@@ -979,7 +979,7 @@ class Users extends \Gazelle\Base {
     }
 
     public function recruitmentHistory(): array {
-        return $this->pg()->all(<<<END_SQL
+        return $this->pg()->allex(<<<END_SQL
             select * from crosstab($$
             with r as (
                 select isrc.name,
@@ -1028,7 +1028,7 @@ class Users extends \Gazelle\Base {
     }
 
     public function recruitmentHistoryRange(): array {
-        return $this->pg()->column(<<<END_SQL
+        return $this->pg()->columnex(<<<END_SQL
             select to_char(
                  now() - interval '11 month' + (interval '1 month' * generate_series(0, 11)), 'YYYY-MM'
             )

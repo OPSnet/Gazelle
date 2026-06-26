@@ -9,7 +9,7 @@ class Bonus extends \Gazelle\Base {
      * @return array of [title, total]
      */
     public function itemPurchase(): array {
-        return $this->pg()->all(<<<END_SQL
+        return $this->pg()->allex(<<<END_SQL
             select bi.id_bonus_item as id,
                 count(hb.id_bonus_item)  as total,
                 bi.title
@@ -32,22 +32,22 @@ class Bonus extends \Gazelle\Base {
      * @return array of array of [title, total] aggregated over interval range
      */
     public function expenditureRange(string $interval, int $offset, int $length): array {
-        return $this->pg()->all(<<<END_SQL
+        return $this->pg()->allex(<<<END_SQL
             select bi.id_bonus_item as id,
                 count(hb.id_bonus_item) as total,
                 bi.title
             from bonus_item bi
             left join history_bonus hb using (id_bonus_item)
             where (
-                bh.id_bonus_item is null
+                hb.id_bonus_item is null
                 or
-                bh.created between (now() - '1 {$interval}'::interval * ?)
-                    and (now() - '1 {$interval}'::interval * ?)
+                hb.created between (now() - interval '1 {$interval}' * ($1::int + $2::int))
+                    and (now() - interval '1 {$interval}' * $1)
             )
             group by bi.id_bonus_item
             order by bi.sequence
-            END_SQL
-            , $offset + $length, $offset
+            END_SQL,
+                $offset, $length,
         );
     }
 
@@ -110,7 +110,7 @@ class Bonus extends \Gazelle\Base {
     public function topSpenders(int $n): array {
         return $this->pg()->allex('
             SELECT id_user as user_id,
-                sum(orice) AS total
+                sum(price) AS total
             from history_bonus
             group by id_user
             order by total desc
@@ -144,7 +144,7 @@ class Bonus extends \Gazelle\Base {
      */
     public function topAggregateSpenders(int $n): array {
         return $this->pg()->allex('
-            select id_user,
+            select user_id,
                 sum(total) as total
             from (
                 select user_id,
