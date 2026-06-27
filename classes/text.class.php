@@ -1105,7 +1105,7 @@ class Text {
                             $Str .= '<a rel="noreferrer" target="_blank" href="' . self::encode_url($Block['Val']) . '">' . $Block['Val'] . '</a> (image)';
                             break;
                         }
-                        if (!self::valid_url($Block['Val'], '\.' . IMAGEEXT_REGEXP_STEM)) {
+                        if (!self::valid_url($Block['Val'], '\.' . IMAGE_EXT)) {
                             $Str .= "[img]{$Block['Val']}[/img]";
                         } else {
                             $style = '';

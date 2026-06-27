@@ -188,24 +188,26 @@ class TextTest extends TestCase {
             'text-image-legacy-url-with-x'
         );
 
-        foreach ([
-            '[IMG=]',
-            '[IMG=|ALT=Foo]',
-            "[IMG=|ALT=Fo\no]",
-            '[IMG=123.123x234.234]',
-            '[IMG=-40x-40]',
-            '[IMG=40x-40]',
-            '[IMG=20,30]',
-            '[IMG=20,30x40,50]',
-            '[IMG=0]',
-            '[IMG=0x100]',
-            '[IMG=100x0]',
-            '[IMG=x]',
-            '[img=0x-40]',
-            '[img=-40x0]',
-            '[img=10x-40]',
-            '[img=-40x10]',
-        ] as $invalid) {
+        foreach (
+            [
+                '[IMG=]',
+                '[IMG=|ALT=Foo]',
+                "[IMG=|ALT=Fo\no]",
+                '[IMG=123.123x234.234]',
+                '[IMG=-40x-40]',
+                '[IMG=40x-40]',
+                '[IMG=20,30]',
+                '[IMG=20,30x40,50]',
+                '[IMG=0]',
+                '[IMG=0x100]',
+                '[IMG=100x0]',
+                '[IMG=x]',
+                '[img=0x-40]',
+                '[img=-40x0]',
+                '[img=10x-40]',
+                '[img=-40x10]',
+            ] as $invalid
+        ) {
             $rendered = \Text::full_format("$invalid{$image}[/img]");
             $this->assertStringNotContainsString(' width="', $rendered, "text-image-invalid-width-$invalid");
             $this->assertStringNotContainsString(' height="', $rendered, "text-image-invalid-height-$invalid");

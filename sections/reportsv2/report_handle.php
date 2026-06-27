@@ -76,7 +76,7 @@ if ($reportType->needLink() !== 'none') {
     if ($link === '' && $reportType->needLink() === 'required') {
         Error400::error("You must supply one or more links in your report");
     } elseif ($link !== '') {
-        if (!preg_match_all(URL_REGEXP, $link, $match)) {
+        if (!preg_match_all(URL_REGEXP_MULTI, $link, $match)) {
             Error400::error("The extra links you provided weren't links...");
         }
         $Links = implode(' ', $match[1]);

@@ -1271,22 +1271,31 @@ defined('CACHE_NAMESPACE') or define('CACHE_NAMESPACE', [
 
 // ------------------------------------------------------------------------
 // Common regexp patterns
+// These are deliberately designed to be conservative and may fail certain edge cases.
+// If one does not match an expected valid target, write the test first in RegexpTest.php
+// and then make the necessary change.
 
-defined('IP_REGEXP_STEM')   or define('IP_REGEXP_STEM',  '(?:\b25[0-5]|\b2[0-4][0-9]|\b[01]?[0-9][0-9]?)(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}');
-defined('IP_REGEXP')        or define('IP_REGEXP',       '/' . IP_REGEXP_STEM . '/');
-defined('URL_REGEXP_STEM')  or define('URL_REGEXP_STEM', '(https?:\/\/(?:' . IP_REGEXP_STEM . '|localhost|(?:[\w-]+(?:\.[\w-]+)+))(?::\d{1,5})?(?:\/\S*))');
-defined('URL_REGEXP')       or define('URL_REGEXP',      '/^' . URL_REGEXP_STEM . '$/i');
-defined('CSS_REGEXP')       or define('CSS_REGEXP',      '/^' . URL_REGEXP_STEM . '\.css(?:\?\S*)?$/i');
-defined('IMAGEEXT_REGEXP_STEM') or define('IMAGEEXT_REGEXP_STEM', '(?:avif|bmp|gif|jpe?g|svg|tiff?|png|web[mp])');
-defined('IMAGE_REGEXP')     or define('IMAGE_REGEXP',    '/^(' . URL_REGEXP_STEM . '\.' . IMAGEEXT_REGEXP_STEM . '(?:[#&?]\S*)?)$/i');
-defined('IMAGETEXT_REGEXP') or define('IMAGETEXT_REGEXP', '/\b(' . URL_REGEXP_STEM . '\.' . IMAGEEXT_REGEXP_STEM . '(?:[#&?]\S*)?)\b/i');
-defined('SITELINK_REGEXP')  or define('SITELINK_REGEXP', '(?:' . preg_quote(SITE_URL, '/') .  '|' . preg_quote(ALT_SITE_URL, '/') . ')');
-defined('ARTIST_REGEXP')    or define('ARTIST_REGEXP',   '/^' . SITELINK_REGEXP . '\/artist\.php\?.*?\bid=(?P<id>\d+)$/');
-defined('COLLAGE_REGEXP')   or define('COLLAGE_REGEXP',  '/^' . SITELINK_REGEXP . '\/collages\.php\?.*?\bid=(?P<id>\d+)\b/');
-defined('TGROUP_REGEXP')    or define('TGROUP_REGEXP',   '/^' . SITELINK_REGEXP . '\/torrents\.php\?.*?\bid=(?P<id>\d+)\b/');
-defined('TORRENT_REGEXP')   or define('TORRENT_REGEXP',  '/^' . SITELINK_REGEXP . '\/torrents\.php\?.*?\btorrentid=(?P<id>\d+)\b/');
-defined('EMAIL_REGEXP')     or define('EMAIL_REGEXP',    '/^[\w-]+(?:\.[\w-]+)*(?:\+[.\w-]+)?@[\w-]+(?:\.[\w-]+)+$/');
-defined('USERNAME_REGEXP')  or define('USERNAME_REGEXP', '/\b(?:[01]$(*PRUNE)(*FAIL)|(?P<username>[\w.]{1,20}))\b/');
+defined('IP_REGEXP_STEM')   or define('IP_REGEXP_STEM',   '(?:\b25[0-5]|\b2[0-4]\d|\b[01]?\d\d?)(?:\.(?:25[0-5]|2[0-4]\d|[01]?\d\d?)){3}');
+defined('IP_REGEXP')        or define('IP_REGEXP',        '/' . IP_REGEXP_STEM . '/');
+defined('URL_PROTO_HOST')   or define('URL_PROTO_HOST',   '(?:https?:\/\/(?:' . IP_REGEXP_STEM . '|localhost|(?:[\w-]+(?:\.[\w-]+)+))(?::\d{1,5})?)');
+defined('URL_PATH')         or define('URL_PATH',         '(?:\/(?:[^\W"#%<>?]|[.-]+|%[\da-f]{2})*)*');
+//                                                            arg      =   value
+defined('URL_ARG')          or define('URL_ARG',          '(?:[\w-]+(?:=(?:[^\W"%<>-]|[.-]+|%[\da-f]{2})*)?)');
+//                                                             query                                         fragment
+defined('URL_QUERY_FRAG')   or define('URL_QUERY_FRAG',   '(?:\?' . URL_ARG . '?(?:[&;]' . URL_ARG . ')*)?(?:#(?:[^\W"%<>]|[.=-]+|%[\da-f]{2})*)?');
+defined('URL_REGEXP')       or define('URL_REGEXP',       '/^' . URL_PROTO_HOST . URL_PATH . URL_QUERY_FRAG . '$/i');
+defined('URL_REGEXP_MULTI') or define('URL_REGEXP_MULTI', '/(' . URL_PROTO_HOST . URL_PATH . URL_QUERY_FRAG . ')+/i');
+defined('CSS_REGEXP')       or define('CSS_REGEXP',       '/^' . URL_PROTO_HOST . URL_PATH . '\.css' . URL_QUERY_FRAG . '$/i');
+defined('IMAGE_EXT')        or define('IMAGE_EXT',        '(?:avif|bmp|gif|jpe?g|png|svg|tiff?|web[mp])');
+defined('IMAGE_REGEXP')     or define('IMAGE_REGEXP',     '/^('  . URL_PROTO_HOST . URL_PATH . '\.' . IMAGE_EXT . URL_QUERY_FRAG . ')$/i');
+defined('IMAGETEXT_REGEXP') or define('IMAGETEXT_REGEXP', '/\b(' . URL_PROTO_HOST . URL_PATH . '\.' . IMAGE_EXT . URL_QUERY_FRAG . ')\b/i');
+defined('SITELINK_REGEXP')  or define('SITELINK_REGEXP',  '(?:' . preg_quote(SITE_URL, '/') .  '|' . preg_quote(ALT_SITE_URL, '/') . ')');
+defined('ARTIST_REGEXP')    or define('ARTIST_REGEXP',    '/^' . SITELINK_REGEXP . '\/artist\.php\?.*?\bid=(?P<id>\d+)$/');
+defined('COLLAGE_REGEXP')   or define('COLLAGE_REGEXP',   '/^' . SITELINK_REGEXP . '\/collages\.php\?.*?\bid=(?P<id>\d+)\b/');
+defined('TGROUP_REGEXP')    or define('TGROUP_REGEXP',    '/^' . SITELINK_REGEXP . '\/torrents\.php\?.*?\bid=(?P<id>\d+)\b/');
+defined('TORRENT_REGEXP')   or define('TORRENT_REGEXP',   '/^' . SITELINK_REGEXP . '\/torrents\.php\?.*?\btorrentid=(?P<id>\d+)\b/');
+defined('EMAIL_REGEXP')     or define('EMAIL_REGEXP',     '/^[\w-]+(?:\.[\w-]+)*(?:\+[.\w-]+)?@[\w-]+(?:\.[\w-]+)+$/');
+defined('USERNAME_REGEXP')  or define('USERNAME_REGEXP',  '/\b(?:[01]$(*PRUNE)(*FAIL)|(?P<username>[\w.]{1,20}))\b/');
 
 // ------------------------------------------------------------------------
 // Various scripts redownload .torrent files periodically.
