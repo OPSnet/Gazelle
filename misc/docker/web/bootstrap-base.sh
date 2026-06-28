@@ -45,7 +45,8 @@ if [ -z "${MYSQL_INIT_DB-}" ]; then
         cat /opt/gazelle/mysql_schema.sql /opt/gazelle/mysql_data.sql
         cat <<EOF
 CREATE USER IF NOT EXISTS 'ro_$MYSQL_USER'@'%' IDENTIFIED BY 'ro_$MYSQL_PASSWORD';
-GRANT SELECT ON $MYSQL_DATABASE.* TO 'ro_$MYSQL_USER'@'%';
+GRANT SELECT, SHOW VIEW ON $MYSQL_DATABASE.* TO 'ro_$MYSQL_USER'@'%';
+GRANT SHOW VIEW ON $MYSQL_DATABASE.* TO '$MYSQL_USER'@'%';
 GRANT SELECT ON performance_schema.table_io_waits_summary_by_index_usage TO '$MYSQL_USER'@'%';
 GRANT SELECT ON performance_schema.table_io_waits_summary_by_table TO '$MYSQL_USER'@'%';
 GRANT SELECT ON sys.schema_redundant_indexes TO '$MYSQL_USER'@'%';

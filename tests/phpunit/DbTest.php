@@ -419,6 +419,19 @@ class DbTest extends TestCase {
         $this->assertEquals(2, $this->pg()->scalarex('select 2'), 'pg-abort-qry3');
     }
 
+    public function testMysqlReadView(): void {
+        $this->assertEquals(
+            0,
+            DB::DB()->scalar("select count(*) from v_summary_seed_seeding"),
+            'mysql-view-ro'
+        );
+        $this->assertEquals(
+            0,
+            DB::DB(readWrite: true)->scalar("select count(*) from v_summary_seed_seeding"),
+            'mysql-view-rw'
+        );
+    }
+
     public function testMysqlDuplicateException(): void {
         $this->expectException(DB\MysqlDuplicateKeyException::class);
         DB::DB()->prepared_query("
@@ -690,6 +703,19 @@ class DbTest extends TestCase {
         $this->pg()->query("
             drop table test_bytea
         ");
+    }
+
+    public function testPgReadView(): void {
+        $this->assertEquals(
+            0,
+            $this->pgro()->scalarex("select count(*) from relay.v_summary_seed_seeding"),
+            'mysql-view-ro'
+        );
+        $this->assertEquals(
+            0,
+            $this->pg()->scalarex("select count(*) from relay.v_summary_seed_seeding"),
+            'mysql-view-rw'
+        );
     }
 
     #[Group('no-ci')]

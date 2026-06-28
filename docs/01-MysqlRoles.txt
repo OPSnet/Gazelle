@@ -57,8 +57,7 @@ GRANT INSERT, SELECT, UPDATE ON `gazelle`.`users_freeleeches` TO 'trk'@'localhos
 GRANT INSERT, SELECT, UPDATE ON `gazelle`.`users_main` TO 'trk'@'localhost';
 
 -- Grants for website
-GRANT CREATE TEMPORARY TABLES, DELETE, INSERT, SELECT, UPDATE ON `gazelle`.* TO 'www'@'localhost';
-GRANT DROP ON `gazelle`.`drives` TO 'www'@'localhost';
+GRANT CREATE TEMPORARY TABLES, DELETE, INSERT, SELECT, SHOW VIEW UPDATE ON `gazelle`.* TO 'www'@'localhost';
 GRANT EXECUTE ON FUNCTION `gazelle`.`binomial_ci` TO 'www'@'localhost';
 GRANT EXECUTE ON FUNCTION `gazelle`.`bonus_accrual` TO 'www'@'localhost';
 GRANT EXECUTE ON FUNCTION `gazelle`.`category_bonus_accrual` TO 'www'@'localhost';

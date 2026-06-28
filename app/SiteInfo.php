@@ -139,11 +139,13 @@ class SiteInfo extends Base {
         self::$db->prepared_query("
             SELECT table_name
             FROM information_schema.tables
-            WHERE table_name NOT IN (
-                SELECT DISTINCT TABLE_NAME
-                FROM information_schema.statistics
-                WHERE INDEX_NAME = 'PRIMARY' AND  TABLE_SCHEMA = ?
-            ) AND TABLE_SCHEMA = ?
+            WHERE table_type = 'BASE TABLE'
+                AND table_name NOT IN (
+                    SELECT DISTINCT TABLE_NAME
+                    FROM information_schema.statistics
+                    WHERE INDEX_NAME = 'PRIMARY' AND  TABLE_SCHEMA = ?
+                )
+                AND TABLE_SCHEMA = ?
             ORDER BY TABLE_NAME
             ", MYSQL_DB, MYSQL_DB
         );
