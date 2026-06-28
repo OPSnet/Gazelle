@@ -111,7 +111,7 @@ class Download extends Base {
                         Time = VALUES(Time),
                         Expired = FALSE,
                         Uses = Uses + ?
-                    ", $userId, $this->torrent->id(), $tokenCount, $tokenCount
+                    ", $userId, $this->torrent->id, $tokenCount, $tokenCount
                 );
                 self::$db->commit();
                 self::$cache->delete_value("user_tokens_$userId");
@@ -127,7 +127,7 @@ class Download extends Base {
             INSERT INTO users_downloads
                    (UserID, TorrentID)
             VALUES (?,      ?)
-            ", $user->id, $this->torrent->id()
+            ", $user->id, $this->torrent->id
         );
 
         $user->stats()->increment('download_total');

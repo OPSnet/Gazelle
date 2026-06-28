@@ -52,19 +52,26 @@ class UserTokenTest extends TestCase {
     public function testPasswordToken(): void {
         $manager = new Manager\UserToken();
         $userToken = $manager->createPasswordResetToken($this->user);
-        $this->assertEquals('1 day', UserTokenType::confirm->interval(), 'usertoken-confirm-interval');
-
+        $this->assertEquals(
+            '1 day',
+            UserTokenType::confirm->interval(),
+            'usertoken-confirm-interval',
+        );
         $this->assertEquals(
             1,
-            $this->pg()->prepared_query("
+            $this->pg()->query("
                 update user_token set
-                    expiry = now() - '1 second'::interval
-                where id_user_token = ?
-                ", $userToken->id()
+                    expiry = now() - interval '1 second'
+                where id_user_token = $1
+                ", $userToken->tokenId
             ),
-            'usertoken-pg-update'
+            'usertoken-pg-update',
         );
-        $this->assertEquals(1, $manager->expireTokens(UserTokenType::password), 'usertoken-expire');
+        $this->assertEquals(
+            1,
+            $manager->expireTokens(UserTokenType::password),
+            'usertoken-expire',
+        );
     }
 
     public function testUserTokenMissing(): void {

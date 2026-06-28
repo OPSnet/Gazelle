@@ -14,11 +14,11 @@ if (
     || !isset($_GET['feed'], $_GET['auth'])
     || $user->rssAuth($_GET['feed']) !== $_GET['auth']
 ) {
-    // phpcs:disable Generic.PHP.ForbiddenFunctions.Found
-    if (md5($user->id() . RSS_HASH . $_GET['passkey']) !== $_GET['auth']) {
+    // phpcs:disable Generic.PHP.ForbiddenFunctions.FoundWithAlternative
+    if (md5($user->id . RSS_HASH . $_GET['passkey']) !== $_GET['auth']) {
         die($feed->blocked());
     }
-    // phpcs:enable Generic.PHP.ForbiddenFunctions.Found
+    // phpcs:enable Generic.PHP.ForbiddenFunctions.FoundWithAlternative
 }
 
 if (

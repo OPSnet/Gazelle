@@ -697,8 +697,8 @@ class Torrent {
         if ($SphQLResultTor !== false) {
             $MatchingTorrentIDs = $SphQLResultTor->to_pair('id', 'id');
             foreach ($AllTorrents as $tgroup) {
-                if (!isset($MatchingTorrentIDs[$tgroup->id()])) {
-                    unset($this->Groups[$tgroup->id()]);
+                if (!isset($MatchingTorrentIDs[$tgroup->id])) {
+                    unset($this->Groups[$tgroup->id]);
                 }
             }
         }
@@ -716,7 +716,7 @@ class Torrent {
             $torrentList = array_map(fn($id) => $this->torMan->findById($id), $tgroup->torrentIdList());
             foreach ($torrentList as $torrent) {
                 if (is_null($torrent) || !$this->filter_torrent_internal($torrent)) {
-                    unset($this->Groups[$tgroup->id()]);
+                    unset($this->Groups[$tgroup->id]);
                     break;
                 }
             }

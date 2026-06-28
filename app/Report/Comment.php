@@ -22,7 +22,7 @@ class Comment extends AbstractReport {
     }
 
     public function titlePrefix(): string {
-        return "Comment Report: #{$this->subject->id()} ";
+        return "Comment Report: #{$this->subject->id} ";
     }
 
     public function title(): string {

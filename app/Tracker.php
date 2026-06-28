@@ -39,7 +39,7 @@ class Tracker extends Base {
     public function addTorrent(Torrent $torrent): bool {
         return $this->update('add_torrent', [
             'info_hash'   => $torrent->flush()->infohashEncoded(),
-            'id'          => $torrent->id(),
+            'id'          => $torrent->id,
             'freetorrent' => 0,
         ]);
     }

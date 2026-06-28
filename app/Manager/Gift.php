@@ -27,7 +27,7 @@ class Gift extends \Gazelle\BaseManager {
     public function findById(int $id): ?\Gazelle\Gift {
         $gift = array_filter(
             $this->giftList(),
-            fn ($g) => $g->id() === $id
+            fn ($g) => $g->id === $id
         );
         return $gift === [] ? null : array_first($gift);
     }

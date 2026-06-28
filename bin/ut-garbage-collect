@@ -121,7 +121,7 @@ $db->prepared_query("
 ");
 foreach ($db->collect(0) as $collageId) {
     $collage = $collageMan->findById($collageId);
-    echo "collage {$collage->id()} ({$collage->name()})\n";
+    echo "collage {$collage->id} ({$collage->name()})\n";
     $collage->hardRemove();
 }
 
@@ -135,7 +135,7 @@ $requestList = $pgrw->columnex("
 $reqMan = new Manager\Request();
 foreach ($requestList as $requestId) {
     $request = $reqMan->findById($requestId);
-    echo "request {$request->id()} ({$request->title()})\n";
+    echo "request {$request->id} ({$request->title()})\n";
     $request->remove();
 }
 
@@ -149,13 +149,13 @@ $db->prepared_query("
 $forMan = new Manager\Forum();
 foreach ($db->collect(0) as $forumId) {
     $forum = $forMan->findById($forumId);
-    echo "forum {$forum->id()} ({$forum->name()})\n";
+    echo "forum {$forum->id} ({$forum->name()})\n";
     $db->prepared_query("
         DELETE fp, ft
         FROM forums_posts fp
         INNER JOIN forums_topics ft ON (ft.ID = fp.TopicID)
         WHERE ft.ForumID = ?
-        ", $forum->id()
+        ", $forum->id
     );
     $forum->remove();
 }

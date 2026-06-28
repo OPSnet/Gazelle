@@ -18,7 +18,7 @@ class ReportAuto extends BasePgObject {
     }
 
     public function link(): string {
-        return sprintf('<a href="%s">Auto Report #%d</a>', $this->url(), $this->id());
+        return sprintf('<a href="%s">Auto Report #%d</a>', $this->url(), $this->id);
     }
 
     public function location(): string {
@@ -130,7 +130,7 @@ class ReportAuto extends BasePgObject {
      */
     public function claim(?User $user): bool {
         return $this
-            ->setField('id_owner', $user?->id())
+            ->setField('id_owner', $user?->id)
             ->modify();
     }
 

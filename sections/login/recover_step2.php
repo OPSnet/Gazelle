@@ -7,7 +7,7 @@ namespace Gazelle;
 
 use Gazelle\Enum\UserTokenType;
 
-$userToken = new Manager\UserToken()->findByToken($_GET['key']);
+$userToken = new Manager\UserToken()->findByToken($_GET['key'] ?? '');
 if ($userToken?->type() != UserTokenType::password) {
     header('Location: login.php?action=recover');
     exit;
@@ -24,7 +24,7 @@ $validator->setFields([
 
 $error   = false;
 $success = false;
-if (!empty($_REQUEST['password'])) {
+if (isset($_REQUEST['password'])) {
     if (!$validator->validate($_REQUEST)) {
         $error = $validator->errorMessage();
     } elseif (!Util\PasswordCheck::checkPasswordStrength($_REQUEST['password'], $userToken->user())) {

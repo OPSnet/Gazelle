@@ -34,5 +34,5 @@ foreach ($nameList as $name) {
         continue; // name already exists
     }
     $collage->setField('MaxGroupsPerUser', 1)->modify();
-    echo "[collage]{$collage->id()}[/collage]\n";
+    echo "[collage]{$collage->id}[/collage]\n";
 }

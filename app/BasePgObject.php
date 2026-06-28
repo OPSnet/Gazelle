@@ -16,7 +16,7 @@ abstract class BasePgObject extends BaseObject {
             )
         );
         $args = [...array_values($this->updateField)];
-        $args[] = $this->id();
+        $args[] = $this->id;
         $rowCount = $this->pg()->query(
             "update /* BasePgObject */ " . static::tableName
                 . " set $set where " . static::pkName . ' = $' . $counter,

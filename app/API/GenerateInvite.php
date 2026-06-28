@@ -20,15 +20,14 @@ class GenerateInvite extends AbstractAPI {
         }
 
         $email = trim($_GET['email'] ?? '');
-        if (empty($email)) {
+        if ($email === '') {
             json_error("Missing email address");
-        } else {
-            if (self::$db->scalar("SELECT 1 FROM users_main WHERE Email = ?", $email)) {
-                json_error("Email address already in use");
-            }
-            if (self::$db->scalar("SELECT 1 FROM invites WHERE Email = ?", $email)) {
-                json_error("Invite code already generated for this email address");
-            }
+        }
+        if (self::$db->scalar("SELECT 1 FROM users_main WHERE Email = ?", $email)) {
+            json_error("Email address already in use");
+        }
+        if (self::$db->scalar("SELECT 1 FROM invites WHERE Email = ?", $email)) {
+            json_error("Invite code already generated for this email address");
         }
 
         $key = randomString();
@@ -38,18 +37,16 @@ class GenerateInvite extends AbstractAPI {
             VALUES  (?,         ?,         ?,     ?,      now() + INTERVAL 3 DAY)",
             $interviewer->id(), $key, $email, "Passed Interview"
         );
-        if (!empty($_GET['email'])) {
-            new Mail()->send($email, 'New account confirmation at ' . SITE_NAME,
-                self::$twig->render('email/invite-interviewer.text.twig', [
-                    'inviter_name' => $interviewer->username(),
-                    'inviter_key' => $key,
-                    'email' => $email,
-                ])
-            );
-        }
+        new Mail()->send($email, 'New account confirmation at ' . SITE_NAME,
+            self::$twig->render('email/invite-interviewer.text.twig', [
+                'inviter_name' => $interviewer->username(),
+                'inviter_key'  => $key,
+                'email'        => $email,
+            ])
+        );
 
         return [
-            "key" => $key,
+            "key"        => $key,
             "invite_url" => SITE_URL . "/register.php?invite={$key}"
         ];
     }

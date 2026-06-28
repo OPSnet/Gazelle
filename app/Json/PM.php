@@ -27,7 +27,7 @@ class PM extends \Gazelle\Json {
         }
 
         return [
-            'convId'   => $this->pm->id(),
+            'convId'   => $this->pm->id,
             'subject'  => $this->pm->subject()
                 . (is_null($this->pm->forwardedTo()) ? '' : " (Forwarded to {$this->pm->forwardedTo()->username()})"),
             'sticky'   => $this->pm->isPinned(),

@@ -20,7 +20,7 @@ class Artist extends \Gazelle\Collector {
             FROM torrents_artists ta
             INNER JOIN artists_alias aa USING (AliasID)
             WHERE aa.ArtistID = ?
-            ", $this->artist->id()
+            ", $this->artist->id
         );
         while ([$groupId, $role] = self::$db->next_record(MYSQLI_NUM)) {
             // Get the highest importances to place the .torrents in the most relevant folders
@@ -49,12 +49,12 @@ class Artist extends \Gazelle\Collector {
                     continue;
                 }
                 $tgroup = $torrent->group();
-                $info =& $downloadList[$tgroup->id()];
+                $info =& $downloadList[$tgroup->id];
                 $info['Artist'] = $tgroup->artistRole()?->text();
                 $this->addZip(
                     $zip,
                     $info,
-                    match ($this->roleList[$tgroup->id()]) {
+                    match ($this->roleList[$tgroup->id]) {
                         ARTIST_MAIN      => $releaseMan->findNameById($info['ReleaseType']),
                         ARTIST_GUEST     => 'Guest Appearance',
                         ARTIST_REMIXER   => 'Remixed By',
@@ -63,7 +63,7 @@ class Artist extends \Gazelle\Collector {
                         ARTIST_DJ        => 'DJ Mix',
                         ARTIST_PRODUCER  => 'Produced By',
                         ARTIST_ARRANGER  => 'Arranged By',
-                        default          => 'Other-' . $this->roleList[$tgroup->id()],
+                        default          => 'Other-' . $this->roleList[$tgroup->id],
                     }
                 );
                 ++$n;

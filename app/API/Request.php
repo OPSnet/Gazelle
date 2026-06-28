@@ -10,7 +10,7 @@ class Request extends AbstractAPI {
         }
 
         return [
-            'ID'              => $request->id(),
+            'ID'              => $request->id,
             'UserID'          => $request->userId(),
             'TimeAdded'       => $request->created(),
             'LastVote'        => $request->lastVoteDate(),

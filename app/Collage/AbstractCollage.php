@@ -173,7 +173,7 @@ abstract class AbstractCollage extends \Gazelle\Base {
 
     public function updateSequence(string $series): int {
         $list = $this->parseUrlArgs($series, 'li[]');
-        if (empty($list)) {
+        if ($list === []) {
             return 0;
         }
         self::$db->prepared_query("
@@ -234,7 +234,7 @@ abstract class AbstractCollage extends \Gazelle\Base {
      * returns hydrated equivalent
      */
     public function parseUrlArgs(string $urlArgs, string $param): array {
-        if (empty($urlArgs)) {
+        if ($urlArgs === '') {
             return [];
         }
         $list = [];

@@ -155,6 +155,6 @@ function insert (int $id, array $data): void {
                (id_user, reason, id_user_warner, warning)
         values (?,       ?,      ?,              tstzrange(?, ?))
         on conflict do nothing
-        ", $id, $data['reason'] ?: '', (int)$user?->id(), $data['begin'], $data['end']
+        ", $id, $data['reason'] ?: '', (int)$user?->id, $data['begin'], $data['end']
     );
 }

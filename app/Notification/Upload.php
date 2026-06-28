@@ -88,7 +88,7 @@ class Upload extends \Gazelle\Base {
                 $this->cond[] = "unf.ExcludeVA = '0' AND ($like)";
                 $this->args = array_merge($this->args, $mainName);
             } else {
-                if (!empty($guestName)) {
+                if ($guestName !== []) {
                     $this->cond[] = "unf.ExcludeVA = '0'";
                 }
                 $all = [...$mainName, ...$guestName];

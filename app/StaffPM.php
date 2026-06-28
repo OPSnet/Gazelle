@@ -97,7 +97,7 @@ class StaffPM extends BaseObject {
      * @return bool Can they see it?
      */
     public function visible(User $viewer): bool {
-        return in_array($viewer->id(), [$this->userId(), $this->assignedUserId()])
+        return in_array($viewer->id, [$this->userId(), $this->assignedUserId()])
             || ($viewer->isFLS() && $this->classLevel() == 0)
             || ($viewer->isStaff() && $this->classLevel() <= $viewer->privilege()->effectiveClassLevel());
     }
@@ -109,7 +109,7 @@ class StaffPM extends BaseObject {
                 AssignedToUser = ?,
                 Level = ?
             WHERE ID = ?
-            ", $to->id(), $to->privilege()->effectiveClassLevel(), $this->id,
+            ", $to->id, $to->privilege()->effectiveClassLevel(), $this->id,
         );
         $affected = self::$db->affected_rows();
         $this->flush();

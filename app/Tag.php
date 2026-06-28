@@ -176,7 +176,7 @@ class Tag extends BaseObject {
                 AND GroupID = ?
                 AND UserID = ?
                 AND Way = ?
-            ", $this->id, $tgroup->id(), $user->id, $way
+            ", $this->id, $tgroup->id, $user->id, $way
         );
         if (self::$db->has_results()) {
             self::$db->rollback();
@@ -195,7 +195,7 @@ class Tag extends BaseObject {
                 PositiveVotes = PositiveVotes + ?
             WHERE TagID = ?
                 AND GroupID = ?
-            ", $neg, $pos, $this->id, $tgroup->id()
+            ", $neg, $pos, $this->id, $tgroup->id
         );
         self::$db->prepared_query("
             INSERT INTO torrents_tags_votes
@@ -251,7 +251,7 @@ class Tag extends BaseObject {
             WHERE TagID = ?
                 AND GroupID = ?
                 AND UserID = ?
-            ", $this->id, $tgroup->id(), $user->id
+            ", $this->id, $tgroup->id, $user->id
         );
     }
 

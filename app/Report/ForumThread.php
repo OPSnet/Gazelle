@@ -13,7 +13,7 @@ class ForumThread extends AbstractReport {
     }
 
     public function bbLink(): string {
-        return "the forum thread [thread]{$this->subject->id()}[/thread]";
+        return "the forum thread [thread]{$this->subject->id}[/thread]";
     }
 
     public function titlePrefix(): string {

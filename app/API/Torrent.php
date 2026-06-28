@@ -23,7 +23,7 @@ class Torrent extends AbstractAPI {
         }
         $tgroup = $torrent->group();
         return [
-            'ID'             => $torrent->id(),
+            'ID'             => $torrent->id,
             'Name'           => $tgroup->name(),
             'Year'           => $tgroup->year(),
             'ReleaseTypeID'  => $tgroup->releaseType(),
@@ -47,7 +47,7 @@ class Torrent extends AbstractAPI {
             json_error('Group not found');
         }
         return [
-            'ID'             => $tgroup->id(),
+            'ID'             => $tgroup->id,
             'Name'           => $tgroup->name(),
             'Year'           => $tgroup->year(),
             'ReleaseTypeID'  => $tgroup->releaseType(),

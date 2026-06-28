@@ -26,7 +26,7 @@ class Report extends \Gazelle\BaseObject {
     }
 
     public function link(): string {
-        return sprintf('<a href="%s">Report #%d</a>', $this->url(), $this->id());
+        return sprintf('<a href="%s">Report #%d</a>', $this->url(), $this->id);
     }
 
     public function location(): string {
