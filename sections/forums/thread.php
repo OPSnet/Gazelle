@@ -82,7 +82,7 @@ $avatarFilter = Util\Twig::factory($userMan)->createTemplate('{{ user|avatar(vie
 $transitions = new Manager\ForumTransition()->threadTransitionList($Viewer, $thread);
 $auth = $Viewer->auth();
 
-View::show_header("Forums › {$forum->name()} › {$thread->title()}",
+View::show_header("{$thread->title()} ‹ {$forum->name()} ‹ Forums",
      ['js' => 'comments,subscriptions,bbcode' . ($IsDonorForum ? ',donor_titles' : '')]
 );
 echo $Twig->render('forum/thread-header.twig', [
