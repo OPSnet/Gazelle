@@ -292,8 +292,8 @@ class Forum extends \Gazelle\BaseManager {
         if (!$user->permitted('site_forum_autosub')) {
             return [];
         }
-        return $this->pg()->column("
-            select id_forum from forum_autosub where id_user = ?
+        return $this->pg()->columnex("
+            select id_forum from forum_autosub where id_user = $1
             ", $user->id
         );
     }

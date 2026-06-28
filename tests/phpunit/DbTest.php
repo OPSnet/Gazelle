@@ -45,11 +45,11 @@ class DbTest extends TestCase {
         );
         $mysqlAttrTableList = $db->collect(0);
 
-        $pgAttrTableList = $this->pg()->column("
+        $pgAttrTableList = $this->pg()->columnex("
             select table_name
             from information_schema.tables
-            where table_schema = ?
-                and table_name ~ ?
+            where table_schema = $1
+                and table_name ~ $2
             order by 1
             ", 'public', '(?<!_has)_attr$'
         );
@@ -245,11 +245,6 @@ class DbTest extends TestCase {
             insert into t (label) values (?), (?), (?)
             ", 'abc', 'def', 'ghi'),
             'db-pg-triple-insert'
-        );
-        $this->assertEquals(
-            ['phpunit', 'abc', 'def', 'ghi'],
-            $this->pg()->column("select label from t order by id_t"),
-            'db-pg-column'
         );
         $all = $this->pg()->all("
             select id_t, label, created from t order by id_t desc

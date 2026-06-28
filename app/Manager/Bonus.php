@@ -45,7 +45,7 @@ class Bonus extends \Gazelle\Base {
         if (!isset($this->items)) {
             $idList = self::$cache->get_value(self::CACHE_KEY);
             if ($idList === false) {
-                $idList = $this->pg()->column("
+                $idList = $this->pg()->columnex("
                     select id_bonus_item from bonus_item order by sequence
                 ");
                 self::$cache->cache_value(self::CACHE_KEY, $idList, 0);

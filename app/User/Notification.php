@@ -38,12 +38,12 @@ class Notification extends \Gazelle\BaseUser {
         $key = sprintf(self::CACHE_KEY, $this->user->id);
         $config = self::$cache->get_value($key);
         if ($config === false) {
-            $attributes = $this->pg()->column("
+            $attributes = $this->pg()->columnex("
                 select ua.name
                 from user_attr ua
                 inner join user_has_attr uha using (id_user_attr)
                 inner join user_attr_notification uhan using (id_user_attr)
-                where uha.id_user = ?;
+                where uha.id_user = $1
                 ", $this->user->id
             );
 
