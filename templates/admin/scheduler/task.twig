@@ -43,10 +43,7 @@
                 </tr>
 {%      endif %}
                 <tr>
-                    <td>
-                        <span class="reltime">{{ event.created|time_diff }}</span>
-                        <span class="abstime hidden">{{ event.created|date('Y-m-d H:i:s') }}</span>
-                    </td>
+                    <td>{{ event.timestamp.format('Y-m-d H:i:s.u') }}</td>
                     <td>{{ event.severity }}</td>
                     <td>{{ event.event }}</td>
                     <td>{{ event.reference }}</td>
