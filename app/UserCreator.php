@@ -170,10 +170,6 @@ class UserCreator extends Base {
             INSERT INTO user_flt (user_id) VALUES (?)
             ", $this->id
         );
-        self::$db->prepared_query("
-            INSERT INTO user_summary (user_id) VALUES (?)
-            ", $this->id
-        );
         $this->pg()->prepared_query("
             insert into ip_history
                    (id_user, ip, data_origin)

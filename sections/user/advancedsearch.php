@@ -313,7 +313,7 @@ if (empty($_GET)) {
 
     if (isset($_GET['ratio']) && !empty($_GET['ratio']) && isset($_GET['ratio1']) && strlen($_GET['ratio1'])) {
         $frac = explode('.', $_GET['ratio1']);
-        $decimals = strlen(end($frac));
+        $decimals = strlen(array_last($frac));
         if (!$decimals) {
             $decimals = 0;
         }
@@ -324,7 +324,7 @@ if (empty($_GET)) {
 
     if (isset($_GET['bounty']) && !empty($_GET['bounty']) && $_GET['bounty'] !== 'off' && isset($_GET['bounty1']) && strlen($_GET['bounty1'])) {
         $op = $_GET['bounty'];
-        $where[] = $m->op('(SELECT us.request_created_size FROM relay.user_summary us WHERE us.user_id = um1."ID")', $op);
+        $where[] = $m->op('(SELECT usr.created_size FROM user_summary_request usr WHERE usr.id_user = um1."ID")', $op);
         $args = array_merge($args, [$_GET['bounty1'] * 1024 ** 3], ($op === 'between' ? [$_GET['bounty2'] * 1024 ** 3] : []));
     }
 

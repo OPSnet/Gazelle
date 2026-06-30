@@ -251,21 +251,6 @@ class TorrentTest extends TestCase {
             $this->userList['snatcher']->snatch()->recentSnatchList(),
             'utest-recent-snatch'
         );
-        // exercise the alternate version of the SQL query
-        DB::DB()->prepared_query("
-            INSERT INTO user_summary
-                   (user_id, snatch_total)
-            VALUES (?,       ?)
-            ON DUPLICATE KEY UPDATE
-                snatch_total = VALUES(snatch_total)
-            ", $this->userList['snatcher']->id, FAST_LATEST_SNATCH_THRESHOLD + 1
-        );
-        $this->userList['snatcher']->stats()->flush();
-        $this->assertEquals(
-            [$torrent->groupId()],
-            $this->userList['snatcher']->snatch()->flush()->recentSnatchList(),
-            'utest-recent-snatch'
-        );
 
         // a seeder
         $this->userList['seeder'] = Helper::makeUser('torrent.' . randomString(10), 'rent', clearInbox: true);
