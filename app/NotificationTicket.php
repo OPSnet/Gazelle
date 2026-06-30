@@ -14,33 +14,33 @@ class NotificationTicket {
     ) {}
 
     public function flush(): static {
-        $this->info  = [];
+        unset($this->info);
         return $this;
     }
 
     public function info(): array {
-        if (isset($this->info) && !empty($this->info)) {
+        if (isset($this->info)) {
             return $this->info;
         }
-        $this->info = $this->pg()->rowAssoc("
+        $this->info = $this->pg()->rowAssocex("
             select state,
                 reach,
                 retry,
                 created,
                 modified
             from notification_ticket
-            where id_torrent = ?
+            where id_torrent = $1
             ", $this->torrentId
         );
-        $this->info['ticket_state'] = $this->ticketState($this->info['state']);
+        $this->info['ticket_state'] = NotificationTicketState::from($this->info['state']);
         return $this->info;
     }
 
-    public function created(): string {
+    public function created(): \DateTimeImmutable {
         return $this->info()['created'];
     }
 
-    public function modified(): string {
+    public function modified(): \DateTimeImmutable {
         return $this->info()['modified'];
     }
 
@@ -75,10 +75,10 @@ class NotificationTicket {
     // ---------------------------------------------------
 
     public function incrementRetry(): static {
-        $this->pg()->prepared_query("
+        $this->pg()->query("
             update notification_ticket set
                 retry = retry + 1
-            where id_torrent = ?
+            where id_torrent = $1
             ", $this->torrentId
         );
         $this->flush();
@@ -90,20 +90,20 @@ class NotificationTicket {
     }
 
     public function setReach(int $reach): static {
-        $this->pg()->prepared_query("
+        $this->pg()->query("
             update notification_ticket set
-                reach = ?
-            where id_torrent = ?
+                reach = $1
+            where id_torrent = $2
             ", $reach, $this->torrentId
         );
         return $this->flush();
     }
 
     public function setState(NotificationTicketState $state): static {
-        $this->pg()->prepared_query("
+        $this->pg()->query("
             update notification_ticket set
-                state = ?
-            where id_torrent = ?
+                state = $1
+            where id_torrent = $2
             ", $state->value, $this->torrentId
         );
         $this->info['state']        = $state->value;
@@ -133,16 +133,5 @@ class NotificationTicket {
 
     public function setStale(): static {
         return $this->setState(NotificationTicketState::Stale);
-    }
-
-    public function ticketState(string $state): NotificationTicketState {
-        return match ($state) {
-            'pending' => NotificationTicketState::Pending,
-            'stale'   => NotificationTicketState::Stale,
-            'active'  => NotificationTicketState::Active,
-            'done'    => NotificationTicketState::Done,
-            'removed' => NotificationTicketState::Removed,
-            default   => NotificationTicketState::Error,
-        };
     }
 }
