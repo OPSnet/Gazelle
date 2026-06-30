@@ -2,6 +2,8 @@
 
 namespace Gazelle\Top10;
 
+use Gazelle\Enum\UserStatus;
+
 class User extends \Gazelle\Base {
     final public const UPLOADERS      = 'uploaders';
     final public const DOWNLOADERS    = 'downloaders';
@@ -27,33 +29,32 @@ class User extends \Gazelle\Base {
         if (!array_key_exists($type, $this->sortMap)) {
             return [];
         }
-
         $list = self::$cache->get_value(sprintf(self::CACHE_KEY, $type, $limit));
         if ($list === false) {
             $orderBy = $this->sortMap[$type];
-            self::$db->prepared_query("
-                SELECT
-                    um.ID          AS id,
-                    um.created     AS created,
-                    uls.Uploaded   AS uploaded,
-                    uls.Downloaded AS downloaded,
-                    coalesce(us.request_vote_size, 0)    AS request_votes,
-                    coalesce(us.request_bounty_total, 0) AS request_fills,
-                    coalesce(us.upload_total, 0)         AS num_uploads,
-                    abs(uls.Uploaded - ?) / (unix_timestamp() - unix_timestamp(um.created)) AS up_speed,
-                    uls.Downloaded / (unix_timestamp() - unix_timestamp(um.created))        AS down_speed
-                FROM users_main              um
-                INNER JOIN users_leech_stats uls ON (uls.UserID = um.ID)
-                LEFT JOIN user_summary       us  ON (us.user_id = um.ID)
-                WHERE um.Enabled = '1'
-                    AND (um.Paranoia IS NULL OR (um.Paranoia NOT LIKE '%\"uploaded\"%' AND um.Paranoia NOT LIKE '%\"downloaded\"%'))
-                GROUP BY um.ID
-                ORDER BY {$orderBy} DESC
-                LIMIT ?
-                ", STARTING_UPLOAD, $limit
+            $list = $this->pg()->allex(<<<END_SQL
+                select
+                    um."ID"          as id,
+                    um.created       as created,
+                    uls."Uploaded"   as uploaded,
+                    uls."Downloaded" as downloaded,
+                    usr.vote_size    as request_votes,
+                    usr.bounty_total as request_fills,
+                    ust.upload       as num_uploads,
+                    abs(uls."Uploaded" - $1) / (unix_timestamp() - unix_timestamp(um.created)) as up_speed,
+                    uls."Downloaded" / (unix_timestamp() - unix_timestamp(um.created))         as down_speed
+                from relay.users_main              um
+                inner join relay.users_leech_stats uls on (uls."UserID" = um."ID")
+                inner join user_summary_request    usr on (usr.id_user = um."ID")
+                inner join user_summary_tgroup     ust on (ust.id_user = um."ID")
+                where um."Enabled" = $2
+                    and (um."Paranoia" is null or (um."Paranoia" !~~ '%\"uploaded\"%' and um."Paranoia" !~~ '%\"downloaded\"%'))
+                group by um.ID
+                order by {$orderBy} desc
+                limit $3
+                END_SQL,
+                    STARTING_UPLOAD, UserStatus::enabled->value, $limit
             );
-
-            $list = self::$db->to_array(false, MYSQLI_ASSOC);
             self::$cache->cache_value(sprintf(self::CACHE_KEY, $type, $limit), $list, 3600 * 12);
         }
         return $list;

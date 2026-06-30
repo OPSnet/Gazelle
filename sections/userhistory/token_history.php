@@ -33,7 +33,7 @@ if ($_GET['expire'] ?? 0) {
 }
 
 $paginator = new Util\Paginator(25, (int)($_GET['page'] ?? 1));
-$paginator->setTotal($user->stats()->flTokenTotal());
+$paginator->setTotal($user->stats()->flTokenUsed());
 
 echo $Twig->render('user/history-freeleech.twig', [
     'list'      => $user->tokenList($torMan, $paginator->limit(), $paginator->offset()),

@@ -772,7 +772,7 @@ class User extends \Gazelle\BaseManager {
         return count($seen) + count($ids);
     }
 
-    public function disableUnconfirmedUsers(\Gazelle\Task|null $task = null): int {
+    public function disableUnconfirmedUsers(Task|null $task = null): int {
         // get a list of user IDs for clearing cache keys
         self::$db->prepared_query("
             SELECT ID
@@ -1027,7 +1027,7 @@ class User extends \Gazelle\BaseManager {
                 'week-total'   => 8,
                 'extra'        => [
                     'Unique groups' => [
-                        'Query' => 'us.unique_group_total',
+                        'Query' => 'ust.unique_group',
                         'Count' => 500,
                         'Type'  => 'int'
                     ]
@@ -1043,7 +1043,7 @@ class User extends \Gazelle\BaseManager {
                 'week-total'   => 8,
                 'extra'        => [
                     '"Perfect" FLACs' => [
-                        'Query' => 'us.perfect_flac_total',
+                        'Query' => 'ust.perfect_flac',
                         'Count' => 500,
                         'Type'  => 'int'
                     ]
@@ -1059,7 +1059,7 @@ class User extends \Gazelle\BaseManager {
                 'week-total'   => 12,
                 'extra'        => [
                     '"Perfecter" FLACs' => [
-                        'Query' => 'us.perfecter_flac_total',
+                        'Query' => 'ust.perfecter_flac',
                         'Count' => 2000,
                         'Type'  => 'int'
                     ]
@@ -1068,12 +1068,17 @@ class User extends \Gazelle\BaseManager {
         ];
         if (RECOVERY_DB) {
             $criteria[ELITE_TM]['extra'][SITE_NAME . ' Upload'] = [
-               'Query' => "
-                    (SELECT uls.Uploaded + us.request_bounty_size - coalesce(rb.final, 0)
-                    FROM users_leech_stats uls
-                    INNER JOIN user_summary us ON (us.user_id = uls.UserID)
-                    LEFT JOIN recovery_buffer rb ON (rb.user_id = uls.UserID)
-                    WHERE uls.UserID = um.ID)",
+               'Query' => <<<END_SQL
+                    (select uls."Uploaded" + usr.bounty_size - coalesce(rb.final, 0)
+                    from relay.users_leech_stats uls
+                    inner join user_summary_request usr on (usr.id_user = uls."UserID")
+                    left join relay.recovery_buffer rb on (rb.user_id = uls."UserID")
+                    where uls."UserID" = um."ID")
+                    END_SQL,
+                    /* Note: replacing the trailing `um."ID"` by a placeholder
+                     * allows the query to be used in the context of a next
+                     * class condition for a user.
+                     */
                'Count' => 2048 * 1024 ** 3,
                'Type'  => 'bytes'
             ];
@@ -1089,18 +1094,19 @@ class User extends \Gazelle\BaseManager {
         foreach ($this->promotionCriteria() as $level) {
             $fromClass = $this->userclassName($level['from-class']);
             $toClass   = $this->userclassName($level['to-class']);
-            $query = "
-                SELECT um.ID
-                FROM users_main um
-                INNER JOIN users_leech_stats uls ON (uls.UserID = um.ID)
-                INNER JOIN user_summary      us  ON (us.user_id = um.ID)
-                WHERE um.Enabled = ?
-                    AND um.PermissionID = ?
-                    AND uls.Uploaded + us.request_vote_size >= ?
-                    AND us.upload_total >= ?
-                    AND (uls.Downloaded = 0 OR uls.Uploaded / uls.Downloaded >= ?)
-                    AND um.created <= now() - INTERVAL ? WEEK
-            ";
+            $sql = <<<END_SQL
+                select um."ID"
+                from relay.users_main              um
+                inner join relay.users_leech_stats uls on (uls."UserID" = um."ID")
+                inner join user_summary_request    usr on (usr.id_user = um."ID")
+                inner join user_summary_tgroup     ust on (ust.id_user = um."ID")
+                where um."Enabled"                     = $1
+                    and um."PermissionID"              = $2
+                    and uls."Uploaded" + usr.vote_size >= $3
+                    and ust.upload                     >= $4
+                    and (uls."Downloaded" = 0 or uls."Uploaded" / uls."Downloaded"::float >= $5::float)
+                    and um.created <= now() - interval '1 week' * $6 
+            END_SQL;
             $args = [
                 UserStatus::enabled->value,
                 $level['from-class'],
@@ -1111,16 +1117,13 @@ class User extends \Gazelle\BaseManager {
             ];
 
             if (isset($level['extra'])) {
-                $query .= ' AND ' . implode(' AND ',
-                    array_map(function ($v) use (&$args) {
-                        $args[] = $v['Count'];
-                        return "{$v['Query']} >= ?";
-                    }, $level['extra'])
-                );
+                foreach ($level['extra'] as $e) {
+                    $sql .= " and {$e['Query']} >= {$this->pg()->placeholder(count($args))}";
+                    $args[] = $e['Count'];
+                }
             }
 
-            self::$db->prepared_query($query, ...$args);
-            foreach (self::$db->collect(0) as $userId) {
+            foreach ($this->pg()->columnex($sql, ...$args) as $userId) {
                 $user = $this->findById($userId);
                 if ($user?->warning()->isWarned()) {
                     continue;
@@ -1156,21 +1159,22 @@ class User extends \Gazelle\BaseManager {
             $toClass   = $this->userclassName($level['from-class']);
             $task?->debug("Begin demoting users from $fromClass to $toClass");
 
-            $query = "
-                SELECT ID
-                FROM users_main um
-                INNER JOIN users_leech_stats uls ON (uls.UserID = um.ID)
-                INNER JOIN user_summary      us  ON (us.user_id = um.ID)
-                WHERE um.Enabled = ?
-                    AND um.PermissionID = ?
-                    AND (
-                        uls.Uploaded + us.request_vote_size < ?
-                        OR us.upload_total < ?
-                        OR (
-                            uls.Downloaded > 0
-                            AND (uls.Uploaded + us.request_vote_size) / uls.Downloaded < ?
+            $sql = <<<END_SQL
+                select um."ID"
+                from relay.users_main              um
+                inner join relay.users_leech_stats uls on (uls."UserID" = um."ID")
+                inner join user_summary_request    usr on (usr.id_user = um."ID")
+                inner join user_summary_tgroup     ust on (ust.id_user = um."ID")
+                where um."Enabled"        = $1
+                    and um."PermissionID" = $2
+                    and (
+                        uls."Uploaded" + usr.vote_size < $3
+                        or ust.upload < $4
+                        or (
+                            uls."Downloaded" > 0
+                            and (uls."Uploaded" + usr.vote_size) / uls."Downloaded"::float < $5::float
                         )
-            ";
+            END_SQL;
             $args = [
                 UserStatus::enabled->value,
                 $level['to-class'],
@@ -1180,17 +1184,14 @@ class User extends \Gazelle\BaseManager {
             ];
 
             if (isset($level['extra'])) {
-                $query .= ' OR NOT ' . implode(' AND ',
-                    array_map(function ($v) use (&$args) {
-                        $args[] = $v['Count'];
-                        return "{$v['Query']} >= ?";
-                    }, $level['extra'])
-                );
+                foreach ($level['extra'] as $e) {
+                    $sql .= " or {$e['Query']} < {$this->pg()->placeholder(count($args))}";
+                    $args[] = $e['Count'];
+                }
             }
-            $query .= ')';
+            $sql .= ')';
 
-            self::$db->prepared_query($query, ...$args);
-            foreach (self::$db->collect(0) as $userId) {
+            foreach ($this->pg()->columnex($sql, ...$args) as $userId) {
                 $user = $this->findById($userId);
                 if (is_null($user)) {
                     continue;
@@ -1205,6 +1206,10 @@ class User extends \Gazelle\BaseManager {
                     ->addStaffNote("Class changed to $toClass by System")
                     ->modify();
                 $user->auditTrail()->addEvent(UserAuditEvent::userclass, "Demoted to $toClass");
+                /* Be careful! SQL column names in the "extra" conditions
+                 * are referenced in the template. If columns are renamed
+                 * or added they must match here as well.
+                 */
                 $user->inbox()->createSystem(
                     "You have been demoted to $toClass",
                     self::$twig->render('notification/demotion.bbcode.twig', [
@@ -1266,11 +1271,13 @@ class User extends \Gazelle\BaseManager {
         }
         if (isset($criteria['extra'])) {
             foreach ($criteria['extra'] as $req => $info) {
-                $query = (string)$info['Query'];
-                $query = (str_starts_with($query, 'us.'))
-                    ? "SELECT $query FROM user_summary us WHERE user_id = ?"
-                    : str_replace('um.ID', '?', $query);
-                $current = (int)self::$db->scalar($query, ...array_fill(0, substr_count($query, '?'), $user->id));
+                $sql = (string)$info['Query'];
+                $current = (int)$this->pg()->scalarex(
+                    str_starts_with($sql, 'ust.')
+                        ? "select $sql from user_summary_tgroup ust where id_user = $1"
+                        : str_replace('um."ID"', '$1', $sql),
+                    $user->id
+                );
                 if ($req == SITE_NAME . ' Upload') {
                     $goal[$req] = [
                         'current' => byte_format($current),
@@ -1824,7 +1831,7 @@ class User extends \Gazelle\BaseManager {
     /**
      * Mark all users on ratio watch who have downloaded beyond what their required ratio allows.
      */
-    public function ratioWatchSet(\Gazelle\Task|null $task = null): int {
+    public function ratioWatchSet(Task|null $task = null): int {
         $idList = $this->ratioWatchSetList();
         if (!$idList) {
             return 0;

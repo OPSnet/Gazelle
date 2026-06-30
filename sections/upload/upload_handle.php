@@ -492,7 +492,7 @@ if ($tgroup) {
         $tgroup->addArtists($ArtistRoleList, $ArtistNameList);
         $Cache->increment_value('stats_album_count', count($ArtistNameList));
     }
-    $Viewer->stats()->increment('unique_group_total');
+    $Viewer->stats()->incrementTGroup(Enum\UserSummaryTGroup::uniqueGroup);
 }
 $GroupID = $tgroup->id;
 $logName = $tgroup->text();
@@ -598,11 +598,11 @@ if ($Viewer->option('AutoSubscribe')) {
 }
 
 $totalNew = count($upload['new']);
-$Viewer->stats()->increment('upload_total', $totalNew);
+$Viewer->stats()->incrementTGroup(Enum\UserSummaryTGroup::upload, $totalNew);
 if ($torrent->isPerfectFlac()) {
-    $Viewer->stats()->increment('perfect_flac_total');
+    $Viewer->stats()->incrementTGroup(Enum\UserSummaryTGroup::perfectFlac);
 } elseif ($torrent->isPerfecterFlac()) {
-    $Viewer->stats()->increment('perfecter_flac_total');
+    $Viewer->stats()->incrementTGroup(Enum\UserSummaryTGroup::perfecterFlac);
 }
 
 // Update the various cache keys affected by this

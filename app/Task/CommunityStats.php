@@ -7,9 +7,12 @@ use Gazelle\Stats\TGroups as TGroupsStats;
 
 class CommunityStats extends \Gazelle\Task {
     public function run(): void {
-        $usersStats = new UsersStats();
-        $this->processed = new TGroupsStats()->refresh()
-            + $usersStats->refresh()
-            + $usersStats->refreshUseragentTracker();
+        $tgroupRefresh = new TGroupsStats()->refresh();
+        $this->info("tgroup", $tgroupRefresh);
+
+        $usersStats     = new UsersStats();
+        $trackerRefresh = $usersStats->refreshUseragentTracker();
+        $this->info("tracker", $trackerRefresh);
+        $this->processed = $usersStats->refresh($this) + $tgroupRefresh + $trackerRefresh;
     }
 }

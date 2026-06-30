@@ -2,6 +2,13 @@
 
 namespace Gazelle\Stats;
 
+use Gazelle\Enum\UserSummary;
+use Gazelle\Enum\UserSummaryFltoken;
+use Gazelle\Enum\UserSummaryMisc;
+use Gazelle\Enum\UserSummaryRequest;
+use Gazelle\Enum\UserSummarySeed;
+use Gazelle\Enum\UserSummaryTGroup;
+
 class User extends \Gazelle\BaseObject {
     /**
      * This class offloads all the counting operations you might
@@ -95,65 +102,45 @@ class User extends \Gazelle\BaseObject {
         $key = sprintf(self::CACHE_GENERAL, $this->id);
         $info = self::$cache->get_value($key);
         if ($info === false) {
-            // If a user has done nothing so far (no collages, no downloads...)
-            // they will have no row in user_summary as yet, hence the need
-            // to fallback on an array with values of 0
-            $info = self::$db->rowAssoc("
-                SELECT artist_added_total,
-                    bp_hourly_accrual,
-                    collage_total,
-                    collage_contrib,
-                    download_total,
-                    download_unique,
-                    fl_token_total,
-                    forum_post_total,
-                    forum_thread_total,
-                    invited_total,
-                    leech_total,
-                    perfect_flac_total,
-                    perfecter_flac_total,
-                    request_bounty_total,
-                    request_bounty_size,
-                    request_created_total,
-                    request_created_size,
-                    request_vote_total,
-                    request_vote_size,
-                    seeding_total,
-                    seedtime_hour,
-                    snatch_total,
-                    snatch_unique,
-                    unique_group_total,
-                    upload_total
-                FROM user_summary
-                WHERE user_id = ?
+            // user_summary_seed maintains data only for enabled users,
+            // so it will draw a null on a disabled/unconfirmed user
+            $info = $this->pg()->rowAssocex("
+                select
+                    usf.gifted,
+                    usf.received,
+                    usf.used,
+                    usm.collage_created,
+                    usm.collage_contrib,
+                    usm.forum_post,
+                    usm.forum_thread,
+                    usm.invited,
+                    usr.bounty_total,
+                    usr.created_total,
+                    usr.vote_total,
+                    usr.bounty_size,
+                    usr.created_size,
+                    usr.vote_size,
+                    ust.artist_added,
+                    ust.download_total,
+                    ust.download_unique,
+                    ust.perfect_flac,
+                    ust.perfecter_flac,
+                    ust.upload,
+                    ust.unique_group,
+                    coalesce(uss.leeching,        0)   as leeching,
+                    coalesce(uss.seeding,         0)   as seeding,
+                    coalesce(uss.snatch_total,    0)   as snatch_total,
+                    coalesce(uss.snatch_unique,   0)   as snatch_unique,
+                    coalesce(uss.bp_accrual_hour, 0.0) as bp_accrual_hour,
+                    coalesce(uss.seedtime_hour,   0.0) as seedtime_hour
+                from user_summary_fltoken       usf
+                inner join user_summary_misc    usm using (id_user)
+                inner join user_summary_request usr using (id_user)
+                inner join user_summary_tgroup  ust using (id_user)
+                left  join user_summary_seed    uss using (id_user)
+                where usf.id_user = $1
                 ", $this->id
-            ) ?? [
-                'artist_added_total'    => 0,
-                'bp_hourly_accrual'     => 0.0,
-                'collage_total'         => 0,
-                'collage_contrib'       => 0,
-                'download_total'        => 0,
-                'download_unique'       => 0,
-                'fl_token_total'        => 0,
-                'forum_post_total'      => 0,
-                'forum_thread_total'    => 0,
-                'invited_total'         => 0,
-                'leech_total'           => 0,
-                'perfect_flac_total'    => 0,
-                'perfecter_flac_total'  => 0,
-                'request_bounty_total'  => 0,
-                'request_bounty_size'   => 0,
-                'request_created_total' => 0,
-                'request_created_size'  => 0,
-                'request_vote_total'    => 0,
-                'request_vote_size'     => 0,
-                'seeding_total'         => 0,
-                'seedtime_hour'         => 0,
-                'snatch_total'          => 0,
-                'snatch_unique'         => 0,
-                'unique_group_total'    => 0,
-                'upload_total'          => 0,
-            ];
+            );
             self::$cache->cache_value($key, $info, 300);
         }
         $this->info = $info;
@@ -166,116 +153,155 @@ class User extends \Gazelle\BaseObject {
      * In any case, those stats will be updated within the hour.
      * If we can update immediately, though, we can do it here.
      */
-    public function increment(string $name, int $incr = 1): int {
-        self::$db->prepared_query("
-            UPDATE user_summary SET
-                $name = $name + ?
-            WHERE user_id = ?
-            ", $incr, $this->id
+    public function incrementFltoken(UserSummaryFltoken $field, int $increment = 1): int {
+        return $this->increment(UserSummary::fltoken, $field, $increment);
+    }
+
+    public function incrementMisc(UserSummaryMisc $field, int $increment = 1): int {
+        return $this->increment(UserSummary::misc, $field, $increment);
+    }
+
+    public function incrementRequest(UserSummaryRequest $field, int $increment = 1): int {
+        return $this->increment(UserSummary::request, $field, $increment);
+    }
+
+    public function incrementSeed(UserSummarySeed $field, int $increment = 1): int {
+        return $this->increment(UserSummary::seed, $field, $increment);
+    }
+
+    public function incrementTGroup(UserSummaryTGroup $field, int $increment = 1): int {
+        return $this->increment(UserSummary::tgroup, $field, $increment);
+    }
+
+    public function increment(
+        UserSummary $table,
+        UserSummaryFltoken|UserSummaryMisc|UserSummaryRequest|UserSummarySeed|UserSummaryTGroup $field,
+        int $increment = 1
+    ): int {
+        $affected = $this->pg()->query("
+            update {$table->value} set
+                {$field->value} = {$field->value} + $1
+            where id_user = $2
+            ", $increment, $this->id
         );
-        $this->info = [];
-        self::$cache->delete_value(sprintf(self::CACHE_GENERAL, $this->id));
-        return self::$db->affected_rows();
+        $this->flush();
+        return $affected;
+    }
+
+    public function metric(UserSummaryFltoken|UserSummaryMisc|UserSummaryRequest|UserSummarySeed|UserSummaryTGroup $field): int {
+        return $this->info()[$field->value];
+    }
+
+    public function metricFloat(UserSummarySeed $field): float {
+        return $this->info()[$field->value];
     }
 
     public function artistAddedTotal(): int {
-        return $this->info()['artist_added_total'];
-    }
-
-    public function collageTotal(): int {
-        return $this->info()['collage_total'];
+        return $this->metric(UserSummaryTGroup::artistAdded);
     }
 
     public function bpHourlyAccrual(): float {
-        return $this->info()['bp_hourly_accrual'];
+        return $this->metricFloat(UserSummarySeed::bpAccrualHour);
+    }
+
+    public function collageTotal(): int {
+        return $this->metric(UserSummaryMisc::collageCreated);
     }
 
     public function collageContrib(): int {
-        return $this->info()['collage_contrib'];
+        return $this->metric(UserSummaryMisc::collageContrib);
     }
 
     public function downloadTotal(): int {
-        return $this->info()['download_total'];
+        return $this->metric(UserSummaryTGroup::downloadTotal);
     }
 
     public function downloadUnique(): int {
-        return $this->info()['download_unique'];
+        return $this->metric(UserSummaryTGroup::downloadUnique);
     }
 
-    public function flTokenTotal(): int {
-        return $this->info()['fl_token_total'];
+    public function flTokenGifted(): int {
+        return $this->metric(UserSummaryFltoken::gifted);
+    }
+
+    public function flTokenReceived(): int {
+        return $this->metric(UserSummaryFltoken::received);
+    }
+
+    public function flTokenUsed(): int {
+        return $this->metric(UserSummaryFltoken::used);
     }
 
     public function forumPostTotal(): int {
-        return $this->info()['forum_post_total'];
+        return $this->metric(UserSummaryMisc::forumPost);
     }
 
     public function forumThreadTotal(): int {
-        return $this->info()['forum_thread_total'];
+        return $this->metric(UserSummaryMisc::forumThread);
     }
 
     public function invitedTotal(): int {
-        return $this->info()['invited_total'];
+        return $this->metric(UserSummaryMisc::invited);
     }
 
     public function leechTotal(): int {
-        return $this->info()['leech_total'];
+        return $this->metric(UserSummarySeed::leeching);
     }
 
     public function perfectFlacTotal(): int {
-        return $this->info()['perfect_flac_total'];
+        return $this->metric(UserSummaryTGroup::perfectFlac);
     }
 
     public function perfecterFlacTotal(): int {
-        return $this->info()['perfecter_flac_total'];
+        return $this->metric(UserSummaryTGroup::perfecterFlac);
     }
 
     public function requestBountySize(): int {
-        return $this->info()['request_bounty_size'];
+        return $this->metric(UserSummaryRequest::bountySize);
     }
 
     public function requestBountyTotal(): int {
-        return $this->info()['request_bounty_total'];
+        return $this->metric(UserSummaryRequest::bountyTotal);
     }
 
     public function requestCreatedSize(): int {
-        return $this->info()['request_created_size'];
+        return $this->metric(UserSummaryRequest::createdSize);
     }
 
     public function requestCreatedTotal(): int {
-        return $this->info()['request_created_total'];
+        return $this->metric(UserSummaryRequest::createdTotal);
     }
 
     public function requestVoteSize(): int {
-        return $this->info()['request_vote_size'];
+        return $this->metric(UserSummaryRequest::voteSize);
     }
 
     public function requestVoteTotal(): int {
-        return $this->info()['request_vote_total'];
+        return $this->metric(UserSummaryRequest::voteTotal);
     }
 
     public function seedingTotal(): int {
-        return $this->info()['seeding_total'];
+        return $this->metric(UserSummarySeed::seeding);
     }
 
     public function seedtimeHour(): int {
-        return $this->info()['seedtime_hour'];
+        return $this->metric(UserSummarySeed::seedtimeHour);
     }
 
     public function snatchTotal(): int {
-        return $this->info()['snatch_total'];
+        return $this->metric(UserSummarySeed::snatchTotal);
     }
 
     public function snatchUnique(): int {
-        return $this->info()['snatch_unique'];
+        return $this->metric(UserSummarySeed::snatchUnique);
     }
 
     public function uniqueGroupTotal(): int {
-        return $this->info()['unique_group_total'];
+        return $this->metric(UserSummaryTGroup::uniqueGroup);
     }
 
     public function uploadTotal(): int {
-        return $this->info()['upload_total'];
+        return $this->metric(UserSummaryTGroup::upload);
     }
 
     public function timeline(): array {

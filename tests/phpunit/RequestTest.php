@@ -391,8 +391,17 @@ class RequestTest extends TestCase {
         $this->assertInstanceOf(Torrent::class, $torrent, 'request-torrent-filler');
 
         $this->assertEquals(1, $this->request->fill($user, $torrent), 'request-fill');
-        $this->assertEquals($fillBefore['bounty-size'] + $taxedBounty * 2, $user->stats()->flush()->requestBountySize(), 'request-fill-receive-bounty');
-        $this->assertEquals($fillBefore['bounty-total'] + 1, $user->stats()->requestBountyTotal(), 'request-fill-receive-total');
+        $user->stats()->flush();
+        $this->assertEquals(
+            $fillBefore['bounty-size'] + $taxedBounty * 2,
+            $user->stats()->requestBountySize(),
+            'request-fill-receive-bounty',
+        );
+        $this->assertEquals(
+            $fillBefore['bounty-total'] + 1,
+            $user->stats()->requestBountyTotal(),
+            'request-fill-receive-total',
+        );
         $this->assertTrue(Helper::recentDate($this->request->fillDate()), 'request-fill-date');
         $this->assertEquals($this->request->id, $torrent->requestFills()[0]->id, 'request-torrent-fills');
 

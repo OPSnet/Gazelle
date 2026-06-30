@@ -606,23 +606,30 @@ class Request extends BasePgObject implements Bookmarked, CategoryHasArtist {
                         last_vote    = i.last_vote
             ', $this->id
         );
-        [$bountySize, $requestTotal] = $this->pg()->rowex("
-            select
-                sum(rv.bounty) as size,
-                count(*)       as total
-            from request_vote rv
-            inner join request r using (id_request)
-            where rv.id_user != r.id_filler
-              and rv.id_user = $1
-            group by rv.id_user
-            ", $user->id
-        );
+        // Note: in theory the not matched branch should never be taken
+        // because the row is always meant to exist in the table, but is
+        // added for completeness.
         $this->pg()->query("
-            update relay.user_summary set
-                request_vote_size  = $1,
-                request_vote_total = $2
-            where user_id = $3
-            ", $bountySize, $requestTotal, $user->id
+            merge into user_summary_request usr
+            using (
+                select
+                    rv.id_user,
+                    sum(rv.bounty) as size,
+                    count(*) as total
+                from request_vote rv
+                inner join request r using (id_request)
+                where rv.id_user != r.id_filler
+                  and rv.id_user = $1
+                group by rv.id_user
+            ) src on usr.id_user = src.id_user
+            when matched then
+                update set
+                    vote_size  = src.size,
+                    vote_total = src.total
+            when not matched then
+                insert (id_user, vote_size, vote_total)
+                values (src.id_user, src.size, src.total)
+            ", $user->id
         );
         $this->pg()->commit();
         self::$db->commit();

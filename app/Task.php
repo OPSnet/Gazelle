@@ -47,13 +47,18 @@ abstract class Task extends Base {
         echo("DONE! (" . number_format((hrtime(true) - $this->startTime) * 1e-9, 3) . ")\n");
 
         foreach ($this->events as $event) {
-            $timestamp = $event->timestamp()->format('Y-m-d H:i:s');
-            printf("%s [%s] (%d) %s\n", $timestamp, $event->severity, $event->reference, $event->event);
+            printf(
+                "%s [%s] (%d) %s\n",
+                $event->timestamp()->format('Y-m-d H:i:s.u'),
+                $event->severity,
+                $event->reference,
+                $event->event,
+            );
             $this->pg()->query('
                 insert into task_history_event
                        (id_task_history, created, reference, severity,                  note)
                 VALUES ($1,              $2,      $3,        $4::task_event_severity_t, substr($5, 1, 1000))
-            ', $this->historyId, $timestamp, $event->reference, $event->severity, $event->event);
+            ', $this->historyId, $event->timestamp(), $event->reference, $event->severity, $event->event);
         }
 
         if ($errorCount > 0 && $sane) {

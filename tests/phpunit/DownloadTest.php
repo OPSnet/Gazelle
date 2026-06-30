@@ -103,7 +103,7 @@ class DownloadTest extends TestCase {
         new Stats\Users()->refresh();
         $this->assertEquals(
             3,
-            $this->userList['down']->flush()->stats()->flTokenTotal(),
+            $this->userList['down']->flush()->stats()->flTokenUsed(),
             'download-user-fl-tokens-used',
         );
         $this->assertEquals(

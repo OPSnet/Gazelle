@@ -9,11 +9,11 @@ class CollageContributed extends \Gazelle\UserRank\AbstractUserRank {
 
     public function selector(): string {
         return <<<END_SQL
-            select collage_contrib
+            select usm.collage_contrib
             from relay.users_main um
-            inner join relay.user_summary us on (us.user_id = um."ID")
+            inner join user_summary_misc usm on (usm.id_user = um."ID")
             where um."Enabled" = '1'
-                and collage_contrib > 0
+                and usm.collage_contrib > 0
         END_SQL;
     }
 }

@@ -3,6 +3,8 @@
 namespace Gazelle\Manager;
 
 use Gazelle\Enum\CollageType;
+use Gazelle\Enum\UserSummary;
+use Gazelle\Enum\UserSummaryMisc;
 use Gazelle\Intf\CollageEntry;
 
 class Collage extends \Gazelle\BaseManager {
@@ -43,7 +45,7 @@ class Collage extends \Gazelle\BaseManager {
             ", $user->id, $categoryId, trim($name), trim($description), trim($tagList)
         );
         $id = self::$db->inserted_id();
-        $user->stats()->increment('collage_total');
+        $user->stats()->incrementMisc(UserSummaryMisc::collageCreated);
         new \Gazelle\Stats\Collage()->increment();
         $this->logger()->general(
             "Collage $id ($name) was created by {$user->username()}"

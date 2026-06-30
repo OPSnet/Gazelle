@@ -13,7 +13,7 @@ ini_set('memory_limit', '1G');
 class SchedulerTest extends TestCase {
     public function testGlobalRun(): void {
         $scheduler = new TaskScheduler();
-        $this->expectOutputRegex('/^(?:\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} \[(?:debug|info)\] (.*?)\n|Running task (?:.*?)\.\.\.DONE! \(\d+\.\d+\)\n)*$/');
+        $this->expectOutputRegex('/^(?:\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(?:.\d{1,6})? \[(?:debug|info)\] (.*?)\n|Running task (?:.*?)\.\.\.DONE! \(\d+\.\d+\)\n)*$/');
         $scheduler->run();
     }
 
@@ -33,7 +33,7 @@ class SchedulerTest extends TestCase {
             $name, "phpunit run task", "A run with no PHP implementation"
         );
 
-        $this->expectOutputRegex('/^(?:\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} \[(?:debug|info)\] (.*?)\n|Running task (?:.*?)\.\.\.Failed\.\n$)/');
+        $this->expectOutputRegex('/^(?:\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(?:.\d{1,6})? \[(?:debug|info)\] (.*?)\n|Running task (?:.*?)\.\.\.Failed\.\n$)/');
         $scheduler->run();
         $pg->query('
             delete from task where class_name = $1

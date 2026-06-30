@@ -2,6 +2,9 @@
 
 namespace Gazelle\Manager;
 
+use Gazelle\Enum\UserSummary;
+use Gazelle\Enum\UserSummaryMisc;
+
 class ForumThread extends \Gazelle\BaseManager {
     protected const ID_KEY = 'zz_ft_%d';
 
@@ -20,7 +23,7 @@ class ForumThread extends \Gazelle\BaseManager {
         $thread = new \Gazelle\ForumThread(self::$db->inserted_id());
         $thread->addPost($user, $body);
         $db->relaxConstraints(false);
-        $user->stats()->increment('forum_thread_total');
+        $user->stats()->incrementMisc(UserSummaryMisc::forumThread);
         $forum->flush();
         return $thread;
     }

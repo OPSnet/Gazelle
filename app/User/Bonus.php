@@ -256,8 +256,8 @@ class Bonus extends \Gazelle\BaseUser {
     }
 
     public function hourlyRate(): float {
-        return (float)self::$db->scalar("
-            SELECT bp_hourly_accrual FROM user_summary WHERE user_id = ?
+        return (float)$this->pg()->scalarex("
+            select bp_accrual_hour from user_summary_seed where id_user = $1
             ", $this->user->id
         );
     }

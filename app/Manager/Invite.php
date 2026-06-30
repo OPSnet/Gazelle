@@ -2,10 +2,18 @@
 
 namespace Gazelle\Manager;
 
+use Gazelle\Task;
+
 class Invite extends \Gazelle\Base {
     protected string $search;
 
-    public function create(\Gazelle\User $user, string $email, string $notes, string $reason, string $source): ?\Gazelle\Invite {
+    public function create(
+        \Gazelle\User $user,
+        string        $email,
+        string        $notes,
+        string        $reason,
+        string        $source,
+    ): \Gazelle\Invite|null {
         self::$db->begin_transaction();
         if (!$user->invite()->issueInvite()) {
             return null;
@@ -19,13 +27,13 @@ class Invite extends \Gazelle\Base {
         );
         $invite = new \Gazelle\Invite($inviteKey);
         if (is_number($source)) {
-            new \Gazelle\Manager\InviteSource()->createPendingInviteSource((int)$source, $inviteKey);
+            new InviteSource()->createPendingInviteSource((int)$source, $inviteKey);
         }
         self::$db->commit();
         return $invite;
     }
 
-    public function findUserByKey(string $inviteKey, User $manager = new User()): ?\Gazelle\User {
+    public function findUserByKey(string $inviteKey, User $manager = new User()): \Gazelle\User|null {
         return $manager->findById(
             (int)self::$db->scalar("
                 SELECT InviterID FROM invites WHERE InviteKey = ?
@@ -120,7 +128,10 @@ class Invite extends \Gazelle\Base {
     /**
      * Expire unused invitations and return them to the user
      */
-    public function expire(\Gazelle\Task|null $task = null, User $manager = new User()): int {
+    public function expire(
+        Task|null $task    = null,
+        User      $manager = new User(),
+    ): int {
         $expired = 0;
         self::$db->begin_transaction();
         self::$db->prepared_query("

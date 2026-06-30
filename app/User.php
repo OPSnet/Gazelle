@@ -2,9 +2,6 @@
 
 namespace Gazelle;
 
-use Gazelle\Enum\AvatarDisplay;
-use Gazelle\Enum\UserAuditEvent;
-use Gazelle\Enum\UserStatus;
 use Gazelle\User\MultiFactorAuth;
 use Gazelle\Util\Time;
 
@@ -254,12 +251,12 @@ class User extends BaseAttrObject {
         return $this->info()['avatar'];
     }
 
-    public function avatarMode(): AvatarDisplay {
+    public function avatarMode(): Enum\AvatarDisplay {
         return match ((int)$this->option('DisableAvatars')) {
-            AvatarDisplay::none->value              => AvatarDisplay::none,
-            AvatarDisplay::fallbackSynthetic->value => AvatarDisplay::fallbackSynthetic,
-            AvatarDisplay::forceSynthetic->value    => AvatarDisplay::forceSynthetic,
-            default                                 => AvatarDisplay::show,
+            Enum\AvatarDisplay::none->value              => Enum\AvatarDisplay::none,
+            Enum\AvatarDisplay::fallbackSynthetic->value => Enum\AvatarDisplay::fallbackSynthetic,
+            Enum\AvatarDisplay::forceSynthetic->value    => Enum\AvatarDisplay::forceSynthetic,
+            default                                      => Enum\AvatarDisplay::show,
         };
     }
 
@@ -275,13 +272,13 @@ class User extends BaseAttrObject {
             $donor = new User\Donor($viewed);
             $this->avatarCache[$viewed->id] = [
                 'image' => match ($this->avatarMode()) {
-                    AvatarDisplay::show
+                    Enum\AvatarDisplay::show
                         => $viewed->avatar() ?: USER_DEFAULT_AVATAR,
-                    AvatarDisplay::fallbackSynthetic
+                    Enum\AvatarDisplay::fallbackSynthetic
                         => $viewed->avatar() ?: new User\SyntheticAvatar($this)->avatar($viewed->username()),
-                    AvatarDisplay::forceSynthetic
+                    Enum\AvatarDisplay::forceSynthetic
                         => new User\SyntheticAvatar($this)->avatar($viewed->username()),
-                    AvatarDisplay::none
+                    Enum\AvatarDisplay::none
                         => USER_DEFAULT_AVATAR,
                 },
                 'hover' => $donor->avatarHover(),
@@ -507,7 +504,7 @@ class User extends BaseAttrObject {
     }
 
     public function showAvatars(): bool {
-        return $this->avatarMode() != AvatarDisplay::none;
+        return $this->avatarMode() != Enum\AvatarDisplay::none;
     }
 
     public function slogan(): ?string {
@@ -555,11 +552,11 @@ class User extends BaseAttrObject {
         return $this->hasAttr('enforce-mfa') && !$this->MFA()->enabled();
     }
 
-    public function userStatus(): UserStatus {
+    public function userStatus(): Enum\UserStatus {
         return match ($this->info()['Enabled']) {
-            '1'     => UserStatus::enabled,
-            '2'     => UserStatus::disabled,
-            default => UserStatus::unconfirmed,
+            '1'     => Enum\UserStatus::enabled,
+            '2'     => Enum\UserStatus::disabled,
+            default => Enum\UserStatus::unconfirmed,
         };
     }
 
@@ -886,7 +883,7 @@ class User extends BaseAttrObject {
         }
         if (!empty($this->staffNote)) {
             $this->auditTrail()->addEvent(
-                UserAuditEvent::staffNote,
+                Enum\UserAuditEvent::staffNote,
                 implode(', ', $this->staffNote)
             );
             $changed = true;
@@ -993,7 +990,7 @@ class User extends BaseAttrObject {
         self::$db->commit();
 
         $this->auditTrail()->addEvent(
-            UserAuditEvent::staffNote,
+            Enum\UserAuditEvent::staffNote,
             sprintf("leech stats (up: %s, down: %s, ratio: %s) transferred to %s by %s\n\n",
                 byte_format($up), byte_format($down), ratio($up, $down),
                 $this->label(), $staffname
@@ -1208,15 +1205,15 @@ class User extends BaseAttrObject {
     }
 
     public function isUnconfirmed(): bool {
-        return $this->info()['Enabled'] == UserStatus::unconfirmed->value;
+        return $this->info()['Enabled'] == Enum\UserStatus::unconfirmed->value;
     }
 
     public function isEnabled(): bool {
-        return $this->info()['Enabled'] == UserStatus::enabled->value;
+        return $this->info()['Enabled'] == Enum\UserStatus::enabled->value;
     }
 
     public function isDisabled(): bool {
-        return $this->info()['Enabled'] == UserStatus::disabled->value;
+        return $this->info()['Enabled'] == Enum\UserStatus::disabled->value;
     }
 
     public function isLocked(): bool {
@@ -1618,8 +1615,8 @@ class User extends BaseAttrObject {
         }
         $nr = self::$db->affected_rows();
         $this->flush();
-        $this->stats()->increment('request_bounty_total', $bounty > 0 ? 1 : -1);
-        $this->stats()->increment('request_bounty_size', $bounty);
+        $this->stats()->incrementRequest(Enum\UserSummaryRequest::bountyTotal, $bounty > 0 ? 1 : -1);
+        $this->stats()->incrementRequest(Enum\UserSummaryRequest::bountySize, $bounty);
         return $nr;
     }
 

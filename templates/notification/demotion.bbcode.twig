@@ -19,15 +19,15 @@ You have been demoted from {{ from }} to {{ to }} as you no longer meet all the 
     }} uploads required, you have {{ user.stats.uploadTotal|number_format }}
 {% endif %}
 {% for label, condition in level['extra'] %}
-{%  if condition['Query'] == 'us.unique_group_total' %}
+{%  if condition['Query'] == 'ust.unique_group' %}
 {{      success(user.stats.uniqueGroupTotal >= condition['Count']) }} {{ condition['Count']|number_format
     }} {{ label|raw }} required, you have {{ user.stats.uniqueGroupTotal|number_format }}
 {%  endif %}
-{%  if condition['Query'] == 'us.perfect_flac_total' %}
+{%  if condition['Query'] == 'ust.perfect_flac' %}
 {{      success(user.stats.perfectFlacTotal >= condition['Count']) }} {{ condition['Count']|number_format
     }} {{ label|raw }} required, you have {{ user.stats.perfectFlacTotal|number_format }}
 {%  endif %}
-{%  if condition['Query'] == 'us.perfecter_flac_total' %}
+{%  if condition['Query'] == 'ust.perfecter_flac' %}
 {{      success(user.stats.perfecterFlacTotal >= condition['Count']) }} {{ condition['Count']|number_format
     }} {{ label|raw }} required, you have {{ user.stats.perfecterFlacTotal|number_format }}
 {%  endif %}

@@ -166,8 +166,8 @@ class UserPromotionTest extends TestCase {
         );
 
         $this->user->setField('leech_upload', 501 * 1024 ** 3)->modify();
-        $db->prepared_query('
-            UPDATE user_summary SET upload_total = 50 WHERE user_id = ?
+        $this->user->pg()->query('
+            update user_summary_tgroup set upload = 50 where id_user = $1
             ', $this->user->id
         );
         $db->prepared_query("
@@ -185,8 +185,8 @@ class UserPromotionTest extends TestCase {
             'promote-user-elite',
         );
 
-        $db->prepared_query('
-            UPDATE user_summary SET upload_total = 501, unique_group_total = 501 WHERE user_id = ?
+        $this->user->pg()->query('
+            update user_summary_tgroup set upload = 501, unique_group = 501 where id_user = $1
             ', $this->user->id
         );
         $db->prepared_query("
@@ -204,8 +204,8 @@ class UserPromotionTest extends TestCase {
             'promote-user-power-tm',
         );
 
-        $db->prepared_query('
-            UPDATE user_summary SET unique_group_total = 499 WHERE user_id = ?
+        $this->user->pg()->query('
+            update user_summary_tgroup set unique_group = 499 where id_user = $1
             ', $this->user->id
         );
         $this->user->flush();
@@ -243,13 +243,13 @@ class UserPromotionTest extends TestCase {
             'demote-tm-upload-unique',
         );
 
-        $db->prepared_query('
-            UPDATE user_summary SET
-                upload_total         = 2000,
-                unique_group_total   =  500,
-                perfect_flac_total   =  500,
-                perfecter_flac_total = 2000
-            WHERE user_id = ?
+        $this->user->pg()->query('
+            update user_summary_tgroup set
+                upload         = 2000,
+                unique_group   = 500,
+                perfect_flac   = 500,
+                perfecter_flac = 2000
+            where id_user = $1
             ', $this->user->id
         );
         $db->prepared_query("
@@ -266,8 +266,8 @@ class UserPromotionTest extends TestCase {
             'user-is-ultimate',
         );
 
-        $db->prepared_query('
-            UPDATE user_summary SET perfecter_flac_total = 1999 WHERE user_id = ?
+        $this->user->pg()->query('
+            update user_summary_tgroup set perfecter_flac = 1999 where id_user = $1
             ', $this->user->id
         );
         $this->user->flush();

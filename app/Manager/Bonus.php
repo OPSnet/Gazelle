@@ -7,6 +7,7 @@ namespace Gazelle\Manager;
 use Gazelle\BonusItem;
 use Gazelle\Enum\BonusItemPurchaseStatus;
 use Gazelle\Enum\UserStatus;
+use Gazelle\Task;
 use Gazelle\User;
 
 class Bonus extends \Gazelle\Base {
@@ -158,7 +159,7 @@ class Bonus extends \Gazelle\Base {
         return $this->addMultiPoints($points, self::$db->collect('ID'));
     }
 
-    public function givePoints(\Gazelle\Task|null $task = null): int {
+    public function givePoints(Task|null $task = null): int {
         //------------------------ Update Bonus Points -------------------------//
         // calculation:
         // size (convert from bytes to GB) is in torrents
@@ -215,7 +216,7 @@ class Bonus extends \Gazelle\Base {
             ON DUPLICATE KEY UPDATE points = points + bu.delta
         ");
         $processed = self::$db->affected_rows();
-        $task?->info('user_bonus updated');
+        $task?->info('user_bonus updated', $processed);
 
         /* flush their stats */
         self::$db->prepared_query("

@@ -130,7 +130,7 @@ class Download extends Base {
             ", $user->id, $this->torrent->id
         );
 
-        $user->stats()->increment('download_total');
+        $user->stats()->incrementTGroup(Enum\UserSummaryTGroup::downloadTotal);
         if ($this->torrent->group()->image() != '' && $this->torrent->uploaderId() != $user->id) {
             $user->snatch()->flush();
         }

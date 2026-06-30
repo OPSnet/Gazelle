@@ -2,10 +2,6 @@
 
 namespace Gazelle;
 
-use Gazelle\Enum\NotificationType;
-use Gazelle\Enum\UserAuditEvent;
-use Gazelle\Enum\UserCreatorError;
-use Gazelle\Enum\UserStatus;
 use Gazelle\Exception\UserCreatorException;
 
 class UserCreator extends Base {
@@ -37,13 +33,13 @@ class UserCreator extends Base {
 
     public function create(): User {
         if (!isset($this->passHash)) {
-            throw new UserCreatorException(UserCreatorError::password);
+            throw new UserCreatorException(Enum\UserCreatorError::password);
         }
         if (!isset($this->username)) {
-            throw new UserCreatorException(UserCreatorError::username);
+            throw new UserCreatorException(Enum\UserCreatorError::username);
         }
         if (self::$db->scalar("SELECT 1 FROM users_main WHERE Username = ?", $this->username)) {
-            throw new UserCreatorException(UserCreatorError::duplicate);
+            throw new UserCreatorException(Enum\UserCreatorError::duplicate);
         }
 
         if ($this->newInstall()) {
@@ -64,7 +60,7 @@ class UserCreator extends Base {
             );
             $inviter = $manager->findById((int)$inviterId);
             if (is_null($inviter)) {
-                throw new UserCreatorException(UserCreatorError::invitation);
+                throw new UserCreatorException(Enum\UserCreatorError::invitation);
             }
             if ($this->email && strtolower($email) != strtolower($this->email[0])) {
                 // The invitation was sent to one email address, and the user
@@ -83,7 +79,7 @@ class UserCreator extends Base {
 
         if (!$this->email || new Manager\EmailBlacklist()->exists(array_first($this->email))) {
             // neither setEmail() nor setInviteKey() produced anything useful or email blacklisted
-            throw new UserCreatorException(UserCreatorError::email);
+            throw new UserCreatorException(Enum\UserCreatorError::email);
         }
 
         // create users_main row
@@ -111,8 +107,8 @@ class UserCreator extends Base {
             $ipaddr,
             $this->permissionId,
             $this->permissionId == SYSOP
-                ? UserStatus::enabled->value
-                : UserStatus::unconfirmed->value,
+                ? Enum\UserStatus::enabled->value
+                : Enum\UserStatus::unconfirmed->value,
             STARTING_INVITES,
             new Search\ASN()->countryISO($ipaddr),
             authKey()
@@ -190,19 +186,19 @@ class UserCreator extends Base {
         );
         foreach (
             [
-                'user_summary_fltoken',
-                'user_summary_misc',
-                'user_summary_request',
-                'user_summary_seed',
-                'user_summary_tgroup'
+                Enum\UserSummary::fltoken,
+                Enum\UserSummary::misc,
+                Enum\UserSummary::request,
+                Enum\UserSummary::seed,
+                Enum\UserSummary::tgroup,
             ] as $table
         ) {
             $this->pg()->query("
-                insert into $table (id_user) values ($1)
+                insert into {$table->value} (id_user) values ($1)
                 ", $this->id
             );
         }
-        foreach (NotificationType::cases() as $attr) {
+        foreach (Enum\NotificationType::cases() as $attr) {
             $attr = strtolower($attr->toString());
             $this->pg()->prepared_query("
                 insert into user_has_attr (id_user, id_user_attr)
@@ -212,7 +208,7 @@ class UserCreator extends Base {
 
         if ($inviter) {
             new Manager\InviteSource()->resolveInviteSource($this->inviteKey, $user);
-            $inviter->stats()->increment('invited_total');
+            $inviter->stats()->incrementMisc(Enum\UserSummaryMisc::invited);
             $user->externalProfile()->modifyProfile($inviterReason);
             self::$db->prepared_query("
                 DELETE FROM invites WHERE InviteKey = ?
@@ -237,7 +233,7 @@ class UserCreator extends Base {
         new Tracker()->addUser($user);
         if ($this->note) {
             new User\AuditTrail($user)->addEvent(
-                UserAuditEvent::invite,
+                Enum\UserAuditEvent::invite,
                 implode("\n", $this->note)
             );
         }
