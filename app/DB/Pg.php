@@ -157,29 +157,6 @@ class Pg {
         return $this->executeParams($query, ...$args)->getAffectedRows();
     }
 
-    // postponed
-    /**
-     * DO NOT USE FOR UNTRUSTED DATA. There can likely be weird cases with specifically crafted data, especially BYTEA.
-     */
-    //public function insertCopyex(string $table, array $colList, array $rows): bool {
-    //}
-
-    /**
-     * Perform an insert or update and return the RETURNING clause
-     * Returns `null` if executeParams() failed
-     */
-    public function writeReturningex(string $query, ...$args): mixed {
-        return $this->scalarex($query, ...$args);
-    }
-
-    /**
-     * Perform an insert or update and return the RETURNING clause,
-     * when there is more than one item returned
-     */
-    public function writeReturningRowex(string $query, ...$args): array {
-        return $this->rowex($query, ...$args);
-    }
-
     public function scalarex(string $query, ...$args): mixed {
         $result = $this->rowex($query, ...$args);
         return $result === null ? null : $result[0];
@@ -306,44 +283,6 @@ class Pg {
         );
         $this->stats->register("copy $table", count($processedRows), $begin, $colList);
         return $success;
-    }
-
-    /**
-     * Perform an insert or update and return the RETURNING clause
-     * Returns `false` if the execute() failed
-     */
-    public function writeReturning(string $query, ...$args): int|string|float|false {
-        if ($this->tx === 'pgw') {
-            throw new \Exception('ongoing pg_wrapper transaction');
-        }
-        $begin = hrtime(true);
-        $st = $this->prepare($query);
-        if ($st->execute([...$args])) {
-            $result = $st->fetch(\PDO::FETCH_NUM)[0];
-            $this->stats->register($query, (int)$result, $begin, [...$args]);
-            return $result;
-        }
-        $this->stats->error($query, $args);
-        return false;
-    }
-
-    /**
-     * Perform an insert or update and return the RETURNING clause,
-     * when there is more than one item returned
-     */
-    public function writeReturningRow(string $query, ...$args): array {
-        if ($this->tx === 'pgw') {
-            throw new \Exception('ongoing pg_wrapper transaction');
-        }
-        $begin = hrtime(true);
-        $st = $this->prepare($query);
-        if ($st->execute([...$args])) {
-            $row = $st->fetch(\PDO::FETCH_NUM);
-            $this->stats->register($query, count($row), $begin, [...$args]);
-            return $row;
-        }
-        $this->stats->error($query, $args);
-        return [];
     }
 
     protected function fetchRow(string $query, int $mode, ...$args): array {

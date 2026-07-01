@@ -36,13 +36,13 @@ class History extends \Gazelle\BaseUser {
     }
 
     public function announceKeyList(): array {
-        return $this->pg()->all("
-            SELECT previous,
+        return $this->pg()->allex("
+            select previous,
                 created,
                 ip,
                 useragent
             from history_announce
-            where id_user = ?
+            where id_user = $1
             order by created desc
             ", $this->user->id
         );
@@ -112,7 +112,7 @@ class History extends \Gazelle\BaseUser {
         $this->pg()->query("
             insert into history_password
                    (id_user, ip,       useragent)
-            VALUES ($1,      $2::inet, $3)
+            values ($1,      $2::inet, $3)
             ", $this->user->id, $ipaddr, $useragent
         );
         self::$cache->delete_value("user_pw_count_{$this->user->id}");
@@ -143,7 +143,7 @@ class History extends \Gazelle\BaseUser {
      */
     public function email(ASN $asn = new ASN()): array {
         self::$db->prepared_query("
-            select h.Email  AS email,
+            SELECT h.Email  AS email,
                 h.created   AS created,
                 h.IP        AS ip,
                 h.useragent AS useragent
@@ -213,10 +213,10 @@ class History extends \Gazelle\BaseUser {
             ", $this->user->id, $newEmail, $ipaddr, $useragent
         );
         $affected = self::$db->affected_rows();
-        $this->pg()->insert("
+        $this->pg()->query("
             insert into history_email
                    (id_user, email, useragent, ip)
-            values (?,       ?,     ?,         ?::inet)
+            values ($1,      $2,    $3,        $4::inet)
             ", $this->id, $newEmail, $useragent, $ipaddr
         );
         if ($notify) {
@@ -267,7 +267,7 @@ class History extends \Gazelle\BaseUser {
     }
 
     public function registerSiteIp(string $ipaddr, int $delay = IP_HISTORY_NEW_INTERVAL): int {
-        return (int)$this->pg()->scalarex("
+        return $this->pg()->scalarex("
             with cur as (
                 select $1::int id_user,
                     $2::inet as ip,
@@ -279,12 +279,12 @@ class History extends \Gazelle\BaseUser {
             ),
             ins as (
                 select
-                    coalesce((select id_user from cur), $1)   as id_user,
-                    coalesce((select ip from cur), $2::inet)  as ip,
+                    coalesce((select id_user from cur), $1)  as id_user,
+                    coalesce((select ip from cur), $2::inet) as ip,
                     coalesce((select total + 1 from cur), 1) as total,
                     tstzmultirange(
                         tstzrange(
-                            case when (select recent from cur) > now() - '1 second'::interval * $3
+                            case when (select recent from cur) > now() - interval '1 second' * $3
                                 then (select recent from cur)
                                 else now()
                             end,
@@ -316,8 +316,8 @@ class History extends \Gazelle\BaseUser {
                 lower(seen) first_seen,
                 upper(seen) last_seen
             from ip_history
-            where id_user = $1
-                and data_origin = 'token'
+            where data_origin = 'token'
+                and id_user   = $1
             order by $orderBy
             ", $this->user->id
         );
@@ -334,12 +334,14 @@ class History extends \Gazelle\BaseUser {
         };
         // merge ipv6 of the same /64 into a single row if gaps are small
         $result = $this->pg()->allex("
-            select host(case when count(ip) > 1
-                             then network(set_masklen(max(ip), 64))
-                             else max(ip)
-                        end) ip,
-                lower(unnest(merge_ranges_by_gap(range_agg(seen), '14 days'::interval))) first_seen,
-                upper(unnest(merge_ranges_by_gap(range_agg(seen), '14 days'::interval))) last_seen,
+            select host(
+                    case when count(ip) > 1
+                    then network(set_masklen(max(ip), 64))
+                    else max(ip)
+                    end
+                ) ip,
+                lower(unnest(merge_ranges_by_gap(range_agg(seen), interval '14 days'))) first_seen,
+                upper(unnest(merge_ranges_by_gap(range_agg(seen), interval '14 days'))) last_seen,
                 (case when count(ip) > 1 then array_agg(ip) else null end) ips
             from ip_site_history
             where id_user = $1
@@ -396,18 +398,18 @@ class History extends \Gazelle\BaseUser {
             ", $this->user->id
         );
         $n += self::$db->affected_rows();
-        $n += $this->pg()->prepared_query("
+        $n += $this->pg()->query("
             update history_password set
                 ip = '0.0.0.0',
                 useragent = 'reset-ip-history'
-            where id_user = ?
+            where id_user = $1
             ", $this->user->id
         );
-        $n += $this->pg()->prepared_query("
+        $n += $this->pg()->query("
             update history_announce set
                 ip = '0.0.0.0',
                 useragent = 'reset-ip-history'
-            where id_user = ?
+            where id_user = $1
             ", $this->user->id
         );
         self::$db->prepared_query("

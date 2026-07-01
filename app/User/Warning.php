@@ -77,14 +77,14 @@ class Warning extends \Gazelle\BaseUser {
     }
 
     public function warningList(): array {
-        return $this->pg()->all("
+        return $this->pg()->allex("
             select id_user_warner as id_warner,
                 lower(warning)    as begin,
                 upper(warning)    as end,
                 now() <@ warning  as active,
                 reason
             from user_warning
-            where id_user = ?
+            where id_user = $1
             order by id_user_warning
             ", $this->user->id
         );
@@ -141,11 +141,11 @@ class Warning extends \Gazelle\BaseUser {
      * Remove any current warnings
      */
     public function clear(): int {
-        $affected = $this->pg()->prepared_query("
+        $affected = $this->pg()->query("
             update user_warning set
                 warning = NULL
             where upper(warning) > now()
-                and id_user = ?
+                and id_user = $1
             ", $this->user->id
         );
         $this->flush();

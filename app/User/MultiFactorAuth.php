@@ -36,10 +36,10 @@ class MultiFactorAuth extends \Gazelle\BaseUser {
         #[\SensitiveParameter] string $key,
         ?User $editor = null
     ): ?array {
-        $affectedRows = $this->pg()->prepared_query("
+        $affectedRows = $this->pg()->query("
             insert into multi_factor_auth
                    (id_user, secret, ip)
-            values (?,       ?,      ?)
+            values ($1,      $2,     $3)
             ", $this->user->id, $key, $this->requestContext()->remoteAddr()
         );
         if ($affectedRows < 1) {
@@ -172,8 +172,8 @@ class MultiFactorAuth extends \Gazelle\BaseUser {
             "removed via {$this->requestContext()->remoteAddr()}",
             $this->requestContext()->viewer(),
         );
-        $affected = $this->pg()->prepared_query("
-            delete from multi_factor_auth where id_user = ?
+        $affected = $this->pg()->query("
+            delete from multi_factor_auth where id_user = $1
             ", $this->user->id
         );
         new Manager\UserToken()->removeTokens($this->user, UserTokenType::mfa);

@@ -599,62 +599,6 @@ class DbTest extends TestCase {
         ");
     }
 
-    public function testPgWriteReturn(): void {
-        $this->pg()->prepared_query("
-            create temporary table test1 (
-                t_id int not null primary key
-            )
-        ");
-        $n = random_int(1000, 9999);
-        $value = $this->pg()->writeReturning("
-            insert into test1 (t_id) values (?) returning t_id
-            ", $n
-        );
-        $this->assertEquals($n, $value, 'db-pg-write-scalar');
-
-        $this->pg()->prepared_query("
-            create temporary table test2 (
-                t_id int not null primary key,
-                label text not null
-            )
-        ");
-        $n = random_int(1000, 9999);
-        $label = randomString();
-        $row = $this->pg()->writeReturningRow("
-            insert into test2 (t_id, label) values (?, ?) returning t_id, label
-            ", $n, $label
-        );
-        $this->assertEquals([$n, $label], $row, 'db-pg-write-row');
-    }
-
-    public function testPgWriteReturnex(): void {
-        $this->pg()->query("
-            create temporary table test1 (
-                t_id int not null primary key
-            )
-        ");
-        $n = random_int(1000, 9999);
-        $value = $this->pg()->writeReturningex("
-            insert into test1 (t_id) values ($1) returning t_id
-            ", $n
-        );
-        $this->assertEquals($n, $value, 'db-pg-write-scalar');
-
-        $this->pg()->query("
-            create temporary table test2 (
-                t_id int not null primary key,
-                label text not null
-            )
-        ");
-        $n = random_int(1000, 9999);
-        $label = randomString();
-        $row = $this->pg()->writeReturningRowex("
-            insert into test2 (t_id, label) values ($1, $2) returning t_id, label
-            ", $n, $label
-        );
-        $this->assertEquals([$n, $label], $row, 'db-pg-write-row');
-    }
-
     public function testPgByteaAll(): void {
         $this->pg()->prepared_query("
             create temporary table test_bytea (

@@ -166,18 +166,18 @@ class Notification extends \Gazelle\BaseUser {
 
         $affected = 0;
         foreach ($selected as $attr) {
-            $affected += $this->pg()->prepared_query("
+            $affected += $this->pg()->query("
                 insert into user_has_attr (id_user, id_user_attr)
-                values (?, (select id_user_attr from user_attr where name = ?))
+                values ($1, (select id_user_attr from user_attr where name = $2))
                 on conflict do nothing;
             ", $userId, $attr);
         }
 
         foreach ($unselected as $attr) {
-            $affected += $this->pg()->prepared_query("
+            $affected += $this->pg()->query("
                 delete from user_has_attr
-                where id_user = ?
-                    and id_user_attr = (select id_user_attr from user_attr where name = ?);
+                where id_user = $1
+                    and id_user_attr = (select id_user_attr from user_attr where name = $2);
             ", $userId, $attr);
         }
 
@@ -247,11 +247,13 @@ class Notification extends \Gazelle\BaseUser {
     }
 
     public function setPushTopic(string $newTopic): bool {
-        return $this->pg()->prepared_query("
+        return $this->pg()->query("
             insert into user_push_options
-            values (?, ?, default)
+                   (id_user, push_token)
+            values ($1,      $2)
             on conflict (id_user)
-            do update set push_token = excluded.push_token;
+            do update set
+                push_token = excluded.push_token
             ", $this->user->id, $newTopic
         ) === 1;
     }

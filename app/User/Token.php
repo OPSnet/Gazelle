@@ -68,11 +68,11 @@ class Token extends \Gazelle\BaseUser {
      * Burn a token, return false if it has already been burnt
      */
     public function consume(): bool {
-        $affected = $this->pg()->prepared_query("
+        $affected = $this->pg()->query("
             update user_token set
                 expiry = now()
             where expiry > now()
-                and id_user_token = ?
+                and id_user_token = $1
             ", $this->tokenId
         );
         $this->flush();

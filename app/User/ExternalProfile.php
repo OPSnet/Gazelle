@@ -29,20 +29,20 @@ class ExternalProfile extends \Gazelle\BaseUser {
     }
 
     public function modifyProfile(string $profile): int {
-        $affected = $this->pg()->prepared_query("
+        $affected = $this->pg()->query("
             insert into user_external_profile
                    (id_user, profile)
-            values (?,       ?)
-            on conflict (id_user) do update set profile = ?
-            ", $this->user->id, $profile, $profile
+            values ($1,      $2)
+            on conflict (id_user) do update set profile = $2
+            ", $this->user->id, $profile
         );
         $this->flush();
         return $affected;
     }
 
     public function remove(): int {
-        $affected = $this->pg()->prepared_query("
-            delete from user_external_profile where id_user = ?
+        $affected = $this->pg()->query("
+            delete from user_external_profile where id_user = $1
             ", $this->user->id
         );
         $this->flush();

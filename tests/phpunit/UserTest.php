@@ -338,12 +338,18 @@ class UserTest extends TestCase {
         $warned = $this->user->warning();
         $this->assertFalse($warned->isWarned(), 'utest-warn-initial');
         $end = $warned->add(staffReason: 'phpunit 1', interval: '1 hour', warner: $this->user);
-        $this->assertTrue(Helper::recentDate($end->upper->format('Y-m-d H:i:s'), -60 * 60 + 60), 'utest-warn-1-hour'); // one hour - 60 seconds
+        $this->assertTrue(
+            Helper::recentDateTimeImmutable($end->upper, -3600 + 60), // one hour - 60 seconds
+            'utest-warn-1-hour'
+        );
         $this->assertTrue($warned->isWarned(), 'utest-is-warned');
         $this->assertEquals(1, $warned->total(), 'utest-warn-total');
 
         $end = $warned->warn(2, "phpunit warning", $this->user, "phpunit");
-        $this->assertTrue(Helper::recentDate($end->upper->format('Y-m-d H:i:s'), strtotime('+2 weeks') - 60), 'utest-warn-in-future'); // two weeks - 60 seconds
+        $this->assertTrue(
+            Helper::recentDateTimeImmutable($end->upper, strtotime('+2 weeks') - 60), // two weeks - 60 seconds
+            'utest-warn-in-future'
+        );
         $this->assertEquals(2, $warned->total(), 'utest-warn-total');
         $warningList = $warned->warningList();
         $this->assertCount(2, $warningList, 'utest-warn-list');
@@ -465,7 +471,10 @@ class UserTest extends TestCase {
             $history['ip'],
             'utest-announce-key-history-ipaddr'
         );
-        $this->assertTrue(Helper::recentDate($history['created']), 'utest-announce-key-history-date');
+        $this->assertTrue(
+            Helper::recentDateTimeImmutable($history['created']),
+            'utest-announce-key-history-date',
+        );
     }
 
     public function testInactive(): void {
