@@ -125,20 +125,12 @@ class ReportType extends \Gazelle\BasePgObject {
         return $this->info()['need_image'];
     }
 
-    public function needImageDefault(): string {
-        return $this->enumDefault(static::tableName, 'need_image');
-    }
-
     public function needImageList(): array {
         return $this->enumList(static::tableName, 'need_image');
     }
 
     public function needLink(): string {
         return $this->info()['need_link'];
-    }
-
-    public function needLinkDefault(): string {
-        return $this->enumDefault(static::tableName, 'need_link');
     }
 
     public function needLinkList(): array {
@@ -149,20 +141,12 @@ class ReportType extends \Gazelle\BasePgObject {
         return $this->info()['need_sitelink'];
     }
 
-    public function needSitelinkDefault(): string {
-        return $this->enumDefault(static::tableName, 'need_sitelink');
-    }
-
     public function needSitelinkList(): array {
         return $this->enumList(static::tableName, 'need_sitelink');
     }
 
     public function needTrack(): string {
         return $this->info()['need_track'];
-    }
-
-    public function needTrackDefault(): string {
-        return $this->enumDefault(static::tableName, 'need_track');
     }
 
     public function needTrackList(): array {
@@ -233,5 +217,20 @@ class ReportType extends \Gazelle\BasePgObject {
         $affected = self::$db->affected_rows();
         $this->flush();
         return $affected;
+    }
+
+    protected function enumList(string $table, string $column): array {
+        $columnType = (string)static::$db->scalar("
+            SELECT column_type
+            FROM information_schema.columns
+            WHERE table_schema = ?
+                AND table_name = ?
+                AND column_name = ?
+            ", MYSQL_DB, $table, $column
+        );
+        if (!preg_match('/^enum\((.*)\)$/', $columnType, $match)) {
+            return [];
+        }
+        return explode(',', str_replace("'", "", $match[1]));
     }
 }

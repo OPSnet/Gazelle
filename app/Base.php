@@ -28,33 +28,6 @@ abstract class Base {
         return static::$requestContext;
     }
 
-    public function enumList(string $table, string $column): array {
-        $columnType = (string)static::$db->scalar("
-            SELECT column_type
-            FROM information_schema.columns
-            WHERE table_schema = ?
-                AND table_name = ?
-                AND column_name = ?
-            ", MYSQL_DB, $table, $column
-        );
-        if (!preg_match('/^enum\((.*)\)$/', $columnType, $match)) {
-            return [];
-        }
-        return explode(',', str_replace("'", "", $match[1]));
-    }
-
-    public function enumDefault(string $table, string $column): ?string {
-        $default = static::$db->scalar("
-            SELECT column_default
-            FROM information_schema.columns
-            WHERE table_schema = ?
-                AND table_name = ?
-                AND column_name = ?
-            ", MYSQL_DB, $table, $column
-        );
-        return $default ? (string)$default : null;
-    }
-
     // *** functions delegated to the request context
 
     public function logger(): Log {
