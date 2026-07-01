@@ -124,18 +124,22 @@ $user->setField('profile_title', trim($_POST['profile_title']));
 $newEmail = false;
 $emailClean = trim($_POST['email']);
 if ($user->email() != $emailClean) {
-    if (!$Viewer->permitted('users_edit_profiles') && !$user->validatePassword($_POST['password'])) {
-        Error400::error('You must enter your current password when changing your email address.');
-    }
-    if ($ownProfile && !Util\PasswordCheck::checkPasswordStrength($_POST['password'], $user)) {
-        // same corner case as with changing passwords, see comment there
-        $user->addStaffNote("forced logout because of weak/compromised password")->modify();
-        $user->session()->logoutEverywhere();
-        echo $Twig->render('login/weak-password.twig');
-        exit;
-    }
     if (new Manager\EmailBlacklist()->exists($emailClean)) {
         Error400::error('The email address or domain is not allowed.');
+    }
+    // Everyone must supply their own password to change their email address
+    // Staff do not need to supply a password if they are changing someone's email address
+    if ($ownProfile) {
+        if (!$user->validatePassword($_POST['password'])) {
+            Error400::error('You must enter your current password when changing your email address.');
+        }
+        if (!Util\PasswordCheck::checkPasswordStrength($_POST['password'], $user)) {
+            // same corner case as with changing passwords, see comment there
+            $user->addStaffNote("forced logout because of weak/compromised password")->modify();
+            $user->session()->logoutEverywhere();
+            echo $Twig->render('login/weak-password.twig');
+            exit;
+        }
     }
     $newEmail = $emailClean;
     $user->setField('Email', $emailClean);
