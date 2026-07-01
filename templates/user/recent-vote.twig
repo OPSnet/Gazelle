@@ -19,9 +19,9 @@
             <div title="Downvoted" class="center tooltip vote_tag_down" style="font-size: 24pt">▼</div>
 {%  endif %}
     </td>
-{%  if recent|length < 5 %}
+{%  if loop.last and recent|length < 5 %}
 {%      for n in range(recent|length + 1, 5) %}
-    <td>&nbsp;</td>
+    <td></td>
 {%      endfor %}
 {%  endif %}
 {% endfor %}
@@ -35,12 +35,12 @@
         <img src="{{ r.tgroup.cover|image_cache(width = 150) }}" loading="eager" class="tooltip" title="{{ r.tgroup.text }}" alt="{{ r.tgroup.text }}" data-origin-src="{{ r.image }}" width="107">
         </a>
     </td>
-{%  if recent|length < 5 %}
-{%      for n in range(recent|length + 1, 5) %}
-    <td>&nbsp;</td>
-{%      endfor %}
-{%  endif %}
 {%  if loop.last %}
+{%      if recent|length < 5 %}
+{%          for n in range(recent|length + 1, 5) %}
+    <td></td>
+{%          endfor %}
+{%      endif %}
 </tr>
 </table>
 {%  endif %}
