@@ -277,20 +277,22 @@ class Mysql {
             if (!in_array(mysqli_errno($this->LinkID), [1213, 1205])) {
                 break;
             }
-            // if we have a viewer, we have a request context, otherwise, it must be script
-            global $Debug, $Viewer;
-            $Debug->analysis(
-                is_null($Viewer) && isset($_SERVER['argv'])
-                    ? ($_SERVER['argv'][0] ?? 'cli')
-                    : $Viewer->requestContext()->module(),
-                'Non-Fatal Deadlock:',
-                $Query,
-                86_400,
-            );
-            trigger_error("Database deadlock, attempt $i");
-
-            usleep((int)($sleep * 1e6));
-            $sleep *= 1.75;
+            if ($i === 5) {
+                // if we have a viewer, we have a request context, otherwise, it must be script
+                global $Debug, $Viewer;
+                $Debug->analysis(
+                    is_null($Viewer) && isset($_SERVER['argv'])
+                        ? ($_SERVER['argv'][0] ?? 'cli')
+                        : $Viewer->requestContext()->module(),
+                    'Non-Fatal Deadlock:',
+                    $Query,
+                    86_400,
+                );
+                trigger_error("Database deadlock");
+            } else {
+                usleep((int)($sleep * 1e6));
+                $sleep *= 1.75;
+            }
         }
         $elapsed = (hrtime(true) - $startTime) * 1e-9;
         // Kills admin pages, and prevents Debug->analysis when the whole set exceeds 1 MB
