@@ -45,6 +45,26 @@ class Riplog extends \Gazelle\Base {
                 $this->logcheckerVersion(),
         );
         $riplog = new \Gazelle\Riplog($torrent, self::$db->inserted_id());
+        $this->pg()->scalarex('
+            insert into riplog
+                   (id_riplog, id_torrent, checksum, score, riplog_language, ripper, logchecker_version, ripper_version, filename, details)
+            values ($1,        $2,         $3,       $4,    $5,               $6,    $7,                 $8,             $9,       $10)
+            returning id_riplog
+            ', $riplog->id,
+            $torrent->id,
+            match ($parsed->getChecksumState()) {
+                Checksum::CHECKSUM_OK      => 'ok',
+                Checksum::CHECKSUM_MISSING => 'missing',
+                default                    => 'invalid',
+            },
+            max(0, $parsed->getScore()),
+            $parsed->getLanguage(),
+            $parsed->getRipper(),
+            $this->logcheckerVersion(),
+            $parsed->getRipperVersion(),
+            $filename,
+            $this->pg()->arrayConverter()->output($parsed->getDetails()),
+        );
         $riplog->file()->put($filepath);
         $riplog->html()->put($parsed->getLog());
         return $riplog;
@@ -139,6 +159,32 @@ class Riplog extends \Gazelle\Base {
                 $this->logcheckerVersion(),
                 $torrent->id,
                 $logId,
+        );
+        $this->pg()->query('
+            update riplog set
+                checksum           = $1,
+                score              = $2,
+                riplog_language    = $3,
+                ripper             = $4,
+                logchecker_version = $5,
+                ripper_version     = $6,
+                details            = $7
+            where id_riplog    = $8
+                and id_torrent = $9
+            ',
+            match ($parsed->getChecksumState()) {
+                Checksum::CHECKSUM_OK      => 'ok',
+                Checksum::CHECKSUM_MISSING => 'missing',
+                default                    => 'invalid',
+            },
+            max(0, $parsed->getScore()),
+            $parsed->getLanguage(),
+            $parsed->getRipper(),
+            $this->logcheckerVersion(),
+            $parsed->getRipperVersion(),
+            $this->pg()->arrayConverter()->output($parsed->getDetails()),
+            $logId,
+            $torrent->id,
         );
 
         $affectedRows = self::$db->affected_rows();

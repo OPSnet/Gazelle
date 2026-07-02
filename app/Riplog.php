@@ -161,6 +161,10 @@ class Riplog extends BaseObject {
         $this->file()->remove();
         $this->html()->remove();
         $affected = self::$db->affected_rows();
+        $this->pg()->query('
+            delete from riplog where id_riplog = $1 and id_torrent = $2
+            ', $this->id, $this->torrent->id
+        );
         $this->flush();
         return $affected;
     }

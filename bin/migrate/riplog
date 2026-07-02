@@ -1,0 +1,74 @@
+#! /usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+namespace Gazelle;
+
+require __DIR__ . '/../../lib/bootstrap.php';
+
+$db = DB::DB();
+$pg = new DB\Pg(PG_RW_DSN);
+$pg->begin();
+
+$n = $pg->query("
+    delete from riplog
+");
+echo "$n riplogs removed\n";
+
+$n        = 0;
+$adjusted = 0;
+$db->prepared_query("
+    SELECT * FROM torrents_logs
+");
+while (($row = $db->next_row(MYSQLI_ASSOC)) !== null) {
+    $id = $pg->scalarex('
+        insert into riplog
+               (id_riplog, id_torrent, checksum, score, riplog_language, ripper, logchecker_version, ripper_version, filename, details)
+        values ($1,        $2,         $3,       $4,    $5,              $6,     $7,                 $8,             $9,       $10)
+        returning id_riplog
+        ', $row['LogID'],
+        $row['TorrentID'],
+        match ($row['ChecksumState']) {
+            'checksum_ok'      => 'ok',
+            'checksum_missing' => 'missing',
+            default            => 'invalid',
+        },
+        $row['Score'],
+        $row['Language'],
+        $row['Ripper'],
+        $row['LogcheckerVersion'],
+        $row['RipperVersion'],
+        $row['FileName'],
+        $pg->arrayConverter()->output(
+            is_null($row['Details'])
+            ? []
+            : explode("\r\n", trim($row['Details']))
+        ),
+    );
+    ++$n;
+    if ($row['Adjusted'] === '1') {
+        $adjusted += $pg->query('
+            insert into riplog_adjust
+                   (checksum, id_user, score, reason, details, id_riplog)
+            values ($1,       $2,      $3,    $4,     $5,      $6)
+            ', 
+            match ($row['AdjustedChecksum']) {
+                '1'     => 'ok',
+                default => 'invalid',
+            },
+            $row['AdjustedBy'],
+            $row['AdjustedScore'],
+            $row['AdjustedReason'],
+            $pg->arrayConverter()->output(
+                is_null($row['AdjustedDetails']) || $row['AdjustedDetails'] === ''
+                ? []
+                : unserialize($row['AdjustedDetails'])
+            ),
+            $id,
+        );
+    }
+}
+$pg->commit();
+
+echo "$n riplogs inserted, $adjusted adjustments inserted\n";
