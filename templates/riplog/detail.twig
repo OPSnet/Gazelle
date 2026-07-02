@@ -20,7 +20,9 @@
 {%  endif %}
 {%  if riplog.file.exists %}
         <div style="padding: 10px; float: left"><a class="brackets" name="riplog-{{ n }}" href="view.php?type=riplog&amp;id={{
-            riplog.torrent.id }}.{{ riplog.id }}" target="_blank">View Raw Log{{ nth }}</a>{{ arrows }}</div>
+            riplog.torrent.id }}.{{ riplog.id }}" target="_blank">View Raw Log{%
+                if total > 1 %} (score {{ riplog.isAdjusted ? riplog.scoreAdjusted : riplog.score }}){%
+                endif %}{{ nth }}</a>{{ arrows }}</div>
 {%  else %}
         <div style="padding: 10px; float: left">Log not found in storage{{ arrows }}</div>
 {%  endif %}
