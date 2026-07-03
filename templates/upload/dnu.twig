@@ -3,7 +3,7 @@
 <div class="dnu_list box pad">
     <h3 id="dnu_header">Do Not Upload List</h3>
     <p>{% if dnu_new %}<strong class="important_text">{% endif -%}
-        Last updated: {{ dnu.latest|time_diff }}
+        Last updated: {{ dnu.latest.format('Y-m-d H:i:s')|time_diff }}
         {% if dnu_new %}</strong>{% endif %}
     </p>
     <p>The following releases are currently forbidden from being uploaded to the site. Do not upload them unless your torrent meets a condition specified in the given reason.

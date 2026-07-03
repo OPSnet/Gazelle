@@ -20,7 +20,11 @@ class DnuTest extends TestCase {
         $manager = new Manager\DNU();
 
         $initial = $manager->dnuList();
-        $dnu = $manager->create('phpunit ' . randomString(10), 'phpunit description', $this->user);
+        $dnu = $manager->create(
+            'phpunit ' . randomString(10),
+            'phpunit description',
+            $this->user,
+        );
         $this->assertCount(count($initial) + 1, $manager->dnuList(), 'dnu-create');
 
         $this->assertEquals(
@@ -33,8 +37,14 @@ class DnuTest extends TestCase {
             ),
             'dnu-modify'
         );
-        $this->assertTrue(Helper::recentDate($manager->latest()), 'dnu-latest');
-        $this->assertTrue($manager->hasNewForUser($this->user), 'dnu-user-latest');
+        $this->assertTrue(
+            Helper::recentDateTimeImmutable($manager->latest()),
+            'dnu-latest',
+        );
+        $this->assertTrue(
+            $manager->hasNewForUser($this->user),
+            'dnu-user-latest',
+        );
 
         $this->assertEquals(
             0,
@@ -54,8 +64,16 @@ class DnuTest extends TestCase {
         $manager = new Manager\DNU();
         $idList = array_map(fn ($x) => $x['id_do_not_upload'], $manager->dnuList());
 
-        $first  = $manager->create('phpunit first ' . randomString(10), 'phpunit description', $this->user);
-        $second = $manager->create('phpunit second ' . randomString(10), 'phpunit description', $this->user);
+        $first  = $manager->create(
+            'phpunit first ' . randomString(10),
+            'phpunit description',
+            $this->user,
+        );
+        $second = $manager->create(
+            'phpunit second ' . randomString(10),
+            'phpunit description',
+            $this->user,
+        );
 
         // This may fail when run locally because all the Sequence values could
         // be 9999 if the list has never been reordered, so all will change.

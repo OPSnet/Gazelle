@@ -12,10 +12,10 @@
             <input type="hidden" name="action" value="dnu_alter">
             <input type="hidden" name="auth" value="{{ viewer.auth }}">
             <td>
-                <input type="text" name="name" size="40">
+                <input type="text" name="name" size="20">
             </td>
             <td colspan="2">
-                <input type="text" name="description" size="60">
+                <input type="text" name="description" size="50">
             </td>
             <td>
                 <input type="submit" value="Create">
@@ -24,9 +24,9 @@
     </tr>
     <tr class="colhead">
         <td>Name</td>
-        <td>Description</td>
-        <td>Added</td>
-        <td>Submit</td>
+        <td>Reason</td>
+        <td>Created</td>
+        <td>Action</td>
     </tr>
     <tbody>
 {% for item in list %}
@@ -41,11 +41,11 @@
         <td>
             <input type="text" name="description" value="{{ item.description }}" size="60">
         </td>
-        <td>
-            {{ item.id_user|user_url }}<br>
-            {{ item.created|time_diff }}
+        <td class="nobr">
+            {{ item.id_user|user_url }}
+            {{ item.created.format('Y-m-d H:i:s')|time_diff }}
         </td>
-        <td>
+        <td class="nobr">
             <input type="submit" name="submit" value="Edit">
             <input type="submit" name="submit" value="Delete">
         </td>

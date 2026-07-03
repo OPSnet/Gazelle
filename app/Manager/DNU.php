@@ -2,25 +2,28 @@
 
 namespace Gazelle\Manager;
 
+use Gazelle\User;
+
 class DNU extends \Gazelle\Base {
     public function create(
-        string        $name,
-        string        $description,
-        \Gazelle\User $user,
+        string $name,
+        string $description,
+        User   $user,
     ): int {
-        return $this->pg()->insert("
+        return $this->pg()->scalarex("
             insert into do_not_upload
                    (name, description, id_user, sequence)
-            VALUES (?,    ?,           ?,       9999)
+            values ($1,   $2,          $3,       9999)
+            returning id_do_not_upload
             ", $name, $description, $user->id
         );
     }
 
     public function modify(
-        int           $id,
-        string        $name,
-        string        $description,
-        \Gazelle\User $user,
+        int    $id,
+        string $name,
+        string $description,
+        User   $user,
     ): int {
         return $this->pg()->query("
             update do_not_upload set
@@ -55,26 +58,26 @@ class DNU extends \Gazelle\Base {
     }
 
     public function dnuList(): array {
-        return $this->pg()->all("
-            SELECT d.id_do_not_upload,
+        return $this->pg()->allex("
+            select d.id_do_not_upload,
                 d.name,
                 d.description,
                 d.id_user,
                 d.created,
-                case when d.created > now() - '1 month'::interval
+                case when d.created > now() - interval '1 month'
                     then 1 else 0 end as is_new
             from do_not_upload d
             order by d.sequence
         ");
     }
 
-    public function latest(): string {
-        return (string)$this->pg()->scalar("
-            select greatest('-infinity', max(created)) from do_not_upload
+    public function latest(): \DateTimeImmutable|null {
+        return $this->pg()->scalarex("
+            select max(created) from do_not_upload
         ");
     }
 
-    public function hasNewForUser(\Gazelle\User $user): bool {
+    public function hasNewForUser(User $user): bool {
         return (bool)$this->pg()->scalarex(<<<END_SQL
             select coalesce(max(t.created), '-infinity') < $1
             from relay.torrents t
