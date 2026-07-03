@@ -41,8 +41,7 @@ class TorrentDeleted extends TorrentAbstract {
                 0             AS Seeders,
                 0             AS Leechers,
                 0             AS Snatched,
-                NULL          AS last_action,
-                ''            AS ripLogIds
+                NULL          AS last_action
             FROM deleted_torrents t
             WHERE t.ID = ?
             GROUP BY t.ID

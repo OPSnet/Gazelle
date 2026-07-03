@@ -4,6 +4,7 @@ namespace Gazelle;
 
 class RiplogCollection {
     public function __construct(
+        /** @var array<Riplog> $riplogList */
         protected array $riplogList,
         protected bool  $allChecksum = true,
         protected int   $lowestScore = 100,
@@ -35,5 +36,13 @@ class RiplogCollection {
 
     public function total(): int {
         return count($this->riplogList);
+    }
+
+    /**
+     * Get array of the hashes of all logfiles for a torrent
+     * @return array<string>
+     */
+    public function riplogHashList(): array {
+        return array_map(fn ($r) => $r->file()->hash(), $this->riplogList);
     }
 }

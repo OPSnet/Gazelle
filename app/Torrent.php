@@ -51,11 +51,9 @@ class Torrent extends TorrentAbstract {
                 tls.Seeders,
                 tls.Leechers,
                 tls.Snatched,
-                tls.last_action,
-                group_concat(tl.LogID) AS ripLogIds
+                tls.last_action
             FROM torrents t
             INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
-            LEFT JOIN torrents_logs      AS tl  ON (tl.TorrentID  = t.ID)
             WHERE t.ID = ?
             GROUP BY t.ID
             ", $this->id

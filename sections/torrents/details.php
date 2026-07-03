@@ -118,6 +118,7 @@ if (!$torrentList) {
         echo $Twig->render('torrent/detail-torrentgroup.twig', [
             'is_snatched_grp' => $tgroup->isSnatched(),
             'report_man'      => new Manager\Torrent\Report($torMan),
+            'riplog_man'      => new Manager\Riplog(),
             'show_extended'   => true,
             'show_id'         => ($_GET['torrentid'] ?? ''),
             'snatcher'        => $Viewer->snatch(),

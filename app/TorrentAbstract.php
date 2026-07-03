@@ -86,9 +86,6 @@ abstract class TorrentAbstract extends BaseAttrObject {
             foreach (['LogChecksum', 'HasCue', 'HasLog', 'HasLogDB', 'Scene'] as $zerotruth) {
                 $info[$zerotruth] = !($info[$zerotruth] == '0');
             }
-
-            $info['ripLogIds'] = empty($info['ripLogIds']) ? [] : array_map('intval', explode(',', $info['ripLogIds']));
-            $info['LogCount'] = count($info['ripLogIds']);
             if (!$this->isDeleted()) {
                 self::$cache->cache_value($key, $info, ($info['Seeders'] ?? 0) > 0 ? 600 : 3600);
             }
@@ -461,38 +458,6 @@ abstract class TorrentAbstract extends BaseAttrObject {
         return $this->info()['LogScore'];
     }
 
-    public function logfileList(): array {
-        self::$db->prepared_query("
-            SELECT LogID AS id,
-                Score,
-                `Checksum`,
-                Adjusted,
-                AdjustedBy,
-                AdjustedScore,
-                AdjustedChecksum,
-                AdjustmentReason,
-                coalesce(AdjustmentDetails, 'a:0:{}') AS AdjustmentDetails,
-                Details
-            FROM torrents_logs
-            WHERE TorrentID = ?
-            ", $this->id
-        );
-        $list = self::$db->to_array(false, MYSQLI_ASSOC);
-        foreach ($list as &$log) {
-            $log['has_riplog']         = new File\RipLog($this->id, $log['id'])->exists();
-            $log['html_log']           = new File\RipLogHTML($this->id, $log['id'])->get();
-            $log['adjustment_details'] = unserialize($log['AdjustmentDetails']);
-            $log['adjusted']           = ($log['Adjusted'] === '1');
-            $log['adjusted_checksum']  = ($log['AdjustedChecksum'] === '1');
-            $log['checksum']           = ($log['Checksum'] === '1');
-            $log['details']            = trim($log['Details'] ?? '') ? explode("\r\n", trim($log['Details'])) : [];
-            if ($log['adjusted'] && $log['checksum'] !== $log['adjusted_checksum']) {
-                $log['details'][] = 'Bad/No Checksum(s)';
-            }
-        }
-        return $list;
-    }
-
     /**
      * The media of this torrent. Will be null for non-music uploads.
      */
@@ -566,10 +531,6 @@ abstract class TorrentAbstract extends BaseAttrObject {
 
     public function reportTotal(User $viewer): int {
         return count($this->reportIdList($viewer));
-    }
-
-    public function ripLogIdList(): array {
-        return $this->info()['ripLogIds'];
     }
 
     public function seederTotal(): int {
@@ -792,24 +753,5 @@ abstract class TorrentAbstract extends BaseAttrObject {
             return implode(' / ', $extra);
         }
         return '';
-    }
-
-    /**
-     * Get array of the hashes of all logfiles for a torrent
-     * @return array<string>
-     */
-    public function riplogHashList(): array {
-        self::$db->prepared_query("
-            SELECT LogID FROM torrents_logs WHERE TorrentID = ?
-            ", $this->id
-        );
-        $hashes = [];
-        foreach (self::$db->collect(0) as $logId) {
-            $file = new File\RipLog($this->id, $logId);
-            if ($file->exists()) {
-                $hashes[] = $file->hash();
-            }
-        }
-        return $hashes;
     }
 }

@@ -74,7 +74,7 @@ class Riplog extends \Gazelle\Base {
         Torrent $torrent,
         array   $uploadList,
     ): array {
-        $seen       = $torrent->riplogHashList();
+        $seen       = $this->collection($torrent)->riplogHashList();
         $riplogList = [];
         for ($n = 0, $end = count($uploadList['error']); $n < $end; ++$n) {
             if ($uploadList['error'][$n] === UPLOAD_ERR_OK) {

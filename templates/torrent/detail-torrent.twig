@@ -65,7 +65,7 @@
                     </div>
                     <div class="linkbox" data-id="{{ torrent_id }}">
 {% if torrent.media == 'CD' and torrent.hasLogDb %}
-                        <a href="#" class="brackets view-riplog">View log{{ torrent.ripLogIdList|length|plural }}</a>
+                        <a href="#" class="brackets view-riplog">View log{{ riplog_man.fetchIdList(torrent)|length|plural }}</a>
 {% endif %}
 {% if viewer.permitted('site_view_torrent_snatchlist') %}
                         <a href="#" class="brackets tooltip view-download" title="View the list of users that have clicked the &quot;DL&quot; button.">View downloaders</a>

@@ -206,6 +206,7 @@ echo ' [' . $tgroup->year() . ']'; } ?></strong>
                 'hide'            => true,
                 'is_snatched_grp' => $isSnatched,
                 'report_man'      => $reportMan,
+                'riplog_man'      => new Manager\Riplog(),
                 'snatcher'        => $snatcher,
                 'tgroup'          => $tgroup,
                 'torrent_list'    => object_generator($torMan, $tgroup->torrentIdList()),

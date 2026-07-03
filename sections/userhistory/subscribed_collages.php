@@ -123,6 +123,7 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
                     'colspan_add'     => 1,
                     'is_snatched_grp' => $tgroup->isSnatched(),
                     'report_man'      => $reportMan,
+                    'riplog_man'      => new Manager\Riplog(),
                     'snatcher'        => $snatcher,
                     'tgroup'          => $tgroup,
                     'torrent_list'    => object_generator($torMan, $torrentIdList),

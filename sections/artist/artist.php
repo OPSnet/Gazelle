@@ -265,6 +265,7 @@ if ($sections = $artist->sections()) {
             'hide'            => $groupsClosed || $sectionClosed,
             'is_snatched_grp' => $isSnatched,
             'report_man'      => $reportMan,
+            'riplog_man'      => new Manager\Riplog(),
             'snatcher'        => $snatcher,
             'section_id'      => $sectionId,
             'tgroup'          => $tgroup,

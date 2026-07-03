@@ -3,13 +3,17 @@
 namespace Gazelle\Json;
 
 use Gazelle\Enum\TorrentFlag;
+use Gazelle\Manager\Riplog         as RiplogManager;
+use Gazelle\Manager\Torrent        as TorrentManager;
+use Gazelle\Manager\Torrent\Report as TorrentReportManager;
 
 class Torrent extends \Gazelle\Json {
     public function __construct(
-        protected \Gazelle\Torrent                $torrent,
-        protected \Gazelle\User                   $user,
-        protected \Gazelle\Manager\Torrent        $torMan    = new \Gazelle\Manager\Torrent(),
-        protected \Gazelle\Manager\Torrent\Report $reportMan = new \Gazelle\Manager\Torrent\Report(),
+        protected \Gazelle\Torrent     $torrent,
+        protected \Gazelle\User        $user,
+        protected TorrentManager       $torMan        = new TorrentManager(),
+        protected TorrentReportManager $reportMan     = new TorrentReportManager(),
+        protected RiplogManager        $riplogManager = new RiplogManager(),
     ) {}
 
     public function torrentPayload(): array {
@@ -24,6 +28,7 @@ class Torrent extends \Gazelle\Json {
         if ($torrent->hasFlag(TorrentFlag::noLineage)) {
             $trumpList[] = 'Missing lineage';
         }
+        $ripLogIdList = $this->riplogManager->fetchIdList($torrent);
 
         return array_merge(
             $this->user->snatch()->isSnatched($torrent) || $torrent->uploaderId() == $this->user->id
@@ -45,8 +50,8 @@ class Torrent extends \Gazelle\Json {
                 'hasCue'        => $torrent->hasCue(),
                 'logScore'      => $torrent->logScore(),
                 'logChecksum'   => $torrent->logChecksum(),
-                'logCount'      => count($torrent->ripLogIdList()),
-                'ripLogIds'     => $torrent->ripLogIdList(),
+                'logCount'      => count($ripLogIdList),
+                'ripLogIds'     => $ripLogIdList,
                 'fileCount'     => $torrent->fileTotal(),
                 'size'          => $torrent->size(),
                 'seeders'       => $torrent->seederTotal(),

@@ -2,16 +2,23 @@
 
 namespace Gazelle\Json\Notification;
 
+use Gazelle\Manager\Riplog            as RiplogManager;
+use Gazelle\Manager\Torrent           as TorrentManager;
+use Gazelle\User\Notification\Torrent as UserNotifier;
+use Gazelle\Util\Paginator;
+
 class Torrent extends \Gazelle\Json {
     public function __construct(
-        protected \Gazelle\User\Notification\Torrent $notifier,
-        protected \Gazelle\Util\Paginator            $paginator,
-        protected \Gazelle\Manager\Torrent           $torMan = new \Gazelle\Manager\Torrent(),
+        protected UserNotifier   $notifier,
+        protected Paginator      $paginator,
+        protected TorrentManager $torMan = new TorrentManager(),
+        protected RiplogManager  $riplogManager = new RiplogManager(),
     ) {}
 
     public function torrentPayload(array $info): array {
-        $torrent = $info['torrent'];
-        $tgroup = $torrent->group();
+        $torrent      = $info['torrent'];
+        $tgroup       = $torrent->group();
+        $riplogIdList = $this->riplogManager->fetchIdList($torrent);
         return [
             'torrentId'       => $torrent->id,
             'groupId'         => $tgroup->id,
@@ -39,8 +46,8 @@ class Torrent extends \Gazelle\Json {
             'hasCue'          => $torrent->hasCue(),
             'logScore'        => $torrent->logScore(),
             'logChecksum'     => $torrent->logChecksum(),
-            'logCount'        => count($torrent->ripLogIdList()),
-            'ripLogIds'       => $torrent->ripLogIdList(),
+            'logCount'        => count($riplogIdList),
+            'ripLogIds'       => $riplogIdList,
             'freeTorrent'     => $torrent->isFreeleech(),
             'isNeutralLeech'  => $torrent->isNeutralleech(),
             'reported'        => (bool)$torrent->reportTotal($this->notifier->user()),
