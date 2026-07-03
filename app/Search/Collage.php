@@ -2,22 +2,25 @@
 
 namespace Gazelle\Search;
 
+use Gazelle\User;
+use Gazelle\Util\SortableTableHeader;
+
 class Collage extends \Gazelle\Base {
     /* In queries, the collages table is aliased to c */
 
     protected bool $bookmarkView = false;
-    protected bool $configured = false;
-    protected bool $contributor = false;
-    protected bool $tagAll = true;
-    protected bool $filtered = true;
+    protected bool $configured   = false;
+    protected bool $contributor;
+    protected bool $tagAll       = true;
+    protected bool $filtered     = true;
 
-    protected string $lookup = 'name';
+    protected string $lookup   = 'Name';
     protected string $userLink = '';
 
     protected array $category   = [];
     protected array $taglist    = [];
     protected array $joinList   = [];
-    protected array $whereList  = ["c.Deleted = '0'"];
+    protected array $whereList  = ["c.\"Deleted\" = '0'"];
     protected array $filter     = [];
     protected array $args       = [];
 
@@ -25,9 +28,9 @@ class Collage extends \Gazelle\Base {
     protected string $join;
     protected string $where;
 
-    protected \Gazelle\Util\SortableTableHeader $header;
+    protected SortableTableHeader $header;
 
-    public function header(): \Gazelle\Util\SortableTableHeader {
+    public function header(): SortableTableHeader {
         return $this->header;
     }
 
@@ -40,11 +43,11 @@ class Collage extends \Gazelle\Base {
     }
 
     public function isContributor(): bool {
-        return $this->contributor;
+        return isset($this->contributor);
     }
 
     public function isSelectedCategory(int $id): bool {
-        return empty($this->category) || in_array($id, $this->category);
+        return $this->category === [] || in_array($id, $this->category);
     }
 
     public function isTagAll(): bool {
@@ -59,50 +62,53 @@ class Collage extends \Gazelle\Base {
         return $this->userLink;
     }
 
-    public function filtered(): bool {
-        return $this->filtered;
+    public function hiddenTags(array $list = HIDDEN_TAGS): array {
+        return $this->pg()->columnex('
+            select name
+            from tag
+            where id_tag = any($1)
+            ', $this->pg()->integerConverter()->output($list)
+        );
     }
 
-    public function hiddenTags(): array {
-        self::$db->prepared_query("
-                SELECT Name
-                FROM tags
-                WHERE find_in_set (id, ?)", implode(',', HIDDEN_TAGS));
-        return self::$db->collect(0);
-    }
-
-    public function setBookmarkView(\Gazelle\User $user): static {
+    public function setBookmarkView(User $user): static {
         $this->bookmarkView = true;
-        $this->userLink = $user->link();
-        $this->joinList[]  = "INNER JOIN bookmarks_collages AS bc ON (c.ID = bc.CollageID)";
-        $this->whereList[] = "bc.UserID = ?";
-        $this->args[]  = $user->id;
+        $this->userLink     = $user->link();
+        $this->joinList[]   = 'inner join bookmark_collage bc on (c."ID" = bc.id_collage)';
+        $this->whereList[]  = "bc.id_user = {$this->pg()->placeholder(count($this->args))}";
+        $this->args[]       = $user->id;
         return $this;
     }
 
     public function setCategory(array $category): static {
-        $this->category = array_filter($category, fn ($id) => in_array($id, array_keys(COLLAGE)));
+        $this->category = array_filter(
+            $category,
+            fn ($id) => in_array($id, array_keys(COLLAGE))
+        );
         return $this;
     }
 
-    public function setContributor(\Gazelle\User $user): static {
+    public function setContributor(User $user): static {
         $this->contributor = true;
-        $this->userLink = $user->link();
-        $this->whereList[] = "c.ID IN (SELECT DISTINCT CollageID FROM collages_torrents WHERE UserID = ?)";
+        $this->userLink    = $user->link();
+        $placeholder       = $this->pg()->placeholder(count($this->args));
+        $this->whereList[] = <<<END_SQL
+            c."ID" in (select distinct ct."CollageID" from relay.collages_torrents ct where ct."UserID" = $placeholder)
+        END_SQL;
         $this->args[] = $user->id;
         return $this;
     }
 
     public function setLookup(string $lookup): static {
-        if (!in_array($lookup, ['name', 'description'])) {
-            $lookup = 'name';
+        $lookup = ucfirst($lookup);
+        if (in_array($lookup, ['Name', 'Description'])) {
+            $this->lookup = $lookup;
         }
-        $this->lookup = $lookup;
         return $this;
     }
 
     public function setPersonal(): static {
-        $this->whereList[] = 'c.CategoryID = 0';
+        $this->whereList[] = 'c."CategoryID" = 0';
         return $this;
     }
 
@@ -116,17 +122,23 @@ class Collage extends \Gazelle\Base {
         return $this;
     }
 
-    public function setUser(\Gazelle\User $user): static {
+    public function setUser(User $user): static {
         $this->userLink = $user->link();
-        $this->whereList[] = 'c.UserID = ?';
+        $this->whereList[] = <<<END_SQL
+            c."UserID" = {$this->pg()->placeholder(count($this->args))}
+        END_SQL;
         $this->args[]  = $user->id;
         return $this;
     }
 
     public function setWordlist(string $wordlist): static {
         if (preg_match_all('/(\S+)/', $wordlist, $match)) {
-            array_push($this->whereList, ...array_fill(0, count($match[0]), "c." . $this->lookup . " LIKE concat('%', ?, '%')"));
-            array_push($this->args, ...$match[0]);
+            foreach ($match[0] as $m) {
+                $this->whereList[] = <<<END_SQL
+                    c."{$this->lookup}" ~~* ('%' || {$this->pg()->placeholder(count($this->args))} || '%')
+                END_SQL;
+                $this->args[] = $m;
+            }
         }
         return $this;
     }
@@ -138,33 +150,35 @@ class Collage extends \Gazelle\Base {
 
     public function configure(): void {
         $this->header = new \Gazelle\Util\SortableTableHeader('time', [
-            'time'        => ['dbColumn' => 'c.ID',          'defaultSort' => 'desc', 'text' => 'Created'],
-            'name'        => ['dbColumn' => 'c.Name',        'defaultSort' => 'asc',  'text' => 'Collage'],
-            'subscribers' => ['dbColumn' => 'c.Subscribers', 'defaultSort' => 'desc', 'text' => 'Subscribers'],
-            'torrents'    => ['dbColumn' => 'c.NumTorrents', 'defaultSort' => 'desc', 'text' => 'Entries'],
-            'updated'     => ['dbColumn' => 'c.Updated',     'defaultSort' => 'desc', 'text' => 'Updated'],
+            'time'        => ['dbColumn' => 'c."ID"',          'defaultSort' => 'desc', 'text' => 'Created'],
+            'name'        => ['dbColumn' => 'c."Name"',        'defaultSort' => 'asc',  'text' => 'Collage'],
+            'subscribers' => ['dbColumn' => 'c."Subscribers"', 'defaultSort' => 'desc', 'text' => 'Subscribers'],
+            'torrents'    => ['dbColumn' => 'c."NumTorrents"', 'defaultSort' => 'desc', 'text' => 'Entries'],
+            'updated'     => ['dbColumn' => 'c."Updated"',     'defaultSort' => 'desc', 'text' => 'Updated'],
         ]);
         if ($this->category) {
             sort($this->category);
             if (implode(' ', $this->category) !== implode(' ', array_keys(COLLAGE))) {
-                $this->whereList[] = "c.CategoryID IN (" . placeholders($this->category) . ')';
-                array_push($this->args, ...$this->category);
+                $this->whereList[] = "c.\"CategoryID\" = any({$this->pg()->placeholder(count($this->args))})";
+                $this->args[] = $this->pg()->integerConverter()->output($this->category);
             }
         }
         if ($this->taglist) {
-            $this->whereList[] = '(' . implode($this->tagAll ? ' AND ' : ' OR ',
-                    array_fill(0, count($this->taglist), "c.TagList LIKE concat('%', ?, '%')"))
-                . ')';
-            array_push($this->args, ...$this->taglist);
+            $cond = [];
+            foreach ($this->taglist as $tag) {
+                $cond[] = "c.\"TagList\" ~~* ('%' || {$this->pg()->placeholder(count($this->args))} || '%')";
+                $this->args[] = $tag;
+            }
+            $this->whereList[] = '(' . implode($this->tagAll ? ' AND ' : ' OR ', $cond) . ')';
         }
         if ($this->filtered) {
             foreach ($this->hiddenTags() as $htag) {
-                $this->whereList[] = "NOT find_in_set(?, replace(c.Taglist, ' ', ','))";
-                array_push($this->args, $htag);
+                $this->whereList[] = "c.\"TagList\" !~~* ('%' || {$this->pg()->placeholder(count($this->args))} || '%')";
+                $this->args[] = $htag;
             }
         }
         $this->join = implode(' ', $this->joinList);
-        $this->where = implode(' AND ', $this->whereList);
+        $this->where = implode(' and ', $this->whereList);
         $this->configured = true;
     }
 
@@ -172,10 +186,10 @@ class Collage extends \Gazelle\Base {
         if (!$this->configured) {
             $this->configure();
         }
-        return (int)self::$db->scalar("
-            SELECT count(*)
-            FROM collages AS c {$this->join}
-            WHERE {$this->where}
+        return $this->pg()->scalarex("
+            select count(*)
+            from relay.collages c {$this->join}
+            where {$this->where}
             ", ...$this->args
         );
     }
@@ -184,27 +198,29 @@ class Collage extends \Gazelle\Base {
         if (!$this->configured) {
             $this->configure();
         }
-        $orderBy = $this->header->orderBy();
+        $orderBy  = $this->header->orderBy();
         $orderDir = $this->header->dir();
-        self::$db->prepared_query("
-            SELECT c.ID        AS id,
-                c.Name         AS name,
-                c.NumTorrents  AS total,
-                c.TagList      AS tag_list,
-                c.CategoryID   AS category_id,
-                c.UserID       AS user_id,
-                c.Subscribers  AS subscriber_total,
-                c.Updated      AS updated
-            FROM collages AS c {$this->join}
-            WHERE {$this->where}
-            ORDER BY $orderBy $orderDir, id
-            LIMIT ? OFFSET ?
-            ", ...[...$this->args, $limit, $offset]
+        $args     = $this->args;
+        $limitPh  = "limit {$this->pg()->placeholder(count($args))}";
+        $args[]   = $limit;
+        $offsetPh = "offset {$this->pg()->placeholder(count($args))}";
+        $args[]   = $offset;
+        return $this->pg()->allex(<<<END_SQL
+            SELECT c."ID"                         as id,
+                c."Name"                          as name,
+                c."NumTorrents"                   as total,
+                c."TagList"                       as taglist,
+                string_to_array(c."TagList", ' ') as tag,
+                c."CategoryID"                    as category_id,
+                c."UserID"                        as user_id,
+                c."Subscribers"                   as subscriber_total,
+                c.updated
+            from relay.collages c {$this->join}
+            where {$this->where}
+            order by $orderBy $orderDir, id
+            $limitPh $offsetPh
+            END_SQL,
+                ...$args
         );
-        $list = self::$db->to_array(false, MYSQLI_ASSOC);
-        foreach ($list as &$c) {
-            $c['tag'] = explode(' ', $c['tag_list']);
-        }
-        return $list;
     }
 }

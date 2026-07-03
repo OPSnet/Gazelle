@@ -3,6 +3,7 @@
 namespace Gazelle;
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use GazelleUnitTest\Helper;
 use Gazelle\Enum\CollageType;
 use Gazelle\Enum\CommentType;
@@ -12,6 +13,7 @@ use Gazelle\Enum\CommentType;
  * Look at, for instance, the tests for donors and bonus points for that.
  */
 
+#[AllowMockObjectsWithoutExpectations]
 class CollageTest extends TestCase {
     protected array $collageList;
     protected array $artistName;
@@ -95,8 +97,8 @@ class CollageTest extends TestCase {
         $this->collageList[] = new Manager\Collage()->create(
             user:        $this->userList['u1'],
             categoryId:  CollageType::theme->value,
-            name:        'phpunit collage lock ' . randomString(20),
             description: 'phpunit collage lock description',
+            name:        'phpunit collage lock ' . randomString(20),
             tagList:     implode(' ', $this->tagList(3)),
         );
         $collage = $this->collageList[0];
@@ -139,8 +141,8 @@ class CollageTest extends TestCase {
         $this->collageList[] = $manager->create(
             user:        $this->userList['u1'],
             categoryId:  CollageType::theme->value,
-            name:        $name,
             description: $description,
+            name:        $name,
             tagList:     implode(',', $tagList),
         );
         $collage = $this->collageList[0];
@@ -177,55 +179,185 @@ class CollageTest extends TestCase {
         $this->userList['u1']->addCustomPrivilege('site_collages_manage');
     }
 
-    public function testCollageSearch(): void {
-        $mockSearch = $this->getMockBuilder(Search\Collage::class)->onlyMethods(['hiddenTags'])->getMock();
-        $mockSearch->method('hiddenTags')->willReturn(['test','spam']);
-
+    public function testCollageSearchBasic(): void {
         $manager = new Manager\Collage();
-        $initial = sizeof($mockSearch->setLookup('name')->page(100, 0));
+        $search  = new Search\Collage();
+        $initial = $search->total();
+        $user    = $this->userList['u1'];
         $this->collageList[] = $manager->create(
-            user:        $this->userList['u1'],
+            user:        $user,
             categoryId:  CollageType::theme->value,
-            name:        'phpunit collage add ' . randomString(20),
             description: 'phpunit collage add description',
+            name:        'phpunit collage add ' . randomString(20),
             tagList:     'jazz metal rap',
         );
-        $this->collageList[] = $manager->create(
-            user:        $this->userList['u1'],
-            categoryId:  CollageType::theme->value,
-            name:        'phpunit collage add ' . randomString(20),
-            description: 'phpunit collage add description',
-            tagList:     'funk spam rock',
+        $this->collageList[0]->addEntry($this->tgroupList[0], $this->userList['u1']);
+        $this->assertEquals(
+            1,
+            $search->total() - $initial,
+            'collage-search-total',
+        );
+        $this->assertFalse(
+            $search->isContributor(),
+            'collage-search-is-not-contributor',
+        );
+        $this->assertFalse(
+            $search->isFilteredView(),
+            'collage-search-is-not-filtered',
         );
 
-        $result = $mockSearch->page(100, 0);
-        $this->assertCount($initial + 1, $result, 'collage-search-results');
+        // contributor
+        $contributor = new Search\Collage()
+            ->setCategory([CollageType::theme->value])
+            ->setContributor($user);
+        $this->assertTrue(
+            $contributor->isFilteredView(),
+            'collage-search-is-filtered',
+        );
+        $this->assertTrue(
+            $contributor->isContributor(),
+            'collage-search-is-contributor',
+        );
+        $this->assertFalse(
+            $contributor->isBookmarkView(),
+            'collage-search-is-not-bookmark-view',
+        );
+        $this->assertFalse(
+            $contributor->isSelectedCategory(CollageType::genre->value),
+            'collage-search-is-not-cat-genre',
+        );
+        $this->assertEquals(
+            $user->link(),
+            $contributor->userLink(),
+            'collage-search-contributor-userlink',
+        );
+        $this->assertEquals(
+            1,
+            $contributor->total(),
+            'collage-search-contributor-total',
+        );
+        $page = $contributor->page(2, 0);
+        $this->assertCount(
+            1,
+            $page,
+            'collage-search-page-total',
+        );
+        $result  = array_first($page);
+        $collage = array_first($this->collageList);
+        $this->assertEquals(
+            $result['id'],
+            $collage->id,
+            'collage-search-result-id',
+        );
     }
 
-    public function testCollageSearchUnfiltered(): void {
-        $mockSearch = $this->getMockBuilder(Search\Collage::class)->onlyMethods(['hiddenTags'])->getMock();
-        $mockSearch->method('hiddenTags')->willReturn(['test','spam']);
-        $mockSearch->disableFilter();
-
+    public function testCollageSearchBookmark(): void {
         $manager = new Manager\Collage();
-        $initial = sizeof($mockSearch->setLookup('name')->page(100, 0));
+        $user    = $this->userList['u1'];
         $this->collageList[] = $manager->create(
-            user:        $this->userList['u1'],
+            user:        $user,
             categoryId:  CollageType::theme->value,
-            name:        'phpunit collage add ' . randomString(20),
             description: 'phpunit collage add description',
+            name:        'phpunit collage add ' . randomString(20),
+            tagList:     'jazz metal rap',
+        );
+        $collage  = array_first($this->collageList);
+        $bookmark = new User\Bookmark($this->userList['u1']);
+        $bookmark->create($collage);
+
+        $search = new Search\Collage()
+            ->setBookmarkView($user);
+        $this->assertEquals(
+            1,
+            $search->total(),
+            'collage-search-bookmark',
+        );
+    }
+
+    public function testCollageSearchLookup(): void {
+        $manager = new Manager\Collage();
+        $user    = $this->userList['u1'];
+        $this->collageList[] = $manager->create(
+            user:        $user,
+            categoryId:  CollageType::personal->value,
+            name:        'phpunit brillig slithy toves ' . randomString(20),
+            description: randomString(),
             tagList:     'jazz metal rap',
         );
         $this->collageList[] = $manager->create(
-            user:        $this->userList['u1'],
-            categoryId:  CollageType::theme->value,
-            name:        'phpunit collage add ' . randomString(20),
-            description: 'phpunit collage add description',
-            tagList:     'funk spam rock',
+            user:        $user,
+            categoryId:  CollageType::personal->value,
+            name:         randomString(),
+            description: 'phpunit brillig slithy toves ' . randomString(20),
+            tagList:     'jazz metal rap',
         );
 
-        $result = $mockSearch->page(100, 0);
-        $this->assertCount($initial + 2, $result, 'collage-search-results');
+        $nameSearch = new Search\Collage()->setWordlist('slithy brillig toves');
+        $this->assertEquals(
+            1,
+            $nameSearch->total(),
+            'collage-search-lookup-name-total',
+        );
+        $this->assertEquals(
+            $this->collageList[0]->id,
+            array_first($nameSearch->page(1, 0))['id'],
+            'collage-search-lookup-name-page',
+        );
+
+        $descriptionSearch = new Search\Collage()
+            ->setLookup('Description')
+            ->setWordlist('slithy brillig toves');
+        $this->assertEquals(
+            1,
+            $descriptionSearch->total(),
+            'collage-search-lookup-description-total',
+        );
+        $this->assertEquals(
+            $this->collageList[1]->id,
+            array_first($descriptionSearch->page(1, 0))['id'],
+            'collage-search-lookup-description-page',
+        );
+    }
+
+    public function testCollageSearchTag(): void {
+        $manager = new Manager\Collage();
+        $user    = $this->userList['u1'];
+        $this->collageList[] = $manager->create(
+            user:        $user,
+            categoryId:  CollageType::personal->value,
+            description: 'phpunit collage add description',
+            name:        'phpunit collage add ' . randomString(20),
+            tagList:     'jazz metal rap',
+        );
+
+        $tagAny = new Search\Collage()
+            ->setUser($user)
+            ->setPersonal()
+            ->setTagAll(false)
+            ->setTaglist(['metal', 'bongos']);
+        $this->assertFalse(
+            $tagAny->isTagAll(),
+            'collage-search-is-not-tag-all',
+        );
+        $this->assertEquals(
+            1,
+            $tagAny->total(),
+            'collage-search-tag-any',
+        );
+
+        $tagAll = new Search\Collage()
+            ->setUser($user)
+            ->setTagAll(true)
+            ->setTaglist(['metal', 'bongos']);
+        $this->assertTrue(
+            $tagAll->isTagAll(),
+            'collage-search-is-tag-all',
+        );
+        $this->assertEquals(
+            0,
+            $tagAll->total(),
+            'collage-search-tag-all',
+        );
     }
 
     public function testCollageAdd(): void {
@@ -233,8 +365,8 @@ class CollageTest extends TestCase {
         $this->collageList[] = $manager->create(
             user:        $this->userList['u1'],
             categoryId:  CollageType::theme->value,
-            name:        'phpunit collage add ' . randomString(20),
             description: 'phpunit collage add description',
+            name:        'phpunit collage add ' . randomString(20),
             tagList:     implode(',', $this->tagList(3)),
         );
         $collage = $this->collageList[0];
@@ -285,22 +417,22 @@ class CollageTest extends TestCase {
             $manager->create(
                 user:        $this->userList['u1'],
                 categoryId:  CollageType::artist->value,
-                name:        'phpunit collage artist ' . randomString(20),
                 description: 'phpunit collage artist description',
+                name:        'phpunit collage artist ' . randomString(20),
                 tagList:     implode(' ', $this->tagList(3)),
             ),
             $manager->create(
                 user:        $this->userList['u1'],
                 categoryId:  CollageType::artist->value,
-                name:        'phpunit collage artist ' . randomString(20),
                 description: 'phpunit collage artist description',
+                name:        'phpunit collage artist ' . randomString(20),
                 tagList:     implode(' ', $this->tagList(3)),
             ),
             $manager->create(
                 user:        $this->userList['u1'],
                 categoryId:  CollageType::artist->value,
-                name:        'phpunit collage artist ' . randomString(20),
                 description: 'phpunit collage artist description',
+                name:        'phpunit collage artist ' . randomString(20),
                 tagList:     implode(' ', $this->tagList(4)),
             ),
         ];
@@ -359,8 +491,8 @@ class CollageTest extends TestCase {
         $this->collageList[] = $manager->create(
             user:        $this->userList['u1'],
             categoryId:  CollageType::label->value,
-            name:        'phpunit collage api ' . randomString(20),
             description: 'phpunit collage api description',
+            name:        'phpunit collage api ' . randomString(20),
             tagList:     implode(' ', $this->tagList(3)),
         );
         $_GET['req']       = 'collage';
@@ -382,8 +514,8 @@ class CollageTest extends TestCase {
         $this->collageList[] = $manager->create(
             user:        $this->userList['u1'],
             categoryId:  CollageType::label->value,
-            name:        'phpunit collage contrib ' . randomString(20),
             description: 'phpunit collage contrib description',
+            name:        'phpunit collage contrib ' . randomString(20),
             tagList:     implode(' ', $this->tagList(3)),
         );
         $collage = $this->collageList[0];
@@ -457,29 +589,29 @@ class CollageTest extends TestCase {
             $manager->create(
                 user:        $user,
                 categoryId:  CollageType::personal->value,
+                description: 'phpunit collage feature description',
                 name:        'phpunit collage feat 001 ' . randomString(20),
-                description: 'phpunit collage feature description',
                 tagList:     implode(' ', $this->tagList(3)),
             ),
             $manager->create(
                 user:        $user,
                 categoryId:  CollageType::personal->value,
+                description: 'phpunit collage feature description',
                 name:        'phpunit collage feat 002 ' . randomString(20),
-                description: 'phpunit collage feature description',
                 tagList:     implode(' ', $this->tagList(3)),
             ),
             $manager->create(
                 user:        $user,
                 categoryId:  CollageType::personal->value,
+                description: 'phpunit collage feature description',
                 name:        'phpunit collage feat 003 ' . randomString(20),
-                description: 'phpunit collage feature description',
                 tagList:     implode(' ', $this->tagList(3)),
             ),
             $manager->create(
                 user:        $user,
                 categoryId:  CollageType::personal->value,
-                name:        'phpunit collage feat 004 ' . randomString(20),
                 description: 'phpunit collage feature description',
+                name:        'phpunit collage feat 004 ' . randomString(20),
                 tagList:     implode(' ', $this->tagList(3)),
             ),
         ];
@@ -510,8 +642,8 @@ class CollageTest extends TestCase {
         $this->collageList[] = new Manager\Collage()->create(
             user:        $this->userList['u1'],
             categoryId:  CollageType::staffPick->value,
-            name:        'phpunit collage json ' . randomString(20),
             description: 'phpunit collage json description',
+            name:        'phpunit collage json ' . randomString(20),
             tagList:     implode(',', $this->tagList(3)),
         );
         $collage = $this->collageList[0];
@@ -538,8 +670,8 @@ class CollageTest extends TestCase {
         $this->collageList[] = new Manager\Collage()->create(
             user:        $this->userList['u1'],
             categoryId:  CollageType::chart->value,
-            name:        'phpunit collage lock ' . randomString(20),
             description: 'phpunit collage lock description',
+            name:        'phpunit collage lock ' . randomString(20),
             tagList:     implode(' ', $this->tagList(3)),
         );
         $collage = $this->collageList[0];
@@ -588,36 +720,36 @@ class CollageTest extends TestCase {
             $manager->create(
                 user:        $this->userList['u1'],
                 categoryId:  CollageType::series->value,
-                name:        $stem . randomString(20),
                 description: 'phpunit collage man description',
+                name:        $stem . randomString(20),
                 tagList:     implode(' ', $this->tagList(3)),
             ),
             $manager->create(
                 user:        $this->userList['u1'],
                 categoryId:  CollageType::series->value,
-                name:        $stem . randomString(20),
                 description: 'phpunit collage man description',
+                name:        $stem . randomString(20),
                 tagList:     implode(' ', $this->tagList(3)),
             ),
             $manager->create(
                 user:        $this->userList['u1'],
                 categoryId:  CollageType::series->value,
-                name:        $stem . randomString(20),
                 description: 'phpunit collage man description',
+                name:        $stem . randomString(20),
                 tagList:     implode(' ', $this->tagList(3)),
             ),
             $manager->create(
                 user:        $this->userList['u2'],
                 categoryId:  CollageType::series->value,
-                name:        $stem . randomString(20),
                 description: 'phpunit collage man description',
+                name:        $stem . randomString(20),
                 tagList:     implode(' ', $this->tagList(3)),
             ),
             $manager->create(
                 user:        $this->userList['u2'],
                 categoryId:  CollageType::genre->value,
-                name:        $stem . randomString(20),
                 description: 'phpunit collage man description',
+                name:        $stem . randomString(20),
                 tagList:     implode(' ', $this->tagList(3)),
             ),
         ];
@@ -644,8 +776,8 @@ class CollageTest extends TestCase {
         $this->collageList[] = new Manager\Collage()->create(
             user:        $this->userList['u1'],
             categoryId:  CollageType::personal->value,
-            name:        'phpunit collage personal ' . randomString(20),
             description: 'phpunit collage personal description',
+            name:        'phpunit collage personal ' . randomString(20),
             tagList:     implode(',', $this->tagList(3)),
         );
         $collage = $this->collageList[0];
@@ -713,8 +845,8 @@ class CollageTest extends TestCase {
         $this->collageList[] = $manager->create(
             user:        $this->userList['u1'],
             categoryId:  CollageType::theme->value,
-            name:        $name,
             description: 'phpunit collage remove description',
+            name:        $name,
             tagList:     implode(' ', $this->tagList(3)),
         );
         $collage = $this->collageList[0];
@@ -743,8 +875,8 @@ class CollageTest extends TestCase {
         $this->collageList[] = $manager->create(
             user:        $this->userList['u1'],
             categoryId:  CollageType::theme->value,
-            name:        $name,
             description: 'phpunit collage remove description',
+            name:        $name,
             tagList:     implode(' ', $this->tagList(3)),
         );
         $collage = $this->collageList[0];
@@ -765,8 +897,8 @@ class CollageTest extends TestCase {
         $collage = $this->collageList[] = $manager->create(
             user:        $this->userList['u1'],
             categoryId:  CollageType::personal->value,
-            name:        $name,
             description: 'phpunit collage ajax description',
+            name:        $name,
             tagList:     implode(' ', $this->tagList(3)),
         );
 
@@ -829,8 +961,8 @@ class CollageTest extends TestCase {
         $this->collageList[] = $manager->create(
             user:        $this->userList['u1'],
             categoryId:  CollageType::theme->value,
-            name:        'phpunit collage notif ' . randomString(20),
             description: 'phpunit collage notif description',
+            name:        'phpunit collage notif ' . randomString(20),
             tagList:     implode(' ', $this->tagList(3)),
         );
         $subscriber = $this->userList['u2'];
@@ -900,8 +1032,8 @@ class CollageTest extends TestCase {
         $this->collageList[] = $manager->create(
             user:        $creator,
             categoryId:  CollageType::theme->value,
-            name:        'phpunit collage comment ' . randomString(20),
             description: 'phpunit collage comment description',
+            name:        'phpunit collage comment ' . randomString(20),
             tagList:     implode(' ', $this->tagList(3)),
         );
         $collage = $this->collageList[0];

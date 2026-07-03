@@ -63,6 +63,7 @@
                 <element key="sha1" value="hash_file"/>
                 <element key="uniqid" value="hash_file"/>
                 <element key="sha1file" value="hash_file"/>
+                <element key="sizeof" value="count"/>
                 <element key="strcmp" value="==="/>
             </property>
         </properties>
