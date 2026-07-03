@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle;
 
 class Forum extends BaseObject {
@@ -410,18 +412,19 @@ class Forum extends BaseObject {
      */
     public function toggleAutoSubscribe(User $user, bool $active): int {
         if ($active) {
-            return $this->pg()->prepared_query("
-                INSERT INTO forum_autosub
+            return $this->pg()->query("
+                insert into forum_autosub
                        (id_forum, id_user)
-                VALUES (?,        ?)
-                ON CONFLICT (id_forum, id_user) DO NOTHING
+                values ($1,       $2)
+                on conflict (id_forum, id_user)
+                    do nothing
                 ", $this->id, $user->id
             );
         } else {
-            return $this->pg()->prepared_query("
-                DELETE FROM forum_autosub
-                WHERE id_forum = ?
-                    AND id_user = ?
+            return $this->pg()->query("
+                delete from forum_autosub
+                where id_forum = $1
+                    and id_user = $2
                 ", $this->id, $user->id
             );
         }
