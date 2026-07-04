@@ -43,7 +43,7 @@
         </td>
         <td class="nobr">
             {{ item.id_user|user_url }}
-            {{ item.created.format('Y-m-d H:i:s')|time_diff }}
+            {{ item.created|time_diff }}
         </td>
         <td class="nobr">
             <input type="submit" name="submit" value="Edit">
