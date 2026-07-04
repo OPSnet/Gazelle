@@ -170,10 +170,10 @@ class UserCreator extends Base {
             INSERT INTO user_flt (user_id) VALUES (?)
             ", $this->id
         );
-        $this->pg()->prepared_query("
+        $this->pg()->query("
             insert into ip_history
                    (id_user, ip, data_origin)
-            values (?,       ?,  'registration')
+            values ($1,      $2,  'registration')
             ", $this->id, $ipaddr
         );
         self::$db->prepared_query("
@@ -196,9 +196,9 @@ class UserCreator extends Base {
         }
         foreach (Enum\NotificationType::cases() as $attr) {
             $attr = strtolower($attr->toString());
-            $this->pg()->prepared_query("
+            $this->pg()->query("
                 insert into user_has_attr (id_user, id_user_attr)
-                values (?, (select id_user_attr from user_attr where name like ?))
+                values ($1, (select id_user_attr from user_attr where name = $2))
             ", $this->id, "{$attr}-pop");
         }
 
