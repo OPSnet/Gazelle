@@ -11,22 +11,22 @@ if (!$Viewer->permitted('site_analysis')) {
     Error403::error();
 }
 
-$errMan = new Manager\ErrorLog();
+$errorLog = new Manager\ErrorLog();
 $remove = array_key_extract_suffix('clear-', $_POST);
 if ($remove) {
-    $removed = $errMan->removeList($remove);
+    $removed = $errorLog->removeList($remove);
 } elseif (isset($_POST['slow-clear'])) {
-    $removed = $errMan->removeSlow((float)($_POST['slow'] ?? 60.0));
+    $removed = $errorLog->removeSlow((float)($_POST['slow'] ?? 60.0));
 } else {
     $removed = -1;
 }
 
 if (isset($_REQUEST['filter']) && isset($_REQUEST['search'])) {
-    $errMan->setFilter(trim($_REQUEST['search']));
+    $errorLog->setFilter(trim($_REQUEST['search']));
 }
 
 $paginator = new Util\Paginator(ITEMS_PER_PAGE, (int)($_GET['page'] ?? 1));
-$paginator->setTotal($errMan->total());
+$paginator->setTotal($errorLog->total());
 
 $heading = new Util\SortableTableHeader('updated', [
     // see Gazelle\ErrorLog for these table aliases
@@ -45,7 +45,7 @@ $heading = new Util\SortableTableHeader('updated', [
 
 echo $Twig->render('debug/analysis-list.twig', [
     'heading'   => $heading,
-    'list'      => $errMan->list(
+    'list'      => $errorLog->list(
         $heading->orderBy(),
         $heading->dir(),
         $paginator->limit(),

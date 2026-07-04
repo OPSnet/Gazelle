@@ -23,7 +23,7 @@ class ErrorLog extends BasePgObject {
         if (isset($this->info)) {
             return $this->info;
         }
-        $info = $this->pg()->rowAssoc("
+        $info = $this->pg()->rowAssocex("
             select id_error_log,
                 id_user,
                 duration,
@@ -39,17 +39,15 @@ class ErrorLog extends BasePgObject {
                 encode(digest, 'base64') as digest,
                 error_list
             from error_log
-            where id_error_log = ?
+            where id_error_log = $1
             ", $this->id
         );
         $info['trace']      = explode("\n", $info['trace']);
-        $info['request']    = json_decode($info['request'], true);
-        $info['error_list'] = json_decode($info['error_list'], true);
         $this->info = $info;
         return $this->info;
     }
 
-    public function created(): string {
+    public function created(): \DateTimeImmutable {
         return $this->info()['created'];
     }
 
@@ -89,7 +87,7 @@ class ErrorLog extends BasePgObject {
         return $this->info()['trace'];
     }
 
-    public function updated(): string {
+    public function updated(): \DateTimeImmutable {
         return $this->info()['updated'];
     }
 
@@ -102,8 +100,8 @@ class ErrorLog extends BasePgObject {
     }
 
     public function remove(): int {
-        $affected = $this->pg()->prepared_query("
-            delete from error_log where id_error_log = ?
+        $affected = $this->pg()->query("
+            delete from error_log where id_error_log = $1
             ", $this->id
         );
         $this->flush();

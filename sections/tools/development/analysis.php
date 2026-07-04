@@ -25,8 +25,10 @@ if (isset($_POST['remove'])) {
     $case = $errorLog->findByNext((int)$_POST['id']);
 } elseif (isset($_POST['remove-prev']) || isset($_POST['remove-next'])) {
     authorize();
-    $id = (int)$_POST['id'];
-    $case = isset($_POST['remove-prev']) ? $errorLog->findByPrev($id) : $errorLog->findByNext($id);
+    $id   = (int)$_POST['id'];
+    $case = isset($_POST['remove-prev'])
+        ? $errorLog->findByPrev($id)
+        : $errorLog->findByNext($id);
     $errorLog->findById($id)->remove();
 } elseif (isset($_REQUEST['case'])) {
     $case = $errorLog->findById((int)$_REQUEST['case']);
