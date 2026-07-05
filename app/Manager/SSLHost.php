@@ -7,6 +7,8 @@ use Gazelle\Util\Curl;
 class SSLHost extends \Gazelle\Base {
     protected Curl $curl;
 
+    final public const EXPIRY_KEY = 'ssl_expire_days';
+
     public function __construct(?Curl $curl = null) {
         // for testing
         if ($curl !== null) {
@@ -22,6 +24,11 @@ class SSLHost extends \Gazelle\Base {
             ->setOption(CURLOPT_FRESH_CONNECT, true)
             ->setOption(CURLOPT_FORBID_REUSE, true)
             ->setOption(CURLOPT_SSL_SESSIONID_CACHE, 0);
+    }
+
+    public function flush(): static {
+        self::$cache->delete_value(self::EXPIRY_KEY);
+        return $this;
     }
 
     public function lookup(string $hostname, int $port): array {
@@ -71,23 +78,27 @@ class SSLHost extends \Gazelle\Base {
         if (is_null($notBefore) || is_null($notAfter)) {
             return null;
         }
-        return $this->pg()->scalarex("
+        $affected = $this->pg()->scalarex("
             insert into ssl_host
                    (hostname, port, not_before, not_after)
             values ($1,       $2,   $3,         $4)
             returning id_ssl_host
             ", $hostname, $port, $notBefore, $notAfter
         );
+        $this->flush();
+        return $affected;
     }
 
     public function removeList(array $idList): int {
         if (count($idList) === 0) {
             return 0;
         }
-        return $this->pg()->query("
+        $affected = $this->pg()->query("
             delete from ssl_host where id_ssl_host = any($1::int[])
             ", $this->pg()->integerConverter()->output($idList)
         );
+        $this->flush();
+        return $affected;
     }
 
     public function list(): array {
@@ -109,12 +120,17 @@ class SSLHost extends \Gazelle\Base {
      * Returns null if no domains are tracked.
      */
     public function expiryDays(): ?int {
-        return $this->pg()->scalarex("
-            select extract(day from not_after - now())
-            from ssl_host
-            order by not_after asc
-            limit 1
-        ");
+        $days = self::$cache->get_value(self::EXPIRY_KEY);
+        if ($days === false) {
+            $days = $this->pg()->scalarex("
+                select extract(day from not_after - now())
+                from ssl_host
+                order by not_after asc
+                limit 1
+            ");
+            self::$cache->cache_value(self::EXPIRY_KEY, $days, 3600);
+        }
+        return $days;
     }
 
     public function schedule(): int {
@@ -128,7 +144,7 @@ class SSLHost extends \Gazelle\Base {
         if (!$args) {
             return 0;
         }
-        return $this->pg()->query("
+        $affected = $this->pg()->query("
             update ssl_host set
                 not_before = c.not_before::timestamptz,
                 not_after = c.not_after::timestamptz
@@ -136,6 +152,9 @@ class SSLHost extends \Gazelle\Base {
                 placeholders_pg(array_slice($args, 0, (int)(count($args) / 3)), '(%s, %s, %s)', 3)
             . ") as c(id_ssl_host, not_before, not_after) 
             where c.id_ssl_host::int = ssl_host.id_ssl_host
-        ", ...$args);
+            ", ...$args
+        );
+        $this->flush();
+        return $affected;
     }
 }

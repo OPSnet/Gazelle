@@ -32,6 +32,7 @@ class SchedulerTest extends TestCase {
             ',
             $name, "phpunit run task", "A run with no PHP implementation"
         );
+        $scheduler->flush();
 
         $this->expectOutputRegex('/^(?:\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(?:.\d{1,6})? \[(?:debug|info)\] (.*?)\n|Running task (?:.*?)\.\.\.Failed\.\n$)/');
         $scheduler->run();

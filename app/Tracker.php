@@ -11,6 +11,8 @@ use Gazelle\Util\Curl;
 use Gazelle\Util\Irc;
 
 class Tracker extends Base {
+    protected const string RECENT_KEY = 'tracker_recent';
+
     protected static array $Requests = [];
     protected string|false $error    = false;
 
@@ -328,12 +330,17 @@ class Tracker extends Base {
     }
 
     public function recentUpdate(int $seconds): bool {
-        return (bool)self::$db->scalar("
-            SELECT 1
-            FROM xbt_files_users
-            WHERE mtime > unix_timestamp(now() - INTERVAL ? SECOND)
-            LIMIT 1
-            ", $seconds
-        );
+        $recent = self::$cache->get_value(self::RECENT_KEY);
+        if ($recent === false) {
+            $recent = self::$db->scalar("
+                SELECT 1
+                FROM xbt_files_users
+                WHERE mtime > unix_timestamp(now() - INTERVAL ? SECOND)
+                LIMIT 1
+                ", $seconds
+            );
+            self::$cache->cache_value(self::RECENT_KEY, $recent, 60);
+        }
+        return $recent === 1;
     }
 }

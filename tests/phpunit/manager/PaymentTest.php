@@ -67,14 +67,14 @@ class PaymentTest extends TestCase {
         $next    = new \DateTimeImmutable("3 days")->modify('midnight');
         $idList  =  [
             $manager->create(
-                text:   'phpunit-' . randomString(6),
+                text:   'phpunit-one-' . randomString(6),
                 expiry: $next,
                 rent:   0.03125,
                 cc:     'XBT',
                 active: true,
             ),
             $manager->create(
-                text:   'phpunit-' . randomString(6),
+                text:   'phpunit-two-' . randomString(6),
                 expiry: new \DateTimeImmutable("4 days")->modify('midnight'),
                 rent:   0.03125,
                 cc:     'XBT',

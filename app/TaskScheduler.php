@@ -8,9 +8,18 @@ namespace Gazelle;
  */
 
 class TaskScheduler extends Base {
-    final public const CACHE_TASKS = 'tasks';
+    final public const CACHE_TASKS   = 'tasks';
+    final public const CACHE_LAST_OK = 'task_last_ok';
 
     protected Util\SortableTableHeader $heading;
+
+    public function flush(): static {
+        self::$cache->delete_multi([
+            self::CACHE_TASKS,
+            self::CACHE_LAST_OK,
+        ]);
+        return $this;
+    }
 
     public function findById(int $taskId): ?array {
         $tasks = $this->taskList();
@@ -94,22 +103,27 @@ class TaskScheduler extends Base {
     }
 
     public function taskList(): array {
-        return $this->pg()->allByKeyex(
-            'id_task',
-            <<<END_SQL
-            select id_task,
-                name,
-                class_name,
-                description,
-                period,
-                is_enabled,
-                is_sane,
-                is_debug,
-                run_now
-            from task
-            order by class_name
-            END_SQL
-        );
+        $list = self::$cache->get_value(self::CACHE_TASKS);
+        if ($list === false) {
+            $list = $this->pg()->allByKeyex(
+                'id_task',
+                <<<END_SQL
+                select id_task,
+                    name,
+                    class_name,
+                    description,
+                    period,
+                    is_enabled,
+                    is_sane,
+                    is_debug,
+                    run_now
+                from task
+                order by class_name
+                END_SQL
+            );
+            self::$cache->cache_value(self::CACHE_TASKS, $list, 0);
+        }
+        return $list;
     }
 
     public function insaneTaskTotal(): int {
@@ -128,22 +142,26 @@ class TaskScheduler extends Base {
     }
 
     public function enqueue(int $taskId): int {
-        return $this->pg()->query('
+        $affected = $this->pg()->query('
             update task set
                 is_sane = true,
                 run_now = true
             where id_task = $1
             ', $taskId
         );
+        $this->flush();
+        return $affected;
     }
 
     public function clear(int $taskId): int {
-        return $this->pg()->query('
+        $affected = $this->pg()->query('
             update task set
                 run_now = false
             where id_task = $1
             ', $taskId
         );
+        $this->flush();
+        return $affected;
     }
 
     public function updateTask(
@@ -167,7 +185,7 @@ class TaskScheduler extends Base {
             ', $name, $description, $period, $isEnabled, $isSane, $isDebug,
                 $taskId,
         );
-        self::$cache->delete_value(self::CACHE_TASKS);
+        $this->flush();
         return $affected;
     }
 
@@ -180,12 +198,14 @@ class TaskScheduler extends Base {
     }
 
     public function runNow(int $taskId): int {
-        return $this->pg()->query("
+        $affected = $this->pg()->query("
             update task set
                 run_now = true
             where id_task = $1
             ", $taskId
         );
+        $this->flush();
+        return $affected;
     }
 
     public function run(): int {
@@ -267,6 +287,7 @@ class TaskScheduler extends Base {
                 where id_task = $1
                 ', $taskId
             );
+            $this->flush();
             return -1;
         }
 
@@ -463,8 +484,13 @@ class TaskScheduler extends Base {
     }
 
     public function isLastRunIntervalOk(int $delay): bool {
-        return $delay >= (int)$this->pg()->scalarex("
-            select extract(epoch from now() - max(created)) from task_history
-        ");
+        $last = self::$cache->get_value(self::CACHE_LAST_OK);
+        if ($last === false) {
+            $last = (int)$this->pg()->scalarex("
+                select extract(epoch from now() - max(created)) from task_history
+            ");
+            self::$cache->cache_value(self::CACHE_LAST_OK, $last, 120);
+        }
+        return $delay >= $last;
     }
 }

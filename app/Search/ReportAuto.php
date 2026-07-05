@@ -4,7 +4,7 @@ namespace Gazelle\Search;
 
 use Gazelle\Enum\ReportAutoState;
 
-class ReportAuto {
+class ReportAuto extends \Gazelle\Base {
     use \Gazelle\Pg;
 
     protected array $args = [];
@@ -56,11 +56,10 @@ class ReportAuto {
      * number of users with matching reports
      */
     public function total(): int {
-        $cond = implode(' and ', $this->cond);
+        $cond  = implode(' and ', $this->cond);
         $where = $cond ? "where $cond" : '';
-
         return (int)$this->pg()->scalarex("
-            select count(distinct id_user) from Report_auto $where
+            select count(distinct id_user) from report_auto $where
             ", ...$this->args
         );
     }
@@ -134,7 +133,6 @@ class ReportAuto {
             END_SQL,
                 ...$args
         );
-
         $reports = [];
         foreach ($list as $userId => $row) {
             $reports[$userId] = array_map(

@@ -11,9 +11,10 @@ use Gazelle\Exception\PaymentFetchForexException;
 class Payment extends \Gazelle\Base {
     final protected const LIST_KEY = 'payment_list';
     final protected const RENT_KEY = 'payment_monthly_rental';
+    final protected const SOON_KEY = 'payment_soon';
 
     public function flush(): static {
-        self::$cache->delete_multi([self::LIST_KEY, self::RENT_KEY]);
+        self::$cache->delete_multi([self::LIST_KEY, self::RENT_KEY, self::SOON_KEY]);
         return $this;
     }
 
@@ -150,12 +151,17 @@ class Payment extends \Gazelle\Base {
     }
 
     public function soon(): array {
-        return $this->pg()->rowAssocex("
-            select count(*) as total,
-                min(expiry) as next
-            from payment
-            where expiry < now() + interval '1 week'
-                and active is true
-        ");
+        $soon = self::$cache->get_value(self::SOON_KEY);
+        if ($soon === false) {
+            $soon = $this->pg()->rowAssocex("
+                select count(*) as total,
+                    min(expiry) as next
+                from payment
+                where expiry < now() + interval '1 week'
+                    and active is true
+            ");
+            self::$cache->cache_value(self::SOON_KEY, $soon, 3600);
+        }
+        return $soon;
     }
 }

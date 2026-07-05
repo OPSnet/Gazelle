@@ -168,7 +168,11 @@ class DownloadTest extends TestCase {
         $download = new Download($this->torrent, new User\UserclassRateLimit($user), false);
         $this->assertEquals(DownloadStatus::ok, $download->status(), 'down-stats-ok');
         $current = $tstats->recentDownloadTotal();
-        $this->assertEquals($initial[0]['total'] + 1, $current[0]['total'], 'down-stats-increment');
+        $this->assertEquals(
+            1,
+            $current[0]['total'] - $initial[0]['total'],
+            'down-stats-increment'
+        );
 
         // there will be one user (or more) in the past day
         $ustats = new Stats\Users();
