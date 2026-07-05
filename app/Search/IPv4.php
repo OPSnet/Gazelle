@@ -45,8 +45,8 @@ class IPv4 extends \Gazelle\Base {
 
     public function create(): static {
         $this->name = 'tmp_ipsearch_' . str_replace(['.', ' '], '', microtime());
-        $this->pg()->prepared_query("drop table if exists " . $this->name);
-        $this->pg()->prepared_query("
+        $this->pg()->query("drop table if exists " . $this->name);
+        $this->pg()->query("
             create temporary table {$this->name} (
                 addr inet primary key
             )
@@ -69,10 +69,10 @@ class IPv4 extends \Gazelle\Base {
         $quad = array_unique($match[0]);
         $added = 0;
         foreach (array_chunk($quad, self::MAX_INSERT) as $chunk) {
-            $added += $this->pg()->prepared_query("
+            $added += $this->pg()->query("
                 insert into {$this->name}
                        (addr)
-                values " . placeholders($chunk, '(?)') .
+                values " . placeholders_pg($chunk, '(%s)') .
                 " on conflict do nothing",
                  ...$chunk
             );
@@ -107,7 +107,7 @@ class IPv4 extends \Gazelle\Base {
         $column = ['lower(range_agg(ih.seen))', 'upper(range_agg(ih.seen))', 'min(ip)', 'count(distinct ip)'][$this->column];
         $direction = ['asc', 'desc'][$this->direction];
 
-        $result = $this->pg()->all("
+        $result = $this->pg()->allex("
             with cte as (
                 select 
                   id_user,
@@ -115,7 +115,7 @@ class IPv4 extends \Gazelle\Base {
                 from ip_site_history ih
                 inner join {$this->name} s on (s.addr = ih.ip)
                 group by id_user
-                limit ? offset ?
+                limit $1 offset $2
             )
             select
               ip,

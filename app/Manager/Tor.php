@@ -45,7 +45,7 @@ class Tor extends \Gazelle\Base {
     }
 
     public function exitNodeList(): array {
-        return $this->pg()->all("
+        return $this->pg()->allex("
             select t.ipv4,
                 t.created,
                 coalesce(a.cc, 'XX') as cc,

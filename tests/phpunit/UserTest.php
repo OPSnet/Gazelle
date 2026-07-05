@@ -339,16 +339,18 @@ class UserTest extends TestCase {
         $this->assertFalse($warned->isWarned(), 'utest-warn-initial');
         $end = $warned->add(staffReason: 'phpunit 1', interval: '1 hour', warner: $this->user);
         $this->assertTrue(
-            Helper::recentDateTimeImmutable($end->upper, -3600 + 60), // one hour - 60 seconds
-            'utest-warn-1-hour'
+            // one hour - 60 seconds
+            Helper::recentDateTimeImmutable($end->upper, -3600 + 60),
+            'utest-warn-1-hour',
         );
         $this->assertTrue($warned->isWarned(), 'utest-is-warned');
         $this->assertEquals(1, $warned->total(), 'utest-warn-total');
 
         $end = $warned->warn(2, "phpunit warning", $this->user, "phpunit");
         $this->assertTrue(
-            Helper::recentDateTimeImmutable($end->upper, strtotime('+2 weeks') - 60), // two weeks - 60 seconds
-            'utest-warn-in-future'
+            // two weeks - 60 seconds
+            Helper::recentDateTimeImmutable($end->upper, strtotime('+2 weeks') - 60),
+            'utest-warn-in-future',
         );
         $this->assertEquals(2, $warned->total(), 'utest-warn-total');
         $warningList = $warned->warningList();

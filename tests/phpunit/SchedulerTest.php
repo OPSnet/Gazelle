@@ -186,7 +186,10 @@ class SchedulerTest extends TestCase {
             'task-history-total'
         );
         $item = array_first($history->items);
-        $this->assertTrue(Helper::recentDate($item->created->format('Y-m-d H:i:s')), 'task-created');
+        $this->assertTrue(
+            Helper::recentDateTimeImmutable($item->created),
+            'task-created'
+        );
         $this->assertEquals('completed', $item->status, 'task-status');
         $this->assertEquals(0, $item->nrErrors, 'task-nr-error');
         $this->assertEquals(0, $item->nrItems, 'task-nr-item');

@@ -1,6 +1,7 @@
 <?php
-/** @phpstan-var \Gazelle\User $Viewer */
-/** @phpstan-var \Twig\Environment $Twig */
+
+// @phpstan-var \Gazelle\User $Viewer
+// @phpstan-var \Twig\Environment $Twig
 
 declare(strict_types=1);
 
@@ -9,7 +10,6 @@ namespace Gazelle;
 if (!$Viewer->permitted('users_view_ips')) {
     Error403::error();
 }
-
 
 $userMan = new Manager\User();
 $user = $userMan->findById((int)($_GET['userid'] ?? 0));
@@ -27,6 +27,5 @@ echo $Twig->render('admin/user-info.twig', [
     'direction'     => $direction,
     'invite_source' => new Manager\InviteSource(),
     'hist'          => new User\History($user, $column, $direction),
-    'now'           => date('Y-m-d H:i:s'),
     'user'          => $user,
 ]);

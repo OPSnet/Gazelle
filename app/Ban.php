@@ -30,20 +30,20 @@ class Ban extends BasePgObject {
             where id_ip_ban = ?
             ", $this->id
         );
-        $this->info['hist'] = $this->pg()->all("
+        $this->info['hist'] = $this->pg()->allex("
             select id_ip_ban_hist,
                 id_user,
                 created,
                 note
             from ip_ban_hist
-            where id_ip_ban = ?
+            where id_ip_ban = $1
             order by id_ip_ban_hist desc
             ", $this->id
         );
         return $this->info;
     }
 
-    public function created(): string {
+    public function created(): \DateTimeImmutable {
         return $this->history()[0]['created'];
     }
 
@@ -63,11 +63,12 @@ class Ban extends BasePgObject {
         return count($this->history());
     }
 
-    public function addNote(string $note, ?User $user): int {
-        $added = $this->pg()->insert("
+    public function addNote(string $note, User|null $user): int {
+        $added = $this->pg()->scalarex("
             insert into ip_ban_hist
                    (id_ip_ban, note, id_user)
-            values (?,         ?,    ?)
+            values ($1,        $2,   $3)
+            returning id_ip_ban_hist
             ", $this->id, $note, (int)$user?->id,
         );
         $this->flush();

@@ -2,6 +2,9 @@
 
 namespace Gazelle\Manager;
 
+use Gazelle\Forum;
+use Gazelle\User;
+
 class News extends \Gazelle\Base {
     final protected const CACHE_KEY = 'newsv2';
 
@@ -12,12 +15,12 @@ class News extends \Gazelle\Base {
      * news items.
      */
     public function create(
-        string         $title,
-        string         $body,
-        string         $pitch,
-        \Gazelle\User  $user,
-        \Gazelle\Forum $forum,
-        ForumThread    $threadMan = new ForumThread(),
+        string      $title,
+        string      $body,
+        string      $pitch,
+        User        $user,
+        Forum       $forum,
+        ForumThread $threadMan = new ForumThread(),
     ): int {
         $body   = trim($body);
         $title  = trim($title);
@@ -25,10 +28,11 @@ class News extends \Gazelle\Base {
         $thread = $threadMan->create($forum, $user, $title, $body);
 
         $body .= "\n\n[url=/forums.php?action=viewthread&threadid={$thread->id}]{$pitch}[/url]";
-        $id = $this->pg()->insert("
+        $id = $this->pg()->scalarex("
             insert into news
                    (id_user, id_thread, title, body)
-            VALUES (?,       ?,         ?,     ?)
+            values ($1,      $2,        $3,    $4)
+            returning id_news
             ", $user->id, $thread->id, $title, $body
         );
         self::$cache->delete_multi(['feed_news', self::CACHE_KEY]);
@@ -51,14 +55,14 @@ class News extends \Gazelle\Base {
     }
 
     public function list(int $limit, int $offset): array {
-        return $this->pg()->all("
-            select id_news AS id,
+        return $this->pg()->allex("
+            select id_news as id,
                 title,
                 body,
                 created
             from news
             order by created desc
-            limit ? offset ?
+            limit $1 offset $2
             ", $limit, $offset
         );
     }
@@ -84,10 +88,10 @@ class News extends \Gazelle\Base {
      * @return array [string title, string body] or null if no such article
      */
     public function fetch(int $id): ?array {
-        $article = $this->pg()->row("
+        $article = $this->pg()->rowex("
             select title, body
             from news
-            where id_news = ?
+            where id_news = $1
             ", $id
         );
         return $article === [] ? null : $article;
@@ -119,7 +123,7 @@ class News extends \Gazelle\Base {
      */
     public function latestEpoch(): int {
         $latest = $this->headlines();
-        return $latest ? (int)strtotime($latest[0]['created']) : 0;
+        return $latest ? $latest[0]['created']->format('U') : 0;
     }
 
     /**

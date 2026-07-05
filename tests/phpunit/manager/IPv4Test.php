@@ -40,7 +40,7 @@ class IPv4Test extends TestCase {
         $this->assertCount(1, $ban->history(), 'ban-history-initial');
         $ban->addNote('phpunit add note', $this->userList[0]);
         $this->assertEquals(2, $ban->total(), 'ban-total');
-        $this->assertTrue(Helper::recentDate($ban->created()), 'ban-created');
+        $this->assertTrue(Helper::recentDateTimeImmutable($ban->created()), 'ban-created');
 
         $this->assertFalse($manager->isBanned('127.9.9.61'), 'ipv4-outside-ban-range');
         $manager->create('127.9.9.55/26', 'extend');

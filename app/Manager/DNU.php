@@ -13,7 +13,7 @@ class DNU extends \Gazelle\Base {
         return $this->pg()->scalarex("
             insert into do_not_upload
                    (name, description, id_user, sequence)
-            values ($1,   $2,          $3,       9999)
+            values ($1,   $2,          $3,      9999)
             returning id_do_not_upload
             ", $name, $description, $user->id
         );
@@ -31,7 +31,6 @@ class DNU extends \Gazelle\Base {
                 description = $2,
                 id_user     = $3
             where id_do_not_upload = $4
-            returning id_do_not_upload
             ", $name, $description, $user->id, $id
         );
     }

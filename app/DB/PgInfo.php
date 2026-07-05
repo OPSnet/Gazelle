@@ -14,7 +14,7 @@ class PgInfo {
     ) {}
 
     public function info(): array {
-        return $this->pg()->all("
+        return $this->pg()->allex("
             select (case when t.table_schema = 'public' then '' else t.table_schema || '.' end )
                     || t.table_name as table_name,
                 pg_relation_size(t.table_schema || '.' || t.table_name) as table_size,

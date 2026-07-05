@@ -3,28 +3,29 @@
 namespace Gazelle\Manager;
 
 use Gazelle\Enum\SourceDB;
+use sad_spirit\pg_wrapper\exceptions\server\ConstraintViolationException;
 
 class Tag extends \Gazelle\BaseManager {
     protected const ID_KEY    = 'zz_tag_%d';
     protected const ALIAS_KEY = 'tag_aliases_search';
     protected const GENRE_KEY = 'tag_genre';
 
-    public function create(string $name, \Gazelle\User $user, string $type = 'other', int $uses = 0): \Gazelle\Tag {
+    public function create(string $name, \Gazelle\User $user, string $kind = 'other', int $uses = 0): \Gazelle\Tag {
         self::$db->prepared_query("
             INSERT INTO tags
                    (Name, UserID, TagType, Uses)
             VALUES (?,    ?,      ?,       ?)
             ", $this->resolve($this->sanitize($name)),
                 $user->id,
-                $type,
+                $kind,
                 $uses,
         );
         $tagId = self::$db->inserted_id();
         $this->pg()->query('
             insert into tag
-                   (id_tag, id_user, usage, name, kind)
+                   (id_tag, id_user, usage, kind, name)
             values ($1,     $2,      $3,    $4,   $5)
-            ', $tagId, $user->id, $uses, $this->resolve($this->sanitize($name)), $type
+            ', $tagId, $user->id, $uses, $kind, $this->resolve($this->sanitize($name))
         );
         $this->pg()->query("
             select setval('tag_id_tag_seq', $1)
@@ -39,13 +40,13 @@ class Tag extends \Gazelle\BaseManager {
      * name is not allowed: in this case null is returned. Otherwise a new tag
      * is created.
      */
-    public function softCreate(string $name, \Gazelle\User $user, string $type = 'other', int $uses = 0): ?\Gazelle\Tag {
+    public function softCreate(string $name, \Gazelle\User $user, string $kind = 'other', int $uses = 0): ?\Gazelle\Tag {
         $tag = $this->findByName($name);
         if ($tag) {
             return $tag;
         }
         return $this->validName($name)
-            ? $this->create($name, $user, $type, $uses)
+            ? $this->create($name, $user, $kind, $uses)
             : null;
     }
 
@@ -89,20 +90,21 @@ class Tag extends \Gazelle\BaseManager {
      */
     public function createRejected(string $name, \Gazelle\User $user): int {
         try {
-            return $this->pg()->insert("
+            return $this->pg()->scalarex("
                 insert into tag_reject
                        (name, id_user)
-                values (?,    ?)
+                values ($1,   $2)
+                returning id_tag_reject
                 ", $this->sanitize($name), $user->id
             );
-        } catch (\PDOException) {
-            // most likely a duplicate key due to a name that already exists
+        } catch (ConstraintViolationException) {
+            // duplicate key due to a name that already exists
             return 0;
         }
     }
 
     public function rejectedList(): array {
-        return $this->pg()->all(<<<END_SQL
+        return $this->pg()->allex(<<<END_SQL
             select tr.id_tag_reject as id,
                 tr.id_user,
                 um."Username" as creator,

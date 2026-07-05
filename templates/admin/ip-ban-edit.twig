@@ -23,7 +23,7 @@ future.</div>
 {%  endif %}
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
         <td>{{ h.note }}</td>
-        <td>{{ h.created|time_diff }}</td>
+        <td>{{ h.created|date('Y-m-d H:i:s')|time_diff }}</td>
         <td>{{ h.id_user|user_url }}</td>
     </tr>
 {%  if loop.end %}

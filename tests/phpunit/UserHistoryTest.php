@@ -61,6 +61,6 @@ class UserHistoryTest extends TestCase {
         $list = $user->history()->siteIP();
         $this->assertCount(1, $list, 'ipaddr-site-history');
         $this->assertEquals('127.10.11.12', $list[0]['ip'], 'ipaddr-site-ip');
-        $this->assertTrue(Helper::recentDate($list[0]['last_seen']->format('c')), 'ipaddr-site-last-seen');
+        $this->assertTrue(Helper::recentDateTimeImmutable($list[0]['last_seen']), 'ipaddr-site-last-seen');
     }
 }

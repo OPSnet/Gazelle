@@ -9,20 +9,20 @@
 </div><br>
 <div class="thin">
 {% for r in total %}
-    {% if loop.first %}
+{%  if loop.first %}
     <table id="scores" class="hidden" style="width: 50%; margin: 0 auto;">
         <tr>
             <th>Username</th>
             <th>Checked</th>
         </tr>
-    {% endif %}
+{%  endif %}
         <tr>
             <td>{{ r.user_id|user_url }}</td>
             <td>{{ r.total|number_format }}</td>
         </tr>
-    {% if loop.last %}
+{%  if loop.last %}
     </table>
-    {% endif %}
+{%  endif %}
 {% endfor %}
     <form action="" method="GET" id="search_form"{% if not search %} class="hidden"{% endif %}>
         <input type="hidden" name="action" value="enable_requests">
@@ -74,8 +74,8 @@
 </div>
 
 {% for r in page %}
-    {% if loop.first %}
-    {{ paginator.linkbox|raw }}
+{%  if loop.first %}
+{{      paginator.linkbox|raw }}
     <div class="box pad">
     Before proceeding with an enable, you should perform searches on the IP address
     used and the given email address to verify that someone is not trying to take
@@ -99,46 +99,46 @@
             <td class="nobr">Ban Reason</td>
             <td class="nobr">Comment<?= $ShowChecked ? ' / Checked By' : ''?></td>
             <td class="nobr">Submit{{ header.emit('handled_timestamp')|raw }}</td>
-        {% if show_checked %}
+{%      if show_checked %}
             <td>outcome{{ header.emit('outcome')|raw }}</td>
-        {% endif %}
+{%      endif %}
         </tr>
-    {% endif %}
+{%  endif %}
         <tr class="row{{ cycle(['a', 'b'], loop.index0) }}" id="row_{{ r.id }}">
             <td class="center">
-    {% if r.isPending %}
+{%  if r.isPending %}
                 <input type="checkbox" id="multi" data-id="{{ r.id }}">
-    {% endif %}
+{%  endif %}
             </td>
             <td>{{ r.user.id|user_url }}</td>
             <td><a href="/tools.php?action=email_search&amp;emaillist={{ r.email }}">{{ r.email }}</td>
             <td><a href="/tools.php?action=ip_search&amp;ip={{ r.ipv4 }}">{{ r.ipv4 }}</a></td>
             <td>{{ r.created|time_diff }}</td>
             <td>{% if r.banReason == 3 %}<b>Inactivity</b>{% else %}Other ({{ r.banReason }}){% endif %}</td>
-    {% if not r.isPending %}
+{%  if not r.isPending %}
             <td>{{ r.admin_user_id|user_url }}</td>
             <td>{{ r.handled }}</td>
-    {% endif %}
+{%  endif %}
             <td><input class="inputtext" type="text" id="comment{{ r.id }}" placeholder="Comment"></td>
             <td>
                 <input type="submit" id="outcome" value="Approve" data-id="{{ r.id }}">
                 <input type="submit" id="outcome" value="Reject" data-id="{{ r.id }}">
                 <input type="submit" id="outcome" value="Discard" data-id="{{ r.id }}">
             </td>
-    {% if show_checked %}
+{%  if show_checked %}
             <td>{{ r.outcomeLabel }}
-        {% if r.isDiscarded %}
+{%      if r.isDiscarded %}
                 <a href="" id="unresolve" onclick="return false;" class="brackets" data-id="{{ r.id }}">Unresolve</a>
-        {% endif %}
+{%      endif %}
             </td>
-    {% endif %}
+{%  endif %}
         </tr>
         <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
             <td>&nbsp;</td>
             <td colspan="6">{{ r.useragent }}</td>
             <td colspan="{{ show_checked ? 3 : 4 }}">-</td>
         </tr>
-    {% if loop.last %}
+{%  if loop.last %}
     </table>
     {{ paginator.linkbox|raw }}
 <div style="padding-bottom: 11px;">
@@ -146,7 +146,7 @@
     <input type="submit" id="outcome" value="Reject Selected">
     <input type="submit" id="outcome" value="Discard Selected">
 </div>
-    {% endif %}
+{%  endif %}
 {% else %}
     <h2 align="center">No new pending auto enable requests{% if view %} in this view{% endif %}.</h2>
 {% endfor %}
