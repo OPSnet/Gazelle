@@ -7,6 +7,8 @@ declare(strict_types=1);
 
 namespace Gazelle;
 
+use Gazelle\Enum\AuthnMechanism;
+
 define('AJAX', !isset($_POST['auth']));
 
 /* 'x' requests every 'y' seconds: [5,10] = 5 requests every 10 seconds */
@@ -99,7 +101,11 @@ if ($Viewer->isLocked() || $Viewer->enforceMFA()) {
     exit;
 }
 
-if (AJAX && !defined('AUTHED_BY_TOKEN') && in_array($Action, $RequireTokenPages)) {
+if (
+    AJAX
+    && $Viewer->requestContext()->authn->mechanism() !== AuthnMechanism::apikey
+    && in_array($Action, $RequireTokenPages)
+) {
     json_error("This page requires an API token");
 }
 switch ($Action) {

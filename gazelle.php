@@ -3,8 +3,7 @@
 
 namespace Gazelle;
 
-use Gazelle\Util\Crypto;
-use Gazelle\Util\Time;
+use Gazelle\Enum\AuthnMechanism;
 
 // 1. Initialization
 
@@ -55,75 +54,17 @@ if (
 // 2. Do we have a viewer?
 
 Base::setRequestContext($context);
-$Viewer    = null;
-$cookie    = null;
-$banMan    = new Manager\Ban();
-$userMan   = new Manager\User();
-
-// Authorization header only makes sense for the ajax endpoint
-if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $module === 'ajax') {
-    if ($banMan->isBanned($context->remoteAddr())) {
-        header('Content-type: application/json');
-        json_die('failure', 'your ip address has been banned');
-    }
-    [$success, $result] = $userMan->findByAuthorization($_SERVER['HTTP_AUTHORIZATION']);
-    if ($success) {
-        $Viewer = $result;
-        define('AUTHED_BY_TOKEN', true);
-    } else {
-        header('Content-type: application/json');
-        json_die('failure', $result);
-    }
-} elseif (isset($_COOKIE['session'])) {
-    $cookie = new SessionCookie($_COOKIE['session']);
-    $Viewer = $userMan->findByCookie($cookie);
-    if (!$Viewer) {
-        SessionCookie::expire();
-        header('Location: login.php');
-        exit;
-    }
-} elseif ($module === 'torrents' && ($_REQUEST['action'] ?? '') == 'download' && isset($_REQUEST['torrent_pass'])) {
-    $Viewer = $userMan->findByAnnounceKey($_REQUEST['torrent_pass']);
-    if (is_null($Viewer) || $Viewer->isDisabled() || $Viewer->isLocked()) {
-        http_response_code(403);
-        exit;
-    }
-} elseif (!in_array($module, ['chat', 'enable', 'index', 'login', 'recovery', 'register'])) {
-    if (
-        // Ocelot is allowed
-        !($module === 'tools' && ($_GET['action'] ?? '') === 'ocelot' && ($_GET['key'] ?? '') === TRACKER_SECRET)
-    ) {
-        // but for everything else, we need a $Viewer
-        header('Location: login.php');
-        exit;
-    }
-}
+$Viewer = $context->authn->authenticate();
+$context->authn->updateIp($Viewer);
 
 // 3. We have a viewer (or this is a login or registration attempt)
 
 if ($Viewer) {
-    // To proxify images (or not), or e.g. not render the name of a thread
-    // for a user who may lack the privileges to see it in the first place.
-    \Text::setViewer($Viewer);
-    Util\Twig::setViewer($Viewer);
-    $Viewer->requestContext()->setViewer($Viewer);
-
     // these endpoints do not exist
     if (in_array($module, OBSOLETE_ENDPOINTS)) {
         $Viewer->session()->logoutEverywhere();
         header('Location: login.php');
         exit;
-    }
-    if ($Viewer->permitted('site_disable_ip_history')) {
-        $Viewer->requestContext()->anonymize();
-    }
-    if ($Viewer->ipaddr() != $Viewer->requestContext()->remoteAddr() && !$Viewer->permitted('site_disable_ip_history')) {
-        if ($banMan->isBanned($Viewer->requestContext()->remoteAddr())) {
-            Error403::error('Your IP address has been banned.');
-        }
-        if (!$cookie) {  // api key or passkey (torrent dl)
-            new Manager\IPv4()->registerApi($Viewer, $Viewer->requestContext()->remoteAddr());
-        }
     }
     $authorized = ['ajax', 'chat', 'locked', 'login', 'logout', 'staffpm'];
     if ($Viewer->isLocked() && !in_array($module, $authorized)) {

@@ -11,9 +11,10 @@ class RequestContext {
     protected string $sessionId;
 
     public function __construct(
-        protected readonly string $scriptName,
-        protected string $remoteAddr,
-        protected string $useragent,
+        protected readonly string      $scriptName,
+        protected string               $remoteAddr,
+        protected string               $useragent,
+        public readonly Authentication $authn = new Authentication(),
     ) {
         $info = pathinfo($scriptName);
         if (!array_key_exists('dirname', $info)) {
