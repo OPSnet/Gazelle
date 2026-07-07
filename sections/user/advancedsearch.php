@@ -11,6 +11,10 @@ namespace Gazelle;
 
 $userMan = new Manager\User();
 
+if (!$Viewer->permitted('admin_advanced_user_search')) {
+    Error400::error('nope');
+}
+
 if (isset($_GET['search'])) {
     $_GET['search'] = trim($_GET['search']);
 }

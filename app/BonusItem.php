@@ -228,6 +228,8 @@ class BonusItem extends \Gazelle\BasePgObject {
                 throw new BonusPurchaseException(Enum\BonusItemPurchaseStatus::insufficientFunds);
             }
             $amount = $this->amount();
+            $user->stats()->incrementFltoken(Enum\UserSummaryFltoken::gifted, $amount);
+            $receiver->stats()->incrementFltoken(Enum\UserSummaryFltoken::received, $amount);
             $receiver->inbox()->createSystem(
                 "Here " . ($amount == 1 ? 'is' : 'are') . ' ' . article($amount)
                     . " freeleech token" . plural($amount) . "!",

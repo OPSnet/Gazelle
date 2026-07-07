@@ -293,7 +293,7 @@ class InviteTest extends TestCase {
         $userMan = new Manager\User();
         $this->user->setField('PermissionID', MEMBER)->modify();
         $this->user->addClasses([
-            (int)current(array_filter(
+            (int)array_first(array_filter(
                 $userMan->classList(),
                 fn ($class) => $class['Name'] == 'Recruiter'
             ))['ID']
@@ -385,9 +385,9 @@ class InviteTest extends TestCase {
             'invite-source-invited-invitee'
         );
 
-        $usage = current(array_filter(
+        $usage = array_first(array_filter(
             $inviteSourceMan->usageList(),
-            fn($s) => $s['invite_source_id'] === $sourceId
+            fn ($s) => $s['invite_source_id'] === $sourceId
         ));
         $this->assertEquals(
             [

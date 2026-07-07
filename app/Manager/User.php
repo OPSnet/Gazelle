@@ -211,6 +211,17 @@ class User extends \Gazelle\BaseManager {
         return "$display ({$this->userclassName($user->primaryClass())})";
     }
 
+    public function attrList(): array {
+        self::$db->prepared_query('
+            SELECT ID       AS id,
+                Name        AS name,
+                Description AS description
+            FROM user_attr
+            ORDER BY Name
+        ');
+        return self::$db->to_array(false, MYSQLI_ASSOC);
+    }
+
     /**
      * Bulk update a user attribute for a list of user ids.
      * Note: the user cache is not updated, the calling code is
@@ -330,6 +341,22 @@ class User extends \Gazelle\BaseManager {
             $classLevelList[$c['Level']] = $c;
         }
         return $classLevelList;
+    }
+
+    public function userclassPrimary(): array {
+        return array_filter(
+            $this->classLevelList(),
+            fn ($c) => $c['Secondary'] == '0'
+        );
+    }
+
+    public function userclassSecondary(): array {
+        $secondary = array_filter(
+            $this->classLevelList(),
+            fn ($c) => $c['Secondary'] == '1'
+        );
+        usort($secondary, fn ($c1, $c2) => $c1['Name'] <=> $c2['Name']);
+        return $secondary;
     }
 
     /**

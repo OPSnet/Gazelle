@@ -77,7 +77,13 @@ class Twig {
 
         $twig->addFilter(new \Twig\TwigFilter(
             'bb_format',
-            fn ($text, $outputToc = true) => new \Twig\Markup(\Text::full_format($text, $outputToc, cache: ImageCacheMode::cache, bucket: CacheBucket::forum), 'UTF-8')
+            fn ($text, $outputToc = true) => new \Twig\Markup(
+                \Text::full_format(
+                    $text,
+                    $outputToc,
+                    cache: ImageCacheMode::cache, bucket: CacheBucket::forum),
+                'UTF-8'
+            )
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
@@ -93,6 +99,18 @@ class Twig {
         $twig->addFilter(new \Twig\TwigFilter(
             'column',
             fn (\Gazelle\Util\SortableTableHeader $header, string $name) => new \Twig\Markup($header->emit($name), 'UTF-8')
+        ));
+
+        $twig->addFilter(new \Twig\TwigFilter(
+            'date_fmt',
+            fn (?\DateTimeInterface $date) => new \Twig\Markup(
+                $date?->format('Y-m-d H:i:sP') ?? 'Never', 'UTF-8')
+        ));
+
+        $twig->addFilter(new \Twig\TwigFilter(
+            'date_diff',
+            fn (?\DateTimeInterface $date, $levels = 2, $span = true) => new \Twig\Markup(
+                time_diff($date?->getTimestamp(), $levels, $span), 'UTF-8')
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
@@ -143,27 +161,13 @@ class Twig {
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
-            'date_fmt',
-            fn (?\DateTimeInterface $date) => new \Twig\Markup(
-                $date?->format('Y-m-d H:i:sP') ?? 'Never', 'UTF-8')
-        ));
-
-        $twig->addFilter(new \Twig\TwigFilter(
-            'date_diff',
-            fn (?\DateTimeInterface $date, $levels = 2, $span = true) => new \Twig\Markup(
-                time_diff($date?->getTimestamp(), $levels, $span), 'UTF-8')
-        ));
-
-        $twig->addFilter(new \Twig\TwigFilter(
             'time_compact',
             fn (int $seconds) => new \Twig\Markup(Time::convertSeconds($seconds), 'UTF-8')
         ));
-
         $twig->addFilter(new \Twig\TwigFilter(
             'time_diff',
             fn ($time, $levels = 2, $span = true) => new \Twig\Markup(time_diff($time, $levels, $span), 'UTF-8')
         ));
-
         $twig->addFilter(new \Twig\TwigFilter(
             'time_interval',
             fn ($time, $levels = 2) => new \Twig\Markup(

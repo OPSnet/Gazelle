@@ -16,13 +16,16 @@ class SortableTableHeader {
      *     'dbColumn'    => 'columnName',
      *     'defaultSort' => 'desc',
      *     'text'        => 'Column Display Text',
+     *     'alias'       => 'c1',
      *   ],
      *   'size' => [
      *     'dbColumn'    => 'columnName',
      *     'defaultSort' => 'desc',
      *     'text'        => 'Column Display Text',
+     *     'alias'       => 'c2',
      *   ],
      * ]
+     * The alias fields are optional, but useful when the columns are entirely dynameic
      * Items missing a 'text' value cannot be output.
      *
      * @param array $arrowMap sort direction => symbol to output
@@ -31,51 +34,69 @@ class SortableTableHeader {
         string $defaultSortKey,
         private readonly array $labelMap,
         private readonly array $arrowMap = ['asc' => '↓', 'desc' => '↑', '' => ''],
-        array $request = []
+        array $request = [],
     ) {
         if ($request === []) {
             // Since we can't have expressions as default values in the param list...
             $request = $_GET;
         }
-        $this->currentSortKey = (!empty($request['order']) && isset($labelMap[$request['order']]))
+        $this->currentSortKey = isset($labelMap[$request['order'] ?? ''])
             ? $request['order']
             : $defaultSortKey;
         $this->currentSortDir =
-            (empty($request['sort']) || $request['sort'] === $this->current()['defaultSort'])
+            (!isset($request['sort']) || $request['sort'] === ($this->current()['defaultSort'] ?? ''))
             ? $this->current()['defaultSort']
             : self::SORT_DIRS[$this->current()['defaultSort']];
     }
 
-    public function emit(string $outputKey): string {
-        $outputData = $this->getData($outputKey);
-        // Fail silently if we have nothing to output
-        if (!isset($outputData) || empty($outputData['text'])) {
-            return '';
+    public function alias(string $columnKey): string {
+        $alias = array_first(array_values(array_filter(
+            $this->labelMap,
+            fn ($m) => $m['alias'] === $columnKey,
+        )));
+        return is_array($alias) ? ($alias['text'] ?? "err:$columnKey") : '';
+    }
+
+    public function aliasField(string $columnKey): string {
+        $field = array_keys(array_filter(
+            $this->labelMap,
+            fn ($m) => $m['alias'] === $columnKey,
+        ));
+        return $field !== [] ? (string)array_first($field) : '';
+    }
+
+    public function emit(string $columnKey): string {
+        $columnData = $this->labelMap[$columnKey];
+        if ($columnData === []) {
+            // Fail if column does not exist
+            return "err:$columnKey";
+        }
+        if (!isset(self::SORT_DIRS[$columnData['defaultSort']], self::SORT_DIRS[$this->currentSortDir])) {
+            // Fail gracefully if misconfigured
+            return $columnData['text'];
         }
 
-        // Fail gracefully if we got invalid input
-        if (!isset(self::SORT_DIRS[$outputData['defaultSort']], self::SORT_DIRS[$this->currentSortDir])) {
-            return $outputData['text'];
-        }
-
-        $isCurrentKey  = ($outputKey === $this->currentSortKey);
-        $outputSortDir = ($isCurrentKey) ? self::SORT_DIRS[$this->currentSortDir] : $outputData['defaultSort'];
-        $outputArrow   = ($isCurrentKey) ? $this->arrowMap[$this->currentSortDir] : '';
-
+        $isCurrent  = ($columnKey === $this->currentSortKey);
         return sprintf(
             '<a href="?%s">%s</a> %s',
-            get_url(['page'], true, false, ['order' => $outputKey, 'sort' => $outputSortDir]),
-            $outputData['text'],
-            $outputArrow
+            get_url(
+                ['page'],
+                true,
+                false,
+                [
+                    'order' => $columnKey,
+                    'sort'  => $isCurrent
+                        ? self::SORT_DIRS[$this->currentSortDir]
+                        : $columnData['defaultSort'],
+                ],
+            ),
+            $columnData['text'],
+            $isCurrent ? $this->arrowMap[$this->currentSortDir] : '',
         );
     }
 
-    public function current(): ?array {
-        return $this->getData($this->currentSortKey);
-    }
-
-    public function getData(string $sortKey): ?array {
-        return $this->labelMap[$sortKey] ?? null;
+    public function current(): array {
+        return $this->labelMap[$this->currentSortKey] ?? [];
     }
 
     public function orderKeyList(): array {

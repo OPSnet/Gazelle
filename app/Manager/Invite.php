@@ -12,7 +12,7 @@ class Invite extends \Gazelle\Base {
         string        $email,
         string        $notes,
         string        $reason,
-        string        $source,
+        string        $source, // FIXME: why not int?
     ): \Gazelle\Invite|null {
         self::$db->begin_transaction();
         if (!$user->invite()->issueInvite()) {

@@ -150,6 +150,9 @@ defined('FOLDER_CLASH_SALT') or define('FOLDER_CLASH_SALT', 'changeme');
 // any time with harm (although a page reload would be necessary).
 defined('GIFT_SALT') or define('GIFT_SALT', 'changeme');
 
+// User search queries are hashified with this salt.
+defined('SEARCH_SALT') or define('SEARCH_SALT', 'changeme');
+
 // Seedbox ids are hashified with this salt.
 defined('SEEDBOX_SALT') or define('SEEDBOX_SALT', 'changeme');
 

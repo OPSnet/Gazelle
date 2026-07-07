@@ -168,6 +168,10 @@ class User extends \Gazelle\BaseObject {
         return $this->increment(UserSummary::seed, $field, $increment);
     }
 
+    public function incrementSeedFloat(UserSummarySeed $field, float $increment): int {
+        return $this->increment(UserSummary::seed, $field, $increment);
+    }
+
     public function incrementTGroup(UserSummaryTGroup $field, int $increment = 1): int {
         return $this->increment(UserSummary::tgroup, $field, $increment);
     }
@@ -175,7 +179,7 @@ class User extends \Gazelle\BaseObject {
     public function increment(
         UserSummary $table,
         UserSummaryFltoken|UserSummaryMisc|UserSummaryRequest|UserSummarySeed|UserSummaryTGroup $field,
-        int $increment = 1
+        int|float $increment = 1
     ): int {
         $affected = $this->pg()->query("
             update {$table->value} set
