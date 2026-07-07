@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Gazelle\Manager;
 
+use Gazelle\Enum\RiplogChecksum;
 use Gazelle\RiplogCollection;
 use Gazelle\Torrent        as Torrent;
 use Gazelle\TorrentDeleted as TorrentDeleted;
@@ -29,29 +30,12 @@ class Riplog extends \Gazelle\Base {
         string|null $filename = null,
     ): \Gazelle\Riplog {
         $parsed = $this->parse($filepath);
-        self::$db->prepared_query('
-            INSERT INTO torrents_logs
-                   (TorrentID, Score, `Checksum`, Ripper, RipperVersion, `Language`, ChecksumState, Details, FileName, LogcheckerVersion)
-            VALUES (?,         ?,      ?,         ?,      ?,             ?,          ?,             ?,       ?,        ?)
-            ', $torrent->id,
-                max(0, $parsed->getScore()),
-                $parsed->getChecksumState() === Checksum::CHECKSUM_OK ? '1' : '0',
-                $parsed->getRipper(),
-                $parsed->getRipperVersion(),
-                $parsed->getLanguage(),
-                $parsed->getChecksumState(),
-                implode("\r\n", $parsed->getDetails()),
-                $filename,
-                $this->logcheckerVersion(),
-        );
-        $riplog = new \Gazelle\Riplog($torrent, self::$db->inserted_id());
-        $this->pg()->scalarex('
+        $id = $this->pg()->scalarex('
             insert into riplog
-                   (id_riplog, id_torrent, checksum, score, riplog_language, ripper, logchecker_version, ripper_version, filename, details)
-            values ($1,        $2,         $3,       $4,    $5,               $6,    $7,                 $8,             $9,       $10)
+                   (id_torrent, checksum, score, riplog_language, ripper, logchecker_version, ripper_version, filename, details)
+            values ($1,         $2,       $3,    $4,              $5,     $6,                 $7,             $8,       $9)
             returning id_riplog
-            ', $riplog->id,
-            $torrent->id,
+            ', $torrent->id,
             match ($parsed->getChecksumState()) {
                 Checksum::CHECKSUM_OK      => 'ok',
                 Checksum::CHECKSUM_MISSING => 'missing',
@@ -65,6 +49,7 @@ class Riplog extends \Gazelle\Base {
             $filename,
             $this->pg()->arrayConverter()->output($parsed->getDetails()),
         );
+        $riplog = new \Gazelle\Riplog($torrent, $id);
         $riplog->file()->put($filepath);
         $riplog->html()->put($parsed->getLog());
         return $riplog;
@@ -94,20 +79,19 @@ class Riplog extends \Gazelle\Base {
         return $riplogList;
     }
 
-    public function findById(Torrent|TorrentDeleted $torrent, int $id): ?\Gazelle\Riplog {
-        $logId = self::$db->scalar("
-            SELECT LogID FROM torrents_logs WHERE TorrentID = ? AND LogID = ?
+    public function findById(Torrent|TorrentDeleted $torrent, int $id): \Gazelle\Riplog|null {
+        $riplogId = $this->pg()->scalarex("
+            select id_riplog from riplog where id_torrent = $1 and id_riplog = $2
             ", $torrent->id, $id
         );
-        return is_null($logId) ? null : new \Gazelle\Riplog($torrent, (int)$logId);
+        return is_null($riplogId) ? null : new \Gazelle\Riplog($torrent, (int)$riplogId);
     }
 
     public function fetchIdList(Torrent|TorrentDeleted $torrent): array {
-        self::$db->prepared_query("
-            SELECT LogID FROM torrents_logs WHERE TorrentID = ?
-            ", $torrent->id
+        return $this->pg()->columnex('
+            select id_riplog from riplog where id_torrent = $1
+            ', $torrent->id
         );
-        return self::$db->collect(0);
     }
 
     public function collection(Torrent|TorrentDeleted $torrent): RiplogCollection {
@@ -130,37 +114,18 @@ class Riplog extends \Gazelle\Base {
 
     public function reparse(
         Torrent $torrent,
-        int     $logId,
+        int     $riplogId, // int because we do not necessarily have an object on hand
     ): int {
-        $riplog = $this->findById($torrent, $logId);
+        $riplog = $this->findById($torrent, $riplogId);
         if (!$riplog) {
             return 0;
         }
         $parsed = $this->parse($riplog->file()->path());
-        self::$db->prepared_query('
-            UPDATE torrents_logs SET
-                `Checksum`        = ?,
-                ChecksumState     = ?,
-                `Language`        = ?,
-                Score             = ?,
-                Details           = ?,
-                Ripper            = ?,
-                RipperVersion     = ?,
-                LogcheckerVersion = ?
-            WHERE TorrentID = ?
-                AND LogID = ?
-            ',  $parsed->getChecksumState() === Checksum::CHECKSUM_OK ? '1' : '0',
-                $parsed->getChecksumState(),
-                $parsed->getLanguage(),
-                max(0, $parsed->getScore()),
-                implode("\r\n", $parsed->getDetails()),
-                $parsed->getRipper(),
-                $parsed->getRipperVersion(),
-                $this->logcheckerVersion(),
-                $torrent->id,
-                $logId,
-        );
         $this->pg()->query('
+            delete from riplog_adjust where id_riplog = $1
+            ', $riplogId
+        );
+        $affected = $this->pg()->query('
             update riplog set
                 checksum           = $1,
                 score              = $2,
@@ -173,9 +138,9 @@ class Riplog extends \Gazelle\Base {
                 and id_torrent = $9
             ',
             match ($parsed->getChecksumState()) {
-                Checksum::CHECKSUM_OK      => 'ok',
-                Checksum::CHECKSUM_MISSING => 'missing',
-                default                    => 'invalid',
+                Checksum::CHECKSUM_OK      => RiplogChecksum::ok,
+                Checksum::CHECKSUM_MISSING => RiplogChecksum::missing,
+                default                    => RiplogChecksum::invalid,
             },
             max(0, $parsed->getScore()),
             $parsed->getLanguage(),
@@ -183,17 +148,14 @@ class Riplog extends \Gazelle\Base {
             $this->logcheckerVersion(),
             $parsed->getRipperVersion(),
             $this->pg()->arrayConverter()->output($parsed->getDetails()),
-            $logId,
+            $riplogId,
             $torrent->id,
         );
-
-        $affectedRows = self::$db->affected_rows();
-        if ($affectedRows > 0) {
+        if ($affected > 0) {
             $riplog->html()->put($parsed->getLog());
             $this->refreshTorrent($torrent);
         }
-
-        return $affectedRows;
+        return $affected;
     }
 
     public function logcheckerVersion(): string {
@@ -222,6 +184,6 @@ class Riplog extends \Gazelle\Base {
         $this->logger()->torrent($torrent, $user, "All logs removed from torrent");
         self::$db->commit();
         $this->refreshTorrent($torrent);
-        return $affected; /** @phpstan-ignore-line return.type not it is not an int|float stupid bot */
+        return $affected; /** @phpstan-ignore-line return.type no it is not an int|float stupid bot */
     }
 }

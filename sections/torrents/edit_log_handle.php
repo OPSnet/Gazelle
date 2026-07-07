@@ -1,4 +1,5 @@
 <?php
+
 /** @phpstan-var \Gazelle\User $Viewer */
 
 declare(strict_types=1);
@@ -40,7 +41,7 @@ if ($adjustedChecksum != $torrent->logChecksum()) {
     $riplog->setField('AdjustedChecksum', $torrent->logChecksum() == '0' ? '1' : '0');
 }
 
-$Deductions = [
+$deductionList = [
     ['read_mode_secure', 20, 'Non-Secure Mode used'],
     ['audio_cache',      10, 'Defeat/disable audio cache should be yes'],
     ['c2_points',        10, 'C2 Pointers enabled'],
@@ -57,7 +58,7 @@ $Deductions = [
     ['combined_log',      0, 'Combined log']
 ];
 
-foreach ($Deductions as [$tag, $deduction, $label]) {
+foreach ($deductionList as [$tag, $deduction, $label]) {
     if (isset($_POST[$tag])) {
         $adjusted = true;
         $adjustedScore -= $deduction;
@@ -68,13 +69,13 @@ foreach ($Deductions as [$tag, $deduction, $label]) {
     }
 }
 
-$TrackDeductions = [
+$trackDeductionList = [
     ['crc_mismatches',       30, 'CRC mismatches'],
     ['suspicious_positions', 20, 'Suspicious positions'],
     ['timing_problems',      20, 'Timing problems']
 ];
 
-foreach ($TrackDeductions as [$tag, $deduction, $label]) {
+foreach ($trackDeductionList as [$tag, $deduction, $label]) {
     $n = (int)($_POST[$tag] ?? 0);
     if ($n > 0) {
         $score = $n * $deduction;
@@ -85,13 +86,19 @@ foreach ($TrackDeductions as [$tag, $deduction, $label]) {
     }
 }
 
-$riplog->setField('Adjusted', $adjusted ? '1' : '0')
-    ->setField('AdjustedChecksum', $adjustedChecksum ? '1' : '0')
-    ->setField('AdjustedScore', max(0, $adjustedScore))
-    ->setField('AdjustmentDetails', serialize($adjustmentDetails))
-    ->setField('AdjustmentReason', $adjustmentReason)
-    ->setField('AdjustedBy', $Viewer->id)
+$riplog->setField(
+        'checksum_adjust',
+        $adjustedChecksum ? Enum\RiplogChecksum::ok : $riplog->checksum()
+    )
+    ->setField(
+        'score_adjust',
+        $adjustedScore != $riplog->score() ?  max(0, $adjustedScore) : $riplog->score()
+    )
+    ->setField('details_adjust', $adjustmentDetails)
+    ->setField('reason_adjust', $adjustmentReason)
+    ->setField('id_user_adjust', $Viewer->id)
     ->modify();
+
 $manager->refreshTorrent($torrent);
 
 header("Location: {$torrent->location()}");

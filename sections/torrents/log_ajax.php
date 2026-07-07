@@ -6,7 +6,7 @@ declare(strict_types=1);
 
 namespace Gazelle;
 
-$torMan = new Manager\Torrent();
+$torMan  = new Manager\Torrent();
 $torrent = $torMan->findById((int)$_GET['torrentid']);
 if (is_null($torrent)) {
     $torrent = $torMan->findDeletedById((int)$_GET['torrentid']);

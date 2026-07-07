@@ -28,7 +28,7 @@ class Riplog extends \Gazelle\Json {
             'score_adjusted'    => $riplog->scoreAdjusted(),
             'checksum'          => $riplog->isChecksumOk(),
             'checksum_adjusted' => $riplog->isActualChecksumOk(),
-            'checksum_state'    => $riplog->checksumState(),
+            'checksum_state'    => $riplog->checksum()->value,
             'adjusted'          => $riplog->isAdjusted(),
             'adjusted_by'       => $riplog->adjusterUserId(),
             'adjusted_reason'   => $riplog->adjustmentReason(),

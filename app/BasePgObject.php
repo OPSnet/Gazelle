@@ -37,9 +37,9 @@ abstract class BasePgObject extends BaseObject {
      */
     public function remove(): int {
         $affected = $this->pg()->query(
-            "DELETE /* BasePgObject */ FROM "
+            "delete /* BasePgObject */ from "
                 . static::tableName
-                . " WHERE "
+                . " where "
                 . static::pkName
                 . ' = $1',
             $this->id

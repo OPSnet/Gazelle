@@ -73,7 +73,7 @@ class RiplogTest extends TestCase {
         );
 
         $this->assertTrue($riplog->isChecksumOk(), 'riplog-checksum');
-        $this->assertEquals(Checksum::CHECKSUM_OK, $riplog->checksumState(), 'riplog-checksum-state');
+        $this->assertEquals(Enum\RiplogChecksum::ok, $riplog->checksum(), 'riplog-checksum-state');
         $this->assertEquals([], $riplog->report(), 'riplog-array-report');
         $this->assertEquals('valid_log_eac.log', $riplog->filename(), 'riplog-filename');
         $this->assertEquals(100, $riplog->score(), 'riplog-score');
@@ -120,10 +120,10 @@ class RiplogTest extends TestCase {
             'riplog-score-not-adjusted',
         );
         $this->assertTrue(
-            $riplog->setField('Adjusted', '1')
-                ->setField('AdjustedChecksum', '0')
-                ->setField('AdjustedScore', 33)
-                ->setField('AdjustedBy', $this->user->id)
+            $riplog->setField('checksum_adjust', Enum\RiplogChecksum::invalid)
+                ->setField('score_adjust', 33)
+                ->setField('id_user_adjust', $this->user->id)
+                ->setField('details_adjust', ['phpunit'])
                 ->modify(),
             'riplog-modify',
         );
@@ -198,6 +198,77 @@ class RiplogTest extends TestCase {
             ['score', 'checksum', 'ripper', 'ripperVersion', 'language', 'details'],
             array_keys($summary[0]),
             'j́son-add-log-summary-keys',
+        );
+    }
+
+    public function testRipogModify(): void {
+        $this->user = Helper::makeUser('riplog.' . randomString(6), 'riplog');
+        $torrent    = Helper::makeTorrentMusic(
+            tgroup: Helper::makeTGroupMusic(
+                $this->user,
+                'phpunit riplog ' . randomString(6),
+                [[ARTIST_MAIN], ['phpunit riplog artist ' . randomString(6)]],
+                ['czech']
+            ),
+            user: $this->user,
+        );
+        $manager = new Manager\Riplog();
+        $riplog  = $manager->create(
+            $torrent,
+            __DIR__ . '/../fixture/valid_log_eac.log',
+            'valid_log_eac.log',
+        );
+        $this->assertTrue(
+            $riplog->setField('checksum_adjust', Enum\RiplogChecksum::invalid)
+                ->setField('score_adjust', 33)
+                ->setField('id_user_adjust', $this->user->id)
+                ->setField('reason_adjust', 'phpunit')
+                ->setField('details_adjust', ['score was too high'])
+                ->modify(),
+            'riplog-adjust-modify',
+        );
+        $this->assertTrue(
+            $riplog->isAdjusted(),
+            'riplog-adjust-is-adjusted',
+        );
+        $this->assertEquals(
+            Enum\RiplogChecksum::invalid,
+            $riplog->checksumAdjusted(),
+            'riplog-adjust-checksum-read',
+        );
+        $this->assertEquals(
+            33,
+            $riplog->scoreAdjusted(),
+            'riplog-adjust-score-read',
+        );
+        $this->assertTrue(
+            $riplog->setField('score_adjust', 44)
+                ->modify(),
+            'riplog-adjust-update',
+        );
+        $riplog->flush();
+        $this->assertTrue(
+            $riplog->isAdjusted(),
+            'riplog-adjust-is-still-adjusted',
+        );
+        $this->assertEquals(
+            44,
+            $riplog->scoreAdjusted(),
+            'riplog-adjust-new-score',
+        );
+        $this->assertEquals(
+            1,
+            $manager->reparse($torrent, $riplog->id),
+            'riplog-reparse',
+        );
+        $riplog->flush();
+        $this->assertFalse(
+            $riplog->isAdjusted(),
+            'riplog-reparsed-is-unadjusted',
+        );
+        $this->assertNull(
+            $riplog->scoreAdjusted(),
+            'riplog-score-reparsed',
         );
     }
 

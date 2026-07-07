@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle;
 
 trait Pg {
-    protected static \Gazelle\DB\Pg $pgro; // R/O access
-    protected static \Gazelle\DB\Pg $pg;   // R/W access
+    protected static DB\Pg $pgro; // R/O access
+    protected static DB\Pg $pg;   // R/W access
 
     public function pgro(): DB\Pg {
         return self::$pgro ??= new DB\Pg(PG_RO_DSN);

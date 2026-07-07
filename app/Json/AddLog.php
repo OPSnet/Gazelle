@@ -17,7 +17,7 @@ class AddLog extends \Gazelle\Json {
         foreach ($this->riplogManager->bulkCreate($this->torrent, $this->uploadList) as $riplog) {
             $summaryList[] = [
                 'score'         => $riplog->score(),
-                'checksum'      => $riplog->checksumState(),
+                'checksum'      => $riplog->checksum()->value,
                 'ripper'        => $riplog->ripper(),
                 'ripperVersion' => $riplog->ripperVersion(),
                 'language'      => $riplog->ripperLanguage(),

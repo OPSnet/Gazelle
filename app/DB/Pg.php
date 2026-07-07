@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Gazelle\DB;
 
-use sad_spirit\pg_wrapper\Connection;
-use sad_spirit\pg_wrapper\Result;
 use sad_spirit\pg_wrapper\converters\containers\ArrayConverter;
+use sad_spirit\pg_wrapper\converters\EnumConverter;
 use sad_spirit\pg_wrapper\converters\IntegerConverter;
 use sad_spirit\pg_wrapper\converters\StringConverter;
 use sad_spirit\pg_wrapper\exceptions\server\ProgrammingException;
+use sad_spirit\pg_wrapper\Connection;
 use sad_spirit\pg_wrapper\PreparedStatement;
+use sad_spirit\pg_wrapper\Result;
 use sad_spirit\pg_wrapper\TypeConverter;
 
 /* There are (at least) two ways to interact with Postgresql databases
@@ -59,9 +60,10 @@ use sad_spirit\pg_wrapper\TypeConverter;
 
 class Pg {
     protected Connection $cnxrw;
-    protected \PDO       $pdo;
+    protected array      $enumRegistration;
     protected Pg\Stats   $stats;
     protected ?string    $tx = null;
+    protected \PDO       $pdo; // deprecated
 
     public function __construct(#[\SensitiveParameter] string $dsn) {
         $this->cnxrw = new Connection(
@@ -74,6 +76,33 @@ class Pg {
 
     public function placeholder(int $n): string {
         return '$' . (1 + $n);
+    }
+
+    /**
+     * @param class-string<\BackedEnum> $className
+     * @param string $pgEnumName
+     */
+    public function registerEnum(
+        string $className,
+        string $pgEnumName,
+        string $schema = 'public'
+    ): bool {
+        if (isset($this->enumRegistration[$pgEnumName])) {
+            return false;
+        }
+        $factory = $this->cnxrw->getTypeConverterFactory();
+        /** @phpstan-ignore-next-line method.notFound dynamic method call */
+        $factory->registerConverter(
+            static function () use ($className) {
+                return new EnumConverter($className);
+            },
+            $pgEnumName,
+            $schema
+        );
+        /** @phpstan-ignore-next-line method.notFound dynamic method call */
+        $factory->registerClassMapping($className, $pgEnumName, $schema);
+        $this->enumRegistration[$pgEnumName] = true;
+        return true;
     }
 
     public function stats(): Pg\Stats {
