@@ -14,31 +14,31 @@ echo $Twig->render('top10/user.twig', [
     'table'  => [
         'ul' => [
             'Title' => 'Uploaders',
-            'Type' => $top10::UPLOADERS
+            'Type'  => Enum\UserTop10Key::uploader,
         ],
         'dl' => [
             'Title' => 'Downloaders',
-            'Type' => $top10::DOWNLOADERS
+            'Type'  => Enum\UserTop10Key::downloader,
         ],
         'numul' => [
             'Title' => 'Torrents Uploaded',
-            'Type' => $top10::UPLOADS
+            'Type'  => Enum\UserTop10Key::uploadTotal,
         ],
         'rv' => [
             'Title' => 'Request Votes',
-            'Type' => $top10::REQUEST_VOTES
+            'Type'  => Enum\UserTop10Key::requestVote,
         ],
         'rf' => [
             'Title' => 'Request Fills',
-            'Type' => $top10::REQUEST_FILLS
+            'Type'  => Enum\UserTop10Key::requestFill,
         ],
         'uls' => [
             'Title' => 'Fastest Uploaders',
-            'Type' => $top10::UPLOAD_SPEED
+            'Type'  => Enum\UserTop10Key::uploadSpeed,
         ],
         'dls' => [
             'Title' => 'Fastest Downloaders',
-            'Type' => $top10::DOWNLOAD_SPEED
+            'Type'  => Enum\UserTop10Key::downloadSpeed,
         ],
     ],
 ]);

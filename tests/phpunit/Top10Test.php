@@ -2,14 +2,18 @@
 
 namespace Gazelle;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use GazelleUnitTest\Helper;
 
 class Top10Test extends TestCase {
     protected User $user;
+    protected static array $userFieldList = [
+        "id", "created", "uploaded", "downloaded", "request_votes", "request_fills", "num_uploads", "up_speed", "down_speed"
+    ];
 
     public function setUp(): void {
-        $this->user = Helper::makeUser('topten.' . randomString(6), 'topten');
+        $this->user = Helper::makeUser('topten.' . randomString(6), 'topten', enable: true);
     }
 
     public function tearDown(): void {
@@ -165,6 +169,53 @@ class Top10Test extends TestCase {
             [],
             $top10->getTopTorrents([], 'year'),
             'top10-t-year'
+        );
+    }
+
+    public function testTop10UserUploader(): void {
+        global $Cache;
+        $Cache->delete_value(
+            sprintf(Top10\User::CACHE_KEY, Enum\UserTop10Key::uploader->value, 1)
+        );
+        $db = DB::DB();
+        $db->prepared_query("
+            UPDATE users_leech_stats SET Uploaded = ? WHERE UserID = ?
+            ", 10 * 1024 ** 4, // 10TiB
+                $this->user->id
+        );
+
+        $uploader = array_first(
+            new Top10\User()->fetch(Enum\UserTop10Key::uploader, 1)
+        );
+        $this->assertEqualsCanonicalizing(
+            self::$userFieldList,
+            array_keys($uploader),
+            'top10-u-uploader-keys',
+        );
+        $this->assertEquals($this->user->id, $uploader['id'], 'top10-u-uploader');
+    }
+
+    public static function dataUserTop10(): array {
+        return [
+            [Enum\UserTop10Key::downloader],
+            [Enum\UserTop10Key::uploadTotal],
+            [Enum\UserTop10Key::requestVote],
+            [Enum\UserTop10Key::requestFill],
+            [Enum\UserTop10Key::uploadSpeed],
+            [Enum\UserTop10Key::downloadSpeed],
+        ];
+    }
+
+    #[DataProvider('dataUserTop10')]
+    public function testTop10UserVariant(Enum\UserTop10Key $type): void {
+        global $Cache;
+        $Cache->delete_value(
+            sprintf(Top10\User::CACHE_KEY, $type->value, 1)
+        );
+        $this->assertEqualsCanonicalizing(
+            self::$userFieldList,
+            array_keys(array_first(new Top10\User()->fetch($type, 1))),
+            "top10-u-{$type->value}-keys",
         );
     }
 }
