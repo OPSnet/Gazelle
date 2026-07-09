@@ -10,7 +10,7 @@ class NotificationTicket {
     protected array $info;
 
     public function __construct(
-        protected int $torrentId,
+        public readonly int $torrentId,
     ) {}
 
     public function flush(): static {
@@ -66,10 +66,6 @@ class NotificationTicket {
 
     public function isStale(): bool {
         return $this->state() == NotificationTicketState::Stale;
-    }
-
-    public function torrentId(): int {
-        return $this->torrentId;
     }
 
     // ---------------------------------------------------

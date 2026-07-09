@@ -209,13 +209,13 @@ class NotificationUploadTest extends TestCase {
         // it should be pending, so make it active
         $this->assertNull($ticketManager->findByExclusion(NotificationTicketState::Pending, exclude: [$this->torrent->id]), 'ntick-pending-exclude');
         $ticket = $ticketManager->findByExclusion(NotificationTicketState::Pending, exclude: []);
-        $this->assertEquals($this->torrent->id, $ticket?->torrentId(), 'ntick-pending-torrent-id');
+        $this->assertEquals($this->torrent->id, $ticket?->torrentId, 'ntick-pending-torrent-id');
         $ticket?->setActive();
         $this->assertEquals($ticket?->state(), NotificationTicketState::Active, 'ntick-active-value');
         $this->assertEquals(1, new Manager\Notification()->ticketStats()['active']['total'], 'notifier-ticket-stats-now-active');
 
         // send the IRC notification
-        $torrent = $this->torMan->findById((int)$ticket?->torrentId());
+        $torrent = $this->torMan->findById((int)$ticket?->torrentId);
         $this->assertInstanceOf(Torrent::class, $torrent, 'ntick-torrent-found');
         $notification = new Notification\Upload($torrent);
         $message = $notification->ircNotification();

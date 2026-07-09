@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\Manager;
 
 use Gazelle\Enum\NotificationTicketState;
 use Gazelle\Enum\NotificationType;
+use Gazelle\Util\Curl;
 
 class Notification extends \Gazelle\Base {
     /**
@@ -17,8 +20,8 @@ class Notification extends \Gazelle\Base {
      * but that is sufficient for our purposes.
      */
     public function processBacklog(
-        \Gazelle\Manager\NotificationTicket $ticketMan,
-        \Gazelle\Manager\Torrent            $torMan,
+        NotificationTicket $ticketMan = new NotificationTicket(),
+        Torrent            $torMan    = new Torrent(),
     ): int {
         $processed = 0;
         $seen      = [];
@@ -26,12 +29,22 @@ class Notification extends \Gazelle\Base {
         // How many new uploads can we process in roughly 50s
         $eta = hrtime(true) + 50e9;
         while (hrtime(true) < $eta) {
-            $ticket = $ticketMan->findByExclusion(NotificationTicketState::Pending, $seen);
+            $ticket = $ticketMan->findByExclusion(
+                NotificationTicketState::Pending,
+                array_values($seen)
+            );
             if (is_null($ticket)) {
-                $ticket = $ticketMan->findByExclusion(NotificationTicketState::Stale, $seen);
+                $ticket = $ticketMan->findByExclusion(
+                    NotificationTicketState::Stale,
+                    array_values($seen)
+                );
                 if (is_null($ticket)) {
                     break;
                 }
+            }
+            if (isset($seen[$ticket->torrentId])) {
+                // we have seen all there is to see
+                break;
             }
 
             // Handle a notification ticket. New uploads will be examined every minute.
@@ -47,13 +60,16 @@ class Notification extends \Gazelle\Base {
                     ++$processed;
                 }
             }
-            $seen[] = $ticket->torrentId();
+            $seen[$ticket->torrentId] = $ticket->torrentId;
         }
         return $processed;
     }
 
-    public function handleTicket(\Gazelle\NotificationTicket $ticket, \Gazelle\Manager\Torrent $torMan): bool {
-        $torrent = $torMan->findById($ticket->torrentId());
+    public function handleTicket(
+        \Gazelle\NotificationTicket $ticket,
+        Torrent                     $torMan = new Torrent()
+    ): bool {
+        $torrent = $torMan->findById($ticket->torrentId);
         if (is_null($torrent)) {
             // something happened and the ticket is out of date
             $ticket->setRemoved();
@@ -112,7 +128,7 @@ class Notification extends \Gazelle\Base {
         }
 
         foreach ($pushTokens as $pushToken) {
-            $curl = new \Gazelle\Util\Curl();
+            $curl = new Curl();
             $curl->setUseProxy(false);
             $curl->setPostData($body . "\n" . $url);
             $curl->setOption(CURLOPT_HTTPHEADER, [
