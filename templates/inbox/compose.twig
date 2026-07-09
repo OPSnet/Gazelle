@@ -1,4 +1,4 @@
-{{ header('Compose message', {'js': 'vendor/jquery.validate,bbcode,form_validate'}) }}
+{{ header('Compose message to ' ~ recipient.username, {'js': 'vendor/jquery.validate,bbcode,form_validate'}) }}
 <div class="thin">
     <div class="header">
         <h2>{{ recipient.id|user_url }} › Send private message</a></h2>
@@ -10,7 +10,7 @@
             <input type="hidden" name="auth" value="{{ viewer.auth }}">
             <div id="quickpost">
                 <h3>Subject</h3>
-                <input type="text" class="required" name="subject" size="95"><br>
+                <input type="text" class="required" name="subject" size="80"><br>
                 <h3>Body</h3>
                 {{ body.emit|raw }}
                 <input type="submit" value="Send message">
