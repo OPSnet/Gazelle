@@ -21,7 +21,7 @@
     }
   },
   "require": {
-    "php": "^8.4",
+    "php": "^8.5",
     "ext-curl": "*",
     "ext-gmp": "*",
     "ext-iconv": "*",
@@ -43,15 +43,15 @@
     "whichbrowser/parser": "^2.1.8"
   },
   "require-dev": {
-    "brianium/paratest": "^7.9",
+    "brianium/paratest": "^7.22",
     "phpmd/phpmd": "@stable",
     "phpstan/phpstan": "^2.1.31",
     "phpstan/extension-installer": "^1.4",
     "phpstan/phpstan-strict-rules": "^2.0",
-    "phpunit/phpcov": "^11",
-    "phpunit/php-code-coverage": "^12",
-    "phpunit/phpunit": "^12",
+    "phpunit/phpcov": "^13",
+    "phpunit/php-code-coverage": "^14",
+    "phpunit/phpunit": "^13",
     "rector/rector": "^2.1",
-    "squizlabs/php_codesniffer": "^3.12"
+    "squizlabs/php_codesniffer": "^4.0"
   }
 }
