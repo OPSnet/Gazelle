@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\User;
 
 use Gazelle\Enum\UserAuditEvent;
@@ -21,52 +23,52 @@ class UserLink extends \Gazelle\BaseUser {
         return $this->user->location();
     }
 
-    public function groupId(User $user): ?int {
-        $id = self::$db->scalar("
-            SELECT GroupID FROM users_dupes WHERE UserID = ?
-            ", $user->id
+    public function groupId(User $user): int|null {
+        return $this->pg()->scalarex('
+            select id_user_link_group from user_link where id_user = $1
+            ', $user->id
         );
-        return is_null($id) ? null : (int)$id;
+    }
+
+    public function linkInfo(): array|null {
+        return $this->pg()->rowAssocex("
+            select ulg.id_user_link_group,
+                ulg.comment
+            from user_link_group ulg
+            inner join user_link ul using (id_user_link_group)
+            where ul.id_user = $1
+            ", $this->user->id
+        );
     }
 
     public function info(): array {
-        $sourceId = $this->user->id;
-        [$linkedGroupId, $comment] = self::$db->row("
-            SELECT dg.ID, dg.Comments
-            FROM dupe_groups AS dg
-            INNER JOIN users_dupes AS ud ON (ud.GroupID = dg.ID)
-            WHERE ud.UserID = ?
-            ", $sourceId
-        );
-        self::$db->prepared_query("
-            SELECT um.ID as user_id,
-                um.Username AS username
-            FROM users_dupes AS ud
-            INNER JOIN users_main AS um ON (um.ID = ud.UserID)
-            WHERE ud.GroupID = ?
-                AND ud.UserID != ?
-            ORDER BY um.ID
-            ", $linkedGroupId, $sourceId
-        );
+        $linkInfo = $this->linkInfo();
         return [
-            'id'      => $linkedGroupId,
-            'comment' => $comment ?? '',
-            'list'    => self::$db->to_pair('user_id', 'username'),
+            'id'      => $linkInfo['id_user_link_group'],
+            'comment' => $linkInfo['comment'] ?? '',
+            'list'    => $this->pg()->pair(
+                'user_id',
+                'username',
+                <<<END_SQL
+                    select ul.id_user as user_id,
+                        um."Username" as username
+                    from user_link ul
+                    inner join relay.users_main um on (um."ID" = ul.id_user)
+                    where ul.id_user_link_group = $1
+                        and ul.id_user != $2
+                    order by ul.id_user
+                END_SQL,
+                    $linkInfo['id_user_link_group'], $this->user->id
+            ),
         ];
     }
 
     public function dupe(User $target, User $admin, bool $updateNote): bool {
-        $sourceId = $this->user->id;
-        self::$db->begin_transaction();
-        [$sourceGroupId, $comments] = self::$db->row("
-            SELECT ud.GroupID, dg.Comments
-            FROM users_dupes AS ud
-            INNER JOIN dupe_groups AS dg ON (dg.ID = ud.GroupID)
-            WHERE ud.UserID = ?
-            ", $sourceId
-        );
+        $linkInfo      = $this->linkInfo();
+        $sourceGroupId = $linkInfo['id_user_link_group'];
         $targetGroupId = $this->groupId($target);
 
+        self::$db->begin_transaction();
         if ($targetGroupId) {
             if ($targetGroupId === $sourceGroupId) {
                 self::$db->rollback();
@@ -83,7 +85,7 @@ class UserLink extends \Gazelle\BaseUser {
                     UPDATE dupe_groups SET
                         Comments = concat(?, Comments)
                     WHERE ID = ?
-                    ", "$comments\n\n", $targetGroupId
+                    ", "{$linkInfo['comment']}\n\n", $targetGroupId
                 );
                 self::$db->prepared_query("
                     DELETE FROM dupe_groups WHERE ID = ?
@@ -99,27 +101,25 @@ class UserLink extends \Gazelle\BaseUser {
                     update user_link_group set
                         comment = $1 || comment
                     where id_user_link_group = $2
-                    ', "$comments\n\n", $targetGroupId
+                    ', "{$linkInfo['comment']}\n\n", $targetGroupId
                 );
                 $this->pg()->query('
                     delete from user_link_group where id_user_link_group = $1
                     ', $sourceGroupId
                 );
-                $linkGroupId = $sourceGroupId;
             } else {
                 self::$db->prepared_query("
                     INSERT INTO users_dupes
                            (UserID, GroupID)
                     VALUES (?,      ?)
-                    ", $sourceId, $targetGroupId
+                    ", $this->user->id, $targetGroupId
                 );
                 $this->pg()->query('
                     insert into user_link
                            (id_user, id_user_link_group, id_user_creator)
                     values ($1,      $2,                 $3)
-                    ', $sourceId, $targetGroupId, $admin->id
+                    ', $this->user->id, $targetGroupId, $admin->id
                 );
-                $linkGroupId = $targetGroupId;
             }
         } elseif ($sourceGroupId) {
             self::$db->prepared_query("
@@ -134,7 +134,6 @@ class UserLink extends \Gazelle\BaseUser {
                 values ($1,      $2,                 $3)
                 ', $target->id, $sourceGroupId, $admin->id
             );
-            $linkGroupId = $sourceGroupId;
         } else {
             self::$db->prepared_query("
                 INSERT INTO dupe_groups () VALUES ()
@@ -145,7 +144,7 @@ class UserLink extends \Gazelle\BaseUser {
                        (UserID, GroupID)
                 VALUES (?,      ?),
                        (?,      ?)
-                ", $target->id, $linkGroupId, $sourceId, $linkGroupId
+                ", $target->id, $linkGroupId, $this->user->id, $linkGroupId
             );
             $this->pg()->query('
                 insert into user_link_group (id_user_link_group) values ($1)
@@ -155,9 +154,9 @@ class UserLink extends \Gazelle\BaseUser {
                 insert into user_link
                        (id_user, id_user_link_group, id_user_creator)
                 values ($1,      $2,                 $3),
-                       ($4,      $5,                 $6)
+                       ($4,      $2,                 $3)
                 ', $target->id, $linkGroupId, $admin->id,
-                $sourceId, $linkGroupId, $admin->id,
+                $this->user->id,
             );
         }
 
@@ -181,10 +180,8 @@ class UserLink extends \Gazelle\BaseUser {
         self::$db->begin_transaction();
         $groupId = $this->groupId($this->user);
         $oldHash = signature(
-            (string)self::$db->scalar("
-                SELECT Comments AS CommentHash
-                FROM dupe_groups
-                WHERE ID = ?
+            (string)$this->pg()->scalarex("
+                select comment from user_link_group where id_user_link_group = $1
                 ", $groupId
             ),
             USER_EDIT_SALT
@@ -234,8 +231,8 @@ class UserLink extends \Gazelle\BaseUser {
         );
 
         // was that the last association in the group?
-        $remaining = (int)self::$db->scalar("
-            SELECT count(*) FROM users_dupes WHERE GroupID = ?
+        $remaining = $this->pg()->scalarex("
+            select count(*) from user_link where id_user_link_group = $1
             ", $groupId
         );
         if ($remaining === 1) {
