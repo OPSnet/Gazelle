@@ -30,9 +30,9 @@
             <td>{{ r.live|number_format }}</td>
             <td>{{ r.dead|number_format }}</td>
             <td>{{ (100 * r.dead_ratio)|number_format(2) }}</td>
-            <td>{{ r.analyze_delta|time_diff }}</td>
+            <td>{{ r.analyze_delta|time_interval }}</td>
             <td>{{ r.analyze_total|number_format }}</td>
-            <td>{{ r.vacuum_delta|time_diff }}</td>
+            <td>{{ r.vacuum_delta|time_interval }}</td>
             <td>{{ r.vacuum_total|number_format }}</td>
         </tr>
 {% endfor %}

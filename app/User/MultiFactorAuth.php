@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\User;
 
 use Gazelle\Enum\UserAuditEvent;
@@ -108,8 +110,8 @@ class MultiFactorAuth extends \Gazelle\BaseUser {
     }
 
     public function details(): ?array {
-        return $this->pg()->rowAssoc('
-            select ip, created from multi_factor_auth where id_user = ?
+        return $this->pg()->rowAssocex('
+            select ip, created from multi_factor_auth where id_user = $1
             ', $this->user->id
         );
     }

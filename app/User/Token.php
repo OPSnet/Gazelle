@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\User;
 
 use Gazelle\Enum\UserTokenType;
@@ -20,18 +22,15 @@ class Token extends \Gazelle\BaseUser {
     }
 
     public function info(): array {
-        if (empty($this->info)) {
-            $this->info = $this->pg()->rowAssoc("
-                select type,
-                    token,
-                    expiry
-                from user_token
-                where id_user_token = ?
-                    and id_user = ?
-                ", $this->tokenId, $this->user->id
-            );
-        }
-        return $this->info;
+        return $this->info ??= $this->pg()->rowAssocex("
+            select type,
+                token,
+                expiry::text
+            from user_token
+            where id_user_token = $1
+                and id_user = $2
+            ", $this->tokenId, $this->user->id
+        );
     }
 
     public function id(): int {
@@ -39,6 +38,8 @@ class Token extends \Gazelle\BaseUser {
     }
 
     public function expiry(): string {
+        // unfortunately, expiry cannot be a \DateTimeInterval,
+        // because it cannot represent +/- infinity
         return $this->info()['expiry'];
     }
 

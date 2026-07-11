@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\Manager;
 
 use Gazelle\Enum\UserTokenType;
@@ -7,23 +9,26 @@ use Gazelle\User;
 
 class UserToken extends \Gazelle\BaseManager {
     public function create(UserTokenType $type, User $user, string|null $value = null): \Gazelle\User\Token {
-        $field = ['type',       'id_user'];
-        $args  = [$type->value, $user->id];
-        if (!empty($value)) {
-            $field[] = 'token';
-            $args[]  = $value;
+        $field       = ['type',       'id_user'];
+        $placeholder = ['$1',         '$2'];
+        $args        = [$type->value, $user->id];
+        if (isset($value)) {
+            $field[]       = 'token';
+            $placeholder[] = '$3';
+            $args[]        = $value;
         }
-        $placeholders = placeholders($field);
-        if ($type->interval()) {
-            $field[]       = 'expiry';
-            $args[]        = $type->interval();
-            $placeholders .= ', now() + ?::interval';
+        if ($type->hourInterval()) {
+            $field[]       = "expiry";
+            $placeholder[] = "now() + interval '1 hour' * {$this->pg()->placeholder(count($args))}";
+            $args[]        = $type->hourInterval();
         }
-        $fields = implode(', ', $field);
         return $this->findById(
-            (int)$this->pg()->scalar("
-                insert into user_token ($fields) values ($placeholders) returning id_user_token
-                ", ...$args
+            $this->pg()->scalarex(
+                sprintf(
+                    'insert into user_token (%s) values (%s) returning id_user_token',
+                    implode(', ', $field),
+                    implode(', ', $placeholder),
+                ), ...$args
             )
         );
     }
@@ -53,14 +58,14 @@ class UserToken extends \Gazelle\BaseManager {
      * Normally you should never need this, all tokens are found by their token instance
      */
     public function findById(int $id): ?\Gazelle\User\Token {
-         $token = $this->pg()->rowAssoc("
+         $token = $this->pg()->rowAssocex("
             select id_user_token,
                 id_user
             from user_token
-            where id_user_token = ?
+            where id_user_token = $1
             ", $id
         );
-        if ($token === []) {
+        if (is_null($token)) {
             return null;
         }
         return new \Gazelle\User\Token(

@@ -3,6 +3,7 @@
 namespace Gazelle;
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Gazelle\Enum\AvatarDisplay;
 use Gazelle\Enum\AvatarSynthetic;
 use GazelleUnitTest\Helper;
@@ -116,24 +117,6 @@ END;
         $this->assertEquals('gogogo',     self::twig('{{ value|repeat(n) }}')->render(['value' => 'go', 'n' => 3]), 'twig-repeat-3');
 
         $this->assertEquals('abc &quot;def&quot;…', self::twig('{{ value|shorten(10) }}')->render(['value' => 'abc "def" ghi']), 'twig-shorten-10');
-
-        $this->assertEquals(
-            '2 hours and 7 minutes',
-            self::twig('{{ value|time_interval }}')->render(['value' => 3600 * 2 + 7 * 60]),
-            'twig-time-ago'
-        );
-
-        $this->assertEquals(
-            '30 minutes',
-            self::twig('{{ value|time_interval }}')->render(['value' => 1800.125]),
-            'twig-time-float-ago'
-        );
-
-        $this->assertEquals(
-            '1 week',
-            self::twig('{{ value|time_interval }}')->render(['value' => new \DateTimeImmutable('1 week ago')]),
-            'twig-time-dti-ago'
-        );
 
         $this->assertMatchesRegularExpression(
             '@^<span class="time tooltip" title="[^"]+">1 hour ago</span>$@',
@@ -345,6 +328,31 @@ END;
             self::twig('{% if value is request_fill %}yes{% endif %}')
                 ->render(['value' => new Contest\RequestFill(0, '', '')]),
             'twig-test-contest-request-fill'
+        );
+    }
+
+    public static function providerTimeInterval(): array {
+        return [
+            // expected    label   value
+            // -----       -----   -----
+            ['2 hours',    '2h7m', 3600 * 2 + 7 * 60],
+            ['30 minutes', '30m',  1800.125],
+            ['1 day',      '1d',   \DateInterval::createFromDateString('1 day')],
+            ['1 week',     '1w',   new \DateTimeImmutable('1 week ago')],
+            ['Never',      'null', null],
+        ];
+    }
+
+    #[DataProvider('providerTimeInterval')]
+    public function testTwigTimeInterval(
+        string $expected,
+        string $label,
+        int|float|\DateInterval|\DateTimeImmutable|null $value,
+    ): void {
+        $this->assertEquals(
+            $expected,
+            self::twig('{{ value|time_interval(1) }}')->render(['value' => $value]),
+            "twig-time-interval-$label",
         );
     }
 }

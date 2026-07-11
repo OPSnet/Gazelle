@@ -130,7 +130,7 @@ class PgTable extends AbstractTable {
 
     public function stats(): array {
         [$schema, $table] = $this->schemaTable();
-        return $this->pg()->rowAssoc("
+        return $this->pg()->rowAssocex("
             select pg_relation_size(t.table_schema || '.' || t.table_name) as table_size,
                 pg_indexes_size(t.table_schema || '.' || t.table_name)  as index_size,
                 s.n_live_tup as live,
@@ -147,8 +147,8 @@ class PgTable extends AbstractTable {
             inner join pg_stat_user_tables s on (
                 s.schemaname = t.table_schema and s.relname = t.table_name
             )
-            where t.table_schema = ?
-                and t.table_name = ?
+            where t.table_schema = $1
+                and t.table_name = $2
             ", $schema, $table
         );
     }

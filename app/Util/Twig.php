@@ -67,7 +67,7 @@ class Twig {
 
         $twig->addFilter(new \Twig\TwigFilter(
             'b64',
-            fn (string $data) => \Gazelle\Util\Text::base64UrlEncode($data)
+            fn (string $data) => Text::base64UrlEncode($data)
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
@@ -98,7 +98,7 @@ class Twig {
 
         $twig->addFilter(new \Twig\TwigFilter(
             'column',
-            fn (\Gazelle\Util\SortableTableHeader $header, string $name) => new \Twig\Markup($header->emit($name), 'UTF-8')
+            fn (SortableTableHeader $header, string $name) => new \Twig\Markup($header->emit($name), 'UTF-8')
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
@@ -170,8 +170,15 @@ class Twig {
         ));
         $twig->addFilter(new \Twig\TwigFilter(
             'time_interval',
-            fn ($time, $levels = 2) => new \Twig\Markup(
-                time_diff((string)\Gazelle\Util\Time::timeAgo($time), $levels, span: false, hideAgo: true),
+            fn ($time, $levels = 2, $hideAgo = true) => new \Twig\Markup(
+                Time::diff(
+                    $time instanceof \DateInterval
+                        ? time() - (int)Time::timeAgo($time)
+                        : Time::timeAgo($time),
+                    $levels,
+                    hideAgo: $hideAgo,
+                    span: false
+                ),
                 'UTF-8'
             )
         ));
@@ -203,7 +210,7 @@ class Twig {
         $twig->addFilter(new \Twig\TwigFilter(
             'user_url',
             fn ($userId) => new \Twig\Markup(
-                self::$userMan->displayUsername((int)$userId, \Gazelle\Util\Twig::viewer()),
+                self::$userMan->displayUsername((int)$userId, Twig::viewer()),
                 'UTF-8',
             )
         ));
@@ -211,7 +218,7 @@ class Twig {
         $twig->addFilter(new \Twig\TwigFilter(
             'user_full',
             fn ($userId) => new \Twig\Markup(
-                self::$userMan->displayUsername((int)$userId, \Gazelle\Util\Twig::viewer(), showFull: true),
+                self::$userMan->displayUsername((int)$userId, Twig::viewer(), showFull: true),
                 'UTF-8',
             )
         ));
@@ -354,7 +361,7 @@ class Twig {
 
         $twig->addTest(new \Twig\TwigTest('request_fill', fn ($contest) => $contest instanceof \Gazelle\Contest\RequestFill));
 
-        $twig->addGlobal('dom', new \Gazelle\Util\Dominator());
+        $twig->addGlobal('dom', new Dominator());
 
         return $twig;
     }

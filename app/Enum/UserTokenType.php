@@ -7,10 +7,10 @@ enum UserTokenType: string {
     case mfa      = 'mfa';
     case password = 'password';
 
-    public function interval(): ?string {
+    public function hourInterval(): ?int {
         return match ($this) {
-            self::confirm  => '1 day',
-            self::password => '1 hour',
+            self::confirm  => 24,
+            self::password => 1,
             default        => null, // does not expire
         };
     }

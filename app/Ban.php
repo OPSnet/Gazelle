@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle;
 
 class Ban extends BasePgObject {
@@ -23,11 +25,11 @@ class Ban extends BasePgObject {
         if (isset($this->info)) {
             return $this->info;
         }
-        $this->info = $this->pg()->rowAssoc("
+        $this->info = $this->pg()->rowAssocex("
             select ip,
                 is_active
             from ip_ban ib
-            where id_ip_ban = ?
+            where id_ip_ban = $1
             ", $this->id
         );
         $this->info['hist'] = $this->pg()->allex("

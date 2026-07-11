@@ -47,7 +47,10 @@ class UserMultiFactorAuthTest extends TestCase {
             $ip,
             'utest-mfa-ip',
         );
-        $this->assertTrue(Helper::recentDate($created), 'uteset-mfa-created');
+        $this->assertTrue(
+            Helper::recentDateTimeImmutable($created),
+            'uteset-mfa-created',
+        );
         $this->assertIsArray($recovery, 'utest-setup-mfa-array');
         $this->assertCount(10, $recovery, 'utest-setup-mfa-count');
         $this->assertTrue(

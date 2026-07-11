@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle;
 
 class Counter {
@@ -17,8 +19,8 @@ class Counter {
     }
 
     public function info(): array {
-        return $this->info ??= $this->pg()->rowAssoc("
-            select description, value from counter where name = ?
+        return $this->info ??= $this->pg()->rowAssocex("
+            select description, value from counter where name = $1
             ", $this->name
         );
     }

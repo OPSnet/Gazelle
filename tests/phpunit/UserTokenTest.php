@@ -24,17 +24,36 @@ class UserTokenTest extends TestCase {
     public function testUserTokenCreate(): void {
         $manager = new Manager\UserToken();
         $userToken = $manager->create(UserTokenType::password, $this->user);
-        $this->assertTrue(Helper::recentDate($userToken->expiry()), 'usertoken-expiry');
-        $this->assertInstanceOf(User\Token::class, $manager->findById($userToken->tokenId), 'usertoken-find-by-id');
-        $this->assertInstanceOf(User\Token::class, $manager->findByToken($userToken->value()), 'usertoken-find-by-token');
-        $this->assertEquals(UserTokenType::password, $userToken->type(), 'usertoken-type');
+        $this->assertTrue(
+            Helper::recentDate($userToken->expiry()),
+            'usertoken-expiry',
+        );
+        $this->assertInstanceOf(
+            User\Token::class,
+            $manager->findById($userToken->tokenId),
+            'usertoken-find-by-id',
+        );
+        $this->assertInstanceOf(
+            User\Token::class,
+            $manager->findByToken($userToken->value()),
+            'usertoken-find-by-token',
+        );
+        $this->assertEquals(
+            UserTokenType::password,
+            $userToken->type(),
+            'usertoken-type',
+        );
         $this->assertTrue($userToken->isValid(), 'usertoken-valid');
 
         $this->assertTrue($userToken->consume(), 'usertoken-consume');
         Helper::sleepTick();
         $this->assertFalse($userToken->consume(), 'usertoken-already-consumed');
 
-        $this->assertEquals(1, $manager->removeUser($userToken->user()), 'usertoken-remove-user');
+        $this->assertEquals(
+            1,
+            $manager->removeUser($userToken->user()),
+            'usertoken-remove-user',
+        );
     }
 
     public function testUserTokenPermanent(): void {
@@ -46,15 +65,19 @@ class UserTokenTest extends TestCase {
     public function testUserTokenExists(): void {
         $manager = new Manager\UserToken();
         $userToken = $manager->create(UserTokenType::confirm, $this->user);
-        $this->assertInstanceOf(User\Token::class, $manager->findByUser($userToken->user(), UserTokenType::confirm), 'usertoken-find-by-user');
+        $this->assertInstanceOf(
+            User\Token::class,
+            $manager->findByUser($userToken->user(), UserTokenType::confirm),
+            'usertoken-find-by-user'
+        );
     }
 
     public function testPasswordToken(): void {
         $manager = new Manager\UserToken();
         $userToken = $manager->createPasswordResetToken($this->user);
         $this->assertEquals(
-            '1 day',
-            UserTokenType::confirm->interval(),
+            24,
+            UserTokenType::confirm->hourInterval(),
             'usertoken-confirm-interval',
         );
         $this->assertEquals(

@@ -5,15 +5,17 @@ namespace Gazelle\Util;
 class Time {
     /**
      * Returns the number of seconds between now() and the given timestamp. If the timestamp
-     * is an integer, we assume that's the nubmer of seconds you wish to subtract, otherwise
+     * is an integer, we assume it's the number of seconds you wish to subtract, otherwise
      * it's a string of a timestamp that we convert to a UNIX timestamp and then do a subtraction.
      * If the passed in $timestamp does not convert properly or is null, return false (error).
      */
-    public static function timeAgo(string|int|float|\DateTimeImmutable $time): false|int {
+    public static function timeAgo(string|int|float|\DateInterval|\DateTimeImmutable|null $time): false|int {
         $epoch = match (true) {
-            is_numeric($time)                   => (int)$time,
+            $time instanceof \DateInterval      => (int)(new \DateTimeImmutable()->sub($time)->format('U')),
             $time instanceof \DateTimeImmutable => (int)(time() - $time->format('U')),
-            default                             => strtotime($time),
+            is_numeric($time)                   => (int)$time,
+            is_string($time)                    => strtotime($time),
+            default                             => false,
         };
         return $epoch === false ? false : time() - $epoch;
     }

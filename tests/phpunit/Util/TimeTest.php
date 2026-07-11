@@ -18,11 +18,18 @@ class TimeTest extends TestCase {
     }
 
     public function testTimestampTimeAgo(): void {
-        $epoch = time();
         $this->assertEquals(
-            $epoch - strtotime('2000-01-01 01:01:01'),
+            time() - strtotime('2000-01-01 01:01:01'),
             Time::timeAgo('2000-01-01 01:01:01'),
             "time-ago-timestamp",
+        );
+    }
+
+    public function testDateIntervalTimeAgo(): void {
+        $this->assertEquals(
+            86400,
+            Time::timeAgo(\DateInterval::createFromDateString('1 day')),
+            "time-ago-interval"
         );
     }
 
