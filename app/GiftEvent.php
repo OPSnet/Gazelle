@@ -302,13 +302,13 @@ class GiftEvent extends \Gazelle\BasePgObject {
         if (!$this->isOpen()) {
             return 0;
         }
-        $result = $this->pg()->executeParams('
+        $affected = $this->pg()->query('
             update gift_event set
                 open = tstzrange(lower(open), now())
             where id_gift_event = $1
             ', $this->id
         );
         $this->flush();
-        return $result->getAffectedRows();
+        return $affected;
     }
 }

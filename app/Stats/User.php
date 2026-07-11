@@ -81,14 +81,13 @@ class User extends \Gazelle\BaseObject {
     }
 
     public function historyUseragentTracker(): array {
-        $result = $this->pg()->executeParams('
+        return $this->pg()->allex('
             select useragent, total
             from history_useragent_tracker
             where id_user = $1
             order by useragent
             ', $this->id
         );
-        return $result->fetchAll(\PGSQL_ASSOC);
     }
 
     /**

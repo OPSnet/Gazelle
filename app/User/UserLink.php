@@ -89,19 +89,19 @@ class UserLink extends \Gazelle\BaseUser {
                     DELETE FROM dupe_groups WHERE ID = ?
                     ", $sourceGroupId
                 );
-                $this->pg()->executeParams('
+                $this->pg()->query('
                     update user_link set
                         id_user_link_group = $1
                     where id_user_link_group = $2
                     ', $targetGroupId, $sourceGroupId
                 );
-                $this->pg()->executeParams('
+                $this->pg()->query('
                     update user_link_group set
                         comment = $1 || comment
                     where id_user_link_group = $2
                     ', "$comments\n\n", $targetGroupId
                 );
-                $this->pg()->executeParams('
+                $this->pg()->query('
                     delete from user_link_group where id_user_link_group = $1
                     ', $sourceGroupId
                 );
@@ -113,7 +113,7 @@ class UserLink extends \Gazelle\BaseUser {
                     VALUES (?,      ?)
                     ", $sourceId, $targetGroupId
                 );
-                $this->pg()->executeParams('
+                $this->pg()->query('
                     insert into user_link
                            (id_user, id_user_link_group, id_user_creator)
                     values ($1,      $2,                 $3)
@@ -128,7 +128,7 @@ class UserLink extends \Gazelle\BaseUser {
                 VALUES (?,      ?)
                 ", $target->id, $sourceGroupId
             );
-            $this->pg()->executeParams('
+            $this->pg()->query('
                 insert into user_link
                        (id_user, id_user_link_group, id_user_creator)
                 values ($1,      $2,                 $3)
@@ -147,11 +147,11 @@ class UserLink extends \Gazelle\BaseUser {
                        (?,      ?)
                 ", $target->id, $linkGroupId, $sourceId, $linkGroupId
             );
-            $this->pg()->executeParams('
+            $this->pg()->query('
                 insert into user_link_group (id_user_link_group) values ($1)
                 ', $linkGroupId
             );
-            $this->pg()->executeParams('
+            $this->pg()->query('
                 insert into user_link
                        (id_user, id_user_link_group, id_user_creator)
                 values ($1,      $2,                 $3),
@@ -198,7 +198,7 @@ class UserLink extends \Gazelle\BaseUser {
             WHERE ID = ?
             ", $comments, $groupId
         );
-        $this->pg()->executeParams('
+        $this->pg()->query('
             update user_link_group set
                 comment = $1
             where id_user_link_group = $2
@@ -228,7 +228,7 @@ class UserLink extends \Gazelle\BaseUser {
             ", $targetId
         );
         $affected = self::$db->affected_rows();
-        $this->pg()->executeParams('
+        $this->pg()->query('
             delete from user_link where id_user = $1
             ', $targetId
         );
@@ -249,7 +249,7 @@ class UserLink extends \Gazelle\BaseUser {
                 ", $groupId
             );
             $affected += self::$db->affected_rows();
-            $this->pg()->executeParams('
+            $this->pg()->query('
                 delete from user_link_group where id_user_link_group = $1
                 ', $groupId
             );

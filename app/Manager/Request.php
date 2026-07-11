@@ -34,7 +34,7 @@ class Request extends \Gazelle\BaseManager {
         $stringConverter = $this->pg()->arrayConverter();
         try {
             $this->pg()->begin();
-            $result = $this->pg()->executeParams(<<<END_SQL
+            $requestId = $this->pg()->scalarex(<<<END_SQL
                 insert into request (
                     id_user, id_tgroup, id_category, id_release_type, year,
                     description, title, image, catalogue_number, record_label,
@@ -66,8 +66,7 @@ class Request extends \Gazelle\BaseManager {
                 $stringConverter->output($format->dbList()),
                 $stringConverter->output($media->dbList()), // 19
             );
-            $requestId = $result->current()['id_request'];
-            $request   = new \Gazelle\Request($requestId);
+            $request = new \Gazelle\Request($requestId);
             if (!$request->vote($user, $bounty)) {
                 throw new \RangeException(
                     "Cannot create request {$requestId} by {$user->label()}: bounty $bounty exceeds upload {$user->uploadedSize()}"

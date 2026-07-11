@@ -691,7 +691,7 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
             DELETE FROM bookmarks_artists WHERE ArtistID = ?
             ", $old->id
         );
-        $this->pg()->executeParams('
+        $this->pg()->query('
             update bookmark_artist set
                 id_artist = $2
             where id_user in (

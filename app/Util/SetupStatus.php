@@ -1,6 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\Util;
+
 use Gazelle\DB;
 use Gazelle\Enum\SetupAction;
 use Gazelle\Manager\User;
@@ -99,18 +102,18 @@ class SetupStatus {
         $current = 0;
         try {
             $pg = new DB\Pg($dsn);
-            if ($pg->executeParams('select 1')->count() !== 1) {
+            if ($pg->query('select 1') !== 1) {
                 $result[$current] = "basic select operation failed";
                 return $result;
             }
 
             ++$current;
-            if ($pg->executeParams('select count(*) from privilege_group')->count() < 1) {
+            if ($pg->query('select count(*) from privilege_group') < 1) {
                 $result[$current] = "tables not initialized";
             }
 
             ++$current;
-            if ($pg->executeParams('select count(*) from relay.permissions')->count() < 1) {
+            if ($pg->query('select count(*) from relay.permissions') < 1) {
                 $result[$current] = "relay tables not working";
             }
         } catch (\Exception $e) {

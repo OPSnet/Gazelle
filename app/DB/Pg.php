@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\DB;
 
 use sad_spirit\pg_wrapper\Connection;
@@ -147,10 +149,6 @@ class Pg {
         }
         $this->stats->register($query, $result->getAffectedRows(), $begin, $args);
         return $result;
-    }
-
-    public function prepareex(string $query): PreparedStatement {
-        return $this->cnxrw->prepare($query);
     }
 
     public function query(string $query, ...$args): int {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle;
 
 use sad_spirit\pg_wrapper\exceptions\server\ProgrammingException;
@@ -269,14 +271,13 @@ class DbTest extends TestCase {
         $this->assertEquals("test", $this->pg()->scalarex("select $1", "test"), 'db-pg-scalar-string');
         $this->assertEquals("test", $this->pg()->scalarex("select '\\x74657374'::bytea"), 'db-pg-scalar-bytea');
 
-        $st = $this->pg()->prepareex("
+        $this->pg()->query("
             create temporary table t (
                 id_t integer not null primary key generated always as identity,
                 label text not null,
                 created timestamptz not null default current_date
             )
         ");
-        $st->execute();
 
         $id = $this->pg()->scalarex("
             insert into t (label) values ($1) returning id_t
@@ -382,18 +383,18 @@ class DbTest extends TestCase {
 
     public function testPgBadQuery(): void {
         $stats = $this->pg()->stats();
-        $queryCnt = count($stats->queryList());
-        $errorCnt = count($stats->errorList());
+        $queryTotal = count($stats->queryList());
+        $errorTotal = count($stats->errorList());
 
         try {
-            $this->pg()->executeParams("select 1 from nonexistent_table");
+            $this->pg()->query("select 1 from nonexistent_table");
             $this->fail('pg-bad-exception-not-thrown');
         } catch (ProgrammingException $e) {
             $this->assertEquals(ProgrammingException::class, $e::class, 'pg-bad-exception-class');
         }
 
-        $this->assertEquals($queryCnt, count($stats->queryList()), 'pg-bad-query-count');
-        $this->assertEquals($errorCnt + 1, count($stats->errorList()), 'pg-bad-error-count');
+        $this->assertEquals($queryTotal, count($stats->queryList()), 'pg-bad-query-count');
+        $this->assertEquals($errorTotal + 1, count($stats->errorList()), 'pg-bad-error-count');
     }
 
     public function testPgAbort(): void {

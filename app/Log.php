@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle;
 
 use Gazelle\Intf\CategoryHasArtist;
@@ -9,8 +11,8 @@ class Log extends Base {
      * Write a general message to the system log.
      */
     public function general(string $message): static {
-        $this->pg()->insert("
-            insert into audit_trail_site (note) values (?)
+        $this->pg()->query("
+            insert into audit_trail_site (note) values ($1)
             ", trim($message)
         );
         return $this;
