@@ -82,9 +82,8 @@ class TGroupTest extends TestCase {
 
         $this->assertTrue($this->tgroup->categoryGrouped(), 'tgroup-create-category-grouped');
         $this->assertFalse($this->tgroup->isShowcase(), 'tgroup-create-showcase');
-        $this->assertCount(0, $this->tgroup->revisionList(), 'tgroup-create-revision-list');
         $this->assertEquals('Music', $this->tgroup->categoryName(), 'tgroup-create-category-name');
-        $this->assertEquals('cats_music', $this->tgroup->categoryCss(), 'tgroup-create-category-ss');
+        $this->assertEquals('cats_music', $this->tgroup->categoryCss(), 'tgroup-create-category-css');
         $this->assertEquals('Live album', $this->tgroup->releaseTypeName(), 'tgroup-create-release-type-name');
         $this->assertEquals($this->name, $this->tgroup->name(), 'tgroup-create-name');
         $this->assertEquals($this->year, $this->tgroup->year(), 'tgroup-create-year');
@@ -144,6 +143,22 @@ class TGroupTest extends TestCase {
             array_keys($timeline[0]),
             'tgroup-user-timeline-section'
         );
+
+        $nope = $this->userList['nope'];
+        $this->assertFalse(
+            $this->tgroup->canEdit($nope),
+            'tgroup-user-cannot-edit',
+        );
+        $nope->privilege()->modifyCustomList(['torrents_edit' => true]);
+        $this->assertTrue(
+            $this->tgroup->canEdit($nope),
+            'tgroup-user-can-edit',
+        );
+
+        $created = $this->tgroup->created();
+        Helper::sleepTick();
+        $this->tgroup->touch();
+        $this->assertNotEquals($created, $this->tgroup->created(), 'tgroup-touch');
     }
 
     public function testTGroupBookmark(): void {
@@ -219,6 +234,7 @@ class TGroupTest extends TestCase {
     }
 
     public function testTGroupArtist(): void {
+        $this->assertNull($this->tgroup->primaryArtist(), 'tgroup-artist-no-primary');
         $artMan = new Manager\Artist();
         $user   = $this->userList['admin'];
         $artistName = 'phpunit ' . randomString(6) . ' band';
@@ -226,6 +242,11 @@ class TGroupTest extends TestCase {
             1,
             $this->tgroup->addArtists([ARTIST_MAIN], [$artistName]),
             'tgroup-artist-add'
+        );
+        $this->assertEquals(
+            0,
+            $this->tgroup->addArtists([ARTIST_MAIN], [$artistName]),
+            'tgroup-artist-duplicate-add'
         );
         $this->assertEquals(
             "$artistName – {$this->tgroup->name()} [{$this->tgroup->year()} Live album]",
@@ -359,6 +380,22 @@ class TGroupTest extends TestCase {
             $this->tgroup->artistRole()->matchName([strtoupper($addName)]),
             'match-name-upper',
         );
+
+        $artistId = array_first(array_first($this->tgroup->artistRole()->idList()))['id'];
+        $this->assertFalse(
+            $this->tgroup->removeArtist(
+                $artMan->findById($artistId),
+                ARTIST_COMPOSER,
+            ),
+            'tgroup-remove-composer',
+        );
+        $this->assertTrue(
+            $this->tgroup->removeArtist(
+                $artMan->findById($artistId),
+                ARTIST_DJ,
+            ),
+            'tgroup-remove-dj',
+        );
     }
 
     public function testTGroupArtwork(): void {
@@ -392,12 +429,86 @@ class TGroupTest extends TestCase {
     }
 
     public function testTGroupRevision(): void {
+        [$description, $image] = [$this->tgroup->description(), $this->tgroup->image()];
         $revisionId = $this->tgroup->createRevision(
             $this->tgroup->description() . "\nmore text",
-            'https://www.example.com/image.jpg',
+            '',
             'phpunit testTGroup summary',
+            $this->userList['user'],
         );
-        $this->assertGreaterThan(0, $revisionId, 'tgroup-revision-add');
+        $this->tgroup->showFallbackImage(true);
+        $this->assertCount(2, $this->tgroup->revisionList(), 'tgroup-revision-list');
+        $info = $this->tgroup->flush()->info($revisionId);
+        $this->assertFalse(
+            $info['from_cache'],
+            'tgroup-revision-info',
+        );
+        $this->assertStringEndsWith(
+            '/common/noartwork/music.png',
+            $info['Image'],
+            'tgroup-fallback-image',
+        );
+        $this->assertEquals(
+            [$description, $image],
+            $this->tgroup->revertRevision($revisionId, $this->userList['user']),
+            'tgroup-revision-revert',
+        );
+    }
+
+    public function testTGroupAbsorb(): void {
+        $this->tgroupExtra = new Manager\TGroup()->create(
+            categoryId:  CATEGORY_MUSIC,
+            name:        $this->name . ' absorb',
+            year:        $this->year,
+            description: "Description",
+            image:       'https://example.com/' . randomString(10) . '.jpg',
+            releaseType: new ReleaseType()->findIdByName('Bootleg'),
+            showcase:    false,
+        );
+        new User\Bookmark($this->userList['nope'])->create($this->tgroup);
+        $manager = new Manager\Torrent();
+        $torrent = $manager->findById(array_first($this->tgroup->torrentIdList()));
+        $this->assertEquals(
+            1,
+            $this->tgroupExtra->absorb($torrent, $this->userList['admin']),
+            'tgroup-absort-torrent-1',
+        );
+        $this->assertCount(
+            2,
+            $this->tgroup->flush()->torrentIdList(),
+            'tgroup-absorb-old-1',
+        );
+        $this->assertCount(
+            1,
+            $this->tgroupExtra->torrentIdList(),
+            'tgroup-absorb-new-1',
+        );
+        $torrent = $manager->findById(array_first($this->tgroup->flush()->torrentIdList()));
+        $this->assertEquals(
+            1,
+            $this->tgroupExtra->absorb($torrent, $this->userList['admin']),
+            'tgroup-absort-torrent-2',
+        );
+        $torrent = $manager->findById(array_first($this->tgroup->flush()->torrentIdList()));
+        $this->assertEquals(
+            1,
+            $this->tgroupExtra->absorb($torrent, $this->userList['admin']),
+            'tgroup-absort-torrent-3',
+        );
+        $this->assertCount(
+            3,
+            $this->tgroupExtra->flush()->torrentIdList(),
+            'tgroup-absorb-new-3',
+        );
+        $this->assertTrue(
+            new User\Bookmark($this->userList['nope'])->isBookmarked($this->tgroupExtra),
+            'tgroup-absorb-is-bookmarked',
+        );
+    }
+
+    public function testTGroupImage(): void {
+        $this->expectNotToPerformAssertions();
+        $this->tgroup->imageFlush();
     }
 
     public function testTGroupJson(): void {
@@ -457,7 +568,11 @@ class TGroupTest extends TestCase {
         // TODO: should this be 1?
         $this->assertEquals(0, $comment->pageNum(), 'tgroup-comment-page-num');
 
-        $this->assertEquals([['torrents', $this->tgroup->id]], $sub->commentSubscriptions(), 'tgroup-tgroup-comment-sub');
+        $this->assertEquals(
+            [['torrents', $this->tgroup->id]],
+            $sub->commentSubscriptions(),
+            'tgroup-tgroup-comment-sub',
+        );
         $this->assertEquals(1, $sub->commentTotal(), 'tgroup-tgroup-comment-all');
     }
 
@@ -465,14 +580,38 @@ class TGroupTest extends TestCase {
         $user = $this->userList['admin'];
         $name = 'phpunit.' . randomString(6);
 
+        $this->assertEquals(
+            'tags_',
+            $this->tgroup->primaryTagCss(),
+            'tgroup-create-noprimary-tag-css',
+        );
+
         $tagMan = new Manager\Tag();
         $tag = $tagMan->create($name, $user);
         $this->assertGreaterThan(1, $tag->id, 'tgroup-tag-create');
-        $this->assertEquals(1, $tag->addTGroup($this->tgroup, $user, 10), 'tgroup-tag-add-one');
+        $this->assertEquals(
+            1,
+            $tag->addTGroup($this->tgroup, $user, 10),
+            'tgroup-tag-add-one',
+        );
+
+        $this->assertEquals(
+            'tags_' . ucfirst(str_replace('.', '_', $name)),
+            $this->tgroup->primaryTagCss(),
+            'tgroup-create-noprimary-tag-css'
+        );
 
         $tag2 = $tagMan->create('phpunit.' . randomString(6), $user);
         $this->assertEquals(1, $tag2->addTGroup($this->tgroup, $user, 5), 'tgroup-tag-add-two');
         $this->tgroup->flush();
+        $this->assertEqualsCanonicalizing(
+            [
+                "<a href=\"torrents.php?taglist={$tag->name()}\">{$tag->name()}</a>",
+                "<a href=\"torrents.php?taglist={$tag2->name()}\">{$tag2->name()}</a>",
+            ],
+            $this->tgroup->torrentTagList(),
+            'tgroup-torrent-tag-list',
+        );
         $this->assertCount(2, $this->tgroup->tagNameList(), 'tgroup-tag-name-list');
         $this->assertContains($name, $this->tgroup->tagNameList(), 'tgroup-tag-name-find-one');
         $this->assertContains($tag2->name(), $this->tgroup->tagNameList(), 'tgroup-tag-name-find-not');
@@ -577,6 +716,46 @@ class TGroupTest extends TestCase {
         $this->assertInstanceOf(TGroup::class, $this->tgroupExtra, 'tgroup-is-split');
         $this->assertCount(2, $this->tgroup->flush()->torrentIdList(), 'tgroup-has-one-less-torrent');
         $this->assertCount(1, $this->tgroupExtra->torrentIdList(), 'tgroup-split-has-one-torrent');
+    }
+
+    public function testTGroupRename(): void {
+        $this->assertEquals(
+            1,
+            $this->tgroup->rename("phpunit new name", $this->userList['admin']),
+            'tgroup-rename',
+        );
+        $this->assertEquals(
+            'phpunit new name',
+            $this->tgroup->flush()->name(),
+            'tgroup-new-rename',
+        );
+    }
+
+    public function testTGroupRemove(): void {
+        $this->tgroupExtra = $this->manager->create(
+            categoryId:      1,
+            name:            $this->name . ' remove ' . randomString(10),
+            year:            $this->year,
+            description:     "Description of {$this->name} remove",
+            image:           '',
+            releaseType:     new ReleaseType()->findIdByName('Split'),
+            showcase:        false,
+        );
+        $collage = new Manager\Collage()->create(
+            user:        $this->userList['user'],
+            categoryId:  Enum\CollageType::theme->value,
+            description: 'phpunit tgroup remove description',
+            name:        'phpunit tgroup remove ' . randomString(20),
+            tagList:     'pop',
+        );
+        $collage->addEntry($this->tgroupExtra, $this->userList['user']);
+        $this->assertEquals(
+            1,
+            $this->tgroupExtra->removeTGroup(),
+            'tgroup-remove-tgroup',
+        );
+        unset($this->tgroupExtra);
+        $collage->hardRemove();
     }
 
     public function testReleaseType(): void {
@@ -875,6 +1054,26 @@ class TGroupTest extends TestCase {
         $this->assertEquals(1, $artistRole[ARTIST_CONDUCTOR], 'tgroup-artistrole-conductor');
         $this->assertEquals(1, $artistRole[ARTIST_MAIN], 'tgroup-artistrole-main');
         $this->assertEquals(1, $artistRole[ARTIST_PRODUCER], 'tgroup-artistrole-producer');
+    }
+
+    public function testTGroupSnatched(): void {
+        $this->assertFalse(
+            $this->tgroup->isSnatched(),
+            'tgroup-is-not-snatched',
+        );
+        $user = $this->userList['admin'];
+        $user->setField('option_list', ['ShowSnatched' => true])->modify();
+        Helper::generateTorrentSnatch(
+            new Manager\Torrent()->findById($this->tgroup->torrentIdList()[0]),
+            $user,
+        );
+        $user->requestContext()->setViewer($user);
+        $db = DB::DB();
+        $db->prepared_query('select * from xbt_snatched where uid = ?', $user->id);
+        $this->assertTrue(
+            $this->tgroup->flush()->isSnatched(),
+            'tgroup-is-snatched',
+        );
     }
 
     public function testTGroupSearchComment(): void {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle;
 
 use Gazelle\Enum\LeechReason;
@@ -131,7 +133,7 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
             WHERE ID = ?
             ', $this->id
         );
-        return $this;
+        return $this->flush();
     }
 
     /**
@@ -141,20 +143,6 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
     public function showFallbackImage(bool $showFallbackImage): static {
         $this->showFallbackImage = $showFallbackImage;
         return $this;
-    }
-
-    public function revisionList(): array {
-         self::$db->prepared_query("
-            SELECT RevisionID AS revision,
-                Summary       AS summary,
-                Time          AS time,
-                UserID        AS user_id
-            FROM wiki_torrents
-            WHERE PageID = ?
-            ORDER BY RevisionID DESC
-            ", $this->id
-        );
-        return self::$db->to_array(false, MYSQLI_ASSOC);
     }
 
     /**
@@ -170,7 +158,7 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
         $this->revisionId = $revisionId;
         if (!$revisionId) {
             $cached = self::$cache->get_value($key);
-            if (is_array($cached)) {
+            if ($cached !== false) {
                 $refresh = false;
                 if (!isset($cached['Image'])) {
                     $cached['Image'] = $this->showFallbackImage
@@ -464,7 +452,7 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
         return $this->info()['Name'];
     }
 
-    public function time(): string {
+    public function created(): string {
         return $this->info()['Time'];
     }
 
@@ -482,11 +470,6 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
 
     public function torrentIdList(): array {
         return $this->info()['torrent_list'];
-    }
-
-    // @phpstan-ignore-next-line missingType.generics
-    public function yieldTorrents(Manager\Torrent $torMan = new Manager\Torrent()): \Generator {
-        return object_generator($torMan, $this->torrentIdList());
     }
 
     /**
@@ -689,7 +672,29 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
      *
      * return int revision id
      */
-    public function createRevision(string $description, ?string $image, string $summary): int {
+    public function createRevision(
+        string      $description,
+        string|null $image,
+        string      $summary,
+        User        $user,
+    ): int {
+        // If this is the first revision, stash a copy of the original metadata
+        $revisionTotal = self::$db->scalar('
+            SELECT count(*) FROM wiki_torrents WHERE PageID = ?
+            ', $this->id
+        );
+        if ($revisionTotal === 0) {
+            self::$db->prepared_query("
+                INSERT INTO wiki_torrents
+                       (PageID, Body, Image, UserID, Summary)
+                VALUES (?,      ?,    ?,     ?,      ?)
+                ", $this->id,
+                $this->description(),
+                $this->image(),
+                $user->id,
+                'original version',
+            );
+        }
         self::$db->prepared_query("
             INSERT INTO wiki_torrents
                    (PageID, Body, Image, UserID, Summary)
@@ -711,26 +716,38 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
         return $revisionId;
     }
 
-    public function revertRevision(int $userId, int $revisionId): ?array {
+    public function revertRevision(int $revisionId, User $user): ?array {
         $revert = self::$db->row("
-            SELECT Body, Image
-            FROM wiki_torrents
-            WHERE PageID = ? AND RevisionID = ?
-            ", $this->id, $revisionId
+            SELECT WikiBody, WikiImage
+            FROM torrents_group
+            WHERE ID = ?
+            ", $this->id
         );
-        if (is_null($revert)) {
-            return null;
-        }
         self::$db->prepared_query("
             INSERT INTO wiki_torrents
                    (PageID, Body, Image, UserID, Summary)
             SELECT  ?,      Body, Image, ?,      ?
             FROM wiki_torrents
             WHERE RevisionID = ?
-            ", $this->id, $userId, "Reverted to revision $revisionId",
+            ", $this->id, $user->id, "Reverted to revision $revisionId",
                 $revisionId
         );
         return $revert;
+    }
+
+    public function revisionList(): array {
+         self::$db->prepared_query("
+            SELECT RevisionID AS revision,
+                Summary       AS summary,
+                Time          AS time,
+                UserID        AS user_id
+                ,Image,Body
+            FROM wiki_torrents
+            WHERE PageID = ?
+            ORDER BY RevisionID DESC
+            ", $this->id
+        );
+        return self::$db->to_array(false, MYSQLI_ASSOC);
     }
 
     public function setFreeleech(
@@ -763,7 +780,7 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
         return count($regular) + count($large);
     }
 
-    public function absorb(Torrent $torrent): int {
+    public function absorb(Torrent $torrent, User $user): int {
         self::$db->begin_transaction();
         self::$db->prepared_query("
             UPDATE torrents SET
@@ -787,13 +804,9 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
             $old->removeTGroup();
         }
         $this->logger()
-            ->group(
-                $this,
-                $this->requestContext()->viewer(),
-                "merged group $oldId"
-            )
+            ->group($this, $user, "merged group $oldId")
             ->general(
-                "Torrent {$torrent->id} was edited by {$this->requestContext()->viewer()->label()}"
+                "Torrent {$torrent->id} was edited by {$user->label()}"
             );
         self::$db->commit();
 
@@ -805,17 +818,17 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
         return $affected;
     }
 
-    public function rename(string $name): bool {
+    public function rename(string $name, User $user): bool {
         $oldName = $this->name();
         $success = $this->setField('Name', $name)->modify();
         if ($success) {
             $this->refresh();
             $this->logger()
                 ->group(
-                    $this, $this->requestContext()->viewer(), "renamed to \"$name\" from \"$oldName\""
+                    $this, $user, "renamed to \"$name\" from \"$oldName\""
                 )
                 ->general(
-                    "Torrent Group {$this->id} was renamed to \"$name\" from \"$oldName\" by {$this->requestContext()->viewer()->username()}"
+                    "Torrent Group {$this->id} was renamed to \"$name\" from \"$oldName\" by {$user->username()}"
                 );
         }
         return $success;

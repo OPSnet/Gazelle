@@ -1,6 +1,7 @@
 <?php
-/** @phpstan-var \Gazelle\User $Viewer */
-/** @phpstan-var \Twig\Environment $Twig */
+
+// @phpstan-var \Gazelle\User $Viewer
+// @phpstan-var \Twig\Environment $Twig
 
 declare(strict_types=1);
 
@@ -42,6 +43,6 @@ if (empty($_POST['confirm'])) {
 
 authorize();
 
-$new->absorb($torrent);
+$new->absorb($torrent, $Viewer);
 
 header('Location: ' . $new->location());

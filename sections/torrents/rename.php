@@ -1,4 +1,5 @@
 <?php
+
 /** @phpstan-var \Gazelle\User $Viewer */
 
 declare(strict_types=1);
@@ -22,5 +23,5 @@ if (is_null($tgroup)) {
     Error404::error();
 }
 
-$tgroup->rename($name);
+$tgroup->rename($name, $Viewer);
 header("Location: {$tgroup->location()}");

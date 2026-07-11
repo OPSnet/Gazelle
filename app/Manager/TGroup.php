@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\Manager;
 
 class TGroup extends \Gazelle\BaseManager {
@@ -173,7 +175,10 @@ class TGroup extends \Gazelle\BaseManager {
         // GroupIDs
         self::$db->prepared_query("SELECT ID FROM torrents WHERE GroupID = ?", $old->id);
         self::$cache->delete_multi(
-            array_map(fn($id) => sprintf(\Gazelle\Torrent::CACHE_KEY, $id), self::$db->collect(0))
+            array_map(
+                fn ($id) => sprintf(\Gazelle\Torrent::CACHE_KEY, $id),
+                self::$db->collect(0)
+            )
         );
 
         self::$db->begin_transaction();
@@ -190,8 +195,8 @@ class TGroup extends \Gazelle\BaseManager {
             ", $new->id, $old->id
         );
 
-        new \Gazelle\Manager\Bookmark()->merge($old, $new);
-        new \Gazelle\Manager\Comment()->merge('torrents', $old->id, $new->id);
+        new Bookmark()->merge($old, $new);
+        new Comment()->merge('torrents', $old->id, $new->id);
         $voteManager->merge($old, $new, $userManager);
 
         // Collages

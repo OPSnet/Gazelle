@@ -1,6 +1,7 @@
 <?php
-/** @phpstan-var \Gazelle\User $Viewer */
-/** @phpstan-var \Twig\Environment $Twig */
+
+// @phpstan-var \Gazelle\User $Viewer
+// @phpstan-var \Twig\Environment $Twig
 
 declare(strict_types=1);
 
@@ -20,7 +21,7 @@ if (is_null($tgroup)) {
     Error404::error();
 }
 
-if (($_GET['action'] ?? '') == 'revert') {
+if (($_GET['action'] ?? '') === 'revert') {
     // we're reverting to a previous revision
     $revisionId = (int)$_GET['revisionid'];
     if (!$revisionId) {
@@ -34,7 +35,7 @@ if (($_GET['action'] ?? '') == 'revert') {
         ]);
         exit;
     }
-    [$body, $image] = $tgroup->revertRevision($Viewer->id, $revisionId);
+    [$body, $image] = $tgroup->revertRevision($revisionId, $Viewer);
     if (is_null($body)) {
         Error404::error("Unable to find revision {$revisionId}");
     }
@@ -122,13 +123,13 @@ if ($tgroup->categoryName() === 'Music') {
     if (!$newReleaseTypeName) {
         Error400::error("Bad release type");
     }
-    if ($releaseType != $tgroup->releaseType()) {
+    if ($releaseType !== $tgroup->releaseType()) {
         $tgroup->setField('ReleaseType', $releaseType);
         $logInfo[] = "Release type {$rt->findNameById($tgroup->releaseType())} → $newReleaseTypeName";
     }
 
     $showcase = isset($_POST['vanity_house']);
-    if ($tgroup->isShowcase() != $showcase) {
+    if ($tgroup->isShowcase() !== $showcase) {
         if (!$Viewer->permitted('torrents_edit_vanityhouse')) {
             Error403::error('You are not allowed to edit the Showcase status');
         }
@@ -142,7 +143,7 @@ if ($summary) {
     $logInfo[] = "summary: $summary";
 }
 if ($newRevision) {
-    $tgroup->createRevision($body, $image, $summary);
+    $tgroup->createRevision($body, $image, $summary, $Viewer);
 }
 
 if ($Viewer->permitted('torrents_freeleech')) {
@@ -150,7 +151,7 @@ if ($Viewer->permitted('torrents_freeleech')) {
     $leechType = $torMan->lookupLeechType($_POST['leech_type'] ?? LeechType::Normal->value);
     $reason    = $torMan->lookupLeechReason($_POST['leech_reason'] ?? LeechReason::Normal->value);
     $tgroup->setFreeleech(
-        all:       $_POST['all'] == 'all',
+        all:       $_POST['all'] === 'all',
         leechType: $leechType,
         reason:    $reason,
         user:      $Viewer,

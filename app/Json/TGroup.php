@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\Json;
 
 class TGroup extends \Gazelle\Json {
@@ -25,7 +27,7 @@ class TGroup extends \Gazelle\Json {
             'releaseTypeName' => $tgroup->releaseTypeName(),
             'categoryId'      => $tgroup->categoryId(),
             'categoryName'    => $tgroup->categoryName(),
-            'time'            => $tgroup->time(),
+            'time'            => $tgroup->created(),
             'vanityHouse'     => $tgroup->isShowcase(),
             'isBookmarked'    => new \Gazelle\User\Bookmark($this->user)->isBookmarked($tgroup),
             'tags'            => array_values($tgroup->tagNameList()),
