@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle;
 
 use Gazelle\Exception\BonusPurchaseException;
@@ -75,7 +77,7 @@ class BonusItem extends \Gazelle\BasePgObject {
         };
     }
 
-    public function price($manager = new \Gazelle\Manager\Bonus()): int {
+    public function price($manager = new Manager\Bonus()): int {
         return (int)ceil(($this->info()['price'] * (100 - $manager->discount()) / 100));
     }
 
@@ -183,7 +185,7 @@ class BonusItem extends \Gazelle\BasePgObject {
                     AND ub.user_id = ?
                 ', $this->amount(), $price, $price, $user->id
             );
-            if (self::$db->affected_rows() != 1 + ($price === 0 ? 0 : 1)) {
+            if (self::$db->affected_rows() !== 1 + ($price === 0 ? 0 : 1)) {
                 throw new BonusPurchaseException(Enum\BonusItemPurchaseStatus::insufficientFunds);
             }
         } elseif (str_starts_with($this->label(), 'other-')) {
@@ -224,14 +226,16 @@ class BonusItem extends \Gazelle\BasePgObject {
                 ", $this->amount(), $price,
                     Enum\UserStatus::enabled->value, $receiver->id, $user->id, $price
             );
-            if (self::$db->affected_rows() != 1 + ($price === 0 ? 0 : 1)) {
+            if (self::$db->affected_rows() !== 1 + ($price === 0 ? 0 : 1)) {
                 throw new BonusPurchaseException(Enum\BonusItemPurchaseStatus::insufficientFunds);
             }
             $amount = $this->amount();
             $user->stats()->incrementFltoken(Enum\UserSummaryFltoken::gifted, $amount);
             $receiver->stats()->incrementFltoken(Enum\UserSummaryFltoken::received, $amount);
+            self::$cache->delete_value(sprintf(User\Bonus::CACHE_FLTOKEN, $user->id));
+            self::$cache->delete_value(sprintf(User\Bonus::CACHE_FLTOKEN, $receiver->id));
             $receiver->inbox()->createSystem(
-                "Here " . ($amount == 1 ? 'is' : 'are') . ' ' . article($amount)
+                "Here " . ($amount === 1 ? 'is' : 'are') . ' ' . article($amount)
                     . " freeleech token" . plural($amount) . "!",
                 self::$twig->render('bonus/token-other-message.bbcode.twig', [
                     'amount'   => $amount,
@@ -253,7 +257,7 @@ class BonusItem extends \Gazelle\BasePgObject {
                             AND ub.user_id = ?
                         ', $price, $price, $user->id
                     );
-                    if (self::$db->affected_rows() != ($price === 0 ? 0 : 1)) {
+                    if (self::$db->affected_rows() !== ($price === 0 ? 0 : 1)) {
                         self::$db->rollback();
                         throw new BonusPurchaseException(Enum\BonusItemPurchaseStatus::insufficientFunds);
                     }
@@ -270,7 +274,7 @@ class BonusItem extends \Gazelle\BasePgObject {
                             AND ub.user_id = ?
                         ', $price, $price, $user->id
                     );
-                    if ($price > 0 && self::$db->affected_rows() != 1) {
+                    if ($price > 0 && self::$db->affected_rows() !== 1) {
                         self::$db->rollback();
                         throw new BonusPurchaseException(Enum\BonusItemPurchaseStatus::insufficientFunds);
                     }
@@ -281,7 +285,7 @@ class BonusItem extends \Gazelle\BasePgObject {
                             VALUES (?,      (SELECT ID FROM user_attr WHERE Name = ?))
                             ", $user->id, 'feature-file-count'
                         );
-                    } catch (\Gazelle\DB\MysqlDuplicateKeyException) {
+                    } catch (DB\MysqlDuplicateKeyException) {
                         // no point in buying a second time
                         self::$db->rollback();
                         throw new BonusPurchaseException(Enum\BonusItemPurchaseStatus::alreadyPurchased);
@@ -302,7 +306,7 @@ class BonusItem extends \Gazelle\BasePgObject {
                             AND ub.user_id = ?
                         ', $price, $price, $user->id
                     );
-                    if (self::$db->affected_rows() != 1 + ($price === 0 ? 0 : 1)) {
+                    if (self::$db->affected_rows() !== 1 + ($price === 0 ? 0 : 1)) {
                         throw new BonusPurchaseException(Enum\BonusItemPurchaseStatus::insufficientFunds);
                     }
                     break;
@@ -316,7 +320,7 @@ class BonusItem extends \Gazelle\BasePgObject {
                             AND ub.user_id = ?
                         ', $price, $price, $user->id
                     );
-                    if ($price > 0 && self::$db->affected_rows() != 1) {
+                    if ($price > 0 && self::$db->affected_rows() !== 1) {
                         self::$db->rollback();
                         throw new BonusPurchaseException(Enum\BonusItemPurchaseStatus::insufficientFunds);
                     }

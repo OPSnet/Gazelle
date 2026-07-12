@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\User;
 
 use Gazelle\BonusItem;
 use Gazelle\BonusPool;
+use Gazelle\User;
 use Gazelle\Util\SortableTableHeader;
 
 /**
@@ -17,9 +20,10 @@ use Gazelle\Util\SortableTableHeader;
 
 class Bonus extends \Gazelle\BaseUser {
     final public const tableName             = 'history_bonus';
+    final public const CACHE_FLTOKEN         = 'bonus_fltoken_%d';
+    final protected const CACHE_HISTORY      = 'bonus_hist_%d_%d';
     final protected const CACHE_PURCHASE     = 'bonus_purchase_%d';
     final protected const CACHE_SUMMARY      = 'bonus_summary_%d';
-    final protected const CACHE_HISTORY      = 'bonus_hist_%d_%d';
     final protected const CACHE_POOL_HISTORY = 'bonus_pool_history_%d';
 
     public function flush(): static {
@@ -44,33 +48,22 @@ class Bonus extends \Gazelle\BaseUser {
      * @return array<int>
      */
     public function tokenExchange(): array {
-        return array_map(
-            'intval',
-            $this->pg()->rowAssocex(<<<END_SQL
-                with sent(n) AS (
-                    select sum(bi.amount)
-                    from history_bonus hb
-                    inner join bonus_item bi using (id_bonus_item)
-                    where hb.id_user_other is not null
-                        and hb.id_user = $1
-                ),
-                recv(n) AS (
-                    select sum(bi.amount)
-                    from history_bonus hb
-                    inner join bonus_item bi using (id_bonus_item)
-                    where hb.id_user_other = $1
-                )
-                select coalesce(recv.n, 0) as received,
-                    coalesce(sent.n, 0)    as sent
-                from sent
-                cross join recv
-                END_SQL
-                , $this->user->id
-            )
-        );
+        $key = sprintf(self::CACHE_FLTOKEN, $this->user->id);
+        $exchange = self::$cache->get_value($key);
+        if ($exchange === false) {
+            $exchange = $this->pg()->rowAssocex('
+                select received,
+                    gifted as sent
+                from user_summary_fltoken
+                where id_user = $1
+                ', $this->user->id
+            );
+            self::$cache->cache_value($key, $exchange, 7 * 86_400);
+        }
+        return $exchange;
     }
 
-    public function otherLatest(\Gazelle\User $other): array {
+    public function otherLatest(User $other): array {
         return $this->pg()->rowAssocex(<<<END_SQL
             select bi.title,
                 hb.created AS purchase_date
