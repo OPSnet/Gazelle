@@ -65,7 +65,7 @@ class UserToken extends \Gazelle\BaseManager {
             where id_user_token = $1
             ", $id
         );
-        if (is_null($token)) {
+        if ($token === []) {
             return null;
         }
         return new \Gazelle\User\Token(

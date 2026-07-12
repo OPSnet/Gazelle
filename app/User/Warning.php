@@ -47,29 +47,21 @@ class Warning extends \Gazelle\BaseUser {
     }
 
     public function info(): array {
-        if (!isset($this->info)) {
-            $this->info = $this->pg()->rowAssocex("
-                select warning
-                from user_warning
-                where now() < upper(warning)
-                    and id_user = $1
-                ", $this->user->id
-            )
-            ?? ['warning' => null];
-        }
-        return $this->info;
+        return $this->info ??= $this->pg()->rowAssocex("
+            select warning
+            from user_warning
+            where now() < upper(warning)
+                and id_user = $1
+            ", $this->user->id
+        );
     }
 
     public function isWarned(): bool {
-        return $this->warning() !== null;
+        return $this->info() !== [];
     }
 
-    public function warning(): ?DateTimeRange {
-        return $this->info()['warning'];
-    }
-
-    public function expiry(): ?\DateTimeImmutable {
-        return $this->isWarned() ? $this->warning()->upper : null;
+    public function expiry(): \DateTimeImmutable|null {
+        return $this->isWarned() ? $this->info()['warning']->upper : null;
     }
 
     public function total(): int {

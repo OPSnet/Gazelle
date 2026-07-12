@@ -186,15 +186,15 @@ class Pg {
 
     public function scalarex(string $query, ...$args): mixed {
         $result = $this->rowex($query, ...$args);
-        return $result === null ? null : $result[0];
+        return $result === [] ? null : $result[0];
     }
 
-    public function rowex(string $query, ...$args): ?array {
-        return $this->executeParams($query, ...$args)->setMode(\PGSQL_NUM)->current();
+    public function rowex(string $query, ...$args): array {
+        return $this->executeParams($query, ...$args)->setMode(\PGSQL_NUM)->current() ?? [];
     }
 
-    public function rowAssocex(string $query, ...$args): ?array {
-        return $this->executeParams($query, ...$args)->current();
+    public function rowAssocex(string $query, ...$args): array {
+        return $this->executeParams($query, ...$args)->current() ?? [];
     }
 
     public function allex(string $query, ...$args): array {

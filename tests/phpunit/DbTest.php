@@ -298,13 +298,15 @@ class DbTest extends TestCase {
             ),
             'db-pg-row-assocex-one'
         );
-        $this->assertNull(
+        $this->assertEquals(
+            [],
             $this->pg()->rowex(
                 'select label from t where id_t = $1', $id + 1
             ),
             'db-pg-row-assocex-none'
         );
-        $this->assertNull(
+        $this->assertEquals(
+            [],
             $this->pg()->rowAssocex(
                 'select label from t where id_t = $1', $id + 1
             ),

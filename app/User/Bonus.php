@@ -75,7 +75,7 @@ class Bonus extends \Gazelle\BaseUser {
             limit 1
             END_SQL
             , $this->user->id, $other->id
-        ) ?? [];
+        );
     }
 
     /**

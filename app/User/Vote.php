@@ -320,7 +320,7 @@ class Vote extends \Gazelle\BasePgUser {
                 from tgroup_vote_summary tvs
                 where id_tgroup = $1
                 ", $tgroup->id
-            ) ?? ['upvote' => 0, 'total' => 0, 'score' => 0];
+            ) ?: ['upvote' => 0, 'total' => 0, 'score' => 0];
             self::$cache->cache_value($key, $tgroupInfo, 259200); // 3 days
         }
         return $tgroupInfo;
@@ -362,7 +362,7 @@ class Vote extends \Gazelle\BasePgUser {
             from tgroup_vote_summary
             where id_tgroup = $1
             ', $tgroup->id
-        ) ?? [0, 0, 0.0];
+        ) ?: [0, 0, 0.0];
     }
 
     /**
@@ -500,12 +500,12 @@ class Vote extends \Gazelle\BasePgUser {
             if ($voteSummary === false) {
                 $voteSummary = $this->pg()->rowAssocex(<<<END_SQL
                     select count(*) AS total,
-                        sum(upvote::int) as up
+                        coalesce(sum(upvote::int), 0) as up
                     from tgroup_vote
                     where id_user = $1
                     END_SQL,
                         $this->user->id
-                ) ?? ['total' => 0, 'upvote' => 0];
+                );
                 self::$cache->cache_value($key, $voteSummary, 0);
             }
             $this->voteSummary = $voteSummary;
