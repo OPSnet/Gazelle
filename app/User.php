@@ -1319,16 +1319,6 @@ class User extends BaseAttrObject {
         return $value;
     }
 
-    // needs to be public for UserHistory
-    public function getSinglePgValue($cacheKey, $query): string {
-        $cacheKey .= '_' . $this->id;
-        if ($this->forceCacheFlush || ($value = self::$cache->get_value($cacheKey)) === false) {
-            $value = (string)$this->pg()->scalar($query, $this->id);
-            self::$cache->cache_value($cacheKey, $value, 3600);
-        }
-        return $value;
-    }
-
     public function trackerIPCount(): int {
         return (int)$this->getSingleValue('user_trackip_count', "
             SELECT count(DISTINCT IP) FROM xbt_snatched WHERE uid = ? AND IP != ''

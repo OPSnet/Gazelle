@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\Stats;
 
 use Gazelle\Enum\UserStatus;
@@ -704,7 +706,7 @@ class Users extends \Gazelle\Base {
     public function refreshUseragentTracker(): int {
         // NB: useragents may be null if the initial announce from ocelot
         // was lost, e.g. because of a deadlock or queue overflow.
-        $result =  $this->pg()->execute("
+        return $this->pg()->query("
             merge into history_useragent_tracker hut using (
                 select xfu.uid as id_user,
                     coalesce(xfu.useragent, '') as useragent,
@@ -722,7 +724,6 @@ class Users extends \Gazelle\Base {
             when matched then
                 delete
         ");
-        return $result->getAffectedRows();
     }
 
     public function registerActivity(string $tableName, int $days): int {

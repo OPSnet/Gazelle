@@ -44,23 +44,47 @@ class UserHistoryTest extends TestCase {
 
         $duplicate = $user->history()->emailDuplicate(new Search\ASN());
         $this->assertCount(1, $duplicate, 'email-duplicate-count');
-        $this->assertEquals($this->userList[0]->id, $duplicate[0]['user_id'], 'email-duplicate-user-id');
+        $this->assertEquals(
+            $this->userList[0]->id,
+            $duplicate[0]['user_id'],
+            'email-duplicate-user-id',
+        );
     }
 
     public function testEmailReset(): void {
         $user  = $this->userList[0];
         $email = 'reset@phpunit';
-        $this->assertEquals(1, $user->history()->resetEmail($email, '127.2.3.4'), 'email-reset-action');
-        $this->assertEquals($email, $user->history()->email(new Search\ASN())[0]['email'], 'email-reset-address');
+        $this->assertEquals(
+            1,
+            $user->history()->resetEmail($email, '127.2.3.4'),
+            'email-reset-action',
+        );
+        $this->assertEquals(
+            $email,
+            array_first($user->history()->email(new Search\ASN()))['email'],
+            'email-reset-address',
+        );
     }
 
     public function testIpHistory(): void {
         $user  = $this->userList[0];
-        $this->assertEquals(1, $user->history()->registerSiteIp('127.10.11.12'), 'ipaddr-register');
-        $this->assertEquals(2, $user->history()->registerSiteIp('127.10.11.12'), 'ipaddr-reregister');
+        $this->assertEquals(
+            1,
+            $user->history()->registerSiteIp('127.10.11.12'),
+            'ipaddr-register',
+        );
+        $this->assertEquals(
+            2,
+            $user->history()->registerSiteIp('127.10.11.12'),
+            'ipaddr-reregister',
+        );
         $list = $user->history()->siteIP();
         $this->assertCount(1, $list, 'ipaddr-site-history');
         $this->assertEquals('127.10.11.12', $list[0]['ip'], 'ipaddr-site-ip');
-        $this->assertTrue(Helper::recentDateTimeImmutable($list[0]['last_seen']), 'ipaddr-site-last-seen');
+        $this->assertTrue(
+            Helper::recentDateTimeImmutable($list[0]['last_seen']),
+            'ipaddr-site-last-seen',
+        );
+        $this->assertCount(0, $user->history()->apiIP(), 'ipaddr-api-history');
     }
 }

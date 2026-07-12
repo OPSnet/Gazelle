@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle;
 
 class Torrent extends TorrentAbstract {
@@ -430,8 +432,8 @@ class Torrent extends TorrentAbstract {
         }
 
         // Torrent notifications
-        $this->pg()->prepared_query("
-            DELETE FROM notification_ticket WHERE id_torrent = ?
+        $this->pg()->query("
+            delete from notification_ticket where id_torrent = $1
             ", $this->id
         );
         self::$db->prepared_query("

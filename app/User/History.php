@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\User;
 
 use Gazelle\UserCreator;
@@ -69,14 +71,21 @@ class History extends \Gazelle\BaseUser {
     /***** PASSWORDS *****/
 
     public function passwordAge(): int {
-        return (int)$this->user->getSinglePgValue('user_pw_epoch', "
-            select extract(epoch from now())
-                - extract(epoch from coalesce(max(hp.created), um.created))
-            from relay.users_main um
-            left join history_password hp on (hp.id_user = um.\"ID\")
-            where um.\"ID\" = ?
-            group by um.created
-        ");
+        $key = sprintf('user_pw_epoch_%d', $this->id);
+        $age = self::$cache->get_value($key);
+        if ($age === false) {
+            $age = (int)$this->pg()->scalarex('
+                select extract(epoch from now())
+                    - extract(epoch from coalesce(max(hp.created), um.created))
+                from relay.users_main um
+                left join history_password hp on (hp.id_user = um."ID")
+                where um."ID" = $1
+                group by um.created
+                ', $this->id
+            );
+            self::$cache->cache_value($key, $age, 86400);
+        }
+        return $age;
     }
 
     public function passwordList(): array {
