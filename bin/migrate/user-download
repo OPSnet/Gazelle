@@ -1,0 +1,37 @@
+#! /usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+namespace Gazelle;
+
+require __DIR__ . '/../../lib/bootstrap.php';
+
+$pg = new DB\Pg(PG_RW_DSN);
+$pg->begin();
+
+$n = $pg->query("
+    delete from user_download
+");
+echo "$n user downloads removed\n";
+
+$pg->query("select setval('user_download_id_user_download_seq', 1, false)");
+
+$n = $pg->query(<<<END_SQL
+    insert into user_download (id_user, id_torrent, created)
+    select "UserID", "TorrentID", "Time"
+    from relay.users_downloads;
+END_SQL
+);
+echo "$n user downloads inserted\n";
+
+$pg->query("
+    with m as (
+        select max(id_user_download) as id
+        from user_download
+    )
+    select setval('user_download_id_user_download_seq', m.id)
+    from m
+");
+
+$pg->commit();

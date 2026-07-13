@@ -122,15 +122,35 @@ class Download extends Base {
     }
 
     protected function success(): DownloadStatus {
-        $user = $this->limiter->user();
-        self::$db->prepared_query("
+        $user  = $this->limiter->user();
+        $found = (bool)self::$db->scalar('
+            SELECT 1
+            FROM users_downloads
+            WHERE UserID = ?
+                AND TorrentID = ?
+            ', $user->id, $this->torrent->id
+        );
+        self::$db->prepared_query('
             INSERT INTO users_downloads
                    (UserID, TorrentID)
             VALUES (?,      ?)
-            ", $user->id, $this->torrent->id
+            ', $user->id, $this->torrent->id
         );
-
+        $id = self::$db->inserted_id();
+        $this->pg()->query('
+            insert into user_download
+                   (id_user, id_torrent, id_user_download)
+            values ($1,      $2,         $3)
+            ', $user->id, $this->torrent->id, $id
+        );
+        $this->pg()->query("
+            select setval('user_download_id_user_download_seq', $1)
+            ", $id
+        );
         $user->stats()->incrementTGroup(Enum\UserSummaryTGroup::downloadTotal);
+        if (!$found) {
+            $user->stats()->incrementTGroup(Enum\UserSummaryTGroup::downloadUnique);
+        }
         if ($this->torrent->group()->image() != '' && $this->torrent->uploaderId() != $user->id) {
             $user->snatch()->flush();
         }

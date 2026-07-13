@@ -435,7 +435,12 @@ class History extends \Gazelle\BaseUser {
             DELETE FROM users_downloads WHERE UserID = ?
             ', $this->user->id
         );
-        return self::$db->affected_rows();
+        $affected = self::$db->affected_rows();
+        $this->pg()->query('
+            delete from user_download where id_user = $1
+            ', $this->user->id
+        );
+        return $affected;
     }
 
     public function resetRatioWatch(): int {

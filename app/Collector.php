@@ -152,10 +152,14 @@ abstract class Collector extends Base  {
         }
         $downloadList = [];
         $insertArgs = [];
+        $placeholder = [];
+        $args        = [$this->user->id];
         while ($row = self::$db->next_record(MYSQLI_ASSOC)) {
             if (!$this->idBoundary || $row['TorrentID'] == $this->idBoundary[$row[$Key]]) {
                 $downloadList[$row[$Key]] = $row;
                 array_push($insertArgs, $this->user->id, $row['TorrentID']);
+                $placeholder[] = "(\$1, {$this->pg()->placeholder(count($args))})";
+                $args[] = $row['TorrentID'];
                 if (count($downloadList) >= self::CHUNK_SIZE) {
                     break;
                 }
@@ -173,6 +177,11 @@ abstract class Collector extends Base  {
                 "INSERT INTO users_downloads (UserID, TorrentID) VALUES"
                 . implode(',', array_fill(0, $found, '(?,?)')),
                 ...$insertArgs
+            );
+            $this->pg()->query('
+                insert into user_download (id_user, id_torrent)
+                values ' . implode(',', $placeholder),
+                ...$args
             );
         }
         self::$db->set_query_id($saveQid);
