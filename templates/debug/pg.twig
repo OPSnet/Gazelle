@@ -7,18 +7,20 @@
     ((pg.totalDuration * 1000)/nr)|number_format(5) }} ms)</summary>
 <table class="debug-table">
     <tr class="colhead">
-        <td>Query</td>
-        <td>Metric</td>
         <td>Duration</td>
+        <td>Metric</td>
+        <td>Query</td>
     </tr>
 {%  endif %}
     <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
-        <td class="debug_data debug_query_data"><pre>{{ q.query|nl2br }}
+        <td class="debug_info debug_query_time nobr">{{ (q.duration * 1000)|number_format(5) }} ms</td>
+        <td class="debug_info">{{ q.metric }}</td>
+        <td class="debug_data debug_query_data"><pre>{{ q.query|trim|nl2br }}
 {%  if q.args %}
-        -- {%
-        for arg in q.args -%}
+--
+{%      for arg in q.args -%}
 {%          if not loop.first %}, {% endif -%}
-{%          if arg is instanceof('\\DateTimeImmutable') -%}
+{%          if arg is instanceof('\\DateTimeInterface') -%}
 '{{              arg|date('Y-m-d H:i:s.u') -}}'
 {%-          else -%}
 {{              arg -}}
@@ -29,8 +31,6 @@
         <br><a class="brackets" href="tools.php?action=db_sandbox&amp;src=pg&amp;debug={{
             {"query": q.query, "args": q.args}|json_encode|b64 }}">Inspect</a>
         </td>
-        <td class="debug_info" style="width: 130px;">{{ q.metric }}</td>
-        <td class="debug_info debug_query_time" style="width: 130px;">{{ (q.duration * 1000)|number_format(5) }} ms</td>
     </tr>
 {%  if loop.last %}
 </table>
