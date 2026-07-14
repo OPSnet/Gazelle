@@ -166,7 +166,7 @@ $db->prepared_query("
     SELECT tg.ID as gid, t.ID as tid
     FROM torrents_group tg
     LEFT JOIN torrents t on (t.GroupID = tg.ID)
-    WHERE tg.Name regexp '^(?:phpunit (?:category (?:change|new)|collfree|comment|download|feat|live in|log(?:checker)?|notify|reaper|request|seedbox|tag|tg(?:man|vote)|torman|torrent(?: (?:report|xcode))?) [a-z]{6}|(?:php(?: split title|unit artist (?:autocomp|merge[12]))|tracker) [a-z]{10}|Some (?:(?:boppy|live|more) )?[a-z]{8} (?:contest )?songs)$'
+    WHERE tg.Name regexp '^(?:phpunit (?:category (?:change|new)|collfree|comment|download|feat|live in|log(?:checker)?|notify|reaper|request|riplog|seedbox|tag|tg(?:man|vote)|torman|torrent(?: (?:report|xcode))?) [a-z]{6}|(?:php(?: split title|unit artist (?:autocomp|merge[12]))|tracker) [a-z]{10}|Some (?:(?:boppy|live|more) )?[a-z]{8} (?:contest )?songs)$'
 ");
 $groupList   = $db->collect('gid');
 $torrentList = $db->collect('tid');

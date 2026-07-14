@@ -27,14 +27,14 @@ class TagTest extends TestCase {
             FROM tags t
             LEFT JOIN torrents_tags tt ON (tt.TagID = t.ID)
             LEFT JOIN torrents_tags_votes ttv ON (ttv.TagID = t.ID)
-            WHERE t.Name like 'phpunit.%'
+            WHERE t.Name REGEXP '^(phpunit\.|ut\.|[1-9][0-9]+)'
         ");
         $pg = new DB\Pg(PG_RW_DSN);
         $pg->query("
             delete from tag_alias where alias_allow ~ '^phpunit'
         ");
         $pg->query("
-            delete from tag where name ~ '^phpunit'
+            delete from tag where name ~ '^(phpunit\.|ut\.|[1-9][0-9]+)'
         ");
     }
 
@@ -225,6 +225,21 @@ class TagTest extends TestCase {
             0,
             array_filter($manager->officialList(), fn($t) => $t->name() == $officialName),
             'tag-empty-official-list'
+        );
+    }
+
+    public function testNameList(): void {
+        $manager    = new Manager\Tag();
+        $this->user = Helper::makeUser('tag.' . randomString(8), 'tag.tgroup');
+        $t1 = $manager->softCreate('phpunit.metal', $this->user);
+        $t2 = $manager->softCreate('phpunit.plastic', $this->user);
+        $this->assertEqualsCanonicalizing(
+            [$t1, $t2],
+            $manager->nameToTagList(
+                'phpunit.metal  phpunit.plastic  ### '
+                . randomString(40)
+            ),
+            'tag-name-tag-list',
         );
     }
 

@@ -1,8 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\Better;
 
 use Gazelle\Enum\BetterFilter;
+use Gazelle\BaseManager;
+use Gazelle\Tag;
+use Gazelle\User;
+use Gazelle\Util\Text;
+use sad_spirit\pg_wrapper\exceptions\server\QueryCanceledException;
 
 abstract class AbstractBetter extends \Gazelle\Base {
     final public const CACHE_TOTAL = 'better_%s_%s_total';
@@ -13,14 +20,14 @@ abstract class AbstractBetter extends \Gazelle\Base {
     protected string $field;
     protected string $search;
     protected string $distinct;
-    protected bool $dirty    = true;
     protected array $where = [];
     protected array $args  = [];
+    protected bool $isTimeout = false;
 
     public function __construct(
-        protected \Gazelle\User $user,
+        protected User         $user,
         protected BetterFilter $filter,
-        protected \Gazelle\BaseManager $manager,
+        protected BaseManager  $manager,
     ) {}
 
     /**
@@ -43,7 +50,6 @@ abstract class AbstractBetter extends \Gazelle\Base {
     abstract public function mode(): string;
 
     public function setSearch(string $search): static {
-        $this->dirty = true;
         $this->search = $search;
         return $this;
     }
@@ -81,6 +87,34 @@ abstract class AbstractBetter extends \Gazelle\Base {
         return $this;
     }
 
+    // used only by SingleSeeded,
+    // but must be defined at this level to respect the Liskov substitution principle
+    // phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundInExtendedClass
+
+    /** @param array<Tag> $tagList */
+    public function setTagIncludeList(array $tagList): static {
+        return $this;
+    }
+
+    /** @param array<Tag> $tagList */
+    public function setTagExcludeList(array $tagList): static {
+        return $this;
+    }
+
+    public function tagIncludeList(): array {
+        return [];
+    }
+
+    public function tagExcludeList(): array {
+        return [];
+    }
+
+    // phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundInExtendedClass
+
+    public function isTimeout(): bool {
+        return $this->isTimeout;
+    }
+
     public function buildQuery(): string {
         $query = $this->baseQuery;
         if ($this->where) {
@@ -107,17 +141,31 @@ abstract class AbstractBetter extends \Gazelle\Base {
                     $this->args[] = $this->search;
                     break;
                 case 'group':
-                case 'torrent':
                     $this->where[] = "tg.\"Name\" ~~* ('%' || {$this->pg()->placeholder(count($this->args))} || '%')";
                     $this->args[] = $this->search;
                     break;
+                case 'torrent':
+                    // do nothing, handled in SingleSeeded
             }
         }
     }
 
     public function totalCacheKey(): string {
-        $class = explode('\\', static::class);
-        return sprintf(self::CACHE_TOTAL, strtolower(array_pop($class)), $this->filter->name);
+        return sprintf(
+            self::CACHE_TOTAL,
+            strtolower(array_last(explode('\\', static::class))
+                . '_' . implode(
+                    '_',
+                    array_map(fn ($t) => $t->id, $this->tagIncludeList())
+                )
+                . '_' . implode(
+                    '_',
+                    array_map(fn ($t) => $t->id, $this->tagExcludeList())
+                )
+                . '_' . Text::base64UrlEncode($this->search ?? '')
+            ),
+            $this->filter->name,
+        );
     }
 
     public function totalSql(): string {
@@ -131,7 +179,14 @@ abstract class AbstractBetter extends \Gazelle\Base {
         $key = $this->totalCacheKey();
         $total = self::$cache->get_value($key);
         if ($total === false) {
-            $total =  $this->pg()->scalarex($this->totalSql(), ...$this->args);
+            try {
+                $this->pg()->setTimeoutMsec(10000);
+                $this->isTimeout = false;
+                $total = $this->pg()->scalarex($this->totalSql(), ...$this->args);
+            } catch (QueryCanceledException $e) {
+                $this->isTimeout = true;
+                $total = 0;
+            }
             self::$cache->cache_value($key, $total, 1200);
         }
         return $total;
@@ -152,9 +207,16 @@ abstract class AbstractBetter extends \Gazelle\Base {
     }
 
     public function page(int $limit, int $offset): array {
-        return array_map(
-            fn ($id) => $this->manager->findById($id),
-            $this->pg()->columnex($this->pageSql($limit, $offset), ...$this->args),
-        );
+        try {
+            $this->pg()->setTimeoutMsec(10000);
+            $this->isTimeout = false;
+            return array_map(
+                fn ($id) => $this->manager->findById($id),
+                $this->pg()->columnex($this->pageSql($limit, $offset), ...$this->args),
+            );
+        } catch (QueryCanceledException $e) {
+            $this->isTimeout = true;
+            return [];
+        }
     }
 }

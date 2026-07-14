@@ -181,17 +181,17 @@ class BetterTGroupTest extends TestCase {
 
     public function testBetterSingleSeeded(): void {
         $torMan = new Manager\Torrent();
-        $single = new Better\SingleSeeded($this->user, Enum\BetterFilter::uploaded, $torMan);
-        $single->setUploader($this->user);
+        $initial = new Better\SingleSeeded($this->user, Enum\BetterFilter::uploaded, $torMan);
+        $initial->setUploader($this->user);
         $this->assertGreaterThan(
             10,
-            strlen($single->heading()),
+            strlen($initial->heading()),
             'better-single-heading',
         );
 
         global $Cache;
-        $Cache->delete_value($single->totalCacheKey());
-        $initialTotal = $single->total();
+        $Cache->delete_value($initial->totalCacheKey());
+        $initialTotal = $initial->total();
 
         $this->tgroup = Helper::makeTGroupMusic(
             user: $this->user,
@@ -208,11 +208,35 @@ class BetterTGroupTest extends TestCase {
         );
         Helper::addTorrentTraffic($torrent, seedTotal: 1);
 
+        $single = new Better\SingleSeeded($this->user, Enum\BetterFilter::uploaded, $torMan);
         $Cache->delete_value($single->totalCacheKey());
         $this->assertEquals(
             1,
             $single->total(),
             'better-single-total',
+        );
+
+        $tagMan = new Manager\Tag();
+        $includeTag = new Better\SingleSeeded($this->user, Enum\BetterFilter::any, $torMan);
+        $includeTag->setTagIncludeList($tagMan->nameToTagList('bop nosuchtag'));
+        $this->assertEquals(
+            1,
+            $includeTag->total(),
+            'better-single-include-tag-total',
+        );
+        $result = array_first($includeTag->page(2, 0));
+        $this->assertEquals(
+            $torrent->id,
+            $result->id,
+            'better-single-include-torrent-id',
+        );
+
+        $excludeTag = new Better\SingleSeeded($this->user, Enum\BetterFilter::any, $torMan);
+        $excludeTag->setTagExcludeList($tagMan->nameToTagList('bop nosuchtag'));
+        $this->assertEquals(
+            0,
+            $excludeTag->total(),
+            'better-single-exclude-tag-total',
         );
     }
 }

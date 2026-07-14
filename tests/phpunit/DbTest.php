@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Gazelle;
 
 use sad_spirit\pg_wrapper\exceptions\server\ProgrammingException;
+use sad_spirit\pg_wrapper\exceptions\server\QueryCanceledException;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\Group;
 use GazelleUnitTest\Helper;
@@ -745,6 +746,16 @@ class DbTest extends TestCase {
             $this->pg()->all("select * from phpunit_insert_copy"),
             'pg-read-insert',
         );
+    }
+
+    public function testPgTimeout(): void {
+        $pg = new DB\Pg(PG_RO_DSN);
+        $pg->setTimeoutMsec(20);
+        $this->expectException(QueryCanceledException::class);
+        $this->expectExceptionMessageMatches(
+            '/ERROR:  57014: canceling statement due to statement timeout/'
+        );
+        $pg->query('select pg_sleep(0.25)');
     }
 
     public function testPgWrite(): void {

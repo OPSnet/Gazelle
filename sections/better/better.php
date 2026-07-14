@@ -1,6 +1,7 @@
 <?php
-/** @phpstan-var \Gazelle\User $Viewer */
-/** @phpstan-var \Twig\Environment $Twig */
+
+// @phpstan-var \Gazelle\User $Viewer
+// @phpstan-var \Twig\Environment $Twig
 
 declare(strict_types=1);
 
@@ -59,6 +60,9 @@ if (isset($_GET['remove']) && $better instanceof Better\Bad && $Viewer->permitte
 
 $uploader = null;
 if ($type == 'single') {
+    $tagMan = new Manager\Tag();
+    $better->setTagIncludeList($tagMan->nameToTagList($_GET['taginclude'] ?? ''));
+    $better->setTagExcludeList($tagMan->nameToTagList($_GET['tagexclude'] ?? ''));
     $uploader = $userMan->find($_GET['uploader'] ?? '');
     if ($uploader) {
         $better->setUploader($uploader);

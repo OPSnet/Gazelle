@@ -69,9 +69,22 @@ class Tag extends \Gazelle\BaseManager {
         return $this->findById(
             (int)self::$db->scalar("
                 SELECT ID FROM tags WHERE Name = ?
-                ", $this->resolve($this->sanitize($name))
+                ", $name |> $this->sanitize(...) |> $this->resolve(...)
             )
         );
+    }
+
+    /** @return array<\Gazelle\Tag> */
+    public function nameToTagList(string $name): array {
+        $tagList = [];
+        /** @phpstan-ignore-next-line foreach.nonIterable regexp is never invalid, will never return false */
+        foreach (preg_split('/(?:\s*,\s*|\s+)/', trim($name)) as $t) {
+            $tag = $this->findByName($t);
+            if ($tag) {
+                $tagList[$t] = $tag;
+            }
+        }
+        return array_values($tagList);
     }
 
     /**
@@ -132,17 +145,13 @@ class Tag extends \Gazelle\BaseManager {
      * remove leading and trailing dots and remove doubled-up dots.
      */
     public function sanitize(string $name): string {
-        return preg_replace('/\.+/', '.',         // remove doubled-up dots
-            trim(                                 // trim leading, trailing dots
-                preg_replace('/[^a-z0-9.]+/', '', // remove non alphanum, dot
-                    str_replace([' ', '-'], '.',  // dash and internal space to dot
-                        strtolower(               // lowercase
-                            trim($name)            // whitespace
-                        )
-                    )
-                ), '.' // trim-a-dot
-            )
-        );
+        return $name
+            |> trim(...)
+            |> strtolower(...)
+            |> (fn ($t) => str_replace([' ', '-'], '.', $t))      // dash and internal space to dot
+            |> (fn ($t) => preg_replace('/[^a-z0-9.]+/', '', $t)) // remove non alphanum, dot
+            |> (fn ($t) => trim($t, '.'))                         // trim leading, trailing dots
+            |> (fn ($t) => preg_replace('/\.+/', '.', $t));       // remove doubled-up dots
     }
 
     /**

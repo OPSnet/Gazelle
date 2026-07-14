@@ -1,5 +1,5 @@
 {% from 'macro/form.twig' import selected -%}
-{{ header('Missing Search', {'js': 'better'}) }}
+{{ header('Better ' ~ better.mode|ucfirst ~ 's', {'js': 'better'}) }}
 <div class="thin">
 <h2>{% if type == 'single' %}Single seeded{% else %}Attaining perfection{% endif %}</h2>
 {% include 'better/links.twig' only %}
@@ -14,6 +14,19 @@
             {% if uploader %} ({{ uploader.id|user_url }}){% endif %}
             <br>Search by userid or @username (e.g. {{ viewer.id }} or @{{ viewer.username }})
         </td>
+    </tr>
+    <tr>
+        <td class="label"><strong>Tags</strong></td>
+        <td>
+            <label><input type="text" name="taginclude" size="20" placeholder="included" value="{{
+                better.tagIncludeList|map(t => t.name)|join(' ') }}"> all of these tags must be present</label>
+            <br>
+            <label><input type="text" name="tagexclude" size="20" placeholder="excluded" value="{{
+                better.tagExcludeList|map(t => t.name)|join(' ') }}"> none of these tags may be present</label>
+            <br>
+            Multiple tags are separated by spaces. If any tags are removed on the results page, it indicates that no upload uses that tag.
+        </td>
+    </tr>
 {% else %}
     <tr>
         <td class="label"><strong>Category</strong></td>
@@ -53,19 +66,32 @@
 {% set size = page|map(t => "#{t.size}")|reduce((sum, s) => sum + s, 0) %}
 <div class="box pad">
     <div class="torrent">
-        <h3>{{ better.heading }}</h3>
+{%  if better.isTimeout %}
+    <div class="box">
+    <b>Warning:</b> database query timed out before completion, simplify your inputs!
+    </div>
+{%  endif %}
 {%  if better.mode != 'torrent' %}
         <h4>There {% if better.total == 1 %}is{% else %}are{% endif %} {{ better.total }} {{ better.mode }}{{ better.total|plural }} remaining</h4>
-{%  elseif better.total > 1 and viewer.permitted('zip_downloader') %}
+{%  else %}
+{%      if better.tagIncludeList|length %}
+        <p>With tags <b>{{ better.tagIncludeList|map(t => t.name)|join(' ') }}</b></p>
+{%      endif %}
+{%      if better.tagExcludeList|length %}
+        <p>Excluding tags <b>{{ better.tagExcludeList|map(t => t.name)|join(' ') }}</b></p>
+{%      endif %}
+{%      if better.total > 1 and viewer.permitted('zip_downloader') %}
         <h4>Here are {{ page_total }}{% if type == 'single' and better.total > 50 %} random{% endif %} torrent{{ page_total|plural }}
-{%      if better.total > 50 %} of {{ better.total }} remaining{% endif %}
-{%          set id_list = page|map(t => "#{t.id}")|join(',') %}
+{%          if better.total > 50 %} of {{ better.total }} remaining{% endif %}
+{%              set id_list = page|map(t => "#{t.id}")|join(',') %}
             <span class="torrents_links_block">
                 <a id="collector-list" class="brackets" href="torrents.php?action=collector&amp;title=better&amp;ids={{
                     id_list }}&amp;sig={{ viewer.hashHmac('collector', id_list) }}">Download All</a>
                 <br>(size: {{ size|octet_size }})
             </span>
         </h4>
+{%      endif %}
+
 {%  endif %}
     </div>
 {{ paginator.linkbox|raw }}

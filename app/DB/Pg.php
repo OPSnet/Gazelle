@@ -450,6 +450,10 @@ class Pg {
         return $info;
     }
 
+    public function setTimeoutMsec(int $msec): int {
+        return $this->query("set statement_timeout = $msec");
+    }
+
     public function version(): string {
         return $this->scalarex('select version()');
     }
