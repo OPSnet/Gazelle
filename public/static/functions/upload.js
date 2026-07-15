@@ -382,6 +382,34 @@ function RemoveArtistField() {
     }
     document.getElementById("artist_field_" + ArtistCount).remove();
     ArtistCount--;
+    CheckNonLatinArtistNames();
+}
+
+function artistNameStartsWithNonLatinLetter(name) {
+    const firstCharacter = Array.from(name.trimStart())[0];
+    return firstCharacter !== undefined
+        && /^\p{Letter}$/u.test(firstCharacter)
+        && !/^\p{Script=Latin}$/u.test(firstCharacter);
+}
+
+function CheckNonLatinArtistNames() {
+    const warning = document.getElementById('non-latin-artist-warning');
+    if (!warning) {
+        return;
+    }
+
+    let showWarning = false;
+    document.querySelectorAll('#artistfields input[name="artists[]"]').forEach((artistField) => {
+        const isNonLatin = artistNameStartsWithNonLatinLetter(artistField.value);
+        artistField.setAttribute('aria-invalid', isNonLatin.toString());
+        if (isNonLatin) {
+            artistField.setAttribute('aria-describedby', warning.id);
+            showWarning = true;
+        } else {
+            artistField.removeAttribute('aria-describedby');
+        }
+    });
+    warning.classList.toggle('hidden', !showWarning);
 }
 
 
@@ -597,6 +625,7 @@ function fillMusicForm(group, torrent, source) {
             remaster_catalogue_number: 'remasterCatalogueNumber',
         });
     }
+    CheckNonLatinArtistNames();
 }
 
 function fillForm(group, torrent, source) {
@@ -895,6 +924,10 @@ function musicFormInit() {
     $('#other_bitrate_span').click(function () {
         AltBitrate();
     });
+    const artistFields = document.getElementById('artistfields');
+    artistFields.addEventListener('input', CheckNonLatinArtistNames);
+    artistFields.addEventListener('change', CheckNonLatinArtistNames);
+    CheckNonLatinArtistNames();
     ArtistCount      = 0;
     ArtistJsonCount  = 0;
     ExtraFormatCount = 0;

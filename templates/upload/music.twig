@@ -30,6 +30,7 @@
     <td class="label">Artist(s):</td>
     <td id="artistfields">
         <p id="vawarning" class="hidden"><strong class="important_text">Please use the multiple artists feature rather than adding "Various Artists" as an artist; read <a href="wiki.php?action=article&amp;id=64" target="_blank">this</a> for more information.</strong></p>
+        <p id="non-latin-artist-warning" class="hidden min_padding" role="alert"><strong class="important_text">It seems like you're entering a non-Latin artist name. Please <a href="wiki.php?action=article&amp;id=83" target="_blank" rel="noopener noreferrer">click here</a> to learn about Orpheus' guidelines on how to name them properly.</strong></p>
 {%  if torrent.Artists %}
 {%      for role, artist_list in torrent.Artists %}
 {%          for artist in artist_list %}
