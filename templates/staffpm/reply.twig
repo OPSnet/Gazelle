@@ -7,15 +7,17 @@
         {{ reply.preview|raw }}
         {{ reply.field|raw }}
         <br>
+{% if not user.isLocked %}
         <strong>Send to: </strong>
         <select name="level">
-{% if not user.isLocked %}
             <option value="0" selected="selected">First Line Support</option>
             <option value="{{ level.fmod }}">Forum Moderators</option>
             <option value="{{ level.mod }}">Moderators</option>
-{% endif %}
             <option value="{{ level.sysop }}">Sysops</option>
         </select>
+{% else %}
+        <input type="hidden" name="level" value="{{ level.mod }}">
+{% endif %}
         {{ reply.button|raw }}
         <input type="hidden" name="action" value="takepost">
         <input type="submit" value="Send message">
