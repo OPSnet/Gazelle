@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\Manager;
 
 use Gazelle\Enum\LeechType;
@@ -169,15 +171,17 @@ class Torrent extends \Gazelle\BaseManager {
         self::$cache->delete_value(sprintf(self::CACHE_FOLDERNAME, signature($folder, FOLDER_CLASH_SALT)));
     }
 
-    public function missingLogfiles(int $userId): array {
+    public function missingLogfiles(\Gazelle\User $user): array {
         self::$db->prepared_query("
-            SELECT ID FROM torrents WHERE HasLog = '1' AND HasLogDB = '0' AND UserID = ?
-            ", $userId
+            SELECT ID
+            FROM torrents
+            WHERE HasLog = '1'
+                AND HasLogDB = '0'
+                AND UserID = ?
+            ", $user->id
         );
-        $torrentIds = self::$db->collect(0);
-
         $result = [];
-        foreach ($torrentIds as $torrentId) {
+        foreach (self::$db->collect(0) as $torrentId) {
             $result[$torrentId] = $this->findById($torrentId);
         }
         return $result;
@@ -223,13 +227,13 @@ class Torrent extends \Gazelle\BaseManager {
         return sprintf(".%s s%ds %s %s", $ext, $size, $name, FILELIST_DELIM);
     }
 
-    public function setSourceFlag(\OrpheusNET\BencodeTorrent\BencodeTorrent $torrent): bool {
-        $sourceFlag = $torrent->getSource();
+    public function setSourceFlag(\OrpheusNET\BencodeTorrent\BencodeTorrent $torrentInfo): bool {
+        $sourceFlag = $torrentInfo->getSource();
         if ($sourceFlag === SOURCE_FLAG) {
             // appropriate source flag for the era, no change
             return false;
         }
-        $createdEpoch = $torrent->getCreationDate();
+        $createdEpoch = $torrentInfo->getCreationDate();
         if (!is_null($createdEpoch)) {
             if (is_null($sourceFlag) && $createdEpoch <= SOURCE_FLAG_NONE_EPOCH) {
                 // no source flag but prior to the introduction of source flags, no change
@@ -245,7 +249,7 @@ class Torrent extends \Gazelle\BaseManager {
             }
         }
         // capture the flag
-        return $torrent->setSource(SOURCE_FLAG);
+        return $torrentInfo->setSource(SOURCE_FLAG);
     }
 
     /**

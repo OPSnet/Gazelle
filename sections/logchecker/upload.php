@@ -1,6 +1,7 @@
 <?php
-/** @phpstan-var \Gazelle\User $Viewer */
-/** @phpstan-var \Twig\Environment $Twig */
+
+// @phpstan-var \Gazelle\User $Viewer
+// @phpstan-var \Twig\Environment $Twig
 
 declare(strict_types=1);
 
@@ -10,5 +11,5 @@ use OrpheusNET\Logchecker\Logchecker;
 
 echo $Twig->render('riplog/upload.twig', [
     'accepted' => Logchecker::getAcceptValues(),
-    'list'     => new Manager\Torrent()->missingLogfiles($Viewer->id),
+    'list'     => new Manager\Torrent()->missingLogfiles($Viewer),
 ]);

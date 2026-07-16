@@ -63,13 +63,26 @@ class RiplogTest extends TestCase {
                 [[ARTIST_MAIN], ['phpunit riplog artist ' . randomString(6)]],
                 ['czech']
             ),
-            user: $this->user,
+            user:   $this->user,
+            hasLog: true,
         );
         $riplogManager = new Manager\Riplog();
         $riplog = $riplogManager->create(
             $torrent,
             __DIR__ . '/../fixture/valid_log_eac.log',
             'valid_log_eac.log',
+        );
+
+        $torrent->setField('HasLogDB', '1')->modify();
+        $this->assertEquals(
+            [
+                $torrent->id => [
+                    'id'   => $torrent->id,
+                    'link' => $torrent->fullLink(),
+                ],
+            ],
+            new Manager\Torrent()->logFileList($torrent->uploader()->id),
+            'torman-user-riplog-list',
         );
 
         $this->assertTrue($riplog->isChecksumOk(), 'riplog-checksum');

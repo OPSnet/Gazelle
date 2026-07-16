@@ -24,8 +24,12 @@ class TorrentManagerTest extends TestCase {
                     tagName:    ['folk'],
                     user:       $this->user,
                 ),
-                user:  $this->user,
-                title: randomString(10),
+                user:     $this->user,
+                title:    randomString(10),
+                filePath: 'phpunit-' . randomString(),
+                media:    'CD',
+                hasCue:   true,
+                hasLog:   true,
             ),
             Helper::makeTorrentMusic(
                 tgroup: Helper::makeTGroupMusic(
@@ -76,6 +80,32 @@ class TorrentManagerTest extends TestCase {
             $latestTotal - 1,
             count($manager->latestUploads(5)),
             'latest-uploads-after-remove'
+        );
+    }
+
+    public function testTorrentManagerFind(): void {
+        $manager  = new Manager\Torrent();
+        $torrent  = array_first($this->torrentList);
+        $infohash = $torrent->infohash();
+        $path     = $torrent->path();
+
+        $this->assertEquals(
+            $torrent->id,
+            $manager->findByInfohash($infohash)->id,
+            'torman-find-by-infohash',
+        );
+        $manager->flushFoldernameCache($path);
+        $this->assertEquals(
+            $torrent->id,
+            array_first(
+                $manager->findAllByFoldername($path)
+            )->id,
+            'torman-find-all-by-foldername',
+        );
+        $this->assertEquals(
+            $torrent->id,
+            array_first(array_keys($manager->missingLogfiles($torrent->uploader()))),
+            'torman-missing-log-files',
         );
     }
 
@@ -151,6 +181,12 @@ class TorrentManagerTest extends TestCase {
         // Torrent was active RESEED_TORRENT days ago reseed request
         $this->torrentList[1]->setField('LastReseedRequest', date('Y-m-d H:i:s'))->modify();
         $this->assertFalse($this->torrentList[1]->isReseedRequestAllowed());
+
+        $this->assertEquals(
+            0,
+            new Manager\Torrent()->resetReseededRequest(),
+            'torman-reset-reseeded-request',
+        );
     }
 
     public function testTorrentLeechReason(): void {
@@ -219,6 +255,20 @@ class TorrentManagerTest extends TestCase {
             ],
             array_keys(new Json\Stats\Torrent()->payload()),
             'json-stats-torrent'
+        );
+    }
+
+    public function testTorrentRandom(): void {
+        foreach ($this->torrentList as $torrent) {
+            Helper::addTorrentTraffic(
+                $torrent,
+                seedTotal: 1 + RANDOM_TORRENT_MIN_SEEDS
+            );
+        }
+        $this->assertInstanceOf(
+            TGroup::class,
+            new Manager\TGroup()->findRandom(),
+            'tgroup-manager-find-random',
         );
     }
 }

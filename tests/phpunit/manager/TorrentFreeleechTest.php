@@ -19,21 +19,31 @@ class TorrentFreeleechTest extends TestCase {
             tagName:    ['hip.hop'],
             user:       $user,
         );
-        $this->torrentList = array_map(fn($info) =>
+        $this->torrentList = array_map(fn ($info) =>
             Helper::makeTorrentMusic(
-                tgroup: $tgroup,
-                format: $info['format'],
-                size:   $info['size'],
-                title:  $info['title'],
-                user:   $user,
+                tgroup:   $tgroup,
+                encoding: $info['encoding'],
+                format:   $info['format'],
+                media:    $info['media'],
+                size:     $info['size'],
+                title:    $info['title'],
+                user:     $user,
             ), [
-                ['format' => 'FLAC', 'size' => 10_000_000, 'title' => 'Regular Edition'],
-                ['format' => 'FLAC', 'size' => 15_000_000, 'title' => 'Limited Edition'],
-                ['format' => 'FLAC', 'size' => 20_000_000, 'title' => 'Deluxe Edition'],
-                ['format' => 'FLAC', 'size' => 25_000_000, 'title' => 'Ultra Edition'],
-                ['format' => 'MP3',  'size' =>  2_000_000, 'title' => 'Ultra Edition'],
+                ['encoding' => '24bit Lossless', 'format' => 'FLAC', 'media' => 'WEB',      'size' => 10_000_000, 'title' => 'Regular Edition'],
+                ['encoding' => 'Lossless',       'format' => 'FLAC', 'media' => 'Cassette', 'size' => 15_000_000, 'title' => 'Limited Edition'],
+                ['encoding' => 'Lossless',       'format' => 'FLAC', 'media' => 'CD',       'size' => 20_000_000, 'title' => 'Deluxe Edition'],
+                ['encoding' => 'Lossless',       'format' => 'FLAC', 'media' => 'WEB',      'size' => 25_000_000, 'title' => 'Ultra Edition'],
+                ['encoding' => '320',            'format' => 'MP3',  'media' => 'WEB',      'size' =>  2_000_000, 'title' => 'Ultra Edition'],
             ]
         );
+        // make the CD torrent 100%
+        $this->torrentList[2]
+            ->setField('HasCue',      '1')
+            ->setField('HasLog',      '1')
+            ->setField('HasLogDB',    '1')
+            ->setField('LogChecksum', '1')
+            ->setField('LogScore',    100)
+            ->modify();
     }
 
     public function tearDown(): void {
@@ -57,6 +67,22 @@ class TorrentFreeleechTest extends TestCase {
         $this->assertEquals(LeechType::Free,    $this->torrentList[2]->flush()->leechType(), 'torman-2-is-free');
         $this->assertEquals(LeechType::Neutral, $this->torrentList[3]->flush()->leechType(), 'torman-3-is-neutral');
         $this->assertEquals(LeechType::Normal,  $this->torrentList[4]->flush()->leechType(), 'torman-4-is-normal');
+
+        // here is as good a place as any to test these methods
+        foreach (range(0, 2) as $n) {
+            $this->assertTrue(
+                $this->torrentList[0]->isPerfecterFlac(),
+                "torrent-$n-is-web-perfecter",
+            );
+        }
+        $this->assertTrue(
+            $this->torrentList[3]->isNeutralLeech(),
+            'torrent-is-nl',
+        );
+        $this->assertTrue(
+            $this->torrentList[0]->unseeded(),
+            'torrent-is-unseeded',
+        );
 
         $this->assertEquals(
             4,

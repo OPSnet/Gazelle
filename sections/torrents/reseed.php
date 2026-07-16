@@ -1,6 +1,7 @@
 <?php
-/** @phpstan-var \Gazelle\User $Viewer */
-/** @phpstan-var \Twig\Environment $Twig */
+
+// @phpstan-var \Gazelle\User $Viewer
+// @phpstan-var \Twig\Environment $Twig
 
 declare(strict_types=1);
 
@@ -29,5 +30,5 @@ if (!$Viewer->permitted('users_mod')) {
 
 echo $Twig->render('torrent/reseed-result.twig', [
     'torrent' => $torrent,
-    'total'   => $torrent->issueReseedRequest($Viewer, new \Gazelle\Manager\User()),
+    'total'   => $torrent->issueReseedRequest($Viewer),
 ]);

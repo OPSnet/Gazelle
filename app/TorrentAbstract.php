@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle;
 
 use Gazelle\Enum\LeechReason;
@@ -643,7 +645,7 @@ abstract class TorrentAbstract extends BaseAttrObject {
     }
 
     public function hasUploadLock(): bool {
-        return (bool)self::$cache->get_value("torrent_{$this->id}_lock");
+        return (bool)self::$cache->get_value(sprintf(self::CACHE_LOCK, $this->id));
     }
 
     public function lockUpload(): void {

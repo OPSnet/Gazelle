@@ -7,6 +7,7 @@ use GazelleUnitTest\Helper;
 use Gazelle\Enum\DownloadStatus;
 use Gazelle\Enum\TorrentFlag;
 use Gazelle\Enum\UserTorrentSearch;
+use OrpheusNET\BencodeTorrent\BencodeTorrent;
 use OrpheusNET\Logchecker\Logchecker;
 
 class TorrentTest extends TestCase {
@@ -84,11 +85,12 @@ class TorrentTest extends TestCase {
     }
 
     public function testContents(): void {
-        $bencoder = new \OrpheusNET\BencodeTorrent\BencodeTorrent();
+        $torrent  = $this->torrent;
+        $bencoder = new BencodeTorrent();
         $bencoder->decodeFile(__DIR__ . '/../fixture/valid_torrent.torrent');
         $info = $bencoder->getData();
         $this->assertIsArray($info, 'torrent-file-data-array');
-        $torrentFile = new File\Torrent($this->torrent->id);
+        $torrentFile = new File\Torrent($torrent->id);
         $this->assertTrue(
             $torrentFile->put($bencoder->getEncode()),
             'torrent-file-put'
@@ -97,8 +99,29 @@ class TorrentTest extends TestCase {
             $torrentFile->exists(),
             'torrent-file-exists'
         );
+        $bencoder->setSource('ZZZ');
+        $this->assertTrue(
+            new Manager\Torrent()->setSourceFlag($bencoder),
+            'torrent-set-source-flag',
+        );
 
-        ['total_size' => $totalSize, 'files' => $fileList] = $bencoder->getFileList();
+        [
+            'files'      => $fileList,
+            'total_size' => $totalSize,
+        ] = $bencoder->getFileList();
+        $this->assertCount(3, $fileList, 'torrent-file-list');
+        $this->assertEquals(8215612, $totalSize, 'torrent-file-total-size');
+        $this->assertEquals(
+            3,
+            $torrent->regenerateFilelist(new BencodeTorrent()),
+            'torrent-regenerate-file-list',
+        );
+        $this->assertEquals(
+            "torrents.php?action=download&id={$torrent->id}&torrent_pass={$this->user->announceKey()}",
+             $torrent->downloadLocation($this->user),
+             'torrent-download-location',
+         );
+
         $torMan = new Manager\Torrent();
         ['path' => $filename, 'size' => $size] = $fileList[0];
         $this->assertEquals(
@@ -106,37 +129,77 @@ class TorrentTest extends TestCase {
             $torMan->metaFilename($filename, $size),
             'torrent-file-meta-filename',
         );
+        $tgroup = $torrent->group();
+        $this->assertEquals(
+            implode(
+                '.',
+                [
+                    array_first($tgroup->artistRole()->roleList()['main'])['name'],
+                    $tgroup->year(),
+                    $tgroup->name(),
+                    "(WEB-FLAC-Lossless)-{$torrent->id}.txt",
+                ]
+            ),
+            $torrent->torrentFilename(asText: true, maxLength: 100),
+            'torrent-torrent-filename',
+        );
+        $announceUrl = randomString(33);
+        $this->assertStringStartsWith(
+            "d8:announce33:$announceUrl",
+            $torrent->torrentBody($announceUrl),
+            'torrent-torrent-body',
+        );
 
         $dbFileList = [];
         foreach ($fileList as ['path' => $filename, 'size' => $size]) {
             $dbFileList[] = $torMan->metaFilename($filename, $size);
         }
-        $this->torrent->setField('FileList', implode("\n", $dbFileList))
+        $torrent->setField('FileList', implode("\n", $dbFileList))
             ->modify();
 
         $this->assertEquals(
             ['flac' => 2],
-            $this->torrent->fileListPrimaryMap(),
+            $torrent->fileListPrimaryMap(),
             'torrent-file-primary-map'
         );
         $this->assertEquals(
             2,
-            $this->torrent->fileListPrimaryTotal(),
+            $torrent->fileListPrimaryTotal(),
             'torrent-file-primary-total'
         );
         $this->assertEquals(
             7228,
-            $this->torrent->fileListNonPrimarySize(),
+            $torrent->fileListNonPrimarySize(),
             'torrent-file-non-primary-size'
         );
         $this->assertEquals(
             "1 track1.flac{{{2056192}}}|||2 track2.flac{{{6152192}}}|||Test Album.log{{{7228}}}",
-            $this->torrent->fileListLegacyAPI(),
+            $torrent->fileListLegacyAPI(),
             'torrent-file-legacy-list'
         );
 
-        $this->assertEquals(8215612, $totalSize, 'torrent-file-total-size');
-        $this->assertCount(3, $fileList, 'torrent-file-list');
+        $torrent->unlockUpload();
+        $this->assertFalse(
+            $torrent->hasUploadLock(),
+            'torrent-no-upload-lock'
+        );
+        $torrent->lockUpload();
+        $this->assertTrue(
+            $torrent->hasUploadLock(),
+            'torrent-has-upload-lock'
+        );
+        $torrent->unlockUpload();
+        $this->assertFalse(
+            $torrent->hasUploadLock(),
+            'torrent-upload-unlocked'
+        );
+
+        $this->assertEquals(
+            "<a href=\"torrents.php?id={$tgroup->id}&amp;torrentid={$torrent->id}#torrent{$torrent->id}\">[WEB / FLAC / Lossless]</a>",
+            $torrent->shortLabelLink(),
+            'torrent-short-label-link',
+        );
+
         $this->assertEquals(
             1,
             $torrentFile->remove(),
@@ -419,6 +482,40 @@ class TorrentTest extends TestCase {
             "Torrent groups scanned: 1\n",
             $collector->summary(),
             "collector-tlist-summary",
+        );
+    }
+
+    public function testTorrentReseed(): void {
+        $this->assertEquals(
+            1,
+            $this->torrent->issueReseedRequest($this->user),
+            'torrent-issue-reseed-request',
+        );
+        $thread = array_first(
+            $this->user->inbox()
+                ->messageList(new Manager\PM($this->user), 1, 0)
+        );
+        $tgroup = $this->torrent->group();
+        $artist = array_first($tgroup->artistRole()->roleList()['main'])['name'];
+        $this->assertEquals(
+            "Re-seed request for torrent $artist – {$tgroup->name()} [{$tgroup->year()} Album]",
+            $thread->subject(),
+            'torrent-reseed-subject',
+        );
+        $message = array_first($thread->postList(1, 0));
+        $this->assertTrue(
+            Helper::recentDate($message['sent_date']),
+            'torrent-reseed-sent-date',
+        );
+        $this->assertStringContainsString(
+            "[user]{$this->user->username()}[/user]",
+            $message['body'],
+            'torrent-reseed-message-sender'
+        );
+        $this->assertStringContainsString(
+            "[url=torrents.php?id={$tgroup->id}&torrentid={$this->torrent->id}#{$this->torrent->id}]",
+            $message['body'],
+            'torrent-reseed-message-location'
         );
     }
 }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Gazelle;
 
+use OrpheusNET\BencodeTorrent\BencodeTorrent;
+
 class Torrent extends TorrentAbstract {
     final public const tableName               = 'torrents';
     final public const CACHE_KEY               = 't_%d';
@@ -104,7 +106,7 @@ class Torrent extends TorrentAbstract {
         if ($contents == false) {
             return '';
         }
-        $tor = new \OrpheusNET\BencodeTorrent\BencodeTorrent();
+        $tor = new BencodeTorrent();
         try {
             $tor->decodeString($contents);
         } catch (\RuntimeException) {
@@ -124,7 +126,10 @@ class Torrent extends TorrentAbstract {
      *
      * @return int number of people messaged
      */
-    public function issueReseedRequest(User $viewer, Manager\User $userMan): int {
+    public function issueReseedRequest(
+        User $viewer,
+        Manager\User $userMan = new Manager\User(),
+    ): int {
         self::$db->prepared_query('
             UPDATE torrents SET
                 LastReseedRequest = now()
@@ -330,7 +335,7 @@ class Torrent extends TorrentAbstract {
      *
      * @return int number of files regenned
      */
-    public function regenerateFilelist(\OrpheusNET\BencodeTorrent\BencodeTorrent $encoder): int {
+    public function regenerateFilelist(BencodeTorrent $encoder): int {
         $torrentFile = new File\Torrent($this->id)->get();
         if ($torrentFile === false) {
             return 0;

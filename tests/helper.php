@@ -187,10 +187,13 @@ class Helper {
         string $catalogueNumber = '',
         string $recordLabel     = 'Unitest Artists',
         string $title           = 'phpunit remaster title',
+        string $filePath        = 'unit-test',
         int    $size            = 10_000_000,
         bool   $seed            = false,
+        bool   $hasCue          = false,
+        bool   $hasLog          = false,
     ): \Gazelle\Torrent {
-        if (empty($catalogueNumber)) {
+        if ($catalogueNumber === '') {
             $catalogueNumber = 'UA-REM-' . random_int(10000, 99999);
         }
         $torrent = new \Gazelle\Manager\Torrent()->create(
@@ -201,10 +204,12 @@ class Helper {
             format:                  $format,
             encoding:                $encoding,
             infohash:                'infohash-' . randomString(11),
-            filePath:                'unit-test',
+            filePath:                $filePath,
             fileList:                [],
             size:                    $size,
             isScene:                 false,
+            hasCue:                  $hasCue,
+            hasLog:                  $hasLog,
             remasterYear:            (int)date('Y'),
             remasterTitle:           $title,
             remasterRecordLabel:     $recordLabel,
