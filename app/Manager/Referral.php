@@ -563,4 +563,14 @@ class Referral extends \Gazelle\Base {
 
         return [true, $inviteKey];
     }
+
+    public function referralList(): array {
+        self::$db->prepared_query("
+            SELECT ID AS id,
+                Site AS site
+            FROM referral_accounts
+            ORDER BY Site
+        ");
+        return self::$db->to_array(false, MYSQLI_ASSOC);
+    }
 }

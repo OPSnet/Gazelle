@@ -1,17 +1,17 @@
 <?php
+
 /** @phpstan-var \Gazelle\User $Viewer */
 
 declare(strict_types=1);
 
 namespace Gazelle;
 
-$action = $_REQUEST['action'] ?? '';
 if ($Viewer->enforceMFA()) {
     require __DIR__ . '/mfa/index.php';
     exit;
 }
 
-switch ($action) {
+switch ($_REQUEST['action'] ?? '') {
     case 'audit':
         require __DIR__ . '/audit.php';
         break;
@@ -71,12 +71,10 @@ switch ($action) {
     case 'permissions':
         require __DIR__ . '/permissions.php';
         break;
-    case 'search':// User search
+    case 'search':
         require $Viewer->permitted('admin_advanced_user_search')
-                && $Viewer->permitted('users_view_ips')
-                && $Viewer->permitted('users_view_email')
-            ? 'advancedsearch.php'
-            : 'search.php';
+            ? __DIR__ . '/../usearch/index.php'
+            : __DIR__ . '/search.php';
         break;
     case 'seedbox':
         require __DIR__ . '/seedbox_edit.php';

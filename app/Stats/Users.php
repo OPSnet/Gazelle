@@ -423,7 +423,7 @@ class Users extends \Gazelle\Base {
                     group by uf."UserID"
                 )
                 select um."ID",
-                    coalesce(flrx.total, 0),
+                    coalesce(fltx.total, 0),
                     coalesce(flrx.total, 0),
                     coalesce(flused.total, 0)
                 from relay.users_main um

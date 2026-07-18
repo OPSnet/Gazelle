@@ -1,0 +1,725 @@
+{% from 'macro/form.twig' import checked, selected %}
+{% macro active_filter(value) %}
+{%  if value is not null %} data-default="true"{% endif %}
+{% endmacro %}
+{% macro active_minmax_filter(min, max) %}
+{%  if min is not null or max is not null %} data-default="true"{% endif %}
+{% endmacro %}
+{% macro active_result(list, name, show) %}
+{%  if name in list or show %} data-default="true"{% endif %}
+{% endmacro %}
+{{ header('User Search', {'js': 'usearch'}) }}
+<style>
+  .user-search-builder * {
+    box-sizing: border-box;
+  }
+  .user-search-builder h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 1rem 0 0.35rem;
+  }
+  .user-search-builder #filter-catalog,
+  .user-search-builder #result-catalog {
+    display: none;
+  }
+
+  .user-search-builder .zone {
+    align-items: flex-start;
+    border: 1px solid #d6d6d6;
+    border-radius: 5px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    min-height: 2.5rem;
+    padding: 0.5rem;
+  }
+  .user-search-builder .palette {
+    border-style: dashed;
+  }
+  .user-search-builder .dropzone {
+    border-style: dashed;
+  }
+  .user-search-builder .zone.drop-zone-hover {
+    background: #eef4ff;
+    border-color: #5a89d4;
+  }
+  .user-search-builder .zone:empty::before {
+    content: attr(data-placeholder);
+    font-style: italic;
+    font-size: 0.9rem;
+    padding: 0.15rem 0.25rem;
+    pointer-events: none;
+  }
+
+  .user-search-builder .chip {
+    align-items: center;
+    border: 1px solid #b6bcc4;
+    border-radius: 6px;
+    cursor: grab;
+    display: inline-flex;
+    font-size: 0.85rem;
+    padding: 0.1rem 0.45rem;
+    user-select: none;
+    white-space: nowrap;
+  }
+  .user-search-builder .chip:active {
+    cursor: grabbing;
+  }
+  .user-search-builder .chip.result-chip.active {
+    border-color: #5a89d4;
+  }
+
+  .user-search-builder .card {
+    border: 1px solid #aab;
+    border-radius: 4px;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.04);
+    display: inline-flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .user-search-builder .card-header {
+    align-items: center;
+    border-bottom: 1px solid #d4d8de;
+    cursor: grab;
+    display: flex;
+    font-size: 0.85rem;
+    gap: 0.4rem;
+    padding: 0.25rem 0.5rem;
+    user-select: none;
+  }
+  .user-search-builder .card-header:active {
+    cursor: grabbing;
+  }
+  .user-search-builder .drag-handle {
+    color: #999;
+    font-size: 0.85rem;
+    line-height: 1;
+    letter-spacing: -2px;
+  }
+  .user-search-builder .card-title {
+    flex: 1 1 auto;
+    font-weight: 600;
+  }
+  .user-search-builder .close-btn {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 1.1rem;
+    line-height: 1;
+    padding: 0 0.1rem 0 0.2rem;
+    color: #777;
+  }
+  .user-search-builder .close-btn:hover {
+    color: #d00;
+  }
+
+  .user-search-builder p {
+    font-size: 0.9rem;
+  }
+
+  .user-search-builder .date-range {
+    display: inline-flex;
+    gap: 0.4rem;
+  }
+  .user-search-builder .widget-body {
+    padding: 0.45rem 0.55rem;
+    white-space: nowrap;
+  }
+  .user-search-builder .widget-body fieldset {
+    border: 1px solid #d4d8de;
+    border-radius: 3px;
+    display: inline-flex;
+    gap: 0.5rem;
+    margin: 2px 0 0 0;
+    padding: 1px 6px 6px 6px;
+  }
+  .user-search-builder .widget-body fieldset > legend {
+    font-size: 0.75rem;
+    padding: 0 4px;
+  }
+  .user-search-builder .widget-body input[type=date],
+  .user-search-builder .widget-body input[type=number],
+  .user-search-builder .widget-body input[type=text],
+  .user-search-builder .widget-body select {
+    border: 1px solid #b6bcc4;
+    border-radius: 3px;
+    color: #222;
+    padding: 1px 4px;
+  }
+  .user-search-builder .widget-body input[type=number] {
+    width: 7em;
+  }
+  .user-search-builder .widget-body label {
+    gap: 0.25rem;
+   }
+
+  .user-search-builder .dragging {
+    opacity: 0.35;
+  }
+  .user-search-builder .drop-before {
+    box-shadow: -2px 0 0 0 #5a89d4;
+  }
+
+  .user-search-builder .actions {
+    margin-top: 0.75rem;
+  }
+  .user-search-builder button[type=submit] {
+    color: #333;
+    cursor: pointer;
+    padding: 0.35rem 1rem;
+  }
+  #url-copy {
+    cursor: pointer;
+    margin-top: 6px;
+    padding: 0.25rem 0.5rem;
+  }
+  summary.user-search {
+    font-size: 1.0rem;
+  }
+</style>
+<div class="thin">
+<div class="header">
+    <h2>User Search</h2>
+    <div class="linkbox">
+    </div>
+</div>
+
+{% if search.isFiltered %}
+<details open>
+<summary class="user-search">Toggle search form display</summary>
+<p>Note: Staff notes are not displayed unless there is an active staff note filter.</p>
+{% endif %}
+<div class="user-search-builder">
+  <div id="filter-catalog">
+    <div class="widget-def" data-widget-id="username"{{ _self.active_filter(input['username']) }}>
+      <span class="name">Username</span>
+      <div class="widget-body">
+        <input type="text" name="username" value="{{ input['username'] }}">
+        <br>
+        <fieldset class="op-group">
+          <legend>match</legend>
+          <label><input type="radio" name="username-op" value="equals"{{ checked(input['username-op'] == 'equals') }}> equals</label>
+          <label><input type="radio" name="username-op" value="contains"{{ checked(input['username-op']|default('contains') == 'contains') }}> contains</label>
+          <label><input type="radio" name="username-op" value="regexp"{{ checked(input['username-op'] == 'regexp') }}> regexp</label>
+        </fieldset>
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="userid"{{ _self.active_filter(input['userid']) }}>
+      <span class="name">User ID</span>
+      <div class="widget-body">
+        <label>Min <input type="number" name="userid-min" value="{{ input['userid-min'] }}" min="0"></label>
+        <label>Max <input type="number" name="userid-max" value="{{ input['userid-max'] }}" min="0"></label>
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="email"{{ _self.active_filter(input['email']) }}>
+      <span class="name">Email</span>
+      <div class="widget-body">
+        <input type="text" name="email" value="{{ input['email'] }}">
+        <br>
+        <fieldset class="op-group">
+          <legend>match</legend>
+          <label><input type="radio" name="email-op" value="equals"{{ checked(input['email-op'] == 'equals') }}> equals</label>
+          <label><input type="radio" name="email-op" value="contains"{{ checked(input['email-op']|default('contains') == 'contains') }}> contains</label>
+          <label><input type="radio" name="email-op" value="regexp"{{ checked(input['email-op'] == 'regexp') }}> regexp</label>
+        </fieldset>
+        <br>
+        <label><input type="checkbox" name="email-hist"{{ checked(input['email-hist']) }}> include historical</label>
+        <label><input type="checkbox" name="email-not"{{ checked(input['email-not']) }}> not (negate the condition)</label>
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="joined"{{ _self.active_minmax_filter(input['joined-from'], input['joined-to']) }}>
+      <span class="name">Joined</span>
+      <div class="widget-body">
+        <span class="date-range">
+          <label>From <input type="date" name="joined-from" value="{{ input['joined-from'] }}"></label>
+          <label>To <input type="date" name="joined-to" value="{{ input['joined-to'] }}"></label>
+        </span>
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="mfa"{{ _self.active_filter(input['mfa']) }}>
+      <span class="name">MFA</span>
+      <div class="widget-body">
+        <fieldset class="op-group">
+          <legend>Multi Factor Auth</legend>
+          <label><input type="radio" name="mfa" value="yes"{{ checked(input['mfa']|default('yes') == 'yes') }}> configured</label>
+          <label><input type="radio" name="mfa" value="no"{{ checked(input['mfa'] == 'no') }}> none</label>
+        </fieldset>
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="lastseen"{{ _self.active_minmax_filter(input['lastseen-from'], input['lastseen-to']) }}>
+      <span class="name">Last seen</span>
+      <div class="widget-body">
+        <span class="date-range">
+          <label>From <input type="date" name="lastseen-from" value="{{ input['lastseen-from'] }}"></label>
+          <label>To <input type="date" name="lastseen-to" value="{{ input['lastseen-to'] }}"></label>
+        </span>
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="userclass"{{ _self.active_filter(input['userclass']) }}>
+      <span class="name">Userclass</span>
+      <div class="widget-body">
+        <select name="userclass[]" size="3" multiple>
+{% for c in primary %}
+          <option value="{{ c.ID }}"{{ selected(c.ID in input['userclass']) }}>{{ c.Name }} ({{ c.Level }})</option>
+{% endfor %}
+        </select>
+        <br>Shift- or Ctrl-click to select multiple
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="secclass"{{ _self.active_filter(input['secclass']) }}>
+      <span class="name">Secondary class</span>
+      <div class="widget-body">
+        <select name="secclass[]" size="3" multiple>
+{% for c in secondary %}
+{%  if c.badge != '' %}
+          <option value="{{ c.ID }}"{{ selected(c.ID in input['secclass']) }}>{{ c.Name }}</option>
+{%  endif %}
+{% endfor %}
+        </select>
+        <br>Shift- or Ctrl-click to select multiple
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="enabled"{{ _self.active_filter(input['enabled']) }}>
+      <span class="name">Enabled</span>
+      <div class="widget-body">
+        <fieldset>
+          <legend>Status</legend>
+          <label><input type="radio" name="enabled" value="enabled"{{ checked(input['enabled'] == 'enabled') }}> ✅ Enabled</label>
+          <label><input type="radio" name="enabled" value="disabled"{{ checked(input['enabled'] == 'disabled') }}> 🚫 Disabled</label>
+          <label><input type="radio" name="enabled" value="unconfirmed"{{ checked(input['enabled'] == 'unconfirmed') }}> ❓ Unconfirmed</label>
+        </fieldset>
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="attr"{{ _self.active_filter(input['disable']) }}>
+      <span class="name">Revoked?</span>
+      <div class="widget-body">
+        <select name="disable[]" size="{{ disable|length }}" multiple>
+{% for d in disable %}
+          <option value="{{ d.id }}" title="{{ d.description|raw }}"{{ selected(d.id in input['disable']) }}>{{
+            d.name|ucfirst|replace({'-': ' '}) }}</option>
+{% endfor %}
+        </select>
+        <br>Shift- or Ctrl-click to select multiple
+        <br>
+        <fieldset>
+          <legend>Locked</legend>
+          <label><input type="radio" name="disable-op" value="all"{{ checked(input['disable-op']|default("all") == "all") }}> All</label>
+          <label><input type="radio" name="disable-op" value="any"{{ checked(input['disable-op'] == "any") }}> Any</label>
+        </fieldset>
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="locked"{{ _self.active_filter(input['locked']) }}>
+      <span class="name">Locked</span>
+      <div class="widget-body">
+        <fieldset>
+          <legend>Locked</legend>
+          <label><input type="radio" name="locked" value="yes"{{ checked(input['locked'] == "yes") }}> Yes</label>
+          <label><input type="radio" name="locked" value="no"{{ checked(input['locked'] == "no") }}> No</label>
+        </fieldset>
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="warned"{{ _self.active_filter(input['warned']) }}>
+      <span class="name">Warned</span>
+      <div class="widget-body">
+        <fieldset>
+          <legend>Warned</legend>
+          <label><input type="radio" name="warned" value="yes"{{ checked(input['warned'] == "yes") }}> Yes</label>
+          <label><input type="radio" name="warned" value="no"{{ checked(input['warned'] == "no") }}> No</label>
+        </fieldset>
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="inviter"{{ _self.active_filter(input['inviter']) }}>
+      <span class="name">Inviter</span>
+      <div class="widget-body">
+        <input type="text" name="inviter" value="{{ input['inviter'] }}">
+        <br>
+        <fieldset class="op-group">
+          <legend>match</legend>
+          <label><input type="radio" name="inviter-op" value="equals"{{ checked(input['inviter-op'] == 'equals') }}> equals</label>
+          <label><input type="radio" name="inviter-op" value="contains"{{ checked(input['inviter-op']|default('contains') == 'contains') }}> contains</label>
+        </fieldset>
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="invited"{{ _self.active_minmax_filter(input['invited-min'], input['invited-max']) }}>
+      <span class="name"># invited</span>
+      <div class="widget-body">
+        <label>Min <input type="number" name="invited-min" value="{{ input['invited-min'] }}" min="0"></label>
+        <label>Max <input type="number" name="invited-max" value="{{ input['invited-max'] }}" min="0"></label>
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="invsource"{{ _self.active_filter(input['invsource']) }}>
+      <span class="name">Recruitment site</span>
+      <div class="widget-body">
+        <select name="invsource">
+          <option value=""{{ selected(input['invsource'] is null) }}>—</option>
+{% for r in invite_source %}
+          <option value="{{ r.invite_source_id }}"{{ selected(r.invite_source_id in input['invsource']) }}>{{ r.name }}</option>
+{% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="extprofile"{{ _self.active_filter(input['extprofile']) }}>
+      <span class="name">External profile</span>
+      <div class="widget-body">
+        <input type="text" name="extprofile" value="{{ input['extprofile'] }}">
+        <br>
+        <fieldset class="op-group">
+          <legend>match</legend>
+          <label><input type="radio" name="extprofile-op" value="equals"{{ checked(input['extprofile-op']|default('equals') == 'equals') }}> equals</label>
+          <label><input type="radio" name="extprofile-op" value="contains"{{ checked(input['extprofile-op'] == 'contains') }}> contains</label>
+          <label><input type="radio" name="extprofile-op" value="regexp"{{ checked(input['extprofile-op'] == 'regexp') }}> regexp</label>
+        </fieldset>
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="referral"{{ _self.active_filter(input['referral']) }}>
+      <span class="name">Referral site</span>
+      <div class="widget-body">
+        <select name="referral">
+          <option value=""{{ selected(input['referral'] is null) }}>—</option>
+{% for r in referral %}
+          <option value="{{ r.site }}"{{ selected(r.site in input['referral']) }}>{{ r.site }}</option>
+{% endfor %}
+        </select>
+        <label>User ID <input type="text" name="referral-uid" value="{{ input['referral-uid'] }}" min="0"></label>
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="siteip"{{ _self.active_filter(input['siteip']) }}>
+      <span class="name">Site IP</span>
+      <div class="widget-body">
+        <input type="text" name="siteip" value="{{ input['siteip'] }}">
+        <input type="hidden" name="siteip-op" value="subnet">
+        <br>
+        <span>Use exact IP (192.168.10.20)<br>or CIDR (192.168.10.0/24)<span>
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="trackerip"{{ _self.active_filter(input['trackerip']) }}>
+      <span class="name">Tracker IP</span>
+      <div class="widget-body">
+        <input type="text" name="trackerip" value="{{ input['trackerip'] }}">
+        <br><label><input type="checkbox" name="trackerip-hist"{{ checked(input['trackerip-hist']) }}> search historical</label>
+        <input type="hidden" name="trackerip-op" value="prefix">
+        <br>
+        <span>Prefix match: exact IP (192.168.30.40)<br>or prefix (192.168.30, 192.168, ...)<span>
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="staffnote"{{ _self.active_filter(input['staffnote']) }}>
+      <span class="name">Staff notes</span>
+      <div class="widget-body">
+        <input type="text" name="staffnote" value="{{ input['staffnote'] }}">
+        <fieldset class="op-group">
+          <legend>match</legend>
+          <label><input type="radio" name="staffnote-op" value="regexp"{{ checked(input['staffnote-op']|default('regexp') == 'regexp') }}> regexp</label>
+          <label><input type="radio" name="staffnote-op" value="webquery"{{ checked(input['staffnote-op'] == 'webquery') }}> webquery</label>
+        </fieldset>
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="stylesheet"{{ _self.active_filter(input['stylesheet']) }}>
+      <span class="name">Stylesheet</span>
+      <div class="widget-body">
+        <select name="stylesheet">
+          <option value=""{{ selected(input['stylesheet'] is null) }}>—</option>
+{% for s in stylesheet %}
+          <option value="{{ s.id }}"{{ selected(s.id == input['stylesheet']) }}>{{ s.name }}</option>
+{% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="bprate"{{ _self.active_minmax_filter(input['bprate-min'], input['bprate-min']) }}>
+      <span class="name">BP rate</span>
+      <div class="widget-body">
+        <label>Min <input type="number" name="bprate-min" value="{{ input['bprate-min'] }}" min="0"></label>
+        <label>Max <input type="number" name="bprate-max" value="{{ input['bprate-max'] }}" min="0"></label>
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="bptotal"{{ _self.active_minmax_filter(input['bptotal-min'], input['bptotal-max']) }}>
+      <span class="name">BP total</span>
+      <div class="widget-body">
+        <label>Min <input type="number" name="bptotal-min" value="{{ input['bptotal-min'] }}" min="0"></label>
+        <label>Max <input type="number" name="bptotal-max" value="{{ input['bptotal-max'] }}" min="0"></label>
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="fltoken"{{ _self.active_minmax_filter(input['fltoken-min'], input['fltoken-max']) }}>
+      <span class="name">FL tokens</span>
+      <div class="widget-body">
+        <label>Min <input type="number" name="fltoken-min" value="{{ input['fltoken-min'] }}" min="0"></label>
+        <label>Max <input type="number" name="fltoken-max" value="{{ input['fltoken-max'] }}" min="0"></label>
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="flrx"{{ _self.active_minmax_filter(input['flrx-min'], input['flrx-max']) }}>
+      <span class="name">FL received</span>
+      <div class="widget-body">
+        <label>Min <input type="number" name="flrx-min" value="{{ input['flrx-min'] }}" min="0"></label>
+        <label>Max <input type="number" name="flrx-max" value="{{ input['flrx-max'] }}" min="0"></label>
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="fltx"{{ _self.active_minmax_filter(input['fltx-min'], input['fltx-max']) }}>
+      <span class="name">FL gifted</span>
+      <div class="widget-body">
+        <label>Min <input type="number" name="fltx-min" value="{{ input['fltx-min'] }}" min="0"></label>
+        <label>Max <input type="number" name="fltx-max" value="{{ input['fltx-max'] }}" min="0"></label>
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="flused"{{ _self.active_minmax_filter(input['flused-min'], input['flused-max']) }}>
+      <span class="name">FL used</span>
+      <div class="widget-body">
+        <label>Min <input type="number" name="flused-min" value="{{ input['flused-min'] }}" min="0"></label>
+        <label>Max <input type="number" name="flused-max" value="{{ input['flused-max'] }}" min="0"></label>
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="uploads"{{ _self.active_minmax_filter(input['uploads-min'], input['uploads-max']) }}>
+      <span class="name">Uploads</span>
+      <div class="widget-body">
+        <label>Min <input type="number" name="uploads-min" value="{{ input['uploads-min'] }}" min="0"></label>
+        <label>Max <input type="number" name="uploads-max" value="{{ input['uploads-max'] }}" min="0"></label>
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="tdownload"{{ _self.active_minmax_filter(input['tdownload-min'], input['tdownload-max']) }}>
+      <span class="name">Torrents downloaded</span>
+      <div class="widget-body">
+        <label>Min <input type="number" name="tdownload-min" value="{{ input['tdownload-min'] }}" min="0"></label>
+        <label>Max <input type="number" name="tdownload-max" value="{{ input['tdownload-max'] }}" min="0"></label>
+        <br>
+        <label><input type="checkbox" name="tdownload-uniq"{{ checked(input['tdownload-uniq']) }}> Unique?</label>
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="leech"{{ _self.active_minmax_filter(input['leech-min'], input['leech-max']) }}>
+      <span class="name">Leeching</span>
+      <div class="widget-body">
+        <label>Min <input type="number" name="leech-min" value="{{ input['leech-min'] }}" min="0"></label>
+        <label>Max <input type="number" name="leech-max" value="{{ input['leech-max'] }}" min="0"></label>
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="snatch"{{ _self.active_minmax_filter(input['snatch-min'], input['snatch-max']) }}>
+      <span class="name">Snatched</span>
+      <div class="widget-body">
+        <label>Min <input type="number" name="snatch-min" value="{{ input['snatch-min'] }}" min="0"></label>
+        <label>Max <input type="number" name="snatch-max" value="{{ input['snatch-max'] }}" min="0"></label>
+        <br>
+        <label><input type="checkbox" name="snatch-uniq"{{ checked(input['snatch-uniq']) }}> Unique?</label>
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="seeding"{{ _self.active_minmax_filter(input['seeding-min'], input['seeding-max']) }}>
+      <span class="name">Seeding</span>
+      <div class="widget-body">
+        <label>Min <input type="number" name="seeding-min" value="{{ input['seeding-min'] }}" min="0"></label>
+        <label>Max <input type="number" name="seeding-max" value="{{ input['seeding-max'] }}" min="0"></label>
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="seedhour"{{ _self.active_minmax_filter(input['seedhour-min'], input['seedhour-max']) }}>
+      <span class="name">Seed hours</span>
+      <div class="widget-body">
+        <label>Min <input type="number" name="seedhour-min" value="{{ input['seedhour-min'] }}" min="0"></label>
+        <label>Max <input type="number" name="seedhour-max" value="{{ input['seedhour-max'] }}" min="0"></label>
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="requestcreate"{{ _self.active_minmax_filter(input['requestcreate-min'], input['requestcreate-max']) }}>
+      <span class="name">Requests created</span>
+      <div class="widget-body">
+        <label>Min <input type="number" name="requestcreate-min" value="{{ input['requestcreate-min'] }}" min="0"></label>
+        <label>Max <input type="number" name="requestcreate-max" value="{{ input['requestcreate-max'] }}" min="0"></label>
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="uploadgb"{{ _self.active_minmax_filter(input['uploadgb-min'], input['uploadgb-max']) }}>
+      <span class="name">Uploaded GiB</span>
+      <div class="widget-body">
+        <label>Min <input type="number" name="uploadgb-min" value="{{ input['uploadgb-min'] }}" min="0"></label>
+        <label>Max <input type="number" name="uploadgb-max" value="{{ input['uploadgb-max'] }}" min="0"></label>
+        <br>Decimal values allowed
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="downloadgb"{{ _self.active_minmax_filter(input['downloadgb-min'], input['downloadgb-max']) }}>
+      <span class="name">Downloaded GiB</span>
+      <div class="widget-body">
+        <label>Min <input type="number" name="downloadgb-min" value="{{ input['downloadgb-min'] }}" min="0"></label>
+        <label>Max <input type="number" name="downloadgb-max" value="{{ input['downloadgb-max'] }}" min="0"></label>
+        <br>Decimal values allowed
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="requestvotegb"{{ _self.active_minmax_filter(input['requestvotegb-min'], input['requestvotegb-max']) }}>
+      <span class="name">Bounty voted GiB</span>
+      <div class="widget-body">
+        <label>Min <input type="number" name="requestvotegb-min" value="{{ input['requestvotegb-min'] }}" min="0"></label>
+        <label>Max <input type="number" name="requestvotegb-max" value="{{ input['requestvotegb-max'] }}" min="0"></label>
+      </div>
+    </div>
+
+    <div class="widget-def" data-widget-id="requestgaingb"{{ _self.active_minmax_filter(input['requestgaingb-min'], input['requestgaingb-max']) }}>
+      <span class="name">Bounty gained GiB</span>
+      <div class="widget-body">
+        <label>Min <input type="number" name="requestgaingb-min" value="{{ input['requestgaingb-min'] }}" min="0"></label>
+        <label>Max <input type="number" name="requestgaingb-max" value="{{ input['requestgaingb-max'] }}" min="0"></label>
+      </div>
+    </div>
+
+  </div>
+  <div id="result-catalog">
+    <div class="widget-def" data-widget-id="username"{{ _self.active_result(default_result, 'username', not search.isFiltered) }}><span class="name">Username</span></div>
+    <div class="widget-def" data-widget-id="userid"{{ _self.active_result(default_result, 'userid') }}><span class="name">User ID</span></div>
+    <div class="widget-def" data-widget-id="email"{{ _self.active_result(default_result, 'email') }}><span class="name">Email</span></div>
+    <div class="widget-def" data-widget-id="joined"{{ _self.active_result(default_result, 'joined', not search.isFiltered) }}><span class="name">Joined</span></div>
+    <div class="widget-def" data-widget-id="mfa"{{ _self.active_result(default_result, 'mfa') }}><span class="name">MFA</span></div>
+    <div class="widget-def" data-widget-id="lastseen"{{ _self.active_result(default_result, 'lastseen', not search.isFiltered) }}><span class="name">Last seen</span></div>
+    <div class="widget-def" data-widget-id="userclass"{{ _self.active_result(default_result, 'userclass') }}><span class="name">Userclass</span></div>
+    <div class="widget-def" data-widget-id="secclass"{{ _self.active_result(default_result, 'secclass') }}><span class="name">Secondary class</span></div>
+    <div class="widget-def" data-widget-id="enabled"{{ _self.active_result(default_result, 'enabled') }}><span class="name">Enabled</span></div>
+    <div class="widget-def" data-widget-id="disable"{{ _self.active_result(default_result, 'disable') }}><span class="name">Revoked?</span></div>
+    <div class="widget-def" data-widget-id="locked"{{ _self.active_result(default_result, 'locked') }}><span class="name">Locked</span></div>
+    <div class="widget-def" data-widget-id="inviter"{{ _self.active_result(default_result, 'inviter', not search.isFiltered) }}><span class="name">Inviter</span></div>
+    <div class="widget-def" data-widget-id="invited"{{ _self.active_result(default_result, 'invited') }}><span class="name"># invited</span></div>
+    <div class="widget-def" data-widget-id="invsource"{{ _self.active_result(default_result, 'invsource') }}><span class="name">Recruitment site</span></div>
+    <div class="widget-def" data-widget-id="extprofile"{{ _self.active_result(default_result, 'extprofile') }}><span class="name">External profile</span></div>
+    <div class="widget-def" data-widget-id="referral"{{ _self.active_result(default_result, 'referral') }}><span class="name">Referral site</span></div>
+    <div class="widget-def" data-widget-id="siteip"{{ _self.active_result(default_result, 'siteip') }}><span class="name">Site IP</span></div>
+    <div class="widget-def" data-widget-id="trackerip"{{ _self.active_result(default_result, 'trackerip') }}><span class="name">Tracker IP</span></div>
+    <div class="widget-def" data-widget-id="staffnote"{{ _self.active_result(default_result, 'staffnote') }}><span class="name">Staff notes</span></div>
+    <div class="widget-def" data-widget-id="stylesheet"{{ _self.active_result(default_result, 'stylesheet') }}><span class="name">Stylesheet</span></div>
+    <div class="widget-def" data-widget-id="bprate"{{ _self.active_result(default_result, 'bprate') }}><span class="name">BP rate</span></div>
+    <div class="widget-def" data-widget-id="bptotal"{{ _self.active_result(default_result, 'bptotal') }}><span class="name">BP total</span></div>
+    <div class="widget-def" data-widget-id="fltoken"{{ _self.active_result(default_result, 'fltoken') }}><span class="name">FL tokens</span></div>
+    <div class="widget-def" data-widget-id="flrx"{{ _self.active_result(default_result, 'flrx') }}><span class="name">FL received</span></div>
+    <div class="widget-def" data-widget-id="fltx"{{ _self.active_result(default_result, 'fltx') }}><span class="name">FL gifted</span></div>
+    <div class="widget-def" data-widget-id="flused"{{ _self.active_result(default_result, 'flused') }}><span class="name">FL used</span></div>
+    <div class="widget-def" data-widget-id="uploads"{{ _self.active_result(default_result, 'uploads') }}><span class="name">Uploads</span></div>
+    <div class="widget-def" data-widget-id="tdownload"{{ _self.active_result(default_result, 'tdownload') }}><span class="name">Torrents downloaded</span></div>
+    <div class="widget-def" data-widget-id="tdownload-uniq"{{ _self.active_result(default_result, 'tdownload-uniq') }}><span class="name">Torrents downloaded (Unique)</span></div>
+    <div class="widget-def" data-widget-id="leech"{{ _self.active_result(default_result, 'leech') }}><span class="name">Leeching</span></div>
+    <div class="widget-def" data-widget-id="snatch"{{ _self.active_result(default_result, 'snatch') }}><span class="name">Snatched</span></div>
+    <div class="widget-def" data-widget-id="snatch-uniq"{{ _self.active_result(default_result, 'snatch-uniq') }}><span class="name">Snatched (Unique)</span></div>
+    <div class="widget-def" data-widget-id="seeding"{{ _self.active_result(default_result, 'seeding') }}><span class="name">Seeding</span></div>
+    <div class="widget-def" data-widget-id="seedhour"{{ _self.active_result(default_result, 'seedhour') }}><span class="name">Seed hours</span></div>
+    <div class="widget-def" data-widget-id="requestcreate"{{ _self.active_result(default_result, 'requestcreate') }}><span class="name">Requests created</span></div>
+    <div class="widget-def" data-widget-id="uploadgb"{{ _self.active_result(default_result, 'uploadgb') }}><span class="name">Uploaded GiB</span></div>
+    <div class="widget-def" data-widget-id="downloadgb"{{ _self.active_result(default_result, 'downloadgb') }}><span class="name">Downloaded GiB</span></div>
+    <div class="widget-def" data-widget-id="requestvotegb"{{ _self.active_result(default_result, 'requestvotegb') }}><span class="name">Bounty voted GiB</span></div>
+    <div class="widget-def" data-widget-id="requestgaingb"{{ _self.active_result(default_result, 'requestgaingb') }}><span class="name">Bounty gained GiB</span></div>
+    <div class="widget-def" data-widget-id="warned"{{ _self.active_result(default_result, 'warned') }}><span class="name">Warned</span></div>
+  </div>
+
+  <form id="user-search" method="get" action="usearch.php" novalidate>
+    <h2>Filter catalog</h2>
+    <div id="filter-palette" class="zone palette" data-zone="filter-palette"
+         data-placeholder="(empty — drag a filter here)"></div>
+
+    <h2>Search filters</h2>
+    <div id="filter-active" class="zone dropzone" data-zone="filter-active"
+         data-placeholder="Drop a filter here, or double-click one in the catalog above."></div>
+
+    <h2>Result columns</h2>
+    <p>Drag or double-click a column to the list below, reordering as required. Results are be sorted by default on the first three columns</p>
+    <div id="result-palette" class="zone palette" data-zone="result-palette"
+         data-placeholder="(empty)"></div>
+
+    <h2>Display result columns</h2>
+    <div id="result-active" class="zone dropzone" data-zone="result-active"
+         data-placeholder="Drop result columns for the resultset here. Reorder by dragging.">
+     </div>
+
+    <input type="hidden" name="view" id="view-input">
+    <div class="actions">
+      <button type="submit">Search</button>
+    </div>
+  </form>
+</div>
+{% if search.isFiltered %}
+</details>
+{% endif %}
+
+{% if search.isFiltered %}
+<div class="box pad">
+{%  set result  = search.page(paginator.limit, paginator.offset) %}
+{%  set columns = result[0]|length %}
+{%  set heading = search.heading %}
+{%  for r in result %}
+{%    if loop.first %}
+  <h3>Users matched: {{ search.total|number_format }}</h3>
+{{      paginator.linkbox|raw }}
+  <table>
+    <tr>
+{%      for col in 0 .. (columns-1) %}
+{%        set field = 'c' ~ col %}
+      <th>{{ heading.alias(field)|raw }}</th>
+{%      endfor %}
+    </tr>
+{%    endif %}
+    <tr>
+{%    for col in 0 .. (columns-1) %}
+      <td>
+{%-     set field = 'c' ~ col %}
+{%      if r[field] is instanceof('\\DateTimeImmutable') %}
+{{          r[field]|date('Y-m-d H:i:s') -}}
+{%      elseif heading.aliasField(field) in ['username', 'inviter'] %}
+{{          r[field]|user_url -}}
+{%      elseif heading.aliasField(field) == 'enabled' %}
+{%          if r[field] == enum('Gazelle\\Enum\\UserStatus').disabled.value %}🚫
+{%          elseif r[field] == enum('Gazelle\\Enum\\UserStatus').unconfirmed.value %}❓
+{%          else %}✅
+{%          endif %}
+{%      elseif heading.aliasField(field) == 'mfa' %}
+{%          if r[field] %}✅{% else %}·{% endif %}
+{%      elseif heading.aliasField(field) == 'staffnote' %}
+{{          r[field]|join('<br>')|raw }}
+{%      elseif heading.aliasField(field) == 'disable' %}
+{{          r[field]|default([])|map(attr => attr|replace({'disable-': ''}))|join(', ') }}
+{%      elseif heading.aliasField(field) ends with 'gb' %}
+{{          r[field]|octet_size -}}
+{%      elseif heading.aliasField(field) in ['joined', 'lastseen'] %}
+{{          r[field]|time_diff -}}
+{%      elseif heading.aliasField(field) in [
+            'bptotal', 'fltoken', 'invited', 'leech',
+            'requestcreate', 'seedhour', 'seeding', 'snatch',
+            'snatch-uniq', 'tdownload', 'tdownload-uniq', 'uploads',
+        ] %}
+{{          r[field]|number_format-}}
+{%      else %}
+{{          r[field] -}}
+{%      endif -%}
+      </td>
+{%    endfor %}
+    </tr>
+{%    if loop.last %}
+  </table>
+{%    endif %}
+{%  endfor %}
+</div>
+{{  paginator.linkbox|raw }}
+{%  if viewer.permitted('admin_site_debug') %}
+{%  endif %}
+</div>
+{% endif %}
+{{ footer() }}
