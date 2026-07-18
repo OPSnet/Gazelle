@@ -745,7 +745,7 @@ class Text {
                     } else {
                         // Basic tags, like [b] or [size=5]
                         $Array[$ArrayPos] = ['Type' => $TagName, 'Val' => self::parse($Block)];
-                        if (!is_object($Attrib) && $MaxAttribs > 0) {
+                        if ($MaxAttribs > 0) {
                             $Array[$ArrayPos]['Attr'] = strtolower($Attrib);
                         }
                     }

@@ -241,42 +241,6 @@ parameters:
 			path: ../classes/sphinxqlresult.class.php
 
 		-
-			rawMessage: 'Offset ''collageid'' on *NEVER* in isset() always exists and is not nullable.'
-			identifier: isset.offset
-			count: 1
-			path: ../classes/text.class.php
-
-		-
-			rawMessage: 'Offset ''id'' on *NEVER* in isset() always exists and is not nullable.'
-			identifier: isset.offset
-			count: 2
-			path: ../classes/text.class.php
-
-		-
-			rawMessage: Offset 'id' on *NEVER* on left side of ?? always exists and is not nullable.
-			identifier: nullCoalesce.offset
-			count: 2
-			path: ../classes/text.class.php
-
-		-
-			rawMessage: 'Offset ''torrentid'' on *NEVER* in isset() always exists and is not nullable.'
-			identifier: isset.offset
-			count: 1
-			path: ../classes/text.class.php
-
-		-
-			rawMessage: Result of && is always false.
-			identifier: booleanAnd.alwaysFalse
-			count: 1
-			path: ../classes/text.class.php
-
-		-
-			rawMessage: Unreachable statement - code above always terminates.
-			identifier: deadCode.unreachable
-			count: 1
-			path: ../classes/text.class.php
-
-		-
 			rawMessage: 'Call to method getName() of internal class WhichBrowser\Model\Primitive\NameVersion from outside its root namespace WhichBrowser.'
 			identifier: method.internalClass
 			count: 1
@@ -317,12 +281,6 @@ parameters:
 			identifier: nullCoalesce.offset
 			count: 1
 			path: ../sections/api/index.php
-
-		-
-			rawMessage: 'Call to an undefined method Gazelle\Better\ArtistCollage|Gazelle\Better\ArtistDescription|Gazelle\Better\ArtistDiscogs|Gazelle\Better\ArtistImage|Gazelle\Better\Artwork|Gazelle\Better\Bad|Gazelle\Better\Checksum|Gazelle\Better\SingleSeeded::setUploader().'
-			identifier: method.notFound
-			count: 1
-			path: ../sections/better/better.php
 
 		-
 			rawMessage: Offset 'userid' on non-empty-array<mixed> on left side of ?? always exists and is not nullable.
@@ -371,12 +329,6 @@ parameters:
 			identifier: variable.undefined
 			count: 4
 			path: ../sections/recovery/save.php
-
-		-
-			rawMessage: If condition is always false.
-			identifier: if.alwaysFalse
-			count: 1
-			path: ../sections/reportsv2/resolve_handle.php
 
 		-
 			rawMessage: Offset 'bitrates' on non-empty-array<mixed> on left side of ?? always exists and is not nullable.
@@ -429,18 +381,6 @@ parameters:
 		-
 			rawMessage: 'Call to function is_null() with int will always evaluate to false.'
 			identifier: function.impossibleType
-			count: 1
-			path: ../sections/torrents/edit_handle.php
-
-		-
-			rawMessage: 'Offset ''Description''|''Encoding''|''Format''|''Media''|''RemasterCatalogueNu…''|''RemasterRecordLabel''|''RemasterTitle''|''RemasterYear''|''Scene'' on *NEVER* in isset() always exists and is not nullable.'
-			identifier: isset.offset
-			count: 1
-			path: ../sections/torrents/edit_handle.php
-
-		-
-			rawMessage: Offset 'Description'|'Encoding'|'Format'|'Media'|'RemasterCatalogueNu…'|'RemasterRecordLabel'|'RemasterTitle'|'RemasterYear'|'Scene' on *NEVER* on left side of ?? always exists and is not nullable.
-			identifier: nullCoalesce.offset
 			count: 1
 			path: ../sections/torrents/edit_handle.php
 

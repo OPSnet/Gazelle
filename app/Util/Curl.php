@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\Util;
 
 use Gazelle\Enum\CurlMethod;
@@ -51,7 +53,7 @@ class Curl {
 
     public function fetch(string $url): bool {
         curl_reset($this->curl);
-        // @phpstan-ignore-next-line argument.type
+        /** @phpstan-ignore-next-line argument.type Offset 10002 (non-empty-string) does not accept type string. (huh?) */
         curl_setopt_array($this->curl, [
             CURLOPT_HEADER         => false,
             CURLOPT_HTTPHEADER     => $this->headers,
