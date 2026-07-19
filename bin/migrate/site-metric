@@ -1,0 +1,77 @@
+#! /usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+namespace Gazelle;
+
+require __DIR__ . '/../../lib/bootstrap.php';
+
+$pg = new DB\Pg(PG_RW_DSN);
+$pg->begin();
+
+$n = $pg->query("
+    delete from history_site_metric hsm
+    using site_metric sm
+    where sm.id_site_metric = hsm.id_site_metric
+        and sm.name in (
+            'snatch-lossless',
+            'snatch-lossy',
+            'torrent-created'
+        )
+");
+echo "$n site metric records removed\n";
+
+$n = $pg->query(<<<END_SQL
+    with lossless(metric, dt) as (
+        select count(*),
+            to_timestamp(xs.tstamp)::date as dt
+        from relay.xbt_snatched xs
+        inner join relay.torrents t on (t."ID" = xs.fid)
+        where t."Format" = 'FLAC'
+            and xs.tstamp < extract(epoch from (now() - interval '1 day')::date)
+        group by dt
+    )
+    insert into history_site_metric (id_site_metric, metric, dt)
+    select (select id_site_metric from site_metric where name = 'snatch-lossless'),
+        lossless.*
+        from lossless
+    END_SQL
+);
+echo "$n snatch-lossless rows inserted\n";
+
+$n = $pg->query(<<<END_SQL
+    with lossy(metric, dt) as (
+        select count(*),
+            to_timestamp(xs.tstamp)::date as dt
+        from relay.xbt_snatched xs
+        inner join relay.torrents t on (t."ID" = xs.fid)
+        where t."Format" != 'FLAC'
+            and xs.tstamp < extract(epoch from (now() - interval '1 day')::date)
+        group by dt
+    )
+    insert into history_site_metric (id_site_metric, metric, dt)
+    select (select id_site_metric from site_metric where name = 'snatch-lossy'),
+        lossy.*
+        from lossy
+    END_SQL
+);
+echo "$n snatch-lossy rows inserted\n";
+
+$n = $pg->query(<<<END_SQL
+    with lossy(metric, dt) as (
+        select count(*),
+            date(t.created) as dt
+        from relay.torrents t
+        where t.created < (now() - interval '1 day')::date
+        group by dt
+    )
+    insert into history_site_metric (id_site_metric, metric, dt)
+    select (select id_site_metric from site_metric where name = 'torrent-created'),
+        lossy.*
+        from lossy
+    END_SQL
+);
+echo "$n torrent-created rows inserted\n";
+
+$pg->commit();

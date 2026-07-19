@@ -149,7 +149,7 @@ class SchedulerTest extends TestCase {
 
     public function testTaskDetailList(): void {
         $list = new TaskScheduler()->taskDetailList();
-        $this->assertCount(42, $list, 'task-detail-list');
+        $this->assertCount(43, $list, 'task-detail-list');
         $detail = array_first($list);
         $this->assertEqualsCanonicalizing(
             [

@@ -45,6 +45,18 @@ class SiteInfoTest extends TestCase {
         $this->assertEquals([], $info->tablesWithDuplicateForeignKeys(), 'siteinfo-table-dup-foreign-keys');
     }
 
+    public function testSiteMetric(): void {
+        new DB\Pg(PG_RW_DSN)->query('
+            delete from history_site_metric where dt = $1
+            ', new \DateTimeImmutable('yesterday')
+        );
+        $this->assertEquals(
+            11,
+            new SiteInfo()->refreshHistorySiteMetric(),
+            'siteinfo-history-metric',
+        );
+    }
+
     #[Group('no-ci')]
     public function testGitInfo(): void {
         $info = new SiteInfo();

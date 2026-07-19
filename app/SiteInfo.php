@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle;
 
 use Gazelle\Util\Time;
@@ -233,6 +235,188 @@ class SiteInfo extends Base {
             WHERE t.TABLE_SCHEMA = ?
                 AND t.TABLE_NAME = ?
             ", MYSQL_DB, $tableName
+        );
+    }
+
+    public function refreshHistorySiteMetric(): int {
+        $begin    = new \DateTime('yesterday');
+        $end      = new \DateTime('today');
+        $inserted = 0;
+
+        if ($this->refreshHistorySiteMetricNeeded('request-filled')) {
+            // if filled is missing, unfilled is too
+            $inserted += $this->pg()->query(<<<END_SQL
+                insert into history_site_metric (id_site_metric, dt, metric)
+                select sm.id_site_metric,
+                    $1::date,
+                    coalesce(
+                        case sm.name
+                            when 'request-filled'   then sum(
+                                case when r.id_filler is null
+                                    then 0
+                                    else 1
+                                end
+                            )
+                            when 'request-unfilled' then sum(
+                                case when r.id_filler is null
+                                    /* special case no rows in request table */
+                                    then case when r.id_request is null then 0 else 1 end
+                                    else 0
+                                end
+                            )
+                        end,
+                        0
+                    )
+                from site_metric sm
+                left join request r on (true)
+                where sm.name in ('request-unfilled', 'request-filled')
+                    and (r.id_request is null or r.created < $2)
+                group by sm.id_site_metric,
+                    sm.name
+                END_SQL, $begin, $end
+            );
+        }
+
+        if ($this->refreshHistorySiteMetricNeeded('snatch-lossless')) {
+            $inserted += $this->pg()->query(<<<END_SQL
+                with snatch as (
+                    select
+                        coalesce(sum(case when t."Format" = 'FLAC' then 1 else 0 end), 0) as lossless,
+                        coalesce(sum(case when t."Format" = 'FLAC' then 0 else 1 end), 0) as lossy
+                    from relay.xbt_snatched   xs
+                    inner join relay.torrents t  on (t."ID" = xs.fid)
+                    where xs.tstamp >= extract(epoch from $1::date)
+                        and xs.tstamp < extract(epoch from $2::date)
+                )
+                insert into history_site_metric (id_site_metric, dt, metric)
+                select sm.id_site_metric,
+                    $1::date,
+                    case
+                        when sm.name = 'snatch-lossless' then snatch.lossless
+                        when sm.name = 'snatch-lossy'    then snatch.lossy
+                    end
+                from snatch
+                cross join site_metric sm
+                where sm.name in ('snatch-lossless', 'snatch-lossy');
+                END_SQL, $begin, $end
+            );
+        }
+
+        if ($this->refreshHistorySiteMetricNeeded('torrent-seeding')) {
+            // and torrent-leeching
+            $inserted += $this->pg()->query(<<<END_SQL
+                with torrent as (
+                    select
+                        coalesce(sum(case when xfu.remaining = 0 then 1 else 0 end), 0) as seeding,
+                        coalesce(sum(case when xfu.remaining = 0 then 0 else 1 end), 0) as leeching
+                    from relay.xbt_files_users xfu
+                )
+                insert into history_site_metric (id_site_metric, dt, metric)
+                select sm.id_site_metric,
+                    $1::date,
+                    case
+                        when sm.name = 'torrent-seeding'  then torrent.seeding
+                        when sm.name = 'torrent-leeching' then torrent.leeching
+                    end
+                from torrent
+                cross join site_metric sm
+                where sm.name in ('torrent-seeding', 'torrent-leeching');
+                END_SQL, $begin
+            );
+        }
+
+        if ($this->refreshHistorySiteMetricNeeded('torrent-created')) {
+            $inserted += $this->pg()->query(<<<END_SQL
+                with torrent(metric) as (
+                    select count(*)
+                    from relay.torrents t
+                    where t.created >= $1
+                        and t.created < $2
+                )
+                insert into history_site_metric (id_site_metric, dt, metric)
+                select sm.id_site_metric,
+                    $1::date,
+                    torrent.metric
+                from torrent
+                cross join site_metric sm
+                where sm.name = 'torrent-created'
+                END_SQL, $begin, $end
+            );
+        }
+
+        if ($this->refreshHistorySiteMetricNeeded('torrent-single-seed-flac')) {
+            $inserted += $this->pg()->query(<<<END_SQL
+                with ssf(metric) as (
+                    select count(*)
+                    from relay.torrents t
+                    inner join relay.torrents_leech_stats tls on (tls."TorrentID" = t."ID")
+                    where t."Format"      = 'FLAC'
+                        and tls."Seeders" = 1
+                )
+                insert into history_site_metric (id_site_metric, dt, metric)
+                select sm.id_site_metric,
+                    $1::date,
+                    coalesce(ssf.metric, 0)
+                from ssf
+                cross join site_metric sm
+                where sm.name = 'torrent-single-seed-flac';
+                END_SQL, $begin
+            );
+        }
+
+        if ($this->refreshHistorySiteMetricNeeded('user-enable')) {
+            // and user-disable
+            $inserted += $this->pg()->query(<<<END_SQL
+                insert into history_site_metric (id_site_metric, dt, metric)
+                select sm.id_site_metric,
+                    $1::date,
+                    coalesce(
+                        case sm.name
+                            when 'user-enable'  then sum(case when um."Enabled" = $2 then 1 else 0 end)
+                            when 'user-disable' then sum(case when um."Enabled" = $2 then 0 else 1 end)
+                        end,
+                        0
+                    )
+                from relay.users_main  um
+                cross join site_metric sm
+                where sm.name in ('user-enable', 'user-disable')
+                group by sm.id_site_metric,
+                    sm.name
+                END_SQL, $begin, Enum\UserStatus::enabled->value
+            );
+        }
+
+        if ($this->refreshHistorySiteMetricNeeded('user-ratio')) {
+            $inserted += $this->pg()->query(<<<END_SQL
+                with ratio(metric) as (
+                    select coalesce(count(*), 0)
+                    from relay.users_info  ui
+                    where ui."RatioWatchEnds" > $1
+                )
+                insert into history_site_metric (id_site_metric, dt, metric)
+                select sm.id_site_metric,
+                    $1::date,
+                    ratio.metric
+                from ratio
+                cross join site_metric sm
+                where sm.name = 'user-ratio'
+                END_SQL, $begin
+            );
+        }
+        return $inserted;
+    }
+
+    public function refreshHistorySiteMetricNeeded(string $name): bool {
+        // the task to update the metrics is run several times a day to take
+        // into account the possibility of the database being stopped for
+        // maintenance, or a query dying due to a deadlock.
+        return !(bool)$this->pg()->scalarex("
+            select 1
+            from history_site_metric hsm
+            inner join site_metric sm using (id_site_metric)
+            where hsm.dt = (now() - interval '1 day')::date
+                and sm.name = $1
+            ", $name
         );
     }
 }
