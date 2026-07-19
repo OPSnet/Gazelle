@@ -1,4 +1,5 @@
 <?php
+
 /** @phpstan-var \Gazelle\User $Viewer */
 
 declare(strict_types=1);
@@ -12,8 +13,6 @@ if (!$Viewer->permitted('admin_dnu')) {
 authorize();
 
 $manager = new Manager\DNU();
-
-$db = DB::DB();
 
 if ($_POST['submit'] == 'Reorder') {
     // Reorder, issued from an ajax call, see dnu.js

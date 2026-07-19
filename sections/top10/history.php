@@ -1,6 +1,9 @@
 <?php
-/** @phpstan-var \Gazelle\User $Viewer */
-/** @phpstan-var \Twig\Environment $Twig */
+
+/**
+ * @phpstan-var \Gazelle\User $Viewer
+ * @phpstan-var \Twig\Environment $Twig
+ */
 
 declare(strict_types=1);
 
@@ -12,8 +15,7 @@ if (!$Viewer->permitted('users_mod')) {
 
 $isByDay = trim($_GET['datetype'] ?? 'day')  == 'day';
 
-$db = DB::DB();
-if (empty($_GET['date'])) {
+if (!isset($_GET['date'])) {
     $date = date('Y-m-d');
     $list = [];
 } else {
