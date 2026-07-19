@@ -5,7 +5,6 @@ namespace Gazelle\Search;
 use Gazelle\Enum\BetterEncoding;
 use Gazelle\Enum\BetterFilter;
 
-
 class Transcode extends \Gazelle\Base {
     /**
      * A class to deal with finding Lossless uploads that can be transcoded,

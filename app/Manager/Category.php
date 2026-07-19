@@ -14,7 +14,7 @@ class Category extends \Gazelle\Base {
     }
 
     public function findIdByName(string $name): ?int {
-        $found = current(array_filter(
+        $found = array_first(array_filter(
             $this->nameList(),
             fn($n) => $n['name'] == $name
         ));

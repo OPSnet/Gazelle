@@ -1,4 +1,5 @@
 <?php
+
 // phpcs:disable PSR1.Files.SideEffects.FoundWithSymbols
 
 /* This file defines all the configuration required to run a Gazelle

@@ -5,7 +5,6 @@ namespace Gazelle\UserMatch;
 use Gazelle\Enum\Direction;
 use Gazelle\Enum\UserMatchSort;
 
-
 class ListMatcher extends \Gazelle\Base {
     final protected const string CACHE_KEY = 'listmatcher_cache_%s_%s';
     final protected const int MAX_INSERT = 1000;

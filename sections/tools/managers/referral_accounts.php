@@ -1,4 +1,5 @@
 <?php
+
 // phpcs:disable Generic.WhiteSpace.ScopeIndent.IncorrectExact
 // phpcs:disable Generic.WhiteSpace.ScopeIndent.Incorrect
 // phpcs:disable PSR1.Files.SideEffects.FoundWithSymbols

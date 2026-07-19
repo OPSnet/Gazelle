@@ -169,7 +169,9 @@ class Artist extends \Gazelle\BaseManager {
 
     public function autocompleteList(string $prefix): array {
         $prefix = trim($prefix);
-        if ($prefix == '') { return []; }
+        if ($prefix === '') {
+            return [];
+        }
         $list = self::$cache->get($key = $this->autocompleteKey($prefix));
         if ($list === false) {
             $orderBy = 'm.exact_match DESC, sum(tls.Snatched) DESC, selected_alias.Name ASC';

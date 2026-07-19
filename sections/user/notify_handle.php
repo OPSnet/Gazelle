@@ -1,6 +1,9 @@
 <?php
-/** @phpstan-var \Gazelle\User $Viewer */
-/** @phpstan-var \Gazelle\Cache $Cache */
+
+/**
+ * @phpstan-var \Gazelle\User $Viewer
+ * @phpstan-var \Gazelle\Cache $Cache
+ */
 
 declare(strict_types=1);
 

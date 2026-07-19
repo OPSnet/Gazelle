@@ -1,7 +1,10 @@
 <?php
-/** @phpstan-var \Gazelle\User $Viewer */
-// phpcs:disable Generic.WhiteSpace.ScopeIndent.IncorrectExact
-// phpcs:disable Generic.WhiteSpace.ScopeIndent.Incorrect
+
+/**
+ * phpcs:disable Generic.WhiteSpace.ScopeIndent.IncorrectExact
+ * phpcs:disable Generic.WhiteSpace.ScopeIndent.Incorrect
+ * @phpstan-var \Gazelle\User $Viewer
+ */
 
 declare(strict_types=1);
 

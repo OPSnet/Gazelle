@@ -1,4 +1,5 @@
 <?php
+
 // phpcs:disable PSR1.Files.SideEffects.FoundWithSymbols
 
 declare(strict_types=1);
@@ -62,9 +63,10 @@ function diff(string $OldText, string $NewText): array {
     return $Result;
 }
 
-/** @phpstan-var \Gazelle\User $Viewer */
-/** @phpstan-var \Twig\Environment $Twig */
-
+/**
+ * @phpstan-var \Gazelle\User $Viewer
+ * @phpstan-var \Twig\Environment $Twig
+ */
 $old = (int)($_GET['old'] ?? 0);
 $new = (int)($_GET['new'] ?? 0);
 if ($old >= $new) {

@@ -1,10 +1,14 @@
 <?php
-/** @phpstan-var \Gazelle\User $Viewer */
-/** @phpstan-var \Twig\Environment $Twig */
+
+/**
+ * @phpstan-var \Gazelle\User $Viewer
+ * @phpstan-var \Twig\Environment $Twig
+ */
 
 declare(strict_types=1);
 
 namespace Gazelle;
+
 ini_set('memory_limit', '256M');
 
 if (!$Viewer->permitted('site_analysis')) {

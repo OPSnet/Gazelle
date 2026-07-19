@@ -1,7 +1,10 @@
 <?php
-/** @phpstan-var \Gazelle\User $user */
-/** @phpstan-var \Gazelle\User $Viewer */
-/** @phpstan-var \Twig\Environment $Twig */
+
+/**
+ * @phpstan-var \Gazelle\User $user
+ * @phpstan-var \Gazelle\User $Viewer
+ * @phpstan-var \Twig\Environment $Twig
+ */
 
 declare(strict_types=1);
 

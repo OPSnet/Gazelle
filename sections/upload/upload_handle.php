@@ -1,9 +1,12 @@
 <?php
-// phpcs:disable PSR1.Files.SideEffects.FoundWithSymbols
-/** @phpstan-var \Gazelle\User $Viewer */
-/** @phpstan-var \Gazelle\Cache $Cache */
-/** @phpstan-var \Twig\Environment $Twig */
-/** @phpstan-var \Gazelle\Debug $Debug */
+
+/**
+ * phpcs:disable PSR1.Files.SideEffects.FoundWithSymbols
+ * @phpstan-var \Gazelle\User $Viewer
+ * @phpstan-var \Gazelle\Cache $Cache
+ * @phpstan-var \Twig\Environment $Twig
+ * @phpstan-var \Gazelle\Debug $Debug
+ */
 
 declare(strict_types=1);
 

@@ -1,6 +1,9 @@
 <?php
-/** @phpstan-var \Gazelle\User $Viewer */
-/** @phpstan-var \Gazelle\Debug $Debug */
+
+/**
+ * @phpstan-var \Gazelle\User $Viewer
+ * @phpstan-var \Gazelle\Debug $Debug
+ */
 
 declare(strict_types=1);
 

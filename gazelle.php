@@ -1,4 +1,5 @@
 <?php
+
 // phpcs:disable PSR1.Files.SideEffects.FoundWithSymbols
 
 namespace Gazelle;

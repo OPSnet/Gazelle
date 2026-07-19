@@ -1,6 +1,9 @@
 <?php
-// phpcs:disable PSR1.Files.SideEffects.FoundWithSymbols
-/** @phpstan-var \Gazelle\User $Viewer */
+
+/**
+ * phpcs:disable PSR1.Files.SideEffects.FoundWithSymbols
+ * @phpstan-var \Gazelle\User $Viewer
+ */
 
 declare(strict_types=1);
 

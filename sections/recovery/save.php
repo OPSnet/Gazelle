@@ -1,4 +1,5 @@
 <?php
+
 /** @phpstan-var \Gazelle\Cache $Cache */
 
 declare(strict_types=1);
