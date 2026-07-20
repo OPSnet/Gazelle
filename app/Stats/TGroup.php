@@ -39,8 +39,7 @@ class TGroup extends \Gazelle\BaseObject {
         $info = self::$cache->get_value($key);
         if ($info === false) {
             $info = self::$db->rowAssoc("
-                SELECT bookmark_total,
-                    download_total,
+                SELECT download_total,
                     leech_total,
                     seeding_total,
                     snatch_total
@@ -48,7 +47,6 @@ class TGroup extends \Gazelle\BaseObject {
                 WHERE tgroup_id = ?
                 ", $this->id
             ) ?? [
-                'bookmark_total'   => 0,
                 'download_total'   => 0,
                 'leech_total'      => 0,
                 'seeding_total'    => 0,
@@ -78,7 +76,10 @@ class TGroup extends \Gazelle\BaseObject {
     }
 
     public function bookmarkTotal(): int {
-        return $this->info()['bookmark_total'];
+        return $this->pg()->scalarex('
+            select count(*) from bookmark_tgroup where id_tgroup = $1
+            ', $this->id
+        );
     }
 
     public function downloadTotal(): int {

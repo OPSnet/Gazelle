@@ -1763,6 +1763,10 @@ class User extends BaseAttrObject {
             delete from audit_trail_user where id_user = $1
             ', $this->id
         );
+        $this->pg()->query('
+            delete from user_warning where id_user = $1
+            ', $this->id
+        );
         $affected = parent::remove();
         $this->flush();
         self::$cache->delete_multi([

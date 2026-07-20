@@ -49,24 +49,9 @@ class Bookmark extends \Gazelle\BaseUser {
     }
 
     /**
-     * Get the bookmark schema.
-     * Recommended usage:
-     * [$table, $column] = $bookmark->schema('torrent');
-     */
-    public function schema(Bookmarked $object): array {
-        return match ($object->bookmarkType()) {
-            BookmarkType::artist  => ['bookmarks_artists',  'ArtistID'],
-            BookmarkType::collage => ['bookmarks_collages', 'CollageID'],
-            BookmarkType::request => ['bookmarks_requests', 'RequestID'],
-            BookmarkType::tgroup  => ['bookmarks_torrents', 'GroupID'],
-        };
-    }
-
-    /**
      * Bookmark an object by a user
      */
     public function create(Bookmarked $object): bool {
-        [$table, $column] = $this->schema($object);
         if (
             (bool)$this->pg()->scalarex("
                 select 1
@@ -79,14 +64,14 @@ class Bookmark extends \Gazelle\BaseUser {
             // overbooked
             return false;
         }
-        if ($object->bookmarkType() === BookmarkType::tgroup) {
-            self::$db->prepared_query("
-                INSERT IGNORE INTO bookmarks_torrents
-                       (GroupID,  UserID, Sort)
-                VALUES (?,        ?,
-                    (1 + coalesce((SELECT max(m.Sort) from bookmarks_torrents m WHERE m.UserID = ?), 0))
-                )", $object->id(), $this->id, $this->id
+        if ($object->bookmarkType() !== BookmarkType::tgroup) {
+            $this->pg()->query("
+                insert into bookmark_{$object->bookmarkType()->name}
+                       (id_{$object->bookmarkType()->name}, id_user)
+                values ($1, $2)
+                ", $object->id(), $this->id
             );
+        } else {
             $this->pg()->query("
                 insert into bookmark_tgroup
                        (id_tgroup, id_user, seq)
@@ -95,9 +80,8 @@ class Bookmark extends \Gazelle\BaseUser {
                 )
                 ", $object->id(), $this->id
             );
-            // Intf\Bookmarked has no knowledge of TGroup methods
+            // Intf\Bookmarked has no knowledge of TGroup properties, hence id()
             $tgroup = new TGroup($object->id());
-            $tgroup->stats()->increment('bookmark_total');
 
             // RSS feed stuff
             $feed   = new Feed();
@@ -119,19 +103,10 @@ class Bookmark extends \Gazelle\BaseUser {
                     )
                 );
             }
-        } else {
-            self::$db->prepared_query("
-                INSERT IGNORE INTO $table ($column, UserID) VALUES (?, ?)
-                ", $object->id(), $this->id
-            );
-            $this->pg()->query("
-                insert into bookmark_{$object->bookmarkType()->name}
-                       (id_{$object->bookmarkType()->name}, id_user)
-                values ($1, $2)
-                ", $object->id(), $this->id
-            );
         }
-        self::$cache->delete_value(sprintf(self::CACHE_KEY, $object->bookmarkType()->name, $this->id));
+        self::$cache->delete_value(
+            sprintf(self::CACHE_KEY, $object->bookmarkType()->name, $this->id)
+        );
         $this->flush();
         return true;
     }
@@ -254,18 +229,17 @@ class Bookmark extends \Gazelle\BaseUser {
     }
 
     public function artistList(): array {
-        self::$db->prepared_query("
-            SELECT ag.ArtistID AS artist_id,
-                aa.Name        AS artist_name,
-                ba.Time        AS created
-            FROM bookmarks_artists ba
-            INNER JOIN artists_group ag USING (ArtistID)
-            INNER JOIN artists_alias aa ON (ag.PrimaryAlias = aa.AliasID)
-            WHERE ba.UserID = ?
-            ORDER BY aa.Name
-            ", $this->id
+        return $this->pg()->allex(<<<END_SQL
+            select ag."ArtistID" as artist_id,
+                aa."Name"        as artist_name,
+                ba.created
+            from bookmark_artist           ba
+            inner join relay.artists_group ag on (ag."ArtistID" = ba.id_artist)
+            inner join relay.artists_alias aa on (aa."AliasID" = ag."PrimaryAlias")
+            where ba.id_user = $1
+            order by aa."Name"
+            END_SQL, $this->id
         );
-        return self::$db->to_array(false, MYSQLI_ASSOC);
     }
 
     /**
@@ -314,20 +288,7 @@ class Bookmark extends \Gazelle\BaseUser {
     }
 
     public function removeSnatched(): int {
-        self::$db->prepared_query("
-            DELETE b
-            FROM bookmarks_torrents AS b
-            INNER JOIN (
-                SELECT DISTINCT t.GroupID
-                FROM torrents AS t
-                INNER JOIN xbt_snatched AS s ON (s.fid = t.ID)
-                WHERE s.uid = ?
-            ) AS s USING (GroupID)
-            WHERE b.UserID = ?
-            ", $this->id, $this->id
-        );
-        $affected = self::$db->affected_rows();
-        $this->pg()->query('
+        $affected = $this->pg()->query('
             with snatched(id_tgroup, id_user) as (
                 select distinct t."GroupID",
                     xs.uid
@@ -339,6 +300,7 @@ class Bookmark extends \Gazelle\BaseUser {
             using snatched
             where d.id_tgroup = snatched.id_tgroup
                 and d.id_user = snatched.id_user
+                and d.id_user = $1
             ', $this->id
         );
         self::$cache->delete_multi([
@@ -353,13 +315,7 @@ class Bookmark extends \Gazelle\BaseUser {
      * Remove a bookmark of an object by a user
      */
     public function removeObject(Bookmarked $object): int {
-        [$table, $column] = $this->schema($object);
-        self::$db->prepared_query("
-            DELETE FROM $table WHERE UserID = ? AND $column = ?
-            ", $this->id, $object->id()
-        );
-        $affected = self::$db->affected_rows();
-        $this->pg()->query("
+        $affected = $this->pg()->query("
             delete from bookmark_{$object->bookmarkType()->name}
             where id_{$object->bookmarkType()->name} = $1
                 and id_user = $2
@@ -377,27 +333,13 @@ class Bookmark extends \Gazelle\BaseUser {
         $affected = 0;
         foreach (
             [
-                'bookmarks_artists',
-                'bookmarks_collages',
-                'bookmarks_requests',
-                'bookmarks_torrents',
-            ] as $table
-        ) {
-            self::$db->prepared_query("
-                DELETE FROM $table WHERE UserID = ?
-                ", $this->id
-            );
-            $affected += self::$db->affected_rows();
-        }
-        foreach (
-            [
                 'bookmark_artist',
                 'bookmark_collage',
                 'bookmark_request',
                 'bookmark_tgroup',
             ] as $table
         ) {
-            $this->pg()->query("
+            $affected += $this->pg()->query("
                 delete from $table where id_user = $1
                 ", $this->id
             );

@@ -147,10 +147,6 @@ class TGroup extends AbstractCollage {
         } else {
             // personal collages are nuked hard, no undo
             new \Gazelle\Manager\Comment()->remove('collages', $this->id);
-            self::$db->prepared_query("
-                DELETE FROM bookmarks_collages WHERE CollageID = ?
-                ", $this->id
-            );
             $this->pg()->query("
                 delete from bookmark_collage where id_collage = $1
                 ", $this->id

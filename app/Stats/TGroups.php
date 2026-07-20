@@ -47,15 +47,6 @@ class TGroups extends \Gazelle\Base {
             ON DUPLICATE KEY UPDATE snatch_total = VALUES(snatch_total)
         ");
 
-        self::$db->prepared_query("
-            INSERT INTO tgroup_summary_new (tgroup_id, bookmark_total)
-                SELECT b.GroupID, count(*) as bookmark_total
-                FROM bookmarks_torrents b
-                INNER JOIN torrents_group AS tg ON (tg.ID = b.GroupID)
-                GROUP BY b.GroupID
-            ON DUPLICATE KEY UPDATE bookmark_total = VALUES(bookmark_total)
-        ");
-
         self::$db->begin_transaction();
         self::$db->prepared_query("
             DELETE FROM tgroup_summary

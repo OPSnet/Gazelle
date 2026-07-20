@@ -680,17 +680,6 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
         // if it does not yet exists there. Delete any remaining old ids
         // as the new id is already present in the target object.
         $newId = $this->id;
-        self::$db->prepared_query("
-            UPDATE bookmarks_artists
-            LEFT JOIN (SELECT UserID FROM bookmarks_artists WHERE ArtistID = ?) X USING (UserID)
-            SET ArtistID = ?
-            WHERE ArtistID = ? AND X.UserID IS NULL;
-            ", $newId, $newId, $old->id
-        );
-        self::$db->prepared_query("
-            DELETE FROM bookmarks_artists WHERE ArtistID = ?
-            ", $old->id
-        );
         $this->pg()->query('
             update bookmark_artist set
                 id_artist = $2

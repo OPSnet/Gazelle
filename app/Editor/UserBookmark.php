@@ -14,14 +14,7 @@ class UserBookmark extends \Gazelle\Base {
      * @param $list array<int, int>
      */
     public function remove(array $list): int {
-        self::$db->prepared_query("
-            DELETE FROM bookmarks_torrents
-            WHERE UserID = ?
-                AND GroupID IN (" . placeholders($list) . ")
-            ", $this->userId, ...$list
-        );
-        $affected = self::$db->affected_rows();
-        $this->pg()->query("
+        $affected = $this->pg()->query("
             delete from bookmark_tgroup
             where id_user = $1
                 and id_tgroup = any($2)
@@ -37,29 +30,25 @@ class UserBookmark extends \Gazelle\Base {
      * @param $list array<int, int>
      */
     public function modify(array $list): int {
-        $placeholders = [];
-        $args = [];
-        foreach ($list as $tgroupId => $sequence) {
-            $placeholders[] = '(?, ?, ?)';
-            $args = array_merge($args,  [(int)$tgroupId, (int)$sequence, $this->userId]);
-        }
-        if ($placeholders === []) {
+        if ($list === []) {
             return 0;
         }
-        self::$db->prepared_query("
-            INSERT INTO bookmarks_torrents
-                (GroupID, Sort, UserID)
-            VALUES " . implode(', ', $placeholders) . "
-            ON DUPLICATE KEY UPDATE
-                Sort = VALUES (Sort)
-            ", ...$args
-        );
-        $affected = self::$db->affected_rows();
-        $this->pg()->prepared_query("
+        $args         = [$this->userId];
+        $placeholders = [];
+        foreach ($list as $tgroupId => $sequence) {
+            $placeholders[] = sprintf(
+                '($1,$%d,$%d)',
+                count($args) + 1, count($args) + 2,
+            );
+            $args = array_merge($args,  [(int)$tgroupId, (int)$sequence]);
+        }
+        $affected = $this->pg()->query("
             insert into bookmark_tgroup
-                (id_tgroup, seq, id_user)
+                (id_user, id_tgroup, seq)
             values " . implode(', ', $placeholders) . "
-            on conflict (id_tgroup, id_user) do update set seq = EXCLUDED.seq
+            on conflict (id_tgroup, id_user)
+                do update set
+                    seq = EXCLUDED.seq
             ", ...$args
         );
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->userId));

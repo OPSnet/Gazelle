@@ -36,6 +36,12 @@ $db->prepared_query("
     )
     WHERE aa.name REGEXP '^phpunit '
 ");
+$db->prepared_query("
+    DELETE aa, ag
+    FROM artists_group ag
+    INNER JOIN artists_alias aa USING (ArtistID)
+    WHERE aa.name REGEXP '^phpunit\.';
+");
 
 // contests
 $db->prepared_query("
@@ -54,11 +60,11 @@ $db->prepared_query("
         SELECT 1 FROM artists_group ag WHERE ag.artistid = aa.artistid
     )
 ");
-$db->prepared_query("
-    DELETE FROM bookmarks_artists ba WHERE NOT EXISTS(
-        SELECT 1 FROM artists_group ag WHERE ag.ArtistID = ba.ArtistID
+$pgrw->query(<<<END_SQL
+    delete from bookmark_artist ba where not exists(
+        select 1 from relay.artists_group ag where ag."ArtistID" = ba.id_artist
     )
-");
+END_SQL);
 $db->prepared_query("
     CREATE TEMPORARY TABLE orphan_similar (SimilarID int not null primary key)
 ");
@@ -189,10 +195,6 @@ foreach ($groupList as $tgroupId) {
     if ($tgroup instanceof TGroup) {
         try {
             echo "tgroup $torrentId ({$tgroup?->name()})\n";
-            $db->prepared_query("
-                DELETE FROM bookmarks_torrents bt WHERE GroupID = ?
-                ", $tgroupId
-            );
             $pgrw->query('
                 delete from bookmark_tgroup bt WHERE id_tgroup = $1
                 ', $tgroupId
