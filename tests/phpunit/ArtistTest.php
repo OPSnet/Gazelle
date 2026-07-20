@@ -53,18 +53,6 @@ class ArtistTest extends TestCase {
 
         $artist = $manager->create('phpunit.' . randomString(12));
         $this->artistIdList[] = $artist->id;
-
-        // fake it
-        DB::DB()->prepared_query("
-            INSERT INTO artist_usage
-                   (artist_id, artist_role_id, uses)
-            VALUES (?,         ?,              ?)
-            ", $artist->id,    1,              RANDOM_ARTIST_MIN_ENTRIES
-        );
-
-        // before test run: TRUNCATE TABLE artst_usage;
-        // and then: new Stats\Artists()->updateUsage();
-        $this->assertEquals($artist->id, $manager->findRandom()->id, 'artist-find-random');
         $this->assertNull($manager->findByIdAndRevision($artist->id, -666), 'artist-find-revision-fail');
 
         $this->assertGreaterThan(0, $artist->id, 'artist-create-artist-id');
@@ -75,6 +63,32 @@ class ArtistTest extends TestCase {
         $this->assertNull($manager->findByIdAndRevision($artist->id, -1), 'artist-is-an-unrevised-artist');
         // empty, but at least it tests the SQL
         $this->assertCount(0, $artist->tagLeaderboard(), 'artist-tag-leaderboard');
+    }
+
+    public function testArtistRandom(): void {
+        $manager = new Manager\Artist();
+        $artist  = $manager->create('phpunit.' . randomString(12));
+        $this->artistIdList[] = $artist->id;
+        $this->tgroupList = [
+            Helper::makeTGroupMusic(
+                $this->user,
+                'phpunit artist random ' . randomString(10),
+                [[ARTIST_MAIN], [$artist->name()]],
+                ['trip.hop'],
+            )
+        ];
+        new Stats\Artists()->updateUsage();
+        DB::DB()->prepared_query('
+            UPDATE artist_usage SET
+                uses = 1000
+            WHERE artist_id = ?
+            ', $artist->id
+        );
+        $this->assertInstanceOf(
+            Artist::class,
+            $manager->findRandom(),
+            'artist-find-random',
+        );
     }
 
     public function testArtistInfo(): void {
