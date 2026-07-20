@@ -62,8 +62,16 @@ class Paginator {
     }
 
     public function removeParam(string $param): static {
-        $this->remove[] = $param;
+        $this->remove[$param] = true;
         return $this;
+    }
+
+    public function params(array $exclude = [], bool $withPage = false): string {
+        $exclude = array_flip($exclude);
+        if (!$withPage) {
+            $exclude['page'] = true;
+        }
+        return http_build_query(array_diff_key($_GET + $this->param, $exclude, $this->remove), '', '&');
     }
 
     public function linkbox(): string {
@@ -72,23 +80,10 @@ class Paginator {
         }
         $this->linkbox = '';
 
-        $uri = preg_replace('/[?&]page=\d+/', '', $_SERVER['REQUEST_URI']);
-        if (is_null($uri)) {
-            $uri = $_SERVER['REQUEST_URI'];
+        $uri = $_SERVER['DOCUMENT_URI'] . '?';
+        if ($params = $this->params()) {
+            $uri .= html_escape($params) . '&amp;';
         }
-        foreach ($this->remove as $param) {
-            /* page?param=1&keep=2 => page?keep=2
-             * page?keep=2&param=1 => page?keep=2
-             * page?keep=3&param=2&also=3 => page?keep=3&also=3
-             */
-            $uri = preg_replace(
-                "/(?:(?<=\?)$param=[^&]+&?|&$param=[^&]+(?:(?=&)|$))/",
-                '',
-                $uri
-            );
-        }
-        $uri = str_replace('&', '&amp;', rtrim($uri, '?'));
-        $uri .= str_contains($uri, '?') ? '&amp;' : '?';
 
         if ($this->total > 0) {
             $pageCount = $this->pages();
@@ -113,16 +108,15 @@ class Paginator {
                 return $this->linkbox;
             }
 
-            $paramList = $this->param ? ('&amp;' . http_build_query($this->param, '', '&amp;')) : '';
             if ($this->page > 1) {
-                $this->linkbox = "<a href=\"{$uri}page=1{$paramList}{$this->anchor}\"><b>First</b></a> « <a href=\"{$uri}page="
+                $this->linkbox = "<a href=\"{$uri}page=1{$this->anchor}\"><b>First</b></a> « <a href=\"{$uri}page="
                     . ($this->page - 1)
-                    . "{$paramList}{$this->anchor}\" class=\"pager_prev\"><b>Prev</b></a> ‹ ";
+                    . "{$this->anchor}\" class=\"pager_prev\"><b>Prev</b></a> ‹ ";
             }
 
             for ($i = $firstPage; $i <= $lastPage; $i++) {
                 if ($i != $this->page) {
-                    $this->linkbox .= "<a href=\"{$uri}page=$i{$paramList}{$this->anchor}\">";
+                    $this->linkbox .= "<a href=\"{$uri}page=$i{$this->anchor}\">";
                 }
                 $this->linkbox .= '<b>';
                 $firstEntry = (($i - 1) * $this->perPage) + 1;
@@ -148,7 +142,7 @@ class Paginator {
 
             if ($this->page && $this->page < $pageCount) {
                 $this->linkbox .= " › <a href=\"{$uri}page=" . ($this->page + 1)
-                    . "{$paramList}{$this->anchor}\" class=\"pager_next\"> <b>Next</b></a> » <a href=\"{$uri}page={$pageCount}{$paramList}{$this->anchor}\"><b>Last</b></a>";
+                    . "{$this->anchor}\" class=\"pager_next\"> <b>Next</b></a> » <a href=\"{$uri}page={$pageCount}{$this->anchor}\"><b>Last</b></a>";
             }
         }
         if (strlen($this->linkbox)) {

@@ -64,59 +64,65 @@ class PaginatorTest extends TestCase {
         $paginator = new Util\Paginator($perPage, $currentPage);
 
         $paginator->setTotal(15)->setAnchor('phpunit');
-        $_SERVER['REQUEST_URI'] = SITE_URL . '/paginator_test.php';
+        $_SERVER['DOCUMENT_URI'] = '/paginator_test.php';
+        $_GET = ['page' => (string)$currentPage];
 
         $linkbox = $paginator->linkbox();
         $this->assertMatchesRegularExpression(
-            '|<a href="[^"]+/paginator_test\.php\?page=2#phpunit"><b>10-15|',
+            '|<a href="/paginator_test\.php\?page=2#phpunit"><b>10-15|',
             $linkbox, 'paginator-linkbox-anchor');
         $this->assertMatchesRegularExpression('|<b>1-9</b>|', $linkbox, 'paginator-linkbox-anchor-page');
     }
 
-    public function testLinkboxRemoveParam(): void {
+    public function testRemoveParam(): void {
         $perPage = 9;
         $currentPage = 1;
+        $_SERVER['DOCUMENT_URI'] = '/paginator_test.php';
 
+        $_GET = ['stay' => 'on'];
         $paginator = new Util\Paginator($perPage, $currentPage);
         $paginator->setTotal(15)->removeParam('remove');
-        $_SERVER['REQUEST_URI'] = SITE_URL . '/paginator_test.php?remove=yes&stay=on';
+        $this->assertEquals('stay=on', $paginator->params(), 'paginator-remove-params-noop');
 
-        $linkbox = $paginator->linkbox();
-        $this->assertMatchesRegularExpression(
-            '|<a href="[^"]+/paginator_test\.php\?stay=on&amp;page=2"><b>10-15|',
-            $linkbox, 'paginator-linkbox-remparam-1');
+        $_GET = ['stay' => 'on', 'remove' => 'this'];
+        $this->assertEquals('stay=on', $paginator->params(), 'paginator-remove-params-1');
 
-        $paginator = new Util\Paginator($perPage, $currentPage);
-        $paginator->setTotal(15)->removeParam('remove');
-        $_SERVER['REQUEST_URI'] = SITE_URL . '/paginator_test.php?stay=on&remove=yes';
-        $this->assertEquals($linkbox, $paginator->linkbox(), 'paginator-linkbox-remparam-2');
-
-        $paginator = new Util\Paginator($perPage, $currentPage);
-        $paginator->setTotal(15)->removeParam('remove');
-        $_SERVER['REQUEST_URI'] = SITE_URL . '/paginator_test.php?remove=yes';
-        $this->assertMatchesRegularExpression(
-            '|<a href="[^"]+/paginator_test\.php\?page=2"><b>10-15|',
-            $paginator->linkbox(), 'paginator-linkbox-remparam-bare');
+        $_GET = ['stay' => '=<bad>', 'remove' => ''];
+        $this->assertEquals('stay=%3D%3Cbad%3E', $paginator->params(), 'paginator-linkbox-params-2');
     }
 
-    public function testLinkboxSetParam(): void {
+    public function testSetParam(): void {
         $perPage = 9;
         $currentPage = 1;
 
+        $_GET = [];
         $paginator = new Util\Paginator($perPage, $currentPage);
         $paginator->setTotal(15)->setParam('new5', '1')->setParam('morenew', 'yes');
-        $_SERVER['REQUEST_URI'] = SITE_URL . '/paginator_test.php?stay=on';
+        $this->assertEquals('new5=1&morenew=yes', $paginator->params(), 'paginator-setparam-1');
 
-        $this->assertMatchesRegularExpression(
-            '|<a href="[^"]+/paginator_test\.php\?stay=on&amp;page=2&amp;new5=1&amp;morenew=yes"><b>10-15|',
-            $paginator->linkbox(), 'paginator-linkbox-setparam-1');
+        $_GET = ['stay' => 'on'];
+        $this->assertEquals(
+            'stay=on&new5=1&morenew=yes',
+            $paginator->params([], false), 'paginator-setparam-2');
+    }
 
+    public function testParams(): void {
+        $perPage = 9;
+        $currentPage = 3;
         $paginator = new Util\Paginator($perPage, $currentPage);
-        $paginator->setTotal(15)->setParam('new5', '1')->setParam('morenew', 'yes');
-        $_SERVER['REQUEST_URI'] = SITE_URL . '/paginator_test.php';
-        $this->assertMatchesRegularExpression(
-            '|<a href="[^"]+/paginator_test\.php\?page=2&amp;new5=1&amp;morenew=yes"><b>10-15|',
-            $paginator->linkbox(), 'paginator-linkbox-setparam-2');
+
+        $_GET = ['page' => (string)$currentPage];
+        $this->assertEquals('', $paginator->params(), 'paginatior-params-without-page-1');
+        $this->assertEquals('page=3', $paginator->params([], true), 'paginatior-params-with-page-1');
+
+        $_GET = ['action' => 'stuff', 'page' => $currentPage];
+        $this->assertEquals('action=stuff', $paginator->params(), 'paginatior-params-without-page-2');
+        $this->assertEquals('action=stuff&page=3', $paginator->params([], true), 'paginatior-params-with-page-2');
+        $this->assertEquals('', $paginator->params(['action']), 'paginatior-params-exclude-without');
+        $this->assertEquals('page=3', $paginator->params(['action'], true), 'paginatior-params-exclude-with');
+
+        $_GET = ['action' => ['array', 'stuff'], 'page' => $currentPage];
+        $this->assertEquals('action%5B0%5D=array&action%5B1%5D=stuff', $paginator->params(), 'paginatior-params-array');
     }
 
     public function testLinkboxFullPage(): void {
@@ -125,18 +131,21 @@ class PaginatorTest extends TestCase {
 
         $paginator = new Util\Paginator($perPage, $currentPage);
         $paginator->setTotal(18);
-        $_SERVER['REQUEST_URI'] = SITE_URL . '/paginator_test.php';
+        $_SERVER['DOCUMENT_URI'] = '/paginator_test.php';
+        $_GET = ['stay' => 'on'];
 
         $linkbox = $paginator->linkbox();
         $this->assertMatchesRegularExpression('| <b>10-18</b>|', $linkbox, 'paginator-linkbox-full-1');
+        $this->assertMatchesRegularExpression(
+            '|&amp;page=1|', $linkbox, 'paginator-linkbox-full-2');
         $this->assertDoesNotMatchRegularExpression(
-            '|<a href="[^"]+/paginator_test\.php\?page=3|', $linkbox, 'paginator-linkbox-full-2');
+            '|&amp;page=2|', $linkbox, 'paginator-linkbox-full-3');
 
         $paginator = new Util\Paginator($perPage, 1);
         $paginator->setTotal(18);
         $linkbox = $paginator->linkbox();
-        $this->assertMatchesRegularExpression('|<b>1-9</b> |', $linkbox, 'paginator-linkbox-full-3');
+        $this->assertMatchesRegularExpression('|<b>1-9</b> |', $linkbox, 'paginator-linkbox-full-4');
         $this->assertDoesNotMatchRegularExpression(
-            '|<a href="[^"]+/paginator_test\.php\?page=3|', $linkbox, 'paginator-linkbox-full-4');
+            '|&amp;page=3|', $linkbox, 'paginator-linkbox-full-5');
     }
 }
