@@ -183,11 +183,6 @@ class Validator {
                         $this->errorMessage = html_escape($ValidateVar) . " does not look like a valid image url";
                         break;
                     }
-                    $banned = ImageProxy::badHost($ValidateVar);
-                    if ($banned) {
-                        $this->errorMessage = "Please rehost images from " . html_escape($banned) . " elsewhere.";
-                        break;
-                    }
                 } elseif ($Field['Type'] == 'link') {
                     $MaxLength = $Field['maxlength'] ?? 255;
                     $MinLength = $Field['minlength'] ?? 10;
