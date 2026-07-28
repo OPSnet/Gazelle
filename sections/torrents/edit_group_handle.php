@@ -1,7 +1,9 @@
 <?php
 
-// @phpstan-var \Gazelle\User $Viewer
-// @phpstan-var \Twig\Environment $Twig
+/**
+ * @phpstan-var \Gazelle\User $Viewer
+ * @phpstan-var \Twig\Environment $Twig
+ */
 
 declare(strict_types=1);
 
@@ -74,9 +76,12 @@ if ($_POST['name'] !== $tgroup->name()) {
 }
 
 $newRevision = false;
-$image = trim($_POST['image']);
+$image = trim($_POST['image'] ?? '');
+if ($image === '') {
+    $image = null;
+}
 if ($image !== $tgroup->image()) {
-    if ($image !== '') {
+    if (!is_null($image)) {
         if (!preg_match(IMAGE_REGEXP, $image)) {
             Error400::error(html_escape($image) . " does not look like a valid image url");
         }

@@ -22,5 +22,5 @@ if (is_null($tgroup)) {
 }
 
 echo new Json\TGroup($tgroup, $Viewer)
-    ->setVersion(2)
+    ->setVersion(3)
     ->response();

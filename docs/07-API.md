@@ -996,6 +996,9 @@ Note: the `proxyImage` value has a short lifespan. Depending on (bad) luck,
 it may expire (404) one second after the response. It is provided in order
 to rehost the image elsewhere when the origin image (`wikiImage`) is no longer available.
 
+In version 3 of this endpoint, the `image' field returns null (rather than
+empty string '' previously) if there is no image.
+
 ```json
 {
     "status": "success",

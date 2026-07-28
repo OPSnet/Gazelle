@@ -333,7 +333,7 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
         return $this->info()['Body'] ?? '';
     }
 
-    public function image(): string {
+    public function image(): string|null {
         return $this->info()['Image'];
     }
 

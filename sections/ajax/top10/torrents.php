@@ -9,7 +9,9 @@ declare(strict_types=1);
 
 namespace Gazelle;
 
-$details = isset($_GET['details']) && in_array($_GET['details'], ['day', 'week', 'overall', 'snatched', 'data', 'seeded', 'month', 'year']) ? $_GET['details'] : 'all';
+$details = isset($_GET['details']) && in_array($_GET['details'], ['day', 'week', 'overall', 'snatched', 'data', 'seeded', 'month', 'year'])
+    ? $_GET['details']
+    : 'all';
 
 $limit = (int)($_GET['limit'] ?? 10);
 $limit = in_array($limit, [10, 100, 250]) && $details !== 'all' ? $limit : 10;
